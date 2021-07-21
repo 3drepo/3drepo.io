@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,29 +15,46 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CircularProgress from '@material-ui/core/CircularProgress';
 import React from 'react';
 
-import { LoaderContainer, StyledButton } from './submitButton.styles';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import { merge } from 'lodash';
+
+import { LoaderContainer, StyledButton, StyledFab } from './submitButton.styles';
 
 interface IProps {
 	children: any;
 	pending?: boolean;
 	disabled?: boolean;
+	variant?: string;
 }
 
-export const SubmitButton = (props: IProps) => (
-	<StyledButton
-		type="submit"
-		variant="raised"
-		color="secondary"
-		disabled={props.pending || props.disabled}
-	>
-		{props.children}
-		{props.pending && (
-			<LoaderContainer>
-				<CircularProgress size={16} />
-			</LoaderContainer>
-		)}
-	</StyledButton>
-);
+export const SubmitButton = ({ pending, disabled, children, ...props }: IProps) => {
+	const additionalProps = merge({
+		type: 'submit',
+		variant: 'contained',
+		color: 'secondary',
+	}, props);
+
+	const isFabVariant = props.variant === 'fab';
+
+	const Button = isFabVariant ? StyledFab : StyledButton;
+
+	if (additionalProps.hasOwnProperty('variant') && isFabVariant) {
+		delete additionalProps.variant;
+	}
+
+	return (
+		<Button
+			disabled={pending || disabled}
+			{...additionalProps}
+		>
+			{children}
+			{pending && (
+				<LoaderContainer>
+					<CircularProgress size={16} />
+				</LoaderContainer>
+			)}
+		</Button>
+	);
+};

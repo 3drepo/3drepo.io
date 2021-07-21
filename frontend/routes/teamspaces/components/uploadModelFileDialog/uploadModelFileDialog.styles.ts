@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,29 +17,24 @@
 
 import Button from '@material-ui/core/Button';
 import DialogActions from '@material-ui/core/DialogActions';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import styled from 'styled-components';
 
 import { COLOR } from '../../../../styles';
 
-export const ModelName = styled.h3`
-	margin: 0 0 24px;
-	color: ${COLOR.BLACK_60};
-`;
-
 export const ModelInfo = styled.p`
 	color: ${COLOR.BLACK_40};
-	margin: 0;
+	margin: 0 0 4px;
 	font-size: 14px;
 `;
 
-export const HiddenFileInput = styled.input`
-	visibility: hidden;
-	width: 0;
-`;
+export const FileName = styled(ModelInfo)`
+	display: flex;
+	align-items: center;
+	margin-right: 8px;
 
-export const FileLabel = styled.label`
-	&& {
-		margin: 0 4px 0 0;
+	svg {
+		margin-right: 8px;
 	}
 `;
 
@@ -52,5 +47,30 @@ export const StyledDialogActions = styled(DialogActions)`
 export const CancelButton = styled(Button)`
 	&& {
 		margin: 0 4px 0 0;
+	}
+`;
+
+export const Main = styled.div`
+	text-align: center;
+`;
+
+export const Additional = styled.p`
+	text-align: center;
+`;
+
+export const FileContainer = styled.div`
+	display: flex;
+	margin-top: 12px;
+`;
+
+export const CheckboxContainer = styled(FormControlLabel)`
+	&& {
+		display: flex;
+		height: 30px;
+		margin-left: 0;
+
+		& > span {
+			padding-left: 0;
+		}
 	}
 `;

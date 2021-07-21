@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,36 +15,38 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Field, Form, Formik } from 'formik';
-import { omit } from 'lodash';
 import React from 'react';
-import * as Yup from 'yup';
-
-import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../services/validation';
-import { clientConfigService } from './../../services/clientConfig';
 
 import Checkbox from '@material-ui/core/Checkbox';
+import Divider from '@material-ui/core/Divider';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
+import { Field, Form, Formik } from 'formik';
+import { omit } from 'lodash';
+import * as Yup from 'yup';
+import * as queryString from 'query-string';
+
+import { howDidYouFindUsOptions, industries } from '../../constants/signup';
+import { clientConfigService } from '../../services/clientConfig';
+import { COOKIES_PAGE, PRIVACY_PAGE, TERMS_PAGE } from '../../services/staticPages';
+import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../services/validation';
 import { Panel } from '../components/panel/panel.component';
+import { SelectField } from '../components/selectField/selectField.component';
 import { SubmitButton } from '../components/submitButton/submitButton.component';
+import { FieldsRow, StyledTextField } from '../profile/profile.styles';
 import { Footer } from './components/footer';
 import { ReCaptcha } from './components/reCaptcha/reCaptcha.component';
-
-import { COOKIES_PAGE, PRIVACY_PAGE, TERMS_PAGE } from '../../services/staticPages';
-import { SelectField } from '../components/selectField/selectField.component';
-import { FieldsRow, StyledTextField } from '../profile/profile.styles';
 import {
 	ButtonContainer,
 	Container,
+	FirstColumnFormControl,
 	Headline,
 	StyledFormControl,
 	StyledGrid,
 	TermLink
 } from './signUp.styles';
 
-import * as queryString from 'query-string';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -66,7 +68,11 @@ const RegistrationInitialValues = {
 	password: '',
 	passwordConfirm: '',
 	termsAgreed: false,
-	mailListAgreed: true
+	mailListAgreed: true,
+	jobTitle: '',
+	phoneNumber: '',
+	industry: '',
+	howDidYouFindUs: ''
 };
 
 const RegistrationSchema = Yup.object().shape({
@@ -88,7 +94,11 @@ const RegistrationSchema = Yup.object().shape({
 		),
 	countryCode: schema.required,
 	captcha: clientConfigService.captcha_client_key ? schema.required : Yup.string(),
-	termsAgreed: Yup.boolean().oneOf([true])
+	termsAgreed: Yup.boolean().oneOf([true]),
+	jobTitle: schema.jobTitle,
+	phoneNumber: schema.phoneNumber,
+	industry: schema.industry,
+	howDidYouFindUs: schema.howDIdYouFindUs
 });
 
 const DEFAULT_INPUT_PROPS = {
@@ -170,6 +180,20 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 			</MenuItem>
 		))
 
+	public renderIndustries = () =>
+		industries.map((industry) => (
+			<MenuItem key={industry} value={industry}>
+				{industry}
+			</MenuItem>
+		))
+
+	public renderHowDidYouFindUsOptions = () =>
+		howDidYouFindUsOptions.map((howDidYouFindUsOption) => (
+			<MenuItem key={howDidYouFindUsOption} value={howDidYouFindUsOption}>
+				{howDidYouFindUsOption}
+			</MenuItem>
+		))
+
 	public render() {
 		const {isPending} = this.props;
 		const { email: defaultEmail } = queryString.parse(this.props.location.search) || '';
@@ -211,6 +235,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 											helperText={form.touched.password && (form.errors.password || '')}
 											label={`Password${this.state.passwordStrengthMessage}`}
 											type="password"
+											autoComplete="new-password"
 											disabled={isPending}
 											onChange={this.handlePasswordChange(field.onChange)}
 										/>
@@ -223,6 +248,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 											helperText={form.touched.passwordConfirm && (form.errors.passwordConfirm || '')}
 											label="Password confirmation"
 											type="password"
+											autoComplete="new-password"
 											disabled={isPending}
 											onChange={this.handlePasswordChange(field.onChange)}
 										/>
@@ -293,6 +319,52 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 										)} />
 									</StyledFormControl>
 								</FieldsRow>
+								<FieldsRow container wrap="nowrap">
+									<Field name="jobTitle" render={({ field, form }) => (
+										<StyledTextField
+											{...DEFAULT_INPUT_PROPS}
+											{...field}
+											error={Boolean(form.touched.jobTitle && form.errors.jobTitle)}
+											helperText={form.touched.jobTitle && (form.errors.jobTitle || '')}
+											label="Job Title"
+											disabled={isPending}
+										/>
+									)} />
+									<Field name="phoneNumber" render={({ field, form }) => (
+										<StyledTextField
+											{...field}
+											error={Boolean(form.touched.phoneNumber && form.errors.phoneNumber)}
+											helperText={form.touched.phoneNumber && (form.errors.phoneNumber || '')}
+											label="Phone Number"
+											margin="normal"
+											disabled={isPending}
+										/>
+									)} />
+								</FieldsRow>
+								<FieldsRow container wrap="nowrap">
+									<FirstColumnFormControl>
+										<InputLabel>Industry *</InputLabel>
+										<Field name="industry" render={({ field }) => (
+											<SelectField
+												{...field}
+												MenuProps={{ PaperProps: {style: PaperPropsStyle}, disabled: isPending}}
+											>
+												{this.renderIndustries()}
+											</SelectField>
+										)} />
+									</FirstColumnFormControl>
+									<StyledFormControl>
+										<InputLabel>How did you find us? *</InputLabel>
+										<Field name="howDidYouFindUs" render={({ field }) => (
+											<SelectField
+												{...field}
+												MenuProps={{ PaperProps: {style: PaperPropsStyle}, disabled: isPending}}
+											>
+												{this.renderHowDidYouFindUsOptions()}
+											</SelectField>
+										)} />
+									</StyledFormControl>
+								</FieldsRow>
 
 								{ clientConfigService.captcha_client_key &&
 									<Field name="captcha" render={({ field }) =>
@@ -335,6 +407,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 								</ButtonContainer>
 							</Form>
 						</Formik>
+						<Divider light />
 						<Footer />
 					</Panel>
 				</StyledGrid>

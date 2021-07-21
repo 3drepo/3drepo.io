@@ -1,18 +1,18 @@
 /**
- *	Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2014 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -24,6 +24,7 @@ const User = require("../models/user");
 const responseCodes = require("../response_codes.js");
 const config = require("../config");
 const utils = require("../utils");
+const UserBilling = require("../models/userBilling");
 
 /**
  * @api {get} /:teamspace/subscriptions List subscriptions
@@ -75,7 +76,7 @@ function updateSubscription(req, res, next) {
 	User.findByUserName(req.params.account)
 		.then(dbUser => {
 			const billingUser = req.session.user.username;
-			return dbUser.updateSubscriptions(req.body.plans, billingUser, req.body.billingAddress || {});
+			return User.updateSubscriptions(dbUser, req.body.plans, billingUser, req.body.billingAddress || {});
 		})
 		.then(agreement => {
 
@@ -100,7 +101,7 @@ function listSubscriptions(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 	User.findByUserName(req.params.account)
 		.then(user => {
-			const subscriptions = user.customData.billing.getActiveSubscriptions();
+			const subscriptions =  UserBilling.getActiveSubscriptions(user.customData.billing);
 
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, subscriptions);
 		})

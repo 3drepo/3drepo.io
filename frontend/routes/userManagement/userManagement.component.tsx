@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import React from 'react';
+
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
-import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import { isEmpty, isEqual } from 'lodash';
-import React from 'react';
 import { Link, Redirect, Route, Switch } from 'react-router-dom';
 
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
@@ -30,10 +30,10 @@ import { TextOverlay } from '../components/textOverlay/textOverlay.component';
 import Jobs from '../jobs/jobs.container';
 import Projects from '../projects/projects.container';
 import Users from '../users/users.container';
-
 import {
 	Header,
 	LoaderContainer,
+	StyledTab,
 	TabContent,
 	TeamspaceSelectContainer
 } from './userManagement.styles';
@@ -214,7 +214,7 @@ export class UserManagement extends React.PureComponent<IProps, IState> {
 									disabled: isTabDisabled || (isAdminOnly && !isTeamspaceAdmin)
 								};
 
-								return <Tab key={index} {...props} component={Link} />;
+								return <StyledTab key={index} {...props} component={Link} />;
 							})}
 					</Tabs>
 				</Header>

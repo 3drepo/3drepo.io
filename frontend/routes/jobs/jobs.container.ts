@@ -19,19 +19,20 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { Jobs } from './jobs.component';
-
 import {
 	selectJobs,
 	selectJobsColors,
-	JobsActions
+	selectJobsPending,
+	JobsActions,
 } from '../../modules/jobs';
 import { selectCurrentTeamspace } from '../../modules/userManagement';
+import { Jobs } from './jobs.component';
 
 const mapStateToProps = createStructuredSelector({
 	currentTeamspace: selectCurrentTeamspace,
 	jobs: selectJobs,
-	colors: selectJobsColors
+	colors: selectJobsColors,
+	isPending: selectJobsPending,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

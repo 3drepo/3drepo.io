@@ -1,18 +1,18 @@
 /**
- *	Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2014 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -24,6 +24,7 @@
 	const middlewares = require("../middlewares/middlewares");
 	const Project = require("../models/project");
 	const utils = require("../utils");
+	const _ = require("lodash");
 
 	/**
 	 * @api {post} /:teamspace/projects Create project
@@ -67,9 +68,10 @@
 
 	/**
 	 * @api {put} /:teamspace/projects/:project Update project
-	 * @apiName updateProject
+	 * @apiName updateProjectPut
 	 * @apiGroup Project
 	 * @apiDescription It updates a project. The name can be changed and the permissions as well as the permissions of users
+	 * @apiDeprecated use now (#Project:updateProject)
 	 *
 	 * @apiPermission canUpdateProject
 	 *
@@ -79,7 +81,7 @@
 	 * @apiParam (Request body) {[]Permission} permissions The permissions for each user from the project
 	 *
 	 * @apiParam (Request body: Permissions ) {String} user The username of the user to have it permission changed
-	 * @apiParam (Request body: Permissions ) {[]String} permissions An array of permissions for the user to be assigned
+	 * @apiParam (Request body: Permissions ) {String[]} permissions An array of permissions for the user to be assigned
 	 *
 	 * @apiExample {put} Example usage update permissions:
 	 * PUT /teamSpace1/Classic%20project HTTP/1.1
@@ -141,8 +143,195 @@
 	 *    models: []
 	 * }
 	 *
-	 * */
-	router.put("/projects/:project", middlewares.project.canUpdate, updateProject);
+	 */
+	router.put("/projects/:project", middlewares.project.canUpdate, changeProject);
+
+	/**
+	 * @api {patch} /:teamspace/projects/:project Update project
+	 * @apiName updateProject
+	 * @apiGroup Project
+	 * @apiDescription Update project properties (name, permissions)
+	 *
+	 * @apiPermission canUpdateProject
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
+	 * @apiParam {String} project Name of project
+	 * @apiParam (Request body) {String} [name] Project name
+	 * @apiParam (Request body) {ProjectPermission[]} [permissions] List of user permissions
+	 *
+	 * @apiParam (Type: ProjectPermission) {String} user Username of user
+	 * @apiParam (Type: ProjectPermission) {String[]} permissions List of user privileges
+	 *
+	 * @apiExample {patch} Example usage (update permissions):
+	 * PATCH /acme/ProjectAnvil HTTP/1.1
+	 * {
+	 *    permissions: [
+	 *       {
+	 *          user: "alice",
+	 *          permissions: [
+	 *             "admin_project"
+	 *          ]
+	 *       },
+	 *       {
+	 *          user: "mike",
+	 *          permissions: []
+	 *       }
+	 *    ]
+	 * }
+	 *
+	 * @apiExample {patch} Example usage (rename project):
+	 * PATCH /acme/ProjectAnvil HTTP/1.1
+	 * {
+	 *    name: "ProjectInstantTunnel"
+	 * }
+	 *
+	 * @apiExample {patch} Example usage:
+	 * PATCH /acme/ProjectInstantTunnel HTTP/1.1
+	 * {
+	 *    name: "Project Trebuchet",
+	 *    permissions: [
+	 *       {
+	 *          user: "bob",
+	 *          permissions: [
+	 *             "admin_project"
+	 *          ]
+	 *       }
+	 *    ]
+	 * }
+	 *
+	 * @apiSuccessExample {json} Success-Response:
+	 * {
+	 *    status: "ok"
+	 * }
+	 */
+	router.patch("/projects/:project", middlewares.project.canUpdate, updateProject);
+
+	/**
+	 * @api {get} /:teamspace/projects/:project/models List models of the project
+	 * @apiName listModels
+	 * @apiGroup Project
+	 *
+	 * @apiDescription It returns a list of models .
+	 *
+	 * @apiPermission canListProjects
+	 *
+	 * @apiParam {String} teamspace Name of the teamspace
+	 * @apiParam {String} project The name of the project to list models
+	 *
+	 * @apiParam (Query) {String} [name] Filters models by name
+	 *
+	 *
+	 * @apiExample {get} Example usage:
+	 * GET /teamSpace1/projects/Bim%20Logo/models?name=log HTTP/1.1
+	 *
+	 * @apiSuccessExample {json} Success:
+	 * [
+	 *   {
+	 *     "_id": "5ce7dd19-1252-4548-a9c9-4a5414f2e0c5",
+	 *     "federate": true,
+	 *     "desc": "",
+	 *     "name": "Full Logo",
+	 *     "__v": 17,
+	 *     "timestamp": "2019-05-02T16:17:37.902Z",
+	 *     "type": "Federation",
+	 *     "subModels": [
+	 *       {
+	 *         "database": "teamSpace1",
+	 *         "model": "b1fceab8-b0e9-4e45-850b-b9888efd6521",
+	 *         "name": "block"
+	 *       },
+	 *       {
+	 *         "database": "teamSpace1",
+	 *         "model": "7cf61b4f-acdf-4295-b2d0-9b45f9f27418",
+	 *         "name": "letters"
+	 *       },
+	 *       {
+	 *         "database": "teamSpace1",
+	 *         "model": "2710bd65-37d3-4e7f-b2e0-ffe743ce943f",
+	 *         "name": "pipes"
+	 *       }
+	 *     ],
+	 *     "surveyPoints": [
+	 *       {
+	 *         "position": [
+	 *           0,
+	 *           0,
+	 *           0
+	 *         ],
+	 *         "latLong": [
+	 *           -34.459127,
+	 *           0
+	 *         ]
+	 *       }
+	 *     ],
+	 *     "properties": {
+	 *       "unit": "mm",
+	 *       "topicTypes": [
+	 *         {
+	 *           "label": "Clash",
+	 *           "value": "clash"
+	 *         },
+	 *         {
+	 *           "label": "Diff",
+	 *           "value": "diff"
+	 *         },
+	 *         {
+	 *           "label": "RFI",
+	 *           "value": "rfi"
+	 *         },
+	 *         {
+	 *           "label": "Risk",
+	 *           "value": "risk"
+	 *         },
+	 *         {
+	 *           "label": "H&S",
+	 *           "value": "hs"
+	 *         },
+	 *         {
+	 *           "label": "Design",
+	 *           "value": "design"
+	 *         },
+	 *         {
+	 *           "label": "Constructibility",
+	 *           "value": "constructibility"
+	 *         },
+	 *         {
+	 *           "label": "GIS",
+	 *           "value": "gis"
+	 *         },
+	 *         {
+	 *           "label": "For information",
+	 *           "value": "for_information"
+	 *         },
+	 *         {
+	 *           "label": "VR",
+	 *           "value": "vr"
+	 *         }
+	 *       ]
+	 *     },
+	 *     "permissions": [
+	 *       "change_model_settings",
+	 *       "upload_files",
+	 *       "create_issue",
+	 *       "comment_issue",
+	 *       "view_issue",
+	 *       "view_model",
+	 *       "download_model",
+	 *       "edit_federation",
+	 *       "delete_federation",
+	 *       "delete_model",
+	 *       "manage_model_permission"
+	 *     ],
+	 *     "status": "ok",
+	 *     "id": "5ce7dd19-1252-4548-a9c9-4a5414f2e0c5",
+	 *     "model": "5ce7dd19-1252-4548-a9c9-4a5414f2e0c5",
+	 *     "account": "teamSpace1",
+	 *     "headRevisions": {
+	 *     }
+	 *   }
+	 * ]	 *
+	 */
+	router.get("/projects/:project/models",  middlewares.project.canList, listModels);
 
 	/**
 	 * @api {get} /:teamspace/projects List projects
@@ -345,15 +534,16 @@
 		});
 	}
 
-	function updateProject(req, res, next) {
+	function changeProject(req, res, next) {
+		Project.updateAttrs(req.params.account, req.params.project, req.body).then(project => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
 
-		Project.findOne({ account: req.params.account }, {name: req.params.project}).then(project => {
-			if(!project) {
-				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
-			} else {
-				return project.updateAttrs(req.body);
-			}
-		}).then(project => {
+	function updateProject(req, res, next) {
+		Project.updateProject(req.params.account, req.params.project, req.body).then(project => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -361,7 +551,6 @@
 	}
 
 	function deleteProject(req, res, next) {
-
 		Project.delete(req.params.account, req.params.project).then(project => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
 		}).catch(err => {
@@ -370,7 +559,7 @@
 	}
 
 	function listProjects(req, res, next) {
-		Project.findAndPopulateUsers({ account: req.params.account }, {}).then(projects => {
+		Project.listProjects(req.params.account).then(projects => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, projects);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -378,11 +567,19 @@
 	}
 
 	function listProject(req, res, next) {
+		Project.getProjectUserPermissions(req.params.account, req.params.project).then(project => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
 
-		Project.findOneAndPopulateUsers({ account: req.params.account }, {name: req.params.project}).then(project => {
+	function listModels(req, res, next) {
+		const filters = _.pick(req.query, "name");
+		const username = req.session.user.username;
 
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project.toObject());
-
+		Project.listModels(req.params.account, req.params.project, username, filters).then(models => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, models);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});

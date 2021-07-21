@@ -22,14 +22,22 @@ import { SelectField } from '../../../selectField/selectField.component';
 
 export const StyledSelect = styled(SelectField).attrs({
 	classes: {
-		root: 'select',
+		select: 'select',
 		disabled: 'select--disabled',
 		icon: 'select__icon'
 	}
 })`
 	&& {
 		width: 100%;
-		display: ${({ hidden }) => hidden ? 'none' : 'initial'};
+		display: ${({ hidden }) => hidden ? 'none' : 'block'};
+
+		&:before {
+			content: none;
+		}
+
+		.select {
+			padding-right: 32px;
+		}
 	}
 
 	.select--disabled ~ .select__icon {
@@ -45,6 +53,8 @@ export const Item = styled(MenuItem)`
 	&& {
 		font-size: 14px;
 		color: ${COLOR.BLACK_60};
+		padding-top: 12px;
+		padding-bottom: 12px;
 
 		${(props: any) => props.group ? css`
 			height: 12px;

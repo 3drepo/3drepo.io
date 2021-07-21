@@ -91,7 +91,7 @@ function* getCompareModelData({ isFederation, revision }) {
 			yield put(CompareActions.setComponentState({ compareModels: [model], isPending: false }));
 		} else {
 			const { data: submodelsRevisionsMap } = yield API.getSubModelsRevisions(teamspace, settings._id, revision);
-			const compareModels = settings.subModels.map(({ model }) => {
+			const compareModels = Object.keys(submodelsRevisionsMap).map((model) => {
 				const subModelData = submodelsRevisionsMap[model];
 				return prepareModelToCompare(teamspace, model, subModelData.name, false, subModelData.revisions);
 			});
@@ -265,17 +265,13 @@ function* startComparisonOfFederation() {
 		const model = compareModels[index];
 		const isSelectedModel = selectedModelsMap[model._id];
 		const isTargetModel = targetModelsMap[model._id];
+		let keepModelShown = isSelectedModel;
 
 		if (isTargetModel && isSelectedModel) {
 			const targetRevision = isDiff ? model.targetDiffRevision : model.targetClashRevision;
-			const canReuseModel = model.baseRevision.name === targetRevision.name && selectedModelsMap[model._id] && !isDiff;
+			keepModelShown = model.baseRevision.name === targetRevision.name && !isDiff;
 
-			if (canReuseModel) {
-				const isAlreadyVisible = modelsToShow.some(({ _id }) => !!model._id);
-
-				if (!isAlreadyVisible) {
-					modelsToShow.push(model);
-				}
+			if (keepModelShown) {
 				Viewer.diffToolSetAsComparator(
 					model.teamspace,
 					model._id
@@ -288,6 +284,10 @@ function* startComparisonOfFederation() {
 				);
 				modelsToLoad.push(modelPromise);
 			}
+		}
+
+		if (keepModelShown) {
+			modelsToShow.push(model);
 		} else {
 			modelsToHide.push(model);
 		}

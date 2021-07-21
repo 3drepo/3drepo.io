@@ -27,7 +27,7 @@ export const DialogButtons = ({onClickCancel, validateQuota, validateUploadLimit
 		<VisualSettingsButtonsContainer>
 			<NeutralActionButton
 				color="primary"
-				variant="raised"
+				variant="contained"
 				disabled={false}
 				type="button"
 				onClick={onClickCancel}
@@ -38,7 +38,7 @@ export const DialogButtons = ({onClickCancel, validateQuota, validateUploadLimit
 			<Field render={ ({ form }) => (
 				<Button
 					color="secondary"
-					variant="raised"
+					variant="contained"
 					type="submit"
 					disabled={!form.isValid || form.isValidating ||
 						!validateQuota(form.values.files) || !validateUploadLimit(form.values.files) }

@@ -12,7 +12,7 @@
  *  GNU Affero General Public License for more details.
  *
  *  You should have received a copy of the GNU Affero General Public License
- *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 import styled from 'styled-components';
@@ -23,7 +23,13 @@ import { COLOR } from '../../../../../../styles';
 import { ColorSelect } from '../../../../../components/colorPicker/colorPicker.styles';
 import { CheckboxCell } from '../../../../../components/customTable/customTable.styles';
 import { TextField } from '../../../../../components/textField/textField.component';
-import { ActionsLine, MutableActionsLine } from '../../../../../components/textField/textField.styles';
+import {
+	ActionsLine,
+	MutableActionsLine,
+	StyledLinkableField,
+	StyledMarkdownField,
+} from '../../../../../components/textField/textField.styles';
+import { StyledForm as StyledFormComponent } from '../../../views/components/viewItem/viewItem.styles';
 
 interface IContainer {
 	nodeType: string;
@@ -48,6 +54,8 @@ export const MeasurementValue = styled.div`
 	width: auto;
 	text-align: right;
 	padding-right: 10px;
+	white-space: nowrap;
+	margin-left: 10px;
 `;
 
 export const AxisLabel = styled.div`
@@ -55,6 +63,7 @@ export const AxisLabel = styled.div`
 `;
 
 export const AxisValue = styled.div`
+	white-space: nowrap;
 `;
 
 export const Actions = styled.div`
@@ -65,7 +74,6 @@ export const Actions = styled.div`
 	font-size: 12px;
 
 	${ColorSelect} {
-		width: auto;
 		border-bottom: none;
 	}
 `;
@@ -97,9 +105,14 @@ export const StyledCheckboxCell = styled(CheckboxCell)`
 	margin-left: 30px;
 `;
 
+export const StyledForm = styled(StyledFormComponent)`
+	overflow: hidden;
+`;
+
 export const StyledTextField = styled(TextField)`
 	width: 100%;
-	margin-left: ${(props) => props.left ? '66px' : '6px'};
+	overflow: hidden;
+	margin-left: 36px !important;
 
 	input {
 		margin-right: 60px;
@@ -111,5 +124,15 @@ export const StyledTextField = styled(TextField)`
 
 	${MutableActionsLine} {
 		bottom: 0;
+	}
+
+	${StyledMarkdownField} {
+		text-overflow: ellipsis;
+		margin-right: 30px;
+	}
+
+	${StyledLinkableField} {
+		text-overflow: ellipsis;
+		margin-right: 30px;
 	}
 `;

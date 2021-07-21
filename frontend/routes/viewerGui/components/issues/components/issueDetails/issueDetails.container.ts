@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -21,15 +21,26 @@ import { createStructuredSelector } from 'reselect';
 import { selectUsername } from '../../../../../../modules/currentUser';
 import { DialogActions } from '../../../../../../modules/dialog';
 import {
+	selectActiveIssueComments,
 	selectActiveIssueDetails,
 	selectExpandDetails,
 	selectFailedToLoad,
 	selectFetchingDetailsIsPending,
+	selectIssues,
+	selectMeasureMode,
 	selectNewComment,
-	IssuesActions
+	selectPostCommentIsPending,
+	IssuesActions,
 } from '../../../../../../modules/issues';
 import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
-import { selectPermissions } from '../../../../../../modules/model';
+import { selectPermissions, selectUnit } from '../../../../../../modules/model';
+import {
+	selectEndDate,
+	selectSelectedStartingDate,
+	selectSequences,
+	selectStartDate,
+	SequencesActions
+} from '../../../../../../modules/sequences';
 import { selectTopicTypes } from '../../../../../../modules/teamspace';
 import { ViewpointsActions } from '../../../../../../modules/viewpoints';
 import { withViewer } from '../../../../../../services/viewer/viewer';
@@ -37,6 +48,7 @@ import { IssueDetails } from './issueDetails.component';
 
 const mapStateToProps = createStructuredSelector({
 	issue: selectActiveIssueDetails,
+	comments: selectActiveIssueComments,
 	jobs: selectJobsList,
 	expandDetails: selectExpandDetails,
 	fetchingDetailsIsPending: selectFetchingDetailsIsPending,
@@ -45,14 +57,24 @@ const mapStateToProps = createStructuredSelector({
 	currentUser: selectUsername,
 	permissions: selectPermissions,
 	topicTypes: selectTopicTypes,
-	failedToLoad: selectFailedToLoad
+	failedToLoad: selectFailedToLoad,
+	postCommentIsPending: selectPostCommentIsPending,
+	issues: selectIssues,
+	minSequenceDate: selectStartDate,
+	maxSequenceDate: selectEndDate,
+	selectedDate: selectSelectedStartingDate,
+	sequences: selectSequences,
+	units: selectUnit,
+	measureMode: selectMeasureMode,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setState: IssuesActions.setComponentState,
 	fetchIssue: IssuesActions.fetchIssue,
 	saveIssue: IssuesActions.saveIssue,
-	updateIssue: IssuesActions.updateIssue,
+	updateIssue: IssuesActions.updateActiveIssue,
+	updateViewpoint: IssuesActions.updateActiveIssueViewpoint,
+	cloneIssue: IssuesActions.cloneIssue,
 	postComment: IssuesActions.postComment,
 	removeComment: IssuesActions.removeComment,
 	updateSelectedIssuePin: IssuesActions.updateSelectedIssuePin,
@@ -64,7 +86,13 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	attachLinkResources: IssuesActions.attachLinkResources,
 	showDialog: DialogActions.showDialog,
 	showScreenshotDialog:  DialogActions.showScreenshotDialog,
-	setCameraOnViewpoint: ViewpointsActions.setCameraOnViewpoint
+	showConfirmDialog: DialogActions.showConfirmDialog,
+	showViewpoint: ViewpointsActions.showViewpoint,
+	showSequenceDate: SequencesActions.showSequenceDate,
+	setMeasureMode: IssuesActions.setMeasureMode,
+	removeMeasurement: IssuesActions.removeMeasurement,
+	setMeasurementColor: IssuesActions.setMeasurementColor,
+	setMeasurementName: IssuesActions.setMeasurementName,
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(IssueDetails));

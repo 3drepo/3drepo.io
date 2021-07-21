@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2020 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -29,6 +29,7 @@ interface IUserButtonProps {
 	isMenuOpen?: boolean;
 	IconProps?: any;
 	Icon?: React.ReactNode;
+	id?: string;
 }
 
 export const MainMenuButton: React.FunctionComponent<IUserButtonProps> =
@@ -51,7 +52,7 @@ export const MainMenuButton: React.FunctionComponent<IUserButtonProps> =
 	return (
 		<StyledIconButton
 			{...props}
-			active={Number(isMenuOpen)}
+			active={isMenuOpen ? 1 : 0}
 			aria-label="Toggle main menu"
 			aria-haspopup="true"
 		>

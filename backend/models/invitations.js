@@ -1,26 +1,27 @@
 /**
- *	Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 "use strict";
 
 const db = require("../handler/db");
 const User = require("./user");
 const Job = require("./job");
-const Project = require("./project");
-const ModelSetting = require("./modelSetting");
+const { changePermissions, findModelSettings } = require("./modelSetting");
+const { findProjectsById, setUserAsProjectAdminById } = require("./project");
 const systemLogger = require("../logger.js").systemLogger;
 const Mailer = require("../mailer/mailer");
 
@@ -28,7 +29,6 @@ const { contains: setContains } = require("./helper/set");
 
 const responseCodes = require("../response_codes.js");
 const { omit } = require("lodash");
-const C = require("../constants");
 
 const MODELS_PERMISSION = ["collaborator", "commenter", "viewer"];
 
@@ -41,9 +41,11 @@ const getCollection = async () => {
 const invitations = {};
 
 const validateModels = (projectsPermissions, projectsData) => {
-	return projectsPermissions.every((project, index) => {
+	const projectIDtoData = {};
+	projectsData.forEach((data) => projectIDtoData[data._id] = data);
+	return projectsPermissions.every((project) => {
 		const models = new Set((project.models || []).map(m=> m.model));
-		const allModels = new Set(projectsData[index].models);
+		const allModels = new Set(projectIDtoData[project.project].models);
 		return setContains(allModels, models);
 	});
 };
@@ -92,11 +94,11 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 
 	const projectIds = projectsPermissions.map(pr => pr.project);
 
-	const [emailUser, teamspaceJob, projects, teamspaceObject] = await Promise.all([
+	const [emailUser, teamspaceJob, projects] = await Promise.all([
 		User.findByEmail(email),
 		Job.findByJob(teamspace, job),
-		Project.findByIds(teamspace, projectIds),
-		User.findByUserName(teamspace)
+		findProjectsById(teamspace, projectIds),
+		User.hasReachedLicenceLimitCheck(teamspace)
 	]);
 
 	if (emailUser) { // If there is already a user registered with that email
@@ -117,10 +119,6 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 
 	if (!validateModels(projectsPermissions, projects)) {
 		throw responseCodes.INVALID_MODEL_ID;
-	}
-
-	if (await teamspaceObject.hasReachedLicenceLimit()) {
-		throw responseCodes.LICENCE_LIMIT_REACHED;
 	}
 
 	permissions = cleanPermissions(permissions);
@@ -201,25 +199,24 @@ invitations.teamspaceInvitationCheck = async (email, teamspace) => {
 
 const applyModelPermissions = (teamspace, invitedUser, modelsPermissions) => async modelSetting=> {
 	const {permission} = modelsPermissions.find(({model}) => model === modelSetting._id);
-	return await modelSetting.changePermissions(modelSetting.permissions.concat({user: invitedUser, permission}), teamspace);
+	return await changePermissions(teamspace, modelSetting._id, modelSetting.permissions.concat({user: invitedUser, permission}));
 };
 
 const applyProjectPermissions = (teamspace, invitedUser) => async ({ project_admin , project, models}) => {
 	if (project_admin) {
-		await Project.setUserAsProjectAdminById(teamspace, project, invitedUser);
+		await setUserAsProjectAdminById(teamspace, project, invitedUser);
 	} else {
 		const modelsIds = models.map(({model}) => model);
-		const modelsList = await ModelSetting.find({ account: teamspace }, {"_id" : {"$in" : modelsIds}});
+		const modelsList = await findModelSettings(teamspace, {"_id" : {"$in" : modelsIds}});
 		await Promise.all(modelsList.map(applyModelPermissions(teamspace, invitedUser, models)));
 	}
 };
 
 const applyTeamspacePermissions = (invitedUser) => async ({ teamspace, job, permissions  }) => {
-	const teamspaceUser = await User.findByUserName(teamspace);
 	const teamPerms = permissions.teamspace_admin ? ["teamspace_admin"] : [];
 
 	try {
-		await teamspaceUser.addTeamMember(invitedUser, job, teamPerms);
+		await User.addTeamMember(teamspace, invitedUser, job, teamPerms);
 
 		if (!permissions.teamspace_admin) {
 			await Promise.all(permissions.projects.map(applyProjectPermissions(teamspace, invitedUser)));
@@ -253,10 +250,6 @@ invitations.getInvitationsByTeamspace = async (teamspaceName) => {
 		const teamspaceData =  omit(invitationEntry.teamSpaces.find(({teamspace}) => teamspace === teamspaceName), "teamspace");
 		return { email, ...teamspaceData };
 	});
-};
-
-invitations.isInvitation = (user) => {
-	return C.EMAIL_REGEXP.test(user);
 };
 
 module.exports = invitations;

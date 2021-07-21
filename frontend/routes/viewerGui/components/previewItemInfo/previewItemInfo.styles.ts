@@ -15,10 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Typography from '@material-ui/core/Typography';
 import styled from 'styled-components';
 
-import { COLOR } from '../../../../styles/colors';
+import Typography from '@material-ui/core/Typography';
+
+import { VIEWER_PANELS } from '../../../../constants/viewerGui';
+import { COLOR } from '../../../../styles';
 
 export const Container = styled.div`
 	min-width: 0;
@@ -30,6 +32,7 @@ export const Status = styled.div`
 	display: flex;
 	align-items: center;
 	color: ${(props) => props.color || COLOR.WHITE};
+	width: 120px;
 `;
 
 export const Name = styled(Typography)`
@@ -57,7 +60,7 @@ export const Date = styled.span`
 export const Details = styled.div`
 	align-items: center;
 	display: flex;
-	justify-content: space-between;
+	justify-content: ${({ panelType }) => panelType === VIEWER_PANELS.GROUPS ? `flex-start` : `space-between`};
 	height: 21px;
 `;
 

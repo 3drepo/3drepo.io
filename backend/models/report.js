@@ -1,28 +1,29 @@
 /**
- *	Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
 
 const moment = require("moment");
-const ModelSetting = require("./modelSetting");
+const { findModelSettingById } = require("./modelSetting");
 const User = require ("./user");
 const config = require("../config");
 const C = require("../constants");
 const Job = require("./job");
+const utils = require("../utils");
 
 const ReportType = {
 	ISSUES : "Issues",
@@ -102,13 +103,9 @@ class ReportGenerator {
 		this.getUsersToJobs();
 	}
 
-	getDBCol() {
-		return { account: this.teamspace, model: this.modelID };
-	}
-
 	getModelName() {
 		this.promises.push(
-			ModelSetting.findById(this.getDBCol(), this.modelID).then((setting) => {
+			findModelSettingById(this.teamspace, this.modelID).then((setting) => {
 				this.modelName = setting.name;
 			})
 		);
@@ -116,7 +113,7 @@ class ReportGenerator {
 
 	getRevisionID() {
 		this.promises.push(
-			require("./history").findLatest(this.getDBCol(), {timestamp: 1, tag: 1}).then((entry) => {
+			require("./history").findLatest(this.teamspace, this.modelID, {timestamp: 1, tag: 1}).then((entry) => {
 				this.rev = entry.tag ? entry.tag : "uploaded at " + formatDate(entry.timestamp);
 			})
 		);
@@ -131,7 +128,7 @@ class ReportGenerator {
 	}
 
 	getUserJob(user) {
-		return this.userToJob.hasOwnProperty(user) ? this.userToJob[user] : "Unknown";
+		return utils.hasField(this.userToJob, user) ? this.userToJob[user] : "Unknown";
 	}
 
 	addEntries(entries) {
@@ -155,7 +152,7 @@ class ReportGenerator {
 
 			attributes[this.type].forEach((field) => {
 				const attri = { label: field.label };
-				if (entry.hasOwnProperty(field.field)) {
+				if (utils.hasField(entry, field.field)) {
 					const value = entry[field.field];
 
 					if(value === "" || value === undefined || value === null) {

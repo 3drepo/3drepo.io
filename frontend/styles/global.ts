@@ -1,10 +1,26 @@
+/**
+ *  Copyright (C) 2021 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import { createGlobalStyle } from 'styled-components';
 import { clientConfigService } from '../services/clientConfig';
 import { COLOR } from './colors';
 
 const appBackgroundImage = clientConfigService.getCustomBackgroundImagePath() || '/images/viewer_background.png';
 
-// tslint:disable-next-line: no-unused-expression
 export const GlobalStyle = createGlobalStyle`
 	* {
 		font-family: Roboto, 'Helvetica Neue', sans-serif;
@@ -21,7 +37,7 @@ export const GlobalStyle = createGlobalStyle`
 		-ms-text-size-adjust: 100%;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
-		overflow: hidden;
+		/* NOTE: Do not set overflow:hidden here */
 	}
 
 	body {
@@ -104,5 +120,46 @@ export const GlobalStyle = createGlobalStyle`
 
 	[data-simplebar=init][data-simplebar-y-hidden] > .simplebar-track.vertical {
 		display: none;
+	}
+
+	.rta__autocomplete {
+		position: absolute;
+		z-index: 1400;
+		display: block;
+		margin-top: 1em;
+		max-width: 380px;
+	}
+
+	.rta__autocomplete--top {
+		margin-top: 0;
+		margin-bottom: 1em;
+	}
+
+	.rta__list {
+		margin: 0;
+		padding: 0;
+		background: ${COLOR.WHITE};
+		border: 1px solid ${COLOR.BLACK_30};
+		border-radius: 3px;
+		box-shadow: 0 0 5px rgba(27, 31, 35, 0.1);
+		list-style: none;
+	}
+
+	.rta__entity {
+		width: 100%;
+		outline: none;
+	}
+
+	.rta__entity:hover {
+		cursor: pointer;
+	}
+
+	.rta__item:not(:last-child) {
+		border-bottom: 1px solid ${COLOR.BLACK_30};
+	}
+
+	.rta__entity--selected {
+		text-decoration: none;
+		background: ${COLOR.BLACK_12};
 	}
 `;

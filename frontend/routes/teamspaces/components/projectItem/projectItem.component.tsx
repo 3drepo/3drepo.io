@@ -20,6 +20,7 @@ import LabelOutlined from '@material-ui/icons/LabelOutlined';
 import React from 'react';
 
 import { ROUTES } from '../../../../constants/routes';
+import { encodeElementId } from '../../../../helpers/html';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
@@ -135,6 +136,7 @@ export class ProjectItem extends React.PureComponent<IProps, IState> {
 		const { name, disabled, isEmpty, query, active, showStarredOnly } = this.props;
 		return (
 			<TreeList
+				id={'project-' + encodeElementId(name)}
 				active={active}
 				query={query}
 				onClick={this.handleClick}

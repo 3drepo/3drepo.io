@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { cloneDeep } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
-import { calculateTotalMeshes } from '../../helpers/tree';
-import { dispatch, getState } from '../store';
 
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { GROUPS_TYPES } from '../../constants/groups';
 import { getRandomColor, hexToGLColor } from '../../helpers/colors';
 import { normalizeGroup, prepareGroup } from '../../helpers/groups';
 import { searchByFilters } from '../../helpers/searching';
+import { calculateTotalMeshes } from '../../helpers/tree';
 import * as API from '../../services/api';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { Viewer } from '../../services/viewer/viewer';
@@ -31,20 +31,21 @@ import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
+import { dispatch, getState } from '../store';
 import { TreeActions } from '../tree';
+import { ViewpointsActions } from '../viewpoints';
 import { GroupsActions, GroupsTypes, INITIAL_CRITERIA_FIELD_STATE } from './groups.redux';
 import {
 	selectActiveGroupDetails,
 	selectActiveGroupId,
 	selectColorOverrides,
+	selectEditingGroupDetails,
 	selectFilteredGroups,
 	selectGroups,
 	selectGroupsMap,
 	selectIsAllOverridden,
-	selectNewGroupDetails,
 	selectSelectedFilters,
-	selectShowDetails,
-	selectUnalteredActiveGroupDetails
+	selectShowDetails
 } from './groups.selectors';
 
 function* fetchGroups({teamspace, modelId, revision}) {
@@ -167,6 +168,8 @@ function* deleteGroups({ teamspace, modelId, groups }) {
 		const groupsToDelete = groups.split(',');
 		const colorOverrides = yield select(selectColorOverrides);
 		const groupsMap = yield select(selectGroupsMap);
+		const isShowDetails = yield select(selectShowDetails);
+		const activeGroupId = yield select(selectActiveGroupId);
 
 		yield all(groupsToDelete.map((groupId) => {
 			const overriddenGroup = colorOverrides[groupId];
@@ -183,6 +186,12 @@ function* deleteGroups({ teamspace, modelId, groups }) {
 
 			return actions;
 		}));
+
+		if (isShowDetails && groupsToDelete.includes(activeGroupId)) {
+			yield put(GroupsActions.setComponentState({ activeGroup: null, showDetails: false }));
+			const { name } = yield select(selectEditingGroupDetails);
+			yield put(SnackbarActions.show(`Group ${name} removed.`));
+		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('delete', 'groups', error));
 	}
@@ -204,7 +213,7 @@ function* downloadGroups({ teamspace, modelId }) {
 		const filteredGroups = searchByFilters(groups, filters, false);
 		const ids = filteredGroups.map((group) => group._id).join(',');
 		const endpointBase =
-			`${teamspace}/${modelId}/revision/master/head/groups/?noIssues=true&noRisks=true`;
+			`${teamspace}/${modelId}/revision/master/head/groups/?noIssues=true&noRisks=true&noViews=true`;
 		const endpoint = ids ? `${endpointBase}&ids=${ids}` : endpointBase;
 		const modelName = Viewer.settings ? Viewer.settings.name : '';
 		yield API.downloadJSON('groups', modelName, `${endpoint}&convertCoords=true`);
@@ -219,7 +228,7 @@ function* showDetails({ group, revision }) {
 		yield put(GroupsActions.highlightGroup(group));
 		yield put(GroupsActions.setComponentState({
 			showDetails: true,
-			newGroup: {...group},
+			editingGroup: cloneDeep(group),
 			criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE
 		}));
 	} catch (error) {
@@ -229,7 +238,7 @@ function* showDetails({ group, revision }) {
 
 function* closeDetails() {
 	try {
-		const activeGroup = yield select(selectUnalteredActiveGroupDetails);
+		const activeGroup = yield select(selectActiveGroupDetails);
 		yield put(GroupsActions.highlightGroup(activeGroup));
 		yield put(GroupsActions.setComponentState({ showDetails: false }));
 
@@ -239,20 +248,21 @@ function* closeDetails() {
 }
 
 function* createGroup({ teamspace, modelId, revision }) {
+	yield put(GroupsActions.toggleDetailsPendingState(true));
 	try {
 		const isAllOverridden = yield select(selectIsAllOverridden);
 		const currentUser = yield select(selectCurrentUser);
-		const newGroupDetails = yield select(selectNewGroupDetails);
+		const editingGroupDetails = yield select(selectEditingGroupDetails);
 		const objectsStatus = yield Viewer.getObjectsStatus();
 
 		const date = new Date();
 		const timestamp = date.getTime();
 		const group = {
-			...normalizeGroup(newGroupDetails),
+			...normalizeGroup(editingGroupDetails),
 			createdAt: timestamp,
 			updatedAt: timestamp,
 			updatedBy: currentUser.username
-		} as any;
+		};
 
 		if (group.objects && objectsStatus.highlightedNodes && objectsStatus.highlightedNodes.length) {
 			group.totalSavedMeshes = calculateTotalMeshes(objectsStatus.highlightedNodes);
@@ -268,42 +278,41 @@ function* createGroup({ teamspace, modelId, revision }) {
 		}
 
 		yield put(GroupsActions.updateGroupSuccess(preparedGroup));
-		yield put(GroupsActions.highlightGroup(preparedGroup));
 		yield put(GroupsActions.showDetails(preparedGroup));
+		yield put(GroupsActions.setActiveGroup(preparedGroup));
 		yield put(SnackbarActions.show('Group created'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('create', 'group', error));
 	}
+	yield put(GroupsActions.toggleDetailsPendingState(false));
 }
 
 function* updateGroup({ teamspace, modelId, revision, groupId }) {
+	yield put(GroupsActions.toggleDetailsPendingState(true));
 	try {
-		const groupDetails = yield select(selectActiveGroupDetails);
+		const groupDetails = yield select(selectEditingGroupDetails);
 
 		const groupToSave = {
 			...normalizeGroup(groupDetails)
-		} as any;
+		};
 
 		const isNormalGroup = groupDetails.type === GROUPS_TYPES.NORMAL;
 		const objectsStatus = yield Viewer.getObjectsStatus();
+
 		if (isNormalGroup) {
-			groupToSave.totalSavedMeshes = calculateTotalMeshes(objectsStatus.highlightedNodes);
 			groupToSave.objects = objectsStatus.highlightedNodes;
 		}
 
 		const { data } = yield API.updateGroup(teamspace, modelId, revision, groupId, groupToSave);
 		const preparedGroup = prepareGroup(data);
 
-		if (isNormalGroup) {
-			preparedGroup.totalSavedMeshes = groupToSave.totalSavedMeshes;
-		}
-
 		yield put(GroupsActions.updateGroupSuccess(preparedGroup));
-		yield put(GroupsActions.highlightGroup(preparedGroup));
+		yield put(GroupsActions.showDetails(preparedGroup));
 		yield put(SnackbarActions.show('Group updated'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('update', 'group', error));
 	}
+	yield put(GroupsActions.toggleDetailsPendingState(false));
 }
 
 function* setNewGroup() {
@@ -312,7 +321,7 @@ function* setNewGroup() {
 	const groupNumber = groups.length + 1;
 
 	try {
-		const newGroup = prepareGroup({
+		const editingGroup = prepareGroup({
 			author: currentUser.username,
 			name: `Untitled group ${groupNumber}`,
 			color: getRandomColor(),
@@ -321,13 +330,25 @@ function* setNewGroup() {
 
 		yield put(GroupsActions.setComponentState({
 			showDetails: true,
-			activeGroup: null,
 			totalMeshes: 0,
-			newGroup,
+			editingGroup,
 			criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE
 		}));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'new group', error));
+	}
+}
+
+function * clearColorOverrides() {
+	yield put(GroupsActions.clearColorOverridesSuccess());
+	yield put(ViewpointsActions.setSelectedViewpoint(null));
+}
+
+function * setOverrideAll({overrideAll}) {
+	if (!overrideAll) {
+		yield put(GroupsActions.clearColorOverrides());
+	} else {
+		yield put(GroupsActions.setOverrideAllSuccess());
 	}
 }
 
@@ -381,12 +402,11 @@ function* unsubscribeFromChanges({ teamspace, modelId }) {
 }
 
 function* resetToSavedSelection({ groupId }) {
-	const activeGroup = yield select(selectUnalteredActiveGroupDetails);
+	const activeGroup = yield select(selectActiveGroupDetails);
 	activeGroup.rules = (activeGroup || { rules: [] }).rules;
 
 	yield all([
-		put(GroupsActions.selectGroup(activeGroup)),
-		put(GroupsActions.setComponentState({ newGroup: activeGroup }))
+		put(GroupsActions.selectGroup(activeGroup))
 	]);
 }
 
@@ -410,4 +430,6 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.SUBSCRIBE_ON_CHANGES, subscribeOnChanges);
 	yield takeLatest(GroupsTypes.UNSUBSCRIBE_FROM_CHANGES, unsubscribeFromChanges);
 	yield takeLatest(GroupsTypes.RESET_TO_SAVED_SELECTION, resetToSavedSelection);
+	yield takeLatest(GroupsTypes.CLEAR_COLOR_OVERRIDES, clearColorOverrides);
+	yield takeLatest(GroupsTypes.SET_OVERRIDE_ALL, setOverrideAll);
 }

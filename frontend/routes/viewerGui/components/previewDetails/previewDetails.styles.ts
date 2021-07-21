@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,32 +15,49 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import styled, { css } from 'styled-components';
+
 import { Form } from 'formik';
-import styled from 'styled-components';
 
 import {
-	ExpansionPanel,
-	ExpansionPanelDetails,
-	ExpansionPanelSummary,
+	Accordion,
+	AccordionDetails,
+	AccordionSummary,
 	IconButton,
 	Typography as TypographyComponent
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import {GROUP_PANEL_NAME, GROUPS_TYPES} from '../../../../constants/groups';
 
 import { COLOR } from '../../../../styles';
+import { Container as MessageListContainer, FilterWrapper } from '../../../components/messagesList/messagesList.styles';
 
-const SUMMARY_HEIGHT = 64;
+const SUMMARY_HEIGHT = 78;
+
+const containerStyle = (edit: boolean, panelName: string = '', isSmartGroup: boolean) => {
+	if (panelName === GROUP_PANEL_NAME) {
+		return isSmartGroup ? COLOR.BLACK_6 : COLOR.WHITE;
+	}
+
+	return !edit ? COLOR.WHITE : COLOR.BLACK_6;
+};
+
+interface IContainer {
+	edit: boolean;
+	panelName: string;
+	isSmartGroup?: boolean;
+}
 
 export const Container = styled.div`
 	color: ${COLOR.BLACK_60};
-	background-color: ${COLOR.WHITE};
+	background-color: ${({ edit, panelName, isSmartGroup }: IContainer) => containerStyle(edit, panelName, isSmartGroup)};
 	overflow: hidden;
 	display: flex;
 	flex-direction: column;
 	height: 100%;
 `;
 
-export const Collapsable = styled(ExpansionPanel)`
+export const Collapsable = styled(Accordion)`
 	&& {
 		box-shadow: none;
 		padding: 0 12px;
@@ -49,7 +66,7 @@ export const Collapsable = styled(ExpansionPanel)`
 	}
 `;
 
-export const Details = styled(ExpansionPanelDetails)`
+export const Details = styled(AccordionDetails)`
 	&& {
 		display: flex;
 		flex-direction: column;
@@ -59,9 +76,16 @@ export const Details = styled(ExpansionPanelDetails)`
 	}
 `;
 
-export const Summary = styled(ExpansionPanelSummary).attrs({
+export const Summary = styled(AccordionSummary)`
+	&& {
+		display: none;
+	}
+` as any;
+
+export const Header = styled(AccordionSummary).attrs({
 	classes: {
-		expandIcon: 'summary-icon'
+		focused: 'focused',
+		expandIcon: 'summary-icon',
 	}
 })`
 	&& {
@@ -72,11 +96,15 @@ export const Summary = styled(ExpansionPanelSummary).attrs({
 		background-color: ${COLOR.WHITE};
 		z-index: 2;
 
+		&.focused {
+			background-color: ${COLOR.WHITE};
+		}
+
 		.summary-icon {
 			display: none;
 		}
 
-		box-shadow: ${(props: any) => props.scrolled ? `0 4px 7px -4px ${COLOR.BLACK_30};` : 'none'};
+		box-shadow: ${({expanded}: { expanded: boolean }) => expanded ? `0 4px 7px -4px ${COLOR.BLACK_30};` : 'none'};
 	}
 ` as any;
 
@@ -86,7 +114,7 @@ export const CollapsableContent = styled.div`
 
 export const StyledForm = styled(Form)`
 	&& {
-		width: 100%;
+		width: 94%;
 		padding-right: 4px !important;
 	}
 `;
@@ -96,7 +124,21 @@ export const Content = styled.div`
 `;
 
 export const NotCollapsableContent = styled.div`
+	position: relative;
 	flex-grow: 1;
+
+	&:before {
+		position: absolute;
+		z-index: 5;
+		top: 0;
+		left: 0;
+		pointer-events: none;
+		width: 100%;
+		content: '';
+		height: 10px;
+		overflow: hidden;
+		box-shadow: inset 0 4px 7px -4px ${COLOR.BLACK_30};
+	}
 `;
 
 export const ToggleButtonContainer = styled.div`
@@ -105,7 +147,7 @@ export const ToggleButtonContainer = styled.div`
 	top: auto;
 	background-color: ${COLOR.WHITE};
 	width: 100%;
-	z-index: 2;
+	z-index: 1;
 	position: static;
 ` as any;
 
@@ -123,10 +165,16 @@ export const ToggleIcon = styled(ExpandMoreIcon)`
 
 export const Typography = styled(TypographyComponent)`
 	&& {
-		max-height: 40px;
+		max-height: 45px;
 		overflow: hidden;
 		margin-right: 24px;
 		margin-bottom: 0;
+	}
+`;
+
+export const TitleNumber = styled(Typography)`
+	&& {
+		margin-right: 3px;
 	}
 `;
 
@@ -134,12 +182,33 @@ export const MainInfoContainer = styled.div`
 	display: flex;
 	flex-direction: column;
 	width: 100%;
+	padding-right: 0 !important;
+`;
+
+const unexpandedStyles  = css`
+	height: calc(100% - ${SUMMARY_HEIGHT}px);
+
+	${NotCollapsableContent} {
+		height: calc(100% - 40px);
+	}
+
+	${MessageListContainer} {
+		height: calc(100% - 40px);
+	}
+`;
+
+const expandedStyles = css`
+	overflow: auto;
+	position: static;
+
+	${MessageListContainer} {
+		height: auto;
+	}
+
 `;
 
 export const ScrollableContainer = styled.div`
-	overflow: auto;
-	position: static;
-	height: 100%;
+	${({ expanded }: { expanded: boolean }) => expanded ? expandedStyles : unexpandedStyles};
 	display: flex;
 	flex-direction: column;
 `;

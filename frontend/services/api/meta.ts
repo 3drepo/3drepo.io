@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Cache } from '../cache';
 import api from './';
 
 /**
@@ -66,4 +65,15 @@ export const removeStarredMeta = (metaRecordKey) => {
  */
 export const overrideStarredMeta = (starredMeta) => {
 	return api.put('starredMeta', starredMeta);
+};
+
+/**
+ * Get mesh IDs by query
+ * @param teamspace
+ * @param modelId
+ * @param rules
+ * @param revision
+ */
+export const getMeshIDsByQuery = (teamspace, modelId, rules, revision = 'master/head') => {
+	return api.post(`${teamspace}/${modelId}/revision/${revision}/meta/rules?meshids=true`, rules);
 };

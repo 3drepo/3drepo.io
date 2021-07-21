@@ -33,9 +33,19 @@ interface IProps {
 	hideDialog: () => void;
 	showRevisionsDialog: (config) => void;
 	currentRevision: any;
+	getCompareModels: (revisionId) => void;
 }
 
 export class RevisionsSwitch extends React.PureComponent<IProps, any> {
+
+	public componentDidUpdate(prevProps: IProps) {
+		const { currentRevision, getCompareModels } = this.props;
+
+		if (currentRevision !== prevProps.currentRevision) {
+			getCompareModels(currentRevision._id);
+		}
+	}
+
 	public renderCurrentSwitchState = renderWhenTrue(() => (
 		<DisplayedText>
 			{`${this.props.modelSettings.name} - ${this.revisionName}`}
@@ -64,7 +74,7 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 	}
 
 	get revisionName() {
-		const { currentRevision: revision } =  this.props;
+		const { currentRevision: revision } = this.props;
 		return revision.tag || formatDate(revision.timestamp, LONG_DATE_TIME_FORMAT);
 	}
 

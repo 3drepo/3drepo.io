@@ -17,8 +17,14 @@
 
 import React from 'react';
 
+import Tooltip from '@material-ui/core/Tooltip';
+
+import { isNumber } from 'lodash';
 import { StarIcon } from '../../../../../components/starIcon/starIcon.component';
-import { Container, MetaKey, MetaKeyText, MetaValue, StarIconWrapper  } from './metaRecord.styles';
+import {
+	Actions, Container, MetaKey, MetaKeyText, MetaValue, StarIconWrapper, StyledCopyIcon, StyledIconButton,
+	StyledSelectSimilarIcon,
+} from './metaRecord.styles';
 
 interface IProps {
 	starred: boolean;
@@ -26,6 +32,8 @@ interface IProps {
 	className?: string;
 	value?: string;
 	onStarClick: () => void;
+	selectAllSimilar: (rules) => void;
+	copyRules: (rules) => void;
 }
 
 interface IState {
@@ -36,6 +44,16 @@ export class MetaRecord extends React.PureComponent<IProps, IState> {
 	public state = {
 		hasDelayedClick: false
 	};
+
+	private get rules() {
+		const { value, name } = this.props;
+
+		return [{
+			field: name,
+			operator: isNumber(value) ? 'EQUALS' : 'IS',
+			values: [value],
+		}];
+	}
 
 	private get isStarred() {
 		const { starred } = this.props;
@@ -56,7 +74,7 @@ export class MetaRecord extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { value, name } = this.props;
+		const { value, name, copyRules } = this.props;
 
 		return (
 			<Container className={this.props.className}>
@@ -70,9 +88,23 @@ export class MetaRecord extends React.PureComponent<IProps, IState> {
 					<MetaKeyText>{name}</MetaKeyText>
 				</MetaKey>
 				<MetaValue>{value}</MetaValue>
+				<Actions>
+					<Tooltip title="Copy group filter to clipboard">
+						<StyledIconButton onClick={() => copyRules(this.rules)}>
+							<StyledCopyIcon />
+						</StyledIconButton>
+					</Tooltip>
+					<Tooltip title="Select elements with same parameter value">
+						<StyledIconButton onClick={this.handleSelectAllSimilar}>
+							<StyledSelectSimilarIcon />
+						</StyledIconButton>
+					</Tooltip>
+				</Actions>
 			</Container>
 		);
 	}
+
+	private handleSelectAllSimilar = () => this.props.selectAllSimilar(this.rules);
 
 	private handleStarClick = () => {
 		if (this.starClickTimeout) {

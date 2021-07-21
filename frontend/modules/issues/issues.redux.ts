@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,7 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { cloneDeep, keyBy } from 'lodash';
+
+import { cloneDeep, isEqual, keyBy } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
@@ -25,11 +26,12 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	fetchIssueFailure: [],
 	setComponentState: ['componentState'],
 	saveIssue: ['teamspace', 'model', 'issueData', 'revision', 'finishSubmitting', 'ignoreViewer'],
-	updateIssue: ['teamspace', 'modelId', 'issueData'],
+	updateActiveIssue: ['issueData'],
 	updateBoardIssue: ['teamspace', 'modelId', 'issueData'],
-	postComment: ['teamspace', 'modelId', 'issueData', 'finishSubmitting'],
+	cloneIssue: ['dialogId'],
+	postComment: ['teamspace', 'modelId', 'issueData', 'ignoreViewer', 'finishSubmitting'],
 	removeComment: ['teamspace', 'modelId', 'issueData'],
-	saveIssueSuccess: ['issue'],
+	saveIssueSuccess: ['issue', 'resetComponentState'],
 	setNewIssue: [],
 	printIssues: ['teamspace', 'modelId'],
 	downloadIssues: ['teamspace', 'modelId'],
@@ -38,9 +40,9 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	setActiveIssue: ['issue', 'revision', 'ignoreViewer'],
 	togglePendingState: ['isPending'],
 	toggleDetailsPendingState: ['isPending'],
+	togglePostCommentPendingState: ['isPending'],
 	subscribeOnIssueChanges: ['teamspace', 'modelId'],
 	unsubscribeOnIssueChanges: ['teamspace', 'modelId'],
-	focusOnIssue: ['issue', 'revision'],
 	toggleIsImportingBcf: ['isImporting'],
 	toggleSubmodelsIssues: ['showSubmodelIssues'],
 	importBcf: ['teamspace', 'modelId', 'file', 'revision'],
@@ -51,7 +53,8 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	createCommentsSuccess: ['comments', 'issueId'],
 	deleteCommentSuccess: ['commentGuid', 'issueId'],
 	updateCommentSuccess: ['comment', 'issueId'],
-	toggleSortOrder: ['sortOrder'],
+	toggleSortOrder: [],
+	setSortBy: ['field'],
 	updateNewIssue: ['newIssue'],
 	setFilters: ['filters'],
 	showCloseInfo: ['issueId'],
@@ -61,14 +64,20 @@ export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
 	attachFileResources: ['files'],
 	attachLinkResources: ['links'],
 	attachResourcesSuccess: ['resources', 'issueId'],
-	updateResourcesSuccess: ['resourcesIds', 'updates', 'issueId' ],
+	updateResourcesSuccess: ['resourcesIds', 'updates', 'issueId'],
 	reset: [],
 	goToIssue: ['issue'],
-	showMultipleGroups: ['issue', 'revision'],
 	setNewComment: ['newComment'],
 	saveNewScreenshot: ['teamspace', 'model', 'isNewIssue'],
 	updateSelectedIssuePin: ['position'],
-	toggleShowPins: ['showPins']
+	toggleShowPins: ['showPins'],
+	updateActiveIssueViewpoint: ['screenshot'],
+	setMeasureMode: ['measureMode'],
+	setMeasureModeSuccess: ['measureMode'],
+	addMeasurement: ['measurement'],
+	removeMeasurement: ['uuid'],
+	setMeasurementColor: ['uuid', 'color'],
+	setMeasurementName: ['uuid', 'name'],
 }, { prefix: 'ISSUES/' });
 
 export const INITIAL_STATE = {
@@ -84,12 +93,15 @@ export const INITIAL_STATE = {
 		filteredRisks: [],
 		showPins: true,
 		fetchingDetailsIsPending: false,
+		postCommentIsPending: false,
 		isImportingBCF: false,
 		showSubmodelIssues: false,
 		sortOrder: 'desc',
+		sortBy: 'created',
 		failedToLoad: false,
-		savedPin: null
-	}
+		savedPin: null,
+		measureMode: ''
+	},
 };
 
 const updateIssueProps = (issuesMap, issueId, props = {}) => {
@@ -108,6 +120,10 @@ export const toggleDetailsPendingState = (state = INITIAL_STATE, { isPending }) 
 	return setComponentState(state, { componentState: { fetchingDetailsIsPending: isPending } });
 };
 
+export const togglePostCommentPendingState = (state = INITIAL_STATE, { isPending }) => {
+	return setComponentState(state, { componentState: { postCommentIsPending: isPending } });
+};
+
 export const toggleIsImportingBcf = (state = INITIAL_STATE, { isImporting }) => {
 	return setComponentState(state, { componentState: { isImportingBCF: isImporting }});
 };
@@ -119,8 +135,8 @@ export const fetchIssuesSuccess = (state = INITIAL_STATE, { issues = [] }) => {
 	};
 };
 
-export const fetchIssueSuccess = (state = INITIAL_STATE, { issue: {_id, comments, resources} }) => {
-	const issuesMap = updateIssueProps(state.issuesMap, _id, { comments, resources });
+export const fetchIssueSuccess = (state = INITIAL_STATE, { issue: {_id, comments, resources, shapes} }) => {
+	const issuesMap = updateIssueProps(state.issuesMap, _id, { comments, resources, shapes });
 
 	return { ...state, issuesMap, componentState: { ...state.componentState, failedToLoad: false } };
 };
@@ -129,19 +145,38 @@ export const fetchIssueFailure = (state = INITIAL_STATE) => {
 	return { ...state, componentState: { ...state.componentState, failedToLoad: true } };
 };
 
-export const saveIssueSuccess = (state = INITIAL_STATE, { issue }) => {
+export const saveIssueSuccess = (state = INITIAL_STATE, { issue, resetComponentState = true }) => {
 	const issuesMap = updateIssueProps(state.issuesMap, issue._id, issue);
+	const oldPosition = state.issuesMap[state.componentState.activeIssue]?.position;
+	const newPosition = issuesMap[state.componentState.activeIssue]?.position;
+
+	if (!isEqual(oldPosition, newPosition)) {
+		issuesMap[state.componentState.activeIssue].position = oldPosition;
+	}
+
+	const newComponentState = { ...state.componentState };
+
+	if (resetComponentState) {
+		newComponentState.newIssue = {};
+	}
 
 	return {
 		...state,
 		issuesMap,
-		componentState: { ...state.componentState, newIssue: {} }
+		componentState: newComponentState
 	};
 };
 
 export const updateSelectedIssuePin =  (state = INITIAL_STATE, { position }) => {
 	if (state.componentState.activeIssue) {
-		return saveIssueSuccess(state, { issue: {_id: state.componentState.activeIssue, position} });
+		const issue = { _id: state.componentState.activeIssue, position };
+		const issuesMap = updateIssueProps(state.issuesMap, issue._id, issue);
+
+		return {
+			...state,
+			issuesMap,
+			componentState: { ...state.componentState, newIssue: {} }
+		};
 	}
 
 	if (state.componentState.newIssue) {
@@ -168,7 +203,13 @@ export const createCommentsSuccess = (state = INITIAL_STATE, { comments, issueId
 };
 
 export const createCommentSuccess = (state = INITIAL_STATE, { comment, issueId }) => {
-	return createCommentsSuccess(state, {comments: [comment], issueId } );
+	const alreadyInComments = state.issuesMap[issueId].comments.find(({ guid }) => guid === comment.guid);
+
+	if (!alreadyInComments) {
+		return createCommentsSuccess(state, {comments: [comment], issueId } );
+	}
+
+	return { ...state };
 };
 
 export const updateCommentSuccess = (state = INITIAL_STATE, { comment, issueId }) => {
@@ -191,6 +232,15 @@ export const toggleSortOrder = (state = INITIAL_STATE) => {
 		...state, componentState: {
 			...state.componentState,
 			sortOrder: state.componentState.sortOrder === 'asc' ? 'desc' : 'asc'
+		}
+	};
+};
+
+export const setSortBy = (state = INITIAL_STATE, {field}) => {
+	return {
+		...state, componentState: {
+			...state.componentState,
+			sortBy: field
 		}
 	};
 };
@@ -239,6 +289,10 @@ const toggleShowPins = (state = INITIAL_STATE, { showPins }) => {
 	return setComponentState(state, { componentState: { showPins } });
 };
 
+const setMeasureModeSuccess = (state = INITIAL_STATE, { measureMode }) => {
+	return setComponentState(state, { componentState: { measureMode } });
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.FETCH_ISSUES_SUCCESS]: fetchIssuesSuccess,
 	[IssuesTypes.FETCH_ISSUE_SUCCESS]: fetchIssueSuccess,
@@ -247,12 +301,14 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.SAVE_ISSUE_SUCCESS]: saveIssueSuccess,
 	[IssuesTypes.TOGGLE_PENDING_STATE]: togglePendingState,
 	[IssuesTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState,
+	[IssuesTypes.TOGGLE_POST_COMMENT_PENDING_STATE]: togglePostCommentPendingState,
 	[IssuesTypes.TOGGLE_IS_IMPORTING_BCF]: toggleIsImportingBcf,
 	[IssuesTypes.CREATE_COMMENT_SUCCESS]: createCommentSuccess,
 	[IssuesTypes.CREATE_COMMENTS_SUCCESS]: createCommentsSuccess,
 	[IssuesTypes.UPDATE_COMMENT_SUCCESS]: updateCommentSuccess,
 	[IssuesTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess,
 	[IssuesTypes.TOGGLE_SORT_ORDER]: toggleSortOrder,
+	[IssuesTypes.SET_SORT_BY]: setSortBy,
 	[IssuesTypes.SHOW_CLOSE_INFO]: showCloseInfo,
 	[IssuesTypes.HIDE_CLOSE_INFO]: hideCloseInfo,
 	[IssuesTypes.RESET]: reset,
@@ -260,5 +316,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[IssuesTypes.ATTACH_RESOURCES_SUCCESS]: attachResourcesSuccess,
 	[IssuesTypes.UPDATE_RESOURCES_SUCCESS]: updateResourcesSuccess,
 	[IssuesTypes.UPDATE_SELECTED_ISSUE_PIN]: updateSelectedIssuePin,
-	[IssuesTypes.TOGGLE_SHOW_PINS]: toggleShowPins
+	[IssuesTypes.TOGGLE_SHOW_PINS]: toggleShowPins,
+	[IssuesTypes.SET_MEASURE_MODE_SUCCESS]: setMeasureModeSuccess
 });

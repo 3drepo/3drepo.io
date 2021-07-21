@@ -19,97 +19,41 @@ import React from 'react';
 
 import { Tooltip } from '@material-ui/core';
 
-import { VIEWER_EVENTS } from '../../../../../../constants/viewer';
-import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
-import { uuid } from '../../../../../../helpers/uuid';
-import { MEASURE_TYPE, MEASURING_MODE } from '../../../../../../modules/measurements/measurements.constants';
-import { MEASURING_TYPES } from './measuringType.constants';
+import { BASIC_TYPES, MEASURING_TYPES } from './measuringType.constants';
 import { Icon, Wrapper } from './measuringType.styles';
 
 interface IProps {
-	viewer: any;
-	teamspace: string;
-	model: string;
-	isMeasureActive: boolean;
 	setMeasureMode: (mode) => void;
 	measureMode: string;
-	disableMeasure: (isDisabled) => void;
-	deactivateMeasure: () => void;
-	activateMeasure: () => void;
-	addMeasurement: (measure: any) => void;
 	isMetadataActive: boolean;
-	setMetadataActive: (isActive) => void;
-	setPanelVisibility: (panelName, visibility) => void;
+	isClipEdit: boolean;
+	basicTypes?: boolean;
 }
 
+const isBasicType = (({mode}) => BASIC_TYPES.includes(mode));
+
 export const MeasuringType = ({
-	activateMeasure, deactivateMeasure, setMeasureMode, measureMode, viewer, addMeasurement, isMetadataActive,
-	setMetadataActive, setPanelVisibility,
-}: IProps) => {
-
-	const handlePickPoint = ({ trans, position }) => {
-		if (measureMode === MEASURING_MODE.POINT) {
-			if (trans) {
-				position = trans.inverse().multMatrixPnt(position);
-			}
-			addMeasurement({
-				uuid: uuid(),
-				position,
-				type: MEASURE_TYPE.POINT,
-				color: { r: 0, g: 1, b: 1, a: 1},
-			});
-		}
-	};
-
-	const togglePinListeners = (enabled: boolean) => {
-		const resolver = enabled ? 'on' : 'off';
-		viewer[resolver](VIEWER_EVENTS.PICK_POINT, handlePickPoint);
-	};
-
+	setMeasureMode, measureMode, isMetadataActive, isClipEdit
+, basicTypes}: IProps) => {
 	React.useEffect(() => {
-		if (isMetadataActive) {
+		if (isMetadataActive || isClipEdit) {
 			setMeasureMode('');
-			deactivateMeasure();
 		}
-	}, [isMetadataActive]);
-
-	React.useEffect(() => {
-		if (measureMode === '' || measureMode === MEASURING_MODE.POINT) {
-			deactivateMeasure();
-
-			if (measureMode === MEASURING_MODE.POINT) {
-				viewer.setPinDropMode(true);
-				togglePinListeners(true);
-			}
-		} else {
-			activateMeasure();
-			viewer.setPinDropMode(false);
-			togglePinListeners(false);
-		}
-		return () => {
-			deactivateMeasure();
-			viewer.setPinDropMode(false);
-			togglePinListeners(false);
-		};
-	}, [measureMode]);
+	}, [isMetadataActive, isClipEdit]);
 
 	const handleMeasuringTypeClick = (mode) => () => {
-		if (isMetadataActive) {
-			setMetadataActive(false);
-			setPanelVisibility(VIEWER_PANELS.BIM, false);
-		}
-
 		if (mode === measureMode) {
 			setMeasureMode('');
-			return deactivateMeasure();
+		} else {
+			setMeasureMode(mode);
 		}
-
-		setMeasureMode(mode);
 	};
+
+	const AVAILABLE_TYPES = !basicTypes ? MEASURING_TYPES : MEASURING_TYPES.filter(isBasicType);
 
 	return (
 			<>
-				{MEASURING_TYPES.map(({ icon, activeIcon, name, mode }) => (
+				{AVAILABLE_TYPES.map(({ icon, activeIcon, name, mode }) => (
 					<Tooltip title={name} key={name}>
 						<Wrapper>
 							<Icon

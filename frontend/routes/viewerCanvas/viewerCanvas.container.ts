@@ -20,11 +20,17 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { selectGisLayers } from '../../modules/gis';
-import { selectPins as selectIssuePins } from '../../modules/issues';
+import { selectHighlightedShapes as selectIssuesHighlightedShapes,
+	selectPins as selectIssuePins, selectShapes as selectIssuesShapes } from '../../modules/issues';
 import { selectPins as selectMeasurementPins } from '../../modules/measurements';
 import { selectGISCoordinates, selectHasGISCoordinates } from '../../modules/model';
-import { selectPins as selectRiskPins } from '../../modules/risks';
-import { selectAllTransparencyOverrides, selectColorOverrides, TreeActions } from '../../modules/tree';
+import { selectIsPaused, selectIsViewerManipulationEnabled, selectPresentationMode } from '../../modules/presentation';
+import { selectHighlightedShapes as selectRisksHighlightedShapes,
+	selectPins as selectRiskPins, selectShapes as selectRisksShapes  } from '../../modules/risks';
+import { selectIsLoadingFrameState, selectSelectedHiddenNodes,
+	selectSelectedSequenceId, SequencesActions } from '../../modules/sequences';
+import { TreeActions } from '../../modules/tree';
+import { selectAllTransparencyOverrides, selectColorOverrides, selectTransformations } from '../../modules/viewerGui';
 import { withViewer } from '../../services/viewer/viewer';
 import { ViewerCanvas } from './viewerCanvas.component';
 
@@ -36,11 +42,23 @@ const mapStateToProps = createStructuredSelector({
 	measurementPins: selectMeasurementPins,
 	gisCoordinates: selectGISCoordinates,
 	hasGisCoordinates: selectHasGISCoordinates,
-	gisLayers: selectGisLayers
+	gisLayers: selectGisLayers,
+	viewerManipulationEnabled: selectIsViewerManipulationEnabled,
+	presentationMode: selectPresentationMode,
+	isPresentationPaused: selectIsPaused,
+	transformations: selectTransformations,
+	selectedSequenceId: selectSelectedSequenceId,
+	isLoadingSequenceFrame: selectIsLoadingFrameState,
+	sequenceHiddenNodes: selectSelectedHiddenNodes,
+	issuesShapes: selectIssuesShapes,
+	issuesHighlightedShapes: selectIssuesHighlightedShapes,
+	risksShapes: selectRisksShapes,
+	risksHighlightedShapes: selectRisksHighlightedShapes
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	handleTransparencyOverridesChange: TreeActions.handleTransparencyOverridesChange
+	handleTransparencyOverridesChange: TreeActions.handleTransparencyOverridesChange,
+	handleTransparenciesVisibility: SequencesActions.handleTransparenciesVisibility
 }, dispatch);
 
 export default withViewer(connect(mapStateToProps, mapDispatchToProps)(ViewerCanvas));

@@ -180,11 +180,10 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 	}
 
 	public componentWillUnmount() {
+		document.removeEventListener('keydown', this.handleKeyDown);
 		if (this.props.pathname.includes(ROUTES.VIEWER)) {
 			this.props.viewer.resumeRendering();
 		}
-
-		document.removeEventListener('keydown', this.handleKeyDown);
 
 		if (this.layer) {
 			this.clearCanvas();

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,18 +16,28 @@
  */
 
 import styled from 'styled-components';
-import { COLOR } from '../../../../../../styles';
 
-import { LogList as LogListBase } from '../../../../../components/logList/logList.component';
+import Tab from '@material-ui/core/Tab';
+
+import { Tabs } from '@material-ui/core';
+import { COLOR } from '../../../../../../styles';
+import { Image as ImageComponent } from '../../../../../components/image';
+import { MessagesList as MessagesListComponent } from '../../../../../components/messagesList/';
+import {
+	Container as MessageListContainer,
+	FilterWrapper,
+} from '../../../../../components/messagesList/messagesList.styles';
 import PreviewDetailsBase from '../../../previewDetails/previewDetails.container';
+import { Container as PreviewDetailsContainer } from '../../../previewDetails/previewDetails.styles';
+import { Container as TabContainer } from '../../../risks/components/riskDetails/riskDetails.styles';
 
 export const Container = styled.div``;
 
-export const LogList = styled(LogListBase)`
+export const MessagesList = styled(MessagesListComponent)`
 	height: 100%;
 `;
 
-export const LogsContainer = styled.div`
+export const MessageContainer = styled.div`
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
@@ -35,10 +45,17 @@ export const LogsContainer = styled.div`
 
 export const PreviewDetails = styled(PreviewDetailsBase)``;
 
-export const DescriptionImage = styled.div`
-	max-height: 250px;
-	overflow: hidden;
-`;
+export const DescriptionImage = styled(ImageComponent)`
+	img {
+		display: block;
+		margin-top: 6px;
+		margin-bottom: 8px;
+		max-width: 100%;
+		width: 100%;
+		max-height: 200px;
+		height: auto;
+	}
+` as any;
 
 export const HorizontalView = styled.div`
 	display: flex;
@@ -47,7 +64,7 @@ export const HorizontalView = styled.div`
 	overflow: hidden;
 	background-color: ${COLOR.WHITE};
 
-	${PreviewDetails}, ${LogsContainer} {
+	${PreviewDetails}, ${MessageContainer} {
 		min-width: 50%;
 		width: 50%;
 		min-height: 60vh;
@@ -56,9 +73,56 @@ export const HorizontalView = styled.div`
 		overflow: auto;
 	}
 
-	${LogList} {
+	${MessagesList} {
 		:before {
 			box-shadow: none;
 		}
+	}
+
+	${PreviewDetailsContainer} {
+		background-color: ${COLOR.WHITE};
+	}
+
+	${MessageListContainer}, ${FilterWrapper} {
+		background-color: ${COLOR.BLACK_6};
+	}
+`;
+
+export const TabContent = styled.div`
+	background-color: ${COLOR.WHITE};
+	flex: 1;
+	position: relative;
+	overflow: hidden;
+	display: flex;
+	height: inherit;
+`;
+
+export const StyledTab = styled(Tab)`
+	&& {
+		font-size: 13px;
+		padding-left: 0;
+		padding-right: 0;
+		margin-right: 10px;
+	}
+`;
+
+export const StyledTabs = styled(Tabs)`
+	& .MuiTabScrollButton-root {
+		width: 15px;
+	}
+
+	&& {
+		position: relative;
+		width: 345px;
+	}
+`;
+
+export const Content = styled.div`
+	display: ${(props) => props.active ? 'block' : 'none'};
+	width: 100%;
+	margin-bottom: 5px;
+
+	${TabContainer} {
+		margin-top: 6px;
 	}
 `;

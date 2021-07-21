@@ -42,19 +42,6 @@ module.exports.createApp = function (server, serverConfig) {
 	});
 
 	io.use(sharedSession(session, { autoSave: true }));
-
-	io.use((socket, next) => {
-		// init the singleton db connection
-		const DB = require("../handler/db");
-		DB.getDB("admin").then(() => {
-			// set db to singleton modelFactory class
-			require("../models/factory/modelFactory").setDB(DB);
-			next();
-		}).catch(err => {
-			systemLogger.logError("Chat server - DB init error - " + err.message);
-		});
-	});
-
 	initiateSocket();
 
 	const credentialErrorEventName = "credentialError";

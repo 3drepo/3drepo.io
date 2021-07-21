@@ -22,15 +22,19 @@ import IconButton from '@material-ui/core/IconButton';
 import Input from '@material-ui/core/Input';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Popover from '@material-ui/core/Popover';
+import Slider from '@material-ui/core/Slider';
 import styled from 'styled-components';
 
-import Slider from '@material-ui/lab/Slider';
 import { COLOR, FONT_WEIGHT } from '../../../styles';
 import { CheckboxField } from '../customTable/customTable.component';
 
 export const ColorSelect = styled(Grid)`
 	cursor: ${(props: any) => props.disabled ? 'default' : 'pointer'};
 	border-bottom: 1px solid rgba(0, 0, 0, .12);
+
+	&& {
+		width: 49px;
+	}
 ` as any;
 
 export const Dot = styled(Grid)`
@@ -115,7 +119,7 @@ export const SelectedColor = styled(({ color, ...rest}) =>
 	border: ${(props) => props.color && props.color !== COLOR.WHITE ? 0 : 1 }px solid ${COLOR.BLACK_6};
 `;
 
-// tslint:disable-next-line:max-line-length
+// eslint-disable-next-line max-len
 export const SelectedColorBackground = styled.div` background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect x="0" width="5" height="5" y="0" fill="rgb(158, 158, 158)"/><rect x="5" width="5" height="5" y="5" fill="rgb(158, 158, 158)"/></svg>');
 	width: 55px;
 	height: 20px;

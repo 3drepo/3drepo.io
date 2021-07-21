@@ -43,3 +43,5 @@ export const getTeamspaceProjects = memoizeOne((teamspaceName, teamspaces, proje
 		models: projects[projectId].models
 	}));
 });
+
+export const getModelCodeFieldErrorMsg = (error) => error ? 'Can only contain alphanumeric characters' : '';

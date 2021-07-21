@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -57,7 +57,6 @@ export function* updateSettings({ modelData: { teamspace, project, modelId }, se
 		const modifiedSettings = cloneDeep(settings);
 
 		yield API.editModelSettings(teamspace, modelId, modifiedSettings);
-
 		yield put(
 			TeamspacesActions.updateModelSuccess(
 				teamspace, modelId, { project, model: modelId, name: modifiedSettings.name, code: modifiedSettings.code }
@@ -163,9 +162,10 @@ const isTagFormatInValid = (tag) => {
 	return tag && !tag.match(clientConfigService.tagRegExp);
 };
 
-export function* uploadModelFile({ teamspace, project, modelData, fileData }) {
+export function* uploadModelFile({ teamspace, project, modelData, fileData, handleClose }) {
 	try {
 		const isInvalidTag = isTagFormatInValid(fileData.tag);
+		yield put(ModelActions.setModelUploadingState(true));
 
 		if (isInvalidTag) {
 			const INVALID_TAG_MESSAGE =
@@ -185,9 +185,11 @@ export function* uploadModelFile({ teamspace, project, modelData, fileData }) {
 			formData.append('file', fileData.file);
 			formData.append('tag', fileData.tag);
 			formData.append('desc', fileData.desc);
+			formData.append('importAnimations', fileData.importAnimations);
 
 			const { modelId, modelName } = modelData;
 			const { data: { status }, data } = yield API.uploadModelFile(teamspace, modelId, formData);
+			handleClose();
 
 			if (status === uploadFileStatuses.ok) {
 				if (data.hasOwnProperty('errorReason') && data.errorReason.message) {
@@ -204,7 +206,10 @@ export function* uploadModelFile({ teamspace, project, modelData, fileData }) {
 				}
 			}
 		}
+		yield put(ModelActions.setModelUploadingState(false));
 	} catch (e) {
+		handleClose();
+		yield put(ModelActions.setModelUploadingState(false));
 		yield put(DialogActions.showEndpointErrorDialog('upload', 'model', e));
 		yield put(TeamspacesActions.setModelUploadStatus(teamspace, project, modelData.modelId, uploadFileStatuses.failed));
 	}

@@ -1,3 +1,20 @@
+/**
+ *  Copyright (C) 2021 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 "use strict";
 
 const express = require("express");
@@ -13,6 +30,7 @@ const ModelHelper = require("../models/helper/model");
 const User = require("../models/user");
 const DEFAULT_PLUGIN_STRUCTURE = require("../plugin/plugin-structure.js").DEFAULT_PLUGIN_STRUCTURE;
 const path = require("path");
+const utils = require("../utils");
 
 const config = require("../config");
 
@@ -35,28 +53,28 @@ function createClientConfig(serverConfig, req) {
 		"uistate": {},
 		"structure": pluginStructure,
 		"frontendPug": [],
-		"ga" : config.ga,
 		"development" : config.development,
-		"googleConversionId": config.googleConversionId,
+		"gtm": config.gtm,
 		"userNotice" : config.userNotice,
 		"customLogins" : config.customLogins,
-		"liveChatLicense" : config.liveChatLicense,
+		"intercomLicense" : _.get(config, "intercom.license"),
 		"resourceUploadSizeLimit" : config.resourceUploadSizeLimit,
-		"sequencesEnabled": Boolean(config.sequencesEnabled)
+		"sequencesEnabled": true,
+		"presenterEnabled": true
 	};
 
-	if (config.hasOwnProperty("captcha_client_key")) {
+	if (utils.hasField(config, "captcha_client_key")) {
 		clientConfig.captcha_client_key = config.captcha_client_key;
 	}
 
 	// Set up the legal plugins
-	if (config.hasOwnProperty("legal")) {
+	if (utils.hasField(config, "legal")) {
 		for (let i = 0; i < config.legal.length; i += 1) {
 			pluginStructure.functions.push(config.legal[i].page);
 		}
 	}
 
-	if (config.hasOwnProperty("captcha_client_key")) {
+	if (utils.hasField(config, "captcha_client_key")) {
 		clientConfig.captcha_client_key = config.captcha_client_key;
 	}
 
@@ -66,7 +84,7 @@ function createClientConfig(serverConfig, req) {
 
 	// Set up the legal plugins
 	clientConfig.legalTemplates = [];
-	if (config.hasOwnProperty("legal")) {
+	if (utils.hasField(config, "legal")) {
 		clientConfig.legalTemplates = config.legal;
 	}
 
@@ -107,9 +125,9 @@ function createClientConfig(serverConfig, req) {
 	clientConfig.legal = config.legal;
 	clientConfig.tagRegExp = History.tagRegExp;
 	clientConfig.modelNameRegExp = ModelHelper.modelNameRegExp;
-	clientConfig.fileNameRegExp = ModelHelper.fileNameRegExp;
+	clientConfig.fileNameRegExp = C.FILENAME_REGEXP;
 	clientConfig.usernameRegExp = User.usernameRegExp;
-	clientConfig.acceptedFormat = ModelHelper.acceptedFormat;
+	clientConfig.acceptedFormat = C.ACCEPTED_FILE_FORMATS;
 	clientConfig.login_check_interval = config.login_check_interval;
 
 	clientConfig.responseCodes = _.each(responseCodes.codesMap);

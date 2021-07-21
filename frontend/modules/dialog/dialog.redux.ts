@@ -16,9 +16,11 @@
  */
 
 import { DialogProps as IDialogProps } from '@material-ui/core/Dialog';
+import { push } from 'connected-react-router';
 import { get, omit } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import uuid from 'uuidv4';
+import { ROUTES } from '../../constants/routes';
 import * as Dialogs from '../../routes/components/dialogContainer/components';
 
 export interface IDialogConfig {
@@ -29,10 +31,15 @@ export interface IDialogConfig {
 	data?: any;
 	logError?: string;
 	DialogProps?: IDialogProps;
-	buttonVariant?: 'text' | 'flat' | 'outlined' | 'contained' | 'raised' | 'fab' | 'extendedFab';
+	buttonVariant?: 'text' | 'outlined' | 'contained';
 	closeText?: string;
 	onConfirm?: () => void;
 	onCancel?: () => void;
+	search?: {
+		enabled?: boolean;
+		onOpen?: () => void;
+		onClose?: () => void;
+	};
 }
 
 interface IDialogState {
@@ -49,7 +56,8 @@ export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	setPendingState: ['isPending'],
 	showScreenshotDialog: ['config'],
 	showNewUpdateDialog: ['config'],
-	showLoggedOutDialog: []
+	showLoggedOutDialog: [],
+	showRedirectToTeamspaceDialog: ['error'],
 }, { prefix: 'DIALOG/' });
 
 export const INITIAL_STATE = {
@@ -63,6 +71,7 @@ const showDialog = (state = INITIAL_STATE, action) => {
 		config,
 		data: action.config.data,
 	};
+
 	const dialogs = [...state.dialogs, dialog];
 	return { ...state, dialogs };
 };
@@ -154,6 +163,26 @@ const showLoggedOutDialog = (state = INITIAL_STATE, action) => {
 
 	return showDialog(state, { config });
 };
+
+const showRedirectToTeamspaceDialog = (state = INITIAL_STATE, action) => {
+	const { method, dataType, error } = action;
+	const status = get(error.response, 'status', 'Implementation error');
+	const message = get(error.response, 'data.message', error.message);
+	const config = {
+		title: 'Error',
+		content: 'We cannot load the model due to the following:',
+		template: Dialogs.RedirectToTeamspaceDialog,
+		onCancel: () => push(ROUTES.TEAMSPACES),
+		onConfirm: () => push(ROUTES.TEAMSPACES),
+		data: {
+			status,
+			message,
+		}
+	};
+
+	return showDialog(state, { config });
+};
+
 export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.HIDE_DIALOG]: hideDialog,
 	[DialogTypes.SHOW_DIALOG]: showDialog,
@@ -163,5 +192,6 @@ export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.SHOW_REVISIONS_DIALOG]: showRevisionsDialog,
 	[DialogTypes.SHOW_SCREENSHOT_DIALOG]: showScreenshotDialog,
 	[DialogTypes.SHOW_NEW_UPDATE_DIALOG]: showNewUpdateDialog,
-	[DialogTypes.SHOW_LOGGED_OUT_DIALOG]: showLoggedOutDialog
+	[DialogTypes.SHOW_LOGGED_OUT_DIALOG]: showLoggedOutDialog,
+	[DialogTypes.SHOW_REDIRECT_TO_TEAMSPACE_DIALOG]: showRedirectToTeamspaceDialog,
 });

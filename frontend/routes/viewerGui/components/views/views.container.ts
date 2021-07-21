@@ -18,7 +18,9 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { selectIsCommenter } from '../../../../modules/model/permissions.selectors';
+
+import { selectSettings, ModelActions } from '../../../../modules/model';
+import { selectIsAdmin, selectIsCommenter } from '../../../../modules/model/permissions.selectors';
 import {
 	selectActiveViewpoint,
 	selectEditMode,
@@ -26,8 +28,9 @@ import {
 	selectNewViewpoint,
 	selectSearchEnabled,
 	selectSearchQuery,
+	selectSortOrder,
 	selectViewpointsList,
-	ViewpointsActions
+	ViewpointsActions,
 } from '../../../../modules/viewpoints';
 import { Views } from './views.component';
 
@@ -36,10 +39,13 @@ const mapStateToProps = createStructuredSelector({
 	newViewpoint: selectNewViewpoint,
 	activeViewpoint: selectActiveViewpoint,
 	isPending: selectIsPending,
+	isAdmin: selectIsAdmin,
 	editMode: selectEditMode,
 	searchQuery: selectSearchQuery,
 	searchEnabled: selectSearchEnabled,
 	isCommenter: selectIsCommenter,
+	modelSettings: selectSettings,
+	sortOrder: selectSortOrder,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -48,12 +54,17 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	createViewpoint: ViewpointsActions.createViewpoint,
 	updateViewpoint: ViewpointsActions.updateViewpoint,
 	deleteViewpoint: ViewpointsActions.deleteViewpoint,
+	toggleSortOrder: ViewpointsActions.toggleSortOrder,
 	subscribeOnViewpointChanges: ViewpointsActions.subscribeOnViewpointChanges,
 	unsubscribeOnViewpointChanges: ViewpointsActions.unsubscribeOnViewpointChanges,
-	showViewpoint: ViewpointsActions.showViewpoint,
+	setActiveViewpoint: ViewpointsActions.setActiveViewpoint,
 	setNewViewpoint: ViewpointsActions.setNewViewpoint,
+	setDefaultViewpoint: ViewpointsActions.setDefaultViewpoint,
 	setSearchQuery: ViewpointsActions.setSearchQuery,
 	setState: ViewpointsActions.setComponentState,
+	shareViewpointLink: ViewpointsActions.shareViewpointLink,
+	showPreset: ViewpointsActions.showPreset,
+	fetchModelSettings: ModelActions.fetchSettings,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Views);

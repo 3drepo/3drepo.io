@@ -1,18 +1,18 @@
 /**
- *	Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2014 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -20,7 +20,7 @@
 
 	const responseCodes = require("../response_codes");
 	const C				= require("../constants");
-	const ModelSetting = require("../models/modelSetting");
+	const { findModelSettingById } = require("../models/modelSetting");
 	// var History = require('../models/history');
 	const User = require("../models/user");
 	const utils = require("../utils");
@@ -32,6 +32,7 @@
 	const hasReadAccessToModelHelper = require("./checkPermissions").hasReadAccessToModelHelper;
 	const isAccountAdminHelper = require("./checkPermissions").isAccountAdminHelper;
 	const validateUserSession = require("./checkPermissions").validateUserSession;
+	const sessionCheck = require("./sessionCheck");
 
 	const readAccessToModel = [C.PERM_VIEW_MODEL];
 
@@ -49,8 +50,8 @@
 	function loggedIn(req, res, next) {
 		if (skipLoggedIn(req)) {
 			next();
-		} else if (!req.session || !req.session.hasOwnProperty(C.REPO_SESSION_USER)) {
-			responseCodes.respond("Check logged in middleware", req, res, next, responseCodes.AUTH_ERROR, null, req.params);
+		} else if (!sessionCheck(req)) {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, null, {});
 		} else {
 			next();
 		}
@@ -61,7 +62,7 @@
 		let limits;
 		return User.findByUserName(account).then(dbUser => {
 
-			limits = dbUser.customData.billing.getSubscriptionLimits();
+			limits = User.getSubscriptionLimits(dbUser);
 			return User.getTeamspaceSpaceUsed(account);
 
 		}).then(totalSize => {
@@ -71,11 +72,24 @@
 
 	}
 
+	async function checkSufficientSpace(account, size) {
+		if (size > config.uploadSizeLimit) {
+			throw responseCodes.SIZE_LIMIT;
+		}
+
+		const sizeInMB = size / (1024 * 1024);
+		const space = await freeSpace(account);
+
+		if (sizeInMB > space) {
+			throw responseCodes.SIZE_LIMIT_PAY;
+		}
+	}
+
 	function isTeamspaceMember(req, res, next) {
 		return validateUserSession(req).then(() => {
 			const teamspace = req.params.account;
 			const user = req.session.user.username;
-			return User.teamspaceMemberCheck(teamspace, user).then(() => {
+			return User.teamspaceMemberCheck(user, teamspace).then(() => {
 				next();
 			}).catch(err => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -94,9 +108,9 @@
 
 		return User.findByUserName(account).then(dbUser => {
 
-			limits = dbUser.customData.billing.getSubscriptionLimits();
+			limits = User.getSubscriptionLimits(dbUser);
 
-			return ModelSetting.findById({account}, model);
+			return findModelSettingById(account, model);
 
 		}).then(modelSetting => {
 
@@ -122,7 +136,7 @@
 	function isHereEnabled(req, res, next) {
 		const teamspace = req.params.account;
 
-		if (config.here && config.here.appID && config.here.appCode) {
+		if (config.here && config.here.apiKey) {
 			return User.isHereEnabled(teamspace).then((hereEnabled) => {
 				if (hereEnabled) {
 					next();
@@ -177,6 +191,7 @@
 		// Helpers
 		// checkPermissions,
 		freeSpace,
+		checkSufficientSpace,
 		hasReadAccessToModelHelper,
 		isAccountAdminHelper,
 		checkPermissionsHelper

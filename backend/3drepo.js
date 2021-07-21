@@ -1,46 +1,62 @@
 /**
- *	Copyright (C) 2014 3D Repo Ltd
-*
-*	This program is free software: you can redistribute it and/or modify
-*	it under the terms of the GNU Affero General Public License as
-*	published by the Free Software Foundation, either version 3 of the
-*	License, or (at your option) any later version.
-*
-*	This program is distributed in the hope that it will be useful,
-*	but WITHOUT ANY WARRANTY; without even the implied warranty of
-*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*	GNU Affero General Public License for more details.
-*
-*	You should have received a copy of the GNU Affero General Public License
-*	along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ *  Copyright (C) 2014 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 "use strict";
-
+const config = require("./config.js");
 const express = require("express");
+const compression = require("compression");
 const fs = require("fs");
 
 const logger = require("./logger.js");
 const systemLogger = logger.systemLogger;
-
-const config = require("./config.js");
 
 const https = require("https");
 const http = require("http");
 const tls  = require("tls");
 const vhost = require("vhost");
 const crypto = require("crypto");
+const utils = require("./utils");
 
 const certs = {};
 const certMap = {};
 let sslOptions = {};
+
+function initAPM() {
+	systemLogger.logInfo("Initialising APM:");
+	// Any option not supplied via the options object can instead be configured using environment variables, however an empty elastic array required to initialise in the app
+	const apm = require("elastic-apm-node");
+	apm.start({
+		// Override service name from package.json
+		// Allowed characters: a-z, A-Z, 0-9, -, _, and space
+		serviceName: config.apm.serviceName || "",
+		// Use if APM Server requires a token
+		secretToken: config.apm.secretToken || "",
+		// Set custom APM Server URL (default: http://localhost:8200)
+		serverUrl: config.apm.serverUrl || "",
+		logLevel: config.apm.logLevel || ""
+	});
+}
 
 function setupSSL() {
 	if ("ssl" in config) {
 
 		for (const certGroup in config.ssl) {
 
-			if (config.ssl.hasOwnProperty(certGroup)) {
+			if (utils.hasField(config.ssl, certGroup)) {
 				const certGroupOptions = {};
 
 				certGroupOptions.key = fs.readFileSync(config.ssl[certGroup].key, "utf8");
@@ -110,10 +126,16 @@ function handleHTTPSRedirect() {
 }
 
 function runServer() {
+
+	if (config.apm) {
+		initAPM();
+	}
+
 	// The core express application
 	const mainApp = express();
+	mainApp.use(compression());
 
-	if(config.hasOwnProperty("umask")) {
+	if(utils.hasField(config, "umask")) {
 		systemLogger.logInfo("Setting umask: " + config.umask);
 		process.umask(config.umask);
 	}
@@ -138,9 +160,9 @@ function runServer() {
 }
 
 function handleSubdomains(mainApp) {
-	if (config.hasOwnProperty("subdomains")) {
+	if (utils.hasField(config, "subdomains")) {
 		for (const subdomain in config.subdomains) {
-			if (config.subdomains.hasOwnProperty(subdomain)) {
+			if (utils.hasField(config.subdomains, subdomain)) {
 				setupSubdomain(mainApp, subdomain);
 			}
 		}
@@ -154,7 +176,7 @@ function setupSubdomain(mainApp, subdomain) {
 
 	for (let subId = 0; subId < subdomainServers.length; subId++) {
 
-		const serverConfig = subdomainServers[subId];
+		const serverConfig = { ...subdomainServers[subId], using_ssl: config.using_ssl, public_protocol: config.public_protocol };
 
 		// Certificate group
 		const certGroup = serverConfig.certificate ? serverConfig.certificate : "default";
@@ -190,8 +212,7 @@ function logCreateService(serverConfig) {
 		"Loading " +
 		serverConfig.service +
 		" on " + serverConfig.hostname + ":" +
-		serverConfig.port,
-		serverConfig.host_dir
+		serverConfig.port
 	);
 }
 

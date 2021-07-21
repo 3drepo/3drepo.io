@@ -17,7 +17,10 @@
 import { Form, Formik } from 'formik';
 import * as React from 'react';
 import * as Yup from 'yup';
+import { renderWhenTrueOtherwise } from '../../../../helpers/rendering';
 import { clientConfigService } from '../../../../services/clientConfig';
+import { Loader as LoaderIndicator } from '../../loader/loader.component';
+import { LoaderContainer } from '../../messagesList/messagesList.styles';
 import {
 	DialogTab,
 	DialogTabs
@@ -49,16 +52,23 @@ const schema = Yup.object().shape({
 				.trim()
 				.required('Name is required')
 			})
-		)
-		,
+		),
 	links: Yup.array()
 		.of(
 			Yup.object().shape({
 				name: Yup.string().strict(false).trim().required('Name is required'),
-				link: Yup.string().url('Link should be a url').required('Link is required')
+				link: Yup.string().matches(
+					/^[a-zA-Z]+:\/\/([-a-zA-Z0-9@:%_\+.~#&=]+\/*)+[-a-zA-Z0-9@:%_\+.~#?&=]*$/,
+					'Link should be a URL').required('Link is required')
 			})
 		)
 	});
+
+const Loader = () => (
+		<LoaderContainer>
+			<LoaderIndicator size={18} />
+		</LoaderContainer>
+);
 
 export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
 	public state = {
@@ -99,6 +109,17 @@ export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
 				.every((s) => s <= clientConfigService.resourceUploadSizeLimit);
 	}
 
+	private renderAttachResourceFiles = (values) => renderWhenTrueOtherwise(() => (
+		<AttachResourceFiles
+			files={values.files}
+			validateQuota={this.validateQuota}
+			validateUploadLimit={this.validateUploadLimit}
+			uploadLimit={clientConfigService.resourceUploadSizeLimit}
+		/>
+		),
+		<Loader />
+	)
+
 	public render() {
 		const {selectedTab} = this.state;
 		return (
@@ -120,13 +141,7 @@ export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
 					render={({ values }) => (
 						<Form>
 							{
-								selectedTab === 0 &&
-									<AttachResourceFiles
-										files={values.files}
-										validateQuota={this.validateQuota}
-										validateUploadLimit={this.validateUploadLimit}
-										uploadLimit={clientConfigService.resourceUploadSizeLimit}
-									/>
+								selectedTab === 0 && this.renderAttachResourceFiles(values)(this.props.quotaLeft)
 							}
 							{selectedTab === 1 && <AttachResourceUrls links={values.links} />}
 								<DialogButtons

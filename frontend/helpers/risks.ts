@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,13 +16,14 @@
  */
 
 import { get } from 'lodash';
+
 import { getFilterValues, UNASSIGNED_JOB } from '../constants/reportedItems';
 import {
 	LEVELS,
 	LEVELS_OF_RISK,
 	RISK_CONSEQUENCES,
+	RISK_DEFAULT_HIDDEN_LEVELS,
 	RISK_FILTER_RELATED_FIELDS,
-	RISK_LEVELS,
 	RISK_LEVELS_COLOURS,
 	RISK_LEVELS_ICONS,
 	RISK_LIKELIHOODS,
@@ -31,6 +32,8 @@ import {
 } from '../constants/risks';
 import { getAPIUrl } from '../services/api';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
+import { IHeaderMenuItem } from './reportedItems';
+import { setShapesUuids } from './shapes';
 
 export const prepareRisk = (risk, jobs = []) => {
 	const preparedRisk = {...risk};
@@ -47,46 +50,48 @@ export const prepareRisk = (risk, jobs = []) => {
 		preparedRisk.descriptionThumbnail = descriptionThumbnail;
 	}
 
-	if (preparedRisk.residual_likelihood || preparedRisk.likelihood) {
+	if (!(isNaN(preparedRisk.residual_likelihood) && isNaN(preparedRisk.likelihood))) {
 		preparedRisk.residual_likelihood  = getValidNumber(preparedRisk.residual_likelihood, preparedRisk.likelihood);
 	}
 
-	if (preparedRisk.residual_consequence ||  preparedRisk.consequence) {
+	if (!(isNaN(preparedRisk.residual_consequence) && isNaN(preparedRisk.consequence))) {
 		preparedRisk.residual_consequence = getValidNumber(preparedRisk.residual_consequence, preparedRisk.consequence);
 	}
 
-	if (preparedRisk.residual_likelihood || preparedRisk.residual_consequence ) {
-		preparedRisk.residual_level_of_risk  = getValidNumber(
+	if (!(isNaN(preparedRisk.residual_likelihood) && isNaN(preparedRisk.residual_consequence))) {
+		preparedRisk.residual_level_of_risk  = getValidPositiveNumber(
 			preparedRisk.residual_level_of_risk,
-			calculateLevelOfRisk(preparedRisk.residual_likelihood , preparedRisk.residual_consequence )
+			calculateLevelOfRisk(preparedRisk.residual_likelihood, preparedRisk.residual_consequence )
 		);
 	}
 
-	if (preparedRisk.level_of_risk || preparedRisk.likelihood || preparedRisk.consequence) {
-		preparedRisk.level_of_risk = getValidNumber(preparedRisk.level_of_risk,
+	if (!(isNaN(preparedRisk.level_of_risk) && isNaN(preparedRisk.likelihood) && isNaN(preparedRisk.consequence))) {
+		preparedRisk.level_of_risk = getValidPositiveNumber(preparedRisk.level_of_risk,
 			calculateLevelOfRisk(preparedRisk.likelihood, preparedRisk.consequence));
 	}
 
-	if (preparedRisk.overall_level_of_risk || preparedRisk.residual_level_of_risk  || preparedRisk.level_of_risk) {
-		preparedRisk.overall_level_of_risk = getValidNumber(
+	if (!(isNaN(preparedRisk.overall_level_of_risk) &&
+		isNaN(preparedRisk.residual_level_of_risk) &&
+		isNaN(preparedRisk.level_of_risk))) {
+		preparedRisk.overall_level_of_risk = getValidPositiveNumber(
 			preparedRisk.overall_level_of_risk,
-			getValidNumber(preparedRisk.residual_level_of_risk , preparedRisk.level_of_risk)
+			getValidPositiveNumber(preparedRisk.residual_level_of_risk , preparedRisk.level_of_risk)
 		);
 	}
 
-	if (preparedRisk.overall_level_of_risk) {
-		preparedRisk.statusColor = getRiskColor(preparedRisk.overall_level_of_risk);
-	}
-
-	if (preparedRisk.mitigation_status) {
-		preparedRisk.StatusIconComponent = getRiskIcon(preparedRisk.mitigation_status);
-	}
+	preparedRisk.statusColor = getRiskColor(preparedRisk.overall_level_of_risk);
+	preparedRisk.StatusIconComponent = getRiskIcon(preparedRisk.mitigation_status);
 
 	if (preparedRisk.assigned_roles) {
 		preparedRisk.roleColor = get(jobs.find((job) => job.name === get(preparedRisk.assigned_roles, '[0]')), 'color');
 	}
 
-	preparedRisk.defaultHidden = preparedRisk.mitigation_status === RISK_LEVELS.AGREED_FULLY;
+	preparedRisk.defaultHidden = RISK_DEFAULT_HIDDEN_LEVELS.includes(preparedRisk.mitigation_status);
+	preparedRisk.color = getRiskColor(risk.residual_level_of_risk);
+
+	if (preparedRisk.shapes) {
+		preparedRisk.shapes = setShapesUuids(preparedRisk.shapes);
+	}
 
 	return preparedRisk;
 };
@@ -127,7 +132,7 @@ export const getRiskLikelihoodName = (likelihood: number) => {
 };
 
 const getRiskIcon = (mitigationStatus) =>  RISK_LEVELS_ICONS[mitigationStatus] || null;
-const getRiskColor = (levelOfRisk) => RISK_LEVELS_COLOURS[levelOfRisk].color;
+export const getRiskColor = (levelOfRisk) => RISK_LEVELS_COLOURS[getValidPositiveNumber(levelOfRisk, -1)].color;
 
 export const getRiskStatus = (levelOfRisk: number, mitigationStatus: string) => {
 	return ({
@@ -137,7 +142,7 @@ export const getRiskStatus = (levelOfRisk: number, mitigationStatus: string) => 
 };
 
 export const getRiskPinColor = (risk) => {
-	const levelOfRisk = (risk.overall_level_of_risk !== undefined) ? risk.overall_level_of_risk : 4;
+	const levelOfRisk = getValidPositiveNumber(risk.overall_level_of_risk, 4);
 	return RISK_LEVELS_COLOURS[levelOfRisk].pinColor;
 };
 
@@ -176,22 +181,15 @@ const getValidNumber = (value, defaultValue?) => {
 	return defaultValue;
 };
 
-const canChangeStatusToClosed = (riskData, userJob, permissions, currentUser) => {
-	return isAdmin(permissions) || isJobOwner(riskData, userJob, permissions, currentUser);
-};
+const getValidPositiveNumber = (value, defaultValue?) => {
+	const validNumber = getValidNumber(value, defaultValue);
 
-export const canChangeStatus = (riskData, userJob, permissions, currentUser) => {
-	return canChangeStatusToClosed(riskData, userJob, permissions, currentUser) ||
-		isAssignedJob(riskData, userJob, permissions);
+	return validNumber >= 0 ? validNumber : defaultValue;
 };
 
 export const canChangeBasicProperty = (riskData, userJob, permissions, currentUser) => {
 	return isAdmin(permissions) || isJobOwner(riskData, userJob, permissions, currentUser) &&
 		canComment(riskData, userJob, permissions, currentUser);
-};
-
-export const canChangeAssigned = (riskData, userJob, permissions, currentUser) => {
-	return isAdmin(permissions) || canChangeBasicProperty(riskData, userJob, permissions, currentUser);
 };
 
 export const canComment = (riskData, userJob, permissions, currentUser) => {
@@ -203,39 +201,70 @@ export const canComment = (riskData, userJob, permissions, currentUser) => {
 	return ableToComment;
 };
 
+export const getRiskFilterValues = (property) =>
+	property.map((value) => ({
+		label: value,
+		value
+	}));
+
+const getFromToFilter = (label) =>  [{
+		label: 'From',
+		value: {
+			label: label + ' from',
+			value: label + 'from',
+			date: null
+		}
+	}, {
+		label: 'To',
+		value: {
+			label: label + ' to',
+			value: label + 'to',
+			date: null
+		}
+	}];
+
 export const filtersValuesMap = (jobs, settings) => {
 	const jobsList = [...jobs, UNASSIGNED_JOB];
 
 	return {
-		[RISK_FILTER_RELATED_FIELDS.CATEGORY]: getFilterValues(settings.riskCategories
-				.map((category) => ({ value: category, name: category }))),
+		[RISK_FILTER_RELATED_FIELDS.CATEGORY]: getFilterValues(getRiskFilterValues(settings.category)),
 		[RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS]: getFilterValues(RISK_MITIGATION_STATUSES),
 		[RISK_FILTER_RELATED_FIELDS.CREATED_BY]: getFilterValues(jobs),
 		[RISK_FILTER_RELATED_FIELDS.RISK_OWNER]: getFilterValues(jobsList),
+		[RISK_FILTER_RELATED_FIELDS.ELEMENT]: getRiskFilterValues(settings.element),
+		[RISK_FILTER_RELATED_FIELDS.LOCATION]: getRiskFilterValues(settings.location_desc),
+		[RISK_FILTER_RELATED_FIELDS.RISK_FACTOR]: getRiskFilterValues(settings.risk_factor),
+		[RISK_FILTER_RELATED_FIELDS.ASSOCIATED_ACTIVITY]: getRiskFilterValues(settings.associated_activity),
+		[RISK_FILTER_RELATED_FIELDS.SCOPE]: getRiskFilterValues(settings.scope),
+		[RISK_FILTER_RELATED_FIELDS.MITIGATION_STAGE]: getRiskFilterValues(settings.mitigation_stage),
+		[RISK_FILTER_RELATED_FIELDS.MITIGATION_TYPE]: getRiskFilterValues(settings.mitigation_type),
 		[RISK_FILTER_RELATED_FIELDS.RISK_CONSEQUENCE]: getFilterValues(RISK_CONSEQUENCES),
 		[RISK_FILTER_RELATED_FIELDS.RISK_LIKELIHOOD]: getFilterValues(RISK_LIKELIHOODS),
 		[RISK_FILTER_RELATED_FIELDS.RESIDUAL_CONSEQUENCE]: getFilterValues(RISK_CONSEQUENCES),
 		[RISK_FILTER_RELATED_FIELDS.RESIDUAL_LIKELIHOOD]: getFilterValues(RISK_LIKELIHOODS),
 		[RISK_FILTER_RELATED_FIELDS.LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK),
 		[RISK_FILTER_RELATED_FIELDS.RESIDUAL_LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK),
-		[RISK_FILTER_RELATED_FIELDS.OVERALL_LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK)
+		[RISK_FILTER_RELATED_FIELDS.OVERALL_LEVEL_OF_RISK]: getFilterValues(LEVELS_OF_RISK),
+		[RISK_FILTER_RELATED_FIELDS.START_DATETIME]: getFromToFilter('Start')
 	};
 };
 
-export const getHeaderMenuItems = (
-		teamspace, model, printRisks, downloadRisks, toggleSortOrder, toggleShowPins?, showPins?
-	) => {
+export const getHeaderMenuItems = (props) => {
+	const {teamspace, model, printItems, downloadItems, toggleSortOrder,
+		toggleShowPins ,  showPins, sortOrder, setSortBy, sortByField} = props;
+
 	const items = [{
 		...RISKS_ACTIONS_MENU.PRINT,
-		onClick: () => printRisks(teamspace, model)
+		onClick: () => printItems(teamspace, model)
 	}, {
 		...RISKS_ACTIONS_MENU.DOWNLOAD,
-		onClick: () => downloadRisks(teamspace, model)
+		onClick: () => downloadItems(teamspace, model)
 	}, {
-		...RISKS_ACTIONS_MENU.SORT_BY_DATE,
+		...RISKS_ACTIONS_MENU.SORT_ORDER,
 		onClick: () => {
 			toggleSortOrder();
-		}
+		},
+		Icon: sortOrder === 'asc' ? RISKS_ACTIONS_MENU.SORT_ORDER.ASC : RISKS_ACTIONS_MENU.SORT_ORDER.DESC
 	}];
 
 	const togglePinItem = {
@@ -244,7 +273,23 @@ export const getHeaderMenuItems = (
 		onClick: () => toggleShowPins(!showPins)
 	};
 
-	const menuItems = !!toggleShowPins ? [...items, {...togglePinItem}] : [...items];
+	const menuItems: IHeaderMenuItem[] = !!toggleShowPins ? [...items, {...togglePinItem}] : [...items];
+
+	menuItems.push({
+		label: 'Sort by',
+		subItems: [
+			{
+				label: 'Created at',
+				onClick: () => setSortBy('created'),
+				enabled: sortByField === 'created'
+			},
+			{
+				label: 'Start date',
+				onClick: () => setSortBy('sequence_start'),
+				enabled: sortByField === 'sequence_start'
+			},
+			]
+	});
 
 	return menuItems;
 };

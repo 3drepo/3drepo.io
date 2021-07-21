@@ -93,7 +93,7 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 			>
 				<Form>
 					<FormContainer container direction="column">
-						<Headline color="primary" variant="subheading">Basic Information</Headline>
+						<Headline color="primary" variant="subtitle1">Basic Information</Headline>
 						<Grid container direction="row" wrap="nowrap">
 							<StyledDropzone
 								disabled={isAvatarPending}
@@ -152,7 +152,7 @@ export class ProfileDataForm extends React.PureComponent<IProps, IState> {
 						<Field render={ ({ form }) => (
 							<StyledButton
 								color="secondary"
-								variant="raised"
+								variant="contained"
 								disabled={!form.isValid || form.isValidating}
 								type="submit"
 							>

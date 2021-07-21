@@ -42,7 +42,7 @@ export const createProject = (teamspace, projectData) => {
  * @param project
  */
 export const updateProject = (teamspace, projectName, projectData) => {
-	return api.put(`${teamspace}/projects/${projectName}`, projectData);
+	return api.patch(`${teamspace}/projects/${projectName}`, projectData);
 };
 
 /**

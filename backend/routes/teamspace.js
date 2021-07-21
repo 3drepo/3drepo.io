@@ -1,18 +1,18 @@
 /**
- *	Copyright (C) 2018 3D Repo Ltd
+ *  Copyright (C) 2018 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -54,7 +54,7 @@
 
 	/**
 	 * @api {post} /:teamspace/settings/mitigations.csv Upload mitigations file
-	 * @apiName upload//MitigationsFile
+	 * @apiName uploadMitigationsFile
 	 * @apiGroup Teamspace
 	 * @apiDescription Upload a risk mitigations CSV file to a teamspace.
 	 *
@@ -296,7 +296,8 @@
 	 *    user: "viewerTeamspace1Model1JobB",
 	 *    firstName: "Alice",
 	 *    lastName: "Stratford",
-	 *    company: "Teamspace one"
+	 *    company: "Teamspace one",
+	 *    job: {"_id": "Job1", color: "#FFFFFF"}
 	 * }
 	 */
 	router.get("/members/:user", middlewares.isTeamspaceMember, getTeamMemberInfo);
@@ -397,7 +398,7 @@
 	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam (Request body) {String} job The job that the users going to have assigned
 	 * @apiParam (Request body) {String} user The username of the user to become a member
-	 * @apiParam (Request body) {[]String} permissions The permisions to be assigned to the member it can be an empty array or have a "teamspace_admin" value.
+	 * @apiParam (Request body) {String[]} permissions The permisions to be assigned to the member it can be an empty array or have a "teamspace_admin" value.
 	 *
 	 * @apiExample {post} Example usage:
 	 * POST /teamSpace1/members HTTP/1.1
@@ -419,6 +420,34 @@
 	 *
 	 */
 	router.post("/members", middlewares.isAccountAdmin, addTeamMember);
+
+	/**
+	 * @api {get} /:teamspace/addOns get enabled add ons
+	 * @apiName getAddOns
+	 * @apiGroup Teamspace
+	 * @apiDescription view the list of addOns enabled on this teamspace
+	 *
+	 * @apiPermission teamspace member
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
+	 *
+	 * @apiSuccessExample {json} Success
+	 * {
+	 *   vrEnabled: true,
+	 *   hereEnabled: true
+	 * }
+	 *
+	 */
+
+	router.get("/addOns", middlewares.isTeamspaceMember, getTeamspaceAddOns);
+
+	function getTeamspaceAddOns(req, res, next) {
+		User.getAddOnsForTeamspace(req.params.account).then((addOns) => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, addOns);
+		}).catch(err => {
+			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+		});
+	}
 
 	function getBillingInfo(req, res, next) {
 		User.findByUserName(req.params.account).then(user => {
@@ -476,14 +505,7 @@
 
 	function addTeamMember(req, res, next) {
 		const responsePlace = utils.APIInfo(req);
-		User.findByUserName(req.params.account)
-			.then(dbUser => {
-				if(req.body.user) {
-					return dbUser.addTeamMember(req.body.user, req.body.job, req.body.permissions);
-				} else {
-					return Promise.reject(responseCodes.USER_NOT_FOUND);
-				}
-			})
+		User.addTeamMember(req.params.account, req.body.user, req.body.job, req.body.permissions)
 			.then((user) => {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, user);
 			})
@@ -497,7 +519,7 @@
 		const responsePlace = utils.APIInfo(req);
 		User.findByUserName(req.params.account)
 			.then(dbUser => {
-				return dbUser.removeTeamMember(req.params.user, req.query.cascadeRemove);
+				return User.removeTeamMember(dbUser, req.params.user, req.query.cascadeRemove);
 			})
 			.then(() => {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {user: req.params.user});
@@ -556,15 +578,7 @@
 			if (err) {
 				return responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err , err.resCode ? err.resCode : err);
 			} else {
-				const storeFileProm = TeamspaceSettings.processMitigationsFile(account, user, sessionId, req.file.originalname, req.file.buffer);
-				storeFileProm.then(([updatedTS, processFileResult]) => {
-					const result = { "status":"ok" };
-					if (updatedTS) {
-						result.mitigationsUpdatedAt = updatedTS;
-					}
-					if (processFileResult) {
-						result.records = processFileResult.length;
-					}
+				TeamspaceSettings.processMitigationsFile(account, user, sessionId, req.file.originalname, req.file.buffer).then((result) => {
 					responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, result);
 				}).catch(promErr => {
 					responseCodes.respond(place, req, res, next, promErr, promErr);

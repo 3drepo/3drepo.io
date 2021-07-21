@@ -44,12 +44,17 @@ describe("Sign up", function() {
 
 	const username = "signup_helloworld";
 	const uppercase_username = "Signup_helloworld";
-	const password = "password";
+	const password = "Str0ngPassword!";
 	const email = "test3drepo_signup@mailinator.com";
 	const firstName = "Hello";
 	const lastName = "World";
 	const countryCode = "GB";
 	const company = "company";
+	const jobTitle = "someJobTitle";
+	const industry = "Architecture";
+	const howDidYouFindUs = "Facebook";
+	const phoneNumber = "0123456789";
+
 	const mailListAgreed = true;
 
 	const usernameNoSpam = "signup_nospam";
@@ -58,9 +63,8 @@ describe("Sign up", function() {
 
 	const User = require("../../models/user");
 
-	it("with available username should return success", function(done) {
-
-		request(server)
+	it("with available username should return success", async function() {
+		const {body} = await request(server)
 			.post(`/${username}`)
 			.send({
 
@@ -70,19 +74,63 @@ describe("Sign up", function() {
 				"lastName": lastName,
 				"countryCode": countryCode,
 				"company": company,
-				"mailListAgreed": mailListAgreed
+				"mailListAgreed": mailListAgreed,
+				"jobTitle": jobTitle,
+				"industry": industry,
+				"howDidYouFindUs": howDidYouFindUs,
+				"phoneNumber": phoneNumber
 
-			}).expect(200, function(err, res) {
+			}).expect(200);
 
-				expect(res.body.account).to.equal(username);
-				done(err);
-			});
-
+		expect(body.account).to.equal(username);
 	});
 
-	it("with same username but different case should fail", function(done) {
+	it("with short password should fail", async function() {
+		const {body} = await request(server)
+			.post(`/${username}`)
+			.send({
 
-		request(server)
+				"email": email,
+				"password": "Sh0rt!",
+				"firstName": firstName,
+				"lastName": lastName,
+				"countryCode": countryCode,
+				"company": company,
+				"mailListAgreed": mailListAgreed,
+				"jobTitle": jobTitle,
+				"industry": industry,
+				"howDidYouFindUs": howDidYouFindUs,
+				"phoneNumber": phoneNumber
+
+			}).expect(400);
+
+		expect(body.value).to.equal(responseCodes.PASSWORD_TOO_SHORT.value);
+	});
+
+	it("with weak password should fail", async function() {
+		const {body} = await request(server)
+			.post(`/${username}`)
+			.send({
+
+				"email": email,
+				"password": "password",
+				"firstName": firstName,
+				"lastName": lastName,
+				"countryCode": countryCode,
+				"company": company,
+				"mailListAgreed": mailListAgreed,
+				"jobTitle": jobTitle,
+				"industry": industry,
+				"howDidYouFindUs": howDidYouFindUs,
+				"phoneNumber": phoneNumber
+
+			}).expect(400);
+
+		expect(body.value).to.equal(responseCodes.PASSWORD_TOO_WEAK.value);
+	});
+
+	it("with same username but different case should fail", async function() {
+		const { body } =  await request(server)
 			.post(`/${uppercase_username}`)
 			.send({
 
@@ -92,18 +140,19 @@ describe("Sign up", function() {
 				"lastName": lastName,
 				"countryCode": countryCode,
 				"company": company,
-				"mailListAgreed": mailListAgreed
+				"mailListAgreed": mailListAgreed,
+				"jobTitle": jobTitle,
+				"industry": industry,
+				"howDidYouFindUs": howDidYouFindUs,
+				"phoneNumber": phoneNumber
 
-			}).expect(400, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.USER_EXISTS.value);
-				done(err);
-			});
+			}).expect(400);
 
+		expect(body.value).to.equal(responseCodes.USER_EXISTS.value);
 	});
 
-	it("with mailing list opt-out selected should return success", function(done) {
-
-		request(server)
+	it("with mailing list opt-out selected should return success", async function() {
+		const { body } = await request(server)
 			.post(`/${usernameNoSpam}`)
 			.send({
 
@@ -113,70 +162,78 @@ describe("Sign up", function() {
 				"lastName": lastName,
 				"countryCode": countryCode,
 				"company": company,
-				"mailListAgreed": noMailListAgreed
+				"mailListAgreed": noMailListAgreed,
+				"jobTitle": jobTitle,
+				"industry": industry,
+				"howDidYouFindUs": howDidYouFindUs,
+				"phoneNumber": phoneNumber
 
-			}).expect(200, function(err, res) {
+			}).expect(200);
 
-				expect(res.body.account).to.equal(usernameNoSpam);
-				done(err);
-			});
-
+		expect(body.account).to.equal(usernameNoSpam);
 	});
 
-	it("should have user created in database after sign up", function() {
-		// use return for promise function
-		return User.findByUserName(username).then(user => {
-			expect(user).to.not.be.null;
-			expect(user.user).to.equal(username);
-			expect(user.customData.billing.billingInfo.firstName).to.equal(firstName);
-			expect(user.customData.billing.billingInfo.lastName).to.equal(lastName);
-			expect(user.customData.billing.billingInfo.countryCode).to.equal(countryCode);
-			expect(user.customData.billing.billingInfo.company).to.equal(company);
-			expect(user.customData.mailListOptOut).to.be.undefined;
-		});
+	it("should have user created in database after sign up", async function() {
+		const user = await User.findByUserName(username);
+
+		expect(user).to.not.be.null;
+		expect(user.user).to.equal(username);
+		expect(user.customData.billing.billingInfo.firstName).to.equal(firstName);
+		expect(user.customData.billing.billingInfo.lastName).to.equal(lastName);
+		expect(user.customData.billing.billingInfo.countryCode).to.equal(countryCode);
+		expect(user.customData.billing.billingInfo.company).to.equal(company);
+		expect(user.customData.mailListOptOut).to.be.undefined;
+		expect(user.customData.extras.jobTitle).to.equal(jobTitle);
+		expect(user.customData.extras.industry).to.equal(industry);
+		expect(user.customData.extras.howDidYouFindUs).to.equal(howDidYouFindUs);
+		expect(user.customData.extras.phoneNumber).to.equal(phoneNumber);
 	});
 
-	it("with mailing list opt-out should have flag set", function() {
-		// use return for promise function
-		return User.findByUserName(usernameNoSpam).then(user => {
-			expect(user).to.not.be.null;
-			expect(user.user).to.equal(usernameNoSpam);
-			expect(user.customData.billing.billingInfo.firstName).to.equal(firstName);
-			expect(user.customData.billing.billingInfo.lastName).to.equal(lastName);
-			expect(user.customData.billing.billingInfo.countryCode).to.equal(countryCode);
-			expect(user.customData.billing.billingInfo.company).to.equal(company);
-			expect(user.customData.mailListOptOut).to.equal(true);
-		});
+	it("with mailing list opt-out should have flag set", async function() {
+		const user = await User.findByUserName(usernameNoSpam);
+
+		expect(user).to.not.be.null;
+		expect(user.user).to.equal(usernameNoSpam);
+		expect(user.customData.billing.billingInfo.firstName).to.equal(firstName);
+		expect(user.customData.billing.billingInfo.lastName).to.equal(lastName);
+		expect(user.customData.billing.billingInfo.countryCode).to.equal(countryCode);
+		expect(user.customData.billing.billingInfo.company).to.equal(company);
+		expect(user.customData.mailListOptOut).to.equal(true);
+		expect(user.customData.extras.jobTitle).to.equal(jobTitle);
+		expect(user.customData.extras.industry).to.equal(industry);
+		expect(user.customData.extras.howDidYouFindUs).to.equal(howDidYouFindUs);
+		expect(user.customData.extras.phoneNumber).to.equal(phoneNumber);
 	});
 
-	it("with username that already exists should fail", function(done) {
+	it("with username that already exists should fail", async function() {
 
-		request(server)
+		const { body } = await request(server)
 			.post(`/${username}`)
 			.send({
-
 				"email": "test3drepo3_signup@mailinator.com",
 				"password": password,
 				"firstName": firstName,
 				"lastName": lastName,
 				"countryCode": countryCode,
 				"company": company,
-				"mailListAgreed": mailListAgreed
+				"mailListAgreed": mailListAgreed,
+				"jobTitle": jobTitle,
+				"industry": industry,
+				"howDidYouFindUs": howDidYouFindUs,
+				"phoneNumber": phoneNumber
 
-			}).expect(400, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.USER_EXISTS.value);
-				done(err);
-			});
+			}).expect(400);
 
+		expect(body.value).to.equal(responseCodes.USER_EXISTS.value);
 	});
 
 	C.REPO_BLACKLIST_USERNAME.forEach(username => {
 
-		it("with blacklisted username - " + username + " should fail", function(done) {
+		it("with blacklisted username - " + username + " should fail", async function() {
 
 			// POST /contact is another API so skip checking
 			if(username === "contact") {
-				return done();
+				return ;
 			}
 
 			request(server)
@@ -189,11 +246,13 @@ describe("Sign up", function() {
 					"lastName": lastName,
 					"countryCode": countryCode,
 					"company": company,
-					"mailListAgreed": mailListAgreed
+					"mailListAgreed": mailListAgreed,
+					"jobTitle": jobTitle,
+					"industry": industry,
+					"howDidYouFindUs": howDidYouFindUs,
+					"phoneNumber": phoneNumber
 
-				}).expect(400, function(err, res) {
-					done(err);
-				});
+				}).expect(400);
 		});
 
 	});
@@ -209,7 +268,11 @@ describe("Sign up", function() {
 				"lastName": lastName,
 				"countryCode": countryCode,
 				"company": company,
-				"mailListAgreed": mailListAgreed
+				"mailListAgreed": mailListAgreed,
+				"jobTitle": jobTitle,
+				"industry": industry,
+				"howDidYouFindUs": howDidYouFindUs,
+				"phoneNumber": phoneNumber
 
 			}).expect(400, function(err, res) {
 
@@ -229,7 +292,11 @@ describe("Sign up", function() {
 				"lastName": lastName,
 				"countryCode": countryCode,
 				"company": company,
-				"mailListAgreed": mailListAgreed
+				"mailListAgreed": mailListAgreed,
+				"jobTitle": jobTitle,
+				"industry": industry,
+				"howDidYouFindUs": howDidYouFindUs,
+				"phoneNumber": phoneNumber
 
 			}).expect(400, function(err, res) {
 
@@ -249,7 +316,11 @@ describe("Sign up", function() {
 				"lastName": lastName,
 				"countryCode": countryCode,
 				"company": company,
-				"mailListAgreed": mailListAgreed
+				"mailListAgreed": mailListAgreed,
+				"jobTitle": jobTitle,
+				"industry": industry,
+				"howDidYouFindUs": howDidYouFindUs,
+				"phoneNumber": phoneNumber
 
 			}).expect(400, function(err, res) {
 
@@ -269,7 +340,11 @@ describe("Sign up", function() {
 				"lastName": lastName,
 				"countryCode": countryCode,
 				"company": company,
-				"mailListAgreed": mailListAgreed
+				"mailListAgreed": mailListAgreed,
+				"jobTitle": jobTitle,
+				"industry": industry,
+				"howDidYouFindUs": howDidYouFindUs,
+				"phoneNumber": phoneNumber
 
 			}).expect(400, function(err, res) {
 
@@ -289,7 +364,11 @@ describe("Sign up", function() {
 				"lastName": lastName,
 				"countryCode": countryCode,
 				"company": company,
-				"mailListAgreed": mailListAgreed
+				"mailListAgreed": mailListAgreed,
+				"jobTitle": jobTitle,
+				"industry": industry,
+				"howDidYouFindUs": howDidYouFindUs,
+				"phoneNumber": phoneNumber
 
 			}).expect(400, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -307,7 +386,11 @@ describe("Sign up", function() {
 				"lastName": lastName,
 				"countryCode": countryCode,
 				"company": company,
-				"mailListAgreed": mailListAgreed
+				"mailListAgreed": mailListAgreed,
+				"jobTitle": jobTitle,
+				"industry": industry,
+				"howDidYouFindUs": howDidYouFindUs,
+				"phoneNumber": phoneNumber
 
 			}).expect(400, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -325,7 +408,11 @@ describe("Sign up", function() {
 				"lastName": lastName,
 				"countryCode": countryCode,
 				"company": company,
-				"mailListAgreed": mailListAgreed
+				"mailListAgreed": mailListAgreed,
+				"jobTitle": jobTitle,
+				"industry": industry,
+				"howDidYouFindUs": howDidYouFindUs,
+				"phoneNumber": phoneNumber
 			}).expect(400, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 				done(err);
@@ -342,7 +429,11 @@ describe("Sign up", function() {
 				"firstName": firstName,
 				"countryCode": countryCode,
 				"company": company,
-				"mailListAgreed": mailListAgreed
+				"mailListAgreed": mailListAgreed,
+				"jobTitle": jobTitle,
+				"industry": industry,
+				"howDidYouFindUs": howDidYouFindUs,
+				"phoneNumber": phoneNumber
 
 			}).expect(400, function(err, res) {
 
@@ -361,7 +452,11 @@ describe("Sign up", function() {
 				"lastName": true,
 				"countryCode": countryCode,
 				"company": company,
-				"mailListAgreed": mailListAgreed
+				"mailListAgreed": mailListAgreed,
+				"jobTitle": jobTitle,
+				"industry": industry,
+				"howDidYouFindUs": howDidYouFindUs,
+				"phoneNumber": phoneNumber
 			}).expect(400, function(err, res) {
 
 				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -379,7 +474,11 @@ describe("Sign up", function() {
 				"firstName": firstName,
 				"lastName": lastName,
 				"company": company,
-				"mailListAgreed": mailListAgreed
+				"mailListAgreed": mailListAgreed,
+				"jobTitle": jobTitle,
+				"industry": industry,
+				"howDidYouFindUs": howDidYouFindUs,
+				"phoneNumber": phoneNumber
 
 			}).expect(400, function(err, res) {
 
@@ -398,7 +497,11 @@ describe("Sign up", function() {
 				"lastName": lastName,
 				"countryCode": 44,
 				"company": company,
-				"mailListAgreed": mailListAgreed
+				"mailListAgreed": mailListAgreed,
+				"jobTitle": jobTitle,
+				"industry": industry,
+				"howDidYouFindUs": howDidYouFindUs,
+				"phoneNumber": phoneNumber
 			}).expect(400, function(err, res) {
 
 				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -416,7 +519,11 @@ describe("Sign up", function() {
 				"firstName" : firstName,
 				"lastName": lastName,
 				"countryCode": countryCode,
-				"mailListAgreed": mailListAgreed
+				"mailListAgreed": mailListAgreed,
+				"jobTitle": jobTitle,
+				"industry": industry,
+				"howDidYouFindUs": howDidYouFindUs,
+				"phoneNumber": phoneNumber
 
 			}).expect(200, function(err, res) {
 				done();
@@ -433,7 +540,11 @@ describe("Sign up", function() {
 				"lastName": lastName,
 				"countryCode": countryCode,
 				"company": 123,
-				"mailListAgreed": mailListAgreed
+				"mailListAgreed": mailListAgreed,
+				"jobTitle": jobTitle,
+				"industry": industry,
+				"howDidYouFindUs": howDidYouFindUs,
+				"phoneNumber": phoneNumber
 			}).expect(400, function(err, res) {
 
 				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -441,4 +552,72 @@ describe("Sign up", function() {
 			});
 	});
 
+	it("without jobTitle should fail", function(done) {
+		request(server)
+			.post("/signup_somebaduser")
+			.send({
+
+				"email": email,
+				"password": password,
+				"firstName": firstName,
+				"lastName": lastName,
+				"countryCode": countryCode,
+				"company": company,
+				"mailListAgreed": mailListAgreed,				
+				"industry": industry,
+				"howDidYouFindUs": howDidYouFindUs,
+				"phoneNumber": phoneNumber
+
+			}).expect(400, function(err, res) {
+
+				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+				done(err);
+			});
+	});
+
+	it("without industry should fail", function(done) {
+		request(server)
+			.post("/signup_somebaduser")
+			.send({
+
+				"email": email,
+				"password": password,
+				"firstName": firstName,
+				"lastName": lastName,
+				"countryCode": countryCode,
+				"company": company,
+				"mailListAgreed": mailListAgreed,
+				"jobTitle":jobTitle,
+				"howDidYouFindUs": howDidYouFindUs,
+				"phoneNumber": phoneNumber
+
+			}).expect(400, function(err, res) {
+
+				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+				done(err);
+			});
+	});
+
+	it("without howDidYouFindUs should fail", function(done) {
+		request(server)
+			.post("/signup_somebaduser")
+			.send({
+
+				"email": email,
+				"password": password,
+				"firstName": firstName,
+				"lastName": lastName,
+				"countryCode": countryCode,
+				"company": company,
+				"mailListAgreed": mailListAgreed,
+				"jobTitle":jobTitle,
+				"industry": industry,
+				"phoneNumber": phoneNumber
+
+			}).expect(400, function(err, res) {
+
+				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+				done(err);
+			});
+	});	
 });

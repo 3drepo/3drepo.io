@@ -1,18 +1,18 @@
 /**
- *	Copyright (C) 2016 3D Repo Ltd
+ *  Copyright (C) 2016 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -142,10 +142,6 @@ function riskChanged(emitter, account, model, _id, data) {
 	return insertEventQueue("risk" + eventTypes.UPDATED, emitter, account, model, null, {_id, ...data});
 }
 
-function risksDeleted(emitter, account, model, ids) {
-	return insertEventQueue("risk" + eventTypes.DELETED, emitter, account, model, null, ids);
-}
-
 // Viewpoints notifications
 
 function viewpointsCreated(emitter, account, model, data) {
@@ -160,6 +156,16 @@ function viewpointsDeleted(emitter, account, model, ids) {
 	return insertEventQueue("view" + eventTypes.DELETED, emitter, account, model, null, ids);
 }
 
+// Presentation stream
+function streamPresentation(emitter, account, model, presentationId, data) {
+	return insertEventQueue("stream", emitter, account, model, ["presentation", presentationId], data);
+}
+
+// Presentation stream
+function endPresentation(emitter, account, model, presentationId) {
+	return insertEventQueue("end", emitter, account, model, ["presentation", presentationId]);
+}
+
 module.exports = {
 	newIssues,
 	newComment,
@@ -170,7 +176,6 @@ module.exports = {
 	groupsDeleted,
 	newRisks,
 	riskChanged,
-	risksDeleted,
 	viewpointsChanged,
 	viewpointsCreated,
 	viewpointsDeleted,
@@ -182,5 +187,7 @@ module.exports = {
 	deletedNotification,
 	resourcesCreated,
 	resourceDeleted,
-	loggedOut
+	loggedOut,
+	streamPresentation,
+	endPresentation
 };

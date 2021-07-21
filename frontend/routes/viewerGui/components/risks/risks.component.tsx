@@ -17,7 +17,9 @@
 
 import React from 'react';
 
-import { RISK_FILTERS, RISK_LEVELS } from '../../../../constants/risks';
+import { isEmpty } from 'lodash';
+
+import { RISK_DEFAULT_HIDDEN_LEVELS, RISK_FILTERS } from '../../../../constants/risks';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { filtersValuesMap, getHeaderMenuItems } from '../../../../helpers/risks';
@@ -46,41 +48,49 @@ interface IProps {
 	};
 	activeRiskDetails: any;
 	sortOrder: string;
+	sortByField: string;
 	fetchRisks: (teamspace, model, revision) => void;
 	setState: (componentState: any) => void;
 	setNewRisk: () => void;
-	downloadRisks: (teamspace, model) => void;
-	printRisks: (teamspace, model) => void;
+	downloadItems: (teamspace, model) => void;
+	printItems: (teamspace, model) => void;
 	setActiveRisk: (risk, revision?) => void;
 	showRiskDetails: (revision, riskId) => void;
 	goToRisk: (risk) => void;
 	closeDetails: () => void;
 	toggleShowPins: (showPins: boolean) => void;
-	subscribeOnRiskChanges: (teamspace, modelId) => void;
-	unsubscribeOnRiskChanges: (teamspace, modelId) => void;
 	saveRisk: (teamspace, modelId, risk) => void;
 	toggleSortOrder: () => void;
 	setFilters: (filters) => void;
 	teamspaceSettings: any;
+	fetchMitigationCriteria: (teamspace: string) => void;
+	criteria: any;
+	setSortBy: (field) => void;
+	id?: string;
 }
 export class Risks extends React.PureComponent<IProps, any> {
 	get filters() {
-		const filterValuesMap = filtersValuesMap(this.props.jobs, this.props.teamspaceSettings);
-		return RISK_FILTERS.map((riskFilter) => {
+		const { criteria } = this.props;
+		if (isEmpty(criteria)) {
+			return [];
+		}
+		const filterValuesMap = filtersValuesMap(this.props.jobs, criteria);
+		const generatedFilters = RISK_FILTERS.map((riskFilter) => {
 			riskFilter.values = filterValuesMap[riskFilter.relatedField];
 			return riskFilter;
 		});
+
+		return generatedFilters.filter((riskFilter) => riskFilter.values.length);
 	}
 
 	get headerMenuItems() {
-		const { printRisks, downloadRisks, toggleSortOrder, toggleShowPins, teamspace, model, showPins } = this.props;
-		return getHeaderMenuItems(teamspace, model, printRisks, downloadRisks, toggleSortOrder, toggleShowPins, showPins);
+		return getHeaderMenuItems(this.props);
 	}
 
 	get showDefaultHiddenItems() {
 		if (this.props.selectedFilters.length) {
 			return this.props.selectedFilters
-				.some(({ value: { value } }) => value === RISK_LEVELS.AGREED_FULLY);
+				.some(({ value: { value } }) => RISK_DEFAULT_HIDDEN_LEVELS.includes(value));
 		}
 		return false;
 	}
@@ -94,7 +104,8 @@ export class Risks extends React.PureComponent<IProps, any> {
 	));
 
 	public componentDidMount() {
-		this.props.subscribeOnRiskChanges(this.props.teamspace, this.props.model);
+		const { teamspace, model, fetchMitigationCriteria } = this.props;
+		fetchMitigationCriteria(teamspace);
 		this.handleSelectedIssue();
 	}
 
@@ -109,12 +120,13 @@ export class Risks extends React.PureComponent<IProps, any> {
 	}
 
 	public componentWillUnmount() {
-		this.props.unsubscribeOnRiskChanges(this.props.teamspace, this.props.model);
 	}
 
 	public setActiveRisk = (item) => {
 		this.props.setActiveRisk(item, this.props.revision);
 	}
+
+	public deactivateRisk = () => this.props.setActiveRisk(null);
 
 	public handleToggleFilters = (searchEnabled) => {
 		const changes: any = { searchEnabled };
@@ -159,11 +171,14 @@ export class Risks extends React.PureComponent<IProps, any> {
 				onToggleFilters={this.handleToggleFilters}
 				onChangeFilters={this.props.setFilters}
 				onActiveItem={this.setActiveRisk}
+				onDeactivateItem={this.deactivateRisk}
 				onNewItem={this.props.setNewRisk}
 				onShowDetails={this.props.goToRisk}
 				onCloseDetails={this.closeDetails}
 				renderDetailsView={this.renderDetailsView}
 				type={VIEWER_PANELS.RISKS}
+				sortByField={this.props.sortByField}
+				id={this.props.id}
 			/>
 		);
 	}

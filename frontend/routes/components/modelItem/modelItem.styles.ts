@@ -17,6 +17,7 @@
 
 import Grid from '@material-ui/core/Grid';
 import styled from 'styled-components';
+
 import { COLOR } from '../../../styles';
 
 export const Container = styled.div``;

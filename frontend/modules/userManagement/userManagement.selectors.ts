@@ -27,7 +27,7 @@ import { selectLocation } from '../router/router.selectors';
 import { selectModels as selectModelsMap, selectProjectsList, selectTeamspaces } from '../teamspaces';
 import { getExtendedModelPermissions, getExtendedProjectPermissions, prepareUserData } from './userManagement.helpers';
 
-const orderByFullName = (users) => orderBy(users, (user) => user.lastName + ' ' + user. firstName, 'asc');
+const orderByFullName = (users) => orderBy(users, (user) => user.lastName + ' ' + user.firstName, 'asc');
 
 export const selectUserManagementDomain = (state) => ({ ...state.userManagement });
 

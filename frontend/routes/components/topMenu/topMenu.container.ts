@@ -23,6 +23,8 @@ import { createStructuredSelector } from 'reselect';
 import { selectIsAuthenticated, AuthActions } from '../../../modules/auth';
 import { selectCurrentUser, selectIsInitialised } from '../../../modules/currentUser';
 import { DialogActions } from '../../../modules/dialog';
+import { selectIsPresenting } from '../../../modules/presentation';
+import { selectPathname } from '../../../modules/router/router.selectors';
 import { selectSettings, ViewerActions } from '../../../modules/viewer';
 import { selectIsFocusMode } from '../../../modules/viewerGui';
 import { TopMenu } from './topMenu.component';
@@ -33,11 +35,14 @@ const mapStateToProps = createStructuredSelector({
 	visualSettings: selectSettings,
 	isFocusMode: selectIsFocusMode,
 	isAuthenticated: selectIsAuthenticated,
+	isPresenting: selectIsPresenting,
+	pathname: selectPathname,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	onLogout: AuthActions.logout,
 	showDialog: DialogActions.showDialog,
+	showConfirmDialog: DialogActions.showConfirmDialog,
 	updateSettings: ViewerActions.updateSettings
 }, dispatch);
 

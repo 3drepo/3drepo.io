@@ -31,6 +31,7 @@ interface IProps {
 	disableFocusListener?: TooltipProps['disableFocusListener'];
 	action?: (event) => void;
 	onClick?: (event) => void;
+	id?: string;
 }
 
 export const TooltipButton = (props: IProps) => {
@@ -49,12 +50,13 @@ export const TooltipButton = (props: IProps) => {
 	const iconProps = { color, fontSize: 'small' } as any;
 
 	const renderButton = () => (
-		<StyledIconButton
+		<StyledIconButton id={props.id}
 			aria-label={label}
 			onClick={onClick || action}
 			disabled={disabled}
 			className={className}
-			active={Number(active)}>
+			active={Number(active)}
+		>
 			<Icon {...iconProps} />
 		</StyledIconButton>
 	);

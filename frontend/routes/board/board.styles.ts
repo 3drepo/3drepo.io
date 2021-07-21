@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Button from '@material-ui/core/Button';
+import Fab from '@material-ui/core/Fab';
 import FormControlBase from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
@@ -33,9 +33,10 @@ export const Container = styled.div`
 `;
 
 export const BoardContainer = styled.div`
-	height: calc(100% - 50px);
+	height: 100%;
 	box-sizing: border-box;
 	border-top: 1px solid ${COLOR.BLACK_6};
+	overflow: hidden;
 
 	> div {
 		height: 100%;
@@ -81,6 +82,9 @@ export const BoardContainer = styled.div`
 
 			> span:nth-child(1) {
 				font-size: 14px;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
 			}
 			> span:nth-child(2) {
 				font-size: 12px;
@@ -92,9 +96,8 @@ export const BoardContainer = styled.div`
 
 export const Config = styled.div`
 	background-color: ${COLOR.WHITE};
-	min-height: 30px;
+	flex-basis: 30px;
 	padding: 10px 15px;
-	padding-left: 15px;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -109,8 +112,8 @@ export const ViewConfig = styled.div`
 	display: flex;
 `;
 
-export const AddButton = styled(Button).attrs({
-	mini: true,
+export const AddButton = styled(Fab).attrs({
+	size: 'small',
 })``;
 
 export const TitleActions = styled.div`

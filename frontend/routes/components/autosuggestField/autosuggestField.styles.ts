@@ -17,7 +17,7 @@
 
 import Popper from '@material-ui/core/Popper';
 import styled from 'styled-components';
-import { COLOR } from '../../../styles/colors';
+import { COLOR } from '../../../styles';
 import { TextField } from '../textField/textField.component';
 
 export const Container = styled.div``;

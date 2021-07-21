@@ -21,14 +21,15 @@ import { cond, matches, stubTrue } from 'lodash';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import SimpleBar from 'simplebar-react';
-
-import { IconButton, MenuItem, Tab, Tabs } from '@material-ui/core';
+import { IconButton, MenuItem, Tabs } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
 import Check from '@material-ui/icons/Check';
 
+import { encodeElementId } from '../../helpers/html';
 import { renderWhenTrue } from '../../helpers/rendering';
 import { sortModels } from '../../modules/teamspaces/teamspaces.helpers';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
+import { EmptyStateInfo } from '../components/components.styles';
 import { Body, BodyWrapper } from '../components/customTable/customTable.styles';
 import {
 	MenuList,
@@ -65,8 +66,10 @@ import {
 	List,
 	LoaderContainer,
 	MenuButton,
-	OtherTeamspacesLabel
+	OtherTeamspacesLabel,
+	StyledTab,
 } from './teamspaces.styles';
+
 interface IProps {
 	match: any;
 	history: any;
@@ -95,6 +98,8 @@ interface IProps {
 	fetchStarredModels: () => void;
 	leaveTeamspace: (Teamspace) => void;
 	setState: (componentState: any) => void;
+	subscribeOnChanges: () => void;
+	unsubscribeFromChanges: () => void;
 }
 
 interface IState {
@@ -136,7 +141,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		return {
 			[TEAMSPACE_FILTER_RELATED_FIELDS.DATA_TYPE]: [],
 			[TEAMSPACE_FILTER_RELATED_FIELDS.MODEL_TYPE]: MODEL_SUBTYPES.map(({ value }) => ({ value, label: value })),
-			[TEAMSPACE_FILTER_RELATED_FIELDS .MODEL_CODE]: modelCodes.map((code) => ({ value: code, label: code })),
+			[TEAMSPACE_FILTER_RELATED_FIELDS.MODEL_CODE]: modelCodes.map((code) => ({ value: code, label: code })),
 		};
 	}
 
@@ -164,7 +169,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			visibleItems,
 			starredVisibleItems,
 			fetchStarredModels,
-			showStarredOnly
+			showStarredOnly,
+			subscribeOnChanges,
 		} = this.props;
 
 		if (!items.length) {
@@ -176,6 +182,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 			visibleItems: showStarredOnly ? starredVisibleItems : visibleItems,
 			lastVisibleItems: visibleItems
 		});
+
+		subscribeOnChanges();
 	}
 
 	public componentDidUpdate(prevProps) {
@@ -212,7 +220,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				visibleItems: this.state.visibleItems
 			});
 		}
-
+		this.props.unsubscribeFromChanges();
 	}
 
 	private shouldBeVisible = cond([
@@ -391,7 +399,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 		const visibleItemsMap = {};
 
 		Object.keys(this.props.starredModelsMap).forEach((starredKey) => {
-			const [ teamspace, modelId ] = starredKey.split('/');
+			const [teamspace, modelId] = starredKey.split('/');
 			visibleItemsMap[teamspace] = true;
 
 			if (this.props.modelsMap[modelId]) {
@@ -444,7 +452,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	})(models.length)
 
 	private renderProjectContainer = (models, project) => renderWhenTrue(() => (
-		<GridContainer key={`container-${project.id}`}>
+		<GridContainer  key={`container-${project.id}`} id={`models-container-${encodeElementId(project.name)}`}>
 			{this.renderAddModelGridItem(project.teamspace, project.id)}
 			{this.renderModels(models)}
 		</GridContainer>
@@ -485,11 +493,10 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 	private renderMenuButton = (isPending, props) => (
 		<MenuButton
 			buttonRef={props.buttonRef}
-			variant="fab"
 			color="secondary"
 			aria-label="Toggle menu"
 			aria-haspopup="true"
-			mini
+			size="small"
 			onClick={props.onClick}
 			disabled={isPending}
 		>
@@ -525,8 +532,12 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 
 	private renderLoader = renderWhenTrue(() => (
 		<LoaderContainer>
-				<Loader content="Loading teamspaces..." />
+			<Loader content="Loading teamspaces..." />
 		</LoaderContainer>
+	));
+
+	public renderEmptyState = renderWhenTrue(() => (
+		<EmptyStateInfo>No favourites models have been added yet</EmptyStateInfo>
 	));
 
 	public renderMyTeamspace = () => {
@@ -576,8 +587,8 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 						value={Number(showStarredOnly)}
 						onChange={this.handleTabChange}
 					>
-						<Tab label="All" />
-						<Tab label="Favourites" />
+						<StyledTab label="All" />
+						<StyledTab label="Favourites" />
 					</Tabs>
 					<ButtonMenu
 						renderButton={this.renderMenuButton.bind(this, isPending)}
@@ -597,6 +608,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 				<List>
 					{this.renderLoader(isPending)}
 					{this.renderList(!isPending && this.props.items.length)}
+					{this.renderEmptyState(!isPending && showStarredOnly && !this.props.starredModelsMap.length)}
 				</List>
 			</ViewerPanel>
 		);

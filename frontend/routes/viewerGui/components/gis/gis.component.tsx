@@ -58,6 +58,7 @@ interface IProps {
 	removeVisibleLayer: (layer) => void;
 	resetVisibleLayers: () => void;
 	visibleLayers: any[];
+	id?: string;
 }
 
 interface IState {
@@ -141,8 +142,10 @@ export class Gis extends React.PureComponent<IProps, IState> {
 	)
 
 	public renderActions = () => {
+		let  menuOpenProp = {};
+
 		if (this.state.settingsModeActive) {
-			return <PanelBarActions type={this.type} hideSearch hideMenu menuDisabled menuOpen={false} />;
+			menuOpenProp = {menuOpen: false};
 		}
 
 		return (
@@ -152,6 +155,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 				menuActions={this.renderActionsMenu}
 				menuDisabled={this.props.isPending || this.state.settingsModeActive}
 				hideSearch
+				{...menuOpenProp}
 			/>
 		);
 	}
@@ -228,6 +232,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 				Icon={this.getTitleIcon()}
 				renderActions={this.renderActions}
 				pending={this.props.isPending}
+				id={this.props.id}
 			>
 				{(settingsModeActive || !hasGISCoordinates) && (
 					<Settings

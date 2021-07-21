@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,21 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import MenuItem from '@material-ui/core/MenuItem';
+import Paper from '@material-ui/core/Paper';
 import ExpandIcon from '@material-ui/icons/ChevronRight';
 import CollapseIcon from '@material-ui/icons/ExpandMore';
-import { isNil, keyBy, omit, uniqBy } from 'lodash';
+import SearchIcon from '@material-ui/icons/Search';
+import { isEqual, isNil, keyBy, omit, uniqBy } from 'lodash';
 import React from 'react';
 import Autosuggest from 'react-autosuggest';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-
-import MenuItem from '@material-ui/core/MenuItem';
-import Paper from '@material-ui/core/Paper';
-import SearchIcon from '@material-ui/icons/Search';
+import * as yup from 'yup';
 import { BACKSPACE, ENTER_KEY } from '../../../constants/keys';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { compareStrings } from '../../../helpers/searching';
 import { formatShortDate } from '../../../services/formatting/formatDate';
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
+import { Filter } from '../fontAwesomeIcon';
 import { Highlight } from '../highlight/highlight.component';
 import { FiltersMenu } from './components/filtersMenu/filtersMenu.component';
 import {
@@ -40,7 +41,6 @@ import {
 	CopyIcon,
 	FiltersButton,
 	InputContainer,
-	MoreIcon,
 	Placeholder,
 	PlaceholderText,
 	SelectedFilters,
@@ -80,6 +80,17 @@ export interface IDataType {
 	type?: number;
 }
 
+const filterItemSchema = yup.object().shape({
+	label: yup.string(),
+	type: yup.number().required().positive().integer(),
+	value: yup.object().shape({
+		label: yup.string(),
+		value: yup.string().required()
+	})
+});
+
+const filterItemsSchema = yup.array().of(filterItemSchema);
+
 interface IProps {
 	filters?: IFilter[];
 	dataTypes?: IDataType[];
@@ -101,6 +112,8 @@ interface IState {
 	filtersOpen: boolean;
 }
 
+const FilterIcon = () => <Filter className="fontSizeTiny" />;
+
 const getMenuButton = (InitialIcon) => ({ IconProps, Icon, ...props }: { Icon?, IconProps: any }) => (
 	<ButtonWrapper>
 		<StyledIconButton
@@ -114,7 +127,7 @@ const getMenuButton = (InitialIcon) => ({ IconProps, Icon, ...props }: { Icon?, 
 );
 
 const CopyButton = getMenuButton(CopyIcon) as any;
-const MoreButton = getMenuButton(MoreIcon);
+const FilterButton = getMenuButton(FilterIcon);
 
 const getSuggestionValue = (suggestion) => suggestion.name;
 
@@ -182,7 +195,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	public renderCopyButton = renderWhenTrue(() => (
 		<CopyToClipboard text={JSON.stringify(this.props.selectedFilters)}>
 			<ButtonContainer>
-				<CopyButton IconProps={{size: 'small'}} disabled={!this.props.selectedFilters.length} />
+				<CopyButton fontSize="small" disabled={!this.props.selectedFilters.length} />
 			</ButtonContainer>
 		</CopyToClipboard>
 	));
@@ -190,7 +203,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	public renderFiltersMenuButton = renderWhenTrue(() => (
 		<ButtonContainer>
 			<ButtonMenu
-				renderButton={MoreButton}
+				renderButton={FilterButton}
 				renderContent={this.renderFiltersMenu}
 				PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
 				PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
@@ -221,7 +234,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps, prevState) {
 		const filtersChanged = this.props.filters.length !== prevProps.filters.length;
-		const selectedFiltersChanged = this.state.selectedFilters.length !== prevState.selectedFilters.length;
+		const selectedFiltersChanged = isEqual(this.state.selectedFilters, prevState.selectedFilters);
 		if (filtersChanged || selectedFiltersChanged) {
 			this.filterSuggestions = mapFiltersToSuggestions(
 				this.props.filters,
@@ -260,6 +273,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 				const newFilters = [...prevState.selectedFilters];
 				newFilters[selectedFilterIndex].label = child.label;
 				newFilters[selectedFilterIndex].value.label = formatShortDate(child.date);
+				newFilters[selectedFilterIndex].value.date = child.date;
 				return newFilters as any;
 			}, this.handleFiltersChange);
 		} else {
@@ -337,12 +351,16 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 		try {
 			const newSelectedFilters = JSON.parse(event.clipboardData.getData('text'));
 
+			if (!filterItemsSchema.isValidSync(newSelectedFilters)) {
+				return;
+			}
+
 			this.setState((prevState) => ({
 				selectedFilters: uniqBy([
 					...prevState.selectedFilters,
 					...newSelectedFilters
 				], (filter) => JSON.stringify(filter))
-			}));
+			}), this.handleFiltersChange);
 		} catch (error) {
 			this.setState({ value: event.clipboardData.getData('text') });
 		}
@@ -426,7 +444,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 
 			if (!event.target.value.length) {
 				if (!isNil(this.state.removableFilterIndex)) {
-					changes.selectedFilters = [...this.state.selectedFilters],
+					changes.selectedFilters = [...this.state.selectedFilters];
 					changes.selectedFilters.pop();
 					changes.removableFilterIndex = changes.selectedFilters.length - 1;
 					this.setState(changes, () => {
@@ -522,7 +540,7 @@ export class FilterPanel extends React.PureComponent<IProps, IState> {
 	public handleKeyUp = () => {
 		const list = document.querySelector('.react-autosuggest__suggestions-list');
 		if (list) {
-			const item = list.querySelector('[aria-selected="true"]') as any;
+			const item = list.querySelector<HTMLElement>('[aria-selected="true"]');
 			if (item) {
 				list.scrollTo({
 					top: item.offsetTop + item.clientHeight - list.clientHeight,

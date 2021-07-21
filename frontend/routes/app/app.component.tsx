@@ -19,13 +19,14 @@ import { memoize } from 'lodash';
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 
-import { ROUTES } from '../../constants/routes';
+import { PUBLIC_ROUTES, ROUTES } from '../../constants/routes';
+import { getCookie, setCookie } from '../../helpers/cookies';
 import { renderWhenTrue } from '../../helpers/rendering';
-import { analyticsService } from '../../services/analytics';
+import { WebGLChecker } from '../../helpers/webglChecker';
 import { clientConfigService } from '../../services/clientConfig';
 import { isStaticRoute, STATIC_ROUTES } from '../../services/staticPages';
 import { DialogContainer } from '../components/dialogContainer';
-import { LiveChat } from '../components/liveChat';
+import { Intercom } from '../components/intercom';
 import { PrivateRoute } from '../components/privateRoute';
 import { SnackbarContainer } from '../components/snackbarContainer';
 import StaticPageRoute from '../components/staticPageRoute/staticPageRoute.component';
@@ -55,6 +56,8 @@ interface IProps {
 	hideDialog: () => void;
 	onLoggedOut: () => void;
 	subscribeToDm: (event, handler) => void;
+	showDialog: (config) => void;
+	dialogs: any[];
 }
 
 interface IState {
@@ -64,12 +67,11 @@ interface IState {
 
 const DEFAULT_REDIRECT = ROUTES.TEAMSPACES;
 
-const ANALYTICS_REFERER_ROUTES = [
-	'sign-up',
-	'register-request'
-] as any;
-
 export class App extends React.PureComponent<IProps, IState> {
+
+	get WebGLVersion() {
+		return WebGLChecker();
+	}
 
 	public state = {
 		referrer: DEFAULT_REDIRECT,
@@ -93,42 +95,37 @@ export class App extends React.PureComponent<IProps, IState> {
 		props.startup();
 	}
 
-	public isRefererRoute(path) {
-		return ANALYTICS_REFERER_ROUTES.includes(path.replace('/', ''));
-	}
-
 	public componentDidMount() {
-		this.props.authenticate();
-		this.sendAnalyticsPageView(location);
-
-		if ('serviceWorker' in navigator) {
-			navigator.serviceWorker.addEventListener('message', (event) => {
-				if (event.data.type === 'UPDATE') {
-					this.props.showNewUpdateDialog({
-						onConfirm: () => {
-							location.reload();
-						}
-					});
-				}
-			});
+		if (!PUBLIC_ROUTES.includes(location.pathname)) {
+			this.props.authenticate();
 		}
 
 		this.props.subscribeToDm('loggedOut', this.props.onLoggedOut);
 	}
 
 	public componentDidUpdate(prevProps) {
-		if (location.pathname !== prevProps.location.pathname) {
-			this.sendAnalyticsPageView(location);
-			this.props.hideDialog();
+		if (decodeURIComponent(location.pathname) !== decodeURIComponent(prevProps.location.pathname)) {
+			if (this.props.dialogs.length) {
+				this.props.hideDialog();
+			}
 		}
-	}
 
-	public sendAnalyticsPageView(location) {
-		const isAnalyticsRefererRoute = this.isRefererRoute(location.pathname);
-		analyticsService.sendPageView(location);
+		if (!this.props.dialogs.length && this.props.isAuthenticated && this.WebGLVersion !== 2) {
+			const { currentUser: { username }, showDialog } = this.props;
+			const cookieName = `unsupportedViewerWarning_${username}`;
+			const cookie = getCookie(cookieName);
 
-		if (isAnalyticsRefererRoute) {
-			analyticsService.sendPageViewReferer(location);
+			if (!cookie) {
+				showDialog({
+					title: `3D Repo Error`,
+					content: `
+						Your browser does not support WebGL 2.0 therefore the 3D Viewer will be unavailable.
+						However, you can still other functionalities we offer.<br><br>
+						To get the full experience, please update to the latest Chrome, Firefox or Edge.
+					`,
+					onCancel: () => setCookie(cookieName, true),
+				});
+			}
 		}
 	}
 
@@ -146,16 +143,13 @@ export class App extends React.PureComponent<IProps, IState> {
 					<Route exact path={ROUTES.REGISTER_VERIFY} component={RegisterVerify} />
 					<Redirect exact from={ROUTES.HOME} to={ROUTES.TEAMSPACES} />
 					<PrivateRoute path={ROUTES.DASHBOARD} component={Dashboard} />
-					<PrivateRoute
-						path={`${ROUTES.VIEWER}/:teamspace/:model/:revision?`}
-						component={ViewerGui}
-					/>
+					<PrivateRoute path={ROUTES.MODEL_VIEWER} component={ViewerGui} />
 					{this.renderStaticRoutes()}
 					<Route component={NotFound} />
 				</Switch>
 				<DialogContainer />
 				<SnackbarContainer />
-				<LiveChat />
+				<Intercom />
 			</AppContainer>
 		);
 	}

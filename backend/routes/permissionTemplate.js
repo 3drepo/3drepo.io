@@ -1,18 +1,18 @@
 /**
- *	Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2017 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -24,6 +24,7 @@
 	const middlewares = require("../middlewares/middlewares");
 	const User = require("../models/user");
 	const utils = require("../utils");
+	const PermissionTemplates = require("../models/permissionTemplates");
 
 	/**
 	 * @apiDefine PermissionTemplate Permission Template
@@ -143,11 +144,8 @@
 	router.delete("/permission-templates/:permissionId", middlewares.isAccountAdmin, deleteTemplate);
 
 	function listTemplates(req, res, next) {
-
 		User.findByUserName(req.params.account).then(user => {
-
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, user.customData.permissionTemplates.get());
-
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, PermissionTemplates.get(user));
 		}).catch(err => {
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -163,11 +161,12 @@
 				permissions: req.body.permissions
 			};
 
-			return user.customData.permissionTemplates.add(permission);
+			return PermissionTemplates.add(user, permission);
 
 		}).then(permission => {
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
+
 		}).catch(err => {
 
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
@@ -179,7 +178,7 @@
 
 		User.findByUserName(req.params.account).then(user => {
 
-			return user.customData.permissionTemplates.remove(req.params.permissionId);
+			return PermissionTemplates.remove(user, req.params.permissionId);
 
 		}).then(() => {
 

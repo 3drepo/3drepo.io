@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,11 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isEmpty, pick } from 'lodash';
 import memoizeOne from 'memoize-one';
 import * as queryString from 'query-string';
 import React from 'react';
-import SimpleBar from 'simplebar-react';
 
 import { MODEL_ROLES_LIST } from '../../constants/model-permissions';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
@@ -61,7 +59,7 @@ interface IProps {
 	selectedModels: any[];
 	permissions: any[];
 	onSelectionChange: (selectedModels) => void;
-	onPermissionsChange: (modelsWithPermissions, updatedPermissions) => void;
+	onPermissionsChange: (modelsWithPermissions) => void;
 }
 
 interface IState {
@@ -117,22 +115,31 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 
 	public handlePermissionsChange = (permissions) => {
 		if (this.props.onPermissionsChange) {
-			const modelsWithPermissions = this.props.selectedModels.map((selectedModel) => {
-				const newPermissions = selectedModel.permissions.map((currentPermission) => {
-					const memberPermission = permissions.find(({user}) => user === currentPermission.user);
-					return {
-						user: currentPermission.user,
-						permission: memberPermission ? memberPermission.key : currentPermission.permission
-					};
-				}).filter(({ permission }) => permission);
+			const modelsWithPermissions = this.props.selectedModels.map(({ model, ...modelProps }) => {
+				const permissionsToSave = modelProps.permissions.reduce((updatedUserPermissions, currentPermissions) => {
+					if (!currentPermissions.isAdmin) {
+						const updatedPermissions = permissions.find(({ user }) =>
+								user === currentPermissions.user
+						);
+						const permissionsKey = updatedPermissions && updatedPermissions.key;
 
+						if (updatedPermissions) {
+							updatedUserPermissions.push({
+								user: currentPermissions.user,
+								permission: permissionsKey || '',
+							});
+						}
+					}
+
+					return updatedUserPermissions;
+				}, []);
 				return {
-					...pick(selectedModel, ['name', 'model', 'federate', 'subModels']),
-					permissions: newPermissions
+					model,
+					permissions: permissionsToSave
 				};
 			});
 
-			this.props.onPermissionsChange(modelsWithPermissions, permissions);
+			this.props.onPermissionsChange(modelsWithPermissions);
 		}
 	}
 

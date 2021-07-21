@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {get, omit} from 'lodash';
 import {createActions, createReducer} from 'reduxsauce';
 import {PROJECT_ROLES_TYPES} from '../../constants/project-permissions';
 
 export const { Types: UserManagementTypes, Creators: UserManagementActions } = createActions({
 	fetchQuotaAndInvitations: [],
-	fetchQuotaAndInvitationsSuccess: [ 'invitations', 'collaboratorLimit'],
+	fetchQuotaAndInvitationsSuccess: ['invitations', 'collaboratorLimit'],
 	fetchTeamspaceUsers: [],
 	fetchTeamspaceUsersSuccess: ['users'],
 	setUsersPending: ['isPending'],
@@ -47,9 +46,9 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	fetchModelsPermissions: ['models'],
 	fetchModelPermissionsSuccess: ['models'],
 	fetchCurrentTeamspaceJobsAndColors: [],
-	updateModelsPermissions: ['modelsWithPermissions', 'permissions'],
-	updateModelsPermissionsPre: ['modelsWithPermissions', 'permissions'],
-	updateModelPermissionsSuccess: ['updatedModels', 'permissions'],
+	updateModelsPermissions: ['modelsWithPermissions'],
+	updateModelsPermissionsPre: ['modelsWithPermissions'],
+	updateModelPermissionsSuccess: ['updatedModels'],
 	sendInvitation: ['email', 'job', 'isAdmin', 'permissions', 'onFinish', 'onError'],
 	removeInvitationSuccess: ['email'],
 	removeInvitation: ['email'],
@@ -110,7 +109,7 @@ export const setProjectsPending = (state = INITIAL_STATE, { isPending }) => {
 };
 
 export const addUserSuccess = (state = INITIAL_STATE, { user, currentUser }) => {
-	return {...state, users: [ ...state.users, user ] };
+	return {...state, users: [...state.users, user] };
 };
 
 export const removeUserSuccess = (state = INITIAL_STATE, { username }) => {
@@ -179,6 +178,7 @@ export const fetchProjectSuccess = (state = INITIAL_STATE, { project }) => {
 
 export const updateProjectPermissionsSuccess = (state = INITIAL_STATE, { permissions }) => {
 	const project = {...state.project};
+
 	project.permissions = mergePermissions(project.permissions, permissions);
 	return {...state, project };
 };
@@ -187,8 +187,7 @@ export const fetchModelPermissionsSuccess = (state = INITIAL_STATE, { models }) 
 	return { ...state, models };
 };
 
-export const updateModelPermissionsSuccess = (state = INITIAL_STATE, { updatedModels, permissions }) => {
-
+export const updateModelPermissionsSuccess = (state = INITIAL_STATE, { updatedModels }) => {
 	const models = state.models.map((model) => {
 		const updatedModel = updatedModels.find((m) => m.model === model.model);
 

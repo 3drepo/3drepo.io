@@ -18,6 +18,7 @@
 "use strict";
 (() => {
 
+	const { uploadSizeLimit } = require("./config.js");
 	const utils = require("./utils.js");
 
 	function define(name, value) {
@@ -464,7 +465,8 @@
 		"false",
 		"admin",
 		"root",
-		"notifications"
+		"notifications",
+		"loginRecord"
 	]);
 
 	// -----------------------------------------------------------------------------
@@ -474,7 +476,17 @@
 	// -----------------------------------------------------------------------------
 
 	define("USERNAME_REGEXP",  /^[a-zA-Z][\w]{1,19}$/);
-	define("EMAIL_REGEXP", /^([a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,5})$/);
+	define("EMAIL_REGEXP", /^(?:[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-zA-Z0-9-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/);
+	define("FILENAME_REGEXP",  /[ *"/\\[\]:;|=,<>$]/g);
+
+	// -----------------------------------------------------------------------------
+	//
+	// Password requirements
+	//
+	// -----------------------------------------------------------------------------
+
+	define("MIN_PASSWORD_LENGTH", 8);
+	define("MIN_PASSWORD_STRENGTH", 2);
 
 	// -----------------------------------------------------------------------------
 	//
@@ -486,7 +498,7 @@
 
 	// -----------------------------------------------------------------------------
 	//
-	// Invocie state
+	// Invoice state
 	//
 	// -----------------------------------------------------------------------------
 	define("INV_INIT", "init");
@@ -523,12 +535,92 @@
 
 	define("PROJECT_DEFAULT_ID", "default");
 
-	// issues
+	// min timestamp set to 100000000000
+	// this is assumption for smallest millisecond timestamp
+	// making this assumption because this is what https://www.epochconverter.com/ does
+	// 100000000000 = GMT: Saturday, 3 March 1973 09:46:40
+	define("MIN_MS_TIMESTAMP", 100000000000);
 
-	define("ISSUE_STATUS_OPEN", "open");
-	define("ISSUE_STATUS_IN_PROGRESS", "in progress");
-	define("ISSUE_STATUS_FOR_APPROVAL", "for approval");
-	define("ISSUE_STATUS_CLOSED", "closed");
+	// tickets
+	define("LONG_TEXT_CHAR_LIM", 660);
+
+	// risks
+	define("RISK_FILTERS",{
+		"ids": {
+			"fieldName": "_id" ,
+			"type": "UUID"
+		},
+		"numbers": {
+			"fieldName": "number",
+			"type": "number"
+		},
+		"categories": {
+			"fieldName": "category"
+		},
+		"mitigationStatus": {
+			"fieldName": "mitigation_status"
+		},
+		"residualLikelihoods": {
+			"fieldName": "residual_likelihood",
+			"type": "number"
+		},
+		"residualConsequences": {
+			"fieldName": "residual_consequence",
+			"type": "number"
+		},
+		"consequences": {
+			"fieldName": "consequence",
+			"type": "number"
+		},
+		"likelihoods": {
+			"fieldName": "likelihood",
+			"type": "number"
+		},
+		"levelOfRisks": {
+			"fieldName": "levelOfRisks",
+			"type": "number"
+		},
+		"residualLevelOfRisks": {
+			"fieldName": "residualLevelOfRisks",
+			"type": "number"
+		}
+	});
+
+	// issues
+	define("ISSUE_FILTERS",{
+		"ids": {
+			"fieldName": "_id" ,
+			"type": "UUID"
+		},
+		"numbers": {
+			"fieldName": "number",
+			"type": "number"
+		},
+		"topicTypes": {
+			"fieldName": "topic_type" // if no type is defined string is assumed
+		},
+		"status": {
+			"fieldName": "status"
+		},
+		"priorities": {
+			"fieldName": "priority"
+		},
+		"owners" : {
+			"fieldName": "owner"
+		},
+		"assignedRoles" : {
+			"fieldName": "assigned_roles",
+			"type": "array"
+		}
+	});
+
+	define("ISSUE_STATUS",{
+		"OPEN": "open",
+		"IN_PROGRESS": "in progress",
+		"FOR_APPROVAL": "for approval",
+		"VOID": "void",
+		"CLOSED": "closed"
+	});
 
 	define("MAIL_URLS",{
 		"forgotPassword": data => `/password-change?username=${data.username}&token=${data.token}`,
@@ -548,5 +640,28 @@
 		{ _id: "Main Contractor", "color": "#b15928"},
 		{ _id: "Supplier", "color": "#6a3d9a"}
 	]);
+
+	define("ACCEPTED_IMAGE_FORMATS",  ["png", "jpg", "gif"]);
+
+	// -----------------------------------------------------------------------------
+	//
+	// Upload
+	//
+	// -----------------------------------------------------------------------------
+	define("ACCEPTED_FILE_FORMATS", [
+		"x","obj","3ds","md3","md2","ply",
+		"mdl","ase","hmp","smd","mdc","md5",
+		"stl","lxo","nff","raw","off","ac",
+		"bvh","irrmesh","irr","q3d","q3s","b3d",
+		"dae","ter","csm","3d","lws","xml","ogex",
+		"ms3d","cob","scn","blend","pk3","ndo",
+		"ifc","xgl","zgl","fbx","assbin", "bim", "dgn",
+		"rvt", "rfa", "spm", "dwg", "dxf"
+	]);
+	define("MS_CHUNK_BYTES_LIMIT", Math.min(52428800, uploadSizeLimit));
+	define("CONTENT_LENGTH_HEADER", "content-length");
+	define("MS_TRANSFER_MODE_HEADER", "x-ms-transfer-mode");
+	define("MS_CONTENT_LENGTH_HEADER", "x-ms-content-length");
+	define("CONTENT_RANGE_HEADER", "content-range");
 
 })();

@@ -20,15 +20,12 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { isEmpty, isEqual, memoize, pick } from 'lodash';
 import React from 'react';
 
-// @ts-ignore
 import AdminIconSrc from '../../../icons/how_to_reg.svg';
-
 import { MODEL_ROLES_TYPES } from '../../../constants/model-permissions';
 import { CellUserSearch } from '../customTable/components/cellUserSearch/cellUserSearch.component';
 import { TableHeadingRadio } from '../customTable/components/tableHeadingRadio/tableHeadingRadio.component';
 import { CheckboxField, CustomTable, CELL_TYPES } from '../customTable/customTable.component';
 import { UserItem } from '../userItem/userItem.component';
-
 import { ModelItem } from '../modelItem/modelItem.component';
 import {
 	DisabledCheckbox,
@@ -102,6 +99,9 @@ const MODEL_PERMISSIONS_TABLE_CELLS = [{
 	CellComponent: ModelItem,
 	searchBy: ['model', 'name']
 }];
+
+MODEL_PERMISSIONS_TABLE_CELLS[0].HeadingProps.root.width = '220px';
+MODEL_PERMISSIONS_TABLE_CELLS[0].CellProps.root.width = '220px';
 
 interface IProps {
 	className?: string;
@@ -245,6 +245,7 @@ export class PermissionsTable extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		const rows = this.getTableRows(this.props.permissions, this.props.roles, []);
+
 		this.setState({
 			cells: this.getTableCells(this.props.roles),
 			rows,
@@ -254,7 +255,6 @@ export class PermissionsTable extends React.PureComponent<IProps, IState> {
 
 	public componentDidUpdate(prevProps, prevState) {
 		const changes = {} as any;
-
 		const selectedPermissionsChanged = (prevState.selectedGlobalPermissions !== this.state.selectedGlobalPermissions) ||
 			prevState.selectedUsers.length !== this.state.selectedUsers.length;
 
@@ -266,8 +266,10 @@ export class PermissionsTable extends React.PureComponent<IProps, IState> {
 			|| (this.state.selectedUsers.length !== prevState.selectedUsers.length);
 
 		if (selectedPermissionsChanged || permissionsChanged) {
+			const rows = this.getTableRows(this.props.permissions, this.props.roles, this.state.selectedUsers);
 			changes.selectedGlobalPermissions = UNDEFINED_PERMISSIONS;
-			changes.rows = this.getTableRows(this.props.permissions, this.props.roles, this.state.selectedUsers);
+			changes.rows = rows;
+			changes.selectedUsers = this.activeSelection ? this.state.selectedUsers : rows;
 			changes.currentUser = this.props.permissions.find(({ isCurrentUser }) => isCurrentUser) || {};
 		}
 		if (!isEmpty(changes)) {
@@ -295,7 +297,7 @@ export class PermissionsTable extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const {rows, cells } = this.state;
+		const { rows, cells } = this.state;
 		const onSelectionChange = this.activeSelection ? this.handleSelectionChange : null;
 		return (
 			<>

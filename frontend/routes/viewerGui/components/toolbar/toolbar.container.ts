@@ -28,16 +28,18 @@ import {
 	selectIsFocusMode,
 	selectIsMetadataVisible,
 	selectNavigationMode,
+	selectProjectionMode,
 	ViewerGuiActions
 } from '../../../../modules/viewerGui';
+import { TreeActions } from '../../../../modules/tree';
+import { selectIsActive, BimActions } from '../../../../modules/bim';
+import { GroupsActions } from '../../../../modules/groups';
+import { MeasurementsActions } from '../../../../modules/measurements';
+import { selectMetaKeysExist } from '../../../../modules/model';
 import { Toolbar } from './toolbar.component';
 
-import { TreeActions } from '../../../../modules/tree';
-
-import { selectIsActive, BimActions } from '../../../../modules/bim';
-import { selectMetaKeysExist } from '../../../../modules/model';
-
 const mapStateToProps = createStructuredSelector({
+	projectionMode: selectProjectionMode,
 	navigationMode: selectNavigationMode,
 	helicopterSpeed: selectHelicopterSpeed,
 	isFocusMode: selectIsFocusMode,
@@ -60,14 +62,16 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setIsFocusMode: ViewerGuiActions.setIsFocusMode,
 	setClippingMode: ViewerGuiActions.setClippingMode,
 	setClipEdit: ViewerGuiActions.setClipEdit,
+	setMeasureMode: MeasurementsActions.setMeasureMode,
 	stopListenOnNumClip: ViewerGuiActions.stopListenOnNumClip,
-	setMeasureVisibility: ViewerGuiActions.setMeasureVisibility,
 	setCoordView: ViewerGuiActions.setCoordView,
 	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
+	setProjectionMode: ViewerGuiActions.setProjectionMode,
 	setMetadataActive: BimActions.setIsActive,
 	showAllNodes: TreeActions.showAllNodes,
 	hideSelectedNodes: TreeActions.hideSelectedNodes,
 	isolateSelectedNodes: TreeActions.isolateSelectedNodes,
+	clearColorOverrides: GroupsActions.clearColorOverrides
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Toolbar);

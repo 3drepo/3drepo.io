@@ -15,21 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+
+import { Link } from 'react-router-dom';
+
+import { COLOR } from '../../../../../styles';
 
 export const ListItemContainer = styled.li`
 	height: 72px;
 	display: flex;
-	border-top: 1px solid #dcdcdc;
-	background-color: rgb(250,250,250);
+	border-top: 1px solid ${COLOR.GRAY_60};
+	background-color: ${COLOR.LIGHT_GRAY};
 	transition: background-color .4s cubic-bezier(.25,.8,.25,1);
 
 	&:hover {
-		background-color: rgba(158,158,158,0.2);
+		background-color: ${COLOR.DARK_GRAY_20};
 	}
 `;
 
 export const StyledLink = styled(Link)`
-	color: rgba(0, 0, 0, 0.87);
+	color: ${COLOR.BLACK_87};
+
+	&& {
+		padding: 12px 24px;
+	}
 `;

@@ -18,32 +18,32 @@
 import React from 'react';
 
 import { Resources } from '../../../../../components/resources/resources.component';
-
 import { Content } from '../riskDetails/riskDetails.styles';
 
 interface IProps {
 	active: boolean;
-	risk: any;
+	resources: any;
 	onRemoveResource: (resource) => void;
 	attachFileResources: () => void;
 	attachLinkResources: () => void;
 	showDialog: (config: any) => void;
 	canComment: boolean;
+	formRef: any;
 }
 
 export const AttachmentsFormTab: React.FunctionComponent<IProps> = ({
-	active, risk, showDialog, attachFileResources, attachLinkResources, onRemoveResource, canComment,
+	active, resources, showDialog, attachFileResources, attachLinkResources, onRemoveResource, canComment, formRef,
 }) => {
 	return (
 		<Content active={active}>
 			<Resources
 				showDialog={showDialog}
-				resources={risk.resources}
+				resources={resources}
 				onSaveFiles={attachFileResources}
 				onSaveLinks={attachLinkResources}
 				onRemoveResource={onRemoveResource}
 				canEdit={canComment}
-				toLeft
+				formRef={formRef}
 			/>
 		</Content>
 	);

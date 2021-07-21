@@ -54,13 +54,38 @@ describe("Teamspace", function() {
 	const mixedUser1 = {
 		user: "sub_all",
 		password: "password",
-		quota: {spaceLimit: 23553, collaboratorLimit: "unlimited", spaceUsed: 0}
+		key: "eef3a905644d9cdcea53cf60ebc344d7",
+		quota: {spaceLimit: 23553, collaboratorLimit: "unlimited", spaceUsed: 0},
+		subscriptions : {
+			"basic": {
+			  "collaborators": 0,
+			  "data": 1
+			},
+			"paypal": [
+			  {
+				"expiryDate": "2118-07-29T10:29:39.000Z",
+				"quantity": 2,
+				"plan": "hundredQuidPlan"
+			  }
+			],
+			"enterprise": {
+			  "collaborators": 2,
+			  "data": 1024,
+			  "expiryDate": "2118-07-29T10:29:39.000Z"
+			},
+			"discretionary": {
+			  "collaborators": "unlimited",
+			  "data": 2048,
+			  "expiryDate": "2118-08-29T10:29:39.000Z"
+			}
+		  }
 	};
 
 	const mixedUser2 = {
 		user: "sub_all2",
 		password: "password",
-		quota: {spaceLimit: 22529, collaboratorLimit: "unlimited", spaceUsed: 0}
+		quota: {spaceLimit: 22529, collaboratorLimit: "unlimited", spaceUsed: 0},
+		key: "bfc07b68267ab54bfdeb891fe77187be"
 	};
 
 	const mixedUser3 = {
@@ -77,7 +102,8 @@ describe("Teamspace", function() {
 
 	const imsharedTeamspace = {
 		user: "imsharedTeamspace",
-		password: "imsharedTeamspace"
+		password: "imsharedTeamspace",
+		key: "c6e96d6ed8e95745fd9a222a82113a16"
 	};
 
 	const metaTestTeamspace = {
@@ -211,28 +237,34 @@ describe("Teamspace", function() {
 		});
 	});
 
-	describe("user with mixed subscription", function(done) {
+	describe("user with mixed subscription",  function() {
 		const user =  mixedUser1;
-		before(function(done) {
+		before(async function() {
 			this.timeout(timeout);
-			agent.post("/login")
+			await agent.post("/login")
 				.send({username: user.user, password: user.password})
-				.expect(200, done);
+				.expect(200);
 
 		});
 
-		it("should have the correct aggregated quota", function(done) {
-			agent.get(`/${user.user}/quota`)
-				.expect(200, function(err, res) {
-					expect(res.body).to.deep.equal(user.quota);
-					done(err);
-				});
+		it("should have the correct aggregated quota", async function() {
+			const {body} = await agent.get(`/${user.user}/quota`)
+				.expect(200);
+
+			expect(body).to.deep.equal(user.quota);
 		});
 
-		after(function(done) {
+		it("should be able to fetch suscriptions", async function() {
+			const { body } = await agent.get(`/${user.user}/subscriptions`)
+				.expect(200);
+
+			expect(body).to.deep.equal(user.subscriptions);
+		});
+
+		after(async function() {
 			this.timeout(timeout);
-			agent.post("/logout")
-				.expect(200, done);
+			await agent.post("/logout")
+				.expect(200);
 		});
 	});
 
@@ -286,6 +318,7 @@ describe("Teamspace", function() {
 		});
 	});
 
+
 	describe("user with mixed subscription with expired subscriptions (3)", function(done) {
 		const user =  mixedUser4;
 		before(function(done) {
@@ -311,6 +344,37 @@ describe("Teamspace", function() {
 		});
 	});
 
+	describe("Trying to get addOns information of a teamspace", function(done) {
+		const expectedAddOns = {
+			vrEnabled: true,
+			srcEnabled: true,
+			hereEnabled: true,
+			powerBIEnabled: true
+		}
+		it("as the teamspace owner should succeed", function(done) {
+			agent.get(`/${mixedUser1.user}/addOns?key=${mixedUser1.key}`)
+				.expect(200, function(err, res) {
+					expect(res.body).to.deep.equal(expectedAddOns);
+					done(err);
+				});
+		});
+
+		it("as a member of the teamspace should succeed", function(done) {
+			agent.get(`/${mixedUser1.user}/addOns?key=${mixedUser2.key}`)
+				.expect(200, function(err, res) {
+					expect(res.body).to.deep.equal(expectedAddOns);
+					done(err);
+				});
+		});
+		it("as a non-member of the teamspace should fail", function(done) {
+			agent.get(`/${mixedUser1.user}/addOns?key=${imsharedTeamspace.key}`)
+				.expect(400, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+					done(err);
+				});
+		});
+	});
+
 	describe("Member of a teamspace trying to get other members information", function(done) {
 		const user =  mixedUser4;
 		before(function(done) {
@@ -321,15 +385,30 @@ describe("Teamspace", function() {
 
 		});
 
-		const expectedInfo = {
-			user: mixedUser3.user,
-			firstName: "dflkgjfdgdf",
-			lastName: "lkgjri",
-			company: "flskjdflksdj"
-		};
 
 		it("should pass if the member exists", function(done) {
+			const expectedInfo = {
+				user: mixedUser3.user,
+				firstName: "dflkgjfdgdf",
+				lastName: "lkgjri",
+				company: "flskjdflksdj"
+			};
 			agent.get(`/${mixedUser1.user}/members/${mixedUser3.user}`)
+				.expect(200, function(err, res) {
+					expect(res.body).to.deep.equal(expectedInfo);
+					done(err);
+				});
+		});
+
+		it("should pass if the member exists (with job)", function(done) {
+			const expectedInfo = {
+				user: mixedUser1.user,
+				firstName: "dflkgjfdgdf",
+				lastName: "lkgjri",
+				company: "flskjdflksdj",
+				job: {_id: "jobB", color: "#9C9CD5"}
+			};
+			agent.get(`/${mixedUser1.user}/members/${mixedUser1.user}`)
 				.expect(200, function(err, res) {
 					expect(res.body).to.deep.equal(expectedInfo);
 					done(err);
@@ -872,4 +951,5 @@ describe("Teamspace", function() {
 				.expect(200, done);
 		});
 	});
+
 });

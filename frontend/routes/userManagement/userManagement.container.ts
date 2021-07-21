@@ -25,13 +25,12 @@ import {
 	selectIsTeamspaceAdmin,
 	UserManagementActions
 } from '../../modules/userManagement';
-import { UserManagement } from './userManagement.component';
-
 import {
 	selectCurrentTeamspace as selectDefaultTeamspace,
 	selectCurrentUser
 } from '../../modules/currentUser';
 import { selectIsPending, selectTeamspacesList, TeamspacesActions } from '../../modules/teamspaces';
+import { UserManagement } from './userManagement.component';
 
 const mapStateToProps = createStructuredSelector({
 	defaultTeamspace: selectDefaultTeamspace,

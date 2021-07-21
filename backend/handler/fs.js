@@ -1,16 +1,18 @@
-/*
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+/**
+ *  Copyright (C) 2021 3D Repo Ltd
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -19,9 +21,9 @@ const config = require("../config.js");
 const fs = require("fs");
 const path = require("path");
 const ResponseCodes = require("../response_codes");
-const systemLogger = require("../logger.js").systemLogger;
-const nodeuuid = require("uuid/v1");
+const systemLogger = require("../logger").systemLogger;
 const farmhash = require("farmhash");
+const utils = require("../utils");
 
 const generateFoldernames = (fileName, dirLevels) => {
 	if (dirLevels < 1) {
@@ -60,7 +62,7 @@ const createFoldersIfNecessary = (foldersPath) => {
 class FSHandler {
 	constructor() {
 		if (config.fs) {
-			if (config.fs.hasOwnProperty("path") && config.fs.hasOwnProperty("levels")) {
+			if (utils.hasField(config.fs, "path") && utils.hasField(config.fs, "levels")) {
 				this.testFilesystem();
 			} else {
 				const err = "fs entry found in config, but cannot find path/levels entry";
@@ -71,9 +73,9 @@ class FSHandler {
 	}
 
 	storeFile(data) {
-		const _id = nodeuuid();
+		const _id = utils.generateUUID({string: true});
 		const folderNames = generateFoldernames(_id, config.fs.levels);
-		const link = path.join(folderNames, _id);
+		const link = path.posix.join(folderNames, _id);
 
 		return new Promise((resolve, reject) => {
 			createFoldersIfNecessary(this.getFullPath(folderNames)).then(() =>{
@@ -93,7 +95,8 @@ class FSHandler {
 			return fs.existsSync(this.getFullPath(key)) ?
 				Promise.resolve(fs.createReadStream(this.getFullPath(key))) :
 				Promise.reject(ResponseCodes.NO_FILE_FOUND);
-		} catch {
+		} catch (err) {
+			systemLogger.logError("Failed to get filestream: ", err);
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
 	}
@@ -101,7 +104,8 @@ class FSHandler {
 	getFile(key) {
 		try {
 			return Promise.resolve(fs.readFileSync(this.getFullPath(key)));
-		} catch {
+		} catch (err) {
+			systemLogger.logError("Failed to get file: ", err);
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		}
 	}

@@ -19,6 +19,7 @@
   "plugins": ["node"],
   "extends": ["eslint:recommended", "plugin:node/recommended"],
   "rules": {
+	"license-header": 2,
 	"node/no-unpublished-require": 0,
 	"no-fallthrough" : 0,
 	"no-control-regex": 0,

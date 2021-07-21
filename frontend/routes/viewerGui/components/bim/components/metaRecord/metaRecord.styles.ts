@@ -15,9 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import IconButton from '@material-ui/core/IconButton';
+import SelectSimilarIcon from '@material-ui/icons/Adjust';
+import CopyIcon from '@material-ui/icons/FileCopy';
 import styled from 'styled-components';
+
 import { COLOR } from '../../../../../../styles';
 import { LinkableField } from '../../../../../components/linkableField/linkableField.component';
+
+export const Actions = styled.div`
+	display: flex;
+	visibility: hidden;
+`;
 
 export const Container = styled.div`
 	display: flex;
@@ -27,6 +36,12 @@ export const Container = styled.div`
 
 	&:nth-child(2n) {
 		background-color: ${COLOR.BLACK_6};
+	}
+
+	&:hover {
+		${Actions} {
+			visibility: visible;
+		}
 	}
 `;
 
@@ -59,3 +74,25 @@ export const StarIconWrapper = styled.div`
 	margin-right: 2px;
 	margin-top: -2px;
 ` as any;
+
+export const StyledIconButton = styled(IconButton)`
+	&& {
+		padding: 6px;
+	}
+`;
+
+export const StyledCopyIcon = styled(CopyIcon).attrs({
+	fontSize: 'small',
+})`
+	&& {
+		color: ${COLOR.PRIMARY_DARK};
+	}
+`;
+
+export const StyledSelectSimilarIcon = styled(SelectSimilarIcon).attrs({
+	fontSize: 'small',
+})`
+	&& {
+		color: ${COLOR.PRIMARY_DARK};
+	}
+`;

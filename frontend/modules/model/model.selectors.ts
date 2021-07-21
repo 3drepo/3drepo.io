@@ -60,6 +60,10 @@ export const selectIsPending = createSelector(
 	selectModelDomain, (state) => state.isPending
 );
 
+export const selectIsModelUploading = createSelector(
+	selectModelDomain, (state) => state.isModelUploading
+);
+
 export const selectPendingRevision = createSelector(
 	selectModelDomain, (state) => state.pendingRevision
 );
@@ -78,6 +82,14 @@ export const selectCurrentModel = createSelector(
 
 export const selectCurrentModelName = createSelector(
 	selectSettings, (state) => state.name
+);
+
+export const selectDefaultView = createSelector(
+	selectSettings, (state) => state.defaultView
+);
+
+export const selectDefaultLegend = createSelector(
+	selectSettings, (state) => state.defaultLegend
 );
 
 export const selectMetaKeys = createSelector(
@@ -102,4 +114,8 @@ export const selectUnit = createSelector(
 
 export const selectCurrentModelTeamspace = createSelector(
 	selectSettings, (state) => state.account
+);
+
+export const selectSubModels = createSelector(
+		selectSettings, (state) => state.subModels
 );

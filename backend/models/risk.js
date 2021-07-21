@@ -1,33 +1,28 @@
 /**
- *	Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 "use strict";
 
-const utils = require("../utils");
+const yup = require("yup");
+const C = require("../constants");
 const responseCodes = require("../response_codes.js");
-const db = require("../handler/db");
-
-const _ = require("lodash");
-
 const ChatEvent = require("./chatEvent");
-
-const Comment = require("./comment");
-const View = require("./viewpoint");
-
 const Ticket = require("./ticket");
+const utils = require("../utils");
 
 const fieldTypes = {
 	"_id": "[object Object]",
@@ -51,6 +46,7 @@ const fieldTypes = {
 	"mitigation_status": "[object String]",
 	"mitigation_type": "[object String]",
 	"name": "[object String]",
+	"number": "[object Number]",
 	"owner": "[object String]",
 	"position": "[object Array]",
 	"residual_consequence": "[object Number]",
@@ -60,10 +56,23 @@ const fieldTypes = {
 	"risk_factor": "[object String]",
 	"safetibase_id": "[object String]",
 	"scope": "[object String]",
+	"sequence_start": "[object Number]",
+	"sequence_end": "[object Number]",
 	"thumbnail": "[object String]",
 	"viewpoint": "[object Object]",
-	"viewpoints": "[object Array]"
+	"viewpoints": "[object Array]",
+	"shapes": "[object Array]"
 };
+
+const riskSchema = yup.object().shape({
+	desc: yup.string().max(C.LONG_TEXT_CHAR_LIM),
+	mitigation_desc: yup.string().max(C.LONG_TEXT_CHAR_LIM),
+	residual_risk: yup.string().max(C.LONG_TEXT_CHAR_LIM)
+});
+
+const ownerPrivilegeAttributes = [
+	"desc"
+];
 
 const LEVELS = {
 	VERY_LOW: 0,
@@ -85,33 +94,6 @@ function getLevelOfRisk(riskData) {
 	}
 
 	return {level_of_risk, residual_level_of_risk, overall_level_of_risk};
-}
-
-function addMitigationComment(account, model, sessionId, riskId, comments, data, viewpoint) {
-	if (data.residual && data.likelihood && data.consequence && data.mitigation) {
-		if (!comments) {
-			comments = [];
-		}
-
-		comments.forEach((comment) => {
-			comment.sealed = true;
-		});
-
-		const mitigationComment = Comment.newMitigationComment(
-			data.owner,
-			data.likelihood,
-			data.consequence,
-			data.mitigation,
-			viewpoint,
-			data.position
-		);
-
-		comments.push(mitigationComment);
-
-		ChatEvent.newComment(sessionId, account, model, riskId, mitigationComment);
-	}
-
-	return comments;
 }
 
 function calculateLevelOfRisk(likelihood, consequence) {
@@ -136,107 +118,84 @@ function calculateLevelOfRisk(likelihood, consequence) {
 	return levelOfRisk;
 }
 
-async function createViewPoint(account, model, viewpoint) {
-	let newViewpoint = null;
-
-	if (viewpoint) {
-		newViewpoint = {...viewpoint};
-		if (Object.prototype.toString.call(viewpoint) === fieldTypes["viewpoint"]) {
-			newViewpoint.guid = utils.generateUUID();
-			newViewpoint = View.clean(newViewpoint, fieldTypes.viewpoint);
-		} else {
-			throw responseCodes.INVALID_ARGUMENTS;
-		}
-	}
-
-	return newViewpoint;
-}
-
 class Risk extends Ticket {
 	constructor() {
-		super("risks", "risk_id", "issueIds", "RISK", fieldTypes, []);
+		super("risks", "risk", "issueIds", "RISK", fieldTypes, ownerPrivilegeAttributes);
 	}
 
 	async create(account, model, newRisk, sessionId) {
+		if (!riskSchema.isValidSync(newRisk, { strict: true })) {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
 		newRisk = await super.create(account, model, newRisk);
 		ChatEvent.newRisks(sessionId, account, model, [newRisk]);
 		return newRisk;
 	}
 
-	onBeforeUpdate(account, model, sessionId, residualData) {
-		return async function(data, oldRisk) {
-			if (residualData.residual) {
-				const updatedComments = addMitigationComment(
-					account,
-					model,
-					sessionId,
-					oldRisk._id,
-					oldRisk.comments,
-					data,
-					createViewPoint(residualData.viewpoint)
-				);
-
-				data.comments = updatedComments;
-			}
-
-			return data;
-		};
-	}
-
 	async update(user, sessionId, account, model, issueId, data) {
+		if (!data || !riskSchema.isValidSync(data, { strict: true })) {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
 		// 0. Set the black list for attributes
 		const attributeBlacklist = [
 			"_id",
 			"comments",
 			"created",
 			"creator_role",
-			"name",
-			"norm",
 			"number",
 			"owner",
 			"rev_id",
 			"status",
 			"thumbnail",
-			"viewpoint",
 			"viewpoints"
 		];
 
-		const residualData = _.pick(data, ["viewpoint", "residual"]);
-		const beforeUpdate =  this.onBeforeUpdate(account, model, sessionId, residualData).bind(this);
+		const updatedRisk = await super.update(attributeBlacklist, user, sessionId, account, model, issueId, data);
 
-		data = _.omit(data, ["viewpoint", "residual"]);
-		return await super.update(attributeBlacklist, user, sessionId, account, model, issueId, data, beforeUpdate);
-	}
-
-	deleteRisks(dbCol, sessionId, ids) {
-		const riskIdStrings = [].concat(ids);
-
-		for (let i = 0; i < ids.length; i++) {
-			if ("[object String]" === Object.prototype.toString.call(ids[i])) {
-				ids[i] = utils.stringToUUID(ids[i]);
-			}
+		if (utils.hasField(updatedRisk.data, "consequence") ||
+			utils.hasField(updatedRisk.data, "likelihood") ||
+			utils.hasField(updatedRisk.data, "residual_consequence") ||
+			utils.hasField(updatedRisk.data, "residual_likelihood")) {
+			const levelOfRisk = getLevelOfRisk(updatedRisk.updatedTicket);
+			updatedRisk.updatedTicket = {...updatedRisk.updatedTicket, ...levelOfRisk};
+			updatedRisk.data = {...updatedRisk.data, ...levelOfRisk};
 		}
 
-		return db.getCollection(dbCol.account, dbCol.model + ".risks").then((_dbCol) => {
-			return _dbCol.remove({ _id: {$in: ids}}).then((deleteResponse) => {
-				if (!deleteResponse.result.ok) {
-					return Promise.reject(responseCodes.RISK_NOT_FOUND);
-				}
-
-				// Success!
-				ChatEvent.risksDeleted(sessionId, dbCol.account,  dbCol.model, riskIdStrings);
-			});
-		});
+		return updatedRisk;
 	}
 
-	async getRisksReport(account, model, rid, ids, res) {
+	async getRisksReport(account, model, rid, filters, res) {
 		const reportGen = require("../models/report").newRisksReport(account, model, rid);
-		return this.getReport(account, model, rid, ids, res, reportGen);
+		return this.getReport(account, model, rid, filters, res, reportGen);
 	}
 
 	clean(account, model, riskToClean) {
 		riskToClean = super.clean(account, model, riskToClean);
 		return { ...riskToClean, ...getLevelOfRisk(riskToClean) };
+	}
+
+	async findByModelName(account, model, branch, revId, query, projection, filters, noClean = false, convertCoords = false) {
+		// eslint-disable-next-line prefer-const
+		let { levelOfRisks, residualLevelOfRisks, ...queryFilters} = filters;
+
+		const filterRisk = (risk) => {
+			const levelOfRisk = getLevelOfRisk(risk);
+			let valid = true;
+
+			if (levelOfRisks) {
+				valid = levelOfRisks.includes(levelOfRisk.level_of_risk);
+			}
+
+			if (residualLevelOfRisks) {
+				valid = valid && residualLevelOfRisks.includes(levelOfRisk.residual_level_of_risk);
+			}
+
+			return valid;
+		};
+
+		return super.findByModelName(account, model, branch, revId, query, projection, queryFilters, noClean, convertCoords, filterRisk);
 	}
 }
 

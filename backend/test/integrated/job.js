@@ -105,6 +105,112 @@ describe("Job", function () {
 			});
 	});
 
+	it("get job assigned to current user should succeed", function(done) {
+		agent.get(`/${username}/myJob`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal({});
+				done(err);
+			});
+	});
+
+	it("get job assigned to current user after job assignment should succeed", function(done) {
+		async.series([
+			function(done) {
+				agent.post(`/${username}/jobs/${job2._id}/${username}`)
+					.expect(200, done);
+			},
+			function(done) {
+				agent.get(`/${username}/myJob`)
+					.expect(200, function(err, res) {
+						expect(res.body).to.deep.equal(job2);
+						done(err);
+					});
+			}
+		], done);
+	});
+
+	it("update job colour should succeed", function(done) {
+		const updatedJob = {
+			_id: job2._id,
+			color: "#aaaaaa"
+		};
+
+		let oldJobs;
+
+		async.series([
+			function(done) {
+				agent.get(`/${username}/jobs`)
+					.expect(200, function(err, res) {
+						oldJobs = res.body;
+						done(err);
+					});
+			},
+			function(done) {
+				agent.put(`/${username}/jobs/${job2._id}`)
+					.send(updatedJob)
+					.expect(200, done);
+			},
+			function(done) {
+				agent.get(`/${username}/jobs`)
+					.expect(200, function(err, res) {
+						const newJobs = [
+							job,
+							updatedJob
+						];
+
+						expect(res.body).to.deep.equal(newJobs);
+						done(err);
+					});
+			},
+			function(done) {
+				agent.put(`/${username}/jobs/${job2._id}`)
+					.send(oldJobs[1])
+					.expect(200, done);
+			},
+			function(done) {
+				agent.get(`/${username}/jobs`)
+					.expect(200, function(err, res) {
+						expect(res.body).to.deep.equal(oldJobs);
+						done(err);
+					});
+			}
+		], done);
+	});
+
+	it("update job id should fail", function(done) {
+		const updatedJob = {
+			_id: "new name",
+			color: job2._id
+		};
+
+		let oldJobs;
+
+		async.series([
+			function(done) {
+				agent.get(`/${username}/jobs`)
+					.expect(200, function(err, res) {
+						oldJobs = res.body;
+						done(err);
+					});
+			},
+			function(done) {
+				agent.put(`/${username}/jobs/${job2._id}`)
+					.send(updatedJob)
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						done(err);
+					});
+			},
+			function(done) {
+				agent.get(`/${username}/jobs`)
+					.expect(200, function(err, res) {
+						expect(res.body).to.deep.equal(oldJobs);
+						done(err);
+					});
+			}
+		], done);
+	});
+
 	it("should able to list the job created", function(done) {
 		agent.get(`/${username}/jobs`)
 			.expect(200, function(err, res) {
@@ -166,6 +272,51 @@ describe("Job", function () {
 			}
 
 		], (err, res) => done(err));
+	});
+
+	// is the functionality of this endpoint useful?
+	it("list job colours should show unique list and succeed", function(done) {
+		agent.get(`/${username}/jobs/colors`)
+			.expect(200, function(err, res) {
+				expect(res.body).to.deep.equal([job.color]);
+				done(err);
+			});
+	});
+
+	it("list job colours should succeed", function(done) {
+		const updatedJob = {
+			_id: job2._id,
+			color: "#aaaaaa"
+		};
+
+		let oldJobs;
+
+		async.series([
+			function(done) {
+				agent.get(`/${username}/jobs`)
+					.expect(200, function(err, res) {
+						oldJobs = res.body;
+						done(err);
+					});
+			},
+			function(done) {
+				agent.put(`/${username}/jobs/${job2._id}`)
+					.send(updatedJob)
+					.expect(200, done);
+			},
+			function(done) {
+				agent.get(`/${username}/jobs/colors`)
+					.expect(200, function(err, res) {
+						expect(res.body).to.deep.equal([job.color, updatedJob.color]);
+						done(err);
+					});
+			},
+			function(done) {
+				agent.put(`/${username}/jobs/${job2._id}`)
+					.send(oldJobs[1])
+					.expect(200, done);
+			}
+		], done);
 	});
 
 	it("should fail to remove a job if it is assigned to someone", function(done) {

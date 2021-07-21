@@ -20,7 +20,9 @@ const DEFAULT_ISSUE_DATA = {
 	"assigned_roles":[]
 };
 
-const createIssue = (account, modelId) => (agent, issueData = null) =>  next => {
+const createIssue = (account, modelId) => (agent, issueData = null) =>  (...args) => {
+	const next = args.pop();
+
 	agent.post(`/${account}/${modelId}/issues`)
 		.send({...DEFAULT_ISSUE_DATA, ...(issueData || {})})
 		.expect(200 , (err, res) => next(err, res.body));

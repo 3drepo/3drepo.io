@@ -16,66 +16,45 @@
  */
 
 "use strict";
-const mongoose = require("mongoose");
-const ModelFactory = require("./factory/modelFactory");
 const utils = require("../utils");
 const C = require("../constants");
-const ResponseCodes = require("../response_codes");
+const responseCodes = require("../response_codes");
 const db = require("../handler/db");
 const stringToUUID = utils.stringToUUID;
 const uuidToString = utils.uuidToString;
 
-const Schema = mongoose.Schema;
+const getCollName = (model) => model + ".history";
 
-const historySchema = Schema({
-	_id: Object,
-	shared_id: Object,
-	paths: [],
-	type: String,
-	api: Number,
-	parents: [],
-	name: String,
-	tag: String,
-	author: String,
-	desc: String,
-	timestamp: Date,
-	incomplete: Number,
-	coordOffset: [],
-	current: [],
-	rFile: [],
-	void: Boolean
-});
+const findOne = async (account, model, query, projection, sort) =>
+	await db.findOne(account, getCollName(model), query, projection, sort);
 
-const getColl = async (account, model) =>  await db.getCollection(account, model + ".history");
+const History = {};
 
-const find = async (account, model, query, projection = {}) =>  {
-	const col = await getColl(account, model);
-	return await col.find(query, projection);
-};
-
-const findOne = async (account, model, query, projection = {}) =>  {
-	const col = await getColl(account, model);
-	return await col.findOne(query, projection);
-};
-
-historySchema.statics.getHistory = function(dbColOptions, branch, revId, projection) {
-
+History.getHistory = async function(account, model, branch, revId, projection) {
 	let history;
 
 	if (revId && utils.isUUID(revId)) {
-		history = this.findByUID(dbColOptions, revId, projection);
+		history = await this.findByUID(account, model, revId, projection);
 	} else if (revId && !utils.isUUID(revId)) {
-		history = this.findByTag(dbColOptions, revId, projection);
+		history = await this.findByTag(account, model, revId, projection);
 	} else if (branch) {
-		history = this.findByBranch(dbColOptions, branch, projection);
+		history = await this.findByBranch(account, model, branch, projection);
+	}
+
+	if (!history) {
+		throw responseCodes.INVALID_TAG_NAME;
 	}
 
 	return history;
 };
 
-historySchema.statics.tagRegExp = /^[a-zA-Z0-9_-]{1,20}$/;
+History.find = async function(account, model, query, projection, sort) {
+	return await db.find(account, getCollName(model), query, projection, sort);
+};
+
+History.tagRegExp = /^[a-zA-Z0-9_-]{1,50}$/;
 // list revisions by branch
-historySchema.statics.listByBranch = function(dbColOptions, branch, projection, showVoid = false) {
+History.listByBranch = async function(account, model, branch, projection, showVoid = false) {
 
 	const query = {"incomplete": {"$exists": false}};
 
@@ -89,19 +68,18 @@ historySchema.statics.listByBranch = function(dbColOptions, branch, projection, 
 		query.shared_id = stringToUUID(branch);
 	}
 
-	return History.find(
-		dbColOptions,
+	return await this.find(
+		account, model,
 		query,
 		projection,
-		{sort: {timestamp: -1}}
+		{timestamp: -1}
 	);
 };
 
 // get the head of a branch
 // FIXME: findByBranch and listByBranch seem to be doing similar things
 // FIXME: maybe findByBranch can just take the 1st elem of listByBranch
-historySchema.statics.findByBranch = function(dbColOptions, branch, projection, showVoid = false) {
-
+History.findByBranch = async function(account, model, branch, projection, showVoid = false) {
 	const query = { "incomplete": {"$exists": false}};
 
 	if(!showVoid) {
@@ -115,88 +93,94 @@ historySchema.statics.findByBranch = function(dbColOptions, branch, projection, 
 	} else {
 		query.shared_id = stringToUUID(branch);
 	}
-	return History.findOne(
-		dbColOptions,
+
+	const sort = {timestamp: -1};
+
+	const res = await findOne(
+		account,
+		model,
 		query,
 		projection,
-		{sort: {timestamp: -1}}
+		sort
 	);
+
+	return res;
 };
 
-historySchema.statics.revisionCount = async function(teamspace, model) {
+History.revisionCount = async function(teamspace, model) {
 	const query = {"incomplete": {"$exists": false}, "void": {"$ne": true}};
-	return (await find(teamspace, model, query)).count();
+	return await db.count(teamspace, getCollName(model), query);
 };
 
 // get the head of default branch (master)
-historySchema.statics.findLatest = function(dbColOptions, projection) {
-	return this.findByBranch(dbColOptions, null, projection);
+History.findLatest = async function(account, model, projection) {
+	return await this.findByBranch(account, model, null, projection);
 };
 
-historySchema.statics.findByUID = function(dbColOptions, revId, projection) {
+History.findByUID = async function(account, model, revId, projection) {
 	projection = projection || {};
-	return History.findOne(dbColOptions, { _id: stringToUUID(revId)}, projection);
-
+	return await findOne(account, model, { _id: stringToUUID(revId)}, projection);
 };
 
-historySchema.statics.updateRevision = async function(dbColOptions, modelId, data) {
-	if(data.hasOwnProperty("void") &&
-		Object.prototype.toString.call(data.void) === "[object Boolean]") {
-		const rev = await History.findByUID(dbColOptions, modelId);
-		if(!rev) {
-			return Promise.reject(ResponseCodes.MODEL_HISTORY_NOT_FOUND);
+History.updateRevision = async function(account, model, revId, voidValue) {
+	if(utils.isBoolean(voidValue)) {
+		voidValue = voidValue ? true : undefined;
+
+		const {result} = await db.update(account, getCollName(model), {_id: utils.stringToUUID(revId)} , { $set:  {void: voidValue}});
+
+		if(!result.n) {
+			throw responseCodes.INVALID_TAG_NAME;
 		}
 
-		if(data.void) {
-			rev.void = true;
-		} else {
-			rev.void = undefined;
-		}
-
-		return rev.save().then(() => ResponseCodes.OK);
+		return responseCodes.OK;
 
 	} else {
-		return Promise.reject(ResponseCodes.INVALID_ARGUMENTS);
+		throw responseCodes.INVALID_ARGUMENTS;
 	}
 };
 
-historySchema.statics.findByTag = function(dbColOptions, tag, projection) {
-	projection = projection || {};
-	return History.findOne(dbColOptions, { tag, incomplete: {"$exists": false }}, projection);
+History.findByTag = async function(account, model, tag, projection = {}) {
+	return await findOne(account, model, { tag, incomplete: {"$exists": false }}, projection);
 };
 
-historySchema.statics.findByObjectId = async (account, model, id, projection) =>
+History.findByObjectId = async (account, model, id, projection) =>
 	await findOne(account, model, { current: stringToUUID(id) }, projection);
 
-// add an item to current
-historySchema.methods.addToCurrent = function(id) {
-	this.current.push(id);
-};
+const clean = function(history, branch) {
+	history._id = uuidToString(history._id);
+	history.name = history._id;
+	history.branch = history.branch || branch || C.MASTER_BRANCH_NAME;
 
-// remove an item from current
-historySchema.methods.removeFromCurrent = function(id) {
-	this.current.remove(id);
-};
-
-historySchema.statics.clean = function(histories) {
-	return histories.map(h=> h.clean());
-};
-
-historySchema.methods.clean = function() {
-
-	const clean = this.toObject();
-	clean._id = uuidToString(clean._id);
-	clean.name = clean._id;
-	return clean;
-};
-
-const History = ModelFactory.createClass(
-	"History",
-	historySchema,
-	arg => {
-		return `${arg.model}.history`;
+	if(history.rFile && history.rFile.length > 0) {
+		const orgFileArr = history.rFile[0].split("_");
+		history.fileType = orgFileArr[orgFileArr.length - 1].toUpperCase();
 	}
-);
+	delete history.rFile;
+
+	return history;
+};
+
+History.clean = function(histories, branch) { // or history
+	return Array.isArray(histories) ?
+		histories.map((history) => clean(history, branch)) :
+		clean(histories, branch);
+};
+
+History.isValidTag = async function(account, model, tag) {
+	if (!tag) {
+		throw responseCodes.INVALID_TAG_NAME;
+	} else {
+		if (!tag.match(History.tagRegExp)) {
+			throw responseCodes.INVALID_TAG_NAME;
+		}
+
+		const _tag = await History.findByTag(account, model, tag, {_id: 1});
+
+		if (_tag) {
+			throw responseCodes.DUPLICATE_TAG;
+		}
+	}
+};
 
 module.exports = History;
 

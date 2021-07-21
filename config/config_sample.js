@@ -48,7 +48,14 @@ module.exports = {
 	logfile: {
 		filename: './3drepo.log',
 		console_level: 'info',
-		file_level: 'debug'
+		file_level: 'debug',
+		noColors: false,
+		jsonOutput: false // will not be colourised regardless of other options.
+	},
+	loginPolicy: {
+		maxUnsuccessfulLoginAttempts: 10,
+		remainingLoginAttemptsPromptThreshold: 5,
+		lockoutDuration: 900000
 	},
 	db: {
 		host: 'localhost',
@@ -119,6 +126,16 @@ module.exports = {
 			skipChecking: true
 		}
 	},
+	intercom: {
+		license: "",    // This is for identifying which app is yours in the intercom client
+		secretKey: "",  // This is for validating the user identity in intercom
+		accessToken: "" // This is for the api request to intercom in the backend
+	},
+    elastic: {
+		/*
+		 * Please refer to elastic documentation for configuration settings
+		 * https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/client-configuration.html
+		*/
+    },
 	termsUpdatedAt: 1520592720000,
-	bcf_dir: '/tmp',
 }

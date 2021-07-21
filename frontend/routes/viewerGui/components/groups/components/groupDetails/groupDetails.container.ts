@@ -23,26 +23,31 @@ import { selectCurrentUser } from '../../../../../../modules/currentUser';
 import {
 	selectActiveGroupDetails,
 	selectCriteriaFieldState,
+	selectEditingGroupDetails,
 	selectExpandDetails,
-	GroupsActions
+	selectFetchingDetailsIsPending,
+	GroupsActions,
 } from '../../../../../../modules/groups';
 import { selectMetaKeys, selectSettings } from '../../../../../../modules/model';
 import { selectSelectedNodes, selectTotalMeshes } from '../../../../../../modules/tree';
 import { GroupDetails } from './groupDetails.component';
 
 const mapStateToProps = createStructuredSelector({
-	activeGroup: selectActiveGroupDetails,
+	editingGroup: selectEditingGroupDetails,
+	originalGroup: selectActiveGroupDetails,
 	modelSettings: selectSettings,
 	expandDetails: selectExpandDetails,
 	currentUser: selectCurrentUser,
 	totalMeshes: selectTotalMeshes,
 	selectedNodes: selectSelectedNodes,
 	fieldNames: selectMetaKeys,
-	criteriaFieldState: selectCriteriaFieldState
+	criteriaFieldState: selectCriteriaFieldState,
+	isPending: selectFetchingDetailsIsPending,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setState: GroupsActions.setComponentState,
+	updateEditingGroup: GroupsActions.updateEditingGroup,
 	updateGroup: GroupsActions.updateGroup,
 	createGroup: GroupsActions.createGroup,
 	setCriteriaState: GroupsActions.setCriteriaFieldState

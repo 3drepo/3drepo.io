@@ -29,12 +29,14 @@ import { clientConfigService } from '../../../../services/clientConfig';
 import { schema } from '../../../../services/validation';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
 
-import { getTeamspacesList, getTeamspaceProjects } from '../../../../helpers/model';
-import { MODEL_SUBTYPES } from './../../teamspaces.contants';
+import { getModelCodeFieldErrorMsg, getTeamspacesList, getTeamspaceProjects } from '../../../../helpers/model';
+import { MODEL_SUBTYPES } from '../../teamspaces.contants';
 import { FieldWrapper, Row, SelectWrapper } from './modelDialog.styles';
 
 const ModelSchema = Yup.object().shape({
-	modelName: schema.firstName.max(120).required(),
+	modelName: schema.firstName
+			.max(120, 'Model Name is limited to 120 characters')
+			.required('Model Name is a required field'),
 	teamspace: Yup.string().required(),
 	project: Yup.string().required(),
 	unit: Yup.string().required(),
@@ -131,7 +133,7 @@ export const ModelDialog = (props: IProps) => {
 								<TextField
 									{...field}
 									error={Boolean(form.touched.code && form.errors.code)}
-									helperText={form.touched.code && (form.errors.code || '')}
+									helperText={form.touched.code && getModelCodeFieldErrorMsg(form.errors.code)}
 									label="Model Code (optional)"
 									margin="normal"
 									fullWidth
@@ -158,7 +160,7 @@ export const ModelDialog = (props: IProps) => {
 					<Field render={({ form }) =>
 						<Button
 							type="submit"
-							variant="raised"
+							variant="contained"
 							color="secondary"
 							disabled={(!form.isValid || form.isValidating)}>
 							Save

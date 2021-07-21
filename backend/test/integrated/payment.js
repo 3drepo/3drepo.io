@@ -21,15 +21,14 @@ const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp();
 const logger = require("../../logger.js");
-const systemLogger = logger.systemLogger;
 const responseCodes = require("../../response_codes.js");
 const helpers = require("../helpers/signUp");
 const async = require("async");
 const moment = require("moment-timezone");
 
 const Paypal = require("../../models/paypal");
-const UserBilling = require("../../models/userBilling");
-const getNextPaymentDate = UserBilling.statics.getNextPaymentDate;
+//const UserBilling = require("../../models/userBilling");
+//const getNextPaymentDate = UserBilling.statics.getNextPaymentDate;
 const url = require("url");
 
 const sinon = require("sinon");
@@ -62,6 +61,7 @@ describe("Enrolling to a subscription", function () {
 	const billingId = "I-000000000000";
 
 	const timeout = 30000;
+	/*
 
 	before(function(done) {
 
@@ -72,7 +72,7 @@ describe("Enrolling to a subscription", function () {
 
 				function(done) {
 					helpers.signUpAndLogin({
-						server, request, agent, expect, User, systemLogger,
+						server, request, agent, expect, User,
 						username: username2, password: password2, email: email2,
 						done
 					});
@@ -80,7 +80,7 @@ describe("Enrolling to a subscription", function () {
 
 				function(done) {
 					helpers.signUpAndLogin({
-						server, request, agent, expect, User, systemLogger,
+						server, request, agent, expect, User,
 						username: username3, password: password3, email: email3,
 						done
 					});
@@ -88,7 +88,7 @@ describe("Enrolling to a subscription", function () {
 
 				function(done) {
 					helpers.signUpAndLogin({
-						server, request, agent, expect, User, systemLogger,
+						server, request, agent, expect, User,
 						username, password, email,
 						done: function(err, _agent) {
 							agent = _agent;
@@ -109,7 +109,7 @@ describe("Enrolling to a subscription", function () {
 
 				function(done) {
 					helpers.signUpAndLogin({
-						server, request, agent, expect, User, systemLogger,
+						server, request, agent, expect, User,
 						username: username5, password: password5, email: email5,
 						done
 					});
@@ -129,6 +129,7 @@ describe("Enrolling to a subscription", function () {
 		});
 
 	});
+
 
 	const plans = {
 		"plans": [
@@ -150,6 +151,9 @@ describe("Enrolling to a subscription", function () {
 			"vat": "123456"
 		}
 	};
+
+	/*
+	COMMENTED OUT PAYPAL TESTS
 
 	it("should succeed no VAT is supplied", function(done) {
 		this.timeout(timeout);
@@ -1153,4 +1157,6 @@ describe("Enrolling to a subscription", function () {
 		});
 	});
 
+	Paypal commented out
+	*/
 });

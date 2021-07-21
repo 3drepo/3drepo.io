@@ -1,26 +1,58 @@
+/**
+ *  Copyright (C) 2021 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import AdjustIcon from '@material-ui/icons/Adjust';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import Download from '@material-ui/icons/CloudDownload';
 import Upload from '@material-ui/icons/CloudUpload';
+import HighlightOff from '@material-ui/icons/HighlightOff';
 import LensIcon from '@material-ui/icons/Lens';
 import PanoramaFishEyeIcon from '@material-ui/icons/PanoramaFishEye';
 import Pins from '@material-ui/icons/PinDrop';
 import Print from '@material-ui/icons/Print';
-import { SortAmountDown, SortAmountUp } from '../routes/components/fontAwesomeIcon';
-
 import ViewModule from '@material-ui/icons/ViewModule';
 
-import { DATA_TYPES, FILTER_TYPES } from '../routes/components/filterPanel/filterPanel.component';
+import { SortAmountDown, SortAmountUp } from '../routes/components/fontAwesomeIcon';
+import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel.component';
 import { COLOR, PIN_COLORS } from '../styles';
 
 export const ISSUE_PANEL_NAME = 'issue';
+
+export const ISSUE_PROPERTIES_TAB = 'issue';
+export const ISSUE_SEQUENCING_TAB = 'sequencing';
+export const ATTACHMENTS_ISSUE_TAB = 'attachments';
+export const ISSUE_SHAPES_TAB = 'shapes';
+
+export const ISSUE_TABS = {
+	ISSUE: 'Properties',
+	SEQUENCING: 'Sequencing',
+	SHAPES: 'Shapes',
+	ATTACHMENTS: 'Attachments',
+};
 
 export const STATUSES = {
 	OPEN: 'open',
 	IN_PROGRESS: 'in progress',
 	FOR_APPROVAL: 'for approval',
-	CLOSED: 'closed'
+	CLOSED: 'closed',
+	VOID: 'void',
 };
+
+export const ISSUE_DEFAULT_HIDDEN_STATUSES = [STATUSES.CLOSED, STATUSES.VOID];
 
 export const PRIORITIES = {
 	NONE: 'none',
@@ -39,7 +71,8 @@ export const ISSUE_STATUSES = [
 	{ value: STATUSES.OPEN, name: 'Open' },
 	{ value: STATUSES.IN_PROGRESS, name: 'In progress'},
 	{ value: STATUSES.FOR_APPROVAL, name: 'For approval' },
-	{ value: STATUSES.CLOSED, name: 'Closed' }
+	{ value: STATUSES.CLOSED, name: 'Closed' },
+	{ value: STATUSES.VOID, name: 'Void' },
 ];
 
 export const ISSUE_PRIORITIES = [
@@ -76,7 +109,8 @@ export const STATUSES_ICONS = {
 	[STATUSES.OPEN]: PanoramaFishEyeIcon,
 	[STATUSES.IN_PROGRESS]: LensIcon,
 	[STATUSES.FOR_APPROVAL]: AdjustIcon,
-	[STATUSES.CLOSED]: CheckCircleIcon
+	[STATUSES.CLOSED]: CheckCircleIcon,
+	[STATUSES.VOID]: HighlightOff,
 };
 
 export const ISSUE_FILTER_RELATED_FIELDS = {
@@ -85,7 +119,8 @@ export const ISSUE_FILTER_RELATED_FIELDS = {
 	CREATED_BY: 'creator_role',
 	ASSIGNED_TO: 'assigned_roles',
 	TYPE: 'topic_type',
-	CREATED_DATE: 'created'
+	CREATED_DATE: 'created',
+	START_DATETIME: 'sequence_start'
 };
 
 export const ISSUE_FILTERS = [
@@ -118,6 +153,11 @@ export const ISSUE_FILTERS = [
 		label: 'Date',
 		relatedField: ISSUE_FILTER_RELATED_FIELDS.CREATED_DATE,
 		type: FILTER_TYPES.DATE
+	},
+	{
+		label: 'Starting Date',
+		relatedField: ISSUE_FILTER_RELATED_FIELDS.START_DATETIME,
+		type: FILTER_TYPES.DATE
 	}
 ] as any;
 
@@ -142,13 +182,10 @@ export const ISSUES_ACTIONS_MENU = {
 		label: 'Download JSON',
 		Icon: Download
 	},
-	SORT_BY_DATE: {
-		label: 'Sort by date',
-		isSorting: true,
-		Icon: {
-			ASC: SortAmountUp,
-			DESC: SortAmountDown
-		}
+	SORT_ORDER: {
+		label: 'Sort order',
+		ASC: SortAmountUp,
+		DESC: SortAmountDown,
 	},
 	SHOW_PINS: {
 		label: 'Show Pins',

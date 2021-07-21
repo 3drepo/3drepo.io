@@ -1,19 +1,19 @@
 /**
- **  Copyright (C) 2020 3D Repo Ltd
- **
- **  This program is free software= you can redistribute it and/or modify
- **  it under the terms of the GNU Affero General Public License as
- **  published by the Free Software Foundation, either version 3 of the
- **  License, or (at your option) any later version.
- **
- **  This program is distributed in the hope that it will be useful,
- **  but WITHOUT ANY WARRANTY; without even the implied warranty of
- **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- **  GNU Affero General Public License for more details.
- **
- **  You should have received a copy of the GNU Affero General Public License
- **  along with this program.  If not, see <http=//www.gnu.org/licenses/>.
- **/
+ *  Copyright (C) 2020 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import EventEmitter from 'eventemitter3';
 import React from 'react';
@@ -21,18 +21,19 @@ import React from 'react';
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import {
 	VIEWER_EVENTS,
+	VIEWER_MEASURING_MODE,
 	VIEWER_NAV_MODES,
+	VIEWER_PROJECTION_MODES
 } from '../../constants/viewer';
 import { UnityUtil } from '../../globals/unity-util';
-import { asyncTimeout } from '../../helpers/aync';
+import { uuid as UUID } from '../../helpers/uuid';
 import { DialogActions } from '../../modules/dialog';
 import { dispatch, getState } from '../../modules/store';
 import { selectMemory } from '../../modules/viewer';
-import { PIN_COLORS } from '../../styles';
 import { clientConfigService } from '../clientConfig';
 import { MultiSelect } from './multiSelect';
 
-const UNITY_LOADER_PATH = 'unity/Build/UnityLoader.js';
+const UNITY_LOADER_PATH = 'unity/Build/unity.loader.js';
 
 declare const Module;
 
@@ -57,10 +58,10 @@ export class ViewerService {
 	public units = 'm';
 	public convertToM = 1.0;
 	public isInitialised = false;
-	public measureMode = false;
 	public measuringUnits = '';
 	public modelString = null;
 	public divId = 'unityViewer';
+	public canvas = null;
 	private numClips = 0;
 	private stats: boolean = false;
 	private emitter = new EventEmitter();
@@ -71,18 +72,19 @@ export class ViewerService {
 	};
 
 	public fullscreen: boolean;
-	public pinDropMode: boolean;
 	public unityLoaderReady: boolean;
 	public unityLoaderScript: HTMLScriptElement;
 	public settings: any;
 	public options: any;
 	public plugins: any;
 
+	public measureMode: string;
+	public measureModeLabels: boolean;
+
 	public constructor({ name = 'viewer', ...config}: IViewerConstructor) {
 		this.name = name;
 
 		this.unityLoaderReady = false;
-		this.pinDropMode = false;
 
 		this.viewer = document.createElement('div');
 		this.viewer.className = 'viewer';
@@ -101,13 +103,13 @@ export class ViewerService {
 		UnityUtil.init(this.handleUnityError, this.onUnityProgress, this.onModelProgress);
 		UnityUtil.hideProgressBar();
 
-		const unityHolder = document.createElement('div');
+		const unityHolder = document.createElement('canvas');
 		unityHolder.className = 'emscripten';
 		unityHolder.setAttribute('id', this.divId);
 		unityHolder.removeAttribute('style');
 		unityHolder.setAttribute('width', '100%');
 		unityHolder.setAttribute('height', '100%');
-		unityHolder.setAttribute('tabindex', '1'); // You need this for unityHolder to register keyboard events
+		unityHolder.setAttribute('tabindex', '1'); // You need this for unityHolder to register keyboard ts
 		unityHolder.setAttribute('oncontextmenu', 'event.preventDefault()');
 
 		unityHolder.onmousedown = () => {
@@ -118,6 +120,7 @@ export class ViewerService {
 
 		this.element.appendChild(this.viewer);
 		this.viewer.appendChild(unityHolder);
+		this.canvas = unityHolder;
 
 		this.unityLoaderScript = document.createElement('script');
 	}
@@ -141,7 +144,7 @@ export class ViewerService {
 		UnityUtil.viewer = this;
 
 		try {
-			await this.insertUnityLoader(this.memory);
+			await this.insertUnityLoader();
 
 			(async () => {
 				await this.initUnity({
@@ -161,7 +164,7 @@ export class ViewerService {
 	public initUnity(options) {
 		return new Promise((resolve, reject) => {
 			if (this.isInitialised) {
-				resolve();
+				resolve(null);
 			}
 
 			UnityUtil.setAPIHost(options.getAPI);
@@ -170,9 +173,6 @@ export class ViewerService {
 			this.options = options;
 			this.emit(VIEWER_EVENTS.VIEWER_INIT);
 			document.body.style.cursor = 'wait';
-
-			// Shouldn't need this, but for something it is not being recognised from unitySettings!
-			Module.errorhandler = UnityUtil.onUnityError;
 
 			if (this.options && this.options.plugins) {
 				this.plugins = this.options.plugins;
@@ -191,7 +191,7 @@ export class ViewerService {
 					model: this.modelString,
 					name: this.name
 				});
-				resolve();
+				resolve(null);
 			}).catch((error) => {
 				this.emit(VIEWER_EVENTS.VIEWER_INIT, error);
 				console.error('UnityUtil.onReady failed: ', error);
@@ -200,7 +200,7 @@ export class ViewerService {
 		});
 	}
 
-	public insertUnityLoader(memory) {
+	public insertUnityLoader() {
 		if (document.querySelector('.unity-loader')) {
 			return Promise.resolve();
 		}
@@ -208,14 +208,14 @@ export class ViewerService {
 		return new Promise((resolve, reject) => {
 			this.unityLoaderScript.addEventListener ('load', () => {
 				(async () => {
-					await UnityUtil.loadUnity(this.divId, undefined, memory);
-					console.debug('Loaded UnityLoader.js succesfully');
-					resolve();
+					console.debug('Loaded unity.loader.js succesfully');
+					await UnityUtil.loadUnity(this.canvas, undefined);
+					resolve(null);
 				})();
 			}, false);
 			this.unityLoaderScript.addEventListener ('error', (error) => {
-				console.error('Error loading UnityLoader.js', error);
-				reject('Error loading UnityLoader.js');
+				console.error('Error loading unity.loader.js', error);
+				reject('Error loading unity.loader.js');
 			}, false);
 
 			// Event handlers MUST come first before setting src
@@ -252,14 +252,29 @@ export class ViewerService {
 	}
 
 	public pickPointEvent(pointInfo) {
+		if (this.measureMode !== 'PointPin') {
+			return;
+		}
+
 		// User clicked a mesh
-		this.emit(VIEWER_EVENTS.PICK_POINT, {
-			id : pointInfo.id,
-			normal : pointInfo.normal,
-			position: pointInfo.position,
-			screenPos : pointInfo.mousePos,
-			selectColour : PIN_COLORS.YELLOW,
-		});
+		const position  = pointInfo.trans ? pointInfo.trans.inverse().multMatrixPnt(pointInfo.position) : pointInfo.position;
+
+		const measure = {
+			uuid: UUID(),
+			position,
+			type: -1,
+			color: [0, 1, 1, 1],
+		};
+
+		this.measurementAlertEvent(measure);
+	}
+
+	public moveMeshes(teamspace: string, modelId: string, meshes: string[], matrix: number[]) {
+		UnityUtil.moveMeshes(teamspace, modelId, meshes, matrix);
+	}
+
+	public resetMovedMeshes(teamspace: string, modelId: string, meshes: string[]) {
+		UnityUtil.resetMovedMeshes(teamspace, modelId, meshes);
 	}
 
 	/**
@@ -347,8 +362,7 @@ export class ViewerService {
 		UnityUtil.reset();
 		this.isInitialised = false;
 		this.removeAllListeners();
-		this.setPinDropMode(false);
-		await this.disableMeasure();
+		await this.clearMeasureMode();
 	}
 
 	/**
@@ -356,7 +370,7 @@ export class ViewerService {
 	 */
 
 	public get canSelect() {
-		return !this.pinDropMode && !this.measureMode;
+		return !Boolean(this.measureMode);
 	}
 
 	public objectSelected(pointInfo) {
@@ -398,26 +412,6 @@ export class ViewerService {
 	/**
 	 * Measure
 	 */
-
-	public async activateMeasure() {
-		this.measureMode = true;
-		await this.isViewerReady();
-		UnityUtil.enableMeasuringTool();
-		this.measureMode = true;
-	}
-
-	public async disableMeasure() {
-		this.measureMode = false;
-		await this.isViewerReady();
-		UnityUtil.disableMeasuringTool();
-		this.measureMode = false;
-	}
-
-	public async setMeasureMode(mode: string) {
-		await this.isViewerReady();
-		UnityUtil.setMeasureToolMode(mode);
-	}
-
 	public async setMeasuringUnits(units) {
 		this.measuringUnits = units;
 		await this.isViewerReady();
@@ -445,12 +439,12 @@ export class ViewerService {
 
 	public async enableEdgeSnapping() {
 		await this.isViewerReady();
-		UnityUtil.enableMeasureToolSnap();
+		UnityUtil.enableSnapping();
 	}
 
 	public async disableEdgeSnapping() {
 		await this.isViewerReady();
-		UnityUtil.disableMeasureToolSnap();
+		UnityUtil.disableSnapping();
 	}
 
 	public async enableMeasureXYZDisplay() {
@@ -480,12 +474,82 @@ export class ViewerService {
 		this.emit(VIEWER_EVENTS.ALL_MEASUREMENTS_REMOVED);
 	}
 
+	public measurementModeChanged(mode) {
+		this.emit(VIEWER_EVENTS.MEASUREMENT_MODE_CHANGED, mode);
+	}
+
+	public async setMeasureMode(mode: string, labels: boolean = true) {
+		await this.isViewerReady();
+
+		this.measureMode = mode;
+		this.measureModeLabels = labels;
+
+		if (!mode) {
+			UnityUtil.disableMeasuringTool();
+			UnityUtil.disableSnapping();
+			return;
+		}
+
+		this.setVisibilityOfMeasurementsLabels(labels);
+		MultiSelect.toggleAreaSelect(false);
+
+		if (mode === VIEWER_MEASURING_MODE.POINT)  {
+			UnityUtil.disableMeasuringTool();
+		} else {
+			UnityUtil.setMeasureToolMode(mode);
+			UnityUtil.enableMeasuringTool();
+		}
+
+		this.measurementModeChanged(mode);
+	}
+
+	public async clearMeasureMode() {
+		return await this.setMeasureMode('');
+	}
+
+	public async setVisibilityOfMeasurementsLabels(visible) {
+		await this.isViewerReady();
+		if (visible) {
+			UnityUtil.showNewMeasurementsLabels();
+		} else {
+			UnityUtil.hideNewMeasurementsLabels();
+		}
+	}
+
+	public async addMeasurements(measurements, hideLabels) {
+		await this.isViewerReady();
+		await this.isModelLoaded();
+		await this.setVisibilityOfMeasurementsLabels(!hideLabels);
+
+		measurements.forEach(UnityUtil.addMeasurement);
+
+		this.setVisibilityOfMeasurementsLabels(this.measureModeLabels);
+	}
+
+	public async removeMeasurements(measurements) {
+		await this.isViewerReady();
+		await this.isModelLoaded();
+		measurements.forEach(({uuid}) => this.removeMeasurement(uuid));
+	}
+
+	public async selectMeasurements(measurements) {
+		await this.isViewerReady();
+		await this.isModelLoaded();
+		measurements.forEach(({uuid}) => UnityUtil.selectMeasurement(uuid));
+	}
+
+	public async deselectMeasurements(measurements) {
+		await this.isViewerReady();
+		await this.isModelLoaded();
+		measurements.forEach(({uuid}) => UnityUtil.deselectMeasurement(uuid));
+	}
+
 	/**
 	 * Highlight
 	 */
 
 	public get canHighlight() {
-		return this.isInitialised && !this.pinDropMode && !this.measureMode;
+		return this.isInitialised && !Boolean(this.measureMode);
 	}
 
 	public async highlightObjects(
@@ -499,7 +563,7 @@ export class ViewerService {
 				if (ids) {
 					const uniqueIds = Array.from(new Set(ids));
 					if (uniqueIds.length) {
-						// @ts-ignore
+						// eslint-disable-next-line @typescript-eslint/await-thenable
 						await UnityUtil.highlightObjects(account, model, uniqueIds, colour, multi, forceReHighlight);
 						this.emit(VIEWER_EVENTS.HIGHLIGHT_OBJECTS, {account, model, uniqueIds });
 						return;
@@ -515,11 +579,10 @@ export class ViewerService {
 		this.emit(VIEWER_EVENTS.CLEAR_HIGHLIGHT_OBJECTS, {});
 	}
 
-	public unhighlightObjects(account, model, ids) {
+	public unhighlightObjects(account, model, ids: string[]) {
 		if (ids) {
 			const uniqueIds = Array.from(new Set(ids));
 			if (uniqueIds.length) {
-				// @ts-ignore
 				UnityUtil.unhighlightObjects(account, model, uniqueIds);
 				this.emit(VIEWER_EVENTS.UNHIGHLIGHT_OBJECTS, {account, model, uniqueIds });
 				return;
@@ -646,14 +709,6 @@ export class ViewerService {
 		UnityUtil.removePin(pin.id);
 	}
 
-	public setPinDropMode(on: boolean) {
-		this.pinDropMode = on;
-
-		if (on) {
-			MultiSelect.toggleAreaSelect(false);
-		}
-	}
-
 	/**
 	 * Diffs
 	 */
@@ -700,11 +755,16 @@ export class ViewerService {
 			initialised.resolve = resolve;
 			initialised.reject = reject;
 		});
+
+		if (this.initialisedPromise) {
+			this.initialisedPromise.reject();
+		}
+
 		this.initialisedPromise = initialised;
 	}
 
 	public async isViewerReady() {
-		return await this.initialisedPromise.promise;
+		return await (this.initialisedPromise && this.initialisedPromise.promise);
 	}
 
 	/**
@@ -715,22 +775,22 @@ export class ViewerService {
 		return await this.isModelLoaded();
 	}
 
-	public async loadViewerModel(teamspace, model, branch, revision) {
+	public async loadViewerModel(teamspace, model, branch, revision, viewpoint) {
 		if (!teamspace || !model) {
 			console.error('Teamspace, model, branch or revision was not defined!', teamspace, model, branch, revision);
 			await Promise.reject('Teamspace, model, branch or revision was not defined!');
 		} else {
-			await this.loadNewModel(teamspace, model, branch, revision);
+			await this.loadNewModel(teamspace, model, branch, revision, viewpoint);
 			this.initialisedPromise.resolve();
 		}
 	}
 
-	public async loadNewModel(account, model, branch, revision) {
+	public async loadNewModel(account, model, branch, revision, viewpoint) {
 		await UnityUtil.onReady();
 		this.emit(VIEWER_EVENTS.MODEL_LOADING_START);
 		document.body.style.cursor = 'wait';
 
-		await UnityUtil.loadModel(account, model, branch, revision);
+		await UnityUtil.loadModel(account, model, branch, revision, viewpoint);
 
 		await UnityUtil.onLoaded().then((bbox) => {
 			document.body.style.cursor = 'initial';
@@ -765,10 +825,6 @@ export class ViewerService {
 
 	public overrideMeshColor(account, model, meshIDs, color) {
 		UnityUtil.overrideMeshColor(account, model, meshIDs, color);
-
-		if (color.length > 3) {
-			UnityUtil.overrideMeshOpacity(account, model, meshIDs, color[3]);
-		}
 	}
 
 	public resetMeshColor(account, model, meshIDs) {
@@ -811,22 +867,30 @@ export class ViewerService {
 	}
 
 	public setMaxShadowDistance(value: number) {
-		if (value === undefined) { return; }
+		if (value === undefined) {
+ 			return;
+		}
 		UnityUtil.setMaxShadowDistance(value);
 	}
 
 	public setNumCacheThreads(value: number) {
-		if (value === undefined) { return; }
+		if (value === undefined) {
+ 			return;
+		}
 		UnityUtil.setNumCacheThreads(value);
 	}
 
 	public setNearPlane = (nearplane: number) => {
-		if (nearplane === undefined) { return; }
+		if (nearplane === undefined) {
+ 			return;
+		}
 		UnityUtil.setDefaultNearPlane(nearplane);
 	}
 
 	public setFarPlaneSamplingPoints = (farplaneSample: number) => {
-		if (farplaneSample === undefined) { return; }
+		if (farplaneSample === undefined) {
+ 			return;
+		}
 		UnityUtil.setFarPlaneSampleSize(farplaneSample);
 	}
 
@@ -835,6 +899,20 @@ export class ViewerService {
 			UnityUtil.toggleStats();
 			this.stats = val;
 		}
+	}
+
+	public setPlaneBorderWidth = (width: number) => {
+		if (width === undefined) {
+ 			return;
+		}
+		UnityUtil.setPlaneBorderWidth(width);
+	}
+
+	public setPlaneBorderColor = (color: number[]) => {
+		if (color === undefined) {
+ 			return;
+		}
+		UnityUtil.setPlaneBorderColor(color);
 	}
 
 	/**
@@ -886,11 +964,12 @@ export class ViewerService {
 
 	public async getObjectsStatus({ teamspace, model } = { teamspace: '', model: '' }) {
 		await this.isViewerReady();
-		return this.getUnityObjectsStatus(teamspace, model);
+		return await this.getUnityObjectsStatus(teamspace, model);
 	}
 
 	public async getCurrentViewpoint({ teamspace, model }) {
-		return this.isInitialised ? await asyncTimeout(1000, this.getCurrentViewpointInfo, teamspace, model) : null;
+		await this.isViewerReady();
+		return await this.getCurrentViewpointInfo(teamspace, model);
 	}
 
 	public async goToDefaultViewpoint() {
@@ -898,9 +977,29 @@ export class ViewerService {
 		return this.showAll();
 	}
 
-	public async setCamera({ position, up, view_dir, look_at, animate, rollerCoasterMode, account, model }) {
+	public async setProjectionMode(mode) {
 		await this.isModelReady();
-		UnityUtil.setViewpoint(position, up, view_dir, look_at, animate !== undefined ? animate : true, rollerCoasterMode);
+		switch (mode) {
+			case VIEWER_PROJECTION_MODES.ORTHOGRAPHIC:
+				UnityUtil.useOrthographicProjection();
+				break;
+			default:
+				UnityUtil.usePerspectiveProjection();
+		}
+	}
+
+	public async setCamera({ position, up, view_dir, look_at, type, orthographicSize, account, model }) {
+		await this.isModelReady();
+		UnityUtil.setViewpoint(
+			position,
+			up,
+			view_dir,
+			look_at,
+			type,
+			orthographicSize,
+			account,
+			model
+		);
 	}
 
 	/**
@@ -1040,6 +1139,14 @@ export class ViewerService {
 
 	public stopClipEdit() {
 		UnityUtil.stopClipEdit();
+	}
+
+	public setNavigationOn() {
+		UnityUtil.setNavigationOn();
+	}
+
+	public setNavigationOff() {
+		UnityUtil.setNavigationOff();
 	}
 }
 

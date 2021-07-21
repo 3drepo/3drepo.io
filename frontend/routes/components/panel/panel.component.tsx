@@ -17,6 +17,8 @@
 
 import React from 'react';
 
+import { pick } from 'lodash';
+
 import { Container, Content, ContentWrapper, Title } from './panel.styles';
 
 interface IProps {
@@ -26,15 +28,21 @@ interface IProps {
 	paperProps?: any;
 	hiddenScrollbars?: boolean;
 	disableStretching?: boolean;
+	id?: string;
+	style?: any;
 }
 
-export const Panel = (props: IProps) => (
-	<Container {...props.paperProps} className={props.className}>
-		<Title>{props.title}</Title>
-		<Content>
-			<ContentWrapper disableStretching={props.disableStretching} hiddenScrollbars={props.hiddenScrollbars}>
-				{props.children}
-			</ContentWrapper>
-		</Content>
-	</Container>
-);
+export const Panel = (props: IProps) => {
+	const draggableProps = pick(props, ['onMouseDown', 'onMouseUp', 'onTouchStart', 'onTouchEnd']);
+
+	return (
+		<Container {...draggableProps} {...props.paperProps} style={props.style} className={props.className} id={props.id}>
+			<Title>{props.title}</Title>
+			<Content>
+				<ContentWrapper disableStretching={props.disableStretching} hiddenScrollbars={props.hiddenScrollbars}>
+					{props.children}
+				</ContentWrapper>
+			</Content>
+		</Container>
+	);
+};

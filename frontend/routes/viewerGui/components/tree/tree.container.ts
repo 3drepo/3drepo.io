@@ -23,7 +23,7 @@ import {
 	selectActiveNode,
 	selectDataRevision,
 	selectExpandedNodesMap,
-	selectIfcSpacesHidden,
+	selectHiddenGeometryVisible,
 	selectIsPending,
 	selectNodesIndexesMap,
 	selectSearchEnabled,
@@ -39,7 +39,7 @@ import { Tree } from './tree.component';
 const mapStateToProps = createStructuredSelector({
 	searchEnabled: selectSearchEnabled,
 	selectedFilters: selectSelectedFilters,
-	ifcSpacesHidden: selectIfcSpacesHidden,
+	hiddenGeometryVisible: selectHiddenGeometryVisible,
 	nodesList: selectVisibleTreeNodesList,
 	visibleNodesIds: selectVisibleTreeNodesIds,
 	expandedNodesMap: selectExpandedNodesMap,
@@ -54,7 +54,7 @@ const mapStateToProps = createStructuredSelector({
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showAllNodes: TreeActions.showAllNodes,
 	isolateSelectedNodes: TreeActions.isolateSelectedNodes,
-	hideIfcSpaces: TreeActions.hideIfcSpaces,
+	showHiddenGeometry: TreeActions.showHiddenGeometry,
 	setState: TreeActions.setComponentState,
 	handleNodesClick: TreeActions.handleNodesClick,
 	goToRootNode: TreeActions.goToRootNode,

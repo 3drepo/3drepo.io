@@ -20,8 +20,6 @@
 const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp();
-const logger = require("../../logger.js");
-const systemLogger = logger.systemLogger;
 const responseCodes = require("../../response_codes.js");
 
 describe("Login", function () {
@@ -29,7 +27,8 @@ describe("Login", function () {
 	let server;
 	const username = "login_username";
 	const username_not_verified = "login_nonverified";
-	const password = "password";
+	const password = "Str0ngPassword!";
+	const newPassword = "someCrazyNewPassword2999";
 	const email = suf => `test3drepo_login_${suf}@mailinator.com`;
 
 	before(function(done) {
@@ -56,7 +55,7 @@ describe("Login", function () {
 	it("with correct password and username and verified should login successfully", function () {
 
 		// create a user
-		return User.createUser(systemLogger, username, password, {
+		return User.createUser(username, password, {
 			email: email("success")
 		}, 200000).then(emailVerifyToken => {
 			return User.verify(username, emailVerifyToken.token, true);
@@ -80,7 +79,7 @@ describe("Login", function () {
 		const username = "email_user"
 
 		// create a user
-		return User.createUser(systemLogger, username, password, {
+		return User.createUser(username, password, {
 			email: email("mail_success")
 		}, 200000).then(emailVerifyToken => {
 			return User.verify(username, emailVerifyToken.token, true);
@@ -103,7 +102,7 @@ describe("Login", function () {
 	it("with correct password and username but not yet verified should fail", function () {
 
 		// create a user
-		return User.createUser(systemLogger, username_not_verified, password, {
+		return User.createUser(username_not_verified, password, {
 			email: email("notyetverf")
 		}, 200000).then(user => {
 
@@ -113,7 +112,6 @@ describe("Login", function () {
 					.send({ username: username_not_verified, password })
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.USER_NOT_VERIFIED.value);
-						console.log(err);
 						err ? reject(err) : resolve();
 					});
 			});
@@ -222,6 +220,134 @@ describe("Login", function () {
 			});
 	});
 
+	describe("Forgot password ", function() {
+		let token = null
 
+		it("with username should succeed", async function() {
+			const data = await User.getForgotPasswordToken(username);
 
+			expect(data.email).to.equal( email("success"));
+			expect(data.username).to.equal(username);
+			expect(data.token).to.not.be.undefined;
+		});
+
+		it("with email should succeed", async function() {
+			const data = await User.getForgotPasswordToken(email("success"));
+
+			expect(data.email).to.equal(email("success"));
+			expect(data.username).to.equal(username);
+			expect(data.token).to.not.be.undefined;
+
+			token = data.token;
+		});
+
+		it("reset with short password using token should fail", async function() {
+			const {body} = await request(server)
+				.put(`/${username}/password`)
+				.send({token, newPassword: "Sh0rt!"})
+				.expect(400);
+
+			expect(body.value).to.equal(responseCodes.PASSWORD_TOO_SHORT.value);
+		});
+
+		it("reset with weak password using token should fail", async function() {
+			const {body} = await request(server)
+				.put(`/${username}/password`)
+				.send({token, newPassword: "password"})
+				.expect(400);
+
+			expect(body.value).to.equal(responseCodes.PASSWORD_TOO_WEAK.value);
+		});
+
+		it("reset password with token should succeed", async function() {
+			await request(server)
+				.put(`/${username}/password`)
+				.send({token, newPassword})
+				.expect(200);
+		});
+
+		it("login with new password should succeed", async function() {
+			const {body} = await request(server)
+				.post("/login")
+				.send({ username, password: newPassword})
+				.expect(200);
+
+			expect(body.username).to.equal(username);
+		});
+
+		it("reset password with expired token should fail", async function() {
+			const {body} = await request(server)
+				.put(`/${username}/password`)
+				.send({token, newPassword: "anotherPassword98"})
+				.expect(400);
+
+			expect(body.value).to.equal(responseCodes.TOKEN_INVALID.value);
+		});
+	});
+
+	describe("Lockout password ", function() {
+		it("few incorrect login attempts should not lock account", async function() {
+			const attempts = 3;
+
+			for (let i = 0; i < attempts; i++) {
+				await request(server)
+					.post("/login")
+					.send({ username, password: "wrongPassword" })
+					.expect(400);
+			}
+
+			const {body} = await request(server)
+				.post("/login")
+				.send({ username, password: newPassword })
+				.expect(200);
+		});
+
+		it("remaining attempts warning should warn user of imminent account locking", async function() {
+			const attempts = 8;
+
+			for (let i = 0; i < attempts; i++) {
+				const remaining = 9 - i;
+				const {body} = await request(server)
+					.post("/login")
+					.send({ username, password: "wrongPassword" })
+					.expect(400);
+
+				expect(body.value).to.equal(responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value);
+
+				if (remaining <= 5) {
+					expect(body.message).to.equal("Incorrect username or password (Remaining attempts: " + remaining + ")");
+				}
+			}
+
+			const {body} = await request(server)
+				.post("/login")
+				.send({ username, password: newPassword })
+				.expect(200);
+		});
+
+		it("too many bad login attempts should lock account", async function() {
+			const attempts = 10;
+
+			for (let i = 0; i < attempts; i++) {
+				await request(server)
+					.post("/login")
+					.send({ username, password: "wrongPassword" })
+					.expect(400);
+			}
+
+			const {body} = await request(server)
+				.post("/login")
+				.send({ username, password: newPassword })
+				.expect(400);
+
+			expect(body.value).to.equal(responseCodes.TOO_MANY_LOGIN_ATTEMPTS.value);
+		});
+
+		it("correct credentials for expired lockout should succeed", async function() {
+			await request(server)
+				.post("/login")
+				.send({ username: "login_lockout_expired_user", password })
+				.expect(200);
+		});
+	});
 });

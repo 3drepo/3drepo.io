@@ -23,44 +23,46 @@ import FocusIcon from '@material-ui/icons/CenterFocusStrong';
 import ClipIcon from '@material-ui/icons/Crop';
 import HomeIcon from '@material-ui/icons/Home';
 import MetadataIcon from '@material-ui/icons/Info';
+import InvertColorsOffIcon from '@material-ui/icons/InvertColorsOff';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
 import TurntableIcon from '@material-ui/icons/Redo';
 import ShowAllIcon from '@material-ui/icons/Visibility';
 import HideIcon from '@material-ui/icons/VisibilityOff';
 import IsolateIcon from '@material-ui/icons/VisibilityOutlined';
-
 import IncreaseIcon from '@material-ui/icons/Add';
 import DecreaseIcon from '@material-ui/icons/Remove';
 import ResetIcon from '@material-ui/icons/Replay';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { Helicopter } from '../../../components/fontAwesomeIcon';
-
-import {
-	ButtonWrapper,
-	ClipIconWrapper,
-	ClipNumber,
-	Container,
-	Submenu,
-	SubmenuDot,
-	ToolbarButton
-} from './toolbar.styles';
-
 import {
 	INITIAL_HELICOPTER_SPEED,
 	MAX_HELICOPTER_SPEED,
 	MIN_HELICOPTER_SPEED,
 	VIEWER_CLIP_MODES,
 	VIEWER_NAV_MODES,
+	VIEWER_PROJECTION_MODES,
 	VIEWER_TOOLBAR_ITEMS
 } from '../../../../constants/viewer';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
+import {
+	ButtonWrapper,
+	ClipIconWrapper,
+	ClipNumber,
+	Container,
+	OrthogonalIcon,
+	PerspectiveIcon,
+	Submenu,
+	SubmenuDot,
+	ToolbarButton
+} from './toolbar.styles';
 
-const HelicopterIcon = () => <Helicopter IconProps={{ className: 'fontSizeSmall' }} />;
+const HelicopterIcon = () => <Helicopter className="fontSizeSmall" />;
 
 interface IProps {
 	teamspace: string;
 	model: string;
+	projectionMode: string;
 	navigationMode: string;
 	helicopterSpeed: number;
 	isFocusMode: boolean;
@@ -72,6 +74,7 @@ interface IProps {
 	metaKeysExist: boolean;
 	isMetadataVisible: boolean;
 	goToExtent: () => void;
+	setProjectionMode: (mode) => void;
 	setNavigationMode: (navigationMode) => void;
 	initialiseToolbar: () => void;
 	increaseHelicopterSpeed: (teamspace, modelId) => void;
@@ -84,10 +87,11 @@ interface IProps {
 	setClippingMode: (clippingMode) => void;
 	setClipEdit: (isClipEdit) => void;
 	setMetadataActive: (isActive) => void;
-	setMeasureVisibility: (visible) => void;
+	setMeasureMode: (mode) => void;
 	setCoordView: (visible) => void;
 	stopListenOnNumClip: () => void;
 	setPanelVisibility: (panelName, visibility) => void;
+	clearColorOverrides: () => void;
 }
 
 interface IState {
@@ -114,6 +118,32 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				label: VIEWER_TOOLBAR_ITEMS.EXTENT,
 				Icon: HomeIcon,
 				action: this.props.goToExtent
+			},
+			{
+				label: VIEWER_TOOLBAR_ITEMS.PERSPECTIVE_VIEW,
+				Icon: PerspectiveIcon,
+				action: () => this.handleShowSubmenu(VIEWER_TOOLBAR_ITEMS.PERSPECTIVE_VIEW),
+				show: this.props.projectionMode !== VIEWER_PROJECTION_MODES.ORTHOGRAPHIC,
+				subMenu: [
+					{
+						label: VIEWER_TOOLBAR_ITEMS.ORTHOGRAPHIC_VIEW,
+						Icon: OrthogonalIcon,
+						action: () => this.handleProjectionModeClick(VIEWER_PROJECTION_MODES.ORTHOGRAPHIC)
+					}
+				]
+			},
+			{
+				label: VIEWER_TOOLBAR_ITEMS.ORTHOGRAPHIC_VIEW,
+				Icon: OrthogonalIcon,
+				action: () => this.handleShowSubmenu(VIEWER_TOOLBAR_ITEMS.ORTHOGRAPHIC_VIEW),
+				show: this.props.projectionMode === VIEWER_PROJECTION_MODES.ORTHOGRAPHIC,
+				subMenu: [
+					{
+						label: VIEWER_TOOLBAR_ITEMS.PERSPECTIVE_VIEW,
+						Icon: PerspectiveIcon,
+						action: () => this.handleProjectionModeClick(VIEWER_PROJECTION_MODES.PERSPECTIVE)
+					}
+				]
 			},
 			{
 				label: VIEWER_TOOLBAR_ITEMS.TURNTABLE,
@@ -177,6 +207,12 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 				action: () => this.props.isolateSelectedNodes(undefined)
 			},
 			{
+				label: VIEWER_TOOLBAR_ITEMS.CLEAR_OVERRIDE,
+				Icon: InvertColorsOffIcon,
+				action: () => this.props.clearColorOverrides()
+			},
+
+			{
 				label: VIEWER_TOOLBAR_ITEMS.FOCUS,
 				Icon: FocusIcon,
 				action: () => this.props.setIsFocusMode(true)
@@ -237,16 +273,20 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 	}
 
 	public componentWillUnmount() {
-		this.props.setMeasureVisibility(false);
 		if (this.props.isMetadataActive) {
 			this.toggleMetadataPanel();
 		}
+
 		this.props.stopListenOnNumClip();
 	}
 
 	public handleNavigationModeClick = (mode) => {
 		this.props.setNavigationMode(mode);
 		this.setState({ activeSubMenu: '' });
+	}
+
+	public handleProjectionModeClick = (mode) => {
+		this.props.setProjectionMode(mode);
 	}
 
 	public handleClickAway = () => {
@@ -281,26 +321,29 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 		const condition = this.state.activeSubMenu === label;
 		return (
 			<Fade in={condition}>
-				<ClickAwayListener onClickAway={this.handleClickAway}>
-					<Submenu>{subMenu.map((subButton, subKey) => (
-						<ToolbarButton
-							key={subKey}
-							variant="secondary"
-							coloured={subButton.specificOption ? 1 : 0}
-							label={subButton.label}
-							Icon={subButton.Icon}
-							action={subButton.action}
-							disabled={subButton.disabled} />)
+				<div>
+					<ClickAwayListener onClickAway={this.handleClickAway}>
+						<Submenu>{subMenu.map((subButton, subKey) => (
+							<ToolbarButton
+								key={subKey}
+								variant="secondary"
+								coloured={subButton.specificOption ? 1 : 0}
+								label={subButton.label}
+								Icon={subButton.Icon}
+								action={subButton.action}
+								disabled={subButton.disabled}
+							/>)
 						)}
-					</Submenu>
-				</ClickAwayListener>
+						</Submenu>
+					</ClickAwayListener>
+				</div>
 			</Fade>
 		);
 	})(subMenu.length && this.state.activeSubMenu === label)
 
 	public render() {
 		return (
-			<Container visible={!this.props.isFocusMode}>
+			<Container visible={!this.props.isFocusMode} id="bottom-toolbar">
 				{this.renderButtons()}
 			</Container>
 		);
@@ -314,14 +357,15 @@ export class Toolbar extends React.PureComponent<IProps, IState> {
 		const {
 			isMetadataActive,
 			setMetadataActive,
-			setMeasureVisibility,
 			setPanelVisibility,
+			setMeasureMode,
 		} = this.props;
 		setMetadataActive(!isMetadataActive);
 		setPanelVisibility(VIEWER_PANELS.BIM, !isMetadataActive);
+		setPanelVisibility(VIEWER_PANELS.ACTIVITIES, false);
 
 		if (!isMetadataActive) {
-			setMeasureVisibility(false);
+			setMeasureMode('');
 		}
 	}
 

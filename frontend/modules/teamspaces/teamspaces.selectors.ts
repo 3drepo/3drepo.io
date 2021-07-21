@@ -33,6 +33,15 @@ export const selectTeamspaces = createSelector(
 	selectTeamspacesDomain, (state) => state.teamspaces
 );
 
+export const selectTeamspaceDetails = (teamspace) => createSelector(
+		selectTeamspaces, (teamspaces) => {
+			if (teamspaces && teamspaces[teamspace]) {
+				return teamspaces[teamspace];
+			}
+			return {};
+		}
+);
+
 export const selectTeamspacesList = createSelector(
 	selectTeamspaces, (teamspaces) => values(teamspaces)
 );

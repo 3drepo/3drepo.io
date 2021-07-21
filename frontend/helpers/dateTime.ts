@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+export const MILLI_PER_HOUR = 1000 * 60 * 60;
 export const MILLI_PER_DAY = 1000 * 60 * 60 * 24;
 
 export const getDays = (min, max) => {
@@ -27,3 +28,5 @@ export const getDate = (base, days) => {
 	const baseDate = new Date(base).setHours(0, 0, 0, 0);
 	return new Date(baseDate.valueOf() + days * MILLI_PER_DAY);
 };
+
+export const isDateOutsideRange = (min, max, date) =>  max < date || min > date;

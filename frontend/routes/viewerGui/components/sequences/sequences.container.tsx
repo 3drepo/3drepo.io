@@ -19,35 +19,49 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { selectCurrentActivities, selectIsLoadingFrame, selectMaxDate, selectMinDate,
-	selectSelectedDate, selectSelectedFrameColors, selectSelectedMinDate,
-	selectSelectedSequence, selectSequences, selectStepInterval, selectStepScale,
-	SequencesActions } from '../../../../modules/sequences';
 
+import { ActivitiesActions } from '../../../../modules/activities';
+import { LegendActions } from '../../../../modules/legend';
+import {
+	selectActivitiesPending, selectCurrentActivities, selectEndDate, selectFrames, selectIsLoadingFrameState,
+	selectSelectedEndingDate, selectSelectedFrameColors, selectSelectedSequence, selectSelectedStartingDate,
+	selectSequences, selectStartDate, selectStepInterval, selectStepScale, SequencesActions,
+} from '../../../../modules/sequences';
+import { selectDraggablePanels, selectRightPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
+import { selectIsLoadingSequenceViewpoint, ViewpointsActions } from '../../../../modules/viewpoints';
 import { Sequences } from './sequences.component';
 
 const mapStateToProps = createStructuredSelector({
 	sequences: selectSequences,
-	minDate: selectMinDate,
-	maxDate: selectMaxDate,
-	selectedDate: selectSelectedDate,
-	selectedMinDate: selectSelectedMinDate,
+	startDate: selectStartDate,
+	endDate: selectEndDate,
+	frames: selectFrames,
+	selectedDate: selectSelectedStartingDate,
+	selectedEndingDate: selectSelectedEndingDate,
 	colorOverrides: selectSelectedFrameColors,
 	stepInterval: selectStepInterval,
 	stepScale: selectStepScale,
 	currentTasks: selectCurrentActivities,
-	loadingFrame: selectIsLoadingFrame,
-	selectedSequence: selectSelectedSequence
+	loadingFrameState: selectIsLoadingFrameState,
+	loadingViewpoint: selectIsLoadingSequenceViewpoint,
+	selectedSequence: selectSelectedSequence,
+	rightPanels: selectRightPanels,
+	draggablePanels: selectDraggablePanels,
+	isActivitiesPending: selectActivitiesPending,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	initializeSequences: SequencesActions.initializeSequences,
-	setSelectedFrame: SequencesActions.setSelectedFrame,
+	setSelectedDate: SequencesActions.setSelectedDate,
 	setStepInterval: SequencesActions.setStepInterval,
 	setStepScale: SequencesActions.setStepScale,
-	fetchFrame: SequencesActions.fetchFrame,
 	setSelectedSequence: SequencesActions.setSelectedSequence,
-	restoreIfcSpacesHidden: SequencesActions.restoreIfcSpacesHidden
+	toggleActivitiesPanel: ActivitiesActions.toggleActivitiesPanel,
+	toggleLegend: LegendActions.togglePanel,
+	resetLegendPanel: LegendActions.resetPanel,
+	fetchActivityDetails: ActivitiesActions.fetchDetails,
+	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
+	deselectViewsAndLeaveClipping: ViewpointsActions.deselectViewsAndLeaveClipping,
+	setActiveViewpoint: ViewpointsActions.setActiveViewpoint,
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Sequences));

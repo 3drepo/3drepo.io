@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -18,132 +18,386 @@
 "use strict";
 (() => {
 
-	const mongoose = require("mongoose");
 	const C = require("../constants");
+	const db = require("../handler/db");
 	const responseCodes = require("../response_codes.js");
-	const ModelFactory = require("./factory/modelFactory");
 	const utils = require("../utils");
 	const _ = require("lodash");
-	const nodeuuid = require("uuid/v1");
-	const ModelSetting = require("./modelSetting");
-	const schema = mongoose.Schema({
-		_id: {
-			type: Object,
-			get: v => {
-				if(v.id) {
-					return v;
-				}
+	const { changePermissions, prepareDefaultView, findModelSettings, findPermissionByUser } = require("./modelSetting");
+	const PermissionTemplates = require("./permissionTemplates");
 
-				return utils.uuidToString(v);
-			},
-			set: utils.stringToUUID
-		},
-		name: { type: String, unique: true},
-		models: [String],
-		permissions: [{
-			_id: false,
-			user: { type: String, required: true },
-			permissions: [String]
-		}]
-	});
+	const PROJECTS_COLLECTION_NAME = "projects";
 
-	function checkProjectNameValid (project) {
-		const regex = "^[^/?=#+]{0,119}[^/?=#+ ]{1}$";
-		return project && project.match(regex);
+	async function checkDupName(teamspace, project) {
+		const coll = await db.getCollection(teamspace, PROJECTS_COLLECTION_NAME);
+		const count = await coll.find({_id: {$ne: project._id}, name: project.name}).count();
+
+		if (count > 0) {
+			throw responseCodes.PROJECT_EXIST;
+		}
 	}
 
-	schema.set("toObject", { getters: true });
-
-	schema.pre("save", function checkInvalidName(next) {
-
-		if(C.PROJECT_DEFAULT_ID === this.name) {
-			return next(utils.makeError(responseCodes.INVALID_PROJECT_NAME));
-		}
-
-		return next();
-	});
-
-	schema.pre("save", function checkDupName(next) {
-
-		Project.findOne(this._dbcolOptions, {name: this.name}).then(project => {
-			if(project && project.id !== this.id) {
-				return next(utils.makeError(responseCodes.PROJECT_EXIST));
-			} else {
-				return next();
-			}
-		});
-	});
-
-	schema.pre("save", function checkPermissionName(next) {
-
-		for (let i = 0; i < this.permissions.length; i++) {
-			const permission = this.permissions[i];
+	function checkPermissionName(permissions) {
+		for (let i = 0; i < permissions.length; i++) {
+			const permission = permissions[i];
 
 			if (_.intersection(C.PROJECT_PERM_LIST, permission.permissions).length < permission.permissions.length) {
-				return next(utils.makeError(responseCodes.INVALID_PERM));
+				throw responseCodes.INVALID_PERM;
 			}
 		}
+	}
 
-		return next();
-	});
+	function checkProjectNameValid(projectName) {
+		const regex = "^[^/?=#+]{0,119}[^/?=#+ ]{1}$";
+		if (!projectName || !projectName.match(regex) || C.PROJECT_DEFAULT_ID === projectName) {
+			throw responseCodes.INVALID_PROJECT_NAME;
+		}
+	}
 
-	schema.statics.createProject = function(account, name, username, userPermissions) {
-		if(checkProjectNameValid(name)) {
-			const project = Project.createInstance({account});
-			project.name = name;
-			project._id = nodeuuid();
-
-			if(userPermissions.indexOf(C.PERM_TEAMSPACE_ADMIN) === -1) {
-				project.permissions = [{
-					user: username,
-					permissions: [C.PERM_PROJECT_ADMIN]
-				}];
-			}
-
-			return project.save().then(() => {
-				const proj = project.toObject();
-				proj.permissions = C.IMPLIED_PERM[C.PERM_PROJECT_ADMIN].project;
-				return proj;
-			});
-		} else {
-			return Promise.reject(responseCodes.INVALID_PROJECT_NAME);
+	function clean(projectToClean) {
+		if (projectToClean) {
+			projectToClean._id = utils.uuidToString(projectToClean._id);
 		}
 
+		return projectToClean;
+	}
+
+	function populateUsers(userList, project) {
+		project._id = utils.uuidToString(project._id);
+
+		userList.forEach(user => {
+			let userFound;
+
+			if (project.permissions && Array.isArray(project.permissions)) {
+				userFound = project.permissions.find(perm => perm.user === user);
+			} else {
+				project.permissions = [];
+			}
+
+			if (!userFound) {
+				project.permissions.push({
+					permissions: [],
+					user
+				});
+			}
+		});
+
+		return project;
+	}
+
+	function prepareProject(project) {
+		if (project) {
+			project = { models: [], permissions: [], ...project };
+		}
+
+		return project;
+	}
+
+	async function setUserAsProjectAdminByQuery(teamspace, user, query) {
+		const foundProject = await Project.findOneProject(teamspace, query);
+		const projectPermission = { user, permissions: ["admin_project"]};
+
+		return await Project.updateAttrs(teamspace, foundProject.name, { permissions: foundProject.permissions.concat(projectPermission) });
+	}
+
+	const Project = {};
+
+	Project.addModelToProject = async function(teamspace, projectName, modelId) {
+		return db.update(teamspace, PROJECTS_COLLECTION_NAME, { name: projectName }, { "$push" : { "models": modelId } });
 	};
 
-	schema.statics.delete = function(account, name) {
+	Project.createProject = async function(teamspace, name, username, userPermissions) {
+		checkProjectNameValid(name);
+
+		const project = {
+			_id: utils.generateUUID(),
+			name,
+			models: [],
+			permissions: []
+		};
+
+		if (!userPermissions.includes(C.PERM_TEAMSPACE_ADMIN)) {
+			project.permissions = [{
+				user: username,
+				permissions: [C.PERM_PROJECT_ADMIN]
+			}];
+		}
+
+		await checkDupName(teamspace, project);
+
+		await db.insert(teamspace, PROJECTS_COLLECTION_NAME, project);
+
+		project._id = utils.uuidToString(project._id);
+		project.permissions = C.IMPLIED_PERM[C.PERM_PROJECT_ADMIN].project;
+
+		return project;
+	};
+
+	Project.delete = async function(teamspace, name) {
+		const ModelHelper = require("./helper/model");
+		const project = await db.findOneAndDelete(teamspace, PROJECTS_COLLECTION_NAME, {name}, {models: 1});
+
+		if (!project) {
+			throw responseCodes.PROJECT_NOT_FOUND;
+		}
+
+		// remove all models as well
+		if (project.models) {
+			await Promise.all(project.models.map(m => ModelHelper.removeModel(teamspace, m, true)));
+		}
+
+		return project;
+	};
+
+	Project.listProjects = async function(teamspace, query = {}, projection) {
+		const User = require("./user");
+		const userList = await User.getAllUsersInTeamspace(teamspace);
+		let projects = await db.find(teamspace, PROJECTS_COLLECTION_NAME, query, projection);
+
+		if (projects) {
+			projects = projects.map(p => populateUsers(userList, prepareProject(p)));
+		}
+
+		return projects;
+	};
+
+	Project.findProjectsById = async function(teamspace, ids) {
+		const foundProjects = await Project.listProjects(teamspace, { _id: { $in: ids.map(utils.stringToUUID) } });
+
+		foundProjects.forEach(clean);
+
+		return foundProjects;
+	};
+
+	Project.findOneProject = async function(teamspace, query, projection) {
+		const foundProject = await db.findOne(teamspace, PROJECTS_COLLECTION_NAME, query, projection);
+
+		return prepareProject(foundProject);
+	};
+
+	Project.findProjectPermsByUser = async function(teamspace, model, username) {
+		const project = await Project.findOneProject(teamspace, {name: model}, {permissions: 1});
+
+		if (!project) {
+			return [];
+		} else {
+			return project.permissions.find(perm => perm.user === username);
+		}
+	};
+
+	Project.getProjectUserPermissions = async function(teamspace, projectName) {
+		const User = require("./user");
+		const [userList, project] = await Promise.all([
+			User.getAllUsersInTeamspace(teamspace),
+			Project.findOneProject(teamspace, {name: projectName})
+		]);
+
+		if (!project) {
+			throw responseCodes.PROJECT_NOT_FOUND;
+		}
+
+		return populateUsers(userList, project);
+	};
+
+	Project.getProjectsAndModelsForUser = async function(teamspace, teamspacePermissions, teamspaceModels, teamspaceFeds, username) {
+		const projects = await Project.listProjects(teamspace, {});
+
+		projects.forEach((project, i) => {
+			project._id = utils.uuidToString(project._id);
+
+			let permissions = project.permissions.find(p => p.user === username);
+			permissions = _.get(permissions, "permissions") || [];
+			// show inherited and implied permissions
+			permissions = permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || p);
+			permissions = permissions.concat(teamspacePermissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || null));
+
+			project.permissions = _.uniq(_.compact(_.flatten(permissions)));
+
+			projects[i] = project;
+
+			const findModel = model => (m, index, modelList) => {
+				if (m.model === model) {
+					modelList.splice(index, 1);
+					return true;
+				}
+			};
+
+			project.models.forEach((model, j) => {
+				const fullModel = teamspaceModels.find(findModel(model)) || teamspaceFeds.find(findModel(model));
+				project.models[j] = fullModel;
+			});
+
+			project.models = _.compact(project.models);
+		});
+
+		return projects;
+	};
+
+	Project.getProjectsForAccountsList = async function(teamspace, accounts, username, hasAvatar) {
+		const projPromises = [];
+		const query = { "permissions": { "$elemMatch": { user: username } } };
+		const projection = { "permissions": { "$elemMatch": { user: username } }, "models": 1, "name": 1 };
+		const projects = await Project.listProjects(teamspace, query, projection);
+		let account = null;
+
+		projects.forEach(_proj => {
+			projPromises.push(new Promise(function (resolve) {
+				let myProj;
+				if (!_proj || _proj.permissions.length === 0) {
+					resolve();
+					return;
+				}
+
+				if (!account) {
+					account = accounts.find(_account => _account.account === teamspace);
+
+					if (!account) {
+						const {_makeAccountObject} = require("./helper/model");
+						account = _makeAccountObject(teamspace);
+						account.hasAvatar = hasAvatar;
+						accounts.push(account);
+					}
+				}
+
+				myProj = account.projects.find(p => p.name === _proj.name);
+
+				if (!myProj) {
+					myProj = _proj;
+					account.projects.push(myProj);
+					myProj.permissions = myProj.permissions[0].permissions;
+				} else {
+					myProj.permissions = _.uniq(myProj.permissions.concat(_proj.permissions[0].permissions));
+				}
+
+				// show implied and inherited permissions
+				myProj.permissions = myProj.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].project || p);
+				myProj.permissions = _.uniq(_.flatten(myProj.permissions));
+
+				let inheritedModelPerms = myProj.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || null);
+				inheritedModelPerms = _.uniq(_.flatten(inheritedModelPerms));
+
+				const newModelIds = _.difference(_proj.models, myProj.models.map(m => m.model));
+				if (newModelIds.length) {
+					const {_getModels} = require("./helper/model");
+					_getModels(account.account, newModelIds, inheritedModelPerms).then(models => {
+						myProj.models = models.models.concat(models.fedModels);
+						resolve();
+					});
+				} else {
+					resolve();
+				}
+			}));
+		});
+
+		await Promise.all(projPromises);
+
+		return account;
+	};
+
+	Project.getProjectNamesAccessibleToUser = async function(teamspace, username) {
+		const projects = await Project.listProjects(teamspace, { "permissions.user": username }, {name: 1});
+		return projects.map(p => p.name);
+	};
+
+	Project.listModels = async function(account, project, username, filters) {
+		const AccountPermissions = require("./accountPermissions");
+		const User = require("./user");
 		const ModelHelper = require("./helper/model");
 
-		let project;
+		const [dbUser, projectObj] = await Promise.all([
+			await User.findByUserName(account),
+			Project.findOneProject(account, {name: project})
+		]);
 
-		return Project.findOneAndRemove({account}, {name}).then(_project => {
+		if (!projectObj) {
+			throw responseCodes.PROJECT_NOT_FOUND;
+		}
 
-			project = _project;
+		if (filters && filters.name) {
+			filters.name = new RegExp(".*" + filters.name + ".*", "i");
+		}
 
-			// remove all models as well
+		let modelsSettings =  await findModelSettings(account, { _id: { $in : projectObj.models }, ...filters});
+		let permissions = [];
 
-			if(!project) {
-				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
-			} else {
-				return Promise.resolve();
+		const accountPerm = AccountPermissions.findByUser(dbUser, username);
+		const projectPerm = projectObj.permissions.find(p=> p.user === username);
+
+		if (accountPerm && accountPerm.permissions) {
+			permissions = permissions.concat(ModelHelper.flattenPermissions(accountPerm.permissions));
+		}
+
+		if (projectPerm && projectPerm.permissions) {
+			permissions  = permissions.concat(ModelHelper.flattenPermissions(projectPerm.permissions));
+		}
+
+		modelsSettings = await Promise.all(modelsSettings.map(async setting => {
+			const template = await findPermissionByUser(account, setting._id, username);
+
+			let settingsPermissions = [];
+			if(template) {
+				const permissionTemplate = PermissionTemplates.findById(dbUser, template.permission);
+				if (permissionTemplate && permissionTemplate.permissions) {
+					settingsPermissions = settingsPermissions.concat(ModelHelper.flattenPermissions(permissionTemplate.permissions, true));
+				}
 			}
-		}).then(() => {
-			return Promise.all(project.models.map(m => ModelHelper.removeModel(account, m, true)));
-		}).then(() => project);
+
+			setting = await prepareDefaultView(account, setting._id, setting);
+			setting.permissions = _.uniq(permissions.concat(settingsPermissions));
+			setting.model = setting._id;
+			setting.account = account;
+			setting.subModels = await ModelHelper.listSubModels(account, setting._id, C.MASTER_BRANCH_NAME);
+			setting.headRevisions = {};
+
+			return setting;
+		}));
+
+		return modelsSettings;
 	};
 
-	schema.statics.removeModel = function(account, model) {
-		return Project.update({account}, { models: model }, { "$pull" : { "models": model}}, {"multi": true});
+	Project.isProjectAdmin = async function(teamspace, model, user) {
+		const projection = { "permissions": { "$elemMatch": { user: user } }};
+		const project = await Project.findOneProject(teamspace, {models: model}, projection);
+		const hasProjectPermissions = project && project.permissions.length > 0;
+
+		return hasProjectPermissions && project.permissions[0].permissions.includes(C.PERM_PROJECT_ADMIN);
 	};
 
-	schema.methods.updateAttrs = function(data) {
-		const whitelist = ["name", "permissions"];
+	Project.removeProjectModel = async function(teamspace, model) {
+		return db.update(teamspace, PROJECTS_COLLECTION_NAME, { models: model }, { "$pull" : { "models": model}}, {"multi": true});
+	};
+
+	Project.removeUserFromProjects = async function(teamspace, userToRemove) {
+		const projects = await Project.listProjects(teamspace, { "permissions.user": userToRemove});
+		await Promise.all(
+			projects.map(proj => Project.updateAttrs(teamspace, proj.name, {
+				permissions: proj.permissions.filter(perm => perm.user !== userToRemove)
+			}))
+		);
+	};
+
+	Project.setUserAsProjectAdmin = async function(teamspace, projectName, user) {
+		return setUserAsProjectAdminByQuery(teamspace, user, {name: projectName});
+	};
+
+	Project.setUserAsProjectAdminById = async function(teamspace, projectId, user) {
+		return setUserAsProjectAdminByQuery(teamspace, user, {_id: utils.stringToUUID(projectId)});
+	};
+
+	Project.updateAttrs = async function(account, projectName, data) {
+		const project = await Project.findOneProject(account, {name: projectName});
+
+		if (!project) {
+			throw responseCodes.PROJECT_NOT_FOUND;
+		}
+
+		const whitelist = ["name", "permissions", "models"];
 		const User = require("./user");
 
 		let usersToRemove = [];
-
 		let check = Promise.resolve();
-		if(data.permissions) {
+
+		if (data.permissions) {
 			// user to delete
 			for(let i = data.permissions.length - 1; i >= 0; i--) {
 				if(!Array.isArray(data.permissions[i].permissions) || data.permissions[i].permissions.length === 0) {
@@ -151,155 +405,88 @@
 				}
 			}
 
-			usersToRemove = _.difference(this.permissions.map(p => p.user), data.permissions.map(p => p.user));
+			usersToRemove = _.difference(project.permissions.map(p => p.user), data.permissions.map(p => p.user));
 
-			check = User.findByUserName(this._dbcolOptions.account).then(teamspace => {
-
+			check = User.findByUserName(account).then(teamspace => {
 				return User.getAllUsersInTeamspace(teamspace.user).then(members => {
 					const someUserNotAssignedWithLicence = data.permissions.some(
 						perm => {
 							return !members.includes(perm.user);
 						}
 					);
-					if(someUserNotAssignedWithLicence) {
+
+					if (someUserNotAssignedWithLicence) {
 						return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 					}
 				});
-
 			});
 		}
 
-		if(data["name"] && !checkProjectNameValid(data["name"])) {
-			return Promise.reject(responseCodes.INVALID_PROJECT_NAME);
+		if (data["name"]) {
+			checkProjectNameValid(data["name"]);
 		}
 
-		return check.then(() => {
+		await check;
 
-			Object.keys(data).forEach(key => {
-				if(whitelist.indexOf(key) !== -1) {
-					this[key] = data[key];
-				}
-			});
+		Object.keys(data).forEach(key => {
+			if(whitelist.indexOf(key) !== -1) {
+				project[key] = data[key];
+			}
+		});
 
-			const userPromises = [];
+		const userPromises = [];
 
-			usersToRemove.forEach(user => {
-				// remove all model permissions in this project as well, if any
-				userPromises.push(
-					ModelSetting.find(this._dbcolOptions, { "permissions.user": user}).then(settings =>
-						Promise.all(
-							settings.map(s => s.changePermissions(s.permissions.filter(perm => perm.user !== user)))
-						)
+		usersToRemove.forEach(user => {
+			// remove all model permissions in this project as well, if any
+			userPromises.push(
+				findModelSettings(account, { "permissions.user": user}).then(settings =>
+					Promise.all(
+						settings.map(s => changePermissions(account, s._id, s.permissions.filter(perm => perm.user !== user)))
 					)
-				);
-			});
-
-			return Promise.all(userPromises);
-
-		}).then(() => {
-			return this.save();
+				)
+			);
 		});
 
-	};
+		await Promise.all(userPromises);
 
-	schema.statics.findAndPopulateUsers = function(account, query) {
+		checkProjectNameValid(projectName);
+		await checkDupName(account, project);
+		checkPermissionName(project.permissions);
 
-		const User = require("./user");
-
-		let userList;
-		return User.getAllUsersInTeamspace(account.account).then(users => {
-			userList = users;
-			return Project.find(account, query);
-
-		}).then(projects => {
-
-			if(projects) {
-				projects.forEach(p => Project.populateUsers(userList, p));
-			}
-
-			return projects;
-
-		});
-	};
-
-	schema.statics.findOneAndPopulateUsers = function(account, query) {
-
-		const User = require("./user");
-
-		let userList;
-
-		return User.getAllUsersInTeamspace(account.account).then(users => {
-
-			userList = users;
-			return Project.findOne(account, query);
-
-		}).then(project => {
-
-			if(project) {
-				return Project.populateUsers(userList, project);
-			} else {
-				return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
-			}
-
-		});
-	};
-
-	schema.statics.findByNames = function(account, projectNames) {
-		return Project.find({account}, { name: { $in:projectNames } });
-	};
-
-	schema.statics.findByIds = function(account, _ids) {
-		return Project.find({account}, { _id: { $in: _ids.map(utils.stringToUUID) } });
-	};
-
-	schema.statics.populateUsers = function(userList, project) {
-
-		userList.forEach(user => {
-
-			const userFound = project.permissions.find(perm => perm.user === user);
-
-			if(!userFound) {
-				project.permissions.push({
-					user
-				});
-			}
-		});
+		await db.update(account, PROJECTS_COLLECTION_NAME, {name: projectName}, project);
 
 		return project;
 	};
 
-	schema.methods.findPermsByUser = function(username) {
-		return this.permissions.find(perm => perm.user === username);
-	};
+	Project.updateProject = async function(account, projectName, data) {
+		const project = await Project.findOneProject(account, { name: projectName });
 
-	schema.statics.isProjectAdmin = async function(account, model, user) {
-		const projection = { "permissions": { "$elemMatch": { user: user } }};
-		const project = await Project.findOne({account}, {models: model}, projection);
-		const hasProjectPermissions = project && project.permissions.length > 0;
-
-		return hasProjectPermissions && project.permissions[0].permissions.includes(C.PERM_PROJECT_ADMIN);
-	};
-
-	schema.statics.setUserAsProjectAdmin = async function(teamspace, project, user) {
-		const projectObj = await Project.findOne({ account: teamspace }, {name: project});
-		const projectPermission = { user, permissions: ["admin_project"]};
-		return await projectObj.updateAttrs({ permissions: projectObj.permissions.concat(projectPermission) });
-	};
-
-	schema.statics.setUserAsProjectAdminById = async function(teamspace, project, user) {
-		const projectObj = await Project.findOne({ account: teamspace }, {_id: utils.stringToUUID(project)});
-		const projectPermission = { user, permissions: ["admin_project"]};
-		return await projectObj.updateAttrs({ permissions: projectObj.permissions.concat(projectPermission) });
-	};
-
-	const Project = ModelFactory.createClass(
-		"Project",
-		schema,
-		() => {
-			return "projects";
+		if (!project) {
+			throw responseCodes.PROJECT_NOT_FOUND;
 		}
-	);
+
+		if (data.name) {
+			project.name = data.name;
+		}
+
+		if (data.permissions) {
+			data.permissions.forEach((permissionUpdate) => {
+				const userIndex = project.permissions.findIndex(x => x.user === permissionUpdate.user);
+
+				if (-1 !== userIndex) {
+					if (permissionUpdate.permissions && permissionUpdate.permissions.length) {
+						project.permissions[userIndex].permissions = permissionUpdate.permissions;
+					} else {
+						project.permissions.splice(userIndex, 1);
+					}
+				} else if (permissionUpdate.permissions && permissionUpdate.permissions.length) {
+					project.permissions.push(permissionUpdate);
+				}
+			});
+		}
+
+		return Project.updateAttrs(account, projectName, project);
+	};
 
 	module.exports = Project;
-
 })();

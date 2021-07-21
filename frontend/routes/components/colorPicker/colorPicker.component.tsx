@@ -22,7 +22,7 @@ import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import { identity, memoize } from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 
-import { componentToHex, rgbaToHex } from '../../../helpers/colors';
+import { componentToHex, hexToGLColor, rgbaToHex, GLToHexColor } from '../../../helpers/colors';
 import {
 	Canvas,
 	CanvasContainer,
@@ -88,13 +88,15 @@ const getCanvasColor = (event, canvasCtx) => {
 };
 
 interface IProps {
-	value?: string;
+	value?: string | number[];
 	predefinedColors?: string[];
 	onChange?: (color) => void;
 	disabled?: boolean;
 	disableUnderline?: boolean;
 	disableButtons?: boolean;
 	opacityEnabled?: boolean;
+	onOpen?: () => void;
+	onClose?: () => void;
 }
 
 interface IState {
@@ -182,7 +184,9 @@ const ColorSquareSelector = ({value, onChange}) => {
 	}, [value]);
 
 	const setColor = ({nativeEvent}) => {
-		if (!dragging)  { return; }
+		if (!dragging)  {
+ 			return;
+		}
 		const blockCanvas = canvasRef.current as HTMLCanvasElement;
 		const ctx = blockCanvas.getContext('2d');
 		onChange(getCanvasColor(nativeEvent, ctx));
@@ -375,20 +379,25 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 	}
 
 	public handleClose = () => {
+		if (this.props.onClose) {
+			this.props.onClose();
+		}
+
 		this.setState({
 			open: false,
 		});
 	}
 
 	public handleSave = () => {
-		this.props.onChange(this.state.selectedColor);
+		const value = Array.isArray(this.props.value) ?  hexToGLColor(this.state.selectedColor) : this.state.selectedColor;
+		this.props.onChange(value);
 		this.handleClose();
 	}
 
 	public renderFooter = () => (
 		<Footer>
 			<StyledButton
-				variant="raised"
+				variant="contained"
 				color="secondary"
 				onClick={this.handleSave}
 			>
@@ -412,8 +421,16 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	get hexValue() {
+		return (Array.isArray(this.props.value) ? GLToHexColor(this.props.value) : this.props.value) || '';
+	}
+
 	public onPanelOpen = () => {
-		const value = this.props.value || '';
+		const value = this.hexValue;
+
+		if (this.props.onOpen) {
+			this.props.onOpen();
+		}
 
 		this.setState({
 			baseColor: stripAlpha(value),
@@ -446,7 +463,9 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 	}
 
 	public withOpacity = ({selectedColor, opacitySliderVisibility, opacity}) => {
-		if (!this.props.opacityEnabled) { return selectedColor; }
+		if (!this.props.opacityEnabled) {
+ 			return selectedColor;
+		}
 		return stripAlpha(selectedColor) + (opacitySliderVisibility ? alphaToHex(opacity) : '');
 	}
 
@@ -467,13 +486,13 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const {value, predefinedColors, disabled, disableButtons, opacityEnabled} = this.props;
+		const {predefinedColors, disabled, disableButtons, opacityEnabled} = this.props;
 		const {open, hashInput, selectedColor, baseColor, opacity, opacitySliderVisibility} = this.state;
 
 		return (
 			<>
 				<RootRef rootRef={this.colorSelectRef}>
-					<OpenPanelButton onClick={this.openPanel} disabled={disabled} color={value} />
+					<OpenPanelButton onClick={this.openPanel} disabled={disabled} color={this.hexValue} />
 				</RootRef>
 
 				<Panel

@@ -15,17 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 "use strict";
-const mongoose = require("mongoose");
-const ModelFactory = require("./factory/modelFactory");
 const DB = require("../handler/db");
 
-const schema = mongoose.Schema({
-	type: String,
-	count: Number
-});
-
 // inc counter and return the number atomically
-schema.statics.findAndIncInvoiceNumber = function() {
+const findAndIncInvoiceNumber = function() {
 	// mongoose findOneAndUpdate hanged for no reason, fallback to mongo native api
 
 	return DB.getDB("admin")
@@ -43,7 +36,7 @@ schema.statics.findAndIncInvoiceNumber = function() {
 };
 
 // inc counter and return the number atomically
-schema.statics.findAndIncRefundNumber = function() {
+const findAndIncRefundNumber = function() {
 
 	// mongoose findOneAndUpdate hanged for no reason, fallback to mongo native api
 
@@ -61,12 +54,7 @@ schema.statics.findAndIncRefundNumber = function() {
 
 };
 
-const Counter = ModelFactory.createClass(
-	"Counter",
-	schema,
-	() => {
-		return "counters";
-	}
-);
-
-module.exports = Counter;
+module.exports = {
+	findAndIncInvoiceNumber,
+	findAndIncRefundNumber
+};

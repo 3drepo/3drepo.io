@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { splitValuesIfNecessary } from '../../helpers/requests';
 import api from './';
 
 /**
@@ -26,10 +27,11 @@ import api from './';
  */
 
 export const getGroups = (teamspace, modelId, revision?) => {
+	const query = 'noIssues=true&noRisks=true&noViews=true&noSequences=true';
 	if (revision) {
-		return api.get(`${teamspace}/${modelId}/revision/${revision}/groups/?noIssues=true&noRisks=true`);
+		return api.get(`${teamspace}/${modelId}/revision/${revision}/groups/?${query}`);
 	}
-	return api.get(`${teamspace}/${modelId}/revision/master/head/groups/?noIssues=true&noRisks=true`);
+	return api.get(`${teamspace}/${modelId}/revision/master/head/groups/?${query}`);
 };
 
 /**
@@ -80,5 +82,9 @@ export const updateGroup = (teamspace, modelId, revision, groupId, group) => {
  * @param groups
  */
 export const deleteGroups = (teamspace, modelId, groups) => {
-	return api.delete(`${teamspace}/${modelId}/groups/?ids=${groups}`);
+	const GROUPS_IDS_ARGUMENT_INDICATION = '?ids=';
+	const apiPath = `${teamspace}/${modelId}/groups/${GROUPS_IDS_ARGUMENT_INDICATION}`;
+	const groupsChunks = splitValuesIfNecessary(`${apiPath}${groups}`, GROUPS_IDS_ARGUMENT_INDICATION);
+
+	return Promise.all(groupsChunks.map((ids) => api.delete(`${apiPath}${ids}`)));
 };

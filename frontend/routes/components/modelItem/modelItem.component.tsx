@@ -17,6 +17,8 @@
 
 import React from 'react';
 
+import { Tooltip } from '@material-ui/core';
+
 import { Highlight } from '../highlight/highlight.component';
 import { Container, Detail, Name } from './modelItem.styles';
 
@@ -27,18 +29,16 @@ interface IProps {
 }
 
 export const ModelItem = ({name, isFederation, searchText = ''}: IProps) => {
-	const highlightProps = {
-		search: searchText || ''
-	};
-
 	return (
 		<Container>
-			<Name>
-				<Highlight
-					search={searchText}
-					text={name}
-				/>
-			</Name>
+			<Tooltip title={name}>
+				<Name>
+					<Highlight
+						search={searchText}
+						text={name}
+					/>
+				</Name>
+			</Tooltip>
 			<Detail>
 				<Highlight
 					search={searchText}

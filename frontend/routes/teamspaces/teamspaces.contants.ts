@@ -16,6 +16,7 @@
  */
 
 import AddCircle from '@material-ui/icons/AddCircle';
+import LoadModel from '@material-ui/icons/CameraEnhance';
 import CloudDownload from '@material-ui/icons/CloudDownload';
 import CloudUpload from '@material-ui/icons/CloudUpload';
 import Delete from '@material-ui/icons/Delete';
@@ -26,8 +27,8 @@ import Settings from '@material-ui/icons/Settings';
 import SettingsBackupRestore from '@material-ui/icons/SettingsBackupRestore';
 import Share from '@material-ui/icons/Share';
 import Board from '@material-ui/icons/TableChart';
-import { SortAmountDown, SortAmountUp } from '../../routes/components/fontAwesomeIcon';
 import { DATA_TYPES, FILTER_TYPES } from '../components/filterPanel/filterPanel.component';
+import { SortAmountDown, SortAmountUp } from '../components/fontAwesomeIcon';
 
 export const ROW_ACTIONS = {
 	UPLOAD_FILE: {
@@ -61,7 +62,6 @@ export const ROW_ACTIONS = {
 	DELETE: {
 		label: 'Delete',
 		Icon: Delete,
-		color: 'error',
 		requiredPermissions: 'delete_model'
 	},
 	ADD_NEW: {
@@ -80,6 +80,10 @@ export const ROW_ACTIONS = {
 	BOARD: {
 		label: 'Issues & Risks',
 		Icon: Board
+	},
+	LOAD_MODEL: {
+		label: 'Load model with',
+		Icon: LoadModel
 	}
 };
 

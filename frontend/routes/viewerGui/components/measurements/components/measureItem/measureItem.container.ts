@@ -19,14 +19,12 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { selectMeasurementsColors } from '../../../../../../modules/measurements';
 import { selectUnit } from '../../../../../../modules/model';
 
 import { MeasureItem } from './measureItem.component';
 
 const mapStateToProps = createStructuredSelector({
 	modelUnit: selectUnit,
-	colors: selectMeasurementsColors,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

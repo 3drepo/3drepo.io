@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,20 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { keyBy, omit } from 'lodash';
+import { keyBy } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	fetchGroups: ['teamspace', 'modelId', 'revision'],
 	fetchGroupsSuccess: ['groups'],
 	togglePendingState: ['isPending'],
+	toggleDetailsPendingState: ['isPending'],
 	setComponentState: ['componentState'],
 	setActiveGroup: ['group', 'revision'],
 	resetActiveGroup: ['group'],
 	showDetails: ['group', 'revision'],
 	closeDetails: [],
 	setNewGroup: [],
-	updateNewGroup: ['newGroup'],
 	selectGroup: ['group'],
 	addToHighlighted: ['groupId'],
 	removeFromHighlighted: ['groupId'],
@@ -37,9 +37,12 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	clearSelectionHighlights: ['shouldClearTree'],
 	addColorOverride: ['groupId'],
 	removeColorOverride: ['groupId'],
+	clearColorOverrides: [],
+	clearColorOverridesSuccess: [],
 	setColorOverrides: ['groupIds'],
 	toggleColorOverride: ['groupId'],
 	setOverrideAll: ['overrideAll'],
+	setOverrideAllSuccess: [],
 	deleteGroups: ['teamspace', 'modelId', 'groups'],
 	showDeleteInfo: ['groupIds'],
 	deleteGroupsSuccess: ['groupIds'],
@@ -53,7 +56,8 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	unsubscribeFromChanges: ['teamspace', 'modelId'],
 	setCriteriaFieldState: ['criteriaFieldState'],
 	resetToSavedSelection: ['groupId'],
-	resetComponentState: []
+	resetComponentState: [],
+	updateEditingGroup: ['properties']
 }, { prefix: 'GROUPS/' });
 
 export interface ICriteriaFieldState {
@@ -71,7 +75,7 @@ export interface IGroupComponentState {
 	activeGroup: any;
 	showDetails: boolean;
 	expandDetails: boolean;
-	newGroup: any;
+	editingGroup: any;
 	updatedGroup: any;
 	selectedFilters: any[];
 	highlightedGroups: any;
@@ -79,6 +83,7 @@ export interface IGroupComponentState {
 	criteriaFieldState: ICriteriaFieldState;
 	allOverridden: boolean;
 	searchEnabled: boolean;
+	fetchingDetailsIsPending: boolean;
 }
 
 export interface IGroupState {
@@ -108,19 +113,24 @@ export const INITIAL_STATE: IGroupState = {
 		highlightedGroups: {},
 		showDetails: false,
 		expandDetails: true,
-		newGroup: {},
+		editingGroup: {},
 		updatedGroup: {},
 		selectedFilters: [],
 		totalMeshes: 0,
 		criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE,
 		allOverridden: false,
-		searchEnabled: false
+		searchEnabled: false,
+		fetchingDetailsIsPending: false,
 	},
 	colorOverrides: [],
 	fieldNames: []
 };
 
 export const togglePendingState = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
+
+export const toggleDetailsPendingState = (state = INITIAL_STATE, { isPending }) => {
+	return setComponentState(state, { componentState: { fetchingDetailsIsPending: isPending } });
+};
 
 export const fetchGroupsSuccess = (state = INITIAL_STATE, { groups = [] }) => {
 	const groupsMap = keyBy(groups, '_id');
@@ -174,41 +184,31 @@ export const setColorOverrides = (state = INITIAL_STATE, { groupIds }) => {
 	return {...state, colorOverrides: newOverrides.concat(overridesLeft)};
 };
 
-export const setOverrideAll = (state = INITIAL_STATE, { overrideAll }) => {
-	let groupIds = [];
-	if (overrideAll) {
-		groupIds = Object.keys(state.groupsMap);
-	}
-
-	const componentState = { ...state.componentState, allOverridden: overrideAll };
-	return setColorOverrides({...state, componentState}, { groupIds });
-};
-
 export const updateGroupSuccess = (state = INITIAL_STATE, { group }) => {
 	const groupsMap = { ...state.groupsMap };
-	const newGroup = { ...state.componentState.newGroup };
+	const editingGroup = { ...state.componentState.editingGroup };
 
 	groupsMap[group._id] = group;
 
-	if (newGroup) {
-		newGroup.willBeUpdated = false;
-		newGroup.objects = group.objects;
-		newGroup.totalSavedMeshes = group.totalSavedMeshes;
+	if (editingGroup) {
+		editingGroup.willBeUpdated = false;
+		editingGroup.objects = group.objects;
+		editingGroup.totalSavedMeshes = group.totalSavedMeshes;
 	}
 
 	if (state.componentState.allOverridden) {
 		state = addColorOverride(state, { groupId: group._id});
 	}
 
-	return { ...state, groupsMap, componentState: { ...state.componentState, newGroup } };
+	return { ...state, groupsMap, componentState: { ...state.componentState, editingGroup } };
 };
 
 export const deleteGroupsSuccess = (state = INITIAL_STATE, { groupIds }) => {
 	const groupsMap = { ...state.groupsMap };
-	const newGroup = { ...state.componentState.newGroup };
+	const editingGroup = { ...state.componentState.editingGroup };
 
-	if (newGroup) {
-		newGroup.willBeRemoved = false;
+	if (editingGroup) {
+		editingGroup.willBeRemoved = false;
 	}
 
 	groupIds.forEach((groupId) => {
@@ -216,39 +216,60 @@ export const deleteGroupsSuccess = (state = INITIAL_STATE, { groupIds }) => {
 		delete groupsMap[groupId];
 	});
 
-	return { ...state, groupsMap, componentState: { ...state.componentState, newGroup } };
+	return { ...state, groupsMap, componentState: { ...state.componentState, editingGroup } };
 };
 
 export const showUpdateInfo = (state = INITIAL_STATE, {}) => {
-	const newGroup = { ...state.componentState.newGroup };
+	const editingGroup = { ...state.componentState.editingGroup };
 
-	if (newGroup) {
-		newGroup.willBeUpdated = true;
+	if (editingGroup) {
+		editingGroup.willBeUpdated = true;
 	}
-	return { ...state, componentState: { ...state.componentState, newGroup } };
+	return { ...state, componentState: { ...state.componentState, editingGroup } };
 };
 
 export const showDeleteInfo = (state = INITIAL_STATE, { groupIds }) => {
 	const groupsMap = { ...state.groupsMap };
-	const newGroup = { ...state.componentState.newGroup };
-	if (newGroup) {
-		newGroup.willBeRemoved = true;
+	const editingGroup = { ...state.componentState.editingGroup };
+	if (editingGroup) {
+		editingGroup.willBeRemoved = true;
 	}
 
 	groupIds.forEach((groupId) => {
 		groupsMap[groupId].willBeRemoved = true;
 	});
 
-	return { ...state, groupsMap, componentState: { ...state.componentState, newGroup } };
+	return { ...state, groupsMap, componentState: { ...state.componentState, editingGroup } };
 };
 
 const resetComponentState = (state = INITIAL_STATE) => {
 	return { ...state, componentState: INITIAL_STATE.componentState };
 };
 
+export const setOverrideAllSuccess = (state = INITIAL_STATE) => {
+	let groupIds = [];
+	groupIds = Object.keys(state.groupsMap);
+
+	const componentState = { ...state.componentState, allOverridden: true };
+	return setColorOverrides({...state, componentState}, { groupIds });
+};
+
+const clearColorOverridesSuccess = (state = INITIAL_STATE) => {
+	const componentState = { ...state.componentState, allOverridden: false };
+	return { ...state, colorOverrides: [], componentState};
+};
+
+const updateEditingGroup = (state = INITIAL_STATE, {properties}) => {
+	let { editingGroup } = state.componentState;
+	editingGroup = {...editingGroup, ...properties};
+	const componentState = { ...state.componentState, editingGroup };
+
+	return { ...state, componentState};
+};
 export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.FETCH_GROUPS_SUCCESS]: fetchGroupsSuccess,
 	[GroupsTypes.TOGGLE_PENDING_STATE]: togglePendingState,
+	[GroupsTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState,
 	[GroupsTypes.SET_COMPONENT_STATE]: setComponentState,
 	[GroupsTypes.ADD_TO_HIGHLIGHTED]: addToHighlighted,
 	[GroupsTypes.REMOVE_FROM_HIGHLIGHTED]: removeFromHighlighted,
@@ -260,5 +281,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.SET_CRITERIA_FIELD_STATE]: setCriteriaFieldState,
 	[GroupsTypes.SHOW_UPDATE_INFO]: showUpdateInfo,
 	[GroupsTypes.RESET_COMPONENT_STATE]: resetComponentState,
-	[GroupsTypes.SET_OVERRIDE_ALL]: setOverrideAll
+	[GroupsTypes.CLEAR_COLOR_OVERRIDES_SUCCESS]: clearColorOverridesSuccess,
+	[GroupsTypes.SET_OVERRIDE_ALL_SUCCESS]: setOverrideAllSuccess,
+	[GroupsTypes.UPDATE_EDITING_GROUP]: updateEditingGroup,
 });

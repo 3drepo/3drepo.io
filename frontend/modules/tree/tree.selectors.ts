@@ -19,10 +19,10 @@ import { flatten, pick, uniq, values } from 'lodash';
 import { createSelector } from 'reselect';
 
 import { NODE_TYPES, VISIBILITY_STATES } from '../../constants/tree';
+import { mergeArrays } from '../../helpers/arrays';
 import { searchByFilters } from '../../helpers/searching';
 import { calculateTotalMeshes } from '../../helpers/tree';
-import { selectOverrides, selectTransparencies } from '../groups';
-import { selectSelectedFrameColors, selectSelectedFrameTransparencies } from '../sequences';
+
 import TreeProcessing from './treeProcessing/treeProcessing';
 import { ITreeProcessingData } from './treeProcessing/treeProcessing.constants';
 
@@ -52,7 +52,7 @@ export const selectActiveNode = createSelector(
 	selectTreeDomain, (state) => state.activeNode
 );
 
-const selectTreeProccessing = () => TreeProcessing.data as ITreeProcessingData;
+const selectTreeProccessing = () => TreeProcessing.data ;
 
 export const selectTreeNodesList = createSelector(
 	selectTreeProccessing, selectDataRevision,
@@ -131,8 +131,8 @@ export const selectSearchEnabled = createSelector(
 	selectComponentState, (state) => state.searchEnabled
 );
 
-export const selectIfcSpacesHidden = createSelector(
-	selectComponentState, (state) => state.ifcSpacesHidden
+export const selectHiddenGeometryVisible = createSelector(
+	selectComponentState, (state) => state.hiddenGeometryVisible
 );
 
 export const selectDefaultHiddenNodesIds = createSelector(
@@ -248,7 +248,7 @@ export const selectGetMeshesByIds = (nodesIds = []) => createSelector(
 				}
 
 				if (meshes) {
-					meshesByNodes[node.namespacedId].meshes = meshesByNodes[node.namespacedId].meshes.concat(meshes);
+					mergeArrays(meshesByNodes[node.namespacedId].meshes, meshes);
 				} else if (!childrenMap[node._id] && node.hasChildren) {
 					// This should only happen in federations.
 					// Traverse down the tree to find submodel nodes
@@ -272,10 +272,17 @@ export const selectGetNodesIdsFromSharedIds = (objects = []) => createSelector(
 		if (!objects.length) {
 			return [];
 		}
-		const objectsSharedIds = objects.map(({ shared_ids }) => shared_ids);
-		const sharedIds = flatten(objectsSharedIds) as string[];
-		const nodesIdsBySharedIds = values(pick(nodesBySharedIds, sharedIds));
-		return uniq(nodesIdsBySharedIds);
+
+		const ids = new Set();
+		objects.forEach((obj) => {
+			obj.shared_ids.forEach((sharedId) => {
+				const id = nodesBySharedIds[sharedId];
+				if (id) {
+					ids.add(id);
+				}
+			});
+		});
+		return Array.from(ids);
 	}
 );
 
@@ -286,14 +293,4 @@ export const selectVisibleTreeNodesIds = createSelector(
 
 export const selectIsTreeProcessed = createSelector(
 	selectTreeDomain, (state) => state.isTreeProcessed
-);
-
-export const selectColorOverrides = createSelector(
-	selectOverrides, selectSelectedFrameColors,
-		(groupsOverrides, sequenceFrameOverrides ) => ({...groupsOverrides, ...sequenceFrameOverrides})
-);
-
-export const selectAllTransparencyOverrides = createSelector(
-	selectTransparencies, selectSelectedFrameTransparencies,
-		(groupsTransparencies, sequenceTransparencies) => ({...groupsTransparencies, ...sequenceTransparencies})
 );

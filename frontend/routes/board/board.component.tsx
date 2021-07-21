@@ -37,34 +37,27 @@ import {
 	ISSUE_FILTER_PROPS, ISSUE_FILTER_VALUES, RISK_FILTER_PROPS, RISK_FILTER_VALUES
 } from '../../modules/board/board.constants';
 import { ButtonMenu } from '../components/buttonMenu/buttonMenu.component';
-import {
-	IconWrapper, MenuList, StyledItemText, StyledListItem
-} from '../components/filterPanel/components/filtersMenu/filtersMenu.styles';
+
 import { Loader } from '../components/loader/loader.component';
 import { MenuButton } from '../components/menuButton/menuButton.component';
 import { Panel } from '../components/panel/panel.component';
 
 import { isViewer } from '../../helpers/permissions';
+import { renderActionsMenu } from '../../helpers/reportedItems';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 import { FilterPanel } from '../components/filterPanel/filterPanel.component';
-import IssueDetails from '../viewerGui/components/issues/components/issueDetails/issueDetails.container';
-import { ListNavigation } from '../viewerGui/components/listNavigation/listNavigation.component';
-import RiskDetails from '../viewerGui/components/risks/components/riskDetails/riskDetails.container';
 import { getProjectModels, getTeamspaceProjects } from './board.helpers';
 import {
 	AddButton,
 	BoardContainer,
-	BoardDialogTitle,
 	BoardItem,
 	Config,
 	Container,
 	DataConfig,
 	FormControl,
-	FormWrapper,
 	LoaderContainer,
 	NoDataMessage,
 	SelectContainer,
-	Title,
 	ViewConfig
 } from './board.styles';
 import { BoardTitleComponent } from './components/boardTitleComponent.component';
@@ -102,8 +95,7 @@ interface IProps {
 	topicTypes: any[];
 	selectedIssueFilters: any[];
 	selectedRiskFilters: any[];
-	issuesSortOrder: string;
-	risksSortOrder: string;
+	sortOrder: string;
 	cards: ICard[];
 	projectsMap: any;
 	modelsMap: any;
@@ -123,8 +115,7 @@ interface IProps {
 	exportBCF: (eamspace, modelId) => void;
 	printItems: (teamspace, model) => void;
 	downloadItems: (teamspace, model) => void;
-	toggleIssuesSortOrder: () => void;
-	toggleRisksSortOrder: () => void;
+	toggleSortOrder: () => void;
 	toggleClosedIssues: () => void;
 	showSnackbar: (text) => void;
 	subscribeOnIssueChanges: (teamspace, modelId) => void;
@@ -134,7 +125,9 @@ interface IProps {
 	resetModel: () => void;
 	resetIssues: () => void;
 	resetRisks: () => void;
-	teamspaceSettings: any;
+	openCardDialog: (cardId: string, onChange: (index: number) => void) => void;
+	setSortBy: (field) => void;
+	criteria: any;
 }
 
 const PANEL_PROPS = {
@@ -143,13 +136,23 @@ const PANEL_PROPS = {
 	}
 };
 
-const BoardCard = memo(({ metadata, onClick }: any) => (
+const RiskBoardCard = ({ metadata, onClick }: any) => (
 	<BoardItem
 		key={metadata.id}
 		{...metadata}
 		onItemClick={onClick}
+		panelName="risk "
 	/>
-));
+);
+
+const IssueBoardCard = ({ metadata, onClick }: any) => (
+	<BoardItem
+		key={metadata.id}
+		{...metadata}
+		panelName="issue "
+		onItemClick={onClick}
+	/>
+);
 
 export function Board(props: IProps) {
 	const boardRef = useRef(null);
@@ -159,15 +162,8 @@ export function Board(props: IProps) {
 	const isIssuesBoard = type === 'issues';
 	const boardData = { lanes: props.lanes };
 	const selectedFilters = isIssuesBoard ? props.selectedIssueFilters : props.selectedRiskFilters;
+
 	const {
-		printItems,
-		downloadItems,
-		importBCF,
-		exportBCF,
-		toggleIssuesSortOrder,
-		toggleRisksSortOrder,
-		toggleClosedIssues,
-		showClosedIssues,
 		resetModel,
 		resetIssues,
 		resetRisks,
@@ -246,7 +242,17 @@ export function Board(props: IProps) {
 	};
 
 	const handleModelChange = (e) => {
-		const url = `${ROUTES.BOARD_MAIN}/${type}/${teamspace}/${project}/${e.target.value}`;
+		const newModelId = e.target.value;
+		const url = `${ROUTES.BOARD_MAIN}/${type}/${teamspace}/${project}/${newModelId}`;
+
+		if (!isIssuesBoard) {
+			props.unsubscribeOnRiskChanges(teamspace, modelId);
+			props.subscribeOnRiskChanges(teamspace, newModelId);
+		} else {
+			props.unsubscribeOnIssueChanges(teamspace, modelId);
+			props.subscribeOnIssueChanges(teamspace, newModelId);
+		}
+
 		props.history.push(url);
 	};
 
@@ -262,57 +268,24 @@ export function Board(props: IProps) {
 		props.fetchCardData(type, teamspace, modelId, newCardId);
 	};
 
-	const handleOpenDialog = useCallback((cardId?, metadata?, laneId?) => {
-		if (cardId) {
-			props.fetchCardData(type, teamspace, modelId, cardId);
-		}
-
-		const TemplateComponent = isIssuesBoard ? IssueDetails : RiskDetails;
-		const dataType = isIssuesBoard ? 'issue' : 'risk';
-		const size = cardId ? 'lg' : 'sm';
-		const titlePrefix = cardId ? 'Edit' : 'Add new';
-		const initialIndex = props.cards.findIndex((card) => card.id === cardId);
-
-		if (!cardId) {
-			props.resetCardData();
-		}
-
-		const Form = (formProps: any) => (
-			<FormWrapper size={size}>
-				<TemplateComponent {...formProps} disableViewer />
-			</FormWrapper>
-		);
-
-		const DialogTitle = cardId ? (
-			<BoardDialogTitle>
-				<Title>{titlePrefix} {dataType}</Title>
-				<ListNavigation
-					initialIndex={initialIndex}
-					lastIndex={props.cards.length - 1}
-					onChange={handleNavigationChange}
-				/>
-			</BoardDialogTitle>
-		) : `${titlePrefix} ${dataType}`;
-
-		const config = {
-			title: DialogTitle,
-			template: Form,
-			data: {
-				teamspace,
-				model: modelId,
-				disableViewer: true,
-				horizontal: true,
-			},
-			DialogProps: {
-				maxWidth: size
-			}
-		};
-
-		props.showDialog(config);
-	}, [type, props.fetchCardData, project, teamspace, modelId, props.cards]);
+	const handleOpenDialog = useCallback((cardId?) => {
+		props.openCardDialog(cardId, handleNavigationChange);
+	}, [teamspace, modelId, props.cards]);
 
 	const handleAddNewCard = () => {
 		handleOpenDialog();
+	};
+
+	const getUpdatedProps = ({ filterProp, toLaneId }) => {
+		if (filterProp === ISSUE_FILTER_PROPS.assigned_roles.value) {
+			return [toLaneId];
+		}
+
+		if (filterProp === RISK_FILTER_PROPS.mitigation_status.value && filterProp === toLaneId ) {
+			return '';
+		}
+
+		return toLaneId;
 	};
 
 	const handleCardMove = (fromLaneId, toLaneId, cardId) => {
@@ -321,7 +294,7 @@ export function Board(props: IProps) {
 		}
 
 		const updatedProps = {
-			[props.filterProp]: props.filterProp === ISSUE_FILTER_PROPS.assigned_roles.value ? [toLaneId] : toLaneId
+			[props.filterProp]: getUpdatedProps({ filterProp: props.filterProp, toLaneId })
 		};
 
 		if (isIssuesBoard) {
@@ -396,7 +369,6 @@ export function Board(props: IProps) {
 
 	const renderAddButton = () => (
 		<AddButton
-			variant="fab"
 			color="secondary"
 			aria-label="Add new card"
 			aria-haspopup="true"
@@ -445,7 +417,7 @@ export function Board(props: IProps) {
 	};
 
 	const components = {
-		Card: BoardCard
+		Card:  isIssuesBoard ? IssueBoardCard : RiskBoardCard
 	};
 
 	const renderBoard = renderWhenTrue(() => (
@@ -501,12 +473,14 @@ export function Board(props: IProps) {
 	const filterItems = () => {
 		const filterValuesMap = isIssuesBoard
 				? issuesFilters(props.jobs, props.topicTypes)
-				: risksFilters(props.jobs, props.teamspaceSettings);
+				: risksFilters(props.jobs, props.criteria);
 
-		return FILTER_ITEMS.map((issueFilter) => {
+		const generatedFilters = FILTER_ITEMS.map((issueFilter) => {
 			issueFilter.values = filterValuesMap[issueFilter.relatedField];
 			return issueFilter;
 		});
+
+		return generatedFilters.filter((filter) => filter.values.length);
 	};
 
 	const getSearchButton = () => {
@@ -516,57 +490,13 @@ export function Board(props: IProps) {
 		return <IconButton disabled={!project || !modelId} onClick={props.toggleSearchEnabled}><SearchIcon /></IconButton>;
 	};
 
-	const headerMenu = isIssuesBoard ?
-		getIssueMenuItems(
-			teamspace,
-			modelId,
-			null,
-			printItems,
-			downloadItems,
-			importBCF,
-			exportBCF,
-			toggleIssuesSortOrder,
-			null, null,
-			toggleClosedIssues,
-			showClosedIssues
-		) :
-		getRisksMenuItems(
-			teamspace, modelId, printItems, downloadItems, toggleRisksSortOrder
-		);
-
-	const sortOrder = isIssuesBoard ? props.issuesSortOrder : props.risksSortOrder;
-
-	const renderSortIcon = (Icon) => {
-		if (sortOrder === 'asc') {
-			return <Icon.ASC IconProps={{ fontSize: 'small' }} />;
-		}
-		return <Icon.DESC IconProps={{ fontSize: 'small' }} />;
-	};
-
-	const renderCheckIcon = renderWhenTrue(() => <Check fontSize="small" />);
-
-	const renderActionsMenu = () => (
-		<MenuList>
-			{(headerMenu as any).map(({ label, Icon, onClick, isSorting }, index) => {
-				return (
-					<StyledListItem key={index} button onClick={onClick}>
-						<IconWrapper>
-							{isSorting ? renderSortIcon(Icon) : <Icon fontSize="small" />}
-						</IconWrapper>
-						<StyledItemText>
-							{label}
-							{renderCheckIcon(label === ISSUES_ACTIONS_MENU.SHOW_CLOSED_ISSUES.label && props.showClosedIssues)}
-						</StyledItemText>
-					</StyledListItem>
-				);
-			})}
-		</MenuList>
-	);
+	const menuProps = {...props, teamspace, model: modelId};
+	const headerMenu = isIssuesBoard ? getIssueMenuItems(menuProps) : getRisksMenuItems(menuProps);
 
 	const getMenuButton = () => (
 		<ButtonMenu
 			renderButton={MenuButton}
-			renderContent={renderActionsMenu}
+			renderContent={() => renderActionsMenu(headerMenu)}
 			PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
 			PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
 			ButtonProps={{ disabled: !project || !modelId }}

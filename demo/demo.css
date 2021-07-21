@@ -18,20 +18,21 @@ html, body, #viewer, #canvas, #unity {
   margin: 0;
   display: flex;
   position: absolute;
-  width: 400px;
+  width: 50%;
+  min-width: 600px;
   top: 5px;
 }
 #changeModel input, #changeModel button {
-  height: 7vh;
+  height: 24px;
   text-align: center;
   min-height: 20px;
   background: rgba(255, 255, 255, 0.803);
   border: none;
-  margin: 0;
+  margin: 4;
   border: solid 1px #d0d0d0;
 }
 #changeModel button  {
-    width: 30%;
+    width: 200px;
   cursor: pointer;
 }
 #changeModel input {

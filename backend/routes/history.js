@@ -1,25 +1,24 @@
 /**
- *	Copyright (C) 2016 3D Repo Ltd
+ *  Copyright (C) 2016 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.ap
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
 const express = require("express");
 const router = express.Router({mergeParams: true});
 const middlewares = require("../middlewares/middlewares");
-const C = require("../constants");
 
 const responseCodes = require("../response_codes.js");
 const History = require("../models/history");
@@ -99,22 +98,6 @@ router.get("/revisions.json", middlewares.hasReadAccessToModel, listRevisions);
 router.get("/revisions/:branch.json", middlewares.hasReadAccessToModel, listRevisionsByBranch);
 
 /**
- * @api {put} /:teamspace/:model/revisions/:id/tag Update revision tag
- * @apiName updateRevisionTag
- * @apiGroup History
- *
- * @apiDescription Update revision tag
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} id Unique Revision ID or tag
- * @apiParam {String} tag Tag to update
- *
- */
-
-router.put("/revisions/:id/tag", middlewares.hasReadAccessToModel, updateRevisionTag);
-
-/**
  * @api {patch} /:teamspace/:model/revisions/:id Update revision status
  * @apiName updateRevisionStatus
  * @apiGroup History
@@ -139,84 +122,39 @@ router.put("/revisions/:id/tag", middlewares.hasReadAccessToModel, updateRevisio
 router.patch("/revisions/:id", middlewares.hasReadAccessToModel, updateRevision);
 
 function listRevisions(req, res, next) {
-
 	const place = utils.APIInfo(req);
-	const account = req.params.account;
-	const model = req.params.model;
-	const branch = req.params.branch;
+	const {account, model, branch } = req.params;
 	const showVoid = req.query.showVoid !== undefined;
 
 	const projection = {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1, void: 1, rFile: 1};
 
-	History.listByBranch({account, model}, branch || null, projection, showVoid).then(histories => {
-
-		histories = History.clean(histories);
-
-		histories.forEach(function(history) {
-			history.branch = history.branch || branch || C.MASTER_BRANCH_NAME;
-			if(history.rFile && history.rFile.length > 0) {
-				const orgFileArr = history.rFile[0].split("_");
-				history.fileType = orgFileArr[orgFileArr.length - 1].toUpperCase();
-			}
-			delete history.rFile;
-		});
-
+	History.listByBranch(account, model, branch || null, projection, showVoid).then(histories => {
+		histories = History.clean(histories, branch);
 		responseCodes.respond(place, req, res, next, responseCodes.OK, histories);
-
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
 	});
 }
 
 function listRevisionsByBranch(req, res, next) {
-
 	const place = utils.APIInfo(req);
-	const account = req.params.account;
-	const model = req.params.model;
+	const {account, model, branch } = req.params;
 
-	History.listByBranch({account, model}, req.params.branch, {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1}).then(histories => {
-
-		histories = History.clean(histories);
-
-		histories.forEach(function(history) {
-			history.branch = history.branch || req.params.branch;
-		});
-
+	History.listByBranch(account, model, branch, {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1}).then(histories => {
+		histories = History.clean(histories, branch);
 		responseCodes.respond(place, req, res, next, responseCodes.OK, histories);
-
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
 	});
 }
 
 function updateRevision(req, res, next) {
-
 	const place = utils.APIInfo(req);
-	const account = req.params.account;
-	const model = req.params.model;
+	const {account, model, id} = req.params;
+	const voidValue = req.body.void;
 
-	History.updateRevision({account, model}, req.params.id, req.body).then(() => {
+	History.updateRevision(account, model, id, voidValue).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, {});
-	}).catch(err => {
-		responseCodes.respond(place, req, res, next, err, err);
-	});
-}
-
-function updateRevisionTag(req, res, next) {
-
-	const place = utils.APIInfo(req);
-	const account = req.params.account;
-	const model = req.params.model;
-
-	History.findByUID({account, model}, req.params.id, {_id : 1, tag: 1}).then(history => {
-		if (!history) {
-			return Promise.reject(responseCodes.MODEL_HISTORY_NOT_FOUND);
-		} else {
-			history.tag = req.body.tag;
-			return history.save();
-		}
-	}).then(history => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, history.clean());
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err, err);
 	});

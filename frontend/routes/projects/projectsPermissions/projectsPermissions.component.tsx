@@ -62,12 +62,14 @@ export class ProjectsPermissions extends React.PureComponent<IProps, IState> {
 					const updatedPermissions = permissions.find((userPermissions) => {
 						return userPermissions.user === currentPermissions.user;
 					});
-					const permissionsKey = updatedPermissions ? updatedPermissions.key : currentPermissions.key;
+					const permissionsKey = updatedPermissions && updatedPermissions.key;
 
-					updatedUserPermissions.push({
-						user: currentPermissions.user,
-						permissions: permissionsKey ? [permissionsKey] : []
-					});
+					if (updatedPermissions) {
+						updatedUserPermissions.push({
+							user: currentPermissions.user,
+							permissions: permissionsKey ? [permissionsKey] : []
+						});
+					}
 				}
 
 				return updatedUserPermissions;

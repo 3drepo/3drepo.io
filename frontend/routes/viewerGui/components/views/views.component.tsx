@@ -18,22 +18,28 @@
 import React from 'react';
 
 import AddIcon from '@material-ui/icons/Add';
-import CancelIcon from '@material-ui/icons/Cancel';
-import SearchIcon from '@material-ui/icons/Search';
 import { isEqual } from 'lodash';
 
+import { SORT_ORDER_TYPES } from '../../../../constants/sorting';
 import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
+import { VIEWS_ACTIONS_ITEMS, VIEWS_ACTIONS_MENU } from '../../../../constants/views';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { IViewpointsComponentState } from '../../../../modules/viewpoints/viewpoints.redux';
 import { Viewer } from '../../../../services/viewer/viewer';
+import { EmptyStateInfo } from '../../../components/components.styles';
+import {
+	IconWrapper,
+	MenuList, StyledItemText,
+	StyledListItem
+} from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
+import { SortAmountDown, SortAmountUp } from '../../../components/fontAwesomeIcon';
 import { PanelBarActions } from '../panelBarActions';
 import { ViewerPanelButton, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
 import { PresetViews } from './components/presetViews/presetViews.component';
 import { ViewItem } from './components/viewItem/viewItem.component';
 import {
 	Container,
-	EmptyStateInfo,
 	SearchField,
 	ViewerBottomActions,
 	ViewpointsList,
@@ -43,6 +49,7 @@ import {
 
 interface IProps {
 	isPending: boolean;
+	isAdmin: boolean;
 	viewpoints: any[];
 	newViewpoint: any;
 	activeViewpoint: any;
@@ -52,15 +59,24 @@ interface IProps {
 	isCommenter: boolean;
 	teamspace: string;
 	model: string;
+	modelSettings: any;
 	fetchViewpoints: (teamspace, modelId) => void;
 	createViewpoint: (teamspace, modelId, view) => void;
 	prepareNewViewpoint: (teamspace, modelId, viewName) => void;
 	updateViewpoint: (teamspace, modelId, viewId, newName) => void;
 	deleteViewpoint: (teamspace, modelId, viewId) => void;
 	showViewpoint: (teamspace, modelId, view) => void;
+	shareViewpointLink: (teamspace, modelId, viewId) => void;
+	setDefaultViewpoint: (teamspace, modelId, viewId) => void;
+	setActiveViewpoint: (teamspace, modelId, view) => void;
 	subscribeOnViewpointChanges: (teamspace, modelId) => void;
 	unsubscribeOnViewpointChanges: (teamspace, modelId) => void;
 	setState: (componentState: IViewpointsComponentState) => void;
+	fetchModelSettings: (teamspace: string, modelId: string) => void;
+	showPreset: (preset: string) => void;
+	id?: string;
+	sortOrder?: string;
+	toggleSortOrder: () => void;
 }
 
 export class Views extends React.PureComponent<IProps, any> {
@@ -72,6 +88,12 @@ export class Views extends React.PureComponent<IProps, any> {
 
 	get type() {
 		return VIEWER_PANELS.VIEWS;
+	}
+
+	get menuActionsMap() {
+		return {
+			[VIEWS_ACTIONS_ITEMS.SORT_BY]: this.props.toggleSortOrder,
+		};
 	}
 
 	public renderSearch = renderWhenTrue(() => (
@@ -114,6 +136,8 @@ export class Views extends React.PureComponent<IProps, any> {
 		const Viewpoints = filteredViewpoints.map((viewpoint) => {
 			const isActive = Boolean(activeViewpoint && activeViewpoint._id === viewpoint._id);
 			const viewpointData = isActive && editMode ? activeViewpoint : viewpoint;
+			const { defaultView } = this.props.modelSettings;
+			const isDefaultView = defaultView ? viewpoint._id === defaultView.id : false;
 			return (
 				<ViewItem
 					key={viewpoint._id}
@@ -125,10 +149,14 @@ export class Views extends React.PureComponent<IProps, any> {
 					onCancelEditMode={this.handleCancelEditMode}
 					onOpenEditMode={this.handleOpenEditMode}
 					onDelete={this.props.deleteViewpoint}
+					onShare={this.props.shareViewpointLink}
 					teamspace={teamspace}
 					modelId={model}
 					onSaveEdit={this.handleUpdate(viewpoint._id)}
 					onChangeName={this.handleActiveViewpointChange}
+					onSetDefault={this.props.setDefaultViewpoint}
+					isAdmin={this.props.isAdmin}
+					defaultView={isDefaultView}
 				/>
 			);
 		});
@@ -159,9 +187,14 @@ export class Views extends React.PureComponent<IProps, any> {
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
-		const { viewpoints, searchQuery, newViewpoint, activeViewpoint } = this.props;
+		const { viewpoints, searchQuery, newViewpoint, activeViewpoint, modelSettings, model } = this.props;
 		const viewpointsChanged = !isEqual(prevProps.viewpoints, viewpoints);
 		const searchQueryChanged = prevProps.searchQuery !== searchQuery;
+
+		if (modelSettings.model !== model) {
+			this.props.fetchModelSettings(this.props.teamspace, model);
+		}
+
 		if (searchQueryChanged || viewpointsChanged) {
 			this.setFilteredViewpoints(() => {
 				if (!searchQuery && activeViewpoint) {
@@ -190,7 +223,10 @@ export class Views extends React.PureComponent<IProps, any> {
 	}
 
 	public resetActiveView = () => {
-		this.props.setState({ activeViewpoint: null, editMode: false });
+		const { teamspace, model } = this.props;
+
+		this.props.setState({ editMode: false });
+		this.props.setActiveViewpoint(teamspace, model, null);
 	}
 
 	public handleActiveViewpointChange = (name) => {
@@ -204,7 +240,7 @@ export class Views extends React.PureComponent<IProps, any> {
 	public handleViewpointItemClick = (viewpoint) => () => {
 		if (!this.props.editMode) {
 			const { teamspace, model } = this.props;
-			this.props.showViewpoint(teamspace, model, viewpoint);
+			this.props.setActiveViewpoint(teamspace, model, viewpoint);
 		}
 	}
 
@@ -263,12 +299,10 @@ export class Views extends React.PureComponent<IProps, any> {
 	public getTitleIcon = () => <ViewsIcon />;
 
 	public renderFooterContent = () => (
-		<ViewerPanelFooter alignItems="center">
+		<ViewerPanelFooter container alignItems="center">
 			<ViewerBottomActions>
 				<PresetViews
-					teamspace={this.props.teamspace}
-					model={this.props.model}
-					showViewpoint={this.props.showViewpoint}
+					showPreset={this.props.showPreset}
 				/>
 			</ViewerBottomActions>
 			<ViewerPanelButton
@@ -277,16 +311,36 @@ export class Views extends React.PureComponent<IProps, any> {
 				disabled={!!this.props.newViewpoint || !this.props.isCommenter}
 				color="secondary"
 				variant="fab"
+				id={this.props.id + '-add-new-button'}
 			>
 				<AddIcon />
 			</ViewerPanelButton>
 		</ViewerPanelFooter>
 	)
 
+	public renderActionsMenu = () => (
+		<MenuList>
+			{VIEWS_ACTIONS_MENU.map(({ name, label, sortType }) => {
+				const isAscending = this.props.sortOrder === SORT_ORDER_TYPES.ASCENDING;
+				return (
+					<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
+						<IconWrapper>
+							{isAscending ? <SortAmountUp fontSize="small" /> : <SortAmountDown fontSize="small" />}
+						</IconWrapper>
+						<StyledItemText>
+							{label}
+						</StyledItemText>
+					</StyledListItem>
+				);
+			})}
+		</MenuList>
+	)
+
 	public renderActions = () => (
 		<PanelBarActions
 			type={this.type}
-			hideMenu
+			menuLabel="Show views menu"
+			menuActions={this.renderActionsMenu}
 			isSearchEnabled={this.props.searchEnabled}
 			onSearchOpen={this.handleOpenSearchMode}
 			onSearchClose={this.handleCloseSearchMode}
@@ -303,6 +357,7 @@ export class Views extends React.PureComponent<IProps, any> {
 				Icon={this.getTitleIcon()}
 				renderActions={this.renderActions}
 				pending={this.props.isPending}
+				id={this.props.id}
 			>
 				<Container ref={this.containerRef}>
 					{this.renderEmptyState(!hasViewpoints && !searchEnabled && !newViewpoint)}

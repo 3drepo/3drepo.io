@@ -21,6 +21,7 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import { getCriteriaLabel, getUpdatedCriteria, prepareCriterion } from '../../../helpers/criteria';
 import { renderWhenTrue } from '../../../helpers/rendering';
+import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import {
 	ButtonContainer,
 	Chip,
@@ -38,7 +39,6 @@ import {
 	StyledMoreIcon
 } from './criteriaField.styles';
 
-import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import { CriteriaPasteField } from './components/criteriaPasteField/criteriaPasteField.components';
 import { NewCriterionForm } from './newCriterionForm.component';
 
@@ -295,7 +295,7 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 		return (
 			<Container className={className}>
 				<FiltersContainer>
-					<InputLabel shrink>{label}</InputLabel>
+					<InputLabel>{label}</InputLabel>
 					<SelectedCriteria>
 						{this.renderPlaceholder(placeholder && !value.length && !isPasteEnabled)}
 						{this.renderCriteriaChips(!!value.length)}

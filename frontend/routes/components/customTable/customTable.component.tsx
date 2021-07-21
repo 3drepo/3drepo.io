@@ -25,8 +25,7 @@ import { sortByJob, sortByName } from '../../../helpers/sorting';
 import { Highlight } from '../highlight/highlight.component';
 import { JobItem } from '../jobItem/jobItem.component';
 import { TableHeading } from './components/tableHeading/tableHeading.component';
-
-import { Body, BodyWrapper, Cell, CheckboxCell, Container, Head, Row } from './customTable.styles';
+import { Body, BodyWrapper, Cell, CheckboxCell, Container, Head, HighlightWrapper, Row } from './customTable.styles';
 
 export const TableButton = ({Icon, onClick, disabled}) => {
 	return (
@@ -426,7 +425,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 					}
 					{
 						row.data.map((cellData, cellIndex) => {
-							const {CellProps = {}, CellComponent, type} = (cells[cellIndex] || {}) as any;
+							const {CellProps = {}, CellComponent, type} = (cells[cellIndex] || {});
 							const {root = {}, component = {}} = CellProps;
 
 							const cellRootProps = {
@@ -445,7 +444,11 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 									{
 										CellComponent ?
 											(<CellComponent {...cellComponentProps} />) :
-											(<Highlight text={cellComponentProps.value} search={cellComponentProps.searchText} />)
+											(<Tooltip title={cellComponentProps?.value || ''} placement="bottom">
+												<HighlightWrapper>
+													<Highlight text={cellComponentProps.value} search={cellComponentProps.searchText} />
+												</HighlightWrapper>
+											</Tooltip>)
 									}
 								</Cell>
 							);

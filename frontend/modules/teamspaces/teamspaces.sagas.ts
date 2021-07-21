@@ -18,11 +18,14 @@
 import { normalize } from 'normalizr';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
+import { CHAT_CHANNELS } from '../../constants/chat';
 import * as API from '../../services/api';
+import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 import { selectStarredModels, StarredActions } from '../starred';
+import { dispatch } from '../store';
 import { UserManagementActions } from '../userManagement';
 import { TeamspacesActions, TeamspacesTypes } from './teamspaces.redux';
 import { teamspacesSchema } from './teamspaces.schema';
@@ -35,15 +38,17 @@ export function* fetchTeamspaces({ username }) {
 		const normalizedData = normalize(teamspaces, [teamspacesSchema]);
 
 		yield put(TeamspacesActions.fetchTeamspacesSuccess(normalizedData.entities));
+		yield put(TeamspacesActions.subscribeOnChanges());
+
 	} catch (e) {
-		yield put(DialogActions.showEndpointErrorDialog('fetch', 'team spaces', e));
+		yield put(DialogActions.showEndpointErrorDialog('fetch', 'teamspaces', e));
 	}
 
 	yield put(TeamspacesActions.setPendingState(false));
 }
 
 export function* fetchTeamspacesIfNecessary({ username }) {
-	const teamspaces = yield select( selectTeamspacesList );
+	const teamspaces = yield select(selectTeamspacesList);
 	if (!teamspaces.length) {
 		yield put(TeamspacesActions.fetchTeamspaces(username));
 	}
@@ -187,10 +192,39 @@ export function* removeModel({ teamspace, modelData }) {
 	}
 }
 
+const onCreated = ({ account, settings, ...others }) => {
+	const createdModel = {
+		...settings,
+		...others,
+		account,
+	};
+	dispatch(TeamspacesActions.createModelSuccess(account, createdModel));
+};
+
+function* subscribeOnChanges() {
+	const teamspaces = yield select(selectTeamspacesList);
+	for (let i = 0; i < teamspaces.length; ++i) {
+		yield put(ChatActions.callChannelActions(CHAT_CHANNELS.TEAMSPACES, teamspaces[i].account, '', {
+			subscribeToModelCreated: onCreated,
+		}));
+	}
+}
+
+function* unsubscribeFromChanges() {
+	const teamspaces = yield select(selectTeamspacesList);
+	for (let i = 0; i < teamspaces.length; ++i) {
+		yield put(ChatActions.callChannelActions(CHAT_CHANNELS.TEAMSPACES, teamspaces[i].account, '', {
+			unsubscribeToModelCreated: onCreated,
+		}));
+	}
+}
+
 export default function* TeamspacesSaga() {
 	yield takeLatest(TeamspacesTypes.FETCH_TEAMSPACES, fetchTeamspaces);
 	yield takeLatest(TeamspacesTypes.LEAVE_TEAMSPACE, leaveTeamspace);
 	yield takeLatest(TeamspacesTypes.FETCH_TEAMSPACES_IF_NECESSARY, fetchTeamspacesIfNecessary);
+	yield takeLatest(TeamspacesTypes.SUBSCRIBE_ON_CHANGES, subscribeOnChanges);
+	yield takeLatest(TeamspacesTypes.UNSUBSCRIBE_FROM_CHANGES, unsubscribeFromChanges);
 
 	// Projects
 	yield takeLatest(TeamspacesTypes.CREATE_PROJECT, createProject);

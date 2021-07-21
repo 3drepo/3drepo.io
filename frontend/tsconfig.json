@@ -13,7 +13,8 @@
     "lib": [
       "es2015",
       "es2017",
-      "dom"
+      "dom",
+      "es2020.string"
     ],
     "jsx": "react",
     "removeComments": true,

@@ -51,4 +51,12 @@ export const IconContainer = styled(Icon).attrs({
 			width: 1em;
 		}
 	}
+
+	&.fontSizeTiny {
+		font-size: 16px;
+
+		svg {
+			width: 1em;
+		}
+	}
 `;

@@ -1,19 +1,20 @@
 /**
  *  Copyright (C) 2020 3D Repo Ltd
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.ap
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 "use strict";
 
 const _ = require("lodash");
@@ -21,7 +22,6 @@ const parse = require("csv-parse/lib/sync");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
-const nodeuuid = require("uuid/v1");
 
 // NB: Order of fieldTypes important for importCSV
 const fieldTypes = {
@@ -95,7 +95,6 @@ class Mitigation {
 
 	async importCSV(account, data) {
 		const csvFields = Object.keys(fieldTypes);
-		const clearMitigations = this.clearAll(account);
 
 		const records = parse(data, {
 			columns: csvFields,
@@ -103,8 +102,6 @@ class Mitigation {
 			from_line: 2,
 			trim: true
 		});
-
-		await clearMitigations;
 
 		return this.insert(account, records);
 	}
@@ -130,11 +127,12 @@ class Mitigation {
 				}
 			});
 
-			newMitigation._id = utils.stringToUUID(nodeuuid());
+			newMitigation._id = utils.generateUUID();
 
 			mitigations[i] = newMitigation;
 		}
 
+		await this.clearAll(account);
 		await mitigationColl.insert(mitigations);
 
 		return mitigations;

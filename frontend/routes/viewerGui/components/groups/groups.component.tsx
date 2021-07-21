@@ -21,7 +21,6 @@ import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import Check from '@material-ui/icons/Check';
-import Delete from '@material-ui/icons/Delete';
 import InvertColors from '@material-ui/icons/InvertColors';
 import Visibility from '@material-ui/icons/VisibilityOutlined';
 import { isEmpty, isEqual, size, stubTrue } from 'lodash';
@@ -39,6 +38,7 @@ import { hexToRgba } from '../../../../helpers/colors';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { searchByFilters } from '../../../../helpers/searching';
+import { EmptyStateInfo } from '../../../components/components.styles';
 import {
 	IconWrapper,
 	MenuList,
@@ -51,7 +51,6 @@ import { ListNavigation } from '../listNavigation/listNavigation.component';
 import { PanelBarActions } from '../panelBarActions';
 import { ListContainer, Summary } from '../risks/risks.styles';
 import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
-import { EmptyStateInfo } from '../views/views.styles';
 import { GroupDetails } from './components/groupDetails';
 import { GroupsContainer, GroupIcon, GroupListItem, StyledIcon } from './groups.styles';
 
@@ -88,6 +87,7 @@ interface IProps {
 	resetActiveGroup: () => void;
 	subscribeOnChanges: (teamspace, modelId) => void;
 	unsubscribeFromChanges: (teamspace, modelId) => void;
+	id?: string;
 }
 
 interface IState {
@@ -143,7 +143,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 			<ListNavigation
 				panelType={this.type}
 				initialIndex={initialIndex}
-				lastIndex={this.state.filteredGroups.length - 1}
+				itemsCount={this.state.filteredGroups.length}
 				onChange={this.handleNavigationChange}
 			/>
 		);
@@ -151,8 +151,9 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 	public renderGroupsList = renderWhenTrue(() => {
 		const Items = this.state.filteredGroups.map((group) => (
-			<GroupListItem
+				<GroupListItem
 					{...group}
+					created=""
 					key={group._id}
 					hideThumbnail
 					statusColor={this.getOverriddenColor(group._id, group.color)}
@@ -166,7 +167,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 					hasViewPermission={stubTrue}
 					panelName={GROUP_PANEL_NAME}
 					extraInfo={this.renderObjectsNumber(group.totalSavedMeshes)}
-			/>
+				/>
 		));
 
 		return <ListContainer className="groups-list" ref={this.groupsContainerRef}>{Items}</ListContainer>;
@@ -182,21 +183,27 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 	public renderListView = renderWhenTrue(() => (
 		<>
-			<ViewerPanelContent>
-				{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredGroups.length)}
-				{this.renderNotFound(this.props.searchEnabled && !this.state.filteredGroups.length)}
-				{this.renderGroupsList(this.state.filteredGroups.length)}
+			<ViewerPanelContent onClick={this.resetActiveGroup}>
+				<div onClick={(event: React.MouseEvent<HTMLDivElement>) => event.stopPropagation()}>
+					{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredGroups.length)}
+					{this.renderNotFound(this.props.searchEnabled && !this.state.filteredGroups.length)}
+					{this.renderGroupsList(this.state.filteredGroups.length)}
+				</div>
 			</ViewerPanelContent>
-			<ViewerPanelFooter alignItems="center" justify="space-between">
+			<ViewerPanelFooter onClick={this.resetActiveGroup} container alignItems="center" justify="space-between">
 				<Summary>
 					{`${this.state.filteredGroups.length} groups displayed`}
 				</Summary>
 				<ViewerPanelButton
 					aria-label="Add group"
-					onClick={this.props.setNewGroup}
+					onClick={(e) => {
+						e.stopPropagation();
+						this.props.setNewGroup();
+					}}
 					color="secondary"
 					variant="fab"
 					disabled={!this.canAddOrUpdate}
+					id={this.props.id + '-add-new-button'}
 				>
 					<AddIcon />
 				</ViewerPanelButton>
@@ -222,6 +229,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 			saveGroup={this.props.saveGroup}
 			resetToSavedSelection={this.handleResetToSavedSelection}
 			canUpdate={this.canAddOrUpdate}
+			deleteGroup={this.handleGroupDelete}
 		/>
 	));
 
@@ -371,23 +379,27 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		return this.props.activeGroupId === group._id;
 	}
 
-	public handleGroupDelete = (groupId) => () => {
-		const { teamspace, model, deleteGroups } = this.props;
-		deleteGroups(teamspace, model, groupId);
+	public handleGroupDelete = (id) => {
+		const { teamspace, model, deleteGroups, closeDetails } = this.props;
+		if (id) {
+			deleteGroups(teamspace, model, id);
+		} else {
+			closeDetails();
+		}
 	}
 
-	public handleColorOverride = (group) => () => this.props.toggleColorOverride(group._id);
+	public handleColorOverride = (group) => (e: React.SyntheticEvent) => {
+		e.stopPropagation();
+		this.props.toggleColorOverride(group._id);
+	}
 
-	public handleGroupIsolate = (group) => () => this.props.isolateGroup(group);
+	public handleGroupIsolate = (group) => (e: React.SyntheticEvent) => {
+		e.stopPropagation();
+		this.props.isolateGroup(group);
+	}
 
 	public renderGroupActions = (group) => () => (
 		<>
-			<TooltipButton
-				label="Isolate"
-				action={this.handleGroupIsolate(group)}
-				Icon={Visibility}
-				disabled={!this.props.isModelLoaded}
-			/>
 			<TooltipButton
 				label="Toggle Colour Override"
 				action={this.handleColorOverride(group)}
@@ -395,9 +407,9 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				disabled={!this.props.isModelLoaded}
 			/>
 			<TooltipButton
-				label="Delete"
-				action={this.handleGroupDelete(group._id)}
-				Icon={Delete}
+				label="Isolate"
+				action={this.handleGroupIsolate(group)}
+				Icon={Visibility}
 				disabled={!this.props.isModelLoaded}
 			/>
 		</>
@@ -435,6 +447,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 				Icon={this.renderTitleIcon()}
 				renderActions={this.renderActions}
 				pending={this.props.isPending}
+				id={this.props.id + (this.props.showDetails ? '-details' : '' )}
 			>
 				{this.renderFilterPanel(this.props.searchEnabled && !this.props.showDetails)}
 				{this.renderListView(!this.props.showDetails)}

@@ -1,18 +1,18 @@
 /**
- *	Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2014 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -45,6 +45,7 @@ const systemLogger = require("../logger.js").systemLogger;
  * @apiParam (Request body) {String} name Group name
  * @apiParam (Request body) {Object[]} objects List of objects in group
  * @apiParam (Request body) {Object[]} [rules] List of rules in group
+ * @apiParam (Request body) {Number[]} [transformation] Flat 16 element array representation of 4x4 transformation matrix
  */
 
 /**
@@ -57,6 +58,7 @@ const systemLogger = require("../logger.js").systemLogger;
  * @apiSuccess (200) {String} name Group name
  * @apiSuccess (200) {Object[]} objects List of objects in group
  * @apiSuccess (200) {Object[]} rules List of rules in group
+ * @apiSuccess (200) {Number[]} transformation Flat 16 element array representation of 4x4 transformation matrix
  * @apiSuccess (200) {Number} updatedAt Group update timestamp in milliseconds
  * @apiSuccess (200) {Number} updatedBy Username of last user to amend group
  * @apiSuccess (200) {String} _id Unique ID of group
@@ -74,6 +76,8 @@ const systemLogger = require("../logger.js").systemLogger;
  * @apiParam (Query) {Boolean} [ifcguids] Flag that returns IFC GUIDs for group elements
  * @apiParam (Query) {Boolean} [noIssues] Flag that hides groups for issues
  * @apiParam (Query) {Boolean} [noRisks] Flag that hides groups for risks
+ * @apiParam (Query) {Boolean} [noViews] Flag that hides groups for risks
+ * @apiParam (Query) {Number} [updatedSince] Only return issues that has been updated since this value (in epoch value)
  * @apiSuccess (200) {Object[]} objects List of group objects
  *
  * @apiExample {get} Example usage (/master/head)
@@ -462,27 +466,24 @@ router.post("/revision/:rid/groups/", middlewares.issue.canCreate, createGroup);
  */
 router.delete("/groups/", middlewares.issue.canCreate, deleteGroups);
 
-const getDbColOptions = function (req) {
-	return { account: req.params.account, model: req.params.model, logger: req[C.REQ_REPO].logger };
-};
-
 function listGroups(req, res, next) {
-
-	const dbCol = getDbColOptions(req);
 	const place = utils.APIInfo(req);
+	const { account, model, rid } = req.params;
+	const branch = rid ? null : "master";
 
 	const showIfcGuids = (req.query.ifcguids) ? JSON.parse(req.query.ifcguids) : false;
-
 	const ids = req.query.ids ? req.query.ids.split(",") : null;
-	let groupList;
 
-	if (req.params.rid) {
-		groupList = Group.listGroups(dbCol, req.query, null, req.params.rid, ids, showIfcGuids);
-	} else {
-		groupList = Group.listGroups(dbCol, req.query, "master", null, ids, showIfcGuids);
+	let updatedSince = req.query.updatedSince;
+
+	if (updatedSince) {
+		updatedSince = parseInt(updatedSince, 10);
+		if (isNaN(updatedSince)) {
+			return responseCodes.respond(place, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+		}
 	}
 
-	groupList.then(groups => {
+	Group.getList(account, model, branch, rid, ids, req.query, showIfcGuids).then(groups => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, groups);
 	}).catch(err => {
 		systemLogger.logError(err.stack);
@@ -491,25 +492,12 @@ function listGroups(req, res, next) {
 }
 
 function findGroup(req, res, next) {
-
-	const dbCol = getDbColOptions(req);
 	const place = utils.APIInfo(req);
+	const { account, model, rid, uid } = req.params;
+	const branch = rid ? null : "master";
 	const showIfcGuids = (req.query.ifcguids) ? JSON.parse(req.query.ifcguids) : false;
 
-	let groupItem;
-	if (req.params.rid) {
-		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, null, req.params.rid, showIfcGuids);
-	} else {
-		groupItem = Group.findByUIDSerialised(dbCol, req.params.uid, "master", null, showIfcGuids);
-	}
-
-	groupItem.then(group => {
-		if (!group) {
-			return Promise.reject({ resCode: responseCodes.GROUP_NOT_FOUND });
-		} else {
-			return Promise.resolve(group);
-		}
-	}).then(group => {
+	Group.findByUID(account, model, branch, rid, uid, showIfcGuids, false).then(group => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		systemLogger.logError(err.stack);
@@ -519,15 +507,13 @@ function findGroup(req, res, next) {
 
 function createGroup(req, res, next) {
 	const place = utils.APIInfo(req);
+	const { account, model } = req.params;
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 	const rid = req.params.rid ? req.params.rid : null;
 	const branch = rid ? null : "master";
-	const create = Group.createGroup(getDbColOptions(req), sessionId, req.body, req.session.user.username, branch, rid);
 
-	create.then(group => {
-
+	Group.create(account, model, branch, rid, sessionId, req.session.user.username, req.body).then(group => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
-
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
 	});
@@ -536,11 +522,12 @@ function createGroup(req, res, next) {
 function deleteGroups(req, res, next) {
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 	const place = utils.APIInfo(req);
+	const { account, model } = req.params;
 
 	if (req.query.ids) {
 		const ids = req.query.ids.split(",");
 
-		Group.deleteGroups(getDbColOptions(req), sessionId, ids).then(() => {
+		Group.deleteGroups(account, model, sessionId, ids).then(() => {
 			responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "success" });
 		}).catch(err => {
 			responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
@@ -551,21 +538,14 @@ function deleteGroups(req, res, next) {
 }
 
 function updateGroup(req, res, next) {
-	const dbCol = getDbColOptions(req);
 	const place = utils.APIInfo(req);
+	const { account, model, uid } = req.params;
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
 	const rid = req.params.rid ? req.params.rid : null;
 	const branch = rid ? null : "master";
-	const groupItem = Group.findByUID(dbCol, req.params.uid, branch, rid, false);
-	groupItem.then(group => {
-		if (!group) {
-			return Promise.reject({ resCode: responseCodes.GROUP_NOT_FOUND });
-		} else {
-			return group.updateGroup(dbCol, sessionId, req.body, req.session.user.username, branch, rid);
-		}
 
-	}).then(group => {
+	Group.update(account, model, branch, rid, sessionId, req.session.user.username, uid, req.body).then(group => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		systemLogger.logError(err.stack);

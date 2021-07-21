@@ -15,15 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TextField } from '@material-ui/core';
+import { Tooltip } from '@material-ui/core';
+import Grid from '@material-ui/core/Grid';
 import { Field, Formik } from 'formik';
 import React from 'react';
 import * as Yup from 'yup';
-
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { schema } from '../../../../services/validation';
 import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
 import OpenInViewerButton from '../../../components/openInViewerButton/openInViewerButton.container';
+import { TextField } from '../../../components/textField/textField.component';
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 import { RoleIndicator } from '../previewListItem/previewListItem.styles';
 import {
@@ -31,15 +32,17 @@ import {
 	CollapsableContent,
 	Container,
 	Details,
+	Header,
 	MainInfoContainer,
 	NotCollapsableContent,
 	ScrollableContainer,
 	StyledForm,
 	Summary,
+	TitleNumber,
 	ToggleButton,
 	ToggleButtonContainer,
 	ToggleIcon,
-	Typography,
+	Typography
 } from './previewDetails.styles';
 
 interface IProps {
@@ -54,7 +57,6 @@ interface IProps {
 	StatusIconComponent: any;
 	statusColor: string;
 	defaultExpanded: boolean;
-	disableExpanding: boolean;
 	editable?: boolean;
 	willBeRemoved?: boolean;
 	willBeUpdated?: boolean;
@@ -69,6 +71,9 @@ interface IProps {
 	onNameChange?: (event, name: string) => void;
 	renderCollapsable?: () => JSX.Element | JSX.Element[];
 	renderNotCollapsable?: () => JSX.Element | JSX.Element[];
+	actionButton?: React.ReactNode;
+	clone?: boolean;
+	isSmartGroup?: boolean;
 }
 
 const ValidationSchema = Yup.object().shape({
@@ -77,26 +82,36 @@ const ValidationSchema = Yup.object().shape({
 
 export class PreviewDetails extends React.PureComponent<IProps, any> {
 	public state = {
-		expanded: true
+		expanded: true,
+		collapsed: false,
 	};
 
 	public headerRef = React.createRef<any>();
-
 	public textFieldRef = React.createRef<any>();
+	public scrollableContainerRef = React.createRef<HTMLDivElement>();
 
-	public renderNameWithCounter = renderWhenTrue(() => (
-		<Typography paragraph>
-			{`${this.props.number}. ${this.props.name}`}
-		</Typography>
-	));
+	public renderNameWithCounter = renderWhenTrue(() => {
+		const title = `${this.props.number}. ${this.props.name}`;
+		return (
+			<Tooltip title={title}>
+				<Typography paragraph>
+					{title}
+				</Typography>
+			</Tooltip>
+		);
+	});
 
 	public renderName = renderWhenTrue(() => (
-		<Typography paragraph>
-			{this.props.name}
-		</Typography>
+		<Tooltip title={this.props.name}>
+			<Typography paragraph>
+				{this.props.name}
+			</Typography>
+		</Tooltip>
 	));
 
 	public renderNameField = renderWhenTrue(() => (
+	<Grid container alignItems="center" justify="space-between" >
+		<TitleNumber>{this.props.number}.</TitleNumber>
 		<Formik
 			initialValues={{name: this.props.name}}
 			validationSchema={ValidationSchema}
@@ -109,7 +124,6 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 						<TextField
 							{...field}
 							inputRef={this.textFieldRef}
-							autoFocus
 							fullWidth
 							placeholder={placeholder}
 							onChange={this.handleNameChange(field)}
@@ -120,11 +134,16 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 								onFocus: () => this.handleFocusName(field, form),
 								onBlur: () => this.handleBlurName(field, form)
 							}}
+							mutable={!this.props.isNew}
+							requiredConfirm={!this.props.isNew}
 						/>
 					);
 				}} />
 			</StyledForm>
 		</Formik>
+
+		</Grid>
+
 	));
 
 	public renderExpandIcon = renderWhenTrue(() => (
@@ -145,8 +164,10 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		<ActionMessage content={`This ${this.props.panelName} has been deleted by someone else`} />
 	);
 
-	public renderNotCollapsableContent = renderWhenTrue(() => {
-		return (
+	public renderNotCollapsableContent = () => {
+		const Component = this.props.renderNotCollapsable && this.props.renderNotCollapsable();
+
+		return renderWhenTrue(() => (
 			<>
 				<ToggleButtonContainer onClick={this.handleToggle}>
 					<ToggleButton>
@@ -157,14 +178,15 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 					{this.props.renderNotCollapsable()}
 				</NotCollapsableContent>
 			</>
-		);
-	});
+		))(!!Component);
+	}
 
 	public componentDidMount() {
-		const { editable, defaultExpanded } = this.props;
-		if (this.textFieldRef.current) {
+		const { editable, defaultExpanded, isNew } = this.props;
+		if (isNew && this.textFieldRef.current) {
 			this.textFieldRef.current.select();
 		}
+
 		this.setState({
 			expanded: editable || defaultExpanded
 		});
@@ -178,6 +200,18 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	public handleToggle = (event) => {
 		event.persist();
 		this.setState(({ expanded }) => ({ expanded: !expanded }), () => {
+			if (this.scrollableContainerRef.current) {
+				if (this.state.expanded) {
+					setTimeout(() => {
+						this.scrollableContainerRef.current.scrollTop = 0;
+					}, 50);
+					this.setState({ collapsed: false });
+				} else {
+					setTimeout(() => {
+						this.setState({ collapsed: true });
+					}, 300);
+				}
+			}
 			if (this.props.onExpandChange) {
 				this.props.onExpandChange(event, this.state.expanded);
 			}
@@ -185,16 +219,16 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	}
 
 	public handleFocusName = (field, form) => {
-		const nameChanged = form.initialValues.name !== field.value;
-
-		if (this.props.isNew) {
+		if (this.props.isNew && !this.props.clone) {
+			const nameChanged = form.initialValues.name !== field.value;
 			form.setFieldValue('name', nameChanged ? field.value : '');
 		}
 	}
 
 	public handleBlurName = (field, form) => {
-		const nameChanged = this.props.name !== field.value;
-		if (this.props.isNew) {
+		if (this.props.isNew && !this.props.clone) {
+			const nameChanged = this.props.name !== field.value;
+
 			form.setFieldValue('name', nameChanged && field.value ? field.value : this.props.name);
 		}
 	}
@@ -204,6 +238,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		const { teamspace, modelId } = this.props.urlParams;
 		return (
 			<OpenInViewerButton
+				preview
 				teamspace={teamspace}
 				model={modelId}
 				query={`${type}Id=${id}`}
@@ -215,30 +250,29 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		const {
 			className,
 			roleColor,
-			// tslint:disable-next-line
 			number,
 			owner,
 			created,
 			StatusIconComponent,
 			statusColor,
 			editable,
-			disableExpanding,
 			willBeUpdated,
 			willBeRemoved,
 			renderCollapsable,
-			renderNotCollapsable,
 			handleHeaderClick,
-			showModelButton
+			showModelButton,
+			actionButton,
+			isSmartGroup,
+			panelName,
 		} = this.props;
 
 		return (
-			<Container className={className}>
+			<Container className={className} edit={!this.props.isNew} panelName={panelName} isSmartGroup={isSmartGroup}>
 				{this.renderUpdateMessage(willBeUpdated)}
 				{this.renderDeleteMessage(willBeRemoved)}
-				<Summary
-					expandIcon={this.renderExpandIcon(!disableExpanding && !editable)}
+				<Header
 					onClick={handleHeaderClick}
-					scrolled={this.props.scrolled ? 1 : 0}
+					expanded={this.state.expanded && this.props.scrolled ? 1 : 0}
 				>
 					<RoleIndicator color={roleColor} ref={this.headerRef} />
 					<MainInfoContainer>
@@ -251,17 +285,19 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 							createdAt={created}
 							StatusIconComponent={StatusIconComponent}
 							statusColor={statusColor}
+							actionButton={actionButton}
 						/>
 					</MainInfoContainer>
-				</Summary>
+				</Header>
 
-				<ScrollableContainer>
+				<ScrollableContainer ref={this.scrollableContainerRef} expanded={!this.state.collapsed}>
 					<Collapsable onChange={this.handleToggle} expanded={this.state.expanded}>
+						<Summary />
 						<Details>
 							{this.renderCollapsable(Boolean(renderCollapsable))}
 						</Details>
 					</Collapsable>
-					{this.renderNotCollapsableContent(!!renderNotCollapsable)}
+					{this.renderNotCollapsableContent()}
 				</ScrollableContainer>
 			</Container>
 		);

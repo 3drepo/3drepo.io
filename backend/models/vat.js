@@ -1,6 +1,23 @@
+/**
+ *  Copyright (C) 2021 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 "use strict";
 
-const soap = require("soap");
+// const soap = require("soap");
 const config = require("../config");
 const vatValidationUrl = config.vat.checkUrl;
 const addressMeta = require("./addressMeta");
@@ -66,9 +83,9 @@ function getByCountryCode(code, isBusiness) {
 
 }
 
-const soapClient = soap.createClientAsync(vatValidationUrl);
+// const soapClient = soap.createClientAsync(vatValidationUrl);
 
-function checkVAT(code, vatNum) {
+function checkVAT(code/* , vatNum*/) {
 
 	const isDebug = config.vat && config.vat.debug && config.vat.debug.skipChecking;
 	const isOutsideEU = addressMeta.euCountriesCode.indexOf(code) === -1;
@@ -87,7 +104,7 @@ function checkVAT(code, vatNum) {
 
 		// console.log("checkVAT Slow Path hit")
 
-		soapClient.then((client) => {
+		/*		soapClient.then((client) => {
 			return client.checkVatAsync({
 				countryCode: code,
 				vatNumber: vatNum
@@ -98,6 +115,9 @@ function checkVAT(code, vatNum) {
 			.catch((err) => {
 				reject(err);
 			});
+			*/
+		// commented out as soap library has warnings - we need update if we revive this.
+		reject("Needs re-implementing");
 
 	});
 

@@ -20,8 +20,10 @@ import { ChatEvents } from './chat.events';
 import { IssuesChatEvents } from './issues.chat.events';
 import { ModelChatEvents } from './models.chat.events';
 import { NotificationsChatEvents } from './notifications.chat.events';
+import { PresentationChatEvents } from './presentation.chat.events';
 import { RisksChatEvents } from './risks.chat.events';
 import { Subscriptions } from './subscriptions';
+import { TeamspacesChatEvents } from './teamspaces.chat.events';
 
 const getEventName = (teamspace: string, model: string, keys: string, event: string) => {
 	const eventName = [teamspace];
@@ -40,36 +42,38 @@ const getEventName = (teamspace: string, model: string, keys: string, event: str
 
 export class Channel {
 	/**
-	 * This property contains the object to suscribe to the issues and comments for the issues chat events
+	 * This property contains the object to subscribe to the issues and comments for the issues chat events
 	 */
 	public issues: IssuesChatEvents;
 
 	/**
-	 * This property contains the object to suscribe to the risks and comments for the risks chat events
+	 * This property contains the object to subscribe to the risks and comments for the risks chat events
 	 */
 	public risks: RisksChatEvents;
 
 	/**
-	 * This property contains the object to suscribe to the groups chat events
+	 * This property contains the object to subscribe to the groups chat events
 	 */
 	public groups: ChatEvents;
 
 	/**
-	 * This property contains the object to suscribe to the resources chat events
+	 * This property contains the object to subscribe to the resources chat events
 	 */
 	public resources: ChatEvents;
 
 	/**
-	 * This property contains the object to suscribe to the views chat events
+	 * This property contains the object to subscribe to the views chat events
 	 */
 	public views: ChatEvents;
 
 	/**
-	 * This property contains the object to suscribe to the general model status chat events
+	 * This property contains the object to subscribe to the general model status chat events
 	 */
 	public model: ModelChatEvents;
 
 	public notifications: NotificationsChatEvents;
+
+	public teamspaces: TeamspacesChatEvents;
 
 	/**
 	 * This dictionary holds the callbacks for every event in the channel .
@@ -90,6 +94,8 @@ export class Channel {
 		this[CHAT_CHANNELS.VIEWS] = new ChatEvents(this, 'view');
 		this[CHAT_CHANNELS.RESOURCES] = new ChatEvents(this, 'resource');
 		this[CHAT_CHANNELS.NOTIFICATIONS] = new NotificationsChatEvents(this);
+		this[CHAT_CHANNELS.PRESENTATION] = new PresentationChatEvents(this);
+		this[CHAT_CHANNELS.TEAMSPACES] = new TeamspacesChatEvents(this);
 	}
 
 	/**
@@ -97,7 +103,7 @@ export class Channel {
 	 * private use for the NotificationEvents objects.
 	 * @param event the event name
 	 * @param callback the callback that will be used when the event is remotely triggered
-	 * @param keys extra keys for suscribing to a particular entity events
+	 * @param keys extra keys for subscribing to a particular entity events
 	 */
 	public subscribe(event: string, callback: (data: any) => void, context: any, keys = null) {
 		const eventFullName = getEventName(this.teamspace, this.modelStr, keys, event);
@@ -112,7 +118,7 @@ export class Channel {
 	 * This method is for stop listening to a remote notification event. Its intended for
 	 * private use for the NotificationEvents objects.
 	 * @param event the event name
-	 * @param keys extra keys for unsuscribing to a particular entity events
+	 * @param keys extra keys for unsubscribing to a particular entity events
 	 */
 	public unsubscribe(event: string, callback: (data: any) => void, keys = null) {
 		const eventFullName = getEventName(this.teamspace, this.modelStr, keys, event);

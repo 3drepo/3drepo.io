@@ -71,7 +71,7 @@ export const Container = styled.div`
 `;
 
 export const Row = styled.div`
-	height: 62px;
+	min-height: 62px;
 	display: flex;
 	flex-direction: row;
 	border-bottom: 1px solid ${COLOR.BLACK_6};
@@ -107,4 +107,10 @@ export const BodyWrapper = styled.div`
 	width: 100%;
 	position: relative;
 	height: inherit;
+`;
+
+export const HighlightWrapper = styled.span`
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 `;

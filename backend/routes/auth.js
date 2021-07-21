@@ -1,18 +1,18 @@
 /**
- *	Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2014 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.	If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -21,16 +21,20 @@ const express = require("express");
 const router = express.Router({mergeParams: true});
 const responseCodes = require("../response_codes.js");
 const C = require("../constants");
+const sessionCheck = require("../middlewares/sessionCheck");
 const middlewares = require("../middlewares/middlewares");
 const config = require("../config");
 const utils = require("../utils");
+const systemLogger = require("../logger.js").systemLogger;
 // const ChatEvent = require("../models/chatEvent");
 const User = require("../models/user");
-const addressMeta = require("../models/addressMeta");
+
+const LoginRecord = require("../models/loginRecord");
 const Mailer = require("../mailer/mailer");
 const httpsPost = require("../libs/httpsReq").post;
 
 const chatEvent = require("../models/chatEvent");
+const FileType = require("file-type");
 
 const multer = require("multer");
 
@@ -108,7 +112,7 @@ router.post("/logout", logout);
  *	"username": "alice"
  * }
  */
-router.get("/login", checkLogin);
+router.get("/login", middlewares.loggedIn, checkLogin);
 
 /**
  * @api {post} /forgot-password Forgot password
@@ -548,8 +552,13 @@ router.put("/:account", middlewares.isAccountAdmin, updateUser);
 router.put("/:account/password", resetPassword);
 
 function createSession(place, req, res, next, user) {
+	req.body.username = user.username;
+
 	regenerateAuthSession(req, config, user)
-		.then(() => getSessionsByUsername(user.username))
+		.then(() => {
+			LoginRecord.saveLoginRecord(req.sessionID, user.username, req.ips[0] || req.ip, req.headers["user-agent"] ,req.header("Referer"));
+			return getSessionsByUsername(user.username);
+		})
 		.then(sessions => { // Remove other sessions with the same username
 			if (!req.session.user.webSession) {
 				return null;
@@ -566,9 +575,9 @@ function createSession(place, req, res, next, user) {
 			});
 
 			return removeSessions(ids);
-		}).then(() =>
-			responseCodes.respond(place, req, res, next, responseCodes.OK, user)
-		).catch((err) => {
+		}).then(() => {
+			responseCodes.respond(place, req, res, next, responseCodes.OK, user);
+		}).catch((err) => {
 			responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {username: user.username});
 		});
 }
@@ -576,34 +585,19 @@ function createSession(place, req, res, next, user) {
 function login(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 
-	if (Object.prototype.toString.call(req.body.username) === "[object String]"
-		&& Object.prototype.toString.call(req.body.password) === "[object String]") {
+	const { username, password} = req.body;
+	if (utils.isString(username) && utils.isString(password)) {
 
-		req[C.REQ_REPO].logger.logInfo("Authenticating user", { username: req.body.username});
+		systemLogger.logInfo(`Authenticating ${username}...`);
 
-		if(req.session.user) {
+		if(sessionCheck(req)) {
 			return responseCodes.respond(responsePlace, req, res, next, responseCodes.ALREADY_LOGGED_IN, responseCodes.ALREADY_LOGGED_IN);
 		}
 
-		User.authenticate(req[C.REQ_REPO].logger, req.body.username, req.body.password).then(user => {
-
-			const responseData = { username: user.user };
-
-			req[C.REQ_REPO].logger.logInfo("User is logged in", responseData);
-
-			responseData.flags = {};
-
-			responseData.flags.termsPrompt = !user.hasReadLatestTerms();
-
-			user.customData.lastLoginAt = new Date();
-
-			req.body.username = user.user;
-
-			user.save().then(() => {
-				createSession(responsePlace, req, res, next, responseData);
-			});
+		User.authenticate(username, password).then(user => {
+			createSession(responsePlace, req, res, next, user);
 		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode || err);
 		});
 	} else {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
@@ -612,24 +606,21 @@ function login(req, res, next) {
 }
 
 function checkLogin(req, res, next) {
-	if (!req.session || !req.session.user) {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, {});
-	} else {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {username: req.session.user.username});
-	}
+	responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {username: req.session.user.username});
 }
 
 function logout(req, res, next) {
-	if(!req.session || !req.session.user) {
-		return responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, {});
+	const responsePlace = utils.APIInfo(req);
+	if(!sessionCheck(req)) {
+		return responseCodes.respond(responsePlace, req, res, next, responseCodes.NOT_LOGGED_IN, {});
 	}
 
 	const username = req.session.user.username;
 
 	req.session.destroy(function() {
-		req[C.REQ_REPO].logger.logDebug("User has logged out.");
+		systemLogger.logDebug("User has logged out.");
 		res.clearCookie("connect.sid", { domain: config.cookie_domain, path: "/" });
-		responseCodes.respond("Logout POST", req, res, next, responseCodes.OK, {username: username});
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {username: username});
 	});
 }
 
@@ -640,7 +631,7 @@ function updateUser(req, res, next) {
 		if(Object.prototype.toString.call(req.body.oldPassword) === "[object String]" &&
 			Object.prototype.toString.call(req.body.newPassword) === "[object String]") {
 			// Update password
-			User.updatePassword(req[C.REQ_REPO].logger, req.params[C.REPO_REST_API_ACCOUNT], req.body.oldPassword, null, req.body.newPassword).then(() => {
+			User.updatePassword(req.params[C.REPO_REST_API_ACCOUNT], req.body.oldPassword, null, req.body.newPassword).then(() => {
 				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 			}).catch(err => {
 				responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
@@ -651,9 +642,7 @@ function updateUser(req, res, next) {
 
 	} else {
 		// Update user info
-		User.findByUserName(req.params[C.REPO_REST_API_ACCOUNT]).then(user => {
-			return user.updateInfo(req.body);
-		}).then(() => {
+		User.updateInfo(req.params[C.REPO_REST_API_ACCOUNT], req.body).then(() => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
@@ -675,13 +664,17 @@ function signUp(req, res, next) {
 		return responseCodes.respond(responsePlace, req, res, next, err, err);
 	}
 
-	if (Object.prototype.toString.call(req.body.email) === "[object String]"
-		&& Object.prototype.toString.call(req.body.password) === "[object String]"
-		&& Object.prototype.toString.call(req.body.firstName) === "[object String]"
-		&& Object.prototype.toString.call(req.body.lastName) === "[object String]"
-		&& Object.prototype.toString.call(req.body.countryCode) === "[object String]"
-		&& (!req.body.company || Object.prototype.toString.call(req.body.company) === "[object String]")
-		&& Object.prototype.toString.call(req.body.mailListAgreed) === "[object Boolean]") {
+	if (utils.isString(req.body.email)
+		&& utils.isString(req.body.password)
+		&& utils.isString(req.body.firstName)
+		&& utils.isString(req.body.lastName)
+		&& utils.isString(req.body.countryCode)
+		&& (!req.body.company || utils.isString(req.body.company))
+		&& utils.isBoolean(req.body.mailListAgreed)
+		&& utils.isString(req.body.jobTitle)
+		&& utils.isString(req.body.industry)
+		&& utils.isString(req.body.howDidYouFindUs)
+		&& (!req.body.phoneNumber || utils.isString(req.body.phoneNumber))) {
 
 		// check if captcha is enabled
 		const checkCaptcha = config.auth.captcha ? httpsPost(config.captcha.validateUrl, {
@@ -695,37 +688,24 @@ function signUp(req, res, next) {
 		checkCaptcha.then(resBody => {
 
 			if(resBody.success) {
-				return User.createUser(req[C.REQ_REPO].logger, req.params.account, req.body.password, {
+				return User.createUser(req.params.account, req.body.password, {
 
 					email: req.body.email,
 					firstName: req.body.firstName,
 					lastName: req.body.lastName,
 					countryCode: req.body.countryCode,
 					company: req.body.company,
-					mailListOptOut: !req.body.mailListAgreed
-
+					mailListOptOut: !req.body.mailListAgreed,
+					industry: req.body.industry,
+					jobTitle: req.body.jobTitle,
+					howDidYouFindUs: req.body.howDidYouFindUs,
+					phoneNumber: req.body.phoneNumber
 				}, config.tokenExpiry.emailVerify);
 			} else {
-				// console.log(resBody);
 				return Promise.reject({ resCode: responseCodes.INVALID_CAPTCHA_RES});
 			}
 
 		}).then(data => {
-
-			const country = addressMeta.countries.find(_country => _country.code === req.body.countryCode);
-			// send to sales
-			Mailer.sendNewUser({
-				user: req.params.account,
-				email: req.body.email,
-				firstName: req.body.firstName,
-				lastName: req.body.lastName,
-				country: country && country.name,
-				company: req.body.company
-			}).catch(err => {
-				// catch email error instead of returning to client
-				req[C.REQ_REPO].logger.logError(`Email error - ${err.message}`);
-				return Promise.resolve(err);
-			});
 			// send verification email
 			return Mailer.sendVerifyUserEmail(req.body.email, {
 				token : data.token,
@@ -735,13 +715,13 @@ function signUp(req, res, next) {
 				pay: req.body.pay
 			}).catch(err => {
 				// catch email error instead of returning to client
-				req[C.REQ_REPO].logger.logError(`Email error - ${err.message}`);
+				systemLogger.logError(`Email error - ${err.message}`);
 				return Promise.resolve(err);
 			});
 
 		}).then(emailRes => {
 
-			req[C.REQ_REPO].logger.logInfo("Email info - " + JSON.stringify(emailRes));
+			systemLogger.logInfo("Email info - " + JSON.stringify(emailRes));
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
@@ -777,12 +757,12 @@ function forgotPassword(req, res, next) {
 					firstName:data.firstName
 				}).catch(err => {
 					// catch email error instead of returning to client
-					req[C.REQ_REPO].logger.logDebug(`Email error - ${err.message}`);
+					systemLogger.logDebug(`Email error - ${err.message}`);
 					return Promise.reject(responseCodes.PROCESS_ERROR("Internal Email Error"));
 				});
 			}
 		}).then(emailRes => {
-			req[C.REQ_REPO].logger.logInfo("Email info - " + JSON.stringify(emailRes));
+			systemLogger.logInfo("Email info - " + JSON.stringify(emailRes));
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {});
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode || err , err.resCode ? err.resCode : err);
@@ -797,38 +777,31 @@ function getAvatar(req, res, next) {
 
 	// Update user info
 	User.findByUserName(req.params[C.REPO_REST_API_ACCOUNT]).then(user => {
+		const avatar = User.getAvatar(user);
 
-		if(!user.getAvatar()) {
+		if(!avatar) {
 			return Promise.reject({resCode: responseCodes.USER_DOES_NOT_HAVE_AVATAR });
 		}
 
-		return Promise.resolve(user.getAvatar());
-
+		return Promise.resolve(avatar);
 	}).then(avatar => {
-
 		res.write(avatar.data.buffer);
 		res.end();
-
 	}).catch((err) => {
-
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
 
 function uploadAvatar(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
-
 	// check space and format
 	function fileFilter(fileReq, file, cb) {
-
-		const acceptedFormat = ["png", "jpg", "gif"];
-
 		let format = file.originalname.split(".");
 		format = format.length <= 1 ? "" : format.splice(-1)[0];
 
 		const size = parseInt(fileReq.headers["content-length"]);
 
-		if(acceptedFormat.indexOf(format.toLowerCase()) === -1) {
+		if(!C.ACCEPTED_IMAGE_FORMATS.includes(format.toLowerCase())) {
 			return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
 		}
 
@@ -848,11 +821,14 @@ function uploadAvatar(req, res, next) {
 		if (err) {
 			return responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err , err.resCode ?  err.resCode : err);
 		} else {
-			User.findByUserName(req.params[C.REPO_REST_API_ACCOUNT]).then(user => {
-				user.customData.avatar = { data: req.file.buffer};
-				return user.save();
+			FileType.fromBuffer(req.file.buffer).then(type => {
+				if (!C.ACCEPTED_IMAGE_FORMATS.includes(type.ext)) {
+					throw(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
+				}
 			}).then(() => {
-				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "success" });
+				return User.updateAvatar(req.params[C.REPO_REST_API_ACCOUNT], req.file.buffer).then(() => {
+					responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "success" });
+				});
 			}).catch(error => {
 				responseCodes.respond(responsePlace, req, res, next, error.resCode ? error.resCode : error, error.resCode ? error.resCode : error);
 			});
@@ -865,7 +841,7 @@ function resetPassword(req, res, next) {
 
 	if (Object.prototype.toString.call(req.body.token) === "[object String]" &&
 		Object.prototype.toString.call(req.body.newPassword) === "[object String]") {
-		User.updatePassword(req[C.REQ_REPO].logger, req.params[C.REPO_REST_API_ACCOUNT], null, req.body.token, req.body.newPassword).then(() => {
+		User.updatePassword(req.params[C.REPO_REST_API_ACCOUNT], null, req.body.token, req.body.newPassword).then(() => {
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
 		}).catch(err => {
 			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
@@ -875,35 +851,26 @@ function resetPassword(req, res, next) {
 	}
 }
 
-function listUserInfo(req, res, next) {
+async function listUserInfo(req, res, next) {
 
 	const responsePlace = utils.APIInfo(req);
-	let user;
+	const user = await User.findByUserName(req.params.account);
 
-	User.findByUserName(req.params.account).then(_user => {
+	if(!user) {
+		throw {resCode: responseCodes.USER_NOT_FOUND};
+	}
 
-		if(!_user) {
-			return Promise.reject({resCode: responseCodes.USER_NOT_FOUND});
-		}
+	const accounts = await User.listAccounts(user);
 
-		user = _user;
-		return user.listAccounts();
+	const {firstName, lastName, email, avatar, billing: { billingInfo }}  = user.customData;
 
-	}).then(databases => {
-
-		const customData = user.customData.toObject();
-
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
-			accounts: databases,
-			firstName: customData.firstName,
-			lastName: customData.lastName,
-			email: customData.email,
-			billingInfo: customData.billing.billingInfo,
-			hasAvatar: customData.avatar ? true : false
-		});
-
-	}).catch(err => {
-		responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);
+	responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
+		accounts,
+		firstName,
+		lastName,
+		email,
+		billingInfo: billingInfo,
+		hasAvatar:  Boolean(avatar)
 	});
 }
 
@@ -934,7 +901,9 @@ function listInfo(req, res, next) {
 		});
 
 	} else {
-		listUserInfo(req, res, next);
+		listUserInfo(req, res, next).catch(err => {
+			responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode ? {} : err);
+		});
 	}
 }
 

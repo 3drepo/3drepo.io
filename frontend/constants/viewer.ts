@@ -1,3 +1,20 @@
+/**
+ *  Copyright (C) 2021 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 export const VIEWER_NAV_MODES = {
 	HELICOPTER: 'HELICOPTER',
 	TURNTABLE: 'TURNTABLE'
@@ -70,7 +87,8 @@ export const VIEWER_EVENTS = {
 	MODEL_LOADED: 'MODEL_LOADED',
 	MEASUREMENT_REMOVED: 'MEASUREMENT_REMOVED',
 	ALL_MEASUREMENTS_REMOVED: 'ALL_MEASUREMENTS_REMOVED',
-	MEASUREMENT_CREATED: 'MEASUREMENT_CREATED'
+	MEASUREMENT_CREATED: 'MEASUREMENT_CREATED',
+	MEASUREMENT_MODE_CHANGED:  'MEASUREMENT_MODE_CHANGED'
 };
 
 export const VIEWER_ERRORS = {
@@ -88,7 +106,9 @@ export const DEFAULT_SETTINGS = {
 	farPlaneSamplingPoints: 5,
 	farPlaneAlgorithm: 'box',
 	maxShadowDistance: 10000,
-	numCacheThreads: 3
+	numCacheThreads: 3,
+	clipPlaneBorderWidth: 0.8,
+	clipPlaneBorderColor: [0.02, 0.16, 0.32]
 };
 
 export const VIEWER_PANELS = {
@@ -102,13 +122,21 @@ export const VIEWER_PANELS = {
 	GIS: 'gis'
 };
 
+export const VIEWER_PROJECTION_MODES = {
+	ORTHOGRAPHIC: 'orthographic',
+	PERSPECTIVE: 'perspective'
+};
+
 export const VIEWER_TOOLBAR_ITEMS = {
 	EXTENT: 'Extent',
 	TURNTABLE: 'Turntable',
 	HELICOPTER: 'Helicopter',
+	PERSPECTIVE_VIEW: 'Perspective View',
+	ORTHOGRAPHIC_VIEW: 'Orthographic View',
 	SHOW_ALL: 'Show All',
 	HIDE: 'Hide',
 	ISOLATE: 'Isolate',
+	CLEAR_OVERRIDE: 'Clear Override',
 	FOCUS: 'Focus',
 	CLIP: 'Clip',
 	COORDVIEW: 'Show Coordinates',
@@ -120,7 +148,11 @@ export const MIN_HELICOPTER_SPEED = -99;
 export const MAX_HELICOPTER_SPEED = 99;
 export const NEW_PIN_ID = 'newPinId';
 
-export const VIEWER_PIN_MODE = {
-	NORMAL: 'NORMAL',
-	PIN: 'PIN'
+export const VIEWER_MEASURING_MODE = {
+	POINT: 'PointPin',
+	RAY_CAST: 'Raycast',
+	MINIMUM_DISTANCE: 'MinimumDistance',
+	SAM: 'SurfaceArea',
+	CSAM: 'PolygonArea',
+	POINT_TO_POINT: 'Point',
 };

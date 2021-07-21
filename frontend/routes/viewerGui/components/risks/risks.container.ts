@@ -26,22 +26,22 @@ import {
 	selectActiveRiskDetails,
 	selectActiveRiskId,
 	selectFetchingDetailsIsPending,
+	selectFilteredRisks,
 	selectIsRisksPending,
-	selectRisks,
+	selectMitigationCriteria,
 	selectSearchEnabled,
 	selectSelectedFilters,
 	selectSelectedRisk,
 	selectShowDetails,
 	selectShowPins,
-	selectSortOrder,
-	RisksActions
+	selectSortByField, selectSortOrder, RisksActions
 } from '../../../../modules/risks';
 import { selectSettings as selectTeamspaceSettings } from '../../../../modules/teamspace';
 import { Risks } from './risks.component';
 
 const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
-	risks: selectRisks,
+	risks: selectFilteredRisks,
 	jobs: selectJobsList,
 	activeRiskId: selectActiveRiskId,
 	activeRiskDetails: selectActiveRiskDetails,
@@ -54,24 +54,26 @@ const mapStateToProps = createStructuredSelector({
 	sortOrder: selectSortOrder,
 	selectedRisk: selectSelectedRisk,
 	teamspaceSettings: selectTeamspaceSettings,
+	criteria: selectMitigationCriteria,
+	sortByField: selectSortByField
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchRisks: RisksActions.fetchRisks,
 	setState: RisksActions.setComponentState,
 	setNewRisk: RisksActions.setNewRisk,
-	downloadRisks: RisksActions.downloadRisks,
-	printRisks: RisksActions.printRisks,
+	downloadItems: RisksActions.downloadRisks,
+	printItems: RisksActions.printRisks,
 	setActiveRisk: RisksActions.setActiveRisk,
 	showRiskDetails: RisksActions.showDetails,
 	goToRisk: RisksActions.goToRisk,
 	toggleShowPins: RisksActions.toggleShowPins,
-	subscribeOnRiskChanges: RisksActions.subscribeOnRiskChanges,
-	unsubscribeOnRiskChanges: RisksActions.unsubscribeOnRiskChanges,
 	closeDetails: RisksActions.closeDetails,
 	saveRisk: RisksActions.saveRisk,
 	toggleSortOrder: RisksActions.toggleSortOrder,
 	setFilters: RisksActions.setFilters,
+	fetchMitigationCriteria: RisksActions.fetchMitigationCriteria,
+	setSortBy: RisksActions.setSortBy,
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Risks));

@@ -1,26 +1,26 @@
 /**
- *	Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2014 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 "use strict";
 (() => {
 
-	const C = require("./constants");
 	const _ = require("lodash");
 	const config = require("./config");
-	const systemLogger = require("./logger.js").systemLogger;
+	const { systemLogger, logLabels} = require("./logger.js");
 	const utils = require("./utils");
 
 	/**
@@ -46,6 +46,7 @@
 		NOT_AUTHORIZED: { message: "Not Authorized", status: 401 },
 
 		INVALID_ARGUMENTS: { message: "Missing or invalid arguments", status: 400 },
+		INVALID_DATE_ORDER: { message: "Start date does not precede end date", status: 400 },
 
 		RID_SID_OR_UID_NOT_SPECIFIED: { message: "RID, SID or UID not specified", status: 422 },
 
@@ -61,7 +62,6 @@
 
 		INVALID_INPUTS_TO_PASSWORD_UPDATE: { message: "Invalid new or old password", status: 422 },
 
-		MODEL_HISTORY_NOT_FOUND: { message: "Model history not found", status: 404 },
 		MODEL_INFO_NOT_FOUND: { message: "Model info not found", status: 404 },
 
 		BRANCH_NOT_FOUND: { message: "Branch not found", status: 404 },
@@ -89,7 +89,7 @@
 		FILE_IMPORT_LOAD_SCENE_INVALID_MESHES: { message: "Import failed: Untriangulated meshes", status: 400 },
 		FILE_IMPORT_NO_MESHES: { message: "Import failed: Model does not have geometry", status: 400 },
 		FILE_IMPORT_BAD_EXT: { message: "Import failed: Unsupported file type", status: 400 },
-		FILE_IMPORT_UNSUPPORTED_VERSION_BIM: { message: "Import failed: Unsupported navisworks plugin version", status: 400 },
+		FILE_IMPORT_UNSUPPORTED_VERSION_BIM: { message: "Import failed: Unsupported plugin version", status: 400 },
 		FILE_IMPORT_UNSUPPORTED_VERSION_FBX: { message: "Import failed: Unsupported FBX version (Supported: 2011, 2012, 2013)", status: 400 },
 		FILE_IMPORT_UNSUPPORTED_VERSION: { message: "Unsupported file version", status: 400 },
 		FILE_IMPORT_MAX_NODES_EXCEEDED: { message: "Import failed: Too many objects, consider splitting up the model", status: 400 },
@@ -97,6 +97,7 @@
 		FILE_IMPORT_SYNCHRO_NOT_SUPPORTED: { message: "SPM import is currently not supported", status: 400 },
 		FILE_IMPORT_NO_3D_VIEW: { message: "Cannot find a 3D View within the model.", status: 400 },
 		FILE_IMPORT_TIMED_OUT: { message: "Process timed out. Consider splitting up the model", status: 500 },
+		FILE_IMPORT_GEOMETRY_ERR: { message: "File contains geometry that are not polylines/triangles", status: 400 },
 
 		QUEUE_CONN_ERR: { message: "Failed to queue your request. Please try again later.", status: 500},
 		QUEUE_NO_CONFIG: { message: "Server has no queue configuration", status: 500 },
@@ -113,15 +114,21 @@
 
 		GROUP_NOT_FOUND: { message: "Group not found", status: 404 },
 		INVALID_GROUP: { message: "Group request malformed", status: 400 },
+		MULTIPLE_RULES_PER_FIELD_NOT_ALLOWED: { message: "Only one rule allowed per field", status: 400 },
 
 		VIEW_NOT_FOUND: { message: "Camera viewpoint not found", status: 404 },
+		CANNOT_DELETE_DEFAULT_VIEW: { message: "This view is set to be the default for the model. Please change it before deleting.", status: 400 },
 
+		ACTIVITY_NOT_FOUND: { message: "Activity not found", status: 404 },
 		SEQUENCE_NOT_FOUND: { message: "Sequence not found", status: 404 },
+		SEQUENCE_READ_ONLY: { message: "Sequence not found", status: 400 },
 		TASK_NOT_FOUND: { message: "Sequence task not found", status: 404 },
 
 		USER_EXISTS: { message: "User already exists", status: 400 },
 		OWNER_MUST_BE_ADMIN: {message: "Cannot alter permissions of teamspace owner", status: 400},
 		SIGN_UP_PASSWORD_MISSING: { message: "Password is missing", status: 400 },
+		PASSWORD_TOO_SHORT: { message: "Password is too short", status: 400 },
+		PASSWORD_TOO_WEAK: { message: "Password is too weak", status: 400 },
 		TOKEN_INVALID: { message: "Token is invalid or expired", status: 400 },
 		ALREADY_VERIFIED: { message: "Already verified", status: 400 },
 		USER_NOT_VERIFIED: { message: "Account not yet verified. Please check your email.", status: 400 },
@@ -130,6 +137,8 @@
 		MODEL_EXIST: { message: "Model already exists with that name", status: 400 },
 		PROJECT_EXIST: { message: "Project already exists", status: 400 },
 		DATABASE_EXIST: { message: "Database already exists", status: 400 },
+		TOO_MANY_LOGIN_ATTEMPTS: { message: "Too many unsuccessful login attempts! Account locked", status: 400 },
+		ACCOUNT_LOGIN_LOCKED: { message: "Account locked. Please try again later", status: 400 },
 
 		SIZE_LIMIT_PAY: { message: "Teamspace quota exceeded.", status: 400 },
 		INVALID_SUBSCRIPTION_PLAN: { message: "Invalid subscription plan", status: 400 },
@@ -172,6 +181,7 @@
 		NOT_IN_ROLE: { message: "User or role not found", status: 400 },
 		RESOURCE_NOT_FOUND: { message: "Resource not found", status: 404 },
 		MODEL_NOT_FOUND: { message: "Model not found", status: 404 },
+		CORRELATION_ID_NOT_FOUND: { message: "Correlation ID not found", status: 404 },
 		INVALID_ROLE: { message: "Invalid role name", status: 400 },
 		ALREADY_IN_ROLE: { message: "User already assigned with this role", status: 400 },
 
@@ -272,8 +282,9 @@
 		VAT_CODE_ERROR:{ message: "Error validating VAT number", status: 500},
 
 		TEAMSPACE_SETTINGS_NOT_FOUND: { message: "Teamspace settings not found", status: 404 },
-		NOTIFICATION_NOT_FOUND: { message: "Notification not found", status: 404}
+		NOTIFICATION_NOT_FOUND: { message: "Notification not found", status: 404},
 
+		INVALID_STREAM_SESSION: { message: "The streaming session code is not valid",  status:400 }
 	};
 
 	let valueCounter = 0;
@@ -381,9 +392,14 @@
 		"jpg": "image/jpg"
 	};
 
+	const genResponseLogging = ({status, code}, {contentLength}, {session, startTime, method, originalUrl} = {}) => {
+		const user = session && session.user ? session.user.username : "unknown";
+		const currentTime = Date.now();
+		const latency = startTime ? `${currentTime - startTime}` : "???";
+		return systemLogger.formatResponseMsg({status,code,latency,contentLength,user,method, originalUrl});
+	};
+
 	/**
-	 *
-	 *
 	 * @param {any} place
 	 * @param {any} req
 	 * @param {any} res
@@ -392,17 +408,17 @@
 	 * @param {any} extraInfo
 	 * @param {any} format
 	 */
-	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format, cache) {
+	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format, cache, customHeaders) {
 
 		resCode = utils.mongoErrorToResCode(resCode);
 
 		if (!resCode || valid_values.indexOf(resCode.value) === -1) {
 			if (resCode && resCode.stack) {
-				req[C.REQ_REPO].logger.logError(resCode.stack);
+				systemLogger.logError(resCode.stack, undefined, logLabels.network);
 			} else if (resCode && resCode.message) {
-				req[C.REQ_REPO].logger.logError(resCode.message);
+				systemLogger.logError(resCode.message, undefined, logLabels.network);
 			} else {
-				req[C.REQ_REPO].logger.logError(JSON.stringify(resCode));
+				systemLogger.logError(JSON.stringify(resCode), undefined, logLabels.network);
 			}
 
 			if(!resCode.value) {
@@ -424,10 +440,7 @@
 
 			meta.contentLength = JSON.stringify(responseObject)
 				.length;
-			req[C.REQ_REPO].logger.logError(
-				resCode.code + " (" + resCode.value + ")",
-				meta
-			);
+			systemLogger.logInfo(genResponseLogging(resCode, meta, req), undefined, logLabels.network);
 
 			res.status(resCode.status)
 				.send(responseObject);
@@ -436,12 +449,13 @@
 
 			if(cache) {
 				res.setHeader("Cache-Control", `private, max-age=${cache.maxAge || config.cachePolicy.maxAge}`);
-				if (cache.etag) {
-					res.setHeader("etag", cache.etag);
-				}
 			}
 
-			if (Buffer.isBuffer(extraInfo)) {
+			if (customHeaders) {
+				res.writeHead(resCode.status, customHeaders);
+			}
+
+			if (extraInfo && Buffer.isBuffer(extraInfo)) {
 
 				res.status(resCode.status);
 
@@ -463,17 +477,17 @@
 
 			} else {
 
-				meta.contentLength = typeof extraInfo === "string" ? extraInfo.length : JSON.stringify(extraInfo)
-					.length;
-				res.status(resCode.status)
-					.send(extraInfo);
+				if(extraInfo) {
+					meta.contentLength = typeof extraInfo === "string" ? extraInfo.length : JSON.stringify(extraInfo)
+						.length;
+
+				}
+				res.status(resCode.status).send(extraInfo);
 			}
 
 			// log bandwidth and http status code
-			req[C.REQ_REPO].logger.logInfo(resCode.code, meta);
+			systemLogger.logInfo(genResponseLogging(resCode, meta, req), undefined, logLabels.network);
 		}
-
-		// next();
 	};
 
 	responseCodes.writeStreamRespond =  function (place, req, res, next, readStream, customHeaders) {
@@ -483,7 +497,7 @@
 		let response = responseCodes.OK;
 
 		readStream.on("error", error => {
-			req[C.REQ_REPO].logger.logInfo(`Stream failed: [${error.code} - ${error.message}]`, {place});
+			systemLogger.logError(`Stream failed: [${error.code} - ${error.message}] @ ${place}`, undefined, logLabels.network);
 			response = responseCodes.NO_FILE_FOUND;
 			res.status(response.status);
 			res.end();
@@ -498,11 +512,11 @@
 			length += data.length;
 		}).on("end", () => {
 			res.end();
-			req[C.REQ_REPO].logger.logInfo(response.status, {
+			systemLogger.logInfo(genResponseLogging(response, {
 				place,
 				httpCode: response.status,
 				contentLength: length
-			});
+			}, req), undefined, logLabels.network);
 		});
 	};
 

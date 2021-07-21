@@ -74,7 +74,7 @@ export class CellSelect extends React.PureComponent<IProps, IState> {
 
 			return (
 				<Item
-					group={item.group}
+					group={item.group ? 1 : 0}
 					disabled={item.disabled}
 					key={index}
 					value={item.value}

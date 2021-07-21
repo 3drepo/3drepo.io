@@ -1,30 +1,32 @@
 /**
- *	Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 "use strict";
 
+const yup = require("yup");
 const utils = require("../utils");
 const responseCodes = require("../response_codes.js");
-const db = require("../handler/db");
 
 const History = require("./history");
-const Ref = require("./ref");
 
 const ChatEvent = require("./chatEvent");
+const { findModelSettingById } = require("../models/modelSetting");
 
+const BCF = require("./bcf");
 const Ticket = require("./ticket");
 
 const C = require("../constants");
@@ -38,7 +40,6 @@ const fieldTypes = {
 	"desc": "[object String]",
 	"due_date": "[object Number]",
 	"name": "[object String]",
-	"norm": "[object Array]",
 	"number": "[object Number]",
 	"owner": "[object String]",
 	"position": "[object Array]",
@@ -46,6 +47,8 @@ const fieldTypes = {
 	"priority_last_changed": "[object Number]",
 	"rev_id": ["[object String]", "[object Object]"],
 	"scale": "[object Number]",
+	"sequence_start": "[object Number]",
+	"sequence_end": "[object Number]",
 	"status": "[object String]",
 	"status_last_changed": "[object Number]",
 	"topic_type": "[object String]",
@@ -53,88 +56,42 @@ const fieldTypes = {
 	"viewCount": "[object Number]",
 	"viewpoint": "[object Object]",
 	"viewpoints": "[object Array]",
+	"shapes": "[object Array]",
 	"extras": "[object Object]"
 };
 
+const issueSchema = yup.object().shape({
+	desc: yup.string().max(C.LONG_TEXT_CHAR_LIM)
+});
+
 const ownerPrivilegeAttributes = [
-	"position",
 	"desc",
 	"due_date",
 	"priority"
 ];
 
-const statusEnum = {
-	"OPEN": C.ISSUE_STATUS_OPEN,
-	"IN_PROGRESS": C.ISSUE_STATUS_IN_PROGRESS,
-	"FOR_APPROVAL": C.ISSUE_STATUS_FOR_APPROVAL,
-	"CLOSED": C.ISSUE_STATUS_CLOSED
-};
+const statusEnum = C.ISSUE_STATUS;
 
 class Issue extends Ticket {
 	constructor() {
-		super("issues", "issue_id", "issueIds", "ISSUE", fieldTypes,ownerPrivilegeAttributes);
+		super("issues", "issue", "issueIds", "ISSUE", fieldTypes, ownerPrivilegeAttributes);
 	}
 
 	async create(account, model, newIssue, sessionId) {
-		// Sets the issue number
-		const coll = await db.getCollection(account, model + ".issues");
-		try {
-			const issues = await coll.find({}, {number: 1}).sort({ number: -1 }).limit(1).toArray();
-			newIssue.number = (issues.length > 0) ? issues[0].number + 1 : 1;
-		} catch(e) {
-			newIssue.number = 1;
+		if (!issueSchema.isValidSync(newIssue, { strict: true })) {
+			throw responseCodes.INVALID_ARGUMENTS;
 		}
 
-		newIssue =  await super.create(account, model, newIssue);
-
+		newIssue = await super.create(account, model, newIssue);
 		ChatEvent.newIssues(sessionId, account, model, [newIssue]);
 		return newIssue;
-	}
-
-	async findByModelName(account, model, branch, revId, projection, ids, noClean = false, useIssueNumber = false) {
-		if (useIssueNumber && Array.isArray(ids)) {
-			ids = { number:  {"$in": ids.map(x => parseInt(x))} };
-		}
-
-		const issues = await super.findByModelName(account, model, branch, revId, projection, ids, noClean);
-
-		if (!useIssueNumber) { // useIssueNumber is being used by export bcf and it doesnt export the submodel issues
-			let submodels = [];
-
-			if (branch || revId) {
-				// searches for the revision models
-				const { current } = (await History.getHistory({account, model}, branch, revId)) || {};
-				if (current) {
-					submodels = await Ref.find({account, model}, {type: "ref", _id: {"$in": current}}, {project:1});
-					submodels = submodels.map(r => r.project);
-				}
-			}
-
-			const issuesPerSubmodels = await Promise.all(submodels.map(submodel =>
-				this.findByModelName(account, submodel,"master", null, projection, ids, noClean, useIssueNumber)
-			));
-
-			issuesPerSubmodels.forEach(subIssues => Array.prototype.push.apply(issues, subIssues));
-		}
-
-		return issues;
-	}
-
-	updateFromBCF(dbCol, issueToUpdate, changeSet) {
-		return db.getCollection(dbCol.account, dbCol.model + ".issues").then((_dbCol) => {
-			return _dbCol.update({_id: utils.stringToUUID(issueToUpdate._id)}, {$set: changeSet}).then(() => {
-				const sessionId = issueToUpdate.sessionId;
-				const updatedIssue = this.clean(dbCol.account, dbCol.model, issueToUpdate);
-				ChatEvent.issueChanged(sessionId, dbCol.account, dbCol.model, updatedIssue._id, updatedIssue);
-				return updatedIssue;
-			});
-		});
 	}
 
 	async onBeforeUpdate(data, oldIssue, userPermissions, systemComments) {
 		// 2.6 if the user is trying to change the status and it doesnt have the necessary permissions throw a ISSUE_UPDATE_PERMISSION_DECLINED
 		if (data.status && data.status !== oldIssue.status) {
-			const canChangeStatus = userPermissions.hasAdminPrivileges || (userPermissions.hasAssignedJob && data.status !== statusEnum.CLOSED);
+			const canChangeStatus = userPermissions.hasAdminPrivileges ||
+				(userPermissions.hasAssignedJob && data.status !== statusEnum.CLOSED && data.status !== statusEnum.VOID);
 			if (!canChangeStatus) {
 				throw responseCodes.ISSUE_UPDATE_PERMISSION_DECLINED;
 			}
@@ -170,19 +127,20 @@ class Issue extends Ticket {
 	}
 
 	async update(user, sessionId, account, model, issueId, data) {
+		if (!data || !issueSchema.isValidSync(data, { strict: true })) {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+
 		// 0. Set the black list for attributes
 		const attributeBlacklist = [
 			"_id",
 			"comments",
 			"created",
 			"creator_role",
-			"name",
-			"norm",
 			"number",
 			"owner",
 			"rev_id",
 			"thumbnail",
-			"viewpoint",
 			"viewpoints",
 			"priority_last_changed",
 			"status_last_changed"
@@ -191,37 +149,106 @@ class Issue extends Ticket {
 		return await super.update(attributeBlacklist, user, sessionId, account, model, issueId, data, this.onBeforeUpdate.bind(this));
 	}
 
-	async getIssuesReport(account, model, rid, ids, res) {
-		const reportGen = require("../models/report").newIssuesReport(account, model, rid);
-		return super.getReport(account, model, rid, ids, res, reportGen);
+	async getBCF(account, model, branch, revId, filters) {
+		const projection = {};
+		const noClean = true;
+
+		const settings = await findModelSettingById(account, model);
+
+		const issues = await this.findByModelName(account, model, branch, revId, undefined, projection,
+			filters, noClean);
+
+		return BCF.getBCFZipReadStream(account, model, issues, settings.properties.unit);
 	}
 
-	getIssuesList(account, model, branch, revision, ids, sort, convertCoords) {
+	async importBCF(requester, account, model, revId, dataBuffer) {
+		if (dataBuffer.byteLength === 0) {
+			return Promise.reject(responseCodes.INVALID_ARGUMENTS);
+		}
 
-		const projection = {
-			extras: 0,
-			"comments": 0,
-			"viewpoints.extras": 0,
-			"viewpoints.scribble": 0,
-			"viewpoints.screenshot.content": 0,
-			"viewpoints.screenshot.resizedContent": 0,
-			"thumbnail.content": 0
-		};
+		let branch;
 
-		return this.findByModelName(
-			account,
-			model,
-			branch,
-			revision,
-			projection,
-			ids,
-			false
-		).then((issues) => {
-			if (convertCoords) {
-				issues.forEach(this.toDirectXCoords);
-			}
-			return issues;
+		if (!revId) {
+			branch = "master";
+		}
+
+		const history = await  History.getHistory(account, model, branch, revId, {_id: 1});
+
+		revId = history._id;
+
+		const settings = await findModelSettingById(account, model);
+		const bcfIssues = await BCF.importBCF(requester, account, model, dataBuffer, settings);
+
+		return this.merge(account, model, branch, revId, bcfIssues, requester.socketId, requester.user);
+	}
+
+	async merge(account, model, branch, revId, data, sessionId, user) {
+		const existingIssues = await this.findByModelName(account, model, branch, revId, {}, {}, true);
+		const existingIssuesMap = {};
+		for (let i = 0; i < existingIssues.length; ++i) {
+			existingIssuesMap[utils.uuidToString(existingIssues[i]._id)] = i;
+		}
+
+		// sort issues by date and add number
+		data = data.sort((a, b) => {
+			return a.created > b.created;
 		});
+
+		for (let i = 0; i < data.length; i++) {
+			const issueToMerge = data[i];
+			issueToMerge.rev_id = revId;
+
+			const matchIndex = existingIssuesMap[utils.uuidToString(issueToMerge._id)];
+
+			if (matchIndex !== undefined) {
+				const matchingIssue = existingIssues[matchIndex];
+
+				// 0. Set the black list for attributes
+				const attributeBlacklist = [
+					"_id",
+					"created",
+					"creator_role",
+					"name",
+					"number",
+					"owner",
+					"rev_id",
+					"thumbnail",
+					"viewpoint",
+					"priority_last_changed",
+					"status_last_changed"
+				];
+
+				// Attempt to merge viewpoints and comments and sort by created desc
+				const complexAttrs = ["comments", "viewpoints"];
+				complexAttrs.forEach((complexAttr) => {
+					if (matchingIssue[complexAttr]) {
+						let mergedAttr = matchingIssue[complexAttr];
+
+						for (let issueIdx = 0; issueIdx < issueToMerge[complexAttr].length; issueIdx++) {
+							if (-1 === matchingIssue[complexAttr].findIndex(attr =>
+								utils.uuidToString(attr.guid) === utils.uuidToString(issueToMerge[complexAttr][issueIdx].guid))) {
+								mergedAttr.push(issueToMerge[complexAttr][issueIdx]);
+							}
+						}
+						if (mergedAttr.length && mergedAttr[0].created) {
+							mergedAttr = mergedAttr.sort((a, b) => {
+								return a.created > b.created;
+							});
+						}
+						issueToMerge[complexAttr] = mergedAttr;
+					}
+				});
+
+				await super.update(attributeBlacklist, user, sessionId, account, model, issueToMerge._id, issueToMerge, this.onBeforeUpdate.bind(this));
+			} else {
+				await this.create(account, model, issueToMerge, sessionId);
+			}
+		}
+	}
+
+	async getIssuesReport(account, model, rid, filters, res) {
+		const reportGen = require("../models/report").newIssuesReport(account, model, rid);
+		return super.getReport(account, model, rid, filters, res, reportGen);
 	}
 
 	isIssueBeingClosed(oldIssue, newIssue) {
@@ -245,7 +272,7 @@ class Issue extends Ticket {
 	}
 
 	isPriorityChange(oldIssue, newIssue) {
-		if (!newIssue.hasOwnProperty("priority")) {
+		if (!utils.hasField(newIssue, "priority")) {
 			return false;
 		}
 
@@ -253,7 +280,7 @@ class Issue extends Ticket {
 	}
 
 	isStatusChange(oldIssue, newIssue) {
-		if (!newIssue.hasOwnProperty("status")) {
+		if (!utils.hasField(newIssue, "status")) {
 			return false;
 		}
 		return oldIssue.status !== newIssue.status;

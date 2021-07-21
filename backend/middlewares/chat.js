@@ -21,7 +21,7 @@ const C = require("../constants");
 module.exports = {
 	onNotification: function(req, res, next) {
 		const sessionId = req.headers[C.HEADER_SOCKET_ID];
-		const notifications = (req.userNotifications  || []);
+		const notifications = req.userNotifications  || [];
 
 		const deletedNotifications = notifications.filter(n => n.deleted);
 		const upsertedNotifications = notifications.filter(n => !n.deleted);
@@ -37,8 +37,10 @@ module.exports = {
 		const account = req.params.account;
 		const model = req.params.model;
 		const _id = req.params.issueId || req.params.riskId;
+		const notifications = req.userNotifications  || [];
 
 		chatEvent.newComment(sessionId, account, model, _id, comment);
+		notifications.forEach(chatEvent.upsertedNotification.bind(null,sessionId));
 		next();
 	},
 

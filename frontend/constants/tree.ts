@@ -1,12 +1,29 @@
+/**
+ *  Copyright (C) 2021 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import SelectAllIcon from '@material-ui/icons/DoneAll';
-import IFCSpacesIcon from '@material-ui/icons/ViewAgenda';
+import GeometryIcon from '@material-ui/icons/ViewAgenda';
 import ShowAllIcon from '@material-ui/icons/Visibility';
 import IsolateIcon from '@material-ui/icons/VisibilityOutlined';
 
 export const TREE_ACTIONS_ITEMS = {
 	SHOW_ALL: 'showAll',
 	ISOLATE_SELECTED: 'isolateSelected',
-	HIDE_IFC_SPACES: 'hideIfcSpaces',
+	SHOW_HIDDEN_GEOMETRY: 'showHiddenGeometry',
 	SELECT_ALL: 'selectAll'
 };
 
@@ -22,9 +39,9 @@ export const TREE_ACTIONS_MENU = [
 		Icon: IsolateIcon
 	},
 	{
-		name: TREE_ACTIONS_ITEMS.HIDE_IFC_SPACES,
-		label: 'Hide IFC spaces',
-		Icon: IFCSpacesIcon
+		name: TREE_ACTIONS_ITEMS.SHOW_HIDDEN_GEOMETRY,
+		label: 'Show hidden geometry',
+		Icon: GeometryIcon
 	},
 	{
 		name: TREE_ACTIONS_ITEMS.SELECT_ALL,

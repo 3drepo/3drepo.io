@@ -25,6 +25,7 @@ import { FixedSizeList as List } from 'react-window';
 import { TREE_ACTIONS_ITEMS, TREE_ACTIONS_MENU, TREE_ITEM_SIZE } from '../../../../constants/tree';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
+import { EmptyStateInfo } from '../../../components/components.styles';
 import {
 	IconWrapper,
 	MenuList,
@@ -34,14 +35,13 @@ import {
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import { PanelBarActions } from '../panelBarActions';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { EmptyStateInfo } from '../views/views.styles';
 import TreeNode from './components/treeNode/treeNode.container';
 
 interface IProps {
 	className: string;
 	selectedFilters: any[];
 	searchEnabled: boolean;
-	ifcSpacesHidden: boolean;
+	hiddenGeometryVisible: boolean;
 	nodesList: any[];
 	expandedNodesMap: any;
 	nodesSelectionMap: any;
@@ -55,9 +55,10 @@ interface IProps {
 	setState: (componentState: any) => void;
 	showAllNodes: () => void;
 	isolateSelectedNodes: (nodeIds: any[]) => void;
-	hideIfcSpaces: () => void;
+	showHiddenGeometry: () => void;
 	goToRootNode: (nodeId: boolean) => void;
 	selectNodes: (nodesIds: any[]) => void;
+	id?: string;
 }
 
 interface IState {
@@ -72,11 +73,11 @@ export class Tree extends React.PureComponent<IProps, IState> {
 	}
 
 	get menuActionsMap() {
-		const { isolateSelectedNodes, hideIfcSpaces } = this.props;
+		const { isolateSelectedNodes, showHiddenGeometry } = this.props;
 		return {
 			[TREE_ACTIONS_ITEMS.SHOW_ALL]: this.handleShowAllNodes,
 			[TREE_ACTIONS_ITEMS.ISOLATE_SELECTED]: () => isolateSelectedNodes(undefined),
-			[TREE_ACTIONS_ITEMS.HIDE_IFC_SPACES]: hideIfcSpaces,
+			[TREE_ACTIONS_ITEMS.SHOW_HIDDEN_GEOMETRY]: showHiddenGeometry,
 			[TREE_ACTIONS_ITEMS.SELECT_ALL]: this.handleSelectAllNodes
 		};
 	}
@@ -134,6 +135,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 							itemCount={size}
 							itemSize={TREE_ITEM_SIZE}
 							itemKey={this.getNodeId}
+							className="tree-list"
 						>
 							{this.renderTreeNode}
 						</List>
@@ -168,6 +170,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 				Icon={<TreeIcon />}
 				renderActions={this.renderActions}
 				pending={isPending}
+				id={this.props.id}
 			>
 				{this.renderFilterPanel(searchEnabled)}
 				{this.renderNodesList(!isPending && !!nodesList.length)}
@@ -241,14 +244,16 @@ export class Tree extends React.PureComponent<IProps, IState> {
 		);
 	}
 
+	private renderCheckIcon = renderWhenTrue(() => <Check fontSize="small" />);
+
 	private renderActionsMenu = () => (
 		<MenuList>
-			{TREE_ACTIONS_MENU.map(( {name, Icon, label }) => (
+			{TREE_ACTIONS_MENU.map(({ name, Icon, label }) => (
 				<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
 					<IconWrapper><Icon fontSize="small" /></IconWrapper>
 					<StyledItemText>
 						{label}
-						{(name === TREE_ACTIONS_ITEMS.HIDE_IFC_SPACES && this.props.ifcSpacesHidden) && <Check fontSize="small" />}
+						{this.renderCheckIcon(name === TREE_ACTIONS_ITEMS.SHOW_HIDDEN_GEOMETRY && this.props.hiddenGeometryVisible)}
 					</StyledItemText>
 				</StyledListItem>
 			))}

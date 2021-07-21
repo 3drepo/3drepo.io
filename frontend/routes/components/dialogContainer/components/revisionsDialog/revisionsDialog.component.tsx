@@ -22,7 +22,6 @@ import DialogActions from '@material-ui/core/DialogActions';
 
 import { ROUTES } from '../../../../../constants/routes';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
-import { analyticsService, EVENT_ACTIONS, EVENT_CATEGORIES } from '../../../../../services/analytics';
 import { Loader } from '../../../loader/loader.component';
 import { RevisionsListItem } from '../../../revisionsListItem/revisionsListItem.component';
 import { TYPES } from './revisionsDialog.constants';
@@ -66,10 +65,9 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 
 	private revisionClickHandler = ({ tag, _id }) => {
 		const { teamspace, modelId, handleClose, history } = this.props;
+
 		handleClose();
 		history.push(`${ROUTES.VIEWER}/${teamspace}/${modelId}/${tag || _id}`);
-
-		analyticsService.sendEvent(EVENT_CATEGORIES.MODEL, EVENT_ACTIONS.VIEW);
 	}
 
 	private toggleVoid = (event, revision) => {
@@ -87,6 +85,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 
 	private onRevisionItemClick = (event, revision) => {
 		const { handleSetNewRevision } = this.props;
+
 		if (this.props.type === TYPES.VIEWER) {
 			const isCurrentRevision = this.currentRevisionId === revision._id;
 			if (!isCurrentRevision) {
@@ -144,7 +143,7 @@ export class RevisionsDialog extends React.PureComponent<IProps, any> {
 				<DialogActions>
 					<Button
 						onClick={this.props.handleClose}
-						variant="raised"
+						variant="contained"
 						color="secondary"
 					>Ok</Button>
 				</DialogActions>

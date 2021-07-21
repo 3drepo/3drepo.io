@@ -20,6 +20,7 @@ import React from 'react';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
+import Tooltip from '@material-ui/core/Tooltip';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 import EditIcon from '@material-ui/icons/Edit';
 import { Field, Formik } from 'formik';
@@ -27,7 +28,6 @@ import { isEmpty } from 'lodash';
 
 import { ROUTES } from '../../constants/routes';
 import { LONG_DATE_TIME_FORMAT } from '../../services/formatting/formatDate';
-import { COLOR } from '../../styles';
 import { ChipsInput } from '../components/chipsInput/chipsInput.component';
 import { DateTime } from '../components/dateTime/dateTime.component';
 import { Loader } from '../components/loader/loader.component';
@@ -180,8 +180,15 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 	}
 
 	private renderLastTreatmentsUpdated = () => {
-		if (this.state.fileName) {
-			return this.state.fileName;
+		const { fileName } = this.state;
+		if (fileName) {
+			return (
+				<Tooltip title={fileName} placement="bottom">
+					<span>
+						{fileName}
+					</span>
+				</Tooltip>
+			);
 		}
 
 		if (this.treatmentsUpdatedAt) {
@@ -198,10 +205,10 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 	private renderTreatmentSuggestionsSection = () => {
 		return (
 			<SuggestionsContainer container direction="column" wrap="nowrap">
-				<Headline color="textPrimary" variant="subheading">Treatment Suggestions</Headline>
+				<Headline color="textPrimary" variant="subtitle1">Treatment Suggestions</Headline>
 				<FileGrid container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
 					<InfoColumnWrapper container>
-						<DataText variant="body2">
+						<DataText variant="body1">
 							{this.renderLastTreatmentsUpdated()}
 						</DataText>
 					</InfoColumnWrapper>
@@ -281,7 +288,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 							<Field render={({ form }) =>
 								<Button
 									type="submit"
-									variant="raised"
+									variant="contained"
 									color="secondary"
 									disabled={!form.isValid || form.isSubmitting}
 								>

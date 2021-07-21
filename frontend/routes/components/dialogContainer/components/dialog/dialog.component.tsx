@@ -27,24 +27,28 @@ import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { IDialogConfig } from '../../../../../modules/dialog/dialog.redux';
 import { dispatch } from '../../../../../modules/store';
 import { COLOR } from '../../../../../styles';
-import { DialogActions, DialogTitle } from './dialog.styles';
+import { SearchButton } from '../../../../viewerGui/components/panelBarActions/searchButton';
+import { DialogActions, DialogTitle, TopDialogActions } from './dialog.styles';
 
 interface IProps {
 	id: number;
 	config: IDialogConfig;
 	data?: any;
 	hide: (dialogId) => void;
+	searchEnabled?: boolean;
 }
 
-export const Dialog = (props: IProps) => {
+export const Dialog: React.FunctionComponent<IProps> = React.forwardRef((props, ref) => {
 	const [isOpen, setIsOpen] = useState(true);
+	const [closeDisabled, setCloseDisabled] = useState(false);
+
 	useEffect(() => {
 		if (props.config && props.config.logError) {
 			console.error(props.config.logError, props.config.content);
 		}
 	}, []);
 
-	const { content, title, template: DialogTemplate, DialogProps, onCancel } = props.config;
+	const { content, title, template: DialogTemplate, DialogProps, onCancel, search } = props.config;
 
 	const renderContent = renderWhenTrue(() => (
 		<DialogContent>
@@ -60,12 +64,22 @@ export const Dialog = (props: IProps) => {
 				{...data}
 				handleResolve={handleResolve}
 				handleClose={handleClose}
+				dialogId={props.id}
+				handleDisableClose={handleCloseDisable}
+				disableClosed={closeDisabled}
 			/>
 		);
 	});
 
 	const renderCloseButton = () => (
-		<IconButton onClick={handleClose}><CloseIcon nativeColor={COLOR.WHITE} /></IconButton>
+		<TopDialogActions>
+			{search && <SearchButton
+				enabled={props.searchEnabled}
+				onOpen={search.onOpen}
+				onClose={search.onClose}
+			/>}
+			<IconButton onClick={handleClose}><CloseIcon htmlColor={COLOR.WHITE} /></IconButton>
+		</TopDialogActions>
 	);
 
 	const renderActions = renderWhenTrue(() => (
@@ -78,6 +92,8 @@ export const Dialog = (props: IProps) => {
 			</Button>
 		</DialogActions>
 	));
+
+	const handleCloseDisable = (set: boolean) => setCloseDisabled(set);
 
 	const handleCallback = (callback) => {
 		const action = callback();
@@ -94,12 +110,15 @@ export const Dialog = (props: IProps) => {
 	};
 
 	const handleClose = (...args) => {
-		setIsOpen(false);
+		if (!closeDisabled) {
+			setIsOpen(false);
 
-		handleHide();
+			handleHide();
 
-		if (props.config.onCancel) {
-			handleCallback(props.config.onCancel.bind(null, ...args));
+			if (props.config.onCancel) {
+				handleCallback(props.config.onCancel.bind(null, ...args));
+			}
+
 		}
 	};
 
@@ -113,11 +132,11 @@ export const Dialog = (props: IProps) => {
 	};
 
 	return (
-		<DialogBase {...DialogProps} open={isOpen} onClose={handleClose}>
+		<DialogBase {...DialogProps} ref={ref} open={isOpen} onClose={handleClose}>
 			<DialogTitle disableTypography>{title}{renderCloseButton()}</DialogTitle>
 			{renderContent(content && !DialogTemplate)}
 			{renderTemplate(!!DialogTemplate)}
-			{renderActions(content && onCancel)}
+			{renderActions(content && onCancel && !props.config.onConfirm)}
 		</DialogBase>
 	);
-};
+});

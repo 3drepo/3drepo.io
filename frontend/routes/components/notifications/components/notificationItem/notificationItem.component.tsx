@@ -1,4 +1,3 @@
-
 /**
  *  Copyright (C) 2018 3D Repo Ltd
  *
@@ -15,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import { Tooltip } from '@material-ui/core';
 import Avatar from '@material-ui/core/Avatar';
 import Place from '@material-ui/icons/Place';
@@ -38,6 +38,9 @@ export interface INotification {
 	teamSpace: string;
 	modelName: string;
 	issuesId?: string[];
+	referrer?: string;
+	riskId?: string;
+	issueId?: string;
 	revision?: string;
 	revisions?: string[];
 	timestamp: number;
@@ -49,7 +52,9 @@ const TYPES = {
 	ISSUE_ASSIGNED : 'ISSUE_ASSIGNED',
 	ISSUE_CLOSED : 'ISSUE_CLOSED',
 	MODEL_UPDATED : 'MODEL_UPDATED',
-	MODEL_UPDATED_FAILED : 'MODEL_UPDATED_FAILED'
+	MODEL_UPDATED_FAILED : 'MODEL_UPDATED_FAILED',
+	USER_REFERENCED : 'USER_REFERENCED'
+
 };
 
 interface IProps extends INotification {
@@ -94,6 +99,7 @@ const getIcon = (notification) => {
 	switch (notification.type) {
 		case TYPES.ISSUE_CLOSED:
 		case TYPES.ISSUE_ASSIGNED:
+		case TYPES.USER_REFERENCED:
 			return (<Place />);
 		case TYPES.MODEL_UPDATED:
 		case TYPES.MODEL_UPDATED_FAILED:
@@ -136,6 +142,8 @@ const getDetails = (notification: IProps) => {
 			return 'New revision failed to import';
 		case TYPES.ISSUE_CLOSED:
 			return notification.issuesId.length <= 1 ? 'Issue has been closed' : `${notification.issuesId.length} closed issues`;
+		case TYPES.USER_REFERENCED:
+			return `${notification.referrer} has tagged you in a comment`;
 	}
 };
 
@@ -164,6 +172,10 @@ export class NotificationItem extends React.PureComponent<IProps, IState> {
 			if (issueId) {
 				search = `?issueId=${issueId}`;
 			}
+		}
+
+		if (this.props.type === TYPES.USER_REFERENCED) {
+			search = this.props.issueId ? `?issueId=${this.props.issueId}` : `?riskId=${this.props.riskId}`;
 		}
 
 		if (this.props.type === TYPES.MODEL_UPDATED && this.props.revision) {

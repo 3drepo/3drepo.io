@@ -26,7 +26,6 @@ const responseCodes = require("../../response_codes.js");
 const helpers = require("../helpers/signUp");
 const C = require("../../constants");
 const async = require("async");
-const ModelSetting = require("../../models/modelSetting");
 const User = require("../../models/user");
 const config = require("../../config");
 const fs = require("fs");

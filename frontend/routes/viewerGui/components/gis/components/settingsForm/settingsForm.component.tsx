@@ -17,11 +17,11 @@
 
 import { Field } from 'formik';
 import React from 'react';
+import SaveIcon from '@material-ui/icons/Save';
 
 import { ViewerPanelButton, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { Container, Header, Headline, StyledForm, StyledTextField } from './settingsForm.styles';
 
-import SaveIcon from '@material-ui/icons/Save';
 
 const defaultFieldProps = {
 	required: true,
@@ -37,7 +37,7 @@ export const SettingsForm = (props) => {
 				<Header>
 					To visualize map tiles match GIS point with project base point
 				</Header>
-				<Headline color="primary" variant="subheading">
+				<Headline color="primary" variant="subtitle1">
 					GIS Point - World Coordinates
 				</Headline>
 				<Field name="latitude" render={ ({ field, form }) => (
@@ -67,7 +67,7 @@ export const SettingsForm = (props) => {
 						label="Angle from North (Clockwise Degrees)"
 					/>
 				)} />
-				<Headline color="primary" variant="subheading">
+				<Headline color="primary" variant="subtitle1">
 					Project Base Point - Model Coordinates
 				</Headline>
 
@@ -99,7 +99,7 @@ export const SettingsForm = (props) => {
 					/>
 				)} />
 			</Container>
-			<ViewerPanelFooter alignItems="center" justify="flex-end">
+			<ViewerPanelFooter container alignItems="center" justify="flex-end">
 				<Field render={({ form }) => (
 					<ViewerPanelButton
 						type="submit"

@@ -17,32 +17,99 @@
 
 "use strict";
 
-const ModelFactory = require("../factory/modelFactory");
-const ModelSetting = require("../modelSetting");
+const db = require("../../handler/db");
+const {
+	prepareDefaultView,
+	createNewSetting,
+	deleteModelSetting,
+	findModelSettingById,
+	findModelSettings,
+	findPermissionByUser,
+	getModelsData,
+	isModelNameExists,
+	setModelImportFail,
+	setModelImportSuccess,
+	setModelStatus,
+	createCorrelationId
+} = require("../modelSetting");
 const User = require("../user");
 const responseCodes = require("../../response_codes");
 const importQueue = require("../../services/queue");
 const C = require("../../constants");
 const Mailer = require("../../mailer/mailer");
 const systemLogger = require("../../logger.js").systemLogger;
-const config = require("../../config");
 const History = require("../history");
-const Scene = require("../scene");
-const Ref = require("../ref");
+const { getRefNodes } = require("../ref");
+const { findNodesByType, getGridfsFileStream, getNodeById, getParentMatrix } = require("../scene");
 const utils = require("../../utils");
 const middlewares = require("../../middlewares/middlewares");
-const multer = require("multer");
 const fs = require("fs");
 const ChatEvent = require("../chatEvent");
-const Project = require("../project");
+const { addModelToProject, createProject, findOneProject, removeProjectModel } = require("../project");
 const _ = require("lodash");
-const nodeuuid = require("uuid/v1");
 const FileRef = require("../fileRef");
 const notifications = require("../notification");
 const CombinedStream = require("combined-stream");
 const stringToStream = require("string-to-stream");
 const { StreamBuffer } = require("./stream");
-const { BinToTriangleStringStream, BinToVector3dStringStream } = require("./binary");
+const { BinToFaceStringStream, BinToVector3dStringStream } = require("./binary");
+const PermissionTemplates = require("../permissionTemplates");
+const AccountPermissions = require("../accountPermissions");
+
+async function _fillInModelDetails(accountName, setting, permissions) {
+	if (permissions.indexOf(C.PERM_MANAGE_MODEL_PERMISSION) !== -1) {
+		permissions = C.MODEL_PERM_LIST.slice(0);
+	}
+
+	const model = {
+		federate: setting.federate,
+		permissions: permissions,
+		model: setting._id,
+		type: setting.type,
+		units: setting.properties.unit,
+		name: setting.name,
+		status: setting.status,
+		errorReason: setting.errorReason,
+		subModels: setting.federate && setting.subModels || undefined,
+		timestamp: setting.timestamp || null,
+		code: setting.properties ? setting.properties.code || undefined : undefined
+
+	};
+
+	const nRev = await History.revisionCount(accountName, setting._id);
+
+	model.nRevisions = nRev;
+
+	return model;
+}
+
+// list all models in an account
+async function _getModels(teamspace, ids, permissions) {
+	const models = [];
+	const fedModels = [];
+
+	let query = {};
+
+	if (ids) {
+		query = { _id: { "$in": ids } };
+	}
+
+	const settings = await findModelSettings(teamspace, query);
+
+	await Promise.all(settings.map(async setting => {
+		const model = await _fillInModelDetails(teamspace, setting, permissions);
+
+		if (!(model.permissions.length === 1 && model.permissions[0] === null)) {
+			setting.federate ? fedModels.push(model) : models.push(model);
+		}
+	}));
+
+	return { models, fedModels };
+}
+
+function _makeAccountObject(name) {
+	return { account: name, models: [], fedModels: [], projects: [], permissions: [], isAdmin: false };
+}
 
 /** *****************************************************************************
  * Converts error code from repobouncerclient to a response error object.
@@ -85,7 +152,11 @@ function translateBouncerErrCode(bouncerErrorCode) {
 		{ res: responseCodes.FILE_IMPORT_NO_3D_VIEW, softFail: false, userErr: true},
 		{ res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, softFail: false, userErr: false},
 		{ res: responseCodes.FILE_IMPORT_TIMED_OUT, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_SYNCHRO_NOT_SUPPORTED, softFail: false, userErr: false}
+		{ res: responseCodes.FILE_IMPORT_SYNCHRO_NOT_SUPPORTED, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_MAX_NODE_EXCEEDED, softFail: false, userErr: true},
+		{ res: responseCodes.FILE_IMPORT_PROCESS_ERR, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_PROCESS_ERR, softFail: false, userErr: false},
+		{ res: responseCodes.FILE_IMPORT_GEOMETRY_ERR, softFail: false, userErr: false} // 34
 	];
 
 	const errObj =  bouncerErrToWebErr.length > bouncerErrorCode ?
@@ -95,50 +166,34 @@ function translateBouncerErrCode(bouncerErrorCode) {
 }
 
 function insertModelUpdatedNotificationsLatestReview(account, model) {
-	History.findLatest({account, model},{tag:1}).then(h => {
+	History.findLatest(account, model,{tag:1}).then(h => {
 		const revision = (!h || !h.tag) ? "" : h.tag;
 		return notifications.upsertModelUpdatedNotifications(account, model, revision);
 	}).then(n => n.forEach(ChatEvent.upsertedNotification.bind(null,null)));
 }
-function importSuccess(account, model, sharedSpacePath, user) {
-	Promise.all([
-		setStatus(account, model, "ok", user),
-		History.revisionCount(account, model)
-	]).then(([setting, nRevisions]) => {
+
+async function importSuccess(account, model, sharedSpacePath, user) {
+	try {
+		const [setting, nRevisions] = await Promise.all([
+			setStatus(account, model, "ok", user),
+			History.revisionCount(account, model)
+		]);
+
 		if (setting) {
-			if (sharedSpacePath && setting.corID) {
-				const path = require("path");
-				const tmpDir = path.join(sharedSpacePath, setting.corID);
-				const tmpModelFile = path.join(sharedSpacePath, `${setting.corID}.json`);
-				const filesToDelete  = [{ type:"file", path: tmpModelFile}];
+			systemLogger.logDebug(`Model status changed to ${setting.status} and correlation ID reset`);
 
-				fs.readdirSync(tmpDir).forEach((file) => {
-					filesToDelete.push({ type: "file", path: path.join(tmpDir, file)});
-				});
-
-				_deleteFiles(filesToDelete);
-				_deleteFiles([{desc: "tmp dir", type: "dir", path: tmpDir}]);
-			}
-			systemLogger.logInfo(`Model status changed to ${setting.status} and correlation ID reset`);
-			setting.corID = undefined;
-			setting.errorReason = undefined;
-			if(setting.type === "toy" || setting.type === "sample") {
-				setting.timestamp = new Date();
-			}
-			setting.markModified("errorReason");
+			const updatedSetting = await setModelImportSuccess(account, model, setting.type === "toy" || setting.type === "sample");
 
 			// hack to add the user field to send to the user
-			const data = {user, nRevisions ,...JSON.parse(JSON.stringify(setting))};
+			const data = {user, nRevisions ,...JSON.parse(JSON.stringify(updatedSetting))};
 			ChatEvent.modelStatusChanged(null, account, model, data);
 
 			// Creates model updated notification.
 			insertModelUpdatedNotificationsLatestReview(account, model);
-
-			setting.save();
 		}
-	}).catch(err => {
+	} catch (err) {
 		systemLogger.logError("Failed to invoke importSuccess:" +  err);
-	});
+	}
 }
 
 /**
@@ -151,22 +206,12 @@ function importSuccess(account, model, sharedSpacePath, user) {
  * @param {errMsg} errMsg - Verbose error message (errCode.message will be used if undefined)
  */
 function importFail(account, model, sharedSpacePath, user, errCode, errMsg) {
-	ModelSetting.findById({account, model}, model).then(setting => {
-		// mark model failed
-		setting.status = "failed";
-		if(setting.type === "toy" || setting.type === "sample") {
-			setting.timestamp = undefined;
-		}
+	const translatedError = translateBouncerErrCode(errCode);
 
-		const translatedError = translateBouncerErrCode(errCode);
-		setting.errorReason = translatedError.res;
-
-		setting.markModified("errorReason");
-		setting.save().then(() => {
-			// hack to add the user field to send to the user
-			const data = Object.assign({user}, JSON.parse(JSON.stringify(setting)));
-			ChatEvent.modelStatusChanged(null, account, model, data);
-		});
+	setModelImportFail(account, model, translatedError.res).then(setting => {
+		// hack to add the user field to send to the user
+		const data = Object.assign({user}, JSON.parse(JSON.stringify(setting)));
+		ChatEvent.modelStatusChanged(null, account, model, data);
 
 		if (!errMsg) {
 			errMsg = setting.errorReason.message;
@@ -221,94 +266,51 @@ function importFail(account, model, sharedSpacePath, user, errCode, errMsg) {
  * @param {model} model - Model
  * @param {user} user - The user who triggered the status
  */
-function setStatus(account, model, status, user) {
-	ChatEvent.modelStatusChanged(null, account, model, { status, user });
-	return ModelSetting.findById({account, model}, model).then(setting => {
-		setting.status = status;
-		systemLogger.logInfo(`Model status changed to ${status}`);
-		return setting.save();
-	}).catch(err => {
+async function setStatus(account, model, status, user) {
+	try {
+		const setting = await setModelStatus(account, model, status);
+		systemLogger.logDebug(`Model status changed to ${status}`);
+		ChatEvent.modelStatusChanged(null, account, model, { status, user });
+
+		return setting;
+	} catch(err) {
 		systemLogger.logError("Failed to invoke setStatus:", err);
-	});
-}
-
-/**
- * Create correlation ID, store it in model setting, and return it
- * @param {account} account - User account
- * @param {model} model - Model
- * @param {addTimestamp} - add a timestamp to the model settings while you're at it
- */
-function createCorrelationId(setting, addTimestamp = false) {
-	const correlationId = nodeuuid();
-
-	if(setting) {
-		setting.corID = correlationId;
-		if (addTimestamp) {
-			// FIXME: This is a temporary workaround, needed because federation
-			// doesn't update it's own timestamp (and also not wired into the chat)
-			setting.timestamp = new Date();
-		}
-		systemLogger.logInfo(`Correlation ID ${setting.corID} set`);
-
-		return setting.save().then(() => {
-			return correlationId;
-		});
 	}
-
-	return Promise.reject("setting is undefined");
-}
-
-/**
- * Clear correlation ID from model setting when processing returns
- * @param {account} account - User account
- * @param {model} model - Model
- */
-function resetCorrelationId(account, model) {
-	ModelSetting.findById({account, model}, model).then(setting => {
-		setting.corID = undefined;
-		systemLogger.logInfo("Correlation ID reset");
-		setting.save();
-	}).catch(err => {
-		systemLogger.logError("Failed to resetCorrelationId:", err);
-	});
 }
 
 function createNewModel(teamspace, modelName, data) {
-	if(!data.hasOwnProperty("project")) {
+	if(!utils.hasField(data, "project")) {
 		return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 	}
 
 	const projectName = data.project;
-	return Project.findOne({account: teamspace}, {name: projectName}).then((project) => {
+	return findOneProject(teamspace, {name: projectName}).then((project) => {
 		if(!project) {
 			return Promise.reject(responseCodes.PROJECT_NOT_FOUND);
 		}
 
+		// FIXME when project changes are merged, consider using func in project
 		// Check there's no other model within the same project with the model name
-		return ModelSetting.count({account: teamspace},
-			{name: modelName, _id: {"$in": project.models}}).then((count) => {
-			return count > 0;
-		}).then((modelNameExists) => {
+		return isModelNameExists(teamspace, project.models, modelName).then((modelNameExists) => {
 			if(modelNameExists) {
 				return Promise.reject({resCode: responseCodes.MODEL_EXIST});
 			}
 
 			// Create a model setting
-			return ModelSetting.createNewSetting(teamspace, modelName, data).then((settings) => {
+			return createNewSetting(teamspace, modelName, data).then((settings) => {
 				// Add model into project
-				project.models.push(settings._id);
-
-				return project.save().then(() => {
+				return addModelToProject(teamspace, projectName, settings._id).then(() => {
 					// call chat to indicate a new model has been created
 					const modelData = {
 						account: teamspace,
 						model:  settings._id,
 						name: modelName,
 						permissions: C.MODEL_PERM_LIST,
-						timestamp: undefined
+						timestamp: undefined,
+						projectName
 					};
 
-					// ChatEvent.newModel(data.sessionId, teamspace, modelData);
+					ChatEvent.newModel(data.sessionId, teamspace, modelData);
 					return {modelData, settings};
 				});
 			});
@@ -328,13 +330,13 @@ function createNewFederation(teamspace, modelName, username, data, toyFed) {
 function importToyProject(account, username) {
 
 	// create a project named Sample_Project
-	return Project.createProject(username, "Sample_Project", username, [C.PERM_TEAMSPACE_ADMIN]).then(project => {
+	return createProject(username, "Sample_Project", username, [C.PERM_TEAMSPACE_ADMIN]).then(project => {
 
 		return Promise.all([
 
-			importToyModel(account, username, "Lego_House_Architecture", "a29d06a0-51b7-45d7-9d33-41a62e036e5b", project.name),
-			importToyModel(account, username, "Lego_House_Landscape", "76fa299d-b626-48c5-9327-05fa371b3a49", project.name),
-			importToyModel(account, username, "Lego_House_Structure", "7ea2eb1f-3ba6-4f13-b6e5-a1b53f17d0c6", project.name)
+			importToyModel(account, username, "Lego_House_Architecture", "1cac0310-e3cc-11ea-bc6b-69e466be9639", project.name),
+			importToyModel(account, username, "Lego_House_Landscape", "1cab8de0-e3cc-11ea-bc6b-69e466be9639", project.name),
+			importToyModel(account, username, "Lego_House_Structure", "1cac5130-e3cc-11ea-bc6b-69e466be9639", project.name)
 
 		]).then(models => {
 
@@ -342,9 +344,6 @@ function importToyProject(account, username) {
 			const skip = { tree: 1 };
 
 			const subModels = models.map(m => {
-
-				m = m.toObject();
-
 				importSuccess(account, m._id);
 
 				return {
@@ -353,7 +352,7 @@ function importToyProject(account, username) {
 				};
 			});
 
-			return importToyModel(account, username, "Lego_House_Federation", "cd669a0e-8fb9-4237-ac56-fc787bf3ffb5", project.name, subModels, skip);
+			return importToyModel(account, username, "Lego_House_Federation", "1ccd46b0-e3cc-11ea-bc6b-69e466be9639", project.name, subModels, skip);
 		});
 
 	}).catch(err => {
@@ -432,7 +431,7 @@ function createFederatedModel(account, model, username, subModels, modelSettings
 			return;
 		}
 
-		addSubModelsPromise.push(ModelSetting.findById({account, model: subModel.model}, subModel.model).then(setting => {
+		addSubModelsPromise.push(findModelSettingById(account, subModel.model).then(setting => {
 			if(!setting) {
 				return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 			}
@@ -452,59 +451,46 @@ function createFederatedModel(account, model, username, subModels, modelSettings
 
 	});
 
-	const fedSettings = modelSettings ? Promise.resolve(modelSettings)
-		: ModelSetting.findById({account}, model);
-
 	return Promise.all(addSubModelsPromise).then(() => {
-		return fedSettings.then((settings) => {
-			return createCorrelationId(settings, true).then(correlationId => {
-				setStatus(account, model, "queued", username).then(() => {
-					const federatedJSON = {
-						database: account,
-						project: model,
-						subProjects: subModelArr
-					};
+		return createCorrelationId(account, model, true).then(correlationId => {
+			setStatus(account, model, "queued", username).then(() => {
+				const federatedJSON = {
+					database: account,
+					project: model,
+					subProjects: subModelArr
+				};
 
-					if(toyFed) {
-						federatedJSON.toyFed = toyFed;
-					}
+				if(toyFed) {
+					federatedJSON.toyFed = toyFed;
+				}
 
-					return importQueue.createFederatedModel(correlationId, account, federatedJSON);
-				});
+				return importQueue.createFederatedModel(correlationId, account, federatedJSON);
 			});
 		});
-
 	});
 
 }
 
 function searchTree(account, model, branch, rev, searchString, username) {
 
-	const search = (history) => {
+	const search = () => {
 
 		let items = [];
 
-		const filter = {
-			_id: {"$in": history.current },
-			type: {"$in": ["transformation", "mesh"]},
-			name: new RegExp(searchString, "i")
-		};
+		const type = {"$in": ["transformation", "mesh"]};
 
-		return Scene.find({account, model}, filter, { name: 1 }).then(objs => {
+		return findNodesByType(account, model, branch, rev, type, searchString, { name: 1 }).then(objs => {
 
 			objs.forEach((obj, i) => {
 
-				objs[i] = obj.toJSON();
+				objs[i] = obj;
 				objs[i].account = account;
 				objs[i].model = model;
 				items.push(objs[i]);
 
 			});
 
-			return Ref.find({account, model}, {
-				_id: {"$in": history.current },
-				type: "ref"
-			});
+			return getRefNodes(account, model, branch, rev);
 
 		}).then(refs => {
 
@@ -540,9 +526,9 @@ function searchTree(account, model, branch, rev, searchString, username) {
 
 		if(granted) {
 
-			return History.getHistory({ account, model }, branch, rev).then(history => {
+			return  History.getHistory(account, model, branch, rev).then(history => {
 				if(history) {
-					return search(history);
+					return search();
 				} else {
 					return Promise.resolve([]);
 				}
@@ -555,19 +541,14 @@ function searchTree(account, model, branch, rev, searchString, username) {
 
 }
 
-function listSubModels(account, model, branch) {
+function listSubModels(account, model, branch = "master") {
 
 	const subModels = [];
 
-	return History.findByBranch({ account, model }, branch).then(history => {
+	return History.findByBranch(account, model, branch).then(history => {
 
 		if(history) {
-			const filter = {
-				type: "ref",
-				_id: { $in: history.current }
-			};
-
-			return Ref.find({ account, model }, filter);
+			return getRefNodes(account, model, branch);
 		} else {
 			return [];
 		}
@@ -576,7 +557,7 @@ function listSubModels(account, model, branch) {
 
 		const proms = refs.map(ref =>
 
-			ModelSetting.findById({ account: ref.owner}, ref.project, { name: 1 }).then(subModel => {
+			findModelSettingById(ref.owner, ref.project, { name: 1 }).then(subModel => {
 				// TODO: Why would this return null?
 				if (subModel) {
 					subModels.push({
@@ -596,7 +577,7 @@ function listSubModels(account, model, branch) {
 }
 
 function downloadLatest(account, model) {
-	return History.findLatest({account, model}, {rFile: 1}).then((fileEntry) => {
+	return History.findLatest(account, model, {rFile: 1}).then((fileEntry) => {
 		if(!fileEntry || !fileEntry.rFile || !fileEntry.rFile.length) {
 			return Promise.reject(responseCodes.NO_FILE_FOUND);
 		}
@@ -617,124 +598,27 @@ function downloadLatest(account, model) {
 	});
 }
 
-function uploadFile(req) {
-	if (!config.cn_queue) {
-		return Promise.reject(responseCodes.QUEUE_NO_CONFIG);
-	}
-
-	const account = req.params.account;
-	const model = req.params.model;
-	const user = req.session.user.username;
-
-	ChatEvent.modelStatusChanged(null, account, model, { status: "uploading", user });
-	// upload model with tag
-	const checkTag = tag => {
-		if(!tag) {
-			return Promise.resolve();
-		} else {
-			return (tag.match(History.tagRegExp) ? Promise.resolve() : Promise.reject(responseCodes.INVALID_TAG_NAME)).then(() => {
-				return History.findByTag({account, model}, tag, {_id: 1});
-			}).then(_tag => {
-				if (!_tag) {
-					return Promise.resolve();
-				} else {
-					return Promise.reject(responseCodes.DUPLICATE_TAG);
-				}
-			});
-
-		}
-	};
-
-	return new Promise((resolve, reject) => {
-
-		const upload = multer({
-			dest: config.cn_queue.upload_dir,
-			fileFilter: function(fileReq, file, cb) {
-
-				let format = file.originalname.split(".");
-
-				if(format.length <= 1) {
-					return cb({resCode: responseCodes.FILE_NO_EXT});
-				}
-
-				const isIdgn = format[format.length - 1] === "dgn" && format[format.length - 2] === "i";
-
-				format = format[format.length - 1];
-
-				const size = parseInt(fileReq.headers["content-length"]);
-
-				if(isIdgn || acceptedFormat.indexOf(format.toLowerCase()) === -1) {
-					return cb({resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
-				}
-
-				if(size > config.uploadSizeLimit) {
-					return cb({ resCode: responseCodes.SIZE_LIMIT });
-				}
-
-				const sizeInMB = size / (1024 * 1024);
-				middlewares.freeSpace(account).then(space => {
-
-					if(sizeInMB > space) {
-						cb({ resCode: responseCodes.SIZE_LIMIT_PAY });
-					} else {
-						cb(null, true);
-					}
-				});
-			}
-		});
-
-		upload.single("file")(req, null, function (err) {
-			if (err) {
-				return reject(err);
-
-			} else if(!req.file.size) {
-				return reject(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
-
-			} else {
-				ChatEvent.modelStatusChanged(null, account, model, { status: "uploaded" });
-				return resolve(req.file);
-			}
-		});
-
-	}).then(file => {
-		return checkTag(req.body.tag).then(() => file);
-	});
-
-}
-
-function _deleteFiles(files) {
-
-	files.forEach(file => {
-
-		const deleteFile = (file.type === "file" ? fs.unlinkSync : fs.rmdirSync);
-
-		try {
-			deleteFile(file.path);
-		} catch(err) {
-			systemLogger.logError("error while deleting file",{
-				message: err.message,
-				err: err,
-				file: file.path
-			});
-		}
-	});
-}
-
 /**
  * Called by importModel to perform model upload
  */
-function _handleUpload(correlationId, account, model, username, file, data) {
+async function _handleUpload(correlationId, account, model, username, file, data) {
+	const newFileName = file.originalname.replace(C.FILENAME_REGEXP, "_");
+
+	await importQueue.writeImportData(correlationId,
+		account,
+		model,
+		username,
+		newFileName,
+		data.tag,
+		data.desc,
+		data.importAnimations
+	);
 
 	return importQueue.importFile(
 		correlationId,
 		file.path,
-		file.originalname,
-		account,
-		model,
-		username,
-		null,
-		data.tag,
-		data.desc
+		newFileName,
+		null
 	);
 }
 
@@ -744,24 +628,22 @@ function importModel(account, model, username, modelSetting, source, data) {
 		return Promise.reject({ message: `modelSetting is ${modelSetting}`});
 	}
 
-	return modelSetting.save().then(() => {
-		return createCorrelationId(modelSetting).then(correlationId => {
-			return setStatus(account, model, "queued", username).then(setting => {
+	return createCorrelationId(account, model).then(correlationId => {
+		return setStatus(account, model, "queued", username).then(setting => {
 
-				modelSetting = setting;
+			modelSetting = setting;
 
-				if (source.type === "upload") {
-					return _handleUpload(correlationId, account, model, username, source.file, data);
+			if (source.type === "upload") {
+				return _handleUpload(correlationId, account, model, username, source.file, data);
 
-				} else if (source.type === "toy") {
+			} else if (source.type === "toy") {
 
-					return importQueue.importToyModel(correlationId, account, model, source).then(() => {
-						systemLogger.logInfo(`Job ${modelSetting.corID} imported without error`,{account, model, username});
-						return modelSetting;
-					});
-				}
+				return importQueue.importToyModel(correlationId, account, model, source).then(() => {
+					systemLogger.logInfo(`Job ${modelSetting.corID} imported without error`,{account, model, username});
+					return modelSetting;
+				});
+			}
 
-			});
 		});
 	}).catch(err => {
 		systemLogger.logError("Failed to importModel:", err);
@@ -771,7 +653,7 @@ function importModel(account, model, username, modelSetting, source, data) {
 }
 
 function isSubModel(account, model) {
-	return ModelSetting.find({ account, model}, { federate: true }).then((feds) => {
+	return findModelSettings(account, { federate: true }).then((feds) => {
 		const promises = [];
 
 		feds.forEach(modelSetting => {
@@ -786,25 +668,27 @@ function isSubModel(account, model) {
 	});
 }
 
-function removeModelCollections(account, model) {
-	return FileRef.removeAllFilesFromModel(account, model).then(() => {
-		return ModelFactory.dbManager.listCollections(account).then((collections) => {
-			const promises = [];
+async function removeModelCollections(account, model) {
+	try {
+		await FileRef.removeAllFilesFromModel(account, model);
+	} catch (err) {
+		systemLogger.logError("Failed to remove files", err);
+	}
 
-			collections.forEach(collection => {
-				if(collection.name.startsWith(model + ".")) {
+	const collections = await db.listCollections(account);
+	const promises = [];
 
-					promises.push(ModelFactory.dbManager.dropCollection(account, collection));
-				}
-			});
-
-			return Promise.all(promises);
-		});
+	collections.forEach(collection => {
+		if(collection.name.startsWith(model + ".")) {
+			promises.push(db.dropCollection(account, collection));
+		}
 	});
+
+	return Promise.all(promises);
 }
 
 function removeModel(account, model, forceRemove) {
-	return ModelSetting.findById({account, model}, model).then(setting => {
+	return findModelSettingById(account, model).then(setting => {
 		if (!setting) {
 			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
 		}
@@ -823,8 +707,8 @@ function removeModel(account, model, forceRemove) {
 			}
 			return removeModelCollections(account, model).then(() => {
 				const deletePromises = [];
-				deletePromises.push(setting.remove());
-				deletePromises.push(Project.removeModel(account, model));
+				deletePromises.push(deleteModelSetting(account, model));
+				deletePromises.push(removeProjectModel(account, model));
 				return Promise.all(deletePromises);
 			}).catch((err) => {
 				systemLogger.logError("Failed to remove collections: ", err);
@@ -834,181 +718,54 @@ function removeModel(account, model, forceRemove) {
 	});
 }
 
-function getModelPermission(username, setting, account) {
-
-	if(!setting) {
-		return Promise.resolve([]);
+const flattenPermissions = (permissions, defaultToPermissionDefinition = false) => {
+	if (!permissions) {
+		return [];
 	}
 
-	let permissions = [];
-	let dbUser;
+	return _.compact(_.flatten(permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || (defaultToPermissionDefinition ? p : null))));
+};
 
-	return User.findByUserName(account).then(_dbUser => {
+async function getModelPermission(username, setting, account) {
+	if(!setting) {
+		return [];
+	}
 
-		dbUser = _dbUser;
-
+	try {
+		let permissions = [];
+		const dbUser = await User.findByUserName(account);
 		if(!dbUser) {
 			return [];
 		}
 
-		const accountPerm = dbUser.customData.permissions.findByUser(username);
-
+		const accountPerm = AccountPermissions.findByUser(dbUser, username);
 		if(accountPerm && accountPerm.permissions) {
-			permissions = _.compact(_.flatten(accountPerm.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || null)));
+			permissions = flattenPermissions(accountPerm.permissions);
 		}
 
 		const projectQuery = { models: setting._id, "permissions.user": username };
-		// project admin have access to models underneath it.
-		return Project.findOne({account}, projectQuery, { "permissions.$" : 1 });
 
-	}).then(project => {
+		// project admin have access to models underneath it.
+		const project = await findOneProject(account, projectQuery, { "permissions.$" : 1 });
 
 		if(project && project.permissions) {
-			permissions = permissions.concat(
-				_.compact(_.flatten(project.permissions[0].permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || null)))
-			);
+			permissions = permissions.concat(flattenPermissions(project.permissions[0].permissions));
 		}
 
-		const template = setting.findPermissionByUser(username);
+		const template = await findPermissionByUser(account, setting._id, username);
 
 		if(template) {
+			const permissionTemplate = PermissionTemplates.findById(dbUser, template.permission);
 
-			const permission = dbUser.customData.permissionTemplates.findById(template.permission);
-
-			if(permission && permission.permissions) {
-				permissions = permissions.concat(
-					_.flatten(permission.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || p))
-				);
+			if(permissionTemplate && permissionTemplate.permissions) {
+				permissions = permissions.concat(flattenPermissions(permissionTemplate.permissions, true));
 			}
 		}
 
 		return _.uniq(permissions);
-	}).catch(err => {
+	} catch(err) {
 		systemLogger.logError("Failed to getModelPermission:", err);
-	});
-}
-
-function getAllMetadata(account, model, branch, rev) {
-	return getAllIdsWithMetadataField(account, model, branch, rev, "");
-}
-
-function getAllIdsWith4DSequenceTag(account, model, branch, rev) {
-	// Get sequence tag then call the generic getAllIdsWithMetadataField
-	return ModelSetting.findOne({account : account}, {_id : model}).then(settings => {
-		if(!settings) {
-			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
-		}
-		if(!settings.fourDSequenceTag) {
-			return Promise.reject(responseCodes.SEQ_TAG_NOT_FOUND);
-		}
-		return getAllIdsWithMetadataField(account, model,  branch, rev, settings.fourDSequenceTag);
-
-	});
-}
-
-function getAllIdsWithMetadataField(account, model, branch, rev, fieldName, username) {
-	// Get the revision object to find all relevant IDs
-	let history;
-	let fullFieldName = "metadata";
-
-	if (fieldName && fieldName.length > 0) {
-		fullFieldName += "." + fieldName;
 	}
-
-	return History.getHistory({ account, model }, branch, rev).then(_history => {
-		history = _history;
-		if(!history) {
-			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
-		}
-		// Check for submodel references
-		const filter = {
-			type: "ref",
-			_id: { $in: history.current }
-		};
-		return Ref.find({ account, model }, filter);
-	}).then(refs =>{
-
-		// for all refs get their tree
-		const getMeta = [];
-
-		refs.forEach(ref => {
-
-			let refBranch, refRev;
-
-			if (utils.uuidToString(ref._rid) === C.MASTER_BRANCH) {
-				refBranch = C.MASTER_BRANCH_NAME;
-			} else {
-				refRev = utils.uuidToString(ref._rid);
-			}
-
-			getMeta.push(
-				getAllIdsWithMetadataField(ref.owner, ref.project, refBranch, refRev, fieldName, username)
-					.then(obj => {
-						return Promise.resolve({
-							data: obj.data,
-							account: ref.owner,
-							model: ref.project
-						});
-					})
-					.catch(() => {
-					// Just because a sub model fails doesn't mean everything failed. Resolve the promise.
-						return Promise.resolve();
-					})
-			);
-		});
-
-		return Promise.all(getMeta);
-
-	}).then(_subMeta => {
-
-		const match = {
-			_id: {"$in": history.current}
-		};
-		match[fullFieldName] =  {"$exists" : true};
-
-		const projection = {
-			parents: 1
-		};
-		projection[fullFieldName] = 1;
-
-		return Scene.find({account, model}, match, projection).then(obj => {
-			if(obj) {
-				// rename fieldName to "value"
-				const parsedObj = {data: obj};
-				if(obj.length > 0 && fieldName && fieldName.length > 0) {
-					const objStr = JSON.stringify(obj);
-					parsedObj.data = JSON.parse(objStr.replace(new RegExp(fieldName, "g"), "value"));
-				}
-				if(_subMeta.length > 0) {
-					parsedObj.subModels = _subMeta;
-				}
-				return parsedObj;
-			} else {
-				return Promise.reject(responseCodes.METADATA_NOT_FOUND);
-			}
-		});
-
-	});
-
-}
-
-function getMetadata(account, model, id) {
-
-	const projection = {
-		shared_id: 0,
-		paths: 0,
-		type: 0,
-		api: 0,
-		parents: 0
-	};
-
-	return Scene.findOne({account, model}, { _id: utils.stringToUUID(id) }, projection).then(obj => {
-		if(obj) {
-			return obj;
-		} else {
-			return Promise.reject(responseCodes.METADATA_NOT_FOUND);
-		}
-	});
 }
 
 async function getMeshById(account, model, meshId) {
@@ -1022,32 +779,39 @@ async function getMeshById(account, model, meshId) {
 		"parents": 1,
 		"vertices": 1,
 		"faces": 1,
-		"_extRef":1
+		"_extRef": 1,
+		"primitive": 1
 	};
 
-	const mesh = await Scene.getObjectById(account, model, utils.stringToUUID(meshId), projection);
-	mesh.matrix = await Scene.getParentMatrix(account, model, mesh.parents[0], revisionIds);
+	const mesh = await getNodeById(account, model, utils.stringToUUID(meshId), projection);
+	mesh.matrix = await getParentMatrix(account, model, mesh.parents[0], revisionIds);
 
-	const vertices =  mesh.vertices ? new StreamBuffer({buffer: mesh.vertices.buffer, chunkSize: mesh.vertices.buffer.length}) : await Scene.getGridfsFileStream(account, model, mesh._extRef.vertices);
-	const triangles = mesh.faces ?  new StreamBuffer({buffer: mesh.faces.buffer, chunkSize: mesh.faces.buffer.length})  : await Scene.getGridfsFileStream(account, model, mesh._extRef.faces);
+	const vertices =  mesh.vertices ? new StreamBuffer({buffer: mesh.vertices.buffer, chunkSize: mesh.vertices.buffer.length}) : await getGridfsFileStream(account, model, mesh._extRef.vertices);
+	const faces = mesh.faces ?  new StreamBuffer({buffer: mesh.faces.buffer, chunkSize: mesh.faces.buffer.length})  : await getGridfsFileStream(account, model, mesh._extRef.faces);
+
+	if (!("primitive" in mesh)) { // if the primitive type is missing, then set it to triangles for backwards compatibility. this matches the behaviour of the bouncer api.
+		mesh.primitive = 3;
+	}
 
 	const combinedStream = CombinedStream.create();
-	combinedStream.append(stringToStream(["{\"matrix\":", JSON.stringify(mesh.matrix), ",\"vertices\":["].join("")));
+	combinedStream.append(stringToStream(["{\"matrix\":", JSON.stringify(mesh.matrix)].join("")));
+	combinedStream.append(stringToStream([",\"primitive\":", mesh.primitive].join("")));
+	combinedStream.append(stringToStream(",\"vertices\":["));
 	combinedStream.append(vertices.pipe(new BinToVector3dStringStream({isLittleEndian: true})));
-	combinedStream.append(stringToStream("],\"triangles\":["));
-	combinedStream.append(triangles.pipe(new BinToTriangleStringStream({isLittleEndian: true})));
+	combinedStream.append(stringToStream("],\"faces\":["));
+	combinedStream.append(faces.pipe(new BinToFaceStringStream({isLittleEndian: true})));
 	combinedStream.append(stringToStream("]}"));
 	return 	combinedStream;
 }
 
 async function getSubModelRevisions(account, model, branch, rev) {
-	const history = await History.getHistory({ account, model }, branch, rev);
+	const history = await  History.getHistory(account, model, branch, rev);
 
 	if(!history) {
 		return Promise.reject(responseCodes.INVALID_TAG_NAME);
 	}
 
-	const refNodes = await Ref.getRefNodes(account, model, history.current);
+	const refNodes = await getRefNodes(account, model, branch, rev);
 	const modelIds = refNodes.map((refNode) => refNode.project);
 	const results = {};
 
@@ -1059,7 +823,7 @@ async function getSubModelRevisions(account, model, branch, rev) {
 	const projection = {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1};
 	modelIds.forEach((modelId) => {
 		results[modelId] = {};
-		promises.push(History.listByBranch({account, model: modelId}, null, projection).then((revisions) => {
+		promises.push(History.listByBranch(account, modelId, null, projection).then((revisions) => {
 			revisions = History.clean(revisions);
 
 			revisions.forEach(function(revision) {
@@ -1069,7 +833,7 @@ async function getSubModelRevisions(account, model, branch, rev) {
 		}));
 	});
 
-	promises.push(ModelSetting.getModelsData(param).then((modelNameResult) => {
+	promises.push(getModelsData(param).then((modelNameResult) => {
 		const lookUp = modelNameResult[account];
 		modelIds.forEach((modelId) => {
 			results[modelId].name = lookUp[modelId].name;
@@ -1079,19 +843,39 @@ async function getSubModelRevisions(account, model, branch, rev) {
 	return Promise.all(promises).then(() => results);
 }
 
-const fileNameRegExp = /[ *"/\\[\]:;|=,<>$]/g;
-const acceptedFormat = [
-	"x","obj","3ds","md3","md2","ply",
-	"mdl","ase","hmp","smd","mdc","md5",
-	"stl","lxo","nff","raw","off","ac",
-	"bvh","irrmesh","irr","q3d","q3s","b3d",
-	"dae","ter","csm","3d","lws","xml","ogex",
-	"ms3d","cob","scn","blend","pk3","ndo",
-	"ifc","xgl","zgl","fbx","assbin", "bim", "dgn",
-	"rvt", "rfa", "spm"
-];
+const getModelSetting = async (account, model, username) => {
+	let setting = await findModelSettingById(account, model);
+
+	if (!setting) {
+		throw { resCode: responseCodes.MODEL_INFO_NOT_FOUND};
+	} else {
+		// compute permissions by user role
+		const [permissions, submodels] = await Promise.all([
+			getModelPermission(
+				username,
+				setting,
+				account
+			),
+			listSubModels(account, model, C.MASTER_BRANCH_NAME)
+		]);
+
+		setting = await prepareDefaultView(account, model, setting);
+
+		return {
+			...setting,
+			account,
+			model: setting._id,
+			headRevisions: {},
+			permissions,
+			subModels: submodels
+		};
+	}
+};
 
 module.exports = {
+	_fillInModelDetails,
+	_getModels,
+	_makeAccountObject,
 	createNewModel,
 	createNewFederation,
 	importToyModel,
@@ -1100,20 +884,14 @@ module.exports = {
 	listSubModels,
 	searchTree,
 	downloadLatest,
-	fileNameRegExp,
-	acceptedFormat,
-	uploadFile,
 	importModel,
 	removeModel,
 	getModelPermission,
-	getMetadata,
-	resetCorrelationId,
-	getAllMetadata,
-	getAllIdsWith4DSequenceTag,
-	getAllIdsWithMetadataField,
 	getSubModelRevisions,
 	setStatus,
 	importSuccess,
 	importFail,
-	getMeshById
+	getMeshById,
+	getModelSetting,
+	flattenPermissions
 };

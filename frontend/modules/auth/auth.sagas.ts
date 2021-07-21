@@ -19,7 +19,6 @@ import { push } from 'connected-react-router';
 import { put, take, takeLatest } from 'redux-saga/effects';
 
 import { NewTermsDialog } from '../../routes/components/newTermsDialog/newTermsDialog.component';
-import { analyticsService } from '../../services/analytics';
 import * as API from '../../services/api';
 import { CurrentUserActions } from '../currentUser';
 import { DialogActions } from '../dialog';
@@ -30,10 +29,15 @@ function* login({ username, password }) {
 	yield put(AuthActions.setPendingStatus(true));
 
 	try {
-		// tslint:disable-next-line:no-shadowed-variable
-		const {data} = yield API.login(username, password);
+		const { data } = yield API.login(username, password);
 		const flags = data.flags;
 		username = data.username;
+
+		yield put(CurrentUserActions.fetchUserSuccess({
+			username,
+			avatarUrl: API.getAvatarUrl(username)
+		}));
+		yield put(AuthActions.loginSuccess());
 
 		if (flags && flags.termsPrompt) {
 			yield put(DialogActions.showDialog({
@@ -41,14 +45,6 @@ function* login({ username, password }) {
 				template: NewTermsDialog
 			}));
 		}
-
-		yield analyticsService.setUserId(username);
-
-		yield put(CurrentUserActions.fetchUserSuccess({
-			username,
-			avatarUrl: API.getAvatarUrl(username)
-		}));
-		yield put(AuthActions.loginSuccess());
 	} catch (e) {
 		if (e.response.status === 401) {
 			yield put(AuthActions.loginFailure());

@@ -51,23 +51,23 @@ const UserInfoComponent = (props: IProps) => {
 	return (
 		<Container>
 			<Panel title="Teamspaces">
-					<StyledList>
-						<UserContainer>
-							<Avatar
-								name={name}
-								url={avatarUrl}
-								loading={loading}
-							/>
-							{ loading
-								? <LoadingText>Loading...</LoadingText>
-								: <UserData>
-										<UserName>{firstName} {lastName}</UserName>
-										<UserEmail>{email}</UserEmail>
-									</UserData>
-							}
-						</UserContainer>
-						{renderItems(items)}
-					</StyledList>
+				<StyledList>
+					<UserContainer>
+						<Avatar
+							name={name}
+							url={avatarUrl}
+							loading={loading}
+						/>
+						{ loading
+							? <LoadingText>Loading...</LoadingText>
+							: <UserData>
+									<UserName>{firstName} {lastName}</UserName>
+									<UserEmail>{email}</UserEmail>
+								</UserData>
+						}
+					</UserContainer>
+					{renderItems(items)}
+				</StyledList>
 			</Panel>
 		</Container>
 	);

@@ -1,7 +1,28 @@
+/**
+ *  Copyright (C) 2021 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import { memoize } from 'lodash';
-import { WHITE } from './../styles/colors';
+import { WHITE } from '../styles';
 
 export const parseHex = (hex) => {
+	if (Array.isArray(hex)) { // if is already a rgb array return it
+		return hex;
+	}
+
 	hex = hex.replace(/^#/, '');
 
 	if (hex.length <= 4) {
@@ -32,7 +53,7 @@ export const hexToRgba = (hex, alpha = 1) => {
 };
 
 export const rgbaToHex = memoize((rgbaColor): string => {
-	// tslint:disable-next-line:prefer-const
+	// eslint-disable-next-line prefer-const
 	let [r, g, b, a] = rgbaColor.match(/[.\d]+/g).map(Number);
 	a = Math.round(a * 255);
 	return '#' + componentToHex(r) + componentToHex(g) + componentToHex(b) + componentToHex(a);
@@ -62,6 +83,6 @@ export const getRandomColor = () => {
 	];
 };
 
-export const hasTransparency = (hex) => hex.length === 9;
+export const hasTransparency = (color) => Array.isArray(color) ? color.length > 3 : color.length === 9;
 
-export const getTransparency = (hex) => parseInt(hex.slice(7), 16) / 255;
+export const getTransparency = (color) => (Array.isArray(color) ? color[3] : parseInt(color.slice(7), 16) ) / 255;

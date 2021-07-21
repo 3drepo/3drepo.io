@@ -1,17 +1,38 @@
+/**
+ *  Copyright (C) 2021 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import semverCompare from 'semver-compare';
 import UAParser from 'ua-parser-js';
 
 const DEFAULT_SUPPORTED_BROWSERS_CONFIG = {
 	desktop: [{
-		browser: 'firefox', minversion: 41,
+		browser: 'firefox', minversion: 54,
 	}, {
-		browser: 'chrome', minversion: 45,
+		browser: 'chrome', minversion: 51,
 	}, {
-		browser: 'chrome headless', minversion: 45,
+		browser: 'chrome headless', minversion: 51,
 	}, {
-		browser: 'edge',
+		browser: 'edge', minversion: 14,
 	}, {
-		os: 'mac os', minos: '10.10.0', browser: 'safari', minversion: 8,
+		os: 'mac os', minos: '10.12.0', browser: 'safari', minversion: 10.1,
+	}, {
+		browser: 'opera', minversion: 38,
+	}, {
+		browser: 'electron'
 	}],
 	tablet: [{
 		os: 'ios', minos: '9', browser: 'mobile safari',
@@ -105,7 +126,6 @@ export default class UnsupportedBrowserDetection {
 					minversion: this.compareVersions(minversion, browserVersion),
 					versions: versions ? versions.indexOf(parsedVersion) >= 0 : false,
 				};
-
 				return Object.keys(options).map((key) => checked[key]).indexOf(false) !== -1;
 			});
 		return isSupported;

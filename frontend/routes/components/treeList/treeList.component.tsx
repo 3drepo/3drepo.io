@@ -76,6 +76,7 @@ interface IProps {
 	isEmpty?: boolean;
 	IconProps?: any;
 	showStarredOnly?: boolean;
+	id?: string;
 	children?: (props) => JSX.Element;
 	renderRoot?: (props) => JSX.Element;
 	onClick?: () => void;
@@ -122,9 +123,9 @@ export class TreeList extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { level, renderRoot, onClick, disabled, className, ...props } = this.props;
+		const { level, renderRoot, onClick, disabled, className, id, ...props } = this.props;
 		const active = this.isActive;
-		const containerProps = { active, level, disabled, className };
+		const containerProps = { active, level, disabled, className, id };
 
 		const rootProps = {
 			...props,

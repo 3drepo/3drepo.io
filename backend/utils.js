@@ -17,21 +17,91 @@
 
 "use strict";
 const _ = require("lodash");
+const fs = require("fs").promises;
 const sharp = require("sharp");
-const nodeuuid = require("uuid/v1");
+const nodeuuid = require("uuid").v1;
+const yup = require("yup");
 const uuidparse = require("uuid-parse");
 const mongo = require("mongodb");
+const crypto = require("crypto");
 
 function Utils() {
 
 	const self = this;
 
+	this.notEmpty = (obj) => Object.keys(obj).length > 0;
+
+	this.isDate = (value) => {
+		return "[object Date]" === Object.prototype.toString.call(value);
+	};
+
 	this.isString = (value) => {
 		return "[object String]" === Object.prototype.toString.call(value);
 	};
 
+	this.isHexColor = (value) => {
+		return this.isString(value) && value.match(/^#(?:(?:[\da-f]{3}){1,2}|(?:[\da-f]{4}){1,2})$/i);
+	};
+
+	this.isNumber = (value) => {
+		return "[object Number]" === Object.prototype.toString.call(value);
+	};
+
+	this.isObject = (value) => {
+		return "[object Object]" === Object.prototype.toString.call(value);
+	};
+
+	this.typeMatch = (value, type) => {
+		return type === Object.prototype.toString.call(value);
+	};
+
+	this.isBoolean =  (value) => {
+		return "[object Boolean]" === Object.prototype.toString.call(value);
+	};
+
 	this.hasField = (obj, field) => {
 		return Object.prototype.hasOwnProperty.call(obj, field);
+	};
+
+	this.isUUIDObject = (value) => {
+		try {
+			return this.isObject(value) && !!this.uuidToString(value);
+		} catch(e) {
+			return false;
+		}
+	};
+
+	this.uuidSchema = yup.object().test((val) => val === undefined  || this.isUUIDObject(val));
+
+	this.convertQueryValue = (value, type) => {
+		switch(type) {
+			case "number":
+				value = parseFloat(value);
+				break;
+			case "UUID":
+				value = this.stringToUUID(value);
+				break;
+			case "array":
+				value = value === "Unassigned" ? [] : [value];
+				break;
+		}
+
+		return value;
+	};
+
+	this.deserialiseQueryFilters = (queryparams, fields) => {
+		const keys = _.keys(fields);
+		return keys.reduce((acum, key) => {
+			if (queryparams[key]) {
+				acum[fields[key].fieldName] = queryparams[key].split(",").map((val) => this.convertQueryValue(val,fields[key].type));
+			}
+
+			return acum;
+		} , {});
+	};
+
+	this.generateHashString = (length = 32) => {
+		return crypto.randomBytes(length / 2).toString("hex");
 	};
 
 	/** *****************************************************************************
@@ -112,6 +182,36 @@ function Utils() {
 		}
 
 		return self.stringToUUID(nodeuuid());
+	};
+
+	/** *****************************************************************************
+	* Generate a set of unique UUIDs
+	* @returns Array{Buffer} - Binary representation of a UUID
+	*******************************************************************************/
+	this.generateUUIDs = function(length = 0, options) {
+		const generatedUUIDs = new Set();
+
+		let _id = nodeuuid();
+		for (let i = 0; i < length; i++) {
+
+			while (generatedUUIDs.has(_id)) { // guarantee uniqueness
+				_id = nodeuuid();
+			}
+
+			generatedUUIDs.add(_id);
+		}
+
+		let ids = [];
+
+		if(options && options.string) {
+			ids = Array.from(generatedUUIDs);
+		} else {
+			for (const id of generatedUUIDs) {
+				ids.push(self.stringToUUID(id));
+			}
+		}
+
+		return ids;
 	};
 
 	/** *****************************************************************************
@@ -253,7 +353,6 @@ function Utils() {
 			}
 
 			return image
-				.crop(sharp.gravity.centre)
 				.resize(destWidth, destHeight)
 				.png()
 				.toBuffer();
@@ -271,6 +370,24 @@ function Utils() {
 		return point.length === 3 ? [point[0], -point[2], point[1]] : [];
 
 	};
+
+	this.emptyDir = async function(dir) {
+		await fs.rm(dir, { recursive: true, force: true });
+		return this.mkdir(dir);
+	};
+
+	this.mkdir = async (newDir) => {
+		try {
+			await fs.mkdir(newDir, { recursive: true });
+		} catch(err) {
+			if (err.code !== "EEXIST") {
+				throw err;
+			}
+		}
+	};
+
+	this.writeFile = (fileName, content) => fs.writeFile(fileName, content, { flag: "a+" });
+
 }
 
 module.exports = new Utils();

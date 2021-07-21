@@ -18,7 +18,9 @@
 import React from 'react';
 
 import Grid from '@material-ui/core/Grid';
+import * as Yup from 'yup';
 
+import { Field, Form, Formik } from 'formik';
 import { ColorPicker } from '../colorPicker/colorPicker.component';
 import {
 	Container,
@@ -28,6 +30,12 @@ import {
 	Title
 } from './newJobForm.styles';
 
+const NewJobSchema = Yup.object().shape({
+	name: Yup.string()
+		.max(50, 'Job name is limited to 50 characters')
+		.required('Job name is a required field')
+});
+
 interface IProps {
 	title: string;
 	colors: string[];
@@ -35,32 +43,25 @@ interface IProps {
 	onCancel: () => void;
 }
 
-interface IState {
-	name: string;
-	color?: string;
-}
-
 export class NewJobForm extends React.PureComponent<IProps, any> {
 	public state = {
-		name: '',
 		color: ''
 	};
 
 	public handleColorChange = (value) => {
-		this.setState({color: value} as any);
+		this.setState({ color: value } as any);
 	}
 
-	public handleJobNameChange = (event) => {
-		this.setState({name: event.target.value} as any);
-	}
-
-	public handleSave = () => {
-		this.props.onSave({...this.state});
+	public handleSave = ({ name }) => {
+		this.props.onSave({
+			name,
+			...this.state
+		});
 	}
 
 	public render() {
-		const {title, colors} = this.props;
-		const {name, color} = this.state;
+		const { title, colors } = this.props;
+		const { color } = this.state;
 
 		return (
 			<Container>
@@ -68,42 +69,57 @@ export class NewJobForm extends React.PureComponent<IProps, any> {
 					container
 					direction="column">
 					<Title>{title}</Title>
-
-					<Grid
-						item
-						container
-						direction="row"
-						spacing={16}
-						wrap="nowrap"
+					<Formik
+						initialValues={{
+							name: '',
+						}}
+						validationSchema={NewJobSchema}
+						onSubmit={this.handleSave}
 					>
-						<StyledTextFieldContainer item>
-							<StyledTextField
-								autoFocus
-								placeholder="Set job name"
-								fullWidth
-								value={name}
-								onChange={this.handleJobNameChange}
-								InputLabelProps={ {
-									shrink: true
-								} }
-							/>
-						</StyledTextFieldContainer>
-						<Grid item>
-							<ColorPicker
-								value={color}
-								predefinedColors={colors}
-								onChange={this.handleColorChange}
-							/>
+						<Form>
+						<Grid
+							item
+							container
+							direction="row"
+							spacing={2}
+							wrap="nowrap"
+						>
+							<StyledTextFieldContainer item>
+								<Field name="name" render={ ({ field, form }) => (
+									<StyledTextField
+										{...field}
+										error={Boolean(form.errors.name)}
+										helperText={form.errors.name}
+										placeholder="Set job name"
+										margin="normal"
+										fullWidth
+										autoFocus
+										InputLabelProps={ {
+											shrink: true
+										} }
+									/>
+								)} />
+							</StyledTextFieldContainer>
+							<Grid item>
+								<ColorPicker
+									value={color}
+									predefinedColors={colors}
+									onChange={this.handleColorChange}
+								/>
+							</Grid>
 						</Grid>
-					</Grid>
-					<SaveButton
-						variant="contained"
-						color="secondary"
-						disabled={!name}
-						aria-label="Add new job"
-						onClick={this.handleSave}>
-						+ Add job
-					</SaveButton>
+						<Field render={ ({ form }) =>
+							<SaveButton
+								type="submit"
+								variant="contained"
+								color="secondary"
+								disabled={!form.isValid || form.isValidating}
+								aria-label="Add new job">
+								+ Add job
+							</SaveButton>}
+						/>
+						</Form>
+					</Formik>
 				</Grid>
 			</Container>
 		);

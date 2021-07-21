@@ -15,27 +15,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Grid } from '@material-ui/core';
 import React from 'react';
+
+import { Grid, Tooltip } from '@material-ui/core';
+
 import { formatShortDate } from '../../../../../../services/formatting/formatDate';
 import { ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
-import { SequenceDatesContainer, SequenceItemContainer, SequenceItemIcon, SequenceName } from '../../sequences.styles';
+import {
+	SequenceDatesContainer,
+	SequenceItemContainer,
+	SequenceItemIcon,
+	SequenceName,
+} from '../../sequences.styles';
 
 interface IProps {
 	sequences: any;
 	setSelectedSequence: (id: string) => void;
 }
 
-const SequenceItem = ({name, modelName, minDate, maxDate, onClick}) => (
+const SequenceItem = ({name, modelName, startDate, endDate, onClick}) => (
 	<SequenceItemContainer onClick={onClick}>
 		<Grid container direction="row" alignItems="center">
 			<SequenceItemIcon />
-			<Grid item direction="column">
-				<SequenceName>{name}</SequenceName>
+			<Grid item>
+				<Tooltip title={name}>
+					<SequenceName>{name}</SequenceName>
+				</Tooltip>
 				<Grid item>{modelName}</Grid>
 				<SequenceDatesContainer>
-					<Grid item>Start: {formatShortDate(new Date(minDate))} </Grid>
-					<Grid item>End: {formatShortDate(new Date(maxDate))} </Grid>
+					<Grid item>Start: {formatShortDate(new Date(startDate))} </Grid>
+					<Grid item>End: {formatShortDate(new Date(endDate))} </Grid>
 				</SequenceDatesContainer>
 			</Grid>
 		</Grid>
@@ -44,7 +53,7 @@ const SequenceItem = ({name, modelName, minDate, maxDate, onClick}) => (
 
 export class SequencesList extends React.PureComponent<IProps, {}> {
 	public render = () => {
-		const {setSelectedSequence, sequences} = this.props;
+		const { setSelectedSequence, sequences } = this.props;
 
 		return (
 			<ViewerPanelContent>

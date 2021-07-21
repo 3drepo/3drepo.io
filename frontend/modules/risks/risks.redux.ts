@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { cloneDeep, keyBy } from 'lodash';
+import { cloneDeep, isEqual, keyBy } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: RisksTypes, Creators: RisksActions } = createActions({
@@ -26,11 +26,12 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	fetchRiskFailure: [],
 	setComponentState: ['componentState'],
 	saveRisk: ['teamspace', 'model', 'riskData', 'revision', 'finishSubmitting', 'ignoreViewer'],
-	updateRisk: ['teamspace', 'modelId', 'riskData'],
+	updateRisk: ['riskData'],
 	updateBoardRisk: ['teamspace', 'modelId', 'riskData'],
-	postComment: ['teamspace', 'modelId', 'riskData', 'finishSubmitting'],
+	cloneRisk: ['dialogId'],
+	postComment: ['teamspace', 'modelId', 'riskData', 'ignoreViewer', 'finishSubmitting'],
 	removeComment: ['teamspace', 'modelId', 'riskData'],
-	saveRiskSuccess: ['risk'],
+	saveRiskSuccess: ['risk', 'resetComponentState'],
 	setNewRisk: [],
 	printRisks: ['teamspace', 'modelId'],
 	downloadRisks: ['teamspace', 'modelId'],
@@ -40,32 +41,40 @@ export const { Types: RisksTypes, Creators: RisksActions } = createActions({
 	setActiveRisk: ['risk', 'revision', 'ignoreViewer'],
 	togglePendingState: ['isPending'],
 	toggleDetailsPendingState: ['isPending'],
+	togglePostCommentPendingState: ['isPending'],
 	subscribeOnRiskChanges: ['teamspace', 'modelId'],
 	unsubscribeOnRiskChanges: ['teamspace', 'modelId'],
-	focusOnRisk: ['risk', 'revision'],
 	toggleShowPins: ['showPins'],
 	subscribeOnRiskCommentsChanges: ['teamspace', 'modelId', 'riskId'],
 	unsubscribeOnRiskCommentsChanges: ['teamspace', 'modelId', 'riskId'],
 	createCommentSuccess: ['comment', 'riskId'],
+	createCommentsSuccess: ['comments', 'riskId'],
 	deleteCommentSuccess: ['commentGuid', 'riskId'],
 	updateCommentSuccess: ['comment', 'riskId'],
 	toggleSortOrder: ['sortOrder'],
+	setSortBy: ['field'],
 	updateNewRisk: ['newRisk'],
 	setFilters: ['filters'],
 	showCloseInfo: ['riskId'],
 	hideCloseInfo: ['riskId'],
-	showMultipleGroups: ['risk', 'revision'],
 	updateSelectedRiskPin: ['position'],
 	removeResource: ['resource'],
 	removeResourceSuccess: ['resource', 'riskId'],
 	attachFileResources: ['files'],
 	attachLinkResources: ['links'],
 	attachResourcesSuccess: ['resources', 'riskId'],
-	updateResourcesSuccess: ['resourcesIds', 'updates', 'riskId' ],
+	updateResourcesSuccess: ['resourcesIds', 'updates', 'riskId'],
 	fetchMitigationCriteria: ['teamspace'],
 	fetchMitigationCriteriaSuccess: ['criteria', 'teamspace'],
 	fetchMitigationCriteriaFailure: [],
 	showMitigationSuggestions: ['conditions', 'setFieldValue'],
+	updateActiveRiskViewpoint: ['screenshot'],
+	setMeasureMode: ['measureMode'],
+	setMeasureModeSuccess: ['measureMode'],
+	addMeasurement: ['measurement'],
+	removeMeasurement: ['uuid'],
+	setMeasurementColor: ['uuid', 'color'],
+	setMeasurementName: ['uuid', 'name'],
 	reset: []
 }, { prefix: 'RISKS/' });
 
@@ -78,15 +87,23 @@ export interface IRisksComponentState {
 	newComment: any;
 	selectedFilters: any[];
 	associatedActivities: any[];
+	fetchingDetailsIsPending: boolean;
+	postCommentIsPending: boolean;
+	failedToLoad: boolean;
+	filteredRisks: any[];
+	measureMode: string;
+	sortOrder: string;
+	sortBy: string;
 }
 
 export interface IRisksState {
 	risksMap: any;
 	isPending: boolean;
 	componentState: IRisksComponentState;
+	mitigationCriteria: any;
 }
 
-export const INITIAL_STATE = {
+export const INITIAL_STATE: IRisksState = {
 	risksMap: {},
 	isPending: true,
 	componentState: {
@@ -99,9 +116,12 @@ export const INITIAL_STATE = {
 		filteredRisks: [],
 		showPins: true,
 		fetchingDetailsIsPending: false,
+		postCommentIsPending: false,
 		associatedActivities: [],
 		sortOrder: 'desc',
-		failedToLoad: false
+		failedToLoad: false,
+		sortBy: 'created',
+		measureMode: ''
 	},
 	mitigationCriteria: {},
 };
@@ -120,6 +140,10 @@ export const togglePendingState = (state = INITIAL_STATE, { isPending }) => ({ .
 
 export const toggleDetailsPendingState = (state = INITIAL_STATE, { isPending }) => {
 	return setComponentState(state, { componentState: { fetchingDetailsIsPending: isPending } });
+};
+
+export const togglePostCommentPendingState = (state = INITIAL_STATE, { isPending }) => {
+	return setComponentState(state, { componentState: { postCommentIsPending: isPending } });
 };
 
 export const fetchRisksSuccess = (state = INITIAL_STATE, { risks = [] }) => {
@@ -147,26 +171,39 @@ export const fetchRiskFailure = (state = INITIAL_STATE) => {
 	return { ...state, componentState: { ...state.componentState, failedToLoad: true } };
 };
 
-export const saveRiskSuccess = (state = INITIAL_STATE, { risk }) => {
+export const saveRiskSuccess = (state = INITIAL_STATE, { risk, resetComponentState =  true }) => {
 	const risksMap = updateRiskProps(state.risksMap, risk._id, risk);
+
+	const newComponentState = { ...state.componentState };
+
+	if (resetComponentState) {
+		newComponentState.newRisk = {};
+	}
 
 	return {
 		...state,
 		risksMap,
-		componentState: { ...state.componentState, newRisk: {}}
+		componentState: newComponentState
 	};
 };
 
 export const updateSelectedRiskPin =  (state = INITIAL_STATE, { position }) => {
 	if (state.componentState.activeRisk) {
 		const risk = state.risksMap[state.componentState.activeRisk];
-		return saveRiskSuccess(state, { risk: {...risk, position} });
+		const risksMap = updateRiskProps(state.risksMap, risk._id, { ...risk, position });
+
+		return {
+			...state,
+			risksMap,
+			componentState: { ...state.componentState, newRisk: {}}
+		};
 	}
 
 	if (state.componentState.newRisk) {
 		const componentState = state.componentState;
 
-		return {...state,
+		return {
+			...state,
 			componentState: { ...componentState , newRisk: { ...componentState.newRisk, position } }
 		};
 	}
@@ -178,18 +215,22 @@ export const setComponentState = (state = INITIAL_STATE, { componentState = {} }
 	return { ...state, componentState: { ...state.componentState, ...componentState } };
 };
 
-export const createCommentSuccess = (state = INITIAL_STATE, { comment, riskId }) => {
-	let comments;
-
-	if (comment.action || comment.viewpoint) {
-		comments = [comment, ...state.risksMap[riskId].comments.map((log) => ({ ...log, sealed: true, new: true }))];
-	} else {
-		comments = [...state.risksMap[riskId].comments.map((log) => ({ ...log, sealed: true, new: true }))];
-	}
+export const createCommentsSuccess = (state = INITIAL_STATE, { comments, riskId }) => {
+	comments = comments.concat(state.risksMap[riskId].comments);
+	comments = comments.map((log, i) => ({ ...log, sealed: (i !== 0) ? true : log.sealed}));
 
 	const risksMap = updateRiskProps(state.risksMap, riskId, { comments });
-
 	return { ...state, risksMap };
+};
+
+export const createCommentSuccess = (state = INITIAL_STATE, { comment, riskId }) => {
+	const alreadyInComments = state.risksMap[riskId].comments.find(({ guid }) => guid === comment.guid);
+
+	if (!alreadyInComments) {
+		return createCommentsSuccess(state, {comments: [comment], riskId } );
+	}
+
+	return { ...state };
 };
 
 export const updateCommentSuccess = (state = INITIAL_STATE, { comment, riskId }) => {
@@ -212,6 +253,15 @@ export const toggleSortOrder = (state = INITIAL_STATE) => {
 		...state, componentState: {
 			...state.componentState,
 			sortOrder: state.componentState.sortOrder === 'asc' ? 'desc' : 'asc'
+		}
+	};
+};
+
+export const setSortBy = (state = INITIAL_STATE, {field}) => {
+	return {
+		...state, componentState: {
+			...state.componentState,
+			sortBy: field
 		}
 	};
 };
@@ -262,6 +312,10 @@ export const fetchMitigationCriteriaSuccess = (state = INITIAL_STATE,  { criteri
 	return { ...state, mitigationCriteria: { ...criteria, teamspace } };
 };
 
+const setMeasureModeSuccess = (state = INITIAL_STATE, { measureMode }) => {
+	return setComponentState(state, { componentState: { measureMode } });
+};
+
 const reset = () => cloneDeep(INITIAL_STATE);
 
 export const reducer = createReducer(INITIAL_STATE, {
@@ -272,10 +326,13 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.SAVE_RISK_SUCCESS]: saveRiskSuccess,
 	[RisksTypes.TOGGLE_PENDING_STATE]: togglePendingState,
 	[RisksTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState,
+	[RisksTypes.TOGGLE_POST_COMMENT_PENDING_STATE]: togglePostCommentPendingState,
 	[RisksTypes.CREATE_COMMENT_SUCCESS]: createCommentSuccess,
+	[RisksTypes.CREATE_COMMENTS_SUCCESS]: createCommentsSuccess,
 	[RisksTypes.UPDATE_COMMENT_SUCCESS]: updateCommentSuccess,
 	[RisksTypes.DELETE_COMMENT_SUCCESS]: deleteCommentSuccess,
 	[RisksTypes.TOGGLE_SORT_ORDER]: toggleSortOrder,
+	[RisksTypes.SET_SORT_BY]: setSortBy,
 	[RisksTypes.SHOW_CLOSE_INFO]: showCloseInfo,
 	[RisksTypes.HIDE_CLOSE_INFO]: hideCloseInfo,
 	[RisksTypes.UPDATE_SELECTED_RISK_PIN]: updateSelectedRiskPin,
@@ -286,4 +343,5 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[RisksTypes.FETCH_MITIGATION_CRITERIA_SUCCESS]: fetchMitigationCriteriaSuccess,
 	[RisksTypes.FETCH_MITIGATION_CRITERIA_FAILURE]: fetchRiskFailure,
 	[RisksTypes.RESET]: reset,
+	[RisksTypes.SET_MEASURE_MODE_SUCCESS]: setMeasureModeSuccess,
 });

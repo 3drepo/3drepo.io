@@ -20,10 +20,10 @@ import { matchPath } from 'react-router';
 import { createSelector } from 'reselect';
 import { ROUTES } from '../../constants/routes';
 
-export const selectRouterDomain = (state) => state.router;
+export const selectRouterDomain = (state) => state.router || '';
 
 export const selectLocation = createSelector(
-	selectRouterDomain, (router) => router.location
+	selectRouterDomain, (router) => router.location || ''
 );
 
 export const selectPathname = createSelector(
@@ -40,7 +40,7 @@ export const selectHash = createSelector(
 
 export const selectUrlParams = createSelector(
 	selectLocation, (location) => {
-		const viewerPath = `${ROUTES.VIEWER}/:teamspace/:model/:revision?`;
+		const viewerPath = ROUTES.MODEL_VIEWER;
 		const boardPath = ROUTES.BOARD_SPECIFIC;
 
 		const viewerParams = matchPath(location.pathname, { path: viewerPath });

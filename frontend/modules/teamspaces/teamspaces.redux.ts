@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { cloneDeep, keyBy, omit } from 'lodash';
+import { omit, values } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import { DATA_TYPES } from '../../routes/components/filterPanel/filterPanel.component';
 import { SORTING_BY_LAST_UPDATED } from '../../routes/teamspaces/teamspaces.contants';
@@ -43,9 +43,52 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 	createModelSuccess: ['teamspace', 'modelData'],
 	updateModelSuccess: ['teamspace', 'modelId', 'modelData'],
 	removeModelSuccess: ['teamspace', 'modelData'],
+	subscribeOnChanges: [],
+	unsubscribeFromChanges: [],
 }, { prefix: 'TEAMSPACES/' });
 
-export const INITIAL_STATE = {
+interface ISubModel {
+	database: string;
+	model: string;
+	name: string;
+}
+
+interface IModel {
+	code?: string;
+	federate?: boolean;
+	permissions: string[];
+	model: string;
+	units: string;
+	name: string;
+	status: string;
+	subModels: ISubModel[];
+	timestamp: string;
+	nRevisions: number;
+	projectName: string;
+}
+
+export interface ITeamspacesComponentState {
+	showStarredOnly: boolean;
+	visibleItems: any;
+	starredVisibleItems: any;
+	teamspacesItems: any[];
+	searchEnabled?: boolean;
+	selectedFilters: any[];
+	selectedDataTypes: any[];
+	activeSorting: string;
+	nameSortingDescending: boolean;
+	dateSortingDescending: boolean;
+}
+
+export interface IActivitiesState {
+	teamspaces: any;
+	projects: any;
+	models: Record<IModel['model'], IModel>;
+	componentState: ITeamspacesComponentState;
+	isPending: boolean;
+}
+
+export const INITIAL_STATE: IActivitiesState = {
 	teamspaces: {},
 	projects: {},
 	models: {},
@@ -110,14 +153,46 @@ const getProject = (state, teamspaceName, projectName) => {
 
 // Models
 const updateModelSuccess = (state = INITIAL_STATE, { modelId, modelData }) => {
-	const model = { ...state.models[modelId], name: modelData.name, code: modelData.code };
+	const allFederations = values({ ...state.models })
+		.filter((modelItem: IModel) => modelItem.federate);
+
+	const federationsWithModel = allFederations
+		.filter((federation) => federation.subModels
+			.filter(({ model: subModelId }) => subModelId === modelId ).length
+		);
+
+	const model = { ...state.models[modelId],
+		name: modelData.name || state.models[modelId].name,
+		code: modelData.code || state.models[modelId].code
+	};
+
 	if (modelData.federate) {
 		model.subModels = modelData.subModels;
 		model.timestamp = modelData.timestamp;
-	}
 
-	const models = { ...state.models, [modelId]: model };
-	return { ...state, models };
+		const models = { ...state.models, [modelId]: model };
+		return { ...state, models };
+	} else {
+		if (federationsWithModel.length) {
+			federationsWithModel.forEach((_, index) => {
+				federationsWithModel[index].subModels = federationsWithModel[index].subModels
+					.map((subModel) => subModel.model === modelId ? {
+						...subModel,
+						name: modelData.name || state.models[modelId].name,
+					} : {
+						...subModel
+					});
+			});
+		}
+
+		const updatedFederations = federationsWithModel.reduce((federations, federation) => {
+			federations[federation.model] = federation;
+			return federations;
+		}, {});
+
+		const models = { ...state.models, [modelId]: model, ...updatedFederations };
+		return { ...state, models };
+	}
 };
 
 const createModelSuccess = (state = INITIAL_STATE, { teamspace, modelData }) => {

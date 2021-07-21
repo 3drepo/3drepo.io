@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,52 +16,18 @@
  */
 
 import React from 'react';
+import Linkify from 'react-linkify';
 
 interface IProps {
-	children?: any;
+	children?: React.ReactChild;
 	className?: string;
 	style?: any;
 }
 
-// tslint:disable-next-line:max-line-length
-const urlRegex = /(http|https):\/\/\S+/ig;
-
-const anchorUrl = (url, key) => {
-	return (<a key={key} href={url} target="_blank" rel="noopener">{url}</a>);
-};
-
-export class LinkableField extends React.PureComponent<IProps, null> {
-	public textRef = React.createRef<HTMLSpanElement>();
-
-	public linkedText = (): React.ReactNode => {
-		let match = urlRegex.exec(this.props.children || '');
-		let lastIndex = 0;
-		const res = [];
-
-		while (match) {
-			if (lastIndex !== match.index) {
-				res.push(this.props.children.substring(lastIndex, match.index));
-			}
-
-			res.push(anchorUrl(match[0], match.index));
-			lastIndex = match.index + match[0].length;
-			match = urlRegex.exec(this.props.children);
-		}
-
-		if (lastIndex === 0) {
-			return this.props.children;
-		}
-
-		res.push(this.props.children.substring(lastIndex, this.props.children.length));
-
-		return res;
-	}
-
-	public render() {
-		return (
-			<span ref={this.textRef} style={...this.props.style} className={this.props.className}>
-				{this.linkedText()}
-			</span>
-		);
-	}
-}
+export const LinkableField: React.FC<IProps> = React.forwardRef(
+	({ style, className, children }: IProps, ref: React.Ref<HTMLSpanElement>) => (
+		<span style={style} ref={ref} className={className}>
+			<Linkify properties={{target: '_blank', rel: 'noopener noreferrer'}}>{children}</Linkify>
+		</span>
+	)
+);

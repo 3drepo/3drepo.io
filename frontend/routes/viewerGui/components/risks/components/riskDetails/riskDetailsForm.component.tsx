@@ -17,33 +17,24 @@
 
 import React from 'react';
 
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
 import Tooltip from '@material-ui/core/Tooltip';
 import { withFormik, Form } from 'formik';
 import { debounce, get, isEmpty, isEqual } from 'lodash';
 import * as Yup from 'yup';
 
 import {
-	ATTACHMENTS_RISK_TYPE, MAIN_RISK_TYPE, RISK_TABS, TREATMENT_RISK_TYPE,
+	ATTACHMENTS_RISK_TYPE, MAIN_RISK_TYPE, RISK_TABS, SEQUENCING_RISK_TYPE, SHAPES_RISK_TYPE, TREATMENT_RISK_TYPE,
 } from '../../../../../../constants/risks';
-import { VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
-import { renderWhenTrue } from '../../../../../../helpers/rendering';
+import { LONG_TEXT_CHAR_LIM, VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
 import { calculateLevelOfRisk } from '../../../../../../helpers/risks';
-import { canChangeAssigned, canChangeBasicProperty, canChangeStatus } from '../../../../../../helpers/risks';
+import { canChangeBasicProperty, canComment } from '../../../../../../helpers/risks';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
-import PinButton from '../../../pinButton/pinButton.container';
 import { AttachmentsFormTab } from '../attachmentsFormTab/attachmentsFormTab.component';
 import { MainRiskFormTab } from '../mainRiskFormTab/mainRiskFormTab.component';
+import { SequencingFormTab } from '../sequencingFormTab/sequencingFormTab.component';
+import { ShapesFormTab } from '../shapesFormTab/shapesFormTab.component';
 import { TreatmentRiskFormTab } from '../treatmentFormTab/treatmentFormTab.component';
-import {
-	Container,
-	DescriptionImage,
-	FieldsContainer,
-	FieldsRow,
-	StyledFormControl,
-	TabContent,
-} from './riskDetails.styles';
+import { StyledTab, StyledTabs, TabContent } from './riskDetails.styles';
 
 interface IProps {
 	risk: any;
@@ -56,6 +47,7 @@ interface IProps {
 	myJob: any;
 	isValid: boolean;
 	dirty: boolean;
+	horizontal: boolean;
 	onSubmit: (values) => void;
 	onValueChange: (event) => void;
 	handleChange: (event) => void;
@@ -66,12 +58,29 @@ interface IProps {
 	onRemoveResource: (resource) => void;
 	attachFileResources: () => void;
 	attachLinkResources: () => void;
+	showScreenshotDialog: (config: any) => void;
 	showDialog: (config: any) => void;
 	canComment: boolean;
+	canEditBasicProperty: boolean;
 	hasPin: boolean;
-	hidePin?: boolean;
+	disableViewer?: boolean;
 	criteria: any;
 	showMitigationSuggestions: (conditions: any, setFieldValue) => void;
+	formRef: any;
+	onUpdateViewpoint: () => void;
+	onTakeScreenshot: () => void;
+	onUploadScreenshot: (image) => void;
+	showSequenceDate: (date) => void;
+	setMeasureMode: (measureMode) => void;
+	removeMeasurement: (uuid) => void;
+	setMeasurementColor: (uuid, color) => void;
+	setMeasurementName: (uuid, type, name) => void;
+	minSequenceDate: number;
+	maxSequenceDate: number;
+	selectedDate: Date;
+	sequences: any[];
+	units: any;
+	measureMode: string;
 }
 
 interface IState {
@@ -80,9 +89,10 @@ interface IState {
 }
 
 export const RiskSchema = Yup.object().shape({
-	description: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
-	mitigation_desc: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
-	residual_risk: Yup.string().max(220, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+	desc: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
+	mitigation_desc: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
+	mitigation_detail: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
+	residual_risk: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
 });
 
 class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
@@ -90,19 +100,9 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		return !this.props.risk._id;
 	}
 
-	get canEditRiskStatus() {
+	get canEditViewpoint() {
 		const { risk, myJob, permissions, currentUser } = this.props;
-		return this.isNewRisk || canChangeStatus(risk, myJob, permissions, currentUser);
-	}
-
-	get canEditBasicProperty() {
-		const { risk, myJob, permissions, currentUser } = this.props;
-		return this.isNewRisk || canChangeBasicProperty(risk, myJob, permissions, currentUser);
-	}
-
-	get canChangeAssigned() {
-		const { risk, myJob, permissions, currentUser } = this.props;
-		return canChangeAssigned(risk, myJob, permissions, currentUser);
+		return this.isNewRisk || canComment(risk, myJob, permissions, currentUser);
 	}
 
 	public state = {
@@ -176,24 +176,12 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		this.setState({ activeTab });
 	}
 
-	public renderPinButton = renderWhenTrue(() => (
-		<StyledFormControl>
-			<PinButton
-				onChange={this.props.onChangePin}
-				onSave={this.props.onSavePin}
-				disabled={!this.isNewRisk && !this.canEditBasicProperty}
-				hasPin={this.props.hasPin}
-			/>
-		</StyledFormControl>
-	));
-
 	public showRiskContent = (active) => (
 		<MainRiskFormTab
 			active={active}
 			isNewRisk={this.isNewRisk}
-			canEditBasicProperty={this.canEditBasicProperty}
-			canChangeAssigned={this.canChangeAssigned}
-			renderPinButton={this.renderPinButton}
+			canEditBasicProperty={this.props.canEditBasicProperty}
+			canEditViewpoint={this.canEditViewpoint}
 			{...this.props}
 		/>
 	)
@@ -202,14 +190,40 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		<TreatmentRiskFormTab
 			active={active}
 			isNewRisk={this.isNewRisk}
-			canEditBasicProperty={this.canEditBasicProperty}
-			canEditRiskStatus={this.canEditRiskStatus}
 			{...this.props}
 		/>
 	)
 
+	public showSequencingContent = (active) => (
+		<SequencingFormTab
+			active={active}
+			isNewTicket={this.isNewRisk}
+			{...this.props}
+			showSequenceDate={this.props.showSequenceDate}
+			min={this.props.minSequenceDate}
+			max={this.props.maxSequenceDate}
+			startTimeValue={this.props.values.sequence_start}
+			endTimeValue={this.props.values.sequence_end}
+			sequences={this.props.sequences}
+		/>
+	)
+
+	public showShapesContent = (active) => (
+		<ShapesFormTab
+			active={active}
+			units={this.props.units}
+			measureMode={this.props.measureMode}
+			removeMeasurement={this.props.removeMeasurement}
+			setMeasurementColor={this.props.setMeasurementColor}
+			setMeasurementName={this.props.setMeasurementName}
+			setMeasureMode={this.props.setMeasureMode}
+			shapes={this.props.risk.shapes}
+			addButtonsEnabled={!this.props.horizontal}
+		/>
+	)
+
 	public showAttachmentsContent = (active) => (
-		<AttachmentsFormTab active={active} {...this.props} />
+		<AttachmentsFormTab active={active} resources={this.props.risk.resources} {...this.props} />
 	)
 
 	get attachmentsProps() {
@@ -233,20 +247,25 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 		const { activeTab } = this.state;
 		return (
 			<Form>
-				<Tabs
+				<StyledTabs
 					value={activeTab}
 					indicatorColor="secondary"
 					textColor="primary"
-					fullWidth
 					onChange={this.handleChange}
+					variant="scrollable"
+					scrollButtons="auto"
 				>
-					<Tab label={RISK_TABS.RISK} value={MAIN_RISK_TYPE} />
-					<Tab label={RISK_TABS.TREATMENT} value={TREATMENT_RISK_TYPE} />
-					<Tab {...this.attachmentsProps} value={ATTACHMENTS_RISK_TYPE} />
-				</Tabs>
+					<StyledTab label={RISK_TABS.RISK} value={MAIN_RISK_TYPE} />
+					<StyledTab label={RISK_TABS.TREATMENT} value={TREATMENT_RISK_TYPE} />
+					<StyledTab label={RISK_TABS.SEQUENCING} value={SEQUENCING_RISK_TYPE} />
+					<StyledTab label={RISK_TABS.SHAPES} value={SHAPES_RISK_TYPE} />
+					<StyledTab {...this.attachmentsProps} value={ATTACHMENTS_RISK_TYPE} />
+				</StyledTabs>
 				<TabContent>
 					{this.showRiskContent(activeTab === MAIN_RISK_TYPE)}
 					{this.showTreatmentContent(activeTab === TREATMENT_RISK_TYPE)}
+					{this.showSequencingContent(activeTab === SEQUENCING_RISK_TYPE)}
+					{this.showShapesContent(activeTab === SHAPES_RISK_TYPE)}
 					{this.showAttachmentsContent(activeTab === ATTACHMENTS_RISK_TYPE)}
 				</TabContent>
 			</Form>
@@ -256,6 +275,13 @@ class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
 
 export const RiskDetailsForm = withFormik({
 	mapPropsToValues: ({ risk }) => {
+		const setMitigationStatusValue = () => {
+			if (risk.mitigation_status && risk.mitigation_status !== 'mitigation_status') {
+				return risk.mitigation_status;
+			}
+			return '';
+		};
+
 		return ({
 			safetibase_id: risk.safetibase_id || '',
 			associated_activity: risk.associated_activity || '',
@@ -263,7 +289,7 @@ export const RiskDetailsForm = withFormik({
 			risk_factor: risk.risk_factor || '',
 			scope: risk.scope || '',
 			location_desc: risk.location_desc || '',
-			mitigation_status: risk.mitigation_status || '',
+			mitigation_status: setMitigationStatusValue(),
 			mitigation_desc: risk.mitigation_desc || '',
 			mitigation_detail: risk.mitigation_detail || '',
 			mitigation_stage: risk.mitigation_stage || '',
@@ -278,7 +304,9 @@ export const RiskDetailsForm = withFormik({
 			residual_consequence: risk.residual_consequence,
 			residual_level_of_risk: risk.residual_level_of_risk,
 			overall_level_of_risk: risk.overall_level_of_risk,
-			residual_risk: risk.residual_risk
+			residual_risk: risk.residual_risk,
+			sequence_start: risk.sequence_start,
+			sequence_end: risk.sequence_end
 		});
 	},
 	handleSubmit: (values, { props }) => {

@@ -18,7 +18,6 @@
 import React from 'react';
 
 import InputLabel from '@material-ui/core/InputLabel';
-import RisksIcon from '@material-ui/icons/Warning';
 import { Field } from 'formik';
 
 import {
@@ -27,8 +26,8 @@ import {
 	RISK_LIKELIHOODS,
 } from '../../../../../../constants/risks';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
-import { Image } from '../../../../../components/image';
 import { TextField } from '../../../../../components/textField/textField.component';
+import { UpdateButtons } from '../../../updateButtons/updateButtons.component';
 import { AutoSuggestField } from '../autoSuggestField/autosuggestField.component';
 import { LevelOfRisk } from '../levelOfRisk/levelOfRisk.component';
 import {
@@ -37,30 +36,38 @@ import {
 	DescriptionImage,
 	FieldsContainer,
 	FieldsRow,
-	StyledFormControl
+	StyledFormControl,
 } from '../riskDetails/riskDetails.styles';
 import { RiskSchema } from '../riskDetails/riskDetailsForm.component';
+import { RisksIcon } from '../riskIcon/riskIcon.component';
 
 interface IProps {
 	risk: any;
 	active: boolean;
 	isNewRisk: boolean;
+	canComment: boolean;
 	canEditBasicProperty: boolean;
-	canChangeAssigned: boolean;
+	canEditViewpoint: boolean;
 	jobs: any[];
-	hidePin?: boolean;
-	renderPinButton: (show: boolean) => React.ReactNode;
+	disableViewer?: boolean;
 	values?: any;
 	criteria: any;
+	hasPin: boolean;
+	onSavePin: (position) => void;
+	onChangePin: (pin) => void;
+	onUpdateViewpoint: () => void;
+	onTakeScreenshot: () => void;
+	onUploadScreenshot: (image) => void;
+	showScreenshotDialog: (config: any) => void;
 }
 
 export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
-	active, isNewRisk, risk, hidePin, jobs, canChangeAssigned, canEditBasicProperty,
-	renderPinButton, values, criteria,
+	active, isNewRisk, risk, disableViewer, jobs, canComment, canEditBasicProperty,
+	canEditViewpoint, values, criteria, ...props
 }) => {
 	const getCategories = () => {
 		const { category = [] } = criteria;
-		return category.map((x) => ({label: x, value: x}));
+		return category.map((x) => ({ label: x, value: x }));
 	};
 
 	return (
@@ -76,21 +83,32 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 						label="Description"
 						disabled={!canEditBasicProperty}
 						mutable={!isNewRisk}
+						enableMarkdown
 					/>
 				)} />
 			</Container>
 
 			{risk.descriptionThumbnail && (
-				<DescriptionImage>
-					<Image
-						src={risk.descriptionThumbnail}
-						enablePreview
-					/>
-				</DescriptionImage>
+				<DescriptionImage
+					src={risk.descriptionThumbnail}
+					enablePreview
+				/>
 			)}
 
 			<FieldsRow container alignItems="center" justify="space-between">
-				{renderPinButton(!hidePin)}
+				<UpdateButtons
+					isNew={isNewRisk}
+					disableViewer={disableViewer}
+					canEditViewpoint={canEditViewpoint}
+					onChangePin={props.onChangePin}
+					onSavePin={props.onSavePin}
+					onUpdateViewpoint={props.onUpdateViewpoint}
+					onTakeScreenshot={props.onTakeScreenshot}
+					onUploadScreenshot={props.onUploadScreenshot}
+					onShowScreenshotDialog={props.showScreenshotDialog}
+					hasImage={risk.descriptionThumbnail}
+					hasPin={props.hasPin}
+				/>
 			</FieldsRow>
 
 			<FieldsRow container alignItems="center" justify="space-between">
@@ -102,7 +120,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 								{...field}
 								items={RISK_LIKELIHOODS}
 								inputId="likelihood"
-								disabled={!canEditBasicProperty}
+								disabled={!canComment}
 							/>
 						)} />
 					</StyledFormControl>
@@ -114,7 +132,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 								{...field}
 								items={RISK_CONSEQUENCES}
 								inputId="consequence"
-								disabled={!canEditBasicProperty}
+								disabled={!canComment}
 							/>
 						)} />
 					</StyledFormControl>
@@ -145,7 +163,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 							{...field}
 							items={jobs}
 							inputId="assigned_roles"
-							disabled={!(isNewRisk || canChangeAssigned)}
+							disabled={!(isNewRisk || canComment)}
 						/>
 					)} />
 				</StyledFormControl>
@@ -157,7 +175,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 							{...field}
 							items={getCategories()}
 							inputId="category"
-							disabled={!canEditBasicProperty}
+							disabled={!canComment}
 						/>
 					)} />
 				</StyledFormControl>
@@ -171,6 +189,8 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 							suggestions={criteria.associated_activity}
 							form={form}
 							field={field}
+							disabled={!canComment}
+							saveOnChange={isNewRisk}
 						/>
 					)} />
 				</StyledFormControl>
@@ -181,7 +201,8 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 							suggestions={criteria.element}
 							form={form}
 							field={field}
-							disabled={!canEditBasicProperty}
+							disabled={!canComment}
+							saveOnChange={isNewRisk}
 						/>
 					)} />
 				</StyledFormControl>
@@ -195,7 +216,8 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 							suggestions={criteria.risk_factor}
 							form={form}
 							field={field}
-							disabled={!canEditBasicProperty}
+							disabled={!canComment}
+							saveOnChange={isNewRisk}
 						/>
 					)} />
 					<Field name="location_desc" render={({ field, form }) => (
@@ -204,7 +226,8 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 							suggestions={criteria.location_desc}
 							form={form}
 							field={field}
-							disabled={!canEditBasicProperty}
+							disabled={!canComment}
+							saveOnChange={isNewRisk}
 						/>
 					)} />
 				</FieldsContainer>
@@ -215,7 +238,8 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 							suggestions={criteria.scope}
 							form={form}
 							field={field}
-							disabled={!canEditBasicProperty}
+							disabled={!canComment}
+							saveOnChange={isNewRisk}
 						/>
 					)} />
 				</FieldsContainer>

@@ -1,4 +1,5 @@
 docs/
 test/
 node_modules/
-gulpfile.js
+eslint-rules/
+statics/

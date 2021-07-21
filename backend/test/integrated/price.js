@@ -21,9 +21,8 @@ const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp();
 const logger = require("../../logger.js");
-const systemLogger = logger.systemLogger;
-const UserBilling = require("../../models/userBilling");
-const getNextPaymentDate = UserBilling.statics.getNextPaymentDate;
+// const UserBilling = require("../../models/userBilling");
+// const getNextPaymentDate = UserBilling.statics.getNextPaymentDate;
 const helpers = require("../helpers/signUp");
 const moment = require("moment-timezone");
 const User = require("../../models/user");
@@ -49,7 +48,7 @@ describe("Billing agreement price from PayPal", function () {
 			console.log("API test server is listening on port 8080!");
 
 			helpers.signUpAndLogin({
-				server, request, agent, expect, User, systemLogger,
+				server, request, agent, expect, User,
 				username, password, email,
 				done: function(err, _agent) {
 					agent = _agent;
@@ -67,6 +66,10 @@ describe("Billing agreement price from PayPal", function () {
 			done();
 		});
 	});
+
+
+	/*
+	COMMENTED OUT FOR PAYPAL SUPPORT
 
 	function makeTest(options, stubs, done) {
 		const plans = {
@@ -593,4 +596,7 @@ describe("Billing agreement price from PayPal", function () {
 			}, stub, done);
 		});
 	});
+
+	Paypal commented out
+	*/
 });

@@ -17,7 +17,7 @@
 
 import React from 'react';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { EmptyStateInfo } from '../../../views/views.styles';
+import { EmptyStateInfo } from '../../../../../components/components.styles';
 import { CompareDiffItem } from '../compareDiffItem/compareDiffItem.component';
 import { CompareFilters } from '../compareFilters/compareFilters.component';
 import { Container, List } from './compareDiff.styles';

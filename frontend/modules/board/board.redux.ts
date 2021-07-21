@@ -22,6 +22,7 @@ export const { Types: BoardTypes, Creators: BoardActions } = createActions({
 	fetchData: ['boardType', 'teamspace', 'project', 'modelId'],
 	fetchCardData: ['boardType', 'teamspace', 'modelId', 'cardId'],
 	resetCardData: ['boardType'],
+	openCardDialog: ['cardId', 'onNavigationChange', 'disableReset'],
 	setIsPending: ['isPending'],
 	setFilterProp: ['filterProp'],
 	setBoardType: ['boardType'],
@@ -30,7 +31,9 @@ export const { Types: BoardTypes, Creators: BoardActions } = createActions({
 	setFilters: ['filters'],
 	printItems: ['teamspace', 'modelId'],
 	downloadItems: ['teamspace', 'modelId'],
-	toggleClosedIssues: []
+	toggleClosedIssues: [],
+	toggleSortOrder: [],
+	setSortBy: ['field'],
 }, { prefix: 'BOARD/' });
 
 export const INITIAL_STATE = {

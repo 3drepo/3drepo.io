@@ -1,65 +1,69 @@
-language: node_js
+matrix:
+  include:
+    #linter test
+    - language: node_js
+      dist: focal
+      name: Linter check
+      git:
+      submodules: false
+      depth: 1
+      node_js:
+        - "14.17.1"
+      script:
+        - cd backend
+        - yarn install
+        - yarn lint
+        - cd ../frontend
+        - yarn install
+        - yarn lint
+        - yarn build:test
+    # tests
+    - language: node_js
+      dist: focal
+      name: Backend tests
+      git:
+      submodules: false
+      depth: 1
+      node_js:
+        - "14.17.1"
+      sudo: true
+      addons:
+        apt:
+         packages:
+            - expect-dev
+            - rabbitmq-server
+      hosts:
+        - test.127.0.0.1
+      services: mongodb
 
-git:
-  submodules: false
-  depth: 1
+      before_install:
+        - mkdir -p submodules
+        - test_ver=`cat backend/test/testDBVersion`
+        - cd submodules
+        - git clone https://$TESTS_USER:$TESTS_PASSWORD@github.com/3drepo/tests.git
+        - cd tests
+        - git checkout $test_ver
+        - git status
+        - sudo apt install mongo-tools -y
+        - cd backend && mongorestore
+        - cd ../../../
+        - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
 
-node_js:
-    - "10.15.1"
+      install:
+        - cd ./backend
+        - yarn install
+        - cd ./../frontend
+        - DETECT_CHROMEDRIVER_VERSION=true yarn install
+        - yarn build
 
-sudo: true
-dist: trusty
-
-addons:
-  apt:
-   sources:
-      - mongodb-3.2-precise
-
-   packages:
-      - expect-dev
-
-  chrome: stable
-  hosts:
-    - test.127.0.0.1
-
-before_install:
-    - until nc -z localhost 27017; do echo "waiting for mongo"; sleep 1; done
-    - mkdir -p submodules
-    - test_ver=`cat backend/test/testDBVersion`
-    - cd submodules
-    - git clone https://$TESTS_USER:$TESTS_PASSWORD@github.com/3drepo/tests.git
-    - cd tests
-    - git checkout $test_ver
-    - git status
-    - cd backend && mongorestore
-    - cd ../../../
-    - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
-
-install:
-    - cd ./backend
-    - yarn install
-    - yarn lint
-    - cd ./../frontend
-    - DETECT_CHROMEDRIVER_VERSION=true yarn install
-    - yarn lint
-    - yarn build:test
-
-cache:
-  yarn: true
-  directories:
-    - node_modules
-
-services:
-  - rabbitmq
-  - mongodb
-
-script:
-    - cd ./../backend
-    - unbuffer yarn test
-    - cd ../
-    - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" &
-    - cd ./frontend
-    - unbuffer yarn test
+      script:
+        - cd ../backend
+        - mkdir coverage
+        - unbuffer yarn test
+        - cd ../
+        - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" &
+        - cd ./frontend
+       #- unbuffer yarn test
 
 notifications:
     email:

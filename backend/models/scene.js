@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2016 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,58 +16,82 @@
  */
 
 "use strict";
-const mongoose = require("mongoose");
-const ModelFactory = require("./factory/modelFactory");
-const Schema = mongoose.Schema;
 const utils = require("../utils");
 const db = require("../handler/db");
 const ExternalServices = require("../handler/externalServices");
 const matrix = require("./helper/matrix");
+const History = require("./history");
 
-const schema = Schema({
-	_id: Object,
-	parents: []
-});
+function clean(nodeToClean) {
+	if (nodeToClean) {
+		if (nodeToClean._id) {
+			nodeToClean._id = utils.uuidToString(nodeToClean._id);
+		}
 
-if (!schema.options.toJSON) {
-	schema.options.toJSON = {};
+		if (nodeToClean.parents) {
+			nodeToClean.parents = nodeToClean.parents.map(p => utils.uuidToString(p));
+		}
+	}
+
+	return nodeToClean;
 }
 
-const dbFindOne = async (account, model, query, projection) => {
-	const coll = await db.getCollection(account, model + ".scene");
-	return await coll.findOne(query, projection);
-};
+function cleanAll(nodesToClean) {
+	return nodesToClean.map(clean);
+}
 
-schema.options.toJSON.transform = function (doc, ret) {
-	ret._id = utils.uuidToString(doc._id);
-	if(doc.parents) {
-		const newParents = [];
-		doc.parents.forEach(function(parentId) {
-			newParents.push(utils.uuidToString(parentId));
-		});
-		ret.parents = newParents;
+function getSceneCollectionName(model) {
+	return model + ".scene";
+}
+
+async function getNodeBySharedId(account, model, shared_id, revisionIds, projection = {}) {
+	return await db.findOne(account, getSceneCollectionName(model), {shared_id, _id :{$in: revisionIds}}, projection);
+}
+
+async function findNodes(account, model, branch, revision, query = {}, projection = {}) {
+	const history = await History.getHistory(account, model, branch, revision);
+
+	if (!query._id) {
+		query._id = {"$in": history.current };
 	}
-	return ret;
+
+	return cleanAll(await db.find(account, getSceneCollectionName(model), query, projection));
+}
+
+const Scene = {};
+
+Scene.findNodesByField = async function (account, model, branch, revision, fieldName, projection = {}) {
+	const query = {};
+	query[fieldName] = {"$exists" : true};
+
+	projection.parents = 1;
+	projection[fieldName] = 1;
+
+	return findNodes(account, model, branch, revision, query, projection);
 };
 
-schema.statics.getBySharedId = async (account, model, shared_id, revisionIds, projection = {}) => {
-	return await dbFindOne(account, model, {shared_id, _id :{$in: revisionIds}}, projection);
+Scene.findNodesByType = async function (account, model, branch, revision, type, searchString, projection) {
+	const query = {
+		type
+	};
+
+	if (searchString) {
+		query.name = new RegExp(searchString, "i");
+	}
+
+	return findNodes(account, model, branch, revision, query, projection);
 };
 
-schema.statics.getObjectById = async (account, model, id, projection = {}) => {
-	return await dbFindOne(account, model, {_id: id}, projection);
+Scene.getGridfsFileStream = async function (account, model, filename) {
+	return await ExternalServices.getFileStream(account, getSceneCollectionName(model), "gridfs", filename);
 };
 
-schema.statics.getObjectById = async (account, model, id, projection = {}) => {
-	return await dbFindOne(account, model, {_id: id}, projection);
+Scene.getNodeById = async function (account, model, id, projection = {}) {
+	return clean(await db.findOne(account, getSceneCollectionName(model), {_id: id}, projection));
 };
 
-schema.statics.getGridfsFileStream = async (account, model, filename) => {
-	return await ExternalServices.getFileStream(account, model + ".scene", "gridfs", filename);
-};
-
-schema.statics.getParentMatrix = async (account, model, parent, revisionIds) => {
-	const mesh = await Scene.getBySharedId(account, model, parent, revisionIds);
+Scene.getParentMatrix = async function (account, model, parent, revisionIds) {
+	const mesh = await getNodeBySharedId(account, model, utils.stringToUUID(parent), revisionIds);
 
 	if ((mesh.parents || []).length > 0) {
 		const parentMatrix = await Scene.getParentMatrix(account, model, mesh.parents[0], revisionIds);
@@ -78,13 +102,5 @@ schema.statics.getParentMatrix = async (account, model, parent, revisionIds) => 
 
 	return mesh.matrix || matrix.getIdentity(4);
 };
-
-const Scene = ModelFactory.createClass(
-	"Scene",
-	schema,
-	arg => {
-		return `${arg.model}.scene`;
-	}
-);
 
 module.exports = Scene;

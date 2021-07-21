@@ -26,7 +26,6 @@ const responseCodes = require("../../response_codes.js");
 const helpers = require("../helpers/signUp");
 const C = require("../../constants");
 const async = require("async");
-const ModelSetting = require("../../models/modelSetting");
 const User = require("../../models/user");
 const config = require("../../config");
 const fs = require("fs");
@@ -39,7 +38,18 @@ describe("Revision", function () {
 	const username = "rev";
 	const password = "123456";
 	const model = "monkeys";
-	let revisions;
+	const testTag = "logo";
+	const testRevId = "7349c6eb-4009-4a4a-af66-701a496dbe2e";
+
+
+	const getRevision = async (rev, querystring = '') => {
+		if (querystring) {
+			querystring = `?${querystring}`;
+		}
+
+		var { body: allRevisions } = await agent.get(`/${username}/${model}/revisions.json${querystring}`)
+		return allRevisions.find(({_id}) => _id === rev);
+	}
 
 	before(function(done) {
 
@@ -74,7 +84,7 @@ describe("Revision", function () {
 				expect(res.body[0]).to.have.property("_id");
 				expect(res.body[0]).to.have.property("timestamp");
 				expect(res.body[0]).to.have.property("author");
-				revisions = res.body;
+				expect(Date.parse(res.body[0].timestamp)).to.be.above(Date.parse(res.body[2].timestamp));
 				done(err);
 			});
 	});
@@ -88,8 +98,7 @@ describe("Revision", function () {
 
 	it("get asset bundle list by revision tag should succeed", function(done) {
 
-		const revWithTag = revisions.find(rev => rev.tag);
-		agent.get(`/${username}/${model}/revision/${revWithTag.tag}/unityAssets.json`)
+		agent.get(`/${username}/${model}/revision/${testTag}/unityAssets.json`)
 			.expect(200, function(err, res) {
 				done(err);
 			});
@@ -103,15 +112,14 @@ describe("Revision", function () {
 	});
 
 	it("get issues by revision id should succeed", function(done) {
-		agent.get(`/${username}/${model}/revision/${revisions[0]._id}/issues`)
+		agent.get(`/${username}/${model}/revision/${testRevId}/issues`)
 			.expect(200, function(err, res) {
 				done(err);
 			});
 	});
 
 	it("get issues by revision tag should succeed", function(done) {
-		const revWithTag = revisions.find(rev => rev.tag);
-		agent.get(`/${username}/${model}/revision/${revWithTag.tag}/issues`)
+		agent.get(`/${username}/${model}/revision/${testTag}/issues`)
 			.expect(200, function(err, res) {
 				done(err);
 			});
@@ -217,9 +225,8 @@ describe("Revision", function () {
 
 	it("upload with exisitng tag name should fail", function(done) {
 
-		const revWithTag = revisions.find(rev => rev.tag);
 		agent.post(`/${username}/${model}/upload`)
-			.field("tag", revWithTag.tag)
+			.field("tag", testTag)
 			.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
 			.expect(400, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.DUPLICATE_TAG.value);
@@ -227,6 +234,8 @@ describe("Revision", function () {
 			});
 
 	});
+
+
 
 	it("upload with invalid tag name should fail", function(done) {
 
@@ -239,4 +248,26 @@ describe("Revision", function () {
 			});
 
 	});
+
+	it("update revision", async () => {
+		await agent.patch(`/${username}/${model}/revisions/${testRevId}`)
+				.send({void: true})
+				.expect(200);
+
+		let revision = await getRevision(testRevId);
+		expect(revision).to.be.undefined;
+
+		revision = await getRevision(testRevId, 'showVoid=1');
+		expect(revision.void).to.be.true;
+
+
+
+		await agent.patch(`/${username}/${model}/revisions/${testRevId}`)
+				.send({void: false})
+				.expect(200);
+
+		revision = await getRevision(testRevId);
+		expect(revision).not.to.be.undefined;
+	});
+
 });

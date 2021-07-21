@@ -166,6 +166,63 @@ describe("Model", function () {
 
 	});
 
+	describe("Search model tree", function(done) {
+		const testModel = "2d4a6208-6847-4a25-9d9e-097a63f2de93";
+
+		it("should succeed", function(done) {
+			agent.get(`/${username}/${testModel}/revision/master/head/searchtree.json`)
+				.expect(200, function(err, res) {
+					expect(res.body).to.be.an("array").and.to.have.length(683);
+					done(err);
+				});
+		});
+
+		it("with searchString should succeed", function(done) {
+			const goldenTreeItem = [{
+				"_id": "64cd352f-60fe-4cd6-9a42-da2d5f3892b0",
+				"name": "ComponentName:204",
+				"account": "project_username",
+				"model": "2d4a6208-6847-4a25-9d9e-097a63f2de93"
+			}];
+
+			agent.get(`/${username}/${testModel}/revision/master/head/searchtree.json?searchString=204`)
+				.expect(200, function(err, res) {
+					expect(res.body).to.deep.equal(goldenTreeItem);
+					done(err);
+				});
+		});
+
+		it("with searchString should succeed", function(done) {
+			const goldenTreeItem = [{
+				"_id": "64cd352f-60fe-4cd6-9a42-da2d5f3892b0",
+				"name": "ComponentName:204",
+				"account": "project_username",
+				"model": "2d4a6208-6847-4a25-9d9e-097a63f2de93"
+			}];
+
+			agent.get(`/${username}/${testModel}/revision/master/head/searchtree.json?searchString=ComponentName:20`)
+				.expect(200, function(err, res) {
+					expect(res.body).to.be.an("array").and.to.have.length(10);
+					done(err);
+				});
+		});
+
+		it("with non-matching searchString should succeed", function(done) {
+			agent.get(`/${username}/${testModel}/revision/master/head/searchtree.json?searchString=nomatches`)
+				.expect(200, function(err, res) {
+					expect(res.body).to.deep.equal([]);
+					done(err);
+				});
+		});
+
+		it("with non-existent model should fail", function(done) {
+			agent.get(`/${username}/invalidModel/revision/master/head/searchtree.json`)
+				.expect(404, function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+					done(err);
+				});
+		});
+	});
 
 	it("model added to a project should be listed on top level models array", function(done) {
 
@@ -266,6 +323,38 @@ describe("Model", function () {
 			});
 	});
 
+	it("get helicopter speed should succeed", function(done) {
+		const mymodel = "project6";
+
+		agent.get(`/${username}/${mymodel}/settings/heliSpeed`)
+			.expect(200, function(err, res) {
+				expect(res.body.heliSpeed).to.equal(1);
+				done(err);
+			});
+	});
+
+	it("update helicopter speed should succeed", function(done) {
+		const mymodel = "project6";
+		const newSpeed = {
+			heliSpeed: 3
+		};
+
+		async.series([
+			function(done) {
+				agent.put(`/${username}/${mymodel}/settings/heliSpeed`)
+					.send(newSpeed)
+					.expect(200, done);
+			},
+			function(done) {
+				agent.get(`/${username}/${mymodel}/settings/heliSpeed`)
+					.expect(200, function(err, res) {
+						expect(res.body.heliSpeed).to.equal(newSpeed.heliSpeed);
+						done(err);
+					});
+			}
+		], done);
+	});
+
 	it("should return error message if model name already exists", function(done) {
 
 		const model = "project7";
@@ -297,6 +386,79 @@ describe("Model", function () {
 				expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
 				done(err);
 			});
+	});
+
+	describe("Setting a default viewpoint", function() {
+		before(function(done) {
+			async.series([
+				callback => {
+					agent.post("/logout").send({}).expect(200, callback);
+				},
+				callback => {
+					agent.post("/login").send({
+						username, password
+					}).expect(200, callback);
+				}
+			], done);
+		});
+
+		const testModel = "2d4a6208-6847-4a25-9d9e-097a63f2de93";
+		const viewId = "df8fa4a0-c2ba-11ea-8373-eb03ef03362f";
+		it("setting a valid view Id as default viewpoint should succeed", function (done) {
+			async.series([
+				callback => {
+					agent.put(`/${username}/${testModel}/settings`)
+						.send({defaultView: viewId})
+						.expect(200, callback);
+				},
+				callback => {
+					agent.get(`/${username}/${testModel}.json`)
+						.expect(200, (err, res) => {
+							expect(res.body.defaultView).to.deep.equal({
+								id: viewId,
+								name: "fdgdfg"
+							});
+							callback(err);
+						});
+				}
+			], done);
+		});
+
+		it("setting an invalid view Id as default viewpoint should fail", function (done) {
+			agent.put(`/${username}/${testModel}/settings`)
+				.send({defaultView: "df8fa4a0-c2ba-11ea-8373-eb03ef03362a"})
+				.expect(404, (err, res) => {
+					expect(res.body.value).to.equal(responseCodes.VIEW_NOT_FOUND.value);
+					done(err);
+				});
+		});
+
+
+		it("removing a view when it's currently set as default should fail", function (done) {
+			agent.delete(`/${username}/${testModel}/viewpoints/${viewId}`)
+				.expect(400, (err, res) => {
+					expect(res.body.value).to.equal(responseCodes.CANNOT_DELETE_DEFAULT_VIEW.value);
+					done(err);
+				});
+		});
+
+		it("setting null as default viewpoint to reset default viewpoint should succeed", function (done) {
+			async.series([
+				callback => {
+					agent.put(`/${username}/${testModel}/settings`)
+						.send({defaultView: null})
+						.expect(200, callback);
+				},
+				callback => {
+					agent.get(`/${username}/${testModel}.json`)
+						.expect(200, (err, res) => {
+							expect(res.body.defaultView).to.equal(undefined);
+							callback(err);
+						});
+				}
+			], done);
+		});
+
 	});
 
 	describe("Download latest file", function() {
@@ -364,35 +526,24 @@ describe("Model", function () {
 		});
 
 		it("should remove setting in settings collection", function() {
-			return ModelSetting.findById({account: username, model: model}, model).then(setting => {
+			// FIXME why does this test directly import ModelSetting?!
+			return ModelSetting.findModelSettingById(username, model).then(setting => {
 				expect(setting).to.be.null;
 			});
 		});
 
-		it("should be removed from collaborator's model listing", function(done) {
+		it("should be removed from collaborator's model listing", async function() {
 
 			const agent2 = request.agent(server);
 
-			async.series([
-				callback => {
-					agent2.post("/login").send({ username: "testing", password: "testing" }).expect(200, callback);
-				},
-				callback => {
-					agent2.get("/testing.json").expect(200, function(err, res) {
+			await agent2.post("/login").send({ username: "testing", password: "testing" }).expect(200);
 
-						const account = res.body.accounts.find(account => account.account === username);
-						const modelExists = account.models.find(m => m.model === model);
+			const {body} =  await agent2.get("/testing.json").expect(200);
 
-						expect(modelExists).to.not.exist;
+			const account = body.accounts.find(account => account.account === username);
+			const modelExists = account.models.find(m => m.model === model);
 
-						// const mm = account.models.find(m => m.model === model);
-						// expect(mm).to.not.exist;
-
-						callback(err);
-					});
-				}
-			], done);
-
+			expect(modelExists).to.not.exist;
 		});
 
 		it("should be removed from model group", function(done) {

@@ -47,6 +47,7 @@ interface IProps {
 	hasOnlyOlderNotifications: boolean;
 	currentUser: any;
 	drawerOpened: boolean;
+	id?: string;
 	sendGetNotifications: () => void;
 	confirmSendDeleteAllNotifications: () => void;
 	sendUpdateNotificationRead: (id: string, read: boolean) => void;
@@ -58,8 +59,8 @@ interface IProps {
 	setDrawerPanelState: (open: boolean) => void;
 }
 
-const NotificationButton = ({ unreadCount, onClick }) => (
-	<IconButton onClick={onClick} aria-label="Show notifications" aria-haspopup="true">
+const NotificationButton = ({ unreadCount, onClick, id }) => (
+	<IconButton onClick={onClick} aria-label="Show notifications" aria-haspopup="true" id={id}>
 		<Badge
 			badgeContent={unreadCount}
 			color={unreadCount > 0 ? 'primary' : 'secondary'}
@@ -153,7 +154,7 @@ export class Notifications extends React.PureComponent<IProps, any> {
 		const { unreadCount } = this.props;
 		return (
 			<>
-				<NotificationButton onClick={this.toggleDrawer} unreadCount={unreadCount}  />
+				<NotificationButton onClick={this.toggleDrawer} unreadCount={unreadCount} id={this.props.id} />
 				<Drawer
 					variant="persistent"
 					anchor="right"
@@ -205,7 +206,7 @@ export class Notifications extends React.PureComponent<IProps, any> {
 
 	private renderNotificationsHeader = () => (
 		<ListSubheaderToolbar rightContent={this.renderRightContent()}>
-			<Typography variant="title" color="inherit">
+			<Typography variant="h6" color="inherit">
 				Notifications
 			</Typography>
 		</ListSubheaderToolbar>

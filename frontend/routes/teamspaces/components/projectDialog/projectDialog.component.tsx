@@ -130,7 +130,7 @@ export class ProjectDialog extends React.PureComponent<IProps, any> {
 						<Field render={ ({ form }) => (
 							<Button
 								type="submit"
-								variant="raised"
+								variant="contained"
 								color="secondary"
 								disabled={!form.isValid || form.isValidating}
 							>

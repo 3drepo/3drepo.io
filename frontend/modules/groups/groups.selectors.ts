@@ -17,11 +17,12 @@
 
 import { values } from 'lodash';
 import { createSelector } from 'reselect';
-import { getGroupOverride } from '../../helpers/colorOverrides';
+import { addToGroupDictionary } from '../../helpers/colorOverrides';
 import { getTransparency, hasTransparency } from '../../helpers/colors';
 import { searchByFilters } from '../../helpers/searching';
+import { selectFocusedIssueOverrideGroups } from '../issues';
 
-export const selectGroupsDomain = (state) => ({...state.groups});
+export const selectGroupsDomain = (state) => (state.groups);
 
 export const selectGroups = createSelector(
 	selectGroupsDomain, (state) => values(state.groupsMap)
@@ -43,13 +44,17 @@ export const selectActiveGroupId = createSelector(
 	selectComponentState, (state) => state.activeGroup
 );
 
-export const selectActiveGroupDetails = createSelector(
-	selectComponentState, (state) => state.newGroup
+export const selectEditingGroupDetails = createSelector(
+	selectComponentState, (state) => state.editingGroup
 );
 
-export const selectUnalteredActiveGroupDetails = createSelector(
-	selectActiveGroupId, selectGroupsMap, selectActiveGroupDetails,
-		(groupId, groupMap, defaultGroup) => groupMap[groupId] || defaultGroup
+export const selectActiveGroupDetails = createSelector(
+	selectActiveGroupId, selectGroupsMap,
+		(groupId, groupMap) => groupMap[groupId] || {}
+);
+
+export const selectFetchingDetailsIsPending = createSelector(
+	selectComponentState, (state) => state.fetchingDetailsIsPending
 );
 
 export const selectShowDetails = createSelector(
@@ -58,10 +63,6 @@ export const selectShowDetails = createSelector(
 
 export const selectExpandDetails = createSelector(
 	selectComponentState, (state) => state.expandDetails
-);
-
-export const selectNewGroupDetails = createSelector(
-	selectComponentState, (state) => state.newGroup
 );
 
 export const selectHighlightedGroups = createSelector(
@@ -100,25 +101,43 @@ export const selectCriteriaFieldState = createSelector(
 	selectComponentState, (state) => state.criteriaFieldState
 );
 
-const selectOverridesDict = createSelector(
-	selectColorOverrides, selectFilteredGroups, selectComponentState, (groupOverrides, filteredGroups, componentState) => {
-		const filteredGroupsMap = filteredGroups.reduce((map, group) => {
+export const selectAllOverridesDict = createSelector(
+	selectColorOverrides, selectFilteredGroups, selectComponentState, selectFocusedIssueOverrideGroups,
+	(groupOverrides, filteredGroups, componentState, issuesGroups) => {
+		const issuesOverrides = issuesGroups.map(({_id}) => _id);
+
+		const filteredGroupsMap = filteredGroups.concat(issuesGroups).reduce((map, group) => {
 			map[group._id] = group;
 			return map;
 		} , {});
 
-		return groupOverrides.reduce((overrides, groupId) => {
+		return groupOverrides.concat(issuesOverrides).reduce((overrides, groupId) => {
 			// filter out the filtered groups and if its showing details the selected group
-			if (filteredGroupsMap[groupId] && (!componentState.showDetails || componentState.activeGroup !== groupId)) {
+			if (filteredGroupsMap[groupId]  && !componentState.showDetails) {
 				const group = filteredGroupsMap[groupId];
-				getGroupOverride(overrides.colors, group, group.color);
+				addToGroupDictionary(overrides.colors, group, group.color);
 
 				if (hasTransparency(group.color)) {
-					getGroupOverride(overrides.transparencies, group, getTransparency(group.color));
+					addToGroupDictionary(overrides.transparencies, group, getTransparency(group.color));
 				}
 			}
 			return overrides;
 		}, {colors: {}, transparencies: {} });
+	}
+);
+
+export const selectOverridesDict = createSelector(
+	selectAllOverridesDict, selectComponentState, (overrides, { activeGroup}) => {
+		if (!activeGroup) {
+			return overrides;
+		}
+
+		const filtered = { colors: {} , transparencies: {}};
+		filtered.colors = {...overrides.colors};
+		filtered.transparencies = {...overrides.transparencies};
+		delete filtered.colors[activeGroup];
+		delete filtered.transparencies[activeGroup];
+		return filtered;
 	}
 );
 

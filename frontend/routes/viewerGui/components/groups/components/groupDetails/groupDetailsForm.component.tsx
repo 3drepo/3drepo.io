@@ -1,3 +1,20 @@
+/**
+ *  Copyright (C) 2021 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import { Select } from '@material-ui/core';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -34,10 +51,7 @@ interface IProps {
 	canUpdate: boolean;
 	fieldNames: any[];
 	selectedNodes: any[];
-	onSubmit: () => void;
 	handleChange: (event) => void;
-	setIsFormValid: (isFormValid) => void;
-	setIsFormDirty: (isFormDirty) => void;
 }
 
 export class GroupDetailsForm extends React.PureComponent<IProps, any> {
@@ -45,55 +59,10 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 		return !this.props.group._id;
 	}
 
-	public formikRef = React.createRef<HTMLElement>() as any;
-
-	public componentDidMount() {
-		this.props.setIsFormValid(this.isNewGroup);
-	}
-
-	public componentDidUpdate(prevProps) {
-		const { name, desc, color, rules, type, objects } = this.props.group;
-		const currentValues = { name, desc, color, rules, type };
-		const initialValues = this.formikRef.current.initialValues;
-		const groupChanged = !isEqual(this.props.group, prevProps.group);
-		const isNormalGroup = this.props.group.type === GROUPS_TYPES.NORMAL;
-		const sharedIdsChanged = isNormalGroup ? this.areSharedIdsChanged(this.props.selectedNodes, objects) : false;
-
-		const isFormDirtyAndValid = (!isEqual(initialValues, currentValues) && groupChanged) || sharedIdsChanged;
-		this.props.setIsFormValid(isFormDirtyAndValid);
-		this.props.setIsFormDirty(isFormDirtyAndValid);
-	}
-
-	public areSharedIdsChanged = (selectedNodes = [], groupObjects = []) => {
-		const toFullIdsDict = (dict, val) => {
-			val.shared_ids.forEach((e) => dict[val.account + '.' + val.model + '.' + e] = true);
-			return dict;
-		};
-
-		selectedNodes = selectedNodes.reduce(toFullIdsDict, {});
-		groupObjects = groupObjects.reduce(toFullIdsDict, {});
-
-		return !isEqual(selectedNodes, groupObjects);
-	}
-
 	public handleFieldChange = (onChange, form) => (event) => {
 		event.persist();
-		const newValues = {
-			...form.values,
-			[event.target.name]: event.target.value
-		};
-
 		onChange(event);
-		const isDirty = !isEqual(newValues, form.initialValues);
-		this.props.setIsFormDirty(isDirty);
-		form.validateForm(newValues)
-			.then(() => {
-				this.props.handleChange(event);
-				this.props.setIsFormValid(true);
-			})
-			.catch(() => {
-				this.props.setIsFormValid(false);
-			});
+		this.props.handleChange(event);
 	}
 
 	public renderTypeSelectItems = () => {
@@ -114,8 +83,8 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 				validateOnBlur={false}
 				validateOnChange={false}
 				validationSchema={GroupSchema}
-				onSubmit={this.props.onSubmit}
-				ref={this.formikRef}
+				onSubmit={() => null}
+				enableReinitialize
 			>
 				<Form>
 					<FieldsRow>

@@ -1,18 +1,18 @@
 /**
- *	Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -23,6 +23,7 @@ const onSuccess = responseCodes.onSuccessfulOperation;
 const middlewares = require("../middlewares/middlewares");
 const User =  require("../models/user");
 const utils = require("../utils");
+const { setIntercomHash } = require("../models/intercom");
 const { isString, isArray, isObject } = require("lodash");
 
 /**
@@ -215,6 +216,7 @@ router.delete("/starredModels", middlewares.loggedIn, deleteStarredModels, onSuc
 async function getProfile(req, res, next) {
 	const username = req.session.user.username;
 	req.dataModel = await User.getProfileByUsername(username);
+	setIntercomHash(req.dataModel);
 	next();
 }
 

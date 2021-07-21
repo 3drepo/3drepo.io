@@ -32,8 +32,8 @@ export const DeleteAllNotificationsDialog = (props: IProps) => {
 			</DialogContent>
 
 			<DialogActions>
-				<Button onClick={props.handleClose} color="secondary">Cancel</Button>;
-				<Button onClick={props.handleResolve} variant="raised" color="secondary">Ok</Button>;
+				<Button onClick={props.handleClose} color="secondary">Cancel</Button>
+				<Button onClick={props.handleResolve} variant="contained" color="secondary">Ok</Button>
 			</DialogActions>
 		</>
 	);

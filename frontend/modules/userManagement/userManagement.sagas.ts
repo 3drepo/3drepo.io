@@ -18,12 +18,15 @@
 import { isEmpty } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
+import {
+	FederationReminderDialog
+} from '../../routes/modelsPermissions/components/federationReminderDialog/federationReminderDialog.component';
+import { RemoveUserDialog } from '../../routes/users/components/removeUserDialog/removeUserDialog.component';
 import * as API from '../../services/api';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { JobsActions } from '../jobs';
 import { SnackbarActions } from '../snackbar';
-
 import {
 	selectCurrentTeamspace,
 	selectInvitations,
@@ -32,11 +35,7 @@ import {
 	UserManagementActions,
 	UserManagementTypes,
 } from '../userManagement';
-
-import {
-	FederationReminderDialog
-} from '../../routes/modelsPermissions/components/federationReminderDialog/federationReminderDialog.component';
-import { RemoveUserDialog } from '../../routes/users/components/removeUserDialog/removeUserDialog.component';
+import { dialogMessages } from './userManagement.constants';
 
 export function* fetchQuotaAndInvitations() {
 	try {
@@ -300,7 +299,7 @@ export function* fetchModelsPermissions({ models }) {
 	}
 }
 
-export function* updateModelsPermissionsPre({ modelsWithPermissions, permissions }) {
+export function* updateModelsPermissionsPre({ modelsWithPermissions }) {
 	try {
 		const currentProject = yield select(selectProject);
 		const permissionlessModels = [];
@@ -319,7 +318,7 @@ export function* updateModelsPermissionsPre({ modelsWithPermissions, permissions
 			}
 		}
 
-		const resolveUpdate = UserManagementActions.updateModelsPermissions(modelsWithPermissions, permissions);
+		const resolveUpdate = UserManagementActions.updateModelsPermissions(modelsWithPermissions);
 
 		if (permissionlessModels.length) {
 			const config = {
@@ -340,12 +339,17 @@ export function* updateModelsPermissionsPre({ modelsWithPermissions, permissions
 	}
 }
 
-export function* updateModelsPermissions({ modelsWithPermissions, permissions }) {
+export function* updateModelsPermissions({ modelsWithPermissions }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
 		const response = yield API.updateModelsPermissions(teamspace, modelsWithPermissions);
-		yield put(UserManagementActions.updateModelPermissionsSuccess(response.data, permissions));
-		yield put(SnackbarActions.show('Models/federations permissions updated'));
+
+		if (response.status === 200) {
+			yield put(UserManagementActions.updateModelPermissionsSuccess(modelsWithPermissions));
+			yield put(SnackbarActions.show('Models/federations permissions updated'));
+		} else {
+			yield put(DialogActions.showErrorDialog('update', 'models/federations permissions', dialogMessages.UPDATE_ERROR));
+		}
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('update', 'models/federations permissions', error));
 	}

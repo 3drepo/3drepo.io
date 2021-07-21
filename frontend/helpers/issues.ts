@@ -13,22 +13,33 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 import fileDialog from 'file-dialog';
 import {
 	ISSUE_COLORS,
+	ISSUE_DEFAULT_HIDDEN_STATUSES,
 	ISSUE_FILTER_RELATED_FIELDS,
 	ISSUE_PRIORITIES,
 	ISSUE_STATUSES,
 	ISSUES_ACTIONS_MENU,
 	PRIORITIES,
-	STATUSES,
 	STATUSES_ICONS
 } from '../constants/issues';
 import { getFilterValues, UNASSIGNED_JOB } from '../constants/reportedItems';
 import { getAPIUrl } from '../services/api';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
+import { prepareResources } from './resources';
+import { setShapesUuids } from './shapes';
+
+export const getStatusIcon = (priority, status) => {
+	const statusIcon = {
+		Icon: STATUSES_ICONS[status] || null,
+		color: (ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS[PRIORITIES.NONE]).color
+	};
+
+	return {...statusIcon};
+};
 
 export const prepareIssue = (issue, jobs = []) => {
 	const preparedIssue = {...issue};
@@ -46,7 +57,7 @@ export const prepareIssue = (issue, jobs = []) => {
 	}
 
 	if (issue.priority && issue.status) {
-		const { Icon, color } = this.getStatusIcon(issue.priority, issue.status);
+		const { Icon, color } = getStatusIcon(issue.priority, issue.status);
 		preparedIssue.StatusIconComponent = Icon;
 		preparedIssue.statusColor = color;
 	}
@@ -58,19 +69,18 @@ export const prepareIssue = (issue, jobs = []) => {
 	}
 
 	if (issue.status) {
-		preparedIssue.defaultHidden = issue.status === STATUSES.CLOSED;
+		preparedIssue.defaultHidden = ISSUE_DEFAULT_HIDDEN_STATUSES.includes(issue.status);
+	}
+
+	if (issue.shapes) {
+		preparedIssue.shapes = setShapesUuids(preparedIssue.shapes);
+	}
+
+	if (issue.resources) {
+		issue.resources = prepareResources(issue.account, issue.model, issue.resources);
 	}
 
 	return preparedIssue;
-};
-
-export const getStatusIcon = (priority, status) => {
-	const statusIcon = {
-		Icon: STATUSES_ICONS[status] || null,
-		color: (ISSUE_COLORS[status] || ISSUE_COLORS[priority] || ISSUE_COLORS[PRIORITIES.NONE]).color
-	};
-
-	return {...statusIcon};
 };
 
 export const getIssuePinColor = (issue: any) => {
@@ -137,6 +147,22 @@ export const canComment = (issueData, userJob, permissions, currentUser) => {
 	return ableToComment && isNotClosed;
 };
 
+const getFromToFilter = (label) =>  [{
+	label: 'From',
+	value: {
+		label: label + ' from',
+		value: label + 'from',
+		date: null
+	}
+}, {
+	label: 'To',
+	value: {
+		label: label + ' to',
+		value: label + 'to',
+		date: null
+	}
+}];
+
 export const filtersValuesMap = (jobs, topicTypes) => {
 	const jobsList = [...jobs, UNASSIGNED_JOB];
 
@@ -147,42 +173,33 @@ export const filtersValuesMap = (jobs, topicTypes) => {
 		[ISSUE_FILTER_RELATED_FIELDS.PRIORITY]: getFilterValues(ISSUE_PRIORITIES),
 		[ISSUE_FILTER_RELATED_FIELDS.TYPE]: getFilterValues(topicTypes
 				.map((category) => ({ value: category, name: category }))),
-		[ISSUE_FILTER_RELATED_FIELDS.CREATED_DATE]: [{
-			label: 'From',
-			value: {
-				label: 'From',
-				value: 'from',
-				date: null
-			}
-		}, {
-			label: 'To',
-			value: {
-				label: 'To',
-				value: 'to',
-				date: null
-			}
-		}]
+		[ISSUE_FILTER_RELATED_FIELDS.CREATED_DATE]: getFromToFilter('Created'),
+		[ISSUE_FILTER_RELATED_FIELDS.START_DATETIME]: getFromToFilter('Start')
 	};
 };
 
-export const getHeaderMenuItems = (
-	teamspace,
-	model,
-	revision,
-	printIssues,
-	downloadIssues,
-	importBCF,
-	exportBCF,
-	toggleSortOrder,
-	toggleShowPins?,
-	showPins?,
-	toggleClosedIssues?,
-	showClosedIssues?,
-) => {
+export const getHeaderMenuItems = (props) => {
+	const {teamspace,
+		model,
+		revision,
+		printItems,
+		downloadItems,
+		importBCF,
+		exportBCF,
+		toggleSortOrder,
+		setSortBy,
+		toggleShowPins,
+		showPins,
+		toggleClosedIssues,
+		showClosedIssues,
+		sortOrder,
+		sortByField
+		} = props;
+
 	const items = [
 		{
 			...ISSUES_ACTIONS_MENU.PRINT,
-			onClick: () => printIssues(teamspace, model)
+			onClick: () => printItems(teamspace, model)
 		}, {
 			...ISSUES_ACTIONS_MENU.IMPORT_BCF,
 			onClick: () => {
@@ -195,12 +212,13 @@ export const getHeaderMenuItems = (
 			onClick: () => exportBCF(teamspace, model)
 		}, {
 			...ISSUES_ACTIONS_MENU.DOWNLOAD,
-			onClick: () => downloadIssues(teamspace, model)
+			onClick: () => downloadItems(teamspace, model)
 		}, {
-			...ISSUES_ACTIONS_MENU.SORT_BY_DATE,
+			...ISSUES_ACTIONS_MENU.SORT_ORDER,
 			onClick: () => {
 				toggleSortOrder();
-			}
+			},
+			Icon: sortOrder === 'asc' ? ISSUES_ACTIONS_MENU.SORT_ORDER.ASC : ISSUES_ACTIONS_MENU.SORT_ORDER.DESC
 		}
 	];
 
@@ -221,6 +239,22 @@ export const getHeaderMenuItems = (
 			onClick: toggleClosedIssues
 		});
 	}
+
+	extraItems.push({
+		label: 'Sort by',
+		subItems: [
+			{
+				label: 'Created at',
+				onClick: () => setSortBy('created'),
+				enabled: sortByField === 'created'
+			},
+			{
+				label: 'Start date',
+				onClick: () => setSortBy('sequence_start'),
+				enabled: sortByField === 'sequence_start'
+			},
+		]
+	});
 
 	return [...items, ...extraItems];
 };

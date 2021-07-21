@@ -1,3 +1,20 @@
+/**
+ *  Copyright (C) 2021 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import { mapValues } from 'lodash';
 
 import { hexToGLColor, hexToRgba } from '../helpers/colors';
@@ -20,6 +37,7 @@ export const COLOR = {
 
 	WHITE,
 	WHITE_20: hexToRgba(WHITE, .2),
+	WHITE_10: hexToRgba(WHITE, .1),
 	WHITE_87: hexToRgba(WHITE, 0.87),
 
 	TRANSPARENT : hexToRgba(WHITE, 0),
@@ -40,6 +58,7 @@ export const COLOR = {
 	BLACK_87: hexToRgba(BLACK, .87),
 
 	DARK_GRAY: '#bfbfbf',
+	DARK_GRAY_20: 'rgba(158, 158, 158, .2)',
 	GRAY: '#f0f0f0',
 	GRAY_60: 'rgba(189, 189, 189, .6)',
 	GRAY_50: 'rgba(189, 189, 189, .5)',
@@ -52,6 +71,7 @@ export const COLOR = {
 	MAROON: '#c9241c',
 	CRIMSON: '#dc143c',
 	VIVID_RED: '#f00000',
+	red: '#e8004e',
 	DUSTY_RED: '#d3494e',
 	CORAL_RED: '#ff073a',
 	SOFT_RED: '#c27676',
@@ -82,6 +102,7 @@ export const COLOR = {
 	REGENT_GRAY: '#8397AC',
 	SILVER_CHALICE: '#A8A8A8',
 	LIGHT_BLUE: '#6788ab',
+	LIGHT_GREY_BLUE: '#dee2e6',
 	ALICE_BLUE: '#f0f7ff',
 	CLOUD: '#cfcdcc',
 	TUNDORA: '#4d4d4d'

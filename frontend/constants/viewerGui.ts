@@ -1,3 +1,20 @@
+/**
+ *  Copyright (C) 2021 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import CompareIcon from '@material-ui/icons/Compare';
 import TreeIcon from '@material-ui/icons/DeviceHub';
 import GroupsIcon from '@material-ui/icons/GroupWork';
@@ -6,7 +23,8 @@ import SequencesIcon from '@material-ui/icons/Movie';
 import ViewsIcon from '@material-ui/icons/PhotoCamera';
 import IssuesIcon from '@material-ui/icons/Place';
 import MeasureIcon from '@material-ui/icons/Straighten';
-import RisksIcon from '@material-ui/icons/Warning';
+import { RisksIcon } from '../routes/viewerGui/components/risks/components/riskIcon/riskIcon.component';
+
 import { clientConfigService } from '../services/clientConfig';
 
 export const VIEWER_PANELS = {
@@ -20,6 +38,8 @@ export const VIEWER_PANELS = {
 	COMPARE: 'compare',
 	SEQUENCES: 'sequences',
 	MEASUREMENTS: 'measurements',
+	ACTIVITIES: 'activities',
+	LEGEND: 'legend',
 };
 
 export const VIEWER_PANELS_ICONS = {
@@ -76,8 +96,15 @@ export const VIEWER_LEFT_PANELS = [
 	VIEWER_PANELS.MEASUREMENTS,
 ].filter((panel) => clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES).map(getPanelConfig);
 
+export const VIEWER_DRAGGABLE_PANELS = [
+	VIEWER_PANELS.LEGEND,
+];
+
 export const VIEWER_RIGHT_PANELS = [
-	VIEWER_PANELS.BIM
+	VIEWER_PANELS.BIM,
+	VIEWER_PANELS.ACTIVITIES,
 ].map(getPanelConfig);
 
 export const VIEWER_PANEL_TITLE_HEIGHT = 40;
+
+export const LONG_TEXT_CHAR_LIM = 660;

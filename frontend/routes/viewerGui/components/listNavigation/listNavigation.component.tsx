@@ -27,8 +27,8 @@ interface IProps {
 	panelType?: string;
 	className?: string;
 	initialIndex?: number;
-	lastIndex: number;
-	onChange: (currentIndex) => void;
+	itemsCount: number;
+	onChange: (currentIndex: number) => void;
 }
 
 interface IState {
@@ -50,16 +50,17 @@ export class ListNavigation extends React.PureComponent<IProps, IState> {
 		this.props.onChange(this.state.currentIndex);
 	}
 
+	public handleNavigation = ( skip ) => {
+		const index =  (this.props.itemsCount +  this.state.currentIndex + skip) % this.props.itemsCount ;
+		this.setState({ currentIndex: index }, this.handleChange);
+	}
+
 	public handlePrevItem = () => {
-		const index = this.state.currentIndex;
-		const prevIndex = index === 0 ? this.props.lastIndex : index - 1;
-		this.setState({ currentIndex: prevIndex }, this.handleChange);
+		this.handleNavigation(-1);
 	}
 
 	public handleNextItem = () => {
-		const index = this.state.currentIndex;
-		const nextIndex = index === this.props.lastIndex ? 0 : index + 1;
-		this.setState({ currentIndex: nextIndex }, this.handleChange);
+		this.handleNavigation(1);
 	}
 
 	public render() {

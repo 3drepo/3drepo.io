@@ -16,6 +16,8 @@
  */
 
 "use strict";
+
+/*
 (() => {
 
 	const mongoose = require("mongoose");
@@ -55,3 +57,6 @@
 	module.exports = IPN;
 
 })();
+Paypal commented out
+
+*/

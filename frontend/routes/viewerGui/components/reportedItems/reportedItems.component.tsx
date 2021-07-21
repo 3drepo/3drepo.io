@@ -20,20 +20,13 @@ import React from 'react';
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import ArrowBack from '@material-ui/icons/ArrowBack';
-import Check from '@material-ui/icons/Check';
-import { isEmpty, isEqual } from 'lodash';
 
 import { CREATE_ISSUE, VIEW_ISSUE } from '../../../../constants/issue-permissions';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
-import { searchByFilters } from '../../../../helpers/searching';
-import { sortByDate } from '../../../../helpers/sorting';
-import {
-	IconWrapper,
-	MenuList,
-	StyledItemText,
-	StyledListItem
-} from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
+import { renderActionsMenu, IHeaderMenuItem } from '../../../../helpers/reportedItems';
+import { EmptyStateInfo } from '../../../components/components.styles';
+
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
 import { ListNavigation } from '../listNavigation/listNavigation.component';
 import { PanelBarActions } from '../panelBarActions';
@@ -41,15 +34,6 @@ import { PreviewListItem } from '../previewListItem/previewListItem.component';
 import { ListContainer, Summary } from '../risks/risks.styles';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
-import { EmptyStateInfo } from '../views/views.styles';
-
-interface IHeaderMenuItem {
-	label: string;
-	enabled?: boolean;
-	Icon?: any;
-	isSorting?: boolean;
-	onClick?: (event?) => void;
-}
 
 interface IProps {
 	className?: string;
@@ -74,31 +58,25 @@ interface IProps {
 	setState: (componentState: any) => void;
 	onNewItem: () => void;
 	onActiveItem: (item) => void;
+	onDeactivateItem?: () => void;
 	onShowDetails: (item) => void;
 	onCloseDetails: () => void;
 	onToggleFilters: (isActive) => void;
 	onChangeFilters: (selectedFilters) => void;
-	toggleShowPins: (showPins: boolean, filteredItems) => void;
+	toggleShowPins: (showPins: boolean) => void;
 	renderDetailsView: (statement) => React.ReactChildren[];
+	sortByField?: string;
+	id?: string;
 }
 
 interface IState {
-	filteredItems: any[];
 	prevScroll: number;
 }
 
 export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	get activeItemIndex() {
-		return this.state.filteredItems.findIndex((item) => item._id === this.props.activeItemId);
-	}
-
-	get filteredItems() {
-		const { items, selectedFilters, showDefaultHiddenItems } = this.props;
-		return sortByDate(
-			searchByFilters(items, selectedFilters, showDefaultHiddenItems),
-			{ order: this.props.sortOrder }
-		);
+		return this.props.items.findIndex((item) => item._id === this.props.activeItemId);
 	}
 
 	get listFooterText() {
@@ -106,21 +84,28 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 			return 'Uploading BCF...';
 		}
 		if (this.props.isModelLoaded) {
-			return `${this.state.filteredItems.length} results displayed`;
+			return `${this.props.items.length} results displayed`;
 		}
 		return 'Model is loading';
 	}
 	public state = {
-		filteredItems: [],
 		prevScroll: 0
 	};
 
 	public listViewRef = React.createRef<HTMLElement>();
 	public listContainerRef = React.createRef<any>();
 
+	public handleClickOutside = () => {
+		const { onDeactivateItem } = this.props;
+
+		if (onDeactivateItem) {
+			onDeactivateItem();
+		}
+	}
+
 	public renderItemsList = renderWhenTrue(() => (
 		<ListContainer ref={this.listContainerRef}>
-			{this.state.filteredItems.map((item, index) => (
+			{this.props.items.map((item, index) => (
 				<PreviewListItem
 					{...item}
 					key={index}
@@ -137,12 +122,14 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public renderListView = renderWhenTrue(() => (
 		<>
-			<ViewerPanelContent ref={this.listViewRef}>
-				{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredItems.length)}
-				{this.renderNotFound(this.props.searchEnabled && !this.state.filteredItems.length)}
-				{this.renderItemsList(this.state.filteredItems.length)}
+			<ViewerPanelContent onClick={this.handleClickOutside} ref={this.listViewRef}>
+				<div onClick={(event: React.MouseEvent<HTMLDivElement>) => event.stopPropagation()}>
+					{this.renderEmptyState(!this.props.searchEnabled && !this.props.items.length)}
+					{this.renderNotFound(this.props.searchEnabled && !this.props.items.length)}
+					{this.renderItemsList(this.props.items)}
+				</div>
 			</ViewerPanelContent>
-			<ViewerPanelFooter alignItems="center" justify="space-between">
+			<ViewerPanelFooter onClick={this.handleClickOutside} container alignItems="center" justify="space-between">
 				<Summary>{this.listFooterText}</Summary>
 				<ViewerPanelButton
 					aria-label="Add item"
@@ -150,6 +137,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 					color="secondary"
 					variant="fab"
 					disabled={!this.hasPermission(CREATE_ISSUE) || !this.props.isModelLoaded}
+					id={this.props.id + '-add-new-button'}
 				>
 					<AddIcon />
 				</ViewerPanelButton>
@@ -166,12 +154,12 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	));
 
 	public renderHeaderNavigation = () => {
-		const initialIndex = this.state.filteredItems.findIndex(({ _id }) => this.props.activeItemId === _id);
+		const initialIndex = this.props.items.findIndex(({ _id }) => this.props.activeItemId === _id);
 		return (
 			<ListNavigation
 				panelType={this.props.type}
 				initialIndex={initialIndex}
-				lastIndex={this.state.filteredItems.length - 1}
+				itemsCount={this.props.items.length}
 				onChange={this.handleNavigationChange}
 			/>
 		);
@@ -185,36 +173,18 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 		<EmptyStateInfo>No entry matched</EmptyStateInfo>
 	));
 
-	public componentDidMount() {
-		this.setState({ filteredItems: this.filteredItems });
-	}
-
 	public componentDidUpdate(prevProps) {
-		const { items, selectedFilters, showDefaultHiddenItems, searchEnabled, sortOrder, showDetails } = this.props;
-		const itemsChanged = !isEqual(prevProps.items, items);
-		const sortingChanged = prevProps.sortOrder !== sortOrder;
-		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
-		const showDefaultHiddenItemsChanged = prevProps.showDefaultHiddenItems !== showDefaultHiddenItems;
-		const searchEnabledChange = prevProps.searchEnabled !== searchEnabled;
+		const { showDetails } = this.props;
 		const detailsWasClosed = prevProps.showDetails !== showDetails && !showDetails;
 
 		const changes = {} as IState;
 
-		if (itemsChanged || filtersChanged || showDefaultHiddenItemsChanged || searchEnabledChange || sortingChanged) {
-			changes.filteredItems = this.filteredItems;
-		}
-
-		const filteredItems = changes.filteredItems || this.state.filteredItems;
-		if (detailsWasClosed && this.listViewRef.current && this.props.activeItemId && filteredItems.length) {
+		if (detailsWasClosed) {
 			this.listViewRef.current.scrollTop = this.state.prevScroll;
 		}
 
 		if (this.listViewRef.current) {
 			this.setState({prevScroll: this.listViewRef.current.scrollTop});
-		}
-
-		if (!isEmpty(changes)) {
-			this.setState(changes);
 		}
 	}
 
@@ -245,15 +215,13 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 	public handleCloseSearchMode = () => {
 		this.props.onToggleFilters(false);
 		this.props.onChangeFilters([]);
-		this.setState({
-			filteredItems: this.props.items
-		});
 	}
 
 	public handleOpenSearchMode = () => this.props.onToggleFilters(true);
 
 	public renderTitleIcon = () => {
 		const { showDetails, Icon } = this.props;
+
 		if (showDetails) {
 			return (
 				<IconButton onClick={this.props.onCloseDetails} >
@@ -264,40 +232,14 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 		return <Icon />;
 	}
 
-	public renderSortIcon = (Icon) => {
-		if (this.props.sortOrder === 'asc') {
-			return <Icon.ASC IconProps={{ fontSize: 'small' }} /> ;
-		}
-		return <Icon.DESC IconProps={{ fontSize: 'small' }} /> ;
-	}
-
-	public renderActionsMenu = () => (
-		<MenuList>
-			{this.props.headerMenuItems.map(({ label, Icon, onClick, enabled, isSorting }, index) => {
-				return (
-					<StyledListItem key={index} button onClick={onClick}>
-						<IconWrapper>
-							{isSorting ? this.renderSortIcon(Icon) : <Icon fontSize="small" />}
-						</IconWrapper>
-						<StyledItemText>
-							{label}
-							{enabled && <Check fontSize="small" />}
-						</StyledItemText>
-					</StyledListItem>
-				);
-			})}
-		</MenuList>
-	)
-
 	public handleNavigationChange = (currentIndex) => {
-		const itemToShow = this.state.filteredItems[currentIndex] || this.state.filteredItems[0];
+		const itemToShow = this.props.items[currentIndex] || this.props.items[0];
 		this.props.onShowDetails(itemToShow);
 	}
 
 	public renderActions = () => {
 		if (this.props.showDetails && this.props.activeItemId) {
-			const canBeNavigated = this.state.filteredItems.length > 1 ||
-					(this.state.filteredItems.length === 1 && this.state.filteredItems[0]._id !== this.props.activeItemId);
+			const canBeNavigated = this.props.items.length > 1;
 			return canBeNavigated ?
 					this.renderHeaderNavigation() : <PanelBarActions type={this.props.type} hideSearch hideMenu />;
 		}
@@ -306,7 +248,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 			<PanelBarActions
 				type={this.props.type}
 				menuLabel="Show filters menu"
-				menuActions={this.renderActionsMenu}
+				menuActions={() => renderActionsMenu(this.props.headerMenuItems)}
 				isSearchEnabled={this.props.searchEnabled}
 				onSearchOpen={this.handleOpenSearchMode}
 				onSearchClose={this.handleCloseSearchMode}
@@ -316,6 +258,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const { className, title, isPending, searchEnabled, showDetails } = this.props;
+
 		return (
 			<ViewerPanel
 				className={className}
@@ -323,6 +266,7 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 				Icon={this.renderTitleIcon()}
 				renderActions={this.renderActions}
 				pending={isPending}
+				id={this.props.id + (showDetails ? '-details' : '' )}
 			>
 				{this.renderFilterPanel(searchEnabled && !showDetails)}
 				{this.renderListView(!showDetails)}

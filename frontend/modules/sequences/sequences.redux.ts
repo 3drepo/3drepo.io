@@ -15,46 +15,122 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { findIndex } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import { STEP_SCALE } from '../../constants/sequences';
 import { sortByField } from '../../helpers/sorting';
 
 export const { Types: SequencesTypes, Creators: SequencesActions } = createActions({
-	fetchSequences: [],
+	fetchSequence: ['sequenceId'],
+	fetchSequenceList: [],
 	initializeSequences: [],
-	fetchSequencesSuccess: ['sequences'],
+	fetchSequenceSuccess: ['sequence'],
+	fetchSequenceListSuccess: ['sequences'],
+	updateSequence: ['sequenceId', 'newName'],
+	updateSequenceSuccess: ['sequenceId', 'newName'],
 	setSelectedSequence: ['sequenceId'],
-	setSelectedFrame: ['date'],
+	setSelectedSequenceSuccess: ['sequenceId'],
 	setSelectedDate: ['date'],
+	setSelectedDateSuccess: ['date'],
+	setLastSelectedDateSuccess: ['date'],
 	fetchFrame: ['date'],
+	prefetchFrames: [],
 	setStateDefinition: ['stateId', 'stateDefinition'],
-	setLastLoadedSuccesfullState: ['stateId'],
 	setStepInterval: ['stepInterval'],
 	setStepScale: ['stepScale'],
-	setIfcSpacesHidden: ['ifcSpacesHidden'],
-	restoreIfcSpacesHidden: [],
+	fetchActivitiesDefinitions: ['sequenceId'],
+	fetchActivitiesDefinitionsSuccess: ['sequenceId', 'activities'],
+	setActivitiesPending: ['isPending'],
+	showSequenceDate: ['date'],
+	handleTransparenciesVisibility: ['transparencies'],
+	restoreModelDefaultVisibility: [],
 	reset: []
 }, { prefix: 'SEQUENCES/' });
 
-export const INITIAL_STATE = {
+export interface IFrame {
+	dateTime: Date;
+	state: string;
+}
+
+export interface ISequance {
+	_id: string;
+	rev_id: string;
+	name: string;
+	frames: any[];
+	teamspace: string;
+	model: string;
+}
+
+export interface ISequencesState {
+	sequences: null | ISequance[];
+	selectedSequence: null | string;
+	lastSelectedSequence: null | string;
+	selectedDate: null | Date;
+	lastSelectedDate: null | Date;
+	stateDefinitions: any;
+	statesPending: boolean;
+	stepInterval: number;
+	stepScale: STEP_SCALE;
+	hiddenGeometryVisible: boolean;
+	activities: any;
+	activitiesPending: any;
+}
+
+export const INITIAL_STATE: ISequencesState = {
 	sequences: null,
 	selectedSequence: null,
 	lastSelectedSequence: null,
 	selectedDate: null,
-	lastSuccesfulStateId: null,
+	lastSelectedDate: null,
 	stateDefinitions: {},
 	statesPending: false,
 	stepInterval: 1,
 	stepScale: STEP_SCALE.DAY,
-	ifcSpacesHidden: true
+	hiddenGeometryVisible: true,
+	activities: {},
+	activitiesPending: true,
 };
 
-export const fetchSequencesSuccess = (state = INITIAL_STATE, { sequences }) => {
+export const fetchSequenceSuccess = (state = INITIAL_STATE, { sequence }) => {
+	let sequences = state.sequences;
+	if (sequences && sequences.length > 0) {
+		const sequenceIndex = sequences.findIndex((s) => s._id === sequence._id);
+
+		if (sequenceIndex >= 0) {
+			sequences[sequenceIndex] = sequence;
+		}
+	} else {
+		sequences = [sequence];
+	}
+
+	return { ...state, sequences };
+};
+
+export const fetchSequenceListSuccess = (state = INITIAL_STATE, { sequences }) => {
 	sequences = sortByField([...sequences], { order: 'asc', config: { field: '_id' } });
 	return { ...state, sequences };
 };
 
-export const setSelectedSequence = (state = INITIAL_STATE, { sequenceId }) => {
+export const updateSequenceSuccess = (state = INITIAL_STATE, { sequenceId, newName }) => {
+	const sequencesList = [...state.sequences];
+	const index = findIndex(state.sequences, (sequence) => sequence._id === sequenceId);
+	sequencesList[index].name = newName;
+
+	return {
+		...state,
+		sequences: sequencesList
+	};
+};
+
+export const fetchActivitiesDefinitionsSuccess = (state = INITIAL_STATE, { sequenceId, activities }) => {
+	return { ...state, activities: {...state.activities, [sequenceId]: activities } };
+};
+
+export const setActivitiesPending = (state = INITIAL_STATE, { isPending }) => {
+	return {...state, activitiesPending: isPending };
+};
+
+export const setSelectedSequenceSuccess = (state = INITIAL_STATE, { sequenceId }) => {
 	let lastSelectedSequence = state.lastSelectedSequence;
 
 	if (sequenceId !== null && state.lastSelectedSequence !== sequenceId) {
@@ -70,16 +146,16 @@ export const setSelectedSequence = (state = INITIAL_STATE, { sequenceId }) => {
 	return {...state, selectedSequence: sequenceId, lastSelectedSequence };
 };
 
-export const setSelectedDate =  (state = INITIAL_STATE, { date }) => {
-	return {...state, selectedDate: date};
+export const setSelectedDateSuccess =  (state = INITIAL_STATE, { date }) => {
+	return {...state, selectedDate: date };
+};
+
+export const setLastSelectedDateSuccess =  (state = INITIAL_STATE, { date }) => {
+	return {...state, lastSelectedDate: date};
 };
 
 export const setStateDefinition = (state = INITIAL_STATE, { stateId, stateDefinition}) => {
 	return {...state, stateDefinitions: {...state.stateDefinitions, [stateId]: stateDefinition}};
-};
-
-export const setLastLoadedSuccesfullState =  (state = INITIAL_STATE, { stateId }) => {
-	return {...state, lastSuccesfulStateId: stateId};
 };
 
 export const setStepInterval = (state = INITIAL_STATE, { stepInterval }) => {
@@ -94,18 +170,17 @@ export const reset = () => {
 	return {...INITIAL_STATE};
 };
 
-export const setIfcSpacesHidden = (state = INITIAL_STATE, { ifcSpacesHidden }) => {
-	return {...state, ifcSpacesHidden};
-};
-
 export const reducer = createReducer(INITIAL_STATE, {
-	[SequencesTypes.FETCH_SEQUENCES_SUCCESS]: fetchSequencesSuccess,
-	[SequencesTypes.SET_SELECTED_DATE]: setSelectedDate,
+	[SequencesTypes.FETCH_SEQUENCE_SUCCESS]: fetchSequenceSuccess,
+	[SequencesTypes.FETCH_SEQUENCE_LIST_SUCCESS]: fetchSequenceListSuccess,
+	[SequencesTypes.UPDATE_SEQUENCE_SUCCESS]: updateSequenceSuccess,
+	[SequencesTypes.FETCH_ACTIVITIES_DEFINITIONS_SUCCESS]: fetchActivitiesDefinitionsSuccess,
+	[SequencesTypes.SET_ACTIVITIES_PENDING]: setActivitiesPending,
+	[SequencesTypes.SET_SELECTED_DATE_SUCCESS]: setSelectedDateSuccess,
+	[SequencesTypes.SET_LAST_SELECTED_DATE_SUCCESS]: setLastSelectedDateSuccess,
 	[SequencesTypes.SET_STATE_DEFINITION]: setStateDefinition,
-	[SequencesTypes.SET_SELECTED_SEQUENCE]: setSelectedSequence,
-	[SequencesTypes.SET_LAST_LOADED_SUCCESFULL_STATE]: setLastLoadedSuccesfullState,
+	[SequencesTypes.SET_SELECTED_SEQUENCE_SUCCESS]: setSelectedSequenceSuccess,
 	[SequencesTypes.SET_STEP_INTERVAL]: setStepInterval,
-	[SequencesTypes.SET_IFC_SPACES_HIDDEN]: setIfcSpacesHidden,
 	[SequencesTypes.SET_STEP_SCALE]: setStepScale,
 	[SequencesTypes.RESET]: reset
 });

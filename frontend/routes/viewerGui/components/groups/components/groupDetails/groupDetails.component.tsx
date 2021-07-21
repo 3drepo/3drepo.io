@@ -15,17 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import AutorenewIcon from '@material-ui/icons/Autorenew';
-import SaveIcon from '@material-ui/icons/Save';
 import React from 'react';
 
-import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
-import { TooltipButton } from '../../../../../teamspaces/components/tooltipButton/tooltipButton.component';
+import AutorenewIcon from '@material-ui/icons/Autorenew';
+import Delete from '@material-ui/icons/Delete';
+import SaveIcon from '@material-ui/icons/Save';
 
+import { isEqual } from 'lodash';
+import * as Yup from 'yup';
 import { GROUP_PANEL_NAME, GROUP_TYPES_ICONS, GROUPS_TYPES } from '../../../../../../constants/groups';
+import { rulesAreEqual , stripGroupRules } from '../../../../../../helpers/groups';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
+import { hasSameSharedIds } from '../../../../../../helpers/tree';
 import { ICriteriaFieldState } from '../../../../../../modules/groups/groups.redux';
+import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 import { CriteriaField } from '../../../../../components/criteriaField/criteriaField.component';
+import { TooltipButton } from '../../../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
 import { ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
@@ -33,7 +38,8 @@ import { Actions, ColorPickerWrapper, Container, Content } from './groupDetails.
 import { GroupDetailsForm } from './groupDetailsForm.component';
 
 interface IProps {
-	activeGroup: any;
+	editingGroup: any;
+	originalGroup: any;
 	teamspace: string;
 	model: string;
 	revision: string;
@@ -45,37 +51,45 @@ interface IProps {
 	selectedNodes: any;
 	fieldNames: any[];
 	criteriaFieldState: ICriteriaFieldState;
-	createGroup: (teamspace, modelId, revision) => void;
-	updateGroup: (teamspace, modelId, revision, groupId) => void;
-	setState: (componentState) => void;
-	setCriteriaState: (criteriaState) => void;
+	createGroup: (teamspace: any, modelId: any, revision: any) => void;
+	updateGroup: (teamspace: any, modelId: any, revision: any, groupId: any) => void;
+	updateEditingGroup: (fields: any) => void;
+	setCriteriaState: (criteriaState: any) => void;
 	resetToSavedSelection: () => void;
+	isPending: boolean;
+	deleteGroup: (id: string | null) => void;
 }
+
 interface IState {
 	isFormValid: boolean;
 	isFormDirty: boolean;
 	scrolled: boolean;
 }
 
+const GroupSchema = Yup.object().shape({
+	name: Yup.string().required(),
+	desc: Yup.string().max(220),
+	rules: Yup.array(),
+	type: Yup.string()
+}).test(({type, rules}) => {
+	return type === GROUPS_TYPES.NORMAL ||  rules.length > 0 ;
+});
+
 export class GroupDetails extends React.PureComponent<IProps, IState> {
-
 	get isNewGroup() {
-		return !this.props.activeGroup._id;
+		return !this.props.editingGroup._id;
 	}
 
-	get groupData() {
-		return this.props.activeGroup;
+	get isSmartGroup() {
+		return this.editingGroup.type === GROUPS_TYPES.SMART;
 	}
 
-	get hasValidRules() {
-		if (this.groupData.type === GROUPS_TYPES.SMART) {
-			return !!this.groupData.rules.length;
-		}
-		return true;
+	get editingGroup() {
+		return this.props.editingGroup;
 	}
 
 	get isFormValid() {
-		return this.state.isFormDirty && this.state.isFormValid && this.hasValidRules;
+		return this.state.isFormDirty && this.state.isFormValid ;
 	}
 
 	public state = {
@@ -90,7 +104,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 	public renderRulesField = renderWhenTrue(() => (
 		<CriteriaField
 			name="rules"
-			value={this.groupData.rules}
+			value={this.editingGroup.rules}
 			{...this.props.criteriaFieldState}
 			onChange={this.handleFieldChange}
 			onCriterionSelect={this.handleCriterionSelect}
@@ -104,82 +118,87 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 
 	public renderPreview = renderWhenTrue(() => (
 		<PreviewDetails
-			key={this.groupData._id}
-			{...this.groupData}
-			roleColor={this.groupData.color}
-			created={this.groupData.createdAt}
+			key={this.editingGroup._id}
+			{...this.editingGroup}
+			roleColor={this.editingGroup.color}
+			created={this.editingGroup.createdAt}
 			editable={this.props.canUpdate}
 			onNameChange={this.handleFieldChange}
 			renderCollapsable={this.renderGroupForm}
-			renderNotCollapsable={() => this.renderRulesField(this.groupData.type === GROUPS_TYPES.SMART)}
-			disableExpanding
+			renderNotCollapsable={() => this.renderRulesField(this.isSmartGroup)}
 			panelName={GROUP_PANEL_NAME}
-			StatusIconComponent={GROUP_TYPES_ICONS[this.groupData.type]}
+			isSmartGroup={this.isSmartGroup}
+			StatusIconComponent={GROUP_TYPES_ICONS[this.editingGroup.type]}
 			scrolled={this.state.scrolled}
 			isNew={this.isNewGroup}
 		/>
 	));
 
 	public componentDidMount() {
-		if (!this.isNewGroup) {
-			this.props.setState({ newGroup: { ...this.groupData }});
-		} else {
-			this.props.setState({ isFormValid: true });
+		this.setState({ isFormDirty: this.isNewGroup, isFormValid: true });
+	}
+
+	public componentDidUpdate(prevProps: Readonly<React.PropsWithChildren<IProps>>) {
+		if (prevProps === this.props) {
+			return;
 		}
+
+		if (!this.isNewGroup) {
+			// We ignore the setDirty in newgroup because is always dirty, just needs to be valid.
+			const wasUpdated = !isEqual(stripGroupRules(this.editingGroup), stripGroupRules(this.props.originalGroup));
+
+			// We check only for smartgroups if the rules changed
+			const rulesChanged = this.isSmartGroup && !rulesAreEqual(this.editingGroup, this.props.originalGroup);
+
+			// if it is a smart group, we ignore the manual selection because it depends on the rules
+			const selectionChanged = !this.isSmartGroup &&
+				!hasSameSharedIds(this.props.selectedNodes, this.editingGroup.objects);
+
+			this.setIsFormDirty(wasUpdated || selectionChanged || rulesChanged);
+		}
+
+		// if it is a smart group, we ignore the manual selection because it depends on the rules
+		const groupHasValidSelection = this.isSmartGroup || this.props.selectedNodes.length > 0;
+		this.setIsFormValid(GroupSchema.isValidSync(this.editingGroup) && groupHasValidSelection);
 	}
 
 	public handleGroupFormSubmit = () => {
 		const { teamspace, model, revision, updateGroup, createGroup } = this.props;
-		const { name, desc, type, color, rules } = this.groupData;
 
-		this.formRef.current.formikRef.current.resetForm({name, desc, type, color, rules});
 		if (this.isNewGroup) {
 			createGroup(teamspace, model, revision);
 		} else {
-			updateGroup(teamspace, model, revision, this.groupData._id);
+			updateGroup(teamspace, model, revision, this.editingGroup._id);
 		}
 	}
 
-	public handleFieldChange = (event) => {
-		this.props.setState({
-			newGroup: {
-				...this.groupData,
-				[event.target.name]: event.target.value
-			}
-		});
+	public handleFieldChange = (event: { target: { name: any; value: any; }; }) => {
+		this.props.updateEditingGroup({[event.target.name]: event.target.value});
 	}
 
-	public handleColorChange = (color) => {
-		this.props.setState({
-			newGroup: {
-				...this.groupData, color
-			}
-		});
-		this.setIsFormValid(true);
+	public handleColorChange = (color: any) => {
+		this.props.updateEditingGroup({color});
 	}
 
 	public renderGroupForm = () => (
 		<GroupDetailsForm
 			ref={this.formRef}
-			key={`${this.groupData._id}.${this.groupData.updatedAt}`}
-			group={this.groupData}
-			onSubmit={this.handleGroupFormSubmit}
+			key={`${this.editingGroup._id}.${this.editingGroup.updatedAt}`}
+			group={this.editingGroup}
 			currentUser={this.props.currentUser}
 			totalMeshes={this.props.totalMeshes}
 			canUpdate={this.props.canUpdate}
-			setIsFormValid={this.setIsFormValid}
-			setIsFormDirty={this.setIsFormDirty}
 			fieldNames={this.props.fieldNames}
 			handleChange={this.handleFieldChange}
 			selectedNodes={this.props.selectedNodes}
 		/>
 	)
 
-	public handleCriterionSelect = (criterion) => {
+	public handleCriterionSelect = (criterion: any) => {
 		this.props.setCriteriaState({ criterionForm: criterion });
 	}
 
-	public handlePanelScroll = (e) => {
+	public handlePanelScroll = (e: { target: { scrollHeight: number; offsetHeight: any; scrollTop: number; }; }) => {
 		if (e.target.scrollHeight > e.target.offsetHeight + e.target.scrollTop) {
 			if (e.target.scrollTop > 0 && !this.state.scrolled) {
 				this.setState({ scrolled: true });
@@ -194,30 +213,42 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		}
 	}
 
-	public setIsFormValid = (isFormValid) => {
+	public setIsFormValid = (isFormValid: boolean) => {
 		this.setState({ isFormValid });
 	}
 
-	public setIsFormDirty = (isFormDirty) => {
+	public setIsFormDirty = (isFormDirty: boolean) => {
 		this.setState({ isFormDirty });
+	}
+
+	public handleDelete = () => {
+		this.props.deleteGroup(this.editingGroup._id);
 	}
 
 	public renderFooter = () => {
 		return (
-			<ViewerPanelFooter alignItems="center">
+			<ViewerPanelFooter container alignItems="center">
 				<Actions>
 					<ColorPickerWrapper>
 						<ColorPicker
-							value={this.groupData.color}
+							value={this.editingGroup.color}
 							onChange={this.handleColorChange}
 							disabled={!this.props.canUpdate}
 							opacityEnabled
 						/>
 					</ColorPickerWrapper>
+					{ !this.isNewGroup &&
+						<TooltipButton
+							label="Reset to saved selection"
+							action={this.props.resetToSavedSelection}
+							Icon={AutorenewIcon}
+						/>
+					}
 					<TooltipButton
-						label="Reset to saved selection"
-						action={this.props.resetToSavedSelection}
-						Icon={AutorenewIcon}
+						label="Delete"
+						action={this.handleDelete}
+						Icon={Delete}
+						disabled={!this.props.canUpdate}
 					/>
 				</Actions>
 				<ViewerPanelButton
@@ -225,9 +256,11 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 					color="secondary"
 					type="submit"
 					onClick={this.handleGroupFormSubmit}
-					mini
+					size="small"
 					aria-label="Save group"
 					disabled={!this.isFormValid || !this.props.canUpdate}
+					pending={this.props.isPending}
+					id="groups-card-save-button"
 				>
 					<SaveIcon />
 				</ViewerPanelButton>
@@ -242,7 +275,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 					onScroll={this.handlePanelScroll}
 					ref={this.panelRef}
 				>
-					{this.renderPreview(this.groupData)}
+					{this.renderPreview(this.editingGroup)}
 				</Content>
 				{this.renderFooter()}
 			</Container>

@@ -16,7 +16,7 @@
  */
 
 import { invoke } from 'lodash';
-import { put, takeLatest } from 'redux-saga/effects';
+import { takeLatest } from 'redux-saga/effects';
 import io from 'socket.io-client';
 
 import * as API from '../../services/api';
@@ -98,8 +98,12 @@ const getChannel = (teamspace, model = '') => {
 const invokeChannelHandlers = (channel, handlers) => {
 	for (const handler in handlers) {
 		if (handlers.hasOwnProperty(handler)) {
-			const args = handlers[handler];
-			invoke(channel, handler, args);
+			let args = handlers[handler];
+			if (!Array.isArray(args)) {
+				args = [args];
+			}
+
+			invoke(channel, handler, ...args);
 		}
 	}
 };

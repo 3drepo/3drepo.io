@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,48 +16,47 @@
  */
 
 "use strict";
-const mongoose = require("mongoose");
-const ModelFactory = require("./factory/modelFactory");
-const ModelSettings = require("./modelSetting");
+const { findModelSettingById } = require("./modelSetting");
+const { findNodesByType } = require("./scene");
+const C = require("../constants");
+const utils = require("../utils");
 
-const Schema = mongoose.Schema;
+const Ref = {};
 
-const refSchema = Schema({
-	_id: Object,
-	shared_id: Object,
-	type: { type: String, default: "ref"},
-	project: String,
-	owner: String,
-	_rid: Object,
-	parents: [],
-	name: String
-});
+Ref.getRefNodes = async (account, model, branch, revision, projection) => {
+	const settings = await findModelSettingById(account, model);
 
-refSchema.statics.getRefNodes = function(account, model, ids) {
-	return ModelSettings.findById({account}, model).then((settings) => {
-		if(settings.federate) {
-			const filter = {
-				type: "ref"
-			};
+	if (settings.federate) {
+		return findNodesByType(account, model, branch, revision, "ref", undefined, projection);
+	}
 
-			if (ids && ids.length > 0) {
-				filter._id = { $in: ids };
-			}
-
-			return Ref.find({ account, model }, filter);
-		}
-		return [];
-	});
+	return [];
 };
 
-refSchema.methods = {};
+Ref.getSubModels = async (account, model, branch, revision, callbackProm) => {
+	const refs = await Ref.getRefNodes(account, model, branch, revision, {owner: 1, project: 1, _rid: 1});
+	const subModelArr = [];
+	for(let i = 0; i < refs.length; ++i) {
+		const {owner, project, _rid} = refs[i];
+		let refBranch, refRev;
+		if (utils.uuidToString(_rid) === C.MASTER_BRANCH) {
+			refBranch = C.MASTER_BRANCH_NAME;
+		} else {
+			refRev = utils.uuidToString(_rid);
+		}
+		subModelArr.push({
+			account: owner,
+			model: project,
+			branch: refBranch,
+			revision: refRev
+		});
+		if (callbackProm) {
+			await callbackProm(owner, project, refBranch, refRev);
+		}
 
-const Ref = ModelFactory.createClass(
-	"Ref",
-	refSchema,
-	arg => {
-		return `${arg.model}.scene`;
 	}
-);
+
+	return subModelArr;
+};
 
 module.exports = Ref;

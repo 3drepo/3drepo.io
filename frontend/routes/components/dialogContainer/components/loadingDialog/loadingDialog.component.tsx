@@ -22,15 +22,15 @@ import { Loader } from '../../../loader/loader.component';
 import { LoaderContainer } from './loadingDialog.styles';
 
 interface IProps {
-	content: string;
+	content?: string;
 }
 
-export const LoadingDialog = (props: IProps) => {
+export const LoadingDialog: React.FunctionComponent<IProps> = (props) => {
 	return (
 		<>
 			<DialogContent>
 				<LoaderContainer>
-					<Loader content={props.content} />
+					<Loader content={props.content || props.children} />
 				</LoaderContainer>
 			</DialogContent>
 		</>

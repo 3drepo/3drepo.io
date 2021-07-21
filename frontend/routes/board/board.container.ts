@@ -27,23 +27,22 @@ import {
 	selectLanes,
 	selectSearchEnabled,
 	selectShowClosedIssues,
-	BoardActions,
+	selectSortByField, selectSortOrder, BoardActions
 } from '../../modules/board';
 import { DialogActions } from '../../modules/dialog';
 import {
 	selectSelectedFilters as selectSelectedIssueFilters,
-	selectSortOrder as selectIssuesSortOrder,
 	IssuesActions
 } from '../../modules/issues';
 import { selectJobsList } from '../../modules/jobs';
 import { selectSettings, ModelActions } from '../../modules/model';
 import {
+	selectMitigationCriteria,
 	selectSelectedFilters as selectSelectedRiskFilters,
-	selectSortOrder as selectRisksSortOrder,
 	RisksActions
 } from '../../modules/risks';
 import { SnackbarActions } from '../../modules/snackbar';
-import { selectSettings as selectTeamspaceSettings, selectTopicTypes } from '../../modules/teamspace';
+import { selectTopicTypes } from '../../modules/teamspace';
 import { selectModels, selectProjects, selectTeamspacesList } from '../../modules/teamspaces';
 import { Board } from './board.component';
 
@@ -58,20 +57,21 @@ const mapStateToProps = createStructuredSelector({
 	jobs: selectJobsList,
 	selectedIssueFilters: selectSelectedIssueFilters,
 	selectedRisksFilters: selectSelectedRiskFilters,
-	issuesSortOrder: selectIssuesSortOrder,
-	risksSortOrder: selectRisksSortOrder,
 	cards: selectCards,
 	projectsMap: selectProjects,
 	modelsMap: selectModels,
 	showClosedIssues: selectShowClosedIssues,
 	modelSettings: selectSettings,
-	teamspaceSettings: selectTeamspaceSettings,
+	criteria: selectMitigationCriteria,
+	sortOrder: selectSortOrder,
+	sortByField: selectSortByField
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchData: BoardActions.fetchData,
 	fetchCardData: BoardActions.fetchCardData,
 	resetCardData: BoardActions.resetCardData,
+	openCardDialog: BoardActions.openCardDialog,
 	setFilterProp: BoardActions.setFilterProp,
 	setBoardType: BoardActions.setBoardType,
 	showDialog: DialogActions.showDialog,
@@ -84,8 +84,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	downloadItems: BoardActions.downloadItems,
 	importBCF: IssuesActions.importBcf,
 	exportBCF: IssuesActions.exportBcf,
-	toggleIssuesSortOrder: IssuesActions.toggleSortOrder,
-	toggleRisksSortOrder: RisksActions.toggleSortOrder,
+	toggleSortOrder: BoardActions.toggleSortOrder,
 	showSnackbar: SnackbarActions.show,
 	subscribeOnIssueChanges: IssuesActions.subscribeOnIssueChanges,
 	unsubscribeOnIssueChanges: IssuesActions.unsubscribeOnIssueChanges,
@@ -94,6 +93,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	resetModel: ModelActions.reset,
 	resetIssues: IssuesActions.reset,
 	resetRisks: RisksActions.reset,
+	setSortBy: BoardActions.setSortBy
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Board);

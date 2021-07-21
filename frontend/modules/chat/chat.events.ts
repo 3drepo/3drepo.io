@@ -53,7 +53,7 @@ export class ChatEvents {
 	}
 
 	/**
-	 * This method is internal for suscribe to the channel event using the type of
+	 * This method is internal for subscribe to the channel event using the type of
 	 * entity corresponding to the instance of this class and a event of that type.
 	 *
 	 * @param event the event we are going to subscribe to
@@ -69,9 +69,9 @@ export class ChatEvents {
 	 * entity corresponding to the instance of this class and a event of that type.
 	 *
 	 * @param event the event we are going to subscribe to
-	 * @param callback the exact same callback that was used for suscribing to the event.
+	 * @param callback the exact same callback that was used for subscribing to the event.
 	 * notice that if bind is a applied to a method of a function it creates a new function so
-	 * this exact bind function should be passed here in order to succesfully unsuscribe
+	 * this exact bind function should be passed here in order to successfully unsubscribe
 	 */
 	private unsubscribeFromEvent(event: EventType, callback: (data: any) => void) {
 		this.channel.unsubscribe(this.entity + event, callback, this.keys );

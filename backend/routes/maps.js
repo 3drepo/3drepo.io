@@ -1,19 +1,20 @@
 /**
- *	Copyright (C) 2018 3D Repo Ltd
+ *  Copyright (C) 2018 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 "use strict";
 
 const express = require("express");
@@ -24,9 +25,9 @@ const httpsGet = require("../libs/httpsReq");
 const config = require("../config");
 const User = require("../models/user");
 
-const hereBaseDomain = ".base.maps.cit.api.here.com";
-const hereAerialDomain = ".aerial.maps.cit.api.here.com";
-const hereTrafficDomain = ".traffic.maps.cit.api.here.com";
+const hereBaseDomain = ".base.maps.ls.hereapi.com";
+const hereAerialDomain = ".aerial.maps.ls.hereapi.com";
+const hereTrafficDomain = ".traffic.maps.ls.hereapi.com";
 
 /**
  * @apiDefine Maps Maps
@@ -476,7 +477,7 @@ function listMaps(req, res) {
 	];
 
 	User.isHereEnabled(teamspace).then((hereEnabled) => {
-		if (hereEnabled && (config.here && config.here.appID && config.here.appCode)) {
+		if (hereEnabled && config.here && config.here.apiKey) {
 			maps = maps.concat([
 				{ name: "Here", layers: [
 					{ name: "Map Tiles", source: "HERE" },
@@ -546,7 +547,8 @@ function requestMapTile(req, res, domain, uri) {
 }
 
 function requestHereMapTile(req, res, domain, uri) {
-	uri += "?app_id=" + config.here.appID + "&app_code=" + config.here.appCode;
+	uri += "?apiKey=" + config.here.apiKey;
+
 	if (req.query.congestion) {
 		uri += "&congestion=" + req.query.congestion;
 	}
@@ -581,24 +583,22 @@ function requestHereMapTile(req, res, domain, uri) {
 }
 
 function getOSMTile(req, res) {
-	if(config.osm) {
-		const domain = config.osm ? config.osm.domain : "a.tile.openstreetmap.org";
-		const uri = `/${config.osm.prefix}/${req.params.zoomLevel}/${req.params.gridx}/${req.params.gridy}.png?key=${config.osm.key}`;
-		systemLogger.logInfo("Fetching osm map tile: " + domain + "/" + uri);
-		requestMapTile(req, res, domain, uri);
-	} else {
-		const domain = "a.tile.openstreetmap.org";
-		const uri = "/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + ".png";
-		systemLogger.logInfo("Fetching osm map tile: " + domain + "/" + uri);
-		requestMapTile(req, res, domain, uri);
+	let domain = "a.tile.openstreetmap.org";
+	let uri = "/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + ".png";
+
+	if (config.osm && config.osm.domain) {
+		domain = config.osm.domain;
+		uri = `/${config.osm.prefix}/${req.params.zoomLevel}/${req.params.gridx}/${req.params.gridy}.png?key=${config.osm.key}`;
 	}
 
+	systemLogger.logInfo("Fetching osm map tile: " + domain + uri);
+	requestMapTile(req, res, domain, uri);
 }
 
 function getHereBaseInfo(req, res) {
 	const domain = "1" + hereBaseDomain;
 	let uri = "/maptile/2.1/info";
-	uri += "?app_id=" + config.here.appID + "&app_code=" + config.here.appCode;
+	uri += "?apiKey=" + config.here.apiKey;
 	httpsGet.get(domain, uri).then(info =>{
 		res.setHeader("Cache-Control", `private, max-age=${config.cachePolicy.maxAge}`);
 		res.write(info);
@@ -742,7 +742,7 @@ function getHereBuildingsFromLongLat(req, res) {
 	const domain = "pde.api.here.com";
 	let uri = "/1/tile.json?&layer=BUILDING&level=" + zoomLevel + "&tilex=" + tileX + "&tiley=" + tileY + "&region=WEU";
 	systemLogger.logInfo("Fetching Here building platform data extensions: " + uri);
-	uri += "&app_id=" + config.here.appID + "&app_code=" + config.here.appCode;
+	uri += "&apiKey=" + config.here.apiKey;
 
 	httpsGet.get(domain, uri).then(buildings =>{
 		res.status(200).json(buildings);

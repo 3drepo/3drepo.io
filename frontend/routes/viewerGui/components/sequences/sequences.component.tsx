@@ -21,9 +21,11 @@ import { IconButton } from '@material-ui/core';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import { STEP_SCALE } from '../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
+import { getSelectedFrame } from '../../../../modules/sequences/sequences.helper';
+import { EmptyStateInfo } from '../../../components/components.styles';
 import { Loader } from '../../../components/loader/loader.component';
 import { PanelBarActions } from '../panelBarActions';
-import { EmptyStateInfo } from '../views/views.styles';
+import { SequenceForm } from './components/sequenceForm/';
 import { SequencePlayer } from './components/sequencePlayer/sequencePlayer.component';
 import { SequencesList } from './components/sequencesList/sequencesList.component';
 import { TasksList } from './components/tasksList/sequenceTasksList.component';
@@ -33,61 +35,86 @@ import {
 
 interface IProps {
 	sequences: any;
-	initializeSequences: () => void;
-	setSelectedFrame: (date: Date) => void;
-	fetchFrame: (date: Date) => void;
+	setSelectedDate: (date: Date) => void;
 	setStepInterval: (interval: number) => void;
 	setStepScale: (scale: STEP_SCALE) => void;
 	setSelectedSequence: (id: string) => void;
-	restoreIfcSpacesHidden: () => void;
-	maxDate: Date;
-	minDate: Date;
+	endDate: Date;
+	startDate: Date;
+	frames: any[];
 	selectedDate: Date;
-	selectedMinDate: Date;
+	selectedEndingDate: Date;
 	colorOverrides: any;
 	stepInterval: number;
 	stepScale: STEP_SCALE;
 	currentTasks: any[];
-	loadingFrame: boolean;
+	loadingFrameState: boolean;
+	loadingViewpoint: boolean;
 	selectedSequence: any;
+	rightPanels: string[];
+	setPanelVisibility: (panelName, visibility) => void;
+	toggleActivitiesPanel: () => void;
+	fetchActivityDetails: (id: string) => void;
+	deselectViewsAndLeaveClipping: () => void;
+	showViewpoint: (teamspace: string, model: string, viewpoint: any) => void;
+	id?: string;
+	isActivitiesPending: boolean;
+	draggablePanels: string[];
+	toggleLegend: () => void;
+	resetLegendPanel: () => void;
 }
 
 const da =  new Date();
 
-const SequenceDetails = ({ minDate, maxDate, selectedDate,
-	setSelectedFrame, stepInterval,
-	stepScale, setStepInterval, setStepScale,
-	currentTasks, selectedMinDate, loadingFrame,
-	fetchFrame }) => (
+const SequenceDetails = ({
+	startDate, endDate, selectedDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
+	setStepScale, currentTasks, loadingFrameState, loadingViewpoint, rightPanels, toggleActivitiesPanel,
+	fetchActivityDetails, onPlayStarted, frames, isActivitiesPending, toggleLegend, draggablePanels
+}) => (
 		<>
+			<SequenceForm />
 			<SequencePlayer
-				min={minDate}
-				max={maxDate}
+				min={startDate}
+				max={endDate}
 				value={selectedDate}
+				endingDate={selectedEndingDate}
 				stepInterval={stepInterval}
 				stepScale={stepScale}
-				onChange={setSelectedFrame}
+				onChange={setSelectedDate}
 				onChangeStepScale={setStepScale}
 				onChangeStepInterval={setStepInterval}
-				loadingFrame={loadingFrame}
-				fetchFrame={fetchFrame}
+				loadingFrame={loadingFrameState || loadingViewpoint}
+				rightPanels={rightPanels}
+				toggleActivitiesPanel={toggleActivitiesPanel}
+				onPlayStarted={onPlayStarted}
+				frames={frames}
+				isActivitiesPending={isActivitiesPending}
+				toggleLegend={toggleLegend}
+				draggablePanels={draggablePanels}
 			/>
-			<TasksList tasks={currentTasks}
-				minDate={selectedMinDate}
-				maxDate={selectedDate}
-				loadingFrame={loadingFrame} />
+			<TasksList
+				tasks={currentTasks}
+				startDate={selectedDate}
+				endDate={selectedEndingDate}
+				fetchActivityDetails={fetchActivityDetails}
+			/>
 		</>
 	);
 
 const SequencesLoader = () => (<LoaderContainer><Loader /></LoaderContainer>);
 
 export class Sequences extends React.PureComponent<IProps, {}> {
-	public componentDidMount = () => {
-		this.props.initializeSequences();
+	public componentWillUnmount = () => {
+		this.props.setPanelVisibility(VIEWER_PANELS.ACTIVITIES, false);
+		this.props.resetLegendPanel();
 	}
 
-	public componentWillUnmount = () => {
-		this.props.restoreIfcSpacesHidden();
+	public componentDidUpdate(prevProps: Readonly<IProps>) {
+		const { selectedSequence, setPanelVisibility, resetLegendPanel } = this.props;
+		if (selectedSequence !== prevProps.selectedSequence && !selectedSequence) {
+			setPanelVisibility(VIEWER_PANELS.ACTIVITIES, false);
+			resetLegendPanel();
+		}
 	}
 
 	public renderTitleIcon = () => {
@@ -101,6 +128,21 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 		return <SequencesIcon />;
 	}
 
+	public onPlayStarted = () => {
+		const {
+			selectedSequence,
+			selectedDate,
+			frames,
+			showViewpoint,
+			deselectViewsAndLeaveClipping
+		} = this.props;
+		const { viewpoint } = getSelectedFrame(frames, selectedDate);
+
+		if (!viewpoint) {
+			deselectViewsAndLeaveClipping();
+		}
+	}
+
 	public render = () => {
 		const { selectedSequence, setSelectedSequence, sequences } = this.props;
 
@@ -112,15 +154,16 @@ export class Sequences extends React.PureComponent<IProps, {}> {
 					hideSearch
 					hideMenu
 				/>}
+				id={this.props.id}
 			>
 
 				{!sequences && <SequencesLoader />}
 
-				{sequences && selectedSequence && sequences.length > 0 &&
-					<SequenceDetails {...this.props} />
+				{selectedSequence && sequences.length > 0 &&
+					<SequenceDetails {...this.props} onPlayStarted={this.onPlayStarted} />
 				}
 
-				{sequences  && !selectedSequence && sequences.length > 0 &&
+				{sequences && !selectedSequence && sequences.length > 0 &&
 					<SequencesList sequences={sequences} setSelectedSequence={setSelectedSequence} />
 				}
 

@@ -126,13 +126,13 @@ export class SelectField extends React.PureComponent<SelectProps, any> {
 		};
 
 		const hasLabel = Boolean(findLabel(this.props.children, selectProps.value));
-
+		const renderValue = this.props.renderValue || (hasLabel ? null : (value) => value);
 		return (
 			<Select
 				className={className}
 				{...selectProps}
 				MenuProps={customMenuProps} displayEmpty
-				renderValue={hasLabel ? null : (value) => value} >
+				renderValue={renderValue}>
 				{children}
 			</Select>
 		);

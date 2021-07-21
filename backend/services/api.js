@@ -21,12 +21,11 @@
  *
  * @returns
  */
-module.exports.createApp = function () {
-	const logger = require("../logger.js");
+module.exports.createApp = function (config) {
 	const express = require("express");
 	const compress = require("compression");
 	const responseCodes = require("../response_codes");
-	const C = require("../constants");
+	const { systemLogger } = require("../logger");
 	const cors = require("cors");
 	const bodyParser = require("body-parser");
 	const utils = require("../utils");
@@ -36,31 +35,16 @@ module.exports.createApp = function () {
 	// Express app
 	const app = express();
 
-	app.disable("etag");
+	if (config && !config.using_ssl && config.public_protocol === "https") {
+		app.set("trust proxy", 1);
+	}
 
-	// put logger in req object
-	app.use(logger.startRequest);
+	app.disable("etag");
 
 	// Session middlewares
 	app.use(keyAuthentication, sessionManager);
 
 	app.use(cors({ origin: true, credentials: true }));
-
-	// init the singleton db connection for modelFactory
-	app.use((req, res, next) => {
-		// init the singleton db connection
-		const DB = require("../handler/db");
-		DB.getDB("admin")
-			.then(() => {
-				// set db to singleton modelFactory class
-				require("../models/factory/modelFactory")
-					.setDB(DB);
-				next();
-			})
-			.catch(err => {
-				responseCodes.respond("Express Middleware", req, res, next, responseCodes.DB_ERROR(err), err);
-			});
-	});
 
 	app.use(bodyParser.urlencoded({
 		extended: true
@@ -73,6 +57,8 @@ module.exports.createApp = function () {
 	app.use(compress({ level: 9 }));
 
 	app.use(function (req, res, next) {
+		// record start time of the request
+		req.startTime = Date.now();
 		// intercept OPTIONS method
 		if ("OPTIONS" === req.method) {
 			res.sendStatus(200);
@@ -122,11 +108,10 @@ module.exports.createApp = function () {
 	// groups handler
 	app.use("/:account/:model", require("../routes/group"));
 
-	// viewpoints handler
-	app.use("/:account/:model", require("../routes/viewpoint"));
+	// views handler
+	app.use("/:account/:model", require("../routes/view"));
 
 	// issues handler
-	app.use("/:account/:model", require("../routes/issueAnalytic"));
 	app.use("/:account/:model", require("../routes/issue"));
 
 	// resources handler
@@ -141,12 +126,15 @@ module.exports.createApp = function () {
 	// history handler
 	app.use("/:account/:model", require("../routes/history"));
 
+	// presentation handler
+	app.use("/:account/:model", require("../routes/presentation"));
+
 	app.use(function(err, req, res, next) {
 		if(err) {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		}
 
-		err.stack && req[C.REQ_REPO].logger.logError(err.stack);
+		err.stack && systemLogger.logError(err.stack);
 		// next(err);
 	});
 

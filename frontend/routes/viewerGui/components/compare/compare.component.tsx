@@ -73,7 +73,7 @@ interface IProps {
 	compareDisabled: boolean;
 	selectedItemsMap: any[];
 	isCompareProcessed: boolean;
-	isAnyTargetClashModel: boolean;
+	canTestForClash: boolean;
 	revision?: string;
 	toggleCompare: () => void;
 	setSortType: (sortType) => void;
@@ -82,7 +82,7 @@ interface IProps {
 	setTargetModel: (modelId, isTarget, isTypeChange?) => void;
 	setComponentState: (state) => void;
 	setTargetRevision: (modelId, targetRevision, isDiff) => void;
-	getCompareModels: (revision) => void;
+	id?: string;
 }
 
 export class Compare extends React.PureComponent<IProps, any> {
@@ -135,9 +135,9 @@ export class Compare extends React.PureComponent<IProps, any> {
 	));
 
 	public componentDidMount() {
-		if (!this.props.compareModels.length) {
-			this.props.getCompareModels(this.props.revision);
-		}
+		// if (!this.props.compareModels.length) {
+		// 	this.props.getCompareModels(this.props.revision);
+		// }
 	}
 
 	public renderClashTabLabel = () => {
@@ -161,7 +161,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 			compareDisabled,
 			isCompareProcessed,
 			isFederation,
-			isAnyTargetClashModel,
+			canTestForClash,
 		} = this.props;
 		return (
 			<CompareContainer
@@ -169,14 +169,15 @@ export class Compare extends React.PureComponent<IProps, any> {
 				renderActions={this.renderActions}
 				pending={isPending}
 				empty={!isPending && !compareModels.length}
+				id={this.props.id}
 			>
 				<ViewerPanelContent scrollDisabled>
 					<Tabs
 						value={activeTab}
 						indicatorColor="secondary"
 						textColor="primary"
-						fullWidth
 						onChange={this.handleChange}
+						variant="fullWidth"
 					>
 						<Tab label={COMPARE_TABS.DIFF} value={DIFF_COMPARE_TYPE} disabled={isCompareProcessed} />
 						<Tab
@@ -191,17 +192,14 @@ export class Compare extends React.PureComponent<IProps, any> {
 						{this.renderClashContent(!this.isDiffTabActive)}
 					</TabContent>
 				</ViewerPanelContent>
-				<ViewerPanelFooter
-						alignItems="center"
-						justify="space-between"
-				>
+				<ViewerPanelFooter container alignItems="center" justify="space-between">
 					{this.renderSlider()}
 					<ViewerPanelButton
 							aria-label="Compare"
 							onClick={toggleCompare}
 							color="secondary"
 							variant="fab"
-							disabled={compareDisabled || (!this.isDiffTabActive && !isAnyTargetClashModel)}
+							disabled={compareDisabled || (!this.isDiffTabActive && !canTestForClash)}
 							active={Number(isActive)}
 					>
 						<CompareIcon />
@@ -311,4 +309,5 @@ export class Compare extends React.PureComponent<IProps, any> {
 				</SliderLabels>
 			</SliderContainer>
 		);
-	}}
+	}
+}

@@ -21,7 +21,6 @@ const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp();
 const logger = require("../../logger.js");
-const systemLogger = logger.systemLogger;
 const responseCodes = require("../../response_codes.js");
 
 describe("Logout", function () {
@@ -29,7 +28,7 @@ describe("Logout", function () {
 	let server;
 	const username = "logout_username";
 	const username_not_verified = "logout_username_not_verified";
-	const password = "password";
+	const password = "Str0ngPassword!";
 	const email = "test3drepo_logout@mailinator.com";
 
 	before(function(done) {
@@ -41,7 +40,7 @@ describe("Logout", function () {
 			request(server).get("/info").end(() => {
 
 				// create a user
-				return User.createUser(systemLogger, username, password, {
+				return User.createUser(username, password, {
 					email: email
 				}, 200000).then(emailVerifyToken => {
 					return User.verify(username, emailVerifyToken.token, true);

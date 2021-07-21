@@ -1,19 +1,20 @@
 /**
  *  Copyright (C) 2019 3D Repo Ltd
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.ap
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 "use strict";
 
 const express = require("express");
@@ -22,22 +23,60 @@ const middlewares = require("../middlewares/middlewares");
 
 const C = require("../constants");
 const responseCodes = require("../response_codes.js");
-const BCF = require("../models/bcf");
 const Issue = require("../models/issue");
 const utils = require("../utils");
 const multer = require("multer");
 const config = require("../config.js");
-const ModelSetting = require("../models/modelSetting");
+const { findModelSettingById } = require("../models/modelSetting");
 const Comment = require("../models/comment");
 
 /**
- * @api {get} /:teamspace/:model/issues/:issueId Find Issue by ID
- * @apiName findIssueById
- * @apiGroup Issues
+ * @apiDefine Issues Issues
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
- * @apiParam {Number} issueId Issue ID
+ */
+
+/**
+ * @apiDefine IssueIdParam
+ *
+ * @apiParam {String} issueId Issue ID
+ */
+
+/**
+ * @apiDefine RevIdParam
+ *
+ * @apiParam {String} revId Revision ID
+ */
+
+/**
+ * @apiDefine ViewpointIdParam
+ *
+ * @apiParam {String} viewpointId Viewpoint ID
+ */
+
+/**
+ * @apiDefine listIssuesParams
+ *
+ * @apiParam (Query) {String} [convertCoords] Convert coordinates to user space
+ * @apiParam (Query) {Number} [updatedSince] Only return issues updated since this value (in epoch value)
+ * @apiParam (Query) {Number[]} [numbers] Array of issue numbers to filter for
+ * @apiParam (Query) {String[]} [ids] Array of issue IDs to filter for
+ * @apiParam (Query) {String[]} [topicTypes] Array of topic types to filter
+ * @apiParam (Query) {String[]} [status] Array of status to filter
+ * @apiParam (Query) {String[]} [priorities] Array of priorities to filter
+ * @apiParam (Query) {String[]} [owners] Array of owners to filter
+ * @apiParam (Query) {String[]} [assignedRoles] Array of assigned roles  to filter. For searching unassigned issues the one of the values should be 'Unassigned'.
+ *
+ */
+
+/**
+ * @api {get} /:teamspace/:model/issues/:issueId Get issue
+ * @apiName findIssue
+ * @apiGroup Issues
+ *
+ * @apiUse Issues
+ * @apiUse IssueIdParam
  *
  * @apiDescription Find an issue with the requested Issue ID.
  *
@@ -54,7 +93,6 @@ const Comment = require("../models/comment");
  *		model: "model_ID"
  *		modelCode: ""
  *		name: "Issue one"
- *		norm: []
  *		number: 1
  *		owner: "username"
  *		position: []
@@ -79,37 +117,32 @@ const Comment = require("../models/comment");
  *	 "status": 500,
  *	 "message": "Issue not found",
  * }
- *
  */
-router.get("/issues/:issueId", middlewares.issue.canView, findIssueById);
+router.get("/issues/:issueId", middlewares.issue.canView, findIssue);
 
 /**
- * @api {get} /:teamspace/:model/issues/:issueId/thumbnail.png Get Issue Thumbnail
- * @apiName findIssueById
+ * @api {get} /:teamspace/:model/issues/:issueId/thumbnail.png Get issue thumbnail
+ * @apiName getThumbnail
  * @apiGroup Issues
+ * @apiDescription Retrieve screenshot thumbnail image for requested issue.
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {Number} id Issue unique ID.
+ * @apiUse Issues
+ * @apiUse IssueIdParam
  *
- * @apiDescription Retrieve thumbnail screenshot image for requested issue.
- *
- * @apiSuccess 200 {Object} thumbnail Thumbnail Image
- *
+ * @apiSuccess (200) {Object} thumbnail Thumbnail image
  */
 router.get("/issues/:issueId/thumbnail.png", middlewares.issue.canView, getThumbnail);
 
 /**
- * @api {get} /:teamspace/:model/issues Get all Issues
+ * @api {get} /:teamspace/:model/issues?[query] List Issues
  * @apiName listIssues
  * @apiGroup Issues
+ * @apiDescription List all issues for model.
  *
- * @apiDescription List all available issue for current model.
+ * @apiUse Issues
+ * @apiUse listIssuesParams
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
  *
- * @apiSuccess (200) {Object} Issue Object.
  * @apiSuccessExample {json} Success-Response.
  * HTTP/1.1 200 OK
  * [
@@ -131,7 +164,6 @@ router.get("/issues/:issueId/thumbnail.png", middlewares.issue.canView, getThumb
  *		"viewCount":1,
  *		"commentCount":0,
  *		"thumbnail":"nabile/MODEL_ID/issues/ISSUE_ID/thumbnail.png",
- *		"norm":[0,0,0],
  *		"position":[8341.8056640625,1279.962158203125,-3050.34521484375],
  *		"typePrefix":"sample",
  *		"modelCode":"",
@@ -157,19 +189,16 @@ router.get("/issues/:issueId/thumbnail.png", middlewares.issue.canView, getThumb
  *			}
  *	}
  * ]
- *
  */
 router.get("/issues", middlewares.issue.canView, listIssues);
 
 /**
- * @api {get} /:teamspace/:model/issues.bcfzip Get Issues BCF zip file
+ * @api {get} /:teamspace/:model/issues.bcfzip Download issues BCF file
  * @apiName getIssuesBCF
  * @apiGroup Issues
+ * @apiDescription Download issues as a BCF file.
  *
- * @apiDescription Get a downloaded zip file of all Issues BCF.
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
+ * @apiUse Issues
  */
 router.get("/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
 
@@ -177,48 +206,46 @@ router.get("/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
  * @api {post} /:teamspace/:model/issues.bcfzip Import BCF file
  * @apiName importBCF
  * @apiGroup Issues
+ * @apiDescription Upload issues BCF file.
  *
- * @apiDescription Upload an Issues BCF file.
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
+ * @apiUse Issues
  */
 router.post("/issues.bcfzip", middlewares.issue.canCreate, importBCF);
 
 /**
- * @api {get} /:teamspace/:model/issues.bcfzip Get Issue Screenshot
+ * @api {get} /:teamspace/:model/issues/:issueId/viewpoints/:viewpointId/screenshot.png Get issue viewpoint screenshot
  * @apiName getScreenshot
  * @apiGroup Issues
+ * @apiDescription Get an issue viewpoint screenshot.
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} id Viewpoint unique ID.
- *
- * @apiDescription Get an issue screenshot from viewpoints using a viewpoint ID and issue ID.
+ * @apiUse Issues
+ * @apiUse IssueIdParam
+ * @apiUse ViewpointIdParam
  */
 router.get("/issues/:issueId/viewpoints/:vid/screenshot.png", middlewares.issue.canView, getScreenshot);
 
 /**
- * @api {get} /:teamspace/:model/issues/:issueId/viewpoints/:vid/screenshotSmall.png Get smaller version of Issue screenshot
+ * @api {get} /:teamspace/:model/issues/:issueId/viewpoints/:viewpointId/screenshotSmall.png Get smaller version of Issue screenshot
  * @apiName getScreenshotSmall
  * @apiGroup Issues
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} id Viewpoint unique ID.
+ * @apiUse Issues
+ * @apiUse IssueIdParam
+ * @apiUse ViewpointIdParam
  *
  * @apiSuccess (200) {Object} Issue Screenshot.
  */
 router.get("/issues/:issueId/viewpoints/:vid/screenshotSmall.png", middlewares.issue.canView, getScreenshot);
 
 /**
- * @api {get} /:teamspace/:model/revision/:rid/issues Get all Issues by revision ID
- * @apiName listIssues
+ * @api {get} /:teamspace/:model/revision/:revId/issues List Issues by revision ID
+ * @apiName listIssuesByRevision
  * @apiGroup Issues
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} id Revision unique ID.
+ * @apiUse Issues
+ * @apiUse RevIdParam
+ *
+ * @apiUse listIssuesParams
  *
  * @apiDescription Get all issues related to specific revision ID.
  *
@@ -243,7 +270,7 @@ router.get("/issues/:issueId/viewpoints/:vid/screenshotSmall.png", middlewares.i
  *		"assigned_roles":["Architect"],
  *		"viewCount":1,"commentCount":0,
  *		"thumbnail":"ACCOUNT/MODEL_ID/issues/ISSUE_ID/thumbnail.png",
- *		"norm":[],"position":[],
+ *		"position":[],
  *		"typePrefix":"sample",
  *		"modelCode":"",
  *		"account":"username",
@@ -271,13 +298,12 @@ router.get("/issues/:issueId/viewpoints/:vid/screenshotSmall.png", middlewares.i
 router.get("/revision/:rid/issues", middlewares.issue.canView, listIssues);
 
 /**
- * @api {get} /:teamspace/:model/revision/:rid/issues.bcfzip Get Issues BCF zip file by revision ID
- * @apiName getIssuesBCF
+ * @api {get} /:teamspace/:model/revision/:revId/issues.bcfzip Get Issues BCF zip file by revision ID
+ * @apiName getIssuesBCFTRid
  * @apiGroup Issues
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} id Revision unique ID.
+ * @apiUse Issues
+ * @apiUse RevIdParam
  *
  * @apiDescription Get Issues BCF export based on revision ID.
  *
@@ -285,18 +311,17 @@ router.get("/revision/:rid/issues", middlewares.issue.canView, listIssues);
 router.get("/revision/:rid/issues.bcfzip", middlewares.issue.canView, getIssuesBCF);
 
 /**
- * @api {post} /:teamspace/:model/revision/:rid/issues.bcfzip Post Issues BCF zip file by revision ID
- * @apiName getIssuesBCF
+ * @api {post} /:teamspace/:model/revision/:revId/issues.bcfzip Post Issues BCF zip file by revision ID
+ * @apiName postIssuesBCF
  * @apiGroup Issues
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} id Revision unique ID.
+ * @apiUse Issues
+ * @apiUse RevIdParam
  *
  * @apiDescription Upload Issues BCF file using current revision ID.
  *
- * @apiSuccess (200) {Object} Status
- * @apiSuccessExample {json} Success-Response.
+ * @apiSuccess (200) {String} status "ok" on success
+ * @apiSuccessExample {json} Success-Response:
  * HTTP
  * {
  *	"status":"ok"
@@ -310,21 +335,19 @@ router.post("/revision/:rid/issues.bcfzip", middlewares.issue.canCreate, importB
  * @apiName renderIssuesHTML
  * @apiGroup Issues
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
+ * @apiUse Issues
  *
  * @apiDescription Render all Issues into a HTML webpage, response is rendered HTML.
  */
 router.get("/issues.html", middlewares.issue.canView, renderIssuesHTML);
 
 /**
- * @api {get} /:teamspace/:model/revision/:rid/issues.html Issues response into as HTML by revision ID
- * @apiName  renderIssuesHTML
+ * @api {get} /:teamspace/:model/revision/:revId/issues.html Issues response into as HTML by revision ID
+ * @apiName  renderIssuesHTMLRid
  * @apiGroup Issues
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} id Revision unique ID.
+ * @apiUse Issues
+ * @apiUse RevIdParam
  *
  * @apiDescription Render all Issues into a HTML webpage based on current revision ID.
  */
@@ -336,31 +359,19 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
  * @apiGroup Issues
  * @apiDescription Creates a new issue.
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
+ * @apiUse Issues
  *
  * @apiParam (Request body) {String} name The name of the issue
- * @apiParam (Request body) {[]String} assigned_roles The roles assigned to the issue. Even though its an array (this is for future support of multiple assigned jobs), currently it has one or none elements correspoing to the available jobs in the teamaspace.
- * @apiParam (Request body) {String} status The status of the issue. It can have a value of "open","in progress","for approval" or "closed".
- * @apiParam (Request body) {String} priority The priority of the issue. It can have a value of "none", "low", "medium" or "high".
+ * @apiParam (Request body) {String[]} assigned_roles The roles assigned to the issue. Even though its an array (this is for future support of multiple assigned jobs), currently it has one or none elements correspoing to the available jobs in the teamaspace.
+ * @apiParam (Request body) {String} status The status of the issue. It can have a value of "open","in progress","for approval", "void" or "closed".
+ * @apiParam (Request body) {String} priority The priority of the issue. It can have a value of "none", String"low", "medium" or "high".
  * @apiParam (Request body) {String} topic_type Type of the issue. It's value has to be one of the defined topic_types for the model. See <a href='#api-Model-createModel'>here</a> for more details.
  * @apiParam (Request body) {Viewpoint} viewpoint The viewpoint of the issue, defining the position of the camera and the screenshot for that position.
  * @apiParam (Request body) {String} desc The description of the created issue
- * @apiParam (Request body) {[3]Number} position The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.
+ * @apiParam (Request body) {Number[3]} position The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.
+ * @apiParam (Request body) {Number[3]} position The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.
  *
- * @apiParam (Request body: Viewpoint) {[3]Number} right The right vector of the viewpoint indicating the direction of right in relative coordinates.
- * @apiParam (Request body: Viewpoint) {[3]Number} up The up vector of the viewpoint indicating the direction of up in relative coordinates.
- * @apiParam (Request body: Viewpoint) {[3]Number} position The position vector indicates where in the world the viewpoint is positioned.
- * @apiParam (Request body: Viewpoint) {[3]Number} look_at The vector indicating where in the world the viewpoint is looking at.
- * @apiParam (Request body: Viewpoint) {[3]Number} view_dir The vector indicating where is the viewpoint is looking at in relative coordinates.
- * @apiParam (Request body: Viewpoint) {Number} near The vector indicating the near plane.
- * @apiParam (Request body: Viewpoint) {Number} far The vector indicating the far plane.
- * @apiParam (Request body: Viewpoint) {Number} fov The angle of the field of view.
- * @apiParam (Request body: Viewpoint) {Number} aspect_ratio The aspect ratio of the fustrum.
- * @apiParam (Request body: Viewpoint) {String} highlighted_group_id If the issue is associated with one or more objects from the model this field has the value of a group id generated to hold those objects
- * @apiParam (Request body: Viewpoint) {Boolean} hide_IFC A flag to hide the IFC
- * @apiParam (Request body: Viewpoint) {String} screenshot A string in base64 representing the screenshot associated with the issue
- *
+ * @apiUse viewpointObject
  *
  * @apiExample {post} Example usage:
  * POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues HTTP/1.1
@@ -403,7 +414,98 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
  *       "fov": 1.0471975803375244,
  *       "aspect_ratio": 4.031496047973633,
  *       "clippingPlanes": [],
- *       "highlighted_group_id": "",
+ *       "override_groups": [
+ *           {
+ *               "color": [
+ *          	     0,
+ *          	     106,
+ *          	     255,
+ *          	     52
+ *          	 ],
+ *          	 "objects": [
+ *                   {
+ *                       "shared_ids": [
+ *                           "ffd49cfd-57fb-4c31-84f7-02b41352b54f"
+ *                       ],
+ *                       "account": "teamSpace1",
+ *                       "model": "2710bd65-37d3-4e7f-b2e0-ffe743ce943f"
+ *                   }
+ *               ]
+ *          },
+ *          {
+ *              "color": [
+ *                  96,
+ *                  237,
+ *                  61
+ *              ],
+ *          	"objects": [
+ *          	    {
+ *                      "shared_ids": [
+ *                          "a4a14ee6-aa44-4f36-96bd-f80dbabf8ead"
+ *                      ],
+ *                      "account": "teamSpace1",
+ *                      "model": "2710bd65-37d3-4e7f-b2e0-ffe743ce943f"
+ *                  }
+ *              ]
+ *          }
+ *       ],
+ *       "transformation_groups": [
+ *           {
+ *               "transformation": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
+ *          	 "objects": [
+ *                   {
+ *                       "shared_ids": [
+ *                           "ffd49cfd-57fb-4c31-84f7-02b41352b54f"
+ *                       ],
+ *                       "account": "teamSpace1",
+ *                       "model": "2710bd65-37d3-4e7f-b2e0-ffe743ce943f"
+ *                   }
+ *               ]
+ *          },
+ *          {
+ *              "color": [
+ *                  96,
+ *                  237,
+ *                  61
+ *              ],
+ *          	"objects": [
+ *          	    {
+ *                      "shared_ids": [
+ *                          "a4a14ee6-aa44-4f36-96bd-f80dbabf8ead"
+ *                      ],
+ *                      "account": "teamSpace1",
+ *                      "model": "2710bd65-37d3-4e7f-b2e0-ffe743ce943f"
+ *                  }
+ *              ]
+ *          }
+ *       ],
+ *       "highlighted_group": {
+ *       	"objects": [
+ *       		{
+ *       			"shared_ids": [
+ *       				"60286d41-d897-4de6-a0ed-0929fa68be96"
+ *       			],
+ *       			"account": "teamSpace1",
+ *       			"model": "7cf61b4f-acdf-4295-b2d0-9b45f9f27418"
+ *       		}
+ *       	],
+ *       	"color": [
+ *       		255,
+ *       		255,
+ *       		0
+ *       	]
+ *       },
+ *       "hidden_group": {
+ *       	"objects": [
+ *       		{
+ *       			"shared_ids": [
+ *       				"57b0969f-6009-4e32-9153-2b17d3a3628b"
+ *       			],
+ *       			"account": "teamSpace1",
+ *       			"model": "b1fceab8-b0e9-4e45-850b-b9888efd6521"
+ *       		}
+ *       	]
+ *       }
  *       "hideIfc": true,
  *       "screenshot": "iVBORw0KGgoAAAANSUhEUgAACAAAA...ggg=="
  *    },
@@ -433,11 +535,6 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
  *       -3960.10205078125,
  *       4487.1552734375,
  *       3326.732177734375
- *    ],
- *    "norm": [
- *       0,
- *       0,
- *       0
  *    ],
  *    "_id": "9ba5fb10-c8db-11e9-8f2a-ada77612c97e",
  *    "created": 1566918114625,
@@ -478,7 +575,16 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
  *       "fov": 1.0471975803375244,
  *       "aspect_ratio": 4.031496047973633,
  *       "clippingPlanes": [],
- *       "highlighted_group_id": "",
+ *       "hidden_group_id": "119d5dc0-e223-11ea-8549-49012d4e4956",
+ *       "highlighted_group_id" : "80c5a270-e223-11ea-8549-49012d4e4956",
+ *       "override_group_ids": [
+ *          "11952060-e223-11ea-8549-49012d4e4956",
+ *          "bc5ca80-e6c7-11ea-bd51-ddd919e6418e"
+ *       ],
+ *       "transformation_group_ids": [
+ *          "12345678-e223-11ea-8549-49012d4e4956",
+ *          "12345678-e6c7-11ea-bd51-ddd919e6418e"
+ *       ],
  *       "hideIfc": true,
  *       "screenshot": "teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/9ba5fb10-c8db-11e9-8f2a-ada77612c97e/viewpoints/125ce196-852c-49ed-9a2f-f9a77aa03390/screenshot.png",
  *       "guid": "125ce196-852c-49ed-9a2f-f9a77aa03390",
@@ -494,31 +600,33 @@ router.get("/revision/:rid/issues.html", middlewares.issue.canView, renderIssues
 router.post("/issues", middlewares.issue.canCreate, storeIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {patch} /:teamspace/:model/issues/:issueId Update Issue.
+ * @api {patch} /:teamspace/:model/issues/:issueId Update issue
  * @apiName  updateIssue
  * @apiGroup Issues
  * @apiDescription Updates an issue. It takes the part of the issue that can be updated.
- * The system will create a system comment withing the issue describing which values were changed.
- * The user needs to be the teamspace administrator, or the project administrator, or has the same job as the creator of the issue, or has the issue assigned. In the case that the issue has been assigned to the user, the user cant change it to the "close status".
+ * The system will create a system comment within the issue describing which values were changed.
+ * The user needs to be the teamspace administrator, the project administrator, has the same job as the creator of the issue, or has the issue assigned. In the case that the issue has been assigned to the user, the user cannot change it to the "closed" status.
  *
- * If the issue is being updated to assigned to a job, and the status of the issue has the value "for_approval" then the status of the issue is automtically changed to "in_progress".
+ * If the issue is being updated to assigned to a job and the status of the issue has the value "for_approval", then the status of the issue is automatically changed to "in_progress".
  *
- * If the user is changing the issue to the "for_approval" status, the issue will be assigned to the job that the creator of the issue has.
+ * If the user is changing the issue to the "for_approval" status, the issue will be assigned to the job that the creator of the issue.
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} id Issue unique ID.
+ * @apiUse Issues
+ * @apiUse IssueIdParam
  *
- * @apiParam (Request body) {[]String} [assigned_roles] The roles assigned to the issue. Even though its an array (this is for future support of multiple assigned jobs), currently it has one or none elements correspoing to the available jobs in the teamaspace.
- * @apiParam (Request body) {String} [desc] The description of the issue
- * @apiParam (Request body) {String} [status] The status of the issue. It can have a value of "open","in progress","for approval" or "closed".
- * @apiParam (Request body) {String} [topic_type] Type of the issue. It's value has to be one of the defined topic_types for the model. See <a href='#api-Model-createModel'>here</a> for more details.
- * @apiParam (Request body) {[3]Number} [position] The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.
- * @apiParam (Request body) {Number} [due_date] A timestamp depicting the due date of issue.
- * @apiParam (Request body) {String} [priority] The priority of the issue. It can have a value of "none", "low", "medium" or "high".
- * @apiParam (Request body) {Number} [scale] The scale of the issue.
- * @apiParam (Request body) {Number} [viewCount] The viewcount of the issue.
- * @apiParam (Request body) {Object} [extras] A field containing any extras that wanted to be saved in the issue. This is normally used by BCF.
+ * @apiParam (Request body) {[]String} [assigned_roles] Job roles assigned to the issue
+ * @apiParam (Request body) {String} [desc] Description of issue
+ * @apiParam (Request body) {String} [status] The status of issue (values: "open", "in progress", "for approval", "closed")
+ * @apiParam (Request body) {String} [topic_type] Topic type of issue (see <a href='#api-Model-createModel'>here</a> for available types)
+ * @apiParam (Request body) {[3]Number} [position] Vector defining the pin position of the issue; empty if the issue has no pin
+ * @apiParam (Request body) {Number} [due_date] Due date timestamp for the issue
+ * @apiParam (Request body) {String} [priority] The priority of the issue (values: "none", "low", "medium", "high")
+ * @apiParam (Request body) {Number} [scale] The scale factor of the issue
+ * @apiParam (Request body) {Viewpoint} [viewpoint] The viewpoint and screenshot of the issue
+ * @apiParam (Request body) {Number} [viewCount] The viewcount of the issue
+ * @apiParam (Request body) {Object} [extras] A field containing any extras that wanted to be saved in the issue (typically used by BCF)
+ *
+ * @apiUse viewpointObject
  *
  * @apiExample {patch} Example usage:
  * PATCH /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/98c39770-c8e2-11e9-8f2a-ada77612c97e HTTP/1.1
@@ -616,7 +724,6 @@ router.post("/issues", middlewares.issue.canCreate, storeIssue, middlewares.noti
  *       "guid": "a1167d5f-2434-4a50-a158-d6a6745e7d6a",
  *       "screenshotSmall": "teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/issues/98c39770-c8e2-11e9-8f2a-ada77612c97e/viewpoints/a1167d5f-2434-4a50-a158-d6a6745e7d6a/screenshotSmall.png"
  *    },
- *    "norm": [],
  *    "position": [],
  *    "extras": {
  *    }
@@ -628,27 +735,25 @@ router.post("/issues", middlewares.issue.canCreate, storeIssue, middlewares.noti
 router.patch("/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.chat.onUpdateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {post} /:teamspace/:model/revision/:rid/issues Create issue on revision
+ * @api {post} /:teamspace/:model/revision/:revId/issues Create issue on revision
  * @apiName newIssueRev
  * @apiGroup Issues
  * @apiDescription Creates a new issue for a particular revision. See <a href="#api-Issues-newIssue">here</a> for more details.
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} rid Unique Revision ID to store.
+ * @apiUse Issues
+ * @apiUse RevIdParam
  */
 router.post("/revision/:rid/issues", middlewares.issue.canCreate, storeIssue, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {patch} /:teamspace/:model/revision/:rid/issues/:issueId Update issue on revision
+ * @api {patch} /:teamspace/:model/revision/:revId/issues/:issueId Update issue on revision
  * @apiName updateIssueRev
  * @apiGroup Issues
  * @apiDescription Updates an issue for a particular revision. See <a href="#api-Issues-updateIssue">here</a> for more details.
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} rid Unique Revision ID to update to.
- * @apiParam {String} issueId Unique Issue ID to update.
+ * @apiUse Issues
+ * @apiUse IssueIdParam
+ * @apiUse RevIdParam
  */
 router.patch("/revision/:rid/issues/:issueId", middlewares.issue.canComment, updateIssue, middlewares.notification.onUpdateIssue, middlewares.chat.onNotification, responseCodes.onSuccessfulOperation);
 
@@ -657,14 +762,18 @@ router.patch("/revision/:rid/issues/:issueId", middlewares.issue.canComment, upd
  * @apiName commentIssue
  * @apiGroup Issues
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} issueId Unique Issue ID to update.
- * @apiParam {Json} PAYLOAD The data with the comment to be added.
+ * @apiUse Issues
+ * @apiUse IssueIdParam
+ *
+ * @apiParam (Request body) {String} comment Comment text
+ * @apiParam (Request body) {Viewpoint} [viewpoint] The viewpoint associated with the comment
+ *
+ * @apiUse viewpointObject
+ *
  * @apiParamExample {json} PAYLOAD
  *    {
  *      "comment": "This is a commment",
- *      "viewpoint: {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}
+ *      "viewpoint": {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}
  *    }
  *
  * @apiSuccessExample {json} Success
@@ -681,16 +790,15 @@ router.patch("/revision/:rid/issues/:issueId", middlewares.issue.canComment, upd
  * @apiError 404 Issue not found
  * @apiError 400 Comment with no text
  * */
-router.post("/issues/:issueId/comments", middlewares.issue.canComment, addComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
+router.post("/issues/:issueId/comments", middlewares.issue.canComment, addComment, middlewares.notification.onNewComment, middlewares.chat.onCommentCreated, responseCodes.onSuccessfulOperation);
 
 /**
  * @api {delete} /:teamspace/:model/issues/:issueId/comments Deletes an comment from an issue
  * @apiName commentIssue
  * @apiGroup Issues
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} issueId Unique Issue ID to update.
+ * @apiUse Issues
+ * @apiUse IssueIdParam
  * @apiParam {Json} PAYLOAD The data with the comment guid to be deleted.
  * @apiParamExample {json} PAYLOAD
  *    {
@@ -723,9 +831,8 @@ router.post("/revision/:rid/issues.json", middlewares.issue.canCreate, storeIssu
  *
  * This method triggers a chat event
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} issueId Issue unique ID
+ * @apiUse Issues
+ * @apiUse IssueIdParam
  *
  * @apiParam (Request body file resource (multipart/form-data)) {File[]} files The array of files to be attached
  * @apiParam (Request body file resource (multipart/form-data)) {String[]} names The names of the files; it should have the same length as the files field and should include the file extension
@@ -767,14 +874,13 @@ router.post("/issues/:issueId/resources",middlewares.issue.canComment, attachRes
  * the resources has been attached to it also deletes the resource from the system. This
  * method triggers a chat event .
  *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID
- * @apiParam {String} issueId Issue unique ID
+ * @apiUse Issues
+ * @apiUse IssueIdParam
  *
  * @apiParam (Request body) {String} _id The resource id to be detached
  *
- * @apiSuccessExample {json}
- *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
  * {
  *    "_id":"e25e42d5-c4f0-4fbc-a8f4-bc9899e6662a",
  *    "size":2509356,
@@ -792,6 +898,7 @@ function storeIssue(req, res, next) {
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
 	data.owner = req.session.user.username;
+	delete data._id; // Ignore _id field
 
 	if (req.params.rid) {
 		data.revId = req.params.rid;
@@ -829,45 +936,44 @@ function listIssues(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, rid } = req.params;
 	const branch = rid ? null : "master";
-	const ids = req.query.ids ? req.query.ids.split(",") : null;
-	const convertCoords = !!req.query.convertCoords;
+	const filters = utils.deserialiseQueryFilters(req.query, C.ISSUE_FILTERS);
 
-	Issue.getIssuesList(account, model, branch, rid, ids, req.query.sortBy, convertCoords).then(issues => {
+	const convertCoords = !!req.query.convertCoords;
+	let updatedSince = req.query.updatedSince;
+
+	if (updatedSince) {
+		updatedSince = parseInt(updatedSince, 10);
+		if (isNaN(updatedSince)) {
+			return responseCodes.respond(place, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+		}
+	}
+
+	Issue.getList(account, model, branch, rid, filters, convertCoords, updatedSince).then(issues => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, issues);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
-
 }
 
 function getIssuesBCF(req, res, next) {
 	const place = utils.APIInfo(req);
 	const account = req.params.account;
 	const model = req.params.model;
-	const dbCol =  {account: account, model: model};
 
-	let ids;
-	let useIssueNumbers = false;
-	if (req.query.numbers) {
-		ids = req.query.numbers.split(",");
-		useIssueNumbers = true;
-	} else if (req.query.ids) {
-		ids = req.query.ids.split(",");
-	}
+	const filters = utils.deserialiseQueryFilters(req.query, C.ISSUE_FILTERS);
 
 	let getBCFZipRS;
 
 	if (req.params.rid) {
-		getBCFZipRS = BCF.getBCFZipReadStream(account, model, req.session.user.username, null, req.params.rid, ids, useIssueNumbers);
+		getBCFZipRS = Issue.getBCF(account, model, null, req.params.rid, filters);
 	} else {
-		getBCFZipRS = BCF.getBCFZipReadStream(account, model, req.session.user.username, "master", null, ids, useIssueNumbers);
+		getBCFZipRS = Issue.getBCF(account, model, "master", null, filters);
 	}
 
 	getBCFZipRS.then(zipRS => {
-
 		const timestamp = (new Date()).toLocaleString();
 
-		ModelSetting.findById(dbCol, dbCol.model).then((settings) => {
+		findModelSettingById(account, model).then((settings) => {
 			const filenamePrefix = (settings.name + "_" + timestamp + "_").replace(/\W+/g, "_");
 
 			const headers = {
@@ -884,7 +990,7 @@ function getIssuesBCF(req, res, next) {
 	});
 }
 
-function findIssueById(req, res, next) {
+function findIssue(req, res, next) {
 	const place = utils.APIInfo(req);
 	const {account, model, issueId} = req.params;
 
@@ -898,9 +1004,9 @@ function findIssueById(req, res, next) {
 function renderIssuesHTML(req, res, next) {
 	const place = utils.APIInfo(req);
 	const {account, model, rid} = req.params;
-	const ids = req.query.ids ? req.query.ids.split(",") : undefined;
+	const filters = utils.deserialiseQueryFilters(req.query, C.ISSUE_FILTERS);
 
-	Issue.getIssuesReport(account, model, rid, ids, res).catch(err => {
+	Issue.getIssuesReport(account, model, rid, filters, res).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
 }
@@ -908,51 +1014,39 @@ function renderIssuesHTML(req, res, next) {
 function importBCF(req, res, next) {
 	const place = utils.APIInfo(req);
 
-	// check space
-	function fileFilter(fileReq, file, cb) {
-
-		const acceptedFormat = [
-			"bcf", "bcfzip", "zip"
-		];
-
-		let format = file.originalname.split(".");
-		format = format.length <= 1 ? "" : format.splice(-1)[0];
-
-		const size = parseInt(fileReq.headers["content-length"]);
-
-		if (acceptedFormat.indexOf(format.toLowerCase()) === -1) {
-			return cb({ resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
-		}
-
-		if (size > config.uploadSizeLimit) {
-			return cb({ resCode: responseCodes.SIZE_LIMIT });
-		}
-
-		cb(null, true);
-	}
-
-	if (!config.bcf_dir) {
-		return responseCodes.respond(place, req, res, next, { message: "config.bcf_dir is not defined" });
-	}
-
 	const upload = multer({
-		dest: config.bcf_dir,
-		fileFilter: fileFilter
+		storage: multer.memoryStorage(),
+		fileFilter : (fileReq, file, cb) => {
+			const acceptedFormat = [
+				"bcf", "bcfzip", "zip"
+			];
+
+			let format = file.originalname.split(".");
+			format = format.length <= 1 ? "" : format.splice(-1)[0];
+
+			const size = parseInt(fileReq.headers["content-length"]);
+
+			if (acceptedFormat.indexOf(format.toLowerCase()) === -1) {
+				return cb({ resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
+			}
+
+			if (size > config.uploadSizeLimit) {
+				return cb({ resCode: responseCodes.SIZE_LIMIT });
+			}
+
+			cb(null, true);
+		}
 	});
 
 	upload.single("file")(req, res, function (err) {
 		if (err) {
-			return responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
-
-		} else if (!req.file.size) {
-			return responseCodes.respond(place, req, res, next, responseCodes.FILE_FORMAT_NOT_SUPPORTED, responseCodes.FILE_FORMAT_NOT_SUPPORTED);
-		} else {
-			BCF.importBCF({ socketId: req.headers[C.HEADER_SOCKET_ID], user: req.session.user.username }, req.params.account, req.params.model, req.params.rid, req.file.path).then(() => {
-				responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "ok" });
-			}).catch(error => {
-				responseCodes.respond(place, req, res, next, error, error);
-			});
+			return responseCodes.respond(place, req, res, next, err.resCode || err, err.resCode || err);
 		}
+		Issue.importBCF({ socketId: req.headers[C.HEADER_SOCKET_ID], user: req.session.user.username }, req.params.account, req.params.model, req.params.rid, req.file.buffer).then(() => {
+			responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "ok" });
+		}).catch(error => {
+			responseCodes.respond(place, req, res, next, error, error);
+		});
 	});
 }
 
@@ -982,9 +1076,11 @@ function addComment(req, res, next) {
 	const user = req.session.user.username;
 	const data =  req.body;
 	const {account, model, issueId} = req.params;
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	Comment.addComment(account, model, "issues", issueId, user, data).then(comment => {
+	Issue.addComment(account, model, issueId, user, data, sessionId).then(({comment, userRefs}) => {
 		req.dataModel = comment;
+		req.userReferences = {type: "issue", userRefs};
 		next();
 	}).catch(err => {
 		responseCodes.onError(req, res, err);

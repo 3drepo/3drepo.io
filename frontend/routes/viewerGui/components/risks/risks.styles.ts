@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -28,13 +28,13 @@ import { ReportedItems } from '../reportedItems';
 
 export const RisksContainer = styled(ReportedItems).attrs({
 	title: VIEWER_PANELS_TITLES[VIEWER_PANELS.RISKS],
-	Icon: VIEWER_PANELS_ICONS[VIEWER_PANELS.RISKS] as any
+	Icon: () => VIEWER_PANELS_ICONS[VIEWER_PANELS.RISKS] as any
 })`
 	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.RISKS]}px;
 ` as any;
 
 export const ListContainer = styled.ul`
-	height: 100%;
+	height: auto;
 	padding: 0;
 	margin: 0;
 	cursor: pointer;

@@ -1,19 +1,20 @@
 /**
- *	Copyright (C) 2020 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 "use strict";
 
 const { Transform } = require("stream");
@@ -101,48 +102,36 @@ class BinToVector3dStringStream extends Transform {
 	}
 }
 
-// It asssumes that the data is formatted this way:
-// [3,v0index, v1index, v2index,3,v3index, v4index, v5index,..., 3, vnindex, v(n+1)index, v(n+2)index]
-// were viindex is the index (int32) in the vertices array
-const binToTrianglesArray = (buffer, isLittleEndian = false) => {
-	const INT_BYTE_SIZE = 4;
-	const ITEM_LEAP =  INT_BYTE_SIZE * 4; // 16 = 4 * 4 means four bytes (a uint32) and 4 means 4 components per triangle.
-	// The first uint is the number of vertices, in the case of triangles this number will always be three so gets ignored
-
+const binToFacesString = (buffer, isLittleEndian = false) => {
 	const bufferLength = buffer.length;
-	const result = new Array(bufferLength * 3 / ITEM_LEAP);
 	const getUint32 =  (!isLittleEndian ? buffer.readUInt32BE : buffer.readUInt32LE).bind(buffer);
 
-	for (let i = 0; i < bufferLength ; i = i + ITEM_LEAP) {
-		result[(i * 3 / ITEM_LEAP) ] = getUint32(i + INT_BYTE_SIZE);
-		result[(i * 3 / ITEM_LEAP) + 1] = getUint32(i + 2 * INT_BYTE_SIZE);
-		result[(i * 3 / ITEM_LEAP) + 2] = getUint32(i + 3 * INT_BYTE_SIZE);
-	}
-
-	return result;
-};
-
-const binToTrianglesString = (buffer, isLittleEndian = false) => {
 	const INT_BYTE_SIZE = 4;
-	const ITEM_LEAP =  INT_BYTE_SIZE * 4; // 16 = 4 * 4 means four bytes (a uint32) and 4 means 4 components per triangle.
-	// The first uint is the number of vertices, in the case of triangles this number will always be three so gets ignored
 
-	const bufferLength = buffer.length;
+	// The first element is the number of vertices in the face (e.g. two for lines, three for triangles, etc.)
+	// The vertex count is present for each face, but as a rule faces of different counts are not mixed in the same array
+	// so we only need to define this once.
+	const FACE_SIZE = getUint32(0);
+	const ITEM_LEAP = INT_BYTE_SIZE * (FACE_SIZE + 1);
+
 	let result = "";
-	const getUint32 =  (!isLittleEndian ? buffer.readUInt32BE : buffer.readUInt32LE).bind(buffer);
 
 	for (let i = 0; i < bufferLength ; i = i + ITEM_LEAP) {
 		if (i !== 0) {
 			result += ",";
 		}
-
-		result += getUint32(i + INT_BYTE_SIZE) + "," + getUint32(i + 2 * INT_BYTE_SIZE) + "," + getUint32(i + 3 * INT_BYTE_SIZE);
+		for (let j = 1; j <= FACE_SIZE; j++) {
+			result += getUint32(i + j * INT_BYTE_SIZE);
+			if (j < FACE_SIZE) {
+				result += ",";
+			}
+		}
 	}
 
 	return result;
 };
 
-class BinToTriangleStringStream extends Transform {
+class BinToFaceStringStream extends Transform {
 	constructor(opts = {}) {
 		super(opts);
 		this.started = false;
@@ -155,7 +144,7 @@ class BinToTriangleStringStream extends Transform {
 		}
 
 		this.started = true;
-		this.push(binToTrianglesString(chunk, this.isLittleEndian));
+		this.push(binToFacesString(chunk, this.isLittleEndian));
 		callback();
 	}
 }
@@ -163,9 +152,8 @@ class BinToTriangleStringStream extends Transform {
 module.exports = {
 	binToArrayVector3d,
 	toFloat32Array,
-	binToTrianglesArray,
-	binToTrianglesString,
-	BinToTriangleStringStream,
+	binToFacesString,
+	BinToFaceStringStream,
 	BinToVector3dStringStream,
 	VECTOR3D_SIZE
 };

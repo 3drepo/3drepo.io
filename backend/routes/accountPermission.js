@@ -1,18 +1,18 @@
 /**
- *	Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2017 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -21,6 +21,7 @@
 	const router = express.Router({ mergeParams: true });
 	const responseCodes = require("../response_codes");
 	const middlewares = require("../middlewares/middlewares");
+	const AccountPermissions = require("../models/accountPermissions");
 	const User = require("../models/user");
 	const utils = require("../utils");
 	const _ = require("lodash");
@@ -141,7 +142,8 @@
 	function listPermissions(req, res, next) {
 		User.findByUserName(req.params.account)
 			.then(user => {
-				const permissions = user.toObject().customData.permissions;
+				const permissions = user.customData.permissions;
+
 				return User.getAllUsersInTeamspace(req.params.account).then(
 					users => {
 						users.forEach(_user => {
@@ -176,8 +178,8 @@
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OWNER_MUST_BE_ADMIN);
 			} else {
 				User.findByUserName(req.params.account)
-					.then(user => {
-						return user.customData.permissions.add(req.body);
+					.then(teamspace => {
+						return AccountPermissions.updateOrCreate(teamspace, req.body.user, req.body.permissions);
 					})
 					.then(permission => {
 						responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
@@ -187,6 +189,7 @@
 					});
 			}
 		} else {
+
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
 		}
 	}
@@ -197,8 +200,8 @@
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OWNER_MUST_BE_ADMIN);
 			} else {
 				User.findByUserName(req.params.account)
-					.then(user => {
-						return user.customData.permissions.update(req.params.user, req.body);
+					.then(teamspace => {
+						return AccountPermissions.update(teamspace, req.params.user, req.body.permissions);
 					})
 					.then(permission => {
 						responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
@@ -215,7 +218,7 @@
 	function deletePermission(req, res, next) {
 		User.findByUserName(req.params.account)
 			.then(user => {
-				return user.customData.permissions.remove(req.params.user);
+				return AccountPermissions.remove(user, req.params.user);
 			})
 			.then(() => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {});

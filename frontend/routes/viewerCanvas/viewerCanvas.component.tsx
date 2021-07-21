@@ -17,17 +17,22 @@
 
 import React from 'react';
 
-import { difference, isEqual } from 'lodash';
+import { difference, differenceBy, isEqual } from 'lodash';
+import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';
 import { addColorOverrides, overridesColorDiff, removeColorOverrides } from '../../helpers/colorOverrides';
 import { pinsDiff } from '../../helpers/pins';
-import { Container } from './viewerCanvas.styles';
+import { PresentationMode } from '../../modules/presentation/presentation.constants';
+import { moveMeshes, resetMovedMeshes, transformationDiffChanges,
+transformationDiffRemoves } from '../../modules/sequences/sequences.helper';
+import { ViewerService } from '../../services/viewer/viewer';
+import { Border, Container } from './viewerCanvas.styles';
 
 interface IProps {
 	location: any;
 	className?: string;
-	viewer: any;
+	viewer: ViewerService;
 	match: {
 		params: {
 			model: string;
@@ -40,14 +45,29 @@ interface IProps {
 	issuePins: any[];
 	riskPins: any[];
 	measurementPins: any[];
+	transformations: any[];
 	gisLayers: string[];
+	sequenceHiddenNodes: string[];
 	hasGisCoordinates: boolean;
 	gisCoordinates: any;
 	handleTransparencyOverridesChange: any;
+	viewerManipulationEnabled: boolean;
+	presentationMode: PresentationMode;
+	isPresentationPaused: boolean;
+	handleTransparenciesVisibility: any;
+	issuesShapes: any[];
+	risksShapes: any[];
+	issuesHighlightedShapes: any[];
+	risksHighlightedShapes: any[];
 }
 
 export class ViewerCanvas extends React.PureComponent<IProps, any> {
 	private containerRef = React.createRef<HTMLElement>();
+
+	constructor(props) {
+		super(props);
+		this.renderMeasurements = queuableFunction(this.renderMeasurements, this);
+	}
 
 	public get shouldBeVisible() {
 		return this.props.location.pathname.includes(ROUTES.VIEWER);
@@ -88,6 +108,14 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		addColorOverrides(toAdd);
 	}
 
+	public renderTransformations(prev, curr) {
+		const changes = transformationDiffChanges(prev, curr);
+		const removes = transformationDiffRemoves(prev, curr);
+
+		moveMeshes(changes);
+		resetMovedMeshes(removes);
+	}
+
 	public renderGisLayers(prev: string[], curr: string[]) {
 		const { viewer } = this.props;
 		const toAdd = difference(curr, prev);
@@ -103,12 +131,34 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 		if (prev.length === 0 && curr.length > 0) {
 			viewer.mapStart();
 		}
-
 	}
 
-	public componentDidUpdate(prevProps: IProps) {
+	public async renderMeasurements(prev: any[], curr: any[]) {
+		const { viewer } = this.props;
+
+		const toAdd = differenceBy(curr, prev, 'uuid', 'color');
+		const toRemove = differenceBy(prev, curr, 'uuid', 'color');
+
+		await viewer.removeMeasurements(toRemove);
+		await viewer.addMeasurements(toAdd, true);
+	}
+
+	public async renderMeasurementsHighlights(prev: any[], curr: any[]) {
+		const { viewer } = this.props;
+
+		const toAdd = difference(curr, prev);
+		const toRemove = difference(prev, curr);
+
+		await viewer.deselectMeasurements(toRemove);
+		await viewer.selectMeasurements(toAdd);
+	}
+
+	public async componentDidUpdate(prevProps: IProps) {
 		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
-			gisCoordinates, gisLayers, transparencies } = this.props;
+			gisCoordinates, gisLayers, transparencies, transformations: transformation,
+			sequenceHiddenNodes, viewerManipulationEnabled, viewer,
+			issuesShapes, issuesHighlightedShapes, risksShapes, risksHighlightedShapes
+		} = this.props;
 
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
 			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
@@ -116,6 +166,10 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 
 		if (prevProps.transparencies && !isEqual(transparencies, prevProps.transparencies)) {
 			this.props.handleTransparencyOverridesChange(transparencies, prevProps.transparencies);
+		}
+
+		if (prevProps.transformations && !isEqual(transformation, prevProps.transformations)) {
+			this.renderTransformations(prevProps.transformations, transformation);
 		}
 
 		if (!isEqual(issuePins, prevProps.issuePins)) {
@@ -138,16 +192,48 @@ export class ViewerCanvas extends React.PureComponent<IProps, any> {
 			this.renderGisLayers(prevProps.gisLayers, gisLayers);
 		}
 
+		if (!isEqual(prevProps.issuesShapes, issuesShapes)) {
+			await this.renderMeasurements(prevProps.issuesShapes, issuesShapes);
+		}
+
+		if (!isEqual(prevProps.issuesHighlightedShapes, issuesHighlightedShapes)) {
+			await this.renderMeasurementsHighlights(prevProps.issuesHighlightedShapes, issuesHighlightedShapes);
+		}
+
+		if (!isEqual(prevProps.risksShapes, risksShapes)) {
+			await this.renderMeasurements(prevProps.risksShapes, risksShapes);
+		}
+
+		if (!isEqual(prevProps.risksHighlightedShapes, risksHighlightedShapes)) {
+			await this.renderMeasurementsHighlights(prevProps.risksHighlightedShapes, risksHighlightedShapes);
+		}
+
+		if (prevProps.viewerManipulationEnabled !== viewerManipulationEnabled) {
+			if (viewerManipulationEnabled) {
+				viewer.setNavigationOn();
+			} else {
+				viewer.setNavigationOff();
+			}
+		}
+		if (prevProps.transparencies && !isEqual(prevProps.sequenceHiddenNodes, sequenceHiddenNodes)) {
+			this.props.handleTransparenciesVisibility(sequenceHiddenNodes);
+		}
 	}
 
 	public render() {
 		return (
-			<Container
-				visible={this.shouldBeVisible}
-				id="viewer"
-				ref={this.containerRef}
-				className={this.props.className}
-			/>
+			<>
+				<Container
+					visible={this.shouldBeVisible}
+					id="viewer"
+					ref={this.containerRef}
+					className={this.props.className}
+				/>
+				<Border
+					presentationMode={this.props.presentationMode}
+					isPresentationPaused={this.props.isPresentationPaused}
+				/>
+			</>
 		);
 	}
 }

@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  *  Copyright (C) 2018 3D Repo Ltd
  *
@@ -16,6 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+"use strict";
+
 const { deleteNotifications, fetchNotification } = require("../helpers/notifications");
 const { loginUsers } = require("../helpers/users.js");
 const { createModel, createFederation, updateFederation } = require("../helpers/models");
@@ -24,7 +24,7 @@ const bouncerHelper = require("../helpers/bouncerHelper");
 const expect = require("chai").expect;
 const app = require("../../services/api.js").createApp();
 const async = require("async");
-const newId = require("uuid/v1");
+const newId = require("uuid").v1;
 
 
 let agents = {};
@@ -473,7 +473,7 @@ describe("Notifications", function() {
 				testForNoClosedNotification("collaboratorTeamspace1Model1JobD")
 			);
 
-			it("the user that closed the issue shouldnt get a closed issue notification",
+			it("the user that closed the issue should not get a closed issue notification",
 				testForNoClosedNotification("teamSpace1")
 			);
 
@@ -561,6 +561,7 @@ describe("Notifications", function() {
 		};
 
 		const upload = tag => agents.teamSpace1.post(`/${account}/${model}/upload?tag=${tag}`)
+		.field("tag", tag)
 		.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
 		.expect(200, function(err, res) {
 			if(err) {done(err);}
@@ -624,7 +625,7 @@ describe("Notifications", function() {
 				});
 			});
 
-
+		/*
 		it("should have a notification when a federation has been updated", done => {
 			bouncerHelper.startBouncerWorker(() => {
 
@@ -647,12 +648,12 @@ describe("Notifications", function() {
 						.then(resFederation => updateFederation(agents.teamSpace1, 'teamSpace1',resFederation.body.model,[subModels[0]]))
 					);
 			});
-		})
+		}) */
 	});
 
 
 	describe("of type model update failed", ()=> {
-		it("should be created for the user that uploaded the model", done => {
+		/*		it("should be created for the user that uploaded the model", done => {
 			const username = "collaboratorTeamspace1Model1JobA";
 			const agent = agents[username];
 
@@ -696,7 +697,7 @@ describe("Notifications", function() {
 			upload();
 
 		}).timeout(60000);
-
+		*/
 		const testForBothNotifications = function(errcode, done) {
 			const username = "collaboratorTeamspace1Model1JobA";
 			const agent = agents[username];

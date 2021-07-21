@@ -21,20 +21,18 @@ import { DEFAULT_VIEWPOINTS } from './presetViews.constants';
 import { StyledSvgIcon } from './presetViews.styles';
 
 interface IProps {
-	teamspace: string;
-	model: string;
-	showViewpoint: (teamspace, modelId, view) => void;
+	showPreset: (preset) => void;
 }
 
-export const PresetViews = ({ teamspace, model, showViewpoint }: IProps) => {
+export const PresetViews = ({ showPreset }: IProps) => {
 
-	const handleViewpointClick = (viewpoint) => () => showViewpoint(teamspace, model, viewpoint);
+	const handleViewpointClick = (preset) => () => showPreset(preset);
 
 	return (
 			<>
-				{DEFAULT_VIEWPOINTS.map(({ icon, viewBox, _id, name, ...props }) => (
+				{DEFAULT_VIEWPOINTS.map(({ icon, viewBox, _id, name, preset }) => (
 					<Tooltip title={name} key={`${_id}_tooltip`}>
-						<StyledSvgIcon viewBox={viewBox} onClick={handleViewpointClick(props)} key={_id}>
+						<StyledSvgIcon viewBox={viewBox} onClick={handleViewpointClick(preset)} key={_id}>
 							{icon()}
 						</StyledSvgIcon>
 					</Tooltip>

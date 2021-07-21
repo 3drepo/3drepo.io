@@ -70,7 +70,10 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 	}
 
 	public onSuggestionsFetchRequested = ({ value }) => {
-		if (this.state.value !== value) {
+		const suggestions = this.getSuggestions(value);
+		const isCurrentValueTheSameAsSuggestion = (suggestions.length === 1) && (suggestions[0] === this.state.value);
+
+		if (!isCurrentValueTheSameAsSuggestion) {
 			this.setState({
 				suggestions: this.getSuggestions(value)
 			});
@@ -79,16 +82,6 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 
 	public onSuggestionsClearRequested = () => {
 		this.setState({ suggestions: [] });
-	}
-
-	public handleChange = (event, { newValue }) => {
-		this.setState({ value: newValue }, () => {
-			if (this.props.onChange) {
-				this.props.onChange({
-					target: { value: newValue, name: this.props.name }
-				});
-			}
-		});
 	}
 
 	public renderSuggestion = (suggestion, { isHighlighted, query }) => (
@@ -133,7 +126,7 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 	public handleKeyUp = () => {
 		const list = document.querySelector('.react-autosuggest__suggestions-list');
 		if (list) {
-			const item = list.querySelector('[aria-selected="true"]') as any;
+			const item = list.querySelector<HTMLElement>('[aria-selected="true"]') ;
 			if (item) {
 				list.scrollTo({
 					top: item.offsetTop + item.clientHeight - list.clientHeight,
@@ -149,9 +142,26 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 		}
 	}
 
+	private handleValueUpdate = () => {
+		if (this.props.onChange) {
+			this.props.onChange({
+				target: { value: this.state.value, name: this.props.name }
+			});
+		}
+	}
+
+	public onSearchChange = (event, { newValue }) => {
+		this.setState({ value: newValue }, this.handleValueUpdate);
+	}
+
+	public onSuggestionSelected: any = (event, { suggestion }) => {
+		event.preventDefault();
+		this.setState({ value: suggestion }, this.handleValueUpdate);
+	}
+
 	public render() {
 		const { value, suggestions } = this.state;
-		const { label, onBlur, name, placeholder } = this.props;
+		const { name, placeholder } = this.props;
 
 		return (
 			<Container>
@@ -164,17 +174,16 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 					renderSuggestion={this.renderSuggestion}
 					renderInputComponent={this.renderInputComponent}
 					inputProps={{
-						label,
 						value,
 						name,
-						onBlur,
 						placeholder,
-						onChange: this.handleChange,
+						onChange: this.onSearchChange,
 						inputRef: (node) => {
 							this.popperNode = node;
 						}
 					}}
 					renderSuggestionsContainer={this.renderSuggestionsContainer}
+					onSuggestionSelected={this.onSuggestionSelected}
 				/>
 			</Container>
 		);

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,22 +16,31 @@
  */
 
 import { Field, Form, Formik } from 'formik';
+import { snakeCase } from 'lodash';
 import React from 'react';
 import * as Yup from 'yup';
-
 import Button from '@material-ui/core/Button';
 import DialogContent from '@material-ui/core/DialogContent';
 import TextField from '@material-ui/core/TextField';
-import {
-	LoadingDialog
-} from './../../../../routes/components/dialogContainer/components/loadingDialog/loadingDialog.component';
+import FileIcon from '@material-ui/icons/InsertDriveFileOutlined';
+import Checkbox from '@material-ui/core/Checkbox';
 
 import { unitsMap } from '../../../../constants/model-parameters';
 import { schema } from '../../../../services/validation';
-import { FileInputField } from './components/fileInputField.component';
-
+import { LoadingDialog } from '../../../components/dialogContainer/components';
+import { renderWhenTrue, renderWhenTrueOtherwise} from '../../../../helpers/rendering';
 import { formatNamedMonthDate } from '../../../../services/formatting/formatDate';
-import { CancelButton, ModelInfo, ModelName, StyledDialogActions } from './uploadModelFileDialog.styles';
+import { FileInputField } from './components/fileInputField.component';
+import {
+	Additional,
+	CancelButton,
+	CheckboxContainer,
+	FileContainer,
+	FileName,
+	Main,
+	ModelInfo,
+	StyledDialogActions,
+} from './uploadModelFileDialog.styles';
 
 const UploadSchema = Yup.object().shape({
 	revisionName: schema.revisionName,
@@ -39,32 +48,61 @@ const UploadSchema = Yup.object().shape({
 });
 
 interface IProps {
-	uploadModelFile: (teamspace, projectName, modelData, fileData) => void;
+	uploadModelFile: (teamspace, projectName, modelData, fileData, handleClose) => void;
 	fetchModelSettings: (teamspace, modelId) => void;
 	fetchRevisions: (teamspace, modelId, showVoid) => void;
 	handleClose: () => void;
+	handleDisableClose: (set: boolean) => void;
+	disableClosed: boolean;
 	modelSettings: any;
 	revisions: any[];
+	models: any[];
 	modelId: string;
 	modelName: string;
 	teamspaceName: string;
 	projectName: string;
 	isPending: boolean;
+	values: any;
+	isModelUploading: boolean;
 }
 
 interface IState {
 	fileName: string;
+	allowImportAnimations: boolean;
 }
 
 export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 	public state = {
-		fileName: ''
+		fileName: '',
+		allowImportAnimations: false,
 	};
+
+	get modelDetails() {
+		return this.props.models[this.props.modelSettings.id] || null;
+	}
+
+	get modelStatus() {
+		return this.modelDetails && this.modelDetails.status;
+	}
+
+	get isModelUploading() {
+		return this.props.isModelUploading;
+	}
 
 	public componentDidMount() {
 		const { modelId, teamspaceName, fetchModelSettings, fetchRevisions } = this.props;
 		fetchRevisions(teamspaceName, modelId, true);
 		fetchModelSettings(teamspaceName, modelId);
+	}
+
+	public componentDidUpdate(prevProps: Readonly<IProps>) {
+		if (this.isModelUploading && !this.props.disableClosed) {
+			this.props.handleDisableClose(true);
+		}
+
+		if (!this.isModelUploading && this.props.disableClosed) {
+			this.props.handleDisableClose(false);
+		}
 	}
 
 	public handleFileUpload = (values) => {
@@ -73,36 +111,85 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		const fileData = {
 			file: values.file,
 			tag: values.revisionName,
-			desc: values.revisionDesc
+			desc: values.revisionDesc,
+			importAnimations: values.importAnimations,
 		};
 
 		const modelData = {
 			modelName, modelId
 		};
 
-		uploadModelFile(teamspaceName, projectName, modelData, fileData);
-		handleClose();
+		uploadModelFile(teamspaceName, projectName, modelData, fileData, handleClose);
 	}
 
-	public renderRevisionInfo = (revisions) => {
-		if (!revisions.length) {
-			return `No revisions yet.`;
-		}
-		const lastRevision = revisions[0];
-		const info = `#Revisions: ${revisions.length}`;
-		const formatedDate = formatNamedMonthDate(lastRevision.timestamp);
+	public renderRevisionsInfo = renderWhenTrueOtherwise(() => (
+		<ModelInfo>
+			{`Number of Revisions: ${this.props.revisions.length}`}
+		</ModelInfo>
+	), () => (
+		<ModelInfo>
+			No revisions yet.
+		</ModelInfo>
+	));
 
-		if (lastRevision.tag) {
-			return `${info}, Most Recent: ${ lastRevision.tag } - ${ formatedDate }`;
-		}
+	public renderLastRevisionInfo = renderWhenTrue(() => {
+		const lastRevision = this.props.revisions[0];
+		const formattedDate = formatNamedMonthDate(lastRevision.timestamp);
+		const lastRevisionTag = `${lastRevision.tag} ` || '';
 
-		return `${info}, Most Recent: ${formatedDate}`;
-	}
+		return (
+			<ModelInfo>
+				{`Last Revision: ${lastRevisionTag}(Uploaded on ${formattedDate})`}
+			</ModelInfo>
+		);
+	});
 
-	public handleFileChange = (onChange) => (event, ...params) => {
+	public renderModelUnits = renderWhenTrue(() => (
+		<ModelInfo>
+			{`Model Units: ${unitsMap[this.props.modelSettings.properties.unit]}`}
+		</ModelInfo>
+	));
+
+	public renderImportTransformations = renderWhenTrue(() => (
+		<Field name="importAnimations" render={({ field }) => (
+			<CheckboxContainer
+				control={
+					<Checkbox
+						checked={field.value}
+						{...field}
+						color="secondary"
+					/>
+				}
+				label="Import transformations"
+			/>
+		)} />
+	));
+
+	public renderFileName = renderWhenTrue(() => (
+		<FileName><FileIcon />{this.state.fileName}</FileName>
+	));
+
+	public handleFileChange = (onChange, { values, setFieldValue }) => (event, ...params) => {
+		const fileName = event.target.value.name;
 		this.setState({
-			fileName: event.target.value.name
+			fileName,
 		});
+
+		const extension = fileName.split('.').pop();
+
+		if (extension === 'spm') {
+			this.setState({
+				allowImportAnimations: true
+			}, () => setFieldValue('importAnimations', true));
+		} else if (this.state.allowImportAnimations) {
+			this.setState({
+				allowImportAnimations: false
+			}, () => setFieldValue('importAnimations', false));
+		}
+
+		if (!values.revisionName) {
+			setFieldValue('revisionName', snakeCase(fileName.replace(extension, '').substring(0, 50)));
+		}
 
 		onChange(event, ...params);
 	}
@@ -114,16 +201,38 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 			return <LoadingDialog content={`Loading ${modelName} data...`} />;
 		}
 
+		if (this.isModelUploading) {
+			return (
+				<LoadingDialog>
+					<Main>{`Uploading ${modelName} model...`}</Main>
+					<Additional>{'Please do not leave this page before upload has finished'}</Additional>
+				</LoadingDialog>
+			);
+		}
+
 		return (
 			<Formik
 				onSubmit={this.handleFileUpload}
-				initialValues={{ revisionName: '', revisionDesc: '', file: '' }}
+				initialValues={{ revisionName: '', revisionDesc: '', file: '', importAnimations: false, }}
+				enableReinitialize
 				validationSchema={UploadSchema}
 			>
 				<Form>
 					<DialogContent>
-						<ModelName>{modelName}</ModelName>
-						<ModelInfo> {this.renderRevisionInfo(revisions)} </ModelInfo>
+						{this.renderRevisionsInfo(!!revisions.length)}
+						{this.renderLastRevisionInfo(!!revisions.length)}
+						{this.renderModelUnits(!!modelSettings.properties)}
+						<FileContainer>
+							{this.renderFileName(!!this.state.fileName)}
+							<Field name="file" render={({ field, form }) =>
+								<FileInputField
+									{...field}
+									onChange={this.handleFileChange(field.onChange, form)}
+									update={!!this.state.fileName}
+								/>
+							} />
+						</FileContainer>
+						{this.renderImportTransformations(this.state.allowImportAnimations)}
 						<Field
 							name="revisionName"
 							render={ ({ field, form }) =>
@@ -131,7 +240,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 									{...field}
 									error={Boolean(form.errors.revisionName)}
 									helperText={form.errors.revisionName}
-									label="Name"
+									label="Revision Name"
 									margin="normal"
 									fullWidth
 								/>}
@@ -146,33 +255,25 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 									fullWidth
 								/>}
 						/>
-						{ modelSettings.properties &&
-							<ModelInfo>
-								{`Model units: ${unitsMap[modelSettings.properties.unit]}`}
-							</ModelInfo>
-						}
-						{this.state.fileName && <ModelInfo>File name: {this.state.fileName} </ModelInfo>}
 						<StyledDialogActions>
-							<Field name="file" render={({ field }) =>
-								<FileInputField
-									{...field}
-									onChange={this.handleFileChange(field.onChange)}
-						/>} />
 							<Field render={ () =>
 								<CancelButton
 									onClick={handleClose}
-									color="secondary">
+									color="secondary"
+								>
 									Cancel
-									</CancelButton> }
-							/>
+								</CancelButton>
+							} />
 							<Field render={ ({ form }) =>
 								<Button
 									type="submit"
-									variant="raised"
+									variant="contained"
 									color="secondary"
-									disabled={(!form.isValid || form.isValidating)}>
-										Upload
-									</Button>}	/>
+									disabled={(!form.isValid || form.isValidating)}
+								>
+									Upload
+								</Button>
+							} />
 						</StyledDialogActions>
 					</DialogContent>
 				</Form>

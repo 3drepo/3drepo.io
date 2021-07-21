@@ -24,6 +24,7 @@ import * as API from '../../services/api';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { Viewer } from '../../services/viewer/viewer';
 import { BimActions } from '../bim';
+import { CommentsActions } from '../comments';
 import { CompareActions } from '../compare';
 import { selectCurrentUser, CurrentUserActions } from '../currentUser';
 import { DialogActions } from '../dialog';
@@ -33,13 +34,14 @@ import { selectIssuesMap, IssuesActions } from '../issues';
 import { JobsActions } from '../jobs';
 import { MeasurementsActions } from '../measurements';
 import { selectCurrentRevisionId, selectSettings, ModelActions, ModelTypes } from '../model';
+import { PresentationActions } from '../presentation';
 import { selectRisksMap, RisksActions } from '../risks';
 import { selectUrlParams } from '../router/router.selectors';
 import { SequencesActions } from '../sequences';
 import { StarredActions } from '../starred';
 import { dispatch } from '../store';
 import { TreeActions } from '../tree';
-import { ViewpointsActions } from '../viewpoints';
+import { selectInitialView, ViewpointsActions, ViewpointsTypes } from '../viewpoints';
 import { ViewerGuiActions, ViewerGuiTypes } from './viewerGui.redux';
 import {
 	selectClipNumber,
@@ -50,30 +52,48 @@ import {
 
 function* fetchData({ teamspace, model }) {
 	try {
+		yield put(ModelActions.setPendingState(true));
+		const { data: settings } = yield API.getModelSettings(teamspace, model);
+
+		yield put(ModelActions.fetchSettingsSuccess(settings));
+		yield put(ModelActions.setPendingState(false));
+	} catch (error) {
+		yield put(DialogActions.showRedirectToTeamspaceDialog(error));
+		return;
+	}
+
+	try {
 		const { username } = yield select(selectCurrentUser);
+
 		yield all([
+			put(ModelActions.fetchRevisions(teamspace, model, false)),
 			put(CurrentUserActions.fetchUser(username)),
 			put(JobsActions.fetchJobs(teamspace)),
 			put(JobsActions.getMyJob(teamspace)),
 			put(TreeActions.startListenOnSelections()),
 			put(ViewerGuiActions.startListenOnClickPin()),
 			put(ViewerGuiActions.startListenOnModelLoaded()),
-			put(ModelActions.fetchSettings(teamspace, model)),
 			put(ModelActions.fetchMetaKeys(teamspace, model)),
-			put(ModelActions.waitForSettingsAndFetchRevisions(teamspace, model)),
-			put(TreeActions.setIsTreeProcessed(false))]);
+			put(TreeActions.setIsTreeProcessed(false)),
+			put(ViewpointsActions.fetchViewpoints(teamspace, model)),
+			put(CommentsActions.fetchUsers(teamspace))
+		]);
 
-		yield take(ModelTypes.FETCH_REVISIONS_SUCCESS);
+		yield all([
+			take(ModelTypes.FETCH_REVISIONS_SUCCESS),
+			take(ViewpointsTypes.FETCH_VIEWPOINTS_SUCCESS),
+		]);
+
 		const revision = yield select(selectCurrentRevisionId);
 
 		yield all([
 			put(ViewerGuiActions.loadModel()),
 			put(TreeActions.fetchFullTree(teamspace, model, revision)),
-			put(ViewpointsActions.fetchViewpoints(teamspace, model)),
 			put(IssuesActions.fetchIssues(teamspace, model, revision)),
 			put(RisksActions.fetchRisks(teamspace, model, revision)),
 			put(GroupsActions.fetchGroups(teamspace, model, revision)),
 			put(ViewerGuiActions.getHelicopterSpeed(teamspace, model)),
+			put(SequencesActions.fetchSequenceList()),
 			put(StarredActions.fetchStarredMeta())
 		]);
 	} catch (error) {
@@ -92,23 +112,11 @@ function* resetPanelsStates() {
 			put(ViewerGuiActions.resetPanels()),
 			put(SequencesActions.reset()),
 			put(GisActions.resetLayers()),
-			put(MeasurementsActions.resetMeasurementTool())
+			put(MeasurementsActions.resetMeasurementTool()),
+			put(PresentationActions.reset())
 		]);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('reset', 'panels data', error));
-	}
-}
-
-function* setMeasureVisibility({ visible }) {
-	try {
-		const metadataActive = yield select(selectIsMetadataVisible);
-
-		if (visible && metadataActive) {
-			yield put(BimActions.setIsActive(false));
-		}
-		yield put(MeasurementsActions.setMeasureActive(visible));
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('set', 'measure visibility', error));
 	}
 }
 
@@ -237,6 +245,15 @@ function* goToExtent() {
 	}
 }
 
+function* setProjectionMode({mode}) {
+	try {
+		yield Viewer.setProjectionMode(mode);
+		yield put(ViewerGuiActions.setProjectionModeSuccess(mode));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set', 'projection mode', error));
+	}
+}
+
 function* setNavigationMode({mode}) {
 	try {
 		yield Viewer.setNavigationMode(mode);
@@ -342,6 +359,7 @@ function* clearHighlights() {
 function* setCamera({ params }) {
 	try {
 		Viewer.setCamera(params);
+		yield put(ViewerGuiActions.setProjectionModeSuccess(params.type));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'camera', error));
 	}
@@ -349,13 +367,20 @@ function* setCamera({ params }) {
 
 function* loadModel() {
 	try {
+		yield Viewer.isViewerReady();
+
 		const { teamspace, model } = yield select(selectUrlParams);
 		const revision = yield select(selectCurrentRevisionId);
 		const modelSettings = yield select(selectSettings);
+		const selectedViewpoint = yield select(selectInitialView);
 
-		yield Viewer.isViewerReady();
-		yield Viewer.loadViewerModel(teamspace, model, 'master', revision || 'head');
+		yield Viewer.loadViewerModel(teamspace, model, 'master', revision || 'head', selectedViewpoint?.viewpoint);
 		yield Viewer.updateViewerSettings(modelSettings);
+
+		if (selectedViewpoint) { // This is to have the viewpoint state in redux the same as in unity
+			yield put(ViewpointsActions.showViewpoint(teamspace, model, selectedViewpoint, true));
+		}
+
 	} catch (error) {
 		const content = 'The model was either not found, failed to load correctly ' +
 			'or you are not authorized to view it. ' +
@@ -380,7 +405,6 @@ function* setIsPinDropMode({ mode }: { mode: boolean }) {
 export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.FETCH_DATA, fetchData);
 	yield takeLatest(ViewerGuiTypes.RESET_PANELS_STATES, resetPanelsStates);
-	yield takeLatest(ViewerGuiTypes.SET_MEASURE_VISIBILITY, setMeasureVisibility);
 	yield takeLatest(ViewerGuiTypes.SET_COORD_VIEW, setCoordView);
 	yield takeLatest(ViewerGuiTypes.START_LISTEN_ON_MODEL_LOADED, startListenOnModelLoaded);
 	yield takeLatest(ViewerGuiTypes.STOP_LISTEN_ON_MODEL_LOADED, stopListenOnModelLoaded);
@@ -401,6 +425,7 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.STOP_LISTEN_ON_NUM_CLIP, stopListenOnNumClip);
 	yield takeLatest(ViewerGuiTypes.CLEAR_HIGHLIGHTS, clearHighlights);
 	yield takeLatest(ViewerGuiTypes.SET_CAMERA, setCamera);
+	yield takeLatest(ViewerGuiTypes.SET_PROJECTION_MODE, setProjectionMode);
 	yield takeLatest(ViewerGuiTypes.LOAD_MODEL, loadModel);
 	yield takeLatest(ViewerGuiTypes.SET_IS_PIN_DROP_MODE, setIsPinDropMode);
 }

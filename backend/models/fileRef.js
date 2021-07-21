@@ -21,10 +21,11 @@ const Mailer = require("../mailer/mailer");
 const ExternalServices = require("../handler/externalServices");
 const ResponseCodes = require("../response_codes");
 const systemLogger = require("../logger.js").systemLogger;
-const nodeuuid = require("uuid/v1");
+const utils = require("../utils");
 
 const ORIGINAL_FILE_REF_EXT = ".history.ref";
 const UNITY_BUNDLE_REF_EXT = ".stash.unity3d.ref";
+const ACTIVITIES_FILE_REF_EXT = ".activities.ref";
 const STATE_FILE_REF_EXT = ".sequences.ref";
 const JSON_FILE_REF_EXT = ".stash.json_mpc.ref";
 const RESOURCES_FILE_REF_EXT = ".resources.ref";
@@ -146,6 +147,10 @@ FileRef.getOriginalFile = function(account, model, fileName) {
 	return fetchFileStream(account, model, collection, fileName, false);
 };
 
+FileRef.getSRCFile = function(account, model, fileName) {
+	return _fetchFile(account, model,  ".stash.src.ref", fileName, true);
+};
+
 FileRef.fetchFile = (account, model, collName, ref_id) => {
 	return _fetchFile(account, model, "." + collName + ".ref", ref_id);
 };
@@ -155,6 +160,10 @@ FileRef.removeFile = async (account, model, collName, ref_id) => {
 
 	const col = await DB.getCollection(account, refCollName);
 	const entry = await col.findOne({_id: ref_id});
+
+	if (!entry) {
+		return [];
+	}
 
 	return await Promise.all([
 		ExternalServices.removeFiles(account, refCollName, entry.type, [entry.link]),
@@ -188,6 +197,10 @@ FileRef.getTotalModelFileSize = function(account, model) {
 
 FileRef.getUnityBundle = function(account, model, fileName) {
 	return _fetchFile(account, model, UNITY_BUNDLE_REF_EXT, fileName, false, true);
+};
+
+FileRef.getSequenceActivitiesFile = function(account, model, fileName) {
+	return _fetchFile(account, model, ACTIVITIES_FILE_REF_EXT, fileName, false, false);
 };
 
 FileRef.getSequenceStateFile = function(account, model, fileName) {
@@ -289,7 +302,7 @@ FileRef.storeFile = async function(account, collection, user, name, data, extraF
 
 FileRef.storeUrlAsResource = async function(account, model, user, name, link, extraFields = null) {
 	const collName = model + RESOURCES_FILE_REF_EXT;
-	const refInfo = {_id: nodeuuid(), link, type: "http", ...extraFields  };
+	const refInfo = {_id: utils.generateUUID({string: true}), link, type: "http", ...extraFields  };
 	const ref = await insertRef(account, collName, user, name, refInfo);
 	return ref;
 };

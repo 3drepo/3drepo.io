@@ -1,18 +1,18 @@
 /**
- *	Copyright (C) 2015 3D Repo Ltd
+ *  Copyright (C) 2015 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /** *************************************************************************
@@ -23,12 +23,16 @@
 "use strict";
 
 const amqp = require("amqplib");
-const fs = require("fs.extra");
+const fs = require("fs").promises;
 const shortid = require("shortid");
 const systemLogger = require("../logger").systemLogger;
 const Mailer = require("../mailer/mailer");
 const config = require("../config");
+const C = require("../constants");
 const responseCodes = require("../response_codes");
+const Utils = require("../utils");
+
+const sharedSpacePH = "$SHARED_SPACE";
 
 class ImportQueue {
 	constructor() {
@@ -51,31 +55,6 @@ class ImportQueue {
 		this.uid = shortid.generate();
 		this.channel = null;
 		this.initialised = this.connect();
-	}
-
-	writeFile(fileName, content) {
-		// FIXME: v10 has native support of promise for fs. can remove when we upgrade.
-		return new Promise((resolve, reject) => {
-			fs.writeFile(fileName, content, { flag: "a+" }, err => {
-				if (err) {
-					reject(err);
-				} else {
-					resolve();
-				}
-			});
-		});
-	}
-
-	mkdir(newDir) {
-		return new Promise((resolve, reject) => {
-			fs.mkdir(newDir, (err) => {
-				if (!err || err && err.code === "EEXIST") {
-					resolve();
-				} else {
-					reject(err);
-				}
-			});
-		});
 	}
 
 	connect() {
@@ -148,43 +127,21 @@ class ImportQueue {
 		});
 	}
 
+	getTaskPath(corID) {
+		return `${this.sharedSpacePath}/${corID}`;
+	}
+
 	/** *****************************************************************************
 	 * Dispatch work to queue to import a model via a file uploaded by User
 	 * @param {string} corID - correlation ID for this request
-	 * @param {filePath} filePath - Path to uploaded file
-	 * @param {orgFileName} orgFileName - Original file name of the file
-	 * @param {databaseName} databaseName - name of database to commit to
-	 * @param {modelName} modelName - name of model to commit to
-	 * @param {userName} userName - name of user
-	 * @param {copy} copy - use fs.copy or fs.move, default fs.move
-	 * @param {tag} tag - revision tag
-	 * @param {desc} desc - revison description
 	 *******************************************************************************/
-	importFile(corID, filePath, orgFileName, databaseName, modelName, userName, copy, tag, desc) {
-		const jsonFilename = `${this.sharedSpacePath}/${corID}.json`;
+	async importFile(corID, filePath, orgFileName, copy) {
+		if (orgFileName) {
+			await this._moveFileToSharedSpace(corID, filePath, orgFileName, copy);
+		}
 
-		return this._moveFileToSharedSpace(corID, filePath, orgFileName, copy).then(obj => {
-			const json = {
-				file: obj.filePath,
-				database: databaseName,
-				project: modelName,
-				owner: userName
-			};
-
-			if (tag) {
-				json.tag = tag;
-			}
-
-			if (desc) {
-				json.desc = desc;
-			}
-
-			return this.writeFile(jsonFilename, JSON.stringify(json)).then(() => {
-				const msg = `import -f ${jsonFilename}`;
-				return this._dispatchWork(corID, msg, true);
-			});
-
-		});
+		const msg = `import -f ${sharedSpacePH}/${corID}.json`;
+		return this._dispatchWork(corID, msg, true);
 	}
 
 	/** *****************************************************************************
@@ -197,10 +154,10 @@ class ImportQueue {
 		const newFileDir = this.sharedSpacePath + "/" + corID;
 		const filename = `${newFileDir}/obj.json`;
 
-		return this.mkdir(this.sharedSpacePath).then(() => {
-			return this.mkdir(newFileDir).then(() => {
-				return this.writeFile(filename, JSON.stringify(defObj)).then(() => {
-					const msg = `genFed ${filename} ${account}`;
+		return Utils.mkdir(this.sharedSpacePath).then(() => {
+			return Utils.mkdir(newFileDir).then(() => {
+				return Utils.writeFile(filename, JSON.stringify(defObj)).then(() => {
+					const msg = `genFed ${sharedSpacePH}/${corID}/obj.json ${account}`;
 					return this._dispatchWork(corID, msg);
 				});
 			});
@@ -230,25 +187,53 @@ class ImportQueue {
 	 * @param {newFileName} newFileName - New file name to rename to
 	 * @param {copy} copy - use fs.copy instead of fs.move if set to true
 	 *******************************************************************************/
-	_moveFileToSharedSpace(corID, orgFilePath, newFileName, copy) {
-		const ModelHelper = require("../models/helper/model");
-		newFileName = newFileName.replace(ModelHelper.fileNameRegExp, "_");
+	async _moveFileToSharedSpace(corID, orgFilePath, newFileName, copy) {
+		newFileName = newFileName.replace(C.FILENAME_REGEXP, "_");
 
-		const newFileDir = this.sharedSpacePath + "/" + corID + "/";
+		const newFileDir = `${this.sharedSpacePath}/${corID}/`;
 		const filePath = newFileDir + newFileName;
 
-		return this.mkdir(newFileDir).then(() => {
-			const move = copy ? fs.copy : fs.move;
-			return new Promise((resolve, reject) => {
-				move(orgFilePath, filePath, (moveErr) => {
-					if (moveErr) {
-						reject(moveErr);
-					} else {
-						resolve({ filePath, newFileDir });
-					}
-				});
-			});
-		});
+		await Utils.mkdir(newFileDir);
+		await fs.copyFile(orgFilePath, filePath);
+		if (!copy) {
+			await fs.rm(orgFilePath);
+		}
+		return `${corID}/${newFileName}`;
+	}
+
+	/** *****************************************************************************
+	 * @param {corID} corID - correlation ID of upload
+	 * @param {databaseName} databaseName - name of database to commit to
+	 * @param {modelName} modelName - name of model to commit to
+	 * @param {userName} userName - name of user
+	 * @param {tag} tag - revision tag
+	 * @param {desc} desc - revison description
+	 *******************************************************************************/
+	async writeImportData(corID, databaseName, modelName, userName, newFileName, tag, desc, importAnimations = true) {
+		const jsonFilename = `${this.getTaskPath(corID)}.json`;
+
+		const json = {
+			file: `${sharedSpacePH}/${corID}/${newFileName}`,
+			filename: newFileName,
+			database: databaseName,
+			project: modelName,
+			owner: userName,
+			revId: corID
+		};
+
+		if (tag) {
+			json.tag = tag;
+		}
+
+		if (desc) {
+			json.desc = desc;
+		}
+
+		if (importAnimations) {
+			json.importAnimations = importAnimations;
+		}
+
+		await Utils.writeFile(jsonFilename, JSON.stringify(json));
 	}
 
 	/** *****************************************************************************
@@ -285,7 +270,7 @@ class ImportQueue {
 	}
 
 	insertEventMessage(msg) {
-		this.getChannel().then((channel) => {
+		return  this.getChannel().then((channel) => {
 			return channel.assertExchange(this.eventExchange, "fanout", {
 				durable: true
 			}).then(() => {
@@ -306,23 +291,18 @@ class ImportQueue {
 	processCallbackMsg(res) {
 		systemLogger.logInfo("Job request id " + res.properties.correlationId
 				+ " returned with: " + res.content);
-		const resData = JSON.parse(res.content);
 
-		const resErrorCode = resData.value;
-		const resErrorMessage = resData.message;
-		const resDatabase = resData.database;
-		const resProject = resData.project;
-		const resUser = resData.user ? resData.user : "unknown";
+		const {value, message, database, project, user = "unknown" , status} = JSON.parse(res.content);
 
 		const ModelHelper = require("../models/helper/model");
 
-		if ("processing" === resData.status) {
-			ModelHelper.setStatus(resDatabase, resProject, "processing", resUser);
+		if (status && Utils.isString(status)) {
+			ModelHelper.setStatus(database, project, status, user);
 		} else {
-			if (resErrorCode === 0) {
-				ModelHelper.importSuccess(resDatabase, resProject, this.sharedSpacePath, resUser);
+			if (value === 0) {
+				ModelHelper.importSuccess(database, project, this.sharedSpacePath, user);
 			} else {
-				ModelHelper.importFail(resDatabase, resProject, this.sharedSpacePath, resUser, resErrorCode, resErrorMessage);
+				ModelHelper.importFail(database, project, this.sharedSpacePath, user, value, message);
 			}
 		}
 	}

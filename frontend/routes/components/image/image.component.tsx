@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -18,21 +18,24 @@
 import React from 'react';
 
 import { ScreenshotDialog } from '../screenshotDialog';
-import { Container, StyledImage } from './image.styles';
+import { Container, ImagePlaceholder, StyledImage } from './image.styles';
 
 interface IProps {
 	src: string;
 	className: string;
 	alt?: string;
 	enablePreview?: boolean;
+	enablePlaceholder?: boolean;
 	showScreenshotDialog: (config) => void;
 	onClick?: () => void;
 }
 
-export class Image extends React.PureComponent<IProps, any> {
-	public handlePreview = () => {
-		const { src, enablePreview, showScreenshotDialog, onClick } = this.props;
+export const Image = ({ src, enablePlaceholder, enablePreview, showScreenshotDialog, onClick, ...props }: IProps) => {
+	const [loaded, setLoaded] = React.useState<boolean>(false);
 
+	const handleLoaded = () => setLoaded(true);
+
+	const handlePreview = () => {
 		if (onClick) {
 			onClick();
 			return;
@@ -41,15 +44,12 @@ export class Image extends React.PureComponent<IProps, any> {
 		if (enablePreview && src) {
 			showScreenshotDialog({ sourceImage: src, disabled: true, template: ScreenshotDialog, notFullScreen: true, });
 		}
-	}
+	};
 
-	public render() {
-		const { src, alt, enablePreview, className } = this.props;
-
-		return (
-			<Container className={className} enablePreview={enablePreview} onClick={this.handlePreview}>
-				<StyledImage src={src} alt={alt} />
-			</Container>
-		);
-	}
-}
+	return (
+		<Container className={props.className} enablePreview={enablePreview} onLoad={handleLoaded} onClick={handlePreview}>
+			{enablePlaceholder && !loaded && <ImagePlaceholder />}
+			<StyledImage loading={enablePlaceholder && !loaded ? 1 : 0} src={src} alt={props.alt} />
+		</Container>
+	);
+};

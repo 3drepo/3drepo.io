@@ -21,7 +21,9 @@ import { isEqual } from 'lodash';
 import * as React from 'react';
 import * as Yup from 'yup';
 import { DEFAULT_SETTINGS } from '../../../../../constants/viewer';
+import { IS_FIREFOX } from '../../../../../helpers/browser';
 import { schema } from '../../../../../services/validation';
+import { ColorPicker } from '../../../colorPicker/colorPicker.component';
 import { SelectField } from '../../../selectField/selectField.component';
 import { DialogTab, DialogTabs, ErrorTooltip, FormListItem, NegativeActionButton, NeutralActionButton,
 		ShortInput, VisualSettingsButtonsContainer,
@@ -32,7 +34,8 @@ const SettingsSchema = Yup.object().shape({
 	memory: schema.integer(16, 2032),
 	farPlaneSamplingPoints: schema.integer(1, Number.POSITIVE_INFINITY),
 	maxShadowDistance: schema.integer(1, Number.POSITIVE_INFINITY),
-	numCacheThreads: schema.integer(1, 15)
+	numCacheThreads: schema.integer(1, 15),
+	clipPlaneBorderWidth: schema.number(0, Number.POSITIVE_INFINITY)
 });
 
 const BasicSettings = (props) => {
@@ -66,6 +69,28 @@ const BasicSettings = (props) => {
 					<Switch onClick={props.onCacheChange} checked={field.value} {...field} value="true" color="secondary" />
 				)} />
 			</FormListItem>
+			<FormListItem>
+				Clipping plane border width
+				<Field name="clipPlaneBorderWidth" render={ ({ field, form }) => {
+					return (
+					<ErrorTooltip title={form.errors.clipPlaneBorderWidth || ''} placement="bottom-end">
+					<ShortInput
+						error={Boolean(form.errors.clipPlaneBorderWidth)}
+						{...field}
+						/>
+					</ErrorTooltip>
+					);
+				}} />
+			</FormListItem>
+			<FormListItem>
+				Clipping plane border color
+				<Field name="clipPlaneBorderColor" render={ ({ field }) => (
+					<ColorPicker {...field} onChange={(val) => {
+						// this is because colorpicker doenst use the standard events for inputs
+						field.onChange({target: {name: field.name, value: val}});
+					}} />
+				)} />
+			</FormListItem>
 		</List>
 	);
 };
@@ -79,19 +104,21 @@ const AdvancedSettings = (props) => {
 					<Switch checked={field.value} {...field} value="true" color="secondary" />
 				)} />
 			</FormListItem>
-			<FormListItem>
-				Memory for Unity
-				<Field name="memory" render={ ({ field, form }) => {
-					return (
-					<ErrorTooltip title={form.errors.memory || ''} placement="bottom-end">
-					<ShortInput
-						error={Boolean(form.errors.memory)}
-						{...field}
-						endAdornment={<InputAdornment position="end">MB</InputAdornment>} />
-					</ErrorTooltip>
-					);
-				}} />
-			</FormListItem>
+			{!IS_FIREFOX &&
+				<FormListItem>
+					Memory for Unity
+					<Field name="memory" render={ ({ field, form }) => {
+						return (
+						<ErrorTooltip title={form.errors.memory || ''} placement="bottom-end">
+						<ShortInput
+							error={Boolean(form.errors.memory)}
+							{...field}
+							endAdornment={<InputAdornment position="end">MB</InputAdornment>} />
+						</ErrorTooltip>
+						);
+					}} />
+				</FormListItem>
+			}
 			<FormListItem>
 				Number of Caching Threads
 				<Field name="numCacheThreads" render={ ({ field, form }) => {
@@ -177,7 +204,7 @@ const Buttons = (props) => {
 			<Field render={ ({ form }) => (
 			<NegativeActionButton
 				color="primary"
-				variant="raised"
+				variant="contained"
 				disabled={isEqual(form.values, DEFAULT_SETTINGS)}
 				type="button"
 				onClick={() => form.setValues(DEFAULT_SETTINGS)}
@@ -187,7 +214,7 @@ const Buttons = (props) => {
 			)} />
 			<NeutralActionButton
 				color="primary"
-				variant="raised"
+				variant="contained"
 				disabled={false}
 				type="button"
 				onClick={props.onClickCancel}
@@ -197,7 +224,7 @@ const Buttons = (props) => {
 			<Field render={ ({ form }) => (
 					<Button
 						color="secondary"
-						variant="raised"
+						variant="contained"
 						type="submit"
 						disabled={!form.isValid || form.isValidating}
 						>
@@ -239,7 +266,7 @@ export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
 		this.setState({showCacheWarning : event.target.checked});
 	}
 
-	public onSubmit = (values, { resetForm }) => {
+	public onSubmit = (values) => {
 		const { updateSettings, currentUser} = this.props;
 
 		values.nearPlane = Number(values.nearPlane);

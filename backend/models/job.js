@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -18,155 +18,193 @@
 "use strict";
 
 const {map, compact, uniq} = require("lodash");
-const mongoose = require("mongoose");
-const ModelFactory = require("./factory/modelFactory");
 const responseCodes = require("../response_codes.js");
 const C = require("../constants.js");
-const schema = mongoose.Schema({
-	_id: String,
-	color: String,
-	users: [String]
-});
+const db = require("../handler/db");
 
-function validateJobName(job) {
+function validateJobName(jobName) {
 	const regex = "^[^/?=#+]{0,119}[^/?=#+ ]{1}$";
-	return job && job.match(regex);
+	return jobName && jobName.match(regex);
 }
 
-schema.statics.addDefaultJobs = function(teamspace) {
+const JOBS_COLLECTION_NAME = "jobs";
+
+const Job = {};
+
+Job.addDefaultJobs = function(teamspace) {
 	const promises = [];
+
 	C.DEFAULT_JOBS.forEach(job => {
-		promises.push(this.addJob(teamspace, job));
+		promises.push(Job.addJob(teamspace, job));
 	});
 
 	return Promise.all(promises);
-
 };
 
-schema.statics.usersWithJob = function(teamspace) {
-	return this.find({account: teamspace}, {}, {_id: 1, users : 1}).then((jobs) => {
-		const userToJob  = {};
+Job.addJob = async function(teamspace, jobData) {
+	if (!jobData._id || !validateJobName(jobData._id)) {
+		throw responseCodes.JOB_ID_INVALID;
+	}
 
-		jobs.forEach(job => {
+	const foundJob = await Job.findByJob(teamspace, jobData._id);
+
+	if (foundJob) {
+		throw responseCodes.DUP_JOB;
+	}
+
+	const newJobEntry = {
+		_id: jobData._id,
+		users: []
+	};
+
+	if (jobData.color) {
+		newJobEntry.color = jobData.color;
+	}
+
+	return db.insert(teamspace, JOBS_COLLECTION_NAME, newJobEntry);
+};
+
+Job.addUserToJob = async function(teamspace, jobName, user) {
+	// Check if user is member of teamspace
+	const User = require("./user");
+	await User.teamspaceMemberCheck(user, teamspace);
+
+	const job = await Job.findByJob(teamspace, jobName);
+
+	if (!job) {
+		return Promise.reject(responseCodes.JOB_NOT_FOUND);
+	}
+
+	await Job.removeUserFromAnyJob(teamspace, user);
+
+	job.users.push(user);
+
+	return db.update(teamspace, JOBS_COLLECTION_NAME, {_id: jobName}, {$set: {users: job.users}});
+};
+
+Job.findByJob = async function(teamspace, jobName) {
+	const foundJob = await db.findOne(teamspace, JOBS_COLLECTION_NAME, {_id: jobName});
+
+	if (foundJob && !foundJob.users) {
+		foundJob.users = [];
+	}
+
+	return foundJob;
+};
+
+Job.findJobByUser = async function(teamspace, user) {
+	const foundJob = await db.findOne(teamspace, JOBS_COLLECTION_NAME, {users: user});
+
+	if (foundJob && !foundJob.users) {
+		foundJob.users = [];
+	}
+
+	return foundJob;
+};
+
+Job.findUsersWithJobs = async function(teamspace, jobNames) {
+	const foundJobs = await db.find(teamspace, JOBS_COLLECTION_NAME, { _id: { $in: jobNames } });
+
+	return foundJobs.reduce((users, jobItem) => users.concat(jobItem.users), []);
+};
+
+Job.getAllColors = async function(teamspace) {
+	const jobs = await Job.getAllJobs(teamspace);
+	return compact(uniq(map(jobs, "color")));
+};
+
+Job.getAllJobs = async function(teamspace) {
+	const foundJobs = await db.find(teamspace, JOBS_COLLECTION_NAME, {});
+
+	return foundJobs.map(({_id, color}) => {
+		return {_id, color};
+	});
+};
+
+Job.getUserJob = async function(teamspace, user) {
+	const foundJob = await Job.findJobByUser(teamspace, user);
+
+	return foundJob ? {
+		_id: foundJob._id,
+		color: foundJob.color
+	} : {};
+};
+
+Job.removeJob = async function(teamspace, jobName) {
+	const foundJob = await Job.findByJob(teamspace, jobName);
+
+	if (!foundJob) {
+		throw responseCodes.JOB_NOT_FOUND;
+	}
+
+	if (foundJob.users.length > 0) {
+		throw responseCodes.JOB_ASSIGNED;
+	}
+
+	return db.remove(teamspace, JOBS_COLLECTION_NAME, {_id: jobName});
+};
+
+Job.removeUserFromAnyJob = async function(teamspace, user) {
+	const job = await Job.findJobByUser(teamspace, user);
+
+	if (job) {
+		await Job.removeUserFromJob(teamspace, job._id, user);
+	}
+};
+
+Job.removeUserFromJob = async function(teamspace, jobName, user) {
+	const job = await Job.findByJob(teamspace, jobName);
+	let result;
+
+	if (!job) {
+		throw responseCodes.JOB_NOT_FOUND;
+	}
+
+	if (job.users) {
+		job.users.splice(job.users.indexOf(user), 1);
+		result = await db.update(teamspace, JOBS_COLLECTION_NAME, {_id: jobName}, {$set: {users: job.users}});
+	}
+
+	return result;
+};
+
+Job.updateJob = async function(teamspace, jobName, updatedData) {
+	if (!jobName) {
+		throw responseCodes.JOB_ID_INVALID;
+	}
+
+	if (updatedData._id && updatedData._id !== jobName) {
+		throw responseCodes.INVALID_ARGUMENTS;
+	}
+
+	const foundJob = await Job.findByJob(teamspace, jobName);
+	let result;
+
+	if (!foundJob) {
+		throw responseCodes.JOB_NOT_FOUND;
+	}
+
+	if (updatedData.color) {
+		result = await db.update(teamspace, JOBS_COLLECTION_NAME, {_id: jobName}, {$set: {color: updatedData.color}});
+	}
+
+	return result;
+};
+
+Job.usersWithJob = async function(teamspace) {
+	const foundJobs = await db.find(teamspace, JOBS_COLLECTION_NAME, {}, {_id: 1, users : 1});
+	const userToJob = {};
+
+	foundJobs.forEach(job => {
+		if (job.users) {
 			job.users.forEach(user => {
 				userToJob[user] = job._id;
 			});
-		});
-
-		return userToJob;
-
-	});
-
-};
-
-schema.statics.removeUserFromAnyJob = function(teamspace, user) {
-	return Job.findByUser(teamspace, user).then(job => {
-		if(job) {
-			return job.removeUserFromJob(user);
 		}
 	});
 
+	return userToJob;
 };
 
-schema.methods.removeUserFromJob = function(user) {
-	this.users.splice(this.users.indexOf(user), 1);
-	return this.save();
-};
-
-schema.statics.findUsersWithJobs = function (teamspace, jobs) {
-	return this.find({ account: teamspace }, { _id: { $in: jobs } })
-		.then(items => items.reduce((users, jobitem) => users.concat(jobitem.users),[]));
-};
-
-schema.statics.findByJob = function(teamspace, job) {
-	return this.findOne({account: teamspace}, {_id: job});
-
-};
-
-schema.statics.findByUser = function(teamspace, user) {
-	return this.findOne({account: teamspace}, {users: user});
-};
-
-schema.statics.addUserToJob = function(teamspace, user, jobName) {
-	// Check if user is member of teamspace
-	const User = require("./user");
-	return User.teamspaceMemberCheck(teamspace, user).then(() => {
-		return Job.findByJob(teamspace, jobName).then((job) => {
-			if(!job) {
-				return Promise.reject(responseCodes.JOB_NOT_FOUND);
-			}
-
-			return Job.removeUserFromAnyJob(teamspace, user).then(() => {
-				job.users.push(user);
-				return job.save();
-			});
-
-		});
-	});
-};
-
-schema.statics.addJob = function(teamspace, jobData) {
-	if(!jobData._id || !validateJobName(jobData._id)) {
-		return Promise.reject(responseCodes.JOB_ID_INVALID);
-	}
-	return this.findByJob(teamspace, jobData._id).then(jobFound => {
-		if(jobFound) {
-			return Promise.reject(responseCodes.DUP_JOB);
-		}
-
-		const newJobEntry = this.model("Job").createInstance({account: teamspace});
-		newJobEntry._id = jobData._id;
-		if(jobData.color) {
-			newJobEntry.color = jobData.color;
-		}
-		return newJobEntry.save();
-	});
-};
-
-schema.methods.updateJob = function(updatedData) {
-	if(updatedData.color) {
-		this.color = updatedData.color;
-	}
-
-	return this.save();
-};
-
-schema.statics.removeJob = function(teamspace, jobName) {
-
-	return this.findByJob(teamspace, jobName).then(jobFound => {
-		if(!jobFound) {
-			return Promise.reject(responseCodes.JOB_NOT_FOUND);
-		}
-
-		if(jobFound.users.length > 0) {
-			return Promise.reject(responseCodes.JOB_ASSIGNED);
-		}
-
-		return Job.remove({account: teamspace}, {_id: jobName});
-
-	});
-
-};
-
-schema.statics.getAllJobs = function(teamspace) {
-	return this.find({account: teamspace}).then(jobs => {
-		return jobs.map(({_id, color}) => {
-			return {_id, color};
-		});
-	});
-};
-
-schema.statics.getAllColors = function(teamspace) {
-	return Job.getAllJobs(teamspace).then((jobs) => {
-		return compact(uniq(map(jobs, "color")));
-	});
-};
-
-const Job = ModelFactory.createClass(
-	"Job",
-	schema,
-	() => {
-		return "jobs";
-	});
 module.exports = Job;
 

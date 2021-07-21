@@ -20,14 +20,15 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
+import ShareIcon from '@material-ui/icons/Share';
+
 import { Form } from 'formik';
 import styled, { css } from 'styled-components';
 
 import { FONT_WEIGHT } from '../../../../../../styles';
 import { COLOR } from '../../../../../../styles';
-import * as ImageStyles from '../../../../../components/image/image.styles';
 
-const IconStyles = css`
+export const IconStyles = css`
 	cursor: pointer;
 
 	&:hover {
@@ -41,11 +42,7 @@ export const ViewpointItem = styled(MenuItem)`
 		padding: 8px;
 		background-color: ${(props: any) => props.active ? `${COLOR.BLACK_6}` : 'initial'};
 		border-bottom: 1px solid ${COLOR.BLACK_20};
-	}
-
-	${ImageStyles.StyledImage} {
-		width: 79px;
-		height: 79px;
+		box-sizing: content-box;
 	}
 ` as any;
 
@@ -59,7 +56,7 @@ export const StyledForm = styled(Form)`
 export const IconsGroup = styled.div<{ disabled: boolean }>`
 	display: flex;
 	align-items: center;
-	margin-right: 20px;
+	margin-right: 0;
 	${({ disabled }) => disabled ? css`
 		pointer-events: none;
 		opacity: 0.2;
@@ -85,7 +82,7 @@ export const StyledDeleteIcon = styled(DeleteIcon)`
 
 export const StyledEditIcon = styled(EditIcon)`
 	&& {
-		${IconStyles}
+		${IconStyles};
 		margin-right: 14px;
 	}
 `;
@@ -99,14 +96,14 @@ export const NewViewpointName = styled(TextField)`
 
 export const StyledCancelIcon = styled(CancelIcon)`
 	&& {
-		${IconStyles}
+		${IconStyles};
 		margin-right: 14px;
 	}
 `;
 
 export const StyledSaveIcon = styled(SaveIcon)`
 	&& {
-		${IconStyles}
+		${IconStyles};
 	}
 `;
 
@@ -120,6 +117,13 @@ export const SaveIconButton = styled(IconButton)`
 	}
 `;
 
+export const StyledShareIcon = styled(ShareIcon)`
+	&& {
+		${IconStyles};
+		margin-right: 14px;
+	}
+`;
+
 export const NameRow = styled.div`
 	flex: 1;
 	display: flex;
@@ -129,7 +133,37 @@ export const NameRow = styled.div`
 
 export const Name = styled.h3`
 	margin-left: 16px;
+	max-width: ${(props: any) => props.active ? '150px' : '260px'};
 	font-weight: ${FONT_WEIGHT.NORMAL};
 	font-size: 14px;
 	color: ${COLOR.BLACK};
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+`;
+
+export const Small = styled.small`
+	display: block;
+	color: ${COLOR.BLACK_60};
+`;
+
+export const Image = styled.img`
+	width: 79px;
+	height: 79px;
+	object-fit: cover;
+`;
+
+export const HamburgerIconButton = styled(IconButton)`
+	&& {
+		${IconStyles};
+		width: 24px;
+	}
+
+	&:first-child {
+		margin-right: -18px;
+	}
+
+	&&:hover {
+		background-color: ${COLOR.TRANSPARENT}
+	}
 `;

@@ -15,8 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { cloneDeep, keyBy } from 'lodash';
+import { cloneDeep, keyBy, orderBy } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
+import { SORT_ORDER_TYPES } from '../../constants/sorting';
+import { prepareGroup } from '../../helpers/groups';
 
 export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createActions({
 	setPendingState: ['pendingState'],
@@ -30,17 +32,28 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	deleteViewpointSuccess: ['viewpointId'],
 	subscribeOnViewpointChanges: ['teamspace', 'modelId'],
 	unsubscribeOnViewpointChanges: ['teamspace', 'modelId'],
-	showViewpoint: ['teamspace', 'modelId', 'view'],
 	setCameraOnViewpoint: ['teamspace', 'modelId', 'view'],
 	prepareNewViewpoint: ['teamspace', 'modelId', 'viewpointName'],
 	setNewViewpoint: ['newViewpoint'],
-	setActiveViewpoint: ['activeViewpoint'],
+	setActiveViewpoint: ['teamspace', 'modelId', 'view'],
 	setSearchQuery: ['searchQuery'],
 	showDeleteInfo: ['viewpointId'],
-	setComponentState: ['componentState']
+	setComponentState: ['componentState'],
+	shareViewpointLink: ['teamspace', 'modelId', 'viewpointId'],
+	setDefaultViewpoint: ['teamspace', 'modelId', 'view'],
+	setSelectedViewpoint: ['selectedViewpoint'],
+	deselectViewsAndLeaveClipping: [],
+	showViewpoint: ['teamspace', 'modelId', 'view', 'ignoreCamera'],
+	fetchGroupSuccess: ['group'],
+	cacheGroupsFromViewpoint: ['viewpoint', 'groupsData'],
+	showPreset: ['preset'],
+	toggleSortOrder: [],
+	fetchViewpointGroups: ['teamspace', 'modelId', 'view'],
+	addViewpointGroupsBeingLoaded: ['ids'],
 }, { prefix: 'VIEWPOINTS/' });
 
 export interface IViewpointsComponentState {
+	sortOrder?: string;
 	activeViewpoint?: number;
 	editMode?: boolean;
 	newViewpoint?: any;
@@ -51,27 +64,47 @@ export interface IViewpointsComponentState {
 export interface IViewpointsState {
 	isPending: boolean;
 	viewpointsMap: any[];
+	viewpointsGroups: any;
+	viewpointsGroupsBeingLoaded: Set<string>;
 	componentState: IViewpointsComponentState;
+	selectedViewpoint: any;
 }
 
 export const INITIAL_STATE: IViewpointsState = {
 	isPending: true,
 	viewpointsMap: [],
-	componentState: {}
+	viewpointsGroups: {},
+	viewpointsGroupsBeingLoaded: new Set(),
+	componentState: {
+		sortOrder: SORT_ORDER_TYPES.ASCENDING,
+	},
+	selectedViewpoint: null
 };
 
 const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
 	return { ...state, isPending: pendingState };
 };
 
+const prepareViewpointGroups = (viewpoint) => {
+	if (Boolean(viewpoint.viewpoint.override_groups?.length)) {
+		viewpoint.viewpoint.override_groups = viewpoint.viewpoint.override_groups.map(prepareGroup);
+	}
+	return viewpoint;
+};
+
+const addViewpointGroupsBeingLoaded = (state = INITIAL_STATE, { ids }) => {
+	const viewpointsGroupsBeingLoaded = new Set([...state.viewpointsGroupsBeingLoaded, ...ids]);
+	return { ...state, viewpointsGroupsBeingLoaded };
+};
+
 const fetchViewpointsSuccess = (state = INITIAL_STATE, { viewpoints = [] }) => {
-	const viewpointsMap = keyBy(viewpoints, '_id');
+	const viewpointsMap = keyBy(viewpoints.map(prepareViewpointGroups), '_id');
 	return { ...state, viewpointsMap };
 };
 
 const createViewpointSuccess = (state = INITIAL_STATE, {viewpoint}) => {
 	const viewpointsMap = cloneDeep(state.viewpointsMap);
-	viewpointsMap[viewpoint._id] = viewpoint ;
+	viewpointsMap[viewpoint._id] = prepareViewpointGroups(viewpoint) ;
 
 	const componentState = {
 		...state.componentState,
@@ -106,6 +139,28 @@ const setComponentState = (state = INITIAL_STATE, { componentState = {} }) => {
 	return { ...state, componentState: {...state.componentState, ...componentState} };
 };
 
+const setSelectedViewpoint = (state = INITIAL_STATE, { selectedViewpoint }) => {
+	return { ...state, selectedViewpoint };
+};
+
+const fetchGroupSuccess = (state = INITIAL_STATE, { group }) => {
+	const viewpointsGroupsBeingLoaded = new Set([...state.viewpointsGroupsBeingLoaded]);
+	viewpointsGroupsBeingLoaded.delete(group._id);
+
+	return { ...state, viewpointsGroups: { ...state.viewpointsGroups, [group._id]: group }, viewpointsGroupsBeingLoaded };
+};
+
+const toggleSortOrder = (state = INITIAL_STATE) => {
+	const currentSortOrder = state.componentState.sortOrder;
+	const isASC = currentSortOrder === SORT_ORDER_TYPES.ASCENDING;
+	const sortOrder = isASC ? SORT_ORDER_TYPES.DESCENDING : SORT_ORDER_TYPES.ASCENDING;
+
+	const viewpoints =  orderBy(state.viewpointsMap, ['name'], [sortOrder as ('asc' | 'desc')]);
+
+	state = setComponentState(state, {componentState: { sortOrder }});
+	return fetchViewpointsSuccess(state,  {viewpoints});
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[ViewpointsTypes.SET_PENDING_STATE]: setPendingState,
 	[ViewpointsTypes.FETCH_VIEWPOINTS_SUCCESS]: fetchViewpointsSuccess,
@@ -113,5 +168,9 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewpointsTypes.UPDATE_VIEWPOINT_SUCCESS]: updateViewpointSuccess,
 	[ViewpointsTypes.DELETE_VIEWPOINT_SUCCESS]: deleteViewpointSuccess,
 	[ViewpointsTypes.SHOW_DELETE_INFO]: showDeleteInfo,
-	[ViewpointsTypes.SET_COMPONENT_STATE]: setComponentState
+	[ViewpointsTypes.SET_COMPONENT_STATE]: setComponentState,
+	[ViewpointsTypes.SET_SELECTED_VIEWPOINT]: setSelectedViewpoint,
+	[ViewpointsTypes.FETCH_GROUP_SUCCESS]: fetchGroupSuccess,
+	[ViewpointsTypes.TOGGLE_SORT_ORDER]: toggleSortOrder,
+	[ViewpointsTypes.ADD_VIEWPOINT_GROUPS_BEING_LOADED]: addViewpointGroupsBeingLoaded,
 });

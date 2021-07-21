@@ -21,12 +21,15 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { get, groupBy, memoize, startCase, values } from 'lodash';
 import { createSelector } from 'reselect';
-import { PRIORITIES, STATUSES } from '../../constants/issues';
+
+import {  PRIORITIES, STATUSES } from '../../constants/issues';
 import { LEVELS_LIST, RISK_MITIGATION_STATUSES } from '../../constants/risks';
-import { sortByDate } from '../../helpers/sorting';
-import { selectAllFilteredIssues, selectSortOrder as selectIssuesSortOrder } from '../issues';
+import {  selectAllFilteredIssuesGetter, selectSortByField as selectIssuesSortByField,
+	selectSortOrder as selectIssuesSortOrder } from '../issues';
 import { selectJobs } from '../jobs';
-import { selectAllFilteredRisks, selectRiskCategories, selectSortOrder as selectRisksSortOrder } from '../risks';
+import { selectAllFilteredRisksGetter, selectRiskCategories, selectSortByField as  selectRisksSortByField,
+	selectSortOrder as selectRisksSortOrder
+} from '../risks';
 import { selectTopicTypes } from '../teamspace';
 import { BOARD_TYPES, ISSUE_FILTER_PROPS, NOT_DEFINED_PROP, RISK_FILTER_PROPS } from './board.constants';
 
@@ -34,7 +37,7 @@ dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isBetween);
 
-export const selectBoardDomain = (state) => ({...state.board});
+export const selectBoardDomain = (state) => state.board;
 
 export const selectIsPending = createSelector(
 	selectBoardDomain, (state) => state.isPending
@@ -88,22 +91,29 @@ const selectJobsValues = createSelector(
 	return jobs.map(({ _id }) => ({ name: _id, value: _id }));
 });
 
-const selectRawCardData = createSelector(
-	selectBoardDomain,
-	selectAllFilteredIssues,
-	selectAllFilteredRisks,
-	selectShowClosedIssues,
-	selectIssuesSortOrder,
-	selectRisksSortOrder,
-	({ filterProp }, issues, risks, showClosedIssues, issuesSortOrder, risksSortOrder) => {
-		const activeIssues = issues.filter(({ status }) => {
-			const activeGroupingByStatus = filterProp === ISSUE_FILTER_PROPS.status.value;
-			return showClosedIssues || activeGroupingByStatus || status !== STATUSES.CLOSED;
-		});
+const selectIssues = createSelector(
+	selectBoardDomain,  selectShowClosedIssues, selectAllFilteredIssuesGetter,
+	({ filterProp }, showClosedIssues, selectAllFilteredIssuessGetter) => {
+		const forceShowHidden = filterProp === ISSUE_FILTER_PROPS.status.value || showClosedIssues;
+		return  selectAllFilteredIssuessGetter(forceShowHidden);
+	}
+);
 
+const selectRisks = createSelector(
+	selectBoardDomain, selectAllFilteredRisksGetter,
+	({ filterProp }, risksGetter) => {
+		const forceShowHidden = filterProp === RISK_FILTER_PROPS.mitigation_status.value;
+		return risksGetter(forceShowHidden);
+	}
+);
+
+const selectRawCardData = createSelector(
+	selectIssues,
+	selectRisks,
+	(issues, risks ) => {
 		return {
-			[BOARD_TYPES.ISSUES]: sortByDate(activeIssues, { order: issuesSortOrder }),
-			[BOARD_TYPES.RISKS]: sortByDate(risks, { order: risksSortOrder })
+			[BOARD_TYPES.ISSUES]: issues,
+			[BOARD_TYPES.RISKS]: risks
 		};
 });
 
@@ -196,10 +206,16 @@ export const selectLanes = createSelector(
 
 		if (notDefinedGroup && notDefinedGroup.length) {
 			const propertyName = notDefinedGroup[0].prop;
+			let title = 'Undefined';
+
+			if (propertyName === FILTER_PROPS.assigned_roles.value) {
+				title = 'Unassigned';
+			} else if (propertyName === RISK_FILTER_PROPS.mitigation_status.value) {
+				title = 'Unmitigated';
+			}
 			const notDefinedLane = {
 				id: propertyName,
-				title: propertyName === FILTER_PROPS.assigned_roles.value ?
-					'Unassigned' : `Not defined ${FILTER_PROPS[propertyName] ? FILTER_PROPS[propertyName].name : ''}`,
+				title,
 				label: `${notDefinedGroup.length} ${boardType}`,
 				cards: notDefinedGroup
 			};
@@ -233,4 +249,15 @@ export const selectCards = createSelector(
 		lanes.forEach((lane) => cards.push(...lane.cards));
 		return cards;
 	}
+);
+
+/** Unified selectors */
+export const selectSortOrder = createSelector(
+	selectBoardType,  selectIssuesSortOrder, selectRisksSortOrder,
+	(type, issuesSortOrder, risksSortOrder) =>   type === 'issues' ? issuesSortOrder : risksSortOrder
+);
+
+export const selectSortByField = createSelector(
+	selectBoardType,  selectIssuesSortByField, selectRisksSortByField,
+	(type, issuesSortByField, risksSortByField) =>   type === 'issues' ? issuesSortByField : risksSortByField
 );

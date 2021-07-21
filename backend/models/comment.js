@@ -1,25 +1,26 @@
 /**
- *	Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2019 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 "use strict";
 
 const get = require("lodash").get;
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
-const View = require("./viewpoint");
+const { cleanViewpoint, createViewpoint } = require("../models/viewpoint");
 const db = require("../handler/db");
 const FileRef = require("./fileRef");
 
@@ -53,7 +54,7 @@ class TextCommentGenerator extends CommentGenerator {
 	constructor(owner, commentText, viewpoint, pinPosition) {
 		super(owner);
 
-		if (fieldTypes.comment === Object.prototype.toString.call(commentText)) {
+		if (utils.typeMatch(commentText, fieldTypes.comment)) {
 			this.comment = commentText;
 
 			if (viewpoint && viewpoint.guid) {
@@ -74,13 +75,20 @@ class SystemCommentGenerator extends CommentGenerator {
 		super(owner);
 
 		if (undefined !== from && fieldTypes.from !== Object.prototype.toString.call(from)) {
-			from = from ? from.toString() : "";
+			if (utils.isObject(from)) {
+				from = JSON.stringify(from);
+			} else {
+				from = from ? from.toString() : "";
+			}
 		}
 
 		if (undefined !== to && fieldTypes.to !== Object.prototype.toString.call(to)) {
-			to = to ? to.toString() : "";
+			if (utils.isObject(to)) {
+				to = JSON.stringify(to);
+			} else {
+				to = to ? to.toString() : "";
+			}
 		}
-
 		this.action = {
 			property,
 			from,
@@ -108,7 +116,34 @@ class MitigationCommentGenerator extends TextCommentGenerator {
 	}
 }
 
-const addComment = async function(account, model, colName, id, user, data) {
+const identifyReferences = (comment) => {
+	const userRefs = new Set();
+	const ticketRefs =  new Set();
+
+	if (comment) {
+		let inQuotes = false;
+		const arrayOfLines = comment.split("\n");
+		arrayOfLines.forEach((line) => {
+			// New line resets the quote state. So a line is considered
+			// within quotes if the previous line is already in quotes or
+			// it contains the quote symbol
+			inQuotes = line.trim() !== "" && (line[0] === ">" || inQuotes);
+			if (!inQuotes) {
+				const users = line.match(/@\S*/g);
+				users && users.forEach((x) => userRefs.add(x.substr(1)));
+
+				const tickets = line.match(/#\d+/g);
+				tickets && tickets.forEach((x) => ticketRefs.add(parseInt(x.substr(1),10)));
+			}
+		});
+	}
+
+	return { userRefs: Array.from(userRefs), ticketRefs: Array.from(ticketRefs) };
+
+};
+
+const addComment = async function(account, model, colName, id, user, data, routePrefix, ticketType) {
+
 	if (!(data.comment || "").trim() && !get(data,"viewpoint.screenshot")) {
 		throw { resCode: responseCodes.ISSUE_COMMENT_NO_TEXT};
 	}
@@ -129,15 +164,10 @@ const addComment = async function(account, model, colName, id, user, data) {
 	let viewpoint = null;
 
 	if (data.viewpoint) {
-		viewpoint = View.clean(data.viewpoint, fieldTypes.viewpoint);
-		viewpoint.guid = utils.generateUUID();
-
-		if (viewpoint.screenshot) {
-			viewpoint.screenshot = new Buffer.from(viewpoint.screenshot, "base64");
-			await View.setExternalScreenshotRef(viewpoint, account, model, colName);
-		}
+		viewpoint = await createViewpoint(account, model, colName, routePrefix, id, data.viewpoint, true, ticketType);
 	}
 
+	const references = identifyReferences(data.comment);
 	const comment = new TextCommentGenerator(user, data.comment, viewpoint);
 
 	// 4. Append the new comment
@@ -148,10 +178,10 @@ const addComment = async function(account, model, colName, id, user, data) {
 
 	await col.update({ _id }, {...viewpointPush ,$set : {comments}});
 
-	View.setViewpointScreenshotURL(colName, account, model, id, viewpoint);
+	cleanViewpoint(routePrefix, viewpoint);
 
 	// 6. Return the new comment.
-	return {...comment, viewpoint, guid: utils.uuidToString(comment.guid)};
+	return { comment: {...comment, viewpoint, guid: utils.uuidToString(comment.guid)}, ...references };
 };
 
 const deleteComment =  async function(account, model, colName, id, guid, user) {
@@ -216,10 +246,21 @@ const deleteComment =  async function(account, model, colName, id, guid, user) {
 	return {guid};
 };
 
+const clean = (routePrefix, comment) =>  {
+	["rev_id", "guid"].forEach((key) => {
+		if (comment[key]) {
+			comment[key] = utils.uuidToString(comment[key]);
+		}
+	});
+	if(comment.viewpoint) {
+		cleanViewpoint(routePrefix, comment.viewpoint);
+	}
+};
+
 module.exports = {
-	newTextComment : (owner, commentText, viewpoint, pinPosition) => new TextCommentGenerator(owner, commentText, viewpoint, pinPosition),
 	newSystemComment : (owner, property, from, to) => new SystemCommentGenerator(owner, property, from, to),
 	newMitigationComment : (owner, likelihood, consequence, mitigation, viewpoint, pinPosition) => new MitigationCommentGenerator(owner, likelihood, consequence, mitigation, viewpoint, pinPosition),
 	addComment,
-	deleteComment
+	deleteComment,
+	clean
 };

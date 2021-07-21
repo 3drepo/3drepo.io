@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -20,7 +20,6 @@ import IconButton from '@material-ui/core/IconButton';
 import Popper from '@material-ui/core/Popper';
 import TextField from '@material-ui/core/TextField';
 import Copy from '@material-ui/icons/FileCopy';
-import More from '@material-ui/icons/MoreVert';
 import styled, { css } from 'styled-components';
 import { COLOR } from './../../../styles/colors';
 
@@ -161,13 +160,6 @@ export const StyledIconButton = styled(IconButton)`
 		position: absolute;
 		bottom: 10px;
 		right: 10px;
-	}
-`;
-
-export const MoreIcon = styled(More)`
-	&& {
-		font-size: 20px;
-		position: absolute;
 	}
 `;
 

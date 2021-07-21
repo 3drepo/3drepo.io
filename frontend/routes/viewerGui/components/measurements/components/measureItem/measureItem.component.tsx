@@ -15,16 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import RemoveIcon from '@material-ui/icons/Close';
-import { Formik } from 'formik';
-import { cond, eq, matches, stubTrue } from 'lodash';
 import React from 'react';
 
-import { parseHex } from '../../../../../../helpers/colors';
-import { getColor, MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
+import Tooltip from '@material-ui/core/Tooltip';
+import RemoveIcon from '@material-ui/icons/Close';
+import { Formik } from 'formik';
+import { cond, matches, stubTrue } from 'lodash';
+
+import { hexToGLColor, GLToHexColor } from '../../../../../../helpers/colors';
+import { MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
-import { StyledForm } from '../../../views/components/viewItem/viewItem.styles';
 import {
 	Actions,
 	AxisLabel,
@@ -32,33 +33,18 @@ import {
 	Container,
 	MeasurementPoint,
 	MeasurementValue,
-	StyledCheckbox,
-	StyledCheckboxCell,
-	StyledTextField,
+	StyledForm,
+	StyledTextField
 } from './measureItem.styles';
-
-export interface IColor {
-	r: number;
-	g: number;
-	b: number;
-	a: number;
-}
-
-interface IPosition {
-	x: number;
-	y: number;
-	z: number;
-}
 
 export interface IMeasure {
 	uuid: string;
 	name: string;
-	positions?: IPosition[];
+	positions?: number[];
 	position?: number[];
 	value: number;
-	color: IColor;
-	checked: boolean;
-	customColor: IColor;
+	color: number[];
+	customColor: number[];
 	type: number;
 }
 
@@ -68,7 +54,6 @@ interface IProps extends IMeasure {
 	removeMeasurement: (uuid) => void;
 	units: string;
 	setMeasurementColor: (uuid, color) => void;
-	setMeasurementCheck?: (uuid, type) => void;
 	setMeasurementName: (uuid, type, name) => void;
 	modelUnit: string;
 	colors: string[];
@@ -109,8 +94,12 @@ export const getUnits = (units: string, type: number) => {
 	return units;
 };
 
+const chopGLAlpha = (color) => color.slice(0, 3);
+const chopHexAlphaColor = (color) => color.substr(0, 7);
+const unChopGlAlpha = (color) => [...color.slice(0, 3), 1];
+
 export const MeasureItem = ({
-	uuid, index, name, typeName, value, units, color, removeMeasurement, type, position, customColor, checked, ...props
+	uuid, index, name, typeName, value, units, color, removeMeasurement, type, position, customColor, ...props
 }: IProps) => {
 	const textFieldRef = React.useRef(null);
 
@@ -118,21 +107,8 @@ export const MeasureItem = ({
 		removeMeasurement(uuid);
 	};
 
-	const handleCheckChange = () => {
-		if (props.setMeasurementCheck) {
-			props.setMeasurementCheck(uuid, type);
-		}
-	};
-
-	const handleColorChange = (hexColor) => {
-		const { red, green, blue } = parseHex(hexColor);
-
-		props.setMeasurementColor(uuid, {
-			r: red,
-			g: green,
-			b: blue,
-			a: 1,
-		});
+	const handleColorChange = (pickerColor) => {
+		props.setMeasurementColor(uuid, unChopGlAlpha(pickerColor));
 	};
 
 	const handleSave = ({ target: { value: newName }}) => props.setMeasurementName(uuid, newName, type);
@@ -143,35 +119,25 @@ export const MeasureItem = ({
 
 	return (
 		<Container tall={Number(isPointTypeMeasure)}>
-			{
-				!isPointTypeMeasure &&
-				<StyledCheckboxCell>
-					<StyledCheckbox
-						color="primary"
-						onChange={handleCheckChange}
-						checked={checked}
-					/>
-				</StyledCheckboxCell>
-			}
 			<Formik
 				initialValues={{ newName: name }}
 				onSubmit={handleSubmit}
 			>
-				<StyledForm>
-					<StyledTextField
-						ref={textFieldRef}
-						left={Number(isPointTypeMeasure)}
-						requiredConfirm
-						fullWidth
-						value={name}
-						name="newName"
-						mutable
-						onChange={handleSave}
-						onKeyDown={this._handleKeyDown}
-						inputProps={{ maxLength: 15 }}
-						disableShowDefaultUnderline
-					/>
-				</StyledForm>
+				<Tooltip title={name} placement="bottom">
+					<StyledForm>
+						<StyledTextField
+							ref={textFieldRef}
+							requiredConfirm
+							fullWidth
+							value={name}
+							name="newName"
+							mutable
+							onChange={handleSave}
+							inputProps={{ maxLength: 15 }}
+							disableShowDefaultUnderline
+						/>
+					</StyledForm>
+				</Tooltip>
 			</Formik>
 			<Actions>
 				{
@@ -195,10 +161,10 @@ export const MeasureItem = ({
 					: <MeasurementValue>{getValue(value, units, type, props.modelUnit)} {getUnits(units, type)}</MeasurementValue>
 				}
 				<ColorPicker
-					value={getColor(customColor || color)}
+					value={chopGLAlpha(customColor || color)}
 					onChange={handleColorChange}
 					disableUnderline
-					predefinedColors={props.colors}
+					predefinedColors={props.colors.map(chopHexAlphaColor)}
 				/>
 				<SmallIconButton
 					Icon={RemoveIcon}

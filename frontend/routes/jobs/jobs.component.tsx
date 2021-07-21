@@ -23,8 +23,10 @@ import { ColorPicker } from '../components/colorPicker/colorPicker.component';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
 import { CustomTable, CELL_TYPES, TableButton } from '../components/customTable/customTable.component';
 import { FloatingActionPanel } from '../components/floatingActionPanel/floatingActionPanel.component';
+import { Loader } from '../components/loader/loader.component';
 import { NewJobForm } from '../components/newJobForm/newJobForm.component';
 import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
+import { LoaderContainer } from '../userManagement/userManagement.styles';
 import { Container } from './jobs.styles';
 
 const JOBS_TABLE_CELLS = [{
@@ -56,6 +58,7 @@ interface IProps {
 	remove: (teamspace, jobId) => void;
 	updateColor: (teamspace, job) => void;
 	fetchJobsAndColors: () => void;
+	isPending: boolean;
 }
 
 interface IState {
@@ -114,8 +117,11 @@ export class Jobs extends React.PureComponent<IProps, IState> {
 	public componentDidMount() {
 		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement).parentNode;
 		this.setState({ containerElement });
+		this.props.fetchJobsAndColors();
+	}
 
-		if (!this.props.jobs.length || !this.props.colors.length) {
+	public componentDidUpdate(prevProps: Readonly<IProps>) {
+		if (prevProps.currentTeamspace !== this.props.currentTeamspace) {
 			this.props.fetchJobsAndColors();
 		}
 	}
@@ -138,8 +144,17 @@ export class Jobs extends React.PureComponent<IProps, IState> {
 	)
 
 	public render() {
-		const { jobs, colors } =  this.props;
+		const { jobs, colors, isPending, currentTeamspace } =  this.props;
 		const { containerElement } = this.state;
+
+		if (isPending) {
+			const content = `Loading "${currentTeamspace}" jobs data...`;
+			return (
+				<LoaderContainer>
+					<Loader content={content} />
+				</LoaderContainer>
+			);
+		}
 
 		return (
 			<Container>

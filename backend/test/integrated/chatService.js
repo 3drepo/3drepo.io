@@ -214,7 +214,7 @@ describe("Chat service", function () {
 			expect(issues[0].viewpoint.aspect_ratio).to.equal(issue.viewpoint.aspect_ratio);
 			expect(issues[0].viewpoint.far).to.equal(issue.viewpoint.far);
 			expect(issues[0].viewpoint.near).to.equal(issue.viewpoint.near);
-			expect(issues[0].viewpoint.clippingPlanes).to.deep.equal(issue.viewpoint.clippingPlanes);
+			expect(issues[0].viewpoint.clippingPlanes).to.deep.equal(undefined);
 			issueId = issues[0]._id;
 
 
@@ -236,7 +236,7 @@ describe("Chat service", function () {
 	let commentGuid = null;
 
 	it("subscribe new comment chat event should succeed", function(done) {
-		const comment = {"comment":"abc123","viewpoint":{"up":[0,1,0],"position":[38,38,125.08011914810137],"look_at":[0,0,-1],"view_dir":[0,0,-1],"right":[1,0,0],"unityHeight":3.598903890627168,"fov":2.127137068283407,"aspect_ratio":0.8810888191084674,"far":244.15656512260063,"near":60.08161739445468,"clippingPlanes":[]}};
+		const comment = {"comment":"abc123","viewpoint":{"up":[0,1,0],"position":[38,38,125.08011914810137],"look_at":[0,0,-1],"view_dir":[0,0,-1],"right":[1,0,0],"fov":2.127137068283407,"aspect_ratio":0.8810888191084674,"far":244.15656512260063,"near":60.08161739445468,"clippingPlanes":[]}};
 
 		socket.on(`${account}::${model}::${issueId}::commentCreated`, function(resComment) {
 			expect(resComment).to.exist;
@@ -246,19 +246,17 @@ describe("Chat service", function () {
 			expect(resComment.viewpoint.look_at).to.deep.equal(comment.viewpoint.look_at);
 			expect(resComment.viewpoint.view_dir).to.deep.equal(comment.viewpoint.view_dir);
 			expect(resComment.viewpoint.right).to.deep.equal(comment.viewpoint.right);
-			expect(resComment.viewpoint.unityHeight).to.equal(comment.viewpoint.unityHeight);
 			expect(resComment.viewpoint.fov).to.equal(comment.viewpoint.fov);
 			expect(resComment.viewpoint.aspect_ratio).to.equal(comment.viewpoint.aspect_ratio);
 			expect(resComment.viewpoint.far).to.equal(comment.viewpoint.far);
 			expect(resComment.viewpoint.near).to.equal(comment.viewpoint.near);
-			expect(resComment.viewpoint.clippingPlanes).to.deep.equal(comment.viewpoint.clippingPlanes);
+			expect(resComment.viewpoint.clippingPlanes).to.deep.equal(undefined);
 
 			commentGuid = resComment.guid;
 
 			done();
 		});
 
-		// console.log('issueId2', issueId);
 		teamSpace1Agent.post(`/${account}/${model}/issues/${issueId}/comments`)
 			.send(comment)
 			.expect(200 , function(err, res) {

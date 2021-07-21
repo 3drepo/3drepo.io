@@ -18,6 +18,7 @@
 const notification = require("../models/notification");
 const issues = require("../models/issue");
 const _ = require("lodash");
+const utils = require("../utils");
 
 module.exports = {
 	onUpdateIssue: function (req, res, next) {
@@ -27,7 +28,7 @@ module.exports = {
 		let oldIssue = null;
 		let issue = null;
 
-		const isCommentModification = req.dataModel.hasOwnProperty("comment"); // In case the update of the issue is for commenting
+		const isCommentModification = utils.hasField(req.dataModel, "comment"); // In case the update of the issue is for commenting
 
 		if (!isCommentModification) {
 			oldIssue = req.oldDataModel;
@@ -66,6 +67,27 @@ module.exports = {
 				next();
 			});
 
+		} else {
+			next();
+		}
+	},
+
+	onNewComment: (req, res, next) => {
+		const username = req.session.user.username;
+		const teamspace = req.params.account;
+		const modelId = req.params.model;
+		const _id = req.params.issueId || req.params.riskId;
+		const { type, userRefs } = req.userReferences;
+
+		if(userRefs) {
+			Promise.all(
+				userRefs.map((user) =>
+					notification.insertUserReferencedNotification(username, teamspace, modelId, type, _id, user)
+				)
+			).then((notifications) => {
+				req.userNotifications = _.flatten(notifications);
+				next();
+			});
 		} else {
 			next();
 		}

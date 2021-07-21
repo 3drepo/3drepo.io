@@ -18,7 +18,15 @@
 import { createSelector } from 'reselect';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 import * as Bim from '../bim';
+import { selectOverrides as selectGroupsOverrides,
+	selectTransparencies as selectGroupsTransparencies } from '../groups';
+import { selectIsPresentationActive } from '../presentation';
+import { selectSelectedFrameColors, selectSelectedFrameTransformations,
+	selectSelectedFrameTransparencies } from '../sequences';
 import { selectIsTreeProcessed } from '../tree';
+import { selectOverrides as selectViewsOverrides,
+		selectTransformations as selectViewsTransformations,
+		selectTransparencies as selectViewsTransparencies } from '../viewpoints';
 
 export const selectViewerGuiDomain = (state) => ({...state.viewerGui});
 
@@ -34,6 +42,10 @@ export const selectLockedPanels = createSelector(
 	selectViewerGuiDomain, (state) => state.lockedPanels || []
 );
 
+export const selectDraggablePanels = createSelector(
+	selectViewerGuiDomain, (state) => state.draggablePanels || []
+);
+
 export const selectIsMetadataVisible = createSelector(
 		selectRightPanels, Bim.selectIsPending,
 	(state, isPending) => state[VIEWER_PANELS.BIM] && !isPending
@@ -46,6 +58,10 @@ export const selectIsModelLoaded = createSelector(
 
 export const selectIsCoordViewActive = createSelector(
 	selectViewerGuiDomain, (state) => state.coordViewActive
+);
+
+export const selectProjectionMode = createSelector(
+	selectViewerGuiDomain, (state) => state.projectionMode
 );
 
 export const selectNavigationMode = createSelector(
@@ -70,4 +86,34 @@ export const selectIsClipEdit = createSelector(
 
 export const selectClipNumber = createSelector(
 	selectViewerGuiDomain, (state) => state.clipNumber
+);
+
+export const selectColorOverrides = createSelector(
+	selectViewsOverrides, selectGroupsOverrides, selectSelectedFrameColors,
+		(viewsOverrides, groupsOverrides, sequenceFrameOverrides ) =>
+		({...viewsOverrides,  ...groupsOverrides, ...sequenceFrameOverrides})
+);
+
+export const selectAllTransparencyOverrides = createSelector(
+	selectViewsTransparencies, selectGroupsTransparencies, selectSelectedFrameTransparencies,
+		(viewsTransparencies, groupsTransparencies, sequenceTransparencies) =>
+		({...viewsTransparencies, ...groupsTransparencies, ...sequenceTransparencies})
+);
+
+export const selectTransformations = createSelector(
+	selectViewsTransformations, selectSelectedFrameTransformations,
+	(viewsTransformations, sequenceTransformations) =>
+			({...sequenceTransformations, ...viewsTransformations})
+);
+
+export const selectDisabledPanelButtons = createSelector(
+	selectIsPresentationActive, (isPresentationActive) => {
+		const disabledPanelButtons = new Set();
+
+		if (isPresentationActive) {
+			disabledPanelButtons.add(VIEWER_PANELS.COMPARE);
+		}
+
+		return disabledPanelButtons;
+	}
 );

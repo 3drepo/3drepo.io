@@ -1,5 +1,23 @@
+/**
+ *  Copyright (C) 2021 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import { intersection, keys, memoize, pickBy, uniqBy } from 'lodash';
 import { NODE_TYPES, SELECTION_STATES, VISIBILITY_STATES } from '../../../constants/tree';
+import { mergeArrays } from '../../../helpers/arrays';
 
 export class Processing {
 	public get fullySelectedNodesIds() {
@@ -94,47 +112,49 @@ export class Processing {
 	}
 
 	public selectNodes = ({ nodesIds = [], ...extraData }) => {
-		const nodes = [];
+		const nodes = new Set();
 		nodesIds.forEach((id) => {
 			if (this.visibilityMap[id] !== VISIBILITY_STATES.INVISIBLE) {
 				const node = this.nodesList[this.nodesIndexesMap[id]];
-				if (node.type === 'mesh' && !node.name) {
-					nodes.push(this.nodesList[this.nodesIndexesMap[node.parentId]]);
-				} else {
-					nodes.push(node);
+				if (node) {
+					if (node.type === 'mesh' && !node.name) {
+						nodes.add(this.nodesList[this.nodesIndexesMap[node.parentId]]);
+					} else {
+						nodes.add(node);
+					}
 				}
 			}
 		});
 
-		if (!nodes.length) {
+		if (!nodes.size) {
 			return { highlightedObjects: [] };
 		}
 
-		const highlightedObjects = this.handleSelection(nodes, SELECTION_STATES.SELECTED);
+		const highlightedObjects = this.handleSelection(Array.from(nodes), SELECTION_STATES.SELECTED);
 
 		return { highlightedObjects };
 	}
 
 	public deselectNodes = ({ nodesIds = [] }) => {
-		const nodes = [];
+		const nodes = new Set();
 		for (let index = 0, size = nodesIds.length; index < size; index++) {
 			const nodeId = nodesIds[index];
 			if (this.selectionMap[nodeId] !== SELECTION_STATES.UNSELECTED) {
 				this.selectionMap[nodeId] = SELECTION_STATES.UNSELECTED;
 				const [node] = this.getNodesByIds([nodeId]);
 				if (node.type === 'mesh' && !node.name) {
-					nodes.push(this.nodesList[this.nodesIndexesMap[node.parentId]]);
+					nodes.add(this.nodesList[this.nodesIndexesMap[node.parentId]]);
 				} else {
-					nodes.push(node);
+					nodes.add(node);
 				}
 			}
 		}
 
-		if (!nodes.length) {
+		if (!nodes.size) {
 			return { unhighlightedObjects: [] };
 		}
 
-		const unhighlightedObjects = this.handleSelection(nodes, SELECTION_STATES.UNSELECTED);
+		const unhighlightedObjects = this.handleSelection(Array.from(nodes), SELECTION_STATES.UNSELECTED);
 		return { unhighlightedObjects };
 	}
 
@@ -144,7 +164,6 @@ export class Processing {
 	}
 
 	public isolateNodes = ({ nodesIds = [], ifcSpacesHidden = true}: any) => {
-		const meshesToUpdate = {};
 		const parentNodesByLevel = [];
 		const toIsolate = {};
 		const isParent = {};
@@ -189,15 +208,16 @@ export class Processing {
 			++nodeIdx;
 		}
 
-		const { unhighlightedObjects, meshesToUpdate: meshToHide } = this.hideNodes(toHide, true);
-		const { meshesToUpdate: meshToShow }  = this.showNodes(toShow, ifcSpacesHidden);
+		const { unhighlightedObjects, meshesToHide } = this.hideNodes(toHide, true);
+		const { meshesToShow, meshesToHide: extraMeshesToHide }  = this.showNodes(toShow, ifcSpacesHidden);
+		mergeArrays(meshesToHide, extraMeshesToHide);
 
 		for (let i =  parentNodesByLevel.length - 1 ; i >= 0; --i) {
 			this.updateParentsVisibility(parentNodesByLevel[i]);
 			this.updateParentsSelection(parentNodesByLevel[i]);
 		}
 
-		return { unhighlightedObjects, meshToHide, meshToShow};
+		return { unhighlightedObjects, meshesToHide, meshesToShow};
 	}
 
 	private hideNodes = (nodesId, skipParent = false) => {
@@ -254,35 +274,66 @@ export class Processing {
 		}
 
 		const unhighlightedObjects = this.handleSelection(toDeselect, SELECTION_STATES.UNSELECTED);
-		const meshesToUpdate = this.getMeshesByNodes(toGetMeshes);
+		const meshesToHide = this.getMeshesByNodes(toGetMeshes);
 
-		return { unhighlightedObjects, meshesToUpdate };
+		return { unhighlightedObjects, meshesToHide };
 
 	}
 
 	private showNodes = (nodesIds, ifcSpacesHidden) => {
+		return this.showNodesExceptMeshIDs(nodesIds, ifcSpacesHidden, []);
+	}
+
+	private showNodesExceptMeshIDs = (nodesIds, ifcSpacesHidden, meshes = []) => {
+		const meshToHide = {};
+		meshes.forEach((mesh) => meshToHide[mesh] = true);
+
 		const filteredNodes = [];
-		for (let nodeIdx = 0; nodeIdx < nodesIds.length; ++nodeIdx) {
-			const nodeID = nodesIds[nodeIdx];
-			const currentState = this.visibilityMap[nodeID];
-			if (currentState !== VISIBILITY_STATES.VISIBLE) {
+		if (meshes.length === 0) {
+			for (let nodeIdx = 0; nodeIdx < nodesIds.length; ++nodeIdx) {
+				const nodeID = nodesIds[nodeIdx];
+				const currentState = this.visibilityMap[nodeID];
+
+				if (currentState !== VISIBILITY_STATES.VISIBLE) {
+					const node = this.nodesList[this.nodesIndexesMap[nodeID]];
+					filteredNodes.push(node);
+				}
+			}
+		} else {
+			for (let nodeIdx = 0; nodeIdx < nodesIds.length; ++nodeIdx) {
+				const nodeID = nodesIds[nodeIdx];
 				const node = this.nodesList[this.nodesIndexesMap[nodeID]];
 				filteredNodes.push(node);
 			}
 		}
+
 		const meshesToCheck = this.getMeshesByNodes(filteredNodes);
-		const meshesToUpdate = [];
+		const meshesToShow = [];
+		const meshesToHide = [];
 		const parentNodesByLevel = [];
 
+		// eslint-disable-next-line @typescript-eslint/no-for-in-array
 		for (const ns in meshesToCheck) {
-			const entry = {...meshesToCheck[ns]};
-			entry.meshes = [];
+			const toShowEntry = {...meshesToCheck[ns]};
+			const toHideEntry = {...meshesToCheck[ns]};
+			toShowEntry.meshes = [];
+			toHideEntry.meshes = [];
+
 			meshesToCheck[ns].meshes.forEach((meshId) => {
 				const currentState = this.visibilityMap[meshId];
-				const desiredState = ifcSpacesHidden ?  this.defaultVisibilityMap[meshId] : VISIBILITY_STATES.VISIBLE;
+				const shouldHide = meshToHide[meshId];
+
+				const desiredState = shouldHide ? VISIBILITY_STATES.INVISIBLE
+					: (ifcSpacesHidden ?  this.defaultVisibilityMap[meshId] : VISIBILITY_STATES.VISIBLE);
+
 				if (currentState !== desiredState) {
 					this.visibilityMap[meshId] = desiredState;
-					entry.meshes.push(meshId);
+					if (shouldHide) {
+						toHideEntry.meshes.push(meshId);
+					} else {
+						toShowEntry.meshes.push(meshId);
+					}
+
 					const [meshNode] = this.getNodesByIds([meshId]);
 					const parents = this.getParentsByPath(meshNode);
 					for (let index = 0; index < parents.length ; ++index) {
@@ -296,19 +347,21 @@ export class Processing {
 				}
 			});
 
-			meshesToUpdate.push(entry);
+			meshesToShow.push(toShowEntry);
+			meshesToHide.push(toHideEntry);
 		}
 
 		for (let i =  parentNodesByLevel.length - 1 ; i >= 0; --i) {
 			this.updateParentsVisibility(parentNodesByLevel[i]);
 		}
 
-		return { meshesToUpdate };
+		return { meshesToShow, meshesToHide };
 	}
 
-	public showAllNodes = (ifcSpacesHidden) => {
-		const root = this.nodesList[0];
-		return this.showNodes(root.childrenIds, ifcSpacesHidden);
+	public showAllExceptMeshIDs = (ifcSpacesHidden, meshes) => {
+		const nodes = this.nodesList[0].childrenIds;
+		return this.showNodesExceptMeshIDs(nodes, ifcSpacesHidden, meshes);
+
 	}
 
 	public updateVisibility = ({ nodesIds = [], ifcSpacesHidden, visibility}) => {
@@ -339,6 +392,7 @@ export class Processing {
 	private handleSelection = (toSelect, desiredState) => {
 		const meshes = this.getMeshesByNodes(toSelect);
 		const parentNodesByLevel = [];
+		// eslint-disable-next-line @typescript-eslint/no-for-in-array
 		for (const ns in meshes) {
 			meshes[ns].meshes.forEach((meshId) => {
 				const meshNode = this.nodesList[this.nodesIndexesMap[meshId]];
@@ -398,7 +452,6 @@ export class Processing {
 		}
 
 		const meshList = {};
-
 		for (let index = 0; index < nodes.length; ++index) {
 			const node = nodes[index];
 			if (node.subTreeRoots.length) {
@@ -411,10 +464,10 @@ export class Processing {
 							meshList[stRoot.namespacedId] = {
 								modelId: stRoot.model,
 								teamspace: stRoot.teamspace,
-								meshes
+								meshes : [...meshes]
 							};
 						} else {
-							meshList[stRoot.namespacedId].meshes = meshList[stRoot.namespacedId].meshes.concat(meshes);
+							mergeArrays(meshList[stRoot.namespacedId].meshes, meshes);
 						}
 					}
 				});
@@ -425,10 +478,10 @@ export class Processing {
 						meshList[node.namespacedId] = {
 							modelId: node.model,
 							teamspace: node.teamspace,
-							meshes
+							meshes:  [...meshes]
 						};
 					} else {
-						meshList[node.namespacedId].meshes = meshList[node.namespacedId].meshes.concat(meshes);
+						mergeArrays(meshList[node.namespacedId].meshes, meshes);
 					}
 				}
 			}

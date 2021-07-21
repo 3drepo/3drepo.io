@@ -2,6 +2,7 @@
 const amqp = require("amqplib/callback_api");
 const conf = require("../../config");
 const path = require("path");
+const fs = require("fs");
 const winston = require('winston');
 //Note: these error codes corresponds to error_codes.h in bouncerclient
 const ERRCODE_BOUNCER_CRASH = 12;
@@ -13,14 +14,32 @@ let channel = null;
 let errorCode = 0;
 
 
-const logger = new (winston.Logger)({
+const logger = winston.createLogger({
 	transports: [new (winston.transports.File)({'filename': conf.logLocation? conf.logLocation : "./bouncer_worker.log"})]
 });
+
+const replaceSharedDirPlaceHolder = (command) => {
+	const tagToReplace = '$SHARED_SPACE';
+	// messages coming in has a placeholder for $SHARED_SPACE.
+	// we need to do a find/replace to make it use rabbitmq sharedDir instead
+	let cmd = command;
+	const sharedDir = conf.cn_queue.shared_storage;
+	cmd = cmd.replace(tagToReplace, sharedDir);
+	const cmdArr = cmd.split(/\s+/);
+	if (cmdArr[0] === 'import') {
+		const data = fs.readFileSync(cmdArr[2], 'utf8');
+		const result = data.replace(tagToReplace, sharedDir);
+		fs.writeFileSync(cmdArr[2], result, 'utf8');
+	}
+	return cmd;
+};
+
 
 /**
  * handle queue message
  */
-function handleMessage(cmd, rid, callback){
+function handleMessage(commandMsg, rid, callback){
+	const cmd = replaceSharedDirPlaceHolder(commandMsg);
 	// command start with importToy is handled here instead of passing it to bouncer
 	if(cmd.startsWith('importToy')){
 		const  args = cmd.split(' ');

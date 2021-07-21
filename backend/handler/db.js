@@ -1,18 +1,18 @@
 /**
- *	Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2014 3D Repo Ltd
  *
- *	This program is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU Affero General Public License as
- *	published by the Free Software Foundation, either version 3 of the
- *	License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- *	You should have received a copy of the GNU Affero General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -27,23 +27,78 @@
 		autoReconnect: true
 	};
 
+	const Handler = {};
+
 	let db;
 
-	function disconnect() {
+	Handler.authenticate = async function (database, password) {
+		const authDB = await Handler.getAuthDB();
+
+		try {
+			await authDB.authenticate(database, password);
+		} catch (err) {
+			if (authDB) {
+				authDB.close();
+			}
+
+			throw err;
+		}
+
+		authDB.close();
+	};
+
+	Handler.disconnect = function () {
 		if(db) {
 			db.close();
 			db = null;
 		}
-	}
+	};
 
-	function dropCollection(database, collection) {
-		getDB(database).then(dbConn => {
+	Handler.dropCollection = function (database, collection) {
+		Handler.getDB(database).then(dbConn => {
 			dbConn.dropCollection(collection.name);
 		}).catch(err => {
-			disconnect();
+			Handler.disconnect();
 			return Promise.reject(err);
 		});
-	}
+	};
+
+	/**
+	 * @param {string} database
+	 * @param {string} colName
+	 * @param {object} query
+	 * @param {object} projection
+	 * @param {object} sort
+	 * @returns {Promise<Array<Object>}
+	 */
+	Handler.find = async function (database, colName, query, projection = {}, sort = {}) {
+		const collection = await Handler.getCollection(database, colName);
+		// NOTE: v3.6 driver find take sort/projection as 2nd argument like findOne
+		return collection.find(query).project(projection).sort(sort).toArray();
+	};
+
+	Handler.findOne = async function (database, colName, query, projection = {}, sort) {
+		const collection = await Handler.getCollection(database, colName);
+		// NOTE: documentation states it should be { projection, sort } so when we upgrade we may have to change.
+		//       Also: projection stops working if you pass in a sort with empty obj.
+		if(sort) {
+			projection.sort = sort;
+		}
+
+		return collection.findOne(query, projection);
+	};
+
+	Handler.findOneAndDelete = async function (database, colName, query, projection = {}) {
+		const collection = await Handler.getCollection(database, colName);
+		const findResult = await collection.findOneAndDelete(query, projection);
+		return findResult.value;
+	};
+
+	Handler.deleteMany = async function (database, colName, query) {
+		const collection = await Handler.getCollection(database, colName);
+		const findResult = await collection.deleteMany(query);
+		return findResult.value;
+	};
 
 	function getURL(database) {
 		// Generate connection string that could include multiple hosts that
@@ -66,7 +121,7 @@
 		return connectString;
 	}
 
-	function getDB(database) {
+	Handler.getDB = function (database) {
 		if(db) {
 			return Promise.resolve(db.db(database));
 		} else {
@@ -75,34 +130,34 @@
 				return db;
 			});
 		}
-	}
+	};
 
-	function getAuthDB() {
+	Handler.getAuthDB = function () {
 		return MongoClient.connect(getURL("admin"), connConfig).then(_db => {
 			return _db;
 		});
-	}
+	};
 
-	function getCollection(database, colName)	{
-		return getDB(database).then(dbConn => {
+	Handler.getCollection = function (database, colName) {
+		return Handler.getDB(database).then(dbConn => {
 			return dbConn.collection(colName);
 		}).catch(err => {
-			disconnect();
+			Handler.disconnect();
 			return Promise.reject(err);
 		});
-	}
+	};
 
-	function getCollectionStats(database, colName)	{
-		return getDB(database).then(dbConn => {
+	Handler.getCollectionStats = function (database, colName) {
+		return Handler.getDB(database).then(dbConn => {
 			return dbConn.collection(colName).stats();
 		}).catch(err => {
-			disconnect();
+			Handler.disconnect();
 			return Promise.reject(err);
 		});
-	}
+	};
 
 	function getGridFSBucket(database, collection, chunksize = null) {
-		return getDB(database).then(dbConn => {
+		return Handler.getDB(database).then(dbConn => {
 			const options = {bucketName: collection};
 			if (chunksize) {
 				options.chunksize =  chunksize;
@@ -110,12 +165,12 @@
 
 			return new GridFSBucket(dbConn, options);
 		}).catch(err => {
-			disconnect();
+			Handler.disconnect();
 			return Promise.reject(err);
 		});
 	}
 
-	function getFileStreamFromGridFS(database, collection, filename) {
+	Handler.getFileStreamFromGridFS = function (database, collection, filename) {
 		return getGridFSBucket(database,collection).then((bucket) => {
 			return bucket.find({filename}).toArray().then(file => {
 				if(file.length === 0) {
@@ -124,10 +179,20 @@
 				return Promise.resolve({stream: bucket.openDownloadStream(file[0]._id), size: file[0].length});
 			});
 		});
-	}
+	};
 
-	function getFileFromGridFS(database, collection, filename) {
-		return getFileStreamFromGridFS(database, collection, filename).then((file) => {
+	Handler.insert = async function (database, colName, data) {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.insert(data);
+	};
+
+	Handler.insertMany = async function (database, colName, data) {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.insertMany(data);
+	};
+
+	Handler.getFileFromGridFS = function (database, collection, filename) {
+		return Handler.getFileStreamFromGridFS(database, collection, filename).then((file) => {
 			const fileStream = file.stream;
 			return new Promise((resolve) => {
 				const bufs = [];
@@ -140,9 +205,9 @@
 				});
 			});
 		});
-	}
+	};
 
-	function storeFileInGridFS(database, collection, filename, buffer) {
+	Handler.storeFileInGridFS = function (database, collection, filename, buffer) {
 		return getGridFSBucket(database, collection).then(bucket => {
 			return new Promise(function(resolve, reject) {
 				try {
@@ -163,55 +228,57 @@
 				}
 			});
 		});
-	}
+	};
 
-	// FIXME: this exist as a (temp) workaround because modelFactory has one call that doesn't expect promise!
-	function _getCollection(database, colName)	{
-		return db.db(database).collection(colName);
-	}
-
-	function listCollections(database) {
-		return getDB(database).then(dbConn => {
+	Handler.listCollections = function (database) {
+		return Handler.getDB(database).then(dbConn => {
 			return dbConn.listCollections().toArray();
 		}).catch(err => {
-			disconnect();
+			Handler.disconnect();
 			return Promise.reject(err);
 		});
 
-	}
+	};
 
-	function runCommand(database, cmd) {
-		return getDB(database).then(dbConn => {
+	Handler.remove = async function (database, colName, query) {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.remove(query);
+	};
+
+	Handler.runCommand = function (database, cmd) {
+		return Handler.getDB(database).then(dbConn => {
 			return dbConn.command(cmd);
 		}).catch(err => {
-			disconnect();
+			Handler.disconnect();
 			return Promise.reject(err);
 		});
-	}
+	};
 
-	function getSessionStore(session) {
+	Handler.getSessionStore = function (session) {
 		const MongoDBStore = require("connect-mongodb-session")(session);
 		return new MongoDBStore({
 			uri: getURL("admin"),
 			collection: "sessions"
 		});
-	}
-
-	module.exports = {
-		disconnect,
-		dropCollection,
-		getDB,
-		getAuthDB,
-		getCollection,
-		getCollectionStats,
-		getFileStreamFromGridFS,
-		getFileFromGridFS,
-		storeFileInGridFS,
-		_getCollection,
-		listCollections,
-		getSessionStore,
-		runCommand
 	};
 
+	Handler.update = async function (database, colName, query, data, upsert = false) {
+		const collection = await Handler.getCollection(database, colName);
+		const options = upsert ? { upsert } : undefined;
+		return collection.update(query, data, options);
+	};
+
+	Handler.updateOne = async function (database, colName, query, data, upsert = false) {
+		const collection = await Handler.getCollection(database, colName);
+		const options = upsert ? { upsert } : undefined;
+		return collection.updateOne(query, data, options);
+	};
+
+	Handler.count = async function (database, colName, query, data) {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.count(query, data);
+	};
+
+	module.exports = Handler;
 }());
 

@@ -17,7 +17,11 @@
 
 import React from 'react';
 
-import { ISSUE_FILTERS, ISSUES_ACTIONS_MENU, STATUSES } from '../../../../constants/issues';
+import {
+	ISSUE_DEFAULT_HIDDEN_STATUSES,
+	ISSUE_FILTERS,
+	ISSUES_ACTIONS_MENU,
+} from '../../../../constants/issues';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { filtersValuesMap, getHeaderMenuItems } from '../../../../helpers/issues';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -39,6 +43,7 @@ interface IProps {
 	activeIssueId?: string;
 	showDetails?: boolean;
 	showPins: boolean;
+	sortByField: string;
 	issueDetails?: any;
 	isImportingBCF?: boolean;
 	searchEnabled: boolean;
@@ -57,20 +62,20 @@ interface IProps {
 	fetchIssues: (teamspace, model, revision) => void;
 	setState: (componentState: any) => void;
 	setNewIssue: () => void;
-	downloadIssues: (teamspace, model) => void;
-	printIssues: (teamspace, model) => void;
+	downloadItems: (teamspace, model) => void;
+	printItems: (teamspace, model) => void;
 	setActiveIssue: (issue, revision?) => void;
 	showIssueDetails: (revision, issueId ) => void;
 	goToIssue: (issue) => void;
 	closeDetails: () => void;
 	toggleShowPins: (showPins: boolean) => void;
 	toggleSubmodelsIssues: (showSubmodelIssues: boolean) => void;
-	subscribeOnIssueChanges: (teamspace, modelId) => void;
-	unsubscribeOnIssueChanges: (teamspace, modelId) => void;
 	importBCF: (teamspace, modelId, file, revision) => void;
 	exportBCF: (teamspace, modelId) => void;
 	toggleSortOrder: () => void;
 	setFilters: (filters) => void;
+	setSortBy: (field) => void;
+	id?: string;
 }
 
 export class Issues extends React.PureComponent<IProps, any> {
@@ -80,34 +85,6 @@ export class Issues extends React.PureComponent<IProps, any> {
 			issueFilter.values = filterValuesMap[issueFilter.relatedField];
 			return issueFilter;
 		});
-	}
-
-	get commonHeaderMenuItems() {
-		const {
-			printIssues,
-			downloadIssues,
-			importBCF,
-			exportBCF,
-			teamspace,
-			model,
-			revision,
-			toggleSortOrder,
-			toggleShowPins,
-			showPins
-		} = this.props;
-
-		return getHeaderMenuItems(
-			teamspace,
-			model,
-			revision,
-			printIssues,
-			downloadIssues,
-			importBCF,
-			exportBCF,
-			toggleSortOrder,
-			toggleShowPins,
-			showPins
-		);
 	}
 
 	get toggleSubmodelsMenuItem() {
@@ -124,7 +101,7 @@ export class Issues extends React.PureComponent<IProps, any> {
 	}
 
 	get headerMenuItems() {
-		return this.commonHeaderMenuItems;
+		return getHeaderMenuItems(this.props);
 		/* NOTE: We no longer supper submodel issues in federation.
 		 * return !this.props.modelSettings.federate ?
 			this.commonHeaderMenuItems :
@@ -134,7 +111,7 @@ export class Issues extends React.PureComponent<IProps, any> {
 	get showDefaultHiddenItems() {
 		if (this.props.selectedFilters.length) {
 			return this.props.selectedFilters
-				.some(({ value: { value } }) => value === STATUSES.CLOSED);
+				.some(({ value: { value } }) => ISSUE_DEFAULT_HIDDEN_STATUSES.includes(value));
 		}
 		return false;
 	}
@@ -148,7 +125,6 @@ export class Issues extends React.PureComponent<IProps, any> {
 	));
 
 	public componentDidMount() {
-		this.props.subscribeOnIssueChanges(this.props.teamspace, this.props.model);
 		this.props.fetchSettings(this.props.teamspace); // This is to fetch topic_types
 		this.handleSelectedIssue();
 	}
@@ -165,12 +141,13 @@ export class Issues extends React.PureComponent<IProps, any> {
 	}
 
 	public componentWillUnmount() {
-		this.props.unsubscribeOnIssueChanges(this.props.teamspace, this.props.model);
 	}
 
 	public setActiveIssue = (item) => {
 		this.props.setActiveIssue(item, this.props.revision);
 	}
+
+	public deactivateIssue = () => this.setActiveIssue(null);
 
 	public getFilterValues(property) {
 		return property.map(({ value, name, label }) => {
@@ -226,11 +203,14 @@ export class Issues extends React.PureComponent<IProps, any> {
 				onToggleFilters={this.handleToggleFilters}
 				onChangeFilters={this.props.setFilters}
 				onActiveItem={this.setActiveIssue}
+				onDeactivateItem={this.deactivateIssue}
 				onNewItem={this.props.setNewIssue}
 				onShowDetails={this.props.goToIssue}
 				onCloseDetails={this.closeDetails}
 				renderDetailsView={this.renderDetailsView}
 				type={VIEWER_PANELS.ISSUES}
+				sortByField={this.props.sortByField}
+				id={this.props.id}
 			/>
 		);
 	}

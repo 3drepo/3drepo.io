@@ -15,7 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+
+import { Grid, IconButton, Input, ListItem } from '@material-ui/core';
+import Slider from '@material-ui/core/Slider';
+import DotIcon from '@material-ui/icons/FiberManualRecord';
 
 import {
 	VIEWER_PANELS,
@@ -23,12 +27,10 @@ import {
 	VIEWER_PANELS_MIN_HEIGHTS,
 	VIEWER_PANELS_TITLES
 } from '../../../../constants/viewerGui';
-
-import { Grid, IconButton, Input } from '@material-ui/core';
-import DotIcon from '@material-ui/icons/FiberManualRecord';
-import Slider from '@material-ui/lab/Slider';
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
 import { DateField } from '../../../components/dateField/dateField.component';
+import { Loader } from '../../../components/loader/loader.component';
+import { Content as ContentComponent } from '../../../components/loader/loader.styles';
 import { MenuItemContainer } from '../previewListItem/previewListItem.styles';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
@@ -56,7 +58,7 @@ export const SequenceSlider = styled(Slider)`
 
 export const SequencePlayerContainer = styled.div`
 	display: block;
-	height: 128px;
+	height: 165px
 `;
 
 export const SequenceTasksListContainer = styled(ViewerPanelContent)`
@@ -101,6 +103,7 @@ export const SequencePlayerColumn = styled(Grid).attrs({
 })`
 	&& {
 		overflow: hidden;
+		position: relative;
 	}
 `;
 
@@ -122,6 +125,11 @@ export const TaskItemLabel = styled.div`
 	margin-top: 3px;
 	line-height: 1.3;
 	margin-bottom: 2px;
+	${(props: any) => props.clickable && css`
+		&:hover {
+			cursor: pointer;
+		}
+	`}
 `;
 
 export const SequenceRow = styled(Grid).attrs({
@@ -152,8 +160,8 @@ export const IntervalRow = styled(SequenceRow)`
 
 export const DatePicker = styled(DateField)`
 	&& {
-		width: 113px;
-		margin-top: 0;
+		width: 160px;
+		margin: 0 9px 12px;
 	}
 
 	input {
@@ -197,6 +205,10 @@ export const SequenceName = styled(Grid).attrs({
 	&& {
 		font-size: 18px;
 		font-weight: 500;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		white-space: nowrap;
+		max-width: 250px;
 	}
 `;
 
@@ -212,4 +224,17 @@ export const SequenceDatesContainer = styled(Grid).attrs({
 
 export const LoaderContainer = styled.div`
 	padding-top: 30px;
+`;
+
+export const StyledLoader = styled(Loader)`
+	flex-direction: row;
+	position: absolute;
+	bottom: 36px;
+	pointer-events: none;
+
+	${ContentComponent} {
+		margin-left: 10px;
+		margin-right: 0;
+		font-size: 13px;
+	}
 `;

@@ -1,18 +1,18 @@
 /**
- * Copyright (C) 2020 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 "use strict";
@@ -94,25 +94,25 @@ class TeamspaceSettings {
 		if (hasSufficientQuota) {
 			const fileSizeLimit = require("../config").uploadSizeLimit;
 			if(file.byteLength > fileSizeLimit) {
-				return Promise.reject(responseCodes.SIZE_LIMIT);
+				throw responseCodes.SIZE_LIMIT;
 			}
 			const fNameArr = filename.split(".");
 			if (fNameArr.length < 2 || fNameArr[fNameArr.length - 1].toLowerCase() !== "csv") {
-				return Promise.reject(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
+				throw responseCodes.FILE_FORMAT_NOT_SUPPORTED;
 			}
 
-			const storeFileProm = FileRef.storeMitigationsFile(account, username, filename, file).then(async () => {
-				const settingsCol = await this.getTeamspaceSettingsCollection(account, true);
-				const updatedAt = new Date();
-				await settingsCol.update({_id: account}, {$set: {"mitigationsUpdatedAt":updatedAt}});
-				return updatedAt;
-			});
-
 			const Mitigation = require("./mitigation");
-			const readCSVProm = Mitigation.importCSV(account, file);
-			return Promise.all([storeFileProm, readCSVProm]);
+			const importedMitigations = await Mitigation.importCSV(account, file);
+
+			await FileRef.storeMitigationsFile(account, username, filename, file);
+
+			const settingsCol = await this.getTeamspaceSettingsCollection(account, true);
+			const updatedAt = new Date();
+			await settingsCol.update({_id: account}, {$set: {"mitigationsUpdatedAt":updatedAt}});
+
+			return { "status":"ok", mitigationsUpdatedAt: updatedAt, records: importedMitigations.length };
 		} else {
-			return Promise.reject(responseCodes.SIZE_LIMIT_PAY);
+			throw responseCodes.SIZE_LIMIT_PAY;
 		}
 	}
 

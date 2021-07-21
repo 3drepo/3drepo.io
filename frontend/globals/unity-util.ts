@@ -1,28 +1,35 @@
-/*
-* Copyright (C) 2017 3D Repo Ltd
-*
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU Affero General Public License as
-* published by the Free Software Foundation, either version 3 of the
-* License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU Affero General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public License
-* along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-declare var Module;
+/**
+ *  Copyright (C) 2017 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* eslint-disable no-var */
 declare var SendMessage;
-declare var UnityLoader;
+declare var createUnityInstance;
+/* eslint-enable no-var */
+
+import { IS_FIREFOX } from '../helpers/browser';
 
 export class UnityUtil {
 	/** @hidden */
 	private static errorCallback: any;
+	/** @hidden */
 	private static progressCallback: any;
+	/** @hidden */
 	private static modelLoaderProgressCallback: any;
+
 	/**
 	 * viewer can be assigned, containing any callback function the user wishes to hook onto.
 	 * The following functions are supported:
@@ -81,9 +88,6 @@ export class UnityUtil {
 	public static unityHasErrored = false;
 
 	/** @hidden */
-	public static initialLoad = true;
-
-	/** @hidden */
 	public static screenshotPromises = [];
 	/** @hidden */
 	public static viewpointsPromises = [];
@@ -111,47 +115,98 @@ export class UnityUtil {
 	}
 
 	/** @hidden */
-	public static onProgress(gameInstance, progress: number) {
+	public static onProgress(progress: number) {
 		requestAnimationFrame(() => {
-			UnityUtil.progressCallback(progress);
+			if (UnityUtil.progressCallback) {
+				UnityUtil.progressCallback(progress);
+			}
 		});
 	}
 
 	/**
 	 * Launch the Unity Game.
  	 * @category Configurations
-	 * @param divId - the html div tag this game should be loaded into.
-	 * @param unityConfig - url to find the game configuration
-	 * @param memory - Amount of memory the game should start with (in bytes)
+	 * @param canvas - the html dom of the unity canvas
+	 * @param host - host server URL (e.g. https://www.3drepo.io)
 	 * @return returns a promise which resolves when the game is loaded.
 	 *
 	 */
-	public static loadUnity(divId: string, unityConfig = 'unity/Build/unity.json', memory?: number): Promise<void> {
-		memory = memory || 2130706432;
+	public static loadUnity(canvas: any, host): Promise<void> {
+		let canvasDom = canvas;
+		let domainURL = host;
+		if (Object.prototype.toString.call(canvas) === '[object String]') {
+			// The user is calling it like Unity 2019. Convert it to a dom an create a canvas
+			console.warn('[DEPRECATED WARNING] loadUnity() no longer takes in a string and a URL to the unity config. Please check the API documentation and update your function.');
+			const divDom = document.getElementById(canvas);
+			canvasDom = document.createElement('canvas');
+			canvasDom.id = 'unity';
+			divDom.appendChild(canvasDom);
 
-		const unitySettings: any = {
-			onProgress: this.onProgress
-		};
-		UnityLoader.Error.handler = this.onUnityError;
-		if (window) {
-			if (!(window as any).Module) {
-				window.Module = {};
+			if (host) {
+				// Old schema asks for a json file location, we now take the domain url
+				// and generate the object at run time.
+				domainURL = host.match('^https?:\/\/[^\/]+');
 			}
-			unitySettings.Module = (window as any).Module;
-			unitySettings.Module.TOTAL_MEMORY = memory;
-			UnityUtil.unityInstance = UnityLoader.instantiate(
-				divId,
-				unityConfig,
-				unitySettings
-			);
-		} else {
-			UnityUtil.unityInstance = UnityLoader.instantiate(
-				divId,
-				unityConfig
-			);
 		}
 
+		return UnityUtil._loadUnity(canvasDom, domainURL);
+
+	}
+
+	/** @hidden */
+	public static _loadUnity(canvas: any, unityURL): Promise<void> {
+
+		if (!window.Module) {
+			// Add withCredentials to XMLHttpRequest prototype to allow unity game to
+			// do CORS request. We used to do this with a .jspre on the unity side but it's no longer supported
+			// as of Unity 2019.1
+			(XMLHttpRequest.prototype as any).originalOpen = XMLHttpRequest.prototype.open;
+			const newOpen = function(_, url) {
+				// eslint-disable-next-line
+				const original = this.originalOpen.apply(this, arguments);
+				this.withCredentials = true;
+				return original;
+			};
+			XMLHttpRequest.prototype.open = newOpen;
+		}
+
+		const buildUrl = `${unityURL ? unityURL + '/' : ''}unity/Build`;
+
+		const config = {
+			dataUrl: buildUrl + '/unity.data.unityweb',
+			frameworkUrl: buildUrl + '/unity.framework.js.unityweb',
+			codeUrl: buildUrl + '/unity.wasm.unityweb',
+			streamingAssetsUrl: 'StreamingAssets',
+			companyName: '3D Repo Ltd',
+			productName: '3D Repo Unity',
+			productVersion: '1.0',
+			errorHandler: (e, t, n) => {
+				// This member is not part of the documented API, but the current version of loader.js checks for it
+				UnityUtil.onUnityError(e);
+				return true; // Returning true suppresses loader.js' alert call
+			}
+		};
+
+		createUnityInstance(canvas, config, (progress) => {
+			this.onProgress(progress);
+		}).then((unityInstance) => {
+			UnityUtil.unityInstance = unityInstance;
+		}).catch(UnityUtil.onUnityError);
+
 		return UnityUtil.onReady();
+	}
+
+	/**
+	 * @category Configurations
+	 * Quits unity instance & reset all custom callback and promises
+	 */
+	public static quitUnity() {
+		this.reset();
+		UnityUtil.errorCallback = null;
+		UnityUtil.progressCallback = null;
+		UnityUtil.modelLoaderProgressCallback = null;
+		UnityUtil.readyPromise = null;
+		UnityUtil.unityInstance.Quit();
 	}
 
 	/**
@@ -160,10 +215,6 @@ export class UnityUtil {
 	 * Cancels any model that is currently loading. This will reject any model promises with "cancel" as the message
 	 */
 	public static cancelLoadModel() {
-		if (UnityUtil.initialLoad) {
-			return;
-		}
-
 		if (!UnityUtil.loadedFlag && UnityUtil.loadedResolve) {
 			// If the previous model is being loaded but hasn't finished yet
 			UnityUtil.loadedResolve.reject('cancel');
@@ -191,23 +242,21 @@ export class UnityUtil {
 	 * @hidden
 	 * Handle a error from Unity
 	 */
-	public static onUnityError(errorObject) {
+	public static onUnityError(message) {
 
-		const err = errorObject.message;
-		const line = errorObject.lineno;
 		let reload = false;
 		let conf;
 
-		if (UnityUtil.isUnityError(err)) {
+		if (UnityUtil.isUnityError(message)) {
 			reload = true;
 			conf = `Your browser has failed to load 3D Repo's model viewer. The following occured:
-					<br><br> <code>Error ${err} occured at line ${line}</code>
+					<br><br> <code>${message}</code>
 					<br><br> This may due to insufficient memory. Please ensure you are using a modern 64bit web browser
 					(such as Chrome or Firefox), reduce your memory usage and try again.
 					If you are unable to resolve this problem, please contact support@3drepo.org referencing the above error.
 					<br><md-container>`;
 		} else {
-			conf = `Something went wrong :( <br><br> <code>Error ${err} occured at line ${line}</code><br><br>
+			conf = `Something went wrong :( <br><br> <code>${message}</code><br><br>
 				If you are unable to resolve this problem, please contact support@3drepo.org referencing the above error
 				<br><br> Click OK to refresh this page<md-container>`;
 		}
@@ -361,14 +410,13 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static loaded(bboxStr) {
-		// tslint:disable-next-line
+		// eslint-disable-next-line no-console
 		console.log(`[${new Date()}]Loading model done. `);
 		const res = {
 			bbox: JSON.parse(bboxStr)
 		};
 		UnityUtil.loadedResolve.resolve(res);
 		UnityUtil.loadedFlag = true;
-		UnityUtil.initialLoad = false;
 	}
 
 	/** @hidden */
@@ -463,9 +511,13 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static measurementAlert(strMeasurement) {
-		const measurement = JSON.parse(strMeasurement);
-		if (UnityUtil.viewer && UnityUtil.viewer.measurementAlertEvent) {
-			UnityUtil.viewer.measurementAlertEvent(measurement);
+		try {
+			const measurement = JSON.parse(strMeasurement);
+			if (UnityUtil.viewer && UnityUtil.viewer.measurementAlertEvent) {
+				UnityUtil.viewer.measurementAlertEvent(measurement);
+			}
+		} catch (error) {
+			console.error('Failed to parse measurement alert', strMeasurement);
 		}
 	}
 
@@ -731,19 +783,19 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Enable the measure tool snap to edges.
-	 * @category Measuring tool
+	 * Enable snapping to snap the cursor to the closest edge
+	 * @category Configurations
 	 */
-	public static enableMeasureToolSnap() {
-		UnityUtil.toUnity('EnableMeasureToolSnap', undefined, undefined);
+	public static enableSnapping() {
+		UnityUtil.toUnity('EnableSnapping', undefined, undefined);
 	}
 
 	/**
-	 * Disable the measure tool snap to edges.
-	 * @category Measuring tool
+	 * Disable Snapping
+	 * @category Configurations
 	 */
-	public static disableMeasureToolSnap() {
-		UnityUtil.toUnity('DisableMeasureToolSnap', undefined, undefined);
+	public static disableSnapping() {
+		UnityUtil.toUnity('DisableSnapping', undefined, undefined);
 	}
 
 	/**
@@ -792,6 +844,26 @@ export class UnityUtil {
 	 */
 	public static disableMeasureToolXYZDisplay() {
 		UnityUtil.toUnity('DisableMeasureToolXYZDisplay');
+	}
+
+	public static addMeasurement(measurement) {
+		UnityUtil.toUnity('AddMeasurement', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(measurement));
+	}
+
+	public static hideNewMeasurementsLabels() {
+		UnityUtil.toUnity('HideNewMeasurementsLabels');
+	}
+
+	public static showNewMeasurementsLabels() {
+		UnityUtil.toUnity('ShowNewMeasurementsLabels');
+	}
+
+	public static selectMeasurement(id: string) {
+		UnityUtil.toUnity('SelectMeasurement', UnityUtil.LoadingState.MODEL_LOADING, id);
+	}
+
+	public static deselectMeasurement(id: string) {
+		UnityUtil.toUnity('DeselectMeasurement', UnityUtil.LoadingState.MODEL_LOADING, id);
 	}
 
 	/**
@@ -997,38 +1069,23 @@ export class UnityUtil {
 	public static highlightObjects(
 		account: string,
 		model: string,
-		idArr: [string],
+		idArr: string[],
 		color: [number],
 		toggleMode: boolean,
 		forceReHighlight: boolean
 	) {
-		const maxNodesPerReq = 20000;
-		const promises = [];
-		for (let i = 0 ; i < idArr.length; i += maxNodesPerReq) {
-			const promise = new Promise((resolve, reject) => {
-				setTimeout(() => {
-					try {
-						const endIdx = i + maxNodesPerReq < idArr.length ? i + maxNodesPerReq : idArr.length ;
-						const arr = idArr.slice(i, endIdx);
-						const params: any = {
-							database : account,
-							model,
-							ids : arr,
-							toggle : toggleMode,
-							forceReHighlight,
-							color: color ? color : UnityUtil.defaultHighlightColor
-						};
-						UnityUtil.toUnity('HighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
-						resolve();
-					} catch (error) {
-						reject(error);
-					}
-				}, i > 0 ? 100 : 0);
-			});
-			promises.push(promise);
-		}
-
-		return Promise.all(promises);
+		UnityUtil.multipleCallInChunks(idArr.length, (start, end) => {
+			const arr = idArr.slice(start, end);
+			const params: any = {
+				database : account,
+				model,
+				ids : arr,
+				toggle : toggleMode,
+				forceReHighlight,
+				color: color ? color : UnityUtil.defaultHighlightColor
+			};
+			UnityUtil.toUnity('HighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+		});
 	}
 
 	/**
@@ -1038,14 +1095,17 @@ export class UnityUtil {
 	 * @param model - name of model
 	 * @param idArr - array of unique IDs associated with the objects to highlight
 	 */
-	public static unhighlightObjects(account: string, model: string, idArr: [string]) {
-		const params: any = {
-			database : account,
-			model,
-			ids : idArr
-		};
+	public static unhighlightObjects(account: string, model: string, idArr: string[]) {
+		UnityUtil.multipleCallInChunks(idArr.length, (start, end) => {
+			const arr = idArr.slice(start, end);
+			const params: any = {
+				database : account,
+				model,
+				ids : idArr
+			};
 
-		UnityUtil.toUnity('UnhighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+			UnityUtil.toUnity('UnhighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
+		});
 	}
 
 	public static pauseRendering() {
@@ -1065,10 +1125,21 @@ export class UnityUtil {
 	 * @param model - name of model
 	 * @param branch - ID of the branch (deprecated value)
 	 * @param revision - ID of revision
+	 * @param initView? - the view the model should load with
+	 * @param clearCanvas? - Reset the state of the viewer prior to loading the model (Default: true)
 	 * @return returns a promise that resolves when the model start loading.
 	 */
-	public static loadModel(account: string, model: string, branch = '', revision = 'head'): Promise<void> {
-		UnityUtil.reset();
+	public static loadModel(
+		account: string,
+		model: string,
+		branch = '',
+		revision = 'head',
+		initView = null,
+		clearCanvas = true
+	): Promise<void> {
+		if (clearCanvas) {
+			UnityUtil.reset(!initView);
+		}
 		const params: any = {
 			database : account,
 			model
@@ -1078,12 +1149,27 @@ export class UnityUtil {
 			params.revID = revision;
 		}
 
+		if (initView) {
+			params.initView = initView;
+		}
 		UnityUtil.onLoaded();
-		// tslint:disable-next-line
+		// eslint-disable-next-line no-console
 		console.log(`[${new Date()}]Loading model: `, params);
 		UnityUtil.toUnity('LoadModel', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
 
 		return UnityUtil.onLoading();
+	}
+
+	/**
+	 * Offload a model that is currently loaded
+	 * @category Configurations
+	 * @param account - name of teamspace
+	 * @param model - name of model
+	 * @param revision - ID of revision
+	 */
+	public static offLoadModel(account: string, model: string, revision = 'head') {
+		const ns = `${account}.${model}${revision === 'head' ? '' : `.${revision}`}`;
+		UnityUtil.toUnity('UnloadModel', UnityUtil.LoadingState.MODEL_LOADED, ns);
 	}
 
 	/**
@@ -1148,13 +1234,15 @@ export class UnityUtil {
 	 * @param color - RGB value of the override color (note: alpha will be ignored)
 	 */
 	public static overrideMeshColor(account: string, model: string, meshIDs: [string], color: [number]) {
-		const param: any = {};
-		if (account && model) {
-			param.nameSpace = account + '.' + model;
-		}
-		param.ids = meshIDs;
-		param.color = color;
-		UnityUtil.toUnity('OverrideMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
+			const param: any = {};
+			if (account && model) {
+				param.nameSpace = account + '.' + model;
+			}
+			param.ids = meshIDs.slice(start, end);
+			param.color = color;
+			UnityUtil.toUnity('OverrideMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		});
 	}
 
 	/**
@@ -1165,12 +1253,14 @@ export class UnityUtil {
 	 * @param meshIDs - unique IDs of the meshes to operate on
 	 */
 	public static resetMeshColor(account: string, model: string, meshIDs: [string]) {
-		const param: any = {};
-		if (account && model) {
-			param.nameSpace = account + '.' + model;
-		}
-		param.ids = meshIDs;
-		UnityUtil.toUnity('ResetMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
+			const param: any = {};
+			if (account && model) {
+				param.nameSpace = account + '.' + model;
+			}
+			param.ids = meshIDs.slice(start, end);
+			UnityUtil.toUnity('ResetMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		});
 	}
 
 	/**
@@ -1183,13 +1273,15 @@ export class UnityUtil {
 	 * @param opacity - opacity (>0 - 1) value to override with
 	 */
 	public static overrideMeshOpacity(account: string, model: string, meshIDs: [string], opacity: number) {
-		const param: any = {};
-		if (account && model) {
-			param.nameSpace = account + '.' + model;
-		}
-		param.ids = meshIDs;
-		param.opacity = opacity;
-		UnityUtil.toUnity('OverrideMeshOpacity', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
+			const param: any = {};
+			if (account && model) {
+				param.nameSpace = account + '.' + model;
+			}
+			param.ids = meshIDs.slice(start, end);
+			param.opacity = opacity;
+			UnityUtil.toUnity('OverrideMeshOpacity', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		});
 	}
 
 	/**
@@ -1200,12 +1292,14 @@ export class UnityUtil {
 	 * @param meshIDs - unique IDs of the meshes to operate on
 	 */
 	public static resetMeshOpacity(account: string, model: string, meshIDs: [string]) {
-		const param: any = {};
-		if (account && model) {
-			param.nameSpace = account + '.' + model;
-		}
-		param.ids = meshIDs;
-		UnityUtil.toUnity('ResetMeshOpacity', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
+			const param: any = {};
+			if (account && model) {
+				param.nameSpace = account + '.' + model;
+			}
+			param.ids = meshIDs.slice(start, end);
+			UnityUtil.toUnity('ResetMeshOpacity', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		});
 	}
 
 	/**
@@ -1221,18 +1315,21 @@ export class UnityUtil {
 	 * Clear the canvas and reset all settings
 	 * @category Configurations
 	 */
-	public static reset() {
+	public static reset(resetProjection = true) {
 		UnityUtil.cancelLoadModel();
 		UnityUtil.loadedPromise = null;
 		UnityUtil.loadedResolve = null;
 		UnityUtil.loadingPromise = null;
 		UnityUtil.loadingResolve = null;
 		UnityUtil.loadedFlag = false;
-		UnityUtil.initialLoad = true;
 
 		UnityUtil.disableMeasuringTool();
+		UnityUtil.disableSnapping();
 		UnityUtil.clearAllMeasurements();
 		UnityUtil.diffToolDisableAndClear();
+		if (resetProjection) {
+			UnityUtil.usePerspectiveProjection();
+		}
 		UnityUtil.toUnity('ClearCanvas', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
@@ -1340,6 +1437,15 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Set API key to use for authentication. Ensure setAPIHost is called before this.
+	 * @category Configurations
+	 * @param apiKey
+	 */
+	public static setAPIKey(apiKey: string) {
+		UnityUtil.toUnity('SetAPIKey', UnityUtil.LoadingState.VIEWER_READY, apiKey);
+	}
+
+	/**
 	 * Set the default near plane value. This can be use to tweak situations where
 	 * geometry closest to you are being clipped
 	 * @category Configurations
@@ -1387,6 +1493,20 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Use orthographic view
+	 */
+	public static useOrthographicProjection() {
+		UnityUtil.toUnity('UseOrthographicProjection', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+	}
+
+	/**
+	 * Use perspective view
+	 */
+	public static usePerspectiveProjection() {
+		UnityUtil.toUnity('UsePerspectiveProjection', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+	}
+
+	/**
 	 * Change the camera configuration
 	 * teamspace and model is only needed if the viewpoint is relative to a model
 	 * @category Navigations
@@ -1402,12 +1522,22 @@ export class UnityUtil {
 		up: [number],
 		forward: [number],
 		lookAt: [number],
+		projectionType?: boolean,
+		orthographicSize?: number,
 		account?: string,
 		model?: string
 	) {
 		const param: any = {};
 		if (account && model) {
 			param.nameSpace = account + '.' + model;
+		}
+
+		if (projectionType) {
+			param.type = projectionType;
+		}
+
+		if (orthographicSize) {
+			param.orthographicSize = orthographicSize;
 		}
 
 		param.position = pos;
@@ -1466,6 +1596,19 @@ export class UnityUtil {
 	}
 
 	/**
+	 * @hidden
+	 * A helper function to split the calls into multiple calls when the array is too large for SendMessage to handle
+	 */
+	public static multipleCallInChunks(arrLength: number, func: (start: number, end: number) => any, chunkSize = 20000) {
+		let index = 0;
+		while (index < arrLength) {
+			const end = index + chunkSize >= arrLength ? undefined : index + chunkSize;
+			func(index, end);
+			index += chunkSize;
+		}
+	}
+
+	/**
 	 * Toggle visibility of the given list of objects
 	 * @category Model Interactions
 	 * @param account - name of teamspace
@@ -1474,15 +1617,16 @@ export class UnityUtil {
 	 * @param visibility - true = visible, false = invisible
 	 */
 	public static toggleVisibility(account: string, model: string, ids: [string], visibility: boolean) {
-		const param: any = {};
-		if (account && model) {
-			param.nameSpace = account + '.' + model;
-		}
+		UnityUtil.multipleCallInChunks(ids.length, (start, end) => {
+			const param: any = {};
+			if (account && model) {
+				param.nameSpace = account + '.' + model;
+			}
 
-		param.ids = ids;
-		param.visible = visibility;
-		UnityUtil.toUnity('ToggleVisibility', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
-
+			param.ids = ids.slice(start, end);
+			param.visible = visibility;
+			UnityUtil.toUnity('ToggleVisibility', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		});
 	}
 
 	/**
@@ -1548,6 +1692,24 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Change the background colour of the viewer
+	 * note: alpha defaults to 1 if an array of 3 numbers is sent
+	 * @param color - rgba colour value to set to e.g.[1,0,0,1] for solid red.
+	 * @category Configurations
+	 */
+	public static setBackgroundColor(color: number[]) {
+		UnityUtil.toUnity('SetBackgroundColor', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({color}));
+	}
+
+	/**
+	 * Reset viewer background to default
+	 * @category Configurations
+	 */
+	public static ResetBackground() {
+		UnityUtil.toUnity('ResetBackground', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
 	 * Sets the render quality to default
 	 * @category Configurations
 	 */
@@ -1577,6 +1739,94 @@ export class UnityUtil {
 	 */
 	public static setXRayHighlightOff(): any {
 		UnityUtil.toUnity('SetXRayHighlightOff', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
+	 * Change the colour of the clipping planes border
+	 * @category  Model Interactions
+	 * @param colour - colour RGB value of the colour to change to. e.g. [1, 0, 0]
+	 */
+	public static setPlaneBorderColor(color: number[]) {
+		UnityUtil.toUnity('SetPlaneBorderColor', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({color}));
+	}
+
+	/**
+	 * Change the width of the clipping planes border
+	 * @category  Model Interactions
+	 * @param width - the width of the clipping plane border
+	 */
+	public static setPlaneBorderWidth(width: number) {
+		// There is an scale factor so the value that the user enters is not small
+		UnityUtil.toUnity('SetPlaneBorderWidth', UnityUtil.LoadingState.VIEWER_READY, width *	0.01);
+	}
+
+	/**
+	 * Sets the navigations interaction on
+	 * @category Model Interactions
+	 */
+	public static setNavigationOn(): any {
+		UnityUtil.toUnity('SetNavigationOn', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
+	 * Sets the navigations interaction off
+	 * @category Model Interactions
+	 */
+	public static setNavigationOff(): any {
+		UnityUtil.toUnity('SetNavigationOff', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/** @hidden */
+	public static setResolutionScaling(scale: number) {
+		UnityUtil.toUnity('SetResolutionScaling', UnityUtil.LoadingState.VIEWER_READY, scale);
+	}
+
+	/** @hidden */
+	public static toggleUtilityCamera() {
+		UnityUtil.toUnity('ToggleUtilityCamera', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/** @hidden */
+	public static toggleCameraPause() {
+		UnityUtil.toUnity('ToggleCameraPause', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
+	 * Move mesh/meshes by a given transformation matrix.
+	 * NOTE: this currently only works as desired in Synchro Scenarios
+	 * @category Model Interactions
+	 * @param teamspace teamspace of the model
+	 * @param modelId modelID the meshes belongs in
+	 * @param meshes array of mesh unique IDs
+	 * @param matrix array of 16 numbers, representing the transformation on the meshes (row major)
+	 */
+	public static moveMeshes(teamspace: string, modelId: string, meshes: string[], matrix: number[]) {
+		UnityUtil.multipleCallInChunks(meshes.length, (start, end) => {
+			const param: any = {
+				nameSpace : teamspace + '.' + modelId,
+				meshes: meshes.slice(start, end),
+				matrix
+			};
+			UnityUtil.toUnity('MoveMeshes', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		});
+	}
+
+	/**
+	 * Move mesh/meshes by a given transformation matrix.
+	 * NOTE: this currently only works as desired in Synchro Scenarios
+	 * @category Model Interactions
+	 * @param teamspace teamspace of the model
+	 * @param modelId modelID the meshes belongs in
+	 * @param meshes array of mesh unique IDs
+	 */
+	public static resetMovedMeshes(teamspace: string, modelId: string, meshes: string[]) {
+		UnityUtil.multipleCallInChunks(meshes.length, (start, end) => {
+			const param: any = {
+				nameSpace : teamspace + '.' + modelId,
+				meshes: meshes.slice(start, end),
+			};
+			UnityUtil.toUnity('ResetMovedMeshes', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
+		});
 	}
 
 }

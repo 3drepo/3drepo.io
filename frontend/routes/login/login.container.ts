@@ -29,7 +29,8 @@ const mapStateToProps = createStructuredSelector({
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	onLogin: AuthActions.login
+	onLogin: AuthActions.login,
+	authenticate: AuthActions.authenticate,
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Login));

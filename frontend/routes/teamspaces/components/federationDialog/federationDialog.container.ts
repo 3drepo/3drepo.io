@@ -19,6 +19,7 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import { selectIsPending, selectSettings, ModelActions } from '../../../../modules/model';
 import {
 	selectFederations,
 	selectModels,
@@ -26,7 +27,6 @@ import {
 	selectTeamspaces,
 	TeamspacesActions,
 } from '../../../../modules/teamspaces';
-import { selectIsPending, selectSettings, ModelActions } from './../../../../modules/model';
 import { FederationDialog } from './federationDialog.component';
 
 const mapStateToProps = createStructuredSelector({

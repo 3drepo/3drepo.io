@@ -17,70 +17,42 @@
 
 "use strict";
 
-const mongoose = require("mongoose");
-const vat = require("./vat");
+const { checkVAT } = require("./vat");
 const responseCodes = require("../response_codes");
 const systemLogger = require("../logger.js").systemLogger;
+const { omit } = require("lodash");
 
-const billingAddressSchema = new mongoose.Schema({
-	// vat setter was async. setter cannot be async at the momnent.
-	// could happen in the future versions of mongoose
-	// https://github.com/Automattic/mongoose/issues/4227
-	vat: { type: String },
-	line1: { type: String },
-	line2: { type: String },
-	line3: { type: String },
-	firstName: { type: String },
-	lastName: { type: String },
-	company: { type: String },
-	city: { type: String },
-	postalCode: { type: String },
-	countryCode: { type: String },
-	state: { type: String },
-	jobTitle: {type: String },
-	phoneNo: {type: String }
-});
+const BillingAddress = {};
 
-billingAddressSchema.methods.changeBillingAddress = function (billingAddress) {
+BillingAddress.changeVATNumber = async function(billing, vatCode) {
+	billing.vat = vatCode;
 
-	Object.keys(billingAddress).forEach(key => {
-
-		if(key === "_id") {
-			return;
-		}
-
-		this.set(key, billingAddress[key]);
-
-	});
-
-	if(billingAddress.vat) {
-		return this.changeVATNumber(billingAddress.vat);
-	} else {
-		return Promise.resolve();
-	}
-};
-
-billingAddressSchema.methods.changeVATNumber = function(vatCode) {
-
-	this.vat = vatCode;
-
-	let cleanedVATNumber = this.vat.replace(/ /g,"");
+	let cleanedVATNumber = billing.vat.replace(/ /g,"");
 	if (cleanedVATNumber.toUpperCase().startsWith(this.countryCode)) {
 		cleanedVATNumber = cleanedVATNumber.substr(2);
 	}
 
-	return vat.checkVAT(this.countryCode, cleanedVATNumber)
-		.then(result => {
-			if (!result.valid) {
-				return Promise.reject(responseCodes.INVALID_VAT);
-			} else {
-				return Promise.resolve();
-			}
-		})
-		.catch(err => {
-			systemLogger.logError(`VAT Error - ${err}`);
-			return Promise.reject(responseCodes.VAT_CODE_ERROR);
-		});
+	try {
+		const { valid } = await checkVAT(billing.countryCode, cleanedVATNumber);
+		if (!valid) {
+			throw (responseCodes.INVALID_VAT);
+		}
+	} catch(err) {
+		systemLogger.logError(`VAT Error - ${err}`);
+		throw (responseCodes.VAT_CODE_ERROR);
+	}
+
+	return billing;
 };
 
-module.exports = billingAddressSchema;
+BillingAddress.changeBillingAddress = async function (billing, billingAddress) {
+	billing = {...billing, ...omit(billingAddress, "_.id")};
+
+	if(billingAddress.vat) {
+		billing = await this.changeVATNumber(billing, billingAddress.vat);
+	}
+
+	return billing;
+};
+
+module.exports = BillingAddress;

@@ -24,7 +24,7 @@ import { isEmpty } from 'lodash';
 import { forOwn, pick, uniq } from 'lodash';
 
 import { LabelButton } from '../../../../viewerGui/components/labelButton/labelButton.styles';
-import { EmptyStateInfo } from '../../../../viewerGui/components/views/views.styles';
+import { EmptyStateInfo } from '../../../components.styles';
 import { CellSelect } from '../../../customTable/components/cellSelect/cellSelect.component';
 import {
 	Container, Label, StyledDialogContent, StyledGrid, StyledList, StyledListItem, StyledTypography,
@@ -68,11 +68,11 @@ const SuggestionsList = ({ suggestions, onClick }) => (
 );
 
 const getStageOptions = (suggestions) => [{ value: '', name: 'All' }, ...uniq(suggestions
-		.map(({ mitigation_stage }) => mitigation_stage))
+		.map(({ mitigation_stage }) => mitigation_stage).filter(Boolean))
 		.map((value) => ({ value, name: value }))];
 
 const getTypeOptions = (suggestions) => [{ value: '', name: 'All' }, ...uniq(suggestions
-		.map(({ mitigation_type }) => mitigation_type))
+		.map(({ mitigation_type }) => mitigation_type).filter(Boolean))
 		.map((value) => ({ value, name: value }))];
 
 interface ISuggestion {
