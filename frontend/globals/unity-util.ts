@@ -20,17 +20,6 @@ declare var createUnityInstance;
 declare var createPixelStreamingInstance;
 /* eslint-enable no-var */
 
-/**
- * The required properties of the Pixel Streaming configuration for the loadUnreal method.
- */
-class UnrealConfig {
-	/** The fully qualified address of the matchmaking server */
-	public serverUri: string;
-	/** Whether to attempt to connect as soon as createUnrealInstance is called;
-	 * be aware that many browsers will not allow the session to start without explicit interaction from the user. */
-	public autoConnect: boolean;
-}
-
 export class UnityUtil {
 	/** @hidden */
 	private static errorCallback: any;
@@ -215,7 +204,7 @@ export class UnityUtil {
 	 * @param config - an object describing the configuration of the viewer
 	 * @return returns a promise which resolves when the game is loaded.
 	 */
-	public static loadUnreal(div: any, config: UnrealConfig): Promise<void> {
+	public static loadUnreal(div: any, config: any): Promise<void> {
 		// The client must load the PixelStreaming dependencies before beginning if they wish to use PixelStreaming
 		if (typeof createPixelStreamingInstance !== 'function') {
 			console.error('An application must load the Unreal PixelStreaming dependencies before attemping to load the viewer');
