@@ -17,8 +17,16 @@
 
 /* eslint-disable no-var */
 declare var createUnityInstance;
-declare var createPixelStreamingInstance;
 /* eslint-enable no-var */
+
+/**
+ * Defines the members that a config object for loadUnreal must implement.
+ * Unlike Unity, the application must pass the method to create the 
+ */
+interface IUnrealConfig{
+	autoConnect: Boolean,
+	serverUrl: String,
+}
 
 export class UnityUtil {
 	/** @hidden */
@@ -204,12 +212,7 @@ export class UnityUtil {
 	 * @param config - an object describing the configuration of the viewer
 	 * @return returns a promise which resolves when the game is loaded.
 	 */
-	public static loadUnreal(div: any, config: any): Promise<void> {
-		// The client must load the PixelStreaming dependencies before beginning if they wish to use PixelStreaming
-		if (typeof createPixelStreamingInstance !== 'function') {
-			console.error('An application must load the Unreal PixelStreaming dependencies before attemping to load the viewer');
-		}
-
+	public static loadUnreal(div: any, createPixelStreamingInstance: (div: HTMLElement, config: IUnrealConfig, onProgress: (number)=>void) => Promise<void>, config: IUnrealConfig): Promise<void> {
 		if (Object.prototype.toString.call(div) === '[object String]') {
 			// tslint:disable-next-line
 			div = document.getElementById(div);
