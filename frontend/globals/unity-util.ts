@@ -20,8 +20,8 @@ declare var createUnityInstance;
 /* eslint-enable no-var */
 
 /**
- * Defines the members that a config object for loadUnreal must implement.
- * Unlike Unity, the application must pass the method to create the 
+ * Defines the members that a config object for loadUnreal must implement. These are used by
+ * createPixelStreamingInstance which is defined by the signalling server (passed into loadUnreal when used)
  */
 interface IUnrealConfig{
 	autoConnect: Boolean,
@@ -212,7 +212,7 @@ export class UnityUtil {
 	 * @param config - an object describing the configuration of the viewer
 	 * @return returns a promise which resolves when the game is loaded.
 	 */
-	public static loadUnreal(div: any, createPixelStreamingInstance: (div: HTMLElement, config: IUnrealConfig, onProgress: (number)=>void) => Promise<void>, config: IUnrealConfig): Promise<void> {
+	public static loadUnreal(div: any, createPixelStreamingInstance: (div: HTMLElement, config: IUnrealConfig, onProgress: (number) => void) => Promise<void>, config: IUnrealConfig): Promise<void> {
 		if (Object.prototype.toString.call(div) === '[object String]') {
 			// tslint:disable-next-line
 			div = document.getElementById(div);
