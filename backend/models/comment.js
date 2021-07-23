@@ -43,9 +43,9 @@ const fieldTypes = {
 };
 
 class CommentGenerator {
-	constructor(owner) {
+	constructor(owner, created) {
 		this.guid = utils.generateUUID();
-		this.created = (new Date()).getTime();
+		this.created = created ? created : (new Date()).getTime();
 		this.owner = owner;
 	}
 }
@@ -63,6 +63,27 @@ class TextCommentGenerator extends CommentGenerator {
 
 			if (pinPosition && fieldTypes.pinPosition === Object.prototype.toString.call(pinPosition)) {
 				this.pinPosition = pinPosition;
+			}
+		} else {
+			throw responseCodes.INVALID_ARGUMENTS;
+		}
+	}
+}
+
+class BCFCommentGenerator extends TextCommentGenerator {
+	constructor(owner, guid, created, commentText, viewpoint, pinPosition) {
+		super(owner, commentText, viewpoint, pinPosition);
+
+		if ((!guid || utils.isString(guid) || utils.isUUIDObject(guid)) &&
+			(!created || utils.isNumber(created))) {
+			this.sealed = true;
+
+			if (guid) {
+				this.guid = utils.stringToUUID(guid);
+			}
+
+			if (created) {
+				this.created = created;
 			}
 		} else {
 			throw responseCodes.INVALID_ARGUMENTS;
@@ -258,6 +279,7 @@ const clean = (routePrefix, comment) =>  {
 };
 
 module.exports = {
+	newBCFComment : (owner, guid, created, commentText, viewpoint) => new BCFCommentGenerator(owner, guid, created, commentText, viewpoint),
 	newSystemComment : (owner, property, from, to) => new SystemCommentGenerator(owner, property, from, to),
 	newMitigationComment : (owner, likelihood, consequence, mitigation, viewpoint, pinPosition) => new MitigationCommentGenerator(owner, likelihood, consequence, mitigation, viewpoint, pinPosition),
 	addComment,
