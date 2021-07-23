@@ -21,7 +21,7 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 import { NAMED_MONTH_DATE_FORMAT } from '../../../../services/formatting/formatDate';
 import { DateTime } from '../../../components/dateTime/dateTime.component';
 import { UserMarker } from '../../../components/messagesList/components/message/components/userMarker';
-import { Author, Container, Date, Details, ExtraInfo, Icon, Status,OpenInViewerButton } from './previewItemInfo.styles';
+import { Author, Container, Date, Details, ExtraInfo, Icon, Status, OpenInViewerButton } from './previewItemInfo.styles';
 
 interface IProps {
 	author: string;
@@ -51,7 +51,7 @@ export class PreviewItemInfo extends React.PureComponent<IProps, any> {
 			/>
 		);
 	});
-	
+
 	public renderDateTime = renderWhenTrue(() => (
 		<Date>
 			<DateTime value={this.props.createdAt} format={NAMED_MONTH_DATE_FORMAT} />

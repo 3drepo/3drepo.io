@@ -251,7 +251,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			actionButton,
 			isSmartGroup,
 			panelName,
-			type, 
+			type,
 			id,
 			urlParams
 		} = this.props;
@@ -276,7 +276,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 							statusColor={statusColor}
 							actionButton={actionButton}
 							showModelButton={showModelButton}
-							type = {type}
+							type={type}
 							id={id}
 							urlParams={urlParams}
 						/>
