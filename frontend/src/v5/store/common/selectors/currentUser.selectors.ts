@@ -14,10 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { CurrentUserSelectors } from '@/v5/store/common/selectors/currentUser.selectors';
-import React from 'react';
 
-export const MainLayout = (): JSX.Element => {
-	const userName: string = CurrentUserSelectors.selectUsername();
-	return (<div><h1>Main Layout: {userName}</h1></div>);
-};
+import * as CurrentUserSelectors_ from '@/v4/modules/currentUser/currentUser.selectors';
+import { wrapSelectors } from './selectors.helper';
+
+export const CurrentUserSelectors = wrapSelectors(CurrentUserSelectors_);

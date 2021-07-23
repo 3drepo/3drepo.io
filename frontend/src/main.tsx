@@ -40,7 +40,7 @@ window.UnityUtil = UnityUtil;
 const render = () => {
 	ReactDOM.render(
 		<Provider store={store as any} >
-			<ConnectedRouter history={history}>
+			<ConnectedRouter history={history as History}>
 				<Switch >
 					<Route path="/v5"><MainLayout /></Route>
 					<Route><V4Root /></Route>
@@ -64,5 +64,5 @@ initApp();
 
 if (!IS_DEVELOPMENT) {
 	// eslint-disable-next-line @typescript-eslint/no-var-requires
-	require('offline-plugin/runtime').install();
+	(require('offline-plugin/runtime') as {install: () => void}).install();
 }

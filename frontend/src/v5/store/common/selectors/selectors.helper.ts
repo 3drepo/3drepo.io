@@ -14,10 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { CurrentUserSelectors } from '@/v5/store/common/selectors/currentUser.selectors';
-import React from 'react';
 
-export const MainLayout = (): JSX.Element => {
-	const userName: string = CurrentUserSelectors.selectUsername();
-	return (<div><h1>Main Layout: {userName}</h1></div>);
+import { useSelector } from 'react-redux';
+
+
+type NameMap<Type> = {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	[Property in keyof Type]: () => ReturnType<Extract<Type[Property], (...args: any) => any >>;
 };
+
+export const wrapSelectors = <T>(moduleSelectors: T): NameMap<T> => {
+	const exportObject = {};
+	Object.keys(moduleSelectors).forEach((key) => {
+		exportObject[key] = () => useSelector(moduleSelectors[key]);
+	});
+
+	return exportObject as NameMap<T>;
+};
+
