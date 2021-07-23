@@ -616,7 +616,7 @@ export function * updateActiveRiskViewpoint({screenshot}) {
 		viewpoint = {...viewpoint, screenshot};
 	}
 
-	yield put(RisksActions.updateRisk(account, model, {viewpoint}));
+	yield put(RisksActions.updateRisk({viewpoint}));
 }
 
 /** shapes **/
