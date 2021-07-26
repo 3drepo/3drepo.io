@@ -28,6 +28,13 @@ interface IUnrealConfig{
 	serverUrl: String,
 }
 
+/**
+ * Defines the function that initialises the DOM with the Unreal Pixel Streaming functionality.
+ * Pixel Streaming dependencies are loaded externally; the createPixelStreamingInstance function is the entry point
+ * to these.
+ */
+type CreatePixelStreamingInstanceDelegate = (div: HTMLElement, config: IUnrealConfig, onProgress: (number) => void) => Promise<void>;
+
 export class UnityUtil {
 	/** @hidden */
 	private static errorCallback: any;
@@ -212,7 +219,7 @@ export class UnityUtil {
 	 * @param config - an object describing the configuration of the viewer
 	 * @return returns a promise which resolves when the game is loaded.
 	 */
-	public static loadUnreal(div: any, createPixelStreamingInstance: (div: HTMLElement, config: IUnrealConfig, onProgress: (number) => void) => Promise<void>, config: IUnrealConfig): Promise<void> {
+	public static loadUnreal(div: any, createPixelStreamingInstance: CreatePixelStreamingInstanceDelegate, config: IUnrealConfig): Promise<void> {
 		if (Object.prototype.toString.call(div) === '[object String]') {
 			// tslint:disable-next-line
 			div = document.getElementById(div);
