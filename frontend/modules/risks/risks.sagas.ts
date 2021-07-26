@@ -167,9 +167,10 @@ function* updateRisk({riskData}) {
 		updatedRisk.resources = prepareResources(account, model, updatedRisk.resources);
 
 		updatedRisk = {...updatedRisk, ...riskData};
+		const preparedRisk = prepareRisk(updatedRisk);
 
 		yield put(RisksActions.setComponentState({ savedPin: position }));
-		yield put(RisksActions.saveRiskSuccess(updatedRisk));
+		yield put(RisksActions.saveRiskSuccess(preparedRisk));
 		yield put(SnackbarActions.show('Risk updated'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('update', 'risk', error));

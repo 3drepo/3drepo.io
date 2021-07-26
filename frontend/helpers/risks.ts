@@ -42,9 +42,9 @@ export const prepareRisk = (risk, jobs = []) => {
 		preparedRisk.thumbnail = risk.thumbnail.length ? getAPIUrl(risk.thumbnail) : '';
 	}
 
-	const descriptionThumbnail = preparedRisk.viewpoint && preparedRisk.viewpoint.screenshot
-		? getAPIUrl(preparedRisk.viewpoint.screenshot)
-		: (preparedRisk.descriptionThumbnail || '');
+	const descriptionThumbnail = risk.viewpoint && risk.viewpoint.screenshot
+		? getAPIUrl(risk.viewpoint.screenshot)
+		: (risk.descriptionThumbnail || '');
 
 	if (descriptionThumbnail) {
 		preparedRisk.descriptionThumbnail = descriptionThumbnail;
