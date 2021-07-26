@@ -40,8 +40,7 @@ export class RevisionsSwitch extends React.PureComponent<IProps, any> {
 
 	public componentDidUpdate(prevProps: IProps) {
 		const { currentRevision, getCompareModels } = this.props;
-
-		if (currentRevision !== prevProps.currentRevision) {
+		if (currentRevision && currentRevision !== prevProps.currentRevision) {
 			getCompareModels(currentRevision._id);
 		}
 	}
