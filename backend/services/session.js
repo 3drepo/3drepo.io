@@ -15,15 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// This file contains the session shared between various services
-// TODO: Currently this stores everything on the filesystem,
-// but it needs to be changed.
-
 "use strict";
 
 const expressSession = require("express-session");
 const { getCollection, getSessionStore } = require("../handler/db");
 const C = require("../constants");
+const utils = require("../utils");
 const { systemLogger } = require("../logger");
 const store = getSessionStore(expressSession);
 const useragent = require("useragent");
@@ -65,10 +62,7 @@ module.exports.regenerateAuthSession = (req, config, user) => {
 				}
 
 				if (req.headers.referer) {
-					// Only store the `protocol://domain` part of the referrer
-					// e.g. If referrer is `https://3drepo.org/abc/xyz` we only store `https://3drepo.org`
-					const refererDomain = req.headers.referer.match(/^(\w)*:\/\/.*?\//);
-					user.referer = refererDomain ? refererDomain[0].slice(0, -1) : req.headers.referer;
+					user.referer = utils.getURLDomain(req.headers.referer);
 				}
 
 				req.session[C.REPO_SESSION_USER] = user;
