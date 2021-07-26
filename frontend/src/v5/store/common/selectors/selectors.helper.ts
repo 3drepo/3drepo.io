@@ -31,4 +31,3 @@ export const wrapSelectors = <T>(moduleSelectors: T): NameMap<T> => {
 
 	return exportObject as NameMap<T>;
 };
-

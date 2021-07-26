@@ -14,23 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { CurrentUserActions } from '@/v5/store/common/actions/currentUser.actions';
-import { Button } from '@material-ui/core';
-import { CurrentUserSelectors } from '@selectors/currentUser.selectors';
-import React, { SyntheticEvent } from 'react';
 
-export const MainLayout = (): JSX.Element => {
-	const userName: string = CurrentUserSelectors.selectUsername();
+import { CurrentUserActions as _CurrentUserActions,
+	CurrentUserTypes as  _CurrentUserTypes} from '@/v4/modules/currentUser';
+import { ICurrentUserActions } from '@/v4/modules/currentUser/currentUser.redux';
+import { Constants, wrapActions } from './actions.helper';
 
-	const onHandleClick = (e: SyntheticEvent) => {
-		e.preventDefault();
-		CurrentUserActions.fetchUser('teamSpace1');
-	};
-
-	return (
-		<div>
-			<h1>Main Layout: {userName}</h1>
-			<Button onClick={onHandleClick}> click me</Button>
-		</div>
-	);
-};
+export const CurrentUserActions = wrapActions<ICurrentUserActions>(_CurrentUserActions);
+export const CurrentUserTypes = _CurrentUserTypes as Constants<ICurrentUserActions>;

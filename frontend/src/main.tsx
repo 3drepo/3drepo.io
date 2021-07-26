@@ -26,7 +26,7 @@ import '@/v4/services/fontAwesome';
 import 'simplebar/dist/simplebar.min.css';
 
 import 'simplebar';
-import { history, store } from '@/v4/modules/store';
+import { dispatch, history, store } from '@/v4/modules/store';
 import V4Root from '@/v4/routes/index';
 import '@/v4/styles/global';
 
@@ -34,8 +34,11 @@ import { IS_DEVELOPMENT } from '@/v4/constants/environment';
 import { UnityUtil } from '@/globals/unity-util';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { MainLayout } from '@components/mainLayout/mainLayout';
+import { initializeActions } from './v5/store/common/actions/actions.helper';
 
 window.UnityUtil = UnityUtil;
+
+initializeActions(dispatch);
 
 const render = () => {
 	ReactDOM.render(
