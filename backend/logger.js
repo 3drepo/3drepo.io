@@ -20,11 +20,28 @@ const config = require("./config.js");
 const winston = require("winston");
 require("winston-daily-rotate-file");
 
-const stringFormat = ({ level, message, label, timestamp }) => `${timestamp} [${level}] [${label || "APP"}] ${message}`;
-
-const logger = createLogger();
 const SystemLogger = {};
 
+const stringFormat = ({ level, message, label, timestamp }) => `${timestamp} [${level}] [${label || "APP"}] ${message}`;
+const logger = createLogger();
+SystemLogger.formatResponseMsg = (
+	resData
+) => {
+	if (config.logfile.jsonOutput) {
+		return JSON.stringify(resData);
+	} else {
+		const {
+			status,
+			code,
+			latency,
+			contentLength,
+			user,
+			method,
+			originalUrl
+		} = resData;
+		return `${status}\t${code}\t${latency}\t${contentLength}\t${user}\t${method}\t${originalUrl}`;
+	}
+};
 function createLogger() {
 	const transporters = [];
 
@@ -47,16 +64,23 @@ function createLogger() {
 		}));
 	}
 
-	let format = winston.format.combine(
-		winston.format.timestamp(),
-		winston.format.align(),
-		winston.format.printf(stringFormat)
-	);
-
-	if (!config.logfile.noColors) {
+	let format;
+	if (!config.logfile.jsonOutput) {
 		format = winston.format.combine(
-			winston.format.colorize(),
-			format
+			winston.format.timestamp(),
+			winston.format.align(),
+			winston.format.printf(stringFormat)
+		);
+		if (!config.logfile.noColors) {
+			format = winston.format.combine(
+				winston.format.colorize(),
+				format
+			);
+		}
+	} else {
+		format = winston.format.combine(
+			winston.format.timestamp(),
+			winston.format.json()
 		);
 	}
 
