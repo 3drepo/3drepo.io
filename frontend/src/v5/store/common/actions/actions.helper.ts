@@ -15,6 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+
 // eslint-disable-next-line max-len
 type CapitalLetter = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z';
 
@@ -24,7 +30,6 @@ S extends `${infer First}${CapitalLetter}${infer Second}` ? `${Uppercase<First>}
 export type Constants<Type> = {
 	[Property in keyof Type as Constant<`${string & Property}`>]: Constant<`${string & Property}`>;
 };
-
 
 let dispatch = null;
 
@@ -38,4 +43,4 @@ export const wrapActions = <T>(ActionsCreators: T) => {
 	return exportObject as T;
 };
 
-export const initializeActions = (dispatchFunc): void => dispatch  = dispatchFunc;
+export const initializeActions = (dispatchFunc): void => dispatch = dispatchFunc;

@@ -14,23 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { CurrentUserActions } from '@/v5/store/common/actions/currentUser.actions';
-import { Button } from '@material-ui/core';
-import { CurrentUserSelectors } from '@selectors/currentUser.selectors';
-import React, { SyntheticEvent } from 'react';
+import { createSelector } from 'reselect';
 
-export const MainLayout = (): JSX.Element => {
-	const userName: string = CurrentUserSelectors.selectUsername();
+const selectAuthDomain = (state) => state.auth2;
 
-	const onHandleClick = (e: SyntheticEvent) => {
-		e.preventDefault();
-		CurrentUserActions.fetchUser('teamSpace1');
-	};
-
-	return (
-		<div>
-			<h1>Main Layout: {userName}</h1>
-			<Button onClick={onHandleClick}>Click me</Button>
-		</div>
-	);
-};
+export const selectIsAuthenticated = createSelector(
+	selectAuthDomain, (state) => state.isAuthenticated
+);

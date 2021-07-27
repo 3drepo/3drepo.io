@@ -22,3 +22,4 @@ import { Constants, wrapActions } from './actions.helper';
 
 export const CurrentUserActions = wrapActions<ICurrentUserActions>(_CurrentUserActions);
 export const CurrentUserTypes = _CurrentUserTypes as Constants<ICurrentUserActions>;
+

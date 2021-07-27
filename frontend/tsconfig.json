@@ -8,7 +8,8 @@
       "react",
       "react-dom",
       "lodash",
-      "node"
+      "node",
+      "mocha"
     ],
     "lib": [
       "es2015",
@@ -21,8 +22,8 @@
     "sourceMap": true,
     "baseUrl": "./",
     "paths": {
-      "@components/*": ["./src/v5/ui/components/*"],
       "@selectors/*": ["src/v5/store/common/selectors/*"],
+      "@components/*": ["./src/v5/ui/components/*"],
       "@assets/*": ["./assets/*"],
       "@/*": ["./src/*"]
     }
