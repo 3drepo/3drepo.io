@@ -196,7 +196,7 @@ export function* createGroupsByTransformations(transformations) {
 export const stripGroupRules = ({rules, ...restGroupFields}) => restGroupFields;
 
 const ruleIsEqual = (ruleA, ruleB) => {
-	return hasSameElements(ruleA.value, ruleB.value) && ruleA.field === ruleB.field && ruleA.operator === ruleB.operator;
+	return hasSameElements(ruleA.values, ruleB.values) && ruleA.field === ruleB.field && ruleA.operator === ruleB.operator;
 };
 
 export const rulesAreEqual = (groupA, groupB) => {
