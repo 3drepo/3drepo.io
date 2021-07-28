@@ -34,7 +34,7 @@ interface IProps {
 	showModelButton?: boolean;
 	type?: string;
 	id?: string;
-	urlParams: any;
+	urlParams?: any;
 }
 
 export class PreviewItemInfo extends React.PureComponent<IProps, any> {
@@ -86,7 +86,8 @@ export class PreviewItemInfo extends React.PureComponent<IProps, any> {
 			extraInfo,
 			actionButton,
 			panelType,
-			showModelButton
+			showModelButton,
+			urlParams
 			} = this.props;
 
 		return(
@@ -100,7 +101,7 @@ export class PreviewItemInfo extends React.PureComponent<IProps, any> {
 					</UserMarker>
 					{this.renderExtraInfo(extraInfo)}
 					{this.renderDateTime(createdAt)}
-					{this.renderViewModel(showModelButton)}
+					{this.renderViewModel(showModelButton && urlParams)}
 					{this.renderActionButton(actionButton)}
 				</Details>
 			</Container>
