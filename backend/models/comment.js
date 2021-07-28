@@ -70,27 +70,6 @@ class TextCommentGenerator extends CommentGenerator {
 	}
 }
 
-class BCFCommentGenerator extends TextCommentGenerator {
-	constructor(owner, guid, created, commentText, viewpoint, pinPosition) {
-		super(owner, commentText, viewpoint, pinPosition);
-
-		if ((!guid || utils.isString(guid) || utils.isUUIDObject(guid)) &&
-			(!created || utils.isNumber(created))) {
-			this.sealed = true;
-
-			if (guid) {
-				this.guid = utils.stringToUUID(guid);
-			}
-
-			if (created) {
-				this.created = created;
-			}
-		} else {
-			throw responseCodes.INVALID_ARGUMENTS;
-		}
-	}
-}
-
 class SystemCommentGenerator extends CommentGenerator {
 	constructor(owner, property, from, to) {
 		super(owner);
@@ -278,8 +257,15 @@ const clean = (routePrefix, comment) =>  {
 	}
 };
 
+const addPreExistingComment =  (owner, commentText, viewpoint, pinPosition, created, guid) => {
+	const obj = new TextCommentGenerator(owner, commentText, viewpoint, pinPosition);
+	obj.created = created ? created : obj.created;
+	obj.guid = guid ? guid : obj.guid;
+	return obj;
+};
+
 module.exports = {
-	newBCFComment : (owner, guid, created, commentText, viewpoint) => new BCFCommentGenerator(owner, guid, created, commentText, viewpoint),
+	addPreExistingComment,
 	newSystemComment : (owner, property, from, to) => new SystemCommentGenerator(owner, property, from, to),
 	newMitigationComment : (owner, likelihood, consequence, mitigation, viewpoint, pinPosition) => new MitigationCommentGenerator(owner, likelihood, consequence, mitigation, viewpoint, pinPosition),
 	addComment,

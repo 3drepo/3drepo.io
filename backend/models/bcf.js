@@ -26,7 +26,7 @@ const C = require("../constants");
 const systemLogger = require("../logger.js").systemLogger;
 const utils = require("../utils");
 
-const { newBCFComment } = require("./comment");
+const { addPreExistingComment } = require("./comment");
 const FileRef = require("./fileRef");
 const Group = require("./group");
 const Meta = require("./meta");
@@ -597,12 +597,12 @@ function parseMarkupBuffer(markupBuffer) {
 		}
 
 		_.get(xml, "Markup.Comment") && xml.Markup.Comment.forEach(comment => {
-			const obj = newBCFComment(
+			const obj = addPreExistingComment(
 				_.get(comment, "Author[0]._"),
-				_.get(comment, "@.Guid"),
-				utils.isoStringToTimestamp(_.get(comment, "Date[0]._")),
 				_.get(comment, "Comment[0]._"),
-				utils.stringToUUID(_.get(comment, "Viewpoint[0].@.Guid"))
+				utils.stringToUUID(_.get(comment, "Viewpoint[0].@.Guid")),
+				utils.stringToUUID(_.get(comment, "@.Guid")),
+				utils.isoStringToTimestamp(_.get(comment, "Date[0]._")),
 			);
 
 			const commentExtras = {};
