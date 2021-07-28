@@ -407,10 +407,10 @@ async function getIssueBCF(issue, account, model, unit) {
 							};
 						}
 
-						if (("perspective" === vp.type || !_.get(vp, "extras._noPerspective")) && vp.fov) {
+						if (("perspective" === vp.type || !_.get(vp, "extras._noPerspective"))) {
 							viewpointXmlObj.VisualizationInfo.PerspectiveCamera = {
 								...camera,
-								FieldOfView: vp.fov * 180 / Math.PI
+								FieldOfView: vp.fov ? vp.fov * 180 / Math.PI : 60
 							};
 						}
 					} else if (_.get(vp, "extras.OrthogonalCamera")) {
@@ -476,7 +476,6 @@ bcf.getBCFZipReadStream = function(account, model, issues, unit) {
 
 		bcfPromises.push(
 			getIssueBCF(issue, issueAccount, issueModel, unit).then(bcfResult => {
-
 				zip.append(new Buffer.from(bcfResult.markup, "utf8"), {name: `${utils.uuidToString(issue._id)}/markup.bcf`});
 
 				bcfResult.viewpoints.forEach(vp => {
@@ -907,7 +906,8 @@ async function readBCF(account, model, requester, ifcToModelMap, dataBuffer, set
 		for (let vpGuidIdx = 0; vpGuidIdx < vpGuids.length; vpGuidIdx++) {
 			const vpGuid = vpGuids[vpGuidIdx];
 			if (!viewpoints[vpGuid].viewpointXml) {
-				return;
+				systemLogger.logInfo("Cannot find viewpoint xml for ", vpGuid);
+				continue;
 			}
 
 			const vpXML = viewpoints[vpGuid].viewpointXml;
