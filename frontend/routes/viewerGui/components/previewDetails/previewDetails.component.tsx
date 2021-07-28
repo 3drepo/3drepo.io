@@ -165,12 +165,11 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 
 	public renderNotCollapsableContent = () => {
 		const Component = this.props.renderNotCollapsable && this.props.renderNotCollapsable();
-
 		return renderWhenTrue(() => (
 			<>
 				<ToggleButtonContainer onClick={this.handleToggle}>
 					<ToggleButton>
-						{this.renderExpandIcon(!this.props.editable)}
+						{this.renderExpandIcon(!this.props.isNew)}
 					</ToggleButton>
 				</ToggleButtonContainer>
 				<NotCollapsableContent>
@@ -187,7 +186,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		}
 
 		this.setState({
-			expanded: editable || defaultExpanded
+			expanded: isNew || defaultExpanded
 		});
 	}
 
