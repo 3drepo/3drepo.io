@@ -600,7 +600,7 @@ function parseMarkupBuffer(markupBuffer) {
 			const obj = addPreExistingComment(
 				_.get(comment, "Author[0]._"),
 				_.get(comment, "Comment[0]._"),
-				utils.stringToUUID(_.get(comment, "Viewpoint[0].@.Guid")),
+				{ guid: utils.stringToUUID(_.get(comment, "Viewpoint[0].@.Guid"))},
 				utils.stringToUUID(_.get(comment, "@.Guid")),
 				utils.isoStringToTimestamp(_.get(comment, "Date[0]._")),
 			);
