@@ -602,7 +602,7 @@ function parseMarkupBuffer(markupBuffer) {
 				_.get(comment, "Comment[0]._"),
 				{ guid: utils.stringToUUID(_.get(comment, "Viewpoint[0].@.Guid"))},
 				utils.stringToUUID(_.get(comment, "@.Guid")),
-				utils.isoStringToTimestamp(_.get(comment, "Date[0]._")),
+				utils.isoStringToTimestamp(_.get(comment, "Date[0]._"))
 			);
 
 			const commentExtras = {};
