@@ -34,6 +34,7 @@ import { VIEWER_EVENTS } from '../../constants/viewer';
 import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { disableConflictingMeasurementActions, generateName } from '../../helpers/measurements';
 import { prepareResources } from '../../helpers/resources';
+import { prepareRisk } from '../../helpers/risks';
 import { chopShapesUuids } from '../../helpers/shapes';
 import { SuggestedTreatmentsDialog } from '../../routes/components/dialogContainer/components';
 import * as API from '../../services/api';
