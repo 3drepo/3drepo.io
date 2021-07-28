@@ -43,9 +43,9 @@ const fieldTypes = {
 };
 
 class CommentGenerator {
-	constructor(owner, created) {
+	constructor(owner) {
 		this.guid = utils.generateUUID();
-		this.created = created ? created : (new Date()).getTime();
+		this.created = Date.now();
 		this.owner = owner;
 	}
 }
