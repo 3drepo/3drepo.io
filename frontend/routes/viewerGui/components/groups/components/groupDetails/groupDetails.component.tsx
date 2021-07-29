@@ -131,7 +131,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 			StatusIconComponent={GROUP_TYPES_ICONS[this.editingGroup.type]}
 			scrolled={this.state.scrolled}
 			isNew={this.isNewGroup}
-			defaultExpanded={true}
+			defaultExpanded
 		/>
 	));
 

@@ -97,7 +97,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		</Tooltip>
 	));
 
-	public renderTitleNumber = renderWhenTrue(()=> (
+	public renderTitleNumber = renderWhenTrue(() => (
 		<TitleNumber>{this.props.number}.</TitleNumber>
 	));
 
