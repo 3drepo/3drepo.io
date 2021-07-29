@@ -84,7 +84,7 @@ module.exports = {
 		path: require("path").resolve(__dirname, '../../submodules/tests/backend/files/'),
 		levels: 2
 	},
-	defaultStorage: "fs",
+	defaultStorage: "alluxio",
 	tokenExpiry: {
 		emailVerify: 336,
 		forgotPassword: 24
