@@ -89,17 +89,6 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	public textFieldRef = React.createRef<any>();
 	public scrollableContainerRef = React.createRef<HTMLDivElement>();
 
-	public renderNameWithCounter = renderWhenTrue(() => {
-		const title = `${this.props.number}. ${this.props.name}`;
-		return (
-			<Tooltip title={title}>
-				<Typography paragraph>
-					{title}
-				</Typography>
-			</Tooltip>
-		);
-	});
-
 	public renderName = renderWhenTrue(() => (
 		<Tooltip title={this.props.name}>
 			<Typography paragraph>
@@ -108,9 +97,11 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		</Tooltip>
 	));
 
-	public renderNameField = renderWhenTrue(() => (
-	<Grid container alignItems="center" justify="space-between" >
+	public renderTitleNumber = renderWhenTrue(()=> (
 		<TitleNumber>{this.props.number}.</TitleNumber>
+	));
+
+	public renderNameField = renderWhenTrue(() => (
 		<Formik
 			initialValues={{name: this.props.name}}
 			validationSchema={ValidationSchema}
@@ -141,7 +132,6 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			</StyledForm>
 		</Formik>
 
-		</Grid>
 
 	));
 
@@ -250,6 +240,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			actionButton,
 			isSmartGroup,
 			panelName,
+			isNew,
 			type,
 			id,
 			urlParams
@@ -265,20 +256,22 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 				>
 					<RoleIndicator color={roleColor} ref={this.headerRef} />
 					<MainInfoContainer>
-						{this.renderNameWithCounter(!editable && number)}
-						{this.renderName(!editable && !number)}
-						{this.renderNameField(editable)}
-						<PreviewItemInfo
-							author={owner}
-							createdAt={created}
-							StatusIconComponent={StatusIconComponent}
-							statusColor={statusColor}
-							actionButton={actionButton}
-							showModelButton={showModelButton}
-							type={type}
-							id={id}
-							urlParams={urlParams}
-						/>
+						<Grid container alignItems="center" justify="space-between" >
+							{this.renderTitleNumber(number)}
+							{this.renderName(!editable)}
+							{this.renderNameField(editable)}
+						</Grid>
+							<PreviewItemInfo
+								author={owner}
+								createdAt={created}
+								StatusIconComponent={StatusIconComponent}
+								statusColor={statusColor}
+								actionButton={actionButton}
+								showModelButton={showModelButton}
+								type={type}
+								id={id}
+								urlParams={urlParams}
+							/>
 					</MainInfoContainer>
 				</Header>
 
@@ -295,3 +288,4 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		);
 	}
 }
+
