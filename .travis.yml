@@ -34,7 +34,9 @@ matrix:
             - rabbitmq-server
       hosts:
         - test.127.0.0.1
-      services: mongodb
+      services:
+        - mongodb
+        - docker
 
       before_install:
         - mkdir -p submodules
@@ -55,6 +57,8 @@ matrix:
         - cd ./../frontend
         - DETECT_CHROMEDRIVER_VERSION=true yarn install
         - yarn build
+        - cd ..
+        - docker-compose up alluxio-proxy alluxio-worker alluxio-master
 
       script:
         - cd ../backend
