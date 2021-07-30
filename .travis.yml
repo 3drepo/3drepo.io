@@ -50,6 +50,7 @@ matrix:
         - cd backend && mongorestore
         - cd ../../../
         - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
+        - docker-compose up alluxio-proxy alluxio-worker alluxio-master &
 
       install:
         - cd ./backend
@@ -57,11 +58,9 @@ matrix:
         - cd ./../frontend
         - DETECT_CHROMEDRIVER_VERSION=true yarn install
         - yarn build
-        - cd ..
-        - docker-compose up alluxio-proxy alluxio-worker alluxio-master &
 
       script:
-        - cd ./backend
+        - cd ../backend
         - mkdir coverage
         - unbuffer yarn test
         - cd ../
