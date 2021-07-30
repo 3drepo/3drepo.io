@@ -392,16 +392,14 @@
 		"jpg": "image/jpg"
 	};
 
-	const genResponseLogging = (resCode, {place, contentLength}, {session, startTime} = {}) => {
+	const genResponseLogging = ({status, code}, {contentLength}, {session, startTime, method, originalUrl} = {}) => {
 		const user = session && session.user ? session.user.username : "unknown";
 		const currentTime = Date.now();
 		const latency = startTime ? `${currentTime - startTime}` : "???";
-		return `${resCode.status}\t${resCode.code}\t${latency}\t${contentLength}\t${user}\t${place}`;
+		return systemLogger.formatResponseMsg({status,code,latency,contentLength,user,method, originalUrl});
 	};
 
 	/**
-	 *
-	 *
 	 * @param {any} place
 	 * @param {any} req
 	 * @param {any} res
