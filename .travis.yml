@@ -61,7 +61,7 @@ matrix:
         - docker-compose up alluxio-proxy alluxio-worker alluxio-master &
 
       script:
-        - cd ../backend
+        - cd ./backend
         - mkdir coverage
         - unbuffer yarn test
         - cd ../
