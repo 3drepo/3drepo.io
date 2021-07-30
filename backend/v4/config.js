@@ -16,7 +16,7 @@
  */
 
 "use strict";
-const VERSION = require("./VERSION.json").VERSION;
+const VERSION = require("./../VERSION.json").VERSION;
 
 const config = require("app-config").config;
 const utils = require("./utils");

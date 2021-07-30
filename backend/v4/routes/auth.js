@@ -26,7 +26,6 @@ const middlewares = require("../middlewares/middlewares");
 const config = require("../config");
 const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
-// const ChatEvent = require("../models/chatEvent");
 const User = require("../models/user");
 
 const LoginRecord = require("../models/loginRecord");
@@ -909,7 +908,7 @@ function listInfo(req, res, next) {
 
 function printVersion(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
-	const versionInfo = require("../VERSION");
+	const versionInfo = require("../../VERSION");
 	responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, versionInfo);
 }
 
