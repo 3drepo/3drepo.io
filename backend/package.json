@@ -55,7 +55,7 @@
     "serve-favicon": "2.5.0",
     "sharp": "0.28.3",
     "shortid": "2.2.14",
-    "slash": "4.0.0",
+    "slash": "3.0.0",
     "socket.io": "2.2.0",
     "socket.io-client": "2.2.0",
     "string-to-stream": "3.0.1",
