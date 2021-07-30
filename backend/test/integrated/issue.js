@@ -256,10 +256,14 @@ describe("Issues", function () {
 			let res = await agent.post(`/${username}/${model}/issues`)
 						.send(issue)
 						.expect(200)
+			console.log("res.body 1");
+			console.log(res.body);
 
 			let issueId = res.body._id;
 
 			res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
+			console.log("res.body 2");
+			console.log(res.body);
 
 			expect(res.body.viewpoint.screenshot).to.equal(`${username}/${model}/issues/${issueId}/viewpoints/${res.body.viewpoint.guid}/screenshot.png`);
 		});
