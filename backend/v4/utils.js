@@ -19,6 +19,7 @@
 const _ = require("lodash");
 const fs = require("fs").promises;
 const sharp = require("sharp");
+const moment = require("moment");
 const nodeuuid = require("uuid").v1;
 const yup = require("yup");
 const uuidparse = require("uuid-parse");
@@ -102,6 +103,14 @@ function Utils() {
 
 	this.generateHashString = (length = 32) => {
 		return crypto.randomBytes(length / 2).toString("hex");
+	};
+
+	this.timestampToISOString = (timestamp) => {
+		return moment(parseInt(timestamp)).format();
+	};
+
+	this.isoStringToTimestamp = (isoString) => {
+		return Number(moment(isoString).format("x").valueOf());
 	};
 
 	/** *****************************************************************************

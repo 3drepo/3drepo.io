@@ -46,7 +46,7 @@ module.exports.createApp = function () {
 		extended: true
 	}));
 	app.use(bodyParser.json());
-	app.use(favicon(publicDir + "/images/favicon.ico"));
+	app.use(favicon(publicDir + "/assets/images/favicon.ico"));
 
 	app.locals.pretty = true;
 
