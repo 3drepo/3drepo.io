@@ -57,8 +57,6 @@ matrix:
         - cd ./../frontend
         - DETECT_CHROMEDRIVER_VERSION=true yarn install
         - yarn build
-        - cd ..
-        - docker-compose up alluxio-proxy alluxio-worker alluxio-master
 
       script:
         - cd ../backend
@@ -68,6 +66,8 @@ matrix:
         - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" &
         - cd ./frontend
        #- unbuffer yarn test
+        - cd ..
+        - docker-compose up alluxio-proxy alluxio-worker alluxio-master
 
 notifications:
     email:
