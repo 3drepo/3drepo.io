@@ -15,7 +15,8 @@
     "test:one": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha --exit",
     "test:int": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha test/v4/integrated --recursive --exit",
     "lint": "eslint ./src/v4 --rulesdir eslint-rules/",
-    "lint:fix": "eslint --fix ./src/v4 --rulesdir eslint-rules/"
+    "lint:fix": "eslint --fix ./src/v4 --rulesdir eslint-rules/",
+	"start": "cross-env NODE_CONFIG_DIR=../config node ./src/v4/3drepo.js"
   },
   "dependencies": {
     "@elastic/elasticsearch": "7.12.0",
@@ -82,7 +83,8 @@
     "nyc": "15.0.1",
     "proxyquire": "2.1.0",
     "sinon": "7.2.3",
-    "supertest": "3.4.2"
+    "supertest": "3.4.2",
+    "typescript": "^4.3.5"
   },
   "description": "The backend for 3drepo.io",
   "main": "3drepo.js",
