@@ -38,7 +38,7 @@ module.exports.createApp = function () {
 	app.use(compression());
 	app.use("/config", configRoute);
 
-	const publicDir = __dirname + "/../../public";
+	const publicDir = __dirname + "/../../../public";
 
 	app.use(compress({ level: 9 }));
 	app.use(cors({ origin: true, credentials: true }));
