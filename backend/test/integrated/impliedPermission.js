@@ -160,11 +160,7 @@ describe("Implied permission::", function () {
 		it("can delete project", function(done) {
 			agent
 				.delete(`/${sharedTeamspace}/projects/${project}`)
-				.expect(200, function(err, res) {
-					console.log(err);
-					console.log(res.body);
-					done();
-				});
+				.expect(200, done);
 		});
 
 		it("can create a model", function(done) {

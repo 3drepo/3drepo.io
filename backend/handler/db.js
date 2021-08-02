@@ -237,14 +237,15 @@
 		});
 	};
 
-	Handler.listCollections = function (database) {
-		return Handler.getDB(database).then(dbConn => {
-			return dbConn.listCollections().toArray();
-		}).catch(err => {
+	Handler.listCollections = async function (database) {
+		try {
+			const dbConn = await Handler.getDB(database);
+			const colls = await dbConn.listCollections().toArray();
+			return colls.map(({name, options}) => ({name, options}));
+		} catchi (err) {
 			Handler.disconnect();
-			return Promise.reject(err);
-		});
-
+			throw err;
+		}
 	};
 
 	Handler.remove = async function (database, colName, query) {
