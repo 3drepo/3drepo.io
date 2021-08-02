@@ -34,6 +34,7 @@ import { IS_DEVELOPMENT } from '@/v4/constants/environment';
 import { UnityUtil } from '@/globals/unity-util';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { MainLayout } from '@components/mainLayout/mainLayout';
+import * as OfflinePluginRuntime from 'offline-plugin/runtime';
 import { initializeActions } from './v5/store/common/actions/actions.helper';
 
 window.UnityUtil = UnityUtil;
@@ -42,15 +43,15 @@ initializeActions(dispatch);
 
 const render = () => {
 	ReactDOM.render(
-		<Provider store={store as any} >
+		<Provider store={store as any}>
 			<ConnectedRouter history={history as History}>
-				<Switch >
+				<Switch>
 					<Route path="/v5"><MainLayout /></Route>
 					<Route><V4Root /></Route>
 				</Switch>
 			</ConnectedRouter>
 		</Provider>,
-		document.getElementById('app')
+		document.getElementById('app'),
 	);
 };
 
@@ -66,6 +67,5 @@ const initApp = () => {
 initApp();
 
 if (!IS_DEVELOPMENT) {
-	// eslint-disable-next-line @typescript-eslint/no-var-requires
-	(require('offline-plugin/runtime') as {install: () => void}).install();
+	OfflinePluginRuntime.install();
 }

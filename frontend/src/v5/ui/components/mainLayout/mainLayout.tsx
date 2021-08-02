@@ -29,7 +29,10 @@ export const MainLayout = (): JSX.Element => {
 
 	return (
 		<div>
-			<h1>Main Layout: {userName}</h1>
+			<h1>
+				Main Layout:
+				{userName}
+			</h1>
 			<Button onClick={onHandleClick}>Click me</Button>
 		</div>
 	);

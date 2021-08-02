@@ -17,7 +17,6 @@
 
 import { useSelector } from 'react-redux';
 
-
 type NameMap<Type> = {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	[Property in keyof Type]: () => ReturnType<Extract<Type[Property], (...args: any) => any >>;

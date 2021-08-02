@@ -19,7 +19,7 @@ import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../common/actions/actions.helper';
 
 interface IAuthActions {
-	login: (username: string , password: string) => any;
+	login: (username: string, password: string) => any;
 	loginSuccess: () => any;
 }
 
@@ -29,16 +29,14 @@ interface IAuthState {
 
 export const { Types: AuthTypes, Creators: AuthActions } = createActions({
 	login: ['username', 'password'],
-	loginSuccess: []
-}, { prefix: 'AUTH2/' }) as { Types: Constants<IAuthActions>; Creators: IAuthActions};
+	loginSuccess: [],
+}, { prefix: 'AUTH2/' }) as { Types: Constants<IAuthActions>; Creators: IAuthActions };
 
 export const INITIAL_STATE: IAuthState = {
 	isAuthenticated: false,
 };
 
-export const loginSuccess = (state = INITIAL_STATE): IAuthState => {
-	return { ...state, isAuthenticated: true };
-};
+export const loginSuccess = (state = INITIAL_STATE): IAuthState => ({ ...state, isAuthenticated: true });
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[AuthTypes.LOGIN_SUCCESS]: loginSuccess,

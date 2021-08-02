@@ -16,10 +16,9 @@
  */
 
 import { CurrentUserActions as _CurrentUserActions,
-	CurrentUserTypes as  _CurrentUserTypes} from '@/v4/modules/currentUser';
+	CurrentUserTypes as _CurrentUserTypes } from '@/v4/modules/currentUser';
 import { ICurrentUserActions } from '@/v4/modules/currentUser/currentUser.redux';
 import { Constants, wrapActions } from './actions.helper';
 
 export const CurrentUserActions = wrapActions<ICurrentUserActions>(_CurrentUserActions);
 export const CurrentUserTypes = _CurrentUserTypes as Constants<ICurrentUserActions>;
-

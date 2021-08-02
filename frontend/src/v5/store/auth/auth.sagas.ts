@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as API from '@/v4/services/api';
 import { put, takeLatest } from 'redux-saga/effects';
 import { AuthActions, AuthTypes } from './auth.redux';
 
-export function* login({ username, password }: {username: string; password: string}) {
+export function* login() {
 	try {
 		yield put(AuthActions.loginSuccess());
-	} catch (e) {
+	// eslint-disable-next-line no-empty
+	} finally {
 	}
 }
 

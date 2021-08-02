@@ -43,4 +43,4 @@ export const wrapActions = <T>(ActionsCreators: T) => {
 	return exportObject as T;
 };
 
-export const initializeActions = (dispatchFunc): void => dispatch = dispatchFunc;
+export const initializeActions = (dispatchFunc): void => { dispatch = dispatchFunc; };
