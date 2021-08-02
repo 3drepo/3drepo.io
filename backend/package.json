@@ -6,16 +6,16 @@
   },
   "private": true,
   "scripts": {
-    "gen-docs": "yarn apidoc -i v4/routes/ -o docs/ ",
+    "gen-docs": "yarn apidoc -i src/v4/routes/ -o docs/ ",
     "test": "yarn test:unit && yarn test:int",
     "test:cover": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config nyc yarn test ",
     "test:cover-one": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config nyc --reporter none mocha ",
     "test:coverall": "yarn test:cover && nyc report --reporter=text-lcov | coveralls",
-    "test:unit": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha v4/test/unit --recursive --exit",
+    "test:unit": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha test/v4/unit --recursive --exit",
     "test:one": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha --exit",
-    "test:int": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha v4/test/integrated --recursive --exit",
-    "lint": "eslint ./v4 --rulesdir eslint-rules/",
-    "lint:fix": "eslint --fix ./v4 --rulesdir eslint-rules/"
+    "test:int": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha test/v4/integrated --recursive --exit",
+    "lint": "eslint ./src/v4 --rulesdir eslint-rules/",
+    "lint:fix": "eslint --fix ./src/v4 --rulesdir eslint-rules/"
   },
   "dependencies": {
     "@elastic/elasticsearch": "7.12.0",
