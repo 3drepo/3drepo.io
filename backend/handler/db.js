@@ -27,18 +27,20 @@
 		autoReconnect: true
 	};
 
-	function getGridFSBucket(database, collection, chunksize = null) {
-		return Handler.getDB(database).then(dbConn => {
+	async function getGridFSBucket(database, collection, chunksize = null) {
+		try {
+			const dbConn = await Handler.getDB(database);
 			const options = {bucketName: collection};
+
 			if (chunksize) {
 				options.chunksize =  chunksize;
 			}
 
 			return new GridFSBucket(dbConn, options);
-		}).catch(err => {
+		} catch (err) {
 			Handler.disconnect();
-			return Promise.reject(err);
-		});
+			throw err;
+		}
 	}
 
 	function getHostPorts() {
@@ -113,14 +115,17 @@
 	 */
 	Handler.find = async function (database, colName, query, projection = {}, sort = {}) {
 		const collection = await Handler.getCollection(database, colName);
-		// NOTE: v3.6 driver find take sort/projection as 2nd argument like findOne
-		return collection.find(query).project(projection).sort(sort).toArray();
+		const options = { projection };
+
+		if (sort) {
+			options.sort = sort;
+		}
+
+		return collection.find(query, options).toArray();
 	};
 
 	Handler.findOne = async function (database, colName, query, projection = {}, sort) {
 		const collection = await Handler.getCollection(database, colName);
-		// NOTE: documentation states it should be { projection, sort } so when we upgrade we may have to change.
-		//       Also: projection stops working if you pass in a sort with empty obj.
 		const options = { projection };
 
 		if (sort) {
@@ -154,9 +159,7 @@
 	};
 
 	Handler.getAuthDB = function () {
-		return MongoClient.connect(getURL("admin"), connConfig).then(_db => {
-			return _db.db("admin");
-		});
+		return Handler.getDB("admin");
 	};
 
 	Handler.getCollection = function (database, colName) {
