@@ -18,7 +18,7 @@
 
 const expect = require("chai").expect;
 const proxyquire = require("proxyquire").noCallThru();
-const checkPermission  = proxyquire("../../../middlewares/checkPermissions", {
+const checkPermission  = proxyquire("../../../../src/v4/middlewares/checkPermissions", {
 	"./getPermissionsAdapter": {},
 	"../response_codes": {}
 }).checkPermissionsHelper;

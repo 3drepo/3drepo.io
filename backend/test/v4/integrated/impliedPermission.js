@@ -9,9 +9,9 @@ describe("Implied permission::", function () {
 	let server;
 	let agent;
 
-	const app = require("../../services/api.js").createApp();
+	const app = require("../../../src/v4/services/api.js").createApp();
 	const sharedTeamspace = "imsharedTeamspace";
-	const C = require("../../constants");
+	const C = require("../../../src/v4/constants");
 	const request = require("supertest");
 	const expect = require("chai").expect;
 	const model = {
@@ -20,7 +20,7 @@ describe("Implied permission::", function () {
 		"code": "00123",
 		"unit": "m",
 	};
-	const q = require("../../services/queue");
+	const q = require("../../../src/v4/services/queue");
 
 	const baseIssue = {
 		"status": "open",
@@ -209,7 +209,7 @@ describe("Implied permission::", function () {
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/upload`)
 				.field("tag", "teamspace_admin_upload")
-				.attach("file", __dirname + "/../../statics/3dmodels/upper.OBJ")
+				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/upper.OBJ")
 				.expect(200, done);
 		});
 
@@ -439,7 +439,7 @@ describe("Implied permission::", function () {
 		it("can create federation in your own project", function(done) {
 
 			const modelName = "fedmodel123";
-			const q = require("../../services/queue");
+			const q = require("../../../src/v4/services/queue");
 			let corId, appId;
 
 			agent
@@ -483,7 +483,7 @@ describe("Implied permission::", function () {
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/upload`)
 				.field("tag", "project_admin_upload")
-				.attach("file", __dirname + "/../../statics/3dmodels/upper.OBJ")
+				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/upper.OBJ")
 				.expect(200, done);
 		});
 
@@ -806,7 +806,7 @@ describe("Implied permission::", function () {
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/upload`)
 				.field("tag", "model_admin_upload")
-				.attach("file", __dirname + "/../../statics/3dmodels/upper.OBJ")
+				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/upper.OBJ")
 				.expect(200, done);
 		});
 
@@ -1427,7 +1427,7 @@ describe("Implied permission::", function () {
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/upload`)
 				.field("tag", "project_upload")
-				.attach("file", __dirname + "/../../statics/3dmodels/upper.OBJ")
+				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/upper.OBJ")
 				.expect(200, done);
 		});
 

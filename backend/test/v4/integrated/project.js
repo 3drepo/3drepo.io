@@ -19,10 +19,10 @@
 
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../services/api.js").createApp();
-const logger = require("../../logger.js");
+const app = require("../../../src/v4/services/api.js").createApp();
+const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
-const responseCodes = require("../../response_codes.js");
+const responseCodes = require("../../../src/v4/response_codes.js");
 const async = require("async");
 
 describe("Projects", function () {

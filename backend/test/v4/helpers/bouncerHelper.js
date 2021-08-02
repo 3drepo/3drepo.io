@@ -1,6 +1,6 @@
 
 const amqp = require("amqplib/callback_api");
-const conf = require("../../config");
+const conf = require("../../../src/v4/config");
 const path = require("path");
 const fs = require("fs");
 const winston = require('winston');

@@ -20,8 +20,8 @@
 const async = require("async");
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../services/api.js").createApp();
-const responseCodes = require("../../response_codes");
+const app = require("../../../src/v4/services/api.js").createApp();
+const responseCodes = require("../../../src/v4/response_codes");
 
 describe("Teamspace", function() {
 	let server;
@@ -115,8 +115,8 @@ describe("Teamspace", function() {
 	const notMemberOfTeamspace = "fed";
 	const collaboratorTeamspace = "teamSpace1";
 
-	const mitigationsFile = "/../../statics/mitigations/mitigations1.csv";
-	const bigMitigationsFile = "/../../statics/mitigations/big.csv";
+	const mitigationsFile = "/../../../src/v4/statics/mitigations/mitigations1.csv";
+	const bigMitigationsFile = "/../../../src/v4/statics/mitigations/big.csv";
 
 	before(function(done) {
 
@@ -821,7 +821,7 @@ describe("Teamspace", function() {
 
 	describe("Upload mitigations file", function(done) {
 		const user =  imsharedTeamspace;
-		const notMitigationsFile = "/../../statics/mitigations/notMitigations.zip";
+		const notMitigationsFile = "/../../../src/v4/statics/mitigations/notMitigations.zip";
 
 		before(function(done) {
 			this.timeout(timeout);

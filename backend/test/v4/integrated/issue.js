@@ -18,8 +18,8 @@
 
 const request = require("supertest");
 const {should, assert, expect, Assertion } = require("chai");
-const app = require("../../services/api.js").createApp();
-const responseCodes = require("../../response_codes.js");
+const app = require("../../../src/v4/services/api.js").createApp();
+const responseCodes = require("../../../src/v4/response_codes.js");
 const async = require("async");
 const { login } = require("../helpers/users.js");
 const { createIssue } = require("../helpers/issues.js");
@@ -41,9 +41,9 @@ describe("Issues", function () {
 
 	const model = "project1";
 
-	const pngBase64 = require("../../statics/images/avatar.base64");
-	const altBase64 = require("../../statics/images/dog.base64");
-	const pdfBase64 = require("../../statics/documents/tocatta_pdf");
+	const pngBase64 = require("../statics/images/avatar.base64");
+	const altBase64 = require("../statics/images/dog.base64");
+	const pdfBase64 = require("../statics/documents/tocatta_pdf");
 
 	const baseIssue = {
 		"status": "open",
@@ -67,9 +67,9 @@ describe("Issues", function () {
 	};
 
 	const bcf = {
-		path: "/../../statics/bcf/example1.bcf",
-		withGroupsPath: "/../../statics/bcf/withGroups.bcf",
-		invalidFile: "/../../statics/bcf/notBCF.txt",
+		path: "/../../../src/v4/statics/bcf/example1.bcf",
+		withGroupsPath: "/../../../src/v4/statics/bcf/withGroups.bcf",
+		invalidFile: "/../../../src/v4/statics/bcf/notBCF.txt",
 		issue1: "75959a60-8ef1-11e6-8d05-9717c0574272",
 		issue2: "8d46d1b0-8ef1-11e6-8d05-9717c0574272"
 	};

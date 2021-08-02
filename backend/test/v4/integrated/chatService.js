@@ -20,8 +20,8 @@ const request = require("supertest");
 const chai = require("chai")
 chai.use(require('chai-shallow-deep-equal'));
 const expect = chai.expect;
-const config = require("../../config");
-const app = require("../../services/api.js").createApp();
+const config = require("../../../src/v4/config");
+const app = require("../../../src/v4/services/api.js").createApp();
 const async = require("async");
 const http = require("http");
 // let newXhr = require('socket.io-client-cookie');
@@ -93,7 +93,7 @@ describe("Chat service", function () {
 
 			const chatServer = http.createServer();
 
-			const chat = require("../../services/chat.js").createApp(
+			const chat = require("../../../src/v4/services/chat.js").createApp(
 				chatServer, config.chat_server
 			);
 
@@ -509,7 +509,7 @@ describe("Chat service", function () {
 				async.series([bouncerHelper.startBouncerWorker,
 					next => teamSpace1Agent.post(`/${account}/${model}/upload`)
 						.field("tag", "onetag")
-						.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+						.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
 						.expect(200, function(err, res) {
 							next(err);
 						})
@@ -532,7 +532,7 @@ describe("Chat service", function () {
 				async.series([next => bouncerHelper.startBouncerWorker(next, 1),
 					next => agent.post(`/${account}/${model}/upload`)
 						.field("tag", "onetag")
-						.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+						.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
 						.expect(200, function(err, res) {
 							next(err);
 						})
@@ -558,7 +558,7 @@ describe("Chat service", function () {
 				async.series([next => bouncerHelper.startBouncerWorker(next, 7),
 					next => agent.post(`/${account}/${model}/upload`)
 						.field("tag", "onetag")
-						.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+						.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
 						.expect(200, function(err, res) {
 							next(err);
 						})

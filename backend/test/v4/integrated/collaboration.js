@@ -19,15 +19,15 @@
 
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../services/api.js").createApp();
-const logger = require("../../logger.js");
-const responseCodes = require("../../response_codes.js");
+const app = require("../../../src/v4/services/api.js").createApp();
+const logger = require("../../../src/v4/logger.js");
+const responseCodes = require("../../../src/v4/response_codes.js");
 const helpers = require("../helpers/signUp");
 const async = require("async");
-const C = require("../../constants");
+const C = require("../../../src/v4/constants");
 
 describe("Sharing/Unsharing a model", function () {
-	const User = require("../../models/user");
+	const User = require("../../../src/v4/models/user");
 	let server;
 	let agent;
 	const username = "projectowner";
@@ -69,7 +69,7 @@ describe("Sharing/Unsharing a model", function () {
 
 	after(function(done) {
 
-		const q = require("../../services/queue");
+		const q = require("../../../src/v4/services/queue");
 
 		q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
 			return q.channel.purgeQueue(q.workerQName);
@@ -245,7 +245,7 @@ describe("Sharing/Unsharing a model", function () {
 
 		it("and the viewer should NOT be able to upload model", function(done) {
 			agent.post(`/${username}/${model}/upload`)
-				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
 				.expect(401, done);
 		});
 
@@ -615,7 +615,7 @@ describe("Sharing/Unsharing a model", function () {
 
 		it("and the commenter should NOT be able to upload model", function(done) {
 			agent.post(`/${username}/${model}/upload`)
-				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
 				.expect(401, done);
 		});
 
@@ -976,7 +976,7 @@ describe("Sharing/Unsharing a model", function () {
 		it("and the collaborator should be able to upload model", function(done) {
 			agent.post(`/${username}/${model}/upload`)
 				.field("tag", "collab_upload")
-				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
 				.expect(200, done);
 		});
 

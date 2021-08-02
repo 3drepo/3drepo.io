@@ -19,8 +19,8 @@
 
 const request = require("supertest");
 const expect = require("chai").expect;
-const responseCodes = require("../../response_codes.js");
-const app = require("../../services/api.js").createApp();
+const responseCodes = require("../../../src/v4/response_codes.js");
+const app = require("../../../src/v4/services/api.js").createApp();
 
 describe("Meshes", function () {
 	let server;
@@ -49,7 +49,7 @@ describe("Meshes", function () {
 	});
 
 	after(function(done) {
-		const q = require("../../services/queue");
+		const q = require("../../../src/v4/services/queue");
 		q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
 			return q.channel.purgeQueue(q.workerQName);
 		}).then(() => {

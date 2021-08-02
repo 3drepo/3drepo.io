@@ -18,11 +18,11 @@
  */
 
 const expect = require("chai").expect;
-const app = require("../../services/api.js").createApp();
+const app = require("../../../src/v4/services/api.js").createApp();
 
 const request = require("supertest");
-const C = require("../../constants");
-const responseCodes = require("../../response_codes.js");
+const C = require("../../../src/v4/constants");
+const responseCodes = require("../../../src/v4/response_codes.js");
 
 describe("Sign up", function() {
 
@@ -61,7 +61,7 @@ describe("Sign up", function() {
 	const emailNoSpam = "test3drepo_signup_nospam@mailinator.com";
 	const noMailListAgreed = false;
 
-	const User = require("../../models/user");
+	const User = require("../../../src/v4/models/user");
 
 	it("with available username should return success", async function() {
 		const {body} = await request(server)
@@ -563,7 +563,7 @@ describe("Sign up", function() {
 				"lastName": lastName,
 				"countryCode": countryCode,
 				"company": company,
-				"mailListAgreed": mailListAgreed,				
+				"mailListAgreed": mailListAgreed,
 				"industry": industry,
 				"howDidYouFindUs": howDidYouFindUs,
 				"phoneNumber": phoneNumber
@@ -619,5 +619,5 @@ describe("Sign up", function() {
 				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 				done(err);
 			});
-	});	
+	});
 });

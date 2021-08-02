@@ -1,6 +1,6 @@
 "use strict";
 
-const vat = require("../../../models/vat");
+const vat = require("../../../../src/v4/models/vat");
 const expect = require("chai").expect;
 
 describe("VAT", function() {

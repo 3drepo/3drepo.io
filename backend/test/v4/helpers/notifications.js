@@ -1,4 +1,4 @@
-const { checkPermissionsHelper } = require("../../middlewares/checkPermissions");
+const { checkPermissionsHelper } = require("../../../src/v4/middlewares/checkPermissions");
 
 const NOTIFICATIONS_URL = "/notifications";
 

@@ -18,9 +18,9 @@
  */
 
 const expect = require("chai").expect;
-const app = require("../../services/api.js").createApp();
-const vat = require("../../models/vat");
-const config = require("../../config");
+const app = require("../../../src/v4/services/api.js").createApp();
+const vat = require("../../../src/v4/models/vat");
+const config = require("../../../src/v4/config");
 
 describe("VAT from http://ec.europa.eu ", function () {
 

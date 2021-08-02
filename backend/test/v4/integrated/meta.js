@@ -19,20 +19,20 @@
 
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../services/api.js").createApp();
-const logger = require("../../logger.js");
+const app = require("../../../src/v4/services/api.js").createApp();
+const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
-const responseCodes = require("../../response_codes.js");
+const responseCodes = require("../../../src/v4/response_codes.js");
 const helpers = require("../helpers/signUp");
-const C = require("../../constants");
+const C = require("../../../src/v4/constants");
 const async = require("async");
-const User = require("../../models/user");
-const config = require("../../config");
+const User = require("../../../src/v4/models/user");
+const config = require("../../../src/v4/config");
 const fs = require("fs");
 
 describe("Metadata", function () {
 
-	const User = require("../../models/user");
+	const User = require("../../../src/v4/models/user");
 	let server;
 	let agent;
 	const username = "metaTest";

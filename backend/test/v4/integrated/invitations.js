@@ -21,7 +21,7 @@ const { loginUsers } = require("../helpers/users.js");
 const { expect, AssertionError } = require("chai");
 const { USER_ALREADY_EXISTS, JOB_NOT_FOUND, INVALID_PROJECT_ID,
 	INVALID_MODEL_ID, NOT_AUTHORIZED, INVALID_MODEL_PERMISSION,
-	LICENCE_LIMIT_REACHED } = require("../../response_codes.js");
+	LICENCE_LIMIT_REACHED } = require("../../../src/v4/response_codes.js");
 const STRONG_PASSWORD = "Str0ngPassword!";
 
 const inviteUrl = (account) => `/${account}/invitations`;
@@ -232,7 +232,7 @@ describe("Invitations ", function () {
 			.send({ email, job: inviteJob, permissions: {teamspace_admin: true}})
 			.expect(200);
 
-		const User = require("../../models/user");
+		const User = require("../../../src/v4/models/user");
 		const { token } = await User.createUser(username, STRONG_PASSWORD, {email}, 200000);
 
 		await User.verify(username, token, {skipImportToyModel : true, skipCreateBasicPlan: true});
@@ -275,7 +275,7 @@ describe("Invitations ", function () {
 			.send({ email, job: inviteJob, permissions: team1Perm })
 			.expect(200);
 
-		const User = require("../../models/user");
+		const User = require("../../../src/v4/models/user");
 		const { token } = await User.createUser(username, STRONG_PASSWORD, {email}, 200000);
 		await User.verify(username, token, {skipImportToyModel : true, skipCreateBasicPlan: true});
 
@@ -317,7 +317,7 @@ describe("Invitations ", function () {
 			.send({ email, job: inviteJob, permissions: team1Perm })
 			.expect(200);
 
-		const User = require("../../models/user");
+		const User = require("../../../src/v4/models/user");
 		const { token } = await User.createUser(username, STRONG_PASSWORD, {email}, 200000);
 		await User.verify(username, token, {skipImportToyModel : true, skipCreateBasicPlan: true});
 

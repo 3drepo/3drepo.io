@@ -4,7 +4,7 @@ const expect = require("chai").expect;
 const moment = require("moment");
 const proxyquire = require("proxyquire").noCallThru();
 
-const UserBilling = proxyquire("../../../models/userBilling", {
+const UserBilling = proxyquire("../../../../src/v4/models/userBilling", {
 	"./subscriptions": {},
 	"./billingAddress": {},
 	"./paypal.js": {},
@@ -16,7 +16,7 @@ const UserBilling = proxyquire("../../../models/userBilling", {
 	"./user": {}
 });
 
-const C = require("../../../constants");
+const C = require("../../../../src/v4/constants");
 
 describe("UserBilling", function() {
 /*

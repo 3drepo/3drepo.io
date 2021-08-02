@@ -22,7 +22,7 @@ const { createModel, createFederation, updateFederation } = require("../helpers/
 const request = require("supertest");
 const bouncerHelper = require("../helpers/bouncerHelper");
 const expect = require("chai").expect;
-const app = require("../../services/api.js").createApp();
+const app = require("../../../src/v4/services/api.js").createApp();
 const async = require("async");
 const newId = require("uuid").v1;
 
@@ -562,7 +562,7 @@ describe("Notifications", function() {
 
 		const upload = tag => agents.teamSpace1.post(`/${account}/${model}/upload?tag=${tag}`)
 		.field("tag", tag)
-		.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+		.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
 		.expect(200, function(err, res) {
 			if(err) {done(err);}
 		});
@@ -689,7 +689,7 @@ describe("Notifications", function() {
 
 			const upload = next => agent.post(`/${account}/${model}/upload`)
 				.field("tag", "onetag")
-				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
 				.expect(200, function(err, res) {
 					if(err) {done(err);}
 				});
@@ -736,7 +736,7 @@ describe("Notifications", function() {
 
 			const upload = next => agent.post(`/${account}/${model}/upload`)
 				.field("tag", "onetag")
-				.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+				.attach("file", __dirname + "/../statics/3dmodels/8000cubes.obj")
 				.expect(200, function(err, res) {
 					if(err) {done(err);}
 				});

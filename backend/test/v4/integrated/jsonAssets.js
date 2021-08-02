@@ -19,7 +19,7 @@
 
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../services/api.js").createApp();
+const app = require("../../../src/v4/services/api.js").createApp();
 
 describe("JSON Assets", function () {
 	let server;
@@ -50,7 +50,7 @@ describe("JSON Assets", function () {
 		});
 
 		after(function(done) {
-			const q = require("../../services/queue");
+			const q = require("../../../src/v4/services/queue");
 			q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
 				return q.channel.purgeQueue(q.workerQName);
 			}).then(() => {
@@ -151,7 +151,7 @@ describe("JSON Assets", function () {
 		});
 
 		after(function(done) {
-			const q = require("../../services/queue");
+			const q = require("../../../src/v4/services/queue");
 			q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
 				return q.channel.purgeQueue(q.workerQName);
 			}).then(() => {
@@ -374,7 +374,7 @@ describe("JSON Assets", function () {
 		});
 
 		after(function(done) {
-			const q = require("../../services/queue");
+			const q = require("../../../src/v4/services/queue");
 			q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
 				return q.channel.purgeQueue(q.workerQName);
 			}).then(() => {
@@ -461,7 +461,7 @@ describe("JSON Assets", function () {
 		});
 
 		after(function(done) {
-			const q = require("../../services/queue");
+			const q = require("../../../src/v4/services/queue");
 			q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
 				return q.channel.purgeQueue(q.workerQName);
 			}).then(() => {

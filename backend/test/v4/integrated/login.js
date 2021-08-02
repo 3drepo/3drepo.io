@@ -19,11 +19,11 @@
 
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../services/api.js").createApp();
-const responseCodes = require("../../response_codes.js");
+const app = require("../../../src/v4/services/api.js").createApp();
+const responseCodes = require("../../../src/v4/response_codes.js");
 
 describe("Login", function () {
-	const User = require("../../models/user");
+	const User = require("../../../src/v4/models/user");
 	let server;
 	const username = "login_username";
 	const username_not_verified = "login_nonverified";

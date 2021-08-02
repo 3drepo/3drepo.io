@@ -19,16 +19,16 @@
 
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../services/api.js").createApp();
-const logger = require("../../logger.js");
-// const UserBilling = require("../../models/userBilling");
+const app = require("../../../src/v4/services/api.js").createApp();
+const logger = require("../../../src/v4/logger.js");
+// const UserBilling = require("../../../src/v4/models/userBilling");
 // const getNextPaymentDate = UserBilling.statics.getNextPaymentDate;
 const helpers = require("../helpers/signUp");
 const moment = require("moment-timezone");
-const User = require("../../models/user");
+const User = require("../../../src/v4/models/user");
 const url = require("url");
 
-const Paypal = require("../../models/paypal");
+const Paypal = require("../../../src/v4/models/paypal");
 
 const sinon = require("sinon");
 

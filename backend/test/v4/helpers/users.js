@@ -16,7 +16,7 @@
  */
 "use strict";
 
-const app = require("../../services/api.js").createApp();
+const app = require("../../../src/v4/services/api.js").createApp();
 const request = require("supertest");
 const async = require("async");
 const { expect } = require("chai");

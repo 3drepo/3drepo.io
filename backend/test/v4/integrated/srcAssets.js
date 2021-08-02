@@ -18,8 +18,8 @@
 
 const request = require("supertest");
 const {should, assert, expect, Assertion } = require("chai");
-const app = require("../../services/api.js").createApp();
-const responseCodes = require("../../response_codes.js");
+const app = require("../../../src/v4/services/api.js").createApp();
+const responseCodes = require("../../../src/v4/response_codes.js");
 const async = require("async");
 const { login } = require("../helpers/users.js");
 

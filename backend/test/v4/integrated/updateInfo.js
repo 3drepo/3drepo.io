@@ -19,14 +19,14 @@
 
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../services/api.js").createApp();
-const logger = require("../../logger.js");
-const responseCodes = require("../../response_codes.js");
+const app = require("../../../src/v4/services/api.js").createApp();
+const logger = require("../../../src/v4/logger.js");
+const responseCodes = require("../../../src/v4/response_codes.js");
 const helpers = require("../helpers/signUp");
 const async = require("async");
 
 describe("Updating user info", function () {
-	const User = require("../../models/user");
+	const User = require("../../../src/v4/models/user");
 	let server;
 	let agent;
 	const username = "updateinfo_username";
@@ -181,7 +181,7 @@ describe("Updating user info", function () {
 
 	it("should succeed to update the avatar", async function() {
 		await agent.post(`/${username}/avatar`)
-			.attach("file", __dirname + "/../../statics/images/avatar.png")
+			.attach("file", __dirname + "/../../../src/v4/statics/images/avatar.png")
 			.expect(200);
 	})
 
@@ -193,7 +193,7 @@ describe("Updating user info", function () {
 
 	it ("should fail to update the avatar with the wrong type of file", async function() {
 		await agent.post(`/${username}/avatar`)
-			.attach("file", __dirname + "/../../statics/images/avatar_fakeimage_zip.png")
+			.attach("file", __dirname + "/../../../src/v4/statics/images/avatar_fakeimage_zip.png")
 			.expect(400);
 	});
 });

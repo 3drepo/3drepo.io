@@ -1,5 +1,6 @@
 "use strict";
 
+
 /**
  *  Copyright (C) 2016 3D Repo Ltd
  *
@@ -19,20 +20,20 @@
 
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../services/api.js").createApp();
-const logger = require("../../logger.js");
+const app = require("../../../src/v4/services/api.js").createApp();
+const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
-const responseCodes = require("../../response_codes.js");
+const responseCodes = require("../../../src/v4/response_codes.js");
 const helpers = require("../helpers/signUp");
-const C = require("../../constants");
+const C = require("../../../src/v4/constants");
 const async = require("async");
-const User = require("../../models/user");
-const config = require("../../config");
+const User = require("../../../src/v4/models/user");
+const config = require("../../../src/v4/config");
 const fs = require("fs");
 
 describe("Revision", function () {
 
-	const User = require("../../models/user");
+	const User = require("../models/user");
 	let server;
 	let agent;
 	const username = "rev";
@@ -227,7 +228,7 @@ describe("Revision", function () {
 
 		agent.post(`/${username}/${model}/upload`)
 			.field("tag", testTag)
-			.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+			.attach("file", __dirname + "/../statics/3dmodels/8000cubes.obj")
 			.expect(400, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.DUPLICATE_TAG.value);
 				done(err);
@@ -241,7 +242,7 @@ describe("Revision", function () {
 
 		agent.post(`/${username}/${model}/upload`)
 			.field("tag", "a!b")
-			.attach("file", __dirname + "/../../statics/3dmodels/8000cubes.obj")
+			.attach("file", __dirname + "/../statics/3dmodels/8000cubes.obj")
 			.expect(400, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
 				done(err);

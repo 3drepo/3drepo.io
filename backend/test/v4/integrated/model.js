@@ -19,11 +19,11 @@
 
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../services/api.js").createApp();
-const responseCodes = require("../../response_codes.js");
+const app = require("../../../src/v4/services/api.js").createApp();
+const responseCodes = require("../../../src/v4/response_codes.js");
 const async = require("async");
-const ModelSetting = require("../../models/modelSetting");
-const User = require("../../models/user");
+const ModelSetting = require("../../../src/v4/models/modelSetting");
+const User = require("../../../src/v4/models/user");
 describe("Model", function () {
 	let server;
 	let agent;
@@ -55,7 +55,7 @@ describe("Model", function () {
 	});
 
 	after(function(done) {
-		const q = require("../../services/queue");
+		const q = require("../../../src/v4/services/queue");
 		q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
 			return q.channel.purgeQueue(q.workerQName);
 		}).then(() => {

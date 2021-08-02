@@ -19,7 +19,7 @@
 
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../services/frontend.js").createApp();
+const app = require("../../../src/v4/services/frontend.js").createApp();
 
 describe("Config", function () {
 	let server;

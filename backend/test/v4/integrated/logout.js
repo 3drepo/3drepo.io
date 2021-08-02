@@ -19,12 +19,12 @@
 
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../services/api.js").createApp();
-const logger = require("../../logger.js");
-const responseCodes = require("../../response_codes.js");
+const app = require("../../../src/v4/services/api.js").createApp();
+const logger = require("../../../src/v4/logger.js");
+const responseCodes = require("../../../src/v4/response_codes.js");
 
 describe("Logout", function () {
-	const User = require("../../models/user");
+	const User = require("../../../src/v4/models/user");
 	let server;
 	const username = "logout_username";
 	const username_not_verified = "logout_username_not_verified";
