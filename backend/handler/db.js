@@ -245,7 +245,7 @@
 			const dbConn = await Handler.getDB(database);
 			const colls = await dbConn.listCollections().toArray();
 			return colls.map(({name, options}) => ({name, options}));
-		} catchi (err) {
+		} catch (err) {
 			Handler.disconnect();
 			throw err;
 		}
