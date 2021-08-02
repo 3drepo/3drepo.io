@@ -129,6 +129,8 @@ module.exports.createApp = function (config) {
 	// presentation handler
 	app.use("/:account/:model", require("../routes/presentation"));
 
+	require("../../v5/src/routes/routesManager").init(app);
+
 	app.use(function(err, req, res, next) {
 		if(err) {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
