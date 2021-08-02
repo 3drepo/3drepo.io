@@ -248,19 +248,24 @@ SequenceActivities.get = async (account, model, sequenceId) => {
 };
 
 SequenceActivities.createActivities = async (account, model, sequenceId, activities, overwrite) => {
+	console.log("createActivities");
 	await Sequence.sequenceExists(account, model, sequenceId);
 
 	if (!yup.array().isValidSync(activities, { strict: true })) {
+		console.log("invalid args");
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
 	const activitiesList = [];
 	const treeFile = [];
+	console.log("traverse activities");
 	traverseActivities(activities, addToActivityListAndCreateTreeFile(activitiesList, utils.stringToUUID(sequenceId), treeFile, overwrite));
 
+	console.log("clear activities cache");
 	await clearActivityListCache(account, model, sequenceId);
 
 	if(overwrite) {
+		console.log("overwrite");
 		const activityTreeFile = JSON.stringify({activities: treeFile});
 
 		await Promise.all([
@@ -269,6 +274,8 @@ SequenceActivities.createActivities = async (account, model, sequenceId, activit
 		]);
 	}
 
+	console.log("insertMny");
+	console.log(activitiesList);
 	await db.insertMany(account, activityCol(model), activitiesList);
 };
 
