@@ -43,7 +43,7 @@
 		"@material-ui/pickers": "3.2.10",
 		"@popperjs/core": "2.6.0",
 		"@webscopeio/react-textarea-autocomplete": "4.6.3",
-		"axios": "0.19.0",
+		"axios": "0.21.1",
 		"connected-react-router": "6.9.1",
 		"copy-to-clipboard": "3.2.0",
 		"dayjs": "1.8.11",
@@ -56,7 +56,7 @@
 		"history": "4.9.0",
 		"idb": "6.0.0",
 		"konva": "4.0.9",
-		"lodash": "4.17.15",
+		"lodash": "4.17.21",
 		"markdown-linkify": "1.0.3",
 		"material-design-icons": "3.0.1",
 		"material-ui-chip-input": "2.0.0-beta.2",
@@ -99,7 +99,7 @@
 		"semver-compare": "1.0.0",
 		"simplebar": "4.0.0",
 		"simplebar-react": "1.0.0",
-		"socket.io-client": "2.0.4",
+		"socket.io-client": "4.1.3",
 		"sw-precache": "5.2.0",
 		"uuidv4": "5.0.1",
 		"worker-loader": "2.0.0",
@@ -107,7 +107,7 @@
 		"zxcvbn": "4.4.2"
 	},
 	"devDependencies": {
-		"@types/lodash": "4.14.137",
+		"@types/lodash": "4.14.171",
 		"@types/node": "8.5.2",
 		"@types/protractor": "4.0.0",
 		"@types/react": "16.8.6",
@@ -154,6 +154,6 @@
 	"resolutions": {
 		"react": "16.8.6",
 		"react-dom": "16.8.6",
-		"lodash": "4.17.15"
+		"lodash": "4.17.21"
 	}
 }
