@@ -19,9 +19,13 @@ const { Router } = require('express');
 const { validSession } = require('../../middleware/auth');
 const { respond } = require('../../utils/responder');
 const { template, createResponseCode } = require('../../utils/responseCodes');
+const Teamspaces = require('../../handler/teamspaces');
 
 const getTeamspaceList = (req, res) => {
-	respond(req, res, createResponseCode(template.ok), { teamspaces: [] });
+	const user = req.session.user.username;
+	Teamspaces.getTeamspaceListByUser(user).then((teamspaces) => {
+		respond(req, res, createResponseCode(template.ok), { teamspaces });
+	}).catch((err) => respond(req, res, err));
 };
 
 const establishRoutes = () => {

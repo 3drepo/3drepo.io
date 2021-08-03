@@ -27,7 +27,7 @@ const Responder = {};
 
 const constructApiInfo = ({ method, originalUrl }) => `${method} ${originalUrl}`;
 
-const genResponseLogging = ({ status, code }, { contentLength }, { session, startTime, method, originalUrl } = {}) => {
+const genResponseLogging = ({ status, code }, contentLength, { session, startTime, method, originalUrl } = {}) => {
 	const user = session?.user ? session.user.username : 'unknown';
 	const currentTime = Date.now();
 	const latency = startTime ? `${currentTime - startTime}` : '???';
@@ -67,7 +67,7 @@ Responder.respond = (req, res, resCode, body, { cache, customHeaders } = {}) => 
 		return;
 	}
 
-	let contentLength;
+	let contentLength = 0;
 
 	if (cache) {
 		res.setHeader('Cache-Control', `private, max-age=${cachePolicy.maxAge}`);
