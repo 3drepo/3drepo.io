@@ -1,89 +1,31 @@
 {
-  "env": {
-    "browser": false,
-    "node" : true,
-    "es6" : true
-  },
-  "globals": {
-    "console": false,
-    "module": true,
-    "document": false,
-    "require": false,
-    "Buffer": false,
-    "describe": false,
-    "it": false,
-    "after": false,
-    "before": false,
-    "process": false
-  },
-  "plugins": ["node"],
-  "extends": ["eslint:recommended", "plugin:node/recommended"],
-  "rules": {
-	"license-header": 2,
-	"node/no-unpublished-require": 0,
-	"no-fallthrough" : 0,
-	"no-control-regex": 0,
-	"strict": ["error", "global"],
-	"eqeqeq": 2,
-	"no-extend-native": 2,
-	"no-var": 2,
-	"no-undef": 2,
-	"no-multiple-empty-lines" : [
-			"error",
-			{"max" : 1}
-	],
-	"no-trailing-spaces" : 2,
-	"no-whitespace-before-property": 2,
-	"space-before-blocks" : 2,
-	"space-in-parens": 2,
-	"space-infix-ops" : 2,
-	"spaced-comment" : 2,
-	"semi": [
-		"error",
-		"always"
-	],
-	"linebreak-style": [
-		"error",
-		"unix"
-	],
-	"quotes": [
-		"error",
-		"double"
-	],
-	"block-scoped-var" : [
-		"error"
-	],
-	"no-shadow" : [
-	    "error"
-	],
-	"curly" : [
-		"error",
-		"all"
-	],
-	"no-console": [
-	    	"error",
-	    	{ "allow": ["warn", "error"] }
-	],
-	"brace-style" : [
-	    "error",
-	    "1tbs"
-	],
-	"array-bracket-spacing": [
-	    "error",
-	    "never"
-	],
-	"comma-style": ["error", "last"],
-	"comma-dangle": [
-	    "error",
-	    "never"
-	],
-	"indent": [
-	    "error",
-	    "tab",
-	    { "SwitchCase": 1 }
-	],
-	"prefer-const": [
-		"error"
-	]
-  }
+    "extends": [
+        "airbnb-base",
+        "plugin:node/recommended",
+        "plugin:security/recommended"
+    ],
+    "parserOptions": {
+        "ecmaVersion": 2020
+    },
+    "env": {
+      },
+    "rules": {
+		"license-header": 2,
+		"arrow-parens": ["error", "always"],
+		"no-tabs": ["error", {"allowIndentationTabs": true}],
+		"no-plusplus" : 0,
+        "indent": ["error", "tab", { "SwitchCase": 1 }],
+        "object-curly-newline": 0,
+        "max-len": ["error", {
+            "code": 120,
+            "ignoreComments": true,
+            "ignoreTemplateLiterals": true,
+            "ignoreStrings":  true
+        }],
+		"no-throw-literal": 0,
+        "no-restricted-syntax": 0,
+        "no-underscore-dangle": ["error", { "allow": ["_id"] }],
+        "security/detect-non-literal-fs-filename": 0,
+		"security/detect-object-injection": 0
+    }
 }
