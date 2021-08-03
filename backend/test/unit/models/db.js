@@ -745,7 +745,7 @@ describe("Check DB handler", function() {
 			const newData = { $set: { users: [] } };
 			const result = await db.updateMany(account, "jobs", query, newData);
 			expect(result.result.n).to.equal(24);
-			expect(result.result.nModified).to.equal(10);
+			expect(result.result.nModified).to.equal(8);
 			expect(result.result.ok).to.equal(1);
 		});
 	});
