@@ -342,7 +342,7 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 		toUpdate.$unset = toUnset;
 	}
 
-	await db.update(account, sequenceCol(model), {_id: utils.stringToUUID(sequenceId)}, toUpdate);
+	await db.updateOne(account, sequenceCol(model), {_id: utils.stringToUUID(sequenceId)}, toUpdate);
 };
 
 Sequence.deleteLegend = async (account, model, sequenceId) => {

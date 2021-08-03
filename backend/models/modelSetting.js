@@ -314,8 +314,7 @@ ModelSetting.isFederation = async function(account, model) {
 };
 
 ModelSetting.isModelNameExists = async function(account, models, modelName) {
-	const coll = await db.getCollection(account, MODELS_COLL);
-	const count = await coll.find({name: modelName, _id: {"$in": models}}).count();
+	const count = await db.count(account, MODELS_COLL, {name: modelName, _id: {"$in": models}});
 
 	return count > 0;
 };
@@ -546,7 +545,7 @@ ModelSetting.updateModelSetting = async function (account, model, updateObj) {
 	}
 
 	if (Object.keys(updateBson).length > 0) {
-		await db.update(account, MODELS_COLL, {_id: model}, updateBson);
+		await db.updateOne(account, MODELS_COLL, {_id: model}, updateBson);
 	}
 
 	return ModelSetting.prepareDefaultView(account, model, setting);
