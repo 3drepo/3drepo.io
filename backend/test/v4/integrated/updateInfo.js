@@ -181,7 +181,7 @@ describe("Updating user info", function () {
 
 	it("should succeed to update the avatar", async function() {
 		await agent.post(`/${username}/avatar`)
-			.attach("file", __dirname + "/../images/avatar.png")
+			.attach("file", __dirname + "/../statics/images/avatar.png")
 			.expect(200);
 	})
 
@@ -193,7 +193,7 @@ describe("Updating user info", function () {
 
 	it ("should fail to update the avatar with the wrong type of file", async function() {
 		await agent.post(`/${username}/avatar`)
-			.attach("file", __dirname + "/../images/avatar_fakeimage_zip.png")
+			.attach("file", __dirname + "/../statics/images/avatar_fakeimage_zip.png")
 			.expect(400);
 	});
 });
