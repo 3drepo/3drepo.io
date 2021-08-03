@@ -433,7 +433,7 @@ Group.update = async function (account, model, branch = "master", revId = null, 
 				updateBson.$unset = toUnset;
 			}
 
-			await db.update(account, getGroupCollectionName(model), { _id: group._id }, updateBson);
+			await db.updateOne(account, getGroupCollectionName(model), { _id: group._id }, updateBson);
 		}
 
 		clean(group);
