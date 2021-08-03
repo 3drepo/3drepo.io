@@ -137,7 +137,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 
 	public renderExpandIcon = renderWhenTrue(() => (
 		<ToggleIcon active={Number(this.state.expanded)} />
-		));
+	));
 
 	public renderCollapsable = renderWhenTrue(() => (
 		<CollapsableContent>
@@ -256,7 +256,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 				>
 					<RoleIndicator color={roleColor} ref={this.headerRef} />
 					<MainInfoContainer>
-						<Grid container alignItems="center" justify="space-between" >
+						<Grid container alignItems="center" >
 							{this.renderTitleNumber(number)}
 							{this.renderName(!editable)}
 							{this.renderNameField(editable)}
