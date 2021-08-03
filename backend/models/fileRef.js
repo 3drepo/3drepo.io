@@ -275,7 +275,6 @@ FileRef.removeResourceFromEntity  = async function(account, model, property, pro
 
 FileRef.storeMitigationsFile = async function(account, user, name, data) {
 	const collName = MITIGATIONS_FILE_REF;
-	const collection = await );
 
 	await removeAllFiles(account, collName);
 	await db.remove(account, collName, {});
