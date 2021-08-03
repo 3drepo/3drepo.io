@@ -284,12 +284,6 @@
 		});
 	};
 
-	Handler.update = async function (database, colName, query, data, upsert = false) {
-		const collection = await Handler.getCollection(database, colName);
-		const options = upsert ? { upsert } : undefined;
-		return collection.update(query, data, options);
-	};
-
 	Handler.updateMany = async function (database, colName, query, data, upsert = false) {
 		const collection = await Handler.getCollection(database, colName);
 		const options = upsert ? { upsert } : undefined;

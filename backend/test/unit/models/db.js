@@ -702,54 +702,6 @@ describe("Check DB handler", function() {
 		});
 	});
 
-	describe("update", function () {
-		it("update should succeed", async function() {
-			const query = { _id: "Test Job 3" };
-			const newData = { $set: { users: [ "update1" ] } };
-			const result = await db.update(account, "jobs", query, newData);
-			expect(result.result.n).to.equal(1);
-			expect(result.result.nModified).to.equal(1);
-			expect(result.result.ok).to.equal(1);
-		});
-
-		it("upsert on existing record should succeed", async function() {
-			const query = { _id: "Test Job 3" };
-			const newData = { $set: { users: [ "update1", "update2" ] } };
-			const result = await db.update(account, "jobs", query, newData, true);
-			expect(result.result.n).to.equal(1);
-			expect(result.result.nModified).to.equal(1);
-			expect(result.result.ok).to.equal(1);
-		});
-
-		it("upsert should succeed", async function() {
-			const query = { _id: "update upsert" };
-			const newData = { $set: { users: [ "update1", "update2", "update3" ] } };
-			const result = await db.update(account, "jobs", query, newData, true);
-			expect(result.result.n).to.equal(1);
-			expect(result.result.nModified).to.equal(0);
-			expect(result.result.ok).to.equal(1);
-			newJobIds.push(result.result.upserted[0]._id);
-		});
-
-		it("upsert again should modify existing record", async function() {
-			const query = { _id: "update upsert" };
-			const newData = { $set: { users: [ "u1", "u2", "u3", "u4" ] } };
-			const result = await db.update(account, "jobs", query, newData, true);
-			expect(result.result.n).to.equal(1);
-			expect(result.result.nModified).to.equal(1);
-			expect(result.result.ok).to.equal(1);
-		});
-
-		it("update records should succeed", async function() {
-			const query = {};
-			const newData = { users: [] };
-			const result = await db.update(account, "jobs", query, newData);
-			expect(result.result.n).to.equal(1);
-			expect(result.result.nModified).to.equal(1);
-			expect(result.result.ok).to.equal(1);
-		});
-	});
-
 	describe("updateMany", function () {
 		it("update many should succeed", async function() {
 			const query = { _id: "Test Job 4" };
@@ -792,7 +744,7 @@ describe("Check DB handler", function() {
 			const query = {};
 			const newData = { $set: { users: [] } };
 			const result = await db.updateMany(account, "jobs", query, newData);
-			expect(result.result.n).to.equal(25);
+			expect(result.result.n).to.equal(24);
 			expect(result.result.nModified).to.equal(10);
 			expect(result.result.ok).to.equal(1);
 		});
