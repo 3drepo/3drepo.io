@@ -452,7 +452,7 @@
 		await checkDupName(account, project);
 		checkPermissionName(project.permissions);
 
-		await db.updateOne(account, PROJECTS_COLLECTION_NAME, {name: projectName}, project);
+		await db.updateOne(account, PROJECTS_COLLECTION_NAME, {name: projectName}, { $set: project });
 
 		return project;
 	};
