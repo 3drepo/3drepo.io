@@ -16,7 +16,8 @@
     "test:int": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha test/v4/integrated --recursive --exit",
     "lint": "eslint . --rulesdir eslint-rules/",
     "lint:fix": "eslint --fix . --rulesdir eslint-rules/",
-    "start": "cross-env NODE_CONFIG_DIR=../config node ./src/v4/3drepo.js"
+    "start": "cross-env NODE_CONFIG_DIR=../config node ./src/v4/3drepo.js",
+    "watch": "cross-env NODE_CONFIG_DIR=../config nodemon ./src/v4/3drepo.js"
   },
   "dependencies": {
     "@elastic/elasticsearch": "7.12.0",
@@ -83,6 +84,7 @@
     "eslint-plugin-security": "1.4.0",
     "mocha": "9.0.2",
     "mocha-lcov-reporter": "1.3.0",
+    "nodemon": "2.0.12",
     "nyc": "15.0.1",
     "proxyquire": "2.1.0",
     "sinon": "7.2.3",
