@@ -33,7 +33,6 @@ const fs = require("fs");
 
 describe("Revision", function () {
 
-	const User = require("../models/user");
 	let server;
 	let agent;
 	const username = "rev";
