@@ -16,15 +16,20 @@
  */
 
 const { Router } = require('express');
+const { validSession } = require('../../middleware/auth');
+const { respond } = require('../../utils/responder');
+const { template, createResponseCode } = require('../../utils/responseCodes');
 
 const getTeamspaceList = (req, res) => {
-
+	respond(req, res, createResponseCode(template.ok), { teamspaces: [] });
 };
 
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 
-	router.get('/', getTeamspaceList);
+	router.get('/', validSession, getTeamspaceList);
+
+	return router;
 };
 
 module.exports = establishRoutes();

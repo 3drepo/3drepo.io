@@ -69,6 +69,7 @@ module.exports.createApp = function (config) {
 		}
 	});
 
+	require(`${v5Path}/routes/routesManager`).init(app);
 	app.use("/", require("../routes/user"));
 
 	app.use("/:account", require("../routes/job"));
@@ -130,8 +131,6 @@ module.exports.createApp = function (config) {
 
 	// presentation handler
 	app.use("/:account/:model", require("../routes/presentation"));
-
-	require(`${v5Path}/routes/routesManager`).init(app);
 
 	app.use(function(err, req, res, next) {
 		if(err) {

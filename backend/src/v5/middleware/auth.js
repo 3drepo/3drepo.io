@@ -16,12 +16,17 @@
  */
 
 const { isSessionValid } = require('../utils/sessions');
+const { respond } = require('../utils/responder');
+const { template, createResponseCode } = require('../utils/responseCodes');
 
 const AuthMiddlewares = {};
 
-AuthMiddlewares.validSession = ({ header, session }, res, next) => {
+AuthMiddlewares.validSession = (req, res, next) => {
+	const { header, session } = req;
 	if (isSessionValid(session, header.referer)) {
 		next();
+	} else {
+		respond(req, res, createResponseCode(template.notLoggedIn));
 	}
 };
 

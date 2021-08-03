@@ -14,20 +14,29 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const { toCamelCase, toSnakeCase } = require('./helper/strings');
 
-const { camelCase, snakeCase } = require('lodash');
+const ResponseCodes = {};
 
-const StringHelper = {};
+ResponseCodes.template = {
+	ok: { message: 'OK', status: 200 },
 
-// Turns thisIsUs to THIS_IS_US
-StringHelper.toSnakeCase = (str) => snakeCase(str).toUpperCase();
-StringHelper.toCamelCase = (str) => camelCase(str);
+	// Auth
+	notLoggedIn: { message: 'You are not logged in', status: 401 },
 
-// e.g. URL `https://3drepo.org/abc/xyz` this returns `https://3drepo.org`
-// returns the whole string if the regex is not matched
-StringHelper.getURLDomain = (url) => {
-	const domainRegexMatch = url.match(/^(\w)*:\/\/.*?\//);
-	return domainRegexMatch ? domainRegexMatch[0].replace(/\/\s*$/, '') : url;
+	// Fail safe
+	unknown: { message: 'Unknown error occured. Please contact support.', status: 500 },
 };
 
-module.exports = StringHelper;
+Object.keys(ResponseCodes.template).forEach((key) => {
+	ResponseCodes.template[key].code = toSnakeCase(key);
+});
+
+ResponseCodes.createResponseCode = (errCode, message) => {
+	const res = { ...errCode } || ResponseCodes.UNKNOWN_ERROR;
+	return message ? { ...res, message } : res;
+};
+
+ResponseCodes.codeExists = (code) => !!ResponseCodes.template[toCamelCase(code)];
+
+module.exports = ResponseCodes;
