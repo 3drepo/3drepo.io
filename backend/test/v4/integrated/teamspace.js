@@ -115,8 +115,8 @@ describe("Teamspace", function() {
 	const notMemberOfTeamspace = "fed";
 	const collaboratorTeamspace = "teamSpace1";
 
-	const mitigationsFile = "/../mitigations/mitigations1.csv";
-	const bigMitigationsFile = "/../mitigations/big.csv";
+	const mitigationsFile = "/../statics/mitigations/mitigations1.csv";
+	const bigMitigationsFile = "/../statics/mitigations/big.csv";
 
 	before(function(done) {
 
@@ -821,7 +821,7 @@ describe("Teamspace", function() {
 
 	describe("Upload mitigations file", function(done) {
 		const user =  imsharedTeamspace;
-		const notMitigationsFile = "/../mitigations/notMitigations.zip";
+		const notMitigationsFile = "/../statics/mitigations/notMitigations.zip";
 
 		before(function(done) {
 			this.timeout(timeout);
