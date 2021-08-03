@@ -207,6 +207,11 @@
 		return collection.insertMany(data);
 	};
 
+	Handler.insertOne = async function (database, colName, data) {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.insertOne(data);
+	};
+
 	Handler.getFileFromGridFS = function (database, collection, filename) {
 		return Handler.getFileStreamFromGridFS(database, collection, filename).then((file) => {
 			const fileStream = file.stream;

@@ -61,8 +61,7 @@ const unionArrayMerger = opts => (objValue, srcValue) => {
  * @returns {Promise} Returns a promise with the recently created notification
  */
 const insertNotification = async (username, type, data) => {
-	const notifColl = await db.getCollection(NOTIFICATIONS_DB, username);
-	const insertion = await notifColl.insertOne(generateNotification(type, data));
+	const insertion = await db.insertOne(NOTIFICATIONS_DB, username, generateNotification(type, data));
 	return utils.objectIdToString(insertion.ops[0]);
 };
 
