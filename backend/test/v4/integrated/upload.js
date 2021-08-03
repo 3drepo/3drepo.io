@@ -89,7 +89,7 @@ describe("Uploading a model", function () {
 		it("should return error (no subscriptions)", function(done) {
 			agent.post(`/${username}/${modelId}/upload`)
 				.field("tag", "no_quota")
-				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
+				.attach("file", __dirname + "/../3dmodels/8000cubes.obj")
 				.expect(400, function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT_PAY.value);
 					done(err);
@@ -116,7 +116,7 @@ describe("Uploading a model", function () {
 		it("should return error (has a subscription but ran out of space)", function(done) {
 			agent.post(`/${username}/${modelId}/upload`)
 				.field("tag", "no_space")
-				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
+				.attach("file", __dirname + "/../3dmodels/8000cubes.obj")
 				.expect(400, function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT_PAY.value);
 					done(err);
@@ -143,7 +143,7 @@ describe("Uploading a model", function () {
 		it("should succeed", async function() {
 			await agent.post(`/${username}/${modelId}/upload`)
 				.field("tag", "with_quota")
-				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
+				.attach("file", __dirname + "/../3dmodels/8000cubes.obj")
 				.expect(200);
 		});
 		/*
@@ -171,7 +171,7 @@ describe("Uploading a model", function () {
 		it("should succeed (uppercase extension)", function(done) {
 			agent.post(`/${username}/${modelId}/upload`)
 				.field("tag", "uppercase_ext")
-				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/upper.OBJ")
+				.attach("file", __dirname + "/../3dmodels/upper.OBJ")
 				.expect(200, function(err, res) {
 					done(err);
 				});
@@ -179,7 +179,7 @@ describe("Uploading a model", function () {
 
 		it("but without tag should fail", function(done) {
 			agent.post(`/${username}/${modelId}/upload`)
-				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
+				.attach("file", __dirname + "/../3dmodels/8000cubes.obj")
 				.expect(400, function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
 					done(err);
@@ -189,7 +189,7 @@ describe("Uploading a model", function () {
 		it("but with invalid tag should fail", function(done) {
 			agent.post(`/${username}/${modelId}/upload`)
 				.field("tag", "bad tag!")
-				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
+				.attach("file", __dirname + "/../3dmodels/8000cubes.obj")
 				.expect(400, function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
 					done(err);
@@ -200,7 +200,7 @@ describe("Uploading a model", function () {
 
 			agent.post(`/${username}/${modelId}/upload`)
 				.field("tag", "empty_file")
-				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/empty.ifc")
+				.attach("file", __dirname + "/../3dmodels/empty.ifc")
 				.expect(400, function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
 					done(err);
@@ -212,7 +212,7 @@ describe("Uploading a model", function () {
 
 			agent.post(`/${username}/${modelId}/upload`)
 				.field("tag", "unsupported_ext")
-				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/toy.abc")
+				.attach("file", __dirname + "/../3dmodels/toy.abc")
 				.expect(400, function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
 					done(err);
@@ -224,7 +224,7 @@ describe("Uploading a model", function () {
 
 			agent.post(`/${username}/${modelId}/upload`)
 				.field("tag", "no_ext")
-				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/toy")
+				.attach("file", __dirname + "/../3dmodels/toy")
 				.expect(400, function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.FILE_NO_EXT.value);
 					done(err);
@@ -236,7 +236,7 @@ describe("Uploading a model", function () {
 
 			agent.post(`/${username}/${modelId}/upload`)
 				.field("tag", "too_big")
-				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/toy.ifc")
+				.attach("file", __dirname + "/../3dmodels/toy.ifc")
 				.expect(400, function(err, res) {
 					expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT.value);
 					done(err);
@@ -443,7 +443,7 @@ describe("Uploading a model", function () {
 					.set("Content-Range", "bytes 0-2999999/6425218")
 					.set("Content-Type", "application/octet-stream")
 					.set("Content-Length", "bytes=3000000")
-					.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/chunk0.obj")
+					.attach("file", __dirname + "/../3dmodels/chunk0.obj")
 					.expect(404, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.CORRELATION_ID_NOT_FOUND.value);
 						done(err);
@@ -454,7 +454,7 @@ describe("Uploading a model", function () {
 				agent.patch(`/${username}/${modelId}/upload/ms-chunking/${corID1}`)
 					.set("Content-Type", "application/octet-stream")
 					.set("Content-Length", "bytes=3000000")
-					.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/chunk0.obj")
+					.attach("file", __dirname + "/../3dmodels/chunk0.obj")
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 						done(err);
@@ -466,7 +466,7 @@ describe("Uploading a model", function () {
 					.set("Content-Range", "kilobytes 0-2999999/6425218")
 					.set("Content-Type", "application/octet-stream")
 					.set("Content-Length", "bytes=3000000")
-					.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/chunk0.obj")
+					.attach("file", __dirname + "/../3dmodels/chunk0.obj")
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 						done(err);
@@ -478,7 +478,7 @@ describe("Uploading a model", function () {
 					.set("Content-Range", "bytes=0-2999999/6425218")
 					.set("Content-Type", "application/octet-stream")
 					.set("Content-Length", "bytes=3000000")
-					.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/chunk0.obj")
+					.attach("file", __dirname + "/../3dmodels/chunk0.obj")
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 						done(err);
@@ -490,7 +490,7 @@ describe("Uploading a model", function () {
 					.set("Content-Range", "bytes 0-52428799/52428800")
 					.set("Content-Type", "application/octet-stream")
 					.set("Content-Length", "bytes=52428800")
-					.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/big0.ifc")
+					.attach("file", __dirname + "/../3dmodels/big0.ifc")
 					.expect(400, function(err, res) {
 						expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT.value);
 						done(err);
@@ -502,7 +502,7 @@ describe("Uploading a model", function () {
 					.set("Content-Range", "bytes 0-2999999/6425218")
 					.set("Content-Type", "application/octet-stream")
 					.set("Content-Length", "bytes=3000000")
-					.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/chunk0.obj")
+					.attach("file", __dirname + "/../3dmodels/chunk0.obj")
 					.expect(200, function(err, res) {
 						expect(res.headers["range"]).to.equal("bytes=0-2999999");
 						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(3425218);
@@ -515,7 +515,7 @@ describe("Uploading a model", function () {
 					.set("Content-Range", "bytes 0-2999999/6425218")
 					.set("Content-Type", "application/octet-stream")
 					.set("Content-Length", "bytes=3000000")
-					.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/chunk0.obj")
+					.attach("file", __dirname + "/../3dmodels/chunk0.obj")
 					.expect(200, function(err, res) {
 						expect(res.headers["range"]).to.equal("bytes=0-2999999");
 						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(3425218);
@@ -528,7 +528,7 @@ describe("Uploading a model", function () {
 					.set("Content-Range", "bytes 3000000-5999999/6425218")
 					.set("Content-Type", "application/octet-stream")
 					.set("Content-Length", "bytes=3000000")
-					.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/chunk1.obj")
+					.attach("file", __dirname + "/../3dmodels/chunk1.obj")
 					.expect(200, function(err, res) {
 						const nextChunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, 425218);
 						expect(res.headers["range"]).to.equal("bytes=0-5999999");
@@ -542,7 +542,7 @@ describe("Uploading a model", function () {
 					.set("Content-Range", "bytes 6000000-6425217/6425218")
 					.set("Content-Type", "application/octet-stream")
 					.set("Content-Length", "bytes=425218")
-					.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/chunk2.obj")
+					.attach("file", __dirname + "/../3dmodels/chunk2.obj")
 					.expect(200, function(err, res) {
 						expect(res.headers["range"]).to.equal("bytes=0-6425217");
 						expect(parseInt(res.headers["x-ms-chunk-size"])).to.equal(0);
@@ -557,7 +557,7 @@ describe("Uploading a model", function () {
 							.set("Content-Range", "bytes 3000000-5999999/6425218")
 							.set("Content-Type", "application/octet-stream")
 							.set("Content-Length", "bytes=3000000")
-							.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/big1.ifc")
+							.attach("file", __dirname + "/../3dmodels/big1.ifc")
 							.expect(200, function(err, res) {
 								const nextChunkSize = Math.min(C.MS_CHUNK_BYTES_LIMIT, 425218);
 								expect(res.headers["range"]).to.equal("bytes=0-5999999");
@@ -570,7 +570,7 @@ describe("Uploading a model", function () {
 							.set("Content-Range", "bytes 6000000-6425217/6425218")
 							.set("Content-Type", "application/octet-stream")
 							.set("Content-Length", "bytes=425218")
-							.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/big2.ifc")
+							.attach("file", __dirname + "/../3dmodels/big2.ifc")
 							.expect(400, function(err, res) {
 								expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT.value);
 								done(err);

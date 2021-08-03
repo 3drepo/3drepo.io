@@ -67,9 +67,9 @@ describe("Issues", function () {
 	};
 
 	const bcf = {
-		path: "/../../../src/v4/statics/bcf/example1.bcf",
-		withGroupsPath: "/../../../src/v4/statics/bcf/withGroups.bcf",
-		invalidFile: "/../../../src/v4/statics/bcf/notBCF.txt",
+		path: "/../bcf/example1.bcf",
+		withGroupsPath: "/../bcf/withGroups.bcf",
+		invalidFile: "/../bcf/notBCF.txt",
 		issue1: "75959a60-8ef1-11e6-8d05-9717c0574272",
 		issue2: "8d46d1b0-8ef1-11e6-8d05-9717c0574272"
 	};

@@ -35,7 +35,7 @@ const attachDocument = (account, modelId) => (agent, names , filenames, issueId 
 	const request = agent.post(`/${account}/${modelId}/issues/${issueId}/resources`)
 		.field({names});
 
-	filenames.forEach(file => request.attach("file", __dirname + "/../../statics/documents/" + file));
+	filenames.forEach(file => request.attach("file", __dirname + "/../statics/documents/" + file));
 	request.expect(200, (err, res) => next(err, res.body));
 };
 

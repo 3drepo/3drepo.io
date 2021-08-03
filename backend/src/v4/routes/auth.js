@@ -908,7 +908,7 @@ function listInfo(req, res, next) {
 
 function printVersion(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
-	const versionInfo = require("../../VERSION");
+	const versionInfo = require("../../../VERSION");
 	responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, versionInfo);
 }
 
