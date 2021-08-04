@@ -15,9 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { getAccessibleTeamspaces } = require('../models/users');
+
 const Teamspaces = {};
 
 Teamspaces.getTeamspaceListByUser = async (user) => {
+	const tsList = getAccessibleTeamspaces(user);
+	return tsList;
 };
 
 module.exports = Teamspaces;

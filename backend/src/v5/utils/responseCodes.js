@@ -26,6 +26,9 @@ ResponseCodes.template = {
 
 	// Fail safe
 	unknown: { message: 'Unknown error occured. Please contact support.', status: 500 },
+
+	// User document related error
+	userNotFound: { message: 'User not found.', status: 404 },
 };
 
 Object.keys(ResponseCodes.template).forEach((key) => {
