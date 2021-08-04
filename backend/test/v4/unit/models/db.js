@@ -18,12 +18,12 @@
 
 const expect = require("chai").expect;
 const proxyquire = require("proxyquire").noCallThru();
-const checkPermission  = proxyquire("../../../middlewares/checkPermissions", {
+const checkPermission  = proxyquire("../../../../src/v4/middlewares/checkPermissions", {
 	"./getPermissionsAdapter": {},
 	"../response_codes": {}
 }).checkPermissionsHelper;
-const C = require("../../../constants");
-const db = require("../../../handler/db");
+const C = require("../../../../src/v4/constants");
+const db = require("../../../../src/v4/handler/db");
 
 const account = "testuser";
 const password = "testuser";
