@@ -19,7 +19,7 @@ const { Router } = require('express');
 const { validSession } = require('../../middleware/auth');
 const { respond } = require('../../utils/responder');
 const { template, createResponseCode } = require('../../utils/responseCodes');
-const Teamspaces = require('../../processors/teamspaces');
+const Teamspaces = require('../../processors/teamspaces/teamspaces');
 
 const getTeamspaceList = (req, res) => {
 	const user = req.session.user.username;

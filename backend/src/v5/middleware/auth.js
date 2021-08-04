@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { createResponseCode, template } = require('../utils/responseCodes');
 const { isSessionValid } = require('../utils/sessions');
 const { respond } = require('../utils/responder');
-const { template, createResponseCode } = require('../utils/responseCodes');
 
 const AuthMiddlewares = {};
 

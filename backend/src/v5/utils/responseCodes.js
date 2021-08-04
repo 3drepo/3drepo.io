@@ -29,6 +29,9 @@ ResponseCodes.template = {
 
 	// User document related error
 	userNotFound: { message: 'User not found.', status: 404 },
+
+	// Teamspace related error
+	teamspaceNotFound: { message: 'User not found.', status: 404 },
 };
 
 Object.keys(ResponseCodes.template).forEach((key) => {

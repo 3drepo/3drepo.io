@@ -14,8 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { v4Path } = require('../../interop');
-// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require
-const db = require(`${v4Path}/handler/db`);
 
-module.exports = db;
+const PermConst = {};
+
+PermConst.teamspaceAdmin = 'teamspace_admin';
+
+module.exports = PermConst;
