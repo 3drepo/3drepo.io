@@ -206,7 +206,7 @@ SequenceActivities.edit = async (account, model, sequenceId, activityId, activit
 	}
 
 	const query =  {_id: utils.stringToUUID(activityId), sequenceId: utils.stringToUUID(sequenceId)};
-	const {result} = await db.update(account, activityCol(model), query, {$set: activity});
+	const {result} = await db.updateOne(account, activityCol(model), query, {$set: activity});
 
 	if (!result.n) {
 		throw responseCodes.ACTIVITY_NOT_FOUND;
