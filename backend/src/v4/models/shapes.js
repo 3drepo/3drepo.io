@@ -71,7 +71,7 @@ Shapes.getByTicketId = async (account, model, subCollectionName, ticket_id) => {
 
 Shapes.removeByTicketId = async (account, model, subCollectionName, ticket_id) => {
 	const query = { ticket_id: utils.stringToUUID(ticket_id) };
-	return await db.remove(account, getCollectionName(model, subCollectionName), query);
+	return await db.deleteMany(account, getCollectionName(model, subCollectionName), query);
 };
 
 module.exports = Shapes;

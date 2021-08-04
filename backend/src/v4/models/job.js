@@ -141,7 +141,7 @@ Job.removeJob = async function(teamspace, jobName) {
 		throw responseCodes.JOB_ASSIGNED;
 	}
 
-	return db.remove(teamspace, JOBS_COLLECTION_NAME, {_id: jobName});
+	return db.deleteOne(teamspace, JOBS_COLLECTION_NAME, {_id: jobName});
 };
 
 Job.removeUserFromAnyJob = async function(teamspace, user) {

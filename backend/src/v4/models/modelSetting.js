@@ -219,7 +219,7 @@ ModelSetting.createNewSetting = async function(teamspace, modelName, data) {
 };
 
 ModelSetting.deleteModelSetting = function(account, model) {
-	return db.remove(account, MODELS_COLL, { _id: model });
+	return db.deleteOne(account, MODELS_COLL, { _id: model });
 };
 
 ModelSetting.findModelSettingById = async function(account, model, projection, toClean = true) {

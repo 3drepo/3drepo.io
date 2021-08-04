@@ -165,7 +165,7 @@ FileRef.removeFile = async (account, model, collName, ref_id) => {
 
 	return await Promise.all([
 		ExternalServices.removeFiles(account, refCollName, entry.type, [entry.link]),
-		db.remove(account, refCollName, {_id:entry._id})
+		db.deleteOne(account, refCollName, {_id:entry._id})
 	]);
 };
 
@@ -263,10 +263,10 @@ FileRef.removeResourceFromEntity  = async function(account, model, property, pro
 			await ExternalServices.removeFiles(account, collection, ref.type, [ref.link]);
 		}
 
-		await collection.remove({_id:resourceId});
+		await collection.deleteOne({_id:resourceId});
 	} else {
 		delete ref._id;
-		await collection.update({_id: resourceId}, { $set: ref });
+		await collection.updateOne({_id: resourceId}, { $set: ref });
 	}
 
 	ref[property] = [propertyId]; // This is to identify from where this ref has been dettached
@@ -277,7 +277,7 @@ FileRef.storeMitigationsFile = async function(account, user, name, data) {
 	const collName = MITIGATIONS_FILE_REF;
 
 	await removeAllFiles(account, collName);
-	await db.remove(account, collName, {});
+	await db.deleteMany(account, collName, {});
 
 	const extraFields = {"_id":MITIGATIONS_ID};
 

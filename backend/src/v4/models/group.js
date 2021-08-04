@@ -302,13 +302,13 @@ Group.create = async function (account, model, branch = "master", rid = null, se
 
 Group.deleteGroups = async function (account, model, sessionId, ids) {
 	const groupIds = ids.map(utils.stringToUUID);
-	await db.remove(account, getGroupCollectionName(model), { _id: { $in: groupIds } });
+	await db.deleteMany(account, getGroupCollectionName(model), { _id: { $in: groupIds } });
 
 	ChatEvent.groupsDeleted(sessionId, account, model, ids);
 };
 
 Group.deleteGroupsByViewId = async function (account, model, view_id) {
-	return await db.remove(account, getGroupCollectionName(model), { view_id });
+	return await db.deleteMany(account, getGroupCollectionName(model), { view_id });
 };
 
 Group.findByUID = async function (account, model, branch, revId, uid, showIfcGuids = false, noClean = true, convertToIfcGuids = false) {

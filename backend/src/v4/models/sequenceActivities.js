@@ -221,7 +221,7 @@ SequenceActivities.remove = async (account, model, sequenceId, activityId) => {
 	const idsToDelete = await getDescendantsIds(account, model, sequenceId, activityId);
 
 	const query = {_id:{ $in: idsToDelete}, sequenceId: utils.stringToUUID(sequenceId)};
-	const {result} = await db.remove(account,  activityCol(model), query);
+	const {result} = await db.deleteMany(account,  activityCol(model), query);
 
 	if (!result.n) {
 		throw responseCodes.ACTIVITY_NOT_FOUND;
