@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { createResponseCode, template } = require('../../utils/responseCodes');
 const { Router } = require('express');
-const { validSession } = require('../../middleware/auth');
-const { respond } = require('../../utils/responder');
-const { template, createResponseCode } = require('../../utils/responseCodes');
 const Teamspaces = require('../../processors/teamspaces/teamspaces');
+const { respond } = require('../../utils/responder');
+const { validSession } = require('../../middleware/auth');
 
 const getTeamspaceList = (req, res) => {
 	const user = req.session.user.username;

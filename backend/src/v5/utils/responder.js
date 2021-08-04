@@ -17,11 +17,11 @@
 
 const networkLabel = require('./logger').labels.network;
 const logger = require('./logger').logWithLabel(networkLabel);
-const { v4Path } = require('../../interop');
-// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require
-const { cachePolicy } = require(`${v4Path}/config`);
+const { codeExists, createResponseCode, template } = require('./responseCodes');
 const { isBuffer, isString } = require('./helper/typeCheck');
-const { template, codeExists, createResponseCode } = require('./responseCodes');
+const { v4Path } = require('../../interop');
+// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
+const { cachePolicy } = require(`${v4Path}/config`);
 
 const Responder = {};
 

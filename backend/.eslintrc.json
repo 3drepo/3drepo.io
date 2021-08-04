@@ -7,9 +7,14 @@
     "parserOptions": {
         "ecmaVersion": 2020
     },
+	"plugins": [
+		"require-sort"
+	],
     "env": {
       },
     "rules": {
+		"import/order": 0,
+	    "require-sort/require-sort": "error",
 		"license-header": 2,
 		"arrow-parens": ["error", "always"],
 		"no-tabs": ["error", {"allowIndentationTabs": true}],

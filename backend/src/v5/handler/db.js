@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { v4Path } = require('../../interop');
-// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require
+// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
 const db = require(`${v4Path}/handler/db`);
 
 module.exports = db;
