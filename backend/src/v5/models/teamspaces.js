@@ -16,7 +16,7 @@
  */
 
 const db = require('../handler/db');
-const teamspaceAdminLabel = require('../utils/permissions/permissions.constants');
+const teamspaceAdminLabel = require('../utils/permissions/permissions.constants').teamspaceAdmin;
 
 const { template, createResponseCode } = ('../utils/responseCodes');
 
@@ -35,7 +35,7 @@ const getTeamspace = async (ts, projection) => {
 Teamspace.getTeamspaceAdmins = async (ts) => {
 	const data = await getTeamspace(ts, { 'customData.permissions': 1 });
 	return data.customData.permissions.flatMap(
-		({ _id, permissions }) => (permissions.includes(teamspaceAdminLabel) ? _id : []),
+		({ user, permissions }) => (permissions.includes(teamspaceAdminLabel) ? user : []),
 	);
 };
 

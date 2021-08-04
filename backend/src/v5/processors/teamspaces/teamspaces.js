@@ -22,7 +22,7 @@ const Teamspaces = {};
 
 Teamspaces.getTeamspaceListByUser = async (user) => {
 	const tsList = await getAccessibleTeamspaces(user);
-	return tsList.map(async (ts) => ({ name: ts, isAdmin: await isTeamspaceAdmin(ts, user) }));
+	return Promise.all(tsList.map(async (ts) => ({ name: ts, isAdmin: await isTeamspaceAdmin(ts, user) })));
 };
 
 module.exports = Teamspaces;
