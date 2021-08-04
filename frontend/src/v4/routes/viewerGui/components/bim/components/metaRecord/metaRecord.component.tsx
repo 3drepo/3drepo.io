@@ -100,7 +100,8 @@ const MetaRecordData = ({ value, name, copyRules, selectAllSimilar }) => {
 	);
 };
 
-export const MetaRecord = ({ name, data, ...props }: IProps) => {
+export const MetaRecord = (props: IProps) => {
+	const { name, data, copyRules, selectAllSimilar, starredMetaMap, toggleStarredRecord } = props;
 	const [collapsed, setCollapsed] = useState<boolean>(false);
 	const hasSubData = !data.value;
 
@@ -110,9 +111,18 @@ export const MetaRecord = ({ name, data, ...props }: IProps) => {
 		<>
 			<Header section={hasSubData}>
 				{hasSubData && <CollapseButton collapsed={collapsed} onClick={toggleCollapse} />}
-				{!hasSubData && <Starred data={data} {...props} />}
+				{!hasSubData && <Starred
+					data={data}
+					starredMetaMap={starredMetaMap}
+					toggleStarredRecord={toggleStarredRecord}
+				/>}
 				<Title>{name || 'Unnamed'}</Title>
-				{!hasSubData && <MetaRecordData name={name} {...data} {...props} />}
+				{!hasSubData && <MetaRecordData
+					name={name}
+					value={data.value}
+					copyRules={copyRules}
+					selectAllSimilar={selectAllSimilar}
+				/>}
 			</Header>
 			{hasSubData && <SubList collapsed={collapsed} data={data} {...props} />}
 		</>
