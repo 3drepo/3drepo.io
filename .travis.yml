@@ -43,7 +43,7 @@ matrix:
         - sleep 100
         - mkdir -p submodules
         - sleep 100
-        - test_ver=`cat backend/test/testDBVersion`
+        - test_ver=`cat backend/testDBVersion`
         - sleep 100
         - cd submodules
         - sleep 100
