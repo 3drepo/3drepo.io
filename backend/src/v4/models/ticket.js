@@ -499,7 +499,7 @@ class Ticket extends View {
 
 		const settings = await findModelSettingById(account, model);
 
-		await coll.insert(newTicket);
+		await coll.insertOne(newTicket);
 
 		if (shapes) {
 			newTicket.shapes = shapes;

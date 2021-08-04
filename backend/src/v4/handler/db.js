@@ -296,9 +296,9 @@
 		return collection.updateOne(query, data, options);
 	};
 
-	Handler.count = async function (database, colName, query, data) {
+	Handler.count = async function (database, colName, query, options) {
 		const collection = await Handler.getCollection(database, colName);
-		return collection.count(query, data);
+		return collection.countDocuments(query, options);
 	};
 
 	module.exports = Handler;

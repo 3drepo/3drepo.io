@@ -223,7 +223,7 @@ Sequence.createSequence = async (account, model, sequenceData) => {
 	sequenceData.startDate = new Date(sequenceData.frames[0].dateTime);
 	sequenceData.endDate = new Date(sequenceData.frames[sequenceData.frames.length - 1].dateTime);
 
-	await db.insert(account, sequenceCol(model), sequenceData);
+	await db.insertOne(account, sequenceCol(model), sequenceData);
 
 	return { _id: utils.uuidToString(sequenceData._id) };
 };

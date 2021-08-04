@@ -695,7 +695,6 @@ describe("Check DB handler", function() {
 			const query = { _id: "updateOne upsert" };
 			const newData = { $set: { users: [ "uOne", "uTwo", "uThree", "uFour" ] } };
 			const result = await db.updateOne(account, "jobs", query, newData, true);
-			console.log(result.result);
 			expect(result.result.n).to.equal(1);
 			expect(result.result.nModified).to.equal(1);
 			expect(result.result.ok).to.equal(1);

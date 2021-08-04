@@ -213,7 +213,7 @@ ModelSetting.createNewSetting = async function(teamspace, modelName, data) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	await db.insert(teamspace, MODELS_COLL, setting);
+	await db.insertOne(teamspace, MODELS_COLL, setting);
 
 	return setting;
 };

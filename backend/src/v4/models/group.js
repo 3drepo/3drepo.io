@@ -285,7 +285,7 @@ Group.create = async function (account, model, branch = "master", rid = null, se
 		newGroup.author = creator;
 		newGroup.createdAt = Date.now();
 
-		await db.insert(account, getGroupCollectionName(model), newGroup);
+		await db.insertOne(account, getGroupCollectionName(model), newGroup);
 
 		newGroup._id = utils.uuidToString(newGroup._id);
 		newGroup.objects = await getObjectIds(account, model, branch, rid, newGroup, true, false);

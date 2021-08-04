@@ -133,7 +133,7 @@ class Mitigation {
 		}
 
 		await this.clearAll(account);
-		await mitigationColl.insert(mitigations);
+		await mitigationColl.insertMany(mitigations);
 
 		return mitigations;
 	}

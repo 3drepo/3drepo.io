@@ -61,7 +61,7 @@ Job.addJob = async function(teamspace, jobData) {
 		newJobEntry.color = jobData.color;
 	}
 
-	return db.insert(teamspace, JOBS_COLLECTION_NAME, newJobEntry);
+	return db.insertOne(teamspace, JOBS_COLLECTION_NAME, newJobEntry);
 };
 
 Job.addUserToJob = async function(teamspace, jobName, user) {
