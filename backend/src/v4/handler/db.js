@@ -143,14 +143,12 @@
 
 	Handler.deleteMany = async function (database, colName, query) {
 		const collection = await Handler.getCollection(database, colName);
-		const findResult = await collection.deleteMany(query);
-		return findResult.value;
+		return collection.deleteMany(query);
 	};
 
 	Handler.deleteOne = async function (database, colName, query) {
 		const collection = await Handler.getCollection(database, colName);
-		const findResult = await collection.deleteOne(query);
-		return findResult.value;
+		return collection.deleteOne(query);
 	};
 
 	Handler.getDB = function (database) {
