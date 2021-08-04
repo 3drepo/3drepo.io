@@ -576,14 +576,14 @@ describe("Check DB handler", function() {
 		});
 	});
 
-	describe("insert", function () {
+	describe("insertOne", function () {
 		const newJob = {
 			_id: "Test Job",
 			users: []
 		};
 
 		it("insert should succeed", async function() {
-			const result = await db.insert(account, "jobs", newJob);
+			const result = await db.insertOne(account, "jobs", newJob);
 			expect(result.result.n).to.equal(1);
 			expect(result.result.ok).to.equal(1);
 			newJobIds.push(result.ops[0]._id);
@@ -591,7 +591,7 @@ describe("Check DB handler", function() {
 
 		it("duplicate insert should fail", async function() {
 			try {
-				await db.insert(account, "jobs", newJob);
+				await db.insertOne(account, "jobs", newJob);
 				throw {}; // should've failed at previous line
 			} catch (err) {
 				expect(err.code).to.equal(11000);
@@ -599,13 +599,13 @@ describe("Check DB handler", function() {
 		});
 
 		it("incorrect username should succeed", async function() {
-			const result = await db.insert("wrong", "jobs", newJob);
+			const result = await db.insertOne("wrong", "jobs", newJob);
 			expect(result.result.n).to.equal(1);
 			expect(result.result.ok).to.equal(1);
 		});
 
 		it("insert without _id should succeed", async function() {
-			const result = await db.insert(account, "jobs", { users: ["no ID"] });
+			const result = await db.insertOne(account, "jobs", { users: ["no ID"] });
 			expect(result.result.n).to.equal(1);
 			expect(result.result.ok).to.equal(1);
 			newJobIds.push(result.ops[0]._id);
