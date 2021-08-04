@@ -749,24 +749,24 @@ describe("Check DB handler", function() {
 		});
 	});
 
-	describe("remove", function () {
-		it("remove should succeed", async function() {
+	describe("deleteOne", function () {
+		it("deleteOne should succeed", async function() {
 			const query = { _id: newJobIds.pop() };
-			const result = await db.remove(account, "jobs", query);
+			const result = await db.deleteOne(account, "jobs", query);
 			expect(result.result.n).to.equal(1);
 			expect(result.result.ok).to.equal(1);
 		});
 
-		it("remove non-existent record should succeed", async function() {
+		it("deleteOne non-existent record should succeed", async function() {
 			const query = { _id: "notexist" };
-			const result = await db.remove(account, "jobs", query);
+			const result = await db.deleteOne(account, "jobs", query);
 			expect(result.result.n).to.equal(0);
 			expect(result.result.ok).to.equal(1);
 		});
 
-		it("remove with incorrect username should succeed", async function() {
+		it("deleteOne with incorrect username should succeed", async function() {
 			const query = { _id: "Test Job" };
-			const result = await db.remove("wrong", "jobs", query);
+			const result = await db.deleteOne("wrong", "jobs", query);
 			expect(result.result.n).to.equal(1);
 			expect(result.result.ok).to.equal(1);
 		});

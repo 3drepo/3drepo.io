@@ -255,11 +255,6 @@
 		}
 	};
 
-	Handler.remove = async function (database, colName, query) {
-		const collection = await Handler.getCollection(database, colName);
-		return collection.remove(query);
-	};
-
 	Handler.runCommand = function (database, cmd) {
 		return Handler.getDB(database).then(dbConn => {
 			return dbConn.command(cmd);
