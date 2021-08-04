@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,28 +15,48 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import styled from 'styled-components';
+
 import IconButton from '@material-ui/core/IconButton';
 import SelectSimilarIcon from '@material-ui/icons/Adjust';
 import CopyIcon from '@material-ui/icons/FileCopy';
-import styled from 'styled-components';
 
-import { COLOR } from '../../../../../../styles';
-import { LinkableField } from '../../../../../components/linkableField/linkableField.component';
+import { COLOR } from '@/v4/styles';
+import {
+	List as ListComponent,
+	Title as TitleComponent,
+	SectionHeader,
+} from '../../../measurements/components/measurementsList/measurementsList.styles';
+import {
+	MeasurementValue as ValueComponent,
+	Actions as ActionsComponent,
+} from '../../../measurements/components/measureItem/measureItem.styles';
 
-export const Actions = styled.div`
-	display: flex;
+
+export const Actions = styled(ActionsComponent)`
 	visibility: hidden;
 `;
 
-export const Container = styled.div`
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	padding: 4px 0;
+export const List = styled(ListComponent)`
+	border-bottom: none;
 
-	&:nth-child(2n) {
-		background-color: ${COLOR.BLACK_6};
+	${SectionHeader} {
+		padding-left: 14px;
 	}
+	
+	& & ${SectionHeader} {
+		padding-left: 24px;
+	}
+
+	& & & ${SectionHeader} {
+		padding-left: 36px;
+	}
+`;
+
+export const Header = styled(SectionHeader)`
+	border-bottom-color: ${({ section }: { section: boolean }) => section ? COLOR.BLACK_20 : COLOR.BLACK_6};
+	height: auto;
+	min-height: 40px;
 
 	&:hover {
 		${Actions} {
@@ -45,27 +65,31 @@ export const Container = styled.div`
 	}
 `;
 
-export const MetaKey = styled.div`
-	width: 50%;
+export const Title = styled(TitleComponent)`
+	width: 30%;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	white-space: break-spaces;
+`;
+
+export const Value = styled(ValueComponent)`
+	white-space: break-spaces;
+	text-align: left;
+`;
+
+export const Data = styled.div`
 	display: flex;
-	flex-direction: row;
-	justify-content: flex-start;
+	justify-content: space-between;
 	align-items: center;
+	align-self: center;
+	flex-grow: 1;
+	width: 70%;
 `;
 
-export const MetaKeyText = styled.div`
-	color: ${COLOR.BLACK_60};
-	font-size: 14px;
-	padding-right: 10px;
-	word-break: break-word;
-`;
-
-export const MetaValue = styled(LinkableField)`
-	width: 50%;
-	color: ${COLOR.BLACK_87};
-	font-size: 14px;
-	padding-right: 10px;
-	word-break: break-word;
+export const StyledIconButton = styled(IconButton)`
+	&& {
+		padding: 6px;
+	}
 `;
 
 export const StarIconWrapper = styled.div`
@@ -73,12 +97,6 @@ export const StarIconWrapper = styled.div`
 	margin-left: 5px;
 	margin-right: 2px;
 	margin-top: -2px;
-` as any;
-
-export const StyledIconButton = styled(IconButton)`
-	&& {
-		padding: 6px;
-	}
 `;
 
 export const StyledCopyIcon = styled(CopyIcon).attrs({
