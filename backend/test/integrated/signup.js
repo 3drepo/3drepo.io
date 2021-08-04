@@ -50,10 +50,10 @@ describe("Sign up", function() {
 	const lastName = "World";
 	const countryCode = "GB";
 	const company = "company";
-	const jobTitle = "someJobTitle";
-	const industry = "Architecture";
-	const howDidYouFindUs = "Facebook";
-	const phoneNumber = "0123456789";
+	// const jobTitle = "someJobTitle";
+	// const industry = "Architecture";
+	// const howDidYouFindUs = "Facebook";
+	// const phoneNumber = "0123456789";
 
 	const mailListAgreed = true;
 
@@ -75,10 +75,10 @@ describe("Sign up", function() {
 				"countryCode": countryCode,
 				"company": company,
 				"mailListAgreed": mailListAgreed,
-				"jobTitle": jobTitle,
-				"industry": industry,
-				"howDidYouFindUs": howDidYouFindUs,
-				"phoneNumber": phoneNumber
+				// "jobTitle": jobTitle,
+				// "industry": industry,
+				// "howDidYouFindUs": howDidYouFindUs,
+				// "phoneNumber": phoneNumber
 
 			}).expect(200);
 
@@ -97,10 +97,10 @@ describe("Sign up", function() {
 				"countryCode": countryCode,
 				"company": company,
 				"mailListAgreed": mailListAgreed,
-				"jobTitle": jobTitle,
-				"industry": industry,
-				"howDidYouFindUs": howDidYouFindUs,
-				"phoneNumber": phoneNumber
+				// "jobTitle": jobTitle,
+				// "industry": industry,
+				// "howDidYouFindUs": howDidYouFindUs,
+				// "phoneNumber": phoneNumber
 
 			}).expect(400);
 
@@ -119,10 +119,10 @@ describe("Sign up", function() {
 				"countryCode": countryCode,
 				"company": company,
 				"mailListAgreed": mailListAgreed,
-				"jobTitle": jobTitle,
-				"industry": industry,
-				"howDidYouFindUs": howDidYouFindUs,
-				"phoneNumber": phoneNumber
+				// "jobTitle": jobTitle,
+				// "industry": industry,
+				// "howDidYouFindUs": howDidYouFindUs,
+				// "phoneNumber": phoneNumber
 
 			}).expect(400);
 
@@ -141,10 +141,10 @@ describe("Sign up", function() {
 				"countryCode": countryCode,
 				"company": company,
 				"mailListAgreed": mailListAgreed,
-				"jobTitle": jobTitle,
-				"industry": industry,
-				"howDidYouFindUs": howDidYouFindUs,
-				"phoneNumber": phoneNumber
+				// "jobTitle": jobTitle,
+				// "industry": industry,
+				// "howDidYouFindUs": howDidYouFindUs,
+				// "phoneNumber": phoneNumber
 
 			}).expect(400);
 
@@ -163,10 +163,10 @@ describe("Sign up", function() {
 				"countryCode": countryCode,
 				"company": company,
 				"mailListAgreed": noMailListAgreed,
-				"jobTitle": jobTitle,
-				"industry": industry,
-				"howDidYouFindUs": howDidYouFindUs,
-				"phoneNumber": phoneNumber
+				// "jobTitle": jobTitle,
+				// "industry": industry,
+				// "howDidYouFindUs": howDidYouFindUs,
+				// "phoneNumber": phoneNumber
 
 			}).expect(200);
 
@@ -183,10 +183,10 @@ describe("Sign up", function() {
 		expect(user.customData.billing.billingInfo.countryCode).to.equal(countryCode);
 		expect(user.customData.billing.billingInfo.company).to.equal(company);
 		expect(user.customData.mailListOptOut).to.be.undefined;
-		expect(user.customData.extras.jobTitle).to.equal(jobTitle);
-		expect(user.customData.extras.industry).to.equal(industry);
-		expect(user.customData.extras.howDidYouFindUs).to.equal(howDidYouFindUs);
-		expect(user.customData.extras.phoneNumber).to.equal(phoneNumber);
+		// expect(user.customData.extras.jobTitle).to.equal(jobTitle);
+		// expect(user.customData.extras.industry).to.equal(industry);
+		// expect(user.customData.extras.howDidYouFindUs).to.equal(howDidYouFindUs);
+		// expect(user.customData.extras.phoneNumber).to.equal(phoneNumber);
 	});
 
 	it("with mailing list opt-out should have flag set", async function() {
@@ -199,10 +199,10 @@ describe("Sign up", function() {
 		expect(user.customData.billing.billingInfo.countryCode).to.equal(countryCode);
 		expect(user.customData.billing.billingInfo.company).to.equal(company);
 		expect(user.customData.mailListOptOut).to.equal(true);
-		expect(user.customData.extras.jobTitle).to.equal(jobTitle);
-		expect(user.customData.extras.industry).to.equal(industry);
-		expect(user.customData.extras.howDidYouFindUs).to.equal(howDidYouFindUs);
-		expect(user.customData.extras.phoneNumber).to.equal(phoneNumber);
+		// expect(user.customData.extras.jobTitle).to.equal(jobTitle);
+		// expect(user.customData.extras.industry).to.equal(industry);
+		// expect(user.customData.extras.howDidYouFindUs).to.equal(howDidYouFindUs);
+		// expect(user.customData.extras.phoneNumber).to.equal(phoneNumber);
 	});
 
 	it("with username that already exists should fail", async function() {
@@ -217,10 +217,10 @@ describe("Sign up", function() {
 				"countryCode": countryCode,
 				"company": company,
 				"mailListAgreed": mailListAgreed,
-				"jobTitle": jobTitle,
-				"industry": industry,
-				"howDidYouFindUs": howDidYouFindUs,
-				"phoneNumber": phoneNumber
+				// "jobTitle": jobTitle,
+				// "industry": industry,
+				// "howDidYouFindUs": howDidYouFindUs,
+				// "phoneNumber": phoneNumber
 
 			}).expect(400);
 
@@ -247,10 +247,10 @@ describe("Sign up", function() {
 					"countryCode": countryCode,
 					"company": company,
 					"mailListAgreed": mailListAgreed,
-					"jobTitle": jobTitle,
-					"industry": industry,
-					"howDidYouFindUs": howDidYouFindUs,
-					"phoneNumber": phoneNumber
+					// "jobTitle": jobTitle,
+					// "industry": industry,
+					// "howDidYouFindUs": howDidYouFindUs,
+					// "phoneNumber": phoneNumber
 
 				}).expect(400);
 		});
@@ -269,10 +269,10 @@ describe("Sign up", function() {
 				"countryCode": countryCode,
 				"company": company,
 				"mailListAgreed": mailListAgreed,
-				"jobTitle": jobTitle,
-				"industry": industry,
-				"howDidYouFindUs": howDidYouFindUs,
-				"phoneNumber": phoneNumber
+				// "jobTitle": jobTitle,
+				// "industry": industry,
+				// "howDidYouFindUs": howDidYouFindUs,
+				// "phoneNumber": phoneNumber
 
 			}).expect(400, function(err, res) {
 
@@ -293,10 +293,10 @@ describe("Sign up", function() {
 				"countryCode": countryCode,
 				"company": company,
 				"mailListAgreed": mailListAgreed,
-				"jobTitle": jobTitle,
-				"industry": industry,
-				"howDidYouFindUs": howDidYouFindUs,
-				"phoneNumber": phoneNumber
+				// "jobTitle": jobTitle,
+				// "industry": industry,
+				// "howDidYouFindUs": howDidYouFindUs,
+				// "phoneNumber": phoneNumber
 
 			}).expect(400, function(err, res) {
 
@@ -317,10 +317,10 @@ describe("Sign up", function() {
 				"countryCode": countryCode,
 				"company": company,
 				"mailListAgreed": mailListAgreed,
-				"jobTitle": jobTitle,
-				"industry": industry,
-				"howDidYouFindUs": howDidYouFindUs,
-				"phoneNumber": phoneNumber
+				// "jobTitle": jobTitle,
+				// "industry": industry,
+				// "howDidYouFindUs": howDidYouFindUs,
+				// "phoneNumber": phoneNumber
 
 			}).expect(400, function(err, res) {
 
@@ -341,10 +341,10 @@ describe("Sign up", function() {
 				"countryCode": countryCode,
 				"company": company,
 				"mailListAgreed": mailListAgreed,
-				"jobTitle": jobTitle,
-				"industry": industry,
-				"howDidYouFindUs": howDidYouFindUs,
-				"phoneNumber": phoneNumber
+				// "jobTitle": jobTitle,
+				// "industry": industry,
+				// "howDidYouFindUs": howDidYouFindUs,
+				// "phoneNumber": phoneNumber
 
 			}).expect(400, function(err, res) {
 
@@ -365,10 +365,10 @@ describe("Sign up", function() {
 				"countryCode": countryCode,
 				"company": company,
 				"mailListAgreed": mailListAgreed,
-				"jobTitle": jobTitle,
-				"industry": industry,
-				"howDidYouFindUs": howDidYouFindUs,
-				"phoneNumber": phoneNumber
+				// "jobTitle": jobTitle,
+				// "industry": industry,
+				// "howDidYouFindUs": howDidYouFindUs,
+				// "phoneNumber": phoneNumber
 
 			}).expect(400, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -387,10 +387,10 @@ describe("Sign up", function() {
 				"countryCode": countryCode,
 				"company": company,
 				"mailListAgreed": mailListAgreed,
-				"jobTitle": jobTitle,
-				"industry": industry,
-				"howDidYouFindUs": howDidYouFindUs,
-				"phoneNumber": phoneNumber
+				// "jobTitle": jobTitle,
+				// "industry": industry,
+				// "howDidYouFindUs": howDidYouFindUs,
+				// "phoneNumber": phoneNumber
 
 			}).expect(400, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -409,10 +409,10 @@ describe("Sign up", function() {
 				"countryCode": countryCode,
 				"company": company,
 				"mailListAgreed": mailListAgreed,
-				"jobTitle": jobTitle,
-				"industry": industry,
-				"howDidYouFindUs": howDidYouFindUs,
-				"phoneNumber": phoneNumber
+				// "jobTitle": jobTitle,
+				// "industry": industry,
+				// "howDidYouFindUs": howDidYouFindUs,
+				// "phoneNumber": phoneNumber
 			}).expect(400, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 				done(err);
@@ -430,10 +430,10 @@ describe("Sign up", function() {
 				"countryCode": countryCode,
 				"company": company,
 				"mailListAgreed": mailListAgreed,
-				"jobTitle": jobTitle,
-				"industry": industry,
-				"howDidYouFindUs": howDidYouFindUs,
-				"phoneNumber": phoneNumber
+				// "jobTitle": jobTitle,
+				// "industry": industry,
+				// "howDidYouFindUs": howDidYouFindUs,
+				// "phoneNumber": phoneNumber
 
 			}).expect(400, function(err, res) {
 
@@ -453,10 +453,10 @@ describe("Sign up", function() {
 				"countryCode": countryCode,
 				"company": company,
 				"mailListAgreed": mailListAgreed,
-				"jobTitle": jobTitle,
-				"industry": industry,
-				"howDidYouFindUs": howDidYouFindUs,
-				"phoneNumber": phoneNumber
+				// "jobTitle": jobTitle,
+				// "industry": industry,
+				// "howDidYouFindUs": howDidYouFindUs,
+				// "phoneNumber": phoneNumber
 			}).expect(400, function(err, res) {
 
 				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -475,10 +475,10 @@ describe("Sign up", function() {
 				"lastName": lastName,
 				"company": company,
 				"mailListAgreed": mailListAgreed,
-				"jobTitle": jobTitle,
-				"industry": industry,
-				"howDidYouFindUs": howDidYouFindUs,
-				"phoneNumber": phoneNumber
+				// "jobTitle": jobTitle,
+				// "industry": industry,
+				// "howDidYouFindUs": howDidYouFindUs,
+				// "phoneNumber": phoneNumber
 
 			}).expect(400, function(err, res) {
 
@@ -498,10 +498,10 @@ describe("Sign up", function() {
 				"countryCode": 44,
 				"company": company,
 				"mailListAgreed": mailListAgreed,
-				"jobTitle": jobTitle,
-				"industry": industry,
-				"howDidYouFindUs": howDidYouFindUs,
-				"phoneNumber": phoneNumber
+				// "jobTitle": jobTitle,
+				// "industry": industry,
+				// "howDidYouFindUs": howDidYouFindUs,
+				// "phoneNumber": phoneNumber
 			}).expect(400, function(err, res) {
 
 				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -520,10 +520,10 @@ describe("Sign up", function() {
 				"lastName": lastName,
 				"countryCode": countryCode,
 				"mailListAgreed": mailListAgreed,
-				"jobTitle": jobTitle,
-				"industry": industry,
-				"howDidYouFindUs": howDidYouFindUs,
-				"phoneNumber": phoneNumber
+				// "jobTitle": jobTitle,
+				// "industry": industry,
+				// "howDidYouFindUs": howDidYouFindUs,
+				// "phoneNumber": phoneNumber
 
 			}).expect(200, function(err, res) {
 				done();
@@ -541,10 +541,10 @@ describe("Sign up", function() {
 				"countryCode": countryCode,
 				"company": 123,
 				"mailListAgreed": mailListAgreed,
-				"jobTitle": jobTitle,
-				"industry": industry,
-				"howDidYouFindUs": howDidYouFindUs,
-				"phoneNumber": phoneNumber
+				// "jobTitle": jobTitle,
+				// "industry": industry,
+				// "howDidYouFindUs": howDidYouFindUs,
+				// "phoneNumber": phoneNumber
 			}).expect(400, function(err, res) {
 
 				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
@@ -552,72 +552,72 @@ describe("Sign up", function() {
 			});
 	});
 
-	it("without jobTitle should fail", function(done) {
-		request(server)
-			.post("/signup_somebaduser")
-			.send({
+	// it("without jobTitle should fail", function(done) {
+	// 	request(server)
+	// 		.post("/signup_somebaduser")
+	// 		.send({
 
-				"email": email,
-				"password": password,
-				"firstName": firstName,
-				"lastName": lastName,
-				"countryCode": countryCode,
-				"company": company,
-				"mailListAgreed": mailListAgreed,				
-				"industry": industry,
-				"howDidYouFindUs": howDidYouFindUs,
-				"phoneNumber": phoneNumber
+	// 			"email": email,
+	// 			"password": password,
+	// 			"firstName": firstName,
+	// 			"lastName": lastName,
+	// 			"countryCode": countryCode,
+	// 			"company": company,
+	// 			"mailListAgreed": mailListAgreed,				
+	// 			"industry": industry,
+	// 			"howDidYouFindUs": howDidYouFindUs,
+	// 			"phoneNumber": phoneNumber
 
-			}).expect(400, function(err, res) {
+	// 		}).expect(400, function(err, res) {
 
-				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-				done(err);
-			});
-	});
+	// 			expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+	// 			done(err);
+	// 		});
+	// });
 
-	it("without industry should fail", function(done) {
-		request(server)
-			.post("/signup_somebaduser")
-			.send({
+	// it("without industry should fail", function(done) {
+	// 	request(server)
+	// 		.post("/signup_somebaduser")
+	// 		.send({
 
-				"email": email,
-				"password": password,
-				"firstName": firstName,
-				"lastName": lastName,
-				"countryCode": countryCode,
-				"company": company,
-				"mailListAgreed": mailListAgreed,
-				"jobTitle":jobTitle,
-				"howDidYouFindUs": howDidYouFindUs,
-				"phoneNumber": phoneNumber
+	// 			"email": email,
+	// 			"password": password,
+	// 			"firstName": firstName,
+	// 			"lastName": lastName,
+	// 			"countryCode": countryCode,
+	// 			"company": company,
+	// 			"mailListAgreed": mailListAgreed,
+	// 			"jobTitle":jobTitle,
+	// 			"howDidYouFindUs": howDidYouFindUs,
+	// 			"phoneNumber": phoneNumber
 
-			}).expect(400, function(err, res) {
+	// 		}).expect(400, function(err, res) {
 
-				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-				done(err);
-			});
-	});
+	// 			expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+	// 			done(err);
+	// 		});
+	// });
 
-	it("without howDidYouFindUs should fail", function(done) {
-		request(server)
-			.post("/signup_somebaduser")
-			.send({
+	// it("without howDidYouFindUs should fail", function(done) {
+	// 	request(server)
+	// 		.post("/signup_somebaduser")
+	// 		.send({
 
-				"email": email,
-				"password": password,
-				"firstName": firstName,
-				"lastName": lastName,
-				"countryCode": countryCode,
-				"company": company,
-				"mailListAgreed": mailListAgreed,
-				"jobTitle":jobTitle,
-				"industry": industry,
-				"phoneNumber": phoneNumber
+	// 			"email": email,
+	// 			"password": password,
+	// 			"firstName": firstName,
+	// 			"lastName": lastName,
+	// 			"countryCode": countryCode,
+	// 			"company": company,
+	// 			"mailListAgreed": mailListAgreed,
+	// 			"jobTitle":jobTitle,
+	// 			"industry": industry,
+	// 			"phoneNumber": phoneNumber
 
-			}).expect(400, function(err, res) {
+	// 		}).expect(400, function(err, res) {
 
-				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-				done(err);
-			});
-	});	
+	// 			expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+	// 			done(err);
+	// 		});
+	// });	
 });
