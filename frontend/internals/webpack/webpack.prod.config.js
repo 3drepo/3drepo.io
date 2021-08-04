@@ -12,7 +12,7 @@ const outputNames = {
 module.exports = getWebpackConfig({
   mode: MODES.PRODUCTION,
   entry: {
-    unity: './globals/unity-util-external.ts'
+    unity: './src/globals/unity-util-external.ts'
   },
   output: {
     filename: ({ chunk: { name }}) => outputNames[name] || '[name].js'

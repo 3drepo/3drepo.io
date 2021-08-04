@@ -45,7 +45,7 @@ const fieldTypes = {
 class CommentGenerator {
 	constructor(owner) {
 		this.guid = utils.generateUUID();
-		this.created = (new Date()).getTime();
+		this.created = Date.now();
 		this.owner = owner;
 	}
 }
@@ -257,7 +257,15 @@ const clean = (routePrefix, comment) =>  {
 	}
 };
 
+const addPreExistingComment =  (owner, commentText, viewpoint, pinPosition, created, guid) => {
+	const obj = new TextCommentGenerator(owner, commentText, viewpoint, pinPosition);
+	obj.created = created ? created : obj.created;
+	obj.guid = guid ? guid : obj.guid;
+	return obj;
+};
+
 module.exports = {
+	addPreExistingComment,
 	newSystemComment : (owner, property, from, to) => new SystemCommentGenerator(owner, property, from, to),
 	newMitigationComment : (owner, likelihood, consequence, mitigation, viewpoint, pinPosition) => new MitigationCommentGenerator(owner, likelihood, consequence, mitigation, viewpoint, pinPosition),
 	addComment,

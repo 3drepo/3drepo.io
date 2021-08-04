@@ -68,6 +68,7 @@ describe("Issues", function () {
 
 	const bcf = {
 		path: "/../../statics/bcf/example1.bcf",
+		withGroupsPath: "/../../statics/bcf/withGroups.bcf",
 		invalidFile: "/../../statics/bcf/notBCF.txt",
 		issue1: "75959a60-8ef1-11e6-8d05-9717c0574272",
 		issue2: "8d46d1b0-8ef1-11e6-8d05-9717c0574272"
@@ -3162,7 +3163,6 @@ describe("Issues", function () {
 		});
 
 		describe("Importing a bcf file", function() {
-
 			it("should succeed", function(done) {
 				async.series([
 					function(done) {
@@ -3173,7 +3173,6 @@ describe("Issues", function () {
 					function(done) {
 						agent.get(`/${bcfusername}/${bcfmodel}/issues`)
 							.expect(200, function(err, res) {
-								console.log("@2");
 								const issue1 = res.body.find(issue => issue._id === bcf.issue1);
 								const issue2 = res.body.find(issue => issue._id === bcf.issue2);
 
@@ -3185,8 +3184,6 @@ describe("Issues", function () {
 					function(done) {
 						agent.get(`/${bcfusername}/${bcfmodel}/issues/${bcf.issue1}`)
 							.expect(200, function(err, res) {
-								console.log("@3");
-
 								const issue1 = res.body;
 
 								expect(issue1.thumbnail).to.exist;
@@ -3220,6 +3217,23 @@ describe("Issues", function () {
 					}
 				], done);
 
+			});
+
+			it("with groups should succeed", function(done) {
+				async.series([
+					function(done) {
+						agent.post(`/${bcfusername}/${bcfmodel}/issues.bcfzip`)
+							.attach("file", __dirname + bcf.withGroupsPath)
+							.expect(200, done);
+					},
+					function(done) {
+						agent.get(`/${bcfusername}/${bcfmodel}/issues`)
+							.expect(200, function(err, res) {
+								expect(res.body).to.have.lengthOf(9);
+								done(err);
+							});
+					}
+				], done);
 			});
 
 			it("if user is collaborator should succeed", function(done) {
