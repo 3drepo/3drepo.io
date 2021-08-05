@@ -20,12 +20,12 @@ const { src } = require('../../helper/path');
 const ResponseCodes = require(`${src}/utils/responseCodes`);
 
 const testCreateResponseCodes = () => {
+	const msg = 'Some random message';
 	describe.each([
 		[ResponseCodes.template.ok, undefined, ResponseCodes.template.ok],
-		[ResponseCodes.template.ok, 'this is a different message',
-			{ ...ResponseCodes.template.ok, message: 'this is a different message' }],
+		[ResponseCodes.template.ok, msg, { ...ResponseCodes.template.ok, message: msg }],
 		[undefined, undefined, ResponseCodes.template.unknown],
-		[undefined, 'msg2', { ...ResponseCodes.template.unknown, message: 'msg2' }],
+		[undefined, msg, { ...ResponseCodes.template.unknown, message: msg }],
 	])('Create response codes', (errCode, message, result) => {
 		test(`with ${JSON.stringify(errCode)} and ${message} should result in ${JSON.stringify(result)} `, () => {
 			expect(ResponseCodes.createResponseCode(errCode, message)).toEqual(result);
@@ -37,6 +37,7 @@ const testCodeExists = () => {
 	describe.each([
 		['OK', true],
 		['UNKNOWN', true],
+		['userNotFound', true],
 		['', false],
 		['bnlah', false],
 		[undefined, false],
