@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { createResponseCode, template } = require('../utils/responseCodes');
 const db = require('../handler/db');
 const teamspaceAdminLabel = require('../utils/permissions/permissions.constants').teamspaceAdmin;
-
-const { template, createResponseCode } = ('../utils/responseCodes');
 
 const Teamspace = {};
 

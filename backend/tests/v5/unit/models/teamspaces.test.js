@@ -19,6 +19,7 @@ const { src } = require('../../helper/path');
 
 const Teamspace = require(`${src}/models/teamspaces`);
 const db = require(`${src}/handler/db`);
+const { template } = require(`${src}/utils/responseCodes`);
 const teamspaceAdminLabel = require(`${src}/utils/permissions/permissions.constants`).teamspaceAdmin;
 
 const testTeamspaceAdmins = () => {
@@ -39,10 +40,14 @@ const testTeamspaceAdmins = () => {
 			expect(res).toEqual(['personA', 'personC']);
 		});
 		test('should return error if teamspace does not exists', () => {
+			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+
+			expect(Teamspace.getTeamspaceAdmins('someTS'))
+				.rejects.toThrow(template.teamspaceNotFound);
 		});
 	});
 };
 
-describe('Teamspace (Model)', () => {
+describe('Teamspaces (Model)', () => {
 	testTeamspaceAdmins();
 });
