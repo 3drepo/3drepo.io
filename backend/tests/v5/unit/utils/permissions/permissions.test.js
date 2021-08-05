@@ -38,6 +38,6 @@ const testIsTeamspaceAdmin = () => {
 	});
 };
 
-describe('Permissions', () => {
+describe('utils/permissions', () => {
 	testIsTeamspaceAdmin();
 });

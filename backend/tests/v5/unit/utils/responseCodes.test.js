@@ -48,7 +48,7 @@ const testCodeExists = () => {
 	});
 };
 
-describe('Response Codes', () => {
+describe('utils/responseCodes', () => {
 	testCreateResponseCodes();
 	testCodeExists();
 });

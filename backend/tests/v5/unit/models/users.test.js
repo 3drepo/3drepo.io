@@ -44,6 +44,6 @@ const testGetAccessibleTeamspaces = () => {
 	});
 };
 
-describe('Users (Model)', () => {
+describe('models/users', () => {
 	testGetAccessibleTeamspaces();
 });

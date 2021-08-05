@@ -67,7 +67,7 @@ const testToSnakeCase = () => {
 	});
 };
 
-describe('String helpers', () => {
+describe('utils/helper/strings', () => {
 	testGetURLDomain();
 	testToCamelCase();
 	testToSnakeCase();

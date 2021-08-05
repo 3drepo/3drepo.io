@@ -42,6 +42,6 @@ const testIsSessionValid = () => {
 	});
 };
 
-describe('Sessions', () => {
+describe('utils/sessions', () => {
 	testIsSessionValid();
 });

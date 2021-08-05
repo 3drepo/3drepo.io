@@ -48,6 +48,6 @@ const testTeamspaceAdmins = () => {
 	});
 };
 
-describe('Teamspaces (Model)', () => {
+describe('models/teamspaces', () => {
 	testTeamspaceAdmins();
 });

@@ -50,7 +50,7 @@ const testIsString = () => {
 	});
 };
 
-describe('Type Checker', () => {
+describe('utils/helpers/typeCheck', () => {
 	testIsBuffer();
 	testIsString();
 });
