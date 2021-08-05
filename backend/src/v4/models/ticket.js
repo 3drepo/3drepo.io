@@ -409,7 +409,6 @@ class Ticket extends View {
 	* @param {object} newTicket
 	*/
 	async create(account, model, newTicket) {
-		console.log("ticket create");
 		if (!newTicket.name) {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}
@@ -470,8 +469,6 @@ class Ticket extends View {
 				// FIXME need to revisit this for BCF refactor
 				// This allows BCF import to create new issue with more than 1 viewpoint
 				newTicket.viewpoints = [await this.createViewpoint(account, model, newTicket._id, newTicket.viewpoint, true)];
-				console.log("newTicket.viewpoints");
-				console.log(newTicket.viewpoints);
 
 				if (newTicket.viewpoints[0].thumbnail) {
 					newTicket.thumbnail = newTicket.viewpoints[0].thumbnail;
@@ -515,7 +512,6 @@ class Ticket extends View {
 	}
 
 	getScreenshot(account, model, uid, vid) {
-		console.log("getScreenshot");
 		uid = utils.stringToUUID(uid);
 		vid = utils.stringToUUID(vid);
 

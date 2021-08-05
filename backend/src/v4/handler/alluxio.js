@@ -54,22 +54,12 @@ class AlluxioHandler {
 		const _id = nodeuuid();
 		const folderNames = generateFoldernames(_id, this.levels);
 		const link = path.join(folderNames, _id);
-		// debug info
-		const info = await this.client.getInfo();
-		console.log(info.uptimeMs);
-		console.log(this.getAlluxioPathFormat(link));
-		console.log(Object.prototype.toString.call(data));
-		// debug info
 		await this.client.uploadFile(this.getAlluxioPathFormat(link), data);
 		return ({_id, link, size:data.length, type: "alluxio"});
 	}
 
 	async getFileStream(key) {
 		try {
-			// debug info
-			const info = await this.client.getInfo();
-			console.log(info.uptimeMs);
-			// debug info
 			return await this.client.downloadFileStream(this.getAlluxioPathFormat(key));
 		} catch {
 			throw ResponseCodes.NO_FILE_FOUND;
@@ -78,10 +68,6 @@ class AlluxioHandler {
 
 	async getFile(key) {
 		try {
-			// debug info
-			const info = await this.client.getInfo();
-			console.log(info.uptimeMs);
-			// debug info
 			return await this.client.downloadFile(this.getAlluxioPathFormat(key));
 		} catch {
 			throw ResponseCodes.NO_FILE_FOUND;
@@ -89,18 +75,10 @@ class AlluxioHandler {
 	}
 
 	async removeFile(key) {
-		// debug info
-		const info = await this.client.getInfo();
-		console.log(info.uptimeMs);
-		// debug info
 		return await this.client.delete(this.getAlluxioPathFormat(key));
 	}
 
 	async removeFiles(keys) {
-		// debug info
-		const info = await this.client.getInfo();
-		console.log(info.uptimeMs);
-		// debug info
 		return await Promise.all(keys.map(this.removeFile, this));
 	}
 
