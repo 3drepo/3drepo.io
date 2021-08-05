@@ -3,8 +3,7 @@
 	"current" : "2.20.0",
 	"supported": []
   },
-  {
-    "civil" :{
+  "civil" :{
 	"current" : "4.18.0",
 	"supported": []
   },
