@@ -27,7 +27,6 @@ const { deleteNotifications, fetchNotification } = require("../helpers/notificat
 const { createModel } = require("../helpers/models.js");
 const { cloneDeep } = require("lodash");
 
-
 describe("Issues", function () {
 	let server;
 	let agent;
@@ -59,7 +58,7 @@ describe("Issues", function () {
 			"fov":2.1124830653010416,
 			"aspect_ratio":0.8750189337327384,
 			"far":276.75612077194506 ,
-			"near":76.42411012233212,
+			"near":76.42411012233212
 		},
 		"scale":1,
 		"creator_role":"jobA",
@@ -67,9 +66,9 @@ describe("Issues", function () {
 	};
 
 	const bcf = {
-		path: "/../statics/bcf/example1.bcf",
-		withGroupsPath: "/../statics/bcf/withGroups.bcf",
-		invalidFile: "/../statics/bcf/notBCF.txt",
+		path: "/../../statics/bcf/example1.bcf",
+		withGroupsPath: "/../../statics/bcf/withGroups.bcf",
+		invalidFile: "/../../statics/bcf/notBCF.txt",
 		issue1: "75959a60-8ef1-11e6-8d05-9717c0574272",
 		issue2: "8d46d1b0-8ef1-11e6-8d05-9717c0574272"
 	};
@@ -100,8 +99,8 @@ describe("Issues", function () {
 		it("should succeed", async function() {
 			const issue = { "name":"Issue test", ...cloneDeep(baseIssue) };
 			let res = (await agent.post(`/${username}/${model}/issues`)
-						.send(issue)
-						.expect(200));
+				.send(issue)
+				.expect(200));
 
 			const issueId = res.body._id;
 
@@ -123,7 +122,7 @@ describe("Issues", function () {
 			expect(res.body.viewpoint.far).to.equal(issue.viewpoint.far);
 			expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
 
-			res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200)
+			res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
 
 			expect(res.body.name).to.equal(issue.name);
 			expect(res.body.scale).to.equal(issue.scale);
@@ -193,8 +192,8 @@ describe("Issues", function () {
 				"priority": "none"
 			};
 			let res = (await agent.post(`/${username}/${model}/issues`)
-						.send(issue)
-						.expect(200));
+				.send(issue)
+				.expect(200));
 
 			const issueId = res.body._id;
 
@@ -215,7 +214,7 @@ describe("Issues", function () {
 			expect(res.body.viewpoint.far).to.equal(issue.viewpoint.far);
 			expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
 
-			res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200)
+			res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
 
 			expect(res.body.name).to.equal(issue.name);
 			expect(res.body.scale).to.equal(issue.scale);
@@ -234,7 +233,6 @@ describe("Issues", function () {
 			expect(res.body.viewpoint.far).to.equal(issue.viewpoint.far);
 			expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
 		});
-
 
 		it("with long desc should fail", function(done) {
 			const issue = Object.assign({"name":"Issue test"}, {
@@ -255,10 +253,10 @@ describe("Issues", function () {
 			issue.viewpoint.screenshot = pngBase64;
 
 			let res = await agent.post(`/${username}/${model}/issues`)
-						.send(issue)
-						.expect(200)
+				.send(issue)
+				.expect(200);
 
-			let issueId = res.body._id;
+			const issueId = res.body._id;
 
 			res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
 
@@ -266,25 +264,25 @@ describe("Issues", function () {
 		});
 
 		it("with screenshot using the wrong file format should fail", async function() {
-			const issue ={"name":"Wrong file issue", ...cloneDeep(baseIssue)};
+			const issue = {"name":"Wrong file issue", ...cloneDeep(baseIssue)};
 			issue.viewpoint.screenshot = pdfBase64;
 
 			const res = await agent.post(`/${username}/${model}/issues`)
-					.send(issue)
-					.expect(responseCodes.FILE_FORMAT_NOT_SUPPORTED.status);
+				.send(issue)
+				.expect(responseCodes.FILE_FORMAT_NOT_SUPPORTED.status);
 
 			expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
 		});
 
 		it("with an existing group associated should succeed", async function() {
-			const username3 = 'teamSpace1';
-			const model2 = '5bfc11fa-50ac-b7e7-4328-83aa11fa50ac';
+			const username3 = "teamSpace1";
+			const model2 = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
 
 			const groupData = {
 				"color":[98,126,184],
 				"objects":[
 					{
-						"account": 'teamSpace1',
+						"account": "teamSpace1",
 						model: model2,
 						"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
 					}]
@@ -294,18 +292,18 @@ describe("Issues", function () {
 
 			agent2 = await request.agent(server);
 			await agent2.post("/login")
-				.send({ username: 'teamSpace1', password })
+				.send({ username: "teamSpace1", password })
 				.expect(200);
 
 			const groupId = (await agent2.post(`/${username3}/${model2}/revision/master/head/groups/`)
-					.send(groupData)
-					.expect(200)).body._id;
+				.send(groupData)
+				.expect(200)).body._id;
 
 			issue.viewpoint = { ...issue.viewpoint, highlighted_group_id:groupId};
 
 			const issueId = (await agent2.post(`/${username3}/${model2}/issues`)
-						.send(issue)
-						.expect(200)).body._id;
+				.send(issue)
+				.expect(200)).body._id;
 
 			const res = await agent2.get(`/${username3}/${model2}/issues/${issueId}`).expect(200);
 			expect(res.body.viewpoint.highlighted_group_id).to.equal(groupId);
@@ -313,12 +311,12 @@ describe("Issues", function () {
 		});
 
 		it("with a embeded group should succeed", function(done) {
-			const username3 = 'teamSpace1';
-			const model2 = '5bfc11fa-50ac-b7e7-4328-83aa11fa50ac';
+			const username3 = "teamSpace1";
+			const model2 = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
 
 			const highlighted_group = {
 				objects: [{
-					"account": 'teamSpace1',
+					"account": "teamSpace1",
 					model: model2,
 					"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
 				}],
@@ -327,7 +325,7 @@ describe("Issues", function () {
 
 			const hidden_group = {
 				objects: [{
-					"account": 'teamSpace1',
+					"account": "teamSpace1",
 					model: model2,
 					"shared_ids":["69b60e77-e049-492f-b8a3-5f5b2730129c"]
 				}]
@@ -337,16 +335,15 @@ describe("Issues", function () {
 
 			const issue = {...baseIssue, "name":"Issue embeded group  test", viewpoint};
 
-			let issueId = '';
+			let issueId = "";
 			let highlighted_group_id = "";
 			let hidden_group_id = "";
-
 
 			async.series([
 				function(done) {
 					agent2 = request.agent(server);
 					agent2.post("/login")
-						.send({ username: 'teamSpace1', password })
+						.send({ username: "teamSpace1", password })
 						.expect(200, done);
 				},
 				function(done) {
@@ -490,7 +487,7 @@ describe("Issues", function () {
 						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
 					}],
 					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
-				},
+				}
 			];
 
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
@@ -537,7 +534,7 @@ describe("Issues", function () {
 						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
 					}],
 					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
-				},
+				}
 			];
 
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
@@ -568,7 +565,7 @@ describe("Issues", function () {
 						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
 					}],
 					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
-				},
+				}
 			];
 
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
@@ -598,7 +595,7 @@ describe("Issues", function () {
 						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
 					}],
 					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
-				},
+				}
 			];
 
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
@@ -624,7 +621,7 @@ describe("Issues", function () {
 						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
 					}],
 					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
-				},
+				}
 			];
 
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
@@ -1298,7 +1295,7 @@ describe("Issues", function () {
 					"fov":2,
 					"aspect_ratio":1,
 					"far":300,
-					"near":50,
+					"near":50
 				}
 			};
 
@@ -1425,7 +1422,7 @@ describe("Issues", function () {
 						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
 					}],
 					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
-				},
+				}
 			];
 
 			const issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["jobA"]});
@@ -1515,7 +1512,7 @@ describe("Issues", function () {
 						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
 					}],
 					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
-				},
+				}
 			];
 
 			const issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["jobA"]});
@@ -1602,7 +1599,6 @@ describe("Issues", function () {
 			], done);
 		});
 
-
 		it("change viewpoint embedded transformation without matrix should fail", function(done) {
 			const transformation_groups = [
 				{
@@ -1619,7 +1615,7 @@ describe("Issues", function () {
 						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
 					}],
 					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
-				},
+				}
 			];
 
 			const issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["jobA"]});
@@ -1681,7 +1677,7 @@ describe("Issues", function () {
 						"shared_ids": ["69b60e77-e049-492f-b8a3-5f5b2730129c"]
 					}],
 					transformation: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
-				},
+				}
 			];
 
 			const issue = Object.assign({"name":"Issue test"}, baseIssue, { assigned_roles:["jobA"]});
@@ -1736,7 +1732,7 @@ describe("Issues", function () {
 
 			const data = { topic_type: "abc123"};
 			let commentData = {
-				comment:'',
+				comment:"",
 				viewpoint:{
 					up:[0,1,0],
 					position:[38,38 ,125.08011914810137],
@@ -1750,13 +1746,12 @@ describe("Issues", function () {
 					near:76.42411012233212,
 					screenshot:pngBase64
 				}
-			}
+			};
 
 			// Creating an issue
 			const issueId = (await agent.post(`/${username}/${model}/issues`)
 				.send(issue)
 				.expect(200)).body._id;
-
 
 			// Commenting the issue
 			commentData = (await agent.post(`/${username}/${model}/issues/${issueId}/comments`).send(commentData).expect(200)).body;
@@ -1766,11 +1761,11 @@ describe("Issues", function () {
 			const commentId = commentData.guid;
 
 			// patch stuff
-			let res = await agent.patch(`/${username}/${model}/issues/${issueId}`)
+			const res = await agent.patch(`/${username}/${model}/issues/${issueId}`)
 				.send(data)
 				.expect(200);
 
-			let comment = res.body.comments.filter(c=> c.guid == commentId)[0];
+			const comment = res.body.comments.filter(c=> c.guid == commentId)[0];
 			expect(commentData.viewpoint.screenshot).to.exist
 				.and.to.be.not.equal(pngBase64);
 			expect(commentData.viewpoint.screenshotSmall).to.exist;
@@ -1779,8 +1774,8 @@ describe("Issues", function () {
 		it("bad screenshot format within comments should fail", async () => {
 			const issue = Object.assign({"name":"Bad screenshot Issue test"}, baseIssue, { topic_type: "ru123"});
 
-			let commentData = {
-				comment:'',
+			const commentData = {
+				comment:"",
 				viewpoint:{
 					up:[0,1,0],
 					position:[38,38 ,125.08011914810137],
@@ -1794,7 +1789,7 @@ describe("Issues", function () {
 					near:76.42411012233212,
 					screenshot: pdfBase64
 				}
-			}
+			};
 
 			// Creating an issue
 			const issueId = (await agent.post(`/${username}/${model}/issues`)
@@ -2077,15 +2072,15 @@ describe("Issues", function () {
 			it("change viewpoint", function(done) {
 				const updateData = {
 					"viewpoint": {
-							"up":[0,1,0],
-							"position":[20,20,100],
-							"look_at":[0,0,-100],
-							"view_dir":[0,0,-1],
-							"right":[1,0,0],
-							"fov":2,
-							"aspect_ratio":1,
-							"far":300,
-							"near":50,
+						"up":[0,1,0],
+						"position":[20,20,100],
+						"look_at":[0,0,-100],
+						"view_dir":[0,0,-1],
+						"right":[1,0,0],
+						"fov":2,
+						"aspect_ratio":1,
+						"far":300,
+						"near":50
 					}
 				};
 
@@ -2272,15 +2267,15 @@ describe("Issues", function () {
 			it("change viewpoint", function(done) {
 				const updateData = {
 					"viewpoint": {
-							"up":[0,1,0],
-							"position":[20,20,100],
-							"look_at":[0,0,-100],
-							"view_dir":[0,0,-1],
-							"right":[1,0,0],
-							"fov":2,
-							"aspect_ratio":1,
-							"far":300,
-							"near":50,
+						"up":[0,1,0],
+						"position":[20,20,100],
+						"look_at":[0,0,-100],
+						"view_dir":[0,0,-1],
+						"right":[1,0,0],
+						"fov":2,
+						"aspect_ratio":1,
+						"far":300,
+						"near":50
 					}
 				};
 				agent.patch(`/${username}/${model}/issues/${issueId}`)
@@ -2576,7 +2571,7 @@ describe("Issues", function () {
 								"fov":2.1124830653010416,
 								"aspect_ratio":0.8750189337327384,
 								"far":276.75612077194506 ,
-								"near":76.42411012233212,
+								"near":76.42411012233212
 							}
 						};
 
@@ -2590,7 +2585,7 @@ describe("Issues", function () {
 
 		describe("and then commenting", function() {
 			let issueId;
-			let commentId = null
+			let commentId = null;
 
 			before(function(done) {
 				const issue = Object.assign({"name":"Issue test"}, baseIssue);
@@ -2616,7 +2611,7 @@ describe("Issues", function () {
 						"fov":2.1124830653010416,
 						"aspect_ratio":0.8750189337327384,
 						"far":276.75612077194506 ,
-						"near":76.42411012233212,
+						"near":76.42411012233212
 					}
 				};
 
@@ -2840,12 +2835,11 @@ describe("Issues", function () {
 		});
 
 		it("should create comment successful if the user tagged a user that doesn't not exist", function(done) {
-			const comment = {comment : `@doesntExist1234`};
+			const comment = {comment : "@doesntExist1234"};
 			agent.post(`/${teamspace}/${model}/issues/${issueId}/comments`)
 				.send(comment)
 				.expect(200, done);
 		});
-
 
 		it("should NOT create a notification if the user does not belong in the teamspace", function(done) {
 			const comment = {comment : `@${username}`};
@@ -2892,9 +2886,9 @@ describe("Issues", function () {
 				login(agent, altUser, password),
 				fetchNotification(agent),
 				(notifications, next) => {
-					expect(notifications, 'There should not be any notifications').to.be.an("array").and.to.have.length(0);
+					expect(notifications, "There should not be any notifications").to.be.an("array").and.to.have.length(0);
 					next();
-				},
+				}
 			],
 			done);
 		});
@@ -2916,9 +2910,8 @@ describe("Issues", function () {
 				(issue, next) => {
 					issues.push(issue);
 					next();
-				}], done)
+				}], done);
 		};
-
 
 		before(function(done) {
 			async.series([
@@ -2930,15 +2923,14 @@ describe("Issues", function () {
 				createAndPushIssue,
 				createAndPushIssue,
 				createAndPushIssue,
-				createAndPushIssue,
+				createAndPushIssue
 			], done);
 		});
-
 
 		const testForNoComment = (id, done) => {
 			agent.get(`/${teamspace}/${model}/issues/${id}`).expect(200, function(err , res) {
 				const comments = res.body.comments;
-				expect(comments, 'There should not be a comment').to.be.an("array").and.to.have.length(0);
+				expect(comments, "There should not be a comment").to.be.an("array").and.to.have.length(0);
 				return done(err);
 			});
 		};
@@ -2947,15 +2939,15 @@ describe("Issues", function () {
 			agent.get(`/${teamspace}/${model}/issues/${referencedIssueId}`).expect(200, function(err , res) {
 				const comments = res.body.comments;
 
-				expect(comments, 'There should be one system comment').to.be.an("array").and.to.have.length(1);
+				expect(comments, "There should be one system comment").to.be.an("array").and.to.have.length(1);
 
 				const commentAction = comments[0].action;
 
-				expect(commentAction.property).to.equal('issue_referenced')
-				expect(commentAction.to).to.equal(otherIssueNumber.toString())
+				expect(commentAction.property).to.equal("issue_referenced");
+				expect(commentAction.to).to.equal(otherIssueNumber.toString());
 				return done(err);
 			});
-		}
+		};
 
 		it("should create a system message when the issue has been referenced", function(done) {
 			const comment = {comment : `look at issue  #${issues[0].number} and #${issues[1].number} `};
@@ -2967,10 +2959,10 @@ describe("Issues", function () {
 						.expect(200, done);
 				},
 				function(done) {
-					testForReference(issues[0]._id, issues[2].number, done );
+					testForReference(issues[0]._id, issues[2].number, done);
 				},
 				function(done) {
-					testForReference(issues[1]._id, issues[2].number, done );
+					testForReference(issues[1]._id, issues[2].number, done);
 				},
 				function(done) {
 					testForNoComment(issues[3]._id, done);
@@ -2978,7 +2970,7 @@ describe("Issues", function () {
 
 				function(done) {
 					testForNoComment(issues[3]._id, done);
-				},
+				}
 			], done);
 		});
 
@@ -2998,23 +2990,22 @@ describe("Issues", function () {
 						const [otherIssueNumber1, otherIssueNumber2] =  [issues[2].number.toString(), issues[1].number.toString()]
 							.sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
 
-						expect(comments, 'There should be two system comments').to.be.an("array").and.to.have.length(2);
+						expect(comments, "There should be two system comments").to.be.an("array").and.to.have.length(2);
 
 						comments = comments
 							.sort((commentA, commentB) => parseInt(commentA.action.to, 10) - parseInt(commentB.action.to, 10));
 
 						const commentAction1 = comments[0].action;
-						expect(commentAction1.property).to.equal('issue_referenced')
+						expect(commentAction1.property).to.equal("issue_referenced");
 						expect(commentAction1.to).to.equal(otherIssueNumber1);
 
 						const commentAction2 = comments[1].action;
-						expect(commentAction2.property).to.equal('issue_referenced')
+						expect(commentAction2.property).to.equal("issue_referenced");
 						expect(commentAction2.to).to.equal(otherIssueNumber2);
-
 
 						return done(err);
 					});
-				},
+				}
 			], done);
 		});
 
@@ -3038,8 +3029,8 @@ describe("Issues", function () {
 					testForNoComment(issues[5]._id, done);
 				},
 				function(done) {
-					testForReference(issues[6]._id, issues[7].number, done );
-				},
+					testForReference(issues[6]._id, issues[7].number, done);
+				}
 
 			], done);
 
@@ -3365,7 +3356,7 @@ describe("Issues", function () {
 			it("if teamspace does not exist should fail", async function() {
 				const res = await agent.post(`/${fakeTeamspace}/${viewerModel}/issues.bcfzip`)
 					.attach("file", __dirname + bcf.path)
-					.expect(404)
+					.expect(404);
 
 				expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
 			});
@@ -3433,22 +3424,22 @@ describe("Issues", function () {
 			async.series([
 				login(agent, teamspace, password),
 				(next) => {
-					createModel(agent, teamspace,'Query issues').then((res) => {
+					createModel(agent, teamspace,"Query issues").then((res) => {
 						model = res.body.model;
 
-						let createIssueTeamspace1 = createIssue(teamspace,model);
+						const createIssueTeamspace1 = createIssue(teamspace,model);
 
 						async.series([
-							createIssueTeamspace1(agent, {topic_type: 'information', number: 0, status: 'closed', priority: 'none', assigned_roles:[]}),
-							createIssueTeamspace1(agent, {topic_type: 'other', number: 1, status: 'open', priority: 'medium', assigned_roles:['Client']}),
-							createIssueTeamspace1(agent, {topic_type: 'information', number: 2, status: 'in progress', priority: 'high', assigned_roles:[]}),
-							login(agent,'adminTeamspace1JobA', password ),
-							createIssueTeamspace1(agent, {topic_type: 'structure', number: 3, status: 'open', priority: 'none', assigned_roles:[]}),
-							createIssueTeamspace1(agent, {topic_type: 'architecture', number: 4, status: 'open', priority: 'none', assigned_roles:['Client']}),
+							createIssueTeamspace1(agent, {topic_type: "information", number: 0, status: "closed", priority: "none", assigned_roles:[]}),
+							createIssueTeamspace1(agent, {topic_type: "other", number: 1, status: "open", priority: "medium", assigned_roles:["Client"]}),
+							createIssueTeamspace1(agent, {topic_type: "information", number: 2, status: "in progress", priority: "high", assigned_roles:[]}),
+							login(agent,"adminTeamspace1JobA", password),
+							createIssueTeamspace1(agent, {topic_type: "structure", number: 3, status: "open", priority: "none", assigned_roles:[]}),
+							createIssueTeamspace1(agent, {topic_type: "architecture", number: 4, status: "open", priority: "none", assigned_roles:["Client"]}),
 							login(agent, teamspace, password)
 						], next);
-					})
-				},
+					});
+				}
 			], done);
 		});
 
@@ -3456,67 +3447,66 @@ describe("Issues", function () {
 			let ids = [];
 
 			agent.get(`/${teamspace}/${model}/issues`)
-			.expect(200, function(err, res) {
-				ids = res.body.map(issue => issue._id);
-				ids = [ids[0], ids[2], ids[4]].sort();
-
-				agent.get(`/${teamspace}/${model}/issues?ids=${ids.join(',')}`)
 				.expect(200, function(err, res) {
-					expect(res.body.map((issue => issue._id)).sort()).to.eql(ids)
-					done(err);
-				});
+					ids = res.body.map(issue => issue._id);
+					ids = [ids[0], ids[2], ids[4]].sort();
 
-			});
+					agent.get(`/${teamspace}/${model}/issues?ids=${ids.join(",")}`)
+						.expect(200, function(err, res) {
+							expect(res.body.map((issue => issue._id)).sort()).to.eql(ids);
+							done(err);
+						});
+
+				});
 		});
 
 		it(" by topic", function(done) {
 			agent.get(`/${teamspace}/${model}/issues?topicTypes=information,structure`)
-			.expect(200, function(err, res) {
-				expect(res.body.map((issue => issue.topic_type)).sort()).to.eql(['information', 'structure', 'information'].sort())
-				done(err);
-			});
+				.expect(200, function(err, res) {
+					expect(res.body.map((issue => issue.topic_type)).sort()).to.eql(["information", "structure", "information"].sort());
+					done(err);
+				});
 		});
 
 		it(" by status", function(done) {
 			agent.get(`/${teamspace}/${model}/issues?status=closed,in%20progress`)
-			.expect(200, function(err, res) {
-				expect(res.body.map((issue => issue.status)).sort()).to.eql(['closed', 'in progress'].sort())
-				done(err);
-			});
+				.expect(200, function(err, res) {
+					expect(res.body.map((issue => issue.status)).sort()).to.eql(["closed", "in progress"].sort());
+					done(err);
+				});
 		});
 
 		it(" by priority", function(done) {
 			agent.get(`/${teamspace}/${model}/issues?priorities=medium,high`)
-			.expect(200, function(err, res) {
-				expect(res.body.map((issue => issue.priority)).sort()).to.eql(['medium', 'high'].sort())
-				done(err);
-			});
+				.expect(200, function(err, res) {
+					expect(res.body.map((issue => issue.priority)).sort()).to.eql(["medium", "high"].sort());
+					done(err);
+				});
 		});
 
 		it(" by number", function(done) {
 			agent.get(`/${teamspace}/${model}/issues?numbers=1,3,4,39`)
-			.expect(200, function(err, res) {
-				expect(res.body.map((issue => issue.number)).sort()).to.eql([1, 3, 4].sort())
-				done(err);
-			});
+				.expect(200, function(err, res) {
+					expect(res.body.map((issue => issue.number)).sort()).to.eql([1, 3, 4].sort());
+					done(err);
+				});
 		});
 
 		it(" by assigned role", function(done) {
 			agent.get(`/${teamspace}/${model}/issues/?assignedRoles=Client`)
-			.expect(200, function(err, res) {
-				expect(res.body.map((issue => issue.assigned_roles[0])).sort()).to.eql(['Client','Client'].sort())
-				done(err);
-			});
+				.expect(200, function(err, res) {
+					expect(res.body.map((issue => issue.assigned_roles[0])).sort()).to.eql(["Client","Client"].sort());
+					done(err);
+				});
 		});
 
 		it(" by unassigned role", function(done) {
 			agent.get(`/${teamspace}/${model}/issues/?assignedRoles=Unassigned`)
-			.expect(200, function(err, res) {
-				expect(res.body.map((issue => issue.assigned_roles.length)).sort()).to.eql([0,0,0].sort())
-				done(err);
-			});
+				.expect(200, function(err, res) {
+					expect(res.body.map((issue => issue.assigned_roles.length)).sort()).to.eql([0,0,0].sort());
+					done(err);
+				});
 		});
-
 
 	});
 
