@@ -310,6 +310,8 @@ Viewpoint.setExternalScreenshotRef = async function(viewpoint, account, model, c
 	console.log("viewpoint setExtScreenshotRef");
 	const screenshot = viewpoint.screenshot;
 	const ref = await FileRef.storeFile(account, model + "." + collName + ".ref", null, null, screenshot);
+	console.log("ref");
+	console.log(ref);
 	delete viewpoint.screenshot;
 	viewpoint.screenshot_ref = ref._id;
 	return viewpoint;
