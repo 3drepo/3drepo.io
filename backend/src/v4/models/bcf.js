@@ -651,7 +651,7 @@ function parseViewpointClippingPlanes(clippingPlanes, scale) {
 	return parsedPlanes;
 }
 
-async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, issueName, ifcToModelMap) {
+async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, issueName, issueId, ifcToModelMap) {
 	const vp = {};
 	const groupPromises = [];
 
@@ -738,6 +738,7 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 
 		if (selectionObjects && selectionObjects.length > 0) {
 			const groupData = {
+				issue_id: utils.stringToUUID(issueId),
 				name: issueName,
 				color: [255, 0, 0],
 				objects: selectionObjects
@@ -752,6 +753,7 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 
 		if (shownObjects && shownObjects.length > 0) {
 			const groupData = {
+				issue_id: utils.stringToUUID(issueId),
 				name: issueName,
 				color: [255, 0, 0],
 				objects: shownObjects
@@ -766,6 +768,7 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 
 		if (hiddenObjects && hiddenObjects.length > 0) {
 			const groupData = {
+				issue_id: utils.stringToUUID(issueId),
 				name: issueName,
 				color: [255, 0, 0],
 				objects: hiddenObjects
@@ -950,7 +953,7 @@ async function readBCF(account, model, requester, ifcToModelMap, dataBuffer, set
 					model: model
 				};
 
-				const vpComponents = await parseViewpointComponents(groupDbCol, _.get(vpXML, "VisualizationInfo.Components"), settings.federate, issue.name, ifcToModelMap);
+				const vpComponents = await parseViewpointComponents(groupDbCol, _.get(vpXML, "VisualizationInfo.Components"), settings.federate, issue.name, issue._id, ifcToModelMap);
 				vp = {...vp, ...vpComponents};
 			}
 			issue.viewpoints.push(vp);
