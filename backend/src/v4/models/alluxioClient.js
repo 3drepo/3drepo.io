@@ -118,6 +118,7 @@ class AlluxioClient {
 	}
 
 	async uploadFile(path, data) {
+		console.log("alluxioClient uploadFile")
 		if (await this.exists(path)) {
 			throw new Error(`Couldn't create file "${path}":file already exists.`);
 		}
@@ -125,18 +126,21 @@ class AlluxioClient {
 		let id = 0;
 
 		try {
+			console.log("alluxioClient createFile")
 			id = await this.createFile(path, {recursive: true});
 		} catch(e) {
 			throw new AlluxioError(`Couldn't create file "${path}": unknown error.`, e);
 		}
 
 		try {
+			console.log("alluxioClient write")
 			await this.write(id, data);
 		} catch(e) {
 			throw new AlluxioError(`Couldn't write data to file "${path}": unknown error.`, e);
 		}
 
 		try {
+			console.log("alluxioClient closeFile")
 			await this.closeFile(id);
 		} catch(e) {
 			throw new AlluxioError(`Couldn't closse file "${path}": unknown error.`, e);

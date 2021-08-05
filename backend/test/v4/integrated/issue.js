@@ -252,7 +252,7 @@ describe("Issues", function () {
 
 		it("with screenshot should succeed", async function() {
 			const issue = {"name":"Issue test", ...cloneDeep(baseIssue)};
-			issue.viewpoint.screenshot = pngBase64;
+			issue.viewpoint.screenshot = altBase64;
 
 			let res = await agent.post(`/${username}/${model}/issues`)
 						.send(issue)
