@@ -393,10 +393,6 @@ describe("Sequences", function () {
 				const res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
 					.expect(200);
 
-				console.log("====== res.body.activities ========");
-				console.log(res.body.activities);
-				console.log("====== newActivitiesList.activities ========");
-				console.log(newActivitiesList.activities);
 				expect(sortById(res.body.activities)).to.deep.equal(sortById(newActivitiesList.activities))
 			});
 		});
@@ -433,10 +429,6 @@ describe("Sequences", function () {
 				const res = await agent.get(`/${username}/${model}/sequences/${sequenceId}/activities`)
 					.expect(200);
 
-				console.log("====== res.body.activities ========");
-				console.log(res.body.activities);
-				console.log("====== newActivitiesList.activities ========");
-				console.log(newActivitiesList.activities);
 				expect(sortById(res.body.activities)).to.deep.equal(sortById(newActivitiesList.activities))
 			});
 		})

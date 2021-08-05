@@ -288,6 +288,7 @@ FileRef.storeMitigationsFile = async function(account, user, name, data) {
 };
 
 FileRef.storeFileAsResource = async function(account, model, user, name, data, extraFields = null) {
+	console.log("storeFileAsResource");
 	const collName = model + RESOURCES_FILE_REF_EXT;
 
 	return await this.storeFile(account, collName, user, name, data, extraFields);

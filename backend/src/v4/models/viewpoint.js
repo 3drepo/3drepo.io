@@ -152,6 +152,7 @@ Viewpoint.cleanViewpoint = function(routePrefix, viewpointToClean, serialise = t
 };
 
 Viewpoint.createViewpoint = async (account, model, collName, routePrefix, hostId, vpData, addGUID, viewpointType, createThumbnail = false) => {
+	console.log("createViewpoint");
 	if (!vpData) {
 		return;
 	}
@@ -306,6 +307,7 @@ Viewpoint.createViewpoint = async (account, model, collName, routePrefix, hostId
 };
 
 Viewpoint.setExternalScreenshotRef = async function(viewpoint, account, model, collName) {
+	console.log("viewpoint setExtScreenshotRef");
 	const screenshot = viewpoint.screenshot;
 	const ref = await FileRef.storeFile(account, model + "." + collName + ".ref", null, null, screenshot);
 	delete viewpoint.screenshot;
