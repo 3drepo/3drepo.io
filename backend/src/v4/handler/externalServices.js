@@ -30,7 +30,6 @@ const ExternalServices = {};
 const getDefaultStorageType = () => config.defaultStorage || (config.fs ? "fs" : null) || "gridfs";
 
 ExternalServices.getFileStream = (account, collection, type, key) => {
-	// type = "alluxio";
 	switch(type) {
 		case "fs" :
 			return FSHandler.getFileStream(key);
