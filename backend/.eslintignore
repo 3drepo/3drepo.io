@@ -1,4 +1,6 @@
-test/v4
-statics/
+tests/v4
 eslint-rules
 jest.config.js
+docs/
+node_modules/
+coverage/
