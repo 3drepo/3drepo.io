@@ -57,6 +57,8 @@ class AlluxioHandler {
 		// debug info
 		const info = await this.client.getInfo();
 		console.log(info.uptimeMs);
+		console.log(this.getAlluxioPathFormat(link));
+		console.log(Object.prototype.toString.call(data));
 		// debug info
 		await this.client.uploadFile(this.getAlluxioPathFormat(link), data);
 		return ({_id, link, size:data.length, type: "alluxio"});
