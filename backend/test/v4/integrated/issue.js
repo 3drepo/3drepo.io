@@ -269,6 +269,25 @@ describe("Issues", function () {
 			expect(res.body.viewpoint.screenshot).to.equal(`${username}/${model}/issues/${issueId}/viewpoints/${res.body.viewpoint.guid}/screenshot.png`);
 		});
 
+		it("with screenshot again should succeed", async function() {
+			const issue = {"name":"Issue test", ...cloneDeep(baseIssue)};
+			issue.viewpoint.screenshot = altBase64;
+
+			let res = await agent.post(`/${username}/${model}/issues`)
+						.send(issue)
+						.expect(200)
+			console.log("res.body 1");
+			console.log(res.body);
+
+			let issueId = res.body._id;
+
+			res = await agent.get(`/${username}/${model}/issues/${issueId}`).expect(200);
+			console.log("res.body 2");
+			console.log(res.body);
+
+			expect(res.body.viewpoint.screenshot).to.equal(`${username}/${model}/issues/${issueId}/viewpoints/${res.body.viewpoint.guid}/screenshot.png`);
+		});
+
 		it("with screenshot using the wrong file format should fail", async function() {
 			const issue ={"name":"Wrong file issue", ...cloneDeep(baseIssue)};
 			issue.viewpoint.screenshot = pdfBase64;

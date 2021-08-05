@@ -143,7 +143,7 @@ class AlluxioClient {
 			console.log("alluxioClient closeFile")
 			await this.closeFile(id);
 		} catch(e) {
-			throw new AlluxioError(`Couldn't closse file "${path}": unknown error.`, e);
+			throw new AlluxioError(`Couldn't close file "${path}": unknown error.`, e);
 		}
 
 	}
