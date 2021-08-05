@@ -86,6 +86,7 @@ function resourceDeleted(emitter, account, model, data) {
 
 // Issues chat events
 function newIssues(emitter, account, model, data) {
+	console.log("chat newIssues");
 	return insertEventQueue("issue" + eventTypes.CREATED, emitter, account, model, null, data);
 }
 

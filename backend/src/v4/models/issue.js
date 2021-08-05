@@ -78,6 +78,7 @@ class Issue extends Ticket {
 	}
 
 	async create(account, model, newIssue, sessionId) {
+		console.log("issue create");
 		if (!issueSchema.isValidSync(newIssue, { strict: true })) {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}

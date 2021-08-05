@@ -409,6 +409,7 @@ class Ticket extends View {
 	* @param {object} newTicket
 	*/
 	async create(account, model, newTicket) {
+		console.log("ticket create");
 		if (!newTicket.name) {
 			return Promise.reject({ resCode: responseCodes.INVALID_ARGUMENTS });
 		}
@@ -512,6 +513,7 @@ class Ticket extends View {
 	}
 
 	getScreenshot(account, model, uid, vid) {
+		console.log("getScreenshot");
 		uid = utils.stringToUUID(uid);
 		vid = utils.stringToUUID(vid);
 
