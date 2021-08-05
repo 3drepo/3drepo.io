@@ -25,47 +25,44 @@ const matchHelper = (func, string, match) => {
 };
 
 const testGetURLDomain = () => {
-	describe('Get URL Domain', () => {
-		test('with a typical url, it should return the domain + protocol', () => {
-			matchHelper(StringHelper.getURLDomain, 'http://abc.com/xyz/asb', 'http://abc.com');
-			matchHelper(StringHelper.getURLDomain, 'http://abc.com/xyz/asb?abc=35', 'http://abc.com');
-		});
-		test('with a domain only url, it should return the domain + protocol', () => {
-			matchHelper(StringHelper.getURLDomain, 'http://abc.com/', 'http://abc.com');
-			matchHelper(StringHelper.getURLDomain, 'ftp://abc.com/', 'ftp://abc.com');
-			matchHelper(StringHelper.getURLDomain, 'http://abc.com', 'http://abc.com');
-		});
-		test('with an invalid url, it should return the full string', () => {
-			matchHelper(StringHelper.getURLDomain, 'someString', 'someString');
-		});
-		test('with an empty string, it should return an empty string', () => {
-			matchHelper(StringHelper.getURLDomain, '', '');
+	describe.each([
+		['http://abc.com/xyz/asb', 'http://abc.com'],
+		['http://abc.com/xyz/asb?abc=35', 'http://abc.com'],
+		['http://abc.com/', 'http://abc.com'],
+		['ftp://abc.com/', 'ftp://abc.com'],
+		['http://abc.com', 'http://abc.com'],
+		['someString', 'someString'],
+		['', ''],
+
+	])('Get URL Domain', (source, target) => {
+		test(`with ${source} should return ${target}`, () => {
+			matchHelper(StringHelper.getURLDomain, source, target);
 		});
 	});
 };
 
 const testToCamelCase = () => {
-	describe('To Camel Case', () => {
-		test('should expect to return camel case on an given string', () => {
-			matchHelper(StringHelper.toCamelCase, 'one two three', 'oneTwoThree');
-			matchHelper(StringHelper.toCamelCase, 'one_two_three', 'oneTwoThree');
-			matchHelper(StringHelper.toCamelCase, 'ONE_TWO_THREE', 'oneTwoThree');
-		});
-		test('with an empty string, it should return an empty string', () => {
-			matchHelper(StringHelper.toCamelCase, '', '');
+	describe.each([
+		['one two three', 'oneTwoThree'],
+		['one_two_three', 'oneTwoThree'],
+		['ONE_TWO_THREE1', 'oneTwoThree1'],
+		['', ''],
+	])('To Camel Case', (source, target) => {
+		test(`with ${source} should result in ${target}`, () => {
+			matchHelper(StringHelper.toCamelCase, source, target);
 		});
 	});
 };
 
 const testToSnakeCase = () => {
-	describe('To Snake Case', () => {
-		test('should expect to return snake case on an given string', () => {
-			matchHelper(StringHelper.toSnakeCase, 'one two three', 'ONE_TWO_THREE');
-			matchHelper(StringHelper.toSnakeCase, 'one_two_three', 'ONE_TWO_THREE');
-			matchHelper(StringHelper.toSnakeCase, 'oneTwoThree', 'ONE_TWO_THREE');
-		});
-		test('with an empty string, it should return an empty string', () => {
-			matchHelper(StringHelper.toSnakeCase, '', '');
+	describe.each([
+		['one two three', 'ONE_TWO_THREE'],
+		['oneTwoThree', 'ONE_TWO_THREE'],
+		['oneTwoThree1', 'ONE_TWO_THREE_1'],
+		['', ''],
+	])('To Snake Case', (source, target) => {
+		test(`with ${source} should result in ${target}`, () => {
+			matchHelper(StringHelper.toSnakeCase, source, target);
 		});
 	});
 };

@@ -15,9 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const _ = require('lodash');
+
 const TypeChecker = {};
 
-TypeChecker.isBuffer = (buf) => buf && Buffer.isBuffer(buf);
-TypeChecker.isString = (value) => Object.prototype.toString.call(value) === '[object String]';
+TypeChecker.isBuffer = (buf) => !!(buf && Buffer.isBuffer(buf));
+TypeChecker.isString = (value) => _.isString(value);
 
 module.exports = TypeChecker;
