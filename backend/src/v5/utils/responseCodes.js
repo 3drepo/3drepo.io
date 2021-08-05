@@ -38,11 +38,11 @@ Object.keys(ResponseCodes.template).forEach((key) => {
 	ResponseCodes.template[key].code = toSnakeCase(key);
 });
 
+ResponseCodes.codeExists = (code) => !!ResponseCodes.template[toCamelCase(code)];
+
 ResponseCodes.createResponseCode = (errCode, message) => {
-	const res = { ...errCode } || ResponseCodes.UNKNOWN_ERROR;
+	const res = ResponseCodes.codeExists(errCode?.code) ? errCode : ResponseCodes.template.unknown;
 	return message ? { ...res, message } : res;
 };
-
-ResponseCodes.codeExists = (code) => !!ResponseCodes.template[toCamelCase(code)];
 
 module.exports = ResponseCodes;
