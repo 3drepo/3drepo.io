@@ -295,7 +295,10 @@ FileRef.storeFileAsResource = async function(account, model, user, name, data, e
 };
 
 FileRef.storeFile = async function(account, collection, user, name, data, extraFields = null) {
+	console.log("FileRef storeFile");
 	let refInfo = await ExternalServices.storeFile(account, collection, data);
+	console.log("refInfo");
+	console.log(refInfo);
 	refInfo = {...refInfo ,...(extraFields || {}) };
 
 	return await insertRef(account, collection, user, name, refInfo);
