@@ -393,7 +393,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 
 	public handleUpdateScreenshot =
 		(screenshot, disableViewpointSuggestion = false, forceViewpointUpdate = false) => {
-		const { updateRisk, disableViewer } = this.props;
+		const { updateRisk, disableViewer, risk } = this.props;
 
 		if (this.isNewRisk) {
 			this.props.setState({ newRisk: {
@@ -402,7 +402,7 @@ export class RiskDetails extends React.PureComponent<IProps, IState> {
 				}});
 		} else {
 			if (screenshot) {
-				const viewpoint = { screenshot };
+				const viewpoint = { ...risk.viewpoint, screenshot };
 
 				if (!disableViewpointSuggestion && !disableViewer) {
 					this.handleViewpointUpdateSuggest(viewpoint);

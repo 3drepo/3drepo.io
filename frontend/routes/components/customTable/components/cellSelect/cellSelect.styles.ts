@@ -31,10 +31,6 @@ export const StyledSelect = styled(SelectField).attrs({
 		width: 100%;
 		display: ${({ hidden }) => hidden ? 'none' : 'block'};
 
-		&:before {
-			content: none;
-		}
-
 		.select {
 			padding-right: 32px;
 		}

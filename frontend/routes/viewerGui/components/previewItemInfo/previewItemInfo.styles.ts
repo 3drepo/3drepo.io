@@ -21,6 +21,7 @@ import Typography from '@material-ui/core/Typography';
 
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { COLOR } from '../../../../styles';
+import { OpenInViewerButton as OpenInViewerButtonComponent } from '../../../components/openInViewerButton/openInViewerButton.component';
 
 export const Container = styled.div`
 	min-width: 0;
@@ -72,4 +73,13 @@ export const Icon = styled.div`
 export const ExtraInfo = styled.span`
 	font-size: 12px;
 	color: ${COLOR.BLACK_60};
+`;
+
+export const OpenInViewerButton = styled(OpenInViewerButtonComponent)`
+	&& {
+		position: relative;
+		display: flex;
+		top: 0;
+		right:0;
+	}
 `;

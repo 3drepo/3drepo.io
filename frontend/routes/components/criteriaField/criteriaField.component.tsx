@@ -145,6 +145,11 @@ export class CriteriaField extends React.PureComponent<IProps, IState> {
 		} else if (!isEqual(prevProps.criterionForm, this.props.criterionForm)) {
 			this.setState({ criterionForm: this.props.criterionForm });
 		}
+
+		if (this.props.value !== prevProps.value) {
+			this.setState({selectedCriteria: this.props.value});
+		}
+
 	}
 
 	public getSelectedCriterionForm(selectedCriteria = []) {

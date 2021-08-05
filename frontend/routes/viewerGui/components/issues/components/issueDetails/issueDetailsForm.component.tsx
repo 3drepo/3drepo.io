@@ -244,7 +244,7 @@ export const IssueDetailsForm = withFormik({
 			status: issue.status,
 			priority: issue.priority,
 			topic_type: issue.topic_type,
-			assigned_roles: get(issue, 'assigned_roles[0]', ''),
+			assigned_roles: get(issue, 'assigned_roles[0]', 'Unassigned'),
 			due_date: issue.due_date,
 			desc: issue.desc,
 			sequence_start: issue.sequence_start,

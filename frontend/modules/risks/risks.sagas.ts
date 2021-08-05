@@ -34,6 +34,7 @@ import { VIEWER_EVENTS } from '../../constants/viewer';
 import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { disableConflictingMeasurementActions, generateName } from '../../helpers/measurements';
 import { prepareResources } from '../../helpers/resources';
+import { prepareRisk } from '../../helpers/risks';
 import { chopShapesUuids } from '../../helpers/shapes';
 import { SuggestedTreatmentsDialog } from '../../routes/components/dialogContainer/components';
 import * as API from '../../services/api';
@@ -167,9 +168,10 @@ function* updateRisk({riskData}) {
 		updatedRisk.resources = prepareResources(account, model, updatedRisk.resources);
 
 		updatedRisk = {...updatedRisk, ...riskData};
+		const preparedRisk = prepareRisk(updatedRisk);
 
 		yield put(RisksActions.setComponentState({ savedPin: position }));
-		yield put(RisksActions.saveRiskSuccess(updatedRisk));
+		yield put(RisksActions.saveRiskSuccess(preparedRisk));
 		yield put(SnackbarActions.show('Risk updated'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('update', 'risk', error));
@@ -616,7 +618,7 @@ export function * updateActiveRiskViewpoint({screenshot}) {
 		viewpoint = {...viewpoint, screenshot};
 	}
 
-	yield put(RisksActions.updateRisk(account, model, {viewpoint}));
+	yield put(RisksActions.updateRisk({viewpoint}));
 }
 
 /** shapes **/

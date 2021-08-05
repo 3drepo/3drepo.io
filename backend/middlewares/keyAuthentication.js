@@ -60,7 +60,7 @@ async function apiKeyCheck(req, res, next) {
 		const user = await User.findByAPIKey(req.query.key);
 		if (user) {
 			req.session = {};
-			req.session.user = { username: user.user, roles: user.roles };
+			req.session.user = { username: user.user, roles: user.roles, isAPIKey: true };
 		}
 	}
 

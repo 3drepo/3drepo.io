@@ -19,7 +19,6 @@
 
 const _ = require("lodash");
 const archiver = require("archiver");
-const moment = require("moment");
 const xml2js = require("xml2js");
 const yauzl = require("yauzl-promise");
 
@@ -27,6 +26,7 @@ const C = require("../constants");
 const systemLogger = require("../logger.js").systemLogger;
 const utils = require("../utils");
 
+const { addPreExistingComment } = require("./comment");
 const FileRef = require("./fileRef");
 const Group = require("./group");
 const Meta = require("./meta");
@@ -155,12 +155,12 @@ async function getIssueBCF(issue, account, model, unit) {
 				break;
 			case "Markup.Topic.CreationDate":
 				if (_.has(issue, markupMapping[key])) {
-					_.set(markup, key, moment(_.get(issue, markupMapping[key])).format());
+					_.set(markup, key, utils.timestampToISOString(_.get(issue, markupMapping[key])));
 				}
 				break;
 			case "Markup.Topic.DueDate":
 				if (_.has(issue, markupMapping[key])) {
-					_.set(markup, key, moment(_.get(issue, markupMapping[key])).format());
+					_.set(markup, key, utils.timestampToISOString(_.get(issue, markupMapping[key])));
 				} else if (_.has(issue, "extras.DueDate")) {
 					_.set(markup, key, _.get(issue, "extras.DueDate"));
 				}
@@ -190,7 +190,7 @@ async function getIssueBCF(issue, account, model, unit) {
 			"@":{
 				Guid: utils.uuidToString(comment.guid ? comment.guid : utils.generateUUID())
 			},
-			"Date": moment(comment.created).format(),
+			"Date": utils.timestampToISOString(comment.created),
 			"Author": comment.owner,
 			"Comment": comment.comment,
 			"Viewpoint": {
@@ -407,10 +407,10 @@ async function getIssueBCF(issue, account, model, unit) {
 							};
 						}
 
-						if (("perspective" === vp.type || !_.get(vp, "extras._noPerspective")) && vp.fov) {
+						if (("perspective" === vp.type || !_.get(vp, "extras._noPerspective"))) {
 							viewpointXmlObj.VisualizationInfo.PerspectiveCamera = {
 								...camera,
-								FieldOfView: vp.fov * 180 / Math.PI
+								FieldOfView: vp.fov ? vp.fov * 180 / Math.PI : 60
 							};
 						}
 					} else if (_.get(vp, "extras.OrthogonalCamera")) {
@@ -476,7 +476,6 @@ bcf.getBCFZipReadStream = function(account, model, issues, unit) {
 
 		bcfPromises.push(
 			getIssueBCF(issue, issueAccount, issueModel, unit).then(bcfResult => {
-
 				zip.append(new Buffer.from(bcfResult.markup, "utf8"), {name: `${utils.uuidToString(issue._id)}/markup.bcf`});
 
 				bcfResult.viewpoints.forEach(vp => {
@@ -577,12 +576,12 @@ function parseMarkupBuffer(markupBuffer) {
 			issue.priority = sanitise(_.get(xml, "Markup.Topic[0].Priority[0]._"), priorityEnum);
 			_.get(xml, "Markup.Topic[0].Index[0]._") && (issue.extras.Index = _.get(xml, "Markup.Topic[0].Index[0]._"));
 			_.get(xml, "Markup.Topic[0].Labels[0]._") && (issue.extras.Labels = _.get(xml, "Markup.Topic[0].Labels[0]._"));
-			issue.created = moment(_.get(xml, "Markup.Topic[0].CreationDate[0]._")).format("x").valueOf();
+			issue.created = utils.isoStringToTimestamp(_.get(xml, "Markup.Topic[0].CreationDate[0]._"));
 			issue.owner = _.get(xml, "Markup.Topic[0].CreationAuthor[0]._");
 			_.get(xml, "Markup.Topic[0].ModifiedDate[0]._") && (issue.extras.ModifiedDate = _.get(xml, "Markup.Topic[0].ModifiedDate[0]._"));
 			_.get(xml, "Markup.Topic[0].ModifiedAuthor[0]._") && (issue.extras.ModifiedAuthor = _.get(xml, "Markup.Topic[0].ModifiedAuthor[0]._"));
 			if (_.get(xml, "Markup.Topic[0].DueDate[0]._")) {
-				issue.due_date = moment(_.get(xml, "Markup.Topic[0].DueDate[0]._")).valueOf();
+				issue.due_date = utils.isoStringToTimestamp(_.get(xml, "Markup.Topic[0].DueDate[0]._"));
 			}
 			if (_.get(xml, "Markup.Topic[0].AssignedTo[0]._")) {
 				issue.assigned_roles = _.get(xml, "Markup.Topic[0].AssignedTo[0]._").split(",");
@@ -597,14 +596,13 @@ function parseMarkupBuffer(markupBuffer) {
 		}
 
 		_.get(xml, "Markup.Comment") && xml.Markup.Comment.forEach(comment => {
-			const obj = {
-				guid: _.get(comment, "@.Guid") ? utils.stringToUUID(_.get(comment, "@.Guid")) : utils.generateUUID(),
-				created: Number(moment(_.get(comment, "Date[0]._")).format("x").valueOf()),
-				owner: _.get(comment, "Author[0]._"),
-				comment: _.get(comment, "Comment[0]._"),
-				sealed: true,
-				viewpoint: utils.isUUID(_.get(comment, "Viewpoint[0].@.Guid")) ? utils.stringToUUID(_.get(comment, "Viewpoint[0].@.Guid")) : undefined
-			};
+			const obj = addPreExistingComment(
+				_.get(comment, "Author[0]._"),
+				_.get(comment, "Comment[0]._"),
+				{ guid: utils.stringToUUID(_.get(comment, "Viewpoint[0].@.Guid"))},
+				utils.stringToUUID(_.get(comment, "@.Guid")),
+				utils.isoStringToTimestamp(_.get(comment, "Date[0]._"))
+			);
 
 			const commentExtras = {};
 			_.get(comment, "ModifiedDate") && (commentExtras.ModifiedDate = _.get(comment, "ModifiedDate"));
@@ -653,7 +651,7 @@ function parseViewpointClippingPlanes(clippingPlanes, scale) {
 	return parsedPlanes;
 }
 
-async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, issueName, ifcToModelMap) {
+async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, issueName, issueId, ifcToModelMap) {
 	const vp = {};
 	const groupPromises = [];
 
@@ -740,13 +738,14 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 
 		if (selectionObjects && selectionObjects.length > 0) {
 			const groupData = {
+				issue_id: utils.stringToUUID(issueId),
 				name: issueName,
 				color: [255, 0, 0],
 				objects: selectionObjects
 			};
 
 			groupPromises.push(
-				Group.createGroup(groupDbCol.account, groupDbCol.model, undefined, groupData).then(group => {
+				Group.create(groupDbCol.account, groupDbCol.model, undefined, undefined, undefined, undefined, groupData).then(group => {
 					return vp.highlighted_group_id = utils.stringToUUID(group._id);
 				})
 			);
@@ -754,13 +753,14 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 
 		if (shownObjects && shownObjects.length > 0) {
 			const groupData = {
+				issue_id: utils.stringToUUID(issueId),
 				name: issueName,
 				color: [255, 0, 0],
 				objects: shownObjects
 			};
 
 			groupPromises.push(
-				Group.createGroup(groupDbCol.account, groupDbCol.model, undefined, groupData).then(group => {
+				Group.create(groupDbCol.account, groupDbCol.model, undefined, undefined, undefined, undefined, groupData).then(group => {
 					return vp.shown_group_id = utils.stringToUUID(group._id);
 				})
 			);
@@ -768,13 +768,14 @@ async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, 
 
 		if (hiddenObjects && hiddenObjects.length > 0) {
 			const groupData = {
+				issue_id: utils.stringToUUID(issueId),
 				name: issueName,
 				color: [255, 0, 0],
 				objects: hiddenObjects
 			};
 
 			groupPromises.push(
-				Group.createGroup(groupDbCol.account, groupDbCol.model, undefined, groupData).then(group => {
+				Group.create(groupDbCol.account, groupDbCol.model, undefined, undefined, undefined, undefined, groupData).then(group => {
 					return vp.hidden_group_id = utils.stringToUUID(group._id);
 				})
 			);
@@ -908,7 +909,8 @@ async function readBCF(account, model, requester, ifcToModelMap, dataBuffer, set
 		for (let vpGuidIdx = 0; vpGuidIdx < vpGuids.length; vpGuidIdx++) {
 			const vpGuid = vpGuids[vpGuidIdx];
 			if (!viewpoints[vpGuid].viewpointXml) {
-				return;
+				systemLogger.logInfo("Cannot find viewpoint xml for ", vpGuid);
+				continue;
 			}
 
 			const vpXML = viewpoints[vpGuid].viewpointXml;
@@ -951,7 +953,7 @@ async function readBCF(account, model, requester, ifcToModelMap, dataBuffer, set
 					model: model
 				};
 
-				const vpComponents = await parseViewpointComponents(groupDbCol, _.get(vpXML, "VisualizationInfo.Components"), settings.federate, issue.name, ifcToModelMap);
+				const vpComponents = await parseViewpointComponents(groupDbCol, _.get(vpXML, "VisualizationInfo.Components"), settings.federate, issue.name, issue._id, ifcToModelMap);
 				vp = {...vp, ...vpComponents};
 			}
 			issue.viewpoints.push(vp);

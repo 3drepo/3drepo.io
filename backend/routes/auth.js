@@ -671,10 +671,11 @@ function signUp(req, res, next) {
 		&& utils.isString(req.body.countryCode)
 		&& (!req.body.company || utils.isString(req.body.company))
 		&& utils.isBoolean(req.body.mailListAgreed)
-		&& utils.isString(req.body.jobTitle)
-		&& utils.isString(req.body.industry)
-		&& utils.isString(req.body.howDidYouFindUs)
-		&& (!req.body.phoneNumber || utils.isString(req.body.phoneNumber))) {
+		// && utils.isString(req.body.jobTitle)
+		// && utils.isString(req.body.industry)
+		// && utils.isString(req.body.howDidYouFindUs)
+		// && (!req.body.phoneNumber || utils.isString(req.body.phoneNumber))
+	) {
 
 		// check if captcha is enabled
 		const checkCaptcha = config.auth.captcha ? httpsPost(config.captcha.validateUrl, {
@@ -695,11 +696,11 @@ function signUp(req, res, next) {
 					lastName: req.body.lastName,
 					countryCode: req.body.countryCode,
 					company: req.body.company,
-					mailListOptOut: !req.body.mailListAgreed,
-					industry: req.body.industry,
-					jobTitle: req.body.jobTitle,
-					howDidYouFindUs: req.body.howDidYouFindUs,
-					phoneNumber: req.body.phoneNumber
+					mailListOptOut: !req.body.mailListAgreed
+					// industry: req.body.industry,
+					// jobTitle: req.body.jobTitle,
+					// howDidYouFindUs: req.body.howDidYouFindUs,
+					// phoneNumber: req.body.phoneNumber
 				}, config.tokenExpiry.emailVerify);
 			} else {
 				return Promise.reject({ resCode: responseCodes.INVALID_CAPTCHA_RES});

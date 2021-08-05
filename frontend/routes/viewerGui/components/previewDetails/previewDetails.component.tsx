@@ -23,7 +23,6 @@ import * as Yup from 'yup';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { schema } from '../../../../services/validation';
 import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
-import OpenInViewerButton from '../../../components/openInViewerButton/openInViewerButton.container';
 import { TextField } from '../../../components/textField/textField.component';
 import { PreviewItemInfo } from '../previewItemInfo/previewItemInfo.component';
 import { RoleIndicator } from '../previewListItem/previewListItem.styles';
@@ -90,17 +89,6 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 	public textFieldRef = React.createRef<any>();
 	public scrollableContainerRef = React.createRef<HTMLDivElement>();
 
-	public renderNameWithCounter = renderWhenTrue(() => {
-		const title = `${this.props.number}. ${this.props.name}`;
-		return (
-			<Tooltip title={title}>
-				<Typography paragraph>
-					{title}
-				</Typography>
-			</Tooltip>
-		);
-	});
-
 	public renderName = renderWhenTrue(() => (
 		<Tooltip title={this.props.name}>
 			<Typography paragraph>
@@ -109,9 +97,11 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		</Tooltip>
 	));
 
-	public renderNameField = renderWhenTrue(() => (
-	<Grid container alignItems="center" justify="space-between" >
+	public renderTitleNumber = renderWhenTrue(() => (
 		<TitleNumber>{this.props.number}.</TitleNumber>
+	));
+
+	public renderNameField = renderWhenTrue(() => (
 		<Formik
 			initialValues={{name: this.props.name}}
 			validationSchema={ValidationSchema}
@@ -142,13 +132,12 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			</StyledForm>
 		</Formik>
 
-		</Grid>
 
 	));
 
 	public renderExpandIcon = renderWhenTrue(() => (
 		<ToggleIcon active={Number(this.state.expanded)} />
-		));
+	));
 
 	public renderCollapsable = renderWhenTrue(() => (
 		<CollapsableContent>
@@ -166,12 +155,11 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 
 	public renderNotCollapsableContent = () => {
 		const Component = this.props.renderNotCollapsable && this.props.renderNotCollapsable();
-
 		return renderWhenTrue(() => (
 			<>
 				<ToggleButtonContainer onClick={this.handleToggle}>
 					<ToggleButton>
-						{this.renderExpandIcon(!this.props.editable)}
+						{this.renderExpandIcon(!this.props.isNew)}
 					</ToggleButton>
 				</ToggleButtonContainer>
 				<NotCollapsableContent>
@@ -188,7 +176,7 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		}
 
 		this.setState({
-			expanded: editable || defaultExpanded
+			expanded: isNew || defaultExpanded
 		});
 	}
 
@@ -233,18 +221,6 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		}
 	}
 
-	public renderViewModel = renderWhenTrue(() => {
-		const { type, id } = this.props;
-		const { teamspace, modelId } = this.props.urlParams;
-		return (
-			<OpenInViewerButton
-				preview
-				teamspace={teamspace}
-				model={modelId}
-				query={`${type}Id=${id}`}
-			/>
-		);
-	});
 
 	public render() {
 		const {
@@ -264,6 +240,10 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 			actionButton,
 			isSmartGroup,
 			panelName,
+			isNew,
+			type,
+			id,
+			urlParams
 		} = this.props;
 
 		return (
@@ -276,17 +256,22 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 				>
 					<RoleIndicator color={roleColor} ref={this.headerRef} />
 					<MainInfoContainer>
-						{this.renderNameWithCounter(!editable && number)}
-						{this.renderName(!editable && !number)}
-						{this.renderNameField(editable)}
-						{this.renderViewModel(showModelButton)}
-						<PreviewItemInfo
-							author={owner}
-							createdAt={created}
-							StatusIconComponent={StatusIconComponent}
-							statusColor={statusColor}
-							actionButton={actionButton}
-						/>
+						<Grid container alignItems="center" >
+							{this.renderTitleNumber(number)}
+							{this.renderName(!editable)}
+							{this.renderNameField(editable)}
+						</Grid>
+							<PreviewItemInfo
+								author={owner}
+								createdAt={created}
+								StatusIconComponent={StatusIconComponent}
+								statusColor={statusColor}
+								actionButton={actionButton}
+								showModelButton={showModelButton}
+								type={type}
+								id={id}
+								urlParams={urlParams}
+							/>
 					</MainInfoContainer>
 				</Header>
 
@@ -303,3 +288,4 @@ export class PreviewDetails extends React.PureComponent<IProps, any> {
 		);
 	}
 }
+
