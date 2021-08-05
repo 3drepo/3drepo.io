@@ -48,11 +48,13 @@ ExternalServices.getFileStream = (account, collection, type, key) => {
 
 ExternalServices.getFile = (account, collection, type, key) => {
 	// type = "alluxio";
+	console.log("ExtServ - getFile");
+	console.log(type);
 	switch(type) {
 		case "fs" :
-			return  Promise.resolve(FSHandler.getFile(key));
+			return Promise.resolve(FSHandler.getFile(key));
 		case "s3" :
-			return  Promise.resolve(S3Handler.getFile(key));
+			return Promise.resolve(S3Handler.getFile(key));
 		case "gridfs" :
 			return GridFSHandler.getFile(account, collection, key);
 		case "alluxio" :
@@ -65,6 +67,8 @@ ExternalServices.getFile = (account, collection, type, key) => {
 
 ExternalServices.storeFile = (account, collection, data) => {
 	const type = getDefaultStorageType();
+	console.log("ExtServ - storeFile");
+	console.log(type);
 
 	switch(type) {
 		case "fs":
@@ -81,6 +85,8 @@ ExternalServices.storeFile = (account, collection, data) => {
 
 ExternalServices.removeFiles = (account, collection, type, keys) => {
 	// type = "alluxio";
+	console.log("ExtServ - removeFile");
+	console.log(type);
 	switch(type) {
 		case "fs" :
 			return FSHandler.removeFiles(keys);
