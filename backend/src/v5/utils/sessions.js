@@ -18,18 +18,18 @@
 const { v4Path } = require('../../interop');
 // FIXME: can remove the disable once we migrated config
 // eslint-disable-next-line
-const apiUrls = require(`${v4Path}/config`);
+const { apiUrls } = require(`${v4Path}/config`);
 const { getURLDomain } = require('./helper/strings');
 
 const referrerMatch = (sessionReferrer, headerReferrer) => {
 	const domain = getURLDomain(headerReferrer);
 	return domain === sessionReferrer
-        || apiUrls.some((api) => api.match(domain));
+        || apiUrls.all.some((api) => api.match(domain));
 };
 
 const SessionUtils = {};
 
-SessionUtils.isSessionValid = (session, referrer) => session?.user
-	&& (session.user.isAPIKey || (!referrer || referrerMatch(session.user.referrer, referrer)));
+SessionUtils.isSessionValid = (session, referrer) => !!(session?.user
+	&& (session.user.isAPIKey || (!referrer || referrerMatch(session.user.referer, referrer))));
 
 module.exports = SessionUtils;
