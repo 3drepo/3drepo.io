@@ -40,27 +40,16 @@ matrix:
 
       before_install:
         - docker-compose up alluxio-proxy alluxio-worker alluxio-master &
-        - sleep 100
         - mkdir -p submodules
-        - sleep 100
         - test_ver=`cat backend/testDBVersion`
-        - sleep 100
         - cd submodules
-        - sleep 100
         - git clone https://$TESTS_USER:$TESTS_PASSWORD@github.com/3drepo/tests.git
-        - sleep 100
         - cd tests
-        - sleep 100
         - git checkout $test_ver
-        - sleep 100
         - git status
-        - sleep 100
         - sudo apt install mongo-tools -y
-        - sleep 100
         - cd backend && mongorestore
-        - sleep 100
         - cd ../../../
-        - sleep 100
         - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
         - until nc -z localhost 39999; do echo Waiting for Alluxio; sleep 1; done
 

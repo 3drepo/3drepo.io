@@ -56,7 +56,7 @@ class AlluxioHandler {
 		const link = path.join(folderNames, _id);
 		// debug info
 		const info = await this.client.getInfo();
-		console.log(info);
+		console.log(info.uptimeMS);
 		// debug info
 		await this.client.uploadFile(this.getAlluxioPathFormat(link), data);
 		return ({_id, link, size:data.length, type: "alluxio"});
@@ -66,7 +66,7 @@ class AlluxioHandler {
 		try {
 			// debug info
 			const info = await this.client.getInfo();
-			console.log(info);
+			console.log(info.uptimeMS);
 			// debug info
 			return await this.client.downloadFileStream(this.getAlluxioPathFormat(key));
 		} catch {
@@ -78,7 +78,7 @@ class AlluxioHandler {
 		try {
 			// debug info
 			const info = await this.client.getInfo();
-			console.log(info);
+			console.log(info.uptimeMS);
 			// debug info
 			return await this.client.downloadFile(this.getAlluxioPathFormat(key));
 		} catch {
@@ -89,7 +89,7 @@ class AlluxioHandler {
 	async removeFile(key) {
 		// debug info
 		const info = await this.client.getInfo();
-		console.log(info);
+		console.log(info.uptimeMS);
 		// debug info
 		return await this.client.delete(this.getAlluxioPathFormat(key));
 	}
@@ -97,7 +97,7 @@ class AlluxioHandler {
 	async removeFiles(keys) {
 		// debug info
 		const info = await this.client.getInfo();
-		console.log(info);
+		console.log(info.uptimeMS);
 		// debug info
 		return await Promise.all(keys.map(this.removeFile, this));
 	}
