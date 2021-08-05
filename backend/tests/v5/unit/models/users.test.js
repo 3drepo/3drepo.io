@@ -39,8 +39,8 @@ const testGetAccessibleTeamspaces = () => {
 	test('should return error if user does not exists', async () => {
 		jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
 
-		expect(User.getAccessibleTeamspaces('user'))
-			.rejects.toThrow(template.userNotFound);
+		await expect(User.getAccessibleTeamspaces('user'))
+			.rejects.toEqual(template.userNotFound);
 	});
 };
 

@@ -39,11 +39,11 @@ const testTeamspaceAdmins = () => {
 			const res = await Teamspace.getTeamspaceAdmins('someTS');
 			expect(res).toEqual(['personA', 'personC']);
 		});
-		test('should return error if teamspace does not exists', () => {
+		test('should return error if teamspace does not exists', async () => {
 			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
 
-			expect(Teamspace.getTeamspaceAdmins('someTS'))
-				.rejects.toThrow(template.teamspaceNotFound);
+			await expect(Teamspace.getTeamspaceAdmins('someTS'))
+				.rejects.toEqual(template.teamspaceNotFound);
 		});
 	});
 };
