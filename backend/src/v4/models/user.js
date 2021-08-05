@@ -434,8 +434,8 @@ User.createUser = async function (username, password, customData, tokenExpiryTim
 
 	const cleanedCustomData = {
 		createdAt: new Date(),
-		inactive: true,
-		extras: {}
+		inactive: true
+		// extras: {}
 	};
 
 	["firstName", "lastName", "email", "mailListOptOut"]
@@ -445,12 +445,12 @@ User.createUser = async function (username, password, customData, tokenExpiryTim
 			}
 		});
 
-	["jobTitle", "industry", "phoneNumber", "howDidYouFindUs"]
-		.forEach(key => {
-			if (customData[key]) {
-				cleanedCustomData.extras[key] = customData[key];
-			}
-		});
+	// ["jobTitle", "industry", "phoneNumber", "howDidYouFindUs"]
+	// 	.forEach(key => {
+	// 		if (customData[key]) {
+	// 			cleanedCustomData.extras[key] = customData[key];
+	// 		}
+	// 	});
 
 	const billingInfo = {};
 
@@ -542,14 +542,14 @@ User.verify = async function (username, token, options) {
 	}
 
 	try {
-		const { customData: {firstName, lastName, email, billing, mailListOptOut, extras } } = user;
-		const { jobTitle, phoneNumber, industry, howDidYouFindUs } = extras;
+		const { customData: {firstName, lastName, email, billing, mailListOptOut /* , extras*/ } } = user;
+		// const { jobTitle, phoneNumber, industry, howDidYouFindUs } = extras;
 
 		const subscribed = !mailListOptOut;
 		const company = get(billing, "billingInfo.company");
 
 		await Intercom.createContact(username, formatPronouns(firstName + " " + lastName), email,
-			subscribed, company, jobTitle, phoneNumber, industry, howDidYouFindUs);
+			subscribed, company /* , jobTitle, phoneNumber, industry, howDidYouFindUs */);
 	} catch (err) {
 		systemLogger.logError("Failed to create contact in intercom when verifying user", username, err);
 	}

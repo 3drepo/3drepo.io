@@ -27,7 +27,7 @@ import { omit } from 'lodash';
 import * as Yup from 'yup';
 import * as queryString from 'query-string';
 
-import { howDidYouFindUsOptions, industries } from '../../constants/signup';
+// import { howDidYouFindUsOptions, industries } from '../../constants/signup';
 import { clientConfigService } from '../../services/clientConfig';
 import { COOKIES_PAGE, PRIVACY_PAGE, TERMS_PAGE } from '../../services/staticPages';
 import { getPasswordStrength, getPasswordStrengthMessage, schema } from '../../services/validation';
@@ -40,7 +40,7 @@ import { ReCaptcha } from './components/reCaptcha/reCaptcha.component';
 import {
 	ButtonContainer,
 	Container,
-	FirstColumnFormControl,
+	// FirstColumnFormControl,
 	Headline,
 	StyledFormControl,
 	StyledGrid,
@@ -69,10 +69,10 @@ const RegistrationInitialValues = {
 	passwordConfirm: '',
 	termsAgreed: false,
 	mailListAgreed: true,
-	jobTitle: '',
-	phoneNumber: '',
-	industry: '',
-	howDidYouFindUs: ''
+	// jobTitle: '',
+	// phoneNumber: '',
+	// industry: '',
+	// howDidYouFindUs: ''
 };
 
 const RegistrationSchema = Yup.object().shape({
@@ -95,10 +95,10 @@ const RegistrationSchema = Yup.object().shape({
 	countryCode: schema.required,
 	captcha: clientConfigService.captcha_client_key ? schema.required : Yup.string(),
 	termsAgreed: Yup.boolean().oneOf([true]),
-	jobTitle: schema.jobTitle,
-	phoneNumber: schema.phoneNumber,
-	industry: schema.industry,
-	howDidYouFindUs: schema.howDIdYouFindUs
+	// jobTitle: schema.jobTitle,
+	// phoneNumber: schema.phoneNumber,
+	// industry: schema.industry,
+	// howDidYouFindUs: schema.howDIdYouFindUs
 });
 
 const DEFAULT_INPUT_PROPS = {
@@ -180,19 +180,19 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 			</MenuItem>
 		))
 
-	public renderIndustries = () =>
-		industries.map((industry) => (
-			<MenuItem key={industry} value={industry}>
-				{industry}
-			</MenuItem>
-		))
+	// public renderIndustries = () =>
+	// 	industries.map((industry) => (
+	// 		<MenuItem key={industry} value={industry}>
+	// 			{industry}
+	// 		</MenuItem>
+	// 	))
 
-	public renderHowDidYouFindUsOptions = () =>
-		howDidYouFindUsOptions.map((howDidYouFindUsOption) => (
-			<MenuItem key={howDidYouFindUsOption} value={howDidYouFindUsOption}>
-				{howDidYouFindUsOption}
-			</MenuItem>
-		))
+	// public renderHowDidYouFindUsOptions = () =>
+	// 	howDidYouFindUsOptions.map((howDidYouFindUsOption) => (
+	// 		<MenuItem key={howDidYouFindUsOption} value={howDidYouFindUsOption}>
+	// 			{howDidYouFindUsOption}
+	// 		</MenuItem>
+	// 	))
 
 	public render() {
 		const {isPending} = this.props;
@@ -319,7 +319,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 										)} />
 									</StyledFormControl>
 								</FieldsRow>
-								<FieldsRow container wrap="nowrap">
+								{/* <FieldsRow container wrap="nowrap">
 									<Field name="jobTitle" render={({ field, form }) => (
 										<StyledTextField
 											{...DEFAULT_INPUT_PROPS}
@@ -364,7 +364,7 @@ export class SignUp extends React.PureComponent<IProps, IState> {
 											</SelectField>
 										)} />
 									</StyledFormControl>
-								</FieldsRow>
+								</FieldsRow> */}
 
 								{ clientConfigService.captcha_client_key &&
 									<Field name="captcha" render={({ field }) =>
