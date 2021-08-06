@@ -24,18 +24,21 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import '@/v4/services/fontAwesome';
 import 'simplebar/dist/simplebar.min.css';
+import { ThemeProvider } from 'styled-components';
+import { MuiThemeProvider } from '@material-ui/core';
 
 import 'simplebar';
 import { dispatch, history, store } from '@/v4/modules/store';
 import V4Root from '@/v4/routes/index';
-import '@/v4/styles/global';
 
 import { IS_DEVELOPMENT } from '@/v4/constants/environment';
 import { UnityUtil } from '@/globals/unity-util';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { MainLayout } from '@components/mainLayout/mainLayout';
+import { ThemeLayout } from '@components/themeLayout/';
 import * as OfflinePluginRuntime from 'offline-plugin/runtime';
-import { initializeActionsDispatchers } from './v5/services/actionsDispatchers/actionsDistpatchers.helper';
+import { theme } from '@/v5/ui/themes/theme';
+import { initializeActionsDispatchers } from '@/v5/services/actionsDispatchers/actionsDistpatchers.helper';
 
 window.UnityUtil = UnityUtil;
 
@@ -46,7 +49,12 @@ const render = () => {
 		<Provider store={store as any}>
 			<ConnectedRouter history={history as History}>
 				<Switch>
-					<Route path="/v5"><MainLayout /></Route>
+					<ThemeProvider theme={theme}>
+						<MuiThemeProvider theme={theme}>
+							<Route exact path="/v5"><MainLayout /></Route>
+							<Route exact path="/v5/theme"><ThemeLayout /></Route>
+						</MuiThemeProvider>
+					</ThemeProvider>
 					<Route><V4Root /></Route>
 				</Switch>
 			</ConnectedRouter>
