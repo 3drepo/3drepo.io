@@ -9,7 +9,7 @@
       "react-dom",
       "lodash",
       "node",
-      "mocha"
+      "jest"
     ],
     "lib": [
       "es2015",

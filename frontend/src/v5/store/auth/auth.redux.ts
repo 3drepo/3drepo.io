@@ -16,7 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { Constants } from '../common/actions/actions.helper';
+import { Constants } from '../common/actions.helper';
 
 interface IAuthActions {
 	login: (username: string, password: string) => any;

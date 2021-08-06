@@ -35,11 +35,11 @@ import { UnityUtil } from '@/globals/unity-util';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { MainLayout } from '@components/mainLayout/mainLayout';
 import * as OfflinePluginRuntime from 'offline-plugin/runtime';
-import { initializeActions } from './v5/store/common/actions/actions.helper';
+import { initializeActionsDispatchers } from './v5/services/actionsDispatchers/actionsDistpatchers.helper';
 
 window.UnityUtil = UnityUtil;
 
-initializeActions(dispatch);
+initializeActionsDispatchers(dispatch);
 
 const render = () => {
 	ReactDOM.render(
