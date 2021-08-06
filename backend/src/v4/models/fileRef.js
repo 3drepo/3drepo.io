@@ -16,7 +16,7 @@
  */
 
 "use strict";
-const DB = require("../handler/db");
+const db = require("../handler/db");
 const Mailer = require("../mailer/mailer");
 const ExternalServices = require("../handler/externalServices");
 const ResponseCodes = require("../response_codes");
@@ -43,7 +43,7 @@ const attachResourceProps = [ISSUES_RESOURCE_PROP, RISKS_RESOURCE_PROP];
 const extensionRe = /\.(\w+)$/;
 
 function getRefEntry(account, collection, fileName) {
-	return DB.getCollection(account, collection).then((col) => {
+	return db.getCollection(account, collection).then((col) => {
 		return col ? col.findOne({_id: fileName}) : Promise.reject(ResponseCodes.NO_FILE_FOUND);
 	});
 }
@@ -106,7 +106,7 @@ function fetchFileStream(account, model, collection, fileName, useLegacyNameOnFa
 }
 
 function removeAllFiles(account, collection) {
-	return DB.getCollection(account, collection).then((col) => {
+	return db.getCollection(account, collection).then((col) => {
 		if (col) {
 			const query = [
 				{
@@ -134,8 +134,7 @@ function removeAllFiles(account, collection) {
 
 async function insertRef(account, collection, user, name, refInfo) {
 	const ref = { ...refInfo, name, user , createdAt : (new Date()).getTime()};
-	const resourcesRef = await DB.getCollection(account, collection);
-	await resourcesRef.insertOne(ref);
+	await db.insertOne(account, collection, ref);
 
 	return ref;
 }
@@ -158,8 +157,7 @@ FileRef.fetchFile = (account, model, collName, ref_id) => {
 FileRef.removeFile = async (account, model, collName, ref_id) => {
 	const refCollName =   model + "." + collName + ".ref";
 
-	const col = await DB.getCollection(account, refCollName);
-	const entry = await col.findOne({_id: ref_id});
+	const entry = await db.findOne(account, refCollName, {_id: ref_id});
 
 	if (!entry) {
 		return [];
@@ -167,12 +165,12 @@ FileRef.removeFile = async (account, model, collName, ref_id) => {
 
 	return await Promise.all([
 		ExternalServices.removeFiles(account, refCollName, entry.type, [entry.link]),
-		col.remove({_id:entry._id})
+		db.deleteOne(account, refCollName, {_id:entry._id})
 	]);
 };
 
 FileRef.getTotalModelFileSize = function(account, model) {
-	return DB.getCollection(account, model + ORIGINAL_FILE_REF_EXT).then((col) => {
+	return db.getCollection(account, model + ORIGINAL_FILE_REF_EXT).then((col) => {
 		let totalSize = 0;
 		if(col) {
 			return col.find({},{size : 1}).toArray().then((res) => {
@@ -185,7 +183,7 @@ FileRef.getTotalModelFileSize = function(account, model) {
 
 		return totalSize;
 	}).then(modelVersionsFileSize =>
-		DB.getCollection(account, model + RESOURCES_FILE_REF_EXT)
+		db.getCollection(account, model + RESOURCES_FILE_REF_EXT)
 			.then(col =>
 				col.find({ size: { $exists: true} }, {size : 1}).toArray())
 			.then(res => {
@@ -249,7 +247,7 @@ FileRef.removeResourceFromEntity  = async function(account, model, property, pro
 	}
 
 	const collName = model + RESOURCES_FILE_REF_EXT;
-	const collection = await DB.getCollection(account, collName);
+	const collection = await db.getCollection(account, collName);
 	const ref = await collection.findOne({_id: resourceId});
 
 	if (!Array.isArray(ref[property]) || ref[property].indexOf(propertyId) === -1) {
@@ -265,10 +263,10 @@ FileRef.removeResourceFromEntity  = async function(account, model, property, pro
 			await ExternalServices.removeFiles(account, collection, ref.type, [ref.link]);
 		}
 
-		await collection.remove({_id:resourceId});
+		await collection.deleteOne({_id:resourceId});
 	} else {
 		delete ref._id;
-		await collection.update({_id: resourceId}, { $set: ref });
+		await collection.updateOne({_id: resourceId}, { $set: ref });
 	}
 
 	ref[property] = [propertyId]; // This is to identify from where this ref has been dettached
@@ -277,10 +275,9 @@ FileRef.removeResourceFromEntity  = async function(account, model, property, pro
 
 FileRef.storeMitigationsFile = async function(account, user, name, data) {
 	const collName = MITIGATIONS_FILE_REF;
-	const collection = await DB.getCollection(account, collName);
 
 	await removeAllFiles(account, collName);
-	await collection.remove({});
+	await db.deleteMany(account, collName, {});
 
 	const extraFields = {"_id":MITIGATIONS_ID};
 

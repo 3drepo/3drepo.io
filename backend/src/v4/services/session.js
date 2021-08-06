@@ -88,5 +88,5 @@ module.exports.getSessionsByUsername = (username) => {
 
 module.exports.removeSessions = (sessionIds) => {
 	const query = { _id: { $in: sessionIds } };
-	return getCollection("admin", "sessions").then(_dbCol => _dbCol.remove(query));
+	return getCollection("admin", "sessions").then(_dbCol => _dbCol.deleteMany(query));
 };

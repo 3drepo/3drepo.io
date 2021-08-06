@@ -39,17 +39,14 @@ const generateCode = () => {
 };
 
 Presentation.startPresenting = async (teamspace, model, user) => {
-	const coll = await db.getCollection(teamspace, model + ".presentations");
 	const code = generateCode();
-	await coll.updateOne({ user }, { $set: { user, code}}, {upsert: true});
+	await db.updateOne(teamspace, model + ".presentations", { user }, { $set: { user, code}}, true);
 	return code;
 };
 
 Presentation.validateStream = async (teamspace , model, user, code) => {
-	const coll = await db.getCollection(teamspace, model + ".presentations");
-	const res = await coll.findOne({ user, code });
-	return  Boolean(res);
-
+	const res = await db.findOne(teamspace, model + ".presentations", { user, code });
+	return Boolean(res);
 };
 
 Presentation.streamPresentation = async (teamspace , model, user, code, viewpoint, sessionId) => {
@@ -65,14 +62,12 @@ Presentation.endPresentation = async (teamspace , model, user, code, sessionId) 
 		throw {resCode: INVALID_STREAM_SESSION};
 	}
 
-	const coll = await db.getCollection(teamspace, model + ".presentations");
-	await coll.deleteOne({ user, code });
+	await db.deleteOne(teamspace, model + ".presentations", { user, code });
 	return await ChatEvent.endPresentation(sessionId, teamspace , model, code);
 };
 
 Presentation.exists = async (teamspace, model, code) => {
-	const coll = await db.getCollection(teamspace, model + ".presentations");
-	const res = await coll.findOne({ code });
+	const res = await db.findOne(teamspace, model + ".presentations", { code });
 	return Boolean(res);
 };
 

@@ -43,8 +43,7 @@ const getAssetListFromRef = async (ref, username) => {
 };
 
 const getAssetListEntry = async (database, model, revInfo) => {
-	const dbCol = await db.getCollection(database, model + ".stash.3drepo");
-	const list = await dbCol.find({rev_id: revInfo._id, type: "mesh"}, { _id: 1}).toArray();
+	const list = await db.find(database, model + ".stash.3drepo", {rev_id: revInfo._id, type: "mesh"}, { _id: 1});
 	return {
 		database,
 		model,

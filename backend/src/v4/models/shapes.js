@@ -16,7 +16,7 @@
  */
 
 "use strict";
-const DB = require("../handler/db");
+const db = require("../handler/db");
 const yup = require("yup");
 
 const utils = require("../utils");
@@ -58,7 +58,7 @@ Shapes.createMany = async (account, model, subCollectionName, ticket_id, shapes)
 	await Shapes.removeByTicketId(account, model, subCollectionName, ticket_id); // remove old collection of shapes
 
 	if (shapes.length) {
-		await DB.insertMany(account, getCollectionName(model, subCollectionName), shapes);
+		await db.insertMany(account, getCollectionName(model, subCollectionName), shapes);
 	}
 
 	return  shapes;
@@ -66,12 +66,12 @@ Shapes.createMany = async (account, model, subCollectionName, ticket_id, shapes)
 
 Shapes.getByTicketId = async (account, model, subCollectionName, ticket_id) => {
 	const query = { ticket_id };
-	return await DB.find(account, getCollectionName(model, subCollectionName), query);
+	return await db.find(account, getCollectionName(model, subCollectionName), query);
 };
 
 Shapes.removeByTicketId = async (account, model, subCollectionName, ticket_id) => {
 	const query = { ticket_id: utils.stringToUUID(ticket_id) };
-	return await DB.remove(account, getCollectionName(model, subCollectionName), query);
+	return await db.deleteMany(account, getCollectionName(model, subCollectionName), query);
 };
 
 module.exports = Shapes;

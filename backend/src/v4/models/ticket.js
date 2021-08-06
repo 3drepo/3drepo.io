@@ -132,8 +132,7 @@ class Ticket extends View {
 		const foundTicket = await super.findByUID(account, model, uid, projection, true);
 
 		if (foundTicket.refs) {
-			const refsColl = await db.getCollection(account, model + ".resources.ref");
-			const resources = await refsColl.find({ _id: { $in: foundTicket.refs } }, { name: 1, size: 1, createdAt: 1, link: 1, type: 1 }).toArray();
+			const resources = await db.find(account, model + ".resources.ref", { _id: { $in: foundTicket.refs } }, { name: 1, size: 1, createdAt: 1, link: 1, type: 1 });
 			resources.forEach(r => {
 				if (r.type !== "http") {
 					delete r.link;
@@ -500,7 +499,7 @@ class Ticket extends View {
 
 		const settings = await findModelSettingById(account, model);
 
-		await coll.insert(newTicket);
+		await coll.insertOne(newTicket);
 
 		if (shapes) {
 			newTicket.shapes = shapes;
