@@ -17,7 +17,6 @@
 
 import { isNil } from 'lodash';
 import { createSelector } from 'reselect';
-import { boolean } from 'yup/lib/locale';
 
 const selectCurrentUserDomain = (state) => ({...state.currentUser});
 
