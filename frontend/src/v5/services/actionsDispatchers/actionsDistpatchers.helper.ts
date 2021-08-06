@@ -34,7 +34,7 @@ export type Constants<Type> = {
 let dispatch = null;
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export const wrapActions = <T>(ActionsCreators: T) => {
+export const createActionsDispatchers = <T>(ActionsCreators: T) => {
 	const exportObject = {};
 	Object.keys(ActionsCreators).forEach((key) => {
 		exportObject[key] = (...args) => dispatch(ActionsCreators[key].apply(null, args));
@@ -43,4 +43,4 @@ export const wrapActions = <T>(ActionsCreators: T) => {
 	return exportObject as T;
 };
 
-export const initializeActions = (dispatchFunc): void => { dispatch = dispatchFunc; };
+export const initializeActionsDispatchers = (dispatchFunc): void => { dispatch = dispatchFunc; };

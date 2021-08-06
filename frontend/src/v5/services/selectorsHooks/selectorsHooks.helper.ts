@@ -15,10 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CurrentUserActions as _CurrentUserActions,
-	CurrentUserTypes as _CurrentUserTypes } from '@/v4/modules/currentUser';
-import { ICurrentUserActions } from '@/v4/modules/currentUser/currentUser.redux';
-import { Constants, wrapActions } from './actions.helper';
+import { useSelector } from 'react-redux';
 
-export const CurrentUserActions = wrapActions<ICurrentUserActions>(_CurrentUserActions);
-export const CurrentUserTypes = _CurrentUserTypes as Constants<ICurrentUserActions>;
+type NameMap<Type> = {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	[Property in keyof Type]: () => ReturnType<Extract<Type[Property], (...args: any) => any >>;
+};
+
+export const createHooksSelectors = <T>(moduleSelectors: T): NameMap<T> => {
+	const exportObject = {};
+	Object.keys(moduleSelectors).forEach((key) => {
+		exportObject[key] = () => useSelector(moduleSelectors[key]);
+	});
+
+	return exportObject as NameMap<T>;
+};

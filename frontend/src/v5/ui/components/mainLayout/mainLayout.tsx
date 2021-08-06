@@ -14,17 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { CurrentUserActions } from '@/v5/store/common/actions/currentUser.actions';
 import { Button } from '@material-ui/core';
-import { CurrentUserSelectors } from '@selectors/currentUser.selectors';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import React, { SyntheticEvent } from 'react';
+import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
 
 export const MainLayout = (): JSX.Element => {
-	const userName: string = CurrentUserSelectors.selectUsername();
+	const userName: string = CurrentUserHooksSelectors.selectUsername();
 
 	const onHandleClick = (e: SyntheticEvent) => {
 		e.preventDefault();
-		CurrentUserActions.fetchUser('teamSpace1');
+		CurrentUserActionsDispatchers.fetchUser('teamSpace1');
 	};
 
 	return (

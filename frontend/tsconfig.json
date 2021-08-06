@@ -22,7 +22,6 @@
     "sourceMap": true,
     "baseUrl": "./",
     "paths": {
-      "@selectors/*": ["src/v5/store/common/selectors/*"],
       "@components/*": ["./src/v5/ui/components/*"],
       "@assets/*": ["./assets/*"],
       "@/*": ["./src/*"]
