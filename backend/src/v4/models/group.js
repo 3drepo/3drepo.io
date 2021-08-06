@@ -285,7 +285,7 @@ Group.create = async function (account, model, branch = "master", rid = null, se
 		newGroup.author = creator;
 		newGroup.createdAt = Date.now();
 
-		await db.insert(account, getGroupCollectionName(model), newGroup);
+		await db.insertOne(account, getGroupCollectionName(model), newGroup);
 
 		newGroup._id = utils.uuidToString(newGroup._id);
 		newGroup.objects = await getObjectIds(account, model, branch, rid, newGroup, true, false);
@@ -302,13 +302,13 @@ Group.create = async function (account, model, branch = "master", rid = null, se
 
 Group.deleteGroups = async function (account, model, sessionId, ids) {
 	const groupIds = ids.map(utils.stringToUUID);
-	await db.remove(account, getGroupCollectionName(model), { _id: { $in: groupIds } });
+	await db.deleteMany(account, getGroupCollectionName(model), { _id: { $in: groupIds } });
 
 	ChatEvent.groupsDeleted(sessionId, account, model, ids);
 };
 
 Group.deleteGroupsByViewId = async function (account, model, view_id) {
-	return await db.remove(account, getGroupCollectionName(model), { view_id });
+	return await db.deleteMany(account, getGroupCollectionName(model), { view_id });
 };
 
 Group.findByUID = async function (account, model, branch, revId, uid, showIfcGuids = false, noClean = true, convertToIfcGuids = false) {
@@ -433,7 +433,7 @@ Group.update = async function (account, model, branch = "master", revId = null, 
 				updateBson.$unset = toUnset;
 			}
 
-			await db.update(account, getGroupCollectionName(model), { _id: group._id }, updateBson);
+			await db.updateOne(account, getGroupCollectionName(model), { _id: group._id }, updateBson);
 		}
 
 		clean(group);

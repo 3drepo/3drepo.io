@@ -29,8 +29,7 @@
 	const PROJECTS_COLLECTION_NAME = "projects";
 
 	async function checkDupName(teamspace, project) {
-		const coll = await db.getCollection(teamspace, PROJECTS_COLLECTION_NAME);
-		const count = await coll.find({_id: {$ne: project._id}, name: project.name}).count();
+		const count = await db.count(teamspace, PROJECTS_COLLECTION_NAME, {_id: {$ne: project._id}, name: project.name});
 
 		if (count > 0) {
 			throw responseCodes.PROJECT_EXIST;
@@ -103,7 +102,7 @@
 	const Project = {};
 
 	Project.addModelToProject = async function(teamspace, projectName, modelId) {
-		return db.update(teamspace, PROJECTS_COLLECTION_NAME, { name: projectName }, { "$push" : { "models": modelId } });
+		return db.updateOne(teamspace, PROJECTS_COLLECTION_NAME, { name: projectName }, { "$push" : { "models": modelId } });
 	};
 
 	Project.createProject = async function(teamspace, name, username, userPermissions) {
@@ -125,7 +124,7 @@
 
 		await checkDupName(teamspace, project);
 
-		await db.insert(teamspace, PROJECTS_COLLECTION_NAME, project);
+		await db.insertOne(teamspace, PROJECTS_COLLECTION_NAME, project);
 
 		project._id = utils.uuidToString(project._id);
 		project.permissions = C.IMPLIED_PERM[C.PERM_PROJECT_ADMIN].project;
@@ -364,7 +363,7 @@
 	};
 
 	Project.removeProjectModel = async function(teamspace, model) {
-		return db.update(teamspace, PROJECTS_COLLECTION_NAME, { models: model }, { "$pull" : { "models": model}}, {"multi": true});
+		return db.updateMany(teamspace, PROJECTS_COLLECTION_NAME, { models: model }, { "$pull" : { "models": model}});
 	};
 
 	Project.removeUserFromProjects = async function(teamspace, userToRemove) {
@@ -453,7 +452,7 @@
 		await checkDupName(account, project);
 		checkPermissionName(project.permissions);
 
-		await db.update(account, PROJECTS_COLLECTION_NAME, {name: projectName}, project);
+		await db.updateOne(account, PROJECTS_COLLECTION_NAME, {name: projectName}, { $set: project });
 
 		return project;
 	};

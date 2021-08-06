@@ -53,7 +53,7 @@ LoginRecord.saveLoginRecord = async (id, username, ipAddr, userAgent, referer) =
 	}
 
 	return Promise.all([
-		db.insert("loginRecords", username, loginRecord),
+		db.insertOne("loginRecords", username, loginRecord),
 		writeNewElasticDocument(username, loginRecord)]);
 };
 
