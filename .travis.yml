@@ -80,6 +80,19 @@ matrix:
         - cd backend
         - yarn install
         - yarn test:v5
+     #test (v5, Windows)
+    - language: node_js
+      os: windows
+      name: Backend tests  (V5)
+      git:
+      submodules: false
+      depth: 1
+      node_js:
+        - "14.17.1"
+      script:
+        - cd backend
+        - yarn install
+        - yarn test:v5
 
 
 notifications:
