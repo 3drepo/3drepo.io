@@ -48,14 +48,19 @@ export const transformMetadataToNestedList = (metadata) => metadata.reduce((acc,
 	merge(setValueToField(crr.categories, crr), acc)
 , {});
 
-export const sortMetadata = ({ key: keyA }, { key: keyB }) => {
-	if (keyA < keyB) {
+export const sortMetadata = ([nameA, dataA], [nameB, dataB]) => {
+	if (!!dataA.key > !!dataB.key) {
 		return -1;
 	}
-	if (keyA > keyB) {
+	if (!!dataA.key < !!dataB.key) {
 		return 1;
 	}
 
-	return 0;
+	if (nameA < nameB) {
+		return -1;
+	}
+	if (nameA > nameB) {
+		return 1;
+	}
 };
 

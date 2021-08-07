@@ -147,7 +147,7 @@ export class Bim extends React.PureComponent<IProps, any> {
 	};
 
 	private renderMetadata = () =>
-		Object.entries(transformMetadataToNestedList(this.metadata)).map(
+		Object.entries(transformMetadataToNestedList(this.metadata)).sort(sortMetadata).map(
 			([index, data]) => (
 				<MetaRecord
 					key={index}
@@ -157,7 +157,7 @@ export class Bim extends React.PureComponent<IProps, any> {
 					starredMetaMap={this.props.starredMetaMap}
 				/>
 			)
-		).sort(sortMetadata);
+		);
 
 	private renderList = () => {
 		const { selectedFilters, showStarred } = this.props;

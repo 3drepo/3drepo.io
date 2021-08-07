@@ -42,10 +42,13 @@ export const List = styled(ListComponent)`
 
 	${SectionHeader} {
 		padding-left: 14px;
+		background-color: ${COLOR.BLACK_6};
 	}
 	
-	& & ${SectionHeader} {
-		padding-left: 24px;
+	& & {
+		${SectionHeader} {
+			padding-left: 24px;
+		}
 	}
 
 	& & & ${SectionHeader} {
@@ -70,6 +73,7 @@ export const Title = styled(TitleComponent)`
 	margin-top: 10px;
 	margin-bottom: 10px;
 	white-space: break-spaces;
+	overflow: initial;
 `;
 
 export const Value = styled(ValueComponent)`

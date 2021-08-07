@@ -49,16 +49,7 @@ const CollapseButton = ({ collapsed, onClick }) => (
 	</StyledIconButton>
 );
 
-const renderNestedMetadata = (metadata, render) =>
-	Object.entries(metadata).map(render).sort(sortMetadata);
-
-const SubList = ({ collapsed, data, ...props }) => (
-	<List>
-		{collapsed && renderNestedMetadata(data, ([index, item]) => (
-			<MetaRecord key={index} name={index} data={item} {...props} />
-		))}
-	</List>
-);
+const renderNestedMetadata = (metadata, render) => Object.entries(metadata).sort(sortMetadata).map(render);
 
 const Starred = ({ data, starredMetaMap, toggleStarredRecord }) => {
 	const { key } = data;
@@ -74,9 +65,9 @@ const Starred = ({ data, starredMetaMap, toggleStarredRecord }) => {
 	);
 };
 
-const MetaRecordData = ({ value, name, copyRules, selectAllSimilar }) => {
+const MetaRecordData = ({ value, key, copyRules, selectAllSimilar }) => {
 	const rules = [{
-		field: name,
+		field: key,
 		operator: isNumber(value) ? 'EQUALS' : 'IS',
 		values: [value],
 	}];
@@ -107,6 +98,23 @@ export const MetaRecord = (props: IProps) => {
 
 	const toggleCollapse = () => setCollapsed(!collapsed);
 
+	const renderSubList = () => (
+		<List>
+			{collapsed && renderNestedMetadata(data, ([index, item]) => (
+				<MetaRecord
+					key={index}
+					name={index}
+					data={item}
+					copyRules={copyRules}
+					selectAllSimilar={selectAllSimilar}
+					starredMetaMap={starredMetaMap}
+					toggleStarredRecord={toggleStarredRecord}
+				/>
+			))}
+		</List>
+	);
+
+
 	return (
 		<>
 			<Header section={hasSubData}>
@@ -118,13 +126,13 @@ export const MetaRecord = (props: IProps) => {
 				/>}
 				<Title>{name || 'Unnamed'}</Title>
 				{!hasSubData && <MetaRecordData
-					name={name}
+					key={data.key}
 					value={data.value}
 					copyRules={copyRules}
 					selectAllSimilar={selectAllSimilar}
 				/>}
 			</Header>
-			{hasSubData && <SubList collapsed={collapsed} data={data} {...props} />}
+			{hasSubData && renderSubList()}
 		</>
 	);
 };
