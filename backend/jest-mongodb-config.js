@@ -18,7 +18,7 @@
 module.exports = {
 	mongodbMemoryServerOptions: {
 		binary: {
-			version: '3.4.24',
+			version: '3.6.23',
 			skipMD5: true,
 			downloadDir: './node_modules/.cache',
 		},
