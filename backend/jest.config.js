@@ -46,9 +46,6 @@ module.exports = {
 	        "functions": 100,
     	    "lines": 100,
         	"statements": 0
-		},
-		"./src/v5/utils/responder": {
-			"lines": 84,
 		}
 	},
 
