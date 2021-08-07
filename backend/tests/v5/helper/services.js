@@ -15,9 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Path = {};
+const { src, srcV4 } = require('./path');
 
-Path.src = `${__dirname}/../../../src/v5`;
-Path.srcV4 = `${__dirname}/../../../src/v4`;
+const { createApp } = require(`${srcV4}/services/api`);
+const db = require(`${src}/handler/db`);
 
-module.exports = Path;
+const ServiceHelper = {};
+
+ServiceHelper.app = () => createApp().listen(8080);
+
+ServiceHelper.closeApp = async (server) => {
+	await db.disconnect();
+	if (server) await server.close();
+};
+
+module.exports = ServiceHelper;

@@ -15,9 +15,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Path = {};
+const { MongoClient } = require('mongodb');
 
-Path.src = `${__dirname}/../../../src/v5`;
-Path.srcV4 = `${__dirname}/../../../src/v4`;
+describe('insert', () => {
+	let connection;
+	let db;
 
-module.exports = Path;
+	beforeAll(async () => {
+		connection = await MongoClient.connect(process.env.MONGO_URL, {
+			useNewUrlParser: true,
+			useUnifiedTopology: true,
+		});
+		db = await connection.db();
+	});
+
+	afterAll(async () => {
+		await connection.close();
+	});
+
+	it('should insert a doc into collection', async () => {
+		const users = db.collection('users');
+
+		const mockUser = { _id: 'some-user-id', name: 'John' };
+		await users.insertOne(mockUser);
+
+		const insertedUser = await users.findOne({ _id: 'some-user-id' });
+		expect(insertedUser).toEqual(mockUser);
+	});
+});

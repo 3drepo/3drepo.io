@@ -15,9 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Path = {};
-
-Path.src = `${__dirname}/../../../src/v5`;
-Path.srcV4 = `${__dirname}/../../../src/v4`;
-
-module.exports = Path;
+module.exports = {
+	mongodbMemoryServerOptions: {
+		binary: {
+			version: '3.4.24',
+			skipMD5: true,
+			downloadDir: './node_modules/.cache',
+		},
+		instance: {
+			auth: false,
+			dbName: "admin"
+		},
+		autoStart: false,
+	},
+};

@@ -7,8 +7,8 @@
   "private": true,
   "scripts": {
     "gen-docs": "yarn apidoc -i src/v4/routes/ -o docs/ ",
-	"test": "yarn test:unit && yarn test:int",
-	"test:v5": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config yarn jest",
+    "test": "yarn test:unit && yarn test:int",
+    "test:v5": "cross-env NODE_ENV=testV5 NODE_CONFIG_DIR=../config yarn jest",
     "test:cover": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config nyc yarn test ",
     "test:cover-one": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config nyc --reporter none mocha ",
     "test:coverall": "yarn test:cover && nyc report --reporter=text-lcov | coveralls",
@@ -74,6 +74,7 @@
     "zxcvbn": "4.4.2"
   },
   "devDependencies": {
+    "@shelf/jest-mongodb": "^2.0.1",
     "chai": "4.2.0",
     "chai-shallow-deep-equal": "1.4.6",
     "coveralls": "3.1.1",

@@ -1,6 +1,7 @@
 tests/v4
 eslint-rules
 jest.config.js
+jest-mongodb-config.js
 docs/
 node_modules/
 coverage/

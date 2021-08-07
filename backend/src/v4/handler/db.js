@@ -23,10 +23,6 @@
 	const { PassThrough } = require("stream");
 	const responseCodes = require("../response_codes");
 
-	const connConfig = {
-		autoReconnect: true
-	};
-
 	async function getGridFSBucket(database, collection, chunksize = null) {
 		try {
 			const dbConn = await Handler.getDB(database);
@@ -54,6 +50,9 @@
 	}
 
 	function getURL(database) {
+		if(config.db.connURL) {
+			return config.db.connURL;
+		}
 		// Generate connection string that could include multiple hosts that
 		// represent a replica set.
 		let connectString = `mongodb://${config.db.username}:${config.db.password}@${getHostPorts()}/${database}?authSource=admin`;
@@ -71,22 +70,11 @@
 
 	let db;
 
-	Handler.authenticate = async function (database, password) {
-		const connString = `mongodb://${database}:${password}@${getHostPorts()}/`;
-
-		let authDB;
-
-		try {
-			authDB = await MongoClient.connect(connString, connConfig);
-		} catch (err) {
-			if (authDB) {
-				authDB.close();
-			}
-
+	Handler.authenticate = async (user, password) => {
+		const authDB = await Handler.getAuthDB();
+		if ((await authDB.auth(user, password)) === 0) {
 			throw responseCodes.INCORRECT_USERNAME_OR_PASSWORD;
 		}
-
-		authDB.close();
 	};
 
 	Handler.disconnect = function () {
@@ -151,14 +139,17 @@
 		return collection.deleteOne(query);
 	};
 
-	Handler.getDB = function (database) {
+	Handler.getDB = async (database) => {
 		if (db) {
-			return Promise.resolve(db.db(database));
+			return db.db(database);
 		} else {
-			return MongoClient.connect(getURL(database), connConfig).then(_db => {
-				db = _db;
-				return db.db(database);
+			const connection = await MongoClient.connect(getURL(), {
+				autoReconnect: true,
+				useNewUrlParser: true,
+				useUnifiedTopology: true
 			});
+			return connection.db(database);
+
 		}
 	};
 
