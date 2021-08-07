@@ -79,7 +79,7 @@ module.exports = {
 		bucketName: "3drepo-travis"
 	},
 	fs: {
-		path: require("path").resolve(__dirname, 'tests/v5/fileShare'),
+		path: require("path").resolve(__dirname, '../../backend/tests/v5/fileShare'),
 		levels: 2
 	},
 	defaultStorage: "fs",
