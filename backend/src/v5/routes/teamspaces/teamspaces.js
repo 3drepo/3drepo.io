@@ -31,6 +31,10 @@ const getTeamspaceList = (req, res) => {
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 
+	/**
+	 *
+	 *
+	 */
 	router.get('/', validSession, getTeamspaceList);
 
 	return router;

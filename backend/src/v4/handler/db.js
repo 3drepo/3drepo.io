@@ -86,7 +86,7 @@
 		let conn;
 		try {
 			conn = await connect(user, password);
-			const testDB = await conn.db("admin");
+			await conn.db("admin");
 		} catch (err) {
 			throw responseCodes.INCORRECT_USERNAME_OR_PASSWORD;
 		} finally {
