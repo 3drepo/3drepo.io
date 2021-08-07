@@ -27,6 +27,7 @@ let agent;
 const testUser = {
 	user: 'user1',
 	password: 'someComplicatedPassword!234',
+	apiKey: '1234',
 };
 
 const testUserTSAccess = [
@@ -45,7 +46,7 @@ const setupData = async () => {
 	await ServiceHelper.db.createUser(
 		testUser.user,
 		testUser.password,
-		{},
+		{ apiKey: testUser.apiKey },
 		testUserTSAccess.map(({ name }) => ({ db: name, role: 'team_member' })),
 	);
 };
@@ -56,7 +57,10 @@ const testGetTeamspaceList = () => {
 			const res = await agent.get('/v5/teamspaces/').expect(template.notLoggedIn.status);
 			expect(res.body.code).toEqual(template.notLoggedIn.code);
 		});
-		test('give return a teamspace list if the user has a valid session', () => {});
+		test('give return a teamspace list if the user has a valid session', async () => {
+			const res = await agent.get(`/v5/teamspaces/?key=${testUser.apiKey}`).expect(template.ok.status);
+			expect(res.body).toEqual({ teamspaces: testUserTSAccess });
+		});
 	});
 };
 
