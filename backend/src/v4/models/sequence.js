@@ -223,14 +223,14 @@ Sequence.createSequence = async (account, model, sequenceData) => {
 	sequenceData.startDate = new Date(sequenceData.frames[0].dateTime);
 	sequenceData.endDate = new Date(sequenceData.frames[sequenceData.frames.length - 1].dateTime);
 
-	await db.insert(account, sequenceCol(model), sequenceData);
+	await db.insertOne(account, sequenceCol(model), sequenceData);
 
 	return { _id: utils.uuidToString(sequenceData._id) };
 };
 
 Sequence.deleteSequence = async (account, model, sequenceId) => {
 	await Sequence.sequenceExists(account, model, sequenceId);
-	const { result } = await db.remove(account, sequenceCol(model), {
+	const { result } = await db.deleteOne(account, sequenceCol(model), {
 		_id: utils.stringToUUID(sequenceId),
 		customSequence: true
 	});
@@ -342,12 +342,12 @@ Sequence.updateSequence = async (account, model, sequenceId, data) => {
 		toUpdate.$unset = toUnset;
 	}
 
-	await db.update(account, sequenceCol(model), {_id: utils.stringToUUID(sequenceId)}, toUpdate);
+	await db.updateOne(account, sequenceCol(model), {_id: utils.stringToUUID(sequenceId)}, toUpdate);
 };
 
 Sequence.deleteLegend = async (account, model, sequenceId) => {
 	await Sequence.sequenceExists(account, model, sequenceId);
-	await db.remove(account, legendCol(model), { _id: utils.stringToUUID(sequenceId) });
+	await db.deleteOne(account, legendCol(model), { _id: utils.stringToUUID(sequenceId) });
 };
 
 Sequence.getLegend = async (account, model, sequenceId) => {

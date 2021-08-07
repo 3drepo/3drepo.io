@@ -25,7 +25,7 @@ const utils = require("../utils");
 const C = require("../constants");
 const responseCodes = require("../response_codes.js");
 const path  = require("path");
-const DB = require("../handler/db");
+const db = require("../handler/db");
 const { set } = require("lodash");
 
 // Various getter/setter helper functions
@@ -130,12 +130,12 @@ Invoice.clean = (invoice) => {
 };
 
 Invoice.find = async function(account, query, projection, sort) {
-	const invoices =  await DB.find(account, COLL_NAME, query, projection, sort);
+	const invoices =  await db.find(account, COLL_NAME, query, projection, sort);
 	return invoices.map(this.clean);
 };
 
 Invoice.findOne = async function(account, query, projection, sort) {
-	const invoice = await DB.findOne(account, COLL_NAME, query, projection, sort);
+	const invoice = await db.findOne(account, COLL_NAME, query, projection, sort);
 	return this.clean(invoice);
 };
 
@@ -164,7 +164,7 @@ Invoice.findByTransactionId = async function (account, transactionId) {
 };
 
 Invoice.hasPendingBill = async function (account, billingAgreementId) {
-	const count = await DB.count(account, { billingAgreementId: billingAgreementId, pending: true });
+	const count = await db.count(account, { billingAgreementId: billingAgreementId, pending: true });
 	return count > 0;
 };
 

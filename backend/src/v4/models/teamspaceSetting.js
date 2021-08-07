@@ -58,7 +58,7 @@ class TeamspaceSettings {
 		};
 		const settingsColl = await this.getTeamspaceSettingsCollection(account);
 
-		return await settingsColl.insert(settings);
+		return await settingsColl.insertOne(settings);
 	}
 
 	getTeamspaceSettingsCollection(account) {

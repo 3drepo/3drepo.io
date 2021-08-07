@@ -44,7 +44,7 @@ class Mitigation {
 
 	async clearAll(account) {
 		const mitigationColl = await this.getMitigationCollection(account);
-		return await mitigationColl.remove({});
+		return await mitigationColl.deleteMany({});
 	}
 
 	async getCriteria(account) {
@@ -133,7 +133,7 @@ class Mitigation {
 		}
 
 		await this.clearAll(account);
-		await mitigationColl.insert(mitigations);
+		await mitigationColl.insertMany(mitigations);
 
 		return mitigations;
 	}

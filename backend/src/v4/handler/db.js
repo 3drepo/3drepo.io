@@ -27,21 +27,63 @@
 		autoReconnect: true
 	};
 
+	async function getGridFSBucket(database, collection, chunksize = null) {
+		try {
+			const dbConn = await Handler.getDB(database);
+			const options = {bucketName: collection};
+
+			if (chunksize) {
+				options.chunksize =  chunksize;
+			}
+
+			return new GridFSBucket(dbConn, options);
+		} catch (err) {
+			Handler.disconnect();
+			throw err;
+		}
+	}
+
+	function getHostPorts() {
+		const hostPorts = [];
+
+		for (const host in config.db.host) {
+			hostPorts.push(`${config.db.host[host]}:${config.db.port[host]}`);
+		}
+
+		return hostPorts.join(",");
+	}
+
+	function getURL(database) {
+		// Generate connection string that could include multiple hosts that
+		// represent a replica set.
+		let connectString = `mongodb://${config.db.username}:${config.db.password}@${getHostPorts()}/${database}?authSource=admin`;
+
+		connectString += config.db.replicaSet ? "&replicaSet=" + config.db.replicaSet : "";
+
+		if (Number.isInteger(config.db.timeout)) {
+			connectString += "&socketTimeoutMS=" + config.db.timeout;
+		}
+
+		return connectString;
+	}
+
 	const Handler = {};
 
 	let db;
 
 	Handler.authenticate = async function (database, password) {
-		const authDB = await Handler.getAuthDB();
+		const connString = `mongodb://${database}:${password}@${getHostPorts()}/`;
+
+		let authDB;
 
 		try {
-			await authDB.authenticate(database, password);
+			authDB = await MongoClient.connect(connString, connConfig);
 		} catch (err) {
 			if (authDB) {
 				authDB.close();
 			}
 
-			throw err;
+			throw responseCodes.INCORRECT_USERNAME_OR_PASSWORD;
 		}
 
 		authDB.close();
@@ -73,19 +115,24 @@
 	 */
 	Handler.find = async function (database, colName, query, projection = {}, sort = {}) {
 		const collection = await Handler.getCollection(database, colName);
-		// NOTE: v3.6 driver find take sort/projection as 2nd argument like findOne
-		return collection.find(query).project(projection).sort(sort).toArray();
+		const options = { projection };
+
+		if (sort) {
+			options.sort = sort;
+		}
+
+		return collection.find(query, options).toArray();
 	};
 
 	Handler.findOne = async function (database, colName, query, projection = {}, sort) {
 		const collection = await Handler.getCollection(database, colName);
-		// NOTE: documentation states it should be { projection, sort } so when we upgrade we may have to change.
-		//       Also: projection stops working if you pass in a sort with empty obj.
-		if(sort) {
-			projection.sort = sort;
+		const options = { projection };
+
+		if (sort) {
+			options.sort = sort;
 		}
 
-		return collection.findOne(query, projection);
+		return collection.findOne(query, options);
 	};
 
 	Handler.findOneAndDelete = async function (database, colName, query, projection = {}) {
@@ -96,46 +143,27 @@
 
 	Handler.deleteMany = async function (database, colName, query) {
 		const collection = await Handler.getCollection(database, colName);
-		const findResult = await collection.deleteMany(query);
-		return findResult.value;
+		return collection.deleteMany(query);
 	};
 
-	function getURL(database) {
-		// Generate connection string that could include multiple hosts that
-		// represent a replica set.
-		let connectString = "mongodb://" + config.db.username + ":" + config.db.password + "@";
-		const hostPorts = [];
-
-		for(const host in config.db.host) {
-			hostPorts.push(config.db.host[host] + ":" + config.db.port[host]);
-		}
-
-		connectString += hostPorts.join(",");
-		connectString += "/" + database + "?authSource=admin";
-		connectString += config.db.replicaSet ? "&replicaSet=" + config.db.replicaSet : "";
-
-		if(Number.isInteger(config.db.timeout)) {
-			connectString += "&socketTimeoutMS=" + config.db.timeout;
-		}
-
-		return connectString;
-	}
+	Handler.deleteOne = async function (database, colName, query) {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.deleteOne(query);
+	};
 
 	Handler.getDB = function (database) {
-		if(db) {
+		if (db) {
 			return Promise.resolve(db.db(database));
 		} else {
 			return MongoClient.connect(getURL(database), connConfig).then(_db => {
 				db = _db;
-				return db;
+				return db.db(database);
 			});
 		}
 	};
 
 	Handler.getAuthDB = function () {
-		return MongoClient.connect(getURL("admin"), connConfig).then(_db => {
-			return _db;
-		});
+		return Handler.getDB("admin");
 	};
 
 	Handler.getCollection = function (database, colName) {
@@ -156,20 +184,6 @@
 		});
 	};
 
-	function getGridFSBucket(database, collection, chunksize = null) {
-		return Handler.getDB(database).then(dbConn => {
-			const options = {bucketName: collection};
-			if (chunksize) {
-				options.chunksize =  chunksize;
-			}
-
-			return new GridFSBucket(dbConn, options);
-		}).catch(err => {
-			Handler.disconnect();
-			return Promise.reject(err);
-		});
-	}
-
 	Handler.getFileStreamFromGridFS = function (database, collection, filename) {
 		return getGridFSBucket(database,collection).then((bucket) => {
 			return bucket.find({filename}).toArray().then(file => {
@@ -181,14 +195,14 @@
 		});
 	};
 
-	Handler.insert = async function (database, colName, data) {
-		const collection = await Handler.getCollection(database, colName);
-		return collection.insert(data);
-	};
-
 	Handler.insertMany = async function (database, colName, data) {
 		const collection = await Handler.getCollection(database, colName);
 		return collection.insertMany(data);
+	};
+
+	Handler.insertOne = async function (database, colName, data) {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.insertOne(data);
 	};
 
 	Handler.getFileFromGridFS = function (database, collection, filename) {
@@ -230,19 +244,15 @@
 		});
 	};
 
-	Handler.listCollections = function (database) {
-		return Handler.getDB(database).then(dbConn => {
-			return dbConn.listCollections().toArray();
-		}).catch(err => {
+	Handler.listCollections = async function (database) {
+		try {
+			const dbConn = await Handler.getDB(database);
+			const colls = await dbConn.listCollections().toArray();
+			return colls.map(({name, options}) => ({name, options}));
+		} catch (err) {
 			Handler.disconnect();
-			return Promise.reject(err);
-		});
-
-	};
-
-	Handler.remove = async function (database, colName, query) {
-		const collection = await Handler.getCollection(database, colName);
-		return collection.remove(query);
+			throw err;
+		}
 	};
 
 	Handler.runCommand = function (database, cmd) {
@@ -262,10 +272,10 @@
 		});
 	};
 
-	Handler.update = async function (database, colName, query, data, upsert = false) {
+	Handler.updateMany = async function (database, colName, query, data, upsert = false) {
 		const collection = await Handler.getCollection(database, colName);
 		const options = upsert ? { upsert } : undefined;
-		return collection.update(query, data, options);
+		return collection.updateMany(query, data, options);
 	};
 
 	Handler.updateOne = async function (database, colName, query, data, upsert = false) {
@@ -274,9 +284,9 @@
 		return collection.updateOne(query, data, options);
 	};
 
-	Handler.count = async function (database, colName, query, data) {
+	Handler.count = async function (database, colName, query, options) {
 		const collection = await Handler.getCollection(database, colName);
-		return collection.count(query, data);
+		return collection.countDocuments(query, options);
 	};
 
 	module.exports = Handler;
