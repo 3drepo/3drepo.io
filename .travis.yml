@@ -91,6 +91,7 @@ matrix:
         - "14.17.1"
       script:
         - cd backend
+        - npm install -g yarn
         - yarn install
         - yarn test:v5
 
