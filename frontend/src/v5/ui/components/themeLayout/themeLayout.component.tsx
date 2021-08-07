@@ -61,5 +61,51 @@ export const ThemeLayout = (): JSX.Element => (
 		<Button variant="outlined" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
 		<Divider />
 
+		<Typography variant="h3" gutterBottom>button-contained-small</Typography>
+
+		<Button variant="contained" size="small" color="primary">Default</Button>
+		<Button variant="contained" size="small" color="primary" disabled>Disabled</Button>
+		<Divider />
+
+		<Button variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Default</Button>
+		<Button variant="contained" size="small" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
+		<Divider />
+
+		<Button variant="contained" size="small" color="secondary">Default</Button>
+		<Button variant="contained" size="small" color="secondary" disabled>Disabled</Button>
+		<Divider />
+
+		<Button variant="contained" size="small" color="secondary" startIcon={<AddIcon />}>Default</Button>
+		<Button variant="contained" size="small" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
+		<Divider />
+
+		<Typography variant="h3" gutterBottom>button-outlined-small</Typography>
+
+		<Button variant="outlined" size="small" color="primary">Default</Button>
+		<Button variant="outlined" size="small" color="primary" disabled>Disabled</Button>
+		<Divider />
+
+		<Button variant="outlined" size="small" color="primary" startIcon={<AddIcon />}>Default</Button>
+		<Button variant="outlined" size="small" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
+		<Divider />
+
+		<Button variant="outlined" size="small" color="secondary">Default</Button>
+		<Button variant="outlined" size="small" color="secondary" disabled>Disabled</Button>
+		<Divider />
+
+		<Button variant="outlined" size="small" color="secondary" startIcon={<AddIcon />}>Default</Button>
+		<Button variant="outlined" size="small" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
+		<Divider />
+
+		<Typography variant="h3" gutterBottom>button-text</Typography>
+
+		<Button variant="text" color="primary">Default</Button>
+		<Button variant="text" color="primary" disabled>Disabled</Button>
+		<Divider />
+
+		<Button variant="text" color="primary" startIcon={<AddIcon />}>Default</Button>
+		<Button variant="text" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
+		<Divider />
+
 	</Container>
 );

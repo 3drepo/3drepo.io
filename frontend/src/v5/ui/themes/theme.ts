@@ -197,27 +197,108 @@ export const theme = createMuiTheme({
 				fontSize: '0.75rem',
 				fontWeight: FONT_WEIGHT.BOLD,
 			},
-			text: {
+			contained: {
 				padding: '10px 15px',
+				boxShadow: 'none',
+				'&:hover': {
+					boxShadow: 'none',
+				},
+				'&:active': {
+					boxShadow: 'none',
+				},
+				'&$disabled': {
+					color: COLOR.WHITE,
+					backgroundColor: COLOR.BASE_LIGHTEST,
+				},
+				'&.Mui-focusVisible': {
+					boxShadow: SHADOW.MEDIUM,
+				},
+			},
+			containedPrimary: {
+				'&:hover': {
+					backgroundColor: COLOR.PRIMARY_DARK,
+				},
+				'&:active': {
+					backgroundColor: COLOR.PRIMARY_DARKEST,
+				},
 			},
 			containedSecondary: {
 				color: COLOR.SECONDARY_MAIN,
-				backgroundColor: COLOR.TERTIARY_LIGHTEST,
+				backgroundColor: 'transparent',
 				'&:hover': {
 					color: COLOR.WHITE,
 					backgroundColor: COLOR.SECONDARY_MAIN,
 				},
-				'&.Mui-focusVisible': {
+				'&:active': {
 					color: COLOR.WHITE,
 					backgroundColor: COLOR.SECONDARY_DARK,
-					boxShadow: 'none',
 				},
 			},
-			contained: {
-				boxShadow: 'none',
+			containedSizeSmall: {
+				padding: '7.5px 15px',
+			},
+			outlined: {
+				padding: '10px 15px',
+				backgroundColor: 'transparent',
 				'&$disabled': {
+					color: COLOR.BASE_LIGHTEST,
+				},
+				'&.Mui-focusVisible': {
+					backgroundColor: COLOR.WHITE,
+					boxShadow: SHADOW.MEDIUM,
+				},
+			},
+			outlinedPrimary: {
+				'&:hover': {
+					backgroundColor: COLOR.PRIMARY_LIGHTEST,
+				},
+				'&:active': {
+					backgroundColor: COLOR.PRIMARY_LIGHTEST,
+				},
+			},
+			outlinedSecondary: {
+				color: COLOR.SECONDARY_MAIN,
+				backgroundColor: 'transparent',
+				'&$disabled': {
+					borderColor: COLOR.BASE_LIGHTEST,
+				},
+				'&:hover': {
 					color: COLOR.WHITE,
-					backgroundColor: COLOR.BASE_LIGHTEST,
+					backgroundColor: COLOR.SECONDARY_MAIN,
+				},
+				'&:active': {
+					color: COLOR.WHITE,
+					backgroundColor: COLOR.SECONDARY_DARK,
+				},
+			},
+			outlinedSizeSmall: {
+				padding: '7.5px 15px',
+			},
+			text: {
+				padding: '10px 15px',
+				'&:hover': {
+					boxShadow: 'none',
+					backgroundColor: 'transparent',
+					textDecorationLine: 'underline',
+				},
+				'&:active': {
+					boxShadow: 'none',
+					backgroundColor: 'transparent',
+					textDecorationLine: 'underline',
+				},
+				'&$disabled': {
+					color: COLOR.BASE_LIGHT,
+				},
+				'&.Mui-focusVisible': {
+					backgroundColor: COLOR.PRIMARY_LIGHTEST,
+				},
+			},
+			textPrimary: {
+				'&:hover': {
+					backgroundColor: 'transparent',
+				},
+				'&:active': {
+					backgroundColor: 'transparent',
 				},
 			},
 		},
