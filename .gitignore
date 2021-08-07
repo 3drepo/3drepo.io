@@ -82,6 +82,7 @@ backend/.nyc_output
 backend/mongodb-prebuilt-*
 backend/3drepo.log
 backend/docs/
+backend/tests/v5/fileShare
 npm-debug.log.*
 .vscode/
 *.swo
