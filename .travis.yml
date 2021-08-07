@@ -73,6 +73,8 @@ matrix:
       depth: 1
       node_js:
         - "14.17.1"
+      before_install:
+        - sudo apt-get install libssl1.0.0 -y
       script:
         - cd backend
         - yarn install
