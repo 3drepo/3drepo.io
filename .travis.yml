@@ -74,7 +74,8 @@ matrix:
       node_js:
         - "14.17.1"
       before_install:
-        - sudo apt-get install libssl1.0.0 -y
+        - wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl1.0/libssl1.0.0_1.0.2n-1ubuntu5.5_amd64.deb
+        - sudo apt install ./libssl1.0.0_1.0.2n-1ubuntu5.5_amd64.deb
       script:
         - cd backend
         - yarn install
