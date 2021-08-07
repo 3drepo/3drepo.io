@@ -87,11 +87,10 @@ module.exports.createApp = function (server, serverConfig) {
 
 				userToSocket[socket.client.id] = socket;
 				socketIdBySession[sessionId] = socket.client.id;
-		// save the new socket-id
+				// save the new socket-id
 				const db = require("../handler/db");
-				db.getCollection("admin", "sessions").then((coll) =>
-					coll.update({ _id: sessionId},  { $set: { "session.user.socketId": socket.client.id }})
-				).catch(err => {
+				db.updateMany("admin", "sessions", { _id: sessionId},
+					{ $set: { "session.user.socketId": socket.client.id }}).catch(err => {
 					systemLogger.logError("Chat server - DB update error - " + err.message);
 				});
 			}

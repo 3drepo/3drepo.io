@@ -19,7 +19,7 @@ import { createGlobalStyle } from 'styled-components';
 import { clientConfigService } from '../services/clientConfig';
 import { COLOR } from './colors';
 
-const appBackgroundImage = clientConfigService.getCustomBackgroundImagePath() || '/images/viewer_background.png';
+const appBackgroundImage = clientConfigService.getCustomBackgroundImagePath() || '/assets/images/viewer_background.png';
 
 export const GlobalStyle = createGlobalStyle`
 	* {

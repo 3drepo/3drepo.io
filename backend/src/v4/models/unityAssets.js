@@ -44,9 +44,7 @@ async function getAssetListFromRef(ref, username) {
 }
 
 function getAssetListEntry(account, model, revId) {
-	return db.getCollection(account, model + ".stash.unity3d").then(dbCol => {
-		return dbCol.findOne({_id: revId});
-	});
+	return db.findOne(account, model + ".stash.unity3d", {_id: revId});
 }
 
 UnityAssets.getAssetList = function(account, model, branch, rev, username) {

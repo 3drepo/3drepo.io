@@ -117,7 +117,7 @@ const handleAuthenticateFail = async function (user, username) {
 		elapsedTime && elapsedTime < config.loginPolicy.lockoutDuration ?
 		user.customData.loginInfo.failedLoginCount + 1 : 1;
 
-	await db.update("admin", COLL_NAME, {user: username}, {$set: {
+	await db.updateOne("admin", COLL_NAME, {user: username}, {$set: {
 		"customData.loginInfo.lastFailedLoginAt": currentTime,
 		"customData.loginInfo.failedLoginCount": failedLoginCount
 	}});
@@ -169,16 +169,14 @@ User.authenticate =  async function (username, password) {
 	try {
 		await db.authenticate(user.user, password);
 	} catch (err) {
-		const resCode = utils.mongoErrorToResCode(err);
-
 		const remainingLoginAttempts = await handleAuthenticateFail(user, user.user);
 
-		if (resCode.value === responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value &&
+		if (err.value === responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value &&
 			remainingLoginAttempts <= config.loginPolicy.remainingLoginAttemptsPromptThreshold) {
-			throw appendRemainingLoginsInfo(resCode, remainingLoginAttempts);
+			throw appendRemainingLoginsInfo(err, remainingLoginAttempts);
 		}
 
-		throw { resCode };
+		throw { resCode: err };
 	}
 
 	if (user.customData && user.customData.inactive) {
@@ -193,7 +191,7 @@ User.authenticate =  async function (username, password) {
 
 	user.customData.lastLoginAt = new Date();
 
-	await db.update("admin", COLL_NAME, {user: username}, {
+	await db.updateOne("admin", COLL_NAME, {user: username}, {
 		$set: {"customData.lastLoginAt": user.customData.lastLoginAt},
 		$unset: {"customData.loginInfo.failedLoginCount":""}
 	});
@@ -248,18 +246,18 @@ User.getStarredMetadataTags = async function (username) {
 };
 
 User.appendStarredMetadataTag = async function (username, tag) {
-	await db.update("admin", COLL_NAME, {user: username}, {$addToSet: { "customData.StarredMetadataTags" : tag } });
+	await db.updateOne("admin", COLL_NAME, {user: username}, {$addToSet: { "customData.StarredMetadataTags" : tag } });
 	return {};
 };
 
 User.setStarredMetadataTags = async function (username, tags) {
 	tags = _.uniq(tags);
-	await db.update("admin", COLL_NAME, {user: username}, {$set: { "customData.StarredMetadataTags" : tags}});
+	await db.updateOne("admin", COLL_NAME, {user: username}, {$set: { "customData.StarredMetadataTags" : tags}});
 	return {};
 };
 
 User.deleteStarredMetadataTag = async function (username, tag) {
-	await db.update("admin", COLL_NAME, {user: username}, {$pull: { "customData.StarredMetadataTags" : tag } });
+	await db.updateOne("admin", COLL_NAME, {user: username}, {$pull: { "customData.StarredMetadataTags" : tag } });
 	return {};
 };
 
@@ -283,13 +281,13 @@ User.appendStarredModels = async function (username, ts, modelID) {
 
 	if(starredModels[ts].indexOf(modelID) === -1) {
 		starredModels[ts].push(modelID);
-		await db.update("admin", COLL_NAME, {user: username}, {$set: { "customData.starredModels" : starredModels } });
+		await db.updateOne("admin", COLL_NAME, {user: username}, {$set: { "customData.starredModels" : starredModels } });
 	}
 	return {};
 };
 
 User.setStarredModels = async function (username, models) {
-	await db.update("admin", COLL_NAME, {user: username}, {$set: { "customData.starredModels" : models}});
+	await db.updateOne("admin", COLL_NAME, {user: username}, {$set: { "customData.starredModels" : models}});
 	return {};
 };
 
@@ -303,12 +301,12 @@ User.deleteStarredModel = async function (username, ts, modelID) {
 			userProfile.customData.starredModels[ts][0] === modelID) {
 			const action = {$unset: {}};
 			action.$unset[`customData.starredModels.${ts}`] = "";
-			await db.update("admin", COLL_NAME, {user: username}, action);
+			await db.updateOne("admin", COLL_NAME, {user: username}, action);
 
 		} else {
 			const action = {$pull: {}};
 			action.$pull[`customData.starredModels.${ts}`] = modelID;
-			await db.update("admin", COLL_NAME, {user: username}, action);
+			await db.updateOne("admin", COLL_NAME, {user: username}, action);
 		}
 	}
 	return {};
@@ -316,12 +314,12 @@ User.deleteStarredModel = async function (username, ts, modelID) {
 
 User.generateApiKey = async function (username) {
 	const apiKey = utils.generateHashString();
-	await db.update("admin", COLL_NAME, {user: username}, {$set: {"customData.apiKey" : apiKey}});
+	await db.updateOne("admin", COLL_NAME, {user: username}, {$set: {"customData.apiKey" : apiKey}});
 	return apiKey;
 };
 
 User.deleteApiKey = async function (username) {
-	await db.update("admin", COLL_NAME, {user: username}, {$unset: {"customData.apiKey" : 1}});
+	await db.updateOne("admin", COLL_NAME, {user: username}, {$unset: {"customData.apiKey" : 1}});
 };
 
 User.findUsersWithoutMembership = async function (teamspace, searchString) {
@@ -409,7 +407,7 @@ User.updatePassword = async function (username, oldPassword, token, newPassword)
 		await db.runCommand("admin", updateUserCmd);
 
 		if (user) {
-			await db.update("admin", COLL_NAME, {user: username}, {$set: {"customData.resetPasswordToken" : undefined }});
+			await db.updateOne("admin", COLL_NAME, {user: username}, {$set: {"customData.resetPasswordToken" : undefined }});
 		}
 
 	} catch(err) {
@@ -436,8 +434,8 @@ User.createUser = async function (username, password, customData, tokenExpiryTim
 
 	const cleanedCustomData = {
 		createdAt: new Date(),
-		inactive: true,
-		extras: {}
+		inactive: true
+		// extras: {}
 	};
 
 	["firstName", "lastName", "email", "mailListOptOut"]
@@ -447,12 +445,12 @@ User.createUser = async function (username, password, customData, tokenExpiryTim
 			}
 		});
 
-	["jobTitle", "industry", "phoneNumber", "howDidYouFindUs"]
-		.forEach(key => {
-			if (customData[key]) {
-				cleanedCustomData.extras[key] = customData[key];
-			}
-		});
+	// ["jobTitle", "industry", "phoneNumber", "howDidYouFindUs"]
+	// 	.forEach(key => {
+	// 		if (customData[key]) {
+	// 			cleanedCustomData.extras[key] = customData[key];
+	// 		}
+	// 	});
 
 	const billingInfo = {};
 
@@ -536,7 +534,7 @@ User.verify = async function (username, token, options) {
 
 	} else if (tokenData.token === token && tokenData.expiredAt > new Date()) {
 
-		await db.update("admin", COLL_NAME, { user: username },
+		await db.updateOne("admin", COLL_NAME, { user: username },
 			{ $unset: {"customData.inactive": "", "customData.emailVerifyToken": "" }});
 
 	} else {
@@ -544,14 +542,14 @@ User.verify = async function (username, token, options) {
 	}
 
 	try {
-		const { customData: {firstName, lastName, email, billing, mailListOptOut, extras } } = user;
-		const { jobTitle, phoneNumber, industry, howDidYouFindUs } = extras;
+		const { customData: {firstName, lastName, email, billing, mailListOptOut /* , extras*/ } } = user;
+		// const { jobTitle, phoneNumber, industry, howDidYouFindUs } = extras;
 
 		const subscribed = !mailListOptOut;
 		const company = get(billing, "billingInfo.company");
 
 		await Intercom.createContact(username, formatPronouns(firstName + " " + lastName), email,
-			subscribed, company, jobTitle, phoneNumber, industry, howDidYouFindUs);
+			subscribed, company /* , jobTitle, phoneNumber, industry, howDidYouFindUs */);
 	} catch (err) {
 		systemLogger.logError("Failed to create contact in intercom when verifying user", username, err);
 	}
@@ -614,7 +612,7 @@ User.updateInfo = async function(username, updateObj) {
 		await User.checkEmailAvailableAndValid(updateObj.email, username);
 	}
 
-	await db.update("admin", COLL_NAME, {user: username}, {$set: updateData});
+	await db.updateOne("admin", COLL_NAME, {user: username}, {$set: updateData});
 };
 
 User.getForgotPasswordToken = async function (userNameOrEmail) {
@@ -644,7 +642,7 @@ User.getForgotPasswordToken = async function (userNameOrEmail) {
 			firstName:user.customData.firstName
 		};
 
-		await db.update("admin", COLL_NAME, {user: user.user}, {$set: { "customData.resetPasswordToken": resetPasswordToken }});
+		await db.updateOne("admin", COLL_NAME, {user: user.user}, {$set: { "customData.resetPasswordToken": resetPasswordToken }});
 
 		return resetPasswordUserInfo;
 	}
@@ -1124,19 +1122,19 @@ User.findUserByBillingId = async function (billingAgreementId) {
 };
 
 User.updateAvatar = async function(username, avatarBuffer) {
-	await db.update("admin", COLL_NAME, {user: username}, {$set: {"customData.avatar" : {data: avatarBuffer}}});
+	await db.updateOne("admin", COLL_NAME, {user: username}, {$set: {"customData.avatar" : {data: avatarBuffer}}});
 };
 
 User.updatePermissions = async function(username, updatedPermissions) {
-	await db.update("admin", COLL_NAME, {user: username}, {$set: {"customData.permissions": updatedPermissions}});
+	await db.updateOne("admin", COLL_NAME, {user: username}, {$set: {"customData.permissions": updatedPermissions}});
 };
 
 User.updatePermissionTemplates = async function(username, updatedPermissions) {
-	await db.update("admin", COLL_NAME, {user: username}, {$set: {"customData.permissionTemplates": updatedPermissions}});
+	await db.updateOne("admin", COLL_NAME, {user: username}, {$set: {"customData.permissionTemplates": updatedPermissions}});
 };
 
 User.updateSubscriptions = async function(username, subscriptions) {
-	await db.update("admin", COLL_NAME, {user: username}, {$set: {"customData.billing.subscriptions": subscriptions}});
+	await db.updateOne("admin", COLL_NAME, {user: username}, {$set: {"customData.billing.subscriptions": subscriptions}});
 };
 
 /*

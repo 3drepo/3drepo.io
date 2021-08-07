@@ -287,13 +287,8 @@ Viewpoint.createViewpoint = async (account, model, collName, routePrefix, hostId
 
 		if (createThumbnail) {
 			viewpoint.thumbnail = await utils.resizeAndCropScreenshot(imageBuffer, 120, 120, true).catch((err) => {
-				systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
-					account,
-					model,
-					type: collName,
-					id: hostId,
-					err
-				});
+				systemLogger.logError("Failed to generate thumbnail. Using original screenshot", {err});
+				return imageBuffer;
 			});
 		}
 

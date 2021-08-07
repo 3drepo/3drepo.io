@@ -61,7 +61,7 @@ Job.addJob = async function(teamspace, jobData) {
 		newJobEntry.color = jobData.color;
 	}
 
-	return db.insert(teamspace, JOBS_COLLECTION_NAME, newJobEntry);
+	return db.insertOne(teamspace, JOBS_COLLECTION_NAME, newJobEntry);
 };
 
 Job.addUserToJob = async function(teamspace, jobName, user) {
@@ -79,7 +79,7 @@ Job.addUserToJob = async function(teamspace, jobName, user) {
 
 	job.users.push(user);
 
-	return db.update(teamspace, JOBS_COLLECTION_NAME, {_id: jobName}, {$set: {users: job.users}});
+	return db.updateOne(teamspace, JOBS_COLLECTION_NAME, {_id: jobName}, {$set: {users: job.users}});
 };
 
 Job.findByJob = async function(teamspace, jobName) {
@@ -141,7 +141,7 @@ Job.removeJob = async function(teamspace, jobName) {
 		throw responseCodes.JOB_ASSIGNED;
 	}
 
-	return db.remove(teamspace, JOBS_COLLECTION_NAME, {_id: jobName});
+	return db.deleteOne(teamspace, JOBS_COLLECTION_NAME, {_id: jobName});
 };
 
 Job.removeUserFromAnyJob = async function(teamspace, user) {
@@ -162,7 +162,7 @@ Job.removeUserFromJob = async function(teamspace, jobName, user) {
 
 	if (job.users) {
 		job.users.splice(job.users.indexOf(user), 1);
-		result = await db.update(teamspace, JOBS_COLLECTION_NAME, {_id: jobName}, {$set: {users: job.users}});
+		result = await db.updateOne(teamspace, JOBS_COLLECTION_NAME, {_id: jobName}, {$set: {users: job.users}});
 	}
 
 	return result;
@@ -185,7 +185,7 @@ Job.updateJob = async function(teamspace, jobName, updatedData) {
 	}
 
 	if (updatedData.color) {
-		result = await db.update(teamspace, JOBS_COLLECTION_NAME, {_id: jobName}, {$set: {color: updatedData.color}});
+		result = await db.updateOne(teamspace, JOBS_COLLECTION_NAME, {_id: jobName}, {$set: {color: updatedData.color}});
 	}
 
 	return result;

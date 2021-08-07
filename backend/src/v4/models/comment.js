@@ -150,8 +150,7 @@ const addComment = async function(account, model, colName, id, user, data, route
 
 	// 1. Fetch comments
 	const _id = utils.stringToUUID(id) ;
-	const col = await db.getCollection(account, model + "." + colName);
-	const items = await col.find({ _id }, {comments: 1}).toArray();
+	const items = await db.find(account, model + "." + colName, { _id }, {comments: 1});
 	if (items.length === 0) {
 		throw { resCode: responseCodes.ISSUE_NOT_FOUND };
 	}
@@ -176,7 +175,7 @@ const addComment = async function(account, model, colName, id, user, data, route
 	// 5. Update the item.
 	const viewpointPush =  viewpoint ? {$push: { viewpoints: viewpoint }} : {};
 
-	await col.update({ _id }, {...viewpointPush ,$set : {comments}});
+	await db.updateOne(account, model + "." + colName, { _id }, {...viewpointPush, $set : {comments}});
 
 	cleanViewpoint(routePrefix, viewpoint);
 
@@ -187,8 +186,7 @@ const addComment = async function(account, model, colName, id, user, data, route
 const deleteComment =  async function(account, model, colName, id, guid, user) {
 	// 1. Fetch comments
 	const _id = utils.stringToUUID(id) ;
-	const col = await db.getCollection(account, model + "." + colName);
-	const item = await col.findOne({ _id }, {comments: 1, viewpoints: 1});
+	const item = await db.findOne(account, model + "." + colName, { _id }, {comments: 1, viewpoints: 1});
 
 	if (item === 0) {
 		throw { resCode: responseCodes.ISSUE_NOT_FOUND };
@@ -238,7 +236,7 @@ const deleteComment =  async function(account, model, colName, id, guid, user) {
 
 	// 4. Update the issue;
 	await Promise.all([
-		col.update({ _id }, {$set : {comments, viewpoints}}),
+		db.updateOne(account, model + "." + colName, { _id }, {$set : {comments, viewpoints}}),
 		deleteScreenshotPromise
 	]);
 
