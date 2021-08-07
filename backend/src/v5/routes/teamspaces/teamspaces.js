@@ -32,7 +32,15 @@ const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 
 	/**
-	 *
+	 * @openapi
+	 * /teamspaces:
+	 *   get:
+	 *     description: Get a list of teamspaces the user has access to
+	 *     tags: [Teamspaces]
+	 *     produces: application/json
+	 *     responses:
+	 *       200:
+	 *         description: returns list of teamspace
 	 *
 	 */
 	router.get('/', validSession, getTeamspaceList);

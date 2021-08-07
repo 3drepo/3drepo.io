@@ -17,10 +17,9 @@
 	    "require-sort/require-sort": "error",
 		"license-header": 2,
 		"arrow-parens": ["error", "always"],
-		"no-tabs": 0,
 		"indent": ["error", "tab"],
 		"no-plusplus" : 0,
-        "indent": ["error", "tab", { "SwitchCase": 1 }],
+		"no-tabs": ["error", {"allowIndentationTabs": true}],
         "object-curly-newline": 0,
         "max-len": ["error", {
             "code": 120,

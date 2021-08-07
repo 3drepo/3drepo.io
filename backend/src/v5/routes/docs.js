@@ -15,13 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const RoutesManager = {};
-const TeamspaceRoutes = require('./teamspaces/teamspaces');
-const docsInit = require('./docs');
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 
-RoutesManager.init = (app) => {
-	docsInit(app);
-	app.use('/v5/teamspaces/', TeamspaceRoutes);
+const options = {
+	definition: {
+		openapi: '3.0.0',
+		info: {
+			title: '3D Repo IO',
+			version: '5.0.0',
+		},
+		servers: [
+			{ url: 'http://api1.example.org/api/v5' },
+		],
+	},
+	apis: [`${__dirname}/**/*.js`], // files containing annotations as above
 };
 
-module.exports = RoutesManager;
+const setupDocEndpoint = (app) => {
+	const docs = swaggerJsdoc(options);
+	docs.basePath = '/api/v5';
+	const uiOptions = {
+		explorer: true,
+	};
+	app.use('/docs', swaggerUi.serve, swaggerUi.setup(docs, uiOptions));
+};
+
+module.exports = setupDocEndpoint;
