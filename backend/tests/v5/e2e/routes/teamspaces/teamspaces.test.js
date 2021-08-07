@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const SuperTest = require('supertest');
 const ServiceHelper = require('../../../helper/services');
-const { src, srcV4 } = require('../../../helper/path');
+const { src } = require('../../../helper/path');
 
-const DbHandler = require(`${src}/handler/db`);
-const { createTeamSpaceRole } = require(`${srcV4}/models/role`);
+const { template } = require(`${src}/utils/responseCodes`);
 
 let server;
+let agent;
 
 const testUser = {
 	user: 'user1',
@@ -35,34 +36,26 @@ const testUserTSAccess = [
 ];
 
 const setupData = async () => {
-	const adminDB = await DbHandler.getAuthDB();
-
 	await Promise.all(testUserTSAccess.map(async ({ name, isAdmin }) => {
-		await adminDB.addUser(
-			name,
-			name,
-			{
-				customData: {
-					permissions: isAdmin ? [{ user: testUser.user, permissions: 'teamspace_admin' }] : [],
-				},
-				roles: [],
-			},
-		);
-		await createTeamSpaceRole(name);
+		await ServiceHelper.db.createUser(name, name,
+			{ permissions: isAdmin ? [{ user: testUser.user, permissions: 'teamspace_admin' }] : [] },
+			[]);
+		await ServiceHelper.db.createTeamspaceRole(name);
 	}));
-	await adminDB.addUser(
+	await ServiceHelper.db.createUser(
 		testUser.user,
 		testUser.password,
-		{
-			customData: {},
-			roles: testUserTSAccess.map(({ name }) => ({ db: name, role: 'team_member' })),
-		},
+		{},
+		testUserTSAccess.map(({ name }) => ({ db: name, role: 'team_member' })),
 	);
 };
 
 const testGetTeamspaceList = () => {
 	describe('Get teamspace list', () => {
-		test('should fail without a valid session', () => {});
+		test('should fail without a valid session', async () => {
+			const res = await agent.get('/v5/teamspaces/').expect(template.notLoggedIn.status);
+			expect(res.body.code).toEqual(template.notLoggedIn.code);
+		});
 		test('give return a teamspace list if the user has a valid session', () => {});
 	});
 };
@@ -70,6 +63,7 @@ const testGetTeamspaceList = () => {
 describe('E2E routes/teamspaces', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
+		agent = await SuperTest(server);
 		await setupData();
 	});
 	afterAll(() => ServiceHelper.closeApp(server));

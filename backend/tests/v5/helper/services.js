@@ -18,14 +18,23 @@
 const { src, srcV4 } = require('./path');
 
 const { createApp } = require(`${srcV4}/services/api`);
-const db = require(`${src}/handler/db`);
+const DbHandler = require(`${src}/handler/db`);
+const { createTeamSpaceRole } = require(`${srcV4}/models/role`);
 
-const ServiceHelper = {};
+const db = {};
+const ServiceHelper = { db };
+
+db.createUser = async (user, pwd, customData = {}, roles = []) => {
+	const adminDB = await DbHandler.getAuthDB();
+	return adminDB.addUser(user, pwd, { customData, roles });
+};
+
+db.createTeamspaceRole = (ts) => createTeamSpaceRole(ts);
 
 ServiceHelper.app = () => createApp().listen(8080);
 
 ServiceHelper.closeApp = async (server) => {
-	await db.disconnect();
+	await DbHandler.disconnect();
 	if (server) await server.close();
 };
 

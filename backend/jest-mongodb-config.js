@@ -24,7 +24,9 @@ module.exports = {
 		},
 		instance: {
 			auth: false,
-			dbName: "admin"
+			dbName: "admin",
+			ip: "127.0.0.1",
+			port: 27227
 		},
 		autoStart: false,
 	},

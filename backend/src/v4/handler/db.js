@@ -49,13 +49,18 @@
 		return hostPorts.join(",");
 	}
 
-	function getURL(database) {
-		if(config.db.connURL) {
-			return config.db.connURL;
-		}
+	function getURL(username, password) {
 		// Generate connection string that could include multiple hosts that
 		// represent a replica set.
-		let connectString = `mongodb://${config.db.username}:${config.db.password}@${getHostPorts()}/${database}?authSource=admin`;
+
+		let authStr = "";
+		if(username && password) {
+			authStr = `${username}:${password}@`;
+		} else if(config.db.username && config.db.password) {
+			authStr = `${config.db.username}:${config.db.password}@`;
+		}
+
+		let connectString = `mongodb://${authStr}${getHostPorts()}/`;
 
 		connectString += config.db.replicaSet ? "&replicaSet=" + config.db.replicaSet : "";
 
@@ -63,18 +68,35 @@
 			connectString += "&socketTimeoutMS=" + config.db.timeout;
 		}
 
+		console.log(connectString);
 		return connectString;
 	}
+
+	const connect = (username, password) => {
+		return MongoClient.connect(getURL(username, password), {
+			useNewUrlParser: true,
+			useUnifiedTopology: true
+		});
+	};
 
 	const Handler = {};
 
 	let db;
 
 	Handler.authenticate = async (user, password) => {
-		const authDB = await Handler.getAuthDB();
-		if ((await authDB.auth(user, password)) === 0) {
+		let conn;
+		try {
+			conn = await connect(user, password);
+			const testDB = await conn.db("admin");
+		} catch (err) {
+			console.log(err);
 			throw responseCodes.INCORRECT_USERNAME_OR_PASSWORD;
+		} finally {
+			if(conn) {
+				conn.close();
+			}
 		}
+
 	};
 
 	Handler.disconnect = function () {
@@ -143,12 +165,8 @@
 		if (db) {
 			return db.db(database);
 		} else {
-			const connection = await MongoClient.connect(getURL(), {
-				autoReconnect: true,
-				useNewUrlParser: true,
-				useUnifiedTopology: true
-			});
-			return connection.db(database);
+			db = await connect();
+			return db.db(database);
 
 		}
 	};
