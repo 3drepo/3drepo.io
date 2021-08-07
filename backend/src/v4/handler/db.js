@@ -68,7 +68,6 @@
 			connectString += "&socketTimeoutMS=" + config.db.timeout;
 		}
 
-		console.log(connectString);
 		return connectString;
 	}
 
@@ -89,7 +88,6 @@
 			conn = await connect(user, password);
 			const testDB = await conn.db("admin");
 		} catch (err) {
-			console.log(err);
 			throw responseCodes.INCORRECT_USERNAME_OR_PASSWORD;
 		} finally {
 			if(conn) {
