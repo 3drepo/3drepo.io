@@ -24,12 +24,14 @@ const { template } = require(`${src}/utils/responseCodes`);
 let server;
 let agent;
 
+// This is the user being used for tests
 const testUser = {
 	user: 'user1',
 	password: 'someComplicatedPassword!234',
 	apiKey: '1234',
 };
 
+// This is the list of teamspaces the user has access to
 const testUserTSAccess = [
 	{ name: 'ts1', isAdmin: true },
 	{ name: 'ts2', isAdmin: false },
@@ -39,8 +41,7 @@ const testUserTSAccess = [
 const setupData = async () => {
 	await Promise.all(testUserTSAccess.map(async ({ name, isAdmin }) => {
 		await ServiceHelper.db.createUser(name, name,
-			{ permissions: isAdmin ? [{ user: testUser.user, permissions: 'teamspace_admin' }] : [] },
-			[]);
+			{ permissions: isAdmin ? [{ user: testUser.user, permissions: 'teamspace_admin' }] : [] });
 		await ServiceHelper.db.createTeamspaceRole(name);
 	}));
 	await ServiceHelper.db.createUser(
