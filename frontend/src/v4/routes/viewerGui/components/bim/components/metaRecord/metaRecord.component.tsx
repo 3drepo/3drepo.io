@@ -65,9 +65,9 @@ const Starred = ({ data, starredMetaMap, toggleStarredRecord }) => {
 	);
 };
 
-const MetaRecordData = ({ value, key, copyRules, selectAllSimilar }) => {
+const MetaRecordData = ({ value, field, copyRules, selectAllSimilar }) => {
 	const rules = [{
-		field: key,
+		field,
 		operator: isNumber(value) ? 'EQUALS' : 'IS',
 		values: [value],
 	}];
@@ -126,7 +126,7 @@ export const MetaRecord = (props: IProps) => {
 				/>}
 				<Title>{name || 'Unnamed'}</Title>
 				{!hasSubData && <MetaRecordData
-					key={data.key}
+					field={data.key}
 					value={data.value}
 					copyRules={copyRules}
 					selectAllSimilar={selectAllSimilar}
