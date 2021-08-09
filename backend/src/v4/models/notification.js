@@ -61,8 +61,7 @@ const unionArrayMerger = opts => (objValue, srcValue) => {
  * @returns {Promise} Returns a promise with the recently created notification
  */
 const insertNotification = async (username, type, data) => {
-	const notifColl = await db.getCollection(NOTIFICATIONS_DB, username);
-	const insertion = await notifColl.insertOne(generateNotification(type, data));
+	const insertion = await db.insertOne(NOTIFICATIONS_DB, username, generateNotification(type, data));
 	return utils.objectIdToString(insertion.ops[0]);
 };
 
@@ -75,9 +74,7 @@ const deleteNotification = (username, _id) => {
 
 const updateNotification = (username, _id, data) => {
 	_id =  utils.stringToUUID(_id);
-	return db.getCollection(NOTIFICATIONS_DB, username).then((collection) =>
-		collection.update({_id}, { $set: data })
-	);
+	return db.updateMany(NOTIFICATIONS_DB, username, {_id}, { $set: data });
 };
 
 const upsertNotification = async (username, data, type, criteria, opts) => {
@@ -131,8 +128,7 @@ const fillModelData = function(fullNotifications) {
 };
 
 const getNotification = (username, type, criteria) =>
-	db.getCollection(NOTIFICATIONS_DB, username)
-		.then((collection) => collection.find(Object.assign({type},  criteria)).toArray());
+	db.find(NOTIFICATIONS_DB, username, Object.assign({type},  criteria));
 
 const getHistoricAssignedRoles = (issue) => {
 	const comments = issue.comments;
@@ -231,16 +227,14 @@ module.exports = {
 	updateNotification,
 
 	updateAllNotifications: async function(username, data) {
-		const notifications = await db.getCollection(NOTIFICATIONS_DB, username);
-		await notifications.update({}, { $set: data }, {multi: true});
+		await db.updateMany(NOTIFICATIONS_DB, username, {}, { $set: data });
 	},
 
 	/**
 	 * This delete all notifications for the particular user
 	 */
 	deleteAllNotifications: async function(username) {
-		const notifications = await db.getCollection(NOTIFICATIONS_DB, username);
-		await notifications.deleteMany({});
+		await db.deleteMany(NOTIFICATIONS_DB, username, {});
 	},
 
 	/**
@@ -419,7 +413,6 @@ module.exports = {
 			criteria._id = utils.stringToUUID(criteria._id);
 		}
 
-		return db.getCollection(NOTIFICATIONS_DB, username).then((collection) => collection.find(criteria, {sort: {timestamp: -1}}).toArray())
-			.then(fillModelData);
+		return db.find(NOTIFICATIONS_DB, username, criteria, undefined, {timestamp: -1}).then(fillModelData);
 	}
 };

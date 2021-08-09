@@ -210,7 +210,7 @@ class View {
 		newView = this.checkTypes(newView, this.fieldTypes);
 
 		const coll = await this.getCollection(account, model);
-		await coll.insert(newView);
+		await coll.insertOne(newView);
 
 		newView = this.clean(account, model, newView);
 

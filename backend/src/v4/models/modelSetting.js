@@ -213,13 +213,13 @@ ModelSetting.createNewSetting = async function(teamspace, modelName, data) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	await db.insert(teamspace, MODELS_COLL, setting);
+	await db.insertOne(teamspace, MODELS_COLL, setting);
 
 	return setting;
 };
 
 ModelSetting.deleteModelSetting = function(account, model) {
-	return db.remove(account, MODELS_COLL, { _id: model });
+	return db.deleteOne(account, MODELS_COLL, { _id: model });
 };
 
 ModelSetting.findModelSettingById = async function(account, model, projection, toClean = true) {
@@ -314,8 +314,7 @@ ModelSetting.isFederation = async function(account, model) {
 };
 
 ModelSetting.isModelNameExists = async function(account, models, modelName) {
-	const coll = await db.getCollection(account, MODELS_COLL);
-	const count = await coll.find({name: modelName, _id: {"$in": models}}).count();
+	const count = await db.count(account, MODELS_COLL, {name: modelName, _id: {"$in": models}});
 
 	return count > 0;
 };
@@ -546,7 +545,7 @@ ModelSetting.updateModelSetting = async function (account, model, updateObj) {
 	}
 
 	if (Object.keys(updateBson).length > 0) {
-		await db.update(account, MODELS_COLL, {_id: model}, updateBson);
+		await db.updateOne(account, MODELS_COLL, {_id: model}, updateBson);
 	}
 
 	return ModelSetting.prepareDefaultView(account, model, setting);

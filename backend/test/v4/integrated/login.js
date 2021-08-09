@@ -136,10 +136,8 @@ describe("Login", function () {
 			.post("/login")
 			.send({ username, password: password + "123" })
 			.expect(400, function(err, res) {
-
 				expect(res.body.value).to.equal(responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value);
 				done(err);
-
 			});
 	});
 

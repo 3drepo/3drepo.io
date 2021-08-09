@@ -18,10 +18,10 @@
 "use strict";
 
 const C = require("../constants");
-const DB = require("../handler/db");
+const db = require("../handler/db");
 
 const findByRoleID = async function(id) {
-	return await DB.findOne("admin", "system.roles", { _id: id});
+	return await db.findOne("admin", "system.roles", { _id: id});
 };
 
 const Role = {};
@@ -48,7 +48,7 @@ Role.createTeamSpaceRole = async function (account) {
 		"roles": []
 	};
 
-	await DB.runCommand(account, createRoleCmd);
+	await db.runCommand(account, createRoleCmd);
 };
 
 Role.grantTeamSpaceRoleToUser = async function (username, account) {
@@ -57,7 +57,7 @@ Role.grantTeamSpaceRoleToUser = async function (username, account) {
 		roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
 	};
 
-	return await DB.runCommand("admin", grantRoleCmd);
+	return await db.runCommand("admin", grantRoleCmd);
 };
 
 Role.revokeTeamSpaceRoleFromUser = async function(username, account) {
@@ -66,7 +66,7 @@ Role.revokeTeamSpaceRoleFromUser = async function(username, account) {
 		roles: [{role: C.DEFAULT_MEMBER_ROLE, db: account}]
 	};
 
-	return await DB.runCommand("admin", cmd);
+	return await db.runCommand("admin", cmd);
 };
 
 module.exports = Role;

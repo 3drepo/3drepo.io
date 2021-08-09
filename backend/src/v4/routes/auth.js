@@ -586,7 +586,6 @@ function login(req, res, next) {
 
 	const { username, password} = req.body;
 	if (utils.isString(username) && utils.isString(password)) {
-
 		systemLogger.logInfo(`Authenticating ${username}...`);
 
 		if(sessionCheck(req)) {
