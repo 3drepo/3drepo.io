@@ -15,6 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { VERSION } = require('../../../VERSION.json');
+const { v4Path } = require('../../interop');
+// FIXME: can remove the disable once we migrated config
+// eslint-disable-next-line
+const { apiUrls } = require(`${v4Path}/config`);
 const { getSwaggerComponents } = require('../utils/responseCodes');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
@@ -24,10 +29,10 @@ const options = {
 		openapi: '3.0.0',
 		info: {
 			title: '3D Repo IO',
-			version: '5.0.0',
+			version: VERSION,
 		},
 		servers: [
-			{ url: 'http://api1.example.org/api/v5' },
+			{ url: `${apiUrls.all[0]}/v5` },
 		],
 		security: [
 			{ keyAuth: [] },
