@@ -144,7 +144,7 @@ class AlluxioClient {
 
 	}
 
-	async write(id, data) {
+	write(id, data) {
 		return axios({
 			method: "post",
 			url: this.getStreamsURL("write", id),
@@ -154,7 +154,6 @@ class AlluxioClient {
 			}
 		});
 	}
-
 }
 
 module.exports = AlluxioClient;

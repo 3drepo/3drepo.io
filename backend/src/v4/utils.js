@@ -401,9 +401,24 @@ function Utils() {
 	// returns the whole string if the regex is not matched.
 	this.getURLDomain = (url) => {
 		const domainRegexMatch = url.match(/^(\w)*:\/\/.*?\//);
-		return domainRegexMatch ?  domainRegexMatch[0].replace(/\/\s*$/, "") : url;
+		return domainRegexMatch ? domainRegexMatch[0].replace(/\/\s*$/, "") : url;
 	};
 
+	this.generateFoldernames = (fileName, dirLevels) => {
+		if (dirLevels < 1) {
+			return "";
+		}
+		const folders = [];
+		const minChunkLen = 4;
+		const nameChunkLen = Math.max(fileName.length / dirLevels, minChunkLen);
+
+		for(let i = 0 ; i < dirLevels; i++) {
+			const chunkStart = (i * nameChunkLen) % fileName.length;
+			const fileNameHash = farmhash.fingerprint32(fileName.substr(chunkStart,nameChunkLen) + Math.random());
+			folders.push(fileNameHash & 255);
+		}
+		return folders.join("/");
+	};
 }
 
 module.exports = new Utils();

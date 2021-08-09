@@ -20,26 +20,10 @@
 const config = require("../config.js");
 const path = require("path");
 const ResponseCodes = require("../response_codes");
-const nodeuuid = require("uuid").v1;
+const utils = require("../utils");
 const farmhash = require("farmhash");
-const AlluxioClient = require("../models/alluxioClient");
+const AlluxioClient = require("./alluxioClient");
 const slash = require("slash");
-
-const generateFoldernames = (fileName, dirLevels) => {
-	if (dirLevels < 1) {
-		return "";
-	}
-	const folders = [];
-	const minChunkLen = 4;
-	const nameChunkLen = Math.max(fileName.length / dirLevels, minChunkLen);
-
-	for(let i = 0 ; i < dirLevels; i++) {
-		const chunkStart = (i * nameChunkLen) % fileName.length;
-		const fileNameHash = farmhash.fingerprint32(fileName.substr(chunkStart,nameChunkLen) + Math.random());
-		folders.push(fileNameHash & 255);
-	}
-	return folders.join("/");
-};
 
 class AlluxioHandler {
 	constructor() {
@@ -51,8 +35,8 @@ class AlluxioHandler {
 	}
 
 	async storeFile(data) {
-		const _id = nodeuuid();
-		const folderNames = generateFoldernames(_id, this.levels);
+		const _id = utils.generateUUID({string: true});
+		const folderNames = utils.generateFoldernames(_id, this.levels);
 		const link = path.join(folderNames, _id);
 		await this.client.uploadFile(this.getAlluxioPathFormat(link), data);
 		return ({_id, link, size:data.length, type: "alluxio"});
@@ -60,7 +44,7 @@ class AlluxioHandler {
 
 	async getFileStream(key) {
 		try {
-			return await this.client.downloadFileStream(this.getAlluxioPathFormat(key));
+			await this.client.downloadFileStream(this.getAlluxioPathFormat(key));
 		} catch {
 			throw ResponseCodes.NO_FILE_FOUND;
 		}
@@ -83,7 +67,7 @@ class AlluxioHandler {
 	}
 
 	getAlluxioPathFormat(link) {
-		return "/" + slash(link);
+		return `/${slash(link)}`;
 	}
 }
 
