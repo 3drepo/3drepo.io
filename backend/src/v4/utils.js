@@ -25,6 +25,7 @@ const yup = require("yup");
 const uuidparse = require("uuid-parse");
 const mongo = require("mongodb");
 const crypto = require("crypto");
+const farmhash = require("farmhash");
 
 function Utils() {
 

@@ -21,7 +21,6 @@ const config = require("../config.js");
 const path = require("path");
 const ResponseCodes = require("../response_codes");
 const utils = require("../utils");
-const farmhash = require("farmhash");
 const AlluxioClient = require("./alluxioClient");
 const slash = require("slash");
 

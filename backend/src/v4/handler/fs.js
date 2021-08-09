@@ -22,7 +22,6 @@ const fs = require("fs");
 const path = require("path");
 const ResponseCodes = require("../response_codes");
 const systemLogger = require("../logger").systemLogger;
-const farmhash = require("farmhash");
 const utils = require("../utils");
 
 const createFoldersIfNecessary = (foldersPath) => {
