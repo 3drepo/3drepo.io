@@ -37,10 +37,26 @@ const establishRoutes = () => {
 	 *   get:
 	 *     description: Get a list of teamspaces the user has access to
 	 *     tags: [Teamspaces]
-	 *     produces: application/json
 	 *     responses:
 	 *       200:
 	 *         description: returns list of teamspace
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 teamspaces:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       name:
+	 *                         type: string
+	 *                         description: name of the teamspace
+	 *                       isAdmin:
+	 *                         type: boolean
+	 *                         description: whether the user is an admin
+	 *
 	 *
 	 */
 	router.get('/', validSession, getTeamspaceList);

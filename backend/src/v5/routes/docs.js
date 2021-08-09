@@ -28,6 +28,9 @@ const options = {
 		servers: [
 			{ url: 'http://api1.example.org/api/v5' },
 		],
+		security: [
+			{ keyAuth: [] },
+		],
 	},
 	apis: [`${__dirname}/**/*.js`], // files containing annotations as above
 };
@@ -35,6 +38,15 @@ const options = {
 const setupDocEndpoint = (app) => {
 	const docs = swaggerJsdoc(options);
 	docs.basePath = '/api/v5';
+	docs.components = docs.components || {};
+	// Setup API key security bearer
+	docs.components.securitySchemes = {
+		keyAuth: {
+			type: 'apiKey',
+			in: 'query',
+			name: 'key',
+		},
+	};
 	const uiOptions = {
 		explorer: true,
 	};
