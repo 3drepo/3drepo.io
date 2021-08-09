@@ -5,11 +5,11 @@
     "module": "commonjs",
     "target": "es6",
     "types": [
+      "@types/jest",
       "react",
       "react-dom",
       "lodash",
       "node",
-      "jest"
     ],
     "lib": [
       "es2015",
@@ -29,7 +29,6 @@
   },
   "exclude": [
     "node_modules",
-    "tests",
     "internals",
     "components"
   ],
