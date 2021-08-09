@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { getSwaggerComponents } = require('../utils/responseCodes');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
@@ -39,6 +40,10 @@ const setupDocEndpoint = (app) => {
 	const docs = swaggerJsdoc(options);
 	docs.basePath = '/api/v5';
 	docs.components = docs.components || {};
+	const { schemas, responses } = getSwaggerComponents();
+	docs.components.schemas = { ...(docs.components.schemas || {}), ...schemas };
+	docs.components.responses = { ...(docs.components.responses || {}), ...responses };
+
 	// Setup API key security bearer
 	docs.components.securitySchemes = {
 		keyAuth: {
@@ -50,6 +55,8 @@ const setupDocEndpoint = (app) => {
 	const uiOptions = {
 		explorer: true,
 	};
+
+	console.log(JSON.stringify(docs));
 	app.use('/docs', swaggerUi.serve, swaggerUi.setup(docs, uiOptions));
 };
 

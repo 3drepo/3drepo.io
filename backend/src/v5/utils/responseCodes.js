@@ -38,6 +38,49 @@ Object.keys(ResponseCodes.template).forEach((key) => {
 	ResponseCodes.template[key].code = toSnakeCase(key);
 });
 
+ResponseCodes.getSwaggerComponents = () => {
+	const schemas = {
+		generalError: {
+			type: 'object',
+			properties: {
+				code: {
+					type: 'string',
+					description: '3D Repo error code',
+				},
+				message: {
+					type: 'string',
+					description: 'A descriptive reason for the error',
+				},
+				place: {
+					type: 'string',
+					description: 'Endpoint this error came from',
+				},
+				status: {
+					type: 'integer',
+					format: 'int32',
+					description: 'HTTP status code',
+				},
+			},
+		},
+	};
+
+	const responses = {};
+	Object.keys(ResponseCodes.template).forEach((key) => {
+		responses[key] = {
+			description: ResponseCodes.template[key].message,
+			content: {
+				'application/json': {
+					schema: {
+						$ref: '#/components/schemas/generalError',
+					},
+				},
+			},
+		};
+	});
+
+	return { schemas, responses };
+};
+
 ResponseCodes.codeExists = (code) => !!ResponseCodes.template[toCamelCase(code)];
 
 ResponseCodes.createResponseCode = (errCode, message) => {
