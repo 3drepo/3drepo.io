@@ -39,46 +39,48 @@ Object.keys(ResponseCodes.template).forEach((key) => {
 });
 
 ResponseCodes.getSwaggerComponents = () => {
-	const schemas = {
-		generalError: {
-			type: 'object',
-			properties: {
-				code: {
-					type: 'string',
-					description: '3D Repo error code',
-				},
-				message: {
-					type: 'string',
-					description: 'A descriptive reason for the error',
-				},
-				place: {
-					type: 'string',
-					description: 'Endpoint this error came from',
-				},
-				status: {
-					type: 'integer',
-					format: 'int32',
-					description: 'HTTP status code',
-				},
+	const genSchema = ({ code, message, status }) => ({
+		type: 'object',
+		properties: {
+			code: {
+				type: 'string',
+				description: '3D Repo error code',
+				example: code,
+			},
+			message: {
+				type: 'string',
+				description: 'A descriptive reason for the error',
+				example: message,
+			},
+			place: {
+				type: 'string',
+				description: 'Endpoint this error came from',
+				example: 'GET /v5/teamspaces',
+
+			},
+			status: {
+				type: 'integer',
+				format: 'int32',
+				description: 'HTTP status code',
+				example: status,
 			},
 		},
-	};
+	});
 
 	const responses = {};
 	Object.keys(ResponseCodes.template).forEach((key) => {
+		const errRes = ResponseCodes.template[key];
 		responses[key] = {
-			description: ResponseCodes.template[key].message,
+			description: errRes.message,
 			content: {
 				'application/json': {
-					schema: {
-						$ref: '#/components/schemas/generalError',
-					},
+					schema: genSchema(errRes),
 				},
 			},
 		};
 	});
 
-	return { schemas, responses };
+	return responses;
 };
 
 ResponseCodes.codeExists = (code) => !!ResponseCodes.template[toCamelCase(code)];

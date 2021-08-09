@@ -55,6 +55,7 @@ const establishRoutes = () => {
 	 *                       name:
 	 *                         type: string
 	 *                         description: name of the teamspace
+	 *                         example: teamspace1
 	 *                       isAdmin:
 	 *                         type: boolean
 	 *                         description: whether the user is an admin

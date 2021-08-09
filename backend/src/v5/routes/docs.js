@@ -40,8 +40,7 @@ const setupDocEndpoint = (app) => {
 	const docs = swaggerJsdoc(options);
 	docs.basePath = '/api/v5';
 	docs.components = docs.components || {};
-	const { schemas, responses } = getSwaggerComponents();
-	docs.components.schemas = { ...(docs.components.schemas || {}), ...schemas };
+	const responses = getSwaggerComponents();
 	docs.components.responses = { ...(docs.components.responses || {}), ...responses };
 
 	// Setup API key security bearer
@@ -56,7 +55,6 @@ const setupDocEndpoint = (app) => {
 		explorer: true,
 	};
 
-	console.log(JSON.stringify(docs));
 	app.use('/docs', swaggerUi.serve, swaggerUi.setup(docs, uiOptions));
 };
 
