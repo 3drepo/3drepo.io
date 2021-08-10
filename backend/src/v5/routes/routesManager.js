@@ -17,10 +17,8 @@
 
 const RoutesManager = {};
 const TeamspaceRoutes = require('./teamspaces/teamspaces');
-const docsInit = require('./docs');
 
 RoutesManager.init = (app) => {
-	docsInit(app);
 	app.use('/v5/teamspaces/', TeamspaceRoutes);
 };
 
