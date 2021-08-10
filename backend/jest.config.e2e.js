@@ -18,8 +18,8 @@
 const config = require('./jest.config');
 
 config.coveragePathIgnorePatterns = [
+	...config.coveragePathIgnorePatterns,
 	'^((?!routes).)*$',
-	'docs.js'
 ];
 
 config.testMatch = ['**/tests/**/e2e/**/*.test.[jt]s?(x)'];

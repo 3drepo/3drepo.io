@@ -18,8 +18,7 @@
 const config = require('./jest.config');
 
 config.coveragePathIgnorePatterns = [
-	'/node_modules/',
-	'logger.js',
+	...config.coveragePathIgnorePatterns,
 	'/routes/',
 	'responder.js',
 	'responseCodes.js',

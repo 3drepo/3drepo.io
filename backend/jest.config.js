@@ -24,6 +24,7 @@ module.exports = {
 	coveragePathIgnorePatterns: [
 		"\\\\node_modules\\\\",
 		"\\\\logger.js",
+		"\\\\swagger.js"
 	],
 
 	// Indicates which provider should be used to instrument code for coverage
