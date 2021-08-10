@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UnityUtil } from './unity-util';
+import { CurrentUserActions } from '@/v4/modules/currentUser';
+import { ICurrentUserActions } from '@/v4/modules/currentUser/currentUser.redux';
+import { createActionsDispatchers } from './actionsDistpatchers.helper';
 
-if (window && !window.UnityUtil) {
-	(window as any).UnityUtil = UnityUtil;
-}
+export const CurrentUserActionsDispatchers = createActionsDispatchers<ICurrentUserActions>(CurrentUserActions);

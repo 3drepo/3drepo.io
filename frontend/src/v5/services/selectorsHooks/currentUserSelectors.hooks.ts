@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UnityUtil } from './unity-util';
+import * as CurrentUserSelectors from '@/v4/modules/currentUser/currentUser.selectors';
+import { createHooksSelectors } from './selectorsHooks.helper';
 
-if (window && !window.UnityUtil) {
-	(window as any).UnityUtil = UnityUtil;
-}
+export const CurrentUserHooksSelectors = createHooksSelectors(CurrentUserSelectors);
