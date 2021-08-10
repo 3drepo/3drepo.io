@@ -23,8 +23,8 @@ module.exports = {
 	// An array of regexp pattern strings used to skip coverage collection
 	coveragePathIgnorePatterns: [
 		"\\\\node_modules\\\\",
-		"\\\\logger.js",
-		"\\\\swagger.js"
+		"logger.js",
+		"swagger.js"
 	],
 
 	// Indicates which provider should be used to instrument code for coverage
