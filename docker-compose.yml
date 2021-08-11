@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   alluxio-master:
-    image: alluxio/alluxio:2.1.2
+    image: alluxio/alluxio:2.6.0
     command: master
     restart: always
     ports:
@@ -25,7 +25,7 @@ services:
         retries: 5
 
   alluxio-worker:
-    image: alluxio/alluxio:2.1.2
+    image: alluxio/alluxio:2.6.0
     command: worker
     restart: always
     ports:
@@ -52,7 +52,7 @@ services:
         retries: 5
 
   alluxio-proxy:
-    image: alluxio/alluxio:2.1.2
+    image: alluxio/alluxio:2.6.0
     command: proxy
     restart: always
     ports:
