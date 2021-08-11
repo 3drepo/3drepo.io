@@ -71,6 +71,7 @@ module.exports = (options) => {
 			alias: {
 				'@': PATHS.SRC_DIR,
 				'@assets': PATHS.ASSETS_DIR,
+				'@components': PATHS.COMPONENTS
 			  },
 		},
 

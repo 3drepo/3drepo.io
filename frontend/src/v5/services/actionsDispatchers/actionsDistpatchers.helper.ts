@@ -15,8 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UnityUtil } from './unity-util';
+let dispatch = null;
 
-if (window && !window.UnityUtil) {
-	(window as any).UnityUtil = UnityUtil;
-}
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const createActionsDispatchers = <T>(ActionsCreators: T) => {
+	const exportObject = {};
+	Object.keys(ActionsCreators).forEach((key) => {
+		exportObject[key] = (...args) => dispatch(ActionsCreators[key].apply(null, args));
+	});
+
+	return exportObject as T;
+};
+
+export const initializeActionsDispatchers = (dispatchFunc): void => { dispatch = dispatchFunc; };

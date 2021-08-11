@@ -15,8 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UnityUtil } from './unity-util';
+// eslint-disable-next-line max-len
+type CapitalLetter = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z';
 
-if (window && !window.UnityUtil) {
-	(window as any).UnityUtil = UnityUtil;
-}
+type Constant<S extends string> =
+S extends `${infer First}${CapitalLetter}${infer Second}` ? `${Uppercase<First>}_S${Uppercase<Second>}` : Uppercase<S>;
+
+export type Constants<Type> = {
+	[Property in keyof Type as Constant<`${string & Property}`>]: Constant<`${string & Property}`>;
+};

@@ -16,6 +16,7 @@
  */
 
 import { ConnectedRouter } from 'connected-react-router';
+import { Route, Switch } from 'react-router-dom';
 import 'font-awesome/css/font-awesome.min.css';
 import 'normalize.css/normalize.css';
 import React from 'react';
@@ -25,24 +26,32 @@ import '@/v4/services/fontAwesome';
 import 'simplebar/dist/simplebar.min.css';
 
 import 'simplebar';
-import { history, store } from '@/v4/modules/store';
-import Root from '@/v4/routes/index';
+import { dispatch, history, store } from '@/v4/modules/store';
+import V4Root from '@/v4/routes/index';
 import '@/v4/styles/global';
 
 import { IS_DEVELOPMENT } from '@/v4/constants/environment';
 import { UnityUtil } from '@/globals/unity-util';
 import { clientConfigService } from '@/v4/services/clientConfig';
+import { MainLayout } from '@components/mainLayout/mainLayout';
+import * as OfflinePluginRuntime from 'offline-plugin/runtime';
+import { initializeActionsDispatchers } from './v5/services/actionsDispatchers/actionsDistpatchers.helper';
 
 window.UnityUtil = UnityUtil;
 
+initializeActionsDispatchers(dispatch);
+
 const render = () => {
 	ReactDOM.render(
-		<Provider store={store as any} >
-			<ConnectedRouter history={history}>
-				<Root />
+		<Provider store={store as any}>
+			<ConnectedRouter history={history as History}>
+				<Switch>
+					<Route path="/v5"><MainLayout /></Route>
+					<Route><V4Root /></Route>
+				</Switch>
 			</ConnectedRouter>
 		</Provider>,
-		document.getElementById('app')
+		document.getElementById('app'),
 	);
 };
 
@@ -58,6 +67,5 @@ const initApp = () => {
 initApp();
 
 if (!IS_DEVELOPMENT) {
-	// eslint-disable-next-line @typescript-eslint/no-var-requires
-	require('offline-plugin/runtime').install();
+	OfflinePluginRuntime.install();
 }
