@@ -38,7 +38,7 @@ import { MainLayout } from '@components/mainLayout/mainLayout';
 import { ThemeLayout } from '@components/themeLayout/';
 import * as OfflinePluginRuntime from 'offline-plugin/runtime';
 import { theme } from '@/v5/ui/themes/theme';
-import { initializeActionsDispatchers } from '@/v5/services/actionsDispatchers/actionsDistpatchers.helper';
+import { initializeActionsDispatchers } from './v5/services/actionsDispatchers/actionsDistpatchers.helper';
 
 window.UnityUtil = UnityUtil;
 
@@ -49,12 +49,14 @@ const render = () => {
 		<Provider store={store as any}>
 			<ConnectedRouter history={history as History}>
 				<Switch>
-					<ThemeProvider theme={theme}>
-						<MuiThemeProvider theme={theme}>
-							<Route exact path="/v5"><MainLayout /></Route>
-							<Route exact path="/v5/theme"><ThemeLayout /></Route>
-						</MuiThemeProvider>
-					</ThemeProvider>
+					<Route exact path="/v5"><MainLayout /></Route>
+					<Route exact path="/v5/theme">
+						<ThemeProvider theme={theme}>
+							<MuiThemeProvider theme={theme}>
+								<ThemeLayout />
+							</MuiThemeProvider>
+						</ThemeProvider>
+					</Route>
 					<Route><V4Root /></Route>
 				</Switch>
 			</ConnectedRouter>
