@@ -8,6 +8,7 @@ frontend/_built/*
 /*.log
 config/*
 !config/test/
+frontend/test/build/*
 frontend/custom/*
 frontend/custom/test
 frontend/docs

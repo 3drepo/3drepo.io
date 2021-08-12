@@ -15,8 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UnityUtil } from './unity-util';
+import { put, takeLatest } from 'redux-saga/effects';
+import { AuthActions, AuthTypes } from './auth.redux';
 
-if (window && !window.UnityUtil) {
-	(window as any).UnityUtil = UnityUtil;
+export function* login() {
+	try {
+		yield put(AuthActions.loginSuccess());
+	// eslint-disable-next-line no-empty
+	} finally {
+	}
+}
+
+export default function* AuthSaga() {
+	yield takeLatest(AuthTypes.LOGIN as any, login);
 }

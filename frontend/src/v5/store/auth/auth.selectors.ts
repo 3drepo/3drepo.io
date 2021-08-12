@@ -14,9 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { createSelector } from 'reselect';
 
-import { UnityUtil } from './unity-util';
+const selectAuthDomain = (state) => state.auth2;
 
-if (window && !window.UnityUtil) {
-	(window as any).UnityUtil = UnityUtil;
-}
+export const selectIsAuthenticated = createSelector(
+	selectAuthDomain, (state) => state.isAuthenticated,
+);
