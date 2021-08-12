@@ -16,6 +16,7 @@
  */
 
 import { createMuiTheme } from '@material-ui/core/styles';
+import { TypographyOptions } from '@material-ui/core/styles/createTypography';
 
 export const COLOR = {
 	WHITE: '#fff',
@@ -68,6 +69,66 @@ export const SHADOW = {
 	MEDIUM: '0px 3px 5px rgba(9, 30, 66, 0.2), 0px 0px 1px rgba(9, 30, 66, 0.31)',
 	LARGE: '0px 0px 12px 6px rgba(9, 30, 66, 0.2), 0px 0px 1px rgba(9, 30, 66, 0.31)',
 	XLARGE: '0px 18px 28px rgba(9, 30, 66, 0.15), 0px 0px 1px rgba(9, 30, 66, 0.31)',
+};
+
+const typography: TypographyOptions = {
+	fontFamily: 'Inter, Arial, sans-serif',
+	h1: {
+		fontWeight: FONT_WEIGHT.MEDIUM,
+		fontSize: '1.5rem',
+		lineHeight: '1.875rem',
+	},
+	h2: {
+		fontWeight: FONT_WEIGHT.MEDIUM,
+		fontSize: '1.125rem',
+		lineHeight: '1.5rem',
+	},
+	h3: {
+		fontWeight: FONT_WEIGHT.MEDIUM,
+		fontSize: '0.938rem',
+		lineHeight: '1.313rem',
+	},
+	h4: {
+		fontWeight: FONT_WEIGHT.REGULAR,
+		fontSize: '0.938rem',
+		lineHeight: '1.313rem',
+	},
+	h5: {
+		fontWeight: FONT_WEIGHT.MEDIUM,
+		fontSize: '0.813rem',
+		lineHeight: '1.188rem',
+	},
+	body1: {
+		fontWeight: FONT_WEIGHT.REGULAR,
+		fontSize: '0.75rem',
+		lineHeight: '1.125rem',
+	},
+	body2: {
+		fontWeight: FONT_WEIGHT.BOLD,
+		fontSize: '0.563rem',
+		lineHeight: '0.75rem',
+		letterSpacing: '0.18em',
+		textTransform: 'uppercase',
+	},
+	caption: {
+		fontWeight: FONT_WEIGHT.MEDIUM,
+		fontSize: '0.625rem',
+		lineHeight: '1rem',
+	},
+	kickerTitle: {
+		fontWeight: FONT_WEIGHT.BOLDER,
+		fontSize: '0.625rem',
+		lineHeight: '1rem',
+		letterSpacing: '0.18em',
+		textTransform: 'uppercase',
+	},
+	kicker: {
+		fontWeight: FONT_WEIGHT.BOLD,
+		fontSize: '0.563rem',
+		lineHeight: '0.75rem',
+		letterSpacing: '0.18em',
+		textTransform: 'uppercase',
+	},
 };
 
 export const theme = createMuiTheme({
@@ -131,59 +192,59 @@ export const theme = createMuiTheme({
 			xlarge: SHADOW.XLARGE,
 		},
 	},
-	typography: {
-		fontFamily: 'Inter, Arial, sans-serif',
-		h1: {
-			fontWeight: FONT_WEIGHT.MEDIUM,
-			fontSize: '1.5rem',
-			lineHeight: '1.875rem',
-		},
-		h2: {
-			fontWeight: FONT_WEIGHT.MEDIUM,
-			fontSize: '1.125rem',
-			lineHeight: '1.5rem',
-		},
-		h3: {
-			fontWeight: FONT_WEIGHT.MEDIUM,
-			fontSize: '0.938rem',
-			lineHeight: '1.313rem',
-		},
-		h4: {
-			fontWeight: FONT_WEIGHT.REGULAR,
-			fontSize: '0.938rem',
-			lineHeight: '1.313rem',
-		},
-		h5: {
-			fontWeight: FONT_WEIGHT.MEDIUM,
-			fontSize: '0.813rem',
-			lineHeight: '1.188rem',
-		},
-		body1: {
-			fontWeight: FONT_WEIGHT.REGULAR,
-			fontSize: '0.75rem',
-			lineHeight: '1.125rem',
-		},
-		caption: {
-			fontWeight: FONT_WEIGHT.MEDIUM,
-			fontSize: '0.625rem',
-			lineHeight: '1rem',
-		},
-		kickerTitle: {
-			fontWeight: FONT_WEIGHT.BOLDER,
-			fontSize: '0.625rem',
-			lineHeight: '1rem',
-			letterSpacing: '0.18em',
-			textTransform: 'uppercase',
-		},
-		kicker: {
-			fontWeight: FONT_WEIGHT.BOLD,
-			fontSize: '0.563rem',
-			lineHeight: '0.75rem',
-			letterSpacing: '0.18em',
-			textTransform: 'uppercase',
+	typography,
+	props: {
+		MuiTextField: {
+			variant: 'outlined',
+			InputLabelProps: {
+				shrink: false,
+			},
 		},
 	},
 	overrides: {
+		MuiOutlinedInput:
+		{
+			root: {
+				'& $notchedOutline, &$disabled:hover:not($error) $notchedOutline, &$disabled $notchedOutline': {
+					borderColor: COLOR.BASE_LIGHTEST,
+					borderRadius: 5,
+					borderWidth: 1,
+				},
+				'&:hover:not($error) $notchedOutline, &$focused:not($error) $notchedOutline': {
+					borderColor: COLOR.TERTIARY_MAIN,
+					borderWidth: 1,
+				},
+				'& $input': {
+					padding: 9,
+					color: COLOR.BASE_MAIN,
+				},
+				'&$focused $input': {
+					color: COLOR.SECONDARY_MAIN,
+				},
+				'&$disabled $input': {
+					color: COLOR.BASE_LIGHT,
+				},
+				'&$error $input': {
+					color: COLOR.ERROR_MAIN,
+					backgroundColor: COLOR.ERROR_LIGHTEST,
+				},
+			},
+		},
+		MuiTextField: {
+			root: {
+				'& $label': {
+					...typography.kicker,
+					display: 'contents',
+					color: COLOR.BASE_MAIN,
+				},
+				'& $label:not(.Mui-error).Mui-focused': {
+					color: COLOR.TERTIARY_MAIN,
+				},
+				'& $label.Mui-disabled': {
+					color: COLOR.BASE_LIGHT,
+				},
+			},
+		},
 		MuiTouchRipple: {
 			root: {
 				visibility: 'hidden',

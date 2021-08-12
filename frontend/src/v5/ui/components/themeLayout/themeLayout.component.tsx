@@ -16,96 +16,113 @@
  */
 
 import React from 'react';
-import { Typography, Button, Divider } from '@material-ui/core';
+import { Typography, Button, Divider, TextField } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/AddCircle';
-
+import { useForm } from 'react-hook-form';
 import { Container } from './themeLayout.styles';
 
-export const ThemeLayout = (): JSX.Element => (
-	<Container>
-		<Typography variant="h1" gutterBottom>Theme Demonstration Page</Typography>
-		<Typography variant="h2" gutterBottom>Buttons</Typography>
-		<Typography variant="h3" gutterBottom>button-contained-standard</Typography>
+export const ThemeLayout = (): JSX.Element => {
+	const { register } = useForm();
 
-		<Button variant="contained" color="primary">Default</Button>
-		<Button variant="contained" color="primary" disabled>Disabled</Button>
-		<Divider />
+	return (
+		<Container>
+			<Typography variant="h1" gutterBottom>Theme Demonstration Page</Typography>
+			<Typography variant="h2" gutterBottom>Buttons</Typography>
+			<Typography variant="h3" gutterBottom>button-contained-standard</Typography>
 
-		<Button variant="contained" color="primary" startIcon={<AddIcon />}>Default</Button>
-		<Button variant="contained" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
-		<Divider />
+			<Button variant="contained" color="primary">Default</Button>
+			<Button variant="contained" color="primary" disabled>Disabled</Button>
+			<Divider />
 
-		<Button variant="contained" color="secondary">Default</Button>
-		<Button variant="contained" color="secondary" disabled>Disabled</Button>
-		<Divider />
+			<Button variant="contained" color="primary" startIcon={<AddIcon />}>Default</Button>
+			<Button variant="contained" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
+			<Divider />
 
-		<Button variant="contained" color="secondary" startIcon={<AddIcon />}>Default</Button>
-		<Button variant="contained" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
-		<Divider />
+			<Button variant="contained" color="secondary">Default</Button>
+			<Button variant="contained" color="secondary" disabled>Disabled</Button>
+			<Divider />
 
-		<Typography variant="h3" gutterBottom>button-outlined-standard</Typography>
+			<Button variant="contained" color="secondary" startIcon={<AddIcon />}>Default</Button>
+			<Button variant="contained" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
+			<Divider />
 
-		<Button variant="outlined" color="primary">Default</Button>
-		<Button variant="outlined" color="primary" disabled>Disabled</Button>
-		<Divider />
+			<Typography variant="h3" gutterBottom>button-outlined-standard</Typography>
 
-		<Button variant="outlined" color="primary" startIcon={<AddIcon />}>Default</Button>
-		<Button variant="outlined" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
-		<Divider />
+			<Button variant="outlined" color="primary">Default</Button>
+			<Button variant="outlined" color="primary" disabled>Disabled</Button>
+			<Divider />
 
-		<Button variant="outlined" color="secondary">Default</Button>
-		<Button variant="outlined" color="secondary" disabled>Disabled</Button>
-		<Divider />
+			<Button variant="outlined" color="primary" startIcon={<AddIcon />}>Default</Button>
+			<Button variant="outlined" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
+			<Divider />
 
-		<Button variant="outlined" color="secondary" startIcon={<AddIcon />}>Default</Button>
-		<Button variant="outlined" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
-		<Divider />
+			<Button variant="outlined" color="secondary">Default</Button>
+			<Button variant="outlined" color="secondary" disabled>Disabled</Button>
+			<Divider />
 
-		<Typography variant="h3" gutterBottom>button-contained-small</Typography>
+			<Button variant="outlined" color="secondary" startIcon={<AddIcon />}>Default</Button>
+			<Button variant="outlined" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
+			<Divider />
 
-		<Button variant="contained" size="small" color="primary">Default</Button>
-		<Button variant="contained" size="small" color="primary" disabled>Disabled</Button>
-		<Divider />
+			<Typography variant="h3" gutterBottom>button-contained-small</Typography>
 
-		<Button variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Default</Button>
-		<Button variant="contained" size="small" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
-		<Divider />
+			<Button variant="contained" size="small" color="primary">Default</Button>
+			<Button variant="contained" size="small" color="primary" disabled>Disabled</Button>
+			<Divider />
 
-		<Button variant="contained" size="small" color="secondary">Default</Button>
-		<Button variant="contained" size="small" color="secondary" disabled>Disabled</Button>
-		<Divider />
+			<Button variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Default</Button>
+			<Button variant="contained" size="small" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
+			<Divider />
 
-		<Button variant="contained" size="small" color="secondary" startIcon={<AddIcon />}>Default</Button>
-		<Button variant="contained" size="small" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
-		<Divider />
+			<Button variant="contained" size="small" color="secondary">Default</Button>
+			<Button variant="contained" size="small" color="secondary" disabled>Disabled</Button>
+			<Divider />
 
-		<Typography variant="h3" gutterBottom>button-outlined-small</Typography>
+			<Button variant="contained" size="small" color="secondary" startIcon={<AddIcon />}>Default</Button>
+			<Button variant="contained" size="small" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
+			<Divider />
 
-		<Button variant="outlined" size="small" color="primary">Default</Button>
-		<Button variant="outlined" size="small" color="primary" disabled>Disabled</Button>
-		<Divider />
+			<Typography variant="h3" gutterBottom>button-outlined-small</Typography>
 
-		<Button variant="outlined" size="small" color="primary" startIcon={<AddIcon />}>Default</Button>
-		<Button variant="outlined" size="small" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
-		<Divider />
+			<Button variant="outlined" size="small" color="primary">Default</Button>
+			<Button variant="outlined" size="small" color="primary" disabled>Disabled</Button>
+			<Divider />
 
-		<Button variant="outlined" size="small" color="secondary">Default</Button>
-		<Button variant="outlined" size="small" color="secondary" disabled>Disabled</Button>
-		<Divider />
+			<Button variant="outlined" size="small" color="primary" startIcon={<AddIcon />}>Default</Button>
+			<Button variant="outlined" size="small" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
+			<Divider />
 
-		<Button variant="outlined" size="small" color="secondary" startIcon={<AddIcon />}>Default</Button>
-		<Button variant="outlined" size="small" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
-		<Divider />
+			<Button variant="outlined" size="small" color="secondary">Default</Button>
+			<Button variant="outlined" size="small" color="secondary" disabled>Disabled</Button>
+			<Divider />
 
-		<Typography variant="h3" gutterBottom>button-text</Typography>
+			<Button variant="outlined" size="small" color="secondary" startIcon={<AddIcon />}>Default</Button>
+			<Button variant="outlined" size="small" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
+			<Divider />
 
-		<Button variant="text" color="primary">Default</Button>
-		<Button variant="text" color="primary" disabled>Disabled</Button>
-		<Divider />
+			<Typography variant="h3" gutterBottom>button-text</Typography>
 
-		<Button variant="text" color="primary" startIcon={<AddIcon />}>Default</Button>
-		<Button variant="text" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
-		<Divider />
+			<Button variant="text" color="primary">Default</Button>
+			<Button variant="text" color="primary" disabled>Disabled</Button>
+			<Divider />
 
-	</Container>
-);
+			<Button variant="text" color="primary" startIcon={<AddIcon />}>Default</Button>
+			<Button variant="text" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
+			<Divider />
+			<TextField label="Input label" {...register('enabledInput')} />
+			<br />
+			<TextField label="Disabled*" value="disabled value" disabled />
+			{' '}
+			<br />
+			<TextField label="Error*" {...register('errorInput')} error />
+			&nbsp;
+			{' '}
+			<br />
+			.
+			<br />
+			<TextField value="Input text without label" />
+			<br />
+			<Divider />
+		</Container>
+	);
+};
