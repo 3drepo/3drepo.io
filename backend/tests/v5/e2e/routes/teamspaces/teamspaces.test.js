@@ -19,7 +19,7 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../helper/services');
 const { src } = require('../../../helper/path');
 
-const { template } = require(`${src}/utils/responseCodes`);
+const { templates } = require(`${src}/utils/responseCodes`);
 
 let server;
 let agent;
@@ -55,11 +55,11 @@ const setupData = async () => {
 const testGetTeamspaceList = () => {
 	describe('Get teamspace list', () => {
 		test('should fail without a valid session', async () => {
-			const res = await agent.get('/v5/teamspaces/').expect(template.notLoggedIn.status);
-			expect(res.body.code).toEqual(template.notLoggedIn.code);
+			const res = await agent.get('/v5/teamspaces/').expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 		test('give return a teamspace list if the user has a valid session', async () => {
-			const res = await agent.get(`/v5/teamspaces/?key=${testUser.apiKey}`).expect(template.ok.status);
+			const res = await agent.get(`/v5/teamspaces/?key=${testUser.apiKey}`).expect(templates.ok.status);
 			expect(res.body).toEqual({ teamspaces: testUserTSAccess });
 		});
 	});

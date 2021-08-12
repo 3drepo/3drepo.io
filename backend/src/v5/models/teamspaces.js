@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createResponseCode, template } = require('../utils/responseCodes');
+const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
 const db = require('../handler/db');
-const teamspaceAdminLabel = require('../utils/permissions/permissions.constants').teamspaceAdmin;
+const { templates } = require('../utils/responseCodes');
 
 const Teamspace = {};
 
@@ -26,7 +26,7 @@ const teamspaceQuery = (query, projection, sort) => db.findOne('admin', 'system.
 const getTeamspace = async (ts, projection) => {
 	const tsDoc = await teamspaceQuery({ user: ts }, projection);
 	if (!tsDoc) {
-		throw createResponseCode(template.teamspaceNotFound);
+		throw templates.teamspaceNotFound;
 	}
 	return tsDoc;
 };
@@ -34,7 +34,7 @@ const getTeamspace = async (ts, projection) => {
 Teamspace.getTeamspaceAdmins = async (ts) => {
 	const data = await getTeamspace(ts, { 'customData.permissions': 1 });
 	return data.customData.permissions.flatMap(
-		({ user, permissions }) => (permissions.includes(teamspaceAdminLabel) ? user : []),
+		({ user, permissions }) => (permissions.includes(TEAMSPACE_ADMIN) ? user : []),
 	);
 };
 

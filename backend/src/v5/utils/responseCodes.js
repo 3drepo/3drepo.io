@@ -14,11 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { toCamelCase, toSnakeCase } = require('./helper/strings');
+const { toCamelCase, toConstantCase } = require('./helper/strings');
 
 const ResponseCodes = {};
 
-ResponseCodes.template = {
+ResponseCodes.templates = {
 	ok: { message: 'OK', status: 200 },
 
 	// Auth
@@ -34,8 +34,8 @@ ResponseCodes.template = {
 	teamspaceNotFound: { message: 'Teamspace not found.', status: 404 },
 };
 
-Object.keys(ResponseCodes.template).forEach((key) => {
-	ResponseCodes.template[key].code = toSnakeCase(key);
+Object.keys(ResponseCodes.templates).forEach((key) => {
+	ResponseCodes.templates[key].code = toConstantCase(key);
 });
 
 ResponseCodes.getSwaggerComponents = () => {
@@ -68,8 +68,8 @@ ResponseCodes.getSwaggerComponents = () => {
 	});
 
 	const responses = {};
-	Object.keys(ResponseCodes.template).forEach((key) => {
-		const errRes = ResponseCodes.template[key];
+	Object.keys(ResponseCodes.templates).forEach((key) => {
+		const errRes = ResponseCodes.templates[key];
 		responses[key] = {
 			description: errRes.message,
 			content: {
@@ -83,10 +83,11 @@ ResponseCodes.getSwaggerComponents = () => {
 	return responses;
 };
 
-ResponseCodes.codeExists = (code) => !!ResponseCodes.template[toCamelCase(code)];
+ResponseCodes.codeExists = (code) => !!ResponseCodes.templates[toCamelCase(code)];
 
 ResponseCodes.createResponseCode = (errCode, message) => {
-	const res = ResponseCodes.codeExists(errCode?.code) ? errCode : ResponseCodes.template.unknown;
+	const res = ResponseCodes.codeExists(errCode?.code)
+		? ResponseCodes.templates[toCamelCase(errCode.code)] : ResponseCodes.templates.unknown;
 	return message ? { ...res, message } : res;
 };
 

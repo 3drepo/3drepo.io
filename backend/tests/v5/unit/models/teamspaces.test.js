@@ -19,8 +19,8 @@ const { src } = require('../../helper/path');
 
 const Teamspace = require(`${src}/models/teamspaces`);
 const db = require(`${src}/handler/db`);
-const { template } = require(`${src}/utils/responseCodes`);
-const teamspaceAdminLabel = require(`${src}/utils/permissions/permissions.constants`).teamspaceAdmin;
+const { templates } = require(`${src}/utils/responseCodes`);
+const { TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 
 const testTeamspaceAdmins = () => {
 	describe('Get teamspace admins', () => {
@@ -28,9 +28,9 @@ const testTeamspaceAdmins = () => {
 			const expectedData = {
 				customData: {
 					permissions: [
-						{ user: 'personA', permissions: [teamspaceAdminLabel] },
+						{ user: 'personA', permissions: [TEAMSPACE_ADMIN] },
 						{ user: 'personB', permissions: ['someOtherPerm'] },
-						{ user: 'personC', permissions: [teamspaceAdminLabel] },
+						{ user: 'personC', permissions: [TEAMSPACE_ADMIN] },
 					],
 				},
 			};
@@ -43,7 +43,7 @@ const testTeamspaceAdmins = () => {
 			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
 
 			await expect(Teamspace.getTeamspaceAdmins('someTS'))
-				.rejects.toEqual(template.teamspaceNotFound);
+				.rejects.toEqual(templates.teamspaceNotFound);
 		});
 	});
 };

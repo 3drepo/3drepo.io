@@ -62,7 +62,7 @@ const testToSnakeCase = () => {
 		['', ''],
 	])('To Snake Case', (source, target) => {
 		test(`with ${source} should result in ${target}`, () => {
-			matchHelper(StringHelper.toSnakeCase, source, target);
+			matchHelper(StringHelper.toConstantCase, source, target);
 		});
 	});
 };

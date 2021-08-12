@@ -18,7 +18,7 @@
 const { src } = require('../../helper/path');
 
 const db = require(`${src}/handler/db`);
-const { template } = require(`${src}/utils/responseCodes`);
+const { templates } = require(`${src}/utils/responseCodes`);
 
 const User = require(`${src}/models/users`);
 
@@ -40,7 +40,7 @@ const testGetAccessibleTeamspaces = () => {
 		jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
 
 		await expect(User.getAccessibleTeamspaces('user'))
-			.rejects.toEqual(template.userNotFound);
+			.rejects.toEqual(templates.userNotFound);
 	});
 };
 

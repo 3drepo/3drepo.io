@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const PermConst = {};
+const permConst = {};
 
-PermConst.teamspaceAdmin = 'teamspace_admin';
+permConst.TEAMSPACE_ADMIN = 'teamspace_admin';
 
-module.exports = PermConst;
+module.exports = permConst;

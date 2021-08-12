@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createResponseCode, template } = require('../utils/responseCodes');
 const { isSessionValid } = require('../utils/sessions');
 const { respond } = require('../utils/responder');
+const { templates } = require('../utils/responseCodes');
 
 const AuthMiddlewares = {};
 
@@ -26,7 +26,7 @@ AuthMiddlewares.validSession = (req, res, next) => {
 	if (isSessionValid(session, header.referer)) {
 		next();
 	} else {
-		respond(req, res, createResponseCode(template.notLoggedIn));
+		respond(req, res, templates.notLoggedIn);
 	}
 };
 

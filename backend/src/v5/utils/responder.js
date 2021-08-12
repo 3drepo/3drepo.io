@@ -17,8 +17,8 @@
 
 const networkLabel = require('./logger').labels.network;
 const logger = require('./logger').logWithLabel(networkLabel);
-const { codeExists, createResponseCode, template } = require('./responseCodes');
 const { isBuffer, isString } = require('./helper/typeCheck');
+const { createResponseCode } = require('./responseCodes');
 const { v4Path } = require('../../interop');
 // eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
 const { cachePolicy } = require(`${v4Path}/config`);
@@ -55,12 +55,7 @@ const mimeTypes = {
 };
 
 Responder.respond = (req, res, resCode, body, { cache, customHeaders } = {}) => {
-	let finalResCode = resCode;
-	if (!resCode?.code || !codeExists(resCode.code)) {
-		// We don't recognise the response code. something went wrong.
-		logger.logError('Unrecognised response code', resCode);
-		finalResCode = createResponseCode(template.unknown);
-	}
+	const finalResCode = createResponseCode(resCode);
 
 	if (finalResCode.status > 200) {
 		createErrorResponse(req, res, finalResCode);

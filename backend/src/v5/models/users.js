@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createResponseCode, template } = require('../utils/responseCodes');
 const db = require('../handler/db');
+const { templates } = require('../utils/responseCodes');
 
 const User = {};
 
@@ -25,7 +25,7 @@ const userQuery = (query, projection, sort) => db.findOne('admin', 'system.users
 const getUser = async (user, projection) => {
 	const userDoc = await userQuery({ user }, projection);
 	if (!userDoc) {
-		throw createResponseCode(template.userNotFound);
+		throw templates.userNotFound;
 	}
 	return userDoc;
 };

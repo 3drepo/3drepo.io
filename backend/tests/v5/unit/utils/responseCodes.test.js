@@ -22,10 +22,10 @@ const ResponseCodes = require(`${src}/utils/responseCodes`);
 const testCreateResponseCodes = () => {
 	const msg = 'Some random message';
 	describe.each([
-		[ResponseCodes.template.ok, undefined, ResponseCodes.template.ok],
-		[ResponseCodes.template.ok, msg, { ...ResponseCodes.template.ok, message: msg }],
-		[undefined, undefined, ResponseCodes.template.unknown],
-		[undefined, msg, { ...ResponseCodes.template.unknown, message: msg }],
+		[ResponseCodes.templates.ok, undefined, ResponseCodes.templates.ok],
+		[ResponseCodes.templates.ok, msg, { ...ResponseCodes.templates.ok, message: msg }],
+		[undefined, undefined, ResponseCodes.templates.unknown],
+		[undefined, msg, { ...ResponseCodes.templates.unknown, message: msg }],
 	])('Create response codes', (errCode, message, result) => {
 		test(`with ${JSON.stringify(errCode)} and ${message} should result in ${JSON.stringify(result)} `, () => {
 			expect(ResponseCodes.createResponseCode(errCode, message)).toEqual(result);

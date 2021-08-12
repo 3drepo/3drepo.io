@@ -19,7 +19,7 @@ const { src } = require('../../helper/path');
 
 jest.mock('../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
-const { template } = require(`${src}/utils/responseCodes`);
+const { templates } = require(`${src}/utils/responseCodes`);
 
 const AuthMiddlewares = require(`${src}/middleware/auth`);
 
@@ -47,7 +47,7 @@ const testValidSession = () => {
 			);
 			expect(mockCB.mock.calls.length).toBe(0);
 			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(template.notLoggedIn);
+			expect(Responder.respond.mock.results[0].value).toEqual(templates.notLoggedIn);
 		});
 	});
 };

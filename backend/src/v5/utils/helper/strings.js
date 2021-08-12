@@ -20,7 +20,7 @@ const { camelCase, snakeCase } = require('lodash');
 const StringHelper = {};
 
 // Turns thisIsUs to THIS_IS_US
-StringHelper.toSnakeCase = (str) => snakeCase(str).toUpperCase();
+StringHelper.toConstantCase = (str) => snakeCase(str).toUpperCase();
 StringHelper.toCamelCase = (str) => camelCase(str);
 
 // e.g. URL `https://3drepo.org/abc/xyz` this returns `https://3drepo.org`
