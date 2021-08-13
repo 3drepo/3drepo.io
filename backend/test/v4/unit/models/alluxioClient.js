@@ -84,18 +84,16 @@ describe("Check Alluxio client", function() {
 	describe("postToPathRoute", function () {
 		it("POST to path should succeed", async function() {
 			const path = "/";
-			const opts = undefined;
 			const action = "list-status";
-			const result = await client.postToPathRoute(path, opts, action);
+			const result = await client.postToPathRoute(path, undefined, action);
 			expect(result).to.exist;
 		});
 
 		it("POST to path with stream action should fail", async function() {
 			const path = "/";
-			const opts = undefined;
 			const action = "close";
 			try {
-				await client.postToPathRoute(path, opts, action);
+				await client.postToPathRoute(path, undefined, action);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
 				expect(err).to.exist;
@@ -104,10 +102,9 @@ describe("Check Alluxio client", function() {
 
 		it("POST to path with invalid action should fail", async function() {
 			const path = "/";
-			const opts = undefined;
 			const action = "invalidAct";
 			try {
-				await client.postToPathRoute(path, opts, action);
+				await client.postToPathRoute(path, undefined, action);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
 				expect(err).to.exist;
@@ -116,10 +113,9 @@ describe("Check Alluxio client", function() {
 
 		it("POST to path with bad path should fail", async function() {
 			const path = `/${uuid}-notexist`;
-			const opts = undefined;
 			const action = "list-status";
 			try {
-				await client.postToPathRoute(path, opts, action);
+				await client.postToPathRoute(path, undefined, action);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
 				expect(err).to.exist;
@@ -142,17 +138,15 @@ describe("Check Alluxio client", function() {
 	describe("ls", function () {
 		it("ls should succeed", async function() {
 			const path = "/";
-			const opts = undefined;
-			const result = await client.ls(path, opts);
+			const result = await client.ls(path, undefined);
 			expect(result).to.exist;
 			expect(result).to.be.an("array");
 		});
 
 		it("ls with non-existent dir should fail", async function() {
 			const path = `${uuid}-invalidDir`;
-			const opts = undefined;
 			try {
-				await client.ls(path, opts);
+				await client.ls(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
 				expect(err).to.exist;
@@ -163,16 +157,14 @@ describe("Check Alluxio client", function() {
 	describe("createDirectory", function () {
 		it("create dir should succeed", async function() {
 			const path = `/${uuid}`;
-			const opts = undefined;
-			const result = await client.createDirectory(path, opts);
+			const result = await client.createDirectory(path, undefined);
 			expect(result).to.equal("");
 		});
 
 		it("create same dir again should fail", async function() {
 			const path = `/${uuid}`;
-			const opts = undefined;
 			try {
-				await client.createDirectory(path, opts);
+				await client.createDirectory(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
 				expect(err).to.exist;
@@ -181,9 +173,8 @@ describe("Check Alluxio client", function() {
 
 		it("create dir without first slash should fail", async function() {
 			const path = `${uuid}-v2`;
-			const opts = undefined;
 			try {
-				await client.createDirectory(path, opts);
+				await client.createDirectory(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
 				expect(err).to.exist;
@@ -194,17 +185,15 @@ describe("Check Alluxio client", function() {
 	describe("createFile", function () {
 		it("create file should succeed", async function() {
 			const path = `/${uuid}/test1`;
-			const opts = undefined;
-			const result = await client.createFile(path, opts);
+			const result = await client.createFile(path, undefined);
 			expect(result).to.exist;
 			fileId = result;
 		});
 
 		it("create same file again should fail", async function() {
 			const path = `/${uuid}/test1`;
-			const opts = undefined;
 			try {
-				await client.createFile(path, opts);
+				await client.createFile(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
 				expect(err).to.exist;
@@ -213,9 +202,8 @@ describe("Check Alluxio client", function() {
 
 		it("create file with bad path should fail", async function() {
 			const path = `/${uuid}-badDir/test2`;
-			const opts = undefined;
 			try {
-				await client.createFile(path, opts);
+				await client.createFile(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
 				expect(err).to.exist;
@@ -224,9 +212,8 @@ describe("Check Alluxio client", function() {
 
 		it("create file missing first slash should fail", async function() {
 			const path = `${uuid}/test3`;
-			const opts = undefined;
 			try {
-				await client.createFile(path, opts);
+				await client.createFile(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
 				expect(err).to.exist;
@@ -237,21 +224,19 @@ describe("Check Alluxio client", function() {
 	describe("postToStreamRoute", function () {
 		it("POST to path should succeed", async function() {
 			const path = `/${uuid}/test4`;
-			const opts = undefined;
-			const id = await client.createFile(path, opts);
+			const id = await client.createFile(path, undefined);
 			const action = "close";
-			const result = await client.postToStreamRoute(id, opts, action);
+			const result = await client.postToStreamRoute(id, undefined, action);
 			expect(result).to.exist;
 			expect(result).to.equal("");
 		});
 
 		it("POST to path with non-stream action should fail", async function() {
 			const path = `/${uuid}/test5`;
-			const opts = undefined;
-			const id = await client.createFile(path, opts);
+			const id = await client.createFile(path, undefined);
 			const action = "list-status";
 			try {
-				await client.postToStreamRoute(id, opts, action);
+				await client.postToStreamRoute(id, undefined, action);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
 				expect(err).to.exist;
@@ -260,11 +245,10 @@ describe("Check Alluxio client", function() {
 
 		it("POST to path with bad action should fail", async function() {
 			const path = `/${uuid}/test6`;
-			const opts = undefined;
-			const id = await client.createFile(path, opts);
+			const id = await client.createFile(path, undefined);
 			const action = "invalid";
 			try {
-				await client.postToStreamRoute(id, opts, action);
+				await client.postToStreamRoute(id, undefined, action);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
 				expect(err).to.exist;
@@ -275,8 +259,7 @@ describe("Check Alluxio client", function() {
 	describe("getStatus", function () {
 		it("get status should succeed", async function() {
 			const path = `/${uuid}/test1`;
-			const opts = undefined;
-			const result = await client.getStatus(path, opts);
+			const result = await client.getStatus(path, undefined);
 			expect(result).to.exist;
 			expect(result).to.have.property("owner");
 			expect(result).to.have.property("ttl");
@@ -315,8 +298,7 @@ describe("Check Alluxio client", function() {
 
 		it("get status on directory should succeed", async function() {
 			const path = `/${uuid}`;
-			const opts = undefined;
-			const result = await client.getStatus(path, opts);
+			const result = await client.getStatus(path, undefined);
 			expect(result).to.exist;
 			expect(result).to.have.property("owner");
 			expect(result).to.have.property("ttl");
@@ -355,9 +337,8 @@ describe("Check Alluxio client", function() {
 
 		it("get status on non-existent directory should fail", async function() {
 			const path = `/${uuid}-gone`;
-			const opts = undefined;
 			try {
-				await client.getStatus(path, opts);
+				await client.getStatus(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
 				expect(err).to.exist;
@@ -366,9 +347,8 @@ describe("Check Alluxio client", function() {
 
 		it("get status on non-existent file should fail", async function() {
 			const path = `/${uuid}-bad/badFile`;
-			const opts = undefined;
 			try {
-				await client.getStatus(path, opts);
+				await client.getStatus(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
 				expect(err).to.exist;
@@ -379,41 +359,28 @@ describe("Check Alluxio client", function() {
 	describe("exists", function () {
 		it("exists should succeed", async function() {
 			const path = `/${uuid}/test1`;
-			const opts = undefined;
-			const result = await client.exists(path, opts);
+			const result = await client.exists(path, undefined);
 			expect(result).to.equal(true);
 		});
 
 		it("exists on non-existent file should return false", async function() {
 			const path = `/${uuid}-badDir/nope`;
-			const opts = undefined;
-			const result = await client.exists(path, opts);
+			const result = await client.exists(path, undefined);
 			expect(result).to.equal(false);
-		});
-	});
-
-	describe("free", function () {
-		it("free should succeed", async function() {
-			const path = `/${uuid}/test1`;
-			const opts = undefined;
-			const result = await client.free(path, opts);
-			console.log(result);
 		});
 	});
 
 	describe("listStatus", function () {
 		it("list status should succeed", async function() {
 			const path = "/";
-			const opts = undefined;
-			const result = await client.listStatus(path, opts);
+			const result = await client.listStatus(path, undefined);
 			expect(result).to.exist;
 			expect(result).to.be.an("array");
 		});
 
 		it("list status on single file should succeed", async function() {
 			const path = `/${uuid}/test1`;
-			const opts = undefined;
-			const result = await client.listStatus(path, opts);
+			const result = await client.listStatus(path, undefined);
 			expect(result).to.exist;
 			expect(result).to.be.an("array");
 			expect(result).to.have.lengthOf(1);
@@ -421,9 +388,8 @@ describe("Check Alluxio client", function() {
 
 		it("list status on non-existent directory should fail", async function() {
 			const path = `/${uuid}-nopedir`;
-			const opts = undefined;
 			try {
-				await client.listStatus(path, opts);
+				await client.listStatus(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
 				expect(err).to.exist;
@@ -432,9 +398,8 @@ describe("Check Alluxio client", function() {
 
 		it("list status on non-existent file should fail", async function() {
 			const path = `/${uuid}/nope`;
-			const opts = undefined;
 			try {
-				await client.listStatus(path, opts);
+				await client.listStatus(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
 				expect(err).to.exist;
@@ -518,17 +483,15 @@ describe("Check Alluxio client", function() {
 	describe("closeFile", function () {
 		it("close file should succeed", async function() {
 			const id = fileId;
-			const opts = undefined;
-			const result = await client.closeFile(id, opts);
+			const result = await client.closeFile(id, undefined);
 			expect(result).to.exist;
 			expect(result).to.equal("");
 		});
 
 		it("close file again should fail", async function() {
 			const id = fileId;
-			const opts = undefined;
 			try {
-				await client.closeFile(id, opts);
+				await client.closeFile(id, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
 				expect(err).to.exist;
@@ -537,9 +500,8 @@ describe("Check Alluxio client", function() {
 
 		it("close file with invalid ID should fail", async function() {
 			const id = "badId";
-			const opts = undefined;
 			try {
-				await client.closeFile(id, opts);
+				await client.closeFile(id, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
 				expect(err).to.exist;
@@ -550,23 +512,23 @@ describe("Check Alluxio client", function() {
 	describe("openFile", function () {
 		it("open file should succeed", async function() {
 			const path = `/${uuid}/test1`;
-			const opts = undefined;
-			const result = await client.openFile(path, opts);
+			const result = await client.openFile(path, undefined);
 			expect(result).to.exist;
 		});
 
 		it("open file again should succeed", async function() {
 			const path = `/${uuid}/test1`;
-			const opts = undefined;
-			const result = await client.openFile(path, opts);
+			const result = await client.openFile(path, undefined);
 			expect(result).to.exist;
 		});
 
-		it("open file that has existing write should succeed", async function() {
-			const path = `/${uuid}/test1`;
-			const opts = undefined;
+		it("open file that has existing stream should fail", async function() {
+			const data = "abcdefg";
+			const path = `/${uuid}/test7`;
+			const id = await client.createFile(path, undefined);
+			await client.write(id, data);
 			try {
-				const result = await client.openFile(path, opts);
+				await client.openFile(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
 				expect(err).to.exist;
@@ -575,9 +537,8 @@ describe("Check Alluxio client", function() {
 
 		it("open file that is directory should fail", async function() {
 			const path = `/${uuid}`;
-			const opts = undefined;
 			try {
-				await client.openFile(path, opts);
+				await client.openFile(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
 				expect(err).to.exist;
@@ -586,9 +547,8 @@ describe("Check Alluxio client", function() {
 
 		it("open file that doesn't exist should fail", async function() {
 			const path = `/${uuid}/notreal`;
-			const opts = undefined;
 			try {
-				await client.openFile(path, opts);
+				await client.openFile(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
 				expect(err).to.exist;
@@ -710,6 +670,41 @@ describe("Check Alluxio client", function() {
 		it("remove file with incorrect key should fail", async function() {
 			try {
 				await client.delete("notexist");
+				throw undefined; // should've failed at previous line
+			} catch (err) {
+				expect(err).to.exist;
+			}
+		});
+	});
+
+	describe("free", function () {
+		it("free should succeed", async function() {
+			const path = `/${uuid}-emptyDir/`;
+			await client.createDirectory(path, undefined);
+			const result = await client.free(path, undefined);
+			expect(result).to.equal("");
+		});
+
+		it("free again should succeed", async function() {
+			const path = `/${uuid}-emptyDir/`;
+			const result = await client.free(path, undefined);
+			expect(result).to.equal("");
+		});
+
+		it("free non-empty directory should fail", async function() {
+			const path = `/${uuid}/`;
+			try {
+				await client.free(path, undefined);
+				throw undefined; // should've failed at previous line
+			} catch (err) {
+				expect(err).to.exist;
+			}
+		});
+
+		it("free non-existent directory should fail", async function() {
+			const path = `/${uuid}-notexist/`;
+			try {
+				await client.free(path, undefined);
 				throw undefined; // should've failed at previous line
 			} catch (err) {
 				expect(err).to.exist;
