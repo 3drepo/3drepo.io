@@ -63,36 +63,36 @@ class AlluxioClient {
 	 * @param {string} path - The absolute directory path to be created.
 	 * @param {string} opts - The absolute directory path to be created.
 	 */
-	async createDirectory(path, opts) {
-		return await this.postToPathRoute(path, opts, "create-directory");
+	createDirectory(path, opts) {
+		return this.postToPathRoute(path, opts, "create-directory");
 	}
 
-	async createFile(path, opts) {
-		return await this.postToPathRoute(path, opts, "create-file");
+	createFile(path, opts) {
+		return this.postToPathRoute(path, opts, "create-file");
 	}
 
-	async delete(path, opts) {
-		return await this.postToPathRoute(path, opts, "delete");
+	delete(path, opts) {
+		return this.postToPathRoute(path, opts, "delete");
 	}
 
-	async exists(path, opts) {
-		return await this.postToPathRoute(path, opts, "exists");
+	exists(path, opts) {
+		return this.postToPathRoute(path, opts, "exists");
 	}
 
-	async openFile(path, opts) {
-		return await this.postToPathRoute(path, opts, "open-file");
+	openFile(path, opts) {
+		return this.postToPathRoute(path, opts, "open-file");
 	}
 
-	async free(path, opts) {
-		return await this.postToPathRoute(path, opts, "free");
+	free(path, opts) {
+		return this.postToPathRoute(path, opts, "free");
 	}
 
-	async getStatus(path, opts) {
-		return await this.postToPathRoute(path, opts, "get-status");
+	getStatus(path, opts) {
+		return this.postToPathRoute(path, opts, "get-status");
 	}
 
-	async listStatus(path, opts) {
-		return await this.postToPathRoute(path, opts, "list-status");
+	listStatus(path, opts) {
+		return this.postToPathRoute(path, opts, "list-status");
 	}
 
 	async downloadFile(path) {
@@ -109,8 +109,8 @@ class AlluxioClient {
 		return (await this.listStatus(path, opts)).map(s => s.name);
 	}
 
-	async closeFile(id, opts) {
-		return await this.postToStreamRoute(id, opts, "close");
+	closeFile(id, opts) {
+		return this.postToStreamRoute(id, opts, "close");
 	}
 
 	async getInfo() {
