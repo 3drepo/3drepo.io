@@ -205,6 +205,7 @@ export const theme = createMuiTheme({
 		MuiOutlinedInput:
 		{
 			root: {
+				marginTop: 6,
 				'& $notchedOutline, &$disabled:hover:not($error) $notchedOutline, &$disabled $notchedOutline': {
 					borderColor: COLOR.BASE_LIGHTEST,
 					borderRadius: 5,
@@ -234,7 +235,7 @@ export const theme = createMuiTheme({
 		},
 		MuiTextField: {
 			root: {
-				margin: 8,
+				margin: '4px 8px 8px 8px',
 				'& $label': {
 					...typography.kicker,
 					display: 'contents',
