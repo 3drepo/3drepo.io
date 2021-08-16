@@ -287,7 +287,7 @@ export const theme = createMuiTheme({
 			},
 			containedSecondary: {
 				color: COLOR.SECONDARY_MAIN,
-				backgroundColor: 'transparent',
+				backgroundColor: COLOR.TERTIARY_LIGHTEST,
 				'&:hover': {
 					color: COLOR.WHITE,
 					backgroundColor: COLOR.SECONDARY_MAIN,
