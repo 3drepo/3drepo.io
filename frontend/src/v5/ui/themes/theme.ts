@@ -19,7 +19,7 @@ import { createMuiTheme } from '@material-ui/core/styles';
 import { TypographyOptions } from '@material-ui/core/styles/createTypography';
 
 export const COLOR = {
-	WHITE: '#fff',
+	PRIMARY_MAIN_TEXT: '#fff',
 	PRIMARY_MAIN: '#00C1D4',
 	PRIMARY_DARK: '#01ACBD',
 	PRIMARY_DARKEST: '#009BAA',
@@ -270,7 +270,7 @@ export const theme = createMuiTheme({
 					boxShadow: 'none',
 				},
 				'&$disabled': {
-					color: COLOR.WHITE,
+					color: COLOR.PRIMARY_MAIN_TEXT,
 					backgroundColor: COLOR.BASE_LIGHTEST,
 				},
 				'&.Mui-focusVisible': {
@@ -278,7 +278,7 @@ export const theme = createMuiTheme({
 				},
 			},
 			containedPrimary: {
-				color: COLOR.WHITE,
+				color: COLOR.PRIMARY_MAIN_TEXT,
 				'&:hover': {
 					backgroundColor: COLOR.PRIMARY_DARK,
 				},
@@ -290,16 +290,17 @@ export const theme = createMuiTheme({
 				color: COLOR.SECONDARY_MAIN,
 				backgroundColor: COLOR.TERTIARY_LIGHTEST,
 				'&:hover': {
-					color: COLOR.WHITE,
+					color: COLOR.PRIMARY_MAIN_TEXT,
 					backgroundColor: COLOR.SECONDARY_MAIN,
 				},
 				'&:active': {
-					color: COLOR.WHITE,
+					color: COLOR.PRIMARY_MAIN_TEXT,
 					backgroundColor: COLOR.SECONDARY_DARK,
 				},
 			},
 			containedSizeSmall: {
 				padding: '7.5px 15px',
+				fontSize: null, // null value means it will use the size from button.root
 			},
 			outlined: {
 				padding: '10px 15px',
@@ -308,14 +309,14 @@ export const theme = createMuiTheme({
 					color: COLOR.BASE_LIGHTEST,
 				},
 				'&.Mui-focusVisible': {
-					backgroundColor: COLOR.WHITE,
+					backgroundColor: COLOR.PRIMARY_MAIN_TEXT,
 					boxShadow: SHADOW.MEDIUM,
 				},
 			},
 			outlinedPrimary: {
 				'&:hover': {
 					backgroundColor: COLOR.PRIMARY_MAIN,
-					color: COLOR.WHITE,
+					color: COLOR.PRIMARY_MAIN_TEXT,
 				},
 				'&:active': {
 					backgroundColor: COLOR.PRIMARY_DARK,
@@ -328,16 +329,17 @@ export const theme = createMuiTheme({
 					borderColor: COLOR.BASE_LIGHTEST,
 				},
 				'&:hover': {
-					color: COLOR.WHITE,
+					color: COLOR.PRIMARY_MAIN_TEXT,
 					backgroundColor: COLOR.SECONDARY_MAIN,
 				},
 				'&:active': {
-					color: COLOR.WHITE,
+					color: COLOR.PRIMARY_MAIN_TEXT,
 					backgroundColor: COLOR.SECONDARY_DARK,
 				},
 			},
 			outlinedSizeSmall: {
 				padding: '7.5px 15px',
+				fontSize: null, // null value means it will use the size from button.root
 			},
 			text: {
 				padding: '10px 15px',
