@@ -15,8 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UnityUtil } from './unity-util';
+import { useSelector } from 'react-redux';
 
-if (window && !window.UnityUtil) {
-	(window as any).UnityUtil = UnityUtil;
-}
+type NameMap<Type> = {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	[Property in keyof Type]: () => ReturnType<Extract<Type[Property], (...args: any) => any >>;
+};
+
+export const createHooksSelectors = <T>(moduleSelectors: T): NameMap<T> => {
+	const exportObject = {};
+	Object.keys(moduleSelectors).forEach((key) => {
+		exportObject[key] = () => useSelector(moduleSelectors[key]);
+	});
+
+	return exportObject as NameMap<T>;
+};
