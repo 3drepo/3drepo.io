@@ -255,6 +255,16 @@ export const theme = createMuiTheme({
 			},
 		},
 		MuiButton: {
+			iconSizeMedium: {
+				'& > *:first-child': {
+					fontSize: 13,
+				},
+			},
+			iconSizeSmall: {
+				'& > *:first-child': {
+					fontSize: 13,
+				},
+			},
 			root: {
 				borderRadius: 5,
 				disableRipple: true,
