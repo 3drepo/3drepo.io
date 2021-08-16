@@ -278,6 +278,7 @@ export const theme = createMuiTheme({
 				},
 			},
 			containedPrimary: {
+				color: COLOR.WHITE,
 				'&:hover': {
 					backgroundColor: COLOR.PRIMARY_DARK,
 				},
@@ -313,10 +314,11 @@ export const theme = createMuiTheme({
 			},
 			outlinedPrimary: {
 				'&:hover': {
-					backgroundColor: COLOR.PRIMARY_LIGHTEST,
+					backgroundColor: COLOR.PRIMARY_MAIN,
+					color: COLOR.WHITE,
 				},
 				'&:active': {
-					backgroundColor: COLOR.PRIMARY_LIGHTEST,
+					backgroundColor: COLOR.PRIMARY_DARK,
 				},
 			},
 			outlinedSecondary: {
