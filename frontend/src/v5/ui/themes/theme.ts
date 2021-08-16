@@ -252,6 +252,7 @@ export const theme = createMuiTheme({
 		},
 		MuiButton: {
 			root: {
+				borderRadius: 5,
 				disableRipple: true,
 				textTransform: 'initial',
 				padding: '10px 15px',
