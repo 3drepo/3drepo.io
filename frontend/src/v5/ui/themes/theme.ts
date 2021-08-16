@@ -215,8 +215,10 @@ export const theme = createMuiTheme({
 					borderWidth: 1,
 				},
 				'& $input': {
-					padding: 9,
+					padding: '0px 15px',
+					height: 35,
 					color: COLOR.BASE_MAIN,
+					...typography.body1,
 				},
 				'&$focused $input': {
 					color: COLOR.SECONDARY_MAIN,
@@ -232,6 +234,7 @@ export const theme = createMuiTheme({
 		},
 		MuiTextField: {
 			root: {
+				margin: 8,
 				'& $label': {
 					...typography.kicker,
 					display: 'contents',
