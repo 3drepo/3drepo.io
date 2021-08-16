@@ -257,6 +257,7 @@ export const theme = createMuiTheme({
 				textTransform: 'initial',
 				padding: '10px 15px',
 				fontSize: '0.75rem',
+				lineHeight: '0.9rem',
 				fontWeight: FONT_WEIGHT.BOLD,
 			},
 			contained: {
