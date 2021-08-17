@@ -9,8 +9,6 @@ else
             echo "WARNING: If running locally then you may require sudo due to port issues "
             echo ""
     fi
-    echo "running the bash stuff"
-    echo $1
 
     cd backend && NODE_ENV=$1 NODE_CONFIG_DIR='./config'  yarn start
 fi
