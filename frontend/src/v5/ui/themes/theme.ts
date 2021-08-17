@@ -65,10 +65,16 @@ export const GRADIENT = {
 };
 
 export const SHADOW = {
-	SMALL: '0px 1px 1px rgba(9, 30, 66, 0.25), 0px 0px 1px rgba(9, 30, 66, 0.31)',
-	MEDIUM: '0px 3px 5px rgba(9, 30, 66, 0.2), 0px 0px 1px rgba(9, 30, 66, 0.31)',
-	LARGE: '0px 0px 12px 6px rgba(9, 30, 66, 0.2), 0px 0px 1px rgba(9, 30, 66, 0.31)',
-	XLARGE: '0px 18px 28px rgba(9, 30, 66, 0.15), 0px 0px 1px rgba(9, 30, 66, 0.31)',
+	LEVEL_1: '0px 1px 1px rgba(0, 0, 0, 0.14), 0px 2px 1px rgba(0, 0, 0, 0.12), 0px 1px 3px rgba(0, 0, 0, 0.2)',
+	LEVEL_2: '0px 2px 2px rgba(0, 0, 0, 0.14), 0px 3px 1px rgba(0, 0, 0, 0.12), 0px 1px 5px rgba(0, 0, 0, 0.2)',
+	LEVEL_3: '0px 3px 4px rgba(0, 0, 0, 0.14), 0px 3px 3px rgba(0, 0, 0, 0.12), 0px 1px 8px rgba(0, 0, 0, 0.2)',
+	LEVEL_4: '0px 4px 5px rgba(0, 0, 0, 0.14), 0px 1px 10px rgba(0, 0, 0, 0.12), 0px 2px 4px rgba(0, 0, 0, 0.2)',
+	LEVEL_5: '0px 6px 10px rgba(0, 0, 0, 0.14), 0px 1px 18px rgba(0, 0, 0, 0.12), 0px 3px 5px rgba(0, 0, 0, 0.2)',
+	LEVEL_6: '0px 8px 10px rgba(0, 0, 0, 0.14), 0px 3px 14px rgba(0, 0, 0, 0.12), 0px 5px 5px rgba(0, 0, 0, 0.2)',
+	LEVEL_7: '0px 9px 12px rgba(0, 0, 0, 0.14), 0px 3px 16px rgba(0, 0, 0, 0.12), 0px 5px 6px rgba(0, 0, 0, 0.2)',
+	LEVEL_8: '0px 12px 17px rgba(0, 0, 0, 0.14), 0px 5px 22px rgba(0, 0, 0, 0.12), 0px 7px 8px rgba(0, 0, 0, 0.2)',
+	LEVEL_9: '0px 16px 24px rgba(0, 0, 0, 0.14), 0px 6px 30px rgba(0, 0, 0, 0.12), 0px 8px 10px rgba(0, 0, 0, 0.2)',
+	LEVEL_10: '0px 24px 38px rgba(0, 0, 0, 0.14), 0px 9px 46px rgba(0, 0, 0, 0.12), 0px 11px 15px rgba(0, 0, 0, 0.2)',
 };
 
 const typography: TypographyOptions = {
@@ -186,10 +192,16 @@ export const theme = createMuiTheme({
 			main: GRADIENT.MAIN,
 		},
 		shadow: {
-			small: SHADOW.SMALL,
-			medium: SHADOW.MEDIUM,
-			large: SHADOW.LARGE,
-			xlarge: SHADOW.XLARGE,
+			level_1: SHADOW.LEVEL_1,
+			level_2: SHADOW.LEVEL_2,
+			level_3: SHADOW.LEVEL_3,
+			level_4: SHADOW.LEVEL_4,
+			level_5: SHADOW.LEVEL_5,
+			level_6: SHADOW.LEVEL_6,
+			level_7: SHADOW.LEVEL_7,
+			level_8: SHADOW.LEVEL_8,
+			level_9: SHADOW.LEVEL_9,
+			level_10: SHADOW.LEVEL_10,
 		},
 	},
 	typography,
@@ -288,7 +300,7 @@ export const theme = createMuiTheme({
 					backgroundColor: COLOR.BASE_LIGHTEST,
 				},
 				'&.Mui-focusVisible': {
-					boxShadow: SHADOW.MEDIUM,
+					boxShadow: SHADOW.LEVEL_5,
 				},
 			},
 			containedPrimary: {
@@ -324,7 +336,7 @@ export const theme = createMuiTheme({
 				},
 				'&.Mui-focusVisible': {
 					backgroundColor: COLOR.PRIMARY_MAIN_TEXT,
-					boxShadow: SHADOW.MEDIUM,
+					boxShadow: SHADOW.LEVEL_5,
 				},
 			},
 			outlinedPrimary: {
