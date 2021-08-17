@@ -54,7 +54,7 @@ const testToCamelCase = () => {
 	});
 };
 
-const testToSnakeCase = () => {
+const testToConstantCase = () => {
 	describe.each([
 		['one two three', 'ONE_TWO_THREE'],
 		['oneTwoThree', 'ONE_TWO_THREE'],
@@ -70,5 +70,5 @@ const testToSnakeCase = () => {
 describe('utils/helper/strings', () => {
 	testGetURLDomain();
 	testToCamelCase();
-	testToSnakeCase();
+	testToConstantCase();
 });
