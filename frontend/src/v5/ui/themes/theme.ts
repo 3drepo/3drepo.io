@@ -19,7 +19,7 @@ import { createMuiTheme } from '@material-ui/core/styles';
 import { TypographyOptions } from '@material-ui/core/styles/createTypography';
 
 export const COLOR = {
-	PRIMARY_MAIN_TEXT: '#fff',
+	PRIMARY_MAIN_CONTRAST: '#fff',
 	PRIMARY_MAIN: '#00C1D4',
 	PRIMARY_DARK: '#01ACBD',
 	PRIMARY_DARKEST: '#009BAA',
@@ -296,7 +296,7 @@ export const theme = createMuiTheme({
 					boxShadow: 'none',
 				},
 				'&$disabled': {
-					color: COLOR.PRIMARY_MAIN_TEXT,
+					color: COLOR.PRIMARY_MAIN_CONTRAST,
 					backgroundColor: COLOR.BASE_LIGHTEST,
 				},
 				'&.Mui-focusVisible': {
@@ -304,7 +304,7 @@ export const theme = createMuiTheme({
 				},
 			},
 			containedPrimary: {
-				color: COLOR.PRIMARY_MAIN_TEXT,
+				color: COLOR.PRIMARY_MAIN_CONTRAST,
 				'&:hover': {
 					backgroundColor: COLOR.PRIMARY_DARK,
 				},
@@ -316,11 +316,11 @@ export const theme = createMuiTheme({
 				color: COLOR.SECONDARY_MAIN,
 				backgroundColor: COLOR.TERTIARY_LIGHTEST,
 				'&:hover': {
-					color: COLOR.PRIMARY_MAIN_TEXT,
+					color: COLOR.PRIMARY_MAIN_CONTRAST,
 					backgroundColor: COLOR.SECONDARY_MAIN,
 				},
 				'&:active': {
-					color: COLOR.PRIMARY_MAIN_TEXT,
+					color: COLOR.PRIMARY_MAIN_CONTRAST,
 					backgroundColor: COLOR.SECONDARY_DARK,
 				},
 			},
@@ -335,14 +335,14 @@ export const theme = createMuiTheme({
 					color: COLOR.BASE_LIGHTEST,
 				},
 				'&.Mui-focusVisible': {
-					backgroundColor: COLOR.PRIMARY_MAIN_TEXT,
+					backgroundColor: COLOR.PRIMARY_MAIN_CONTRAST,
 					boxShadow: SHADOW.LEVEL_5,
 				},
 			},
 			outlinedPrimary: {
 				'&:hover': {
 					backgroundColor: COLOR.PRIMARY_MAIN,
-					color: COLOR.PRIMARY_MAIN_TEXT,
+					color: COLOR.PRIMARY_MAIN_CONTRAST,
 				},
 				'&:active': {
 					backgroundColor: COLOR.PRIMARY_DARK,
@@ -355,11 +355,11 @@ export const theme = createMuiTheme({
 					borderColor: COLOR.BASE_LIGHTEST,
 				},
 				'&:hover': {
-					color: COLOR.PRIMARY_MAIN_TEXT,
+					color: COLOR.PRIMARY_MAIN_CONTRAST,
 					backgroundColor: COLOR.SECONDARY_MAIN,
 				},
 				'&:active': {
-					color: COLOR.PRIMARY_MAIN_TEXT,
+					color: COLOR.PRIMARY_MAIN_CONTRAST,
 					backgroundColor: COLOR.SECONDARY_DARK,
 				},
 			},
