@@ -1,2 +1,9 @@
-test/
-statics/
+tests/v4
+eslint-rules
+jest.config.js
+jest.config.e2e.js
+jest.config.unit.js
+jest-mongodb-config.js
+docs/
+node_modules/
+coverage/

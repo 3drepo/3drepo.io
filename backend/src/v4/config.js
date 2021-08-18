@@ -160,9 +160,6 @@ if (config.db.host.length > 1 && !config.db.replicaSet) {
 	process.exit(1);
 }
 
-config.db.username = coalesce(config.db.username, "username");
-config.db.password = coalesce(config.db.password, "password");
-
 let multipleAPIServer = false;
 
 for (let i = 0; i < config.servers.length; i++) {
