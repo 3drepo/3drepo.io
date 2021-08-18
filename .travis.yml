@@ -17,10 +17,10 @@ matrix:
         - yarn install
         - yarn lint
         - yarn build:test
-    # tests
+    # tests (v4)
     - language: node_js
       dist: focal
-      name: Backend tests
+      name: Backend tests (V4)
       git:
       submodules: false
       depth: 1
@@ -64,6 +64,24 @@ matrix:
         - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" &
         - cd ./frontend
        #- unbuffer yarn test
+     #test (v5)
+    - language: node_js
+      dist: focal
+      name: Backend tests  (V5)
+      git:
+      submodules: false
+      depth: 1
+      node_js:
+        - "14.17.1"
+      before_install:
+        - wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl1.0/libssl1.0.0_1.0.2n-1ubuntu5.6_amd64.deb
+        - sudo apt install $PWD/libssl1.0.0_1.0.2n-1ubuntu5.6_amd64.deb
+      script:
+        - cd backend
+        - yarn install
+        - yarn test:v5
+
+
 
 notifications:
     email:

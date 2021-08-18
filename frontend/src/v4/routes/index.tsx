@@ -43,4 +43,4 @@ export class RootContainer extends React.Component {
 	}
 }
 
-export default RootContainer;
+export default RootContainer as unknown as () => JSX.Element;

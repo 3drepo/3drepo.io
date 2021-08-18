@@ -23,10 +23,6 @@
 	const { PassThrough } = require("stream");
 	const responseCodes = require("../response_codes");
 
-	const connConfig = {
-		autoReconnect: true
-	};
-
 	async function getGridFSBucket(database, collection, chunksize = null) {
 		try {
 			const dbConn = await Handler.getDB(database);
@@ -53,10 +49,18 @@
 		return hostPorts.join(",");
 	}
 
-	function getURL(database) {
+	function getURL(username, password) {
 		// Generate connection string that could include multiple hosts that
 		// represent a replica set.
-		let connectString = `mongodb://${config.db.username}:${config.db.password}@${getHostPorts()}/${database}?authSource=admin`;
+
+		let authStr = "";
+		if(username && password) {
+			authStr = `${username}:${password}@`;
+		} else if(config.db.username && config.db.password) {
+			authStr = `${config.db.username}:${config.db.password}@`;
+		}
+
+		let connectString = `mongodb://${authStr}${getHostPorts()}/`;
 
 		connectString += config.db.replicaSet ? "&replicaSet=" + config.db.replicaSet : "";
 
@@ -67,26 +71,30 @@
 		return connectString;
 	}
 
+	const connect = (username, password) => {
+		return MongoClient.connect(getURL(username, password), {
+			useNewUrlParser: true,
+			useUnifiedTopology: true
+		});
+	};
+
 	const Handler = {};
 
 	let db;
 
-	Handler.authenticate = async function (database, password) {
-		const connString = `mongodb://${database}:${password}@${getHostPorts()}/`;
-
-		let authDB;
-
+	Handler.authenticate = async (user, password) => {
+		let conn;
 		try {
-			authDB = await MongoClient.connect(connString, connConfig);
+			conn = await connect(user, password);
+			await conn.db("admin");
 		} catch (err) {
-			if (authDB) {
-				authDB.close();
-			}
-
 			throw responseCodes.INCORRECT_USERNAME_OR_PASSWORD;
+		} finally {
+			if(conn) {
+				conn.close();
+			}
 		}
 
-		authDB.close();
 	};
 
 	Handler.disconnect = function () {
@@ -151,14 +159,13 @@
 		return collection.deleteOne(query);
 	};
 
-	Handler.getDB = function (database) {
+	Handler.getDB = async (database) => {
 		if (db) {
-			return Promise.resolve(db.db(database));
+			return db.db(database);
 		} else {
-			return MongoClient.connect(getURL(database), connConfig).then(_db => {
-				db = _db;
-				return db.db(database);
-			});
+			db = await connect();
+			return db.db(database);
+
 		}
 	};
 

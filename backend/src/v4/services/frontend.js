@@ -17,6 +17,9 @@
 
 "use strict";
 
+const { v5Path } = require("../../interop");
+const docsService = require(`${v5Path}/services/swagger`);
+
 /**
  * Creates frontend API Express app
  *
@@ -47,6 +50,8 @@ module.exports.createApp = function () {
 	}));
 	app.use(bodyParser.json());
 	app.use(favicon(publicDir + "/assets/images/favicon.ico"));
+
+	docsService(app);
 
 	app.locals.pretty = true;
 
