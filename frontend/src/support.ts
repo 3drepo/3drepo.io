@@ -28,7 +28,7 @@ window.onload = () => {
 
 	if (!detection.isSupported()) {
 		document.documentElement.className += ' unsupported';
-		const pageElement =  document.getElementsByClassName('unsupported-page')[0] as HTMLElement;
+		const pageElement = document.getElementsByClassName('unsupported-page')[0] as HTMLElement;
 		pageElement.style.visibility = 'visible';
 	}
 };

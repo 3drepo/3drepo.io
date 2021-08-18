@@ -17,24 +17,41 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 
+export interface ICurrentUserActions {
+	fetchUser: (username: string) => void;
+	fetchUserSuccess: (userData: Object) => void;
+	fetchQuotaInfo: (teamspace: string) => void;
+	fetchQuotaInfoSuccess: (quota: Object) => void;
+	updateUser: (userData: Object) => void;
+	updateUserSuccess: (userData: Object) => void;
+	updateUserPassword: (passwords: string) => void;
+	setPendingState: (pendingState: boolean) => void;
+	setAvatarPendingState: (pendingState: boolean) => void;
+	uploadAvatar: (file: any) => void;
+	refreshAvatar: (avatarUrl: string) => void;
+	generateApiKey: () => void;
+	deleteApiKey: () => void;
+	setAsInitialised: () => void;
+}
+
+
 export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createActions({
 	fetchUser: ['username'],
 	fetchUserSuccess: ['userData'],
 	fetchQuotaInfo: ['teamspace'],
 	fetchQuotaInfoSuccess: ['quota'],
-	fetchUserError: ['error'],
 	updateUser: ['userData'],
 	updateUserSuccess: ['userData'],
 	updateUserPassword: ['passwords'],
 	setPendingState: ['pendingState'],
 	setAvatarPendingState: ['pendingState'],
-	updateButtonText: ['value'],
 	uploadAvatar: ['file'],
 	refreshAvatar: ['avatarUrl'],
 	generateApiKey: [],
 	deleteApiKey: [],
 	setAsInitialised: []
 }, { prefix: 'CURRENT_USER/' });
+
 
 export const INITIAL_STATE = {
 	currentTeamspace: '',
