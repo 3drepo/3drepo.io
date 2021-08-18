@@ -16,6 +16,8 @@
  */
 "use strict";
 
+const { v5Path } = require("../../interop");
+
 /**
  * Create API Express app
  *
@@ -67,6 +69,7 @@ module.exports.createApp = function (config) {
 		}
 	});
 
+	require(`${v5Path}/routes/routesManager`).init(app);
 	app.use("/", require("../routes/user"));
 
 	app.use("/:account", require("../routes/job"));
