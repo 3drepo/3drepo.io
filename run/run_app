@@ -9,5 +9,6 @@ else
             echo "WARNING: If running locally then you may require sudo due to port issues "
             echo ""
     fi
-    NODE_ENV=$1 NODE_CONFIG_DIR='./config' node $2 "./backend/src/v4/3drepo.js"
+
+    cd backend && NODE_ENV=$1 NODE_CONFIG_DIR='./config'  yarn start
 fi
