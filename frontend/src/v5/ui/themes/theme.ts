@@ -215,6 +215,28 @@ export const theme = createMuiTheme({
 		},
 	},
 	overrides: {
+		MuiAvatar: {
+			root: {
+				margin: '8px 7px',
+			},
+		},
+		MuiFab: {
+			root: {
+				color: COLOR.PRIMARY_MAIN_CONTRAST,
+				height: 37,
+				width: 37,
+				margin: '8px 7px',
+				backgroundColor: 'transparent',
+				boxShadow: 'none',
+				border: `1px solid ${COLOR.PRIMARY_MAIN_CONTRAST}`,
+			},
+			label: {
+				'& > *:first-child': {
+					height: 17,
+					width: 'auto',
+				},
+			},
+		},
 		MuiBreadcrumbs: {
 			li: {
 				'& > a': {
