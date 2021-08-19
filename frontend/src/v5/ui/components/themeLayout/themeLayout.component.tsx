@@ -19,6 +19,7 @@ import React from 'react';
 import { Typography, Button, Divider, TextField } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/AddCircle';
 import { useForm } from 'react-hook-form';
+import { Breadcrumbs } from '@components/shared/breadcrumbs';
 import { Container } from './themeLayout.styles';
 
 export const ThemeLayout = (): JSX.Element => {
@@ -123,6 +124,10 @@ export const ThemeLayout = (): JSX.Element => {
 			<TextField value="Input text without label" />
 			<br />
 			<Divider />
+
+			<Typography variant="h2" gutterBottom>UI controls needed for basic layoutt</Typography>
+			<Typography variant="h2" gutterBottom>Breadcrumbs</Typography>
+			<Breadcrumbs />
 		</Container>
 	);
 };

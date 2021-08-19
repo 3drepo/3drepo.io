@@ -214,6 +214,23 @@ export const theme = createMuiTheme({
 		},
 	},
 	overrides: {
+		MuiBreadcrumbs: {
+			li: {
+				'& > a': {
+					margin: 0,
+					padding: '10px 5px',
+					...typography.body1,
+				},
+				'& > button > span > span': {
+					marginLeft: '1px',
+				},
+			},
+			separator: {
+				marginLeft: 0,
+				marginRight: 0,
+				color: COLOR.BASE_MAIN,
+			},
+		},
 		MuiOutlinedInput:
 		{
 			root: {

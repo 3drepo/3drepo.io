@@ -49,14 +49,14 @@ const render = () => {
 		<Provider store={store as any}>
 			<ConnectedRouter history={history as History}>
 				<Switch>
-					<Route exact path="/v5"><MainLayout /></Route>
-					<Route exact path="/v5/theme">
-						<ThemeProvider theme={theme}>
-							<MuiThemeProvider theme={theme}>
+					<ThemeProvider theme={theme}>
+						<MuiThemeProvider theme={theme}>
+							<Route exact path="/v5"><MainLayout /></Route>
+							<Route exact path="/v5/theme">
 								<ThemeLayout />
-							</MuiThemeProvider>
-						</ThemeProvider>
-					</Route>
+							</Route>
+						</MuiThemeProvider>
+					</ThemeProvider>
 					<Route><V4Root /></Route>
 				</Switch>
 			</ConnectedRouter>
