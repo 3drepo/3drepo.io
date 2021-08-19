@@ -15,14 +15,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import React from 'react';
+import { Container, Link } from './topNavigaton.styles';
 
-export const Container = styled.div`
-	margin: ${({ theme }) => `${theme.spacing(2)}px`};
-	height: 5000px;
-`;
+const LINKS = [{
+	title: 'Federations',
+	to: '#federations',
+	active: true,
+}, {
+	title: 'Containers',
+	to: '#container',
+}, {
+	title: 'Tasks',
+	to: '#tasks',
+}, {
+	title: 'Users',
+	to: '#users',
+}, {
+	title: 'Settings',
+	to: '#settings',
+	disabled: true,
+}];
 
-export const ContrastBackground = styled.div`
-	padding: ${({ theme }) => `${theme.spacing(2)}px`};
-	background-color: ${({ theme }) => theme.palette.secondary.main};
-`;
+export const TopNavigation = (): JSX.Element => (
+	<Container>
+		{LINKS.map(({ title, to, ...props }) => (
+			<Link to={to} {...props}>{title}</Link>
+		))}
+	</Container>
+);

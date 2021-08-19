@@ -147,6 +147,7 @@ export const theme = createMuiTheme({
 			light: COLOR.PRIMARY_LIGHT,
 			lightest: COLOR.PRIMARY_LIGHTEST,
 			contrastText: COLOR.PRIMARY_LIGHTEST,
+			contrast: COLOR.PRIMARY_MAIN_CONTRAST,
 		},
 		secondary: {
 			main: COLOR.SECONDARY_MAIN,

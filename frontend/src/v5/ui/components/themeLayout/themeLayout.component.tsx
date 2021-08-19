@@ -19,8 +19,10 @@ import React from 'react';
 import { Typography, Button, Divider, TextField } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/AddCircle';
 import { useForm } from 'react-hook-form';
+
 import { Breadcrumbs } from '@components/shared/breadcrumbs';
-import { Container } from './themeLayout.styles';
+import { TopNavigation } from '@components/shared/topNavigation';
+import { Container, ContrastBackground } from './themeLayout.styles';
 
 export const ThemeLayout = (): JSX.Element => {
 	const { register } = useForm();
@@ -125,9 +127,14 @@ export const ThemeLayout = (): JSX.Element => {
 			<br />
 			<Divider />
 
-			<Typography variant="h2" gutterBottom>UI controls needed for basic layoutt</Typography>
-			<Typography variant="h2" gutterBottom>Breadcrumbs</Typography>
+			<Typography variant="h2" gutterBottom>UI controls needed for basic layout</Typography>
+			<Typography variant="h3" gutterBottom>Breadcrumbs</Typography>
 			<Breadcrumbs />
+
+			<Typography variant="h3" gutterBottom>Top Navigation</Typography>
+			<ContrastBackground>
+				<TopNavigation />
+			</ContrastBackground>
 		</Container>
 	);
 };
