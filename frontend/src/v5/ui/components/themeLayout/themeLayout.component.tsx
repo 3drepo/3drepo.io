@@ -24,7 +24,6 @@ import { AppBar } from '@components/shared/appBar';
 import { Breadcrumbs } from '@components/shared/breadcrumbs';
 import { TopNavigation } from '@components/shared/topNavigation';
 import { CircleButton } from '@components/shared/circleButton';
-import { NavigationMenu } from '@components/shared/navigatonMenu';
 import { Container, ContrastBackground } from './themeLayout.styles';
 
 export const ThemeLayout = (): JSX.Element => {
@@ -201,11 +200,6 @@ export const ThemeLayout = (): JSX.Element => {
 					GH
 				</CircleButton>
 			</ContrastBackground>
-			{' '}
-			<br />
-
-			<Typography variant="h3" gutterBottom>Navigation Menu</Typography>
-			<NavigationMenu />
 			{' '}
 			<br />
 
