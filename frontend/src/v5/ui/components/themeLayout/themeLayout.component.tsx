@@ -20,6 +20,7 @@ import { Typography, Button, Divider, TextField, SvgIcon } from '@material-ui/co
 import AddIcon from '@material-ui/icons/AddCircle';
 import { useForm } from 'react-hook-form';
 
+import { AppBar } from '@components/shared/appBar';
 import { Breadcrumbs } from '@components/shared/breadcrumbs';
 import { TopNavigation } from '@components/shared/topNavigation';
 import { CircleButton } from '@components/shared/circleButton';
@@ -200,9 +201,16 @@ export const ThemeLayout = (): JSX.Element => {
 					GH
 				</CircleButton>
 			</ContrastBackground>
+			{' '}
+			<br />
 
 			<Typography variant="h3" gutterBottom>Navigation Menu</Typography>
 			<NavigationMenu />
+			{' '}
+			<br />
+
+			<Typography variant="h3" gutterBottom>AppBar (with logo only)</Typography>
+			<AppBar />
 
 		</Container>
 	);
