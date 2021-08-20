@@ -17,12 +17,17 @@
 
 import React from 'react';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { NavigationMenu } from '@components/shared/navigatonMenu';
 import { Container, Breadcrumb, InteractiveBreadcrumb } from './breadcrumbs.styles';
 
 export const Breadcrumbs = (): JSX.Element => {
 	const getBreadcrumbs = ['ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
 
-	const handleClick = (e) => e.preventDefault();
+	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+
+	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
+
+	const handleClose = () => setAnchorEl(null);
 
 	return (
 		<Container aria-label="breadcrumb">
@@ -32,14 +37,17 @@ export const Breadcrumbs = (): JSX.Element => {
 
 				if (isLastItem) {
 					return (
-						<InteractiveBreadcrumb onClick={handleClick} endIcon={<ExpandMoreIcon />}>
-							{title}
-						</InteractiveBreadcrumb>
+						<div>
+							<InteractiveBreadcrumb onClick={handleClick} endIcon={<ExpandMoreIcon />}>
+								{title}
+							</InteractiveBreadcrumb>
+							<NavigationMenu anchorEl={anchorEl} handleClose={handleClose} />
+						</div>
 					);
 				}
 
 				return (
-					<Breadcrumb color="inherit" href={`#4${title}`}>
+					<Breadcrumb color="inherit" href={`#${title}`}>
 						{title}
 					</Breadcrumb>
 				);

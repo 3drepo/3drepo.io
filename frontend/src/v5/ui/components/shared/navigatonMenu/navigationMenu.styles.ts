@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { MenuList as MenuListComponent, MenuItem as MenuItemComponent, SvgIcon } from '@material-ui/core';
+import { Menu as MenuComponent, MenuItem as MenuItemComponent, SvgIcon } from '@material-ui/core';
 
 export const ArrowIcon = styled(SvgIcon).attrs({
 	viewBox: '0 0 5 9',
@@ -26,10 +26,12 @@ export const ArrowIcon = styled(SvgIcon).attrs({
 		width: 4.5px;
 	}
 `;
-export const MenuList = styled(MenuListComponent)`
+export const MenuList = styled(MenuComponent)`
 	&& {
-		padding: 0;
-		width: 226px;
+		& > ul {
+			padding: 0;
+			background-color: ${({ theme }) => theme.palette.primary.contrast};
+		}
 	}
 `;
 

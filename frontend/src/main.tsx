@@ -34,10 +34,11 @@ import V4Root from '@/v4/routes/index';
 import { IS_DEVELOPMENT } from '@/v4/constants/environment';
 import { UnityUtil } from '@/globals/unity-util';
 import { clientConfigService } from '@/v4/services/clientConfig';
-import { MainLayout } from '@components/mainLayout/mainLayout';
+import { MainLayout } from '@components/mainLayout/';
 import { ThemeLayout } from '@components/themeLayout/';
 import * as OfflinePluginRuntime from 'offline-plugin/runtime';
 import { theme } from '@/v5/ui/themes/theme';
+import { GlobalStyle } from '@/v5/ui/themes/global';
 import { initializeActionsDispatchers } from './v5/services/actionsDispatchers/actionsDistpatchers.helper';
 
 window.UnityUtil = UnityUtil;
@@ -51,6 +52,7 @@ const render = () => {
 				<Switch>
 					<ThemeProvider theme={theme}>
 						<MuiThemeProvider theme={theme}>
+							<GlobalStyle />
 							<Route exact path="/v5"><MainLayout /></Route>
 							<Route exact path="/v5/theme">
 								<ThemeLayout />

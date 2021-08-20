@@ -217,6 +217,7 @@ export const theme = createMuiTheme({
 	overrides: {
 		MuiList: {
 			root: {
+				width: 226,
 				borderRadius: 5,
 				boxShadow: SHADOW.LEVEL_5,
 			},
