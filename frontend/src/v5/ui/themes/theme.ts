@@ -215,6 +215,12 @@ export const theme = createMuiTheme({
 		},
 	},
 	overrides: {
+		MuiList: {
+			root: {
+				borderRadius: 5,
+				boxShadow: SHADOW.LEVEL_5,
+			},
+		},
 		MuiAvatar: {
 			root: {
 				margin: '8px 7px',
