@@ -20,24 +20,24 @@ import { AppBar } from '@material-ui/core';
 
 export const Container = styled(AppBar)`
 	&& {
-  	background-color: ${({ theme }) => theme.palette.secondary.main};
+		background-color: ${({ theme }) => theme.palette.secondary.main};
 		box-shadow: none;
-    padding-left: 20px;
-    padding-right: 20px;
-    min-height: 64px;
+		padding-left: 20px;
+		padding-right: 20px;
+		min-height: 64px;
 		display: flex;
-    flex-direction: row;
-    align-items: center;
+		flex-direction: row;
+		align-items: center;
 		position: relative;
-  }
+	}
 `;
 
 export const Items = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
 	width: 50%;
-	
+
 	&:last-child {
 		justify-content: flex-end;
 	}

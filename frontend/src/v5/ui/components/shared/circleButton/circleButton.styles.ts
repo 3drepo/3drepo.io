@@ -44,120 +44,120 @@ export const UserAvatar = styled(Avatar)`
 		width: 38px;
 		color: ${({ theme }) => theme.palette.primary.contrast};
 		background-color: ${({ theme }) => theme.palette.tertiary.main};
-    ${({ theme }) => theme.typography.body1};
-  }
+		${({ theme }) => theme.typography.body1};
+	}
 `;
 
 export const StyledIconButton = styled(IconButton)`
-  ${({ size }) => getButtonSize(size)};
+	${({ size }) => getButtonSize(size)};
 
-  ${({ disabled }) => disabled && css`
+	${({ disabled }) => disabled && css`
 		&& {
-      pointer-events: none;
-      ${UserAvatar} {
-        background-color: ${({ theme }) => theme.palette.secondary.mid};
-        color: ${({ theme }) => theme.palette.secondary.light};
-      }
+		pointer-events: none;
+			${UserAvatar} {
+				background-color: ${({ theme }) => theme.palette.secondary.mid};
+				color: ${({ theme }) => theme.palette.secondary.light};
+			}
 		}
 	`};
 
-  &:hover {
-  	${UserAvatar} {
-    	background-color: ${({ theme }) => theme.palette.tertiary.mid};
-    }
-  }
+	&:hover {
+		${UserAvatar} {
+			background-color: ${({ theme }) => theme.palette.tertiary.mid};
+		}
+	}
 
-  &:focus {
-    ${UserAvatar} {
-      height: 36px;
-      width: 36px;
-      border: 1px solid ${({ theme }) => theme.palette.primary.main};
-    }
-  }
+	&:focus {
+		${UserAvatar} {
+			height: 36px;
+			width: 36px;
+			border: 1px solid ${({ theme }) => theme.palette.primary.main};
+		}
+	}
 
-  &:active {
-    ${UserAvatar} {
-      background-color: ${({ theme }) => theme.palette.tertiary.main};
-    }
-  }
+	&:active {
+		${UserAvatar} {
+			background-color: ${({ theme }) => theme.palette.tertiary.main};
+		}
+	}
 `;
 
 const mainFabStyles = css`
 	&& {
-  background-color: ${({ theme }) => theme.palette.primary.contrast};
-	border: none;
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+		border: none;
 
-	  path {
-	    stroke: ${({ theme }) => theme.palette.secondary.light};
-	  }
+		path {
+			stroke: ${({ theme }) => theme.palette.secondary.light};
+		}
 
-    ${({ disabled }) => disabled && css`
+		${({ disabled }) => disabled && css`
 			&& {
-        path {
-          fill: ${({ theme }) => theme.palette.secondary.light};
-        }
+				path {
+					fill: ${({ theme }) => theme.palette.secondary.light};
+				}
 			}
 		`};
 
-    &:hover, &:focus {
-      && {
-        background-color: transparent;
-      }
-    }
+		&:hover, &:focus {
+			&& {
+				background-color: transparent;
+			}
+		}
 
-    &:active {
-      && {
-        background-color: ${({ theme }) => theme.palette.base.lightest};
-      }
-    }
-  }
+		&:active {
+			&& {
+				background-color: ${({ theme }) => theme.palette.base.lightest};
+			}
+		}
+	}
 `;
 
 const contrastFabStyles = css`
-  ${({ disabled }) => disabled && css`
+	${({ disabled }) => disabled && css`
 		&& {
-      border-color: ${({ theme }) => theme.palette.secondary.light};
+			border-color: ${({ theme }) => theme.palette.secondary.light};
 			pointer-events: none;
-
-      path {
-        fill: ${({ theme }) => theme.palette.secondary.light};
-      }
+		
+			path {
+				fill: ${({ theme }) => theme.palette.secondary.light};
+			}
 		}
 	`};
 
-  &:hover {
-    && {
-      background-color: ${({ theme }) => theme.palette.primary.contrast};
+	&:hover {
+		&& {
+			background-color: ${({ theme }) => theme.palette.primary.contrast};
+		
+			path {
+				fill: ${({ theme }) => theme.palette.secondary.main};
+			}
+		}
+	}
 
-      path {
-        fill: ${({ theme }) => theme.palette.secondary.main};
-      }
-    }
-  }
+	&:focus {
+		&& {
+			border: 1px solid ${({ theme }) => theme.palette.primary.main};
+			path {
+				fill: ${({ theme }) => theme.palette.primary.main};
+			}
+		}
+	}
 
-  &:focus {
-    && {
-      border: 1px solid ${({ theme }) => theme.palette.primary.main};
-      path {
-        fill: ${({ theme }) => theme.palette.primary.main};
-      }
-    }
-  }
+	&:active {
+		&& {
+			background-color: ${({ theme }) => theme.palette.secondary.light};
+			border-color: ${({ theme }) => theme.palette.secondary.light};
 
-  &:active {
-    && {
-      background-color: ${({ theme }) => theme.palette.secondary.light};
-      border-color: ${({ theme }) => theme.palette.secondary.light};
-
-      path {
-        fill: ${({ theme }) => theme.palette.secondary.main};
-      }
-    }
-  }
+			path {
+				fill: ${({ theme }) => theme.palette.secondary.main};
+			}
+		}
+	}
 `;
 
 export const StyledFab = styled(Fab)`
-  ${({ size }) => getButtonSize(size)};
+	${({ size }) => getButtonSize(size)};
 	${({ motive }) => motive === 'main' && mainFabStyles}
-  ${({ motive }) => motive === 'contrast' && contrastFabStyles}
+	${({ motive }) => motive === 'contrast' && contrastFabStyles}
 `;

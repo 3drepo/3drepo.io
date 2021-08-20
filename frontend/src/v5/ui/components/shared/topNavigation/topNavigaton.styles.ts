@@ -21,47 +21,47 @@ import { Link as RouterLink } from 'react-router-dom';
 
 export const Container = styled.nav`
 	display: flex;
-  margin-right: 20px;
+	margin-right: 20px;
 `;
 
 export const Link = styled(LinkComponent).attrs({
 	component: RouterLink,
 })`
-  && {
-    display: flex;
-    align-items: center;
-    position: relative;
-    padding-left: 13px;
-    padding-right: 13px;
-	  height: 64px;
-    color: ${({ theme }) => theme.palette.primary.contrast};
-	  font-family: ${({ theme }) => theme.typography.fontFamily};
-    ${({ theme }) => theme.typography.kicker};
-	  
-	  &:hover {
-      text-decoration: none;
-      color: ${({ theme }) => theme.palette.primary.main};
-	  }
-	  
-	  &:focus, &:visited {
-      outline: none;
-      text-decoration: underline;
-	  }
-  }
-	
+	&& {
+		display: flex;
+		align-items: center;
+		position: relative;
+		padding-left: 13px;
+		padding-right: 13px;
+		height: 64px;
+		color: ${({ theme }) => theme.palette.primary.contrast};
+		font-family: ${({ theme }) => theme.typography.fontFamily};
+		${({ theme }) => theme.typography.kicker};
+
+		&:hover {
+			text-decoration: none;
+			color: ${({ theme }) => theme.palette.primary.main};
+		}
+
+		&:focus, &:visited {
+			outline: none;
+			text-decoration: underline;
+		}
+	}
+
 	${({ disabled }) => disabled && css`
 		&& {
-      color: ${({ theme }) => theme.palette.base.light};
+			color: ${({ theme }) => theme.palette.base.light};
 			pointer-events: none;
 		}
 	`};
-	
+
 	${({ active }) => active && css`
 		&& {
-	    color: ${({ theme }) => theme.palette.primary.main};
+			color: ${({ theme }) => theme.palette.primary.main};
 			&::after {
 				content: '';
-	      background-color: ${({ theme }) => theme.palette.primary.main};
+				background-color: ${({ theme }) => theme.palette.primary.main};
 				display: block;
 				height: 3px;
 				width: 100%;
@@ -69,6 +69,6 @@ export const Link = styled(LinkComponent).attrs({
 				bottom: 0;
 				left: 0;
 			}
-    }
+		}
 	`};
 `;

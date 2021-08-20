@@ -29,7 +29,7 @@ export const ArrowIcon = styled(SvgIcon).attrs({
 export const MenuList = styled(MenuListComponent)`
 	&& {
 		padding: 0;
-    width: 226px;
+		width: 226px;
 	}
 `;
 
@@ -37,32 +37,32 @@ export const MenuItem = styled(MenuItemComponent)`
 	&& {
 		margin: 0;
 		height: 46px;
-    padding-right: 14px;
-    justify-content: space-between;
+		padding-right: 14px;
+		justify-content: space-between;
 
-    ${({ disabled }) => disabled && css`
+		${({ disabled }) => disabled && css`
 			&& {
-	      pointer-events: none;
-        color: ${({ theme }) => theme.palette.base.light};
+				pointer-events: none;
+				color: ${({ theme }) => theme.palette.base.light};
 			}
 		`};
 
 		&:not(:last-child) {
 			border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
 		}
-		
+
 		&:hover {
 			color: ${({ theme }) => theme.palette.primary.main};
-      background-color: initial;
+			background-color: initial;
 		}
 
-    &:focus {
-      background-color: ${({ theme }) => theme.palette.primary.lightest};
-    }
+		&:focus {
+			background-color: ${({ theme }) => theme.palette.primary.lightest};
+		}
 
-    &:active {
-      color: ${({ theme }) => theme.palette.primary.contrast};
-      background-color: ${({ theme }) => theme.palette.primary.dark};
-    }
+		&:active {
+			color: ${({ theme }) => theme.palette.primary.contrast};
+			background-color: ${({ theme }) => theme.palette.primary.dark};
+		}
 	}
 `;
