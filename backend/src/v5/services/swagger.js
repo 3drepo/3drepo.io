@@ -59,7 +59,7 @@ const setupDocEndpoint = (app) => {
 	const uiOptions = {
 		explorer: true,
 	};
-
+	console.log(docs.paths['/teamspaces/:teamspaces/projects']);
 	app.use('/docs', swaggerUi.serve, swaggerUi.setup(docs, uiOptions));
 };
 

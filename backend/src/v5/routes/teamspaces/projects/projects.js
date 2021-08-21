@@ -15,16 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const Projects = require('../../../processors/teamspaces/projects/projects');
 const { Router } = require('express');
-const Teamspaces = require('../../processors/teamspaces/teamspaces');
-const { respond } = require('../../utils/responder');
-const { templates } = require('../../utils/responseCodes');
-const { validSession } = require('../../middleware/auth');
+const { getUserFromSession } = require('../../../utils/sessions');
+const { hasAccessToTeamspace } = require('../../../middleware/permissions/teamspaces');
+const { respond } = require('../../../utils/responder');
+const { templates } = require('../../../utils/responseCodes');
 
-const getTeamspaceList = (req, res) => {
-	const user = req.session.user.username;
-	Teamspaces.getTeamspaceListByUser(user).then((teamspaces) => {
-		respond(req, res, templates.ok, { teamspaces });
+const getProjectList = (req, res) => {
+	const user = getUserFromSession(req.session);
+	const { teamspace } = req.params;
+	Projects.getProjectList(teamspace, user).then((projects) => {
+		respond(req, res, templates.ok, { projects });
 	}).catch((err) => respond(req, res, err));
 };
 
@@ -33,26 +35,39 @@ const establishRoutes = () => {
 
 	/**
 	 * @openapi
-	 * /teamspaces:
+	 * /teamspaces/{teamspace}/projects:
 	 *   get:
-	 *     description: Get a list of teamspaces the user has access to
-	 *     tags: [Teamspaces]
-	 *     operationId: getTeamspaceList
+	 *     description: Get a list of projects within the specified teamspace the user has access to
+	 *     tags: [Projects]
+	 *     operationId: getProjectList
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       200:
-	 *         description: returns list of teamspace
+	 *         description: returns list of projects
 	 *         content:
 	 *           application/json:
 	 *             schema:
 	 *               type: object
 	 *               properties:
-	 *                 teamspaces:
+	 *                 projects:
 	 *                   type: array
 	 *                   items:
 	 *                     type: object
 	 *                     properties:
+	 *                       id:
+	 *                         type: string
+	 *                         description: Project ID
+	 *                         example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
 	 *                       name:
 	 *                         type: string
 	 *                         description: name of the teamspace
@@ -63,7 +78,7 @@ const establishRoutes = () => {
 	 *
 	 *
 	 */
-	router.get('/', validSession, getTeamspaceList);
+	router.get('/', hasAccessToTeamspace, getProjectList);
 
 	return router;
 };
