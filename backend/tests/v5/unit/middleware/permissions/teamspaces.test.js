@@ -23,17 +23,19 @@ jest.mock('../../../../../src/v5/models/teamspaces');
 const Teamspace = require(`${src}/models/teamspaces`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
-const AuthMiddleware = require(`${src}/middleware/auth`);
+jest.mock('../../../../../src/v5/utils/sessions');
+const Sessions = require(`${src}/utils/sessions`);
 const TSMiddlewares = require(`${src}/middleware/permissions/teamspaces`);
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 Teamspace.hasAccessToTeamspace.mockImplementation((teamspace) => teamspace === 'ts');
+Sessions.isSessionValid.mockImplementation((session, ref) => !!session);
+Sessions.getUserFromSession.mockImplementation((session) => 'hi');
 
 const testHasAccessToTeamspace = () => {
 	describe('HasAccessToTeamspace', () => {
 		test('next() should be called if the user has access', async () => {
-			jest.spyOn(AuthMiddleware, 'validSession').mockReturnValue(true);
 			const mockCB = jest.fn(() => {});
 			await TSMiddlewares.hasAccessToTeamspace(
 				{ params: { teamspace: 'ts' }, header: { referer: 'http://abc.com/' }, session: { user: { username: 'hi', referer: 'http://abc.com' } } },
@@ -43,7 +45,6 @@ const testHasAccessToTeamspace = () => {
 			expect(mockCB.mock.calls.length).toBe(1);
 		});
 		test('should respond with notLoggedIn errCode if the session is invalid', async () => {
-			jest.spyOn(AuthMiddleware, 'validSession').mockReturnValue(false);
 			const mockCB = jest.fn(() => {});
 			await TSMiddlewares.hasAccessToTeamspace(
 				{ params: { teamspace: 'ts' }, header: { referer: 'http://xyz.com' } },
@@ -57,7 +58,6 @@ const testHasAccessToTeamspace = () => {
 
 		test('should respond with teamspace not found if the user has no access', async () => {
 			const mockCB = jest.fn(() => {});
-			jest.spyOn(AuthMiddleware, 'validSession').mockReturnValue(true);
 			await TSMiddlewares.hasAccessToTeamspace(
 				{ params: { teamspace: 'ts1' }, header: { referer: 'http://xyz.com' }, session: { user: { username: 'hi', referer: 'http://xyz.com' } } },
 				{},
