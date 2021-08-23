@@ -17,6 +17,8 @@
 
 "use strict";
 const axios = require("axios");
+const logger = require("../logger");
+const systemLogger = logger.systemLogger;
 
 const axiosJSONConfig = {
 	headers: {
@@ -35,6 +37,8 @@ class AlluxioError extends Error {
 class AlluxioClient {
 	constructor(hostname) {
 		this.hostname = hostname;
+		// test client connection
+		this.getInfo();
 	}
 
 	getURL(basePath) {
@@ -114,7 +118,13 @@ class AlluxioClient {
 	}
 
 	async getInfo() {
-		return (await axios.get(`http://${this.hostname}/api/v1/proxy/info`)).data;
+		try {
+			return (await axios.get(`http://${this.hostname}/api/v1/proxy/info`)).data;
+		} catch (err) {
+			systemLogger.logError("Health check failed on alluxio connection, please check settings.");
+			// eslint-disable-next-line
+			process.exit(1);
+		}
 	}
 
 	async uploadFile(path, data) {
