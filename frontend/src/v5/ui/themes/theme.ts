@@ -240,6 +240,7 @@ export const theme = createMuiTheme({
 				backgroundColor: 'transparent',
 				boxShadow: 'none',
 				border: `1px solid ${COLOR.PRIMARY_MAIN_CONTRAST}`,
+				transition: 'none',
 			},
 			label: {
 				'& > *:first-child': {
