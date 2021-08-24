@@ -41,6 +41,7 @@ export const NavigationMenu = ({ anchorEl, handleClose }: INavigationMenu): JSX.
 		to: getRouteLink({ route, teamspace, project: title }),
 	}));
 	const menuPosition = {
+		getContentAnchorEl: null,
 		anchorOrigin: {
 			vertical: 'bottom',
 			horizontal: 'left',

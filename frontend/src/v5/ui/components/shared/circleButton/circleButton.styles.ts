@@ -67,7 +67,7 @@ export const StyledIconButton = styled(IconButton)`
 		}
 	}
 
-	&:focus {
+	&.Mui-focusVisible {
 		${UserAvatar} {
 			height: 36px;
 			width: 36px;
@@ -99,7 +99,7 @@ const mainFabStyles = css`
 			}
 		`};
 
-		&:hover, &:focus {
+		&:hover, &.Mui-focusVisible {
 			&& {
 				background-color: transparent;
 			}
@@ -135,7 +135,7 @@ const contrastFabStyles = css`
 		}
 	}
 
-	&:focus {
+	&.Mui-focusVisible {
 		&& {
 			border: 1px solid ${({ theme }) => theme.palette.primary.main};
 			path {
