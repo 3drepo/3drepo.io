@@ -39,6 +39,7 @@ import { ThemeLayout } from '@components/themeLayout/';
 import * as OfflinePluginRuntime from 'offline-plugin/runtime';
 import { theme } from '@/v5/ui/themes/theme';
 import { GlobalStyle } from '@/v5/ui/themes/global';
+import { ROUTES } from '@/v5/services/routes/routes';
 import { initializeActionsDispatchers } from './v5/services/actionsDispatchers/actionsDistpatchers.helper';
 
 window.UnityUtil = UnityUtil;
@@ -54,9 +55,13 @@ const render = () => {
 						<MuiThemeProvider theme={theme}>
 							<GlobalStyle />
 							<Route exact path="/v5"><MainLayout /></Route>
-							<Route exact path="/v5/theme">
-								<ThemeLayout />
-							</Route>
+							<Route exact path="/v5/theme"><ThemeLayout /></Route>
+							<Route exact path={ROUTES.TEAMSPACE}><MainLayout title="Teamspace page" /></Route>
+							<Route exact path={ROUTES.PROJECT}><MainLayout title="Project page" /></Route>
+							<Route exact path={ROUTES.FEDERATIONS}><MainLayout title="Federations page" /></Route>
+							<Route exact path={ROUTES.CONTAINERS}><MainLayout title="Containers page" /></Route>
+							<Route exact path={ROUTES.TASKS}><MainLayout title="Tasks page" /></Route>
+							<Route exact path={ROUTES.USERS}><MainLayout title="Users page" /></Route>
 						</MuiThemeProvider>
 					</ThemeProvider>
 					<Route><V4Root /></Route>

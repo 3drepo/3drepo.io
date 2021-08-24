@@ -17,13 +17,14 @@
 
 import React from 'react';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+
 import { NavigationMenu } from '@components/shared/navigatonMenu';
 import { Container, Breadcrumb, InteractiveBreadcrumb } from './breadcrumbs.styles';
+import { useBreadcrumbs } from './breadcrumbs.hook';
 
 export const Breadcrumbs = (): JSX.Element => {
-	const getBreadcrumbs = ['ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
-
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+	const breadcrumbs = useBreadcrumbs();
 
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
 
@@ -32,8 +33,8 @@ export const Breadcrumbs = (): JSX.Element => {
 	return (
 		<Container aria-label="breadcrumb">
 
-			{getBreadcrumbs.map((title, index) => {
-				const isLastItem = (getBreadcrumbs.length - 1) === index;
+			{breadcrumbs.map(({ title, link }, index) => {
+				const isLastItem = (breadcrumbs.length - 1) === index;
 
 				if (isLastItem) {
 					return (
@@ -47,7 +48,7 @@ export const Breadcrumbs = (): JSX.Element => {
 				}
 
 				return (
-					<Breadcrumb color="inherit" href={`#${title}`}>
+					<Breadcrumb color="inherit" to={link}>
 						{title}
 					</Breadcrumb>
 				);

@@ -16,31 +16,47 @@
  */
 
 import React from 'react';
+import { useParams, useRouteMatch, useLocation } from 'react-router-dom';
+
+import { ROUTES, getRouteLink } from '@/v5/services/routes/routes';
 import { Container, Link } from './topNavigaton.styles';
 
-const LINKS = [{
-	title: 'Federations',
-	to: '#federations',
-	active: true,
-}, {
-	title: 'Containers',
-	to: '#container',
-}, {
-	title: 'Tasks',
-	to: '#tasks',
-}, {
-	title: 'Users',
-	to: '#users',
-}, {
-	title: 'Settings',
-	to: '#settings',
-	disabled: true,
-}];
+export const TopNavigation = (): JSX.Element => {
+	const { search } = useLocation();
+	const { teamspace, project } = useParams();
+	const isSettings = search.includes(ROUTES.SETTINGS);
+	const isRouteMatch = (path) => (isSettings ? false : useRouteMatch(path));
+	const isProjectSelected = !!project;
 
-export const TopNavigation = (): JSX.Element => (
-	<Container>
-		{LINKS.map(({ title, to, ...props }) => (
-			<Link to={to} {...props}>{title}</Link>
-		))}
-	</Container>
-);
+	const links = [{
+		title: 'Federations',
+		to: getRouteLink({ route: ROUTES.FEDERATIONS, teamspace, project }),
+		active: isRouteMatch(ROUTES.FEDERATIONS),
+		disabled: !isProjectSelected,
+	}, {
+		title: 'Containers',
+		to: getRouteLink({ route: ROUTES.CONTAINERS, teamspace, project }),
+		active: isRouteMatch(ROUTES.CONTAINERS),
+		disabled: !isProjectSelected,
+	}, {
+		title: 'Tasks',
+		to: ROUTES.TASKS,
+		active: isRouteMatch(ROUTES.TASKS),
+	}, {
+		title: 'Users',
+		active: isRouteMatch(ROUTES.USERS),
+		to: ROUTES.USERS,
+	}, {
+		title: 'Settings',
+		to: '?t=settings',
+		active: isSettings,
+	}].filter(({ disabled }) => !disabled);
+
+	return (
+		<Container>
+			{links.map(({ title, to, ...props }) => (
+				<Link to={to} {...props}>{title}</Link>
+			))}
+		</Container>
+	);
+};

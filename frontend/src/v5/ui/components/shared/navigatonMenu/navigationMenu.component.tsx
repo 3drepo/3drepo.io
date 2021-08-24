@@ -18,7 +18,11 @@
 import React from 'react';
 
 import { Typography } from '@material-ui/core';
+import { useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
+import { selectCurrentProjectsList, selectTeamspacesList } from '@/v5/store/teamspaces/teamspaces.selectors';
+import { getRouteLink, ROUTES } from '@/v5/services/routes/routes';
 import { MenuList, MenuItem, ArrowIcon } from './navigationMenu.styles';
 
 interface INavigationMenu {
@@ -27,24 +31,15 @@ interface INavigationMenu {
 }
 
 export const NavigationMenu = ({ anchorEl, handleClose }: INavigationMenu): JSX.Element => {
-	const ITEM_LIST = [{
-		title: 'Teamspace title',
-		to: '/teamspace1',
-	}, {
-		title: 'Teamspace title',
-		to: '/teamspace2',
-	}, {
-		title: 'Teamspace title',
-		to: '/teamspace3',
-	}, {
-		title: 'Teamspace title',
-		to: '/teamspace3',
-	}, {
-		title: 'Teamspace title',
-		to: '/teamspace5',
-		disabled: true,
-	}];
-
+	const currentProjectsList = useSelector(selectCurrentProjectsList);
+	const teamspacesList = useSelector(selectTeamspacesList);
+	const { teamspace, project } = useParams();
+	const route = project ? ROUTES.PROJECT : ROUTES.TEAMSPACE;
+	const list = project ? currentProjectsList : teamspacesList;
+	const menuItems = list.map((title) => ({
+		title,
+		to: getRouteLink({ route, teamspace, project: title }),
+	}));
 	const menuPosition = {
 		anchorOrigin: {
 			vertical: 'bottom',
@@ -58,8 +53,8 @@ export const NavigationMenu = ({ anchorEl, handleClose }: INavigationMenu): JSX.
 
 	return (
 		<MenuList anchorEl={anchorEl} onClose={handleClose} open={Boolean(anchorEl)} {...menuPosition}>
-			{ITEM_LIST.map(({ title, ...props }) => (
-				<MenuItem {...props}>
+			{menuItems.map(({ title, ...props }) => (
+				<MenuItem onClick={handleClose} {...props}>
 					<Typography variant="body1" noWrap>
 						{title}
 					</Typography>

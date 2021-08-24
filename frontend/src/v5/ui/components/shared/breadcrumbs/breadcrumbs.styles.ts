@@ -17,6 +17,7 @@
 
 import styled from 'styled-components';
 import { Button, Breadcrumbs } from '@material-ui/core';
+import { Link } from 'react-router-dom';
 
 export const Container = styled(Breadcrumbs)`
 	&& {
@@ -41,6 +42,7 @@ export const InteractiveBreadcrumb = styled(Button).attrs({
 
 export const Breadcrumb = styled(Button).attrs({
 	variant: 'text',
+	component: Link,
 })`
 	&& {
 		color: ${({ theme }) => theme.palette.base.main};

@@ -14,21 +14,30 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React from 'react';
-import { Typography } from '@material-ui/core';
 
-import { AppBar } from '@components/shared/appBar';
-import { Content } from './mainLayout.styles';
+export const ROUTES = {
+	HOME: '/',
+	TEAMSPACE: '/v5/:teamspace/',
+	PROJECT: '/v5/:teamspace/:project/',
+	FEDERATIONS: '/v5/:teamspace/:project/federations/',
+	CONTAINERS: '/v5/:teamspace/:project/containers/',
+	TASKS: '/v5/tasks/',
+	USERS: '/v5/users/',
+	SETTINGS: 't=settings',
+};
 
-interface IMainLayout {
-	title?: string;
-}
+export const getRouteLink = ({
+	route,
+	...parameters
+}) => {
+	let error = 0;
+	const path = route.replace(/:([^ :]+)\//g, (match, p1) => {
+		if (parameters[p1]) {
+			return `${parameters[p1]}/`;
+		}
+		error++;
+		return null;
+	});
 
-export const MainLayout = ({ title }: IMainLayout): JSX.Element => (
-	<>
-		<AppBar />
-		<Content>
-			<Typography variant="h1">{title || 'Basic layout page'}</Typography>
-		</Content>
-	</>
-);
+	return error ? '/' : path;
+};
