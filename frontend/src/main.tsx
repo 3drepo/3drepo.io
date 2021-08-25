@@ -56,12 +56,13 @@ const render = () => {
 							<GlobalStyle />
 							<Route exact path="/v5"><MainLayout /></Route>
 							<Route exact path="/v5/theme"><ThemeLayout /></Route>
+							<Route exact path={ROUTES.TASKS}><MainLayout title="Tasks page" /></Route>
+							<Route exact path={ROUTES.USERS}><MainLayout title="Users page" /></Route>
+							<Route exact path={ROUTES.SETTINGS}><MainLayout title="Settings page" /></Route>
 							<Route exact path={ROUTES.TEAMSPACE}><MainLayout title="Teamspace page" /></Route>
 							<Route exact path={ROUTES.PROJECT}><MainLayout title="Project page" /></Route>
 							<Route exact path={ROUTES.FEDERATIONS}><MainLayout title="Federations page" /></Route>
 							<Route exact path={ROUTES.CONTAINERS}><MainLayout title="Containers page" /></Route>
-							<Route exact path={ROUTES.TASKS}><MainLayout title="Tasks page" /></Route>
-							<Route exact path={ROUTES.USERS}><MainLayout title="Users page" /></Route>
 						</MuiThemeProvider>
 					</ThemeProvider>
 					<Route><V4Root /></Route>

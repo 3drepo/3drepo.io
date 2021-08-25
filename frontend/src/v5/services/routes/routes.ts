@@ -15,29 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { generatePath } from 'react-router';
+
 export const ROUTES = {
 	HOME: '/',
 	TEAMSPACE: '/v5/:teamspace/',
 	PROJECT: '/v5/:teamspace/:project/',
 	FEDERATIONS: '/v5/:teamspace/:project/federations/',
 	CONTAINERS: '/v5/:teamspace/:project/containers/',
-	TASKS: '/v5/tasks/',
-	USERS: '/v5/users/',
-	SETTINGS: 't=settings',
+	TASKS: '/v5/:teamspace?/:project?/tasks/',
+	USERS: '/v5/:teamspace?/:project?/users/',
+	SETTINGS: '/v5/:teamspace?/:project?/settings/',
 };
 
-export const getRouteLink = ({
-	route,
-	...parameters
-}) => {
-	let error = 0;
-	const path = route.replace(/:([^ :]+)\//g, (match, p1) => {
-		if (parameters[p1]) {
-			return `${parameters[p1]}/`;
-		}
-		error++;
-		return null;
-	});
-
-	return error ? '/' : path;
+export const getRouteLink = ({ route, teamspace = '', project = '', federationId = '', containerId = '' }) => {
+	try {
+		return generatePath(route, { teamspace, project, federationId, containerId });
+	} catch (e) {
+		return '/';
+	}
 };

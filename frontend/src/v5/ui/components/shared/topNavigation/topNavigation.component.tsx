@@ -16,40 +16,37 @@
  */
 
 import React from 'react';
-import { useParams, useRouteMatch, useLocation } from 'react-router-dom';
+import { useParams, useRouteMatch } from 'react-router-dom';
 
 import { ROUTES, getRouteLink } from '@/v5/services/routes/routes';
 import { Container, Link } from './topNavigaton.styles';
 
 export const TopNavigation = (): JSX.Element => {
-	const { search } = useLocation();
 	const { teamspace, project } = useParams();
-	const isSettings = search.includes(ROUTES.SETTINGS);
-	const isRouteMatch = (path) => (isSettings ? false : useRouteMatch(path));
 	const isProjectSelected = !!project;
 
 	const links = [{
 		title: 'Federations',
 		to: getRouteLink({ route: ROUTES.FEDERATIONS, teamspace, project }),
-		active: isRouteMatch(ROUTES.FEDERATIONS),
+		active: useRouteMatch(ROUTES.FEDERATIONS),
 		disabled: !isProjectSelected,
 	}, {
 		title: 'Containers',
 		to: getRouteLink({ route: ROUTES.CONTAINERS, teamspace, project }),
-		active: isRouteMatch(ROUTES.CONTAINERS),
+		active: useRouteMatch(ROUTES.CONTAINERS),
 		disabled: !isProjectSelected,
 	}, {
 		title: 'Tasks',
-		to: ROUTES.TASKS,
-		active: isRouteMatch(ROUTES.TASKS),
+		to: getRouteLink({ route: ROUTES.TASKS, teamspace, project }),
+		active: useRouteMatch(ROUTES.TASKS),
 	}, {
 		title: 'Users',
-		active: isRouteMatch(ROUTES.USERS),
-		to: ROUTES.USERS,
+		to: getRouteLink({ route: ROUTES.USERS, teamspace, project }),
+		active: useRouteMatch(ROUTES.USERS),
 	}, {
 		title: 'Settings',
-		to: '?t=settings',
-		active: isSettings,
+		to: getRouteLink({ route: ROUTES.SETTINGS, teamspace, project }),
+		active: useRouteMatch(ROUTES.SETTINGS),
 	}].filter(({ disabled }) => !disabled);
 
 	return (
