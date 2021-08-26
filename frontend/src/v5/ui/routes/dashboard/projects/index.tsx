@@ -14,17 +14,30 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { theme } from '@/v5/ui/themes/theme';
-import { MuiThemeProvider } from '@material-ui/core';
-import { ThemeProvider } from 'styled-components';
+import { discardSlash } from '@/v5/services/routing/routing';
 import React from 'react';
-import { Dashboard } from './dashboard';
+import { useRouteMatch, Route, Switch } from 'react-router-dom';
+import { Containers } from './containers';
+import { Federations } from './federations';
 
-export const Root = () => (
-	<ThemeProvider theme={theme}>
-		<MuiThemeProvider theme={theme}>
-			<Dashboard />
-		</MuiThemeProvider>
-	</ThemeProvider>
-);
+export const ProjectContent = () => {
+	let { path } = useRouteMatch();
+	path = discardSlash(path);
+
+	return (
+		<>
+			project content:
+			<Switch>
+				<Route path={`${path}/federations`}>
+					<Federations />
+				</Route>
+				<Route path={`${path}/containers`}>
+					<Containers />
+				</Route>
+				<Route path={`${path}/settings`}>
+					Project settings
+				</Route>
+			</Switch>
+		</>
+	);
+};

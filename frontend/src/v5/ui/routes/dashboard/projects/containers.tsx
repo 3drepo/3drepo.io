@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { theme } from '@/v5/ui/themes/theme';
-import { MuiThemeProvider } from '@material-ui/core';
-import { ThemeProvider } from 'styled-components';
 import React from 'react';
-import { Dashboard } from './dashboard';
 
-export const Root = () => (
-	<ThemeProvider theme={theme}>
-		<MuiThemeProvider theme={theme}>
-			<Dashboard />
-		</MuiThemeProvider>
-	</ThemeProvider>
+export const Containers = () => (
+	<>
+		Containers:
+		<ul>
+			<li>container 1</li>
+			<li>container 2</li>
+			<li>container 3</li>
+			<li>container 4</li>
+		</ul>
+	</>
 );
