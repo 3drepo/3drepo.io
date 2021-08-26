@@ -23,12 +23,34 @@ import { useForm } from 'react-hook-form';
 import { AppBar } from '@components/shared/appBar';
 import { Breadcrumbs } from '@components/shared/breadcrumbs';
 import { TopNavigation } from '@components/shared/topNavigation';
-import { CircleButton } from '@components/shared/circleButton';
 import { NavigationMenu } from '@components/shared/navigatonMenu';
+import { CircleButton } from '@/v5/ui/controls/circleButton';
 import { Container, ContrastBackground } from './themeLayout.styles';
+
+const menuList = [{
+	title: 'Teamspace title 1',
+	to: '/#teamspace1',
+}, {
+	title: 'Teamspace title 2',
+	to: '/#teamspace2',
+}, {
+	title: 'Teamspace title 3',
+	to: '/#teamspace3',
+}, {
+	title: 'Teamspace title 4',
+	to: '/#teamspace4',
+}, {
+	title: 'Teamspace title 5',
+	to: '/#teamspace5',
+}];
 
 export const ThemeLayout = (): JSX.Element => {
 	const { register } = useForm();
+	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+
+	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
+
+	const handleClose = () => setAnchorEl(null);
 
 	return (
 		<Container>
@@ -205,7 +227,8 @@ export const ThemeLayout = (): JSX.Element => {
 			<br />
 
 			<Typography variant="h3" gutterBottom>Navigation Menu</Typography>
-			<NavigationMenu />
+			<Button variant="contained" color="primary" onClick={handleClick}>Show Menu</Button>
+			<NavigationMenu anchorEl={anchorEl} handleClose={handleClose} list={menuList} />
 			{' '}
 			<br />
 

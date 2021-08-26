@@ -21,28 +21,33 @@ import { Typography } from '@material-ui/core';
 
 import { MenuList, MenuItem, ArrowIcon } from './navigationMenu.styles';
 
-export const NavigationMenu = (): JSX.Element => {
-	const ITEM_LIST = [{
-		title: 'Teamspace title',
-		to: '/teamspace1',
-	}, {
-		title: 'Teamspace title',
-		to: '/teamspace2',
-	}, {
-		title: 'Teamspace title',
-		to: '/teamspace3',
-	}, {
-		title: 'Teamspace title',
-		to: '/teamspace3',
-	}, {
-		title: 'Teamspace title',
-		to: '/teamspace5',
-		disabled: true,
-	}];
+interface IListItem {
+	title: string;
+	to: string;
+}
+
+interface INavigationMenu {
+	anchorEl: null | HTMLElement;
+	handleClose: () => void;
+	list: IListItem[];
+}
+
+export const NavigationMenu = ({ anchorEl, handleClose, list }: INavigationMenu): JSX.Element => {
+	const menuPosition = {
+		getContentAnchorEl: null,
+		anchorOrigin: {
+			vertical: 'bottom',
+			horizontal: 'left',
+		},
+		transformOrigin: {
+			vertical: 'top',
+			horizontal: 'left',
+		},
+	};
 
 	return (
-		<MenuList>
-			{ITEM_LIST.map(({ title, ...props }) => (
+		<MenuList anchorEl={anchorEl} onClose={handleClose} open={Boolean(anchorEl)} {...menuPosition}>
+			{list.map(({ title, ...props }) => (
 				<MenuItem {...props}>
 					<Typography variant="body1" noWrap>
 						{title}
