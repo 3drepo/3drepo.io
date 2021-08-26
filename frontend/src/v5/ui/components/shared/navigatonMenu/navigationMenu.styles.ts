@@ -19,14 +19,6 @@ import styled, { css } from 'styled-components';
 import { Menu as MenuComponent, MenuItem as MenuItemComponent, SvgIcon } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 
-export const ArrowIcon = styled(SvgIcon).attrs({
-	viewBox: '0 0 5 9',
-})`
-	&& {
-		height: 7px;
-		width: 4.5px;
-	}
-`;
 export const MenuList = styled(MenuComponent)`
 	&& {
 		& > ul {
