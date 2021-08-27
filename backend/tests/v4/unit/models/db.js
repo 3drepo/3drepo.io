@@ -165,7 +165,7 @@ describe("Check DB handler", function() {
 		});
 	});
 
-	describe("geCollectionStats", function () {
+	describe("getCollectionStats", function () {
 		it("get collection stats should succeed", async function() {
 			const stats = await db.getCollectionStats(account, "jobs");
 			expect(stats).to.exist;

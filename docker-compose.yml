@@ -1,0 +1,85 @@
+version: '3.7'
+services:
+  alluxio-master:
+    image: alluxio/alluxio:2.6.0
+    command: master
+    restart: always
+    ports:
+      - "19999:19999"
+      - "19998:19998"
+    # env_file:
+    # - .env.alluxio.master
+    environment:
+      ALLUXIO_JAVA_OPTS: "-Dalluxio.master.hostname=alluxio-master -Dalluxio.master.mount.table.root.ufs=/opt/alluxio/underFSStorage"
+    volumes:
+      - efs-models:/opt/alluxio/underFSStorage
+    networks:
+      - internal
+    healthcheck:
+        test: [
+          "CMD-SHELL", 
+          "wget --spider http://alluxio-master:19999"
+          ]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+
+  alluxio-worker:
+    image: alluxio/alluxio:2.6.0
+    command: worker
+    restart: always
+    ports:
+      - "29999:29999"
+      - "30000:30000"
+    # env_file:
+    # - .env.alluxio.worker #
+    environment:
+      ALLUXIO_JAVA_OPTS: "-Dalluxio.worker.memory.size=1G  -Dalluxio.master.hostname=alluxio-master  -Dalluxio.worker.hostname=alluxio-worker"
+    volumes:
+      - efs-models:/opt/alluxio/underFSStorage
+    networks:
+      - internal
+    shm_size: '1gb'
+    depends_on:
+      - alluxio-master
+    healthcheck:
+        test: [
+          "CMD-SHELL", 
+          "wget --spider http://alluxio-worker:30000"
+          ]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+
+  alluxio-proxy:
+    image: alluxio/alluxio:2.6.0
+    command: proxy
+    restart: always
+    ports:
+      - "39999:39999"
+    # env_file:
+    # - .env.alluxio.worker
+    environment:
+      ALLUXIO_JAVA_OPTS: "-Dalluxio.worker.memory.size=1G  -Dalluxio.master.hostname=alluxio-master  -Dalluxio.worker.hostname=alluxio-worker"
+    volumes:
+      - efs-models:/opt/alluxio/underFSStorage
+    networks:
+      - internal
+    shm_size: '1gb'
+    depends_on:
+      - alluxio-worker
+    healthcheck:
+        test: [
+          "CMD-SHELL", 
+          "wget --spider http://alluxio-proxy:39999"
+          ]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+
+volumes:
+  efs-models:
+
+networks:
+  internal:
+
