@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { Menu as MenuComponent, MenuItem as MenuItemComponent, SvgIcon } from '@material-ui/core';
+import { Menu as MenuComponent, MenuItem as MenuItemComponent } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 
 export const MenuList = styled(MenuComponent)`

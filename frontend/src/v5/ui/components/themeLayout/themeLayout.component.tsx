@@ -27,6 +27,25 @@ import { NavigationMenu } from '@components/shared/navigatonMenu';
 import { CircleButton } from '@/v5/ui/controls/circleButton';
 import { Container, ContrastBackground } from './themeLayout.styles';
 
+const LINKS = [{
+	title: 'Federations',
+	to: '#federations',
+	active: true,
+}, {
+	title: 'Containers',
+	to: '#container',
+}, {
+	title: 'Tasks',
+	to: '#tasks',
+}, {
+	title: 'Users',
+	to: '#users',
+}, {
+	title: 'Settings',
+	to: '#settings',
+	disabled: true,
+}];
+
 const menuList = [{
 	title: 'Teamspace title 1',
 	to: '/#teamspace1',
@@ -158,7 +177,7 @@ export const ThemeLayout = (): JSX.Element => {
 
 			<Typography variant="h3" gutterBottom>Top Navigation</Typography>
 			<ContrastBackground>
-				<TopNavigation />
+				<TopNavigation links={LINKS} />
 			</ContrastBackground>
 
 			<Typography variant="h3" gutterBottom>Circle buttons</Typography>

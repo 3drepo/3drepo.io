@@ -18,28 +18,20 @@
 import React from 'react';
 import { Container, Link } from './topNavigaton.styles';
 
-const LINKS = [{
-	title: 'Federations',
-	to: '#federations',
-	active: true,
-}, {
-	title: 'Containers',
-	to: '#container',
-}, {
-	title: 'Tasks',
-	to: '#tasks',
-}, {
-	title: 'Users',
-	to: '#users',
-}, {
-	title: 'Settings',
-	to: '#settings',
-	disabled: true,
-}];
+interface ILink {
+	title: string;
+	to: string;
+	active?: boolean;
+	disabled?: boolean;
+}
 
-export const TopNavigation = (): JSX.Element => (
+interface ITopNavigation {
+	links: ILink[];
+}
+
+export const TopNavigation = ({ links }: ITopNavigation): JSX.Element => (
 	<Container>
-		{LINKS.map(({ title, to, ...props }) => (
+		{links.map(({ title, to, ...props }) => (
 			<Link to={to} {...props}>{title}</Link>
 		))}
 	</Container>
