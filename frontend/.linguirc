@@ -1,0 +1,13 @@
+{
+   "locales": ["en", "es"],
+   "sourceLocale": "en",
+   "catalogs": [{
+      "path": "src/locales/{locale}/messages",
+      "include": ["src"]
+   }],
+   "format": "minimal",
+   "compileNamespace": "ts",
+   "extractBabelOptions": {
+    "presets": ["@babel/preset-typescript"]
+   }
+}
