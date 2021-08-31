@@ -16,7 +16,7 @@
  */
 
 const { getUserFromSession } = require('../../utils/sessions');
-const { hasAccessToTeamspace } = require('../../models/teamspaces');
+const { hasAccessToTeamspace } = require('../../utils/permissions/permissions');
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
 const { validSession } = require('../auth');
