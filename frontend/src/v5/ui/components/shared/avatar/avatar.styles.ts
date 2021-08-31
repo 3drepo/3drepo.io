@@ -15,18 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import styled from 'styled-components';
+import Avatar from '@material-ui/core/Avatar';
 
-import { StyledFab } from './circleButton.styles';
-
-interface ICircleButton {
-	size?: 'large' | 'medium' | 'small';
-	variant?: 'main' | 'contrast';
-	disabled?: boolean;
-}
-
-export const CircleButton: React.FC<ICircleButton> = ({ size = 'large', variant = 'main', children, ...props }) => (
-	<StyledFab size={size} variant={variant} {...props}>
-		{children}
-	</StyledFab>
-);
+export const AvatarComponent = styled(Avatar)`
+	&& {
+		margin: 0;
+	}
+`;

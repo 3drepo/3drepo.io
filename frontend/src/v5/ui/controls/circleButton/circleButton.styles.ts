@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { Avatar, IconButton, Fab } from '@material-ui/core';
+import { Fab } from '@material-ui/core';
 
 const SIZE_MAP = {
 	small: 22,
@@ -36,51 +36,6 @@ const getButtonSize = (size) => {
 
 	return null;
 };
-
-export const UserAvatar = styled(Avatar)`
-	&& {
-		cursor: pointer;
-		height: 38px;
-		width: 38px;
-		color: ${({ theme }) => theme.palette.primary.contrast};
-		background-color: ${({ theme }) => theme.palette.tertiary.main};
-		${({ theme }) => theme.typography.body1};
-	}
-`;
-
-export const StyledIconButton = styled(IconButton)`
-	${({ size }) => getButtonSize(size)};
-
-	${({ disabled }) => disabled && css`
-		&& {
-		pointer-events: none;
-			${UserAvatar} {
-				background-color: ${({ theme }) => theme.palette.secondary.mid};
-				color: ${({ theme }) => theme.palette.secondary.light};
-			}
-		}
-	`};
-
-	&:hover {
-		${UserAvatar} {
-			background-color: ${({ theme }) => theme.palette.tertiary.mid};
-		}
-	}
-
-	&.Mui-focusVisible {
-		${UserAvatar} {
-			height: 36px;
-			width: 36px;
-			border: 1px solid ${({ theme }) => theme.palette.primary.main};
-		}
-	}
-
-	&:active {
-		${UserAvatar} {
-			background-color: ${({ theme }) => theme.palette.tertiary.main};
-		}
-	}
-`;
 
 const mainFabStyles = css`
 	&& {
@@ -158,6 +113,6 @@ const contrastFabStyles = css`
 
 export const StyledFab = styled(Fab)`
 	${({ size }) => getButtonSize(size)};
-	${({ motive }) => motive === 'main' && mainFabStyles}
-	${({ motive }) => motive === 'contrast' && contrastFabStyles}
+	${({ variant }) => variant === 'main' && mainFabStyles}
+	${({ variant }) => variant === 'contrast' && contrastFabStyles}
 `;

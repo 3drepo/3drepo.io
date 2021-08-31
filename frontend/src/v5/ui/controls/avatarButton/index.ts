@@ -15,18 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
-import { StyledFab } from './circleButton.styles';
-
-interface ICircleButton {
-	size?: 'large' | 'medium' | 'small';
-	variant?: 'main' | 'contrast';
-	disabled?: boolean;
-}
-
-export const CircleButton: React.FC<ICircleButton> = ({ size = 'large', variant = 'main', children, ...props }) => (
-	<StyledFab size={size} variant={variant} {...props}>
-		{children}
-	</StyledFab>
-);
+export { AvatarButton } from './avatarButton.component';

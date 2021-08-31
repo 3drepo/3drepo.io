@@ -215,6 +215,18 @@ export const theme = createMuiTheme({
 		},
 	},
 	overrides: {
+		MuiAvatar: {
+			root: {
+				margin: '8px 7px',
+				color: COLOR.PRIMARY_MAIN_CONTRAST,
+				backgroundColor: COLOR.TERTIARY_MAIN,
+				...typography.body1,
+			},
+			colorDefault: {
+				color: null,
+				backgroundColor: null,
+			},
+		},
 		MuiList: {
 			root: {
 				width: 226,
@@ -226,11 +238,6 @@ export const theme = createMuiTheme({
 				paddingBottom: 0,
 			},
 		},
-		MuiAvatar: {
-			root: {
-				margin: '8px 7px',
-			},
-		},
 		MuiFab: {
 			root: {
 				color: COLOR.PRIMARY_MAIN_CONTRAST,
@@ -240,12 +247,21 @@ export const theme = createMuiTheme({
 				backgroundColor: 'transparent',
 				boxShadow: 'none',
 				border: `1px solid ${COLOR.PRIMARY_MAIN_CONTRAST}`,
+				transition: 'none',
 			},
 			label: {
 				'& > *:first-child': {
 					height: 17,
 					width: 'auto',
 				},
+			},
+			extended: {
+				height: null,
+				width: null,
+				padding: null,
+				minWidth: null,
+				minHeight: null,
+				borderRadius: null,
 			},
 		},
 		MuiBreadcrumbs: {

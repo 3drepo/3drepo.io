@@ -17,16 +17,18 @@
 
 import React from 'react';
 
-import { StyledFab } from './circleButton.styles';
+import { Avatar } from '@components/shared/avatar';
+import { StyledIconButton } from './avatarButton.styles';
 
-interface ICircleButton {
-	size?: 'large' | 'medium' | 'small';
-	variant?: 'main' | 'contrast';
+interface IAvatarButton {
 	disabled?: boolean;
 }
 
-export const CircleButton: React.FC<ICircleButton> = ({ size = 'large', variant = 'main', children, ...props }) => (
-	<StyledFab size={size} variant={variant} {...props}>
-		{children}
-	</StyledFab>
-);
+export const AvatarButton: React.FC<IAvatarButton> = ({ children, ...props }) => {
+	console.error('props:', props);
+	return (
+		<StyledIconButton {...props}>
+			<Avatar>{children}</Avatar>
+		</StyledIconButton>
+	);
+};
