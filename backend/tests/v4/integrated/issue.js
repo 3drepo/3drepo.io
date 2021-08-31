@@ -32,6 +32,7 @@ describe("Issues", function () {
 	let agent;
 	let agent2;
 
+	const timeout = 30000;
 	const username = "issue_username";
 	const username2 = "issue_username2";
 	const password = "password";
@@ -249,6 +250,7 @@ describe("Issues", function () {
 		});
 
 		it("with screenshot should succeed", async function() {
+			this.timeout(timeout);
 			const issue = {"name":"Issue test", ...cloneDeep(baseIssue)};
 			issue.viewpoint.screenshot = pngBase64;
 

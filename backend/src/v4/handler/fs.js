@@ -22,24 +22,7 @@ const fs = require("fs");
 const path = require("path");
 const ResponseCodes = require("../response_codes");
 const systemLogger = require("../logger").systemLogger;
-const farmhash = require("farmhash");
 const utils = require("../utils");
-
-const generateFoldernames = (fileName, dirLevels) => {
-	if (dirLevels < 1) {
-		return "";
-	}
-	const folders = [];
-	const minChunkLen = 4;
-	const nameChunkLen = Math.max(fileName.length / dirLevels, minChunkLen);
-
-	for(let i = 0 ; i < dirLevels; i++) {
-		const chunkStart = (i * nameChunkLen) % fileName.length;
-		const fileNameHash = farmhash.fingerprint32(fileName.substr(chunkStart,nameChunkLen) + Math.random());
-		folders.push(fileNameHash & 255);
-	}
-	return folders.join("/");
-};
 
 const createFoldersIfNecessary = (foldersPath) => {
 	return new Promise((resolve, reject) => {
@@ -74,7 +57,7 @@ class FSHandler {
 
 	storeFile(data) {
 		const _id = utils.generateUUID({string: true});
-		const folderNames = generateFoldernames(_id, config.fs.levels);
+		const folderNames = utils.generateFoldernames(_id, config.fs.levels);
 		const link = path.posix.join(folderNames, _id);
 
 		return new Promise((resolve, reject) => {

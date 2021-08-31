@@ -19,6 +19,8 @@
 const FSHandler = require("./fs");
 const S3Handler = require("./s3");
 const GridFSHandler = require("./gridfs");
+const AlluxioHandler = require("./alluxio");
+
 const ResponseCodes = require("../response_codes");
 const SystemLogger = require("../logger.js").systemLogger;
 const config = require("../config.js");
@@ -35,6 +37,8 @@ ExternalServices.getFileStream = (account, collection, type, key) => {
 			return Promise.resolve(S3Handler.getFileStream(key));
 		case "gridfs" :
 			return GridFSHandler.getFileStream(account, collection, key);
+		case "alluxio" :
+			return AlluxioHandler.getFileStream(key);
 		default:
 			SystemLogger.logError(`Unrecognised external service: ${type}`);
 			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);
@@ -44,11 +48,13 @@ ExternalServices.getFileStream = (account, collection, type, key) => {
 ExternalServices.getFile = (account, collection, type, key) => {
 	switch(type) {
 		case "fs" :
-			return  Promise.resolve(FSHandler.getFile(key));
+			return Promise.resolve(FSHandler.getFile(key));
 		case "s3" :
-			return  Promise.resolve(S3Handler.getFile(key));
+			return Promise.resolve(S3Handler.getFile(key));
 		case "gridfs" :
 			return GridFSHandler.getFile(account, collection, key);
+		case "alluxio" :
+			return AlluxioHandler.getFile(key);
 		default:
 			SystemLogger.logError(`Unrecognised external service: ${type}`);
 			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);
@@ -63,6 +69,8 @@ ExternalServices.storeFile = (account, collection, data) => {
 			return FSHandler.storeFile(data);
 		case "gridfs":
 			return GridFSHandler.storeFile(account, collection, data);
+		case "alluxio":
+			return AlluxioHandler.storeFile(data);
 		default:
 			SystemLogger.logError(`Unrecognised external service: ${type}`);
 			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);
@@ -77,6 +85,8 @@ ExternalServices.removeFiles = (account, collection, type, keys) => {
 			return S3Handler.removeFiles(keys);
 		case "gridfs" :
 			return GridFSHandler.removeFiles(account, collection, keys);
+		case "alluxio":
+			return AlluxioHandler.removeFiles(keys);
 		default:
 			SystemLogger.logError(`Unrecognised external service: ${type}`);
 			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);
