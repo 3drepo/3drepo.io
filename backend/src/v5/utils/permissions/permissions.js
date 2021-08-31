@@ -27,7 +27,7 @@ Permissions.isTeamspaceAdmin = async (teamspace, username) => {
 	return admins.includes(username);
 };
 
-Permissions.hasAccessToTeamsspace = hasAccessToTeamspace;
+Permissions.hasAccessToTeamspace = hasAccessToTeamspace;
 
 Permissions.isProjectAdmin = async (teamspace, project, username) => {
 	const admins = await getProjectAdmins(teamspace, project);
