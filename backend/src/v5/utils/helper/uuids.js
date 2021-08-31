@@ -15,15 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const RoutesManager = {};
-const ContainerRoutes = require('./teamspaces/projects/containers/containers');
-const ProjectRoutes = require('./teamspaces/projects/projects');
-const TeamspaceRoutes = require('./teamspaces/teamspaces');
+const Mongo = require('mongodb');
+const UUIDParse = require('uuid-parse');
+const { isUUIDString } = require('./typeCheck');
 
-RoutesManager.init = (app) => {
-	app.use('/v5/teamspaces/', TeamspaceRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects', ProjectRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', ContainerRoutes);
+const UuidUtils = {};
+
+UuidUtils.stringToUUID = (uuid) => {
+	if (!isUUIDString(uuid) || uuid === '') return uuid;
+	const bytes = UUIDParse.parse(uuid);
+	// eslint-disable-next-line new-cap
+	const buf = new Buffer.from(bytes);
+
+	return Mongo.Binary(buf, 3);
 };
 
-module.exports = RoutesManager;
+module.exports = UuidUtils;

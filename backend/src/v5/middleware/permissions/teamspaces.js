@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { convertAllUUIDs } = require('../dataConverter/pathParams');
 const { getUserFromSession } = require('../../utils/sessions');
 const { hasAccessToTeamspace } = require('../../utils/permissions/permissions');
 const { respond } = require('../../utils/responder');
@@ -37,6 +38,6 @@ const checkTeamspaceAccess = async (req, res, next) => {
 	}
 };
 
-TeamspacePerms.hasAccessToTeamspace = validateMany([validSession, checkTeamspaceAccess]);
+TeamspacePerms.hasAccessToTeamspace = validateMany([convertAllUUIDs, validSession, checkTeamspaceAccess]);
 
 module.exports = TeamspacePerms;

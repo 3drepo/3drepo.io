@@ -15,15 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const RoutesManager = {};
-const ContainerRoutes = require('./teamspaces/projects/containers/containers');
-const ProjectRoutes = require('./teamspaces/projects/projects');
-const TeamspaceRoutes = require('./teamspaces/teamspaces');
+const { stringToUUID } = require('../../utils/helper/uuids');
 
-RoutesManager.init = (app) => {
-	app.use('/v5/teamspaces/', TeamspaceRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects', ProjectRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', ContainerRoutes);
+const PathParams = {};
+
+PathParams.convertAllUUIDs = (req, res, next) => {
+	if (req.params) {
+		Object.keys(req.params).forEach((key) => {
+			req.params[key] = stringToUUID(req.params[key]);
+		});
+	}
+
+	next();
 };
 
-module.exports = RoutesManager;
+module.exports = PathParams;
