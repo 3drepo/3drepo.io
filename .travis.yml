@@ -74,7 +74,7 @@ matrix:
       node_js:
         - "14.17.1"
       before_install:
-        - wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl1.0/libssl1.0.0_1.0.2n-1ubuntu5.6_amd64.deb
+        - wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl1.0/libssl1.0.0_1.0.2n-1ubuntu5.7_amd64.deb
         - sudo apt install $PWD/libssl1.0.0_1.0.2n-1ubuntu5.6_amd64.deb
       script:
         - cd backend
