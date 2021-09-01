@@ -409,7 +409,7 @@ class Ticket extends View {
 	*/
 	async create(account, model, newTicket) {
 		if (!newTicket.name) {
-			return Promise.reject({ resCode: responseCodes.INVALID_ARGUMENTS });
+			throw responseCodes.INVALID_ARGUMENTS;
 		}
 
 		// Sets the ticket number
