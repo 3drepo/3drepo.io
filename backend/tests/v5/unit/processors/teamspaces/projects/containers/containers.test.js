@@ -29,7 +29,8 @@ const modelList = [
 	{ _id: 1, name: 'model1', permissions: [{ user: 'user1', permission: 'collaborator' }, { user: 'user2', permission: 'collaborator' }] },
 	{ _id: 2, name: 'model2', permissions: [{ user: 'user2', permission: 'commenter' }] },
 	{ _id: 3, name: 'model3', permissions: [{ user: 'user1', permission: 'viewer' }] },
-	{ _id: 4, name: 'model4', permissions: [], models: [] },
+	{ _id: 4, name: 'model4', permissions: [] },
+	{ _id: 4, name: 'model4' },
 ];
 
 const user1Favourites = [1];
@@ -49,7 +50,7 @@ jest.mock('../../../../../../../src/v5/utils/permissions/permissions', () => ({
 
 const determineResults = (username) => modelList.flatMap(({ permissions, _id, name }) => {
 	const isAdmin = username === 'projAdmin' || username === 'tsAdmin';
-	const hasModelPerm = permissions.find((entry) => entry.user === username);
+	const hasModelPerm = permissions && permissions.find((entry) => entry.user === username);
 	const isFavourite = username === 'user1' && user1Favourites.includes(_id);
 	return isAdmin || hasModelPerm ? { _id, name, role: isAdmin ? 'admin' : hasModelPerm.permission, isFavourite } : [];
 });

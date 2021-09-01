@@ -42,6 +42,11 @@ const models = [
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
+		isFavourite: true,
+	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
@@ -52,8 +57,16 @@ const models = [
 
 const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
-	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], [teamspace]));
-	const modelProms = models.map((model) => ServiceHelper.db.createModel(model.id, model.name, model.properties));
+	const customData = { starredModels: {
+		[teamspace]: models.flatMap(({ _id, isFavourite }) => (isFavourite ? _id : [])),
+	} };
+	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], [teamspace], customData));
+	const modelProms = models.map((model) => ServiceHelper.db.createModel(
+		teamspace,
+		model._id,
+		model.name,
+		model.properties,
+	));
 	return Promise.all([
 		...userProms,
 		...modelProms,
@@ -88,8 +101,8 @@ const testGetContainerList = () => {
 		test('should return the list of containers if the user has access', async () => {
 			const res = await agent.get(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
 			expect(res.body).toEqual({
-				containers: models.flatMap(({ _id, name, properties }) => (properties?.federate ? []
-					: { _id, name, role: 'admin' })),
+				containers: models.flatMap(({ _id, name, properties, isFavourite }) => (properties?.federate ? []
+					: { _id, name, role: 'admin', isFavourite: !!isFavourite })),
 			});
 		});
 	});
