@@ -34,10 +34,12 @@ const testProject = {
 };
 
 const teamspace = 'teamspace';
+const brokenTS = 'teamspace2';
 
 const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user]);
-	await ServiceHelper.db.createUser(tsAdmin, [teamspace]);
+	await ServiceHelper.db.createTeamspace(brokenTS, [tsAdmin.user], true);
+	await ServiceHelper.db.createUser(tsAdmin, [teamspace, brokenTS]);
 	await ServiceHelper.db.createUser(unlicencedUser);
 	await ServiceHelper.db.createProject(teamspace, testProject._id, testProject.name, [], testProject.admins);
 };
@@ -61,10 +63,15 @@ const testGetProjectList = () => {
 			const res = await agent.get(`${route}?key=${tsAdmin.apiKey}`).expect(templates.ok.status);
 			expect(res.body).toEqual({ projects: [{ ...testProject, isAdmin: true }] });
 		});
+
+		test('should fail if an unknown error happened', async () => {
+			const res = await agent.get(`/v5/teamspaces/${brokenTS}/projects?key=${tsAdmin.apiKey}`).expect(templates.unknown.status);
+			expect(res.body.code).toEqual(templates.unknown.code);
+		});
 	});
 };
 
-describe('E2E routes/projects/projects', () => {
+describe('E2E routes/teamspaces/projects/projects', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);
