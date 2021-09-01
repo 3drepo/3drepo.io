@@ -21,7 +21,7 @@ const TeamspaceRoutes = require('./teamspaces/teamspaces');
 
 RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/', TeamspaceRoutes);
-	app.use('/v5/teamspaces/:teamspaces/projects', ProjectRoutes);
+	app.use('/v5/teamspaces/:teamspace/projects', ProjectRoutes);
 };
 
 module.exports = RoutesManager;
