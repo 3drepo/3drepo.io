@@ -58,7 +58,7 @@ const testGetProjectList = () => {
 			];
 			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
 
-			const res = await Project.getProjectList('someTS', 'someProject');
+			const res = await Project.getProjectList('someTS');
 			expect(res).toEqual(expectedData);
 		});
 	});
