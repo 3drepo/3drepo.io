@@ -28,7 +28,7 @@ Containers.getContainerList = async (teamspace, project, user) => {
 
 	return modelSettings.flatMap(({ _id, name, permissions: modelPerms }) => {
 		const perm = modelPerms ? modelPerms.find((entry) => entry.user === user) : undefined;
-		return (!isAdmin && !perm) ? [] : {	_id, name, role: isAdmin ? 'admin' : perm.permission };
+		return (!isAdmin && !perm) ? [] : { _id, name, role: isAdmin ? 'admin' : perm.permission };
 	});
 };
 

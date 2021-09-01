@@ -25,11 +25,7 @@ let server;
 let agent;
 
 // This is the user being used for tests
-const testUser = {
-	user: ServiceHelper.generateRandomString(),
-	password: ServiceHelper.generateRandomString(),
-	apiKey: ServiceHelper.generateRandomString(),
-};
+const testUser = ServiceHelper.generateUserCredentials();
 
 // This is the list of teamspaces the user has access to
 const testUserTSAccess = [
@@ -43,9 +39,7 @@ const setupData = async () => {
 		({ name, isAdmin }) => ServiceHelper.db.createTeamspace(name, isAdmin ? [testUser.user] : []),
 	));
 	await ServiceHelper.db.createUser(
-		testUser.user,
-		testUser.password,
-		{ apiKey: testUser.apiKey },
+		testUser,
 		testUserTSAccess.map(({ name }) => name),
 	);
 };
