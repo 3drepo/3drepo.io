@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { uuidToString } = require('../../../utils/helper/uuid');
 const {
 	hasProjectAdminPermissions,
 	hasReadAccessToModel,
@@ -35,7 +36,7 @@ Projects.getProjectList = async (teamspace, user) => {
 	return (await Promise.all(projects.map(async ({ _id, name, permissions, models }) => {
 		const isAdmin = tsAdmin || hasProjectAdminPermissions(permissions, user);
 		const hasAccess = isAdmin || await hasSomeModelAccess(teamspace, models, user);
-		return hasAccess ? { _id, name, isAdmin } : [];
+		return hasAccess ? { _id: uuidToString(_id), name, isAdmin } : [];
 	}))).flat();
 };
 

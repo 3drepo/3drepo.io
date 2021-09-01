@@ -36,6 +36,11 @@ const unlicencedUser = {
 	apiKey: 'projectsUnlicencedUserKey',
 };
 
+const testProject = {
+	name: 'project1',
+	isAdmin: true,
+};
+
 const setupData = async () => {
 	await ServiceHelper.db.createUser('teamspace', 'teamspace', { permissions: [{ user: tsAdmin.user, permissions: 'teamspace_admin' }] });
 	await ServiceHelper.db.createTeamspaceRole('teamspace');
@@ -45,6 +50,8 @@ const setupData = async () => {
 		{ apiKey: tsAdmin.apiKey },
 		[{ db: 'teamspace', role: 'team_member' }],
 	);
+	const project = await ServiceHelper.db.createProject('teamspace', testProject.name, tsAdmin.user, []);
+	testProject._id = project._id;
 };
 
 const testGetProjectList = () => {
@@ -63,7 +70,7 @@ const testGetProjectList = () => {
 		});
 		test('give return a project list if the user has a valid session and is admin of teamspace', async () => {
 			const res = await agent.get(`/v5/teamspaces/teamspace/projects?key=${tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual({ projects: [] });
+			expect(res.body).toEqual({ projects: [ testProject ] });
 		});
 	});
 };

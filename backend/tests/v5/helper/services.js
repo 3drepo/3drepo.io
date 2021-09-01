@@ -20,6 +20,7 @@ const { src, srcV4 } = require('./path');
 const { createApp } = require(`${srcV4}/services/api`);
 const DbHandler = require(`${src}/handler/db`);
 const { createTeamSpaceRole } = require(`${srcV4}/models/role`);
+const { createProject } = require(`${srcV4}/models/project`);
 
 const db = {};
 const ServiceHelper = { db };
@@ -30,6 +31,9 @@ db.createUser = async (user, pwd, customData = {}, roles = []) => {
 };
 
 db.createTeamspaceRole = (ts) => createTeamSpaceRole(ts);
+
+db.createProject = (ts, projectName, username, userPermissions) =>
+	createProject(ts, projectName, username, userPermissions);
 
 ServiceHelper.app = () => createApp().listen(8080);
 
