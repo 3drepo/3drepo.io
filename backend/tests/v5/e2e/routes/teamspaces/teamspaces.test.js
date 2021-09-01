@@ -39,16 +39,14 @@ const testUserTSAccess = [
 ];
 
 const setupData = async () => {
-	await Promise.all(testUserTSAccess.map(async ({ name, isAdmin }) => {
-		await ServiceHelper.db.createUser(name, name,
-			{ permissions: isAdmin ? [{ user: testUser.user, permissions: 'teamspace_admin' }] : [] });
-		await ServiceHelper.db.createTeamspaceRole(name);
-	}));
+	await Promise.all(testUserTSAccess.map(
+		({ name, isAdmin }) => ServiceHelper.db.createTeamspace(name, isAdmin ? [testUser.user] : []),
+	));
 	await ServiceHelper.db.createUser(
 		testUser.user,
 		testUser.password,
 		{ apiKey: testUser.apiKey },
-		testUserTSAccess.map(({ name }) => ({ db: name, role: 'team_member' })),
+		testUserTSAccess.map(({ name }) => name),
 	);
 };
 

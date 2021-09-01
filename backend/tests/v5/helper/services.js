@@ -20,16 +20,26 @@ const { src, srcV4 } = require('./path');
 const { createApp } = require(`${srcV4}/services/api`);
 const DbHandler = require(`${src}/handler/db`);
 const { createTeamSpaceRole } = require(`${srcV4}/models/role`);
+const { TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 
 const db = {};
 const ServiceHelper = { db };
 
-db.createUser = async (user, pwd, customData = {}, roles = []) => {
+db.createUser = async (user, pwd, customData = {}, tsList = []) => {
+	const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));
 	const adminDB = await DbHandler.getAuthDB();
 	return adminDB.addUser(user, pwd, { customData, roles });
 };
 
 db.createTeamspaceRole = (ts) => createTeamSpaceRole(ts);
+
+db.createTeamspace = async (teamspace, admins = []) => {
+	const permissions = admins.map((adminUser) => ({ user: adminUser, permissions: TEAMSPACE_ADMIN }));
+	return Promise.all([
+		ServiceHelper.db.createUser(teamspace, teamspace, { permissions }),
+		ServiceHelper.db.createTeamspaceRole(teamspace),
+	]);
+};
 
 ServiceHelper.app = () => createApp().listen(8080);
 
