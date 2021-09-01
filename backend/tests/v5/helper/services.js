@@ -38,10 +38,12 @@ db.createUser = async (userCredentials, tsList = [], customData = {}) => {
 
 db.createTeamspaceRole = (ts) => createTeamSpaceRole(ts);
 
-db.createTeamspace = (teamspace, admins = []) => {
+// breaking = create a broken schema for teamspace to trigger errors for testing
+db.createTeamspace = (teamspace, admins = [], breaking = false) => {
 	const permissions = admins.map((adminUser) => ({ user: adminUser, permissions: TEAMSPACE_ADMIN }));
 	return Promise.all([
-		ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [], { permissions }),
+		ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [],
+			{ permissions: breaking ? undefined : permissions }),
 		ServiceHelper.db.createTeamspaceRole(teamspace),
 	]);
 };
