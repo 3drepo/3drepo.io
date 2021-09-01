@@ -15,11 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const mongo = require("mongodb");
-
 const { src } = require('../../../helper/path');
 
-const UUIDHelper = require(`${src}/utils/helper/uuid`);
+const UUIDHelper = require(`${src}/utils/helper/uuids`);
 
 const matchHelper = (func, string, match) => {
 	const res = func(string);
@@ -28,9 +26,8 @@ const matchHelper = (func, string, match) => {
 
 const testStringToUUID = () => {
 	describe.each([
-		['00000000-0000-0000-0000-000000000001', 'AAAAAAAAAAAAAAAAAAAAAQ=='],
 		['ef0857b6-4cc7-4be1-b2d6-c032dce7806a', '7whXtkzHS+Gy1sAy3OeAag=='],
-		['', 'AAAAAAAAAAAAAAAAAAAAAA=='],
+		['', ''],
 		[undefined, undefined],
 	])('String to UUID', (source, target) => {
 		test(`with ${source} should return ${target}`, () => {
@@ -48,10 +45,9 @@ const testUUIDToString = () => {
 	];
 	const uuidAndStringPairs = uuidTargets.map((target) => [UUIDHelper.stringToUUID(target), target]);
 	uuidAndStringPairs.push(['', '']);
-	console.log(uuidAndStringPairs);
 	describe.each(uuidAndStringPairs)('UUID to String', (source, target) => {
 		test(`with ${source} should result in ${target}`, () => {
-			matchHelper(UUIDHelper.uuidToString, source, target);
+			matchHelper(UUIDHelper.UUIDToString, source, target);
 		});
 	});
 };

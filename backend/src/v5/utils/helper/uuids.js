@@ -15,16 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const _ = require('lodash');
+const Mongo = require('mongodb');
+const UUIDParse = require('uuid-parse');
+const { isUUIDString } = require('./typeCheck');
 
-const TypeChecker = {};
+const UuidUtils = {};
 
-TypeChecker.isBuffer = (buf) => !!(buf && Buffer.isBuffer(buf));
-TypeChecker.isString = (value) => _.isString(value);
-TypeChecker.isUUIDString = (uuid) => {
-	if (!TypeChecker.isString(uuid)) return false;
-	const hasMatch = uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
-	return hasMatch?.length > 0;
+UuidUtils.stringToUUID = (uuid) => {
+	if (!isUUIDString(uuid) || uuid === '') return uuid;
+	const bytes = UUIDParse.parse(uuid);
+	// eslint-disable-next-line new-cap
+	const buf = new Buffer.from(bytes);
+
+	return Mongo.Binary(buf, 3);
 };
 
-module.exports = TypeChecker;
+UuidUtils.UUIDToString = (uuid) => {
+	try {
+		return UUIDParse.unparse(uuid.buffer);
+	} catch {
+		return uuid;
+	}
+};
+
+module.exports = UuidUtils;
