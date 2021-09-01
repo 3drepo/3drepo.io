@@ -15,25 +15,67 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const Crypto = require('crypto');
+
 const { src, srcV4 } = require('./path');
 
 const { createApp } = require(`${srcV4}/services/api`);
 const DbHandler = require(`${src}/handler/db`);
 const { createTeamSpaceRole } = require(`${srcV4}/models/role`);
-const { createProject } = require(`${srcV4}/models/project`);
+const { generateUUID, uuidToString, stringToUUID } = require(`${srcV4}/utils`);
+const { PROJECT_ADMIN, TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 
 const db = {};
 const ServiceHelper = { db };
 
-db.createUser = async (user, pwd, customData = {}, roles = []) => {
+// userCredentials should be the same format as the return value of generateUserCredentials
+db.createUser = async (userCredentials, tsList = [], customData = {}) => {
+	const { user, password, apiKey } = userCredentials;
+	const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));
 	const adminDB = await DbHandler.getAuthDB();
-	return adminDB.addUser(user, pwd, { customData, roles });
+	return adminDB.addUser(user, password, { customData: { ...customData, apiKey }, roles });
 };
 
 db.createTeamspaceRole = (ts) => createTeamSpaceRole(ts);
 
-db.createProject = (ts, projectName, username, userPermissions) =>
-	createProject(ts, projectName, username, userPermissions);
+// breaking = create a broken schema for teamspace to trigger errors for testing
+db.createTeamspace = (teamspace, admins = [], breaking = false) => {
+	const permissions = admins.map((adminUser) => ({ user: adminUser, permissions: TEAMSPACE_ADMIN }));
+	return Promise.all([
+		ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [],
+			{ permissions: breaking ? undefined : permissions }),
+		ServiceHelper.db.createTeamspaceRole(teamspace),
+	]);
+};
+
+db.createProject = (teamspace, _id, name, models = [], admins = []) => {
+	const project = {
+		_id: stringToUUID(_id),
+		name,
+		models,
+		permissions: admins.map((user) => ({ user, permissions: [PROJECT_ADMIN] })),
+	};
+
+	return DbHandler.insertOne(teamspace, 'projects', project);
+};
+
+db.createModel = (teamspace, _id, name, props) => {
+	const settings = {
+		_id,
+		name,
+		...props,
+	};
+	return DbHandler.insertOne(teamspace, 'settings', settings);
+};
+
+ServiceHelper.generateUUIDString = () => uuidToString(generateUUID());
+ServiceHelper.generateRandomString = () => Crypto.randomBytes(15).toString('hex');
+
+ServiceHelper.generateUserCredentials = () => ({
+	user: ServiceHelper.generateRandomString(),
+	password: ServiceHelper.generateRandomString(),
+	apiKey: ServiceHelper.generateRandomString(),
+});
 
 ServiceHelper.app = () => createApp().listen(8080);
 
