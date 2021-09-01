@@ -26,16 +26,16 @@ let agent;
 
 // This is the user being used for tests
 const testUser = {
-	user: 'user1',
-	password: 'someComplicatedPassword!234',
-	apiKey: '1234',
+	user: ServiceHelper.generateRandomString(),
+	password: ServiceHelper.generateRandomString(),
+	apiKey: ServiceHelper.generateRandomString(),
 };
 
 // This is the list of teamspaces the user has access to
 const testUserTSAccess = [
-	{ name: 'ts1', isAdmin: true },
-	{ name: 'ts2', isAdmin: false },
-	{ name: 'ts3', isAdmin: true },
+	{ name: ServiceHelper.generateRandomString(), isAdmin: true },
+	{ name: ServiceHelper.generateRandomString(), isAdmin: false },
+	{ name: ServiceHelper.generateRandomString(), isAdmin: true },
 ];
 
 const setupData = async () => {
