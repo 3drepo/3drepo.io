@@ -23,10 +23,10 @@ const Projects = require(`${src}/processors/teamspaces/projects/projects`);
 const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 
 const projectList = [
-	{ _id: 1, name: 'project1', permissions: [{ user: 'projAdmin', permissions: [PROJECT_ADMIN] }], models: ['modelA'] },
-	{ _id: 2, name: 'project2', permissions: [{ user: 'projAdmin', permissions: [PROJECT_ADMIN] }], models: ['modelB'] },
-	{ _id: 3, name: 'project3', permissions: [{ user: 'mixedUser', permissions: [PROJECT_ADMIN] }], models: [] },
-	{ _id: 4, name: 'project4', permissions: [], models: [] },
+	{ _id: '1', name: 'project1', permissions: [{ user: 'projAdmin', permissions: [PROJECT_ADMIN] }], models: ['modelA'] },
+	{ _id: '2', name: 'project2', permissions: [{ user: 'projAdmin', permissions: [PROJECT_ADMIN] }], models: ['modelB'] },
+	{ _id: '3', name: 'project3', permissions: [{ user: 'mixedUser', permissions: [PROJECT_ADMIN] }], models: [] },
+	{ _id: '4', name: 'project4', permissions: [], models: [] },
 ];
 
 const modelReadPermissions = {

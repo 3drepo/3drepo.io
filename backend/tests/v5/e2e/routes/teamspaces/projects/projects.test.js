@@ -25,32 +25,30 @@ let server;
 let agent;
 
 // These are the users being used for tests
-const tsAdmin = {
-	user: 'projectsTSAdmin',
-	password: 'someComplicatedPassword!234',
-	apiKey: 'projectsTSAdminKey',
-};
-const unlicencedUser = {
-	user: 'projectsUnlicencedUser',
-	password: 'someComplicatedPassword!234',
-	apiKey: 'projectsUnlicencedUserKey',
+const tsAdmin = ServiceHelper.generateUserCredentials();
+const unlicencedUser = ServiceHelper.generateUserCredentials();
+
+const testProject = {
+	_id: ServiceHelper.generateUUIDString(),
+	name: ServiceHelper.generateRandomString(),
 };
 
+const teamspace = 'teamspace';
+const brokenTS = 'teamspace2';
+
 const setupData = async () => {
-	await ServiceHelper.db.createUser('teamspace', 'teamspace', { permissions: [{ user: tsAdmin.user, permissions: 'teamspace_admin' }] });
-	await ServiceHelper.db.createTeamspaceRole('teamspace');
-	await ServiceHelper.db.createUser(
-		tsAdmin.user,
-		tsAdmin.password,
-		{ apiKey: tsAdmin.apiKey },
-		[{ db: 'teamspace', role: 'team_member' }],
-	);
+	await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user]);
+	await ServiceHelper.db.createTeamspace(brokenTS, [tsAdmin.user], true);
+	await ServiceHelper.db.createUser(tsAdmin, [teamspace, brokenTS]);
+	await ServiceHelper.db.createUser(unlicencedUser);
+	await ServiceHelper.db.createProject(teamspace, testProject._id, testProject.name, [], testProject.admins);
 };
 
 const testGetProjectList = () => {
 	describe('Get project list', () => {
+		const route = `/v5/teamspaces/${teamspace}/projects`;
 		test('should fail without a valid session', async () => {
-			const res = await agent.get('/v5/teamspaces/teamspace/projects').expect(templates.notLoggedIn.status);
+			const res = await agent.get(route).expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 		test('should fail without a valid teamspace', async () => {
@@ -58,17 +56,22 @@ const testGetProjectList = () => {
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 		test('should fail without a valid teamspace licence', async () => {
-			const res = await agent.get(`/v5/teamspaces/teamspace/projects?key=${unlicencedUser.apiKey}`).expect(templates.notLoggedIn.status);
-			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+			const res = await agent.get(`${route}?key=${unlicencedUser.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 		test('give return a project list if the user has a valid session and is admin of teamspace', async () => {
-			const res = await agent.get(`/v5/teamspaces/teamspace/projects?key=${tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual({ projects: [] });
+			const res = await agent.get(`${route}?key=${tsAdmin.apiKey}`).expect(templates.ok.status);
+			expect(res.body).toEqual({ projects: [{ ...testProject, isAdmin: true }] });
+		});
+
+		test('should fail if an unknown error happened', async () => {
+			const res = await agent.get(`/v5/teamspaces/${brokenTS}/projects?key=${tsAdmin.apiKey}`).expect(templates.unknown.status);
+			expect(res.body.code).toEqual(templates.unknown.code);
 		});
 	});
 };
 
-describe('E2E routes/projects/projects', () => {
+describe('E2E routes/teamspaces/projects/projects', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);

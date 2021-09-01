@@ -30,4 +30,12 @@ UuidUtils.stringToUUID = (uuid) => {
 	return Mongo.Binary(buf, 3);
 };
 
+UuidUtils.UUIDToString = (uuid) => {
+	try {
+		return UUIDParse.unparse(uuid.buffer);
+	} catch {
+		return uuid;
+	}
+};
+
 module.exports = UuidUtils;
