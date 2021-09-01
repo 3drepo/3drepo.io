@@ -50,7 +50,7 @@ const setupData = async () => {
 const testGetProjectList = () => {
 	describe('Get project list', () => {
 		test('should fail without a valid session', async () => {
-			const res = await agent.get(`/v5/teamspaces/teamspace/projects`).expect(templates.notLoggedIn.status);
+			const res = await agent.get('/v5/teamspaces/teamspace/projects').expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 		test('should fail without a valid teamspace', async () => {

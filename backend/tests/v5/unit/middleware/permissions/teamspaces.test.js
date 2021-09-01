@@ -30,8 +30,8 @@ const TSMiddlewares = require(`${src}/middleware/permissions/teamspaces`);
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 Teamspace.hasAccessToTeamspace.mockImplementation((teamspace) => teamspace === 'ts');
-Sessions.isSessionValid.mockImplementation((session, ref) => !!session);
-Sessions.getUserFromSession.mockImplementation((session) => 'hi');
+Sessions.isSessionValid.mockImplementation((session) => !!session);
+Sessions.getUserFromSession.mockImplementation(() => 'hi');
 
 const testHasAccessToTeamspace = () => {
 	describe('HasAccessToTeamspace', () => {
