@@ -21,6 +21,8 @@ jest.mock('../../../../../../../src/v5/models/projects');
 const ProjectsModel = require(`${src}/models/projects`);
 jest.mock('../../../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
+jest.mock('../../../../../../../src/v5/models/users');
+const Users = require(`${src}/models/users`);
 const Containers = require(`${src}/processors/teamspaces/projects/containers/containers`);
 
 const modelList = [
@@ -30,10 +32,13 @@ const modelList = [
 	{ _id: 4, name: 'model4', permissions: [], models: [] },
 ];
 
+const user1Favourites = [1];
+
 const project = { _id: 1, name: 'project', models: modelList.map(({ _id }) => _id) };
 
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getContainers.mockImplementation(() => modelList);
+Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
 
 // Permissions mock
 jest.mock('../../../../../../../src/v5/utils/permissions/permissions', () => ({
@@ -45,7 +50,8 @@ jest.mock('../../../../../../../src/v5/utils/permissions/permissions', () => ({
 const determineResults = (username) => modelList.flatMap(({ permissions, _id, name }) => {
 	const isAdmin = username === 'projAdmin' || username === 'tsAdmin';
 	const hasModelPerm = permissions.find((entry) => entry.user === username);
-	return isAdmin || hasModelPerm ? { _id, name, role: isAdmin ? 'admin' : hasModelPerm.permission } : [];
+	const isFavourite = username === 'user1' && user1Favourites.includes(_id);
+	return isAdmin || hasModelPerm ? { _id, name, role: isAdmin ? 'admin' : hasModelPerm.permission, isFavourite } : [];
 });
 
 const testGetContainerList = () => {
