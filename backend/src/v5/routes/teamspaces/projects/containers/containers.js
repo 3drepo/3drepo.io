@@ -50,7 +50,7 @@ const establishRoutes = () => {
 	 *           type: string
    	 *       - project:
 	 *         name: project
-	 *         description: name of project
+	 *         description: ID of project
 	 *         in: path
 	 *         required: true
 	 *         schema:
