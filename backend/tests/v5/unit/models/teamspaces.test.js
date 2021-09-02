@@ -22,6 +22,20 @@ const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 
+const testHasAccessToTeamspace = () => {
+	test('should return true if the user has access to teamspace', async () => {
+		jest.spyOn(db, 'findOne').mockResolvedValue({ _id: 'admin.userName' });
+		const res = await Teamspace.hasAccessToTeamspace('teamspace', 'user');
+		expect(res).toBeTruthy();
+	});
+
+	test('should return false if the user do not have access to teamspace', async () => {
+		jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+		const res = await Teamspace.hasAccessToTeamspace('teamspace', 'user');
+		expect(res).toBeFalsy();
+	});
+};
+
 const testTeamspaceAdmins = () => {
 	describe('Get teamspace admins', () => {
 		test('should return list of admins if teamspace exists', async () => {
@@ -50,4 +64,5 @@ const testTeamspaceAdmins = () => {
 
 describe('models/teamspaces', () => {
 	testTeamspaceAdmins();
+	testHasAccessToTeamspace();
 });

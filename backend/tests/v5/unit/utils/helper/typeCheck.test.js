@@ -50,7 +50,25 @@ const testIsString = () => {
 	});
 };
 
+const testIsUUIDString = () => {
+	describe.each(
+		[
+			[Buffer.from('abc'), false],
+			['7591fbdb-52b9-490a-8a77-fdb57c57dbc8', true],
+			['', false],
+			['some random string', false],
+			[3, false],
+			[undefined, false],
+		],
+	)('Is UUID String', (item, isTrue) => {
+		test(`${item} should return ${isTrue}`, () => {
+			expect(TypeChecker.isUUIDString(item)).toBe(isTrue);
+		});
+	});
+};
+
 describe('utils/helpers/typeCheck', () => {
 	testIsBuffer();
 	testIsString();
+	testIsUUIDString();
 });
