@@ -18,32 +18,29 @@
 import styled, { css } from 'styled-components';
 import { IconButton } from '@material-ui/core';
 
-import { AvatarComponent } from '@components/shared/avatar/avatar.styles';
-
 export const StyledIconButton = styled(IconButton)`
 	&& {
-		margin: 8px 7px;
+		margin: 0;
 		padding: 0;
 	}
 
 	${({ disabled }) => disabled && css`
 		&& {
 		pointer-events: none;
-			${AvatarComponent} {
+			.MuiAvatar-root {
 				background-color: ${({ theme }) => theme.palette.secondary.mid};
 				color: ${({ theme }) => theme.palette.secondary.light};
 			}
 		}
 	`};
-
 	&:hover {
-		${AvatarComponent} {
+		.MuiAvatar-root {
 			background-color: ${({ theme }) => theme.palette.tertiary.mid};
 		}
 	}
 
 	&.Mui-focusVisible {
-		${AvatarComponent} {
+		.MuiAvatar-root {
 			height: 36px;
 			width: 36px;
 			border: 1px solid ${({ theme }) => theme.palette.primary.main};
@@ -51,7 +48,7 @@ export const StyledIconButton = styled(IconButton)`
 	}
 
 	&:active {
-		${AvatarComponent} {
+		.MuiAvatar-root {
 			background-color: ${({ theme }) => theme.palette.tertiary.main};
 		}
 	}

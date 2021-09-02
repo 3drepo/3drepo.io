@@ -17,7 +17,7 @@
 
 import React from 'react';
 
-import { Avatar } from '@components/shared/avatar';
+import Avatar from '@material-ui/core/Avatar';
 import { StyledIconButton } from './avatarButton.styles';
 
 interface IAvatarButton {
