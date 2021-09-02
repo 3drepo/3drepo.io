@@ -215,6 +215,17 @@ export const theme = createMuiTheme({
 		},
 	},
 	overrides: {
+		MuiAppBar: {
+			root: {
+				boxShadow: 'none',
+				paddingLeft: 20,
+				paddingRight: 20,
+				minHeight: 64,
+				display: 'flex',
+				flexDirection: 'row',
+				alignItems: 'center',
+			},
+		},
 		MuiAvatar: {
 			root: {
 				margin: '8px 7px',

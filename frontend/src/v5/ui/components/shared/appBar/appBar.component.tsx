@@ -18,13 +18,14 @@
 import React from 'react';
 
 import Logo from '@assets/icons/logo.svg';
-import { Container, Items } from './appBar.styles';
+import { AppBar as MuiAppBar } from '@material-ui/core';
+import { Items } from './appBar.styles';
 
 export const AppBar = (): JSX.Element => (
-	<Container>
+	<MuiAppBar color="secondary">
 		<Items>
 			<Logo />
 		</Items>
 		<Items />
-	</Container>
+	</MuiAppBar>
 );
