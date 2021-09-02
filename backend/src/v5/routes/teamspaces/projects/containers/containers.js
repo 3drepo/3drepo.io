@@ -18,7 +18,7 @@
 const Containers = require('../../../../processors/teamspaces/projects/containers/containers');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../utils/sessions');
-const { hasAccessToTeamspace } = require('../../../../middleware/permissions/teamspaces');
+const { hasAccessToTeamspace } = require('../../../../middleware/permissions/permissions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
 

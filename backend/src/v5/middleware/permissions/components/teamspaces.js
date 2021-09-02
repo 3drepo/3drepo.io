@@ -15,17 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { convertAllUUIDs } = require('../dataConverter/pathParams');
-const { getUserFromSession } = require('../../utils/sessions');
-const { hasAccessToTeamspace } = require('../../utils/permissions/permissions');
-const { respond } = require('../../utils/responder');
-const { templates } = require('../../utils/responseCodes');
-const { validSession } = require('../auth');
-const { validateMany } = require('../common');
+const { getUserFromSession } = require('../../../utils/sessions');
+const { hasAccessToTeamspace } = require('../../../utils/permissions/permissions');
+const { respond } = require('../../../utils/responder');
+const { templates } = require('../../../utils/responseCodes');
 
 const TeamspacePerms = {};
 
-const checkTeamspaceAccess = async (req, res, next) => {
+TeamspacePerms.isTeamspaceMember = async (req, res, next) => {
 	const { session, params } = req;
 	const user = getUserFromSession(session);
 	const { teamspace } = params;
@@ -37,7 +34,5 @@ const checkTeamspaceAccess = async (req, res, next) => {
 		respond(req, res, templates.teamspaceNotFound);
 	}
 };
-
-TeamspacePerms.hasAccessToTeamspace = validateMany([convertAllUUIDs, validSession, checkTeamspaceAccess]);
 
 module.exports = TeamspacePerms;

@@ -19,7 +19,7 @@ const Projects = require('../../../processors/teamspaces/projects/projects');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../utils/helper/uuids');
 const { getUserFromSession } = require('../../../utils/sessions');
-const { hasAccessToTeamspace } = require('../../../middleware/permissions/teamspaces');
+const { hasAccessToTeamspace } = require('../../../middleware/permissions/permissions');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
 
