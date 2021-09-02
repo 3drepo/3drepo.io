@@ -19,7 +19,6 @@ import React from 'react';
 
 import { Typography } from '@material-ui/core';
 
-import { ArrowIcon } from '@assets/icons';
 import { MenuList, MenuItem } from './navigationMenu.styles';
 
 interface IListItem {
@@ -53,7 +52,6 @@ export const NavigationMenu = ({ anchorEl, handleClose, list }: INavigationMenu)
 					<Typography variant="body1" noWrap>
 						{title}
 					</Typography>
-					<ArrowIcon />
 				</MenuItem>
 			))}
 		</MenuList>

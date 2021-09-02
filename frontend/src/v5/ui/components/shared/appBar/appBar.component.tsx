@@ -17,7 +17,7 @@
 
 import React from 'react';
 
-import { Logo } from '@components/shared/logo';
+import Logo from '@assets/icons/logo.svg';
 import { Container, Items } from './appBar.styles';
 
 export const AppBar = (): JSX.Element => (
