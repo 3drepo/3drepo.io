@@ -32,20 +32,20 @@ const getContainerList = (req, res) => {
 
 const deleteFavourites =(req, res)=>{
 	const user = req.session.user.username;
-	const { teamspace } = req.params;
+	const { teamspace,project } = req.params;
 	const favouritesToRemove = req.body.containers;
 
-	Containers.deleteFavourites(user, teamspace, favouritesToRemove).then((favourites) => {
+	Containers.deleteFavourites(user, teamspace,project, favouritesToRemove).then((favourites) => {
 		respond(req, res, templates.ok, {favourites});
 	}).catch((err) => respond(req, res, err));
 }
 
 const appendFavourites = (req, res) => {
 	const user = req.session.user.username;
-	const { teamspace } = req.params;
+	const { teamspace,project } = req.params;
 	const favouritesToAdd = req.body.containers;
 
-	Containers.appendFavourites(user, teamspace, favouritesToAdd).then((favourites) => {
+	Containers.appendFavourites(user, teamspace,project, favouritesToAdd).then((favourites) => {
 		respond(req, res, templates.ok, { favourites });
 	}).catch((err) => respond(req, res, err));
 };
