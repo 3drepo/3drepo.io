@@ -15,17 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const RoutesManager = {};
-const ProjectRoutes = require('./teamspaces/projects/projects');
-const ContainerRoutes = require('./teamspaces/projects/containers/containers');
-const FederationRoutes = require('./teamspaces/projects/federations/federations');
-const TeamspaceRoutes = require('./teamspaces/teamspaces');
+const { appendFavourites, deleteFavourites } = require('../../../../models/users');
 
-RoutesManager.init = (app) => {
-	app.use('/v5/teamspaces/', TeamspaceRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects', ProjectRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', ContainerRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects/:project/federations', FederationRoutes);
+const Containers = {};
+
+Containers.appendFavourites = async (username,teamspace, favouritesToAdd) => {
+	return await appendFavourites(username, teamspace, favouritesToAdd);;
 };
 
-module.exports = RoutesManager;
+Containers.deleteFavourites = async (username,teamspace,favouritesToRemove) => {	
+	return deleteFavourites(username, teamspace, favouritesToRemove);;
+};
+
+module.exports = Containers;

@@ -19,6 +19,7 @@ const db = require('../handler/db');
 const { templates } = require('../utils/responseCodes');
 
 const User = {};
+const COLL_NAME = "system.users";
 
 const userQuery = (query, projection, sort) => db.findOne('admin', 'system.users', query, projection, sort);
 
@@ -34,5 +35,48 @@ User.getAccessibleTeamspaces = async (username) => {
 	const userDoc = await getUser(username, { roles: 1 });
 	return userDoc.roles.map((role) => role.db);
 };
+
+User.appendFavourites = async (username, teamspace, favouritesToAdd) =>{
+	const userProfile = await db.findOne("admin", COLL_NAME, {user: username}, {user: 1,
+		"customData.starredModels" : 1
+	});
+
+	const favourites = userProfile.customData.starredModels || {};
+	if(!favourites[teamspace]) {
+		favourites[teamspace] = [];
+	}
+
+	for (const favourite of favouritesToAdd) { 
+		if(favourites[teamspace].indexOf(favourite) === -1) {
+			favourites[teamspace].push(favourite);
+		}
+	}
+
+	await db.updateOne("admin", COLL_NAME, {user: username}, {$set: { "customData.starredModels" : favourites } });
+
+	return {};
+}
+
+User.deleteFavourites = async (username, teamspace, favouritesToRemove) =>{
+	const userProfile = await db.findOne("admin", COLL_NAME, {user: username}, {user: 1,
+		"customData.starredModels" : 1
+	});
+	
+	const favourites = userProfile.customData.starredModels || {};
+
+	if(favourites && favourites[teamspace]) {		
+		if(favourites[teamspace].every(i=>favouritesToRemove.includes(i))) {
+			const action = {$unset: {}};
+			action.$unset[`customData.starredModels.${teamspace}`] = "";
+			await db.updateOne("admin", COLL_NAME, {user: username}, action);	
+		} 
+		else{
+			const action = {$pullAll: {}};
+			action.$pullAll[`customData.starredModels.${teamspace}`] = favouritesToRemove;
+			await db.updateOne("admin", COLL_NAME, {user: username}, action);
+		}	
+	}
+	return {};
+}
 
 module.exports = User;
