@@ -23,6 +23,7 @@ ResponseCodes.templates = {
 
 	// Auth
 	notLoggedIn: { message: 'You are not logged in', status: 401 },
+	notAuthorized: { message: 'You do not have sufficient access for this action', status: 401 },
 
 	// Fail safe
 	unknown: { message: 'Unknown error occured. Please contact support.', status: 500 },
