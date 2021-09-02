@@ -15,16 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const _ = require('lodash');
+const { getUserFromSession } = require('../../../utils/sessions');
+const { hasAccessToTeamspace } = require('../../../utils/permissions/permissions');
+const { respond } = require('../../../utils/responder');
+const { templates } = require('../../../utils/responseCodes');
 
-const TypeChecker = {};
+const TeamspacePerms = {};
 
-TypeChecker.isBuffer = (buf) => !!(buf && Buffer.isBuffer(buf));
-TypeChecker.isString = (value) => _.isString(value);
-TypeChecker.isUUIDString = (uuid) => {
-	if (!TypeChecker.isString(uuid)) return false;
-	const hasMatch = uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
-	return hasMatch?.length > 0;
+TeamspacePerms.isTeamspaceMember = async (req, res, next) => {
+	const { session, params } = req;
+	const user = getUserFromSession(session);
+	const { teamspace } = params;
+
+	const hasAccess = await hasAccessToTeamspace(teamspace, user);
+	if (teamspace && user && hasAccess) {
+		next();
+	} else {
+		respond(req, res, templates.teamspaceNotFound);
+	}
 };
 
-module.exports = TypeChecker;
+module.exports = TeamspacePerms;

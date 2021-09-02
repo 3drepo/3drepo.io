@@ -95,6 +95,7 @@ const testHasReadAccessToModel = () => {
 		['projAdmin', true, true],
 		['tsAdmin', false, false],
 		['tsAdmin', true, true],
+		['tsAdmin', undefined, true],
 		['nobody', false, false],
 		['nobody', true, false],
 	])('Has read access to model', (user, adminCheck, result) => {

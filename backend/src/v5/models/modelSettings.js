@@ -20,6 +20,7 @@ const db = require('../handler/db');
 const { templates } = require('../utils/responseCodes');
 
 const findOneModel = (ts, query, projection) => db.findOne(ts, 'settings', query, projection);
+const findModel = (ts, query, projection, sort) => db.find(ts, 'settings', query, projection, sort);
 
 Models.getModelById = async (ts, model, projection) => {
 	const res = await findOneModel(ts, { _id: model }, projection);
@@ -28,6 +29,16 @@ Models.getModelById = async (ts, model, projection) => {
 	}
 
 	return res;
+};
+
+Models.getContainers = async (ts, ids, projection, sort) => {
+	const query = { _id: { $in: ids }, federate: { $ne: true } };
+	return findModel(ts, query, projection, sort);
+};
+
+Models.getFederations = async (ts, ids, projection, sort) => {
+	const query = { _id: { $in: ids }, federate: true };
+	return findModel(ts, query, projection, sort);
 };
 
 module.exports = Models;

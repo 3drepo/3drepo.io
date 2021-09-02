@@ -17,16 +17,19 @@
 
 const Projects = require('../../../processors/teamspaces/projects/projects');
 const { Router } = require('express');
+const { UUIDToString } = require('../../../utils/helper/uuids');
 const { getUserFromSession } = require('../../../utils/sessions');
-const { hasAccessToTeamspace } = require('../../../middleware/permissions/teamspaces');
+const { hasAccessToTeamspace } = require('../../../middleware/permissions/permissions');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
+
+const serialiseProject = (project) => ({ ...project, _id: UUIDToString(project._id) });
 
 const getProjectList = (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace } = req.params;
 	Projects.getProjectList(teamspace, user).then((projects) => {
-		respond(req, res, templates.ok, { projects });
+		respond(req, res, templates.ok, { projects: projects.map(serialiseProject) });
 	}).catch((err) => respond(req, res, err));
 };
 

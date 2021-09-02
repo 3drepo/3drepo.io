@@ -15,16 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const _ = require('lodash');
+const { stringToUUID } = require('../../utils/helper/uuids');
 
-const TypeChecker = {};
+const PathParams = {};
 
-TypeChecker.isBuffer = (buf) => !!(buf && Buffer.isBuffer(buf));
-TypeChecker.isString = (value) => _.isString(value);
-TypeChecker.isUUIDString = (uuid) => {
-	if (!TypeChecker.isString(uuid)) return false;
-	const hasMatch = uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
-	return hasMatch?.length > 0;
+PathParams.convertAllUUIDs = (req, res, next) => {
+	if (req.params) {
+		Object.keys(req.params).forEach((key) => {
+			req.params[key] = stringToUUID(req.params[key]);
+		});
+	}
+
+	next();
 };
 
-module.exports = TypeChecker;
+module.exports = PathParams;

@@ -42,11 +42,19 @@ const options = {
 	apis: [`${__dirname}/../routes/**/*.js`], // files containing annotations as above
 };
 
+const roleDefinitions = {
+	type: 'string',
+	enum: ['admin', 'collaborator', 'commenter', 'viewer'],
+	description: 'Possible Values:\n* `admin` - Administrator of the container/federation\n* `collaborator` - User has `commenter` right, plus the ability to upload new revisions\n* `commenter` - User has `viewer` rights, plus write access to tickets, groups and views\n* `viewer` - User has read access to the project',
+
+};
+
 const setupDocEndpoint = (app) => {
 	const docs = swaggerJsdoc(options);
 	docs.components = docs.components || {};
 	const responses = getSwaggerComponents();
 	docs.components.responses = { ...(docs.components.responses || {}), ...responses };
+	docs.components.roles = roleDefinitions;
 
 	// Setup API key security bearer
 	docs.components.securitySchemes = {
@@ -59,7 +67,6 @@ const setupDocEndpoint = (app) => {
 	const uiOptions = {
 		explorer: true,
 	};
-	console.log(docs.paths['/teamspaces/:teamspaces/projects']);
 	app.use('/docs', swaggerUi.serve, swaggerUi.setup(docs, uiOptions));
 };
 

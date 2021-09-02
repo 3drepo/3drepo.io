@@ -34,9 +34,12 @@ matrix:
             - rabbitmq-server
       hosts:
         - test.127.0.0.1
-      services: mongodb
+      services:
+        - mongodb
+        - docker
 
       before_install:
+        - docker-compose up alluxio-proxy alluxio-worker alluxio-master &
         - mkdir -p submodules
         - test_ver=`cat backend/testDBVersion`
         - cd submodules
@@ -48,6 +51,7 @@ matrix:
         - cd backend && mongorestore
         - cd ../../../
         - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
+        - until nc -z localhost 39999; do echo Waiting for Alluxio; sleep 1; done
 
       install:
         - cd ./backend
@@ -74,8 +78,8 @@ matrix:
       node_js:
         - "14.17.1"
       before_install:
-        - wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl1.0/libssl1.0.0_1.0.2n-1ubuntu5.6_amd64.deb
-        - sudo apt install $PWD/libssl1.0.0_1.0.2n-1ubuntu5.6_amd64.deb
+        - wget $SSL_INSTALLER
+        - sudo apt install $PWD/libssl1.0.0_1.0.2n-1ubuntu5.7_amd64.deb
       script:
         - cd backend
         - yarn install

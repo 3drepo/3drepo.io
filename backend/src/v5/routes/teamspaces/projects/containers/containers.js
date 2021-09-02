@@ -15,19 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- const { Router } = require('express');
- const Containers = require('../../../../processors/teamspaces/projects/containers/containers');
- const { respond } = require('../../../../utils/responder');
- const { templates } = require('../../../../utils/responseCodes');
-const { hasAccessToTeamspace } = require('../../../../middleware/permissions/teamspaces');
+const Containers = require('../../../../processors/teamspaces/projects/containers/containers');
+const { Router } = require('express');
+const { getUserFromSession } = require('../../../../utils/sessions');
+const { hasAccessToTeamspace } = require('../../../../middleware/permissions/permissions');
+const { respond } = require('../../../../utils/responder');
+const { templates } = require('../../../../utils/responseCodes');
 
- const appendFavourites = (req, res) => {
-	const user = req.session.user.username;
-	const { teamspace } = req.params;
-	const favouritesToAdd = req.body.containers;
-
-	Containers.appendFavourites(user, teamspace, favouritesToAdd).then((favourites) => {
-		respond(req, res, templates.ok, {favourites});
+const getContainerList = (req, res) => {
+	const user = getUserFromSession(req.session);
+	const { teamspace, project } = req.params;
+	Containers.getContainerList(teamspace, project, user).then((containers) => {
+		respond(req, res, templates.ok, { containers });
 	}).catch((err) => respond(req, res, err));
 };
 
@@ -41,10 +40,79 @@ const deleteFavourites =(req, res)=>{
 	}).catch((err) => respond(req, res, err));
 }
 
+const appendFavourites = (req, res) => {
+	const user = req.session.user.username;
+	const { teamspace } = req.params;
+	const favouritesToAdd = req.body.containers;
+
+	Containers.appendFavourites(user, teamspace, favouritesToAdd).then((favourites) => {
+		respond(req, res, templates.ok, { favourites });
+	}).catch((err) => respond(req, res, err));
+};
+
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/containers:
+	 *   get:
+	 *     description: Get a list of containers within the specified project the user has access to
+	 *     tags: [Containers]
+	 *     operationId: getContainerList
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - project:
+	 *         name: project
+	 *         description: ID of project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: returns list of containers
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 containers:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       id:
+	 *                         type: string
+	 *                         description: Container ID
+	 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                       name:
+	 *                         type: string
+	 *                         description: name of the container
+	 *                         example: Structure
+	 *                       role:
+	 *                         $ref: "#/components/roles"
+	 *                       isFavourite:
+	 *                         type: boolean
+	 *                         description: whether the container is a favourited item for the user
+	 *
+	 *
+	 */
+	router.get('/', hasAccessToTeamspace, getContainerList);
 	router.patch('/favourites', hasAccessToTeamspace, appendFavourites);
 	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites);
+
 	return router;
 };
 
