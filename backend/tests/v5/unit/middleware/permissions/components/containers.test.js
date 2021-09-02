@@ -25,7 +25,11 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 jest.mock('../../../../../../src/v5/utils/sessions');
 const Sessions = require(`${src}/utils/sessions`);
+<<<<<<< HEAD:backend/tests/v5/unit/middleware/permissions/components/containers.test.js
 const ContainerMiddleware = require(`${src}/middleware/permissions/components/containers`);
+=======
+const PermMiddlewares = require(`${src}/middleware/permissions/permissions`);
+>>>>>>> staging:backend/tests/v5/unit/middleware/permissions/permissions.test.js
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
@@ -41,8 +45,13 @@ const testHasReadAccessToContainer = () => {
 	describe('hasReadAccessToContainer', () => {
 		test('next() should be called if the user has access', async () => {
 			const mockCB = jest.fn(() => {});
+<<<<<<< HEAD:backend/tests/v5/unit/middleware/permissions/components/containers.test.js
 			await ContainerMiddleware.hasReadAccessToContainer(
 				{ params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
+=======
+			await PermMiddlewares.hasAccessToTeamspace(
+				{ params: { teamspace: 'ts' }, header: { referer: 'http://abc.com/' }, session: { user: { username: 'hi', referer: 'http://abc.com' } } },
+>>>>>>> staging:backend/tests/v5/unit/middleware/permissions/permissions.test.js
 				{},
 				mockCB,
 			);
@@ -51,8 +60,13 @@ const testHasReadAccessToContainer = () => {
 
 		test('should respond with not authorised if the user has no access', async () => {
 			const mockCB = jest.fn(() => {});
+<<<<<<< HEAD:backend/tests/v5/unit/middleware/permissions/components/containers.test.js
 			await ContainerMiddleware.hasReadAccessToContainer(
 				{ params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
+=======
+			await PermMiddlewares.hasAccessToTeamspace(
+				{ params: { teamspace: 'ts' }, header: { referer: 'http://xyz.com' } },
+>>>>>>> staging:backend/tests/v5/unit/middleware/permissions/permissions.test.js
 				{},
 				mockCB,
 			);
@@ -63,8 +77,13 @@ const testHasReadAccessToContainer = () => {
 
 		test('should respond with whatever hasReadAccessToModel errored with if it errored', async () => {
 			const mockCB = jest.fn(() => {});
+<<<<<<< HEAD:backend/tests/v5/unit/middleware/permissions/components/containers.test.js
 			await ContainerMiddleware.hasReadAccessToContainer(
 				{ params: { teamspace: 'throw' }, session: { user: { username: 'hi' } } },
+=======
+			await PermMiddlewares.hasAccessToTeamspace(
+				{ params: { teamspace: 'ts1' }, header: { referer: 'http://xyz.com' }, session: { user: { username: 'hi', referer: 'http://xyz.com' } } },
+>>>>>>> staging:backend/tests/v5/unit/middleware/permissions/permissions.test.js
 				{},
 				mockCB,
 			);
@@ -75,6 +94,11 @@ const testHasReadAccessToContainer = () => {
 	});
 };
 
+<<<<<<< HEAD:backend/tests/v5/unit/middleware/permissions/components/containers.test.js
 describe('middleware/permissions/components/containers', () => {
 	testHasReadAccessToContainer();
+=======
+describe('middleware/permissions/permissions', () => {
+	testHasAccessToTeamspace();
+>>>>>>> staging:backend/tests/v5/unit/middleware/permissions/permissions.test.js
 });
