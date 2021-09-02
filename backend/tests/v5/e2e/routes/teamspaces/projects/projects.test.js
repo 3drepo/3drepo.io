@@ -41,7 +41,7 @@ const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(brokenTS, [tsAdmin.user], true);
 	await ServiceHelper.db.createUser(tsAdmin, [teamspace, brokenTS]);
 	await ServiceHelper.db.createUser(unlicencedUser);
-	await ServiceHelper.db.createProject(teamspace, testProject._id, testProject.name, []);
+	await ServiceHelper.db.createProject(teamspace, testProject._id, testProject.name);
 };
 
 const testGetProjectList = () => {
