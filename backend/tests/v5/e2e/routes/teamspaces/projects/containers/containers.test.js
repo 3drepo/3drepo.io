@@ -166,12 +166,17 @@ const testGetContainerStats = () => {
 			const res = await agent.get(`${route(federation._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.containerNotFound.status);
 			expect(res.body.code).toEqual(templates.containerNotFound.code);
 		});
-		test('should return the model stats correctly if the user has access', async () => {
+
+		test('should fail if the container doesn\'t exist', async () => {
+			const res = await agent.get(`${route('jibberish')}?key=${users.tsAdmin.apiKey}`).expect(templates.containerNotFound.status);
+			expect(res.body.code).toEqual(templates.containerNotFound.code);
+		});
+		test('should return the container stats correctly if the user has access', async () => {
 			const res = await agent.get(`${route(modelWithRev._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
 			expect(res.body).toEqual(formatToStats(modelWithRev.properties, 1, revision));
 		});
 
-		test('should return the model stats correctly if the user has access (no revisions)', async () => {
+		test('should return the container stats correctly if the user has access (no revisions)', async () => {
 			const res = await agent.get(`${route(modelWithoutRev._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
 			expect(res.body).toEqual(formatToStats(modelWithoutRev.properties, 0, {}));
 		});
