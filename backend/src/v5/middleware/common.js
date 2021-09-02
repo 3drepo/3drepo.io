@@ -15,9 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const permConst = {};
+const Common = {};
 
-permConst.TEAMSPACE_ADMIN = 'teamspace_admin';
-permConst.PROJECT_ADMIN = 'admin_project';
+Common.validateMany = (validators) => {
+	const validateAll = async (req, res, next, current = 0) => {
+		if (validators.length > current) {
+			await validators[current](req, res, () => validateAll(req, res, next, current + 1));
+		} else {
+			next();
+		}
+	};
+	return validateAll;
+};
 
-module.exports = permConst;
+module.exports = Common;

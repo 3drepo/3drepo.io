@@ -32,6 +32,12 @@ ResponseCodes.templates = {
 
 	// Teamspace related error
 	teamspaceNotFound: { message: 'Teamspace not found.', status: 404 },
+
+	// Project related error
+	projectNotFound: { message: 'Project not found.', status: 404 },
+
+	// Model related error
+	modelNotFound: { message: 'Model not found.', status: 404 },
 };
 
 Object.keys(ResponseCodes.templates).forEach((key) => {
