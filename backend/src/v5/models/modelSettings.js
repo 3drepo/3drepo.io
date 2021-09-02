@@ -15,9 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const permConst = {};
+const Models = {};
+const db = require('../handler/db');
+const { templates } = require('../utils/responseCodes');
 
-permConst.TEAMSPACE_ADMIN = 'teamspace_admin';
-permConst.PROJECT_ADMIN = 'admin_project';
+const findOneModel = (ts, query, projection) => db.findOne(ts, 'settings', query, projection);
 
-module.exports = permConst;
+Models.getModelById = async (ts, model, projection) => {
+	const res = await findOneModel(ts, { _id: model }, projection);
+	if (!res) {
+		throw templates.modelNotFound;
+	}
+
+	return res;
+};
+
+module.exports = Models;

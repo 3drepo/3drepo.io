@@ -38,4 +38,10 @@ Teamspace.getTeamspaceAdmins = async (ts) => {
 	);
 };
 
+Teamspace.hasAccessToTeamspace = async (teamspace, username) => {
+	const query = { user: username, 'roles.db': teamspace };
+	const userDoc = await teamspaceQuery(query, { _id: 1 });
+	return !!userDoc;
+};
+
 module.exports = Teamspace;

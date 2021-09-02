@@ -15,9 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const permConst = {};
+const Mongo = require('mongodb');
+const UUIDParse = require('uuid-parse');
+const { isUUIDString } = require('./typeCheck');
 
-permConst.TEAMSPACE_ADMIN = 'teamspace_admin';
-permConst.PROJECT_ADMIN = 'admin_project';
+const UuidUtils = {};
 
-module.exports = permConst;
+UuidUtils.stringToUUID = (uuid) => {
+	if (!isUUIDString(uuid) || uuid === '') return uuid;
+	const bytes = UUIDParse.parse(uuid);
+	// eslint-disable-next-line new-cap
+	const buf = new Buffer.from(bytes);
+
+	return Mongo.Binary(buf, 3);
+};
+
+UuidUtils.UUIDToString = (uuid) => {
+	try {
+		return UUIDParse.unparse(uuid.buffer);
+	} catch {
+		return uuid;
+	}
+};
+
+module.exports = UuidUtils;

@@ -32,4 +32,6 @@ const SessionUtils = {};
 SessionUtils.isSessionValid = (session, referrer) => !!(session?.user
 	&& (session.user.isAPIKey || (!referrer || referrerMatch(session.user.referer, referrer))));
 
+SessionUtils.getUserFromSession = ({ user } = {}) => (user ? user.username : undefined);
+
 module.exports = SessionUtils;

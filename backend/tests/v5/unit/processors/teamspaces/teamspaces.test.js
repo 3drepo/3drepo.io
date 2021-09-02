@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src } = require('../../helper/path');
+const { src } = require('../../../helper/path');
 
 const Teamspaces = require(`${src}/processors/teamspaces/teamspaces`);
 
-jest.mock('../../../../src/v5/models/users');
+jest.mock('../../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
-jest.mock('../../../../src/v5/utils/permissions/permissions');
+jest.mock('../../../../../src/v5/utils/permissions/permissions');
 const Permissions = require(`${src}/utils/permissions/permissions`);
 
 const testGetTeamspaceListByUser = () => {

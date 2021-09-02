@@ -1,3 +1,20 @@
+/**
+ *  Copyright (C) 2021 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 module.exports = {
 	// All imported modules in your tests should be mocked automatically
 	// automock: false,
@@ -15,20 +32,19 @@ module.exports = {
 	collectCoverage: true,
 
 	// An array of glob patterns indicating a set of files for which coverage information should be collected
-	collectCoverageFrom: ["src/v5/**/*.js"],
+	collectCoverageFrom: ['src/v5/**/*.js'],
 
 	// The directory where Jest should output its coverage files
 	coverageDirectory: 'coverage',
 
 	// An array of regexp pattern strings used to skip coverage collection
 	coveragePathIgnorePatterns: [
-		"\\\\node_modules\\\\",
-		"logger.js",
-		"swagger.js"
+		'\\\\node_modules\\\\',
+		'logger.js',
+		'swagger.js',
 	],
 
 	// Indicates which provider should be used to instrument code for coverage
-	coverageProvider: 'v8',
 
 	// A list of reporter names that Jest uses when writing coverage reports
 	// coverageReporters: [
@@ -42,12 +58,12 @@ module.exports = {
 
 	// An object that configures minimum threshold enforcement for coverage results
 	coverageThreshold: {
-		global:{
-			"branches": 100,
-	        "functions": 100,
-    	    "lines": 100,
-        	"statements": 0
-		}
+		global: {
+			branches: 100,
+	        functions: 100,
+    	    lines: 100,
+        	statements: 0,
+		},
 	},
 
 	// A path to a custom dependency extractor
@@ -99,7 +115,7 @@ module.exports = {
 	// notifyMode: "failure-change",
 
 	// A preset that is used as a base for Jest's configuration
-	 preset: "@shelf/jest-mongodb",
+	 preset: '@shelf/jest-mongodb',
 
 	// Run tests from one or more projects
 	// projects: undefined,
@@ -153,13 +169,13 @@ module.exports = {
 
 	// The glob patterns Jest uses to detect test files
 	testMatch: [
-		"**/tests/**/*.test.[jt]s?(x)",
+		'**/tests/**/*.test.[jt]s?(x)',
 	],
 
 	// An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
 	testPathIgnorePatterns: [
-		"\\\\node_modules\\\\",
-		"\\\\v4\\\\"
+		'\\\\node_modules\\\\',
+		'\\\\v4\\\\',
 	],
 	// The regexp pattern or array of patterns that Jest uses to detect test files
 	// testRegex: [],
