@@ -39,6 +39,10 @@ ResponseCodes.templates = {
 
 	// Model related error
 	modelNotFound: { message: 'Model not found.', status: 404 },
+	containerNotFound: { message: 'Container not found.', status: 404 },
+
+	// Revision related error
+	revisionNotFound: { message: 'Revision not found.', status: 404 },
 };
 
 Object.keys(ResponseCodes.templates).forEach((key) => {

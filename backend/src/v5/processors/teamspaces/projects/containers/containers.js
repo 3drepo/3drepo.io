@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { getContainerById, getContainers } = require('../../../../models/modelSettings');
+const { getLatestRevision, getRevisionCount } = require('../../../../models/revisions');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../utils/permissions/permissions');
-const { getContainers } = require('../../../../models/modelSettings');
 const { getFavourites } = require('../../../../models/users');
 const { getProjectById } = require('../../../../models/projects');
 
@@ -35,8 +36,35 @@ Containers.getContainerList = async (teamspace, project, user) => {
 
 	return modelSettings.flatMap(({ _id, name, permissions: modelPerms }) => {
 		const perm = modelPerms ? modelPerms.find((entry) => entry.user === user) : undefined;
-		return (!isAdmin && !perm) ? [] : { _id, name, role: isAdmin ? 'admin' : perm.permission, isFavourite: favourites.includes(_id) };
+		return (!isAdmin && !perm)
+			? [] : { _id, name, role: isAdmin ? 'admin' : perm.permission, isFavourite: favourites.includes(_id) };
 	});
+};
+
+Containers.getContainerStats = async (teamspace, project, container) => {
+	let latestRev = {};
+	const [settings, revCount] = await Promise.all([
+		getContainerById(teamspace, container, { name: 1, type: 1, properties: 1, status: 1 }),
+		getRevisionCount(teamspace, container),
+	]);
+
+	try {
+		latestRev = await getLatestRevision(teamspace, container, { tag: 1, timestamp: 1 });
+	} catch {
+		// do nothing. A container can have 0 revision.
+	}
+
+	return {
+		type: settings.type,
+		code: settings.properties.code,
+		status: settings.status,
+		units: settings.properties.unit,
+		revision: {
+			total: revCount,
+			lastUpdated: latestRev.timestamp,
+			latestRevision: latestRev.tag || latestRev._id,
+		},
+	};
 };
 
 module.exports = Containers;
