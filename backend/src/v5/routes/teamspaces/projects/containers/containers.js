@@ -82,9 +82,7 @@ const establishRoutes = () => {
 	 *                         description: name of the container
 	 *                         example: Structure
 	 *                       role:
-	 *                         type: string
-	 *                         description: role of the user plays within the container
-	 *                         example: collaborator
+	 *                         $ref: "#/components/roles"
 	 *                       isFavourite:
 	 *                         type: boolean
 	 *                         description: whether the container is a favourited item for the user
