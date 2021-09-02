@@ -15,21 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Projects = require('../../../processors/teamspaces/projects/projects');
+const Containers = require('../../../../processors/teamspaces/projects/containers/containers');
 const { Router } = require('express');
-const { UUIDToString } = require('../../../utils/helper/uuids');
-const { getUserFromSession } = require('../../../utils/sessions');
-const { hasAccessToTeamspace } = require('../../../middleware/permissions/permissions');
-const { respond } = require('../../../utils/responder');
-const { templates } = require('../../../utils/responseCodes');
+const { getUserFromSession } = require('../../../../utils/sessions');
+const { hasAccessToTeamspace } = require('../../../../middleware/permissions/permissions');
+const { respond } = require('../../../../utils/responder');
+const { templates } = require('../../../../utils/responseCodes');
 
-const serialiseProject = (project) => ({ ...project, _id: UUIDToString(project._id) });
-
-const getProjectList = (req, res) => {
+const getContainerList = (req, res) => {
 	const user = getUserFromSession(req.session);
-	const { teamspace } = req.params;
-	Projects.getProjectList(teamspace, user).then((projects) => {
-		respond(req, res, templates.ok, { projects: projects.map(serialiseProject) });
+	const { teamspace, project } = req.params;
+	Containers.getContainerList(teamspace, project, user).then((containers) => {
+		respond(req, res, templates.ok, { containers });
 	}).catch((err) => respond(req, res, err));
 };
 
@@ -38,11 +35,11 @@ const establishRoutes = () => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects:
+	 * /teamspaces/{teamspace}/projects/{project}/containers:
 	 *   get:
-	 *     description: Get a list of projects within the specified teamspace the user has access to
-	 *     tags: [Projects]
-	 *     operationId: getProjectList
+	 *     description: Get a list of containers within the specified project the user has access to
+	 *     tags: [Containers]
+	 *     operationId: getContainerList
 	 *     parameters:
 	 *       - teamspace:
 	 *         name: teamspace
@@ -51,37 +48,48 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+   	 *       - project:
+	 *         name: project
+	 *         description: ID of project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
 	 *
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
 	 *       200:
-	 *         description: returns list of projects
+	 *         description: returns list of containers
 	 *         content:
 	 *           application/json:
 	 *             schema:
 	 *               type: object
 	 *               properties:
-	 *                 projects:
+	 *                 containers:
 	 *                   type: array
 	 *                   items:
 	 *                     type: object
 	 *                     properties:
 	 *                       id:
 	 *                         type: string
-	 *                         description: Project ID
-	 *                         example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                         description: Container ID
+	 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 *                       name:
 	 *                         type: string
-	 *                         description: name of the teamspace
-	 *                         example: teamspace1
-	 *                       isAdmin:
+	 *                         description: name of the container
+	 *                         example: Structure
+	 *                       role:
+	 *                         $ref: "#/components/roles"
+	 *                       isFavourite:
 	 *                         type: boolean
-	 *                         description: whether the user is an admin
+	 *                         description: whether the container is a favourited item for the user
 	 *
 	 *
 	 */
-	router.get('/', hasAccessToTeamspace, getProjectList);
+	router.get('/', hasAccessToTeamspace, getContainerList);
 
 	return router;
 };

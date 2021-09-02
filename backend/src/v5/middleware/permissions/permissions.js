@@ -15,15 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const RoutesManager = {};
-const ContainerRoutes = require('./teamspaces/projects/containers/containers');
-const ProjectRoutes = require('./teamspaces/projects/projects');
-const TeamspaceRoutes = require('./teamspaces/teamspaces');
+const { convertAllUUIDs } = require('../dataConverter/pathParams');
+const { isTeamspaceMember } = require('./components/teamspaces');
+const { validSession } = require('../auth');
+const { validateMany } = require('../common');
 
-RoutesManager.init = (app) => {
-	app.use('/v5/teamspaces/', TeamspaceRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects', ProjectRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', ContainerRoutes);
-};
+const Permissions = {};
 
-module.exports = RoutesManager;
+Permissions.hasAccessToTeamspace = validateMany([convertAllUUIDs, validSession, isTeamspaceMember]);
+
+module.exports = Permissions;
