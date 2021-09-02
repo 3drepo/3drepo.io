@@ -56,14 +56,14 @@ const establishRoutes = () => {
 	 *     parameters:
 	 *       - teamspace:
 	 *         name: teamspace
-	 *         description: name of teamspace
+	 *         description: Name of teamspace
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
    	 *       - project:
 	 *         name: project
-	 *         description: name of project
+	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
