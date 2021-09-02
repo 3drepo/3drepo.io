@@ -19,7 +19,7 @@
  const Federations = require('../../../../processors/teamspaces/projects/federations/federations');
  const { respond } = require('../../../../utils/responder');
  const { templates } = require('../../../../utils/responseCodes');
- const { validSession } = require('../../../../middleware/auth');
+const { hasAccessToTeamspace } = require('../../../../middleware/permissions/teamspaces');
 
  const appendFavourites = (req, res) => {
 	const user = req.session.user.username;
@@ -43,8 +43,8 @@ const deleteFavourites =(req, res)=>{
 
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
-	router.patch('/favourites', validSession, appendFavourites);
-    router.delete('/favourites', validSession, deleteFavourites);
+	router.patch('/favourites', hasAccessToTeamspace, appendFavourites);
+	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites);
 	return router;
 };
 
