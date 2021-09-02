@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { getTeamspaceAdmins, hasAccessToTeamspace } = require('../../models/teamspaces');
 const { PROJECT_ADMIN } = require('./permissions.constants');
 const { getModelById } = require('../../models/modelSettings');
 const { getProjectAdmins } = require('../../models/projects');
-const { getTeamspaceAdmins } = require('../../models/teamspaces');
 
 const Permissions = {};
 
@@ -26,6 +26,8 @@ Permissions.isTeamspaceAdmin = async (teamspace, username) => {
 	const admins = await getTeamspaceAdmins(teamspace);
 	return admins.includes(username);
 };
+
+Permissions.hasAccessToTeamspace = hasAccessToTeamspace;
 
 Permissions.isProjectAdmin = async (teamspace, project, username) => {
 	const admins = await getProjectAdmins(teamspace, project);

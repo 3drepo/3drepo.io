@@ -23,7 +23,7 @@ const { templates } = require('../utils/responseCodes');
 const findProject = (ts, query, projection, sort) => db.find(ts, 'projects', query, projection, sort);
 const findOneProject = (ts, query, projection) => db.findOne(ts, 'projects', query, projection);
 
-const getProjectById = async (ts, project, projection) => {
+Projects.getProjectById = async (ts, project, projection) => {
 	const res = await findOneProject(ts, { _id: project }, projection);
 	if (!res) {
 		throw templates.projectNotFound;
@@ -35,7 +35,7 @@ const getProjectById = async (ts, project, projection) => {
 Projects.getProjectList = async (ts, projection = { _id: 1, name: 1 }) => findProject(ts, {}, projection);
 
 Projects.getProjectAdmins = async (ts, project) => {
-	const { permissions } = await getProjectById(ts, project, { permissions: 1 });
+	const { permissions } = await Projects.getProjectById(ts, project, { permissions: 1 });
 	return permissions.flatMap((entry) => (entry.permissions.includes(PROJECT_ADMIN) ? [entry.user] : []));
 };
 

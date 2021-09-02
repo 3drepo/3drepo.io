@@ -42,6 +42,52 @@ const testGetModelById = () => {
 	});
 };
 
+const testGetContainers = () => {
+	describe('Get containers', () => {
+		test('should return the list of containers ', async () => {
+			const expectedData = [
+				{
+					_id: 'abc',
+					name: 'model name',
+				},
+				{
+					_id: '123',
+					name: 'model name 2',
+				},
+			];
+
+			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+
+			const res = await Model.getContainers('someTS', ['someModel']);
+			expect(res).toEqual(expectedData);
+		});
+	});
+};
+
+const testGetFederations = () => {
+	describe('Get federations', () => {
+		test('should return the list of federations ', async () => {
+			const expectedData = [
+				{
+					_id: 'abc',
+					name: 'model name',
+				},
+				{
+					_id: '123',
+					name: 'model name 2',
+				},
+			];
+
+			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+
+			const res = await Model.getFederations('someTS', ['someModel']);
+			expect(res).toEqual(expectedData);
+		});
+	});
+};
+
 describe('models/modelSettings', () => {
 	testGetModelById();
+	testGetContainers();
+	testGetFederations();
 });
