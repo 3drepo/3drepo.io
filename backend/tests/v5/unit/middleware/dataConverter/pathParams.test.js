@@ -37,6 +37,7 @@ const testConvertAllUUIDs = () => {
 				d: 'abc',
 				e: '7591fbdb-52b9-490a-8a77-fdb57c57dbc8',
 				f: '120965d4-dd6e-4505-a2d2-e9a5cdcaad81',
+				container: '120965d4-dd6e-4505-a2d2-e9a5cdcaad81',
 			};
 			const expectedResult = {
 				...params,
