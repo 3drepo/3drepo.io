@@ -60,6 +60,14 @@ const testGetContainerById = () => {
 			await expect(Model.getContainerById('someTS', 'someContainer'))
 				.rejects.toEqual(templates.containerNotFound);
 		});
+
+		test('should return error if some unknown error occured', async () => {
+			const err = '123';
+			jest.spyOn(db, 'findOne').mockRejectedValue(err);
+
+			await expect(Model.getContainerById('someTS', 'someContainer'))
+				.rejects.toEqual(err);
+		});
 	});
 };
 

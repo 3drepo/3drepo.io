@@ -29,7 +29,12 @@ const ContainerMiddleware = require(`${src}/middleware/permissions/components/co
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
-Permissions.hasReadAccessToModel.mockImplementation((teamspace) => teamspace === 'ts');
+Permissions.hasReadAccessToModel.mockImplementation((teamspace) => {
+	if (teamspace === 'throw') {
+		throw templates.projectNotFound;
+	}
+	return teamspace === 'ts';
+});
 Sessions.getUserFromSession.mockImplementation(() => 'hi');
 
 const testHasReadAccessToContainer = () => {
@@ -54,6 +59,18 @@ const testHasReadAccessToContainer = () => {
 			expect(mockCB.mock.calls.length).toBe(0);
 			expect(Responder.respond.mock.calls.length).toBe(1);
 			expect(Responder.respond.mock.results[0].value).toEqual(templates.notAuthorized);
+		});
+
+		test('should respond with whatever hasReadAccessToModel errored with if it errored', async () => {
+			const mockCB = jest.fn(() => {});
+			await ContainerMiddleware.hasReadAccessToContainer(
+				{ params: { teamspace: 'throw' }, session: { user: { username: 'hi' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(0);
+			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond.mock.results[0].value).toEqual(templates.projectNotFound);
 		});
 	});
 };

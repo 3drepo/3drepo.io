@@ -27,10 +27,14 @@ ContainerPerms.hasReadAccessToContainer = async (req, res, next) => {
 	const user = getUserFromSession(session);
 	const { teamspace, project, container } = params;
 
-	if (await hasReadAccessToModel(teamspace, project, container, user)) {
-		next();
-	} else {
-		respond(req, res, templates.notAuthorized);
+	try {
+		if (await hasReadAccessToModel(teamspace, project, container, user)) {
+			next();
+		} else {
+			respond(req, res, templates.notAuthorized);
+		}
+	} catch (err) {
+		respond(req, res, err);
 	}
 };
 

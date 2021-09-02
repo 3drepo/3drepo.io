@@ -59,7 +59,7 @@ Containers.getContainerStats = async (teamspace, project, container) => {
 		code: settings.properties.code,
 		status: settings.status,
 		units: settings.properties.unit,
-		revision: {
+		revisions: {
 			total: revCount,
 			lastUpdated: latestRev.timestamp,
 			latestRevision: latestRev.tag || latestRev._id,

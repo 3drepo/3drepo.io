@@ -68,6 +68,16 @@ db.createModel = (teamspace, _id, name, props) => {
 	return DbHandler.insertOne(teamspace, 'settings', settings);
 };
 
+db.createRevision = (teamspace, modelId, { _id, author, timestamp, tag }) => {
+	const rev = {
+		_id: stringToUUID(_id),
+		author,
+		timestamp,
+		tag,
+	};
+	return DbHandler.insertOne(teamspace, `${modelId}.history`, rev);
+};
+
 ServiceHelper.generateUUIDString = () => uuidToString(generateUUID());
 ServiceHelper.generateRandomString = () => Crypto.randomBytes(15).toString('hex');
 
@@ -75,6 +85,14 @@ ServiceHelper.generateUserCredentials = () => ({
 	user: ServiceHelper.generateRandomString(),
 	password: ServiceHelper.generateRandomString(),
 	apiKey: ServiceHelper.generateRandomString(),
+});
+
+ServiceHelper.generateRevisionEntry = () => ({
+	_id: ServiceHelper.generateUUIDString(),
+	tag: ServiceHelper.generateRandomString(),
+	timestamp: new Date(),
+	author: ServiceHelper.generateRandomString(),
+
 });
 
 ServiceHelper.app = () => createApp().listen(8080);
