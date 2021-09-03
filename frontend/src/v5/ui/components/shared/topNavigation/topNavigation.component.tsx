@@ -15,14 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import React from 'react';
+import { Container, Link } from './topNavigaton.styles';
 
-export const Container = styled.div`
-	margin: ${({ theme }) => `${theme.spacing(2)}px`};
-	height: 5000px;
-`;
+interface ILink {
+	title: string;
+	to: string;
+	active?: boolean;
+	disabled?: boolean;
+}
 
-export const ContrastBackground = styled.div`
-	padding: ${({ theme }) => `${theme.spacing(2)}px`};
-	background-color: ${({ theme }) => theme.palette.secondary.main};
-`;
+interface ITopNavigation {
+	links: ILink[];
+}
+
+export const TopNavigation = ({ links }: ITopNavigation): JSX.Element => (
+	<Container>
+		{links.map(({ title, to, ...props }) => (
+			<Link to={to} {...props}>{title}</Link>
+		))}
+	</Container>
+);

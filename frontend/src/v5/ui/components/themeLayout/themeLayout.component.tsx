@@ -18,11 +18,62 @@
 import React from 'react';
 import { Typography, Button, Divider, TextField } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/AddCircle';
+import IntercomIcon from '@assets/icons/intercom.svg';
+import NotificationsIcon from '@assets/icons/notifications.svg';
+
 import { useForm } from 'react-hook-form';
-import { Container } from './themeLayout.styles';
+
+import { AppBar } from '@components/shared/appBar';
+import { Breadcrumbs } from '@components/shared/breadcrumbs';
+import { TopNavigation } from '@components/shared/topNavigation';
+import { NavigationMenu } from '@components/shared/navigatonMenu';
+import { CircleButton } from '@/v5/ui/controls/circleButton';
+import { AvatarButton } from '@/v5/ui/controls/avatarButton';
+import { Container, ContrastBackground } from './themeLayout.styles';
+
+const LINKS = [{
+	title: 'Federations',
+	to: '#federations',
+	active: true,
+}, {
+	title: 'Containers',
+	to: '#container',
+}, {
+	title: 'Tasks',
+	to: '#tasks',
+}, {
+	title: 'Users',
+	to: '#users',
+}, {
+	title: 'Settings',
+	to: '#settings',
+	disabled: true,
+}];
+
+const menuList = [{
+	title: 'Teamspace title 1',
+	to: '/#teamspace1',
+}, {
+	title: 'Teamspace title 2',
+	to: '/#teamspace2',
+}, {
+	title: 'Teamspace title 3',
+	to: '/#teamspace3',
+}, {
+	title: 'Teamspace title 4',
+	to: '/#teamspace4',
+}, {
+	title: 'Teamspace title 5',
+	to: '/#teamspace5',
+}];
 
 export const ThemeLayout = (): JSX.Element => {
 	const { register } = useForm();
+	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+
+	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
+
+	const handleClose = () => setAnchorEl(null);
 
 	return (
 		<Container>
@@ -123,6 +174,60 @@ export const ThemeLayout = (): JSX.Element => {
 			<TextField value="Input text without label" />
 			<br />
 			<Divider />
+
+			<Typography variant="h2" gutterBottom>UI controls needed for basic layout</Typography>
+			<Typography variant="h3" gutterBottom>Breadcrumbs</Typography>
+			<Breadcrumbs />
+
+			<Typography variant="h3" gutterBottom>Top Navigation</Typography>
+			<ContrastBackground>
+				<TopNavigation links={LINKS} />
+			</ContrastBackground>
+
+			<Typography variant="h3" gutterBottom>Circle buttons</Typography>
+
+			<Typography variant="h4" gutterBottom>icon-intercom</Typography>
+
+			<ContrastBackground>
+				<CircleButton variant="contrast" aria-label="intercom">
+					<IntercomIcon />
+				</CircleButton>
+				<CircleButton variant="contrast" aria-label="intercom" disabled>
+					<IntercomIcon />
+				</CircleButton>
+			</ContrastBackground>
+
+			<Typography variant="h4" gutterBottom>icon-nav-notifications</Typography>
+			<ContrastBackground>
+				<CircleButton variant="contrast" aria-label="notifications">
+					<NotificationsIcon />
+				</CircleButton>
+				<CircleButton variant="contrast" aria-label="notifications" disabled>
+					<NotificationsIcon />
+				</CircleButton>
+			</ContrastBackground>
+
+			<Typography variant="h4" gutterBottom>icon-profile</Typography>
+			<ContrastBackground>
+				<AvatarButton>
+					GH
+				</AvatarButton>
+				<AvatarButton disabled>
+					GH
+				</AvatarButton>
+			</ContrastBackground>
+			{' '}
+			<br />
+
+			<Typography variant="h3" gutterBottom>Navigation Menu</Typography>
+			<Button variant="contained" color="primary" onClick={handleClick}>Show Menu</Button>
+			<NavigationMenu anchorEl={anchorEl} handleClose={handleClose} list={menuList} />
+			{' '}
+			<br />
+
+			<Typography variant="h3" gutterBottom>AppBar (with logo only)</Typography>
+			<AppBar />
+
 		</Container>
 	);
 };
