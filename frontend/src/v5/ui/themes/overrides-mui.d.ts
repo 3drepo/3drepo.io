@@ -33,6 +33,8 @@ interface IShadow {
 	level_8: string;
 	level_9: string;
 	level_10: string;
+	medium: string;
+	large: string;
 }
 
 declare module '@material-ui/core/styles/createPalette' {
@@ -40,6 +42,7 @@ declare module '@material-ui/core/styles/createPalette' {
 		mid?: CSSProperties['color'],
 		lightest?: CSSProperties['color'],
 		darkest?: CSSProperties['color'],
+		contrast?: CSSProperties['color'],
 	}
 
 	interface Palette {
@@ -55,7 +58,7 @@ declare module '@material-ui/core/styles/createPalette' {
 		base?: SimplePaletteColorOptions;
 		favourite?: SimplePaletteColorOptions;
 		gradient?: IGradient;
-		shadow?: IShadow;
+		shadows?: IShadow;
 	}
 }
 
