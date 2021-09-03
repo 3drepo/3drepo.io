@@ -25,7 +25,7 @@ import { Provider } from 'react-redux';
 import '@/v4/services/fontAwesome';
 import 'simplebar/dist/simplebar.min.css';
 import { ThemeProvider } from 'styled-components';
-import { MuiThemeProvider } from '@material-ui/core';
+import { MuiThemeProvider, StylesProvider } from '@material-ui/core';
 
 import 'simplebar';
 import { dispatch, history, store } from '@/v4/modules/store';
@@ -53,7 +53,9 @@ const render = () => {
 					<Route exact path="/v5/theme">
 						<ThemeProvider theme={theme}>
 							<MuiThemeProvider theme={theme}>
-								<ThemeLayout />
+								<StylesProvider injectFirst>
+									<ThemeLayout />
+								</StylesProvider>
 							</MuiThemeProvider>
 						</ThemeProvider>
 					</Route>

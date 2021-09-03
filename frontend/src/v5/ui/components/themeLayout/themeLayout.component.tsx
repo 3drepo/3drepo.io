@@ -16,18 +16,23 @@
  */
 
 import React from 'react';
-import { Typography, Button, Divider, TextField } from '@material-ui/core';
+import { Typography, Divider, TextField } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/AddCircle';
 import { useForm } from 'react-hook-form';
 import { DashboardListItem } from '@components/dashboard/dashboardList/dashboardListItem';
 import { DashboardList } from '@components/dashboard/dashboardList';
-import { DashboardListItemTitle, DashboardListItemRow, DashboardListItemText } from '@components/dashboard/dashboardList/dashboardListItem/components/';
+import {
+	DashboardListItemTitle,
+	DashboardListItemRow,
+	DashboardListItemText,
+} from '@components/dashboard/dashboardList/dashboardListItem/components/';
+import { Button } from '@components/controls/button';
 import { Container } from './themeLayout.styles';
 
 export const ThemeLayout = (): JSX.Element => {
 	const { register } = useForm();
 
-	const DummyDashboardListItem = () => (
+	const MockDashboardListItem = () => (
 		<DashboardListItemRow>
 			<DashboardListItemTitle subtitle="Latest revision: Revision code" width={200}>
 				This is the container title
@@ -117,6 +122,42 @@ export const ThemeLayout = (): JSX.Element => {
 			<Button variant="outlined" size="small" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
 			<Divider />
 
+			<Typography variant="h3" gutterBottom>button-label</Typography>
+
+			<Button variant="label" color="primary">Default</Button>
+			<Button variant="label" color="primary" disabled>Disabled</Button>
+			<Divider />
+
+			<Button variant="label" color="primary" startIcon={<AddIcon />}>Default</Button>
+			<Button variant="label" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
+			<Divider />
+
+			<Button variant="label" color="secondary">Default</Button>
+			<Button variant="label" color="secondary" disabled>Disabled</Button>
+			<Divider />
+
+			<Button variant="label" color="secondary" startIcon={<AddIcon />}>Default</Button>
+			<Button variant="label" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
+			<Divider />
+
+			<Typography variant="h3" gutterBottom>button-label-outlined</Typography>
+
+			<Button variant="label-outlined" color="primary">Default</Button>
+			<Button variant="label-outlined" color="primary" disabled>Disabled</Button>
+			<Divider />
+
+			<Button variant="label-outlined" color="primary" startIcon={<AddIcon />}>Default</Button>
+			<Button variant="label-outlined" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
+			<Divider />
+
+			<Button variant="label-outlined" color="secondary">Default</Button>
+			<Button variant="label-outlined" color="secondary" disabled>Disabled</Button>
+			<Divider />
+
+			<Button variant="label-outlined" color="secondary" startIcon={<AddIcon />}>Default</Button>
+			<Button variant="label-outlined" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
+			<Divider />
+
 			<Typography variant="h3" gutterBottom>button-text</Typography>
 
 			<Button variant="text" color="primary">Default</Button>
@@ -143,10 +184,10 @@ export const ThemeLayout = (): JSX.Element => {
 
 			<DashboardList>
 				<DashboardListItem selected={false}>
-					<DummyDashboardListItem />
+					<MockDashboardListItem />
 				</DashboardListItem>
 				<DashboardListItem selected>
-					<DummyDashboardListItem />
+					<MockDashboardListItem />
 				</DashboardListItem>
 				<DashboardListItem selected={false} />
 			</DashboardList>
