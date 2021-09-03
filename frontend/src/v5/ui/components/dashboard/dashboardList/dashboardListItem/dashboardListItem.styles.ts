@@ -24,8 +24,7 @@ export const Container = styled.li`
   width: 100%;
   list-style: none;
   border: 1px solid ${({ theme }) => theme.palette.base.light};
-  border-bottom-style: none;
-	border-top-style: none;
+	border-bottom-style: none;
 
   &:last-child {
     border-radius: 0 0 5px 5px;
@@ -41,16 +40,16 @@ export const Container = styled.li`
 		border-radius: 5px;
 	}
   
-
-  ${({ selected, theme }) => selected && css`
+  ${({ theme }) => theme.selected && css`
     background-color: ${theme.palette.secondary.main};
     border: none;
   `}
-	
+  
   :hover {
-    border: none;
-    box-shadow: ${({ theme }) => theme.palette.shadows.large}; 
+    border-color: ${({ theme }) => theme.palette.primary.contrast};
+    box-shadow: ${({ theme }) => theme.palette.shadows.large};
     z-index: 100;
+    
 
     & + li {
       border-top: 0;

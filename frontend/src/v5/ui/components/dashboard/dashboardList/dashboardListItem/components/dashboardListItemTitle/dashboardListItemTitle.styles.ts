@@ -34,6 +34,10 @@ export const Link = styled(Typography).attrs({
 })`
   :link, :visited {
     color: ${({ theme }) => theme.palette.secondary.main};
+		
+		${({ theme }) => theme.selected && css`
+			color: ${theme.palette.primary.contrast};
+		`}
   }
 `;
 
@@ -41,4 +45,8 @@ export const Subtitle = styled(Typography).attrs({
 	variant: 'body1',
 })`
   color: ${({ theme }) => theme.palette.base.main};
+
+  ${({ theme }) => theme.selected && css`
+    color: ${theme.palette.base.light};
+  `}
 `;

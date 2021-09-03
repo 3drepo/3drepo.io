@@ -16,6 +16,7 @@
  */
 
 import React, { CSSProperties, Dispatch, ReactNode } from 'react';
+import { ThemeProvider } from 'styled-components';
 import { Container } from './dashboardListItem.styles';
 
 type IDashboradListItem = {
@@ -31,6 +32,11 @@ export const DashboardListItem = ({
 	onClick,
 	color,
 	className,
+	selected,
 }: IDashboradListItem): JSX.Element => (
-	<Container onClick={() => onClick()} color={color} className={className}>{children}</Container>
+	<ThemeProvider theme={{ selected }}>
+		<Container onClick={() => onClick()} color={color} className={className}>
+			{children}
+		</Container>
+	</ThemeProvider>
 );

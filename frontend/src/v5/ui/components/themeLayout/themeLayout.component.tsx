@@ -27,6 +27,20 @@ import { Container } from './themeLayout.styles';
 export const ThemeLayout = (): JSX.Element => {
 	const { register } = useForm();
 
+	const DummyDashboardListItem = () => (
+		<DashboardListItemRow>
+			<DashboardListItemTitle subtitle="Latest revision: Revision code" width={200}>
+				This is the container title
+			</DashboardListItemTitle>
+			<DashboardListItemText width={150}>
+				Container code
+			</DashboardListItemText>
+			<DashboardListItemText>
+				Category label
+			</DashboardListItemText>
+		</DashboardListItemRow>
+	);
+
 	return (
 		<Container>
 			<Typography variant="h1" gutterBottom>Theme Demonstration Page</Typography>
@@ -129,19 +143,11 @@ export const ThemeLayout = (): JSX.Element => {
 
 			<DashboardList>
 				<DashboardListItem selected={false}>
-					<DashboardListItemRow>
-						<DashboardListItemTitle subtitle="Latest revision: Revision code" width={200}>
-							This is the container title
-						</DashboardListItemTitle>
-						<DashboardListItemText width={150}>
-							Container code
-						</DashboardListItemText>
-						<DashboardListItemText>
-							Category label
-						</DashboardListItemText>
-					</DashboardListItemRow>
+					<DummyDashboardListItem />
 				</DashboardListItem>
-				<DashboardListItem selected />
+				<DashboardListItem selected>
+					<DummyDashboardListItem />
+				</DashboardListItem>
 				<DashboardListItem selected={false} />
 			</DashboardList>
 		</Container>

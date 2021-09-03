@@ -30,4 +30,8 @@ export const Text = styled(Typography).attrs({
 	variant: 'body1',
 })`
   color: ${({ theme }) => theme.palette.base.main};
+
+  ${({ theme }) => theme.selected && css`
+    color: ${theme.palette.base.light};
+  `}
 `;
