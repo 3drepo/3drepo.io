@@ -14,8 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import styled, { css } from 'styled-components';
 
-export { DashboardListItemRow } from './dashboardListItemRow';
-export { DashboardListItemTitle } from './dashboardListItemTitle';
-export { DashboardListItemText } from './dashboardListItemText';
-export { DashboardListItemButton } from './dashboardListItemButton';
+export const Container = styled.div`
+  flex-grow: 1;
+
+  ${({ width }) => width && css`
+    width: ${width}px;
+    flex-grow: 0;
+  `}
+`;

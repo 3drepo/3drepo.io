@@ -15,7 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { DashboardListItemRow } from './dashboardListItemRow';
-export { DashboardListItemTitle } from './dashboardListItemTitle';
-export { DashboardListItemText } from './dashboardListItemText';
-export { DashboardListItemButton } from './dashboardListItemButton';
+import { Button } from '@components/controls/button';
+import React, { Dispatch, ReactNode, SyntheticEvent } from 'react';
+import { Container } from './dashboardListItemButton.styles';
+
+type IDashboardListItemButton = {
+	children: ReactNode;
+	width?: number;
+	onClick: Dispatch<SyntheticEvent>;
+};
+
+export const DashboardListItemButton = ({ children, width, onClick }: IDashboardListItemButton): JSX.Element => (
+	<Container width={width}>
+		<Button onClick={onClick} variant="label" color="secondary">{children}</Button>
+	</Container>
+);

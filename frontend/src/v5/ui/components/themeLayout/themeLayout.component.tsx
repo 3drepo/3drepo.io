@@ -25,6 +25,7 @@ import {
 	DashboardListItemTitle,
 	DashboardListItemRow,
 	DashboardListItemText,
+	DashboardListItemButton,
 } from '@components/dashboard/dashboardList/dashboardListItem/components/';
 import { Button } from '@components/controls/button';
 import { Container } from './themeLayout.styles';
@@ -40,6 +41,9 @@ export const ThemeLayout = (): JSX.Element => {
 			<DashboardListItemText width={150}>
 				Container code
 			</DashboardListItemText>
+			<DashboardListItemButton onClick={() => undefined}>
+				1234 Revisions
+			</DashboardListItemButton>
 			<DashboardListItemText>
 				Category label
 			</DashboardListItemText>

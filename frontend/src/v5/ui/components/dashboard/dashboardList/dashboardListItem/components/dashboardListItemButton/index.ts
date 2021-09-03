@@ -15,7 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { DashboardListItemRow } from './dashboardListItemRow';
-export { DashboardListItemTitle } from './dashboardListItemTitle';
-export { DashboardListItemText } from './dashboardListItemText';
-export { DashboardListItemButton } from './dashboardListItemButton';
+export { DashboardListItemButton } from './dashboardListItemButton.component';
