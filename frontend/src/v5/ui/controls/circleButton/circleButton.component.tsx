@@ -15,14 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import React from 'react';
 
-export const Container = styled.div`
-	margin: ${({ theme }) => `${theme.spacing(2)}px`};
-	height: 5000px;
-`;
+import { StyledFab } from './circleButton.styles';
 
-export const ContrastBackground = styled.div`
-	padding: ${({ theme }) => `${theme.spacing(2)}px`};
-	background-color: ${({ theme }) => theme.palette.secondary.main};
-`;
+interface ICircleButton {
+	size?: 'large' | 'medium' | 'small';
+	variant?: 'main' | 'contrast';
+	disabled?: boolean;
+}
+
+export const CircleButton: React.FC<ICircleButton> = ({ size = 'large', variant = 'main', children, ...props }) => (
+	<StyledFab size={size} variant={variant} {...props}>
+		{children}
+	</StyledFab>
+);

@@ -17,12 +17,17 @@
 
 import styled from 'styled-components';
 
-export const Container = styled.div`
-	margin: ${({ theme }) => `${theme.spacing(2)}px`};
-	height: 5000px;
-`;
+export const Items = styled.div`
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	width: 50%;
 
-export const ContrastBackground = styled.div`
-	padding: ${({ theme }) => `${theme.spacing(2)}px`};
-	background-color: ${({ theme }) => theme.palette.secondary.main};
+	&:last-child {
+		justify-content: flex-end;
+	}
+
+	& > *:last-child {
+		margin-right: 0;
+	}
 `;
