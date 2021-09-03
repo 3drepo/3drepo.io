@@ -40,6 +40,7 @@ const project = { _id: 1, name: 'project', models: modelList.map(({ _id }) => _i
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getContainers.mockImplementation(() => modelList);
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
+Users.appendFavourites.mockImplementation((favouritesToAdd) => user1Favourites.push(favouritesToAdd))
 
 // Permissions mock
 jest.mock('../../../../../../../src/v5/utils/permissions/permissions', () => ({
@@ -80,6 +81,38 @@ const testGetContainerList = () => {
 	});
 };
 
+const testAppendFavourites = () =>{
+	describe('Add containers to favourites', () => {
+		test('user favourites should stay the same if one or more containers is not found', async () => {
+			await Containers.appendFavourites('user1', 'teamspace', 'project', [1, -1]);
+			expect(user1Favourites).toEqual([1]);
+		});
+
+		test('new containers should be added to favourites', async () => {
+			await Containers.appendFavourites('user1', 'teamspace', 'project', [1, 2, 3]);
+			expect(user1Favourites).toEqual([1, 2, 3]);
+		});
+		
+	});
+}
+
+const testDeleteFavourites = () =>{
+	describe('Remove containers from favourites', () => {
+		test('user favourites should stay the same if one or more containers are not already in', async () => {
+			await Containers.deleteFavourites('user1', 'teamspace', 'project', [1, 2]);
+			expect(user1Favourites).toEqual([1]);
+		});
+
+		test('containers should be removed from user favourites', async () => {
+			await Containers.deleteFavourites('user1', 'teamspace', 'project', [1]);
+			expect(user1Favourites).toEqual([]);
+		});
+		
+	});
+}
+
 describe('processors/teamspaces/projects/containers', () => {
 	testGetContainerList();
+	testAppendFavourites();
+	testDeleteFavourites();
 });

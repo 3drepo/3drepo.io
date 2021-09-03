@@ -72,7 +72,43 @@ const testGetFavourites = () => {
 	});
 };
 
+const testAppendFavourites = () => {
+	const favouritesData = {
+		teamspace1: ['a', 'b', 'c'],
+		teamspace2: ['d']
+	};
+
+	describe('Add container to favourites', () => {
+		test('Adding an array of containers', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValue({ customData: { starredModels: favouritesData } });
+			await User.appendFavourites('xxx', 'teamspace3', ['e','f']);
+			const newFavourtiesData = favouritesData;
+			newFavourtiesData.teamspace3 = ['e','f'];
+			expect(favouritesData).toEqual(newFavourtiesData);
+		});
+	});
+};
+
+const testDeleteFromFavourites = () => {
+	const favouritesData = {
+		teamspace1: ['a', 'b', 'c'],
+		teamspace2: ['d']
+	};
+
+	describe('Remove container from favourites', () => {
+		test('Remove an array of containers', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValue({ customData: { starredModels: favouritesData } });
+			await User.deleteFavourites('xxx', 'teamspace2', ['d']);
+			const newFavourtiesData = favouritesData;
+			newFavourtiesData.teamspace2 = undefined;
+			expect(favouritesData).toEqual(newFavourtiesData);
+		});
+	});
+};
+
 describe('models/users', () => {
 	testGetAccessibleTeamspaces();
 	testGetFavourites();
+	testAppendFavourites();
+	testDeleteFromFavourites();
 });

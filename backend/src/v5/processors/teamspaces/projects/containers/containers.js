@@ -20,7 +20,6 @@ const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../ut
 const { getContainers } = require('../../../../models/modelSettings');
 const { getFavourites } = require('../../../../models/users');
 const { getProjectById } = require('../../../../models/projects');
-const { templates } = require('../../../../utils/responseCodes');
 
 const Containers = {};
 
@@ -44,21 +43,21 @@ Containers.getContainerList = async (teamspace, project, user) => {
 Containers.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {
 	const {  models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
 	
-	if(!favouritesToAdd.every(i=>models.includes(i))) {
-		throw templates.modelNotFound; 
+	if(favouritesToAdd.every(i=>models.includes(i))) {
+		appendFavourites(username, teamspace, favouritesToAdd);
 	}
 
-	return await appendFavourites(username, teamspace, favouritesToAdd);;
+	return;
 };
 
 Containers.deleteFavourites = async (username, teamspace, project, favouritesToRemove) => {
 	const {  models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
 	
-	if(!favouritesToRemove.every(i=>models.includes(i))) {
-		throw templates.modelNotFound; 
+	if(favouritesToRemove.every(i=>models.includes(i))) {
+		deleteFavourites(username, teamspace, favouritesToRemove);
 	}
 
-	return deleteFavourites(username, teamspace, favouritesToRemove);;
+	return;
 };
 
 module.exports = Containers;
