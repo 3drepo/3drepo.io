@@ -19,6 +19,9 @@ import React from 'react';
 import { Typography, Button, Divider, TextField } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/AddCircle';
 import { useForm } from 'react-hook-form';
+import { DashboardListItem } from '@components/dashboard/dashboardList/dashboardListItem';
+import { DashboardList } from '@components/dashboard/dashboardList';
+import { DashboardListItemTitle, DashboardListItemRow, DashboardListItemText } from '@components/dashboard/dashboardList/dashboardListItem/components/';
 import { Container } from './themeLayout.styles';
 
 export const ThemeLayout = (): JSX.Element => {
@@ -123,6 +126,24 @@ export const ThemeLayout = (): JSX.Element => {
 			<TextField value="Input text without label" />
 			<br />
 			<Divider />
+
+			<DashboardList>
+				<DashboardListItem selected={false}>
+					<DashboardListItemRow>
+						<DashboardListItemTitle subtitle="Latest revision: Revision code" width={200}>
+							This is the container title
+						</DashboardListItemTitle>
+						<DashboardListItemText width={150}>
+							Container code
+						</DashboardListItemText>
+						<DashboardListItemText>
+							Category label
+						</DashboardListItemText>
+					</DashboardListItemRow>
+				</DashboardListItem>
+				<DashboardListItem selected />
+				<DashboardListItem selected={false} />
+			</DashboardList>
 		</Container>
 	);
 };
