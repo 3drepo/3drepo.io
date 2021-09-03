@@ -16,10 +16,14 @@
  */
 
 const RoutesManager = {};
+const ContainerRoutes = require('./teamspaces/projects/containers/containers');
+const ProjectRoutes = require('./teamspaces/projects/projects');
 const TeamspaceRoutes = require('./teamspaces/teamspaces');
 
 RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/', TeamspaceRoutes);
+	app.use('/v5/teamspaces/:teamspace/projects', ProjectRoutes);
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', ContainerRoutes);
 };
 
 module.exports = RoutesManager;

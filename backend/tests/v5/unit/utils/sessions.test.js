@@ -42,6 +42,20 @@ const testIsSessionValid = () => {
 	});
 };
 
+const testGetUserFromSession = () => {
+	describe.each([
+		[undefined, undefined],
+		[{}, undefined],
+		[{ user: {} }, undefined],
+		[{ user: { username: 'user' } }, 'user'],
+	])('Get username from session', (session, user) => {
+		test(`${JSON.stringify(session)} should return ${user || 'undefined'}`, () => {
+			expect(SessionUtils.getUserFromSession(session)).toEqual(user);
+		});
+	});
+};
+
 describe('utils/sessions', () => {
 	testIsSessionValid();
+	testGetUserFromSession();
 });

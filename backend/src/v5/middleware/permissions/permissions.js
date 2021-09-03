@@ -15,9 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const permConst = {};
+const { convertAllUUIDs } = require('../dataConverter/pathParams');
+const { isTeamspaceMember } = require('./components/teamspaces');
+const { validSession } = require('../auth');
+const { validateMany } = require('../common');
 
-permConst.TEAMSPACE_ADMIN = 'teamspace_admin';
-permConst.PROJECT_ADMIN = 'admin_project';
+const Permissions = {};
 
-module.exports = permConst;
+Permissions.hasAccessToTeamspace = validateMany([convertAllUUIDs, validSession, isTeamspaceMember]);
+
+module.exports = Permissions;

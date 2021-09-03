@@ -15,30 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const Models = {};
 const db = require('../handler/db');
 const { templates } = require('../utils/responseCodes');
 
-const User = {};
+const findOneModel = (ts, query, projection) => db.findOne(ts, 'settings', query, projection);
+const findModel = (ts, query, projection, sort) => db.find(ts, 'settings', query, projection, sort);
 
-const userQuery = (query, projection, sort) => db.findOne('admin', 'system.users', query, projection, sort);
-
-const getUser = async (user, projection) => {
-	const userDoc = await userQuery({ user }, projection);
-	if (!userDoc) {
-		throw templates.userNotFound;
+Models.getModelById = async (ts, model, projection) => {
+	const res = await findOneModel(ts, { _id: model }, projection);
+	if (!res) {
+		throw templates.modelNotFound;
 	}
-	return userDoc;
+
+	return res;
 };
 
-User.getFavourites = async (user, teamspace) => {
-	const { customData } = await getUser(user, { 'customData.starredModels': 1 });
-	const favs = customData.starredModels || {};
-	return favs[teamspace] || [];
+Models.getContainers = async (ts, ids, projection, sort) => {
+	const query = { _id: { $in: ids }, federate: { $ne: true } };
+	return findModel(ts, query, projection, sort);
 };
 
-User.getAccessibleTeamspaces = async (username) => {
-	const userDoc = await getUser(username, { roles: 1 });
-	return userDoc.roles.map((role) => role.db);
+Models.getFederations = async (ts, ids, projection, sort) => {
+	const query = { _id: { $in: ids }, federate: true };
+	return findModel(ts, query, projection, sort);
 };
 
-module.exports = User;
+module.exports = Models;

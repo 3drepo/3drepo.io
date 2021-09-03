@@ -15,9 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const permConst = {};
+const { getUserFromSession } = require('../../../utils/sessions');
+const { hasAccessToTeamspace } = require('../../../utils/permissions/permissions');
+const { respond } = require('../../../utils/responder');
+const { templates } = require('../../../utils/responseCodes');
 
-permConst.TEAMSPACE_ADMIN = 'teamspace_admin';
-permConst.PROJECT_ADMIN = 'admin_project';
+const TeamspacePerms = {};
 
-module.exports = permConst;
+TeamspacePerms.isTeamspaceMember = async (req, res, next) => {
+	const { session, params } = req;
+	const user = getUserFromSession(session);
+	const { teamspace } = params;
+
+	const hasAccess = await hasAccessToTeamspace(teamspace, user);
+	if (teamspace && user && hasAccess) {
+		next();
+	} else {
+		respond(req, res, templates.teamspaceNotFound);
+	}
+};
+
+module.exports = TeamspacePerms;

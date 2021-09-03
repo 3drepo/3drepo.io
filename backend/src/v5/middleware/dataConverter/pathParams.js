@@ -15,9 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const permConst = {};
+const { stringToUUID } = require('../../utils/helper/uuids');
 
-permConst.TEAMSPACE_ADMIN = 'teamspace_admin';
-permConst.PROJECT_ADMIN = 'admin_project';
+const PathParams = {};
 
-module.exports = permConst;
+PathParams.convertAllUUIDs = (req, res, next) => {
+	if (req.params) {
+		Object.keys(req.params).forEach((key) => {
+			req.params[key] = stringToUUID(req.params[key]);
+		});
+	}
+
+	next();
+};
+
+module.exports = PathParams;

@@ -25,30 +25,32 @@ let server;
 let agent;
 
 // This is the user being used for tests
-const testUser = {
-	user: 'user1',
-	password: 'someComplicatedPassword!234',
-	apiKey: '1234',
-};
+const testUser = ServiceHelper.generateUserCredentials();
+const testUser2 = ServiceHelper.generateUserCredentials();
 
 // This is the list of teamspaces the user has access to
 const testUserTSAccess = [
-	{ name: 'ts1', isAdmin: true },
-	{ name: 'ts2', isAdmin: false },
-	{ name: 'ts3', isAdmin: true },
+	{ name: ServiceHelper.generateRandomString(), isAdmin: true },
+	{ name: ServiceHelper.generateRandomString(), isAdmin: false },
+	{ name: ServiceHelper.generateRandomString(), isAdmin: true },
 ];
 
+// This is the list of teamspaces the user has access to
+const breakingTSAccess = { name: ServiceHelper.generateRandomString(), isAdmin: true };
+
 const setupData = async () => {
-	await Promise.all(testUserTSAccess.map(async ({ name, isAdmin }) => {
-		await ServiceHelper.db.createUser(name, name,
-			{ permissions: isAdmin ? [{ user: testUser.user, permissions: 'teamspace_admin' }] : [] });
-		await ServiceHelper.db.createTeamspaceRole(name);
-	}));
+	await Promise.all(testUserTSAccess.map(
+		({ name, isAdmin }) => ServiceHelper.db.createTeamspace(name, isAdmin ? [testUser.user] : []),
+	));
+
+	await ServiceHelper.db.createTeamspace(breakingTSAccess.name, [testUser2.user], true);
 	await ServiceHelper.db.createUser(
-		testUser.user,
-		testUser.password,
-		{ apiKey: testUser.apiKey },
-		testUserTSAccess.map(({ name }) => ({ db: name, role: 'team_member' })),
+		testUser,
+		testUserTSAccess.map(({ name }) => name),
+	);
+	await ServiceHelper.db.createUser(
+		testUser2,
+		[breakingTSAccess.name],
 	);
 };
 
@@ -61,6 +63,11 @@ const testGetTeamspaceList = () => {
 		test('give return a teamspace list if the user has a valid session', async () => {
 			const res = await agent.get(`/v5/teamspaces/?key=${testUser.apiKey}`).expect(templates.ok.status);
 			expect(res.body).toEqual({ teamspaces: testUserTSAccess });
+		});
+
+		test('should safely catch error if there is an internal error', async () => {
+			const res = await agent.get(`/v5/teamspaces/?key=${testUser2.apiKey}`).expect(templates.unknown.status);
+			expect(res.body.code).toEqual(templates.unknown.code);
 		});
 	});
 };
