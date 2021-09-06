@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import IconButton from '@material-ui/core/IconButton';
 import SelectSimilarIcon from '@material-ui/icons/Adjust';
@@ -56,8 +56,27 @@ export const List = styled(ListComponent)`
 	}
 `;
 
+export const Title = styled(TitleComponent)`
+	width: 30%;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	white-space: break-spaces;
+	overflow: initial;
+	word-break: break-word;
+`;
+
+const SectionHeaderStyles = css`
+	border-bottom-color: ${COLOR.BLACK_20};
+
+	${Title} {
+		word-break: unset;
+	}
+`;
+
 export const Header = styled(SectionHeader)`
-	border-bottom-color: ${({ section }: { section: boolean }) => section ? COLOR.BLACK_20 : COLOR.BLACK_6};
+	${({ section }: { section: boolean }) => section ? SectionHeaderStyles : css`
+		border-bottom-color: ${COLOR.BLACK_6};
+	`};
 	height: auto;
 	min-height: 40px;
 
@@ -66,14 +85,6 @@ export const Header = styled(SectionHeader)`
 			visibility: visible;
 		}
 	}
-`;
-
-export const Title = styled(TitleComponent)`
-	width: 30%;
-	margin-top: 10px;
-	margin-bottom: 10px;
-	white-space: break-spaces;
-	overflow: initial;
 `;
 
 export const Value = styled(ValueComponent)`

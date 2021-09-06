@@ -17,7 +17,7 @@
 
 import React, { useState } from 'react';
 
-import { isNumber } from 'lodash';
+import { isNil, isNumber } from 'lodash';
 import MoreIcon from '@material-ui/icons/ChevronRight';
 import LessIcon from '@material-ui/icons/ExpandMore';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -94,7 +94,7 @@ const MetaRecordData = ({ value, field, copyRules, selectAllSimilar }) => {
 export const MetaRecord = (props: IProps) => {
 	const { name, data, copyRules, selectAllSimilar, starredMetaMap, toggleStarredRecord } = props;
 	const [collapsed, setCollapsed] = useState<boolean>(false);
-	const hasSubData = !data.value;
+	const hasSubData = isNil(data.value);
 
 	const toggleCollapse = () => setCollapsed(!collapsed);
 
