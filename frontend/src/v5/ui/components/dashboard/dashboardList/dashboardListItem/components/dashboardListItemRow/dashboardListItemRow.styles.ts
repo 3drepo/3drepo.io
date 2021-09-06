@@ -17,7 +17,9 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
-	padding: 20px 20px 20px 30px;
 	display: flex;
 	align-items: center;
+	height: 100%;
+	padding-left: 30px;
+	padding-right: 20px;
 `;

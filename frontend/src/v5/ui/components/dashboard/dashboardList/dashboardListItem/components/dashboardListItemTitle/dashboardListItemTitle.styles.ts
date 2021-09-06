@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 import { Typography } from '@material-ui/core';
-import { Link as RouterLink } from 'react-router-dom';
+import { Button } from '@components/controls/button';
 
 export const Container = styled.div`
   flex-grow: 1;
@@ -28,17 +28,17 @@ export const Container = styled.div`
   `}
 `;
 
-export const Link = styled(Typography).attrs({
-	variant: 'h5',
-	component: RouterLink,
+export const Title = styled(Button).attrs({
+	variant: 'text',
 })`
-  :link, :visited {
-    color: ${({ theme }) => theme.palette.secondary.main};
-		
-		${({ theme }) => theme.selected && css`
-			color: ${theme.palette.primary.contrast};
-		`}
-  }
+  color: ${({ theme }) => theme.palette.secondary.main};
+  padding: 0;
+  margin: 0;
+  line-height: normal;
+
+  ${({ theme }) => theme.selected && css`
+    color: ${theme.palette.primary.contrast};
+  `}
 `;
 
 export const Subtitle = styled(Typography).attrs({

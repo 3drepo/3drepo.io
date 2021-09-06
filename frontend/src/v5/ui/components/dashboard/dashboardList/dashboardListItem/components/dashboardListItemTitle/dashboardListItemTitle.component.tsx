@@ -15,20 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode } from 'react';
-import { Container, Link, Subtitle } from './dashboardListItemTitle.styles';
+import React, { Dispatch, ReactNode } from 'react';
+import { Container, Title, Subtitle } from './dashboardListItemTitle.styles';
 
 type IDashboardListItemTitle = {
 	children?: ReactNode;
 	subtitle: string;
 	width?: number;
+	onClick?: Dispatch<void>;
 };
 
-export const DashboardListItemTitle = ({ children, subtitle, width }: IDashboardListItemTitle): JSX.Element => (
+export const DashboardListItemTitle = ({
+	children, subtitle, width, onClick,
+}: IDashboardListItemTitle): JSX.Element => (
 	<Container width={width}>
-		<Link to="/">
+		<Title onClick={onClick}>
 			{children}
-		</Link>
+		</Title>
 		<Subtitle>{subtitle}</Subtitle>
 	</Container>
 );
