@@ -16,8 +16,8 @@
  */
 
 const RoutesManager = {};
-const FederationRoutes = require('./teamspaces/projects/federations/federations');
 const ContainerRoutes = require('./teamspaces/projects/containers/containers');
+const FederationRoutes = require('./teamspaces/projects/federations/federations');
 const ProjectRoutes = require('./teamspaces/projects/projects');
 const TeamspaceRoutes = require('./teamspaces/teamspaces');
 

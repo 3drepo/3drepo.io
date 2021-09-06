@@ -15,35 +15,121 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- const { Router } = require('express');
- const Federations = require('../../../../processors/teamspaces/projects/federations/federations');
- const { respond } = require('../../../../utils/responder');
- const { templates } = require('../../../../utils/responseCodes');
-const { hasAccessToTeamspace } = require('../../../../middleware/permissions/teamspaces');
+const Federations = require('../../../../processors/teamspaces/projects/federations/federations');
+const { Router } = require('express');
+const { hasAccessToTeamspace } = require('../../../../middleware/permissions/permissions');
+const { respond } = require('../../../../utils/responder');
+const { templates } = require('../../../../utils/responseCodes');
 
- const appendFavourites = (req, res) => {
+const appendFavourites = (req, res) => {
 	const user = req.session.user.username;
-	const { teamspace } = req.params;
+	const { teamspace, project } = req.params;
 	const favouritesToAdd = req.body.federations;
 
-	Federations.appendFavourites(user, teamspace, favouritesToAdd).then((favourites) => {
-		respond(req, res, templates.ok, {favourites});
+	Federations.appendFavourites(user, teamspace, project, favouritesToAdd).then((favourites) => {
+		respond(req, res, templates.ok, { favourites });
 	}).catch((err) => respond(req, res, err));
 };
 
-const deleteFavourites =(req, res)=>{
+const deleteFavourites = (req, res) => {
 	const user = req.session.user.username;
-	const { teamspace } = req.params;
+	const { teamspace, project } = req.params;
 	const favouritesToRemove = req.body.federations;
 
-	Federations.deleteFavourites(user, teamspace, favouritesToRemove).then((favourites) => {
-		respond(req, res, templates.ok, {favourites});
+	Federations.deleteFavourites(user, teamspace, project, favouritesToRemove).then((favourites) => {
+		respond(req, res, templates.ok, { favourites });
 	}).catch((err) => respond(req, res, err));
-}
+};
 
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/federations/favourites:
+	 *   patch:
+	 *     description: Add federations to the user's favourites list
+	 *     tags: [Federations]
+	 *     operationId: appendFederations
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - project:
+	 *         name: project
+	 *         description: ID of project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     requestBody:
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               federations:
+     *                 type: array
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: adds the federations found in the request body to the user's favourites list
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 */
 	router.patch('/favourites', hasAccessToTeamspace, appendFavourites);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/federations/favourites:
+	 *   delete:
+	 *     description: Remove federations from the user's favourites list
+	 *     tags: [Federations]
+	 *     operationId: deleteFederations
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - project:
+	 *         name: project
+	 *         description: ID of project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     requestBody:
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               federations:
+     *                 type: array
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: removes the federations found in the request body from the user's favourites list
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 */
 	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites);
 	return router;
 };

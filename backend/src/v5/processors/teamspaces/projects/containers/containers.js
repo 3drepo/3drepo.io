@@ -41,23 +41,21 @@ Containers.getContainerList = async (teamspace, project, user) => {
 };
 
 Containers.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {
-	const {  models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
-	
-	if(favouritesToAdd.every(i=>models.includes(i))) {
+	const accessibleContainers = await Containers.getContainerList(teamspace, project, username);
+	const containerIDs = accessibleContainers.map((a) => a._id);
+
+	if (favouritesToAdd.every((i) => containerIDs.includes(i))) {
 		appendFavourites(username, teamspace, favouritesToAdd);
 	}
-
-	return;
 };
 
 Containers.deleteFavourites = async (username, teamspace, project, favouritesToRemove) => {
-	const {  models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
-	
-	if(favouritesToRemove.every(i=>models.includes(i))) {
+	const accessibleContainers = await Containers.getContainerList(teamspace, project, username);
+	const containerIDs = accessibleContainers.map((a) => a._id);
+
+	if (favouritesToRemove.every((i) => containerIDs.includes(i))) {
 		deleteFavourites(username, teamspace, favouritesToRemove);
 	}
-
-	return;
 };
 
 module.exports = Containers;

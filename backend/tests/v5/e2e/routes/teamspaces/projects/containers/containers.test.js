@@ -108,6 +108,39 @@ const testGetContainerList = () => {
 	});
 };
 
+const testAppendFavourites = () => {
+	const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/favourites`;
+	describe('Append Favourite Containers', () => {
+		test('should fail without a valid session', async () => {
+			const res = await agent.get(route).expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user is not a member of the teamspace', async () => {
+			const res = await agent.get(`${route}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if the project does not exist', async () => {
+			const res = await agent.get(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/containers?key=${users.tsAdmin.apiKey}`).expect(templates.projectNotFound.status);
+			expect(res.body.code).toEqual(templates.projectNotFound.code);
+		});
+
+		test('should return empty array if the user has no access to any of the containers', async () => {
+			const res = await agent.get(`${route}?key=${users.noProjectAccess.apiKey}`).expect(templates.ok.status);
+			expect(res.body).toEqual({ containers: [] });
+		});
+
+		test('should return the list of containers if the user has access', async () => {
+			const res = await agent.get(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			expect(res.body).toEqual({
+				containers: models.flatMap(({ _id, name, properties, isFavourite }) => (properties?.federate ? []
+					: { _id, name, role: 'admin', isFavourite: !!isFavourite })),
+			});
+		});
+	});
+};
+
 describe('E2E routes/teamspaces/projects/containers', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -116,4 +149,5 @@ describe('E2E routes/teamspaces/projects/containers', () => {
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
 	testGetContainerList();
+	testAppendFavourites();
 });
