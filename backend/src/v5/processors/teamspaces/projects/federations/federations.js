@@ -17,8 +17,8 @@
 
 const { appendFavourites, deleteFavourites } = require('../../../../models/users');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../utils/permissions/permissions');
-const { getFederations } = require('../../../../models/modelSettings');
 const { getFavourites } = require('../../../../models/users');
+const { getFederations } = require('../../../../models/modelSettings');
 const { getProjectById } = require('../../../../models/projects');
 
 const Federations = {};
@@ -39,7 +39,6 @@ const getFederationList = async (teamspace, project, user) => {
 		return (!isAdmin && !perm) ? [] : { _id, name, role: isAdmin ? 'admin' : perm.permission, isFavourite: favourites.includes(_id) };
 	});
 };
-
 
 Federations.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {
 	const accessibleFederations = await getFederationList(teamspace, project, username);

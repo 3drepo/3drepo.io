@@ -40,22 +40,22 @@ const project = { _id: 1, name: 'project', models: modelList.map(({ _id }) => _i
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getContainers.mockImplementation(() => modelList);
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
-Users.appendFavourites.mockImplementation(function(username, teamspace, favouritesToAdd) {
+Users.appendFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
 	for (const favourite of favouritesToAdd) {
 		if (user1Favourites.indexOf(favourite) === -1) {
 			user1Favourites.push(favourite);
 		}
 	}
-} );
+});
 
-Users.deleteFavourites.mockImplementation(function(username, teamspace, favouritesToAdd) {
+Users.deleteFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
 	for (const favourite of favouritesToAdd) {
 		const index = user1Favourites.indexOf(favourite);
 		if (index !== -1) {
-			user1Favourites.splice(index,1);
+			user1Favourites.splice(index, 1);
 		}
 	}
-} );
+});
 
 // Permissions mock
 jest.mock('../../../../../../../src/v5/utils/permissions/permissions', () => ({
@@ -98,7 +98,7 @@ const testGetContainerList = () => {
 
 const testAppendFavourites = () => {
 	describe('Add containers to favourites', () => {
-		test('user favourites should stay the same if one or more containers is not found', async () => {			
+		test('user favourites should stay the same if one or more containers is not found', async () => {
 			await Containers.appendFavourites('tsAdmin', 'teamspace', 'project', [1, -1]);
 			expect(user1Favourites).toEqual([1]);
 			user1Favourites = [1];

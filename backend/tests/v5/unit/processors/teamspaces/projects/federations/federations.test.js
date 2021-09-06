@@ -42,7 +42,6 @@ jest.mock('../../../../../../../src/v5/models/users');
 const Users = require(`${src}/models/users`);
 const Federations = require(`${src}/processors/teamspaces/projects/federations/federations`);
 
-
 const modelList = [
 	{ _id: 1, name: 'model1', permissions: [{ user: 'user1', permission: 'collaborator' }, { user: 'user2', permission: 'collaborator' }] },
 	{ _id: 2, name: 'model2', permissions: [{ user: 'user2', permission: 'commenter' }] },
@@ -58,22 +57,22 @@ const project = { _id: 1, name: 'project', models: modelList.map(({ _id }) => _i
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getFederations.mockImplementation(() => modelList);
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
-Users.appendFavourites.mockImplementation(function(username, teamspace, favouritesToAdd) {
+Users.appendFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
 	for (const favourite of favouritesToAdd) {
 		if (user1Favourites.indexOf(favourite) === -1) {
 			user1Favourites.push(favourite);
 		}
 	}
-} );
+});
 
-Users.deleteFavourites.mockImplementation(function(username, teamspace, favouritesToAdd) {
+Users.deleteFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
 	for (const favourite of favouritesToAdd) {
 		const index = user1Favourites.indexOf(favourite);
 		if (index !== -1) {
-			user1Favourites.splice(index,1);
+			user1Favourites.splice(index, 1);
 		}
 	}
-} );
+});
 
 // Permissions mock
 jest.mock('../../../../../../../src/v5/utils/permissions/permissions', () => ({
