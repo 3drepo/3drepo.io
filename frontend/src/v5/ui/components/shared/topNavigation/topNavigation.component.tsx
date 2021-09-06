@@ -16,44 +16,23 @@
  */
 
 import React from 'react';
-import { useParams, useRouteMatch } from 'react-router-dom';
-
-import { ROUTES, getRouteLink } from '@/v5/services/routes/routes';
 import { Container, Link } from './topNavigaton.styles';
 
-export const TopNavigation = (): JSX.Element => {
-	const { teamspace, project } = useParams();
-	const isProjectSelected = !!project;
+interface ILink {
+	title: string;
+	to: string;
+	active?: boolean;
+	disabled?: boolean;
+}
 
-	const links = [{
-		title: 'Federations',
-		to: getRouteLink({ route: ROUTES.FEDERATIONS, teamspace, project }),
-		active: useRouteMatch(ROUTES.FEDERATIONS),
-		disabled: !isProjectSelected,
-	}, {
-		title: 'Containers',
-		to: getRouteLink({ route: ROUTES.CONTAINERS, teamspace, project }),
-		active: useRouteMatch(ROUTES.CONTAINERS),
-		disabled: !isProjectSelected,
-	}, {
-		title: 'Tasks',
-		to: getRouteLink({ route: ROUTES.TASKS, teamspace, project }),
-		active: useRouteMatch(ROUTES.TASKS),
-	}, {
-		title: 'Users',
-		to: getRouteLink({ route: ROUTES.USERS, teamspace, project }),
-		active: useRouteMatch(ROUTES.USERS),
-	}, {
-		title: 'Settings',
-		to: getRouteLink({ route: ROUTES.SETTINGS, teamspace, project }),
-		active: useRouteMatch(ROUTES.SETTINGS),
-	}].filter(({ disabled }) => !disabled);
+interface ITopNavigation {
+	links: ILink[];
+}
 
-	return (
-		<Container>
-			{links.map(({ title, to, ...props }) => (
-				<Link to={to} {...props}>{title}</Link>
-			))}
-		</Container>
-	);
-};
+export const TopNavigation = ({ links }: ITopNavigation): JSX.Element => (
+	<Container>
+		{links.map(({ title, to, ...props }) => (
+			<Link to={to} {...props}>{title}</Link>
+		))}
+	</Container>
+);

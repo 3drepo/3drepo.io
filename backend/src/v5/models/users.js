@@ -30,6 +30,12 @@ const getUser = async (user, projection) => {
 	return userDoc;
 };
 
+User.getFavourites = async (user, teamspace) => {
+	const { customData } = await getUser(user, { 'customData.starredModels': 1 });
+	const favs = customData.starredModels || {};
+	return favs[teamspace] || [];
+};
+
 User.getAccessibleTeamspaces = async (username) => {
 	const userDoc = await getUser(username, { roles: 1 });
 	return userDoc.roles.map((role) => role.db);

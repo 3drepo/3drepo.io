@@ -18,5 +18,6 @@
 const permConst = {};
 
 permConst.TEAMSPACE_ADMIN = 'teamspace_admin';
+permConst.PROJECT_ADMIN = 'admin_project';
 
 module.exports = permConst;

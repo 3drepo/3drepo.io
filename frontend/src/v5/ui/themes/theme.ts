@@ -215,6 +215,29 @@ export const theme = createMuiTheme({
 		},
 	},
 	overrides: {
+		MuiAppBar: {
+			root: {
+				boxShadow: 'none',
+				paddingLeft: 20,
+				paddingRight: 20,
+				minHeight: 64,
+				display: 'flex',
+				flexDirection: 'row',
+				alignItems: 'center',
+			},
+		},
+		MuiAvatar: {
+			root: {
+				margin: '8px 7px',
+				color: COLOR.PRIMARY_MAIN_CONTRAST,
+				backgroundColor: COLOR.TERTIARY_MAIN,
+				...typography.body1,
+			},
+			colorDefault: {
+				color: null,
+				backgroundColor: null,
+			},
+		},
 		MuiList: {
 			root: {
 				width: 226,
@@ -224,11 +247,6 @@ export const theme = createMuiTheme({
 			padding: {
 				paddingTop: 0,
 				paddingBottom: 0,
-			},
-		},
-		MuiAvatar: {
-			root: {
-				margin: '8px 7px',
 			},
 		},
 		MuiFab: {
@@ -247,6 +265,14 @@ export const theme = createMuiTheme({
 					height: 17,
 					width: 'auto',
 				},
+			},
+			extended: {
+				height: null,
+				width: null,
+				padding: null,
+				minWidth: null,
+				minHeight: null,
+				borderRadius: null,
 			},
 		},
 		MuiBreadcrumbs: {

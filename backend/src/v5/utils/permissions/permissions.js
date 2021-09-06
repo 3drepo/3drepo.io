@@ -15,13 +15,43 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getTeamspaceAdmins } = require('../../models/teamspaces');
+const { getTeamspaceAdmins, hasAccessToTeamspace } = require('../../models/teamspaces');
+const { PROJECT_ADMIN } = require('./permissions.constants');
+const { getModelById } = require('../../models/modelSettings');
+const { getProjectAdmins } = require('../../models/projects');
 
 const Permissions = {};
 
 Permissions.isTeamspaceAdmin = async (teamspace, username) => {
 	const admins = await getTeamspaceAdmins(teamspace);
 	return admins.includes(username);
+};
+
+Permissions.hasAccessToTeamspace = hasAccessToTeamspace;
+
+Permissions.isProjectAdmin = async (teamspace, project, username) => {
+	const admins = await getProjectAdmins(teamspace, project);
+	return admins.includes(username);
+};
+
+Permissions.hasProjectAdminPermissions = (perms, username) => perms.some(
+	({ user, permissions }) => user === username && permissions.includes(PROJECT_ADMIN),
+);
+
+Permissions.hasReadAccessToModel = async (teamspace, project, model, username, adminCheck = true) => {
+	if (adminCheck) {
+		const isAdminArr = (await Promise.all([
+			Permissions.isTeamspaceAdmin(teamspace, username),
+			Permissions.isProjectAdmin(teamspace, project, username),
+		]));
+
+		if (isAdminArr.filter((bool) => bool).length) return true;
+	}
+
+	const { permissions } = await getModelById(teamspace, model, { permissions: 1 });
+
+	// we assume the user has access if they have some form of permissions on the model
+	return permissions && permissions.some((perm) => perm.user === username);
 };
 
 module.exports = Permissions;
