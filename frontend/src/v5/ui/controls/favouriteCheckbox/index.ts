@@ -15,29 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-
-export const Container = styled.div`
-	margin: ${({ theme }) => `${theme.spacing(2)}px`};
-	height: 5000px;
-`;
-
-export const ContrastBackground = styled.div`
-	padding: ${({ theme }) => `${theme.spacing(2)}px`};
-	background-color: ${({ theme }) => theme.palette.secondary.main};
-`;
-
-export const BaseBackground = styled.div`
-  padding: ${({ theme }) => `${theme.spacing(2)}px`};
-  background-color: #e5e5e5;
-`;
-
-export const Group = styled.div`
-	margin-top: 30px;
-`;
-
-export const AppBarGroup = styled(Group)`
-	header {
-		position: relative !important;
-	}
-`;
+export { FavouriteCheckbox } from './favouriteCheckbox.component';

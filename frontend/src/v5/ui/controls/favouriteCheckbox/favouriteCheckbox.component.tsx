@@ -15,29 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import React from 'react';
+import StarIcon from '@assets/icons/v5/star.svg';
+import { Checkbox } from './favouriteCheckbox.styles';
 
-export const Container = styled.div`
-	margin: ${({ theme }) => `${theme.spacing(2)}px`};
-	height: 5000px;
-`;
+type IStarButton = {
+	checked: boolean;
+	onChange: (value: boolean) => void;
+	disabled?: boolean;
+};
 
-export const ContrastBackground = styled.div`
-	padding: ${({ theme }) => `${theme.spacing(2)}px`};
-	background-color: ${({ theme }) => theme.palette.secondary.main};
-`;
-
-export const BaseBackground = styled.div`
-  padding: ${({ theme }) => `${theme.spacing(2)}px`};
-  background-color: #e5e5e5;
-`;
-
-export const Group = styled.div`
-	margin-top: 30px;
-`;
-
-export const AppBarGroup = styled(Group)`
-	header {
-		position: relative !important;
-	}
-`;
+export const FavouriteCheckbox = ({ onChange, disabled, checked }: IStarButton): JSX.Element => (
+	<Checkbox
+		icon={<StarIcon />}
+		checkedIcon={<StarIcon />}
+		onChange={onChange}
+		checked={checked}
+		disabled={disabled}
+	/>
+);

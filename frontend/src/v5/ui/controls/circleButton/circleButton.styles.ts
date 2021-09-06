@@ -53,16 +53,18 @@ const mainFabStyles = css`
 				}
 			}
 		`};
-
+		
 		&:hover, &.Mui-focusVisible {
 			&& {
-				background-color: transparent;
-			}
+        background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+        box-shadow: none;
+      }
 		}
 
 		&:active {
 			&& {
 				background-color: ${({ theme }) => theme.palette.base.lightest};
+				box-shadow: none;
 			}
 		}
 	}

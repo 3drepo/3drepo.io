@@ -18,8 +18,8 @@
 import React from 'react';
 import { Typography, Divider, TextField } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/AddCircle';
-import IntercomIcon from '@assets/icons/intercom.svg';
-import NotificationsIcon from '@assets/icons/notifications.svg';
+import IntercomIcon from '@assets/icons/v5/intercom.svg';
+import NotificationsIcon from '@assets/icons/v5/notifications.svg';
 
 import { useForm } from 'react-hook-form';
 
@@ -38,7 +38,8 @@ import {
 	DashboardListItemText,
 	DashboardListItemButton,
 } from '@components/dashboard/dashboardList/dashboardListItem/components/';
-import { AppBarGroup, Container, ContrastBackground, Group } from './themeLayout.styles';
+import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
+import { AppBarGroup, BaseBackground, Container, ContrastBackground, Group } from './themeLayout.styles';
 
 const LINKS = [{
 	title: 'Federations',
@@ -264,22 +265,35 @@ export const ThemeLayout = (): JSX.Element => {
 
 				<Group>
 					<Typography variant="h3" gutterBottom>Circle buttons</Typography>
+					<Typography variant="h4" gutterBottom>Favourite checkbox</Typography>
+					<BaseBackground>
+						<FavouriteCheckbox checked={false} onChange={() => undefined} />
+						<FavouriteCheckbox checked onChange={() => undefined} />
+						<FavouriteCheckbox checked={false} onChange={() => undefined} disabled />
+					</BaseBackground>
+
+					<ContrastBackground>
+						<FavouriteCheckbox checked={false} onChange={() => undefined} />
+						<FavouriteCheckbox checked onChange={() => undefined} />
+						<FavouriteCheckbox checked={false} onChange={() => undefined} disabled />
+					</ContrastBackground>
+
 					<Typography variant="h4" gutterBottom>icon-intercom</Typography>
 					<ContrastBackground>
-						<CircleButton variant="contrast" aria-label="intercom">
+						<CircleButton onClick={() => undefined} variant="contrast" aria-label="intercom">
 							<IntercomIcon />
 						</CircleButton>
-						<CircleButton variant="contrast" aria-label="intercom" disabled>
+						<CircleButton onClick={() => undefined} variant="contrast" aria-label="intercom" disabled>
 							<IntercomIcon />
 						</CircleButton>
 					</ContrastBackground>
 
 					<Typography variant="h4" gutterBottom>icon-nav-notifications</Typography>
 					<ContrastBackground>
-						<CircleButton variant="contrast" aria-label="notifications">
+						<CircleButton onClick={() => undefined} variant="contrast" aria-label="notifications">
 							<NotificationsIcon />
 						</CircleButton>
-						<CircleButton variant="contrast" aria-label="notifications" disabled>
+						<CircleButton onClick={() => undefined} variant="contrast" aria-label="notifications" disabled>
 							<NotificationsIcon />
 						</CircleButton>
 					</ContrastBackground>
