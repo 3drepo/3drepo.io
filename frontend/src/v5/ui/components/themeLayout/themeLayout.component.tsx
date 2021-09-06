@@ -27,9 +27,9 @@ import { AppBar } from '@components/shared/appBar';
 import { Breadcrumbs } from '@components/shared/breadcrumbs';
 import { TopNavigation } from '@components/shared/topNavigation';
 import { NavigationMenu } from '@components/shared/navigatonMenu';
-import { CircleButton } from '@/v5/ui/controls/circleButton';
-import { AvatarButton } from '@/v5/ui/controls/avatarButton';
-import { Container, ContrastBackground } from './themeLayout.styles';
+import { Button } from '@controls/button';
+import { CircleButton } from '@controls/circleButton';
+import { AvatarButton } from '@controls/avatarButton';
 import { DashboardListItem } from '@components/dashboard/dashboardList/dashboardListItem';
 import { DashboardList } from '@components/dashboard/dashboardList';
 import {
@@ -38,7 +38,7 @@ import {
 	DashboardListItemText,
 	DashboardListItemButton,
 } from '@components/dashboard/dashboardList/dashboardListItem/components/';
-import { Button } from '@components/controls/button';
+import { Container, ContrastBackground } from './themeLayout.styles';
 
 const LINKS = [{
 	title: 'Federations',
@@ -289,7 +289,6 @@ export const ThemeLayout = (): JSX.Element => {
 
 			<Typography variant="h3" gutterBottom>AppBar (with logo only)</Typography>
 			<AppBar />
-
 
 			<DashboardList>
 				<DashboardListItem selected={false}>

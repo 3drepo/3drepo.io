@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Button } from '@components/controls/button';
 import React, { Dispatch, ReactNode, SyntheticEvent } from 'react';
+import { Button } from '@controls/button';
 import { Container } from './dashboardListItemButton.styles';
 
 type IDashboardListItemButton = {

@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 import { Typography } from '@material-ui/core';
-import { Button } from '@components/controls/button';
+import { Button } from '@controls/button';
 
 export const Container = styled.div`
   flex-grow: 1;
