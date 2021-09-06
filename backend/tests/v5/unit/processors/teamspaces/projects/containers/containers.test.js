@@ -33,14 +33,29 @@ const modelList = [
 	{ _id: 4, name: 'model4' },
 ];
 
-const user1Favourites = [1];
+let user1Favourites = [1];
 
 const project = { _id: 1, name: 'project', models: modelList.map(({ _id }) => _id) };
 
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getContainers.mockImplementation(() => modelList);
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
-Users.appendFavourites.mockImplementation((username, teamspace, favouritesToAdd) => user1Favourites.push(favouritesToAdd));
+Users.appendFavourites.mockImplementation(function(username, teamspace, favouritesToAdd) {
+	for (const favourite of favouritesToAdd) {
+		if (user1Favourites.indexOf(favourite) === -1) {
+			user1Favourites.push(favourite);
+		}
+	}
+} );
+
+Users.deleteFavourites.mockImplementation(function(username, teamspace, favouritesToAdd) {
+	for (const favourite of favouritesToAdd) {
+		const index = user1Favourites.indexOf(favourite);
+		if (index !== -1) {
+			user1Favourites.splice(index,1);
+		}
+	}
+} );
 
 // Permissions mock
 jest.mock('../../../../../../../src/v5/utils/permissions/permissions', () => ({
@@ -83,14 +98,28 @@ const testGetContainerList = () => {
 
 const testAppendFavourites = () => {
 	describe('Add containers to favourites', () => {
-		test('user favourites should stay the same if one or more containers is not found', async () => {
-			await Containers.appendFavourites('user1', 'teamspace', 'project', [1, -1]);
+		test('user favourites should stay the same if one or more containers is not found', async () => {			
+			await Containers.appendFavourites('tsAdmin', 'teamspace', 'project', [1, -1]);
 			expect(user1Favourites).toEqual([1]);
+			user1Favourites = [1];
 		});
 
-		test('new containers should be added to favourites', async () => {
-			await Containers.appendFavourites('user1', 'teamspace', 'project', [1, 2, 3]);
+		test('new containers should be added to favourites if user is TS admin', async () => {
+			await Containers.appendFavourites('tsAdmin', 'teamspace', 'project', [1, 2, 3]);
 			expect(user1Favourites).toEqual([1, 2, 3]);
+			user1Favourites = [1];
+		});
+
+		test('new containers should be added to favourites if user has permissions', async () => {
+			await Containers.appendFavourites('user1', 'teamspace', 'project', [1, 3]);
+			expect(user1Favourites).toEqual([1, 3]);
+			user1Favourites = [1];
+		});
+
+		test('new containers should not be added to favourites if user has no permissions', async () => {
+			await Containers.appendFavourites('user1', 'teamspace', 'project', [1, 2]);
+			expect(user1Favourites).toEqual([1]);
+			user1Favourites = [1];
 		});
 	});
 };
@@ -100,11 +129,25 @@ const testDeleteFavourites = () => {
 		test('user favourites should stay the same if one or more containers are not already in', async () => {
 			await Containers.deleteFavourites('user1', 'teamspace', 'project', [1, 2]);
 			expect(user1Favourites).toEqual([1]);
+			user1Favourites = [1];
 		});
 
-		test('containers should be removed from user favourites', async () => {
+		test('containers should be removed from user favourites if user is TS admin', async () => {
+			await Containers.deleteFavourites('tsAdmin', 'teamspace', 'project', [1]);
+			expect(user1Favourites).toEqual([]);
+			user1Favourites = [1];
+		});
+
+		test('containers should be removed from user favourites if user has permission', async () => {
 			await Containers.deleteFavourites('user1', 'teamspace', 'project', [1]);
 			expect(user1Favourites).toEqual([]);
+			user1Favourites = [1];
+		});
+
+		test('containers should not be removed from user favourites if user has no permission', async () => {
+			await Containers.deleteFavourites('user3', 'teamspace', 'project', [1]);
+			expect(user1Favourites).toEqual([1]);
+			user1Favourites = [1];
 		});
 	});
 };

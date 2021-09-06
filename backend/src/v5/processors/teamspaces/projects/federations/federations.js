@@ -16,8 +16,11 @@
  */
 
 const { appendFavourites, deleteFavourites } = require('../../../../models/users');
-const { getProjectById } = require('../../../../models/projects');
+const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../utils/permissions/permissions');
 const { getFederations } = require('../../../../models/modelSettings');
+const { getFavourites } = require('../../../../models/users');
+const { getProjectById } = require('../../../../models/projects');
+
 const Federations = {};
 
 const getFederationList = async (teamspace, project, user) => {
