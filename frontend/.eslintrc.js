@@ -51,6 +51,7 @@ module.exports = {
 		'import/prefer-default-export': 'off',
 		'@typescript-eslint/indent': ['error', 'tab', { SwitchCase: 1 }],
 		'react/jsx-indent': ['error', 'tab'],
-		'react/jsx-props-no-spreading': 'off'
+		'react/jsx-props-no-spreading': 'off',
+		'react/prop-types': 'off'
 	}
 };

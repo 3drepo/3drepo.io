@@ -51,7 +51,7 @@ Permissions.hasReadAccessToModel = async (teamspace, project, model, username, a
 	const { permissions } = await getModelById(teamspace, model, { permissions: 1 });
 
 	// we assume the user has access if they have some form of permissions on the model
-	return permissions.some((perm) => perm.user === username);
+	return permissions && permissions.some((perm) => perm.user === username);
 };
 
 module.exports = Permissions;

@@ -219,6 +219,83 @@ export const theme = createMuiTheme({
 		},
 	},
 	overrides: {
+		MuiAppBar: {
+			root: {
+				boxShadow: 'none',
+				paddingLeft: 20,
+				paddingRight: 20,
+				minHeight: 64,
+				display: 'flex',
+				flexDirection: 'row',
+				alignItems: 'center',
+			},
+		},
+		MuiAvatar: {
+			root: {
+				margin: '8px 7px',
+				color: COLOR.PRIMARY_MAIN_CONTRAST,
+				backgroundColor: COLOR.TERTIARY_MAIN,
+				...typography.body1,
+			},
+			colorDefault: {
+				color: null,
+				backgroundColor: null,
+			},
+		},
+		MuiList: {
+			root: {
+				width: 226,
+				borderRadius: 5,
+				boxShadow: SHADOW.LEVEL_5,
+			},
+			padding: {
+				paddingTop: 0,
+				paddingBottom: 0,
+			},
+		},
+		MuiFab: {
+			root: {
+				color: COLOR.PRIMARY_MAIN_CONTRAST,
+				height: 37,
+				width: 37,
+				margin: '8px 7px',
+				backgroundColor: 'transparent',
+				boxShadow: 'none',
+				border: `1px solid ${COLOR.PRIMARY_MAIN_CONTRAST}`,
+				transition: 'none',
+			},
+			label: {
+				'& > *:first-child': {
+					height: 17,
+					width: 'auto',
+				},
+			},
+			extended: {
+				height: null,
+				width: null,
+				padding: null,
+				minWidth: null,
+				minHeight: null,
+				borderRadius: null,
+			},
+		},
+		MuiBreadcrumbs: {
+			li: {
+				'& > a': {
+					margin: 0,
+					padding: '10px 5px',
+					...typography.body1,
+				},
+				'& > button > span > span': {
+					marginLeft: '1px',
+				},
+			},
+			separator: {
+				marginLeft: 0,
+				marginRight: 0,
+				color: COLOR.BASE_MAIN,
+			},
+		},
 		MuiOutlinedInput:
 		{
 			root: {

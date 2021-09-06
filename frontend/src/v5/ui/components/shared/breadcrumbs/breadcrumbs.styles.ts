@@ -16,13 +16,37 @@
  */
 
 import styled from 'styled-components';
+import { Button, Breadcrumbs } from '@material-ui/core';
 
-export const Container = styled.div`
-	margin: ${({ theme }) => `${theme.spacing(2)}px`};
-	height: 5000px;
+export const Container = styled(Breadcrumbs)`
+	&& {
+		margin-left: 15px;
+	}
 `;
 
-export const ContrastBackground = styled.div`
-	padding: ${({ theme }) => `${theme.spacing(2)}px`};
-	background-color: ${({ theme }) => theme.palette.secondary.main};
+export const InteractiveBreadcrumb = styled(Button).attrs({
+	variant: 'text',
+})`
+	&& {
+		${({ theme }) => theme.typography.body1};
+		color: ${({ theme }) => theme.palette.primary.main};
+		padding: 5px;
+		margin: 0;
+
+		&:hover {
+			text-decoration: none;
+		}
+	}
+`;
+
+export const Breadcrumb = styled(Button).attrs({
+	variant: 'text',
+})`
+	&& {
+		color: ${({ theme }) => theme.palette.base.main};
+	
+		&:hover {
+			text-decoration: none;
+		}
+	}
 `;

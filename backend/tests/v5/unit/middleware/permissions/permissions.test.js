@@ -19,8 +19,8 @@ const { src } = require('../../../helper/path');
 
 jest.mock('../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
-jest.mock('../../../../../src/v5/models/teamspaces');
-const Teamspace = require(`${src}/models/teamspaces`);
+jest.mock('../../../../../src/v5/utils/permissions/permissions');
+const Permissions = require(`${src}/utils/permissions/permissions`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 jest.mock('../../../../../src/v5/utils/sessions');
@@ -29,7 +29,8 @@ const PermMiddlewares = require(`${src}/middleware/permissions/permissions`);
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
-Teamspace.hasAccessToTeamspace.mockImplementation((teamspace) => teamspace === 'ts');
+Permissions.hasAccessToTeamspace.mockImplementation((teamspace) => teamspace === 'ts');
+Permissions.hasReadAccessToModel.mockImplementation((teamspace, project) => project === 'ok');
 Sessions.isSessionValid.mockImplementation((session) => !!session);
 Sessions.getUserFromSession.mockImplementation(() => 'hi');
 
@@ -70,6 +71,57 @@ const testHasAccessToTeamspace = () => {
 	});
 };
 
+const testHasReadAccessToContainer = () => {
+	describe('HasReadAccessToContainer', () => {
+		test('next() should be called if the user has access', async () => {
+			const mockCB = jest.fn(() => {});
+			await PermMiddlewares.hasReadAccessToContainer(
+				{ params: { teamspace: 'ts', project: 'ok' }, header: { referer: 'http://abc.com/' }, session: { user: { username: 'hi', referer: 'http://abc.com' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(1);
+		});
+
+		test('should respond with notAuthorized if the user has no access', async () => {
+			const mockCB = jest.fn(() => {});
+			await PermMiddlewares.hasReadAccessToContainer(
+				{ params: { teamspace: 'ts', project: 'nope' }, header: { referer: 'http://abc.com/' }, session: { user: { username: 'hi', referer: 'http://abc.com' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(0);
+			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond.mock.results[0].value).toEqual(templates.notAuthorized);
+		});
+
+		test('should respond with notLoggedIn errCode if the session is invalid', async () => {
+			const mockCB = jest.fn(() => {});
+			await PermMiddlewares.hasReadAccessToContainer(
+				{ params: { teamspace: 'ts' }, header: { referer: 'http://xyz.com' } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(0);
+			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond.mock.results[0].value).toEqual(templates.notLoggedIn);
+		});
+
+		test('should respond with teamspace not found if the user has no access', async () => {
+			const mockCB = jest.fn(() => {});
+			await PermMiddlewares.hasReadAccessToContainer(
+				{ params: { teamspace: 'ts1' }, header: { referer: 'http://xyz.com' }, session: { user: { username: 'hi', referer: 'http://xyz.com' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(0);
+			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond.mock.results[0].value).toEqual(templates.teamspaceNotFound);
+		});
+	});
+};
+
 describe('middleware/permissions/permissions', () => {
 	testHasAccessToTeamspace();
+	testHasReadAccessToContainer();
 });
