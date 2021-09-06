@@ -16,7 +16,7 @@
  */
 
 import React from 'react';
-import { Typography, Button, Divider, TextField, SvgIcon } from '@material-ui/core';
+import { Typography, Button, Divider, TextField } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/AddCircle';
 import IntercomIcon from '@assets/icons/intercom.svg';
 import NotificationsIcon from '@assets/icons/notifications.svg';

@@ -35,11 +35,9 @@ import { IS_DEVELOPMENT } from '@/v4/constants/environment';
 import { UnityUtil } from '@/globals/unity-util';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { MainLayout } from '@components/mainLayout/';
-import { ThemeLayout } from '@components/themeLayout/';
 import * as OfflinePluginRuntime from 'offline-plugin/runtime';
 import { theme } from '@/v5/ui/themes/theme';
 import { GlobalStyle } from '@/v5/ui/themes/global';
-import { ROUTES } from '@/v5/services/routes/routes';
 import { initializeActionsDispatchers } from './v5/services/actionsDispatchers/actionsDistpatchers.helper';
 
 window.UnityUtil = UnityUtil;
@@ -51,20 +49,14 @@ const render = () => {
 		<Provider store={store as any}>
 			<ConnectedRouter history={history as History}>
 				<Switch>
-					<ThemeProvider theme={theme}>
-						<MuiThemeProvider theme={theme}>
-							<GlobalStyle />
-							<Route exact path="/v5"><MainLayout /></Route>
-							<Route exact path="/v5/theme"><ThemeLayout /></Route>
-							<Route exact path={ROUTES.TASKS}><MainLayout title="Tasks page" /></Route>
-							<Route exact path={ROUTES.USERS}><MainLayout title="Users page" /></Route>
-							<Route exact path={ROUTES.SETTINGS}><MainLayout title="Settings page" /></Route>
-							<Route exact path={ROUTES.TEAMSPACE}><MainLayout title="Teamspace page" /></Route>
-							<Route exact path={ROUTES.PROJECT}><MainLayout title="Project page" /></Route>
-							<Route exact path={ROUTES.FEDERATIONS}><MainLayout title="Federations page" /></Route>
-							<Route exact path={ROUTES.CONTAINERS}><MainLayout title="Containers page" /></Route>
-						</MuiThemeProvider>
-					</ThemeProvider>
+					<Route exact path="/v5">
+						<GlobalStyle />
+						<ThemeProvider theme={theme}>
+							<MuiThemeProvider theme={theme}>
+								<MainLayout title="Containers page" />
+							</MuiThemeProvider>
+						</ThemeProvider>
+					</Route>
 					<Route><V4Root /></Route>
 				</Switch>
 			</ConnectedRouter>
