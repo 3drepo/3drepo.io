@@ -15,22 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { stringToUUID } = require('../../utils/helper/uuids');
+const { getUserFromSession } = require('../../../utils/sessions');
+const { hasReadAccessToModel } = require('../../../utils/permissions/permissions');
+const { respond } = require('../../../utils/responder');
+const { templates } = require('../../../utils/responseCodes');
 
-const PathParams = {};
+const ContainerPerms = {};
 
-const paramsToIgnore = ['container', 'federation'];
+ContainerPerms.hasReadAccessToContainer = async (req, res, next) => {
+	const { session, params } = req;
+	const user = getUserFromSession(session);
+	const { teamspace, project, container } = params;
 
-PathParams.convertAllUUIDs = (req, res, next) => {
-	if (req.params) {
-		Object.keys(req.params).forEach((key) => {
-			if (!paramsToIgnore.includes(key)) {
-				req.params[key] = stringToUUID(req.params[key]);
-			}
-		});
+	try {
+		if (await hasReadAccessToModel(teamspace, project, container, user)) {
+			next();
+		} else {
+			respond(req, res, templates.notAuthorized);
+		}
+	} catch (err) {
+		respond(req, res, err);
 	}
-
-	next();
 };
 
-module.exports = PathParams;
+module.exports = ContainerPerms;

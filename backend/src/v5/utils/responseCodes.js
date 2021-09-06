@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { toCamelCase, toConstantCase } = require('./helper/strings');
+const { logger } = require('./logger');
 
 const ResponseCodes = {};
 
@@ -23,6 +24,7 @@ ResponseCodes.templates = {
 
 	// Auth
 	notLoggedIn: { message: 'You are not logged in', status: 401 },
+	notAuthorized: { message: 'You do not have sufficient access rights for this action', status: 401 },
 
 	// Fail safe
 	unknown: { message: 'Unknown error occured. Please contact support.', status: 500 },
@@ -38,6 +40,10 @@ ResponseCodes.templates = {
 
 	// Model related error
 	modelNotFound: { message: 'Model not found.', status: 404 },
+	containerNotFound: { message: 'Container not found.', status: 404 },
+
+	// Revision related error
+	revisionNotFound: { message: 'Revision not found.', status: 404 },
 };
 
 Object.keys(ResponseCodes.templates).forEach((key) => {
@@ -92,8 +98,12 @@ ResponseCodes.getSwaggerComponents = () => {
 ResponseCodes.codeExists = (code) => !!ResponseCodes.templates[toCamelCase(code)];
 
 ResponseCodes.createResponseCode = (errCode, message) => {
-	const res = ResponseCodes.codeExists(errCode?.code)
-		? ResponseCodes.templates[toCamelCase(errCode.code)] : ResponseCodes.templates.unknown;
+	const codeExists = ResponseCodes.codeExists(errCode?.code);
+	if (!codeExists) {
+		const isError = errCode instanceof Error;
+		logger.logError('Unrecognised error code', isError ? JSON.stringify(errCode, ['message', 'arguments', 'type', 'name', 'stack']) : errCode);
+	}
+	const res = codeExists ? ResponseCodes.templates[toCamelCase(errCode.code)] : ResponseCodes.templates.unknown;
 	return message ? { ...res, message } : res;
 };
 

@@ -22,8 +22,11 @@ const { templates } = require('../utils/responseCodes');
 const findOneModel = (ts, query, projection) => db.findOne(ts, 'settings', query, projection);
 const findModel = (ts, query, projection, sort) => db.find(ts, 'settings', query, projection, sort);
 
-Models.getModelById = async (ts, model, projection) => {
-	const res = await findOneModel(ts, { _id: model }, projection);
+const noFederations = { federate: { $ne: true } };
+const onlyFederations = { federate: true };
+
+const getModelByQuery = async (ts, query, projection) => {
+	const res = await findOneModel(ts, query, projection);
 	if (!res) {
 		throw templates.modelNotFound;
 	}
@@ -31,13 +34,28 @@ Models.getModelById = async (ts, model, projection) => {
 	return res;
 };
 
+Models.getModelById = (ts, model, projection) => getModelByQuery(ts, { _id: model }, projection);
+
+Models.getContainerById = async (ts, container, projection) => {
+	try {
+		const res = await getModelByQuery(ts, { _id: container, ...noFederations }, projection);
+		return res;
+	} catch (err) {
+		if (err?.code === templates.modelNotFound.code) {
+			throw templates.containerNotFound;
+		}
+
+		throw err;
+	}
+};
+
 Models.getContainers = async (ts, ids, projection, sort) => {
-	const query = { _id: { $in: ids }, federate: { $ne: true } };
+	const query = { _id: { $in: ids }, ...noFederations };
 	return findModel(ts, query, projection, sort);
 };
 
 Models.getFederations = async (ts, ids, projection, sort) => {
-	const query = { _id: { $in: ids }, federate: true };
+	const query = { _id: { $in: ids }, ...onlyFederations };
 	return findModel(ts, query, projection, sort);
 };
 
