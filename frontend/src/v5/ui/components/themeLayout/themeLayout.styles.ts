@@ -26,3 +26,13 @@ export const ContrastBackground = styled.div`
 	padding: ${({ theme }) => `${theme.spacing(2)}px`};
 	background-color: ${({ theme }) => theme.palette.secondary.main};
 `;
+
+export const Group = styled.div`
+	margin-top: 30px;
+`;
+
+export const AppBarGroup = styled(Group)`
+	header {
+		position: relative !important;
+	}
+`;

@@ -38,7 +38,7 @@ import {
 	DashboardListItemText,
 	DashboardListItemButton,
 } from '@components/dashboard/dashboardList/dashboardListItem/components/';
-import { Container, ContrastBackground } from './themeLayout.styles';
+import { AppBarGroup, Container, ContrastBackground, Group } from './themeLayout.styles';
 
 const LINKS = [{
 	title: 'Federations',
@@ -104,201 +104,221 @@ export const ThemeLayout = (): JSX.Element => {
 	return (
 		<Container>
 			<Typography variant="h1" gutterBottom>Theme Demonstration Page</Typography>
-			<Typography variant="h2" gutterBottom>Buttons</Typography>
-			<Typography variant="h3" gutterBottom>button-contained-standard</Typography>
 
-			<Button variant="contained" color="primary">Default</Button>
-			<Button variant="contained" color="primary" disabled>Disabled</Button>
-			<Divider />
+			<Group>
+				<Typography variant="h2" gutterBottom>Buttons</Typography>
+				<Typography variant="h3" gutterBottom>button-contained-standard</Typography>
 
-			<Button variant="contained" color="primary" startIcon={<AddIcon />}>Default</Button>
-			<Button variant="contained" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
-			<Divider />
+				<Button variant="contained" color="primary">Default</Button>
+				<Button variant="contained" color="primary" disabled>Disabled</Button>
+				<Divider />
 
-			<Button variant="contained" color="secondary">Default</Button>
-			<Button variant="contained" color="secondary" disabled>Disabled</Button>
-			<Divider />
+				<Button variant="contained" color="primary" startIcon={<AddIcon />}>Default</Button>
+				<Button variant="contained" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
+				<Divider />
 
-			<Button variant="contained" color="secondary" startIcon={<AddIcon />}>Default</Button>
-			<Button variant="contained" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
-			<Divider />
+				<Button variant="contained" color="secondary">Default</Button>
+				<Button variant="contained" color="secondary" disabled>Disabled</Button>
+				<Divider />
 
-			<Typography variant="h3" gutterBottom>button-outlined-standard</Typography>
+				<Button variant="contained" color="secondary" startIcon={<AddIcon />}>Default</Button>
+				<Button variant="contained" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
+				<Divider />
+			</Group>
 
-			<Button variant="outlined" color="primary">Default</Button>
-			<Button variant="outlined" color="primary" disabled>Disabled</Button>
-			<Divider />
+			<Group>
+				<Typography variant="h3" gutterBottom>button-outlined-standard</Typography>
 
-			<Button variant="outlined" color="primary" startIcon={<AddIcon />}>Default</Button>
-			<Button variant="outlined" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
-			<Divider />
+				<Button variant="outlined" color="primary">Default</Button>
+				<Button variant="outlined" color="primary" disabled>Disabled</Button>
+				<Divider />
 
-			<Button variant="outlined" color="secondary">Default</Button>
-			<Button variant="outlined" color="secondary" disabled>Disabled</Button>
-			<Divider />
+				<Button variant="outlined" color="primary" startIcon={<AddIcon />}>Default</Button>
+				<Button variant="outlined" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
+				<Divider />
 
-			<Button variant="outlined" color="secondary" startIcon={<AddIcon />}>Default</Button>
-			<Button variant="outlined" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
-			<Divider />
+				<Button variant="outlined" color="secondary">Default</Button>
+				<Button variant="outlined" color="secondary" disabled>Disabled</Button>
+				<Divider />
 
-			<Typography variant="h3" gutterBottom>button-contained-small</Typography>
+				<Button variant="outlined" color="secondary" startIcon={<AddIcon />}>Default</Button>
+				<Button variant="outlined" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
+				<Divider />
+			</Group>
 
-			<Button variant="contained" size="small" color="primary">Default</Button>
-			<Button variant="contained" size="small" color="primary" disabled>Disabled</Button>
-			<Divider />
+			<Group>
+				<Typography variant="h3" gutterBottom>button-contained-small</Typography>
 
-			<Button variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Default</Button>
-			<Button variant="contained" size="small" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
-			<Divider />
+				<Button variant="contained" size="small" color="primary">Default</Button>
+				<Button variant="contained" size="small" color="primary" disabled>Disabled</Button>
+				<Divider />
 
-			<Button variant="contained" size="small" color="secondary">Default</Button>
-			<Button variant="contained" size="small" color="secondary" disabled>Disabled</Button>
-			<Divider />
+				<Button variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Default</Button>
+				<Button variant="contained" size="small" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
+				<Divider />
 
-			<Button variant="contained" size="small" color="secondary" startIcon={<AddIcon />}>Default</Button>
-			<Button variant="contained" size="small" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
-			<Divider />
+				<Button variant="contained" size="small" color="secondary">Default</Button>
+				<Button variant="contained" size="small" color="secondary" disabled>Disabled</Button>
+				<Divider />
 
-			<Typography variant="h3" gutterBottom>button-outlined-small</Typography>
+				<Button variant="contained" size="small" color="secondary" startIcon={<AddIcon />}>Default</Button>
+				<Button variant="contained" size="small" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
+				<Divider />
+			</Group>
 
-			<Button variant="outlined" size="small" color="primary">Default</Button>
-			<Button variant="outlined" size="small" color="primary" disabled>Disabled</Button>
-			<Divider />
+			<Group>
+				<Typography variant="h3" gutterBottom>button-outlined-small</Typography>
 
-			<Button variant="outlined" size="small" color="primary" startIcon={<AddIcon />}>Default</Button>
-			<Button variant="outlined" size="small" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
-			<Divider />
+				<Button variant="outlined" size="small" color="primary">Default</Button>
+				<Button variant="outlined" size="small" color="primary" disabled>Disabled</Button>
+				<Divider />
 
-			<Button variant="outlined" size="small" color="secondary">Default</Button>
-			<Button variant="outlined" size="small" color="secondary" disabled>Disabled</Button>
-			<Divider />
+				<Button variant="outlined" size="small" color="primary" startIcon={<AddIcon />}>Default</Button>
+				<Button variant="outlined" size="small" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
+				<Divider />
 
-			<Button variant="outlined" size="small" color="secondary" startIcon={<AddIcon />}>Default</Button>
-			<Button variant="outlined" size="small" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
-			<Divider />
+				<Button variant="outlined" size="small" color="secondary">Default</Button>
+				<Button variant="outlined" size="small" color="secondary" disabled>Disabled</Button>
+				<Divider />
 
-			<Typography variant="h3" gutterBottom>button-label</Typography>
+				<Button variant="outlined" size="small" color="secondary" startIcon={<AddIcon />}>Default</Button>
+				<Button variant="outlined" size="small" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
+				<Divider />
+			</Group>
 
-			<Button variant="label" color="primary">Default</Button>
-			<Button variant="label" color="primary" disabled>Disabled</Button>
-			<Divider />
+			<Group>
+				<Typography variant="h3" gutterBottom>button-label</Typography>
 
-			<Button variant="label" color="primary" startIcon={<AddIcon />}>Default</Button>
-			<Button variant="label" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
-			<Divider />
+				<Button variant="label" color="primary">Default</Button>
+				<Button variant="label" color="primary" disabled>Disabled</Button>
+				<Divider />
 
-			<Button variant="label" color="secondary">Default</Button>
-			<Button variant="label" color="secondary" disabled>Disabled</Button>
-			<Divider />
+				<Button variant="label" color="primary" startIcon={<AddIcon />}>Default</Button>
+				<Button variant="label" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
+				<Divider />
 
-			<Button variant="label" color="secondary" startIcon={<AddIcon />}>Default</Button>
-			<Button variant="label" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
-			<Divider />
+				<Button variant="label" color="secondary">Default</Button>
+				<Button variant="label" color="secondary" disabled>Disabled</Button>
+				<Divider />
 
-			<Typography variant="h3" gutterBottom>button-label-outlined</Typography>
+				<Button variant="label" color="secondary" startIcon={<AddIcon />}>Default</Button>
+				<Button variant="label" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
+				<Divider />
+			</Group>
 
-			<Button variant="label-outlined" color="primary">Default</Button>
-			<Button variant="label-outlined" color="primary" disabled>Disabled</Button>
-			<Divider />
+			<Group>
+				<Typography variant="h3" gutterBottom>button-label-outlined</Typography>
 
-			<Button variant="label-outlined" color="primary" startIcon={<AddIcon />}>Default</Button>
-			<Button variant="label-outlined" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
-			<Divider />
+				<Button variant="label-outlined" color="primary">Default</Button>
+				<Button variant="label-outlined" color="primary" disabled>Disabled</Button>
+				<Divider />
 
-			<Button variant="label-outlined" color="secondary">Default</Button>
-			<Button variant="label-outlined" color="secondary" disabled>Disabled</Button>
-			<Divider />
+				<Button variant="label-outlined" color="primary" startIcon={<AddIcon />}>Default</Button>
+				<Button variant="label-outlined" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
+				<Divider />
 
-			<Button variant="label-outlined" color="secondary" startIcon={<AddIcon />}>Default</Button>
-			<Button variant="label-outlined" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
-			<Divider />
+				<Button variant="label-outlined" color="secondary">Default</Button>
+				<Button variant="label-outlined" color="secondary" disabled>Disabled</Button>
+				<Divider />
 
-			<Typography variant="h3" gutterBottom>button-text</Typography>
+				<Button variant="label-outlined" color="secondary" startIcon={<AddIcon />}>Default</Button>
+				<Button variant="label-outlined" color="secondary" startIcon={<AddIcon />} disabled>Disabled</Button>
+				<Divider />
+			</Group>
 
-			<Button variant="text" color="primary">Default</Button>
-			<Button variant="text" color="primary" disabled>Disabled</Button>
-			<Divider />
+			<Group>
+				<Typography variant="h3" gutterBottom>button-text</Typography>
 
-			<Button variant="text" color="primary" startIcon={<AddIcon />}>Default</Button>
-			<Button variant="text" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
-			<Divider />
-			<TextField label="Input label" {...register('enabledInput')} />
-			<br />
-			<TextField label="Disabled*" value="disabled value" disabled />
-			{' '}
-			<br />
-			<TextField label="Error*" {...register('errorInput')} error />
-			&nbsp;
-			{' '}
-			<br />
-			.
-			<br />
-			<TextField value="Input text without label" />
-			<br />
-			<Divider />
+				<Button variant="text" color="primary">Default</Button>
+				<Button variant="text" color="primary" disabled>Disabled</Button>
+				<Divider />
 
-			<Typography variant="h2" gutterBottom>UI controls needed for basic layout</Typography>
-			<Typography variant="h3" gutterBottom>Breadcrumbs</Typography>
-			<Breadcrumbs />
+				<Button variant="text" color="primary" startIcon={<AddIcon />}>Default</Button>
+				<Button variant="text" color="primary" startIcon={<AddIcon />} disabled>Disabled</Button>
+				<Divider />
+			</Group>
 
-			<Typography variant="h3" gutterBottom>Top Navigation</Typography>
-			<ContrastBackground>
-				<TopNavigation links={LINKS} />
-			</ContrastBackground>
+			<Group>
+				<TextField label="Input label" {...register('enabledInput')} />
+				<br />
+				<TextField label="Disabled*" value="disabled value" disabled />
+				<br />
+				<TextField label="Error*" {...register('errorInput')} error />
+				<br />
+				<TextField value="Input text without label" />
+				<br />
+				<Divider />
+			</Group>
 
-			<Typography variant="h3" gutterBottom>Circle buttons</Typography>
+			<Group>
+				<Typography variant="h2" gutterBottom>UI controls needed for basic layout</Typography>
 
-			<Typography variant="h4" gutterBottom>icon-intercom</Typography>
+				<Group>
+					<Typography variant="h3" gutterBottom>Breadcrumbs</Typography>
+					<Breadcrumbs />
+					<Typography variant="h3" gutterBottom>Top Navigation</Typography>
+					<ContrastBackground>
+						<TopNavigation links={LINKS} />
+					</ContrastBackground>
+				</Group>
 
-			<ContrastBackground>
-				<CircleButton variant="contrast" aria-label="intercom">
-					<IntercomIcon />
-				</CircleButton>
-				<CircleButton variant="contrast" aria-label="intercom" disabled>
-					<IntercomIcon />
-				</CircleButton>
-			</ContrastBackground>
+				<Group>
+					<Typography variant="h3" gutterBottom>Circle buttons</Typography>
+					<Typography variant="h4" gutterBottom>icon-intercom</Typography>
+					<ContrastBackground>
+						<CircleButton variant="contrast" aria-label="intercom">
+							<IntercomIcon />
+						</CircleButton>
+						<CircleButton variant="contrast" aria-label="intercom" disabled>
+							<IntercomIcon />
+						</CircleButton>
+					</ContrastBackground>
 
-			<Typography variant="h4" gutterBottom>icon-nav-notifications</Typography>
-			<ContrastBackground>
-				<CircleButton variant="contrast" aria-label="notifications">
-					<NotificationsIcon />
-				</CircleButton>
-				<CircleButton variant="contrast" aria-label="notifications" disabled>
-					<NotificationsIcon />
-				</CircleButton>
-			</ContrastBackground>
+					<Typography variant="h4" gutterBottom>icon-nav-notifications</Typography>
+					<ContrastBackground>
+						<CircleButton variant="contrast" aria-label="notifications">
+							<NotificationsIcon />
+						</CircleButton>
+						<CircleButton variant="contrast" aria-label="notifications" disabled>
+							<NotificationsIcon />
+						</CircleButton>
+					</ContrastBackground>
 
-			<Typography variant="h4" gutterBottom>icon-profile</Typography>
-			<ContrastBackground>
-				<AvatarButton>
-					GH
-				</AvatarButton>
-				<AvatarButton disabled>
-					GH
-				</AvatarButton>
-			</ContrastBackground>
-			{' '}
-			<br />
+					<Typography variant="h4" gutterBottom>icon-profile</Typography>
+					<ContrastBackground>
+						<AvatarButton>
+							GH
+						</AvatarButton>
+						<AvatarButton disabled>
+							GH
+						</AvatarButton>
+					</ContrastBackground>
+				</Group>
+			</Group>
 
-			<Typography variant="h3" gutterBottom>Navigation Menu</Typography>
-			<Button variant="contained" color="primary" onClick={handleClick}>Show Menu</Button>
-			<NavigationMenu anchorEl={anchorEl} handleClose={handleClose} list={menuList} />
-			{' '}
-			<br />
+			<Group>
+				<Typography variant="h3" gutterBottom>Navigation Menu</Typography>
+				<Button variant="contained" color="primary" onClick={handleClick}>Show Menu</Button>
+				<NavigationMenu anchorEl={anchorEl} handleClose={handleClose} list={menuList} />
+			</Group>
 
-			<Typography variant="h3" gutterBottom>AppBar (with logo only)</Typography>
-			<AppBar />
+			<AppBarGroup>
+				<Typography variant="h3" gutterBottom>AppBar (with logo only)</Typography>
+				<AppBar />
+			</AppBarGroup>
 
-			<DashboardList>
-				<DashboardListItem selected={false}>
-					<MockDashboardListItem />
-				</DashboardListItem>
-				<DashboardListItem selected>
-					<MockDashboardListItem />
-				</DashboardListItem>
-				<DashboardListItem selected={false} />
-			</DashboardList>
+			<Group>
+				<Typography variant="h3" gutterBottom>DashboardList</Typography>
+				<DashboardList>
+					<DashboardListItem selected={false}>
+						<MockDashboardListItem />
+					</DashboardListItem>
+					<DashboardListItem selected>
+						<MockDashboardListItem />
+					</DashboardListItem>
+					<DashboardListItem selected={false} />
+				</DashboardList>
+			</Group>
 		</Container>
 	);
 };
