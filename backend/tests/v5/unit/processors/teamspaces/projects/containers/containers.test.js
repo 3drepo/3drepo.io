@@ -23,7 +23,10 @@ jest.mock('../../../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
 jest.mock('../../../../../../../src/v5/models/users');
 const Users = require(`${src}/models/users`);
+jest.mock('../../../../../../../src/v5/models/revisions');
+const Revisions = require(`${src}/models/revisions`);
 const Containers = require(`${src}/processors/teamspaces/projects/containers/containers`);
+const { templates } = require(`${src}/utils/responseCodes`);
 
 const modelList = [
 	{ _id: 1, name: 'model1', permissions: [{ user: 'user1', permission: 'collaborator' }, { user: 'user2', permission: 'collaborator' }] },
@@ -33,12 +36,47 @@ const modelList = [
 	{ _id: 4, name: 'model4' },
 ];
 
+const containerSettings = {
+	container1: {
+		_id: 1,
+		name: 'container 1',
+		type: 'type 1',
+		properties: {
+			units: 'm',
+			code: 'CTN1',
+		},
+		status: 'ok',
+	},
+	container2: {
+		_id: 2,
+		name: 'container 2',
+		type: 'type 2',
+		properties: {
+			units: 'mm',
+			code: 'CTN2',
+		},
+		status: 'processing',
+	},
+};
+
 let user1Favourites = [1];
 
 const project = { _id: 1, name: 'project', models: modelList.map(({ _id }) => _id) };
 
+const container2Rev = {
+	_id: 12,
+	tag: 'revTag',
+	timestamp: 1630606846000,
+};
+
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getContainers.mockImplementation(() => modelList);
+ModelSettings.getContainerById.mockImplementation((teamspace, container) => containerSettings[container]);
+Revisions.getRevisionCount.mockImplementation((teamspace, container) => (container === 'container2' ? 10 : 0));
+Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
+	if (container === 'container2') return container2Rev;
+	throw templates.revisionNotFound;
+});
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
 Users.appendFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
 	for (const favourite of favouritesToAdd) {
@@ -152,8 +190,34 @@ const testDeleteFavourites = () => {
 	});
 };
 
+const formatToStats = (settings, revCount, latestRev) => ({
+	type: settings.type,
+	code: settings.properties.code,
+	status: settings.status,
+	units: settings.properties.unit,
+	revisions: {
+		total: revCount,
+		lastUpdated: latestRev.timestamp,
+		latestRevision: latestRev.tag || latestRev._id,
+	},
+});
+
+const testGetContainerStats = () => {
+	describe('Get container stats', () => {
+		test('should return the stats if the container exists and have no revisions', async () => {
+			const res = await Containers.getContainerStats('teamspace', 'project', 'container1');
+			expect(res).toEqual(formatToStats(containerSettings.container1, 0, {}));
+		});
+		test('should return the stats if the container exists and have revisions', async () => {
+			const res = await Containers.getContainerStats('teamspace', 'project', 'container2');
+			expect(res).toEqual(formatToStats(containerSettings.container2, 10, container2Rev));
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/containers', () => {
 	testGetContainerList();
+	testGetContainerStats();
 	testAppendFavourites();
 	testDeleteFavourites();
 });

@@ -42,6 +42,35 @@ const testGetModelById = () => {
 	});
 };
 
+const testGetContainerById = () => {
+	describe('Get ContainerById', () => {
+		test('should return content of container settings if found', async () => {
+			const expectedData = {
+				_id: 'abc',
+				name: 'container name',
+			};
+			jest.spyOn(db, 'findOne').mockResolvedValue(expectedData);
+
+			const res = await Model.getContainerById('someTS', 'someContainer');
+			expect(res).toEqual(expectedData);
+		});
+		test('should return error if container does not exists', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+
+			await expect(Model.getContainerById('someTS', 'someContainer'))
+				.rejects.toEqual(templates.containerNotFound);
+		});
+
+		test('should return error if some unknown error occured', async () => {
+			const err = '123';
+			jest.spyOn(db, 'findOne').mockRejectedValue(err);
+
+			await expect(Model.getContainerById('someTS', 'someContainer'))
+				.rejects.toEqual(err);
+		});
+	});
+};
+
 const testGetContainers = () => {
 	describe('Get containers', () => {
 		test('should return the list of containers ', async () => {
@@ -88,6 +117,7 @@ const testGetFederations = () => {
 
 describe('models/modelSettings', () => {
 	testGetModelById();
+	testGetContainerById();
 	testGetContainers();
 	testGetFederations();
 });

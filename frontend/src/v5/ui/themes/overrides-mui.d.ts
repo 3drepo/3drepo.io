@@ -40,6 +40,7 @@ declare module '@material-ui/core/styles/createPalette' {
 		mid?: CSSProperties['color'],
 		lightest?: CSSProperties['color'],
 		darkest?: CSSProperties['color'],
+		contrast?: CSSProperties['color'],
 	}
 
 	interface Palette {
