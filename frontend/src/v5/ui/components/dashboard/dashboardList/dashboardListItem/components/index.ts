@@ -19,3 +19,4 @@ export { DashboardListItemRow } from './dashboardListItemRow';
 export { DashboardListItemTitle } from './dashboardListItemTitle';
 export { DashboardListItemText } from './dashboardListItemText';
 export { DashboardListItemButton } from './dashboardListItemButton';
+export { DashboardListItemIcon } from './components.styles';

@@ -31,14 +31,16 @@ import { Button } from '@controls/button';
 import { CircleButton } from '@controls/circleButton';
 import { AvatarButton } from '@controls/avatarButton';
 import { DashboardListItem } from '@components/dashboard/dashboardList/dashboardListItem';
-import { DashboardList } from '@components/dashboard/dashboardList';
+import { DashboardList, DashboardListHeader, DashboardListHeaderLabel } from '@components/dashboard/dashboardList';
 import {
-	DashboardListItemTitle,
+	DashboardListItemButton,
+	DashboardListItemIcon,
 	DashboardListItemRow,
 	DashboardListItemText,
-	DashboardListItemButton,
+	DashboardListItemTitle,
 } from '@components/dashboard/dashboardList/dashboardListItem/components/';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
+import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { AppBarGroup, BaseBackground, Container, ContrastBackground, Group } from './themeLayout.styles';
 import { Typography } from '../../themes/typography';
 
@@ -97,9 +99,15 @@ export const ThemeLayout = (): JSX.Element => {
 			<DashboardListItemButton onClick={() => undefined}>
 				1234 Revisions
 			</DashboardListItemButton>
+			<DashboardListItemIcon>
+				<FavouriteCheckbox checked onChange={() => undefined} />
+			</DashboardListItemIcon>
 			<DashboardListItemText>
 				Category label
 			</DashboardListItemText>
+			<DashboardListItemIcon>
+				<FavouriteCheckbox checked={false} onChange={() => undefined} />
+			</DashboardListItemIcon>
 		</DashboardListItemRow>
 	);
 
@@ -324,6 +332,27 @@ export const ThemeLayout = (): JSX.Element => {
 
 			<Group>
 				<Typography variant="h3" gutterBottom>DashboardList</Typography>
+				<DashboardListHeader>
+					<DashboardListHeaderLabel
+						width={200}
+						onClick={() => undefined}
+						sortingDirection={SortingDirection.ASCENDING}
+						sort
+					>
+						Container
+					</DashboardListHeaderLabel>
+					<DashboardListHeaderLabel
+						width={150}
+						onClick={() => undefined}
+						sortingDirection={SortingDirection.DESCENDING}
+						sort
+					>
+						Code
+					</DashboardListHeaderLabel>
+					<DashboardListHeaderLabel>
+						Revisions
+					</DashboardListHeaderLabel>
+				</DashboardListHeader>
 				<DashboardList>
 					<DashboardListItem selected={false}>
 						<MockDashboardListItem />
@@ -331,7 +360,9 @@ export const ThemeLayout = (): JSX.Element => {
 					<DashboardListItem selected>
 						<MockDashboardListItem />
 					</DashboardListItem>
-					<DashboardListItem selected={false} />
+					<DashboardListItem selected={false}>
+						<MockDashboardListItem />
+					</DashboardListItem>
 				</DashboardList>
 			</Group>
 		</Container>

@@ -16,8 +16,7 @@
  */
 
 import React, { Dispatch, ReactNode, SyntheticEvent } from 'react';
-import { Button } from '@controls/button';
-import { Container } from './dashboardListItemButton.styles';
+import { Container, Button } from './dashboardListItemButton.styles';
 
 type IDashboardListItemButton = {
 	children: ReactNode;
@@ -27,6 +26,8 @@ type IDashboardListItemButton = {
 
 export const DashboardListItemButton = ({ children, width, onClick }: IDashboardListItemButton): JSX.Element => (
 	<Container width={width}>
-		<Button onClick={onClick} variant="label" color="secondary">{children}</Button>
+		<Button onClick={onClick}>
+			{children}
+		</Button>
 	</Container>
 );

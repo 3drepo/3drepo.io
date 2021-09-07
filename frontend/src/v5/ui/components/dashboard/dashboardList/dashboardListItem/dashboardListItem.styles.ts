@@ -19,6 +19,7 @@ import styled, { css } from 'styled-components';
 
 export const Container = styled.li`
   box-sizing: border-box;
+  cursor: pointer;
   background-color: ${({ theme, color }) => color ?? theme.palette.primary.contrast};
   height: 80px;
   width: 100%;
@@ -49,10 +50,9 @@ export const Container = styled.li`
     border-color: ${({ theme }) => theme.palette.primary.contrast};
     box-shadow: ${({ theme }) => theme.palette.shadows.large};
     z-index: 100;
-    
 
     & + li {
-      border-top: 0;
+      border-top-color: transparent;
     }
   }
 `;

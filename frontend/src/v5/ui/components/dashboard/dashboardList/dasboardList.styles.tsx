@@ -21,6 +21,11 @@ export const ListContainer = styled.ul`
 	display: flex;
 	flex-direction: column;
 	width: 100%;
-	margin-top: 40px;
+	margin: 0;
 	padding: 0;
+`;
+
+export const DashboardListHeader = styled.div`
+	display: flex;
+	padding: 13px 0 13px 30px;
 `;

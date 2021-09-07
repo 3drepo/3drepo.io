@@ -18,13 +18,12 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
-	margin: ${({ theme }) => `${theme.spacing(2)}px`};
-	height: 5000px;
+  padding: ${({ theme }) => `${theme.spacing(2)}px`};
 `;
 
 export const ContrastBackground = styled.div`
-	padding: ${({ theme }) => `${theme.spacing(2)}px`};
-	background-color: ${({ theme }) => theme.palette.secondary.main};
+  padding: ${({ theme }) => `${theme.spacing(2)}px`};
+  background-color: ${({ theme }) => theme.palette.secondary.main};
 `;
 
 export const BaseBackground = styled.div`
@@ -33,11 +32,11 @@ export const BaseBackground = styled.div`
 `;
 
 export const Group = styled.div`
-	margin-top: 30px;
+  margin-top: 30px;
 `;
 
 export const AppBarGroup = styled(Group)`
-	header {
-		position: relative !important;
-	}
+  header {
+    position: relative !important;
+  }
 `;
