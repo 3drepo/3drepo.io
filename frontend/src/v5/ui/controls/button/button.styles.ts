@@ -20,11 +20,7 @@ import styled, { css } from 'styled-components';
 import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
 
 export const LabelButton = styled(Button)`
-  text-transform: uppercase;
-  font-weight: ${FONT_WEIGHT.BOLD};
-  font-size: 0.563rem;
   align-items: center;
-  letter-spacing: 0.18rem;
   padding: 8px 12px 8px 15px;
 
   ${({ theme }) => css`

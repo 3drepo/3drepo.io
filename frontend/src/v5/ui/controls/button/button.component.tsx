@@ -17,20 +17,29 @@
 
 import React from 'react';
 import MuiButton, { ButtonProps } from '@material-ui/core/Button';
+import { Typography } from '@/v5/ui/themes/typography';
 import { LabelButton } from './button.styles';
 
 type ButtonVariants = ButtonProps['variant'] | 'label' | 'label-outlined';
 
 type IButton = Omit<ButtonProps, 'variant'> & {
 	variant?: ButtonVariants;
-} ;
+};
 
-export const Button = ({ variant, ...muiButtonProps }: IButton): JSX.Element => {
+export const Button = ({ children, variant, ...props }: IButton): JSX.Element => {
 	if (variant === 'label') {
-		return <LabelButton {...muiButtonProps} />;
+		return (
+			<LabelButton {...props}>
+				<Typography variant="kicker">{children}</Typography>
+			</LabelButton>
+		);
 	}
 	if (variant === 'label-outlined') {
-		return <LabelButton outlined {...muiButtonProps} />;
+		return (
+			<LabelButton outlined {...props}>
+				<Typography variant="kicker">{children}</Typography>
+			</LabelButton>
+		);
 	}
-	return <MuiButton variant={variant} {...muiButtonProps} />;
+	return <MuiButton variant={variant} {...props}>{children}</MuiButton>;
 };

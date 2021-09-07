@@ -16,7 +16,7 @@
  */
 
 import React from 'react';
-import { Typography, Divider, TextField } from '@material-ui/core';
+import { Divider, TextField } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/AddCircle';
 import IntercomIcon from '@assets/icons/v5/intercom.svg';
 import NotificationsIcon from '@assets/icons/v5/notifications.svg';
@@ -40,6 +40,7 @@ import {
 } from '@components/dashboard/dashboardList/dashboardListItem/components/';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { AppBarGroup, BaseBackground, Container, ContrastBackground, Group } from './themeLayout.styles';
+import { Typography } from '../../themes/typography';
 
 const LINKS = [{
 	title: 'Federations',

@@ -79,7 +79,7 @@ export const SHADOW = {
 	LARGE: '0px 0px 12px 6px rgba(9, 30, 66, 0.2), 0px 0px 1px rgba(9, 30, 66, 0.31)',
 };
 
-const typography: TypographyOptions = {
+export const typography: TypographyOptions = {
 	fontFamily: 'Inter, Arial, sans-serif',
 	h1: {
 		fontWeight: FONT_WEIGHT.MEDIUM,
