@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { FixedOrGrowContainer } from '@components/dashboard/dashboardList/dasboardList.styles';
 import React, { Dispatch, ReactNode, SyntheticEvent } from 'react';
-import { Container, Button } from './dashboardListItemButton.styles';
+import { Button } from './dashboardListItemButton.styles';
 
 type IDashboardListItemButton = {
 	children: ReactNode;
@@ -25,9 +26,9 @@ type IDashboardListItemButton = {
 };
 
 export const DashboardListItemButton = ({ children, width, onClick }: IDashboardListItemButton): JSX.Element => (
-	<Container width={width}>
+	<FixedOrGrowContainer width={width}>
 		<Button onClick={onClick}>
 			{children}
 		</Button>
-	</Container>
+	</FixedOrGrowContainer>
 );

@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import React, { ReactNode } from 'react';
-import { Container, Text } from './dashboardListItemText.styles';
+import { FixedOrGrowContainer } from '@components/dashboard/dashboardList/dasboardList.styles';
+import { Text } from './dashboardListItemText.styles';
 
 type IDashboardListItemText = {
 	children: ReactNode;
@@ -23,9 +24,9 @@ type IDashboardListItemText = {
 };
 
 export const DashboardListItemText = ({ children, width }: IDashboardListItemText): JSX.Element => (
-	<Container width={width}>
+	<FixedOrGrowContainer width={width}>
 		<Text>
 			{children}
 		</Text>
-	</Container>
+	</FixedOrGrowContainer>
 );

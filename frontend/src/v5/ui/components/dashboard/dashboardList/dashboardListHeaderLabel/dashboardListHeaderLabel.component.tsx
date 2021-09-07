@@ -22,7 +22,7 @@ import { Typography } from '@/v5/ui/themes/typography';
 import { Container, Button, Indicator } from './dashboardListHeaderLabel.styles';
 
 type IDashboardListHeaderLabel = {
-	children: ReactNode;
+	children?: ReactNode;
 	sortingDirection?: SortingDirection;
 	sort?: boolean;
 	onClick?: Dispatch<void>;

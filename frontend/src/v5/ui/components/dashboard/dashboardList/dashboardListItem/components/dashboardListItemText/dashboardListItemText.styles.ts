@@ -17,15 +17,6 @@
 import styled, { css } from 'styled-components';
 import { Typography } from '@material-ui/core';
 
-export const Container = styled.div`
-  flex-grow: 1;
-
-  ${({ width }) => width && css`
-    width: ${width}px;
-    flex-grow: 0;
-  `}
-`;
-
 export const Text = styled(Typography).attrs({
 	variant: 'body1',
 })`

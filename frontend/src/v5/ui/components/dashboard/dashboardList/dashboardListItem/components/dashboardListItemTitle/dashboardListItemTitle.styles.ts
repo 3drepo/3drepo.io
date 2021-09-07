@@ -19,15 +19,6 @@ import styled, { css } from 'styled-components';
 import { Typography } from '@material-ui/core';
 import { Button } from '@controls/button';
 
-export const Container = styled.div`
-  flex-grow: 1;
-
-  ${({ width }) => width && css`
-    width: ${width}px;
-    flex-grow: 0;
-  `}
-`;
-
 export const Title = styled(Button).attrs({
 	variant: 'text',
 })`

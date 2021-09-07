@@ -99,14 +99,11 @@ export const ThemeLayout = (): JSX.Element => {
 			<DashboardListItemButton onClick={() => undefined}>
 				1234 Revisions
 			</DashboardListItemButton>
-			<DashboardListItemIcon>
-				<FavouriteCheckbox checked onChange={() => undefined} />
-			</DashboardListItemIcon>
 			<DashboardListItemText>
 				Category label
 			</DashboardListItemText>
 			<DashboardListItemIcon>
-				<FavouriteCheckbox checked={false} onChange={() => undefined} />
+				<FavouriteCheckbox checked onChange={() => undefined} />
 			</DashboardListItemIcon>
 		</DashboardListItemRow>
 	);
@@ -352,6 +349,10 @@ export const ThemeLayout = (): JSX.Element => {
 					<DashboardListHeaderLabel>
 						Revisions
 					</DashboardListHeaderLabel>
+					<DashboardListHeaderLabel>
+						Category
+					</DashboardListHeaderLabel>
+					<DashboardListHeaderLabel width={46} />
 				</DashboardListHeader>
 				<DashboardList>
 					<DashboardListItem selected={false}>

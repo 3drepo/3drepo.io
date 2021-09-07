@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { FixedOrGrowContainer } from '@components/dashboard/dashboardList/dasboardList.styles';
 import React, { Dispatch, ReactNode } from 'react';
-import { Container, Title, Subtitle } from './dashboardListItemTitle.styles';
+import { Title, Subtitle } from './dashboardListItemTitle.styles';
 
 type IDashboardListItemTitle = {
 	children?: ReactNode;
@@ -28,10 +29,10 @@ type IDashboardListItemTitle = {
 export const DashboardListItemTitle = ({
 	children, subtitle, width, onClick,
 }: IDashboardListItemTitle): JSX.Element => (
-	<Container width={width}>
+	<FixedOrGrowContainer width={width}>
 		<Title onClick={onClick}>
 			{children}
 		</Title>
 		<Subtitle>{subtitle}</Subtitle>
-	</Container>
+	</FixedOrGrowContainer>
 );

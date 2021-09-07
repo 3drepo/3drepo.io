@@ -14,17 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { Button as ButtonComponent } from '@controls/button';
-
-export const Container = styled.div`
-  flex-grow: 1;
-
-  ${({ width }) => width && css`
-    width: ${width}px;
-    flex-grow: 0;
-  `}
-`;
 
 export const Button = styled(ButtonComponent).attrs({
 	variant: 'label',
