@@ -24,8 +24,6 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import '@/v4/services/fontAwesome';
 import 'simplebar/dist/simplebar.min.css';
-import { ThemeProvider } from 'styled-components';
-import { MuiThemeProvider } from '@material-ui/core';
 
 import 'simplebar';
 import { dispatch, history, store } from '@/v4/modules/store';
@@ -36,8 +34,6 @@ import { UnityUtil } from '@/globals/unity-util';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { MainLayout } from '@components/mainLayout/';
 import * as OfflinePluginRuntime from 'offline-plugin/runtime';
-import { theme } from '@/v5/ui/themes/theme';
-import { GlobalStyle } from '@/v5/ui/themes/global';
 import { initializeActionsDispatchers } from './v5/services/actionsDispatchers/actionsDistpatchers.helper';
 
 window.UnityUtil = UnityUtil;
@@ -49,14 +45,7 @@ const render = () => {
 		<Provider store={store as any}>
 			<ConnectedRouter history={history as History}>
 				<Switch>
-					<Route exact path="/v5">
-						<GlobalStyle />
-						<ThemeProvider theme={theme}>
-							<MuiThemeProvider theme={theme}>
-								<MainLayout title="Containers page" />
-							</MuiThemeProvider>
-						</ThemeProvider>
-					</Route>
+					<Route exact path="/v5"><MainLayout title="Containers page" /></Route>
 					<Route><V4Root /></Route>
 				</Switch>
 			</ConnectedRouter>

@@ -15,7 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import React from 'react';
-import { Typography } from '@material-ui/core';
+import { ThemeProvider } from 'styled-components';
+import { Typography, MuiThemeProvider } from '@material-ui/core';
+import { theme } from '@/v5/ui/themes/theme';
+import { GlobalStyle } from '@/v5/ui/themes/global';
 
 import { AppBar } from '@components/shared/appBar';
 import { Content } from './mainLayout.styles';
@@ -25,10 +28,13 @@ interface IMainLayout {
 }
 
 export const MainLayout = ({ title }: IMainLayout): JSX.Element => (
-	<>
-		<AppBar />
-		<Content>
-			<Typography variant="h1">{title || 'Basic layout page'}</Typography>
-		</Content>
-	</>
+	<ThemeProvider theme={theme}>
+		<MuiThemeProvider theme={theme}>
+			<GlobalStyle />
+			<AppBar />
+			<Content>
+				<Typography variant="h1">{title || 'Basic layout page'}</Typography>
+			</Content>
+		</MuiThemeProvider>
+	</ThemeProvider>
 );
