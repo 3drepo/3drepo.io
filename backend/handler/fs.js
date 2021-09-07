@@ -22,7 +22,6 @@ const fs = require("fs");
 const path = require("path");
 const ResponseCodes = require("../response_codes");
 const systemLogger = require("../logger").systemLogger;
-const farmhash = require("farmhash");
 const utils = require("../utils");
 
 const generateFoldernames = (fileName, dirLevels) => {
@@ -35,7 +34,8 @@ const generateFoldernames = (fileName, dirLevels) => {
 
 	for(let i = 0 ; i < dirLevels; i++) {
 		const chunkStart = (i * nameChunkLen) % fileName.length;
-		const fileNameHash = farmhash.fingerprint32(fileName.substr(chunkStart,nameChunkLen) + Math.random());
+		// Generate a relatively large random number for the file directory name
+		const fileNameHash = Math.random() * 100000;
 		folders.push(fileNameHash & 255);
 	}
 	return folders.join("/");
