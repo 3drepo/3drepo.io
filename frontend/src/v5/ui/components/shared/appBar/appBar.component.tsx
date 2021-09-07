@@ -24,6 +24,7 @@ import NotificationsIcon from '@assets/icons/notifications.svg';
 
 import { CircleButton } from '@/v5/ui/controls/circleButton';
 import { AvatarButton } from '@/v5/ui/controls/avatarButton';
+import { i18n } from '@lingui/core';
 import { Items } from './appBar.styles';
 import { TopNavigation } from '../topNavigation';
 import { Breadcrumbs } from '../breadcrumbs';
@@ -34,8 +35,9 @@ export const AppBar = (): JSX.Element => (
 			<Logo />
 			<Breadcrumbs />
 		</Items>
+
 		<Items>
-			<TopNavigation links={[{ title: 'Containers', to: '/containers' }, { title: 'Settings', to: '/settings' }]} />
+			<TopNavigation links={[{ title: i18n._('Containers'), to: '/containers' }, { title: i18n._('Settings'), to: '/settings' }]} />
 			<CircleButton variant="contrast" aria-label="intercom">
 				<IntercomIcon />
 			</CircleButton>

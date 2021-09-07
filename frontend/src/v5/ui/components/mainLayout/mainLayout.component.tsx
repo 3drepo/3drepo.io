@@ -21,20 +21,31 @@ import { theme } from '@/v5/ui/themes/theme';
 import { GlobalStyle } from '@/v5/ui/themes/global';
 
 import { AppBar } from '@components/shared/appBar';
+import { i18n } from '@lingui/core';
+import { I18nProvider } from '@lingui/react';
+import { messages as enMessages } from '@/locales/en/messages';
+import { messages as esMessages } from '@/locales/es/messages';
 import { Content } from './mainLayout.styles';
 
 interface IMainLayout {
 	title?: string;
 }
 
+i18n.load('en', enMessages);
+i18n.load('es', esMessages);
+
+i18n.activate('en');
+
 export const MainLayout = ({ title }: IMainLayout): JSX.Element => (
-	<ThemeProvider theme={theme}>
-		<MuiThemeProvider theme={theme}>
-			<GlobalStyle />
-			<AppBar />
-			<Content>
-				<Typography variant="h1">{title || 'Basic layout page'}</Typography>
-			</Content>
-		</MuiThemeProvider>
-	</ThemeProvider>
+	<I18nProvider i18n={i18n}>
+		<ThemeProvider theme={theme}>
+			<MuiThemeProvider theme={theme}>
+				<GlobalStyle />
+				<AppBar />
+				<Content>
+					<Typography variant="h1">{title || 'Basic layout page'}</Typography>
+				</Content>
+			</MuiThemeProvider>
+		</ThemeProvider>
+	</I18nProvider>
 );
