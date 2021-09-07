@@ -26,11 +26,13 @@ import { CircleButton } from '@/v5/ui/controls/circleButton';
 import { AvatarButton } from '@/v5/ui/controls/avatarButton';
 import { Items } from './appBar.styles';
 import { TopNavigation } from '../topNavigation';
+import { Breadcrumbs } from '../breadcrumbs';
 
 export const AppBar = (): JSX.Element => (
 	<MuiAppBar color="secondary">
 		<Items>
 			<Logo />
+			<Breadcrumbs />
 		</Items>
 		<Items>
 			<TopNavigation links={[{ title: 'Containers', to: '/containers' }, { title: 'Settings', to: '/settings' }]} />

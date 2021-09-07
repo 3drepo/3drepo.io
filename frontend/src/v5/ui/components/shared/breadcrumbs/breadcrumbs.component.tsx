@@ -18,11 +18,16 @@
 import React from 'react';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { Container, Breadcrumb, InteractiveBreadcrumb } from './breadcrumbs.styles';
+import { NavigationMenu } from '../navigatonMenu';
 
 export const Breadcrumbs = (): JSX.Element => {
-	const getBreadcrumbs = ['ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+	const getBreadcrumbs = ['Atkins', 'Dubai opera'];
 
-	const handleClick = (e) => e.preventDefault();
+	const list = [{ title: 'Dubai opera', to: '123123123' }, { title: 'Other project', to: '9898988' }];
+
+	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
+	const handleClose = () => setAnchorEl(null);
 
 	return (
 		<Container aria-label="breadcrumb">
@@ -32,9 +37,12 @@ export const Breadcrumbs = (): JSX.Element => {
 
 				if (isLastItem) {
 					return (
-						<InteractiveBreadcrumb onClick={handleClick} endIcon={<ExpandMoreIcon />}>
-							{title}
-						</InteractiveBreadcrumb>
+						<div>
+							<InteractiveBreadcrumb onClick={handleClick} endIcon={<ExpandMoreIcon />}>
+								{title}
+							</InteractiveBreadcrumb>
+							<NavigationMenu list={list} anchorEl={anchorEl} handleClose={handleClose} />
+						</div>
 					);
 				}
 

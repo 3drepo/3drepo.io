@@ -46,7 +46,6 @@ export const Breadcrumb = styled(Button).attrs({
 })`
 	&& {
 		color: ${({ theme }) => theme.palette.base.main};
-	
 		&:hover {
 			text-decoration: none;
 		}
