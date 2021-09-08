@@ -53,12 +53,12 @@ const mainFabStyles = css`
 				}
 			}
 		`};
-		
+
 		&:hover, &.Mui-focusVisible {
 			&& {
-        background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-        box-shadow: none;
-      }
+				background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+				box-shadow: none;
+			}
 		}
 
 		&:active {
@@ -75,7 +75,7 @@ const contrastFabStyles = css`
 		&& {
 			border-color: ${({ theme }) => theme.palette.secondary.light};
 			pointer-events: none;
-		
+
 			path {
 				fill: ${({ theme }) => theme.palette.secondary.light};
 			}
@@ -85,7 +85,7 @@ const contrastFabStyles = css`
 	&:hover {
 		&& {
 			background-color: ${({ theme }) => theme.palette.primary.contrast};
-		
+
 			path {
 				fill: ${({ theme }) => theme.palette.secondary.main};
 			}
@@ -95,6 +95,7 @@ const contrastFabStyles = css`
 	&.Mui-focusVisible {
 		&& {
 			border: 1px solid ${({ theme }) => theme.palette.primary.main};
+
 			path {
 				fill: ${({ theme }) => theme.palette.primary.main};
 			}

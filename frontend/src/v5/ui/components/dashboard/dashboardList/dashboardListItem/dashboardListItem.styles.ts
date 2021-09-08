@@ -18,41 +18,41 @@
 import styled, { css } from 'styled-components';
 
 export const Container = styled.li`
-  box-sizing: border-box;
-  cursor: pointer;
-  background-color: ${({ theme, color }) => color ?? theme.palette.primary.contrast};
-  height: 80px;
-  width: 100%;
-  list-style: none;
-  border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+	box-sizing: border-box;
+	cursor: pointer;
+	background-color: ${({ theme, color }) => color ?? theme.palette.primary.contrast};
+	height: 80px;
+	width: 100%;
+	list-style: none;
+	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 	border-bottom-style: none;
 
-  &:last-child {
-    border-radius: 0 0 5px 5px;
+	&:last-child {
+		border-radius: 0 0 5px 5px;
 		border-bottom-style: solid;
-  }
+	}
 
-  &:first-child {
-    border-radius: 5px 5px 0 0;
-    border-top-style: solid;
-  }
-	
+	&:first-child {
+		border-radius: 5px 5px 0 0;
+		border-top-style: solid;
+	}
+
 	&:only-child {
 		border-radius: 5px;
 	}
-  
-  ${({ theme }) => theme.selected && css`
-    background-color: ${theme.palette.secondary.main};
-    border: none;
-  `}
-  
-  :hover {
-    border-color: ${({ theme }) => theme.palette.primary.contrast};
-    box-shadow: ${({ theme }) => theme.palette.shadows.large};
-    z-index: 100;
+	
+	:hover {
+		border-color: ${({ theme }) => theme.palette.primary.contrast};
+		box-shadow: ${({ theme }) => theme.palette.shadows.large};
+		z-index: 100;
 
-    & + li {
-      border-top-color: transparent;
-    }
-  }
+		& + li {
+			border-top-color: transparent;
+		}
+	}
+
+	${({ theme }) => theme.selected && css`
+		background-color: ${theme.palette.secondary.main};
+		border: none;
+	`}
 `;

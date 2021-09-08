@@ -18,9 +18,9 @@
 import styled from 'styled-components';
 
 export const DashboardListItemIcon = styled.div`
-  width: 36px;
-  margin-right: 10px;
-	
+	width: 36px;
+	margin-right: 10px;
+
 	> * {
 		margin: 0;
 	}

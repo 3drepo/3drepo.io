@@ -21,8 +21,8 @@ import { SortingDirection } from '@components/dashboard/dashboardList/dashboardL
 import { FixedOrGrowContainer } from '../dasboardList.styles';
 
 export const Container = styled(FixedOrGrowContainer)`
-  align-items: center;
-  color: ${({ theme }) => theme.palette.base.main};
+	align-items: center;
+	color: ${({ theme }) => theme.palette.base.main};
 `;
 
 export const Button = styled(ButtonComponent).attrs(
@@ -30,32 +30,32 @@ export const Button = styled(ButtonComponent).attrs(
 		variant: 'text',
 	},
 )`
-  color: ${({ theme }) => theme.palette.base.main};
-  justify-content: flex-start;
-  padding: 0;
-  margin: 0;
-  line-height: normal;
+	color: ${({ theme }) => theme.palette.base.main};
+	justify-content: flex-start;
+	padding: 0;
+	margin: 0;
+	line-height: normal;
 
-  &:hover, &:active {
-    text-decoration-line: none;
-  }
+	&:hover, &:active {
+		text-decoration-line: none;
+	}
 `;
 
 export const Indicator = styled.div`
-  margin-left: 5px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
+	margin-left: 5px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
 
-  svg {
-    height: 7px;
-    width: 100%;
-  }
+	svg {
+		height: 7px;
+		width: 100%;
+	}
 
-  ${({ sortingDirection }) => sortingDirection === SortingDirection.ASCENDING && css`
-    svg {
-      transform: rotate(180deg);
-    }
-  `};
+	${({ sortingDirection }) => sortingDirection === SortingDirection.ASCENDING && css`
+		svg {
+			transform: rotate(180deg);
+		}
+	`};
 `;

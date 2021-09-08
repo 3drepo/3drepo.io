@@ -18,55 +18,55 @@ import { IconButton } from '@material-ui/core';
 import styled, { css } from 'styled-components';
 
 export const StyledIconButton = styled(IconButton)`
-  height: 28px;
-  width: 28px;
-  padding: 0;
-  margin: 0 10px 0 0;
-  display: flex;
-  align-items: center;
+	height: 28px;
+	width: 28px;
+	padding: 0;
+	margin: 0 10px 0 0;
+	display: flex;
+	align-items: center;
 
-  svg {
-    height: 7px;
-    width: 11px;
-    margin-top: 2px;
-  }
+	svg {
+		height: 7px;
+		width: 11px;
+		margin-top: 2px;
+	}
 
-  ${({ isOn }) => isOn && css`
-    background-color: ${({ theme }) => theme.palette.secondary.main};
+	${({ isOn }) => isOn && css`
+		background-color: ${({ theme }) => theme.palette.secondary.main};
 
-    svg {
-      margin-top: 0;
-      transform: rotate(180deg);
+		svg {
+			margin-top: 0;
+			transform: rotate(180deg);
 
-      path {
-        fill: ${({ theme }) => theme.palette.primary.contrast};
-      }
-    }
-  `}
+			path {
+				fill: ${({ theme }) => theme.palette.primary.contrast};
+			}
+		}
+	`}
 
-  border: 1px solid ${({ theme }) => theme.palette.secondary.main};
+	border: 1px solid ${({ theme }) => theme.palette.secondary.main};
 
-  &:hover {
-    border-style: none;
-    background-color: ${({ theme }) => theme.palette.base.lightest};
-  }
+	&:hover {
+		border-style: none;
+		background-color: ${({ theme }) => theme.palette.base.lightest};
+	}
 
-  &:active {
-    background-color: ${({ theme }) => theme.palette.secondary.light};
-  }
+	&:active {
+		background-color: ${({ theme }) => theme.palette.secondary.light};
+	}
 
-  &.Mui-focusVisible {
-    background-color: ${({ theme }) => theme.palette.primary.contrast};
-    border-style: solid;
-  }
+	&.Mui-focusVisible {
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+		border-style: solid;
+	}
 
-  :disabled {
-    background-color: transparent;
+	:disabled {
+		background-color: transparent;
 
-    svg {
-      path {
-        fill: ${({ theme }) => theme.palette.base.light};
-      }
-    }
-  }
+		svg {
+			path {
+				fill: ${({ theme }) => theme.palette.base.light};
+			}
+		}
+	}
 `;

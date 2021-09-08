@@ -19,101 +19,101 @@ import Button from '@material-ui/core/Button';
 import styled, { css } from 'styled-components';
 
 const labelButtonPrimaryStyles = css`
-  color: ${({ theme }) => theme.palette.primary.contrast};
-  background-color: ${({ theme }) => theme.palette.primary.main};
+	color: ${({ theme }) => theme.palette.primary.contrast};
+	background-color: ${({ theme }) => theme.palette.primary.main};
 
-  &.Mui-focusVisible {
-    background-color: ${({ theme }) => theme.palette.primary.main};
-  }
+	&.Mui-focusVisible {
+		background-color: ${({ theme }) => theme.palette.primary.main};
+	}
 
-  &:hover {
-    background-color: ${({ theme }) => theme.palette.primary.dark};
-    text-decoration-line: none;
-  }
+	&:hover {
+		background-color: ${({ theme }) => theme.palette.primary.dark};
+		text-decoration-line: none;
+	}
 
-  &:active {
-    background-color: ${({ theme }) => theme.palette.primary.darkest};
-  }
+	&:active {
+		background-color: ${({ theme }) => theme.palette.primary.darkest};
+	}
 `;
 
 const labelButtonSecondaryStyles = css`
-  color: ${({ theme }) => theme.palette.tertiary.main};
-  background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	color: ${({ theme }) => theme.palette.tertiary.main};
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 
-  &.Mui-focusVisible {
-    background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-  }
+	&.Mui-focusVisible {
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	}
 
-  &:hover {
-    background-color: ${({ theme }) => theme.palette.tertiary.main};
-    text-decoration-line: none;
-    color: ${({ theme }) => theme.palette.primary.contrast};
-  }
+	&:hover {
+		background-color: ${({ theme }) => theme.palette.tertiary.main};
+		text-decoration-line: none;
+		color: ${({ theme }) => theme.palette.primary.contrast};
+	}
 
-  &:active {
-    background-color: ${({ theme }) => theme.palette.tertiary.dark};
-    color: ${({ theme }) => theme.palette.primary.contrast};
-  }
+	&:active {
+		background-color: ${({ theme }) => theme.palette.tertiary.dark};
+		color: ${({ theme }) => theme.palette.primary.contrast};
+	}
 `;
 
 export const labelOutlinedButtonPrimaryStyles = css`
-  color: ${({ theme }) => theme.palette.primary.main};
-  background-color: ${({ theme }) => theme.palette.primary.contrast};
-  border: 1px solid ${({ theme }) => theme.palette.primary.main};
+	color: ${({ theme }) => theme.palette.primary.main};
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	border: 1px solid ${({ theme }) => theme.palette.primary.main};
 
-  &:hover {
-    color: ${({ theme }) => theme.palette.primary.contrast};
-    border-color: ${({ theme }) => theme.palette.primary.dark};
-  }
+	&:hover {
+		color: ${({ theme }) => theme.palette.primary.contrast};
+		border-color: ${({ theme }) => theme.palette.primary.dark};
+	}
 
-  &:active {
-    border-color: ${({ theme }) => theme.palette.primary.darkest};
-  }
+	&:active {
+		border-color: ${({ theme }) => theme.palette.primary.darkest};
+	}
 
-  &.Mui-focusVisible {
-    color: ${({ theme }) => theme.palette.primary.main};
-    background-color: ${({ theme }) => theme.palette.primary.contast};
-  }
+	&.Mui-focusVisible {
+		color: ${({ theme }) => theme.palette.primary.main};
+		background-color: ${({ theme }) => theme.palette.primary.contast};
+	}
 
-  &:disabled {
-    border-color: ${({ theme }) => theme.palette.base.lightest};
-  }
+	&:disabled {
+		border-color: ${({ theme }) => theme.palette.base.lightest};
+	}
 `;
 
 export const labelOutlinedButtonSecondaryStyles = css`
-  color: ${({ theme }) => theme.palette.tertiary.main};
-  background-color: ${({ theme }) => theme.palette.primary.contrast};
-  border: 1px solid ${({ theme }) => theme.palette.tertiary.main};
+	color: ${({ theme }) => theme.palette.tertiary.main};
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	border: 1px solid ${({ theme }) => theme.palette.tertiary.main};
 
-  :active {
-    border-color: ${({ theme }) => theme.palette.tertiary.dark};
-  }
+	:active {
+		border-color: ${({ theme }) => theme.palette.tertiary.dark};
+	}
 
-  &.Mui-focusVisible {
-    background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-  }
+	&.Mui-focusVisible {
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	}
 
-  &:disabled {
-    border-color: ${({ theme }) => theme.palette.base.lightest};
-  }
+	&:disabled {
+		border-color: ${({ theme }) => theme.palette.base.lightest};
+	}
 `;
 
 export const LabelButton = styled(Button)`
-  align-items: center;
-  padding: 8px 12px 8px 15px;
+	align-items: center;
+	padding: 8px 12px 8px 15px;
 
-  ${({ theme }) => css`
-    &:disabled {
-      background-color: ${theme.palette.base.lightest};
-      color: ${theme.palette.primary.contrast};
-    }
+	${({ theme }) => css`
+		&:disabled {
+			background-color: ${theme.palette.base.lightest};
+			color: ${theme.palette.primary.contrast};
+		}
 
-    &.Mui-focusVisible {
-      box-shadow: ${theme.palette.shadows.level_5};
-    }
-  `}
+		&.Mui-focusVisible {
+			box-shadow: ${theme.palette.shadows.level_5};
+		}
+	`}
 
-  ${({ color }) => {
+	${({ color }) => {
 		if (color === 'primary') {
 			return labelButtonPrimaryStyles;
 		}
@@ -123,8 +123,7 @@ export const LabelButton = styled(Button)`
 		return '';
 	}}
 
-
-  ${({ color, outlined }) => {
+	${({ color, outlined }) => {
 		if (color === 'primary' && outlined) {
 			return labelOutlinedButtonPrimaryStyles;
 		}

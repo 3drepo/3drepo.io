@@ -20,9 +20,9 @@ import { Typography } from '@material-ui/core';
 export const Text = styled(Typography).attrs({
 	variant: 'body1',
 })`
-  color: ${({ theme }) => theme.palette.base.main};
+	color: ${({ theme }) => theme.palette.base.main};
 
-  ${({ theme }) => theme.selected && css`
-    color: ${theme.palette.base.light};
-  `}
+	${({ theme }) => theme.selected && css`
+		color: ${theme.palette.base.light};
+	`}
 `;

@@ -22,22 +22,22 @@ import { Button } from '@controls/button';
 export const Title = styled(Button).attrs({
 	variant: 'text',
 })`
-  color: ${({ theme }) => theme.palette.secondary.main};
-  padding: 0;
-  margin: 0;
-  line-height: normal;
+	color: ${({ theme }) => theme.palette.secondary.main};
+	padding: 0;
+	margin: 0;
+	line-height: normal;
 
-  ${({ theme }) => theme.selected && css`
-    color: ${theme.palette.primary.contrast};
-  `}
+	${({ theme }) => theme.selected && css`
+		color: ${theme.palette.primary.contrast};
+	`}
 `;
 
 export const Subtitle = styled(Typography).attrs({
 	variant: 'body1',
 })`
-  color: ${({ theme }) => theme.palette.base.main};
+	color: ${({ theme }) => theme.palette.base.main};
 
-  ${({ theme }) => theme.selected && css`
-    color: ${theme.palette.base.light};
-  `}
+	${({ theme }) => theme.selected && css`
+		color: ${theme.palette.base.light};
+	`}
 `;

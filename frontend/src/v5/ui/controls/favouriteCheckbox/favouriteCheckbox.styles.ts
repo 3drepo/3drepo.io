@@ -19,43 +19,43 @@ import { Checkbox as CheckboxComponent } from '@material-ui/core';
 import styled from 'styled-components';
 
 export const Checkbox = styled(CheckboxComponent)`
-  && {
-    padding: 10px;
+	&& {
+		padding: 10px;
 
-    svg {
-      height: 16px;
-      width: 16px;
+		svg {
+			height: 16px;
+			width: 16px;
 
-      path {
-        fill: none;
-        stroke: ${({ theme }) => theme.palette.secondary.light};
-      }
-    }
+			path {
+				fill: none;
+				stroke: ${({ theme }) => theme.palette.secondary.light};
+			}
+		}
 
-    &.Mui-checked {
-      path {
-        fill: ${({ theme }) => theme.palette.favourite.main};
-        stroke: ${({ theme }) => theme.palette.favourite.main};
-      }
-    }
+		&.Mui-checked {
+			path {
+				fill: ${({ theme }) => theme.palette.favourite.main};
+				stroke: ${({ theme }) => theme.palette.favourite.main};
+			}
+		}
 
-    &.Mui-focusVisible {
-      background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-    }
+		&.Mui-focusVisible {
+			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+		}
 
-    &:hover {
-      background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-    }
+		&:hover {
+			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+		}
 
-    &:active {
-      background-color: ${({ theme }) => theme.palette.base.lightest};
-    }
+		&:active {
+			background-color: ${({ theme }) => theme.palette.base.lightest};
+		}
 
-    &.Mui-disabled {
-      path {
-        fill: ${({ theme }) => theme.palette.secondary.lightest};
-        stroke: ${({ theme }) => theme.palette.secondary.lightest};
-      }
-    }
-  }
+		&.Mui-disabled {
+			path {
+				fill: ${({ theme }) => theme.palette.secondary.lightest};
+				stroke: ${({ theme }) => theme.palette.secondary.lightest};
+			}
+		}
+	}
 `;

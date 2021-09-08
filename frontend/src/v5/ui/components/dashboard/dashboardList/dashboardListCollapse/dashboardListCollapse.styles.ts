@@ -20,14 +20,14 @@ import { Divider as DividerComponent } from '@material-ui/core';
 export const Container = styled.div``;
 
 export const ButtonContainer = styled.div`
-  display: flex;
-  align-items: center;
+	display: flex;
+	align-items: center;
 `;
 
 export const CollapsedItemContainer = styled.div`
-  margin-bottom: 16px;
+	margin-bottom: 16px;
 `;
 
 export const Divider = styled(DividerComponent)`
-  margin-top: 16px;
+	margin-top: 16px;
 `;
