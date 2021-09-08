@@ -3,11 +3,12 @@
    "sourceLocale": "en",
    "catalogs": [{
       "path": "src/locales/{locale}/messages",
-      "include": ["src"]
+      "include": ["src/v5/"]
    }],
    "format": "minimal",
    "compileNamespace": "ts",
    "extractBabelOptions": {
-    "presets": ["@babel/preset-typescript"]
-   }
+      "presets": ["@babel/preset-typescript"]
+   },
+   "runtimeConfigModule": ["@lingui/core", "i18n"],
 }

@@ -15,39 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { Button, Breadcrumbs } from '@material-ui/core';
-import { Link } from 'react-router-dom';
+import React from 'react';
 
-export const Container = styled(Breadcrumbs)`
-	&& {
-		margin-left: 15px;
-	}
-`;
+import { UserAvatar, StyledFab, StyledIconButton } from './circleButton.styles';
 
-export const InteractiveBreadcrumb = styled(Button).attrs({
-	variant: 'text',
-})`
-	&& {
-		${({ theme }) => theme.typography.body1};
-		color: ${({ theme }) => theme.palette.primary.main};
-		padding: 5px;
-		margin: 0;
+interface ICircleButton {
+	variant?: 'avatar' | 'fab';
+	size?: 'large' | 'medium' | 'small';
+	motive?: 'main' | 'contrast';
+	disabled?: boolean;
+}
 
-		&:hover {
-			text-decoration: none;
-		}
-	}
-`;
+export const CircleButton: React.FC<ICircleButton> = ({ variant = 'fab', size = 'large', motive = 'main', children, ...props }) => {
+	const isAvatarVariant = variant === 'avatar';
 
-export const Breadcrumb = styled(Button).attrs({
-	variant: 'text',
-	component: Link,
-})`
-	&& {
-		color: ${({ theme }) => theme.palette.base.main};
-		&:hover {
-			text-decoration: none;
-		}
-	}
-`;
+	const ButtonComponent = isAvatarVariant ? StyledIconButton : StyledFab;
+
+	return (
+		<ButtonComponent size={size} motive={motive} {...props}>
+			{isAvatarVariant ? <UserAvatar>{children}</UserAvatar> : children}
+		</ButtonComponent>
+	);
+};

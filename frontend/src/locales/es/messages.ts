@@ -1,0 +1,1 @@
+/*eslint-disable*/export const messages={"Containers":"Contenedores","Settings":"Configuraciones"};

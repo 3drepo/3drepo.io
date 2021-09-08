@@ -19,13 +19,32 @@ import React from 'react';
 
 import Logo from '@assets/icons/logo.svg';
 import { AppBar as MuiAppBar } from '@material-ui/core';
+import IntercomIcon from '@assets/icons/intercom.svg';
+import NotificationsIcon from '@assets/icons/notifications.svg';
+
+import { CircleButton } from '@/v5/ui/controls/circleButton';
+import { AvatarButton } from '@/v5/ui/controls/avatarButton';
+import { i18n } from '@lingui/core';
 import { Items } from './appBar.styles';
+import { TopNavigation } from '../topNavigation';
+import { Breadcrumbs } from '../breadcrumbs';
 
 export const AppBar = (): JSX.Element => (
 	<MuiAppBar color="secondary">
 		<Items>
 			<Logo />
+			<Breadcrumbs />
 		</Items>
-		<Items />
+
+		<Items>
+			<TopNavigation links={[{ title: i18n._('Containers'), to: '/containers' }, { title: i18n._('Settings'), to: '/settings' }]} />
+			<CircleButton variant="contrast" aria-label="intercom">
+				<IntercomIcon />
+			</CircleButton>
+			<CircleButton variant="contrast" aria-label="notifications">
+				<NotificationsIcon />
+			</CircleButton>
+			<AvatarButton> GH </AvatarButton>
+		</Items>
 	</MuiAppBar>
 );
