@@ -15,24 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import React, { Dispatch } from 'react';
+import ChevronIcon from '@assets/icons/v5/chevron.svg';
+import { StyledIconButton } from './chevronButton.styles';
 
-export const Container = styled.div`
-  padding: ${({ theme }) => `${theme.spacing(2)}px`};
-	height: 5000px;
-`;
+export type IChevronButton = {
+	isOn?: boolean;
+	onClick: Dispatch<void>;
+	ref?: React.Ref<HTMLElement>;
+};
 
-export const ContrastBackground = styled.div`
-  padding: ${({ theme }) => `${theme.spacing(2)}px`};
-  background-color: ${({ theme }) => theme.palette.secondary.main};
-`;
-
-export const Group = styled.div`
-  margin-top: 30px;
-`;
-
-export const AppBarGroup = styled(Group)`
-  header {
-    position: relative !important;
-  }
-`;
+export const ChevronButton = React.forwardRef(
+	({ ...props }: IChevronButton, ref: React.Ref<HTMLSpanElement>): JSX.Element => (
+		<StyledIconButton {...props} ref={ref}>
+			<ChevronIcon />
+		</StyledIconButton>
+	),
+);

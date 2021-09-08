@@ -41,7 +41,8 @@ import {
 } from '@components/dashboard/dashboardList/dashboardListItem/components/';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
-import { AppBarGroup, BaseBackground, Container, ContrastBackground, Group } from './themeLayout.styles';
+import { DashboardListCollapse } from '@components/dashboard/dashboardList/dashboardListCollapse';
+import { AppBarGroup, Container, ContrastBackground, Group } from './themeLayout.styles';
 import { Typography } from '../../themes/typography';
 
 const LINKS = [{
@@ -90,16 +91,16 @@ export const ThemeLayout = (): JSX.Element => {
 
 	const MockDashboardListItem = () => (
 		<DashboardListItemRow>
-			<DashboardListItemTitle subtitle="Latest revision: Revision code" width={200}>
+			<DashboardListItemTitle subtitle="Latest revision: Revision code">
 				This is the container title
 			</DashboardListItemTitle>
 			<DashboardListItemText width={150}>
 				Container code
 			</DashboardListItemText>
-			<DashboardListItemButton onClick={() => undefined}>
+			<DashboardListItemButton width={150} tooltipTitle="View revisions" onClick={() => undefined}>
 				1234 Revisions
 			</DashboardListItemButton>
-			<DashboardListItemText>
+			<DashboardListItemText width={250}>
 				Category label
 			</DashboardListItemText>
 			<DashboardListItemIcon>
@@ -271,18 +272,6 @@ export const ThemeLayout = (): JSX.Element => {
 
 				<Group>
 					<Typography variant="h3" gutterBottom>Circle buttons</Typography>
-					<Typography variant="h4" gutterBottom>Favourite checkbox</Typography>
-					<BaseBackground>
-						<FavouriteCheckbox checked={false} onChange={() => undefined} />
-						<FavouriteCheckbox checked onChange={() => undefined} />
-						<FavouriteCheckbox checked={false} onChange={() => undefined} disabled />
-					</BaseBackground>
-
-					<ContrastBackground>
-						<FavouriteCheckbox checked={false} onChange={() => undefined} />
-						<FavouriteCheckbox checked onChange={() => undefined} />
-						<FavouriteCheckbox checked={false} onChange={() => undefined} disabled />
-					</ContrastBackground>
 
 					<Typography variant="h4" gutterBottom>icon-intercom</Typography>
 					<ContrastBackground>
@@ -314,6 +303,16 @@ export const ThemeLayout = (): JSX.Element => {
 						</AvatarButton>
 					</ContrastBackground>
 				</Group>
+
+				<Group>
+					<Typography variant="h4" gutterBottom>Favourite checkbox</Typography>
+
+					<ContrastBackground>
+						<FavouriteCheckbox checked={false} onChange={() => undefined} />
+						<FavouriteCheckbox checked onChange={() => undefined} />
+						<FavouriteCheckbox checked={false} onChange={() => undefined} disabled />
+					</ContrastBackground>
+				</Group>
 			</Group>
 
 			<Group>
@@ -329,42 +328,49 @@ export const ThemeLayout = (): JSX.Element => {
 
 			<Group>
 				<Typography variant="h3" gutterBottom>DashboardList</Typography>
-				<DashboardListHeader>
-					<DashboardListHeaderLabel
-						width={200}
-						onClick={() => undefined}
-						sortingDirection={SortingDirection.ASCENDING}
-						sort
-					>
-						Container
-					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel
-						width={150}
-						onClick={() => undefined}
-						sortingDirection={SortingDirection.DESCENDING}
-						sort
-					>
-						Code
-					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel>
-						Revisions
-					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel>
-						Category
-					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel width={46} />
-				</DashboardListHeader>
-				<DashboardList>
-					<DashboardListItem selected={false}>
-						<MockDashboardListItem />
-					</DashboardListItem>
-					<DashboardListItem selected>
-						<MockDashboardListItem />
-					</DashboardListItem>
-					<DashboardListItem selected={false}>
-						<MockDashboardListItem />
-					</DashboardListItem>
-				</DashboardList>
+				<DashboardListCollapse
+					title="Containers (2)"
+					tooltipTitles={{
+						collapsed: 'Show list',
+						visible: 'Hide list',
+					}}
+				>
+					<DashboardListHeader>
+						<DashboardListHeaderLabel
+							onClick={() => undefined}
+							sortingDirection={SortingDirection.ASCENDING}
+							sort
+						>
+							Container
+						</DashboardListHeaderLabel>
+						<DashboardListHeaderLabel
+							width={150}
+							onClick={() => undefined}
+							sortingDirection={SortingDirection.DESCENDING}
+							sort
+						>
+							Code
+						</DashboardListHeaderLabel>
+						<DashboardListHeaderLabel width={150}>
+							Revisions
+						</DashboardListHeaderLabel>
+						<DashboardListHeaderLabel width={250}>
+							Category
+						</DashboardListHeaderLabel>
+						<DashboardListHeaderLabel width={46} />
+					</DashboardListHeader>
+					<DashboardList>
+						<DashboardListItem selected={false}>
+							<MockDashboardListItem />
+						</DashboardListItem>
+						<DashboardListItem selected>
+							<MockDashboardListItem />
+						</DashboardListItem>
+						<DashboardListItem selected={false}>
+							<MockDashboardListItem />
+						</DashboardListItem>
+					</DashboardList>
+				</DashboardListCollapse>
 			</Group>
 		</Container>
 	);

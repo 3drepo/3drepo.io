@@ -14,25 +14,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import styled from 'styled-components';
+import { Divider as DividerComponent } from '@material-ui/core';
 
-export const Container = styled.div`
-  padding: ${({ theme }) => `${theme.spacing(2)}px`};
-	height: 5000px;
+export const Container = styled.div``;
+
+export const ButtonContainer = styled.div`
+  display: flex;
+  align-items: center;
 `;
 
-export const ContrastBackground = styled.div`
-  padding: ${({ theme }) => `${theme.spacing(2)}px`};
-  background-color: ${({ theme }) => theme.palette.secondary.main};
+export const CollapsedItemContainer = styled.div`
+  margin-bottom: 16px;
 `;
 
-export const Group = styled.div`
-  margin-top: 30px;
-`;
-
-export const AppBarGroup = styled(Group)`
-  header {
-    position: relative !important;
-  }
+export const Divider = styled(DividerComponent)`
+  margin-top: 16px;
 `;
