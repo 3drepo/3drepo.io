@@ -14,10 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { discardSlash, discardUrlComponent, RouteExcept, uriCombine } from '@/v5/services/routing/routing';
-import { MenuItem, Select, MuiThemeProvider } from '@material-ui/core';
+import { RouteExcept } from '@/v5/services/routing/routing';
+import { MuiThemeProvider } from '@material-ui/core';
 import React from 'react';
-import { useRouteMatch, useParams, useHistory, Route, Link } from 'react-router-dom';
+import { useRouteMatch, Route } from 'react-router-dom';
 
 import { ThemeProvider } from 'styled-components';
 
@@ -37,36 +37,6 @@ i18n.load('en', enMessages);
 i18n.load('es', esMessages);
 
 i18n.activate('en');
-
-const NavigationLinks = () => {
-	let { url } = useRouteMatch();
-	url = discardSlash(url);
-
-	const { project } = useParams();
-
-	return (
-		<>
-			<br />{url}<br />
-			{project && project !== 'settings'
-				&& (
-					<>
-						<Link to={`${url}/federations`}> federations</Link>
-						<Link to={`${url}/containers`}> containers</Link>
-					</>
-				)}
-			<Link to={`${discardUrlComponent(url, 'settings')}/settings`}> settings</Link>
-		</>
-	);
-};
-
-
-/*
-<h1>logo</h1>
-<TeamSpacesSelection />
-<ProjectsSelection />
-<NavigationLinks />
-<br />
-*/
 
 export const Dashboard = () => {
 	const { path } = useRouteMatch();

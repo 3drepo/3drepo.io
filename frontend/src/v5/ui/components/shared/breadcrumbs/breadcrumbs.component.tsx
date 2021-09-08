@@ -50,9 +50,14 @@ const projectsLists = {
 	],
 };
 
+const addUrlToTarget = (url) => ({ to, title }) => ({ title, to: `${url}/${to}` });
+
 export const Breadcrumbs = (): JSX.Element => {
 	const { teamspace, project } = useParams();
 	let { url } = useRouteMatch();
+
+	const urlProject = project ? uriCombine(url, '../') : url;
+
 	url = teamspace ? uriCombine(url, '../') : url;
 	url = project ? uriCombine(url, '../') : url;
 
@@ -60,7 +65,7 @@ export const Breadcrumbs = (): JSX.Element => {
 
 	const teamspaceTo = `${url}/${teamspace}`;
 
-	const list: any[] = !project ? teamspacesList : projectsLists[teamspace] || [];
+	let list: any[] = !project ? teamspacesList : projectsLists[teamspace] || [];
 
 	if (teamspace) {
 		getBreadcrumbs.push(teamspace);
@@ -70,7 +75,7 @@ export const Breadcrumbs = (): JSX.Element => {
 		getBreadcrumbs.push(list.find(({ to }) => to === project).title);
 	}
 
-	// const list = [{ title: 'Dubai opera', to: '123123123' }, { title: 'Other project', to: '9898988' }];
+	list = list.map(addUrlToTarget(urlProject));
 
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);

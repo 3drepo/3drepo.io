@@ -15,24 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { discardSlash, discardUrlComponent } from '@/v5/services/routing/routing';
+import { useRouteMatch, useParams } from 'react-router-dom';
+
+import { Trans } from '@lingui/react';
 import React from 'react';
 import { Container, Link } from './topNavigaton.styles';
 
-interface ILink {
-	title: string;
-	to: string;
-	active?: boolean;
-	disabled?: boolean;
-}
+export const TopNavigation = (): JSX.Element => {
+	let { url } = useRouteMatch();
+	url = discardSlash(url);
 
-interface ITopNavigation {
-	links: ILink[];
-}
-
-export const TopNavigation = ({ links }: ITopNavigation): JSX.Element => (
-	<Container>
-		{links.map(({ title, to, ...props }) => (
-			<Link to={to} {...props}>{title}</Link>
-		))}
-	</Container>
-);
+	const { project } = useParams();
+	return (
+		<Container>
+			{project && project !== 'settings'
+				&& (
+					<>
+						<Link to={`${url}/federations`}><Trans id="Federations" /></Link>
+						<Link to={`${url}/containers`}><Trans id="Containers" /></Link>
+					</>
+				)}
+			<Link to={`${discardUrlComponent(url, 'settings')}/settings`}><Trans id="Settings" /></Link>
+		</Container>
+	);
+};
