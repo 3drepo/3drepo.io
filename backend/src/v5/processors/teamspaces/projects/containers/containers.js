@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { appendFavourites, deleteFavourites } = require('../../../../models/users');
 const { getContainerById, getContainers } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionCount } = require('../../../../models/revisions');
-const { appendFavourites, deleteFavourites } = require('../../../../models/users');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../utils/permissions/permissions');
 const { getFavourites } = require('../../../../models/users');
 const { getProjectById } = require('../../../../models/projects');
