@@ -24,19 +24,16 @@ const ResponseCodes = require("../response_codes");
 const systemLogger = require("../logger").systemLogger;
 const utils = require("../utils");
 
-const generateFoldernames = (fileName, dirLevels) => {
+const generateFoldernames = (dirLevels) => {
 	if (dirLevels < 1) {
 		return "";
 	}
 	const folders = [];
-	const minChunkLen = 4;
-	const nameChunkLen = Math.max(fileName.length / dirLevels, minChunkLen);
 
 	for(let i = 0 ; i < dirLevels; i++) {
-		const chunkStart = (i * nameChunkLen) % fileName.length;
 		// Generate a relatively large random number for the file directory name
-		const fileNameHash = Math.random() * 100000;
-		folders.push(fileNameHash & 255);
+		const randomNumber = Math.random() * 100000;
+		folders.push(randomNumber & 255);
 	}
 	return folders.join("/");
 };
@@ -74,7 +71,7 @@ class FSHandler {
 
 	storeFile(data) {
 		const _id = utils.generateUUID({string: true});
-		const folderNames = generateFoldernames(_id, config.fs.levels);
+		const folderNames = generateFoldernames(config.fs.levels);
 		const link = path.posix.join(folderNames, _id);
 
 		return new Promise((resolve, reject) => {
