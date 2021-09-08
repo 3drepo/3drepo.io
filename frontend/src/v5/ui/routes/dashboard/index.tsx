@@ -15,11 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { discardSlash, discardUrlComponent, RouteExcept, uriCombine } from '@/v5/services/routing/routing';
-import { MenuItem, Select } from '@material-ui/core';
+import { MenuItem, Select, MuiThemeProvider } from '@material-ui/core';
 import React from 'react';
 import { useRouteMatch, useParams, useHistory, Route, Link } from 'react-router-dom';
-import { ProjectContent } from './projects';
+
+import { ThemeProvider } from 'styled-components';
+
+import { theme } from '@/v5/ui/themes/theme';
+import { GlobalStyle } from '@/v5/ui/themes/global';
+
+import { i18n } from '@lingui/core';
+import { I18nProvider } from '@lingui/react';
+import { messages as esMessages } from '@/locales/es/messages';
+import { AppBar } from '@components/shared/appBar';
+import { messages as enMessages } from '@/locales/en/messages';
 import { TeamspaceContent } from './teamspaces';
+import { ProjectContent } from './projects';
+import { Content } from './index.styles';
+
+i18n.load('en', enMessages);
+i18n.load('es', esMessages);
+
+i18n.activate('en');
 
 const ProjectsSelection = () => {
 	const history = useHistory();
@@ -102,24 +119,36 @@ const TeamSpacesSelection = () => {
 	);
 };
 
+/*
+<h1>logo</h1>
+<TeamSpacesSelection />
+<ProjectsSelection />
+<NavigationLinks />
+<br />
+*/
+
 export const Dashboard = () => {
 	const { path } = useRouteMatch();
 
 	return (
 		<Route path={`${path}/:teamspace?/:project?`}>
-			<h1>logo</h1>
-			<TeamSpacesSelection />
-			<ProjectsSelection />
-			<NavigationLinks />
-			<br />
+			<I18nProvider i18n={i18n}>
+				<ThemeProvider theme={theme}>
+					<MuiThemeProvider theme={theme}>
+						<GlobalStyle />
+						<AppBar />
+						<Content>
+							<Route path={`${path}/:teamspace/`}>
+								<TeamspaceContent />
+							</Route>
 
-			<Route path={`${path}/:teamspace/`}>
-				<TeamspaceContent />
-			</Route>
-
-			<RouteExcept path={`${path}/:teamspace/:project`} exceptPath={`${path}/:teamspace/settings`}>
-				<ProjectContent />
-			</RouteExcept>
+							<RouteExcept path={`${path}/:teamspace/:project`} exceptPath={`${path}/:teamspace/settings`}>
+								<ProjectContent />
+							</RouteExcept>
+						</Content>
+					</MuiThemeProvider>
+				</ThemeProvider>
+			</I18nProvider>
 		</Route>
 	);
 };

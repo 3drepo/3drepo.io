@@ -17,13 +17,56 @@
 
 import React from 'react';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { useParams, useHistory } from 'react-router-dom';
 import { Container, Breadcrumb, InteractiveBreadcrumb } from './breadcrumbs.styles';
 import { NavigationMenu } from '../navigatonMenu';
 
-export const Breadcrumbs = (): JSX.Element => {
-	const getBreadcrumbs = ['Atkins', 'Dubai opera'];
+const teamspacesList = [{
+	to: 'atkins',
+	title: 'Atkins',
+}, {
+	to: 'skanska',
+	title: 'Skanska',
+}];
 
-	const list = [{ title: 'Dubai opera', to: '123123123' }, { title: 'Other project', to: '9898988' }];
+const projectsLists = {
+	atkins: [{
+		to: '12389jkh',
+		title: 'Dubai',
+	}, {
+		to: 'nlgkgouo12',
+		title: 'Another atkins project',
+	}],
+	skanska: [
+		{
+			to: 'kjbljbasda',
+			title: 'Kings cross',
+		},
+		{
+			to: 'asdasdjnlkn',
+			title: 'Paddington',
+		},
+	],
+};
+
+export const Breadcrumbs = (): JSX.Element => {
+	const history = useHistory();
+
+	const { teamspace, project } = useParams();
+
+	const getBreadcrumbs = [];
+
+	const list: any[] = !project ? teamspacesList : projectsLists[teamspace] || [];
+
+	if (teamspace) {
+		getBreadcrumbs.push(teamspace);
+	}
+
+	if (project) {
+		getBreadcrumbs.push(list.find(({ to }) => to === project).title);
+	}
+
+	// const list = [{ title: 'Dubai opera', to: '123123123' }, { title: 'Other project', to: '9898988' }];
 
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
@@ -47,7 +90,7 @@ export const Breadcrumbs = (): JSX.Element => {
 				}
 
 				return (
-					<Breadcrumb color="inherit" to={`#4${title}`}>
+					<Breadcrumb color="inherit" to={teamspace}>
 						{title}
 					</Breadcrumb>
 				);

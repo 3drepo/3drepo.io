@@ -35,7 +35,6 @@ export const AppBar = (): JSX.Element => (
 			<Logo />
 			<Breadcrumbs />
 		</Items>
-
 		<Items>
 			<TopNavigation links={[{ title: i18n._('Containers'), to: '/containers' }, { title: i18n._('Settings'), to: '/settings' }]} />
 			<CircleButton variant="contrast" aria-label="intercom">
