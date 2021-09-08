@@ -17,7 +17,8 @@
 
 import React from 'react';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useRouteMatch } from 'react-router-dom';
+import { uriCombine } from '@/v5/services/routing/routing';
 import { Container, Breadcrumb, InteractiveBreadcrumb } from './breadcrumbs.styles';
 import { NavigationMenu } from '../navigatonMenu';
 
@@ -50,11 +51,14 @@ const projectsLists = {
 };
 
 export const Breadcrumbs = (): JSX.Element => {
-	const history = useHistory();
-
 	const { teamspace, project } = useParams();
+	let { url } = useRouteMatch();
+	url = teamspace ? uriCombine(url, '../') : url;
+	url = project ? uriCombine(url, '../') : url;
 
 	const getBreadcrumbs = [];
+
+	const teamspaceTo = `${url}/${teamspace}`;
 
 	const list: any[] = !project ? teamspacesList : projectsLists[teamspace] || [];
 
@@ -74,7 +78,6 @@ export const Breadcrumbs = (): JSX.Element => {
 
 	return (
 		<Container aria-label="breadcrumb">
-
 			{getBreadcrumbs.map((title, index) => {
 				const isLastItem = (getBreadcrumbs.length - 1) === index;
 
@@ -90,7 +93,7 @@ export const Breadcrumbs = (): JSX.Element => {
 				}
 
 				return (
-					<Breadcrumb color="inherit" to={teamspace}>
+					<Breadcrumb color="inherit" to={teamspaceTo}>
 						{title}
 					</Breadcrumb>
 				);

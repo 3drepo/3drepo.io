@@ -38,46 +38,6 @@ i18n.load('es', esMessages);
 
 i18n.activate('en');
 
-const ProjectsSelection = () => {
-	const history = useHistory();
-	const { teamspace, project } = useParams();
-	let { url } = useRouteMatch();
-
-	url = project ? uriCombine(url, '../') : url;
-
-	const handleChange = (event) => {
-		history.push(`${url}/${event.target.value}`);
-	};
-
-	const items = {
-		atkins: [{
-			value: '12389jkh',
-			label: 'Dubai',
-		}, {
-			value: 'nlgkgouo12',
-			label: 'Another atkins project',
-		}],
-		skanska: [
-			{
-				value: 'kjbljbasda',
-				label: 'Kings cross',
-			},
-			{
-				value: 'asdasdjnlkn',
-				label: 'Paddington',
-			},
-		],
-	}[teamspace] || [];
-
-	return (
-		<Select value={project || '-'} onChange={handleChange} displayEmpty={!project}>
-			{items.map(({ value, label }) => (
-				<MenuItem key={value} value={value}>{label}</MenuItem>
-			))}
-		</Select>
-	);
-};
-
 const NavigationLinks = () => {
 	let { url } = useRouteMatch();
 	url = discardSlash(url);
@@ -99,25 +59,6 @@ const NavigationLinks = () => {
 	);
 };
 
-const TeamSpacesSelection = () => {
-	const history = useHistory();
-	const { teamspace, project } = useParams();
-	let { url } = useRouteMatch();
-	url = uriCombine(url, './');
-	url = teamspace ? uriCombine(url, '../') : url;
-	url = project ? uriCombine(url, '../') : url;
-
-	const handleChange = (event) => {
-		history.push(`${url}/${event.target.value}`);
-	};
-
-	return (
-		<Select value={teamspace} onChange={handleChange}>
-			<MenuItem value="atkins">Atkins</MenuItem>
-			<MenuItem value="skanska">Skanska</MenuItem>
-		</Select>
-	);
-};
 
 /*
 <h1>logo</h1>
