@@ -19,13 +19,13 @@ import React from 'react';
 import StarIcon from '@assets/icons/v5/star.svg';
 import { Checkbox } from './favouriteCheckbox.styles';
 
-type IStarButton = {
+type IFavouriteCheckbox = {
 	checked: boolean;
 	onChange: (value: boolean) => void;
 	disabled?: boolean;
 };
 
-export const FavouriteCheckbox = ({ onChange, disabled, checked }: IStarButton): JSX.Element => (
+export const FavouriteCheckbox = ({ onChange, disabled, checked }: IFavouriteCheckbox): JSX.Element => (
 	<Checkbox
 		icon={<StarIcon />}
 		checkedIcon={<StarIcon />}

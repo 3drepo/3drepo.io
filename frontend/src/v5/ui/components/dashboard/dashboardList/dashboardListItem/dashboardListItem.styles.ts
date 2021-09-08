@@ -24,7 +24,7 @@ export const Container = styled.li`
   height: 80px;
   width: 100%;
   list-style: none;
-  border: 1px solid ${({ theme }) => theme.palette.base.light};
+  border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 	border-bottom-style: none;
 
   &:last-child {

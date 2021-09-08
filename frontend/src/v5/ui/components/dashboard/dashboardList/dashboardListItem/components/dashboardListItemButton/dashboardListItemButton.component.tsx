@@ -16,6 +16,7 @@
  */
 
 import { FixedOrGrowContainer } from '@components/dashboard/dashboardList/dasboardList.styles';
+import { Tooltip } from '@material-ui/core';
 import React, { Dispatch, ReactNode, SyntheticEvent } from 'react';
 import { Button } from './dashboardListItemButton.styles';
 
@@ -23,12 +24,20 @@ type IDashboardListItemButton = {
 	children: ReactNode;
 	width?: number;
 	onClick: Dispatch<SyntheticEvent>;
+	tooltipTitle?: string;
 };
 
-export const DashboardListItemButton = ({ children, width, onClick }: IDashboardListItemButton): JSX.Element => (
+export const DashboardListItemButton = ({
+	children,
+	width,
+	onClick,
+	tooltipTitle = '',
+}: IDashboardListItemButton): JSX.Element => (
 	<FixedOrGrowContainer width={width}>
-		<Button onClick={onClick}>
-			{children}
-		</Button>
+		<Tooltip title={tooltipTitle}>
+			<Button onClick={onClick}>
+				{children}
+			</Button>
+		</Tooltip>
 	</FixedOrGrowContainer>
 );

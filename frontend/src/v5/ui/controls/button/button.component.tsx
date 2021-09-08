@@ -26,20 +26,24 @@ type IButton = Omit<ButtonProps, 'variant'> & {
 	variant?: ButtonVariants;
 };
 
-export const Button = ({ children, variant, ...props }: IButton): JSX.Element => {
+export const Button = React.forwardRef(({
+	children,
+	variant,
+	...props
+}: IButton, ref: React.Ref<HTMLButtonElement>): JSX.Element => {
 	if (variant === 'label') {
 		return (
-			<LabelButton {...props}>
+			<LabelButton {...props} ref={ref}>
 				<Typography variant="kicker">{children}</Typography>
 			</LabelButton>
 		);
 	}
 	if (variant === 'label-outlined') {
 		return (
-			<LabelButton outlined {...props}>
+			<LabelButton outlined {...props} ref={ref}>
 				<Typography variant="kicker">{children}</Typography>
 			</LabelButton>
 		);
 	}
-	return <MuiButton variant={variant} {...props}>{children}</MuiButton>;
-};
+	return <MuiButton variant={variant} {...props} ref={ref}>{children}</MuiButton>;
+});

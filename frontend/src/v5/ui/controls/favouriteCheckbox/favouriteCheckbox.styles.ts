@@ -21,7 +21,6 @@ import styled from 'styled-components';
 export const Checkbox = styled(CheckboxComponent)`
   && {
     padding: 10px;
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
 
     svg {
       height: 16px;
@@ -53,8 +52,6 @@ export const Checkbox = styled(CheckboxComponent)`
     }
 
     &.Mui-disabled {
-      background-color: ${({ theme }) => theme.palette.primary.contrast};
-
       path {
         fill: ${({ theme }) => theme.palette.secondary.lightest};
         stroke: ${({ theme }) => theme.palette.secondary.lightest};
