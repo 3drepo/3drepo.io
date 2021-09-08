@@ -26,8 +26,10 @@ export const ProjectContent = () => {
 
 	return (
 		<>
-			project content:
 			<Switch>
+				<Route exact path={path}>
+					project content
+				</Route>
 				<Route path={`${path}/federations`}>
 					<Federations />
 				</Route>
