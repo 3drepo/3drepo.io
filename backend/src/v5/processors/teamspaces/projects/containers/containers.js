@@ -16,8 +16,9 @@
  */
 
 const { getContainerById, getContainers } = require('../../../../models/modelSettings');
-const { getLatestRevision, getRevisionCount } = require('../../../../models/revisions');
+const { getLatestRevision, getRevisionCount, getRevisions } = require('../../../../models/revisions');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../utils/permissions/permissions');
+const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { getFavourites } = require('../../../../models/users');
 const { getProjectById } = require('../../../../models/projects');
 
@@ -65,6 +66,12 @@ Containers.getContainerStats = async (teamspace, project, container) => {
 			latestRevision: latestRev.tag || latestRev._id,
 		},
 	};
+};
+
+Containers.getRevisions = async (teamspace, container, showVoid) => {
+	const revisions = await getRevisions(teamspace, container, showVoid, { _id: 1, author: 1, timestamp: 1, name: 1 });
+	revisions.map((revision) => ({ ...revision, _id: UUIDToString(revision._id) }));
+	return revisions;
 };
 
 module.exports = Containers;

@@ -69,6 +69,12 @@ const container2Rev = {
 	timestamp: 1630606846000,
 };
 
+const model1Revisions = [
+	{_id: 1, author: "user1", timestamp: "2018-04-28T11:15:47.000Z"},
+	{_id: 2, author: "user1", timestamp: "2018-05-28T11:15:47.000Z"},
+	{_id: 3, author: "user1", timestamp: "2018-06-28T11:15:47.000Z"}
+];
+
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getContainers.mockImplementation(() => modelList);
 ModelSettings.getContainerById.mockImplementation((teamspace, container) => containerSettings[container]);
@@ -77,6 +83,7 @@ Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 	if (container === 'container2') return container2Rev;
 	throw templates.revisionNotFound;
 });
+Revisions.getRevisions.mockImplementation((teamspace, container, showVoid) => model1Revisions);
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
 
 // Permissions mock
@@ -143,7 +150,17 @@ const testGetContainerStats = () => {
 	});
 };
 
+const testGetRevisions = () => {
+	describe('Get container revisions', () => {
+		test('should return the revisions if the container exists', async () => {
+			const res = await Containers.getRevisions('teamspace', 1, false);
+			expect(res).toEqual(model1Revisions);
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/containers', () => {
 	testGetContainerList();
 	testGetContainerStats();
+	testGetRevisions();
 });

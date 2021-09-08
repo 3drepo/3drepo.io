@@ -43,6 +43,15 @@ const getContainerStats = async (req, res) => {
 	}).catch((err) => respond(req, res, err));
 };
 
+const getRevisions = async (req, res) => {
+	const { teamspace, container } = req.params;
+	const showVoid = req.query.showVoid === 'true';
+
+	Containers.getRevisions(teamspace, container, showVoid).then((revisions) => {
+		respond(req, res, templates.ok, revisions);
+	}).catch((err) => respond(req, res, err));
+};
+
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 
@@ -183,6 +192,76 @@ const establishRoutes = () => {
 	 *                       example: rev1
 	 */
 	router.get('/:container/stats', hasReadAccessToContainer, getContainerStats);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions:
+	 *   get:
+	 *     description: Get a list of revisions of a container
+	 *     tags: [Containers]
+	 *     operationId: getRevisions
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - project:
+	 *         name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *         type: string
+   	 *       - container:
+	 *         name: container
+	 *         description: Container ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *         type: string
+	 *       - showVoid :
+	 *         name: showVoid
+	 *         description: Include void revisions or not
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *         type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: returns list of revisions
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 revisions:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       _id:
+	 *                         type: string
+	 *                         description: Revision ID
+	 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                       author:
+	 *                         type: string
+	 *                         description: name of the creator of the revision
+	 *                         example: someUser
+	 *                       timestamp:
+	 *                         type: string
+	 *                         description: Revision creation date
+	 *                         example: 2018-06-28T11:15:47.000Z
+	 *
+	 *
+	 */
+	router.get('/:container/revisions', hasReadAccessToContainer, getRevisions);
 
 	return router;
 };
