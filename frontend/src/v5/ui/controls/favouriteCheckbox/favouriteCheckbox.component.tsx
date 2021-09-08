@@ -23,14 +23,13 @@ type IFavouriteCheckbox = {
 	checked: boolean;
 	onChange: (value: boolean) => void;
 	disabled?: boolean;
+	className?: string;
 };
 
-export const FavouriteCheckbox = ({ onChange, disabled, checked }: IFavouriteCheckbox): JSX.Element => (
+export const FavouriteCheckbox = ({ ...props }: IFavouriteCheckbox): JSX.Element => (
 	<Checkbox
 		icon={<StarIcon />}
 		checkedIcon={<StarIcon />}
-		onChange={onChange}
-		checked={checked}
-		disabled={disabled}
+		{...props}
 	/>
 );

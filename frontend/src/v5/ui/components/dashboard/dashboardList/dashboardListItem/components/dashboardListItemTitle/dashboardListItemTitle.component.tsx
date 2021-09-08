@@ -24,12 +24,13 @@ type IDashboardListItemTitle = {
 	subtitle: string;
 	width?: number;
 	onClick?: Dispatch<void>;
+	className?: string;
 };
 
 export const DashboardListItemTitle = ({
-	children, subtitle, width, onClick,
+	children, subtitle, width, onClick, className,
 }: IDashboardListItemTitle): JSX.Element => (
-	<FixedOrGrowContainer width={width}>
+	<FixedOrGrowContainer width={width} className={className}>
 		<Title onClick={onClick}>
 			{children}
 		</Title>

@@ -21,10 +21,11 @@ import { Text } from './dashboardListItemText.styles';
 type IDashboardListItemText = {
 	children: ReactNode;
 	width?: number;
+	className?: string;
 };
 
-export const DashboardListItemText = ({ children, width }: IDashboardListItemText): JSX.Element => (
-	<FixedOrGrowContainer width={width}>
+export const DashboardListItemText = ({ children, width, className }: IDashboardListItemText): JSX.Element => (
+	<FixedOrGrowContainer width={width} className={className}>
 		<Text>
 			{children}
 		</Text>

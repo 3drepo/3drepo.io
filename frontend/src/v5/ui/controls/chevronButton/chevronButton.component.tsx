@@ -22,7 +22,7 @@ import { StyledIconButton } from './chevronButton.styles';
 export type IChevronButton = {
 	isOn?: boolean;
 	onClick: Dispatch<void>;
-	ref?: React.Ref<HTMLElement>;
+	className?: string;
 };
 
 export const ChevronButton = React.forwardRef(

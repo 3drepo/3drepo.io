@@ -27,6 +27,7 @@ type IDashboardListHeaderLabel = {
 	sort?: boolean;
 	onClick?: Dispatch<void>;
 	width?: number;
+	className?: string;
 };
 
 export const DashboardListHeaderLabel = ({
@@ -35,8 +36,9 @@ export const DashboardListHeaderLabel = ({
 	onClick,
 	width,
 	sort = false,
+	className,
 }: IDashboardListHeaderLabel): JSX.Element => (
-	<Container width={width}>
+	<Container width={width} className={className}>
 		{sort ? (
 			<Button onClick={onClick}>
 				<Typography variant="kicker">

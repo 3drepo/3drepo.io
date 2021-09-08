@@ -25,6 +25,7 @@ type IDashboardListItemButton = {
 	width?: number;
 	onClick: Dispatch<SyntheticEvent>;
 	tooltipTitle?: string;
+	className?: string;
 };
 
 export const DashboardListItemButton = ({
@@ -32,8 +33,9 @@ export const DashboardListItemButton = ({
 	width,
 	onClick,
 	tooltipTitle = '',
+	className,
 }: IDashboardListItemButton): JSX.Element => (
-	<FixedOrGrowContainer width={width}>
+	<FixedOrGrowContainer width={width} className={className}>
 		<Tooltip title={tooltipTitle}>
 			<Button onClick={onClick}>
 				{children}

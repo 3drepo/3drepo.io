@@ -20,8 +20,9 @@ import { Container } from './dashboardListItemRow.styles';
 
 type IDashboardListItemRow = {
 	children: ReactNode;
+	className?: string;
 };
 
-export const DashboardListItemRow = ({ children }: IDashboardListItemRow): JSX.Element => (
-	<Container>{children}</Container>
+export const DashboardListItemRow = ({ children, className }: IDashboardListItemRow): JSX.Element => (
+	<Container className={className}>{children}</Container>
 );

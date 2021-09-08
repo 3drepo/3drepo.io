@@ -27,14 +27,17 @@ type IDashboardListCollapse = {
 	tooltipTitles?: {
 		visible: string;
 		collapsed: string;
-	}
+	},
+	className?: string;
 };
 
-export const DashboardListCollapse = ({ children, title, tooltipTitles }: IDashboardListCollapse): JSX.Element => {
+export const DashboardListCollapse = ({
+	children, title, tooltipTitles, className,
+}: IDashboardListCollapse): JSX.Element => {
 	const [isCollapsed, setIsCollapsed] = useState(false);
 
 	return (
-		<Container>
+		<Container className={className}>
 			<ButtonContainer>
 				<Tooltip title={(!isCollapsed ? tooltipTitles?.collapsed : tooltipTitles?.visible)}>
 					<ChevronButton isOn={!isCollapsed} onClick={() => setIsCollapsed((state) => !state)} />

@@ -24,6 +24,7 @@ type ButtonVariants = ButtonProps['variant'] | 'label' | 'label-outlined';
 
 type IButton = Omit<ButtonProps, 'variant'> & {
 	variant?: ButtonVariants;
+	className?: string;
 };
 
 export const Button = React.forwardRef(({
