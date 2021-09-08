@@ -21,6 +21,8 @@ const appendSlashIfNeeded = (uri) => (uri[uri.length - 1] !== '/' ? `${uri}/` : 
 
 export const discardSlash = (uri) => (uri[uri.length - 1] === '/' ? uri.slice(0, -1) : uri);
 
+export const discardUrlComponent = (uri, component) => discardSlash(uri.replace(component, ''));
+
 export const uriCombine = (uri, path) => {
 	let pathname = appendSlashIfNeeded(uri);
 	const otherPath = appendSlashIfNeeded(path);

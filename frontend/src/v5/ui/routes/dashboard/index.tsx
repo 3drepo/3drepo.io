@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { discardSlash, RouteExcept, uriCombine } from '@/v5/services/routing/routing';
+import { discardSlash, discardUrlComponent, RouteExcept, uriCombine } from '@/v5/services/routing/routing';
 import { MenuItem, Select } from '@material-ui/core';
 import React from 'react';
 import { useRouteMatch, useParams, useHistory, Route, Link } from 'react-router-dom';
@@ -69,6 +69,7 @@ const NavigationLinks = () => {
 
 	return (
 		<>
+			<br />{url}<br />
 			{project && project !== 'settings'
 				&& (
 					<>
@@ -76,7 +77,7 @@ const NavigationLinks = () => {
 						<Link to={`${url}/containers`}> containers</Link>
 					</>
 				)}
-			<Link to={`${url}/settings`}> settings</Link>
+			<Link to={`${discardUrlComponent(url, 'settings')}/settings`}> settings</Link>
 		</>
 	);
 };
