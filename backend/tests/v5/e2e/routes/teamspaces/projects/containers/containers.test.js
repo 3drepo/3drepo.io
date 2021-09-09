@@ -74,8 +74,11 @@ const federation = models[2];
 const revisions = [
 	ServiceHelper.generateRevisionEntry(),
 	ServiceHelper.generateRevisionEntry(),
-	ServiceHelper.generateRevisionEntry()
+	ServiceHelper.generateRevisionEntry(true),
 ];
+
+const latestRevision = revisions.filter((rev) => !rev.void)
+	.reduce((a, b) => (a.timestamp > b.timestamp ? a : b));
 
 const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
@@ -177,7 +180,8 @@ const testGetContainerStats = () => {
 		});
 		test('should return the container stats correctly if the user has access', async () => {
 			const res = await agent.get(`${route(modelWithRev._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual(formatToStats(modelWithRev.properties, 1, revisions[0]));
+			const nonVoidRevisionCount = revisions.filter((rev) => !rev.void).length;
+			expect(res.body).toEqual(formatToStats(modelWithRev.properties, nonVoidRevisionCount, latestRevision));
 		});
 
 		test('should return the container stats correctly if the user has access (no revisions)', async () => {
@@ -185,6 +189,19 @@ const testGetContainerStats = () => {
 			expect(res.body).toEqual(formatToStats(modelWithoutRev.properties, 0, {}));
 		});
 	});
+};
+
+const formatRevisions = (revs, includeVoids = false) => {
+	let formattedRevisions = revs;
+
+	if (!includeVoids) {
+		formattedRevisions = formattedRevisions.filter((rev) => !rev.void);
+	}
+
+	formattedRevisions = formattedRevisions.map((rev) => ({ ...rev, timestamp: rev.timestamp.toISOString() }))
+		.sort((a, b) => b.timestamp - a.timestamp);
+
+	return formattedRevisions;
 };
 
 const testGetRevisions = () => {
@@ -219,10 +236,15 @@ const testGetRevisions = () => {
 			const res = await agent.get(`${route('jibberish')}&key=${users.tsAdmin.apiKey}`).expect(templates.containerNotFound.status);
 			expect(res.body.code).toEqual(templates.containerNotFound.code);
 		});
-		test('should return the container revisions correctly if the user has access', async () => {
+
+		test('should return non void container revisions correctly if the user has access', async () => {
 			const res = await agent.get(`${route(modelWithRev._id)}&key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			const formattedRevisions = revisions.map((rev) => ({ ...rev, timestamp: rev.timestamp.toString('YYYY-MM-DDTmm:ss.sssZ') }));
-			expect(res.body).toEqual(formattedRevisions);
+			expect(res.body).toEqual(formatRevisions(revisions));
+		});
+
+		test('should return all container revisions correctly if the user has access', async () => {
+			const res = await agent.get(`${route(modelWithRev._id, true)}&key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			expect(res.body).toEqual(formatRevisions(revisions, true));
 		});
 	});
 };

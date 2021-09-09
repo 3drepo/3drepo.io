@@ -69,12 +69,14 @@ db.createModel = (teamspace, _id, name, props) => {
 };
 
 db.createRevisions = (teamspace, modelId, revisions) => {
-	const formattedRevisions = revisions.map((rev)=> ({ ...rev , _id: stringToUUID(rev._id) }));
-	DbHandler.insertMany(teamspace, `${modelId}.history`, formattedRevisions)
+	const formattedRevisions = revisions.map((rev) => ({ ...rev, _id: stringToUUID(rev._id) }));
+	DbHandler.insertMany(teamspace, `${modelId}.history`, formattedRevisions);
 };
 
 ServiceHelper.generateUUIDString = () => uuidToString(generateUUID());
 ServiceHelper.generateRandomString = () => Crypto.randomBytes(15).toString('hex');
+ServiceHelper.generateRandomDate = (start, end) => new Date(start.getTime() + Math.random()
+	* (end.getTime() - start.getTime()));
 
 ServiceHelper.generateUserCredentials = () => ({
 	user: ServiceHelper.generateRandomString(),
@@ -82,12 +84,13 @@ ServiceHelper.generateUserCredentials = () => ({
 	apiKey: ServiceHelper.generateRandomString(),
 });
 
-ServiceHelper.generateRevisionEntry = () => ({
+ServiceHelper.generateRevisionEntry = (isVoid = false) => ({
 	_id: ServiceHelper.generateUUIDString(),
 	tag: ServiceHelper.generateRandomString(),
-	timestamp: new Date(),
 	author: ServiceHelper.generateRandomString(),
-
+	// generate a random date
+	timestamp: ServiceHelper.generateRandomDate(new Date(2018, 1, 1), new Date()),
+	void: isVoid,
 });
 
 ServiceHelper.app = () => createApp().listen(8080);
