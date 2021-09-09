@@ -15,39 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { Button, Breadcrumbs } from '@material-ui/core';
-import { Link } from 'react-router-dom';
-
-export const Container = styled(Breadcrumbs)`
-	&& {
-		margin-left: 15px;
-	}
-`;
-
-export const InteractiveBreadcrumb = styled(Button).attrs({
-	variant: 'text',
-})`
-	&& {
-		${({ theme }) => theme.typography.body1};
-		color: ${({ theme }) => theme.palette.primary.main};
-		padding: 5px;
-		margin: 0;
-
-		&:hover {
-			text-decoration: none;
-		}
-	}
-`;
-
-export const Breadcrumb = styled(Button).attrs({
-	variant: 'text',
-	component: Link,
-})`
-	&& {
-		color: ${({ theme }) => theme.palette.base.main};
-		&:hover {
-			text-decoration: none;
-		}
-	}
-`;
+export { MainLayout } from './mainLayout.component';
