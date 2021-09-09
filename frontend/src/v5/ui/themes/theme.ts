@@ -378,6 +378,7 @@ export const theme = createMuiTheme({
 				padding: '10px 15px',
 				fontSize: '0.75rem',
 				fontWeight: FONT_WEIGHT.BOLD,
+				minWidth: null,
 			},
 			contained: {
 				padding: '10px 15px',
