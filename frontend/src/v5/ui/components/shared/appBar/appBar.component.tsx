@@ -17,7 +17,7 @@
 
 import React from 'react';
 
-import Logo from '@assets/icons/v5/logo.svg';
+import Logo from '@assets/icons/logo.svg';
 import { AppBar as MuiAppBar } from '@material-ui/core';
 import { Items } from './appBar.styles';
 

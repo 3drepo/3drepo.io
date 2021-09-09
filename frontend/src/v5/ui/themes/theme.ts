@@ -75,11 +75,9 @@ export const SHADOW = {
 	LEVEL_8: '0px 12px 17px rgba(0, 0, 0, 0.14), 0px 5px 22px rgba(0, 0, 0, 0.12), 0px 7px 8px rgba(0, 0, 0, 0.2)',
 	LEVEL_9: '0px 16px 24px rgba(0, 0, 0, 0.14), 0px 6px 30px rgba(0, 0, 0, 0.12), 0px 8px 10px rgba(0, 0, 0, 0.2)',
 	LEVEL_10: '0px 24px 38px rgba(0, 0, 0, 0.14), 0px 9px 46px rgba(0, 0, 0, 0.12), 0px 11px 15px rgba(0, 0, 0, 0.2)',
-	MEDIUM: '0px 3px 5px rgba(9, 30, 66, 0.2), 0px 0px 1px rgba(9, 30, 66, 0.31)',
-	LARGE: '0px 0px 12px 6px rgba(9, 30, 66, 0.2), 0px 0px 1px rgba(9, 30, 66, 0.31)',
 };
 
-export const typography: TypographyOptions = {
+const typography: TypographyOptions = {
 	fontFamily: 'Inter, Arial, sans-serif',
 	h1: {
 		fontWeight: FONT_WEIGHT.MEDIUM,
@@ -205,8 +203,6 @@ export const theme = createMuiTheme({
 			level_8: SHADOW.LEVEL_8,
 			level_9: SHADOW.LEVEL_9,
 			level_10: SHADOW.LEVEL_10,
-			medium: SHADOW.MEDIUM,
-			large: SHADOW.LARGE,
 		},
 	},
 	typography,

@@ -16,7 +16,7 @@
  */
 
 import React, { Dispatch, ReactNode } from 'react';
-import ArrowIcon from '@assets/icons/v5/arrow.svg';
+import ArrowIcon from '@assets/icons/arrow.svg';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { Typography } from '@/v5/ui/themes/typography';
 import { Container, Button, Indicator } from './dashboardListHeaderLabel.styles';

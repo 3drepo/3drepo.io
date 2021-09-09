@@ -18,8 +18,8 @@
 import React from 'react';
 import { Divider, TextField } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/AddCircle';
-import IntercomIcon from '@assets/icons/v5/intercom.svg';
-import NotificationsIcon from '@assets/icons/v5/notifications.svg';
+import IntercomIcon from '@assets/icons/intercom.svg';
+import NotificationsIcon from '@assets/icons/notifications.svg';
 
 import { useForm } from 'react-hook-form';
 
@@ -275,20 +275,20 @@ export const ThemeLayout = (): JSX.Element => {
 
 					<Typography variant="h4" gutterBottom>icon-intercom</Typography>
 					<ContrastBackground>
-						<CircleButton onClick={() => undefined} variant="contrast" aria-label="intercom">
+						<CircleButton variant="contrast" aria-label="intercom">
 							<IntercomIcon />
 						</CircleButton>
-						<CircleButton onClick={() => undefined} variant="contrast" aria-label="intercom" disabled>
+						<CircleButton variant="contrast" aria-label="intercom" disabled>
 							<IntercomIcon />
 						</CircleButton>
 					</ContrastBackground>
 
 					<Typography variant="h4" gutterBottom>icon-nav-notifications</Typography>
 					<ContrastBackground>
-						<CircleButton onClick={() => undefined} variant="contrast" aria-label="notifications">
+						<CircleButton variant="contrast" aria-label="notifications">
 							<NotificationsIcon />
 						</CircleButton>
-						<CircleButton onClick={() => undefined} variant="contrast" aria-label="notifications" disabled>
+						<CircleButton variant="contrast" aria-label="notifications" disabled>
 							<NotificationsIcon />
 						</CircleButton>
 					</ContrastBackground>

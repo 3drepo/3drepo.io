@@ -16,7 +16,7 @@
  */
 
 import React, { Dispatch } from 'react';
-import ChevronIcon from '@assets/icons/v5/chevron.svg';
+import ChevronIcon from '@assets/icons/chevron.svg';
 import { StyledIconButton } from './chevronButton.styles';
 
 export type IChevronButton = {

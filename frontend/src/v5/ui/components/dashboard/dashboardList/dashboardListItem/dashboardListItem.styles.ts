@@ -20,7 +20,7 @@ import styled, { css } from 'styled-components';
 export const Container = styled.li`
 	box-sizing: border-box;
 	cursor: pointer;
-	background-color: ${({ theme, color }) => color ?? theme.palette.primary.contrast};
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	height: 80px;
 	width: 100%;
 	list-style: none;
@@ -43,7 +43,7 @@ export const Container = styled.li`
 	
 	:hover {
 		border-color: ${({ theme }) => theme.palette.primary.contrast};
-		box-shadow: ${({ theme }) => theme.palette.shadows.large};
+		box-shadow: 0 0 12px 6px rgba(9, 30, 66, 0.2), 0 0 1px rgba(9, 30, 66, 0.31);
 		z-index: 100;
 
 		& + li {

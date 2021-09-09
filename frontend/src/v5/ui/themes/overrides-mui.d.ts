@@ -33,8 +33,6 @@ interface IShadow {
 	level_8: string;
 	level_9: string;
 	level_10: string;
-	medium: string;
-	large: string;
 }
 
 declare module '@material-ui/core/styles/createPalette' {

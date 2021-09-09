@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { CSSProperties, Dispatch, ReactNode } from 'react';
+import React, { Dispatch, ReactNode } from 'react';
 import { ThemeProvider } from 'styled-components';
 import { Container } from './dashboardListItem.styles';
 
@@ -24,18 +24,16 @@ type IDashboradListItem = {
 	onClick?: Dispatch<void>;
 	selected: boolean;
 	className?: string;
-	color?: CSSProperties['color'];
 };
 
 export const DashboardListItem = ({
 	children,
 	onClick,
-	color,
 	className,
 	selected,
 }: IDashboradListItem): JSX.Element => (
 	<ThemeProvider theme={{ selected }}>
-		<Container onClick={onClick} color={color} className={className}>
+		<Container onClick={onClick} className={className}>
 			{children}
 		</Container>
 	</ThemeProvider>

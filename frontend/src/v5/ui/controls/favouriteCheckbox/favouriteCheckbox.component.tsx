@@ -16,7 +16,7 @@
  */
 
 import React from 'react';
-import StarIcon from '@assets/icons/v5/star.svg';
+import StarIcon from '@assets/icons/star.svg';
 import { Checkbox } from './favouriteCheckbox.styles';
 
 type IFavouriteCheckbox = {

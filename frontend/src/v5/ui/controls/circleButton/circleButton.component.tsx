@@ -15,14 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { Dispatch } from 'react';
+import React from 'react';
 
 import { StyledFab } from './circleButton.styles';
 
 interface ICircleButton {
 	size?: 'large' | 'medium' | 'small';
 	variant?: 'main' | 'contrast';
-	onClick: Dispatch<void>;
 	disabled?: boolean;
 	className?: string;
 }
@@ -30,11 +29,10 @@ interface ICircleButton {
 export const CircleButton: React.FC<ICircleButton> = ({
 	size = 'large',
 	variant = 'main',
-	onClick,
 	children,
 	...props
 }) => (
-	<StyledFab onClick={onClick} size={size} variant={variant} {...props}>
+	<StyledFab size={size} variant={variant} {...props}>
 		{children}
 	</StyledFab>
 );

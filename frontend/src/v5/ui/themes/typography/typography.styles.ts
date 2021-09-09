@@ -16,24 +16,11 @@
  */
 import styled from 'styled-components';
 import { Typography } from '@material-ui/core';
-import { typography } from '@/v5/ui/themes/theme';
 
-export const KickerTypography = styled(Typography).attrs({
-	component: 'span',
-})`
-	font-weight: ${typography.kicker.fontWeight};
-	font-size: ${typography.kicker.fontSize};
-	line-height: ${typography.kicker.lineHeight};
-	letter-spacing: ${typography.kicker.letterSpacing};
-	text-transform: ${typography.kicker.textTransform};
+export const KickerTypography = styled(Typography)`
+	${({ theme }) => theme.typography.kicker};
 `;
 
-export const KickerTitleTypography = styled(Typography).attrs({
-	component: 'span',
-})`
-	font-weight: ${typography.kickerTitle.fontWeight};
-	font-size: ${typography.kickerTitle.fontSize};
-	line-height: ${typography.kickerTitle.lineHeight};
-	letter-spacing: ${typography.kickerTitle.letterSpacing};
-	text-transform: ${typography.kickerTitle.textTransform};
+export const KickerTitleTypography = styled(Typography)`
+	${({ theme }) => theme.typography.kickerTitle};
 `;
