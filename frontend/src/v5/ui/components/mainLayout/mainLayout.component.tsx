@@ -16,7 +16,7 @@
  */
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { Typography, MuiThemeProvider } from '@material-ui/core';
+import { Typography, MuiThemeProvider, StylesProvider } from '@material-ui/core';
 import { theme } from '@/v5/ui/themes/theme';
 import { GlobalStyle } from '@/v5/ui/themes/global';
 
@@ -40,11 +40,13 @@ export const MainLayout = ({ title }: IMainLayout): JSX.Element => (
 	<I18nProvider i18n={i18n}>
 		<ThemeProvider theme={theme}>
 			<MuiThemeProvider theme={theme}>
-				<GlobalStyle />
-				<AppBar />
-				<Content>
-					<Typography variant="h1">{title || 'Basic layout page'}</Typography>
-				</Content>
+				<StylesProvider injectFirst>
+					<GlobalStyle />
+					<AppBar />
+					<Content>
+						<Typography variant="h1">{title || 'Basic layout page'}</Typography>
+					</Content>
+				</StylesProvider>
 			</MuiThemeProvider>
 		</ThemeProvider>
 	</I18nProvider>

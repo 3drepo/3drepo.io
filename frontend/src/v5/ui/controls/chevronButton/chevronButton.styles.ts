@@ -27,7 +27,7 @@ export const StyledIconButton = styled(IconButton)`
 
 	svg {
 		height: 7px;
-		width: 11px;
+		width: 12px;
 		margin-top: 2px;
 	}
 
