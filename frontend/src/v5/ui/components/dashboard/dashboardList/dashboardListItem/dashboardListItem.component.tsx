@@ -19,10 +19,10 @@ import React, { Dispatch, ReactNode } from 'react';
 import { ThemeProvider } from 'styled-components';
 import { Container } from './dashboardListItem.styles';
 
-type IDashboradListItem = {
+type IDashboardListItem = {
 	children?: ReactNode;
 	onClick?: Dispatch<void>;
-	selected: boolean;
+	selected?: boolean;
 	className?: string;
 };
 
@@ -30,8 +30,8 @@ export const DashboardListItem = ({
 	children,
 	onClick,
 	className,
-	selected,
-}: IDashboradListItem): JSX.Element => (
+	selected = false,
+}: IDashboardListItem): JSX.Element => (
 	<ThemeProvider theme={{ selected }}>
 		<Container onClick={onClick} className={className}>
 			{children}
