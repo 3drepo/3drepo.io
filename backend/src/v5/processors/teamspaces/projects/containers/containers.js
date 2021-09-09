@@ -68,10 +68,9 @@ Containers.getContainerStats = async (teamspace, project, container) => {
 	};
 };
 
-Containers.getRevisions = async (teamspace, container, showVoid) => {
+Containers.getRevisions = async (teamspace, container, showVoid) => {	
 	const revisions = await getRevisions(teamspace, container, showVoid, { _id: 1, author: 1, timestamp: 1, name: 1 });
-	revisions.map((revision) => ({ ...revision, _id: UUIDToString(revision._id) }));
-	return revisions;
+	return revisions.map((revision) => ({ ...revision, _id: UUIDToString(revision._id) }));
 };
 
 module.exports = Containers;

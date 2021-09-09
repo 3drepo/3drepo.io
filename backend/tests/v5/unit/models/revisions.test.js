@@ -53,7 +53,29 @@ const testGetLatestRevision = () => {
 	});
 };
 
+const testGetRevisions = () => {
+	describe('GetRevisions', () => {
+		test('Should return container revisions', async () => {
+			const expectedData = [
+				{ _id: 1, author: 'someUser', timestamp: new Date() },
+				{ _id: 2, author: 'someUser', timestamp: new Date() },
+				{ _id: 3, author: 'someUser', timestamp: new Date() },
+			];
+			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+
+			const res = await Revisions.getRevisions('someTS', 'someModel');
+			expect(res).toEqual(expectedData);
+		});
+
+		test('Should throw CONTAINER_NOT_FOUND if there is no revisions table', async () => {
+			jest.spyOn(db, 'find').mockResolvedValue({ length: 0 });
+			await expect(Revisions.getRevisions('someTS', 'someModel')).rejects.toEqual(templates.containerNotFound);
+		});
+	});
+};
+
 describe('models/revisions', () => {
 	testGetRevisionCount();
 	testGetLatestRevision();
+	testGetRevisions();
 });

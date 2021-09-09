@@ -27,8 +27,9 @@ const collectionName = (model) => `${model}.history`;
 
 const findRevisionsByQuery = async (teamspace, model, query, projection, sort) => {
 	const rev = await db.find(teamspace, collectionName(model), query, projection, sort);
+	
 	if (!rev || rev.length === 0) {
-		throw templates.revisionNotFound;
+		throw templates.containerNotFound;
 	}
 
 	return rev;

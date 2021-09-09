@@ -68,14 +68,9 @@ db.createModel = (teamspace, _id, name, props) => {
 	return DbHandler.insertOne(teamspace, 'settings', settings);
 };
 
-db.createRevision = (teamspace, modelId, { _id, author, timestamp, tag }) => {
-	const rev = {
-		_id: stringToUUID(_id),
-		author,
-		timestamp,
-		tag,
-	};
-	return DbHandler.insertOne(teamspace, `${modelId}.history`, rev);
+db.createRevisions = (teamspace, modelId, revisions) => {
+	const formattedRevisions = revisions.map((rev)=> ({ ...rev , _id: stringToUUID(rev._id) }));
+	DbHandler.insertMany(teamspace, `${modelId}.history`, formattedRevisions)
 };
 
 ServiceHelper.generateUUIDString = () => uuidToString(generateUUID());

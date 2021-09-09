@@ -71,7 +71,11 @@ const modelWithRev = models[0];
 const modelWithoutRev = models[1];
 const federation = models[2];
 
-const revision = ServiceHelper.generateRevisionEntry();
+const revisions = [
+	ServiceHelper.generateRevisionEntry(),
+	ServiceHelper.generateRevisionEntry(),
+	ServiceHelper.generateRevisionEntry()
+];
 
 const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
@@ -90,7 +94,7 @@ const setupData = async () => {
 		...modelProms,
 		ServiceHelper.db.createUser(nobody),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
-		ServiceHelper.db.createRevision(teamspace, modelWithRev._id, revision),
+		ServiceHelper.db.createRevisions(teamspace, modelWithRev._id, revisions),
 	]);
 };
 
@@ -173,12 +177,52 @@ const testGetContainerStats = () => {
 		});
 		test('should return the container stats correctly if the user has access', async () => {
 			const res = await agent.get(`${route(modelWithRev._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual(formatToStats(modelWithRev.properties, 1, revision));
+			expect(res.body).toEqual(formatToStats(modelWithRev.properties, 1, revisions[0]));
 		});
 
 		test('should return the container stats correctly if the user has access (no revisions)', async () => {
 			const res = await agent.get(`${route(modelWithoutRev._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
 			expect(res.body).toEqual(formatToStats(modelWithoutRev.properties, 0, {}));
+		});
+	});
+};
+
+const testGetRevisions = () => {
+	const route = (containerId, showVoid = false) => `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${containerId}/revisions?showVoid=${showVoid}`;
+	describe('Get container revisions', () => {
+		test('should fail without a valid session', async () => {
+			const res = await agent.get(route(modelWithRev._id, false)).expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user is not a member of the teamspace', async () => {
+			const res = await agent.get(`${route(modelWithRev._id)}&key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if the project does not exist', async () => {
+			const res = await agent.get(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/containers/${modelWithRev._id}/revisions?key=${users.tsAdmin.apiKey}`).expect(templates.projectNotFound.status);
+			expect(res.body.code).toEqual(templates.projectNotFound.code);
+		});
+
+		test('should fail if the user does not have access to the container', async () => {
+			const res = await agent.get(`${route(modelWithRev._id)}&key=${users.noProjectAccess.apiKey}`).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		});
+
+		test('should fail if the model is a federation', async () => {
+			const res = await agent.get(`${route(federation._id)}&key=${users.tsAdmin.apiKey}`).expect(templates.containerNotFound.status);
+			expect(res.body.code).toEqual(templates.containerNotFound.code);
+		});
+
+		test('should fail if the container doesn\'t exist', async () => {
+			const res = await agent.get(`${route('jibberish')}&key=${users.tsAdmin.apiKey}`).expect(templates.containerNotFound.status);
+			expect(res.body.code).toEqual(templates.containerNotFound.code);
+		});
+		test('should return the container revisions correctly if the user has access', async () => {
+			const res = await agent.get(`${route(modelWithRev._id)}&key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			const formattedRevisions = revisions.map((rev) => ({ ...rev, timestamp: rev.timestamp.toString('YYYY-MM-DDTmm:ss.sssZ') }));
+			expect(res.body).toEqual(formattedRevisions);
 		});
 	});
 };
@@ -192,4 +236,5 @@ describe('E2E routes/teamspaces/projects/containers', () => {
 	afterAll(() => ServiceHelper.closeApp(server));
 	testGetContainerList();
 	testGetContainerStats();
+	testGetRevisions();
 });

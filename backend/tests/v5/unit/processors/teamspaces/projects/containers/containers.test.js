@@ -70,9 +70,9 @@ const container2Rev = {
 };
 
 const model1Revisions = [
-	{_id: 1, author: "user1", timestamp: "2018-04-28T11:15:47.000Z"},
-	{_id: 2, author: "user1", timestamp: "2018-05-28T11:15:47.000Z"},
-	{_id: 3, author: "user1", timestamp: "2018-06-28T11:15:47.000Z"}
+	{ _id: 1, author: 'user1', timestamp: new Date() },
+	{ _id: 2, author: 'user1', timestamp: new Date() },
+	{ _id: 3, author: 'user1', timestamp: new Date() },
 ];
 
 ProjectsModel.getProjectById.mockImplementation(() => project);
@@ -83,7 +83,7 @@ Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 	if (container === 'container2') return container2Rev;
 	throw templates.revisionNotFound;
 });
-Revisions.getRevisions.mockImplementation((teamspace, container, showVoid) => model1Revisions);
+Revisions.getRevisions.mockImplementation(() => model1Revisions);
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
 
 // Permissions mock
