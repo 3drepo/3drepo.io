@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 
 export const Content = styled.section`
-  background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-  display: block;
-  padding: 100px 20px;
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	display: block;
+	padding: 100px 20px;
 `;
