@@ -27,6 +27,7 @@ import { reducer as authReducer } from './auth/auth.redux';
 import { reducer as billingReducer } from './billing/billing.redux';
 import { reducer as bimReducer } from './bim/bim.redux';
 import { reducer as boardReducer } from './board/board.redux';
+import { reducer as dialogsReducer } from '../../v5/store/dialogs/dialogs.redux';
 import { reducer as canvasHistoryReducer } from './canvasHistory/canvasHistory.redux';
 import { reducer as chatReducer } from './chat/chat.redux';
 import { reducer as commentsReducer } from './comments/comments.redux';
@@ -68,6 +69,7 @@ export default function createReducer(history) {
 		currentUser: currentUserReducer,
 		userManagement: userManagementReducer,
 		dialog: dialogReducer,
+		dialogs: dialogsReducer,
 		jobs: jobsReducer,
 		snackbar: snackbarReducer,
 		billing: billingReducer,

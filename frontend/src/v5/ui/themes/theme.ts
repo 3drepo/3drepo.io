@@ -215,6 +215,23 @@ export const theme = createMuiTheme({
 		},
 	},
 	overrides: {
+		MuiDialog: {
+			paper: {
+				minWidth: '30%',
+			},
+		},
+		MuiDialogActions: {
+			root: {
+				backgroundColor: COLOR.TERTIARY_LIGHTEST,
+			},
+		},
+		MuiDialogTitle: {
+			root: {
+				paddingTop: 35,
+				textAlign: 'center',
+				...typography.h2,
+			},
+		},
 		MuiAppBar: {
 			root: {
 				boxShadow: 'none',
