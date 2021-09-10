@@ -17,7 +17,7 @@
 
 import React from 'react';
 import MuiButton, { ButtonProps } from '@material-ui/core/Button';
-import { Typography } from '@/v5/ui/themes/typography';
+import { Typography } from '@/v5/ui/controls/typography';
 import { LabelButton } from './button.styles';
 
 type ButtonVariants = ButtonProps['variant'] | 'label' | 'label-outlined';
