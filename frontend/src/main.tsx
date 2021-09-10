@@ -45,7 +45,7 @@ const render = () => {
 		<Provider store={store as any}>
 			<ConnectedRouter history={history as History}>
 				<Switch>
-					<Route exact path="/v5"><MainLayout title="Containers page" /></Route>
+					<Route exact path="/v5"><MainLayout /></Route>
 					<Route><V4Root /></Route>
 				</Switch>
 			</ConnectedRouter>
