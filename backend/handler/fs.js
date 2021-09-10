@@ -31,9 +31,8 @@ const generateFoldernames = (dirLevels) => {
 	const folders = [];
 
 	for(let i = 0 ; i < dirLevels; i++) {
-		// Generate a relatively large random number for the file directory name
-		const randomNumber = Math.random() * 100000;
-		folders.push(randomNumber & 255);
+		const folderName = Math.round(Math.random() * 255);
+		folders.push(folderName);
 	}
 	return folders.join("/");
 };
