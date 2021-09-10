@@ -16,46 +16,38 @@
  */
 
 import React from 'react';
-import { Button, Dialog as DialogContainer, DialogContent, DialogContentText, DialogTitle, DialogActions as DialogActionsContainer } from '@material-ui/core';
+import { Dialog as DialogContainer } from '@material-ui/core';
 import { useDispatch } from 'react-redux';
 
+import { InfoDialog } from '@/v5/ui/controls/dialog/infoDialog';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import CloseIcon from '@assets/icons/close.svg';
 import { CloseButton } from './dialog.styles';
+
+const DIALOG_TEMPLATES = {
+	info: InfoDialog,
+};
 
 interface IDialog {
 	id: string;
 	type?: string;
 }
 
-export const Dialog: React.FC<IDialog> = ({ id }) => {
+export const Dialog: React.FC<IDialog> = ({ id, type = 'info' }) => {
 	const dispatch = useDispatch();
 
 	const handleClose = () => {
 		dispatch(DialogsActions.close(id));
 	};
 
+	const DialogTemplate = DIALOG_TEMPLATES[type];
+
 	return (
 		<DialogContainer open onClose={handleClose}>
 			<CloseButton aria-label="Close dialog" onClick={handleClose}>
 				<CloseIcon />
 			</CloseButton>
-			<DialogTitle>
-				Sample dialog
-			</DialogTitle>
-			<DialogContent>
-				<DialogContentText>
-					This is only a sample dialog content.
-				</DialogContentText>
-			</DialogContent>
-			<DialogActionsContainer>
-				<Button autoFocus onClick={handleClose} variant="outlined" color="secondary">
-					Cancel
-				</Button>
-				<Button onClick={handleClose} variant="contained" color="primary">
-					OK
-				</Button>
-			</DialogActionsContainer>
+			<DialogTemplate onClose={handleClose} />
 		</DialogContainer>
 	);
 };

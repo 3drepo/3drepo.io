@@ -28,6 +28,8 @@ interface IDialogActions {
 interface IDialogConfig {
 	id: string;
 	type?: 'error' | 'info';
+	onConfirm?: () => void,
+	onCancel?: () => void,
 }
 
 interface IDialogState {
