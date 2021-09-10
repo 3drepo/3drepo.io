@@ -33,7 +33,7 @@ export const DashboardListItem = ({
 	selected = false,
 }: IDashboardListItem): JSX.Element => (
 	<ThemeProvider theme={{ selected }}>
-		<Container onClick={onClick} className={className}>
+		<Container onClick={onClick} className={className} selected={selected}>
 			{children}
 		</Container>
 	</ThemeProvider>

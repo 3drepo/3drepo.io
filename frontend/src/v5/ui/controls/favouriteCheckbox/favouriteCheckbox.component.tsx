@@ -17,14 +17,10 @@
 
 import React from 'react';
 import StarIcon from '@assets/icons/star.svg';
+import { CheckboxProps } from '@material-ui/core';
 import { Checkbox } from './favouriteCheckbox.styles';
 
-type IFavouriteCheckbox = {
-	checked: boolean;
-	onChange: (value: boolean) => void;
-	disabled?: boolean;
-	className?: string;
-};
+type IFavouriteCheckbox = Omit<Omit<CheckboxProps, 'icon'>, 'checkedIcon'>;
 
 export const FavouriteCheckbox = ({ ...props }: IFavouriteCheckbox): JSX.Element => (
 	<Checkbox

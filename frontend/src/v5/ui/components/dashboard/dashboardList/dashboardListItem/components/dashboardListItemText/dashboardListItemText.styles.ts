@@ -22,7 +22,7 @@ export const Text = styled(Typography).attrs({
 })`
 	color: ${({ theme }) => theme.palette.base.main};
 
-	${({ theme }) => theme.selected && css`
+	${({ selected, theme }) => selected && css`
 		color: ${theme.palette.base.light};
 	`}
 `;

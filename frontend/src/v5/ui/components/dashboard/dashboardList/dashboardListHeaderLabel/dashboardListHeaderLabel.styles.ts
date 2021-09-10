@@ -18,7 +18,7 @@
 import styled, { css } from 'styled-components';
 import { Button as ButtonComponent } from '@controls/button';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
-import { FixedOrGrowContainer } from '../dasboardList.styles';
+import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 
 export const Container = styled(FixedOrGrowContainer)`
 	align-items: center;

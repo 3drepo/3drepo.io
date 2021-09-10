@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FixedOrGrowContainer } from '@components/dashboard/dashboardList/dasboardList.styles';
-import { Tooltip } from '@material-ui/core';
 import React, { Dispatch, ReactNode, SyntheticEvent } from 'react';
+import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
+import { Tooltip } from '@material-ui/core';
 import { Button } from './dashboardListItemButton.styles';
 
 type IDashboardListItemButton = {

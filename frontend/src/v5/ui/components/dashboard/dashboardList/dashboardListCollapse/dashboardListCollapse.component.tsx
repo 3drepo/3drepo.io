@@ -17,7 +17,7 @@
 
 import React, { ReactNode, useState } from 'react';
 import { Collapse, Tooltip } from '@material-ui/core';
-import { Typography } from '@/v5/ui/themes/typography';
+import { Typography } from '@controls/typography';
 import { ChevronButton } from '@controls/chevronButton';
 import { Container, ButtonContainer, Divider, CollapsedItemContainer } from './dashboardListCollapse.styles';
 
@@ -39,7 +39,7 @@ export const DashboardListCollapse = ({
 	return (
 		<Container className={className}>
 			<ButtonContainer>
-				<Tooltip title={(!isCollapsed ? tooltipTitles?.collapsed : tooltipTitles?.visible)}>
+				<Tooltip title={(!isCollapsed ? tooltipTitles?.visible : tooltipTitles?.collapsed) ?? ''}>
 					<ChevronButton isOn={!isCollapsed} onClick={() => setIsCollapsed((state) => !state)} />
 				</Tooltip>
 				<Typography variant="h3" color="secondary">{title}</Typography>

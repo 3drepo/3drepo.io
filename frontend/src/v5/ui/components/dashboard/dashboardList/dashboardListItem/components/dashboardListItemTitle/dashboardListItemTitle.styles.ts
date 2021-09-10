@@ -27,7 +27,7 @@ export const Title = styled(Button).attrs({
 	margin: 0;
 	line-height: normal;
 
-	${({ theme }) => theme.selected && css`
+	${({ theme, selected}) => selected && css`
 		color: ${theme.palette.primary.contrast};
 	`}
 `;
@@ -37,7 +37,7 @@ export const Subtitle = styled(Typography).attrs({
 })`
 	color: ${({ theme }) => theme.palette.base.main};
 
-	${({ theme }) => theme.selected && css`
+	${({ theme, selected }) => selected && css`
 		color: ${theme.palette.base.light};
 	`}
 `;

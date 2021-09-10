@@ -15,18 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import React, { ReactNode } from 'react';
-import { FixedOrGrowContainer } from '@components/dashboard/dashboardList/dasboardList.styles';
+import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { Text } from './dashboardListItemText.styles';
 
 type IDashboardListItemText = {
 	children: ReactNode;
 	width?: number;
 	className?: string;
+	selected?: boolean;
 };
 
-export const DashboardListItemText = ({ children, width, className }: IDashboardListItemText): JSX.Element => (
+export const DashboardListItemText = ({
+	children,
+	width,
+	className,
+	selected = false,
+}: IDashboardListItemText): JSX.Element => (
 	<FixedOrGrowContainer width={width} className={className}>
-		<Text>
+		<Text selected={selected}>
 			{children}
 		</Text>
 	</FixedOrGrowContainer>

@@ -40,18 +40,8 @@ export const Container = styled.li`
 	&:only-child {
 		border-radius: 5px;
 	}
-	
-	:hover {
-		border-color: ${({ theme }) => theme.palette.primary.contrast};
-		box-shadow: 0 0 12px 6px rgba(9, 30, 66, 0.2), 0 0 1px rgba(9, 30, 66, 0.31);
-		z-index: 100;
 
-		& + li {
-			border-top-color: transparent;
-		}
-	}
-
-	${({ theme }) => theme.selected && css`
+	${({ theme, selected }) => selected && css`
 		background-color: ${theme.palette.secondary.main};
 		border: none;
 	`}

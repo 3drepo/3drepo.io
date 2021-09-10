@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FixedOrGrowContainer } from '@components/dashboard/dashboardList/dasboardList.styles';
 import React, { Dispatch, ReactNode } from 'react';
+import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
+import { Tooltip } from '@material-ui/core';
 import { Title, Subtitle } from './dashboardListItemTitle.styles';
 
 type IDashboardListItemTitle = {
@@ -24,16 +25,20 @@ type IDashboardListItemTitle = {
 	subtitle: string;
 	width?: number;
 	onClick?: Dispatch<void>;
+	tooltipTitle?: string;
 	className?: string;
+	selected?: boolean;
 };
 
 export const DashboardListItemTitle = ({
-	children, subtitle, width, onClick, className,
+	children, subtitle, width, onClick, className, selected = false, tooltipTitle = '',
 }: IDashboardListItemTitle): JSX.Element => (
 	<FixedOrGrowContainer width={width} className={className}>
-		<Title onClick={onClick}>
-			{children}
-		</Title>
-		<Subtitle>{subtitle}</Subtitle>
+		<Tooltip title={tooltipTitle}>
+			<Title onClick={onClick} selected={selected}>
+				{children}
+			</Title>
+		</Tooltip>
+		<Subtitle selected={selected}>{subtitle}</Subtitle>
 	</FixedOrGrowContainer>
 );

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 export const ListContainer = styled.ul`
 	display: flex;
@@ -28,13 +28,4 @@ export const ListContainer = styled.ul`
 export const DashboardListHeader = styled.div`
 	display: flex;
 	padding: 13px 20px 13px 30px;
-`;
-
-export const FixedOrGrowContainer = styled.div`
-  flex: 1;
-	
-  ${({ width }) => width && css`
-    min-width: ${width}px;
-    flex: 0;
-  `}
 `;

@@ -18,7 +18,7 @@
 import React, { Dispatch, ReactNode } from 'react';
 import ArrowIcon from '@assets/icons/arrow.svg';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
-import { Typography } from '@/v5/ui/themes/typography';
+import { Typography } from '@controls/typography';
 import { Container, Button, Indicator } from './dashboardListHeaderLabel.styles';
 
 type IDashboardListHeaderLabel = {
