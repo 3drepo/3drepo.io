@@ -27,7 +27,7 @@ export const Title = styled(Button).attrs({
 	margin: 0;
 	line-height: normal;
 
-	${({ theme, selected}) => selected && css`
+	${({ theme, selected }) => selected && css`
 		color: ${theme.palette.primary.contrast};
 	`}
 `;
