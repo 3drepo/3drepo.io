@@ -17,13 +17,65 @@
 
 import React from 'react';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { useParams, useRouteMatch } from 'react-router-dom';
+import { uriCombine } from '@/v5/services/routing/routing';
 import { Container, Breadcrumb, InteractiveBreadcrumb } from './breadcrumbs.styles';
 import { NavigationMenu } from '../navigatonMenu';
 
-export const Breadcrumbs = (): JSX.Element => {
-	const getBreadcrumbs = ['Atkins', 'Dubai opera'];
+const teamspacesList = [{
+	to: 'atkins',
+	title: 'Atkins',
+}, {
+	to: 'skanska',
+	title: 'Skanska',
+}];
 
-	const list = [{ title: 'Dubai opera', to: '123123123' }, { title: 'Other project', to: '9898988' }];
+const projectsLists = {
+	atkins: [{
+		to: '12389jkh',
+		title: 'Dubai',
+	}, {
+		to: 'nlgkgouo12',
+		title: 'Another atkins project',
+	}],
+	skanska: [
+		{
+			to: 'kjbljbasda',
+			title: 'Kings cross',
+		},
+		{
+			to: 'asdasdjnlkn',
+			title: 'Paddington',
+		},
+	],
+};
+
+const addUrlToTarget = (url) => ({ to, title }) => ({ title, to: `${url}/${to}` });
+
+export const Breadcrumbs = (): JSX.Element => {
+	const { teamspace, project } = useParams();
+	let { url } = useRouteMatch();
+
+	const urlProject = project ? uriCombine(url, '../') : url;
+
+	url = teamspace ? uriCombine(url, '../') : url;
+	url = project ? uriCombine(url, '../') : url;
+
+	const getBreadcrumbs = [];
+
+	const teamspaceTo = `${url}/${teamspace}`;
+
+	let list: any[] = !project ? teamspacesList : projectsLists[teamspace] || [];
+
+	if (teamspace) {
+		getBreadcrumbs.push(teamspace);
+	}
+
+	if (project) {
+		getBreadcrumbs.push(list.find(({ to }) => to === project).title);
+	}
+
+	list = list.map(addUrlToTarget(urlProject));
 
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
@@ -31,7 +83,6 @@ export const Breadcrumbs = (): JSX.Element => {
 
 	return (
 		<Container aria-label="breadcrumb">
-
 			{getBreadcrumbs.map((title, index) => {
 				const isLastItem = (getBreadcrumbs.length - 1) === index;
 
@@ -47,7 +98,7 @@ export const Breadcrumbs = (): JSX.Element => {
 				}
 
 				return (
-					<Breadcrumb color="inherit" to={`#4${title}`}>
+					<Breadcrumb color="inherit" to={teamspaceTo}>
 						{title}
 					</Breadcrumb>
 				);

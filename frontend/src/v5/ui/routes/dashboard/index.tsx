@@ -14,38 +14,52 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { RouteExcept } from '@/v5/services/routing/routing';
+import { MuiThemeProvider } from '@material-ui/core';
 import React from 'react';
+import { useRouteMatch, Route } from 'react-router-dom';
+
 import { ThemeProvider } from 'styled-components';
-import { Typography, MuiThemeProvider } from '@material-ui/core';
+
 import { theme } from '@/v5/ui/themes/theme';
 import { GlobalStyle } from '@/v5/ui/themes/global';
 
-import { AppBar } from '@components/shared/appBar';
 import { i18n } from '@lingui/core';
 import { I18nProvider } from '@lingui/react';
-import { messages as enMessages } from '@/locales/en/messages';
 import { messages as esMessages } from '@/locales/es/messages';
-import { Content } from './mainLayout.styles';
-
-interface IMainLayout {
-	title?: string;
-}
+import { AppBar } from '@components/shared/appBar';
+import { messages as enMessages } from '@/locales/en/messages';
+import { TeamspaceContent } from './teamspaces';
+import { ProjectContent } from './projects';
+import { Content } from './index.styles';
 
 i18n.load('en', enMessages);
 i18n.load('es', esMessages);
 
 i18n.activate('en');
 
-export const MainLayout = ({ title }: IMainLayout): JSX.Element => (
-	<I18nProvider i18n={i18n}>
-		<ThemeProvider theme={theme}>
-			<MuiThemeProvider theme={theme}>
-				<GlobalStyle />
-				<AppBar />
-				<Content>
-					<Typography variant="h1">{title || 'Basic layout page'}</Typography>
-				</Content>
-			</MuiThemeProvider>
-		</ThemeProvider>
-	</I18nProvider>
-);
+export const Dashboard = () => {
+	const { path } = useRouteMatch();
+
+	return (
+		<Route path={`${path}/:teamspace?/:project?`}>
+			<I18nProvider i18n={i18n}>
+				<ThemeProvider theme={theme}>
+					<MuiThemeProvider theme={theme}>
+						<GlobalStyle />
+						<AppBar />
+						<Content>
+							<Route path={`${path}/:teamspace/`}>
+								<TeamspaceContent />
+							</Route>
+
+							<RouteExcept path={`${path}/:teamspace/:project`} exceptPath={`${path}/:teamspace/settings`}>
+								<ProjectContent />
+							</RouteExcept>
+						</Content>
+					</MuiThemeProvider>
+				</ThemeProvider>
+			</I18nProvider>
+		</Route>
+	);
+};
