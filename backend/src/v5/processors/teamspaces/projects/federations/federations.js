@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getFederations } = require('../../../../models/modelSettings');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../utils/permissions/permissions');
 const { getFavourites } = require('../../../../models/users');
+const { getFederations } = require('../../../../models/modelSettings');
 const { getProjectById } = require('../../../../models/projects');
 
 const Federations = {};

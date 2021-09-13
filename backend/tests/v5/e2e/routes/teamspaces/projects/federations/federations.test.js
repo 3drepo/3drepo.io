@@ -103,8 +103,8 @@ const testGetFederationList = () => {
 		test('should return the list of federations if the user has access', async () => {
 			const res = await agent.get(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
 			expect(res.body).toEqual({
-				federations: modelSettings.flatMap(({ _id, name, properties, isFavourite }) => (properties?.federate ?
-					{ _id, name, role: 'admin', isFavourite: !!isFavourite } : [])),
+				federations: modelSettings.flatMap(({ _id, name, properties, isFavourite }) => (properties?.federate
+					? { _id, name, role: 'admin', isFavourite: !!isFavourite } : [])),
 			});
 		});
 	});
