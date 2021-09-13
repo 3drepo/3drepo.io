@@ -18,3 +18,5 @@
 export { DashboardList } from './dashboardList.component';
 export { DashboardListHeader } from './dasboardList.styles';
 export { DashboardListHeaderLabel } from './dashboardListHeaderLabel';
+export { DashboardListCollapse } from './dashboardListCollapse';
+export { DashboardListItem } from './dashboardListItem';
