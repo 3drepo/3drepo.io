@@ -16,9 +16,7 @@
  */
 
 import React from 'react';
-
 import { Typography } from '@material-ui/core';
-
 import { MenuList, MenuItem } from './navigationMenu.styles';
 
 interface IListItem {
@@ -48,7 +46,7 @@ export const NavigationMenu = ({ anchorEl, handleClose, list }: INavigationMenu)
 	return (
 		<MenuList anchorEl={anchorEl} onClose={handleClose} open={Boolean(anchorEl)} {...menuPosition}>
 			{list.map(({ title, ...props }) => (
-				<MenuItem {...props}>
+				<MenuItem {...props} onClick={handleClose}>
 					<Typography variant="body1" noWrap>
 						{title}
 					</Typography>

@@ -55,5 +55,6 @@ module.exports = {
 		'react/prop-types': 'off',
 		'react/require-default-props': 'off',
 		'react/jsx-indent-props': ['error', 'tab'],
+		'react/jsx-one-expression-per-line':  0
 	}
 };
