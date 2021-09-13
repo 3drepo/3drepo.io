@@ -28,6 +28,7 @@ type IDashboardListHeaderLabel = {
 	onClick?: Dispatch<void>;
 	width?: number;
 	className?: string;
+	name?: string;
 };
 
 export const DashboardListHeaderLabel = ({

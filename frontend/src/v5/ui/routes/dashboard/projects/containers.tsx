@@ -24,7 +24,6 @@ import {
 	DashboardListCollapse,
 	DashboardListItem,
 } from '@components/dashboard/dashboardList';
-import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import {
 	DashboardListItemButton,
 	DashboardListItemIcon,
@@ -78,31 +77,36 @@ const MockContainerListItem = ({
 	</DashboardListItemRow>
 );
 
-export const Containers = () => (
-	<>
-		<DashboardListCollapse
-			title="All Containers(11)"
-			tooltipTitles={{
-				collapsed: 'Show list',
-				visible: 'Hide list',
-			}}
-		>
-			<DashboardListHeader>
-				<DashboardListHeaderLabel sortingDirection={SortingDirection.ASCENDING} sort>
-					Container
-				</DashboardListHeaderLabel>
-				<DashboardListHeaderLabel width={150} sort>Revisions</DashboardListHeaderLabel>
-				<DashboardListHeaderLabel width={130} sort>Container code</DashboardListHeaderLabel>
-				<DashboardListHeaderLabel width={160} sort>Category</DashboardListHeaderLabel>
-				<DashboardListHeaderLabel width={194} sort>Last Updated</DashboardListHeaderLabel>
-			</DashboardListHeader>
-			<DashboardList>
-				{mockContainers.map((container, i) => (
-					<DashboardListItem selected={i === 3}>
-						<MockContainerListItem container={container} selected={i === 3} />
-					</DashboardListItem>
-				))}
-			</DashboardList>
-		</DashboardListCollapse>
-	</>
-);
+export const Containers = () => {
+	const onSortingChanged = ({ column, direction }) => {
+		// eslint-disable-next-line no-console
+		console.log({ column, direction });
+	};
+
+	return (
+		<>
+			<DashboardListCollapse
+				title="All Containers(11)"
+				tooltipTitles={{
+					collapsed: 'Show list',
+					visible: 'Hide list',
+				}}
+			>
+				<DashboardListHeader onSortingChange={onSortingChanged}>
+					<DashboardListHeaderLabel name="container" sort> Container </DashboardListHeaderLabel>
+					<DashboardListHeaderLabel name="revision" width={150} sort> Revisions </DashboardListHeaderLabel>
+					<DashboardListHeaderLabel name="code" width={130} sort>Container code</DashboardListHeaderLabel>
+					<DashboardListHeaderLabel name="category" width={160} sort>Category</DashboardListHeaderLabel>
+					<DashboardListHeaderLabel width={194} sort>Last Updated</DashboardListHeaderLabel>
+				</DashboardListHeader>
+				<DashboardList>
+					{mockContainers.map((container, i) => (
+						<DashboardListItem selected={i === 3}>
+							<MockContainerListItem container={container} selected={i === 3} />
+						</DashboardListItem>
+					))}
+				</DashboardList>
+			</DashboardListCollapse>
+		</>
+	);
+};

@@ -14,13 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import styled from 'styled-components';
 
-export const ListContainer = styled.ul`
+export const DashboardListHeaderContainer = styled.div`
 	display: flex;
-	flex-direction: column;
-	width: 100%;
-	margin: 0;
-	padding: 0;
+	padding: 13px 20px 13px 30px;
 `;

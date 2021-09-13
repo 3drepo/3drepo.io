@@ -15,12 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-
-export const ListContainer = styled.ul`
-	display: flex;
-	flex-direction: column;
-	width: 100%;
-	margin: 0;
-	padding: 0;
-`;
+export { DashboardListHeader } from './dashboardListHeader.component';
