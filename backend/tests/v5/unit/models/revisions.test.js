@@ -74,8 +74,30 @@ const testGetRevisions = () => {
 	});
 };
 
+const testUpdateRevisionStatus = () => {	
+	describe('UpdateRevisionStatus', () => {
+		test('Should update the void status of a revision', async () => {
+			const expectedData = [
+				{ _id: 1, author: 'someUser', timestamp: new Date() },
+				{ _id: 2, author: 'someUser', timestamp: new Date() },
+				{ _id: 3, author: 'someUser', timestamp: new Date(), void: true },
+			];
+			
+			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+			await Revisions.updateRevisionStatus('someTS', 'someModel', 3, false);
+			expect(expectedData.find(r=>r._id === 3).void).toEqual(false);
+		});
+
+		test('Should throw CONTAINER_NOT_FOUND if there is no revisions table', async () => {
+			jest.spyOn(db, 'find').mockResolvedValue(undefined);
+			await expect(Revisions.updateRevisionStatus('someTS', 'someModel', 3, true)).rejects.toEqual(templates.containerNotFound);
+		});
+	});
+};
+
 describe('models/revisions', () => {
 	testGetRevisionCount();
 	testGetLatestRevision();
 	testGetRevisions();
+	testUpdateRevisionStatus();
 });

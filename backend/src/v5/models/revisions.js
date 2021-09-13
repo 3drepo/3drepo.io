@@ -17,7 +17,7 @@
 
 const db = require('../handler/db');
 const { templates } = require('../utils/responseCodes');
-
+const { UUIDToString } = require('../utils/helper/uuids');
 const Revisions = {};
 
 const excludeVoids = { void: { $ne: true } };
@@ -25,7 +25,7 @@ const excludeIncomplete = { incomplete: { $exists: false } };
 
 const collectionName = (model) => `${model}.history`;
 
-const findRevisionsByQuery = async (teamspace, model, query, projection, sort) => {
+const findRevisionsByModel = async (teamspace, model, query, projection, sort) => {
 	const revisions = await db.find(teamspace, collectionName(model), query, projection, sort);
 
 	if (!revisions || revisions.length === 0) {
@@ -33,6 +33,17 @@ const findRevisionsByQuery = async (teamspace, model, query, projection, sort) =
 	}
 
 	return revisions;
+};
+
+const findOneRevisionByID = async (teamspace, model, revision, projection, sort) => {
+	const revisions = await findRevisionsByModel(teamspace, model, {}, projection, sort);		
+	const rev = revisions.find(r => UUIDToString(r._id) === UUIDToString(revision));
+
+	if (!rev) {
+		throw templates.revisionNotFound;
+	}
+
+	return rev;
 };
 
 const findOneRevisionByQuery = async (teamspace, model, query, projection, sort) => {
@@ -58,11 +69,22 @@ Revisions.getRevisionCount = (teamspace, model) => {
 Revisions.getRevisions = (teamspace, model, showVoid, projection = {}) => {
 	const query = { ...excludeIncomplete };
 
-	if(!showVoid){
+	if (!showVoid) {
 		query.void = { $ne: true };
 	}
 
-	return findRevisionsByQuery(teamspace, model, query, projection);
+	return findRevisionsByModel(teamspace, model, query, projection);
+};
+
+Revisions.updateRevisionStatus = async (teamspace, model, revision, status) => {
+	const rev = await findOneRevisionByID(teamspace, model, revision, {_id: revision}, {_id: 1, void: 1 });
+
+	if(rev.void === status || (rev.void === undefined && !status)){
+		return;
+	}
+	
+	rev.void = status;
+	await db.updateOne(teamspace, collectionName(model), {_id: rev._id}, {$set: { "void" : rev.void } });
 };
 
 module.exports = Revisions;

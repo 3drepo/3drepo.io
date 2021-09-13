@@ -72,7 +72,7 @@ const container2Rev = {
 const model1Revisions = [
 	{ _id: 1, author: 'user1', timestamp: new Date() },
 	{ _id: 2, author: 'user1', timestamp: new Date() },
-	{ _id: 3, author: 'user1', timestamp: new Date() },
+	{ _id: 3, author: 'user1', timestamp: new Date(), void: true },
 ];
 
 ProjectsModel.getProjectById.mockImplementation(() => project);
@@ -83,7 +83,13 @@ Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 	if (container === 'container2') return container2Rev;
 	throw templates.revisionNotFound;
 });
-Revisions.getRevisions.mockImplementation(() => model1Revisions);
+Revisions.getRevisions.mockImplementation((teamspace, container, showVoid) => 
+	(model1Revisions.filter(r => !r.void || showVoid)));
+Revisions.updateRevisionStatus.mockImplementation((teamspace, container, revision, status)=>{
+	const rev = model1Revisions.find(r => r._id === revision);
+	rev.void = status;
+})
+
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
 
 // Permissions mock
@@ -152,9 +158,28 @@ const testGetContainerStats = () => {
 
 const testGetRevisions = () => {
 	describe('Get container revisions', () => {
-		test('should return the revisions if the container exists', async () => {
+		test('should return non-void revisions if the container exists', async () => {
 			const res = await Containers.getRevisions('teamspace', 1, false);
+			expect(res).toEqual(model1Revisions.filter(r => !r.void));
+		});
+		test('should return all revisions if the container exists', async () => {
+			const res = await Containers.getRevisions('teamspace', 1, true);
 			expect(res).toEqual(model1Revisions);
+		});
+	});
+};
+
+const testUpdateRevisionStatus = () => {
+	const revision3 = model1Revisions.find(r => r._id === 3);
+	describe('Get container revisions', () => {
+		test('should not update revision if the request body is not boolean', async () => {
+			const initialRev3Status = revision3.void;
+			await Containers.updateRevisionStatus('teamspace', 1, revision3._id, 123);
+			expect(revision3.void).toEqual(initialRev3Status);
+		});
+		test('should update revision if the request body is boolean', async () => {
+			await Containers.updateRevisionStatus('teamspace', 1, revision3._id, false);
+			expect(revision3.void).toEqual(false);
 		});
 	});
 };
@@ -163,4 +188,5 @@ describe('processors/teamspaces/projects/containers', () => {
 	testGetContainerList();
 	testGetContainerStats();
 	testGetRevisions();
+	testUpdateRevisionStatus();
 });

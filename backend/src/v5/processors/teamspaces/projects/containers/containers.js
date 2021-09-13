@@ -16,7 +16,7 @@
  */
 
 const { getContainerById, getContainers } = require('../../../../models/modelSettings');
-const { getLatestRevision, getRevisionCount, getRevisions } = require('../../../../models/revisions');
+const { getLatestRevision, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../utils/permissions/permissions');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { getFavourites } = require('../../../../models/users');
@@ -73,6 +73,14 @@ Containers.getRevisions = async (teamspace, container, showVoid) => {
 		{ _id: 1, author: 1, timestamp: 1, tag: 1, void: 1 });
 
 	return revisions.map((revision) => ({ ...revision, _id: UUIDToString(revision._id) }));
+};
+
+Containers.updateRevisionStatus = async (teamspace, container, revision, status) => {
+	if(typeof status === 'boolean'){
+		//To ensure container ID is valid
+		await updateRevisionStatus(teamspace, container, revision, status);
+	}
+	return {};
 };
 
 module.exports = Containers;

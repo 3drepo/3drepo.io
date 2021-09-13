@@ -52,6 +52,15 @@ const getRevisions = async (req, res) => {
 	}).catch((err) => respond(req, res, err));
 };
 
+const updateRevisionStatus = async (req, res) => {
+	const { teamspace, container, revision } = req.params;
+	const status = req.body.void;
+
+	Containers.updateRevisionStatus(teamspace, container, revision, status).then((rev) => {
+		respond(req, res, templates.ok, rev);
+	}).catch((err) => respond(req, res, err));
+};
+
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 
@@ -263,6 +272,62 @@ const establishRoutes = () => {
 	 */
 	router.get('/:container/revisions', hasReadAccessToContainer, getRevisions);
 
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions/:revision:
+	 *   patch:
+	 *     description: Updates the void status of a revision
+	 *     tags: [Containers]
+	 *     operationId: updateRevisionStatus
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - project:
+	 *         name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *         type: string
+   	 *       - container:
+	 *         name: container
+	 *         description: Container ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *         type: string
+	 *       - revision:
+	 *         name: revision
+	 *         description: Revision ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *         type: string
+	 *     requestBody:
+	 *       content:
+	 *         'application/x-www-form-urlencoded':
+	 *           schema:
+	 *             properties:
+	 *               void:
+	 *                 description: The new status value
+	 *                 type: boolean         
+	 *             required:
+	 *               - status
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: updates the status of the revision
+	 */
+	router.patch('/:container/revisions/:revision', hasReadAccessToContainer, updateRevisionStatus);
+	
 	return router;
 };
 
