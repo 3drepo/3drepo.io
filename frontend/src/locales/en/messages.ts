@@ -1,1 +1,1 @@
-/*eslint-disable*/export const messages={"Containers":"Containers","Settings":"Settings"};
+/*eslint-disable*/export const messages={"Containers":"Containers","Federations":"Federations","Settings":"Settings"};
