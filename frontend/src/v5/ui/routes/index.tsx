@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { theme } from '@/v5/ui/themes/theme';
-import { MuiThemeProvider } from '@material-ui/core';
+import { MuiThemeProvider, StylesProvider } from '@material-ui/core';
 import { ThemeProvider } from 'styled-components';
 import React from 'react';
 import { Dashboard } from './dashboard';
@@ -23,7 +23,9 @@ import { Dashboard } from './dashboard';
 export const Root = () => (
 	<ThemeProvider theme={theme}>
 		<MuiThemeProvider theme={theme}>
-			<Dashboard />
+			<StylesProvider injectFirst>
+				<Dashboard />
+			</StylesProvider>
 		</MuiThemeProvider>
 	</ThemeProvider>
 );

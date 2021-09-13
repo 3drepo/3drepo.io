@@ -16,12 +16,7 @@
  */
 import React from 'react';
 import { RouteExcept } from '@/v5/services/routing/routing';
-import { MuiThemeProvider, StylesProvider } from '@material-ui/core';
 import { useRouteMatch, Route } from 'react-router-dom';
-
-import { ThemeProvider } from 'styled-components';
-
-import { theme } from '@/v5/ui/themes/theme';
 import { GlobalStyle } from '@/v5/ui/themes/global';
 
 import { i18n } from '@lingui/core';
@@ -44,23 +39,17 @@ export const Dashboard = () => {
 	return (
 		<Route path={`${path}/:teamspace?/:project?`}>
 			<I18nProvider i18n={i18n}>
-				<ThemeProvider theme={theme}>
-					<MuiThemeProvider theme={theme}>
-						<StylesProvider injectFirst>
-							<GlobalStyle />
-							<AppBar />
-							<Content>
-								<Route path={`${path}/:teamspace/`}>
-									<TeamspaceContent />
-								</Route>
+				<GlobalStyle />
+				<AppBar />
+				<Content>
+					<Route path={`${path}/:teamspace/`}>
+						<TeamspaceContent />
+					</Route>
 
-								<RouteExcept path={`${path}/:teamspace/:project`} exceptPath={`${path}/:teamspace/settings`}>
-									<ProjectContent />
-								</RouteExcept>
-							</Content>
-							<StylesProvider />
-					</MuiThemeProvider>
-				</ThemeProvider>
+					<RouteExcept path={`${path}/:teamspace/:project`} exceptPath={`${path}/:teamspace/settings`}>
+						<ProjectContent />
+					</RouteExcept>
+				</Content>
 			</I18nProvider>
 		</Route>
 	);
