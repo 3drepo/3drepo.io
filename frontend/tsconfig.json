@@ -25,7 +25,7 @@
       "@components/*": ["./src/v5/ui/components/*"],
       "@assets/*": ["./assets/*"],
       "@/*": ["./src/*"]
-    }
+    },
   },
   "exclude": [
     "node_modules",

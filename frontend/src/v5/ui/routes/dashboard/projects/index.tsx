@@ -14,40 +14,32 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { discardSlash } from '@/v5/services/routing/routing';
+import React from 'react';
+import { useRouteMatch, Route, Switch } from 'react-router-dom';
+import { Containers } from './containers';
+import { Federations } from './federations';
 
-import styled from 'styled-components';
-import { Button, Breadcrumbs } from '@material-ui/core';
-import { Link } from 'react-router-dom';
+export const ProjectContent = () => {
+	let { path } = useRouteMatch();
+	path = discardSlash(path);
 
-export const Container = styled(Breadcrumbs)`
-	&& {
-		margin-left: 15px;
-	}
-`;
-
-export const InteractiveBreadcrumb = styled(Button).attrs({
-	variant: 'text',
-})`
-	&& {
-		${({ theme }) => theme.typography.body1};
-		color: ${({ theme }) => theme.palette.primary.main};
-		padding: 5px;
-		margin: 0;
-
-		&:hover {
-			text-decoration: none;
-		}
-	}
-`;
-
-export const Breadcrumb = styled(Button).attrs({
-	variant: 'text',
-	component: Link,
-})`
-	&& {
-		color: ${({ theme }) => theme.palette.base.main};
-		&:hover {
-			text-decoration: none;
-		}
-	}
-`;
+	return (
+		<>
+			<Switch>
+				<Route exact path={path}>
+					project content
+				</Route>
+				<Route path={`${path}/federations`}>
+					<Federations />
+				</Route>
+				<Route path={`${path}/containers`}>
+					<Containers />
+				</Route>
+				<Route path={`${path}/settings`}>
+					Project settings
+				</Route>
+			</Switch>
+		</>
+	);
+};

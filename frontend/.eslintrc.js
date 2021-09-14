@@ -12,7 +12,7 @@ module.exports = {
 		ecmaVersion: 2020,
 		project: './tsconfig.json'
 	},
-	ignorePatterns: ['/*.*'],
+	ignorePatterns: ['/*.*', "**/src/locales/**"],
 	parser: '@typescript-eslint/parser',
 	rules: {
 		'license-header': 'error',
@@ -52,6 +52,8 @@ module.exports = {
 		'@typescript-eslint/indent': ['error', 'tab', { SwitchCase: 1 }],
 		'react/jsx-indent': ['error', 'tab'],
 		'react/jsx-props-no-spreading': 'off',
-		'react/prop-types': 'off'
+		'react/prop-types': 'off',
+		'react/require-default-props': 'off',
+		'react/jsx-one-expression-per-line':  0
 	}
 };

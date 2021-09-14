@@ -15,14 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { discardSlash } from '@/v5/services/routing/routing';
+import React from 'react';
+import { useRouteMatch, Route, Switch } from 'react-router-dom';
 
-export const Container = styled.div`
-	margin: ${({ theme }) => `${theme.spacing(2)}px`};
-	height: 5000px;
-`;
+export const TeamspaceContent = () => {
+	let { path } = useRouteMatch();
+	path = discardSlash(path);
 
-export const ContrastBackground = styled.div`
-	padding: ${({ theme }) => `${theme.spacing(2)}px`};
-	background-color: ${({ theme }) => theme.palette.secondary.main};
-`;
+	return (
+		<>
+			<Switch>
+				<Route exact path={`${path}/settings`}>
+					Teamspace settings
+				</Route>
+
+				<Route exact path={`${path}`}>
+					Teamspace data
+				</Route>
+
+			</Switch>
+		</>
+	);
+};

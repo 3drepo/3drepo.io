@@ -17,29 +17,88 @@
 
 import React from 'react';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { useParams, useRouteMatch } from 'react-router-dom';
+import { uriCombine } from '@/v5/services/routing/routing';
 import { Container, Breadcrumb, InteractiveBreadcrumb } from './breadcrumbs.styles';
+import { NavigationMenu } from '../navigatonMenu';
+
+const teamspacesList = [{
+	to: 'atkins',
+	title: 'Atkins',
+}, {
+	to: 'skanska',
+	title: 'Skanska',
+}];
+
+const projectsLists = {
+	atkins: [{
+		to: '12389jkh',
+		title: 'Dubai',
+	}, {
+		to: 'nlgkgouo12',
+		title: 'Another atkins project',
+	}],
+	skanska: [
+		{
+			to: 'kjbljbasda',
+			title: 'Kings cross',
+		},
+		{
+			to: 'asdasdjnlkn',
+			title: 'Paddington',
+		},
+	],
+};
+
+const addUrlToTarget = (url) => ({ to, title }) => ({ title, to: `${url}/${to}` });
 
 export const Breadcrumbs = (): JSX.Element => {
-	const getBreadcrumbs = ['ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+	const { teamspace, project } = useParams();
+	let { url } = useRouteMatch();
 
-	const handleClick = (e) => e.preventDefault();
+	const urlProject = project ? uriCombine(url, '../') : url;
+
+	url = teamspace ? uriCombine(url, '../') : url;
+	url = project ? uriCombine(url, '../') : url;
+
+	const getBreadcrumbs = [];
+
+	const teamspaceTo = `${url}/${teamspace}`;
+
+	let list: any[] = !project ? teamspacesList : projectsLists[teamspace] || [];
+
+	if (teamspace) {
+		getBreadcrumbs.push(teamspace);
+	}
+
+	if (project) {
+		getBreadcrumbs.push(list.find(({ to }) => to === project).title);
+	}
+
+	list = list.map(addUrlToTarget(urlProject));
+
+	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
+	const handleClose = () => setAnchorEl(null);
 
 	return (
 		<Container aria-label="breadcrumb">
-
 			{getBreadcrumbs.map((title, index) => {
 				const isLastItem = (getBreadcrumbs.length - 1) === index;
 
 				if (isLastItem) {
 					return (
-						<InteractiveBreadcrumb onClick={handleClick} endIcon={<ExpandMoreIcon />}>
-							{title}
-						</InteractiveBreadcrumb>
+						<div>
+							<InteractiveBreadcrumb onClick={handleClick} endIcon={<ExpandMoreIcon />}>
+								{title}
+							</InteractiveBreadcrumb>
+							<NavigationMenu list={list} anchorEl={anchorEl} handleClose={handleClose} />
+						</div>
 					);
 				}
 
 				return (
-					<Breadcrumb color="inherit" href={`#4${title}`}>
+					<Breadcrumb color="inherit" to={teamspaceTo}>
 						{title}
 					</Breadcrumb>
 				);
