@@ -90,6 +90,7 @@ export const Header = styled(SectionHeader)`
 export const Value = styled(ValueComponent)`
 	white-space: break-spaces;
 	text-align: left;
+	word-break: break-word;
 `;
 
 export const Data = styled.div`
