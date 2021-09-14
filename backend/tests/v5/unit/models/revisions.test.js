@@ -74,7 +74,7 @@ const testGetRevisions = () => {
 	});
 };
 
-const testUpdateRevisionStatus = () => {	
+const testUpdateRevisionStatus = () => {
 	describe('UpdateRevisionStatus', () => {
 		test('Should update the void status of a revision', async () => {
 			const expectedData = [
@@ -82,10 +82,10 @@ const testUpdateRevisionStatus = () => {
 				{ _id: 2, author: 'someUser', timestamp: new Date() },
 				{ _id: 3, author: 'someUser', timestamp: new Date(), void: true },
 			];
-			
+
 			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
 			await Revisions.updateRevisionStatus('someTS', 'someModel', 3, false);
-			expect(expectedData.find(r=>r._id === 3).void).toEqual(false);
+			expect(expectedData.find((r) => r._id === 3).void).toEqual(false);
 		});
 
 		test('Should throw CONTAINER_NOT_FOUND if there is no revisions table', async () => {

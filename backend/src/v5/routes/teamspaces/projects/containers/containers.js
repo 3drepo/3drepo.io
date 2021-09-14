@@ -315,7 +315,7 @@ const establishRoutes = () => {
 	 *             properties:
 	 *               void:
 	 *                 description: The new status value
-	 *                 type: boolean         
+	 *                 type: boolean
 	 *             required:
 	 *               - status
 	 *     responses:
@@ -327,7 +327,7 @@ const establishRoutes = () => {
 	 *         description: updates the status of the revision
 	 */
 	router.patch('/:container/revisions/:revision', hasReadAccessToContainer, updateRevisionStatus);
-	
+
 	return router;
 };
 

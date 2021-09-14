@@ -76,8 +76,7 @@ Containers.getRevisions = async (teamspace, container, showVoid) => {
 };
 
 Containers.updateRevisionStatus = async (teamspace, container, revision, status) => {
-	if(typeof status === 'boolean'){
-		//To ensure container ID is valid
+	if (typeof status === 'boolean') {
 		await updateRevisionStatus(teamspace, container, revision, status);
 	}
 	return {};

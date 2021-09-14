@@ -88,7 +88,6 @@ ServiceHelper.generateRevisionEntry = (isVoid = false) => ({
 	_id: ServiceHelper.generateUUIDString(),
 	tag: ServiceHelper.generateRandomString(),
 	author: ServiceHelper.generateRandomString(),
-	// generate a random date
 	timestamp: ServiceHelper.generateRandomDate(new Date(2018, 1, 1), new Date()),
 	void: isVoid,
 });

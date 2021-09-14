@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { UUIDToString } = require('../utils/helper/uuids');
 const db = require('../handler/db');
 const { templates } = require('../utils/responseCodes');
-const { UUIDToString } = require('../utils/helper/uuids');
+
 const Revisions = {};
 
 const excludeVoids = { void: { $ne: true } };
@@ -25,8 +26,8 @@ const excludeIncomplete = { incomplete: { $exists: false } };
 
 const collectionName = (model) => `${model}.history`;
 
-const findRevisionsByModel = async (teamspace, model, query, projection, sort) => {
-	const revisions = await db.find(teamspace, collectionName(model), query, projection, sort);
+const findRevisionsByModel = async (teamspace, model, query, projection) => {
+	const revisions = await db.find(teamspace, collectionName(model), query, projection, {});
 
 	if (!revisions || revisions.length === 0) {
 		throw templates.containerNotFound;
@@ -36,8 +37,8 @@ const findRevisionsByModel = async (teamspace, model, query, projection, sort) =
 };
 
 const findOneRevisionByID = async (teamspace, model, revision, projection, sort) => {
-	const revisions = await findRevisionsByModel(teamspace, model, {}, projection, sort);		
-	const rev = revisions.find(r => UUIDToString(r._id) === UUIDToString(revision));
+	const revisions = await findRevisionsByModel(teamspace, model, {}, projection, sort);
+	const rev = revisions.find((r) => UUIDToString(r._id) === UUIDToString(revision));
 
 	if (!rev) {
 		throw templates.revisionNotFound;
@@ -77,14 +78,14 @@ Revisions.getRevisions = (teamspace, model, showVoid, projection = {}) => {
 };
 
 Revisions.updateRevisionStatus = async (teamspace, model, revision, status) => {
-	const rev = await findOneRevisionByID(teamspace, model, revision, {_id: revision}, {_id: 1, void: 1 });
+	const rev = await findOneRevisionByID(teamspace, model, revision, { _id: 1, void: 1 });
 
-	if(rev.void === status || (rev.void === undefined && !status)){
+	if (rev.void === status || (rev.void === undefined && !status)) {
 		return;
 	}
-	
+
 	rev.void = status;
-	await db.updateOne(teamspace, collectionName(model), {_id: rev._id}, {$set: { "void" : rev.void } });
+	await db.updateOne(teamspace, collectionName(model), { _id: rev._id }, { $set: { void: rev.void } });
 };
 
 module.exports = Revisions;

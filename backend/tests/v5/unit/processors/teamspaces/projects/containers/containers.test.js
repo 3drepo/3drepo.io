@@ -83,12 +83,14 @@ Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 	if (container === 'container2') return container2Rev;
 	throw templates.revisionNotFound;
 });
-Revisions.getRevisions.mockImplementation((teamspace, container, showVoid) => 
-	(model1Revisions.filter(r => !r.void || showVoid)));
-Revisions.updateRevisionStatus.mockImplementation((teamspace, container, revision, status)=>{
-	const rev = model1Revisions.find(r => r._id === revision);
+
+Revisions.getRevisions.mockImplementation((teamspace, container, showVoid) => (
+	model1Revisions.filter((r) => !r.void || showVoid)));
+
+Revisions.updateRevisionStatus.mockImplementation((teamspace, container, revision, status) => {
+	const rev = model1Revisions.find((r) => r._id === revision);
 	rev.void = status;
-})
+});
 
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
 
@@ -160,7 +162,7 @@ const testGetRevisions = () => {
 	describe('Get container revisions', () => {
 		test('should return non-void revisions if the container exists', async () => {
 			const res = await Containers.getRevisions('teamspace', 1, false);
-			expect(res).toEqual(model1Revisions.filter(r => !r.void));
+			expect(res).toEqual(model1Revisions.filter((r) => !r.void));
 		});
 		test('should return all revisions if the container exists', async () => {
 			const res = await Containers.getRevisions('teamspace', 1, true);
@@ -170,7 +172,7 @@ const testGetRevisions = () => {
 };
 
 const testUpdateRevisionStatus = () => {
-	const revision3 = model1Revisions.find(r => r._id === 3);
+	const revision3 = model1Revisions.find((r) => r._id === 3);
 	describe('Get container revisions', () => {
 		test('should not update revision if the request body is not boolean', async () => {
 			const initialRev3Status = revision3.void;
