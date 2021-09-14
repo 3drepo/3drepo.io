@@ -31,6 +31,7 @@ import {
 	MeasurementValue as ValueComponent,
 	Actions as ActionsComponent,
 } from '../../../measurements/components/measureItem/measureItem.styles';
+import { LinkableField } from '../../../../../components/linkableField/linkableField.component';
 
 
 export const Actions = styled(ActionsComponent)`
@@ -87,10 +88,13 @@ export const Header = styled(SectionHeader)`
 	}
 `;
 
-export const Value = styled(ValueComponent)`
+export const Value = styled(LinkableField)`
 	white-space: break-spaces;
-	text-align: left;
 	word-break: break-word;
+	width: auto;
+	text-align: left;
+	padding-right: 10px;
+	margin-left: 10px;
 `;
 
 export const Data = styled.div`
