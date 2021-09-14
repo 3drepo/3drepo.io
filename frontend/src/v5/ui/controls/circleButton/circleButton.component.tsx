@@ -23,15 +23,9 @@ interface ICircleButton {
 	size?: 'large' | 'medium' | 'small';
 	variant?: 'main' | 'contrast';
 	disabled?: boolean;
-	className?: string;
 }
 
-export const CircleButton: React.FC<ICircleButton> = ({
-	size = 'large',
-	variant = 'main',
-	children,
-	...props
-}) => (
+export const CircleButton: React.FC<ICircleButton> = ({ size = 'large', variant = 'main', children, ...props }) => (
 	<StyledFab size={size} variant={variant} {...props}>
 		{children}
 	</StyledFab>
