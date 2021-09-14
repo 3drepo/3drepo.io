@@ -76,21 +76,38 @@ const testGetRevisions = () => {
 
 const testUpdateRevisionStatus = () => {
 	describe('UpdateRevisionStatus', () => {
-		test('Should update the void status of a revision', async () => {
-			const expectedData = [
-				{ _id: 1, author: 'someUser', timestamp: new Date() },
-				{ _id: 2, author: 'someUser', timestamp: new Date() },
-				{ _id: 3, author: 'someUser', timestamp: new Date(), void: true },
-			];
+		const expectedData = [
+			{ _id: 1, author: 'someUser', timestamp: new Date() },
+			{ _id: 2, author: 'someUser', timestamp: new Date() },
+			{ _id: 3, author: 'someUser', timestamp: new Date(), void: true },
+		];
 
+		test('Should update the void status of a revision', async () => {			
 			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
 			await Revisions.updateRevisionStatus('someTS', 'someModel', 3, false);
 			expect(expectedData.find((r) => r._id === 3).void).toEqual(false);
 		});
 
+		test('Should not update the void status of a revision if void is not set and new status is false', async () => {			
+			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+			await Revisions.updateRevisionStatus('someTS', 'someModel', 1, false);
+			expect(expectedData.find((r) => r._id === 1).void).toEqual(undefined);
+		});
+
+		test('Should not update the void status of a revision if void has the same value as status', async () => {			
+			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+			await Revisions.updateRevisionStatus('someTS', 'someModel', 3, true);
+			expect(expectedData.find((r) => r._id === 3).void).toEqual(true);
+		});
+
 		test('Should throw CONTAINER_NOT_FOUND if there is no revisions table', async () => {
 			jest.spyOn(db, 'find').mockResolvedValue(undefined);
 			await expect(Revisions.updateRevisionStatus('someTS', 'someModel', 3, true)).rejects.toEqual(templates.containerNotFound);
+		});
+
+		test('Should throw REVISION_NOT_FOUND if it cannot find the revision in the revisions table', async () => {
+			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+			await expect(Revisions.updateRevisionStatus('someTS', 'someModel', -1, true)).rejects.toEqual(templates.revisionNotFound);
 		});
 	});
 };
