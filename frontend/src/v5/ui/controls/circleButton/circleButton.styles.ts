@@ -56,15 +56,13 @@ const mainFabStyles = css`
 
 		&:hover, &.Mui-focusVisible {
 			&& {
-				background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-				box-shadow: none;
+				background-color: transparent;
 			}
 		}
 
 		&:active {
 			&& {
 				background-color: ${({ theme }) => theme.palette.base.lightest};
-				box-shadow: none;
 			}
 		}
 	}
@@ -95,7 +93,6 @@ const contrastFabStyles = css`
 	&.Mui-focusVisible {
 		&& {
 			border: 1px solid ${({ theme }) => theme.palette.primary.main};
-
 			path {
 				fill: ${({ theme }) => theme.palette.primary.main};
 			}
