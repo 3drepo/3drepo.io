@@ -405,18 +405,15 @@ function Utils() {
 		return domainRegexMatch ? domainRegexMatch[0].replace(/\/\s*$/, "") : url;
 	};
 
-	this.generateFoldernames = (fileName, dirLevels) => {
+	this.generateFoldernames = (dirLevels) => {
 		if (dirLevels < 1) {
 			return "";
 		}
 		const folders = [];
-		const minChunkLen = 4;
-		const nameChunkLen = Math.max(fileName.length / dirLevels, minChunkLen);
 
 		for(let i = 0 ; i < dirLevels; i++) {
-			const chunkStart = (i * nameChunkLen) % fileName.length;
-			const fileNameHash = farmhash.fingerprint32(fileName.substr(chunkStart,nameChunkLen) + Math.random());
-			folders.push(fileNameHash & 255);
+			const folderName = Math.round(Math.random() * 255);
+			folders.push(folderName);
 		}
 		return folders.join("/");
 	};

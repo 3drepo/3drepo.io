@@ -35,7 +35,7 @@ class AlluxioHandler {
 
 	async storeFile(data) {
 		const _id = utils.generateUUID({string: true});
-		const folderNames = utils.generateFoldernames(_id, this.levels);
+		const folderNames = utils.generateFoldernames(this.levels);
 		const link = path.join(folderNames, _id);
 		await this.client.uploadFile(this.getAlluxioPathFormat(link), data);
 		return ({_id, link, size:data.length, type: "alluxio"});
