@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../utils/permissions/permissions');
-const { getFavourites } = require('../../../../models/users');
-const { getProjectById } = require('../../../../models/projects');
+const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
+const { getFavourites } = require('../../../../../models/users');
+const { getProjectById } = require('../../../../../models/projects');
 
-const Models = {};
+const ModelList = {};
 
-Models.getModelList = async (teamspace, project, user, modelSettings) => {
+ModelList.getModelList = async (teamspace, project, user, modelSettings) => {
 	const { permissions } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
 
 	const [isTSAdmin, favourites] = await Promise.all([
@@ -38,4 +38,4 @@ Models.getModelList = async (teamspace, project, user, modelSettings) => {
 	});
 };
 
-module.exports = Models;
+module.exports = ModelList;

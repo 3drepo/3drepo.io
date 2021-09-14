@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Federations = require('../../../../processors/teamspaces/projects/federations/federations');
+const Federations = require('../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { hasAccessToTeamspace } = require('../../../../middleware/permissions/permissions');

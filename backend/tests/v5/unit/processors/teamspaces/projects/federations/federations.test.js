@@ -24,7 +24,7 @@ const ModelSettings = require(`${src}/models/modelSettings`);
 jest.mock('../../../../../../../src/v5/models/users');
 const Users = require(`${src}/models/users`);
 jest.mock('../../../../../../../src/v5/models/revisions');
-const Federations = require(`${src}/processors/teamspaces/projects/federations/federations`);
+const Federations = require(`${src}/processors/teamspaces/projects/models/federations`);
 
 const federationList = [
 	{ _id: 1, name: 'federation 1', permissions: [{ user: 'user1', permission: 'collaborator' }, { user: 'user2', permission: 'collaborator' }] },

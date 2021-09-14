@@ -16,7 +16,7 @@
  */
 
 const { getFederations } = require('../../../../models/modelSettings');
-const { getModelList } = require('../models/models');
+const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
 
 const Federations = {};

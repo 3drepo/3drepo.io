@@ -17,7 +17,7 @@
 
 const { getContainerById, getContainers } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionCount } = require('../../../../models/revisions');
-const { getModelList } = require('../models/models');
+const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
 
 const Containers = {};
