@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { isNil, isNumber } from 'lodash';
 import MoreIcon from '@material-ui/icons/ChevronRight';
@@ -41,11 +41,13 @@ interface IProps {
 	toggleStarredRecord?: (key, isStarred) => void;
 	selectAllSimilar?: (rules) => void;
 	copyRules?: (rules) => void;
+	showStarred: boolean;
+	isSearch: boolean;
 }
 
 const CollapseButton = ({ collapsed, onClick }) => (
 	<StyledIconButton onClick={onClick}>
-		{collapsed ? <LessIcon /> : <MoreIcon />}
+		{collapsed ? <MoreIcon /> : <LessIcon />}
 	</StyledIconButton>
 );
 
@@ -92,15 +94,20 @@ const MetaRecordData = ({ value, field, copyRules, selectAllSimilar }) => {
 };
 
 export const MetaRecord = (props: IProps) => {
-	const { name, data, copyRules, selectAllSimilar, starredMetaMap, toggleStarredRecord } = props;
-	const [collapsed, setCollapsed] = useState<boolean>(false);
+	const { name, data, copyRules, selectAllSimilar, starredMetaMap, toggleStarredRecord, showStarred, isSearch } = props;
+	const [collapsed, setCollapsed] = useState<boolean>(true);
 	const hasSubData = isNil(data.value);
+
+	useEffect(() => {
+		const forceCollapsed = showStarred || isSearch;
+		setCollapsed(!forceCollapsed);
+	}, [showStarred, isSearch]);
 
 	const toggleCollapse = () => setCollapsed(!collapsed);
 
 	const renderSubList = () => (
 		<List>
-			{collapsed && renderNestedMetadata(data, ([index, item]) => (
+			{!collapsed && renderNestedMetadata(data, ([index, item]) => (
 				<MetaRecord
 					key={index}
 					name={index}
@@ -109,6 +116,8 @@ export const MetaRecord = (props: IProps) => {
 					selectAllSimilar={selectAllSimilar}
 					starredMetaMap={starredMetaMap}
 					toggleStarredRecord={toggleStarredRecord}
+					showStarred={showStarred}
+					isSearch={isSearch}
 				/>
 			))}
 		</List>

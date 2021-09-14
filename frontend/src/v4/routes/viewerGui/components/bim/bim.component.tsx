@@ -155,6 +155,8 @@ export class Bim extends React.PureComponent<IProps, any> {
 					data={data}
 					toggleStarredRecord={this.toggleStarredRecord}
 					starredMetaMap={this.props.starredMetaMap}
+					showStarred={this.props.showStarred}
+					isSearch={!!this.props.selectedFilters.length}
 				/>
 			)
 		);
