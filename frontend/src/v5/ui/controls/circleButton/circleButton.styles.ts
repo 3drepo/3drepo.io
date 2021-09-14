@@ -73,7 +73,6 @@ const contrastFabStyles = css`
 		&& {
 			border-color: ${({ theme }) => theme.palette.secondary.light};
 			pointer-events: none;
-
 			path {
 				fill: ${({ theme }) => theme.palette.secondary.light};
 			}
@@ -83,7 +82,6 @@ const contrastFabStyles = css`
 	&:hover {
 		&& {
 			background-color: ${({ theme }) => theme.palette.primary.contrast};
-
 			path {
 				fill: ${({ theme }) => theme.palette.secondary.main};
 			}
