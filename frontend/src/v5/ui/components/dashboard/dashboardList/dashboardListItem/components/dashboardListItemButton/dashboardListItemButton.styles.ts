@@ -22,4 +22,5 @@ export const Button = styled(ButtonComponent).attrs({
 	color: 'secondary',
 })`
 	margin: 0;
+	width: 135px;
 `;

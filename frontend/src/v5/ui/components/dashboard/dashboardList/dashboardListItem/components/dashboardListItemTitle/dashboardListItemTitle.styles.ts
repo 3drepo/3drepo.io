@@ -22,11 +22,11 @@ import { Button } from '@controls/button';
 export const Title = styled(Button).attrs({
 	variant: 'text',
 })`
+	${({ theme }) => theme.typography.h5};
+	
 	color: ${({ theme }) => theme.palette.secondary.main};
 	padding: 0;
 	margin: 0;
-	line-height: normal;
-	font-size: ${({ theme }) => theme.typography.h5.fontSize};
 
 	${({ theme, selected }) => selected && css`
 		color: ${theme.palette.primary.contrast};
