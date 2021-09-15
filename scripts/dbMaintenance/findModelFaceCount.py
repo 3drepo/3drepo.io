@@ -29,7 +29,41 @@ def getCount(connString, database, modelId, debug):
         if 0 < len(list(db.settings.find({"_id":modelId}))):
             if debug:
                 print("\t--model: " +  modelId)
-            for entry in db[modelId + ".scene"].aggregate([{"$group":{"_id":None,"faces_count":{"$sum":1}}}]):
+            histories = db[modelId + ".history"].find().sort("timestamp", -1)
+            current = histories[0].get("current")
+            for entry in db[modelId + ".scene"].aggregate([{"$match":{"_id":{"$in":current}}},{"$group":{"_id":None,"faces_count":{"$sum":1}}}]):
+                facesCount = entry.get("faces_count")
+                if debug:
+                    print("\t\t--faces_count: " + str(facesCount))
+                else:
+                    return facesCount
+        else:
+            if debug:
+                print("\t-model not found: " + modelId)
+            else:
+                return 0
+
+    else:
+        if debug:
+            print("--database not found: " + database)
+        else:
+            return 0
+
+def getCountFromStash(connString, database, modelId, debug):
+    ##### Connect to the Database #####
+    db = MongoClient(connString)
+    if database in db.database_names():
+        db = MongoClient(connString)[database]
+        if debug:
+            print("--database: " + database)
+
+    ##### Check model ID, get latest revision, and sum face count #####
+        if 0 < len(list(db.settings.find({"_id":modelId}))):
+            if debug:
+                print("\t--model: " +  modelId)
+            histories = db[modelId + ".history"].find().sort("timestamp", -1)
+            revId = histories[0].get("_id")
+            for entry in db[modelId + ".stash.3drepo"].aggregate([{"$match":{"rev_id":revId}},{"$group":{"_id":None,"faces_count":{"$sum":1}}}]):
                 facesCount = entry.get("faces_count")
                 if debug:
                     print("\t\t--faces_count: " + str(facesCount))

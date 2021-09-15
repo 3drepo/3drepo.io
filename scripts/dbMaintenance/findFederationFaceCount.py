@@ -1,6 +1,7 @@
 import sys
 from pymongo import MongoClient
 from findModelFaceCount import getCount
+from findModelFaceCount import getCountFromStash
 from findModelFaceCount import printMeshCount
 
 if len(sys.argv) < 7:
@@ -18,7 +19,7 @@ fedId = sys.argv[6]
 connString = "mongodb://"+ userName + ":" + password +"@"+mongoURL + ":" + mongoPort + "/"
 
 debug = False
-showSum = False
+showSum = True
 
 ##### Connect to the Database #####
 db = MongoClient(connString)
@@ -36,6 +37,7 @@ if database in db.database_names():
             modelId = entry.get("project")
             if showSum:
                 modelFacesCount = getCount(connString, database, modelId, debug)
+                # modelFacesCount = getCountFromStash(connString, database, modelId, debug)
                 if modelFacesCount != None:
                     facesCount = facesCount + modelFacesCount
             else:
