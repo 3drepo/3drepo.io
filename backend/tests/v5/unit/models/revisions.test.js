@@ -55,15 +55,22 @@ const testGetLatestRevision = () => {
 
 const testGetRevisions = () => {
 	describe('GetRevisions', () => {
-		test('Should return container revisions', async () => {
-			const expectedData = [
-				{ _id: 1, author: 'someUser', timestamp: new Date() },
-				{ _id: 2, author: 'someUser', timestamp: new Date() },
-				{ _id: 3, author: 'someUser', timestamp: new Date() },
-			];
-			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+		const expectedData = [
+			{ _id: 1, author: 'someUser', timestamp: new Date() },
+			{ _id: 2, author: 'someUser', timestamp: new Date() },
+			{ _id: 3, author: 'someUser', timestamp: new Date(), void: true },
+		];
 
-			const res = await Revisions.getRevisions('someTS', 'someModel');
+		test('Should return non void container revisions', async () => {
+			const nonVoidData = expectedData.filter(d => !d.void);
+			jest.spyOn(db, 'find').mockResolvedValue(nonVoidData);
+			const res = await Revisions.getRevisions('someTS', 'someModel', false);
+			expect(res).toEqual(nonVoidData);
+		});
+
+		test('Should return all container revisions', async () => {
+			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+			const res = await Revisions.getRevisions('someTS', 'someModel', true);
 			expect(res).toEqual(expectedData);
 		});
 
