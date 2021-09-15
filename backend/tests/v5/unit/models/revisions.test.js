@@ -82,19 +82,19 @@ const testUpdateRevisionStatus = () => {
 			{ _id: 3, author: 'someUser', timestamp: new Date(), void: true },
 		];
 
-		test('Should update the void status of a revision', async () => {			
+		test('Should update the void status of a revision', async () => {
 			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
 			await Revisions.updateRevisionStatus('someTS', 'someModel', 3, false);
 			expect(expectedData.find((r) => r._id === 3).void).toEqual(false);
 		});
 
-		test('Should not update the void status of a revision if void is not set and new status is false', async () => {			
+		test('Should not update the void status of a revision if void is not set and new status is false', async () => {
 			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
 			await Revisions.updateRevisionStatus('someTS', 'someModel', 1, false);
 			expect(expectedData.find((r) => r._id === 1).void).toEqual(undefined);
 		});
 
-		test('Should not update the void status of a revision if void has the same value as status', async () => {			
+		test('Should not update the void status of a revision if void has the same value as status', async () => {
 			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
 			await Revisions.updateRevisionStatus('someTS', 'someModel', 3, true);
 			expect(expectedData.find((r) => r._id === 3).void).toEqual(true);
