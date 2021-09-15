@@ -79,9 +79,11 @@ const user1Favourites = [1];
 const project = { _id: 1, name: 'project', models: federationList.map(({ _id }) => _id) };
 
 
-
 ProjectsModel.getProjectById.mockImplementation(() => project);
+ModelSettings.getFederations.mockImplementation(() => federationList);
+ModelSettings.getFederationById.mockImplementation((teamspace, federation) => federationSettings[federation]);
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
+
 Users.appendFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
 	for (const favourite of favouritesToAdd) {
 		if (user1Favourites.indexOf(favourite) === -1) {
@@ -108,35 +110,34 @@ jest.mock('../../../../../../../src/v5/utils/permissions/permissions', () => ({
 
 const determineResults = (username) => federationList.flatMap(({ permissions, _id, name }) => {
 	const isAdmin = username === 'projAdmin' || username === 'tsAdmin';
-	hasProjectAdminPermissions: jest.fn().mockImplementation((perm, user) => user === 'projAdmin'),
-}));
+	const hasModelPerm = permissions && permissions.find((entry) => entry.user === username);
+	const isFavourite = username === 'user1' && user1Favourites.includes(_id);
 	return isAdmin || hasModelPerm ? { _id, name, role: isAdmin ? 'admin' : hasModelPerm.permission, isFavourite } : [];
 });
 
 const testGetFederationList = () => {
 	describe('Get federation list by user', () => {
-
+		test('should return the whole list if the user is a teamspace admin', async () => {
 			const res = await Federations.getFederationList('teamspace', 'xxx', 'tsAdmin');
 			expect(res).toEqual(determineResults('tsAdmin'));
 		});
-});
+		test('should return the whole list if the user is a project admin', async () => {
 			const res = await Federations.getFederationList('teamspace', 'xxx', 'projAdmin');
 			expect(res).toEqual(determineResults('projAdmin'));
 		});
-
+		test('should return a partial list if the user has model access in some federations', async () => {
 			const res = await Federations.getFederationList('teamspace', 'xxx', 'user1');
 			expect(res).toEqual(determineResults('user1'));
 		});
-		});
+		test('should return a partial list if the user has model access in some federations (2)', async () => {
 			const res = await Federations.getFederationList('teamspace', 'xxx', 'user2');
 			expect(res).toEqual(determineResults('user2'));
 		});
-		});
-		});
-		});
+		test('should return empty array if the user has no access', async () => {
+			const res = await Federations.getFederationList('teamspace', 'xxx', 'nobody');
+			expect(res).toEqual([]);
 		});
 	});
-};
 };
 
 

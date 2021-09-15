@@ -28,4 +28,22 @@ Federations.getFederationList = async (teamspace, project, user) => {
 	return getModelList(teamspace, project, user, modelSettings);
 };
 
+Federations.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {
+	const accessibleFederations = await getFederationList(teamspace, project, username);
+	const federationIDs = accessibleFederations.map((a) => a._id);
+
+	if (favouritesToAdd.every((i) => federationIDs.includes(i))) {
+		await appendFavourites(username, teamspace, favouritesToAdd);
+	}
+};
+
+Federations.deleteFavourites = async (username, teamspace, project, favouritesToRemove) => {
+	const accessibleFederations = await getFederationList(teamspace, project, username);
+	const federationIDs = accessibleFederations.map((a) => a._id);
+
+	if (favouritesToRemove.every((i) => federationIDs.includes(i))) {
+		await deleteFavourites(username, teamspace, favouritesToRemove);
+	}
+};
+
 module.exports = Federations;
