@@ -17,9 +17,7 @@
 
 const { getContainerById, getContainers } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
-const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../utils/permissions/permissions');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
-const { getFavourites } = require('../../../../models/users');
 const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
 
