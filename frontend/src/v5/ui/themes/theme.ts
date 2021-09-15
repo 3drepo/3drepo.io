@@ -101,7 +101,7 @@ const typography: TypographyOptions = {
 	},
 	h5: {
 		fontWeight: FONT_WEIGHT.MEDIUM,
-		fontSize: '0.813rem',
+		fontSize: '0.8125rem',
 		lineHeight: '1.188rem',
 	},
 	body1: {
@@ -251,8 +251,8 @@ export const theme = createMuiTheme({
 		},
 		MuiTooltip: {
 			tooltip: {
-				backgroundColor: 'rgba(18, 30, 51, 0.9)', // COLOR.SECONDARY_DARK
-				padding: '8px 10px 10px 10px',
+				backgroundColor: COLOR.SECONDARY_DARK,
+				padding: '7px 10px 8px 10px',
 				borderRadius: '3px',
 				...typography.caption,
 			},

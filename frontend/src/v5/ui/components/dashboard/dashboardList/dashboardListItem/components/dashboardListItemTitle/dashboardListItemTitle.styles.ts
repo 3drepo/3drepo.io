@@ -26,6 +26,7 @@ export const Title = styled(Button).attrs({
 	padding: 0;
 	margin: 0;
 	line-height: normal;
+	font-size: ${({ theme }) => theme.typography.h5.fontSize};
 
 	${({ theme, selected }) => selected && css`
 		color: ${theme.palette.primary.contrast};

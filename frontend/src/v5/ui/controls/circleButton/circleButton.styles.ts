@@ -73,6 +73,7 @@ const contrastFabStyles = css`
 		&& {
 			border-color: ${({ theme }) => theme.palette.secondary.light};
 			pointer-events: none;
+
 			path {
 				fill: ${({ theme }) => theme.palette.secondary.light};
 			}

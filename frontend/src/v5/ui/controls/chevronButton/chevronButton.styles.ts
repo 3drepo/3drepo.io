@@ -27,7 +27,7 @@ export const StyledIconButton = styled(IconButton)`
 
 	svg {
 		height: 7px;
-		width: 12px;
+		width: 100%;
 		margin-top: 2px;
 	}
 
@@ -35,7 +35,7 @@ export const StyledIconButton = styled(IconButton)`
 		background-color: ${({ theme }) => theme.palette.secondary.main};
 
 		svg {
-			margin-top: 0;
+			margin-bottom: 3px;
 			transform: rotate(180deg);
 
 			path {
@@ -49,6 +49,12 @@ export const StyledIconButton = styled(IconButton)`
 	&:hover {
 		border-style: none;
 		background-color: ${({ theme }) => theme.palette.base.lightest};
+		
+		svg {
+			path {
+				fill: ${({ theme }) => theme.palette.secondary.main};
+			}
+		}
 	}
 
 	&:active {
