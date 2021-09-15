@@ -16,7 +16,7 @@
  */
 
 const { hasAccessToTeamspace, hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
-const Containers = require('../../../../processors/teamspaces/projects/containers/containers');
+const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { getUserFromSession } = require('../../../../utils/sessions');

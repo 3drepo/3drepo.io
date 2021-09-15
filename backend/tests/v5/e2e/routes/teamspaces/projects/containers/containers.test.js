@@ -38,32 +38,22 @@ const project = {
 	name: ServiceHelper.generateRandomString(),
 };
 
-const createRandomModelProperties = () => ({
-	properties: {
-		code: ServiceHelper.generateUUIDString(),
-		unit: 'm',
-	},
-	type: ServiceHelper.generateUUIDString(),
-	timestamp: Date.now(),
-	status: 'ok',
-});
-
 const models = [
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
 		isFavourite: true,
-		properties: createRandomModelProperties(),
+		properties: ServiceHelper.generateRandomModelProperties(),
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
-		properties: createRandomModelProperties(),
+		properties: ServiceHelper.generateRandomModelProperties(),
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
-		properties: { ...createRandomModelProperties(), federate: true },
+		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true },
 	},
 ];
 

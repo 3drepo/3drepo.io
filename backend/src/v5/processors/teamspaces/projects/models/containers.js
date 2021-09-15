@@ -20,26 +20,16 @@ const { getLatestRevision, getRevisionCount, getRevisions, updateRevisionStatus 
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../utils/permissions/permissions');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { getFavourites } = require('../../../../models/users');
+const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
 
 const Containers = {};
 
 Containers.getContainerList = async (teamspace, project, user) => {
-	const { permissions, models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
+	const { models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
+	const modelSettings = await getContainers(teamspace, models, { _id: 1, name: 1, permissions: 1 });
 
-	const [isTSAdmin, modelSettings, favourites] = await Promise.all([
-		isTeamspaceAdmin(teamspace, user),
-		getContainers(teamspace, models, { _id: 1, name: 1, permissions: 1 }),
-		getFavourites(user, teamspace),
-	]);
-
-	const isAdmin = isTSAdmin || hasProjectAdminPermissions(permissions, user);
-
-	return modelSettings.flatMap(({ _id, name, permissions: modelPerms }) => {
-		const perm = modelPerms ? modelPerms.find((entry) => entry.user === user) : undefined;
-		return (!isAdmin && !perm)
-			? [] : { _id, name, role: isAdmin ? 'admin' : perm.permission, isFavourite: favourites.includes(_id) };
-	});
+	return getModelList(teamspace, project, user, modelSettings);
 };
 
 Containers.getContainerStats = async (teamspace, project, container) => {

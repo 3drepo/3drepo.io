@@ -38,6 +38,9 @@ ResponseCodes.templates = {
 	// Project related error
 	projectNotFound: { message: 'Project not found.', status: 404 },
 
+	// Federation related error
+	federationNotFound: { message: 'Federation not found.', status: 404 },
+
 	// Model related error
 	modelNotFound: { message: 'Model not found.', status: 404 },
 	containerNotFound: { message: 'Container not found.', status: 404 },

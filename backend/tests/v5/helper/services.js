@@ -92,6 +92,16 @@ ServiceHelper.generateRevisionEntry = (isVoid = false) => ({
 	void: isVoid,
 });
 
+ServiceHelper.generateRandomModelProperties = () => ({
+	properties: {
+		code: ServiceHelper.generateUUIDString(),
+		unit: 'm',
+	},
+	type: ServiceHelper.generateUUIDString(),
+	timestamp: Date.now(),
+	status: 'ok',
+});
+
 ServiceHelper.app = () => createApp().listen(8080);
 
 ServiceHelper.closeApp = async (server) => {

@@ -25,7 +25,7 @@ jest.mock('../../../../../../../src/v5/models/users');
 const Users = require(`${src}/models/users`);
 jest.mock('../../../../../../../src/v5/models/revisions');
 const Revisions = require(`${src}/models/revisions`);
-const Containers = require(`${src}/processors/teamspaces/projects/containers/containers`);
+const Containers = require(`${src}/processors/teamspaces/projects/models/containers`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const modelList = [
