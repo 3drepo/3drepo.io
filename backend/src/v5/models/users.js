@@ -31,6 +31,10 @@ const getUser = async (user, projection) => {
 	return userDoc;
 };
 
+const updateUser = async (username, action) => {
+	await db.updateOne('admin', COLL_NAME, { user: username }, action);	
+};
+
 User.getFavourites = async (user, teamspace) => {
 	const { customData } = await getUser(user, { 'customData.starredModels': 1 });
 	const favs = customData.starredModels || {};
@@ -56,7 +60,7 @@ User.appendFavourites = async (username, teamspace, favouritesToAdd) => {
 		}
 	}
 
-	await db.updateOne('admin', COLL_NAME, { user: username }, { $set: { 'customData.starredModels': favourites } });
+	await updateUser(username, { $set: { 'customData.starredModels': favourites } });
 };
 
 User.deleteFavourites = async (username, teamspace, favouritesToRemove) => {	
@@ -65,13 +69,14 @@ User.deleteFavourites = async (username, teamspace, favouritesToRemove) => {
 	const favourites = userProfile.customData.starredModels || {};
 
 	if (favourites[teamspace]) {
-		const updatedFav = favourites[teamspace].filter((i) => !favouritesToRemove.includes(i));
+		const updatedFav = favourites[teamspace].filter((i) => !favouritesToRemove.includes(i)); 
 		if(updatedFav.length) {
-			await db.updateOne('admin', COLL_NAME, { user: username }, { $set: { 'customData.starredModels': updatedFav } });
+			favourites[teamspace] = updatedFav;
+			await updateUser(username, { $set: { 'customData.starredModels': favourites } })
 		} else {
 			const action = { $unset: {} };
 			action.$unset[`customData.starredModels.${teamspace}`] = '';
-			await db.updateOne('admin', COLL_NAME, { user: username }, action);
+			await updateUser(username, action);
 		}
 	}
 };
