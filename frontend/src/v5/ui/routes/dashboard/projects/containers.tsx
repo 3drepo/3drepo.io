@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2020 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,19 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
+import React from 'react';
 
-import { BimActions } from '@/v4/modules/bim';
-import { MetaRecord } from './metaRecord.component';
-
-const mapStateToProps = createStructuredSelector({
-});
-
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	selectAllSimilar: BimActions.selectAllSimilar,
-	copyRules: BimActions.copyRules,
-}, dispatch);
-
-export default connect(mapStateToProps, mapDispatchToProps)(MetaRecord);
+export const Containers = () => (
+	<>
+		Containers:
+		<ul>
+			<li>container 1</li>
+			<li>container 2</li>
+			<li>container 3</li>
+			<li>container 4</li>
+		</ul>
+	</>
+);

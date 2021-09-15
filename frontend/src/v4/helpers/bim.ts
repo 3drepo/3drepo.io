@@ -15,12 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { map } from 'lodash';
-import { IMetaRecord } from '../modules/bim/bim.redux';
+import { map, merge } from 'lodash';
+import { IMetaRecordList } from '../modules/bim/bim.redux';
 import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel.component';
 
-export const prepareMetadata = (metadata: IMetaRecord[]) => {
-	return map(metadata, (value, key) => ({ key, value }));
+export const prepareMetadata = (metadata: IMetaRecordList) => {
+	return map(metadata, (value, key) => {
+		return {
+			key,
+			value,
+			categories: key.split('::'),
+		};
+	});
 };
 
 export const getFilters = (metaKeys) => {
@@ -32,3 +38,29 @@ export const getFilters = (metaKeys) => {
 		}))
 	}];
 };
+
+const setValueToField = (fields, value) => fields
+	.reduceRight((acc, crr, index, arr) => ({
+		[crr]: index + 1 < arr.length ? acc : value,
+	}), {});
+
+export const transformMetadataToNestedList = (metadata) => metadata.reduce((acc, crr) =>
+	merge(setValueToField(crr.categories, crr), acc)
+, {});
+
+export const sortMetadata = ([nameA, dataA], [nameB, dataB]) => {
+	if (!!dataA.key > !!dataB.key) {
+		return -1;
+	}
+	if (!!dataA.key < !!dataB.key) {
+		return 1;
+	}
+
+	if (nameA < nameB) {
+		return -1;
+	}
+	if (nameA > nameB) {
+		return 1;
+	}
+};
+

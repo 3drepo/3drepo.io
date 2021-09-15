@@ -17,23 +17,14 @@
 
 import React from 'react';
 
-import { UserAvatar, StyledFab, StyledIconButton } from './circleButton.styles';
-
-interface ICircleButton {
-	variant?: 'avatar' | 'fab';
-	size?: 'large' | 'medium' | 'small';
-	motive?: 'main' | 'contrast';
-	disabled?: boolean;
-}
-
-export const CircleButton: React.FC<ICircleButton> = ({ variant = 'fab', size = 'large', motive = 'main', children, ...props }) => {
-	const isAvatarVariant = variant === 'avatar';
-
-	const ButtonComponent = isAvatarVariant ? StyledIconButton : StyledFab;
-
-	return (
-		<ButtonComponent size={size} motive={motive} {...props}>
-			{isAvatarVariant ? <UserAvatar>{children}</UserAvatar> : children}
-		</ButtonComponent>
-	);
-};
+export const Federations = () => (
+	<>
+		Federations:
+		<ul>
+			<li>federation 1</li>
+			<li>federation 2</li>
+			<li>federation 3</li>
+			<li>federation 4</li>
+		</ul>
+	</>
+);

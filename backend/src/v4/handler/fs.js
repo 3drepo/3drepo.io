@@ -57,7 +57,7 @@ class FSHandler {
 
 	storeFile(data) {
 		const _id = utils.generateUUID({string: true});
-		const folderNames = utils.generateFoldernames(_id, config.fs.levels);
+		const folderNames = utils.generateFoldernames(config.fs.levels);
 		const link = path.posix.join(folderNames, _id);
 
 		return new Promise((resolve, reject) => {
