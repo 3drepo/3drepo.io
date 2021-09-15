@@ -49,6 +49,19 @@ Models.getContainerById = async (ts, container, projection) => {
 	}
 };
 
+Models.getFederationById = async (ts, federation, projection) => {
+	try {
+		const res = await getModelByQuery(ts, { _id: federation, ...onlyFederations }, projection);
+		return res;
+	} catch (err) {
+		if (err?.code === templates.modelNotFound.code) {
+			throw templates.federationNotFound;
+		}
+
+		throw err;
+	}
+};
+
 Models.getContainers = async (ts, ids, projection, sort) => {
 	const query = { _id: { $in: ids }, ...noFederations };
 	return findModel(ts, query, projection, sort);

@@ -40,22 +40,47 @@ jest.mock('../../../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
 jest.mock('../../../../../../../src/v5/models/users');
 const Users = require(`${src}/models/users`);
-const Federations = require(`${src}/processors/teamspaces/projects/federations/federations`);
+jest.mock('../../../../../../../src/v5/models/revisions');
+const Federations = require(`${src}/processors/teamspaces/projects/models/federations`);
 
-const modelList = [
-	{ _id: 1, name: 'model1', permissions: [{ user: 'user1', permission: 'collaborator' }, { user: 'user2', permission: 'collaborator' }] },
-	{ _id: 2, name: 'model2', permissions: [{ user: 'user2', permission: 'commenter' }] },
-	{ _id: 3, name: 'model3', permissions: [{ user: 'user1', permission: 'viewer' }] },
-	{ _id: 4, name: 'model4', permissions: [] },
-	{ _id: 4, name: 'model4' },
+const federationList = [
+	{ _id: 1, name: 'federation 1', permissions: [{ user: 'user1', permission: 'collaborator' }, { user: 'user2', permission: 'collaborator' }] },
+	{ _id: 2, name: 'federation 2', permissions: [{ user: 'user2', permission: 'commenter' }] },
+	{ _id: 3, name: 'federation 3', permissions: [{ user: 'user1', permission: 'viewer' }] },
+	{ _id: 4, name: 'federation 4', permissions: [] },
+	{ _id: 5, name: 'federation 5' },
 ];
 
-let user1Favourites = [1];
+const federationSettings = {
+	federation1: {
+		_id: 1,
+		name: 'federation 1',
+		type: 'type 1',
+		properties: {
+			units: 'm',
+			code: 'FED1',
+		},
+		status: 'ok',
+	},
+	federation2: {
+		_id: 2,
+		name: 'federation 2',
+		type: 'type 2',
+		properties: {
+			units: 'mm',
+			code: 'FED2',
+		},
+		status: 'processing',
+	},
+};
 
-const project = { _id: 1, name: 'project', models: modelList.map(({ _id }) => _id) };
+
+const user1Favourites = [1];
+const project = { _id: 1, name: 'project', models: federationList.map(({ _id }) => _id) };
+
+
 
 ProjectsModel.getProjectById.mockImplementation(() => project);
-ModelSettings.getFederations.mockImplementation(() => modelList);
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
 Users.appendFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
 	for (const favourite of favouritesToAdd) {
@@ -80,6 +105,40 @@ jest.mock('../../../../../../../src/v5/utils/permissions/permissions', () => ({
 	isTeamspaceAdmin: jest.fn().mockImplementation((teamspace, user) => user === 'tsAdmin'),
 	hasProjectAdminPermissions: jest.fn().mockImplementation((perm, user) => user === 'projAdmin'),
 }));
+
+const determineResults = (username) => federationList.flatMap(({ permissions, _id, name }) => {
+	const isAdmin = username === 'projAdmin' || username === 'tsAdmin';
+	hasProjectAdminPermissions: jest.fn().mockImplementation((perm, user) => user === 'projAdmin'),
+}));
+	return isAdmin || hasModelPerm ? { _id, name, role: isAdmin ? 'admin' : hasModelPerm.permission, isFavourite } : [];
+});
+
+const testGetFederationList = () => {
+	describe('Get federation list by user', () => {
+
+			const res = await Federations.getFederationList('teamspace', 'xxx', 'tsAdmin');
+			expect(res).toEqual(determineResults('tsAdmin'));
+		});
+});
+			const res = await Federations.getFederationList('teamspace', 'xxx', 'projAdmin');
+			expect(res).toEqual(determineResults('projAdmin'));
+		});
+
+			const res = await Federations.getFederationList('teamspace', 'xxx', 'user1');
+			expect(res).toEqual(determineResults('user1'));
+		});
+		});
+			const res = await Federations.getFederationList('teamspace', 'xxx', 'user2');
+			expect(res).toEqual(determineResults('user2'));
+		});
+		});
+		});
+		});
+		});
+	});
+};
+};
+
 
 const testAppendFavourites = () => {
 	describe('Add federations to favourites', () => {
@@ -138,6 +197,7 @@ const testDeleteFavourites = () => {
 };
 
 describe('processors/teamspaces/projects/federations', () => {
+	testGetFederationList();
 	testAppendFavourites();
 	testDeleteFavourites();
 });
