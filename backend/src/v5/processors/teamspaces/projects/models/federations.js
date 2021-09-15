@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const RoutesManager = {};
-const ContainerRoutes = require('./teamspaces/projects/containers/containers');
-const FederationRoutes = require('./teamspaces/projects/federations/federations');
-const ProjectRoutes = require('./teamspaces/projects/projects');
-const TeamspaceRoutes = require('./teamspaces/teamspaces');
+const { getFederations } = require('../../../../models/modelSettings');
+const { getModelList } = require('./commons/modelList');
+const { getProjectById } = require('../../../../models/projects');
 
-RoutesManager.init = (app) => {
-	app.use('/v5/teamspaces/', TeamspaceRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects', ProjectRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', ContainerRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects/:project/federations', FederationRoutes);
+const Federations = {};
+
+Federations.getFederationList = async (teamspace, project, user) => {
+	const { models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
+	const modelSettings = await getFederations(teamspace, models, { _id: 1, name: 1, permissions: 1 });
+
+	return getModelList(teamspace, project, user, modelSettings);
 };
 
-module.exports = RoutesManager;
+module.exports = Federations;
