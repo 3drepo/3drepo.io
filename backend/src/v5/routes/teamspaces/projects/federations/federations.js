@@ -20,9 +20,10 @@ const { Router } = require('express');
 const { hasAccessToTeamspace } = require('../../../../middleware/permissions/permissions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
+const { getUserFromSession } = require('../../../../utils/sessions');
 
 const appendFavourites = (req, res) => {
-	const user = req.session.user.username;
+	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
 	const favouritesToAdd = req.body.federations;
 
@@ -32,7 +33,7 @@ const appendFavourites = (req, res) => {
 };
 
 const deleteFavourites = (req, res) => {
-	const user = req.session.user.username;
+	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
 	const favouritesToRemove = req.body.federations;
 
@@ -74,6 +75,9 @@ const establishRoutes = () => {
      *             properties:
      *               federations:
      *                 type: array
+	 *                 items:
+	 *                   type: string
+	 *                   format: uuid
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -81,10 +85,6 @@ const establishRoutes = () => {
 	 *         $ref: "#/components/responses/teamspaceNotFound"
 	 *       200:
 	 *         description: adds the federations found in the request body to the user's favourites list
-	 *         content:
-	 *           application/json:
-	 *             schema:
-	 *               type: object
 	 */
 	router.patch('/favourites', hasAccessToTeamspace, appendFavourites);
 
@@ -118,6 +118,9 @@ const establishRoutes = () => {
      *             properties:
      *               federations:
      *                 type: array
+	 *                 items:
+	 *                   type: string
+	 *                   format: uuid
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -125,10 +128,6 @@ const establishRoutes = () => {
 	 *         $ref: "#/components/responses/teamspaceNotFound"
 	 *       200:
 	 *         description: removes the federations found in the request body from the user's favourites list
-	 *         content:
-	 *           application/json:
-	 *             schema:
-	 *               type: object
 	 */
 	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites);
 	return router;

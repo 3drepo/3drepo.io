@@ -44,7 +44,7 @@ const getContainerStats = async (req, res) => {
 };
 
 const deleteFavourites = (req, res) => {
-	const user = req.session.user.username;
+	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
 	const favouritesToRemove = req.body.containers;
 
@@ -54,7 +54,7 @@ const deleteFavourites = (req, res) => {
 };
 
 const appendFavourites = (req, res) => {
-	const user = req.session.user.username;
+	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
 	const favouritesToAdd = req.body.containers;
 
@@ -233,6 +233,9 @@ const establishRoutes = () => {
      *             properties:
      *               containers:
      *                 type: array
+	 *                 items:
+	 *                   type: string
+	 *                   format: uuid
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -240,10 +243,6 @@ const establishRoutes = () => {
 	 *         $ref: "#/components/responses/teamspaceNotFound"
 	 *       200:
 	 *         description: adds the containers found in the request body to the user's favourites list
-	 *         content:
-	 *           application/json:
-	 *             schema:
-	 *               type: object
 	 */
 	router.patch('/favourites', hasAccessToTeamspace, appendFavourites);
 
@@ -277,6 +276,9 @@ const establishRoutes = () => {
      *             properties:
      *               containers:
      *                 type: array
+	 *                 items:
+	 *                   type: string
+	 *                   format: uuid
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -284,10 +286,6 @@ const establishRoutes = () => {
 	 *         $ref: "#/components/responses/teamspaceNotFound"
 	 *       200:
 	 *         description: removes the containers found in the request body from the user's favourites list
-	 *         content:
-	 *           application/json:
-	 *             schema:
-	 *               type: object
 	 */
 	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites);
 
