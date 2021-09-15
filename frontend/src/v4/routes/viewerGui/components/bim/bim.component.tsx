@@ -21,10 +21,10 @@ import { Tab } from '@material-ui/core';
 import InfoIcon from '@material-ui/icons/Info';
 import { isEmpty } from 'lodash';
 
-import { BIM_ACTIONS_ITEMS, BIM_ACTIONS_MENU } from '../../../../constants/bim';
-import { getFilters } from '../../../../helpers/bim';
-import { renderWhenTrue } from '../../../../helpers/rendering';
-import { IMetaRecord } from '../../../../modules/bim/bim.redux';
+import { BIM_ACTIONS_ITEMS, BIM_ACTIONS_MENU } from '@/v4/constants/bim';
+import { getFilters, sortMetadata, transformMetadataToNestedList } from '@/v4/helpers/bim';
+import { renderWhenTrue } from '@/v4/helpers/rendering';
+import { IMetaRecord } from '@/v4/modules/bim/bim.redux';
 import { EmptyStateInfo } from '../../../components/components.styles';
 import {
 	MenuList,
@@ -124,19 +124,19 @@ export class Bim extends React.PureComponent<IProps, any> {
 
 	private handleFilterChange = (selectedFilters) => {
 		this.props.setComponentState({ selectedFilters });
-	}
+	};
 
 	private getTitleIcon = () => <InfoIcon />;
 
 	private handleCloseSearchMode = () => {
 		this.props.setComponentState({ searchEnabled: false, selectedFilters: [] });
-	}
+	};
 
 	private handleOpenSearchMode = () => this.props.setComponentState({ searchEnabled: true });
 
 	private handleTabChange = (event, activeTab) => this.props.setComponentState({
 		showStarred: Boolean(activeTab)
-	})
+	});
 
 	private toggleStarredRecord = (key, isStarred) => () => {
 		if (isStarred) {
@@ -144,47 +144,48 @@ export class Bim extends React.PureComponent<IProps, any> {
 		} else {
 			this.props.addMetaRecordToStarred(key);
 		}
-	}
+	};
 
-	private renderMetaRecord = ({ key, value }) => {
-		const isStarred = Boolean(this.props.starredMetaMap[key]);
-
-		return (
-			<MetaRecord
-				onStarClick={this.toggleStarredRecord(key, isStarred)}
-				value={value}
-				name={key}
-				key={key}
-				starred={isStarred}
-			/>
+	private renderMetadata = () =>
+		Object.entries(transformMetadataToNestedList(this.metadata)).sort(sortMetadata).map(
+			([index, data]) => (
+				<MetaRecord
+					key={index}
+					name={index}
+					data={data}
+					toggleStarredRecord={this.toggleStarredRecord}
+					starredMetaMap={this.props.starredMetaMap}
+					showStarred={this.props.showStarred}
+					isSearch={!!this.props.selectedFilters.length}
+				/>
+			)
 		);
-	}
 
 	private renderList = () => {
 		const { selectedFilters, showStarred } = this.props;
 		const areFiltersActive = !!selectedFilters.length;
 		const hasMetadata = Boolean(this.metadata.length);
 		return (
-				<>
-					<Tabs
-						indicatorColor="primary"
-						textColor="primary"
-						value={Number(showStarred)}
-						onChange={this.handleTabChange}
-					>
-						<Tab label="All" />
-						<Tab label="Starred" />
-					</Tabs>
-					<ViewerPanelContent>
-						<Container>
-							{this.metadata.map((meta) => this.renderMetaRecord(meta))}
-							{this.renderEmptyState(!areFiltersActive && !hasMetadata)}
-							{this.renderNotFound(areFiltersActive && !hasMetadata)}
-						</Container>
-					</ViewerPanelContent>
+			<>
+				<Tabs
+					indicatorColor="primary"
+					textColor="primary"
+					value={Number(showStarred)}
+					onChange={this.handleTabChange}
+				>
+					<Tab label="All" />
+					<Tab label="Starred" />
+				</Tabs>
+				<ViewerPanelContent>
+					<Container>
+						{this.renderMetadata()}
+						{this.renderEmptyState(!areFiltersActive && !hasMetadata)}
+						{this.renderNotFound(areFiltersActive && !hasMetadata)}
+					</Container>
+				</ViewerPanelContent>
 			</>
 		);
-	}
+	};
 
 	private renderActionsMenu = (menu) =>  {
 		return(
@@ -199,7 +200,7 @@ export class Bim extends React.PureComponent<IProps, any> {
 				))}
 			</MenuList>
 		);
-	}
+	};
 
 	private renderActions = () => (
 		<PanelBarActions
@@ -211,5 +212,5 @@ export class Bim extends React.PureComponent<IProps, any> {
 			onSearchOpen={this.handleOpenSearchMode}
 			onSearchClose={this.handleCloseSearchMode}
 		/>
-	)
+	);
 }
