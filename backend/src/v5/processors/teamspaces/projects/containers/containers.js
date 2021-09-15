@@ -73,7 +73,7 @@ Containers.appendFavourites = async (username, teamspace, project, favouritesToA
 	const containerIDs = accessibleContainers.map((a) => a._id);
 
 	if (favouritesToAdd.every((i) => containerIDs.includes(i))) {
-		appendFavourites(username, teamspace, favouritesToAdd);
+		await appendFavourites(username, teamspace, favouritesToAdd);
 	}
 };
 
@@ -82,7 +82,7 @@ Containers.deleteFavourites = async (username, teamspace, project, favouritesToR
 	const containerIDs = accessibleContainers.map((a) => a._id);
 
 	if (favouritesToRemove.every((i) => containerIDs.includes(i))) {
-		deleteFavourites(username, teamspace, favouritesToRemove);
+		await deleteFavourites(username, teamspace, favouritesToRemove);
 	}
 };
 

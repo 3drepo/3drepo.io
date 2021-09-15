@@ -45,7 +45,7 @@ Federations.appendFavourites = async (username, teamspace, project, favouritesTo
 	const federationIDs = accessibleFederations.map((a) => a._id);
 
 	if (favouritesToAdd.every((i) => federationIDs.includes(i))) {
-		appendFavourites(username, teamspace, favouritesToAdd);
+		await appendFavourites(username, teamspace, favouritesToAdd);
 	}
 };
 
@@ -54,7 +54,7 @@ Federations.deleteFavourites = async (username, teamspace, project, favouritesTo
 	const federationIDs = accessibleFederations.map((a) => a._id);
 
 	if (favouritesToRemove.every((i) => federationIDs.includes(i))) {
-		deleteFavourites(username, teamspace, favouritesToRemove);
+		await deleteFavourites(username, teamspace, favouritesToRemove);
 	}
 };
 
