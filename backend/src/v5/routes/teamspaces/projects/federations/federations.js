@@ -27,8 +27,8 @@ const appendFavourites = (req, res) => {
 	const { teamspace, project } = req.params;
 	const favouritesToAdd = req.body.federations;
 
-	Federations.appendFavourites(user, teamspace, project, favouritesToAdd).then((favourites) => {
-		respond(req, res, templates.ok, { favourites });
+	Federations.appendFavourites(user, teamspace, project, favouritesToAdd).then(() => {
+		respond(req, res, templates.ok);
 	}).catch((err) => respond(req, res, err));
 };
 
@@ -37,8 +37,8 @@ const deleteFavourites = (req, res) => {
 	const { teamspace, project } = req.params;
 	const favouritesToRemove = req.body.federations;
 
-	Federations.deleteFavourites(user, teamspace, project, favouritesToRemove).then((favourites) => {
-		respond(req, res, templates.ok, { favourites });
+	Federations.deleteFavourites(user, teamspace, project, favouritesToRemove).then(() => {
+		respond(req, res, templates.ok);
 	}).catch((err) => respond(req, res, err));
 };
 
