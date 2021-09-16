@@ -20,7 +20,7 @@ import { push } from 'connected-react-router';
 
 import { dispatch } from '@/v4/modules/store';
 import { clientConfigService } from '@/v4/services/clientConfig';
-import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authActions.dispatchers';
+import { AuthActions } from '@/v4/modules/auth';
 
 axios.defaults.withCredentials = true;
 
@@ -39,7 +39,7 @@ axios.interceptors.response.use(
 						const sessionHasExpired = unauthorized && notLogin;
 
 						if (sessionHasExpired) {
-							AuthActionsDispatchers.sessionExpired();
+							dispatch(AuthActions.sessionExpired());
 						} else {
 							throw error.response;
 						}

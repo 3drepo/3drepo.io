@@ -15,17 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import * as AuthSelectors from '@/v4/modules/auth/auth.selectors';
+import { createHooksSelectors } from './selectorsHooks.helper';
 
-import Avatar from '@material-ui/core/Avatar';
-import { StyledIconButton } from './avatarButton.styles';
-
-interface IAvatarButton {
-	disabled?: boolean;
-}
-
-export const AvatarButton: React.FC<IAvatarButton> = ({ children, ...props }) => (
-	<StyledIconButton {...props}>
-		<Avatar>{children}</Avatar>
-	</StyledIconButton>
-);
+export const AuthHooksSelectors = createHooksSelectors(AuthSelectors);
