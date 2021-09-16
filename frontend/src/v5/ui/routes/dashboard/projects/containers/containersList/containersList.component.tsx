@@ -34,8 +34,47 @@ import {
 	DashboardListItemTitle,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
-import { EllipsisButton } from '@controls/ellipsisButton';
+import { EllipsisButtonWithMenu } from '@controls/ellipsisButtonWithMenu';
 import { Container } from './containersList.styles';
+
+const ellipsisMenuItems = [
+	{
+		title: <Trans id="containers.ellipsisMenu.loadContainer" message="Load Container in 3D Viewer" />,
+		onClick: () => {},
+	},
+	{
+		title: <Trans id="containers.ellipsisMenu.uploadNewRevision" message="Upload new Revision" />,
+		onClick: () => {},
+	},
+	{
+		title: <Trans id="containers.ellipsisMenu.viewIssues" message="View Issues" />,
+		onClick: () => {},
+	},
+	{
+		title: <Trans id="containers.ellipsisMenu.viewRisks" message="View Risks" />,
+		onClick: () => {},
+	},
+	{
+		title: <Trans id="containers.ellipsisMenu.viewRevisions" message="View Revisions" />,
+		onClick: () => {},
+	},
+	{
+		title: <Trans id="containers.ellipsisMenu.editPermissions" message="Edit Permissions" />,
+		onClick: () => {},
+	},
+	{
+		title: <Trans id="containers.ellipsisMenu.shareContainer" message="Share Container" />,
+		onClick: () => {},
+	},
+	{
+		title: <Trans id="containers.ellipsisMenu.settings" message="Settings" />,
+		onClick: () => {},
+	},
+	{
+		title: <Trans id="containers.ellipsisMenu.delete" message="Delete" />,
+		onClick: () => {},
+	},
+];
 
 type IContainersList = {
 	emptyMessage: ReactNode;
@@ -130,11 +169,7 @@ export const ContainersList = ({
 									<DashboardListItemIcon
 										selected={container._id === selectedId}
 									>
-										<EllipsisButton
-											onClick={(event) => {
-												event.stopPropagation();
-											}}
-										/>
+										<EllipsisButtonWithMenu list={ellipsisMenuItems} />
 									</DashboardListItemIcon>
 								</DashboardListItemRow>
 							</DashboardListItem>
