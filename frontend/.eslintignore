@@ -3,6 +3,7 @@ test/
 unity/
 ts-rules/
 node_modules/
+docs/
 serviceWorkerExtras.js
 plopfile.js
 eslint-rules/
