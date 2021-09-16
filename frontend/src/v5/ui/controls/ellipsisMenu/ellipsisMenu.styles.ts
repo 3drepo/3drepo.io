@@ -16,30 +16,36 @@
  */
 
 import styled from 'styled-components';
-import { Menu as MenuComponent, MenuItem as MenuItemComponent } from '@material-ui/core';
+import {
+	MenuList as MenuListComponent,
+	MenuItem as MenuItemComponent,
+	Popper as PopperComponent,
+} from '@material-ui/core';
 
-export const MenuList = styled(MenuComponent)`
-	ul {
-		padding: 10px 0;
-	}
+export const MenuList = styled(MenuListComponent)`
+  padding: 10px 0;
 `;
 
 export const MenuItem = styled(MenuItemComponent)`
-	color: ${({ theme }) => theme.palette.secondary.main};
-	margin: 0;
-	height: 40px;
-	padding-right: 14px;
-	justify-content: space-between;
+  color: ${({ theme }) => theme.palette.secondary.main};
+  margin: 0;
+  height: 40px;
+  padding-right: 14px;
+  justify-content: space-between;
 
-	&:hover {
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	}
+  &:hover {
+    background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+  }
 
-	&:focus {
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	}
+  &:focus {
+    background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+  }
 
-	&:active {
-		background-color: ${({ theme }) => theme.palette.base.light};
-	}
+  &:active {
+    background-color: ${({ theme }) => theme.palette.base.light};
+  }
+`;
+
+export const Popper = styled(PopperComponent)`
+  z-index: 100;
 `;

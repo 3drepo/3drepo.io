@@ -16,6 +16,8 @@
  */
 
 import React, { MouseEvent } from 'react';
+import { Trans } from '@lingui/react';
+import { Tooltip } from '@material-ui/core';
 import { EllipsisButton } from '@controls/ellipsisButton';
 import { EllipsisMenu, IEllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 
@@ -37,15 +39,17 @@ export const EllipsisButtonWithMenu = ({ list }: IEllipsisButtonWithMenu): JSX.E
 
 	return (
 		<>
-			<EllipsisButton
-				aria-controls="ellipsis-menu"
-				aria-haspopup="true"
-				onClick={(event) => {
-					event.stopPropagation();
-					handleClickDropdown(event);
-				}}
-				isOn={Boolean(anchorEl)}
-			/>
+			<Tooltip title={<Trans id="ellipsisMenu.tooltip" message="More options" />}>
+				<EllipsisButton
+					aria-controls="ellipsis-menu-list"
+					aria-haspopup="true"
+					onClick={(event) => {
+						event.stopPropagation();
+						handleClickDropdown(event);
+					}}
+					isOn={Boolean(anchorEl)}
+				/>
+			</Tooltip>
 			<EllipsisMenu
 				anchorEl={anchorEl}
 				handleClose={handleCloseDropdown}

@@ -16,8 +16,8 @@
  */
 
 import React, { Dispatch, ReactNode } from 'react';
-import { Typography } from '@material-ui/core';
-import { MenuList, MenuItem } from './ellipsisMenu.styles';
+import { ClickAwayListener, Grow, Paper, Typography } from '@material-ui/core';
+import { MenuList, MenuItem, Popper } from './ellipsisMenu.styles';
 
 interface IListItem {
 	title: ReactNode;
@@ -31,41 +31,47 @@ export interface IEllipsisMenu {
 }
 
 export const EllipsisMenu = ({ anchorEl, handleClose, list }: IEllipsisMenu): JSX.Element => {
-	const menuPosition = {
-		getContentAnchorEl: null,
-		anchorOrigin: {
-			vertical: 'bottom',
-			horizontal: 'right',
-		},
-		transformOrigin: {
-			vertical: 'top',
-			horizontal: 'right',
-		},
+	const handleListKeyDown = (event) => {
+		if (event.key === 'Tab') {
+			event.preventDefault();
+			handleClose();
+		}
 	};
 
 	return (
-		<MenuList
-			anchorEl={anchorEl}
-			onClose={(event) => {
-				event.stopPropagation();
-				handleClose();
-			}}
+		<Popper
 			open={Boolean(anchorEl)}
-			{...menuPosition}
+			anchorEl={anchorEl}
+			transition
+			disablePortal
+			placement="bottom-end"
 		>
-			{list.map(({ title, onClick }) => (
-				<MenuItem
-					onClick={(event) => {
-						event.stopPropagation();
-						onClick(event);
-						handleClose();
-					}}
+			{({ TransitionProps, placement }) => (
+				<Grow
+					{...TransitionProps}
+					style={{ transformOrigin: placement === 'bottom-end' ? 'center top' : 'center bottom' }}
 				>
-					<Typography variant="body1" noWrap>
-						{title}
-					</Typography>
-				</MenuItem>
-			))}
-		</MenuList>
+					<Paper>
+						<ClickAwayListener onClickAway={handleClose}>
+							<MenuList autoFocusItem={Boolean(anchorEl)} id="ellipsis-menu-list" onKeyDown={handleListKeyDown}>
+								{list.map(({ title, onClick }) => (
+									<MenuItem
+										onClick={(event) => {
+											event.stopPropagation();
+											onClick(event);
+											handleClose();
+										}}
+									>
+										<Typography variant="body1" noWrap>
+											{title}
+										</Typography>
+									</MenuItem>
+								))}
+							</MenuList>
+						</ClickAwayListener>
+					</Paper>
+				</Grow>
+			)}
+		</Popper>
 	);
 };
