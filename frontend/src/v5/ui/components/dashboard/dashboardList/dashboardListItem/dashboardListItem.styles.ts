@@ -43,6 +43,6 @@ export const Container = styled.li`
 
 	${({ theme, selected }) => selected && css`
 		background-color: ${theme.palette.secondary.main};
-		border: none;
+		border: none !important;
 	`}
 `;

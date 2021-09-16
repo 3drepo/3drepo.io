@@ -18,7 +18,9 @@
 import styled from 'styled-components';
 
 export const Content = styled.section`
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	display: block;
-	padding: 100px 20px;
+	padding: 64px 20px;
 `;

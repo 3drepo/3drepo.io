@@ -14,31 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 
-export const ListContainer = styled.ul`
-	display: flex;
-	flex-direction: column;
-	width: 100%;
-	margin: 0;
-	padding: 0;
-`;
-
-export const DashboardListEmptyContainer = styled.div`
-	display: flex;
-	align-items: center;
-	height: 75px;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	border: 1px dashed ${({ theme }) => theme.palette.base.light};
-	border-radius: 5px;
-	padding-left: 30px;
-`;
-
-export const DashboardListEmptyText = styled(Typography).attrs({
-	variant: 'body1',
-})`
-	color: ${({ theme }) => theme.palette.base.main};
-	margin-right: 27px;
+export const Container = styled.div`
+  margin: 16px 0;
 `;

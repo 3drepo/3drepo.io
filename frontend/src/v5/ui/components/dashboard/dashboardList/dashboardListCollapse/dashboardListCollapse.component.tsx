@@ -21,12 +21,12 @@ import { Typography } from '@controls/typography';
 import { ChevronButton } from '@controls/chevronButton';
 import { Container, ButtonContainer, Divider, CollapsedItemContainer } from './dashboardListCollapse.styles';
 
-type IDashboardListCollapse = {
+export type IDashboardListCollapse = {
 	children: ReactNode;
-	title: string;
+	title: ReactNode;
 	tooltipTitles?: {
-		visible: string;
-		collapsed: string;
+		visible: ReactNode;
+		collapsed: ReactNode;
 	},
 	className?: string;
 };
