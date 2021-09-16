@@ -81,26 +81,17 @@ const testAppendFavourites = () => {
 	describe('Add containers to favourites', () => {
 		test('Adding an array of containers of a new teamspace', async () => {
 			jest.spyOn(db, 'findOne').mockResolvedValue({ customData: { starredModels: favouritesData } });
-			await User.appendFavourites('xxx', 'teamspace3', ['e', 'f']);
-			const newFavourtiesData = favouritesData;
-			newFavourtiesData.teamspace3 = ['e', 'f'];
-			expect(favouritesData).toEqual(newFavourtiesData);
+			await User.appendFavourites('xxx', 'teamspace3', ['e', 'f']);			
 		});
 
 		test('Adding an array of containers of an existing teamspace', async () => {
 			jest.spyOn(db, 'findOne').mockResolvedValue({ customData: { starredModels: favouritesData } });
-			await User.appendFavourites('xxx', 'teamspace1', ['d', 'e']);
-			const newFavourtiesData = favouritesData;
-			newFavourtiesData.teamspace1 = ['d', 'e'];
-			expect(favouritesData).toEqual(newFavourtiesData);
+			await User.appendFavourites('xxx', 'teamspace1', ['d', 'e']);						
 		});
 
 		test('Adding an array of containers of an existing teamspace with duplicate entries', async () => {
 			jest.spyOn(db, 'findOne').mockResolvedValue({ customData: { starredModels: favouritesData } });
-			await User.appendFavourites('xxx', 'teamspace1', ['a', 'b', 'c', ' d', 'e']);
-			const newFavourtiesData = favouritesData;
-			newFavourtiesData.teamspace1 = ['d', 'e'];
-			expect(favouritesData).toEqual(newFavourtiesData);
+			await User.appendFavourites('xxx', 'teamspace1', ['a', 'b', 'c', ' d', 'e']);						
 		});
 	});
 };

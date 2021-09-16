@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- const { appendFavourites, deleteFavourites } = require('../../../../models/users');
+const { appendFavourites, deleteFavourites } = require('../../../../models/users');
 const { getFederations } = require('../../../../models/modelSettings');
-const { getModelList, isFavouritesListValid } = require('./commons/modelList');
+const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
+const { editFavourites } = require('./commons/favourites');
 
 const Federations = {};
 
@@ -30,19 +31,13 @@ Federations.getFederationList = async (teamspace, project, user) => {
 };
 
 Federations.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {
-	const acessibleFederations = await Federations.getFederationList(teamspace, project, username);
-	
-	if (isFavouritesListValid(acessibleFederations, favouritesToAdd)) {
-		await appendFavourites(username, teamspace, favouritesToAdd);
-	}
+	const accessibleFederations = await Federations.getFederationList(teamspace, project, username);
+	await editFavourites(username, teamspace, accessibleFederations, favouritesToAdd, appendFavourites);
 };
 
 Federations.deleteFavourites = async (username, teamspace, project, favouritesToRemove) => {
-	const acessibleFederations = await Federations.getFederationList(teamspace, project, username);
-
-	if (isFavouritesListValid(acessibleFederations, favouritesToRemove)) {
-		await deleteFavourites(username, teamspace, favouritesToRemove);
-	}
+	const accessibleFederations = await Federations.getFederationList(teamspace, project, username);
+	await editFavourites(username, teamspace, accessibleFederations, favouritesToRemove, deleteFavourites);
 };
 
 module.exports = Federations;
