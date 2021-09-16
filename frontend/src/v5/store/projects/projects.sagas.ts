@@ -15,10 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
+import { put, takeLatest } from 'redux-saga/effects';
+import * as API from '@/v5/services/api';
+import { ProjectsActions, ProjectsTypes, IProjects } from './projects.redux';
 
-const selectTeamspacesDomain = (state) => state.teamspaces2;
+export function* fetch({ teamspace }) {
+	yield put(ProjectsActions.setSending(true));
 
-export const selectTeamspaces = createSelector(
-	selectTeamspacesDomain, (state) => state.teamspaces,
-);
+	try {
+		const { data: { projects } } = yield API.fetchProjects(teamspace);
+		yield put(ProjectsActions.fetchSuccess(projects as IProjects[]));
+	} catch (e) {
+		console.error(e);
+	}
+
+	yield put(ProjectsActions.setSending(false));
+}
+
+export default function* ProjectsSaga() {
+	yield takeLatest(ProjectsTypes.FETCH as any, fetch);
+}

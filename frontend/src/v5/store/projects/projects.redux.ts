@@ -1,0 +1,56 @@
+/**
+ *  Copyright (C) 2021 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import { createActions, createReducer } from 'reduxsauce';
+import { Constants } from '../common/actions.helper';
+
+export interface IProjects {
+	id: string;
+	name: string;
+	isAdmin: boolean;
+}
+
+interface IProjectsActions {
+	fetch: (teamspace: string) => any;
+	fetchSuccess: (projects: IProjects[]) => any;
+	setSending: (isPending: boolean) => any;
+}
+
+export const { Types: ProjectsTypes, Creators: ProjectsActions } = createActions({
+	fetch: ['teamspace'],
+	fetchSuccess: ['projects'],
+	setSending: ['isPending'],
+}, { prefix: 'PROJECTS/' }) as { Types: Constants<IProjectsActions>; Creators: IProjectsActions };
+
+interface IProjectsState {
+	projects: IProjects[];
+	isPending: boolean;
+}
+
+export const INITIAL_STATE: IProjectsState = {
+	projects: [],
+	isPending: true,
+};
+
+export const setPendingStatus = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
+
+export const fetchSuccess = (state = INITIAL_STATE, { projects }) => ({ ...state, projects });
+
+export const reducer = createReducer(INITIAL_STATE, {
+	[ProjectsTypes.FETCH_SUCCESS]: fetchSuccess,
+	[ProjectsTypes.SET_SENDING]: setPendingStatus,
+});

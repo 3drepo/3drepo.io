@@ -17,6 +17,24 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 
+export interface IAuthActions {
+	authenticate: () => void;
+	login: (teamspace: string, passwords: string) => void;
+	loginSuccess: () => void;
+	loginFailure: () => void;
+	logout: () => void;
+	sessionExpired: () => void;
+	sendPasswordChangeRequest: (userNameOrEmail: string) => void;
+	setPendingStatus: (isPending: string) => void;
+	changePassword: (username: string, token: string, password: string) => void;
+	setLocalSessionStatus: (status: string) => void;
+	register: (username: string, data: any) => void;
+	verify: (username: string, token: string) => void;
+	setAuthMessage: (message: string) => void;
+	onLoggedOut: () => void;
+	clearAuthMessage: () => void;
+}
+
 export const { Types: AuthTypes, Creators: AuthActions } = createActions({
 	authenticate: [],
 	login: ['username', 'password'],

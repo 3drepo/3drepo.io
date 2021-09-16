@@ -15,10 +15,5 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
-
-const selectTeamspacesDomain = (state) => state.teamspaces2;
-
-export const selectTeamspaces = createSelector(
-	selectTeamspacesDomain, (state) => state.teamspaces,
-);
+export * from './teamspaces';
+export * from './projects';

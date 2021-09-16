@@ -17,8 +17,8 @@
 
 import { createSelector } from 'reselect';
 
-const selectTeamspacesDomain = (state) => state.teamspaces2;
+const selectProjectsDomain = (state) => state.projects;
 
-export const selectTeamspaces = createSelector(
-	selectTeamspacesDomain, (state) => state.teamspaces,
+export const selectProjects = createSelector(
+	selectProjectsDomain, (state) => state.projects,
 );
