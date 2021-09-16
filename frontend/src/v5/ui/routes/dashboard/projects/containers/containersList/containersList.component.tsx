@@ -54,7 +54,8 @@ export const ContainersList = ({
 }: IContainersList): JSX.Element => {
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 
-	const onSortingChanged = () => { };
+	const onSortingChanged = () => {
+	};
 
 	return (
 		<Container>
@@ -96,7 +97,10 @@ export const ContainersList = ({
 										{container.title}
 									</DashboardListItemTitle>
 									<DashboardListItemButton
-										onClick={() => {}}
+										onClick={() => {
+											// eslint-disable-next-line no-console
+											console.log('handle revisions button');
+										}}
 										width={186}
 										tooltipTitle="View revisions"
 									>
@@ -111,7 +115,15 @@ export const ContainersList = ({
 									<DashboardListItemText width={97} selected={container._id === selectedId}>
 										{container.date}
 									</DashboardListItemText>
-									<DashboardListItemIcon><FavouriteCheckbox /></DashboardListItemIcon>
+									<DashboardListItemIcon>
+										<FavouriteCheckbox
+											onClick={(event) => {
+												event.stopPropagation();
+												// eslint-disable-next-line no-console
+												console.log('handle favourite click');
+											}}
+										/>
+									</DashboardListItemIcon>
 									<DashboardListItemIcon><FavouriteCheckbox /></DashboardListItemIcon>
 								</DashboardListItemRow>
 							</DashboardListItem>

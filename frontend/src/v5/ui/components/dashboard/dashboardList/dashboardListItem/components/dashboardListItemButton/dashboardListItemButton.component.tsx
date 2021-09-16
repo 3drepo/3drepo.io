@@ -37,7 +37,11 @@ export const DashboardListItemButton = ({
 }: IDashboardListItemButton): JSX.Element => (
 	<FixedOrGrowContainer width={width} className={className}>
 		<Tooltip title={tooltipTitle}>
-			<Button onClick={onClick}>
+			<Button onClick={(event) => {
+				event.stopPropagation();
+				onClick(event);
+			}}
+			>
 				{children}
 			</Button>
 		</Tooltip>

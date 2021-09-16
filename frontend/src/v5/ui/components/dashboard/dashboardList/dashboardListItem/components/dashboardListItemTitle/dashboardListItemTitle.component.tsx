@@ -35,7 +35,13 @@ export const DashboardListItemTitle = ({
 }: IDashboardListItemTitle): JSX.Element => (
 	<FixedOrGrowContainer width={width} className={className}>
 		<Tooltip title={tooltipTitle}>
-			<Title onClick={onClick} selected={selected}>
+			<Title
+				onClick={(event) => {
+					event.stopPropagation();
+					onClick(event);
+				}}
+				selected={selected}
+			>
 				{children}
 			</Title>
 		</Tooltip>
