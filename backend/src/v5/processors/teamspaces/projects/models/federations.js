@@ -19,7 +19,7 @@ const { appendFavourites, deleteFavourites } = require('../../../../models/users
 const { getFederations } = require('../../../../models/modelSettings');
 const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
-const { editFavourites } = require('./commons/favourites');
+const { checkModelsAreValid } = require('./commons/favourites');
 
 const Federations = {};
 
@@ -32,12 +32,14 @@ Federations.getFederationList = async (teamspace, project, user) => {
 
 Federations.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {
 	const accessibleFederations = await Federations.getFederationList(teamspace, project, username);
-	await editFavourites(username, teamspace, accessibleFederations, favouritesToAdd, appendFavourites);
+	checkModelsAreValid(accessibleFederations, favouritesToAdd);
+	await appendFavourites(username, teamspace, favouritesToAdd);
 };
 
 Federations.deleteFavourites = async (username, teamspace, project, favouritesToRemove) => {
 	const accessibleFederations = await Federations.getFederationList(teamspace, project, username);
-	await editFavourites(username, teamspace, accessibleFederations, favouritesToRemove, deleteFavourites);
+	checkModelsAreValid(accessibleFederations, favouritesToRemove);
+	await deleteFavourites(username, teamspace, favouritesToRemove);
 };
 
 module.exports = Federations;

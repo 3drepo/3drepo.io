@@ -21,13 +21,11 @@
 
  const Favourites = {};
  
- Favourites.editFavourites = async (username, teamspace, acessibleModels, favourites, modelMethod) =>{
-    const invalidFavourites = getArrayDifference(acessibleModels.map((c)=>c._id), favourites);
+ Favourites.checkModelsAreValid = async (accessibleModels, favourites) =>{
+    const invalidFavourites = getArrayDifference(accessibleModels.map((c)=>c._id), favourites);
 	if (invalidFavourites.length) {
-		throw createResponseCode(templates.invalidArguments,  "Invalid Arguements: " + invalidFavourites);
+		throw createResponseCode(templates.invalidArguments,  "The action cannot be performed on the following models: " + invalidFavourites);
 	}
-
-	await modelMethod(username, teamspace, favourites);
  };
  
  module.exports = Favourites;
