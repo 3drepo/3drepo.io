@@ -16,18 +16,11 @@
  */
 
 import React from 'react';
-import ChevronIcon from '@assets/icons/chevron.svg';
-import { IconButtonProps } from '@material-ui/core';
-import { StyledIconButton } from './chevronButton.styles';
 
-export type IChevronButton = IconButtonProps & {
-	isOn?: boolean;
-};
-
-export const ChevronButton = React.forwardRef(
-	({ ...props }: IChevronButton, ref: React.Ref<HTMLSpanElement>): JSX.Element => (
-		<StyledIconButton {...props} ref={ref}>
-			<ChevronIcon />
-		</StyledIconButton>
-	),
+export default () => (
+	<svg width="3" height="13" viewBox="0 0 3 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+		<circle cx="1.5" cy="6.5" r="1.5" fill="#172B4D" />
+		<circle cx="1.5" cy="1.5" r="1.5" fill="#172B4D" />
+		<circle cx="1.5" cy="11.5" r="1.5" fill="#172B4D" />
+	</svg>
 );

@@ -16,18 +16,18 @@
  */
 
 import React from 'react';
-import ChevronIcon from '@assets/icons/chevron.svg';
-import { IconButtonProps } from '@material-ui/core';
-import { StyledIconButton } from './chevronButton.styles';
+import EllipsisIcon from '@assets/icons/ellipsis.svg';
+import { IconButtonProps } from '@material-ui/core/IconButton';
+import { StyledIconButton } from './ellipsisButton.styles';
 
-export type IChevronButton = IconButtonProps & {
+export type IEllipsisButton = IconButtonProps & {
 	isOn?: boolean;
 };
 
-export const ChevronButton = React.forwardRef(
-	({ ...props }: IChevronButton, ref: React.Ref<HTMLSpanElement>): JSX.Element => (
+export const EllipsisButton = React.forwardRef(
+	({ ...props }: IEllipsisButton, ref: React.Ref<HTMLSpanElement>): JSX.Element => (
 		<StyledIconButton {...props} ref={ref}>
-			<ChevronIcon />
+			<EllipsisIcon />
 		</StyledIconButton>
 	),
 );

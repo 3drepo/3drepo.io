@@ -34,6 +34,7 @@ import {
 	DashboardListItemTitle,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
+import { EllipsisButton } from '@controls/ellipsisButton';
 import { Container } from './containersList.styles';
 
 type IContainersList = {
@@ -119,12 +120,22 @@ export const ContainersList = ({
 										<FavouriteCheckbox
 											onClick={(event) => {
 												event.stopPropagation();
+											}}
+											onChange={(event) => {
 												// eslint-disable-next-line no-console
-												console.log('handle favourite click');
+												console.log('handle favourite click', event.target.value);
 											}}
 										/>
 									</DashboardListItemIcon>
-									<DashboardListItemIcon><FavouriteCheckbox /></DashboardListItemIcon>
+									<DashboardListItemIcon
+										selected={container._id === selectedId}
+									>
+										<EllipsisButton
+											onClick={(event) => {
+												event.stopPropagation();
+											}}
+										/>
+									</DashboardListItemIcon>
 								</DashboardListItemRow>
 							</DashboardListItem>
 						))

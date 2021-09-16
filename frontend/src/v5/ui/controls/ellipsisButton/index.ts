@@ -15,19 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import ChevronIcon from '@assets/icons/chevron.svg';
-import { IconButtonProps } from '@material-ui/core';
-import { StyledIconButton } from './chevronButton.styles';
-
-export type IChevronButton = IconButtonProps & {
-	isOn?: boolean;
-};
-
-export const ChevronButton = React.forwardRef(
-	({ ...props }: IChevronButton, ref: React.Ref<HTMLSpanElement>): JSX.Element => (
-		<StyledIconButton {...props} ref={ref}>
-			<ChevronIcon />
-		</StyledIconButton>
-	),
-);
+export { EllipsisButton } from './ellipsisButton.component';
