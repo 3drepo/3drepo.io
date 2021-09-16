@@ -23,6 +23,7 @@
     "baseUrl": "./",
     "paths": {
       "@components/*": ["./src/v5/ui/components/*"],
+      "@controls/*": ["./src/v5/ui/controls/*"],
       "@assets/*": ["./assets/*"],
       "@/*": ["./src/*"]
     },

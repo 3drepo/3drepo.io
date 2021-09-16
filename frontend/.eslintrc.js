@@ -54,6 +54,7 @@ module.exports = {
 		'react/jsx-props-no-spreading': 'off',
 		'react/prop-types': 'off',
 		'react/require-default-props': 'off',
+		'react/jsx-indent-props': ['error', 'tab'],
 		'react/jsx-one-expression-per-line':  0
 	}
 };
