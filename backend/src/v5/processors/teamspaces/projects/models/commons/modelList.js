@@ -38,4 +38,13 @@ ModelList.getModelList = async (teamspace, project, user, modelSettings) => {
 	});
 };
 
+ModelList.isFavouritesListValid = (acessibleModels, favouritesIDs) => {
+	const acessibleModelsIDs = {};
+	for (var i = 0; i< acessibleModels.length; i++) {    
+		acessibleModelsIDs[acessibleModels[i]._id] = true;
+	}
+
+	return favouritesIDs.every((i) => acessibleModelsIDs[i] !== undefined);
+}
+
 module.exports = ModelList;

@@ -18,7 +18,7 @@
 const { appendFavourites, deleteFavourites } = require('../../../../models/users');
 const { getContainerById, getContainers } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionCount } = require('../../../../models/revisions');
-const { getModelList } = require('./commons/modelList');
+const { getModelList, isFavouritesListValid } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
 
 const Containers = {};
@@ -58,18 +58,16 @@ Containers.getContainerStats = async (teamspace, project, container) => {
 
 Containers.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {
 	const accessibleContainers = await Containers.getContainerList(teamspace, project, username);
-	const containerIDs = accessibleContainers.map((a) => a._id);
 
-	if (favouritesToAdd.every((i) => containerIDs.includes(i))) {
+	if (isFavouritesListValid(accessibleContainers, favouritesToAdd)) {
 		await appendFavourites(username, teamspace, favouritesToAdd);
 	}
 };
 
 Containers.deleteFavourites = async (username, teamspace, project, favouritesToRemove) => {
 	const accessibleContainers = await Containers.getContainerList(teamspace, project, username);
-	const containerIDs = accessibleContainers.map((a) => a._id);
 
-	if (favouritesToRemove.every((i) => containerIDs.includes(i))) {
+	if (isFavouritesListValid(accessibleContainers, favouritesToRemove)) {
 		await deleteFavourites(username, teamspace, favouritesToRemove);
 	}
 };
