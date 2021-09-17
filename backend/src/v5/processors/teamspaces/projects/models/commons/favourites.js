@@ -15,12 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { appendFavourites, deleteFavourites } = require('../../../../../models/users');
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 
 const Favourites = {};
 
-Favourites.checkModelsAreValid = (accessibleModels, favourites) => {
+const checkModelsAreValid = (accessibleModels, favourites) => {
 	if (!favourites.length) {
 		throw createResponseCode(templates.invalidArguments, 'The favourites list provided is empty');
 	}
@@ -30,6 +31,16 @@ Favourites.checkModelsAreValid = (accessibleModels, favourites) => {
 	if (invalidFavourites.length) {
 		throw createResponseCode(templates.invalidArguments, `The action cannot be performed on the following models: ${invalidFavourites}`);
 	}
+};
+
+Favourites.appendFavourites = async (username, teamspace, accessibleModels, favourites) => {
+	checkModelsAreValid(accessibleModels, favourites);
+	await appendFavourites(username, teamspace, favourites);
+};
+
+Favourites.deleteFavourites = async (username, teamspace, accessibleModels, favourites) => {
+	checkModelsAreValid(accessibleModels, favourites);
+	await deleteFavourites(username, teamspace, favourites);
 };
 
 module.exports = Favourites;

@@ -48,9 +48,8 @@ const deleteFavourites = (req, res) => {
 	const { teamspace, project } = req.params;
 	const favouritesToRemove = req.body.containers;
 
-	Containers.deleteFavourites(user, teamspace, project, favouritesToRemove).then(() => {
-		respond(req, res, templates.ok);
-	}).catch((err) => respond(req, res, err));
+	Containers.deleteFavourites(user, teamspace, project, favouritesToRemove)
+		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
 };
 
 const appendFavourites = (req, res) => {
@@ -58,9 +57,8 @@ const appendFavourites = (req, res) => {
 	const { teamspace, project } = req.params;
 	const favouritesToAdd = req.body.containers;
 
-	Containers.appendFavourites(user, teamspace, project, favouritesToAdd).then(() => {
-		respond(req, res, templates.ok);
-	}).catch((err) => respond(req, res, err));
+	Containers.appendFavourites(user, teamspace, project, favouritesToAdd)
+		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
 };
 
 const establishRoutes = () => {

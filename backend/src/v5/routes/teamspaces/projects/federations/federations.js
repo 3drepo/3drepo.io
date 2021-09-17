@@ -35,9 +35,8 @@ const appendFavourites = (req, res) => {
 	const { teamspace, project } = req.params;
 	const favouritesToAdd = req.body.federations;
 
-	Federations.appendFavourites(user, teamspace, project, favouritesToAdd).then(() => {
-		respond(req, res, templates.ok);
-	}).catch((err) => respond(req, res, err));
+	Federations.appendFavourites(user, teamspace, project, favouritesToAdd)
+		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
 };
 
 const deleteFavourites = (req, res) => {
@@ -45,9 +44,8 @@ const deleteFavourites = (req, res) => {
 	const { teamspace, project } = req.params;
 	const favouritesToRemove = req.body.federations;
 
-	Federations.deleteFavourites(user, teamspace, project, favouritesToRemove).then(() => {
-		respond(req, res, templates.ok);
-	}).catch((err) => respond(req, res, err));
+	Federations.deleteFavourites(user, teamspace, project, favouritesToRemove)
+		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
 };
 
 const establishRoutes = () => {
@@ -68,7 +66,7 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-		   *       - project:
+	 *       - project:
 	 *         name: project
 	 *         description: Project ID
 	 *         in: path

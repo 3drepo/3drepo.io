@@ -200,6 +200,12 @@ const testAppendFavourites = () => {
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
+		test('should fail if the list contains a federation', async () => {
+			const res = await agent.patch(`${route}?key=${users.noProjectAccess.apiKey}`)
+				.expect(templates.invalidArguments.status).send({ containers: [federation._id] });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
 		test('should fail if the favourites list provided is empty', async () => {
 			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
 				.expect(templates.invalidArguments.status).send({ containers: [] });
@@ -237,6 +243,12 @@ const testDeleteFavourites = () => {
 		test('should fail if the user has no access to one or more containers', async () => {
 			const res = await agent.delete(`${route}?key=${users.noProjectAccess.apiKey}`)
 				.expect(templates.invalidArguments.status).send({ containers: [models[1]._id] });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if the list contains a federation', async () => {
+			const res = await agent.delete(`${route}?key=${users.noProjectAccess.apiKey}`)
+				.expect(templates.invalidArguments.status).send({ containers: [federation._id] });
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 

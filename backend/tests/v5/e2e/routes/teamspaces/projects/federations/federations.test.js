@@ -57,6 +57,8 @@ const modelSettings = [
 	},
 ];
 
+const container = modelSettings.find(({ properties }) => !properties.federate);
+
 const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
 	const customData = { starredModels: {
@@ -137,6 +139,12 @@ const testAppendFavourites = () => {
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
+		test('should fail if the list containers a container', async () => {
+			const res = await agent.patch(`${route}?key=${users.noProjectAccess.apiKey}`)
+				.expect(templates.invalidArguments.status).send({ federations: [container._id] });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
 		test('should fail if the favourites list provided is empty', async () => {
 			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
 				.expect(templates.invalidArguments.status).send({ federations: [] });
@@ -174,6 +182,12 @@ const testDeleteFavourites = () => {
 		test('should fail if the user has no access to one or more federations', async () => {
 			const res = await agent.delete(`${route}?key=${users.noProjectAccess.apiKey}`)
 				.expect(templates.invalidArguments.status).send({ federations: [modelSettings[1]._id] });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if the favourites list provided has a container', async () => {
+			const res = await agent.delete(`${route}?key=${users.tsAdmin.apiKey}`)
+				.expect(templates.invalidArguments.status).send({ federations: [container._id] });
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 

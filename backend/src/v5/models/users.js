@@ -21,7 +21,8 @@ const db = require('../handler/db');
 const User = {};
 const COLL_NAME = 'system.users';
 
-const userQuery = (query, projection, sort) => db.findOne('admin', 'system.users', query, projection, sort);
+const userQuery = (query, projection, sort) => db.findOne('admin', COLL_NAME, query, projection, sort);
+const updateUser = (username, action) => db.updateOne('admin', COLL_NAME, { user: username }, action);
 
 const getUser = async (user, projection) => {
 	const userDoc = await userQuery({ user }, projection);
@@ -29,10 +30,6 @@ const getUser = async (user, projection) => {
 		throw templates.userNotFound;
 	}
 	return userDoc;
-};
-
-const updateUser = async (username, action) => {
-	await db.updateOne('admin', COLL_NAME, { user: username }, action);
 };
 
 User.getFavourites = async (user, teamspace) => {
@@ -47,24 +44,24 @@ User.getAccessibleTeamspaces = async (username) => {
 };
 
 User.appendFavourites = async (username, teamspace, favouritesToAdd) => {
-	const userProfile = await getUser(username, { customData: 1 });
+	const userProfile = await getUser(username, { 'customData.starredModels': 1 });
 
 	const favourites = userProfile.customData.starredModels || {};
 	if (!favourites[teamspace]) {
 		favourites[teamspace] = [];
 	}
 
-	for (const favourite of favouritesToAdd) {
-		if (favourites[teamspace].indexOf(favourite) === -1) {
-			favourites[teamspace].push(favourite);
+	favouritesToAdd.forEach((fav) => {
+		if (favourites[teamspace].includes(fav)) {
+			favourites[teamspace].push(fav);
 		}
-	}
+	});
 
 	await updateUser(username, { $set: { 'customData.starredModels': favourites } });
 };
 
 User.deleteFavourites = async (username, teamspace, favouritesToRemove) => {
-	const userProfile = await getUser(username, { customData: 1 });
+	const userProfile = await getUser(username, { 'customData.starredModels': 1 });
 
 	const favourites = userProfile.customData.starredModels || {};
 

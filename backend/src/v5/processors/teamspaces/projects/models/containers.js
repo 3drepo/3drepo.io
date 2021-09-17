@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { appendFavourites, deleteFavourites } = require('../../../../models/users');
+const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getContainerById, getContainers } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionCount } = require('../../../../models/revisions');
-const { checkModelsAreValid } = require('./commons/favourites');
 const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
 
@@ -59,14 +58,12 @@ Containers.getContainerStats = async (teamspace, project, container) => {
 
 Containers.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {
 	const accessibleContainers = await Containers.getContainerList(teamspace, project, username);
-	checkModelsAreValid(accessibleContainers, favouritesToAdd);
-	await appendFavourites(username, teamspace, favouritesToAdd);
+	return appendFavourites(username, teamspace, accessibleContainers, favouritesToAdd);
 };
 
 Containers.deleteFavourites = async (username, teamspace, project, favouritesToRemove) => {
 	const accessibleContainers = await Containers.getContainerList(teamspace, project, username);
-	checkModelsAreValid(accessibleContainers, favouritesToRemove);
-	await deleteFavourites(username, teamspace, favouritesToRemove);
+	return deleteFavourites(username, teamspace, accessibleContainers, favouritesToRemove);
 };
 
 module.exports = Containers;
