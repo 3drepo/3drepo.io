@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 
