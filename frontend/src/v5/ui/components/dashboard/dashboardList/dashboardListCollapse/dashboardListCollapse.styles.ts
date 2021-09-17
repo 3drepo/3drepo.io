@@ -14,18 +14,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { theme } from '@/v5/ui/themes/theme';
-import { MuiThemeProvider, StylesProvider } from '@material-ui/core';
-import { ThemeProvider } from 'styled-components';
-import React from 'react';
-import { Dashboard } from './dashboard';
+import styled from 'styled-components';
+import { Divider as DividerComponent } from '@material-ui/core';
 
-export const Root = () => (
-	<ThemeProvider theme={theme}>
-		<MuiThemeProvider theme={theme}>
-			<StylesProvider injectFirst>
-				<Dashboard />
-			</StylesProvider>
-		</MuiThemeProvider>
-	</ThemeProvider>
-);
+export const Container = styled.div``;
+
+export const ButtonContainer = styled.div`
+	display: flex;
+	align-items: center;
+`;
+
+export const CollapsedItemContainer = styled.div`
+	margin-bottom: 16px;
+`;
+
+export const Divider = styled(DividerComponent)`
+	margin-top: 16px;
+`;

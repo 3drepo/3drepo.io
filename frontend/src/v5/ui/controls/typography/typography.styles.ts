@@ -14,18 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { theme } from '@/v5/ui/themes/theme';
-import { MuiThemeProvider, StylesProvider } from '@material-ui/core';
-import { ThemeProvider } from 'styled-components';
-import React from 'react';
-import { Dashboard } from './dashboard';
+import styled from 'styled-components';
+import { Typography } from '@material-ui/core';
 
-export const Root = () => (
-	<ThemeProvider theme={theme}>
-		<MuiThemeProvider theme={theme}>
-			<StylesProvider injectFirst>
-				<Dashboard />
-			</StylesProvider>
-		</MuiThemeProvider>
-	</ThemeProvider>
-);
+export const KickerTypography = styled(Typography)`
+	${({ theme }) => theme.typography.kicker};
+`;
+
+export const KickerTitleTypography = styled(Typography)`
+	${({ theme }) => theme.typography.kickerTitle};
+`;

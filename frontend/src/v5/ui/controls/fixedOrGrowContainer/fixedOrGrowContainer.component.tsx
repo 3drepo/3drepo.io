@@ -14,18 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { theme } from '@/v5/ui/themes/theme';
-import { MuiThemeProvider, StylesProvider } from '@material-ui/core';
-import { ThemeProvider } from 'styled-components';
-import React from 'react';
-import { Dashboard } from './dashboard';
 
-export const Root = () => (
-	<ThemeProvider theme={theme}>
-		<MuiThemeProvider theme={theme}>
-			<StylesProvider injectFirst>
-				<Dashboard />
-			</StylesProvider>
-		</MuiThemeProvider>
-	</ThemeProvider>
+import React from 'react';
+import { StyledComponentProps } from 'styled-components';
+import { Container } from './fixedOrGrowContainer.styles';
+
+type IFixedOrGrowContainer = {
+	width?: number;
+} & StyledComponentProps;
+
+export const FixedOrGrowContainer = ({
+	width,
+	children,
+}: IFixedOrGrowContainer): JSX.Element => (
+	<Container width={width}>{children}</Container>
 );

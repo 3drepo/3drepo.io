@@ -14,18 +14,26 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { theme } from '@/v5/ui/themes/theme';
-import { MuiThemeProvider, StylesProvider } from '@material-ui/core';
-import { ThemeProvider } from 'styled-components';
-import React from 'react';
-import { Dashboard } from './dashboard';
+import React, { ReactNode } from 'react';
+import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
+import { Text } from './dashboardListItemText.styles';
 
-export const Root = () => (
-	<ThemeProvider theme={theme}>
-		<MuiThemeProvider theme={theme}>
-			<StylesProvider injectFirst>
-				<Dashboard />
-			</StylesProvider>
-		</MuiThemeProvider>
-	</ThemeProvider>
+type IDashboardListItemText = {
+	children: ReactNode;
+	width?: number;
+	className?: string;
+	selected?: boolean;
+};
+
+export const DashboardListItemText = ({
+	children,
+	width,
+	className,
+	selected = false,
+}: IDashboardListItemText): JSX.Element => (
+	<FixedOrGrowContainer width={width} className={className}>
+		<Text selected={selected}>
+			{children}
+		</Text>
+	</FixedOrGrowContainer>
 );

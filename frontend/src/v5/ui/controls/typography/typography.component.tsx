@@ -14,18 +14,22 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { theme } from '@/v5/ui/themes/theme';
-import { MuiThemeProvider, StylesProvider } from '@material-ui/core';
-import { ThemeProvider } from 'styled-components';
 import React from 'react';
-import { Dashboard } from './dashboard';
+import { Typography as MuiTypography, TypographyProps, TypographyVariant } from '@material-ui/core';
+import { KickerTypography, KickerTitleTypography } from './typography.styles';
 
-export const Root = () => (
-	<ThemeProvider theme={theme}>
-		<MuiThemeProvider theme={theme}>
-			<StylesProvider injectFirst>
-				<Dashboard />
-			</StylesProvider>
-		</MuiThemeProvider>
-	</ThemeProvider>
-);
+type ITypographyVariants = TypographyVariant | 'kicker' | 'kickerTitle';
+
+type ITypography = Omit<TypographyProps, 'variant'> & {
+	variant: ITypographyVariants;
+};
+
+export const Typography = ({ variant, children, ...props }: ITypography): JSX.Element => {
+	if (variant === 'kicker') {
+		return <KickerTypography {...props}>{children}</KickerTypography>;
+	}
+	if (variant === 'kickerTitle') {
+		return <KickerTitleTypography {...props}>{children}</KickerTitleTypography>;
+	}
+	return <MuiTypography variant={variant} {...props}>{children}</MuiTypography>;
+};
