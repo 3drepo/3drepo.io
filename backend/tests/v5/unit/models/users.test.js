@@ -141,7 +141,7 @@ const testAppendFavourites = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
 			const teamspace = 'teamspace1';
 			const arr = ['d', 'e'];
-			await User.appendFavourites(user, teamspace, arr);
+			await expect(User.appendFavourites(user, teamspace, arr)).resolves.toBe(undefined);
 			checkResults(fn, teamspace, arr);
 		});
 
@@ -150,7 +150,7 @@ const testAppendFavourites = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
 			const teamspace = 'teamspace1';
 			const arr = ['a', 'b', 'c', ' d', 'e'];
-			await User.appendFavourites(user, teamspace, arr);
+			await expect(User.appendFavourites(user, teamspace, arr)).resolves.toBe(undefined);
 			checkResults(fn, teamspace, arr);
 		});
 
@@ -198,7 +198,7 @@ const testDeleteFromFavourites = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
 			const teamspace = 'teamspace2';
 			const arr = ['d'];
-			await User.deleteFavourites('xxx', teamspace, arr);
+			await expect(User.deleteFavourites('xxx', teamspace, arr)).resolves.toBe(undefined);
 			checkResults(fn, teamspace, arr);
 		});
 
@@ -207,7 +207,7 @@ const testDeleteFromFavourites = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
 			const teamspace = 'teamspace1';
 			const arr = ['c'];
-			await User.deleteFavourites('xxx', teamspace, arr);
+			await expect(User.deleteFavourites('xxx', teamspace, arr)).resolves.toBe(undefined);
 			checkResults(fn, teamspace, arr);
 		});
 
