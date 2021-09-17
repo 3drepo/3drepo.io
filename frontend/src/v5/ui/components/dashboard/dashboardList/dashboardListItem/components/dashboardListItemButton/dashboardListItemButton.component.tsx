@@ -24,7 +24,7 @@ type IDashboardListItemButton = {
 	children: ReactNode;
 	width?: number;
 	onClick: Dispatch<SyntheticEvent>;
-	tooltipTitle?: string;
+	tooltipTitle?: ReactNode;
 	className?: string;
 };
 

@@ -18,6 +18,7 @@
 import React, { ReactNode, useState } from 'react';
 import { isEmpty } from 'lodash';
 import { Trans } from '@lingui/react';
+import { Tooltip } from '@material-ui/core';
 import {
 	DashboardList,
 	DashboardListCollapse,
@@ -40,39 +41,39 @@ import { Container } from './containersList.styles';
 const ellipsisMenuItems = [
 	{
 		title: <Trans id="containers.ellipsisMenu.loadContainer" message="Load Container in 3D Viewer" />,
-		onClick: () => {},
+		onClick: () => { },
 	},
 	{
 		title: <Trans id="containers.ellipsisMenu.uploadNewRevision" message="Upload new Revision" />,
-		onClick: () => {},
+		onClick: () => { },
 	},
 	{
 		title: <Trans id="containers.ellipsisMenu.viewIssues" message="View Issues" />,
-		onClick: () => {},
+		onClick: () => { },
 	},
 	{
 		title: <Trans id="containers.ellipsisMenu.viewRisks" message="View Risks" />,
-		onClick: () => {},
+		onClick: () => { },
 	},
 	{
 		title: <Trans id="containers.ellipsisMenu.viewRevisions" message="View Revisions" />,
-		onClick: () => {},
+		onClick: () => { },
 	},
 	{
 		title: <Trans id="containers.ellipsisMenu.editPermissions" message="Edit Permissions" />,
-		onClick: () => {},
+		onClick: () => { },
 	},
 	{
 		title: <Trans id="containers.ellipsisMenu.shareContainer" message="Share Container" />,
-		onClick: () => {},
+		onClick: () => { },
 	},
 	{
 		title: <Trans id="containers.ellipsisMenu.settings" message="Settings" />,
-		onClick: () => {},
+		onClick: () => { },
 	},
 	{
 		title: <Trans id="containers.ellipsisMenu.delete" message="Delete" />,
-		onClick: () => {},
+		onClick: () => { },
 	},
 ];
 
@@ -130,9 +131,17 @@ export const ContainersList = ({
 							>
 								<DashboardListItemRow>
 									<DashboardListItemTitle
-										subtitle={`Latest revision ${container.latestRevision}`}
+										subtitle={(
+											<Trans
+												id="containers.list.item.subtitle"
+												message="Latest revision: {revision}"
+												values={{ revision: container.latestRevision }}
+											/>
+										)}
 										selected={container._id === selectedId}
-										tooltipTitle="Title tooltip"
+										tooltipTitle={
+											<Trans id="containers.list.item.title.tooltip" message="Launch latest revision" />
+										}
 									>
 										{container.title}
 									</DashboardListItemTitle>
@@ -142,9 +151,15 @@ export const ContainersList = ({
 											console.log('handle revisions button');
 										}}
 										width={186}
-										tooltipTitle="View revisions"
+										tooltipTitle={
+											<Trans id="containers.list.item.revisions.tooltip" message="View revisions" />
+										}
 									>
-										{`${container.revisionsCount} revisions`}
+										<Trans
+											id="containers.list.item.revisions"
+											message="{count} revisions"
+											values={{ count: container.revisionsCount }}
+										/>
 									</DashboardListItemButton>
 									<DashboardListItemText selected={container._id === selectedId}>
 										{container.code}
@@ -156,15 +171,21 @@ export const ContainersList = ({
 										{container.date}
 									</DashboardListItemText>
 									<DashboardListItemIcon>
-										<FavouriteCheckbox
-											onClick={(event) => {
-												event.stopPropagation();
-											}}
-											onChange={(event) => {
-												// eslint-disable-next-line no-console
-												console.log('handle favourite click', event.target.value);
-											}}
-										/>
+										<Tooltip
+											title={
+												<Trans id="containers.list.item.favourite.tooltip" message="Add to favourites" />
+											}
+										>
+											<FavouriteCheckbox
+												onClick={(event) => {
+													event.stopPropagation();
+												}}
+												onChange={(event) => {
+													// eslint-disable-next-line no-console
+													console.log('handle favourite click', event.target.value);
+												}}
+											/>
+										</Tooltip>
 									</DashboardListItemIcon>
 									<DashboardListItemIcon
 										selected={container._id === selectedId}

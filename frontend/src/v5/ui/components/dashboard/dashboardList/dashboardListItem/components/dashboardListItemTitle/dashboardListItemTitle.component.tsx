@@ -22,10 +22,10 @@ import { Title, Subtitle } from './dashboardListItemTitle.styles';
 
 type IDashboardListItemTitle = {
 	children?: ReactNode;
-	subtitle: string;
+	subtitle: ReactNode;
 	width?: number;
 	onClick?: Dispatch<void>;
-	tooltipTitle?: string;
+	tooltipTitle?: ReactNode;
 	className?: string;
 	selected?: boolean;
 };
