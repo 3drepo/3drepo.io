@@ -35,10 +35,19 @@ const testGetGroupsByIds = () => {
 				},
 			];
 
-			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
 
-			const res = await Group.getGroupsByIds('someTS', ['someModel']);
+			const teamspace = 'someTS';
+			const model = 'someModel';
+			const groupIds = [1, 2, 3];
+			const projection = { _id: 0 };
+			const res = await Group.getGroupsByIds(teamspace, model, groupIds, projection);
 			expect(res).toEqual(expectedData);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual(`${model}.groups`);
+			expect(fn.mock.calls[0][2]).toEqual({ _ids: { $in: groupIds } });
+			expect(fn.mock.calls[0][3]).toEqual(projection);
 		});
 	});
 };
@@ -57,10 +66,18 @@ const testGetGroups = () => {
 				},
 			];
 
-			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
 
-			const res = await Group.getGroups('someTS', ['someModel']);
+			const teamspace = 'someTS';
+			const model = 'someModel';
+			const projection = { _id: 0 };
+			const res = await Group.getGroups(teamspace, model, projection);
 			expect(res).toEqual(expectedData);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual(`${model}.groups`);
+			expect(fn.mock.calls[0][2]).toEqual({});
+			expect(fn.mock.calls[0][3]).toEqual(projection);
 		});
 	});
 };
