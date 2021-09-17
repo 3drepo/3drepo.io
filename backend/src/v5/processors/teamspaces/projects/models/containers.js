@@ -18,8 +18,8 @@
 const { appendFavourites, deleteFavourites } = require('../../../../models/users');
 const { getContainerById, getContainers } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionCount } = require('../../../../models/revisions');
-const { getModelList } = require('./commons/modelList');
 const { checkModelsAreValid } = require('./commons/favourites');
+const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
 
 const Containers = {};

@@ -49,7 +49,7 @@ ResponseCodes.templates = {
 	revisionNotFound: { message: 'Revision not found.', status: 404 },
 
 	// Invalid Arguements
-	invalidArguments: { message: 'The arguements provided are not valid', status: 400 },
+	invalidArguments: { message: 'The arguments provided are not valid', status: 400 },
 };
 
 Object.keys(ResponseCodes.templates).forEach((key) => {

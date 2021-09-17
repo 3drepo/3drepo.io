@@ -30,7 +30,6 @@ const getFederationList = (req, res) => {
 	}).catch((err) => respond(req, res, err));
 };
 
-
 const appendFavourites = (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
@@ -50,7 +49,6 @@ const deleteFavourites = (req, res) => {
 		respond(req, res, templates.ok);
 	}).catch((err) => respond(req, res, err));
 };
-
 
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });

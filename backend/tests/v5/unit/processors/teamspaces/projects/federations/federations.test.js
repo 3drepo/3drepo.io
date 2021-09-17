@@ -42,6 +42,7 @@ jest.mock('../../../../../../../src/v5/models/users');
 const Users = require(`${src}/models/users`);
 jest.mock('../../../../../../../src/v5/models/revisions');
 const Federations = require(`${src}/processors/teamspaces/projects/models/federations`);
+const { templates } = require(`${src}/utils/responseCodes`);
 
 const federationList = [
 	{ _id: 1, name: 'federation 1', permissions: [{ user: 'user1', permission: 'collaborator' }, { user: 'user2', permission: 'collaborator' }] },
@@ -74,10 +75,8 @@ const federationSettings = {
 	},
 };
 
-
 const user1Favourites = [1];
 const project = { _id: 1, name: 'project', models: federationList.map(({ _id }) => _id) };
-
 
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getFederations.mockImplementation(() => federationList);
@@ -140,59 +139,38 @@ const testGetFederationList = () => {
 	});
 };
 
-
 const testAppendFavourites = () => {
 	describe('Add federations to favourites', () => {
-		test('user favourites should stay the same if one or more federations is not found', async () => {
-			await Federations.appendFavourites('user1', 'teamspace', 'project', [1, -1]);
-			expect(user1Favourites).toEqual([1]);
-			user1Favourites = [1];
+		test('new federations should be added to favourites if user has all permissions', async () => {
+			await Federations.appendFavourites('user1', 'teamspace', 'project', [3]);
 		});
 
-		test('new federations should be added to favourites if user is TS admin', async () => {
-			await Federations.appendFavourites('tsAdmin', 'teamspace', 'project', [1, 2, 3]);
-			expect(user1Favourites).toEqual([1, 2, 3]);
-			user1Favourites = [1];
+		test('should return error if one or more federations are not found', async () => {
+			await expect(Federations.appendFavourites('user1', 'teamspace', 'project', [1, -1]))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: -1' });
 		});
 
-		test('new federations should be added to favourites if user has permissions', async () => {
-			await Federations.appendFavourites('user1', 'teamspace', 'project', [1, 3]);
-			expect(user1Favourites).toEqual([1, 3]);
-			user1Favourites = [1];
-		});
-
-		test('new federations should not be added to favourites if user has no permissions', async () => {
-			await Federations.appendFavourites('user1', 'teamspace', 'project', [1, 2]);
-			expect(user1Favourites).toEqual([1]);
-			user1Favourites = [1];
+		test('should return error if user has no permissions on one or more models', async () => {
+			await expect(Federations.appendFavourites('user1', 'teamspace', 'project', [1, 2]))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: 2' });
 		});
 	});
 };
 
 const testDeleteFavourites = () => {
 	describe('Remove federations from favourites', () => {
-		test('user favourites should stay the same if one or more federations are not already in', async () => {
-			await Federations.deleteFavourites('user1', 'teamspace', 'project', [1, 2]);
-			expect(user1Favourites).toEqual([1]);
-			user1Favourites = [1];
-		});
-
-		test('federations should be removed from user favourites if user is TS admin', async () => {
+		test('federations should be removed from favourites if user has all permissions', async () => {
 			await Federations.deleteFavourites('tsAdmin', 'teamspace', 'project', [1]);
-			expect(user1Favourites).toEqual([]);
-			user1Favourites = [1];
 		});
 
-		test('federations should be removed from user favourites if user has permission', async () => {
-			await Federations.deleteFavourites('user1', 'teamspace', 'project', [1]);
-			expect(user1Favourites).toEqual([]);
-			user1Favourites = [1];
+		test('should return error if one or more federations are not found', async () => {
+			await expect(Federations.deleteFavourites('tsAdmin', 'teamspace', 'project', [1, -1]))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: -1' });
 		});
 
-		test('federations should not be removed from user favourites if user has no permission', async () => {
-			await Federations.deleteFavourites('user3', 'teamspace', 'project', [1]);
-			expect(user1Favourites).toEqual([1]);
-			user1Favourites = [1];
+		test('should return error if user has no permissions on one or more models', async () => {
+			await expect(Federations.deleteFavourites('user1', 'teamspace', 'project', [2]))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: 2' });
 		});
 	});
 };

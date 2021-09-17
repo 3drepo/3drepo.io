@@ -16,10 +16,10 @@
  */
 
 const { appendFavourites, deleteFavourites } = require('../../../../models/users');
+const { checkModelsAreValid } = require('./commons/favourites');
 const { getFederations } = require('../../../../models/modelSettings');
 const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
-const { checkModelsAreValid } = require('./commons/favourites');
 
 const Federations = {};
 

@@ -38,5 +38,4 @@ ModelList.getModelList = async (teamspace, project, user, modelSettings) => {
 	});
 };
 
-
 module.exports = ModelList;

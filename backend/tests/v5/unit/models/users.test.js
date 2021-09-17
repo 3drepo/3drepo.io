@@ -79,19 +79,30 @@ const testAppendFavourites = () => {
 	};
 
 	describe('Add containers to favourites', () => {
-		test('Adding an array of containers of a new teamspace', async () => {
+		test('Should add favourite containers under a new teamspace', async () => {
 			jest.spyOn(db, 'findOne').mockResolvedValue({ customData: { starredModels: favouritesData } });
-			await User.appendFavourites('xxx', 'teamspace3', ['e', 'f']);			
+			await User.appendFavourites('xxx', 'teamspace3', ['e', 'f']);
 		});
 
-		test('Adding an array of containers of an existing teamspace', async () => {
+		test('Should add favourite containers on an existing teamspace', async () => {
 			jest.spyOn(db, 'findOne').mockResolvedValue({ customData: { starredModels: favouritesData } });
-			await User.appendFavourites('xxx', 'teamspace1', ['d', 'e']);						
+			await User.appendFavourites('xxx', 'teamspace1', ['d', 'e']);
 		});
 
-		test('Adding an array of containers of an existing teamspace with duplicate entries', async () => {
+		test('Should add favourite containers on an existing teamspace and ignore duplicate entries', async () => {
 			jest.spyOn(db, 'findOne').mockResolvedValue({ customData: { starredModels: favouritesData } });
-			await User.appendFavourites('xxx', 'teamspace1', ['a', 'b', 'c', ' d', 'e']);						
+			await User.appendFavourites('xxx', 'teamspace1', ['a', 'b', 'c', ' d', 'e']);
+		});
+
+		test('Should add favourite containers on a new teamspace to a user that has no favourites', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValue({ customData: { } });
+			await User.appendFavourites('xxx', 'teamspace3', ['e', 'f']);
+		});
+
+		test('Should return error when trying to add favourites to a user that doesnt exist', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+			await expect(User.appendFavourites('xxx', 'teamspace3', ['e', 'f']))
+				.rejects.toEqual(templates.userNotFound);
 		});
 	});
 };
@@ -103,20 +114,32 @@ const testDeleteFromFavourites = () => {
 	};
 
 	describe('Remove container from favourites', () => {
-		test('Remove all containers of a teamspace', async () => {
+		test('Should remove all favourite containers from a teamspace', async () => {
 			jest.spyOn(db, 'findOne').mockResolvedValue({ customData: { starredModels: favouritesData } });
 			await User.deleteFavourites('xxx', 'teamspace2', ['d']);
-			const newFavourtiesData = favouritesData;
-			newFavourtiesData.teamspace2 = undefined;
-			expect(favouritesData).toEqual(newFavourtiesData);
 		});
 
-		test('Remove some containers of a teamspace', async () => {
+		test('Should remove some favourite containers from teamspace', async () => {
 			jest.spyOn(db, 'findOne').mockResolvedValue({ customData: { starredModels: favouritesData } });
 			await User.deleteFavourites('xxx', 'teamspace1', ['c']);
-			const newFavourtiesData = favouritesData;
-			newFavourtiesData.teamspace1[2] = undefined;
-			expect(favouritesData).toEqual(newFavourtiesData);
+		});
+
+		test('Should return error when trying to remove favourites from a user that doesnt exist', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+			await expect(User.deleteFavourites('xxx', 'teamspace1', ['a', 'b']))
+				.rejects.toEqual(templates.userNotFound);
+		});
+
+		test('Should return error when trying to remove favourites that are not in users favourites list', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValue({ customData: { starredModels: favouritesData } });
+			await expect(User.deleteFavourites('xxx', 'teamspace3', ['e', 'f']))
+				.rejects.toEqual({ ...templates.invalidArguments, message: "The IDs provided are not in the user's favourites list" });
+		});
+
+		test('Should return error when trying to remove favourites from a user that has no favourites', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValue({ customData: { } });
+			await expect(User.deleteFavourites('xxx', 'teamspace1', ['a', 'b']))
+				.rejects.toEqual({ ...templates.invalidArguments, message: "The IDs provided are not in the user's favourites list" });
 		});
 	});
 };

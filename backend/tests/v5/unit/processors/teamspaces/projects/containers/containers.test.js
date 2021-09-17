@@ -59,7 +59,7 @@ const containerSettings = {
 	},
 };
 
-let user1Favourites = [1];
+const user1Favourites = [1];
 
 const project = { _id: 1, name: 'project', models: modelList.map(({ _id }) => _id) };
 
@@ -136,56 +136,36 @@ const testGetContainerList = () => {
 
 const testAppendFavourites = () => {
 	describe('Add containers to favourites', () => {
-		test('user favourites should stay the same if one or more containers is not found', async () => {
-			await Containers.appendFavourites('tsAdmin', 'teamspace', 'project', [1, -1]);
-			expect(user1Favourites).toEqual([1]);
-			user1Favourites = [1];
+		test('new containers should be added to favourites if user has all permissions', async () => {
+			await Containers.appendFavourites('user1', 'teamspace', 'project', [3]);
 		});
 
-		test('new containers should be added to favourites if user is TS admin', async () => {
-			await Containers.appendFavourites('tsAdmin', 'teamspace', 'project', [1, 2, 3]);
-			expect(user1Favourites).toEqual([1, 2, 3]);
-			user1Favourites = [1];
+		test('should return error if one or more containers are not found', async () => {
+			await expect(Containers.appendFavourites('user1', 'teamspace', 'project', [1, -1]))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: -1' });
 		});
 
-		test('new containers should be added to favourites if user has permissions', async () => {
-			await Containers.appendFavourites('user1', 'teamspace', 'project', [1, 3]);
-			expect(user1Favourites).toEqual([1, 3]);
-			user1Favourites = [1];
-		});
-
-		test('new containers should not be added to favourites if user has no permissions', async () => {
-			await Containers.appendFavourites('user1', 'teamspace', 'project', [1, 2]);
-			expect(user1Favourites).toEqual([1]);
-			user1Favourites = [1];
+		test('should return error if user has no permissions on one or more models', async () => {
+			await expect(Containers.appendFavourites('user1', 'teamspace', 'project', [1, 2]))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: 2' });
 		});
 	});
 };
 
 const testDeleteFavourites = () => {
 	describe('Remove containers from favourites', () => {
-		test('user favourites should stay the same if one or more containers are not already in', async () => {
-			await Containers.deleteFavourites('user1', 'teamspace', 'project', [1, 2]);
-			expect(user1Favourites).toEqual([1]);
-			user1Favourites = [1];
-		});
-
-		test('containers should be removed from user favourites if user is TS admin', async () => {
+		test('containers should be removed from favourites if user has all permissions', async () => {
 			await Containers.deleteFavourites('tsAdmin', 'teamspace', 'project', [1]);
-			expect(user1Favourites).toEqual([]);
-			user1Favourites = [1];
 		});
 
-		test('containers should be removed from user favourites if user has permission', async () => {
-			await Containers.deleteFavourites('user1', 'teamspace', 'project', [1]);
-			expect(user1Favourites).toEqual([]);
-			user1Favourites = [1];
+		test('should return error if one or more containers are not found', async () => {
+			await expect(Containers.deleteFavourites('tsAdmin', 'teamspace', 'project', [1, -1]))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: -1' });
 		});
 
-		test('containers should not be removed from user favourites if user has no permission', async () => {
-			await Containers.deleteFavourites('user3', 'teamspace', 'project', [1]);
-			expect(user1Favourites).toEqual([1]);
-			user1Favourites = [1];
+		test('should return error if user has no permissions on one or more models', async () => {
+			await expect(Containers.deleteFavourites('user1', 'teamspace', 'project', [2]))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: 2' });
 		});
 	});
 };

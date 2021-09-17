@@ -16,17 +16,17 @@
  */
 
 
- const { getArrayDifference } = require("../../../../../utils/helper/arrays");
- const { templates, createResponseCode } = require('../../../../../utils/responseCodes');
+const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
+const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 
- const Favourites = {};
- 
- Favourites.checkModelsAreValid = async (accessibleModels, favourites) =>{
-    const invalidFavourites = getArrayDifference(accessibleModels.map((c)=>c._id), favourites);
+const Favourites = {};
+
+Favourites.checkModelsAreValid = (accessibleModels, favourites) => {
+	const invalidFavourites = getArrayDifference(accessibleModels.map((c) => c._id), favourites);
+
 	if (invalidFavourites.length) {
-		throw createResponseCode(templates.invalidArguments,  "The action cannot be performed on the following models: " + invalidFavourites);
+		throw createResponseCode(templates.invalidArguments, `The action cannot be performed on the following models: ${invalidFavourites}`);
 	}
- };
- 
- module.exports = Favourites;
- 
+};
+
+module.exports = Favourites;
