@@ -47,6 +47,9 @@ ResponseCodes.templates = {
 
 	// Revision related error
 	revisionNotFound: { message: 'Revision not found.', status: 404 },
+
+	// Invalid Arguements
+	invalidArguments: { message: 'The arguments provided are not valid', status: 400 },
 };
 
 Object.keys(ResponseCodes.templates).forEach((key) => {
@@ -106,7 +109,7 @@ ResponseCodes.createResponseCode = (errCode, message) => {
 		const isError = errCode instanceof Error;
 		logger.logError('Unrecognised error code', isError ? JSON.stringify(errCode, ['message', 'arguments', 'type', 'name', 'stack']) : errCode);
 	}
-	const res = codeExists ? ResponseCodes.templates[toCamelCase(errCode.code)] : ResponseCodes.templates.unknown;
+	const res = codeExists ? errCode : ResponseCodes.templates.unknown;
 	return message ? { ...res, message } : res;
 };
 
