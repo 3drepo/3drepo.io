@@ -17,10 +17,11 @@
 
 const { getContainerById, getContainers } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionCount } = require('../../../../models/revisions');
+const Groups = require('./commons/groups');
 const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
 
-const Containers = {};
+const Containers = { ...Groups };
 
 Containers.getContainerList = async (teamspace, project, user) => {
 	const { models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });

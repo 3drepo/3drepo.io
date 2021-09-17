@@ -15,18 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Groups = require('./commons/groups');
-const { getFederations } = require('../../../../models/modelSettings');
-const { getModelList } = require('./commons/modelList');
-const { getProjectById } = require('../../../../models/projects');
+const db = require('../handler/db');
 
-const Federations = { ...Groups };
+const Groups = {};
 
-Federations.getFederationList = async (teamspace, project, user) => {
-	const { models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
-	const modelSettings = await getFederations(teamspace, models, { _id: 1, name: 1, permissions: 1 });
+const findGroup = (teamspace, model, query, projection, sort) => db.find(teamspace, `${model}.groups`, query, projection, sort);
 
-	return getModelList(teamspace, project, user, modelSettings);
+Groups.getGroupsByIds = (teamspace, model, ids, projection) => {
+	const query = { _ids: { $in: ids } };
+	return findGroup(teamspace, model, query, projection);
 };
 
-module.exports = Federations;
+Groups.getGroups = (teamspace, model, projection) => findGroup(teamspace, model, {}, projection);
+
+module.exports = Groups;

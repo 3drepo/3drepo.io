@@ -14,19 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const { getGroups, getGroupsByIds } = require('../../../../../models/groups');
 
-const Groups = require('./commons/groups');
-const { getFederations } = require('../../../../models/modelSettings');
-const { getModelList } = require('./commons/modelList');
-const { getProjectById } = require('../../../../models/projects');
+const Groups = {};
 
-const Federations = { ...Groups };
+Groups.getGroups = (teamspace, model, groupsIds = []) => (groupsIds.length
+	? getGroupsByIds(teamspace, model, groupsIds) : getGroups(teamspace, model));
 
-Federations.getFederationList = async (teamspace, project, user) => {
-	const { models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
-	const modelSettings = await getFederations(teamspace, models, { _id: 1, name: 1, permissions: 1 });
-
-	return getModelList(teamspace, project, user, modelSettings);
-};
-
-module.exports = Federations;
+module.exports = Groups;
