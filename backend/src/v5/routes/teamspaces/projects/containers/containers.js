@@ -16,6 +16,7 @@
  */
 
 const { hasAccessToTeamspace, hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
+const { hasPermissionsAndValidArguments } = require('../../../../middleware/permissions/components/revisions');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
@@ -326,7 +327,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: updates the status of the revision
 	 */
-	router.patch('/:container/revisions/:revision', hasReadAccessToContainer, updateRevisionStatus);
+	router.patch('/:container/revisions/:revision', hasPermissionsAndValidArguments, updateRevisionStatus);
 
 	return router;
 };

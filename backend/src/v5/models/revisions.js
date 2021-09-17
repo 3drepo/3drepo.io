@@ -57,11 +57,9 @@ Revisions.getRevisions = (teamspace, model, showVoid, projection = {}) => {
 };
 
 Revisions.updateRevisionStatus = async (teamspace, model, revision, status) => {
-	const rev = await findOneRevisionByQuery(teamspace, model, {_id: revision} ,{ _id: 1, void: 1 });
-
-	await db.updateOne(teamspace, collectionName(model), { _id: rev._id }, { $set: { void: status } });
-
-	return {};
+	const query = { $or: [ { _id: revision }, { tag: revision } ] };
+	await findOneRevisionByQuery(teamspace, model, query ,{ _id: 1, void: 1 });
+	await db.updateOne(teamspace, collectionName(model), query, { $set: { void: status } });
 };
 
 module.exports = Revisions;
