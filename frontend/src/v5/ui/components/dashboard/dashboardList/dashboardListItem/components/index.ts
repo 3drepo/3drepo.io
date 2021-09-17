@@ -14,18 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { theme } from '@/v5/ui/themes/theme';
-import { MuiThemeProvider, StylesProvider } from '@material-ui/core';
-import { ThemeProvider } from 'styled-components';
-import React from 'react';
-import { Dashboard } from './dashboard';
 
-export const Root = () => (
-	<ThemeProvider theme={theme}>
-		<MuiThemeProvider theme={theme}>
-			<StylesProvider injectFirst>
-				<Dashboard />
-			</StylesProvider>
-		</MuiThemeProvider>
-	</ThemeProvider>
-);
+export { DashboardListItemRow } from './dashboardListItemRow';
+export { DashboardListItemTitle } from './dashboardListItemTitle';
+export { DashboardListItemText } from './dashboardListItemText';
+export { DashboardListItemButton } from './dashboardListItemButton';
+export { DashboardListItemIcon } from './components.styles';
