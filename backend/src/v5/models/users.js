@@ -52,7 +52,7 @@ User.appendFavourites = async (username, teamspace, favouritesToAdd) => {
 	}
 
 	favouritesToAdd.forEach((fav) => {
-		if (favourites[teamspace].includes(fav)) {
+		if (!favourites[teamspace].includes(fav)) {
 			favourites[teamspace].push(fav);
 		}
 	});
@@ -71,8 +71,7 @@ User.deleteFavourites = async (username, teamspace, favouritesToRemove) => {
 			favourites[teamspace] = updatedFav;
 			await updateUser(username, { $set: { 'customData.starredModels': favourites } });
 		} else {
-			const action = { $unset: {} };
-			action.$unset[`customData.starredModels.${teamspace}`] = '';
+			const action = { $unset: { [`customData.starredModels.${teamspace}`]: 1 } };
 			await updateUser(username, action);
 		}
 	} else {
