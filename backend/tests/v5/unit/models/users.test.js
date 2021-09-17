@@ -102,8 +102,8 @@ const testAppendFavourites = () => {
 
 	const user = 'xxx';
 
-	const determineAction = (teamspace, favToAdd) => {
-		const results = _.cloneDeep(favouritesData.starredModels);
+	const determineAction = (teamspace, favToAdd, dataOverride) => {
+		const results = _.cloneDeep(dataOverride || favouritesData.starredModels);
 		results[teamspace] = results[teamspace] || [];
 		favToAdd.forEach((id) => {
 			if (!results[teamspace].includes(id)) results[teamspace].push(id);
@@ -111,13 +111,22 @@ const testAppendFavourites = () => {
 		return { $set: { 'customData.starredModels': results } };
 	};
 
-	const checkResults = (fn, teamspace, arr) => {
+	const checkResults = (fn, teamspace, arr, dataOverride) => {
 		expect(fn.mock.calls.length).toBe(1);
 		expect(fn.mock.calls[0][2]).toEqual({ user });
-		expect(fn.mock.calls[0][3]).toEqual(determineAction(teamspace, arr));
+		expect(fn.mock.calls[0][3]).toEqual(determineAction(teamspace, arr, dataOverride));
 	};
 
 	describe('Add containers to favourites', () => {
+		test('Should add favourite containers if the user has no favourites entry', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValue({ customData: {} });
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
+			const teamspace = 'teamspace3';
+			const arr = ['e', 'f'];
+			await expect(User.appendFavourites(user, teamspace, arr)).resolves.toBe(undefined);
+			checkResults(fn, teamspace, arr, {});
+		});
+
 		test('Should add favourite containers under a new teamspace', async () => {
 			jest.spyOn(db, 'findOne').mockResolvedValue({ customData: favouritesData });
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
