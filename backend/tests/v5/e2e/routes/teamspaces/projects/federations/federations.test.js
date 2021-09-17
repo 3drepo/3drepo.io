@@ -137,6 +137,12 @@ const testAppendFavourites = () => {
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
+		test('should fail if the favourites list provided is empty', async () => {
+			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.expect(templates.invalidArguments.status).send({ federations: [] });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
 		test('should append a new federation to the user favourites', async () => {
 			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
 				.expect(templates.ok.status).send({ federations: [modelSettings[1]._id] });
@@ -168,6 +174,12 @@ const testDeleteFavourites = () => {
 		test('should fail if the user has no access to one or more federations', async () => {
 			const res = await agent.delete(`${route}?key=${users.noProjectAccess.apiKey}`)
 				.expect(templates.invalidArguments.status).send({ federations: [modelSettings[1]._id] });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if the favourites list provided is empty', async () => {
+			const res = await agent.delete(`${route}?key=${users.tsAdmin.apiKey}`)
+				.expect(templates.invalidArguments.status).send({ federations: [] });
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 

@@ -21,6 +21,10 @@ const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 const Favourites = {};
 
 Favourites.checkModelsAreValid = (accessibleModels, favourites) => {
+	if (!favourites.length) {
+		throw createResponseCode(templates.invalidArguments, 'The favourites list provided is empty');
+	}
+
 	const invalidFavourites = getArrayDifference(accessibleModels.map((c) => c._id), favourites);
 
 	if (invalidFavourites.length) {
