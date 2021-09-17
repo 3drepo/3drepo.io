@@ -24,60 +24,48 @@ const ModelSettings = require(`${src}/models/modelSettings`);
 jest.mock('../../../../../../../src/v5/models/users');
 const Users = require(`${src}/models/users`);
 jest.mock('../../../../../../../src/v5/models/revisions');
-const Revisions = require(`${src}/models/revisions`);
-const Containers = require(`${src}/processors/teamspaces/projects/models/containers`);
+const Federations = require(`${src}/processors/teamspaces/projects/models/federations`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
-const modelList = [
-	{ _id: 1, name: 'model1', permissions: [{ user: 'user1', permission: 'collaborator' }, { user: 'user2', permission: 'collaborator' }] },
-	{ _id: 2, name: 'model2', permissions: [{ user: 'user2', permission: 'commenter' }] },
-	{ _id: 3, name: 'model3', permissions: [{ user: 'user1', permission: 'viewer' }] },
-	{ _id: 4, name: 'model4', permissions: [] },
-	{ _id: 4, name: 'model4' },
+const federationList = [
+	{ _id: 1, name: 'federation 1', permissions: [{ user: 'user1', permission: 'collaborator' }, { user: 'user2', permission: 'collaborator' }] },
+	{ _id: 2, name: 'federation 2', permissions: [{ user: 'user2', permission: 'commenter' }] },
+	{ _id: 3, name: 'federation 3', permissions: [{ user: 'user1', permission: 'viewer' }] },
+	{ _id: 4, name: 'federation 4', permissions: [] },
+	{ _id: 5, name: 'federation 5' },
 ];
 
-const containerSettings = {
-	container1: {
+const federationSettings = {
+	federation1: {
 		_id: 1,
-		name: 'container 1',
+		name: 'federation 1',
 		type: 'type 1',
 		properties: {
 			units: 'm',
-			code: 'CTN1',
+			code: 'FED1',
 		},
 		status: 'ok',
 	},
-	container2: {
+	federation2: {
 		_id: 2,
-		name: 'container 2',
+		name: 'federation 2',
 		type: 'type 2',
 		properties: {
 			units: 'mm',
-			code: 'CTN2',
+			code: 'FED2',
 		},
 		status: 'processing',
 	},
 };
 
 const user1Favourites = [1];
-
-const project = { _id: 1, name: 'project', models: modelList.map(({ _id }) => _id) };
-
-const container2Rev = {
-	_id: 12,
-	tag: 'revTag',
-	timestamp: 1630606846000,
-};
+const project = { _id: 1, name: 'project', models: federationList.map(({ _id }) => _id) };
 
 ProjectsModel.getProjectById.mockImplementation(() => project);
-ModelSettings.getContainers.mockImplementation(() => modelList);
-ModelSettings.getContainerById.mockImplementation((teamspace, container) => containerSettings[container]);
-Revisions.getRevisionCount.mockImplementation((teamspace, container) => (container === 'container2' ? 10 : 0));
-Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
-	if (container === 'container2') return container2Rev;
-	throw templates.revisionNotFound;
-});
+ModelSettings.getFederations.mockImplementation(() => federationList);
+ModelSettings.getFederationById.mockImplementation((teamspace, federation) => federationSettings[federation]);
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
+
 Users.appendFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
 	for (const favourite of favouritesToAdd) {
 		if (user1Favourites.indexOf(favourite) === -1) {
@@ -102,112 +90,86 @@ jest.mock('../../../../../../../src/v5/utils/permissions/permissions', () => ({
 	hasProjectAdminPermissions: jest.fn().mockImplementation((perm, user) => user === 'projAdmin'),
 }));
 
-const determineResults = (username) => modelList.flatMap(({ permissions, _id, name }) => {
+const determineResults = (username) => federationList.flatMap(({ permissions, _id, name }) => {
 	const isAdmin = username === 'projAdmin' || username === 'tsAdmin';
 	const hasModelPerm = permissions && permissions.find((entry) => entry.user === username);
 	const isFavourite = username === 'user1' && user1Favourites.includes(_id);
 	return isAdmin || hasModelPerm ? { _id, name, role: isAdmin ? 'admin' : hasModelPerm.permission, isFavourite } : [];
 });
 
-const testGetContainerList = () => {
-	describe('Get container list by user', () => {
+const testGetFederationList = () => {
+	describe('Get federation list by user', () => {
 		test('should return the whole list if the user is a teamspace admin', async () => {
-			const res = await Containers.getContainerList('teamspace', 'xxx', 'tsAdmin');
+			const res = await Federations.getFederationList('teamspace', 'xxx', 'tsAdmin');
 			expect(res).toEqual(determineResults('tsAdmin'));
 		});
 		test('should return the whole list if the user is a project admin', async () => {
-			const res = await Containers.getContainerList('teamspace', 'xxx', 'projAdmin');
+			const res = await Federations.getFederationList('teamspace', 'xxx', 'projAdmin');
 			expect(res).toEqual(determineResults('projAdmin'));
 		});
-		test('should return a partial list if the user has model access in some containers', async () => {
-			const res = await Containers.getContainerList('teamspace', 'xxx', 'user1');
+		test('should return a partial list if the user has model access in some federations', async () => {
+			const res = await Federations.getFederationList('teamspace', 'xxx', 'user1');
 			expect(res).toEqual(determineResults('user1'));
 		});
-		test('should return a partial list if the user has model access in some containers (2)', async () => {
-			const res = await Containers.getContainerList('teamspace', 'xxx', 'user2');
+		test('should return a partial list if the user has model access in some federations (2)', async () => {
+			const res = await Federations.getFederationList('teamspace', 'xxx', 'user2');
 			expect(res).toEqual(determineResults('user2'));
 		});
 		test('should return empty array if the user has no access', async () => {
-			const res = await Containers.getContainerList('teamspace', 'xxx', 'nobody');
+			const res = await Federations.getFederationList('teamspace', 'xxx', 'nobody');
 			expect(res).toEqual([]);
 		});
 	});
 };
 
 const testAppendFavourites = () => {
-	describe('Add containers to favourites', () => {
-		test('new containers should be added to favourites if user has all permissions', async () => {
-			await Containers.appendFavourites('user1', 'teamspace', 'project', [3]);
+	describe('Add federations to favourites', () => {
+		test('new federations should be added to favourites if user has all permissions', async () => {
+			await expect(Federations.appendFavourites('user1', 'teamspace', 'project', [3])).resolves.toEqual(undefined);
 		});
 
-		test('should return error if one or more containers are not found', async () => {
-			await expect(Containers.appendFavourites('user1', 'teamspace', 'project', [1, -1]))
+		test('should return error if one or more federations are not found', async () => {
+			await expect(Federations.appendFavourites('user1', 'teamspace', 'project', [1, -1]))
 				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: -1' });
 		});
 
-		test('should return error if the containers list provided is empty', async () => {
-			await expect(Containers.appendFavourites('user1', 'teamspace', 'project', []))
+		test('should return error if the federations list provided is empty', async () => {
+			await expect(Federations.appendFavourites('user1', 'teamspace', 'project', []))
 				.rejects.toEqual({ ...templates.invalidArguments, message: 'The favourites list provided is empty' });
 		});
 
 		test('should return error if user has no permissions on one or more models', async () => {
-			await expect(Containers.appendFavourites('user1', 'teamspace', 'project', [1, 2]))
+			await expect(Federations.appendFavourites('user1', 'teamspace', 'project', [1, 2]))
 				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: 2' });
 		});
 	});
 };
 
 const testDeleteFavourites = () => {
-	describe('Remove containers from favourites', () => {
-		test('containers should be removed from favourites if user has all permissions', async () => {
-			await Containers.deleteFavourites('tsAdmin', 'teamspace', 'project', [1]);
+	describe('Remove federations from favourites', () => {
+		test('federations should be removed from favourites if user has all permissions', async () => {
+			await expect(Federations.deleteFavourites('tsAdmin', 'teamspace', 'project', [1])).resolves.toEqual(undefined);
 		});
 
-		test('should return error if one or more containers are not found', async () => {
-			await expect(Containers.deleteFavourites('tsAdmin', 'teamspace', 'project', [1, -1]))
+		test('should return error if one or more federations are not found', async () => {
+			await expect(Federations.deleteFavourites('tsAdmin', 'teamspace', 'project', [1, -1]))
 				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: -1' });
 		});
 
-		test('should return error if the containers list provided is empty', async () => {
-			await expect(Containers.deleteFavourites('user1', 'teamspace', 'project', []))
+		test('should return error if the federations list provided is empty', async () => {
+			await expect(Federations.deleteFavourites('user1', 'teamspace', 'project', []))
 				.rejects.toEqual({ ...templates.invalidArguments, message: 'The favourites list provided is empty' });
 		});
 
 		test('should return error if user has no permissions on one or more models', async () => {
-			await expect(Containers.deleteFavourites('user1', 'teamspace', 'project', [2]))
+			await expect(Federations.deleteFavourites('user1', 'teamspace', 'project', [2]))
 				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: 2' });
 		});
 	});
 };
 
-const formatToStats = (settings, revCount, latestRev) => ({
-	type: settings.type,
-	code: settings.properties.code,
-	status: settings.status,
-	units: settings.properties.unit,
-	revisions: {
-		total: revCount,
-		lastUpdated: latestRev.timestamp,
-		latestRevision: latestRev.tag || latestRev._id,
-	},
-});
-
-const testGetContainerStats = () => {
-	describe('Get container stats', () => {
-		test('should return the stats if the container exists and have no revisions', async () => {
-			const res = await Containers.getContainerStats('teamspace', 'project', 'container1');
-			expect(res).toEqual(formatToStats(containerSettings.container1, 0, {}));
-		});
-		test('should return the stats if the container exists and have revisions', async () => {
-			const res = await Containers.getContainerStats('teamspace', 'project', 'container2');
-			expect(res).toEqual(formatToStats(containerSettings.container2, 10, container2Rev));
-		});
-	});
-};
-
-describe('processors/teamspaces/projects/containers', () => {
-	testGetContainerList();
-	testGetContainerStats();
+describe('processors/teamspaces/projects/federations', () => {
+	testGetFederationList();
 	testAppendFavourites();
 	testDeleteFavourites();
 });
