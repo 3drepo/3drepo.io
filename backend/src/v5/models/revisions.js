@@ -26,27 +26,6 @@ const excludeIncomplete = { incomplete: { $exists: false } };
 
 const collectionName = (model) => `${model}.history`;
 
-const findRevisionsByModel = async (teamspace, model, query, projection) => {
-	const revisions = await db.find(teamspace, collectionName(model), query, projection, {});
-
-	if (!revisions || revisions.length === 0) {
-		throw templates.containerNotFound;
-	}
-
-	return revisions;
-};
-
-const findOneRevisionByID = async (teamspace, model, revision, projection, sort) => {
-	const revisions = await findRevisionsByModel(teamspace, model, {}, projection, sort);
-	const rev = revisions.find((r) => UUIDToString(r._id) === UUIDToString(revision));
-
-	if (!rev) {
-		throw templates.revisionNotFound;
-	}
-
-	return rev;
-};
-
 const findOneRevisionByQuery = async (teamspace, model, query, projection, sort) => {
 	const rev = await db.findOne(teamspace, collectionName(model), query, projection, sort);
 	if (!rev) {
@@ -71,21 +50,18 @@ Revisions.getRevisions = (teamspace, model, showVoid, projection = {}) => {
 	const query = { ...excludeIncomplete };
 
 	if (!showVoid) {
-		query.void = { $ne: true };
+		query.void = excludeVoids.void;
 	}
 
 	return findRevisionsByModel(teamspace, model, query, projection);
 };
 
 Revisions.updateRevisionStatus = async (teamspace, model, revision, status) => {
-	const rev = await findOneRevisionByID(teamspace, model, revision, { _id: 1, void: 1 });
+	const rev = await findOneRevisionByQuery(teamspace, model, {_id: revision} ,{ _id: 1, void: 1 });
 
-	if (rev.void === status || (rev.void === undefined && !status)) {
-		return;
-	}
+	await db.updateOne(teamspace, collectionName(model), { _id: rev._id }, { $set: { void: status } });
 
-	rev.void = status;
-	await db.updateOne(teamspace, collectionName(model), { _id: rev._id }, { $set: { void: rev.void } });
+	return {};
 };
 
 module.exports = Revisions;

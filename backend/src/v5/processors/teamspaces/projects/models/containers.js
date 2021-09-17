@@ -67,7 +67,6 @@ Containers.updateRevisionStatus = async (teamspace, container, revision, status)
 	if (typeof status === 'boolean') {
 		await updateRevisionStatus(teamspace, container, revision, status);
 	}
-	return {};
 };
 
 module.exports = Containers;

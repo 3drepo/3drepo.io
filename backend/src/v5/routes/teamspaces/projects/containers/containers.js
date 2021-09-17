@@ -56,8 +56,8 @@ const updateRevisionStatus = async (req, res) => {
 	const { teamspace, container, revision } = req.params;
 	const status = req.body.void;
 
-	Containers.updateRevisionStatus(teamspace, container, revision, status).then((rev) => {
-		respond(req, res, templates.ok, rev);
+	Containers.updateRevisionStatus(teamspace, container, revision, status).then(() => {
+		respond(req, res, templates.ok, {});
 	}).catch((err) => respond(req, res, err));
 };
 
