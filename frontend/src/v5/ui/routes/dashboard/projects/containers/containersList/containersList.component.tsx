@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useMemo, useState } from 'react';
 import { isEmpty } from 'lodash';
 import { Trans } from '@lingui/react';
 import { Tooltip } from '@material-ui/core';
@@ -98,7 +98,7 @@ export const ContainersList = ({
 	const onSortingChanged = () => {
 	};
 
-	return (
+	return useMemo(() => (
 		<Container>
 			<DashboardListCollapse
 				title={title}
@@ -203,5 +203,5 @@ export const ContainersList = ({
 				</DashboardList>
 			</DashboardListCollapse>
 		</Container>
-	);
+	), [containers]);
 };

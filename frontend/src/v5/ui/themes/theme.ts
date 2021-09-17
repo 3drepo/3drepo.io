@@ -328,9 +328,17 @@ export const theme = createMuiTheme({
 					'&$disabled $input': {
 						color: COLOR.BASE_LIGHT,
 					},
+					'&$disabled $path': {
+						fill: COLOR.BASE_LIGHT,
+					},
 					'&$error $input': {
 						color: COLOR.ERROR_MAIN,
+					},
+					'&$error': {
 						backgroundColor: COLOR.ERROR_LIGHTEST,
+					},
+					'&$error $path': {
+						fill: COLOR.ERROR_MAIN,
 					},
 				},
 			},

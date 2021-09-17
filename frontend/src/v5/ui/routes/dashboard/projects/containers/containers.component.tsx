@@ -15,11 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@lingui/core';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
 import { Trans } from '@lingui/react';
 import AddIcon from '@material-ui/icons/AddCircle';
+import { MainHeader } from '@controls/mainHeader';
+import { SearchInput } from '@controls/searchInput';
 import { Container, Content, NewContainerButton } from './containers.styles';
 import { ContainersList } from './containersList';
 
@@ -39,8 +41,24 @@ for (let i = 0; i < 10; i++) {
 }
 
 export const Containers = (): JSX.Element => {
+	const [searchInput, setSearchInput] = useState('');
+
 	return (
 		<Container>
+			<MainHeader>
+				<Trans
+					id="containers.search.placeholder"
+					message="Search containers..."
+					render={({ translation }) => (
+						<SearchInput
+							onClear={() => setSearchInput('')}
+							onChange={(event) => setSearchInput(event.currentTarget.value)}
+							value={searchInput}
+							placeholder={translation as string}
+						/>
+					)}
+				/>
+			</MainHeader>
 			<Content>
 				<ContainersList
 					containers={mockContainers}
