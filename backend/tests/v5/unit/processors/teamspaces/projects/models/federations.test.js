@@ -25,6 +25,7 @@ jest.mock('../../../../../../../src/v5/models/users');
 const Users = require(`${src}/models/users`);
 jest.mock('../../../../../../../src/v5/models/revisions');
 const Federations = require(`${src}/processors/teamspaces/projects/models/federations`);
+const { templates } = require(`${src}/utils/responseCodes`);
 
 const federationList = [
 	{ _id: 1, name: 'federation 1', permissions: [{ user: 'user1', permission: 'collaborator' }, { user: 'user2', permission: 'collaborator' }] },
@@ -58,13 +59,29 @@ const federationSettings = {
 };
 
 const user1Favourites = [1];
-
 const project = { _id: 1, name: 'project', models: federationList.map(({ _id }) => _id) };
 
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getFederations.mockImplementation(() => federationList);
 ModelSettings.getFederationById.mockImplementation((teamspace, federation) => federationSettings[federation]);
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
+
+Users.appendFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
+	for (const favourite of favouritesToAdd) {
+		if (user1Favourites.indexOf(favourite) === -1) {
+			user1Favourites.push(favourite);
+		}
+	}
+});
+
+Users.deleteFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
+	for (const favourite of favouritesToAdd) {
+		const index = user1Favourites.indexOf(favourite);
+		if (index !== -1) {
+			user1Favourites.splice(index, 1);
+		}
+	}
+});
 
 // Permissions mock
 jest.mock('../../../../../../../src/v5/utils/permissions/permissions', () => ({
@@ -105,6 +122,54 @@ const testGetFederationList = () => {
 	});
 };
 
+const testAppendFavourites = () => {
+	describe('Add federations to favourites', () => {
+		test('new federations should be added to favourites if user has all permissions', async () => {
+			await expect(Federations.appendFavourites('user1', 'teamspace', 'project', [3])).resolves.toEqual(undefined);
+		});
+
+		test('should return error if one or more federations are not found', async () => {
+			await expect(Federations.appendFavourites('user1', 'teamspace', 'project', [1, -1]))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: -1' });
+		});
+
+		test('should return error if the federations list provided is empty', async () => {
+			await expect(Federations.appendFavourites('user1', 'teamspace', 'project', []))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The favourites list provided is empty' });
+		});
+
+		test('should return error if user has no permissions on one or more models', async () => {
+			await expect(Federations.appendFavourites('user1', 'teamspace', 'project', [1, 2]))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: 2' });
+		});
+	});
+};
+
+const testDeleteFavourites = () => {
+	describe('Remove federations from favourites', () => {
+		test('federations should be removed from favourites if user has all permissions', async () => {
+			await expect(Federations.deleteFavourites('tsAdmin', 'teamspace', 'project', [1])).resolves.toEqual(undefined);
+		});
+
+		test('should return error if one or more federations are not found', async () => {
+			await expect(Federations.deleteFavourites('tsAdmin', 'teamspace', 'project', [1, -1]))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: -1' });
+		});
+
+		test('should return error if the federations list provided is empty', async () => {
+			await expect(Federations.deleteFavourites('user1', 'teamspace', 'project', []))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The favourites list provided is empty' });
+		});
+
+		test('should return error if user has no permissions on one or more models', async () => {
+			await expect(Federations.deleteFavourites('user1', 'teamspace', 'project', [2]))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: 2' });
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/federations', () => {
 	testGetFederationList();
+	testAppendFavourites();
+	testDeleteFavourites();
 });

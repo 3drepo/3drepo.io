@@ -173,6 +173,98 @@ const testGetContainerStats = () => {
 	});
 };
 
+const testAppendFavourites = () => {
+	const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/favourites`;
+	describe('Append Favourite Containers', () => {
+		test('should fail without a valid session', async () => {
+			const res = await agent.patch(route)
+				.expect(templates.notLoggedIn.status).send({ containers: [models[1]._id] });
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user is not a member of the teamspace', async () => {
+			const res = await agent.patch(`${route}?key=${nobody.apiKey}`)
+				.expect(templates.teamspaceNotFound.status).send({ containers: [models[1]._id] });
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if the project does not exist', async () => {
+			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/containers/favourites?key=${users.tsAdmin.apiKey}`)
+				.expect(templates.projectNotFound.status).send({ containers: [models[1]._id] });
+			expect(res.body.code).toEqual(templates.projectNotFound.code);
+		});
+
+		test('should fail if the user has no access to one or more containers', async () => {
+			const res = await agent.patch(`${route}?key=${users.noProjectAccess.apiKey}`)
+				.expect(templates.invalidArguments.status).send({ containers: [models[1]._id] });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if the list contains a federation', async () => {
+			const res = await agent.patch(`${route}?key=${users.noProjectAccess.apiKey}`)
+				.expect(templates.invalidArguments.status).send({ containers: [federation._id] });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if the favourites list provided is empty', async () => {
+			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.expect(templates.invalidArguments.status).send({ containers: [] });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should append a new container to the user favourites', async () => {
+			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.expect(templates.ok.status).send({ containers: [models[1]._id] });
+		});
+	});
+};
+
+const testDeleteFavourites = () => {
+	const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/favourites`;
+	describe('Remove Favourite Containers', () => {
+		test('should fail without a valid session', async () => {
+			const res = await agent.delete(route)
+				.expect(templates.notLoggedIn.status).send({ containers: [models[0]._id] });
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user is not a member of the teamspace', async () => {
+			const res = await agent.delete(`${route}?key=${nobody.apiKey}`)
+				.expect(templates.teamspaceNotFound.status).send({ containers: [models[0]._id] });
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if the project does not exist', async () => {
+			const res = await agent.delete(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/containers/favourites?key=${users.tsAdmin.apiKey}`)
+				.expect(templates.projectNotFound.status).send({ containers: [models[0]._id] });
+			expect(res.body.code).toEqual(templates.projectNotFound.code);
+		});
+
+		test('should fail if the user has no access to one or more containers', async () => {
+			const res = await agent.delete(`${route}?key=${users.noProjectAccess.apiKey}`)
+				.expect(templates.invalidArguments.status).send({ containers: [models[1]._id] });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if the list contains a federation', async () => {
+			const res = await agent.delete(`${route}?key=${users.noProjectAccess.apiKey}`)
+				.expect(templates.invalidArguments.status).send({ containers: [federation._id] });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if the favourites list provided is empty', async () => {
+			const res = await agent.delete(`${route}?key=${users.tsAdmin.apiKey}`)
+				.expect(templates.invalidArguments.status).send({ containers: [] });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should remove a container from the user favourites', async () => {
+			await agent.delete(`${route}?key=${users.tsAdmin.apiKey}`)
+				.expect(templates.ok.status).send({ containers: [models[0]._id] });
+		});
+	});
+};
+
 describe('E2E routes/teamspaces/projects/containers', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -182,4 +274,6 @@ describe('E2E routes/teamspaces/projects/containers', () => {
 	afterAll(() => ServiceHelper.closeApp(server));
 	testGetContainerList();
 	testGetContainerStats();
+	testAppendFavourites();
+	testDeleteFavourites();
 });
