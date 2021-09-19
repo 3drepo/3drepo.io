@@ -16,7 +16,7 @@
  */
 
 const { convertAllUUIDs } = require('../dataConverter/pathParams');
-const { hasReadAccessToContainer } = require('./components/containers');
+const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('./components/containers');
 const { isTeamspaceMember } = require('./components/teamspaces');
 const { validSession } = require('../auth');
 const { validateMany } = require('../common');
@@ -25,5 +25,6 @@ const Permissions = {};
 
 Permissions.hasAccessToTeamspace = validateMany([convertAllUUIDs, validSession, isTeamspaceMember]);
 Permissions.hasReadAccessToContainer = validateMany([Permissions.hasAccessToTeamspace, hasReadAccessToContainer]);
+Permissions.hasWriteAccessToContainer = validateMany([Permissions.hasAccessToTeamspace, hasWriteAccessToContainer]);
 
 module.exports = Permissions;

@@ -18,18 +18,19 @@
  const { respond } = require('../../../utils/responder');
  const { templates } = require('../../../utils/responseCodes');
  const { validateMany } = require('../../common')
- const { hasReadAccessToContainer } = require('../permissions')
+ const { hasWriteAccessToContainer } = require('../../permissions/permissions')
  const RevisionPerms = {};
  
- RevisionPerms.hasValidArguments = async (req, res, next) => {        
-     if (typeof req.body.void === 'boolean') {
+ RevisionPerms.hasValidArguments = async (req, res, next) => {   
+    const numOfProps = Object.keys(req.body).length; 
+    if (numOfProps === 1 && typeof req.body.void === 'boolean') {
         next(); 
     } else {
         respond(req, res, templates.invalidArguments);
     } 
  };
  
- RevisionPerms.hasPermissionsAndValidArguments = validateMany([RevisionPerms.hasValidArguments, hasReadAccessToContainer]);
+ RevisionPerms.hasPermissionsAndValidArguments = validateMany([hasWriteAccessToContainer, RevisionPerms.hasValidArguments]);
 
 
  module.exports = RevisionPerms;

@@ -49,7 +49,10 @@ const getRevisions = async (req, res) => {
 	const showVoid = req.query.showVoid === 'true';
 
 	Containers.getRevisions(teamspace, container, showVoid).then((revisions) => {
-		respond(req, res, templates.ok, revisions);
+		const formattedRevisions = revisions.map((rev)=> {
+			return {...rev, _id: UUIDToString(rev._id)};
+		});
+		respond(req, res, templates.ok, { formattedRevisions });
 	}).catch((err) => respond(req, res, err));
 };
 

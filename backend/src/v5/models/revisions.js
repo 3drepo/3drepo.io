@@ -26,6 +26,15 @@ const excludeIncomplete = { incomplete: { $exists: false } };
 
 const collectionName = (model) => `${model}.history`;
 
+const findRevisionsByQuery = async (teamspace, model, query, projection, sort) => {
+	const rev = await db.find(teamspace, collectionName(model), query, projection, sort);
+	if (!rev) {
+		throw templates.revisionNotFound;
+	}
+
+	return rev;
+};
+
 const findOneRevisionByQuery = async (teamspace, model, query, projection, sort) => {
 	const rev = await db.findOne(teamspace, collectionName(model), query, projection, sort);
 	if (!rev) {
@@ -46,14 +55,15 @@ Revisions.getRevisionCount = (teamspace, model) => {
 	return db.count(teamspace, collectionName(model), query);
 };
 
-Revisions.getRevisions = (teamspace, model, showVoid, projection = {}) => {
+Revisions.getRevisions = async(teamspace, model, showVoid, projection = {}) => {
 	const query = { ...excludeIncomplete };
 
 	if (!showVoid) {
 		query.void = excludeVoids.void;
 	}
 
-	return findRevisionsByModel(teamspace, model, query, projection);
+	const revisions = await findRevisionsByQuery(teamspace, model, query, projection);
+	return revisions;
 };
 
 Revisions.updateRevisionStatus = async (teamspace, model, revision, status) => {

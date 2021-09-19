@@ -38,18 +38,36 @@ Permissions.hasProjectAdminPermissions = (perms, username) => perms.some(
 	({ user, permissions }) => user === username && permissions.includes(PROJECT_ADMIN),
 );
 
-Permissions.hasReadAccessToModel = async (teamspace, project, model, username, adminCheck = true) => {
-	if (adminCheck) {
-		const isAdminArr = (await Promise.all([
-			Permissions.isTeamspaceAdmin(teamspace, username),
-			Permissions.isProjectAdmin(teamspace, project, username),
-		]));
+const hasAdminPermissions = async (teamspace, project, username) =>{
+	const isAdminArr = (await Promise.all([
+		Permissions.isTeamspaceAdmin(teamspace, username),
+		Permissions.isProjectAdmin(teamspace, project, username),
+	]));
 
-		if (isAdminArr.filter((bool) => bool).length) return true;
+	return isAdminArr.filter((bool) => bool).length;
+}
+
+Permissions.hasWriteAccessToModel = async (teamspace, project, model, username, adminCheck = true) => {
+	if (adminCheck) {
+		const hasAdminPerms = await hasAdminPermissions(teamspace, project, username);
+		if(hasAdminPerms){
+			return true;
+		}		
 	}
 
 	const { permissions } = await getModelById(teamspace, model, { permissions: 1 });
+	return permissions && permissions.some((perm) => perm.user === username && perm.permission === 'collaborator' );
+};
 
+Permissions.hasReadAccessToModel = async (teamspace, project, model, username, adminCheck = true) => {
+	if (adminCheck) {
+		const hasAdminPerms = await hasAdminPermissions(teamspace, project, username);
+		if(hasAdminPerms){
+			return true;
+		}		
+	}
+
+	const { permissions } = await getModelById(teamspace, model, { permissions: 1 });
 	// we assume the user has access if they have some form of permissions on the model
 	return permissions && permissions.some((perm) => perm.user === username);
 };
