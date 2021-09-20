@@ -18,7 +18,7 @@
 import { RouteExcept } from '@/v5/services/routing/routing';
 import { MuiThemeProvider } from '@material-ui/core';
 import React from 'react';
-import { useRouteMatch, Route, useParams } from 'react-router-dom';
+import { useRouteMatch, Route } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 
 import { theme } from '@/v5/ui/themes/theme';
@@ -28,7 +28,6 @@ import { I18nProvider } from '@lingui/react';
 import { messages as esMessages } from '@/locales/es/messages';
 import { AppBar } from '@components/shared/appBar';
 import { messages as enMessages } from '@/locales/en/messages';
-import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
 import { TeamspaceContent } from './teamspaces';
 import { ProjectContent } from './projects';
 import { Content } from './index.styles';

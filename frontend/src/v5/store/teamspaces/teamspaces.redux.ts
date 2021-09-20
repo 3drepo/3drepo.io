@@ -26,11 +26,13 @@ export interface ITeamspace {
 export interface ITeamspacesActions {
 	fetch: () => any;
 	fetchSuccess: (teamspaces: ITeamspace[]) => any;
+	fetchFailure: () => any;
 }
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
 	fetch: [],
 	fetchSuccess: ['teamspaces'],
+	fetchFailure: [],
 }, { prefix: 'TEAMSPACES2/' }) as { Types: Constants<ITeamspacesActions>; Creators: ITeamspacesActions };
 
 interface ITeamspacesState {

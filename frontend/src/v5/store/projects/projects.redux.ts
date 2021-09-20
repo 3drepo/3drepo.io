@@ -27,11 +27,13 @@ export interface IProject {
 export interface IProjectsActions {
 	fetch: (teamspace: string) => any;
 	fetchSuccess: (teamspace: string, projects: IProject[]) => any;
+	fetchFailure: () => any;
 }
 
 export const { Types: ProjectsTypes, Creators: ProjectsActions } = createActions({
 	fetch: ['teamspace'],
 	fetchSuccess: ['teamspace', 'projects'],
+	fetchFailure: [],
 }, { prefix: 'PROJECTS/' }) as { Types: Constants<IProjectsActions>; Creators: IProjectsActions };
 
 interface IProjectsState {
@@ -43,8 +45,6 @@ export const INITIAL_STATE: IProjectsState = {
 	projects: [],
 	currentTeamspace: '',
 };
-
-export const setPendingStatus = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
 
 export const fetchSuccess = (state = INITIAL_STATE, { teamspace, projects }) => ({ ...state,
 	currentTeamspace: teamspace,

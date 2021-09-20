@@ -24,7 +24,7 @@ export function* fetch({ teamspace }) {
 		const { data: { projects } } = yield API.fetchProjects(teamspace);
 		yield put(ProjectsActions.fetchSuccess(teamspace, projects as IProject[]));
 	} catch (e) {
-		console.error(e);
+		yield put(ProjectsActions.fetchFailure());
 	}
 }
 

@@ -1,6 +1,5 @@
-import { AuthActions, AuthTypes } from '@/v5/store/auth/auth.redux';
+import { AuthActions } from '@/v5/store/auth/auth.redux';
 import * as AuthSaga from '@/v5/store/auth/auth.sagas';
-import assert from 'assert';
 import { expectSaga } from 'redux-saga-test-plan';
 
 describe('Auth sagas', () => {
@@ -12,7 +11,7 @@ describe('Auth sagas', () => {
 			// Dispatch any actions that the saga will `take`.
 			.put(AuthActions.loginSuccess())
 			// Start the test. Returns a Promise.
-			.run();
+			.silentRun();
 	})
 
 });
