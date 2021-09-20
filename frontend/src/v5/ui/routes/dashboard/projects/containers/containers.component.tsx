@@ -15,34 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@lingui/core';
+import React from 'react';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
 import { Trans } from '@lingui/react';
 import { MainHeader } from '@controls/mainHeader';
 import { SearchInput } from '@controls/searchInput';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
+import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
+import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { Container, Content, NewContainerButton, NewContainerMainHeaderButton, UploadFileButton } from './containers.styles';
 import { ContainersList } from './containersList';
 
-const mockContainers = [];
-for (let i = 0; i < 10; i++) {
-	const mockContainer = {
-		_id: i,
-		latestRevision: 123,
-		title: 'This is the container title',
-		revisionsCount: 7878,
-		category: 'my awesome category',
-		code: 'XX123',
-		date: i18n.date(new Date()),
-	};
-
-	mockContainers.push(mockContainer);
-}
-
 export const Containers = (): JSX.Element => {
-	const [searchInput, setSearchInput] = useState('');
+	const filteredContainers = ContainersHooksSelectors.selectFilteredContainers();
+	const queryInput = ContainersHooksSelectors.selectFilterQuery();
 
 	return (
 		<Container>
@@ -52,9 +39,9 @@ export const Containers = (): JSX.Element => {
 					message="Search containers..."
 					render={({ translation }) => (
 						<SearchInput
-							onClear={() => setSearchInput('')}
-							onChange={(event) => setSearchInput(event.currentTarget.value)}
-							value={searchInput}
+							onClear={() => ContainersActionsDispatchers.setFilterQuery('')}
+							onChange={(event) => ContainersActionsDispatchers.setFilterQuery(event.currentTarget.value)}
+							value={queryInput}
 							placeholder={translation as string}
 						/>
 					)}
@@ -68,12 +55,12 @@ export const Containers = (): JSX.Element => {
 			</MainHeader>
 			<Content>
 				<ContainersList
-					containers={mockContainers}
+					containers={filteredContainers}
 					title={(
 						<Trans
 							id="containers.favourites.collapseTitle"
 							message="Favourites ({count})"
-							values={{ count: mockContainers.length }}
+							values={{ count: filteredContainers.length }}
 						/>
 					)}
 					titleTooltips={{
@@ -90,12 +77,12 @@ export const Containers = (): JSX.Element => {
 					)}
 				/>
 				<ContainersList
-					containers={mockContainers}
+					containers={filteredContainers}
 					title={(
 						<Trans
 							id="containers.all.collapseTitle"
 							message="All containers ({count})"
-							values={{ count: mockContainers.length }}
+							values={{ count: filteredContainers.length }}
 						/>
 					)}
 					titleTooltips={{

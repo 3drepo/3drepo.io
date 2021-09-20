@@ -18,6 +18,7 @@
 import React, { ReactNode, useMemo, useState } from 'react';
 import { isEmpty } from 'lodash';
 import { Trans } from '@lingui/react';
+import { i18n } from '@lingui/core';
 import { Tooltip } from '@material-ui/core';
 import {
 	DashboardList,
@@ -36,6 +37,7 @@ import {
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { EllipsisButtonWithMenu } from '@controls/ellipsisButtonWithMenu';
+import { IContainer } from '@/v5/store/containers/containers.redux';
 import { Container } from './containersList.styles';
 
 const ellipsisMenuItems = [
@@ -79,7 +81,7 @@ const ellipsisMenuItems = [
 
 type IContainersList = {
 	emptyMessage: ReactNode;
-	containers: Array<any>;
+	containers: Array<IContainer>;
 	title: ReactNode;
 	titleTooltips: {
 		collapsed: ReactNode;
@@ -126,8 +128,8 @@ export const ContainersList = ({
 						containers.map((container) => (
 							<DashboardListItem
 								selected={container._id === selectedId}
-								onClick={() => setSelectedId(container._id)}
-								key={container.id}
+								onClick={() => setSelectedId((id) => (id === container._id ? null : container._id))}
+								key={container._id}
 							>
 								<DashboardListItemRow>
 									<DashboardListItemTitle
@@ -168,7 +170,7 @@ export const ContainersList = ({
 										{container.category}
 									</DashboardListItemText>
 									<DashboardListItemText width={97} selected={container._id === selectedId}>
-										{container.date}
+										{i18n.date(container.date)}
 									</DashboardListItemText>
 									<DashboardListItemIcon>
 										<Tooltip
@@ -203,5 +205,5 @@ export const ContainersList = ({
 				</DashboardList>
 			</DashboardListCollapse>
 		</Container>
-	), [containers]);
+	), [containers, selectedId]);
 };
