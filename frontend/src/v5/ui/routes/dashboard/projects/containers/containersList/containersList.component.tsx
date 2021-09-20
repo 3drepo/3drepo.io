@@ -37,51 +37,62 @@ import {
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { EllipsisButtonWithMenu } from '@controls/ellipsisButtonWithMenu';
-import { IContainer } from '@/v5/store/containers/containers.redux';
+import { IContainer } from '@/v5/store/containers/containers.types';
+import { useOrderedList } from './containersList.hooks';
+import { DEFAULT_SORT_CONFIG } from './containersList.constants';
 import { Container } from './containersList.styles';
 
 const ellipsisMenuItems = [
 	{
 		title: <Trans id="containers.ellipsisMenu.loadContainer" message="Load Container in 3D Viewer" />,
-		onClick: () => { },
+		onClick: () => {
+		},
 	},
 	{
 		title: <Trans id="containers.ellipsisMenu.uploadNewRevision" message="Upload new Revision" />,
-		onClick: () => { },
+		onClick: () => {
+		},
 	},
 	{
 		title: <Trans id="containers.ellipsisMenu.viewIssues" message="View Issues" />,
-		onClick: () => { },
+		onClick: () => {
+		},
 	},
 	{
 		title: <Trans id="containers.ellipsisMenu.viewRisks" message="View Risks" />,
-		onClick: () => { },
+		onClick: () => {
+		},
 	},
 	{
 		title: <Trans id="containers.ellipsisMenu.viewRevisions" message="View Revisions" />,
-		onClick: () => { },
+		onClick: () => {
+		},
 	},
 	{
 		title: <Trans id="containers.ellipsisMenu.editPermissions" message="Edit Permissions" />,
-		onClick: () => { },
+		onClick: () => {
+		},
 	},
 	{
 		title: <Trans id="containers.ellipsisMenu.shareContainer" message="Share Container" />,
-		onClick: () => { },
+		onClick: () => {
+		},
 	},
 	{
 		title: <Trans id="containers.ellipsisMenu.settings" message="Settings" />,
-		onClick: () => { },
+		onClick: () => {
+		},
 	},
 	{
 		title: <Trans id="containers.ellipsisMenu.delete" message="Delete" />,
-		onClick: () => { },
+		onClick: () => {
+		},
 	},
 ];
 
 type IContainersList = {
 	emptyMessage: ReactNode;
-	containers: Array<IContainer>;
+	containers: IContainer[];
 	title: ReactNode;
 	titleTooltips: {
 		collapsed: ReactNode;
@@ -96,9 +107,7 @@ export const ContainersList = ({
 	titleTooltips,
 }: IContainersList): JSX.Element => {
 	const [selectedId, setSelectedId] = useState<string | null>(null);
-
-	const onSortingChanged = () => {
-	};
+	const { sortedList, setSortConfig } = useOrderedList(containers, DEFAULT_SORT_CONFIG);
 
 	return useMemo(() => (
 		<Container>
@@ -106,26 +115,26 @@ export const ContainersList = ({
 				title={title}
 				tooltipTitles={titleTooltips}
 			>
-				<DashboardListHeader onSortingChange={onSortingChanged}>
-					<DashboardListHeaderLabel name="container" sort>
+				<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
+					<DashboardListHeaderLabel name="title" sort>
 						<Trans id="containers.list.header.container" message="Container" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="revision" width={186} sort>
+					<DashboardListHeaderLabel width={186}>
 						<Trans id="containers.list.header.revisions" message="Revisions" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="code" sort>
+					<DashboardListHeaderLabel name="code">
 						<Trans id="containers.list.header.containerCode" message="Container code" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="category" width={188} sort>
+					<DashboardListHeaderLabel name="category" width={188}>
 						<Trans id="containers.list.header.category" message="Category" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="lastUpdated" width={180} sort>
+					<DashboardListHeaderLabel name="date" width={180}>
 						<Trans id="containers.list.header.lastUpdated" message="Last updated" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>
 				<DashboardList>
-					{!isEmpty(containers) ? (
-						containers.map((container) => (
+					{!isEmpty(sortedList) ? (
+						sortedList.map((container) => (
 							<DashboardListItem
 								selected={container._id === selectedId}
 								onClick={() => setSelectedId((id) => (id === container._id ? null : container._id))}
@@ -205,5 +214,5 @@ export const ContainersList = ({
 				</DashboardList>
 			</DashboardListCollapse>
 		</Container>
-	), [containers, selectedId]);
+	), [sortedList, selectedId]);
 };

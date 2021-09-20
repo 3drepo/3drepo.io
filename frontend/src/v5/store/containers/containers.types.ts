@@ -15,22 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
-import { IContainersState } from '@/v5/store/containers/containers.types';
+export interface IContainer {
+	_id: string;
+	title: string;
+	latestRevision: number;
+	revisionsCount: number;
+	category: string;
+	code: string;
+	date: Date;
+}
 
-const selectProjectsDomain = (state: { containers: IContainersState }) => state.containers;
-
-export const selectContainers = createSelector(
-	selectProjectsDomain, (state) => state.containers,
-);
-
-export const selectFilterQuery = createSelector(
-	selectProjectsDomain, (state) => state.filterQuery,
-);
-
-export const selectFilteredContainers = createSelector(
-	[selectContainers, selectFilterQuery],
-	(containers, filterQuery) => containers.filter((
-		{ title },
-	) => title.toLowerCase().includes(filterQuery.toLowerCase())),
-);
+export interface IContainersState {
+	containers: IContainer[];
+	isPending: boolean;
+	filterQuery: string;
+}

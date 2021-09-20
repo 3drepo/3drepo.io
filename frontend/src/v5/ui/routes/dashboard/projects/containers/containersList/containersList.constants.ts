@@ -15,22 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
-import { IContainersState } from '@/v5/store/containers/containers.types';
+import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 
-const selectProjectsDomain = (state: { containers: IContainersState }) => state.containers;
-
-export const selectContainers = createSelector(
-	selectProjectsDomain, (state) => state.containers,
-);
-
-export const selectFilterQuery = createSelector(
-	selectProjectsDomain, (state) => state.filterQuery,
-);
-
-export const selectFilteredContainers = createSelector(
-	[selectContainers, selectFilterQuery],
-	(containers, filterQuery) => containers.filter((
-		{ title },
-	) => title.toLowerCase().includes(filterQuery.toLowerCase())),
-);
+export const DEFAULT_SORT_CONFIG = {
+	column: 'title',
+	direction: SortingDirection.DESCENDING,
+};

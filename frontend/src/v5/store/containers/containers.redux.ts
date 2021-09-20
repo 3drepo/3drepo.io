@@ -17,16 +17,8 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '@/v5/store/common/actions.helper';
-
-export interface IContainer {
-	_id: string;
-	title: string;
-	latestRevision: number;
-	revisionsCount: number;
-	category: string;
-	code: string;
-	date: Date;
-}
+import { mockContainers } from './containers.fixtures';
+import { IContainersState } from './containers.types';
 
 export interface IContainersActions {
 	fetch: (teamspace: string) => any;
@@ -41,36 +33,6 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	setPending: ['isPending'],
 	setFilterQuery: ['query'],
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActions>; Creators: IContainersActions };
-
-export interface IContainersState {
-	containers: IContainer[];
-	isPending: boolean;
-	filterQuery: string;
-}
-
-const mockContainers = [];
-for (let i = 0; i < 10; i++) {
-	const mockContainer: IContainer = {
-		_id: String(i),
-		latestRevision: 123,
-		title: String(i),
-		revisionsCount: 7878,
-		category: 'my awesome category',
-		code: 'XX123',
-		date: new Date(),
-	};
-
-	mockContainers.push(mockContainer);
-}
-mockContainers.push({
-	_id: '123123',
-	latestRevision: 123,
-	title: 'Some container value',
-	revisionsCount: 7878,
-	category: 'my awesome category',
-	code: 'XX123',
-	date: new Date(),
-});
 
 export const INITIAL_STATE: IContainersState = {
 	containers: mockContainers,
