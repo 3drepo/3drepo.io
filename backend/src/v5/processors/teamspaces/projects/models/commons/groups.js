@@ -18,7 +18,7 @@ const { getGroups, getGroupsByIds } = require('../../../../../models/groups');
 
 const Groups = {};
 
-Groups.getGroups = (teamspace, model, groupsIds = []) => (groupsIds.length
-	? getGroupsByIds(teamspace, model, groupsIds) : getGroups(teamspace, model));
+Groups.getGroups = (teamspace, model, groupsIds = [], includeHidden = false) => (groupsIds.length
+	? getGroupsByIds(teamspace, model, groupsIds) : getGroups(teamspace, model, includeHidden));
 
 module.exports = Groups;

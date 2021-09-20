@@ -26,6 +26,16 @@ Groups.getGroupsByIds = (teamspace, model, ids, projection) => {
 	return findGroup(teamspace, model, query, projection);
 };
 
-Groups.getGroups = (teamspace, model, projection) => findGroup(teamspace, model, {}, projection);
+Groups.getGroups = (teamspace, model, includeHidden, projection) => {
+	const query = includeHidden
+		? {}
+		: {
+			issue_id: { $exists: false },
+			risk_id: { $exists: false },
+			sequence_id: { $exists: false },
+			view_id: { $exists: false },
+		};
+	return findGroup(teamspace, model, query, projection);
+};
 
 module.exports = Groups;

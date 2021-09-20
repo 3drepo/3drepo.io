@@ -71,12 +71,43 @@ const testGetGroups = () => {
 			const teamspace = 'someTS';
 			const model = 'someModel';
 			const projection = { _id: 0 };
-			const res = await Group.getGroups(teamspace, model, projection);
+			const res = await Group.getGroups(teamspace, model, true, projection);
 			expect(res).toEqual(expectedData);
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual(teamspace);
 			expect(fn.mock.calls[0][1]).toEqual(`${model}.groups`);
 			expect(fn.mock.calls[0][2]).toEqual({});
+			expect(fn.mock.calls[0][3]).toEqual(projection);
+		});
+
+		test('should return the list of Groups without hidden groups', async () => {
+			const expectedData = [
+				{
+					_id: 'abc',
+					name: 'Group 1',
+				},
+				{
+					_id: '123',
+					name: 'Group 2',
+				},
+			];
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+
+			const teamspace = 'someTS';
+			const model = 'someModel';
+			const projection = { _id: 0 };
+			const res = await Group.getGroups(teamspace, model, false, projection);
+			expect(res).toEqual(expectedData);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual(`${model}.groups`);
+			expect(fn.mock.calls[0][2]).toEqual({
+				issue_id: { $exists: false },
+				risk_id: { $exists: false },
+				sequence_id: { $exists: false },
+				view_id: { $exists: false },
+			});
 			expect(fn.mock.calls[0][3]).toEqual(projection);
 		});
 	});
