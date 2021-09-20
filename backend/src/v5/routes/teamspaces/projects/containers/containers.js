@@ -49,10 +49,10 @@ const getRevisions = async (req, res) => {
 	const showVoid = req.query.showVoid === 'true';
 
 	Containers.getRevisions(teamspace, container, showVoid).then((revisions) => {
-		const formattedRevisions = revisions.map((rev)=> {
+		revisions = revisions.map((rev)=> {
 			return {...rev, _id: UUIDToString(rev._id)};
 		});
-		respond(req, res, templates.ok, { formattedRevisions });
+		respond(req, res, templates.ok, { revisions });
 	}).catch((err) => respond(req, res, err));
 };
 
@@ -280,7 +280,7 @@ const establishRoutes = () => {
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions/:revision:
 	 *   patch:
-	 *     description: Updates the void status of a revision
+	 *     description: Update a revision. Currently only the void status can be updated.
 	 *     tags: [Containers]
 	 *     operationId: updateRevisionStatus
 	 *     parameters:
@@ -305,9 +305,9 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *         type: string
-	 *       - revision:
-	 *         name: revision
-	 *         description: Revision ID
+	 *       - revision/tag:
+	 *         name: revision/tag
+	 *         description: Revision ID or Revision tag
 	 *         in: path
 	 *         required: true
 	 *         schema:

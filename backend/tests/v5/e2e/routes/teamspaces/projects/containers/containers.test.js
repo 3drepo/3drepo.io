@@ -27,6 +27,7 @@ let agent;
 const users = {
 	tsAdmin: ServiceHelper.generateUserCredentials(),
 	noProjectAccess: ServiceHelper.generateUserCredentials(),
+	limitedPermissions: ServiceHelper.generateUserCredentials()
 };
 
 const nobody = ServiceHelper.generateUserCredentials();
@@ -43,6 +44,7 @@ const models = [
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
 		isFavourite: true,
+		permissions: [{ user: users.limitedPermissions, permission: "viewer" },{ user: users.limitedPermissions, permission: "commentator" }],
 		properties: ServiceHelper.generateRandomModelProperties(),
 	},
 	{
@@ -88,7 +90,7 @@ const setupData = async () => {
 		...modelProms,
 		ServiceHelper.db.createUser(nobody),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
-		ServiceHelper.db.createRevisions(teamspace, modelWithRev._id, revisions),
+		...revisions.map((revision) => ServiceHelper.db.createRevision(teamspace, modelWithRev._id, revision)),
 	]);
 };
 
@@ -182,17 +184,13 @@ const testGetContainerStats = () => {
 	});
 };
 
-const formatRevisions = (revs, includeVoids = false) => {
-	let formattedRevisions = revs;
+const formatRevisions = (revs, includeVoid = false) => {
+	let revisions = revs;
+	
+	revisions = revisions.flatMap((rev) => includeVoid || !rev.void ? { ...rev, timestamp: rev.timestamp.toISOString() } : []);
+	revisions = revisions.sort((a, b) => b.timestamp - a.timestamp);
 
-	if (!includeVoids) {
-		formattedRevisions = formattedRevisions.filter((rev) => !rev.void);
-	}
-
-	formattedRevisions = formattedRevisions.map((rev) => ({ ...rev, timestamp: rev.timestamp.toISOString() }))
-		.sort((a, b) => b.timestamp - a.timestamp);
-
-	return formattedRevisions;
+	return {revisions};
 };
 
 const testGetRevisions = () => {
@@ -218,14 +216,9 @@ const testGetRevisions = () => {
 			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
 
-		test('should fail if the model is a federation', async () => {
-			const res = await agent.get(`${route(federation._id)}&key=${users.tsAdmin.apiKey}`).expect(templates.containerNotFound.status);
-			expect(res.body.code).toEqual(templates.containerNotFound.code);
-		});
-
-		test('should fail if the container doesn\'t exist', async () => {
-			const res = await agent.get(`${route('jibberish')}&key=${users.tsAdmin.apiKey}`).expect(templates.containerNotFound.status);
-			expect(res.body.code).toEqual(templates.containerNotFound.code);
+		test('should return an empty object if the container does not exist or does not have any revisions', async () => {
+			const res = await agent.get(`${route('jibberish')}&key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			expect(res.body).toEqual({revisions: []});
 		});
 
 		test('should return non void container revisions correctly if the user has access', async () => {
@@ -255,17 +248,23 @@ const testUpdateRevisionStatus = () => {
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
-		test('should fail if the project does not exist', async () => {
-			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/containers/${modelWithRev._id}/revisions/${voidRevision._id}?key=${users.tsAdmin.apiKey}`)
-				.send({ void: false }).expect(templates.projectNotFound.status);
-			expect(res.body.code).toEqual(templates.projectNotFound.code);
-		});
-
-		test('should fail if the user does not have access to the container', async () => {
+		test('should fail if the user does not have access to the project', async () => {
 			const res = await agent.patch(`${route(voidRevision._id)}?key=${users.noProjectAccess.apiKey}`)
 				.send({ void: false }).expect(templates.notAuthorized.status);
 			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
+
+		test('should fail if the user does not have adequate permissions to edit the model', async () => {
+			const res = await agent.patch(`${route(voidRevision._id)}?key=${users.limitedPermissions.apiKey}`)
+				.send({ void: false }).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		});
+
+		test('should fail if the project does not exist', async () => {
+			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/containers/${modelWithRev._id}/revisions/${voidRevision._id}?key=${users.tsAdmin.apiKey}`)
+				.send({ void: false }).expect(templates.projectNotFound.status);
+			expect(res.body.code).toEqual(templates.projectNotFound.code);
+		});		
 
 		test('should fail if the container doesn\'t exist', async () => {
 			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/dfsfaewfc/revisions/${voidRevision._id}?key=${users.tsAdmin.apiKey}`)
@@ -279,14 +278,16 @@ const testUpdateRevisionStatus = () => {
 			expect(res.body.code).toEqual(templates.revisionNotFound.code);
 		});
 
-		test('should not update a revision\'s status if the body if the request is not boolean', async () => {
+		test('should return erorr if the body of the request is not boolean', async () => {
 			await agent.patch(`${route(voidRevision._id)}?key=${users.tsAdmin.apiKey}`)
-				.send({ void: 123 }).expect(templates.ok.status);
+				.send({ void: 123 }).expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
 
-			const res = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${modelWithRev._id}/revisions?showVoid=true&key=${users.tsAdmin.apiKey}`)
-				.expect(templates.ok.status);
-			const revision = res.body.find((r) => r._id === voidRevision._id);
-			expect(revision.void).toEqual(true);
+		test('should return erorr if the body of the request containes exitra payload', async () => {
+			await agent.patch(`${route(voidRevision._id)}?key=${users.tsAdmin.apiKey}`)
+				.send({ void: true, extra:123 }).expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should update a revision\'s status if the body of the request is boolean', async () => {

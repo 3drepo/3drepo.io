@@ -68,9 +68,9 @@ db.createModel = (teamspace, _id, name, props) => {
 	return DbHandler.insertOne(teamspace, 'settings', settings);
 };
 
-db.createRevisions = (teamspace, modelId, revisions) => {
-	const formattedRevisions = revisions.map((rev) => ({ ...rev, _id: stringToUUID(rev._id) }));
-	DbHandler.insertMany(teamspace, `${modelId}.history`, formattedRevisions);
+db.createRevision = (teamspace, modelId, revision) => {
+	const formattedRevision = { ...revision, _id: stringToUUID(revision._id) };
+	return DbHandler.insertOne(teamspace, `${modelId}.history`, formattedRevision);
 };
 
 ServiceHelper.generateUUIDString = () => uuidToString(generateUUID());
@@ -92,7 +92,7 @@ ServiceHelper.generateRevisionEntry = (isVoid = false) => ({
 	void: isVoid,
 });
 
-ServiceHelper.generateRandomModelProperties = () => ({
+ServiceHelper.generateRandomModelProperties = (permissions) => ({
 	properties: {
 		code: ServiceHelper.generateUUIDString(),
 		unit: 'm',
