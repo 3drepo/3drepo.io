@@ -390,6 +390,7 @@ export const theme = createMuiTheme({
 			},
 			contained: {
 				padding: '10px 15px',
+				height: '35px',
 				boxShadow: 'none',
 				'&:hover': {
 					boxShadow: 'none',
@@ -427,10 +428,12 @@ export const theme = createMuiTheme({
 				},
 			},
 			containedSizeSmall: {
+				height: '30px',
 				padding: '7.5px 15px',
 				fontSize: null, // null value means it will use the size from button.root
 			},
 			outlined: {
+				height: '35px',
 				padding: '10px 15px',
 				backgroundColor: 'transparent',
 				'&$disabled': {
@@ -460,12 +463,19 @@ export const theme = createMuiTheme({
 					color: COLOR.PRIMARY_MAIN_CONTRAST,
 					backgroundColor: COLOR.SECONDARY_MAIN,
 				},
+				'&:hover $path': {
+					fill: COLOR.PRIMARY_MAIN_CONTRAST,
+				},
 				'&:active': {
 					color: COLOR.PRIMARY_MAIN_CONTRAST,
 					backgroundColor: COLOR.SECONDARY_DARK,
 				},
+				'&:active $path': {
+					fill: COLOR.PRIMARY_MAIN_CONTRAST,
+				},
 			},
 			outlinedSizeSmall: {
+				height: '30px',
 				padding: '7.5px 15px',
 				fontSize: null, // null value means it will use the size from button.root
 			},

@@ -19,10 +19,11 @@ import React, { useState } from 'react';
 import { i18n } from '@lingui/core';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
 import { Trans } from '@lingui/react';
-import AddIcon from '@material-ui/icons/AddCircle';
 import { MainHeader } from '@controls/mainHeader';
 import { SearchInput } from '@controls/searchInput';
-import { Container, Content, NewContainerButton } from './containers.styles';
+import AddCircleIcon from '@assets/icons/add_circle.svg';
+import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
+import { Container, Content, NewContainerButton, NewContainerMainHeaderButton, UploadFileButton } from './containers.styles';
 import { ContainersList } from './containersList';
 
 const mockContainers = [];
@@ -58,6 +59,12 @@ export const Containers = (): JSX.Element => {
 						/>
 					)}
 				/>
+				<NewContainerMainHeaderButton startIcon={<AddCircleIcon />} variant="outlined" color="secondary">
+					<Trans id="containers.mainHeader.newContainer" message="New Container" />
+				</NewContainerMainHeaderButton>
+				<UploadFileButton startIcon={<ArrowUpCircleIcon />} variant="contained" color="primary">
+					<Trans id="containers.mainHeader.uploadFile" message="Upload file" />
+				</UploadFileButton>
 			</MainHeader>
 			<Content>
 				<ContainersList
@@ -100,7 +107,7 @@ export const Containers = (): JSX.Element => {
 							<DashboardListEmptyText>
 								<Trans id="containers.all.emptyMessage" message="You haven’t created any Containers." />
 							</DashboardListEmptyText>
-							<NewContainerButton startIcon={<AddIcon />}>
+							<NewContainerButton startIcon={<AddCircleIcon />}>
 								<Trans id="containers.all.newContainer" message="New Container" />
 							</NewContainerButton>
 						</>

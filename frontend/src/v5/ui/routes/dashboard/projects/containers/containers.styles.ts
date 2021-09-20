@@ -29,5 +29,26 @@ export const NewContainerButton = styled(Button).attrs({
 	color: 'primary',
 })`
 	width: 140px;
-	height: 35px;
+	
+	svg {
+		path {
+			fill: ${({ theme }) => theme.palette.primary.contrast};
+		}
+	}
+`;
+
+export const NewContainerMainHeaderButton = styled(Button).attrs({
+	variant: 'outlined',
+	color: 'secondary',
+})`
+	width: 140px;
+	margin-left: auto;
+`;
+
+export const UploadFileButton = styled(Button).attrs({
+	variant: 'contained',
+	color: 'primary',
+})`
+	width: 116px;
+	margin-right: 0;
 `;

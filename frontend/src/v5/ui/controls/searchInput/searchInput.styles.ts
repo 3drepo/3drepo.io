@@ -27,6 +27,7 @@ export const IconButton = styled(IconButtonComponent)`
 
 export const TextField = styled(TextFieldComponent)`
 	width: 300px;
+	margin: 0;
 
 	input {
 		padding-left: 10px;
@@ -34,6 +35,10 @@ export const TextField = styled(TextFieldComponent)`
 
 	.MuiOutlinedInput-adornedEnd {
 		padding-right: 0;
+	}
+	
+	.MuiOutlinedInput-root {
+		margin: 0;
 	}
 `;
 
