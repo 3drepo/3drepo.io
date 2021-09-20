@@ -26,6 +26,7 @@ import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentU
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
 import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authActions.dispatchers';
+import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
 import { Dashboard } from './dashboard';
 
 export const Root = () => {
@@ -40,6 +41,10 @@ export const Root = () => {
 	React.useEffect(() => {
 		if (userName) {
 			CurrentUserActionsDispatchers.fetchUser(userName);
+		}
+
+		if (isAuthenticated) {
+			TeamspacesActionsDispatchers.fetch();
 		}
 
 		if (!isNull(isAuthenticated) && !isAuthenticated) {

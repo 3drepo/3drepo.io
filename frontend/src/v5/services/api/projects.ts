@@ -17,4 +17,4 @@
 
 import api from './default';
 
-export const fetchProjects = (teamspace: string): Promise<any> => api.get(`${teamspace}/projects`);
+export const fetchProjects = (teamspace: string): Promise<any> => api.get(`teamspaces/${teamspace}/projects`);

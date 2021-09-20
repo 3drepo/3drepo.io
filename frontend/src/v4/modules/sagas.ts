@@ -34,12 +34,14 @@ import measurementsSaga from './measurements/measurements.sagas';
 import modelSaga from './model/model.sagas';
 import notificationsSaga from './notifications/notifications.sagas';
 import presentationSaga from './presentation/presentation.sagas';
+import projectsSaga from '../../v5/store/projects/projects.sagas';
 import risksSaga from './risks/risks.sagas';
 import sequencesSaga from './sequences/sequences.sagas';
 import starredSaga from './starred/starred.sagas';
 import startupSaga from './startup/startup.sagas';
 import teamspaceSaga from './teamspace/teamspace.sagas';
 import teamspacesSaga from './teamspaces/teamspaces.sagas';
+import teamspaces2Saga from '../../v5/store/teamspaces/teamspaces.sagas';
 import treeSaga from './tree/tree.sagas';
 import userManagementSaga from './userManagement/userManagement.sagas';
 import viewerSaga from './viewer/viewer.sagas';
@@ -79,6 +81,8 @@ export default function* rootSaga() {
 		fork(activitiesSaga),
 		fork(presentationSaga),
 		fork(legendSaga),
+		fork(teamspaces2Saga),
+		fork(projectsSaga),
 		// <-- INJECT MODULE SAGA -->
 	]);
 }

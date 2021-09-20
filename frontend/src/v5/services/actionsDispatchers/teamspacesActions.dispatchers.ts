@@ -15,19 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
-import * as API from '@/v5/services/api';
-import { ProjectsActions, ProjectsTypes, IProject } from './projects.redux';
+import { ITeamspacesActions, TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
+import { createActionsDispatchers } from './actionsDistpatchers.helper';
 
-export function* fetch({ teamspace }) {
-	try {
-		const { data: { projects } } = yield API.fetchProjects(teamspace);
-		yield put(ProjectsActions.fetchSuccess(teamspace, projects as IProject[]));
-	} catch (e) {
-		console.error(e);
-	}
-}
-
-export default function* ProjectsSaga() {
-	yield takeLatest(ProjectsTypes.FETCH as any, fetch);
-}
+export const TeamspacesActionsDispatchers = createActionsDispatchers<ITeamspacesActions>(TeamspacesActions);

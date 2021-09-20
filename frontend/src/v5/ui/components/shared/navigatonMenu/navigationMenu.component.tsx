@@ -46,7 +46,7 @@ export const NavigationMenu = ({ anchorEl, handleClose, list }: INavigationMenu)
 	return (
 		<MenuList anchorEl={anchorEl} onClose={handleClose} open={Boolean(anchorEl)} {...menuPosition}>
 			{list.map(({ title, ...props }) => (
-				<MenuItem {...props} onClick={handleClose}>
+				<MenuItem key={title} {...props} onClick={handleClose}>
 					<Typography variant="body1" noWrap>
 						{title}
 					</Typography>

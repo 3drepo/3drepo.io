@@ -18,38 +18,31 @@
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../common/actions.helper';
 
-export interface ITeamspaces {
+export interface ITeamspace {
 	name: string;
 	isAdmin: boolean;
 }
 
-interface ITeamspacesActions {
-	fetch: (teamspace: string) => any;
-	fetchSuccess: (projects: ITeamspaces[]) => any;
-	setSending: (isPending: boolean) => any;
+export interface ITeamspacesActions {
+	fetch: () => any;
+	fetchSuccess: (teamspaces: ITeamspace[]) => any;
 }
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
 	fetch: [],
-	fetchSuccess: [],
-	setSending: ['isPending'],
+	fetchSuccess: ['teamspaces'],
 }, { prefix: 'TEAMSPACES2/' }) as { Types: Constants<ITeamspacesActions>; Creators: ITeamspacesActions };
 
 interface ITeamspacesState {
-	teamspaces: ITeamspaces[];
-	isPending: boolean;
+	teamspaces: ITeamspace[];
 }
 
 export const INITIAL_STATE: ITeamspacesState = {
 	teamspaces: [],
-	isPending: true,
 };
-
-export const setPendingStatus = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
 
 export const fetchSuccess = (state = INITIAL_STATE, { teamspaces }) => ({ ...state, teamspaces });
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[TeamspacesTypes.FETCH_SUCCESS]: fetchSuccess,
-	[TeamspacesTypes.SET_SENDING]: setPendingStatus,
 });

@@ -17,19 +17,15 @@
 
 import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
-import { TeamspacesActions, TeamspacesTypes, ITeamspaces } from './teamspaces.redux';
+import { TeamspacesActions, TeamspacesTypes, ITeamspace } from './teamspaces.redux';
 
 export function* fetch() {
-	yield put(TeamspacesActions.setSending(true));
-
 	try {
 		const { data: { teamspaces } } = yield API.fetchTeamspaces();
-		yield put(TeamspacesActions.fetchSuccess(teamspaces as ITeamspaces[]));
+		yield put(TeamspacesActions.fetchSuccess(teamspaces as ITeamspace[]));
 	} catch (e) {
 		console.error(e);
 	}
-
-	yield put(TeamspacesActions.setSending(false));
 }
 
 export default function* TeamspacesSaga() {

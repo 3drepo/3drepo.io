@@ -18,39 +18,42 @@
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../common/actions.helper';
 
-export interface IProjects {
-	id: string;
+export interface IProject {
+	_id: string;
 	name: string;
 	isAdmin: boolean;
 }
 
-interface IProjectsActions {
+export interface IProjectsActions {
 	fetch: (teamspace: string) => any;
-	fetchSuccess: (projects: IProjects[]) => any;
-	setSending: (isPending: boolean) => any;
+	fetchSuccess: (teamspace: string, projects: IProject[]) => any;
 }
 
 export const { Types: ProjectsTypes, Creators: ProjectsActions } = createActions({
 	fetch: ['teamspace'],
-	fetchSuccess: ['projects'],
-	setSending: ['isPending'],
+	fetchSuccess: ['teamspace', 'projects'],
 }, { prefix: 'PROJECTS/' }) as { Types: Constants<IProjectsActions>; Creators: IProjectsActions };
 
 interface IProjectsState {
-	projects: IProjects[];
-	isPending: boolean;
+	projects: Record<string, IProject[]> | [];
+	currentTeamspace: string;
 }
 
 export const INITIAL_STATE: IProjectsState = {
 	projects: [],
-	isPending: true,
+	currentTeamspace: '',
 };
 
 export const setPendingStatus = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
 
-export const fetchSuccess = (state = INITIAL_STATE, { projects }) => ({ ...state, projects });
+export const fetchSuccess = (state = INITIAL_STATE, { teamspace, projects }) => ({ ...state,
+	currentTeamspace: teamspace,
+	projects: {
+		...state.projects,
+		[teamspace]: projects,
+	},
+});
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[ProjectsTypes.FETCH_SUCCESS]: fetchSuccess,
-	[ProjectsTypes.SET_SENDING]: setPendingStatus,
 });

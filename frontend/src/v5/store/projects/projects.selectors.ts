@@ -22,3 +22,11 @@ const selectProjectsDomain = (state) => state.projects;
 export const selectProjects = createSelector(
 	selectProjectsDomain, (state) => state.projects,
 );
+
+export const selectCurrentTeamspace = createSelector(
+	selectProjectsDomain, (state) => state.currentTeamspace,
+);
+
+export const selectCurrentProjects = createSelector(
+	selectCurrentTeamspace, selectProjects, (teamspace, state) => state[teamspace] || [],
+);
