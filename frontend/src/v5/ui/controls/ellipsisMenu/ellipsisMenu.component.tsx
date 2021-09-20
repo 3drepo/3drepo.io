@@ -56,6 +56,7 @@ export const EllipsisMenu = ({ anchorEl, handleClose, list }: IEllipsisMenu): JS
 							<MenuList autoFocusItem={Boolean(anchorEl)} id="ellipsis-menu-list" onKeyDown={handleListKeyDown}>
 								{list.map(({ title, onClick }) => (
 									<MenuItem
+										key={title}
 										onClick={(event) => {
 											event.stopPropagation();
 											onClick(event);

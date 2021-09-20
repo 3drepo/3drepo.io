@@ -24,7 +24,7 @@ export const StyledIconButton = styled(IconButton)`
 	display: flex;
 	align-items: center;
 
-	${({ isOn }) => isOn && css`
+	${({ $isOn }) => $isOn && css`
 		background-color: ${({ theme }) => theme.palette.tertiary.main};
 
 		circle {

@@ -25,8 +25,8 @@ export type IChevronButton = IconButtonProps & {
 };
 
 export const ChevronButton = React.forwardRef(
-	({ ...props }: IChevronButton, ref: React.Ref<HTMLSpanElement>): JSX.Element => (
-		<StyledIconButton {...props} ref={ref}>
+	({ isOn, ...props }: IChevronButton, ref: React.Ref<HTMLSpanElement>): JSX.Element => (
+		<StyledIconButton $isOn={isOn} {...props} ref={ref}>
 			<ChevronIcon />
 		</StyledIconButton>
 	),

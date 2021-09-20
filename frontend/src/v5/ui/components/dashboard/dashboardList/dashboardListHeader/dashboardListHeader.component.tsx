@@ -45,10 +45,13 @@ export const DashboardListHeader = ({ onSortingChange, children }): JSX.Element 
 
 	return (
 		<DashboardListHeaderContainer>
-			{children.map((child) => React.cloneElement(child, {
-				...registerSort(child.props.name),
-				...child.props,
-			}))}
+			{children.map((child) => (
+				React.cloneElement(child, {
+					key: child.props.name,
+					...registerSort(child.props.name),
+					...child.props,
+				})
+			))}
 		</DashboardListHeaderContainer>
 	);
 };

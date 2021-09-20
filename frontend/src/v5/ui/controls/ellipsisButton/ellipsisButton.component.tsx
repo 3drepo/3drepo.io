@@ -25,8 +25,8 @@ export type IEllipsisButton = IconButtonProps & {
 };
 
 export const EllipsisButton = React.forwardRef(
-	({ ...props }: IEllipsisButton, ref: React.Ref<HTMLSpanElement>): JSX.Element => (
-		<StyledIconButton {...props} ref={ref}>
+	({ isOn, ...props }: IEllipsisButton, ref: React.Ref<HTMLSpanElement>): JSX.Element => (
+		<StyledIconButton $isOn={isOn} {...props} ref={ref}>
 			<EllipsisIcon />
 		</StyledIconButton>
 	),

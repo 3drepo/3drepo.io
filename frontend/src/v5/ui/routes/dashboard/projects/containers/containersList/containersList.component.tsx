@@ -119,7 +119,7 @@ export const ContainersList = ({
 					<DashboardListHeaderLabel name="category" width={188} sort>
 						<Trans id="containers.list.header.category" message="Category" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel width={180} sort>
+					<DashboardListHeaderLabel name="lastUpdated" width={180} sort>
 						<Trans id="containers.list.header.lastUpdated" message="Last updated" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>

@@ -36,7 +36,7 @@ export const SearchInput = ({ onClear, value, ...props }: ISearchInput): JSX.Ele
 			),
 			endAdornment: (
 				(
-					<EndAdornment isVisible={value}>
+					<EndAdornment $isVisible={value}>
 						<IconButton onClick={() => onClear()}>
 							<CloseIcon />
 						</IconButton>
