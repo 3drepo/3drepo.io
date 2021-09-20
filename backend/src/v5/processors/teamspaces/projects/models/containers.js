@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getContainerById, getContainers } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
@@ -65,6 +66,16 @@ Containers.getRevisions = async (teamspace, container, showVoid) => {
 
 Containers.updateRevisionStatus = async (teamspace, container, revision, status) => {
 	await updateRevisionStatus(teamspace, container, revision, status);
+};
+
+Containers.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {
+	const accessibleContainers = await Containers.getContainerList(teamspace, project, username);
+	return appendFavourites(username, teamspace, accessibleContainers, favouritesToAdd);
+};
+
+Containers.deleteFavourites = async (username, teamspace, project, favouritesToRemove) => {
+	const accessibleContainers = await Containers.getContainerList(teamspace, project, username);
+	return deleteFavourites(username, teamspace, accessibleContainers, favouritesToRemove);
 };
 
 module.exports = Containers;

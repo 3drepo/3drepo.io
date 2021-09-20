@@ -93,6 +93,22 @@ Revisions.updateRevisionStatus.mockImplementation((teamspace, container, revisio
 });
 
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
+Users.appendFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
+	for (const favourite of favouritesToAdd) {
+		if (user1Favourites.indexOf(favourite) === -1) {
+			user1Favourites.push(favourite);
+		}
+	}
+});
+
+Users.deleteFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
+	for (const favourite of favouritesToAdd) {
+		const index = user1Favourites.indexOf(favourite);
+		if (index !== -1) {
+			user1Favourites.splice(index, 1);
+		}
+	}
+});
 
 // Permissions mock
 jest.mock('../../../../../../../src/v5/utils/permissions/permissions', () => ({
@@ -129,6 +145,52 @@ const testGetContainerList = () => {
 		test('should return empty array if the user has no access', async () => {
 			const res = await Containers.getContainerList('teamspace', 'xxx', 'nobody');
 			expect(res).toEqual([]);
+		});
+	});
+};
+
+const testAppendFavourites = () => {
+	describe('Add containers to favourites', () => {
+		test('new containers should be added to favourites if user has all permissions', async () => {
+			await expect(Containers.appendFavourites('user1', 'teamspace', 'project', [3])).resolves.toEqual(undefined);
+		});
+
+		test('should return error if one or more containers are not found', async () => {
+			await expect(Containers.appendFavourites('user1', 'teamspace', 'project', [1, -1]))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: -1' });
+		});
+
+		test('should return error if the containers list provided is empty', async () => {
+			await expect(Containers.appendFavourites('user1', 'teamspace', 'project', []))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The favourites list provided is empty' });
+		});
+
+		test('should return error if user has no permissions on one or more models', async () => {
+			await expect(Containers.appendFavourites('user1', 'teamspace', 'project', [1, 2]))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: 2' });
+		});
+	});
+};
+
+const testDeleteFavourites = () => {
+	describe('Remove containers from favourites', () => {
+		test('containers should be removed from favourites if user has all permissions', async () => {
+			await expect(Containers.deleteFavourites('tsAdmin', 'teamspace', 'project', [1])).resolves.toEqual(undefined);
+		});
+
+		test('should return error if one or more containers are not found', async () => {
+			await expect(Containers.deleteFavourites('tsAdmin', 'teamspace', 'project', [1, -1]))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: -1' });
+		});
+
+		test('should return error if the containers list provided is empty', async () => {
+			await expect(Containers.deleteFavourites('user1', 'teamspace', 'project', []))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The favourites list provided is empty' });
+		});
+
+		test('should return error if user has no permissions on one or more models', async () => {
+			await expect(Containers.deleteFavourites('user1', 'teamspace', 'project', [2]))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: 2' });
 		});
 	});
 };
@@ -189,6 +251,8 @@ const testUpdateRevisionStatus = () => {
 describe('processors/teamspaces/projects/containers', () => {
 	testGetContainerList();
 	testGetContainerStats();
+	testAppendFavourites();
+	testDeleteFavourites();
 	testGetRevisions();
 	testUpdateRevisionStatus();
 });

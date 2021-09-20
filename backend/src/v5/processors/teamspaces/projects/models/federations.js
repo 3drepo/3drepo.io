@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getFederations } = require('../../../../models/modelSettings');
 const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
@@ -26,6 +27,16 @@ Federations.getFederationList = async (teamspace, project, user) => {
 	const modelSettings = await getFederations(teamspace, models, { _id: 1, name: 1, permissions: 1 });
 
 	return getModelList(teamspace, project, user, modelSettings);
+};
+
+Federations.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {
+	const accessibleFederations = await Federations.getFederationList(teamspace, project, username);
+	await appendFavourites(username, teamspace, accessibleFederations, favouritesToAdd);
+};
+
+Federations.deleteFavourites = async (username, teamspace, project, favouritesToRemove) => {
+	const accessibleFederations = await Federations.getFederationList(teamspace, project, username);
+	await deleteFavourites(username, teamspace, accessibleFederations, favouritesToRemove);
 };
 
 module.exports = Federations;
