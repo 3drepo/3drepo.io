@@ -23,29 +23,29 @@ import {
 } from '@material-ui/core';
 
 export const MenuList = styled(MenuListComponent)`
-  padding: 10px 0;
+	padding: 10px 0;
 `;
 
 export const MenuItem = styled(MenuItemComponent)`
-  color: ${({ theme }) => theme.palette.secondary.main};
-  margin: 0;
-  height: 40px;
-  padding-right: 14px;
-  justify-content: space-between;
+	color: ${({ theme }) => theme.palette.secondary.main};
+	margin: 0;
+	height: 40px;
+	padding-right: 14px;
+	justify-content: space-between;
 
-  &:hover {
-    background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-  }
+	&:hover {
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	}
 
-  &:focus {
-    background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-  }
+	&:focus {
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	}
 
-  &:active {
-    background-color: ${({ theme }) => theme.palette.base.light};
-  }
+	&:active {
+		background-color: ${({ theme }) => theme.palette.base.light};
+	}
 `;
 
 export const Popper = styled(PopperComponent)`
-  z-index: 100;
+	z-index: 100;
 `;
