@@ -101,7 +101,7 @@ const typography: TypographyOptions = {
 	},
 	h5: {
 		fontWeight: FONT_WEIGHT.MEDIUM,
-		fontSize: '0.813rem',
+		fontSize: '0.8125rem',
 		lineHeight: '1.188rem',
 	},
 	body1: {
@@ -192,7 +192,7 @@ export const theme = createMuiTheme({
 		gradient: {
 			main: GRADIENT.MAIN,
 		},
-		shadow: {
+		shadows: {
 			level_1: SHADOW.LEVEL_1,
 			level_2: SHADOW.LEVEL_2,
 			level_3: SHADOW.LEVEL_3,
@@ -249,6 +249,17 @@ export const theme = createMuiTheme({
 				paddingBottom: 0,
 			},
 		},
+		MuiTooltip: {
+			tooltip: {
+				backgroundColor: COLOR.SECONDARY_DARK,
+				padding: '7px 10px 8px 10px',
+				borderRadius: '3px',
+				...typography.caption,
+			},
+			tooltipPlacementBottom: {
+				margin: '5px 0 !important',
+			},
+		},
 		MuiFab: {
 			root: {
 				color: COLOR.PRIMARY_MAIN_CONTRAST,
@@ -293,36 +304,36 @@ export const theme = createMuiTheme({
 			},
 		},
 		MuiOutlinedInput:
-		{
-			root: {
-				marginTop: 6,
-				'& $notchedOutline, &$disabled:hover:not($error) $notchedOutline, &$disabled $notchedOutline': {
-					borderColor: COLOR.BASE_LIGHTEST,
-					borderRadius: 5,
-					borderWidth: 1,
-				},
-				'&:hover:not($error) $notchedOutline, &$focused:not($error) $notchedOutline': {
-					borderColor: COLOR.TERTIARY_MAIN,
-					borderWidth: 1,
-				},
-				'& $input': {
-					padding: '0px 15px',
-					height: 35,
-					color: COLOR.BASE_MAIN,
-					...typography.body1,
-				},
-				'&$focused $input': {
-					color: COLOR.SECONDARY_MAIN,
-				},
-				'&$disabled $input': {
-					color: COLOR.BASE_LIGHT,
-				},
-				'&$error $input': {
-					color: COLOR.ERROR_MAIN,
-					backgroundColor: COLOR.ERROR_LIGHTEST,
+			{
+				root: {
+					marginTop: 6,
+					'& $notchedOutline, &$disabled:hover:not($error) $notchedOutline, &$disabled $notchedOutline': {
+						borderColor: COLOR.BASE_LIGHTEST,
+						borderRadius: 5,
+						borderWidth: 1,
+					},
+					'&:hover:not($error) $notchedOutline, &$focused:not($error) $notchedOutline': {
+						borderColor: COLOR.TERTIARY_MAIN,
+						borderWidth: 1,
+					},
+					'& $input': {
+						padding: '0px 15px',
+						height: 35,
+						color: COLOR.BASE_MAIN,
+						...typography.body1,
+					},
+					'&$focused $input': {
+						color: COLOR.SECONDARY_MAIN,
+					},
+					'&$disabled $input': {
+						color: COLOR.BASE_LIGHT,
+					},
+					'&$error $input': {
+						color: COLOR.ERROR_MAIN,
+						backgroundColor: COLOR.ERROR_LIGHTEST,
+					},
 				},
 			},
-		},
 		MuiTextField: {
 			root: {
 				margin: '4px 8px 8px 8px',
@@ -344,6 +355,11 @@ export const theme = createMuiTheme({
 				visibility: 'hidden',
 			},
 		},
+		MuiDivider: {
+			root: {
+				backgroundColor: COLOR.BASE_LIGHTEST,
+			},
+		},
 		MuiButton: {
 			iconSizeMedium: {
 				'& > *:first-child': {
@@ -361,7 +377,6 @@ export const theme = createMuiTheme({
 				textTransform: 'initial',
 				padding: '10px 15px',
 				fontSize: '0.75rem',
-				lineHeight: '0.9rem',
 				fontWeight: FONT_WEIGHT.BOLD,
 				minWidth: null,
 			},

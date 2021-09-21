@@ -81,11 +81,10 @@ Responder.respond = (req, res, resCode, body, { cache, customHeaders } = {}) => 
 		res.flush();
 		res.end();
 	} else {
-		res.status(finalResCode.status);
 		if (body) {
 			contentLength = isString(body) ? body.length : JSON.stringify(body).length;
-			res.send(body);
 		}
+		res.status(finalResCode.status).send(body);
 	}
 	logger.logInfo(genResponseLogging(resCode, contentLength, req));
 };

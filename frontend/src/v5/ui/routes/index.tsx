@@ -17,9 +17,9 @@
 
 import React from 'react';
 import { isNull } from 'lodash';
-import { MuiThemeProvider } from '@material-ui/core';
-import { ThemeProvider } from 'styled-components';
 import { useHistory } from 'react-router-dom';
+import { MuiThemeProvider, StylesProvider } from '@material-ui/core';
+import { ThemeProvider } from 'styled-components';
 
 import { theme } from '@/v5/ui/themes/theme';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
@@ -55,7 +55,9 @@ export const Root = () => {
 	return (
 		<ThemeProvider theme={theme}>
 			<MuiThemeProvider theme={theme}>
-				<Dashboard />
+				<StylesProvider injectFirst>
+					<Dashboard />
+				</StylesProvider>
 			</MuiThemeProvider>
 		</ThemeProvider>
 	);

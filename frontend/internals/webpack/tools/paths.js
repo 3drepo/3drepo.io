@@ -9,6 +9,7 @@ const SRC_DIR =  resolve(APP_DIR, 'src');
 const UI =  resolve(SRC_DIR, 'v5', 'ui');
 
 const COMPONENTS = resolve(UI, 'components');
+const CONTROLS = resolve(UI, 'controls');
 const SELECTORS = resolve(SRC_DIR, 'v5', 'store', 'common', 'selectors');
 
-module.exports = { PROJECT_DIR, APP_DIR, DIST_DIR ,ASSETS_DIR, SRC_DIR, COMPONENTS, SELECTORS};
+module.exports = { PROJECT_DIR, APP_DIR, DIST_DIR ,ASSETS_DIR, SRC_DIR, COMPONENTS, CONTROLS, SELECTORS};

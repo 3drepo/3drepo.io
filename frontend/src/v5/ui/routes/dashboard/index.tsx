@@ -14,14 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { RouteExcept } from '@/v5/services/routing/routing';
-import { MuiThemeProvider } from '@material-ui/core';
 import React from 'react';
+import { RouteExcept } from '@/v5/services/routing/routing';
 import { useRouteMatch, Route } from 'react-router-dom';
-import { ThemeProvider } from 'styled-components';
-
-import { theme } from '@/v5/ui/themes/theme';
 import { GlobalStyle } from '@/v5/ui/themes/global';
 import { i18n } from '@lingui/core';
 import { I18nProvider } from '@lingui/react';
@@ -43,21 +38,17 @@ export const Dashboard = () => {
 	return (
 		<Route path={`${path}/:teamspace?/:project?`}>
 			<I18nProvider i18n={i18n}>
-				<ThemeProvider theme={theme}>
-					<MuiThemeProvider theme={theme}>
-						<GlobalStyle />
-						<AppBar />
-						<Content>
-							<Route path={`${path}/:teamspace/`}>
-								<TeamspaceContent />
-							</Route>
+				<GlobalStyle />
+				<AppBar />
+				<Content>
+					<Route path={`${path}/:teamspace/`}>
+						<TeamspaceContent />
+					</Route>
 
-							<RouteExcept path={`${path}/:teamspace/:project`} exceptPath={`${path}/:teamspace/settings`}>
-								<ProjectContent />
-							</RouteExcept>
-						</Content>
-					</MuiThemeProvider>
-				</ThemeProvider>
+					<RouteExcept path={`${path}/:teamspace/:project`} exceptPath={`${path}/:teamspace/settings`}>
+						<ProjectContent />
+					</RouteExcept>
+				</Content>
 			</I18nProvider>
 		</Route>
 	);

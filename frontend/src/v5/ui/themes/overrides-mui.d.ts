@@ -56,7 +56,7 @@ declare module '@material-ui/core/styles/createPalette' {
 		base?: SimplePaletteColorOptions;
 		favourite?: SimplePaletteColorOptions;
 		gradient?: IGradient;
-		shadow?: IShadow;
+		shadows?: IShadow;
 	}
 }
 
