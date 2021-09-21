@@ -21,15 +21,20 @@ import { GlobalStyle } from '@/v5/ui/themes/global';
 
 import { i18n } from '@lingui/core';
 import { I18nProvider } from '@lingui/react';
+import { en, es } from 'make-plural/plurals';
 import { messages as esMessages } from '@/locales/es/messages';
-import { AppBar } from '@components/shared/appBar';
 import { messages as enMessages } from '@/locales/en/messages';
+import { AppBar } from '@components/shared/appBar';
 import { TeamspaceContent } from './teamspaces';
 import { ProjectContent } from './projects';
 import { Content } from './index.styles';
 
 i18n.load('en', enMessages);
 i18n.load('es', esMessages);
+i18n.loadLocaleData({
+	en: { plurals: en },
+	es: { plurals: es },
+});
 
 i18n.activate('en');
 
