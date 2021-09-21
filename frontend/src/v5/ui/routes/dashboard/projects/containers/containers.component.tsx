@@ -37,8 +37,9 @@ import { ContainersList } from './containersList';
 export const Containers = (): JSX.Element => {
 	const filteredContainers = ContainersHooksSelectors.selectFilteredContainers();
 	const favouriteContainers = ContainersHooksSelectors.selectFavouriteContainers();
+	const filterQuery = ContainersHooksSelectors.selectFilterQuery();
 
-	const [searchInput, setSearchInput] = useState('');
+	const [searchInput, setSearchInput] = useState(filterQuery);
 
 	const debounceSearchUpdate = debounce(
 		(value: string) => ContainersActionsDispatchers.setFilterQuery(value),
