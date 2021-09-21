@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getUserFromSession } = require('../../../utils/sessions');
 const { hasReadAccessToModel, hasWriteAccessToModel } = require('../../../utils/permissions/permissions');
+const { getUserFromSession } = require('../../../utils/sessions');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
 

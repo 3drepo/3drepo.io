@@ -14,13 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 const { hasAccessToTeamspace, hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
-const { hasPermissionsAndValidArguments } = require('../../../../middleware/permissions/components/revisions');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { getUserFromSession } = require('../../../../utils/sessions');
+const { hasPermissionsAndValidArguments } = require('../../../../middleware/dataConverter/revisions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
 
@@ -48,10 +47,8 @@ const getRevisions = async (req, res) => {
 	const { teamspace, container } = req.params;
 	const showVoid = req.query.showVoid === 'true';
 
-	Containers.getRevisions(teamspace, container, showVoid).then((revisions) => {
-		revisions = revisions.map((rev) => {
-			return { ...rev, _id: UUIDToString(rev._id) };
-		});
+	Containers.getRevisions(teamspace, container, showVoid).then((revs) => {
+		const revisions = revs.map((rev) => ({ ...rev, _id: UUIDToString(rev._id) }));
 		respond(req, res, templates.ok, { revisions });
 	}).catch((err) => respond(req, res, err));
 };
@@ -308,7 +305,6 @@ const establishRoutes = () => {
 	 *         description: removes the containers found in the request body from the user's favourites list
 	 */
 	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites);
-
 
 	/**
 	 * @openapi

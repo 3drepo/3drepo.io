@@ -64,7 +64,26 @@ const testGetProjectList = () => {
 	});
 };
 
+const testModelExistsInProject = () => {
+	describe('Model Exists In Project', () => {
+		test('should return true if a model is part of a project', async () => {
+			const project = { models: ['a', 'b', 'c'] };
+			jest.spyOn(db, 'findOne').mockResolvedValue(project);
+			const res = await Project.modelExistsInProject('someTS', 'someProject', 'a');
+			expect(res).toEqual(true);
+		});
+
+		test('should return false if a model is not part of a project', async () => {
+			const project = { models: ['a', 'b', 'c'] };
+			jest.spyOn(db, 'findOne').mockResolvedValue(project);
+			const res = await Project.modelExistsInProject('someTS', 'someProject', 'd');
+			expect(res).toEqual(false);
+		});
+	});
+};
+
 describe('models/projects', () => {
 	testProjectAdmins();
 	testGetProjectList();
+	testModelExistsInProject();
 });

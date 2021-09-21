@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { UUIDToString } = require('../utils/helper/uuids');
 const db = require('../handler/db');
 const { templates } = require('../utils/responseCodes');
 
@@ -28,10 +27,6 @@ const collectionName = (model) => `${model}.history`;
 
 const findRevisionsByQuery = async (teamspace, model, query, projection, sort) => {
 	const rev = await db.find(teamspace, collectionName(model), query, projection, sort);
-	if (!rev) {
-		throw templates.revisionNotFound;
-	}
-
 	return rev;
 };
 
@@ -55,7 +50,7 @@ Revisions.getRevisionCount = (teamspace, model) => {
 	return db.count(teamspace, collectionName(model), query);
 };
 
-Revisions.getRevisions = async(teamspace, model, showVoid, projection = {}) => {
+Revisions.getRevisions = async (teamspace, model, showVoid, projection = {}) => {
 	const query = { ...excludeIncomplete };
 
 	if (!showVoid) {
@@ -67,8 +62,8 @@ Revisions.getRevisions = async(teamspace, model, showVoid, projection = {}) => {
 };
 
 Revisions.updateRevisionStatus = async (teamspace, model, revision, status) => {
-	const query = { $or: [ { _id: revision }, { tag: revision } ] };
-	await findOneRevisionByQuery(teamspace, model, query ,{ _id: 1, void: 1 });
+	const query = { $or: [{ _id: revision }, { tag: revision }] };
+	await findOneRevisionByQuery(teamspace, model, query, { _id: 1, void: 1 });
 	await db.updateOne(teamspace, collectionName(model), query, { $set: { void: status } });
 };
 

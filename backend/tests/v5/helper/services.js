@@ -92,7 +92,7 @@ ServiceHelper.generateRevisionEntry = (isVoid = false) => ({
 	void: isVoid,
 });
 
-ServiceHelper.generateRandomModelProperties = (permissions) => ({
+ServiceHelper.generateRandomModelProperties = () => ({
 	properties: {
 		code: ServiceHelper.generateUUIDString(),
 		unit: 'm',

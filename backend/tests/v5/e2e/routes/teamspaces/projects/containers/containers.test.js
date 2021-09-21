@@ -27,7 +27,7 @@ let agent;
 const users = {
 	tsAdmin: ServiceHelper.generateUserCredentials(),
 	noProjectAccess: ServiceHelper.generateUserCredentials(),
-	limitedPermissions: ServiceHelper.generateUserCredentials()
+	limitedPermissions: ServiceHelper.generateUserCredentials(),
 };
 
 const nobody = ServiceHelper.generateUserCredentials();
@@ -44,7 +44,7 @@ const models = [
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
 		isFavourite: true,
-		permissions: [{ user: users.limitedPermissions, permission: "viewer" },{ user: users.limitedPermissions, permission: "commentator" }],
+		permissions: [{ user: users.limitedPermissions, permission: 'viewer' }, { user: users.limitedPermissions, permission: 'commentator' }],
 		properties: ServiceHelper.generateRandomModelProperties(),
 	},
 	{
@@ -167,9 +167,9 @@ const testGetContainerStats = () => {
 			expect(res.body.code).toEqual(templates.containerNotFound.code);
 		});
 
-		test('should fail if the container doesn\'t exist', async () => {
-			const res = await agent.get(`${route('jibberish')}?key=${users.tsAdmin.apiKey}`).expect(templates.containerNotFound.status);
-			expect(res.body.code).toEqual(templates.containerNotFound.code);
+		test('should fail if the container does not exist', async () => {
+			const res = await agent.get(`${route('jibberish')}?key=${users.tsAdmin.apiKey}`).expect(templates.modelNotFound.status);
+			expect(res.body.code).toEqual(templates.modelNotFound.code);
 		});
 		test('should return the container stats correctly if the user has access', async () => {
 			const res = await agent.get(`${route(modelWithRev._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
@@ -276,14 +276,14 @@ const testDeleteFavourites = () => {
 	});
 };
 
-
 const formatRevisions = (revs, includeVoid = false) => {
-	let revisions = revs;
+	let formattedRevisions = revs;
 
-	revisions = revisions.flatMap((rev) => includeVoid || !rev.void ? { ...rev, timestamp: rev.timestamp.toISOString() } : []);
-	revisions = revisions.sort((a, b) => b.timestamp - a.timestamp);
+	formattedRevisions = formattedRevisions.flatMap((rev) => (includeVoid
+		|| !rev.void ? { ...rev, timestamp: rev.timestamp.toISOString() } : []));
+	formattedRevisions = formattedRevisions.sort((a, b) => b.timestamp - a.timestamp);
 
-	return { revisions };
+	return { revisions: [...formattedRevisions] };
 };
 
 const testGetRevisions = () => {
@@ -304,14 +304,14 @@ const testGetRevisions = () => {
 			expect(res.body.code).toEqual(templates.projectNotFound.code);
 		});
 
+		test('should fail if the container does not exist', async () => {
+			const res = await agent.get(`${route('jibberish')}&key=${users.tsAdmin.apiKey}`).expect(templates.modelNotFound.status);
+			expect(res.body.code).toEqual(templates.modelNotFound.code);
+		});
+
 		test('should fail if the user does not have access to the container', async () => {
 			const res = await agent.get(`${route(modelWithRev._id)}&key=${users.noProjectAccess.apiKey}`).expect(templates.notAuthorized.status);
 			expect(res.body.code).toEqual(templates.notAuthorized.code);
-		});
-
-		test('should return an empty object if the container does not exist or does not have any revisions', async () => {
-			const res = await agent.get(`${route('jibberish')}&key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual({ revisions: [] });
 		});
 
 		test('should return non void container revisions correctly if the user has access', async () => {
@@ -359,26 +359,26 @@ const testUpdateRevisionStatus = () => {
 			expect(res.body.code).toEqual(templates.projectNotFound.code);
 		});
 
-		test('should fail if the container doesn\'t exist', async () => {
+		test('should fail if the container does not exist', async () => {
 			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/dfsfaewfc/revisions/${voidRevision._id}?key=${users.tsAdmin.apiKey}`)
-				.send({ void: false }).expect(templates.containerNotFound.status);
-			expect(res.body.code).toEqual(templates.containerNotFound.code);
+				.send({ void: false }).expect(templates.modelNotFound.status);
+			expect(res.body.code).toEqual(templates.modelNotFound.code);
 		});
 
-		test('should fail if the revision doesn\'t exist', async () => {
+		test('should fail if the revision does not exist', async () => {
 			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${modelWithRev._id}/revisions/fdefaxsxsa?key=${users.tsAdmin.apiKey}`)
 				.send({ void: false }).expect(templates.revisionNotFound.status);
 			expect(res.body.code).toEqual(templates.revisionNotFound.code);
 		});
 
 		test('should return erorr if the body of the request is not boolean', async () => {
-			await agent.patch(`${route(voidRevision._id)}?key=${users.tsAdmin.apiKey}`)
+			const res = await agent.patch(`${route(voidRevision._id)}?key=${users.tsAdmin.apiKey}`)
 				.send({ void: 123 }).expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should return erorr if the body of the request containes exitra payload', async () => {
-			await agent.patch(`${route(voidRevision._id)}?key=${users.tsAdmin.apiKey}`)
+			const res = await agent.patch(`${route(voidRevision._id)}?key=${users.tsAdmin.apiKey}`)
 				.send({ void: true, extra: 123 }).expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
@@ -386,11 +386,6 @@ const testUpdateRevisionStatus = () => {
 		test('should update a revision\'s status if the body of the request is boolean', async () => {
 			await agent.patch(`${route(voidRevision._id)}?key=${users.tsAdmin.apiKey}`)
 				.send({ void: false }).expect(templates.ok.status);
-
-			const res = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${modelWithRev._id}/revisions?showVoid=true&key=${users.tsAdmin.apiKey}`)
-				.expect(templates.ok.status);
-			const revision = res.body.find((r) => r._id === voidRevision._id);
-			expect(revision.void).toEqual(false);
 		});
 	});
 };

@@ -35,6 +35,13 @@ Permissions.hasReadAccessToModel.mockImplementation((teamspace) => {
 	}
 	return teamspace === 'ts';
 });
+
+Permissions.hasWriteAccessToModel.mockImplementation((teamspace) => {
+	if (teamspace === 'throw') {
+		throw templates.projectNotFound;
+	}
+	return teamspace === 'ts';
+});
 Sessions.getUserFromSession.mockImplementation(() => 'hi');
 
 const testHasReadAccessToContainer = () => {
@@ -75,6 +82,45 @@ const testHasReadAccessToContainer = () => {
 	});
 };
 
+const testHasWriteAccessToContainer = () => {
+	describe('hasWriteAccessToContainer', () => {
+		test('next() should be called if the user has access', async () => {
+			const mockCB = jest.fn(() => {});
+			await ContainerMiddleware.hasWriteAccessToContainer(
+				{ params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(1);
+		});
+
+		test('should respond with not authorised if the user has no access', async () => {
+			const mockCB = jest.fn(() => {});
+			await ContainerMiddleware.hasWriteAccessToContainer(
+				{ params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(0);
+			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond.mock.results[0].value).toEqual(templates.notAuthorized);
+		});
+
+		test('should respond with whatever hasWriteAccessToModel errored with if it errored', async () => {
+			const mockCB = jest.fn(() => {});
+			await ContainerMiddleware.hasWriteAccessToContainer(
+				{ params: { teamspace: 'throw' }, session: { user: { username: 'hi' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(0);
+			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond.mock.results[0].value).toEqual(templates.projectNotFound);
+		});
+	});
+};
+
 describe('middleware/permissions/components/containers', () => {
 	testHasReadAccessToContainer();
+	testHasWriteAccessToContainer();
 });

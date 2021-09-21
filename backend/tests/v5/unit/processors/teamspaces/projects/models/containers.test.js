@@ -236,11 +236,6 @@ const testGetRevisions = () => {
 const testUpdateRevisionStatus = () => {
 	const revision3 = model1Revisions.find((r) => r._id === 3);
 	describe('Get container revisions', () => {
-		test('should not update revision if the request body is not boolean', async () => {
-			const initialRev3Status = revision3.void;
-			await Containers.updateRevisionStatus('teamspace', 1, revision3._id, 123);
-			expect(revision3.void).toEqual(initialRev3Status);
-		});
 		test('should update revision if the request body is boolean', async () => {
 			await Containers.updateRevisionStatus('teamspace', 1, revision3._id, false);
 			expect(revision3.void).toEqual(false);

@@ -34,7 +34,7 @@ const getModelByQuery = async (ts, query, projection) => {
 	return res;
 };
 
-Models.getModelById = async (ts, model, projection) => await getModelByQuery(ts, { _id: model }, projection);
+Models.getModelById = async (ts, model, projection) => getModelByQuery(ts, { _id: model }, projection);
 
 Models.getContainerById = async (ts, container, projection) => {
 	try {

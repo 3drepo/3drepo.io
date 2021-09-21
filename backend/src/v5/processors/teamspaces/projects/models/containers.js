@@ -18,7 +18,6 @@
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getContainerById, getContainers } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
-const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
 

@@ -15,16 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('./components/containers');
-const { convertAllUUIDs } = require('../dataConverter/pathParams');
-const { isTeamspaceMember } = require('./components/teamspaces');
-const { validSession } = require('../auth');
+const { hasWriteAccessToContainer } = require('../permissions/permissions');
+const { respond } = require('../../utils/responder');
+const { templates } = require('../../utils/responseCodes');
 const { validateMany } = require('../common');
 
-const Permissions = {};
+const Revisions = {};
 
-Permissions.hasAccessToTeamspace = validateMany([convertAllUUIDs, validSession, isTeamspaceMember]);
-Permissions.hasReadAccessToContainer = validateMany([Permissions.hasAccessToTeamspace, hasReadAccessToContainer]);
-Permissions.hasWriteAccessToContainer = validateMany([Permissions.hasAccessToTeamspace, hasWriteAccessToContainer]);
+Revisions.hasValidArgsForVoidUpdate = (req, res, next) => {
+	const numOfProps = Object.keys(req.body).length;
+	if (numOfProps === 1 && typeof req.body.void === 'boolean') {
+		next();
+	} else {
+		respond(req, res, templates.invalidArguments);
+	}
+};
 
-module.exports = Permissions;
+Revisions.hasPermissionsAndValidArguments = validateMany([hasWriteAccessToContainer,
+	Revisions.hasValidArgsForVoidUpdate]);
+
+module.exports = Revisions;
