@@ -29,6 +29,7 @@ import { ContainersList } from './containersList';
 
 export const Containers = (): JSX.Element => {
 	const filteredContainers = ContainersHooksSelectors.selectFilteredContainers();
+	const favouriteContainers = ContainersHooksSelectors.selectFavouriteContainers();
 	const queryInput = ContainersHooksSelectors.selectFilterQuery();
 
 	return (
@@ -55,12 +56,12 @@ export const Containers = (): JSX.Element => {
 			</MainHeader>
 			<Content>
 				<ContainersList
-					containers={filteredContainers}
+					containers={favouriteContainers}
 					title={(
 						<Trans
 							id="containers.favourites.collapseTitle"
 							message="Favourites ({count})"
-							values={{ count: filteredContainers.length }}
+							values={{ count: favouriteContainers.length }}
 						/>
 					)}
 					titleTooltips={{

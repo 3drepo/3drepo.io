@@ -16,38 +16,27 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
+import { times } from 'lodash';
 import { Constants } from '@/v5/store/common/actions.helper';
-import { mockContainers } from './containers.fixtures';
+import { containerMockFactory } from './containers.fixtures';
 import { IContainersState } from './containers.types';
 
 export interface IContainersActions {
-	fetch: (teamspace: string) => any;
-	fetchSuccess: () => any;
-	setPending: (isPending: boolean) => any;
 	setFilterQuery: (query: string) => any;
 }
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({
-	fetch: ['teamspace'],
-	fetchSuccess: ['containers'],
-	setPending: ['isPending'],
 	setFilterQuery: ['query'],
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActions>; Creators: IContainersActions };
 
 export const INITIAL_STATE: IContainersState = {
-	containers: mockContainers,
+	containers: times(10, () => containerMockFactory()),
 	filterQuery: '',
 	isPending: true,
 };
 
-export const setPendingStatus = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
-
-export const fetchSuccess = (state = INITIAL_STATE, { containers }) => ({ ...state, containers });
-
 export const setFilterQuery = (state = INITIAL_STATE, { query }) => ({ ...state, filterQuery: query });
 
 export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
-	[ContainersTypes.FETCH_SUCCESS]: fetchSuccess,
-	[ContainersTypes.SET_PENDING]: setPendingStatus,
 	[ContainersTypes.SET_FILTER_QUERY]: setFilterQuery,
 });

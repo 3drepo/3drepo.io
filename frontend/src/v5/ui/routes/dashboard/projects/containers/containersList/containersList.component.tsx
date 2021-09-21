@@ -42,54 +42,6 @@ import { useOrderedList } from './containersList.hooks';
 import { DEFAULT_SORT_CONFIG } from './containersList.constants';
 import { Container } from './containersList.styles';
 
-const ellipsisMenuItems = [
-	{
-		title: <Trans id="containers.ellipsisMenu.loadContainer" message="Load Container in 3D Viewer" />,
-		onClick: () => {
-		},
-	},
-	{
-		title: <Trans id="containers.ellipsisMenu.uploadNewRevision" message="Upload new Revision" />,
-		onClick: () => {
-		},
-	},
-	{
-		title: <Trans id="containers.ellipsisMenu.viewIssues" message="View Issues" />,
-		onClick: () => {
-		},
-	},
-	{
-		title: <Trans id="containers.ellipsisMenu.viewRisks" message="View Risks" />,
-		onClick: () => {
-		},
-	},
-	{
-		title: <Trans id="containers.ellipsisMenu.viewRevisions" message="View Revisions" />,
-		onClick: () => {
-		},
-	},
-	{
-		title: <Trans id="containers.ellipsisMenu.editPermissions" message="Edit Permissions" />,
-		onClick: () => {
-		},
-	},
-	{
-		title: <Trans id="containers.ellipsisMenu.shareContainer" message="Share Container" />,
-		onClick: () => {
-		},
-	},
-	{
-		title: <Trans id="containers.ellipsisMenu.settings" message="Settings" />,
-		onClick: () => {
-		},
-	},
-	{
-		title: <Trans id="containers.ellipsisMenu.delete" message="Delete" />,
-		onClick: () => {
-		},
-	},
-];
-
 type IContainersList = {
 	emptyMessage: ReactNode;
 	containers: IContainer[];
@@ -108,6 +60,54 @@ export const ContainersList = ({
 }: IContainersList): JSX.Element => {
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const { sortedList, setSortConfig } = useOrderedList(containers, DEFAULT_SORT_CONFIG);
+
+	const ellipsisMenuItems = [
+		{
+			title: <Trans id="containers.ellipsisMenu.loadContainer" message="Load Container in 3D Viewer" />,
+			onClick: () => {
+			},
+		},
+		{
+			title: <Trans id="containers.ellipsisMenu.uploadNewRevision" message="Upload new Revision" />,
+			onClick: () => {
+			},
+		},
+		{
+			title: <Trans id="containers.ellipsisMenu.viewIssues" message="View Issues" />,
+			onClick: () => {
+			},
+		},
+		{
+			title: <Trans id="containers.ellipsisMenu.viewRisks" message="View Risks" />,
+			onClick: () => {
+			},
+		},
+		{
+			title: <Trans id="containers.ellipsisMenu.viewRevisions" message="View Revisions" />,
+			onClick: () => {
+			},
+		},
+		{
+			title: <Trans id="containers.ellipsisMenu.editPermissions" message="Edit Permissions" />,
+			onClick: () => {
+			},
+		},
+		{
+			title: <Trans id="containers.ellipsisMenu.shareContainer" message="Share Container" />,
+			onClick: () => {
+			},
+		},
+		{
+			title: <Trans id="containers.ellipsisMenu.settings" message="Settings" />,
+			onClick: () => {
+			},
+		},
+		{
+			title: <Trans id="containers.ellipsisMenu.delete" message="Delete" />,
+			onClick: () => {
+			},
+		},
+	];
 
 	return useMemo(() => (
 		<Container>
@@ -188,6 +188,7 @@ export const ContainersList = ({
 											}
 										>
 											<FavouriteCheckbox
+												checked={container.isFavourited}
 												onClick={(event) => {
 													event.stopPropagation();
 												}}

@@ -15,39 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as faker from 'faker';
 import { IContainer } from '@/v5/store/containers/containers.types';
 
-export const mockContainers: IContainer[] = [
-	{
-		_id: '1121523',
-		latestRevision: 123,
-		title: 'Some different container title',
-		revisionsCount: 2521,
-		category: 'Mocks',
-		code: 'ABC11212312123-12312',
-		date: new Date('1993-12-17T03:24:00'),
-	},
-	{
-		_id: '123123',
-		latestRevision: 123,
-		title: 'Some container title',
-		revisionsCount: 89,
-		category: 'Architecture',
-		code: 'DD-SSS_Z123123SSSss',
-		date: new Date('2021-08-17T03:24:00'),
-	},
-];
-
-for (let i = 0; i < 10; i++) {
-	const mockContainer = {
-		_id: String(i),
-		latestRevision: 123,
-		title: String(i),
-		revisionsCount: 120,
-		category: 'my awesome category',
-		code: 'XX123',
-		date: new Date(),
-	};
-
-	mockContainers.push(mockContainer);
-}
+export const containerMockFactory = (): IContainer => ({
+	_id: faker.datatype.uuid(),
+	latestRevision: faker.datatype.number({ min: 10, max: 1200 }),
+	title: faker.random.words(3),
+	revisionsCount: faker.datatype.number({ min: 10, max: 1200 }),
+	category: faker.random.word(),
+	code: faker.datatype.uuid(),
+	date: faker.date.past(2),
+	isFavourited: faker.datatype.boolean(),
+});

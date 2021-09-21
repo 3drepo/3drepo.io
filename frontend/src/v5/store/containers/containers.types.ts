@@ -15,6 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+export interface IContainersState {
+	containers: IContainer[];
+	isPending: boolean;
+	filterQuery: string;
+}
+
 export interface IContainer {
 	_id: string;
 	title: string;
@@ -23,10 +29,5 @@ export interface IContainer {
 	category: string;
 	code: string;
 	date: Date;
-}
-
-export interface IContainersState {
-	containers: IContainer[];
-	isPending: boolean;
-	filterQuery: string;
+	isFavourited: boolean;
 }

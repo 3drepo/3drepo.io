@@ -34,3 +34,7 @@ export const selectFilteredContainers = createSelector(
 		{ title },
 	) => title.toLowerCase().includes(filterQuery.toLowerCase())),
 );
+
+export const selectFavouriteContainers = createSelector(
+	selectFilteredContainers, (containers) => containers.filter(({ isFavourited }) => isFavourited),
+);
