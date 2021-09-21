@@ -32,7 +32,6 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 export const INITIAL_STATE: IContainersState = {
 	containers: times(10, () => containerMockFactory()),
 	filterQuery: '',
-	isPending: true,
 };
 
 export const setFilterQuery = (state = INITIAL_STATE, { query }) => ({ ...state, filterQuery: query });

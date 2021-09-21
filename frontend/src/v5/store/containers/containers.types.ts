@@ -17,7 +17,6 @@
 
 export interface IContainersState {
 	containers: IContainer[];
-	isPending: boolean;
 	filterQuery: string;
 }
 
