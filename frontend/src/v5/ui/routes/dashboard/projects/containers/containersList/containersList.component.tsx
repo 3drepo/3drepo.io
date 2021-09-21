@@ -116,7 +116,7 @@ export const ContainersList = ({
 				tooltipTitles={titleTooltips}
 			>
 				<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
-					<DashboardListHeaderLabel name="title" sort>
+					<DashboardListHeaderLabel name="name" sort>
 						<Trans id="containers.list.header.container" message="Container" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel width={186}>
@@ -125,10 +125,10 @@ export const ContainersList = ({
 					<DashboardListHeaderLabel name="code">
 						<Trans id="containers.list.header.containerCode" message="Container code" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="category" width={188}>
+					<DashboardListHeaderLabel name="type" width={188}>
 						<Trans id="containers.list.header.category" message="Category" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="date" width={180}>
+					<DashboardListHeaderLabel name="lastUpdated" width={180}>
 						<Trans id="containers.list.header.lastUpdated" message="Last updated" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>
@@ -154,7 +154,7 @@ export const ContainersList = ({
 											<Trans id="containers.list.item.title.tooltip" message="Launch latest revision" />
 										}
 									>
-										{container.title}
+										{container.name}
 									</DashboardListItemTitle>
 									<DashboardListItemButton
 										onClick={() => {
@@ -176,10 +176,10 @@ export const ContainersList = ({
 										{container.code}
 									</DashboardListItemText>
 									<DashboardListItemText width={188} selected={container._id === selectedId}>
-										{container.category}
+										{container.type}
 									</DashboardListItemText>
 									<DashboardListItemText width={97} selected={container._id === selectedId}>
-										{i18n.date(container.date)}
+										{i18n.date(container.lastUpdated)}
 									</DashboardListItemText>
 									<DashboardListItemIcon>
 										<Tooltip
@@ -188,7 +188,7 @@ export const ContainersList = ({
 											}
 										>
 											<FavouriteCheckbox
-												checked={container.isFavourited}
+												checked={container.isFavourite}
 												onClick={(event) => {
 													event.stopPropagation();
 												}}

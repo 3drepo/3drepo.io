@@ -23,11 +23,12 @@ export interface IContainersState {
 
 export interface IContainer {
 	_id: string;
-	title: string;
-	latestRevision: number;
+	name: string;
+	latestRevision: string;
 	revisionsCount: number;
-	category: string;
+	lastUpdated: Date;
+	type: string;
 	code: string;
-	date: Date;
-	isFavourited: boolean;
+	isFavourite: boolean;
+	role: string;
 }

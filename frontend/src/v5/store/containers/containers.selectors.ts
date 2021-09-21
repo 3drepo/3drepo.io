@@ -31,10 +31,10 @@ export const selectFilterQuery = createSelector(
 export const selectFilteredContainers = createSelector(
 	[selectContainers, selectFilterQuery],
 	(containers, filterQuery) => containers.filter((
-		{ title },
-	) => title.toLowerCase().includes(filterQuery.toLowerCase())),
+		{ name },
+	) => name.toLowerCase().includes(filterQuery.toLowerCase())),
 );
 
 export const selectFavouriteContainers = createSelector(
-	selectFilteredContainers, (containers) => containers.filter(({ isFavourited }) => isFavourited),
+	selectFilteredContainers, (containers) => containers.filter(({ isFavourite }) => isFavourite),
 );

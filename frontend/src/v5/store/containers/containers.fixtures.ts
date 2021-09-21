@@ -20,11 +20,12 @@ import { IContainer } from '@/v5/store/containers/containers.types';
 
 export const containerMockFactory = (): IContainer => ({
 	_id: faker.datatype.uuid(),
-	latestRevision: faker.datatype.number({ min: 10, max: 1200 }),
-	title: faker.random.words(3),
+	latestRevision: faker.random.words(2),
 	revisionsCount: faker.datatype.number({ min: 10, max: 1200 }),
-	category: faker.random.word(),
+	lastUpdated: faker.date.past(2),
+	name: faker.random.words(3),
+	role: faker.random.arrayElement(['admin', 'collaborator']),
+	type: faker.random.word(),
 	code: faker.datatype.uuid(),
-	date: faker.date.past(2),
-	isFavourited: faker.datatype.boolean(),
+	isFavourite: faker.datatype.boolean(),
 });
