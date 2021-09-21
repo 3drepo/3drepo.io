@@ -18,7 +18,7 @@
 const { getTeamspaceAdmins, hasAccessToTeamspace } = require('../../models/teamspaces');
 const { PROJECT_ADMIN } = require('./permissions.constants');
 const { getModelById } = require('../../models/modelSettings');
-const { getProjectAdmins } = require('../../models/projects');
+const { getProjectAdmins, modelExistsInProject } = require('../../models/projects');
 
 const Permissions = {};
 
@@ -47,7 +47,14 @@ const hasAdminPermissions = async (teamspace, project, username) =>{
 	return isAdminArr.filter((bool) => bool).length;
 }
 
-Permissions.hasWriteAccessToModel = async (teamspace, project, model, username, adminCheck = true) => {
+Permissions.hasWriteAccessToModel = async (teamspace, project, modelID, username, adminCheck = true) => {
+	const model = await getModelById(teamspace, modelID, { permissions: 1 });
+
+	const modelExistsInProject = await modelExistsInProject(teamspace, project, modelID);
+	if(!modelExistsInProject){
+		return false;
+	}
+
 	if (adminCheck) {
 		const hasAdminPerms = await hasAdminPermissions(teamspace, project, username);
 		if(hasAdminPerms){
@@ -55,11 +62,18 @@ Permissions.hasWriteAccessToModel = async (teamspace, project, model, username, 
 		}		
 	}
 
-	const { permissions } = await getModelById(teamspace, model, { permissions: 1 });
+	const { permissions } = model;
 	return permissions && permissions.some((perm) => perm.user === username && perm.permission === 'collaborator' );
 };
 
-Permissions.hasReadAccessToModel = async (teamspace, project, model, username, adminCheck = true) => {
+Permissions.hasReadAccessToModel = async (teamspace, project, modelID, username, adminCheck = true) => {
+	const model = await getModelById(teamspace, modelID, { permissions: 1 });
+
+	const modelExistsInProject = await modelExistsInProject(teamspace, project, modelID);
+	if(!modelExistsInProject){
+		return false;
+	}
+
 	if (adminCheck) {
 		const hasAdminPerms = await hasAdminPermissions(teamspace, project, username);
 		if(hasAdminPerms){
@@ -67,7 +81,7 @@ Permissions.hasReadAccessToModel = async (teamspace, project, model, username, a
 		}		
 	}
 
-	const { permissions } = await getModelById(teamspace, model, { permissions: 1 });
+	const { permissions } = model;
 	// we assume the user has access if they have some form of permissions on the model
 	return permissions && permissions.some((perm) => perm.user === username);
 };
