@@ -16,9 +16,10 @@
  */
 
 import { expectSaga } from 'redux-saga-test-plan';
+import { throwError } from 'redux-saga-test-plan/providers';
 
-import * as TeamspacesSaga from '../teamspaces.sagas';
 import { TeamspacesActions } from '../teamspaces.redux';
+import * as TeamspacesSaga from '../teamspaces.sagas';
 
 describe('Teamspaces: sagas', () => {
 	describe('fetch', () => {
@@ -30,6 +31,17 @@ describe('Teamspaces: sagas', () => {
 			expectSaga(TeamspacesSaga.default)
 				.dispatch(TeamspacesActions.fetch())
 				.put(TeamspacesActions.fetchSuccess([]))
+				.silentRun();
+		});
+
+		it('should handle teamspaces api error and dispatch FETCH_FAILURE', () => {
+			jest.mock('@/v5/services/api', () => ({
+				fetchProjects: () => throwError(new Error('error')),
+			}));
+
+			expectSaga(TeamspacesSaga.default)
+				.dispatch(TeamspacesActions.fetch())
+				.put(TeamspacesActions.fetchFailure())
 				.silentRun();
 		});
 	});
