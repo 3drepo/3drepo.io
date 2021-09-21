@@ -17,10 +17,11 @@
 
 const Groups = require('../../../../processors/teamspaces/projects/models/commons/groups');
 const { Router } = require('express');
-const { getUserFromSession } = require('../../../../utils/sessions');
+// const { getUserFromSession } = require('../../../../utils/sessions');
 const { hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
+const { validateGroupExportData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups');
 
 const exportGroups = (req, res) => {
 	const { teamspace, container } = req.params;
@@ -55,9 +56,9 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *         type: string
-	 *       - containers:
-	 *         name: project
-	 *         description: Project ID
+	 *       - container:
+	 *         name: container
+	 *         description: Container ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -68,12 +69,12 @@ const establishRoutes = () => {
 	 *         application/json:
 	 *           schema:
 	 *             type: object
-	 *               properties:
-	 *                 groups:
-	 *                   type: array
-	 *                     items
-	 *                      type: string
-	 *                      format: uuid
+	 *             properties:
+	 *               groups:
+	 *                 type: array
+	 *                 items:
+	 *                   type: string
+	 *                   format: uuid
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -107,7 +108,7 @@ const establishRoutes = () => {
 	 *
 	 *
 	 */
-	router.get('/groups/', hasReadAccessToContainer, validateGroupExportParams, exportGroups);
+	router.post('/export', hasReadAccessToContainer, validateGroupExportData, exportGroups);
 
 	return router;
 };

@@ -38,7 +38,7 @@ Groups.validateGroupExportData = async (req, res, next) => {
 		req.body = output;
 		next();
 	} catch (err) {
-		respond(req, res, createResponseCode(templates.invalidArguments, err));
+		respond(req, res, createResponseCode(templates.invalidArguments, err.message || err));
 	}
 };
 

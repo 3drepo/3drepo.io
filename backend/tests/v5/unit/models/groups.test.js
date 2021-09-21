@@ -46,7 +46,7 @@ const testGetGroupsByIds = () => {
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual(teamspace);
 			expect(fn.mock.calls[0][1]).toEqual(`${model}.groups`);
-			expect(fn.mock.calls[0][2]).toEqual({ _ids: { $in: groupIds } });
+			expect(fn.mock.calls[0][2]).toEqual({ _id: { $in: groupIds } });
 			expect(fn.mock.calls[0][3]).toEqual(projection);
 		});
 	});

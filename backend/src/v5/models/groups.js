@@ -22,7 +22,7 @@ const Groups = {};
 const findGroup = (teamspace, model, query, projection, sort) => db.find(teamspace, `${model}.groups`, query, projection, sort);
 
 Groups.getGroupsByIds = (teamspace, model, ids, projection) => {
-	const query = { _ids: { $in: ids } };
+	const query = { _id: { $in: ids } };
 	return findGroup(teamspace, model, query, projection);
 };
 
@@ -35,6 +35,7 @@ Groups.getGroups = (teamspace, model, includeHidden, projection) => {
 			sequence_id: { $exists: false },
 			view_id: { $exists: false },
 		};
+
 	return findGroup(teamspace, model, query, projection);
 };
 
