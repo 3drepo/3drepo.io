@@ -67,6 +67,13 @@ const testGetRevisions = () => {
 			expect(res).toEqual(expectedData);
 		});
 
+		test('Should return non void container revisions', async () => {
+			const nonVoidRevisions = expectedData.filter((rev) => !rev.void);
+			jest.spyOn(db, 'find').mockResolvedValue(nonVoidRevisions);
+			const res = await Revisions.getRevisions('someTS', 'someModel', false);
+			expect(res).toEqual(nonVoidRevisions);
+		});
+
 		test('Should return an empty object if there are no revisions', async () => {
 			jest.spyOn(db, 'find').mockResolvedValue([]);
 			const res = await Revisions.getRevisions('someTS', 'someModel', true);
