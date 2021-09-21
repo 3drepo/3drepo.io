@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
 import { Trans } from '@lingui/react';
 import { MainHeader } from '@controls/mainHeader';
@@ -24,13 +24,31 @@ import AddCircleIcon from '@assets/icons/add_circle.svg';
 import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
-import { Container, Content, NewContainerButton, NewContainerMainHeaderButton, UploadFileButton } from './containers.styles';
+import { debounce } from 'lodash';
+import {
+	Container,
+	Content,
+	NewContainerButton,
+	NewContainerMainHeaderButton,
+	UploadFileButton,
+} from './containers.styles';
 import { ContainersList } from './containersList';
 
 export const Containers = (): JSX.Element => {
 	const filteredContainers = ContainersHooksSelectors.selectFilteredContainers();
 	const favouriteContainers = ContainersHooksSelectors.selectFavouriteContainers();
-	const queryInput = ContainersHooksSelectors.selectFilterQuery();
+
+	const [searchInput, setSearchInput] = useState('');
+
+	const debounceSearchUpdate = debounce(
+		(value: string) => ContainersActionsDispatchers.setFilterQuery(value),
+		300,
+		{ trailing: true },
+	);
+
+	useEffect(() => {
+		debounceSearchUpdate(searchInput);
+	}, [searchInput]);
 
 	return (
 		<Container>
@@ -40,9 +58,9 @@ export const Containers = (): JSX.Element => {
 					message="Search containers..."
 					render={({ translation }) => (
 						<SearchInput
-							onClear={() => ContainersActionsDispatchers.setFilterQuery('')}
-							onChange={(event) => ContainersActionsDispatchers.setFilterQuery(event.currentTarget.value)}
-							value={queryInput}
+							onClear={() => setSearchInput('')}
+							onChange={(event) => setSearchInput(event.currentTarget.value)}
+							value={searchInput}
 							placeholder={translation as string}
 						/>
 					)}

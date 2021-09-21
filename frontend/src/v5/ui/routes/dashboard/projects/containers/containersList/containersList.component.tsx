@@ -39,8 +39,8 @@ import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { EllipsisButtonWithMenu } from '@controls/ellipsisButtonWithMenu';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { useOrderedList } from './containersList.hooks';
-import { DEFAULT_SORT_CONFIG } from './containersList.constants';
 import { Container } from './containersList.styles';
+import { DEFAULT_SORT_CONFIG } from './containersList.constants';
 
 type IContainersList = {
 	emptyMessage: ReactNode;
@@ -61,51 +61,46 @@ export const ContainersList = ({
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const { sortedList, setSortConfig } = useOrderedList(containers, DEFAULT_SORT_CONFIG);
 
+	const toggleSelectedId = (id: IContainer['_id']) => {
+		setSelectedId((state) => (state === id ? null : id));
+	};
+
 	const ellipsisMenuItems = [
 		{
 			title: <Trans id="containers.ellipsisMenu.loadContainer" message="Load Container in 3D Viewer" />,
-			onClick: () => {
-			},
+			onClick: () => { },
 		},
 		{
 			title: <Trans id="containers.ellipsisMenu.uploadNewRevision" message="Upload new Revision" />,
-			onClick: () => {
-			},
+			onClick: () => { },
 		},
 		{
 			title: <Trans id="containers.ellipsisMenu.viewIssues" message="View Issues" />,
-			onClick: () => {
-			},
+			onClick: () => { },
 		},
 		{
 			title: <Trans id="containers.ellipsisMenu.viewRisks" message="View Risks" />,
-			onClick: () => {
-			},
+			onClick: () => { },
 		},
 		{
 			title: <Trans id="containers.ellipsisMenu.viewRevisions" message="View Revisions" />,
-			onClick: () => {
-			},
+			onClick: () => { },
 		},
 		{
 			title: <Trans id="containers.ellipsisMenu.editPermissions" message="Edit Permissions" />,
-			onClick: () => {
-			},
+			onClick: () => { },
 		},
 		{
 			title: <Trans id="containers.ellipsisMenu.shareContainer" message="Share Container" />,
-			onClick: () => {
-			},
+			onClick: () => { },
 		},
 		{
 			title: <Trans id="containers.ellipsisMenu.settings" message="Settings" />,
-			onClick: () => {
-			},
+			onClick: () => { },
 		},
 		{
 			title: <Trans id="containers.ellipsisMenu.delete" message="Delete" />,
-			onClick: () => {
-			},
+			onClick: () => { },
 		},
 	];
 
@@ -137,7 +132,7 @@ export const ContainersList = ({
 						sortedList.map((container) => (
 							<DashboardListItem
 								selected={container._id === selectedId}
-								onClick={() => setSelectedId((id) => (id === container._id ? null : container._id))}
+								onClick={() => toggleSelectedId(container._id)}
 								key={container._id}
 							>
 								<DashboardListItemRow>
