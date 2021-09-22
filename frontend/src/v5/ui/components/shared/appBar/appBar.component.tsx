@@ -29,7 +29,7 @@ import { TopNavigation } from '../topNavigation';
 import { Breadcrumbs } from '../breadcrumbs';
 
 export const AppBar = (): JSX.Element => (
-	<MuiAppBar color="secondary">
+	<MuiAppBar position="static" color="secondary">
 		<Items>
 			<Logo />
 			<Breadcrumbs />

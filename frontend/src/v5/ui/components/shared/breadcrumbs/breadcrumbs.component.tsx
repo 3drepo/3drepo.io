@@ -28,7 +28,9 @@ import { IProject } from '@/v5/store/projects/projects.redux';
 import { Container, Breadcrumb, InteractiveBreadcrumb } from './breadcrumbs.styles';
 import { NavigationMenu } from '../navigatonMenu';
 
-const addUrlToTarget = (url) => ({ to, title }) => ({ title, to: `${url}/${to}` });
+const createDefaultProjectLink = (url) => ({ to, title }) => ({ title, to: `${url}/${to}/federations` });
+
+const createDefaultTeamspaceLink = (url) => ({ to, title }) => ({ title, to: `${url}/${to}` });
 
 const teamspaceList2LinkList = (teamspaces: ITeamspace[]) => (teamspaces.length ? teamspaces.map(({ name }) => ({
 	to: name,
@@ -72,7 +74,11 @@ export const Breadcrumbs = (): JSX.Element => {
 		getBreadcrumbs.push(list.find(({ to }) => to === project).title);
 	}
 
-	list = list.map(addUrlToTarget(urlProject));
+	if (project) {
+		list = list.map(createDefaultProjectLink(urlProject));
+	} else {
+		list = list.map(createDefaultTeamspaceLink(url));
+	}
 
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
