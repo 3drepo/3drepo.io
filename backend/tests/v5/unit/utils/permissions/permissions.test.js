@@ -125,14 +125,14 @@ const testHasWriteAccessToModel = () => {
 		['tsAdmin', undefined, true],
 		['nobody', false, false],
 		['nobody', true, false],
-	])('Has read access to model', (user, adminCheck, result) => {
-		test(`${user} ${result ? 'have' : 'does not have'} read access (adminCheck: ${adminCheck})`, async () => {
+	])('Has write access to model', (user, adminCheck, result) => {
+		test(`${user} ${result ? 'have' : 'does not have'} write access (adminCheck: ${adminCheck})`, async () => {
 			Projects.modelExistsInProject.mockImplementation(() => true);
 			expect(await Permissions.hasWriteAccessToModel('teamspace', 'project', 'model', user, adminCheck)).toBe(result);
 		});
 	});
 
-	describe('Container does not belong to the project', () => {
+	describe('Has write access to model (2)', () => {
 		test('should return false if the model does not belong to the project', async () => {
 			Projects.modelExistsInProject.mockImplementation(() => false);
 			expect(await Permissions.hasWriteAccessToModel('teamspace', 'project', 'model', 'a', true)).toBe(false);

@@ -27,7 +27,8 @@ let agent;
 const users = {
 	tsAdmin: ServiceHelper.generateUserCredentials(),
 	noProjectAccess: ServiceHelper.generateUserCredentials(),
-	limitedPermissions: ServiceHelper.generateUserCredentials(),
+	viewer: ServiceHelper.generateUserCredentials(),
+	commenter: ServiceHelper.generateUserCredentials(),
 };
 
 const nobody = ServiceHelper.generateUserCredentials();
@@ -44,7 +45,7 @@ const models = [
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
 		isFavourite: true,
-		permissions: [{ user: users.limitedPermissions, permission: 'viewer' }, { user: users.limitedPermissions, permission: 'commentator' }],
+		permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
 		properties: ServiceHelper.generateRandomModelProperties(),
 	},
 	{
@@ -283,7 +284,7 @@ const formatRevisions = (revs, includeVoid = false) => {
 		|| !rev.void ? { ...rev, timestamp: rev.timestamp.toISOString() } : []));
 	formattedRevisions = formattedRevisions.sort((a, b) => b.timestamp - a.timestamp);
 
-	return { revisions: [...formattedRevisions] };
+	return { revisions: formattedRevisions };
 };
 
 const testGetRevisions = () => {
@@ -347,8 +348,14 @@ const testUpdateRevisionStatus = () => {
 			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
 
-		test('should fail if the user does not have adequate permissions to edit the model', async () => {
-			const res = await agent.patch(`${route(voidRevision._id)}?key=${users.limitedPermissions.apiKey}`)
+		test('should fail if the user does not have adequate permissions to edit the container (viewer)', async () => {
+			const res = await agent.patch(`${route(voidRevision._id)}?key=${users.viewer.apiKey}`)
+				.send({ void: false }).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		});
+
+		test('should fail if the user does not have adequate permissions to edit the container (commenter)', async () => {
+			const res = await agent.patch(`${route(voidRevision._id)}?key=${users.commenter.apiKey}`)
 				.send({ void: false }).expect(templates.notAuthorized.status);
 			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
@@ -371,13 +378,13 @@ const testUpdateRevisionStatus = () => {
 			expect(res.body.code).toEqual(templates.revisionNotFound.code);
 		});
 
-		test('should return erorr if the body of the request is not boolean', async () => {
+		test('should return error if the body of the request is not boolean', async () => {
 			const res = await agent.patch(`${route(voidRevision._id)}?key=${users.tsAdmin.apiKey}`)
 				.send({ void: 123 }).expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
-		test('should return erorr if the body of the request containes exitra payload', async () => {
+		test('should return error if the body of the request contains extra payload', async () => {
 			const res = await agent.patch(`${route(voidRevision._id)}?key=${users.tsAdmin.apiKey}`)
 				.send({ void: true, extra: 123 }).expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
