@@ -20,14 +20,18 @@ const { Router } = require('express');
 // const { getUserFromSession } = require('../../../../utils/sessions');
 const { hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
 const { respond } = require('../../../../utils/responder');
-const { templates } = require('../../../../utils/responseCodes');
+// const { templates } = require('../../../../utils/responseCodes');
+const { serialiseGroupArray } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups');
 const { validateGroupExportData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups');
 
-const exportGroups = (req, res) => {
+const exportGroups = (req, res, next) => {
 	const { teamspace, container } = req.params;
 	const { groups: groupIds } = req.body || {};
 	Groups.getGroups(teamspace, container, groupIds)
-		.then((groups) => respond(req, res, templates.ok, { groups }))
+		.then((groups) => {
+			req.outputData = groups;
+			next();
+		})
 		.catch((err) => respond(req, res, err));
 };
 
@@ -108,7 +112,7 @@ const establishRoutes = () => {
 	 *
 	 *
 	 */
-	router.post('/export', hasReadAccessToContainer, validateGroupExportData, exportGroups);
+	router.post('/export', hasReadAccessToContainer, validateGroupExportData, exportGroups, serialiseGroupArray);
 
 	return router;
 };
