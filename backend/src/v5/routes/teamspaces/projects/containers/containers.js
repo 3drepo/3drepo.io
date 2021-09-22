@@ -14,12 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { hasAccessToTeamspace, hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
+const { hasAccessToTeamspace, hasReadAccessToContainer,hasWriteAccessToContainer } = require('../../../../middleware/permissions/permissions');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { getUserFromSession } = require('../../../../utils/sessions');
-const { hasPermissionsAndValidArguments } = require('../../../../middleware/dataConverter/revisions');
+const { validateUpdateRevisionData } = require('../../../../middleware/dataConverter/revisions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
 
@@ -58,7 +58,7 @@ const updateRevisionStatus = async (req, res) => {
 	const status = req.body.void;
 
 	Containers.updateRevisionStatus(teamspace, container, revision, status).then(() => {
-		respond(req, res, templates.ok, {});
+		respond(req, res, templates.ok);
 	}).catch((err) => respond(req, res, err));
 };
 
@@ -430,7 +430,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: updates the status of the revision
 	 */
-	router.patch('/:container/revisions/:revision', hasPermissionsAndValidArguments, updateRevisionStatus);
+	router.patch('/:container/revisions/:revision', hasWriteAccessToContainer,validateUpdateRevisionData, updateRevisionStatus);
 
 	return router;
 };

@@ -15,23 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { hasWriteAccessToContainer } = require('../permissions/permissions');
+const {createResponseCode} = require('../../../v5/utils/responseCodes')
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
-const { validateMany } = require('../common');
-
+const Yup = require('yup');
 const Revisions = {};
 
-Revisions.hasValidArgsForVoidUpdate = (req, res, next) => {
-	const numOfProps = Object.keys(req.body).length;
-	if (numOfProps === 1 && typeof req.body.void === 'boolean') {
+Revisions.validateUpdateRevisionData = async (req, res, next) => {
+	const schema = Yup.object().shape({
+		void: Yup.bool('void must be of type boolean')
+			.required()
+			.strict(true)
+	});
+
+	schema.noUnknown(true);
+	try {
+		await schema.validate(req.body);
 		next();
-	} else {
-		respond(req, res, templates.invalidArguments);
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err.message || err));
 	}
 };
-
-Revisions.hasPermissionsAndValidArguments = validateMany([hasWriteAccessToContainer,
-	Revisions.hasValidArgsForVoidUpdate]);
 
 module.exports = Revisions;

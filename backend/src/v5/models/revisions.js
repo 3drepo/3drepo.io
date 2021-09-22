@@ -25,10 +25,7 @@ const excludeIncomplete = { incomplete: { $exists: false } };
 
 const collectionName = (model) => `${model}.history`;
 
-const findRevisionsByQuery = async (teamspace, model, query, projection, sort) => {
-	const rev = await db.find(teamspace, collectionName(model), query, projection, sort);
-	return rev;
-};
+const findRevisionsByQuery = (teamspace, model, query, projection, sort) => db.find(teamspace, collectionName(model), query, projection, sort);
 
 const findOneRevisionByQuery = async (teamspace, model, query, projection, sort) => {
 	const rev = await db.findOne(teamspace, collectionName(model), query, projection, sort);
@@ -57,13 +54,11 @@ Revisions.getRevisions = async (teamspace, model, showVoid, projection = {}) => 
 		query.void = excludeVoids.void;
 	}
 
-	const revisions = await findRevisionsByQuery(teamspace, model, query, projection);
-	return revisions;
+	return findRevisionsByQuery(teamspace, model, query, projection);;
 };
 
 Revisions.updateRevisionStatus = async (teamspace, model, revision, status) => {
 	const query = { $or: [{ _id: revision }, { tag: revision }] };
-	await findOneRevisionByQuery(teamspace, model, query, { _id: 1, void: 1 });
 	await db.updateOne(teamspace, collectionName(model), query, { $set: { void: status } });
 };
 
