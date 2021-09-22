@@ -17,11 +17,14 @@
 
 import React, { Dispatch, ReactNode } from 'react';
 import { ClickAwayListener, Grow, Paper, Typography } from '@material-ui/core';
+import { Link } from 'react-router-dom';
 import { MenuList, MenuItem, Popper } from './ellipsisMenu.styles';
 
 interface IListItem {
 	title: ReactNode;
-	onClick: Dispatch<void>;
+	onClick?: Dispatch<void>;
+	to?: string;
+	key: number;
 }
 
 export interface IEllipsisMenu {
@@ -54,12 +57,16 @@ export const EllipsisMenu = ({ anchorEl, handleClose, list }: IEllipsisMenu): JS
 					<Paper>
 						<ClickAwayListener onClickAway={handleClose}>
 							<MenuList autoFocusItem={Boolean(anchorEl)} id="ellipsis-menu-list" onKeyDown={handleListKeyDown}>
-								{list.map(({ title, onClick }) => (
+								{list.map(({ title, onClick, to = '', key }) => (
 									<MenuItem
-										key={title}
+										key={key}
+										component={to ? Link : null}
+										to={to}
 										onClick={(event) => {
 											event.stopPropagation();
-											onClick(event);
+											if (onClick) {
+												onClick(event);
+											}
 											handleClose();
 										}}
 									>

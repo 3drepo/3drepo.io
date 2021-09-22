@@ -38,6 +38,7 @@ import {
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { EllipsisButtonWithMenu } from '@controls/ellipsisButtonWithMenu';
 import { IContainer } from '@/v5/store/containers/containers.types';
+import { getContainerMenuItems } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.helpers';
 import { useOrderedList } from './containersList.hooks';
 import { Container } from './containersList.styles';
 import { DEFAULT_SORT_CONFIG } from './containersList.constants';
@@ -64,45 +65,6 @@ export const ContainersList = ({
 	const toggleSelectedId = (id: IContainer['_id']) => {
 		setSelectedId((state) => (state === id ? null : id));
 	};
-
-	const ellipsisMenuItems = [
-		{
-			title: <Trans id="containers.ellipsisMenu.loadContainer" message="Load Container in 3D Viewer" />,
-			onClick: () => { },
-		},
-		{
-			title: <Trans id="containers.ellipsisMenu.uploadNewRevision" message="Upload new Revision" />,
-			onClick: () => { },
-		},
-		{
-			title: <Trans id="containers.ellipsisMenu.viewIssues" message="View Issues" />,
-			onClick: () => { },
-		},
-		{
-			title: <Trans id="containers.ellipsisMenu.viewRisks" message="View Risks" />,
-			onClick: () => { },
-		},
-		{
-			title: <Trans id="containers.ellipsisMenu.viewRevisions" message="View Revisions" />,
-			onClick: () => { },
-		},
-		{
-			title: <Trans id="containers.ellipsisMenu.editPermissions" message="Edit Permissions" />,
-			onClick: () => { },
-		},
-		{
-			title: <Trans id="containers.ellipsisMenu.shareContainer" message="Share Container" />,
-			onClick: () => { },
-		},
-		{
-			title: <Trans id="containers.ellipsisMenu.settings" message="Settings" />,
-			onClick: () => { },
-		},
-		{
-			title: <Trans id="containers.ellipsisMenu.delete" message="Delete" />,
-			onClick: () => { },
-		},
-	];
 
 	return useMemo(() => (
 		<Container>
@@ -197,7 +159,7 @@ export const ContainersList = ({
 									<DashboardListItemIcon
 										selected={container._id === selectedId}
 									>
-										<EllipsisButtonWithMenu list={ellipsisMenuItems} />
+										<EllipsisButtonWithMenu list={getContainerMenuItems(container._id)} />
 									</DashboardListItemIcon>
 								</DashboardListItemRow>
 							</DashboardListItem>
