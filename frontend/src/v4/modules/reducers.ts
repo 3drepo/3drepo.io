@@ -19,7 +19,7 @@ import { connectRouter } from 'connected-react-router';
 import { combineReducers } from 'redux';
 import undoable from 'redux-undo';
 
-import { reducer as containersReducer } from '../../v5/store/containers/containers.redux';
+import { reducer as containersReducer } from '@/v5/store/containers/containers.redux';
 import { CanvasHistoryTypes } from './canvasHistory';
 import { batchGroupBy } from './canvasHistory/canvasHistory.helpers';
 
