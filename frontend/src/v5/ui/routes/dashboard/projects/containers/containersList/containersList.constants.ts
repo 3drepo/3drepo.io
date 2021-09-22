@@ -18,6 +18,6 @@
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 
 export const DEFAULT_SORT_CONFIG = {
-	column: 'title',
+	column: 'name',
 	direction: SortingDirection.DESCENDING,
 };

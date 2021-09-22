@@ -111,10 +111,10 @@ export const ContainersList = ({
 				tooltipTitles={titleTooltips}
 			>
 				<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
-					<DashboardListHeaderLabel name="name" sort>
+					<DashboardListHeaderLabel name="name">
 						<Trans id="containers.list.header.container" message="Container" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel width={186}>
+					<DashboardListHeaderLabel name="revisionsCount" width={186}>
 						<Trans id="containers.list.header.revisions" message="Revisions" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="code">
