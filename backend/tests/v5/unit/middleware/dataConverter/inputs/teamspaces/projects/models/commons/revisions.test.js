@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src } = require('../../../helper/path');
+const { src } = require('../../../../../../../../helper/path');
 
-jest.mock('../../../../../src/v5/utils/responder');
+jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
-jest.mock('../../../../../src/v5/utils/permissions/permissions');
-const Revisions = require(`${src}/middleware/dataConverter/revisions`);
+jest.mock('../../../../../../../../../../src/v5/utils/permissions/permissions');
+const Revisions = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 // Mock respond function to just return the resCode

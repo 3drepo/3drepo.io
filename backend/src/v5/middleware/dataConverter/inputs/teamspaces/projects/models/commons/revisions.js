@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createResponseCode, templates } = require('../../utils/responseCodes');
+const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const Yup = require('yup');
-const { respond } = require('../../utils/responder');
+const { respond } = require('../../../../../../../utils/responder');
 
 const Revisions = {};
 
@@ -32,7 +32,7 @@ Revisions.validateUpdateRevisionData = async (req, res, next) => {
 		await schema.validate(req.body);
 		next();
 	} catch (err) {
-		respond(req, res, createResponseCode(templates.invalidArguments, err.message || err));
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };
 

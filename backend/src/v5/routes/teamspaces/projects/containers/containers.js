@@ -21,7 +21,7 @@ const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
-const { validateUpdateRevisionData } = require('../../../../middleware/dataConverter/revisions');
+const { validateUpdateRevisionData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 
 const getContainerList = (req, res) => {
 	const user = getUserFromSession(req.session);
@@ -378,7 +378,7 @@ const establishRoutes = () => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions/:revision:
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions/{revision}:
 	 *   patch:
 	 *     description: Update a revision. Currently only the void status can be updated.
 	 *     tags: [Containers]
@@ -391,22 +391,22 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-		   *       - project:
+	 *       - project:
 	 *         name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *         type: string
-		   *       - container:
+	 *       - container:
 	 *         name: container
 	 *         description: Container ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *         type: string
-	 *       - revision/tag:
-	 *         name: revision/tag
+	 *       - revision:
+	 *         name: revision
 	 *         description: Revision ID or Revision tag
 	 *         in: path
 	 *         required: true
@@ -414,7 +414,7 @@ const establishRoutes = () => {
 	 *         type: string
 	 *     requestBody:
 	 *       content:
-	 *         'application/x-www-form-urlencoded':
+     *         application/json:
 	 *           schema:
 	 *             properties:
 	 *               void:
