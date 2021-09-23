@@ -36,8 +36,9 @@ ContainerPerms.hasReadAccessToContainer = async (req, res, next) => {
 	} catch (err) {
 		if (err.code === templates.modelNotFound.code) {
 			respond(req, res, templates.containerNotFound);
+		} else {
+			respond(req, res, err);
 		}
-		respond(req, res, err);
 	}
 };
 
@@ -55,8 +56,9 @@ ContainerPerms.hasWriteAccessToContainer = async (req, res, next) => {
 	} catch (err) {
 		if (err.code === templates.modelNotFound.code) {
 			respond(req, res, templates.containerNotFound);
+		} else {
+			respond(req, res, err);
 		}
-		respond(req, res, err);
 	}
 };
 
