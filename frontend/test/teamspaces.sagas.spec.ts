@@ -18,8 +18,8 @@
 import { expectSaga } from 'redux-saga-test-plan';
 import { throwError } from 'redux-saga-test-plan/providers';
 
-import { TeamspacesActions } from '../teamspaces.redux';
-import * as TeamspacesSaga from '../teamspaces.sagas';
+import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
+import * as TeamspacesSaga from '@/v5/store/teamspaces/teamspaces.sagas';
 
 describe('Teamspaces: sagas', () => {
 	describe('fetch', () => {

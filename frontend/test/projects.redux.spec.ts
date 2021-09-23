@@ -15,29 +15,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { INITIAL_STATE, reducer as teamspaceReducer, TeamspacesActions } from '../teamspaces.redux';
+import { INITIAL_STATE, reducer as projectsReducer, ProjectsActions } from "@/v5/store/projects/projects.redux";
 
-describe('Teamspace: redux', () => {
+describe('Projects: redux', () => {
 	const defaultState = {
 		...INITIAL_STATE,
 	};
 
 	describe('on fetchSuccess action', () => {
 		it('should set teamspaces', () => {
-			const teamspaces = [{
+			const teamspaceName = 'teamspaceName';
+			const projects = [{
+				_id: '123',
 				name: 'teamspace 1',
 				isAdmin: true,
 			}, {
-				name: 'teamspace-2',
+				_id: '1234',
+				name: 'teamspace 2',
 				isAdmin: true,
 			}, {
-				name: 'teamspace_3',
+				_id: '1235',
+				name: 'teamspace 3',
 				isAdmin: false,
 			}];
 
-			expect(teamspaceReducer(defaultState, TeamspacesActions.fetchSuccess(teamspaces))).toEqual({
+			expect(projectsReducer(defaultState, ProjectsActions.fetchSuccess(teamspaceName, projects))).toEqual({
 				...defaultState,
-				teamspaces,
+				currentTeamspace: teamspaceName,
+				projects: {
+					[teamspaceName]: projects,
+				},
 			});
 		});
 	});
