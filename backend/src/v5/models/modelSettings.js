@@ -17,10 +17,12 @@
 
 const Models = {};
 const db = require('../handler/db');
+const { generateUUID } = require('../utils/helper/uuids');
 const { templates } = require('../utils/responseCodes');
 
 const findOneModel = (ts, query, projection) => db.findOne(ts, 'settings', query, projection);
 const findModel = (ts, query, projection, sort) => db.find(ts, 'settings', query, projection, sort);
+const insertOneModel = (ts, data) => db.insertOne(ts, 'settings', data);
 
 const noFederations = { federate: { $ne: true } };
 const onlyFederations = { federate: true };
@@ -33,6 +35,8 @@ const getModelByQuery = async (ts, query, projection) => {
 
 	return res;
 };
+
+Models.addContainer = (ts, data) => insertOneModel(ts, { _id: generateUUID({ string: true }), ...data });
 
 Models.getModelById = (ts, model, projection) => getModelByQuery(ts, { _id: model }, projection);
 

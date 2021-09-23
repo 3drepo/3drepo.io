@@ -22,6 +22,9 @@ const { templates } = require('../utils/responseCodes');
 
 const findProject = (ts, query, projection, sort) => db.find(ts, 'projects', query, projection, sort);
 const findOneProject = (ts, query, projection) => db.findOne(ts, 'projects', query, projection);
+const updateOneProject = (ts, query, data) => db.updateOne(ts, 'projects', query, data);
+
+Projects.addProjectModel = (ts, project, model) => updateOneProject(ts, { _id: project }, { $push: { models: model } });
 
 Projects.getProjectById = async (ts, project, projection) => {
 	const res = await findOneProject(ts, { _id: project }, projection);

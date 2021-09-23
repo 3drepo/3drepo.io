@@ -37,6 +37,7 @@ const testProjectAdmins = () => {
 			const res = await Project.getProjectAdmins('someTS', 'someProject');
 			expect(res).toEqual(['personA', 'personC']);
 		});
+
 		test('should return error if project does not exists', async () => {
 			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
 
@@ -64,7 +65,24 @@ const testGetProjectList = () => {
 	});
 };
 
+const testAddProjectModel = () => {
+	describe('Add project model', () => {
+		test('should add model to project models', async () => {
+			const expectedData = {
+				matchedCount: 1,
+				modifiedCount: 1,
+				upsertedId: 'someProject',
+			};
+			jest.spyOn(db, 'updateOne').mockResolvedValue(expectedData);
+
+			const res = await Project.addProjectModel('someTS', 'someProject', 'someModel');
+			expect(res).toEqual(expectedData);
+		});
+	});
+};
+
 describe('models/projects', () => {
 	testProjectAdmins();
 	testGetProjectList();
+	testAddProjectModel();
 });

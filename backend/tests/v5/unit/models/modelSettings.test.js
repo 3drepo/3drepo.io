@@ -144,10 +144,23 @@ const testGetFederations = () => {
 	});
 };
 
+const testAddContainer = () => {
+	describe('Add container', () => {
+		test('should return the list of federations ', async () => {
+			const expectedData = { insertedId: 'newContainerId' };
+			jest.spyOn(db, 'insertOne').mockResolvedValue(expectedData);
+
+			const res = await Model.addContainer('someTS', {});
+			expect(res).toEqual(expectedData);
+		});
+	});
+};
+
 describe('models/modelSettings', () => {
 	testGetModelById();
 	testGetContainerById();
 	testGetFederationById();
 	testGetContainers();
 	testGetFederations();
+	testAddContainer();
 });

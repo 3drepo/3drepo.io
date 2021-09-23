@@ -38,12 +38,23 @@ ResponseCodes.templates = {
 	// Project related error
 	projectNotFound: { message: 'Project not found.', status: 404 },
 
+	// Model related error
+	modelNotFound: { message: 'Model not found.', status: 404 },
+	invalidModelName: { message: 'Model name invalid.', status: 400 },
+	duplicateModelName: { message: 'Model name already exists.', status: 400 },
+
 	// Federation related error
 	federationNotFound: { message: 'Federation not found.', status: 404 },
 
-	// Model related error
-	modelNotFound: { message: 'Model not found.', status: 404 },
+	// Container related error
 	containerNotFound: { message: 'Container not found.', status: 404 },
+	invalidContainerName: { message: 'Container name invalid.', status: 400 },
+	invalidContainerCode: { message: 'Container code invalid.', status: 400 },
+	invalidContainerUnit: { message: 'Container unit invalid.', status: 400 },
+	invalidContainerDefaultView: { message: 'Container default view invalid.', status: 400 },
+	invalidContainerDefaultLegend: { message: 'Container default legend invalid.', status: 400 },
+	missingContainerName: { message: 'Container name missing.', status: 400 },
+	missingContainerUnit: { message: 'Container unit missing.', status: 400 },
 
 	// Revision related error
 	revisionNotFound: { message: 'Revision not found.', status: 404 },

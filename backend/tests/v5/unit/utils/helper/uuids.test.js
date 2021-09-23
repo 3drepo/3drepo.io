@@ -18,6 +18,7 @@
 const { src } = require('../../../helper/path');
 
 const UUIDHelper = require(`${src}/utils/helper/uuids`);
+const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 
 const matchHelper = (func, string, match) => {
 	const res = func(string);
@@ -52,7 +53,23 @@ const testUUIDToString = () => {
 	});
 };
 
+const testGenerateUUID = () => {
+	describe('Generate UUID', () => {
+		test('should return UUID string', () => {
+			const res = UUIDHelper.generateUUID();
+			expect(isUUIDString(res)).toEqual(false);
+			expect(isUUIDString(UUIDHelper.UUIDToString(res))).toEqual(true);
+		});
+
+		test('should return UUID string when string option set', () => {
+			const res = UUIDHelper.generateUUID({ string: true });
+			expect(isUUIDString(res)).toEqual(true);
+		});
+	});
+};
+
 describe('utils/helper/uuid', () => {
 	testStringToUUID();
 	testUUIDToString();
+	testGenerateUUID();
 });

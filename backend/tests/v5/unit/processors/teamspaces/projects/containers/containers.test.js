@@ -26,6 +26,7 @@ const Users = require(`${src}/models/users`);
 jest.mock('../../../../../../../src/v5/models/revisions');
 const Revisions = require(`${src}/models/revisions`);
 const Containers = require(`${src}/processors/teamspaces/projects/models/containers`);
+const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const modelList = [
@@ -143,7 +144,28 @@ const testGetContainerStats = () => {
 	});
 };
 
+const testAddContainer = () => {
+	describe('Add container', () => {
+		test('should return the container ID on success', async () => {
+			const data = {
+				name: 'container name',
+				code: 'code99',
+				unit: 'mm',
+			};
+			const newContainerId = 'newContainerId';
+			jest.mock('../../../../../../../src/v5/models/modelSettings', () => ({
+				...jest.requireActual('../../../../../../../src/v5/models/modelSettings'),
+				addContainer: jest.fn().mockImplementation(() => ({ insertedId: newContainerId })),
+			}));
+			jest.spyOn(db, 'insertOne').mockResolvedValue({ insertedId: true });
+			const res = await Containers.addContainer('teamspace', 'project', 'tsAdmin', data);
+			expect(res).toEqual({ _id: newContainerId });
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/containers', () => {
 	testGetContainerList();
 	testGetContainerStats();
+	testAddContainer();
 });

@@ -22,6 +22,15 @@ const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
+const { validateContainer } = require('../../../../middleware/teamspaces/projects/containers/containers');
+
+const addContainer = (req, res) => {
+	const user = getUserFromSession(req.session);
+	const { teamspace, project } = req.params;
+	Containers.addContainer(teamspace, project, user, req.body).then((containerId) => {
+		respond(req, res, templates.ok, { _id: containerId });
+	}).catch((err) => respond(req, res, err));
+};
 
 const getContainerList = (req, res) => {
 	const user = getUserFromSession(req.session);
@@ -45,6 +54,70 @@ const getContainerStats = async (req, res) => {
 
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/containers:
+	 *   post:
+	 *     description: Add a new container to the specified project the user has access to
+	 *     tags: [Containers]
+	 *     operationId: addContainer
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - project:
+	 *         name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     requestBody:
+	 *       content:
+   	 *         application/json:
+   	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *               name:
+	 *                 type: string
+	 *               unit:
+	 *                 type: string
+	 *               desc:
+	 *                 type: string
+	 *               code:
+	 *                 type: string
+	 *               type:
+	 *                 type: string
+   	 *           example:
+	 *             name: Awesome Model
+	 *             unit: mm
+	 *             desc: This is an awesome model
+	 *             code: awe12
+	 *             type: Mechanical
+	 *
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/projectNotFound"
+	 *       200:
+	 *         description: Container ID
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 _id:
+	 *                   type: string
+	 *                   description: Container ID
+	 *                   example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	 */
+	router.post('/', hasAccessToTeamspace, validateContainer, addContainer);
 
 	/**
 	 * @openapi

@@ -15,12 +15,43 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getContainerById, getContainers } = require('../../../../models/modelSettings');
+const {
+	addContainer,
+	getContainerById,
+	getContainers,
+} = require('../../../../models/modelSettings');
+const { addProjectModel, getProjectById } = require('../../../../models/projects');
 const { getLatestRevision, getRevisionCount } = require('../../../../models/revisions');
 const { getModelList } = require('./commons/modelList');
-const { getProjectById } = require('../../../../models/projects');
+const { templates } = require('../../../../utils/responseCodes');
 
 const Containers = {};
+
+Containers.addContainer = async (teamspace, project, user, data) => {
+	const { models } = await getProjectById(teamspace, project, { models: 1 });
+	const modelSettings = await getContainers(teamspace, models, { _id: 0, name: 1 });
+
+	if (modelSettings.map((setting) => setting.name).includes(data.name)) {
+		throw templates.duplicateModelName;
+	}
+
+	data.properties = {
+		code: data.code,
+		unit: data.unit,
+	};
+	delete data.code;
+	delete data.unit;
+
+	if (data.subModels) {
+		data.federate = true;
+	}
+
+	const response = await addContainer(teamspace, data);
+
+	await addProjectModel(teamspace, project, response.insertedId);
+
+	return response.insertedId;
+};
 
 Containers.getContainerList = async (teamspace, project, user) => {
 	const { models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
