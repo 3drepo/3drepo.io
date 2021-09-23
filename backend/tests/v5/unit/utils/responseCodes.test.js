@@ -24,6 +24,7 @@ const testCreateResponseCodes = () => {
 	describe.each([
 		[ResponseCodes.templates.ok, undefined, ResponseCodes.templates.ok],
 		[ResponseCodes.templates.ok, msg, { ...ResponseCodes.templates.ok, message: msg }],
+		[{ ...ResponseCodes.templates.ok, message: msg }, undefined, { ...ResponseCodes.templates.ok, message: msg }],
 		[undefined, undefined, ResponseCodes.templates.unknown],
 		[undefined, msg, { ...ResponseCodes.templates.unknown, message: msg }],
 	])('Create response codes', (errCode, message, result) => {

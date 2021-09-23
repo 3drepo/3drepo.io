@@ -24,11 +24,8 @@ interface IAvatarButton {
 	disabled?: boolean;
 }
 
-export const AvatarButton: React.FC<IAvatarButton> = ({ children, ...props }) => {
-	console.error('props:', props);
-	return (
-		<StyledIconButton {...props}>
-			<Avatar>{children}</Avatar>
-		</StyledIconButton>
-	);
-};
+export const AvatarButton: React.FC<IAvatarButton> = ({ children, ...props }) => (
+	<StyledIconButton {...props}>
+		<Avatar>{children}</Avatar>
+	</StyledIconButton>
+);

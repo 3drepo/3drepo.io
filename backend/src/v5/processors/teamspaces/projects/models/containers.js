@@ -21,6 +21,7 @@ const {
 	getContainers,
 } = require('../../../../models/modelSettings');
 const { addProjectModel, getProjectById } = require('../../../../models/projects');
+const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getLatestRevision, getRevisionCount } = require('../../../../models/revisions');
 const { getModelList } = require('./commons/modelList');
 const { templates } = require('../../../../utils/responseCodes');
@@ -84,6 +85,16 @@ Containers.getContainerStats = async (teamspace, project, container) => {
 			latestRevision: latestRev.tag || latestRev._id,
 		},
 	};
+};
+
+Containers.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {
+	const accessibleContainers = await Containers.getContainerList(teamspace, project, username);
+	return appendFavourites(username, teamspace, accessibleContainers, favouritesToAdd);
+};
+
+Containers.deleteFavourites = async (username, teamspace, project, favouritesToRemove) => {
+	const accessibleContainers = await Containers.getContainerList(teamspace, project, username);
+	return deleteFavourites(username, teamspace, accessibleContainers, favouritesToRemove);
 };
 
 module.exports = Containers;
