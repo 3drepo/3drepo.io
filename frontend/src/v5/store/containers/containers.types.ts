@@ -15,6 +15,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export * from './teamspaces';
-export * from './projects';
-export * from './containers';
+import { Action } from 'redux';
+
+export interface IContainersState {
+	containers: IContainer[];
+	filterQuery: string;
+}
+
+export interface IContainer {
+	_id: string;
+	name: string;
+	latestRevision: string;
+	revisionsCount: number;
+	lastUpdated: Date;
+	type: string;
+	code: string;
+	isFavourite: boolean;
+	role: string;
+}
+
+export interface FavouritesPayload {
+	teamspace: string;
+	projectId: string;
+	containersIds: IContainer['_id'][];
+}
+
+export interface PayloadAction<T, A = ''> extends Action<A> {
+	payload: T;
+}

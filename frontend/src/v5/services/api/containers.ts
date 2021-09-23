@@ -15,6 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export * from './teamspaces';
-export * from './projects';
-export * from './containers';
+import { FavouritesPayload } from '@/v5/store/containers/containers.types';
+import api from './default';
+
+export const addFavourites = async ({ teamspace, projectId, containersIds }: FavouritesPayload) => (
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/favourites`, {
+		containers: containersIds,
+	})
+);
+
+export const removeFavourites = async ({ teamspace, projectId, containersIds }: FavouritesPayload) => (
+	api.delete(`teamspaces/${teamspace}/projects/${projectId}/favourites`, {
+		containers: containersIds,
+	})
+);
