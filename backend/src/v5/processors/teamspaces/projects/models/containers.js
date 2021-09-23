@@ -36,18 +36,22 @@ Containers.addContainer = async (teamspace, project, user, data) => {
 		throw templates.duplicateModelName;
 	}
 
-	data.properties = {
-		code: data.code,
-		unit: data.unit,
+	const containerSettings = {
+		...data,
+		properties: {
+			code: data.code,
+			unit: data.unit,
+		},
 	};
-	delete data.code;
-	delete data.unit;
 
-	if (data.subModels) {
-		data.federate = true;
+	delete containerSettings.code;
+	delete containerSettings.unit;
+
+	if (containerSettings.subModels) {
+		containerSettings.federate = true;
 	}
 
-	const response = await addContainer(teamspace, data);
+	const response = await addContainer(teamspace, containerSettings);
 
 	await addProjectModel(teamspace, project, response.insertedId);
 

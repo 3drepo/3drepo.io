@@ -54,6 +54,7 @@ Containers.filterContainerData = (req, res, next) => {
 
 Containers.validContainerName = (req, res, next) => {
 	if (req.body && req.body.name) {
+		// eslint-disable-next-line
 		const modelNameRegExp = /^[\x00-\x7F]{1,120}$/;
 
 		if (req.body.name.match(modelNameRegExp)) {

@@ -21,12 +21,13 @@ jest.mock('../../../../../../../src/v5/models/projects');
 const ProjectsModel = require(`${src}/models/projects`);
 jest.mock('../../../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
+const newContainerId = 'newContainerId';
+ModelSettings.addContainer.mockImplementation(() => ({ insertedId: newContainerId }));
 jest.mock('../../../../../../../src/v5/models/users');
 const Users = require(`${src}/models/users`);
 jest.mock('../../../../../../../src/v5/models/revisions');
 const Revisions = require(`${src}/models/revisions`);
 const Containers = require(`${src}/processors/teamspaces/projects/models/containers`);
-const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const modelList = [
@@ -214,14 +215,32 @@ const testAddContainer = () => {
 				code: 'code99',
 				unit: 'mm',
 			};
-			const newContainerId = 'newContainerId';
-			jest.mock('../../../../../../../src/v5/models/modelSettings', () => ({
-				...jest.requireActual('../../../../../../../src/v5/models/modelSettings'),
-				addContainer: jest.fn().mockImplementation(() => ({ insertedId: newContainerId })),
-			}));
-			jest.spyOn(db, 'insertOne').mockResolvedValue({ insertedId: true });
 			const res = await Containers.addContainer('teamspace', 'project', 'tsAdmin', data);
-			expect(res).toEqual({ _id: newContainerId });
+			expect(res).toEqual(newContainerId);
+		});
+
+		test('should return the container ID if data has sub models', async () => {
+			const data = {
+				name: 'container name',
+				code: 'code99',
+				unit: 'mm',
+				subModels: [
+					'model1',
+					'model2',
+				],
+			};
+			const res = await Containers.addContainer('teamspace', 'project', 'tsAdmin', data);
+			expect(res).toEqual(newContainerId);
+		});
+
+		test('should return error if model name exists', async () => {
+			const data = {
+				name: 'model1',
+				code: 'code99',
+				unit: 'mm',
+			};
+			await expect(Containers.addContainer('teamspace', 'project', 'tsAdmin', data))
+				.rejects.toEqual(templates.duplicateModelName);
 		});
 	});
 };
