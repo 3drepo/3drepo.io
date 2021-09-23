@@ -27,12 +27,13 @@ const serialiseGroup = (group) => {
 		_id: UUIDToString(group._id),
 	};
 
-	if (output.objects.length) {
-		output.objects.forEach((objEntry) => {
+	if (output.objects && output.objects.length) {
+		output.objects = output.objects.map((objEntry) => {
 			if (objEntry.shared_ids) {
 				// eslint-disable-next-line no-param-reassign
 				objEntry.shared_ids = objEntry.shared_ids.map(UUIDToString);
 			}
+			return objEntry;
 		});
 	}
 	return output;
@@ -40,7 +41,6 @@ const serialiseGroup = (group) => {
 
 Groups.serialiseGroupArray = (req, res) => {
 	const groups = req.outputData.map(serialiseGroup);
-
 	respond(req, res, templates.ok, { groups });
 };
 

@@ -105,6 +105,48 @@ ServiceHelper.generateRandomModelProperties = () => ({
 	status: 'ok',
 });
 
+ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {
+	const genId = () => (serialised ? ServiceHelper.generateUUIDString() : generateUUID());
+	const group = {
+		_id: genId(),
+		name: ServiceHelper.generateRandomString(),
+		color: [1, 1, 1],
+		createdAt: Date.now(),
+		updatedAt: Date.now(),
+		updatedBy: ServiceHelper.generateRandomString(),
+		author: ServiceHelper.generateRandomString(),
+
+	};
+
+	if (isSmart) {
+		group.rules = [
+			{
+				field: 'IFC GUID',
+				operator: 'IS',
+				values: [
+					'1rbbJcnUDEEA_ArpSqk3B7',
+				],
+			},
+		];
+	} else {
+		group.objects = [{
+			account, model,
+		}];
+
+		if (isIfcGuids) {
+			group.objects[0].ifc_guids = [
+				ServiceHelper.generateRandomString(),
+				ServiceHelper.generateRandomString(),
+				ServiceHelper.generateRandomString(),
+			];
+		} else {
+			group.objects[0].shared_ids = [genId(), genId(), genId()];
+		}
+	}
+
+	return group;
+};
+
 ServiceHelper.app = () => createApp().listen(8080);
 
 ServiceHelper.closeApp = async (server) => {
