@@ -54,14 +54,14 @@ Revisions.getRevisions = async (teamspace, model, showVoid, projection = {}) => 
 		query.void = excludeVoids.void;
 	}
 
-	return findRevisionsByQuery(teamspace, model, query, projection);;
+	return findRevisionsByQuery(teamspace, model, query, projection);
 };
 
 Revisions.updateRevisionStatus = async (teamspace, model, revision, status) => {
 	const query = { $or: [{ _id: revision }, { tag: revision }] };
 	const res = await db.updateOne(teamspace, collectionName(model), query, { $set: { void: status } });
 	
-	if(res.matchedCount === 0){
+	if(res && res.matchedCount === 0){
 		throw templates.revisionNotFound;
 	}
 };

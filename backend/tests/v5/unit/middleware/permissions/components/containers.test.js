@@ -30,15 +30,21 @@ const ContainerMiddleware = require(`${src}/middleware/permissions/components/co
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 Permissions.hasReadAccessToModel.mockImplementation((teamspace) => {
-	if (teamspace === 'throw') {
+	if (teamspace === 'throwProjectError') {
 		throw templates.projectNotFound;
+	}
+	if (teamspace === 'throwModelError') {
+		throw templates.modelNotFound;
 	}
 	return teamspace === 'ts';
 });
 
 Permissions.hasWriteAccessToModel.mockImplementation((teamspace) => {
-	if (teamspace === 'throw') {
+	if (teamspace === 'throwProjectError') {
 		throw templates.projectNotFound;
+	}
+	if (teamspace === 'throwModelError') {
+		throw templates.modelNotFound;
 	}
 	return teamspace === 'ts';
 });
@@ -68,16 +74,28 @@ const testHasReadAccessToContainer = () => {
 			expect(Responder.respond.mock.results[0].value).toEqual(templates.notAuthorized);
 		});
 
-		test('should respond with whatever hasReadAccessToModel errored with if it errored', async () => {
+		test('should respond with projectNotFound error if hasReadAccessToContainer threw projectNotFound', async () => {
 			const mockCB = jest.fn(() => {});
 			await ContainerMiddleware.hasReadAccessToContainer(
-				{ params: { teamspace: 'throw' }, session: { user: { username: 'hi' } } },
+				{ params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
 			expect(mockCB.mock.calls.length).toBe(0);
 			expect(Responder.respond.mock.calls.length).toBe(1);
 			expect(Responder.respond.mock.results[0].value).toEqual(templates.projectNotFound);
+		});
+
+		test('should respond with containerNotFound error if hasReadAccessToContainer threw modelNotFound', async () => {
+			const mockCB = jest.fn(() => {});
+			await ContainerMiddleware.hasReadAccessToContainer(
+				{ params: { teamspace: 'throwModelError' }, session: { user: { username: 'hi' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(0);
+			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond.mock.results[0].value).toEqual(templates.containerNotFound);
 		});
 	});
 };
@@ -106,16 +124,28 @@ const testHasWriteAccessToContainer = () => {
 			expect(Responder.respond.mock.results[0].value).toEqual(templates.notAuthorized);
 		});
 
-		test('should respond with whatever hasWriteAccessToModel errored with if it errored', async () => {
+		test('should respond with projectNotFound error if hasReadAccessToContainer threw projectNotFound', async () => {
 			const mockCB = jest.fn(() => {});
 			await ContainerMiddleware.hasWriteAccessToContainer(
-				{ params: { teamspace: 'throw' }, session: { user: { username: 'hi' } } },
+				{ params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
 			expect(mockCB.mock.calls.length).toBe(0);
 			expect(Responder.respond.mock.calls.length).toBe(1);
 			expect(Responder.respond.mock.results[0].value).toEqual(templates.projectNotFound);
+		});
+
+		test('should respond with containerNotFound error if hasWriteAccessToContainer threw modelNotFound', async () => {
+			const mockCB = jest.fn(() => {});
+			await ContainerMiddleware.hasWriteAccessToContainer(
+				{ params: { teamspace: 'throwModelError' }, session: { user: { username: 'hi' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(0);
+			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond.mock.results[0].value).toEqual(templates.containerNotFound);
 		});
 	});
 };

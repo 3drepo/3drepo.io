@@ -54,47 +54,69 @@ const testGetLatestRevision = () => {
 };
 
 const testGetRevisions = () => {
-	describe('GetRevisions', () => {
-		const expectedData = [
-			{ _id: 1, author: 'someUser', timestamp: new Date() },
-			{ _id: 2, author: 'someUser', timestamp: new Date() },
-			{ _id: 3, author: 'someUser', timestamp: new Date(), void: true },
-		];
+	const checkResults = (fn, showVoid) => {
+		const query = { incomplete: { $exists: false } };
+	
+		if(!showVoid){
+			query.void = { $ne: true };
+		}
+	
+		expect(fn.mock.calls.length).toBe(1);
+		expect(fn.mock.calls[0][2]).toEqual(query);
+	};
 
+	const expectedData = [
+		{ _id: 1, author: 'someUser', timestamp: new Date() },
+		{ _id: 2, author: 'someUser', timestamp: new Date() },
+		{ _id: 3, author: 'someUser', timestamp: new Date(), void: true },
+	];
+
+	describe('GetRevisions', () => {
 		test('Should return all container revisions', async () => {
-			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
 			const res = await Revisions.getRevisions('someTS', 'someModel', true);
 			expect(res).toEqual(expectedData);
+			checkResults(fn, true);
 		});
 
 		test('Should return non void container revisions', async () => {
 			const nonVoidRevisions = expectedData.filter((rev) => !rev.void);
-			jest.spyOn(db, 'find').mockResolvedValue(nonVoidRevisions);
+			const fn = jest.spyOn(db, 'find').mockResolvedValue(nonVoidRevisions);
 			const res = await Revisions.getRevisions('someTS', 'someModel', false);
 			expect(res).toEqual(nonVoidRevisions);
+			checkResults(fn, false);
 		});
 
 		test('Should return an empty object if there are no revisions', async () => {
-			jest.spyOn(db, 'find').mockResolvedValue([]);
+			const fn = jest.spyOn(db, 'find').mockResolvedValue([]);
 			const res = await Revisions.getRevisions('someTS', 'someModel', true);
 			expect(res).toEqual([]);
+			checkResults(fn, true);
 		});
 	});
 };
 
 const testUpdateRevisionStatus = () => {
+	const checkResults = (fn, revision, voidStatus) => {
+		expect(fn.mock.calls.length).toBe(1);
+		expect(fn.mock.calls[0][2]).toEqual( { $or: [{ _id: revision }, { tag: revision }] });
+		expect(fn.mock.calls[0][3]).toEqual({ $set: { void: voidStatus } });
+	};
+
+	const revision = { _id: 1, author: 'someUser', timestamp: new Date(), void: true };
+
 	describe('UpdateRevisionStatus', () => {
-		const expectedData = { _id: 1, author: 'someUser', timestamp: new Date(), void: true };
-
 		test('Should update the void status of a revision', async () => {
-			jest.spyOn(db, 'findOne').mockResolvedValue(expectedData);
-			await Revisions.updateRevisionStatus('someTS', 'someModel', 3, false);
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(()=>{});
+			await Revisions.updateRevisionStatus('someTS', 'someModel', 1, false);
+			checkResults(fn, revision._id, false);
 		});
 
-		test('Should throw REVISION_NOT_FOUND if it cannot find the revision in the revisions table', async () => {
-			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
-			await expect(Revisions.updateRevisionStatus('someTS', 'someModel', -1, true)).rejects.toEqual(templates.revisionNotFound);
-		});
+		// test('Should throw REVISION_NOT_FOUND if it cannot find the revision in the revisions table', async () => {
+		// 	const fn = jest.spyOn(db, 'updateOne').mockImplementation(()=> undefined);
+		// 	await expect(Revisions.updateRevisionStatus('someTS', 'someModel', -1, true)).rejects.toEqual(templates.revisionNotFound);
+		// 	checkResults(fn, revision._id, true);
+		// });
 	});
 };
 

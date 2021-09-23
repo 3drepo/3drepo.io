@@ -15,20 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const {createResponseCode} = require('../../../v5/utils/responseCodes')
-const { respond } = require('../../utils/responder');
-const { templates } = require('../../utils/responseCodes');
+ const { createResponseCode, templates } = require('../../utils/responseCodes');
+ const { respond } = require('../../utils/responder');
 const Yup = require('yup');
 const Revisions = {};
 
+
 Revisions.validateUpdateRevisionData = async (req, res, next) => {
-	const schema = Yup.object().shape({
+	const schema = Yup.object().strict(true).noUnknown().shape({
 		void: Yup.bool('void must be of type boolean')
-			.required()
-			.strict(true)
+		.required()
+		.strict(true)		
 	});
 
-	schema.noUnknown(true);
 	try {
 		await schema.validate(req.body);
 		next();

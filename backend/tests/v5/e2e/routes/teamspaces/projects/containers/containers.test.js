@@ -169,8 +169,8 @@ const testGetContainerStats = () => {
 		});
 
 		test('should fail if the container does not exist', async () => {
-			const res = await agent.get(`${route('jibberish')}?key=${users.tsAdmin.apiKey}`).expect(templates.modelNotFound.status);
-			expect(res.body.code).toEqual(templates.modelNotFound.code);
+			const res = await agent.get(`${route('jibberish')}?key=${users.tsAdmin.apiKey}`).expect(templates.containerNotFound.status);
+			expect(res.body.code).toEqual(templates.containerNotFound.code);
 		});
 		test('should return the container stats correctly if the user has access', async () => {
 			const res = await agent.get(`${route(modelWithRev._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
@@ -306,8 +306,8 @@ const testGetRevisions = () => {
 		});
 
 		test('should fail if the container does not exist', async () => {
-			const res = await agent.get(`${route('jibberish')}&key=${users.tsAdmin.apiKey}`).expect(templates.modelNotFound.status);
-			expect(res.body.code).toEqual(templates.modelNotFound.code);
+			const res = await agent.get(`${route('jibberish')}&key=${users.tsAdmin.apiKey}`).expect(templates.containerNotFound.status);
+			expect(res.body.code).toEqual(templates.containerNotFound.code);
 		});
 
 		test('should fail if the user does not have access to the container', async () => {
@@ -368,8 +368,8 @@ const testUpdateRevisionStatus = () => {
 
 		test('should fail if the container does not exist', async () => {
 			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/dfsfaewfc/revisions/${voidRevision._id}?key=${users.tsAdmin.apiKey}`)
-				.send({ void: false }).expect(templates.modelNotFound.status);
-			expect(res.body.code).toEqual(templates.modelNotFound.code);
+				.send({ void: false }).expect(templates.containerNotFound.status);
+			expect(res.body.code).toEqual(templates.containerNotFound.code);
 		});
 
 		test('should fail if the revision does not exist', async () => {
@@ -393,6 +393,9 @@ const testUpdateRevisionStatus = () => {
 		test('should update a revision\'s status if the body of the request is boolean', async () => {
 			await agent.patch(`${route(voidRevision._id)}?key=${users.tsAdmin.apiKey}`)
 				.send({ void: false }).expect(templates.ok.status);
+
+			const revs = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${modelWithRev._id}/revisions?key=${users.tsAdmin.apiKey}`);
+			expect(revs.body.revisions.find((r) => r._id === voidRevision._id).void).toEqual(false);
 		});
 	});
 };

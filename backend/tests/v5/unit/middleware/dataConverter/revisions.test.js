@@ -26,48 +26,56 @@ const { templates } = require(`${src}/utils/responseCodes`);
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
-const testHasValidArgsForVoidUpdate = () => {
+const testValidateUpdateRevisionData = () => {
 	describe('Check if req arguments for void status update are valid', () => {
-		test('should respond with invalidArguments if there are no body arguments', () => {
+		test('should respond with invalidArguments if there are no body arguments', async () => {
 			const mockCB = jest.fn(() => {});
-			Revisions.hasValidArgsForVoidUpdate({ body: { } }, {}, mockCB);
+			await Revisions.validateUpdateRevisionData({ body: { } }, {}, mockCB);
 			expect(mockCB.mock.calls.length).toBe(0);
 			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.invalidArguments);
+			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
 		});
 
-		test('should respond with invalidArguments if there are more than one body arguments', () => {
+		test('should respond with invalidArguments if there are more than one body arguments',async () => {
 			const mockCB = jest.fn(() => {});
-			Revisions.hasValidArgsForVoidUpdate({ body: { void: false, invalidArg: 123 } }, {}, mockCB);
+			await Revisions.validateUpdateRevisionData({ body: { void: false, invalidArg: 123 } }, {}, mockCB);
 			expect(mockCB.mock.calls.length).toBe(0);
 			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.invalidArguments);
+			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
 		});
 
-		test('should respond with invalidArguments if there is no body argument named void', () => {
+		test('should respond with invalidArguments if there is no body argument named void', async() => {
 			const mockCB = jest.fn(() => {});
-			Revisions.hasValidArgsForVoidUpdate({ body: { invalidArg: false } }, {}, mockCB);
+			await Revisions.validateUpdateRevisionData({ body: { invalidArg: false } }, {}, mockCB);
 			expect(mockCB.mock.calls.length).toBe(0);
 			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.invalidArguments);
+			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
 		});
 
-		test('should respond with invalidArguments if there is one body argument named void but not boolean', () => {
+		test('should respond with invalidArguments if there is one body argument named void but not boolean', async() => {
 			const mockCB = jest.fn(() => {});
-			Revisions.hasValidArgsForVoidUpdate({ body: { void: 123 } }, {}, mockCB);
+			await Revisions.validateUpdateRevisionData({ body: { void: 123 } }, {}, mockCB);
 			expect(mockCB.mock.calls.length).toBe(0);
 			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.invalidArguments);
+			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
+		});		
+
+		test('should respond with invalidArguments if body is not an object', async () => {
+			const mockCB = jest.fn(() => {});
+			await Revisions.validateUpdateRevisionData({ body: 1 }, {}, mockCB);
+			expect(mockCB.mock.calls.length).toBe(0);
+			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
 		});
 
-		test('next() should be called if there is only one body argument named void and it is boolean', () => {
+		test('next() should be called if there is only one body argument named void and it is boolean', async () => {
 			const mockCB = jest.fn(() => {});
-			Revisions.hasValidArgsForVoidUpdate({ body: { void: false } }, {}, mockCB);
+			await Revisions.validateUpdateRevisionData({ body: { void: false } }, {}, mockCB);
 			expect(mockCB.mock.calls.length).toBe(1);
 		});
 	});
 };
 
 describe('middleware/dataConverter/revisions', () => {
-	testHasValidArgsForVoidUpdate();
+	testValidateUpdateRevisionData();
 });
