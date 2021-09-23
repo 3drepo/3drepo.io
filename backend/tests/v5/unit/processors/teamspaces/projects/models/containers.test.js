@@ -223,7 +223,7 @@ const testGetRevisions = () => {
 	describe('Get container revisions', () => {
 		test('should return non-void revisions if the container exists', async () => {
 			const idx = getRevisionsMock.mock.calls.length;
-			const res = await Revisions.getRevisions('teamspace', 1, false);
+			const res = await Containers.getRevisions('teamspace', 1, false);
 			expect(getRevisionsMock.mock.calls.length).toBe(idx + 1);
 			expect(getRevisionsMock.mock.calls[idx][1]).toEqual(1);
 			expect(getRevisionsMock.mock.calls[idx][2]).toEqual(false);
@@ -232,7 +232,7 @@ const testGetRevisions = () => {
 
 		test('should return all revisions if the container exists', async () => {
 			const idx = getRevisionsMock.mock.calls.length;
-			const res = await Revisions.getRevisions('teamspace', 1, true);
+			const res = await Containers.getRevisions('teamspace', 1, true);
 			expect(getRevisionsMock.mock.calls.length).toBe(idx + 1);
 			expect(getRevisionsMock.mock.calls[idx][1]).toEqual(1);
 			expect(getRevisionsMock.mock.calls[idx][2]).toEqual(true);
