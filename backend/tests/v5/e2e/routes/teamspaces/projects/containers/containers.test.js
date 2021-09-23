@@ -19,6 +19,7 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../helper/services');
 const { src } = require('../../../../../helper/path');
 
+const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 let server;
@@ -173,6 +174,31 @@ const testGetContainerStats = () => {
 	});
 };
 
+const testAddContainer = () => {
+	const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/containers`;
+	describe('Add container', () => {
+		test('should fail without a valid session', async () => {
+			const res = await agent.post(route).expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user is not a member of the teamspace', async () => {
+			const res = await agent.post(`${route}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if container name already exists', async () => {
+			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.duplicateModelName.status).send({ name: models[0].name, unit: 'mm' });
+			expect(res.body.code).toEqual(templates.duplicateModelName.code);
+		});
+
+		test('should return new container ID if the user has permissions', async () => {
+			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status).send({ name: 'container name', unit: 'mm' });
+			expect(isUUIDString(res.body._id)).toEqual(true);
+		});
+	});
+};
+
 const testAppendFavourites = () => {
 	const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/favourites`;
 	describe('Append Favourite Containers', () => {
@@ -274,6 +300,7 @@ describe('E2E routes/teamspaces/projects/containers', () => {
 	afterAll(() => ServiceHelper.closeApp(server));
 	testGetContainerList();
 	testGetContainerStats();
+	testAddContainer();
 	testAppendFavourites();
 	testDeleteFavourites();
 });
