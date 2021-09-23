@@ -78,6 +78,29 @@ db.createRevision = (teamspace, modelId, { _id, author, timestamp, tag }) => {
 	return DbHandler.insertOne(teamspace, `${modelId}.history`, rev);
 };
 
+db.createGroups = (teamspace, modelId, groups = []) => {
+	const toInsert = groups.map((entry) => {
+		const converted = {
+			...entry,
+			_id: stringToUUID(entry._id),
+		};
+
+		if ((entry.objects || []).length) {
+			converted.objects = entry.objects.map((objectEntry) => {
+				const convertedObj = { ...objectEntry };
+				if (objectEntry.shared_ids) {
+					convertedObj.shared_ids = objectEntry.shared_ids.map(uuidToString);
+				}
+				return convertedObj;
+			});
+		}
+
+		return converted;
+	});
+
+	return DbHandler.insertMany(teamspace, 'modelId.groups', toInsert);
+};
+
 ServiceHelper.generateUUIDString = () => uuidToString(generateUUID());
 ServiceHelper.generateRandomString = () => Crypto.randomBytes(15).toString('hex');
 
