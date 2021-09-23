@@ -84,7 +84,9 @@ matrix:
         - cd backend
         - yarn install
         - yarn test:v5
-
+        - cd ../frontend
+        - yarn install
+        - yarn test
 
 
 notifications:
