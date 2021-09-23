@@ -56,11 +56,11 @@ const testGetLatestRevision = () => {
 const testGetRevisions = () => {
 	const checkResults = (fn, showVoid) => {
 		const query = { incomplete: { $exists: false } };
-	
-		if(!showVoid){
+
+		if (!showVoid) {
 			query.void = { $ne: true };
 		}
-	
+
 		expect(fn.mock.calls.length).toBe(1);
 		expect(fn.mock.calls[0][2]).toEqual(query);
 	};
@@ -99,24 +99,23 @@ const testGetRevisions = () => {
 const testUpdateRevisionStatus = () => {
 	const checkResults = (fn, revision, voidStatus) => {
 		expect(fn.mock.calls.length).toBe(1);
-		expect(fn.mock.calls[0][2]).toEqual( { $or: [{ _id: revision }, { tag: revision }] });
+		expect(fn.mock.calls[0][2]).toEqual({ $or: [{ _id: revision }, { tag: revision }] });
 		expect(fn.mock.calls[0][3]).toEqual({ $set: { void: voidStatus } });
 	};
 
-	const revision = { _id: 1, author: 'someUser', timestamp: new Date(), void: true };
-
 	describe('UpdateRevisionStatus', () => {
+		const revision = { _id: 1, author: 'someUser', timestamp: new Date(), void: true };
 		test('Should update the void status of a revision', async () => {
-			const fn = jest.spyOn(db, 'updateOne').mockImplementation(()=>{});
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
 			await Revisions.updateRevisionStatus('someTS', 'someModel', 1, false);
 			checkResults(fn, revision._id, false);
 		});
 
-		// test('Should throw REVISION_NOT_FOUND if it cannot find the revision in the revisions table', async () => {
-		// 	const fn = jest.spyOn(db, 'updateOne').mockImplementation(()=> undefined);
-		// 	await expect(Revisions.updateRevisionStatus('someTS', 'someModel', -1, true)).rejects.toEqual(templates.revisionNotFound);
-		// 	checkResults(fn, revision._id, true);
-		// });
+		test('Should throw REVISION_NOT_FOUND if it cannot find the revision in the revisions table', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => undefined);
+			await expect(Revisions.updateRevisionStatus('someTS', 'someModel', -1, true)).rejects.toEqual(templates.revisionNotFound);
+			checkResults(fn, -1, true);
+		});
 	});
 };
 

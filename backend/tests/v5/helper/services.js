@@ -75,8 +75,8 @@ db.createRevision = (teamspace, modelId, revision) => {
 
 ServiceHelper.generateUUIDString = () => uuidToString(generateUUID());
 ServiceHelper.generateRandomString = () => Crypto.randomBytes(15).toString('hex');
-ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime() + Math.random()
-	* (end.getTime() - start.getTime()));
+ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
+ + Math.random() * (end.getTime() - start.getTime()));
 
 ServiceHelper.generateUserCredentials = () => ({
 	user: ServiceHelper.generateRandomString(),

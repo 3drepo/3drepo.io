@@ -56,7 +56,8 @@ Containers.getContainerStats = async (teamspace, project, container) => {
 	};
 };
 
-Containers.getRevisions = (teamspace, container, showVoid) => getRevisions(teamspace, container, showVoid, { _id: 1, author: 1, timestamp: 1, tag: 1, void: 1 });
+Containers.getRevisions = (teamspace, container, showVoid) => getRevisions(teamspace,
+	container, showVoid, { _id: 1, author: 1, timestamp: 1, tag: 1, void: 1 });
 
 Containers.updateRevisionStatus = updateRevisionStatus;
 

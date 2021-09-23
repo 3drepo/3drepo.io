@@ -84,8 +84,7 @@ Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 	throw templates.revisionNotFound;
 });
 
-Revisions.getRevisions.mockImplementation((teamspace, container, showVoid) => (
-	model1Revisions.filter((r) => !r.void || showVoid)));
+const getRevisionsMock = Revisions.getRevisions.mockImplementation(() => model1Revisions);
 
 Revisions.updateRevisionStatus.mockImplementation((teamspace, container, revision, status) => {
 	const rev = model1Revisions.find((r) => r._id === revision);
@@ -223,22 +222,21 @@ const testGetContainerStats = () => {
 const testGetRevisions = () => {
 	describe('Get container revisions', () => {
 		test('should return non-void revisions if the container exists', async () => {
-			const res = await Containers.getRevisions('teamspace', 1, false);
-			expect(res).toEqual(model1Revisions.filter((r) => !r.void));
-		});
-		test('should return all revisions if the container exists', async () => {
-			const res = await Containers.getRevisions('teamspace', 1, true);
+			const idx = getRevisionsMock.mock.calls.length;
+			const res = await Revisions.getRevisions('teamspace', 1, false);
+			expect(getRevisionsMock.mock.calls.length).toBe(idx + 1);
+			expect(getRevisionsMock.mock.calls[idx][1]).toEqual(1);
+			expect(getRevisionsMock.mock.calls[idx][2]).toEqual(false);
 			expect(res).toEqual(model1Revisions);
 		});
-	});
-};
 
-const testUpdateRevisionStatus = () => {
-	const revision3 = model1Revisions.find((r) => r._id === 3);
-	describe('Get container revisions', () => {
-		test('should update revision if the request body is boolean', async () => {
-			await Containers.updateRevisionStatus('teamspace', 1, revision3._id, false);
-			expect(revision3.void).toEqual(false);
+		test('should return all revisions if the container exists', async () => {
+			const idx = getRevisionsMock.mock.calls.length;
+			const res = await Revisions.getRevisions('teamspace', 1, true);
+			expect(getRevisionsMock.mock.calls.length).toBe(idx + 1);
+			expect(getRevisionsMock.mock.calls[idx][1]).toEqual(1);
+			expect(getRevisionsMock.mock.calls[idx][2]).toEqual(true);
+			expect(res).toEqual(model1Revisions);
 		});
 	});
 };
@@ -249,5 +247,4 @@ describe('processors/teamspaces/projects/containers', () => {
 	testAppendFavourites();
 	testDeleteFavourites();
 	testGetRevisions();
-	testUpdateRevisionStatus();
 });

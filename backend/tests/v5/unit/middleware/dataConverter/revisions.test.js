@@ -36,7 +36,7 @@ const testValidateUpdateRevisionData = () => {
 			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
 		});
 
-		test('should respond with invalidArguments if there are more than one body arguments',async () => {
+		test('should respond with invalidArguments if there are more than one body arguments', async () => {
 			const mockCB = jest.fn(() => {});
 			await Revisions.validateUpdateRevisionData({ body: { void: false, invalidArg: 123 } }, {}, mockCB);
 			expect(mockCB.mock.calls.length).toBe(0);
@@ -44,7 +44,7 @@ const testValidateUpdateRevisionData = () => {
 			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
 		});
 
-		test('should respond with invalidArguments if there is no body argument named void', async() => {
+		test('should respond with invalidArguments if there is no body argument named void', async () => {
 			const mockCB = jest.fn(() => {});
 			await Revisions.validateUpdateRevisionData({ body: { invalidArg: false } }, {}, mockCB);
 			expect(mockCB.mock.calls.length).toBe(0);
@@ -52,13 +52,13 @@ const testValidateUpdateRevisionData = () => {
 			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
 		});
 
-		test('should respond with invalidArguments if there is one body argument named void but not boolean', async() => {
+		test('should respond with invalidArguments if there is one body argument named void but not boolean', async () => {
 			const mockCB = jest.fn(() => {});
 			await Revisions.validateUpdateRevisionData({ body: { void: 123 } }, {}, mockCB);
 			expect(mockCB.mock.calls.length).toBe(0);
 			expect(Responder.respond.mock.calls.length).toBe(1);
 			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
-		});		
+		});
 
 		test('should respond with invalidArguments if body is not an object', async () => {
 			const mockCB = jest.fn(() => {});

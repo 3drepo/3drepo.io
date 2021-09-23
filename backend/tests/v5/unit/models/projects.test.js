@@ -68,9 +68,9 @@ const testModelExistsInProject = () => {
 	describe('Model Exists In Project', () => {
 		test('should return error if the project does not exist', async () => {
 			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
-			
+
 			await expect(Project.modelExistsInProject('someTS', 'someProject', 'a'))
-			.rejects.toEqual(templates.projectNotFound);
+				.rejects.toEqual(templates.projectNotFound);
 		});
 
 		test('should return true if a model is part of a project', async () => {

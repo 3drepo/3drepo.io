@@ -14,14 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { hasAccessToTeamspace, hasReadAccessToContainer,hasWriteAccessToContainer } = require('../../../../middleware/permissions/permissions');
+const { hasAccessToTeamspace, hasReadAccessToContainer, hasWriteAccessToContainer } = require('../../../../middleware/permissions/permissions');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { getUserFromSession } = require('../../../../utils/sessions');
-const { validateUpdateRevisionData } = require('../../../../middleware/dataConverter/revisions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
+const { validateUpdateRevisionData } = require('../../../../middleware/dataConverter/revisions');
 
 const getContainerList = (req, res) => {
 	const user = getUserFromSession(req.session);
@@ -430,7 +430,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: updates the status of the revision
 	 */
-	router.patch('/:container/revisions/:revision', hasWriteAccessToContainer,validateUpdateRevisionData, updateRevisionStatus);
+	router.patch('/:container/revisions/:revision', hasWriteAccessToContainer, validateUpdateRevisionData, updateRevisionStatus);
 
 	return router;
 };
