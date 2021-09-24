@@ -68,14 +68,9 @@ db.createModel = (teamspace, _id, name, props) => {
 	return DbHandler.insertOne(teamspace, 'settings', settings);
 };
 
-db.createRevision = (teamspace, modelId, { _id, author, timestamp, tag }) => {
-	const rev = {
-		_id: stringToUUID(_id),
-		author,
-		timestamp,
-		tag,
-	};
-	return DbHandler.insertOne(teamspace, `${modelId}.history`, rev);
+db.createRevision = (teamspace, modelId, revision) => {
+	const formattedRevision = { ...revision, _id: stringToUUID(revision._id) };
+	return DbHandler.insertOne(teamspace, `${modelId}.history`, formattedRevision);
 };
 
 db.createGroups = (teamspace, modelId, groups = []) => {
@@ -103,6 +98,8 @@ db.createGroups = (teamspace, modelId, groups = []) => {
 
 ServiceHelper.generateUUIDString = () => uuidToString(generateUUID());
 ServiceHelper.generateRandomString = () => Crypto.randomBytes(15).toString('hex');
+ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
+ + Math.random() * (end.getTime() - start.getTime()));
 
 ServiceHelper.generateUserCredentials = () => ({
 	user: ServiceHelper.generateRandomString(),
@@ -110,12 +107,12 @@ ServiceHelper.generateUserCredentials = () => ({
 	apiKey: ServiceHelper.generateRandomString(),
 });
 
-ServiceHelper.generateRevisionEntry = () => ({
+ServiceHelper.generateRevisionEntry = (isVoid = false) => ({
 	_id: ServiceHelper.generateUUIDString(),
 	tag: ServiceHelper.generateRandomString(),
-	timestamp: new Date(),
 	author: ServiceHelper.generateRandomString(),
-
+	timestamp: ServiceHelper.generateRandomDate(),
+	void: !!isVoid,
 });
 
 ServiceHelper.generateRandomModelProperties = () => ({

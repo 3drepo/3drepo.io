@@ -88,15 +88,30 @@ class View {
 			this.viewpointType !== "view",this.viewpointType, createThumbnail);
 	}
 
-	getCollection(account, model) {
-		return db.getCollection(account, model + "." + this.collName);
+	getCollectionName(model) {
+		return `${model}.${this.collName}`;
+	}
+
+	getCollection(teamspace, model) {
+		return db.getCollection(teamspace, this.getCollectionName(model));
+	}
+
+	async findByQuery(teamspace, model, query, projection) {
+		return db.find(teamspace, this.getCollectionName(model), query, projection);
+	}
+
+	async findOneByQuery(teamspace, model, query, projection) {
+		return db.findOne(teamspace, this.getCollectionName(model), query, projection);
+	}
+
+	async updateByQuery(teamspace, model, query, action) {
+		return db.updateOne(teamspace, this.getCollectionName(model), query, action);
 	}
 
 	async findByUID(account, model, uid, projection, noClean = false) {
 		uid = utils.stringToUUID(uid);
 
-		const views = await this.getCollection(account, model);
-		const foundView = await views.findOne({ _id: uid }, projection);
+		const foundView = await this.findOneByQuery(account, model, { _id: uid }, projection);
 
 		if (!foundView) {
 			return Promise.reject(this.response("NOT_FOUND"));
@@ -110,8 +125,7 @@ class View {
 	}
 
 	async getList(account, model) {
-		const coll = await this.getCollection(account, model);
-		const views = await coll.find().toArray();
+		const views = await this.findByQuery(account, model);
 		views.forEach((foundView, index) => {
 			views[index] = this.clean(account, model, foundView);
 		});
@@ -165,8 +179,7 @@ class View {
 
 		data = this.checkTypes(data, this.fieldTypes);
 
-		const views = await this.getCollection(account, model);
-		await views.update({ _id: uid }, { $set: data });
+		await this.updateByQuery(account, model, { _id: uid }, { $set: data });
 
 		ChatEvent.viewpointsChanged(sessionId, account, model, Object.assign({ _id: utils.uuidToString(uid) }, data));
 
