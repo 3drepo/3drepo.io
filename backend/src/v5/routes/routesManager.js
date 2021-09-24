@@ -29,8 +29,8 @@ RoutesManager.init = (app) => {
 
 	// Containers
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', ContainerRoutes);
-	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/revisions', ContainerRevisionRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/groups', ContainerGroupsRoutes);
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/revisions', ContainerRevisionRoutes);
 
 	// Federations
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations', FederationRoutes);
