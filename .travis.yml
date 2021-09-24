@@ -93,9 +93,6 @@ matrix:
       depth: 1
       node_js:
         - "14.17.1"
-      before_install:
-        - wget $SSL_INSTALLER
-        - sudo apt install $PWD/libssl1.0.0_1.0.2n-1ubuntu5.7_amd64.deb
       script:
         - cd frontend
         - yarn install
