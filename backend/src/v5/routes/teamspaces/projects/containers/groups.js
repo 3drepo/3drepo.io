@@ -26,13 +26,16 @@ const { validateGroupExportData } = require('../../../../middleware/dataConverte
 
 const exportGroups = (req, res, next) => {
 	const { teamspace, container } = req.params;
-	const { groups: groupIds } = req.body || {};
+	const { groups: groupIds } = req.body;
 	Groups.getGroups(teamspace, container, groupIds)
 		.then((groups) => {
 			req.outputData = groups;
 			next();
 		})
-		.catch((err) => respond(req, res, err));
+		.catch(
+			// istanbul ignore next
+			(err) => respond(req, res, err),
+		);
 };
 
 const establishRoutes = () => {

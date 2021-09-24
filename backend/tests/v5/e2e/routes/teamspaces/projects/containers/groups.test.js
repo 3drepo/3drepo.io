@@ -50,18 +50,10 @@ const models = [
 		name: ServiceHelper.generateRandomString(),
 		properties: ServiceHelper.generateRandomModelProperties(),
 	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
-		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true },
-	},
 ];
 
 const modelWithGroups = models[0];
 const modelWithoutGroups = models[1];
-const federation = models[2];
-
-const revision = ServiceHelper.generateRevisionEntry();
 
 const groups = [
 	ServiceHelper.generateGroup(teamspace, modelWithGroups._id),
@@ -109,11 +101,52 @@ const testExportGroups = () => {
 		});
 
 		test('should fail if the container does not exist', async () => {
-			console.log(createRoute(project._id, 'dslfkjds'));
 			const res = await agent.post(`${createRoute(project._id, 'dslfkjds')}?key=${users.tsAdmin.apiKey}`)
 				.send({ groups: groups.map(({ _id }) => _id) })
 				.expect(templates.containerNotFound.status);
 			expect(res.body.status).toEqual(templates.containerNotFound.status);
+		});
+
+		test('should fail if the user does not have permissions to access the container', async () => {
+			const res = await agent.post(`${createRoute()}?key=${users.noProjectAccess.apiKey}`)
+				.send({ groups: groups.map(({ _id }) => _id) })
+				.expect(templates.notAuthorized.status);
+			expect(res.body.status).toEqual(templates.notAuthorized.status);
+		});
+
+		test('should fail if the payload is not of the right schema', async () => {
+			const res = await agent.post(`${createRoute()}?key=${users.tsAdmin.apiKey}`)
+				.send({ groups: 1 })
+				.expect(templates.invalidArguments.status);
+			expect(res.body.status).toEqual(templates.invalidArguments.status);
+		});
+
+		test('should fail if the groups array is empty', async () => {
+			const res = await agent.post(`${createRoute()}?key=${users.tsAdmin.apiKey}`)
+				.send({ groups: [] })
+				.expect(templates.invalidArguments.status);
+			expect(res.body.status).toEqual(templates.invalidArguments.status);
+		});
+
+		test('should give every groups the user requested', async () => {
+			const res = await agent.post(`${createRoute()}?key=${users.tsAdmin.apiKey}`)
+				.send({ groups: groups.map(({ _id }) => _id) })
+				.expect(templates.ok.status);
+			expect(res.body).toEqual({ groups });
+		});
+
+		test('should give every groups the user requested (2)', async () => {
+			const res = await agent.post(`${createRoute()}?key=${users.tsAdmin.apiKey}`)
+				.send({ groups: [groups[0]._id] })
+				.expect(templates.ok.status);
+			expect(res.body).toEqual({ groups: [groups[0]] });
+		});
+
+		test('should return an empty array should the ids are not found', async () => {
+			const res = await agent.post(`${createRoute(project._id, modelWithoutGroups._id)}?key=${users.tsAdmin.apiKey}`)
+				.send({ groups: groups.map(({ _id }) => _id) })
+				.expect(templates.ok.status);
+			expect(res.body).toEqual({ groups: [] });
 		});
 	});
 };

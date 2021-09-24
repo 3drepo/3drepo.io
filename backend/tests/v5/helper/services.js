@@ -93,7 +93,7 @@ db.createGroups = (teamspace, modelId, groups = []) => {
 		return converted;
 	});
 
-	return DbHandler.insertMany(teamspace, 'modelId.groups', toInsert);
+	return DbHandler.insertMany(teamspace, `${modelId}.groups`, toInsert);
 };
 
 ServiceHelper.generateUUIDString = () => uuidToString(generateUUID());
