@@ -69,7 +69,6 @@ const revisions = [
 const modelWithRev = models[0];
 const modelWithoutRev = models[1];
 const federation = models[2];
-const voidRevision = revisions[2];
 
 const latestRevision = revisions.filter((rev) => !rev.void)
 	.reduce((a, b) => (a.timestamp > b.timestamp ? a : b));
@@ -277,128 +276,6 @@ const testDeleteFavourites = () => {
 	});
 };
 
-const formatRevisions = (revs, includeVoid = false) => {
-	const formattedRevisions = revs
-		.sort((a, b) => b.timestamp - a.timestamp)
-		.flatMap((rev) => (includeVoid
-			|| !rev.void ? { ...rev, timestamp: rev.timestamp.toISOString() } : []));
-
-	return { revisions: formattedRevisions };
-};
-
-const testGetRevisions = () => {
-	const route = (containerId, showVoid = false, ts = teamspace) => `/v5/teamspaces/${ts}/projects/${project.id}/containers/${containerId}/revisions?showVoid=${showVoid}`;
-	describe('Get container revisions', () => {
-		test('should fail without a valid session', async () => {
-			const res = await agent.get(route(modelWithRev._id, false)).expect(templates.notLoggedIn.status);
-			expect(res.body.code).toEqual(templates.notLoggedIn.code);
-		});
-
-		test('should fail if the user is not a member of the teamspace', async () => {
-			const res = await agent.get(`${route(modelWithRev._id)}&key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
-			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
-		});
-
-		test('should fail if the project does not exist', async () => {
-			const res = await agent.get(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/containers/${modelWithRev._id}/revisions?key=${users.tsAdmin.apiKey}`).expect(templates.projectNotFound.status);
-			expect(res.body.code).toEqual(templates.projectNotFound.code);
-		});
-
-		test('should fail if the container does not exist', async () => {
-			const res = await agent.get(`${route('jibberish')}&key=${users.tsAdmin.apiKey}`).expect(templates.containerNotFound.status);
-			expect(res.body.code).toEqual(templates.containerNotFound.code);
-		});
-
-		test('should fail if the user does not have access to the container', async () => {
-			const res = await agent.get(`${route(modelWithRev._id)}&key=${users.noProjectAccess.apiKey}`).expect(templates.notAuthorized.status);
-			expect(res.body.code).toEqual(templates.notAuthorized.code);
-		});
-
-		test('should return non void container revisions correctly if the user has access', async () => {
-			const res = await agent.get(`${route(modelWithRev._id)}&key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual(formatRevisions(revisions));
-		});
-
-		test('should return all container revisions correctly if the user has access', async () => {
-			const res = await agent.get(`${route(modelWithRev._id, true)}&key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual(formatRevisions(revisions, true));
-		});
-	});
-};
-
-const testUpdateRevisionStatus = () => {
-	const route = (revision) => `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${modelWithRev._id}/revisions/${revision}`;
-	describe('Update a revision status', () => {
-		test('should fail without a valid session', async () => {
-			const res = await agent.patch(route(voidRevision._id))
-				.send({ void: false }).expect(templates.notLoggedIn.status);
-			expect(res.body.code).toEqual(templates.notLoggedIn.code);
-		});
-
-		test('should fail if the user is not a member of the teamspace', async () => {
-			const res = await agent.patch(`${route(voidRevision._id)}?key=${nobody.apiKey}`)
-				.send({ void: false }).expect(templates.teamspaceNotFound.status);
-			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
-		});
-
-		test('should fail if the user does not have access to the project', async () => {
-			const res = await agent.patch(`${route(voidRevision._id)}?key=${users.noProjectAccess.apiKey}`)
-				.send({ void: false }).expect(templates.notAuthorized.status);
-			expect(res.body.code).toEqual(templates.notAuthorized.code);
-		});
-
-		test('should fail if the user does not have adequate permissions to edit the container (viewer)', async () => {
-			const res = await agent.patch(`${route(voidRevision._id)}?key=${users.viewer.apiKey}`)
-				.send({ void: false }).expect(templates.notAuthorized.status);
-			expect(res.body.code).toEqual(templates.notAuthorized.code);
-		});
-
-		test('should fail if the user does not have adequate permissions to edit the container (commenter)', async () => {
-			const res = await agent.patch(`${route(voidRevision._id)}?key=${users.commenter.apiKey}`)
-				.send({ void: false }).expect(templates.notAuthorized.status);
-			expect(res.body.code).toEqual(templates.notAuthorized.code);
-		});
-
-		test('should fail if the project does not exist', async () => {
-			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/containers/${modelWithRev._id}/revisions/${voidRevision._id}?key=${users.tsAdmin.apiKey}`)
-				.send({ void: false }).expect(templates.projectNotFound.status);
-			expect(res.body.code).toEqual(templates.projectNotFound.code);
-		});
-
-		test('should fail if the container does not exist', async () => {
-			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/dfsfaewfc/revisions/${voidRevision._id}?key=${users.tsAdmin.apiKey}`)
-				.send({ void: false }).expect(templates.containerNotFound.status);
-			expect(res.body.code).toEqual(templates.containerNotFound.code);
-		});
-
-		test('should fail if the revision does not exist', async () => {
-			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${modelWithRev._id}/revisions/fdefaxsxsa?key=${users.tsAdmin.apiKey}`)
-				.send({ void: false }).expect(templates.revisionNotFound.status);
-			expect(res.body.code).toEqual(templates.revisionNotFound.code);
-		});
-
-		test('should return error if the body of the request is not boolean', async () => {
-			const res = await agent.patch(`${route(voidRevision._id)}?key=${users.tsAdmin.apiKey}`)
-				.send({ void: 123 }).expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should return error if the body of the request contains extra payload', async () => {
-			const res = await agent.patch(`${route(voidRevision._id)}?key=${users.tsAdmin.apiKey}`)
-				.send({ void: true, extra: 123 }).expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should update a revision\'s status if the body of the request is boolean', async () => {
-			await agent.patch(`${route(voidRevision._id)}?key=${users.tsAdmin.apiKey}`)
-				.send({ void: false }).expect(templates.ok.status);
-
-			const revs = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${modelWithRev._id}/revisions?key=${users.tsAdmin.apiKey}`);
-			expect(revs.body.revisions.find((r) => r._id === voidRevision._id).void).toEqual(false);
-		});
-	});
-};
-
 describe('E2E routes/teamspaces/projects/containers', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -410,6 +287,4 @@ describe('E2E routes/teamspaces/projects/containers', () => {
 	testGetContainerStats();
 	testAppendFavourites();
 	testDeleteFavourites();
-	testGetRevisions();
-	testUpdateRevisionStatus();
 });

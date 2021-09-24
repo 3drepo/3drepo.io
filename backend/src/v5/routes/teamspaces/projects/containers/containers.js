@@ -14,14 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { hasAccessToTeamspace, hasReadAccessToContainer, hasWriteAccessToContainer } = require('../../../../middleware/permissions/permissions');
+const { hasAccessToTeamspace, hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
-const { validateUpdateRevisionData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 
 const getContainerList = (req, res) => {
 	const user = getUserFromSession(req.session);
@@ -40,28 +39,6 @@ const getContainerStats = async (req, res) => {
 		statsSerialised.revisions.latestRevision = UUIDToString(stats.revisions.latestRevision);
 
 		respond(req, res, templates.ok, statsSerialised);
-	}).catch((err) => respond(req, res, err));
-};
-
-const getRevisions = async (req, res) => {
-	const { teamspace, container } = req.params;
-	const showVoid = req.query.showVoid === 'true';
-
-	Containers.getRevisions(teamspace, container, showVoid).then((revs) => {
-		const revisions = revs.map((rev) => ({ ...rev, _id: UUIDToString(rev._id) }));
-		respond(req, res, templates.ok, { revisions });
-	}).catch(
-		/* istanbul ignore next */
-		(err) => respond(req, res, err),
-	);
-};
-
-const updateRevisionStatus = async (req, res) => {
-	const { teamspace, container, revision } = req.params;
-	const status = req.body.void;
-
-	Containers.updateRevisionStatus(teamspace, container, revision, status).then(() => {
-		respond(req, res, templates.ok);
 	}).catch((err) => respond(req, res, err));
 };
 
@@ -308,133 +285,6 @@ const establishRoutes = () => {
 	 *         description: removes the containers found in the request body from the user's favourites list
 	 */
 	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites);
-
-	/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions:
-	 *   get:
-	 *     description: Get a list of revisions of a container
-	 *     tags: [Containers]
-	 *     operationId: getRevisions
-	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
-	 *         description: Name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-		   *       - project:
-	 *         name: project
-	 *         description: Project ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *         type: string
-		   *       - container:
-	 *         name: container
-	 *         description: Container ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *         type: string
-	 *       - showVoid :
-	 *         name: showVoid
-	 *         description: Include void revisions or not
-	 *         in: query
-	 *         required: false
-	 *         schema:
-	 *         type: string
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/teamspaceNotFound"
-	 *       200:
-	 *         description: returns list of revisions
-	 *         content:
-	 *           application/json:
-	 *             schema:
-	 *               type: object
-	 *               properties:
-	 *                 revisions:
-	 *                   type: array
-	 *                   items:
-	 *                     type: object
-	 *                     properties:
-	 *                       _id:
-	 *                         type: string
-	 *                         description: Revision ID
-	 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
-	 *                       author:
-	 *                         type: string
-	 *                         description: name of the creator of the revision
-	 *                         example: someUser
-	 *                       timestamp:
-	 *                         type: string
-	 *                         description: Revision creation date
-	 *                         example: 2018-06-28T11:15:47.000Z
-	 *
-	 *
-	 */
-	router.get('/:container/revisions', hasReadAccessToContainer, getRevisions);
-
-	/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions/{revision}:
-	 *   patch:
-	 *     description: Update a revision. Currently only the void status can be updated.
-	 *     tags: [Containers]
-	 *     operationId: updateRevisionStatus
-	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
-	 *         description: Name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - project:
-	 *         name: project
-	 *         description: Project ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *         type: string
-	 *       - container:
-	 *         name: container
-	 *         description: Container ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *         type: string
-	 *       - revision:
-	 *         name: revision
-	 *         description: Revision ID or Revision tag
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *         type: string
-	 *     requestBody:
-	 *       content:
-     *         application/json:
-	 *           schema:
-	 *             properties:
-	 *               void:
-	 *                 description: The new status value
-	 *                 type: boolean
-	 *             required:
-	 *               - status
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/teamspaceNotFound"
-	 *       200:
-	 *         description: updates the status of the revision
-	 */
-	router.patch('/:container/revisions/:revision', hasWriteAccessToContainer, validateUpdateRevisionData, updateRevisionStatus);
-
 	return router;
 };
 
