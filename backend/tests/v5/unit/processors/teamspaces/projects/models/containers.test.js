@@ -86,11 +86,6 @@ Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 
 const getRevisionsMock = Revisions.getRevisions.mockImplementation(() => model1Revisions);
 
-Revisions.updateRevisionStatus.mockImplementation((teamspace, container, revision, status) => {
-	const rev = model1Revisions.find((r) => r._id === revision);
-	rev.void = status;
-});
-
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
 Users.appendFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
 	for (const favourite of favouritesToAdd) {
