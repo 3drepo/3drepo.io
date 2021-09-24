@@ -34,6 +34,7 @@ const users = {
 const nobody = ServiceHelper.generateUserCredentials();
 
 const teamspace = ServiceHelper.generateRandomString();
+const brokenTS = ServiceHelper.generateRandomString();
 
 const project = {
 	id: ServiceHelper.generateUUIDString(),
@@ -76,6 +77,7 @@ const latestRevision = revisions.filter((rev) => !rev.void)
 
 const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
+	await ServiceHelper.db.createTeamspace(brokenTS, [users.tsAdmin.user], true);
 	const customData = { starredModels: {
 		[teamspace]: models.flatMap(({ _id, isFavourite }) => (isFavourite ? _id : [])),
 	} };
@@ -280,15 +282,15 @@ const testDeleteFavourites = () => {
 const formatRevisions = (revs, includeVoid = false) => {
 	let formattedRevisions = revs;
 
+	formattedRevisions = formattedRevisions.sort((a, b) => b.timestamp - a.timestamp);
 	formattedRevisions = formattedRevisions.flatMap((rev) => (includeVoid
 		|| !rev.void ? { ...rev, timestamp: rev.timestamp.toISOString() } : []));
-	formattedRevisions = formattedRevisions.sort((a, b) => a.timestamp - b.timestamp);
 
 	return { revisions: formattedRevisions };
 };
 
 const testGetRevisions = () => {
-	const route = (containerId, showVoid = false) => `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${containerId}/revisions?showVoid=${showVoid}`;
+	const route = (containerId, showVoid = false, ts = teamspace) => `/v5/teamspaces/${ts}/projects/${project.id}/containers/${containerId}/revisions?showVoid=${showVoid}`;
 	describe('Get container revisions', () => {
 		test('should fail without a valid session', async () => {
 			const res = await agent.get(route(modelWithRev._id, false)).expect(templates.notLoggedIn.status);
@@ -319,6 +321,11 @@ const testGetRevisions = () => {
 			const res = await agent.get(`${route(modelWithRev._id)}&key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
 			expect(res.body).toEqual(formatRevisions(revisions));
 		});
+
+		/*	test('should safely catch error if there is an internal error', async () => {
+			const res = await agent.get(`${route(modelWithRev._id, false, brokenTS)}&key=${users.tsAdmin.apiKey}`).expect(templates.unknown.status);
+			expect(res.body.code).toEqual(templates.unknown.code);
+		}); */
 
 		test('should return all container revisions correctly if the user has access', async () => {
 			const res = await agent.get(`${route(modelWithRev._id, true)}&key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
