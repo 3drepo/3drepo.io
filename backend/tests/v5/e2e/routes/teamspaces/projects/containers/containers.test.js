@@ -282,7 +282,7 @@ const formatRevisions = (revs, includeVoid = false) => {
 
 	formattedRevisions = formattedRevisions.flatMap((rev) => (includeVoid
 		|| !rev.void ? { ...rev, timestamp: rev.timestamp.toISOString() } : []));
-	formattedRevisions = formattedRevisions.sort((a, b) => b.timestamp - a.timestamp);
+	formattedRevisions = formattedRevisions.sort((a, b) => a.timestamp - b.timestamp);
 
 	return { revisions: formattedRevisions };
 };

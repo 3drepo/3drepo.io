@@ -48,14 +48,14 @@ Revisions.getRevisionCount = (teamspace, model) => {
 	return db.count(teamspace, collectionName(model), query);
 };
 
-Revisions.getRevisions = async (teamspace, model, showVoid, projection = {}) => {
+Revisions.getRevisions = (teamspace, model, showVoid, projection = {}) => {
 	const query = { ...excludeIncomplete };
 
 	if (!showVoid) {
 		query.void = excludeVoids.void;
 	}
 
-	return findRevisionsByQuery(teamspace, model, query, projection);
+	return findRevisionsByQuery(teamspace, model, query, projection, { timestamp: -1 });
 };
 
 Revisions.updateRevisionStatus = async (teamspace, model, revision, status) => {
