@@ -27,6 +27,8 @@ let agent;
 const users = {
 	tsAdmin: ServiceHelper.generateUserCredentials(),
 	noProjectAccess: ServiceHelper.generateUserCredentials(),
+	viewer: ServiceHelper.generateUserCredentials(),
+	commenter: ServiceHelper.generateUserCredentials(),
 };
 
 const nobody = ServiceHelper.generateUserCredentials();
@@ -43,6 +45,7 @@ const models = [
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
 		isFavourite: true,
+		permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
 		properties: ServiceHelper.generateRandomModelProperties(),
 	},
 	{
@@ -57,11 +60,18 @@ const models = [
 	},
 ];
 
+const revisions = [
+	ServiceHelper.generateRevisionEntry(),
+	ServiceHelper.generateRevisionEntry(),
+	ServiceHelper.generateRevisionEntry(true),
+];
+
 const modelWithRev = models[0];
 const modelWithoutRev = models[1];
 const federation = models[2];
 
-const revision = ServiceHelper.generateRevisionEntry();
+const latestRevision = revisions.filter((rev) => !rev.void)
+	.reduce((a, b) => (a.timestamp > b.timestamp ? a : b));
 
 const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
@@ -80,7 +90,7 @@ const setupData = async () => {
 		...modelProms,
 		ServiceHelper.db.createUser(nobody),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
-		ServiceHelper.db.createRevision(teamspace, modelWithRev._id, revision),
+		...revisions.map((revision) => ServiceHelper.db.createRevision(teamspace, modelWithRev._id, revision)),
 	]);
 };
 
@@ -157,13 +167,14 @@ const testGetContainerStats = () => {
 			expect(res.body.code).toEqual(templates.containerNotFound.code);
 		});
 
-		test('should fail if the container doesn\'t exist', async () => {
+		test('should fail if the container does not exist', async () => {
 			const res = await agent.get(`${route('jibberish')}?key=${users.tsAdmin.apiKey}`).expect(templates.containerNotFound.status);
 			expect(res.body.code).toEqual(templates.containerNotFound.code);
 		});
 		test('should return the container stats correctly if the user has access', async () => {
 			const res = await agent.get(`${route(modelWithRev._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual(formatToStats(modelWithRev.properties, 1, revision));
+			const nonVoidRevisionCount = revisions.filter((rev) => !rev.void).length;
+			expect(res.body).toEqual(formatToStats(modelWithRev.properties, nonVoidRevisionCount, latestRevision));
 		});
 
 		test('should return the container stats correctly if the user has access (no revisions)', async () => {
