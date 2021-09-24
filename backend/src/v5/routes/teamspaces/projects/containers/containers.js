@@ -50,7 +50,10 @@ const getRevisions = async (req, res) => {
 	Containers.getRevisions(teamspace, container, showVoid).then((revs) => {
 		const revisions = revs.map((rev) => ({ ...rev, _id: UUIDToString(rev._id) }));
 		respond(req, res, templates.ok, { revisions });
-	}).catch((err) => respond(req, res, err));
+	}).catch(
+		/* istanbul ignore next */
+		(err) => respond(req, res, err),
+	);
 };
 
 const updateRevisionStatus = async (req, res) => {
