@@ -23,8 +23,8 @@ ResponseCodes.templates = {
 	ok: { message: 'OK', status: 200 },
 
 	// Auth
-	notLoggedIn: { message: 'You are not logged in', status: 401 },
-	notAuthorized: { message: 'You do not have sufficient access rights for this action', status: 401 },
+	notLoggedIn: { message: 'You are not logged in.', status: 401 },
+	notAuthorized: { message: 'You do not have sufficient access rights for this action.', status: 401 },
 
 	// Fail safe
 	unknown: { message: 'Unknown error occured. Please contact support.', status: 500 },
@@ -60,7 +60,7 @@ ResponseCodes.templates = {
 	revisionNotFound: { message: 'Revision not found.', status: 404 },
 
 	// Invalid Arguements
-	invalidArguments: { message: 'The arguments provided are not valid', status: 400 },
+	invalidArguments: { message: 'The arguments provided are not valid.', status: 400 },
 };
 
 Object.keys(ResponseCodes.templates).forEach((key) => {

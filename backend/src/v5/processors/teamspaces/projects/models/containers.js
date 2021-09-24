@@ -15,47 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const {
-	addContainer,
-	getContainerById,
-	getContainers,
-} = require('../../../../models/modelSettings');
-const { addProjectModel, getProjectById } = require('../../../../models/projects');
+const { addModel, getModelList } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
+const { getContainerById, getContainers } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionCount } = require('../../../../models/revisions');
-const { getModelList } = require('./commons/modelList');
+const { getProjectById } = require('../../../../models/projects');
 const { templates } = require('../../../../utils/responseCodes');
 
 const Containers = {};
 
-Containers.addContainer = async (teamspace, project, user, data) => {
-	const { models } = await getProjectById(teamspace, project, { models: 1 });
-	const modelSettings = await getContainers(teamspace, models, { _id: 0, name: 1 });
+Containers.addContainer = (teamspace, project, user, data) => addModel(teamspace, project, user, data);
 
-	if (modelSettings.map((setting) => setting.name).includes(data.name)) {
-		throw templates.duplicateModelName;
-	}
-
-	const containerSettings = {
-		...data,
-		properties: {
-			code: data.code,
-			unit: data.unit,
-		},
-	};
-
-	delete containerSettings.code;
-	delete containerSettings.unit;
-
-	if (containerSettings.subModels) {
-		containerSettings.federate = true;
-	}
-
-	const response = await addContainer(teamspace, containerSettings);
-
-	await addProjectModel(teamspace, project, response.insertedId);
-
-	return response.insertedId;
+Containers.deleteContainer = async (teamspace, project, container, user) => {
 };
 
 Containers.getContainerList = async (teamspace, project, user) => {

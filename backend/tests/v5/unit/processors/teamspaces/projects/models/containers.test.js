@@ -20,9 +20,9 @@ const { src } = require('../../../../../helper/path');
 jest.mock('../../../../../../../src/v5/models/projects');
 const ProjectsModel = require(`${src}/models/projects`);
 jest.mock('../../../../../../../src/v5/models/modelSettings');
-const ModelSettings = require(`${src}/models/modelSettings`);
 const newContainerId = 'newContainerId';
-ModelSettings.addContainer.mockImplementation(() => ({ insertedId: newContainerId }));
+const ModelSettings = require(`${src}/models/modelSettings`);
+ModelSettings.addModel.mockImplementation(() => ({ insertedId: newContainerId }));
 jest.mock('../../../../../../../src/v5/models/users');
 const Users = require(`${src}/models/users`);
 jest.mock('../../../../../../../src/v5/models/revisions');
@@ -72,6 +72,7 @@ const container2Rev = {
 };
 
 ProjectsModel.getProjectById.mockImplementation(() => project);
+ModelSettings.getModels.mockImplementation(() => modelList);
 ModelSettings.getContainers.mockImplementation(() => modelList);
 ModelSettings.getContainerById.mockImplementation((teamspace, container) => containerSettings[container]);
 Revisions.getRevisionCount.mockImplementation((teamspace, container) => (container === 'container2' ? 10 : 0));

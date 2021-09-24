@@ -15,11 +15,39 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { addModel, getModels } = require('../../../../../models/modelSettings');
+const { addProjectModel, getProjectById } = require('../../../../../models/projects');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
 const { getFavourites } = require('../../../../../models/users');
-const { getProjectById } = require('../../../../../models/projects');
+const { templates } = require('../../../../../utils/responseCodes');
 
 const ModelList = {};
+
+ModelList.addModel = async (teamspace, project, user, data) => {
+	const { models } = await getProjectById(teamspace, project, { models: 1 });
+	const modelSettings = await getModels(teamspace, models, undefined, { _id: 0, name: 1 });
+
+	if (modelSettings.map((setting) => setting.name).includes(data.name)) {
+		throw templates.duplicateModelName;
+	}
+
+	const settings = {
+		...data,
+		properties: {
+			code: data.code,
+			unit: data.unit,
+		},
+	};
+
+	delete settings.code;
+	delete settings.unit;
+
+	const response = await addModel(teamspace, settings);
+
+	await addProjectModel(teamspace, project, response.insertedId);
+
+	return response.insertedId;
+};
 
 ModelList.getModelList = async (teamspace, project, user, modelSettings) => {
 	const { permissions } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });

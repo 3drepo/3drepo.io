@@ -100,6 +100,28 @@ const testGetFederationById = () => {
 	});
 };
 
+const testGetModels = () => {
+	describe('Get models', () => {
+		test('should return the list of models ', async () => {
+			const expectedData = [
+				{
+					_id: 'abc',
+					name: 'model name',
+				},
+				{
+					_id: '123',
+					name: 'model name 2',
+				},
+			];
+
+			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+
+			const res = await Model.getModels('someTS', ['someModel']);
+			expect(res).toEqual(expectedData);
+		});
+	});
+};
+
 const testGetContainers = () => {
 	describe('Get containers', () => {
 		test('should return the list of containers ', async () => {
@@ -144,13 +166,25 @@ const testGetFederations = () => {
 	});
 };
 
-const testAddContainer = () => {
-	describe('Add container', () => {
-		test('should return the list of federations ', async () => {
+const testAddModel = () => {
+	describe('Add model', () => {
+		test('should return inserted ID on success', async () => {
 			const expectedData = { insertedId: 'newContainerId' };
 			jest.spyOn(db, 'insertOne').mockResolvedValue(expectedData);
 
-			const res = await Model.addContainer('someTS', {});
+			const res = await Model.addModel('someTS', {});
+			expect(res).toEqual(expectedData);
+		});
+	});
+};
+
+const testDeleteModel = () => {
+	describe('Delete model', () => {
+		test('should return deleted count on success', async () => {
+			const expectedData = { deletedCount: 1 };
+			jest.spyOn(db, 'deleteOne').mockResolvedValue(expectedData);
+
+			const res = await Model.deleteModel('someTS', 'someModel');
 			expect(res).toEqual(expectedData);
 		});
 	});
@@ -160,7 +194,9 @@ describe('models/modelSettings', () => {
 	testGetModelById();
 	testGetContainerById();
 	testGetFederationById();
+	testGetModels();
 	testGetContainers();
 	testGetFederations();
-	testAddContainer();
+	testAddModel();
+	testDeleteModel();
 });

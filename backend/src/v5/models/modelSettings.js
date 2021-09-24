@@ -20,6 +20,7 @@ const db = require('../handler/db');
 const { generateUUID } = require('../utils/helper/uuids');
 const { templates } = require('../utils/responseCodes');
 
+const deleteOneModel = (ts, query) => db.deleteOne(ts, 'settings', query);
 const findOneModel = (ts, query, projection) => db.findOne(ts, 'settings', query, projection);
 const findModel = (ts, query, projection, sort) => db.find(ts, 'settings', query, projection, sort);
 const insertOneModel = (ts, data) => db.insertOne(ts, 'settings', data);
@@ -36,7 +37,9 @@ const getModelByQuery = async (ts, query, projection) => {
 	return res;
 };
 
-Models.addContainer = (ts, data) => insertOneModel(ts, { _id: generateUUID({ string: true }), ...data });
+Models.addModel = (ts, data) => insertOneModel(ts, { _id: generateUUID({ string: true }), ...data });
+
+Models.deleteModel = (ts, container) => deleteOneModel(ts, { _id: container });
 
 Models.getModelById = (ts, model, projection) => getModelByQuery(ts, { _id: model }, projection);
 
@@ -66,14 +69,13 @@ Models.getFederationById = async (ts, federation, projection) => {
 	}
 };
 
-Models.getContainers = async (ts, ids, projection, sort) => {
-	const query = { _id: { $in: ids }, ...noFederations };
+Models.getModels = async (ts, ids, filters = {}, projection, sort) => {
+	const query = { _id: { $in: ids }, ...filters };
 	return findModel(ts, query, projection, sort);
 };
 
-Models.getFederations = async (ts, ids, projection, sort) => {
-	const query = { _id: { $in: ids }, ...onlyFederations };
-	return findModel(ts, query, projection, sort);
-};
+Models.getContainers = (ts, ids, projection, sort) => Models.getModels(ts, ids, noFederations, projection, sort);
+
+Models.getFederations = (ts, ids, projection, sort) => Models.getModels(ts, ids, onlyFederations, projection, sort);
 
 module.exports = Models;
