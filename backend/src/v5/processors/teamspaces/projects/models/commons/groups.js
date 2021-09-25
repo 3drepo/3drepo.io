@@ -14,11 +14,38 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { getGroups, getGroupsByIds } = require('../../../../../models/groups');
+const { addGroups, getGroups, getGroupsByIds, updateGroup } = require('../../../../../models/groups');
 
 const Groups = {};
 
 Groups.getGroups = (teamspace, model, groupsIds = [], includeHidden = false) => (groupsIds.length
 	? getGroupsByIds(teamspace, model, groupsIds) : getGroups(teamspace, model, includeHidden));
+
+Groups.importGroups = async (teamspace, model, groups) => {
+	const ids = groups.map(({ _id }) => _id);
+
+	const groupsToUpdate = await getGroupsByIds(teamspace, model, ids, { _id: 1 });
+
+	if (groupsToUpdate.length === 0) {
+		await addGroups(teamspace, model, groups);
+	} else {
+	// Some requires update
+		const actionPromises = [];
+
+		const updatesLookup = new Set(groupsToUpdate.map(({ _id }) => _id));
+		const groupsToInsert = [];
+
+		groups.forEach((group) => {
+			if (updatesLookup.has(group._id)) {
+				actionPromises.push(updateGroup(teamspace, model, group._id, group));
+			} else {
+				groupsToInsert.push(group);
+			}
+		});
+
+		if (groupsToInsert.length) actionPromises.push(addGroups(teamspace, model, groupsToInsert));
+		await Promise.all(actionPromises);
+	}
+};
 
 module.exports = Groups;

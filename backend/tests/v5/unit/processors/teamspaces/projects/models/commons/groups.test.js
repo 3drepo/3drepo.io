@@ -24,7 +24,11 @@ const GroupsModel = require(`${src}/models/groups`);
 
 const fullGroupList = [{ _id: 1 }, { _id: 2 }];
 GroupsModel.getGroups.mockImplementation(() => Promise.resolve(fullGroupList));
-GroupsModel.getGroupsByIds.mockImplementation(() => Promise.resolve([fullGroupList[0]]));
+GroupsModel.getGroupsByIds.mockImplementation((teamspace, model, ids) => Promise.resolve(
+	fullGroupList.filter(({ _id }) => ids.includes(_id)),
+));
+const addGroupsFn = GroupsModel.addGroups.mockResolvedValue(() => {});
+const updateGroupFn = GroupsModel.updateGroup.mockResolvedValue(() => {});
 
 const testGetGroups = () => {
 	describe('get groups', () => {
@@ -38,6 +42,43 @@ const testGetGroups = () => {
 	});
 };
 
+const testImportGroups = () => {
+	describe('import groups', () => {
+		const existingGroups = [
+			{ _id: 1, val: 2 },
+			{ _id: 2, val: 2 },
+		];
+		const newGroups = [
+			{ _id: 3, val: 2 },
+			{ _id: 4, val: 2 },
+		];
+		test('should import successfully if all groups were new', async () => {
+			const addGroupsIdx = addGroupsFn.mock.calls.length;
+			const updateGroupIdx = updateGroupFn.mock.calls.length;
+			await expect(Groups.importGroups('empty', 'model', newGroups)).resolves.toEqual(undefined);
+			expect(updateGroupFn.mock.calls.length).toBe(updateGroupIdx);
+			expect(addGroupsFn.mock.calls.length).toBe(addGroupsIdx + 1);
+		});
+
+		test('should import successfully if all groups were old', async () => {
+			const addGroupsIdx = addGroupsFn.mock.calls.length;
+			const updateGroupIdx = updateGroupFn.mock.calls.length;
+			await expect(Groups.importGroups('teamspace', 'model', existingGroups)).resolves.toEqual(undefined);
+			expect(updateGroupFn.mock.calls.length).toBe(updateGroupIdx + existingGroups.length);
+			expect(addGroupsFn.mock.calls.length).toBe(addGroupsIdx);
+		});
+
+		test('should import successfully if the group list is a combination of both', async () => {
+			const addGroupsIdx = addGroupsFn.mock.calls.length;
+			const updateGroupIdx = updateGroupFn.mock.calls.length;
+			await expect(Groups.importGroups('teamspace', 'model', [...existingGroups, ...newGroups])).resolves.toEqual(undefined);
+			expect(updateGroupFn.mock.calls.length).toBe(updateGroupIdx + existingGroups.length);
+			expect(addGroupsFn.mock.calls.length).toBe(addGroupsIdx + 1);
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/models/commons/groups', () => {
 	testGetGroups();
+	testImportGroups();
 });

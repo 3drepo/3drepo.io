@@ -19,7 +19,7 @@ const { src } = require('../../helper/path');
 
 const Group = require(`${src}/models/groups`);
 const db = require(`${src}/handler/db`);
-// const { templates } = require(`${src}/utils/responseCodes`);
+const { templates } = require(`${src}/utils/responseCodes`);
 
 const testGetGroupsByIds = () => {
 	describe('Get many groups by Ids', () => {
@@ -113,7 +113,54 @@ const testGetGroups = () => {
 	});
 };
 
+const testUpdateGroup = () => {
+	describe('update group', () => {
+		const updateObj = { hello: 1 };
+		const _id = 1;
+		const teamspace = 'someTS';
+		const model = 'someModel';
+		test('should update successfully if the id is found', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 1 });
+			await expect(Group.updateGroup(teamspace, model, _id, updateObj)).resolves.toBe(undefined);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual(`${model}.groups`);
+			expect(fn.mock.calls[0][2]).toEqual({ _id });
+			expect(fn.mock.calls[0][3]).toEqual(updateObj);
+		});
+
+		test('should throw an error if the id is not found', async () => {
+			jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 0 });
+			await expect(Group.updateGroup(teamspace, model, _id, updateObj)).rejects.toEqual(templates.groupNotFound);
+		});
+	});
+};
+
+const testAddGroups = () => {
+	describe('update group', () => {
+		test('should add groups successfully', async () => {
+			const groups = [
+				{ _id: 1 },
+				{ _id: 2 },
+				{ _id: 3 },
+				{ _id: 4 },
+				{ _id: 5 },
+			];
+			const teamspace = 'someTS';
+			const model = 'someModel';
+			const fn = jest.spyOn(db, 'insertMany').mockResolvedValue(undefined);
+			await expect(Group.addGroups(teamspace, model, groups)).resolves.toBe(undefined);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual(`${model}.groups`);
+			expect(fn.mock.calls[0][2]).toEqual(groups);
+		});
+	});
+};
+
 describe('models/groups', () => {
 	testGetGroups();
 	testGetGroupsByIds();
+	testUpdateGroup();
+	testAddGroups();
 });

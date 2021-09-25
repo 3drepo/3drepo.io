@@ -16,6 +16,7 @@
  */
 
 const db = require('../handler/db');
+const { templates } = require('../utils/responseCodes');
 
 const Groups = {};
 
@@ -37,6 +38,16 @@ Groups.getGroups = (teamspace, model, includeHidden, projection) => {
 		};
 
 	return findGroup(teamspace, model, query, projection);
+};
+
+Groups.addGroups = (teamspace, model, groups) => db.insertMany(teamspace, `${model}.groups`, groups);
+
+Groups.updateGroup = async (teamspace, model, _id, action) => {
+	const res = await db.updateOne(teamspace, `${model}.groups`, { _id }, action);
+
+	if (!res || res.matchedCount === 0) {
+		throw templates.groupNotFound;
+	}
 };
 
 module.exports = Groups;
