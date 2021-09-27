@@ -77,7 +77,7 @@ const ruleParametersTypeCheck = (operator, values) => {
 const ruleValidator = Yup.object().shape({
 	field: Yup.string().required().min(1),
 	operator: Yup.string().uppercase().oneOf(Object.keys(operators)).required(),
-	values: Yup.array().of(Yup.string()).optional(),
+	values: Yup.array().of(Yup.mixed()).optional(),
 }).strict(true).noUnknown()
 	.test(
 		'Rules validation', 'values field is not valid with the operator selected',
@@ -85,13 +85,13 @@ const ruleValidator = Yup.object().shape({
 			const nParams = operators[value.operator];
 			const arrLength = (value.values || []).length;
 			return (nParams === 0 && arrLength === 0)
-					|| (nParams >= arrLength && ruleParametersTypeCheck(value.operator, value.values));
+				|| (nParams <= arrLength && ruleParametersTypeCheck(value.operator, value.values));
 		},
 	);
 
-const checkGroupValid = (group, idRequired = true) => {
+const checkGroupValid = (group) => {
 	const schema = Yup.object().shape({
-		_id: idRequired ? types.id : types.id.required(),
+		_id: types.id.required(),
 		color: types.colorArr.required(),
 		name: types.strings.title,
 		author: types.strings.username.required(),
@@ -105,7 +105,7 @@ const checkGroupValid = (group, idRequired = true) => {
 		.required()
 		.test(
 			'Group validation',
-			'Can only container either rules or objects',
+			'Should contains either rules or objects',
 			(value) => (value.rules && !value.objects) || (!value.rules && value.objects),
 		);
 
@@ -149,7 +149,6 @@ Groups.validateGroupsImportData = async (req, res, next) => {
 
 		next();
 	} catch (err) {
-		console.log('threw', err);
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };

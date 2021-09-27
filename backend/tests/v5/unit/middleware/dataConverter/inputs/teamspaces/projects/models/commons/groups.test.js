@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const _ = require('lodash');
 const { src } = require('../../../../../../../../helper/path');
 const { generateGroup, generateUUIDString } = require('../../../../../../../../helper/services');
 
@@ -86,8 +87,66 @@ const testValidateGroupsImportData = () => {
 	const ifcGroup = generateGroup('ab', generateUUIDString(), false, true);
 	const normalGroup = generateGroup('ab', generateUUIDString(), false, false);
 
+	const numberRule = {
+		field: 'abc',
+		operator: 'EQUALS',
+		values: [2, 4],
+	};
+
+	const rangeRule = {
+		field: 'abc',
+		operator: 'IN_RANGE',
+		values: [2, 4, 5, 7],
+	};
+
+	const existRule = {
+		field: 'abc',
+		operator: 'IS_EMPTY',
+	};
+
+	const badExistRule = {
+		field: 'abc',
+		operator: 'IS_EMPTY',
+	};
+
+	const badRangeRule = {
+		field: 'abc',
+		operator: 'IN_RANGE',
+		values: [2, 4, 3],
+	};
+
+	const badRule = {
+		field: 'abc',
+		operator: 'EQUALS',
+		values: ['2', '4'],
+	};
+
+	const badRule2 = {
+		field: 'abc',
+		operator: 'EQUALS',
+		values: ['2', '4'],
+	};
+
 	describe.each([
 		[{ body: { groups: [ruleGroup, ifcGroup, normalGroup] } }, true, 'valid mixed schema'],
+		[{ body: { groups: [_.omit(ruleGroup, ['_id'])] } }, false, 'missing _id'],
+		[{ body: { groups: [_.omit(ruleGroup, ['rules'])] } }, false, 'no objects or rules'],
+		[{ body: { groups: [_.omit(ruleGroup, ['color'])] } }, false, 'no color'],
+		[{ body: { groups: [_.omit(ruleGroup, ['author'])] } }, false, 'no author'],
+		[{ body: { groups: [_.omit(ruleGroup, ['createdAt'])] } }, false, 'no createdAt'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [] }] } }, false, 'with empty rules'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [existRule] }] } }, true, 'exists rule'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [badExistRule] }] } }, false, 'existsRule with parameters'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [numberRule] }] } }, true, 'rule with number parameters'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [rangeRule] }] } }, true, 'rule with range parameters'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [badRangeRule] }] } }, false, 'rule with in correct amount of range parameters'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [...ruleGroup.rules, numberRule] }] } }, true, 'multiple rules'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [...ruleGroup.rules, badRule, numberRule] }] } }, false, 'multiple rules where one is bad'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [badRule] }] } }, false, 'rule with invalidParameters'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [badRule2] }] } }, false, 'rule with invalidParameters (2)'],
+		[{ body: { groups: [{ ...ifcGroup, objects: [] }] } }, false, 'with empty objects'],
+		[{ body: { groups: [{ ...ruleGroup, description: '123' }] } }, true, 'with description'],
+		[{ body: { groups: [_.omit(ruleGroup, ['updatedBy, updatedAt'])] } }, true, 'without updatedAt and updatedBy'],
 	])('Validate Groups import data', (data, shouldPass, desc) => {
 		test(`${desc} ${shouldPass ? ' should call next()' : 'should respond with invalidArguments'}`, async () => {
 			const mockCB = jest.fn(() => {});
