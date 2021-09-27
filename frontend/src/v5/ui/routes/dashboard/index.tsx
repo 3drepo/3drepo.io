@@ -25,9 +25,10 @@ import { messages as esMessages } from '@/locales/es/messages';
 import { messages as enMessages } from '@/locales/en/messages';
 import { discardSlash } from '@/v5/services/routing/routing';
 import { AppBar } from '@components/shared/appBar';
+import { MAIN_HEADER_PORTAL_TARGET_ID } from '@/v5/ui/routes/dashboard/index.constants';
 import { TeamspaceContent } from './teamspaces';
 import { ProjectContent } from './projects';
-import { Content } from './index.styles';
+import { Content, MainHeaderPortalRoot } from './index.styles';
 
 i18n.load('en', enMessages);
 i18n.load('es', esMessages);
@@ -47,6 +48,7 @@ export const Dashboard = () => {
 			<I18nProvider i18n={i18n}>
 				<GlobalStyle />
 				<AppBar />
+				<MainHeaderPortalRoot id={MAIN_HEADER_PORTAL_TARGET_ID} />
 				<Content>
 					<Route path={`${path}/:teamspace/`}>
 						<TeamspaceContent />
