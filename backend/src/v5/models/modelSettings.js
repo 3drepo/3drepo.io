@@ -39,7 +39,7 @@ const getModelByQuery = async (ts, query, projection) => {
 
 Models.addModel = (ts, data) => insertOneModel(ts, { _id: generateUUID({ string: true }), ...data });
 
-Models.deleteModel = (ts, container) => deleteOneModel(ts, { _id: container });
+Models.deleteModel = (ts, model) => deleteOneModel(ts, { _id: model });
 
 Models.getModelById = (ts, model, projection) => getModelByQuery(ts, { _id: model }, projection);
 

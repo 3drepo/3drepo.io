@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addModel, getModelList } = require('./commons/modelList');
+const { addModel, deleteModel, getModelList } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getContainerById, getContainers } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionCount } = require('../../../../models/revisions');
@@ -27,6 +27,16 @@ const Containers = {};
 Containers.addContainer = (teamspace, project, user, data) => addModel(teamspace, project, user, data);
 
 Containers.deleteContainer = async (teamspace, project, container, user) => {
+	try {
+		const res = await deleteModel(teamspace, project, container, user);
+		return res;
+	} catch (err) {
+		if (err?.code === templates.modelNotFound.code) {
+			throw templates.containerNotFound;
+		}
+
+		throw err;
+	}
 };
 
 Containers.getContainerList = async (teamspace, project, user) => {

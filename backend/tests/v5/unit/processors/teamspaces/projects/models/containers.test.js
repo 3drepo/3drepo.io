@@ -23,6 +23,7 @@ jest.mock('../../../../../../../src/v5/models/modelSettings');
 const newContainerId = 'newContainerId';
 const ModelSettings = require(`${src}/models/modelSettings`);
 ModelSettings.addModel.mockImplementation(() => ({ insertedId: newContainerId }));
+ModelSettings.deleteModel.mockImplementation((ts, model) => ({ deletedCount: model === 1 ? 1 : 0 }));
 jest.mock('../../../../../../../src/v5/models/users');
 const Users = require(`${src}/models/users`);
 jest.mock('../../../../../../../src/v5/models/revisions');
@@ -246,10 +247,35 @@ const testAddContainer = () => {
 	});
 };
 
+const testDeleteContainer = () => {
+	describe('Delete container', () => {
+		test('should succeed for teamspace admin', async () => {
+			const res = await Containers.deleteContainer('teamspace', 'project', 1, 'tsAdmin');
+			expect(res).toEqual({});
+		});
+
+		test('should succeed for project admin', async () => {
+			const res = await Containers.deleteContainer('teamspace', 'project', 1, 'projAdmin');
+			expect(res).toEqual({});
+		});
+
+		test('should return not authorized error if user not admin', async () => {
+			await expect(Containers.deleteContainer('teamspace', 'project', 1, 'notAdmin'))
+				.rejects.toEqual(templates.notAuthorized);
+		});
+
+		test('should return container not found error if container does not exist', async () => {
+			await expect(Containers.deleteContainer('teamspace', 'project', 'badModel', 'tsAdmin'))
+				.rejects.toEqual(templates.containerNotFound);
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/containers', () => {
 	testGetContainerList();
 	testGetContainerStats();
 	testAddContainer();
+	testDeleteContainer();
 	testAppendFavourites();
 	testDeleteFavourites();
 });
