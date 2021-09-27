@@ -126,6 +126,7 @@ const establishRoutes = () => {
 	 *
 	 */
 	router.post('/export', hasReadAccessToContainer, validateGroupsExportData, exportGroups, serialiseGroupArray);
+	console.log(hasCommenterAccessToContainer, validateGroupsImportData, importGroups);
 	router.post('/import', hasCommenterAccessToContainer, validateGroupsImportData, importGroups);
 
 	return router;
