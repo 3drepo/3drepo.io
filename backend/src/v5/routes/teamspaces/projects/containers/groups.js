@@ -22,7 +22,7 @@ const { hasReadAccessToContainer } = require('../../../../middleware/permissions
 const { respond } = require('../../../../utils/responder');
 // const { templates } = require('../../../../utils/responseCodes');
 const { serialiseGroupArray } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups');
-const { validateGroupExportData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups');
+const { validateGroupsExportData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups');
 
 const exportGroups = (req, res, next) => {
 	const { teamspace, container } = req.params;
@@ -115,7 +115,8 @@ const establishRoutes = () => {
 	 *
 	 *
 	 */
-	router.post('/export', hasReadAccessToContainer, validateGroupExportData, exportGroups, serialiseGroupArray);
+
+	router.post('/export', hasReadAccessToContainer, validateGroupsExportData, exportGroups, serialiseGroupArray);
 
 	return router;
 };
