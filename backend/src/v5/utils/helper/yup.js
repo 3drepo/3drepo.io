@@ -17,8 +17,27 @@
 
 const Yup = require('yup');
 
-const YupHelper = { validators: {} };
+const YupHelper = { validators: {}, types: { strings: {} } };
 
-YupHelper.validators.uuid = Yup.string().uuid('ids are expected to be of uuid format');
+YupHelper.types.id = Yup.string().uuid('ids are expected to be of uuid format');
+
+YupHelper.types.colorArr = Yup.array()
+	.of(Yup.number().min(0).max(255).integer())
+	.min(3).max(4);
+
+YupHelper.types.strings.username = Yup.string().min(2).max(65).matches(/^[\w]{1,64}$/,
+	// eslint-disable-next-line no-template-curly-in-string
+	'${path} cannot be longer than 64 characters and must only contain alphanumeric characters and underscores');
+YupHelper.types.strings.title = Yup.string().min(1).max(120);
+
+YupHelper.types.strings.blob = Yup.string().min(1).max(650);
+
+YupHelper.types.timestamp = Yup.number().min(new Date(2000, 1, 1).getTime()).integer()
+	.test(
+		'Timestamp validation check',
+		// eslint-disable-next-line no-template-curly-in-string
+		'${path} is not a valid timestamp (ms since epoch)',
+		(value) => new Date(value).getTime() > 0,
+	);
 
 module.exports = YupHelper;

@@ -16,10 +16,10 @@
  */
 
 const { src } = require('../../../../../../../../helper/path');
-const { generateUUIDString } = require('../../../../../../../../helper/services');
+const { generateGroup, generateUUIDString } = require('../../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
-const { UUIDToString } = require(`${src}/utils/helper/uuids`);
+const { UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const Responder = require(`${src}/utils/responder`);
 const { cloneDeep } = require(`${src}/utils/helper/objects`);
 const { isString } = require(`${src}/utils/helper/typeCheck`);
@@ -30,7 +30,7 @@ const GroupsInputMiddlewares = require(`${src}/middleware/dataConverter/inputs/t
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
-const testValidateGroupExportData = () => {
+const testValidateGroupsExportData = () => {
 	describe.each([
 		[{ body: { groups: [] } }, false],
 		[{ body: { groups: null } }, false],
@@ -40,12 +40,12 @@ const testValidateGroupExportData = () => {
 		[{ body: { group: [generateUUIDString()] } }, false],
 		[{ body: { groups: [generateUUIDString()] } }, true],
 		[{ body: { groups: [generateUUIDString(), generateUUIDString()] } }, true],
-	])('Validate Group export data', (data, shouldPass) => {
+	])('Validate Groups export data', (data, shouldPass) => {
 		test(`${shouldPass ? 'should call next()' : 'should respond with invalidArguments'} with ${JSON.stringify(data)}`,
 			async () => {
 				const mockCB = jest.fn(() => {});
 				const req = cloneDeep(data);
-				await GroupsInputMiddlewares.validateGroupExportData(
+				await GroupsInputMiddlewares.validateGroupsExportData(
 					req,
 					{},
 					mockCB,
@@ -67,6 +67,49 @@ const testValidateGroupExportData = () => {
 	});
 };
 
+const deserialiseGroup = (group) => {
+	const output = cloneDeep(group);
+	output._id = stringToUUID(output._id);
+	if (output.objects) {
+		for (let i = 0; i < output.objects.length; ++i) {
+			if (output.objects[i].shared_ids) {
+				output.objects[i].shared_ids = output.objects[i].shared_ids.map(stringToUUID);
+			}
+		}
+	}
+
+	return output;
+};
+
+const testValidateGroupsImportData = () => {
+	const ruleGroup = generateGroup('ab', generateUUIDString(), true);
+	const ifcGroup = generateGroup('ab', generateUUIDString(), false, true);
+	const normalGroup = generateGroup('ab', generateUUIDString(), false, false);
+
+	describe.each([
+		[{ body: { groups: [ruleGroup, ifcGroup, normalGroup] } }, true, 'valid mixed schema'],
+	])('Validate Groups import data', (data, shouldPass, desc) => {
+		test(`${desc} ${shouldPass ? ' should call next()' : 'should respond with invalidArguments'}`, async () => {
+			const mockCB = jest.fn(() => {});
+			const req = cloneDeep(data);
+			await GroupsInputMiddlewares.validateGroupsImportData(
+				req,
+				{},
+				mockCB,
+			);
+			if (shouldPass) {
+				expect(mockCB.mock.calls.length).toBe(1);
+				expect(req.body.groups).toEqual(data.body.groups.map(deserialiseGroup));
+			} else {
+				expect(mockCB.mock.calls.length).toBe(0);
+				expect(Responder.respond.mock.calls.length).toBe(1);
+				expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
+			}
+		});
+	});
+};
+
 describe('middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups', () => {
-	testValidateGroupExportData();
+	testValidateGroupsExportData();
+	testValidateGroupsImportData();
 });

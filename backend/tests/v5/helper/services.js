@@ -97,7 +97,7 @@ db.createGroups = (teamspace, modelId, groups = []) => {
 };
 
 ServiceHelper.generateUUIDString = () => uuidToString(generateUUID());
-ServiceHelper.generateRandomString = () => Crypto.randomBytes(15).toString('hex');
+ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(length / 2).toString('hex');
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
  + Math.random() * (end.getTime() - start.getTime()));
 
@@ -155,9 +155,9 @@ ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = fal
 
 		if (isIfcGuids) {
 			group.objects[0].ifc_guids = [
-				ServiceHelper.generateRandomString(),
-				ServiceHelper.generateRandomString(),
-				ServiceHelper.generateRandomString(),
+				ServiceHelper.generateRandomString(22),
+				ServiceHelper.generateRandomString(22),
+				ServiceHelper.generateRandomString(22),
 			];
 		} else {
 			group.objects[0].shared_ids = [genId(), genId(), genId()];
