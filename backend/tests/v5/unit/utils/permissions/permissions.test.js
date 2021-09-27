@@ -140,10 +140,38 @@ const testHasWriteAccessToModel = () => {
 	});
 };
 
+const testHasCommenterAccessToModel = () => {
+	describe.each([
+		['a', false, false],
+		['b', false, true],
+		['c', false, true],
+		['projAdmin', false, false],
+		['projAdmin', true, true],
+		['tsAdmin', false, false],
+		['tsAdmin', true, true],
+		['tsAdmin', undefined, true],
+		['nobody', false, false],
+		['nobody', true, false],
+	])('Has commenter access to model', (user, adminCheck, result) => {
+		test(`${user} ${result ? 'have' : 'does not have'} write access (adminCheck: ${adminCheck})`, async () => {
+			Projects.modelExistsInProject.mockImplementation(() => true);
+			expect(await Permissions.hasCommenterAccessToModel('teamspace', 'project', 'model', user, adminCheck)).toBe(result);
+		});
+	});
+
+	describe('Has write access to model (2)', () => {
+		test('should return false if the model does not belong to the project', async () => {
+			Projects.modelExistsInProject.mockImplementation(() => false);
+			expect(await Permissions.hasCommenterAccessToModel('teamspace', 'project', 'model', 'a', true)).toBe(false);
+		});
+	});
+};
+
 describe('utils/permissions', () => {
 	testIsTeamspaceAdmin();
 	testIsProjectAdmin();
 	testHasProjectAdminPermissions();
 	testHasReadAccessToModel();
 	testHasWriteAccessToModel();
+	testHasCommenterAccessToModel();
 });
