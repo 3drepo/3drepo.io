@@ -24,7 +24,15 @@ const { templates } = require('../../../../../utils/responseCodes');
 const ModelList = {};
 
 ModelList.addModel = async (teamspace, project, user, data) => {
-	const { models } = await getProjectById(teamspace, project, { models: 1 });
+	const { models, permissions } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
+
+	const isTSAdmin = await isTeamspaceAdmin(teamspace, user);
+	const isAdmin = isTSAdmin || hasProjectAdminPermissions(permissions, user);
+
+	if (!isAdmin) {
+		throw templates.notAuthorized;
+	}
+
 	const modelSettings = await getModels(teamspace, models, undefined, { _id: 0, name: 1 });
 
 	if (modelSettings.map((setting) => setting.name).includes(data.name)) {

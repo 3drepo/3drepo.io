@@ -220,7 +220,7 @@ const testGetContainerStats = () => {
 
 const testAddContainer = () => {
 	describe('Add container', () => {
-		test('should return the container ID on success', async () => {
+		test('should return the container ID on success for teamspace admin', async () => {
 			const data = {
 				name: 'container name',
 				code: 'code99',
@@ -228,6 +228,26 @@ const testAddContainer = () => {
 			};
 			const res = await Containers.addContainer('teamspace', 'project', 'tsAdmin', data);
 			expect(res).toEqual(newContainerId);
+		});
+
+		test('should return the container ID on success for project admin', async () => {
+			const data = {
+				name: 'container name',
+				code: 'code99',
+				unit: 'mm',
+			};
+			const res = await Containers.addContainer('teamspace', 'project', 'projAdmin', data);
+			expect(res).toEqual(newContainerId);
+		});
+
+		test('should return not authorized error if user is not admin', async () => {
+			const data = {
+				name: 'container name',
+				code: 'code99',
+				unit: 'mm',
+			};
+			await expect(Containers.addContainer('teamspace', 'project', 'notAdmin', data))
+				.rejects.toEqual(templates.notAuthorized);
 		});
 
 		test('should return the container ID if data has sub models', async () => {
