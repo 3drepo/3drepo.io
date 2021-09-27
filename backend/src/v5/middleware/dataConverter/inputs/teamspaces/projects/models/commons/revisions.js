@@ -15,16 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('./components/containers');
-const { convertAllUUIDs } = require('../dataConverter/pathParams');
-const { isTeamspaceMember } = require('./components/teamspaces');
-const { validSession } = require('../auth');
-const { validateMany } = require('../common');
+const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
+const Yup = require('yup');
+const { respond } = require('../../../../../../../utils/responder');
 
-const Permissions = {};
+const Revisions = {};
 
-Permissions.hasAccessToTeamspace = validateMany([convertAllUUIDs, validSession, isTeamspaceMember]);
-Permissions.hasReadAccessToContainer = validateMany([Permissions.hasAccessToTeamspace, hasReadAccessToContainer]);
-Permissions.hasWriteAccessToContainer = validateMany([Permissions.hasAccessToTeamspace, hasWriteAccessToContainer]);
+Revisions.validateUpdateRevisionData = async (req, res, next) => {
+	const schema = Yup.object().strict(true).noUnknown().shape({
+		void: Yup.bool('void must be of type boolean')
+			.required()
+			.strict(true),
+	});
 
-module.exports = Permissions;
+	try {
+		await schema.validate(req.body);
+		next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+module.exports = Revisions;
