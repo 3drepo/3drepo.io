@@ -145,45 +145,6 @@ const establishRoutes = () => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}:
-	 *   delete:
-	 *     description: Delete container from project the user is admin of
-	 *     tags: [Containers]
-	 *     operationId: deleteContainer
-	 *     parameters:
-	 *       - teamspace:
-	 *         name: teamspace
-	 *         description: Name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-   	 *       - project:
-	 *         name: project
-	 *         description: Project ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-   	 *       - container:
-	 *         name: container
-	 *         description: Container ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/containerNotFound"
-	 *       200:
-	 *         description: Container removed.
-	 */
-	router.delete('/', hasAccessToTeamspace, deleteContainer);
-
-	/**
-	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/containers:
 	 *   get:
 	 *     description: Get a list of containers within the specified project the user has access to
@@ -404,6 +365,46 @@ const establishRoutes = () => {
 	 *         description: removes the containers found in the request body from the user's favourites list
 	 */
 	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}:
+	 *   delete:
+	 *     description: Delete container from project the user is admin of
+	 *     tags: [Containers]
+	 *     operationId: deleteContainer
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - project:
+	 *         name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - container:
+	 *         name: container
+	 *         description: Container ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/containerNotFound"
+	 *       200:
+	 *         description: Container removed.
+	 */
+	router.delete('/:container', hasAccessToTeamspace, deleteContainer);
+
 	return router;
 };
 

@@ -210,6 +210,31 @@ const testAddContainer = () => {
 	});
 };
 
+const testDeleteContainer = () => {
+	const route = (containerId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${containerId}`;
+	describe('Delete container', () => {
+		test('should fail without a valid session', async () => {
+			const res = await agent.delete(route(models[0]._id)).expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user is not a member of the teamspace', async () => {
+			const res = await agent.delete(`${route(models[0]._id)}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if container does not exist', async () => {
+			const res = await agent.delete(`${route('badId')}?key=${users.tsAdmin.apiKey}`).expect(templates.containerNotFound.status);
+			expect(res.body.code).toEqual(templates.containerNotFound.code);
+		});
+
+		test('should return ok on success', async () => {
+			const res = await agent.delete(`${route(models[0]._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			expect(res.body).toEqual({});
+		});
+	});
+};
+
 const testAppendFavourites = () => {
 	const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/favourites`;
 	describe('Append Favourite Containers', () => {
@@ -311,7 +336,8 @@ describe('E2E routes/teamspaces/projects/containers', () => {
 	afterAll(() => ServiceHelper.closeApp(server));
 	testGetContainerList();
 	testGetContainerStats();
-	testAddContainer();
 	testAppendFavourites();
 	testDeleteFavourites();
+	testAddContainer();
+	testDeleteContainer();
 });
