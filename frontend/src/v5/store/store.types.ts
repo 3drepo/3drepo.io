@@ -15,17 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FavouritePayload } from '@/v5/store/containers/containers.types';
-import api from './default';
+import { Action } from 'redux';
+import { ScreamingSnakeCase } from 'type-fest';
 
-export const addFavourites = async ({ teamspace, projectId, containerId }: FavouritePayload) => (
-	api.patch(`teamspaces/${teamspace}/projects/${projectId}/favourites`, {
-		containers: [containerId],
-	})
-);
+export type ExtendedAction<T, A = ''> = Action<ScreamingSnakeCase<`${string & A}`>> & {
+	[P in keyof T]?: T[P];
+};
 
-export const removeFavourites = async ({ teamspace, projectId, containerId }: FavouritePayload) => (
-	api.delete(`teamspaces/${teamspace}/projects/${projectId}/favourites`, {
-		containers: [containerId],
-	})
-);
+export type AllReturnTypes<T extends Record<keyof T, (...args: any) => any>> = {
+	[P in keyof T]: ReturnType<T[P]>
+};

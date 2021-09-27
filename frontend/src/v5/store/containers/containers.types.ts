@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Action } from 'redux';
+import { AllReturnTypes, ExtendedAction } from '@/v5/store/store.types';
 
 export interface IContainersState {
 	containers: IContainer[];
@@ -34,12 +34,16 @@ export interface IContainer {
 	role: string;
 }
 
-export interface FavouritesPayload {
+export interface FavouritePayload {
 	teamspace: string;
 	projectId: string;
-	containersIds: IContainer['_id'][];
+	containerId: IContainer['_id'];
 }
 
-export interface PayloadAction<T, A = ''> extends Action<A> {
-	payload: T;
+export interface IContainersActionCreators {
+	setFilterQuery: (query: string) => ExtendedAction<{query: string}, 'setFilterQuery'>
+	addFavourite: (teamspace: string, projectId: string, containerId: string) => ExtendedAction<FavouritePayload, 'addFavourite'>
+	removeFavourite: (teamspace: string, projectId: string, containerId: string) => ExtendedAction<FavouritePayload, 'removeFavourite'>
 }
+
+export type IContainersActions = AllReturnTypes<IContainersActionCreators>;
