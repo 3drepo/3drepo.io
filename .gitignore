@@ -110,3 +110,4 @@ package-lock.json
 .vs/3drepo.io/v16/Browse.VC.opendb
 backend/globalConfig.json
 *.swn
+.vs/

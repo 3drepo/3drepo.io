@@ -72,6 +72,12 @@ const container2Rev = {
 	timestamp: 1630606846000,
 };
 
+const model1Revisions = [
+	{ _id: 1, author: 'user1', timestamp: new Date() },
+	{ _id: 2, author: 'user1', timestamp: new Date() },
+	{ _id: 3, author: 'user1', timestamp: new Date(), void: true },
+];
+
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getModels.mockImplementation(() => modelList);
 ModelSettings.getContainers.mockImplementation(() => modelList);
@@ -81,6 +87,9 @@ Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 	if (container === 'container2') return container2Rev;
 	throw templates.revisionNotFound;
 });
+
+const getRevisionsMock = Revisions.getRevisions.mockImplementation(() => model1Revisions);
+
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
 Users.appendFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
 	for (const favourite of favouritesToAdd) {
@@ -271,6 +280,28 @@ const testDeleteContainer = () => {
 	});
 };
 
+const testGetRevisions = () => {
+	describe('Get container revisions', () => {
+		test('should return non-void revisions if the container exists', async () => {
+			const idx = getRevisionsMock.mock.calls.length;
+			const res = await Containers.getRevisions('teamspace', 1, false);
+			expect(getRevisionsMock.mock.calls.length).toBe(idx + 1);
+			expect(getRevisionsMock.mock.calls[idx][1]).toEqual(1);
+			expect(getRevisionsMock.mock.calls[idx][2]).toEqual(false);
+			expect(res).toEqual(model1Revisions);
+		});
+
+		test('should return all revisions if the container exists', async () => {
+			const idx = getRevisionsMock.mock.calls.length;
+			const res = await Containers.getRevisions('teamspace', 1, true);
+			expect(getRevisionsMock.mock.calls.length).toBe(idx + 1);
+			expect(getRevisionsMock.mock.calls[idx][1]).toEqual(1);
+			expect(getRevisionsMock.mock.calls[idx][2]).toEqual(true);
+			expect(res).toEqual(model1Revisions);
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/containers', () => {
 	testGetContainerList();
 	testGetContainerStats();
@@ -278,4 +309,5 @@ describe('processors/teamspaces/projects/containers', () => {
 	testDeleteContainer();
 	testAppendFavourites();
 	testDeleteFavourites();
+	testGetRevisions();
 });

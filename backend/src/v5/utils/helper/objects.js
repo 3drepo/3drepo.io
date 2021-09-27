@@ -15,16 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('./components/containers');
-const { convertAllUUIDs } = require('../dataConverter/pathParams');
-const { isTeamspaceMember } = require('./components/teamspaces');
-const { validSession } = require('../auth');
-const { validateMany } = require('../common');
+const _ = require('lodash');
 
-const Permissions = {};
+const Objects = {};
 
-Permissions.hasAccessToTeamspace = validateMany([convertAllUUIDs, validSession, isTeamspaceMember]);
-Permissions.hasReadAccessToContainer = validateMany([Permissions.hasAccessToTeamspace, hasReadAccessToContainer]);
-Permissions.hasWriteAccessToContainer = validateMany([Permissions.hasAccessToTeamspace, hasWriteAccessToContainer]);
+Objects.cloneDeep = _.cloneDeep;
 
-module.exports = Permissions;
+module.exports = Objects;

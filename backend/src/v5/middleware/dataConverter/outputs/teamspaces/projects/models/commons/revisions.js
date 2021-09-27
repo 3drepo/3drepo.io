@@ -14,17 +14,30 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
+const { respond } = require('../../../../../../../utils/responder');
+const { templates } = require('../../../../../../../utils/responseCodes');
 
-const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('./components/containers');
-const { convertAllUUIDs } = require('../dataConverter/pathParams');
-const { isTeamspaceMember } = require('./components/teamspaces');
-const { validSession } = require('../auth');
-const { validateMany } = require('../common');
+const Revision = {};
 
-const Permissions = {};
+const serialiseRevision = (rev) => {
+	const serialised = {
+		...rev,
+		_id: UUIDToString(rev._id),
+	};
 
-Permissions.hasAccessToTeamspace = validateMany([convertAllUUIDs, validSession, isTeamspaceMember]);
-Permissions.hasReadAccessToContainer = validateMany([Permissions.hasAccessToTeamspace, hasReadAccessToContainer]);
-Permissions.hasWriteAccessToContainer = validateMany([Permissions.hasAccessToTeamspace, hasWriteAccessToContainer]);
+	if (rev.timestamp) {
+		serialised.timestamp = rev.timestamp.getTime();
+	}
 
-module.exports = Permissions;
+	return serialised;
+};
+
+Revision.serialiseRevisionArray = (req, res) => {
+	const revs = req.outputData;
+	const revisions = revs.map(serialiseRevision);
+
+	respond(req, res, templates.ok, { revisions });
+};
+
+module.exports = Revision;

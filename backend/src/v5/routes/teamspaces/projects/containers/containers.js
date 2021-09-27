@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 const { hasAccessToTeamspace, hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
@@ -405,7 +404,6 @@ const establishRoutes = () => {
 	 *         description: removes the containers found in the request body from the user's favourites list
 	 */
 	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites);
-
 	return router;
 };
 
