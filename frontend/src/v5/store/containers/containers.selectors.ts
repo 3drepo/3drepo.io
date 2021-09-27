@@ -31,8 +31,8 @@ export const selectFilterQuery = createSelector(
 export const selectFilteredContainers = createSelector(
 	[selectContainers, selectFilterQuery],
 	(containers, filterQuery) => containers.filter((
-		{ name },
-	) => name.toLowerCase().includes(filterQuery.toLowerCase())),
+		{ name, code, type },
+	) => [name, code, type].join(' ').toLowerCase().includes(filterQuery.toLowerCase())),
 );
 
 export const selectFavouriteContainers = createSelector(
