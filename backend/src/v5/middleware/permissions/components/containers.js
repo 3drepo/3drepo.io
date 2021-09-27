@@ -15,20 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { hasReadAccessToModel, hasWriteAccessToModel } = require('../../../utils/permissions/permissions');
+const { hasCommenterAccessToModel, hasReadAccessToModel, hasWriteAccessToModel } = require('../../../utils/permissions/permissions');
 const { getUserFromSession } = require('../../../utils/sessions');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
 
 const ContainerPerms = {};
 
-ContainerPerms.hasReadAccessToContainer = async (req, res, next) => {
+const permissionsCheckTemplate = (callback) => async (req, res, next) => {
 	const { session, params } = req;
 	const user = getUserFromSession(session);
 	const { teamspace, project, container } = params;
 
 	try {
-		if (await hasReadAccessToModel(teamspace, project, container, user)) {
+		if (await callback(teamspace, project, container, user)) {
 			next();
 		} else {
 			respond(req, res, templates.notAuthorized);
@@ -42,24 +42,10 @@ ContainerPerms.hasReadAccessToContainer = async (req, res, next) => {
 	}
 };
 
-ContainerPerms.hasWriteAccessToContainer = async (req, res, next) => {
-	const { session, params } = req;
-	const user = getUserFromSession(session);
-	const { teamspace, project, container } = params;
+ContainerPerms.hasReadAccessToContainer = permissionsCheckTemplate(hasReadAccessToModel);
 
-	try {
-		if (await hasWriteAccessToModel(teamspace, project, container, user)) {
-			next();
-		} else {
-			respond(req, res, templates.notAuthorized);
-		}
-	} catch (err) {
-		if (err.code === templates.modelNotFound.code) {
-			respond(req, res, templates.containerNotFound);
-		} else {
-			respond(req, res, err);
-		}
-	}
-};
+ContainerPerms.hasWriteAccessToContainer = permissionsCheckTemplate(hasWriteAccessToModel);
+
+ContainerPerms.hasCommenterAccessToContainer = permissionsCheckTemplate(hasCommenterAccessToModel);
 
 module.exports = ContainerPerms;

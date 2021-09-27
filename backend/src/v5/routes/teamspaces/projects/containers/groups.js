@@ -15,14 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { hasCommenterAccessToContainer, hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
+const { validateGroupsExportData, validateGroupsImportData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups');
 const Groups = require('../../../../processors/teamspaces/projects/models/commons/groups');
 const { Router } = require('express');
-// const { getUserFromSession } = require('../../../../utils/sessions');
-const { hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
 const { respond } = require('../../../../utils/responder');
-// const { templates } = require('../../../../utils/responseCodes');
 const { serialiseGroupArray } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups');
-const { validateGroupsExportData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups');
+const { templates } = require('../../../../utils/responseCodes');
 
 const exportGroups = (req, res, next) => {
 	const { teamspace, container } = req.params;
@@ -32,6 +31,17 @@ const exportGroups = (req, res, next) => {
 			req.outputData = groups;
 			next();
 		})
+		.catch(
+			// istanbul ignore next
+			(err) => respond(req, res, err),
+		);
+};
+
+const importGroups = (req, res) => {
+	const { teamspace, container } = req.params;
+	const { groups } = req.body;
+	Groups.importGroups(teamspace, container, groups)
+		.then(() => respond(req, res, templates.ok))
 		.catch(
 			// istanbul ignore next
 			(err) => respond(req, res, err),
@@ -115,8 +125,8 @@ const establishRoutes = () => {
 	 *
 	 *
 	 */
-
 	router.post('/export', hasReadAccessToContainer, validateGroupsExportData, exportGroups, serialiseGroupArray);
+	router.post('/import', hasCommenterAccessToContainer, validateGroupsImportData, importGroups);
 
 	return router;
 };
