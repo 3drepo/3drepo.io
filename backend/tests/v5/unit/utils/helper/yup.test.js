@@ -16,6 +16,7 @@
  */
 
 const { src } = require('../../../helper/path');
+const { generateRandomString } = require('../../../helper/services');
 
 const YupHelper = require(`${src}/utils/helper/yup`);
 
@@ -38,7 +39,7 @@ const testColorArr = () => {
 		[0, false],
 		[true, false],
 		[[], false],
-		[['2', '3', '4'], false],
+		[['a', 'b', 'c'], false],
 		[[1], false],
 		[[1, 2, 3], true],
 		[[256, 256, 256], false],
@@ -54,7 +55,66 @@ const testColorArr = () => {
 	});
 };
 
+const testUsername = () => {
+	describe.each([
+		['1', false],
+		['1a', true],
+		['5c6ea70f-a55f-4cf2-9055-93db43503944', false],
+		['5c6ea70f_a55f_4cf2_9055_93db43503944', true],
+		[generateRandomString(66), false],
+		[0, false],
+		[true, false],
+	])('Username validator', (data, res) => {
+		test(`${data} should return ${res}`, async () => {
+			await expect(YupHelper.types.strings.username.isValid(data)).resolves.toBe(res);
+		});
+	});
+};
+
+const testTitle = () => {
+	describe.each([
+		['', false],
+		[generateRandomString(120), true],
+		[generateRandomString(121), false],
+	])('Title validator', (data, res) => {
+		test(`${data} should return ${res}`, async () => {
+			await expect(YupHelper.types.strings.title.isValid(data)).resolves.toBe(res);
+		});
+	});
+};
+
+const testBlob = () => {
+	describe.each([
+		['', false],
+		[generateRandomString(650), true],
+		[generateRandomString(651), false],
+	])('Blob validator', (data, res) => {
+		test(`${data.length} characters should return ${res}`, async () => {
+			await expect(YupHelper.types.strings.blob.isValid(data)).resolves.toBe(res);
+		});
+	});
+};
+
+const testTimestamp = () => {
+	describe.each([
+		['', false],
+		['a', false],
+		[-1, false],
+		[new Date(2000, 1, 1).getTime() - 1, false],
+		[new Date(2000, 1, 1).getTime(), true],
+		[324093824093285092385094354340395834, false],
+	])('Timestamp validator', (data, res) => {
+		test(`${data} characters should return ${res}`, async () => {
+			await expect(YupHelper.types.timestamp.isValid(data)).resolves.toBe(res);
+		});
+	});
+};
+
 describe('utils/helper/yup', () => {
 	testId();
 	testColorArr();
+	testUsername();
+	testTitle();
+	testBlob();
+	testTimestamp();
 });

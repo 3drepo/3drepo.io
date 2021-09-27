@@ -23,12 +23,12 @@ YupHelper.types.id = Yup.string().uuid('ids are expected to be of uuid format');
 
 YupHelper.types.colorArr = Yup.array()
 	.of(Yup.number().min(0).max(255).integer())
-	.min(3).max(4)
-	.strict(true);
+	.min(3).max(4);
 
-YupHelper.types.strings.username = Yup.string().min(2).max(65).matches(/^[\w]{1,64}$/,
+YupHelper.types.strings.username = Yup.string().min(2).max(65).strict(true)
+	.matches(/^[\w]{1,64}$/,
 	// eslint-disable-next-line no-template-curly-in-string
-	'${path} cannot be longer than 64 characters and must only contain alphanumeric characters and underscores');
+		'${path} cannot be longer than 64 characters and must only contain alphanumeric characters and underscores');
 YupHelper.types.strings.title = Yup.string().min(1).max(120);
 
 YupHelper.types.strings.blob = Yup.string().min(1).max(650);
