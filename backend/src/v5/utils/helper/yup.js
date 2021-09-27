@@ -23,7 +23,8 @@ YupHelper.types.id = Yup.string().uuid('ids are expected to be of uuid format');
 
 YupHelper.types.colorArr = Yup.array()
 	.of(Yup.number().min(0).max(255).integer())
-	.min(3).max(4);
+	.min(3).max(4)
+	.strict(true);
 
 YupHelper.types.strings.username = Yup.string().min(2).max(65).matches(/^[\w]{1,64}$/,
 	// eslint-disable-next-line no-template-curly-in-string

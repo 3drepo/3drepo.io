@@ -15,27 +15,46 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Yup = require('yup');
-
 const { src } = require('../../../helper/path');
 
 const YupHelper = require(`${src}/utils/helper/yup`);
-const { UUIDToString } = require(`${src}/utils/helper/uuids`);
-const { isString } = require(`${src}/utils/helper/typeCheck`);
 
-const testUUIDValidator = () => {
+const testId = () => {
 	describe.each([
 		['1', false],
 		['5c6ea70f-a55f-4cf2-9055-93db43503944', true],
 		[0, false],
 		[true, false],
-	])('UUID validator', (data, res) => {
+	])('ID validator', (data, res) => {
 		test(`${data} should return ${res}`, async () => {
-			await expect(YupHelper.validators.uuid.isValid(data)).resolves.toBe(res);
+			await expect(YupHelper.types.id.isValid(data)).resolves.toBe(res);
+		});
+	});
+};
+
+const testColorArr = () => {
+	describe.each([
+		['1', false],
+		[0, false],
+		[true, false],
+		[[], false],
+		[['2', '3', '4'], false],
+		[[1], false],
+		[[1, 2, 3], true],
+		[[256, 256, 256], false],
+		[[0, 0, 0], true],
+		[[-1, -1, -1], false],
+		[[1, 2, 3, 4], true],
+		[[1, 2, 3, 5, 5], false],
+		[[0.1, 2, 3, 4], false],
+	])('Colour array validator', (data, res) => {
+		test(`${data} should return ${res}`, async () => {
+			await expect(YupHelper.types.colorArr.isValid(data)).resolves.toBe(res);
 		});
 	});
 };
 
 describe('utils/helper/yup', () => {
-	testUUIDValidator();
+	testId();
+	testColorArr();
 });
