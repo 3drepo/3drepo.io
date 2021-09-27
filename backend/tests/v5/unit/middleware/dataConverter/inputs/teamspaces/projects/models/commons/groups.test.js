@@ -107,6 +107,7 @@ const testValidateGroupsImportData = () => {
 	const badExistRule = {
 		field: 'abc',
 		operator: 'IS_EMPTY',
+		values: [2, 4, 3],
 	};
 
 	const badRangeRule = {
