@@ -25,11 +25,11 @@ export const StyledIconButton = styled(IconButton)`
 	align-items: center;
 
 	${({ $isOn }) => $isOn && css`
-		background-color: ${({ theme }) => theme.palette.tertiary.main};
+			background-color: ${({ theme }) => theme.palette.tertiary.main};
 
-		circle {
-			fill: ${({ theme }) => theme.palette.primary.contrast};
-		}
+			circle {
+				fill: ${({ theme }) => theme.palette.primary.contrast};
+			}
 	`}
 	
 	&:hover {

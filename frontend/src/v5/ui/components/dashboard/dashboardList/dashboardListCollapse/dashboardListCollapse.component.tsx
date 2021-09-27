@@ -38,9 +38,9 @@ export const DashboardListCollapse = ({
 
 	return (
 		<Container className={className}>
-			<ButtonContainer>
+			<ButtonContainer onClick={() => setIsCollapsed((state) => !state)}>
 				<Tooltip title={(!isCollapsed ? tooltipTitles?.visible : tooltipTitles?.collapsed) ?? ''}>
-					<ChevronButton isOn={!isCollapsed} onClick={() => setIsCollapsed((state) => !state)} />
+					<ChevronButton isOn={!isCollapsed} />
 				</Tooltip>
 				<Typography variant="h3" color="secondary">{title}</Typography>
 			</ButtonContainer>

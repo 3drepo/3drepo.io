@@ -368,6 +368,11 @@ export const theme = createMuiTheme({
 				backgroundColor: COLOR.BASE_LIGHTEST,
 			},
 		},
+		MuiIconButton: {
+			root: {
+				transition: 'none',
+			},
+		},
 		MuiButton: {
 			iconSizeMedium: {
 				'& > *:first-child': {
@@ -387,6 +392,7 @@ export const theme = createMuiTheme({
 				fontSize: '0.75rem',
 				fontWeight: FONT_WEIGHT.BOLD,
 				minWidth: null,
+				transition: 'none',
 			},
 			contained: {
 				padding: '10px 15px',
