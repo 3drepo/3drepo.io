@@ -15,32 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
+const { castSchema } = require('../../../../../schemas/groups');
 const { respond } = require('../../../../../../../utils/responder');
 const { templates } = require('../../../../../../../utils/responseCodes');
 
 const Groups = {};
 
-const serialiseGroup = (group) => {
-	const output = {
-		...group,
-		_id: UUIDToString(group._id),
-	};
-
-	if (output.objects && output.objects.length) {
-		output.objects = output.objects.map((objEntry) => {
-			if (objEntry.shared_ids) {
-				// eslint-disable-next-line no-param-reassign
-				objEntry.shared_ids = objEntry.shared_ids.map(UUIDToString);
-			}
-			return objEntry;
-		});
-	}
-	return output;
-};
-
 Groups.serialiseGroupArray = (req, res) => {
-	const groups = req.outputData.map(serialiseGroup);
+	const groups = req.outputData.map(castSchema);
 	respond(req, res, templates.ok, { groups });
 };
 

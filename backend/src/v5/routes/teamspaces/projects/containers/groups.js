@@ -93,40 +93,77 @@ const establishRoutes = () => {
 	 *                   type: string
 	 *                   format: uuid
 	 *     responses:
+	 *       400:
+	 *         $ref: "#/components/responses/invalidArguments"
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       404:
-	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *         $ref: "#/components/responses/containersNotFound"
 	 *       200:
 	 *         description: returns list of containers
 	 *         content:
 	 *           application/json:
 	 *             schema:
-	 *               type: object
-	 *               properties:
-	 *                 containers:
-	 *                   type: array
-	 *                   items:
-	 *                     type: object
-	 *                     properties:
-	 *                       id:
-	 *                         type: string
-	 *                         description: Container ID
-	 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
-	 *                       name:
-	 *                         type: string
-	 *                         description: name of the container
-	 *                         example: Structure
-	 *                       role:
-	 *                         $ref: "#/components/roles"
-	 *                       isFavourite:
-	 *                         type: boolean
-	 *                         description: whether the container is a favourited item for the user
-	 *
+	 *               $ref: "#/components/schemas/group"
+	 *     links:
+	 *       importGroups:
+	 *         operationId: ImportContainerGroups
+	 *         requestBody:
+	 *           groups: "$response.body#/groups"
 	 *
 	 */
 	router.post('/export', hasReadAccessToContainer, validateGroupsExportData, exportGroups, serialiseGroupArray);
-	console.log(hasCommenterAccessToContainer, validateGroupsImportData, importGroups);
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/groups/import:
+	 *   post:
+	 *     description: Import a list of groups into the container
+	 *     tags: [Containers]
+	 *     operationId: ImportContainerGroups
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - project:
+	 *         name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *         type: string
+	 *       - container:
+	 *         name: container
+	 *         description: Container ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *         type: string
+	 *     requestBody:
+	 *       description: List of group ids to export
+	 *       content:
+	 *         application/json:
+	 *           schema:
+	 *             type: array
+	 *             items:
+	 *               type: object
+	 *               properties:
+	 *                 groups:
+   	 *                   $ref: "#/components/schemas/group"
+	 *     responses:
+	 *       400:
+	 *         $ref: "#/components/responses/invalidArguments"
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/containerNotFound"
+	 *       200:
+	 *         description: Imported successfully
+	 *
+	 */
 	router.post('/import', hasCommenterAccessToContainer, validateGroupsImportData, importGroups);
 
 	return router;

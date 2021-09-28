@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { UUIDToString } = require('./uuids');
 const Yup = require('yup');
 
 const YupHelper = { validators: {}, types: { strings: {} } };
 
-YupHelper.types.id = Yup.string().uuid('ids are expected to be of uuid format');
+YupHelper.types.id = Yup.string().uuid('ids are expected to be of uuid format').transform((val, org) => UUIDToString(org));
 
 YupHelper.types.colorArr = Yup.array()
 	.of(Yup.number().min(0).max(255).integer())
@@ -34,6 +35,10 @@ YupHelper.types.strings.title = Yup.string().min(1).max(120);
 YupHelper.types.strings.blob = Yup.string().min(1).max(650);
 
 YupHelper.types.timestamp = Yup.number().min(new Date(2000, 1, 1).getTime()).integer()
+	.transform((value, originalValue) => {
+		const ts = new Date(originalValue).getTime();
+		return ts > 0 ? ts : value;
+	})
 	.test(
 		'Timestamp validation check',
 		// eslint-disable-next-line no-template-curly-in-string

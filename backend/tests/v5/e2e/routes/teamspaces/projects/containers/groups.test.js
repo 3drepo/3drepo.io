@@ -50,10 +50,16 @@ const models = [
 		name: ServiceHelper.generateRandomString(),
 		properties: ServiceHelper.generateRandomModelProperties(),
 	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: ServiceHelper.generateRandomModelProperties(),
+	},
 ];
 
 const modelWithGroups = models[0];
 const modelWithoutGroups = models[1];
+const modelForImport = models[2];
 
 const groups = [
 	ServiceHelper.generateGroup(teamspace, modelWithGroups._id),
@@ -151,6 +157,75 @@ const testExportGroups = () => {
 	});
 };
 
+const testImportGroups = () => {
+	const createRoute = (projectId = project.id, modelId = modelForImport._id) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/groups/import`;
+	const exportRoute = (projectId = project.id, modelId = modelForImport._id) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/groups/export`;
+	describe('Import groups', () => {
+		test('should fail without a valid session', async () => {
+			const res = await agent.post(createRoute()).expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user is not a member of the teamspace', async () => {
+			const res = await agent.post(`${createRoute()}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if the project does not exist', async () => {
+			const res = await agent.post(`${createRoute('dslfkjds')}?key=${users.tsAdmin.apiKey}`).expect(templates.projectNotFound.status);
+			expect(res.body.code).toEqual(templates.projectNotFound.code);
+		});
+
+		test('should fail if the container does not exist', async () => {
+			const res = await agent.post(`${createRoute(project._id, 'dslfkjds')}?key=${users.tsAdmin.apiKey}`)
+				.send({ groups: groups.map(({ _id }) => _id) })
+				.expect(templates.containerNotFound.status);
+			expect(res.body.status).toEqual(templates.containerNotFound.status);
+		});
+
+		test('should fail if the user does not have permissions to access the container', async () => {
+			const res = await agent.post(`${createRoute()}?key=${users.noProjectAccess.apiKey}`)
+				.send({ groups: groups.map(({ _id }) => _id) })
+				.expect(templates.notAuthorized.status);
+			expect(res.body.status).toEqual(templates.notAuthorized.status);
+		});
+
+		test('should fail if the payload is not of the right schema', async () => {
+			const res = await agent.post(`${createRoute()}?key=${users.tsAdmin.apiKey}`)
+				.send({ groups: 1 })
+				.expect(templates.invalidArguments.status);
+			expect(res.body.status).toEqual(templates.invalidArguments.status);
+		});
+
+		test('should fail if the groups array is empty', async () => {
+			const res = await agent.post(`${createRoute()}?key=${users.tsAdmin.apiKey}`)
+				.send({ groups: [] })
+				.expect(templates.invalidArguments.status);
+			expect(res.body.status).toEqual(templates.invalidArguments.status);
+		});
+
+		test('should import every group successfully', async () => {
+			await agent.post(`${createRoute()}?key=${users.tsAdmin.apiKey}`)
+				.send({ groups })
+				.expect(templates.ok.status);
+			const res = await agent.post(`${exportRoute()}?key=${users.tsAdmin.apiKey}`)
+				.send({ groups: groups.map(({ _id }) => _id) })
+				.expect(templates.ok.status);
+			expect(res.body.groups).toEqual(groups);
+		});
+
+		test('should import every group successfully again', async () => {
+			await agent.post(`${createRoute()}?key=${users.tsAdmin.apiKey}`)
+				.send({ groups })
+				.expect(templates.ok.status);
+			const res = await agent.post(`${exportRoute()}?key=${users.tsAdmin.apiKey}`)
+				.send({ groups: groups.map(({ _id }) => _id) })
+				.expect(templates.ok.status);
+			expect(res.body.groups).toEqual(groups);
+		});
+	});
+};
+
 describe('E2E routes/teamspaces/projects/containers', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -159,4 +234,5 @@ describe('E2E routes/teamspaces/projects/containers', () => {
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
 	testExportGroups();
+	testImportGroups();
 });
