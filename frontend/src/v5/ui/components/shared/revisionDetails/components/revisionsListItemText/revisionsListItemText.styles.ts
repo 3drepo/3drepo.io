@@ -14,19 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import styled, { css } from 'styled-components';
+import { Typography } from '@material-ui/core';
 
-import React from 'react';
-import { StyledComponentProps } from 'styled-components';
-import { Container } from './fixedOrGrowContainer.styles';
+export const Text = styled(Typography)`
+	${({ theme }) => theme.typography.body1};
+  color: ${({ theme, selected }) => (selected ? theme.palette.primary.contrast : theme.palette.base.light)};
 
-type IFixedOrGrowContainer = {
-	width?: number;
-} & StyledComponentProps;
-
-export const FixedOrGrowContainer = ({
-	width,
-	children,
-	...props
-}: IFixedOrGrowContainer): JSX.Element => (
-	<Container width={width} {...props}>{children}</Container>
-);
+	${({ meta, theme }) => meta && css`
+		${theme.typography.kicker};
+	`}
+`;

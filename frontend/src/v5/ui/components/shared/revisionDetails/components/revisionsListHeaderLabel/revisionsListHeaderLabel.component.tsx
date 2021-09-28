@@ -15,18 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { StyledComponentProps } from 'styled-components';
-import { Container } from './fixedOrGrowContainer.styles';
+import React, { ReactNode } from 'react';
+import { Typography } from '@controls/typography';
+import { Container } from './revisionsListHeaderLabel.styles';
 
-type IFixedOrGrowContainer = {
+type IDashboardListHeaderLabel = {
 	width?: number;
-} & StyledComponentProps;
+	className?: string;
+	children?: ReactNode;
+};
 
-export const FixedOrGrowContainer = ({
-	width,
-	children,
-	...props
-}: IFixedOrGrowContainer): JSX.Element => (
-	<Container width={width} {...props}>{children}</Container>
+export const RevisionsListHeaderLabel = ({ children, ...props }: IDashboardListHeaderLabel) => (
+	<Container {...props}>
+		<Typography variant="kicker">
+			{children}
+		</Typography>
+	</Container>
 );

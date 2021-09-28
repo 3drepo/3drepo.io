@@ -15,18 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { StyledComponentProps } from 'styled-components';
-import { Container } from './fixedOrGrowContainer.styles';
+import React, { ReactNode } from 'react';
+import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
+import { Text } from './revisionsListItemText.styles';
 
-type IFixedOrGrowContainer = {
+type IDashboardListItemText = {
+	children: ReactNode;
 	width?: number;
-} & StyledComponentProps;
+	className?: string;
+	meta?: boolean;
+	selected?: boolean;
+};
 
-export const FixedOrGrowContainer = ({
-	width,
+export const RevisionsListItemText = ({
 	children,
-	...props
-}: IFixedOrGrowContainer): JSX.Element => (
-	<Container width={width} {...props}>{children}</Container>
+	width,
+	className,
+	meta = false,
+	selected = false,
+}: IDashboardListItemText): JSX.Element => (
+	<FixedOrGrowContainer width={width} className={className}>
+		<Text meta={meta} selected={selected}>
+			{children}
+		</Text>
+	</FixedOrGrowContainer>
 );

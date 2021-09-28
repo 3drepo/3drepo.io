@@ -15,18 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { StyledComponentProps } from 'styled-components';
-import { Container } from './fixedOrGrowContainer.styles';
+import styled from 'styled-components';
+import { Typography } from '@material-ui/core';
 
-type IFixedOrGrowContainer = {
-	width?: number;
-} & StyledComponentProps;
-
-export const FixedOrGrowContainer = ({
-	width,
-	children,
-	...props
-}: IFixedOrGrowContainer): JSX.Element => (
-	<Container width={width} {...props}>{children}</Container>
-);
+export const Text = styled(Typography)`
+	${({ theme }) => theme.typography.kicker};
+	color: ${({ theme, selected }) => (selected ? theme.palette.primary.contrast : theme.palette.base.light)};
+	display: inline;
+	cursor: pointer;
+`;

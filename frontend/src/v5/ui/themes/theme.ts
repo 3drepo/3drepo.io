@@ -116,6 +116,12 @@ const typography: TypographyOptions = {
 		letterSpacing: '0.18em',
 		textTransform: 'uppercase',
 	},
+	link: {
+		fontWeight: FONT_WEIGHT.MEDIUM,
+		fontSize: '0.75rem',
+		lineHeight: '1.125rem',
+		textDecoration: 'underline',
+	},
 	caption: {
 		fontWeight: FONT_WEIGHT.MEDIUM,
 		fontSize: '0.625rem',

@@ -33,6 +33,7 @@ import {
 
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
+import { RevisionDetails } from '@components/shared/revisionDetails';
 
 const mockContainer = {
 	latestRevision: 123,
@@ -101,9 +102,12 @@ export const Containers = () => {
 				</DashboardListHeader>
 				<DashboardList>
 					{mockContainers.map((container, i) => (
-						<DashboardListItem selected={i === 3}>
-							<MockContainerListItem container={container} selected={i === 3} />
-						</DashboardListItem>
+						<>
+							<DashboardListItem selected={i === 3}>
+								<MockContainerListItem container={container} selected={i === 3} />
+							</DashboardListItem>
+							{i === 3 && <RevisionDetails />}
+						</>
 					))}
 				</DashboardList>
 			</DashboardListCollapse>

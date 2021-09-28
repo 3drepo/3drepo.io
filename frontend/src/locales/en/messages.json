@@ -1,5 +1,11 @@
 {
   "Containers": "Containers",
   "Federations": "Federations",
-  "Settings": "Settings"
+  "Settings": "Settings",
+  "revisionDetails.addedOn": "Added on",
+  "revisionDetails.addedBy": "Added by",
+  "revisionDetails.revisionCode": "Revision code",
+  "revisionDetails.description": "Description",
+  "revisionDetails.status.active": "Active",
+  "revisionDetails.status.void": "Void"
 }

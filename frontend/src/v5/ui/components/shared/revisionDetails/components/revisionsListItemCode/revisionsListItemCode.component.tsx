@@ -15,18 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { StyledComponentProps } from 'styled-components';
-import { Container } from './fixedOrGrowContainer.styles';
+import React, { Dispatch, ReactNode } from 'react';
+import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
+import { Tooltip } from '@material-ui/core';
+import { Text } from './revisionsListItemCode.styles';
 
-type IFixedOrGrowContainer = {
+type IRevisionsListItemCode = {
+	children: ReactNode;
 	width?: number;
-} & StyledComponentProps;
+	className?: string;
+	onClick?: Dispatch<void>;
+};
 
-export const FixedOrGrowContainer = ({
-	width,
+export const RevisionsListItemCode = ({
 	children,
-	...props
-}: IFixedOrGrowContainer): JSX.Element => (
-	<Container width={width} {...props}>{children}</Container>
+	width,
+	className,
+	onClick,
+}: IRevisionsListItemCode): JSX.Element => (
+	<FixedOrGrowContainer width={width} className={className}>
+		<Tooltip title="Launch in Viewer">
+			<Text onClick={onClick}>
+				{children}
+			</Text>
+		</Tooltip>
+	</FixedOrGrowContainer>
 );
