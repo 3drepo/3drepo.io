@@ -250,20 +250,6 @@ const testAddContainer = () => {
 				.rejects.toEqual(templates.notAuthorized);
 		});
 
-		test('should return the container ID if data has sub models', async () => {
-			const data = {
-				name: 'container name',
-				code: 'code99',
-				unit: 'mm',
-				subModels: [
-					'model1',
-					'model2',
-				],
-			};
-			const res = await Containers.addContainer('teamspace', 'project', 'tsAdmin', data);
-			expect(res).toEqual(newContainerId);
-		});
-
 		test('should return error if model name exists', async () => {
 			const data = {
 				name: 'model1',

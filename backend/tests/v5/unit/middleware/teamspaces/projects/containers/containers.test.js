@@ -139,6 +139,13 @@ const testValidContainerCode = () => {
 			expect(mockCB.mock.calls.length).toBe(1);
 		});
 
+		test('next() should be called if properties exists', () => {
+			const mockCB = jest.fn(() => {});
+			const body = { code: 'code1000', properties: {} };
+			Containers.validContainerCode({ body }, {}, mockCB);
+			expect(mockCB.mock.calls.length).toBe(1);
+		});
+
 		test('should respond with invalid container code if code bad', async () => {
 			const mockCB = jest.fn(() => {});
 			const body = { code: '"£$%^&*()_+' };
@@ -168,9 +175,32 @@ const testValidContainerUnit = () => {
 			expect(mockCB.mock.calls.length).toBe(1);
 		});
 
+		test('next() should be called if model unit is uppercase', () => {
+			const mockCB = jest.fn(() => {});
+			const body = { unit: 'FT' };
+			Containers.validContainerUnit({ body }, {}, mockCB);
+			expect(mockCB.mock.calls.length).toBe(1);
+		});
+
+		test('next() should be called if properties exists', () => {
+			const mockCB = jest.fn(() => {});
+			const body = { unit: 'ft', properties: {} };
+			Containers.validContainerUnit({ body }, {}, mockCB);
+			expect(mockCB.mock.calls.length).toBe(1);
+		});
+
 		test('should respond with invalid container unit if unit not a string', async () => {
 			const mockCB = jest.fn(() => {});
 			const body = { unit: 123 };
+			Containers.validContainerUnit({ body }, {}, mockCB);
+			expect(mockCB.mock.calls.length).toBe(0);
+			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond.mock.results[0].value).toEqual(templates.invalidContainerUnit);
+		});
+
+		test('should respond with invalid container unit if not a recognised unit', async () => {
+			const mockCB = jest.fn(() => {});
+			const body = { unit: 'x' };
 			Containers.validContainerUnit({ body }, {}, mockCB);
 			expect(mockCB.mock.calls.length).toBe(0);
 			expect(Responder.respond.mock.calls.length).toBe(1);
@@ -183,6 +213,34 @@ const testValidContainerUnit = () => {
 			expect(mockCB.mock.calls.length).toBe(0);
 			expect(Responder.respond.mock.calls.length).toBe(1);
 			expect(Responder.respond.mock.results[0].value).toEqual(templates.missingContainerUnit);
+		});
+	});
+};
+
+const testValidContainerType = () => {
+	describe('Valid container type', () => {
+		test('next() should be called if model type is valid', () => {
+			const mockCB = jest.fn(() => {});
+			const body = { type: 'A' };
+			Containers.validContainerType({ body }, {}, mockCB);
+			expect(mockCB.mock.calls.length).toBe(1);
+		});
+
+		test('should respond with invalid container type if type not a string', async () => {
+			const mockCB = jest.fn(() => {});
+			const body = { type: 123 };
+			Containers.validContainerType({ body }, {}, mockCB);
+			expect(mockCB.mock.calls.length).toBe(0);
+			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond.mock.results[0].value).toEqual(templates.invalidContainerType);
+		});
+
+		test('should respond with missing container type if type missing', async () => {
+			const mockCB = jest.fn(() => {});
+			Containers.validContainerType({ body: {} }, {}, mockCB);
+			expect(mockCB.mock.calls.length).toBe(0);
+			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond.mock.results[0].value).toEqual(templates.missingContainerType);
 		});
 	});
 };
@@ -246,6 +304,7 @@ describe('middleware/common', () => {
 	testValidContainerName();
 	testValidContainerCode();
 	testValidContainerUnit();
+	testValidContainerType();
 	testValidContainerDefaultView();
 	testValidContainerDefaultLegend();
 });

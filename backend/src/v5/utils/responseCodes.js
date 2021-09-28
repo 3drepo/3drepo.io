@@ -51,10 +51,12 @@ ResponseCodes.templates = {
 	invalidContainerName: { message: 'Container name invalid.', status: 400 },
 	invalidContainerCode: { message: 'Container code invalid.', status: 400 },
 	invalidContainerUnit: { message: 'Container unit invalid.', status: 400 },
+	invalidContainerType: { message: 'Container type invalid.', status: 400 },
 	invalidContainerDefaultView: { message: 'Container default view invalid.', status: 400 },
 	invalidContainerDefaultLegend: { message: 'Container default legend invalid.', status: 400 },
 	missingContainerName: { message: 'Container name missing.', status: 400 },
 	missingContainerUnit: { message: 'Container unit missing.', status: 400 },
+	missingContainerType: { message: 'Container type missing.', status: 400 },
 
 	// Revision related error
 	revisionNotFound: { message: 'Revision not found.', status: 404 },

@@ -72,6 +72,13 @@ Containers.validContainerCode = (req, res, next) => {
 		const modelCodeRegExp = /^[a-zA-Z0-9]{0,50}$/;
 
 		if (modelCodeRegExp.test(req.body.code)) {
+			if (!req.body.properties) {
+				req.body.properties = {};
+			}
+
+			req.body.properties.code = req.body.code;
+			delete req.body.code;
+
 			next();
 		} else {
 			respond(req, res, templates.invalidContainerCode);
@@ -83,13 +90,34 @@ Containers.validContainerCode = (req, res, next) => {
 
 Containers.validContainerUnit = (req, res, next) => {
 	if (req.body && req.body.unit) {
-		if (isString(req.body.unit)) {
+		const validUnits = ['ft', 'mm', 'cm', 'dm', 'm'];
+
+		if (isString(req.body.unit) && validUnits.includes(req.body.unit.toLowerCase())) {
+			if (!req.body.properties) {
+				req.body.properties = {};
+			}
+
+			req.body.properties.unit = req.body.unit.toLowerCase();
+			delete req.body.unit;
+
 			next();
 		} else {
 			respond(req, res, templates.invalidContainerUnit);
 		}
 	} else {
 		respond(req, res, templates.missingContainerUnit);
+	}
+};
+
+Containers.validContainerType = (req, res, next) => {
+	if (req.body && req.body.type) {
+		if (isString(req.body.type)) {
+			next();
+		} else {
+			respond(req, res, templates.invalidContainerType);
+		}
+	} else {
+		respond(req, res, templates.missingContainerType);
 	}
 };
 
@@ -123,6 +151,7 @@ Containers.validateContainer = validateMany([
 	Containers.validContainerName,
 	Containers.validContainerCode,
 	Containers.validContainerUnit,
+	Containers.validContainerType,
 	Containers.validContainerDefaultView,
 	Containers.validContainerDefaultLegend,
 ]);

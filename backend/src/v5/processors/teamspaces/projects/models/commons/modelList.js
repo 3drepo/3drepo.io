@@ -39,18 +39,7 @@ ModelList.addModel = async (teamspace, project, user, data) => {
 		throw templates.duplicateModelName;
 	}
 
-	const settings = {
-		...data,
-		properties: {
-			code: data.code,
-			unit: data.unit,
-		},
-	};
-
-	delete settings.code;
-	delete settings.unit;
-
-	const response = await addModel(teamspace, settings);
+	const response = await addModel(teamspace, data);
 
 	await addProjectModel(teamspace, project, response.insertedId);
 
