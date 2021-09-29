@@ -39,6 +39,8 @@ import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { EllipsisButtonWithMenu } from '@controls/ellipsisButtonWithMenu';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { getContainerMenuItems } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.helpers';
+import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
+import { Highlight } from '@controls/highlight';
 import { useOrderedList } from './containersList.hooks';
 import { Container } from './containersList.styles';
 import { DEFAULT_SORT_CONFIG } from './containersList.constants';
@@ -61,6 +63,7 @@ export const ContainersList = ({
 }: IContainersList): JSX.Element => {
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const { sortedList, setSortConfig } = useOrderedList(containers, DEFAULT_SORT_CONFIG);
+	const filterQuery = ContainersHooksSelectors.selectFilterQuery();
 
 	const toggleSelectedId = (id: IContainer['_id']) => {
 		setSelectedId((state) => (state === id ? null : id));
@@ -111,7 +114,9 @@ export const ContainersList = ({
 											<Trans id="containers.list.item.title.tooltip" message="Launch latest revision" />
 										}
 									>
-										{container.name}
+										<Highlight search={filterQuery}>
+											{container.name}
+										</Highlight>
 									</DashboardListItemTitle>
 									<DashboardListItemButton
 										onClick={() => {
@@ -130,10 +135,14 @@ export const ContainersList = ({
 										/>
 									</DashboardListItemButton>
 									<DashboardListItemText selected={container._id === selectedId}>
-										{container.code}
+										<Highlight search={filterQuery}>
+											{container.code}
+										</Highlight>
 									</DashboardListItemText>
 									<DashboardListItemText width={188} selected={container._id === selectedId}>
-										{container.type}
+										<Highlight search={filterQuery}>
+											{container.type}
+										</Highlight>
 									</DashboardListItemText>
 									<DashboardListItemText width={97} selected={container._id === selectedId}>
 										{i18n.date(container.lastUpdated)}

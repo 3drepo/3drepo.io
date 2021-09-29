@@ -14,41 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Button } from '@controls/button';
 import styled from 'styled-components';
 
-export const Container = styled.div``;
-
-export const Content = styled.div`
-	max-width: 1289px;
-	margin: 26px auto 0;
-`;
-
-export const NewContainerButton = styled(Button).attrs({
-	variant: 'contained',
-	color: 'primary',
-})`
-	width: 140px;
-	
-	svg {
-		path {
-			fill: ${({ theme }) => theme.palette.primary.contrast};
-		}
-	}
-`;
-
-export const NewContainerMainHeaderButton = styled(Button).attrs({
-	variant: 'outlined',
-	color: 'secondary',
-})`
-	width: 140px;
-	margin-left: auto;
-`;
-
-export const UploadFileButton = styled(Button).attrs({
-	variant: 'contained',
-	color: 'primary',
-})`
-	width: 116px;
-	margin-right: 0;
+export const Tag = styled.mark`
+	background-color: ${({ theme }) => theme.palette.primary.light};
 `;
