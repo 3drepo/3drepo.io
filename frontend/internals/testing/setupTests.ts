@@ -1,4 +1,4 @@
-require("fake-indexeddb/auto");
+require('fake-indexeddb/auto');
 import nock from 'nock';
 import axios from 'axios';
 import clientConfigMock from './clientConfig.mock';
@@ -7,15 +7,7 @@ axios.defaults.adapter = require('axios/lib/adapters/http');
 
 nock.disableNetConnect();
 
-let windowSpy;
-const originalWindow = { ...window };
-
-windowSpy = jest.spyOn(window, 'window', 'get');
-
-windowSpy.mockImplementation(() => ({
-	...originalWindow, // In case you need other window properties to be in place
-	ClientConfig: clientConfigMock,
-}));
+(window as any).ClientConfig = clientConfigMock;
 
 beforeEach(() => {
 	if (!nock.isActive()) {
@@ -34,8 +26,4 @@ afterEach(() => {
 		throw new Error('Not all nock interceptors were used!');
 	}
 	nockCleanup();
-});
-
-afterAll(() => {
-	windowSpy.mockRestore();
 });
