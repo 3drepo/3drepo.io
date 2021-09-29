@@ -15,7 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { hasCommenterAccessToContainer, hasReadAccessToContainer, hasWriteAccessToContainer } = require('./components/containers');
+const {
+	hasCommenterAccessToContainer, hasCommenterAccessToFederation, hasReadAccessToContainer,
+	hasReadAccessToFederation, hasWriteAccessToContainer, hasWriteAccessToFederation,
+} = require('./components/models');
 const { convertAllUUIDs } = require('../dataConverter/pathParams');
 const { isTeamspaceMember } = require('./components/teamspaces');
 const { validSession } = require('../auth');
@@ -28,5 +31,10 @@ Permissions.hasReadAccessToContainer = validateMany([Permissions.hasAccessToTeam
 Permissions.hasCommenterAccessToContainer = validateMany([
 	Permissions.hasAccessToTeamspace, hasCommenterAccessToContainer]);
 Permissions.hasWriteAccessToContainer = validateMany([Permissions.hasAccessToTeamspace, hasWriteAccessToContainer]);
+
+Permissions.hasReadAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasReadAccessToFederation]);
+Permissions.hasCommenterAccessToFederation = validateMany([
+	Permissions.hasAccessToTeamspace, hasCommenterAccessToFederation]);
+Permissions.hasWriteAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasWriteAccessToFederation]);
 
 module.exports = Permissions;

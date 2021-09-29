@@ -15,18 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { hasCommenterAccessToContainer, hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
+const { hasCommenterAccessToFederation, hasReadAccessToFederation } = require('../../../../middleware/permissions/permissions');
 const { validateGroupsExportData, validateGroupsImportData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups');
-const Groups = require('../../../../processors/teamspaces/projects/models/containers');
+const Groups = require('../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
 const { respond } = require('../../../../utils/responder');
 const { serialiseGroupArray } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups');
 const { templates } = require('../../../../utils/responseCodes');
 
 const exportGroups = (req, res, next) => {
-	const { teamspace, container } = req.params;
+	const { teamspace, federation } = req.params;
 	const { groups: groupIds } = req.body;
-	Groups.getGroups(teamspace, container, groupIds)
+	Groups.getGroups(teamspace, federation, groupIds)
 		.then((groups) => {
 			req.outputData = groups;
 			next();
@@ -38,9 +38,9 @@ const exportGroups = (req, res, next) => {
 };
 
 const importGroups = (req, res) => {
-	const { teamspace, container } = req.params;
+	const { teamspace, federation } = req.params;
 	const { groups } = req.body;
-	Groups.importGroups(teamspace, container, groups)
+	Groups.importGroups(teamspace, federation, groups)
 		.then(() => respond(req, res, templates.ok))
 		.catch(
 			// istanbul ignore next
@@ -53,11 +53,11 @@ const establishRoutes = () => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/groups/export:
+	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/groups/export:
 	 *   post:
-	 *     description: Export a list of groups from the container
-	 *     tags: [Containers]
-	 *     operationId: ExportContainerGroups
+	 *     description: Export a list of groups from the federation
+	 *     tags: [Federations]
+	 *     operationId: ExportFederationGroups
 	 *     parameters:
 	 *       - teamspace:
 	 *         name: teamspace
@@ -73,9 +73,9 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *         type: string
-	 *       - container:
-	 *         name: container
-	 *         description: Container ID
+	 *       - federation:
+	 *         name: federation
+	 *         description: Federation ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -98,28 +98,28 @@ const establishRoutes = () => {
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       404:
-	 *         $ref: "#/components/responses/containersNotFound"
+	 *         $ref: "#/components/responses/federationsNotFound"
 	 *       200:
-	 *         description: returns list of containers
+	 *         description: returns list of federations
 	 *         content:
 	 *           application/json:
 	 *             schema:
 	 *               $ref: "#/components/schemas/group"
 	 *     links:
 	 *       importGroups:
-	 *         operationId: ImportContainerGroups
+	 *         operationId: ImportFederationGroups
 	 *         requestBody:
 	 *           groups: "$response.body#/groups"
 	 *
 	 */
-	router.post('/export', hasReadAccessToContainer, validateGroupsExportData, exportGroups, serialiseGroupArray);
+	router.post('/export', hasReadAccessToFederation, validateGroupsExportData, exportGroups, serialiseGroupArray);
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/groups/import:
+	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/groups/import:
 	 *   post:
-	 *     description: Import a list of groups into the container
-	 *     tags: [Containers]
-	 *     operationId: ImportContainerGroups
+	 *     description: Import a list of groups into the federation
+	 *     tags: [Federations]
+	 *     operationId: ImportFederationGroups
 	 *     parameters:
 	 *       - teamspace:
 	 *         name: teamspace
@@ -135,9 +135,9 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *         type: string
-	 *       - container:
-	 *         name: container
-	 *         description: Container ID
+	 *       - federation:
+	 *         name: federation
+	 *         description: Federation ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -159,12 +159,12 @@ const establishRoutes = () => {
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       404:
-	 *         $ref: "#/components/responses/containerNotFound"
+	 *         $ref: "#/components/responses/federationNotFound"
 	 *       200:
 	 *         description: Imported successfully
 	 *
 	 */
-	router.post('/import', hasCommenterAccessToContainer, validateGroupsImportData, importGroups);
+	router.post('/import', hasCommenterAccessToFederation, validateGroupsImportData, importGroups);
 
 	return router;
 };
