@@ -126,7 +126,7 @@ const testUpdateGroup = () => {
 			expect(fn.mock.calls[0][0]).toEqual(teamspace);
 			expect(fn.mock.calls[0][1]).toEqual(`${model}.groups`);
 			expect(fn.mock.calls[0][2]).toEqual({ _id });
-			expect(fn.mock.calls[0][3]).toEqual(updateObj);
+			expect(fn.mock.calls[0][3]).toEqual({ $set: { ...updateObj } });
 		});
 
 		test('should throw an error if the id is not found', async () => {

@@ -90,12 +90,13 @@ const numberOperator = (operator) => {
 const ruleValidator = Yup.object().shape({
 	field: Yup.string().required().min(1),
 	operator: Yup.string().uppercase().oneOf(Object.keys(operators)).required(),
-	values: Yup.array().of(Yup.mixed().when('operator', {
+	values: Yup.array().when('operator', {
 		is: numberOperator,
-		then: Yup.mixed().transform(Number).test((val) => !Number.isNaN(val)),
-		otherwise: Yup.string().min(1),
-	})).optional(),
-}).strict(true).noUnknown()
+		then: Yup.array().of(Yup.number()).min(1).required(),
+		otherwise: Yup.array().of(Yup.string().min(1)).optional(),
+	}),
+})
+	.noUnknown()
 	.test(
 		'Rules validation', 'values field is not valid with the operator selected',
 		(value) => {
@@ -106,7 +107,7 @@ const ruleValidator = Yup.object().shape({
 		},
 	);
 
-const schema = (group) => {
+const schema = (group, strict = false) => {
 	const rulesOrObjects = group.rules
 		? { rules: Yup.array().of(ruleValidator).min(1).required() }
 		: { objects: Yup.array().of(objectEntryValidator).min(1).required() };
@@ -122,7 +123,7 @@ const schema = (group) => {
 		updatedBy: types.strings.username.optional().default(group.author),
 		...rulesOrObjects,
 
-	}).strict(true).noUnknown()
+	}).strict(strict).noUnknown()
 		.required()
 		.test(
 			'Group validation',
@@ -133,7 +134,7 @@ const schema = (group) => {
 	return output;
 };
 
-Group.validateSchema = (group) => schema(group).validate(group);
+Group.validateSchema = (group) => schema(group, true).validate(group);
 Group.castSchema = (group) => schema(group).cast(group);
 
 module.exports = Group;

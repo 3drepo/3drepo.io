@@ -38,4 +38,19 @@ UuidUtils.UUIDToString = (uuid) => {
 	}
 };
 
+class LookUpTable {
+	constructor(ids) {
+		this.items = new Set(ids.map(UuidUtils.UUIDToString));
+	}
+
+	has(id) {
+		return this.items.has(UuidUtils.UUIDToString(id));
+	}
+
+	add(id) {
+		this.items.insert(UuidUtils.UUIDToString(id));
+	}
+}
+
+UuidUtils.UUIDLookUpTable = LookUpTable;
 module.exports = UuidUtils;

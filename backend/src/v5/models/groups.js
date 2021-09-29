@@ -43,7 +43,7 @@ Groups.getGroups = (teamspace, model, includeHidden, projection) => {
 Groups.addGroups = (teamspace, model, groups) => db.insertMany(teamspace, `${model}.groups`, groups);
 
 Groups.updateGroup = async (teamspace, model, _id, action) => {
-	const res = await db.updateOne(teamspace, `${model}.groups`, { _id }, action);
+	const res = await db.updateOne(teamspace, `${model}.groups`, { _id }, { $set: { ...action } });
 
 	if (!res || res.matchedCount === 0) {
 		throw templates.groupNotFound;

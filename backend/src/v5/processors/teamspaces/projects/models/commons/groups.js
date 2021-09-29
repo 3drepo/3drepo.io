@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { addGroups, getGroups, getGroupsByIds, updateGroup } = require('../../../../../models/groups');
+const { UUIDLookUpTable } = require('../../../../../utils/helper/uuids');
 
 const Groups = {};
 
@@ -32,7 +33,7 @@ Groups.importGroups = async (teamspace, model, groups) => {
 	// Some requires update
 		const actionPromises = [];
 
-		const updatesLookup = new Set(groupsToUpdate.map(({ _id }) => _id));
+		const updatesLookup = new UUIDLookUpTable(groupsToUpdate.map(({ _id }) => _id));
 		const groupsToInsert = [];
 
 		groups.forEach((group) => {

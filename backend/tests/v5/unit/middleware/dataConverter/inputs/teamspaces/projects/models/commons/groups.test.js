@@ -119,16 +119,17 @@ const testValidateGroupsImportData = () => {
 	const badRule = {
 		field: 'abc',
 		operator: 'EQUALS',
-		values: ['2', '4'],
+		values: ['a', 'b'],
 	};
 
-	const badRule2 = {
+	const wrongTypedRule = {
 		field: 'abc',
 		operator: 'EQUALS',
 		values: ['2', '4'],
 	};
 
 	describe.each([
+		[{ body: { groups: [] } }, false, 'empty group'],
 		[{ body: { groups: [ruleGroup, ifcGroup, normalGroup] } }, true, 'valid mixed schema'],
 		[{ body: { groups: [_.omit(ruleGroup, ['_id'])] } }, false, 'missing _id'],
 		[{ body: { groups: [_.omit(ruleGroup, ['rules'])] } }, false, 'no objects or rules'],
@@ -144,7 +145,7 @@ const testValidateGroupsImportData = () => {
 		[{ body: { groups: [{ ...ruleGroup, rules: [...ruleGroup.rules, numberRule] }] } }, true, 'multiple rules'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [...ruleGroup.rules, badRule, numberRule] }] } }, false, 'multiple rules where one is bad'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [badRule] }] } }, false, 'rule with invalidParameters'],
-		[{ body: { groups: [{ ...ruleGroup, rules: [badRule2] }] } }, false, 'rule with invalidParameters (2)'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [wrongTypedRule] }] } }, false, 'rule with wrong typed parameters'],
 		[{ body: { groups: [{ ...ifcGroup, objects: [] }] } }, false, 'with empty objects'],
 		[{ body: { groups: [{ ...ruleGroup, description: '123' }] } }, true, 'with description'],
 		[{ body: { groups: [_.omit(ruleGroup, ['updatedBy, updatedAt'])] } }, true, 'without updatedAt and updatedBy'],
