@@ -17,7 +17,7 @@
 
 import { Button, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
 import React from 'react';
-import { Dialog } from '../dialog.component';
+import { Modal } from '../modal.component';
 
 interface IFormDialog extends React.DetailedHTMLProps<React.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement> {
 	onClickClose?: () => void;
@@ -26,10 +26,10 @@ interface IFormDialog extends React.DetailedHTMLProps<React.FormHTMLAttributes<H
 	confirmLabel?: string;
 }
 
-export const FormDialog = (props: IFormDialog) => {
+export const FormModal = (props: IFormDialog) => {
 	const { onClickClose, title, confirmLabel, open, children, className, ...formProps } = props;
 	return (
-		<Dialog onClickClose={onClickClose} open={open} className={className}>
+		<Modal onClickClose={onClickClose} open={open} className={className}>
 			<form {...formProps}>
 				<DialogTitle>
 					{title}
@@ -46,6 +46,6 @@ export const FormDialog = (props: IFormDialog) => {
 					</Button>
 				</DialogActions>
 			</form>
-		</Dialog>
+		</Modal>
 	);
 };

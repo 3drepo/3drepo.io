@@ -16,16 +16,16 @@
  */
 
 import React from 'react';
-import { Dialog as DialogContainer } from '@material-ui/core';
+import { useSelector } from 'react-redux';
+import { selectDialogs } from '@/v5/store/dialogs/dialogs.selectors';
+import { Modal } from '@/v5/ui/controls/modal';
 
-import CloseIcon from '@assets/icons/close.svg';
-import { CloseButton } from './dialog.styles';
+export const ModalsDispatcher = (): JSX.Element => {
+	const dialogs = useSelector(selectDialogs);
 
-export const Dialog = ({ onClickClose, open, children, className }) => (
-	<DialogContainer open={open} onClose={onClickClose} className={className}>
-		<CloseButton aria-label="Close dialog" onClick={onClickClose}>
-			<CloseIcon />
-		</CloseButton>
-		{children}
-	</DialogContainer>
-);
+	return (
+		<>
+			{dialogs.map((dialog) => <Modal key={dialog.id} {...dialog} />)}
+		</>
+	);
+};

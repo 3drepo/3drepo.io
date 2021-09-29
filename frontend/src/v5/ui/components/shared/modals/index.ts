@@ -15,4 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { Dialog } from './dialog.component';
+export { ModalsDispatcher } from './modals.component';
