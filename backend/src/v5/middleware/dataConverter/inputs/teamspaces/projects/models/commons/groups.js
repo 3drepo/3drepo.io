@@ -46,7 +46,7 @@ Groups.validateGroupsExportData = async (req, res, next) => {
 Groups.validateGroupsImportData = async (req, res, next) => {
 	try {
 		const { groups } = req.body;
-		if (!groups.length) throw createResponseCode(templates.invalidArguments, 'Groups array cannot be empty');
+		if (!groups?.length) throw createResponseCode(templates.invalidArguments, 'Groups array cannot be empty');
 		await Promise.all(groups.map(validateSchema));
 		for (let i = 0; i < groups.length; ++i) {
 			const group = groups[i];

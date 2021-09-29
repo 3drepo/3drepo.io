@@ -223,6 +223,20 @@ const testImportGroups = () => {
 				.expect(templates.ok.status);
 			expect(res.body.groups).toEqual(groups);
 		});
+
+		test('should import sucessfully and only update groups that were noted', async () => {
+			const changedGroup = { ...groups[0], name: ServiceHelper.generateRandomString() };
+			const newGroup = ServiceHelper.generateGroup(teamspace, modelWithGroups._id, true, false);
+			const importData = [changedGroup, newGroup];
+			await agent.post(`${createRoute()}?key=${users.tsAdmin.apiKey}`)
+				.send({ groups: importData })
+				.expect(templates.ok.status);
+			const res = await agent.post(`${exportRoute()}?key=${users.tsAdmin.apiKey}`)
+				.send({ groups: [...groups.map(({ _id }) => _id), newGroup._id] })
+				.expect(templates.ok.status);
+
+			expect(res.body.groups).toEqual([changedGroup, ...groups.slice(1), newGroup]);
+		});
 	});
 };
 

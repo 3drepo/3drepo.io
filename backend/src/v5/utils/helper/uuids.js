@@ -40,7 +40,7 @@ UuidUtils.UUIDToString = (uuid) => {
 
 class LookUpTable {
 	constructor(ids) {
-		this.items = new Set(ids.map(UuidUtils.UUIDToString));
+		this.items = new Set(ids?.length ? ids.map(UuidUtils.UUIDToString) : []);
 	}
 
 	has(id) {
@@ -48,7 +48,7 @@ class LookUpTable {
 	}
 
 	add(id) {
-		this.items.insert(UuidUtils.UUIDToString(id));
+		this.items.add(UuidUtils.UUIDToString(id));
 	}
 }
 

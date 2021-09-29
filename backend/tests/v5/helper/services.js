@@ -97,6 +97,7 @@ db.createGroups = (teamspace, modelId, groups = []) => {
 };
 
 ServiceHelper.generateUUIDString = () => uuidToString(generateUUID());
+ServiceHelper.generateUUID = () => generateUUID();
 ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex');
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
  + Math.random() * (end.getTime() - start.getTime()));
