@@ -14,9 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+<<<<<<< HEAD:frontend/src/v5/ui/routes/dashboard/index.tsx
 import React from 'react';
 import { RouteExcept } from '@/v5/services/routing/routing';
 import { useRouteMatch, Route } from 'react-router-dom';
+=======
+import React, { useState } from 'react';
+import { ThemeProvider } from 'styled-components';
+import { Typography, MuiThemeProvider, Button } from '@material-ui/core';
+import { theme } from '@/v5/ui/themes/theme';
+>>>>>>> ISSUE #2696 - decoupled dialogs from redux and added a formdialog:frontend/src/v5/ui/components/mainLayout/mainLayout.component.tsx
 import { GlobalStyle } from '@/v5/ui/themes/global';
 import { useDispatch } from 'react-redux';
 

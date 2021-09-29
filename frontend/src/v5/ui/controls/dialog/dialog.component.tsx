@@ -17,37 +17,15 @@
 
 import React from 'react';
 import { Dialog as DialogContainer } from '@material-ui/core';
-import { useDispatch } from 'react-redux';
 
-import { InfoDialog } from '@/v5/ui/controls/dialog/infoDialog';
-import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import CloseIcon from '@assets/icons/close.svg';
 import { CloseButton } from './dialog.styles';
 
-const DIALOG_TEMPLATES = {
-	info: InfoDialog,
-};
-
-interface IDialog {
-	id: string;
-	type?: string;
-}
-
-export const Dialog: React.FC<IDialog> = ({ id, type = 'info' }) => {
-	const dispatch = useDispatch();
-
-	const handleClose = () => {
-		dispatch(DialogsActions.close(id));
-	};
-
-	const DialogTemplate = DIALOG_TEMPLATES[type];
-
-	return (
-		<DialogContainer open onClose={handleClose}>
-			<CloseButton aria-label="Close dialog" onClick={handleClose}>
-				<CloseIcon />
-			</CloseButton>
-			<DialogTemplate onClose={handleClose} />
-		</DialogContainer>
-	);
-};
+export const Dialog = ({ onClickClose, open, children, className }) => (
+	<DialogContainer open={open} onClose={onClickClose} className={className}>
+		<CloseButton aria-label="Close dialog" onClick={onClickClose}>
+			<CloseIcon />
+		</CloseButton>
+		{children}
+	</DialogContainer>
+);

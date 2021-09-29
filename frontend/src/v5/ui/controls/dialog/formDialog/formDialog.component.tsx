@@ -15,40 +15,37 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Button, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
 import React from 'react';
-import { Button, DialogContent, DialogContentText, DialogTitle, DialogActions } from '@material-ui/core';
+import { Dialog } from '../dialog.component';
 
-interface IInfoDialog extends React.DetailedHTMLProps<React.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement> {
-	onCancel?: () => void,
-	title?:string
+interface IFormDialog extends React.DetailedHTMLProps<React.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement> {
+	onClickClose?: () => void;
+	title?: string;
+	open?: boolean;
+	confirmLabel?: string;
 }
 
-export const InfoDialog: React.FC<IInfoDialog> = ({ onCancel, title, ...formProps }) => {
-	const handleOnCancel = () => {
-		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
-		onCancel();
-	};
-
+export const FormDialog = (props: IFormDialog) => {
+	const { onClickClose, title, confirmLabel, open, children, className, ...formProps } = props;
 	return (
-		<>
+		<Dialog onClickClose={onClickClose} open={open} className={className}>
 			<form {...formProps}>
 				<DialogTitle>
-					Sample dialog
+					{title}
 				</DialogTitle>
 				<DialogContent>
-					<DialogContentText>
-						This is only a sample info dialog content.
-					</DialogContentText>
+					{children}
 				</DialogContent>
 				<DialogActions>
-					<Button autoFocus onClick={handleOnCancel} variant="outlined" color="secondary">
+					<Button autoFocus onClick={onClickClose} variant="outlined" color="secondary">
 						Cancel
 					</Button>
 					<Button type="submit" variant="contained" color="primary">
-						OK
+						{confirmLabel || 'OK'}
 					</Button>
 				</DialogActions>
 			</form>
-		</>
+		</Dialog>
 	);
 };
