@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { takeLatest } from 'redux-saga/effects';
+import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import {
+	ContainersActions,
 	ContainersTypes,
 } from '@/v5/store/containers/containers.redux';
 import { ExtendedAction } from '@/v5/store/store.types';
@@ -26,6 +27,7 @@ import { FavouritePayload } from './containers.types';
 export function* addFavourites({ containerId, teamspace, projectId }: ExtendedAction<FavouritePayload>) {
 	try {
 		yield API.addFavourites({ teamspace, containerId, projectId });
+		yield put(ContainersActions.toggleFavouriteSuccess(containerId));
 	} catch (e) {
 		console.error(e);
 	}
@@ -34,6 +36,7 @@ export function* addFavourites({ containerId, teamspace, projectId }: ExtendedAc
 export function* removeFavourites({ containerId, teamspace, projectId }: ExtendedAction<FavouritePayload>) {
 	try {
 		yield API.removeFavourites({ containerId, teamspace, projectId });
+		yield put(ContainersActions.toggleFavouriteSuccess(containerId));
 	} catch (e) {
 		console.error(e);
 	}

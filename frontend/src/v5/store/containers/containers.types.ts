@@ -44,6 +44,7 @@ export interface IContainersActionCreators {
 	setFilterQuery: (query: string) => ExtendedAction<{query: string}, 'setFilterQuery'>
 	addFavourite: (teamspace: string, projectId: string, containerId: string) => ExtendedAction<FavouritePayload, 'addFavourite'>
 	removeFavourite: (teamspace: string, projectId: string, containerId: string) => ExtendedAction<FavouritePayload, 'removeFavourite'>
+	toggleFavouriteSuccess: (containerId: string) => ExtendedAction<{containerId: string}, 'toggleFavouriteSuccess'>
 }
 
 export type IContainersActions = AllReturnTypes<IContainersActionCreators>;
