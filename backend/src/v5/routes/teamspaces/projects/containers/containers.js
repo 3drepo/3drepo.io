@@ -40,7 +40,7 @@ const getContainerStats = async (req, res) => {
 
 		respond(req, res, templates.ok, statsSerialised);
 	}).catch(
-		// Istanbul ignore next
+		// istanbul ignore next
 		(err) => respond(req, res, err),
 	);
 };
