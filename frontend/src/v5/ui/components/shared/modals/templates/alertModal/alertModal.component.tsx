@@ -15,4 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { InfoDialog } from './infoDialog.component';
+import React from 'react';
+import { Button, DialogContent, DialogContentText, DialogTitle, DialogActions } from '@material-ui/core';
+
+interface IAlertModal {
+	onClickClose?: () => void,
+	message?:string
+}
+
+export const AlertModal: React.FC<IAlertModal> = ({ onClickClose, message }) => (
+	<>
+		<DialogTitle>
+			Alert!
+		</DialogTitle>
+		<DialogContent>
+			<DialogContentText>
+				{message}
+			</DialogContentText>
+		</DialogContent>
+		<DialogActions>
+			<Button autoFocus onClick={onClickClose} variant="contained" color="primary">
+				Close
+			</Button>
+		</DialogActions>
+	</>
+);

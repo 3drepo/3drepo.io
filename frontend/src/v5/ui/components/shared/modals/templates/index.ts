@@ -15,24 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { Dialog as DialogContainer } from '@material-ui/core';
+import { AlertModal } from './alertModal/alertModal.component';
 
-import CloseIcon from '@assets/icons/close.svg';
-import { CloseButton } from './modal.styles';
-
-interface IModal {
-	onClickClose: () => void;
-	open:boolean;
-	children:any;
-	className?: string;
-}
-
-export const Modal = ({ onClickClose, open, children, className }: IModal) => (
-	<DialogContainer open={open} onClose={onClickClose} className={className}>
-		<CloseButton aria-label="Close dialog" onClick={onClickClose}>
-			<CloseIcon />
-		</CloseButton>
-		{children}
-	</DialogContainer>
-);
+export const MODAL_TEMPLATES = {
+	alert: AlertModal,
+};

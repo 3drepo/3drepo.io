@@ -21,15 +21,14 @@ import uuid from 'uuidv4';
 import { Constants } from '../common/actions.helper';
 
 interface IDialogActions {
-	open: (type?: string) => void;
+	open: (type?: string, props?: any) => void;
 	close: (id: string) => void;
 }
 
 interface IDialogConfig {
 	id: string;
-	type?: 'error' | 'info';
-	onConfirm?: () => void,
-	onCancel?: () => void,
+	modalType?: 'error' | 'info' | 'alert';
+	props: any;
 }
 
 interface IDialogState {
@@ -41,14 +40,15 @@ export const INITIAL_STATE: IDialogState = {
 };
 
 export const { Types: DialogsTypes, Creators: DialogsActions } = createActions({
-	open: ['config'],
+	open: ['modalType', 'props'],
 	close: ['id'],
-}, { prefix: 'DIALOGS/' }) as { Types: Constants<IDialogActions>; Creators: IDialogActions };
+}, { prefix: 'MODALS/' }) as { Types: Constants<IDialogActions>; Creators: IDialogActions };
 
-export const openHandler = (state = INITIAL_STATE, { config }): IDialogState => {
+export const openHandler = (state = INITIAL_STATE, { modalType, props }): IDialogState => {
 	const dialog = {
 		id: uuid(),
-		...config,
+		modalType,
+		props,
 	};
 
 	const dialogs = [...state.dialogs, dialog];

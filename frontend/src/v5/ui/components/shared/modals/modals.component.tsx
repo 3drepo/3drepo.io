@@ -15,17 +15,38 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { selectDialogs } from '@/v5/store/dialogs/dialogs.selectors';
 import { Modal } from '@/v5/ui/controls/modal';
+import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
+import { MODAL_TEMPLATES } from './templates';
+
+const ModalTemplateContainer = ({ id, modalType, props }) => {
+	const [openState, setOpenState] = useState(true);
+
+	const dispatch = useDispatch();
+
+	const onClickClose = () => {
+		setOpenState(false);
+		setTimeout(() => dispatch(DialogsActions.close(id)), 500);
+	};
+
+	const ModalTemplate = MODAL_TEMPLATES[modalType];
+
+	return (
+		<Modal open={openState} onClickClose={onClickClose}>
+			<ModalTemplate onClickClose={onClickClose} {...props} />
+		</Modal>
+	);
+};
 
 export const ModalsDispatcher = (): JSX.Element => {
 	const dialogs = useSelector(selectDialogs);
 
 	return (
 		<>
-			{dialogs.map((dialog) => <Modal key={dialog.id} {...dialog} />)}
+			{dialogs.map((dialog) => <ModalTemplateContainer key={dialog.id} {...dialog} />)}
 		</>
 	);
 };
