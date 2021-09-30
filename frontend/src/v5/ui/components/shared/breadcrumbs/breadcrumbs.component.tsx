@@ -28,7 +28,7 @@ import { IProject } from '@/v5/store/projects/projects.redux';
 import { Container, Breadcrumb, InteractiveBreadcrumb } from './breadcrumbs.styles';
 import { NavigationMenu } from '../navigatonMenu';
 
-const createDefaultProjectLink = (url) => ({ to, title }) => ({ title, to: `${url}/${to}/federations` });
+const createDefaultProjectLink = (url) => ({ to, title }) => ({ title, to: `${url}/${to}/t/federations` });
 
 const createDefaultTeamspaceLink = (url) => ({ to, title }) => ({ title, to: `${url}/${to}` });
 

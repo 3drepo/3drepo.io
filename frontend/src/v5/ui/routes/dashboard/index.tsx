@@ -44,10 +44,9 @@ export const Dashboard = () => {
 					<Route path={`${path}/:teamspace/`}>
 						<TeamspaceContent />
 					</Route>
-
-					<RouteExcept path={`${path}/:teamspace/:project`} exceptPath={`${path}/:teamspace/settings`}>
+					<Route path={`${path}/:teamspace/:project`}>
 						<ProjectContent />
-					</RouteExcept>
+					</Route>
 				</Content>
 			</I18nProvider>
 		</Route>

@@ -32,13 +32,13 @@ export const ProjectContent = () => {
 				<Route exact path={path}>
 					project content
 				</Route>
-				<Route path={`${path}/federations`}>
+				<Route path={`${path}/t/federations`}>
 					<Federations />
 				</Route>
-				<Route path={`${path}/containers`}>
+				<Route path={`${path}/t/containers`}>
 					<Containers />
 				</Route>
-				<Route path={`${path}/settings`}>
+				<Route path={`${path}/t/settings`}>
 					Project settings
 				</Route>
 			</Switch>

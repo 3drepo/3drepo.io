@@ -29,14 +29,14 @@ export const TopNavigation = (): JSX.Element => {
 	const { project } = useParams();
 	return (
 		<Container>
-			{project && project !== 'settings'
+			{project
 				&& (
 					<>
-						<Link to={`${url}/federations`}><Trans id="Federations" /></Link>
-						<Link to={`${url}/containers`}><Trans id="Containers" /></Link>
+						<Link to={`${url}/t/federations`}><Trans id="Federations" /></Link>
+						<Link to={`${url}/t/containers`}><Trans id="Containers" /></Link>
 					</>
 				)}
-			<Link to={`${discardUrlComponent(url, 'settings')}/settings`}><Trans id="Settings" /></Link>
+			<Link to={`${discardUrlComponent(url, 'settings')}/t/settings`}><Trans id="Settings" /></Link>
 		</Container>
 	);
 };
