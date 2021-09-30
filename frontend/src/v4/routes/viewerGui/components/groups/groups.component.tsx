@@ -17,6 +17,8 @@
 
 import React from 'react';
 
+import fileDialog from 'file-dialog';
+
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import ArrowBack from '@material-ui/icons/ArrowBack';
@@ -84,6 +86,7 @@ interface IProps {
 	isolateGroup: (group) => void;
 	downloadGroups: (teamspace, model) => void;
 	exportGroups: (teamspace, model) => void;
+	importGroups: (teamspace, model, file) => void;
 	resetToSavedSelection: (groupId) => void;
 	resetActiveGroup: () => void;
 	subscribeOnChanges: (teamspace, modelId) => void;
@@ -111,15 +114,15 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	}
 
 	get menuActionsMap() {
-		const { setOverrideAll, teamspace, model, downloadGroups, exportGroups, isAllOverridden } = this.props;
+		const { setOverrideAll, teamspace, model, downloadGroups, exportGroups, importGroups, isAllOverridden } = this.props;
 		return {
 			[GROUPS_ACTIONS_ITEMS.SHOW_STANDARD]: () => {},
 			[GROUPS_ACTIONS_ITEMS.SHOW_SMART]: () => {},
 			[GROUPS_ACTIONS_ITEMS.EXPORT]: () => exportGroups(teamspace, model),
-			[GROUPS_ACTIONS_ITEMS.IMPORT]: () => {},
+			[GROUPS_ACTIONS_ITEMS.IMPORT]: () => fileDialog({accept: '.json'}, (files) => importGroups(teamspace, model, files[0])),
 			[GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL]: () => setOverrideAll(!isAllOverridden),
 			[GROUPS_ACTIONS_ITEMS.DELETE_ALL]: () => this.handleDeleteGroups(),
-			[GROUPS_ACTIONS_ITEMS.DOWNLOAD]: () => downloadGroups(teamspace, model)
+			[GROUPS_ACTIONS_ITEMS.DOWNLOAD]: () => downloadGroups(teamspace, model),
 		};
 	}
 

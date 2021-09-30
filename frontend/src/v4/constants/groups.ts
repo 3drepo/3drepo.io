@@ -47,8 +47,8 @@ export const GROUP_TYPES_ICONS = {
 };
 
 export const GROUPS_ACTIONS_ITEMS = {
-	NORMAL_GROUPS: 'show standard groups',
-	SMART_GROUPS: 'show smart groups',
+	SHOW_STANDARD: 'show standard groups',
+	SHOW_SMART: 'show smart groups',
 	EXPORT: 'export groups',
 	IMPORT: 'import groups',
 	OVERRIDE_ALL: 'overrideAll',
@@ -73,7 +73,7 @@ export const GROUPS_ACTIONS_MENU = [
 		Icon: Download
 	},
 	{
-		name: GROUPS_ACTIONS_ITEMS.Import,
+		name: GROUPS_ACTIONS_ITEMS.IMPORT,
 		label: 'Import Groups',
 		Icon: Upload
 	},

@@ -231,12 +231,31 @@ function* exportGroups({ teamspace, modelId}) {
 		const endpoint =
 			`${teamspace}/${modelId}/groups/export`;
 		const modelName = Viewer.settings ? Viewer.settings.name : '';
-		yield API.downloadJSONHttpPost('groups', modelName, `${endpoint}`, {groups: ids});
+		yield API.downloadJSONHttpPost('groups', modelName, endpoint, {groups: ids});
 	} catch (error) {
 		console.log(error);
 		yield put(DialogActions.showErrorDialog('export', 'groups', error));
 	}
 }
+
+function* importGroups({ teamspace, modelId, file}) {
+	try {
+		const endpoint =
+			`${teamspace}/${modelId}/groups/import`;
+		const reader = new FileReader();
+		reader.readAsText(file)
+
+		reader.addEventListener("load", () => {
+			API.default.post(endpoint, JSON.parse(reader.result));
+		}, false);
+
+
+	} catch (error) {
+		console.log(error);
+		yield put(DialogActions.showErrorDialog('export', 'groups', error));
+	}
+}
+
 
 function* showDetails({ group, revision }) {
 	try {
@@ -439,6 +458,7 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.ISOLATE_GROUP, isolateGroup);
 	yield takeLatest(GroupsTypes.DOWNLOAD_GROUPS, downloadGroups);
 	yield takeLatest(GroupsTypes.EXPORT_GROUPS, exportGroups);
+	yield takeLatest(GroupsTypes.IMPORT_GROUPS, importGroups);
 	yield takeLatest(GroupsTypes.SHOW_DETAILS, showDetails);
 	yield takeLatest(GroupsTypes.CLOSE_DETAILS, closeDetails);
 	yield takeLatest(GroupsTypes.CREATE_GROUP, createGroup);

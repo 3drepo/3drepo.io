@@ -37,8 +37,7 @@ const triggerDownloadWithJSON = (data, filename) => {
  */
 export const downloadJSON = (panelName, modelName, endpoint) => {
 	const timestamp = formatDate(Date.now(), 'DD_MM_YYYY_HH_mm_ss');
-
-	return api.get(endpoint).then((res) => triggerDownloadWithJSON(res.data, `${modelName}_${timestamp}_${panelName}.json`);
+	return api.get(endpoint).then((res) => triggerDownloadWithJSON(res.data, `${modelName}_${timestamp}_${panelName}.json`));
 };
 
 export const downloadJSONHttpPost = (panelName, modelName, endpoint, payload) => {
