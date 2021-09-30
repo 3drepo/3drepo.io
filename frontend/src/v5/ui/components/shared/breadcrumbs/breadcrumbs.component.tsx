@@ -28,9 +28,7 @@ import { IProject } from '@/v5/store/projects/projects.redux';
 import { Container, Breadcrumb, InteractiveBreadcrumb } from './breadcrumbs.styles';
 import { NavigationMenu } from '../navigatonMenu';
 
-const createDefaultProjectLink = (url) => ({ to, title }) => ({ title, to: `${url}/${to}/t/federations` });
-
-const createDefaultTeamspaceLink = (url) => ({ to, title }) => ({ title, to: `${url}/${to}` });
+const createToWithUrl = (url) => ({ to, title }) => ({ title, to: `${url}/${to}` });
 
 const teamspaceList2LinkList = (teamspaces: ITeamspace[]) => (teamspaces.length ? teamspaces.map(({ name }) => ({
 	to: name,
@@ -43,7 +41,9 @@ const projectList2LinkList = (projects: IProject[]) => (projects.length ? projec
 })) : []);
 
 export const Breadcrumbs = (): JSX.Element => {
-	const { teamspace, project } = useParams();
+	const { teamspace } = useParams();
+	let { project } = useParams();
+
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
 
@@ -52,6 +52,10 @@ export const Breadcrumbs = (): JSX.Element => {
 			ProjectsActionsDispatchers.fetch(teamspace);
 		}
 	}, [project, teamspace]);
+
+	if (projects.length && !projects.find(({ _id }) => _id === project)) {
+		project = null;
+	}
 
 	let { url } = useRouteMatch();
 
@@ -74,11 +78,7 @@ export const Breadcrumbs = (): JSX.Element => {
 		getBreadcrumbs.push(list.find(({ to }) => to === project).title);
 	}
 
-	if (project) {
-		list = list.map(createDefaultProjectLink(urlProject));
-	} else {
-		list = list.map(createDefaultTeamspaceLink(url));
-	}
+	list = list.map(createToWithUrl(project ? urlProject : url));
 
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
