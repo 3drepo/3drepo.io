@@ -222,7 +222,6 @@ function* downloadGroups({ teamspace, modelId }) {
 function* exportGroups({ teamspace, modelId}) {
 	try {
 		const filteredGroups = yield select(selectFilteredGroups);
-		console.log(filteredGroups);
 		const ids = filteredGroups.map(({_id}) => _id);
 		const endpoint =
 			`${teamspace}/${modelId}/groups/export`;
