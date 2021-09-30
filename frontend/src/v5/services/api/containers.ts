@@ -19,13 +19,13 @@ import { FavouritePayload } from '@/v5/store/containers/containers.types';
 import api from './default';
 
 export const addFavourites = ({ teamspace, projectId, containerId }: FavouritePayload) => (
-	api.patch(`teamspaces/${teamspace}/projects/${projectId}/favourites`, {
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites`, {
 		containers: [containerId],
 	})
 );
 
 export const removeFavourites = ({ teamspace, projectId, containerId }: FavouritePayload) => (
-	api.delete(`teamspaces/${teamspace}/projects/${projectId}/favourites`, {
+	api.delete(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites`, {
 		containers: [containerId],
 	})
 );

@@ -29,7 +29,7 @@ describe('Containers: sagas', () => {
 		it('should call addFavourite endpoint and dispatch TOGGLE_FAVOURITE_SUCCESS', async () => {
 
 			mockServer
-			.patch(`/teamspaces/${teamspace}/projects/${projectId}/favourites`)
+			.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
 			.reply(200)
 
 			await expectSaga(ContainersSaga.default)
@@ -41,7 +41,7 @@ describe('Containers: sagas', () => {
 		it('should call addFavourite endpoint with 404 and should not dispatch TOGGLE_FAVOURITE_SUCCESS', async () => {
 
 			mockServer
-			.patch(`/teamspaces/${teamspace}/projects/${projectId}/favourites`)
+			.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
 			.reply(404)
 
 			await expectSaga(ContainersSaga.default)
@@ -57,7 +57,7 @@ describe('Containers: sagas', () => {
 		it('should call removeFavourite endpoint and dispatch TOGGLE_FAVOURITE_SUCCESS', async () => {
 
 			mockServer
-			.delete(`/teamspaces/${teamspace}/projects/${projectId}/favourites`)
+			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
 			.reply(200)
 
 			await expectSaga(ContainersSaga.default)
@@ -69,7 +69,7 @@ describe('Containers: sagas', () => {
 		it('should call removeFavourite endpoint with 404 and not dispatch TOGGLE_FAVOURITE_SUCCESS', async () => {
 
 			mockServer
-			.delete(`/teamspaces/${teamspace}/projects/${projectId}/favourites`)
+			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
 			.reply(404)
 
 			await expectSaga(ContainersSaga.default)
