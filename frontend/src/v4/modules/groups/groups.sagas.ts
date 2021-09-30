@@ -22,7 +22,6 @@ import { CHAT_CHANNELS } from '../../constants/chat';
 import { GROUPS_TYPES } from '../../constants/groups';
 import { getRandomColor, hexToGLColor } from '../../helpers/colors';
 import { normalizeGroup, prepareGroup } from '../../helpers/groups';
-import { searchByFilters } from '../../helpers/searching';
 import { calculateTotalMeshes } from '../../helpers/tree';
 import * as API from '../../services/api';
 import { MultiSelect } from '../../services/viewer/multiSelect';
@@ -208,9 +207,7 @@ function* isolateGroup({ group }) {
 
 function* downloadGroups({ teamspace, modelId }) {
 	try {
-		const groups = yield select(selectGroups);
-		const filters = yield select(selectSelectedFilters);
-		const filteredGroups = searchByFilters(groups, filters, false);
+		const filteredGroups = yield select(selectFilteredGroups);
 		const ids = filteredGroups.map((group) => group._id).join(',');
 		const endpointBase =
 			`${teamspace}/${modelId}/revision/master/head/groups/?noIssues=true&noRisks=true&noViews=true`;
@@ -224,16 +221,14 @@ function* downloadGroups({ teamspace, modelId }) {
 
 function* exportGroups({ teamspace, modelId}) {
 	try {
-		const groups = yield select(selectGroups);
-		const filters = yield select(selectSelectedFilters);
-		const filteredGroups = searchByFilters(groups, filters, false);
+		const filteredGroups = yield select(selectFilteredGroups);
+		console.log(filteredGroups);
 		const ids = filteredGroups.map(({_id}) => _id);
 		const endpoint =
 			`${teamspace}/${modelId}/groups/export`;
 		const modelName = Viewer.settings ? Viewer.settings.name : '';
 		yield API.downloadJSONHttpPost('groups', modelName, endpoint, {groups: ids});
 	} catch (error) {
-		console.log(error);
 		yield put(DialogActions.showErrorDialog('export', 'groups', error));
 	}
 }
@@ -251,7 +246,6 @@ function* importGroups({ teamspace, modelId, file}) {
 
 
 	} catch (error) {
-		console.log(error);
 		yield put(DialogActions.showErrorDialog('export', 'groups', error));
 	}
 }
