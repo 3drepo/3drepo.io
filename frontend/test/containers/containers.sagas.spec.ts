@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import nock from 'nock';
 import * as ContainersSaga from '@/v5/store/containers/containers.sagas';
 import { expectSaga } from 'redux-saga-test-plan';
 import { ContainersActions } from '@/v5/store/containers/containers.redux';
+import { mockServer } from '../../internals/testing/mockServer';
 
 describe('Containers: sagas', () => {
 	const teamspace = 'teamspace';
@@ -28,7 +28,7 @@ describe('Containers: sagas', () => {
 	describe('addFavourite', () => {
 		it('should call addFavourite endpoint and dispatch TOGGLE_FAVOURITE_SUCCESS', async () => {
 
-			nock('http://api1.app-3drepo.com:80/api/v5')
+			mockServer
 			.patch(`/teamspaces/${teamspace}/projects/${projectId}/favourites`)
 			.reply(200)
 
@@ -40,7 +40,7 @@ describe('Containers: sagas', () => {
 
 		it('should call addFavourite endpoint with 404 and should not dispatch TOGGLE_FAVOURITE_SUCCESS', async () => {
 
-			nock('http://api1.app-3drepo.com:80/api/v5')
+			mockServer
 			.patch(`/teamspaces/${teamspace}/projects/${projectId}/favourites`)
 			.reply(404)
 
@@ -56,7 +56,7 @@ describe('Containers: sagas', () => {
 	describe('removeFavourite', () => {
 		it('should call removeFavourite endpoint and dispatch TOGGLE_FAVOURITE_SUCCESS', async () => {
 
-			nock('http://api1.app-3drepo.com:80/api/v5')
+			mockServer
 			.delete(`/teamspaces/${teamspace}/projects/${projectId}/favourites`)
 			.reply(200)
 
@@ -68,7 +68,7 @@ describe('Containers: sagas', () => {
 
 		it('should call removeFavourite endpoint with 404 and not dispatch TOGGLE_FAVOURITE_SUCCESS', async () => {
 
-			nock('http://api1.app-3drepo.com:80/api/v5')
+			mockServer
 			.delete(`/teamspaces/${teamspace}/projects/${projectId}/favourites`)
 			.reply(404)
 

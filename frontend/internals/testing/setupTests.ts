@@ -9,6 +9,10 @@ nock.disableNetConnect();
 
 (window as any).ClientConfig = clientConfigMock;
 
+beforeAll(() => {
+	jest.spyOn(console, 'error').mockImplementation(() => {});
+});
+
 beforeEach(() => {
 	if (!nock.isActive()) {
 		nock.activate();
