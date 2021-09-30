@@ -23,7 +23,7 @@ import { DialogActions } from '../../../../modules/dialog';
 import {
 	selectActiveGroupId,
 	selectColorOverrides,
-	selectGroups,
+	selectFilteredGroups,
 	selectGroupsMap,
 	selectHighlightedGroups,
 	selectIsAllOverridden,
@@ -39,7 +39,7 @@ import { withViewer } from '../../../../services/viewer/viewer';
 import { Groups } from './groups.component';
 
 const mapStateToProps = createStructuredSelector({
-	groups: selectGroups,
+	groups: selectFilteredGroups,
 	groupsMap: selectGroupsMap,
 	isPending: selectIsPending,
 	activeGroupId: selectActiveGroupId,
