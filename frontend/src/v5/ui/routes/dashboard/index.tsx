@@ -14,27 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-<<<<<<< HEAD:frontend/src/v5/ui/routes/dashboard/index.tsx
 import React from 'react';
 import { RouteExcept } from '@/v5/services/routing/routing';
-import { useRouteMatch, Route } from 'react-router-dom';
-=======
-import React, { useState } from 'react';
-import { ThemeProvider } from 'styled-components';
-import { Typography, MuiThemeProvider, Button } from '@material-ui/core';
-import { theme } from '@/v5/ui/themes/theme';
->>>>>>> ISSUE #2696 - decoupled dialogs from redux and added a formdialog:frontend/src/v5/ui/components/mainLayout/mainLayout.component.tsx
+import { useRouteMatch, Route, Switch } from 'react-router-dom';
 import { GlobalStyle } from '@/v5/ui/themes/global';
-import { useDispatch } from 'react-redux';
 
 import { i18n } from '@lingui/core';
 import { I18nProvider } from '@lingui/react';
 import { messages as esMessages } from '@/locales/es/messages';
 import { AppBar } from '@components/shared/appBar';
 import { messages as enMessages } from '@/locales/en/messages';
+import { ModalsDispatcher } from '@components/shared/modals';
 import { TeamspaceContent } from './teamspaces';
 import { ProjectContent } from './projects';
 import { Content } from './index.styles';
+import { ModalsDemo } from './modalsDemo';
 
 i18n.load('en', enMessages);
 i18n.load('es', esMessages);
@@ -50,14 +44,19 @@ export const Dashboard = () => {
 				<GlobalStyle />
 				<AppBar />
 				<Content>
-					<Route path={`${path}/:teamspace/`}>
-						<TeamspaceContent />
-					</Route>
-
+					<Switch>
+						<Route path={`${path}/modals/`}>
+							<ModalsDemo />
+						</Route>
+						<Route path={`${path}/:teamspace/`}>
+							<TeamspaceContent />
+						</Route>
+					</Switch>
 					<RouteExcept path={`${path}/:teamspace/:project`} exceptPath={`${path}/:teamspace/settings`}>
 						<ProjectContent />
 					</RouteExcept>
 				</Content>
+				<ModalsDispatcher />
 			</I18nProvider>
 		</Route>
 	);
