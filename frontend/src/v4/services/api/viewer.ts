@@ -18,6 +18,17 @@
 import { formatDate } from '../formatting/formatDate';
 import api from '.';
 
+const triggerDownloadWithJSON = (data, filename) => {
+	const content = JSON.stringify(data, null, 2);
+	const a = document.createElement('a');
+	const file = new Blob([content]);
+	a.href = URL.createObjectURL(file);
+	a.download = filename;
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+}
+
 /**
  * Download JSON file
  * @param panelName
@@ -27,17 +38,13 @@ import api from '.';
 export const downloadJSON = (panelName, modelName, endpoint) => {
 	const timestamp = formatDate(Date.now(), 'DD_MM_YYYY_HH_mm_ss');
 
-	return api.get(endpoint).then((res) => {
-		const content = JSON.stringify(res.data, null, 2);
-		const a = document.createElement('a');
-		const file = new Blob([content]);
-		a.href = URL.createObjectURL(file);
-		a.download = `${modelName}_${timestamp}_${panelName}.json`;
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-	});
+	return api.get(endpoint).then((res) => triggerDownloadWithJSON(res.data, `${modelName}_${timestamp}_${panelName}.json`);
 };
+
+export const downloadJSONHttpPost = (panelName, modelName, endpoint, payload) => {
+	const timestamp = formatDate(Date.now(), 'DD_MM_YYYY_HH_mm_ss');
+	return api.post(endpoint, payload).then(({data}) => triggerDownloadWithJSON(data, `${modelName}_${timestamp}_${panelName}.json`));
+}
 
 /**
  * Edit helicopter speed

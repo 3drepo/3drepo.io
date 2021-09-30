@@ -66,6 +66,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showConfirmDialog: DialogActions.showConfirmDialog,
 	isolateGroup: GroupsActions.isolateGroup,
 	downloadGroups: GroupsActions.downloadGroups,
+	exportGroups: GroupsActions.exportGroups,
 	resetToSavedSelection: GroupsActions.resetToSavedSelection,
 	resetActiveGroup: GroupsActions.resetActiveGroup,
 	subscribeOnChanges: GroupsActions.subscribeOnChanges,
