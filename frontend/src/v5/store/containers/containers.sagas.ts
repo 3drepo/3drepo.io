@@ -22,7 +22,7 @@ import {
 	ContainersTypes,
 } from '@/v5/store/containers/containers.redux';
 import { ExtendedAction } from '@/v5/store/store.types';
-import { FavouritePayload } from './containers.types';
+import { FavouritePayload, FetchContainersPayload, FetchContainersResponse } from './containers.types';
 
 export function* addFavourites({ containerId, teamspace, projectId }: ExtendedAction<FavouritePayload>) {
 	try {
@@ -42,7 +42,18 @@ export function* removeFavourites({ containerId, teamspace, projectId }: Extende
 	}
 }
 
+export function* fetchContainers({ teamspace, projectId }: ExtendedAction<FetchContainersPayload>) {
+	try {
+		const data: FetchContainersResponse = yield API.fetchContainers({ teamspace, projectId });
+
+		yield put(ContainersActions.fetchContainersSuccess(data.containers as any));
+	} catch (e) {
+		console.error(e);
+	}
+}
+
 export default function* ContainersSaga() {
 	yield takeLatest(ContainersTypes.ADD_FAVOURITE, addFavourites);
 	yield takeLatest(ContainersTypes.REMOVE_FAVOURITE, removeFavourites);
+	yield takeLatest(ContainersTypes.FETCH_CONTAINERS, fetchContainers);
 }

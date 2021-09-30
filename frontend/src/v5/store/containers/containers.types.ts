@@ -51,10 +51,21 @@ export interface FavouritePayload {
 }
 
 export interface IContainersActionCreators {
-	setFilterQuery: (query: string) => ExtendedAction<{query: string}, 'setFilterQuery'>
+	setFilterQuery: (query: string) => ExtendedAction<{ query: string }, 'setFilterQuery'>
 	addFavourite: (teamspace: string, projectId: string, containerId: string) => ExtendedAction<FavouritePayload, 'addFavourite'>
 	removeFavourite: (teamspace: string, projectId: string, containerId: string) => ExtendedAction<FavouritePayload, 'removeFavourite'>
-	toggleFavouriteSuccess: (containerId: string) => ExtendedAction<{containerId: string}, 'toggleFavouriteSuccess'>
+	toggleFavouriteSuccess: (containerId: string) => ExtendedAction<{ containerId: string }, 'toggleFavouriteSuccess'>
+	fetchContainers: (teamspace: string, projectId: string) => ExtendedAction<FetchContainersPayload, 'fetchContainers'>
+	fetchContainersSuccess: (containers: IContainer[]) => ExtendedAction<{ containers: IContainer[]}, 'fetchContainersSuccess'>
 }
 
 export type IContainersActions = AllReturnTypes<IContainersActionCreators>;
+
+export type FetchContainersPayload = {
+	teamspace: string;
+	projectId: string;
+};
+
+export type FetchContainersResponse = {
+	containers: Array<Pick<IContainer, '_id' | 'name' | 'role' | 'isFavourite'>>
+};

@@ -25,6 +25,7 @@ import AddCircleIcon from '@assets/icons/add_circle.svg';
 import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
+import { useParams } from 'react-router';
 import {
 	Container,
 	Content,
@@ -36,6 +37,8 @@ import { ContainersList } from './containersList';
 import { EmptySearchResults } from './containersList/emptySearchResults';
 
 export const Containers = (): JSX.Element => {
+	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+
 	const filteredContainers = ContainersHooksSelectors.selectFilteredContainers();
 	const favouriteContainers = ContainersHooksSelectors.selectFilteredFavouriteContainers();
 	const filterQuery = ContainersHooksSelectors.selectFilterQuery();
@@ -52,6 +55,10 @@ export const Containers = (): JSX.Element => {
 	useEffect(() => {
 		debounceSearchUpdate(searchInput);
 	}, [searchInput]);
+
+	useEffect(() => {
+		ContainersActionsDispatchers.fetchContainers(teamspace, project);
+	}, []);
 
 	return (
 		<Container>

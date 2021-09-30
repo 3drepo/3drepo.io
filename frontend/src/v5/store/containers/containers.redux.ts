@@ -26,6 +26,8 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	addFavourite: ['teamspace', 'projectId', 'containerId'],
 	removeFavourite: ['teamspace', 'projectId', 'containerId'],
 	toggleFavouriteSuccess: ['containerId'],
+	fetchContainers: ['teamspace', 'projectId'],
+	fetchContainersSuccess: ['containers'],
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
 
 export const INITIAL_STATE: IContainersState = {
@@ -54,7 +56,13 @@ export const toggleFavourite = (state = INITIAL_STATE, { containerId }: IContain
 	};
 };
 
+export const fetchContainersSuccess = (state = INITIAL_STATE, { containers }: IContainersActions['fetchContainersSuccess']) => ({
+	...state,
+	containers,
+});
+
 export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
 	[ContainersTypes.SET_FILTER_QUERY]: setFilterQuery,
 	[ContainersTypes.TOGGLE_FAVOURITE_SUCCESS]: toggleFavourite,
+	[ContainersTypes.FETCH_CONTAINERS_SUCCESS]: fetchContainersSuccess,
 });
