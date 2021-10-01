@@ -97,10 +97,12 @@ export const ContainersList = ({
 						sortedList.map((container) => (
 							<DashboardListItem
 								selected={container._id === selectedId}
-								onClick={() => toggleSelectedId(container._id)}
 								key={container._id}
 							>
-								<DashboardListItemRow>
+								<DashboardListItemRow
+									selected={container._id === selectedId}
+									onClick={() => toggleSelectedId(container._id)}
+								>
 									<DashboardListItemTitle
 										subtitle={(
 											<Trans
@@ -171,6 +173,9 @@ export const ContainersList = ({
 										<EllipsisButtonWithMenu list={getContainerMenuItems(container._id)} />
 									</DashboardListItemIcon>
 								</DashboardListItemRow>
+								{container._id === selectedId && (
+									<div style={{ backgroundColor: '#2E405F', width: '100%', height: '100px' }} />
+								)}
 							</DashboardListItem>
 						))
 					) : (

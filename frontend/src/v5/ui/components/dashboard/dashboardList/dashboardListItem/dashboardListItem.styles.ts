@@ -16,16 +16,11 @@
  */
 
 import styled, { css } from 'styled-components';
-import * as ButtonStyles from '@controls/button/button.styles';
-import * as FavouriteCheckboxStyles from '@controls/favouriteCheckbox/favouriteCheckbox.styles';
-import * as EllipsisButtonStyles from '@controls/ellipsisButton/ellipsisButton.styles';
-import { fade } from '@material-ui/core/styles';
+import * as DashboardListItemRowStyles from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemRow/dashboardListItemRow.styles';
 
 export const Container = styled.li`
 	box-sizing: border-box;
-	cursor: pointer;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	height: 80px;
+	height: 100%;
 	width: 100%;
 	list-style: none;
 	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
@@ -34,58 +29,44 @@ export const Container = styled.li`
 	&:last-child {
 		border-radius: 0 0 5px 5px;
 		border-bottom-style: solid;
+
+		${DashboardListItemRowStyles.Container} {
+			${({ selected }) => selected && css`
+				& + * {
+					border-radius: 0 0 5px 5px;
+				}
+			`}
+			
+			${({ selected }) => !selected && css`
+				border-radius: 0 0 5px 5px;
+			`}
+		}
 	}
 
 	&:first-child {
 		border-radius: 5px 5px 0 0;
-		border-top-style: solid;
+
+		${DashboardListItemRowStyles.Container} {
+			border-radius: 5px 5px 0 0;
+		}
 	}
 
 	&:only-child {
 		border-radius: 5px;
-	}
 
-	:hover {
-		border-color: ${({ theme }) => theme.palette.primary.contrast};
-		box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
-		z-index: 100;
-
-		& + li {
-			border-top-color: transparent;
+		${DashboardListItemRowStyles.Container} {
+			${({ selected }) => selected && css`
+				& + * {
+					border-radius: 0 0 5px 5px;
+				}
+			`}
+			${({ selected }) => !selected && css`
+				border-radius: 5px;
+			`}
 		}
 	}
 
-	${({ theme, selected }) => selected && css`
-		background-color: ${theme.palette.secondary.main};
+	${({ selected }) => selected && css`
 		border: none !important;
-
-		::before {
-			background-color: ${theme.palette.secondary.main};
-		}
-
-		${ButtonStyles.LabelButton} {
-			${ButtonStyles.labelButtonSecondaryStyles};
-			background-color: ${fade(theme.palette.tertiary.lightest, 0.8)};
-		}
-
-		${FavouriteCheckboxStyles.Checkbox} {
-			 &:hover {
-				background-color: ${fade(theme.palette.tertiary.lightest, 0.8)};
-			}
-
-			&:active {
-				background-color: ${theme.palette.base.lightest};
-			}
-		}
-
-		${EllipsisButtonStyles.StyledIconButton} {
-			&:hover {
-				background-color: ${fade(theme.palette.tertiary.lightest, 0.8)} !important;
-			}
-
-			&:active {
-				background-color: ${theme.palette.base.lightest} !important;
-			}
-		}
 	`}
 `;
