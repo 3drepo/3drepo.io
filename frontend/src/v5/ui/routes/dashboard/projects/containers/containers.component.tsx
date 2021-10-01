@@ -33,11 +33,13 @@ import {
 	UploadFileButton,
 } from './containers.styles';
 import { ContainersList } from './containersList';
+import { EmptySearchResults } from './containersList/emptySearchResults';
 
 export const Containers = (): JSX.Element => {
 	const filteredContainers = ContainersHooksSelectors.selectFilteredContainers();
-	const favouriteContainers = ContainersHooksSelectors.selectFavouriteContainers();
+	const favouriteContainers = ContainersHooksSelectors.selectFilteredFavouriteContainers();
 	const filterQuery = ContainersHooksSelectors.selectFilterQuery();
+	const hasContainers = ContainersHooksSelectors.selectHasContainers();
 
 	const [searchInput, setSearchInput] = useState(filterQuery);
 
@@ -87,14 +89,18 @@ export const Containers = (): JSX.Element => {
 						collapsed: <Trans id="containers.favourites.collapse.tooltip.show" message="Show favourites" />,
 						visible: <Trans id="containers.favourites.collapse.tooltip.hide" message="Hide favourites" />,
 					}}
-					emptyMessage={(
-						<DashboardListEmptyText>
-							<Trans
-								id="containers.favourites.emptyMessage"
-								message="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
-							/>
-						</DashboardListEmptyText>
-					)}
+					emptyMessage={
+						filterQuery && hasContainers.favourites ? (
+							<EmptySearchResults searchPhrase={filterQuery} />
+						) : (
+							<DashboardListEmptyText>
+								<Trans
+									id="containers.favourites.emptyMessage"
+									message="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
+								/>
+							</DashboardListEmptyText>
+						)
+					}
 				/>
 				<ContainersList
 					containers={filteredContainers}
@@ -109,16 +115,20 @@ export const Containers = (): JSX.Element => {
 						collapsed: <Trans id="containers.all.collapse.tooltip.show" message="Show all" />,
 						visible: <Trans id="containers.all.collapse.tooltip.hide" message="Hide all" />,
 					}}
-					emptyMessage={(
-						<>
-							<DashboardListEmptyText>
-								<Trans id="containers.all.emptyMessage" message="You haven’t created any Containers." />
-							</DashboardListEmptyText>
-							<NewContainerButton startIcon={<AddCircleIcon />}>
-								<Trans id="containers.all.newContainer" message="New Container" />
-							</NewContainerButton>
-						</>
-					)}
+					emptyMessage={
+						filterQuery && hasContainers.all ? (
+							<EmptySearchResults searchPhrase={filterQuery} />
+						) : (
+							<>
+								<DashboardListEmptyText>
+									<Trans id="containers.all.emptyMessage" message="You haven’t created any Containers." />
+								</DashboardListEmptyText>
+								<NewContainerButton startIcon={<AddCircleIcon />}>
+									<Trans id="containers.all.newContainer" message="New Container" />
+								</NewContainerButton>
+							</>
+						)
+					}
 				/>
 			</Content>
 		</Container>

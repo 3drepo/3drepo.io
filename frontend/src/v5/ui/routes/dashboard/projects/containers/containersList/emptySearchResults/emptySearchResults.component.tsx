@@ -15,18 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as faker from 'faker';
-import { IContainer } from '@/v5/store/containers/containers.types';
+import React from 'react';
+import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
+import { Trans } from '@lingui/react';
+import { SearchPhrase } from './emptySearchResults.styles';
 
-export const containerMockFactory = (overrides?: Partial<IContainer>): IContainer => ({
-	_id: faker.datatype.uuid(),
-	latestRevision: faker.random.words(2),
-	revisionsCount: faker.datatype.number({ min: 10, max: 1200 }),
-	lastUpdated: faker.date.past(2),
-	name: faker.random.words(3),
-	role: faker.random.arrayElement(['admin', 'collaborator']),
-	type: faker.random.word(),
-	code: faker.datatype.uuid(),
-	isFavourite: faker.datatype.boolean(),
-	...overrides,
-});
+type IEmptySearchResults = {
+	searchPhrase: string;
+};
+
+export const EmptySearchResults = ({ searchPhrase }: IEmptySearchResults): JSX.Element => (
+	<DashboardListEmptyText>
+		<Trans
+			id="containers.noSearchResults"
+			message="We couldn't find a match for <0>“{searchPhrase}”</0>. Please try another search."
+			components={[<SearchPhrase />]}
+			values={{ searchPhrase }}
+		/>
+	</DashboardListEmptyText>
+);

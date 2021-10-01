@@ -17,6 +17,7 @@
 
 import { createSelector } from 'reselect';
 import { IContainersState } from '@/v5/store/containers/containers.types';
+import { isEmpty } from 'lodash';
 
 const selectProjectsDomain = (state: { containers: IContainersState }) => state.containers;
 
@@ -35,6 +36,13 @@ export const selectFilteredContainers = createSelector(
 	) => [name, code, type].join(' ').toLowerCase().includes(filterQuery.toLowerCase())),
 );
 
-export const selectFavouriteContainers = createSelector(
+export const selectFilteredFavouriteContainers = createSelector(
 	selectFilteredContainers, (containers) => containers.filter(({ isFavourite }) => isFavourite),
+);
+
+export const selectHasContainers = createSelector(
+	selectContainers, (containers) => ({
+		favourites: containers.some(({ isFavourite }) => isFavourite),
+		all: !isEmpty(containers),
+	}),
 );
