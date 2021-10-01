@@ -19,7 +19,7 @@ import { createActions, createReducer } from 'reduxsauce';
 import { times } from 'lodash';
 import { Constants } from '@/v5/store/common/actions.helper';
 import { containerMockFactory } from './containers.fixtures';
-import { IContainersState } from './containers.types';
+import { ContainerStatuses, IContainersState } from './containers.types';
 
 export interface IContainersActions {
 	setFilterQuery: (query: string) => any;
@@ -30,7 +30,11 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActions>; Creators: IContainersActions };
 
 export const INITIAL_STATE: IContainersState = {
-	containers: times(10, () => containerMockFactory()),
+	containers: [
+		containerMockFactory({ status: ContainerStatuses.PROCESSING }),
+		containerMockFactory({ status: ContainerStatuses.QUEUED }),
+		...times(10, () => containerMockFactory()),
+	],
 	filterQuery: '',
 };
 

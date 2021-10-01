@@ -41,6 +41,7 @@ import { IContainer } from '@/v5/store/containers/containers.types';
 import { getContainerMenuItems } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.helpers';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { Highlight } from '@controls/highlight';
+import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision';
 import { useOrderedList } from './containersList.hooks';
 import { Container } from './containersList.styles';
 import { DEFAULT_SORT_CONFIG } from './containersList.constants';
@@ -105,11 +106,7 @@ export const ContainersList = ({
 								>
 									<DashboardListItemTitle
 										subtitle={(
-											<Trans
-												id="containers.list.item.subtitle"
-												message="Latest revision: {revision}"
-												values={{ revision: container.latestRevision }}
-											/>
+											<LatestRevision name={container.latestRevision} status={container.status} />
 										)}
 										selected={container._id === selectedId}
 										tooltipTitle={
@@ -167,9 +164,7 @@ export const ContainersList = ({
 											/>
 										</Tooltip>
 									</DashboardListItemIcon>
-									<DashboardListItemIcon
-										selected={container._id === selectedId}
-									>
+									<DashboardListItemIcon selected={container._id === selectedId}>
 										<EllipsisButtonWithMenu list={getContainerMenuItems(container._id)} />
 									</DashboardListItemIcon>
 								</DashboardListItemRow>

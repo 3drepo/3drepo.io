@@ -20,6 +20,15 @@ export interface IContainersState {
 	filterQuery: string;
 }
 
+export enum ContainerStatuses {
+	OK = 'ok',
+	FAILED = 'failed',
+	UPLOADING = 'uploading',
+	UPLOADED = 'uploaded',
+	QUEUED = 'queued',
+	PROCESSING = 'processing',
+}
+
 export interface IContainer {
 	_id: string;
 	name: string;
@@ -28,6 +37,7 @@ export interface IContainer {
 	lastUpdated: Date;
 	type: string;
 	code: string;
+	status: ContainerStatuses;
 	isFavourite: boolean;
 	role: string;
 }
