@@ -27,6 +27,8 @@ import {
 	selectGroupsMap,
 	selectHighlightedGroups,
 	selectIsAllOverridden,
+	selectShowSmart,
+	selectShowStandard,
 	selectIsPending,
 	selectSearchEnabled,
 	selectSelectedFilters,
@@ -51,6 +53,8 @@ const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
 	isModelLoaded: selectIsModelLoaded,
 	isAllOverridden: selectIsAllOverridden,
+	showSmart: selectShowSmart,
+	showStandard: selectShowStandard,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -62,6 +66,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	onFiltersChange: GroupsActions.onFiltersChange,
 	toggleColorOverride: GroupsActions.toggleColorOverride,
 	setOverrideAll: GroupsActions.setOverrideAll,
+	setShowSmartGroups: GroupsActions.setShowSmartGroups,
+	setShowStandardGroups: GroupsActions.setShowStandardGroups,
 	deleteGroups: GroupsActions.deleteGroups,
 	showConfirmDialog: DialogActions.showConfirmDialog,
 	isolateGroup: GroupsActions.isolateGroup,

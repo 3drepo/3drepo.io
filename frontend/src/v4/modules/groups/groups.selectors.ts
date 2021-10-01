@@ -81,6 +81,14 @@ export const selectIsAllOverridden = createSelector(
 	selectComponentState, (state) => state.allOverridden
 );
 
+export const selectShowSmart = createSelector(
+	selectComponentState, (state) => state.showSmart
+);
+
+export const selectShowStandard = createSelector(
+	selectComponentState, (state) => state.showStandard
+);
+
 export const selectFilteredGroups = createSelector(
 	selectGroups, selectSelectedFilters, (issues, selectedFilters) => {
 		return searchByFilters(issues, selectedFilters);

@@ -81,6 +81,8 @@ interface IProps {
 	saveGroup: (teamspace, model, group) => void;
 	toggleColorOverride: (group) => void;
 	setOverrideAll: (overrideAll) => void;
+	setShowSmartGroups: (enabled) => void;
+	setShowStandardGroups: (enabled) => void;
 	deleteGroups: (teamspace, model, groups) => void;
 	showConfirmDialog: (config) => void;
 	isolateGroup: (group) => void;
@@ -91,7 +93,7 @@ interface IProps {
 	resetActiveGroup: () => void;
 	subscribeOnChanges: (teamspace, modelId) => void;
 	unsubscribeFromChanges: (teamspace, modelId) => void;
-	id?: string;
+	id?: string	;
 }
 
 export class Groups extends React.PureComponent<IProps, IState> {
@@ -105,10 +107,18 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	}
 
 	get menuActionsMap() {
-		const { setOverrideAll, teamspace, model, downloadGroups, exportGroups, importGroups, isAllOverridden } = this.props;
+		const {
+			setOverrideAll, setShowStandardGroups, setShowSmartGroups,
+			teamspace, 	model,
+			downloadGroups, exportGroups, importGroups,
+			isAllOverridden, showStandard, showSmart
+		} = this.props;
+
 		return {
-			[GROUPS_ACTIONS_ITEMS.SHOW_STANDARD]: () => {},
-			[GROUPS_ACTIONS_ITEMS.SHOW_SMART]: () => {},
+			[GROUPS_ACTIONS_ITEMS.SHOW_STANDARD]: () => {
+				console.log(showStandard, this.props);
+				setShowStandardGroups(!showStandard)},
+			[GROUPS_ACTIONS_ITEMS.SHOW_SMART]: () => setShowSmartGroups(!showSmart),
 			[GROUPS_ACTIONS_ITEMS.EXPORT]: () => exportGroups(teamspace, model),
 			[GROUPS_ACTIONS_ITEMS.IMPORT]: () => fileDialog({accept: '.json'}, (files) => importGroups(teamspace, model, files[0])),
 			[GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL]: () => setOverrideAll(!isAllOverridden),
@@ -318,6 +328,8 @@ export class Groups extends React.PureComponent<IProps, IState> {
 						<StyledItemText>
 							{label}
 							{(name === GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL && this.props.isAllOverridden) && <Check fontSize="small" />}
+							{(name === GROUPS_ACTIONS_ITEMS.SHOW_SMART && this.props.showSmart) && <Check fontSize="small" />}
+							{(name === GROUPS_ACTIONS_ITEMS.SHOW_STANDARD && this.props.showStandard) && <Check fontSize="small" />}
 						</StyledItemText>
 					</StyledListItem>
 				);

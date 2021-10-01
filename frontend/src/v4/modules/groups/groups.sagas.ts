@@ -380,6 +380,24 @@ function * setOverrideAll({overrideAll}) {
 	}
 }
 
+function * setShowSmartGroups({enabled}) {
+
+	if (enabled) {
+		yield put(GroupsActions.setShowSmartGroupsSuccess());
+	} else {
+		yield put(GroupsActions.clearShowSmartGroupsSuccess());
+	}
+}
+
+function * setShowStandardGroups({enabled}) {
+	console.log("here.", enabled);
+	if (enabled) {
+		yield put(GroupsActions.setShowStandardGroupsSuccess());
+	} else {
+		yield put(GroupsActions.clearShowStandardGroupsSuccess());
+	}
+}
+
 const onUpdated = (updatedGroup) => {
 	const group = prepareGroup(updatedGroup);
 	const state = getState();
@@ -462,4 +480,6 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.RESET_TO_SAVED_SELECTION, resetToSavedSelection);
 	yield takeLatest(GroupsTypes.CLEAR_COLOR_OVERRIDES, clearColorOverrides);
 	yield takeLatest(GroupsTypes.SET_OVERRIDE_ALL, setOverrideAll);
+	yield takeLatest(GroupsTypes.SET_SHOW_SMART_GROUPS, setShowSmartGroups);
+	yield takeLatest(GroupsTypes.SET_SHOW_STANDARD_GROUPS, setShowStandardGroups);
 }
