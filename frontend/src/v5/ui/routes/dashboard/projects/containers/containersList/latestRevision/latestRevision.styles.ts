@@ -22,13 +22,13 @@ export const Name = styled(Typography).attrs({
 	variant: 'body1',
 	component: 'span',
 })`
-  font-weight: ${FONT_WEIGHT.BOLD};
+	font-weight: ${FONT_WEIGHT.BOLD};
 `;
 
 export const QueuedStatus = styled(Name)`
-  color: ${({ theme }) => theme.palette.favourite.dark};
+	color: ${({ theme }) => theme.palette.favourite.dark};
 `;
 
 export const ProcessingStatus = styled(Name)`
-  color: ${({ theme }) => theme.palette.tertiary.main};
+	color: ${({ theme }) => theme.palette.tertiary.main};
 `;

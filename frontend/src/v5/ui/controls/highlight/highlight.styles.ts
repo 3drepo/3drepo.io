@@ -17,17 +17,17 @@
 import styled from 'styled-components';
 
 export const Tag = styled.mark`
-  position: relative;
-  background-color: ${({ theme }) => theme.palette.primary.light};
+	position: relative;
+	background-color: ${({ theme }) => theme.palette.primary.light};
 
-  ::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 100%;
-    background-color: ${({ theme }) => theme.palette.primary.light};
+	::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0;
+		height: 100%;
+		width: 100%;
+		background-color: ${({ theme }) => theme.palette.primary.light};
 		opacity: 30%;
-  }
+	}
 `;
