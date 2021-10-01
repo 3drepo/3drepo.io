@@ -15,7 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const EventsManager = require('../services/eventsManager');
 const db = require('../handler/db');
+const { events } = require('../services/eventsManager.constants');
 const { templates } = require('../utils/responseCodes');
 
 const Groups = {};
@@ -40,7 +42,10 @@ Groups.getGroups = (teamspace, model, includeHidden, projection) => {
 	return findGroup(teamspace, model, query, projection);
 };
 
-Groups.addGroups = (teamspace, model, groups) => db.insertMany(teamspace, `${model}.groups`, groups);
+Groups.addGroups = async (teamspace, model, groups) => {
+	await db.insertMany(teamspace, `${model}.groups`, groups);
+	EventsManager.publish(events.NEW_GROUPS, { teamspace, model, groups });
+};
 
 Groups.updateGroup = async (teamspace, model, _id, action) => {
 	const res = await db.updateOne(teamspace, `${model}.groups`, { _id }, { $set: { ...action } });
@@ -48,6 +53,7 @@ Groups.updateGroup = async (teamspace, model, _id, action) => {
 	if (!res || res.matchedCount === 0) {
 		throw templates.groupNotFound;
 	}
+	EventsManager.publish(events.UPDATE_GROUP, { teamspace, model, _id, action });
 };
 
 module.exports = Groups;

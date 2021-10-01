@@ -17,7 +17,7 @@
 
 const EventManagerConst = {};
 
-const eventList = ['NEW_GROUP', 'UPDATE_GROUP'];
+const eventList = ['NEW_GROUPS', 'UPDATE_GROUP'];
 
 const generateEventsMap = () => {
 	const res = {};
