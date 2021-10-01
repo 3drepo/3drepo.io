@@ -90,8 +90,13 @@ export const selectShowStandard = createSelector(
 );
 
 export const selectFilteredGroups = createSelector(
-	selectGroups, selectSelectedFilters, (issues, selectedFilters) => {
-		return searchByFilters(issues, selectedFilters);
+	selectGroups, selectSelectedFilters, selectShowSmart, selectShowStandard, (groups, selectedFilters, showSmart, showStandard) => {
+		const filteredByType = showSmart && showStandard ? groups: groups.filter(({rules}) => {
+			const isSmart = rules?.length > 0;
+			return isSmart ? showSmart : showStandard;
+		});
+
+		return searchByFilters(filteredByType, selectedFilters);
 	}
 );
 
