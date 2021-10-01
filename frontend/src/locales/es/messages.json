@@ -26,12 +26,16 @@
   "containers.list.header.lastUpdated": "",
   "containers.list.header.revisions": "",
   "containers.list.item.favourite.tooltip": "",
+  "containers.list.item.latestRevision.label": "",
+  "containers.list.item.latestRevision.status.processing": "",
+  "containers.list.item.latestRevision.status.queued": "",
   "containers.list.item.revisions": "",
   "containers.list.item.revisions.tooltip": "",
   "containers.list.item.subtitle": "",
   "containers.list.item.title.tooltip": "",
   "containers.mainHeader.newContainer": "",
   "containers.mainHeader.uploadFile": "",
+  "containers.noSearchResults": "",
   "containers.search.placeholder": "",
   "ellipsisMenu.tooltip": ""
 }
