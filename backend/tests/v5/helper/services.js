@@ -59,11 +59,12 @@ db.createProject = (teamspace, _id, name, models = [], admins = []) => {
 	return DbHandler.insertOne(teamspace, 'projects', project);
 };
 
-db.createModel = (teamspace, _id, name, props) => {
+db.createModel = (teamspace, _id, name, props, subModels) => {
 	const settings = {
 		_id,
 		name,
 		...props,
+		subModels
 	};
 	return DbHandler.insertOne(teamspace, 'settings', settings);
 };

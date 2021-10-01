@@ -16,9 +16,10 @@
  */
 
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
-const { getFederations } = require('../../../../models/modelSettings');
+const { getFederations, getFederationById } = require('../../../../models/modelSettings');
 const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
+const { getLatestRevision } = require('../../../../models/revisions');
 
 const Federations = {};
 
@@ -37,6 +38,29 @@ Federations.appendFavourites = async (username, teamspace, project, favouritesTo
 Federations.deleteFavourites = async (username, teamspace, project, favouritesToRemove) => {
 	const accessibleFederations = await Federations.getFederationList(teamspace, project, username);
 	await deleteFavourites(username, teamspace, accessibleFederations, favouritesToRemove);
+};
+
+Federations.getFederationStats = async (teamspace, federation) => {
+	const settings = await getFederationById(teamspace, federation,	{ properties: 1, status: 1, subModels: 1, category: 1 });
+	
+	let lastUpdates = [];
+	if(settings.subModels){
+		await Promise.all(settings.subModels.map(async (m) => {
+			try {
+				lastUpdates.push(await getLatestRevision(teamspace, m.model, { timestamp: 1 }))
+			} catch {
+				// do nothing. A container can have 0 revision.
+			}
+		}));
+	}
+	
+	return {
+		code: settings.properties.code,
+		status: settings.status,
+		subModels: settings.subModels ?  settings.subModels : undefined,
+		category: settings.category,
+		lastUpdated: lastUpdates.length ? lastUpdates.sort((a,b)=>b.timestamp-a.timestamp)[0].timestamp: undefined
+	};
 };
 
 module.exports = Federations;

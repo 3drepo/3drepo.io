@@ -24,6 +24,7 @@ const ModelSettings = require(`${src}/models/modelSettings`);
 jest.mock('../../../../../../../src/v5/models/users');
 const Users = require(`${src}/models/users`);
 jest.mock('../../../../../../../src/v5/models/revisions');
+const Revisions = require(`${src}/models/revisions`);
 const Federations = require(`${src}/processors/teamspaces/projects/models/federations`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -34,7 +35,7 @@ const federationList = [
 	{ _id: 4, name: 'federation 4', permissions: [] },
 	{ _id: 5, name: 'federation 5' },
 ];
-
+	
 const federationSettings = {
 	federation1: {
 		_id: 1,
@@ -45,6 +46,8 @@ const federationSettings = {
 			code: 'FED1',
 		},
 		status: 'ok',
+		subModels: [{ model: 'model1'}, { model: 'model2'}],
+		category: 'category 1'
 	},
 	federation2: {
 		_id: 2,
@@ -55,7 +58,20 @@ const federationSettings = {
 			code: 'FED2',
 		},
 		status: 'processing',
+		subModels: [{ model: 'model3'}],
+		category: 'category 2'
 	},
+	federation3: {
+		_id: 3,
+		name: 'federation 3',
+		type: 'type 3',
+		properties: {
+			units: 'mm',
+			code: 'FED3',
+		},
+		status: 'processing',
+		category: 'category 3'
+	}
 };
 
 const user1Favourites = [1];
@@ -81,6 +97,12 @@ Users.deleteFavourites.mockImplementation((username, teamspace, favouritesToAdd)
 			user1Favourites.splice(index, 1);
 		}
 	}
+});
+
+Revisions.getLatestRevision.mockImplementation((teamspace, federation) => {
+	if (federation === 'model1') return {timestamp: 1234};
+	if (federation === 'model2') return {timestamp: 5678};
+	throw templates.revisionNotFound;
 });
 
 // Permissions mock
@@ -168,8 +190,34 @@ const testDeleteFavourites = () => {
 	});
 };
 
+const formatToStats = (settings, lastUpdated) => ({
+	code: settings.properties.code,
+	status: settings.status,
+	subModels: settings.subModels,
+	category: settings.category,
+	lastUpdated: lastUpdated
+});
+
+const testGetFederationStats = () => {
+	describe('Get federation stats', () => {
+		test('should return the stats if the federation exists and has subModels with revisions', async () => {
+			const res = await Federations.getFederationStats('teamspace', 'federation1');
+			expect(res).toEqual(formatToStats(federationSettings.federation1, 5678));
+		});
+		test('should return the stats if the federation exists and has subModels with no revisions', async () => {
+			const res = await Federations.getFederationStats('teamspace', 'federation2');
+			expect(res).toEqual(formatToStats(federationSettings.federation2));
+		});
+		test('should return the stats if the federation exists and has no subModels', async () => {
+			const res = await Federations.getFederationStats('teamspace', 'federation3');
+			expect(res).toEqual(formatToStats(federationSettings.federation3));
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/federations', () => {
 	testGetFederationList();
 	testAppendFavourites();
 	testDeleteFavourites();
+	testGetFederationStats();
 });

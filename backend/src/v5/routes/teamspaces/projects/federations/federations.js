@@ -18,7 +18,7 @@
 const Federations = require('../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../utils/sessions');
-const { hasAccessToTeamspace } = require('../../../../middleware/permissions/permissions');
+const { hasAccessToTeamspace, hasReadAccessToFederation } = require('../../../../middleware/permissions/permissions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
 
@@ -47,6 +47,18 @@ const deleteFavourites = (req, res) => {
 	Federations.deleteFavourites(user, teamspace, project, favouritesToRemove)
 		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
 };
+
+const getFederationStats = async (req, res) => {
+	const { teamspace, federation } = req.params;
+	Federations.getFederationStats(teamspace, federation).then((stats) => {
+		const statsSerialised = { ...stats };
+		statsSerialised.lastUpdated = stats.lastUpdated ? stats.lastUpdated.getTime() : undefined;
+		respond(req, res, templates.ok, statsSerialised);
+	}).catch(
+		/* istanbul ignore next */
+		(err) => respond(req, res, err),
+	);
+}
 
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
@@ -195,6 +207,72 @@ const establishRoutes = () => {
 	 */
 	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites);
 
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/stats:
+	 *   get:
+	 *     description: Get the statistics and general information about a federation
+	 *     tags: [Federations]
+	 *     operationId: getFederationStats
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - project:
+	 *         name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - federation:
+	 *         name: federation
+	 *         description: Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: returns the statistics of a federation
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 code:
+	 *                   type: string
+	 *                   description: Federation code
+	 *                   example: STR-01
+     *                 status:
+	 *                   type: string
+	 *                   description: Current status of the federation
+	 *                   example: ok
+   	 *                 submodels:
+	 *                   type: array
+	 *                   description: The IDs of the models the federation consists of
+	 *                   items:
+	 *                     type: string
+	 *                     format: uuid
+     *                 category:
+	 *                   type: string
+	 *                   description: Category of the federation
+	 *                   example: 
+     *                 lastUpdated:
+	 *                   type: integer
+	 *                   description: Timestamp(ms) of when any of the submodels was updated
+	 *                   example: 1630598072000
+	 */
+	 router.get('/:federation/stats', hasReadAccessToFederation, getFederationStats);
 	return router;
 };
 
