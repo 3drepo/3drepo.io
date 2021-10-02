@@ -240,7 +240,7 @@ function* importGroups({ teamspace, modelId, file}) {
 		reader.readAsText(file)
 
 		reader.addEventListener("load", () => {
-			API.default.post(endpoint, JSON.parse(reader.result));
+			API.default.post(endpoint, {...JSON.parse(reader.result)});
 		}, false);
 
 
