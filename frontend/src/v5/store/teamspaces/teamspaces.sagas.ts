@@ -15,19 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { put, takeLatest } from 'redux-saga/effects';
+import * as API from '@/v5/services/api';
+import { TeamspacesActions, TeamspacesTypes, ITeamspace } from './teamspaces.redux';
 
-export const Items = styled.div`
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	width: 50%;
-
-	&:last-child {
-		justify-content: flex-end;
+export function* fetch() {
+	try {
+		const { data: { teamspaces } } = yield API.fetchTeamspaces();
+		yield put(TeamspacesActions.fetchSuccess(teamspaces as ITeamspace[]));
+	} catch (e) {
+		yield put(TeamspacesActions.fetchFailure());
 	}
+}
 
-	& > *:last-child div {
-		margin-right: 0;
-	}
-`;
+export default function* TeamspacesSaga() {
+	yield takeLatest(TeamspacesTypes.FETCH as any, fetch);
+}

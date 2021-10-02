@@ -15,19 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { createSelector } from 'reselect';
 
-export const Items = styled.div`
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	width: 50%;
+const selectProjectsDomain = (state) => state.projects;
 
-	&:last-child {
-		justify-content: flex-end;
-	}
+export const selectProjects = createSelector(
+	selectProjectsDomain, (state) => state.projects,
+);
 
-	& > *:last-child div {
-		margin-right: 0;
-	}
-`;
+export const selectCurrentTeamspace = createSelector(
+	selectProjectsDomain, (state) => state.currentTeamspace,
+);
+
+export const selectCurrentProjects = createSelector(
+	selectCurrentTeamspace, selectProjects, (teamspace, state) => state[teamspace] || [],
+);
