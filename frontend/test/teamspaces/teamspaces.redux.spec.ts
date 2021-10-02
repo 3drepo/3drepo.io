@@ -15,19 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { INITIAL_STATE, reducer as teamspaceReducer, TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 
-export const Items = styled.div`
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	width: 50%;
+describe('Teamspace: redux', () => {
+	const defaultState = {
+		...INITIAL_STATE,
+	};
 
-	&:last-child {
-		justify-content: flex-end;
-	}
+	describe('on fetchSuccess action', () => {
+		it('should set teamspaces', () => {
+			const teamspaces = [{
+				name: 'teamspace 1',
+				isAdmin: true,
+			}, {
+				name: 'teamspace-2',
+				isAdmin: true,
+			}, {
+				name: 'teamspace_3',
+				isAdmin: false,
+			}];
 
-	& > *:last-child div {
-		margin-right: 0;
-	}
-`;
+			expect(teamspaceReducer(defaultState, TeamspacesActions.fetchSuccess(teamspaces))).toEqual({
+				...defaultState,
+				teamspaces,
+			});
+		});
+	});
+});

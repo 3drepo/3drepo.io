@@ -26,7 +26,7 @@ export const TeamspaceContent = () => {
 	return (
 		<>
 			<Switch>
-				<Route exact path={`${path}/settings`}>
+				<Route exact path={`${path}/t/settings`}>
 					Teamspace settings
 				</Route>
 
