@@ -1,6 +1,6 @@
 ---
 name: QA Report
-about: Report your testing results of release candidate, or you wish to report multiple
+about: Report your release candidate QA test results, or you wish to report multiple
   bugs within the same feature
 title: ''
 labels: bug
