@@ -390,7 +390,6 @@ function * setShowSmartGroups({enabled}) {
 }
 
 function * setShowStandardGroups({enabled}) {
-	console.log("here.", enabled);
 	if (enabled) {
 		yield put(GroupsActions.setShowStandardGroupsSuccess());
 	} else {

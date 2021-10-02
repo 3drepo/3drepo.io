@@ -91,7 +91,7 @@ export const selectShowStandard = createSelector(
 
 export const selectFilteredGroups = createSelector(
 	selectGroups, selectSelectedFilters, selectShowSmart, selectShowStandard, (groups, selectedFilters, showSmart, showStandard) => {
-		const filteredByType = showSmart && showStandard ? groups: groups.filter(({rules}) => {
+		const filteredByType = showSmart && showStandard ? groups : groups.filter(({ rules }) => {
 			const isSmart = rules?.length > 0;
 			return isSmart ? showSmart : showStandard;
 		});

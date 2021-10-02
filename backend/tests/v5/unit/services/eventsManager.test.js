@@ -31,14 +31,14 @@ describe('services/eventsManager', () => {
 
 	test('Should be able to subscribe to a known event', () => {
 		const fn = jest.fn();
-		EventsManager.subscribe(events.NEW_GROUP, fn);
+		EventsManager.subscribe(events.NEW_GROUPS, fn);
 
 		EventsManager.publish(events.UPDATE_GROUP, { abc: 234 });
 
 		expect(fn.mock.calls.length).toBe(0);
 
 		const msg = { abc: 123 };
-		EventsManager.publish(events.NEW_GROUP, msg);
+		EventsManager.publish(events.NEW_GROUPS, msg);
 
 		expect(fn.mock.calls.length).toBe(1);
 		expect(fn.mock.calls[0][0]).toEqual(msg);

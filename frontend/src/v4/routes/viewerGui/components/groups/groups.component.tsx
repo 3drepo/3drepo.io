@@ -62,6 +62,8 @@ interface IProps {
 	model: any;
 	revision?: string;
 	isAllOverridden: boolean;
+	showSmart: boolean;
+	showStandard: boolean;
 	isPending?: boolean;
 	showDetails?: boolean;
 	groups: any[];
@@ -96,7 +98,7 @@ interface IProps {
 	id?: string	;
 }
 
-export class Groups extends React.PureComponent<IProps, IState> {
+export class Groups extends React.PureComponent<IProps> {
 
 	get type() {
 		return VIEWER_PANELS.GROUPS;
@@ -115,9 +117,7 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		} = this.props;
 
 		return {
-			[GROUPS_ACTIONS_ITEMS.SHOW_STANDARD]: () => {
-				console.log(showStandard, this.props);
-				setShowStandardGroups(!showStandard)},
+			[GROUPS_ACTIONS_ITEMS.SHOW_STANDARD]: () => setShowStandardGroups(!showStandard),
 			[GROUPS_ACTIONS_ITEMS.SHOW_SMART]: () => setShowSmartGroups(!showSmart),
 			[GROUPS_ACTIONS_ITEMS.EXPORT]: () => exportGroups(teamspace, model),
 			[GROUPS_ACTIONS_ITEMS.IMPORT]: () => fileDialog({accept: '.json'}, (files) => importGroups(teamspace, model, files[0])),
@@ -248,8 +248,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		const groupsChanged = !isEqual(prevProps.groups, groups);
 		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
 
-		const changes = {} as IState;
-
 		if (filtersChanged && activeGroupId) {
 			const isSelectedGroupVisible = prevProps.groups.some(({ _id }) => {
 				return _id === activeGroupId;
@@ -260,9 +258,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 			}
 		}
 
-		if (!isEmpty(changes)) {
-			this.setState(changes);
-		}
 	}
 
 	public componentWillUnmount() {

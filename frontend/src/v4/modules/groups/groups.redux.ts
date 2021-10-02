@@ -90,6 +90,8 @@ export interface IGroupComponentState {
 	totalMeshes: number;
 	criteriaFieldState: ICriteriaFieldState;
 	allOverridden: boolean;
+	showSmart: boolean;
+	showStandard: boolean;
 	searchEnabled: boolean;
 	fetchingDetailsIsPending: boolean;
 }
