@@ -15,9 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
-const { convertAllUUIDs } = require('../dataConverter/pathParams');
-*/
 const { isString, isUUIDString } = require('../../../../utils/helper/typeCheck');
 const { respond } = require('../../../../utils/responder');
 const { stringToUUID } = require('../../../../utils/helper/uuids');

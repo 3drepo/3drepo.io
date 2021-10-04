@@ -79,6 +79,7 @@ const model1Revisions = [
 ];
 
 ProjectsModel.getProjectById.mockImplementation(() => project);
+ModelSettings.getModelByName.mockImplementation((ts, models, name) => 'model1' === name ? modelList[0] : undefined);
 ModelSettings.getModels.mockImplementation(() => modelList);
 ModelSettings.getContainers.mockImplementation(() => modelList);
 ModelSettings.getContainerById.mockImplementation((teamspace, container) => containerSettings[container]);
@@ -266,12 +267,12 @@ const testDeleteContainer = () => {
 	describe('Delete container', () => {
 		test('should succeed for teamspace admin', async () => {
 			const res = await Containers.deleteContainer('teamspace', 'project', 1, 'tsAdmin');
-			expect(res).toEqual({});
+			expect(res).toEqual(undefined);
 		});
 
 		test('should succeed for project admin', async () => {
 			const res = await Containers.deleteContainer('teamspace', 'project', 1, 'projAdmin');
-			expect(res).toEqual({});
+			expect(res).toEqual(undefined);
 		});
 
 		test('should return not authorized error if user not admin', async () => {

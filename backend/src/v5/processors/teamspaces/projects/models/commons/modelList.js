@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addModel, deleteModel, getModels } = require('../../../../../models/modelSettings');
+const { addModel, deleteModel, getModelByName } = require('../../../../../models/modelSettings');
 const { addProjectModel, getProjectById } = require('../../../../../models/projects');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
 const { getFavourites } = require('../../../../../models/users');
@@ -33,9 +33,9 @@ ModelList.addModel = async (teamspace, project, user, data) => {
 		throw templates.notAuthorized;
 	}
 
-	const modelSettings = await getModels(teamspace, models, undefined, { _id: 0, name: 1 });
+	const modelSetting = await getModelByName(teamspace, models, data.name, { _id: 0, name: 1 });
 
-	if (modelSettings.map((setting) => setting.name).includes(data.name)) {
+	if (modelSetting) {
 		throw templates.duplicateModelName;
 	}
 
@@ -61,8 +61,6 @@ ModelList.deleteModel = async (teamspace, project, model, user) => {
 	if (response.deletedCount === 0) {
 		throw templates.modelNotFound;
 	}
-
-	return {};
 };
 
 ModelList.getModelList = async (teamspace, project, user, modelSettings) => {

@@ -24,12 +24,11 @@ const { templates } = require('../../../../utils/responseCodes');
 
 const Containers = {};
 
-Containers.addContainer = (teamspace, project, user, data) => addModel(teamspace, project, user, data);
+Containers.addContainer = addModel;
 
 Containers.deleteContainer = async (teamspace, project, container, user) => {
 	try {
-		const res = await deleteModel(teamspace, project, container, user);
-		return res;
+		await deleteModel(teamspace, project, container, user);
 	} catch (err) {
 		if (err?.code === templates.modelNotFound.code) {
 			throw templates.containerNotFound;

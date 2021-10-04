@@ -199,12 +199,12 @@ const testAddContainer = () => {
 		});
 
 		test('should fail if container name already exists', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.duplicateModelName.status).send({ name: models[0].name, unit: 'mm' });
+			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.duplicateModelName.status).send({ name: models[0].name, unit: 'mm', type: 'a' });
 			expect(res.body.code).toEqual(templates.duplicateModelName.code);
 		});
 
 		test('should return new container ID if the user has permissions', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status).send({ name: 'container name', unit: 'mm' });
+			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status).send({ name: 'container name', unit: 'mm', type: 'a' });
 			expect(isUUIDString(res.body._id)).toEqual(true);
 		});
 	});

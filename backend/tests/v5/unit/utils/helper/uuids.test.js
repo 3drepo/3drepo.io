@@ -60,9 +60,13 @@ const testGenerateUUID = () => {
 			expect(isUUIDString(res)).toEqual(false);
 			expect(isUUIDString(UUIDHelper.UUIDToString(res))).toEqual(true);
 		});
+	});
+};
 
-		test('should return UUID string when string option set', () => {
-			const res = UUIDHelper.generateUUID({ string: true });
+const testGenerateStringUUID = () => {
+	describe('Generate string UUID', () => {
+		test('should return UUID string', () => {
+			const res = UUIDHelper.generateStringUUID();
 			expect(isUUIDString(res)).toEqual(true);
 		});
 	});
@@ -72,4 +76,5 @@ describe('utils/helper/uuid', () => {
 	testStringToUUID();
 	testUUIDToString();
 	testGenerateUUID();
+	testGenerateStringUUID();
 });

@@ -22,13 +22,9 @@ const { isUUIDString } = require('./typeCheck');
 
 const UuidUtils = {};
 
-UuidUtils.generateUUID = (options) => {
-	if (options && options.string) {
-		return NodeUUID();
-	}
+UuidUtils.generateUUID = () => UuidUtils.stringToUUID(NodeUUID());
 
-	return UuidUtils.stringToUUID(NodeUUID());
-};
+UuidUtils.generateStringUUID = () => NodeUUID();
 
 UuidUtils.stringToUUID = (uuid) => {
 	if (!isUUIDString(uuid) || uuid === '') return uuid;
