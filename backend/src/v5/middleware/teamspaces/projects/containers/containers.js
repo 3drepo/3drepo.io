@@ -54,7 +54,7 @@ Containers.validContainerName = (req, res, next) => {
 		// eslint-disable-next-line
 		const modelNameRegExp = /^[\x00-\x7F]{1,120}$/;
 
-		if (req.body.name.match(modelNameRegExp)) {
+		if (isString(req.body.name) && req.body.name.match(modelNameRegExp)) {
 			next();
 		} else {
 			respond(req, res, templates.invalidContainerName);
