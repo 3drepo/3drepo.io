@@ -71,7 +71,7 @@ export default function createReducer(history) {
 		currentUser: currentUserReducer,
 		userManagement: userManagementReducer,
 		dialog: dialogReducer,
-		dialogs: dialogsReducer,
+		dialogsV5: dialogsReducer,
 		jobs: jobsReducer,
 		snackbar: snackbarReducer,
 		billing: billingReducer,

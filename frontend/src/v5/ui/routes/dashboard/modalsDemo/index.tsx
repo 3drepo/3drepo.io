@@ -38,7 +38,6 @@ export const ModalsDemo = () => {
 	};
 
 	const onSubmit = () => {
-	// console.log(JSON.stringify(data));
 		setOpen(false);
 	};
 

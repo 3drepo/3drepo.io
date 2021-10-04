@@ -16,7 +16,7 @@
  */
 import { createSelector } from 'reselect';
 
-export const selectDialogDomain = (state) => state.dialogs;
+export const selectDialogDomain = (state) => state.dialogsV5;
 
 export const selectDialogs = createSelector(
 	selectDialogDomain, (state) => state.dialogs,
