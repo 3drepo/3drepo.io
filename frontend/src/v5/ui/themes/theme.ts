@@ -215,6 +215,12 @@ export const theme = createMuiTheme({
 		},
 	},
 	overrides: {
+		MuiBackdrop: {
+			root: {
+				backgroundColor: 'rgba(18, 30, 51, 0.9)',
+				backdropFilter: 'blur(10px)',
+			},
+		},
 		MuiDialog: {
 			paper: {
 				minWidth: '30%',
