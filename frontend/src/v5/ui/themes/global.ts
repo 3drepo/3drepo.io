@@ -21,6 +21,7 @@ export const GlobalStyle = createGlobalStyle`
 	html, body {
 		height: 100%;
 		position: relative;
+		overflow-y: hidden;
 	}
 	
 	body {

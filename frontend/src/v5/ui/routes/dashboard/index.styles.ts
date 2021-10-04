@@ -20,5 +20,6 @@ import styled from 'styled-components';
 export const Content = styled.section`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	display: block;
-	padding: 100px 20px;
+	padding: 36px 20px 100px;
+	overflow-y: scroll;
 `;

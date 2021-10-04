@@ -61,7 +61,9 @@ function configureStore() {
 		)
 	);
 
-	sagaMiddleware.run(rootSaga);
+	if (process.env.NODE_ENV !== 'test') {
+		sagaMiddleware.run(rootSaga);
+	}
 
 	return store;
 }
