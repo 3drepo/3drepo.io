@@ -1,5 +1,5 @@
 require('fake-indexeddb/auto');
-import nock from 'nock';
+const nock = require('nock');
 import axios from 'axios';
 import clientConfigMock from './clientConfig.mock';
 
