@@ -41,14 +41,14 @@ Federations.deleteFavourites = async (username, teamspace, project, favouritesTo
 };
 
 Federations.getFederationStats = async (teamspace, federation) => {
-	const settings = await getFederationById(teamspace, federation, { properties: 1,
+	const { properties, status, subModels, category } = await getFederationById(teamspace, federation, { properties: 1,
 		status: 1,
 		subModels: 1,
 		category: 1 });
 
 	const lastUpdates = [];
-	if (settings.subModels) {
-		await Promise.all(settings.subModels.map(async (m) => {
+	if (subModels) {
+		await Promise.all(subModels.map(async (m) => {
 			try {
 				lastUpdates.push(await getLatestRevision(teamspace, m.model, { timestamp: 1 }));
 			} catch {
@@ -58,10 +58,10 @@ Federations.getFederationStats = async (teamspace, federation) => {
 	}
 
 	return {
-		code: settings.properties.code,
-		status: settings.status,
-		subModels: settings.subModels ? settings.subModels : undefined,
-		category: settings.category,
+		code: properties.code,
+		status: status,
+		subModels: subModels,
+		category: category,
 		lastUpdated: lastUpdates.length ? lastUpdates.sort(
 			(a, b) => b.timestamp - a.timestamp,
 		)[0].timestamp : undefined,

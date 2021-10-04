@@ -46,14 +46,12 @@ const modelSettings = [
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
 		isFavourite: true,
-		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true },
-		subModels: [{ model: modelWithRevId }],
+		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true, subModels: [{ model: modelWithRevId }] },		
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
-		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true },
-		subModels: [{ model: modelWithoutRevId }],
+		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true, subModels: [{ model: modelWithoutRevId }] },		
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
@@ -97,8 +95,7 @@ const setupData = async () => {
 		teamspace,
 		model._id,
 		model.name,
-		model.properties,
-		model.subModels,
+		model.properties
 	));
 	return Promise.all([
 		...userProms,
@@ -146,7 +143,7 @@ const formatToStats = (federation, latestRev) => {
 	const formattedStats = {
 		code: federation.properties.properties.code,
 		status: federation.properties.status,
-		subModels: federation.subModels,
+		subModels: federation.properties.subModels,
 		lastUpdated: latestRev ? latestRev.getTime() : undefined,
 	};
 
