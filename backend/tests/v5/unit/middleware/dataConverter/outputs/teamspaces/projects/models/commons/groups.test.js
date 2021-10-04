@@ -30,6 +30,15 @@ const GroupsOutputMiddlewares = require(`${src}/middleware/dataConverter/outputs
 const respondFn = Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const testSerialiseGroupArray = () => {
+	const badRuleCast = generateGroup('a', 'b', true, false, false);
+	badRuleCast.rules = [{
+		field: 'Element ID',
+		operator: 'IS_NOT_EMPTY',
+		values: [
+			'',
+		],
+	}];
+
 	describe.each([
 		[[], 'empty array'],
 		[
@@ -40,6 +49,7 @@ const testSerialiseGroupArray = () => {
 			],
 			'3 different group types',
 		],
+		[[badRuleCast], 'Bad schema'],
 	])('Serialise Group array data', (data, desc) => {
 		test(`should serialise correctly with ${desc}`,
 			() => {
@@ -60,6 +70,16 @@ const testSerialiseGroupArray = () => {
 								entry.shared_ids = entry.shared_ids.map(UUIDToString);
 							}
 							return entry;
+						});
+					}
+
+					if ((group.rules || []).length) {
+						res.rules = group.rules.map((entry) => {
+							const output = { ...entry };
+							if (entry.operator === 'IS_NOT_EMPTY') {
+								delete output.values;
+							}
+							return output;
 						});
 					}
 
