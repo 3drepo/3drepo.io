@@ -89,6 +89,9 @@ function* fetchData({ teamspace, model }) {
 		yield all([
 			put(ViewerGuiActions.loadModel()),
 			put(TreeActions.fetchFullTree(teamspace, model, revision)),
+		]);
+
+		yield all([
 			put(IssuesActions.fetchIssues(teamspace, model, revision)),
 			put(RisksActions.fetchRisks(teamspace, model, revision)),
 			put(GroupsActions.fetchGroups(teamspace, model, revision)),

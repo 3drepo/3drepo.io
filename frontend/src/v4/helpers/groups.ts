@@ -18,7 +18,7 @@
 import { isEqual, omit, pick } from 'lodash';
 import { select } from 'redux-saga/effects';
 import { GROUP_TYPES_ICONS, GROUPS_TYPES } from '../constants/groups';
-import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds } from '../modules/tree';
+import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds, selectGetNumNodesByMeshSharedIdsArray } from '../modules/tree';
 import { COLOR } from '../styles';
 import { hasSameElements } from './arrays';
 import { getGroupHexColor, hexToArray } from './colors';
@@ -41,9 +41,38 @@ export const prepareGroup = (group) => {
 		color: getGroupHexColor(group.color),
 		rules: (group.rules || []).map(prepareCriterion),
 		objects: group.objects || [],
-		totalSavedMeshes: calculateTotalMeshes(group.objects) || 0
 	};
 };
+
+export function* prepareGroupWithCount(group) {
+
+	let nodeCount = 0;
+	for (let i = 0; i < (group.objects || []).length; ++i) {
+		const entry = group.objects[i];
+
+		const nNodes = yield select(selectGetNumNodesByMeshSharedIdsArray(entry.shared_ids));
+		nodeCount += nNodes;
+	}
+
+	const isSmartGroup = group.rules && group.rules.length;
+	const type = isSmartGroup ? GROUPS_TYPES.SMART : GROUPS_TYPES.NORMAL;
+
+	return {
+		...omit(group, 'author', 'createdDate', 'description'),
+		_id: group._id,
+		owner: group.author,
+		created: group.createdAt,
+		desc: group.description,
+		type,
+		StatusIconComponent: GROUP_TYPES_ICONS[type],
+		statusColor: COLOR.BLACK_54,
+		color: getGroupHexColor(group.color),
+		rules: (group.rules || []).map(prepareCriterion),
+		objects: group.objects || [],
+		totalSavedMeshes: nodeCount
+	};
+
+}
 
 export const normalizeGroup = (group) => {
 	const normalizedGroup = {
