@@ -14,17 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React from 'react';
-import { RouteExcept } from '@/v5/services/routing/routing';
-import { useRouteMatch, Route, Switch } from 'react-router-dom';
-import { GlobalStyle } from '@/v5/ui/themes/global';
 
+import React from 'react';
+import { useRouteMatch, useLocation, Route, Switch, Redirect } from 'react-router-dom';
+import { GlobalStyle } from '@/v5/ui/themes/global';
 import { i18n } from '@lingui/core';
 import { I18nProvider } from '@lingui/react';
 import { messages as esMessages } from '@/locales/es/messages';
 import { AppBar } from '@components/shared/appBar';
 import { messages as enMessages } from '@/locales/en/messages';
 import { ModalsDispatcher } from '@components/shared/modals';
+import { discardSlash } from '@/v5/services/routing/routing';
 import { TeamspaceContent } from './teamspaces';
 import { ProjectContent } from './projects';
 import { Content } from './index.styles';
@@ -37,6 +37,7 @@ i18n.activate('en');
 
 export const Dashboard = () => {
 	const { path } = useRouteMatch();
+	const { pathname } = useLocation();
 
 	return (
 		<Route path={`${path}/:teamspace?/:project?`}>
@@ -44,17 +45,28 @@ export const Dashboard = () => {
 				<GlobalStyle />
 				<AppBar />
 				<Content>
+					<Route path={`${path}/:teamspace/`}>
+						<TeamspaceContent />
+					</Route>
+					<Route path={`${path}/modals/`}>
+						<ModalsDemo />
+					</Route>
 					<Switch>
-						<Route path={`${path}/modals/`}>
-							<ModalsDemo />
-						</Route>
-						<Route path={`${path}/:teamspace/`}>
+						<Route exact path={`${path}/:teamspace/t/settings`}>
 							<TeamspaceContent />
 						</Route>
+
+						<Route exact path={`${path}/:teamspace/:project`}>
+							<Redirect to={`${discardSlash(pathname)}/t/federations`} />
+						</Route>
+						<Route exact path={`${path}/:teamspace/:project/t`}>
+							<Redirect to={`${discardSlash(pathname)}/federations`} />
+						</Route>
+
+						<Route path={`${path}/:teamspace/:project`}>
+							<ProjectContent />
+						</Route>
 					</Switch>
-					<RouteExcept path={`${path}/:teamspace/:project`} exceptPath={`${path}/:teamspace/settings`}>
-						<ProjectContent />
-					</RouteExcept>
 				</Content>
 				<ModalsDispatcher />
 			</I18nProvider>

@@ -14,11 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { discardSlash } from '@/v5/services/routing/routing';
+
 import React from 'react';
 import { useRouteMatch, Route, Switch } from 'react-router-dom';
-import { Containers } from './containers';
+
+import { discardSlash } from '@/v5/services/routing/routing';
 import { Federations } from './federations';
+import { Containers } from './containers';
 
 export const ProjectContent = () => {
 	let { path } = useRouteMatch();
@@ -30,13 +32,13 @@ export const ProjectContent = () => {
 				<Route exact path={path}>
 					project content
 				</Route>
-				<Route path={`${path}/federations`}>
+				<Route path={`${path}/t/federations`}>
 					<Federations />
 				</Route>
-				<Route path={`${path}/containers`}>
+				<Route path={`${path}/t/containers`}>
 					<Containers />
 				</Route>
-				<Route path={`${path}/settings`}>
+				<Route path={`${path}/t/settings`}>
 					Project settings
 				</Route>
 			</Switch>

@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 import { Link as LinkComponent } from '@material-ui/core';
-import { Link as RouterLink } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
 export const Container = styled.nav`
 	display: flex;
@@ -25,7 +25,8 @@ export const Container = styled.nav`
 `;
 
 export const Link = styled(LinkComponent).attrs({
-	component: RouterLink,
+	component: NavLink,
+	activeClassName: 'active',
 })`
 	&& {
 		display: flex;
@@ -56,19 +57,19 @@ export const Link = styled(LinkComponent).attrs({
 		}
 	`};
 
-	${({ active }) => active && css`
-		&& {
-			color: ${({ theme }) => theme.palette.primary.main};
-			&::after {
-				content: '';
-				background-color: ${({ theme }) => theme.palette.primary.main};
-				display: block;
-				height: 3px;
-				width: 100%;
-				position: absolute;
-				bottom: 0;
-				left: 0;
-			}
+	&.active {
+		color: ${({ theme }) => theme.palette.primary.main};
+		text-decoration: none;
+
+		&::after {
+			content: '';
+			background-color: ${({ theme }) => theme.palette.primary.main};
+			display: block;
+			height: 3px;
+			width: 100%;
+			position: absolute;
+			bottom: 0;
+			left: 0;
 		}
-	`};
+	}
 `;

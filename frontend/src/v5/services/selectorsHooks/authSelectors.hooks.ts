@@ -15,19 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import * as AuthSelectors from '@/v4/modules/auth/auth.selectors';
+import { createHooksSelectors } from './selectorsHooks.helper';
 
-export const Items = styled.div`
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	width: 50%;
-
-	&:last-child {
-		justify-content: flex-end;
-	}
-
-	& > *:last-child div {
-		margin-right: 0;
-	}
-`;
+export const AuthHooksSelectors = createHooksSelectors(AuthSelectors);
