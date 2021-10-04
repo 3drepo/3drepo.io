@@ -35,7 +35,7 @@ const federationList = [
 	{ _id: 4, name: 'federation 4', permissions: [] },
 	{ _id: 5, name: 'federation 5' },
 ];
-	
+
 const federationSettings = {
 	federation1: {
 		_id: 1,
@@ -46,8 +46,8 @@ const federationSettings = {
 			code: 'FED1',
 		},
 		status: 'ok',
-		subModels: [{ model: 'model1'}, { model: 'model2'}],
-		category: 'category 1'
+		subModels: [{ model: 'model1' }, { model: 'model2' }],
+		category: 'category 1',
 	},
 	federation2: {
 		_id: 2,
@@ -58,8 +58,8 @@ const federationSettings = {
 			code: 'FED2',
 		},
 		status: 'processing',
-		subModels: [{ model: 'model3'}],
-		category: 'category 2'
+		subModels: [{ model: 'model3' }],
+		category: 'category 2',
 	},
 	federation3: {
 		_id: 3,
@@ -70,8 +70,8 @@ const federationSettings = {
 			code: 'FED3',
 		},
 		status: 'processing',
-		category: 'category 3'
-	}
+		category: 'category 3',
+	},
 };
 
 const user1Favourites = [1];
@@ -100,8 +100,8 @@ Users.deleteFavourites.mockImplementation((username, teamspace, favouritesToAdd)
 });
 
 Revisions.getLatestRevision.mockImplementation((teamspace, federation) => {
-	if (federation === 'model1') return {timestamp: 1234};
-	if (federation === 'model2') return {timestamp: 5678};
+	if (federation === 'model1') return { timestamp: 1234 };
+	if (federation === 'model2') return { timestamp: 5678 };
 	throw templates.revisionNotFound;
 });
 
@@ -195,7 +195,7 @@ const formatToStats = (settings, lastUpdated) => ({
 	status: settings.status,
 	subModels: settings.subModels,
 	category: settings.category,
-	lastUpdated: lastUpdated
+	lastUpdated,
 });
 
 const testGetFederationStats = () => {

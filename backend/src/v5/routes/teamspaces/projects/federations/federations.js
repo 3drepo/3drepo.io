@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { hasAccessToTeamspace, hasReadAccessToFederation } = require('../../../../middleware/permissions/permissions');
 const Federations = require('../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../utils/sessions');
-const { hasAccessToTeamspace, hasReadAccessToFederation } = require('../../../../middleware/permissions/permissions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
 
@@ -58,7 +58,7 @@ const getFederationStats = async (req, res) => {
 		/* istanbul ignore next */
 		(err) => respond(req, res, err),
 	);
-}
+};
 
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
@@ -266,13 +266,13 @@ const establishRoutes = () => {
      *                 category:
 	 *                   type: string
 	 *                   description: Category of the federation
-	 *                   example: 
+	 *                   example:
      *                 lastUpdated:
 	 *                   type: integer
 	 *                   description: Timestamp(ms) of when any of the submodels was updated
 	 *                   example: 1630598072000
 	 */
-	 router.get('/:federation/stats', hasReadAccessToFederation, getFederationStats);
+	router.get('/:federation/stats', hasReadAccessToFederation, getFederationStats);
 	return router;
 };
 

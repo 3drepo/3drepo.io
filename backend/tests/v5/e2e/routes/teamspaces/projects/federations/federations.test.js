@@ -38,8 +38,8 @@ const project = {
 	name: ServiceHelper.generateRandomString(),
 };
 
-const modelWithRevId =  ServiceHelper.generateUUIDString();
-const modelWithoutRevId =  ServiceHelper.generateUUIDString();
+const modelWithRevId = ServiceHelper.generateUUIDString();
+const modelWithoutRevId = ServiceHelper.generateUUIDString();
 
 const modelSettings = [
 	{
@@ -47,18 +47,18 @@ const modelSettings = [
 		name: ServiceHelper.generateRandomString(),
 		isFavourite: true,
 		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true },
-		subModels: [{model: modelWithRevId}]
+		subModels: [{ model: modelWithRevId }],
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
 		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true },
-		subModels: [{model: modelWithoutRevId}]
+		subModels: [{ model: modelWithoutRevId }],
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
-		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true }
+		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true },
 	},
 	{
 		_id: modelWithRevId,
@@ -69,7 +69,7 @@ const modelSettings = [
 		_id: modelWithoutRevId,
 		name: ServiceHelper.generateRandomString(),
 		properties: ServiceHelper.generateRandomModelProperties(),
-	}
+	},
 ];
 
 const container = modelSettings.find(({ properties }) => !properties.federate);
@@ -83,7 +83,6 @@ const revisions = [
 const federationWithRev = modelSettings[0];
 const federationWithoutRev = modelSettings[1];
 const federationWithoutSubModels = modelSettings[2];
-
 
 const latestRevision = revisions.filter((rev) => !rev.void)
 	.reduce((a, b) => (a.timestamp > b.timestamp ? a : b));
@@ -99,14 +98,14 @@ const setupData = async () => {
 		model._id,
 		model.name,
 		model.properties,
-		model.subModels
+		model.subModels,
 	));
 	return Promise.all([
 		...userProms,
 		...modelProms,
 		ServiceHelper.db.createUser(nobody),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, modelSettings.map(({ _id }) => _id)),
-		...revisions.map((revision) => ServiceHelper.db.createRevision(teamspace, modelWithRevId, revision))
+		...revisions.map((revision) => ServiceHelper.db.createRevision(teamspace, modelWithRevId, revision)),
 	]);
 };
 
@@ -148,7 +147,7 @@ const formatToStats = (federation, latestRev) => {
 		code: federation.properties.properties.code,
 		status: federation.properties.status,
 		subModels: federation.subModels,
-		lastUpdated: latestRev ? latestRev.getTime() : undefined
+		lastUpdated: latestRev ? latestRev.getTime() : undefined,
 	};
 
 	return formattedStats;
@@ -198,7 +197,6 @@ const testGetFederationStats = () => {
 		});
 	});
 };
-
 
 const testAppendFavourites = () => {
 	const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/favourites`;

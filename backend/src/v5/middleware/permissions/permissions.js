@@ -16,8 +16,8 @@
  */
 
 const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('./components/containers');
-const { hasReadAccessToFederation } = require('./components/federations');
 const { convertAllUUIDs } = require('../dataConverter/pathParams');
+const { hasReadAccessToFederation } = require('./components/federations');
 const { isTeamspaceMember } = require('./components/teamspaces');
 const { validSession } = require('../auth');
 const { validateMany } = require('../common');

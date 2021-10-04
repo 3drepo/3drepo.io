@@ -64,7 +64,7 @@ db.createModel = (teamspace, _id, name, props, subModels) => {
 		_id,
 		name,
 		...props,
-		subModels
+		subModels,
 	};
 	return DbHandler.insertOne(teamspace, 'settings', settings);
 };

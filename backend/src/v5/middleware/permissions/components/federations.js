@@ -15,32 +15,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- const { hasReadAccessToModel } = require('../../../utils/permissions/permissions');
- const { getUserFromSession } = require('../../../utils/sessions');
- const { respond } = require('../../../utils/responder');
- const { templates } = require('../../../utils/responseCodes');
- 
- const FederationPerms = {};
- 
- FederationPerms.hasReadAccessToFederation = async (req, res, next) => {
-     const { session, params } = req;
-     const user = getUserFromSession(session);
-     const { teamspace, project, federation } = params;
- 
-     try {
-         if (await hasReadAccessToModel(teamspace, project, federation, user)) {
-             next();
-         } else {
-             respond(req, res, templates.notAuthorized);
-         }
-     } catch (err) {
-         if (err.code === templates.modelNotFound.code) {
-             respond(req, res, templates.federationNotFound);
-         } else {
-             respond(req, res, err);
-         }
-     }
- };
- 
- module.exports = FederationPerms;
- 
+const { getUserFromSession } = require('../../../utils/sessions');
+const { hasReadAccessToModel } = require('../../../utils/permissions/permissions');
+const { respond } = require('../../../utils/responder');
+const { templates } = require('../../../utils/responseCodes');
+
+const FederationPerms = {};
+
+FederationPerms.hasReadAccessToFederation = async (req, res, next) => {
+	const { session, params } = req;
+	const user = getUserFromSession(session);
+	const { teamspace, project, federation } = params;
+
+	try {
+		if (await hasReadAccessToModel(teamspace, project, federation, user)) {
+			next();
+		} else {
+			respond(req, res, templates.notAuthorized);
+		}
+	} catch (err) {
+		if (err.code === templates.modelNotFound.code) {
+			respond(req, res, templates.federationNotFound);
+		} else {
+			respond(req, res, err);
+		}
+	}
+};
+
+module.exports = FederationPerms;
