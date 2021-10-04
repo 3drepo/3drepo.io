@@ -19,7 +19,7 @@ import { times } from 'lodash';
 import { containerMockFactory } from '@/v5/store/containers/containers.fixtures';
 import {
 	selectContainers,
-	selectFavouriteContainers,
+	selectFilteredFavouriteContainers,
 	selectFilteredContainers
 } from '@/v5/store/containers/containers.selectors';
 import { IContainersState } from '@/v5/store/containers/containers.types';
@@ -38,7 +38,7 @@ const defaultState: IContainersState = {
 describe('Containers: selectors', () => {
 	describe('selectFavouriteContainers', () => {
 		it('should select favourite containers', () => {
-			const selected = selectFavouriteContainers.resultFunc(defaultState.containers);
+			const selected = selectFilteredFavouriteContainers.resultFunc(defaultState.containers);
 			expect(selected).toHaveLength(6);
 		})
 	})

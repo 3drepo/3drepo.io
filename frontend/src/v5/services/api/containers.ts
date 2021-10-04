@@ -16,15 +16,20 @@
  */
 
 import { FavouritePayload } from '@/v5/store/containers/containers.types';
+import { AxiosResponse } from 'axios';
 import api from './default';
 
-export const addFavourites = ({ teamspace, projectId, containerId }: FavouritePayload) => (
+export const addFavourites = (
+	{ teamspace, projectId, containerId }: FavouritePayload,
+): Promise<AxiosResponse<void>> => (
 	api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites`, {
 		containers: [containerId],
 	})
 );
 
-export const removeFavourites = ({ teamspace, projectId, containerId }: FavouritePayload) => (
+export const removeFavourites = (
+	{ teamspace, projectId, containerId }: FavouritePayload,
+): Promise<AxiosResponse<void>> => (
 	api.delete(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites`, {
 		containers: [containerId],
 	})
