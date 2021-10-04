@@ -79,7 +79,7 @@ const model1Revisions = [
 ];
 
 ProjectsModel.getProjectById.mockImplementation(() => project);
-ModelSettings.getModelByName.mockImplementation((ts, models, name) => 'model1' === name ? modelList[0] : undefined);
+ModelSettings.getModelByName.mockImplementation((ts, models, name) => (name === 'model1' ? modelList[0] : undefined));
 ModelSettings.getModels.mockImplementation(() => modelList);
 ModelSettings.getContainers.mockImplementation(() => modelList);
 ModelSettings.getContainerById.mockImplementation((teamspace, container) => containerSettings[container]);
