@@ -97,6 +97,14 @@ const ruleValidator = Yup.object().shape({
 	}),
 })
 	.noUnknown()
+	.transform((value) => {
+		const nParams = operators[value.operator];
+		const res = { ...value };
+		if (nParams === 0) {
+			delete res.values;
+		}
+		return res;
+	})
 	.test(
 		'Rules validation', 'values field is not valid with the operator selected',
 		(value) => {

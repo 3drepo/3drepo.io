@@ -239,9 +239,11 @@ function* importGroups({ teamspace, modelId, file}) {
 		const reader = new FileReader();
 		reader.readAsText(file)
 
-		reader.addEventListener("load", () => {
-			API.default.post(endpoint, JSON.parse(reader.result as string));
-		}, false);
+		yield new Promise((resolve, reject) => {
+			reader.addEventListener("load", () => {
+				API.default.post(endpoint, JSON.parse(reader.result as string)).then(resolve).catch(reject);
+			}, false);
+		});
 
 
 	} catch (error) {
