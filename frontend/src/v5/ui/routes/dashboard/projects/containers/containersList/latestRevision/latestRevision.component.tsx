@@ -23,9 +23,10 @@ import { Name, ProcessingStatus, QueuedStatus } from './latestRevision.styles';
 interface ILatestRevision {
 	name: string;
 	status: ContainerStatuses;
+	selected?: boolean;
 }
 
-export const LatestRevision = ({ name, status }: ILatestRevision): JSX.Element => (
+export const LatestRevision = ({ name, status, selected = false }: ILatestRevision): JSX.Element => (
 	<>
 		<Trans
 			id="containers.list.item.latestRevision.label"
@@ -34,7 +35,7 @@ export const LatestRevision = ({ name, status }: ILatestRevision): JSX.Element =
 		{(() => {
 			if (status === ContainerStatuses.QUEUED) {
 				return (
-					<QueuedStatus>
+					<QueuedStatus selected={selected}>
 						<Trans id="containers.list.item.latestRevision.status.queued" message="Queued" />
 					</QueuedStatus>
 				);
@@ -42,7 +43,7 @@ export const LatestRevision = ({ name, status }: ILatestRevision): JSX.Element =
 
 			if (status === ContainerStatuses.PROCESSING) {
 				return (
-					<ProcessingStatus>
+					<ProcessingStatus selected={selected}>
 						<Trans id="containers.list.item.latestRevision.status.processing" message="Processing" />
 					</ProcessingStatus>
 				);

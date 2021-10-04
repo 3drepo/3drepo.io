@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { Typography } from '@controls/typography';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { FONT_WEIGHT } from '@/v4/styles';
 
 export const Name = styled(Typography).attrs({
@@ -23,6 +23,12 @@ export const Name = styled(Typography).attrs({
 	component: 'span',
 })`
 	font-weight: ${FONT_WEIGHT.BOLD};
+
+	&& {
+		${({ theme, selected }) => selected && css`
+			color: ${theme.palette.base.main};
+		`}
+	}
 `;
 
 export const QueuedStatus = styled(Name)`

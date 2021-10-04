@@ -106,7 +106,11 @@ export const ContainersList = ({
 								>
 									<DashboardListItemTitle
 										subtitle={(
-											<LatestRevision name={container.latestRevision} status={container.status} />
+											<LatestRevision
+												name={container.latestRevision}
+												status={container.status}
+												selected={container._id === selectedId}
+											/>
 										)}
 										selected={container._id === selectedId}
 										tooltipTitle={
