@@ -15,19 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { IProjectsActions, ProjectsActions } from '@/v5/store/projects/projects.redux';
+import { createActionsDispatchers } from './actionsDistpatchers.helper';
 
-export const Items = styled.div`
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	width: 50%;
-
-	&:last-child {
-		justify-content: flex-end;
-	}
-
-	& > *:last-child div {
-		margin-right: 0;
-	}
-`;
+export const ProjectsActionsDispatchers = createActionsDispatchers<IProjectsActions>(ProjectsActions);
