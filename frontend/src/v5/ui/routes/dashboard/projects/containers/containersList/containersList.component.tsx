@@ -40,6 +40,9 @@ import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { EllipsisButtonWithMenu } from '@controls/ellipsisButtonWithMenu';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { getContainerMenuItems } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.helpers';
+import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
+import { Highlight } from '@controls/highlight';
+import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { useOrderedList } from './containersList.hooks';
 import { Container } from './containersList.styles';
@@ -65,6 +68,7 @@ export const ContainersList = ({
 
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const { sortedList, setSortConfig } = useOrderedList(containers, DEFAULT_SORT_CONFIG);
+	const filterQuery = ContainersHooksSelectors.selectFilterQuery();
 
 	const toggleSelectedId = (id: IContainer['_id']) => {
 		setSelectedId((state) => (state === id ? null : id));
@@ -106,16 +110,18 @@ export const ContainersList = ({
 						sortedList.map((container) => (
 							<DashboardListItem
 								selected={container._id === selectedId}
-								onClick={() => toggleSelectedId(container._id)}
 								key={container._id}
 							>
-								<DashboardListItemRow>
+								<DashboardListItemRow
+									selected={container._id === selectedId}
+									onClick={() => toggleSelectedId(container._id)}
+								>
 									<DashboardListItemTitle
 										subtitle={(
-											<Trans
-												id="containers.list.item.subtitle"
-												message="Latest revision: {revision}"
-												values={{ revision: container.latestRevision }}
+											<LatestRevision
+												name={container.latestRevision}
+												status={container.status}
+												selected={container._id === selectedId}
 											/>
 										)}
 										selected={container._id === selectedId}
@@ -123,7 +129,9 @@ export const ContainersList = ({
 											<Trans id="containers.list.item.title.tooltip" message="Launch latest revision" />
 										}
 									>
-										{container.name}
+										<Highlight search={filterQuery}>
+											{container.name}
+										</Highlight>
 									</DashboardListItemTitle>
 									<DashboardListItemButton
 										onClick={() => {
@@ -142,10 +150,14 @@ export const ContainersList = ({
 										/>
 									</DashboardListItemButton>
 									<DashboardListItemText selected={container._id === selectedId}>
-										{container.code}
+										<Highlight search={filterQuery}>
+											{container.code}
+										</Highlight>
 									</DashboardListItemText>
 									<DashboardListItemText width={188} selected={container._id === selectedId}>
-										{container.type}
+										<Highlight search={filterQuery}>
+											{container.type}
+										</Highlight>
 									</DashboardListItemText>
 									<DashboardListItemText width={97} selected={container._id === selectedId}>
 										{i18n.date(container.lastUpdated)}
@@ -162,17 +174,20 @@ export const ContainersList = ({
 													event.stopPropagation();
 												}}
 												onChange={(event) => {
+													// eslint-disable-next-line no-console
+													console.log('handle favourite click', event.target.value);
 													toggleFavourite(container._id, !!event.currentTarget.checked);
 												}}
 											/>
 										</Tooltip>
 									</DashboardListItemIcon>
-									<DashboardListItemIcon
-										selected={container._id === selectedId}
-									>
+									<DashboardListItemIcon selected={container._id === selectedId}>
 										<EllipsisButtonWithMenu list={getContainerMenuItems(container._id)} />
 									</DashboardListItemIcon>
 								</DashboardListItemRow>
+								{container._id === selectedId && (
+									<div style={{ backgroundColor: '#2E405F', width: '100%', height: '100px' }} />
+								)}
 							</DashboardListItem>
 						))
 					) : (

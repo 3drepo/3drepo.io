@@ -35,7 +35,9 @@ export const Title = styled(Button).attrs({
 
 export const Subtitle = styled(Typography).attrs({
 	variant: 'body1',
+	component: 'span',
 })`
+	display: block;
 	color: ${({ theme }) => theme.palette.base.main};
 
 	${({ theme, selected }) => selected && css`

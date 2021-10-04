@@ -21,12 +21,12 @@ import { Typography } from '@controls/typography';
 import { ChevronButton } from '@controls/chevronButton';
 import { Container, ButtonContainer, Divider, CollapsedItemContainer } from './dashboardListCollapse.styles';
 
-type IDashboardListCollapse = {
+export type IDashboardListCollapse = {
 	children: ReactNode;
-	title: string;
+	title: ReactNode;
 	tooltipTitles?: {
-		visible: string;
-		collapsed: string;
+		visible: ReactNode;
+		collapsed: ReactNode;
 	},
 	className?: string;
 };
@@ -38,9 +38,9 @@ export const DashboardListCollapse = ({
 
 	return (
 		<Container className={className}>
-			<ButtonContainer>
+			<ButtonContainer onClick={() => setIsCollapsed((state) => !state)}>
 				<Tooltip title={(!isCollapsed ? tooltipTitles?.visible : tooltipTitles?.collapsed) ?? ''}>
-					<ChevronButton isOn={!isCollapsed} onClick={() => setIsCollapsed((state) => !state)} />
+					<ChevronButton isOn={!isCollapsed} />
 				</Tooltip>
 				<Typography variant="h3" color="secondary">{title}</Typography>
 			</ButtonContainer>

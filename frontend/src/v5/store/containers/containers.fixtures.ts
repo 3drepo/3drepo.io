@@ -16,7 +16,7 @@
  */
 
 import * as faker from 'faker';
-import { IContainer } from '@/v5/store/containers/containers.types';
+import { ContainerStatuses, IContainer } from '@/v5/store/containers/containers.types';
 
 export const containerMockFactory = (overrides?: Partial<IContainer>): IContainer => ({
 	_id: faker.datatype.uuid(),
@@ -26,6 +26,7 @@ export const containerMockFactory = (overrides?: Partial<IContainer>): IContaine
 	name: faker.random.words(3),
 	role: faker.random.arrayElement(['admin', 'collaborator']),
 	type: faker.random.word(),
+	status: ContainerStatuses.OK,
 	code: faker.datatype.uuid(),
 	isFavourite: faker.datatype.boolean(),
 	...overrides,
