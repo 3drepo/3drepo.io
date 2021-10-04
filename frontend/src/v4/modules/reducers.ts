@@ -20,6 +20,8 @@ import { combineReducers } from 'redux';
 import undoable from 'redux-undo';
 
 import { reducer as containersReducer } from '@/v5/store/containers/containers.redux';
+import { reducer as projectsReducer } from '../../v5/store/projects/projects.redux';
+import { reducer as teamspaces2Reducer } from '../../v5/store/teamspaces/teamspaces.redux';
 import { CanvasHistoryTypes } from './canvasHistory';
 import { batchGroupBy } from './canvasHistory/canvasHistory.helpers';
 
@@ -73,6 +75,7 @@ export default function createReducer(history) {
 		snackbar: snackbarReducer,
 		billing: billingReducer,
 		teamspaces: teamspacesReducer,
+		teamspaces2: teamspaces2Reducer,
 		model: modelReducer,
 		auth: authReducer,
 		notifications: notificationsReducer,
@@ -93,6 +96,7 @@ export default function createReducer(history) {
 		teamspace: teamspaceReducer,
 		sequences: sequencesReducer,
 		presentation: presentationReducer,
+		projects: projectsReducer,
 		activities: activitiesReducer,
 		legend: legendReducer,
 		containers: containersReducer,

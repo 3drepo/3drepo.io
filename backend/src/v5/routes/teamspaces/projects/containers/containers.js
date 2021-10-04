@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 const { hasAccessToTeamspace, hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
@@ -43,6 +42,24 @@ const getContainerStats = async (req, res) => {
 	}).catch((err) => respond(req, res, err));
 };
 
+const deleteFavourites = (req, res) => {
+	const user = getUserFromSession(req.session);
+	const { teamspace, project } = req.params;
+	const favouritesToRemove = req.body.containers;
+
+	Containers.deleteFavourites(user, teamspace, project, favouritesToRemove)
+		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
+};
+
+const appendFavourites = (req, res) => {
+	const user = getUserFromSession(req.session);
+	const { teamspace, project } = req.params;
+	const favouritesToAdd = req.body.containers;
+
+	Containers.appendFavourites(user, teamspace, project, favouritesToAdd)
+		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
+};
+
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 
@@ -67,8 +84,7 @@ const establishRoutes = () => {
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *           type: string
-	 *
+	 *         type: string
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -184,6 +200,91 @@ const establishRoutes = () => {
 	 */
 	router.get('/:container/stats', hasReadAccessToContainer, getContainerStats);
 
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/containers/favourites:
+	 *   patch:
+	 *     description: Add containers to the user's favourites list
+	 *     tags: [Containers]
+	 *     operationId: appendContainers
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - project:
+	 *         name: project
+	 *         description: ID of project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     requestBody:
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               containers:
+     *                 type: array
+	 *                 items:
+	 *                   type: string
+	 *                   format: uuid
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: adds the containers found in the request body to the user's favourites list
+	 */
+	router.patch('/favourites', hasAccessToTeamspace, appendFavourites);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/containers/favourites:
+	 *   delete:
+	 *     description: Remove containers from the user's favourites list
+	 *     tags: [Containers]
+	 *     operationId: deleteContainers
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - project:
+	 *         name: project
+	 *         description: ID of project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     requestBody:
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               containers:
+     *                 type: array
+	 *                 items:
+	 *                   type: string
+	 *                   format: uuid
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: removes the containers found in the request body from the user's favourites list
+	 */
+	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites);
 	return router;
 };
 

@@ -27,7 +27,7 @@ export const Items = styled.div`
 		justify-content: flex-end;
 	}
 
-	& > *:last-child {
+	& > *:last-child div {
 		margin-right: 0;
 	}
 `;

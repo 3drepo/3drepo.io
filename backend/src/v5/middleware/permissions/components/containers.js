@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { hasReadAccessToModel, hasWriteAccessToModel } = require('../../../utils/permissions/permissions');
 const { getUserFromSession } = require('../../../utils/sessions');
-const { hasReadAccessToModel } = require('../../../utils/permissions/permissions');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
 
@@ -34,7 +34,31 @@ ContainerPerms.hasReadAccessToContainer = async (req, res, next) => {
 			respond(req, res, templates.notAuthorized);
 		}
 	} catch (err) {
-		respond(req, res, err);
+		if (err.code === templates.modelNotFound.code) {
+			respond(req, res, templates.containerNotFound);
+		} else {
+			respond(req, res, err);
+		}
+	}
+};
+
+ContainerPerms.hasWriteAccessToContainer = async (req, res, next) => {
+	const { session, params } = req;
+	const user = getUserFromSession(session);
+	const { teamspace, project, container } = params;
+
+	try {
+		if (await hasWriteAccessToModel(teamspace, project, container, user)) {
+			next();
+		} else {
+			respond(req, res, templates.notAuthorized);
+		}
+	} catch (err) {
+		if (err.code === templates.modelNotFound.code) {
+			respond(req, res, templates.containerNotFound);
+		} else {
+			respond(req, res, err);
+		}
 	}
 };
 

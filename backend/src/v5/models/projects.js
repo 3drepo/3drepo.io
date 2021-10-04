@@ -32,6 +32,11 @@ Projects.getProjectById = async (ts, project, projection) => {
 	return res;
 };
 
+Projects.modelExistsInProject = async (teamspace, project, model) => {
+	const proj = await Projects.getProjectById(teamspace, project, { models: 1 });
+	return proj.models.includes(model);
+};
+
 Projects.getProjectList = async (ts, projection = { _id: 1, name: 1 }) => findProject(ts, {}, projection);
 
 Projects.getProjectAdmins = async (ts, project) => {

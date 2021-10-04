@@ -18,9 +18,8 @@
 import styled from 'styled-components';
 
 export const Content = styled.section`
-	display: flex;
-	flex-direction: column;
-	flex-grow: 1;
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	padding: 64px 20px;
+	display: block;
+	padding: 36px 20px 100px;
+	overflow-y: scroll;
 `;

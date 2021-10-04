@@ -296,6 +296,9 @@ export const theme = createMuiTheme({
 				'& > button > span > span': {
 					marginLeft: '1px',
 				},
+				'& .MuiButton-endIcon': {
+					marginLeft: 0,
+				},
 			},
 			separator: {
 				marginLeft: 0,

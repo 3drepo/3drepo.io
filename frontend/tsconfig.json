@@ -10,6 +10,7 @@
       "react-dom",
       "lodash",
       "node",
+      "jest"
     ],
     "lib": [
       "es2015",

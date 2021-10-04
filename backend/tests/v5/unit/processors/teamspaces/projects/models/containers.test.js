@@ -69,6 +69,12 @@ const container2Rev = {
 	timestamp: 1630606846000,
 };
 
+const model1Revisions = [
+	{ _id: 1, author: 'user1', timestamp: new Date() },
+	{ _id: 2, author: 'user1', timestamp: new Date() },
+	{ _id: 3, author: 'user1', timestamp: new Date(), void: true },
+];
+
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getContainers.mockImplementation(() => modelList);
 ModelSettings.getContainerById.mockImplementation((teamspace, container) => containerSettings[container]);
@@ -77,7 +83,26 @@ Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 	if (container === 'container2') return container2Rev;
 	throw templates.revisionNotFound;
 });
+
+const getRevisionsMock = Revisions.getRevisions.mockImplementation(() => model1Revisions);
+
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
+Users.appendFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
+	for (const favourite of favouritesToAdd) {
+		if (user1Favourites.indexOf(favourite) === -1) {
+			user1Favourites.push(favourite);
+		}
+	}
+});
+
+Users.deleteFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
+	for (const favourite of favouritesToAdd) {
+		const index = user1Favourites.indexOf(favourite);
+		if (index !== -1) {
+			user1Favourites.splice(index, 1);
+		}
+	}
+});
 
 // Permissions mock
 jest.mock('../../../../../../../src/v5/utils/permissions/permissions', () => ({
@@ -118,6 +143,52 @@ const testGetContainerList = () => {
 	});
 };
 
+const testAppendFavourites = () => {
+	describe('Add containers to favourites', () => {
+		test('new containers should be added to favourites if user has all permissions', async () => {
+			await expect(Containers.appendFavourites('user1', 'teamspace', 'project', [3])).resolves.toEqual(undefined);
+		});
+
+		test('should return error if one or more containers are not found', async () => {
+			await expect(Containers.appendFavourites('user1', 'teamspace', 'project', [1, -1]))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: -1' });
+		});
+
+		test('should return error if the containers list provided is empty', async () => {
+			await expect(Containers.appendFavourites('user1', 'teamspace', 'project', []))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The favourites list provided is empty' });
+		});
+
+		test('should return error if user has no permissions on one or more models', async () => {
+			await expect(Containers.appendFavourites('user1', 'teamspace', 'project', [1, 2]))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: 2' });
+		});
+	});
+};
+
+const testDeleteFavourites = () => {
+	describe('Remove containers from favourites', () => {
+		test('containers should be removed from favourites if user has all permissions', async () => {
+			await expect(Containers.deleteFavourites('tsAdmin', 'teamspace', 'project', [1])).resolves.toEqual(undefined);
+		});
+
+		test('should return error if one or more containers are not found', async () => {
+			await expect(Containers.deleteFavourites('tsAdmin', 'teamspace', 'project', [1, -1]))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: -1' });
+		});
+
+		test('should return error if the containers list provided is empty', async () => {
+			await expect(Containers.deleteFavourites('user1', 'teamspace', 'project', []))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The favourites list provided is empty' });
+		});
+
+		test('should return error if user has no permissions on one or more models', async () => {
+			await expect(Containers.deleteFavourites('user1', 'teamspace', 'project', [2]))
+				.rejects.toEqual({ ...templates.invalidArguments, message: 'The action cannot be performed on the following models: 2' });
+		});
+	});
+};
+
 const formatToStats = (settings, revCount, latestRev) => ({
 	type: settings.type,
 	code: settings.properties.code,
@@ -143,7 +214,32 @@ const testGetContainerStats = () => {
 	});
 };
 
+const testGetRevisions = () => {
+	describe('Get container revisions', () => {
+		test('should return non-void revisions if the container exists', async () => {
+			const idx = getRevisionsMock.mock.calls.length;
+			const res = await Containers.getRevisions('teamspace', 1, false);
+			expect(getRevisionsMock.mock.calls.length).toBe(idx + 1);
+			expect(getRevisionsMock.mock.calls[idx][1]).toEqual(1);
+			expect(getRevisionsMock.mock.calls[idx][2]).toEqual(false);
+			expect(res).toEqual(model1Revisions);
+		});
+
+		test('should return all revisions if the container exists', async () => {
+			const idx = getRevisionsMock.mock.calls.length;
+			const res = await Containers.getRevisions('teamspace', 1, true);
+			expect(getRevisionsMock.mock.calls.length).toBe(idx + 1);
+			expect(getRevisionsMock.mock.calls[idx][1]).toEqual(1);
+			expect(getRevisionsMock.mock.calls[idx][2]).toEqual(true);
+			expect(res).toEqual(model1Revisions);
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/containers', () => {
 	testGetContainerList();
 	testGetContainerStats();
+	testAppendFavourites();
+	testDeleteFavourites();
+	testGetRevisions();
 });

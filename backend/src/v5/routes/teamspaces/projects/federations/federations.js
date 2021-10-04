@@ -30,6 +30,24 @@ const getFederationList = (req, res) => {
 	}).catch((err) => respond(req, res, err));
 };
 
+const appendFavourites = (req, res) => {
+	const user = getUserFromSession(req.session);
+	const { teamspace, project } = req.params;
+	const favouritesToAdd = req.body.federations;
+
+	Federations.appendFavourites(user, teamspace, project, favouritesToAdd)
+		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
+};
+
+const deleteFavourites = (req, res) => {
+	const user = getUserFromSession(req.session);
+	const { teamspace, project } = req.params;
+	const favouritesToRemove = req.body.federations;
+
+	Federations.deleteFavourites(user, teamspace, project, favouritesToRemove)
+		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
+};
+
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 
@@ -48,7 +66,7 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - project:
+	 *       - project:
 	 *         name: project
 	 *         description: Project ID
 	 *         in: path
@@ -90,6 +108,92 @@ const establishRoutes = () => {
 	 *
 	 */
 	router.get('/', hasAccessToTeamspace, getFederationList);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/federations/favourites:
+	 *   patch:
+	 *     description: Add federations to the user's favourites list
+	 *     tags: [Federations]
+	 *     operationId: appendFederations
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+		   *       - project:
+	 *         name: project
+	 *         description: ID of project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     requestBody:
+	 *       content:
+	 *         application/json:
+	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *               federations:
+	 *                 type: array
+	 *                 items:
+	 *                   type: string
+	 *                   format: uuid
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: adds the federations found in the request body to the user's favourites list
+	 */
+	router.patch('/favourites', hasAccessToTeamspace, appendFavourites);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/federations/favourites:
+	 *   delete:
+	 *     description: Remove federations from the user's favourites list
+	 *     tags: [Federations]
+	 *     operationId: deleteFederations
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+		   *       - project:
+	 *         name: project
+	 *         description: ID of project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     requestBody:
+	 *       content:
+	 *         application/json:
+	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *               federations:
+	 *                 type: array
+	 *                 items:
+	 *                   type: string
+	 *                   format: uuid
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: removes the federations found in the request body from the user's favourites list
+	 */
+	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites);
 
 	return router;
 };
