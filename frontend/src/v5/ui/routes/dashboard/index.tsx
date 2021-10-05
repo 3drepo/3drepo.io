@@ -48,7 +48,7 @@ export const Dashboard = () => {
 					<Route path={`${path}/:teamspace/`}>
 						<TeamspaceContent />
 					</Route>
-					<Route path={`${path}/modals/`}>
+					<Route exact path={`${path}/modals/`}>
 						<ModalsDemo />
 					</Route>
 					<Switch>

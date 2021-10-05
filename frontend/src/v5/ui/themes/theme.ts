@@ -224,6 +224,10 @@ export const theme = createMuiTheme({
 		MuiDialog: {
 			paper: {
 				minWidth: '30%',
+				borderRadius: 10,
+			},
+			paperWidthFalse: {
+				maxWidth: 633,
 			},
 		},
 		MuiDialogActions: {
@@ -233,9 +237,25 @@ export const theme = createMuiTheme({
 		},
 		MuiDialogTitle: {
 			root: {
-				paddingTop: 35,
+				paddingTop: 28,
+				paddingBottom: 0,
 				textAlign: 'center',
-				...typography.h2,
+				'& .MuiTypography-root': {
+					...typography.h1,
+				},
+			},
+		},
+		MuiDialogContent: {
+			root: {
+				paddingTop: 7,
+				flex: 0,
+			},
+		},
+		MuiDialogContentText: {
+			root: {
+				...typography.h4,
+				marginBottom: 0,
+				color: COLOR.BASE_MAIN,
 			},
 		},
 		MuiAppBar: {

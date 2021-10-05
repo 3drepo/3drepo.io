@@ -16,27 +16,37 @@
  */
 
 import React from 'react';
-import { Button, DialogContent, DialogContentText, DialogTitle, DialogActions } from '@material-ui/core';
+import { Button, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
+import WarningIcon from '@assets/icons/warning.svg';
+import { Container, Line, Actions, Details } from './alertModal.styles';
 
 interface IAlertModal {
 	onClickClose?: () => void,
-	message?:string
+	currentActions?: string
+	errorMessage?: string
+	details?: string
 }
 
-export const AlertModal: React.FC<IAlertModal> = ({ onClickClose, message }) => (
-	<>
+export const AlertModal: React.FC<IAlertModal> = ({ onClickClose, currentActions = '', errorMessage, details }) => (
+	<Container>
+		<WarningIcon />
 		<DialogTitle>
-			Alert!
+			Something went wrong {currentActions}
 		</DialogTitle>
 		<DialogContent>
 			<DialogContentText>
-				{message}
+				{errorMessage}
 			</DialogContentText>
 		</DialogContent>
-		<DialogActions>
-			<Button autoFocus onClick={onClickClose} variant="contained" color="primary">
-				Close
+		<Line />
+		<Actions>
+			<Button autoFocus type="submit" onClick={onClickClose} variant="contained" color="primary" size="small">
+				Ok, close window
 			</Button>
-		</DialogActions>
-	</>
+			<Button href="https://3drepo.com/contact/" variant="outlined" color="secondary" size="small">
+				Contact support
+			</Button>
+		</Actions>
+		{details && <Details>{details}</Details>}
+	</Container>
 );

@@ -29,7 +29,11 @@ export const ModalsDemo = () => {
 	const [openState, setOpen] = useState(false);
 
 	const showAlertModal = () => {
-		const action = DialogsActions.open('alert', { message: 'This is an alert message!' });
+		const action = DialogsActions.open('alert', {
+			currentActions: '{current actions}',
+			errorMessage: '<Error message from the network request>',
+			details: 'You will now be redirected back to the dashboard',
+		});
 		dispatch(action);
 	};
 
