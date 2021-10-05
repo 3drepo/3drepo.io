@@ -22,12 +22,18 @@ import {
 	ContainersTypes,
 } from '@/v5/store/containers/containers.redux';
 import { ExtendedAction } from '@/v5/store/store.types';
-import { FavouritePayload, FetchContainersPayload, FetchContainersResponse } from './containers.types';
+import {
+	ContainerStatuses,
+	FavouritePayload,
+	FetchContainersPayload,
+	FetchContainersResponse,
+	IContainer,
+} from './containers.types';
 
 export function* addFavourites({ containerId, teamspace, projectId }: ExtendedAction<FavouritePayload>) {
 	try {
 		yield API.addFavourites({ teamspace, containerId, projectId });
-		yield put(ContainersActions.toggleFavouriteSuccess(containerId));
+		yield put(ContainersActions.toggleFavouriteSuccess(projectId, containerId));
 	} catch (e) {
 		console.error(e);
 	}
@@ -36,7 +42,7 @@ export function* addFavourites({ containerId, teamspace, projectId }: ExtendedAc
 export function* removeFavourites({ containerId, teamspace, projectId }: ExtendedAction<FavouritePayload>) {
 	try {
 		yield API.removeFavourites({ containerId, teamspace, projectId });
-		yield put(ContainersActions.toggleFavouriteSuccess(containerId));
+		yield put(ContainersActions.toggleFavouriteSuccess(projectId, containerId));
 	} catch (e) {
 		console.error(e);
 	}
@@ -44,9 +50,29 @@ export function* removeFavourites({ containerId, teamspace, projectId }: Extende
 
 export function* fetchContainers({ teamspace, projectId }: ExtendedAction<FetchContainersPayload>) {
 	try {
-		const data: FetchContainersResponse = yield API.fetchContainers({ teamspace, projectId });
+		const { containers }: FetchContainersResponse = yield API.fetchContainers({ teamspace, projectId });
 
-		yield put(ContainersActions.fetchContainersSuccess(data.containers as any));
+		const stats = [];
+
+		for (let i = 0; i < containers.length; i++) {
+			const data: any = yield API.fetchContainerStats({ teamspace, projectId, containerId: containers[i]._id });
+			stats.push(data);
+		}
+
+		const containersWithStats = containers.map<IContainer>((container, index) => {
+			const containerStats = stats[index];
+			return {
+				...container,
+				revisionsCount: containerStats.revisions.total,
+				lastUpdated: containerStats.revisions.lastUpdated ?? null,
+				latestRevision: containerStats.revisions.latestRevision ?? '',
+				type: containerStats.type ?? '',
+				code: containerStats.code ?? '',
+				status: containerStats.status ?? ContainerStatuses.OK,
+			};
+		});
+
+		yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithStats));
 	} catch (e) {
 		console.error(e);
 	}

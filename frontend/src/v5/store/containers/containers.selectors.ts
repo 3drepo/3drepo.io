@@ -21,8 +21,12 @@ import { isEmpty } from 'lodash';
 
 const selectProjectsDomain = (state: { containers: IContainersState }) => state.containers;
 
+export const selectCurrentProject = createSelector(
+	selectProjectsDomain, (state) => state.currentProject,
+);
+
 export const selectContainers = createSelector(
-	selectProjectsDomain, (state) => state.containers,
+	[selectProjectsDomain, selectCurrentProject], (state, currentProject) => state.containers[currentProject] ?? [],
 );
 
 export const selectFilterQuery = createSelector(

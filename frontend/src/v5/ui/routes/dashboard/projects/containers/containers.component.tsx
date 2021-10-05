@@ -15,17 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect, useState } from 'react';
-import { debounce } from 'lodash';
+import React from 'react';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
 import { Trans } from '@lingui/react';
 import { MainHeader } from '@controls/mainHeader';
 import { SearchInput } from '@controls/searchInput';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
-import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
-import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
-import { useParams } from 'react-router';
 import {
 	Container,
 	Content,
@@ -35,30 +31,16 @@ import {
 } from './containers.styles';
 import { ContainersList } from './containersList';
 import { EmptySearchResults } from './containersList/emptySearchResults';
+import { useContainersData, useContainersSearch } from './containers.hooks';
 
 export const Containers = (): JSX.Element => {
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const {
+		filteredContainers,
+		favouriteContainers,
+		hasContainers,
+	} = useContainersData();
 
-	const filteredContainers = ContainersHooksSelectors.selectFilteredContainers();
-	const favouriteContainers = ContainersHooksSelectors.selectFilteredFavouriteContainers();
-	const filterQuery = ContainersHooksSelectors.selectFilterQuery();
-	const hasContainers = ContainersHooksSelectors.selectHasContainers();
-
-	const [searchInput, setSearchInput] = useState(filterQuery);
-
-	const debounceSearchUpdate = debounce(
-		(value: string) => ContainersActionsDispatchers.setFilterQuery(value),
-		300,
-		{ trailing: true },
-	);
-
-	useEffect(() => {
-		debounceSearchUpdate(searchInput);
-	}, [searchInput]);
-
-	useEffect(() => {
-		ContainersActionsDispatchers.fetchContainers(teamspace, project);
-	}, []);
+	const { searchInput, setSearchInput, filterQuery } = useContainersSearch();
 
 	return (
 		<Container>

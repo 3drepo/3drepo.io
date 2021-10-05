@@ -16,7 +16,11 @@
  */
 
 import { AxiosResponse } from 'axios';
-import { FavouritePayload, FetchContainersPayload } from '@/v5/store/containers/containers.types';
+import {
+	FavouritePayload,
+	FetchContainersPayload,
+	FetchContainerStatsPayload,
+} from '@/v5/store/containers/containers.types';
 import api from './default';
 
 export const addFavourites = (
@@ -37,5 +41,10 @@ export const removeFavourites = (
 
 export const fetchContainers = async ({ teamspace, projectId }: FetchContainersPayload) => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers`);
+	return data;
+};
+
+export const fetchContainerStats = async ({ teamspace, projectId, containerId }: FetchContainerStatsPayload) => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/stats`);
 	return data;
 };

@@ -20,28 +20,35 @@ import { times } from 'lodash';
 import { containerMockFactory } from '@/v5/store/containers/containers.fixtures';
 
 describe('Containers: redux', () => {
+	const projectId = 'projectId';
 	const mockContainers = times(5, () => containerMockFactory({ isFavourite: false }));
 	const defaultState = {
 		...INITIAL_STATE,
-		containers: mockContainers
+		containers: {
+			[projectId]: mockContainers
+		}
 	};
 
 	it('should add container to favourites', () => {
-		const resultState = containersReducer(defaultState, ContainersActions.toggleFavouriteSuccess(mockContainers[0]._id));
+		const resultState = containersReducer(defaultState, ContainersActions.toggleFavouriteSuccess(projectId, mockContainers[0]._id));
+		const resultContainers = resultState.containers[projectId];
 
-		expect(resultState.containers[0].isFavourite).toEqual(true);
-		expect(resultState.containers.slice(1).every(container => container.isFavourite)).toEqual(false);
+		expect(resultContainers[0].isFavourite).toEqual(true);
+		expect(resultContainers.slice(1).every(container => container.isFavourite)).toEqual(false);
 	});
 
 	it('should remove container from favourites', () => {
 		const mockAllFavouritesContainers = times(5, () => containerMockFactory({ isFavourite: true }))
 		const defaultStateWithAllFavourites = {
 			...INITIAL_STATE,
-			containers: mockAllFavouritesContainers
+			containers: {
+				[projectId]: mockAllFavouritesContainers
+			}
 		}
-		const resultState = containersReducer(defaultStateWithAllFavourites, ContainersActions.toggleFavouriteSuccess(mockAllFavouritesContainers[0]._id));
+		const resultState = containersReducer(defaultStateWithAllFavourites, ContainersActions.toggleFavouriteSuccess(projectId, mockAllFavouritesContainers[0]._id));
+		const resultContainers = resultState.containers[projectId];
 
-		expect(resultState.containers[0].isFavourite).toEqual(false);
-		expect(resultState.containers.slice(1).every(container => container.isFavourite)).toEqual(true);
+		expect(resultContainers[0].isFavourite).toEqual(false);
+		expect(resultContainers.slice(1).every(container => container.isFavourite)).toEqual(true);
 	})
 })

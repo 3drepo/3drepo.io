@@ -16,27 +16,23 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { cloneDeep, times } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { Constants } from '@/v5/store/common/actions.helper';
-import { containerMockFactory } from './containers.fixtures';
-import { IContainersActionCreators, IContainersActions, IContainersState, ContainerStatuses } from './containers.types';
+import { IContainersActionCreators, IContainersActions, IContainersState } from './containers.types';
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({
 	setFilterQuery: ['query'],
 	addFavourite: ['teamspace', 'projectId', 'containerId'],
 	removeFavourite: ['teamspace', 'projectId', 'containerId'],
-	toggleFavouriteSuccess: ['containerId'],
+	toggleFavouriteSuccess: ['projectId', 'containerId'],
 	fetchContainers: ['teamspace', 'projectId'],
-	fetchContainersSuccess: ['containers'],
+	fetchContainersSuccess: ['projectId', 'containers'],
+	setCurrentProject: ['projectId'],
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
 
 export const INITIAL_STATE: IContainersState = {
-	containers: [
-		containerMockFactory({ status: ContainerStatuses.PROCESSING }),
-		containerMockFactory({ status: ContainerStatuses.QUEUED }),
-		containerMockFactory({ status: ContainerStatuses.FAILED }),
-		...times(10, () => containerMockFactory()),
-	],
+	containers: {},
+	currentProject: '',
 	filterQuery: '',
 };
 
@@ -44,25 +40,40 @@ export const setFilterQuery = (state = INITIAL_STATE, { query }: IContainersActi
 	{ ...state, filterQuery: query }
 );
 
-export const toggleFavourite = (state = INITIAL_STATE, { containerId }: IContainersActions['addFavourite']) => {
-	const containers = cloneDeep(state.containers);
+export const toggleFavourite = (state = INITIAL_STATE, { projectId, containerId }: IContainersActions['addFavourite']) => {
+	const containers = cloneDeep(state.containers[projectId]);
 	const containerIndex = containers.findIndex(({ _id }) => _id === containerId);
 
 	containers[containerIndex].isFavourite = !containers[containerIndex].isFavourite;
 
 	return {
 		...state,
-		containers,
+		containers: {
+			...state.containers,
+			[projectId]: containers,
+		},
 	};
 };
 
-export const fetchContainersSuccess = (state = INITIAL_STATE, { containers }: IContainersActions['fetchContainersSuccess']) => ({
-	...state,
+export const fetchContainersSuccess = (state = INITIAL_STATE, {
+	projectId,
 	containers,
+}: IContainersActions['fetchContainersSuccess']) => ({
+	...state,
+	containers: {
+		...state.containers,
+		[projectId]: containers,
+	},
+});
+
+export const setCurrentProject = (state = INITIAL_STATE, { projectId }: IContainersActions['setCurrentProject']) => ({
+	...state,
+	currentProject: projectId,
 });
 
 export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
 	[ContainersTypes.SET_FILTER_QUERY]: setFilterQuery,
 	[ContainersTypes.TOGGLE_FAVOURITE_SUCCESS]: toggleFavourite,
 	[ContainersTypes.FETCH_CONTAINERS_SUCCESS]: fetchContainersSuccess,
+	[ContainersTypes.SET_CURRENT_PROJECT]: setCurrentProject,
 });

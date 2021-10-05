@@ -18,8 +18,9 @@
 import { AllReturnTypes, ExtendedAction } from '@/v5/store/store.types';
 
 export interface IContainersState {
-	containers: IContainer[];
+	containers: Record<string, IContainer[]>;
 	filterQuery: string;
+	currentProject: string;
 }
 
 export enum ContainerStatuses {
@@ -44,19 +45,18 @@ export interface IContainer {
 	role: string;
 }
 
-export interface FavouritePayload {
-	teamspace: string;
-	projectId: string;
+export type FavouritePayload = FetchContainersPayload & {
 	containerId: IContainer['_id'];
-}
+};
 
 export interface IContainersActionCreators {
 	setFilterQuery: (query: string) => ExtendedAction<{ query: string }, 'setFilterQuery'>
 	addFavourite: (teamspace: string, projectId: string, containerId: string) => ExtendedAction<FavouritePayload, 'addFavourite'>
 	removeFavourite: (teamspace: string, projectId: string, containerId: string) => ExtendedAction<FavouritePayload, 'removeFavourite'>
-	toggleFavouriteSuccess: (containerId: string) => ExtendedAction<{ containerId: string }, 'toggleFavouriteSuccess'>
+	toggleFavouriteSuccess: (projectId: string, containerId: string) => ExtendedAction<{ projectId: string, containerId: string }, 'toggleFavouriteSuccess'>
 	fetchContainers: (teamspace: string, projectId: string) => ExtendedAction<FetchContainersPayload, 'fetchContainers'>
-	fetchContainersSuccess: (containers: IContainer[]) => ExtendedAction<{ containers: IContainer[]}, 'fetchContainersSuccess'>
+	fetchContainersSuccess: (projectId: string, containers: IContainer[]) => ExtendedAction<{ projectId: string, containers: IContainer[] }, 'fetchContainersSuccess'>
+	setCurrentProject: (projectId: string) => ExtendedAction<{ projectId: string }, 'setCurrentProject'>
 }
 
 export type IContainersActions = AllReturnTypes<IContainersActionCreators>;
@@ -68,4 +68,8 @@ export type FetchContainersPayload = {
 
 export type FetchContainersResponse = {
 	containers: Array<Pick<IContainer, '_id' | 'name' | 'role' | 'isFavourite'>>
+};
+
+export type FetchContainerStatsPayload = FetchContainersPayload & {
+	containerId: IContainer['_id'];
 };
