@@ -57,7 +57,8 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	setCriteriaFieldState: ['criteriaFieldState'],
 	resetToSavedSelection: ['groupId'],
 	resetComponentState: [],
-	updateEditingGroup: ['properties']
+	updateEditingGroup: ['properties'],
+	updateGroupFromChatService: ['group'],
 }, { prefix: 'GROUPS/' });
 
 export interface ICriteriaFieldState {
