@@ -254,6 +254,11 @@ function* closeDetails() {
 	}
 }
 
+function* updateGroupFromChatService({group}) {
+	const preparedGroup = yield prepareGroupWithCount(group);
+	yield put(GroupsActions.updateGroupSuccess(preparedGroup));
+}
+
 function* createGroup({ teamspace, modelId, revision }) {
 	yield put(GroupsActions.toggleDetailsPendingState(true));
 	try {
@@ -358,8 +363,7 @@ function * setOverrideAll({overrideAll}) {
 	}
 }
 
-function *onUpdated(updatedGroup) {
-	const group = yield prepareGroupWithCount(updatedGroup);
+const onUpdated = (group) => {
 	const state = getState();
 	const isShowingDetails = selectShowDetails(state);
 	const activeGroupId = selectActiveGroupId(state);
@@ -368,16 +372,16 @@ function *onUpdated(updatedGroup) {
 		dispatch(GroupsActions.showUpdateInfo());
 
 		setTimeout(() => {
-			dispatch(GroupsActions.updateGroupSuccess(group));
+			dispatch(GroupsActions.updateGroupFromChatService(group));
 		}, 5000);
 	} else {
-		dispatch(GroupsActions.updateGroupSuccess(group));
+		dispatch(GroupsActions.updateGroupFromChatService(group));
 	}
-}
+};
 
-function *onCreated(createdGroup) {
-	dispatch(GroupsActions.updateGroupSuccess(yield prepareGroupWithCount(createdGroup)));
-}
+const onCreated = (createdGroup) => {
+	dispatch(GroupsActions.updateGroupFromChatService(createdGroup));
+};
 
 const onDeleted = (deletedGroupIds) => {
 	dispatch(GroupsActions.showDeleteInfo(deletedGroupIds));
@@ -438,4 +442,5 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.RESET_TO_SAVED_SELECTION, resetToSavedSelection);
 	yield takeLatest(GroupsTypes.CLEAR_COLOR_OVERRIDES, clearColorOverrides);
 	yield takeLatest(GroupsTypes.SET_OVERRIDE_ALL, setOverrideAll);
+	yield takeLatest(GroupsTypes.UPDATE_GROUP_FROM_CHAT_SERVICE, updateGroupFromChatService);
 }
