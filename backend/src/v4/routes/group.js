@@ -23,6 +23,10 @@ const middlewares = require("../middlewares/middlewares");
 const C = require("../constants");
 const responseCodes = require("../response_codes.js");
 const Group = require("../models/group");
+const {v5Path} = require("../../interop");
+const GroupsV5 = require(`${v5Path}/processors/teamspaces/projects/models/commons/groups`);
+const { serialiseGroupArray} = require(`${v5Path}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups`);
+const { validateGroupsExportData, validateGroupsImportData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups`);
 const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
 
@@ -465,6 +469,48 @@ router.post("/revision/:rid/groups/", middlewares.issue.canCreate, createGroup);
  * }
  */
 router.delete("/groups/", middlewares.issue.canCreate, deleteGroups);
+
+/**
+ * @api {post} /:teamspace/:model/groups/export Export Groups
+ * @apiName exportGroups
+ * @apiGroup Groups
+ * @apiDescription This is a back-ported endpoint from V5. For details please see V5 documentation /docs/#/Federations/ExportFederationGroups
+ */
+router.post("/groups/export", middlewares.issue.canView, validateGroupsExportData, exportGroups, serialiseGroupArray);
+
+/**
+ * @api {post} /:teamspace/:model/groups/export Import Groups
+ * @apiName exportGroups
+ * @apiGroup Groups
+ * @apiDescription This is a back-ported endpoint from V5. For details please see V5 documentation /docs/#/Federations/ImportFederationGroups
+ */
+router.post("/groups/import", middlewares.issue.canView, validateGroupsImportData, importGroups);
+
+function exportGroups(req, res, next) {
+	const place = utils.APIInfo(req);
+	const { account, model } = req.params;
+	const { groups } = req.body;
+
+	GroupsV5.getGroups(account, model, groups).then((outputData) => {
+		req.outputData = outputData;
+		next();
+	}).catch((err) => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+
+}
+
+function importGroups(req, res, next) {
+	const place = utils.APIInfo(req);
+	const { account, model } = req.params;
+	const { groups } = req.body;
+
+	GroupsV5.importGroups(account, model, groups).then(()=> {
+		responseCodes.respond(place, req, res, next, responseCodes.OK);
+	}).catch((err) => {
+		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
 
 function listGroups(req, res, next) {
 	const place = utils.APIInfo(req);

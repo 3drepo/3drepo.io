@@ -73,8 +73,32 @@ db.createRevision = (teamspace, modelId, revision) => {
 	return DbHandler.insertOne(teamspace, `${modelId}.history`, formattedRevision);
 };
 
+db.createGroups = (teamspace, modelId, groups = []) => {
+	const toInsert = groups.map((entry) => {
+		const converted = {
+			...entry,
+			_id: stringToUUID(entry._id),
+		};
+
+		if ((entry.objects || []).length) {
+			converted.objects = entry.objects.map((objectEntry) => {
+				const convertedObj = { ...objectEntry };
+				if (objectEntry.shared_ids) {
+					convertedObj.shared_ids = objectEntry.shared_ids.map(uuidToString);
+				}
+				return convertedObj;
+			});
+		}
+
+		return converted;
+	});
+
+	return DbHandler.insertMany(teamspace, `${modelId}.groups`, toInsert);
+};
+
 ServiceHelper.generateUUIDString = () => uuidToString(generateUUID());
-ServiceHelper.generateRandomString = () => Crypto.randomBytes(15).toString('hex');
+ServiceHelper.generateUUID = () => generateUUID();
+ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex');
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
  + Math.random() * (end.getTime() - start.getTime()));
 
@@ -101,6 +125,48 @@ ServiceHelper.generateRandomModelProperties = () => ({
 	timestamp: Date.now(),
 	status: 'ok',
 });
+
+ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {
+	const genId = () => (serialised ? ServiceHelper.generateUUIDString() : generateUUID());
+	const group = {
+		_id: genId(),
+		name: ServiceHelper.generateRandomString(),
+		color: [1, 1, 1],
+		createdAt: Date.now(),
+		updatedAt: Date.now(),
+		updatedBy: ServiceHelper.generateRandomString(),
+		author: ServiceHelper.generateRandomString(),
+
+	};
+
+	if (isSmart) {
+		group.rules = [
+			{
+				field: 'IFC GUID',
+				operator: 'IS',
+				values: [
+					'1rbbJcnUDEEA_ArpSqk3B7',
+				],
+			},
+		];
+	} else {
+		group.objects = [{
+			account, model,
+		}];
+
+		if (isIfcGuids) {
+			group.objects[0].ifc_guids = [
+				ServiceHelper.generateRandomString(22),
+				ServiceHelper.generateRandomString(22),
+				ServiceHelper.generateRandomString(22),
+			];
+		} else {
+			group.objects[0].shared_ids = [genId(), genId(), genId()];
+		}
+	}
+
+	return group;
+};
 
 ServiceHelper.app = () => createApp().listen(8080);
 

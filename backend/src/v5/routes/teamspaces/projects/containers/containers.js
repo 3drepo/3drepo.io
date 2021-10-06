@@ -39,7 +39,10 @@ const getContainerStats = async (req, res) => {
 		statsSerialised.revisions.latestRevision = UUIDToString(stats.revisions.latestRevision);
 
 		respond(req, res, templates.ok, statsSerialised);
-	}).catch((err) => respond(req, res, err));
+	}).catch(
+		// istanbul ignore next
+		(err) => respond(req, res, err),
+	);
 };
 
 const deleteFavourites = (req, res) => {
