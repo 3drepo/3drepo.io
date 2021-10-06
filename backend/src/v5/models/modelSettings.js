@@ -24,6 +24,17 @@ const findModel = (ts, query, projection, sort) => db.find(ts, 'settings', query
 
 const noFederations = { federate: { $ne: true } };
 const onlyFederations = { federate: true };
+const excludeClosedIssues = { status: { $ne: 'closed' } };
+const excludeMitigatedRisks = {
+	$and: [
+		{ mitigation_status: { $ne: 'void' } },
+		{ mitigation_status: { $ne: 'agreed_fully' } },
+		{ mitigation_status: { $ne: 'rejected' } },
+	],
+};
+
+const issuesName = (model) => `${model}.issues`;
+const risksName = (model) => `${model}.risks`;
 
 const getModelByQuery = async (ts, query, projection) => {
 	const res = await findOneModel(ts, query, projection);
@@ -70,6 +81,16 @@ Models.getContainers = async (ts, ids, projection, sort) => {
 Models.getFederations = async (ts, ids, projection, sort) => {
 	const query = { _id: { $in: ids }, ...onlyFederations };
 	return findModel(ts, query, projection, sort);
+};
+
+Models.getModelIssueCount = async (teamspace, model) => {
+	const query = { ...excludeClosedIssues };
+	return db.count(teamspace, issuesName(model), query);
+};
+
+Models.getModelRiskCount = async (teamspace, model) => {
+	const query = { ...excludeMitigatedRisks };
+	return db.count(teamspace, risksName(model), query);
 };
 
 module.exports = Models;

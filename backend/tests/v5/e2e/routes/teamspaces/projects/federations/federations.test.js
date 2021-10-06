@@ -46,12 +46,16 @@ const modelSettings = [
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
 		isFavourite: true,
-		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true, subModels: [{ model: modelWithRevId }] },		
+		properties: { ...ServiceHelper.generateRandomModelProperties(),
+			federate: true,
+			subModels: [{ model: modelWithRevId }] },
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
-		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true, subModels: [{ model: modelWithoutRevId }] },		
+		properties: { ...ServiceHelper.generateRandomModelProperties(),
+			federate: true,
+			subModels: [{ model: modelWithoutRevId }] },
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
@@ -70,6 +74,42 @@ const modelSettings = [
 	},
 ];
 
+const issues = [
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: 'issue1',
+		modelId: modelSettings[0]._id,
+	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: 'issue2',
+		modelId: modelSettings[0]._id,
+	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: 'issue3',
+		modelId: modelSettings[1]._id,
+	},
+];
+
+const risks = [
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: 'risk1',
+		modelId: modelSettings[0]._id,
+	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: 'risk2',
+		modelId: modelSettings[0]._id,
+	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: 'risk3',
+		modelId: modelSettings[1]._id,
+	},
+];
+
 const container = modelSettings.find(({ properties }) => !properties.federate);
 
 const revisions = [
@@ -81,6 +121,10 @@ const revisions = [
 const federationWithRev = modelSettings[0];
 const federationWithoutRev = modelSettings[1];
 const federationWithoutSubModels = modelSettings[2];
+const federationWithRevIssues = [issues[0], issues[1]];
+const federationWithRevRisks = [risks[0], risks[1]];
+const federationWithoutRevIssues = [issues[2]];
+const federationWithoutRevRisks = [risks[2]];
 
 const latestRevision = revisions.filter((rev) => !rev.void)
 	.reduce((a, b) => (a.timestamp > b.timestamp ? a : b));
@@ -95,11 +139,21 @@ const setupData = async () => {
 		teamspace,
 		model._id,
 		model.name,
-		model.properties
+		model.properties,
+	));
+	const issueProms = issues.map((issue) => ServiceHelper.db.createIssue(
+		teamspace,
+		issue,
+	));
+	const riskProms = risks.map((risk) => ServiceHelper.db.createRisk(
+		teamspace,
+		risk,
 	));
 	return Promise.all([
 		...userProms,
 		...modelProms,
+		...issueProms,
+		...riskProms,
 		ServiceHelper.db.createUser(nobody),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, modelSettings.map(({ _id }) => _id)),
 		...revisions.map((revision) => ServiceHelper.db.createRevision(teamspace, modelWithRevId, revision)),
@@ -139,12 +193,16 @@ const testGetFederationList = () => {
 	});
 };
 
-const formatToStats = (federation, latestRev) => {
+const formatToStats = (federation, issueCount, riskCount, latestRev) => {
 	const formattedStats = {
 		code: federation.properties.properties.code,
 		status: federation.properties.status,
 		subModels: federation.properties.subModels,
 		lastUpdated: latestRev ? latestRev.getTime() : undefined,
+		tickets: {
+			issues: issueCount,
+			risks: riskCount,
+		},
 	};
 
 	return formattedStats;
@@ -180,17 +238,19 @@ const testGetFederationStats = () => {
 
 		test('should return the federation stats correctly if the user has access (subModels with revisions)', async () => {
 			const res = await agent.get(`${route(federationWithRev._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual(formatToStats(federationWithRev, latestRevision.timestamp));
+			expect(res.body).toEqual(formatToStats(federationWithRev, federationWithRevIssues.length,
+				federationWithRevRisks.length, latestRevision.timestamp));
 		});
 
 		test('should return the federation stats correctly if the user has access (subModels without revisions)', async () => {
 			const res = await agent.get(`${route(federationWithoutRev._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual(formatToStats(federationWithoutRev));
+			expect(res.body).toEqual(formatToStats(federationWithoutRev, federationWithoutRevIssues.length,
+				federationWithoutRevRisks.length));
 		});
 
 		test('should return the federation stats correctly if the user has access (no subModels)', async () => {
 			const res = await agent.get(`${route(federationWithoutSubModels._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual(formatToStats(federationWithoutSubModels));
+			expect(res.body).toEqual(formatToStats(federationWithoutSubModels, 0, 0));
 		});
 	});
 };

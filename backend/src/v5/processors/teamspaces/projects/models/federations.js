@@ -16,7 +16,7 @@
  */
 
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
-const { getFederationById, getFederations } = require('../../../../models/modelSettings');
+const { getFederationById, getFederations, getModelIssueCount, getModelRiskCount } = require('../../../../models/modelSettings');
 const { getLatestRevision } = require('../../../../models/revisions');
 const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
@@ -45,7 +45,6 @@ Federations.getFederationStats = async (teamspace, federation) => {
 		status: 1,
 		subModels: 1,
 		category: 1 });
-
 	const lastUpdates = [];
 	if (subModels) {
 		await Promise.all(subModels.map(async (m) => {
@@ -56,15 +55,18 @@ Federations.getFederationStats = async (teamspace, federation) => {
 			}
 		}));
 	}
+	const issueCount = await getModelIssueCount(teamspace, federation);
+	const riskCount = await getModelRiskCount(teamspace, federation);
 
 	return {
 		code: properties.code,
-		status: status,
-		subModels: subModels,
-		category: category,
+		status,
+		subModels,
+		category,
 		lastUpdated: lastUpdates.length ? lastUpdates.sort(
 			(a, b) => b.timestamp - a.timestamp,
 		)[0].timestamp : undefined,
+		tickets: { issues: issueCount, risks: riskCount },
 	};
 };
 

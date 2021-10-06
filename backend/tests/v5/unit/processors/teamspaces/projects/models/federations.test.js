@@ -46,7 +46,7 @@ const federationSettings = {
 			code: 'FED1',
 		},
 		status: 'ok',
-		subModels: [{ model: 'model1' }, { model: 'model2' }],
+		subModels: [{ model: 'container1' }, { model: 'container2' }],
 		category: 'category 1',
 	},
 	federation2: {
@@ -58,7 +58,7 @@ const federationSettings = {
 			code: 'FED2',
 		},
 		status: 'processing',
-		subModels: [{ model: 'model3' }],
+		subModels: [{ model: 'container3' }],
 		category: 'category 2',
 	},
 	federation3: {
@@ -80,6 +80,18 @@ const project = { _id: 1, name: 'project', models: federationList.map(({ _id }) 
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getFederations.mockImplementation(() => federationList);
 ModelSettings.getFederationById.mockImplementation((teamspace, federation) => federationSettings[federation]);
+ModelSettings.getModelIssueCount.mockImplementation((teamspace, federation) => {
+	if (federation === 'federation1') return 1;
+	if (federation === 'federation2') return 2;
+	return 0;
+});
+
+ModelSettings.getModelRiskCount.mockImplementation((teamspace, federation) => {
+	if (federation === 'federation1') return 1;
+	if (federation === 'federation2') return 2;
+	return 0;
+});
+
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
 
 Users.appendFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
@@ -99,9 +111,9 @@ Users.deleteFavourites.mockImplementation((username, teamspace, favouritesToAdd)
 	}
 });
 
-Revisions.getLatestRevision.mockImplementation((teamspace, federation) => {
-	if (federation === 'model1') return { timestamp: 1234 };
-	if (federation === 'model2') return { timestamp: 5678 };
+Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
+	if (container === 'container1') return { timestamp: 1234 };
+	if (container === 'container2') return { timestamp: 5678 };
 	throw templates.revisionNotFound;
 });
 
@@ -190,23 +202,27 @@ const testDeleteFavourites = () => {
 	});
 };
 
-const formatToStats = (settings, lastUpdated) => ({
+const formatToStats = (settings, issueCount, riskCount, lastUpdated) => ({
 	code: settings.properties.code,
 	status: settings.status,
 	subModels: settings.subModels,
 	category: settings.category,
 	lastUpdated,
+	tickets: {
+		issues: issueCount ?? 0,
+		risks: riskCount ?? 0,
+	},
 });
 
 const testGetFederationStats = () => {
 	describe('Get federation stats', () => {
 		test('should return the stats if the federation exists and has subModels with revisions', async () => {
 			const res = await Federations.getFederationStats('teamspace', 'federation1');
-			expect(res).toEqual(formatToStats(federationSettings.federation1, 5678));
+			expect(res).toEqual(formatToStats(federationSettings.federation1, 1, 1, 5678));
 		});
 		test('should return the stats if the federation exists and has subModels with no revisions', async () => {
 			const res = await Federations.getFederationStats('teamspace', 'federation2');
-			expect(res).toEqual(formatToStats(federationSettings.federation2));
+			expect(res).toEqual(formatToStats(federationSettings.federation2, 2, 2));
 		});
 		test('should return the stats if the federation exists and has no subModels', async () => {
 			const res = await Federations.getFederationStats('teamspace', 'federation3');

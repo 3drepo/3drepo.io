@@ -63,7 +63,7 @@ db.createModel = (teamspace, _id, name, props) => {
 	const settings = {
 		_id,
 		name,
-		...props
+		...props,
 	};
 	return DbHandler.insertOne(teamspace, 'settings', settings);
 };
@@ -71,6 +71,16 @@ db.createModel = (teamspace, _id, name, props) => {
 db.createRevision = (teamspace, modelId, revision) => {
 	const formattedRevision = { ...revision, _id: stringToUUID(revision._id) };
 	return DbHandler.insertOne(teamspace, `${modelId}.history`, formattedRevision);
+};
+
+db.createIssue = (teamspace, issue) => {
+	const formattedIssue = { ...issue, _id: stringToUUID(issue._id) };
+	return DbHandler.insertOne(teamspace, `${issue.modelId}.issues`, formattedIssue);
+};
+
+db.createRisk = (teamspace, risk) => {
+	const formattedRisk = { ...risk, _id: stringToUUID(risk._id) };
+	return DbHandler.insertOne(teamspace, `${risk.modelId}.risks`, formattedRisk);
 };
 
 ServiceHelper.generateUUIDString = () => uuidToString(generateUUID());
