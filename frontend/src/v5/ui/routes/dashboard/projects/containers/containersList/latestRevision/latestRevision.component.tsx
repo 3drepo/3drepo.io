@@ -18,15 +18,21 @@
 import React from 'react';
 import { ContainerStatuses } from '@/v5/store/containers/containers.types';
 import { Trans } from '@lingui/react';
+import { i18n } from '@lingui/core';
+import { ErrorTooltip } from '@controls/errorTooltip';
 import { Name, ProcessingStatus, QueuedStatus } from './latestRevision.styles';
 
 interface ILatestRevision {
 	name: string;
 	status: ContainerStatuses;
 	selected?: boolean;
+	error?: {
+		date: Date;
+		message: string;
+	}
 }
 
-export const LatestRevision = ({ name, status, selected = false }: ILatestRevision): JSX.Element => (
+export const LatestRevision = ({ name, status, selected = false, error }: ILatestRevision): JSX.Element => (
 	<>
 		<Trans
 			id="containers.list.item.latestRevision.label"
@@ -46,6 +52,33 @@ export const LatestRevision = ({ name, status, selected = false }: ILatestRevisi
 					<ProcessingStatus selected={selected}>
 						<Trans id="containers.list.item.latestRevision.status.processing" message="Processing" />
 					</ProcessingStatus>
+				);
+			}
+
+			if (status === ContainerStatuses.FAILED && error) {
+				return (
+					<>
+						<Name>
+							{name}
+						</Name>
+						<ErrorTooltip>
+							<Trans
+								id="containers.list.item.latestRevision.status.error.tooltipMessage"
+								message="The latest upload on <0>{date}</0> at <0>{time}</0> has failed due to <0>{message}</0>."
+								values={{
+									date: i18n.date(error.date),
+									time: i18n.date(error.date, {
+										hour: 'numeric',
+										minute: 'numeric',
+									}),
+									message: error.message,
+								}}
+								components={[
+									<b />,
+								]}
+							/>
+						</ErrorTooltip>
+					</>
 				);
 			}
 
