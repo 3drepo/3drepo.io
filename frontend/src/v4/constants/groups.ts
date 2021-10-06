@@ -16,6 +16,7 @@
  */
 
 import Download from '@material-ui/icons/CloudDownload';
+import Upload from '@material-ui/icons/CloudUpload';
 import Delete from '@material-ui/icons/Delete';
 import InvertColors from '@material-ui/icons/InvertColors';
 import OfflineBolt from '@material-ui/icons/OfflineBolt';
@@ -46,12 +47,36 @@ export const GROUP_TYPES_ICONS = {
 };
 
 export const GROUPS_ACTIONS_ITEMS = {
+	SHOW_STANDARD: 'show standard groups',
+	SHOW_SMART: 'show smart groups',
+	EXPORT: 'export groups',
+	IMPORT: 'import groups',
 	OVERRIDE_ALL: 'overrideAll',
 	DOWNLOAD: 'download',
 	DELETE_ALL: 'deleteAll'
 };
 
 export const GROUPS_ACTIONS_MENU = [
+	{
+		name: GROUPS_ACTIONS_ITEMS.SHOW_STANDARD,
+		label: 'Show Standard Groups',
+		Icon: PanTool
+	},
+	{
+		name: GROUPS_ACTIONS_ITEMS.SHOW_SMART,
+		label: 'Show Smart Groups',
+		Icon: OfflineBolt
+	},
+	{
+		name: GROUPS_ACTIONS_ITEMS.EXPORT,
+		label: 'Export Groups',
+		Icon: Download
+	},
+	{
+		name: GROUPS_ACTIONS_ITEMS.IMPORT,
+		label: 'Import Groups',
+		Icon: Upload
+	},
 	{
 		name: GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL,
 		label: 'Override All',

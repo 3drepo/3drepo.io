@@ -17,7 +17,7 @@
 
 const Models = {};
 const db = require('../handler/db');
-const { generateStringUUID } = require('../utils/helper/uuids');
+const { generateUUIDString } = require('../utils/helper/uuids');
 const { templates } = require('../utils/responseCodes');
 
 const deleteOneModel = (ts, query) => db.deleteOne(ts, 'settings', query);
@@ -37,7 +37,7 @@ const getModelByQuery = async (ts, query, projection) => {
 	return res;
 };
 
-Models.addModel = (ts, data) => insertOneModel(ts, { _id: generateStringUUID(), ...data });
+Models.addModel = (ts, data) => insertOneModel(ts, { _id: generateUUIDString(), ...data });
 
 Models.deleteModel = (ts, model) => deleteOneModel(ts, { _id: model });
 

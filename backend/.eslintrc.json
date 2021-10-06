@@ -15,6 +15,7 @@
     "rules": {
 		"import/order": 0,
 	    "require-sort/require-sort": "error",
+	    "no-console": "error",
 		"license-header": 2,
 		"arrow-parens": ["error", "always"],
 		"indent": ["error", "tab"],

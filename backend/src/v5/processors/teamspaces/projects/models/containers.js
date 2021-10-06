@@ -19,10 +19,11 @@ const { addModel, deleteModel, getModelList } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getContainerById, getContainers } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
+const Groups = require('./commons/groups');
 const { getProjectById } = require('../../../../models/projects');
 const { templates } = require('../../../../utils/responseCodes');
 
-const Containers = {};
+const Containers = { ...Groups };
 
 Containers.addContainer = addModel;
 

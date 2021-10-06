@@ -216,9 +216,7 @@ function* isolateGroup({ group }) {
 
 function* downloadGroups({ teamspace, modelId }) {
 	try {
-		const groups = yield select(selectGroups);
-		const filters = yield select(selectSelectedFilters);
-		const filteredGroups = searchByFilters(groups, filters, false);
+		const filteredGroups = yield select(selectFilteredGroups);
 		const ids = filteredGroups.map((group) => group._id).join(',');
 		const endpointBase =
 			`${teamspace}/${modelId}/revision/master/head/groups/?noIssues=true&noRisks=true&noViews=true`;
@@ -229,6 +227,39 @@ function* downloadGroups({ teamspace, modelId }) {
 		yield put(DialogActions.showErrorDialog('download', 'groups', error));
 	}
 }
+
+function* exportGroups({ teamspace, modelId}) {
+	try {
+		const filteredGroups = yield select(selectFilteredGroups);
+		const ids = filteredGroups.map(({_id}) => _id);
+		const endpoint =
+			`${teamspace}/${modelId}/groups/export`;
+		const modelName = Viewer.settings ? Viewer.settings.name : '';
+		yield API.downloadJSONHttpPost('groups', modelName, endpoint, {groups: ids});
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('export', 'groups', error));
+	}
+}
+
+function* importGroups({ teamspace, modelId, file}) {
+	try {
+		const endpoint =
+			`${teamspace}/${modelId}/groups/import`;
+		const reader = new FileReader();
+		reader.readAsText(file)
+
+		yield new Promise((resolve, reject) => {
+			reader.addEventListener("load", () => {
+				API.default.post(endpoint, JSON.parse(reader.result as string)).then(resolve).catch(reject);
+			}, false);
+		});
+
+
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('export', 'groups', error));
+	}
+}
+
 
 function* showDetails({ group, revision }) {
 	try {
@@ -365,6 +396,23 @@ function * setOverrideAll({overrideAll}) {
 	}
 }
 
+function * setShowSmartGroups({enabled}) {
+
+	if (enabled) {
+		yield put(GroupsActions.setShowSmartGroupsSuccess());
+	} else {
+		yield put(GroupsActions.clearShowSmartGroupsSuccess());
+	}
+}
+
+function * setShowStandardGroups({enabled}) {
+	if (enabled) {
+		yield put(GroupsActions.setShowStandardGroupsSuccess());
+	} else {
+		yield put(GroupsActions.clearShowStandardGroupsSuccess());
+	}
+}
+
 const onUpdated = (group) => {
 	const state = getState();
 	const isShowingDetails = selectShowDetails(state);
@@ -434,6 +482,8 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.DELETE_GROUPS, deleteGroups);
 	yield takeLatest(GroupsTypes.ISOLATE_GROUP, isolateGroup);
 	yield takeLatest(GroupsTypes.DOWNLOAD_GROUPS, downloadGroups);
+	yield takeLatest(GroupsTypes.EXPORT_GROUPS, exportGroups);
+	yield takeLatest(GroupsTypes.IMPORT_GROUPS, importGroups);
 	yield takeLatest(GroupsTypes.SHOW_DETAILS, showDetails);
 	yield takeLatest(GroupsTypes.CLOSE_DETAILS, closeDetails);
 	yield takeLatest(GroupsTypes.CREATE_GROUP, createGroup);
@@ -444,5 +494,7 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.RESET_TO_SAVED_SELECTION, resetToSavedSelection);
 	yield takeLatest(GroupsTypes.CLEAR_COLOR_OVERRIDES, clearColorOverrides);
 	yield takeLatest(GroupsTypes.SET_OVERRIDE_ALL, setOverrideAll);
+	yield takeLatest(GroupsTypes.SET_SHOW_SMART_GROUPS, setShowSmartGroups);
+	yield takeLatest(GroupsTypes.SET_SHOW_STANDARD_GROUPS, setShowStandardGroups);
 	yield takeLatest(GroupsTypes.UPDATE_GROUP_FROM_CHAT_SERVICE, updateGroupFromChatService);
 }

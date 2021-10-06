@@ -17,6 +17,8 @@
 
 import React from 'react';
 
+import fileDialog from 'file-dialog';
+
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import ArrowBack from '@material-ui/icons/ArrowBack';
@@ -60,6 +62,8 @@ interface IProps {
 	model: any;
 	revision?: string;
 	isAllOverridden: boolean;
+	showSmart: boolean;
+	showStandard: boolean;
 	isPending?: boolean;
 	showDetails?: boolean;
 	groups: any[];
@@ -79,30 +83,25 @@ interface IProps {
 	saveGroup: (teamspace, model, group) => void;
 	toggleColorOverride: (group) => void;
 	setOverrideAll: (overrideAll) => void;
+	setShowSmartGroups: (enabled) => void;
+	setShowStandardGroups: (enabled) => void;
 	deleteGroups: (teamspace, model, groups) => void;
 	showConfirmDialog: (config) => void;
 	isolateGroup: (group) => void;
 	downloadGroups: (teamspace, model) => void;
+	exportGroups: (teamspace, model) => void;
+	importGroups: (teamspace, model, file) => void;
 	resetToSavedSelection: (groupId) => void;
 	resetActiveGroup: () => void;
 	subscribeOnChanges: (teamspace, modelId) => void;
 	unsubscribeFromChanges: (teamspace, modelId) => void;
-	id?: string;
+	id?: string	;
 }
 
-interface IState {
-	filteredGroups: any[];
-}
-
-export class Groups extends React.PureComponent<IProps, IState> {
+export class Groups extends React.PureComponent<IProps> {
 
 	get type() {
 		return VIEWER_PANELS.GROUPS;
-	}
-
-	get filteredGroups() {
-		const { groups, selectedFilters } = this.props;
-		return searchByFilters(groups, selectedFilters, false);
 	}
 
 	get filters() {
@@ -110,11 +109,21 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	}
 
 	get menuActionsMap() {
-		const { setOverrideAll, teamspace, model, downloadGroups, isAllOverridden } = this.props;
+		const {
+			setOverrideAll, setShowStandardGroups, setShowSmartGroups,
+			teamspace, 	model,
+			downloadGroups, exportGroups, importGroups,
+			isAllOverridden, showStandard, showSmart
+		} = this.props;
+
 		return {
+			[GROUPS_ACTIONS_ITEMS.SHOW_STANDARD]: () => setShowStandardGroups(!showStandard),
+			[GROUPS_ACTIONS_ITEMS.SHOW_SMART]: () => setShowSmartGroups(!showSmart),
+			[GROUPS_ACTIONS_ITEMS.EXPORT]: () => exportGroups(teamspace, model),
+			[GROUPS_ACTIONS_ITEMS.IMPORT]: () => fileDialog({accept: '.json'}, (files) => importGroups(teamspace, model, files[0])),
 			[GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL]: () => setOverrideAll(!isAllOverridden),
 			[GROUPS_ACTIONS_ITEMS.DELETE_ALL]: () => this.handleDeleteGroups(),
-			[GROUPS_ACTIONS_ITEMS.DOWNLOAD]: () => downloadGroups(teamspace, model)
+			[GROUPS_ACTIONS_ITEMS.DOWNLOAD]: () => downloadGroups(teamspace, model),
 		};
 	}
 
@@ -130,27 +139,23 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		}
 		return false;
 	}
-	public state = {
-		filteredGroups: []
-	};
-
 	public groupsContainerRef = React.createRef<any>();
 
 	public renderHeaderNavigation = () => {
-		const initialIndex = this.state.filteredGroups.findIndex(({ _id }) => this.props.activeGroupId === _id);
+		const initialIndex = this.props.groups.findIndex(({ _id }) => this.props.activeGroupId === _id);
 
 		return (
 			<ListNavigation
 				panelType={this.type}
 				initialIndex={initialIndex}
-				itemsCount={this.state.filteredGroups.length}
+				itemsCount={this.props.groups.length}
 				onChange={this.handleNavigationChange}
 			/>
 		);
 	}
 
 	public renderGroupsList = renderWhenTrue(() => {
-		const Items = this.state.filteredGroups.map((group) => (
+		const Items = this.props.groups.map((group) => (
 				<GroupListItem
 					{...group}
 					created=""
@@ -185,14 +190,14 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		<>
 			<ViewerPanelContent onClick={this.resetActiveGroup}>
 				<div onClick={(event: React.MouseEvent<HTMLDivElement>) => event.stopPropagation()}>
-					{this.renderEmptyState(!this.props.searchEnabled && !this.state.filteredGroups.length)}
-					{this.renderNotFound(this.props.searchEnabled && !this.state.filteredGroups.length)}
-					{this.renderGroupsList(this.state.filteredGroups.length)}
+					{this.renderEmptyState(!this.props.searchEnabled && !this.props.groups.length)}
+					{this.renderNotFound(this.props.searchEnabled && !this.props.groups.length)}
+					{this.renderGroupsList(this.props.groups.length)}
 				</div>
 			</ViewerPanelContent>
 			<ViewerPanelFooter onClick={this.resetActiveGroup} container alignItems="center" justify="space-between">
 				<Summary>
-					{`${this.state.filteredGroups.length} groups displayed`}
+					{`${this.props.groups.length} groups displayed`}
 				</Summary>
 				<ViewerPanelButton
 					aria-label="Add group"
@@ -234,9 +239,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 	public componentDidMount() {
 		const { subscribeOnChanges, teamspace, model } = this.props;
-
-		this.setState({ filteredGroups: this.filteredGroups });
-
 		this.toggleViewerEvents();
 		subscribeOnChanges(teamspace, model);
 	}
@@ -246,14 +248,8 @@ export class Groups extends React.PureComponent<IProps, IState> {
 		const groupsChanged = !isEqual(prevProps.groups, groups);
 		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
 
-		const changes = {} as IState;
-
-		if (groupsChanged || filtersChanged) {
-			changes.filteredGroups = this.filteredGroups;
-		}
-
 		if (filtersChanged && activeGroupId) {
-			const isSelectedGroupVisible = prevState.filteredGroups.some(({ _id }) => {
+			const isSelectedGroupVisible = prevProps.groups.some(({ _id }) => {
 				return _id === activeGroupId;
 			});
 
@@ -262,9 +258,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 			}
 		}
 
-		if (!isEmpty(changes)) {
-			this.setState(changes);
-		}
 	}
 
 	public componentWillUnmount() {
@@ -330,6 +323,8 @@ export class Groups extends React.PureComponent<IProps, IState> {
 						<StyledItemText>
 							{label}
 							{(name === GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL && this.props.isAllOverridden) && <Check fontSize="small" />}
+							{(name === GROUPS_ACTIONS_ITEMS.SHOW_SMART && this.props.showSmart) && <Check fontSize="small" />}
+							{(name === GROUPS_ACTIONS_ITEMS.SHOW_STANDARD && this.props.showStandard) && <Check fontSize="small" />}
 						</StyledItemText>
 					</StyledListItem>
 				);
@@ -338,12 +333,12 @@ export class Groups extends React.PureComponent<IProps, IState> {
 	)
 
 	public handleNavigationChange = (currentIndex) => {
-		this.props.showGroupDetails(this.state.filteredGroups[currentIndex], this.props.revision);
+		this.props.showGroupDetails(this.props.groups[currentIndex], this.props.revision);
 	}
 
 	public renderActions = () => {
 		if (this.props.showDetails) {
-			const canBeNavigated = this.props.activeGroupId && this.state.filteredGroups.length >= 2;
+			const canBeNavigated = this.props.activeGroupId && this.props.groups.length >= 2;
 			return canBeNavigated ?
 					this.renderHeaderNavigation() : <PanelBarActions type={this.type} hideSearch hideMenu />;
 		}
@@ -429,7 +424,6 @@ export class Groups extends React.PureComponent<IProps, IState> {
 
 	public handleFilterChange = (selectedFilters) => {
 		this.props.setState({ selectedFilters });
-		this.setState({ filteredGroups: this.filteredGroups });
 	}
 
 	public handleSaveGroup = (teamspace, model, group) => {

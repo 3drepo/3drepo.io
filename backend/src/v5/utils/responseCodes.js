@@ -46,9 +46,8 @@ ResponseCodes.templates = {
 
 	// Container related error
 	containerNotFound: { message: 'Container not found.', status: 404 },
-
-	// Revision related error
 	revisionNotFound: { message: 'Revision not found.', status: 404 },
+	groupNotFound: { message: 'Group not found.', status: 404 },
 
 	// Invalid Arguements
 	invalidArguments: { message: 'The arguments provided are not valid.', status: 400 },

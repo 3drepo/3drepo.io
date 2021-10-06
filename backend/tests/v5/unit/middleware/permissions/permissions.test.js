@@ -30,7 +30,7 @@ const PermMiddlewares = require(`${src}/middleware/permissions/permissions`);
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 Permissions.hasAccessToTeamspace.mockImplementation((teamspace) => teamspace === 'ts');
-Permissions.hasReadAccessToModel.mockImplementation((teamspace, project) => project === 'ok');
+Permissions.hasReadAccessToContainer.mockImplementation((teamspace, project) => project === 'ok');
 Sessions.isSessionValid.mockImplementation((session) => !!session);
 Sessions.getUserFromSession.mockImplementation(() => 'hi');
 

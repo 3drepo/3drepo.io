@@ -23,10 +23,12 @@ import { DialogActions } from '../../../../modules/dialog';
 import {
 	selectActiveGroupId,
 	selectColorOverrides,
-	selectGroups,
+	selectFilteredGroups,
 	selectGroupsMap,
 	selectHighlightedGroups,
 	selectIsAllOverridden,
+	selectShowSmart,
+	selectShowStandard,
 	selectIsPending,
 	selectSearchEnabled,
 	selectSelectedFilters,
@@ -39,7 +41,7 @@ import { withViewer } from '../../../../services/viewer/viewer';
 import { Groups } from './groups.component';
 
 const mapStateToProps = createStructuredSelector({
-	groups: selectGroups,
+	groups: selectFilteredGroups,
 	groupsMap: selectGroupsMap,
 	isPending: selectIsPending,
 	activeGroupId: selectActiveGroupId,
@@ -51,6 +53,8 @@ const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
 	isModelLoaded: selectIsModelLoaded,
 	isAllOverridden: selectIsAllOverridden,
+	showSmart: selectShowSmart,
+	showStandard: selectShowStandard,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -62,10 +66,14 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	onFiltersChange: GroupsActions.onFiltersChange,
 	toggleColorOverride: GroupsActions.toggleColorOverride,
 	setOverrideAll: GroupsActions.setOverrideAll,
+	setShowSmartGroups: GroupsActions.setShowSmartGroups,
+	setShowStandardGroups: GroupsActions.setShowStandardGroups,
 	deleteGroups: GroupsActions.deleteGroups,
 	showConfirmDialog: DialogActions.showConfirmDialog,
 	isolateGroup: GroupsActions.isolateGroup,
 	downloadGroups: GroupsActions.downloadGroups,
+	exportGroups: GroupsActions.exportGroups,
+	importGroups: GroupsActions.importGroups,
 	resetToSavedSelection: GroupsActions.resetToSavedSelection,
 	resetActiveGroup: GroupsActions.resetActiveGroup,
 	subscribeOnChanges: GroupsActions.subscribeOnChanges,

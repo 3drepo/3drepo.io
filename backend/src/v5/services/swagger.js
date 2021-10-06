@@ -14,13 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const Schemas = require('./swagger.schemas');
 
 const { VERSION } = require('../../../VERSION.json');
 const { v4Path } = require('../../interop');
 // FIXME: can remove the disable once we migrated config
 // eslint-disable-next-line
 const { apiUrls } = require(`${v4Path}/config`);
-const { getSwaggerComponents } = require('../utils/responseCodes');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
@@ -42,28 +42,10 @@ const options = {
 	apis: [`${__dirname}/../routes/**/*.js`], // files containing annotations as above
 };
 
-const roleDefinitions = {
-	type: 'string',
-	enum: ['admin', 'collaborator', 'commenter', 'viewer'],
-	description: 'Possible Values:\n* `admin` - Administrator of the container/federation\n* `collaborator` - User has `commenter` right, plus the ability to upload new revisions\n* `commenter` - User has `viewer` rights, plus write access to tickets, groups and views\n* `viewer` - User has read access to the project',
-
-};
-
 const setupDocEndpoint = (app) => {
 	const docs = swaggerJsdoc(options);
 	docs.components = docs.components || {};
-	const responses = getSwaggerComponents();
-	docs.components.responses = { ...(docs.components.responses || {}), ...responses };
-	docs.components.roles = roleDefinitions;
-
-	// Setup API key security bearer
-	docs.components.securitySchemes = {
-		keyAuth: {
-			type: 'apiKey',
-			in: 'query',
-			name: 'key',
-		},
-	};
+	docs.components = { ...docs.components, ...Schemas };
 	const uiOptions = {
 		explorer: true,
 	};

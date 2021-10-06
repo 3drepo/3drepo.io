@@ -16,6 +16,7 @@
  */
 
 const { src } = require('../../../helper/path');
+const { generateUUIDString, generateUUID } = require('../../../helper/services');
 
 const UUIDHelper = require(`${src}/utils/helper/uuids`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
@@ -63,11 +64,45 @@ const testGenerateUUID = () => {
 	});
 };
 
-const testGenerateStringUUID = () => {
+const testGenerateUUIDString = () => {
 	describe('Generate string UUID', () => {
 		test('should return UUID string', () => {
-			const res = UUIDHelper.generateStringUUID();
+			const res = UUIDHelper.generateUUIDString();
 			expect(isUUIDString(res)).toEqual(true);
+		});
+	});
+};
+
+const testLookUpTable = () => {
+	describe('LookUpTable test', () => {
+		test('should construct and function fine without data', () => {
+			const lut = new UUIDHelper.UUIDLookUpTable();
+			expect(lut.has('a')).toBe(false);
+			expect(lut.has()).toBe(false);
+			expect(lut.has(generateUUIDString())).toBe(false);
+			expect(lut.has(generateUUID())).toBe(false);
+
+			const uuid = generateUUID();
+			lut.add(uuid);
+			expect(lut.has(uuid)).toBe(true);
+			expect(lut.has(UUIDHelper.UUIDToString(uuid))).toBe(true);
+		});
+
+		test('should construct and function fine without data', () => {
+			const exists1 = generateUUID();
+			const exists2 = generateUUID();
+			const lut = new UUIDHelper.UUIDLookUpTable([exists1, exists2]);
+			expect(lut.has(exists1)).toBe(true);
+			expect(lut.has(exists2)).toBe(true);
+			expect(lut.has('a')).toBe(false);
+			expect(lut.has()).toBe(false);
+			expect(lut.has(generateUUIDString())).toBe(false);
+			expect(lut.has(generateUUID())).toBe(false);
+
+			const uuid = generateUUID();
+			lut.add(uuid);
+			expect(lut.has(uuid)).toBe(true);
+			expect(lut.has(UUIDHelper.UUIDToString(uuid))).toBe(true);
 		});
 	});
 };
@@ -76,5 +111,6 @@ describe('utils/helper/uuid', () => {
 	testStringToUUID();
 	testUUIDToString();
 	testGenerateUUID();
-	testGenerateStringUUID();
+	testGenerateUUIDString();
+	testLookUpTable();
 });
