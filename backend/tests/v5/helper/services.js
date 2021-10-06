@@ -30,93 +30,158 @@ const ServiceHelper = { db };
 
 // userCredentials should be the same format as the return value of generateUserCredentials
 db.createUser = async (userCredentials, tsList = [], customData = {}) => {
-	const { user, password, apiKey } = userCredentials;
-	const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));
-	const adminDB = await DbHandler.getAuthDB();
-	return adminDB.addUser(user, password, { customData: { ...customData, apiKey }, roles });
+    const { user, password, apiKey } = userCredentials;
+    const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));
+    const adminDB = await DbHandler.getAuthDB();
+    return adminDB.addUser(user, password, { customData: { ...customData, apiKey }, roles });
 };
 
 db.createTeamspaceRole = (ts) => createTeamSpaceRole(ts);
 
 // breaking = create a broken schema for teamspace to trigger errors for testing
 db.createTeamspace = (teamspace, admins = [], breaking = false) => {
-	const permissions = admins.map((adminUser) => ({ user: adminUser, permissions: TEAMSPACE_ADMIN }));
-	return Promise.all([
-		ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [],
-			{ permissions: breaking ? undefined : permissions }),
-		ServiceHelper.db.createTeamspaceRole(teamspace),
-	]);
+    const permissions = admins.map((adminUser) => ({ user: adminUser, permissions: TEAMSPACE_ADMIN }));
+    return Promise.all([
+        ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [],
+            { permissions: breaking ? undefined : permissions }),
+        ServiceHelper.db.createTeamspaceRole(teamspace),
+    ]);
 };
 
 db.createProject = (teamspace, _id, name, models = [], admins = []) => {
-	const project = {
-		_id: stringToUUID(_id),
-		name,
-		models,
-		permissions: admins.map((user) => ({ user, permissions: [PROJECT_ADMIN] })),
-	};
+    const project = {
+        _id: stringToUUID(_id),
+        name,
+        models,
+        permissions: admins.map((user) => ({ user, permissions: [PROJECT_ADMIN] })),
+    };
 
-	return DbHandler.insertOne(teamspace, 'projects', project);
+    return DbHandler.insertOne(teamspace, 'projects', project);
 };
 
 db.createModel = (teamspace, _id, name, props) => {
-	const settings = {
-		_id,
-		name,
-		...props,
-	};
-	return DbHandler.insertOne(teamspace, 'settings', settings);
+    const settings = {
+        _id,
+        name,
+        ...props,
+    };
+    return DbHandler.insertOne(teamspace, 'settings', settings);
 };
 
 db.createRevision = (teamspace, modelId, revision) => {
-	const formattedRevision = { ...revision, _id: stringToUUID(revision._id) };
-	return DbHandler.insertOne(teamspace, `${modelId}.history`, formattedRevision);
+    const formattedRevision = { ...revision, _id: stringToUUID(revision._id) };
+    return DbHandler.insertOne(teamspace, `${modelId}.history`, formattedRevision);
+};
+
+db.createGroups = (teamspace, modelId, groups = []) => {
+    const toInsert = groups.map((entry) => {
+        const converted = {
+            ...entry,
+            _id: stringToUUID(entry._id),
+        };
+
+        if ((entry.objects || []).length) {
+            converted.objects = entry.objects.map((objectEntry) => {
+                const convertedObj = { ...objectEntry };
+                if (objectEntry.shared_ids) {
+                    convertedObj.shared_ids = objectEntry.shared_ids.map(uuidToString);
+                }
+                return convertedObj;
+            });
+        }
+
+        return converted;
+    });
+
+    return DbHandler.insertMany(teamspace, `${modelId}.groups`, toInsert);
 };
 
 db.createIssue = (teamspace, modelId, issue) => {
-	const formattedIssue = { ...issue, _id: stringToUUID(issue._id) };
-	return DbHandler.insertOne(teamspace, `${modelId}.issues`, formattedIssue);
+    const formattedIssue = { ...issue, _id: stringToUUID(issue._id) };
+    return DbHandler.insertOne(teamspace, `${modelId}.issues`, formattedIssue);
 };
 
 db.createRisk = (teamspace, modelId, risk) => {
-	const formattedRisk = { ...risk, _id: stringToUUID(risk._id) };
-	return DbHandler.insertOne(teamspace, `${modelId}.risks`, formattedRisk);
+    const formattedRisk = { ...risk, _id: stringToUUID(risk._id) };
+    return DbHandler.insertOne(teamspace, `${modelId}.risks`, formattedRisk);
 };
 
 ServiceHelper.generateUUIDString = () => uuidToString(generateUUID());
-ServiceHelper.generateRandomString = () => Crypto.randomBytes(15).toString('hex');
+ServiceHelper.generateUUID = () => generateUUID();
+ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex');
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
- + Math.random() * (end.getTime() - start.getTime()));
+    + Math.random() * (end.getTime() - start.getTime()));
 
 ServiceHelper.generateUserCredentials = () => ({
-	user: ServiceHelper.generateRandomString(),
-	password: ServiceHelper.generateRandomString(),
-	apiKey: ServiceHelper.generateRandomString(),
+    user: ServiceHelper.generateRandomString(),
+    password: ServiceHelper.generateRandomString(),
+    apiKey: ServiceHelper.generateRandomString(),
 });
 
 ServiceHelper.generateRevisionEntry = (isVoid = false) => ({
-	_id: ServiceHelper.generateUUIDString(),
-	tag: ServiceHelper.generateRandomString(),
-	author: ServiceHelper.generateRandomString(),
-	timestamp: ServiceHelper.generateRandomDate(),
-	void: !!isVoid,
+    _id: ServiceHelper.generateUUIDString(),
+    tag: ServiceHelper.generateRandomString(),
+    author: ServiceHelper.generateRandomString(),
+    timestamp: ServiceHelper.generateRandomDate(),
+    void: !!isVoid,
 });
 
 ServiceHelper.generateRandomModelProperties = () => ({
-	properties: {
-		code: ServiceHelper.generateUUIDString(),
-		unit: 'm',
-	},
-	type: ServiceHelper.generateUUIDString(),
-	timestamp: Date.now(),
-	status: 'ok',
+    properties: {
+        code: ServiceHelper.generateUUIDString(),
+        unit: 'm',
+    },
+    type: ServiceHelper.generateUUIDString(),
+    timestamp: Date.now(),
+    status: 'ok',
 });
+
+ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {
+    const genId = () => (serialised ? ServiceHelper.generateUUIDString() : generateUUID());
+    const group = {
+        _id: genId(),
+        name: ServiceHelper.generateRandomString(),
+        color: [1, 1, 1],
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        updatedBy: ServiceHelper.generateRandomString(),
+        author: ServiceHelper.generateRandomString(),
+    };
+
+    if (isSmart) {
+        group.rules = [
+            {
+                field: 'IFC GUID',
+                operator: 'IS',
+                values: [
+                    '1rbbJcnUDEEA_ArpSqk3B7',
+                ],
+            },
+        ];
+    } else {
+        group.objects = [{
+            account, model,
+        }];
+
+        if (isIfcGuids) {
+            group.objects[0].ifc_guids = [
+                ServiceHelper.generateRandomString(22),
+                ServiceHelper.generateRandomString(22),
+                ServiceHelper.generateRandomString(22),
+            ];
+        } else {
+            group.objects[0].shared_ids = [genId(), genId(), genId()];
+        }
+    }
+
+    return group;
+};
 
 ServiceHelper.app = () => createApp().listen(8080);
 
 ServiceHelper.closeApp = async (server) => {
-	await DbHandler.disconnect();
-	if (server) await server.close();
+    await DbHandler.disconnect();
+    if (server) await server.close();
 };
 
 module.exports = ServiceHelper;

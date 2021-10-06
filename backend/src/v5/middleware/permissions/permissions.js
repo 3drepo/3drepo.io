@@ -15,7 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('./components/containers');
+const {
+	hasCommenterAccessToContainer, hasCommenterAccessToFederation, hasReadAccessToContainer,
+	hasReadAccessToFederation, hasWriteAccessToContainer, hasWriteAccessToFederation,
+} = require('./components/models');
 const { convertAllUUIDs } = require('../dataConverter/pathParams');
 const { hasReadAccessToFederation } = require('./components/federations');
 const { isTeamspaceMember } = require('./components/teamspaces');
@@ -26,7 +29,14 @@ const Permissions = {};
 
 Permissions.hasAccessToTeamspace = validateMany([convertAllUUIDs, validSession, isTeamspaceMember]);
 Permissions.hasReadAccessToContainer = validateMany([Permissions.hasAccessToTeamspace, hasReadAccessToContainer]);
+Permissions.hasCommenterAccessToContainer = validateMany([
+	Permissions.hasAccessToTeamspace, hasCommenterAccessToContainer]);
 Permissions.hasWriteAccessToContainer = validateMany([Permissions.hasAccessToTeamspace, hasWriteAccessToContainer]);
 Permissions.hasReadAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasReadAccessToFederation]);
+
+Permissions.hasReadAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasReadAccessToFederation]);
+Permissions.hasCommenterAccessToFederation = validateMany([
+	Permissions.hasAccessToTeamspace, hasCommenterAccessToFederation]);
+Permissions.hasWriteAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasWriteAccessToFederation]);
 
 module.exports = Permissions;
