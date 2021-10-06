@@ -29,7 +29,7 @@ interface IModal {
 }
 
 export const Modal = ({ onClickClose, open, children, className }: IModal) => (
-	<DialogContainer open={open} onClose={onClickClose} className={className}>
+	<DialogContainer open={open} className={className}>
 		<CloseButton aria-label="Close dialog" onClick={onClickClose}>
 			<CloseIcon />
 		</CloseButton>

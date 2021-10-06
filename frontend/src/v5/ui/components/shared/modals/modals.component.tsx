@@ -37,7 +37,7 @@ const ModalTemplateContainer = ({ id, modalType, props }) => {
 
 	if (['alert'].includes(modalType)) {
 		return (
-			<Dialog open={openState} onClose={onClickClose} maxWidth={false}>
+			<Dialog open={openState} maxWidth={false}>
 				<ModalTemplate onClickClose={onClickClose} {...props} />
 			</Dialog>
 		);
