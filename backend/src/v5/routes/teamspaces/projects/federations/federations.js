@@ -263,6 +263,15 @@ const establishRoutes = () => {
 	 *                   items:
 	 *                     type: string
 	 *                     format: uuid
+	 *                 tickets:
+	 *                   type: object
+	 *                   properties:
+	 *                     issues:
+	 *                       type: integer
+	 *                       description: The number of non closed issues of the federation
+	 *                     risks:
+	 *                       type: integer
+	 *                       description: The number of unmitigated risks of the federation
      *                 category:
 	 *                   type: string
 	 *                   description: Category of the federation
