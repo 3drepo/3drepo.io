@@ -34,12 +34,12 @@ describe('Containers: redux', () => {
 	});
 
 	it('should remove container from favourites', () => {
-		const mockAllFavouritesContainersMock = times(5, () => containerMockFactory({ isFavourite: true }))
+		const mockAllFavouritesContainers = times(5, () => containerMockFactory({ isFavourite: true }))
 		const defaultStateWithAllFavourites = {
 			...INITIAL_STATE,
-			containers: mockAllFavouritesContainersMock
+			containers: mockAllFavouritesContainers
 		}
-		const resultState = containersReducer(defaultStateWithAllFavourites, ContainersActions.toggleFavouriteSuccess(mockAllFavouritesContainersMock[0]._id));
+		const resultState = containersReducer(defaultStateWithAllFavourites, ContainersActions.toggleFavouriteSuccess(mockAllFavouritesContainers[0]._id));
 
 		expect(resultState.containers[0].isFavourite).toEqual(false);
 		expect(resultState.containers.slice(1).every(container => container.isFavourite)).toEqual(true);
