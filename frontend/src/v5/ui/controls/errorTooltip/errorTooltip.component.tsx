@@ -15,23 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { trim } from 'lodash';
-import Highlighter from 'react-highlight-words';
-import { Tag } from './highlight.styles';
+import React, { ReactNode } from 'react';
+import ErrorCircleIcon from '@assets/icons/error_circle.svg';
+import { Container, Tooltip, IconWrapper } from './errorTooltip.styles';
 
-interface IHighlight {
-	children: string;
-	search: string;
+interface IErrorTooltip {
+	children: ReactNode;
 }
 
-const HighlightTag = (props) => <Tag {...props} />;
-
-export const Highlight = ({ search, children = '' }: IHighlight): JSX.Element => (
-	<Highlighter
-		searchWords={[trim(search)]}
-		autoEscape
-		textToHighlight={children}
-		highlightTag={HighlightTag}
-	/>
+export const ErrorTooltip = ({ children }: IErrorTooltip): JSX.Element => (
+	<Container>
+		<Tooltip
+			placement="right-start"
+			title={children}
+		>
+			<IconWrapper>
+				<ErrorCircleIcon />
+			</IconWrapper>
+		</Tooltip>
+	</Container>
 );

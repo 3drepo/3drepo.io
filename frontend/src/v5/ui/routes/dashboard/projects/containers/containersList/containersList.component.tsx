@@ -121,7 +121,10 @@ export const ContainersList = ({
 											<LatestRevision
 												name={container.latestRevision}
 												status={container.status}
-												selected={container._id === selectedId}
+												error={{
+													date: new Date(),
+													message: 'Mock error message',
+												}}
 											/>
 										)}
 										selected={container._id === selectedId}

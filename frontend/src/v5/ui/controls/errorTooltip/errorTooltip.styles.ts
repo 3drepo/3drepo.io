@@ -14,21 +14,37 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Typography } from '@controls/typography';
 import styled from 'styled-components';
-import { FONT_WEIGHT } from '@/v4/styles';
+import { Tooltip as TooltipComponent, withStyles } from '@material-ui/core';
 
-export const Name = styled(Typography).attrs({
-	variant: 'body1',
-	component: 'span',
-})`
-	font-weight: ${FONT_WEIGHT.BOLD};
+export const Container = styled.div`
+	display: inline-block;
 `;
 
-export const QueuedStatus = styled(Name)`
-	color: ${({ theme }) => theme.palette.favourite.dark};
-`;
+export const Tooltip = withStyles((theme: any) => ({
+	popper: {
+		width: 180,
+	},
+	tooltip: {
+		backgroundColor: theme.palette.primary.contrast,
+		color: theme.palette.error.main,
+		fontSize: theme.typography.pxToRem(12),
+		boxShadow: theme.palette.shadows.level_6,
+		border: 'none',
+		borderRadius: 5,
+		padding: '15px 15px 20px 15px',
+	},
+	tooltipPlacementRight: {
+		margin: '-17px 0px 0 -1px',
+	},
+}))(TooltipComponent);
 
-export const ProcessingStatus = styled(Name)`
-	color: ${({ theme }) => theme.palette.primary.main};
+export const IconWrapper = styled.div`
+	height: max-content;
+	width: max-content;
+	margin-left: 6px;
+
+	svg {
+		transform: translateY(20%);
+	}
 `;

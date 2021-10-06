@@ -32,6 +32,7 @@ export const INITIAL_STATE: IContainersState = {
 	containers: [
 		containerMockFactory({ status: ContainerStatuses.PROCESSING }),
 		containerMockFactory({ status: ContainerStatuses.QUEUED }),
+		containerMockFactory({ status: ContainerStatuses.FAILED }),
 		...times(10, () => containerMockFactory()),
 	],
 	filterQuery: '',

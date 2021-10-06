@@ -27,6 +27,7 @@
   "containers.list.header.revisions": "Revisions",
   "containers.list.item.favourite.tooltip": "Add to favourites",
   "containers.list.item.latestRevision.label": "Latest revision: ",
+  "containers.list.item.latestRevision.status.error.tooltipMessage": "The latest upload on <0>{date}</0> at <0>{time}</0> has failed due to <0>{message}</0>.",
   "containers.list.item.latestRevision.status.processing": "Processing",
   "containers.list.item.latestRevision.status.queued": "Queued",
   "containers.list.item.revisions": "{count} revisions",

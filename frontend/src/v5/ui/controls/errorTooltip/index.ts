@@ -15,23 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { trim } from 'lodash';
-import Highlighter from 'react-highlight-words';
-import { Tag } from './highlight.styles';
-
-interface IHighlight {
-	children: string;
-	search: string;
-}
-
-const HighlightTag = (props) => <Tag {...props} />;
-
-export const Highlight = ({ search, children = '' }: IHighlight): JSX.Element => (
-	<Highlighter
-		searchWords={[trim(search)]}
-		autoEscape
-		textToHighlight={children}
-		highlightTag={HighlightTag}
-	/>
-);
+export { ErrorTooltip } from './errorTooltip.component';
