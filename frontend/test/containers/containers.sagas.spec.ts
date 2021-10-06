@@ -23,29 +23,27 @@ import { mockServer } from '../../internals/testing/mockServer';
 describe('Containers: sagas', () => {
 	const teamspace = 'teamspace';
 	const projectId = 'projectId';
-	const contaienrId = 'containerId';
+	const containerId = 'containerId';
 
 	describe('addFavourite', () => {
 		it('should call addFavourite endpoint and dispatch TOGGLE_FAVOURITE_SUCCESS', async () => {
-
 			mockServer
 			.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
 			.reply(200)
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.addFavourite(teamspace, projectId, contaienrId))
-			.put(ContainersActions.toggleFavouriteSuccess(contaienrId))
+			.dispatch(ContainersActions.addFavourite(teamspace, projectId, containerId))
+			.put(ContainersActions.toggleFavouriteSuccess(containerId))
 			.silentRun();
 		})
 
 		it('should call addFavourite endpoint with 404 and should not dispatch TOGGLE_FAVOURITE_SUCCESS', async () => {
-
 			mockServer
 			.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
 			.reply(404)
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.addFavourite(teamspace, projectId, contaienrId))
+			.dispatch(ContainersActions.addFavourite(teamspace, projectId, containerId))
 			.silentRun()
 			.then(({ effects }: any) => {
 				expect(effects.put).toBeUndefined();
@@ -61,8 +59,8 @@ describe('Containers: sagas', () => {
 			.reply(200)
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.removeFavourite(teamspace, projectId, contaienrId))
-			.put(ContainersActions.toggleFavouriteSuccess(contaienrId))
+			.dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
+			.put(ContainersActions.toggleFavouriteSuccess(containerId))
 			.silentRun();
 		})
 
@@ -73,7 +71,7 @@ describe('Containers: sagas', () => {
 			.reply(404)
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.removeFavourite(teamspace, projectId, contaienrId))
+			.dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
 			.silentRun()
 			.then(({ effects }: any) => {
 				expect(effects.put).toBeUndefined();
