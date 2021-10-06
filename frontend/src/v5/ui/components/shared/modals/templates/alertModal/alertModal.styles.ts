@@ -19,20 +19,20 @@ import styled from 'styled-components';
 import { Typography } from '@controls/typography';
 
 export const Line = styled.hr`
-  border: 0;
-  border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
-  width: calc(100% - 100px);
-  margin-top: 28px;
-  margin-bottom: 11px;
+	border: 0;
+	border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
+	width: calc(100% - 100px);
+	margin-top: 28px;
+	margin-bottom: 11px;
 `;
 
 export const Container = styled.div`
 	display: flex;
-  flex-direction: column;
-  align-items: center;
+	flex-direction: column;
+	align-items: center;
 	min-width: 633px;
-  min-height: 295px;
-  padding-top: 43px;
+	min-height: 295px;
+	padding-top: 43px;
 `;
 
 export const Actions = styled.div`
@@ -42,6 +42,6 @@ export const Actions = styled.div`
 export const Details = styled(Typography).attrs({
 	variant: 'body1',
 })`
-  margin-top: 5px;
-  margin-bottom: 25px;
+	margin-top: 5px;
+	margin-bottom: 25px;
 `;
