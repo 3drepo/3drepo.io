@@ -21,6 +21,10 @@ jest.mock('../../../../../../../src/v5/models/projects');
 const ProjectsModel = require(`${src}/models/projects`);
 jest.mock('../../../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
+jest.mock('../../../../../../../src/v5/models/issues');
+const Issues = require(`${src}/models/issues`);
+jest.mock('../../../../../../../src/v5/models/risks');
+const Risks = require(`${src}/models/risks`);
 jest.mock('../../../../../../../src/v5/models/users');
 const Users = require(`${src}/models/users`);
 jest.mock('../../../../../../../src/v5/models/revisions');
@@ -80,13 +84,13 @@ const project = { _id: 1, name: 'project', models: federationList.map(({ _id }) 
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getFederations.mockImplementation(() => federationList);
 ModelSettings.getFederationById.mockImplementation((teamspace, federation) => federationSettings[federation]);
-ModelSettings.getModelIssueCount.mockImplementation((teamspace, federation) => {
+Issues.getModelIssueCount.mockImplementation((teamspace, federation) => {
 	if (federation === 'federation1') return 1;
 	if (federation === 'federation2') return 2;
 	return 0;
 });
 
-ModelSettings.getModelRiskCount.mockImplementation((teamspace, federation) => {
+Risks.getModelRiskCount.mockImplementation((teamspace, federation) => {
 	if (federation === 'federation1') return 1;
 	if (federation === 'federation2') return 2;
 	return 0;

@@ -78,17 +78,14 @@ const issues = [
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: 'issue1',
-		modelId: modelSettings[0]._id,
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: 'issue2',
-		modelId: modelSettings[0]._id,
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: 'issue3',
-		modelId: modelSettings[1]._id,
 	},
 ];
 
@@ -96,17 +93,14 @@ const risks = [
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: 'risk1',
-		modelId: modelSettings[0]._id,
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: 'risk2',
-		modelId: modelSettings[0]._id,
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: 'risk3',
-		modelId: modelSettings[1]._id,
 	},
 ];
 
@@ -141,19 +135,34 @@ const setupData = async () => {
 		model.name,
 		model.properties,
 	));
-	const issueProms = issues.map((issue) => ServiceHelper.db.createIssue(
+	const federationWithRevIssueProms = federationWithRevIssues.map((issue) => ServiceHelper.db.createIssue(
 		teamspace,
+		federationWithRev._id,
 		issue,
 	));
-	const riskProms = risks.map((risk) => ServiceHelper.db.createRisk(
+	const federationWithRevRiskProms = federationWithRevRisks.map((risk) => ServiceHelper.db.createRisk(
 		teamspace,
+		federationWithRev._id,
 		risk,
 	));
+	const federationWithoutRevIssueProms = federationWithoutRevIssues.map((issue) => ServiceHelper.db.createIssue(
+		teamspace,
+		federationWithoutRev._id,
+		issue,
+	));
+	const federationWithoutRevRiskProms = federationWithoutRevRisks.map((risk) => ServiceHelper.db.createRisk(
+		teamspace,
+		federationWithoutRev._id,
+		risk,
+	));
+
 	return Promise.all([
 		...userProms,
 		...modelProms,
-		...issueProms,
-		...riskProms,
+		...federationWithRevIssueProms,
+		...federationWithRevRiskProms,
+		...federationWithoutRevIssueProms,
+		...federationWithoutRevRiskProms,
 		ServiceHelper.db.createUser(nobody),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, modelSettings.map(({ _id }) => _id)),
 		...revisions.map((revision) => ServiceHelper.db.createRevision(teamspace, modelWithRevId, revision)),

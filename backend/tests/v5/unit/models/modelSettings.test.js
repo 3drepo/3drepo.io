@@ -144,32 +144,10 @@ const testGetFederations = () => {
 	});
 };
 
-const testGetIssueCount = () => {
-	describe('Get issue count', () => {
-		test('should get the number of issues of a federation', async () => {
-			jest.spyOn(db, 'count').mockResolvedValue(5);
-			const res = await Model.getModelIssueCount('someTS', 'someModel');
-			expect(res).toEqual(5);
-		});
-	});
-};
-
-const testGetRiskCount = () => {
-	describe('Get risk count', () => {
-		test('should get the number of risks of a federation', async () => {
-			jest.spyOn(db, 'count').mockResolvedValue(5);
-			const res = await Model.getModelRiskCount('someTS', 'someModel');
-			expect(res).toEqual(5);
-		});
-	});
-};
-
 describe('models/modelSettings', () => {
 	testGetModelById();
 	testGetContainerById();
 	testGetFederationById();
 	testGetContainers();
 	testGetFederations();
-	testGetIssueCount();
-	testGetRiskCount();
 });
