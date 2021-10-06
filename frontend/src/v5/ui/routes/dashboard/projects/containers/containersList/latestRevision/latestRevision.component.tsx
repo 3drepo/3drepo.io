@@ -25,14 +25,13 @@ import { Name, ProcessingStatus, QueuedStatus } from './latestRevision.styles';
 interface ILatestRevision {
 	name: string;
 	status: ContainerStatuses;
-	selected?: boolean;
 	error?: {
 		date: Date;
 		message: string;
 	}
 }
 
-export const LatestRevision = ({ name, status, selected = false, error }: ILatestRevision): JSX.Element => (
+export const LatestRevision = ({ name, status, error }: ILatestRevision): JSX.Element => (
 	<>
 		<Trans
 			id="containers.list.item.latestRevision.label"
@@ -41,7 +40,7 @@ export const LatestRevision = ({ name, status, selected = false, error }: ILates
 		{(() => {
 			if (status === ContainerStatuses.QUEUED) {
 				return (
-					<QueuedStatus selected={selected}>
+					<QueuedStatus>
 						<Trans id="containers.list.item.latestRevision.status.queued" message="Queued" />
 					</QueuedStatus>
 				);
@@ -49,7 +48,7 @@ export const LatestRevision = ({ name, status, selected = false, error }: ILates
 
 			if (status === ContainerStatuses.PROCESSING) {
 				return (
-					<ProcessingStatus selected={selected}>
+					<ProcessingStatus>
 						<Trans id="containers.list.item.latestRevision.status.processing" message="Processing" />
 					</ProcessingStatus>
 				);
