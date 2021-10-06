@@ -21,7 +21,7 @@ const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
-const { validateContainer } = require('../../../../middleware/teamspaces/projects/containers/containers');
+const { validateAddModelData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/models');
 
 const addContainer = (req, res) => {
 	const user = getUserFromSession(req.session);
@@ -141,7 +141,7 @@ const establishRoutes = () => {
 	 *                   description: Container ID
 	 *                   example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 */
-	router.post('/', hasAccessToTeamspace, validateContainer, addContainer);
+	router.post('/', hasAccessToTeamspace, validateAddModelData, addContainer);
 
 	/**
 	 * @openapi

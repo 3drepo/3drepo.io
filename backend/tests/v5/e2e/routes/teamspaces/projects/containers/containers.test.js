@@ -204,38 +204,38 @@ const testAddContainer = () => {
 		});
 
 		test('should fail if name is not a string', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidContainerName.status).send({ name: 123, unit: 'mm', type: 'a' });
-			expect(res.body.code).toEqual(templates.invalidContainerName.code);
+			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidArguments.status).send({ name: 123, unit: 'mm', type: 'a' });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should fail if name invalid', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidContainerName.status).send({ name: '!"£$%^', unit: 'mm', type: 'a' });
-			expect(res.body.code).toEqual(templates.invalidContainerName.code);
+			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidArguments.status).send({ name: '!"£$%^', unit: 'mm', type: 'a' });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should fail if name missing', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.missingContainerName.status).send({ unit: 'mm', type: 'a' });
-			expect(res.body.code).toEqual(templates.missingContainerName.code);
+			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidArguments.status).send({ unit: 'mm', type: 'a' });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should fail if unit invalid', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidContainerUnit.status).send({ name: ServiceHelper.generateRandomString(), unit: 123, type: 'a' });
-			expect(res.body.code).toEqual(templates.invalidContainerUnit.code);
+			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidArguments.status).send({ name: ServiceHelper.generateRandomString(), unit: 123, type: 'a' });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should fail if unit missing', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.missingContainerUnit.status).send({ name: ServiceHelper.generateRandomString(), type: 'a' });
-			expect(res.body.code).toEqual(templates.missingContainerUnit.code);
+			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidArguments.status).send({ name: ServiceHelper.generateRandomString(), type: 'a' });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should fail if type invalid', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidContainerType.status).send({ name: ServiceHelper.generateRandomString(), unit: 'mm', type: 123 });
-			expect(res.body.code).toEqual(templates.invalidContainerType.code);
+			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidArguments.status).send({ name: ServiceHelper.generateRandomString(), unit: 'mm', type: 123 });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should fail if type missing', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.missingContainerType.status).send({ name: ServiceHelper.generateRandomString(), unit: 'mm' });
-			expect(res.body.code).toEqual(templates.missingContainerType.code);
+			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidArguments.status).send({ name: ServiceHelper.generateRandomString(), unit: 'mm' });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should return new container ID if the user has permissions', async () => {
