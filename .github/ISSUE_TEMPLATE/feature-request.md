@@ -1,3 +1,12 @@
+---
+name: Feature Request
+about: Suggest an idea for this project
+title: ''
+labels: feature
+assignees: ''
+
+---
+
 <!-- FEATURE TEMPLATE (delete as appropriate) -->
 <!-- Remember to tag this issue as a feature! -->
 ### Description
