@@ -16,12 +16,12 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { all, put, select, takeLatest } from 'redux-saga/effects';
+import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { GROUPS_TYPES } from '../../constants/groups';
 import { getRandomColor, hexToGLColor } from '../../helpers/colors';
-import { normalizeGroup, prepareGroup } from '../../helpers/groups';
+import { normalizeGroup, prepareGroup, prepareGroupWithCount } from '../../helpers/groups';
 import { searchByFilters } from '../../helpers/searching';
 import { calculateTotalMeshes } from '../../helpers/tree';
 import * as API from '../../services/api';
@@ -32,7 +32,7 @@ import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
-import { TreeActions } from '../tree';
+import { TreeActions, TreeTypes, selectTreeNodesList } from '../tree';
 import { ViewpointsActions } from '../viewpoints';
 import { GroupsActions, GroupsTypes, INITIAL_CRITERIA_FIELD_STATE } from './groups.redux';
 import {
@@ -52,7 +52,15 @@ function* fetchGroups({teamspace, modelId, revision}) {
 	yield put(GroupsActions.togglePendingState(true));
 	try {
 		const {data} = yield API.getGroups(teamspace, modelId, revision);
-		const preparedGroups = data.map(prepareGroup);
+
+		const treeList = yield select(selectTreeNodesList);
+
+		if (!treeList?.length) {
+			//Wait till tree is loaded
+			yield take(TreeTypes.UPDATE_DATA_REVISION);
+		}
+
+		const preparedGroups = yield all(data.map(prepareGroupWithCount));
 		yield put(GroupsActions.fetchGroupsSuccess(preparedGroups));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('get', 'groups', error));
@@ -247,6 +255,11 @@ function* closeDetails() {
 	}
 }
 
+function* updateGroupFromChatService({group}) {
+	const preparedGroup = yield prepareGroupWithCount(group);
+	yield put(GroupsActions.updateGroupSuccess(preparedGroup));
+}
+
 function* createGroup({ teamspace, modelId, revision }) {
 	yield put(GroupsActions.toggleDetailsPendingState(true));
 	try {
@@ -271,7 +284,7 @@ function* createGroup({ teamspace, modelId, revision }) {
 
 		const {data} = yield API.createGroup(teamspace, modelId, revision, group);
 
-		const preparedGroup = prepareGroup(data);
+		const preparedGroup = yield prepareGroupWithCount(data);
 
 		if (isAllOverridden) {
 			yield put(GroupsActions.addColorOverride(preparedGroup._id));
@@ -304,7 +317,7 @@ function* updateGroup({ teamspace, modelId, revision, groupId }) {
 		}
 
 		const { data } = yield API.updateGroup(teamspace, modelId, revision, groupId, groupToSave);
-		const preparedGroup = prepareGroup(data);
+		const preparedGroup = yield prepareGroupWithCount(data);
 
 		yield put(GroupsActions.updateGroupSuccess(preparedGroup));
 		yield put(GroupsActions.showDetails(preparedGroup));
@@ -352,8 +365,7 @@ function * setOverrideAll({overrideAll}) {
 	}
 }
 
-const onUpdated = (updatedGroup) => {
-	const group = prepareGroup(updatedGroup);
+const onUpdated = (group) => {
 	const state = getState();
 	const isShowingDetails = selectShowDetails(state);
 	const activeGroupId = selectActiveGroupId(state);
@@ -362,15 +374,15 @@ const onUpdated = (updatedGroup) => {
 		dispatch(GroupsActions.showUpdateInfo());
 
 		setTimeout(() => {
-			dispatch(GroupsActions.updateGroupSuccess(group));
+			dispatch(GroupsActions.updateGroupFromChatService(group));
 		}, 5000);
 	} else {
-		dispatch(GroupsActions.updateGroupSuccess(group));
+		dispatch(GroupsActions.updateGroupFromChatService(group));
 	}
 };
 
 const onCreated = (createdGroup) => {
-	dispatch(GroupsActions.updateGroupSuccess(prepareGroup(createdGroup)));
+	dispatch(GroupsActions.updateGroupFromChatService(createdGroup));
 };
 
 const onDeleted = (deletedGroupIds) => {
@@ -432,4 +444,5 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.RESET_TO_SAVED_SELECTION, resetToSavedSelection);
 	yield takeLatest(GroupsTypes.CLEAR_COLOR_OVERRIDES, clearColorOverrides);
 	yield takeLatest(GroupsTypes.SET_OVERRIDE_ALL, setOverrideAll);
+	yield takeLatest(GroupsTypes.UPDATE_GROUP_FROM_CHAT_SERVICE, updateGroupFromChatService);
 }
