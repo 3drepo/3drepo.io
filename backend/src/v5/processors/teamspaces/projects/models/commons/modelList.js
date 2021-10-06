@@ -36,7 +36,7 @@ ModelList.addModel = async (teamspace, project, user, data) => {
 	const modelSetting = await getModelByName(teamspace, models, data.name, { _id: 0, name: 1 });
 
 	if (modelSetting) {
-		throw templates.duplicateModelName;
+		throw templates.nameAlreadyExists;
 	}
 
 	const response = await addModel(teamspace, data);

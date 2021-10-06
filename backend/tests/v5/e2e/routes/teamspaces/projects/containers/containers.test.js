@@ -199,8 +199,8 @@ const testAddContainer = () => {
 		});
 
 		test('should fail if container name already exists', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.duplicateModelName.status).send({ name: models[0].name, unit: 'mm', type: 'a' });
-			expect(res.body.code).toEqual(templates.duplicateModelName.code);
+			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.nameAlreadyExists.status).send({ name: models[0].name, unit: 'mm', type: 'a' });
+			expect(res.body.code).toEqual(templates.nameAlreadyExists.code);
 		});
 
 		test('should fail if name is not a string', async () => {

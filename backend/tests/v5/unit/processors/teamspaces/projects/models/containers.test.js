@@ -258,7 +258,7 @@ const testAddContainer = () => {
 				unit: 'mm',
 			};
 			await expect(Containers.addContainer('teamspace', 'project', 'tsAdmin', data))
-				.rejects.toEqual(templates.duplicateModelName);
+				.rejects.toEqual(templates.nameAlreadyExists);
 		});
 	});
 };
