@@ -27,6 +27,7 @@
   "containers.list.header.revisions": "",
   "containers.list.item.favourite.tooltip": "",
   "containers.list.item.latestRevision.label": "",
+  "containers.list.item.latestRevision.status.error.tooltipMessage": "",
   "containers.list.item.latestRevision.status.processing": "",
   "containers.list.item.latestRevision.status.queued": "",
   "containers.list.item.revisions": "",
