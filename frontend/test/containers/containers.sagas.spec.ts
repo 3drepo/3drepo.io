@@ -53,7 +53,6 @@ describe('Containers: sagas', () => {
 
 	describe('removeFavourite', () => {
 		it('should call removeFavourite endpoint and dispatch TOGGLE_FAVOURITE_SUCCESS', async () => {
-
 			mockServer
 			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
 			.reply(200)
@@ -65,7 +64,6 @@ describe('Containers: sagas', () => {
 		})
 
 		it('should call removeFavourite endpoint with 404 and not dispatch TOGGLE_FAVOURITE_SUCCESS', async () => {
-
 			mockServer
 			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
 			.reply(404)
