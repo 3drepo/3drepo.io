@@ -80,7 +80,6 @@ const model1Revisions = [
 
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getModelByName.mockImplementation((ts, models, name) => (name === 'model1' ? modelList[0] : undefined));
-ModelSettings.getModels.mockImplementation(() => modelList);
 ModelSettings.getContainers.mockImplementation(() => modelList);
 ModelSettings.getContainerById.mockImplementation((teamspace, container) => containerSettings[container]);
 Revisions.getRevisionCount.mockImplementation((teamspace, container) => (container === 'container2' ? 10 : 0));
@@ -221,23 +220,13 @@ const testGetContainerStats = () => {
 
 const testAddContainer = () => {
 	describe('Add container', () => {
-		test('should return the container ID on success for teamspace admin', async () => {
+		test('should return the container ID on success', async () => {
 			const data = {
 				name: 'container name',
 				code: 'code99',
 				unit: 'mm',
 			};
 			const res = await Containers.addContainer('teamspace', 'project', 'tsAdmin', data);
-			expect(res).toEqual(newContainerId);
-		});
-
-		test('should return the container ID on success for project admin', async () => {
-			const data = {
-				name: 'container name',
-				code: 'code99',
-				unit: 'mm',
-			};
-			const res = await Containers.addContainer('teamspace', 'project', 'projAdmin', data);
 			expect(res).toEqual(newContainerId);
 		});
 
@@ -265,13 +254,8 @@ const testAddContainer = () => {
 
 const testDeleteContainer = () => {
 	describe('Delete container', () => {
-		test('should succeed for teamspace admin', async () => {
+		test('should succeed', async () => {
 			const res = await Containers.deleteContainer('teamspace', 'project', 1, 'tsAdmin');
-			expect(res).toEqual(undefined);
-		});
-
-		test('should succeed for project admin', async () => {
-			const res = await Containers.deleteContainer('teamspace', 'project', 1, 'projAdmin');
 			expect(res).toEqual(undefined);
 		});
 

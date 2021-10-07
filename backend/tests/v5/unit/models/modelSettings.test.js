@@ -116,28 +116,6 @@ const testGetModelByName = () => {
 	});
 };
 
-const testGetModels = () => {
-	describe('Get models', () => {
-		test('should return the list of models ', async () => {
-			const expectedData = [
-				{
-					_id: 'abc',
-					name: 'model name',
-				},
-				{
-					_id: '123',
-					name: 'model name 2',
-				},
-			];
-
-			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
-
-			const res = await Model.getModels('someTS', ['someModel']);
-			expect(res).toEqual(expectedData);
-		});
-	});
-};
-
 const testGetContainers = () => {
 	describe('Get containers', () => {
 		test('should return the list of containers ', async () => {
@@ -211,7 +189,6 @@ describe('models/modelSettings', () => {
 	testGetContainerById();
 	testGetFederationById();
 	testGetModelByName();
-	testGetModels();
 	testGetContainers();
 	testGetFederations();
 	testAddModel();
