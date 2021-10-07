@@ -215,6 +215,49 @@ export const theme = createMuiTheme({
 		},
 	},
 	overrides: {
+		MuiBackdrop: {
+			root: {
+				backgroundColor: 'rgba(18, 30, 51, 0.9)',
+				backdropFilter: 'blur(10px)',
+			},
+		},
+		MuiDialog: {
+			paper: {
+				minWidth: '30%',
+				borderRadius: 10,
+			},
+			paperWidthFalse: {
+				maxWidth: 633,
+			},
+		},
+		MuiDialogActions: {
+			root: {
+				backgroundColor: COLOR.TERTIARY_LIGHTEST,
+			},
+		},
+		MuiDialogTitle: {
+			root: {
+				paddingTop: 28,
+				paddingBottom: 0,
+				textAlign: 'center',
+				'& .MuiTypography-root': {
+					...typography.h1,
+				},
+			},
+		},
+		MuiDialogContent: {
+			root: {
+				paddingTop: 7,
+				flex: 0,
+			},
+		},
+		MuiDialogContentText: {
+			root: {
+				...typography.h4,
+				marginBottom: 0,
+				color: COLOR.BASE_MAIN,
+			},
+		},
 		MuiAppBar: {
 			root: {
 				boxShadow: 'none',
