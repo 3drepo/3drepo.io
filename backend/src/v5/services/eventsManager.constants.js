@@ -15,17 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const permConst = {};
+const EventManagerConst = {};
 
-permConst.TEAMSPACE_ADMIN = 'teamspace_admin';
-permConst.PROJECT_ADMIN = 'admin_project';
+const eventList = ['NEW_GROUPS', 'UPDATE_GROUP'];
 
-permConst.MODEL_COLLABORATOR = 'collaborator';
-permConst.MODEL_COMMENTER = 'commenter';
-permConst.MODEL_VIEWER = 'viewer';
+const generateEventsMap = () => {
+	const res = {};
+	eventList.forEach((event) => {
+		res[event] = event;
+	});
 
-permConst.MODEL_WRITE_ROLES = [permConst.MODEL_COLLABORATOR];
-permConst.MODEL_COMMENT_ROLES = [permConst.MODEL_COLLABORATOR, permConst.MODEL_COMMENTER];
-permConst.MODEL_READ_ROLES = [permConst.MODEL_COLLABORATOR, permConst.MODEL_COMMENTER, permConst.MODEL_VIEWER];
+	return res;
+};
 
-module.exports = permConst;
+EventManagerConst.events = generateEventsMap();
+
+module.exports = EventManagerConst;

@@ -16,11 +16,12 @@
  */
 
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
+const Groups = require('./commons/groups');
 const { getFederations } = require('../../../../models/modelSettings');
 const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
 
-const Federations = {};
+const Federations = { ...Groups };
 
 Federations.getFederationList = async (teamspace, project, user) => {
 	const { models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });

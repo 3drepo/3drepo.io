@@ -1,3 +1,12 @@
+---
+name: Bug Report
+about: Create a report to help us improve
+title: ''
+labels: bug
+assignees: ''
+
+---
+
 <!-- BUG(S) REPORT TEMPLATE (delete as appropriate) -->
 <!-- Label this issue as "bug" -->
 
@@ -20,4 +29,3 @@ Highlighting objects on a federation node that would highlight multiple sub mode
 
 ### Pictures/ Gifs of the error
 <!-- to help visualise what is wrong -->
-

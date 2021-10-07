@@ -267,7 +267,7 @@ function* getSelectedNodes() {
 	yield waitForTreeToBeReady();
 
 	try {
-		yield call(delay, 100);
+		yield delay(100);
 		const objectsStatus = yield Viewer.getObjectsStatus();
 
 		if (objectsStatus && objectsStatus.highlightedNodes) {
