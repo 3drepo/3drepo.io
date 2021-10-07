@@ -19,6 +19,7 @@ import { connectRouter } from 'connected-react-router';
 import { combineReducers } from 'redux';
 import undoable from 'redux-undo';
 
+import { reducer as dialogsReducer } from '../../v5/store/dialogs/dialogs.redux';
 import { reducer as projectsReducer } from '../../v5/store/projects/projects.redux';
 import { reducer as teamspaces2Reducer } from '../../v5/store/teamspaces/teamspaces.redux';
 import { CanvasHistoryTypes } from './canvasHistory';
@@ -70,6 +71,7 @@ export default function createReducer(history) {
 		currentUser: currentUserReducer,
 		userManagement: userManagementReducer,
 		dialog: dialogReducer,
+		dialogsV5: dialogsReducer,
 		jobs: jobsReducer,
 		snackbar: snackbarReducer,
 		billing: billingReducer,
