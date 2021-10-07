@@ -31,10 +31,12 @@ Containers.deleteContainer = async (teamspace, project, container, user) => {
 	try {
 		await deleteModel(teamspace, project, container, user);
 	} catch (err) {
+		// istanbul ignore next
 		if (err?.code === templates.modelNotFound.code) {
 			throw templates.containerNotFound;
 		}
 
+		// istanbul ignore next
 		throw err;
 	}
 };

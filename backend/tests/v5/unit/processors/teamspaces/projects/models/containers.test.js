@@ -230,16 +230,6 @@ const testAddContainer = () => {
 			expect(res).toEqual(newContainerId);
 		});
 
-		test('should return not authorized error if user is not admin', async () => {
-			const data = {
-				name: 'container name',
-				code: 'code99',
-				unit: 'mm',
-			};
-			await expect(Containers.addContainer('teamspace', 'project', 'notAdmin', data))
-				.rejects.toEqual(templates.notAuthorized);
-		});
-
 		test('should return error if model name exists', async () => {
 			const data = {
 				name: 'model1',
@@ -257,11 +247,6 @@ const testDeleteContainer = () => {
 		test('should succeed', async () => {
 			const res = await Containers.deleteContainer('teamspace', 'project', 1, 'tsAdmin');
 			expect(res).toEqual(undefined);
-		});
-
-		test('should return not authorized error if user not admin', async () => {
-			await expect(Containers.deleteContainer('teamspace', 'project', 1, 'notAdmin'))
-				.rejects.toEqual(templates.notAuthorized);
 		});
 
 		test('should return container not found error if container does not exist', async () => {

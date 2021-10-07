@@ -24,15 +24,7 @@ const { templates } = require('../../../../../utils/responseCodes');
 const ModelList = {};
 
 ModelList.addModel = async (teamspace, project, user, data) => {
-	const { models, permissions } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
-
-	const isTSAdmin = await isTeamspaceAdmin(teamspace, user);
-	const isAdmin = isTSAdmin || hasProjectAdminPermissions(permissions, user);
-
-	if (!isAdmin) {
-		throw templates.notAuthorized;
-	}
-
+	const { models } = await getProjectById(teamspace, project, { models: 1 });
 	const modelSetting = await getModelByName(teamspace, models, data.name, { _id: 0, name: 1 });
 
 	if (modelSetting) {
@@ -47,15 +39,6 @@ ModelList.addModel = async (teamspace, project, user, data) => {
 };
 
 ModelList.deleteModel = async (teamspace, project, model, user) => {
-	const { permissions } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
-
-	const isTSAdmin = await isTeamspaceAdmin(teamspace, user);
-	const isAdmin = isTSAdmin || hasProjectAdminPermissions(permissions, user);
-
-	if (!isAdmin) {
-		throw templates.notAuthorized;
-	}
-
 	const response = await deleteModel(teamspace, model);
 
 	if (response.deletedCount === 0) {
