@@ -20,11 +20,14 @@ const { PROJECT_ADMIN } = require('../utils/permissions/permissions.constants');
 const db = require('../handler/db');
 const { templates } = require('../utils/responseCodes');
 
-const findProject = (ts, query, projection, sort) => db.find(ts, 'projects', query, projection, sort);
+const findProjects = (ts, query, projection, sort) => db.find(ts, 'projects', query, projection, sort);
 const findOneProject = (ts, query, projection) => db.findOne(ts, 'projects', query, projection);
 const updateOneProject = (ts, query, data) => db.updateOne(ts, 'projects', query, data);
+const updateProjects = (ts, query, data) => db.updateMany(ts, 'projects', query, data);
 
 Projects.addProjectModel = (ts, project, model) => updateOneProject(ts, { _id: project }, { $push: { models: model } });
+
+Projects.removeProjectModel = (ts, model) => updateProjects(ts, { models: model }, { $pull: { models: model } });
 
 Projects.getProjectById = async (ts, project, projection) => {
 	const res = await findOneProject(ts, { _id: project }, projection);
@@ -40,7 +43,7 @@ Projects.modelExistsInProject = async (teamspace, project, model) => {
 	return proj.models.includes(model);
 };
 
-Projects.getProjectList = async (ts, projection = { _id: 1, name: 1 }) => findProject(ts, {}, projection);
+Projects.getProjectList = async (ts, projection = { _id: 1, name: 1 }) => findProjects(ts, {}, projection);
 
 Projects.getProjectAdmins = async (ts, project) => {
 	const { permissions } = await Projects.getProjectById(ts, project, { permissions: 1 });

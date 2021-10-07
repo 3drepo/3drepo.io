@@ -37,9 +37,18 @@ const getModelByQuery = async (ts, query, projection) => {
 	return res;
 };
 
-Models.addModel = (ts, data) => insertOneModel(ts, { _id: generateUUIDString(), ...data });
+Models.addModel = async (ts, data) => {
+	const res = await insertOneModel(ts, { _id: generateUUIDString(), ...data });
+	return res.insertedId;
+};
 
-Models.deleteModel = (ts, model) => deleteOneModel(ts, { _id: model });
+Models.deleteModel = async (ts, model) => {
+	const res = await deleteOneModel(ts, { _id: model });
+
+	if (res.deletedCount === 0) {
+		throw templates.modelNotFound;
+	}
+};
 
 Models.getModelById = (ts, model, projection) => getModelByQuery(ts, { _id: model }, projection);
 

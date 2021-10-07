@@ -22,8 +22,14 @@ const ProjectsModel = require(`${src}/models/projects`);
 jest.mock('../../../../../../../src/v5/models/modelSettings');
 const newContainerId = 'newContainerId';
 const ModelSettings = require(`${src}/models/modelSettings`);
-ModelSettings.addModel.mockImplementation(() => ({ insertedId: newContainerId }));
-ModelSettings.deleteModel.mockImplementation((ts, model) => ({ deletedCount: model === 1 ? 1 : 0 }));
+ModelSettings.addModel.mockImplementation(() => newContainerId);
+ModelSettings.deleteModel.mockImplementation(async (ts, model) => {
+	if (model === 1) {
+		return undefined
+	} else {
+		throw templates.containerNotFound
+	}
+});
 jest.mock('../../../../../../../src/v5/models/users');
 const Users = require(`${src}/models/users`);
 jest.mock('../../../../../../../src/v5/models/revisions');

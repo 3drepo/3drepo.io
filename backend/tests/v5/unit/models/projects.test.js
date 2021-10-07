@@ -81,6 +81,21 @@ const testAddProjectModel = () => {
 	});
 };
 
+const testRemoveProjectModel = () => {
+	describe('Remove project model', () => {
+		test('should remove model from project models', async () => {
+			const expectedData = {
+				matchedCount: 1,
+				modifiedCount: 1,
+			};
+			jest.spyOn(db, 'updateMany').mockResolvedValue(expectedData);
+
+			const res = await Project.removeProjectModel('someTS', 'someModel');
+			expect(res).toEqual(expectedData);
+		});
+	});
+};
+
 const testModelExistsInProject = () => {
 	describe('Model Exists In Project', () => {
 		test('should return error if the project does not exist', async () => {
@@ -110,5 +125,6 @@ describe('models/projects', () => {
 	testProjectAdmins();
 	testGetProjectList();
 	testAddProjectModel();
+	testRemoveProjectModel();
 	testModelExistsInProject();
 });

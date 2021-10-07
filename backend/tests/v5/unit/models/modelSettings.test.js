@@ -163,11 +163,12 @@ const testGetFederations = () => {
 const testAddModel = () => {
 	describe('Add model', () => {
 		test('should return inserted ID on success', async () => {
-			const expectedData = { insertedId: 'newContainerId' };
+			const newContainerId = 'newContainerId';
+			const expectedData = { insertedId: newContainerId };
 			jest.spyOn(db, 'insertOne').mockResolvedValue(expectedData);
 
 			const res = await Model.addModel('someTS', {});
-			expect(res).toEqual(expectedData);
+			expect(res).toEqual(newContainerId);
 		});
 	});
 };
@@ -179,7 +180,15 @@ const testDeleteModel = () => {
 			jest.spyOn(db, 'deleteOne').mockResolvedValue(expectedData);
 
 			const res = await Model.deleteModel('someTS', 'someModel');
-			expect(res).toEqual(expectedData);
+			expect(res).toEqual(undefined);
+		});
+
+		test('should return model not found with invalid model ID', async () => {
+			const expectedData = { deletedCount: 0 };
+			jest.spyOn(db, 'deleteOne').mockResolvedValue(expectedData);
+
+			await expect(Model.deleteModel('someTS', 'badModel'))
+				.rejects.toEqual(templates.modelNotFound);
 		});
 	});
 };
