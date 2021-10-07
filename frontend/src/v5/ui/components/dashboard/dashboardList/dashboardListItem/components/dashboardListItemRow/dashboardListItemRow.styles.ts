@@ -72,7 +72,7 @@ export const Container = styled.div`
 
 		${FavouriteCheckboxStyles.Checkbox} {
 			&:hover {
-				background-color: ${fade(theme.palette.tertiary.lightest, 0.8)};
+				background-color: ${theme.palette.secondary.light};
 			}
 
 			&:active {
@@ -82,7 +82,7 @@ export const Container = styled.div`
 
 		${EllipsisButtonStyles.StyledIconButton} {
 			&:hover {
-				background-color: ${fade(theme.palette.tertiary.lightest, 0.8)} !important;
+				background-color: ${theme.palette.secondary.light} !important;
 			}
 
 			&:active {

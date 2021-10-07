@@ -32,7 +32,7 @@ export const Tooltip = withStyles((theme: any) => ({
 		boxShadow: theme.palette.shadows.level_6,
 		border: 'none',
 		borderRadius: 5,
-		padding: '15px 15px 20px 15px',
+		padding: '15px 15px 17px 15px',
 	},
 	tooltipPlacementRight: {
 		margin: '-17px 0px 0 -1px',
