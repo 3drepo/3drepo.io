@@ -78,14 +78,22 @@ const issues = [
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: 'issue1',
+		status: 'open',
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: 'issue2',
+		status: 'closed',
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: 'issue3',
+		status: 'in progress',
+	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: 'issue3',
+		status: 'void',
 	},
 ];
 
@@ -93,16 +101,24 @@ const risks = [
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: 'risk1',
+		mitigation_status: 'unmitigated',
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: 'risk2',
+		mitigation_status: 'proposed',
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: 'risk3',
+		mitigation_status: 'void',
 	},
 ];
+
+const getUnresolvedIssues = (issuesList) => issuesList.filter((i) => i.status !== 'void' && i.status !== 'closed');
+
+const getUnresolvedRisks = (risksList) => risksList.filter((i) => i.mitigation_status !== 'void' && i.mitigation_status !== 'agreed_fully'
+		&& i.mitigation_status !== 'rejected');
 
 const container = modelSettings.find(({ properties }) => !properties.federate);
 
@@ -247,14 +263,16 @@ const testGetFederationStats = () => {
 
 		test('should return the federation stats correctly if the user has access (subModels with revisions)', async () => {
 			const res = await agent.get(`${route(federationWithRev._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual(formatToStats(federationWithRev, federationWithRevIssues.length,
-				federationWithRevRisks.length, latestRevision.timestamp));
+			expect(res.body).toEqual(formatToStats(federationWithRev,
+				getUnresolvedIssues(federationWithRevIssues).length,
+				getUnresolvedRisks(federationWithRevRisks).length, latestRevision.timestamp));
 		});
 
 		test('should return the federation stats correctly if the user has access (subModels without revisions)', async () => {
 			const res = await agent.get(`${route(federationWithoutRev._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual(formatToStats(federationWithoutRev, federationWithoutRevIssues.length,
-				federationWithoutRevRisks.length));
+			expect(res.body).toEqual(formatToStats(federationWithoutRev,
+				getUnresolvedIssues(federationWithoutRevIssues).length,
+				getUnresolvedRisks(federationWithoutRevRisks).length));
 		});
 
 		test('should return the federation stats correctly if the user has access (no subModels)', async () => {

@@ -84,13 +84,13 @@ const project = { _id: 1, name: 'project', models: federationList.map(({ _id }) 
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getFederations.mockImplementation(() => federationList);
 ModelSettings.getFederationById.mockImplementation((teamspace, federation) => federationSettings[federation]);
-Issues.getModelIssueCount.mockImplementation((teamspace, federation) => {
+Issues.getIssuesCount.mockImplementation((teamspace, federation) => {
 	if (federation === 'federation1') return 1;
 	if (federation === 'federation2') return 2;
 	return 0;
 });
 
-Risks.getModelRiskCount.mockImplementation((teamspace, federation) => {
+Risks.getRisksCount.mockImplementation((teamspace, federation) => {
 	if (federation === 'federation1') return 1;
 	if (federation === 'federation2') return 2;
 	return 0;

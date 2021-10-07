@@ -28,8 +28,6 @@ const excludeResolvedRisks = {
 	] },
 };
 
-Risks.getRisksCount = async (teamspace, model) => {
-	return db.count(teamspace, collectionName(model), excludeResolvedRisks);
-};
+Risks.getRisksCount = async (teamspace, model) => db.count(teamspace, collectionName(model), excludeResolvedRisks);
 
 module.exports = Risks;

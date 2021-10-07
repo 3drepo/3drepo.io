@@ -27,8 +27,6 @@ const excludeResolvedIssues = {
 	] },
 };
 
-Issues.getIssuesCount = async (teamspace, model) => {
-	return db.count(teamspace, collectionName(model), excludeResolvedIssues);
-};
+Issues.getIssuesCount = async (teamspace, model) => db.count(teamspace, collectionName(model), excludeResolvedIssues);
 
 module.exports = Issues;
