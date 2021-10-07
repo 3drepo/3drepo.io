@@ -177,8 +177,6 @@ export const ContainersList = ({
 													event.stopPropagation();
 												}}
 												onChange={(event) => {
-													// eslint-disable-next-line no-console
-													console.log('handle favourite click', event.target.value);
 													toggleFavourite(container._id, !!event.currentTarget.checked);
 												}}
 											/>
