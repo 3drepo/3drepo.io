@@ -18,18 +18,17 @@
 const Issues = {};
 const db = require('../handler/db');
 
-const issuesName = (model) => `${model}.issues`;
+const collectionName = (model) => `${model}.issues`;
 
-const excludeClosedIssues = {
+const excludeResolvedIssues = {
 	status: { $nin: [
 		'closed',
 		'void',
 	] },
 };
 
-Issues.getModelIssueCount = async (teamspace, model) => {
-	const query = { ...excludeClosedIssues };
-	return db.count(teamspace, issuesName(model), query);
+Issues.getIssuesCount = async (teamspace, model) => {
+	return db.count(teamspace, collectionName(model), excludeResolvedIssues);
 };
 
 module.exports = Issues;

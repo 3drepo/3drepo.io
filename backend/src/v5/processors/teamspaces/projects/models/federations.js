@@ -18,10 +18,10 @@
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getFederationById, getFederations } = require('../../../../models/modelSettings');
 const { getLatestRevision } = require('../../../../models/revisions');
-const { getModelIssueCount } = require('../../../../models/issues');
+const { getIssuesCount } = require('../../../../models/issues');
 const Groups = require('./commons/groups');
 const { getModelList } = require('./commons/modelList');
-const { getModelRiskCount } = require('../../../../models/risks');
+const { getRisksCount } = require('../../../../models/risks');
 const { getProjectById } = require('../../../../models/projects');
 
 const Federations = { ...Groups };
@@ -54,7 +54,9 @@ const getLastUpdatesFromModels = async (teamspace, models) => {
             }
         }));
     }
-    return lastUpdates;
+
+    return lastUpdates.length ? lastUpdates.sort((a, b) => b.timestamp
+        - a.timestamp)[0].timestamp : undefined;
 };
 
 Federations.getFederationStats = async (teamspace, federation) => {
@@ -65,14 +67,10 @@ Federations.getFederationStats = async (teamspace, federation) => {
         category: 1
     });
 
-    let lastUpdates;
-    let issueCount;
-    let riskCount;
-
-    await Promise.all([
-        issueCount = await getModelIssueCount(teamspace, federation),
-        riskCount = await getModelRiskCount(teamspace, federation),
-        lastUpdates = await getLastUpdatesFromModels(teamspace, subModels),
+    const [issueCount, riskCount, lastUpdates] = await Promise.all([
+        getIssuesCount(teamspace, federation),
+        getRisksCount(teamspace, federation),
+        getLastUpdatesFromModels(teamspace, subModels),
     ]);
 
     return {
@@ -80,8 +78,7 @@ Federations.getFederationStats = async (teamspace, federation) => {
         status,
         subModels,
         category,
-        lastUpdated: lastUpdates.length ? lastUpdates.sort((a, b) => b.timestamp
-            - a.timestamp)[0].timestamp : undefined,
+        lastUpdated: lastUpdates,
         tickets: { issues: issueCount, risks: riskCount },
     };
 };

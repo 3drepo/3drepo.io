@@ -18,9 +18,9 @@
 const Risks = {};
 const db = require('../handler/db');
 
-const risksName = (model) => `${model}.risks`;
+const collectionName = (model) => `${model}.risks`;
 
-const excludeMitigatedRisks = {
+const excludeResolvedRisks = {
 	mitigation_status: { $nin: [
 		'void',
 		'agreed_fully',
@@ -28,9 +28,8 @@ const excludeMitigatedRisks = {
 	] },
 };
 
-Risks.getModelRiskCount = async (teamspace, model) => {
-	const query = { ...excludeMitigatedRisks };
-	return db.count(teamspace, risksName(model), query);
+Risks.getRisksCount = async (teamspace, model) => {
+	return db.count(teamspace, collectionName(model), excludeResolvedRisks);
 };
 
 module.exports = Risks;

@@ -20,7 +20,6 @@ const {
 	hasReadAccessToFederation, hasWriteAccessToContainer, hasWriteAccessToFederation,
 } = require('./components/models');
 const { convertAllUUIDs } = require('../dataConverter/pathParams');
-const { hasReadAccessToFederation } = require('./components/federations');
 const { isTeamspaceMember } = require('./components/teamspaces');
 const { validSession } = require('../auth');
 const { validateMany } = require('../common');
@@ -34,7 +33,6 @@ Permissions.hasCommenterAccessToContainer = validateMany([
 Permissions.hasWriteAccessToContainer = validateMany([Permissions.hasAccessToTeamspace, hasWriteAccessToContainer]);
 Permissions.hasReadAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasReadAccessToFederation]);
 
-Permissions.hasReadAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasReadAccessToFederation]);
 Permissions.hasCommenterAccessToFederation = validateMany([
 	Permissions.hasAccessToTeamspace, hasCommenterAccessToFederation]);
 Permissions.hasWriteAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasWriteAccessToFederation]);
