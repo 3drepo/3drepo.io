@@ -16,7 +16,7 @@
  */
 
 import React from 'react';
-import { Dialog as DialogContainer } from '@material-ui/core';
+import { Dialog } from '@material-ui/core';
 
 import CloseIcon from '@assets/icons/close.svg';
 import { CloseButton } from './modal.styles';
@@ -29,10 +29,10 @@ interface IModal {
 }
 
 export const Modal = ({ onClickClose, open, children, className }: IModal) => (
-	<DialogContainer open={open} className={className}>
+	<Dialog open={open} onClose={onClickClose} className={className} maxWidth={false}>
 		<CloseButton aria-label="Close dialog" onClick={onClickClose}>
 			<CloseIcon />
 		</CloseButton>
 		{children}
-	</DialogContainer>
+	</Dialog>
 );

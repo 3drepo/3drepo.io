@@ -32,7 +32,7 @@ export const ModalsDemo = () => {
 		const action = DialogsActions.open('alert', {
 			currentActions: '{current actions}',
 			errorMessage: '<Error message from the network request>',
-			details: 'You will now be redirected back to the dashboard',
+			details: '<Detail where the user will be taken by clicking ‘OK, close window’>',
 		});
 		dispatch(action);
 	};

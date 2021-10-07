@@ -18,31 +18,15 @@
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
 
-export const Line = styled.hr`
-	border: 0;
-	border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
-	width: calc(100% - 100px);
-	margin-top: 28px;
-	margin-bottom: 11px;
-`;
-
-export const Container = styled.div`
+export const Form = styled.form`
 	display: flex;
 	flex-direction: column;
-	align-items: center;
-	min-width: 633px;
-	min-height: 295px;
-	padding-top: 43px;
+	min-width: 520px;
+	padding-top: 35px;
 `;
 
-export const Actions = styled.div`
-	display: flex;
-`;
-
-export const Details = styled(Typography).attrs({
-	variant: 'body1',
+export const Title = styled(Typography).attrs({
+	variant: 'h2',
 })`
-	margin-top: 5px;
-	margin-bottom: 25px;
-	color: ${({ theme }) => theme.palette.base.main};
+	text-align: center;
 `;
