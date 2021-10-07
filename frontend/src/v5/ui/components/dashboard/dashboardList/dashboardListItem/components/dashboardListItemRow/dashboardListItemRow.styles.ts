@@ -83,6 +83,10 @@ export const Container = styled.div`
 		${EllipsisButtonStyles.StyledIconButton} {
 			&:hover {
 				background-color: ${theme.palette.secondary.light} !important;
+
+				circle {
+					fill: ${theme.palette.primary.contrast} !important;
+				}
 			}
 
 			&:active {
