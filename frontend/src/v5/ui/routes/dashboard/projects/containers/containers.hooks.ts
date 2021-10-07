@@ -27,13 +27,14 @@ export const useContainersData = () => {
 	const filteredContainers = ContainersHooksSelectors.selectFilteredContainers();
 	const favouriteContainers = ContainersHooksSelectors.selectFilteredFavouriteContainers();
 	const hasContainers = ContainersHooksSelectors.selectHasContainers();
+	const isPending = ContainersHooksSelectors.selectIsPending();
 
 	useEffect(() => {
 		ContainersActionsDispatchers.fetchContainers(teamspace, project);
 		ContainersActionsDispatchers.setCurrentProject(project);
 	}, []);
 
-	return { filteredContainers, favouriteContainers, hasContainers };
+	return { filteredContainers, favouriteContainers, hasContainers, isPending };
 };
 
 export const useContainersSearch = () => {

@@ -38,9 +38,14 @@ export const Containers = (): JSX.Element => {
 		filteredContainers,
 		favouriteContainers,
 		hasContainers,
+		isPending,
 	} = useContainersData();
 
 	const { searchInput, setSearchInput, filterQuery } = useContainersSearch();
+
+	if (isPending) {
+		return <div>Loading...</div>;
+	}
 
 	return (
 		<Container>

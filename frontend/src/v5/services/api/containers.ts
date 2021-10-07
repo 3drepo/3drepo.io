@@ -18,8 +18,8 @@
 import { AxiosResponse } from 'axios';
 import {
 	FavouritePayload,
-	FetchContainersPayload,
-	FetchContainerStatsPayload,
+	FetchContainersPayload, FetchContainersResponse,
+	FetchContainerStatsPayload, FetchContainerStatsResponse,
 } from '@/v5/store/containers/containers.types';
 import api from './default';
 
@@ -39,12 +39,19 @@ export const removeFavourites = (
 	})
 );
 
-export const fetchContainers = async ({ teamspace, projectId }: FetchContainersPayload) => {
+export const fetchContainers = async ({
+	teamspace,
+	projectId,
+}: FetchContainersPayload): Promise<FetchContainersResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers`);
 	return data;
 };
 
-export const fetchContainerStats = async ({ teamspace, projectId, containerId }: FetchContainerStatsPayload) => {
+export const fetchContainerStats = async ({
+	teamspace,
+	projectId,
+	containerId,
+}: FetchContainerStatsPayload): Promise<FetchContainerStatsResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/stats`);
 	return data;
 };

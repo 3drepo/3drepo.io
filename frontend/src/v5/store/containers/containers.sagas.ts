@@ -15,18 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
+import { all, put, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import {
 	ContainersActions,
 	ContainersTypes,
 } from '@/v5/store/containers/containers.redux';
 import { ExtendedAction } from '@/v5/store/store.types';
+import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import {
 	ContainerStatuses,
 	FavouritePayload,
 	FetchContainersPayload,
 	FetchContainersResponse,
+	FetchContainerStatsResponse,
 	IContainer,
 } from './containers.types';
 
@@ -49,22 +51,24 @@ export function* removeFavourites({ containerId, teamspace, projectId }: Extende
 }
 
 export function* fetchContainers({ teamspace, projectId }: ExtendedAction<FetchContainersPayload>) {
+	yield put(ContainersActions.setIsPending(true));
 	try {
 		const { containers }: FetchContainersResponse = yield API.fetchContainers({ teamspace, projectId });
 
-		const stats = [];
-
-		for (let i = 0; i < containers.length; i++) {
-			const data: any = yield API.fetchContainerStats({ teamspace, projectId, containerId: containers[i]._id });
-			stats.push(data);
-		}
+		const stats: FetchContainerStatsResponse[] = yield all(
+			containers.map(
+				(container) => API.fetchContainerStats({
+					teamspace, projectId, containerId: container._id,
+				}),
+			),
+		);
 
 		const containersWithStats = containers.map<IContainer>((container, index) => {
 			const containerStats = stats[index];
 			return {
 				...container,
 				revisionsCount: containerStats.revisions.total,
-				lastUpdated: containerStats.revisions.lastUpdated ?? null,
+				lastUpdated: getNullableDate(containerStats.revisions.lastUpdated),
 				latestRevision: containerStats.revisions.latestRevision ?? '',
 				type: containerStats.type ?? '',
 				code: containerStats.code ?? '',
@@ -73,7 +77,9 @@ export function* fetchContainers({ teamspace, projectId }: ExtendedAction<FetchC
 		});
 
 		yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithStats));
+		yield put(ContainersActions.setIsPending(false));
 	} catch (e) {
+		yield put(ContainersActions.setIsPending(false));
 		console.error(e);
 	}
 }
