@@ -38,7 +38,7 @@ ModelList.addModel = async (teamspace, project, user, data) => {
 	return insertedId;
 };
 
-ModelList.deleteModel = async (teamspace, project, model, user) => {
+ModelList.deleteModel = async (teamspace, project, model) => {
 	await deleteModel(teamspace, model);
 	await removeProjectModel(teamspace, model);
 };

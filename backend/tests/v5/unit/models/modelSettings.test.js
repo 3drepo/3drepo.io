@@ -130,10 +130,18 @@ const testGetContainers = () => {
 				},
 			];
 
-			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
 
-			const res = await Model.getContainers('someTS', ['someModel']);
+			const teamspace = 'someTS';
+			const modelIds = ['someModel'];
+			const res = await Model.getContainers(teamspace, modelIds);
 			expect(res).toEqual(expectedData);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual('settings');
+			expect(fn.mock.calls[0][2]).toEqual({ _id: { $in: modelIds }, federate: { $ne: true } });
+			expect(fn.mock.calls[0][3]).toEqual(undefined);
+			expect(fn.mock.calls[0][4]).toEqual(undefined);
 		});
 	});
 };
