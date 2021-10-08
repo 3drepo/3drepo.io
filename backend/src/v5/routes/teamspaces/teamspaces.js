@@ -37,6 +37,7 @@ const establishRoutes = () => {
 	 *   get:
 	 *     description: Get a list of teamspaces the user has access to
 	 *     tags: [Teamspaces]
+	 *     operationId: getTeamspaceList
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"

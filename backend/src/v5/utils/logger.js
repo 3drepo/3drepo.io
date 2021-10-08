@@ -35,6 +35,7 @@ Logger.logger = systemLogger;
 
 Logger.labels = {
 	network: 'NET',
+	event: 'EVENT',
 };
 
 module.exports = Logger;

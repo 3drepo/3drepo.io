@@ -14,13 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const Schemas = require('./swagger.schemas');
 
 const { VERSION } = require('../../../VERSION.json');
 const { v4Path } = require('../../interop');
 // FIXME: can remove the disable once we migrated config
 // eslint-disable-next-line
 const { apiUrls } = require(`${v4Path}/config`);
-const { getSwaggerComponents } = require('../utils/responseCodes');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
@@ -45,21 +45,10 @@ const options = {
 const setupDocEndpoint = (app) => {
 	const docs = swaggerJsdoc(options);
 	docs.components = docs.components || {};
-	const responses = getSwaggerComponents();
-	docs.components.responses = { ...(docs.components.responses || {}), ...responses };
-
-	// Setup API key security bearer
-	docs.components.securitySchemes = {
-		keyAuth: {
-			type: 'apiKey',
-			in: 'query',
-			name: 'key',
-		},
-	};
+	docs.components = { ...docs.components, ...Schemas };
 	const uiOptions = {
 		explorer: true,
 	};
-
 	app.use('/docs', swaggerUi.serve, swaggerUi.setup(docs, uiOptions));
 };
 

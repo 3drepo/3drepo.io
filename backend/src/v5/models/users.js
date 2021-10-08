@@ -15,12 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { createResponseCode, templates } = require('../utils/responseCodes');
 const db = require('../handler/db');
-const { templates } = require('../utils/responseCodes');
 
 const User = {};
+const COLL_NAME = 'system.users';
 
-const userQuery = (query, projection, sort) => db.findOne('admin', 'system.users', query, projection, sort);
+const userQuery = (query, projection, sort) => db.findOne('admin', COLL_NAME, query, projection, sort);
+const updateUser = (username, action) => db.updateOne('admin', COLL_NAME, { user: username }, action);
 
 const getUser = async (user, projection) => {
 	const userDoc = await userQuery({ user }, projection);
@@ -30,9 +32,51 @@ const getUser = async (user, projection) => {
 	return userDoc;
 };
 
+User.getFavourites = async (user, teamspace) => {
+	const { customData } = await getUser(user, { 'customData.starredModels': 1 });
+	const favs = customData.starredModels || {};
+	return favs[teamspace] || [];
+};
+
 User.getAccessibleTeamspaces = async (username) => {
 	const userDoc = await getUser(username, { roles: 1 });
 	return userDoc.roles.map((role) => role.db);
+};
+
+User.appendFavourites = async (username, teamspace, favouritesToAdd) => {
+	const userProfile = await getUser(username, { 'customData.starredModels': 1 });
+
+	const favourites = userProfile.customData.starredModels || {};
+	if (!favourites[teamspace]) {
+		favourites[teamspace] = [];
+	}
+
+	favouritesToAdd.forEach((fav) => {
+		if (!favourites[teamspace].includes(fav)) {
+			favourites[teamspace].push(fav);
+		}
+	});
+
+	await updateUser(username, { $set: { 'customData.starredModels': favourites } });
+};
+
+User.deleteFavourites = async (username, teamspace, favouritesToRemove) => {
+	const userProfile = await getUser(username, { 'customData.starredModels': 1 });
+
+	const favourites = userProfile.customData.starredModels || {};
+
+	if (favourites[teamspace]) {
+		const updatedFav = favourites[teamspace].filter((i) => !favouritesToRemove.includes(i));
+		if (updatedFav.length) {
+			favourites[teamspace] = updatedFav;
+			await updateUser(username, { $set: { 'customData.starredModels': favourites } });
+		} else {
+			const action = { $unset: { [`customData.starredModels.${teamspace}`]: 1 } };
+			await updateUser(username, action);
+		}
+	} else {
+		throw createResponseCode(templates.invalidArguments, "The IDs provided are not in the user's favourites list");
+	}
 };
 
 module.exports = User;
