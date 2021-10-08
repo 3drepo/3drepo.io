@@ -18,7 +18,7 @@
 import Button from '@material-ui/core/Button';
 import styled, { css } from 'styled-components';
 
-const labelButtonPrimaryStyles = css`
+export const labelButtonPrimaryStyles = css`
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	background-color: ${({ theme }) => theme.palette.primary.main};
 
@@ -36,7 +36,7 @@ const labelButtonPrimaryStyles = css`
 	}
 `;
 
-const labelButtonSecondaryStyles = css`
+export const labelButtonSecondaryStyles = css`
 	color: ${({ theme }) => theme.palette.tertiary.main};
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 

@@ -14,12 +14,84 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+import { fade } from '@material-ui/core/styles';
+import * as ButtonStyles from '@controls/button/button.styles';
+import * as FavouriteCheckboxStyles from '@controls/favouriteCheckbox/favouriteCheckbox.styles';
+import * as EllipsisButtonStyles from '@controls/ellipsisButton/ellipsisButton.styles';
+
+const dashboardListItemRowShadow = '0px 0px 12px 6px rgba(9, 30, 66, 0.2), 0px 0px 1px rgba(9, 30, 66, 0.31)';
 
 export const Container = styled.div`
+	position: relative;
 	display: flex;
 	align-items: center;
-	height: 100%;
+	height: 80px;
 	padding-left: 30px;
-	padding-right: 20px;
+	padding-right: 10px;
+	cursor: pointer;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+
+	::before {
+		content: '';
+		position: absolute;
+		left: 50%;
+		height: 100%;
+		width: calc(100% + 10px);
+		transform: translateX(-50%);
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+		border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+		border-radius: 5px;
+		visibility: hidden;
+		z-index: -1;
+	}
+
+	:hover {
+		border-color: ${({ theme }) => theme.palette.primary.contrast};
+		box-shadow: ${dashboardListItemRowShadow};
+		border-radius: 5px;
+		z-index: 100;
+
+		::before {
+			visibility: visible;
+		}
+	}
+
+	${({ theme, selected }) => selected && css`
+		background-color: ${theme.palette.secondary.main};
+
+		::before {
+			background-color: ${theme.palette.secondary.main};
+			border: none;
+		}
+
+		${ButtonStyles.LabelButton} {
+			${ButtonStyles.labelButtonSecondaryStyles};
+			background-color: ${fade(theme.palette.tertiary.lightest, 0.8)};
+		}
+
+		${FavouriteCheckboxStyles.Checkbox} {
+			&:hover {
+				background-color: ${theme.palette.secondary.light};
+			}
+
+			&:active {
+				background-color: ${theme.palette.base.lightest};
+			}
+		}
+
+		${EllipsisButtonStyles.StyledIconButton} {
+			&:hover {
+				background-color: ${theme.palette.secondary.light} !important;
+
+				circle {
+					fill: ${theme.palette.primary.contrast} !important;
+				}
+			}
+
+			&:active {
+				background-color: ${theme.palette.base.lightest} !important;
+			}
+		}
+	`}
 `;

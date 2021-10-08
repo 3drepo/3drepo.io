@@ -22,10 +22,13 @@ import { Checkbox } from './favouriteCheckbox.styles';
 
 type IFavouriteCheckbox = Omit<Omit<CheckboxProps, 'icon'>, 'checkedIcon'>;
 
-export const FavouriteCheckbox = ({ ...props }: IFavouriteCheckbox): JSX.Element => (
-	<Checkbox
-		icon={<StarIcon />}
-		checkedIcon={<StarIcon />}
-		{...props}
-	/>
+export const FavouriteCheckbox = React.forwardRef(
+	({ ...props }: IFavouriteCheckbox, ref: React.Ref<HTMLElement>): JSX.Element => (
+		<Checkbox
+			icon={<StarIcon />}
+			checkedIcon={<StarIcon />}
+			ref={ref}
+			{...props}
+		/>
+	),
 );
