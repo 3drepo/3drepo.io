@@ -50,5 +50,5 @@ describe('Containers: redux', () => {
 
 		expect(resultContainers[0].isFavourite).toEqual(false);
 		expect(resultContainers.slice(1).every(container => container.isFavourite)).toEqual(true);
-	})
+	});
 })

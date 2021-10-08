@@ -19,6 +19,8 @@ import * as ContainersSaga from '@/v5/store/containers/containers.sagas';
 import { expectSaga } from 'redux-saga-test-plan';
 import { ContainersActions } from '@/v5/store/containers/containers.redux';
 import { mockServer } from '../../internals/testing/mockServer';
+import { pick, times } from 'lodash';
+import { containerMockFactory } from '@/v5/store/containers/containers.fixtures';
 
 describe('Containers: sagas', () => {
 	const teamspace = 'teamspace';
@@ -70,6 +72,57 @@ describe('Containers: sagas', () => {
 
 			await expectSaga(ContainersSaga.default)
 			.dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
+			.silentRun()
+			.then(({ effects }: any) => {
+				expect(effects.put).toBeUndefined();
+			});
+		})
+	})
+
+	describe('fetchContainers', () => {
+		const mockContainers = times(10, () => containerMockFactory());
+		const mockContainersBaseResponse = mockContainers.map((container) => pick(container, ['_id', 'name', 'role', 'isFavourite']))
+
+
+		it('should call containers endpoint -> call stats endpoint -> put SET_IS_PENDING ', async () => {
+			mockServer
+			.get(`/teamspaces/${teamspace}/projects/${projectId}/containers`)
+			.reply(200, {
+				containers: mockContainersBaseResponse
+			});
+
+			mockContainers.forEach((container) => {
+				mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${container._id}/stats`)
+				.reply(200, {
+					revisions: {
+						total: container.revisionsCount,
+						lastUpdated: container.lastUpdated,
+						latestRevision: container.latestRevision
+					},
+					type: container.type,
+					status: container.status,
+					code: container.code,
+				});
+			})
+
+			await expectSaga(ContainersSaga.default)
+			.dispatch(ContainersActions.fetchContainers(teamspace, projectId))
+			.put(ContainersActions.setIsPending(true))
+			.put(ContainersActions.fetchContainersSuccess(projectId, mockContainers))
+			.put(ContainersActions.setIsPending(false))
+			.silentRun()
+		})
+
+		it('should call containers endpoint with 404 -> put SET_IS_PENDING ', async () => {
+			mockServer
+			.get(`/teamspaces/${teamspace}/projects/${projectId}/containers`)
+			.reply(404);
+
+			await expectSaga(ContainersSaga.default)
+			.dispatch(ContainersActions.fetchContainers(teamspace, projectId))
+			.put(ContainersActions.setIsPending(true))
+			.put(ContainersActions.setIsPending(false))
 			.silentRun()
 			.then(({ effects }: any) => {
 				expect(effects.put).toBeUndefined();
