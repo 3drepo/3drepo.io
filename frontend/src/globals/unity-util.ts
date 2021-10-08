@@ -15,16 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* eslint-disable no-var */
-declare var SendMessage;
-declare var createUnityInstance;
+/* eslint-disable no-underscore-dangle */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+declare let SendMessage;
+declare let createUnityInstance;
 /* eslint-enable no-var */
 
 export class UnityUtil {
 	/** @hidden */
 	private static errorCallback: any;
+
 	/** @hidden */
 	private static progressCallback: any;
+
 	/** @hidden */
 	private static modelLoaderProgressCallback: any;
 
@@ -47,15 +50,15 @@ export class UnityUtil {
 	 * clicked after a mouse event.
 	 *
 	 * @example UnityUtil.viewer = {
-	 * 		numClipPlanesUpdated = (nPlanes) => console.log(\`Current no. planes: ${nPlanes}\`}
+	 *  numClipPlanesUpdated = (nPlanes) => console.log(\`Current no. planes: ${nPlanes}\`}
 	 */
 	public static viewer: any;
 
 	/** @hidden */
 	public static LoadingState = {
-		VIEWER_READY : 1, // Viewer has been loaded
-		MODEL_LOADING : 2, // model information has been fetched, world offset determined, model starts loading
-		MODEL_LOADED : 3 // Models
+		VIEWER_READY: 1, // Viewer has been loaded
+		MODEL_LOADING: 2, // model information has been fetched, world offset determined, model starts loading
+		MODEL_LOADED: 3, // Models
 	};
 
 	/** @hidden */
@@ -63,22 +66,26 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static readyPromise: Promise<void>;
+
 	/** @hidden */
 	public static readyResolve;
 
 	/** @hidden */
 	public static loadedPromise;
+
 	/** @hidden */
 	public static loadedResolve;
 
 	/** @hidden */
 	public static loadingPromise;
+
 	/** @hidden */
 	public static loadingResolve;
 
 	// Diff promises
 	/** @hidden */
 	public static loadComparatorResolve;
+
 	/** @hidden */
 	public static loadComparatorPromise;
 
@@ -87,14 +94,19 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static screenshotPromises = [];
+
 	/** @hidden */
 	public static viewpointsPromises = [];
+
 	/** @hidden */
 	public static objectStatusPromises = [];
+
 	/** @hidden */
 	public static loadedFlag = false;
+
 	/** @hidden */
 	public static UNITY_GAME_OBJECT = 'WebGLInterface';
+
 	/** @hidden */
 	public static defaultHighlightColor = [1, 1, 0];
 
@@ -102,7 +114,7 @@ export class UnityUtil {
 	* Initialise Unity.
 	* @category Configurations
 	* @param errorCallback - function to call when an error occurs.
-	* 						 This function should take a string(message), boolean(requires reload), boolean(came from unity).
+	* This function should take a string(message), boolean(requires reload), boolean(came from unity).
 	* @param progressCallback
 	* @param modelLoaderProgressCallback
 	*/
@@ -143,23 +155,23 @@ export class UnityUtil {
 			if (host) {
 				// Old schema asks for a json file location, we now take the domain url
 				// and generate the object at run time.
+				// eslint-disable-next-line no-useless-escape
 				domainURL = host.match('^https?:\/\/[^\/]+');
 			}
 		}
 
 		return UnityUtil._loadUnity(canvasDom, domainURL);
-
 	}
 
 	/** @hidden */
 	public static _loadUnity(canvas: any, unityURL): Promise<void> {
-
 		if (!window.Module) {
 			// Add withCredentials to XMLHttpRequest prototype to allow unity game to
 			// do CORS request. We used to do this with a .jspre on the unity side but it's no longer supported
 			// as of Unity 2019.1
 			(XMLHttpRequest.prototype as any).originalOpen = XMLHttpRequest.prototype.open;
-			const newOpen = function(_, url) {
+			// eslint-disable-next-line func-names
+			const newOpen = function () {
 				// eslint-disable-next-line
 				const original = this.originalOpen.apply(this, arguments);
 				this.withCredentials = true;
@@ -168,21 +180,21 @@ export class UnityUtil {
 			XMLHttpRequest.prototype.open = newOpen;
 		}
 
-		const buildUrl = `${unityURL ? unityURL + '/' : ''}unity/Build`;
+		const buildUrl = `${unityURL ? `${unityURL}/` : ''}unity/Build`;
 
 		const config = {
-			dataUrl: buildUrl + '/unity.data.unityweb',
-			frameworkUrl: buildUrl + '/unity.framework.js.unityweb',
-			codeUrl: buildUrl + '/unity.wasm.unityweb',
+			dataUrl: `${buildUrl}/unity.data.unityweb`,
+			frameworkUrl: `${buildUrl}/unity.framework.js.unityweb`,
+			codeUrl: `${buildUrl}/unity.wasm.unityweb`,
 			streamingAssetsUrl: 'StreamingAssets',
 			companyName: '3D Repo Ltd',
 			productName: '3D Repo Unity',
 			productVersion: '1.0',
-			errorHandler: (e, t, n) => {
+			errorHandler: (e) => {
 				// This member is not part of the documented API, but the current version of loader.js checks for it
 				UnityUtil.onUnityError(e);
 				return true; // Returning true suppresses loader.js' alert call
-			}
+			},
 		};
 
 		createUnityInstance(canvas, config, (progress) => {
@@ -230,7 +242,7 @@ export class UnityUtil {
 	public static isUnityError(err) {
 		const checks = [
 			'Array buffer allocation failed', 'Invalid typed array length',
-			'Unity', 'unity', 'emscripten', 'blob:http'
+			'Unity', 'unity', 'emscripten', 'blob:http',
 		];
 		const hasUnityError = !checks.every((check) => err.indexOf(check) === -1);
 		return hasUnityError;
@@ -241,7 +253,6 @@ export class UnityUtil {
 	 * Handle a error from Unity
 	 */
 	public static onUnityError(message) {
-
 		let reload = false;
 		let conf;
 
@@ -275,11 +286,10 @@ export class UnityUtil {
 	public static onLoaded(): Promise<object> {
 		if (!UnityUtil.loadedPromise) {
 			UnityUtil.loadedPromise = new Promise((resolve, reject) => {
-				UnityUtil.loadedResolve = {resolve, reject};
+				UnityUtil.loadedResolve = { resolve, reject };
 			});
 		}
 		return UnityUtil.loadedPromise;
-
 	}
 
 	/**
@@ -290,11 +300,10 @@ export class UnityUtil {
 	public static onLoading(): Promise<void> {
 		if (!UnityUtil.loadingPromise) {
 			UnityUtil.loadingPromise = new Promise((resolve, reject) => {
-				UnityUtil.loadingResolve = {resolve, reject};
+				UnityUtil.loadingResolve = { resolve, reject };
 			});
 		}
 		return UnityUtil.loadingPromise;
-
 	}
 
 	/**
@@ -304,20 +313,17 @@ export class UnityUtil {
 	 */
 	public static onReady(): Promise<void> {
 		if (!UnityUtil.readyPromise) {
-			UnityUtil.readyPromise	= new Promise((resolve, reject) => {
-				UnityUtil.readyResolve = {resolve, reject};
+			UnityUtil.readyPromise = new Promise((resolve, reject) => {
+				UnityUtil.readyResolve = { resolve, reject };
 			});
 		}
 
 		return UnityUtil.readyPromise;
-
 	}
 
 	/** @hidden */
 	public static userAlert(message, reload, isUnity) {
-
 		if (!UnityUtil.unityHasErrored) {
-
 			// Unity can error multiple times, we don't want
 			// to keep annoying the user
 			UnityUtil.unityHasErrored = true;
@@ -325,10 +331,9 @@ export class UnityUtil {
 				UnityUtil.errorCallback(message, reload, isUnity);
 			}
 		}
-
 	}
 
-	/** @hidden*/
+	/** @hidden */
 	public static toUnity(methodName, requireStatus?, params?) {
 		if (requireStatus === UnityUtil.LoadingState.MODEL_LOADED) {
 			// Requires model to be loaded
@@ -366,7 +371,6 @@ export class UnityUtil {
 				}
 			});
 		}
-
 	}
 
 	/*
@@ -411,14 +415,14 @@ export class UnityUtil {
 		// eslint-disable-next-line no-console
 		console.log(`[${new Date()}]Loading model done. `);
 		const res = {
-			bbox: JSON.parse(bboxStr)
+			bbox: JSON.parse(bboxStr),
 		};
 		UnityUtil.loadedResolve.resolve(res);
 		UnityUtil.loadedFlag = true;
 	}
 
 	/** @hidden */
-	public static loading(bboxStr) {
+	public static loading() {
 		UnityUtil.loadingResolve.resolve();
 	}
 
@@ -544,7 +548,7 @@ export class UnityUtil {
 	 */
 	public static centreToPoint(meshIDs: [object]) {
 		const params = {
-			groups: meshIDs
+			groups: meshIDs,
 		};
 		UnityUtil.toUnity('CentreToObject', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
@@ -557,8 +561,8 @@ export class UnityUtil {
 	 */
 	public static changePinColour(id: string, colour: number[]) {
 		const params = {
-			color : colour,
-			pinName : id
+			color: colour,
+			pinName: id,
 		};
 
 		UnityUtil.toUnity('ChangePinColor', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
@@ -618,10 +622,9 @@ export class UnityUtil {
 	 * @return returns a promise that resolves upon comparator model finished loading.
 	 */
 	public static diffToolLoadComparator(account: string, model: string, revision = 'head'): Promise<void> {
-
 		const params: any = {
-			database : account,
-			model
+			database: account,
+			model,
 		};
 
 		if (revision !== 'head') {
@@ -631,7 +634,7 @@ export class UnityUtil {
 
 		if (!UnityUtil.loadComparatorPromise) {
 			UnityUtil.loadComparatorPromise = new Promise((resolve, reject) => {
-				UnityUtil.loadComparatorResolve = {resolve, reject};
+				UnityUtil.loadComparatorResolve = { resolve, reject };
 			});
 		}
 		return UnityUtil.loadComparatorPromise;
@@ -646,8 +649,8 @@ export class UnityUtil {
 	 */
 	public static diffToolSetAsComparator(account: string, model: string) {
 		const params: any = {
-			database : account,
-			model
+			database: account,
+			model,
 		};
 		UnityUtil.toUnity('DiffToolAssignAsComparator', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 	}
@@ -660,7 +663,6 @@ export class UnityUtil {
 	 */
 	public static diffToolSetThreshold(theshold: number) {
 		UnityUtil.toUnity('DiffToolSetThreshold', UnityUtil.LoadingState.MODEL_LOADED, theshold);
-
 	}
 
 	/**
@@ -817,7 +819,7 @@ export class UnityUtil {
 	 * @param uuid - The measurement id of the measurement that will change color
 	 */
 	public static setMeasureToolMeasurementColor(uuid, color) {
-		UnityUtil.toUnity('SetMeasureToolMeasurementColor', undefined, JSON.stringify({uuid, color}));
+		UnityUtil.toUnity('SetMeasureToolMeasurementColor', undefined, JSON.stringify({ uuid, color }));
 	}
 
 	/**
@@ -825,7 +827,7 @@ export class UnityUtil {
 	 * @param uuid - The measurement id of the measurement that will change name
 	 */
 	public static setMeasureToolMeasurementName(uuid, name) {
-		UnityUtil.toUnity('SetMeasureToolMeasurementName', undefined, JSON.stringify({uuid, name}));
+		UnityUtil.toUnity('SetMeasureToolMeasurementName', undefined, JSON.stringify({ uuid, name }));
 	}
 
 	/**
@@ -877,7 +879,7 @@ export class UnityUtil {
 			id,
 			position,
 			normal,
-			color : colour
+			color: colour,
 		};
 		UnityUtil.toUnity('DropRiskPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
@@ -895,7 +897,7 @@ export class UnityUtil {
 			id,
 			position,
 			normal,
-			color : colour
+			color: colour,
 		};
 		UnityUtil.toUnity('DropIssuePin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
@@ -913,7 +915,7 @@ export class UnityUtil {
 			id,
 			position,
 			normal,
-			color : colour
+			color: colour,
 		};
 		UnityUtil.toUnity('DropBookmarkPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
@@ -933,6 +935,7 @@ export class UnityUtil {
 	public static showCoordView() {
 		UnityUtil.toUnity('CoordViewEnable', UnityUtil.LoadingState.MODEL_LOADING, undefined);
 	}
+
 	/**
 	 * Hide x y z coordinates of current point
 	 * @category Configurations
@@ -1059,10 +1062,10 @@ export class UnityUtil {
 	 * @param idArr - array of unique IDs associated with the objects to highlight
 	 * @param color - RGB value of the highlighting colour
 	 * @param toggleMode - If set to true, existing highlighted objects will stay highlighted.
-	 * 				Also any objects that are already highlighted will be unhighlighted
+	 * Also any objects that are already highlighted will be unhighlighted
 	 * @param forceReHighlight - If set to true, existing highlighted objects will be forced
-	 * 					to re-highlight itself. This is typically used for re-colouring a highlight ]
-	 * 					or when you want a specific set of objects to stay highlighted when toggle mode is on
+	 * to re-highlight itself. This is typically used for re-colouring a highlight ]
+	 * or when you want a specific set of objects to stay highlighted when toggle mode is on
 	 */
 	public static highlightObjects(
 		account: string,
@@ -1070,17 +1073,17 @@ export class UnityUtil {
 		idArr: string[],
 		color: [number],
 		toggleMode: boolean,
-		forceReHighlight: boolean
+		forceReHighlight: boolean,
 	) {
 		UnityUtil.multipleCallInChunks(idArr.length, (start, end) => {
 			const arr = idArr.slice(start, end);
 			const params: any = {
-				database : account,
+				database: account,
 				model,
-				ids : arr,
-				toggle : toggleMode,
+				ids: arr,
+				toggle: toggleMode,
 				forceReHighlight,
-				color: color ? color : UnityUtil.defaultHighlightColor
+				color: color || UnityUtil.defaultHighlightColor,
 			};
 			UnityUtil.toUnity('HighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 		});
@@ -1095,11 +1098,11 @@ export class UnityUtil {
 	 */
 	public static unhighlightObjects(account: string, model: string, idArr: string[]) {
 		UnityUtil.multipleCallInChunks(idArr.length, (start, end) => {
-			const arr = idArr.slice(start, end);
+			const ids = idArr.slice(start, end);
 			const params: any = {
-				database : account,
+				database: account,
 				model,
-				ids : idArr
+				ids,
 			};
 
 			UnityUtil.toUnity('UnhighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
@@ -1130,17 +1133,18 @@ export class UnityUtil {
 	public static loadModel(
 		account: string,
 		model: string,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		branch = '',
 		revision = 'head',
 		initView = null,
-		clearCanvas = true
+		clearCanvas = true,
 	): Promise<void> {
 		if (clearCanvas) {
 			UnityUtil.reset(!initView);
 		}
 		const params: any = {
-			database : account,
-			model
+			database: account,
+			model,
 		};
 
 		if (revision !== 'head') {
@@ -1235,7 +1239,7 @@ export class UnityUtil {
 		UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
-				param.nameSpace = account + '.' + model;
+				param.nameSpace = `${account}.${model}`;
 			}
 			param.ids = meshIDs.slice(start, end);
 			param.color = color;
@@ -1254,7 +1258,7 @@ export class UnityUtil {
 		UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
-				param.nameSpace = account + '.' + model;
+				param.nameSpace = `${account}.${model}`;
 			}
 			param.ids = meshIDs.slice(start, end);
 			UnityUtil.toUnity('ResetMeshColor', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
@@ -1274,7 +1278,7 @@ export class UnityUtil {
 		UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
-				param.nameSpace = account + '.' + model;
+				param.nameSpace = `${account}.${model}`;
 			}
 			param.ids = meshIDs.slice(start, end);
 			param.opacity = opacity;
@@ -1293,7 +1297,7 @@ export class UnityUtil {
 		UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
-				param.nameSpace = account + '.' + model;
+				param.nameSpace = `${account}.${model}`;
 			}
 			param.ids = meshIDs.slice(start, end);
 			UnityUtil.toUnity('ResetMeshOpacity', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
@@ -1396,7 +1400,7 @@ export class UnityUtil {
 	 */
 	public static requestScreenShot(): Promise<object> {
 		const newScreenshotPromise = new Promise((resolve, reject) => {
-			this.screenshotPromises.push({ resolve, reject});
+			this.screenshotPromises.push({ resolve, reject });
 		});
 		UnityUtil.toUnity('RequestScreenShot', UnityUtil.LoadingState.VIEWER_READY, undefined);
 
@@ -1417,7 +1421,7 @@ export class UnityUtil {
 
 		const param: any = {};
 		if (account && model) {
-			param.namespace = account + '.' + model;
+			param.namespace = `${account}.${model}`;
 		}
 
 		UnityUtil.toUnity('RequestViewpoint', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(param));
@@ -1523,11 +1527,11 @@ export class UnityUtil {
 		projectionType?: boolean,
 		orthographicSize?: number,
 		account?: string,
-		model?: string
+		model?: string,
 	) {
 		const param: any = {};
 		if (account && model) {
-			param.nameSpace = account + '.' + model;
+			param.nameSpace = `${account}.${model}`;
 		}
 
 		if (projectionType) {
@@ -1543,7 +1547,6 @@ export class UnityUtil {
 		param.forward = forward;
 		param.lookAt = lookAt;
 		UnityUtil.toUnity('SetViewpoint', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(param));
-
 	}
 
 	/**
@@ -1597,7 +1600,7 @@ export class UnityUtil {
 	 * @hidden
 	 * A helper function to split the calls into multiple calls when the array is too large for SendMessage to handle
 	 */
-	public static multipleCallInChunks(arrLength: number, func: (start: number, end: number) => any, chunkSize = 20000) {
+	public static multipleCallInChunks(arrLength: number, func:(start: number, end: number) => any, chunkSize = 20000) {
 		let index = 0;
 		while (index < arrLength) {
 			const end = index + chunkSize >= arrLength ? undefined : index + chunkSize;
@@ -1618,7 +1621,7 @@ export class UnityUtil {
 		UnityUtil.multipleCallInChunks(ids.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
-				param.nameSpace = account + '.' + model;
+				param.nameSpace = `${account}.${model}`;
 			}
 
 			param.ids = ids.slice(start, end);
@@ -1662,7 +1665,7 @@ export class UnityUtil {
 		const param: any = {};
 		param.clip = clipPlane;
 		if (account && model) {
-			param.nameSpace = account + '.' + model;
+			param.nameSpace = `${account}.${model}`;
 		}
 		param.requiresBroadcast = requireBroadcast;
 		UnityUtil.toUnity('UpdateClip', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
@@ -1696,7 +1699,7 @@ export class UnityUtil {
 	 * @category Configurations
 	 */
 	public static setBackgroundColor(color: number[]) {
-		UnityUtil.toUnity('SetBackgroundColor', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({color}));
+		UnityUtil.toUnity('SetBackgroundColor', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({ color }));
 	}
 
 	/**
@@ -1745,7 +1748,7 @@ export class UnityUtil {
 	 * @param colour - colour RGB value of the colour to change to. e.g. [1, 0, 0]
 	 */
 	public static setPlaneBorderColor(color: number[]) {
-		UnityUtil.toUnity('SetPlaneBorderColor', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({color}));
+		UnityUtil.toUnity('SetPlaneBorderColor', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({ color }));
 	}
 
 	/**
@@ -1755,7 +1758,7 @@ export class UnityUtil {
 	 */
 	public static setPlaneBorderWidth(width: number) {
 		// There is an scale factor so the value that the user enters is not small
-		UnityUtil.toUnity('SetPlaneBorderWidth', UnityUtil.LoadingState.VIEWER_READY, width *	0.01);
+		UnityUtil.toUnity('SetPlaneBorderWidth', UnityUtil.LoadingState.VIEWER_READY, width * 0.01);
 	}
 
 	/**
@@ -1801,9 +1804,9 @@ export class UnityUtil {
 	public static moveMeshes(teamspace: string, modelId: string, meshes: string[], matrix: number[]) {
 		UnityUtil.multipleCallInChunks(meshes.length, (start, end) => {
 			const param: any = {
-				nameSpace : teamspace + '.' + modelId,
+				nameSpace: `${teamspace}.${modelId}`,
 				meshes: meshes.slice(start, end),
-				matrix
+				matrix,
 			};
 			UnityUtil.toUnity('MoveMeshes', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
@@ -1820,11 +1823,10 @@ export class UnityUtil {
 	public static resetMovedMeshes(teamspace: string, modelId: string, meshes: string[]) {
 		UnityUtil.multipleCallInChunks(meshes.length, (start, end) => {
 			const param: any = {
-				nameSpace : teamspace + '.' + modelId,
+				nameSpace: `${teamspace}.${modelId}`,
 				meshes: meshes.slice(start, end),
 			};
 			UnityUtil.toUnity('ResetMovedMeshes', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
 		});
 	}
-
 }

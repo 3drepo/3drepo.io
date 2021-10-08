@@ -35,6 +35,8 @@ export interface IMetaRecord {
 	value: string | number | boolean;
 }
 
+export type IMetaRecordList = Record<string, string | number | boolean>;
+
 export interface IBimComponentState {
 	selectedFilters: ISelectedFilter[];
 	showStarred?: boolean;

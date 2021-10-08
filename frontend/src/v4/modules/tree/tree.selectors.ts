@@ -266,6 +266,26 @@ export const selectGetMeshesByIds = (nodesIds = []) => createSelector(
 	}
 );
 
+export const selectGetNumNodesByMeshSharedIdsArray = (meshes = []) => createSelector(
+	selectTreeNodesList, selectNodesIndexesMap, selectNodesBySharedIdsMap,
+	(nodeList, nodeMap, nodesBySharedIds) => {
+		if (!(nodeList && nodeMap && nodesBySharedIds)) {
+			return meshes.length;
+		}
+		const foundNodes = new Set();
+
+		meshes.forEach((mesh) => {
+			const meshId = nodesBySharedIds[mesh];
+			if (meshId && nodeList[nodeMap[meshId]]) {
+				const meshEntry = nodeList[nodeMap[meshId]];
+				foundNodes.add(meshEntry.name && meshEntry.name.length ? meshEntry._id : meshEntry.parentId);
+			}
+		});
+
+		return foundNodes.size;
+	}
+);
+
 export const selectGetNodesIdsFromSharedIds = (objects = []) => createSelector(
 	selectNodesBySharedIdsMap,
 	(nodesBySharedIds) => {
