@@ -29,6 +29,7 @@ export const Link = styled(LinkComponent).attrs({
 	activeClassName: 'active',
 })`
 	&& {
+		text-decoration: none;
 		display: flex;
 		align-items: center;
 		position: relative;
@@ -44,7 +45,7 @@ export const Link = styled(LinkComponent).attrs({
 			color: ${({ theme }) => theme.palette.primary.main};
 		}
 
-		&:focus, &:visited {
+		&.Mui-focusVisible {
 			outline: none;
 			text-decoration: underline;
 		}
@@ -59,7 +60,6 @@ export const Link = styled(LinkComponent).attrs({
 
 	&.active {
 		color: ${({ theme }) => theme.palette.primary.main};
-		text-decoration: none;
 
 		&::after {
 			content: '';

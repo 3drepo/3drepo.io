@@ -26,6 +26,7 @@ type IFixedOrGrowContainer = {
 export const FixedOrGrowContainer = ({
 	width,
 	children,
+	...props
 }: IFixedOrGrowContainer): JSX.Element => (
-	<Container width={width}>{children}</Container>
+	<Container width={width} {...props}>{children}</Container>
 );

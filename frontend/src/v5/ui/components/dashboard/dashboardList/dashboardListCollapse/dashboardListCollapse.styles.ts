@@ -22,6 +22,9 @@ export const Container = styled.div``;
 export const ButtonContainer = styled.div`
 	display: flex;
 	align-items: center;
+	cursor: pointer;
+	width: max-content;
+	user-select: none;
 `;
 
 export const CollapsedItemContainer = styled.div`

@@ -15,23 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { Dispatch, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { Container } from './dashboardListItem.styles';
 
 type IDashboardListItem = {
 	children?: ReactNode;
-	onClick?: Dispatch<void>;
 	selected?: boolean;
 	className?: string;
 };
 
 export const DashboardListItem = ({
 	children,
-	onClick,
 	className,
 	selected = false,
 }: IDashboardListItem): JSX.Element => (
-	<Container onClick={onClick} className={className} selected={selected}>
+	<Container className={className} selected={selected}>
 		{children}
 	</Container>
 );
