@@ -222,7 +222,8 @@ const formatToStats = (federation, issueCount, riskCount, latestRev) => {
 	const formattedStats = {
 		code: federation.properties.properties.code,
 		status: federation.properties.status,
-		subModels: federation.properties.subModels,
+		subModels: federation.properties.subModels
+			? federation.properties.subModels.map(({ model }) => model) : undefined,
 		lastUpdated: latestRev ? latestRev.getTime() : undefined,
 		tickets: {
 			issues: issueCount,
