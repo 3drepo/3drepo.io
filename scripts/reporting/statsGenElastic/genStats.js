@@ -79,7 +79,7 @@ async function start() {
 			await UserList.createUsersReport(db, elasticClient);
 		} else {
 			await Promise.all([
-				// UserList.createUsersReport(db, elasticClient),
+				UserList.createUsersReport(db, elasticClient),
 				DBStats.createDBReport(db, elasticClient)
 			]);
 		}
