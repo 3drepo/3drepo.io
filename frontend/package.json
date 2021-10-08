@@ -1,6 +1,6 @@
 {
 	"name": "3drepo.io-frontend",
-	"version": "4.19.0",
+	"version": "4.19.1",
 	"description": "The frontend for 3drepo.io",
 	"main": "index.js",
 	"directories": {
