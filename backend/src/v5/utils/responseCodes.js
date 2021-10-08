@@ -38,15 +38,12 @@ ResponseCodes.templates = {
 	// Project related error
 	projectNotFound: { message: 'Project not found.', status: 404 },
 
-	// Federation related error
-	federationNotFound: { message: 'Federation not found.', status: 404 },
-
 	// Model related error
 	modelNotFound: { message: 'Model not found.', status: 404 },
+	federationNotFound: { message: 'Federation not found.', status: 404 },
 	containerNotFound: { message: 'Container not found.', status: 404 },
-
-	// Revision related error
 	revisionNotFound: { message: 'Revision not found.', status: 404 },
+	groupNotFound: { message: 'Group not found.', status: 404 },
 
 	// Invalid Arguements
 	invalidArguments: { message: 'The arguments provided are not valid', status: 400 },
