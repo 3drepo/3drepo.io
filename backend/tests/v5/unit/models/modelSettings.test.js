@@ -19,6 +19,7 @@ const { src } = require('../../helper/path');
 
 const Model = require(`${src}/models/modelSettings`);
 const db = require(`${src}/handler/db`);
+const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const testGetModelById = () => {
@@ -160,10 +161,18 @@ const testGetFederations = () => {
 				},
 			];
 
-			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
 
-			const res = await Model.getFederations('someTS', ['someModel']);
+			const teamspace = 'someTS';
+			const modelIds = ['someModel'];
+			const res = await Model.getFederations(teamspace, modelIds);
 			expect(res).toEqual(expectedData);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual('settings');
+			expect(fn.mock.calls[0][2]).toEqual({ _id: { $in: modelIds }, federate: true });
+			expect(fn.mock.calls[0][3]).toEqual(undefined);
+			expect(fn.mock.calls[0][4]).toEqual(undefined);
 		});
 	});
 };
@@ -173,10 +182,17 @@ const testAddModel = () => {
 		test('should return inserted ID on success', async () => {
 			const newContainerId = 'newContainerId';
 			const expectedData = { insertedId: newContainerId };
-			jest.spyOn(db, 'insertOne').mockResolvedValue(expectedData);
 
-			const res = await Model.addModel('someTS', {});
+			const fn = jest.spyOn(db, 'insertOne').mockResolvedValue(expectedData);
+
+			const teamspace = 'someTS';
+			const res = await Model.addModel(teamspace, {});
 			expect(res).toEqual(newContainerId);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual('settings');
+			expect(fn.mock.calls[0][2]).toHaveProperty('_id');
+			expect(isUUIDString(fn.mock.calls[0][2]._id));
 		});
 	});
 };
@@ -185,18 +201,30 @@ const testDeleteModel = () => {
 	describe('Delete model', () => {
 		test('should return deleted count on success', async () => {
 			const expectedData = { deletedCount: 1 };
-			jest.spyOn(db, 'deleteOne').mockResolvedValue(expectedData);
+			const fn = jest.spyOn(db, 'deleteOne').mockResolvedValue(expectedData);
 
-			const res = await Model.deleteModel('someTS', 'someModel');
+			const teamspace = 'someTS';
+			const modelId = 'someModel';
+			const res = await Model.deleteModel(teamspace, modelId);
 			expect(res).toEqual(undefined);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual('settings');
+			expect(fn.mock.calls[0][2]).toEqual({ _id: modelId });
 		});
 
 		test('should return model not found with invalid model ID', async () => {
 			const expectedData = { deletedCount: 0 };
-			jest.spyOn(db, 'deleteOne').mockResolvedValue(expectedData);
+			const fn = jest.spyOn(db, 'deleteOne').mockResolvedValue(expectedData);
 
-			await expect(Model.deleteModel('someTS', 'badModel'))
+			const teamspace = 'someTS';
+			const modelId = 'badModel';
+			await expect(Model.deleteModel(teamspace, modelId))
 				.rejects.toEqual(templates.modelNotFound);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual('settings');
+			expect(fn.mock.calls[0][2]).toEqual({ _id: modelId });
 		});
 	});
 };
