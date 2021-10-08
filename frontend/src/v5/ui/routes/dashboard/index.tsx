@@ -21,14 +21,16 @@ import { GlobalStyle } from '@/v5/ui/themes/global';
 import { i18n } from '@lingui/core';
 import { I18nProvider } from '@lingui/react';
 import { messages as esMessages } from '@/locales/es/messages';
-import { AppBar } from '@components/shared/appBar';
 import { messages as enMessages } from '@/locales/en/messages';
+import { en, es } from 'make-plural/plurals';
+import { AppBar } from '@components/shared/appBar';
 import { ModalsDispatcher } from '@components/shared/modals';
 import { discardSlash } from '@/v5/services/routing/routing';
 import { TeamspaceContent } from './teamspaces';
 import { ProjectContent } from './projects';
 import { Content, MainHeaderPortalRoot } from './index.styles';
 import { ModalsDemo } from './modalsDemo';
+import { MAIN_HEADER_PORTAL_TARGET_ID } from './index.constants';
 
 i18n.load('en', enMessages);
 i18n.load('es', esMessages);
