@@ -75,7 +75,7 @@ async function start() {
 		await Elastic.createMissingIndicies(elasticClient); // initalise the indicies if we're running for the first time
 
 		// if we're running on a daily basis to keep the stats up to date we don't want to run the full DB Report
-		if (Utils.clean(process.env.STATS_RUN_DAILY) === 0) {
+		if (Utils.clean(process.env.STATS_RUN_DAILY) === "0") {
 			await UserList.createUsersReport(db, elasticClient);
 		} else {
 			await Promise.all([
