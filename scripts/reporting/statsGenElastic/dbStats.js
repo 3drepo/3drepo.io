@@ -25,7 +25,7 @@ const DBStats = {};
 const createReports = async(dbConn, elasticClient) => {
 
 	await NewUsersPerMonth.createNewUsersReport(dbConn, elasticClient);
-	const {teamspaces} = await Teamspace.createTeamspaceReport(dbConn, elasticClient);
+	const teamspaces = await Teamspace.createTeamspaceReport(dbConn, elasticClient);
 	for(let i = 0; i < teamspaces.length; ++i) {
 		const ts = teamspaces[i];
 		console.log(`[DB] Creating teamspace activity report for ${ts.teamspace} [${i + 1}/${teamspaces.length}]...`);
