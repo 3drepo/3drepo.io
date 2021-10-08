@@ -133,14 +133,6 @@ describe("Groups", function () {
 				});
 		});
 
-		it("with invalid revision ID should fail", function(done){
-			agent.get(`/${username}/${model}/revision/f640aa3dec2/groups/${groupID}`)
-				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
-					done(err);
-				});
-		});
-
 		it("with some other teamspace should fail", function(done){
 			agent.get(`/${noAccessUser}/${model}/revision/f640aa3dec2/groups/${groupID}`)
 				.expect(404 , function(err, res) {
