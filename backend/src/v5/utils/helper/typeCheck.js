@@ -21,6 +21,7 @@ const TypeChecker = {};
 
 TypeChecker.isBuffer = (buf) => !!(buf && Buffer.isBuffer(buf));
 TypeChecker.isString = (value) => _.isString(value);
+TypeChecker.isNumber = (value) => _.isNumber(value);
 TypeChecker.isUUIDString = (uuid) => {
 	if (!TypeChecker.isString(uuid)) return false;
 	const hasMatch = uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);

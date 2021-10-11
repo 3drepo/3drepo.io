@@ -115,7 +115,7 @@ const establishRoutes = () => {
 	 *
 	 *
 	 */
-	router.get('/:container/revisions', hasReadAccessToContainer, getRevisions, serialiseRevisionArray);
+	router.get('', hasReadAccessToContainer, getRevisions, serialiseRevisionArray);
 
 	/**
 	 * @openapi
@@ -171,7 +171,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: updates the status of the revision
 	 */
-	router.patch('/:container/revisions/:revision', hasWriteAccessToContainer, validateUpdateRevisionData, updateRevisionStatus);
+	router.patch('/:revision', hasWriteAccessToContainer, validateUpdateRevisionData, updateRevisionStatus);
 
 	return router;
 };

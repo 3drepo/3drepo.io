@@ -14,21 +14,30 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import React from 'react';
 import { useRouteMatch, useLocation, Route, Switch, Redirect } from 'react-router-dom';
 import { GlobalStyle } from '@/v5/ui/themes/global';
 import { i18n } from '@lingui/core';
 import { I18nProvider } from '@lingui/react';
 import { messages as esMessages } from '@/locales/es/messages';
-import { AppBar } from '@components/shared/appBar';
 import { messages as enMessages } from '@/locales/en/messages';
+import { en, es } from 'make-plural/plurals';
+import { AppBar } from '@components/shared/appBar';
+import { ModalsDispatcher } from '@components/shared/modals';
 import { discardSlash } from '@/v5/services/routing/routing';
 import { TeamspaceContent } from './teamspaces';
 import { ProjectContent } from './projects';
-import { Content } from './index.styles';
+import { Content, MainHeaderPortalRoot } from './index.styles';
+import { ModalsDemo } from './modalsDemo';
+import { MAIN_HEADER_PORTAL_TARGET_ID } from './index.constants';
 
 i18n.load('en', enMessages);
 i18n.load('es', esMessages);
+i18n.loadLocaleData({
+	en: { plurals: en },
+	es: { plurals: es },
+});
 
 i18n.activate('en');
 
@@ -41,9 +50,13 @@ export const Dashboard = () => {
 			<I18nProvider i18n={i18n}>
 				<GlobalStyle />
 				<AppBar />
+				<MainHeaderPortalRoot id={MAIN_HEADER_PORTAL_TARGET_ID} />
 				<Content>
 					<Route path={`${path}/:teamspace/`}>
 						<TeamspaceContent />
+					</Route>
+					<Route exact path={`${path}/modals/`}>
+						<ModalsDemo />
 					</Route>
 					<Switch>
 						<Route exact path={`${path}/:teamspace/t/settings`}>
@@ -62,6 +75,7 @@ export const Dashboard = () => {
 						</Route>
 					</Switch>
 				</Content>
+				<ModalsDispatcher />
 			</I18nProvider>
 		</Route>
 	);

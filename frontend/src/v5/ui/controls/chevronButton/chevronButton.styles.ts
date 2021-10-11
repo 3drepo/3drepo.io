@@ -31,7 +31,7 @@ export const StyledIconButton = styled(IconButton)`
 		margin-top: 2px;
 	}
 
-	${({ isOn }) => isOn && css`
+	${({ $isOn }) => $isOn && css`
 		background-color: ${({ theme }) => theme.palette.secondary.main};
 
 		svg {

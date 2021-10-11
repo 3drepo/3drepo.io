@@ -16,12 +16,11 @@
  */
 
 import styled, { css } from 'styled-components';
+import * as DashboardListItemRowStyles from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemRow/dashboardListItemRow.styles';
 
 export const Container = styled.li`
 	box-sizing: border-box;
-	cursor: pointer;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	height: 80px;
+	height: 100%;
 	width: 100%;
 	list-style: none;
 	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
@@ -30,19 +29,44 @@ export const Container = styled.li`
 	&:last-child {
 		border-radius: 0 0 5px 5px;
 		border-bottom-style: solid;
+
+		${DashboardListItemRowStyles.Container} {
+			${({ selected }) => selected && css`
+				& + * {
+					border-radius: 0 0 5px 5px;
+				}
+			`}
+			
+			${({ selected }) => !selected && css`
+				border-radius: 0 0 5px 5px;
+			`}
+		}
 	}
 
 	&:first-child {
 		border-radius: 5px 5px 0 0;
-		border-top-style: solid;
+
+		${DashboardListItemRowStyles.Container} {
+			border-radius: 5px 5px 0 0;
+		}
 	}
 
 	&:only-child {
 		border-radius: 5px;
+
+		${DashboardListItemRowStyles.Container} {
+			${({ selected }) => selected && css`
+				& + * {
+					border-radius: 0 0 5px 5px;
+				}
+			`}
+			${({ selected }) => !selected && css`
+				border-radius: 5px;
+			`}
+		}
 	}
 
-	${({ theme, selected }) => selected && css`
-		background-color: ${theme.palette.secondary.main};
-		border: none;
+	${({ selected }) => selected && css`
+		border: none !important;
 	`}
 `;

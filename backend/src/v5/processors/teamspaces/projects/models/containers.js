@@ -18,10 +18,11 @@
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getContainerById, getContainers } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
+const Groups = require('./commons/groups');
 const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
 
-const Containers = {};
+const Containers = { ...Groups };
 
 Containers.getContainerList = async (teamspace, project, user) => {
 	const { models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });

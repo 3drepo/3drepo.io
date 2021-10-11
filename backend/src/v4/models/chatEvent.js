@@ -16,6 +16,9 @@
  */
 
 "use strict";
+const { v5Path } = require("../../interop");
+const EventsManager = require(`${v5Path}/services/eventsManager`);
+const EventsV5 = require(`${v5Path}/services/eventsManager.constants`).events;
 const utils = require("../utils");
 const Queue = require("../services/queue");
 
@@ -165,6 +168,23 @@ function streamPresentation(emitter, account, model, presentationId, data) {
 function endPresentation(emitter, account, model, presentationId) {
 	return insertEventQueue("end", emitter, account, model, ["presentation", presentationId]);
 }
+
+// Handle v5 events
+EventsManager.subscribe(EventsV5.NEW_GROUPS, async ({teamspace, model, groups}) => {
+	const module = require("./group");
+	const groupsSerialised = await module.getList(teamspace, model, "master", undefined, groups.map(({_id}) => _id), {}, false);
+	if(groupsSerialised.length) {
+		groupsSerialised.map((newGroup) => newGroups(undefined, teamspace, model, newGroup));
+	}
+});
+
+EventsManager.subscribe(EventsV5.UPDATE_GROUP, async ({teamspace, model, _id}) => {
+	const module = require("./group");
+	const groupSerialised = await module.findByUID(teamspace, model, "master", undefined, _id, false, false);
+	if(groupSerialised) {
+		groupChanged(undefined, teamspace, model, groupSerialised);
+	}
+});
 
 module.exports = {
 	newIssues,

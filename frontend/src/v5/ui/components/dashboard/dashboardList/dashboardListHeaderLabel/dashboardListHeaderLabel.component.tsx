@@ -18,8 +18,7 @@
 import React, { Dispatch, ReactNode } from 'react';
 import ArrowIcon from '@assets/icons/arrow.svg';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
-import { Typography } from '@controls/typography';
-import { Container, Button, Indicator } from './dashboardListHeaderLabel.styles';
+import { Container, Button, Indicator, Label } from './dashboardListHeaderLabel.styles';
 
 type IDashboardListHeaderLabel = {
 	children?: ReactNode;
@@ -42,9 +41,9 @@ export const DashboardListHeaderLabel = ({
 	<Container width={width} className={className}>
 		{sort ? (
 			<Button onClick={onClick}>
-				<Typography variant="kicker">
+				<Label>
 					{children}
-				</Typography>
+				</Label>
 				{sortingDirection && (
 					<Indicator sortingDirection={sortingDirection}>
 						<ArrowIcon />
@@ -52,9 +51,9 @@ export const DashboardListHeaderLabel = ({
 				)}
 			</Button>
 		) : (
-			<Typography variant="kicker">
+			<Label>
 				{children}
-			</Typography>
+			</Label>
 		)}
 	</Container>
 );
