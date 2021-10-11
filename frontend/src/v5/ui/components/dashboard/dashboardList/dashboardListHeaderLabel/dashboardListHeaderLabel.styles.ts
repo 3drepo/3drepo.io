@@ -19,22 +19,26 @@ import styled, { css } from 'styled-components';
 import { Button as ButtonComponent } from '@controls/button';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
+import { Typography } from '@controls/typography';
 
 export const Container = styled(FixedOrGrowContainer)`
 	align-items: center;
-	color: ${({ theme }) => theme.palette.base.main};
+	display: flex;
 `;
 
-export const Button = styled(ButtonComponent).attrs(
-	{
-		variant: 'text',
-	},
-)`
+export const Label = styled(Typography).attrs({
+	variant: 'kicker',
+})`
 	color: ${({ theme }) => theme.palette.base.main};
+	line-height: normal;
+`;
+
+export const Button = styled(ButtonComponent).attrs({
+	variant: 'text',
+})`
 	justify-content: flex-start;
 	padding: 0;
 	margin: 0;
-	line-height: normal;
 
 	&:hover, &:active {
 		text-decoration-line: none;
