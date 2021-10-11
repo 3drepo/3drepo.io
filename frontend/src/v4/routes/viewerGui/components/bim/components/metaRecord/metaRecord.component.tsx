@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,113 +15,133 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
+import { isNil, isNumber } from 'lodash';
+import MoreIcon from '@material-ui/icons/ChevronRight';
+import LessIcon from '@material-ui/icons/ExpandMore';
 import Tooltip from '@material-ui/core/Tooltip';
 
-import { isNumber } from 'lodash';
-import { StarIcon } from '../../../../../components/starIcon/starIcon.component';
-import {
-	Actions, Container, MetaKey, MetaKeyText, MetaValue, StarIconWrapper, StyledCopyIcon, StyledIconButton,
-	StyledSelectSimilarIcon,
-} from './metaRecord.styles';
+import { sortMetadata } from '@/v4/helpers/bim';
+import { StarIcon } from '@/v4/routes/components/starIcon/starIcon.component';
+import { StarIconWrapper, StyledCopyIcon, StyledSelectSimilarIcon } from '../metaRecord/metaRecord.styles';
+import { List, Title, Data, Header, Value, Actions, StyledIconButton } from './metaRecord.styles';
+
+export interface IMetaData {
+	key?: string;
+	value?: string;
+	categories?: string[];
+}
 
 interface IProps {
-	starred: boolean;
 	name: string;
-	className?: string;
-	value?: string;
-	onStarClick: () => void;
-	selectAllSimilar: (rules) => void;
-	copyRules: (rules) => void;
+	data: IMetaData;
+	nested?: boolean;
+	starredMetaMap?: any;
+	toggleStarredRecord?: (key, isStarred) => void;
+	selectAllSimilar?: (rules) => void;
+	copyRules?: (rules) => void;
+	showStarred: boolean;
+	isSearch: boolean;
 }
 
-interface IState {
-	hasDelayedClick: boolean;
-}
+const CollapseButton = ({ collapsed, onClick }) => (
+	<StyledIconButton onClick={onClick}>
+		{collapsed ? <MoreIcon /> : <LessIcon />}
+	</StyledIconButton>
+);
 
-export class MetaRecord extends React.PureComponent<IProps, IState> {
-	public state = {
-		hasDelayedClick: false
-	};
+const renderNestedMetadata = (metadata, render) => Object.entries(metadata).sort(sortMetadata).map(render);
 
-	private get rules() {
-		const { value, name } = this.props;
+const Starred = ({ data, starredMetaMap, toggleStarredRecord }) => {
+	const { key } = data;
+	const isStarred = Boolean(starredMetaMap[key]);
 
-		return [{
-			field: name,
-			operator: isNumber(value) ? 'EQUALS' : 'IS',
-			values: [value],
-		}];
-	}
+	return (
+		<StarIconWrapper>
+			<StarIcon
+				active={isStarred}
+				onClick={toggleStarredRecord(key, isStarred)}
+			/>
+		</StarIconWrapper>
+	);
+};
 
-	private get isStarred() {
-		const { starred } = this.props;
+const MetaRecordData = ({ value, field, copyRules, selectAllSimilar }) => {
+	const rules = [{
+		field,
+		operator: isNumber(value) ? 'EQUALS' : 'IS',
+		values: [value],
+	}];
 
-		if (this.state.hasDelayedClick) {
-			return !starred;
-		}
+	return (
+		<Data>
+			<Value>{value}</Value>
+			<Actions>
+				<Tooltip title="Copy group filter to clipboard">
+					<StyledIconButton onClick={() => copyRules(rules)}>
+						<StyledCopyIcon />
+					</StyledIconButton>
+				</Tooltip>
+				<Tooltip title="Select elements with same parameter value">
+					<StyledIconButton onClick={() => selectAllSimilar(rules)}>
+						<StyledSelectSimilarIcon />
+					</StyledIconButton>
+				</Tooltip>
+			</Actions>
+		</Data>
+	);
+};
 
-		return starred;
-	}
+export const MetaRecord = (props: IProps) => {
+	const { name, data, copyRules, selectAllSimilar, starredMetaMap, toggleStarredRecord, showStarred, isSearch } = props;
+	const [collapsed, setCollapsed] = useState<boolean>(true);
+	const hasSubData = isNil(data.value);
 
-	private starClickTimeout = null;
+	useEffect(() => {
+		const forceCollapsed = showStarred || isSearch;
+		setCollapsed(!forceCollapsed);
+	}, [showStarred, isSearch]);
 
-	public componentDidUpdate(prevProps) {
-		if (prevProps.starred !== this.props.starred) {
-			this.resetStarClickTimeout();
-		}
-	}
+	const toggleCollapse = () => setCollapsed(!collapsed);
 
-	public render() {
-		const { value, name, copyRules } = this.props;
+	const renderSubList = () => (
+		<List>
+			{!collapsed && renderNestedMetadata(data, ([index, item]) => (
+				<MetaRecord
+					key={index}
+					name={index}
+					data={item}
+					copyRules={copyRules}
+					selectAllSimilar={selectAllSimilar}
+					starredMetaMap={starredMetaMap}
+					toggleStarredRecord={toggleStarredRecord}
+					showStarred={showStarred}
+					isSearch={isSearch}
+				/>
+			))}
+		</List>
+	);
 
-		return (
-			<Container className={this.props.className}>
-				<MetaKey>
-					<StarIconWrapper>
-						<StarIcon
-							active={this.isStarred}
-							onClick={this.handleStarClick}
-						/>
-					</StarIconWrapper>
-					<MetaKeyText>{name}</MetaKeyText>
-				</MetaKey>
-				<MetaValue>{value}</MetaValue>
-				<Actions>
-					<Tooltip title="Copy group filter to clipboard">
-						<StyledIconButton onClick={() => copyRules(this.rules)}>
-							<StyledCopyIcon />
-						</StyledIconButton>
-					</Tooltip>
-					<Tooltip title="Select elements with same parameter value">
-						<StyledIconButton onClick={this.handleSelectAllSimilar}>
-							<StyledSelectSimilarIcon />
-						</StyledIconButton>
-					</Tooltip>
-				</Actions>
-			</Container>
-		);
-	}
 
-	private handleSelectAllSimilar = () => this.props.selectAllSimilar(this.rules);
-
-	private handleStarClick = () => {
-		if (this.starClickTimeout) {
-			this.resetStarClickTimeout();
-		} else {
-			this.setState({ hasDelayedClick: true }, () => {
-				this.starClickTimeout = setTimeout(() => {
-					this.props.onStarClick();
-				}, 2000);
-			});
-		}
-	}
-
-	private resetStarClickTimeout = () => {
-		this.setState({ hasDelayedClick: false }, () => {
-			clearTimeout(this.starClickTimeout);
-			this.starClickTimeout = null;
-		});
-	}
-}
+	return (
+		<>
+			<Header section={hasSubData}>
+				{hasSubData && <CollapseButton collapsed={collapsed} onClick={toggleCollapse} />}
+				{!hasSubData && <Starred
+					data={data}
+					starredMetaMap={starredMetaMap}
+					toggleStarredRecord={toggleStarredRecord}
+				/>}
+				<Title>{name || 'Unnamed'}</Title>
+				{!hasSubData && <MetaRecordData
+					field={data.key}
+					value={data.value}
+					copyRules={copyRules}
+					selectAllSimilar={selectAllSimilar}
+				/>}
+			</Header>
+			{hasSubData && renderSubList()}
+		</>
+	);
+};

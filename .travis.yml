@@ -17,10 +17,10 @@ matrix:
         - yarn install
         - yarn lint
         - yarn build:test
-    # tests
+    # tests (v4)
     - language: node_js
       dist: focal
-      name: Backend tests
+      name: Backend tests (V4)
       git:
       submodules: false
       depth: 1
@@ -34,9 +34,12 @@ matrix:
             - rabbitmq-server
       hosts:
         - test.127.0.0.1
-      services: mongodb
+      services:
+        - mongodb
+        - docker
 
       before_install:
+        - docker-compose up alluxio-proxy alluxio-worker alluxio-master &
         - mkdir -p submodules
         - test_ver=`cat backend/testDBVersion`
         - cd submodules
@@ -48,6 +51,7 @@ matrix:
         - cd backend && mongorestore
         - cd ../../../
         - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
+        - until nc -z localhost 39999; do echo Waiting for Alluxio; sleep 1; done
 
       install:
         - cd ./backend
@@ -64,6 +68,36 @@ matrix:
         - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" &
         - cd ./frontend
        #- unbuffer yarn test
+     #test (v5 be)
+    - language: node_js
+      dist: focal
+      name: Backend tests  (V5)
+      git:
+      submodules: false
+      depth: 1
+      node_js:
+        - "14.17.1"
+      before_install:
+        - wget $SSL_INSTALLER
+        - sudo apt install $PWD/libssl1.0.0_1.0.2n-1ubuntu5.7_amd64.deb
+      script:
+        - cd backend
+        - yarn install
+        - yarn test:v5
+    #test (v5 fe)
+    - language: node_js
+      dist: focal
+      name: Frontend tests (V5)
+      git:
+      submodules: false
+      depth: 1
+      node_js:
+        - "14.17.1"
+      script:
+        - cd frontend
+        - yarn install
+        - yarn test
+
 
 notifications:
     email:

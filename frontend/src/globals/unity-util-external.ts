@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {UnityUtil} from './unity-util';
+import { UnityUtil } from './unity-util';
 
 if (window && !window.UnityUtil) {
 	(window as any).UnityUtil = UnityUtil;

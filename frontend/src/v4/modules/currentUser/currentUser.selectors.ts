@@ -28,15 +28,15 @@ export const selectCurrentUser = createSelector(
 	selectCurrentUserDomain, (state) => state.currentUser || {}
 );
 
-export const selectUsername = createSelector(
-		selectCurrentUser, (state) => state.username || ''
+export const selectUsername: (state) => string = createSelector(
+	selectCurrentUser, (state) => state.username || ''
 );
 
 export const selectAvatar = createSelector(
 	selectCurrentUser, (state) => state.avatarUrl
 );
 
-export const selectIsInitialised = createSelector(
+export const selectIsInitialised: (state) => boolean = createSelector(
 	selectCurrentUserDomain, (state) => state.isInitialised
 );
 

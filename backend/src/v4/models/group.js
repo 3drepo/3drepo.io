@@ -98,7 +98,9 @@ function clean(groupData) {
 		}
 	}
 
-	groupData.objects = groupData.objects.filter(obj => obj.ifc_guids || obj.shared_ids);
+	if(groupData.objects) {
+		groupData.objects = groupData.objects.filter(obj => obj.ifc_guids || obj.shared_ids);
+	}
 
 	delete groupData.__v;
 
@@ -321,7 +323,11 @@ Group.findByUID = async function (account, model, branch, revId, uid, showIfcGui
 	if (convertToIfcGuids) {
 		foundGroup.objects = await getObjectsArrayAsIfcGuids(foundGroup, false);
 	} else {
-		foundGroup.objects = await getObjectIds(account, model, branch, revId, foundGroup, showIfcGuids);
+		try {
+			foundGroup.objects = await getObjectIds(account, model, branch, revId, foundGroup, showIfcGuids);
+		} catch (err) {
+			// This can happen if there's no revisions
+		}
 	}
 
 	return (noClean) ? foundGroup : clean(foundGroup);
@@ -375,7 +381,7 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 			getObjectIds(account, model, branch, revId, result, true, showIfcGuids).then((sharedIdObjects) => {
 				result.objects = sharedIdObjects;
 				return clean(result);
-			})
+			}).catch(() => clean(result))
 		);
 	});
 
@@ -441,7 +447,13 @@ Group.update = async function (account, model, branch = "master", revId = null, 
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	group.objects = await getObjectIds(account, model, branch, revId, group, true, false);
+	try {
+		group.objects = await getObjectIds(account, model, branch, revId, group, true, false);
+	} catch (err) {
+		// if we failed to get the object Ids it shouldn't represent itself as an error.
+		// This is possible if there's no revisions.:
+
+	}
 
 	if (sessionId) {
 		ChatEvent.groupChanged(sessionId, account, model, group);

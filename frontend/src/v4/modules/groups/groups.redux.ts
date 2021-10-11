@@ -43,11 +43,19 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	toggleColorOverride: ['groupId'],
 	setOverrideAll: ['overrideAll'],
 	setOverrideAllSuccess: [],
+	setShowSmartGroups: ['enabled'],
+	setShowStandardGroups: ['enabled'],
+	setShowSmartGroupsSuccess: [],
+	setShowStandardGroupsSuccess: [],
+	clearShowSmartGroupsSuccess: [],
+	clearShowStandardGroupsSuccess: [],
 	deleteGroups: ['teamspace', 'modelId', 'groups'],
 	showDeleteInfo: ['groupIds'],
 	deleteGroupsSuccess: ['groupIds'],
 	isolateGroup: ['group'],
 	downloadGroups: ['teamspace', 'modelId'],
+	exportGroups: ['teamspace', 'modelId'],
+	importGroups: ['teamspace', 'modelId', 'file'],
 	createGroup: ['teamspace', 'modelId', 'revision', 'group'],
 	updateGroup: ['teamspace', 'modelId', 'revision', 'groupId'],
 	showUpdateInfo: [],
@@ -57,7 +65,8 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	setCriteriaFieldState: ['criteriaFieldState'],
 	resetToSavedSelection: ['groupId'],
 	resetComponentState: [],
-	updateEditingGroup: ['properties']
+	updateEditingGroup: ['properties'],
+	updateGroupFromChatService: ['group'],
 }, { prefix: 'GROUPS/' });
 
 export interface ICriteriaFieldState {
@@ -82,6 +91,8 @@ export interface IGroupComponentState {
 	totalMeshes: number;
 	criteriaFieldState: ICriteriaFieldState;
 	allOverridden: boolean;
+	showSmart: boolean;
+	showStandard: boolean;
 	searchEnabled: boolean;
 	fetchingDetailsIsPending: boolean;
 }
@@ -119,6 +130,8 @@ export const INITIAL_STATE: IGroupState = {
 		totalMeshes: 0,
 		criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE,
 		allOverridden: false,
+		showSmart: true,
+		showStandard: true,
 		searchEnabled: false,
 		fetchingDetailsIsPending: false,
 	},
@@ -259,6 +272,27 @@ const clearColorOverridesSuccess = (state = INITIAL_STATE) => {
 	return { ...state, colorOverrides: [], componentState};
 };
 
+export const setShowSmartGroupsSuccess = (state = INITIAL_STATE) => {
+	const componentState = { ...state.componentState, showSmart: true };
+	return {...state, componentState};
+};
+
+export const setShowStandardGroupsSuccess = (state = INITIAL_STATE) => {
+	const componentState = { ...state.componentState, showStandard: true };
+	return {...state, componentState};
+};
+
+export const clearShowSmartGroupsSuccess = (state = INITIAL_STATE) => {
+	const componentState = { ...state.componentState, showSmart: false };
+	return {...state, componentState};
+};
+
+export const clearShowStandardGroupsSuccess = (state = INITIAL_STATE) => {
+	const componentState = { ...state.componentState, showStandard: false };
+	return {...state, componentState};
+};
+
+
 const updateEditingGroup = (state = INITIAL_STATE, {properties}) => {
 	let { editingGroup } = state.componentState;
 	editingGroup = {...editingGroup, ...properties};
@@ -282,6 +316,11 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.SHOW_UPDATE_INFO]: showUpdateInfo,
 	[GroupsTypes.RESET_COMPONENT_STATE]: resetComponentState,
 	[GroupsTypes.CLEAR_COLOR_OVERRIDES_SUCCESS]: clearColorOverridesSuccess,
+	[GroupsTypes.CLEAR_SHOW_SMART_GROUPS_SUCCESS]: clearShowSmartGroupsSuccess,
+	[GroupsTypes.CLEAR_SHOW_STANDARD_GROUPS_SUCCESS]: clearShowStandardGroupsSuccess,
+	[GroupsTypes.CLEAR_COLOR_OVERRIDES_SUCCESS]: clearColorOverridesSuccess,
 	[GroupsTypes.SET_OVERRIDE_ALL_SUCCESS]: setOverrideAllSuccess,
+	[GroupsTypes.SET_SHOW_SMART_GROUPS_SUCCESS]: setShowSmartGroupsSuccess,
+	[GroupsTypes.SET_SHOW_STANDARD_GROUPS_SUCCESS]: setShowStandardGroupsSuccess,
 	[GroupsTypes.UPDATE_EDITING_GROUP]: updateEditingGroup,
 });

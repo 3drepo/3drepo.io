@@ -19,9 +19,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import {
-	BimActions
-} from '../../../../../../modules/bim';
+import { BimActions } from '@/v4/modules/bim';
 import { MetaRecord } from './metaRecord.component';
 
 const mapStateToProps = createStructuredSelector({
