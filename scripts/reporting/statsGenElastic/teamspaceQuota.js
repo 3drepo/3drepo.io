@@ -90,8 +90,9 @@ const reportTeamspaceQuota = async (dbConn, elasticClient) => {
 const TS = {};
 
 TS.createTeamspaceReport = async (dbConn, elasticClient) =>{
-	await reportTeamspaceQuota(dbConn, elasticClient)
+	const teamspaces = await reportTeamspaceQuota(dbConn, elasticClient)
 	console.log("[DB] Generated Teamspace Report");
+	return teamspaces
 };
 
 module.exports = TS;

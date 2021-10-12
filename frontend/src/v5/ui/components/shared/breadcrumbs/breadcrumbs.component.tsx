@@ -16,44 +16,47 @@
  */
 
 import React from 'react';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { useParams, useRouteMatch } from 'react-router-dom';
+
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { uriCombine } from '@/v5/services/routing/routing';
+import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
+import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
+import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
+import { IProject } from '@/v5/store/projects/projects.redux';
 import { Container, Breadcrumb, InteractiveBreadcrumb } from './breadcrumbs.styles';
 import { NavigationMenu } from '../navigatonMenu';
 
-const teamspacesList = [{
-	to: 'atkins',
-	title: 'Atkins',
-}, {
-	to: 'skanska',
-	title: 'Skanska',
-}];
+const createToWithUrl = (url) => ({ to, title }) => ({ title, to: `${url}/${to}` });
 
-const projectsLists = {
-	atkins: [{
-		to: '12389jkh',
-		title: 'Dubai',
-	}, {
-		to: 'nlgkgouo12',
-		title: 'Another atkins project',
-	}],
-	skanska: [
-		{
-			to: 'kjbljbasda',
-			title: 'Kings cross',
-		},
-		{
-			to: 'asdasdjnlkn',
-			title: 'Paddington',
-		},
-	],
-};
+const teamspaceList2LinkList = (teamspaces: ITeamspace[]) => (teamspaces.length ? teamspaces.map(({ name }) => ({
+	to: name,
+	title: name,
+})) : []);
 
-const addUrlToTarget = (url) => ({ to, title }) => ({ title, to: `${url}/${to}` });
+const projectList2LinkList = (projects: IProject[]) => (projects.length ? projects.map(({ name, _id }) => ({
+	to: _id,
+	title: name,
+})) : []);
 
 export const Breadcrumbs = (): JSX.Element => {
-	const { teamspace, project } = useParams();
+	const { teamspace } = useParams();
+	let { project } = useParams();
+
+	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
+	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
+
+	React.useEffect(() => {
+		if (project) {
+			ProjectsActionsDispatchers.fetch(teamspace);
+		}
+	}, [project, teamspace]);
+
+	if (projects.length && !projects.find(({ _id }) => _id === project)) {
+		project = null;
+	}
+
 	let { url } = useRouteMatch();
 
 	const urlProject = project ? uriCombine(url, '../') : url;
@@ -65,17 +68,17 @@ export const Breadcrumbs = (): JSX.Element => {
 
 	const teamspaceTo = `${url}/${teamspace}`;
 
-	let list: any[] = !project ? teamspacesList : projectsLists[teamspace] || [];
+	let list: any[] = !project ? teamspaceList2LinkList(teamspaces) : projectList2LinkList(projects) || [];
 
 	if (teamspace) {
 		getBreadcrumbs.push(teamspace);
 	}
 
-	if (project) {
+	if (project && projects.length) {
 		getBreadcrumbs.push(list.find(({ to }) => to === project).title);
 	}
 
-	list = list.map(addUrlToTarget(urlProject));
+	list = list.map(createToWithUrl(project ? urlProject : url));
 
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
@@ -88,7 +91,7 @@ export const Breadcrumbs = (): JSX.Element => {
 
 				if (isLastItem) {
 					return (
-						<div>
+						<div key={title}>
 							<InteractiveBreadcrumb onClick={handleClick} endIcon={<ExpandMoreIcon />}>
 								{title}
 							</InteractiveBreadcrumb>
@@ -98,7 +101,7 @@ export const Breadcrumbs = (): JSX.Element => {
 				}
 
 				return (
-					<Breadcrumb color="inherit" to={teamspaceTo}>
+					<Breadcrumb key={title} color="inherit" to={teamspaceTo}>
 						{title}
 					</Breadcrumb>
 				);

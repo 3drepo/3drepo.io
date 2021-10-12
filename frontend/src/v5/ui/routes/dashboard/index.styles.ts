@@ -19,6 +19,9 @@ import styled from 'styled-components';
 
 export const Content = styled.section`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	display: block;
-	padding: 100px 20px;
+	overflow-y: auto;
+	flex-grow: 1;
+	padding: 0 20px 100px;
 `;
+
+export const MainHeaderPortalRoot = styled.div``;

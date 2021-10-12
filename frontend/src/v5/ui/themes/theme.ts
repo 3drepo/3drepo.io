@@ -221,6 +221,49 @@ export const theme = createMuiTheme({
 		},
 	},
 	overrides: {
+		MuiBackdrop: {
+			root: {
+				backgroundColor: 'rgba(18, 30, 51, 0.9)',
+				backdropFilter: 'blur(10px)',
+			},
+		},
+		MuiDialog: {
+			paper: {
+				minWidth: '30%',
+				borderRadius: 10,
+			},
+			paperWidthFalse: {
+				maxWidth: 633,
+			},
+		},
+		MuiDialogActions: {
+			root: {
+				backgroundColor: COLOR.TERTIARY_LIGHTEST,
+			},
+		},
+		MuiDialogTitle: {
+			root: {
+				paddingTop: 28,
+				paddingBottom: 0,
+				textAlign: 'center',
+				'& .MuiTypography-root': {
+					...typography.h1,
+				},
+			},
+		},
+		MuiDialogContent: {
+			root: {
+				paddingTop: 7,
+				flex: 0,
+			},
+		},
+		MuiDialogContentText: {
+			root: {
+				...typography.h4,
+				marginBottom: 0,
+				color: COLOR.BASE_MAIN,
+			},
+		},
 		MuiAppBar: {
 			root: {
 				boxShadow: 'none',
@@ -302,6 +345,9 @@ export const theme = createMuiTheme({
 				'& > button > span > span': {
 					marginLeft: '1px',
 				},
+				'& .MuiButton-endIcon': {
+					marginLeft: 0,
+				},
 			},
 			separator: {
 				marginLeft: 0,
@@ -334,9 +380,17 @@ export const theme = createMuiTheme({
 					'&$disabled $input': {
 						color: COLOR.BASE_LIGHT,
 					},
+					'&$disabled $path': {
+						fill: COLOR.BASE_LIGHT,
+					},
 					'&$error $input': {
 						color: COLOR.ERROR_MAIN,
+					},
+					'&$error': {
 						backgroundColor: COLOR.ERROR_LIGHTEST,
+					},
+					'&$error $path': {
+						fill: COLOR.ERROR_MAIN,
 					},
 				},
 			},
@@ -366,6 +420,11 @@ export const theme = createMuiTheme({
 				backgroundColor: COLOR.BASE_LIGHTEST,
 			},
 		},
+		MuiIconButton: {
+			root: {
+				transition: 'none',
+			},
+		},
 		MuiButton: {
 			iconSizeMedium: {
 				'& > *:first-child': {
@@ -385,9 +444,11 @@ export const theme = createMuiTheme({
 				fontSize: '0.75rem',
 				fontWeight: FONT_WEIGHT.BOLD,
 				minWidth: null,
+				transition: 'none',
 			},
 			contained: {
 				padding: '10px 15px',
+				height: '35px',
 				boxShadow: 'none',
 				'&:hover': {
 					boxShadow: 'none',
@@ -425,10 +486,12 @@ export const theme = createMuiTheme({
 				},
 			},
 			containedSizeSmall: {
+				height: '30px',
 				padding: '7.5px 15px',
 				fontSize: null, // null value means it will use the size from button.root
 			},
 			outlined: {
+				height: '35px',
 				padding: '10px 15px',
 				backgroundColor: 'transparent',
 				'&$disabled': {
@@ -458,12 +521,19 @@ export const theme = createMuiTheme({
 					color: COLOR.PRIMARY_MAIN_CONTRAST,
 					backgroundColor: COLOR.SECONDARY_MAIN,
 				},
+				'&:hover $path': {
+					fill: COLOR.PRIMARY_MAIN_CONTRAST,
+				},
 				'&:active': {
 					color: COLOR.PRIMARY_MAIN_CONTRAST,
 					backgroundColor: COLOR.SECONDARY_DARK,
 				},
+				'&:active $path': {
+					fill: COLOR.PRIMARY_MAIN_CONTRAST,
+				},
 			},
 			outlinedSizeSmall: {
+				height: '30px',
 				padding: '7.5px 15px',
 				fontSize: null, // null value means it will use the size from button.root
 			},

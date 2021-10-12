@@ -20,6 +20,8 @@ import { useRouteMatch, useParams } from 'react-router-dom';
 
 import { Trans } from '@lingui/react';
 import React from 'react';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
+import { IProject } from '@/v5/store/projects/projects.redux';
 import { Container, Link } from './topNavigaton.styles';
 
 export const TopNavigation = (): JSX.Element => {
@@ -27,16 +29,19 @@ export const TopNavigation = (): JSX.Element => {
 	url = discardSlash(url);
 
 	const { project } = useParams();
+	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
+	const hasValidProject = Boolean(projects.find(({ _id }) => _id === project));
+
 	return (
 		<Container>
-			{project && project !== 'settings'
+			{hasValidProject
 				&& (
 					<>
-						<Link to={`${url}/federations`}><Trans id="Federations" /></Link>
-						<Link to={`${url}/containers`}><Trans id="Containers" /></Link>
+						<Link to={`${url}/t/federations`}><Trans id="Federations" /></Link>
+						<Link to={`${url}/t/containers`}><Trans id="Containers" /></Link>
 					</>
 				)}
-			<Link to={`${discardUrlComponent(url, 'settings')}/settings`}><Trans id="Settings" /></Link>
+			<Link to={`${discardUrlComponent(url, 'settings')}/t/settings`}><Trans id="Settings" /></Link>
 		</Container>
 	);
 };

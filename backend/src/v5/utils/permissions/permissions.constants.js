@@ -20,4 +20,12 @@ const permConst = {};
 permConst.TEAMSPACE_ADMIN = 'teamspace_admin';
 permConst.PROJECT_ADMIN = 'admin_project';
 
+permConst.MODEL_COLLABORATOR = 'collaborator';
+permConst.MODEL_COMMENTER = 'commenter';
+permConst.MODEL_VIEWER = 'viewer';
+
+permConst.MODEL_WRITE_ROLES = [permConst.MODEL_COLLABORATOR];
+permConst.MODEL_COMMENT_ROLES = [permConst.MODEL_COLLABORATOR, permConst.MODEL_COMMENTER];
+permConst.MODEL_READ_ROLES = [permConst.MODEL_COLLABORATOR, permConst.MODEL_COMMENTER, permConst.MODEL_VIEWER];
+
 module.exports = permConst;

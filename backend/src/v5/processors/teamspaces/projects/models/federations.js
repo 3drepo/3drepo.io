@@ -16,11 +16,15 @@
  */
 
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
-const { getFederations } = require('../../../../models/modelSettings');
+const { getFederationById, getFederations } = require('../../../../models/modelSettings');
+const Groups = require('./commons/groups');
+const { getIssuesCount } = require('../../../../models/issues');
+const { getLatestRevision } = require('../../../../models/revisions');
 const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
+const { getRisksCount } = require('../../../../models/risks');
 
-const Federations = {};
+const Federations = { ...Groups };
 
 Federations.getFederationList = async (teamspace, project, user) => {
 	const { models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
@@ -37,6 +41,46 @@ Federations.appendFavourites = async (username, teamspace, project, favouritesTo
 Federations.deleteFavourites = async (username, teamspace, project, favouritesToRemove) => {
 	const accessibleFederations = await Federations.getFederationList(teamspace, project, username);
 	await deleteFavourites(username, teamspace, accessibleFederations, favouritesToRemove);
+};
+
+const getLastUpdatesFromModels = async (teamspace, models) => {
+	const lastUpdates = [];
+	if (models) {
+		await Promise.all(models.map(async (m) => {
+			try {
+				lastUpdates.push(await getLatestRevision(teamspace, m.model, { timestamp: 1 }));
+			} catch {
+				// do nothing. A container can have 0 revision.
+			}
+		}));
+	}
+
+	return lastUpdates.length ? lastUpdates.sort((a, b) => b.timestamp
+        - a.timestamp)[0].timestamp : undefined;
+};
+
+Federations.getFederationStats = async (teamspace, federation) => {
+	const { properties, status, subModels, category } = await getFederationById(teamspace, federation, {
+		properties: 1,
+		status: 1,
+		subModels: 1,
+		category: 1,
+	});
+
+	const [issueCount, riskCount, lastUpdates] = await Promise.all([
+		getIssuesCount(teamspace, federation),
+		getRisksCount(teamspace, federation),
+		getLastUpdatesFromModels(teamspace, subModels),
+	]);
+
+	return {
+		code: properties.code,
+		status,
+		subModels,
+		category,
+		lastUpdated: lastUpdates,
+		tickets: { issues: issueCount, risks: riskCount },
+	};
 };
 
 module.exports = Federations;
