@@ -15,12 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import React, { ReactNode } from 'react';
+import { AppBar } from '@components/shared/appBar';
+import { ModalsDispatcher } from '@components/shared/modals';
+import { Content, MainHeaderPortalRoot } from './dashboardLayout.styles';
+import { MAIN_HEADER_PORTAL_TARGET_ID } from './dashboardLayout.constants';
 
-export const Content = styled.section`
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	overflow-y: auto;
-	flex-grow: 1;
-`;
+interface IDashboardLayout {
+	children: ReactNode;
+}
 
-export const MainHeaderPortalRoot = styled.div``;
+export const DashboardLayout = ({ children }: IDashboardLayout): JSX.Element => (
+	<>
+		<AppBar />
+		<MainHeaderPortalRoot id={MAIN_HEADER_PORTAL_TARGET_ID} />
+		<Content>
+			{children}
+		</Content>
+		<ModalsDispatcher />
+	</>
+);
