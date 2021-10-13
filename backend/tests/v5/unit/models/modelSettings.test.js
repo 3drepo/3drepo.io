@@ -181,39 +181,24 @@ const testIsSubModel = () => {
 	describe('Is submodel', () => {
 		test('should return false if not submodel', async () => {
 			const teamspace = 'someTS';
-			const expectedData = [
-				{
-					_id: 'someFed',
-					federate: true,
-					subModels: ['subModel'],
-				},
-			];
+			const modelId = 'someModel';
 
-			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+			const fn = jest.spyOn(db, 'count').mockResolvedValue(0);
 
-			const res = await Model.isSubModel(teamspace, 'someModel');
+			const res = await Model.isSubModel(teamspace, modelId);
 			expect(res).toEqual(false);
 
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual(teamspace);
 			expect(fn.mock.calls[0][1]).toEqual('settings');
-			expect(fn.mock.calls[0][2]).toEqual({ federate: true });
-			expect(fn.mock.calls[0][3]).toEqual(undefined);
-			expect(fn.mock.calls[0][4]).toEqual(undefined);
+			expect(fn.mock.calls[0][2]).toEqual({ 'subModels.model': modelId });
 		});
 
 		test('should return true if submodel', async () => {
 			const teamspace = 'someTS';
 			const modelId = 'subModel';
-			const expectedData = [
-				{
-					_id: 'someFed',
-					federate: true,
-					subModels: [modelId],
-				},
-			];
 
-			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+			const fn = jest.spyOn(db, 'count').mockResolvedValue(1);
 
 			const res = await Model.isSubModel(teamspace, modelId);
 			expect(res).toEqual(true);
@@ -221,9 +206,7 @@ const testIsSubModel = () => {
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual(teamspace);
 			expect(fn.mock.calls[0][1]).toEqual('settings');
-			expect(fn.mock.calls[0][2]).toEqual({ federate: true });
-			expect(fn.mock.calls[0][3]).toEqual(undefined);
-			expect(fn.mock.calls[0][4]).toEqual(undefined);
+			expect(fn.mock.calls[0][2]).toEqual({ 'subModels.model': modelId });
 		});
 	});
 };

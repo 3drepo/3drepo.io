@@ -20,6 +20,7 @@ const db = require('../handler/db');
 const { generateUUIDString } = require('../utils/helper/uuids');
 const { templates } = require('../utils/responseCodes');
 
+const countModels = (ts, query) => db.count(ts, 'settings', query);
 const deleteOneModel = (ts, query) => db.deleteOne(ts, 'settings', query);
 const findOneModel = (ts, query, projection) => db.findOne(ts, 'settings', query, projection);
 const findModels = (ts, query, projection, sort) => db.find(ts, 'settings', query, projection, sort);
@@ -51,16 +52,10 @@ Models.deleteModel = async (ts, model) => {
 };
 
 Models.isSubModel = async (ts, model) => {
-	const federations = await findModels(ts, onlyFederations);
-	const promises = [];
+	const subModelCount = await countModels(ts, { 'subModels.model': model });
+	console.log(subModelCount);
 
-	federations.forEach((modelSetting) => {
-		promises.push(modelSetting.subModels && modelSetting.subModels.includes(model));
-	});
-
-	const results = await Promise.all(promises);
-
-	return results.reduce((isSub, current) => isSub || current, false);
+	return subModelCount > 0;
 };
 
 Models.removeModelCollections = async (ts, model) => {
