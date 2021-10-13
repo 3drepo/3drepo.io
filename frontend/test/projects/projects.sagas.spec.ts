@@ -29,9 +29,9 @@ describe('Teamspaces: sagas', () => {
 			}));
 
 			expectSaga(ProjectsSaga.default)
-			.dispatch(ProjectsActions.fetch('teamspaceName'))
-			.put(ProjectsActions.fetchSuccess('teamspaceName', []))
-			.silentRun();
+				.dispatch(ProjectsActions.fetch('teamspaceName'))
+				.put(ProjectsActions.fetchSuccess('teamspaceName', []))
+				.silentRun();
 		});
 
 		it('should handle projects api error and dispatch FETCH_FAILURE', () => {
@@ -40,9 +40,9 @@ describe('Teamspaces: sagas', () => {
 			}));
 
 			expectSaga(ProjectsSaga.default)
-			.dispatch(ProjectsActions.fetch('teamspaceName'))
-			.put(ProjectsActions.fetchFailure())
-			.silentRun();
+				.dispatch(ProjectsActions.fetch('teamspaceName'))
+				.put(ProjectsActions.fetchFailure())
+				.silentRun();
 		});
 	});
 });

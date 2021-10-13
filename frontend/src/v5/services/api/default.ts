@@ -63,7 +63,7 @@ axios.interceptors.response.use(
 	},
 );
 
-const generateV5ApiUrl = (url: string): string => `v5/${url}`;
+export const generateV5ApiUrl = (url: string): string => `v5/${url}`;
 
 const getRequest = (url, ...options) => {
 	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.GET_API, generateV5ApiUrl(url)));
