@@ -14,11 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const { v4Path } = require('../../interop');
+// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
+const config = require(`${v4Path}/config`);
 
-const Path = {};
-
-Path.src = `${__dirname}/../../../src/v5`;
-Path.srcV4 = `${__dirname}/../../../src/v4`;
-Path.modelFolder = `${__dirname}/../resources/models`;
-
-module.exports = Path;
+module.exports = config;

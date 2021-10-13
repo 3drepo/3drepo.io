@@ -15,10 +15,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Path = {};
+const Multer = require('multer');
+const config = require('../../utils/config');
+const { respond } = require('../../utils/responder');
 
-Path.src = `${__dirname}/../../../src/v5`;
-Path.srcV4 = `${__dirname}/../../../src/v4`;
-Path.modelFolder = `${__dirname}/../resources/models`;
+const MulterHelper = {};
 
-module.exports = Path;
+const singleFileMulterPromise = (req, fileName, fileFilter) => new Promise((resolve, reject) => {
+	Multer({
+		dest: config.cn_queue.upload_dir,
+		fileFilter,
+	}).single(fileName)(req, null, (err) => {
+		if (err) {
+			reject(err);
+		} else {
+			resolve();
+		}
+	});
+});
+
+MulterHelper.singleFileUpload = (fileName = 'file', fileFilter) => async (req, res, next) => {
+	try {
+		await singleFileMulterPromise(req, fileName, fileFilter);
+		next();
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
+module.exports = MulterHelper;
