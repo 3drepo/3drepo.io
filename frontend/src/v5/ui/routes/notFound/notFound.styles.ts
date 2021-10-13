@@ -19,12 +19,12 @@ import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 
 export const Container = styled.div`
-  display: flex;
-  flex-grow: 1;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
+	display: flex;
+	flex-grow: 1;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
 `;
 
 export const WrapperContainer = styled.div``;
@@ -34,18 +34,18 @@ export const Title = styled(Typography).attrs({
 	component: 'h2',
 	color: 'secondary',
 })`
-  margin-top: 50px;
+	margin-top: 50px;
 `;
 
 export const Message = styled(Typography).attrs({
 	variant: 'h4',
 	component: 'span',
 })`
-  color: ${({ theme }) => theme.palette.base.main};
-  margin-top: 25px;
+	color: ${({ theme }) => theme.palette.base.main};
+	margin-top: 25px;
 `;
 
 export const ButtonsContainer = styled.div`
-  display: flex;
+	display: flex;
 	margin-top: 30px;
 `;
