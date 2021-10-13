@@ -37,7 +37,7 @@ describe('Teamspaces: sagas', () => {
 			await expectSaga(ProjectsSaga.default)
 			.dispatch(ProjectsActions.fetch(teamspace))
 			.put(ProjectsActions.fetchSuccess(teamspace, projects))
-			.silentRun()
+			.silentRun();
 		});
 
 		it('should handle projects api error and dispatch FETCH_FAILURE', async () => {
@@ -49,7 +49,7 @@ describe('Teamspaces: sagas', () => {
 			.dispatch(ProjectsActions.fetch(teamspace))
 			.put(push(NOT_FOUND_ROUTE_PATH))
 			.put(ProjectsActions.fetchFailure())
-			.silentRun()
+			.silentRun();
 		});
 	});
 });
