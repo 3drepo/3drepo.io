@@ -21,9 +21,14 @@ jest.mock('../../../../../../../src/v5/models/projects');
 const ProjectsModel = require(`${src}/models/projects`);
 jest.mock('../../../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
+jest.mock('../../../../../../../src/v5/models/issues');
+const Issues = require(`${src}/models/issues`);
+jest.mock('../../../../../../../src/v5/models/risks');
+const Risks = require(`${src}/models/risks`);
 jest.mock('../../../../../../../src/v5/models/users');
 const Users = require(`${src}/models/users`);
 jest.mock('../../../../../../../src/v5/models/revisions');
+const Revisions = require(`${src}/models/revisions`);
 const Federations = require(`${src}/processors/teamspaces/projects/models/federations`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -45,6 +50,8 @@ const federationSettings = {
 			code: 'FED1',
 		},
 		status: 'ok',
+		subModels: [{ model: 'container1' }, { model: 'container2' }],
+		category: 'category 1',
 	},
 	federation2: {
 		_id: 2,
@@ -55,6 +62,19 @@ const federationSettings = {
 			code: 'FED2',
 		},
 		status: 'processing',
+		subModels: [{ model: 'container3' }],
+		category: 'category 2',
+	},
+	federation3: {
+		_id: 3,
+		name: 'federation 3',
+		type: 'type 3',
+		properties: {
+			units: 'mm',
+			code: 'FED3',
+		},
+		status: 'processing',
+		category: 'category 3',
 	},
 };
 
@@ -64,6 +84,18 @@ const project = { _id: 1, name: 'project', models: federationList.map(({ _id }) 
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getFederations.mockImplementation(() => federationList);
 ModelSettings.getFederationById.mockImplementation((teamspace, federation) => federationSettings[federation]);
+Issues.getIssuesCount.mockImplementation((teamspace, federation) => {
+	if (federation === 'federation1') return 1;
+	if (federation === 'federation2') return 2;
+	return 0;
+});
+
+Risks.getRisksCount.mockImplementation((teamspace, federation) => {
+	if (federation === 'federation1') return 1;
+	if (federation === 'federation2') return 2;
+	return 0;
+});
+
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
 
 Users.appendFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
@@ -81,6 +113,12 @@ Users.deleteFavourites.mockImplementation((username, teamspace, favouritesToAdd)
 			user1Favourites.splice(index, 1);
 		}
 	}
+});
+
+Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
+	if (container === 'container1') return { timestamp: 1234 };
+	if (container === 'container2') return { timestamp: 5678 };
+	throw templates.revisionNotFound;
 });
 
 // Permissions mock
@@ -168,8 +206,38 @@ const testDeleteFavourites = () => {
 	});
 };
 
+const formatToStats = (settings, issueCount, riskCount, lastUpdated) => ({
+	code: settings.properties.code,
+	status: settings.status,
+	subModels: settings.subModels,
+	category: settings.category,
+	lastUpdated,
+	tickets: {
+		issues: issueCount ?? 0,
+		risks: riskCount ?? 0,
+	},
+});
+
+const testGetFederationStats = () => {
+	describe('Get federation stats', () => {
+		test('should return the stats if the federation exists and has subModels with revisions', async () => {
+			const res = await Federations.getFederationStats('teamspace', 'federation1');
+			expect(res).toEqual(formatToStats(federationSettings.federation1, 1, 1, 5678));
+		});
+		test('should return the stats if the federation exists and has subModels with no revisions', async () => {
+			const res = await Federations.getFederationStats('teamspace', 'federation2');
+			expect(res).toEqual(formatToStats(federationSettings.federation2, 2, 2));
+		});
+		test('should return the stats if the federation exists and has no subModels', async () => {
+			const res = await Federations.getFederationStats('teamspace', 'federation3');
+			expect(res).toEqual(formatToStats(federationSettings.federation3));
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/federations', () => {
 	testGetFederationList();
 	testAppendFavourites();
 	testDeleteFavourites();
+	testGetFederationStats();
 });
