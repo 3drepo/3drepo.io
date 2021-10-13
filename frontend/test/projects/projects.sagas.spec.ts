@@ -20,6 +20,8 @@ import { expectSaga } from 'redux-saga-test-plan';
 import * as ProjectsSaga from '@/v5/store/projects/projects.sagas';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { mockServer } from '../../internals/testing/mockServer';
+import { push } from 'connected-react-router';
+import { NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
 
 describe('Teamspaces: sagas', () => {
 	describe('fetch', () => {
@@ -35,7 +37,7 @@ describe('Teamspaces: sagas', () => {
 			await expectSaga(ProjectsSaga.default)
 			.dispatch(ProjectsActions.fetch(teamspace))
 			.put(ProjectsActions.fetchSuccess(teamspace, projects))
-			.silentRun();
+			.silentRun()
 		});
 
 		it('should handle projects api error and dispatch FETCH_FAILURE', async () => {
@@ -45,8 +47,9 @@ describe('Teamspaces: sagas', () => {
 
 			await expectSaga(ProjectsSaga.default)
 			.dispatch(ProjectsActions.fetch(teamspace))
+			.put(push(NOT_FOUND_ROUTE_PATH))
 			.put(ProjectsActions.fetchFailure())
-			.silentRun();
+			.silentRun()
 		});
 	});
 });
