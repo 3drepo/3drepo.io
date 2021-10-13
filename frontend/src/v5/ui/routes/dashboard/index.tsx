@@ -44,43 +44,41 @@ export const Dashboard = () => {
 	const { pathname } = useLocation();
 
 	return (
-		<>
-			<I18nProvider i18n={i18n}>
-				<GlobalStyle />
-				<Switch>
-					<Route path={`${path}/dashboard/:teamspace?/:project?`}>
-						<DashboardLayout>
-							<Route path={`${path}/dashboard/:teamspace/`}>
+		<I18nProvider i18n={i18n}>
+			<GlobalStyle />
+			<Switch>
+				<Route path={`${path}/dashboard/:teamspace?/:project?`}>
+					<DashboardLayout>
+						<Route path={`${path}/dashboard/:teamspace/`}>
+							<TeamspaceContent />
+						</Route>
+						<Switch>
+							<Route exact path={`${path}/dashboard/:teamspace/t/settings`}>
 								<TeamspaceContent />
 							</Route>
-							<Switch>
-								<Route exact path={`${path}/dashboard/:teamspace/t/settings`}>
-									<TeamspaceContent />
-								</Route>
-								<Route exact path={`${path}/dashboard/:teamspace/:project`}>
-									<Redirect to={`${discardSlash(pathname)}/t/federations`} />
-								</Route>
-								<Route exact path={`${path}/dashboard/:teamspace/:project/t`}>
-									<Redirect to={`${discardSlash(pathname)}/federations`} />
-								</Route>
-								<Route path={`${path}/dashboard/:teamspace/:project`}>
-									<ProjectContent />
-								</Route>
-							</Switch>
-						</DashboardLayout>
-					</Route>
-					<Route exact path={`${path}/modals/`}>
-						<DashboardLayout>
-							<ModalsDemo />
-						</DashboardLayout>
-					</Route>
-					<Route path="*">
-						<DashboardLayout>
-							<NotFound />
-						</DashboardLayout>
-					</Route>
-				</Switch>
-			</I18nProvider>
-		</>
+							<Route exact path={`${path}/dashboard/:teamspace/:project`}>
+								<Redirect to={`${discardSlash(pathname)}/t/federations`} />
+							</Route>
+							<Route exact path={`${path}/dashboard/:teamspace/:project/t`}>
+								<Redirect to={`${discardSlash(pathname)}/federations`} />
+							</Route>
+							<Route path={`${path}/dashboard/:teamspace/:project`}>
+								<ProjectContent />
+							</Route>
+						</Switch>
+					</DashboardLayout>
+				</Route>
+				<Route exact path={`${path}/modals/`}>
+					<DashboardLayout>
+						<ModalsDemo />
+					</DashboardLayout>
+				</Route>
+				<Route path="*">
+					<DashboardLayout>
+						<NotFound />
+					</DashboardLayout>
+				</Route>
+			</Switch>
+		</I18nProvider>
 	);
 };

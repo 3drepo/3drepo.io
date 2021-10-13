@@ -22,9 +22,10 @@ import { dispatch } from '@/v4/modules/store';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { AuthActions } from '@/v4/modules/auth';
 
-axios.defaults.withCredentials = true;
+const axiosInstance = axios.create();
+axiosInstance.defaults.withCredentials = true;
 
-axios.interceptors.response.use(
+axiosInstance.interceptors.response.use(
 	(response) => response,
 	(error) => {
 		try {
@@ -56,9 +57,9 @@ axios.interceptors.response.use(
 					break;
 			}
 
-			return Promise.reject(error);
+			return Promise.reject(error.response);
 		} catch (e) {
-			return Promise.reject(error);
+			return Promise.reject(error.response);
 		}
 	},
 );
@@ -67,27 +68,27 @@ const generateV5ApiUrl = (url: string): string => `v5/${url}`;
 
 const getRequest = (url, ...options) => {
 	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.GET_API, generateV5ApiUrl(url)));
-	return axios.get(requestUrl, ...options);
+	return axiosInstance.get(requestUrl, ...options);
 };
 
 const postRequest = (url, ...options) => {
 	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, generateV5ApiUrl(url)));
-	return axios.post(requestUrl, ...options);
+	return axiosInstance.post(requestUrl, ...options);
 };
 
 const putRequest = (url, ...options) => {
 	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, generateV5ApiUrl(url)));
-	return axios.put(requestUrl, ...options);
+	return axiosInstance.put(requestUrl, ...options);
 };
 
 const deleteRequest = (url, data?) => {
 	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, generateV5ApiUrl(url)));
-	return axios.delete(requestUrl, { data });
+	return axiosInstance.delete(requestUrl, { data });
 };
 
 const patchRequest = (url, ...options) => {
 	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, generateV5ApiUrl(url)));
-	return axios.patch(requestUrl, ...options);
+	return axiosInstance.patch(requestUrl, ...options);
 };
 
 export default {
