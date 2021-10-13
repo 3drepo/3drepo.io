@@ -22,10 +22,9 @@ import { dispatch } from '@/v4/modules/store';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { AuthActions } from '@/v4/modules/auth';
 
-const axiosInstance = axios.create();
-axiosInstance.defaults.withCredentials = true;
+axios.defaults.withCredentials = true;
 
-axiosInstance.interceptors.response.use(
+axios.interceptors.response.use(
 	(response) => response,
 	(error) => {
 		try {
@@ -57,9 +56,9 @@ axiosInstance.interceptors.response.use(
 					break;
 			}
 
-			return Promise.reject(error.response);
+			return Promise.reject(error);
 		} catch (e) {
-			return Promise.reject(error.response);
+			return Promise.reject(error);
 		}
 	},
 );
@@ -68,27 +67,27 @@ const generateV5ApiUrl = (url: string): string => `v5/${url}`;
 
 const getRequest = (url, ...options) => {
 	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.GET_API, generateV5ApiUrl(url)));
-	return axiosInstance.get(requestUrl, ...options);
+	return axios.get(requestUrl, ...options);
 };
 
 const postRequest = (url, ...options) => {
 	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, generateV5ApiUrl(url)));
-	return axiosInstance.post(requestUrl, ...options);
+	return axios.post(requestUrl, ...options);
 };
 
 const putRequest = (url, ...options) => {
 	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, generateV5ApiUrl(url)));
-	return axiosInstance.put(requestUrl, ...options);
+	return axios.put(requestUrl, ...options);
 };
 
 const deleteRequest = (url, data?) => {
 	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, generateV5ApiUrl(url)));
-	return axiosInstance.delete(requestUrl, { data });
+	return axios.delete(requestUrl, { data });
 };
 
 const patchRequest = (url, ...options) => {
 	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, generateV5ApiUrl(url)));
-	return axiosInstance.patch(requestUrl, ...options);
+	return axios.patch(requestUrl, ...options);
 };
 
 export default {

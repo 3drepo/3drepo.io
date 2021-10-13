@@ -17,7 +17,6 @@
 
 import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
-import { redirectTo404Page } from '@/v5/store/store.helpers';
 import { ProjectsActions, ProjectsTypes, IProject } from './projects.redux';
 
 export function* fetch({ teamspace }) {
@@ -25,9 +24,6 @@ export function* fetch({ teamspace }) {
 		const { data: { projects } } = yield API.fetchProjects(teamspace);
 		yield put(ProjectsActions.fetchSuccess(teamspace, projects as IProject[]));
 	} catch (e) {
-		if (e.status === 404) {
-			yield redirectTo404Page();
-		}
 		yield put(ProjectsActions.fetchFailure());
 	}
 }
