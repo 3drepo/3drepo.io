@@ -15,10 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addModel, deleteModel, getModelByName } = require('../../../../../models/modelSettings');
+const { v4Path } = require('../../../../../../interop');
+// eslint-disable-next-line require-sort/require-sort
+const {
+	addModel,
+	deleteModel,
+	getModelById,
+	getModelByName,
+	isSubModel,
+	removeModelCollections,
+} = require('../../../../../models/modelSettings');
 const { addProjectModel, getProjectById, removeProjectModel } = require('../../../../../models/projects');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
 const { getFavourites } = require('../../../../../models/users');
+// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require
+const { removeAllFilesFromModel } = require(`${v4Path}/models/fileRef`);
 const { templates } = require('../../../../../utils/responseCodes');
 
 const ModelList = {};
@@ -39,6 +50,20 @@ ModelList.addModel = async (teamspace, project, user, data) => {
 };
 
 ModelList.deleteModel = async (teamspace, project, model) => {
+	const setting = await getModelById(teamspace, model);
+
+	if (!setting.federate && (await isSubModel(teamspace, model))) {
+		throw templates.containerIsSubModel;
+	}
+
+	try {
+		await removeAllFilesFromModel(teamspace, model);
+	} catch (err) {
+		// log failed removal
+		console.log('fail');
+	}
+
+	await removeModelCollections(teamspace, model);
 	await deleteModel(teamspace, model);
 	await removeProjectModel(teamspace, model);
 };

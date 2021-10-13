@@ -15,8 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src } = require('../../../../../helper/path');
+const { src, srcV4 } = require('../../../../../helper/path');
 
+jest.mock('../../../../../../../src/v4/models/fileRef');
+const FileRef = require(`${srcV4}/models/fileRef`);
 jest.mock('../../../../../../../src/v5/models/projects');
 const ProjectsModel = require(`${src}/models/projects`);
 jest.mock('../../../../../../../src/v5/models/modelSettings');
@@ -31,10 +33,17 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 ModelSettings.addModel.mockImplementation(() => newContainerId);
 ModelSettings.deleteModel.mockImplementation(async (ts, model) => {
-	if (model === 1) {
+	if (Number.isInteger(model)) {
 		return undefined;
 	}
 	throw templates.containerNotFound;
+});
+ModelSettings.isSubModel.mockImplementation((ts, model) => model === 2);
+
+FileRef.removeAllFilesFromModel.mockImplementation(async (ts, model) => {
+	if (model === 3) {
+		throw templates.unknown;
+	}
 });
 
 const modelList = [
@@ -44,6 +53,13 @@ const modelList = [
 	{ _id: 4, name: 'model4', permissions: [] },
 	{ _id: 4, name: 'model4' },
 ];
+
+ModelSettings.getModelById.mockImplementation(async (ts, model) => {
+	if (Number.isInteger(model)) {
+		return modelList[model - 1];
+	}
+	throw templates.containerNotFound;
+});
 
 const containerSettings = {
 	container1: {
@@ -252,6 +268,16 @@ const testDeleteContainer = () => {
 	describe('Delete container', () => {
 		test('should succeed', async () => {
 			const res = await Containers.deleteContainer('teamspace', 'project', 1, 'tsAdmin');
+			expect(res).toEqual(undefined);
+		});
+
+		test('should return container is a submodel if it is a submodel', async () => {
+			await expect(Containers.deleteContainer('teamspace', 'project', 2, 'tsAdmin'))
+				.rejects.toEqual(templates.containerIsSubModel);
+		});
+
+		test('should succeed if file removal fails', async () => {
+			const res = await Containers.deleteContainer('teamspace', 'project', 3, 'tsAdmin');
 			expect(res).toEqual(undefined);
 		});
 

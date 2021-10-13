@@ -16,7 +16,13 @@
  */
 
 const Models = {};
+const { v4Path } = require('../../interop');
+// eslint-disable-next-line require-sort/require-sort
 const db = require('../handler/db');
+// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require
+const { findByBranch } = require(`${v4Path}/models/history`);
+// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require
+const { findNodesByType } = require(`${v4Path}/models/scene`);
 const { generateUUIDString } = require('../utils/helper/uuids');
 const { templates } = require('../utils/responseCodes');
 
@@ -48,6 +54,62 @@ Models.deleteModel = async (ts, model) => {
 	if (res.deletedCount === 0) {
 		throw templates.modelNotFound;
 	}
+};
+
+Models.listSubModels = async (ts, model, branch = 'master') => {
+	const subModels = [];
+	/*
+	const history = await findByBranch(ts, model, branch);
+
+	console.log(history);
+	if (!history) {
+		return subModels;
+	}
+	*/
+
+	const refs = await findNodesByType(ts, model, branch, undefined, 'ref');
+
+	console.log(refs);
+	const proms = refs.map((ref) => Models.getFederationById(ref.owner, ref.project, { name: 1 }).then((subModel) => {
+		subModels.push({
+			database: ref.owner,
+			model: ref.project,
+			name: subModel.name,
+		});
+	}));
+	console.log(proms);
+
+	await Promise.all(proms);
+	console.log(subModels);
+
+	return subModels;
+};
+
+Models.isSubModel = async (ts, model) => {
+	const federations = await findModels(ts, onlyFederations);
+	const promises = [];
+
+	federations.forEach((modelSetting) => {
+		promises.push(Models.listSubModels(ts, modelSetting._id).then((subModels) => subModels.find((subModel) => subModel.model === model)));
+	});
+
+	const results = await Promise.all(promises);
+	console.log(results);
+
+	return results.reduce((isSub, current) => isSub || current, false);
+};
+
+Models.removeModelCollections = async (ts, model) => {
+	const collections = await db.listCollections(ts);
+	const promises = [];
+
+	collections.forEach((collection) => {
+		if (collection.name.startsWith(`${model}.`)) {
+			promises.push(db.dropCollection(ts, collection));
+		}
+	});
+
+	return Promise.all(promises);
 };
 
 Models.getModelById = (ts, model, projection) => getModelByQuery(ts, { _id: model }, projection);
