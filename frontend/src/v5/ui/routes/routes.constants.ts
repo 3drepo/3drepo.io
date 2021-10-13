@@ -15,8 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { push } from 'connected-react-router';
-import { put } from 'redux-saga/effects';
-import { NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
-
-export const redirectTo404Page = () => put(push(NOT_FOUND_ROUTE_PATH));
+export const NOT_FOUND_ROUTE_PATH = '/v5/404';
