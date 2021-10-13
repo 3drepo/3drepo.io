@@ -28,6 +28,7 @@ const {
 const { addProjectModel, getProjectById, removeProjectModel } = require('../../../../../models/projects');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
 const { getFavourites } = require('../../../../../models/users');
+const { logger } = require('../../../../../utils/logger');
 // eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require
 const { removeAllFilesFromModel } = require(`${v4Path}/models/fileRef`);
 const { templates } = require('../../../../../utils/responseCodes');
@@ -59,8 +60,7 @@ ModelList.deleteModel = async (teamspace, project, model) => {
 	try {
 		await removeAllFilesFromModel(teamspace, model);
 	} catch (err) {
-		// log failed removal
-		console.log('fail');
+		logger.logDebug(`[Delete model] : ${JSON.stringify(err)}`);
 	}
 
 	await removeModelCollections(teamspace, model);

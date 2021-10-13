@@ -15,24 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src, srcV4 } = require('../../helper/path');
+const { src } = require('../../helper/path');
 
 const Model = require(`${src}/models/modelSettings`);
-jest.mock('../../../../src/v4/models/scene');
-const Scene = require(`${srcV4}/models/scene`);
 const db = require(`${src}/handler/db`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 const { templates } = require(`${src}/utils/responseCodes`);
-
-Scene.findNodesByType.mockImplementation((ts, model) => {
-	if (model === '123') {
-		return [
-			{ owner: ts, project: 'subModel' },
-		];
-	} else {
-		return []
-	}
-});
 
 const testGetModelById = () => {
 	describe('Get ModelById', () => {
@@ -189,76 +177,54 @@ const testGetFederations = () => {
 	});
 };
 
-const testListSubModels = () => {
-	/*
-	describe('List submodels', () => {
-		test('should succeed', async () => {
-			const teamspace = 'someTS';
-			const modelId = 'someModel';
-			const res = await Model.listSubModels(teamspace, modelId);
-			console.log(res);
-		});
-
-		test('should return empty array if model not found', async () => {
-			const teamspace = 'someTS';
-			const modelId = 'otherModel';
-			const res = await Model.listSubModels(teamspace, modelId);
-			console.log(res);
-		});
-	});
-	*/
-};
-
 const testIsSubModel = () => {
-	/*
-	[
-	{ _id: 'abc', name: 'model name' },
-	{ _id: '123', name: 'model name 2' }
-	]
-	*/
 	describe('Is submodel', () => {
-		test('should succeed if not submodel', async () => {
+		test('should return false if not submodel', async () => {
 			const teamspace = 'someTS';
-			const modelId = 'someModel';
 			const expectedData = [
 				{
-					owner: teamspace,
-					project: modelId,
-				},
-				{
-					owner: teamspace,
-					project: '123',
+					_id: 'someFed',
+					federate: true,
+					subModels: ['subModel'],
 				},
 			];
 
 			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
-			const fn1 = jest.spyOn(db, 'findOne').mockResolvedValue(expectedData[0]);
-			const res = await Model.isSubModel(teamspace, modelId);
-			console.log(res);
+
+			const res = await Model.isSubModel(teamspace, 'someModel');
 			expect(res).toEqual(false);
+
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual('settings');
+			expect(fn.mock.calls[0][2]).toEqual({ federate: true });
+			expect(fn.mock.calls[0][3]).toEqual(undefined);
+			expect(fn.mock.calls[0][4]).toEqual(undefined);
 		});
 
-		/*
-		test('should succeed if submodel', async () => {
+		test('should return true if submodel', async () => {
 			const teamspace = 'someTS';
 			const modelId = 'subModel';
 			const expectedData = [
 				{
-					owner: teamspace,
-					project: modelId,
-				},
-				{
-					owner: teamspace,
-					project: '123',
+					_id: 'someFed',
+					federate: true,
+					subModels: [modelId],
 				},
 			];
 
 			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+
 			const res = await Model.isSubModel(teamspace, modelId);
-			console.log(res);
 			expect(res).toEqual(true);
+
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual('settings');
+			expect(fn.mock.calls[0][2]).toEqual({ federate: true });
+			expect(fn.mock.calls[0][3]).toEqual(undefined);
+			expect(fn.mock.calls[0][4]).toEqual(undefined);
 		});
-		*/
 	});
 };
 
@@ -352,7 +318,6 @@ describe('models/modelSettings', () => {
 	testGetModelByName();
 	testGetContainers();
 	testGetFederations();
-	testListSubModels();
 	testIsSubModel();
 	testRemoveModelCollections();
 	testAddModel();
