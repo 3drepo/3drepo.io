@@ -16,11 +16,12 @@
  */
 
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
-const { getContainerById, getContainers } = require('../../../../models/modelSettings');
+const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const Groups = require('./commons/groups');
 const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
+const { templates } = require('../../../../utils/responseCodes');
 
 const Containers = { ...Groups };
 
@@ -70,6 +71,14 @@ Containers.appendFavourites = async (username, teamspace, project, favouritesToA
 Containers.deleteFavourites = async (username, teamspace, project, favouritesToRemove) => {
 	const accessibleContainers = await Containers.getContainerList(teamspace, project, username);
 	return deleteFavourites(username, teamspace, accessibleContainers, favouritesToRemove);
+};
+
+Containers.updateSettings = async (teamspace, container, payload) => {
+	const res = await updateModelSettings(teamspace, container, payload);
+
+	if (!res || res.matchedCount === 0) {
+		throw templates.containerNotFound;
+	}
 };
 
 module.exports = Containers;
