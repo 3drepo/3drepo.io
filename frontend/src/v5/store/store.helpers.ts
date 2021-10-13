@@ -15,23 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
-import * as API from '@/v5/services/api';
-import { redirectTo404Page } from '@/v5/store/store.helpers';
-import { ProjectsActions, ProjectsTypes, IProject } from './projects.redux';
+import { put } from 'redux-saga/effects';
+import { push } from 'connected-react-router';
 
-export function* fetch({ teamspace }) {
-	try {
-		const { data: { projects } } = yield API.fetchProjects(teamspace);
-		yield put(ProjectsActions.fetchSuccess(teamspace, projects as IProject[]));
-	} catch (e) {
-		if (e.status === 404) {
-			yield redirectTo404Page();
-		}
-		yield put(ProjectsActions.fetchFailure());
-	}
-}
-
-export default function* ProjectsSaga() {
-	yield takeLatest(ProjectsTypes.FETCH as any, fetch);
-}
+export const redirectTo404Page = () => put(push('/v5/404'));
