@@ -53,7 +53,6 @@ Models.deleteModel = async (ts, model) => {
 
 Models.isSubModel = async (ts, model) => {
 	const subModelCount = await countModels(ts, { 'subModels.model': model });
-	console.log(subModelCount);
 
 	return subModelCount > 0;
 };
