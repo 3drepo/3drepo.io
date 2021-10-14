@@ -25,6 +25,7 @@ ResponseCodes.templates = {
 	// Auth
 	notLoggedIn: { message: 'You are not logged in', status: 401 },
 	notAuthorized: { message: 'You do not have sufficient access rights for this action', status: 401 },
+	licenceExpired: { message: 'Licence expired.', status: 401 },
 
 	// Fail safe
 	unknown: { message: 'Unknown error occured. Please contact support.', status: 500 },
@@ -44,6 +45,11 @@ ResponseCodes.templates = {
 	containerNotFound: { message: 'Container not found.', status: 404 },
 	revisionNotFound: { message: 'Revision not found.', status: 404 },
 	groupNotFound: { message: 'Group not found.', status: 404 },
+
+	// File upload related error
+	unsupportedFileFormat: { message: 'The file format is not supported', status: 400 },
+	maxSizeExceeded: { message: 'The file is bigger than the maximum size allowed', status: 400 },
+	quotaLimitExceeded: { message: 'Insufficient quota.', status: 401 },
 
 	// Invalid Arguements
 	invalidArguments: { message: 'The arguments provided are not valid', status: 400 },
