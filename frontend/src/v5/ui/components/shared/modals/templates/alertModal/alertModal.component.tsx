@@ -23,7 +23,9 @@ import { Container, Line, Actions, Details } from './alertModal.styles';
 interface IAlertModal {
 	onClickClose?: () => void,
 	currentActions?: string
-	errorMessage?: string
+	errorMessage?: {
+		message: string;
+	};
 	details?: string
 }
 
@@ -35,7 +37,7 @@ export const AlertModal: React.FC<IAlertModal> = ({ onClickClose, currentActions
 		</DialogTitle>
 		<DialogContent>
 			<DialogContentText>
-				{errorMessage}
+				{errorMessage.message || errorMessage}
 			</DialogContentText>
 		</DialogContent>
 		<Line />
