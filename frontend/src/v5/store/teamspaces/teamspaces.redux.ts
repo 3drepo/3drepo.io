@@ -16,23 +16,38 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
+import { cloneDeep } from 'lodash';
 import { Constants } from '../common/actions.helper';
+
+export interface IUser {
+	user: string;
+	firstName: string;
+	lastName: string;
+	company: string;
+	job: string;
+	isCurrentUser: boolean;
+}
 
 export interface ITeamspace {
 	name: string;
 	isAdmin: boolean;
+	users: IUser[];
 }
 
 export interface ITeamspacesActions {
 	fetch: () => any;
 	fetchSuccess: (teamspaces: ITeamspace[]) => any;
 	fetchFailure: () => any;
+	fetchUsers: (teamspace: string) => any;
+	fetchUsersSuccess: (teamspace: string, users: IUser[]) => any;
 }
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
 	fetch: [],
 	fetchSuccess: ['teamspaces'],
 	fetchFailure: [],
+	fetchUsers: ['teamspace'],
+	fetchUsersSuccess: ['teamspace', 'users'],
 }, { prefix: 'TEAMSPACES2/' }) as { Types: Constants<ITeamspacesActions>; Creators: ITeamspacesActions };
 
 interface ITeamspacesState {
@@ -45,6 +60,20 @@ export const INITIAL_STATE: ITeamspacesState = {
 
 export const fetchSuccess = (state = INITIAL_STATE, { teamspaces }) => ({ ...state, teamspaces });
 
+export const fetchUsersSuccess = (state = INITIAL_STATE, { teamspace, users }) => {
+	const stateClone = cloneDeep(state);
+	const currentTeamspaceIndex = stateClone.teamspaces.findIndex(({ name }) => name === teamspace);
+	stateClone.teamspaces[currentTeamspaceIndex].users = users;
+
+	return ({
+		...state,
+		teamspaces: [
+			...stateClone.teamspaces,
+		],
+	});
+};
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[TeamspacesTypes.FETCH_SUCCESS]: fetchSuccess,
+	[TeamspacesTypes.FETCH_USERS_SUCCESS]: fetchUsersSuccess,
 });

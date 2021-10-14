@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { Button as ButtonComponent } from '@controls/button';
+import { DashboardListEmptyContainer } from '@components/dashboard/dashboardList';
 
 export const Container = styled.div`
 	display: flex;
@@ -25,6 +25,15 @@ export const Container = styled.div`
 	padding-left: 66px;
 	padding-right: 36px;
 	z-index: 1;
+`;
+
+export const RevisionsListEmptyWrapper = styled.div`
+  background-color: ${({ theme }) => theme.palette.secondary.mid};
+	padding: 33px;
+`;
+
+export const RevisionsListEmptyContainer = styled(DashboardListEmptyContainer)`
+	background-color: transparent;
 `;
 
 export const RevisionsListHeaderContainer = styled.header`
@@ -39,27 +48,6 @@ export const RevisionsList = styled.ul`
 	width: 100%;
 	margin: 0 0 40px;
 	padding: 0;
-`;
-
-export const RevisionsListItemButton = styled.div`
-	min-width: 80px;
-`;
-
-export const Button = styled(ButtonComponent).attrs({
-	variant: 'label',
-	color: 'secondary',
-})`
-	margin: 0;
-	width: 100%;
-	color: ${({ theme }) => theme.palette.primary.main};
-`;
-
-export const RevisionsListItemRow = styled.div`
-	display: flex;
-	align-items: center;
-	height: 100%;
-	padding-left: 20px;
-	padding-right: 13px;
 `;
 
 const selectedRevisionListItemStyles = css`
@@ -93,7 +81,7 @@ const revisionListItemStylesLineStyles = ({ theme, selected, isBeforeSelected })
 		position: absolute;
 		top: 50%;
 		left: -10px;
-		z-index: -1;
+		z-index: 0;
 		border: solid 2px transparent;
 		background-origin: border-box;
 		background-clip: content-box, border-box;
@@ -103,7 +91,7 @@ const revisionListItemStylesLineStyles = ({ theme, selected, isBeforeSelected })
 	}
 `;
 
-export const RevisionsListItem = styled.li`
+export const RevisionsListItemWrapper = styled.li`
 	box-sizing: border-box;
 	background-color: ${({ theme }) => theme.palette.secondary.light};
 	height: 52px;

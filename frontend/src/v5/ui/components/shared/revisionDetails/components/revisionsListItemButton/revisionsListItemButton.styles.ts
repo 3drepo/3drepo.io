@@ -14,22 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import styled from 'styled-components';
+import { Button as ButtonComponent } from '@controls/button';
 
-import { createSelector } from 'reselect';
-import { selectCurrentTeamspace } from '@/v5/store/projects/projects.selectors';
-import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
+export const Container = styled.div`
+	min-width: 80px;
+`;
 
-const selectTeamspacesDomain = (state) => state.teamspaces2;
-
-export const selectTeamspaces = createSelector(
-	selectTeamspacesDomain, (state) => state.teamspaces,
-);
-
-export const selectCurrentTeamspaceData = createSelector(
-	selectCurrentTeamspace, selectTeamspaces, (teamspace: string, teamspaces: ITeamspace[]) => teamspaces
-		.find(({ name }) => name === teamspace),
-);
-
-export const selectCurrentTeamspaceUsers = createSelector(
-	selectCurrentTeamspaceData, (teamspaceData: ITeamspace) => teamspaceData?.users || [],
-);
+export const Button = styled(ButtonComponent).attrs({
+	variant: 'label',
+	color: 'secondary',
+})`
+  margin: 0;
+  width: 100%;
+  color: ${({ theme, isVoid }) => (isVoid ? theme.palette.error.main : theme.palette.primary.main)};
+`;

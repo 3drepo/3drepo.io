@@ -15,16 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useParams } from 'react-router';
 import { useRouteMatch, Route, Switch } from 'react-router-dom';
 
 import { discardSlash } from '@/v5/services/routing/routing';
+import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
 import { Federations } from './federations';
 import { Containers } from './containers';
 
 export const ProjectContent = () => {
+	const { teamspace } = useParams();
 	let { path } = useRouteMatch();
 	path = discardSlash(path);
+
+	useEffect(() => {
+		TeamspacesActionsDispatchers.fetchUsers(teamspace);
+	}, []);
 
 	return (
 		<>

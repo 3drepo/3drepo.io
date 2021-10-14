@@ -17,6 +17,7 @@
 
 import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
+import * as APIv4 from '@/v4/services/api';
 import { TeamspacesActions, TeamspacesTypes, ITeamspace } from './teamspaces.redux';
 
 export function* fetch() {
@@ -28,6 +29,17 @@ export function* fetch() {
 	}
 }
 
+export function* fetchUsers({ teamspace }) {
+	try {
+		const { data } = yield APIv4.fetchUsers(teamspace);
+
+		yield put(TeamspacesActions.fetchUsersSuccess(teamspace, data));
+	} catch (e) {
+		console.error(e);
+	}
+}
+
 export default function* TeamspacesSaga() {
 	yield takeLatest(TeamspacesTypes.FETCH as any, fetch);
+	yield takeLatest(TeamspacesTypes.FETCH_USERS as any, fetchUsers);
 }

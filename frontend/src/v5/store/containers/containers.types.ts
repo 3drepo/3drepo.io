@@ -14,20 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-export interface IContainersState {
-	containers: IContainer[];
-	filterQuery: string;
-}
-
-export enum ContainerStatuses {
-	OK = 'ok',
-	FAILED = 'failed',
-	UPLOADING = 'uploading',
-	UPLOADED = 'uploaded',
-	QUEUED = 'queued',
-	PROCESSING = 'processing',
-}
+import { IUser } from '@/v5/store/teamspaces/teamspaces.redux';
 
 export interface IContainer {
 	_id: string;
@@ -40,4 +27,29 @@ export interface IContainer {
 	status: ContainerStatuses;
 	isFavourite: boolean;
 	role: string;
+	revisions: any;
+}
+
+export interface IRevisions {
+	timestamp: Date;
+	tag: string;
+	author: IUser;
+	desc: string;
+	void?: boolean;
+}
+
+export interface IContainersState {
+	containers: Record<string, IContainer[]>;
+	filterQuery: string;
+	currentProject: string;
+	isPending: boolean;
+}
+
+export enum ContainerStatuses {
+	OK = 'ok',
+	FAILED = 'failed',
+	UPLOADING = 'uploading',
+	UPLOADED = 'uploaded',
+	QUEUED = 'queued',
+	PROCESSING = 'processing',
 }

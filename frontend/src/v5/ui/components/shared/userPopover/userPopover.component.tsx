@@ -18,14 +18,8 @@
 import React from 'react';
 
 import { AvatarButton } from '@controls/avatarButton';
+import { IUser } from '@/v5/store/teamspaces/teamspaces.redux';
 import { AvatarWrapper, Container, Company, Job, Name, UserData } from './userPopover.styles';
-
-export interface IUser {
-	user: string;
-	fullName: string;
-	company?: string;
-	job?: string
-}
 
 interface IUserPopover {
 	user: IUser;
@@ -35,13 +29,13 @@ const getInitials = (name) => name.split(' ').slice(0, 2).map((text) => text[0])
 	.trim()
 	.toUpperCase();
 
-export const UserPopover = ({ user: { fullName, company, job } }: IUserPopover) => (
+export const UserPopover = ({ user: { firstName, lastName, company, job } }: IUserPopover) => (
 	<Container>
 		<AvatarWrapper>
-			<AvatarButton>{getInitials(fullName)}</AvatarButton>
+			<AvatarButton>{getInitials(`${firstName} ${lastName}`)}</AvatarButton>
 		</AvatarWrapper>
 		<UserData>
-			<Name>{fullName}</Name>
+			<Name>{firstName} {lastName}</Name>
 			<Company>{company}</Company>
 			<Job>{job}</Job>
 		</UserData>

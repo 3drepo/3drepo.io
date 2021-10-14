@@ -152,7 +152,7 @@ export const ContainersList = ({
 										</Highlight>
 									</DashboardListItemText>
 									<DashboardListItemText width={97} selected={container._id === selectedId}>
-										{i18n.date(container.lastUpdated)}
+										{container.lastUpdated ? i18n.date(container.lastUpdated) : ''}
 									</DashboardListItemText>
 									<DashboardListItemIcon>
 										<Tooltip
@@ -176,7 +176,9 @@ export const ContainersList = ({
 										<EllipsisButtonWithMenu list={getContainerMenuItems(container._id)} />
 									</DashboardListItemIcon>
 								</DashboardListItemRow>
-								{container._id === selectedId && <RevisionDetails />}
+								{container._id === selectedId && (
+									<RevisionDetails containerId={container._id} revisions={container.revisions} />
+								)}
 							</DashboardListItem>
 						))
 					) : (

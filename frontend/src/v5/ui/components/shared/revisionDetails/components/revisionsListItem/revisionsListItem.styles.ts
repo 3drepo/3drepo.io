@@ -14,22 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import styled from 'styled-components';
 
-import { createSelector } from 'reselect';
-import { selectCurrentTeamspace } from '@/v5/store/projects/projects.selectors';
-import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
-
-const selectTeamspacesDomain = (state) => state.teamspaces2;
-
-export const selectTeamspaces = createSelector(
-	selectTeamspacesDomain, (state) => state.teamspaces,
-);
-
-export const selectCurrentTeamspaceData = createSelector(
-	selectCurrentTeamspace, selectTeamspaces, (teamspace: string, teamspaces: ITeamspace[]) => teamspaces
-		.find(({ name }) => name === teamspace),
-);
-
-export const selectCurrentTeamspaceUsers = createSelector(
-	selectCurrentTeamspaceData, (teamspaceData: ITeamspace) => teamspaceData?.users || [],
-);
+export const Container = styled.div`
+	display: flex;
+	align-items: center;
+	height: 100%;
+	padding-left: 20px;
+	padding-right: 13px;
+`;

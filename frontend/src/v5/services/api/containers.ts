@@ -15,21 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
-import { selectCurrentTeamspace } from '@/v5/store/projects/projects.selectors';
-import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
+import api from './default';
 
-const selectTeamspacesDomain = (state) => state.teamspaces2;
+export const fetchContainers = (teamspace: string, projectId: string): Promise<any> => api.get(`teamspaces/${teamspace}/projects/${projectId}/containers`);
 
-export const selectTeamspaces = createSelector(
-	selectTeamspacesDomain, (state) => state.teamspaces,
-);
-
-export const selectCurrentTeamspaceData = createSelector(
-	selectCurrentTeamspace, selectTeamspaces, (teamspace: string, teamspaces: ITeamspace[]) => teamspaces
-		.find(({ name }) => name === teamspace),
-);
-
-export const selectCurrentTeamspaceUsers = createSelector(
-	selectCurrentTeamspaceData, (teamspaceData: ITeamspace) => teamspaceData?.users || [],
-);
+export const fetchContainerStats = (teamspace: string, projectId: string, containerId: string): Promise<any> => api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/stats`);

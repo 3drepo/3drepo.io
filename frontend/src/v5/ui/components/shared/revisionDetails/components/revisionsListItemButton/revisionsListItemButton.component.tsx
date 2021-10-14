@@ -15,21 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
-import { selectCurrentTeamspace } from '@/v5/store/projects/projects.selectors';
-import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
+import React from 'react';
+import { Tooltip } from '@material-ui/core';
+import { Button, Container } from './revisionsListItemButton.styles';
 
-const selectTeamspacesDomain = (state) => state.teamspaces2;
+type IRevisionsListItemButton= {
+	status?: boolean;
+};
 
-export const selectTeamspaces = createSelector(
-	selectTeamspacesDomain, (state) => state.teamspaces,
-);
+export const RevisionsListItemButton = ({ status }: IRevisionsListItemButton): JSX.Element => {
+	const isVoid = !!status;
+	const textStatus = isVoid ? 'void' : 'active';
+	const changeToStatus = isVoid ? 'active' : 'void';
 
-export const selectCurrentTeamspaceData = createSelector(
-	selectCurrentTeamspace, selectTeamspaces, (teamspace: string, teamspaces: ITeamspace[]) => teamspaces
-		.find(({ name }) => name === teamspace),
-);
-
-export const selectCurrentTeamspaceUsers = createSelector(
-	selectCurrentTeamspaceData, (teamspaceData: ITeamspace) => teamspaceData?.users || [],
-);
+	return (
+		<Container>
+			<Tooltip title={`Change to ${changeToStatus}`}>
+				<Button isVoid={isVoid} onClick={() => {}}>
+					{textStatus}
+				</Button>
+			</Tooltip>
+		</Container>
+	);
+};

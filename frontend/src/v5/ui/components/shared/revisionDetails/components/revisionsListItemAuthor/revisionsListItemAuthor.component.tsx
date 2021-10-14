@@ -17,8 +17,9 @@
 
 import React from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
+import { IUser } from '@/v5/store/teamspaces/teamspaces.redux';
 import { Popover } from '@/v4/routes/components/messagesList/components/message/components/markdownMessage/ticketReference/ticketReference.styles';
-import { UserPopover, IUser } from '@components/shared/userPopover/userPopover.component';
+import { UserPopover } from '@components/shared/userPopover/userPopover.component';
 import { Text } from './revisionsListItemAuthor.styles';
 
 type IRevisionsListItemAuthor = {
@@ -55,7 +56,7 @@ export const RevisionsListItemAuthor = ({
 				onMouseLeave={handlePopoverClose}
 				selected={selected}
 			>
-				{author.fullName}
+				{author.user}
 			</Text>
 			<Popover
 				id="mouse-over-popover"

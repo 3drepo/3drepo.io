@@ -16,53 +16,52 @@
  */
 
 import { Trans } from '@lingui/react';
-import { i18n } from '@lingui/core';
-import React from 'react';
-import { Tooltip } from '@material-ui/core';
+import React, { useEffect } from 'react';
+import { useParams } from 'react-router';
 import { RevisionsListHeaderLabel } from '@components/shared/revisionDetails/components/revisionsListHeaderLabel';
-import { RevisionsListItemText } from '@components/shared/revisionDetails/components/revisionsListItemText';
-import { RevisionsListItemCode } from '@components/shared/revisionDetails/components/revisionsListItemCode';
-import { RevisionsListItemAuthor } from '@components/shared/revisionDetails/components/revisionsListItemAuthor';
-import { Container, RevisionsListHeaderContainer, RevisionsListItem, RevisionsListItemRow,
-	RevisionsListItemButton, Button, RevisionsList } from './revisionDetails.styles';
+import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
+import { IRevisions } from '@/v5/store/containers/containers.types';
+import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
+import { NewContainerButton } from '@/v5/ui/routes/dashboard/projects/containers/containers.styles';
+import AddCircleIcon from '@assets/icons/add_circle.svg';
+import { RevisionsListItem } from '@components/shared/revisionDetails/components/revisionsListItem';
+import {
+	Container, RevisionsListHeaderContainer, RevisionsListItemWrapper, RevisionsList, RevisionsListEmptyWrapper,
+	RevisionsListEmptyContainer,
+} from './revisionDetails.styles';
 
-const revisionMock = {
-	date: i18n.date(new Date()),
-	author: {
-		fullName: 'George Hadfield',
-		company: 'Georgehadfield',
-		job: 'Client',
-	},
-	code: 'Title of revision code to go here',
-	description: 'This is a description that can be either long or short in length',
-	status: 'active',
-};
-
-const revisionsMock = [];
-
-for (let i = 0; i < 4; i++) {
-	revisionsMock.push(revisionMock);
+interface IRevisionDetails {
+	containerId: string;
+	revisions: IRevisions[];
 }
 
-const MockContainerListItem = ({ revision, selected }): JSX.Element => (
-	<RevisionsListItemRow>
-		<RevisionsListItemText meta width={130} selected={selected}>{revision.date}</RevisionsListItemText>
-		<RevisionsListItemAuthor author={revision.author} selected={selected} width={228} />
-		<RevisionsListItemCode width={330} onClick={() => {}}>{revision.code}</RevisionsListItemCode>
-		<RevisionsListItemText selected={selected}>{revision.description}</RevisionsListItemText>
-		<RevisionsListItemButton>
-			<Tooltip title="Change to void">
-				<Button onClick={() => {}}>
-					{revision.status}
-				</Button>
-			</Tooltip>
-		</RevisionsListItemButton>
-	</RevisionsListItemRow>
-);
-
-export const RevisionDetails = (): JSX.Element => {
+export const RevisionDetails = ({ containerId, revisions }: IRevisionDetails): JSX.Element => {
+	const { teamspace, project } = useParams();
 	const selected = 0;
-	const isSingle = revisionsMock.length === 1;
+	const isSingle = revisions?.length === 1;
+
+	useEffect(() => {
+		ContainersActionsDispatchers.fetchRevisions(teamspace, project, containerId);
+	}, []);
+
+	if (!revisions) {
+		return null;
+	}
+
+	if (revisions.length === 0) {
+		return (
+			<RevisionsListEmptyWrapper>
+				<RevisionsListEmptyContainer>
+					<DashboardListEmptyText>
+						<Trans id="containers.revisions.emptyMessage" message="You haven’t added any Files." />
+					</DashboardListEmptyText>
+					<NewContainerButton startIcon={<AddCircleIcon />}>
+						<Trans id="containers.revisions.uploadFile" message="Upload File" />
+					</NewContainerButton>
+				</RevisionsListEmptyContainer>
+			</RevisionsListEmptyWrapper>
+		);
+	}
 
 	return (
 		<Container>
@@ -73,14 +72,14 @@ export const RevisionDetails = (): JSX.Element => {
 				<RevisionsListHeaderLabel><Trans id="revisionDetails.description" message="Description" /></RevisionsListHeaderLabel>
 			</RevisionsListHeaderContainer>
 			<RevisionsList>
-				{revisionsMock.map((revision, i) => (
-					<RevisionsListItem
+				{revisions.map((revision, i) => (
+					<RevisionsListItemWrapper
 						isSingle={isSingle}
 						isBeforeSelected={i === selected - 1}
 						selected={i === selected}
 					>
-						<MockContainerListItem revision={revision} selected={i === selected} />
-					</RevisionsListItem>
+						<RevisionsListItem revision={revision} selected={i === selected} />
+					</RevisionsListItemWrapper>
 				))}
 			</RevisionsList>
 		</Container>

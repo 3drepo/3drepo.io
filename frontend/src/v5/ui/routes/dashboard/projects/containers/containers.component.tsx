@@ -17,6 +17,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { debounce } from 'lodash';
+import { useParams } from 'react-router';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
 import { Trans } from '@lingui/react';
 import { MainHeader } from '@controls/mainHeader';
@@ -40,8 +41,14 @@ export const Containers = (): JSX.Element => {
 	const favouriteContainers = ContainersHooksSelectors.selectFilteredFavouriteContainers();
 	const filterQuery = ContainersHooksSelectors.selectFilterQuery();
 	const hasContainers = ContainersHooksSelectors.selectHasContainers();
-
+	const isPending = ContainersHooksSelectors.selectIsPending();
 	const [searchInput, setSearchInput] = useState(filterQuery);
+	const { teamspace, project } = useParams();
+
+	useEffect(() => {
+		ContainersActionsDispatchers.fetchContainers(teamspace, project);
+		ContainersActionsDispatchers.setCurrentProject(project);
+	}, []);
 
 	const debounceSearchUpdate = debounce(
 		(value: string) => ContainersActionsDispatchers.setFilterQuery(value),
@@ -52,6 +59,10 @@ export const Containers = (): JSX.Element => {
 	useEffect(() => {
 		debounceSearchUpdate(searchInput);
 	}, [searchInput]);
+
+	if (isPending) {
+		return <div>Loading...</div>;
+	}
 
 	return (
 		<Container>
