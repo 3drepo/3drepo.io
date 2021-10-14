@@ -15,6 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { generateV5ApiUrl } from '@/v5/services/api/default';
-
-export const NOT_FOUND_ROUTE_PATH = `/${generateV5ApiUrl('404')}`;
+export const NOT_FOUND_ROUTE_PATH = '/v5/404';
