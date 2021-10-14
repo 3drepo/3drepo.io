@@ -22,15 +22,13 @@ import {
 	ContainersTypes,
 } from '@/v5/store/containers/containers.redux';
 import { ExtendedAction } from '@/v5/store/store.types';
-import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import {
-	ContainerStatuses,
 	FavouritePayload,
 	FetchContainersPayload,
 	FetchContainersResponse,
 	FetchContainerStatsResponse,
-	IContainer,
 } from './containers.types';
+import { prepareContainersData } from './containers.helpers';
 
 export function* addFavourites({ containerId, teamspace, projectId }: ExtendedAction<FavouritePayload>) {
 	try {
@@ -51,9 +49,14 @@ export function* removeFavourites({ containerId, teamspace, projectId }: Extende
 }
 
 export function* fetchContainers({ teamspace, projectId }: ExtendedAction<FetchContainersPayload>) {
-	yield put(ContainersActions.setIsPending(true));
+	yield put(ContainersActions.setIsListPending(true));
+	yield put(ContainersActions.setAreStatsPending(true));
 	try {
 		const { containers }: FetchContainersResponse = yield API.fetchContainers({ teamspace, projectId });
+		const containersWithoutStats = prepareContainersData(containers);
+		yield put(ContainersActions.setIsListPending(false));
+
+		yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithoutStats));
 
 		const stats: FetchContainerStatsResponse[] = yield all(
 			containers.map(
@@ -62,24 +65,13 @@ export function* fetchContainers({ teamspace, projectId }: ExtendedAction<FetchC
 				}),
 			),
 		);
-
-		const containersWithStats = containers.map<IContainer>((container, index) => {
-			const containerStats = stats[index];
-			return {
-				...container,
-				revisionsCount: containerStats.revisions.total,
-				lastUpdated: getNullableDate(containerStats.revisions.lastUpdated),
-				latestRevision: containerStats.revisions.latestRevision ?? '',
-				type: containerStats.type ?? '',
-				code: containerStats.code ?? '',
-				status: containerStats.status ?? ContainerStatuses.OK,
-			};
-		});
-
+		const containersWithStats = prepareContainersData(containers, stats);
 		yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithStats));
-		yield put(ContainersActions.setIsPending(false));
+
+		yield put(ContainersActions.setAreStatsPending(false));
 	} catch (e) {
-		yield put(ContainersActions.setIsPending(false));
+		yield put(ContainersActions.setIsListPending(false));
+		yield put(ContainersActions.setAreStatsPending(false));
 		console.error(e);
 	}
 }

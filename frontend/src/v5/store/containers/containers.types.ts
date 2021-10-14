@@ -21,7 +21,8 @@ export interface IContainersState {
 	containers: Record<string, IContainer[]>;
 	filterQuery: string;
 	currentProject: string;
-	isPending: boolean;
+	isListPending: boolean;
+	areStatsPending: boolean;
 }
 
 export enum ContainerStatuses {
@@ -58,7 +59,8 @@ export interface IContainersActionCreators {
 	fetchContainers: (teamspace: string, projectId: string) => ExtendedAction<FetchContainersPayload, 'fetchContainers'>
 	fetchContainersSuccess: (projectId: string, containers: IContainer[]) => ExtendedAction<{ projectId: string, containers: IContainer[] }, 'fetchContainersSuccess'>
 	setCurrentProject: (projectId: string) => ExtendedAction<{ projectId: string }, 'setCurrentProject'>
-	setIsPending: (isPending: boolean) => ExtendedAction<{ isPending: boolean }, 'setIsPending'>
+	setIsListPending: (isPending: boolean) => ExtendedAction<{ isPending: boolean }, 'setIsListPending'>
+	setAreStatsPending: (isPending: boolean) => ExtendedAction<{ isPending: boolean }, 'setAreStatsPending'>
 }
 
 export type IContainersActions = AllReturnTypes<IContainersActionCreators>;

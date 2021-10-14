@@ -28,14 +28,16 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	fetchContainers: ['teamspace', 'projectId'],
 	fetchContainersSuccess: ['projectId', 'containers'],
 	setCurrentProject: ['projectId'],
-	setIsPending: ['isPending'],
+	setIsListPending: ['isPending'],
+	setAreStatsPending: ['isPending'],
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
 
 export const INITIAL_STATE: IContainersState = {
 	containers: {},
 	currentProject: '',
 	filterQuery: '',
-	isPending: true,
+	isListPending: true,
+	areStatsPending: true,
 };
 
 export const setFilterQuery = (state = INITIAL_STATE, { query }: IContainersActions['setFilterQuery']) => (
@@ -76,9 +78,14 @@ export const setCurrentProject = (state = INITIAL_STATE, { projectId }: IContain
 	currentProject: projectId,
 });
 
-export const setIsPending = (state = INITIAL_STATE, { isPending }: IContainersActions['setIsPending']) => ({
+export const setIsListPending = (state = INITIAL_STATE, { isPending }: IContainersActions['setIsListPending']) => ({
 	...state,
-	isPending,
+	isListPending: isPending,
+});
+
+export const setAreStatsPending = (state = INITIAL_STATE, { isPending }: IContainersActions['setAreStatsPending']) => ({
+	...state,
+	areStatsPending: isPending,
 });
 
 export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
@@ -86,5 +93,6 @@ export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
 	[ContainersTypes.TOGGLE_FAVOURITE_SUCCESS]: toggleFavourite,
 	[ContainersTypes.FETCH_CONTAINERS_SUCCESS]: fetchContainersSuccess,
 	[ContainersTypes.SET_CURRENT_PROJECT]: setCurrentProject,
-	[ContainersTypes.SET_IS_PENDING]: setIsPending,
+	[ContainersTypes.SET_IS_LIST_PENDING]: setIsListPending,
+	[ContainersTypes.SET_ARE_STATS_PENDING]: setAreStatsPending,
 });

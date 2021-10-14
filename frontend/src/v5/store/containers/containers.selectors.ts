@@ -51,6 +51,10 @@ export const selectHasContainers = createSelector(
 	}),
 );
 
-export const selectIsPending = createSelector(
-	selectProjectsDomain, (state) => state.isPending,
+export const selectIsListPending = createSelector(
+	selectProjectsDomain, (state) => state.isListPending,
+);
+
+export const selectAreStatsPending = createSelector(
+	selectProjectsDomain, (state) => state.areStatsPending,
 );

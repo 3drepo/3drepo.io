@@ -44,6 +44,7 @@ import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/container
 import { Highlight } from '@controls/highlight';
 import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
+import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/skeletonListItem';
 import { useOrderedList } from './containersList.hooks';
 import { Container } from './containersList.styles';
 import { DEFAULT_SORT_CONFIG } from './containersList.constants';
@@ -69,6 +70,7 @@ export const ContainersList = ({
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const { sortedList, setSortConfig } = useOrderedList(containers, DEFAULT_SORT_CONFIG);
 	const filterQuery = ContainersHooksSelectors.selectFilterQuery();
+	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
 
 	const toggleSelectedId = (id: IContainer['_id']) => {
 		setSelectedId((state) => (state === id ? null : id));
@@ -107,89 +109,93 @@ export const ContainersList = ({
 				</DashboardListHeader>
 				<DashboardList>
 					{!isEmpty(sortedList) ? (
-						sortedList.map((container) => (
-							<DashboardListItem
-								selected={container._id === selectedId}
-								key={container._id}
-							>
-								<DashboardListItemRow
-									selected={container._id === selectedId}
-									onClick={() => toggleSelectedId(container._id)}
-								>
-									<DashboardListItemTitle
-										subtitle={(
-											<LatestRevision
-												name={container.latestRevision}
-												status={container.status}
-												error={{
-													date: new Date(),
-													message: 'Mock error message',
-												}}
-											/>
-										)}
+						sortedList.map((container, index) => (
+							areStatsPending
+								? <SkeletonListItem delay={index / 10} key={container._id} />
+								: (
+									<DashboardListItem
 										selected={container._id === selectedId}
-										tooltipTitle={
-											<Trans id="containers.list.item.title.tooltip" message="Launch latest revision" />
-										}
+										key={container._id}
 									>
-										<Highlight search={filterQuery}>
-											{container.name}
-										</Highlight>
-									</DashboardListItemTitle>
-									<DashboardListItemButton
-										onClick={() => {
-											// eslint-disable-next-line no-console
-											console.log('handle revisions button');
-										}}
-										width={186}
-										tooltipTitle={
-											<Trans id="containers.list.item.revisions.tooltip" message="View revisions" />
-										}
-									>
-										<Trans
-											id="containers.list.item.revisions"
-											message="{count} revisions"
-											values={{ count: container.revisionsCount }}
-										/>
-									</DashboardListItemButton>
-									<DashboardListItemText selected={container._id === selectedId}>
-										<Highlight search={filterQuery}>
-											{container.code}
-										</Highlight>
-									</DashboardListItemText>
-									<DashboardListItemText width={188} selected={container._id === selectedId}>
-										<Highlight search={filterQuery}>
-											{container.type}
-										</Highlight>
-									</DashboardListItemText>
-									<DashboardListItemText width={97} selected={container._id === selectedId}>
-										{container.lastUpdated ? i18n.date(container.lastUpdated) : ''}
-									</DashboardListItemText>
-									<DashboardListItemIcon>
-										<Tooltip
-											title={
-												<Trans id="containers.list.item.favourite.tooltip" message="Add to favourites" />
-											}
+										<DashboardListItemRow
+											selected={container._id === selectedId}
+											onClick={() => toggleSelectedId(container._id)}
 										>
-											<FavouriteCheckbox
-												checked={container.isFavourite}
-												onClick={(event) => {
-													event.stopPropagation();
+											<DashboardListItemTitle
+												subtitle={(
+													<LatestRevision
+														name={container.latestRevision}
+														status={container.status}
+														error={{
+															date: new Date(),
+															message: 'Mock error message',
+														}}
+													/>
+												)}
+												selected={container._id === selectedId}
+												tooltipTitle={
+													<Trans id="containers.list.item.title.tooltip" message="Launch latest revision" />
+												}
+											>
+												<Highlight search={filterQuery}>
+													{container.name}
+												</Highlight>
+											</DashboardListItemTitle>
+											<DashboardListItemButton
+												onClick={() => {
+												// eslint-disable-next-line no-console
+													console.log('handle revisions button');
 												}}
-												onChange={(event) => {
-													toggleFavourite(container._id, !!event.currentTarget.checked);
-												}}
-											/>
-										</Tooltip>
-									</DashboardListItemIcon>
-									<DashboardListItemIcon selected={container._id === selectedId}>
-										<EllipsisButtonWithMenu list={getContainerMenuItems(container._id)} />
-									</DashboardListItemIcon>
-								</DashboardListItemRow>
-								{container._id === selectedId && (
-									<div style={{ backgroundColor: '#2E405F', width: '100%', height: '100px' }} />
-								)}
-							</DashboardListItem>
+												width={186}
+												tooltipTitle={
+													<Trans id="containers.list.item.revisions.tooltip" message="View revisions" />
+												}
+											>
+												<Trans
+													id="containers.list.item.revisions"
+													message="{count} revisions"
+													values={{ count: container.revisionsCount }}
+												/>
+											</DashboardListItemButton>
+											<DashboardListItemText selected={container._id === selectedId}>
+												<Highlight search={filterQuery}>
+													{container.code}
+												</Highlight>
+											</DashboardListItemText>
+											<DashboardListItemText width={188} selected={container._id === selectedId}>
+												<Highlight search={filterQuery}>
+													{container.type}
+												</Highlight>
+											</DashboardListItemText>
+											<DashboardListItemText width={97} selected={container._id === selectedId}>
+												{container.lastUpdated ? i18n.date(container.lastUpdated) : ''}
+											</DashboardListItemText>
+											<DashboardListItemIcon>
+												<Tooltip
+													title={
+														<Trans id="containers.list.item.favourite.tooltip" message="Add to favourites" />
+													}
+												>
+													<FavouriteCheckbox
+														checked={container.isFavourite}
+														onClick={(event) => {
+															event.stopPropagation();
+														}}
+														onChange={(event) => {
+															toggleFavourite(container._id, !!event.currentTarget.checked);
+														}}
+													/>
+												</Tooltip>
+											</DashboardListItemIcon>
+											<DashboardListItemIcon selected={container._id === selectedId}>
+												<EllipsisButtonWithMenu list={getContainerMenuItems(container._id)} />
+											</DashboardListItemIcon>
+										</DashboardListItemRow>
+										{container._id === selectedId && (
+											<div style={{ backgroundColor: '#2E405F', width: '100%', height: '100px' }} />
+										)}
+									</DashboardListItem>
+								)
 						))
 					) : (
 						<DashboardListEmptyContainer>
@@ -199,5 +205,5 @@ export const ContainersList = ({
 				</DashboardList>
 			</DashboardListCollapse>
 		</Container>
-	), [sortedList, selectedId]);
+	), [sortedList, selectedId, areStatsPending]);
 };
