@@ -113,6 +113,11 @@
 		});
 	};
 
+	Handler.aggregate = async (database, colName, pipelines) => {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.aggregate(pipelines).toArray();
+	};
+
 	/**
 	 * @param {string} database
 	 * @param {string} colName
