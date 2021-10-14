@@ -76,6 +76,6 @@ const testValidateUpdateRevisionData = () => {
 	});
 };
 
-describe('middleware/dataConverter/revisions', () => {
+describe('middleware/dataConverter/inputs/teamspaces/projects/models/commond/revisions', () => {
 	testValidateUpdateRevisionData();
 });

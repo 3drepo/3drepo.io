@@ -17,9 +17,10 @@
 
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const Groups = require('./commons/groups');
-const { getFederations } = require('../../../../models/modelSettings');
+const { getFederations, updateModelSettings } = require('../../../../models/modelSettings');
 const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
+const { templates } = require('../../../../utils/responseCodes');
 
 const Federations = { ...Groups };
 
@@ -38,6 +39,14 @@ Federations.appendFavourites = async (username, teamspace, project, favouritesTo
 Federations.deleteFavourites = async (username, teamspace, project, favouritesToRemove) => {
 	const accessibleFederations = await Federations.getFederationList(teamspace, project, username);
 	await deleteFavourites(username, teamspace, accessibleFederations, favouritesToRemove);
+};
+
+Federations.updateSettings = async (teamspace, federation, payload) => {
+	const res = await updateModelSettings(teamspace, federation, payload);
+
+	if (!res || res.matchedCount === 0) {
+		throw templates.federationNotFound;
+	}
 };
 
 module.exports = Federations;

@@ -18,9 +18,10 @@
 const Federations = require('../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../utils/sessions');
-const { hasAccessToTeamspace } = require('../../../../middleware/permissions/permissions');
+const { hasAccessToTeamspace, isProjectAdmin } = require('../../../../middleware/permissions/permissions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
+const { validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/modelSettings')
 
 const getFederationList = (req, res) => {
 	const user = getUserFromSession(req.session);
@@ -45,6 +46,13 @@ const deleteFavourites = (req, res) => {
 	const favouritesToRemove = req.body.federations;
 
 	Federations.deleteFavourites(user, teamspace, project, favouritesToRemove)
+		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
+};
+
+const updateSettings = (req, res) => {
+	const { teamspace, federation } = req.params;
+
+	Federations.updateSettings(teamspace, federation, req.body)
 		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
 };
 
@@ -195,6 +203,80 @@ const establishRoutes = () => {
 	 */
 	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites);
 
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}:
+	 *   patch:
+	 *     description: Updates the settings of a federation
+	 *     tags: [Federations]
+	 *     operationId: updateSettings
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - project:
+	 *         name: project
+	 *         description: ID of project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - federation:
+	 *         name: federation
+	 *         description: ID of federation
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     requestBody:
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+	 *               name:
+	 *                 type: String
+	 *                 example: federation1
+	 *               desc:
+	 *                 type: String
+	 *                 example: description1
+	 *               type:
+	 *                 type: String
+	 *                 example: type1
+	 *               surveyPoints:
+	 *                 type: array
+	 *                 items:
+	 *                   type: object
+	 *                   properties:
+	 *                     position:
+	 *                       type: array
+	 *                       items:
+	 *                         type: float
+	 *                         example: 23.45
+	 *                     latLong:
+	 *                       type: array
+	 *                       items:
+	 *                         type: float
+	 *                         example: 23.45
+	 *               angleFromNorth:
+	 *                 type: integer
+	 *                 example: 100
+	 *               unit:
+	 *                 type: string
+	 *                 example: mm
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: updates the settings of the federation
+	 */
+	 router.patch('/:federation', isProjectAdmin, validateUpdateSettingsData, updateSettings);
 	return router;
 };
 
