@@ -23,12 +23,11 @@ import { MAIN_HEADER_PORTAL_TARGET_ID } from './dashboardLayout.constants';
 
 interface IDashboardLayout {
 	children: ReactNode;
-	hasTopNavigation?: boolean;
 }
 
-export const DashboardLayout = ({ children, hasTopNavigation = true }: IDashboardLayout): JSX.Element => (
+export const DashboardLayout = ({ children }: IDashboardLayout): JSX.Element => (
 	<>
-		<AppBar hasTopNavigation={hasTopNavigation} />
+		<AppBar />
 		<MainHeaderPortalRoot id={MAIN_HEADER_PORTAL_TARGET_ID} />
 		<Content>
 			{children}

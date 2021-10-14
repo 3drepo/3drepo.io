@@ -28,18 +28,14 @@ import { Items } from './appBar.styles';
 import { TopNavigation } from '../topNavigation';
 import { Breadcrumbs } from '../breadcrumbs';
 
-interface IAppBar {
-	hasTopNavigation?: boolean;
-}
-
-export const AppBar = ({ hasTopNavigation = true }: IAppBar): JSX.Element => (
+export const AppBar = (): JSX.Element => (
 	<MuiAppBar position="static" color="secondary">
 		<Items>
 			<Logo />
 			<Breadcrumbs />
 		</Items>
 		<Items>
-			{hasTopNavigation && <TopNavigation />}
+			<TopNavigation />
 			<CircleButton variant="contrast" aria-label="intercom">
 				<IntercomIcon />
 			</CircleButton>

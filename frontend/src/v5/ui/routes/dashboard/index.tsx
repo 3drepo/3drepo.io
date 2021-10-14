@@ -74,9 +74,7 @@ export const Dashboard = () => {
 					</DashboardLayout>
 				</Route>
 				<Route path="*">
-					<DashboardLayout
-						hasTopNavigation={false}
-					>
+					<DashboardLayout>
 						<NotFound />
 					</DashboardLayout>
 				</Route>
