@@ -184,7 +184,10 @@ export const ContainersList = ({
 															event.stopPropagation();
 														}}
 														onChange={(event) => {
-															toggleFavourite(container._id, !!event.currentTarget.checked);
+															toggleFavourite(
+																container._id,
+																!!event.currentTarget.checked,
+															);
 														}}
 													/>
 												</Tooltip>

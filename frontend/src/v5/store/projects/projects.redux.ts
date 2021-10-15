@@ -28,25 +28,30 @@ export interface IProjectsActions {
 	fetch: (teamspace: string) => any;
 	fetchSuccess: (teamspace: string, projects: IProject[]) => any;
 	fetchFailure: () => any;
+	setCurrentProject: (projectId: string) => any;
 }
 
 export const { Types: ProjectsTypes, Creators: ProjectsActions } = createActions({
 	fetch: ['teamspace'],
 	fetchSuccess: ['teamspace', 'projects'],
 	fetchFailure: [],
+	setCurrentProject: ['projectId'],
 }, { prefix: 'PROJECTS/' }) as { Types: Constants<IProjectsActions>; Creators: IProjectsActions };
 
 interface IProjectsState {
 	projects: Record<string, IProject[]> | [];
 	currentTeamspace: string;
+	currentProject: string;
 }
 
 export const INITIAL_STATE: IProjectsState = {
 	projects: [],
 	currentTeamspace: '',
+	currentProject: '',
 };
 
-export const fetchSuccess = (state = INITIAL_STATE, { teamspace, projects }) => ({ ...state,
+export const fetchSuccess = (state = INITIAL_STATE, { teamspace, projects }) => ({
+	...state,
 	currentTeamspace: teamspace,
 	projects: {
 		...state.projects,
@@ -54,6 +59,12 @@ export const fetchSuccess = (state = INITIAL_STATE, { teamspace, projects }) => 
 	},
 });
 
+export const setCurrentProject = (state = INITIAL_STATE, { projectId }) => ({
+	...state,
+	currentProject: projectId,
+});
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[ProjectsTypes.FETCH_SUCCESS]: fetchSuccess,
+	[ProjectsTypes.SET_CURRENT_PROJECT]: setCurrentProject,
 });

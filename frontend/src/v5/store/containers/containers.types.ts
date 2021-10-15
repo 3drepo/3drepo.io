@@ -20,7 +20,6 @@ import { AllReturnTypes, ExtendedAction } from '@/v5/store/store.types';
 export interface IContainersState {
 	containers: Record<string, IContainer[]>;
 	filterQuery: string;
-	currentProject: string;
 	isListPending: boolean;
 	areStatsPending: boolean;
 }
@@ -58,7 +57,6 @@ export interface IContainersActionCreators {
 	toggleFavouriteSuccess: (projectId: string, containerId: string) => ExtendedAction<{ projectId: string, containerId: string }, 'toggleFavouriteSuccess'>
 	fetchContainers: (teamspace: string, projectId: string) => ExtendedAction<FetchContainersPayload, 'fetchContainers'>
 	fetchContainersSuccess: (projectId: string, containers: IContainer[]) => ExtendedAction<{ projectId: string, containers: IContainer[] }, 'fetchContainersSuccess'>
-	setCurrentProject: (projectId: string) => ExtendedAction<{ projectId: string }, 'setCurrentProject'>
 	setIsListPending: (isPending: boolean) => ExtendedAction<{ isPending: boolean }, 'setIsListPending'>
 	setAreStatsPending: (isPending: boolean) => ExtendedAction<{ isPending: boolean }, 'setAreStatsPending'>
 }

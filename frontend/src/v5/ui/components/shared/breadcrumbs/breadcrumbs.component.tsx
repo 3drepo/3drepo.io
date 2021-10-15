@@ -50,6 +50,7 @@ export const Breadcrumbs = (): JSX.Element => {
 	React.useEffect(() => {
 		if (project) {
 			ProjectsActionsDispatchers.fetch(teamspace);
+			ProjectsActionsDispatchers.setCurrentProject(project);
 		}
 	}, [project, teamspace]);
 

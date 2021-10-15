@@ -20,6 +20,7 @@ import { useParams } from 'react-router';
 import { debounce } from 'lodash';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 
 export const useContainersData = () => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
@@ -29,11 +30,7 @@ export const useContainersData = () => {
 	const hasContainers = ContainersHooksSelectors.selectHasContainers();
 	const isListPending = ContainersHooksSelectors.selectIsListPending();
 	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
-	const currentProject = ContainersHooksSelectors.selectCurrentProject();
-
-	useEffect(() => {
-		ContainersActionsDispatchers.setCurrentProject(project);
-	}, []);
+	const currentProject = ProjectsHooksSelectors.selectCurrentProject();
 
 	useEffect(() => {
 		if (!hasContainers.all) {
