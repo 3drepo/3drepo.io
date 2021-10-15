@@ -39,8 +39,7 @@ matrix:
         - docker
 
       before_install:
-        - print("============== test ==============")
-        - with open($NODE_CONFIG_DIR/test/config.js) as stream: content = yaml.load(stream)
+        - with open($NODE_CONFIG_DIR/test/config.js) as stream: content = yaml.load(stream); echo content
         - docker-compose up alluxio-proxy alluxio-worker alluxio-master &
         - mkdir -p submodules
         - test_ver=`cat backend/testDBVersion`
