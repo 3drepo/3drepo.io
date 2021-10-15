@@ -1,5 +1,3 @@
-import yaml
-
 matrix:
   include:
     #linter test
