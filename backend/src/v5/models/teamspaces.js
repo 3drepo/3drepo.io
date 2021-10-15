@@ -53,7 +53,7 @@ Teamspace.getMembersInfo = async (teamspace) => {
 	return data.map(({ user, customData }) => {
 		const { firstName, lastName, billing } = customData;
 		const res = { user, firstName, lastName };
-		if ((billing?.billingInfo || {}).company) {
+		if (billing?.billingInfo?.company) {
 			res.company = billing.billingInfo.company;
 		}
 		return res;
