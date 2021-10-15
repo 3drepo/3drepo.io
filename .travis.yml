@@ -39,7 +39,7 @@ matrix:
         - docker
 
       before_install:
-        - if: false; docker-compose up alluxio-proxy alluxio-worker alluxio-master &
+        - if [false]; then docker-compose up alluxio-proxy alluxio-worker alluxio-master &
         - mkdir -p submodules
         - test_ver=`cat backend/testDBVersion`
         - cd submodules
@@ -51,7 +51,7 @@ matrix:
         - cd backend && mongorestore
         - cd ../../../
         - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
-        - if: false; until nc -z localhost 39999; do echo Waiting for Alluxio; sleep 1; done
+        - if [false]; then until nc -z localhost 39999; do echo Waiting for Alluxio; sleep 1; done
 
       install:
         - cd ./backend
