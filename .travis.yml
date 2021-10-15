@@ -41,6 +41,13 @@ matrix:
       before_install:
         # Disable alluxio setup
         #- docker-compose up alluxio-proxy alluxio-worker alluxio-master &
+        - wget -qO - https://www.mongodb.org/static/pgp/server-5.0.asc | sudo apt-key add -
+        - echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/5.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-5.0.list
+        - sudo apt-get update
+        - sudo apt-get install -y gnupg mongodb-org=5.0.2 mongodb-org-database=5.0.2 mongodb-org-server=5.0.2 mongodb-org-shell=5.0.2 mongodb-org-mongos=5.0.2 mongodb-org-tools=5.0.2
+        - sudo systemctl daemon-reload
+        - sudo systemctl start mongod
+        - echo $(mongod --version)
         - mkdir -p submodules
         - test_ver=`cat backend/testDBVersion`
         - cd submodules
@@ -52,11 +59,7 @@ matrix:
         - cd backend && mongorestore
         - cd ../../../
         - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
-        - wget -qO - https://www.mongodb.org/static/pgp/server-5.0.asc | sudo apt-key add -
-        - echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/5.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-5.0.list
-        - sudo apt-get update
-        - sudo apt-get install -y gnupg mongodb-org=5.0.2 mongodb-org-database=5.0.2 mongodb-org-server=5.0.2 mongodb-org-shell=5.0.2 mongodb-org-mongos=5.0.2 mongodb-org-tools=5.0.2
-        - echo $(mongod --version)
+
         # Disable alluxio connection check
         #- until nc -z localhost 39999; do echo Waiting for Alluxio; sleep 1; done
 
