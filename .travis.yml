@@ -56,7 +56,6 @@ matrix:
         - cd tests
         - git checkout $test_ver
         - git status
-        - sudo apt install mongo-tools -y
         - cd backend && mongorestore
         - cd ../../../
         - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
