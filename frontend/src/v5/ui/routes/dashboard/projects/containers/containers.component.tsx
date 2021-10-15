@@ -59,10 +59,20 @@ export const Containers = (): JSX.Element => {
 						/>
 					)}
 				/>
-				<NewContainerMainHeaderButton startIcon={<AddCircleIcon />} variant="outlined" color="secondary" disabled={isPending}>
+				<NewContainerMainHeaderButton
+					startIcon={<AddCircleIcon />}
+					variant="outlined"
+					color="secondary"
+					disabled={isPending}
+				>
 					<Trans id="containers.mainHeader.newContainer" message="New Container" />
 				</NewContainerMainHeaderButton>
-				<UploadFileButton startIcon={<ArrowUpCircleIcon />} variant="contained" color="primary" disabled={isPending}>
+				<UploadFileButton
+					startIcon={<ArrowUpCircleIcon />}
+					variant="contained"
+					color="primary"
+					disabled={isPending}
+				>
 					<Trans id="containers.mainHeader.uploadFile" message="Upload file" />
 				</UploadFileButton>
 			</MainHeader>

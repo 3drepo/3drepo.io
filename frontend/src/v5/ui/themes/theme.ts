@@ -491,6 +491,9 @@ export const theme = createMuiTheme({
 				'&$disabled': {
 					color: COLOR.BASE_LIGHTEST,
 				},
+				'&$disabled $path': {
+					fill: COLOR.BASE_LIGHTEST,
+				},
 				'&.Mui-focusVisible': {
 					backgroundColor: COLOR.PRIMARY_MAIN_CONTRAST,
 					boxShadow: SHADOW.LEVEL_5,
