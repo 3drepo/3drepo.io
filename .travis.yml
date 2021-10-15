@@ -1,3 +1,5 @@
+import yaml
+
 matrix:
   include:
     #linter test
@@ -39,6 +41,7 @@ matrix:
         - docker
 
       before_install:
+        print("============== test ==============")
         - docker-compose up alluxio-proxy alluxio-worker alluxio-master &
         - mkdir -p submodules
         - test_ver=`cat backend/testDBVersion`
