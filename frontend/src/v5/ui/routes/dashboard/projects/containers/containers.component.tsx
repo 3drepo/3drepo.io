@@ -38,6 +38,7 @@ export const Containers = (): JSX.Element => {
 		filteredContainers,
 		favouriteContainers,
 		hasContainers,
+		isPending,
 	} = useContainersData();
 
 	const { searchInput, setSearchInput, filterQuery } = useContainersSearch();
@@ -54,13 +55,14 @@ export const Containers = (): JSX.Element => {
 							onChange={(event) => setSearchInput(event.currentTarget.value)}
 							value={searchInput}
 							placeholder={translation as string}
+							disabled={isPending}
 						/>
 					)}
 				/>
-				<NewContainerMainHeaderButton startIcon={<AddCircleIcon />} variant="outlined" color="secondary">
+				<NewContainerMainHeaderButton startIcon={<AddCircleIcon />} variant="outlined" color="secondary" disabled={isPending}>
 					<Trans id="containers.mainHeader.newContainer" message="New Container" />
 				</NewContainerMainHeaderButton>
-				<UploadFileButton startIcon={<ArrowUpCircleIcon />} variant="contained" color="primary">
+				<UploadFileButton startIcon={<ArrowUpCircleIcon />} variant="contained" color="primary" disabled={isPending}>
 					<Trans id="containers.mainHeader.uploadFile" message="Upload file" />
 				</UploadFileButton>
 			</MainHeader>
@@ -70,8 +72,7 @@ export const Containers = (): JSX.Element => {
 					title={(
 						<Trans
 							id="containers.favourites.collapseTitle"
-							message="Favourites ({count})"
-							values={{ count: favouriteContainers.length }}
+							message="Favourites"
 						/>
 					)}
 					titleTooltips={{
@@ -96,8 +97,7 @@ export const Containers = (): JSX.Element => {
 					title={(
 						<Trans
 							id="containers.all.collapseTitle"
-							message="All containers ({count})"
-							values={{ count: filteredContainers.length }}
+							message="All containers"
 						/>
 					)}
 					titleTooltips={{

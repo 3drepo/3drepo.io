@@ -71,6 +71,7 @@ export const ContainersList = ({
 	const { sortedList, setSortConfig } = useOrderedList(containers, DEFAULT_SORT_CONFIG);
 	const filterQuery = ContainersHooksSelectors.selectFilterQuery();
 	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
+	const isListPending = ContainersHooksSelectors.selectIsListPending();
 
 	const toggleSelectedId = (id: IContainer['_id']) => {
 		setSelectedId((state) => (state === id ? null : id));
@@ -87,8 +88,9 @@ export const ContainersList = ({
 	return useMemo(() => (
 		<Container>
 			<DashboardListCollapse
-				title={title}
+				title={<>{title} {!isListPending && `(${containers.length})`}</>}
 				tooltipTitles={titleTooltips}
+				isLoading={isListPending}
 			>
 				<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
 					<DashboardListHeaderLabel name="name">
@@ -205,5 +207,5 @@ export const ContainersList = ({
 				</DashboardList>
 			</DashboardListCollapse>
 		</Container>
-	), [sortedList, selectedId, areStatsPending]);
+	), [sortedList, selectedId, areStatsPending, isListPending]);
 };

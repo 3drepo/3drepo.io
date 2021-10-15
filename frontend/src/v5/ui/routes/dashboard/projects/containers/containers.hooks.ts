@@ -27,7 +27,8 @@ export const useContainersData = () => {
 	const filteredContainers = ContainersHooksSelectors.selectFilteredContainers();
 	const favouriteContainers = ContainersHooksSelectors.selectFilteredFavouriteContainers();
 	const hasContainers = ContainersHooksSelectors.selectHasContainers();
-	const isPending = ContainersHooksSelectors.selectIsListPending();
+	const isListPending = ContainersHooksSelectors.selectIsListPending();
+	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
 	const currentProject = ContainersHooksSelectors.selectCurrentProject();
 
 	useEffect(() => {
@@ -40,7 +41,7 @@ export const useContainersData = () => {
 		}
 	}, [currentProject]);
 
-	return { filteredContainers, favouriteContainers, hasContainers, isPending };
+	return { filteredContainers, favouriteContainers, hasContainers, isPending: areStatsPending && isListPending };
 };
 
 export const useContainersSearch = () => {
