@@ -39,7 +39,8 @@ matrix:
         - docker
 
       before_install:
-        - docker-compose up alluxio-proxy alluxio-worker alluxio-master &
+        # Disable alluxio setup
+        #- docker-compose up alluxio-proxy alluxio-worker alluxio-master &
         - mkdir -p submodules
         - test_ver=`cat backend/testDBVersion`
         - cd submodules
@@ -51,7 +52,8 @@ matrix:
         - cd backend && mongorestore
         - cd ../../../
         - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
-        - until nc -z localhost 39999; do echo Waiting for Alluxio; sleep 1; done
+        # Disable alluxio connection check
+        #- until nc -z localhost 39999; do echo Waiting for Alluxio; sleep 1; done
 
       install:
         - cd ./backend
