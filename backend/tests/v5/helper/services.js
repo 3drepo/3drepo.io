@@ -30,10 +30,10 @@ const ServiceHelper = { db };
 
 // userCredentials should be the same format as the return value of generateUserCredentials
 db.createUser = async (userCredentials, tsList = [], customData = {}) => {
-	const { user, password, apiKey } = userCredentials;
+	const { user, password, apiKey, basicData = {} } = userCredentials;
 	const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));
 	const adminDB = await DbHandler.getAuthDB();
-	return adminDB.addUser(user, password, { customData: { ...customData, apiKey }, roles });
+	return adminDB.addUser(user, password, { customData: { ...basicData, ...customData, apiKey }, roles });
 };
 
 db.createTeamspaceRole = (ts) => createTeamSpaceRole(ts);
@@ -96,6 +96,8 @@ db.createGroups = (teamspace, modelId, groups = []) => {
 	return DbHandler.insertMany(teamspace, `${modelId}.groups`, toInsert);
 };
 
+db.createJobs = (teamspace, jobs) => DbHandler.insertMany(teamspace, 'jobs', jobs);
+
 db.createIssue = (teamspace, modelId, issue) => {
 	const formattedIssue = { ...issue, _id: stringToUUID(issue._id) };
 	return DbHandler.insertOne(teamspace, `${modelId}.issues`, formattedIssue);
@@ -116,6 +118,15 @@ ServiceHelper.generateUserCredentials = () => ({
 	user: ServiceHelper.generateRandomString(),
 	password: ServiceHelper.generateRandomString(),
 	apiKey: ServiceHelper.generateRandomString(),
+	basicData: {
+		firstName: ServiceHelper.generateRandomString(),
+		lastName: ServiceHelper.generateRandomString(),
+		billing: {
+			billingInfo: {
+				company: ServiceHelper.generateRandomString(),
+			},
+		},
+	},
 });
 
 ServiceHelper.generateRevisionEntry = (isVoid = false) => ({

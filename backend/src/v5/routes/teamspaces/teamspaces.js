@@ -33,7 +33,10 @@ const getTeamspaceMembers = (req, res) => {
 	const { teamspace } = req.params;
 	Teamspaces.getTeamspaceMembersInfo(teamspace).then((members) => {
 		respond(req, res, templates.ok, { members });
-	}).catch((err) => respond(req, res, err));
+	}).catch(
+		/* istanbul ignore next */
+		(err) => respond(req, res, err),
+	);
 };
 
 const establishRoutes = () => {
