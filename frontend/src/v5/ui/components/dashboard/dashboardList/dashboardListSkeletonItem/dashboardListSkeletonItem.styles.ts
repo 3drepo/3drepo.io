@@ -20,12 +20,12 @@ import * as DashboardListItemStyles from '../dashboardListItem/dashboardListItem
 
 export const Container = styled(DashboardListItemStyles.Container)`
 	border-color: transparent;
-  display: flex;
-  align-items: center;
-  height: 80px;
-  padding-left: 30px;
-  padding-right: 10px;
-  cursor: pointer;
-  background-color: ${({ theme }) => theme.palette.primary.contrast};
+	display: flex;
+	align-items: center;
+	height: 80px;
+	padding-left: 30px;
+	padding-right: 10px;
+	cursor: pointer;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	margin-bottom: 2px;
 `;

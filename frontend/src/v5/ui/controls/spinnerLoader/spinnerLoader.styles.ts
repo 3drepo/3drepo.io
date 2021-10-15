@@ -17,19 +17,19 @@
 import styled from 'styled-components';
 
 export const Spinner = styled.div`
-  border: 2px solid ${({ theme }) => theme.palette.secondary.light};
-  border-top: 2px solid ${({ theme }) => theme.palette.primary.main};
-  border-radius: 50%;
-  width: 12px;
-  height: 12px;
-  animation: spin 1.2s cubic-bezier(0.770, 0.000, 0.175, 1.000) infinite;
+	border: 2px solid ${({ theme }) => theme.palette.secondary.light};
+	border-top: 2px solid ${({ theme }) => theme.palette.primary.main};
+	border-radius: 50%;
+	width: 12px;
+	height: 12px;
+	animation: spin 1.2s cubic-bezier(0.770, 0.000, 0.175, 1.000) infinite;
 
-  @keyframes spin {
-    0% {
-      transform: rotate(45deg);
-    }
-    100% {
-      transform: rotate(405deg);
-    }
-  }
+	@keyframes spin {
+		0% {
+			transform: rotate(45deg);
+		}
+		100% {
+			transform: rotate(405deg);
+		}
+	}
 `;
