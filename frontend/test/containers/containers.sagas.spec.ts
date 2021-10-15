@@ -21,6 +21,7 @@ import { ContainersActions } from '@/v5/store/containers/containers.redux';
 import { mockServer } from '../../internals/testing/mockServer';
 import { pick, times } from 'lodash';
 import { containerMockFactory } from '@/v5/store/containers/containers.fixtures';
+import { prepareContainersData } from '@/v5/store/containers/containers.helpers';
 
 describe('Containers: sagas', () => {
 	const teamspace = 'teamspace';
@@ -81,7 +82,8 @@ describe('Containers: sagas', () => {
 
 	describe('fetchContainers', () => {
 		const mockContainers = times(10, () => containerMockFactory());
-		const mockContainersBaseResponse = mockContainers.map((container) => pick(container, ['_id', 'name', 'role', 'isFavourite']))
+		const mockContainersBaseResponse = mockContainers.map((container) => pick(container, ['_id', 'name', 'role', 'isFavourite']));
+		const mockContainersWithoutStats = prepareContainersData(mockContainers);
 
 
 		it('should call containers endpoint -> call stats endpoint -> put SET_IS_PENDING ', async () => {
@@ -108,10 +110,13 @@ describe('Containers: sagas', () => {
 
 			await expectSaga(ContainersSaga.default)
 			.dispatch(ContainersActions.fetchContainers(teamspace, projectId))
-			.put(ContainersActions.setIsPending(true))
+			.put(ContainersActions.setIsListPending(true))
+			.put(ContainersActions.setAreStatsPending(true))
+			.put(ContainersActions.fetchContainersSuccess(projectId, mockContainersWithoutStats))
+			.put(ContainersActions.setIsListPending(false))
 			.put(ContainersActions.fetchContainersSuccess(projectId, mockContainers))
-			.put(ContainersActions.setIsPending(false))
-			.silentRun()
+			.put(ContainersActions.setAreStatsPending(false))
+			.silentRun();
 		})
 
 		it('should call containers endpoint with 404 -> put SET_IS_PENDING ', async () => {
@@ -121,8 +126,10 @@ describe('Containers: sagas', () => {
 
 			await expectSaga(ContainersSaga.default)
 			.dispatch(ContainersActions.fetchContainers(teamspace, projectId))
-			.put(ContainersActions.setIsPending(true))
-			.put(ContainersActions.setIsPending(false))
+			.put(ContainersActions.setIsListPending(true))
+			.put(ContainersActions.setAreStatsPending(true))
+			.put(ContainersActions.setIsListPending(false))
+			.put(ContainersActions.setAreStatsPending(false))
 			.silentRun()
 			.then(({ effects }: any) => {
 				expect(effects.put).toBeUndefined();
