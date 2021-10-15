@@ -15,4 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { ShimmeringBlock } from './shimmeringBlock.component';
+import React from 'react';
+import { Block } from './skeletonBlock.styles';
+
+interface ISkeletonBlock {
+	className?: string;
+	delay?: number;
+	width?: number;
+	widthPercentage?: number;
+}
+
+export const SkeletonBlock = ({
+	className,
+	delay = 0,
+	width = 100,
+	widthPercentage,
+}: ISkeletonBlock): JSX.Element => (
+	<Block className={className} delay={delay} width={width} widthPercentage={widthPercentage} />
+);

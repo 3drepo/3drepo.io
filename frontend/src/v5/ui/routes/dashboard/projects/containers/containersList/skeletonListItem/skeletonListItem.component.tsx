@@ -16,7 +16,7 @@
  */
 
 import React from 'react';
-import { ShimmeringBlock } from '@controls/shimmeringBlock';
+import { SkeletonBlock } from '@controls/skeletonBlock';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { TitlesContainer, Container } from './skeletonListItem.styles';
 
@@ -28,19 +28,19 @@ export const SkeletonListItem = ({ delay = 0 }: ISkeletonListItem): JSX.Element 
 	<Container>
 		<FixedOrGrowContainer>
 			<TitlesContainer>
-				<ShimmeringBlock delay={delay} widthPercentage={90} />
-				<ShimmeringBlock delay={delay + delay / 2} widthPercentage={80} />
+				<SkeletonBlock delay={delay} widthPercentage={90} />
+				<SkeletonBlock delay={delay + delay / 2} widthPercentage={80} />
 			</TitlesContainer>
 		</FixedOrGrowContainer>
 		<FixedOrGrowContainer width={186} />
 		<FixedOrGrowContainer>
-			<ShimmeringBlock delay={delay} widthPercentage={75} />
+			<SkeletonBlock delay={delay} widthPercentage={75} />
 		</FixedOrGrowContainer>
 		<FixedOrGrowContainer width={188}>
-			<ShimmeringBlock delay={delay} width={133} />
+			<SkeletonBlock delay={delay} width={133} />
 		</FixedOrGrowContainer>
 		<FixedOrGrowContainer width={97}>
-			<ShimmeringBlock delay={delay} width={65} />
+			<SkeletonBlock delay={delay} width={65} />
 		</FixedOrGrowContainer>
 	</Container>
 );
