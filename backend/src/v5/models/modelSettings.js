@@ -16,7 +16,6 @@
  */
 
 const Models = {};
-const { checkViewExists } = require('./views');
 const db = require('../handler/db');
 const { templates } = require('../utils/responseCodes');
 
@@ -73,15 +72,14 @@ Models.getFederations = async (ts, ids, projection, sort) => {
 	return findModel(ts, query, projection, sort);
 };
 
-Models.updateModelSettings = async (ts, model, updateObj) => {
-	const query = { _id: model };
+Models.updateModelSettings = async (ts, model, payload) => {
 	const toUpdate = {};
 	const toUnset = {};
-	const keys = Object.keys(updateObj);
+	const keys = Object.keys(payload);
 
 	for (let i = 0; i < keys.length; i++) {
 		const key = keys[i];
-		const value = updateObj[key];
+		const value = payload[key];
 		if (value) {
 			if (key === 'unit' || key === 'code') {
 				if (!toUpdate.properties) {
@@ -89,12 +87,9 @@ Models.updateModelSettings = async (ts, model, updateObj) => {
 				}
 				toUpdate.properties[key] = value;
 			} else {
-				if (key === 'defaultView') {
-					checkViewExists(ts, model, value);
-				}
 				toUpdate[key] = value;
 			}
-		} else if (['defaultView', 'corID', 'errorReason'].includes(key)) {
+		} else if (key === 'defaultView') {
 			toUnset[key] = 1;
 		}
 	}
@@ -109,7 +104,7 @@ Models.updateModelSettings = async (ts, model, updateObj) => {
 		updateJson.$unset = toUnset;
 	}
 
-	return db.updateOne(ts, 'settings', query, updateJson);
+	return db.updateOne(ts, 'settings', { _id: model }, updateJson);
 };
 
 module.exports = Models;

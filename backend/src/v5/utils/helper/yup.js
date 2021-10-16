@@ -46,15 +46,12 @@ YupHelper.types.timestamp = Yup.number().min(new Date(2000, 1, 1).getTime()).int
 		(value) => new Date(value).getTime() > 0,
 	);
 
-YupHelper.types.strings.position = Yup.array()
-.of(
-	Yup.number().strict(true)
-).test('test-divisibleByThree','position array must be divisible by 3', function(array) {	
-	return array.length % 3 === 0;
-});
+YupHelper.types.position = Yup.array()
+	.of(
+		Yup.number().strict(true),
+	).test('test-divisibleByThree', 'position array must be divisible by 3', (array) => array.length % 3 === 0);
 
 YupHelper.types.strings.unit = Yup.string()
 	.oneOf(['mm', 'cm', 'dm', 'm', 'ft']).strict(true);
-
 
 module.exports = YupHelper;

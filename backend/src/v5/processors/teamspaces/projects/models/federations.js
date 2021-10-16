@@ -18,6 +18,7 @@
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const Groups = require('./commons/groups');
 const { getFederations, updateModelSettings } = require('../../../../models/modelSettings');
+const { checkViewExists } = require('../../../../models/views');
 const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
 const { templates } = require('../../../../utils/responseCodes');
@@ -42,6 +43,14 @@ Federations.deleteFavourites = async (username, teamspace, project, favouritesTo
 };
 
 Federations.updateSettings = async (teamspace, federation, payload) => {
+	if (payload.defaultView) {
+		checkViewExists(teamspace, federation, payload.defaultView);
+	}
+
+	if (payload.defaultLegend) {
+		checkLegendExists(teamspace, federation, payload.defaultLegend);
+	}
+
 	const res = await updateModelSettings(teamspace, federation, payload);
 
 	if (!res || res.matchedCount === 0) {

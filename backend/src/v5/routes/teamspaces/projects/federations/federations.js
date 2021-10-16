@@ -21,7 +21,7 @@ const { getUserFromSession } = require('../../../../utils/sessions');
 const { hasAccessToTeamspace, isProjectAdmin } = require('../../../../middleware/permissions/permissions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
-const { validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/modelSettings')
+const { validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/modelSettings');
 
 const getFederationList = (req, res) => {
 	const user = getUserFromSession(req.session);

@@ -18,33 +18,31 @@
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const Yup = require('yup');
 const { respond } = require('../../../../../utils/responder');
-const { types } = require('../../..//../../utils/helper/yup');
+const { types } = require('../../../../../utils/helper/yup');
 
 const ModelSettings = {};
 
 ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
-	const schema = Yup.object().strict(true).noUnknown().required(true).shape({
+	const schema = Yup.object().shape({
 		name: types.strings.title,
 		desc: types.strings.blob,
 		surveyPoints: Yup.array()
-			.of(
-				Yup.object({
-					position: types.strings.position.required(true),
-					latLong: Yup.array().required(true).of(Yup.number())
-						.test('test-divisibleByTwo','latLong array must be divisible by 2', function(array) {	
-							return array.length % 2 === 0;
-						})
+		.of(
+				Yup.object().shape({
+					position: types.position.required(),
+					latLong: Yup.array().of(Yup.number()).required()
+						.test('test-divisibleByTwo', 'latLong array must be divisible by 2', (array) => array.length % 2 === 0),
 				}),
 			),
 		angleFromNorth: Yup.number(),
 		unit: types.strings.unit,
 		code: Yup.string().matches(/^[a-zA-Z0-9]{0,50}$/),
 		defaultView: types.id,
-		defaultLegend: Yup.string(),
-	}).test('at-least-one-property', "you must provide at least one setting value", value =>
-	!!(value.name || value.desc || value.surveyPoints || value.angleFromNorth || value.unit 
-		|| value.code || value.defaultView || value.defaultLegend)
-    );
+		defaultLegend: types.id,
+	}).strict(true).noUnknown()
+		.required()
+		.test('at-least-one-property', 'you must provide at least one setting value', (value) => !!(value.name || value.desc || value.surveyPoints || value.angleFromNorth || value.unit
+			|| value.code || value.defaultView || value.defaultLegend));
 
 	try {
 		await schema.validate(req.body);

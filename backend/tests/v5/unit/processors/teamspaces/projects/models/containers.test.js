@@ -78,6 +78,14 @@ const model1Revisions = [
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getContainers.mockImplementation(() => modelList);
 ModelSettings.getContainerById.mockImplementation((teamspace, container) => containerSettings[container]);
+
+const updateModelSettingsMock = ModelSettings.updateModelSettings.mockImplementation((teamspace, container) => {
+	if (container === 1) {
+		return 1;
+	}
+	return undefined;
+});
+
 Revisions.getRevisionCount.mockImplementation((teamspace, container) => (container === 'container2' ? 10 : 0));
 Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 	if (container === 'container2') return container2Rev;
@@ -236,10 +244,30 @@ const testGetRevisions = () => {
 	});
 };
 
+const testUpdateSettings = () => {
+	describe('Update container settings', () => {
+		test('should update the settings if the container exists', async () => {
+			const res = await Containers.updateSettings('teamspace', 1, { name: 'newName' });
+			expect(updateModelSettingsMock.mock.calls.length).toBe(1);
+			expect(updateModelSettingsMock.mock.calls[0][1]).toEqual(1);
+			expect(updateModelSettingsMock.mock.calls[0][2]).toEqual({ name: 'newName' });
+		});
+
+		test('should return containerNotFound if the container does not exist', async () => {
+			await expect(Containers.updateSettings('teamspace', 2, { name: 'newName' }))
+			 .rejects.toEqual(templates.containerNotFound);
+			expect(updateModelSettingsMock.mock.calls.length).toBe(1);
+			expect(updateModelSettingsMock.mock.calls[0][1]).toEqual(2);
+			expect(updateModelSettingsMock.mock.calls[0][2]).toEqual({ name: 'newName' });
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/containers', () => {
 	testGetContainerList();
 	testGetContainerStats();
 	testAppendFavourites();
 	testDeleteFavourites();
 	testGetRevisions();
+	testUpdateSettings();
 });

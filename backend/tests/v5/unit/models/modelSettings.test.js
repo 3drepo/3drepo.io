@@ -144,10 +144,46 @@ const testGetFederations = () => {
 	});
 };
 
+const testUpdateModelSettings = () => {
+	const updateObject = {
+		$set: {
+			properties: {
+				unit: 'm',
+				code: 'someCode',
+			},
+			name: 'someName',
+		},
+		$unset: {
+			defaultView: 1,
+		},
+	};
+
+	const checkResults = (fn, model) => {
+		expect(fn.mock.calls.length).toBe(1);
+		expect(fn.mock.calls[0][2]).toEqual({ _id: model });
+		expect(fn.mock.calls[0][3]).toEqual(updateObject);
+	};
+
+	describe('UpdateModelSettings', () => {
+		test('Should update the settings of a model', async () => {
+			const payload = {
+				name: 'someName',
+				unit: 'm',
+				code: 'someCode',
+				defaultView: null,
+			};
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
+			await Model.updateModelSettings('someTS', 'someModel', payload);
+			checkResults(fn, 'someModel');
+		});
+	});
+};
+
 describe('models/modelSettings', () => {
 	testGetModelById();
 	testGetContainerById();
 	testGetFederationById();
 	testGetContainers();
 	testGetFederations();
+	testUpdateModelSettings();
 });

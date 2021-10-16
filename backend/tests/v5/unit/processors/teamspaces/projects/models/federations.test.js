@@ -64,6 +64,12 @@ const project = { _id: 1, name: 'project', models: federationList.map(({ _id }) 
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getFederations.mockImplementation(() => federationList);
 ModelSettings.getFederationById.mockImplementation((teamspace, federation) => federationSettings[federation]);
+const updateModelSettingsMock = ModelSettings.updateModelSettings.mockImplementation((teamspace, federation) => {
+	if (federation === 1) {
+		return 1;
+	}
+	return undefined;
+});
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
 
 Users.appendFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
@@ -168,8 +174,28 @@ const testDeleteFavourites = () => {
 	});
 };
 
+const testUpdateSettings = () => {
+	describe('Update federation settings', () => {
+		test('should update the settings if the federation exists', async () => {
+			const res = await Federations.updateSettings('teamspace', 1, { name: 'newName' });
+			expect(updateModelSettingsMock.mock.calls.length).toBe(1);
+			expect(updateModelSettingsMock.mock.calls[0][1]).toEqual(1);
+			expect(updateModelSettingsMock.mock.calls[0][2]).toEqual({ name: 'newName' });
+		});
+
+		test('should return federationNotFound if the federation does not exist', async () => {
+			await expect(Federations.updateSettings('teamspace', 2, { name: 'newName' }))
+			 .rejects.toEqual(templates.federationNotFound);
+			expect(updateModelSettingsMock.mock.calls.length).toBe(1);
+			expect(updateModelSettingsMock.mock.calls[0][1]).toEqual(2);
+			expect(updateModelSettingsMock.mock.calls[0][2]).toEqual({ name: 'newName' });
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/federations', () => {
 	testGetFederationList();
 	testAppendFavourites();
 	testDeleteFavourites();
+	testUpdateSettings();
 });

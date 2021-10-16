@@ -28,21 +28,17 @@ Projects.isProjectAdmin = async (req, res, next) => {
 	const user = getUserFromSession(session);
 	const { teamspace, project } = params;
 
-	try {
-		const isTsAdmin = await isTeamspaceAdmin(teamspace, user);
-		if (isTsAdmin) {
-			next();
-			return;
-		}
+	const isTsAdmin = await isTeamspaceAdmin(teamspace, user);
+	if (isTsAdmin) {
+		next();
+		return;
+	}
 
-		const isProjAdmin = await isProjectAdmin(teamspace, project, user);
-		if (isProjAdmin) {
-			next();
-		} else {
-			respond(req, res, templates.notAuthorized);
-		}
-	} catch (err) {
-		respond(req, res, err);
+	const isProjAdmin = await isProjectAdmin(teamspace, project, user);
+	if (isProjAdmin) {
+		next();
+	} else {
+		respond(req, res, templates.notAuthorized);
 	}
 };
 
