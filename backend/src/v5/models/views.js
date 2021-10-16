@@ -24,8 +24,8 @@ const colName = 'views';
 
 const getCollectionName = (model) => `${model}.${colName}`;
 
-Views.checkViewExists = async (teamspace, model, id) => {
-	const foundView = await db.findOne(teamspace, getCollectionName(model), { _id: stringToUUID(id) });
+Views.checkViewExists = async (teamspace, model, view) => {
+	const foundView = await db.findOne(teamspace, getCollectionName(model), { _id: stringToUUID(view) });
 
 	if (!foundView) {
 		throw templates.viewNotFound;

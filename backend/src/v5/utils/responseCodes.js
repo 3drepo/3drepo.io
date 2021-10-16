@@ -48,6 +48,9 @@ ResponseCodes.templates = {
 	// View related error
 	viewNotFound: { message: 'View not found', status: 404 },
 
+	// Legend related error
+	legendNotFound: { message: 'Legend not found', status: 404 },
+
 	// Invalid Arguments
 	invalidArguments: { message: 'The arguments provided are not valid', status: 400 },
 };
