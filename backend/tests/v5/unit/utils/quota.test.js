@@ -76,6 +76,9 @@ const testSufficientQuota = () => {
 		return Promise.resolve({ customData: { billing: { subscriptions } } });
 	});
 
+	jest.spyOn(db, 'listCollections').mockImplementation((ts) => Promise.resolve(ts === tsWithSomeUsage ? ['a.issues.ref'] : []));
+	jest.spyOn(db, 'aggregate').mockImplementation(() => Promise.resolve([{ _id: null, total: 1024 * 1024 }]));
+
 	describe.each([
 		['Size bigger than upload size limit', 'teamspace', 8388609, templates.maxSizeExceeded],
 		['Teamspace with expired quota', tsWithExpiredQuota, 10, templates.licenceExpired],
@@ -86,6 +89,8 @@ const testSufficientQuota = () => {
 		['Teamspace with insufficient quota (multiple license)', tsWithMultipleLicense, 1024 * 1024 * 5 + 1, templates.quotaLimitExceeded],
 		['Teamspace with sufficient quota (multiple license v2)', tsWithMultipleLicense2, 1024 * 1024 * 3],
 		['Teamspace with insufficient quota (multiple license v2)', tsWithMultipleLicense2, 1024 * 1024 * 3 + 1, templates.quotaLimitExceeded],
+		['Teamspace with sufficient quota (with existing usage)', tsWithSomeUsage, 1024 * 1024],
+		['Teamspace with insufficient quota (with existing usage)', tsWithSomeUsage, 1024 * 1024 + 1, templates.quotaLimitExceeded],
 	])('Check sufficient quota', (desc, teamspace, size, error) => {
 		test(`${desc} should ${error ? `fail with ${error.code}` : 'should succeed'}`, async () => {
 			const sufficientQuotaProm = Quota.sufficientQuota(teamspace, size);

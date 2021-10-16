@@ -33,7 +33,7 @@ const getTeamspace = async (ts, projection) => {
 
 Teamspace.getSubscriptions = async (ts) => {
 	const tsDoc = await getTeamspace(ts, { 'customData.billing.subscriptions': 1 });
-	return (tsDoc.customData?.billing || {})?.subscriptions || {};
+	return tsDoc.customData?.billing?.subscriptions || {};
 };
 
 Teamspace.getTeamspaceAdmins = async (ts) => {

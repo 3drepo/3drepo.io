@@ -75,6 +75,7 @@ Quota.sufficientQuota = async (teamspace, size) => {
 		calculateQuota(teamspace),
 		calculateSpaceUsed(teamspace),
 	]);
+
 	if ((dataUsed + size) > quotaTotal) {
 		throw templates.quotaLimitExceeded;
 	}
