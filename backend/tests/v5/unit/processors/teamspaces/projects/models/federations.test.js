@@ -25,6 +25,10 @@ jest.mock('../../../../../../../src/v5/models/users');
 const Users = require(`${src}/models/users`);
 jest.mock('../../../../../../../src/v5/models/revisions');
 const Federations = require(`${src}/processors/teamspaces/projects/models/federations`);
+const Views = require(`${src}/models/views`);
+jest.mock('../../../../../../../src/v5/models/views');
+const Legends = require(`${src}/models/legends`);
+jest.mock('../../../../../../../src/v5/models/legends');
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const federationList = [
@@ -71,6 +75,19 @@ const updateModelSettingsMock = ModelSettings.updateModelSettings.mockImplementa
 	return undefined;
 });
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
+Views.checkViewExists.mockImplementation((teamspace, model, view) => {
+	if (view === 1) {
+		return 1;
+	}
+	throw templates.viewNotFound;
+});
+
+Legends.checkLegendExists.mockImplementation((teamspace, model, legend) => {
+	if (legend === 1) {
+		return 1;
+	}
+	throw templates.legendNotFound;
+});
 
 Users.appendFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
 	for (const favourite of favouritesToAdd) {
@@ -176,19 +193,35 @@ const testDeleteFavourites = () => {
 
 const testUpdateSettings = () => {
 	describe('Update federation settings', () => {
-		test('should update the settings if the federation exists', async () => {
-			const res = await Federations.updateSettings('teamspace', 1, { name: 'newName' });
+		test('should update the settings if the federation, view and legend exists', async () => {
+			const payload = { name: 'newName', defaultView: 1, defaultLegend:1 };
+			await Federations.updateSettings('teamspace', 1, payload);
 			expect(updateModelSettingsMock.mock.calls.length).toBe(1);
 			expect(updateModelSettingsMock.mock.calls[0][1]).toEqual(1);
-			expect(updateModelSettingsMock.mock.calls[0][2]).toEqual({ name: 'newName' });
+			expect(updateModelSettingsMock.mock.calls[0][2]).toEqual(payload);
+		});
+
+		test('should return viewNotFound if the view does not exist', async () => {
+			const payload = { name: 'newName', defaultView: 2, defaultLegend:1 };
+			await expect(Federations.updateSettings('teamspace', 1,payload))
+			 .rejects.toEqual(templates.viewNotFound);
+			expect(updateModelSettingsMock.mock.calls.length).toBe(0);
+		});
+
+		test('should return viewNotFound if the view does not exist', async () => {
+			const payload = { name: 'newName', defaultView: 1, defaultLegend:2 };
+			await expect(Federations.updateSettings('teamspace', 1,payload))
+			 .rejects.toEqual(templates.legendNotFound);
+			expect(updateModelSettingsMock.mock.calls.length).toBe(0);
 		});
 
 		test('should return federationNotFound if the federation does not exist', async () => {
-			await expect(Federations.updateSettings('teamspace', 2, { name: 'newName' }))
+			const payload = { name: 'newName', defaultView: 1, defaultLegend:1 };
+			await expect(Federations.updateSettings('teamspace', 2, payload))
 			 .rejects.toEqual(templates.federationNotFound);
 			expect(updateModelSettingsMock.mock.calls.length).toBe(1);
 			expect(updateModelSettingsMock.mock.calls[0][1]).toEqual(2);
-			expect(updateModelSettingsMock.mock.calls[0][2]).toEqual({ name: 'newName' });
+			expect(updateModelSettingsMock.mock.calls[0][2]).toEqual(payload);
 		});
 	});
 };

@@ -76,7 +76,7 @@ Models.updateModelSettings = async (ts, model, payload) => {
 	const toUpdate = {};
 	const toUnset = {};
 	const keys = Object.keys(payload);
-
+	
 	for (let i = 0; i < keys.length; i++) {
 		const key = keys[i];
 		const value = payload[key];
