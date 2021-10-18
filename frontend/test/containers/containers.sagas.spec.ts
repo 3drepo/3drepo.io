@@ -29,7 +29,7 @@ describe('Containers: sagas', () => {
 	const containerId = 'containerId';
 
 	describe('addFavourite', () => {
-		it('should call addFavourite endpoint and dispatch TOGGLE_FAVOURITE_SUCCESS', async () => {
+		it('should call addFavourite endpoint', async () => {
 			mockServer
 			.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
 			.reply(200)
@@ -40,7 +40,7 @@ describe('Containers: sagas', () => {
 			.silentRun();
 		})
 
-		it('should call addFavourite endpoint with 404 and should not dispatch TOGGLE_FAVOURITE_SUCCESS', async () => {
+		it('should call addFavourite with 404', async () => {
 			mockServer
 			.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
 			.reply(404)
@@ -55,7 +55,7 @@ describe('Containers: sagas', () => {
 	})
 
 	describe('removeFavourite', () => {
-		it('should call removeFavourite endpoint and dispatch TOGGLE_FAVOURITE_SUCCESS', async () => {
+		it('should call removeFavourite endpoint', async () => {
 			mockServer
 			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
 			.reply(200)
@@ -66,7 +66,7 @@ describe('Containers: sagas', () => {
 			.silentRun();
 		})
 
-		it('should call removeFavourite endpoint with 404 and not dispatch TOGGLE_FAVOURITE_SUCCESS', async () => {
+		it('should call removeFavourite  with 404', async () => {
 			mockServer
 			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
 			.reply(404)
@@ -86,7 +86,7 @@ describe('Containers: sagas', () => {
 		const mockContainersWithoutStats = prepareContainersData(mockContainers);
 
 
-		it('should call containers endpoint -> call stats endpoint -> put SET_IS_PENDING ', async () => {
+		it('should fetch containers data', async () => {
 			mockServer
 			.get(`/teamspaces/${teamspace}/projects/${projectId}/containers`)
 			.reply(200, {
@@ -119,7 +119,7 @@ describe('Containers: sagas', () => {
 			.silentRun();
 		})
 
-		it('should call containers endpoint with 404 -> put SET_IS_PENDING ', async () => {
+		it('should call containers endpoint with 404', async () => {
 			mockServer
 			.get(`/teamspaces/${teamspace}/projects/${projectId}/containers`)
 			.reply(404);

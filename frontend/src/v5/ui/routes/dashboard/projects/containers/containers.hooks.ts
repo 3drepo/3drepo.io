@@ -33,9 +33,9 @@ export const useContainersData = () => {
 	const currentProject = ProjectsHooksSelectors.selectCurrentProject();
 
 	useEffect(() => {
-		if (!hasContainers.all) {
-			ContainersActionsDispatchers.fetchContainers(teamspace, project);
-		}
+		if (hasContainers.all) return;
+
+		ContainersActionsDispatchers.fetchContainers(teamspace, project);
 	}, [currentProject]);
 
 	return { filteredContainers, favouriteContainers, hasContainers, isPending: areStatsPending && isListPending };
