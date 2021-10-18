@@ -96,6 +96,16 @@ db.createGroups = (teamspace, modelId, groups = []) => {
 	return DbHandler.insertMany(teamspace, `${modelId}.groups`, toInsert);
 };
 
+db.createIssue = (teamspace, modelId, issue) => {
+	const formattedIssue = { ...issue, _id: stringToUUID(issue._id) };
+	return DbHandler.insertOne(teamspace, `${modelId}.issues`, formattedIssue);
+};
+
+db.createRisk = (teamspace, modelId, risk) => {
+	const formattedRisk = { ...risk, _id: stringToUUID(risk._id) };
+	return DbHandler.insertOne(teamspace, `${modelId}.risks`, formattedRisk);
+};
+
 db.createView = (teamspace, modelId, view) => {
 	const formattedView = { _id: stringToUUID(view) };
 	return DbHandler.insertOne(teamspace, `${modelId}.views`, formattedView);
@@ -110,7 +120,7 @@ ServiceHelper.generateUUIDString = () => uuidToString(generateUUID());
 ServiceHelper.generateUUID = () => generateUUID();
 ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex');
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
- + Math.random() * (end.getTime() - start.getTime()));
+    + Math.random() * (end.getTime() - start.getTime()));
 
 ServiceHelper.generateUserCredentials = () => ({
 	user: ServiceHelper.generateRandomString(),
@@ -154,7 +164,6 @@ ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = fal
 		updatedAt: Date.now(),
 		updatedBy: ServiceHelper.generateRandomString(),
 		author: ServiceHelper.generateRandomString(),
-
 	};
 
 	if (isSmart) {

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { hasAccessToTeamspace, isProjectAdmin } = require('../../../../middleware/permissions/permissions');
+const { hasAccessToTeamspace, hasReadAccessToFederation, isProjectAdmin} = require('../../../../middleware/permissions/permissions');
 const Federations = require('../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../utils/sessions');
@@ -47,6 +47,19 @@ const deleteFavourites = (req, res) => {
 
 	Federations.deleteFavourites(user, teamspace, project, favouritesToRemove)
 		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
+};
+
+const getFederationStats = async (req, res) => {
+	const { teamspace, federation } = req.params;
+	Federations.getFederationStats(teamspace, federation).then((stats) => {
+		const statsSerialised = { ...stats };
+		statsSerialised.lastUpdated = stats.lastUpdated ? stats.lastUpdated.getTime() : undefined;
+		if (statsSerialised.subModels) statsSerialised.subModels = statsSerialised.subModels.map(({ model }) => model);
+		respond(req, res, templates.ok, statsSerialised);
+	}).catch(
+		/* istanbul ignore next */
+		(err) => respond(req, res, err),
+	);
 };
 
 const updateSettings = (req, res) => {
@@ -205,6 +218,82 @@ const establishRoutes = () => {
 
 	/**
 	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/stats:
+	 *   get:
+	 *     description: Get the statistics and general information about a federation
+	 *     tags: [Federations]
+	 *     operationId: getFederationStats
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - project:
+	 *         name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - federation:
+	 *         name: federation
+	 *         description: Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: returns the statistics of a federation
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 code:
+	 *                   type: string
+	 *                   description: Federation code
+	 *                   example: STR-01
+     *                 status:
+	 *                   type: string
+	 *                   description: Current status of the federation
+	 *                   example: ok
+   	 *                 subModels:
+	 *                   type: array
+	 *                   description: The IDs of the models the federation consists of
+	 *                   items:
+	 *                     type: string
+	 *                     format: uuid
+	 *                 tickets:
+	 *                   type: object
+	 *                   properties:
+	 *                     issues:
+	 *                       type: integer
+	 *                       description: The number of non closed issues of the federation
+	 *                     risks:
+	 *                       type: integer
+	 *                       description: The number of unmitigated risks of the federation
+     *                 category:
+	 *                   type: string
+	 *                   description: Category of the federation
+	 *                   example:
+     *                 lastUpdated:
+	 *                   type: integer
+	 *                   description: Timestamp(ms) of when any of the submodels was updated
+	 *                   example: 1630598072000
+	 */
+	router.get('/:federation/stats', hasReadAccessToFederation, getFederationStats);
+
+	/**
+	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}:
 	 *   patch:
 	 *     description: Updates the settings of a federation
@@ -218,7 +307,7 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - project:
+		   *       - project:
 	 *         name: project
 	 *         description: ID of project
 	 *         in: path
@@ -233,11 +322,11 @@ const establishRoutes = () => {
 	 *         schema:
 	 *           type: string
 	 *     requestBody:
-     *       content:
-     *         application/json:
-     *           schema:
-     *             type: object
-     *             properties:
+	 *       content:
+	 *         application/json:
+	 *           schema:
+	 *             type: object
+	 *             properties:
 	 *               name:
 	 *                 type: String
 	 *                 example: federation1
@@ -278,7 +367,7 @@ const establishRoutes = () => {
 	 *               defaultLegend:
 	 *                 type: string
 	 *                 format: uuid
-     *                 example: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+	 *                 example: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"

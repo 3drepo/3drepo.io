@@ -39,7 +39,7 @@ export const RouteExcept = ({ path, exceptPath, children }) => (
 	<Switch>
 		<Route exact path={exceptPath} />
 		<Route path={path}>
-			{...children}
+			{children}
 		</Route>
 	</Switch>
 );
