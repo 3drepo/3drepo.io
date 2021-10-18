@@ -21,17 +21,22 @@ import { useRouteMatch, Route, Switch } from 'react-router-dom';
 
 import { discardSlash } from '@/v5/services/routing/routing';
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
+import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
+import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { Federations } from './federations';
 import { Containers } from './containers';
 
 export const ProjectContent = () => {
+	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
 	const { teamspace } = useParams();
 	let { path } = useRouteMatch();
 	path = discardSlash(path);
 
 	useEffect(() => {
-		TeamspacesActionsDispatchers.fetchUsers(teamspace);
-	}, []);
+		if (teamspaces.length) {
+			TeamspacesActionsDispatchers.fetchUsers(teamspace);
+		}
+	}, [teamspaces]);
 
 	return (
 		<>

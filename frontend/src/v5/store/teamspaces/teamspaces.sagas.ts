@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
+import { put, select, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
-import * as APIv4 from '@/v4/services/api';
+import { selectCurrentTeamspaceUsers } from '@/v5/store/teamspaces/teamspaces.selectors';
 import { TeamspacesActions, TeamspacesTypes, ITeamspace } from './teamspaces.redux';
 
 export function* fetch() {
@@ -31,9 +31,13 @@ export function* fetch() {
 
 export function* fetchUsers({ teamspace }) {
 	try {
-		const { data } = yield APIv4.fetchUsers(teamspace);
+		const teamspaceUsers = yield select(selectCurrentTeamspaceUsers);
 
-		yield put(TeamspacesActions.fetchUsersSuccess(teamspace, data));
+		if (!teamspaceUsers.length) {
+			const { data: { members } } = yield API.fetchTeamspaceMembers(teamspace);
+
+			yield put(TeamspacesActions.fetchUsersSuccess(teamspace, members));
+		}
 	} catch (e) {
 		console.error(e);
 	}

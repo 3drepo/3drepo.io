@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export * from './teamspaces';
-export * from './projects';
-export * from './containers';
-export * from './revisions';
+import api from './default';
+
+export const fetchRevisions = (teamspace: string, projectId: string, containerId: string): Promise<any> => api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions`);

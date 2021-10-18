@@ -16,6 +16,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@lingui/core';
 import { RevisionsListItemText } from '@components/shared/revisionDetails/components/revisionsListItemText';
 import { RevisionsListItemAuthor } from '@components/shared/revisionDetails/components/revisionsListItemAuthor';
 import { RevisionsListItemCode } from '@components/shared/revisionDetails/components/revisionsListItemCode';
@@ -30,7 +31,9 @@ type IRevisionsListItem = {
 
 export const RevisionsListItem = ({ revision, selected = false }: IRevisionsListItem): JSX.Element => (
 	<Container>
-		<RevisionsListItemText meta width={130} selected={selected}>{revision.timestamp}</RevisionsListItemText>
+		<RevisionsListItemText meta width={130} selected={selected}>
+			{i18n.date(revision.timestamp)}
+		</RevisionsListItemText>
 		<RevisionsListItemAuthor author={revision.author} selected={selected} width={228} />
 		<RevisionsListItemCode width={330} onClick={() => {}}>{revision.tag}</RevisionsListItemCode>
 		<RevisionsListItemText selected={selected}>{revision.desc}</RevisionsListItemText>

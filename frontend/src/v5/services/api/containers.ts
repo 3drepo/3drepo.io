@@ -17,6 +17,6 @@
 
 import api from './default';
 
-export const fetchContainers = (teamspace: string, projectId: string): Promise<any> => api.get(`teamspaces/${teamspace}/projects/${projectId}/containers`);
-
 export const fetchContainerStats = (teamspace: string, projectId: string, containerId: string): Promise<any> => api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/stats`);
+
+export const fetchContainers = (teamspace: string, projectId: string): Promise<any> => api.get(`teamspaces/${teamspace}/projects/${projectId}/containers`);

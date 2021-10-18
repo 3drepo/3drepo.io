@@ -56,7 +56,7 @@ export const RevisionsListItemAuthor = ({
 				onMouseLeave={handlePopoverClose}
 				selected={selected}
 			>
-				{author.user}
+				{author.firstName} {author.lastName}
 			</Text>
 			<Popover
 				id="mouse-over-popover"

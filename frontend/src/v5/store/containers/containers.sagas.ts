@@ -17,7 +17,6 @@
 
 import { all, put, takeLatest, select } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
-import { getModelRevisions } from '@/v4/services/api';
 import {
 	ContainersActions,
 	ContainersTypes,
@@ -59,7 +58,7 @@ export function* fetchContainers({ teamspace, projectId }) {
 
 export function* fetchRevisions({ teamspace, projectId, containerId }) {
 	try {
-		const { data: revisions } = yield getModelRevisions(teamspace, containerId, true);
+		const { data: { revisions } } = yield API.fetchRevisions(teamspace, projectId, containerId);
 		const teamspaceUsers = yield select(selectCurrentTeamspaceUsers);
 
 		const revisionsWithUsersInfo = revisions.map(({ author, ...revision }) => ({

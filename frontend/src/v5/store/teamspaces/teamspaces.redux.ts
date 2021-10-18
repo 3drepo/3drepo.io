@@ -25,7 +25,6 @@ export interface IUser {
 	lastName: string;
 	company: string;
 	job: string;
-	isCurrentUser: boolean;
 }
 
 export interface ITeamspace {
