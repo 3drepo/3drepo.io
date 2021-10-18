@@ -15,11 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src } = require('../../../../../../../../helper/path');
+const { src, modelFolder } = require('../../../../../../../../helper/path');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
-jest.mock('../../../../../../../../../../src/v5/utils/permissions/permissions');
+const MockExpressRequest = require('mock-express-request');
+const FormData = require('form-data');
+const fs = require('fs');
+const path = require('path');
+
+jest.mock('../../../../../../../../../../src/v5/utils/quota');
+const Quota = require(`${src}/utils/quota`);
 const Revisions = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -75,7 +81,46 @@ const testValidateUpdateRevisionData = () => {
 		});
 	});
 };
+const createRequestWithFile = (teamspace, unsupportedFile = false) => {
+	const form = new FormData();
+	form.append('file',
+		fs.createReadStream(path.join(modelFolder, unsupportedFile ? 'dummy.png' : 'dummy.obj')));
+
+	const req = new MockExpressRequest({
+		method: 'POST',
+		host: 'localhost',
+		url: `/${teamspace}/upload`,
+		headers: form.getHeaders(),
+	});
+
+	form.pipe(req);
+	req.params = { teamspace };
+	return req;
+};
+
+Quota.sufficientQuota.mockImplementation((ts) => (ts === 'noQuota' ? Promise.reject(templates.quotaLimitExceeded) : Promise.resolve()));
+
+const testValidateNewRevisionData = () => {
+	describe.each([
+		['Request with valid data', createRequestWithFile('ts')],
+		['Request with unsupported model file', createRequestWithFile('ts', true), templates.unsupportedFileFormat],
+		['Request with insufficient quota', createRequestWithFile('noQuota'), templates.quotaLimitExceeded],
+	])('Check new revision data', (desc, req, error) => {
+		test(`${desc} should ${error ? `fail with ${error.code}` : ' succeed and next() should be called'}`, async () => {
+			const mockCB = jest.fn(() => {});
+			await Revisions.validateNewRevisionData(req, {}, mockCB);
+			if (error) {
+				expect(mockCB.mock.calls.length).toBe(0);
+				expect(Responder.respond.mock.calls.length).toBe(1);
+				expect(Responder.respond.mock.results[0].value.code).toEqual(error.code);
+			} else {
+				expect(mockCB.mock.calls.length).toBe(1);
+			}
+		});
+	});
+};
 
 describe('middleware/dataConverter/revisions', () => {
 	testValidateUpdateRevisionData();
+	testValidateNewRevisionData();
 });

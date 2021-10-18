@@ -16,12 +16,12 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
-const Yup = require('yup');
 const Path = require('path');
+const Yup = require('yup');
 const { respond } = require('../../../../../../../utils/responder');
+const { singleFileUpload } = require('../../../../../multer');
 const { sufficientQuota } = require('../../../../../../../utils/quota');
 const { validateMany } = require('../../../../../../common');
-const { singleFileUpload } = require('../../../../../multer');
 
 const Revisions = {};
 
@@ -52,24 +52,26 @@ Revisions.validateUpdateRevisionData = async (req, res, next) => {
 };
 
 const fileFilter = async (req, file, cb) => {
-	const { originalname, size } = file;
-	const { teamspace } = req.params;
 	try {
+		const { originalname, size } = file;
+		const { teamspace } = req.params;
 		const fileExt = Path.extname(originalname);
-		if (!ACCEPTED_MODEL_EXT.includes()) {
-			throw createResponseCode(templates.unsupportedFileFormat, `${fileExt} is not a supported model format`);
+		if (!ACCEPTED_MODEL_EXT.includes(fileExt)) {
+			const err = createResponseCode(templates.unsupportedFileFormat, `${fileExt} is not a supported model format`);
+			cb(err, false);
+		} else {
+			await sufficientQuota(teamspace, size);
+			cb(null, true);
 		}
-		await sufficientQuota(teamspace, size);
-		cb(null, true);
 	} catch (err) {
 		cb(err, false);
 	}
 };
 
 const validateRevisionUpload = async (req, res, next) => {
-
+	next();
 };
 
-Revisions.validateNewRevisionData = validateMany(singleFileUpload('file', fileFilter), validateRevisionUpload);
+Revisions.validateNewRevisionData = validateMany([singleFileUpload('file', fileFilter), validateRevisionUpload]);
 
 module.exports = Revisions;
