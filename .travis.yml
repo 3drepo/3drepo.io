@@ -51,7 +51,7 @@ matrix:
         - sudo systemctl start mongod
         - sudo systemctl status mongod && cat /etc/mongod.conf
         - echo $(mongod --version)
-        - mongod -f /etc/mongod.conf &
+        - sudo mongod -f /etc/mongod.conf &
         # - until nc -z localhost 27017; do echo Waiting for MongoDB; sleep 1; done
         - mkdir -p submodules
         - test_ver=`cat backend/testDBVersion`
