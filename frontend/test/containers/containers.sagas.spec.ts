@@ -39,19 +39,6 @@ describe('Containers: sagas', () => {
 			.put(ContainersActions.toggleFavouriteSuccess(projectId, containerId))
 			.silentRun();
 		})
-
-		it('should call addFavourite with 404', async () => {
-			mockServer
-			.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
-			.reply(404)
-
-			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.addFavourite(teamspace, projectId, containerId))
-			.silentRun()
-			.then(({ effects }: any) => {
-				expect(effects.put).toBeUndefined();
-			})
-		})
 	})
 
 	describe('removeFavourite', () => {
@@ -64,19 +51,6 @@ describe('Containers: sagas', () => {
 			.dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
 			.put(ContainersActions.toggleFavouriteSuccess(projectId, containerId))
 			.silentRun();
-		})
-
-		it('should call removeFavourite  with 404', async () => {
-			mockServer
-			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
-			.reply(404)
-
-			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
-			.silentRun()
-			.then(({ effects }: any) => {
-				expect(effects.put).toBeUndefined();
-			});
 		})
 	})
 

@@ -32,8 +32,8 @@ import { prepareContainersData } from './containers.helpers';
 
 export function* addFavourites({ containerId, teamspace, projectId }: ExtendedAction<FavouritePayload>) {
 	try {
-		yield API.addFavourites({ teamspace, containerId, projectId });
 		yield put(ContainersActions.toggleFavouriteSuccess(projectId, containerId));
+		yield API.addFavourites({ teamspace, containerId, projectId });
 	} catch (e) {
 		console.error(e);
 	}
@@ -41,8 +41,8 @@ export function* addFavourites({ containerId, teamspace, projectId }: ExtendedAc
 
 export function* removeFavourites({ containerId, teamspace, projectId }: ExtendedAction<FavouritePayload>) {
 	try {
-		yield API.removeFavourites({ containerId, teamspace, projectId });
 		yield put(ContainersActions.toggleFavouriteSuccess(projectId, containerId));
+		yield API.removeFavourites({ containerId, teamspace, projectId });
 	} catch (e) {
 		console.error(e);
 	}
