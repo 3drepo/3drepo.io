@@ -62,7 +62,6 @@ matrix:
         - cd backend && mongorestore
         - cd ../../../
         - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
-
         # Disable alluxio connection check
         #- until nc -z localhost 39999; do echo Waiting for Alluxio; sleep 1; done
 
