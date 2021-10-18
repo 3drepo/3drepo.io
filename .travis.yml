@@ -46,7 +46,7 @@ matrix:
         - echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/5.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-5.0.list
         - sudo apt-get update
         - sudo apt-get install -y gnupg mongodb-org=5.0.2 mongodb-org-database=5.0.2 mongodb-org-server=5.0.2 mongodb-org-shell=5.0.2 mongodb-org-mongos=5.0.2 mongodb-org-tools=5.0.2
-        - sudo wget https://github.com/mikefarah/yq/releases/download/v4.13.4/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq && yq -i e '.net.bindIp |= "0.0.0.0"' /etc/mongod.conf
+        - sudo wget https://github.com/mikefarah/yq/releases/download/v4.13.4/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq && sudo yq -i e '.net.bindIp |= "0.0.0.0"' /etc/mongod.conf
         - sudo systemctl daemon-reload
         - sudo systemctl start mongod
         - sudo systemctl status mongod && cat /etc/mongod.conf
