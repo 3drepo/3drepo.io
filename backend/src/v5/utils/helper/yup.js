@@ -26,6 +26,10 @@ YupHelper.types.colorArr = Yup.array()
 	.of(Yup.number().min(0).max(255).integer())
 	.min(3).max(4);
 
+YupHelper.types.strings.code = Yup.string().min(1).max(50).strict(true)
+	// eslint-disable-next-line no-template-curly-in-string
+	.matches(/^[a-zA-Z0-9_]*$/, '${path} can only contain alpha-numeric characters or underscores');
+
 YupHelper.types.strings.username = Yup.string().min(2).max(65).strict(true)
 	.matches(/^[\w]{1,64}$/,
 	// eslint-disable-next-line no-template-curly-in-string

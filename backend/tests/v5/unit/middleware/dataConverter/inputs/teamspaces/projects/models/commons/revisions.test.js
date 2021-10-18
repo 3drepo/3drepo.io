@@ -81,10 +81,13 @@ const testValidateUpdateRevisionData = () => {
 		});
 	});
 };
-const createRequestWithFile = (teamspace, unsupportedFile = false) => {
+const createRequestWithFile = (teamspace, { tag, desc, importAnim }, unsupportedFile = false) => {
 	const form = new FormData();
 	form.append('file',
 		fs.createReadStream(path.join(modelFolder, unsupportedFile ? 'dummy.png' : 'dummy.obj')));
+	if (tag) form.append('tag', tag);
+	if (desc) form.append('desc', desc);
+	if (importAnim) form.append('importAnim', importAnim);
 
 	const req = new MockExpressRequest({
 		method: 'POST',
@@ -101,12 +104,18 @@ const createRequestWithFile = (teamspace, unsupportedFile = false) => {
 Quota.sufficientQuota.mockImplementation((ts) => (ts === 'noQuota' ? Promise.reject(templates.quotaLimitExceeded) : Promise.resolve()));
 
 const testValidateNewRevisionData = () => {
+	const standardBody = { tag: '123', description: 'this is a model', importAnim: false };
 	describe.each([
-		['Request with valid data', createRequestWithFile('ts')],
-		['Request with unsupported model file', createRequestWithFile('ts', true), templates.unsupportedFileFormat],
-		['Request with insufficient quota', createRequestWithFile('noQuota'), templates.quotaLimitExceeded],
-	])('Check new revision data', (desc, req, error) => {
+		['Request with valid data', 'ts', standardBody],
+		['Request with unsupported model file', 'ts', standardBody, true, templates.unsupportedFileFormat],
+		['Request with insufficient quota', 'noQuota', standardBody, false, templates.quotaLimitExceeded],
+		['Request with no body should fail', 'ts', {}, false, templates.invalidArguments],
+		['Request with just tag should pass', 'ts', { tag: 'dkfjd' }, false],
+		['Request with wrong tag type should fail', 'ts', { tag: false }, false, templates.invalidArguments],
+		['Request with tag that is not alphanumeric should fail', 'ts', { tag: '1-2-3' }, false, templates.invalidArguments],
+	])('Check new revision data', (desc, ts, bodyContent, badFile, error) => {
 		test(`${desc} should ${error ? `fail with ${error.code}` : ' succeed and next() should be called'}`, async () => {
+			const req = createRequestWithFile(ts, bodyContent, badFile);
 			const mockCB = jest.fn(() => {});
 			await Revisions.validateNewRevisionData(req, {}, mockCB);
 			if (error) {

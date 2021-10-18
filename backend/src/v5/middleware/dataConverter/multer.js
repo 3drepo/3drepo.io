@@ -37,7 +37,7 @@ const singleFileMulterPromise = (req, fileName, fileFilter) => new Promise((reso
 MulterHelper.singleFileUpload = (fileName = 'file', fileFilter) => async (req, res, next) => {
 	try {
 		await singleFileMulterPromise(req, fileName, fileFilter);
-		next();
+		await next();
 	} catch (err) {
 		respond(req, res, err);
 	}

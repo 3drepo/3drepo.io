@@ -18,6 +18,7 @@
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const Path = require('path');
 const Yup = require('yup');
+const YupHelper = require('../../../../../../../utils/helper/yup');
 const { respond } = require('../../../../../../../utils/responder');
 const { singleFileUpload } = require('../../../../../multer');
 const { sufficientQuota } = require('../../../../../../../utils/quota');
@@ -69,7 +70,19 @@ const fileFilter = async (req, file, cb) => {
 };
 
 const validateRevisionUpload = async (req, res, next) => {
-	next();
+	const schema = Yup.object().strict(true).noUnknown().required()
+		.shape({
+			tag: YupHelper.types.strings.code.required(),
+			desc: YupHelper.types.strings.blob,
+			importAnimations: Yup.bool().default(true),
+		});
+
+	try {
+		req.body = await schema.validate(req.body);
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
 };
 
 Revisions.validateNewRevisionData = validateMany([singleFileUpload('file', fileFilter), validateRevisionUpload]);
