@@ -1,7 +1,7 @@
 {
-  "Containers": "Contenedores",
-  "Federations": "Federaciones",
-  "Settings": "Configuraciones",
+  "Containers": "",
+  "Federations": "",
+  "Settings": "",
   "containers.all.collapse.tooltip.hide": "",
   "containers.all.collapse.tooltip.show": "",
   "containers.all.collapseTitle": "",
@@ -32,7 +32,6 @@
   "containers.list.item.latestRevision.status.queued": "",
   "containers.list.item.revisions": "",
   "containers.list.item.revisions.tooltip": "",
-  "containers.list.item.subtitle": "",
   "containers.list.item.title.tooltip": "",
   "containers.mainHeader.newContainer": "",
   "containers.mainHeader.uploadFile": "",
