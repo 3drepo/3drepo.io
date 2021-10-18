@@ -27,6 +27,9 @@ let agent;
 const users = {
 	tsAdmin: ServiceHelper.generateUserCredentials(),
 	noProjectAccess: ServiceHelper.generateUserCredentials(),
+	viewer: ServiceHelper.generateUserCredentials(),
+	commenter: ServiceHelper.generateUserCredentials(),
+	projectAdmin: ServiceHelper.generateUserCredentials(),
 };
 
 const nobody = ServiceHelper.generateUserCredentials();
@@ -36,7 +39,20 @@ const teamspace = ServiceHelper.generateRandomString();
 const project = {
 	id: ServiceHelper.generateUUIDString(),
 	name: ServiceHelper.generateRandomString(),
+	permissions: [{ user: users.projectAdmin.user, permissions: ['admin_project'] }],
 };
+
+const views = [
+	ServiceHelper.generateUUIDString(),
+	ServiceHelper.generateUUIDString(),
+	ServiceHelper.generateUUIDString(),
+];
+
+const legends = [
+	ServiceHelper.generateUUIDString(),
+	ServiceHelper.generateUUIDString(),
+	ServiceHelper.generateUUIDString(),
+];
 
 const modelSettings = [
 	{
@@ -44,6 +60,7 @@ const modelSettings = [
 		name: ServiceHelper.generateRandomString(),
 		isFavourite: true,
 		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true },
+		permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
@@ -57,7 +74,7 @@ const modelSettings = [
 	},
 ];
 
-const container = modelSettings.find(({ properties }) => !properties.federate);
+const federation = modelSettings.find(({ properties }) => !properties.federate);
 
 const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
@@ -71,11 +88,23 @@ const setupData = async () => {
 		model.name,
 		model.properties,
 	));
+	const viewsProms = views.map((view) => ServiceHelper.db.createView(
+		teamspace,
+		federation._id,
+		view,
+	));
+	const legendsProms = legends.map((legend) => ServiceHelper.db.createLegend(
+		teamspace,
+		federation._id,
+		legend,
+	));
 	return Promise.all([
 		...userProms,
 		...modelProms,
 		ServiceHelper.db.createUser(nobody),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, modelSettings.map(({ _id }) => _id)),
+		...viewsProms,
+		...legendsProms,
 	]);
 };
 
@@ -139,9 +168,9 @@ const testAppendFavourites = () => {
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
-		test('should fail if the list containers a container', async () => {
+		test('should fail if the list federations a federation', async () => {
 			const res = await agent.patch(`${route}?key=${users.noProjectAccess.apiKey}`)
-				.expect(templates.invalidArguments.status).send({ federations: [container._id] });
+				.expect(templates.invalidArguments.status).send({ federations: [federation._id] });
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
@@ -185,9 +214,9 @@ const testDeleteFavourites = () => {
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
-		test('should fail if the favourites list provided has a container', async () => {
+		test('should fail if the favourites list provided has a federation', async () => {
 			const res = await agent.delete(`${route}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.invalidArguments.status).send({ federations: [container._id] });
+				.expect(templates.invalidArguments.status).send({ federations: [federation._id] });
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
@@ -204,6 +233,99 @@ const testDeleteFavourites = () => {
 	});
 };
 
+const testUpdateFederationSettings = () => {
+	const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federation._id}`;
+	describe('Update the settings of a federation', () => {
+		test('should fail without a valid session', async () => {
+			const res = await agent.patch(`${route}`)
+				.send({ name: 'name' }).expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user is not a member of the teamspace', async () => {
+			const res = await agent.patch(`${route}?key=${nobody.apiKey}`)
+				.send({ name: 'name' }).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if the user does not have access to the project', async () => {
+			const res = await agent.patch(`${route}?key=${users.noProjectAccess.apiKey}`)
+				.send({ name: 'name' }).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		});
+
+		test('should fail if the user does not have adequate permissions to edit the federation (viewer)', async () => {
+			const res = await agent.patch(`${route}?key=${users.viewer.apiKey}`)
+				.send({ name: 'name' }).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		});
+
+		test('should fail if the user does not have adequate permissions to edit the federation (commenter)', async () => {
+			const res = await agent.patch(`${route}?key=${users.commenter.apiKey}`)
+				.send({ name: 'name' }).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		});
+
+		test('should fail if the project does not exist', async () => {
+			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/federations/${federation._id}?key=${users.tsAdmin.apiKey}`)
+				.send({ name: 'name' }).expect(templates.projectNotFound.status);
+			expect(res.body.code).toEqual(templates.projectNotFound.code);
+		});
+
+		test('should fail if the federation does not exist', async () => {
+			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/dfsfaewfc?key=${users.tsAdmin.apiKey}`)
+				.send({ name: 'name' }).expect(templates.federationNotFound.status);
+			expect(res.body.code).toEqual(templates.federationNotFound.code);
+		});
+
+		test('should fail if a body param is not of the expected type', async () => {
+			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.send({ name: 123 }).expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if the body of the request contains extra payload', async () => {
+			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.send({ name: 'name', extra: 123 }).expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if the defaultView is not found', async () => {
+			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.send({ name: 'name', defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8' }).expect(templates.viewNotFound.status);
+			expect(res.body.code).toEqual(templates.viewNotFound.code);
+		});
+
+		test('should fail if the defaultLegend is not found', async () => {
+			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.send({ name: 'name', defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8' }).expect(templates.legendNotFound.status);
+			expect(res.body.code).toEqual(templates.legendNotFound.code);
+		});
+
+		test('should update a federation\'s settings if the body of the request is as expected', async () => {
+			const payload = {
+				name: 'newName',
+				desc: 'newDesc',
+				surveyPoints: [
+					{
+						position: [7, 8, 9],
+						latLong: [10, 11],
+					},
+				],
+				angleFromNorth: 180,
+				elevation: 150,
+				type: 'someType',
+				unit: 'mm',
+				code: 'CODE1',
+				defaultView: views[1],
+				defaultLegend: legends[1],
+			};
+			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.send(payload).expect(templates.ok.status);
+		});
+	});
+};
+
 describe('E2E routes/teamspaces/projects/federations', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -214,4 +336,5 @@ describe('E2E routes/teamspaces/projects/federations', () => {
 	testGetFederationList();
 	testAppendFavourites();
 	testDeleteFavourites();
+	testUpdateFederationSettings();
 });

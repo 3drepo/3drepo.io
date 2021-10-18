@@ -359,9 +359,20 @@ const establishRoutes = () => {
 	 *               angleFromNorth:
 	 *                 type: integer
 	 *                 example: 100
+	 *               elevation:
+	 *                 type: integer
+	 *                 example: 100
 	 *               unit:
 	 *                 type: string
 	 *                 example: mm
+	 *               defaultView:
+	 *                 type: string
+	 *                 format: uuid
+	 *                 example: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+	 *               defaultLegend:
+	 *                 type: string
+	 *                 format: uuid
+     *                 example: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"

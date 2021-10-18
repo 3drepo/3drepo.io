@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { hasAccessToTeamspace, isProjectAdmin } = require('../../../../middleware/permissions/permissions');
 const Federations = require('../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../utils/sessions');
-const { hasAccessToTeamspace, isProjectAdmin } = require('../../../../middleware/permissions/permissions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
 const { validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/modelSettings');
@@ -265,9 +265,20 @@ const establishRoutes = () => {
 	 *               angleFromNorth:
 	 *                 type: integer
 	 *                 example: 100
+	 *               elevation:
+	 *                 type: integer
+	 *                 example: 100
 	 *               unit:
 	 *                 type: string
 	 *                 example: mm
+	 *               defaultView:
+	 *                 type: string
+	 *                 format: uuid
+	 *                 example: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+	 *               defaultLegend:
+	 *                 type: string
+	 *                 format: uuid
+     *                 example: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -276,7 +287,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: updates the settings of the federation
 	 */
-	 router.patch('/:federation', isProjectAdmin, validateUpdateSettingsData, updateSettings);
+	router.patch('/:federation', isProjectAdmin, validateUpdateSettingsData, updateSettings);
 	return router;
 };
 

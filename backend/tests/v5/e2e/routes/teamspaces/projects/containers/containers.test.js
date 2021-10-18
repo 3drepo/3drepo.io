@@ -29,6 +29,7 @@ const users = {
 	noProjectAccess: ServiceHelper.generateUserCredentials(),
 	viewer: ServiceHelper.generateUserCredentials(),
 	commenter: ServiceHelper.generateUserCredentials(),
+	projectAdmin: ServiceHelper.generateUserCredentials(),
 };
 
 const nobody = ServiceHelper.generateUserCredentials();
@@ -38,7 +39,20 @@ const teamspace = ServiceHelper.generateRandomString();
 const project = {
 	id: ServiceHelper.generateUUIDString(),
 	name: ServiceHelper.generateRandomString(),
+	permissions: [{ user: users.projectAdmin.user, permissions: ['admin_project'] }],
 };
+
+const views = [
+	ServiceHelper.generateUUIDString(),
+	ServiceHelper.generateUUIDString(),
+	ServiceHelper.generateUUIDString(),
+];
+
+const legends = [
+	ServiceHelper.generateUUIDString(),
+	ServiceHelper.generateUUIDString(),
+	ServiceHelper.generateUUIDString(),
+];
 
 const models = [
 	{
@@ -69,6 +83,8 @@ const revisions = [
 const modelWithRev = models[0];
 const modelWithoutRev = models[1];
 const federation = models[2];
+const modelWithViews = models[0];
+const modelWithLegends = models[0];
 
 const latestRevision = revisions.filter((rev) => !rev.void)
 	.reduce((a, b) => (a.timestamp > b.timestamp ? a : b));
@@ -85,12 +101,24 @@ const setupData = async () => {
 		model.name,
 		model.properties,
 	));
+	const viewsProms = views.map((view) => ServiceHelper.db.createView(
+		teamspace,
+		modelWithViews._id,
+		view,
+	));
+	const legendsProms = legends.map((legend) => ServiceHelper.db.createLegend(
+		teamspace,
+		modelWithLegends._id,
+		legend,
+	));
 	return Promise.all([
 		...userProms,
 		...modelProms,
 		ServiceHelper.db.createUser(nobody),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
 		...revisions.map((revision) => ServiceHelper.db.createRevision(teamspace, modelWithRev._id, revision)),
+		...viewsProms,
+		...legendsProms,
 	]);
 };
 
@@ -276,6 +304,99 @@ const testDeleteFavourites = () => {
 	});
 };
 
+const testUpdateContainerSettings = () => {
+	const route = (container) => `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container}`;
+	describe('Update the settings of a container', () => {
+		test('should fail without a valid session', async () => {
+			const res = await agent.patch(route(modelWithViews._id))
+				.send({ name: 'name' }).expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user is not a member of the teamspace', async () => {
+			const res = await agent.patch(`${route(modelWithViews._id)}?key=${nobody.apiKey}`)
+				.send({ name: 'name' }).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if the user does not have access to the project', async () => {
+			const res = await agent.patch(`${route(modelWithViews._id)}?key=${users.noProjectAccess.apiKey}`)
+				.send({ name: 'name' }).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		});
+
+		test('should fail if the user does not have adequate permissions to edit the container (viewer)', async () => {
+			const res = await agent.patch(`${route(modelWithViews._id)}?key=${users.viewer.apiKey}`)
+				.send({ name: 'name' }).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		});
+
+		test('should fail if the user does not have adequate permissions to edit the container (commenter)', async () => {
+			const res = await agent.patch(`${route(modelWithViews._id)}?key=${users.commenter.apiKey}`)
+				.send({ name: 'name' }).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		});
+
+		test('should fail if the project does not exist', async () => {
+			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/containers/${modelWithViews._id}?key=${users.tsAdmin.apiKey}`)
+				.send({ name: 'name' }).expect(templates.projectNotFound.status);
+			expect(res.body.code).toEqual(templates.projectNotFound.code);
+		});
+
+		test('should fail if the container does not exist', async () => {
+			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/dfsfaewfc?key=${users.tsAdmin.apiKey}`)
+				.send({ name: 'name' }).expect(templates.containerNotFound.status);
+			expect(res.body.code).toEqual(templates.containerNotFound.code);
+		});
+
+		test('should fail if a body param is not of the expected type', async () => {
+			const res = await agent.patch(`${route(modelWithViews._id)}?key=${users.tsAdmin.apiKey}`)
+				.send({ name: 123 }).expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if the body of the request contains extra payload', async () => {
+			const res = await agent.patch(`${route(modelWithViews._id)}?key=${users.tsAdmin.apiKey}`)
+				.send({ name: 'name', extra: 123 }).expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if the defaultView is not found', async () => {
+			const res = await agent.patch(`${route(modelWithViews._id)}?key=${users.tsAdmin.apiKey}`)
+				.send({ name: 'name', defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8' }).expect(templates.viewNotFound.status);
+			expect(res.body.code).toEqual(templates.viewNotFound.code);
+		});
+
+		test('should fail if the defaultLegend is not found', async () => {
+			const res = await agent.patch(`${route(modelWithViews._id)}?key=${users.tsAdmin.apiKey}`)
+				.send({ name: 'name', defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8' }).expect(templates.legendNotFound.status);
+			expect(res.body.code).toEqual(templates.legendNotFound.code);
+		});
+
+		test('should update a container\'s settings if the body of the request is as expected', async () => {
+			const payload = {
+				name: 'newName',
+				desc: 'newDesc',
+				surveyPoints: [
+					{
+						position: [7, 8, 9],
+						latLong: [10, 11],
+					},
+				],
+				angleFromNorth: 180,
+				elevation: 150,
+				type: 'someType',
+				unit: 'mm',
+				code: 'CODE1',
+				defaultView: views[1],
+				defaultLegend: legends[1],
+			};
+			await agent.patch(`${route(modelWithViews._id)}?key=${users.tsAdmin.apiKey}`)
+				.send(payload).expect(templates.ok.status);
+		});
+	});
+};
+
 describe('E2E routes/teamspaces/projects/containers', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -287,4 +408,5 @@ describe('E2E routes/teamspaces/projects/containers', () => {
 	testGetContainerStats();
 	testAppendFavourites();
 	testDeleteFavourites();
+	testUpdateContainerSettings();
 });

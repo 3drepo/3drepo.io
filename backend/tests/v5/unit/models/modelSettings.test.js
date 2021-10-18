@@ -145,36 +145,90 @@ const testGetFederations = () => {
 };
 
 const testUpdateModelSettings = () => {
-	const updateObject = {
-		$set: {
-			properties: {
-				unit: 'm',
-				code: 'someCode',
-			},
-			name: 'someName',
-		},
-		$unset: {
-			defaultView: 1,
-		},
-	};
-
-	const checkResults = (fn, model) => {
+	const checkResults = (fn, model, updateObject) => {
 		expect(fn.mock.calls.length).toBe(1);
 		expect(fn.mock.calls[0][2]).toEqual({ _id: model });
 		expect(fn.mock.calls[0][3]).toEqual(updateObject);
 	};
 
 	describe('UpdateModelSettings', () => {
-		test('Should update the settings of a model', async () => {
+		test('Should update the settings of a model with unset', async () => {
 			const payload = {
 				name: 'someName',
 				unit: 'm',
 				code: 'someCode',
 				defaultView: null,
 			};
+
+			const updateObject = {
+				$set: {
+					properties: {
+						unit: 'm',
+						code: 'someCode',
+					},
+					name: 'someName',
+				},
+				$unset: {
+					defaultView: 1,
+				},
+			};
+
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
 			await Model.updateModelSettings('someTS', 'someModel', payload);
-			checkResults(fn, 'someModel');
+			checkResults(fn, 'someModel', updateObject);
+		});
+
+		test('Should update the settings of a model without unset', async () => {
+			const payload = {
+				name: 'someName',
+				unit: 'm',
+				code: 'someCode',
+				defaultView: '123',
+			};
+
+			const updateObject = {
+				$set: {
+					properties: {
+						unit: 'm',
+						code: 'someCode',
+					},
+					name: 'someName',
+					defaultView: '123',
+				},
+			};
+
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
+			await Model.updateModelSettings('someTS', 'someModel', payload);
+			checkResults(fn, 'someModel', updateObject);
+		});
+
+		test('Should update the settings of a model and ignore a null value that cant be unset', async () => {
+			const payload = {
+				name: 'someName',
+				unit: null,
+				code: 'someCode',
+				defaultView: '123',
+			};
+
+			const updateObject = {
+				$set: {
+					properties: {
+						code: 'someCode',
+					},
+					name: 'someName',
+					defaultView: '123',
+				},
+			};
+
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
+			await Model.updateModelSettings('someTS', 'someModel', payload);
+			checkResults(fn, 'someModel', updateObject);
+		});
+
+		test('Should update nothing if the payload is empty', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
+			await Model.updateModelSettings('someTS', 'someModel', {});
+			checkResults(fn, 'someModel', {});
 		});
 	});
 };

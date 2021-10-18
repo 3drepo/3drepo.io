@@ -27,7 +27,7 @@ ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
 		name: types.strings.title,
 		desc: types.strings.blob,
 		surveyPoints: Yup.array()
-		.of(
+			.of(
 				Yup.object().shape({
 					position: types.position.required(),
 					latLong: Yup.array().of(Yup.number()).required()
@@ -35,15 +35,17 @@ ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
 				}),
 			),
 		angleFromNorth: Yup.number(),
+		elevation: Yup.number(),
+		type: Yup.string(),
 		unit: types.strings.unit,
 		code: Yup.string().matches(/^[a-zA-Z0-9]{0,50}$/),
 		defaultView: types.id,
 		defaultLegend: types.id,
 	}).strict(true).noUnknown()
 		.required()
-		.test('at-least-one-property', 'you must provide at least one setting value', (value) => !!(value.name || value.desc || value.surveyPoints || value.angleFromNorth || value.unit
-			|| value.code || value.defaultView || value.defaultLegend));
-
+		.test('at-least-one-property', 'you must provide at least one setting value',
+			(value) => !!(value.name || value.desc || value.surveyPoints || value.angleFromNorth || value.elevation
+          || value.type || value.unit || value.code || value.defaultView || value.defaultLegend));
 	try {
 		await schema.validate(req.body);
 		next();

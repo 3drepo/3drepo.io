@@ -16,10 +16,10 @@
  */
 
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
-const Groups = require('./commons/groups');
 const { getFederations, updateModelSettings } = require('../../../../models/modelSettings');
-const { checkViewExists } = require('../../../../models/views');
+const Groups = require('./commons/groups');
 const { checkLegendExists } = require('../../../../models/legends');
+const { checkViewExists } = require('../../../../models/views');
 const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
 const { templates } = require('../../../../utils/responseCodes');

@@ -35,22 +35,14 @@ Permissions.isTeamspaceAdmin = async (teamspace, username) => {
 Permissions.hasAccessToTeamspace = hasAccessToTeamspace;
 
 Permissions.isProjectAdmin = async (teamspace, project, username) => {
-	const admins = await getProjectAdmins(teamspace, project);
-	return admins.includes(username);
+	const isTsAdmin = await Permissions.isTeamspaceAdmin(teamspace, username);
+	const projAdmins = await getProjectAdmins(teamspace, project);
+	return isTsAdmin || projAdmins.includes(username);
 };
 
 Permissions.hasProjectAdminPermissions = (perms, username) => perms.some(
 	({ user, permissions }) => user === username && permissions.includes(PROJECT_ADMIN),
 );
-
-const hasAdminPermissions = async (teamspace, project, username) => {
-	const isAdminArr = (await Promise.all([
-		Permissions.isTeamspaceAdmin(teamspace, username),
-		Permissions.isProjectAdmin(teamspace, project, username),
-	]));
-
-	return isAdminArr.filter((bool) => bool).length;
-};
 
 const modelType = {
 	CONTAINERS: 0,
@@ -75,7 +67,7 @@ const modelPermCheck = (permCheck, mode) => async (teamspace, project, modelID, 
 	}
 
 	if (adminCheck) {
-		const hasAdminPerms = await hasAdminPermissions(teamspace, project, username);
+		const hasAdminPerms = await Permissions.isProjectAdmin(teamspace, project, username);
 		if (hasAdminPerms) {
 			return true;
 		}
@@ -114,4 +106,5 @@ Permissions.hasCommenterAccessToContainer = modelPermCheck(
 Permissions.hasReadAccessToContainer = modelPermCheck(
 	(perm) => MODEL_READ_ROLES.includes(perm.permission), modelType.CONTAINERS,
 );
+
 module.exports = Permissions;

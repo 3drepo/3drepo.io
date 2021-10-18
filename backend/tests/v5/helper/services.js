@@ -96,6 +96,16 @@ db.createGroups = (teamspace, modelId, groups = []) => {
 	return DbHandler.insertMany(teamspace, `${modelId}.groups`, toInsert);
 };
 
+db.createView = (teamspace, modelId, view) => {
+	const formattedView = { _id: stringToUUID(view) };
+	return DbHandler.insertOne(teamspace, `${modelId}.views`, formattedView);
+};
+
+db.createLegend = (teamspace, modelId, legend) => {
+	const formattedLegend = { _id: stringToUUID(legend) };
+	return DbHandler.insertOne(teamspace, `${modelId}.sequences.legends`, formattedLegend);
+};
+
 ServiceHelper.generateUUIDString = () => uuidToString(generateUUID());
 ServiceHelper.generateUUID = () => generateUUID();
 ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex');
@@ -121,9 +131,17 @@ ServiceHelper.generateRandomModelProperties = () => ({
 		code: ServiceHelper.generateUUIDString(),
 		unit: 'm',
 	},
+	desc: 'random description',
 	type: ServiceHelper.generateUUIDString(),
 	timestamp: Date.now(),
 	status: 'ok',
+	surveyPoints: [
+		{
+			position: [1, 2, 3],
+			latLong: [4, 5],
+		},
+	],
+	anglefromNorth: 123,
 });
 
 ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {

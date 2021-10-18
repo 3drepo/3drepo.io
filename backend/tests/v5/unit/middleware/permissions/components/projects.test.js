@@ -29,8 +29,7 @@ const ProjectMiddlewares = require(`${src}/middleware/permissions/components/pro
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
-Permissions.isTeamspaceAdmin.mockImplementation((teamspace) => teamspace === 'ts');
-Permissions.isProjectAdmin.mockImplementation((teamspace, project) => project === 'pr');
+Permissions.isProjectAdmin.mockImplementation((teamspace, project) => teamspace === 'ts' || project === 'pr');
 Sessions.isSessionValid.mockImplementation((session) => !!session);
 Sessions.getUserFromSession.mockImplementation(() => 'hi');
 
