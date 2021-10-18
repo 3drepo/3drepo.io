@@ -45,10 +45,7 @@ matrix:
         - echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/5.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-5.0.list
         - sudo apt-get update
         - sudo apt-get install -y gnupg mongodb-org=5.0.2 mongodb-org-database=5.0.2 mongodb-org-server=5.0.2 mongodb-org-shell=5.0.2 mongodb-org-tools=5.0.2
-        - sudo systemctl daemon-reload
-        - sudo systemctl start mongod
-        - sudo systemctl status mongod && cat /etc/mongod.conf
-        - echo $(mongod --version)
+        - sudo systemctl daemon-reload && sudo systemctl start mongod && echo $(mongod --version)
         - mkdir -p submodules
         - test_ver=`cat backend/testDBVersion`
         - cd submodules
@@ -56,7 +53,6 @@ matrix:
         - cd tests
         - git checkout $test_ver
         - git status
-        - sudo cat /var/log/mongodb/mongod.log
         - cd backend && mongorestore
         - cd ../../../
         - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
