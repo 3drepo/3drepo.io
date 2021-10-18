@@ -198,7 +198,7 @@ describe("Check DB handler", function() {
 	describe("find", function () {
 		it("find jobs should succeed", async function() {
 			const jobs = await db.find(account, "jobs", {});
-			expect(jobs).to.deep.equal(goldenJobs);
+			expect(jobs.sort()).to.deep.equal(goldenJobs.sort());
 		});
 
 		it("find Architect job should succeed", async function() {
