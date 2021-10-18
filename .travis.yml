@@ -45,10 +45,10 @@ matrix:
         - wget -qO - https://www.mongodb.org/static/pgp/server-5.0.asc | sudo apt-key add -
         - echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/5.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-5.0.list
         - sudo apt-get update
-        - sudo apt-get install -y gnupg mongodb-org=5.0.2 mongodb-org-database=5.0.2 mongodb-org-server=5.0.2 mongodb-org-shell=5.0.2 mongodb-org-mongos=5.0.2 mongodb-org-tools=5.0.2
+        - sudo apt-get install -y gnupg mongodb-org=5.0.2 mongodb-org-database=5.0.2 mongodb-org-server=5.0.2 mongodb-org-shell=5.0.2 mongodb-org-tools=5.0.2
         # - sudo sed -i "s/bindIp:\s127.0.0.1/bindIp:\s0.0.0.0/g" /etc/mongod.conf
         - sudo systemctl daemon-reload
-        - sudo systemctl start mongod
+        # - sudo systemctl start mongod
         - sudo systemctl status mongod && cat /etc/mongod.conf
         - echo $(mongod --version)
         - sudo mongod -f /etc/mongod.conf &
