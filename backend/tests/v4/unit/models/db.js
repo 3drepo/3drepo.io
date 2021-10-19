@@ -466,7 +466,7 @@ describe("Check DB handler", function() {
 				await db.runCommand(account, createRoleCmd);
 				throw {}; // should've failed at previous line
 			} catch (err) {
-				expect(err.code).to.equal(11000);
+				expect(err.code).to.equal(51002);
 			}
 		});
 
