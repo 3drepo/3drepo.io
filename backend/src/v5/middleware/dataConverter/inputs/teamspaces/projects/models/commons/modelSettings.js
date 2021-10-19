@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
+const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const Yup = require('yup');
-const { respond } = require('../../../../../utils/responder');
-const { types } = require('../../../../../utils/helper/yup');
+const { respond } = require('../../../../../../../utils/responder');
+const { types } = require('../../../../../../../utils/helper/yup');
+const { stringToUUID } = require('../../../../../../../utils/helper/uuids')
 
 const ModelSettings = {};
 
@@ -30,28 +31,34 @@ ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
 			.of(
 				Yup.object().shape({
 					position: types.position.required(),
-					latLong: Yup.array().of(Yup.number()).required()
-						.test('test-divisibleByTwo', 'latLong array must be divisible by 2', (array) => array.length % 2 === 0),
+					latLong: Yup.array().of(Yup.number()).length(2).required(),						
 				}),
 			),
-		angleFromNorth: Yup.number(),
-		elevation: Yup.number(),
+		angleFromNorth: Yup.number().min(0).max(360),
 		type: Yup.string(),
 		unit: types.strings.unit,
 		code: Yup.string().matches(/^[a-zA-Z0-9]{0,50}$/),
-		defaultView: types.id,
+		defaultView: types.id.nullable(),
 		defaultLegend: types.id,
 	}).strict(true).noUnknown()
 		.required()
-		.test('at-least-one-property', 'you must provide at least one setting value',
-			(value) => !!(value.name || value.desc || value.surveyPoints || value.angleFromNorth || value.elevation
-          || value.type || value.unit || value.code || value.defaultView || value.defaultLegend));
+		.test('at-least-one-property', 'you must provide at least one setting value', (value) => Object.keys(value).length);
 	try {
 		await schema.validate(req.body);
+		convertBodyUUIDs(req.body);
 		next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };
+
+const convertBodyUUIDs = (payload) => {
+	if (payload) {
+		Object.keys(payload).forEach((key) => {
+			payload[key] = stringToUUID(payload[key]);
+		});
+	}
+};
+
 
 module.exports = ModelSettings;

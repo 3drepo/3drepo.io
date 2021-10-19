@@ -17,7 +17,6 @@
 
 const Views = {};
 const db = require('../handler/db');
-const { stringToUUID } = require('../utils/helper/uuids');
 const { templates } = require('../utils/responseCodes');
 
 const colName = 'views';
@@ -25,7 +24,7 @@ const colName = 'views';
 const getCollectionName = (model) => `${model}.${colName}`;
 
 Views.checkViewExists = async (teamspace, model, view) => {
-	const foundView = await db.findOne(teamspace, getCollectionName(model), { _id: stringToUUID(view) });
+	const foundView = await db.findOne(teamspace, getCollectionName(model), { _id: view });
 
 	if (!foundView) {
 		throw templates.viewNotFound;

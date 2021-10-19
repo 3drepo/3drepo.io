@@ -487,7 +487,6 @@ const testUpdateFederationSettings = () => {
 					},
 				],
 				angleFromNorth: 180,
-				elevation: 150,
 				type: 'someType',
 				unit: 'mm',
 				code: 'CODE1',

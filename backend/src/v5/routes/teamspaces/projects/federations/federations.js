@@ -21,7 +21,7 @@ const { Router } = require('express');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
-const { validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/modelSettings');
+const { validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings');
 
 const getFederationList = (req, res) => {
 	const user = getUserFromSession(req.session);
@@ -352,9 +352,6 @@ const establishRoutes = () => {
 	 *                         type: float
 	 *                         example: 23.45
 	 *               angleFromNorth:
-	 *                 type: integer
-	 *                 example: 100
-	 *               elevation:
 	 *                 type: integer
 	 *                 example: 100
 	 *               unit:

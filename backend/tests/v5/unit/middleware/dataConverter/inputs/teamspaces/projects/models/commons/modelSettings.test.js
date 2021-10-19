@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src } = require('../../../../../../helper/path');
+const { src } = require('../../../../../../../../../../helper/path');
 
-jest.mock('../../../../../../../../src/v5/utils/responder');
+jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
-jest.mock('../../../../../../../../src/v5/utils/permissions/permissions');
-const ModelSettings = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/modelSettings`);
+jest.mock('../../../../../../../../../../src/v5/utils/permissions/permissions');
+const ModelSettings = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings`);
 const { cloneDeep } = require(`${src}/utils/helper/objects`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -45,9 +45,6 @@ const testValidateUpdateSettingsData = () => {
 		[{ body: { angleFromNorth: 'invalid' } }, false, 'with invalid angleFromNorth'],
 		[{ body: { angleFromNorth: null } }, false, 'with null angleFromNorth'],
 		[{ body: { angleFromNorth: 123 } }, true, 'with valid angleFromNorth'],
-		[{ body: { elevation: 'invalid' } }, false, 'with invalid elevation'],
-		[{ body: { elevation: null } }, false, 'with null elevation'],
-		[{ body: { elevation: 123 } }, true, 'with valid elevation'],
 		[{ body: { type: 123 } }, false, 'with invalid type'],
 		[{ body: { type: null } }, false, 'with null type'],
 		[{ body: { type: 'valid' } }, true, 'with valid type'],
@@ -80,6 +77,6 @@ const testValidateUpdateSettingsData = () => {
 	});
 };
 
-describe('middleware/dataConverter/inputs/teamspaces/projects/modelSettings', () => {
+describe('middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings', () => {
 	testValidateUpdateSettingsData();
 });
