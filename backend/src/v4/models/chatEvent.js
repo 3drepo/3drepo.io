@@ -17,8 +17,8 @@
 
 "use strict";
 const { v5Path } = require("../../interop");
-const EventsManager = require(`${v5Path}/services/eventsManager`);
-const EventsV5 = require(`${v5Path}/services/eventsManager.constants`).events;
+const EventsManager = require(`${v5Path}/services/eventsManager/eventsManager`);
+const EventsV5 = require(`${v5Path}/services/eventsManager/eventsManager.constants`).events;
 const utils = require("../utils");
 const Queue = require("../services/queue");
 

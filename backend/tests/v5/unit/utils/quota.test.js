@@ -76,7 +76,7 @@ const testSufficientQuota = () => {
 		return Promise.resolve({ customData: { billing: { subscriptions } } });
 	});
 
-	jest.spyOn(db, 'listCollections').mockImplementation((ts) => Promise.resolve(ts === tsWithSomeUsage ? ['a.issues.ref'] : []));
+	jest.spyOn(db, 'listCollections').mockImplementation((ts) => Promise.resolve(ts === tsWithSomeUsage ? [{ name: 'a.issues.ref' }] : []));
 	jest.spyOn(db, 'aggregate').mockImplementation(() => Promise.resolve([{ _id: null, total: 1024 * 1024 }]));
 
 	describe.each([

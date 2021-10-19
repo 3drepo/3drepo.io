@@ -16,11 +16,14 @@
  */
 
 const { copyFile, mkdir, rm, writeFile } = require('fs/promises');
+const { createResponseCode, templates } = require('../utils/responseCodes');
 const amqp = require('amqplib');
+const { events } = require('./eventsManager/eventsManager.constants');
 const { generateUUIDString } = require('../utils/helper/uuids');
+const { publish } = require('./eventsManager/eventsManager');
 const { cn_queue: queueConfig } = require('../utils/config');
 const queueLabel = require('../utils/logger').labels.queue;
-const { logger } = require('../utils/logger').logWithLabel(queueLabel);
+const logger = require('../utils/logger').logWithLabel(queueLabel);
 
 const Queue = {};
 
@@ -35,19 +38,19 @@ let connectionPromise;
 
 const reconnect = () => {
 	if (++retry <= maxRetries) {
-		logger.error(`Trying to reconnect[${retry}/${maxRetries}]...`);
+		logger.logError(`Trying to reconnect[${retry}/${maxRetries}]...`);
 		// eslint-disable-next-line no-use-before-define
 		return connect();
 	}
-	logger.error('Retries exhausted');
-	return Promise.reject();// FIXME: connection error;
+	logger.logError('Retries exhausted');
+	throw createResponseCode(templates.queueConnectionError, 'Max number of retries reached.');
 	// FIXME EMAIL alert?
 };
 
 const connect = async () => {
 	if (connectionPromise) return connectionPromise;
 	try {
-		logger.info(`Connecting to ${queueConfig.host}...`);
+		logger.logInfo(`Connecting to ${queueConfig.host}...`);
 		connectionPromise = amqp.connect(queueConfig.host);
 		const conn = await connectionPromise;
 		retry = 0;
@@ -58,17 +61,17 @@ const connect = async () => {
 				// this can be called more than once for some reason. Use a boolean to distinguish first timers.
 				connClosed = true;
 				connectionPromise = undefined;
-				logger.info('Connection closed.');
+				logger.logInfo('Connection closed.');
 				reconnect();
 			}
 		});
 
 		conn.on('error', (err) => {
-			logger.error(`Connection error: ${err.message}`);
+			logger.logError(`Connection error: ${err.message}`);
 		});
 		return conn;
 	} catch (err) {
-		logger.error(`Failed to establish connection to rabbit mq: ${err}.`);
+		logger.logError(`Failed to establish connection to rabbit mq: ${err}.`);
 		return reconnect();
 	}
 };
@@ -84,17 +87,18 @@ const queueJob = async (queueName, correlationId, msg) => {
 		const meta = { correlationId, persistent: true };
 
 		await channel.sendToQueue(queueName, dataBuf, meta);
-		logger.logInfo(`[ADD][${queueName}]\tOK\t${correlationId}\t${msg.toString()}`);
+		logger.logInfo(`[${queueName}][INSERT]\tOK\t${correlationId}\t${msg.toString()}`);
+		await channel.close();
 	} catch (err) {
-		logger.logError(`[ADD][${queueName}]\t${err.message}\t${correlationId}\t${msg.toString()}`);
+		logger.logError(`[${queueName}][INSERT]\t${err.message}\t${correlationId}\t${msg.toString()}`);
 		// FIXME Mailer.sendQueueFailedEmail({ message }).catch(() => {});
-		// FIXME: return Promise.reject(responseCodes.QUEUE_CONN_ERR);
+		throw createResponseCode(templates.queueConnectionError, err.message);
 	}
 };
 
 const queueModelJob = (corId, msg) => queueJob(modelq, corId, msg);
 
-Queue.queueModelUpload = async (teamspace, model, owner, { tag, desc, importAnimations }, { originalname, path }) => {
+Queue.queueModelUpload = async (teamspace, model, data, { originalname, path }) => {
 	const revId = generateUUIDString();
 
 	const fileNameSanitised = originalname.replace(/[ *"/\\[\]:;|=,<>$]/g, '_');
@@ -102,14 +106,11 @@ Queue.queueModelUpload = async (teamspace, model, owner, { tag, desc, importAnim
 	const fileLoc = `${revId}/${fileNameSanitised}`;
 
 	const json = {
+		...data,
 		file: `${SHARED_SPACE_TAG}/${fileLoc}`,
 		database: teamspace,
 		project: model,
-		owner,
 		revId,
-		tag,
-		desc,
-		importAnimations,
 	};
 
 	await mkdir(`${sharedDir}/${revId}`);
@@ -121,14 +122,17 @@ Queue.queueModelUpload = async (teamspace, model, owner, { tag, desc, importAnim
 
 		],
 	);
-
-	rm(path);
+	try {
+		await rm(path);
+	} catch (err) {
+		logger.logError(`Failed to remove file from upload dir: ${path}`);
+	}
 
 	const msg = `import -f ${SHARED_SPACE_TAG}/${revId}.json`;
 
 	await queueModelJob(revId, msg);
 
-	return revId;
+	publish(events.QUEUE_ITEM_UPDATE, { teamspace, model, corId: revId, status: 'queued' });
 };
 
 module.exports = Queue;

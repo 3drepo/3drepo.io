@@ -50,13 +50,13 @@ const calculateSpaceUsed = async (teamspace) => {
 	const colsToCount = ['.history.ref', '.issues.ref', '.risks.ref', '.resources.ref'];
 	const collections = await DBHandler.listCollections(teamspace);
 	const promises = [];
-	collections.forEach((colName) => {
-		const colNameArr = colName.split('.');
+	collections.forEach(({ name }) => {
+		const colNameArr = name.split('.');
 		const nParts = colNameArr.length;
 		if (nParts > 2) {
 			const ext = `.${colNameArr[nParts - 2]}.${colNameArr[nParts - 1]}`;
 			if (colsToCount.includes(ext)) {
-				promises.push(getTotalSize(teamspace, colName));
+				promises.push(getTotalSize(teamspace, name));
 			}
 		}
 	});

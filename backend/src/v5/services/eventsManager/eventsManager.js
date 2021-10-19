@@ -16,9 +16,9 @@
  */
 
 const eventConstants = require('./eventsManager.constants');
-const eventLabel = require('../utils/logger').labels.event;
+const eventLabel = require('../../utils/logger').labels.event;
 const events = require('events');
-const logger = require('../utils/logger').logWithLabel(eventLabel);
+const logger = require('../../utils/logger').logWithLabel(eventLabel);
 
 const eventsEmitter = new events.EventEmitter();
 

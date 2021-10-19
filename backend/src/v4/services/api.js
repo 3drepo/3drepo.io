@@ -69,6 +69,7 @@ module.exports.createApp = function (config) {
 		}
 	});
 
+	require(`${v5Path}/services/eventsListener/eventsListener`).init();
 	require(`${v5Path}/routes/routesManager`).init(app);
 	app.use("/", require("../routes/user"));
 

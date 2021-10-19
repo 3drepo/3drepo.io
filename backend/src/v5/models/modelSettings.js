@@ -21,6 +21,7 @@ const { templates } = require('../utils/responseCodes');
 
 const findOneModel = (ts, query, projection) => db.findOne(ts, 'settings', query, projection);
 const findModel = (ts, query, projection, sort) => db.find(ts, 'settings', query, projection, sort);
+const updateOneModel = (ts, query, action) => db.updateOne(ts, 'settings', query, action);
 
 const noFederations = { federate: { $ne: true } };
 const onlyFederations = { federate: true };
@@ -70,6 +71,17 @@ Models.getContainers = async (ts, ids, projection, sort) => {
 Models.getFederations = async (ts, ids, projection, sort) => {
 	const query = { _id: { $in: ids }, ...onlyFederations };
 	return findModel(ts, query, projection, sort);
+};
+
+Models.updateModelStatus = async (ts, model, status, corId) => {
+	const query = { _id: model };
+	const updateObj = { status };
+	if (corId) {
+		updateObj.corID = corId;
+	}
+
+	const { matchedCount } = await updateOneModel(ts, query, { $set: updateObj });
+	if (!matchedCount) throw templates.modelNotFound;
 };
 
 module.exports = Models;

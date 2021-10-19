@@ -53,6 +53,9 @@ ResponseCodes.templates = {
 
 	// Invalid Arguements
 	invalidArguments: { message: 'The arguments provided are not valid', status: 400 },
+
+	// Queue related
+	queueConnectionError: { message: 'There was a problem connecting to the queue. Please contact support', status: 500 },
 };
 
 Object.keys(ResponseCodes.templates).forEach((key) => {

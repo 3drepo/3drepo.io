@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getSwaggerComponents } = require('../utils/responseCodes');
+const { getSwaggerComponents } = require('../../utils/responseCodes');
 
 const Schemas = { responses: getSwaggerComponents(), schemas: {} };
 

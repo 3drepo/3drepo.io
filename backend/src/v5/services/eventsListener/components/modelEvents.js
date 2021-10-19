@@ -15,19 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const EventManagerConst = {};
+const { events } = require('../../eventsManager/eventsManager.constants');
+const { subscribe } = require('../../eventsManager/eventsManager');
+const { updateModelStatus } = require('../../../models/modelSettings');
 
-const eventList = ['NEW_GROUPS', 'UPDATE_GROUP'];
+const queueStatusUpdate = ({ teamspace, model, corId, status }) => updateModelStatus(teamspace, model, status, corId);
 
-const generateEventsMap = () => {
-	const res = {};
-	eventList.forEach((event) => {
-		res[event] = event;
-	});
+const ModelEventsListener = {};
 
-	return res;
+ModelEventsListener.init = () => {
+	subscribe(events.QUEUE_ITEM_UPDATE, queueStatusUpdate);
 };
 
-EventManagerConst.events = generateEventsMap();
-
-module.exports = EventManagerConst;
+module.exports = ModelEventsListener;

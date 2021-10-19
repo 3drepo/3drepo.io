@@ -18,7 +18,7 @@
 "use strict";
 
 const { v5Path } = require("../../interop");
-const docsService = require(`${v5Path}/services/swagger`);
+const docsService = require(`${v5Path}/services/swagger/swagger`);
 
 /**
  * Creates frontend API Express app

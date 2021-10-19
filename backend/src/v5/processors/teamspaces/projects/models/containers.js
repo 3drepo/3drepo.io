@@ -21,6 +21,7 @@ const { getLatestRevision, getRevisionCount, getRevisions, updateRevisionStatus 
 const Groups = require('./commons/groups');
 const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
+const { queueModelUpload } = require('../../../../services/queue');
 
 const Containers = { ...Groups };
 
@@ -59,6 +60,8 @@ Containers.getContainerStats = async (teamspace, project, container) => {
 
 Containers.getRevisions = (teamspace, container, showVoid) => getRevisions(teamspace,
 	container, showVoid, { _id: 1, author: 1, timestamp: 1, tag: 1, void: 1 });
+
+Containers.newRevision = queueModelUpload;
 
 Containers.updateRevisionStatus = updateRevisionStatus;
 
