@@ -19,10 +19,11 @@
 const expect = require("chai").expect;
 const responseCodes = require("../../../../src/v4/response_codes");
 const alluxio = require("../../../../src/v4/handler/alluxio");
+const config = require("../../../../src/v4/config");
 
 const fileList = [];
 
-describe("Check Alluxio handler", function() {
+(config.alluxio ? describe : describe.skip)("Check Alluxio handler", function() {
 	describe("getAlluxioPathFormat", function () {
 		it("get path should succeed", async function() {
 			const link = "test_string";
