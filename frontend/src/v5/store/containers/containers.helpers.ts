@@ -16,7 +16,7 @@
  */
 
 import {
-	ContainerStatuses,
+	UploadStatuses,
 	FetchContainersResponse,
 	FetchContainerStatsResponse,
 	IContainer,
@@ -35,6 +35,6 @@ export const prepareContainersData = (
 		latestRevision: containerStats?.revisions.latestRevision ?? '',
 		type: containerStats?.type ?? '',
 		code: containerStats?.code ?? '',
-		status: containerStats?.status ?? ContainerStatuses.OK,
+		status: containerStats?.status ?? UploadStatuses.OK,
 	};
 });

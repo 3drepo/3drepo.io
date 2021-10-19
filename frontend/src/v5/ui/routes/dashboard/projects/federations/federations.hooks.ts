@@ -15,21 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { Dispatch, ReactNode } from 'react';
-import { Container } from './dashboardListItemRow.styles';
+import { useMemo } from 'react'
+import { federationMockFactory } from '@/v5/store/federations/federations.fixtures';
+import { times } from 'lodash';
 
-type IDashboardListItemRow = {
-	children: ReactNode;
-	className?: string;
-	selected?: boolean;
-	onClick?: Dispatch<void>;
-};
+export const useFederationsData = () => {
 
-export const DashboardListItemRow = ({
-	children,
-	className,
-	selected = false,
-	onClick,
-}: IDashboardListItemRow): JSX.Element => (
-	<Container className={className} selected={selected} onClick={onClick}>{children}</Container>
-);
+	const federations = useMemo(() => {
+		return times(10, () => federationMockFactory());
+	}, []);
+
+	return {
+		filteredFederations: federations,
+		favouriteFederations: [],
+		hasFederations: true,
+		isPending: false,
+	}
+}

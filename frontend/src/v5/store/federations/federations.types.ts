@@ -14,17 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { UploadStatuses } from '@/v5/store/containers/containers.types';
 
-import React from 'react';
-
-export const Federations = () => (
-	<>
-		Federations:
-		<ul>
-			<li>federation 1</li>
-			<li>federation 2</li>
-			<li>federation 3</li>
-			<li>federation 4</li>
-		</ul>
-	</>
-);
+export interface IFederation {
+	_id: string;
+	name: string;
+	role: string;
+	isFavourite: boolean;
+	code: string;
+	status: UploadStatuses;
+	subModels: string[];
+	issues: number;
+	risks: number;
+	category: string;
+	lastUpdated: Date;
+}

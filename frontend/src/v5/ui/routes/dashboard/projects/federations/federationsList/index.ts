@@ -15,21 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { Dispatch, ReactNode } from 'react';
-import { Container } from './dashboardListItemRow.styles';
-
-type IDashboardListItemRow = {
-	children: ReactNode;
-	className?: string;
-	selected?: boolean;
-	onClick?: Dispatch<void>;
-};
-
-export const DashboardListItemRow = ({
-	children,
-	className,
-	selected = false,
-	onClick,
-}: IDashboardListItemRow): JSX.Element => (
-	<Container className={className} selected={selected} onClick={onClick}>{children}</Container>
-);
+export { FederationsList } from './federationsList.component';

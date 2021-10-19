@@ -16,18 +16,21 @@
  */
 
 import * as faker from 'faker';
-import { UploadStatuses, IContainer } from '@/v5/store/containers/containers.types';
+import { UploadStatuses } from '@/v5/store/containers/containers.types';
+import { IFederation } from '@/v5/store/federations/federations.types';
+import { times } from 'lodash';
 
-export const containerMockFactory = (overrides?: Partial<IContainer>): IContainer => ({
+export const federationMockFactory = (overrides?: Partial<IFederation>): IFederation => ({
 	_id: faker.datatype.uuid(),
-	latestRevision: faker.random.words(2),
-	revisionsCount: faker.datatype.number({ min: 10, max: 1200 }),
-	lastUpdated: faker.date.past(2),
 	name: faker.random.words(3),
 	role: faker.random.arrayElement(['admin', 'collaborator']),
-	type: faker.random.word(),
+	lastUpdated: faker.date.past(2),
 	status: UploadStatuses.OK,
 	code: faker.datatype.uuid(),
+	category: faker.random.words(2),
+	subModels: times(faker.datatype.number({ max: 10, min: 1 }), () => faker.datatype.uuid()),
 	isFavourite: faker.datatype.boolean(),
+	issues: faker.datatype.number(120),
+	risks: faker.datatype.number(120),
 	...overrides,
 });

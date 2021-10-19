@@ -24,7 +24,7 @@ export interface IContainersState {
 	areStatsPending: boolean;
 }
 
-export enum ContainerStatuses {
+export enum UploadStatuses {
 	OK = 'ok',
 	FAILED = 'failed',
 	UPLOADING = 'uploading',
@@ -41,7 +41,7 @@ export interface IContainer {
 	lastUpdated: Date;
 	type: string;
 	code: string;
-	status: ContainerStatuses;
+	status: UploadStatuses;
 	isFavourite: boolean;
 	role: string;
 }
