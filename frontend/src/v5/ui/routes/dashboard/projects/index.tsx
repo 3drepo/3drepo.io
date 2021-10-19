@@ -16,9 +16,10 @@
  */
 
 import React from 'react';
-import { useRouteMatch, Route, Switch } from 'react-router-dom';
+import { useRouteMatch, Route, Switch, Redirect } from 'react-router-dom';
 
 import { discardSlash } from '@/v5/services/routing/routing';
+import { NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
 import { Federations } from './federations';
 import { Containers } from './containers';
 
@@ -27,21 +28,22 @@ export const ProjectContent = () => {
 	path = discardSlash(path);
 
 	return (
-		<>
-			<Switch>
-				<Route exact path={path}>
-					project content
-				</Route>
-				<Route path={`${path}/t/federations`}>
-					<Federations />
-				</Route>
-				<Route path={`${path}/t/containers`}>
-					<Containers />
-				</Route>
-				<Route path={`${path}/t/settings`}>
-					Project settings
-				</Route>
-			</Switch>
-		</>
+		<Switch>
+			<Route exact path={path}>
+				project content
+			</Route>
+			<Route exact path={`${path}/t/federations`}>
+				<Federations />
+			</Route>
+			<Route exact path={`${path}/t/containers`}>
+				<Containers />
+			</Route>
+			<Route exact path={`${path}/t/settings`}>
+				Project settings
+			</Route>
+			<Route path="*">
+				<Redirect to={NOT_FOUND_ROUTE_PATH} />
+			</Route>
+		</Switch>
 	);
 };
