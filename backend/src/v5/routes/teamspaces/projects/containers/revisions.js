@@ -16,12 +16,13 @@
  */
 
 const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('../../../../middleware/permissions/permissions');
+const { validateNewRevisionData, validateUpdateRevisionData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
+const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');
 const { serialiseRevisionArray } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
 const { templates } = require('../../../../utils/responseCodes');
-const { validateNewRevisionData, validateUpdateRevisionData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 
 const getRevisions = async (req, res, next) => {
 	const { teamspace, container } = req.params;
@@ -43,6 +44,19 @@ const updateRevisionStatus = async (req, res) => {
 	Containers.updateRevisionStatus(teamspace, container, revision, status).then(() => {
 		respond(req, res, templates.ok);
 	}).catch((err) => respond(req, res, err));
+};
+
+const newRevision = async (req, res) => {
+	const { file } = req;
+	const revInfo = req.body;
+	const { teamspace, container } = req.params;
+	const owner = getUserFromSession(req.session);
+	Containers.newRevision(teamspace, container, { ...revInfo, owner }, file).then(() => {
+		respond(req, res, templates.ok);
+	}).catch((err) => {
+		/* istanbul ignore next */
+		respond(req, res, err);
+	});
 };
 
 const establishRoutes = () => {
@@ -177,7 +191,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: updates the status of the revision
 	 */
-	router.post('', hasWriteAccessToContainer, validateNewRevisionData/* , newRevision */);
+	router.post('', hasWriteAccessToContainer, validateNewRevisionData, newRevision);
 
 	/**
 	 * @openapi
