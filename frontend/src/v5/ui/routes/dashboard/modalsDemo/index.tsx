@@ -31,7 +31,13 @@ export const ModalsDemo = () => {
 	const showAlertModal = () => {
 		const action = DialogsActions.open('alert', {
 			currentActions: '{current actions}',
-			errorMessage: '<Error message from the network request>',
+			error: {
+				message: '<Error message from the network request>',
+				response: {
+					status: 404,
+					statusText: '<http status and error code>',
+				},
+			},
 			details: '<Detail where the user will be taken by clicking ‘OK, close window’>',
 		});
 		dispatch(action);

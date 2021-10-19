@@ -24,10 +24,10 @@ export function* fetch({ teamspace }) {
 	try {
 		const { data: { projects } } = yield API.fetchProjects(teamspace);
 		yield put(ProjectsActions.fetchSuccess(teamspace, projects as IProject[]));
-	} catch (e) {
+	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: 'trying to fetch the projects',
-			errorMessage: e,
+			error,
 		}));
 		yield put(ProjectsActions.fetchFailure());
 	}
