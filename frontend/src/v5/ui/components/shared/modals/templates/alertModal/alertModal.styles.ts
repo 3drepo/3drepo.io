@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Typography } from '@controls/typography';
 
 export const Container = styled.div`
@@ -29,6 +29,9 @@ export const Container = styled.div`
 
 export const Actions = styled.div`
 	display: flex;
+	${({ bottomMargin }) => bottomMargin && css`
+		margin-bottom: 25px;
+	`}
 `;
 
 export const Details = styled(Typography).attrs({

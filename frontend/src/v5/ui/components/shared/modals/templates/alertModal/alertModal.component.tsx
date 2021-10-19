@@ -52,7 +52,7 @@ export const AlertModal: React.FC<IAlertModal> = ({ onClickClose, currentActions
 				</DialogContentText>
 				{!!status && <Status>{errorStatus}</Status>}
 			</DialogContent>
-			<Actions>
+			<Actions bottomMargin={!details}>
 				<Button autoFocus type="submit" onClick={onClickClose} variant="contained" color="primary">
 					<Trans
 						id="alertModal.action.ok"
