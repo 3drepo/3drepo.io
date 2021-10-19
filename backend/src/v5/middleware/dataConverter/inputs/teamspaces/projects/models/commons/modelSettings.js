@@ -17,9 +17,12 @@
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const Yup = require('yup');
+const { checkLegendExists } = require('../../../../../../../models/legends')
+const { checkViewExists} = require('../../../../../../../models/views')
 const { respond } = require('../../../../../../../utils/responder');
 const { types } = require('../../../../../../../utils/helper/yup');
 const { stringToUUID } = require('../../../../../../../utils/helper/uuids')
+
 
 const ModelSettings = {};
 
@@ -38,11 +41,31 @@ ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
 		type: Yup.string(),
 		unit: types.strings.unit,
 		code: Yup.string().matches(/^[a-zA-Z0-9]{0,50}$/),
-		defaultView: types.id.nullable(),
-		defaultLegend: types.id,
+		defaultView: types.id.nullable().test('check-view-exists', 'View not found', async (value) => {
+			if (value) {
+				try{
+					const model = req.params.container ?? req.params.federation;
+					await checkViewExists(req.params.teamspace, model, stringToUUID(value));
+				} catch(err){
+					respond(req, res, err);
+				}
+			}
+			return true;
+		}),
+		defaultLegend: types.id.test('check-legend-exists', 'Legend not found', async (value) => {
+			if (value) {
+				try{
+					const model = req.params.container ?? req.params.federation;
+					await checkLegendExists(req.params.teamspace, model, stringToUUID(value));
+				} catch(err){
+					respond(req, res, err);
+				}				
+			}
+			return true;
+		}),
 	}).strict(true).noUnknown()
 		.required()
-		.test('at-least-one-property', 'you must provide at least one setting value', (value) => Object.keys(value).length);
+		.test('at-least-one-property', 'You must provide at least one setting value', (value) => Object.keys(value).length);
 	try {
 		await schema.validate(req.body);
 		convertBodyUUIDs(req.body);
