@@ -30,7 +30,6 @@ import { MAIN_HEADER_PORTAL_TARGET_ID } from '@/v5/ui/routes/dashboard/index.con
 import { TeamspaceContent } from './teamspaces';
 import { ProjectContent } from './projects';
 import { Content, MainHeaderPortalRoot } from './index.styles';
-import { ModalsDemo } from './modalsDemo';
 
 i18n.load('en', enMessages);
 i18n.load('es', esMessages);
@@ -54,9 +53,6 @@ export const Dashboard = () => {
 				<Content>
 					<Route path={`${path}/:teamspace/`}>
 						<TeamspaceContent />
-					</Route>
-					<Route exact path={`${path}/modals/`}>
-						<ModalsDemo />
 					</Route>
 					<Switch>
 						<Route exact path={`${path}/:teamspace/t/settings`}>
