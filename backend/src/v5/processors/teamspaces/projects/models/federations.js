@@ -86,16 +86,16 @@ Federations.getFederationStats = async (teamspace, federation) => {
 	};
 };
 
-Federations.updateSettings = async (teamspace, federation, payload) => {
-	if (payload.defaultView) {
-		await checkViewExists(teamspace, federation, payload.defaultView);
+Federations.updateSettings = async (teamspace, federation, data) => {
+	if (data.defaultView) {
+		await checkViewExists(teamspace, federation, data.defaultView);
 	}
 
-	if (payload.defaultLegend) {
-		await checkLegendExists(teamspace, federation, payload.defaultLegend);
+	if (data.defaultLegend) {
+		await checkLegendExists(teamspace, federation, data.defaultLegend);
 	}
 
-	const res = await updateModelSettings(teamspace, federation, payload);
+	const res = await updateModelSettings(teamspace, federation, data);
 
 	if (!res || res.matchedCount === 0) {
 		throw templates.federationNotFound;

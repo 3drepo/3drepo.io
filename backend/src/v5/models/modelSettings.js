@@ -72,14 +72,14 @@ Models.getFederations = async (ts, ids, projection, sort) => {
 	return findModel(ts, query, projection, sort);
 };
 
-Models.updateModelSettings = async (ts, model, payload) => {
+Models.updateModelSettings = async (ts, model, data) => {
 	const toUpdate = {};
 	const toUnset = {};
-	const keys = Object.keys(payload);
+	const keys = Object.keys(data);
 
 	for (let i = 0; i < keys.length; i++) {
 		const key = keys[i];
-		const value = payload[key];
+		const value = data[key];
 		if (value) {
 			if (key === 'unit' || key === 'code') {
 				if (!toUpdate.properties) {

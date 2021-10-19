@@ -355,7 +355,7 @@ const testUpdateContainerSettings = () => {
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
-		test('should fail if the body of the request contains extra payload', async () => {
+		test('should fail if the body of the request contains extra data', async () => {
 			const res = await agent.patch(`${route(modelWithViews._id)}?key=${users.tsAdmin.apiKey}`)
 				.send({ name: 'name', extra: 123 }).expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
@@ -374,7 +374,7 @@ const testUpdateContainerSettings = () => {
 		});
 
 		test('should update a container\'s settings if the body of the request is as expected', async () => {
-			const payload = {
+			const data = {
 				name: 'newName',
 				desc: 'newDesc',
 				surveyPoints: [
@@ -391,7 +391,7 @@ const testUpdateContainerSettings = () => {
 				defaultLegend: legends[1],
 			};
 			await agent.patch(`${route(modelWithViews._id)}?key=${users.tsAdmin.apiKey}`)
-				.send(payload).expect(templates.ok.status);
+				.send(data).expect(templates.ok.status);
 		});
 	});
 };

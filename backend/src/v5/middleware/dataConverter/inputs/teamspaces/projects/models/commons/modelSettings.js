@@ -52,10 +52,10 @@ ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
 	}
 };
 
-const convertBodyUUIDs = (payload) => {
-	if (payload) {
-		Object.keys(payload).forEach((key) => {
-			payload[key] = stringToUUID(payload[key]);
+const convertBodyUUIDs = (data) => {
+	if (data) {
+		Object.keys(data).forEach((key) => {
+			data[key] = stringToUUID(data[key]);
 		});
 	}
 };

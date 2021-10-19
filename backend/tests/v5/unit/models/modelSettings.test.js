@@ -153,7 +153,7 @@ const testUpdateModelSettings = () => {
 
 	describe('UpdateModelSettings', () => {
 		test('Should update the settings of a model with unset', async () => {
-			const payload = {
+			const data = {
 				name: 'someName',
 				unit: 'm',
 				code: 'someCode',
@@ -174,12 +174,12 @@ const testUpdateModelSettings = () => {
 			};
 
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
-			await Model.updateModelSettings('someTS', 'someModel', payload);
+			await Model.updateModelSettings('someTS', 'someModel', data);
 			checkResults(fn, 'someModel', updateObject);
 		});
 
 		test('Should update the settings of a model without unset', async () => {
-			const payload = {
+			const data = {
 				name: 'someName',
 				unit: 'm',
 				code: 'someCode',
@@ -198,12 +198,12 @@ const testUpdateModelSettings = () => {
 			};
 
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
-			await Model.updateModelSettings('someTS', 'someModel', payload);
+			await Model.updateModelSettings('someTS', 'someModel', data);
 			checkResults(fn, 'someModel', updateObject);
 		});
 
 		test('Should update the settings of a model and ignore a null value that cant be unset', async () => {
-			const payload = {
+			const data = {
 				name: 'someName',
 				unit: null,
 				code: 'someCode',
@@ -221,11 +221,11 @@ const testUpdateModelSettings = () => {
 			};
 
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
-			await Model.updateModelSettings('someTS', 'someModel', payload);
+			await Model.updateModelSettings('someTS', 'someModel', data);
 			checkResults(fn, 'someModel', updateObject);
 		});
 
-		test('Should update nothing if the payload is empty', async () => {
+		test('Should update nothing if the data is empty', async () => {
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
 			await Model.updateModelSettings('someTS', 'someModel', {});
 			checkResults(fn, 'someModel', {});

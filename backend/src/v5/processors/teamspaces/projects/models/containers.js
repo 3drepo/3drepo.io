@@ -75,16 +75,16 @@ Containers.deleteFavourites = async (username, teamspace, project, favouritesToR
 	return deleteFavourites(username, teamspace, accessibleContainers, favouritesToRemove);
 };
 
-Containers.updateSettings = async (teamspace, container, payload) => {
-	if (payload.defaultView) {
-		await checkViewExists(teamspace, container, payload.defaultView);
+Containers.updateSettings = async (teamspace, container, data) => {
+	if (data.defaultView) {
+		await checkViewExists(teamspace, container, data.defaultView);
 	}
 
-	if (payload.defaultLegend) {
-		await checkLegendExists(teamspace, container, payload.defaultLegend);
+	if (data.defaultLegend) {
+		await checkLegendExists(teamspace, container, data.defaultLegend);
 	}
 
-	const res = await updateModelSettings(teamspace, container, payload);
+	const res = await updateModelSettings(teamspace, container, data);
 
 	if (!res || res.matchedCount === 0) {
 		throw templates.containerNotFound;

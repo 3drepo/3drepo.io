@@ -458,7 +458,7 @@ const testUpdateFederationSettings = () => {
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
-		test('should fail if the body of the request contains extra payload', async () => {
+		test('should fail if the body of the request contains extra data', async () => {
 			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
 				.send({ name: 'name', extra: 123 }).expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
@@ -477,7 +477,7 @@ const testUpdateFederationSettings = () => {
 		});
 
 		test('should update a federation\'s settings if the body of the request is as expected', async () => {
-			const payload = {
+			const data = {
 				name: 'newName',
 				desc: 'newDesc',
 				surveyPoints: [
@@ -494,7 +494,7 @@ const testUpdateFederationSettings = () => {
 				defaultLegend: legends[1],
 			};
 			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
-				.send(payload).expect(templates.ok.status);
+				.send(data).expect(templates.ok.status);
 		});
 	});
 };
