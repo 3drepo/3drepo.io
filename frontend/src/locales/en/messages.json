@@ -39,7 +39,7 @@
   "containers.noSearchResults": "We couldn't find a match for <0>“{searchPhrase}”</0>. Please try another search.",
   "containers.search.placeholder": "Search containers...",
   "ellipsisMenu.tooltip": "More options",
-  "alertModal.header": "Something went wrong {currentActions}",
+  "alertModal.header": "Something went wrong when {currentActions}",
   "alertModal.action.ok": "Ok, close window",
   "alertModal.action.contactSupport": "Contact support"
 }
