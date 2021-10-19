@@ -42,7 +42,7 @@ export const AlertModal: React.FC<IAlertModal> = ({ onClickClose, currentActions
 			<DialogTitle>
 				<Trans
 					id="alertModal.header"
-					message="Something went wrong {currentActions}"
+					message="Something went wrong when {currentActions}"
 					values={{ currentActions }}
 				/>
 			</DialogTitle>
