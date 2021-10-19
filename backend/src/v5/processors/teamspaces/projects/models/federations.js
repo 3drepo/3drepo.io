@@ -16,7 +16,7 @@
  */
 
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
-const { getFederationById, getFederations, updateModelSettings } = require('../../../../models/modelSettings');
+const { getFederationById, getFederations, updateFederationSettings } = require('../../../../models/modelSettings');
 const Groups = require('./commons/groups');
 const { checkLegendExists } = require('../../../../models/legends');
 const { checkViewExists } = require('../../../../models/views');
@@ -87,15 +87,7 @@ Federations.getFederationStats = async (teamspace, federation) => {
 };
 
 Federations.updateSettings = async (teamspace, federation, data) => {
-	if (data.defaultView) {
-		await checkViewExists(teamspace, federation, data.defaultView);
-	}
-
-	if (data.defaultLegend) {
-		await checkLegendExists(teamspace, federation, data.defaultLegend);
-	}
-
-	const res = await updateModelSettings(teamspace, federation, data);
+	const res = await updateFederationSettings(teamspace, federation, data);
 
 	if (!res || res.matchedCount === 0) {
 		throw templates.federationNotFound;

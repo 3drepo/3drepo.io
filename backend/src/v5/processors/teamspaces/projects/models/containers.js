@@ -16,7 +16,7 @@
  */
 
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
-const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
+const { getContainerById, getContainers, updateContainerSettings } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const Groups = require('./commons/groups');
 const { checkLegendExists } = require('../../../../models/legends');
@@ -75,16 +75,8 @@ Containers.deleteFavourites = async (username, teamspace, project, favouritesToR
 	return deleteFavourites(username, teamspace, accessibleContainers, favouritesToRemove);
 };
 
-Containers.updateSettings = async (teamspace, container, data) => {
-	if (data.defaultView) {
-		await checkViewExists(teamspace, container, data.defaultView);
-	}
-
-	if (data.defaultLegend) {
-		await checkLegendExists(teamspace, container, data.defaultLegend);
-	}
-
-	const res = await updateModelSettings(teamspace, container, data);
+Containers.updateSettings = async (teamspace, container, data) => {	
+	const res = await updateContainerSettings(teamspace, container, data);
 
 	if (!res || res.matchedCount === 0) {
 		throw templates.containerNotFound;

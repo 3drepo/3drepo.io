@@ -72,13 +72,21 @@ Models.getFederations = async (ts, ids, projection, sort) => {
 	return findModel(ts, query, projection, sort);
 };
 
-Models.updateModelSettings = async (ts, model, data) => {
+Models.updateContainerSettings = async (ts, model, data) =>{
+	const query = { _id: model, federate: { $ne: true } };
+	return await updateModelSettings(ts, data, query);
+}
+
+Models.updateFederationSettings = async (ts, model, data) =>{
+	const query = { _id: model, federate: true };
+	return await updateModelSettings(ts, data, query);
+}
+
+ const updateModelSettings = async (ts, data, query) => {
 	const toUpdate = {};
 	const toUnset = {};
-	const keys = Object.keys(data);
 
-	for (let i = 0; i < keys.length; i++) {
-		const key = keys[i];
+	Object.keys(data).forEach((key) => {
 		const value = data[key];
 		if (value) {
 			if (key === 'unit' || key === 'code') {
@@ -92,7 +100,7 @@ Models.updateModelSettings = async (ts, model, data) => {
 		} else if (key === 'defaultView') {
 			toUnset[key] = 1;
 		}
-	}
+	});
 
 	const updateJson = {};
 	if (Object.keys(toUpdate).length > 0) {
@@ -102,7 +110,7 @@ Models.updateModelSettings = async (ts, model, data) => {
 		updateJson.$unset = toUnset;
 	}
 
-	return db.updateOne(ts, 'settings', { _id: model }, updateJson);
+	return db.updateOne(ts, 'settings', query , updateJson);
 };
 
 module.exports = Models;

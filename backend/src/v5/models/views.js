@@ -19,9 +19,7 @@ const Views = {};
 const db = require('../handler/db');
 const { templates } = require('../utils/responseCodes');
 
-const colName = 'views';
-
-const getCollectionName = (model) => `${model}.${colName}`;
+const getCollectionName = (model) => `${model}.views`;
 
 Views.checkViewExists = async (teamspace, model, view) => {
 	const foundView = await db.findOne(teamspace, getCollectionName(model), { _id: view });
