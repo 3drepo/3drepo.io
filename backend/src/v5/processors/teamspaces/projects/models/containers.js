@@ -75,12 +75,6 @@ Containers.deleteFavourites = async (username, teamspace, project, favouritesToR
 	return deleteFavourites(username, teamspace, accessibleContainers, favouritesToRemove);
 };
 
-Containers.updateSettings = async (teamspace, container, data) => {	
-	const res = await updateContainerSettings(teamspace, container, data);
-
-	if (!res || res.matchedCount === 0) {
-		throw templates.containerNotFound;
-	}
-};
+Containers.updateSettings = updateContainerSettings;	
 
 module.exports = Containers;

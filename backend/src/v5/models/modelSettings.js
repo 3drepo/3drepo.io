@@ -74,12 +74,20 @@ Models.getFederations = async (ts, ids, projection, sort) => {
 
 Models.updateContainerSettings = async (ts, model, data) =>{
 	const query = { _id: model, federate: { $ne: true } };
-	return await updateModelSettings(ts, data, query);
+	const result = await updateModelSettings(ts, data, query);
+	
+	if (!result || result.matchedCount === 0) {
+		throw templates.containerNotFound;
+	}
 }
 
 Models.updateFederationSettings = async (ts, model, data) =>{
 	const query = { _id: model, federate: true };
-	return await updateModelSettings(ts, data, query);
+	const result = await updateModelSettings(ts, data, query);
+	
+	if (!result || result.matchedCount === 0) {
+		throw templates.federationNotFound;
+	}
 }
 
  const updateModelSettings = async (ts, data, query) => {

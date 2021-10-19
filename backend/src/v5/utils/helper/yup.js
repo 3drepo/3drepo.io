@@ -48,10 +48,10 @@ YupHelper.types.timestamp = Yup.number().min(new Date(2000, 1, 1).getTime()).int
 
 YupHelper.types.position = Yup.array()
 	.of(
-		Yup.number().strict(true),
-	).test('test-divisibleByThree', 'position array must be divisible by 3', (array) => array.length % 3 === 0);
+		Yup.number(),
+	).length(3);
 
 YupHelper.types.strings.unit = Yup.string()
-	.oneOf(['mm', 'cm', 'dm', 'm', 'ft']).strict(true);
+	.oneOf(['mm', 'cm', 'dm', 'm', 'ft']);
 
 module.exports = YupHelper;

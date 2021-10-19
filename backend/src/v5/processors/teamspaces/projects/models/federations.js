@@ -86,12 +86,6 @@ Federations.getFederationStats = async (teamspace, federation) => {
 	};
 };
 
-Federations.updateSettings = async (teamspace, federation, data) => {
-	const res = await updateFederationSettings(teamspace, federation, data);
-
-	if (!res || res.matchedCount === 0) {
-		throw templates.federationNotFound;
-	}
-};
+Federations.updateSettings = updateFederationSettings;
 
 module.exports = Federations;
