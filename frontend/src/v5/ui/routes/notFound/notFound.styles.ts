@@ -15,12 +15,37 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 
-export const Content = styled.section`
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	overflow-y: auto;
+export const Container = styled.div`
+	display: flex;
 	flex-grow: 1;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
 `;
 
-export const MainHeaderPortalRoot = styled.div``;
+export const WrapperContainer = styled.div``;
+
+export const Title = styled(Typography).attrs({
+	variant: 'h1',
+	component: 'h2',
+	color: 'secondary',
+})`
+	margin-top: 50px;
+`;
+
+export const Message = styled(Typography).attrs({
+	variant: 'h4',
+	component: 'span',
+})`
+	color: ${({ theme }) => theme.palette.base.main};
+	margin-top: 25px;
+`;
+
+export const ButtonsContainer = styled.div`
+	display: flex;
+	margin-top: 30px;
+`;
