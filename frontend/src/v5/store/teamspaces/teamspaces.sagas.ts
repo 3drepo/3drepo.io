@@ -26,7 +26,7 @@ export function* fetch() {
 		yield put(TeamspacesActions.fetchSuccess(teamspaces as ITeamspace[]));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: 'trying to fetch the teamspaces',
+			currentActions: 'trying to fetch teamspaces',
 			error,
 		}));
 		yield put(TeamspacesActions.fetchFailure());

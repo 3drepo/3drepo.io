@@ -26,7 +26,7 @@ export function* fetch({ teamspace }) {
 		yield put(ProjectsActions.fetchSuccess(teamspace, projects as IProject[]));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: 'trying to fetch the projects',
+			currentActions: 'trying to fetch projects',
 			error,
 		}));
 		yield put(ProjectsActions.fetchFailure());

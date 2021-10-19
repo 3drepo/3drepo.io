@@ -25,19 +25,16 @@ interface IAlertModal {
 	onClickClose?: () => void,
 	currentActions?: string
 	error?: {
-		message: string;
-		response?: {
-			status: number;
-			statusText: string;
-		}
+		request: {
+			response: string;
+		};
 	};
 	details?: string
 }
 
 export const AlertModal: React.FC<IAlertModal> = ({ onClickClose, currentActions = '', error, details }) => {
-	const errorTextMessage = error.message || error;
-	const { status, statusText } = error.response;
-	const errorStatus = `${status ? `${status} - ` : ''}${statusText}`;
+	const { message, status, code } = JSON.parse(error.request.response);
+	const errorStatus = `${status} - ${code}`;
 
 	return (
 		<Container>
@@ -51,9 +48,9 @@ export const AlertModal: React.FC<IAlertModal> = ({ onClickClose, currentActions
 			</DialogTitle>
 			<DialogContent>
 				<DialogContentText>
-					{errorTextMessage}
+					{message}
 				</DialogContentText>
-				{!!errorStatus && <Status>{errorStatus}</Status>}
+				{!!status && <Status>{errorStatus}</Status>}
 			</DialogContent>
 			<Actions>
 				<Button autoFocus type="submit" onClick={onClickClose} variant="contained" color="primary">

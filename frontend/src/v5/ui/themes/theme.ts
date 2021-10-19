@@ -257,6 +257,7 @@ export const theme = createMuiTheme({
 				...typography.h4,
 				marginBottom: 0,
 				color: COLOR.BASE_MAIN,
+				textAlign: 'center',
 			},
 		},
 		MuiAppBar: {
