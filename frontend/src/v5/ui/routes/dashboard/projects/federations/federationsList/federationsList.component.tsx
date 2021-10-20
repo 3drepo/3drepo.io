@@ -189,7 +189,7 @@ export const FederationsList = ({
 													<Trans
 														id="federations.list.item.containers"
 														message="{count} containers"
-														values={{ count: federation.subModels.length }}
+														values={{ count: federation.containers }}
 													/>
 												</DashboardListItemButton>
 												<DashboardListItemText width={188}>

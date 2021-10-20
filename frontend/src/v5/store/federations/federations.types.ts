@@ -25,6 +25,7 @@ export interface IFederation {
 	code: string;
 	status: UploadStatuses;
 	subModels: string[];
+	containers: number;
 	issues: number;
 	risks: number;
 	category: string;

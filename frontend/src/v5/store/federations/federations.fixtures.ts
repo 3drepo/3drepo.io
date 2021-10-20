@@ -28,6 +28,7 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 	status: UploadStatuses.OK,
 	code: faker.datatype.uuid(),
 	category: faker.random.words(2),
+	containers: faker.datatype.number(120),
 	subModels: times(faker.datatype.number({ max: 10, min: 1 }), () => faker.datatype.uuid()),
 	isFavourite: faker.datatype.boolean(),
 	issues: faker.datatype.number(120),
