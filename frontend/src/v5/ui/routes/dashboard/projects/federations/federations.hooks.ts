@@ -15,20 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useMemo } from 'react'
-import { federationMockFactory } from '@/v5/store/federations/federations.fixtures';
-import { times } from 'lodash';
+import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 
 export const useFederationsData = () => {
-
-	const federations = useMemo(() => {
-		return times(10, () => federationMockFactory());
-	}, []);
+	const filteredFederations = FederationsHooksSelectors.selectFilteredFederations();
+	const favouriteFederations = FederationsHooksSelectors.selectFilteredFavouriteFederations();
+	const hasFederations = FederationsHooksSelectors.selectHasFederations();
 
 	return {
-		filteredFederations: federations,
-		favouriteFederations: [],
-		hasFederations: true,
+		filteredFederations,
+		favouriteFederations,
+		hasFederations,
 		isPending: false,
-	}
-}
+	};
+};

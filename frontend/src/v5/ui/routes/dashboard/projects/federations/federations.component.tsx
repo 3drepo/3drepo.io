@@ -22,17 +22,20 @@ import {
 	Container,
 	Content,
 	NewContainerMainHeaderButton,
-	UploadFileButton
+	UploadFileButton,
 } from '@/v5/ui/routes/dashboard/projects/containers/containers.styles';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
+import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
+import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import { useFederationsData } from './federations.hooks';
 import { FederationsList } from './federationsList';
 
 export const Federations = (): JSX.Element => {
 	const {
 		filteredFederations,
+		favouriteFederations,
 		isPending,
 	} = useFederationsData();
 
@@ -58,6 +61,35 @@ export const Federations = (): JSX.Element => {
 			</MainHeader>
 			<Content>
 				<FederationsList
+					search={{
+						query: FederationsHooksSelectors.selectFavouritesFilterQuery(),
+						dispatcher: FederationsActionsDispatchers.setFavouritesFilterQuery,
+					}}
+					federations={favouriteFederations}
+					title={(
+						<Trans
+							id="federations.favourites.collapseTitle"
+							message="Favourites"
+						/>
+					)}
+					titleTooltips={{
+						collapsed: <Trans id="federations.favourites.collapse.tooltip.show" message="Show favourites" />,
+						visible: <Trans id="federations.favourites.collapse.tooltip.hide" message="Hide favourites" />,
+					}}
+					emptyMessage={(
+						<DashboardListEmptyText>
+							<Trans
+								id="federations.favourites.emptyMessage"
+								message="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
+							/>
+						</DashboardListEmptyText>
+					)}
+				/>
+				<FederationsList
+					search={{
+						query: FederationsHooksSelectors.selectAllFilterQuery(),
+						dispatcher: FederationsActionsDispatchers.setAllFilterQuery,
+					}}
 					federations={filteredFederations}
 					title={(
 						<Trans

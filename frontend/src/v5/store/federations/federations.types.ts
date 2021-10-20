@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
+import { AllReturnTypes, ExtendedAction } from '@/v5/store/store.types';
 
 export interface IFederation {
 	_id: string;
@@ -29,3 +30,18 @@ export interface IFederation {
 	category: string;
 	lastUpdated: Date;
 }
+
+export interface IFederationsState {
+	federations: Record<string, IFederation[]>;
+	allFilterQuery: string;
+	favouritesFilterQuery: string;
+	isListPending: boolean;
+	areStatsPending: boolean;
+}
+
+export interface IFederationsActionCreators {
+	setAllFilterQuery: (query: string) => ExtendedAction<{query: string }, 'setFilterQuery'>;
+	setFavouritesFilterQuery: (query: string) => ExtendedAction<{query: string }, 'setFilterQuery'>;
+}
+
+export type IFederationsActions = AllReturnTypes<IFederationsActionCreators>;

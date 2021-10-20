@@ -14,32 +14,26 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled, { css } from 'styled-components';
-import { Divider as DividerComponent } from '@material-ui/core';
+import { useEffect, useState } from 'react';
+import { debounce } from 'lodash';
 
-export const Container = styled.div`
-	${({ isLoading }) => isLoading && css`
-		pointer-events: none;
-	`}
-`;
+export type SearchInputConfig = {
+	query: any;
+	dispatcher: any;
+};
 
-export const ButtonContainer = styled.div`
-	display: flex;
-	align-items: center;
-	cursor: pointer;
-	width: max-content;
-	user-select: none;
-`;
+export const useSearchInput = ({ query, dispatcher }: SearchInputConfig) => {
+	const [searchInput, setSearchInput] = useState(query);
 
-export const CollapsedItemContainer = styled.div`
-	margin-bottom: 16px;
-`;
+	const debounceSearchUpdate = debounce(
+		(value: string) => dispatcher(value),
+		300,
+		{ trailing: true },
+	);
 
-export const Divider = styled(DividerComponent)`
-	margin-top: 16px;
-`;
+	useEffect(() => {
+		debounceSearchUpdate(searchInput);
+	}, [searchInput]);
 
-export const ControlsContainer = styled.div`
-	display: flex;
-	justify-content: space-between;
-`;
+	return { searchInput, setSearchInput, filterQuery: query };
+};

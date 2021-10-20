@@ -19,7 +19,7 @@ import React, { ReactNode, useState } from 'react';
 import { Collapse, Tooltip } from '@material-ui/core';
 import { Typography } from '@controls/typography';
 import { ChevronButton } from '@controls/chevronButton';
-import { Container, ButtonContainer, Divider, CollapsedItemContainer } from './dashboardListCollapse.styles';
+import { Container, ButtonContainer, Divider, CollapsedItemContainer, ControlsContainer } from './dashboardListCollapse.styles';
 
 export type IDashboardListCollapse = {
 	children: ReactNode;
@@ -30,21 +30,25 @@ export type IDashboardListCollapse = {
 	},
 	className?: string;
 	isLoading?: boolean;
+	sideElement?: ReactNode;
 };
 
 export const DashboardListCollapse = ({
-	children, title, tooltipTitles, className, isLoading = false,
+	children, title, tooltipTitles, className, isLoading = false, sideElement,
 }: IDashboardListCollapse): JSX.Element => {
 	const [isCollapsed, setIsCollapsed] = useState(false);
 
 	return (
 		<Container className={className} isLoading={isLoading}>
-			<ButtonContainer onClick={() => setIsCollapsed((state) => !state)}>
-				<Tooltip title={(!isCollapsed ? tooltipTitles?.visible : tooltipTitles?.collapsed) ?? ''}>
-					<ChevronButton isOn={!isCollapsed} isLoading={isLoading} />
-				</Tooltip>
-				<Typography variant="h3" color="secondary">{title}</Typography>
-			</ButtonContainer>
+			<ControlsContainer>
+				<ButtonContainer onClick={() => setIsCollapsed((state) => !state)}>
+					<Tooltip title={(!isCollapsed ? tooltipTitles?.visible : tooltipTitles?.collapsed) ?? ''}>
+						<ChevronButton isOn={!isCollapsed} isLoading={isLoading} />
+					</Tooltip>
+					<Typography variant="h3" color="secondary">{title}</Typography>
+				</ButtonContainer>
+				{sideElement}
+			</ControlsContainer>
 			<Collapse in={!isCollapsed}>
 				<CollapsedItemContainer>
 					{children}

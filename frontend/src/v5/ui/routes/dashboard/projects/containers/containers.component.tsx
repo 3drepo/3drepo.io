@@ -22,6 +22,9 @@ import { MainHeader } from '@controls/mainHeader';
 import { SearchInput } from '@controls/searchInput';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
+import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
+import { useSearchInput } from '@controls/searchInput/searchInput.hooks';
+import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import {
 	Container,
 	Content,
@@ -31,7 +34,7 @@ import {
 } from './containers.styles';
 import { ContainersList } from './containersList';
 import { EmptySearchResults } from './containersList/emptySearchResults';
-import { useContainersData, useContainersSearch } from './containers.hooks';
+import { useContainersData } from './containers.hooks';
 
 export const Containers = (): JSX.Element => {
 	const {
@@ -41,7 +44,10 @@ export const Containers = (): JSX.Element => {
 		isPending,
 	} = useContainersData();
 
-	const { searchInput, setSearchInput, filterQuery } = useContainersSearch();
+	const { searchInput, setSearchInput, filterQuery } = useSearchInput({
+		query: ContainersHooksSelectors.selectFilterQuery(),
+		dispatcher: ContainersActionsDispatchers.setFilterQuery,
+	});
 
 	return (
 		<Container>
