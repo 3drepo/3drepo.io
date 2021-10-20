@@ -17,6 +17,10 @@
 
 const { src, modelFolder, objModel } = require('../../helper/path');
 const AMQP = require('amqplib');
+
+jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const fs = require('fs/promises');
 const path = require('path');
 
@@ -24,11 +28,11 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 const Queue = require(`${src}/services/queue`);
 
-const createFakeConnection = () => {
+const createFakeConnection = (sendToQueue) => {
 	const dummyFn = () => Promise.resolve();
 	const dummyChannel = {
 		assertQueue: dummyFn,
-		sendToQueue: dummyFn,
+		sendToQueue: sendToQueue || dummyFn,
 		close: dummyFn,
 	};
 	return {
@@ -37,6 +41,8 @@ const createFakeConnection = () => {
 	};
 };
 
+const publishFn = EventsManager.publish.mockImplementation(() => {});
+
 const testQueueModelUpload = () => {
 	const fileCreated = path.join(modelFolder, 'toRemove.obj');
 	describe('queue model upload', () => {
@@ -44,40 +50,46 @@ const testQueueModelUpload = () => {
 		const model = 'modelID';
 		const data = { tag: '123', owner: '123' };
 		const file = { originalname: 'test.obj', path: fileCreated };
+		const fn = jest.spyOn(AMQP, 'connect').mockRejectedValue(undefined);
+
 		test(`should fail with ${templates.queueInsertionFailed.code} if there is some generic error`, async () => {
-			const fn = jest.spyOn(AMQP, 'connect').mockResolvedValueOnce(createFakeConnection());
 			expect.assertions(1);
 			try {
 				await Queue.queueModelUpload(teamspace, model, data, file);
 			} catch (err) {
 				expect(err.code).toEqual(templates.queueInsertionFailed.code);
 			}
-
-			fn.mockRestore();
 		});
 
-		// NOTE: this test needs to be at the end.
 		test(`should fail with ${templates.queueConnectionError.code} if it cannot connect to queue`, async () => {
 			await fs.copyFile(objModel, fileCreated);
-			const fn = jest.spyOn(AMQP, 'connect').mockRejectedValue(undefined);
 			expect.assertions(1);
 			try {
 				await Queue.queueModelUpload(teamspace, model, data, file);
 			} catch (err) {
 				expect(err.code).toEqual(templates.queueConnectionError.code);
 			}
-			fn.mockRestore();
+		});
+
+		test('should succeed with job inserted into the queue', async () => {
+			await fs.copyFile(objModel, fileCreated);
+			const sendToQueueFn = jest.fn(() => {});
+			fn.mockResolvedValueOnce(createFakeConnection(sendToQueueFn));
+
+			await expect(Queue.queueModelUpload(teamspace, model, data, file)).resolves.toBe(undefined);
+
+			expect(sendToQueueFn.mock.calls.length).toBe(1);
+			const { correlationId: corId } = sendToQueueFn.mock.calls[0][2];
+
+			expect(publishFn.mock.calls.length).toBe(1);
+			expect(publishFn.mock.calls[0][0]).toEqual(events.QUEUE_ITEM_UPDATE);
+			expect(publishFn.mock.calls[0][1]).toEqual({ teamspace, model, corId, status: 'queued' });
 		});
 	});
 
-	afterAll(async () => {
-		fs.rm(fileCreated);
-	});
+	afterAll(() => fs.rm(fileCreated).catch(() => {}));
 };
 
 describe('services/queue', () => {
 	testQueueModelUpload();
 });
-
-// const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
-// const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);

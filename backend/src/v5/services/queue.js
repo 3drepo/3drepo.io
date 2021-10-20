@@ -56,19 +56,23 @@ const connect = async () => {
 		retry = 0;
 		connClosed = false;
 
-		conn.on('close', () => {
-			if (!connClosed) {
+		conn.on('close',
+			/* istanbul ignore next */
+			() => {
+				if (!connClosed) {
 				// this can be called more than once for some reason. Use a boolean to distinguish first timers.
-				connClosed = true;
-				connectionPromise = undefined;
-				logger.logInfo('Connection closed.');
-				reconnect();
-			}
-		});
+					connClosed = true;
+					connectionPromise = undefined;
+					logger.logInfo('Connection closed.');
+					reconnect();
+				}
+			});
 
-		conn.on('error', (err) => {
-			logger.logError(`Connection error: ${err.message}`);
-		});
+		conn.on('error',
+			/* istanbul ignore next */
+			(err) => {
+				logger.logError(`Connection error: ${err.message}`);
+			});
 		return conn;
 	} catch (err) {
 		logger.logError(`Failed to establish connection to rabbit mq: ${err}.`);
@@ -127,11 +131,6 @@ Queue.queueModelUpload = async (teamspace, model, data, { originalname, path }) 
 
 		await queueModelJob(revId, msg);
 
-		try {
-			await rm(path);
-		} catch (err) {
-			logger.logError(`Failed to remove file from upload dir: ${path}`);
-		}
 		publish(events.QUEUE_ITEM_UPDATE, { teamspace, model, corId: revId, status: 'queued' });
 	} catch (err) {
 		// Clean up files we created
@@ -146,7 +145,7 @@ Queue.queueModelUpload = async (teamspace, model, data, { originalname, path }) 
 			throw err;
 		}
 
-		logger.logError('Failed to queue model job', err.message || err);
+		logger.logError('Failed to queue model job', err?.message);
 		throw templates.queueInsertionFailed;
 	}
 };
