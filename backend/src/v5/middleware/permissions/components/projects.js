@@ -16,7 +16,7 @@
  */
 
 const { getUserFromSession } = require('../../../utils/sessions');
-const { isProjectAdmin } = require('../../../utils/permissions/permissions');
+const { hasAdminPermissions } = require('../../../utils/permissions/permissions');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
 
@@ -27,7 +27,7 @@ Projects.isProjectAdmin = async (req, res, next) => {
 	const user = getUserFromSession(session);
 	const { teamspace, project } = params;
 	try {
-		const hasAdminPerms = await isProjectAdmin(teamspace, project, user);
+		const hasAdminPerms = await hasAdminPermissions(teamspace, project, user);
 		if (hasAdminPerms) {
 			next();
 		} else {

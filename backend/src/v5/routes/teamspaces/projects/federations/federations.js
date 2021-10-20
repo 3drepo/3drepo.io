@@ -356,6 +356,7 @@ const establishRoutes = () => {
 	 *                 example: 100
 	 *               unit:
 	 *                 type: string
+	 *                 enum: [mm, cm, dm, m, ft]
 	 *                 example: mm
 	 *               defaultView:
 	 *                 type: string

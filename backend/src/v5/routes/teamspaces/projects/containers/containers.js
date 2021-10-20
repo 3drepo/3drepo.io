@@ -191,6 +191,7 @@ const establishRoutes = () => {
 	 *                   example: ok
      *                 units:
 	 *                   type: string
+	 *                   enum: [mm, cm, dm, m, ft]
 	 *                   description: Container units
 	 *                   example: mm
 	 *                 revisions:
