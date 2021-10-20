@@ -24,6 +24,7 @@ import { Container, Actions, Details, Status } from './alertModal.styles';
 interface IAlertModal {
 	onClickClose?: () => void,
 	currentActions?: string
+	errorMessage?: string;
 	error?: {
 		request: {
 			response: string;
@@ -32,8 +33,9 @@ interface IAlertModal {
 	details?: string
 }
 
-export const AlertModal: React.FC<IAlertModal> = ({ onClickClose, currentActions = '', error, details }) => {
-	const { message, status, code } = JSON.parse(error.request.response);
+export const AlertModal: React.FC<IAlertModal> = ({ onClickClose, currentActions = '', error, details, errorMessage }) => {
+	const responseData = error?.request?.response ? JSON.parse(error?.request?.response) : {};
+	const { message, status, code } = responseData;
 	const errorStatus = `${status} - ${code}`;
 
 	return (
@@ -48,7 +50,7 @@ export const AlertModal: React.FC<IAlertModal> = ({ onClickClose, currentActions
 			</DialogTitle>
 			<DialogContent>
 				<DialogContentText>
-					{message}
+					{message || errorMessage}
 				</DialogContentText>
 				{!!status && <Status>{errorStatus}</Status>}
 			</DialogContent>
