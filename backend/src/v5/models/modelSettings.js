@@ -72,25 +72,7 @@ Models.getFederations = async (ts, ids, projection, sort) => {
 	return findModel(ts, query, projection, sort);
 };
 
-Models.updateContainerSettings = async (ts, model, data) =>{
-	const query = { _id: model, federate: { $ne: true } };
-	const result = await updateModelSettings(ts, data, query);
-	
-	if (!result || result.matchedCount === 0) {
-		throw templates.containerNotFound;
-	}
-}
-
-Models.updateFederationSettings = async (ts, model, data) =>{
-	const query = { _id: model, federate: true };
-	const result = await updateModelSettings(ts, data, query);
-	
-	if (!result || result.matchedCount === 0) {
-		throw templates.federationNotFound;
-	}
-}
-
- const updateModelSettings = async (ts, data, query) => {
+Models.updateModelSettings = async (ts, model, data) => {
 	const toUpdate = {};
 	const toUnset = {};
 
@@ -118,7 +100,11 @@ Models.updateFederationSettings = async (ts, model, data) =>{
 		updateJson.$unset = toUnset;
 	}
 
-	return db.updateOne(ts, 'settings', query , updateJson);
+	const result = await db.updateOne(ts, 'settings', { _id: model } , updateJson);
+
+	if (!result || result.matchedCount === 0) {
+		throw templates.modelNotFound;
+	}
 };
 
 module.exports = Models;

@@ -67,7 +67,7 @@ ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
 		.required()
 		.test('at-least-one-property', 'You must provide at least one setting value', (value) => Object.keys(value).length);
 	try {
-		await schema.validate(req.body);
+		req.body = await schema.validate(req.body);
 		convertBodyUUIDs(req.body);
 		next();
 	} catch (err) {

@@ -16,7 +16,7 @@
  */
 
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
-const { getFederationById, getFederations, updateFederationSettings } = require('../../../../models/modelSettings');
+const { getFederationById, getFederations, updateModelSettings } = require('../../../../models/modelSettings');
 const Groups = require('./commons/groups');
 const { checkLegendExists } = require('../../../../models/legends');
 const { checkViewExists } = require('../../../../models/views');
@@ -86,6 +86,6 @@ Federations.getFederationStats = async (teamspace, federation) => {
 	};
 };
 
-Federations.updateSettings = updateFederationSettings;
+Federations.updateSettings = updateModelSettings;
 
 module.exports = Federations;
