@@ -74,6 +74,10 @@ matrix:
     - language: node_js
       dist: focal
       name: Backend tests  (V5)
+      addons:
+        apt:
+         packages:
+            - rabbitmq-server
       git:
       submodules: false
       depth: 1

@@ -19,7 +19,7 @@ const { src } = require('../../helper/path');
 
 const Quota = require(`${src}/utils/quota`);
 const db = require(`${src}/handler/db`);
-const { templates } = require(`${src}/utils/responsecodes`);
+const { templates } = require(`${src}/utils/responseCodes`);
 
 const testSufficientQuota = () => {
 	const tsWithExpiredQuota = 'expiredQuota';
