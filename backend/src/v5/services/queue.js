@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { codeExists, createResponseCode, templates } = require('../utils/responseCodes');
 const { copyFile, mkdir, rm, writeFile } = require('fs/promises');
-const { createResponseCode, templates } = require('../utils/responseCodes');
 const amqp = require('amqplib');
 const { events } = require('./eventsManager/eventsManager.constants');
 const { generateUUIDString } = require('../utils/helper/uuids');
@@ -72,6 +72,7 @@ const connect = async () => {
 		return conn;
 	} catch (err) {
 		logger.logError(`Failed to establish connection to rabbit mq: ${err}.`);
+		connectionPromise = undefined;
 		return reconnect();
 	}
 };
@@ -90,9 +91,9 @@ const queueJob = async (queueName, correlationId, msg) => {
 		logger.logInfo(`[${queueName}][INSERT]\tOK\t${correlationId}\t${msg.toString()}`);
 		await channel.close();
 	} catch (err) {
-		logger.logError(`[${queueName}][INSERT]\t${err.message}\t${correlationId}\t${msg.toString()}`);
+		logger.logError(`[${queueName}][INSERT]\t${err?.message}\t${correlationId}\t${msg.toString()}`);
 		// FIXME Mailer.sendQueueFailedEmail({ message }).catch(() => {});
-		throw createResponseCode(templates.queueConnectionError, err.message);
+		throw createResponseCode(templates.queueConnectionError, err?.message);
 	}
 };
 
@@ -100,39 +101,54 @@ const queueModelJob = (corId, msg) => queueJob(modelq, corId, msg);
 
 Queue.queueModelUpload = async (teamspace, model, data, { originalname, path }) => {
 	const revId = generateUUIDString();
-
 	const fileNameSanitised = originalname.replace(/[ *"/\\[\]:;|=,<>$]/g, '_');
-
 	const fileLoc = `${revId}/${fileNameSanitised}`;
 
-	const json = {
-		...data,
-		file: `${SHARED_SPACE_TAG}/${fileLoc}`,
-		database: teamspace,
-		project: model,
-		revId,
-	};
-
-	await mkdir(`${sharedDir}/${revId}`);
-
-	await Promise.all(
-		[
-			copyFile(path, `${sharedDir}/${fileLoc}`),
-			writeFile(`${sharedDir}/${revId}.json`, JSON.stringify(json)),
-
-		],
-	);
 	try {
-		await rm(path);
+		const json = {
+			...data,
+			file: `${SHARED_SPACE_TAG}/${fileLoc}`,
+			database: teamspace,
+			project: model,
+			revId,
+		};
+
+		await mkdir(`${sharedDir}/${revId}`);
+
+		await Promise.all(
+			[
+				copyFile(path, `${sharedDir}/${fileLoc}`),
+				writeFile(`${sharedDir}/${revId}.json`, JSON.stringify(json)),
+
+			],
+		);
+
+		const msg = `import -f ${SHARED_SPACE_TAG}/${revId}.json`;
+
+		await queueModelJob(revId, msg);
+
+		try {
+			await rm(path);
+		} catch (err) {
+			logger.logError(`Failed to remove file from upload dir: ${path}`);
+		}
+		publish(events.QUEUE_ITEM_UPDATE, { teamspace, model, corId: revId, status: 'queued' });
 	} catch (err) {
-		logger.logError(`Failed to remove file from upload dir: ${path}`);
+		// Clean up files we created
+		Promise.all([
+			rm(`${sharedDir}/${fileLoc}`),
+			rm(`${sharedDir}/${revId}.json`),
+		]).catch((cleanUpErr) => {
+			logger.logError(`Failed to remove files (clean up on failure : ${cleanUpErr}`);
+		});
+
+		if (err?.code && codeExists(err.code)) {
+			throw err;
+		}
+
+		logger.logError('Failed to queue model job', err.message || err);
+		throw templates.queueInsertionFailed;
 	}
-
-	const msg = `import -f ${SHARED_SPACE_TAG}/${revId}.json`;
-
-	await queueModelJob(revId, msg);
-
-	publish(events.QUEUE_ITEM_UPDATE, { teamspace, model, corId: revId, status: 'queued' });
 };
 
 module.exports = Queue;
