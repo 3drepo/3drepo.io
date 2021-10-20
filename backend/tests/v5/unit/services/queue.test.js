@@ -44,7 +44,7 @@ const createFakeConnection = (sendToQueue) => {
 const publishFn = EventsManager.publish.mockImplementation(() => {});
 
 const testQueueModelUpload = () => {
-	const fileCreated = path.join(modelFolder, 'toRemove.obj');
+	const fileCreated = path.join(modelFolder, 'queueObjectTest.obj');
 	describe('queue model upload', () => {
 		const teamspace = 'teamspace';
 		const model = 'modelID';
