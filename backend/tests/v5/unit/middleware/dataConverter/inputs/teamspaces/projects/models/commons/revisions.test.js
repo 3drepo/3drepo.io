@@ -81,10 +81,12 @@ const testValidateUpdateRevisionData = () => {
 		});
 	});
 };
-const createRequestWithFile = (teamspace, { tag, desc, importAnim }, unsupportedFile = false) => {
+const createRequestWithFile = (teamspace, { tag, desc, importAnim }, unsupportedFile = false, noFile = false) => {
 	const form = new FormData();
-	form.append('file',
-		fs.createReadStream(path.join(modelFolder, unsupportedFile ? 'dummy.png' : 'dummy.obj')));
+	if (!noFile) {
+		form.append('file',
+			fs.createReadStream(path.join(modelFolder, unsupportedFile ? 'dummy.png' : 'dummy.obj')));
+	}
 	if (tag) form.append('tag', tag);
 	if (desc) form.append('desc', desc);
 	if (importAnim) form.append('importAnim', importAnim);
@@ -107,15 +109,16 @@ const testValidateNewRevisionData = () => {
 	const standardBody = { tag: '123', description: 'this is a model', importAnim: false };
 	describe.each([
 		['Request with valid data', 'ts', standardBody],
-		['Request with unsupported model file', 'ts', standardBody, true, templates.unsupportedFileFormat],
-		['Request with insufficient quota', 'noQuota', standardBody, false, templates.quotaLimitExceeded],
-		['Request with no body should fail', 'ts', {}, false, templates.invalidArguments],
-		['Request with just tag should pass', 'ts', { tag: 'dkfjd' }, false],
-		['Request with wrong tag type should fail', 'ts', { tag: false }, false, templates.invalidArguments],
-		['Request with tag that is not alphanumeric should fail', 'ts', { tag: '1-2-3' }, false, templates.invalidArguments],
-	])('Check new revision data', (desc, ts, bodyContent, badFile, error) => {
+		['Request with unsupported model file', 'ts', standardBody, true, false, templates.unsupportedFileFormat],
+		['Request with insufficient quota', 'noQuota', standardBody, false, false, templates.quotaLimitExceeded],
+		['Request with no body should fail', 'ts', {}, false, false, templates.invalidArguments],
+		['Request with just tag should pass', 'ts', { tag: 'dkfjd' }, false, false],
+		['Request with wrong tag type should fail', 'ts', { tag: false }, false, false, templates.invalidArguments],
+		['Request with tag that is not alphanumeric should fail', 'ts', { tag: '1-2-3' }, false, false, templates.invalidArguments],
+		['Request with no file should fail', 'ts', { tag: 'drflgdf' }, false, true, templates.invalidArguments],
+	])('Check new revision data', (desc, ts, bodyContent, badFile, noFile, error) => {
 		test(`${desc} should ${error ? `fail with ${error.code}` : ' succeed and next() should be called'}`, async () => {
-			const req = createRequestWithFile(ts, bodyContent, badFile);
+			const req = createRequestWithFile(ts, bodyContent, badFile, noFile);
 			const mockCB = jest.fn(() => {});
 			await Revisions.validateNewRevisionData(req, {}, mockCB);
 			if (error) {
