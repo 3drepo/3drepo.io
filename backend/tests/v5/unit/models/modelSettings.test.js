@@ -144,10 +144,40 @@ const testGetFederations = () => {
 	});
 };
 
+const testUpdateModelStatus = () => {
+	describe('Update model status', () => {
+		test('should update model status and return successfully', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 1 });
+
+			const status = 'queued';
+			const corId = '123';
+			await expect(Model.updateModelStatus('teamspace', 'model', status, corId)).resolves.toBe(undefined);
+
+			expect(fn.mock.calls.length).toBe(1);
+			const action = fn.mock.calls[0][3];
+			expect(action.$set.corID).toEqual(corId);
+			expect(action.$set.status).toEqual(status);
+		});
+
+		test(`should fail with ${templates.modelNotFound.code} if update failed`, async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 0 });
+
+			const status = 'queued';
+			await expect(Model.updateModelStatus('teamspace', 'model', status)).rejects.toEqual(templates.modelNotFound);
+
+			expect(fn.mock.calls.length).toBe(1);
+			const action = fn.mock.calls[0][3];
+			expect(action.$set.status).toEqual(status);
+			expect(action.$set.corId).toEqual(undefined);
+		});
+	});
+};
+
 describe('models/modelSettings', () => {
 	testGetModelById();
 	testGetContainerById();
 	testGetFederationById();
 	testGetContainers();
 	testGetFederations();
+	testUpdateModelStatus();
 });

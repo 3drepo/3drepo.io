@@ -42,7 +42,7 @@ const calculateQuota = async (teamspace) => {
 
 	if (hasExpiredQuota && quotaSize === 0) throw templates.licenceExpired;
 
-	const basicQuota = (config.subscriptions || {}).basic?.data || 0;
+	const basicQuota = config.subscriptions?.basic?.data;
 	return (quotaSize + basicQuota) * 1024 * 1024; // data in MB, returning in Bytes.
 };
 

@@ -48,6 +48,7 @@ const reconnect = () => {
 };
 
 const connect = async () => {
+	/* istanbul ignore next */
 	if (connectionPromise) return connectionPromise;
 	try {
 		logger.logInfo(`Connecting to ${queueConfig.host}...`);

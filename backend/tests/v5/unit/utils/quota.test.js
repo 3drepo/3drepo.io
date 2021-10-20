@@ -56,6 +56,7 @@ const testSufficientQuota = () => {
 				data: 2,
 				expiryDate: Date.now() + 100000,
 			},
+			paypal: {},
 		},
 
 		[tsWithMultipleLicense2]: {
@@ -76,7 +77,11 @@ const testSufficientQuota = () => {
 		return Promise.resolve({ customData: { billing: { subscriptions } } });
 	});
 
-	jest.spyOn(db, 'listCollections').mockImplementation((ts) => Promise.resolve(ts === tsWithSomeUsage ? [{ name: 'a.issues.ref' }] : []));
+	jest.spyOn(db, 'listCollections').mockImplementation((ts) => Promise.resolve(ts === tsWithSomeUsage ? [
+		{ name: 'a.issues.ref' },
+		{ name: 'a.scene.stash' },
+		{ name: 'ref' },
+	] : []));
 	jest.spyOn(db, 'aggregate').mockImplementation(() => Promise.resolve([{ _id: null, total: 1024 * 1024 }]));
 
 	describe.each([
