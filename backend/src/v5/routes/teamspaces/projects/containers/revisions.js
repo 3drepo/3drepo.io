@@ -53,10 +53,10 @@ const newRevision = async (req, res) => {
 	const owner = getUserFromSession(req.session);
 	Containers.newRevision(teamspace, container, { ...revInfo, owner }, file).then(() => {
 		respond(req, res, templates.ok);
-	}).catch((err) => {
+	}).catch(
 		/* istanbul ignore next */
-		respond(req, res, err);
-	});
+		(err) => respond(req, res, err),
+	);
 };
 
 const establishRoutes = () => {

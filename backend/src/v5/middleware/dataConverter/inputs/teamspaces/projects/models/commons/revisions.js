@@ -79,6 +79,7 @@ const validateRevisionUpload = async (req, res, next) => {
 
 	try {
 		req.body = await schema.validate(req.body);
+		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
