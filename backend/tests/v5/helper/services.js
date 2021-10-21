@@ -125,6 +125,7 @@ ServiceHelper.generateUUID = () => generateUUID();
 ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex');
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
     + Math.random() * (end.getTime() - start.getTime()));
+ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
 
 ServiceHelper.generateUserCredentials = () => ({
 	user: ServiceHelper.generateRandomString(),
@@ -151,8 +152,15 @@ ServiceHelper.generateRandomModelProperties = () => ({
 	status: 'ok',
 	surveyPoints: [
 		{
-			position: [1, 2, 3],
-			latLong: [4, 5],
+			position: [
+				ServiceHelper.generateRandomNumber,
+				ServiceHelper.generateRandomNumber,
+				ServiceHelper.generateRandomNumber
+			],
+			latLong: [
+				ServiceHelper.generateRandomNumber,
+				ServiceHelper.generateRandomNumber
+			],
 		},
 	],
 	anglefromNorth: 123,

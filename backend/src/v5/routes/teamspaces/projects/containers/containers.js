@@ -68,7 +68,9 @@ const updateSettings = (req, res) => {
 	const { teamspace, container } = req.params;
 
 	Containers.updateSettings(teamspace, container, req.body)
-		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
+		.then(() => respond(req, res, templates.ok)).catch(
+			// istanbul ignore next
+			(err) => respond(req, res, err));
 };
 
 const establishRoutes = () => {

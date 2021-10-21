@@ -66,7 +66,10 @@ const updateSettings = (req, res) => {
 	const { teamspace, federation } = req.params;
 
 	Federations.updateSettings(teamspace, federation, req.body)
-		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
+		.then(() => respond(req, res, templates.ok)).catch(
+			// istanbul ignore next
+			(err) => respond(req, res, err)
+			);
 };
 
 const establishRoutes = () => {
