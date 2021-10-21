@@ -373,6 +373,12 @@ const testUpdateContainerSettings = () => {
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
+		test('should fail if the a federation Id is passed', async () => {
+			const res = await agent.patch(`${route(federation._id)}?key=${users.tsAdmin.apiKey}`)
+				.send({ name: 'name' }).expect(templates.containerNotFound.status);
+			expect(res.body.code).toEqual(templates.containerNotFound.code);
+		});
+
 		test('should update a container\'s settings if the body of the request is as expected', async () => {
 			const data = {
 				name: 'newName',
@@ -389,6 +395,15 @@ const testUpdateContainerSettings = () => {
 				code: 'CODE1',
 				defaultView: views[1],
 				defaultLegend: legends[1],
+			};
+			await agent.patch(`${route(modelWithViews._id)}?key=${users.tsAdmin.apiKey}`)
+				.send(data).expect(templates.ok.status);
+		});
+
+		test('should update a container\'s settings if not all body params are provided', async () => {
+			const data = {
+				name: 'newName',
+				desc: 'newDesc'
 			};
 			await agent.patch(`${route(modelWithViews._id)}?key=${users.tsAdmin.apiKey}`)
 				.send(data).expect(templates.ok.status);
