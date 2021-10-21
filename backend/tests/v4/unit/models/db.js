@@ -177,6 +177,7 @@ describe("Check DB handler", function() {
 				await db.getCollectionStats("notexist", "jobs");
 				throw {}; // should've failed at previous line
 			} catch (err) {
+				console.log("coll stats err");
 				console.log(err);
 				expect(err.name).to.equal("MongoError");
 				expect(err.message).to.equal("Database [notexist] not found.");

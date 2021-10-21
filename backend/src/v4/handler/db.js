@@ -184,8 +184,12 @@
 
 	Handler.getCollectionStats = function (database, colName) {
 		return Handler.getDB(database).then(dbConn => {
+			console.log("dbConn");
+			console.log(dbConn);
 			return dbConn.collection(colName).stats();
 		}).catch(err => {
+			console.log("err");
+			console.log(err);
 			Handler.disconnect();
 			return Promise.reject(err);
 		});
