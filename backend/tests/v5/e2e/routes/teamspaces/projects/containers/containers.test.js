@@ -43,15 +43,27 @@ const project = {
 };
 
 const views = [
-	ServiceHelper.generateUUIDString(),
-	ServiceHelper.generateUUIDString(),
-	ServiceHelper.generateUUIDString(),
+	{
+		_id: ServiceHelper.generateUUIDString()
+	},
+	{
+		_id: ServiceHelper.generateUUIDString()
+	},
+	{
+		_id: ServiceHelper.generateUUIDString()
+	}
 ];
 
 const legends = [
-	ServiceHelper.generateUUIDString(),
-	ServiceHelper.generateUUIDString(),
-	ServiceHelper.generateUUIDString(),
+	{
+		_id: ServiceHelper.generateUUIDString()
+	},
+	{
+		_id: ServiceHelper.generateUUIDString()
+	},
+	{
+		_id: ServiceHelper.generateUUIDString()
+	}
 ];
 
 const models = [
@@ -101,24 +113,15 @@ const setupData = async () => {
 		model.name,
 		model.properties,
 	));
-	const viewsProms = views.map((view) => ServiceHelper.db.createView(
-		teamspace,
-		modelWithViews._id,
-		view,
-	));
-	const legendsProms = legends.map((legend) => ServiceHelper.db.createLegend(
-		teamspace,
-		modelWithLegends._id,
-		legend,
-	));
+	
 	return Promise.all([
 		...userProms,
 		...modelProms,
 		ServiceHelper.db.createUser(nobody),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
-		...revisions.map((revision) => ServiceHelper.db.createRevision(teamspace, modelWithRev._id, revision)),
-		...viewsProms,
-		...legendsProms,
+		...revisions.map((revision) => ServiceHelper.db.createRevision(teamspace, modelWithRev._id, revision)),	
+		ServiceHelper.db.createViews(teamspace,modelWithViews._id, views),
+	    ServiceHelper.db.createLegends(teamspace,modelWithLegends._id, legends)
 	]);
 };
 
@@ -393,8 +396,8 @@ const testUpdateContainerSettings = () => {
 				type: 'someType',
 				unit: 'mm',
 				code: 'CODE1',
-				defaultView: views[1],
-				defaultLegend: legends[1],
+				defaultView: views[1]._id,
+				defaultLegend: legends[1]._id,
 			};
 			await agent.patch(`${route(modelWithViews._id)}?key=${users.tsAdmin.apiKey}`)
 				.send(data).expect(templates.ok.status);

@@ -52,7 +52,7 @@ ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
 			}
 			return true;
 		}),
-		defaultLegend: types.id.test('check-legend-exists', 'Legend not found', async (value) => {
+		defaultLegend: types.id.nullable().test('check-legend-exists', 'Legend not found', async (value) => {
 			if (value) {
 				try{
 					const model = req.params.container ?? req.params.federation;

@@ -106,14 +106,18 @@ db.createRisk = (teamspace, modelId, risk) => {
 	return DbHandler.insertOne(teamspace, `${modelId}.risks`, formattedRisk);
 };
 
-db.createView = (teamspace, modelId, view) => {
-	const formattedView = { _id: stringToUUID(view) };
-	return DbHandler.insertOne(teamspace, `${modelId}.views`, formattedView);
+db.createViews = (teamspace, modelId, views) => {
+	const formattedViews = views.map((view) => {
+		 return {...view, _id: stringToUUID(view._id) };
+	});
+	return DbHandler.insertMany(teamspace, `${modelId}.views`, formattedViews);
 };
 
-db.createLegend = (teamspace, modelId, legend) => {
-	const formattedLegend = { _id: stringToUUID(legend) };
-	return DbHandler.insertOne(teamspace, `${modelId}.sequences.legends`, formattedLegend);
+db.createLegends = (teamspace, modelId, legends) => {
+	const formattedLegends = legends.map((legend) => {
+		return {...legend, _id: stringToUUID(legend._id) };
+   });
+   return DbHandler.insertMany(teamspace, `${modelId}.sequences.legends`, formattedLegends);
 };
 
 ServiceHelper.generateUUIDString = () => uuidToString(generateUUID());
@@ -141,7 +145,7 @@ ServiceHelper.generateRandomModelProperties = () => ({
 		code: ServiceHelper.generateUUIDString(),
 		unit: 'm',
 	},
-	desc: 'random description',
+	desc: ServiceHelper.generateRandomString(),
 	type: ServiceHelper.generateUUIDString(),
 	timestamp: Date.now(),
 	status: 'ok',

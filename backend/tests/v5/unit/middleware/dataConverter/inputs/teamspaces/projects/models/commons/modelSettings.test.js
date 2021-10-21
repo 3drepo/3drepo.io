@@ -83,7 +83,7 @@ const testValidateUpdateSettingsData = () => {
 		[{ body: { defaultView: existingViewID}, params: {container: '1'} }, true, 'with defaultView that exists'],
 		[{ body: { defaultView: existingViewID}, params: {federation: '1'} }, true, 'with defaultView that exists'],
 		[{ body: { defaultLegend: 123 } }, false, 'with invalid defaultLegend'],
-		[{ body: { defaultLegend: null } }, false, 'with null defaultLegend'],
+		[{ body: { defaultLegend: null } }, true, 'with null defaultLegend'],
 		[{ body: { defaultLegend: '9c7a6c50-ee85-11e8-af42-09344c707317' } , params: {container: '1'} }, false, 'with defaultLegend that does not exist'],
 		[{ body: { defaultLegend: '9c7a6c50-ee85-11e8-af42-09344c707317' } , params: {federation: '1'} }, false, 'with defaultLegend that does not exist'],
 		[{ body: { defaultLegend: existingLegendID }, params: {container: '1'} }, true, 'with defaultLegend that exists'],
