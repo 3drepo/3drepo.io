@@ -15,16 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Typography } from '@controls/typography';
-
-export const Line = styled.hr`
-	border: 0;
-	border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
-	width: calc(100% - 100px);
-	margin-top: 28px;
-	margin-bottom: 11px;
-`;
 
 export const Container = styled.div`
 	display: flex;
@@ -37,6 +29,9 @@ export const Container = styled.div`
 
 export const Actions = styled.div`
 	display: flex;
+	${({ bottomMargin }) => bottomMargin && css`
+		margin-bottom: 25px;
+	`}
 `;
 
 export const Details = styled(Typography).attrs({
@@ -44,5 +39,15 @@ export const Details = styled(Typography).attrs({
 })`
 	margin-top: 5px;
 	margin-bottom: 25px;
+	color: ${({ theme }) => theme.palette.base.main};
+`;
+
+export const Status = styled(Typography).attrs({
+	variant: 'h5',
+	component: 'p',
+})`
+	text-align: center;
+	margin-top: 8px;
+	margin-bottom: 0;
 	color: ${({ theme }) => theme.palette.base.main};
 `;
