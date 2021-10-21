@@ -25,6 +25,7 @@ export const Container = styled.div`
 	padding-left: 66px;
 	padding-right: 36px;
 	z-index: 1;
+	position: relative;
 `;
 
 export const RevisionsListEmptyWrapper = styled.div`
@@ -81,7 +82,7 @@ const revisionListItemStylesLineStyles = ({ theme, selected, isBeforeSelected })
 		position: absolute;
 		top: 50%;
 		left: -10px;
-		z-index: 0;
+		z-index: -1;
 		border: solid 2px transparent;
 		background-origin: border-box;
 		background-clip: content-box, border-box;
