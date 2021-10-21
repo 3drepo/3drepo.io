@@ -186,7 +186,8 @@ describe("Check DB handler", function() {
 	describe("listCollections", function () {
 		it("list collection with valid username should succeed", async function() {
 			const colls = await db.listCollections(account);
-			expect(colls).to.deep.equal(goldenColls);
+			const listOrder = (a, b) => a.name < b.name ? -1 : 1;
+			expect(colls.sort(listOrder)).to.deep.equal(goldenColls.sort(listOrder));
 		});
 
 		it("list collection with incorrect username should be empty", async function() {
