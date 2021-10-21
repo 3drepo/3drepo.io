@@ -30,7 +30,7 @@ export interface IUser {
 export interface ITeamspace {
 	name: string;
 	isAdmin: boolean;
-	users: IUser[];
+	users?: IUser[];
 }
 
 export interface ITeamspacesActions {

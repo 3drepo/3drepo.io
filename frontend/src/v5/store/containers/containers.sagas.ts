@@ -19,7 +19,7 @@ import { all, put, takeLatest, select } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import {
 	ContainersActions,
-	ContainersTypes,
+	ContainersTypes, setRevisionsIsPending,
 } from '@/v5/store/containers/containers.redux';
 import { selectCurrentTeamspaceUsers } from '@/v5/store/teamspaces/teamspaces.selectors';
 import { ContainerStatuses } from './containers.types';
@@ -57,6 +57,7 @@ export function* fetchContainers({ teamspace, projectId }) {
 }
 
 export function* fetchRevisions({ teamspace, projectId, containerId }) {
+	yield put(ContainersActions.setRevisionsIsPending(projectId, containerId, true));
 	try {
 		const { data: { revisions } } = yield API.fetchRevisions(teamspace, projectId, containerId);
 		const teamspaceUsers = yield select(selectCurrentTeamspaceUsers);
@@ -70,6 +71,7 @@ export function* fetchRevisions({ teamspace, projectId, containerId }) {
 	} catch (e) {
 		console.error(e);
 	}
+	yield put(ContainersActions.setRevisionsIsPending(projectId, containerId, false));
 }
 
 export default function* ContainersSaga() {

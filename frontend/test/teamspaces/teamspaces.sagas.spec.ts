@@ -16,33 +16,39 @@
  */
 
 import { expectSaga } from 'redux-saga-test-plan';
-import { throwError } from 'redux-saga-test-plan/providers';
 
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import * as TeamspacesSaga from '@/v5/store/teamspaces/teamspaces.sagas';
+import { mockServer } from '../../internals/testing/mockServer';
 
 describe('Teamspaces: sagas', () => {
-	describe('fetch', () => {
-		it('should fetch teamspaces data and dispatch FETCH_SUCCESS', () => {
-			jest.mock('@/v5/services/api', () => ({
-				fetchTeamspaces: () => Promise.resolve([]),
-			}));
+	const teamspace = 'teamspace';
+	const teamspaces = [];
 
-			expectSaga(TeamspacesSaga.default)
-				.dispatch(TeamspacesActions.fetch())
-				.put(TeamspacesActions.fetchSuccess([]))
-				.silentRun();
+	describe('fetch', () => {
+		it('should fetch teamspaces data and dispatch FETCH_SUCCESS', async () => {
+			mockServer
+					.get(`/teamspaces`)
+					.reply(200, { teamspaces });
+
+			await expectSaga(TeamspacesSaga.default)
+					.dispatch(TeamspacesActions.fetch())
+					.put(TeamspacesActions.fetchSuccess([]))
+					.silentRun();
 		});
 
-		it('should handle teamspaces api error and dispatch FETCH_FAILURE', () => {
-			jest.mock('@/v5/services/api', () => ({
-				fetchProjects: () => throwError(new Error('error')),
-			}));
+		it('should handle teamspaces api error and dispatch FETCH_FAILURE', async () => {
+			mockServer
+					.get(`/teamspaces`)
+					.reply(404);
 
-			expectSaga(TeamspacesSaga.default)
-				.dispatch(TeamspacesActions.fetch())
-				.put(TeamspacesActions.fetchFailure())
-				.silentRun();
+			await expectSaga(TeamspacesSaga.default)
+					.dispatch(TeamspacesActions.fetch())
+					.put(TeamspacesActions.fetchFailure())
+					.silentRun()
+					.then(({ effects }: any) => {
+						expect(effects.put).toBeUndefined();
+					});
 		});
 	});
 });

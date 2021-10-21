@@ -25,6 +25,7 @@ export interface IContainersActions {
 	fetchContainers: (teamspace: string, projectId: string) => any;
 	fetchContainersSuccess: (projectId: string, containers: IContainer[]) => any;
 	fetchRevisions: (teamspace: string, projectId: string, containerId: string) => any;
+	setRevisionsIsPending: (projectId: string, containerId: string, isPending: boolean) => any;
 	fetchRevisionsSuccess: (projectId: string, containerId: string, revisions: IRevisions[]) => any;
 	setCurrentProject: (projectId: string) => any;
 	setIsPending: (isPending: boolean) => any;
@@ -35,6 +36,7 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	fetchContainers: ['teamspace', 'projectId'],
 	fetchContainersSuccess: ['projectId', 'containers'],
 	fetchRevisions: ['teamspace', 'projectId', 'containerId'],
+	setRevisionsIsPending: ['projectId', 'containerId', 'isPending'],
 	fetchRevisionsSuccess: ['projectId', 'containerId', 'revisions'],
 	setCurrentProject: ['projectId'],
 	setIsPending: ['isPending'],
@@ -89,10 +91,24 @@ export const setIsPending = (state = INITIAL_STATE, { isPending }) => ({
 	isPending,
 });
 
+export const setRevisionsIsPending = (state = INITIAL_STATE, { projectId, containerId, isPending }) => {
+	const stateClone = cloneDeep(state);
+	const currentContainerIndex = stateClone.containers[projectId].findIndex(({ _id }) => _id === containerId);
+	stateClone.containers[projectId][currentContainerIndex].isPending = isPending;
+
+	return {
+		...state,
+		containers: {
+			...stateClone.containers,
+		},
+	};
+};
+
 export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
 	[ContainersTypes.SET_FILTER_QUERY]: setFilterQuery,
 	[ContainersTypes.FETCH_CONTAINERS_SUCCESS]: fetchContainersSuccess,
 	[ContainersTypes.FETCH_REVISIONS_SUCCESS]: fetchRevisionsSuccess,
 	[ContainersTypes.SET_CURRENT_PROJECT]: setCurrentProject,
 	[ContainersTypes.SET_IS_PENDING]: setIsPending,
+	[ContainersTypes.SET_REVISIONS_IS_PENDING]: setRevisionsIsPending,
 });
