@@ -36,7 +36,7 @@ describe('Containers: sagas', () => {
 
 			await expectSaga(ContainersSaga.default)
 			.dispatch(ContainersActions.addFavourite(teamspace, projectId, containerId))
-			.put(ContainersActions.setFavouriteSuccess(containerId, true))
+			.put(ContainersActions.setFavouriteSuccess(projectId, containerId, true))
 			.silentRun();
 		})
 	})
@@ -49,7 +49,7 @@ describe('Containers: sagas', () => {
 
 			await expectSaga(ContainersSaga.default)
 			.dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
-			.put(ContainersActions.setFavouriteSuccess(containerId, false))
+			.put(ContainersActions.setFavouriteSuccess(projectId, containerId, false))
 			.silentRun();
 		})
 	})
@@ -58,9 +58,9 @@ describe('Containers: sagas', () => {
 		const mockContainers = times(10, () => containerMockFactory());
 		const mockContainersBaseResponse = mockContainers.map((container) => pick(container, ['_id', 'name', 'role', 'isFavourite']));
 		const mockContainersWithoutStats = prepareContainersData(mockContainers);
-	})
 
 		it('should fetch containers data', async () => {
+			mockServer
 			.get(`/teamspaces/${teamspace}/projects/${projectId}/containers`)
 			.reply(200, {
 				containers: mockContainersBaseResponse
@@ -80,6 +80,8 @@ describe('Containers: sagas', () => {
 					code: container.code,
 				});
 			})
+
+			await expectSaga(ContainersSaga.default)
 			.dispatch(ContainersActions.fetchContainers(teamspace, projectId))
 			.put(ContainersActions.setIsListPending(true))
 			.put(ContainersActions.setAreStatsPending(true))
@@ -106,5 +108,5 @@ describe('Containers: sagas', () => {
 				expect(effects.put).toBeUndefined();
 			});
 		})
-})
+	})
 })
