@@ -172,18 +172,10 @@ describe("Check DB handler", function() {
 			expect(stats.ok).to.equal(1);
 		});
 
-		it("get collection stats with incorrect username should fail", async function() {
-			try {
-				const stats = await db.getCollectionStats("notexist", "jobs");
-				console.log("stats");
-				console.log(stats);
-				throw {}; // should've failed at previous line
-			} catch (err) {
-				console.log("coll stats err");
-				console.log(err);
-				expect(err.name).to.equal("MongoError");
-				expect(err.message).to.equal("Database [notexist] not found.");
-			}
+		it("get collection stats with incorrect username should be size 0", async function() {
+			const stats = await db.getCollectionStats("notexist", "jobs");
+			expect(stats).to.exist;
+			expect(stats.size).to.equal(0);
 		});
 	});
 
