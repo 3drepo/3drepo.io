@@ -16,17 +16,33 @@
  */
 
 const Crypto = require('crypto');
+const amqp = require('amqplib');
 
 const { src, srcV4 } = require('./path');
 
 const { createApp } = require(`${srcV4}/services/api`);
 const DbHandler = require(`${src}/handler/db`);
+const config = require(`${src}/utils/config`);
 const { createTeamSpaceRole } = require(`${srcV4}/models/role`);
 const { generateUUID, uuidToString, stringToUUID } = require(`${srcV4}/utils`);
 const { PROJECT_ADMIN, TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 
 const db = {};
-const ServiceHelper = { db };
+const queue = {};
+const ServiceHelper = { db, queue };
+
+queue.purgeQueues = async () => {
+	// eslint-disable-next-line
+	const { host, worker_queue, model_queue, callback_queue } = config.cn_queue;
+	const conn = await amqp.connect(host);
+	const channel = await conn.createChannel();
+
+	return Promise.all([
+		channel.purgeQueue(worker_queue),
+		channel.purgeQueue(model_queue),
+		channel.purgeQueue(callback_queue),
+	]);
+};
 
 // userCredentials should be the same format as the return value of generateUserCredentials
 db.createUser = async (userCredentials, tsList = [], customData = {}) => {

@@ -16,6 +16,7 @@
  */
 
 const { src, modelFolder, objModel } = require('../../../../../helper/path');
+const ServiceHelper = require('../../../../../helper/services');
 const fs = require('fs/promises');
 const path = require('path');
 
@@ -258,6 +259,7 @@ const testNewRevision = () => {
 				.rejects.toEqual(templates.queueInsertionFailed);
 			await expect(fileExists(fileCreated)).resolves.toBe(false);
 		});
+		afterAll(ServiceHelper.queue.purgeQueues);
 	});
 };
 

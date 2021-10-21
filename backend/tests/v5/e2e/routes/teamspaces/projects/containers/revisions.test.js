@@ -294,7 +294,10 @@ describe('E2E routes/teamspaces/projects/containers', () => {
 		agent = await SuperTest(server);
 		await setupData();
 	});
-	afterAll(() => ServiceHelper.closeApp(server));
+	afterAll(() => Promise.all([
+		ServiceHelper.queue.purgeQueues(),
+		ServiceHelper.closeApp(server),
+	]));
 	testGetRevisions();
 	testUpdateRevisionStatus();
 	testNewRevision();
