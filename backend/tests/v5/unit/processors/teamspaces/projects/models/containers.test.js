@@ -295,7 +295,7 @@ const testGetRevisions = () => {
 			const res = await Containers.getRevisions('teamspace', 1, false);
 			expect(getRevisionsMock.mock.calls.length).toBe(idx + 1);
 			expect(getRevisionsMock.mock.calls[idx][1]).toEqual(1);
-			expect(getRevisionsMock.mock.calls[idx][2]).toEqual(false);
+			expect(getRevisionsMock.mock.calls[idx][2]).toBe(false);
 			expect(res).toEqual(model1Revisions);
 		});
 
@@ -304,7 +304,7 @@ const testGetRevisions = () => {
 			const res = await Containers.getRevisions('teamspace', 1, true);
 			expect(getRevisionsMock.mock.calls.length).toBe(idx + 1);
 			expect(getRevisionsMock.mock.calls[idx][1]).toEqual(1);
-			expect(getRevisionsMock.mock.calls[idx][2]).toEqual(true);
+			expect(getRevisionsMock.mock.calls[idx][2]).toBe(true);
 			expect(res).toEqual(model1Revisions);
 		});
 	});

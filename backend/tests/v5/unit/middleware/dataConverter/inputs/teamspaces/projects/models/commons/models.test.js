@@ -42,7 +42,14 @@ const testValidateAddModelData = () => {
 				angleFromNorth: 10,
 				elevation: 10,
 			};
-			const expectedResult = { ...body };
+			const expectedResult = { ...body,
+				properties: {
+					unit: body.unit,
+					code: body.code,
+				} };
+			delete expectedResult.unit;
+			delete expectedResult.code;
+
 			await Models.validateAddModelData({ body }, {}, mockCB);
 			expect(mockCB.mock.calls.length).toBe(1);
 			expect(body).toEqual(expectedResult);

@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { hasAccessToTeamspace, hasAdminToProject, hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
+const { hasAccessToTeamspace, hasReadAccessToContainer, isAdminToProject } = require('../../../../middleware/permissions/permissions');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
@@ -144,7 +144,7 @@ const establishRoutes = () => {
 	 *                   description: Container ID
 	 *                   example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 */
-	router.post('/', hasAdminToProject, validateAddModelData, addContainer);
+	router.post('/', isAdminToProject, validateAddModelData, addContainer);
 
 	/**
 	 * @openapi
@@ -406,7 +406,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: Container removed.
 	 */
-	router.delete('/:container', hasAdminToProject, deleteContainer);
+	router.delete('/:container', isAdminToProject, deleteContainer);
 
 	return router;
 };

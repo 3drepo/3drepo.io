@@ -37,6 +37,6 @@ Permissions.hasReadAccessToFederation = validateMany([Permissions.hasAccessToTea
 Permissions.hasCommenterAccessToFederation = validateMany([
 	Permissions.hasAccessToTeamspace, hasCommenterAccessToFederation]);
 Permissions.hasWriteAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasWriteAccessToFederation]);
-Permissions.hasAdminToProject = validateMany([Permissions.hasAccessToTeamspace, isProjectAdmin]);
+Permissions.isAdminToProject = validateMany([Permissions.hasAccessToTeamspace, isProjectAdmin]);
 
 module.exports = Permissions;

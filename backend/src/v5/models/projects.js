@@ -25,9 +25,13 @@ const findOneProject = (ts, query, projection) => db.findOne(ts, 'projects', que
 const updateOneProject = (ts, query, data) => db.updateOne(ts, 'projects', query, data);
 const updateProjects = (ts, query, data) => db.updateMany(ts, 'projects', query, data);
 
-Projects.addProjectModel = (ts, project, model) => updateOneProject(ts, { _id: project }, { $push: { models: model } });
+Projects.addModelToProject = (ts, project, model) => updateOneProject(
+	ts,
+	{ _id: project },
+	{ $push: { models: model } },
+);
 
-Projects.removeProjectModel = (ts, model) => updateProjects(ts, { models: model }, { $pull: { models: model } });
+Projects.removeModelFromProject = (ts, model) => updateProjects(ts, { models: model }, { $pull: { models: model } });
 
 Projects.getProjectById = async (ts, project, projection) => {
 	const res = await findOneProject(ts, { _id: project }, projection);

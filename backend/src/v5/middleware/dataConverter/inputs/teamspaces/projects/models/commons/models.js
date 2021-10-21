@@ -27,38 +27,36 @@ Models.validateAddModelData = async (req, res, next) => {
 			// eslint-disable-next-line
 			.matches(/^[\x00-\x7F]{1,120}$/,
 				'name cannot be longer than 120 characters and must only contain alphanumeric characters and underscores')
-			.required()
-			.strict(true),
+			.required(),
 		unit: Yup.string('unit must be ft, mm, cm, dm, or m')
 			.matches(/^(mm|cm|dm|m|ft)$/i,
 				'unit must be ft, mm, cm, dm, or m')
-			.required()
-			.strict(true),
+			.required(),
 		desc: Yup.string('desc must be of type string')
 			.strict(true),
 		code: Yup.string('code must be of type string')
 			.matches(/^[a-zA-Z0-9]{0,50}$/,
-				'code cannot be longer than 50 characters and must only contain alphanumeric characters')
-			.strict(true),
+				'code cannot be longer than 50 characters and must only contain alphanumeric characters'),
 		type: Yup.string('type must be of type string')
-			.required()
-			.strict(true),
-		defaultView: Yup.string('defaultView must be a UUID string')
-			.strict(true),
-		defaultLegend: Yup.string('defaultLegend must be a UUID string')
-			.strict(true),
-		surveyPoints: Yup.array('surveyPoints must be of type array')
-			.strict(true),
-		angleFromNorth: Yup.number('angleFromNorth must be of type number')
-			.strict(true),
-		elevation: Yup.number('elevation must be of type number')
-			.strict(true),
+			.required(),
+		defaultView: Yup.string('defaultView must be a UUID string'),
+		defaultLegend: Yup.string('defaultLegend must be a UUID string'),
+		surveyPoints: Yup.array('surveyPoints must be of type array'),
+		angleFromNorth: Yup.number('angleFromNorth must be of type number'),
+		elevation: Yup.number('elevation must be of type number'),
 	});
 
 	try {
 		await schema.validate(req.body);
-		// move unit to props
-		// move code to props
+
+		req.body.properties = { unit: req.body.unit.toLowerCase() };
+		delete req.body.unit;
+
+		if (req.body.code) {
+			req.body.properties.code = req.body.code;
+			delete req.body.code;
+		}
+
 		next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));

@@ -25,7 +25,7 @@ const {
 	isSubModel,
 	removeModelCollections,
 } = require('../../../../../models/modelSettings');
-const { addProjectModel, getProjectById, removeProjectModel } = require('../../../../../models/projects');
+const { addModelToProject, getProjectById, removeModelFromProject } = require('../../../../../models/projects');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
 const { getFavourites } = require('../../../../../models/users');
 const { logger } = require('../../../../../utils/logger');
@@ -43,9 +43,9 @@ ModelList.addModel = async (teamspace, project, user, data) => {
 		throw templates.nameAlreadyExists;
 	}
 
-	const insertedId = addModel(teamspace, data);
+	const insertedId = await addModel(teamspace, data);
 
-	await addProjectModel(teamspace, project, insertedId);
+	await addModelToProject(teamspace, project, insertedId);
 
 	return insertedId;
 };
@@ -65,7 +65,7 @@ ModelList.deleteModel = async (teamspace, project, model) => {
 
 	await removeModelCollections(teamspace, model);
 	await deleteModel(teamspace, model);
-	await removeProjectModel(teamspace, model);
+	await removeModelFromProject(teamspace, model);
 };
 
 ModelList.getModelList = async (teamspace, project, user, modelSettings) => {

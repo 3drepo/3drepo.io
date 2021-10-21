@@ -186,7 +186,7 @@ const testIsSubModel = () => {
 			const fn = jest.spyOn(db, 'count').mockResolvedValue(0);
 
 			const res = await Model.isSubModel(teamspace, modelId);
-			expect(res).toEqual(false);
+			expect(res).toBe(false);
 
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual(teamspace);
@@ -201,7 +201,7 @@ const testIsSubModel = () => {
 			const fn = jest.spyOn(db, 'count').mockResolvedValue(1);
 
 			const res = await Model.isSubModel(teamspace, modelId);
-			expect(res).toEqual(true);
+			expect(res).toBe(true);
 
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual(teamspace);
@@ -245,19 +245,18 @@ const testRemoveModelCollections = () => {
 const testAddModel = () => {
 	describe('Add model', () => {
 		test('should return inserted ID on success', async () => {
-			const newContainerId = 'newContainerId';
-			const expectedData = { insertedId: newContainerId };
-
-			const fn = jest.spyOn(db, 'insertOne').mockResolvedValue(expectedData);
+			const fn = jest.spyOn(db, 'insertOne');
 
 			const teamspace = 'someTS';
 			const res = await Model.addModel(teamspace, {});
-			expect(res).toEqual(newContainerId);
+
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual(teamspace);
 			expect(fn.mock.calls[0][1]).toEqual('settings');
 			expect(fn.mock.calls[0][2]).toHaveProperty('_id');
 			expect(isUUIDString(fn.mock.calls[0][2]._id));
+
+			expect(res).toEqual(fn.mock.calls[0][2]._id);
 		});
 	});
 };

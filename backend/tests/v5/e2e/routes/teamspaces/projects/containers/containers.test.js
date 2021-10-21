@@ -240,7 +240,7 @@ const testAddContainer = () => {
 
 		test('should return new container ID if the user has permissions', async () => {
 			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status).send({ name: 'container name', unit: 'mm', type: 'a' });
-			expect(isUUIDString(res.body._id)).toEqual(true);
+			expect(isUUIDString(res.body._id)).toBe(true);
 		});
 	});
 };

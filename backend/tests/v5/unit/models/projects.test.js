@@ -75,7 +75,7 @@ const testAddProjectModel = () => {
 			};
 			jest.spyOn(db, 'updateOne').mockResolvedValue(expectedData);
 
-			const res = await Project.addProjectModel('someTS', 'someProject', 'someModel');
+			const res = await Project.addModelToProject('someTS', 'someProject', 'someModel');
 			expect(res).toEqual(expectedData);
 		});
 	});
@@ -90,7 +90,7 @@ const testRemoveProjectModel = () => {
 			};
 			jest.spyOn(db, 'updateMany').mockResolvedValue(expectedData);
 
-			const res = await Project.removeProjectModel('someTS', 'someModel');
+			const res = await Project.removeModelFromProject('someTS', 'someModel');
 			expect(res).toEqual(expectedData);
 		});
 	});
@@ -109,14 +109,14 @@ const testModelExistsInProject = () => {
 			const project = { models: ['a', 'b', 'c'] };
 			jest.spyOn(db, 'findOne').mockResolvedValue(project);
 			const res = await Project.modelExistsInProject('someTS', 'someProject', 'a');
-			expect(res).toEqual(true);
+			expect(res).toBe(true);
 		});
 
 		test('should return false if a model is not part of a project', async () => {
 			const project = { models: ['a', 'b', 'c'] };
 			jest.spyOn(db, 'findOne').mockResolvedValue(project);
 			const res = await Project.modelExistsInProject('someTS', 'someProject', 'd');
-			expect(res).toEqual(false);
+			expect(res).toBe(false);
 		});
 	});
 };
