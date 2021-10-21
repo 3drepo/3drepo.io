@@ -16,9 +16,9 @@
  */
 
 const {
-	hasCommenterAccessToContainer, hasCommenterAccessToFederation, hasReadAccessToContainer,
-	hasReadAccessToFederation, hasWriteAccessToContainer, hasWriteAccessToFederation,
-	hasAdminAccessToContainer, hasAdminAccessToFederation,
+	hasAdminAccessToContainer, hasAdminAccessToFederation, hasCommenterAccessToContainer,
+	hasCommenterAccessToFederation, hasReadAccessToContainer, hasReadAccessToFederation,
+	hasWriteAccessToContainer, hasWriteAccessToFederation,
 } = require('./components/models');
 const { convertAllUUIDs } = require('../dataConverter/pathParams');
 const { isTeamspaceMember } = require('./components/teamspaces');

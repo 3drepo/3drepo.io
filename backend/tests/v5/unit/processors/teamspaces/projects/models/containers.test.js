@@ -96,14 +96,6 @@ Legends.checkLegendExists.mockImplementation((teamspace, model, legend) => {
 	throw templates.legendNotFound;
 });
 
-const updateModelSettingsMock = ModelSettings.updateModelSettings.mockImplementation((teamspace, container) => {
-	if (container === 1) {
-		return 1;
-	}
-
-	return undefined;
-});
-
 Revisions.getRevisionCount.mockImplementation((teamspace, container) => (container === 'container2' ? 10 : 0));
 Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 	if (container === 'container2') return container2Rev;

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { hasAccessToTeamspace, hasReadAccessToFederation, hasAdminAccessToFederation} = require('../../../../middleware/permissions/permissions');
+const { hasAccessToTeamspace, hasAdminAccessToFederation, hasReadAccessToFederation } = require('../../../../middleware/permissions/permissions');
 const Federations = require('../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../utils/sessions');
@@ -68,8 +68,8 @@ const updateSettings = (req, res) => {
 	Federations.updateSettings(teamspace, federation, req.body)
 		.then(() => respond(req, res, templates.ok)).catch(
 			// istanbul ignore next
-			(err) => respond(req, res, err)
-			);
+			(err) => respond(req, res, err),
+		);
 };
 
 const establishRoutes = () => {

@@ -17,14 +17,19 @@
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const Yup = require('yup');
-const { checkLegendExists } = require('../../../../../../../models/legends')
-const { checkViewExists} = require('../../../../../../../models/views')
+const { checkLegendExists } = require('../../../../../../../models/legends');
+const { checkViewExists } = require('../../../../../../../models/views');
 const { respond } = require('../../../../../../../utils/responder');
+const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { types } = require('../../../../../../../utils/helper/yup');
-const { stringToUUID } = require('../../../../../../../utils/helper/uuids')
-
 
 const ModelSettings = {};
+
+const convertBodyUUIDs = (req) => {
+	Object.keys(req.body).forEach((key) => {
+		req.body[key] = stringToUUID(req.body[key]);
+	});
+};
 
 ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
 	const schema = Yup.object().shape({
@@ -34,7 +39,7 @@ ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
 			.of(
 				Yup.object().shape({
 					position: types.position.required(),
-					latLong: Yup.array().of(Yup.number()).length(2).required(),						
+					latLong: Yup.array().of(Yup.number()).length(2).required(),
 				}),
 			),
 		angleFromNorth: Yup.number().min(0).max(360),
@@ -43,10 +48,10 @@ ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
 		code: Yup.string().matches(/^[a-zA-Z0-9]{0,50}$/),
 		defaultView: types.id.nullable().test('check-view-exists', 'View not found', async (value) => {
 			if (value) {
-				try{
+				try {
 					const model = req.params.container ?? req.params.federation;
 					await checkViewExists(req.params.teamspace, model, stringToUUID(value));
-				} catch(err){
+				} catch (err) {
 					return false;
 				}
 			}
@@ -54,12 +59,12 @@ ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
 		}),
 		defaultLegend: types.id.nullable().test('check-legend-exists', 'Legend not found', async (value) => {
 			if (value) {
-				try{
+				try {
 					const model = req.params.container ?? req.params.federation;
 					await checkLegendExists(req.params.teamspace, model, stringToUUID(value));
-				} catch(err){
+				} catch (err) {
 					return false;
-				}				
+				}
 			}
 			return true;
 		}),
@@ -68,18 +73,11 @@ ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
 		.test('at-least-one-property', 'You must provide at least one setting value', (value) => Object.keys(value).length);
 	try {
 		req.body = await schema.validate(req.body);
-		convertBodyUUIDs(req.body);
+		convertBodyUUIDs(req);
 		next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };
-
-const convertBodyUUIDs = (data) => {
-	Object.keys(data).forEach((key) => {
-		data[key] = stringToUUID(data[key]);
-	});
-};
-
 
 module.exports = ModelSettings;

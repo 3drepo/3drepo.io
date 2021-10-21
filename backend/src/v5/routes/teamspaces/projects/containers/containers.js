@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { hasAccessToTeamspace, hasReadAccessToContainer, hasAdminAccessToContainer } = require('../../../../middleware/permissions/permissions');
+const { hasAccessToTeamspace, hasAdminAccessToContainer, hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
@@ -70,7 +70,8 @@ const updateSettings = (req, res) => {
 	Containers.updateSettings(teamspace, container, req.body)
 		.then(() => respond(req, res, templates.ok)).catch(
 			// istanbul ignore next
-			(err) => respond(req, res, err));
+			(err) => respond(req, res, err),
+		);
 };
 
 const establishRoutes = () => {

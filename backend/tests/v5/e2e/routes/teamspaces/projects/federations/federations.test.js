@@ -47,26 +47,26 @@ const modelWithoutRevId = ServiceHelper.generateUUIDString();
 
 const views = [
 	{
-		_id: ServiceHelper.generateUUIDString()
+		_id: ServiceHelper.generateUUIDString(),
 	},
 	{
-		_id: ServiceHelper.generateUUIDString()
+		_id: ServiceHelper.generateUUIDString(),
 	},
 	{
-		_id: ServiceHelper.generateUUIDString()
-	}
+		_id: ServiceHelper.generateUUIDString(),
+	},
 ];
 
 const legends = [
 	{
-		_id: ServiceHelper.generateUUIDString()
+		_id: ServiceHelper.generateUUIDString(),
 	},
 	{
-		_id: ServiceHelper.generateUUIDString()
+		_id: ServiceHelper.generateUUIDString(),
 	},
 	{
-		_id: ServiceHelper.generateUUIDString()
-	}
+		_id: ServiceHelper.generateUUIDString(),
+	},
 ];
 
 const modelSettings = [
@@ -76,7 +76,7 @@ const modelSettings = [
 		isFavourite: true,
 		properties: { ...ServiceHelper.generateRandomModelProperties(),
 			federate: true,
-			subModels: [{ model: modelWithRevId }]
+			subModels: [{ model: modelWithRevId }],
 		},
 		permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
 	},
@@ -201,7 +201,7 @@ const setupData = async () => {
 		teamspace,
 		federationWithoutRev._id,
 		risk,
-	));	
+	));
 
 	return Promise.all([
 		...userProms,
@@ -213,8 +213,8 @@ const setupData = async () => {
 		ServiceHelper.db.createUser(nobody),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, modelSettings.map(({ _id }) => _id)),
 		...revisions.map((revision) => ServiceHelper.db.createRevision(teamspace, modelWithRevId, revision)),
-		ServiceHelper.db.createViews(teamspace,federation._id, views),
-		ServiceHelper.db.createLegends(teamspace,federation._id, legends)
+		ServiceHelper.db.createViews(teamspace, federation._id, views),
+		ServiceHelper.db.createLegends(teamspace, federation._id, legends),
 	]);
 };
 
@@ -251,12 +251,12 @@ const testGetFederationList = () => {
 	});
 };
 
-const formatToStats = (federation, issueCount, riskCount, latestRev) => {
+const formatToStats = (fed, issueCount, riskCount, latestRev) => {
 	const formattedStats = {
-		code: federation.properties.properties.code,
-		status: federation.properties.status,
-		subModels: federation.properties.subModels
-			? federation.properties.subModels.map(({ model }) => model) : undefined,
+		code: fed.properties.properties.code,
+		status: fed.properties.status,
+		subModels: fed.properties.subModels
+			? fed.properties.subModels.map(({ model }) => model) : undefined,
 		lastUpdated: latestRev ? latestRev.getTime() : undefined,
 		tickets: {
 			issues: issueCount,
@@ -507,7 +507,7 @@ const testUpdateFederationSettings = () => {
 		test('should update a federation\'s settings if not all body params are provided', async () => {
 			const data = {
 				name: 'newName',
-				desc: 'newDesc'
+				desc: 'newDesc',
 			};
 			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
 				.send(data).expect(templates.ok.status);

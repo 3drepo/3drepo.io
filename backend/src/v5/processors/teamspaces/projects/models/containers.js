@@ -19,11 +19,8 @@ const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const Groups = require('./commons/groups');
-const { checkLegendExists } = require('../../../../models/legends');
-const { checkViewExists } = require('../../../../models/views');
 const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
-const { templates } = require('../../../../utils/responseCodes');
 
 const Containers = { ...Groups };
 
@@ -75,6 +72,6 @@ Containers.deleteFavourites = async (username, teamspace, project, favouritesToR
 	return deleteFavourites(username, teamspace, accessibleContainers, favouritesToRemove);
 };
 
-Containers.updateSettings = updateModelSettings;	
+Containers.updateSettings = updateModelSettings;
 
 module.exports = Containers;

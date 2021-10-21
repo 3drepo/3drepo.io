@@ -18,14 +18,11 @@
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getFederationById, getFederations, updateModelSettings } = require('../../../../models/modelSettings');
 const Groups = require('./commons/groups');
-const { checkLegendExists } = require('../../../../models/legends');
-const { checkViewExists } = require('../../../../models/views');
 const { getIssuesCount } = require('../../../../models/issues');
 const { getLatestRevision } = require('../../../../models/revisions');
 const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
 const { getRisksCount } = require('../../../../models/risks');
-const { templates } = require('../../../../utils/responseCodes');
 
 const Federations = { ...Groups };
 

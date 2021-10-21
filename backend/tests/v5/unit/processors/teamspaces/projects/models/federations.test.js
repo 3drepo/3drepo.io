@@ -100,13 +100,6 @@ Risks.getRisksCount.mockImplementation((teamspace, federation) => {
 	return 0;
 });
 
-const updateModelSettingsMock = ModelSettings.updateModelSettings.mockImplementation((teamspace, federation) => {
-	if (federation === 1) {
-		return 1;
-	}
-	return undefined;
-});
-
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
 Views.checkViewExists.mockImplementation((teamspace, model, view) => {
 	if (view === 1) {

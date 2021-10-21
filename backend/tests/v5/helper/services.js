@@ -107,17 +107,13 @@ db.createRisk = (teamspace, modelId, risk) => {
 };
 
 db.createViews = (teamspace, modelId, views) => {
-	const formattedViews = views.map((view) => {
-		 return {...view, _id: stringToUUID(view._id) };
-	});
+	const formattedViews = views.map((view) => ({ ...view, _id: stringToUUID(view._id) }));
 	return DbHandler.insertMany(teamspace, `${modelId}.views`, formattedViews);
 };
 
 db.createLegends = (teamspace, modelId, legends) => {
-	const formattedLegends = legends.map((legend) => {
-		return {...legend, _id: stringToUUID(legend._id) };
-   });
-   return DbHandler.insertMany(teamspace, `${modelId}.sequences.legends`, formattedLegends);
+	const formattedLegends = legends.map((legend) => ({ ...legend, _id: stringToUUID(legend._id) }));
+	return DbHandler.insertMany(teamspace, `${modelId}.sequences.legends`, formattedLegends);
 };
 
 ServiceHelper.generateUUIDString = () => uuidToString(generateUUID());
@@ -155,11 +151,11 @@ ServiceHelper.generateRandomModelProperties = () => ({
 			position: [
 				ServiceHelper.generateRandomNumber,
 				ServiceHelper.generateRandomNumber,
-				ServiceHelper.generateRandomNumber
+				ServiceHelper.generateRandomNumber,
 			],
 			latLong: [
 				ServiceHelper.generateRandomNumber,
-				ServiceHelper.generateRandomNumber
+				ServiceHelper.generateRandomNumber,
 			],
 		},
 	],

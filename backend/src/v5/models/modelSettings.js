@@ -100,7 +100,7 @@ Models.updateModelSettings = async (ts, model, data) => {
 		updateJson.$unset = toUnset;
 	}
 
-	const result = await db.updateOne(ts, 'settings', { _id: model } , updateJson);
+	const result = await db.updateOne(ts, 'settings', { _id: model }, updateJson);
 
 	if (!result || result.matchedCount === 0) {
 		throw templates.modelNotFound;

@@ -257,7 +257,7 @@ const testHasAdminAccessToContainer = () => {
 		['c', false],
 		['projAdmin', true],
 		['tsAdmin', true],
-		['nobody', false]
+		['nobody', false],
 	])('Has admin access to container', (user, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} admin access`, async () => {
 			Projects.modelExistsInProject.mockImplementation(() => true);
@@ -361,7 +361,7 @@ const testHasAdminAccessToFederation = () => {
 		['c', false],
 		['projAdmin', true],
 		['tsAdmin', true],
-		['nobody', false]
+		['nobody', false],
 	])('Has admin access to federation', (user, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} admin access`, async () => {
 			Projects.modelExistsInProject.mockImplementation(() => true);
