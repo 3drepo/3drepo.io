@@ -19,15 +19,20 @@ import { createActions, createReducer } from 'reduxsauce';
 import { times } from 'lodash';
 import { Constants } from '@/v5/store/common/actions.helper';
 import { containerMockFactory } from './containers.fixtures';
-import { ContainerStatuses, IContainersState } from './containers.types';
-
-export interface IContainersActions {
-	setFilterQuery: (query: string) => any;
-}
+import {
+	IContainersActionCreators,
+	IContainersState,
+	ContainerStatuses,
+	SetFilterQueryAction,
+	SetFavouriteSuccessAction,
+} from './containers.types';
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({
 	setFilterQuery: ['query'],
-}, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActions>; Creators: IContainersActions };
+	addFavourite: ['teamspace', 'projectId', 'containerId'],
+	removeFavourite: ['teamspace', 'projectId', 'containerId'],
+	setFavouriteSuccess: ['containerId', 'isFavourite'],
+}, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
 
 export const INITIAL_STATE: IContainersState = {
 	containers: [
@@ -39,8 +44,22 @@ export const INITIAL_STATE: IContainersState = {
 	filterQuery: '',
 };
 
-export const setFilterQuery = (state = INITIAL_STATE, { query }) => ({ ...state, filterQuery: query });
+export const setFilterQuery = (state = INITIAL_STATE, { query }: SetFilterQueryAction) => (
+	{ ...state, filterQuery: query }
+);
+
+export const setFavourite = (state = INITIAL_STATE, {
+	containerId,
+	isFavourite,
+}: SetFavouriteSuccessAction) => ({
+	...state,
+	containers: state.containers.map((container) => ({
+		...container,
+		isFavourite: container._id === containerId ? isFavourite : container.isFavourite,
+	})),
+});
 
 export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
 	[ContainersTypes.SET_FILTER_QUERY]: setFilterQuery,
+	[ContainersTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
 });

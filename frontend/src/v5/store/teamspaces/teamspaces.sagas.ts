@@ -17,13 +17,18 @@
 
 import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
+import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { TeamspacesActions, TeamspacesTypes, ITeamspace } from './teamspaces.redux';
 
 export function* fetch() {
 	try {
 		const { data: { teamspaces } } = yield API.fetchTeamspaces();
 		yield put(TeamspacesActions.fetchSuccess(teamspaces as ITeamspace[]));
-	} catch (e) {
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to fetch teamspaces',
+			error,
+		}));
 		yield put(TeamspacesActions.fetchFailure());
 	}
 }
