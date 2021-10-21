@@ -80,11 +80,13 @@ module.exports = {
 		region: "eu-west-2",
 		bucketName: "3drepo-travis"
 	},
+	/*
 	alluxio: {
 		hostname: 'localhost',
 		port: 39999,
 		levels: 2
 	},
+	*/
 	fs: {
 		path: require("path").resolve(__dirname, '../../submodules/tests/backend/files/'),
 		levels: 2
