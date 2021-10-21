@@ -174,7 +174,9 @@ describe("Check DB handler", function() {
 
 		it("get collection stats with incorrect username should fail", async function() {
 			try {
-				await db.getCollectionStats("notexist", "jobs");
+				const stats = await db.getCollectionStats("notexist", "jobs");
+				console.log("stats");
+				console.log(stats);
 				throw {}; // should've failed at previous line
 			} catch (err) {
 				console.log("coll stats err");

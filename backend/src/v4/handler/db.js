@@ -189,9 +189,6 @@
 			const coll = dbConn.collection(colName);
 			console.log("coll");
 			console.log(coll);
-			const stats = coll.stats();
-			console.log("stats");
-			console.log(stats);
 			return dbConn.collection(colName).stats();
 		}).catch(err => {
 			console.log("err");
