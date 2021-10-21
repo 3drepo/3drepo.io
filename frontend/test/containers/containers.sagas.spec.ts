@@ -33,7 +33,7 @@ describe('Containers: sagas', () => {
 
 			await expectSaga(ContainersSaga.default)
 			.dispatch(ContainersActions.addFavourite(teamspace, projectId, containerId))
-			.put(ContainersActions.toggleFavouriteSuccess(containerId))
+			.put(ContainersActions.setFavouriteSuccess(containerId, true))
 			.silentRun();
 		})
 
@@ -59,7 +59,7 @@ describe('Containers: sagas', () => {
 
 			await expectSaga(ContainersSaga.default)
 			.dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
-			.put(ContainersActions.toggleFavouriteSuccess(containerId))
+			.put(ContainersActions.setFavouriteSuccess(containerId, false))
 			.silentRun();
 		})
 

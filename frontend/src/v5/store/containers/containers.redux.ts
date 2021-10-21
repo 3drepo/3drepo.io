@@ -16,16 +16,22 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { cloneDeep, times } from 'lodash';
+import { times } from 'lodash';
 import { Constants } from '@/v5/store/common/actions.helper';
 import { containerMockFactory } from './containers.fixtures';
-import { IContainersActionCreators, IContainersActions, IContainersState, ContainerStatuses } from './containers.types';
+import {
+	IContainersActionCreators,
+	IContainersState,
+	ContainerStatuses,
+	SetFilterQueryAction,
+	SetFavouriteSuccessAction,
+} from './containers.types';
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({
 	setFilterQuery: ['query'],
 	addFavourite: ['teamspace', 'projectId', 'containerId'],
 	removeFavourite: ['teamspace', 'projectId', 'containerId'],
-	toggleFavouriteSuccess: ['containerId'],
+	setFavouriteSuccess: ['containerId', 'isFavourite'],
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
 
 export const INITIAL_STATE: IContainersState = {
@@ -38,23 +44,22 @@ export const INITIAL_STATE: IContainersState = {
 	filterQuery: '',
 };
 
-export const setFilterQuery = (state = INITIAL_STATE, { query }: IContainersActions['setFilterQuery']) => (
+export const setFilterQuery = (state = INITIAL_STATE, { query }: SetFilterQueryAction) => (
 	{ ...state, filterQuery: query }
 );
 
-export const toggleFavourite = (state = INITIAL_STATE, { containerId }: IContainersActions['addFavourite']) => {
-	const containers = cloneDeep(state.containers);
-	const containerIndex = containers.findIndex(({ _id }) => _id === containerId);
-
-	containers[containerIndex].isFavourite = !containers[containerIndex].isFavourite;
-
-	return {
-		...state,
-		containers,
-	};
-};
+export const setFavourite = (state = INITIAL_STATE, {
+	containerId,
+	isFavourite,
+}: SetFavouriteSuccessAction) => ({
+	...state,
+	containers: state.containers.map((container) => ({
+		...container,
+		isFavourite: container._id === containerId ? isFavourite : container.isFavourite,
+	})),
+});
 
 export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
 	[ContainersTypes.SET_FILTER_QUERY]: setFilterQuery,
-	[ContainersTypes.TOGGLE_FAVOURITE_SUCCESS]: toggleFavourite,
+	[ContainersTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
 });
