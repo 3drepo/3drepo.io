@@ -177,7 +177,11 @@ export const ContainersList = ({
 									</DashboardListItemIcon>
 								</DashboardListItemRow>
 								{container._id === selectedId && (
-									<RevisionDetails containerId={container._id} revisions={container.revisions} />
+									<RevisionDetails
+										containerId={container._id}
+										revisions={container.revisions}
+										isLoading={container.isPending}
+									/>
 								)}
 							</DashboardListItem>
 						))

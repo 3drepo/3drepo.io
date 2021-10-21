@@ -25,6 +25,7 @@ import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasb
 import { NewContainerButton } from '@/v5/ui/routes/dashboard/projects/containers/containers.styles';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { RevisionsListItem } from '@components/shared/revisionDetails/components/revisionsListItem';
+import { SkeletonListItem } from '@components/shared/revisionDetails/components/skeletonListItem';
 import {
 	Container, RevisionsListHeaderContainer, RevisionsListItemWrapper, RevisionsList, RevisionsListEmptyWrapper,
 	RevisionsListEmptyContainer,
@@ -33,9 +34,10 @@ import {
 interface IRevisionDetails {
 	containerId: string;
 	revisions: IRevisions[];
+	isLoading?: boolean;
 }
 
-export const RevisionDetails = ({ containerId, revisions }: IRevisionDetails): JSX.Element => {
+export const RevisionDetails = ({ containerId, revisions, isLoading = false }: IRevisionDetails): JSX.Element => {
 	const { teamspace, project } = useParams();
 	const selected = 0;
 	const isSingle = revisions?.length === 1;
@@ -44,11 +46,7 @@ export const RevisionDetails = ({ containerId, revisions }: IRevisionDetails): J
 		ContainersActionsDispatchers.fetchRevisions(teamspace, project, containerId);
 	}, []);
 
-	if (!revisions) {
-		return null;
-	}
-
-	if (revisions.length === 0) {
+	if (revisions && revisions.length === 0) {
 		return (
 			<RevisionsListEmptyWrapper>
 				<RevisionsListEmptyContainer>
@@ -72,15 +70,19 @@ export const RevisionDetails = ({ containerId, revisions }: IRevisionDetails): J
 				<RevisionsListHeaderLabel><Trans id="revisionDetails.description" message="Description" /></RevisionsListHeaderLabel>
 			</RevisionsListHeaderContainer>
 			<RevisionsList>
-				{revisions.map((revision, i) => (
-					<RevisionsListItemWrapper
-						isSingle={isSingle}
-						isBeforeSelected={i === selected - 1}
-						selected={i === selected}
-					>
-						<RevisionsListItem revision={revision} selected={i === selected} />
-					</RevisionsListItemWrapper>
-				))}
+				{!revisions || isLoading ? (
+					<SkeletonListItem />
+				) : (
+					revisions.map((revision, i) => (
+						<RevisionsListItemWrapper
+							isSingle={isSingle}
+							isBeforeSelected={i === selected - 1}
+							selected={i === selected}
+						>
+							<RevisionsListItem revision={revision} selected={i === selected} />
+						</RevisionsListItemWrapper>
+					))
+				)}
 			</RevisionsList>
 		</Container>
 	);
