@@ -38,7 +38,7 @@ before(function(done) {
 	done();
 });
 
-describe("Check Alluxio client", function() {
+(config.alluxio ? describe : describe.skip)("Check Alluxio client", function() {
 	describe("getInfo", function () {
 		it("get info should succeed", async function() {
 			const result = await client.getInfo();

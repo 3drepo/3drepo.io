@@ -21,6 +21,7 @@ import {
 	ContainersActions,
 	ContainersTypes,
 } from '@/v5/store/containers/containers.redux';
+import { AddFavouriteAction, RemoveFavouriteAction } from './containers.types';
 import { ExtendedAction } from '@/v5/store/store.types';
 import {
 	FavouritePayload,
@@ -30,19 +31,19 @@ import {
 } from './containers.types';
 import { prepareContainersData } from './containers.helpers';
 
-export function* addFavourites({ containerId, teamspace, projectId }: ExtendedAction<FavouritePayload>) {
+export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
 	try {
-		yield put(ContainersActions.toggleFavouriteSuccess(projectId, containerId));
 		yield API.addFavourites({ teamspace, containerId, projectId });
+		yield put(ContainersActions.setFavouriteSuccess(containerId, true));
 	} catch (e) {
 		console.error(e);
 	}
 }
 
-export function* removeFavourites({ containerId, teamspace, projectId }: ExtendedAction<FavouritePayload>) {
+export function* removeFavourites({ containerId, teamspace, projectId }: RemoveFavouriteAction) {
 	try {
-		yield put(ContainersActions.toggleFavouriteSuccess(projectId, containerId));
 		yield API.removeFavourites({ containerId, teamspace, projectId });
+		yield put(ContainersActions.setFavouriteSuccess(containerId, false));
 	} catch (e) {
 		console.error(e);
 	}

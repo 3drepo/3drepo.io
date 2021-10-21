@@ -45,7 +45,10 @@ describe('Containers: redux', () => {
 				[projectId]: mockAllFavouritesContainers
 			}
 		}
-		const resultState = containersReducer(defaultStateWithAllFavourites, ContainersActions.toggleFavouriteSuccess(projectId, mockAllFavouritesContainers[0]._id));
+		const resultState = containersReducer(
+			defaultStateWithAllFavourites,
+			ContainersActions.setFavouriteSuccess(mockAllFavouritesContainers[0]._id, false)
+		);
 		const resultContainers = resultState.containers[projectId];
 
 		expect(resultContainers[0].isFavourite).toEqual(false);

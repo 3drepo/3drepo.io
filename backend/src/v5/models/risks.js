@@ -15,12 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+const Risks = {};
+const db = require('../handler/db');
 
-export const Content = styled.section`
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	overflow-y: auto;
-	flex-grow: 1;
-`;
+const collectionName = (model) => `${model}.risks`;
 
-export const MainHeaderPortalRoot = styled.div``;
+const excludeResolvedRisks = {
+	mitigation_status: { $nin: [
+		'void',
+		'agreed_fully',
+		'rejected',
+	] },
+};
+
+Risks.getRisksCount = async (teamspace, model) => db.count(teamspace, collectionName(model), excludeResolvedRisks);
+
+module.exports = Risks;

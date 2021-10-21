@@ -77,7 +77,7 @@ export const ContainersList = ({
 		setSelectedId((state) => (state === id ? null : id));
 	};
 
-	const toggleFavourite = (id: IContainer['_id'], value: boolean) => {
+	const setFavourite = (id: string, value: boolean) => {
 		if (value) {
 			ContainersActionsDispatchers.addFavourite(teamspace, project, id);
 		} else {
@@ -184,7 +184,7 @@ export const ContainersList = ({
 															event.stopPropagation();
 														}}
 														onChange={(event) => {
-															toggleFavourite(
+															setFavourite(
 																container._id,
 																!!event.currentTarget.checked,
 															);
