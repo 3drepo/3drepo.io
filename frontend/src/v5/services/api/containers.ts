@@ -15,8 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ContainersActions } from '@/v5/store/containers/containers.redux';
-import { IContainersActionCreators } from '@/v5/store/containers/containers.types';
-import { createActionsDispatchers } from './actionsDistpatchers.helper';
+import { FavouritePayload } from '@/v5/store/containers/containers.types';
+import { AxiosResponse } from 'axios';
+import api from './default';
 
-export const ContainersActionsDispatchers = createActionsDispatchers<IContainersActionCreators>(ContainersActions);
+export const addFavourites = (
+	{ teamspace, projectId, containerId }: FavouritePayload,
+): Promise<AxiosResponse<void>> => (
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites`, {
+		containers: [containerId],
+	})
+);
+
+export const removeFavourites = (
+	{ teamspace, projectId, containerId }: FavouritePayload,
+): Promise<AxiosResponse<void>> => (
+	api.delete(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites`, {
+		containers: [containerId],
+	})
+);

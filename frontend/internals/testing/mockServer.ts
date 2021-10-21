@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ContainersActions } from '@/v5/store/containers/containers.redux';
-import { IContainersActionCreators } from '@/v5/store/containers/containers.types';
-import { createActionsDispatchers } from './actionsDistpatchers.helper';
+import nock = require('nock');
 
-export const ContainersActionsDispatchers = createActionsDispatchers<IContainersActionCreators>(ContainersActions);
+export const mockServer = nock('http://api1.app-3drepo.com:80/api/v5');
