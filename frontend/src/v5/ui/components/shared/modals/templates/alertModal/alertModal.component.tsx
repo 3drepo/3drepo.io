@@ -18,35 +18,57 @@
 import React from 'react';
 import { Button, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
 import WarningIcon from '@assets/icons/warning.svg';
-import { Container, Line, Actions, Details } from './alertModal.styles';
+import { Trans } from '@lingui/react';
+import { Container, Actions, Details, Status } from './alertModal.styles';
 
 interface IAlertModal {
 	onClickClose?: () => void,
 	currentActions?: string
-	errorMessage?: string
+	errorMessage?: string;
+	error?: {
+		request: {
+			response: string;
+		};
+	};
 	details?: string
 }
 
-export const AlertModal: React.FC<IAlertModal> = ({ onClickClose, currentActions = '', errorMessage, details }) => (
-	<Container>
-		<WarningIcon />
-		<DialogTitle>
-			Something went wrong {currentActions}
-		</DialogTitle>
-		<DialogContent>
-			<DialogContentText>
-				{errorMessage}
-			</DialogContentText>
-		</DialogContent>
-		<Line />
-		<Actions>
-			<Button autoFocus type="submit" onClick={onClickClose} variant="contained" color="primary" size="small">
-				Ok, close window
-			</Button>
-			<Button href="https://3drepo.com/contact/" variant="outlined" color="secondary" size="small">
-				Contact support
-			</Button>
-		</Actions>
-		{details && <Details>{details}</Details>}
-	</Container>
-);
+export const AlertModal: React.FC<IAlertModal> = ({ onClickClose, currentActions = '', error, details, errorMessage }) => {
+	const responseData = error?.request?.response ? JSON.parse(error?.request?.response) : {};
+	const { message, status, code } = responseData;
+	const errorStatus = `${status} - ${code}`;
+
+	return (
+		<Container>
+			<WarningIcon />
+			<DialogTitle>
+				<Trans
+					id="alertModal.header"
+					message="Something went wrong when {currentActions}"
+					values={{ currentActions }}
+				/>
+			</DialogTitle>
+			<DialogContent>
+				<DialogContentText>
+					{message || errorMessage}
+				</DialogContentText>
+				{!!status && <Status>{errorStatus}</Status>}
+			</DialogContent>
+			<Actions bottomMargin={!details}>
+				<Button autoFocus type="submit" onClick={onClickClose} variant="contained" color="primary">
+					<Trans
+						id="alertModal.action.ok"
+						message="Ok, close window"
+					/>
+				</Button>
+				<Button href="https://3drepo.com/contact/" variant="outlined" color="secondary">
+					<Trans
+						id="alertModal.action.contactSupport"
+						message="Contact support"
+					/>
+				</Button>
+			</Actions>
+			{details && <Details>{details}</Details>}
+		</Container>
+	);
+};

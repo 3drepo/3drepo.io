@@ -28,7 +28,6 @@ import { NotFound } from '@/v5/ui/routes/notFound';
 import { DashboardLayout } from '@components/dashboard/dashboardLayout';
 import { TeamspaceContent } from './teamspaces';
 import { ProjectContent } from './projects';
-import { ModalsDemo } from './modalsDemo';
 
 i18n.load('en', enMessages);
 i18n.load('es', esMessages);
@@ -66,11 +65,6 @@ export const Dashboard = () => {
 								<ProjectContent />
 							</Route>
 						</Switch>
-					</DashboardLayout>
-				</Route>
-				<Route exact path={`${path}/modals/`}>
-					<DashboardLayout>
-						<ModalsDemo />
 					</DashboardLayout>
 				</Route>
 				<Route path="*">
