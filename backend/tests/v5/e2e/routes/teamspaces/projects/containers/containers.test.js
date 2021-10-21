@@ -363,14 +363,14 @@ const testUpdateContainerSettings = () => {
 
 		test('should fail if the defaultView is not found', async () => {
 			const res = await agent.patch(`${route(modelWithViews._id)}?key=${users.tsAdmin.apiKey}`)
-				.send({ name: 'name', defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8' }).expect(templates.viewNotFound.status);
-			expect(res.body.code).toEqual(templates.viewNotFound.code);
+				.send({ name: 'name', defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8' }).expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should fail if the defaultLegend is not found', async () => {
 			const res = await agent.patch(`${route(modelWithViews._id)}?key=${users.tsAdmin.apiKey}`)
-				.send({ name: 'name', defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8' }).expect(templates.legendNotFound.status);
-			expect(res.body.code).toEqual(templates.legendNotFound.code);
+				.send({ name: 'name', defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8' }).expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should update a container\'s settings if the body of the request is as expected', async () => {

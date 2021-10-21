@@ -103,7 +103,8 @@ Permissions.hasAdminAccessToFederation = async (teamspace, project, federation, 
 	if (!federationExistsInProject) {
 		return false;
 	}
-	return await hasAdminPermissions(teamspace, project, username);
+	const hasAdminPerms = await hasAdminPermissions(teamspace, project, username);
+	return hasAdminPerms > 0;
 }
 Permissions.hasWriteAccessToFederation = modelPermCheck(
 	(perm) => MODEL_WRITE_ROLES.includes(perm.permission), modelType.FEDERATIONS,
@@ -121,7 +122,8 @@ Permissions.hasAdminAccessToContainer = async (teamspace, project, container ,us
 	if (!containerExistsInProject) {
 		return false;
 	}
-	return await hasAdminPermissions(teamspace, project, username);
+	const hasAdminPerms = await hasAdminPermissions(teamspace, project, username);
+	return hasAdminPerms > 0;
 }
 Permissions.hasWriteAccessToContainer = modelPermCheck(
 	(perm) => MODEL_WRITE_ROLES.includes(perm.permission), modelType.CONTAINERS,

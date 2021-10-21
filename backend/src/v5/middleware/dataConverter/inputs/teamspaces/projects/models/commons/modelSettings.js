@@ -47,7 +47,7 @@ ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
 					const model = req.params.container ?? req.params.federation;
 					await checkViewExists(req.params.teamspace, model, stringToUUID(value));
 				} catch(err){
-					respond(req, res, err);
+					return false;
 				}
 			}
 			return true;
@@ -58,7 +58,7 @@ ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
 					const model = req.params.container ?? req.params.federation;
 					await checkLegendExists(req.params.teamspace, model, stringToUUID(value));
 				} catch(err){
-					respond(req, res, err);
+					return false;
 				}				
 			}
 			return true;
@@ -76,11 +76,9 @@ ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
 };
 
 const convertBodyUUIDs = (data) => {
-	if (data) {
-		Object.keys(data).forEach((key) => {
-			data[key] = stringToUUID(data[key]);
-		});
-	}
+	Object.keys(data).forEach((key) => {
+		data[key] = stringToUUID(data[key]);
+	});
 };
 
 

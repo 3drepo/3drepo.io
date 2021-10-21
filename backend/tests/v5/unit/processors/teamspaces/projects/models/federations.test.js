@@ -259,45 +259,9 @@ const testGetFederationStats = () => {
 	});
 };
 
-const testUpdateSettings = () => {
-	describe('Update federation settings', () => {
-		test('should update the settings if the federation, view and legend exists', async () => {
-			const data = { name: 'newName', defaultView: 1, defaultLegend: 1 };
-			await Federations.updateSettings('teamspace', 1, data);
-			expect(updateModelSettingsMock.mock.calls.length).toBe(1);
-			expect(updateModelSettingsMock.mock.calls[0][1]).toEqual(1);
-			expect(updateModelSettingsMock.mock.calls[0][2]).toEqual(data);
-		});
-
-		test('should return viewNotFound if the view does not exist', async () => {
-			const data = { name: 'newName', defaultView: 2, defaultLegend: 1 };
-			await expect(Federations.updateSettings('teamspace', 1, data))
-				.rejects.toEqual(templates.viewNotFound);
-			expect(updateModelSettingsMock.mock.calls.length).toBe(0);
-		});
-
-		test('should return viewNotFound if the view does not exist', async () => {
-			const data = { name: 'newName', defaultView: 1, defaultLegend: 2 };
-			await expect(Federations.updateSettings('teamspace', 1, data))
-				.rejects.toEqual(templates.legendNotFound);
-			expect(updateModelSettingsMock.mock.calls.length).toBe(0);
-		});
-
-		test('should return federationNotFound if the federation does not exist', async () => {
-			const data = { name: 'newName' };
-			await expect(Federations.updateSettings('teamspace', 2, data))
-				.rejects.toEqual(templates.federationNotFound);
-			expect(updateModelSettingsMock.mock.calls.length).toBe(1);
-			expect(updateModelSettingsMock.mock.calls[0][1]).toEqual(2);
-			expect(updateModelSettingsMock.mock.calls[0][2]).toEqual(data);
-		});
-	});
-};
-
 describe('processors/teamspaces/projects/federations', () => {
 	testGetFederationList();
 	testAppendFavourites();
 	testDeleteFavourites();
 	testGetFederationStats();
-	testUpdateSettings();
 });

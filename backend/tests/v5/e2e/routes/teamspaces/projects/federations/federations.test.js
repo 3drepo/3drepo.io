@@ -388,9 +388,9 @@ const testDeleteFavourites = () => {
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
-		test('should fail if the favourites list provided has a federation', async () => {
+		test('should fail if the favourites list provided has a container', async () => {
 			const res = await agent.delete(`${route}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.invalidArguments.status).send({ federations: [federation._id] });
+				.expect(templates.invalidArguments.status).send({ federations: [container._id] });
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
@@ -466,14 +466,14 @@ const testUpdateFederationSettings = () => {
 
 		test('should fail if the defaultView is not found', async () => {
 			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
-				.send({ name: 'name', defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8' }).expect(templates.viewNotFound.status);
-			expect(res.body.code).toEqual(templates.viewNotFound.code);
+				.send({ name: 'name', defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8' }).expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should fail if the defaultLegend is not found', async () => {
 			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
-				.send({ name: 'name', defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8' }).expect(templates.legendNotFound.status);
-			expect(res.body.code).toEqual(templates.legendNotFound.code);
+				.send({ name: 'name', defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8' }).expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should update a federation\'s settings if the body of the request is as expected', async () => {

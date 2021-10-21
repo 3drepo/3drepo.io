@@ -225,6 +225,12 @@ const testUpdateModelSettings = () => {
 			checkResults(fn, 'someModel', updateObject);
 		});
 
+		test('Should return error if the update fails', async () => {		
+			jest.spyOn(db, 'updateOne').mockImplementation(() => undefined);
+			await expect(Model.updateModelSettings('someTS', 'someModel', {name: 'someName'}))
+			  .rejects.toEqual(templates.modelNotFound);
+		});
+
 		test('Should update nothing if the data is empty', async () => {
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
 			await Model.updateModelSettings('someTS', 'someModel', {});

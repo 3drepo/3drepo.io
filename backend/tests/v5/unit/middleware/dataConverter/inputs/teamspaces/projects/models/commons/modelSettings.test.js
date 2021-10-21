@@ -15,17 +15,38 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src } = require('../../../../../../../../../../helper/path');
+const { src } = require('../../../../../../../../../v5/helper/path');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
+jest.mock('../../../../../../../../../../src/v5/models/views');
+const Views = require(`${src}/models/views`);
+jest.mock('../../../../../../../../../../src/v5/models/legends');
+const Legends = require(`${src}/models/legends`);
 jest.mock('../../../../../../../../../../src/v5/utils/permissions/permissions');
 const ModelSettings = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings`);
 const { cloneDeep } = require(`${src}/utils/helper/objects`);
 const { templates } = require(`${src}/utils/responseCodes`);
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
+
+const existingViewID = '3752b630-065f-11ec-8edf-ab0f7cc84da8';
+Views.checkViewExists.mockImplementation((teamspace, model, view) => {
+	if (UUIDToString(view) === existingViewID){
+		return true;
+	}
+	throw templates.viewNotFound;
+});
+
+const existingLegendID = '3752b630-065f-11ec-8edf-ab0f7cc84da8';
+Legends.checkLegendExists.mockImplementation((teamspace, model, legend) => {
+	if (UUIDToString(legend) === existingLegendID){
+		return true;
+	}
+	throw templates.legendNotFound;
+});
 
 const testValidateUpdateSettingsData = () => {
 	describe.each([
@@ -56,15 +77,23 @@ const testValidateUpdateSettingsData = () => {
 		[{ body: { code: null } }, false, 'with null code'],
 		[{ body: { code: 'CODE1' } }, true, 'with valid code'],
 		[{ body: { defaultView: 123 } }, false, 'with invalid defaultView'],
-		[{ body: { defaultView: null } }, false, 'with null defaultView'],
-		[{ body: { defaultView: '9c7a6c50-ee85-11e8-af42-09344c707317' } }, true, 'with valid defaultView'],
+		[{ body: { defaultView: null } }, true, 'with null defaultView'],
+		[{ body: { defaultView: '9c7a6c50-ee85-11e8-af42-09344c707317' }, params: {container: '1'} }, false, 'with defaultView that does not exist'],
+		[{ body: { defaultView: '9c7a6c50-ee85-11e8-af42-09344c707317' }, params: {federation: '1'} }, false, 'with defaultView that does not exist'],
+		[{ body: { defaultView: existingViewID}, params: {container: '1'} }, true, 'with defaultView that exists'],
+		[{ body: { defaultView: existingViewID}, params: {federation: '1'} }, true, 'with defaultView that exists'],
 		[{ body: { defaultLegend: 123 } }, false, 'with invalid defaultLegend'],
 		[{ body: { defaultLegend: null } }, false, 'with null defaultLegend'],
-		[{ body: { defaultLegend: '9c7a6c50-ee85-11e8-af42-09344c707317' } }, true, 'with valid defaultLegend'],
+		[{ body: { defaultLegend: '9c7a6c50-ee85-11e8-af42-09344c707317' } , params: {container: '1'} }, false, 'with defaultLegend that does not exist'],
+		[{ body: { defaultLegend: '9c7a6c50-ee85-11e8-af42-09344c707317' } , params: {federation: '1'} }, false, 'with defaultLegend that does not exist'],
+		[{ body: { defaultLegend: existingLegendID }, params: {container: '1'} }, true, 'with defaultLegend that exists'],
+		[{ body: { defaultLegend: existingLegendID }, params: {federation: '1'} }, true, 'with defaultLegend that exists'],
+		[{ body : {}}, false, 'with empty body'],
+		[{ body : undefined}, false, 'with undefined body']
 	])('Check if req arguments for settings update are valid', (data, shouldPass, desc) => {
 		test(`${desc} ${shouldPass ? ' should call next()' : 'should respond with invalidArguments'}`, async () => {
 			const mockCB = jest.fn();
-			const req = cloneDeep(data);
+			const req = {...cloneDeep(data)};
 			await ModelSettings.validateUpdateSettingsData(req, {}, mockCB);
 			if (shouldPass) {
 				expect(mockCB.mock.calls.length).toBe(1);

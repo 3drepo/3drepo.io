@@ -262,46 +262,10 @@ const testGetRevisions = () => {
 	});
 };
 
-const testUpdateSettings = () => {
-	describe('Update container settings', () => {
-		test('should update the settings if the container, view and legend exists', async () => {
-			const data = { name: 'newName', defaultView: 1, defaultLegend: 1 };
-			await Containers.updateSettings('teamspace', 1, data);
-			expect(updateModelSettingsMock.mock.calls.length).toBe(1);
-			expect(updateModelSettingsMock.mock.calls[0][1]).toEqual(1);
-			expect(updateModelSettingsMock.mock.calls[0][2]).toEqual(data);
-		});
-
-		test('should return viewNotFound if the view does not exist', async () => {
-			const data = { name: 'newName', defaultView: 2, defaultLegend: 1 };
-			await expect(Containers.updateSettings('teamspace', 1, data))
-				.rejects.toEqual(templates.viewNotFound);
-			expect(updateModelSettingsMock.mock.calls.length).toBe(0);
-		});
-
-		test('should return legendNotFound if the view does not exist', async () => {
-			const data = { name: 'newName', defaultView: 1, defaultLegend: 2 };
-			await expect(Containers.updateSettings('teamspace', 1, data))
-				.rejects.toEqual(templates.legendNotFound);
-			expect(updateModelSettingsMock.mock.calls.length).toBe(0);
-		});
-
-		test('should return containerNotFound if the container does not exist', async () => {
-			const data = { name: 'newName' };
-			await expect(Containers.updateSettings('teamspace', 2, data))
-				.rejects.toEqual(templates.containerNotFound);
-			expect(updateModelSettingsMock.mock.calls.length).toBe(1);
-			expect(updateModelSettingsMock.mock.calls[0][1]).toEqual(2);
-			expect(updateModelSettingsMock.mock.calls[0][2]).toEqual(data);
-		});
-	});
-};
-
 describe('processors/teamspaces/projects/containers', () => {
 	testGetContainerList();
 	testGetContainerStats();
 	testAppendFavourites();
 	testDeleteFavourites();
 	testGetRevisions();
-	testUpdateSettings();
 });
