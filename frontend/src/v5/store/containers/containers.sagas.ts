@@ -54,9 +54,9 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 	try {
 		const { containers }: FetchContainersResponse = yield API.fetchContainers({ teamspace, projectId });
 		const containersWithoutStats = prepareContainersData(containers);
-		yield put(ContainersActions.setIsListPending(false));
 
 		yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithoutStats));
+		yield put(ContainersActions.setIsListPending(false));
 
 		const stats: FetchContainerStatsResponse[] = yield all(
 			containers.map(
