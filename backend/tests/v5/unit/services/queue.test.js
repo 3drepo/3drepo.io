@@ -16,6 +16,7 @@
  */
 
 const { src, modelFolder, objModel } = require('../../helper/path');
+const { generateRandomString } = require('../../helper/services');
 const AMQP = require('amqplib');
 
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
@@ -28,23 +29,25 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 const Queue = require(`${src}/services/queue`);
 
-const createFakeConnection = (sendToQueue) => {
+const createFakeConnection = (sendToQueue, consume) => {
 	const dummyFn = () => Promise.resolve();
 	const dummyChannel = {
 		assertQueue: () => Promise.resolve({
 			queue: {},
 		}),
 		sendToQueue: sendToQueue || dummyFn,
-		consume: dummyFn,
+		consume: consume || dummyFn,
 		close: dummyFn,
 	};
 	return {
 		createChannel: () => Promise.resolve(dummyChannel),
 		on: () => {},
+		close: dummyFn,
 	};
 };
 
 const publishFn = EventsManager.publish.mockImplementation(() => {});
+const fn = jest.spyOn(AMQP, 'connect').mockRejectedValue(undefined);
 
 const testQueueModelUpload = () => {
 	const fileCreated = path.join(modelFolder, 'queueObjectTest.obj');
@@ -53,7 +56,6 @@ const testQueueModelUpload = () => {
 		const model = 'modelID';
 		const data = { tag: '123', owner: '123' };
 		const file = { originalname: 'test.obj', path: fileCreated };
-		const fn = jest.spyOn(AMQP, 'connect').mockRejectedValue(undefined);
 
 		test(`should fail with ${templates.queueInsertionFailed.code} if there is some generic error`, async () => {
 			expect.assertions(1);
@@ -91,8 +93,110 @@ const testQueueModelUpload = () => {
 	});
 
 	afterAll(() => fs.rm(fileCreated).catch(() => {}));
+	afterEach(Queue.close);
+};
+
+const testCallbackQueueConsumer = () => {
+	describe('Callback queue consumption', () => {
+		let callbackFn;
+		test(`Should trigger ${events.QUEUED_TASK_UPDATE} event if there is a task update message`, async () => {
+			publishFn.mockClear();
+			const waitForConsume = new Promise((resolve) => {
+				fn.mockResolvedValueOnce(createFakeConnection(undefined, (a, cb) => {
+					callbackFn = cb;
+					resolve();
+				}));
+				Queue.init();
+			});
+
+			await waitForConsume;
+
+			expect(callbackFn).not.toBe(undefined);
+			const content = {
+				database: generateRandomString(),
+				status: generateRandomString(),
+				project: generateRandomString(),
+				user: generateRandomString(),
+			};
+			const properties = {
+				correlationId: generateRandomString(),
+			};
+			callbackFn({ content: JSON.stringify(content), properties });
+
+			expect(publishFn.mock.calls.length).toBe(1);
+			expect(publishFn.mock.calls[0][0]).toEqual(events.QUEUED_TASK_UPDATE);
+			expect(publishFn.mock.calls[0][1]).toEqual({
+				teamspace: content.database,
+				model: content.project,
+				corId: properties.correlationId,
+				status: content.status,
+				user: content.user,
+			});
+		});
+		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event if there is a task failed message`, async () => {
+			publishFn.mockClear();
+			const waitForConsume = new Promise((resolve) => {
+				fn.mockResolvedValueOnce(createFakeConnection(undefined, (a, cb) => {
+					callbackFn = cb;
+					resolve();
+				}));
+				Queue.init();
+			});
+
+			await waitForConsume;
+
+			expect(callbackFn).not.toBe(undefined);
+			const content = {
+				database: generateRandomString(),
+				project: generateRandomString(),
+				user: generateRandomString(),
+				message: generateRandomString(),
+				value: 1,
+			};
+			const properties = {
+				correlationId: generateRandomString(),
+			};
+			callbackFn({ content: JSON.stringify(content), properties });
+
+			expect(publishFn.mock.calls.length).toBe(1);
+			expect(publishFn.mock.calls[0][0]).toEqual(events.QUEUED_TASK_COMPLETED);
+			expect(publishFn.mock.calls[0][1]).toEqual({
+				teamspace: content.database,
+				model: content.project,
+				corId: properties.correlationId,
+				value: content.value,
+				message: content.message,
+				user: content.user,
+			});
+		});
+
+		test('Should fail gracefully if the service failed to process the message', async () => {
+			publishFn.mockClear();
+			const waitForConsume = new Promise((resolve) => {
+				fn.mockResolvedValueOnce(createFakeConnection(undefined, (a, cb) => {
+					callbackFn = cb;
+					resolve();
+				}));
+				Queue.init();
+			});
+
+			await waitForConsume;
+
+			expect(callbackFn).not.toBe(undefined);
+
+			const properties = {
+				correlationId: generateRandomString(),
+			};
+			callbackFn({ content: {}, properties });
+
+			expect(publishFn.mock.calls.length).toBe(0);
+		});
+	});
+
+	afterEach(Queue.close);
 };
 
 describe('services/queue', () => {
 	testQueueModelUpload();
+	testCallbackQueueConsumer();
 });

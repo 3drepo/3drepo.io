@@ -179,5 +179,11 @@ Queue.queueModelUpload = async (teamspace, model, data, { originalname, path }) 
 };
 
 Queue.init = () => connect();
+Queue.close = async () => {
+	if (connectionPromise) {
+		(await connectionPromise).close();
+		connectionPromise = undefined;
+	}
+};
 
 module.exports = Queue;
