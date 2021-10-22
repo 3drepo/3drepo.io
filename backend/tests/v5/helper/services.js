@@ -41,7 +41,7 @@ queue.purgeQueues = async () => {
 		channel.purgeQueue(worker_queue),
 		channel.purgeQueue(model_queue),
 		channel.purgeQueue(callback_queue),
-	]);
+	]).catch(() => {});
 };
 
 // userCredentials should be the same format as the return value of generateUserCredentials
