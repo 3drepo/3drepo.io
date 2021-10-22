@@ -494,12 +494,21 @@ export const theme = createMuiTheme({
 				'&$disabled $path': {
 					fill: COLOR.BASE_LIGHTEST,
 				},
+				'&:hover $path': {
+					fill: COLOR.PRIMARY_MAIN_CONTRAST,
+				},
+				'&:active $path': {
+					fill: COLOR.PRIMARY_MAIN_CONTRAST,
+				},
 				'&.Mui-focusVisible': {
 					backgroundColor: COLOR.PRIMARY_MAIN_CONTRAST,
 					boxShadow: SHADOW.LEVEL_5,
 				},
 			},
 			outlinedPrimary: {
+				'& $path': {
+					fill: COLOR.PRIMARY_MAIN,
+				},
 				'&:hover': {
 					backgroundColor: COLOR.PRIMARY_MAIN,
 					color: COLOR.PRIMARY_MAIN_CONTRAST,
@@ -518,15 +527,9 @@ export const theme = createMuiTheme({
 					color: COLOR.PRIMARY_MAIN_CONTRAST,
 					backgroundColor: COLOR.SECONDARY_MAIN,
 				},
-				'&:hover $path': {
-					fill: COLOR.PRIMARY_MAIN_CONTRAST,
-				},
 				'&:active': {
 					color: COLOR.PRIMARY_MAIN_CONTRAST,
 					backgroundColor: COLOR.SECONDARY_DARK,
-				},
-				'&:active $path': {
-					fill: COLOR.PRIMARY_MAIN_CONTRAST,
 				},
 			},
 			outlinedSizeSmall: {

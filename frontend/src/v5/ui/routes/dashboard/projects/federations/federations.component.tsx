@@ -26,7 +26,7 @@ import {
 } from '@/v5/ui/routes/dashboard/projects/containers/containers.styles';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
-import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
+import { DashboardListButton, DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import { useFederationsData } from './federations.hooks';
@@ -36,6 +36,7 @@ export const Federations = (): JSX.Element => {
 	const {
 		filteredFederations,
 		favouriteFederations,
+		hasFederations,
 		isPending,
 	} = useFederationsData();
 
@@ -110,6 +111,19 @@ export const Federations = (): JSX.Element => {
 						</DashboardListEmptyText>
 					)}
 				/>
+				{
+					hasFederations.all && (
+						<DashboardListButton
+							startIcon={<AddCircleIcon />}
+							onClick={() => {
+								// eslint-disable-next-line no-console
+								console.log('->  handle add federation');
+							}}
+						>
+							<Trans id="federations.addFederationButton" message="Add new Federation" />
+						</DashboardListButton>
+					)
+				}
 			</Content>
 		</Container>
 	);
