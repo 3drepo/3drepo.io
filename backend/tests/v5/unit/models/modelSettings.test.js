@@ -17,9 +17,14 @@
 
 const { src } = require('../../helper/path');
 
+jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const Model = require(`${src}/models/modelSettings`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
+
+const publishFn = EventsManager.publish.mockImplementation(() => { });
 
 const testGetModelById = () => {
 	describe('Get ModelById', () => {
@@ -146,29 +151,39 @@ const testGetFederations = () => {
 
 const testUpdateModelStatus = () => {
 	describe('Update model status', () => {
-		test('should update model status and return successfully', async () => {
+		test(`should update model status and trigger a ${events.MODEL_IMPORT_UPDATE}`, async () => {
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 1 });
 
+			const teamspace = 'ts';
+			const model = 'model';
+			const user = 'user';
 			const status = 'queued';
 			const corId = '123';
-			await expect(Model.updateModelStatus('teamspace', 'model', status, corId)).resolves.toBe(undefined);
+			await expect(Model.updateModelStatus(teamspace, model, status, corId, user)).resolves.toBe(undefined);
 
 			expect(fn.mock.calls.length).toBe(1);
 			const action = fn.mock.calls[0][3];
 			expect(action.$set.corID).toEqual(corId);
 			expect(action.$set.status).toEqual(status);
+
+			expect(publishFn.mock.calls.length).toBe(1);
+			expect(publishFn.mock.calls[0][0]).toEqual(events.MODEL_IMPORT_UPDATE);
+			expect(publishFn.mock.calls[0][1]).toEqual({ teamspace, model, corId, status, user });
 		});
 
 		test(`should fail with ${templates.modelNotFound.code} if update failed`, async () => {
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 0 });
+			publishFn.mockClear();
 
 			const status = 'queued';
-			await expect(Model.updateModelStatus('teamspace', 'model', status)).rejects.toEqual(templates.modelNotFound);
+			await expect(Model.updateModelStatus('teamspace', 'model', status)).resolves.toBe(undefined);
 
 			expect(fn.mock.calls.length).toBe(1);
 			const action = fn.mock.calls[0][3];
 			expect(action.$set.status).toEqual(status);
 			expect(action.$set.corId).toEqual(undefined);
+
+			expect(publishFn.mock.calls.length).toBe(0);
 		});
 	});
 };

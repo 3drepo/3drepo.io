@@ -31,8 +31,11 @@ const Queue = require(`${src}/services/queue`);
 const createFakeConnection = (sendToQueue) => {
 	const dummyFn = () => Promise.resolve();
 	const dummyChannel = {
-		assertQueue: dummyFn,
+		assertQueue: () => Promise.resolve({
+			queue: {},
+		}),
 		sendToQueue: sendToQueue || dummyFn,
+		consume: dummyFn,
 		close: dummyFn,
 	};
 	return {
