@@ -187,8 +187,7 @@ EventsManager.subscribe(EventsV5.UPDATE_GROUP, async ({teamspace, model, _id}) =
 });
 
 EventsManager.subscribe(EventsV5.MODEL_IMPORT_UPDATE, async ({teamspace, model, status, user}) => {
-	console.log("[v4] status change captured", status, user);
-	modelStatusChanged(null, teamspace, model, {status, user});
+	modelStatusChanged(null, teamspace, model, {status, user: user || "unknown"});
 });
 
 EventsManager.subscribe(EventsV5.MODEL_IMPORT_FINISHED, async ({teamspace, model, corId, success, user, userErr, errCode, message}) => {
