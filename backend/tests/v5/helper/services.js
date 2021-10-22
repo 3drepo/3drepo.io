@@ -32,16 +32,20 @@ const queue = {};
 const ServiceHelper = { db, queue };
 
 queue.purgeQueues = async () => {
-	// eslint-disable-next-line
-	const { host, worker_queue, model_queue, callback_queue } = config.cn_queue;
-	const conn = await amqp.connect(host);
-	const channel = await conn.createChannel();
+	try {
+		// eslint-disable-next-line
+		const { host, worker_queue, model_queue, callback_queue } = config.cn_queue;
+		const conn = await amqp.connect(host);
+		const channel = await conn.createChannel();
 
-	return Promise.all([
-		channel.purgeQueue(worker_queue),
-		channel.purgeQueue(model_queue),
-		channel.purgeQueue(callback_queue),
-	]).catch(() => {});
+		await Promise.all([
+			channel.purgeQueue(worker_queue),
+			channel.purgeQueue(model_queue),
+			channel.purgeQueue(callback_queue),
+		]);
+	} catch (err) {
+		// doesn't really matter if purge queue failed. it's just for clean up.
+	}
 };
 
 // userCredentials should be the same format as the return value of generateUserCredentials
