@@ -395,7 +395,7 @@ describe("Metadata", function () {
 
 		agent.get(`/${username}/${model}/meta/keys`)
 			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal(goldenData);
+				expect(res.body.sort()).to.deep.equal(goldenData.sort());
 				done(err);
 			});
 	});
