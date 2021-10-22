@@ -28,10 +28,12 @@ const logger = require('../utils/logger').logWithLabel(queueLabel);
 const Queue = {};
 
 const SHARED_SPACE_TAG = '$SHARED_SPACE';
-const sharedDir = queueConfig.shared_storage;
-const modelq = queueConfig.model_queue;
-const callbackq = queueConfig.callback_queue;
-const maxRetries = 3; // FIXME: add to config.
+const {
+	maxRetries,
+	callback_queue: callbackq,
+	model_queue: modelq,
+	shared_storage: sharedDir,
+} = queueConfig;
 
 let retry = 0;
 let connClosed = false;
@@ -45,7 +47,6 @@ const reconnect = () => {
 	}
 	logger.logError('Retries exhausted');
 	throw createResponseCode(templates.queueConnectionError, 'Max number of retries reached.');
-	// FIXME EMAIL alert?
 };
 
 const onCallbackQMsg = ({ content, properties }) => {
@@ -124,7 +125,6 @@ const queueJob = async (queueName, correlationId, msg) => {
 		await channel.close();
 	} catch (err) {
 		logger.logError(`[${queueName}][INSERT]\t${err?.message}\t${correlationId}\t${msg.toString()}`);
-		// FIXME Mailer.sendQueueFailedEmail({ message }).catch(() => {});
 		throw createResponseCode(templates.queueConnectionError, err?.message);
 	}
 };
