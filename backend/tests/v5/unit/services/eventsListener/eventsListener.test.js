@@ -28,10 +28,10 @@ ModelSettings.updateModelStatus.mockResolvedValue(() => {});
 
 const testModelEventsListener = () => {
 	describe('Model Events', () => {
-		test(`Should trigger model status update if there is a ${events.QUEUE_ITEM_UPDATE}`, async () => {
-			const waitOnEvent = new Promise((resolve) => EventsManager.subscribe(events.QUEUE_ITEM_UPDATE, resolve));
+		test(`Should trigger model status update if there is a ${events.QUEUED_TASK_UPDATE}`, async () => {
+			const waitOnEvent = new Promise((resolve) => EventsManager.subscribe(events.QUEUED_TASK_UPDATE, resolve));
 			const data = { teamspace: '123', model: '345', corId: 1, status: 'happy' };
-			EventsManager.publish(events.QUEUE_ITEM_UPDATE, data);
+			EventsManager.publish(events.QUEUED_TASK_UPDATE, data);
 
 			await waitOnEvent;
 			expect(ModelSettings.updateModelStatus.mock.calls.length).toBe(1);

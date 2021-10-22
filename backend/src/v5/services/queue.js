@@ -30,6 +30,7 @@ const Queue = {};
 const SHARED_SPACE_TAG = '$SHARED_SPACE';
 const sharedDir = queueConfig.shared_storage;
 const modelq = queueConfig.model_queue;
+const callbackq = queueConfig.callback_queue;
 const maxRetries = 3; // FIXME: add to config.
 
 let retry = 0;
@@ -47,6 +48,31 @@ const reconnect = () => {
 	// FIXME EMAIL alert?
 };
 
+const onCallbackQMsg = ({ content, properties }) => {
+	try {
+		logger.logInfo(`[${callbackq}][CONSUME]\t${properties.correlationId}\t${content}`);
+		const { status, database: teamspace, project: model, user, value, message } = JSON.parse(content);
+		if (status) {
+			publish(events.QUEUED_TASK_UPDATE,
+				{ teamspace, model, corId: properties.correlationId, status, user });
+		} else {
+			publish(events.QUEUED_TASK_COMPLETED,
+				{ teamspace, model, corId: properties.correlationId, user, value, message });
+		}
+	} catch (err) {
+		logger.logInfo(`[${callbackq}][CONSUME]\t${err?.message}\t${properties.correlationId}`);
+	}
+};
+
+const initCallbackQueueListener = async () => {
+	// eslint-disable-next-line no-use-before-define
+	const conn = await connect();
+	const channel = await conn.createChannel();
+	const { queue } = await channel.assertQueue(callbackq);
+
+	channel.consume(queue, onCallbackQMsg, { noAck: true });
+};
+
 const connect = async () => {
 	/* istanbul ignore next */
 	if (connectionPromise) return connectionPromise;
@@ -56,6 +82,7 @@ const connect = async () => {
 		const conn = await connectionPromise;
 		retry = 0;
 		connClosed = false;
+		initCallbackQueueListener();
 
 		conn.on('close',
 			/* istanbul ignore next */
@@ -132,7 +159,7 @@ Queue.queueModelUpload = async (teamspace, model, data, { originalname, path }) 
 
 		await queueModelJob(revId, msg);
 
-		publish(events.QUEUE_ITEM_UPDATE, { teamspace, model, corId: revId, status: 'queued' });
+		publish(events.QUEUED_TASK_UPDATE, { teamspace, model, corId: revId, status: 'queued' });
 	} catch (err) {
 		// Clean up files we created
 		Promise.all([
@@ -150,5 +177,7 @@ Queue.queueModelUpload = async (teamspace, model, data, { originalname, path }) 
 		throw templates.queueInsertionFailed;
 	}
 };
+
+Queue.init = () => connect();
 
 module.exports = Queue;

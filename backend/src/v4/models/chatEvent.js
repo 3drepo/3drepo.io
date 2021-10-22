@@ -186,6 +186,62 @@ EventsManager.subscribe(EventsV5.UPDATE_GROUP, async ({teamspace, model, _id}) =
 	}
 });
 
+EventsManager.subscribe(EventsV5.MODEL_IMPORT_UPDATE, async ({teamspace, model, status, user}) => {
+	console.log("[v4] status change captured", status, user);
+	modelStatusChanged(null, teamspace, model, {status, user});
+});
+
+EventsManager.subscribe(EventsV5.MODEL_IMPORT_FINISHED, async ({teamspace, model, corId, success, user, userErr, errCode, message}) => {
+	const { revisionCount, findLatest } = require("./history");
+	const notifications = require("./notification");
+	const { findModelSettingById, prepareDefaultView } = require("./modelSetting");
+	const rawSettings =  await findModelSettingById(teamspace, model);
+	const [nRevisions, setting]  = await Promise.all([
+		revisionCount(teamspace, model),
+		prepareDefaultView(teamspace, model, rawSettings)
+	]);
+
+	const data = { user, nRevisions, ...setting };
+	modelStatusChanged(null, teamspace, model, data);
+
+	if(success) {
+		const { tag } = await findLatest(teamspace, model, {tag: 1});
+		const notes = await notifications.upsertModelUpdatedNotifications(teamspace, model, tag || corId);
+		notes.map(upsertedNotification);
+	} else {
+		const Mailer = require("../mailer/mailer");
+		const notes = await notifications.insertModelUpdatedFailedNotifications(teamspace, model, user, message);
+		notes.map(upsertedNotification);
+
+		if(!userErr) {
+			const attachments = [];
+			const path = require("path");
+			const sharedSpacePath = require("../config").cn_queue.shared_storage;
+			const sharedDir = path.join(sharedSpacePath, corId);
+			const files = require("fs").readdirSync(sharedDir);
+			files.forEach((file) => {
+				if(file.endsWith(".log")) {
+					attachments.push({
+						filename: file,
+						path: path.join(sharedDir, file)
+					});
+				}
+			});
+
+			Mailer.sendImportError({
+				account: teamspace,
+				model,
+				username: user,
+				err: message,
+				corID: corId,
+				bouncerErr: errCode,
+				attachments
+			});
+		}
+	}
+
+});
+
 module.exports = {
 	newIssues,
 	newComment,

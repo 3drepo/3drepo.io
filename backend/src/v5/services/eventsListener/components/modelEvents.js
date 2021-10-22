@@ -15,16 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { subscribe } = require('../../eventsManager/eventsManager');
-const { updateModelStatus } = require('../../../models/modelSettings');
 
-const queueStatusUpdate = ({ teamspace, model, corId, status }) => updateModelStatus(teamspace, model, status, corId);
+const queueStatusUpdate = ({
+	teamspace, model, corId, status, user,
+}) => updateModelStatus(teamspace, model, status, corId, user);
+const queueTasksCompleted = ({
+	teamspace, model, value, corId, user,
+}) => newRevisionProcessed(teamspace, model, corId, value, user);
 
 const ModelEventsListener = {};
 
 ModelEventsListener.init = () => {
-	subscribe(events.QUEUE_ITEM_UPDATE, queueStatusUpdate);
+	subscribe(events.QUEUED_TASK_UPDATE, queueStatusUpdate);
+	subscribe(events.QUEUED_TASK_COMPLETED, queueTasksCompleted);
 };
 
 module.exports = ModelEventsListener;

@@ -82,7 +82,7 @@ const testQueueModelUpload = () => {
 			const { correlationId: corId } = sendToQueueFn.mock.calls[0][2];
 
 			expect(publishFn.mock.calls.length).toBe(1);
-			expect(publishFn.mock.calls[0][0]).toEqual(events.QUEUE_ITEM_UPDATE);
+			expect(publishFn.mock.calls[0][0]).toEqual(events.QUEUED_TASK_UPDATE);
 			expect(publishFn.mock.calls[0][1]).toEqual({ teamspace, model, corId, status: 'queued' });
 		});
 	});

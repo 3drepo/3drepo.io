@@ -70,7 +70,7 @@ const fileFilter = async (req, file, cb) => {
 };
 
 const validateRevisionUpload = async (req, res, next) => {
-	const schema = Yup.object().strict(true).noUnknown().required()
+	const schema = Yup.object().noUnknown().required()
 		.shape({
 			tag: YupHelper.types.strings.code.required(),
 			desc: YupHelper.types.strings.blob,

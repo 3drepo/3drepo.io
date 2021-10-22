@@ -17,6 +17,9 @@
 
 const Models = {};
 const db = require('../handler/db');
+const { events } = require('../services/eventsManager/eventsManager.constants');
+const { getInfoFromCode } = require('./modelSettings.constants');
+const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
 const findOneModel = (ts, query, projection) => db.findOne(ts, 'settings', query, projection);
@@ -73,7 +76,7 @@ Models.getFederations = async (ts, ids, projection, sort) => {
 	return findModel(ts, query, projection, sort);
 };
 
-Models.updateModelStatus = async (ts, model, status, corId) => {
+Models.updateModelStatus = async (ts, model, status, corId, user) => {
 	const query = { _id: model };
 	const updateObj = { status };
 	if (corId) {
@@ -81,7 +84,41 @@ Models.updateModelStatus = async (ts, model, status, corId) => {
 	}
 
 	const { matchedCount } = await updateOneModel(ts, query, { $set: updateObj });
-	if (!matchedCount) throw templates.modelNotFound;
+	if (matchedCount > 0) {
+		// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
+		// trigger notifications.
+		publish(events.MODEL_IMPORT_UPDATE, { ts, model, corId, status, user });
+	}
+};
+
+Models.newRevisionProcessed = async (teamspace, model, corId, retVal, user) => {
+	const { success, message, userErr } = getInfoFromCode(retVal);
+	const query = { _id: model };
+	const set = {};
+
+	if (success) {
+		set.status = 'ok';
+		set.timestamp = new Date();
+	} else {
+		set.status = 'failed';
+		set.errorReason = {
+			message,
+			timestamp: new Date(),
+			errorCode: retVal,
+
+		};
+	}
+
+	const unset = { corID: 1 };
+	const { matchedCount } = await updateOneModel(teamspace, query, { $set: set, $unset: unset });
+
+	if (matchedCount !== 0) {
+		// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
+		// trigger notifications.
+
+		publish(events.MODEL_IMPORT_FINISHED,
+			{ teamspace, model, success, message, userErr, corId, errCode: retVal, user });
+	}
 };
 
 module.exports = Models;
