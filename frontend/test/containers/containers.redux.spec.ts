@@ -30,7 +30,10 @@ describe('Containers: redux', () => {
 	};
 
 	it('should add container to favourites', () => {
-		const resultState = containersReducer(defaultState, ContainersActions.toggleFavouriteSuccess(projectId, mockContainers[0]._id));
+		const resultState = containersReducer(
+			defaultState,
+			ContainersActions.setFavouriteSuccess(projectId, mockContainers[0]._id, true)
+		);
 		const resultContainers = resultState.containers[projectId];
 
 		expect(resultContainers[0].isFavourite).toEqual(true);
@@ -45,7 +48,10 @@ describe('Containers: redux', () => {
 				[projectId]: mockAllFavouritesContainers
 			}
 		}
-		const resultState = containersReducer(defaultStateWithAllFavourites, ContainersActions.toggleFavouriteSuccess(projectId, mockAllFavouritesContainers[0]._id));
+		const resultState = containersReducer(
+			defaultStateWithAllFavourites,
+			ContainersActions.setFavouriteSuccess(projectId, mockAllFavouritesContainers[0]._id, false)
+		);
 		const resultContainers = resultState.containers[projectId];
 
 		expect(resultContainers[0].isFavourite).toEqual(false);

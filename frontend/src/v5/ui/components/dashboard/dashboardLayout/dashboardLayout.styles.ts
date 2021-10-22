@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Action } from 'redux';
-import { ScreamingSnakeCase } from 'type-fest';
+import styled from 'styled-components';
 
-export type ExtendedAction<T, A = ''> = Action<ScreamingSnakeCase<`${string & A}`>> & {
-	[P in keyof T]?: T[P];
-};
+export const Content = styled.section`
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	overflow-y: auto;
+	flex-grow: 1;
+`;
 
-export type AllReturnTypes<T extends Record<keyof T, (...args: any) => any>> = {
-	[P in keyof T]: ReturnType<T[P]>
-};
+export const MainHeaderPortalRoot = styled.div``;

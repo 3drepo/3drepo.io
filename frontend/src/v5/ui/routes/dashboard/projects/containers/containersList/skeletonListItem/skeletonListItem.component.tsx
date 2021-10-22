@@ -29,7 +29,7 @@ export const SkeletonListItem = ({ delay = 0 }: ISkeletonListItem): JSX.Element 
 		<FixedOrGrowContainer>
 			<TitlesContainer>
 				<SkeletonBlock delay={delay} widthPercentage={90} />
-				<SkeletonBlock delay={delay + delay / 2} widthPercentage={80} />
+				<SkeletonBlock delay={delay + 0.05} widthPercentage={80} />
 			</TitlesContainer>
 		</FixedOrGrowContainer>
 		<FixedOrGrowContainer width={186} />

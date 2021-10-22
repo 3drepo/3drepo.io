@@ -31,8 +31,8 @@ Permissions.hasReadAccessToContainer = validateMany([Permissions.hasAccessToTeam
 Permissions.hasCommenterAccessToContainer = validateMany([
 	Permissions.hasAccessToTeamspace, hasCommenterAccessToContainer]);
 Permissions.hasWriteAccessToContainer = validateMany([Permissions.hasAccessToTeamspace, hasWriteAccessToContainer]);
-
 Permissions.hasReadAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasReadAccessToFederation]);
+
 Permissions.hasCommenterAccessToFederation = validateMany([
 	Permissions.hasAccessToTeamspace, hasCommenterAccessToFederation]);
 Permissions.hasWriteAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasWriteAccessToFederation]);

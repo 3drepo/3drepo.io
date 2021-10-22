@@ -21,42 +21,42 @@ import {
 	ContainersActions,
 	ContainersTypes,
 } from '@/v5/store/containers/containers.redux';
-import { ExtendedAction } from '@/v5/store/store.types';
 import {
-	FavouritePayload,
-	FetchContainersPayload,
+	AddFavouriteAction,
+	RemoveFavouriteAction,
 	FetchContainersResponse,
 	FetchContainerStatsResponse,
+	FetchContainersAction,
 } from './containers.types';
 import { prepareContainersData } from './containers.helpers';
 
-export function* addFavourites({ containerId, teamspace, projectId }: ExtendedAction<FavouritePayload>) {
+export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
 	try {
-		yield put(ContainersActions.toggleFavouriteSuccess(projectId, containerId));
+		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, true));
 		yield API.addFavourites({ teamspace, containerId, projectId });
 	} catch (e) {
 		console.error(e);
 	}
 }
 
-export function* removeFavourites({ containerId, teamspace, projectId }: ExtendedAction<FavouritePayload>) {
+export function* removeFavourites({ containerId, teamspace, projectId }: RemoveFavouriteAction) {
 	try {
-		yield put(ContainersActions.toggleFavouriteSuccess(projectId, containerId));
+		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, false));
 		yield API.removeFavourites({ containerId, teamspace, projectId });
 	} catch (e) {
 		console.error(e);
 	}
 }
 
-export function* fetchContainers({ teamspace, projectId }: ExtendedAction<FetchContainersPayload>) {
+export function* fetchContainers({ teamspace, projectId }: FetchContainersAction) {
 	yield put(ContainersActions.setIsListPending(true));
 	yield put(ContainersActions.setAreStatsPending(true));
 	try {
 		const { containers }: FetchContainersResponse = yield API.fetchContainers({ teamspace, projectId });
 		const containersWithoutStats = prepareContainersData(containers);
-		yield put(ContainersActions.setIsListPending(false));
 
 		yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithoutStats));
+		yield put(ContainersActions.setIsListPending(false));
 
 		const stats: FetchContainerStatsResponse[] = yield all(
 			containers.map(

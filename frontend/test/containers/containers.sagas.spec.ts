@@ -36,7 +36,7 @@ describe('Containers: sagas', () => {
 
 			await expectSaga(ContainersSaga.default)
 			.dispatch(ContainersActions.addFavourite(teamspace, projectId, containerId))
-			.put(ContainersActions.toggleFavouriteSuccess(projectId, containerId))
+			.put(ContainersActions.setFavouriteSuccess(projectId, containerId, true))
 			.silentRun();
 		})
 	})
@@ -49,7 +49,7 @@ describe('Containers: sagas', () => {
 
 			await expectSaga(ContainersSaga.default)
 			.dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
-			.put(ContainersActions.toggleFavouriteSuccess(projectId, containerId))
+			.put(ContainersActions.setFavouriteSuccess(projectId, containerId, false))
 			.silentRun();
 		})
 	})
@@ -58,7 +58,6 @@ describe('Containers: sagas', () => {
 		const mockContainers = times(10, () => containerMockFactory());
 		const mockContainersBaseResponse = mockContainers.map((container) => pick(container, ['_id', 'name', 'role', 'isFavourite']));
 		const mockContainersWithoutStats = prepareContainersData(mockContainers);
-
 
 		it('should fetch containers data', async () => {
 			mockServer

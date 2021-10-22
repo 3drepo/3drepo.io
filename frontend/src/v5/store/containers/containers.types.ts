@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AllReturnTypes, ExtendedAction } from '@/v5/store/store.types';
+import { Action } from 'redux';
 
 export interface IContainersState {
 	containers: Record<string, IContainer[]>;
@@ -47,21 +47,8 @@ export interface IContainer {
 }
 
 export type FavouritePayload = FetchContainersPayload & {
-	containerId: IContainer['_id'];
+	containerId: string;
 };
-
-export interface IContainersActionCreators {
-	setFilterQuery: (query: string) => ExtendedAction<{ query: string }, 'setFilterQuery'>
-	addFavourite: (teamspace: string, projectId: string, containerId: string) => ExtendedAction<FavouritePayload, 'addFavourite'>
-	removeFavourite: (teamspace: string, projectId: string, containerId: string) => ExtendedAction<FavouritePayload, 'removeFavourite'>
-	toggleFavouriteSuccess: (projectId: string, containerId: string) => ExtendedAction<{ projectId: string, containerId: string }, 'toggleFavouriteSuccess'>
-	fetchContainers: (teamspace: string, projectId: string) => ExtendedAction<FetchContainersPayload, 'fetchContainers'>
-	fetchContainersSuccess: (projectId: string, containers: IContainer[]) => ExtendedAction<{ projectId: string, containers: IContainer[] }, 'fetchContainersSuccess'>
-	setIsListPending: (isPending: boolean) => ExtendedAction<{ isPending: boolean }, 'setIsListPending'>
-	setAreStatsPending: (isPending: boolean) => ExtendedAction<{ isPending: boolean }, 'setAreStatsPending'>
-}
-
-export type IContainersActions = AllReturnTypes<IContainersActionCreators>;
 
 export type FetchContainersPayload = {
 	teamspace: string;
@@ -82,8 +69,28 @@ export type FetchContainerStatsResponse = {
 		lastUpdated: number;
 		latestRevision: string;
 	};
-	type: IContainer['type'];
-	status: IContainer['status'];
+	type: string;
+	status: ContainerStatuses;
 	units: string;
-	code: IContainer['code']
+	code: string;
 };
+
+export type SetFilterQueryAction = Action<'SET_FILTER_QUERY'> & { query: string};
+export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;
+export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & FavouritePayload;
+export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & {projectId: string, containerId: string, isFavourite: boolean};
+export type FetchContainersAction = Action<'FETCH_CONTAINERS'> & FetchContainersPayload;
+export type FetchContainersSuccessAction = Action<'FETCH_CONTAINERS_SUCCESS'> & { projectId: string, containers: IContainer[] };
+export type SetIsListPendingAction = Action<'SET_IS_LIST_PENDING'> & { isPending: boolean };
+export type SetAreStatsPendingAction = Action<'SET_ARE_STATS_PENDING'> & { isPending: boolean };
+
+export interface IContainersActionCreators {
+	setFilterQuery: (query: string) => SetFilterQueryAction;
+	addFavourite: (teamspace: string, projectId: string, containerId: string) => AddFavouriteAction;
+	removeFavourite: (teamspace: string, projectId: string, containerId: string) => RemoveFavouriteAction;
+	setFavouriteSuccess: (projectId: string, containerId: string, isFavourite: boolean) => SetFavouriteSuccessAction;
+	fetchContainers: (teamspace: string, projectId: string) => FetchContainersAction;
+	fetchContainersSuccess: (projectId: string, containers: IContainer[]) => FetchContainersSuccessAction;
+	setIsListPending: (isPending: boolean) => SetIsListPendingAction;
+	setAreStatsPending: (isPending: boolean) => SetAreStatsPendingAction;
+}

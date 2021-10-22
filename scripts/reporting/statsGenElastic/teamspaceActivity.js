@@ -134,7 +134,7 @@ const reportActivity = async (db, elasticClient, ts, licenseType) => {
 	const stats = await Promise.all(modelProm);
 
 	const finalStats = stats.reduce(accumulateStats, {});
-	await printStatsToElastic(ElasticClient, finalStats, ts, licenseType);
+	await printStatsToElastic(elasticClient, finalStats, ts, licenseType);
 }
 
 const TS = {};

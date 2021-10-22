@@ -21,8 +21,8 @@ import uuid from 'uuidv4';
 import { Constants } from '../common/actions.helper';
 
 interface IDialogActions {
-	open: (type?: string, props?: any) => void;
-	close: (id: string) => void;
+	open: (type?: string, props?: any) => any;
+	close: (id: string) => any;
 }
 
 interface IDialogConfig {
