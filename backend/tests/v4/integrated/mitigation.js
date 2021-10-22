@@ -241,7 +241,9 @@ describe("Mitigations", function () {
 		it("should succeed", function(done) {
 			agent.get(`/${username}/mitigations/criteria`)
 				.expect(200, function(err, res) {
-					expect(res.body.sort()).to.deep.equal(goldenCriteria.sort());
+					console.log(res.body)
+					const listOrder = (a, b) => a.name < b.name ? -1 : 1;
+					expect(res.body.sort(listOrder)).to.deep.equal(goldenCriteria.sort(listOrder));
 					done(err);
 				});
 		});
