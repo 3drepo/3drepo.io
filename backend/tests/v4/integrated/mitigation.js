@@ -249,7 +249,7 @@ describe("Mitigations", function () {
 		it("if user is not teamspace admin should succeed", function(done) {
 			agent.get(`/${collaboratorTeamspace}/mitigations/criteria`)
 				.expect(200, function(err, res) {
-					expect(res.body).to.deep.equal(goldenCriteria);
+					expect(res.body.sort()).to.deep.equal(goldenCriteria.sort());
 					done(err);
 				});
 		});
