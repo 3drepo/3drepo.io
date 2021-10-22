@@ -21,6 +21,7 @@ jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const Model = require(`${src}/models/modelSettings`);
+const { getInfoFromCode } = require(`${src}/models/modelSettings.constants`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -151,7 +152,7 @@ const testGetFederations = () => {
 
 const testUpdateModelStatus = () => {
 	describe('Update model status', () => {
-		test(`should update model status and trigger a ${events.MODEL_IMPORT_UPDATE}`, async () => {
+		test(`should update model status and trigger a ${events.MODEL_IMPORT_UPDATE} event`, async () => {
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 1 });
 
 			const teamspace = 'ts';
@@ -171,7 +172,7 @@ const testUpdateModelStatus = () => {
 			expect(publishFn.mock.calls[0][1]).toEqual({ teamspace, model, corId, status, user });
 		});
 
-		test(`should fail with ${templates.modelNotFound.code} if update failed`, async () => {
+		test('should not trigger event if model no longer exists ', async () => {
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 0 });
 			publishFn.mockClear();
 
@@ -188,6 +189,77 @@ const testUpdateModelStatus = () => {
 	});
 };
 
+const testNewRevisionProcessed = () => {
+	describe.each([
+		[0], [1], [14], [100],
+	])('Update with new revision', (retVal) => {
+		const teamspace = 'ts';
+		const model = 'model';
+		const user = 'user';
+		const corId = '123';
+		const { success, message, userErr } = getInfoFromCode(retVal);
+		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED} event`,
+			async () => {
+				const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 1 });
+				publishFn.mockClear();
+				await expect(Model.newRevisionProcessed(
+					teamspace, model, corId, retVal, user,
+				)).resolves.toBe(undefined);
+
+				expect(fn.mock.calls.length).toBe(1);
+				const action = fn.mock.calls[0][3];
+				if (success) {
+					expect(action.$set.status).toEqual('ok');
+					expect(action.$set).toHaveProperty('timestamp');
+				} else {
+					expect(action.$set.status).toEqual('failed');
+					expect(action.$set).not.toHaveProperty('timestamp');
+					expect(action.$set).toHaveProperty('errorReason');
+					expect(action.$set.errorReason.message).toEqual(message);
+					expect(action.$set.errorReason.errorCode).toEqual(retVal);
+					expect(action.$set.errorReason).toHaveProperty('timestamp');
+				}
+				expect(action.$unset).toEqual({ corID: 1 });
+
+				expect(publishFn.mock.calls.length).toBe(1);
+				expect(publishFn.mock.calls[0][0]).toEqual(events.MODEL_IMPORT_FINISHED);
+				expect(publishFn.mock.calls[0][1]).toEqual({
+					teamspace,
+					model,
+					corId,
+					userErr,
+					message,
+					success,
+					errCode: retVal,
+					user,
+				});
+			});
+	});
+	describe('Update with new revision when the model is already deleted', () => {
+		test('should not trigger event', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 0 });
+			publishFn.mockClear();
+
+			const teamspace = 'ts';
+			const model = 'model';
+			const user = 'user';
+			const retVal = 0;
+			const corId = '123';
+			await expect(Model.newRevisionProcessed(
+				teamspace, model, corId, retVal, user,
+			)).resolves.toBe(undefined);
+
+			expect(fn.mock.calls.length).toBe(1);
+			const action = fn.mock.calls[0][3];
+			expect(action.$set.status).toEqual('ok');
+			expect(action.$set).toHaveProperty('timestamp');
+			expect(action.$unset).toEqual({ corID: 1 });
+
+			expect(publishFn.mock.calls.length).toBe(0);
+		});
+	});
+};
+
 describe('models/modelSettings', () => {
 	testGetModelById();
 	testGetContainerById();
@@ -195,4 +267,5 @@ describe('models/modelSettings', () => {
 	testGetContainers();
 	testGetFederations();
 	testUpdateModelStatus();
+	testNewRevisionProcessed();
 });

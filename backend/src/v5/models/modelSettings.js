@@ -111,7 +111,6 @@ Models.newRevisionProcessed = async (teamspace, model, corId, retVal, user) => {
 
 	const unset = { corID: 1 };
 	const { matchedCount } = await updateOneModel(teamspace, query, { $set: set, $unset: unset });
-
 	if (matchedCount !== 0) {
 		// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
 		// trigger notifications.
