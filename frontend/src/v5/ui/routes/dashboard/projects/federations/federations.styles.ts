@@ -14,3 +14,19 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import { Button } from '@controls/button';
+import styled from 'styled-components';
+
+export const NewFederationButton = styled(Button).attrs({
+	variant: 'contained',
+	color: 'primary',
+})`
+	width: 145px;
+	
+	svg {
+		path {
+			fill: ${({ theme }) => theme.palette.primary.contrast};
+		}
+	}
+`;

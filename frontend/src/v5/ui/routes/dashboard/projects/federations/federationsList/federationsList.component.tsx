@@ -45,6 +45,7 @@ import {
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { SearchInput } from '@controls/searchInput';
 import { SearchInputConfig, useSearchInput } from '@controls/searchInput/searchInput.hooks';
+import { EmptySearchResults } from '@/v5/ui/routes/dashboard/projects/containers/containersList/emptySearchResults';
 import { Container } from './federationsList.styles';
 import { getFederationMenuItems } from './federationsList.helpers';
 
@@ -57,6 +58,7 @@ type IFederationsList = {
 		visible: ReactNode;
 	},
 	search: SearchInputConfig;
+	hasFederations: boolean;
 };
 
 export const FederationsList = ({
@@ -65,6 +67,7 @@ export const FederationsList = ({
 	title,
 	titleTooltips,
 	search,
+	hasFederations,
 }: IFederationsList): JSX.Element => {
 	const { sortedList, setSortConfig } = useOrderedList(federations, DEFAULT_SORT_CONFIG);
 	const {
@@ -231,7 +234,9 @@ export const FederationsList = ({
 							))
 						) : (
 							<DashboardListEmptyContainer>
-								{emptyMessage}
+								{ filterQuery && hasFederations ? (
+									<EmptySearchResults searchPhrase={filterQuery} />
+								) : emptyMessage }
 							</DashboardListEmptyContainer>
 						)}
 					</DashboardList>

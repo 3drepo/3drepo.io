@@ -16,52 +16,31 @@
  */
 
 import React from 'react';
-import { MainHeader } from '@controls/mainHeader';
 import { Trans } from '@lingui/react';
 import {
 	Container,
 	Content,
-	NewContainerMainHeaderButton,
-	UploadFileButton,
 } from '@/v5/ui/routes/dashboard/projects/containers/containers.styles';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
-import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
-import { DashboardListButton, DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
+import { DashboardListEmptyText, DashboardListButton, Divider } from '@components/dashboard/dashboardList/dasboardList.styles';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import { useFederationsData } from './federations.hooks';
 import { FederationsList } from './federationsList';
+import { NewFederationButton } from './federations.styles';
 
 export const Federations = (): JSX.Element => {
 	const {
 		filteredFederations,
 		favouriteFederations,
 		hasFederations,
-		isPending,
 	} = useFederationsData();
 
 	return (
 		<Container>
-			<MainHeader>
-				<NewContainerMainHeaderButton
-					startIcon={<AddCircleIcon />}
-					variant="outlined"
-					color="secondary"
-					disabled={isPending}
-				>
-					<Trans id="federations.mainHeader.newContainer" message="New Container" />
-				</NewContainerMainHeaderButton>
-				<UploadFileButton
-					startIcon={<ArrowUpCircleIcon />}
-					variant="contained"
-					color="primary"
-					disabled={isPending}
-				>
-					<Trans id="federations.mainHeader.uploadFile" message="Upload file" />
-				</UploadFileButton>
-			</MainHeader>
 			<Content>
 				<FederationsList
+					hasFederations={hasFederations.favourites}
 					search={{
 						query: FederationsHooksSelectors.selectFavouritesFilterQuery(),
 						dispatcher: FederationsActionsDispatchers.setFavouritesFilterQuery,
@@ -86,7 +65,9 @@ export const Federations = (): JSX.Element => {
 						</DashboardListEmptyText>
 					)}
 				/>
+				<Divider />
 				<FederationsList
+					hasFederations={hasFederations.all}
 					search={{
 						query: FederationsHooksSelectors.selectAllFilterQuery(),
 						dispatcher: FederationsActionsDispatchers.setAllFilterQuery,
@@ -94,21 +75,24 @@ export const Federations = (): JSX.Element => {
 					federations={filteredFederations}
 					title={(
 						<Trans
-							id="federations.favourites.collapseTitle"
-							message="Favourites"
+							id="federations.all.collapseTitle"
+							message="All Federations"
 						/>
 					)}
 					titleTooltips={{
-						collapsed: <Trans id="federations.favourites.collapse.tooltip.show" message="Show favourites" />,
-						visible: <Trans id="federations.favourites.collapse.tooltip.hide" message="Hide favourites" />,
+						collapsed: <Trans id="federations.all.collapse.tooltip.show" message="Show federations" />,
+						visible: <Trans id="federations.all.collapse.tooltip.hide" message="Hide federations" />,
 					}}
 					emptyMessage={(
-						<DashboardListEmptyText>
-							<Trans
-								id="federations.favourites.emptyMessage"
-								message="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
-							/>
-						</DashboardListEmptyText>
+
+						<>
+							<DashboardListEmptyText>
+								<Trans id="federations.all.emptyMessage" message="You haven’t created any Federations." />
+							</DashboardListEmptyText>
+							<NewFederationButton startIcon={<AddCircleIcon />}>
+								<Trans id="federations.all.newContainer" message="New Federation" />
+							</NewFederationButton>
+						</>
 					)}
 				/>
 				{

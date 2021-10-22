@@ -17,6 +17,7 @@
 
 import { Typography } from '@controls/typography';
 import styled from 'styled-components';
+import { Divider as DividerComponent } from '@material-ui/core';
 import { Button } from '@controls/button';
 
 export const ListContainer = styled.ul`
@@ -42,6 +43,10 @@ export const DashboardListEmptyText = styled(Typography).attrs({
 })`
 	color: ${({ theme }) => theme.palette.base.main};
 	margin-right: 27px;
+`;
+
+export const Divider = styled(DividerComponent)`
+	margin-top: 16px;
 `;
 
 export const DashboardListButton = styled(Button).attrs({

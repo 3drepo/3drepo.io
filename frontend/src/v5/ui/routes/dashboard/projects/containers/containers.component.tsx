@@ -16,7 +16,7 @@
  */
 
 import React from 'react';
-import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
+import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dasboardList.styles';
 import { Trans } from '@lingui/react';
 import { MainHeader } from '@controls/mainHeader';
 import { SearchInput } from '@controls/searchInput';
@@ -108,6 +108,7 @@ export const Containers = (): JSX.Element => {
 						)
 					}
 				/>
+				<Divider />
 				<ContainersList
 					containers={filteredContainers}
 					title={(
