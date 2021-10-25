@@ -89,6 +89,7 @@ describe("Chat service", function () {
 	let connectSid;
 
 	before(function(done) {
+		require("../../../src/v5/services/eventsManager/eventsManager").reset();
 		server = app.listen(8080, function () {
 
 			const chatServer = http.createServer();

@@ -35,8 +35,6 @@ EventsManager.publish = (eventName, message) => {
 
 EventsManager.subscribe = (eventName, callback) => {
 	if (eventConstants.events[eventName]) {
-		console.log(`subscribing to ${eventName} , # listeners: ${eventsEmitter.listenerCount(eventName)}`);
-		console.trace();
 		eventsEmitter.on(eventName, callback);
 	} else {
 		throw new Error(`Trying to subscribe to an unknown event: ${eventName}`);
