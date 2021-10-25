@@ -354,6 +354,8 @@ describe("Mitigations", function () {
 				agent.post(`/${username}/mitigations`)
 					.send(criterion)
 					.expect(200, function(err, res) {
+						console.log("20211025")
+						console.log(res.body)
 						expect(res.body.length).to.equal(expectedLengths[key]);
 						done(err);
 					});
@@ -368,6 +370,8 @@ describe("Mitigations", function () {
 				agent.post(`/${username}/mitigations`)
 					.send(criterion)
 					.expect(200, function(err, res) {
+						console.log("20211025")
+						console.log(res.body)
 						expect(res.body.length).to.equal(totalSuggestions);
 						done(err);
 					});
