@@ -387,6 +387,8 @@ describe("Mitigations", function () {
 			agent.post(`/${username}/mitigations`)
 				.send(criteria)
 				.expect(200, function(err, res) {
+					console.log("2021102515")
+					console.log(res.body.length)
 					expect(res.body.length).to.equal(45);
 					done(err);
 				});
