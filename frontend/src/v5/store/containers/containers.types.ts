@@ -70,7 +70,7 @@ export type FetchContainerStatsResponse = {
 		latestRevision: string;
 	};
 	type: string;
-	status: ContainerStatuses;
+	status: UploadStatuses;
 	units: string;
 	code: string;
 };

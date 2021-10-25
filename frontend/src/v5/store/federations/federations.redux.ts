@@ -16,39 +16,53 @@
  */
 
 import {
+	FetchFederationsSuccessAction,
 	IFederationsActionCreators,
-	IFederationsActions,
 	IFederationsState,
+	SetFavouritesFilterQueryAction,
+	SetFilterQueryAction,
 } from '@/v5/store/federations/federations.types';
 import { createActions, createReducer } from 'reduxsauce';
-import { times } from 'lodash';
-import { federationMockFactory } from '@/v5/store/federations/federations.fixtures';
 import { Constants } from '../common/actions.helper';
 
 export const { Types: FederationsTypes, Creators: FederationsActions } = createActions({
 	setAllFilterQuery: ['query'],
 	setFavouritesFilterQuery: ['query'],
+	fetchFederations: ['teamspace', 'projectId'],
+	fetchFederationsSuccess: ['projectId', 'federations'],
+	setIsListPending: ['isPending'],
+	setAreStatsPending: ['isPending'],
 }, { prefix: 'FEDERATIONS/' }) as { Types: Constants<IFederationsActionCreators>; Creators: IFederationsActionCreators };
 
 export const INITIAL_STATE: IFederationsState = {
-	federations: {
-		'5cee4c80-26ce-da7d-f03a-7a4d00000000': times(10, () => federationMockFactory()),
-	},
+	federations: {},
 	favouritesFilterQuery: '',
 	allFilterQuery: '',
 	isListPending: false,
 	areStatsPending: false,
 };
 
-export const setAllFilterQuery = (state = INITIAL_STATE, { query }: IFederationsActions['setAllFilterQuery']) => (
+export const setAllFilterQuery = (state = INITIAL_STATE, { query }: SetFilterQueryAction) => (
 	{ ...state, allFilterQuery: query }
 );
 
-export const setFavouritesFilterQuery = (state = INITIAL_STATE, { query }: IFederationsActions['setFavouritesFilterQuery']) => (
+export const setFavouritesFilterQuery = (state = INITIAL_STATE, { query }: SetFavouritesFilterQueryAction) => (
 	{ ...state, favouritesFilterQuery: query }
 );
+
+export const fetchFederationsSuccess = (state = INITIAL_STATE, {
+	projectId,
+	federations,
+}: FetchFederationsSuccessAction) => ({
+	...state,
+	federations: {
+		...state.federations,
+		[projectId]: federations,
+	},
+});
 
 export const reducer = createReducer<IFederationsState>(INITIAL_STATE, {
 	[FederationsTypes.SET_ALL_FILTER_QUERY]: setAllFilterQuery,
 	[FederationsTypes.SET_FAVOURITES_FILTER_QUERY]: setFavouritesFilterQuery,
+	[FederationsTypes.FETCH_FEDERATIONS_SUCCESS]: fetchFederationsSuccess,
 });

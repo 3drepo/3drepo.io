@@ -16,11 +16,24 @@
  */
 
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
+import { useEffect } from 'react';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
+import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
+import { useParams } from 'react-router';
 
 export const useFederationsData = () => {
+	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+
 	const filteredFederations = FederationsHooksSelectors.selectFilteredFederations();
 	const favouriteFederations = FederationsHooksSelectors.selectFilteredFavouriteFederations();
 	const hasFederations = FederationsHooksSelectors.selectHasFederations();
+	const currentProject = ProjectsHooksSelectors.selectCurrentProject();
+
+	useEffect(() => {
+		if (hasFederations.all) return;
+
+		FederationsActionsDispatchers.fetchFederations(teamspace, project);
+	}, [currentProject]);
 
 	return {
 		filteredFederations,

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
-import { AllReturnTypes, ExtendedAction } from '@/v5/store/store.types';
+import { Action } from 'redux';
 
 export interface IFederation {
 	_id: string;
@@ -40,9 +40,43 @@ export interface IFederationsState {
 	areStatsPending: boolean;
 }
 
-export interface IFederationsActionCreators {
-	setAllFilterQuery: (query: string) => ExtendedAction<{query: string }, 'setFilterQuery'>;
-	setFavouritesFilterQuery: (query: string) => ExtendedAction<{query: string }, 'setFilterQuery'>;
-}
+export type FetchFederationsPayload = {
+	teamspace: string;
+	projectId: string;
+};
 
-export type IFederationsActions = AllReturnTypes<IFederationsActionCreators>;
+export type FetchFederationsResponse = {
+	federations: Array<Pick<IFederation, '_id' | 'name' | 'role' | 'isFavourite'>>
+};
+
+export type FetchFederationStatsResponse = {
+	code: string;
+	status: UploadStatuses;
+	subModels: string[];
+	tickets: {
+		issues: number;
+		risks: number;
+	};
+	category: string;
+	lastUpdated: number;
+};
+
+export type FetchFederationStatsPayload = FetchFederationsPayload & {
+	federationId: string;
+};
+
+export type FetchFederationsAction = Action<'FETCH_FEDERATIONS'> & FetchFederationsPayload;
+export type FetchFederationsSuccessAction = Action<'FETCH_FEDERATIONS_SUCCESS'> & { projectId: string, federations: IFederation[] };
+export type SetIsListPendingAction = Action<'SET_IS_LIST_PENDING'> & { isPending: boolean };
+export type SetAreStatsPendingAction = Action<'SET_ARE_STATS_PENDING'> & { isPending: boolean };
+export type SetFilterQueryAction = Action<'SET_ALL_FILTER_QUERY'> & { query: string};
+export type SetFavouritesFilterQueryAction = Action<'SET_FAVOURITES_FILTER_QUERY'> & { query: string};
+
+export interface IFederationsActionCreators {
+	fetchFederations: (teamspace: string, projectId: string) => FetchFederationsAction;
+	fetchFederationsSuccess: (projectId: string, federations: IFederation[]) => FetchFederationsSuccessAction;
+	setAllFilterQuery: (query: string) => SetFilterQueryAction;
+	setFavouritesFilterQuery: (query: string) => SetFavouritesFilterQueryAction;
+	setIsListPending: (isPending: boolean) => SetIsListPendingAction;
+	setAreStatsPending: (isPending: boolean) => SetAreStatsPendingAction
+}

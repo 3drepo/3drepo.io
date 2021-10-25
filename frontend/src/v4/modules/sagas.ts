@@ -17,6 +17,7 @@
 
 import { all, fork } from 'redux-saga/effects';
 import containersSaga from '@/v5/store/containers/containers.sagas';
+import federationsSaga from '@/v5/store/federations/federations.sagas';
 import projectsSaga from '@/v5/store/projects/projects.sagas';
 import teamspaces2Saga from '@/v5/store/teamspaces/teamspaces.sagas';
 import activitiesSaga from './activities/activities.sagas';
@@ -85,6 +86,7 @@ export default function* rootSaga() {
 		fork(teamspaces2Saga),
 		fork(projectsSaga),
 		fork(containersSaga),
+		fork(federationsSaga),
 		// <-- INJECT MODULE SAGA -->
 	]);
 }

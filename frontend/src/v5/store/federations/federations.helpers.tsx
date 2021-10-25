@@ -15,10 +15,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IFederation } from '@/v5/store/federations/federations.types';
+import {
+	FetchFederationsResponse,
+	FetchFederationStatsResponse,
+	IFederation,
+} from '@/v5/store/federations/federations.types';
+import {
+	UploadStatuses,
+} from '@/v5/store/containers/containers.types';
+import { getNullableDate } from '@/v5/helpers/getNullableDate';
 
 export const filterFederations = (federations: IFederation[], filterQuery: string) => (
 	federations.filter((
 		{ name, code, category },
 	) => [name, code, category].join('').toLowerCase().includes(filterQuery.trim().toLowerCase()))
 );
+
+export const prepareFederationsData = (
+	federations: FetchFederationsResponse['federations'],
+	stats?: FetchFederationStatsResponse[],
+) => federations.map<IFederation>((federation, index) => {
+	const federationStats = stats?.[index];
+	return {
+		...federation,
+		code: federationStats?.code ?? '',
+		status: federationStats?.status ?? UploadStatuses.OK,
+		subModels: federationStats?.subModels ?? [],
+		containers: federationStats?.subModels.length ?? 0,
+		issues: federationStats?.tickets.issues ?? 0,
+		risks: federationStats?.tickets.risks ?? 0,
+		lastUpdated: getNullableDate(federationStats?.lastUpdated),
+		category: federationStats?.category ?? '',
+	};
+});
