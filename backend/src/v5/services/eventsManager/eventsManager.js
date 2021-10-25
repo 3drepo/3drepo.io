@@ -36,10 +36,17 @@ EventsManager.publish = (eventName, message) => {
 EventsManager.subscribe = (eventName, callback) => {
 	if (eventConstants.events[eventName]) {
 		console.log(`subscribing to ${eventName} , # listeners: ${eventsEmitter.listenerCount(eventName)}`);
+		console.trace();
 		eventsEmitter.on(eventName, callback);
 	} else {
 		throw new Error(`Trying to subscribe to an unknown event: ${eventName}`);
 	}
+};
+
+// NOTE: this is only used in testing situation to reset the event listeners - not used in practice.
+/* istanbul ignore next */
+EventsManager.reset = () => {
+	eventsEmitter.removeAllListeners();
 };
 
 module.exports = EventsManager;
