@@ -202,15 +202,15 @@ EventsManager.subscribe(EventsV5.MODEL_IMPORT_FINISHED, async ({teamspace, model
 
 	const data = { user, nRevisions, ...setting };
 	modelStatusChanged(null, teamspace, model, data);
-
 	if(success) {
 		const { tag } = await findLatest(teamspace, model, {tag: 1});
 		const notes = await notifications.upsertModelUpdatedNotifications(teamspace, model, tag || corId);
-		notes.map(upsertedNotification);
-	} else {
+		notes.map((note) => upsertedNotification(null, note));
+	}
+	if(message) {
 		const Mailer = require("../mailer/mailer");
 		const notes = await notifications.insertModelUpdatedFailedNotifications(teamspace, model, user, message);
-		notes.map(upsertedNotification);
+		notes.map((note) => upsertedNotification(null, note));
 
 		if(!userErr) {
 			const attachments = [];
