@@ -21,6 +21,7 @@ const { getLatestRevision, getRevisionCount, getRevisions, updateRevisionStatus 
 const Groups = require('./commons/groups');
 const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
+const { timestampToString } = require('../../../../utils/helper/dates');
 
 const Containers = { ...Groups };
 
@@ -52,7 +53,7 @@ Containers.getContainerStats = async (teamspace, project, container) => {
 		revisions: {
 			total: revCount,
 			lastUpdated: latestRev.timestamp,
-			latestRevision: latestRev.tag || latestRev._id,
+			latestRevision: latestRev.tag || timestampToString(latestRev.timestamp),
 		},
 	};
 };
