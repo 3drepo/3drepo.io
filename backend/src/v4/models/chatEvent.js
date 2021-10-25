@@ -202,41 +202,47 @@ EventsManager.subscribe(EventsV5.MODEL_IMPORT_FINISHED, async ({teamspace, model
 
 	const data = { user, nRevisions, ...setting };
 	modelStatusChanged(null, teamspace, model, data);
-	if(success) {
-		const { tag } = await findLatest(teamspace, model, {tag: 1});
-		const notes = await notifications.upsertModelUpdatedNotifications(teamspace, model, tag || corId);
-		notes.map((note) => upsertedNotification(null, note));
-	}
-	if(message) {
-		const Mailer = require("../mailer/mailer");
-		const notes = await notifications.insertModelUpdatedFailedNotifications(teamspace, model, user, message);
-		notes.map((note) => upsertedNotification(null, note));
 
-		if(!userErr) {
-			const attachments = [];
-			const path = require("path");
-			const sharedSpacePath = require("../config").cn_queue.shared_storage;
-			const sharedDir = path.join(sharedSpacePath, corId);
-			const files = require("fs").readdirSync(sharedDir);
-			files.forEach((file) => {
-				if(file.endsWith(".log")) {
-					attachments.push({
-						filename: file,
-						path: path.join(sharedDir, file)
-					});
-				}
-			});
-
-			Mailer.sendImportError({
-				account: teamspace,
-				model,
-				username: user,
-				err: message,
-				corID: corId,
-				bouncerErr: errCode,
-				attachments
-			});
+	console.log("!!!! model import finished", success);
+	try {
+		if(success) {
+			const { tag } = await findLatest(teamspace, model, {tag: 1});
+			const notes = await notifications.upsertModelUpdatedNotifications(teamspace, model, tag || corId);
+			notes.map((note) => upsertedNotification(null, note));
 		}
+		if(message) {
+			const Mailer = require("../mailer/mailer");
+			const notes = await notifications.insertModelUpdatedFailedNotifications(teamspace, model, user, message);
+			notes.map((note) => upsertedNotification(null, note));
+
+			if(!userErr) {
+				const attachments = [];
+				const path = require("path");
+				const sharedSpacePath = require("../config").cn_queue.shared_storage;
+				const sharedDir = path.join(sharedSpacePath, corId);
+				const files = require("fs").readdirSync(sharedDir);
+				files.forEach((file) => {
+					if(file.endsWith(".log")) {
+						attachments.push({
+							filename: file,
+							path: path.join(sharedDir, file)
+						});
+					}
+				});
+
+				Mailer.sendImportError({
+					account: teamspace,
+					model,
+					username: user,
+					err: message,
+					corID: corId,
+					bouncerErr: errCode,
+					attachments
+				});
+			}
+		}
+	} catch (err) {
+		console.log("!!!", err);
 	}
 
 });
