@@ -16,6 +16,7 @@
  */
 
 import React, { ReactNode, useMemo } from 'react';
+import { useParams } from 'react-router';
 import { isEmpty } from 'lodash';
 import { i18n } from '@lingui/core';
 import { Trans } from '@lingui/react';
@@ -60,8 +61,6 @@ type IFederationsList = {
 	},
 	search: SearchInputConfig;
 	hasFederations: boolean;
-	teamspace: string;
-	project: string;
 };
 
 export const FederationsList = ({
@@ -71,9 +70,9 @@ export const FederationsList = ({
 	titleTooltips,
 	search,
 	hasFederations,
-	teamspace,
-	project,
 }: IFederationsList): JSX.Element => {
+	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+
 	const { sortedList, setSortConfig } = useOrderedList(federations, DEFAULT_SORT_CONFIG);
 	const {
 		setSearchInput,

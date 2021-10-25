@@ -34,8 +34,6 @@ export const Federations = (): JSX.Element => {
 		filteredFederations,
 		favouriteFederations,
 		hasFederations,
-		teamspace,
-		project,
 	} = useFederationsData();
 
 	return (
@@ -66,8 +64,6 @@ export const Federations = (): JSX.Element => {
 							/>
 						</DashboardListEmptyText>
 					)}
-					teamspace={teamspace}
-					project={project}
 				/>
 				<Divider />
 				<FederationsList
@@ -97,8 +93,6 @@ export const Federations = (): JSX.Element => {
 							</NewFederationButton>
 						</>
 					)}
-					teamspace={teamspace}
-					project={project}
 				/>
 				{
 					hasFederations.all && (

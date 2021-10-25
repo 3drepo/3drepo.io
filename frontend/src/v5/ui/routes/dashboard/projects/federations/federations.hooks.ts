@@ -36,8 +36,6 @@ export const useFederationsData = () => {
 	}, [currentProject]);
 
 	return {
-		teamspace,
-		project,
 		filteredFederations,
 		favouriteFederations,
 		hasFederations,
