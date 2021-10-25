@@ -25,7 +25,7 @@ export const Button = styled(ButtonComponent).attrs({
 	variant: 'label',
 	color: 'secondary',
 })`
-  margin: 0;
-  width: 100%;
-  color: ${({ theme, isVoid }) => (isVoid ? theme.palette.error.main : theme.palette.primary.main)};
+	margin: 0;
+	width: 100%;
+	color: ${({ theme, isVoid }) => (isVoid ? theme.palette.error.main : theme.palette.primary.main)};
 `;

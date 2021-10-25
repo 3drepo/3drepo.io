@@ -23,8 +23,8 @@ export interface IUser {
 	user: string;
 	firstName: string;
 	lastName: string;
-	company: string;
-	job: string;
+	company?: string;
+	job?: string;
 }
 
 export interface ITeamspace {

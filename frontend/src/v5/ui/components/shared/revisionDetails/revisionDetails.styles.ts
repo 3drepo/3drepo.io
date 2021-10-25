@@ -29,7 +29,7 @@ export const Container = styled.div`
 `;
 
 export const RevisionsListEmptyWrapper = styled.div`
-  background-color: ${({ theme }) => theme.palette.secondary.mid};
+	background-color: ${({ theme }) => theme.palette.secondary.mid};
 	padding: 33px;
 `;
 

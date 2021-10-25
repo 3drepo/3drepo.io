@@ -19,7 +19,7 @@ import { IUser } from '@/v5/store/teamspaces/teamspaces.redux';
 export interface IRevisions {
 	timestamp: Date;
 	tag: string;
-	author: IUser;
+	author: IUser | string;
 	desc: string;
 	void?: boolean;
 }
@@ -35,7 +35,7 @@ export interface IContainer {
 	status: ContainerStatuses;
 	isFavourite: boolean;
 	role: string;
-	revisions: any;
+	revisions: IRevisions[];
 	isPending: boolean;
 }
 

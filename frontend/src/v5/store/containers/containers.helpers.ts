@@ -14,10 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { DashboardListSkeletonItem } from '@components/dashboard/dashboardList/dashboardListSkeletonItem';
-import styled from 'styled-components';
 
-export const Container = styled(DashboardListSkeletonItem)`
-	padding-right: 105px;
-	background-color: ${({ theme }) => theme.palette.secondary.light};
-`;
+import { IRevisions } from '@/v5/store/containers/containers.types';
+import { IUser } from '@/v5/store/teamspaces/teamspaces.redux';
+
+export const prepareRevisionsData = (
+	revisions: IRevisions[],
+	teamspaceUsers?: IUser[],
+) => revisions.map<IRevisions>(({ author, ...revision }) => ({
+	...revision,
+	author: teamspaceUsers.find(({ user }) => user === author),
+}));

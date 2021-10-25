@@ -16,7 +16,6 @@
  */
 
 import {
-	fetchUsersSuccess,
 	INITIAL_STATE,
 	reducer as teamspaceReducer,
 	TeamspacesActions

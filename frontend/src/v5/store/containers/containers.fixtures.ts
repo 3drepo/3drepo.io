@@ -16,7 +16,25 @@
  */
 
 import * as faker from 'faker';
-import { ContainerStatuses, IContainer } from '@/v5/store/containers/containers.types';
+import { times } from 'lodash';
+import { ContainerStatuses, IContainer, IRevisions } from '@/v5/store/containers/containers.types';
+import { IUser } from '@/v5/store/teamspaces/teamspaces.redux';
+
+export const userMockFactory = (overrides?: Partial<IRevisions>): IUser => ({
+	user: faker.name.findName(),
+	firstName: faker.name.firstName(),
+	lastName: faker.name.lastName(),
+	...overrides,
+});
+
+export const revisionsMockFactory = (overrides?: Partial<IRevisions>): IRevisions => ({
+	timestamp: faker.date.past(2),
+	tag: faker.random.words(1),
+	author: userMockFactory(),
+	desc: faker.random.words(3),
+	void: faker.datatype.boolean(),
+	...overrides,
+});
 
 export const containerMockFactory = (overrides?: Partial<IContainer>): IContainer => ({
 	_id: faker.datatype.uuid(),
@@ -29,5 +47,7 @@ export const containerMockFactory = (overrides?: Partial<IContainer>): IContaine
 	status: ContainerStatuses.OK,
 	code: faker.datatype.uuid(),
 	isFavourite: faker.datatype.boolean(),
+	revisions: times(10, () => revisionsMockFactory()),
+	isPending: faker.datatype.boolean(),
 	...overrides,
 });
