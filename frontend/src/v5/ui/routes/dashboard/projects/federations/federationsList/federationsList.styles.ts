@@ -15,7 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
+import * as SearchInputStyles from '@controls/searchInput/searchInput.styles';
+import * as FederationsStyles from '../federations.styles';
 
 export const Container = styled.div`
   margin: 16px 0;
+`;
+
+export const CollapseSideElementGroup = styled.div`
+	display: flex;
+	align-items: center;
+	
+	${SearchInputStyles.TextField} {
+		width: 405px;
+		margin-right: 15px;
+	}
+	
+	${FederationsStyles.NewFederationButton} {
+		margin: 0;
+	}
 `;

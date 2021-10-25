@@ -27,6 +27,8 @@ export const useFederationsData = () => {
 	const filteredFederations = FederationsHooksSelectors.selectFilteredFederations();
 	const favouriteFederations = FederationsHooksSelectors.selectFilteredFavouriteFederations();
 	const hasFederations = FederationsHooksSelectors.selectHasFederations();
+	const isListPending = FederationsHooksSelectors.selectIsListPending();
+	const areStatsPending = FederationsHooksSelectors.selectAreStatsPending();
 	const currentProject = ProjectsHooksSelectors.selectCurrentProject();
 
 	useEffect(() => {
@@ -39,6 +41,6 @@ export const useFederationsData = () => {
 		filteredFederations,
 		favouriteFederations,
 		hasFederations,
-		isPending: false,
+		isPending: isListPending || areStatsPending,
 	};
 };

@@ -34,6 +34,7 @@ export const Federations = (): JSX.Element => {
 		filteredFederations,
 		favouriteFederations,
 		hasFederations,
+		isPending,
 	} = useFederationsData();
 
 	return (
@@ -60,7 +61,7 @@ export const Federations = (): JSX.Element => {
 						<DashboardListEmptyText>
 							<Trans
 								id="federations.favourites.emptyMessage"
-								message="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
+								message="You haven’t added any Favourites. Click the star on a Federation to add your first favourite Federation.          "
 							/>
 						</DashboardListEmptyText>
 					)}
@@ -89,13 +90,13 @@ export const Federations = (): JSX.Element => {
 								<Trans id="federations.all.emptyMessage" message="You haven’t created any Federations." />
 							</DashboardListEmptyText>
 							<NewFederationButton startIcon={<AddCircleIcon />}>
-								<Trans id="federations.all.newContainer" message="New Federation" />
+								<Trans id="federations.all.newFederation" message="New Federation" />
 							</NewFederationButton>
 						</>
 					)}
 				/>
 				{
-					hasFederations.all && (
+					!isPending && hasFederations.all && (
 						<DashboardListButton
 							startIcon={<AddCircleIcon />}
 							onClick={() => {

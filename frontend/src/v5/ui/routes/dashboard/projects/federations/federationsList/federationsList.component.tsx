@@ -48,7 +48,9 @@ import { SearchInput } from '@controls/searchInput';
 import { SearchInputConfig, useSearchInput } from '@controls/searchInput/searchInput.hooks';
 import { EmptySearchResults } from '@/v5/ui/routes/dashboard/projects/containers/containersList/emptySearchResults';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
-import { Container } from './federationsList.styles';
+import AddCircleIcon from '@assets/icons/add_circle.svg';
+import { NewFederationButton } from '@/v5/ui/routes/dashboard/projects/federations/federations.styles';
+import { CollapseSideElementGroup, Container } from './federationsList.styles';
 import { getFederationMenuItems } from './federationsList.helpers';
 
 type IFederationsList = {
@@ -96,18 +98,23 @@ export const FederationsList = ({
 				tooltipTitles={titleTooltips}
 				isLoading={isListPending}
 				sideElement={(
-					<Trans
-						id="containers.search.placeholder"
-						message="Search..."
-						render={({ translation }) => (
-							<SearchInput
-								onClear={() => setSearchInput('')}
-								onChange={(event) => setSearchInput(event.currentTarget.value)}
-								value={searchInput}
-								placeholder={translation as string}
-							/>
-						)}
-					/>
+					<CollapseSideElementGroup>
+						<Trans
+							id="containers.search.placeholder"
+							message="Search..."
+							render={({ translation }) => (
+								<SearchInput
+									onClear={() => setSearchInput('')}
+									onChange={(event) => setSearchInput(event.currentTarget.value)}
+									value={searchInput}
+									placeholder={translation as string}
+								/>
+							)}
+						/>
+						<NewFederationButton startIcon={<AddCircleIcon />}>
+							<Trans id="federations.all.newFederation" message="New Federation" />
+						</NewFederationButton>
+					</CollapseSideElementGroup>
 				)}
 			>
 				<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
@@ -238,9 +245,9 @@ export const FederationsList = ({
 							))
 						) : (
 							<DashboardListEmptyContainer>
-								{ filterQuery && hasFederations ? (
+								{filterQuery && hasFederations ? (
 									<EmptySearchResults searchPhrase={filterQuery} />
-								) : emptyMessage }
+								) : emptyMessage}
 							</DashboardListEmptyContainer>
 						)}
 					</DashboardList>
