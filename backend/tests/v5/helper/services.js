@@ -38,6 +38,8 @@ queue.purgeQueues = async () => {
 		const conn = await amqp.connect(host);
 		const channel = await conn.createChannel();
 
+		channel.on('error', () => {});
+
 		await Promise.all([
 			channel.purgeQueue(worker_queue),
 			channel.purgeQueue(model_queue),
