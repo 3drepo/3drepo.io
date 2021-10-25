@@ -389,7 +389,7 @@ describe("Mitigations", function () {
 				.expect(200, function(err, res) {
 					console.log("2021102515")
 					console.log(res.body.length)
-					expect(res.body.length).to.equal(45);
+					expect(res.body.length).to.equal(0);
 					done(err);
 				});
 		});
