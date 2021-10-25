@@ -424,7 +424,6 @@ const testUpdateContainerSettings = () => {
 				.send(data).expect(templates.ok.status);
 		});
 
-		
 		test('should update a container\'s settings if defaultLegend is null', async () => {
 			const data = {
 				name: 'newName',

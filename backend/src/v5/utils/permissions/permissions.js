@@ -99,7 +99,7 @@ Permissions.hasAdminAccessToFederation = async (teamspace, project, federation, 
 	const [fed, federationExistsInProject, hasAdminPerms] = await Promise.all([
 		getFederationById(teamspace, federation, { _id: 1 }),
 		modelExistsInProject(teamspace, project, federation),
-		hasAdminPermissions(teamspace, project, username)
+		hasAdminPermissions(teamspace, project, username),
 	]);
 
 	return fed && federationExistsInProject && hasAdminPerms > 0;
@@ -118,7 +118,7 @@ Permissions.hasAdminAccessToContainer = async (teamspace, project, container, us
 	const [con, containerExistsInProject, hasAdminPerms] = await Promise.all([
 		getContainerById(teamspace, container, { _id: 1 }),
 		modelExistsInProject(teamspace, project, container),
-		hasAdminPermissions(teamspace, project, username)
+		hasAdminPermissions(teamspace, project, username),
 	]);
 
 	return con && containerExistsInProject && hasAdminPerms > 0;
