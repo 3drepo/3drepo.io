@@ -241,7 +241,6 @@ describe("Mitigations", function () {
 		it("should succeed", function(done) {
 			agent.get(`/${username}/mitigations/criteria`)
 				.expect(200, function(err, res) {
-					console.log(res.body)
 					const sortedObj = {};
 					Object.keys(res.body).forEach((key) => sortedObj[key] = res.body[key].sort());
 					expect(sortedObj).to.deep.equal(goldenCriteria);
@@ -252,7 +251,6 @@ describe("Mitigations", function () {
 		it("if user is not teamspace admin should succeed", function(done) {
 			agent.get(`/${collaboratorTeamspace}/mitigations/criteria`)
 				.expect(200, function(err, res) {
-					console.log(res.body)
 					const sortedObj = {};
 					Object.keys(res.body).forEach((key) => sortedObj[key] = res.body[key].sort());
 					expect(sortedObj).to.deep.equal(goldenCriteria);
@@ -354,8 +352,6 @@ describe("Mitigations", function () {
 				agent.post(`/${username}/mitigations`)
 					.send(criterion)
 					.expect(200, function(err, res) {
-						console.log("20211025")
-						console.log(res.body)
 						expect(res.body.length).to.equal(expectedLengths[key]);
 						done(err);
 					});
@@ -370,8 +366,6 @@ describe("Mitigations", function () {
 				agent.post(`/${username}/mitigations`)
 					.send(criterion)
 					.expect(200, function(err, res) {
-						console.log("20211025")
-						console.log(res.body)
 						expect(res.body.length).to.equal(totalSuggestions);
 						done(err);
 					});
