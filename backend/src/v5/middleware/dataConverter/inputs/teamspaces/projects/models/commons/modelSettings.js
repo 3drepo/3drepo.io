@@ -45,7 +45,7 @@ ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
 		angleFromNorth: Yup.number().min(0).max(360),
 		type: Yup.string(),
 		unit: types.strings.unit,
-		code: Yup.string().matches(/^[a-zA-Z0-9]{0,50}$/),
+		code: types.strings.code,
 		defaultView: types.id.nullable().test('check-view-exists', 'View not found', async (value) => {
 			if (value) {
 				try {

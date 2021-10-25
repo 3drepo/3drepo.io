@@ -54,4 +54,6 @@ YupHelper.types.position = Yup.array()
 YupHelper.types.strings.unit = Yup.string()
 	.oneOf(['mm', 'cm', 'dm', 'm', 'ft']);
 
+YupHelper.types.strings.code = Yup.string().matches(/^[a-zA-Z0-9]*$/).min(1).max(50);
+
 module.exports = YupHelper;

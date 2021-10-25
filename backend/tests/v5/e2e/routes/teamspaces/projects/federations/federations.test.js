@@ -483,7 +483,7 @@ const testUpdateFederationSettings = () => {
 			expect(res.body.code).toEqual(templates.federationNotFound.code);
 		});
 
-		test('should update a federation\'s settings if the body of the request is as expected', async () => {
+		test('should update a federation\'s settings if all the params of the body have values', async () => {
 			const data = {
 				name: 'newName',
 				desc: 'newDesc',
@@ -499,6 +499,48 @@ const testUpdateFederationSettings = () => {
 				code: 'CODE1',
 				defaultView: views[1]._id,
 				defaultLegend: legends[1]._id,
+			};
+			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.send(data).expect(templates.ok.status);
+		});
+
+		test('should update a federation\'s settings if defaultView is null', async () => {
+			const data = {
+				name: 'newName',
+				desc: 'newDesc',
+				surveyPoints: [
+					{
+						position: [7, 8, 9],
+						latLong: [10, 11],
+					},
+				],
+				angleFromNorth: 180,
+				type: 'someType',
+				unit: 'mm',
+				code: 'CODE1',
+				defaultView: null,
+				defaultLegend: legends[1]._id,
+			};
+			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.send(data).expect(templates.ok.status);
+		});
+
+		test('should update a federation\'s settings if defaultLegend is null', async () => {
+			const data = {
+				name: 'newName',
+				desc: 'newDesc',
+				surveyPoints: [
+					{
+						position: [7, 8, 9],
+						latLong: [10, 11],
+					},
+				],
+				angleFromNorth: 180,
+				type: 'someType',
+				unit: 'mm',
+				code: 'CODE1',
+				defaultView: views[1]._id,
+				defaultLegend: null,
 			};
 			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
 				.send(data).expect(templates.ok.status);

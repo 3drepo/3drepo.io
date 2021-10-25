@@ -96,13 +96,13 @@ Permissions.hasReadAccessToModel = modelPermCheck(
 );
 
 Permissions.hasAdminAccessToFederation = async (teamspace, project, federation, username) => {
-	await getFederationById(teamspace, federation, { _id: 1 });
-	const federationExistsInProject = await modelExistsInProject(teamspace, project, federation);
-	if (!federationExistsInProject) {
-		return false;
-	}
-	const hasAdminPerms = await hasAdminPermissions(teamspace, project, username);
-	return hasAdminPerms > 0;
+	const [fed, federationExistsInProject, hasAdminPerms] = await Promise.all([
+		getFederationById(teamspace, federation, { _id: 1 }),
+		modelExistsInProject(teamspace, project, federation),
+		hasAdminPermissions(teamspace, project, username)
+	]);
+
+	return fed && federationExistsInProject && hasAdminPerms > 0;
 };
 Permissions.hasWriteAccessToFederation = modelPermCheck(
 	(perm) => MODEL_WRITE_ROLES.includes(perm.permission), modelType.FEDERATIONS,
@@ -115,13 +115,13 @@ Permissions.hasReadAccessToFederation = modelPermCheck(
 );
 
 Permissions.hasAdminAccessToContainer = async (teamspace, project, container, username) => {
-	await getContainerById(teamspace, container, { _id: 1 });
-	const containerExistsInProject = await modelExistsInProject(teamspace, project, container);
-	if (!containerExistsInProject) {
-		return false;
-	}
-	const hasAdminPerms = await hasAdminPermissions(teamspace, project, username);
-	return hasAdminPerms > 0;
+	const [con, containerExistsInProject, hasAdminPerms] = await Promise.all([
+		getContainerById(teamspace, container, { _id: 1 }),
+		modelExistsInProject(teamspace, project, container),
+		hasAdminPermissions(teamspace, project, username)
+	]);
+
+	return con && containerExistsInProject && hasAdminPerms > 0;
 };
 Permissions.hasWriteAccessToContainer = modelPermCheck(
 	(perm) => MODEL_WRITE_ROLES.includes(perm.permission), modelType.CONTAINERS,

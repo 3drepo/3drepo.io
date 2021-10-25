@@ -382,7 +382,7 @@ const testUpdateContainerSettings = () => {
 			expect(res.body.code).toEqual(templates.containerNotFound.code);
 		});
 
-		test('should update a container\'s settings if the body of the request is as expected', async () => {
+		test('should update a container\'s settings if all the body params have value', async () => {
 			const data = {
 				name: 'newName',
 				desc: 'newDesc',
@@ -398,6 +398,49 @@ const testUpdateContainerSettings = () => {
 				code: 'CODE1',
 				defaultView: views[1]._id,
 				defaultLegend: legends[1]._id,
+			};
+			await agent.patch(`${route(modelWithViews._id)}?key=${users.tsAdmin.apiKey}`)
+				.send(data).expect(templates.ok.status);
+		});
+
+		test('should update a container\'s settings if defaultView is null', async () => {
+			const data = {
+				name: 'newName',
+				desc: 'newDesc',
+				surveyPoints: [
+					{
+						position: [7, 8, 9],
+						latLong: [10, 11],
+					},
+				],
+				angleFromNorth: 180,
+				type: 'someType',
+				unit: 'mm',
+				code: 'CODE1',
+				defaultView: null,
+				defaultLegend: legends[1]._id,
+			};
+			await agent.patch(`${route(modelWithViews._id)}?key=${users.tsAdmin.apiKey}`)
+				.send(data).expect(templates.ok.status);
+		});
+
+		
+		test('should update a container\'s settings if defaultLegend is null', async () => {
+			const data = {
+				name: 'newName',
+				desc: 'newDesc',
+				surveyPoints: [
+					{
+						position: [7, 8, 9],
+						latLong: [10, 11],
+					},
+				],
+				angleFromNorth: 180,
+				type: 'someType',
+				unit: 'mm',
+				code: 'CODE1',
+				defaultView: views[1]._id,
+				defaultLegend: null,
 			};
 			await agent.patch(`${route(modelWithViews._id)}?key=${users.tsAdmin.apiKey}`)
 				.send(data).expect(templates.ok.status);
