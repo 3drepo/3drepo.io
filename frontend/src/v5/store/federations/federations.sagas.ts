@@ -18,8 +18,32 @@
 import { all, put, takeLatest } from 'redux-saga/effects';
 import { FederationsActions, FederationsTypes } from '@/v5/store/federations/federations.redux';
 import * as API from '@/v5/services/api';
-import { FetchFederationsAction, FetchFederationsResponse, FetchFederationStatsResponse } from '@/v5/store/federations/federations.types';
+import {
+	FetchFederationsAction,
+	FetchFederationsResponse,
+	FetchFederationStatsResponse,
+	AddFavouriteAction,
+	RemoveFavouriteAction,
+} from '@/v5/store/federations/federations.types';
 import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
+
+export function* addFavourites({ federationId, teamspace, projectId }: AddFavouriteAction) {
+	try {
+		yield put(FederationsActions.setFavouriteSuccess(projectId, federationId, true));
+		yield API.Federations.addFavourites({ teamspace, projectId, federationId });
+	} catch (e) {
+		console.error(e);
+	}
+}
+
+export function* removeFavourites({ federationId, teamspace, projectId }: RemoveFavouriteAction) {
+	try {
+		yield put(FederationsActions.setFavouriteSuccess(projectId, federationId, false));
+		yield API.Federations.removeFavourites({ teamspace, projectId, federationId });
+	} catch (e) {
+		console.error(e);
+	}
+}
 
 export function* fetchFederations({ teamspace, projectId }: FetchFederationsAction) {
 	yield put(FederationsActions.setIsListPending(true));
@@ -36,7 +60,7 @@ export function* fetchFederations({ teamspace, projectId }: FetchFederationsActi
 
 		const stats: FetchFederationStatsResponse[] = yield all(
 			federations.map(
-				(federation) => API.fetchFederationStats({
+				(federation) => API.Federations.fetchFederationStats({
 					teamspace, projectId, federationId: federation._id,
 				}),
 			),
@@ -53,5 +77,7 @@ export function* fetchFederations({ teamspace, projectId }: FetchFederationsActi
 }
 
 export default function* FederationsSagas() {
+	yield takeLatest(FederationsTypes.ADD_FAVOURITE, addFavourites);
+	yield takeLatest(FederationsTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeLatest(FederationsTypes.FETCH_FEDERATIONS, fetchFederations);
 }

@@ -34,6 +34,8 @@ export const Federations = (): JSX.Element => {
 		filteredFederations,
 		favouriteFederations,
 		hasFederations,
+		teamspace,
+		project,
 	} = useFederationsData();
 
 	return (
@@ -64,6 +66,8 @@ export const Federations = (): JSX.Element => {
 							/>
 						</DashboardListEmptyText>
 					)}
+					teamspace={teamspace}
+					project={project}
 				/>
 				<Divider />
 				<FederationsList
@@ -84,7 +88,6 @@ export const Federations = (): JSX.Element => {
 						visible: <Trans id="federations.all.collapse.tooltip.hide" message="Hide federations" />,
 					}}
 					emptyMessage={(
-
 						<>
 							<DashboardListEmptyText>
 								<Trans id="federations.all.emptyMessage" message="You haven’t created any Federations." />
@@ -94,6 +97,8 @@ export const Federations = (): JSX.Element => {
 							</NewFederationButton>
 						</>
 					)}
+					teamspace={teamspace}
+					project={project}
 				/>
 				{
 					hasFederations.all && (

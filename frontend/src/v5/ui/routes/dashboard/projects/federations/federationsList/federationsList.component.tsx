@@ -46,6 +46,7 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { SearchInput } from '@controls/searchInput';
 import { SearchInputConfig, useSearchInput } from '@controls/searchInput/searchInput.hooks';
 import { EmptySearchResults } from '@/v5/ui/routes/dashboard/projects/containers/containersList/emptySearchResults';
+import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import { Container } from './federationsList.styles';
 import { getFederationMenuItems } from './federationsList.helpers';
 
@@ -59,6 +60,8 @@ type IFederationsList = {
 	},
 	search: SearchInputConfig;
 	hasFederations: boolean;
+	teamspace: string;
+	project: string;
 };
 
 export const FederationsList = ({
@@ -68,6 +71,8 @@ export const FederationsList = ({
 	titleTooltips,
 	search,
 	hasFederations,
+	teamspace,
+	project,
 }: IFederationsList): JSX.Element => {
 	const { sortedList, setSortConfig } = useOrderedList(federations, DEFAULT_SORT_CONFIG);
 	const {
@@ -79,9 +84,9 @@ export const FederationsList = ({
 
 	const toggleFavourite = (id: IContainer['_id'], value: boolean) => {
 		if (value) {
-			// ContainersActionsDispatchers.addFavourite(teamspace, project, id);
+			FederationsActionsDispatchers.addFavourite(teamspace, project, id);
 		} else {
-			// ContainersActionsDispatchers.removeFavourite(teamspace, project, id);
+			FederationsActionsDispatchers.removeFavourite(teamspace, project, id);
 		}
 	};
 

@@ -20,8 +20,26 @@ import {
 	FetchFederationsResponse,
 	FetchFederationStatsPayload,
 	FetchFederationStatsResponse,
+	FavouritePayload,
 } from '@/v5/store/federations/federations.types';
+import { AxiosResponse } from 'axios';
 import api from './default';
+
+export const addFavourites = (
+	{ teamspace, projectId, federationId }: FavouritePayload,
+): Promise<AxiosResponse<void>> => (
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/favourites`, {
+		federations: [federationId],
+	})
+);
+
+export const removeFavourites = (
+	{ teamspace, projectId, federationId }: FavouritePayload,
+): Promise<AxiosResponse<void>> => (
+	api.delete(`teamspaces/${teamspace}/projects/${projectId}/federations/favourites`, {
+		federations: [federationId],
+	})
+);
 
 export const fetchFederations = async ({
 	teamspace,

@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 import { useEffect } from 'react';
+import { useParams } from 'react-router';
+import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
-import { useParams } from 'react-router';
 
 export const useFederationsData = () => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
@@ -36,6 +36,8 @@ export const useFederationsData = () => {
 	}, [currentProject]);
 
 	return {
+		teamspace,
+		project,
 		filteredFederations,
 		favouriteFederations,
 		hasFederations,

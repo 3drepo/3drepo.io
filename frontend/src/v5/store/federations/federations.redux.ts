@@ -15,19 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { createActions, createReducer } from 'reduxsauce';
 import {
 	FetchFederationsSuccessAction,
 	IFederationsActionCreators,
 	IFederationsState,
 	SetFavouritesFilterQueryAction,
 	SetFilterQueryAction,
+	SetFavouriteSuccessAction,
 } from '@/v5/store/federations/federations.types';
-import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../common/actions.helper';
 
 export const { Types: FederationsTypes, Creators: FederationsActions } = createActions({
 	setAllFilterQuery: ['query'],
 	setFavouritesFilterQuery: ['query'],
+	addFavourite: ['teamspace', 'projectId', 'federationId'],
+	removeFavourite: ['teamspace', 'projectId', 'federationId'],
+	setFavouriteSuccess: ['projectId', 'federationId', 'isFavourite'],
 	fetchFederations: ['teamspace', 'projectId'],
 	fetchFederationsSuccess: ['projectId', 'federations'],
 	setIsListPending: ['isPending'],
@@ -50,6 +54,21 @@ export const setFavouritesFilterQuery = (state = INITIAL_STATE, { query }: SetFa
 	{ ...state, favouritesFilterQuery: query }
 );
 
+export const setFavourite = (state = INITIAL_STATE, {
+	projectId,
+	federationId,
+	isFavourite,
+}: SetFavouriteSuccessAction) => ({
+	...state,
+	federations: {
+		...state.federations,
+		[projectId]: state.federations[projectId].map((federation) => ({
+			...federation,
+			isFavourite: federation._id === federationId ? isFavourite : federation.isFavourite,
+		})),
+	},
+});
+
 export const fetchFederationsSuccess = (state = INITIAL_STATE, {
 	projectId,
 	federations,
@@ -65,4 +84,5 @@ export const reducer = createReducer<IFederationsState>(INITIAL_STATE, {
 	[FederationsTypes.SET_ALL_FILTER_QUERY]: setAllFilterQuery,
 	[FederationsTypes.SET_FAVOURITES_FILTER_QUERY]: setFavouritesFilterQuery,
 	[FederationsTypes.FETCH_FEDERATIONS_SUCCESS]: fetchFederationsSuccess,
+	[FederationsTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
 });
