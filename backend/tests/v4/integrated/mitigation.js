@@ -286,12 +286,12 @@ describe("Mitigations", function () {
 	describe("Find mitigation suggestions", function(done) {
 		const totalSuggestions = 201;
 		const expectedLengths = {
-			"category": 162,
-			"location_desc": 46,
-			"element": 84,
-			"risk_factor": 115,
-			"scope": 163,
-			"associated_activity": 163
+			"category": 18,
+			"location_desc": 27,
+			"element": 20,
+			"risk_factor": 18,
+			"scope": 1,
+			"associated_activity": 22
 		};
 		const invalidCriteria = {
 			"mitigation_desc": "Avoid trap hazards near openings.",
@@ -381,7 +381,7 @@ describe("Mitigations", function () {
 		it("by multiple criteria should succeed", function(done) {
 			const criteria = {};
 			Object.keys(goldenCriteria).forEach((key) => {
-				criteria[key] = goldenCriteria[key][0];
+				criteria[key] = goldenCriteria[key][1];
 			});
 
 			agent.post(`/${username}/mitigations`)
