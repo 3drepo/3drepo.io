@@ -206,13 +206,11 @@ const subscribeToV5Events = () => {
 		if(success) {
 			const { tag } = await findLatest(teamspace, model, {tag: 1});
 			const notes = await notifications.upsertModelUpdatedNotifications(teamspace, model, tag || corId);
-			console.log("!!!! Submitting success notification ", teamspace, model, corId);
 			notes.map((note) => upsertedNotification(null, note));
 		}
 		if(message) {
 			const Mailer = require("../mailer/mailer");
 			const notes = await notifications.insertModelUpdatedFailedNotifications(teamspace, model, user, message);
-			console.log("!!!! Submitting failed notification ", teamspace, model, corId);
 			notes.map((note) => upsertedNotification(null, note));
 
 			if(!userErr) {
