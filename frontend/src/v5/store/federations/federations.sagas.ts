@@ -25,7 +25,10 @@ export function* fetchFederations({ teamspace, projectId }: FetchFederationsActi
 	yield put(FederationsActions.setIsListPending(true));
 	yield put(FederationsActions.setAreStatsPending(true));
 	try {
-		const { federations }: FetchFederationsResponse = yield API.fetchFederations({ teamspace, projectId });
+		const { federations }: FetchFederationsResponse = yield API.Federations.fetchFederations({
+			teamspace,
+			projectId,
+		});
 		const federationsWithoutStats = prepareFederationsData(federations);
 
 		yield put(FederationsActions.fetchFederationsSuccess(projectId, federationsWithoutStats));

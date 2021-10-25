@@ -15,7 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export * from './teamspaces';
-export * from './projects';
-export * from './containers';
-export * from './federations';
+import * as Teamspaces from './teamspaces';
+import * as Projects from './projects';
+import * as Containers from './containers';
+import * as Federations from './federations';
+
+export { Teamspaces, Projects, Containers, Federations };

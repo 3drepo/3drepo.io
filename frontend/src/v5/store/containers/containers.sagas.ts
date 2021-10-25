@@ -33,7 +33,7 @@ import { prepareContainersData } from './containers.helpers';
 export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
 	try {
 		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, true));
-		yield API.addFavourites({ teamspace, containerId, projectId });
+		yield API.Containers.addFavourites({ teamspace, containerId, projectId });
 	} catch (e) {
 		console.error(e);
 	}
@@ -42,7 +42,7 @@ export function* addFavourites({ containerId, teamspace, projectId }: AddFavouri
 export function* removeFavourites({ containerId, teamspace, projectId }: RemoveFavouriteAction) {
 	try {
 		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, false));
-		yield API.removeFavourites({ containerId, teamspace, projectId });
+		yield API.Containers.removeFavourites({ containerId, teamspace, projectId });
 	} catch (e) {
 		console.error(e);
 	}
@@ -52,7 +52,7 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 	yield put(ContainersActions.setIsListPending(true));
 	yield put(ContainersActions.setAreStatsPending(true));
 	try {
-		const { containers }: FetchContainersResponse = yield API.fetchContainers({ teamspace, projectId });
+		const { containers }: FetchContainersResponse = yield API.Containers.fetchContainers({ teamspace, projectId });
 		const containersWithoutStats = prepareContainersData(containers);
 
 		yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithoutStats));
@@ -60,7 +60,7 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 
 		const stats: FetchContainerStatsResponse[] = yield all(
 			containers.map(
-				(container) => API.fetchContainerStats({
+				(container) => API.Containers.fetchContainerStats({
 					teamspace, projectId, containerId: container._id,
 				}),
 			),
