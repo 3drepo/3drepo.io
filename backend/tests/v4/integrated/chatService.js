@@ -21,7 +21,7 @@ const chai = require("chai")
 chai.use(require('chai-shallow-deep-equal'));
 const expect = chai.expect;
 const config = require("../../../src/v4/config");
-const app = require("../../../src/v4/services/api.js").createApp();
+const { createApp } = require("../../../src/v4/services/api.js");
 const async = require("async");
 const http = require("http");
 // let newXhr = require('socket.io-client-cookie');
@@ -90,7 +90,7 @@ describe("Chat service", function () {
 
 	before(function(done) {
 		require("../../../src/v5/services/eventsManager/eventsManager").reset();
-		server = app.listen(8080, function () {
+		server = createApp().listen(8080, function () {
 
 			const chatServer = http.createServer();
 
