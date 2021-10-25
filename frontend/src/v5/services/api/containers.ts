@@ -15,12 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { FavouritePayload } from '@/v5/store/containers/containers.types';
+import { AxiosResponse } from 'axios';
+import api from './default';
 
-export const Content = styled.section`
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	overflow-y: auto;
-	flex-grow: 1;
-`;
+export const addFavourites = (
+	{ teamspace, projectId, containerId }: FavouritePayload,
+): Promise<AxiosResponse<void>> => (
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites`, {
+		containers: [containerId],
+	})
+);
 
-export const MainHeaderPortalRoot = styled.div``;
+export const removeFavourites = (
+	{ teamspace, projectId, containerId }: FavouritePayload,
+): Promise<AxiosResponse<void>> => (
+	api.delete(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites`, {
+		containers: [containerId],
+	})
+);
