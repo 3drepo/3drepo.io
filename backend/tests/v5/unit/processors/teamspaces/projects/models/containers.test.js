@@ -26,6 +26,10 @@ const Users = require(`${src}/models/users`);
 jest.mock('../../../../../../../src/v5/models/revisions');
 const Revisions = require(`${src}/models/revisions`);
 const Containers = require(`${src}/processors/teamspaces/projects/models/containers`);
+const Views = require(`${src}/models/views`);
+jest.mock('../../../../../../../src/v5/models/views');
+const Legends = require(`${src}/models/legends`);
+jest.mock('../../../../../../../src/v5/models/legends');
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const modelList = [
@@ -78,6 +82,20 @@ const model1Revisions = [
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getContainers.mockImplementation(() => modelList);
 ModelSettings.getContainerById.mockImplementation((teamspace, container) => containerSettings[container]);
+Views.checkViewExists.mockImplementation((teamspace, model, view) => {
+	if (view === 1) {
+		return 1;
+	}
+	throw templates.viewNotFound;
+});
+
+Legends.checkLegendExists.mockImplementation((teamspace, model, legend) => {
+	if (legend === 1) {
+		return 1;
+	}
+	throw templates.legendNotFound;
+});
+
 Revisions.getRevisionCount.mockImplementation((teamspace, container) => (container === 'container2' ? 10 : 0));
 Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 	if (container === 'container2') return container2Rev;

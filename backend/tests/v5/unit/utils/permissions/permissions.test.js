@@ -250,6 +250,29 @@ const testHasCommenterAccessToContainer = () => {
 	});
 };
 
+const testHasAdminAccessToContainer = () => {
+	describe.each([
+		['a', false],
+		['b', false],
+		['c', false],
+		['projAdmin', true],
+		['tsAdmin', true],
+		['nobody', false],
+	])('Has admin access to container', (user, result) => {
+		test(`${user} ${result ? 'have' : 'does not have'} admin access`, async () => {
+			Projects.modelExistsInProject.mockImplementation(() => true);
+			expect(await Permissions.hasAdminAccessToContainer('teamspace', 'project', 'model', user)).toBe(result);
+		});
+	});
+
+	describe('Container does not belong to the project', () => {
+		test('should return false if the container does not belong to the project', async () => {
+			Projects.modelExistsInProject.mockImplementation(() => false);
+			expect(await Permissions.hasAdminAccessToContainer('teamspace', 'project', 'model', 'a')).toBe(false);
+		});
+	});
+};
+
 const testHasReadAccessToFederation = () => {
 	describe.each([
 		['a', false, true],
@@ -331,6 +354,29 @@ const testHasCommenterAccessToFederation = () => {
 	});
 };
 
+const testHasAdminAccessToFederation = () => {
+	describe.each([
+		['a', false],
+		['b', false],
+		['c', false],
+		['projAdmin', true],
+		['tsAdmin', true],
+		['nobody', false],
+	])('Has admin access to federation', (user, result) => {
+		test(`${user} ${result ? 'have' : 'does not have'} admin access`, async () => {
+			Projects.modelExistsInProject.mockImplementation(() => true);
+			expect(await Permissions.hasAdminAccessToFederation('teamspace', 'project', 'model', user)).toBe(result);
+		});
+	});
+
+	describe('Federation does not belong to the project', () => {
+		test('should return false if the federation does not belong to the project', async () => {
+			Projects.modelExistsInProject.mockImplementation(() => false);
+			expect(await Permissions.hasAdminAccessToFederation('teamspace', 'project', 'model', 'a')).toBe(false);
+		});
+	});
+};
+
 describe('utils/permissions', () => {
 	testIsTeamspaceAdmin();
 	testIsProjectAdmin();
@@ -342,8 +388,10 @@ describe('utils/permissions', () => {
 	testHasReadAccessToContainer();
 	testHasWriteAccessToContainer();
 	testHasCommenterAccessToContainer();
+	testHasAdminAccessToContainer();
 
 	testHasReadAccessToFederation();
 	testHasWriteAccessToFederation();
 	testHasCommenterAccessToFederation();
+	testHasAdminAccessToFederation();
 });
