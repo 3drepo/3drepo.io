@@ -70,6 +70,7 @@ module.exports.createApp = function (config) {
 	});
 
 	require(`${v5Path}/services/eventsListener/eventsListener`).init();
+	require("../models/chatEvent").subscribeToV5Events();
 	require(`${v5Path}/services/queue`).init();
 	require(`${v5Path}/routes/routesManager`).init(app);
 
