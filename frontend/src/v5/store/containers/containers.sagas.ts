@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, takeLatest } from 'redux-saga/effects';
+import { all, put, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import {
 	ContainersActions,
@@ -26,7 +26,7 @@ import {
 	RemoveFavouriteAction,
 	FetchContainersResponse,
 	FetchContainerStatsResponse,
-	FetchContainersAction,
+	FetchContainersAction, FetchContainerStatsAction,
 } from './containers.types';
 import { prepareContainersData } from './containers.helpers';
 
@@ -58,15 +58,11 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 		yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithoutStats));
 		yield put(ContainersActions.setIsListPending(false));
 
-		const stats: FetchContainerStatsResponse[] = yield all(
+		yield all(
 			containers.map(
-				(container) => API.fetchContainerStats({
-					teamspace, projectId, containerId: container._id,
-				}),
+				(container) => put(ContainersActions.fetchContainerStats(teamspace, projectId, container._id)),
 			),
 		);
-		const containersWithStats = prepareContainersData(containers, stats);
-		yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithStats));
 
 		yield put(ContainersActions.setAreStatsPending(false));
 	} catch (e) {
@@ -76,8 +72,21 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 	}
 }
 
+export function* fetchContainerStats({ teamspace, projectId, containerId }: FetchContainerStatsAction) {
+	try {
+		const stats: FetchContainerStatsResponse = yield API.fetchContainerStats({
+			teamspace, projectId, containerId,
+		});
+
+		yield put(ContainersActions.fetchContainerStatsSuccess(projectId, containerId, stats));
+	} catch (e) {
+		console.error(e);
+	}
+}
+
 export default function* ContainersSaga() {
 	yield takeLatest(ContainersTypes.ADD_FAVOURITE, addFavourites);
 	yield takeLatest(ContainersTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeLatest(ContainersTypes.FETCH_CONTAINERS, fetchContainers);
+	yield takeEvery(ContainersTypes.FETCH_CONTAINER_STATS, fetchContainerStats);
 }

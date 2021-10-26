@@ -17,24 +17,30 @@
 
 import {
 	ContainerStatuses,
-	FetchContainersResponse,
+	FetchContainersContainerItemResponse,
 	FetchContainerStatsResponse,
 	IContainer,
 } from '@/v5/store/containers/containers.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 
+export const prepareSingleContainerData = (
+	container: FetchContainersContainerItemResponse,
+	stats?: FetchContainerStatsResponse,
+): IContainer => ({
+	...container,
+	revisionsCount: stats?.revisions.total ?? 0,
+	lastUpdated: getNullableDate(stats?.revisions.lastUpdated),
+	latestRevision: stats?.revisions.latestRevision ?? '',
+	type: stats?.type ?? '',
+	code: stats?.code ?? '',
+	status: stats?.status ?? ContainerStatuses.OK,
+	areStatsPending: !stats,
+});
+
 export const prepareContainersData = (
-	containers: FetchContainersResponse['containers'],
+	containers: Array<FetchContainersContainerItemResponse>,
 	stats?: FetchContainerStatsResponse[],
 ) => containers.map<IContainer>((container, index) => {
 	const containerStats = stats?.[index];
-	return {
-		...container,
-		revisionsCount: containerStats?.revisions.total ?? 0,
-		lastUpdated: getNullableDate(containerStats?.revisions.lastUpdated),
-		latestRevision: containerStats?.revisions.latestRevision ?? '',
-		type: containerStats?.type ?? '',
-		code: containerStats?.code ?? '',
-		status: containerStats?.status ?? ContainerStatuses.OK,
-	};
+	return prepareSingleContainerData(container, containerStats);
 });
