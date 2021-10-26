@@ -375,7 +375,7 @@ describe("Mitigations", function () {
 		it("by multiple criteria should succeed", function(done) {
 			const criteria = {};
 			Object.keys(goldenCriteria).forEach((key) => {
-				criteria[key] = goldenCriteria[key][2];
+				criteria[key] = goldenCriteria[key][3];
 			});
 
 			agent.post(`/${username}/mitigations`)
