@@ -46,4 +46,14 @@ YupHelper.types.timestamp = Yup.number().min(new Date(2000, 1, 1).getTime()).int
 		(value) => new Date(value).getTime() > 0,
 	);
 
+YupHelper.types.position = Yup.array()
+	.of(
+		Yup.number(),
+	).length(3);
+
+YupHelper.types.strings.unit = Yup.string()
+	.oneOf(['mm', 'cm', 'dm', 'm', 'ft']);
+
+YupHelper.types.strings.code = Yup.string().matches(/^[a-zA-Z0-9]*$/).min(1).max(50);
+
 module.exports = YupHelper;

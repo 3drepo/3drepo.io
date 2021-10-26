@@ -133,7 +133,7 @@ const testExportGroups = () => {
 			expect(res.body.status).toEqual(templates.notAuthorized.status);
 		});
 
-		test('should fail if the payload is not of the right schema', async () => {
+		test('should fail if the data is not of the right schema', async () => {
 			const res = await agent.post(`${createRoute()}?key=${users.tsAdmin.apiKey}`)
 				.send({ groups: 1 })
 				.expect(templates.invalidArguments.status);
@@ -210,7 +210,7 @@ const testImportGroups = () => {
 			expect(res.body.status).toEqual(templates.notAuthorized.status);
 		});
 
-		test('should fail if the payload is not of the right schema', async () => {
+		test('should fail if the data is not of the right schema', async () => {
 			const res = await agent.post(`${createRoute()}?key=${users.tsAdmin.apiKey}`)
 				.send({ groups: 1 })
 				.expect(templates.invalidArguments.status);
