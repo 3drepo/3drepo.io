@@ -376,23 +376,20 @@ describe("Mitigations", function () {
 		});
 
 		it("by multiple criteria should succeed", function(done) {
-
-			// const criteria = {
-			// 		mitigation_stage: ['Preliminary Design'],
-			// 		mitigation_type: ['Eliminate'],
-			// 		category: ['Fall-From open edge'],
-			// 		location_desc: ['High Level-Near Opening'],
-			// 		element: ['Slab'],
-			// 		risk_factor: ['Physical-Opening'],
-			// 		scope: ['In situ concrete'],
-			// 		associated_activity: ['Install construction']
-			// }
-
-			const criteria = {};
-			Object.keys(goldenCriteria).forEach((key) => {
-				criteria[key] = goldenCriteria[key][0];
-			});
-
+			// const criteria = {};
+			// Object.keys(goldenCriteria).forEach((key) => {
+			// 	criteria[key] = goldenCriteria[key][0];
+			// });
+			const criteria = {
+				mitigation_stage: ['Preliminary Design'],
+				mitigation_type: ['Eliminate'],
+				category: ['Fall-From open edge'],
+				location_desc: ['High Level-Near Opening'],
+				element: ['Slab'],
+				risk_factor: ['Physical-Opening'],
+				scope: ['In situ concrete'],
+				associated_activity: ['Install construction']
+		}
 			console.log(criteria)
 			agent.post(`/${username}/mitigations`)
 				.send(criteria)
