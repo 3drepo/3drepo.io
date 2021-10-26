@@ -72,4 +72,9 @@ Containers.deleteFavourites = async (username, teamspace, project, favouritesToR
 	return deleteFavourites(username, teamspace, accessibleContainers, favouritesToRemove);
 };
 
+Containers.getContainerSettings = async (teamspace, container) => {
+	const cont = getContainerById(teamspace, container);
+	return cont;
+};
+
 module.exports = Containers;

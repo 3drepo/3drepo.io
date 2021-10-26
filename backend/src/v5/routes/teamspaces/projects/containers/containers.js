@@ -63,6 +63,14 @@ const appendFavourites = (req, res) => {
 		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
 };
 
+const getContainerSettings = (req, res) => {
+	const user = getUserFromSession(req.session);
+	const { teamspace, container } = req.params;
+
+	Containers.getContainerSettings(user, teamspace, container)
+		.then((settings) => respond(req, res, templates.ok, settings)).catch((err) => respond(req, res, err));
+};
+
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 
@@ -288,7 +296,71 @@ const establishRoutes = () => {
 	 *         description: removes the containers found in the request body from the user's favourites list
 	 */
 	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites);
-	return router;
+	
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}:
+	 *   get:
+	 *     description: Get the model settings of container
+	 *     tags: [Containers]
+	 *     operationId: getModelSettings
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - project:
+	 *         name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - container:
+	 *         name: container
+	 *         description: Container ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: returns the statistics of a container
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+     *             properties:
+	 *               _id:
+	 *                 type: String
+	 *                 example: 3549ddf6-885d-4977-87f1-eeac43a0e818
+	 *               timestamp:
+	 *                 type: String
+	 *                 example: 2019-05-13T16:54:44.000Z
+	 *               type:
+	 *                 type: String
+	 *                 example: Structural
+	 *               desc:
+	 *                 type: String
+	 *                 example: Container description
+	 *               name:
+	 *                 type: String
+	 *                 example: Lego tree
+	 *               subModels:
+	 *                 type: array
+	 *                 items:
+	 *                   type: String
+	 *                   example: 3549ddf6-885d-4977-87f1-eeac43a0e818
+	 */
+	 router.get('/:container', hasReadAccessToContainer, getContainerSettings);
+	return router;	
 };
 
 module.exports = establishRoutes();
