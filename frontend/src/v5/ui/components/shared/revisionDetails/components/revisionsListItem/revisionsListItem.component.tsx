@@ -22,6 +22,7 @@ import { RevisionsListItemAuthor } from '@components/shared/revisionDetails/comp
 import { RevisionsListItemCode } from '@components/shared/revisionDetails/components/revisionsListItemCode';
 import { RevisionsListItemButton } from '@components/shared/revisionDetails/components/revisionsListItemButton';
 import { IRevisions } from '@/v5/store/containers/containers.types';
+import { IUser } from '@/v5/store/teamspaces/teamspaces.redux';
 import { Container } from './revisionsListItem.styles';
 
 type IRevisionsListItem = {
@@ -34,7 +35,7 @@ export const RevisionsListItem = ({ revision, selected = false }: IRevisionsList
 		<RevisionsListItemText meta width={130} selected={selected}>
 			{i18n.date(revision.timestamp)}
 		</RevisionsListItemText>
-		<RevisionsListItemAuthor author={revision.author} selected={selected} width={228} />
+		<RevisionsListItemAuthor author={revision.author as IUser} selected={selected} width={228} />
 		<RevisionsListItemCode width={330} onClick={() => {}}>{revision.tag}</RevisionsListItemCode>
 		<RevisionsListItemText selected={selected}>{revision.desc}</RevisionsListItemText>
 		<RevisionsListItemButton status={revision.void} />

@@ -100,7 +100,7 @@ describe('Containers: sagas', () => {
 		it('should fetch revisions data and dispatch FETCH_REVISIONS_SUCCESS', async () => {
 			const revisionsWithUsersInfo = prepareRevisionsData(mockRevisions, mockUsers);
 			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions`)
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions?showVoid`)
 				.reply(200, {
 					revisions: mockRevisions
 				});
@@ -119,7 +119,7 @@ describe('Containers: sagas', () => {
 
 		it('should handle revisions api error', async () => {
 			mockServer
-					.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions`)
+					.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions?showVoid`)
 					.reply(404);
 
 			await expectSaga(ContainersSaga.default)
