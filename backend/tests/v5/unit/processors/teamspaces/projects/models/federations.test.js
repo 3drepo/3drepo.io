@@ -30,6 +30,10 @@ const Users = require(`${src}/models/users`);
 jest.mock('../../../../../../../src/v5/models/revisions');
 const Revisions = require(`${src}/models/revisions`);
 const Federations = require(`${src}/processors/teamspaces/projects/models/federations`);
+const Views = require(`${src}/models/views`);
+jest.mock('../../../../../../../src/v5/models/views');
+const Legends = require(`${src}/models/legends`);
+jest.mock('../../../../../../../src/v5/models/legends');
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const federationList = [
@@ -97,6 +101,19 @@ Risks.getRisksCount.mockImplementation((teamspace, federation) => {
 });
 
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
+Views.checkViewExists.mockImplementation((teamspace, model, view) => {
+	if (view === 1) {
+		return 1;
+	}
+	throw templates.viewNotFound;
+});
+
+Legends.checkLegendExists.mockImplementation((teamspace, model, legend) => {
+	if (legend === 1) {
+		return 1;
+	}
+	throw templates.legendNotFound;
+});
 
 Users.appendFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
 	for (const favourite of favouritesToAdd) {
