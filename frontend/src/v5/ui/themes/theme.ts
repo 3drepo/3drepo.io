@@ -254,6 +254,7 @@ export const theme = createMuiTheme({
 		MuiDialogContent: {
 			root: {
 				paddingTop: 7,
+				paddingBottom: 22,
 				flex: 0,
 			},
 		},
@@ -262,6 +263,7 @@ export const theme = createMuiTheme({
 				...typography.h4,
 				marginBottom: 0,
 				color: COLOR.BASE_MAIN,
+				textAlign: 'center',
 			},
 		},
 		MuiAppBar: {

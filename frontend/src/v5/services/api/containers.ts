@@ -15,8 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { FavouritePayload } from '@/v5/store/containers/containers.types';
+import { AxiosResponse } from 'axios';
 import api from './default';
 
 export const fetchContainerStats = (teamspace: string, projectId: string, containerId: string): Promise<any> => api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/stats`);
 
 export const fetchContainers = (teamspace: string, projectId: string): Promise<any> => api.get(`teamspaces/${teamspace}/projects/${projectId}/containers`);
+
+export const addFavourites = (
+	{ teamspace, projectId, containerId }: FavouritePayload,
+): Promise<AxiosResponse<void>> => (
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites`, {
+		containers: [containerId],
+	})
+);
+
+export const removeFavourites = (
+	{ teamspace, projectId, containerId }: FavouritePayload,
+): Promise<AxiosResponse<void>> => (
+	api.delete(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites`, {
+		containers: [containerId],
+	})
+);

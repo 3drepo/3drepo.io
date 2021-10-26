@@ -108,11 +108,22 @@ db.createRisk = (teamspace, modelId, risk) => {
 	return DbHandler.insertOne(teamspace, `${modelId}.risks`, formattedRisk);
 };
 
+db.createViews = (teamspace, modelId, views) => {
+	const formattedViews = views.map((view) => ({ ...view, _id: stringToUUID(view._id) }));
+	return DbHandler.insertMany(teamspace, `${modelId}.views`, formattedViews);
+};
+
+db.createLegends = (teamspace, modelId, legends) => {
+	const formattedLegends = legends.map((legend) => ({ ...legend, _id: stringToUUID(legend._id) }));
+	return DbHandler.insertMany(teamspace, `${modelId}.sequences.legends`, formattedLegends);
+};
+
 ServiceHelper.generateUUIDString = () => uuidToString(generateUUID());
 ServiceHelper.generateUUID = () => generateUUID();
 ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex');
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
     + Math.random() * (end.getTime() - start.getTime()));
+ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
 
 ServiceHelper.generateUserCredentials = () => ({
 	user: ServiceHelper.generateRandomString(),
@@ -142,9 +153,24 @@ ServiceHelper.generateRandomModelProperties = () => ({
 		code: ServiceHelper.generateUUIDString(),
 		unit: 'm',
 	},
+	desc: ServiceHelper.generateRandomString(),
 	type: ServiceHelper.generateUUIDString(),
 	timestamp: Date.now(),
 	status: 'ok',
+	surveyPoints: [
+		{
+			position: [
+				ServiceHelper.generateRandomNumber,
+				ServiceHelper.generateRandomNumber,
+				ServiceHelper.generateRandomNumber,
+			],
+			latLong: [
+				ServiceHelper.generateRandomNumber,
+				ServiceHelper.generateRandomNumber,
+			],
+		},
+	],
+	anglefromNorth: 123,
 });
 
 ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {

@@ -16,6 +16,7 @@
  */
 
 import React, { ReactNode, useMemo, useState } from 'react';
+import { useParams } from 'react-router';
 import { isEmpty } from 'lodash';
 import { Trans } from '@lingui/react';
 import { i18n } from '@lingui/core';
@@ -43,6 +44,7 @@ import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/container
 import { Highlight } from '@controls/highlight';
 import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision';
 import { RevisionDetails } from '@components/shared/revisionDetails';
+import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { useOrderedList } from './containersList.hooks';
 import { Container } from './containersList.styles';
 import { DEFAULT_SORT_CONFIG } from './containersList.constants';
@@ -63,12 +65,21 @@ export const ContainersList = ({
 	title,
 	titleTooltips,
 }: IContainersList): JSX.Element => {
+	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const { sortedList, setSortConfig } = useOrderedList(containers, DEFAULT_SORT_CONFIG);
 	const filterQuery = ContainersHooksSelectors.selectFilterQuery();
 
 	const toggleSelectedId = (id: IContainer['_id']) => {
 		setSelectedId((state) => (state === id ? null : id));
+	};
+
+	const setFavourite = (id: string, value: boolean) => {
+		if (value) {
+			ContainersActionsDispatchers.addFavourite(teamspace, project, id);
+		} else {
+			ContainersActionsDispatchers.removeFavourite(teamspace, project, id);
+		}
 	};
 
 	return useMemo(() => (
@@ -166,8 +177,7 @@ export const ContainersList = ({
 													event.stopPropagation();
 												}}
 												onChange={(event) => {
-													// eslint-disable-next-line no-console
-													console.log('handle favourite click', event.target.value);
+													setFavourite(container._id, !!event.currentTarget.checked);
 												}}
 											/>
 										</Tooltip>

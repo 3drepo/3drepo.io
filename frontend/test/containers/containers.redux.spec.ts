@@ -33,6 +33,35 @@ describe('Containers: redux', () => {
 		}
 	};
 
+	it('should add container to favourites', () => {
+		const resultState = containersReducer(
+				defaultState,
+				ContainersActions.setFavouriteSuccess(projectId, mockContainers[0]._id, true)
+		);
+		const resultContainers = resultState.containers[projectId];
+
+		expect(resultContainers[0].isFavourite).toEqual(true);
+		expect(resultContainers.slice(1).every(container => container.isFavourite)).toEqual(false);
+	});
+
+	it('should remove container from favourites', () => {
+		const mockAllFavouritesContainers = times(5, () => containerMockFactory({ isFavourite: true }))
+		const defaultStateWithAllFavourites = {
+			...INITIAL_STATE,
+			containers: {
+				[projectId]: mockAllFavouritesContainers
+			}
+		}
+		const resultState = containersReducer(
+				defaultStateWithAllFavourites,
+				ContainersActions.setFavouriteSuccess(projectId, mockAllFavouritesContainers[0]._id, false)
+		);
+		const resultContainers = resultState.containers[projectId];
+
+		expect(resultContainers[0].isFavourite).toEqual(false);
+		expect(resultContainers.slice(1).every(container => container.isFavourite)).toEqual(true);
+	});
+
 	describe('on setCurrentProject action', () => {
 		it('should set project name as current', () => {
 			const teamspaceName = 'teamspaceName';

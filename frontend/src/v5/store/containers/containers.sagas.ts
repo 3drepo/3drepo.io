@@ -23,7 +23,7 @@ import {
 } from '@/v5/store/containers/containers.redux';
 import { selectCurrentTeamspaceUsers } from '@/v5/store/teamspaces/teamspaces.selectors';
 import { prepareRevisionsData } from '@/v5/store/containers/containers.helpers';
-import { ContainerStatuses } from './containers.types';
+import { AddFavouriteAction, RemoveFavouriteAction, ContainerStatuses } from './containers.types';
 
 export function* fetchContainers({ teamspace, projectId }) {
 	yield put(ContainersActions.setIsPending(true));
@@ -57,6 +57,24 @@ export function* fetchContainers({ teamspace, projectId }) {
 	}
 }
 
+export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
+	try {
+		yield API.addFavourites({ teamspace, containerId, projectId });
+		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, true));
+	} catch (e) {
+		console.error(e);
+	}
+}
+
+export function* removeFavourites({ containerId, teamspace, projectId }: RemoveFavouriteAction) {
+	try {
+		yield API.removeFavourites({ containerId, teamspace, projectId });
+		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, false));
+	} catch (e) {
+		console.error(e);
+	}
+}
+
 export function* fetchRevisions({ teamspace, projectId, containerId }) {
 	yield put(ContainersActions.setRevisionsIsPending(projectId, containerId, true));
 	try {
@@ -74,5 +92,7 @@ export function* fetchRevisions({ teamspace, projectId, containerId }) {
 
 export default function* ContainersSaga() {
 	yield takeLatest(ContainersTypes.FETCH_CONTAINERS as any, fetchContainers);
+	yield takeLatest(ContainersTypes.ADD_FAVOURITE, addFavourites);
+	yield takeLatest(ContainersTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeLatest(ContainersTypes.FETCH_REVISIONS as any, fetchRevisions);
 }

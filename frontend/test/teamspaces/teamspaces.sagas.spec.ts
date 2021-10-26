@@ -22,14 +22,13 @@ import * as TeamspacesSaga from '@/v5/store/teamspaces/teamspaces.sagas';
 import { mockServer } from '../../internals/testing/mockServer';
 
 describe('Teamspaces: sagas', () => {
-	const teamspace = 'teamspace';
 	const teamspaces = [];
 
 	describe('fetch', () => {
 		it('should fetch teamspaces data and dispatch FETCH_SUCCESS', async () => {
 			mockServer
-					.get(`/teamspaces`)
-					.reply(200, { teamspaces });
+				.get(`/teamspaces`)
+				.reply(200, { teamspaces });
 
 			await expectSaga(TeamspacesSaga.default)
 					.dispatch(TeamspacesActions.fetch())
@@ -39,16 +38,13 @@ describe('Teamspaces: sagas', () => {
 
 		it('should handle teamspaces api error and dispatch FETCH_FAILURE', async () => {
 			mockServer
-					.get(`/teamspaces`)
-					.reply(404);
+				.get(`/teamspaces`)
+				.reply(404);
 
 			await expectSaga(TeamspacesSaga.default)
-					.dispatch(TeamspacesActions.fetch())
-					.put(TeamspacesActions.fetchFailure())
-					.silentRun()
-					.then(({ effects }: any) => {
-						expect(effects.put).toBeUndefined();
-					});
+				.dispatch(TeamspacesActions.fetch())
+				.put(TeamspacesActions.fetchFailure())
+				.silentRun();
 		});
 	});
 });

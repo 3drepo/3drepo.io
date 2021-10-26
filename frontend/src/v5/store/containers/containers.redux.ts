@@ -18,21 +18,18 @@
 import { createActions, createReducer } from 'reduxsauce';
 import { cloneDeep } from 'lodash';
 import { Constants } from '@/v5/store/common/actions.helper';
-import { IContainersState, IContainer, IRevisions } from './containers.types';
-
-export interface IContainersActions {
-	setFilterQuery: (teamspace: string) => any;
-	fetchContainers: (teamspace: string, projectId: string) => any;
-	fetchContainersSuccess: (projectId: string, containers: IContainer[]) => any;
-	fetchRevisions: (teamspace: string, projectId: string, containerId: string) => any;
-	setRevisionsIsPending: (projectId: string, containerId: string, isPending: boolean) => any;
-	fetchRevisionsSuccess: (projectId: string, containerId: string, revisions: IRevisions[]) => any;
-	setCurrentProject: (projectId: string) => any;
-	setIsPending: (isPending: boolean) => any;
-}
+import {
+	IContainersActionCreators,
+	IContainersState,
+	SetFilterQueryAction,
+	SetFavouriteSuccessAction,
+} from './containers.types';
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({
 	setFilterQuery: ['query'],
+	addFavourite: ['teamspace', 'projectId', 'containerId'],
+	removeFavourite: ['teamspace', 'projectId', 'containerId'],
+	setFavouriteSuccess: ['projectId', 'containerId', 'isFavourite'],
 	fetchContainers: ['teamspace', 'projectId'],
 	fetchContainersSuccess: ['projectId', 'containers'],
 	fetchRevisions: ['teamspace', 'projectId', 'containerId'],
@@ -40,18 +37,33 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	fetchRevisionsSuccess: ['projectId', 'containerId', 'revisions'],
 	setCurrentProject: ['projectId'],
 	setIsPending: ['isPending'],
-}, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActions>; Creators: IContainersActions };
+}, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
 
 export const INITIAL_STATE: IContainersState = {
 	containers: {},
-	currentProject: '',
 	filterQuery: '',
+	currentProject: '',
 	isPending: true,
 };
 
-export const setFilterQuery = (state = INITIAL_STATE, { query }) => (
+export const setFilterQuery = (state = INITIAL_STATE, { query }: SetFilterQueryAction) => (
 	{ ...state, filterQuery: query }
 );
+
+export const setFavourite = (state = INITIAL_STATE, {
+	projectId,
+	containerId,
+	isFavourite,
+}: SetFavouriteSuccessAction) => ({
+	...state,
+	containers: {
+		...state.containers,
+		[projectId]: state.containers[projectId].map((container) => ({
+			...container,
+			isFavourite: container._id === containerId ? isFavourite : container.isFavourite,
+		})),
+	},
+});
 
 export const fetchContainersSuccess = (state = INITIAL_STATE, {
 	projectId,
@@ -106,6 +118,7 @@ export const setRevisionsIsPending = (state = INITIAL_STATE, { projectId, contai
 
 export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
 	[ContainersTypes.SET_FILTER_QUERY]: setFilterQuery,
+	[ContainersTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
 	[ContainersTypes.FETCH_CONTAINERS_SUCCESS]: fetchContainersSuccess,
 	[ContainersTypes.FETCH_REVISIONS_SUCCESS]: fetchRevisionsSuccess,
 	[ContainersTypes.SET_CURRENT_PROJECT]: setCurrentProject,
