@@ -79,7 +79,11 @@ export const RevisionDetails = ({ containerId, revisions, isLoading = false }: I
 							isBeforeSelected={i === selected - 1}
 							selected={i === selected}
 						>
-							<RevisionsListItem revision={revision} selected={i === selected} />
+							<RevisionsListItem
+								revision={revision}
+								containerId={containerId}
+								selected={i === selected}
+							/>
 						</RevisionsListItemWrapper>
 					))
 				)}

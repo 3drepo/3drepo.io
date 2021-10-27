@@ -41,7 +41,7 @@
   "ellipsisMenu.tooltip": "More options",
   "alertModal.header": "Something went wrong when {currentActions}",
   "alertModal.action.ok": "Ok, close window",
-  "alertModal.action.contactSupport": "Contact support"
+  "alertModal.action.contactSupport": "Contact support",
   "revisionDetails.addedOn": "Added on",
   "revisionDetails.addedBy": "Added by",
   "revisionDetails.revisionCode": "Revision code",

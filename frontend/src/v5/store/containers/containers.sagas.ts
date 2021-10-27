@@ -23,7 +23,13 @@ import {
 } from '@/v5/store/containers/containers.redux';
 import { selectCurrentTeamspaceUsers } from '@/v5/store/teamspaces/teamspaces.selectors';
 import { prepareRevisionsData } from '@/v5/store/containers/containers.helpers';
-import { AddFavouriteAction, RemoveFavouriteAction, ContainerStatuses } from './containers.types';
+import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
+import {
+	AddFavouriteAction,
+	RemoveFavouriteAction,
+	ContainerStatuses,
+	SetRevisionVoidStatusAction,
+} from './containers.types';
 
 export function* fetchContainers({ teamspace, projectId }) {
 	yield put(ContainersActions.setIsPending(true));
@@ -46,6 +52,7 @@ export function* fetchContainers({ teamspace, projectId }) {
 				type: containerStats.type ?? '',
 				code: containerStats.code ?? '',
 				status: containerStats.status ?? ContainerStatuses.OK,
+				revisions: [],
 			};
 		});
 
@@ -75,6 +82,20 @@ export function* removeFavourites({ containerId, teamspace, projectId }: RemoveF
 	}
 }
 
+export function* setRevisionVoidStatus({
+	teamspace, projectId, containerId, revisionId, isVoid,
+}: SetRevisionVoidStatusAction) {
+	try {
+		yield API.setRevisionVoidStatus(teamspace, projectId, containerId, revisionId, isVoid);
+		yield put(ContainersActions.setRevisionVoidStatusSuccess(projectId, containerId, revisionId, isVoid));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to set revision void status',
+			error,
+		}));
+	}
+}
+
 export function* fetchRevisions({ teamspace, projectId, containerId }) {
 	yield put(ContainersActions.setRevisionsIsPending(projectId, containerId, true));
 	try {
@@ -95,4 +116,5 @@ export default function* ContainersSaga() {
 	yield takeLatest(ContainersTypes.ADD_FAVOURITE, addFavourites);
 	yield takeLatest(ContainersTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeLatest(ContainersTypes.FETCH_REVISIONS as any, fetchRevisions);
+	yield takeLatest(ContainersTypes.SET_REVISION_VOID_STATUS, setRevisionVoidStatus);
 }

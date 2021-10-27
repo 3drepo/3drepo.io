@@ -33,6 +33,8 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	fetchContainers: ['teamspace', 'projectId'],
 	fetchContainersSuccess: ['projectId', 'containers'],
 	fetchRevisions: ['teamspace', 'projectId', 'containerId'],
+	setRevisionVoidStatus: ['teamspace', 'projectId', 'containerId', 'revisionId', 'isVoid'],
+	setRevisionVoidStatusSuccess: ['projectId', 'containerId', 'revisionId', 'isVoid'],
 	setRevisionsIsPending: ['projectId', 'containerId', 'isPending'],
 	fetchRevisionsSuccess: ['projectId', 'containerId', 'revisions'],
 	setCurrentProject: ['projectId'],
@@ -73,6 +75,25 @@ export const fetchContainersSuccess = (state = INITIAL_STATE, {
 	containers: {
 		...state.containers,
 		[projectId]: containers,
+	},
+});
+
+export const setRevisionVoidStatusSuccess = (state = INITIAL_STATE, {
+	projectId,
+	containerId,
+	revisionId,
+	isVoid,
+}) => ({
+	...state,
+	containers: {
+		...state.containers,
+		[projectId]: state.containers[projectId].map((container) => ({
+			...container,
+			revisions: container.revisions.map((revision) => ({
+				...revision,
+				void: (container._id === containerId && revision.tag === revisionId) ? isVoid : revision.void,
+			})),
+		})),
 	},
 });
 
@@ -124,4 +145,5 @@ export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
 	[ContainersTypes.SET_CURRENT_PROJECT]: setCurrentProject,
 	[ContainersTypes.SET_IS_PENDING]: setIsPending,
 	[ContainersTypes.SET_REVISIONS_IS_PENDING]: setRevisionsIsPending,
+	[ContainersTypes.SET_REVISION_VOID_STATUS_SUCCESS]: setRevisionVoidStatusSuccess,
 });

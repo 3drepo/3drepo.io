@@ -15,15 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { Dispatch } from 'react';
 import { Tooltip } from '@material-ui/core';
 import { Button, Container } from './revisionsListItemButton.styles';
 
 type IRevisionsListItemButton= {
 	status?: boolean;
+	onClick?: Dispatch<void>;
 };
 
-export const RevisionsListItemButton = ({ status }: IRevisionsListItemButton): JSX.Element => {
+export const RevisionsListItemButton = ({ status, onClick }: IRevisionsListItemButton): JSX.Element => {
 	const isVoid = !!status;
 	const textStatus = isVoid ? 'void' : 'active';
 	const changeToStatus = isVoid ? 'active' : 'void';
@@ -31,7 +32,7 @@ export const RevisionsListItemButton = ({ status }: IRevisionsListItemButton): J
 	return (
 		<Container>
 			<Tooltip title={`Change to ${changeToStatus}`}>
-				<Button isVoid={isVoid} onClick={() => {}}>
+				<Button $isVoid={isVoid} onClick={onClick}>
 					{textStatus}
 				</Button>
 			</Tooltip>

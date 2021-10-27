@@ -17,27 +17,39 @@
 
 import React from 'react';
 import { i18n } from '@lingui/core';
+import { useParams } from 'react-router';
+
 import { RevisionsListItemText } from '@components/shared/revisionDetails/components/revisionsListItemText';
 import { RevisionsListItemAuthor } from '@components/shared/revisionDetails/components/revisionsListItemAuthor';
 import { RevisionsListItemCode } from '@components/shared/revisionDetails/components/revisionsListItemCode';
 import { RevisionsListItemButton } from '@components/shared/revisionDetails/components/revisionsListItemButton';
 import { IRevisions } from '@/v5/store/containers/containers.types';
 import { IUser } from '@/v5/store/teamspaces/teamspaces.redux';
+import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { Container } from './revisionsListItem.styles';
 
 type IRevisionsListItem = {
 	revision: IRevisions;
 	selected?: boolean;
+	containerId: string;
 };
 
-export const RevisionsListItem = ({ revision, selected = false }: IRevisionsListItem): JSX.Element => (
-	<Container>
-		<RevisionsListItemText meta width={130} selected={selected}>
-			{i18n.date(revision.timestamp)}
-		</RevisionsListItemText>
-		<RevisionsListItemAuthor author={revision.author as IUser} selected={selected} width={228} />
-		<RevisionsListItemCode width={330} onClick={() => {}}>{revision.tag}</RevisionsListItemCode>
-		<RevisionsListItemText selected={selected}>{revision.desc}</RevisionsListItemText>
-		<RevisionsListItemButton status={revision.void} />
-	</Container>
-);
+export const RevisionsListItem = ({ revision, containerId, selected = false }: IRevisionsListItem): JSX.Element => {
+	const { teamspace, project } = useParams();
+	const { timestamp, desc, author, tag, void: voidStatus } = revision;
+
+	const toggleVoidStatus = () => ContainersActionsDispatchers
+		.setRevisionVoidStatus(teamspace, project, containerId, tag, !voidStatus);
+
+	return (
+		<Container>
+			<RevisionsListItemText meta width={130} selected={selected}>
+				{i18n.date(timestamp)}
+			</RevisionsListItemText>
+			<RevisionsListItemAuthor author={author as IUser} selected={selected} width={228} />
+			<RevisionsListItemCode width={330} onClick={() => {}}>{tag}</RevisionsListItemCode>
+			<RevisionsListItemText selected={selected}>{desc}</RevisionsListItemText>
+			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} />
+		</Container>
+	);
+};
