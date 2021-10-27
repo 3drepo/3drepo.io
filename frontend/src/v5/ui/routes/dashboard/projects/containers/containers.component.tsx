@@ -22,6 +22,8 @@ import { MainHeader } from '@controls/mainHeader';
 import { SearchInput } from '@controls/searchInput';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
+import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
+import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/skeletonListItem';
 import {
 	Container,
 	Content,
@@ -38,7 +40,7 @@ export const Containers = (): JSX.Element => {
 		filteredContainers,
 		favouriteContainers,
 		hasContainers,
-		isPending,
+		isListPending,
 	} = useContainersData();
 
 	const { searchInput, setSearchInput, filterQuery } = useContainersSearch();
@@ -55,7 +57,7 @@ export const Containers = (): JSX.Element => {
 							onChange={(event) => setSearchInput(event.currentTarget.value)}
 							value={searchInput}
 							placeholder={translation as string}
-							disabled={isPending}
+							disabled={isListPending}
 						/>
 					)}
 				/>
@@ -63,7 +65,7 @@ export const Containers = (): JSX.Element => {
 					startIcon={<AddCircleIcon />}
 					variant="outlined"
 					color="secondary"
-					disabled={isPending}
+					disabled={isListPending}
 				>
 					<Trans id="containers.mainHeader.newContainer" message="New Container" />
 				</NewContainerMainHeaderButton>
@@ -71,64 +73,70 @@ export const Containers = (): JSX.Element => {
 					startIcon={<ArrowUpCircleIcon />}
 					variant="contained"
 					color="primary"
-					disabled={isPending}
+					disabled={isListPending}
 				>
 					<Trans id="containers.mainHeader.uploadFile" message="Upload file" />
 				</UploadFileButton>
 			</MainHeader>
 			<Content>
-				<ContainersList
-					containers={favouriteContainers}
-					title={(
-						<Trans
-							id="containers.favourites.collapseTitle"
-							message="Favourites"
-						/>
-					)}
-					titleTooltips={{
-						collapsed: <Trans id="containers.favourites.collapse.tooltip.show" message="Show favourites" />,
-						visible: <Trans id="containers.favourites.collapse.tooltip.hide" message="Hide favourites" />,
-					}}
-					emptyMessage={
-						filterQuery && hasContainers.favourites ? (
-							<EmptySearchResults searchPhrase={filterQuery} />
-						) : (
-							<DashboardListEmptyText>
+				{isListPending ? (
+					<DashboardSkeletonList itemComponent={<SkeletonListItem />} />
+				) : (
+					<>
+						<ContainersList
+							containers={favouriteContainers}
+							title={(
 								<Trans
-									id="containers.favourites.emptyMessage"
-									message="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
+									id="containers.favourites.collapseTitle"
+									message="Favourites"
 								/>
-							</DashboardListEmptyText>
-						)
-					}
-				/>
-				<ContainersList
-					containers={filteredContainers}
-					title={(
-						<Trans
-							id="containers.all.collapseTitle"
-							message="All containers"
+							)}
+							titleTooltips={{
+								collapsed: <Trans id="containers.favourites.collapse.tooltip.show" message="Show favourites" />,
+								visible: <Trans id="containers.favourites.collapse.tooltip.hide" message="Hide favourites" />,
+							}}
+							emptyMessage={
+								filterQuery && hasContainers.favourites ? (
+									<EmptySearchResults searchPhrase={filterQuery} />
+								) : (
+									<DashboardListEmptyText>
+										<Trans
+											id="containers.favourites.emptyMessage"
+											message="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
+										/>
+									</DashboardListEmptyText>
+								)
+							}
 						/>
-					)}
-					titleTooltips={{
-						collapsed: <Trans id="containers.all.collapse.tooltip.show" message="Show all" />,
-						visible: <Trans id="containers.all.collapse.tooltip.hide" message="Hide all" />,
-					}}
-					emptyMessage={
-						filterQuery && hasContainers.all ? (
-							<EmptySearchResults searchPhrase={filterQuery} />
-						) : (
-							<>
-								<DashboardListEmptyText>
-									<Trans id="containers.all.emptyMessage" message="You haven’t created any Containers." />
-								</DashboardListEmptyText>
-								<NewContainerButton startIcon={<AddCircleIcon />}>
-									<Trans id="containers.all.newContainer" message="New Container" />
-								</NewContainerButton>
-							</>
-						)
-					}
-				/>
+						<ContainersList
+							containers={filteredContainers}
+							title={(
+								<Trans
+									id="containers.all.collapseTitle"
+									message="All containers"
+								/>
+							)}
+							titleTooltips={{
+								collapsed: <Trans id="containers.all.collapse.tooltip.show" message="Show all" />,
+								visible: <Trans id="containers.all.collapse.tooltip.hide" message="Hide all" />,
+							}}
+							emptyMessage={
+								filterQuery && hasContainers.all ? (
+									<EmptySearchResults searchPhrase={filterQuery} />
+								) : (
+									<>
+										<DashboardListEmptyText>
+											<Trans id="containers.all.emptyMessage" message="You haven’t created any Containers." />
+										</DashboardListEmptyText>
+										<NewContainerButton startIcon={<AddCircleIcon />}>
+											<Trans id="containers.all.newContainer" message="New Container" />
+										</NewContainerButton>
+									</>
+								)
+							}
+						/>
+					</>
+				)}
 			</Content>
 		</Container>
 	);

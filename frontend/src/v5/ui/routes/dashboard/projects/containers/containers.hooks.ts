@@ -29,7 +29,6 @@ export const useContainersData = () => {
 	const favouriteContainers = ContainersHooksSelectors.selectFilteredFavouriteContainers();
 	const hasContainers = ContainersHooksSelectors.selectHasContainers();
 	const isListPending = ContainersHooksSelectors.selectIsListPending();
-	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
 	const currentProject = ProjectsHooksSelectors.selectCurrentProject();
 
 	useEffect(() => {
@@ -38,7 +37,7 @@ export const useContainersData = () => {
 		ContainersActionsDispatchers.fetchContainers(teamspace, project);
 	}, [currentProject]);
 
-	return { filteredContainers, favouriteContainers, hasContainers, isPending: areStatsPending && isListPending };
+	return { filteredContainers, favouriteContainers, hasContainers,  isListPending };
 };
 
 export const useContainersSearch = () => {

@@ -44,7 +44,7 @@ export interface IContainer {
 	status: ContainerStatuses;
 	isFavourite: boolean;
 	role: string;
-	areStatsPending: boolean;
+	hasStatsPending: boolean;
 }
 
 export type FavouritePayload = FetchContainersPayload & {
@@ -56,7 +56,7 @@ export type FetchContainersPayload = {
 	projectId: string;
 };
 
-export type FetchContainersContainerItemResponse = Pick<IContainer, '_id' | 'name' | 'role' | 'isFavourite'>
+export type FetchContainersContainerItemResponse = Pick<IContainer, '_id' | 'name' | 'role' | 'isFavourite'>;
 
 export type FetchContainersResponse = {
 	containers: Array<FetchContainersContainerItemResponse>
