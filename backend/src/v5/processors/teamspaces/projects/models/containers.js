@@ -77,7 +77,8 @@ Containers.updateSettings = updateModelSettings;
 Containers.getContainerSettings = async (teamspace, container) => {
 	const settings = await getContainerById(teamspace, container, {});
 	const formattedSettings = { ...settings, unit: settings.properties.unit, code: settings.properties.code, 
-		properties: undefined, corID: undefined, account: undefined, permissions:undefined };
+		properties: undefined, corID: undefined, account: undefined, permissions:undefined, 
+		timestamp: settings.timestamp.getTime() };
     return formattedSettings;
 };
 
