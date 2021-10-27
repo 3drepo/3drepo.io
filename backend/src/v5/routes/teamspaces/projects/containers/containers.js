@@ -75,10 +75,9 @@ const updateSettings = (req, res) => {
 };
 
 const getContainerSettings = (req, res) => {
-	const user = getUserFromSession(req.session);
 	const { teamspace, container } = req.params;
 
-	Containers.getContainerSettings(user, teamspace, container)
+	Containers.getContainerSettings(teamspace, container)
 		.then((settings) => respond(req, res, templates.ok, settings)).catch((err) => respond(req, res, err));
 };
 
@@ -407,14 +406,14 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-		   *       - project:
+	 *       - project:
 	 *         name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
-		   *       - container:
+	 *       - container:
 	 *         name: container
 	 *         description: Container ID
 	 *         in: path
@@ -427,30 +426,58 @@ const establishRoutes = () => {
 	 *       404:
 	 *         $ref: "#/components/responses/teamspaceNotFound"
 	 *       200:
-	 *         description: returns the statistics of a container
+	 *         description: returns the model settings of a container
 	 *         content:
 	 *           application/json:
 	 *             schema:
 	 *               type: object
-	 *             properties:
-	 *               _id:
-	 *                 type: String
-	 *                 example: 3549ddf6-885d-4977-87f1-eeac43a0e818
-	 *               timestamp:
-	 *                 type: String
-	 *                 example: 2019-05-13T16:54:44.000Z
-	 *               type:
-	 *                 type: String
-	 *                 example: Structural
-	 *               desc:
-	 *                 type: String
-	 *                 example: Container description
-	 *               name:
-	 *                 type: String
-	 *                 example: Lego tree
-	 *               subModels:
-	 *                 type: array
-	 *                 items:
+	 *               properties:
+	 *                 id:
+	 *                   type: String
+	 *                   example: 3549ddf6-885d-4977-87f1-eeac43a0e818
+	 *                 timestamp:
+	 *                   type: String
+	 *                   example: 2019-05-13T16:54:44.000Z
+	 *                 status:
+	 *                   type: String
+	 *                   example: ok
+	 *                 name:
+	 *                   type: String
+	 *                   example: Lego tree
+	 *                 desc:
+	 *                   type: String
+	 *                   example: Container description
+	 *                 type:
+	 *                   type: String
+	 *                   example: Structural
+	 *                 surveyPoints:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       position:
+	 *                         type: array
+	 *                         items:
+	 *                           type: float
+	 *                           example: 23.45
+	 *                       latLong:
+	 *                         type: array
+	 *                         items:
+	 *                           type: float
+	 *                           example: 23.45
+	 *                 angleFromNorth:
+	 *                   type: integer
+	 *                   example: 150
+	 *                 unit:
+	 *                    type: String
+	 *                    example: mm
+	 *                  code:
+	 *                    type: String
+	 *                    example: CODE1
+	 *                 defaultView:
+	 *                   type: String
+	 *                   example: 3549ddf6-885d-4977-87f1-eeac43a0e818
+	 *                 defaultLegend:
 	 *                   type: String
 	 *                   example: 3549ddf6-885d-4977-87f1-eeac43a0e818
 	 */

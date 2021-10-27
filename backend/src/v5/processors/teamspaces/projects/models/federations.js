@@ -85,4 +85,12 @@ Federations.getFederationStats = async (teamspace, federation) => {
 
 Federations.updateSettings = updateModelSettings;
 
+Federations.getFederationSettings = async (teamspace, federation) => {
+	const settings = await getFederationById(teamspace, federation, {});
+	const formattedSettings = { ...settings, unit: settings.properties.unit, code: settings.properties.code, 
+		properties: undefined, subModels: undefined, corID: undefined, account: undefined, 
+		permissions:undefined ,federate: undefined};
+    return formattedSettings;
+};
+
 module.exports = Federations;

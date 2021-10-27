@@ -72,6 +72,13 @@ const updateSettings = (req, res) => {
 		);
 };
 
+const getFederationSettings = (req, res) => {
+	const { teamspace, federation } = req.params;
+
+	Federations.getFederationSettings(teamspace, federation)
+		.then((settings) => respond(req, res, templates.ok, settings)).catch((err) => respond(req, res, err));
+};
+
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 
@@ -378,6 +385,98 @@ const establishRoutes = () => {
 	 *         description: updates the settings of the federation
 	 */
 	router.patch('/:federation', hasAdminAccessToFederation, validateUpdateSettingsData, updateSettings);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}:
+	 *   get:
+	 *     description: Get the model settings of federation
+	 *     tags: [Federations]
+	 *     operationId: getModelSettings
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	*       - project:
+	 *         name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - federation:
+	 *         name: federation
+	 *         description: Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: returns the model settings of a federation
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 id:
+	 *                   type: String
+	 *                   example: 3549ddf6-885d-4977-87f1-eeac43a0e818
+	 *                 timestamp:
+	 *                   type: String
+	 *                   example: 2019-05-13T16:54:44.000Z
+	 *                 status:
+	 *                   type: String
+	 *                   example: ok
+	 *                 name:
+	 *                   type: String
+	 *                   example: Lego tree
+	 *                 desc:
+	 *                   type: String
+	 *                   example: Federation description
+	 *                 type:
+	 *                   type: String
+	 *                   example: Structural
+	 *                 surveyPoints:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       position:
+	 *                         type: array
+	 *                         items:
+	 *                           type: float
+	 *                           example: 23.45
+	 *                       latLong:
+	 *                         type: array
+	 *                         items:
+	 *                           type: float
+	 *                           example: 23.45
+	 *                 angleFromNorth:
+	 *                   type: integer
+	 *                   example: 150
+	 *                 unit:
+	 *                   type: String
+	 *                   example: mm
+	 *                 code:
+	 *                   type: String
+	 *                   example: CODE1
+	 *                 defaultView:
+	 *                   type: String
+	 *                   example: 3549ddf6-885d-4977-87f1-eeac43a0e818
+	 *                 defaultLegend:
+	 *                   type: String
+	 *                   example: 3549ddf6-885d-4977-87f1-eeac43a0e818
+	 */
+	router.get('/:federation', hasReadAccessToFederation, getFederationSettings);
 	return router;
 };
 
