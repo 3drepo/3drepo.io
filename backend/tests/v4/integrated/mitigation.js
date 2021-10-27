@@ -389,12 +389,13 @@ describe("Mitigations", function () {
 				risk_factor: ['Physical-Opening'],
 				scope: ['In situ concrete'],
 				associated_activity: ['Install construction']
-		}
+			}
 			console.log(criteria)
 			agent.post(`/${username}/mitigations`)
 				.send(criteria)
 				.expect(200, function(err, res) {
 					console.log("2021102615")
+					console.log(res.body)
 					console.log(res.body.length)
 					expect(res.body.length).to.equal(0);
 					done(err);
