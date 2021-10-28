@@ -18,7 +18,10 @@
 "use strict";
 
 const request = require("supertest");
-const expect = require("chai").expect;
+const chai = require("chai");
+const deepEqualInAnyOrder = require("deep-equal-in-any-order");
+chai.use(deepEqualInAnyOrder);
+const { expect } = chai;
 const app = require("../../../src/v4/services/api.js").createApp();
 const async = require("async");
 const responseCodes = require("../../../src/v4/response_codes");
