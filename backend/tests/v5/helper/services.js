@@ -139,27 +139,29 @@ ServiceHelper.generateRevisionEntry = (isVoid = false) => ({
 
 ServiceHelper.generateRandomModelProperties = () => ({
 	properties: {
-		code: ServiceHelper.generateUUIDString(),
+		code: ServiceHelper.generateRandomString(),
 		unit: 'm',
 	},
 	desc: ServiceHelper.generateRandomString(),
-	type: ServiceHelper.generateUUIDString(),
-	timestamp: Date.now(),
+	type: ServiceHelper.generateRandomString(),
+	timestamp: new Date(),
 	status: 'ok',
 	surveyPoints: [
 		{
 			position: [
-				ServiceHelper.generateRandomNumber,
-				ServiceHelper.generateRandomNumber,
-				ServiceHelper.generateRandomNumber,
+				ServiceHelper.generateRandomNumber(),
+				ServiceHelper.generateRandomNumber(),
+				ServiceHelper.generateRandomNumber(),
 			],
 			latLong: [
-				ServiceHelper.generateRandomNumber,
-				ServiceHelper.generateRandomNumber,
+				ServiceHelper.generateRandomNumber(),
+				ServiceHelper.generateRandomNumber(),
 			],
 		},
 	],
-	anglefromNorth: 123,
+	angleFromNorth: 123,
+	defaultView: ServiceHelper.generateUUIDString(),
+	defaultLegend: ServiceHelper.generateUUIDString(),
 });
 
 ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {

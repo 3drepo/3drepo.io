@@ -76,7 +76,11 @@ const getFederationSettings = (req, res) => {
 	const { teamspace, federation } = req.params;
 
 	Federations.getFederationSettings(teamspace, federation)
-		.then((settings) => respond(req, res, templates.ok, settings)).catch((err) => respond(req, res, err));
+		.then((settings) => respond(req, res, templates.ok, { ...settings, timestamp: settings.timestamp.getTime() }))
+		.catch(
+			// istanbul ignore next
+			(err) => respond(req, res, err),
+		);
 };
 
 const establishRoutes = () => {

@@ -46,17 +46,24 @@ const containerSettings = {
 		name: 'container 1',
 		type: 'type 1',
 		properties: {
-			units: 'm',
+			unit: 'm',
 			code: 'CTN1',
 		},
 		status: 'ok',
+		corID: 1,
+		defaultView: 2,
+		defaultLegend: 3,
+		permissions: [1, 2, 3],
+		account: 4,
+		timestamp: new Date(),
+		surveyPoints: [123],
 	},
 	container2: {
 		_id: 2,
 		name: 'container 2',
 		type: 'type 2',
 		properties: {
-			units: 'mm',
+			unit: 'mm',
 			code: 'CTN2',
 		},
 		status: 'processing',
@@ -254,10 +261,35 @@ const testGetRevisions = () => {
 	});
 };
 
+const formatToSettings = (settings) => ({
+	id: settings._id,
+	name: settings.name,
+	type: settings.type,
+	code: settings.properties.code,
+	unit: settings.properties.unit,
+	status: settings.status,
+	desc: settings.desc,
+	timestamp: settings.timestamp,
+	angleFromNorth: settings.angleFromNorth,
+	defaultView: settings.defaultView,
+	defaultLegend: settings.defaultLegend,
+	surveyPoints: settings.surveyPoints,
+});
+
+const testGetContainerSettings = () => {
+	describe('Get container settings', () => {
+		test('should return the container settings', async () => {
+			const res = await Containers.getContainerSettings('teamspace', 'container1');
+			expect(res).toEqual(formatToSettings(containerSettings.container1));
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/containers', () => {
 	testGetContainerList();
 	testGetContainerStats();
 	testAppendFavourites();
 	testDeleteFavourites();
 	testGetRevisions();
+	testGetContainerSettings();
 });

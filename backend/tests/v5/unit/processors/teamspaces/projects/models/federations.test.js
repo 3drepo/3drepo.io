@@ -56,6 +56,13 @@ const federationSettings = {
 		status: 'ok',
 		subModels: [{ model: 'container1' }, { model: 'container2' }],
 		category: 'category 1',
+		corID: 1,
+		defaultView: 2,
+		defaultLegend: 3,
+		permissions: [1, 2, 3],
+		account: 4,
+		timestamp: new Date(),
+		surveyPoints: [123],
 	},
 	federation2: {
 		_id: 2,
@@ -252,9 +259,34 @@ const testGetFederationStats = () => {
 	});
 };
 
+const formatToSettings = (settings) => ({
+	id: settings._id,
+	name: settings.name,
+	type: settings.type,
+	code: settings.properties.code,
+	unit: settings.properties.unit,
+	status: settings.status,
+	desc: settings.desc,
+	timestamp: settings.timestamp,
+	angleFromNorth: settings.angleFromNorth,
+	defaultView: settings.defaultView,
+	defaultLegend: settings.defaultLegend,
+	surveyPoints: settings.surveyPoints,
+});
+
+const testGetFederationSettings = () => {
+	describe('Get federation settings', () => {
+		test('should return the federation settings', async () => {
+			const res = await Federations.getFederationSettings('teamspace', 'federation1');
+			expect(res).toEqual(formatToSettings(federationSettings.federation1));
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/federations', () => {
 	testGetFederationList();
 	testAppendFavourites();
 	testDeleteFavourites();
 	testGetFederationStats();
+	testGetFederationSettings();
 });

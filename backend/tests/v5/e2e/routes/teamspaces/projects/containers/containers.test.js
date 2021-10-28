@@ -456,6 +456,61 @@ const testUpdateContainerSettings = () => {
 	});
 };
 
+const formatToSettings = (settings) => ({
+	id: settings._id,
+	name: settings.name,
+	desc: settings.properties.desc,
+	type: settings.properties.type,
+	code: settings.properties.properties.code,
+	unit: settings.properties.properties.unit,
+	defaultView: settings.properties.defaultView,
+	defaultLegend: settings.properties.defaultLegend,
+	timestamp: settings.properties.timestamp.getTime(),
+	angleFromNorth: settings.properties.angleFromNorth,
+	status: settings.properties.status,
+	surveyPoints: settings.properties.surveyPoints,
+});
+
+const testGetContainerSettings = () => {
+	const route = (containerId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${containerId}`;
+	describe('Get container settings', () => {
+		test('should fail without a valid session', async () => {
+			const res = await agent.get(route(models[1]._id)).expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user is not a member of the teamspace', async () => {
+			const res = await agent.get(`${route(models[1]._id)}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if the project does not exist', async () => {
+			const res = await agent.get(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/containers/${models[1]._id}?key=${users.tsAdmin.apiKey}`).expect(templates.projectNotFound.status);
+			expect(res.body.code).toEqual(templates.projectNotFound.code);
+		});
+
+		test('should fail if the user does not have access to the container', async () => {
+			const res = await agent.get(`${route(models[1]._id)}?key=${users.noProjectAccess.apiKey}`).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		});
+
+		test('should fail if the model is a federation', async () => {
+			const res = await agent.get(`${route(federation._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.containerNotFound.status);
+			expect(res.body.code).toEqual(templates.containerNotFound.code);
+		});
+
+		test('should fail if the container does not exist', async () => {
+			const res = await agent.get(`${route('jibberish')}?key=${users.tsAdmin.apiKey}`).expect(templates.containerNotFound.status);
+			expect(res.body.code).toEqual(templates.containerNotFound.code);
+		});
+
+		test('should return the container settings correctly if the user has access', async () => {
+			const res = await agent.get(`${route(models[1]._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			expect(res.body).toEqual(formatToSettings(models[1]));
+		});
+	});
+};
+
 describe('E2E routes/teamspaces/projects/containers', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -468,4 +523,5 @@ describe('E2E routes/teamspaces/projects/containers', () => {
 	testAppendFavourites();
 	testDeleteFavourites();
 	testUpdateContainerSettings();
+	testGetContainerSettings();
 });

@@ -86,11 +86,32 @@ Federations.getFederationStats = async (teamspace, federation) => {
 Federations.updateSettings = updateModelSettings;
 
 Federations.getFederationSettings = async (teamspace, federation) => {
-	const settings = await getFederationById(teamspace, federation, {});
-	const formattedSettings = { ...settings, unit: settings.properties.unit, code: settings.properties.code, 
-		properties: undefined, subModels: undefined, corID: undefined, account: undefined, 
-		permissions:undefined ,federate: undefined, timestamp: settings.timestamp.getTime()};
-    return formattedSettings;
+	const settings = await getFederationById(teamspace, federation, {
+		_id: 1,
+		name: 1,
+		desc: 1,
+		type: 1,
+		properties: 1,
+		defaultView: 1,
+		defaultLegend: 1,
+		timestamp: 1,
+		angleFromNorth: 1,
+		status: 1,
+		surveyPoints: 1 });
+	return {
+		id: settings._id,
+		name: settings.name,
+		desc: settings.desc,
+		type: settings.type,
+		code: settings.properties.code,
+		unit: settings.properties.unit,
+		defaultView: settings.defaultView,
+		defaultLegend: settings.defaultLegend,
+		timestamp: settings.timestamp,
+		angleFromNorth: settings.angleFromNorth,
+		status: settings.status,
+		surveyPoints: settings.surveyPoints,
+	};
 };
 
 module.exports = Federations;
