@@ -16,8 +16,9 @@
  */
 
 const {
-	hasCommenterAccessToContainer, hasCommenterAccessToFederation, hasReadAccessToContainer,
-	hasReadAccessToFederation, hasWriteAccessToContainer, hasWriteAccessToFederation,
+	hasAdminAccessToContainer, hasAdminAccessToFederation, hasCommenterAccessToContainer,
+	hasCommenterAccessToFederation, hasReadAccessToContainer, hasReadAccessToFederation,
+	hasWriteAccessToContainer, hasWriteAccessToFederation,
 } = require('./components/models');
 const { convertAllUUIDs } = require('../dataConverter/pathParams');
 const { isProjectAdmin } = require('./components/projects');
@@ -32,11 +33,13 @@ Permissions.hasReadAccessToContainer = validateMany([Permissions.hasAccessToTeam
 Permissions.hasCommenterAccessToContainer = validateMany([
 	Permissions.hasAccessToTeamspace, hasCommenterAccessToContainer]);
 Permissions.hasWriteAccessToContainer = validateMany([Permissions.hasAccessToTeamspace, hasWriteAccessToContainer]);
-Permissions.hasReadAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasReadAccessToFederation]);
+Permissions.hasAdminAccessToContainer = validateMany([Permissions.hasAccessToTeamspace, hasAdminAccessToContainer]);
 
+Permissions.hasReadAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasReadAccessToFederation]);
 Permissions.hasCommenterAccessToFederation = validateMany([
 	Permissions.hasAccessToTeamspace, hasCommenterAccessToFederation]);
 Permissions.hasWriteAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasWriteAccessToFederation]);
 Permissions.isAdminToProject = validateMany([Permissions.hasAccessToTeamspace, isProjectAdmin]);
+Permissions.hasAdminAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasAdminAccessToFederation]);
 
 module.exports = Permissions;

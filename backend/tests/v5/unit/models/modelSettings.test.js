@@ -293,6 +293,101 @@ const testDeleteModel = () => {
 	});
 };
 
+const testUpdateModelSettings = () => {
+	const checkResults = (fn, model, updateObject) => {
+		expect(fn.mock.calls.length).toBe(1);
+		expect(fn.mock.calls[0][2]).toEqual({ _id: model });
+		expect(fn.mock.calls[0][3]).toEqual(updateObject);
+	};
+
+	describe('UpdateModelSettings', () => {
+		test('Should update the settings of a model with unset', async () => {
+			const data = {
+				name: 'someName',
+				unit: 'm',
+				code: 'someCode',
+				defaultView: null,
+			};
+
+			const updateObject = {
+				$set: {
+					properties: {
+						unit: 'm',
+						code: 'someCode',
+					},
+					name: 'someName',
+				},
+				$unset: {
+					defaultView: 1,
+				},
+			};
+
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
+			await Model.updateModelSettings('someTS', 'someModel', data);
+			checkResults(fn, 'someModel', updateObject);
+		});
+
+		test('Should update the settings of a model without unset', async () => {
+			const data = {
+				name: 'someName',
+				unit: 'm',
+				code: 'someCode',
+				defaultView: '123',
+			};
+
+			const updateObject = {
+				$set: {
+					properties: {
+						unit: 'm',
+						code: 'someCode',
+					},
+					name: 'someName',
+					defaultView: '123',
+				},
+			};
+
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
+			await Model.updateModelSettings('someTS', 'someModel', data);
+			checkResults(fn, 'someModel', updateObject);
+		});
+
+		test('Should update the settings of a model and ignore a null value that cant be unset', async () => {
+			const data = {
+				name: 'someName',
+				unit: null,
+				code: 'someCode',
+				defaultView: '123',
+			};
+
+			const updateObject = {
+				$set: {
+					properties: {
+						code: 'someCode',
+					},
+					name: 'someName',
+					defaultView: '123',
+				},
+			};
+
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
+			await Model.updateModelSettings('someTS', 'someModel', data);
+			checkResults(fn, 'someModel', updateObject);
+		});
+
+		test('Should return error if the update fails', async () => {
+			jest.spyOn(db, 'updateOne').mockImplementation(() => undefined);
+			await expect(Model.updateModelSettings('someTS', 'someModel', { name: 'someName' }))
+				.rejects.toEqual(templates.modelNotFound);
+		});
+
+		test('Should update nothing if the data is empty', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
+			await Model.updateModelSettings('someTS', 'someModel', {});
+			checkResults(fn, 'someModel', {});
+		});
+	});
+};
+
 describe('models/modelSettings', () => {
 	testGetModelById();
 	testGetContainerById();
@@ -304,4 +399,5 @@ describe('models/modelSettings', () => {
 	testRemoveModelCollections();
 	testAddModel();
 	testDeleteModel();
+	testUpdateModelSettings();
 });

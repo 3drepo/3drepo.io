@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { hasAccessToTeamspace, hasReadAccessToContainer, isAdminToProject } = require('../../../../middleware/permissions/permissions');
+const { hasAccessToTeamspace, hasAdminAccessToContainer, hasReadAccessToContainer, isAdminToProject } = require('../../../../middleware/permissions/permissions');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
@@ -22,6 +22,7 @@ const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
 const { validateAddModelData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/models');
+const { validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings');
 
 const addContainer = (req, res) => {
 	const user = getUserFromSession(req.session);
@@ -78,6 +79,16 @@ const appendFavourites = (req, res) => {
 
 	Containers.appendFavourites(user, teamspace, project, favouritesToAdd)
 		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
+};
+
+const updateSettings = (req, res) => {
+	const { teamspace, container } = req.params;
+
+	Containers.updateSettings(teamspace, container, req.body)
+		.then(() => respond(req, res, templates.ok)).catch(
+			// istanbul ignore next
+			(err) => respond(req, res, err),
+		);
 };
 
 const establishRoutes = () => {
@@ -263,6 +274,7 @@ const establishRoutes = () => {
 	 *                   example: ok
 	 *                 units:
 	 *                   type: string
+	 *                   enum: [mm, cm, dm, m, ft]
 	 *                   description: Container units
 	 *                   example: mm
 	 *                 revisions:
@@ -407,6 +419,89 @@ const establishRoutes = () => {
 	 *         description: Container removed.
 	 */
 	router.delete('/:container', isAdminToProject, deleteContainer);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}:
+	 *   patch:
+	 *     description: Updates the settings of a container
+	 *     tags: [Containers]
+	 *     operationId: updateSettings
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - project:
+	 *         name: project
+	 *         description: ID of project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - container:
+	 *         name: container
+	 *         description: ID of container
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     requestBody:
+	 *       content:
+	 *         application/json:
+	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *               name:
+	 *                 type: String
+	 *                 example: container1
+	 *               desc:
+	 *                 type: String
+	 *                 example: description1
+	 *               type:
+	 *                 type: String
+	 *                 example: type1
+	 *               surveyPoints:
+	 *                 type: array
+	 *                 items:
+	 *                   type: object
+	 *                   properties:
+	 *                     position:
+	 *                       type: array
+	 *                       items:
+	 *                         type: float
+	 *                         example: 23.45
+	 *                     latLong:
+	 *                       type: array
+	 *                       items:
+	 *                         type: float
+	 *                         example: 23.45
+	 *               angleFromNorth:
+	 *                 type: integer
+	 *                 example: 100
+	 *               unit:
+	 *                 type: string
+	 *                 example: mm
+	 *               defaultView:
+	 *                 type: string
+	 *                 format: uuid
+	 *                 example: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+	 *               defaultLegend:
+	 *                 type: string
+	 *                 format: uuid
+	 *                 example: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: updates the settings of the container
+	 */
+	router.patch('/:container', hasAdminAccessToContainer, validateUpdateSettingsData, updateSettings);
 
 	return router;
 };

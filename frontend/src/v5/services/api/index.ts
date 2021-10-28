@@ -17,3 +17,4 @@
 
 export * from './teamspaces';
 export * from './projects';
+export * from './containers';

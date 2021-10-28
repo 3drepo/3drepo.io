@@ -196,7 +196,7 @@ const testUpdateRevisionStatus = () => {
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
-		test('should return error if the body of the request contains extra payload', async () => {
+		test('should return error if the body of the request contains extra data', async () => {
 			const res = await agent.patch(`${route(voidRevision._id)}?key=${users.tsAdmin.apiKey}`)
 				.send({ void: true, extra: 123 }).expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);

@@ -17,7 +17,7 @@
 
 const { addModel, deleteModel, getModelList } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
-const { getContainerById, getContainers } = require('../../../../models/modelSettings');
+const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const Groups = require('./commons/groups');
 const { getProjectById } = require('../../../../models/projects');
@@ -88,5 +88,7 @@ Containers.deleteFavourites = async (username, teamspace, project, favouritesToR
 	const accessibleContainers = await Containers.getContainerList(teamspace, project, username);
 	return deleteFavourites(username, teamspace, accessibleContainers, favouritesToRemove);
 };
+
+Containers.updateSettings = updateModelSettings;
 
 module.exports = Containers;

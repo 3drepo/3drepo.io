@@ -16,7 +16,7 @@
  */
 
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
-const { getFederationById, getFederations } = require('../../../../models/modelSettings');
+const { getFederationById, getFederations, updateModelSettings } = require('../../../../models/modelSettings');
 const Groups = require('./commons/groups');
 const { getIssuesCount } = require('../../../../models/issues');
 const { getLatestRevision } = require('../../../../models/revisions');
@@ -82,5 +82,7 @@ Federations.getFederationStats = async (teamspace, federation) => {
 		tickets: { issues: issueCount, risks: riskCount },
 	};
 };
+
+Federations.updateSettings = updateModelSettings;
 
 module.exports = Federations;
