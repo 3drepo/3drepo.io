@@ -34,6 +34,7 @@ export const prepareSingleContainerData = (
 	type: stats?.type ?? '',
 	code: stats?.code ?? '',
 	status: stats?.status ?? ContainerStatuses.OK,
+	units: stats?.units ?? '',
 	hasStatsPending: !stats,
 });
 

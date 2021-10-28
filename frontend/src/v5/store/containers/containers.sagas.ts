@@ -50,7 +50,6 @@ export function* removeFavourites({ containerId, teamspace, projectId }: RemoveF
 
 export function* fetchContainers({ teamspace, projectId }: FetchContainersAction) {
 	yield put(ContainersActions.setIsListPending(true));
-	yield put(ContainersActions.setAreStatsPending(true));
 	try {
 		const { containers }: FetchContainersResponse = yield API.fetchContainers({ teamspace, projectId });
 		const containersWithoutStats = prepareContainersData(containers);
@@ -63,11 +62,8 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 				(container) => put(ContainersActions.fetchContainerStats(teamspace, projectId, container._id)),
 			),
 		);
-
-		yield put(ContainersActions.setAreStatsPending(false));
 	} catch (e) {
 		yield put(ContainersActions.setIsListPending(false));
-		yield put(ContainersActions.setAreStatsPending(false));
 		console.error(e);
 	}
 }

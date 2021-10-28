@@ -30,6 +30,7 @@ import { IContainer } from '@/v5/store/containers/containers.types';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containerListItem';
+import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/skeletonListItem';
 import { useOrderedList } from './containersList.hooks';
 import { Container } from './containersList.styles';
 import { DEFAULT_SORT_CONFIG } from './containersList.constants';
@@ -97,14 +98,17 @@ export const ContainersList = ({
 				<DashboardList>
 					{!isEmpty(sortedList) ? (
 						sortedList.map((container) => (
-							<ContainerListItem
-								isSelected={container._id === selectedId}
-								container={container}
-								filterQuery={filterQuery}
-								onFavouriteChange={setFavourite}
-								onToggleSelected={toggleSelectedId}
-							/>
-						))
+							container.hasStatsPending ? (
+								<SkeletonListItem />
+							) : (
+								<ContainerListItem
+									isSelected={container._id === selectedId}
+									container={container}
+									filterQuery={filterQuery}
+									onFavouriteChange={setFavourite}
+									onToggleSelected={toggleSelectedId}
+								/>
+							)))
 					) : (
 						<DashboardListEmptyContainer>
 							{emptyMessage}

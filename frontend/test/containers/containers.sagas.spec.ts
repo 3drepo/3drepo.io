@@ -22,6 +22,7 @@ import { mockServer } from '../../internals/testing/mockServer';
 import { pick, times } from 'lodash';
 import { containerMockFactory } from '@/v5/store/containers/containers.fixtures';
 import { prepareContainersData } from '@/v5/store/containers/containers.helpers';
+import { IContainer } from '@/v5/store/containers/containers.types';
 
 describe('Containers: sagas', () => {
 	const teamspace = 'teamspace';
@@ -55,7 +56,7 @@ describe('Containers: sagas', () => {
 	})
 
 	describe('fetchContainers', () => {
-		const mockContainers = times(10, () => containerMockFactory());
+		const mockContainers = times(2, () => containerMockFactory());
 		const mockContainersBaseResponse = mockContainers.map((container) => pick(container, ['_id', 'name', 'role', 'isFavourite']));
 		const mockContainersWithoutStats = prepareContainersData(mockContainers);
 
@@ -66,29 +67,38 @@ describe('Containers: sagas', () => {
 				containers: mockContainersBaseResponse
 			});
 
-			mockContainers.forEach((container) => {
-				mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${container._id}/stats`)
-				.reply(200, {
-					revisions: {
-						total: container.revisionsCount,
-						lastUpdated: container.lastUpdated,
-						latestRevision: container.latestRevision
-					},
-					type: container.type,
-					status: container.status,
-					code: container.code,
-				});
-			})
-
 			await expectSaga(ContainersSaga.default)
 			.dispatch(ContainersActions.fetchContainers(teamspace, projectId))
 			.put(ContainersActions.setIsListPending(true))
-			.put(ContainersActions.setAreStatsPending(true))
 			.put(ContainersActions.fetchContainersSuccess(projectId, mockContainersWithoutStats))
 			.put(ContainersActions.setIsListPending(false))
-			.put(ContainersActions.fetchContainersSuccess(projectId, mockContainers))
-			.put(ContainersActions.setAreStatsPending(false))
+			.silentRun();
+		})
+
+		it('should fetch stats', async () => {
+			const prepareMockStatsReply = (container: IContainer) => ({
+				revisions: {
+					total: container.revisionsCount,
+					lastUpdated: container.lastUpdated.valueOf(),
+					latestRevision: container.latestRevision
+				},
+				type: container.type,
+				status: container.status,
+				code: container.code,
+				units: container.units
+			})
+
+			mockContainers.forEach((container) => {
+				mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${container._id}/stats`)
+				.reply(200, prepareMockStatsReply(container));
+			})
+
+			await expectSaga(ContainersSaga.default)
+			.dispatch(ContainersActions.fetchContainerStats(teamspace, projectId, mockContainers[0]._id))
+			.dispatch(ContainersActions.fetchContainerStats(teamspace, projectId, mockContainers[1]._id))
+			.put(ContainersActions.fetchContainerStatsSuccess(projectId, mockContainers[0]._id, prepareMockStatsReply(mockContainers[0])))
+			.put(ContainersActions.fetchContainerStatsSuccess(projectId, mockContainers[1]._id, prepareMockStatsReply(mockContainers[1])))
 			.silentRun();
 		})
 
@@ -100,9 +110,7 @@ describe('Containers: sagas', () => {
 			await expectSaga(ContainersSaga.default)
 			.dispatch(ContainersActions.fetchContainers(teamspace, projectId))
 			.put(ContainersActions.setIsListPending(true))
-			.put(ContainersActions.setAreStatsPending(true))
 			.put(ContainersActions.setIsListPending(false))
-			.put(ContainersActions.setAreStatsPending(false))
 			.silentRun()
 			.then(({ effects }: any) => {
 				expect(effects.put).toBeUndefined();

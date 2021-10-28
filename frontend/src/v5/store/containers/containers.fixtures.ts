@@ -16,7 +16,7 @@
  */
 
 import * as faker from 'faker';
-import { ContainerStatuses, IContainer } from '@/v5/store/containers/containers.types';
+import { ContainerStatuses, FetchContainerStatsResponse, IContainer } from '@/v5/store/containers/containers.types';
 
 export const containerMockFactory = (overrides?: Partial<IContainer>): IContainer => ({
 	_id: faker.datatype.uuid(),
@@ -28,6 +28,20 @@ export const containerMockFactory = (overrides?: Partial<IContainer>): IContaine
 	type: faker.random.word(),
 	status: ContainerStatuses.OK,
 	code: faker.datatype.uuid(),
+	units: 'mm',
 	isFavourite: faker.datatype.boolean(),
+	hasStatsPending: true,
 	...overrides,
+});
+
+export const prepareMockStatsReply = (container: IContainer): FetchContainerStatsResponse => ({
+	revisions: {
+		total: container.revisionsCount,
+		lastUpdated: container.lastUpdated.valueOf(),
+		latestRevision: container.latestRevision,
+	},
+	type: container.type,
+	status: container.status,
+	code: container.code,
+	units: container.units,
 });
