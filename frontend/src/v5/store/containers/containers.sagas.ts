@@ -53,6 +53,7 @@ export function* fetchContainers({ teamspace, projectId }) {
 				code: containerStats.code ?? '',
 				status: containerStats.status ?? ContainerStatuses.OK,
 				revisions: [],
+				isPending: true,
 			};
 		});
 

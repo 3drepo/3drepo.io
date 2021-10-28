@@ -18,6 +18,7 @@
 import { Trans } from '@lingui/react';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router';
+import { range } from 'lodash';
 import { RevisionsListHeaderLabel } from '@components/shared/revisionDetails/components/revisionsListHeaderLabel';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { IRevisions } from '@/v5/store/containers/containers.types';
@@ -35,9 +36,12 @@ interface IRevisionDetails {
 	containerId: string;
 	revisions: IRevisions[];
 	isLoading?: boolean;
+	revisionsCount?: number;
 }
 
-export const RevisionDetails = ({ containerId, revisions, isLoading = false }: IRevisionDetails): JSX.Element => {
+export const RevisionDetails = ({
+	containerId, revisions, isLoading = false, revisionsCount = 0,
+}: IRevisionDetails): JSX.Element => {
 	const { teamspace, project } = useParams();
 	const selected = 0;
 	const isSingle = revisions?.length === 1;
@@ -46,7 +50,7 @@ export const RevisionDetails = ({ containerId, revisions, isLoading = false }: I
 		ContainersActionsDispatchers.fetchRevisions(teamspace, project, containerId);
 	}, []);
 
-	if (revisions && revisions.length === 0) {
+	if (!isLoading && revisions && revisions.length === 0) {
 		return (
 			<RevisionsListEmptyWrapper>
 				<RevisionsListEmptyContainer>
@@ -70,8 +74,8 @@ export const RevisionDetails = ({ containerId, revisions, isLoading = false }: I
 				<RevisionsListHeaderLabel><Trans id="revisionDetails.description" message="Description" /></RevisionsListHeaderLabel>
 			</RevisionsListHeaderContainer>
 			<RevisionsList>
-				{!revisions || isLoading ? (
-					<SkeletonListItem />
+				{isLoading ? (
+					range(revisionsCount).map((key) => <SkeletonListItem key={key} />)
 				) : (
 					revisions.map((revision, i) => (
 						<RevisionsListItemWrapper

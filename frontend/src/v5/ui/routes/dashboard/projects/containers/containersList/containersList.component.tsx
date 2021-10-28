@@ -189,6 +189,7 @@ export const ContainersList = ({
 								{container._id === selectedId && (
 									<RevisionDetails
 										containerId={container._id}
+										revisionsCount={container.revisionsCount}
 										revisions={container.revisions}
 										isLoading={container.isPending}
 									/>

@@ -16,9 +16,8 @@
  */
 
 import React from 'react';
-import { SkeletonBlock } from '@controls/skeletonBlock';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
-import { Container } from './skeletonListItem.styles';
+import { Container, SkeletonBlock } from './skeletonListItem.styles';
 
 interface ISkeletonListItem {
 	delay?: number;
@@ -27,13 +26,13 @@ interface ISkeletonListItem {
 export const SkeletonListItem = ({ delay = 0 }: ISkeletonListItem): JSX.Element => (
 	<Container>
 		<FixedOrGrowContainer width={130}>
-			<SkeletonBlock delay={delay} widthPercentage={75} />
+			<SkeletonBlock delay={delay} widthPercentage={60} />
 		</FixedOrGrowContainer>
 		<FixedOrGrowContainer width={228}>
-			<SkeletonBlock delay={delay} widthPercentage={75} />
+			<SkeletonBlock delay={delay} widthPercentage={80} />
 		</FixedOrGrowContainer>
 		<FixedOrGrowContainer width={330}>
-			<SkeletonBlock delay={delay} widthPercentage={75} />
+			<SkeletonBlock delay={delay} widthPercentage={55} />
 		</FixedOrGrowContainer>
 		<FixedOrGrowContainer>
 			<SkeletonBlock delay={delay} widthPercentage={75} />

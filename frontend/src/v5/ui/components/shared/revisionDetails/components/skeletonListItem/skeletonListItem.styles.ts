@@ -14,10 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { DashboardListSkeletonItem } from '@components/dashboard/dashboardList/dashboardListSkeletonItem';
 import styled from 'styled-components';
 
+import { DashboardListSkeletonItem } from '@components/dashboard/dashboardList/dashboardListSkeletonItem';
+import { SkeletonBlock as SkeletonBlockComponent } from '@controls/skeletonBlock';
+
 export const Container = styled(DashboardListSkeletonItem)`
-	padding-right: 105px;
+	height: 52px;
+	padding-left: 20px;
 	background-color: ${({ theme }) => theme.palette.secondary.light};
+`;
+
+export const SkeletonBlock = styled(SkeletonBlockComponent)`
+	height: 8px;
+	background-color: ${({ theme }) => theme.palette.secondary.lightest};
 `;
