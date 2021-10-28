@@ -5,10 +5,12 @@
     "module": "commonjs",
     "target": "es6",
     "types": [
+      "@types/jest",
       "react",
       "react-dom",
       "lodash",
-      "node"
+      "node",
+      "jest"
     ],
     "lib": [
       "es2015",
@@ -18,11 +20,17 @@
     ],
     "jsx": "react",
     "removeComments": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "baseUrl": "./",
+    "paths": {
+      "@components/*": ["./src/v5/ui/components/*"],
+      "@controls/*": ["./src/v5/ui/controls/*"],
+      "@assets/*": ["./assets/*"],
+      "@/*": ["./src/*"]
+    },
   },
   "exclude": [
     "node_modules",
-    "tests",
     "internals",
     "components"
   ],
