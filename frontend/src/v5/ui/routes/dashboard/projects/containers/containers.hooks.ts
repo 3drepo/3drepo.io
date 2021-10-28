@@ -37,7 +37,7 @@ export const useContainersData = () => {
 		ContainersActionsDispatchers.fetchContainers(teamspace, project);
 	}, [currentProject]);
 
-	return { filteredContainers, favouriteContainers, hasContainers,  isListPending };
+	return { filteredContainers, favouriteContainers, hasContainers, isListPending };
 };
 
 export const useContainersSearch = () => {
