@@ -435,8 +435,8 @@ const establishRoutes = () => {
 	 *                   type: String
 	 *                   example: 3549ddf6-885d-4977-87f1-eeac43a0e818
 	 *                 timestamp:
-	 *                   type: String
-	 *                   example: 2019-05-13T16:54:44.000Z
+	 *                   type: integer
+	 *                   example: 1519211811670
 	 *                 status:
 	 *                   type: String
 	 *                   example: ok
