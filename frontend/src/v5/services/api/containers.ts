@@ -15,24 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
-import * as API from '@/v5/services/api';
-import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
-import { ProjectsActions, ProjectsTypes, IProject } from './projects.redux';
+import { FavouritePayload } from '@/v5/store/containers/containers.types';
+import { AxiosResponse } from 'axios';
+import api from './default';
 
-export function* fetch({ teamspace }) {
-	try {
-		const { data: { projects } } = yield API.fetchProjects(teamspace);
-		yield put(ProjectsActions.fetchSuccess(teamspace, projects as IProject[]));
-	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: 'trying to fetch projects',
-			error,
-		}));
-		yield put(ProjectsActions.fetchFailure());
-	}
-}
+export const addFavourites = (
+	{ teamspace, projectId, containerId }: FavouritePayload,
+): Promise<AxiosResponse<void>> => (
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites`, {
+		containers: [containerId],
+	})
+);
 
-export default function* ProjectsSaga() {
-	yield takeLatest(ProjectsTypes.FETCH as any, fetch);
-}
+export const removeFavourites = (
+	{ teamspace, projectId, containerId }: FavouritePayload,
+): Promise<AxiosResponse<void>> => (
+	api.delete(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites`, {
+		containers: [containerId],
+	})
+);

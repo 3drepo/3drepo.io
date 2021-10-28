@@ -15,24 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
-import * as API from '@/v5/services/api';
-import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
-import { ProjectsActions, ProjectsTypes, IProject } from './projects.redux';
+const Legends = {};
+const db = require('../handler/db');
+const { templates } = require('../utils/responseCodes');
 
-export function* fetch({ teamspace }) {
-	try {
-		const { data: { projects } } = yield API.fetchProjects(teamspace);
-		yield put(ProjectsActions.fetchSuccess(teamspace, projects as IProject[]));
-	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: 'trying to fetch projects',
-			error,
-		}));
-		yield put(ProjectsActions.fetchFailure());
+const getCollectionName = (model) => `${model}.sequences.legends`;
+
+Legends.checkLegendExists = async (teamspace, model, legend) => {
+	const foundLegend = await db.findOne(teamspace, getCollectionName(model), { _id: legend });
+
+	if (!foundLegend) {
+		throw templates.legendNotFound;
 	}
-}
+};
 
-export default function* ProjectsSaga() {
-	yield takeLatest(ProjectsTypes.FETCH as any, fetch);
-}
+module.exports = Legends;
