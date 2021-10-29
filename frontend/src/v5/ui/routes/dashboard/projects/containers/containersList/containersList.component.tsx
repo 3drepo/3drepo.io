@@ -97,11 +97,12 @@ export const ContainersList = ({
 				</DashboardListHeader>
 				<DashboardList>
 					{!isEmpty(sortedList) ? (
-						sortedList.map((container) => (
+						sortedList.map((container, index) => (
 							container.hasStatsPending ? (
-								<SkeletonListItem />
+								<SkeletonListItem key={container._id} delay={index / 10} />
 							) : (
 								<ContainerListItem
+									key={container._id}
 									isSelected={container._id === selectedId}
 									container={container}
 									filterQuery={filterQuery}
