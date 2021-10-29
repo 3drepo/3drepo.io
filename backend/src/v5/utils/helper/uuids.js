@@ -18,6 +18,7 @@
 const Mongo = require('mongodb');
 const UUIDParse = require('uuid-parse');
 const { isUUIDString } = require('./typeCheck');
+const NodeUUID = require('uuid').v1;
 
 const UuidUtils = {};
 
@@ -29,6 +30,8 @@ UuidUtils.stringToUUID = (uuid) => {
 
 	return Mongo.Binary(buf, 3);
 };
+
+UuidUtils.generateUUIDString = () => NodeUUID();
 
 UuidUtils.UUIDToString = (uuid) => {
 	try {

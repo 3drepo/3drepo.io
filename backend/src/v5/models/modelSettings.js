@@ -17,8 +17,10 @@
 
 const Models = {};
 const db = require('../handler/db');
+const { generateUUIDString } = require('../utils/helper/uuids');
 const { templates } = require('../utils/responseCodes');
 
+const insertOneModel = (ts, data) => db.insertOne(ts, 'settings', data);
 const findOneModel = (ts, query, projection) => db.findOne(ts, 'settings', query, projection);
 const findModel = (ts, query, projection, sort) => db.find(ts, 'settings', query, projection, sort);
 
@@ -107,8 +109,10 @@ Models.updateModelSettings = async (ts, model, data) => {
 	}
 };
 
-Models.addModel = async (teamspace, project, model) => {
-
+Models.addModel = async (ts, project, data) => {
+	const newModelId = generateUUIDString(); 
+	await insertOneModel(ts, { _id: newModelId, ...data });
+	return newModelId;
 };
 
 module.exports = Models;

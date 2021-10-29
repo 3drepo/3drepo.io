@@ -83,7 +83,9 @@ Federations.getFederationStats = async (teamspace, federation) => {
 	};
 };
 
-Federations.addFederation = addModel;
+Federations.addFederation = async (teamspace, project, federation) =>{
+	return await addModel(teamspace, project, {...federation, federate: true});;
+};
 
 Federations.updateSettings = updateModelSettings;
 

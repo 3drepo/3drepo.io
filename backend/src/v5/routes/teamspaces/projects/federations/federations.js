@@ -76,7 +76,7 @@ const addFederation = (req, res) => {
 	const { teamspace, project } = req.params;
 
 	Federations.addFederation(teamspace, project, req.body)
-		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
+		.then((federationId) => respond(req, res, templates.ok, {_id: federationId})).catch((err) => respond(req, res, err));
 };
 
 
@@ -448,7 +448,7 @@ const establishRoutes = () => {
 	 *                   description: Federation ID
 	 *                   example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 */
-	router.post('', hasAdminAccessToFederation, addFederation);
+	router.post('', addFederation);
 	return router;
 };
 
