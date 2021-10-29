@@ -35,7 +35,7 @@ Containers.getContainerList = async (teamspace, project, user) => {
 Containers.getContainerStats = async (teamspace, project, container) => {
 	let latestRev = {};
 	const [settings, revCount] = await Promise.all([
-		getContainerById(teamspace, container, { name: 1, type: 1, properties: 1, status: 1 }),
+		getContainerById(teamspace, container, { name: 1, type: 1, properties: 1, status: 1, errorReason: 1 }),
 		getRevisionCount(teamspace, container),
 	]);
 
@@ -44,8 +44,7 @@ Containers.getContainerStats = async (teamspace, project, container) => {
 	} catch {
 		// do nothing. A container can have 0 revision.
 	}
-
-	return {
+	const stats = {
 		type: settings.type,
 		code: settings.properties.code,
 		status: settings.status,
@@ -53,9 +52,18 @@ Containers.getContainerStats = async (teamspace, project, container) => {
 		revisions: {
 			total: revCount,
 			lastUpdated: latestRev.timestamp,
-			latestRevision: latestRev.tag || timestampToString(latestRev.timestamp),
+			latestRevision: latestRev.tag || timestampToString(latestRev.timestamp?.getTime()),
 		},
 	};
+
+	if (settings.status === 'failed' && settings.errorReason) {
+		stats.errorReason = {
+			message: settings.errorReason.message,
+			timestamp: settings.errorReason.timestamp,
+		};
+	}
+
+	return stats;
 };
 
 Containers.getRevisions = (teamspace, container, showVoid) => getRevisions(teamspace,
