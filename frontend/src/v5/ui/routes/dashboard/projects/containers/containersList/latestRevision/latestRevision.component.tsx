@@ -20,7 +20,8 @@ import { ContainerStatuses } from '@/v5/store/containers/containers.types';
 import { Trans } from '@lingui/react';
 import { i18n } from '@lingui/core';
 import { ErrorTooltip } from '@controls/errorTooltip';
-import { Name, ProcessingStatus, QueuedStatus } from './latestRevision.styles';
+import { TextOverflow } from '@controls/textOverflow';
+import { Name, ProcessingStatus, QueuedStatus, Label, Container } from './latestRevision.styles';
 
 interface ILatestRevision {
 	name: string;
@@ -32,11 +33,14 @@ interface ILatestRevision {
 }
 
 export const LatestRevision = ({ name, status, error }: ILatestRevision): JSX.Element => (
-	<>
-		<Trans
-			id="containers.list.item.latestRevision.label"
-			message="Latest revision: "
-		/>
+	<Container>
+		<Label>
+			<Trans
+				id="containers.list.item.latestRevision.label"
+				message="Latest revision: "
+			/>
+		</Label>
+
 		{(() => {
 			if (status === ContainerStatuses.QUEUED) {
 				return (
@@ -82,10 +86,12 @@ export const LatestRevision = ({ name, status, error }: ILatestRevision): JSX.El
 			}
 
 			return (
-				<Name>
-					{name}
-				</Name>
+				<TextOverflow>
+					<Name>
+						{name}
+					</Name>
+				</TextOverflow>
 			);
 		})()}
-	</>
+	</Container>
 );

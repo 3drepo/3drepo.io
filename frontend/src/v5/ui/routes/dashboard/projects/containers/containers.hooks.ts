@@ -32,7 +32,7 @@ export const useContainersData = () => {
 	const currentProject = ProjectsHooksSelectors.selectCurrentProject();
 
 	useEffect(() => {
-		if (hasContainers.all) return;
+		if (hasContainers.all || currentProject !== project) return;
 
 		ContainersActionsDispatchers.fetchContainers(teamspace, project);
 	}, [currentProject]);

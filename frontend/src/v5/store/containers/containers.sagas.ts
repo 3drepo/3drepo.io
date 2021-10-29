@@ -21,6 +21,7 @@ import {
 	ContainersActions,
 	ContainersTypes,
 } from '@/v5/store/containers/containers.redux';
+import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import {
 	AddFavouriteAction,
 	RemoveFavouriteAction,
@@ -62,9 +63,11 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 				(container) => put(ContainersActions.fetchContainerStats(teamspace, projectId, container._id)),
 			),
 		);
-	} catch (e) {
-		yield put(ContainersActions.setIsListPending(false));
-		console.error(e);
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to fetch containers',
+			error,
+		}));
 	}
 }
 
@@ -75,8 +78,11 @@ export function* fetchContainerStats({ teamspace, projectId, containerId }: Fetc
 		});
 
 		yield put(ContainersActions.fetchContainerStatsSuccess(projectId, containerId, stats));
-	} catch (e) {
-		console.error(e);
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to fetch containers',
+			error,
+		}));
 	}
 }
 
