@@ -72,10 +72,10 @@ const updateSettings = (req, res) => {
 		);
 };
 
-const createFederation = (req, res) => {
+const addFederation = (req, res) => {
 	const { teamspace, project } = req.params;
 
-	Federations.createFederation(teamspace, project, req.body)
+	Federations.addFederation(teamspace, project, req.body)
 		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
 };
 
@@ -417,7 +417,6 @@ const establishRoutes = () => {
 	 *             properties:
 	 *               name:
 	 *                 type: string
-	 *                 example: federation1
 	 *               unit:
 	 *                 type: string
 	 *                 enum: [mm, cm, dm, m, ft]
@@ -438,8 +437,18 @@ const establishRoutes = () => {
 	 *         $ref: "#/components/responses/teamspaceNotFound"
 	 *       200:
 	 *         description: creates new federation
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 _id:
+	 *                   type: string
+	 *                   format: uuid
+	 *                   description: Federation ID
+	 *                   example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 */
-	router.post('', hasAdminAccessToFederation, createFederation);
+	router.post('', hasAdminAccessToFederation, addFederation);
 	return router;
 };
 

@@ -107,7 +107,7 @@ Models.updateModelSettings = async (ts, model, data) => {
 	}
 };
 
-Models.createModel = async (teamspace, project, model) => {
+Models.addModel = async (teamspace, project, model) => {
 
 };
 
