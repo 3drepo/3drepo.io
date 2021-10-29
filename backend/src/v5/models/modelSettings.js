@@ -107,4 +107,8 @@ Models.updateModelSettings = async (ts, model, data) => {
 	}
 };
 
+Models.createModel = async (teamspace, project, model) => {
+
+};
+
 module.exports = Models;

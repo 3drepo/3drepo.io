@@ -72,6 +72,14 @@ const updateSettings = (req, res) => {
 		);
 };
 
+const createFederation = (req, res) => {
+	const { teamspace, project } = req.params;
+
+	Federations.createFederation(teamspace, project, req.body)
+		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
+};
+
+
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 
@@ -378,6 +386,60 @@ const establishRoutes = () => {
 	 *         description: updates the settings of the federation
 	 */
 	router.patch('/:federation', hasAdminAccessToFederation, validateUpdateSettingsData, updateSettings);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/federations:
+	 *   post:
+	 *     description: Creates a new federation
+	 *     tags: [Federations]
+	 *     operationId: createFederation
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - project:
+	 *         name: project
+	 *         description: ID of project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     requestBody:
+	 *       content:
+	 *         application/json:
+	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *               name:
+	 *                 type: string
+	 *                 example: federation1
+	 *               unit:
+	 *                 type: string
+	 *                 enum: [mm, cm, dm, m, ft]
+	 *                 example: mm
+	 *               desc:
+	 *                 type: string
+	 *                 example: description1
+	 *               code:
+	 *                 type: string
+	 *                 example: CODE1
+	 *               type:
+	 *                 type: string
+	 *                 example: type1
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: creates new federation
+	 */
+	router.post('', hasAdminAccessToFederation, createFederation);
 	return router;
 };
 
