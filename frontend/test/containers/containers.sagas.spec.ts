@@ -110,11 +110,7 @@ describe('Containers: sagas', () => {
 			await expectSaga(ContainersSaga.default)
 			.dispatch(ContainersActions.fetchContainers(teamspace, projectId))
 			.put(ContainersActions.setIsListPending(true))
-			.put(ContainersActions.setIsListPending(false))
-			.silentRun()
-			.then(({ effects }: any) => {
-				expect(effects.put).toBeUndefined();
-			});
+			.silentRun();
 		})
 	})
 })
