@@ -77,12 +77,12 @@ const getSettings = (req, res) => {
 
 	Federations.getSettings(teamspace, federation)
 		.then((settings) => {
-			const formattedSettings = { 
+			const formattedSettings = {
 				...settings,
 				properties: undefined,
 				unit: settings.properties.unit,
-				code: settings.properties.code, 
-				timestamp: settings.timestamp ? settings.timestamp.getTime() : undefined 
+				code: settings.properties.code,
+				timestamp: settings.timestamp ? settings.timestamp.getTime() : undefined,
 			};
 			respond(req, res, templates.ok, formattedSettings);
 		})

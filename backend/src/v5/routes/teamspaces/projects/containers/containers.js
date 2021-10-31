@@ -78,12 +78,12 @@ const getSettings = (req, res) => {
 	const { teamspace, container } = req.params;
 	Containers.getSettings(teamspace, container)
 		.then((settings) => {
-			const formattedSettings = { 
+			const formattedSettings = {
 				...settings,
 				properties: undefined,
 				unit: settings.properties.unit,
-				code: settings.properties.code, 
-				timestamp: settings.timestamp ? settings.timestamp.getTime() : undefined
+				code: settings.properties.code,
+				timestamp: settings.timestamp ? settings.timestamp.getTime() : undefined,
 			};
 			respond(req, res, templates.ok, formattedSettings);
 		})

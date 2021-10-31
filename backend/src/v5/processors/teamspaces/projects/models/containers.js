@@ -74,8 +74,7 @@ Containers.deleteFavourites = async (username, teamspace, project, favouritesToR
 
 Containers.updateSettings = updateModelSettings;
 
-Containers.getSettings = async (teamspace, container) => {
-	return await getContainerById(teamspace, container, { corID:0, account: 0, permissions: 0 });
-};
+Containers.getSettings = async (teamspace, container) => getContainerById(teamspace,
+	container, { corID: 0, account: 0, permissions: 0 });
 
 module.exports = Containers;
