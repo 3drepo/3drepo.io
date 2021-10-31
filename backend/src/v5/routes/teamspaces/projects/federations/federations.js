@@ -72,13 +72,22 @@ const updateSettings = (req, res) => {
 		);
 };
 
-const getFederationSettings = (req, res) => {
+const getSettings = (req, res) => {
 	const { teamspace, federation } = req.params;
 
-	Federations.getFederationSettings(teamspace, federation)
-		.then((settings) => respond(req, res, templates.ok, { ...settings, timestamp: settings.timestamp.getTime() }))
+	Federations.getSettings(teamspace, federation)
+		.then((settings) => {
+			const formattedSettings = { 
+				...settings,
+				properties: undefined,
+				unit: settings.properties.unit,
+				code: settings.properties.code, 
+				timestamp: settings.timestamp ? settings.timestamp.getTime() : undefined 
+			};
+			respond(req, res, templates.ok, formattedSettings);
+		})
 		.catch(
-			// istanbul ignore next
+		// istanbul ignore next
 			(err) => respond(req, res, err),
 		);
 };
@@ -396,7 +405,7 @@ const establishRoutes = () => {
 	 *   get:
 	 *     description: Get the model settings of federation
 	 *     tags: [Federations]
-	 *     operationId: getModelSettings
+	 *     operationId: getSettings
 	 *     parameters:
 	 *       - teamspace:
 	 *         name: teamspace
@@ -429,58 +438,9 @@ const establishRoutes = () => {
 	 *         content:
 	 *           application/json:
 	 *             schema:
-	 *               type: object
-	 *               properties:
-	 *                 id:
-	 *                   type: String
-	 *                   example: 3549ddf6-885d-4977-87f1-eeac43a0e818
-	 *                 timestamp:
-	 *                   type: integer
-	 *                   example: 1519211811670
-	 *                 status:
-	 *                   type: String
-	 *                   example: ok
-	 *                 name:
-	 *                   type: String
-	 *                   example: Lego tree
-	 *                 desc:
-	 *                   type: String
-	 *                   example: Federation description
-	 *                 type:
-	 *                   type: String
-	 *                   example: Structural
-	 *                 surveyPoints:
-	 *                   type: array
-	 *                   items:
-	 *                     type: object
-	 *                     properties:
-	 *                       position:
-	 *                         type: array
-	 *                         items:
-	 *                           type: float
-	 *                           example: 23.45
-	 *                       latLong:
-	 *                         type: array
-	 *                         items:
-	 *                           type: float
-	 *                           example: 23.45
-	 *                 angleFromNorth:
-	 *                   type: integer
-	 *                   example: 150
-	 *                 unit:
-	 *                   type: String
-	 *                   example: mm
-	 *                 code:
-	 *                   type: String
-	 *                   example: CODE1
-	 *                 defaultView:
-	 *                   type: String
-	 *                   example: 3549ddf6-885d-4977-87f1-eeac43a0e818
-	 *                 defaultLegend:
-	 *                   type: String
-	 *                   example: 3549ddf6-885d-4977-87f1-eeac43a0e818
+	 *               $ref: "#/components/schemas/modelSettings"
 	 */
-	router.get('/:federation', hasReadAccessToFederation, getFederationSettings);
+	router.get('/:federation', hasReadAccessToFederation, getSettings);
 	return router;
 };
 

@@ -572,7 +572,7 @@ const formatToSettings = (settings) => ({
 	surveyPoints: settings.properties.surveyPoints,
 });
 
-const testGetFederationSettings = () => {
+const testGetSettings = () => {
 	const route = (federationId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federationId}`;
 	describe('Get federation settings', () => {
 		test('should fail without a valid session', async () => {
@@ -624,5 +624,5 @@ describe('E2E routes/teamspaces/projects/federations', () => {
 	testAppendFavourites();
 	testDeleteFavourites();
 	testUpdateFederationSettings();
-	testGetFederationSettings();
+	testGetSettings();
 });

@@ -274,10 +274,10 @@ const formatToSettings = (settings) => ({
 	surveyPoints: settings.surveyPoints,
 });
 
-const testGetFederationSettings = () => {
+const testGetSettings = () => {
 	describe('Get federation settings', () => {
 		test('should return the federation settings', async () => {
-			const res = await Federations.getFederationSettings('teamspace', 'federation1');
+			const res = await Federations.getSettings('teamspace', 'federation1');
 			expect(res).toEqual(formatToSettings(federationSettings.federation1));
 		});
 	});
@@ -288,5 +288,5 @@ describe('processors/teamspaces/projects/federations', () => {
 	testAppendFavourites();
 	testDeleteFavourites();
 	testGetFederationStats();
-	testGetFederationSettings();
+	testGetSettings();
 });

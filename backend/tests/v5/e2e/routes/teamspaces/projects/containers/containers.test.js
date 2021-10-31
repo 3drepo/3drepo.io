@@ -471,7 +471,7 @@ const formatToSettings = (settings) => ({
 	surveyPoints: settings.properties.surveyPoints,
 });
 
-const testGetContainerSettings = () => {
+const testGetSettings = () => {
 	const route = (containerId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${containerId}`;
 	describe('Get container settings', () => {
 		test('should fail without a valid session', async () => {
@@ -523,5 +523,5 @@ describe('E2E routes/teamspaces/projects/containers', () => {
 	testAppendFavourites();
 	testDeleteFavourites();
 	testUpdateContainerSettings();
-	testGetContainerSettings();
+	testGetSettings();
 });

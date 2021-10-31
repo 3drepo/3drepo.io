@@ -276,10 +276,10 @@ const formatToSettings = (settings) => ({
 	surveyPoints: settings.surveyPoints,
 });
 
-const testGetContainerSettings = () => {
+const testGetSettings = () => {
 	describe('Get container settings', () => {
 		test('should return the container settings', async () => {
-			const res = await Containers.getContainerSettings('teamspace', 'container1');
+			const res = await Containers.getSettings('teamspace', 'container1');
 			expect(res).toEqual(formatToSettings(containerSettings.container1));
 		});
 	});
@@ -291,5 +291,5 @@ describe('processors/teamspaces/projects/containers', () => {
 	testAppendFavourites();
 	testDeleteFavourites();
 	testGetRevisions();
-	testGetContainerSettings();
+	testGetSettings();
 });
