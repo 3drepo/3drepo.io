@@ -27,6 +27,9 @@ let agent;
 const users = {
 	tsAdmin: ServiceHelper.generateUserCredentials(),
 	noProjectAccess: ServiceHelper.generateUserCredentials(),
+	viewer: ServiceHelper.generateUserCredentials(),
+	commenter: ServiceHelper.generateUserCredentials(),
+	projectAdmin: ServiceHelper.generateUserCredentials(),
 };
 
 const nobody = ServiceHelper.generateUserCredentials();
@@ -36,10 +39,35 @@ const teamspace = ServiceHelper.generateRandomString();
 const project = {
 	id: ServiceHelper.generateUUIDString(),
 	name: ServiceHelper.generateRandomString(),
+	permissions: [{ user: users.projectAdmin.user, permissions: ['admin_project'] }],
 };
 
 const modelWithRevId = ServiceHelper.generateUUIDString();
 const modelWithoutRevId = ServiceHelper.generateUUIDString();
+
+const views = [
+	{
+		_id: ServiceHelper.generateUUIDString(),
+	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+	},
+];
+
+const legends = [
+	{
+		_id: ServiceHelper.generateUUIDString(),
+	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+	},
+];
 
 const modelSettings = [
 	{
@@ -48,7 +76,9 @@ const modelSettings = [
 		isFavourite: true,
 		properties: { ...ServiceHelper.generateRandomModelProperties(),
 			federate: true,
-			subModels: [{ model: modelWithRevId }] },
+			subModels: [{ model: modelWithRevId }],
+		},
+		permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
@@ -121,6 +151,7 @@ const getUnresolvedRisks = (risksList) => risksList.filter((i) => i.mitigation_s
 		&& i.mitigation_status !== 'rejected');
 
 const container = modelSettings.find(({ properties }) => !properties.federate);
+const federation = modelSettings.find(({ properties }) => properties.federate);
 
 const revisions = [
 	ServiceHelper.generateRevisionEntry(),
@@ -182,6 +213,8 @@ const setupData = async () => {
 		ServiceHelper.db.createUser(nobody),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, modelSettings.map(({ _id }) => _id)),
 		...revisions.map((revision) => ServiceHelper.db.createRevision(teamspace, modelWithRevId, revision)),
+		ServiceHelper.db.createViews(teamspace, federation._id, views),
+		ServiceHelper.db.createLegends(teamspace, federation._id, legends),
 	]);
 };
 
@@ -218,12 +251,12 @@ const testGetFederationList = () => {
 	});
 };
 
-const formatToStats = (federation, issueCount, riskCount, latestRev) => {
+const formatToStats = (fed, issueCount, riskCount, latestRev) => {
 	const formattedStats = {
-		code: federation.properties.properties.code,
-		status: federation.properties.status,
-		subModels: federation.properties.subModels
-			? federation.properties.subModels.map(({ model }) => model) : undefined,
+		code: fed.properties.properties.code,
+		status: fed.properties.status,
+		subModels: fed.properties.subModels
+			? fed.properties.subModels.map(({ model }) => model) : undefined,
 		lastUpdated: latestRev ? latestRev.getTime() : undefined,
 		tickets: {
 			issues: issueCount,
@@ -312,7 +345,7 @@ const testAppendFavourites = () => {
 
 		test('should fail if the favourites list provided has a container', async () => {
 			const res = await agent.patch(`${route}?key=${users.noProjectAccess.apiKey}`)
-				.expect(templates.invalidArguments.status).send({ federations: [container._id] });
+				.expect(templates.invalidArguments.status).send({ federations: [federation._id] });
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
@@ -375,6 +408,155 @@ const testDeleteFavourites = () => {
 	});
 };
 
+const testUpdateFederationSettings = () => {
+	const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federation._id}`;
+	describe('Update the settings of a federation', () => {
+		test('should fail without a valid session', async () => {
+			const res = await agent.patch(`${route}`)
+				.send({ name: 'name' }).expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user is not a member of the teamspace', async () => {
+			const res = await agent.patch(`${route}?key=${nobody.apiKey}`)
+				.send({ name: 'name' }).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if the user does not have access to the project', async () => {
+			const res = await agent.patch(`${route}?key=${users.noProjectAccess.apiKey}`)
+				.send({ name: 'name' }).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		});
+
+		test('should fail if the user does not have adequate permissions to edit the federation (viewer)', async () => {
+			const res = await agent.patch(`${route}?key=${users.viewer.apiKey}`)
+				.send({ name: 'name' }).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		});
+
+		test('should fail if the user does not have adequate permissions to edit the federation (commenter)', async () => {
+			const res = await agent.patch(`${route}?key=${users.commenter.apiKey}`)
+				.send({ name: 'name' }).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		});
+
+		test('should fail if the project does not exist', async () => {
+			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/federations/${federation._id}?key=${users.tsAdmin.apiKey}`)
+				.send({ name: 'name' }).expect(templates.projectNotFound.status);
+			expect(res.body.code).toEqual(templates.projectNotFound.code);
+		});
+
+		test('should fail if the federation does not exist', async () => {
+			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/dfsfaewfc?key=${users.tsAdmin.apiKey}`)
+				.send({ name: 'name' }).expect(templates.federationNotFound.status);
+			expect(res.body.code).toEqual(templates.federationNotFound.code);
+		});
+
+		test('should fail if a body param is not of the expected type', async () => {
+			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.send({ name: 123 }).expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if the body of the request contains extra data', async () => {
+			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.send({ name: 'name', extra: 123 }).expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if the defaultView is not found', async () => {
+			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.send({ name: 'name', defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8' }).expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if the defaultLegend is not found', async () => {
+			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.send({ name: 'name', defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8' }).expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if the a container Id is passed', async () => {
+			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${container._id}?key=${users.tsAdmin.apiKey}`)
+				.send({ name: 'name' }).expect(templates.federationNotFound.status);
+			expect(res.body.code).toEqual(templates.federationNotFound.code);
+		});
+
+		test('should update a federation\'s settings if all the params of the body have values', async () => {
+			const data = {
+				name: 'newName',
+				desc: 'newDesc',
+				surveyPoints: [
+					{
+						position: [7, 8, 9],
+						latLong: [10, 11],
+					},
+				],
+				angleFromNorth: 180,
+				type: 'someType',
+				unit: 'mm',
+				code: 'CODE1',
+				defaultView: views[1]._id,
+				defaultLegend: legends[1]._id,
+			};
+			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.send(data).expect(templates.ok.status);
+		});
+
+		test('should update a federation\'s settings if defaultView is null', async () => {
+			const data = {
+				name: 'newName',
+				desc: 'newDesc',
+				surveyPoints: [
+					{
+						position: [7, 8, 9],
+						latLong: [10, 11],
+					},
+				],
+				angleFromNorth: 180,
+				type: 'someType',
+				unit: 'mm',
+				code: 'CODE1',
+				defaultView: null,
+				defaultLegend: legends[1]._id,
+			};
+			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.send(data).expect(templates.ok.status);
+		});
+
+		test('should update a federation\'s settings if defaultLegend is null', async () => {
+			const data = {
+				name: 'newName',
+				desc: 'newDesc',
+				surveyPoints: [
+					{
+						position: [7, 8, 9],
+						latLong: [10, 11],
+					},
+				],
+				angleFromNorth: 180,
+				type: 'someType',
+				unit: 'mm',
+				code: 'CODE1',
+				defaultView: views[1]._id,
+				defaultLegend: null,
+			};
+			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.send(data).expect(templates.ok.status);
+		});
+
+		test('should update a federation\'s settings if not all body params are provided', async () => {
+			const data = {
+				name: 'newName',
+				desc: 'newDesc',
+			};
+			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.send(data).expect(templates.ok.status);
+		});
+	});
+};
+
 describe('E2E routes/teamspaces/projects/federations', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -386,4 +568,5 @@ describe('E2E routes/teamspaces/projects/federations', () => {
 	testGetFederationStats();
 	testAppendFavourites();
 	testDeleteFavourites();
+	testUpdateFederationSettings();
 });

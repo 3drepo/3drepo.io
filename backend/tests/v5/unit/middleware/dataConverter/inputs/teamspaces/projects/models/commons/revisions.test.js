@@ -132,7 +132,7 @@ const testValidateNewRevisionData = () => {
 	});
 };
 
-describe('middleware/dataConverter/revisions', () => {
+describe('middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions', () => {
 	testValidateUpdateRevisionData();
 	testValidateNewRevisionData();
 });
