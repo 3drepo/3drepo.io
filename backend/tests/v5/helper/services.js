@@ -144,7 +144,6 @@ ServiceHelper.generateRandomModelProperties = () => ({
 	},
 	desc: ServiceHelper.generateRandomString(),
 	type: ServiceHelper.generateRandomString(),
-	timestamp: new Date(),
 	status: 'ok',
 	surveyPoints: [
 		{

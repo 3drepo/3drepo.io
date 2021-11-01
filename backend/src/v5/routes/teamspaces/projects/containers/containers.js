@@ -18,6 +18,7 @@ const { hasAccessToTeamspace, hasAdminAccessToContainer, hasReadAccessToContaine
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
+const { formatModelSettings } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
@@ -74,18 +75,12 @@ const updateSettings = (req, res) => {
 		);
 };
 
-const getSettings = (req, res) => {
+const getSettings = (req, res, next) => {
 	const { teamspace, container } = req.params;
 	Containers.getSettings(teamspace, container)
-		.then((settings) => {
-			const formattedSettings = {
-				...settings,
-				properties: undefined,
-				unit: settings.properties.unit,
-				code: settings.properties.code,
-				timestamp: settings.timestamp ? settings.timestamp.getTime() : undefined,
-			};
-			respond(req, res, templates.ok, formattedSettings);
+		.then((settings) =>{
+			req.outputData = settings;
+			next();
 		})
 		.catch(
 		// istanbul ignore next
@@ -444,7 +439,7 @@ const establishRoutes = () => {
 	 *             schema:
 	 *               $ref: "#/components/schemas/modelSettings"
 	 */
-	router.get('/:container', hasReadAccessToContainer, getSettings);
+	router.get('/:container', hasReadAccessToContainer, getSettings, formatModelSettings);
 	return router;
 };
 

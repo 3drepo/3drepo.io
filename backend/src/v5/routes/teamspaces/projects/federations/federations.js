@@ -18,6 +18,7 @@
 const { hasAccessToTeamspace, hasAdminAccessToFederation, hasReadAccessToFederation } = require('../../../../middleware/permissions/permissions');
 const Federations = require('../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
+const { formatModelSettings } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
@@ -72,19 +73,13 @@ const updateSettings = (req, res) => {
 		);
 };
 
-const getSettings = (req, res) => {
+const getSettings = (req, res, next) => {
 	const { teamspace, federation } = req.params;
 
 	Federations.getSettings(teamspace, federation)
 		.then((settings) => {
-			const formattedSettings = {
-				...settings,
-				properties: undefined,
-				unit: settings.properties.unit,
-				code: settings.properties.code,
-				timestamp: settings.timestamp ? settings.timestamp.getTime() : undefined,
-			};
-			respond(req, res, templates.ok, formattedSettings);
+			req.outputData = settings;
+			next();
 		})
 		.catch(
 		// istanbul ignore next
@@ -440,7 +435,7 @@ const establishRoutes = () => {
 	 *             schema:
 	 *               $ref: "#/components/schemas/modelSettings"
 	 */
-	router.get('/:federation', hasReadAccessToFederation, getSettings);
+	router.get('/:federation', hasReadAccessToFederation, getSettings, formatModelSettings);
 	return router;
 };
 

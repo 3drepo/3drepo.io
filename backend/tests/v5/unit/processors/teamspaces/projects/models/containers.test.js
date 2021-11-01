@@ -49,14 +49,14 @@ const containerSettings = {
 			unit: 'm',
 			code: 'CTN1',
 		},
-		status: 'ok',
-		corID: 1,
+		status: 'ok',		
 		defaultView: 2,
 		defaultLegend: 3,
-		permissions: [1, 2, 3],
-		account: 4,
 		timestamp: new Date(),
 		surveyPoints: [123],
+		angleFromNorth: 10,
+		desc: "One description",
+		
 	},
 	container2: {
 		_id: 2,
@@ -88,7 +88,7 @@ const model1Revisions = [
 
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getContainers.mockImplementation(() => modelList);
-ModelSettings.getContainerById.mockImplementation((teamspace, container) => containerSettings[container]);
+const getContainerByIdMock = ModelSettings.getContainerById.mockImplementation((teamspace, container) => containerSettings[container]);
 Views.checkViewExists.mockImplementation((teamspace, model, view) => {
 	if (view === 1) {
 		return 1;
@@ -261,26 +261,14 @@ const testGetRevisions = () => {
 	});
 };
 
-const formatToSettings = (settings) => ({
-	id: settings._id,
-	name: settings.name,
-	type: settings.type,
-	code: settings.properties.code,
-	unit: settings.properties.unit,
-	status: settings.status,
-	desc: settings.desc,
-	timestamp: settings.timestamp,
-	angleFromNorth: settings.angleFromNorth,
-	defaultView: settings.defaultView,
-	defaultLegend: settings.defaultLegend,
-	surveyPoints: settings.surveyPoints,
-});
-
 const testGetSettings = () => {
 	describe('Get container settings', () => {
 		test('should return the container settings', async () => {
+			const projection = { corID: 0, account: 0, permissions: 0 };
 			const res = await Containers.getSettings('teamspace', 'container1');
-			expect(res).toEqual(formatToSettings(containerSettings.container1));
+			expect(res).toEqual(containerSettings.container1);
+			expect(getContainerByIdMock.mock.calls.length).toBe(1);
+			expect(getContainerByIdMock.mock.calls[0][2]).toEqual(projection);
 		});
 	});
 };

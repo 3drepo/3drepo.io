@@ -76,7 +76,7 @@ const modelSettings = [
 		isFavourite: true,
 		properties: { ...ServiceHelper.generateRandomModelProperties(),
 			federate: true,
-			subModels: [{ model: modelWithRevId }],
+			subModels: [{ model: modelWithRevId }]
 		},
 		permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
 	},
@@ -85,7 +85,8 @@ const modelSettings = [
 		name: ServiceHelper.generateRandomString(),
 		properties: { ...ServiceHelper.generateRandomModelProperties(),
 			federate: true,
-			subModels: [{ model: modelWithoutRevId }] },
+			subModels: [{ model: modelWithoutRevId }]			
+		},
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
@@ -102,6 +103,17 @@ const modelSettings = [
 		name: ServiceHelper.generateRandomString(),
 		properties: ServiceHelper.generateRandomModelProperties(),
 	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true, timestamp: new Date() },
+	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true },
+	},
+
 ];
 
 const issues = [
@@ -558,7 +570,7 @@ const testUpdateFederationSettings = () => {
 };
 
 const formatToSettings = (settings) => ({
-	id: settings._id,
+	_id: settings._id,
 	name: settings.name,
 	desc: settings.properties.desc,
 	type: settings.properties.type,
@@ -566,7 +578,7 @@ const formatToSettings = (settings) => ({
 	unit: settings.properties.properties.unit,
 	defaultView: settings.properties.defaultView,
 	defaultLegend: settings.properties.defaultLegend,
-	timestamp: settings.properties.timestamp.getTime(),
+	timestamp: settings.properties.timestamp ? settings.properties.timestamp.getTime() : undefined,
 	angleFromNorth: settings.properties.angleFromNorth,
 	status: settings.properties.status,
 	surveyPoints: settings.properties.surveyPoints,
@@ -576,22 +588,22 @@ const testGetSettings = () => {
 	const route = (federationId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federationId}`;
 	describe('Get federation settings', () => {
 		test('should fail without a valid session', async () => {
-			const res = await agent.get(route(modelSettings[1]._id)).expect(templates.notLoggedIn.status);
+			const res = await agent.get(route(modelSettings[5]._id)).expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
 		test('should fail if the user is not a member of the teamspace', async () => {
-			const res = await agent.get(`${route(modelSettings[1]._id)}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
+			const res = await agent.get(`${route(modelSettings[5]._id)}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
 		test('should fail if the project does not exist', async () => {
-			const res = await agent.get(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/federations/${modelSettings[1]._id}?key=${users.tsAdmin.apiKey}`).expect(templates.projectNotFound.status);
+			const res = await agent.get(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/federations/${modelSettings[5]._id}?key=${users.tsAdmin.apiKey}`).expect(templates.projectNotFound.status);
 			expect(res.body.code).toEqual(templates.projectNotFound.code);
 		});
 
 		test('should fail if the user does not have access to the federation', async () => {
-			const res = await agent.get(`${route(modelSettings[1]._id)}?key=${users.noProjectAccess.apiKey}`).expect(templates.notAuthorized.status);
+			const res = await agent.get(`${route(modelSettings[5]._id)}?key=${users.noProjectAccess.apiKey}`).expect(templates.notAuthorized.status);
 			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
 
@@ -606,8 +618,13 @@ const testGetSettings = () => {
 		});
 
 		test('should return the federation settings correctly if the user has access', async () => {
-			const res = await agent.get(`${route(modelSettings[1]._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual(formatToSettings(modelSettings[1]));
+			const res = await agent.get(`${route(modelSettings[5]._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			expect(res.body).toEqual(formatToSettings(modelSettings[5]));
+		});
+
+		test('should return the federation settings correctly if the user has access (no timestamp)', async () => {
+			const res = await agent.get(`${route(modelSettings[6]._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			expect(res.body).toEqual(formatToSettings(modelSettings[6]));
 		});
 	});
 };
