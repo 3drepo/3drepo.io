@@ -93,7 +93,8 @@ const project = { _id: 1, name: 'project', models: federationList.map(({ _id }) 
 
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getFederations.mockImplementation(() => federationList);
-const getFederationByIdMock = ModelSettings.getFederationById.mockImplementation((teamspace, federation) => federationSettings[federation]);
+const getFederationByIdMock = ModelSettings.getFederationById.mockImplementation((teamspace,
+	federation) => federationSettings[federation]);
 Issues.getIssuesCount.mockImplementation((teamspace, federation) => {
 	if (federation === 'federation1') return 1;
 	if (federation === 'federation2') return 2;
@@ -262,7 +263,7 @@ const testGetSettings = () => {
 	describe('Get federation settings', () => {
 		test('should return the federation settings', async () => {
 			const projection = { corID: 0, account: 0, permissions: 0, subModels: 0, federate: 0 };
-			const res = await Federations.getSettings('teamspace', 'federation1');			
+			const res = await Federations.getSettings('teamspace', 'federation1');
 			expect(res).toEqual(federationSettings.federation1);
 			expect(getFederationByIdMock.mock.calls.length).toBe(1);
 			expect(getFederationByIdMock.mock.calls[0][2]).toEqual(projection);

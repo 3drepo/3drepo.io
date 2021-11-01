@@ -76,7 +76,7 @@ const modelSettings = [
 		isFavourite: true,
 		properties: { ...ServiceHelper.generateRandomModelProperties(),
 			federate: true,
-			subModels: [{ model: modelWithRevId }]
+			subModels: [{ model: modelWithRevId }],
 		},
 		permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
 	},
@@ -85,7 +85,7 @@ const modelSettings = [
 		name: ServiceHelper.generateRandomString(),
 		properties: { ...ServiceHelper.generateRandomModelProperties(),
 			federate: true,
-			subModels: [{ model: modelWithoutRevId }]			
+			subModels: [{ model: modelWithoutRevId }],
 		},
 	},
 	{

@@ -87,7 +87,7 @@ const models = [
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
-		properties: {...ServiceHelper.generateRandomModelProperties(), timestamp: new Date() },
+		properties: { ...ServiceHelper.generateRandomModelProperties(), timestamp: new Date() },
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),

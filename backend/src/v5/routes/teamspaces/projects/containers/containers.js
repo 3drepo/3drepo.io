@@ -78,7 +78,7 @@ const updateSettings = (req, res) => {
 const getSettings = (req, res, next) => {
 	const { teamspace, container } = req.params;
 	Containers.getSettings(teamspace, container)
-		.then((settings) =>{
+		.then((settings) => {
 			req.outputData = settings;
 			next();
 		})

@@ -49,14 +49,14 @@ const containerSettings = {
 			unit: 'm',
 			code: 'CTN1',
 		},
-		status: 'ok',		
+		status: 'ok',
 		defaultView: 2,
 		defaultLegend: 3,
 		timestamp: new Date(),
 		surveyPoints: [123],
 		angleFromNorth: 10,
-		desc: "One description",
-		
+		desc: 'One description',
+
 	},
 	container2: {
 		_id: 2,
@@ -88,7 +88,8 @@ const model1Revisions = [
 
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getContainers.mockImplementation(() => modelList);
-const getContainerByIdMock = ModelSettings.getContainerById.mockImplementation((teamspace, container) => containerSettings[container]);
+const getContainerByIdMock = ModelSettings.getContainerById.mockImplementation((teamspace,
+	container) => containerSettings[container]);
 Views.checkViewExists.mockImplementation((teamspace, model, view) => {
 	if (view === 1) {
 		return 1;

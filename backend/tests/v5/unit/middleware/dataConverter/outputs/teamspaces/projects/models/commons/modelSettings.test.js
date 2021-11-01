@@ -15,47 +15,45 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- const { src } = require('../../../../../../../../helper/path');
- const { generateRandomModelProperties } = require('../../../../../../../../helper/services');
- 
+const { src } = require('../../../../../../../../helper/path');
+const { generateRandomModelProperties } = require('../../../../../../../../helper/services');
+
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
-const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 const { cloneDeep } = require(`${src}/utils/helper/objects`);
 const { templates } = require(`${src}/utils/responseCodes`);
- 
- const ModelSettingsOutputMiddlewares = require(`${src}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings`);
- 
- // Mock respond function to just return the resCode
- const respondFn = Responder.respond.mockImplementation((req, res, errCode) => errCode);
- 
- const testFormatModelSettings = () => {
-     const withTimestamp = {...generateRandomModelProperties(), timestamp: new Date()};
-     describe.each([
-         [generateRandomModelProperties(), 'no timestamp'],
-         [withTimestamp, 'timestamp'],
-     ])('Format model settings data', (data, desc) => {
-         test(`should format correctly with ${desc}`,
-             () => {
-                 const nextIdx = respondFn.mock.calls.length;
-                 ModelSettingsOutputMiddlewares.formatModelSettings({ outputData: cloneDeep(data) }, {}, () => {});
-                 expect(respondFn.mock.calls.length).toBe(nextIdx + 1);
-                 expect(respondFn.mock.calls[nextIdx][2]).toEqual(templates.ok);
- 
-                 const formattedSettings = {
-                     ...data,
-                   timestamp: data.timestamp ? data.timestamp.getTime() : undefined,
-                   code: data.properties.code,
-                   unit: data.properties.unit                  
-                 };
-                 delete formattedSettings.properties;
- 
-                 expect(respondFn.mock.calls[nextIdx][3]).toEqual({ ...formattedSettings });
-             });
-     });
- };
- 
- describe('middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings', () => {
-    testFormatModelSettings();
- });
- 
+
+const ModelSettingsOutputMiddlewares = require(`${src}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings`);
+
+// Mock respond function to just return the resCode
+const respondFn = Responder.respond.mockImplementation((req, res, errCode) => errCode);
+
+const testFormatModelSettings = () => {
+	const withTimestamp = { ...generateRandomModelProperties(), timestamp: new Date() };
+	describe.each([
+		[generateRandomModelProperties(), 'no timestamp'],
+		[withTimestamp, 'timestamp'],
+	])('Format model settings data', (data, desc) => {
+		test(`should format correctly with ${desc}`,
+			() => {
+				const nextIdx = respondFn.mock.calls.length;
+				ModelSettingsOutputMiddlewares.formatModelSettings({ outputData: cloneDeep(data) }, {}, () => {});
+				expect(respondFn.mock.calls.length).toBe(nextIdx + 1);
+				expect(respondFn.mock.calls[nextIdx][2]).toEqual(templates.ok);
+
+				const formattedSettings = {
+					...data,
+					timestamp: data.timestamp ? data.timestamp.getTime() : undefined,
+					code: data.properties.code,
+					unit: data.properties.unit,
+				};
+				delete formattedSettings.properties;
+
+				expect(respondFn.mock.calls[nextIdx][3]).toEqual({ ...formattedSettings });
+			});
+	});
+};
+
+describe('middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings', () => {
+	testFormatModelSettings();
+});
