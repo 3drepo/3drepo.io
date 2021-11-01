@@ -65,9 +65,7 @@ const onCallbackQMsg = ({ content, properties }) => {
 	}
 };
 
-const initCallbackQueueListener = async () => {
-	// eslint-disable-next-line no-use-before-define
-	const conn = await connect();
+const initCallbackQueueListener = async (conn) => {
 	const channel = await conn.createChannel();
 	const { queue } = await channel.assertQueue(callbackq);
 
@@ -83,7 +81,7 @@ const connect = async () => {
 		const conn = await connectionPromise;
 		retry = 0;
 		connClosed = false;
-		initCallbackQueueListener();
+		initCallbackQueueListener(conn);
 
 		conn.on('close',
 			/* istanbul ignore next */
