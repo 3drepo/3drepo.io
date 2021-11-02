@@ -262,6 +262,8 @@ if(config.paypal) {
 	config.paypal.validateIPN = coalesce(config.paypal.validateIPN, true);
 }
 
+config.cn_queue = { maxRetries: 3, ...config.cn_queue};
+
 // upload size limit
 config.uploadSizeLimit = coalesce(config.uploadSizeLimit, 209715200);
 config.resourceUploadSizeLimit =  config.resourceUploadSizeLimit || 104857600;

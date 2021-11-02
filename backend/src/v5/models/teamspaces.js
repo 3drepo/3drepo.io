@@ -32,6 +32,11 @@ const getTeamspace = async (ts, projection) => {
 	return tsDoc;
 };
 
+Teamspace.getSubscriptions = async (ts) => {
+	const tsDoc = await getTeamspace(ts, { 'customData.billing.subscriptions': 1 });
+	return tsDoc.customData?.billing?.subscriptions || {};
+};
+
 Teamspace.getTeamspaceAdmins = async (ts) => {
 	const data = await getTeamspace(ts, { 'customData.permissions': 1 });
 	return data.customData.permissions.flatMap(
