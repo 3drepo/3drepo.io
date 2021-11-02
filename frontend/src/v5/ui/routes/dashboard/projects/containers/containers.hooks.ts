@@ -29,16 +29,15 @@ export const useContainersData = () => {
 	const favouriteContainers = ContainersHooksSelectors.selectFilteredFavouriteContainers();
 	const hasContainers = ContainersHooksSelectors.selectHasContainers();
 	const isListPending = ContainersHooksSelectors.selectIsListPending();
-	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
 	const currentProject = ProjectsHooksSelectors.selectCurrentProject();
 
 	useEffect(() => {
-		if (hasContainers.all) return;
+		if (hasContainers.all || currentProject !== project) return;
 
 		ContainersActionsDispatchers.fetchContainers(teamspace, project);
 	}, [currentProject]);
 
-	return { filteredContainers, favouriteContainers, hasContainers, isPending: areStatsPending && isListPending };
+	return { filteredContainers, favouriteContainers, hasContainers, isListPending };
 };
 
 export const useContainersSearch = () => {

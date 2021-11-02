@@ -2,6 +2,9 @@
   "Containers": "Contenedores",
   "Federations": "Federaciones",
   "Settings": "Configuraciones",
+  "alertModal.action.contactSupport": "",
+  "alertModal.action.ok": "",
+  "alertModal.header": "",
   "containers.all.collapse.tooltip.hide": "",
   "containers.all.collapse.tooltip.show": "",
   "containers.all.collapseTitle": "",
@@ -27,7 +30,8 @@
   "containers.list.header.revisions": "",
   "containers.list.item.favourite.tooltip": "",
   "containers.list.item.latestRevision.label": "",
-  "containers.list.item.latestRevision.status.error.tooltipMessage": "",
+  "containers.list.item.latestRevision.status.error.tooltipMessageWithDate": "",
+  "containers.list.item.latestRevision.status.error.tooltipMessageWithoutDate": "",
   "containers.list.item.latestRevision.status.processing": "",
   "containers.list.item.latestRevision.status.queued": "",
   "containers.list.item.revisions": "",
@@ -37,5 +41,9 @@
   "containers.mainHeader.uploadFile": "",
   "containers.noSearchResults": "",
   "containers.search.placeholder": "",
-  "ellipsisMenu.tooltip": ""
+  "ellipsisMenu.tooltip": "",
+  "notFound.contactSupportButton.label": "",
+  "notFound.goToDashboardButton.label": "",
+  "notFound.message": "",
+  "notFound.title": ""
 }

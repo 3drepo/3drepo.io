@@ -14,31 +14,25 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Typography } from '@controls/typography';
-import styled from 'styled-components';
-import { FONT_WEIGHT } from '@/v4/styles';
 
-export const Container = styled.div`
-	display: flex;
-	padding-right: 10px;
-`;
+const { src } = require('../../../helper/path');
 
-export const Name = styled(Typography).attrs({
-	variant: 'body1',
-	component: 'span',
-})`
-	font-weight: ${FONT_WEIGHT.BOLD};
-`;
+const DateHelper = require(`${src}/utils/helper/dates`);
 
-export const QueuedStatus = styled(Name)`
-	color: ${({ theme }) => theme.palette.favourite.dark};
-`;
+const testTimestampToString = () => {
+	describe.each([
+		['one two three', undefined],
+		[true, undefined],
+		[1635184512000, '25/10/2021'],
+		[undefined, undefined],
+		[-1, undefined],
+	])('Timestamp to date', (source, target) => {
+		test(`with ${source} should result in ${target}`, () => {
+			DateHelper.timestampToString(source, target);
+		});
+	});
+};
 
-export const ProcessingStatus = styled(Name)`
-	color: ${({ theme }) => theme.palette.primary.main};
-`;
-
-export const Label = styled.span`
-	white-space: nowrap;
-	margin-right: 4px;
-`;
+describe('utils/helper/dates', () => {
+	testTimestampToString();
+});

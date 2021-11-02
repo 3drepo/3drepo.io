@@ -20,23 +20,27 @@ import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { Trans } from '@lingui/react';
 import { i18n } from '@lingui/core';
 import { ErrorTooltip } from '@controls/errorTooltip';
-import { Name, ProcessingStatus, QueuedStatus } from './latestRevision.styles';
+import { TextOverflow } from '@controls/textOverflow';
+import { Name, ProcessingStatus, QueuedStatus, Label, Container } from './latestRevision.styles';
 
 interface ILatestRevision {
 	name: string;
 	status: UploadStatuses;
 	error?: {
-		date: Date;
+		date: Date | null;
 		message: string;
 	}
 }
 
 export const LatestRevision = ({ name, status, error }: ILatestRevision): JSX.Element => (
-	<>
-		<Trans
-			id="containers.list.item.latestRevision.label"
-			message="Latest revision: "
-		/>
+	<Container>
+		<Label>
+			<Trans
+				id="containers.list.item.latestRevision.label"
+				message="Latest revision: "
+			/>
+		</Label>
+
 		{(() => {
 			if (status === UploadStatuses.QUEUED) {
 				return (
@@ -61,31 +65,47 @@ export const LatestRevision = ({ name, status, error }: ILatestRevision): JSX.El
 							{name}
 						</Name>
 						<ErrorTooltip>
-							<Trans
-								id="containers.list.item.latestRevision.status.error.tooltipMessage"
-								message="The latest upload on <0>{date}</0> at <0>{time}</0> has failed due to <0>{message}</0>."
-								values={{
-									date: i18n.date(error.date),
-									time: i18n.date(error.date, {
-										hour: 'numeric',
-										minute: 'numeric',
-									}),
-									message: error.message,
-								}}
-								components={[
-									<b />,
-								]}
-							/>
+							{error.date ? (
+								<Trans
+									id="containers.list.item.latestRevision.status.error.tooltipMessageWithDate"
+									message="The latest upload on <0>{date}</0> at <0>{time}</0> has failed due to <0>{message}</0>."
+									values={{
+										date: i18n.date(error.date),
+										time: i18n.date(error.date, {
+											hour: 'numeric',
+											minute: 'numeric',
+										}),
+										message: error.message,
+									}}
+									components={[
+										<b />,
+									]}
+								/>
+							) : (
+								<Trans
+									id="containers.list.item.latestRevision.status.error.tooltipMessageWithoutDate"
+									message="The latest upload has failed due to <0>{message}</0>."
+									values={{
+										message: error.message,
+									}}
+									components={[
+										<b />,
+									]}
+								/>
+							)}
+
 						</ErrorTooltip>
 					</>
 				);
 			}
 
 			return (
-				<Name>
-					{name}
-				</Name>
+				<TextOverflow>
+					<Name>
+						{name}
+					</Name>
+				</TextOverflow>
 			);
 		})()}
-	</>
+	</Container>
 );

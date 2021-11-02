@@ -23,7 +23,7 @@ import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
 const selectContainersDomain = (state: { containers: IContainersState }) => state.containers;
 
 export const selectContainers = createSelector(
-	[selectContainersDomain, selectCurrentProject], (state, currentProject) => state.containers[currentProject] ?? [],
+	selectContainersDomain, selectCurrentProject, (state, currentProject) => state.containers[currentProject] ?? [],
 );
 
 export const selectFilterQuery = createSelector(
@@ -31,7 +31,7 @@ export const selectFilterQuery = createSelector(
 );
 
 export const selectFilteredContainers = createSelector(
-	[selectContainers, selectFilterQuery],
+	selectContainers, selectFilterQuery,
 	(containers, filterQuery) => containers.filter((
 		{ name, code, type },
 	) => [name, code, type].join('').toLowerCase().includes(filterQuery.trim().toLowerCase())),
@@ -53,5 +53,5 @@ export const selectIsListPending = createSelector(
 );
 
 export const selectAreStatsPending = createSelector(
-	selectContainersDomain, (state) => state.areStatsPending,
+	selectContainers, (containers) => containers.some(({ hasStatsPending }) => hasStatsPending),
 );

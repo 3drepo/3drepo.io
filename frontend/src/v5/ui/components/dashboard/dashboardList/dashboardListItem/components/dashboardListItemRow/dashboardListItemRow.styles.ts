@@ -19,6 +19,7 @@ import { fade } from '@material-ui/core/styles';
 import * as ButtonStyles from '@controls/button/button.styles';
 import * as FavouriteCheckboxStyles from '@controls/favouriteCheckbox/favouriteCheckbox.styles';
 import * as EllipsisButtonStyles from '@controls/ellipsisButton/ellipsisButton.styles';
+import * as TextOverflowStyles from '@controls/textOverflow/textOverflow.styles';
 
 const dashboardListItemRowShadow = '0px 0px 12px 6px rgba(9, 30, 66, 0.2), 0px 0px 1px rgba(9, 30, 66, 0.31)';
 
@@ -63,6 +64,12 @@ export const Container = styled.div`
 		::before {
 			background-color: ${theme.palette.secondary.main};
 			border: none;
+		}
+		
+		${TextOverflowStyles.Container} {
+			&:after {
+				${TextOverflowStyles.fadeToLeft(theme.palette.secondary.main)}
+			}
 		}
 
 		${ButtonStyles.LabelButton} {

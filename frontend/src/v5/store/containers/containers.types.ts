@@ -42,8 +42,14 @@ export interface IContainer {
 	type: string;
 	code: string;
 	status: UploadStatuses;
+	units: string;
 	isFavourite: boolean;
 	role: string;
+	hasStatsPending: boolean;
+	errorResponse?: {
+		message: string;
+		date: Date | null;
+	};
 }
 
 export type FavouritePayload = FetchContainersPayload & {
@@ -55,12 +61,20 @@ export type FetchContainersPayload = {
 	projectId: string;
 };
 
+export type FetchContainersContainerItemResponse = Pick<IContainer, '_id' | 'name' | 'role' | 'isFavourite'>;
+
 export type FetchContainersResponse = {
-	containers: Array<Pick<IContainer, '_id' | 'name' | 'role' | 'isFavourite'>>
+	containers: Array<FetchContainersContainerItemResponse>
 };
 
 export type FetchContainerStatsPayload = FetchContainersPayload & {
 	containerId: IContainer['_id'];
+};
+
+export type FetchContainerStatsSuccessPayload = {
+	containerId: string,
+	projectId: string;
+	containerStats: FetchContainerStatsResponse;
 };
 
 export type FetchContainerStatsResponse = {
@@ -70,6 +84,10 @@ export type FetchContainerStatsResponse = {
 		latestRevision: string;
 	};
 	type: string;
+	errorReason?: {
+		message: string;
+		timestamp: number;
+	};
 	status: UploadStatuses;
 	units: string;
 	code: string;
@@ -82,7 +100,8 @@ export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & {proje
 export type FetchContainersAction = Action<'FETCH_CONTAINERS'> & FetchContainersPayload;
 export type FetchContainersSuccessAction = Action<'FETCH_CONTAINERS_SUCCESS'> & { projectId: string, containers: IContainer[] };
 export type SetIsListPendingAction = Action<'SET_IS_LIST_PENDING'> & { isPending: boolean };
-export type SetAreStatsPendingAction = Action<'SET_ARE_STATS_PENDING'> & { isPending: boolean };
+export type FetchContainerStatsAction = Action<'FETCH_CONTAINER_STATS'> & FetchContainerStatsPayload;
+export type FetchContainerStatsSuccessAction = Action<'FETCH_CONTAINER_STATS_SUCCESS'> & FetchContainerStatsSuccessPayload;
 
 export interface IContainersActionCreators {
 	setFilterQuery: (query: string) => SetFilterQueryAction;
@@ -91,6 +110,11 @@ export interface IContainersActionCreators {
 	setFavouriteSuccess: (projectId: string, containerId: string, isFavourite: boolean) => SetFavouriteSuccessAction;
 	fetchContainers: (teamspace: string, projectId: string) => FetchContainersAction;
 	fetchContainersSuccess: (projectId: string, containers: IContainer[]) => FetchContainersSuccessAction;
+	fetchContainerStats: (teamspace: string, projectId: string, containerId: string) => FetchContainerStatsAction;
+	fetchContainerStatsSuccess: (
+		projectId: string,
+		containerId: string,
+		containerStats: FetchContainerStatsResponse
+	) => FetchContainerStatsSuccessAction;
 	setIsListPending: (isPending: boolean) => SetIsListPendingAction;
-	setAreStatsPending: (isPending: boolean) => SetAreStatsPendingAction;
 }

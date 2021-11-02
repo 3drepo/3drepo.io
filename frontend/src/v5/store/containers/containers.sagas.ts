@@ -15,18 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, takeLatest } from 'redux-saga/effects';
+import { all, put, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import {
 	ContainersActions,
 	ContainersTypes,
 } from '@/v5/store/containers/containers.redux';
+import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import {
 	AddFavouriteAction,
 	RemoveFavouriteAction,
 	FetchContainersResponse,
 	FetchContainerStatsResponse,
-	FetchContainersAction,
+	FetchContainersAction, FetchContainerStatsAction,
 } from './containers.types';
 import { prepareContainersData } from './containers.helpers';
 
@@ -50,7 +51,6 @@ export function* removeFavourites({ containerId, teamspace, projectId }: RemoveF
 
 export function* fetchContainers({ teamspace, projectId }: FetchContainersAction) {
 	yield put(ContainersActions.setIsListPending(true));
-	yield put(ContainersActions.setAreStatsPending(true));
 	try {
 		const { containers }: FetchContainersResponse = yield API.Containers.fetchContainers({ teamspace, projectId });
 		const containersWithoutStats = prepareContainersData(containers);
@@ -58,21 +58,31 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 		yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithoutStats));
 		yield put(ContainersActions.setIsListPending(false));
 
-		const stats: FetchContainerStatsResponse[] = yield all(
+		yield all(
 			containers.map(
-				(container) => API.Containers.fetchContainerStats({
-					teamspace, projectId, containerId: container._id,
-				}),
+				(container) => put(ContainersActions.fetchContainerStats(teamspace, projectId, container._id)),
 			),
 		);
-		const containersWithStats = prepareContainersData(containers, stats);
-		yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithStats));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to fetch containers',
+			error,
+		}));
+	}
+}
 
-		yield put(ContainersActions.setAreStatsPending(false));
-	} catch (e) {
-		yield put(ContainersActions.setIsListPending(false));
-		yield put(ContainersActions.setAreStatsPending(false));
-		console.error(e);
+export function* fetchContainerStats({ teamspace, projectId, containerId }: FetchContainerStatsAction) {
+	try {
+		const stats: FetchContainerStatsResponse = yield API.Containers.fetchContainerStats({
+			teamspace, projectId, containerId,
+		});
+
+		yield put(ContainersActions.fetchContainerStatsSuccess(projectId, containerId, stats));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to fetch containers',
+			error,
+		}));
 	}
 }
 
@@ -80,4 +90,5 @@ export default function* ContainersSaga() {
 	yield takeLatest(ContainersTypes.ADD_FAVOURITE, addFavourites);
 	yield takeLatest(ContainersTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeLatest(ContainersTypes.FETCH_CONTAINERS, fetchContainers);
+	yield takeEvery(ContainersTypes.FETCH_CONTAINER_STATS, fetchContainerStats);
 }

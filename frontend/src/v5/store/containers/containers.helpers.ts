@@ -17,24 +17,35 @@
 
 import {
 	UploadStatuses,
-	FetchContainersResponse,
+	FetchContainersContainerItemResponse,
 	FetchContainerStatsResponse,
 	IContainer,
 } from '@/v5/store/containers/containers.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 
+export const prepareSingleContainerData = (
+	container: FetchContainersContainerItemResponse,
+	stats?: FetchContainerStatsResponse,
+): IContainer => ({
+	...container,
+	revisionsCount: stats?.revisions.total ?? 0,
+	lastUpdated: getNullableDate(stats?.revisions.lastUpdated),
+	latestRevision: stats?.revisions.latestRevision ?? '',
+	type: stats?.type ?? '',
+	code: stats?.code ?? '',
+	status: stats?.status ?? UploadStatuses.OK,
+	units: stats?.units ?? '',
+	hasStatsPending: !stats,
+	errorResponse: stats?.errorReason && {
+		message: stats.errorReason.message,
+		date: getNullableDate(stats?.errorReason.timestamp),
+	},
+});
+
 export const prepareContainersData = (
-	containers: FetchContainersResponse['containers'],
+	containers: Array<FetchContainersContainerItemResponse>,
 	stats?: FetchContainerStatsResponse[],
 ) => containers.map<IContainer>((container, index) => {
 	const containerStats = stats?.[index];
-	return {
-		...container,
-		revisionsCount: containerStats?.revisions.total ?? 0,
-		lastUpdated: getNullableDate(containerStats?.revisions.lastUpdated),
-		latestRevision: containerStats?.revisions.latestRevision ?? '',
-		type: containerStats?.type ?? '',
-		code: containerStats?.code ?? '',
-		status: containerStats?.status ?? UploadStatuses.OK,
-	};
+	return prepareSingleContainerData(container, containerStats);
 });

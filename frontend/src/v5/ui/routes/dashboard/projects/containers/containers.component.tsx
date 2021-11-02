@@ -25,12 +25,13 @@ import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { useSearchInput } from '@controls/searchInput/searchInput.hooks';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
+import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
+import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/skeletonListItem';
+import { Button } from '@controls/button';
 import {
 	Container,
 	Content,
-	NewContainerButton,
-	NewContainerMainHeaderButton,
-	UploadFileButton,
+	HeaderButtonsGroup,
 } from './containers.styles';
 import { ContainersList } from './containersList';
 import { EmptySearchResults } from './containersList/emptySearchResults';
@@ -41,7 +42,7 @@ export const Containers = (): JSX.Element => {
 		filteredContainers,
 		favouriteContainers,
 		hasContainers,
-		isPending,
+		isListPending,
 	} = useContainersData();
 
 	const { searchInput, setSearchInput, filterQuery } = useSearchInput({
@@ -61,81 +62,93 @@ export const Containers = (): JSX.Element => {
 							onChange={(event) => setSearchInput(event.currentTarget.value)}
 							value={searchInput}
 							placeholder={translation as string}
-							disabled={isPending}
+							disabled={isListPending}
 						/>
 					)}
 				/>
-				<NewContainerMainHeaderButton
-					startIcon={<AddCircleIcon />}
-					variant="outlined"
-					color="secondary"
-					disabled={isPending}
-				>
-					<Trans id="containers.mainHeader.newContainer" message="New Container" />
-				</NewContainerMainHeaderButton>
-				<UploadFileButton
-					startIcon={<ArrowUpCircleIcon />}
-					variant="contained"
-					color="primary"
-					disabled={isPending}
-				>
-					<Trans id="containers.mainHeader.uploadFile" message="Upload file" />
-				</UploadFileButton>
+				<HeaderButtonsGroup>
+					<Button
+						startIcon={<AddCircleIcon />}
+						variant="outlined"
+						color="secondary"
+						disabled={isListPending}
+					>
+						<Trans id="containers.mainHeader.newContainer" message="New Container" />
+					</Button>
+					<Button
+						startIcon={<ArrowUpCircleIcon />}
+						variant="contained"
+						color="primary"
+						disabled={isListPending}
+					>
+						<Trans id="containers.mainHeader.uploadFile" message="Upload file" />
+					</Button>
+				</HeaderButtonsGroup>
 			</MainHeader>
 			<Content>
-				<ContainersList
-					containers={favouriteContainers}
-					title={(
-						<Trans
-							id="containers.favourites.collapseTitle"
-							message="Favourites"
-						/>
-					)}
-					titleTooltips={{
-						collapsed: <Trans id="containers.favourites.collapse.tooltip.show" message="Show favourites" />,
-						visible: <Trans id="containers.favourites.collapse.tooltip.hide" message="Hide favourites" />,
-					}}
-					emptyMessage={
-						filterQuery && hasContainers.favourites ? (
-							<EmptySearchResults searchPhrase={filterQuery} />
-						) : (
-							<DashboardListEmptyText>
+				{isListPending ? (
+					<DashboardSkeletonList itemComponent={<SkeletonListItem />} />
+				) : (
+					<>
+						<ContainersList
+							containers={favouriteContainers}
+							title={(
 								<Trans
-									id="containers.favourites.emptyMessage"
-									message="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
+									id="containers.favourites.collapseTitle"
+									message="Favourites"
 								/>
-							</DashboardListEmptyText>
-						)
-					}
-				/>
-				<Divider />
-				<ContainersList
-					containers={filteredContainers}
-					title={(
-						<Trans
-							id="containers.all.collapseTitle"
-							message="All containers"
+							)}
+							titleTooltips={{
+								collapsed: <Trans id="containers.favourites.collapse.tooltip.show" message="Show favourites" />,
+								visible: <Trans id="containers.favourites.collapse.tooltip.hide" message="Hide favourites" />,
+							}}
+							emptyMessage={
+								filterQuery && hasContainers.favourites ? (
+									<EmptySearchResults searchPhrase={filterQuery} />
+								) : (
+									<DashboardListEmptyText>
+										<Trans
+											id="containers.favourites.emptyMessage"
+											message="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
+										/>
+									</DashboardListEmptyText>
+								)
+							}
 						/>
-					)}
-					titleTooltips={{
-						collapsed: <Trans id="containers.all.collapse.tooltip.show" message="Show all" />,
-						visible: <Trans id="containers.all.collapse.tooltip.hide" message="Hide all" />,
-					}}
-					emptyMessage={
-						filterQuery && hasContainers.all ? (
-							<EmptySearchResults searchPhrase={filterQuery} />
-						) : (
-							<>
-								<DashboardListEmptyText>
-									<Trans id="containers.all.emptyMessage" message="You haven’t created any Containers." />
-								</DashboardListEmptyText>
-								<NewContainerButton startIcon={<AddCircleIcon />}>
-									<Trans id="containers.all.newContainer" message="New Container" />
-								</NewContainerButton>
-							</>
-						)
-					}
-				/>
+						<Divider />
+						<ContainersList
+							containers={filteredContainers}
+							title={(
+								<Trans
+									id="containers.all.collapseTitle"
+									message="All containers"
+								/>
+							)}
+							titleTooltips={{
+								collapsed: <Trans id="containers.all.collapse.tooltip.show" message="Show all" />,
+								visible: <Trans id="containers.all.collapse.tooltip.hide" message="Hide all" />,
+							}}
+							emptyMessage={
+								filterQuery && hasContainers.all ? (
+									<EmptySearchResults searchPhrase={filterQuery} />
+								) : (
+									<>
+										<DashboardListEmptyText>
+											<Trans id="containers.all.emptyMessage" message="You haven’t created any Containers." />
+										</DashboardListEmptyText>
+										<Button
+											startIcon={<AddCircleIcon />}
+											variant="contained"
+											color="primary"
+										>
+											<Trans id="containers.all.newContainer" message="New Container" />
+										</Button>
+									</>
+								)
+							}
+						/>
+					</>
+				)}
 			</Content>
 		</Container>
 	);

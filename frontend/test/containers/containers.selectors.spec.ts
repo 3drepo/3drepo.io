@@ -20,7 +20,7 @@ import { containerMockFactory } from '@/v5/store/containers/containers.fixtures'
 import {
 	selectContainers,
 	selectFilteredFavouriteContainers,
-	selectFilteredContainers
+	selectFilteredContainers, selectAreStatsPending
 } from '@/v5/store/containers/containers.selectors';
 import { IContainersState } from '@/v5/store/containers/containers.types';
 
@@ -32,8 +32,9 @@ const defaultState: IContainersState = {
 		{
 			[projectId]: [
 				containerMockFactory({ isFavourite: true, name: searchPhrase }),
-				...times(5, () => containerMockFactory({ isFavourite: true })),
-				...times(4, () => containerMockFactory({ isFavourite: false }))
+				...times(5, () => containerMockFactory({ isFavourite: true, hasStatsPending: false })),
+				...times(4, () => containerMockFactory({ isFavourite: false, hasStatsPending: false })),
+				containerMockFactory({ isFavourite: false, hasStatsPending: true}),
 			],
 		},
 	filterQuery: searchPhrase
@@ -41,23 +42,37 @@ const defaultState: IContainersState = {
 
 describe('Containers: selectors', () => {
 	describe('selectFavouriteContainers', () => {
-		it('should select favourite containers', () => {
+		it('should return favourite containers', () => {
 			const selected = selectFilteredFavouriteContainers.resultFunc(defaultState.containers[projectId]);
 			expect(selected).toHaveLength(6);
 		})
 	})
 
 	describe('selectContainers', () => {
-		it('should select all containers', () => {
+		it('should return all containers', () => {
 			const selected = selectContainers.resultFunc(defaultState, projectId);
-			expect(selected).toHaveLength(10);
+			expect(selected).toHaveLength(11);
 		})
 	})
 
 	describe('selectFilteredContainers', () => {
-		it('should select container with searchPhrase', () => {
+		it('should return container with searchPhrase', () => {
 			const selected = selectFilteredContainers.resultFunc(defaultState.containers[projectId], searchPhrase);
 			expect(selected).toHaveLength(1);
+		})
+	})
+
+	describe('selectAreStatsPending', () => {
+		it('should return true if at least one item has pending stats', () => {
+			const selected = selectAreStatsPending.resultFunc(defaultState.containers[projectId]);
+			expect(selected).toBeTruthy();
+		})
+
+		it('should return false if all items has no pending stats', () => {
+			const containers = times(10, () => containerMockFactory({hasStatsPending: false}));
+
+			const selected = selectAreStatsPending.resultFunc(containers);
+			expect(selected).toBeFalsy();
 		})
 	})
 })

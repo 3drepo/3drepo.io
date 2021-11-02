@@ -17,6 +17,7 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '@/v5/store/common/actions.helper';
+import { prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import {
 	IContainersActionCreators,
 	IContainersState,
@@ -24,7 +25,7 @@ import {
 	SetFavouriteSuccessAction,
 	FetchContainersSuccessAction,
 	SetIsListPendingAction,
-	SetAreStatsPendingAction,
+	FetchContainerStatsSuccessAction,
 } from './containers.types';
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({
@@ -33,8 +34,9 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	removeFavourite: ['teamspace', 'projectId', 'containerId'],
 	fetchContainers: ['teamspace', 'projectId'],
 	fetchContainersSuccess: ['projectId', 'containers'],
+	fetchContainerStats: ['teamspace', 'projectId', 'containerId'],
+	fetchContainerStatsSuccess: ['projectId', 'containerId', 'containerStats'],
 	setIsListPending: ['isPending'],
-	setAreStatsPending: ['isPending'],
 	setFavouriteSuccess: ['projectId', 'containerId', 'isFavourite'],
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
 
@@ -75,20 +77,30 @@ export const fetchContainersSuccess = (state = INITIAL_STATE, {
 	},
 });
 
+export const fetchStatsSuccess = (state = INITIAL_STATE, {
+	projectId,
+	containerId,
+	containerStats,
+}: FetchContainerStatsSuccessAction) => ({
+	...state,
+	containers: {
+		...state.containers,
+		[projectId]: state.containers[projectId].map((container) => {
+			if (containerId !== container._id) return container;
+			return prepareSingleContainerData(container, containerStats);
+		}),
+	},
+});
+
 export const setIsListPending = (state = INITIAL_STATE, { isPending }: SetIsListPendingAction) => ({
 	...state,
 	isListPending: isPending,
-});
-
-export const setAreStatsPending = (state = INITIAL_STATE, { isPending }: SetAreStatsPendingAction) => ({
-	...state,
-	areStatsPending: isPending,
 });
 
 export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
 	[ContainersTypes.SET_FILTER_QUERY]: setFilterQuery,
 	[ContainersTypes.FETCH_CONTAINERS_SUCCESS]: fetchContainersSuccess,
 	[ContainersTypes.SET_IS_LIST_PENDING]: setIsListPending,
-	[ContainersTypes.SET_ARE_STATS_PENDING]: setAreStatsPending,
 	[ContainersTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
+	[ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS]: fetchStatsSuccess,
 });
