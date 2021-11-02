@@ -16,9 +16,11 @@
  */
 
 import { put, select, takeLatest } from 'redux-saga/effects';
+import { isEmpty } from 'lodash';
+
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
-import { selectCurrentTeamspaceUsers } from '@/v5/store/teamspaces/teamspaces.selectors';
+import { selectTeamspaceUsers } from '@/v5/store/teamspaces/teamspaces.selectors';
 import { TeamspacesActions, TeamspacesTypes, ITeamspace } from './teamspaces.redux';
 
 export function* fetch() {
@@ -36,9 +38,9 @@ export function* fetch() {
 
 export function* fetchUsers({ teamspace }) {
 	try {
-		const teamspaceUsers = yield select(selectCurrentTeamspaceUsers);
+		const users = yield select(selectTeamspaceUsers(teamspace));
 
-		if (!teamspaceUsers.length) {
+		if (isEmpty(users[teamspace])) {
 			const { data: { members } } = yield API.fetchTeamspaceMembers(teamspace);
 
 			yield put(TeamspacesActions.fetchUsersSuccess(teamspace, members));

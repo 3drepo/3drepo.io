@@ -19,14 +19,16 @@ import { Trans } from '@lingui/react';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router';
 import { range } from 'lodash';
+import { useSelector } from 'react-redux';
 import { RevisionsListHeaderLabel } from '@components/shared/revisionDetails/components/revisionsListHeaderLabel';
-import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
-import { IRevisions } from '@/v5/store/containers/containers.types';
+import { IRevision } from '@/v5/store/revisions/revisions.types';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
 import { NewContainerButton } from '@/v5/ui/routes/dashboard/projects/containers/containers.styles';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { RevisionsListItem } from '@components/shared/revisionDetails/components/revisionsListItem';
 import { SkeletonListItem } from '@components/shared/revisionDetails/components/skeletonListItem';
+import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
+import { selectIsPending, selectRevisions } from '@/v5/store/revisions/revisions.selectors';
 import {
 	Container, RevisionsListHeaderContainer, RevisionsListItemWrapper, RevisionsList, RevisionsListEmptyWrapper,
 	RevisionsListEmptyContainer,
@@ -34,20 +36,20 @@ import {
 
 interface IRevisionDetails {
 	containerId: string;
-	revisions: IRevisions[];
-	isLoading?: boolean;
 	revisionsCount?: number;
 }
 
-export const RevisionDetails = ({
-	containerId, revisions, isLoading = false, revisionsCount = 0,
-}: IRevisionDetails): JSX.Element => {
+export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDetails): JSX.Element => {
 	const { teamspace, project } = useParams();
-	const selected = 0;
+	const isLoading: boolean = useSelector(selectIsPending(containerId));
+	const revisions: IRevision[] = useSelector(selectRevisions(containerId));
+	const selected = revisions.findIndex((r) => !r.void);
 	const isSingle = revisions?.length === 1;
 
 	useEffect(() => {
-		ContainersActionsDispatchers.fetchRevisions(teamspace, project, containerId);
+		if (!revisions.length) {
+			RevisionsActionsDispatchers.fetch(teamspace, project, containerId);
+		}
 	}, []);
 
 	if (!isLoading && revisions && revisions.length === 0) {
@@ -82,11 +84,13 @@ export const RevisionDetails = ({
 							isSingle={isSingle}
 							isBeforeSelected={i === selected - 1}
 							selected={i === selected}
+							onClick={() => {}}
+							key={revision._id}
 						>
 							<RevisionsListItem
 								revision={revision}
 								containerId={containerId}
-								selected={i === selected}
+								active={i === selected}
 							/>
 						</RevisionsListItemWrapper>
 					))

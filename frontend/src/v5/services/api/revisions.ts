@@ -17,7 +17,7 @@
 
 import api from './default';
 
-export const fetchRevisions = (teamspace: string, projectId: string, containerId: string, showVoid = true): Promise<any> => api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions${showVoid ? '?showVoid' : ''}`);
+export const fetchRevisions = (teamspace: string, projectId: string, containerId: string, showVoid = true): Promise<any> => api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions${showVoid ? '?showVoid=true' : ''}`);
 
 export const setRevisionVoidStatus = (teamspace: string, projectId: string, containerId: string, revision: string, isVoid = true) => api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions/${revision}`, {
 	void: isVoid,

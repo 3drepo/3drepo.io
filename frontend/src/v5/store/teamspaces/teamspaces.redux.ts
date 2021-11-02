@@ -16,7 +16,6 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { cloneDeep } from 'lodash';
 import { Constants } from '../common/actions.helper';
 
 export interface IUser {
@@ -30,7 +29,6 @@ export interface IUser {
 export interface ITeamspace {
 	name: string;
 	isAdmin: boolean;
-	users?: IUser[];
 }
 
 export interface ITeamspacesActions {
@@ -51,26 +49,23 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 
 interface ITeamspacesState {
 	teamspaces: ITeamspace[];
+	users: Record<string, IUser[]>
 }
 
 export const INITIAL_STATE: ITeamspacesState = {
 	teamspaces: [],
+	users: {},
 };
 
 export const fetchSuccess = (state = INITIAL_STATE, { teamspaces }) => ({ ...state, teamspaces });
 
-export const fetchUsersSuccess = (state = INITIAL_STATE, { teamspace, users }) => {
-	const stateClone = cloneDeep(state);
-	const currentTeamspaceIndex = stateClone.teamspaces.findIndex(({ name }) => name === teamspace);
-	stateClone.teamspaces[currentTeamspaceIndex].users = users;
-
-	return ({
-		...state,
-		teamspaces: [
-			...stateClone.teamspaces,
-		],
-	});
-};
+export const fetchUsersSuccess = (state = INITIAL_STATE, { teamspace, users }) => ({
+	...state,
+	users: {
+		...state.users,
+		[teamspace]: users,
+	},
+});
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[TeamspacesTypes.FETCH_SUCCESS]: fetchSuccess,

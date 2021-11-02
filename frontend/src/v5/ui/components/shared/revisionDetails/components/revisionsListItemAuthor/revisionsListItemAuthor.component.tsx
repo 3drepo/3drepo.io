@@ -16,26 +16,33 @@
  */
 
 import React from 'react';
+import { useSelector } from 'react-redux';
+import { useParams } from 'react-router';
+
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { IUser } from '@/v5/store/teamspaces/teamspaces.redux';
 import { Popover } from '@/v4/routes/components/messagesList/components/message/components/markdownMessage/ticketReference/ticketReference.styles';
 import { UserPopover } from '@components/shared/userPopover/userPopover.component';
+import { selectTeamspaceUsers } from '@/v5/store/teamspaces/teamspaces.selectors';
 import { Text } from './revisionsListItemAuthor.styles';
 
 type IRevisionsListItemAuthor = {
 	width?: number;
 	className?: string;
-	author: IUser;
-	selected?: boolean;
+	authorName: string;
+	active?: boolean;
 };
 
 export const RevisionsListItemAuthor = ({
 	width,
 	className,
-	author,
-	selected = false,
+	authorName,
+	active = false,
 }: IRevisionsListItemAuthor): JSX.Element => {
 	const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+	const { teamspace } = useParams();
+	const teamspaceUsers: IUser[] = useSelector(selectTeamspaceUsers(teamspace));
+	const author = teamspaceUsers.find(({ user }) => user === authorName);
 
 	const handlePopoverOpen = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
 		setAnchorEl(event.currentTarget);
@@ -54,7 +61,7 @@ export const RevisionsListItemAuthor = ({
 				aria-haspopup="true"
 				onMouseEnter={handlePopoverOpen}
 				onMouseLeave={handlePopoverClose}
-				selected={selected}
+				active={active}
 			>
 				{author.firstName} {author.lastName}
 			</Text>

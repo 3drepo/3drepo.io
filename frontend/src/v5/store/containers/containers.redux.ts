@@ -16,7 +16,6 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { cloneDeep } from 'lodash';
 import { Constants } from '@/v5/store/common/actions.helper';
 import {
 	IContainersActionCreators,
@@ -78,42 +77,6 @@ export const fetchContainersSuccess = (state = INITIAL_STATE, {
 	},
 });
 
-export const setRevisionVoidStatusSuccess = (state = INITIAL_STATE, {
-	projectId,
-	containerId,
-	revisionId,
-	isVoid,
-}) => ({
-	...state,
-	containers: {
-		...state.containers,
-		[projectId]: state.containers[projectId].map((container) => ({
-			...container,
-			revisions: container.revisions.map((revision) => ({
-				...revision,
-				void: (container._id === containerId && revision.tag === revisionId) ? isVoid : revision.void,
-			})),
-		})),
-	},
-});
-
-export const fetchRevisionsSuccess = (state = INITIAL_STATE, {
-	projectId,
-	containerId,
-	revisions,
-}) => {
-	const stateClone = cloneDeep(state);
-	const currentContainerIndex = stateClone.containers[projectId].findIndex(({ _id }) => _id === containerId);
-	stateClone.containers[projectId][currentContainerIndex].revisions = revisions;
-
-	return {
-		...state,
-		containers: {
-			...stateClone.containers,
-		},
-	};
-};
-
 export const setCurrentProject = (state = INITIAL_STATE, { projectId }) => ({
 	...state,
 	currentProject: projectId,
@@ -124,26 +87,10 @@ export const setIsPending = (state = INITIAL_STATE, { isPending }) => ({
 	isPending,
 });
 
-export const setRevisionsIsPending = (state = INITIAL_STATE, { projectId, containerId, isPending }) => {
-	const stateClone = cloneDeep(state);
-	const currentContainerIndex = stateClone.containers[projectId].findIndex(({ _id }) => _id === containerId);
-	stateClone.containers[projectId][currentContainerIndex].isPending = isPending;
-
-	return {
-		...state,
-		containers: {
-			...stateClone.containers,
-		},
-	};
-};
-
 export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
 	[ContainersTypes.SET_FILTER_QUERY]: setFilterQuery,
 	[ContainersTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
 	[ContainersTypes.FETCH_CONTAINERS_SUCCESS]: fetchContainersSuccess,
-	[ContainersTypes.FETCH_REVISIONS_SUCCESS]: fetchRevisionsSuccess,
 	[ContainersTypes.SET_CURRENT_PROJECT]: setCurrentProject,
 	[ContainersTypes.SET_IS_PENDING]: setIsPending,
-	[ContainersTypes.SET_REVISIONS_IS_PENDING]: setRevisionsIsPending,
-	[ContainersTypes.SET_REVISION_VOID_STATUS_SUCCESS]: setRevisionVoidStatusSuccess,
 });

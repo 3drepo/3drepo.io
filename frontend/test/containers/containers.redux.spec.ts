@@ -21,7 +21,7 @@ import {
 	ContainersActions,
 } from '@/v5/store/containers/containers.redux';
 import { times } from 'lodash';
-import { containerMockFactory, revisionsMockFactory } from '@/v5/store/containers/containers.fixtures';
+import { containerMockFactory } from '@/v5/store/containers/containers.fixtures';
 
 describe('Containers: redux', () => {
 	const projectId = 'projectId';
@@ -69,39 +69,6 @@ describe('Containers: redux', () => {
 			const resultState = containersReducer(defaultState, ContainersActions.setCurrentProject(teamspaceName));
 
 			expect(resultState.currentProject).toEqual(teamspaceName);
-		});
-	});
-
-	describe('on setRevisionsIsPending action', () => {
-		it('should set true to pending state for container', () => {
-			const resultState = containersReducer(
-					defaultState,
-					ContainersActions.setRevisionsIsPending(projectId, mockContainers[0]._id, true)
-			);
-			const resultContainers = resultState.containers[projectId];
-
-			expect(resultContainers[0].isPending).toEqual(true);
-		});
-	});
-
-	describe('on fetchRevisionsSuccess action', () => {
-		it('should set revisions to pending state for container', () => {
-			const mockContainers = times(5, () => containerMockFactory({ revisions: [] }));
-			const mockRevisions = times(5, () => revisionsMockFactory());
-			const mockRevisionsLength = mockRevisions.length;
-			const defaultState = {
-				...INITIAL_STATE,
-				containers: {
-					[projectId]: mockContainers
-				}
-			};
-			const resultState = containersReducer(
-					defaultState,
-					ContainersActions.fetchRevisionsSuccess(projectId, mockContainers[0]._id, mockRevisions)
-			);
-			const resultContainers = resultState.containers[projectId];
-
-			expect(resultContainers[0].revisions.length).toEqual(mockRevisionsLength);
 		});
 	});
 })

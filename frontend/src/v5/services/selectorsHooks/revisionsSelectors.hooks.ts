@@ -15,27 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { Tooltip } from '@material-ui/core';
-import { Button, Container } from './revisionsListItemButton.styles';
+import * as RevisionsSelectors from '@/v5/store/revisions/revisions.selectors';
+import { createHooksSelectors } from './selectorsHooks.helper';
 
-type IRevisionsListItemButton= {
-	status?: boolean;
-	onClick?: (e: React.SyntheticEvent) => void;
-};
-
-export const RevisionsListItemButton = ({ status, onClick }: IRevisionsListItemButton): JSX.Element => {
-	const isVoid = !!status;
-	const textStatus = isVoid ? 'void' : 'active';
-	const changeToStatus = isVoid ? 'active' : 'void';
-
-	return (
-		<Container>
-			<Tooltip title={`Change to ${changeToStatus}`}>
-				<Button $isVoid={isVoid} onClick={onClick}>
-					{textStatus}
-				</Button>
-			</Tooltip>
-		</Container>
-	);
-};
+export const RevisionsHooksSelectors = createHooksSelectors(RevisionsSelectors);

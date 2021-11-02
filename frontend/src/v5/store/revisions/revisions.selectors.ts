@@ -15,13 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IRevisions } from '@/v5/store/containers/containers.types';
-import { IUser } from '@/v5/store/teamspaces/teamspaces.redux';
+import { createSelector } from 'reselect';
+import { IRevisionsState } from './revisions.types';
 
-export const prepareRevisionsData = (
-	revisions: IRevisions[],
-	teamspaceUsers?: IUser[],
-) => revisions.map<IRevisions>(({ author, ...revision }) => ({
-	...revision,
-	author: teamspaceUsers.find(({ user }) => user === author),
-}));
+const selectProjectsDomain = (state: { revisions: IRevisionsState }) => state.revisions;
+
+export const selectRevisions = (containerId) => createSelector(
+	selectProjectsDomain, (state) => state.revisions[containerId] || [],
+);
+
+export const selectIsPending = (containerId) => createSelector(
+	selectProjectsDomain, (state) => state.isPending[containerId],
+);

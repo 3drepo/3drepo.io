@@ -137,10 +137,7 @@ export const ContainersList = ({
 										</Highlight>
 									</DashboardListItemTitle>
 									<DashboardListItemButton
-										onClick={() => {
-											// eslint-disable-next-line no-console
-											console.log('handle revisions button');
-										}}
+										onClick={() => toggleSelectedId(container._id)}
 										width={186}
 										tooltipTitle={
 											<Trans id="containers.list.item.revisions.tooltip" message="View revisions" />
@@ -172,6 +169,7 @@ export const ContainersList = ({
 											}
 										>
 											<FavouriteCheckbox
+												selected={container._id === selectedId}
 												checked={container.isFavourite}
 												onClick={(event) => {
 													event.stopPropagation();
@@ -189,9 +187,7 @@ export const ContainersList = ({
 								{container._id === selectedId && (
 									<RevisionDetails
 										containerId={container._id}
-										revisionsCount={container.revisionsCount}
-										revisions={container.revisions}
-										isLoading={container.isPending}
+										revisionsCount={container.revisionsCount || 1}
 									/>
 								)}
 							</DashboardListItem>

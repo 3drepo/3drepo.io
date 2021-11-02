@@ -17,13 +17,9 @@
 
 import * as ContainersSaga from '@/v5/store/containers/containers.sagas';
 import { expectSaga } from 'redux-saga-test-plan';
-import { call } from 'redux-saga-test-plan/matchers';
-import { times } from 'lodash';
 
 import { mockServer } from '../../internals/testing/mockServer';
 import { ContainersActions } from '@/v5/store/containers/containers.redux';
-import { revisionsMockFactory, userMockFactory } from '@/v5/store/containers/containers.fixtures';
-import { prepareRevisionsData } from "@/v5/store/containers/containers.helpers";
 
 describe('Containers: sagas', () => {
 	const teamspace = 'teamspace';
@@ -82,55 +78,5 @@ describe('Containers: sagas', () => {
 		})
 	})
 
-	describe('fetchRevisions', () => {
-		const mockUsers = times(5, () => userMockFactory());
-		const mockRevisions = times(5, (index) => revisionsMockFactory({ author: mockUsers[index].user }));
-		const mockStore = {
-			teamspaces2: {
-				teamspaces: [{
-					name: teamspace,
-					users: mockUsers,
-				}]
-			},
-			projects: {
-				currentTeamspace: teamspace,
-			},
-		};
 
-		it('should fetch revisions data and dispatch FETCH_REVISIONS_SUCCESS', async () => {
-			const revisionsWithUsersInfo = prepareRevisionsData(mockRevisions, mockUsers);
-			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions?showVoid`)
-				.reply(200, {
-					revisions: mockRevisions
-				});
-
-			await expectSaga(ContainersSaga.default)
-					.withState(mockStore)
-					.provide([
-						[call.fn(prepareRevisionsData), revisionsWithUsersInfo],
-					])
-					.dispatch(ContainersActions.fetchRevisions(teamspace, projectId, containerId))
-					.put(ContainersActions.setRevisionsIsPending(projectId, containerId, true))
-					.put(ContainersActions.fetchRevisionsSuccess(projectId, containerId, revisionsWithUsersInfo))
-					.put(ContainersActions.setRevisionsIsPending(projectId, containerId, false))
-					.silentRun();
-		});
-
-		it('should handle revisions api error', async () => {
-			mockServer
-					.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions?showVoid`)
-					.reply(404);
-
-			await expectSaga(ContainersSaga.default)
-					.withState(mockStore)
-					.dispatch(ContainersActions.fetchRevisions(teamspace, projectId, containerId))
-					.put(ContainersActions.setRevisionsIsPending(projectId, containerId, true))
-					.put(ContainersActions.setRevisionsIsPending(projectId, containerId, false))
-					.silentRun()
-					.then(({ effects }: any) => {
-						expect(effects.put).toBeUndefined();
-					});
-		})
-	});
 })

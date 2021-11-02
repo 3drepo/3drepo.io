@@ -19,7 +19,7 @@ import { Typography } from '@material-ui/core';
 
 export const Text = styled(Typography)`
 	${({ theme }) => theme.typography.body1};
-	color: ${({ theme, selected }) => (selected ? theme.palette.primary.contrast : theme.palette.base.light)};
+	color: ${({ theme, active }) => (active ? theme.palette.primary.contrast : theme.palette.base.light)};
 
 	${({ meta, theme }) => meta && css`
 		${theme.typography.kicker};

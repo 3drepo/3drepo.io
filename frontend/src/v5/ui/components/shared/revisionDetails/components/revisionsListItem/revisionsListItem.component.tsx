@@ -23,32 +23,33 @@ import { RevisionsListItemText } from '@components/shared/revisionDetails/compon
 import { RevisionsListItemAuthor } from '@components/shared/revisionDetails/components/revisionsListItemAuthor';
 import { RevisionsListItemCode } from '@components/shared/revisionDetails/components/revisionsListItemCode';
 import { RevisionsListItemButton } from '@components/shared/revisionDetails/components/revisionsListItemButton';
-import { IRevisions } from '@/v5/store/containers/containers.types';
-import { IUser } from '@/v5/store/teamspaces/teamspaces.redux';
-import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
+import { IRevision } from '@/v5/store/revisions/revisions.types';
+import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
 import { Container } from './revisionsListItem.styles';
 
 type IRevisionsListItem = {
-	revision: IRevisions;
-	selected?: boolean;
+	revision: IRevision;
+	active?: boolean;
 	containerId: string;
 };
 
-export const RevisionsListItem = ({ revision, containerId, selected = false }: IRevisionsListItem): JSX.Element => {
+export const RevisionsListItem = ({ revision, containerId, active = false }: IRevisionsListItem): JSX.Element => {
 	const { teamspace, project } = useParams();
 	const { timestamp, desc, author, tag, void: voidStatus } = revision;
 
-	const toggleVoidStatus = () => ContainersActionsDispatchers
-		.setRevisionVoidStatus(teamspace, project, containerId, tag, !voidStatus);
+	const toggleVoidStatus = (e: React.SyntheticEvent) => {
+		e.stopPropagation();
+		RevisionsActionsDispatchers.setVoidStatus(teamspace, project, containerId, tag || revision._id, !voidStatus);
+	};
 
 	return (
 		<Container>
-			<RevisionsListItemText meta width={130} selected={selected}>
+			<RevisionsListItemText meta width={130} active={active}>
 				{i18n.date(timestamp)}
 			</RevisionsListItemText>
-			<RevisionsListItemAuthor author={author as IUser} selected={selected} width={228} />
+			<RevisionsListItemAuthor authorName={author} active={active} width={228} />
 			<RevisionsListItemCode width={330} onClick={() => {}}>{tag}</RevisionsListItemCode>
-			<RevisionsListItemText selected={selected}>{desc}</RevisionsListItemText>
+			<RevisionsListItemText active={active}>{desc}</RevisionsListItemText>
 			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} />
 		</Container>
 	);

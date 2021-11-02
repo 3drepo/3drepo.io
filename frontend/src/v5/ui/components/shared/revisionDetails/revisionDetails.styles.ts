@@ -59,7 +59,7 @@ const beforeSelectedRevisionListItemStyles = css`
 	background-image: ${({ theme }) => `linear-gradient(${theme.palette.secondary.mid}, ${theme.palette.secondary.mid}), linear-gradient(to bottom, ${theme.palette.secondary.light}, ${theme.palette.primary.main})`};
 `;
 
-const singleSelectedRevisionListItemStyles = css`
+const singleRevisionListItemStyles = ({ theme, selected }) => css`
 	&:after {
 		content: '';
 		display: block !important;
@@ -67,7 +67,7 @@ const singleSelectedRevisionListItemStyles = css`
 		height: 12px;
 		position: absolute;
 		border-radius: 50%;
-		background-color: ${({ theme }) => theme.palette.primary.main};
+		background-color: ${selected ? theme.palette.primary.main : theme.palette.secondary.light};
 		top: calc(50% - 6px);
 		left: -26px;
 	}
@@ -102,10 +102,15 @@ export const RevisionsListItemWrapper = styled.li`
 	border-bottom-style: none;
 	border-left-style: none;
 	position: relative;
+	cursor: pointer;
+	
+	&:hover {
+		background-color: ${({ theme }) => theme.palette.secondary.main};
+	}
 	
 	${({ isSingle }) => css`
 		${!isSingle && revisionListItemStylesLineStyles}
-		${isSingle && singleSelectedRevisionListItemStyles}
+		${isSingle && singleRevisionListItemStyles}
 
 		&:first-of-type:after {
 			border-top-left-radius: 5px;

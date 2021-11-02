@@ -16,8 +16,6 @@
  */
 
 import { createSelector } from 'reselect';
-import { selectCurrentTeamspace } from '@/v5/store/projects/projects.selectors';
-import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 
 const selectTeamspacesDomain = (state) => state.teamspaces2;
 
@@ -25,11 +23,10 @@ export const selectTeamspaces = createSelector(
 	selectTeamspacesDomain, (state) => state.teamspaces,
 );
 
-export const selectCurrentTeamspaceData = createSelector(
-	selectCurrentTeamspace, selectTeamspaces, (teamspace: string, teamspaces: ITeamspace[]) => teamspaces
-		.find(({ name }) => name === teamspace),
+export const selectUsers = createSelector(
+	selectTeamspacesDomain, (state) => state.users,
 );
 
-export const selectCurrentTeamspaceUsers = createSelector(
-	selectCurrentTeamspaceData, (teamspaceData: ITeamspace) => teamspaceData?.users || [],
+export const selectTeamspaceUsers = (teamspace) => createSelector(
+	selectUsers, (state) => state[teamspace] || [],
 );

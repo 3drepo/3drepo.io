@@ -45,40 +45,4 @@ describe('Teamspace: redux', () => {
 			});
 		});
 	});
-
-	describe('on fetchUsersSuccess action', () => {
-		it('should set users for teamspace', () => {
-			const defaultStateWithTeamspaces = {
-				...INITIAL_STATE,
-				teamspaces: [{
-					name: 'teamspace_1',
-					isAdmin: true,
-				}, {
-					name: 'teamspace-2',
-					isAdmin: true,
-				}, {
-					name: 'teamspace_3',
-					isAdmin: false,
-				}],
-			}
-
-			const users = [{
-				user: 'Bob',
-				firstName: 'Bob',
-				lastName: 'Smith',
-				company: 'Arch-1',
-				job: 'Architect',
-			}, {
-				user: 'TomBlack',
-				firstName: 'Tom',
-				lastName: 'Black',
-				company: 'Arch-2',
-				job: 'Architect',
-			}];
-
-			const resultState = teamspaceReducer(defaultStateWithTeamspaces, TeamspacesActions.fetchUsersSuccess('teamspace-2', users));
-
-			expect(resultState.teamspaces[1].users).toEqual(users);
-		});
-	});
 });

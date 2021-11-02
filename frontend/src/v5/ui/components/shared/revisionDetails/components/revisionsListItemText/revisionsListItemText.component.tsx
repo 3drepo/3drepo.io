@@ -24,7 +24,7 @@ type IDashboardListItemText = {
 	width?: number;
 	className?: string;
 	meta?: boolean;
-	selected?: boolean;
+	active?: boolean;
 };
 
 export const RevisionsListItemText = ({
@@ -32,10 +32,10 @@ export const RevisionsListItemText = ({
 	width,
 	className,
 	meta = false,
-	selected = false,
+	active = false,
 }: IDashboardListItemText): JSX.Element => (
 	<FixedOrGrowContainer width={width} className={className}>
-		<Text meta={meta} selected={selected}>
+		<Text meta={meta} active={active}>
 			{children}
 		</Text>
 	</FixedOrGrowContainer>
