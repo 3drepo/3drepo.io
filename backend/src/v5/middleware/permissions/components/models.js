@@ -16,6 +16,8 @@
  */
 
 const {
+	hasAdminAccessToContainer,
+	hasAdminAccessToFederation,
 	hasCommenterAccessToContainer,
 	hasCommenterAccessToFederation,
 	hasReadAccessToContainer,
@@ -49,9 +51,11 @@ const permissionsCheckTemplate = (callback, isFed = false) => async (req, res, n
 ModelPerms.hasReadAccessToContainer = permissionsCheckTemplate(hasReadAccessToContainer);
 ModelPerms.hasWriteAccessToContainer = permissionsCheckTemplate(hasWriteAccessToContainer);
 ModelPerms.hasCommenterAccessToContainer = permissionsCheckTemplate(hasCommenterAccessToContainer);
+ModelPerms.hasAdminAccessToContainer = permissionsCheckTemplate(hasAdminAccessToContainer);
 
 ModelPerms.hasReadAccessToFederation = permissionsCheckTemplate(hasReadAccessToFederation, true);
 ModelPerms.hasWriteAccessToFederation = permissionsCheckTemplate(hasWriteAccessToFederation, true);
 ModelPerms.hasCommenterAccessToFederation = permissionsCheckTemplate(hasCommenterAccessToFederation, true);
+ModelPerms.hasAdminAccessToFederation = permissionsCheckTemplate(hasAdminAccessToFederation, true);
 
 module.exports = ModelPerms;

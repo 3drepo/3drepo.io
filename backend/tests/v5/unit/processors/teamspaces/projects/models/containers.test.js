@@ -15,7 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src } = require('../../../../../helper/path');
+const { src, modelFolder, objModel } = require('../../../../../helper/path');
+const ServiceHelper = require('../../../../../helper/services');
+const fs = require('fs/promises');
+const path = require('path');
 
 jest.mock('../../../../../../../src/v5/models/projects');
 const ProjectsModel = require(`${src}/models/projects`);
@@ -26,6 +29,10 @@ const Users = require(`${src}/models/users`);
 jest.mock('../../../../../../../src/v5/models/revisions');
 const Revisions = require(`${src}/models/revisions`);
 const Containers = require(`${src}/processors/teamspaces/projects/models/containers`);
+const Views = require(`${src}/models/views`);
+jest.mock('../../../../../../../src/v5/models/views');
+const Legends = require(`${src}/models/legends`);
+jest.mock('../../../../../../../src/v5/models/legends');
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const modelList = [
@@ -78,6 +85,20 @@ const model1Revisions = [
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getContainers.mockImplementation(() => modelList);
 ModelSettings.getContainerById.mockImplementation((teamspace, container) => containerSettings[container]);
+Views.checkViewExists.mockImplementation((teamspace, model, view) => {
+	if (view === 1) {
+		return 1;
+	}
+	throw templates.viewNotFound;
+});
+
+Legends.checkLegendExists.mockImplementation((teamspace, model, legend) => {
+	if (legend === 1) {
+		return 1;
+	}
+	throw templates.legendNotFound;
+});
+
 Revisions.getRevisionCount.mockImplementation((teamspace, container) => (container === 'container2' ? 10 : 0));
 Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 	if (container === 'container2') return container2Rev;
@@ -236,10 +257,35 @@ const testGetRevisions = () => {
 	});
 };
 
+const fileExists = (file) => fs.access(file).then(() => true).catch(() => false);
+
+const testNewRevision = () => {
+	const fileCreated = path.join(modelFolder, 'toRemove.obj');
+	describe('New container revisions', () => {
+		const teamspace = 'teamspace';
+		const model = '123';
+		const data = {};
+		const file = { path: fileCreated, originalname: 'hello.obj' };
+		test('should execute successfully if queueModelUpload returns', async () => {
+			await fs.copyFile(objModel, fileCreated);
+			await expect(Containers.newRevision(teamspace, model, data, file)).resolves.toBe(undefined);
+			await expect(fileExists(fileCreated)).resolves.toBe(false);
+		});
+
+		test('should return whatever error queueModelUpload returns should it fail', async () => {
+			await expect(Containers.newRevision(teamspace, model, data, file))
+				.rejects.toEqual(templates.queueInsertionFailed);
+			await expect(fileExists(fileCreated)).resolves.toBe(false);
+		});
+		afterAll(ServiceHelper.queue.purgeQueues);
+	});
+};
+
 describe('processors/teamspaces/projects/containers', () => {
 	testGetContainerList();
 	testGetContainerStats();
 	testAppendFavourites();
 	testDeleteFavourites();
 	testGetRevisions();
+	testNewRevision();
 });

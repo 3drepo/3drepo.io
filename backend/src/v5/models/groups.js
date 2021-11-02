@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const EventsManager = require('../services/eventsManager');
+const EventsManager = require('../services/eventsManager/eventsManager');
 const db = require('../handler/db');
-const { events } = require('../services/eventsManager.constants');
+const { events } = require('../services/eventsManager/eventsManager.constants');
 const { templates } = require('../utils/responseCodes');
 
 const Groups = {};
