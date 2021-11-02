@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Action } from 'redux';
+
 export interface IContainersState {
 	containers: IContainer[];
 	filterQuery: string;
@@ -40,4 +42,22 @@ export interface IContainer {
 	status: ContainerStatuses;
 	isFavourite: boolean;
 	role: string;
+}
+
+export interface FavouritePayload {
+	teamspace: string;
+	projectId: string;
+	containerId: string;
+}
+
+export type SetFilterQueryAction = Action<'SET_FILTER_QUERY'> & { query: string};
+export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;
+export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & FavouritePayload;
+export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & {containerId: string, isFavourite: boolean};
+
+export interface IContainersActionCreators {
+	setFilterQuery: (query: string) => SetFilterQueryAction;
+	addFavourite: (teamspace: string, projectId: string, containerId: string) => AddFavouriteAction;
+	removeFavourite: (teamspace: string, projectId: string, containerId: string) => RemoveFavouriteAction;
+	setFavouriteSuccess: (containerId: string, isFavourite: boolean) => SetFavouriteSuccessAction;
 }

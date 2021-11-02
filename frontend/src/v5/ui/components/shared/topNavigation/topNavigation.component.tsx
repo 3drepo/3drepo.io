@@ -35,13 +35,13 @@ export const TopNavigation = (): JSX.Element => {
 	return (
 		<Container>
 			{hasValidProject
-				&& (
-					<>
-						<Link to={`${url}/t/federations`}><Trans id="Federations" /></Link>
-						<Link to={`${url}/t/containers`}><Trans id="Containers" /></Link>
-					</>
-				)}
-			<Link to={`${discardUrlComponent(url, 'settings')}/t/settings`}><Trans id="Settings" /></Link>
+			&& (
+				<>
+					<Link to={`${url}/t/federations`}><Trans id="Federations" /></Link>
+					<Link to={`${url}/t/containers`}><Trans id="Containers" /></Link>
+					<Link to={`${discardUrlComponent(url, 'settings')}/t/settings`}><Trans id="Settings" /></Link>
+				</>
+			)}
 		</Container>
 	);
 };
