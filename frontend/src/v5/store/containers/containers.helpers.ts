@@ -36,6 +36,10 @@ export const prepareSingleContainerData = (
 	status: stats?.status ?? ContainerStatuses.OK,
 	units: stats?.units ?? '',
 	hasStatsPending: !stats,
+	errorResponse: stats?.errorReason && {
+		message: stats.errorReason.message,
+		date: getNullableDate(stats?.errorReason.timestamp),
+	},
 });
 
 export const prepareContainersData = (

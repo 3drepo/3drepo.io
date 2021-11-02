@@ -46,6 +46,10 @@ export interface IContainer {
 	isFavourite: boolean;
 	role: string;
 	hasStatsPending: boolean;
+	errorResponse?: {
+		message: string;
+		date: Date | null;
+	};
 }
 
 export type FavouritePayload = FetchContainersPayload & {
@@ -81,6 +85,10 @@ export type FetchContainerStatsResponse = {
 	};
 	type: string;
 	status: ContainerStatuses;
+	errorReason?: {
+		message: string;
+		timestamp: number;
+	};
 	units: string;
 	code: string;
 };

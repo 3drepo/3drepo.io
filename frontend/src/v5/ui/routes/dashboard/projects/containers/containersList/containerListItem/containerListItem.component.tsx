@@ -62,10 +62,7 @@ export const ContainerListItem = ({
 					<LatestRevision
 						name={container.latestRevision}
 						status={container.status}
-						error={{
-							date: new Date(),
-							message: 'Mock error message',
-						}}
+						error={container.errorResponse}
 					/>
 				)}
 				selected={isSelected}

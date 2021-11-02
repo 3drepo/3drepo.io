@@ -27,7 +27,7 @@ interface ILatestRevision {
 	name: string;
 	status: ContainerStatuses;
 	error?: {
-		date: Date;
+		date: Date | null;
 		message: string;
 	}
 }
@@ -65,21 +65,35 @@ export const LatestRevision = ({ name, status, error }: ILatestRevision): JSX.El
 							{name}
 						</Name>
 						<ErrorTooltip>
-							<Trans
-								id="containers.list.item.latestRevision.status.error.tooltipMessage"
-								message="The latest upload on <0>{date}</0> at <0>{time}</0> has failed due to <0>{message}</0>."
-								values={{
-									date: i18n.date(error.date),
-									time: i18n.date(error.date, {
-										hour: 'numeric',
-										minute: 'numeric',
-									}),
-									message: error.message,
-								}}
-								components={[
-									<b />,
-								]}
-							/>
+							{error.date ? (
+								<Trans
+									id="containers.list.item.latestRevision.status.error.tooltipMessageWithDate"
+									message="The latest upload on <0>{date}</0> at <0>{time}</0> has failed due to <0>{message}</0>."
+									values={{
+										date: i18n.date(error.date),
+										time: i18n.date(error.date, {
+											hour: 'numeric',
+											minute: 'numeric',
+										}),
+										message: error.message,
+									}}
+									components={[
+										<b />,
+									]}
+								/>
+							) : (
+								<Trans
+									id="containers.list.item.latestRevision.status.error.tooltipMessageWithoutDate"
+									message="The latest upload has failed due to <0>{message}</0>."
+									values={{
+										message: error.message,
+									}}
+									components={[
+										<b />,
+									]}
+								/>
+							)}
+
 						</ErrorTooltip>
 					</>
 				);
