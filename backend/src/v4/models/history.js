@@ -34,11 +34,11 @@ History.getHistory = async function(account, model, branch, revId, projection) {
 	let history;
 
 	if (revId && utils.isUUID(revId)) {
-		history = await this.findByUID(account, model, revId, projection);
+		history = await History.findByUID(account, model, revId, projection);
 	} else if (revId && !utils.isUUID(revId)) {
-		history = await this.findByTag(account, model, revId, projection);
+		history = await History.findByTag(account, model, revId, projection);
 	} else if (branch) {
-		history = await this.findByBranch(account, model, branch, projection);
+		history = await History.findByBranch(account, model, branch, projection);
 	}
 
 	if (!history) {
@@ -68,7 +68,7 @@ History.listByBranch = async function(account, model, branch, projection, showVo
 		query.shared_id = stringToUUID(branch);
 	}
 
-	return await this.find(
+	return await History.find(
 		account, model,
 		query,
 		projection,
@@ -114,7 +114,7 @@ History.revisionCount = async function(teamspace, model) {
 
 // get the head of default branch (master)
 History.findLatest = async function(account, model, projection) {
-	return await this.findByBranch(account, model, null, projection);
+	return await History.findByBranch(account, model, null, projection);
 };
 
 History.findByUID = async function(account, model, revId, projection) {

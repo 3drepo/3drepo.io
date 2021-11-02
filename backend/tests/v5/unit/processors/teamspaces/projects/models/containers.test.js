@@ -15,7 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src, srcV4 } = require('../../../../../helper/path');
+const { src, modelFolder, srcV4, objModel } = require('../../../../../helper/path');
+const ServiceHelper = require('../../../../../helper/services');
+const fs = require('fs/promises');
+const path = require('path');
 
 jest.mock('../../../../../../../src/v4/models/fileRef');
 const FileRef = require(`${srcV4}/models/fileRef`);
@@ -328,6 +331,30 @@ const testGetRevisions = () => {
 	});
 };
 
+const fileExists = (file) => fs.access(file).then(() => true).catch(() => false);
+
+const testNewRevision = () => {
+	const fileCreated = path.join(modelFolder, 'toRemove.obj');
+	describe('New container revisions', () => {
+		const teamspace = 'teamspace';
+		const model = '123';
+		const data = {};
+		const file = { path: fileCreated, originalname: 'hello.obj' };
+		test('should execute successfully if queueModelUpload returns', async () => {
+			await fs.copyFile(objModel, fileCreated);
+			await expect(Containers.newRevision(teamspace, model, data, file)).resolves.toBe(undefined);
+			await expect(fileExists(fileCreated)).resolves.toBe(false);
+		});
+
+		test('should return whatever error queueModelUpload returns should it fail', async () => {
+			await expect(Containers.newRevision(teamspace, model, data, file))
+				.rejects.toEqual(templates.queueInsertionFailed);
+			await expect(fileExists(fileCreated)).resolves.toBe(false);
+		});
+		afterAll(ServiceHelper.queue.purgeQueues);
+	});
+};
+
 describe('processors/teamspaces/projects/containers', () => {
 	testGetContainerList();
 	testGetContainerStats();
@@ -336,4 +363,5 @@ describe('processors/teamspaces/projects/containers', () => {
 	testAppendFavourites();
 	testDeleteFavourites();
 	testGetRevisions();
+	testNewRevision();
 });
