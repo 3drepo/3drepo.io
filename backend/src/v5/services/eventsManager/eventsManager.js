@@ -16,9 +16,9 @@
  */
 
 const eventConstants = require('./eventsManager.constants');
-const eventLabel = require('../utils/logger').labels.event;
+const eventLabel = require('../../utils/logger').labels.event;
 const events = require('events');
-const logger = require('../utils/logger').logWithLabel(eventLabel);
+const logger = require('../../utils/logger').logWithLabel(eventLabel);
 
 const eventsEmitter = new events.EventEmitter();
 
@@ -39,6 +39,12 @@ EventsManager.subscribe = (eventName, callback) => {
 	} else {
 		throw new Error(`Trying to subscribe to an unknown event: ${eventName}`);
 	}
+};
+
+// NOTE: this is only used in testing situation to reset the event listeners - not used in practice.
+/* istanbul ignore next */
+EventsManager.reset = () => {
+	eventsEmitter.removeAllListeners();
 };
 
 module.exports = EventsManager;

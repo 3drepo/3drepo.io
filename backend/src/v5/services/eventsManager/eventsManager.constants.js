@@ -17,7 +17,14 @@
 
 const EventManagerConst = {};
 
-const eventList = ['NEW_GROUPS', 'UPDATE_GROUP'];
+const eventList = [
+	// Groups
+	'NEW_GROUPS', 'UPDATE_GROUP',
+	// Queue specific
+	'QUEUED_TASK_UPDATE', 'QUEUED_TASK_COMPLETED',
+	// Model import (including federation and toy project)
+	'MODEL_IMPORT_UPDATE', 'MODEL_IMPORT_FINISHED',
+];
 
 const generateEventsMap = () => {
 	const res = {};

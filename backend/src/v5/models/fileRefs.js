@@ -15,12 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Path = require('path');
+const FileRefs = {};
+const db = require('../handler/db');
 
-const PathHelper = {};
+const collectionName = (collection) => (collection.endsWith('.ref') ? collection : `${collection}.ref`);
 
-PathHelper.src = `${__dirname}/../../../src/v5`;
-PathHelper.srcV4 = `${__dirname}/../../../src/v4`;
-PathHelper.modelFolder = `${__dirname}/../resources/models`;
-PathHelper.objModel = Path.join(PathHelper.modelFolder, 'dummy.obj');
-module.exports = PathHelper;
+FileRefs.getTotalSize = async (teamspace, collection) => {
+	const pipelines = [
+		{ $match: {} },
+		{ $group: { _id: null, total: { $sum: '$size' } } },
+	];
+
+	const res = await db.aggregate(teamspace, collectionName(collection), pipelines);
+
+	return res.length > 0 ? res[0].total : 0;
+};
+
+module.exports = FileRefs;
