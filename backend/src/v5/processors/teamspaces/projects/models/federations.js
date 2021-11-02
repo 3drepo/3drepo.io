@@ -15,14 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { addModel, deleteModel, getModelList } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
-const { getFederationById, getFederations, updateModelSettings, addModel } = require('../../../../models/modelSettings');
+const { getFederationById, getFederations, updateModelSettings } = require('../../../../models/modelSettings');
 const Groups = require('./commons/groups');
 const { getIssuesCount } = require('../../../../models/issues');
 const { getLatestRevision } = require('../../../../models/revisions');
-const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
 const { getRisksCount } = require('../../../../models/risks');
+const { templates } = require('../../../../utils/responseCodes');
 
 const Federations = { ...Groups };
 
@@ -85,6 +86,17 @@ Federations.getFederationStats = async (teamspace, federation) => {
 
 Federations.addFederation = async (teamspace, project, federation) =>{
 	return await addModel(teamspace, project, {...federation, federate: true});;
+};
+
+Federations.deleteFederation = async (teamspace, project, federation, user) => {
+	try {
+		await deleteModel(teamspace, project, federation, user);
+	} catch (err) {
+		if (err?.code === templates.modelNotFound.code) {
+			throw templates.federationNotFound;
+		}
+		throw err;
+	}
 };
 
 Federations.updateSettings = updateModelSettings;

@@ -15,11 +15,55 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+ const {
+	addModel,
+	deleteModel,
+	getModelById,
+	getModelByName,
+	isSubModel,
+	removeModelCollections,
+} = require('../../../../../models/modelSettings');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
 const { getFavourites } = require('../../../../../models/users');
-const { getProjectById } = require('../../../../../models/projects');
-
+const { addModelToProject, getProjectById, removeProjectModel  } = require('../../../../../models/projects');
+const { removeAllFilesFromModel } = require(`${v4Path}/models/fileRef`);
+const { templates } = require('../../../../../utils/responseCodes')
 const ModelList = {};
+
+ModelList.addModel = async (teamspace, project, data) => {
+	const { models } = await getProjectById(teamspace, project, { models: 1 });
+	const modelSetting = await getModelByName(teamspace, models, data.name, { _id: 0, name: 1 });
+
+	if (modelSetting) {
+		throw templates.nameAlreadyExists;
+	}
+
+	const insertedId = await addModel(teamspace, data);
+
+	await addModelToProject(teamspace, project, insertedId);
+
+	return insertedId;
+};
+
+ModelList.deleteModel = async (teamspace, model) => {
+	const setting = await getModelById(teamspace, model);
+
+	if (!setting.federate && (await isSubModel(teamspace, model))) {
+		throw templates.containerIsSubModel;
+	}
+
+	try {
+		await removeAllFilesFromModel(teamspace, model);
+	} catch (err) {
+		logger.logDebug(`[Delete model] : ${JSON.stringify(err)}`);
+	}
+
+	await Promise.all[
+		removeModelCollections(teamspace, model),
+		deleteModel(teamspace, model),
+		removeProjectModel(teamspace, model)
+	];	
+};
 
 ModelList.getModelList = async (teamspace, project, user, modelSettings) => {
 	const { permissions } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });

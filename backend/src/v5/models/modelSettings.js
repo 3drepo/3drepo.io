@@ -20,12 +20,18 @@ const db = require('../handler/db');
 const { generateUUIDString } = require('../utils/helper/uuids');
 const { templates } = require('../utils/responseCodes');
 
+const countModels = (ts, query) => db.count(ts, 'settings', query);
 const insertOneModel = (ts, data) => db.insertOne(ts, 'settings', data);
 const findOneModel = (ts, query, projection) => db.findOne(ts, 'settings', query, projection);
 const findModel = (ts, query, projection, sort) => db.find(ts, 'settings', query, projection, sort);
 
 const noFederations = { federate: { $ne: true } };
 const onlyFederations = { federate: true };
+
+Models.getModelByName = async (ts, ids, name, projection) => {
+	const query = { _id: { $in: ids }, name };
+	return findOneModel(ts, query, projection);
+};
 
 const getModelByQuery = async (ts, query, projection) => {
 	const res = await findOneModel(ts, query, projection);
@@ -34,6 +40,39 @@ const getModelByQuery = async (ts, query, projection) => {
 	}
 
 	return res;
+};
+
+Models.addModel = async (ts, data) => {
+	const newModelId = generateUUIDString(); 
+	await insertOneModel(ts, { _id: newModelId, ...data });
+	return newModelId;
+};
+
+Models.deleteModel = async (ts, model) => {
+	const res = await deleteOneModel(ts, { _id: model });
+
+	if (res.deletedCount === 0) {
+		throw templates.modelNotFound;
+	}
+};
+
+Models.isSubModel = async (ts, model) => {
+	const subModelCount = await countModels(ts, { 'subModels.model': model });
+
+	return subModelCount > 0;
+};
+
+Models.removeModelCollections = async (ts, model) => {
+	const collections = await db.listCollections(ts);
+	const promises = [];
+
+	collections.forEach((collection) => {
+		if (collection.name.startsWith(`${model}.`)) {
+			promises.push(db.dropCollection(ts, collection));
+		}
+	});
+
+	return Promise.all(promises);
 };
 
 Models.getModelById = (ts, model, projection) => getModelByQuery(ts, { _id: model }, projection);
@@ -109,10 +148,5 @@ Models.updateModelSettings = async (ts, model, data) => {
 	}
 };
 
-Models.addModel = async (ts, project, data) => {
-	const newModelId = generateUUIDString(); 
-	await insertOneModel(ts, { _id: newModelId, ...data });
-	return newModelId;
-};
 
 module.exports = Models;

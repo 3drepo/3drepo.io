@@ -42,6 +42,7 @@ ResponseCodes.templates = {
 	modelNotFound: { message: 'Model not found.', status: 404 },
 	federationNotFound: { message: 'Federation not found.', status: 404 },
 	containerNotFound: { message: 'Container not found.', status: 404 },
+	containerIsSubModel: { message: 'Container is a submodel.', status: 400 },
 	revisionNotFound: { message: 'Revision not found.', status: 404 },
 	groupNotFound: { message: 'Group not found.', status: 404 },
 
@@ -53,6 +54,7 @@ ResponseCodes.templates = {
 
 	// Invalid Arguments
 	invalidArguments: { message: 'The arguments provided are not valid', status: 400 },
+	nameAlreadyExists: { message: 'Name already exists.', status: 400 },
 };
 
 Object.keys(ResponseCodes.templates).forEach((key) => {
