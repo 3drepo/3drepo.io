@@ -19,7 +19,6 @@ import { Trans } from '@lingui/react';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router';
 import { range } from 'lodash';
-import { useSelector } from 'react-redux';
 
 import { RevisionsListHeaderLabel } from '@components/shared/revisionDetails/components/revisionsListHeaderLabel';
 import { IRevision } from '@/v5/store/revisions/revisions.types';
@@ -29,7 +28,7 @@ import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { RevisionsListItem } from '@components/shared/revisionDetails/components/revisionsListItem';
 import { SkeletonListItem } from '@components/shared/revisionDetails/components/skeletonListItem';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
-import { selectIsPending, selectRevisions } from '@/v5/store/revisions/revisions.selectors';
+import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
 import {
 	Container, RevisionsListHeaderContainer, RevisionsListItemWrapper, RevisionsList, RevisionsListEmptyWrapper,
 	RevisionsListEmptyContainer,
@@ -42,8 +41,8 @@ interface IRevisionDetails {
 
 export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDetails): JSX.Element => {
 	const { teamspace, project } = useParams();
-	const isLoading: boolean = useSelector(selectIsPending(containerId));
-	const revisions: IRevision[] = useSelector(selectRevisions(containerId));
+	const isLoading: boolean = RevisionsHooksSelectors.selectIsPending(containerId);
+	const revisions: IRevision[] = RevisionsHooksSelectors.selectRevisions(containerId);
 	const selected = revisions.findIndex((r) => !r.void);
 	const isSingle = revisions?.length === 1;
 

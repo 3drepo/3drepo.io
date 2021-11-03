@@ -27,6 +27,8 @@ export const selectUsers = createSelector(
 	selectTeamspacesDomain, (state) => state.users,
 );
 
-export const selectTeamspaceUsers = (teamspace) => createSelector(
-	selectUsers, (state) => state[teamspace] || [],
+export const selectTeamspaceUsers = createSelector(
+	selectUsers,
+	(_, teamspace) => teamspace,
+	(state, teamspace) => state[teamspace] || [],
 );

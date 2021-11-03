@@ -38,9 +38,9 @@ export function* fetch() {
 
 export function* fetchUsers({ teamspace }) {
 	try {
-		const users = yield select(selectTeamspaceUsers(teamspace));
+		const users = yield select(selectTeamspaceUsers, teamspace);
 
-		if (isEmpty(users[teamspace])) {
+		if (isEmpty(users)) {
 			const { data: { members } } = yield API.fetchTeamspaceMembers(teamspace);
 
 			yield put(TeamspacesActions.fetchUsersSuccess(teamspace, members));

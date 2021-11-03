@@ -16,14 +16,13 @@
  */
 
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { useParams } from 'react-router';
 
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { IUser } from '@/v5/store/teamspaces/teamspaces.redux';
 import { Popover } from '@/v4/routes/components/messagesList/components/message/components/markdownMessage/ticketReference/ticketReference.styles';
 import { UserPopover } from '@components/shared/userPopover/userPopover.component';
-import { selectTeamspaceUsers } from '@/v5/store/teamspaces/teamspaces.selectors';
+import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
 import { Text } from './revisionsListItemAuthor.styles';
 
 type IRevisionsListItemAuthor = {
@@ -41,7 +40,8 @@ export const RevisionsListItemAuthor = ({
 }: IRevisionsListItemAuthor): JSX.Element => {
 	const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
 	const { teamspace } = useParams();
-	const teamspaceUsers: IUser[] = useSelector(selectTeamspaceUsers(teamspace));
+	const teamspaceUsers: IUser[] = TeamspacesHooksSelectors.selectTeamspaceUsers(teamspace);
+
 	const author = teamspaceUsers.find(({ user }) => user === authorName);
 
 	const handlePopoverOpen = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
