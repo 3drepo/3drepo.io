@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, takeLatest } from 'redux-saga/effects';
+import { all, put, takeEvery, takeLatest } from 'redux-saga/effects';
 import { FederationsActions, FederationsTypes } from '@/v5/store/federations/federations.redux';
 import * as API from '@/v5/services/api';
 import {
@@ -23,9 +23,10 @@ import {
 	FetchFederationsResponse,
 	FetchFederationStatsResponse,
 	AddFavouriteAction,
-	RemoveFavouriteAction,
+	RemoveFavouriteAction, FetchFederationStatsAction,
 } from '@/v5/store/federations/federations.types';
 import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
+import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 
 export function* addFavourites({ federationId, teamspace, projectId }: AddFavouriteAction) {
 	try {
@@ -47,7 +48,6 @@ export function* removeFavourites({ federationId, teamspace, projectId }: Remove
 
 export function* fetchFederations({ teamspace, projectId }: FetchFederationsAction) {
 	yield put(FederationsActions.setIsListPending(true));
-	yield put(FederationsActions.setAreStatsPending(true));
 	try {
 		const { federations }: FetchFederationsResponse = yield API.Federations.fetchFederations({
 			teamspace,
@@ -58,21 +58,31 @@ export function* fetchFederations({ teamspace, projectId }: FetchFederationsActi
 		yield put(FederationsActions.fetchFederationsSuccess(projectId, federationsWithoutStats));
 		yield put(FederationsActions.setIsListPending(false));
 
-		const stats: FetchFederationStatsResponse[] = yield all(
+		yield all(
 			federations.map(
-				(federation) => API.Federations.fetchFederationStats({
-					teamspace, projectId, federationId: federation._id,
-				}),
+				(federation) => put(FederationsActions.fetchFederationStats(teamspace, projectId, federation._id)),
 			),
 		);
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to fetch federations',
+			error,
+		}));
+	}
+}
 
-		const federationsDataWithStats = prepareFederationsData(federations, stats);
-		yield put(FederationsActions.fetchFederationsSuccess(projectId, federationsDataWithStats));
-		yield put(FederationsActions.setAreStatsPending(false));
-	} catch (e) {
-		yield put(FederationsActions.setIsListPending(false));
-		yield put(FederationsActions.setAreStatsPending(false));
-		console.error(e);
+export function* fetchFederationStats({ teamspace, projectId, federationId }: FetchFederationStatsAction) {
+	try {
+		const stats: FetchFederationStatsResponse = yield API.Federations.fetchFederationStats({
+			teamspace, projectId, federationId,
+		});
+
+		yield put(FederationsActions.fetchFederationStatsSuccess(projectId, federationId, stats));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to fetch federations',
+			error,
+		}));
 	}
 }
 
@@ -80,4 +90,5 @@ export default function* FederationsSagas() {
 	yield takeLatest(FederationsTypes.ADD_FAVOURITE, addFavourites);
 	yield takeLatest(FederationsTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeLatest(FederationsTypes.FETCH_FEDERATIONS, fetchFederations);
+	yield takeEvery(FederationsTypes.FETCH_FEDERATION_STATS, fetchFederationStats);
 }

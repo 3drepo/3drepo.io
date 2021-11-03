@@ -61,7 +61,7 @@ export const Federations = (): JSX.Element => {
 						<DashboardListEmptyText>
 							<Trans
 								id="federations.favourites.emptyMessage"
-								message="You haven’t added any Favourites. Click the star on a Federation to add your first favourite Federation.          "
+								message="You haven’t added any Favourites. Click the star on a Federation to add your first favourite Federation."
 							/>
 						</DashboardListEmptyText>
 					)}

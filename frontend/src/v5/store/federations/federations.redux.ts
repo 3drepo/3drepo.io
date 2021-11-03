@@ -22,8 +22,9 @@ import {
 	IFederationsState,
 	SetFavouritesFilterQueryAction,
 	SetFilterQueryAction,
-	SetFavouriteSuccessAction,
+	SetFavouriteSuccessAction, FetchFederationStatsSuccessAction,
 } from '@/v5/store/federations/federations.types';
+import { prepareSingleFederationData } from '@/v5/store/federations/federations.helpers';
 import { Constants } from '../common/actions.helper';
 
 export const { Types: FederationsTypes, Creators: FederationsActions } = createActions({
@@ -34,6 +35,8 @@ export const { Types: FederationsTypes, Creators: FederationsActions } = createA
 	setFavouriteSuccess: ['projectId', 'federationId', 'isFavourite'],
 	fetchFederations: ['teamspace', 'projectId'],
 	fetchFederationsSuccess: ['projectId', 'federations'],
+	fetchFederationStats: ['teamspace', 'projectId', 'federationId'],
+	fetchFederationStatsSuccess: ['projectId', 'federationId', 'federationStats'],
 	setIsListPending: ['isPending'],
 	setAreStatsPending: ['isPending'],
 }, { prefix: 'FEDERATIONS/' }) as { Types: Constants<IFederationsActionCreators>; Creators: IFederationsActionCreators };
@@ -43,7 +46,6 @@ export const INITIAL_STATE: IFederationsState = {
 	favouritesFilterQuery: '',
 	allFilterQuery: '',
 	isListPending: false,
-	areStatsPending: false,
 };
 
 export const setAllFilterQuery = (state = INITIAL_STATE, { query }: SetFilterQueryAction) => (
@@ -77,6 +79,21 @@ export const fetchFederationsSuccess = (state = INITIAL_STATE, {
 	federations: {
 		...state.federations,
 		[projectId]: federations,
+	},
+});
+
+export const fetchStatsSuccess = (state = INITIAL_STATE, {
+	projectId,
+	federationId,
+	federationStats,
+}: FetchFederationStatsSuccessAction) => ({
+	...state,
+	federations: {
+		...state.federations,
+		[projectId]: state.federations[projectId].map((federation) => {
+			if (federationId !== federation._id) return federation;
+			return prepareSingleFederationData(federation, federationStats);
+		}),
 	},
 });
 

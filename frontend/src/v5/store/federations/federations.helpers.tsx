@@ -16,7 +16,7 @@
  */
 
 import {
-	FetchFederationsResponse,
+	FetchFederationsItemResponse,
 	FetchFederationStatsResponse,
 	IFederation,
 } from '@/v5/store/federations/federations.types';
@@ -31,20 +31,26 @@ export const filterFederations = (federations: IFederation[], filterQuery: strin
 	) => [name, code, category].join('').toLowerCase().includes(filterQuery.trim().toLowerCase()))
 );
 
+export const prepareSingleFederationData = (
+	federation: FetchFederationsItemResponse,
+	stats?: FetchFederationStatsResponse,
+): IFederation => ({
+	...federation,
+	code: stats?.code ?? '',
+	status: stats?.status ?? UploadStatuses.OK,
+	subModels: stats?.subModels ?? [],
+	containers: stats?.subModels.length ?? 0,
+	issues: stats?.tickets.issues ?? 0,
+	risks: stats?.tickets.risks ?? 0,
+	lastUpdated: getNullableDate(stats?.lastUpdated),
+	category: stats?.category ?? '',
+	hasStatsPending: !stats,
+});
+
 export const prepareFederationsData = (
-	federations: FetchFederationsResponse['federations'],
+	federations: Array<FetchFederationsItemResponse>,
 	stats?: FetchFederationStatsResponse[],
 ) => federations.map<IFederation>((federation, index) => {
 	const federationStats = stats?.[index];
-	return {
-		...federation,
-		code: federationStats?.code ?? '',
-		status: federationStats?.status ?? UploadStatuses.OK,
-		subModels: federationStats?.subModels ?? [],
-		containers: federationStats?.subModels.length ?? 0,
-		issues: federationStats?.tickets.issues ?? 0,
-		risks: federationStats?.tickets.risks ?? 0,
-		lastUpdated: getNullableDate(federationStats?.lastUpdated),
-		category: federationStats?.category ?? '',
-	};
+	return prepareSingleFederationData(federation, federationStats);
 });

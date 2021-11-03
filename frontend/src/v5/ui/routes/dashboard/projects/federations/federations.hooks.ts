@@ -32,7 +32,7 @@ export const useFederationsData = () => {
 	const currentProject = ProjectsHooksSelectors.selectCurrentProject();
 
 	useEffect(() => {
-		if (hasFederations.all) return;
+		if (hasFederations.all || currentProject !== project) return;
 
 		FederationsActionsDispatchers.fetchFederations(teamspace, project);
 	}, [currentProject]);

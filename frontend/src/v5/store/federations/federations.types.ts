@@ -14,7 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { UploadStatuses } from '@/v5/store/containers/containers.types';
+import {
+	UploadStatuses,
+} from '@/v5/store/containers/containers.types';
 import { Action } from 'redux';
 
 export interface IFederation {
@@ -30,6 +32,7 @@ export interface IFederation {
 	risks: number;
 	category: string;
 	lastUpdated: Date;
+	hasStatsPending: boolean;
 }
 
 export interface IFederationsState {
@@ -37,7 +40,6 @@ export interface IFederationsState {
 	allFilterQuery: string;
 	favouritesFilterQuery: string;
 	isListPending: boolean;
-	areStatsPending: boolean;
 }
 
 export type FetchFederationsPayload = {
@@ -45,8 +47,10 @@ export type FetchFederationsPayload = {
 	projectId: string;
 };
 
+export type FetchFederationsItemResponse = Pick<IFederation, '_id' | 'name' | 'role' | 'isFavourite'>;
+
 export type FetchFederationsResponse = {
-	federations: Array<Pick<IFederation, '_id' | 'name' | 'role' | 'isFavourite'>>
+	federations: Array<FetchFederationsItemResponse>;
 };
 
 export type FavouritePayload = FetchFederationsPayload & {
@@ -69,24 +73,36 @@ export type FetchFederationStatsPayload = FetchFederationsPayload & {
 	federationId: string;
 };
 
+export type FetchFederationStatsSuccessPayload = {
+	federationId: string,
+	projectId: string;
+	federationStats: FetchFederationStatsResponse;
+};
+
 export type FetchFederationsAction = Action<'FETCH_FEDERATIONS'> & FetchFederationsPayload;
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;
 export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & FavouritePayload;
 export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & {projectId: string, federationId: string, isFavourite: boolean};
 export type FetchFederationsSuccessAction = Action<'FETCH_FEDERATIONS_SUCCESS'> & { projectId: string, federations: IFederation[] };
 export type SetIsListPendingAction = Action<'SET_IS_LIST_PENDING'> & { isPending: boolean };
-export type SetAreStatsPendingAction = Action<'SET_ARE_STATS_PENDING'> & { isPending: boolean };
 export type SetFilterQueryAction = Action<'SET_ALL_FILTER_QUERY'> & { query: string};
 export type SetFavouritesFilterQueryAction = Action<'SET_FAVOURITES_FILTER_QUERY'> & { query: string};
+export type FetchFederationStatsAction = Action<'FETCH_FEDERATION_STATS'> & FetchFederationStatsPayload;
+export type FetchFederationStatsSuccessAction = Action<'FETCH_FEDERATION_STATS_SUCCESS'> & FetchFederationStatsSuccessPayload;
 
 export interface IFederationsActionCreators {
 	fetchFederations: (teamspace: string, projectId: string) => FetchFederationsAction;
 	fetchFederationsSuccess: (projectId: string, federations: IFederation[]) => FetchFederationsSuccessAction;
+	fetchFederationStats: (teamspace: string, projectId: string, federationId: string) => FetchFederationStatsAction;
+	fetchFederationStatsSuccess: (
+		projectId: string,
+		federationId: string,
+		federationStats: FetchFederationStatsResponse
+	) => FetchFederationStatsSuccessAction;
 	addFavourite: (teamspace: string, projectId: string, federationId: string) => AddFavouriteAction;
 	removeFavourite: (teamspace: string, projectId: string, federationId: string) => RemoveFavouriteAction;
-	setFavouriteSuccess: (projectId: string, containerId: string, isFavourite: boolean) => SetFavouriteSuccessAction;
+	setFavouriteSuccess: (projectId: string, federationId: string, isFavourite: boolean) => SetFavouriteSuccessAction;
 	setAllFilterQuery: (query: string) => SetFilterQueryAction;
 	setFavouritesFilterQuery: (query: string) => SetFavouritesFilterQueryAction;
 	setIsListPending: (isPending: boolean) => SetIsListPendingAction;
-	setAreStatsPending: (isPending: boolean) => SetAreStatsPendingAction
 }
