@@ -40,6 +40,18 @@ describe('Containers: sagas', () => {
 			.put(ContainersActions.setFavouriteSuccess(projectId, containerId, true))
 			.silentRun();
 		})
+
+		it('should call addFavourite endpoint with 404 and revert change', async () => {
+			mockServer
+			.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
+			.reply(404)
+
+			await expectSaga(ContainersSaga.default)
+			.dispatch(ContainersActions.addFavourite(teamspace, projectId, containerId))
+			.put(ContainersActions.setFavouriteSuccess(projectId, containerId, true))
+			.put(ContainersActions.setFavouriteSuccess(projectId, containerId, false))
+			.silentRun();
+		})
 	})
 
 	describe('removeFavourite', () => {
@@ -51,6 +63,18 @@ describe('Containers: sagas', () => {
 			await expectSaga(ContainersSaga.default)
 			.dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
 			.put(ContainersActions.setFavouriteSuccess(projectId, containerId, false))
+			.silentRun();
+		})
+
+		it('should call removeFavourite endpoint with 404 and revert change', async () => {
+			mockServer
+			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
+			.reply(404)
+
+			await expectSaga(ContainersSaga.default)
+			.dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
+			.put(ContainersActions.setFavouriteSuccess(projectId, containerId, false))
+			.put(ContainersActions.setFavouriteSuccess(projectId, containerId, true))
 			.silentRun();
 		})
 	})
