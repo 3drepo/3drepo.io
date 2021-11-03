@@ -19,9 +19,9 @@ import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { RevisionsActions, RevisionsTypes } from './revisions.redux';
-import { SetRevisionVoidStatusAction } from './revisions.types';
+import { FetchAction, SetRevisionVoidStatusAction } from './revisions.types';
 
-export function* fetch({ teamspace, projectId, containerId }) {
+export function* fetch({ teamspace, projectId, containerId }: FetchAction) {
 	yield put(RevisionsActions.setIsPending(containerId, true));
 	try {
 		const { data: { revisions } } = yield API.fetchRevisions(teamspace, projectId, containerId);
@@ -49,6 +49,6 @@ export function* setVoidStatus({ teamspace, projectId, containerId, revisionId, 
 }
 
 export default function* RevisionsSaga() {
-	yield takeLatest(RevisionsTypes.FETCH as any, fetch);
+	yield takeLatest(RevisionsTypes.FETCH, fetch);
 	yield takeLatest(RevisionsTypes.SET_VOID_STATUS, setVoidStatus);
 }
