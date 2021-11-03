@@ -63,6 +63,7 @@ export const ContainerListItem = ({
 						name={container.latestRevision}
 						status={container.status}
 						error={container.errorResponse}
+						hasRevisions={container.revisionsCount > 0}
 					/>
 				)}
 				selected={isSelected}

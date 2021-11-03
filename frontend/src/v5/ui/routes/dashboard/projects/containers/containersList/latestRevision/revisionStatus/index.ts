@@ -15,14 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-
-export const Container = styled.div`
-	display: flex;
-	padding-right: 10px;
-`;
-
-export const Label = styled.span`
-	white-space: nowrap;
-	margin-right: 4px;
-`;
+export { RevisionStatus } from './revisionStatus.component';

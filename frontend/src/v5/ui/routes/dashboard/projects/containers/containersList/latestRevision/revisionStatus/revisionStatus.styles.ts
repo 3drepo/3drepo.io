@@ -16,13 +16,20 @@
  */
 
 import styled from 'styled-components';
+import { Typography } from '@controls/typography';
+import { FONT_WEIGHT } from '@/v4/styles';
 
-export const Container = styled.div`
-	display: flex;
-	padding-right: 10px;
+export const Name = styled(Typography).attrs({
+	variant: 'body1',
+	component: 'span',
+})`
+	font-weight: ${FONT_WEIGHT.BOLD};
 `;
 
-export const Label = styled.span`
-	white-space: nowrap;
-	margin-right: 4px;
+export const QueuedStatus = styled(Name)`
+	color: ${({ theme }) => theme.palette.favourite.dark};
+`;
+
+export const ProcessingStatus = styled(Name)`
+	color: ${({ theme }) => theme.palette.primary.main};
 `;
