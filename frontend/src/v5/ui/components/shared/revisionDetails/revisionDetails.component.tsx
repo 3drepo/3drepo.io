@@ -20,10 +20,11 @@ import React, { useEffect } from 'react';
 import { useParams } from 'react-router';
 import { range } from 'lodash';
 import { useSelector } from 'react-redux';
+
 import { RevisionsListHeaderLabel } from '@components/shared/revisionDetails/components/revisionsListHeaderLabel';
 import { IRevision } from '@/v5/store/revisions/revisions.types';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
-import { NewContainerButton } from '@/v5/ui/routes/dashboard/projects/containers/containers.styles';
+import { Button } from '@controls/button';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { RevisionsListItem } from '@components/shared/revisionDetails/components/revisionsListItem';
 import { SkeletonListItem } from '@components/shared/revisionDetails/components/skeletonListItem';
@@ -59,9 +60,13 @@ export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDe
 					<DashboardListEmptyText>
 						<Trans id="containers.revisions.emptyMessage" message="You haven’t added any Files." />
 					</DashboardListEmptyText>
-					<NewContainerButton startIcon={<AddCircleIcon />}>
+					<Button
+						startIcon={<AddCircleIcon />}
+						variant="contained"
+						color="primary"
+					>
 						<Trans id="containers.revisions.uploadFile" message="Upload File" />
-					</NewContainerButton>
+					</Button>
 				</RevisionsListEmptyContainer>
 			</RevisionsListEmptyWrapper>
 		);

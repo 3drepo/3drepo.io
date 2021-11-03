@@ -468,6 +468,9 @@ export const theme = createMuiTheme({
 			},
 			containedPrimary: {
 				color: COLOR.PRIMARY_MAIN_CONTRAST,
+				'& $path': {
+					fill: COLOR.PRIMARY_MAIN_CONTRAST,
+				},
 				'&:hover': {
 					backgroundColor: COLOR.PRIMARY_DARK,
 				},

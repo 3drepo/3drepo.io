@@ -26,6 +26,9 @@ export const Container = styled.div`
 	padding-right: 36px;
 	z-index: 1;
 	position: relative;
+	max-height: 500px;
+	overflow: hidden;
+	overflow-y: scroll;
 `;
 
 export const RevisionsListEmptyWrapper = styled.div`

@@ -20,6 +20,8 @@ import { debounce } from 'lodash';
 import { useParams } from 'react-router';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
 import { Trans } from '@lingui/react';
+
+import { Button } from '@controls/button';
 import { MainHeader } from '@controls/mainHeader';
 import { SearchInput } from '@controls/searchInput';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
@@ -29,9 +31,7 @@ import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/c
 import {
 	Container,
 	Content,
-	NewContainerButton,
-	NewContainerMainHeaderButton,
-	UploadFileButton,
+	HeaderButtonsGroup,
 } from './containers.styles';
 import { ContainersList } from './containersList';
 import { EmptySearchResults } from './containersList/emptySearchResults';
@@ -79,12 +79,22 @@ export const Containers = (): JSX.Element => {
 						/>
 					)}
 				/>
-				<NewContainerMainHeaderButton startIcon={<AddCircleIcon />} variant="outlined" color="secondary">
-					<Trans id="containers.mainHeader.newContainer" message="New Container" />
-				</NewContainerMainHeaderButton>
-				<UploadFileButton startIcon={<ArrowUpCircleIcon />} variant="contained" color="primary">
-					<Trans id="containers.mainHeader.uploadFile" message="Upload file" />
-				</UploadFileButton>
+				<HeaderButtonsGroup>
+					<Button
+						startIcon={<AddCircleIcon />}
+						variant="outlined"
+						color="secondary"
+					>
+						<Trans id="containers.mainHeader.newContainer" message="New Container" />
+					</Button>
+					<Button
+						startIcon={<ArrowUpCircleIcon />}
+						variant="contained"
+						color="primary"
+					>
+						<Trans id="containers.mainHeader.uploadFile" message="Upload file" />
+					</Button>
+				</HeaderButtonsGroup>
 			</MainHeader>
 			<Content>
 				<ContainersList
@@ -134,9 +144,13 @@ export const Containers = (): JSX.Element => {
 								<DashboardListEmptyText>
 									<Trans id="containers.all.emptyMessage" message="You haven’t created any Containers." />
 								</DashboardListEmptyText>
-								<NewContainerButton startIcon={<AddCircleIcon />}>
+								<Button
+									startIcon={<AddCircleIcon />}
+									variant="contained"
+									color="primary"
+								>
 									<Trans id="containers.all.newContainer" message="New Container" />
-								</NewContainerButton>
+								</Button>
 							</>
 						)
 					}
