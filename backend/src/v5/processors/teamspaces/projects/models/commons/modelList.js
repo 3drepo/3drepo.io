@@ -26,17 +26,21 @@
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
 const { getFavourites } = require('../../../../../models/users');
 const { addModelToProject, getProjectById, removeProjectModel  } = require('../../../../../models/projects');
-const { removeAllFilesFromModel } = require(`${v4Path}/models/fileRef`);
+// const { removeAllFilesFromModel } = require(`${v4Path}/models/fileRef`);
 const { templates } = require('../../../../../utils/responseCodes')
 const ModelList = {};
 
 ModelList.addModel = async (teamspace, project, data) => {
 	const { models } = await getProjectById(teamspace, project, { models: 1 });
-	const modelSetting = await getModelByName(teamspace, models, data.name, { _id: 0, name: 1 });
 
-	if (modelSetting) {
-		throw templates.nameAlreadyExists;
+	if(models){
+		const modelSetting = await getModelByName(teamspace, models, data.name, { _id: 0, name: 1 });
+
+		if (modelSetting) {
+			throw templates.nameAlreadyExists;
+		}
 	}
+	
 
 	const insertedId = await addModel(teamspace, data);
 
@@ -46,17 +50,17 @@ ModelList.addModel = async (teamspace, project, data) => {
 };
 
 ModelList.deleteModel = async (teamspace, model) => {
-	const setting = await getModelById(teamspace, model);
+	const setting = await getModelById(teamspace, model, {});
 
 	if (!setting.federate && (await isSubModel(teamspace, model))) {
 		throw templates.containerIsSubModel;
 	}
 
-	try {
-		await removeAllFilesFromModel(teamspace, model);
-	} catch (err) {
-		logger.logDebug(`[Delete model] : ${JSON.stringify(err)}`);
-	}
+	// try {
+	// 	await removeAllFilesFromModel(teamspace, model);
+	// } catch (err) {
+	// 	logger.logDebug(`[Delete model] : ${JSON.stringify(err)}`);
+	// }
 
 	await Promise.all[
 		removeModelCollections(teamspace, model),

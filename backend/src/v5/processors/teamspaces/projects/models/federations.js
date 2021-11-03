@@ -88,9 +88,9 @@ Federations.addFederation = async (teamspace, project, federation) =>{
 	return await addModel(teamspace, project, {...federation, federate: true});;
 };
 
-Federations.deleteFederation = async (teamspace, project, federation, user) => {
+Federations.deleteFederation = async (teamspace, federation, user) => {
 	try {
-		await deleteModel(teamspace, project, federation, user);
+		await deleteModel(teamspace, federation, user);
 	} catch (err) {
 		if (err?.code === templates.modelNotFound.code) {
 			throw templates.federationNotFound;

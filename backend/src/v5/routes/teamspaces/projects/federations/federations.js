@@ -82,8 +82,8 @@ const addFederation = (req, res) => {
 
 const deleteFederation = (req, res) => {
 	const user = getUserFromSession(req.session);
-	const { teamspace, project, federation } = req.params;
-	Federations.deleteFederation(teamspace, project, federation, user).then(() => {
+	const { teamspace, federation } = req.params;
+	Federations.deleteFederation(teamspace, federation, user).then(() => {
 		respond(req, res, templates.ok);
 	}).catch((err) => respond(req, res, err));
 };

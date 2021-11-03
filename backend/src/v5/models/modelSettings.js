@@ -21,6 +21,7 @@ const { generateUUIDString } = require('../utils/helper/uuids');
 const { templates } = require('../utils/responseCodes');
 
 const countModels = (ts, query) => db.count(ts, 'settings', query);
+const deleteOneModel = (ts, query) => db.deleteOne(ts, 'settings', query);
 const insertOneModel = (ts, data) => db.insertOne(ts, 'settings', data);
 const findOneModel = (ts, query, projection) => db.findOne(ts, 'settings', query, projection);
 const findModel = (ts, query, projection, sort) => db.find(ts, 'settings', query, projection, sort);
