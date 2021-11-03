@@ -62,7 +62,49 @@ const testTeamspaceAdmins = () => {
 	});
 };
 
+const testGetSubscriptions = () => {
+	describe('Get teamspace subscriptions', () => {
+		test('should subscription if teamspace exists', async () => {
+			const expectedData = {
+				customData: {
+					billing: {
+						subscriptions: {
+							a: 1,
+							b: 2,
+						},
+					},
+				},
+			};
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(expectedData);
+
+			const teamspace = 'someTS';
+			const res = await Teamspace.getSubscriptions(teamspace);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][2]).toEqual({ user: teamspace });
+			expect(res).toEqual(expectedData.customData.billing.subscriptions);
+		});
+
+		test('should return empty object if the teamspace has no subs', async () => {
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({});
+
+			const teamspace = 'someTS';
+			const res = await Teamspace.getSubscriptions(teamspace);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][2]).toEqual({ user: teamspace });
+			expect(res).toEqual({});
+		});
+
+		test('should return error if teamspace does not exists', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+
+			await expect(Teamspace.getSubscriptions('someTS'))
+				.rejects.toEqual(templates.teamspaceNotFound);
+		});
+	});
+};
+
 describe('models/teamspaces', () => {
 	testTeamspaceAdmins();
 	testHasAccessToTeamspace();
+	testGetSubscriptions();
 });
