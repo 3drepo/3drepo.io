@@ -15,33 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { discardSlash, discardUrlComponent } from '@/v5/services/routing/routing';
-import { useRouteMatch, useParams } from 'react-router-dom';
-
-import { Trans } from '@lingui/react';
 import React from 'react';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
-import { IProject } from '@/v5/store/projects/projects.redux';
+import { useRouteMatch } from 'react-router-dom';
+import { Trans } from '@lingui/react';
+
+import { discardSlash, discardUrlComponent } from '@/v5/services/routing/routing';
 import { Container, Link } from './topNavigaton.styles';
 
 export const TopNavigation = (): JSX.Element => {
 	let { url } = useRouteMatch();
 	url = discardSlash(url);
 
-	const { project } = useParams();
-	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
-	const hasValidProject = Boolean(projects.find(({ _id }) => _id === project));
-
 	return (
 		<Container>
-			{hasValidProject
-			&& (
-				<>
-					<Link to={`${url}/t/federations`}><Trans id="Federations" /></Link>
-					<Link to={`${url}/t/containers`}><Trans id="Containers" /></Link>
-					<Link to={`${discardUrlComponent(url, 'settings')}/t/settings`}><Trans id="Settings" /></Link>
-				</>
-			)}
+			<Link to={`${url}/t/federations`}><Trans id="Federations" /></Link>
+			<Link to={`${url}/t/containers`}><Trans id="Containers" /></Link>
+			<Link to={`${discardUrlComponent(url, 'settings')}/t/settings`}><Trans id="Project settings" /></Link>
 		</Container>
 	);
 };

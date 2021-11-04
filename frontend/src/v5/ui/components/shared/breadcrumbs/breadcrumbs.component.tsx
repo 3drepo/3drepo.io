@@ -18,8 +18,9 @@
 import React from 'react';
 import { useParams, useRouteMatch, useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
+import HomeIcon from '@assets/icons/home.svg';
+import DownArrowIcon from '@assets/icons/down_arrow.svg';
 import { uriCombine } from '@/v5/services/routing/routing';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
@@ -27,7 +28,7 @@ import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { IProject } from '@/v5/store/projects/projects.redux';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
-import { Container, Breadcrumb, InteractiveBreadcrumb } from './breadcrumbs.styles';
+import { Container, HomeIconBreadcrumb, Breadcrumb, InteractiveBreadcrumb } from './breadcrumbs.styles';
 import { NavigationMenu } from '../navigatonMenu';
 
 const createToWithUrl = (url) => ({ to, title }) => ({ title, to: `${url}/${to}` });
@@ -97,13 +98,17 @@ export const Breadcrumbs = (): JSX.Element => {
 
 	return (
 		<Container aria-label="breadcrumb">
+			<HomeIconBreadcrumb color="inherit" to={teamspaceTo}>
+				<HomeIcon />
+			</HomeIconBreadcrumb>
+
 			{getBreadcrumbs.map((title, index) => {
 				const isLastItem = (getBreadcrumbs.length - 1) === index;
 
 				if (isLastItem) {
 					return (
-						<div key={title}>
-							<InteractiveBreadcrumb onClick={handleClick} endIcon={<ExpandMoreIcon />}>
+						<div key={`${title}`}>
+							<InteractiveBreadcrumb onClick={handleClick} endIcon={<DownArrowIcon />}>
 								{title}
 							</InteractiveBreadcrumb>
 							<NavigationMenu list={list} anchorEl={anchorEl} handleClose={handleClose} />

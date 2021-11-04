@@ -15,22 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect, useState } from 'react';
-import { debounce } from 'lodash';
+import React from 'react';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
 import { Trans } from '@lingui/react';
-import { MainHeader } from '@controls/mainHeader';
-import { SearchInput } from '@controls/searchInput';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
-import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
-import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import {
 	Container,
 	Content,
 	NewContainerButton,
-	NewContainerMainHeaderButton,
-	UploadFileButton,
 } from './containers.styles';
 import { ContainersList } from './containersList';
 import { EmptySearchResults } from './containersList/emptySearchResults';
@@ -41,40 +34,8 @@ export const Containers = (): JSX.Element => {
 	const filterQuery = ContainersHooksSelectors.selectFilterQuery();
 	const hasContainers = ContainersHooksSelectors.selectHasContainers();
 
-	const [searchInput, setSearchInput] = useState(filterQuery);
-
-	const debounceSearchUpdate = debounce(
-		(value: string) => ContainersActionsDispatchers.setFilterQuery(value),
-		300,
-		{ trailing: true },
-	);
-
-	useEffect(() => {
-		debounceSearchUpdate(searchInput);
-	}, [searchInput]);
-
 	return (
 		<Container>
-			<MainHeader>
-				<Trans
-					id="containers.search.placeholder"
-					message="Search containers..."
-					render={({ translation }) => (
-						<SearchInput
-							onClear={() => setSearchInput('')}
-							onChange={(event) => setSearchInput(event.currentTarget.value)}
-							value={searchInput}
-							placeholder={translation as string}
-						/>
-					)}
-				/>
-				<NewContainerMainHeaderButton startIcon={<AddCircleIcon />} variant="outlined" color="secondary">
-					<Trans id="containers.mainHeader.newContainer" message="New Container" />
-				</NewContainerMainHeaderButton>
-				<UploadFileButton startIcon={<ArrowUpCircleIcon />} variant="contained" color="primary">
-					<Trans id="containers.mainHeader.uploadFile" message="Upload file" />
-				</UploadFileButton>
-			</MainHeader>
 			<Content>
 				<ContainersList
 					containers={favouriteContainers}

@@ -14,23 +14,5 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
 
-export const Container = styled.div`
-	height: 75px;
-`;
-
-export const Bar = styled.div`
-	position: fixed;
-	left: 0;
-	right: 0;
-	display: flex;
-	align-items: center;
-	height: 75px;
-	padding: 0 20px;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
-	border-left-style: none;
-	border-right-style: none;
-	z-index: ${({ theme }) => theme.zIndex.appBar};
-`;
+export { DashboardHeader } from './dashboardHeader.component';

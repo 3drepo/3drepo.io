@@ -265,7 +265,7 @@ export const theme = createMuiTheme({
 				boxShadow: 'none',
 				paddingLeft: 20,
 				paddingRight: 20,
-				minHeight: 64,
+				minHeight: 65,
 				display: 'flex',
 				flexDirection: 'row',
 				alignItems: 'center',
@@ -335,20 +335,22 @@ export const theme = createMuiTheme({
 			li: {
 				'& > a': {
 					margin: 0,
-					padding: '10px 5px',
-					...typography.body1,
+					padding: '10px 8px',
+					color: COLOR.PRIMARY_MAIN_CONTRAST,
+					...typography.h3,
 				},
 				'& > button > span > span': {
 					marginLeft: '1px',
 				},
 				'& .MuiButton-endIcon': {
-					marginLeft: 0,
+					marginLeft: 6,
 				},
 			},
 			separator: {
 				marginLeft: 0,
 				marginRight: 0,
-				color: COLOR.BASE_MAIN,
+				color: COLOR.PRIMARY_MAIN_CONTRAST,
+				fontSize: 16,
 			},
 		},
 		MuiOutlinedInput:

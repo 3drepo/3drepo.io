@@ -29,9 +29,9 @@ export const InteractiveBreadcrumb = styled(Button).attrs({
 	variant: 'text',
 })`
 	&& {
-		${({ theme }) => theme.typography.body1};
+		${({ theme }) => theme.typography.h3};
 		color: ${({ theme }) => theme.palette.primary.main};
-		padding: 5px;
+		padding: 5px 9px;
 		margin: 0;
 
 		&:hover {
@@ -45,9 +45,16 @@ export const Breadcrumb = styled(Button).attrs({
 	component: Link,
 })`
 	&& {
-		color: ${({ theme }) => theme.palette.base.main};
+		color: ${({ theme }) => theme.palette.primary.contrast};
+
 		&:hover {
 			text-decoration: none;
 		}
+	}
+`;
+
+export const HomeIconBreadcrumb = styled(Breadcrumb)`
+	&& {
+		padding: 10px;
 	}
 `;

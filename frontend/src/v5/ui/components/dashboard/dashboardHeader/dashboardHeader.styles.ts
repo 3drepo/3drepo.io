@@ -15,4 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const MAIN_HEADER_PORTAL_TARGET_ID = 'main-header-portal-target';
+import styled from 'styled-components';
+
+export const Wrapper = styled.div`
+	width: 100%;
+	height: 114px;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+	border-left-style: none;
+	border-right-style: none;
+`;
+
+export const Container = styled.div`
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	width: 100%;
+	max-width: 1289px;
+	margin: 28px auto 0;
+`;

@@ -15,4 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { MainHeader } from './mainHeader.component';
+import React from 'react';
+
+export default () => (
+	<svg width="11" height="6" viewBox="0 0 11 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+		<path d="M9.67016 0L5.64453 3.61719L1.6189 0L0.292969 1.19141L5.64453 6L10.9961 1.19141L9.67016 0Z" fill="#00C1D4" />
+	</svg>
+);
