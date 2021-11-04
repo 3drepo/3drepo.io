@@ -15,30 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useMemo } from 'react';
-import { DashboardList } from '@components/dashboard/dashboardList';
+import styled from 'styled-components';
+import { DashboardListSkeletonItem } from '@components/dashboard/dashboardList/dashboardListSkeletonItem';
 
-interface IDashboardSkeletonList {
-	itemsAmount?: number;
-	itemComponent: JSX.Element;
-}
-
-export const DashboardSkeletonList = ({ itemsAmount = 10, itemComponent }: IDashboardSkeletonList): JSX.Element => {
-	const list = useMemo(() => Array(itemsAmount).fill({}), []);
-
-	return (
-		<DashboardList>
-			{list.map((item, index) => (
-				<>
-					{
-						React.cloneElement(itemComponent, {
-							key: itemComponent.props.name,
-							delay: index / 10,
-							...itemComponent.props,
-						})
-					}
-				</>
-			))}
-		</DashboardList>
-	);
-};
+export const Container = styled(DashboardListSkeletonItem)`
+	padding-right: 105px;
+`;

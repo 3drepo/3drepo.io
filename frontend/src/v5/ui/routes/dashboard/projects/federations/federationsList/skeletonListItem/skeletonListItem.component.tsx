@@ -15,30 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useMemo } from 'react';
-import { DashboardList } from '@components/dashboard/dashboardList';
+import React from 'react';
+import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
+import { SkeletonBlock } from '@controls/skeletonBlock';
+import { Container } from './skeletonListItem.styles';
 
-interface IDashboardSkeletonList {
-	itemsAmount?: number;
-	itemComponent: JSX.Element;
+interface ISkeletonListItem {
+	delay?: number;
 }
 
-export const DashboardSkeletonList = ({ itemsAmount = 10, itemComponent }: IDashboardSkeletonList): JSX.Element => {
-	const list = useMemo(() => Array(itemsAmount).fill({}), []);
-
-	return (
-		<DashboardList>
-			{list.map((item, index) => (
-				<>
-					{
-						React.cloneElement(itemComponent, {
-							key: itemComponent.props.name,
-							delay: index / 10,
-							...itemComponent.props,
-						})
-					}
-				</>
-			))}
-		</DashboardList>
-	);
-};
+export const SkeletonListItem = ({ delay = 0 }: ISkeletonListItem): JSX.Element => (
+	<Container>
+		<FixedOrGrowContainer>
+			<SkeletonBlock widthPercentage={80} />
+		</FixedOrGrowContainer>
+		<FixedOrGrowContainer width={495} />
+		<FixedOrGrowContainer width={188}>
+			<SkeletonBlock delay={delay} width={133} />
+		</FixedOrGrowContainer>
+		<FixedOrGrowContainer width={97}>
+			<SkeletonBlock delay={delay} width={65} />
+		</FixedOrGrowContainer>
+	</Container>
+);

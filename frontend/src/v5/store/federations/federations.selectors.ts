@@ -24,7 +24,7 @@ import { filterFederations } from './federations.helpers';
 const selectFederationsDomain = (state: { federations: IFederationsState }) => state.federations;
 
 export const selectFederations = createSelector(
-	[selectFederationsDomain, selectCurrentProject], (state, currentProject) => state.federations[currentProject] ?? [],
+	selectFederationsDomain, selectCurrentProject, (state, currentProject) => state.federations[currentProject] ?? [],
 );
 
 export const selectFavouritesFilterQuery = createSelector(
@@ -36,12 +36,12 @@ export const selectAllFilterQuery = createSelector(
 );
 
 export const selectFilteredFederations = createSelector(
-	[selectFederations, selectAllFilterQuery],
+	selectFederations, selectAllFilterQuery,
 	(federations, filterQuery) => filterFederations(federations, filterQuery),
 );
 
 export const selectFilteredFavouriteFederations = createSelector(
-	[selectFederations, selectFavouritesFilterQuery],
+	selectFederations, selectFavouritesFilterQuery,
 	(federations, filterQuery) => filterFederations(federations.filter(({ isFavourite }) => isFavourite), filterQuery),
 );
 
@@ -57,5 +57,5 @@ export const selectIsListPending = createSelector(
 );
 
 export const selectAreStatsPending = createSelector(
-	selectFederationsDomain, (state) => state.areStatsPending,
+	selectFederations, (federations) => federations.some(({ hasStatsPending }) => hasStatsPending),
 );

@@ -44,7 +44,6 @@ export const INITIAL_STATE: IContainersState = {
 	containers: {},
 	filterQuery: '',
 	isListPending: true,
-	areStatsPending: true,
 };
 
 export const setFilterQuery = (state = INITIAL_STATE, { query }: SetFilterQueryAction) => (

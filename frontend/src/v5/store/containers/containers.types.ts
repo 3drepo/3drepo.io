@@ -21,7 +21,6 @@ export interface IContainersState {
 	containers: Record<string, IContainer[]>;
 	filterQuery: string;
 	isListPending: boolean;
-	areStatsPending: boolean;
 }
 
 export enum UploadStatuses {

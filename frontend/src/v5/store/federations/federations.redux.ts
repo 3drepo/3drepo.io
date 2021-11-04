@@ -22,7 +22,9 @@ import {
 	IFederationsState,
 	SetFavouritesFilterQueryAction,
 	SetFilterQueryAction,
-	SetFavouriteSuccessAction, FetchFederationStatsSuccessAction,
+	SetFavouriteSuccessAction,
+	FetchFederationStatsSuccessAction,
+	SetIsListPendingAction,
 } from '@/v5/store/federations/federations.types';
 import { prepareSingleFederationData } from '@/v5/store/federations/federations.helpers';
 import { Constants } from '../common/actions.helper';
@@ -45,7 +47,7 @@ export const INITIAL_STATE: IFederationsState = {
 	federations: {},
 	favouritesFilterQuery: '',
 	allFilterQuery: '',
-	isListPending: false,
+	isListPending: true,
 };
 
 export const setAllFilterQuery = (state = INITIAL_STATE, { query }: SetFilterQueryAction) => (
@@ -97,9 +99,16 @@ export const fetchStatsSuccess = (state = INITIAL_STATE, {
 	},
 });
 
+export const setIsListPending = (state = INITIAL_STATE, { isPending }: SetIsListPendingAction) => ({
+	...state,
+	isListPending: isPending,
+});
+
 export const reducer = createReducer<IFederationsState>(INITIAL_STATE, {
 	[FederationsTypes.SET_ALL_FILTER_QUERY]: setAllFilterQuery,
 	[FederationsTypes.SET_FAVOURITES_FILTER_QUERY]: setFavouritesFilterQuery,
 	[FederationsTypes.FETCH_FEDERATIONS_SUCCESS]: fetchFederationsSuccess,
+	[FederationsTypes.FETCH_FEDERATION_STATS_SUCCESS]: fetchStatsSuccess,
 	[FederationsTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
+	[FederationsTypes.SET_IS_LIST_PENDING]: setIsListPending,
 });
