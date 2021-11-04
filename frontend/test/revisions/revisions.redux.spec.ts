@@ -21,7 +21,7 @@ import {
 	RevisionsActions,
 } from '@/v5/store/revisions/revisions.redux';
 import { times } from 'lodash';
-import { revisionsMockFactory } from '@/v5/store/revisions/revisions.fixtures';
+import { revisionsMockFactory } from './revisions.fixtures';
 
 describe('Revisions: redux', () => {
 	const containerId = 'containerId';

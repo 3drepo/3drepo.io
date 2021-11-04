@@ -14,9 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import { INITIAL_STATE } from '@/v5/store/containers/containers.redux';
 import { times } from 'lodash';
-import { containerMockFactory } from '@/v5/store/containers/containers.fixtures';
+import { containerMockFactory } from './containers.fixtures';
 import {
 	selectContainers,
 	selectFilteredFavouriteContainers,

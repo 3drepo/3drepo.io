@@ -16,7 +16,7 @@
  */
 
 import * as faker from 'faker';
-import { IRevision } from './revisions.types';
+import { IRevision } from '@/v5/store/revisions/revisions.types';
 
 export const revisionsMockFactory = (overrides?: Partial<IRevision>): IRevision => ({
 	_id: faker.datatype.uuid(),
