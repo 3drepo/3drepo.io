@@ -84,6 +84,18 @@ const models = [
 		name: ServiceHelper.generateRandomString(),
 		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true },
 	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: {
+			...ServiceHelper.generateRandomModelProperties(),
+			status: 'failed',
+			errorReason: {
+				message: ServiceHelper.generateRandomString(),
+				timestamp: new Date(),
+			} },
+	},
+
 ];
 
 const revisions = [
@@ -97,6 +109,7 @@ const modelWithoutRev = models[1];
 const federation = models[2];
 const modelWithViews = models[0];
 const modelWithLegends = models[0];
+const modelWithFailedProcess = models[3];
 
 const latestRevision = revisions.filter((rev) => !rev.void)
 	.reduce((a, b) => (a.timestamp > b.timestamp ? a : b));
@@ -158,17 +171,27 @@ const testGetContainerList = () => {
 	});
 };
 
-const formatToStats = (settings, revCount, latestRev) => ({
-	type: settings.type,
-	code: settings.properties.code,
-	status: settings.status,
-	units: settings.properties.unit,
-	revisions: {
-		total: revCount,
-		lastUpdated: latestRev.timestamp ? latestRev.timestamp.getTime() : undefined,
-		latestRevision: latestRev.tag || latestRev._id,
-	},
-});
+const formatToStats = (settings, revCount, latestRev) => {
+	const res = {
+		type: settings.type,
+		code: settings.properties.code,
+		status: settings.status,
+		units: settings.properties.unit,
+		revisions: {
+			total: revCount,
+			lastUpdated: latestRev.timestamp ? latestRev.timestamp.getTime() : undefined,
+			latestRevision: latestRev.tag || latestRev._id,
+		},
+	};
+
+	if (settings.status === 'failed') {
+		res.errorReason = {
+			message: settings.errorReason.message,
+			timestamp: settings.errorReason.timestamp ? settings.errorReason.timestamp.getTime() : undefined,
+		};
+	}
+	return res;
+};
 
 const testGetContainerStats = () => {
 	const route = (containerId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${containerId}/stats`;
@@ -211,6 +234,10 @@ const testGetContainerStats = () => {
 		test('should return the container stats correctly if the user has access (no revisions)', async () => {
 			const res = await agent.get(`${route(modelWithoutRev._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
 			expect(res.body).toEqual(formatToStats(modelWithoutRev.properties, 0, {}));
+		});
+		test('should return the container stats correctly if the latest revision process failed', async () => {
+			const res = await agent.get(`${route(modelWithFailedProcess._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			expect(res.body).toEqual(formatToStats(modelWithFailedProcess.properties, 0, {}));
 		});
 	});
 };

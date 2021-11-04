@@ -64,6 +64,36 @@ const containerSettings = {
 		},
 		status: 'processing',
 	},
+	container3: {
+		_id: 3,
+		name: 'container 3',
+		type: 'type 2',
+		properties: {
+			units: 'mm',
+			code: 'CTN2',
+		},
+		status: 'failed',
+		errorReason: {
+			message: 'abc',
+			bouncerValue: 1,
+			timestamp: new Date(),
+		},
+	},
+	container4: {
+		_id: 4,
+		name: 'container 4',
+		type: 'type 2',
+		properties: {
+			units: 'mm',
+			code: 'CTN2',
+		},
+		status: 'processing',
+		errorReason: {
+			message: 'abc',
+			bouncerValue: 1,
+			timestamp: new Date(),
+		},
+	},
 };
 
 const user1Favourites = [1];
@@ -210,27 +240,35 @@ const testDeleteFavourites = () => {
 	});
 };
 
-const formatToStats = (settings, revCount, latestRev) => ({
-	type: settings.type,
-	code: settings.properties.code,
-	status: settings.status,
-	units: settings.properties.unit,
-	revisions: {
-		total: revCount,
-		lastUpdated: latestRev.timestamp,
-		latestRevision: latestRev.tag || latestRev._id,
-	},
-});
+const formatToStats = (settings, revCount, latestRev) => {
+	const res = {
+		type: settings.type,
+		code: settings.properties.code,
+		status: settings.status,
+		units: settings.properties.unit,
+		revisions: {
+			total: revCount,
+			lastUpdated: latestRev.timestamp,
+			latestRevision: latestRev.tag || latestRev._id,
+		},
+	};
+
+	if (settings.status === 'failed') {
+		res.errorReason = { message: settings.errorReason.message, timestamp: settings.errorReason.timestamp };
+	}
+	return res;
+};
 
 const testGetContainerStats = () => {
-	describe('Get container stats', () => {
-		test('should return the stats if the container exists and have no revisions', async () => {
-			const res = await Containers.getContainerStats('teamspace', 'project', 'container1');
-			expect(res).toEqual(formatToStats(containerSettings.container1, 0, {}));
-		});
-		test('should return the stats if the container exists and have revisions', async () => {
-			const res = await Containers.getContainerStats('teamspace', 'project', 'container2');
-			expect(res).toEqual(formatToStats(containerSettings.container2, 10, container2Rev));
+	describe.each([
+		['the container exists and have no revisions', 'container1'],
+		['the container exists and have revisions', 'container2'],
+		['the container exists and latest revision processing have failed', 'container3'],
+		['the container exists and some previous revision processing have failed', 'container4'],
+	])('Get container stats', (desc, container) => {
+		test(`should return the stats if ${desc}[${container}]`, async () => {
+			const res = await Containers.getContainerStats('teamspace', 'project', container);
+			expect(res).toEqual(formatToStats(containerSettings[container], container === 'container2' ? 10 : 0, container === 'container2' ? container2Rev : {}));
 		});
 	});
 };

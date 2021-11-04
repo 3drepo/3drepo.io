@@ -23,9 +23,8 @@ const fs = require('fs/promises');
 const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
 const { logger } = require('../../../../utils/logger');
-const { timestampToString } = require('../../../../utils/helper/dates');
 const { queueModelUpload } = require('../../../../services/queue');
-
+const { timestampToString } = require('../../../../utils/helper/dates');
 
 const Containers = { ...Groups };
 
