@@ -16,10 +16,26 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
+const Path = require('path');
 const Yup = require('yup');
+const YupHelper = require('../../../../../../../utils/helper/yup');
 const { respond } = require('../../../../../../../utils/responder');
+const { singleFileUpload } = require('../../../../../multer');
+const { sufficientQuota } = require('../../../../../../../utils/quota');
+const { validateMany } = require('../../../../../../common');
 
 const Revisions = {};
+
+const ACCEPTED_MODEL_EXT = [
+	'.x', '.obj', '.3ds', '.md3', '.md2', '.ply',
+	'mdl', '.ase', '.hmp', '.smd', '.mdc', '.md5',
+	'stl', '.lxo', '.nff', '.raw', '.off', '.ac',
+	'bvh', '.irrmesh', '.irr', '.q3d', '.q3s', '.b3d',
+	'dae', '.ter', '.csm', '.3d', '.lws', '.xml', '.ogex',
+	'ms3d', '.cob', '.scn', '.blend', '.pk3', '.ndo',
+	'ifc', '.xgl', '.zgl', '.fbx', '.assbin', '.bim', '.dgn',
+	'rvt', '.rfa', '.spm', '.dwg', '.dxf',
+];
 
 Revisions.validateUpdateRevisionData = async (req, res, next) => {
 	const schema = Yup.object().strict(true).noUnknown().shape({
@@ -35,5 +51,41 @@ Revisions.validateUpdateRevisionData = async (req, res, next) => {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };
+
+const fileFilter = async (req, file, cb) => {
+	try {
+		const { originalname, size } = file;
+		const { teamspace } = req.params;
+		const fileExt = Path.extname(originalname);
+		if (!ACCEPTED_MODEL_EXT.includes(fileExt)) {
+			const err = createResponseCode(templates.unsupportedFileFormat, `${fileExt} is not a supported model format`);
+			cb(err, false);
+		} else {
+			await sufficientQuota(teamspace, size);
+			cb(null, true);
+		}
+	} catch (err) {
+		cb(err, false);
+	}
+};
+
+const validateRevisionUpload = async (req, res, next) => {
+	const schema = Yup.object().noUnknown().required()
+		.shape({
+			tag: YupHelper.types.strings.code.required(),
+			desc: YupHelper.types.strings.blob,
+			importAnimations: Yup.bool().default(true),
+		});
+
+	try {
+		req.body = await schema.validate(req.body);
+		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+Revisions.validateNewRevisionData = validateMany([singleFileUpload('file', fileFilter), validateRevisionUpload]);
 
 module.exports = Revisions;

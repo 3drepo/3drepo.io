@@ -14,29 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 const { v4Path } = require('../../interop');
 // eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
-const { systemLogger } = require(`${v4Path}/logger`);
+const config = require(`${v4Path}/config`);
 
-const Logger = {};
-
-Logger.logWithLabel = (label) => ({
-	...systemLogger,
-	logInfo: (msg, meta) => systemLogger.logInfo(msg, meta, label),
-	logError: (msg, meta) => systemLogger.logError(msg, meta, label),
-	logDebug: (msg, meta) => systemLogger.logDebug(msg, meta, label),
-	logTrace: (msg, meta) => systemLogger.logTrace(msg, meta, label),
-	logWarning: (msg, meta) => systemLogger.logWarning(msg, meta, label),
-	logFatal: (msg, meta) => systemLogger.logFatal(msg, meta, label),
-});
-
-Logger.logger = systemLogger;
-
-Logger.labels = {
-	network: 'NET',
-	event: 'EVENT',
-	queue: 'AMQP',
-};
-
-module.exports = Logger;
+module.exports = config;

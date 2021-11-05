@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Path = require('path');
+const modelEventsListener = require('./components/modelEvents');
 
-const PathHelper = {};
+const EventsListener = {};
 
-PathHelper.src = `${__dirname}/../../../src/v5`;
-PathHelper.srcV4 = `${__dirname}/../../../src/v4`;
-PathHelper.modelFolder = `${__dirname}/../resources/models`;
-PathHelper.objModel = Path.join(PathHelper.modelFolder, 'dummy.obj');
-module.exports = PathHelper;
+EventsListener.init = () => {
+	modelEventsListener.init();
+};
+
+module.exports = EventsListener;

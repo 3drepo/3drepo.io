@@ -20,16 +20,22 @@ const Yup = require('yup');
 
 const YupHelper = { validators: {}, types: { strings: {} } };
 
+YupHelper.validators.alphanumeric = (yupObj) => yupObj.matches(/^[\w]*$/,
+	// eslint-disable-next-line no-template-curly-in-string
+	'${path} can only contain alpha-numeric characters or underscores');
+
 YupHelper.types.id = Yup.string().uuid('ids are expected to be of uuid format').transform((val, org) => UUIDToString(org));
 
 YupHelper.types.colorArr = Yup.array()
 	.of(Yup.number().min(0).max(255).integer())
 	.min(3).max(4);
 
-YupHelper.types.strings.username = Yup.string().min(2).max(65).strict(true)
-	.matches(/^[\w]+$/,
-	// eslint-disable-next-line no-template-curly-in-string
-		'${path} must only contain alphanumeric characters and underscores');
+YupHelper.types.strings.code = YupHelper.validators.alphanumeric(
+	Yup.string().min(1).max(50).strict(true),
+);
+
+YupHelper.types.strings.username = YupHelper.validators.alphanumeric(Yup.string().min(2).max(65).strict(true));
+
 YupHelper.types.strings.title = Yup.string().min(1).max(120);
 
 // This is used for shorter descriptions such as revision desc, model desc, teamspace desc etc.
