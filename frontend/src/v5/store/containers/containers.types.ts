@@ -17,20 +17,6 @@
 
 import { Action } from 'redux';
 
-export interface IContainersState {
-	containers: IContainer[];
-	filterQuery: string;
-}
-
-export enum ContainerStatuses {
-	OK = 'ok',
-	FAILED = 'failed',
-	UPLOADING = 'uploading',
-	UPLOADED = 'uploaded',
-	QUEUED = 'queued',
-	PROCESSING = 'processing',
-}
-
 export interface IContainer {
 	_id: string;
 	name: string;
@@ -44,6 +30,21 @@ export interface IContainer {
 	role: string;
 }
 
+export interface IContainersState {
+	containers: IContainer[];
+	allFilterQuery: string;
+	favouritesFilterQuery: string;
+}
+
+export enum ContainerStatuses {
+	OK = 'ok',
+	FAILED = 'failed',
+	UPLOADING = 'uploading',
+	UPLOADED = 'uploaded',
+	QUEUED = 'queued',
+	PROCESSING = 'processing',
+}
+
 export interface FavouritePayload {
 	teamspace: string;
 	projectId: string;
@@ -51,12 +52,14 @@ export interface FavouritePayload {
 }
 
 export type SetFilterQueryAction = Action<'SET_FILTER_QUERY'> & { query: string};
+export type SetFavouritesFilterQueryAction = Action<'SET_FAVOURITES_FILTER_QUERY'> & { query: string};
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;
 export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & FavouritePayload;
 export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & {containerId: string, isFavourite: boolean};
 
 export interface IContainersActionCreators {
-	setFilterQuery: (query: string) => SetFilterQueryAction;
+	setAllFilterQuery: (query: string) => SetFilterQueryAction;
+	setFavouritesFilterQuery: (query: string) => SetFavouritesFilterQueryAction;
 	addFavourite: (teamspace: string, projectId: string, containerId: string) => AddFavouriteAction;
 	removeFavourite: (teamspace: string, projectId: string, containerId: string) => RemoveFavouriteAction;
 	setFavouriteSuccess: (containerId: string, isFavourite: boolean) => SetFavouriteSuccessAction;

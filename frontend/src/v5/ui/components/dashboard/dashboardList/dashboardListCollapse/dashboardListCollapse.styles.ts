@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
-import { Divider as DividerComponent } from '@material-ui/core';
 
-export const Container = styled.div``;
+export const Container = styled.div`
+`;
 
 export const ButtonContainer = styled.div`
 	display: flex;
@@ -31,6 +31,7 @@ export const CollapsedItemContainer = styled.div`
 	margin-bottom: 16px;
 `;
 
-export const Divider = styled(DividerComponent)`
-	margin-top: 16px;
+export const ControlsContainer = styled.div`
+	display: flex;
+	justify-content: space-between;
 `;

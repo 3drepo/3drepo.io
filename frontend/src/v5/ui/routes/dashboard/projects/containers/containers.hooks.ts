@@ -15,19 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import * as SearchInputStyles from '@controls/searchInput/searchInput.styles';
+import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 
-export const Container = styled.div`
-	margin: 16px 0;
-`;
+export const useContainersData = () => {
+	const filteredContainers = ContainersHooksSelectors.selectFilteredContainers();
+	const favouriteContainers = ContainersHooksSelectors.selectFilteredFavouriteContainers();
+	const hasContainers = ContainersHooksSelectors.selectHasContainers();
 
-export const CollapseSideElementGroup = styled.div`
-	display: flex;
-	align-items: center;
-
-	${SearchInputStyles.TextField} {
-		width: 405px;
-		margin-right: 15px;
-	}
-`;
+	return { filteredContainers, favouriteContainers, hasContainers };
+};

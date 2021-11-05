@@ -14,20 +14,26 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { useEffect, useState } from 'react';
+import { debounce } from 'lodash';
 
-import styled from 'styled-components';
-import * as SearchInputStyles from '@controls/searchInput/searchInput.styles';
+export type SearchInputConfig = {
+	query: any;
+	dispatcher: any;
+};
 
-export const Container = styled.div`
-	margin: 16px 0;
-`;
+export const useSearchInput = ({ query, dispatcher }: SearchInputConfig) => {
+	const [searchInput, setSearchInput] = useState(query);
 
-export const CollapseSideElementGroup = styled.div`
-	display: flex;
-	align-items: center;
+	const debounceSearchUpdate = debounce(
+		(value: string) => dispatcher(value),
+		300,
+		{ trailing: true },
+	);
 
-	${SearchInputStyles.TextField} {
-		width: 405px;
-		margin-right: 15px;
-	}
-`;
+	useEffect(() => {
+		debounceSearchUpdate(searchInput);
+	}, [searchInput]);
+
+	return { searchInput, setSearchInput, filterQuery: query };
+};

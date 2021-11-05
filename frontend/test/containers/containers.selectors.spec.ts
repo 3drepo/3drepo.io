@@ -32,7 +32,8 @@ const defaultState: IContainersState = {
 		...times(5, () => containerMockFactory({ isFavourite: true })),
 		...times(4, () => containerMockFactory({ isFavourite: false }))
 	],
-	filterQuery: searchPhrase
+	favouritesFilterQuery: '',
+	allFilterQuery: searchPhrase,
 }
 
 describe('Containers: selectors', () => {

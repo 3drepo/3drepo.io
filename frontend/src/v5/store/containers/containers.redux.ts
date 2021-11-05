@@ -24,11 +24,13 @@ import {
 	IContainersState,
 	ContainerStatuses,
 	SetFilterQueryAction,
+	SetFavouritesFilterQueryAction,
 	SetFavouriteSuccessAction,
 } from './containers.types';
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({
-	setFilterQuery: ['query'],
+	setAllFilterQuery: ['query'],
+	setFavouritesFilterQuery: ['query'],
 	addFavourite: ['teamspace', 'projectId', 'containerId'],
 	removeFavourite: ['teamspace', 'projectId', 'containerId'],
 	setFavouriteSuccess: ['containerId', 'isFavourite'],
@@ -41,11 +43,16 @@ export const INITIAL_STATE: IContainersState = {
 		containerMockFactory({ status: ContainerStatuses.FAILED }),
 		...times(10, () => containerMockFactory()),
 	],
-	filterQuery: '',
+	favouritesFilterQuery: '',
+	allFilterQuery: '',
 };
 
-export const setFilterQuery = (state = INITIAL_STATE, { query }: SetFilterQueryAction) => (
-	{ ...state, filterQuery: query }
+export const setAllFilterQuery = (state = INITIAL_STATE, { query }: SetFilterQueryAction) => (
+	{ ...state, allFilterQuery: query }
+);
+
+export const setFavouritesFilterQuery = (state = INITIAL_STATE, { query }: SetFavouritesFilterQueryAction) => (
+	{ ...state, favouritesFilterQuery: query }
 );
 
 export const setFavourite = (state = INITIAL_STATE, {
@@ -60,6 +67,7 @@ export const setFavourite = (state = INITIAL_STATE, {
 });
 
 export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
-	[ContainersTypes.SET_FILTER_QUERY]: setFilterQuery,
+	[ContainersTypes.SET_ALL_FILTER_QUERY]: setAllFilterQuery,
+	[ContainersTypes.SET_FAVOURITES_FILTER_QUERY]: setFavouritesFilterQuery,
 	[ContainersTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
 });

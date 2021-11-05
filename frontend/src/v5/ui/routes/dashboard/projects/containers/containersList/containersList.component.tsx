@@ -37,15 +37,20 @@ import {
 	DashboardListItemTitle,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
+import AddCircleIcon from '@assets/icons/add_circle.svg';
+import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
+import { HeaderButtonsGroup } from '@/v5/ui/routes/dashboard/projects/containers/containers.styles';
 import { EllipsisButtonWithMenu } from '@controls/ellipsisButtonWithMenu';
 import { IContainer } from '@/v5/store/containers/containers.types';
+import { SearchInput } from '@controls/searchInput';
+import { SearchInputConfig, useSearchInput } from '@controls/searchInput/searchInput.hooks';
 import { getContainerMenuItems } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.helpers';
-import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { Highlight } from '@controls/highlight';
+import { Button } from '@controls/button';
 import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { useOrderedList } from './containersList.hooks';
-import { Container } from './containersList.styles';
+import { Container, CollapseSideElementGroup } from './containersList.styles';
 import { DEFAULT_SORT_CONFIG } from './containersList.constants';
 
 type IContainersList = {
@@ -56,6 +61,8 @@ type IContainersList = {
 		collapsed: ReactNode;
 		visible: ReactNode;
 	},
+	search: SearchInputConfig;
+	hasContainers: boolean;
 };
 
 export const ContainersList = ({
@@ -63,12 +70,13 @@ export const ContainersList = ({
 	emptyMessage,
 	title,
 	titleTooltips,
+	search,
 }: IContainersList): JSX.Element => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const { sortedList, setSortConfig } = useOrderedList(containers, DEFAULT_SORT_CONFIG);
-	const filterQuery = ContainersHooksSelectors.selectFilterQuery();
+	const { searchInput, setSearchInput, filterQuery } = useSearchInput(search);
 
 	const toggleSelectedId = (id: IContainer['_id']) => {
 		setSelectedId((state) => (state === id ? null : id));
@@ -87,6 +95,38 @@ export const ContainersList = ({
 			<DashboardListCollapse
 				title={title}
 				tooltipTitles={titleTooltips}
+				sideElement={(
+					<CollapseSideElementGroup>
+						<Trans
+							id="containers.search.placeholder"
+							message="Search containers..."
+							render={({ translation }) => (
+								<SearchInput
+									onClear={() => setSearchInput('')}
+									onChange={(event) => setSearchInput(event.currentTarget.value)}
+									value={searchInput}
+									placeholder={translation as string}
+								/>
+							)}
+						/>
+						<HeaderButtonsGroup>
+							<Button
+								startIcon={<AddCircleIcon />}
+								variant="outlined"
+								color="secondary"
+							>
+								<Trans id="containers.mainHeader.newContainer" message="New container" />
+							</Button>
+							<Button
+								startIcon={<ArrowUpCircleIcon />}
+								variant="contained"
+								color="primary"
+							>
+								<Trans id="containers.mainHeader.uploadFiles" message="Upload files" />
+							</Button>
+						</HeaderButtonsGroup>
+					</CollapseSideElementGroup>
+				)}
 			>
 				<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
 					<DashboardListHeaderLabel name="name">

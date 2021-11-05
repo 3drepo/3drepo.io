@@ -19,18 +19,22 @@ import { createSelector } from 'reselect';
 import { IContainersState } from '@/v5/store/containers/containers.types';
 import { isEmpty } from 'lodash';
 
-const selectProjectsDomain = (state: { containers: IContainersState }) => state.containers;
+const selectContainersDomain = (state: { containers: IContainersState }) => state.containers;
 
 export const selectContainers = createSelector(
-	selectProjectsDomain, (state) => state.containers,
+	selectContainersDomain, (state) => state.containers,
 );
 
-export const selectFilterQuery = createSelector(
-	selectProjectsDomain, (state) => state.filterQuery,
+export const selectFavouritesFilterQuery = createSelector(
+	selectContainersDomain, (state) => state.favouritesFilterQuery,
+);
+
+export const selectAllFilterQuery = createSelector(
+	selectContainersDomain, (state) => state.allFilterQuery,
 );
 
 export const selectFilteredContainers = createSelector(
-	[selectContainers, selectFilterQuery],
+	selectContainers, selectAllFilterQuery,
 	(containers, filterQuery) => containers.filter((
 		{ name, code, type },
 	) => [name, code, type].join('').toLowerCase().includes(filterQuery.trim().toLowerCase())),
