@@ -8,6 +8,7 @@ frontend/_built/*
 /*.log
 config/*
 !config/test/
+frontend/test/build/*
 frontend/custom/*
 frontend/custom/test
 frontend/docs
@@ -82,6 +83,7 @@ backend/.nyc_output
 backend/mongodb-prebuilt-*
 backend/3drepo.log
 backend/docs/
+backend/tests/v5/fileShare
 npm-debug.log.*
 .vscode/
 *.swo
@@ -106,3 +108,6 @@ package-lock.json
 .vs/3drepo.io/v16/Browse.VC.db-shm
 .vs/3drepo.io/v16/Browse.VC.db-wal
 .vs/3drepo.io/v16/Browse.VC.opendb
+backend/globalConfig.json
+*.swn
+.vs/

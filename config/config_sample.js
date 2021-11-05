@@ -48,7 +48,9 @@ module.exports = {
 	logfile: {
 		filename: './3drepo.log',
 		console_level: 'info',
-		file_level: 'debug'
+		file_level: 'debug',
+		noColors: false,
+		jsonOutput: false // will not be colourised regardless of other options.
 	},
 	loginPolicy: {
 		maxUnsuccessfulLoginAttempts: 10,

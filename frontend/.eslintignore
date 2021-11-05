@@ -1,0 +1,10 @@
+internals/
+test/
+unity/
+ts-rules/
+node_modules/
+docs/
+serviceWorkerExtras.js
+plopfile.js
+eslint-rules/
+globals/globals.d.ts

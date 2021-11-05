@@ -2,6 +2,7 @@ matrix:
   include:
     #linter test
     - language: node_js
+      dist: focal
       name: Linter check
       git:
       submodules: false
@@ -16,9 +17,10 @@ matrix:
         - yarn install
         - yarn lint
         - yarn build:test
-    # tests
+    # tests (v4)
     - language: node_js
-      name: Backend tests
+      dist: focal
+      name: Backend tests (V4)
       git:
       submodules: false
       depth: 1
@@ -32,24 +34,26 @@ matrix:
             - rabbitmq-server
       hosts:
         - test.127.0.0.1
+      services:
+        - mongodb
+        - docker
 
       before_install:
-        - echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
-        - sudo apt-get update
-        - sudo apt-get install -y --allow-downgrades --allow-unauthenticated mongodb-org=3.2.22 mongodb-org-server=3.2.22 mongodb-org-shell=3.2.22 mongodb-org-tools=3.2.22
-        - sudo rm -rf /var/lib/mongodb/*
-        - sudo service mongod start
-        - until nc -z localhost 27017; do sudo tail /var/log/mongodb/mongod.log; sleep 5; done
+        # Disable alluxio setup
+        #- docker-compose up alluxio-proxy alluxio-worker alluxio-master &
         - mkdir -p submodules
-        - test_ver=`cat backend/test/testDBVersion`
+        - test_ver=`cat backend/testDBVersion`
         - cd submodules
         - git clone https://$TESTS_USER:$TESTS_PASSWORD@github.com/3drepo/tests.git
         - cd tests
         - git checkout $test_ver
         - git status
+        - sudo apt install mongo-tools -y
         - cd backend && mongorestore
         - cd ../../../
         - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
+        # Disable alluxio connection check
+        #- until nc -z localhost 39999; do echo Waiting for Alluxio; sleep 1; done
 
       install:
         - cd ./backend
@@ -58,19 +62,48 @@ matrix:
         - DETECT_CHROMEDRIVER_VERSION=true yarn install
         - yarn build
 
-      cache:
-      yarn: true
-      directories:
-        - node_modules
-
       script:
         - cd ../backend
         - mkdir coverage
-        - unbuffer yarn test
+        - unbuffer yarn  test
         - cd ../
         - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" &
         - cd ./frontend
        #- unbuffer yarn test
+     #test (v5 be)
+    - language: node_js
+      dist: focal
+      name: Backend tests  (V5)
+      addons:
+        apt:
+         packages:
+            - rabbitmq-server
+      git:
+      submodules: false
+      depth: 1
+      node_js:
+        - "14.17.1"
+      before_install:
+        - wget $SSL_INSTALLER
+        - sudo apt install $PWD/libssl1.0.0_1.0.2n-1ubuntu5.7_amd64.deb
+      script:
+        - cd backend
+        - yarn install
+        - yarn test:v5
+    #test (v5 fe)
+    - language: node_js
+      dist: focal
+      name: Frontend tests (V5)
+      git:
+      submodules: false
+      depth: 1
+      node_js:
+        - "14.17.1"
+      script:
+        - cd frontend
+        - yarn install
+        - yarn test
+
 
 notifications:
     email:
