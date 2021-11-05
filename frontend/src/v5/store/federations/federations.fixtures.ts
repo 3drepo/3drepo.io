@@ -17,7 +17,7 @@
 
 import * as faker from 'faker';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
-import { IFederation } from '@/v5/store/federations/federations.types';
+import { FetchFederationStatsResponse, IFederation } from '@/v5/store/federations/federations.types';
 import { times } from 'lodash';
 
 export const federationMockFactory = (overrides?: Partial<IFederation>): IFederation => ({
@@ -35,4 +35,16 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 	risks: faker.datatype.number(120),
 	hasStatsPending: false,
 	...overrides,
+});
+
+export const prepareMockStatsReply = (federation: IFederation): FetchFederationStatsResponse => ({
+	subModels: federation.subModels,
+	tickets: {
+		issues: federation.issues,
+		risks: federation.risks,
+	},
+	lastUpdated: federation.lastUpdated.valueOf(),
+	category: federation.category,
+	status: federation.status,
+	code: federation.code,
 });
