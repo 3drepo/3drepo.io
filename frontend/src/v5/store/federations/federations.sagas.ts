@@ -32,8 +32,12 @@ export function* addFavourites({ federationId, teamspace, projectId }: AddFavour
 	try {
 		yield put(FederationsActions.setFavouriteSuccess(projectId, federationId, true));
 		yield API.Federations.addFavourites({ teamspace, projectId, federationId });
-	} catch (e) {
-		console.error(e);
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to add federation to favourites',
+			error,
+		}));
+		yield put(FederationsActions.setFavouriteSuccess(projectId, federationId, false));
 	}
 }
 
@@ -41,8 +45,12 @@ export function* removeFavourites({ federationId, teamspace, projectId }: Remove
 	try {
 		yield put(FederationsActions.setFavouriteSuccess(projectId, federationId, false));
 		yield API.Federations.removeFavourites({ teamspace, projectId, federationId });
-	} catch (e) {
-		console.error(e);
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to remove federation from favourites',
+			error,
+		}));
+		yield put(FederationsActions.setFavouriteSuccess(projectId, federationId, true));
 	}
 }
 
