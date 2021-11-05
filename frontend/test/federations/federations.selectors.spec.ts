@@ -22,7 +22,7 @@ import {
 	selectFilteredFederations, selectAreStatsPending, selectHasFederations
 } from '@/v5/store/federations/federations.selectors';
 import { IFederationsState } from '@/v5/store/federations/federations.types';
-import { federationMockFactory } from '@/v5/store/federations/federations.fixtures';
+import { federationMockFactory } from './federations.fixtures';
 
 const searchPhrase = 'test phrase';
 const projectId = 'projectId';

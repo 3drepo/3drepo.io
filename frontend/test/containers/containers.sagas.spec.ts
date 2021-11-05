@@ -20,9 +20,9 @@ import { expectSaga } from 'redux-saga-test-plan';
 import { ContainersActions } from '@/v5/store/containers/containers.redux';
 import { mockServer } from '../../internals/testing/mockServer';
 import { pick, times } from 'lodash';
-import { containerMockFactory } from '@/v5/store/containers/containers.fixtures';
 import { prepareContainersData } from '@/v5/store/containers/containers.helpers';
 import { IContainer } from '@/v5/store/containers/containers.types';
+import { containerMockFactory } from './containers.fixtures';
 
 describe('Containers: sagas', () => {
 	const teamspace = 'teamspace';

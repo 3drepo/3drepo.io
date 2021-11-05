@@ -17,7 +17,7 @@
 
 import { INITIAL_STATE, reducer as federationsReducer, FederationsActions } from '@/v5/store/federations/federations.redux';
 import { times } from 'lodash';
-import { federationMockFactory } from '@/v5/store/federations/federations.fixtures';
+import { federationMockFactory } from './federations.fixtures';
 
 describe('Federations: redux', () => {
 	const projectId = 'projectId';

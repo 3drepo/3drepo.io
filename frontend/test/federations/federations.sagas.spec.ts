@@ -20,7 +20,7 @@ import { expectSaga } from 'redux-saga-test-plan';
 import { FederationsActions } from '@/v5/store/federations/federations.redux';
 import { mockServer } from '../../internals/testing/mockServer';
 import { pick, times } from 'lodash';
-import { federationMockFactory } from '@/v5/store/federations/federations.fixtures';
+import { federationMockFactory } from './federations.fixtures';
 import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
 import { FetchFederationStatsResponse, IFederation } from '@/v5/store/federations/federations.types';
 
