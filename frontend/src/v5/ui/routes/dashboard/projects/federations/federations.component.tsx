@@ -27,9 +27,9 @@ import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federati
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
 import { Content } from '@/v5/ui/routes/dashboard/projects/projects.styles';
+import { Button } from '@controls/button';
 import { useFederationsData } from './federations.hooks';
 import { FederationsList } from './federationsList';
-import { NewFederationButton } from './federations.styles';
 import { SkeletonListItem } from './federationsList/skeletonListItem';
 
 export const Federations = (): JSX.Element => {
@@ -99,9 +99,13 @@ export const Federations = (): JSX.Element => {
 								<DashboardListEmptyText>
 									<Trans id="federations.all.emptyMessage" message="You haven’t created any Federations." />
 								</DashboardListEmptyText>
-								<NewFederationButton startIcon={<AddCircleIcon />}>
+								<Button
+									startIcon={<AddCircleIcon />}
+									variant="contained"
+									color="primary"
+								>
 									<Trans id="federations.all.newFederation" message="New Federation" />
-								</NewFederationButton>
+								</Button>
 							</>
 						)}
 					/>

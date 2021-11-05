@@ -31,10 +31,10 @@ import { SearchInput } from '@controls/searchInput';
 import { SearchInputConfig, useSearchInput } from '@controls/searchInput/searchInput.hooks';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
-import { NewFederationButton } from '@/v5/ui/routes/dashboard/projects/federations/federations.styles';
 import { FederationListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/federationListItem';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
+import { Button } from '@controls/button';
 import { CollapseSideElementGroup, Container } from './federationsList.styles';
 import { SkeletonListItem } from './skeletonListItem';
 
@@ -96,9 +96,13 @@ export const FederationsList = ({
 								/>
 							)}
 						/>
-						<NewFederationButton startIcon={<AddCircleIcon />}>
+						<Button
+							startIcon={<AddCircleIcon />}
+							variant="contained"
+							color="primary"
+						>
 							<Trans id="federations.newFederation" message="New Federation" />
-						</NewFederationButton>
+						</Button>
 					</CollapseSideElementGroup>
 				)}
 			>

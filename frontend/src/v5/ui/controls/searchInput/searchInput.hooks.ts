@@ -18,8 +18,8 @@ import { useEffect, useState } from 'react';
 import { debounce } from 'lodash';
 
 export type SearchInputConfig = {
-	query: any;
-	dispatcher: any;
+	query: string;
+	dispatcher: Function;
 };
 
 export const useSearchInput = ({ query, dispatcher }: SearchInputConfig) => {
