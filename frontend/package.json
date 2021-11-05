@@ -24,7 +24,7 @@
 		"lint": "yarn lint:ts && yarn lint:css",
 		"lint:fix": "yarn lint:ts --fix",
 		"docs": "typedoc --out ./docs ./globals --options ./internals/typedoc.js --logger none",
-		"extract": "lingui extract",
+		"extract": "lingui extract --clean --overwrite",
 		"compile": "lingui compile"
 	},
 	"keywords": [
