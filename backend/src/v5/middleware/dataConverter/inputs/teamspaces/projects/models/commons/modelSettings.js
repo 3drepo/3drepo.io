@@ -35,14 +35,8 @@ ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
 	const schema = Yup.object().shape({
 		name: types.strings.title,
 		desc: types.strings.blob,
-		surveyPoints: Yup.array()
-			.of(
-				Yup.object().shape({
-					position: types.position.required(),
-					latLong: Yup.array().of(Yup.number()).length(2).required(),
-				}),
-			),
-		angleFromNorth: Yup.number().min(0).max(360),
+		surveyPoints: types.surveyPoints,
+		angleFromNorth: types.degrees,
 		type: Yup.string(),
 		unit: types.strings.unit,
 		code: types.strings.code,

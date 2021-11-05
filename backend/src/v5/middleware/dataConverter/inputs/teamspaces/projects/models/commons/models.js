@@ -17,6 +17,7 @@
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const Yup = require('yup');
+const YupHelper = require('../../../../../../../utils/helper/yup');
 const { respond } = require('../../../../../../../utils/responder');
 
 const Models = {};
@@ -28,22 +29,13 @@ Models.validateAddModelData = async (req, res, next) => {
 			.matches(/^[\x00-\x7F]{1,120}$/,
 				'name cannot be longer than 120 characters and must only contain alphanumeric characters and underscores')
 			.required(),
-		unit: Yup.string('unit must be ft, mm, cm, dm, or m')
-			.matches(/^(mm|cm|dm|m|ft)$/i,
-				'unit must be ft, mm, cm, dm, or m')
-			.required(),
-		desc: Yup.string('desc must be of type string')
-			.strict(true),
-		code: Yup.string('code must be of type string')
-			.matches(/^[a-zA-Z0-9]{0,50}$/,
-				'code cannot be longer than 50 characters and must only contain alphanumeric characters'),
-		type: Yup.string('type must be of type string')
-			.required(),
-		defaultView: Yup.string('defaultView must be a UUID string'),
-		defaultLegend: Yup.string('defaultLegend must be a UUID string'),
-		surveyPoints: Yup.array('surveyPoints must be of type array'),
-		angleFromNorth: Yup.number('angleFromNorth must be of type number'),
-		elevation: Yup.number('elevation must be of type number'),
+		unit: YupHelper.types.strings.unit.required(),
+		desc: YupHelper.types.strings.blob,
+		code: YupHelper.types.strings.code,
+		type: Yup.string().required(),
+		surveyPoints: YupHelper.types.sureyPoints,
+		angleFromNorth: YupHelper.types.degrees,
+		elevation: Yup.number(),
 	});
 
 	try {

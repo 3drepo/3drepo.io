@@ -36,8 +36,6 @@ const testValidateAddModelData = () => {
 				unit: 'mm',
 				desc: 'this is a container',
 				type: 'Structure',
-				defaultView: '7591fbdb-52b9-490a-8a77-fdb57c57dbc8',
-				defaultLegend: '120965d4-dd6e-4505-a2d2-e9a5cdcaad81',
 				surveyPoints: [],
 				angleFromNorth: 10,
 				elevation: 10,
@@ -263,36 +261,6 @@ const testValidateAddModelData = () => {
 			expect(Responder.respond.mock.results[0].value).toEqual(createResponseCode(templates.invalidArguments,
 				'type is a required field'));
 		});
-
-		/*
-		test('should respond with invalid arguments if not a UUID string', async () => {
-			const mockCB = jest.fn(() => {});
-			const body = {
-				defaultView: '123',
-				name: 'container name',
-				unit: 'mm',
-				type: 'Structure',
-			};
-			await Models.validateAddModelData({ body }, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.invalidArguments);
-		});
-
-		test('should respond with invalid arguments if not a UUID string', async () => {
-			const mockCB = jest.fn(() => {});
-			const body = {
-				defaultLegend: 'abc',
-				name: 'container name',
-				unit: 'mm',
-				type: 'Structure',
-			};
-			await Models.validateAddModelData({ body }, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.invalidArguments);
-		});
-		*/
 	});
 };
 
