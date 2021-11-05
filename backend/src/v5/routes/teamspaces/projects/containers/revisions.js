@@ -16,12 +16,13 @@
  */
 
 const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('../../../../middleware/permissions/permissions');
+const { validateNewRevisionData, validateUpdateRevisionData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
+const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');
 const { serialiseRevisionArray } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
 const { templates } = require('../../../../utils/responseCodes');
-const { validateUpdateRevisionData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 
 const getRevisions = async (req, res, next) => {
 	const { teamspace, container } = req.params;
@@ -43,6 +44,19 @@ const updateRevisionStatus = async (req, res) => {
 	Containers.updateRevisionStatus(teamspace, container, revision, status).then(() => {
 		respond(req, res, templates.ok);
 	}).catch((err) => respond(req, res, err));
+};
+
+const newRevision = async (req, res) => {
+	const { file } = req;
+	const revInfo = req.body;
+	const { teamspace, container } = req.params;
+	const owner = getUserFromSession(req.session);
+	Containers.newRevision(teamspace, container, { ...revInfo, owner }, file).then(() => {
+		respond(req, res, templates.ok);
+	}).catch(
+		/* istanbul ignore next */
+		(err) => respond(req, res, err),
+	);
 };
 
 const establishRoutes = () => {
@@ -116,6 +130,68 @@ const establishRoutes = () => {
 	 *
 	 */
 	router.get('', hasReadAccessToContainer, getRevisions, serialiseRevisionArray);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions:
+	 *   post:
+	 *     description: Create a new revision.
+	 *     tags: [Containers]
+	 *     operationId: createNewRevision
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - project:
+	 *         name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *         type: string
+	 *       - container:
+	 *         name: container
+	 *         description: Container ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *         type: string
+	 *     requestBody:
+	 *       content:
+	 *         multipart/form-data:
+	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *               tag:
+	 *                 description: Unique revision name
+     *                 type: string
+	 *                 example: rev01
+	 *               desc:
+	 *                 description: Description of the revision
+	 *                 type: string
+	 *                 example: Initial design
+	 *               importAnimations:
+	 *                 type: bool
+	 *                 description: Whether animations should be imported (Only relevant for .SPM uploads)
+	 *               file:
+	 *                 type: string
+	 *                 format: binary
+	 *             required:
+	 *               - tag
+	 *               - file
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: updates the status of the revision
+	 */
+	router.post('', hasWriteAccessToContainer, validateNewRevisionData, newRevision);
 
 	/**
 	 * @openapi

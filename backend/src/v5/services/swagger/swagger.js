@@ -16,8 +16,8 @@
  */
 const Schemas = require('./swagger.schemas');
 
-const { VERSION } = require('../../../VERSION.json');
-const { v4Path } = require('../../interop');
+const { VERSION } = require('../../../../VERSION.json');
+const { v4Path } = require('../../../interop');
 // FIXME: can remove the disable once we migrated config
 // eslint-disable-next-line
 const { apiUrls } = require(`${v4Path}/config`);
@@ -39,7 +39,7 @@ const options = {
 		],
 		basePath: '/api/v5',
 	},
-	apis: [`${__dirname}/../routes/**/*.js`], // files containing annotations as above
+	apis: [`${__dirname}/../../routes/**/*.js`], // files containing annotations as above
 };
 
 const setupDocEndpoint = (app) => {

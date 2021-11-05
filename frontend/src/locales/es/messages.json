@@ -29,6 +29,7 @@
   "containers.list.header.lastUpdated": "",
   "containers.list.header.revisions": "",
   "containers.list.item.favourite.tooltip": "",
+  "containers.list.item.latestRevision.emptyContainer": "",
   "containers.list.item.latestRevision.label": "",
   "containers.list.item.latestRevision.status.error.tooltipMessageWithDate": "",
   "containers.list.item.latestRevision.status.error.tooltipMessageWithoutDate": "",

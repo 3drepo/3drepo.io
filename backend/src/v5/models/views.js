@@ -15,19 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const EventManagerConst = {};
+const Views = {};
+const db = require('../handler/db');
+const { templates } = require('../utils/responseCodes');
 
-const eventList = ['NEW_GROUPS', 'UPDATE_GROUP'];
+const getCollectionName = (model) => `${model}.views`;
 
-const generateEventsMap = () => {
-	const res = {};
-	eventList.forEach((event) => {
-		res[event] = event;
-	});
+Views.checkViewExists = async (teamspace, model, view) => {
+	const foundView = await db.findOne(teamspace, getCollectionName(model), { _id: view });
 
-	return res;
+	if (!foundView) {
+		throw templates.viewNotFound;
+	}
 };
 
-EventManagerConst.events = generateEventsMap();
-
-module.exports = EventManagerConst;
+module.exports = Views;

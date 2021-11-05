@@ -87,18 +87,8 @@ class ImportQueue {
 
 	subscribeToQueues() {
 		return Promise.all([
-			this.consumeCallbackQueue(),
 			this.consumeEventQueue()
 		]);
-	}
-
-	// This should only be called by connect(). Do not ever use else where!
-	consumeCallbackQueue() {
-		return this.channel.assertQueue(this.callbackQName).then((queue) => {
-			return this.channel.consume(queue.queue, this.processCallbackMsg.bind(this), { noAck: true });
-		}).catch((err) => {
-			systemLogger.logError("Failed to consume callback queue: " + err.message);
-		});
 	}
 
 	// This should only be called by connect(). Do not ever use else where!

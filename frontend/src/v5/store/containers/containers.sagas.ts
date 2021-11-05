@@ -35,8 +35,12 @@ export function* addFavourites({ containerId, teamspace, projectId }: AddFavouri
 	try {
 		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, true));
 		yield API.Containers.addFavourites({ teamspace, containerId, projectId });
-	} catch (e) {
-		console.error(e);
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to add container to favourites',
+			error,
+		}));
+		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, false));
 	}
 }
 
@@ -44,8 +48,12 @@ export function* removeFavourites({ containerId, teamspace, projectId }: RemoveF
 	try {
 		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, false));
 		yield API.Containers.removeFavourites({ containerId, teamspace, projectId });
-	} catch (e) {
-		console.error(e);
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to remove container from favourites',
+			error,
+		}));
+		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, true));
 	}
 }
 

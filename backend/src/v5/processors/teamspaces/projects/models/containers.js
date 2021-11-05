@@ -16,11 +16,14 @@
  */
 
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
-const { getContainerById, getContainers } = require('../../../../models/modelSettings');
+const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const Groups = require('./commons/groups');
+const fs = require('fs/promises');
 const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
+const { logger } = require('../../../../utils/logger');
+const { queueModelUpload } = require('../../../../services/queue');
 const { timestampToString } = require('../../../../utils/helper/dates');
 
 const Containers = { ...Groups };
@@ -69,6 +72,11 @@ Containers.getContainerStats = async (teamspace, project, container) => {
 Containers.getRevisions = (teamspace, container, showVoid) => getRevisions(teamspace,
 	container, showVoid, { _id: 1, author: 1, timestamp: 1, tag: 1, void: 1 });
 
+Containers.newRevision = async (teamspace, mode, data, file) => queueModelUpload(teamspace, mode, data, file)
+	.finally(() => fs.rm(file.path).catch((e) => {
+		logger.logError(`Failed to delete uploaded file: ${e.message}`);
+	}));
+
 Containers.updateRevisionStatus = updateRevisionStatus;
 
 Containers.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {
@@ -80,5 +88,7 @@ Containers.deleteFavourites = async (username, teamspace, project, favouritesToR
 	const accessibleContainers = await Containers.getContainerList(teamspace, project, username);
 	return deleteFavourites(username, teamspace, accessibleContainers, favouritesToRemove);
 };
+
+Containers.updateSettings = updateModelSettings;
 
 module.exports = Containers;
