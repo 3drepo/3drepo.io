@@ -174,7 +174,7 @@ export class TextField extends React.PureComponent<IProps, IState> {
 		} else if (onChange) {
 			onChange(event);
 		}
-		
+
 		field.onChange(event);
 	}
 
