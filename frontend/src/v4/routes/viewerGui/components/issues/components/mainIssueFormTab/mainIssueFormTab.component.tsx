@@ -21,6 +21,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import { Field } from 'formik';
 
 import { ISSUE_PRIORITIES, ISSUE_STATUSES } from '../../../../../../constants/issues';
+import { LONG_TEXT_CHAR_LIM } from '../../../../../../constants/viewerGui';
 import { canChangeStatus } from '../../../../../../helpers/issues';
 import { NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
@@ -75,6 +76,7 @@ export const MainIssueFormTab: React.FunctionComponent<IProps> = ({
 						validationSchema={IssueSchema}
 						mutable={!isNew}
 						enableMarkdown
+						inputProps={{ maxLength: LONG_TEXT_CHAR_LIM }}
 					/>
 				)} />
 			</Container>
