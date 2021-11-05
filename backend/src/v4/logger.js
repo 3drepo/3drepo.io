@@ -142,7 +142,7 @@ SystemLogger.logDebug = (msg, meta, label) => {
  * @param {Object} meta - Extra informative metadata
  */
 SystemLogger.logWarning = (msg, meta, label) => {
-	logger && logger.warning(logMessage(msg, meta, label), {label});
+	logger && logger.warn(logMessage(msg, meta, label), {label});
 };
 
 /**
