@@ -17,10 +17,6 @@
 
 import React from 'react';
 import { Trans } from '@lingui/react';
-import {
-	Container,
-	Content,
-} from '@/v5/ui/routes/dashboard/projects/containers/containers.styles';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import {
 	DashboardListEmptyText,
@@ -30,6 +26,7 @@ import {
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
+import { Content } from '@/v5/ui/routes/dashboard/projects/projects.styles';
 import { useFederationsData } from './federations.hooks';
 import { FederationsList } from './federationsList';
 import { NewFederationButton } from './federations.styles';
@@ -48,84 +45,81 @@ export const Federations = (): JSX.Element => {
 	const { setFavouritesFilterQuery, setAllFilterQuery } = FederationsActionsDispatchers;
 
 	return (
-		<Container>
-			<Content>
-				{isListPending ? (
-					<DashboardSkeletonList itemComponent={<SkeletonListItem />} />
-				) : (
-					<>
-						<FederationsList
-							hasFederations={hasFederations.favourites}
-							search={{
-								query: favouritesFilterQuery,
-								dispatcher: setFavouritesFilterQuery,
-							}}
-							federations={favouriteFederations}
-							title={(
+		<Content>
+			{isListPending ? (
+				<DashboardSkeletonList itemComponent={<SkeletonListItem />} />
+			) : (
+				<>
+					<FederationsList
+						hasFederations={hasFederations.favourites}
+						search={{
+							query: favouritesFilterQuery,
+							dispatcher: setFavouritesFilterQuery,
+						}}
+						federations={favouriteFederations}
+						title={(
+							<Trans
+								id="federations.favourites.collapseTitle"
+								message="Favourites"
+							/>
+						)}
+						titleTooltips={{
+							collapsed: <Trans id="federations.favourites.collapse.tooltip.show" message="Show favourites" />,
+							visible: <Trans id="federations.favourites.collapse.tooltip.hide" message="Hide favourites" />,
+						}}
+						emptyMessage={(
+							<DashboardListEmptyText>
 								<Trans
-									id="federations.favourites.collapseTitle"
-									message="Favourites"
+									id="federations.favourites.emptyMessage"
+									message="You haven’t added any Favourites. Click the star on a Federation to add your first favourite Federation."
 								/>
-							)}
-							titleTooltips={{
-								collapsed: <Trans id="federations.favourites.collapse.tooltip.show" message="Show favourites" />,
-								visible: <Trans id="federations.favourites.collapse.tooltip.hide" message="Hide favourites" />,
-							}}
-							emptyMessage={(
+							</DashboardListEmptyText>
+						)}
+					/>
+					<Divider />
+					<FederationsList
+						hasFederations={hasFederations.all}
+						search={{
+							query: allFilterQuery,
+							dispatcher: setAllFilterQuery,
+						}}
+						federations={filteredFederations}
+						title={(
+							<Trans
+								id="federations.all.collapseTitle"
+								message="All Federations"
+							/>
+						)}
+						titleTooltips={{
+							collapsed: <Trans id="federations.all.collapse.tooltip.show" message="Show federations" />,
+							visible: <Trans id="federations.all.collapse.tooltip.hide" message="Hide federations" />,
+						}}
+						emptyMessage={(
+							<>
 								<DashboardListEmptyText>
-									<Trans
-										id="federations.favourites.emptyMessage"
-										message="You haven’t added any Favourites. Click the star on a Federation to add your first favourite Federation."
-									/>
+									<Trans id="federations.all.emptyMessage" message="You haven’t created any Federations." />
 								</DashboardListEmptyText>
-							)}
-						/>
-						<Divider />
-						<FederationsList
-							hasFederations={hasFederations.all}
-							search={{
-								query: allFilterQuery,
-								dispatcher: setAllFilterQuery,
-							}}
-							federations={filteredFederations}
-							title={(
-								<Trans
-									id="federations.all.collapseTitle"
-									message="All Federations"
-								/>
-							)}
-							titleTooltips={{
-								collapsed: <Trans id="federations.all.collapse.tooltip.show" message="Show federations" />,
-								visible: <Trans id="federations.all.collapse.tooltip.hide" message="Hide federations" />,
-							}}
-							emptyMessage={(
-								<>
-									<DashboardListEmptyText>
-										<Trans id="federations.all.emptyMessage" message="You haven’t created any Federations." />
-									</DashboardListEmptyText>
-									<NewFederationButton startIcon={<AddCircleIcon />}>
-										<Trans id="federations.all.newFederation" message="New Federation" />
-									</NewFederationButton>
-								</>
-							)}
-						/>
-						{
-							!isListPending && hasFederations.all && (
-								<DashboardListButton
-									startIcon={<AddCircleIcon />}
-									onClick={() => {
-										// eslint-disable-next-line no-console
-										console.log('->  handle add federation');
-									}}
-								>
-									<Trans id="federations.addFederationButton" message="Add new Federation" />
-								</DashboardListButton>
-							)
-						}
-					</>
-				)}
-
-			</Content>
-		</Container>
+								<NewFederationButton startIcon={<AddCircleIcon />}>
+									<Trans id="federations.all.newFederation" message="New Federation" />
+								</NewFederationButton>
+							</>
+						)}
+					/>
+					{
+						!isListPending && hasFederations.all && (
+							<DashboardListButton
+								startIcon={<AddCircleIcon />}
+								onClick={() => {
+									// eslint-disable-next-line no-console
+									console.log('->  handle add federation');
+								}}
+							>
+								<Trans id="federations.addFederationButton" message="Add new Federation" />
+							</DashboardListButton>
+						)
+					}
+				</>
+			)}
+		</Content>
 	);
 };

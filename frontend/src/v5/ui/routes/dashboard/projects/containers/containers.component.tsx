@@ -28,9 +28,9 @@ import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/c
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/skeletonListItem';
 import { Button } from '@controls/button';
+import { Content } from '@/v5/ui/routes/dashboard/projects/projects.styles';
 import {
 	Container,
-	Content,
 	HeaderButtonsGroup,
 } from './containers.styles';
 import { ContainersList } from './containersList';

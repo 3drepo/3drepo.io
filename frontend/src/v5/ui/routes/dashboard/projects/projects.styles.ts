@@ -16,12 +16,7 @@
  */
 import styled from 'styled-components';
 
-export const Container = styled.div``;
-
-export const HeaderButtonsGroup = styled.div`
-	margin-left: auto;
-
-	& > :last-child {
-		margin-right: 0;
-	}
+export const Content = styled.div`
+	max-width: 1289px;
+	margin: 26px auto 100px;
 `;

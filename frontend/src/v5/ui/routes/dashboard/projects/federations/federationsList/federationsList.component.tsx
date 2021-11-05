@@ -19,9 +19,6 @@ import React, { ReactNode, useMemo } from 'react';
 import { useParams } from 'react-router';
 import { isEmpty } from 'lodash';
 import { Trans } from '@lingui/react';
-import { DEFAULT_SORT_CONFIG } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.constants';
-import { useOrderedList } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.hooks';
-import { IContainer } from '@/v5/store/containers/containers.types';
 import {
 	DashboardList,
 	DashboardListCollapse,
@@ -37,6 +34,7 @@ import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { NewFederationButton } from '@/v5/ui/routes/dashboard/projects/federations/federations.styles';
 import { FederationListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/federationListItem';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
+import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { CollapseSideElementGroup, Container } from './federationsList.styles';
 import { SkeletonListItem } from './skeletonListItem';
 
@@ -70,7 +68,7 @@ export const FederationsList = ({
 	const isListPending = FederationsHooksSelectors.selectIsListPending();
 	const areStatsPending = FederationsHooksSelectors.selectAreStatsPending();
 
-	const setFavourite = (id: IContainer['_id'], value: boolean) => {
+	const setFavourite = (id: string, value: boolean) => {
 		if (value) {
 			FederationsActionsDispatchers.addFavourite(teamspace, project, id);
 		} else {
@@ -87,7 +85,7 @@ export const FederationsList = ({
 				sideElement={(
 					<CollapseSideElementGroup>
 						<Trans
-							id="containers.search.placeholder"
+							id="federations.search.placeholder"
 							message="Search..."
 							render={({ translation }) => (
 								<SearchInput
@@ -99,7 +97,7 @@ export const FederationsList = ({
 							)}
 						/>
 						<NewFederationButton startIcon={<AddCircleIcon />}>
-							<Trans id="federations.all.newFederation" message="New Federation" />
+							<Trans id="federations.newFederation" message="New Federation" />
 						</NewFederationButton>
 					</CollapseSideElementGroup>
 				)}

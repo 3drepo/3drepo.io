@@ -14,14 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
 
-export const Container = styled.div``;
-
-export const HeaderButtonsGroup = styled.div`
-	margin-left: auto;
-
-	& > :last-child {
-		margin-right: 0;
-	}
-`;
+export { useOrderedList } from './useOrderedList.hooks';
+export { DEFAULT_SORT_CONFIG } from './useOrderedList.constants';
+export type { ISortConfig } from './useOrderedList.types';

@@ -31,9 +31,8 @@ import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/container
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containerListItem';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/skeletonListItem';
-import { useOrderedList } from './containersList.hooks';
+import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { Container } from './containersList.styles';
-import { DEFAULT_SORT_CONFIG } from './containersList.constants';
 
 type IContainersList = {
 	emptyMessage: ReactNode;
@@ -59,7 +58,7 @@ export const ContainersList = ({
 	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
 	const isListPending = ContainersHooksSelectors.selectIsListPending();
 
-	const toggleSelectedId = (id: IContainer['_id']) => {
+	const toggleSelectedId = (id: string) => {
 		setSelectedId((state) => (state === id ? null : id));
 	};
 
