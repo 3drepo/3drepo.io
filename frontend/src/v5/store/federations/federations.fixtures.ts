@@ -33,5 +33,6 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 	isFavourite: faker.datatype.boolean(),
 	issues: faker.datatype.number(120),
 	risks: faker.datatype.number(120),
+	hasStatsPending: false,
 	...overrides,
 });
