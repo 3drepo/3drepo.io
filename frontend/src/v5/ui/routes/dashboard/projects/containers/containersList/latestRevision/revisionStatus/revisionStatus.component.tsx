@@ -16,16 +16,16 @@
  */
 
 import React from 'react';
-import { ContainerStatuses } from '@/v5/store/containers/containers.types';
 import { Trans } from '@lingui/react';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { i18n } from '@lingui/core';
 import { TextOverflow } from '@controls/textOverflow';
+import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { Name, QueuedStatus, ProcessingStatus } from './revisionStatus.styles';
 
 export interface IRevisionStatus {
 	name: string;
-	status: ContainerStatuses;
+	status: UploadStatuses;
 	error?: {
 		date: Date | null;
 		message: string;
@@ -33,7 +33,7 @@ export interface IRevisionStatus {
 }
 
 export const RevisionStatus = ({ status, error, name }: IRevisionStatus): JSX.Element => {
-	if (status === ContainerStatuses.QUEUED) {
+	if (status === UploadStatuses.QUEUED) {
 		return (
 			<QueuedStatus>
 				<Trans id="containers.list.item.latestRevision.status.queued" message="Queued" />
@@ -41,7 +41,7 @@ export const RevisionStatus = ({ status, error, name }: IRevisionStatus): JSX.El
 		);
 	}
 
-	if (status === ContainerStatuses.PROCESSING) {
+	if (status === UploadStatuses.PROCESSING) {
 		return (
 			<ProcessingStatus>
 				<Trans id="containers.list.item.latestRevision.status.processing" message="Processing" />
@@ -49,7 +49,7 @@ export const RevisionStatus = ({ status, error, name }: IRevisionStatus): JSX.El
 		);
 	}
 
-	if (status === ContainerStatuses.FAILED && error) {
+	if (status === UploadStatuses.FAILED && error) {
 		return (
 			<>
 				<Name>

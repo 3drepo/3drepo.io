@@ -19,7 +19,7 @@ import * as SearchInputStyles from '@controls/searchInput/searchInput.styles';
 import * as FederationsStyles from '../federations.styles';
 
 export const Container = styled.div`
-  margin: 16px 0;
+	margin: 16px 0;
 `;
 
 export const CollapseSideElementGroup = styled.div`

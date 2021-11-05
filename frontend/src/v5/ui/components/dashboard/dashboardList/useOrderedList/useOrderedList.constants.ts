@@ -1,5 +1,3 @@
-import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
-
 /**
  *  Copyright (C) 2021 3D Repo Ltd
  *
@@ -16,6 +14,8 @@ import { SortingDirection } from '@components/dashboard/dashboardList/dashboardL
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 
 export const DEFAULT_SORT_CONFIG = {
 	column: 'name',
