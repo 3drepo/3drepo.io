@@ -16,18 +16,21 @@
  */
 
 import React from 'react';
-import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
 import { Trans } from '@lingui/react';
+import Divider from '@material-ui/core/Divider';
+
 import AddCircleIcon from '@assets/icons/add_circle.svg';
+import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
+import { Button } from '@controls/button';
+import { ContainersList } from './containersList';
+import { EmptySearchResults } from './containersList/emptySearchResults';
+import { useContainersData } from './containers.hooks';
 import {
 	Container,
 	Content,
-	NewContainerButton,
 } from './containers.styles';
-import { ContainersList } from './containersList';
-import { useContainersData } from './containers.hooks';
 
 export const Containers = (): JSX.Element => {
 	const {
@@ -61,15 +64,20 @@ export const Containers = (): JSX.Element => {
 						collapsed: <Trans id="containers.favourites.collapse.tooltip.show" message="Show favourites" />,
 						visible: <Trans id="containers.favourites.collapse.tooltip.hide" message="Hide favourites" />,
 					}}
-					emptyMessage={(
-						<DashboardListEmptyText>
-							<Trans
-								id="containers.favourites.emptyMessage"
-								message="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
-							/>
-						</DashboardListEmptyText>
-					)}
+					emptyMessage={
+						favouritesFilterQuery && hasContainers.favourites ? (
+							<EmptySearchResults searchPhrase={favouritesFilterQuery} />
+						) : (
+							<DashboardListEmptyText>
+								<Trans
+									id="containers.favourites.emptyMessage"
+									message="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
+								/>
+							</DashboardListEmptyText>
+						)
+					}
 				/>
+				<Divider />
 				<ContainersList
 					hasContainers={hasContainers.all}
 					search={{
@@ -80,23 +88,32 @@ export const Containers = (): JSX.Element => {
 					title={(
 						<Trans
 							id="containers.all.collapseTitle"
-							message="All containers"
+							message="All containerss ({count})"
+							values={{ count: filteredContainers.length }}
 						/>
 					)}
 					titleTooltips={{
 						collapsed: <Trans id="containers.all.collapse.tooltip.show" message="Show all" />,
 						visible: <Trans id="containers.all.collapse.tooltip.hide" message="Hide all" />,
 					}}
-					emptyMessage={(
-						<>
-							<DashboardListEmptyText>
-								<Trans id="containers.all.emptyMessage" message="You haven’t created any Containers." />
-							</DashboardListEmptyText>
-							<NewContainerButton startIcon={<AddCircleIcon />}>
-								<Trans id="containers.all.newContainer" message="New Federation" />
-							</NewContainerButton>
-						</>
-					)}
+					emptyMessage={
+						allFilterQuery && hasContainers.all ? (
+							<EmptySearchResults searchPhrase={allFilterQuery} />
+						) : (
+							<>
+								<DashboardListEmptyText>
+									<Trans id="containers.all.emptyMessage" message="You haven’t created any Containers." />
+								</DashboardListEmptyText>
+								<Button
+									startIcon={<AddCircleIcon />}
+									variant="contained"
+									color="primary"
+								>
+									<Trans id="containers.all.newContainer" message="New Container" />
+								</Button>
+							</>
+						)
+					}
 				/>
 			</Content>
 		</Container>
