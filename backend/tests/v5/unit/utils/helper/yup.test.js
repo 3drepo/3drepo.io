@@ -83,14 +83,26 @@ const testTitle = () => {
 	});
 };
 
-const testBlob = () => {
+const testShortDesc = () => {
 	describe.each([
 		['', false],
-		[generateRandomString(650), true],
-		[generateRandomString(651), false],
-	])('Blob validator', (data, res) => {
+		[generateRandomString(660), true],
+		[generateRandomString(661), false],
+	])('Short description validator', (data, res) => {
 		test(`${data.length} characters should return ${res}`, async () => {
-			await expect(YupHelper.types.strings.blob.isValid(data)).resolves.toBe(res);
+			await expect(YupHelper.types.strings.shortDescription.isValid(data)).resolves.toBe(res);
+		});
+	});
+};
+
+const testLongDesc = () => {
+	describe.each([
+		['', false],
+		[generateRandomString(1200), true],
+		[generateRandomString(1201), false],
+	])('Long description validator', (data, res) => {
+		test(`${data.length} characters should return ${res}`, async () => {
+			await expect(YupHelper.types.strings.longDescription.isValid(data)).resolves.toBe(res);
 		});
 	});
 };
@@ -115,6 +127,7 @@ describe('utils/helper/yup', () => {
 	testColorArr();
 	testUsername();
 	testTitle();
-	testBlob();
+	testShortDesc();
+	testLongDesc();
 	testTimestamp();
 });
