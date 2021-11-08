@@ -43,6 +43,7 @@ import { getContainerMenuItems } from '@/v5/ui/routes/dashboard/projects/contain
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { Highlight } from '@controls/highlight';
 import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision';
+import { RevisionDetails } from '@components/shared/revisionDetails';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { useOrderedList } from './containersList.hooks';
 import { Container } from './containersList.styles';
@@ -65,7 +66,6 @@ export const ContainersList = ({
 	titleTooltips,
 }: IContainersList): JSX.Element => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
-
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const { sortedList, setSortConfig } = useOrderedList(containers, DEFAULT_SORT_CONFIG);
 	const filterQuery = ContainersHooksSelectors.selectFilterQuery();
@@ -137,10 +137,7 @@ export const ContainersList = ({
 										</Highlight>
 									</DashboardListItemTitle>
 									<DashboardListItemButton
-										onClick={() => {
-											// eslint-disable-next-line no-console
-											console.log('handle revisions button');
-										}}
+										onClick={() => toggleSelectedId(container._id)}
 										width={186}
 										tooltipTitle={
 											<Trans id="containers.list.item.revisions.tooltip" message="View revisions" />
@@ -163,7 +160,7 @@ export const ContainersList = ({
 										</Highlight>
 									</DashboardListItemText>
 									<DashboardListItemText width={97} selected={container._id === selectedId}>
-										{i18n.date(container.lastUpdated)}
+										{container.lastUpdated ? i18n.date(container.lastUpdated) : ''}
 									</DashboardListItemText>
 									<DashboardListItemIcon>
 										<Tooltip
@@ -172,6 +169,7 @@ export const ContainersList = ({
 											}
 										>
 											<FavouriteCheckbox
+												selected={container._id === selectedId}
 												checked={container.isFavourite}
 												onClick={(event) => {
 													event.stopPropagation();
@@ -187,7 +185,10 @@ export const ContainersList = ({
 									</DashboardListItemIcon>
 								</DashboardListItemRow>
 								{container._id === selectedId && (
-									<div style={{ backgroundColor: '#2E405F', width: '100%', height: '100px' }} />
+									<RevisionDetails
+										containerId={container._id}
+										revisionsCount={container.revisionsCount || 1}
+									/>
 								)}
 							</DashboardListItem>
 						))

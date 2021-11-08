@@ -15,39 +15,60 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { INITIAL_STATE, reducer as containersReducer, ContainersActions } from '@/v5/store/containers/containers.redux';
+import {
+	INITIAL_STATE,
+	reducer as containersReducer,
+	ContainersActions,
+} from '@/v5/store/containers/containers.redux';
 import { times } from 'lodash';
-import { containerMockFactory } from '@/v5/store/containers/containers.fixtures';
+import { containerMockFactory } from './containers.fixtures';
 
 describe('Containers: redux', () => {
+	const projectId = 'projectId';
 	const mockContainers = times(5, () => containerMockFactory({ isFavourite: false }));
 	const defaultState = {
 		...INITIAL_STATE,
-		containers: mockContainers
+		containers: {
+			[projectId]: mockContainers
+		}
 	};
 
 	it('should add container to favourites', () => {
 		const resultState = containersReducer(
-			defaultState,
-			ContainersActions.setFavouriteSuccess(mockContainers[0]._id, true)
+				defaultState,
+				ContainersActions.setFavouriteSuccess(projectId, mockContainers[0]._id, true)
 		);
+		const resultContainers = resultState.containers[projectId];
 
-		expect(resultState.containers[0].isFavourite).toEqual(true);
-		expect(resultState.containers.slice(1).every(container => container.isFavourite)).toEqual(false);
+		expect(resultContainers[0].isFavourite).toEqual(true);
+		expect(resultContainers.slice(1).every(container => container.isFavourite)).toEqual(false);
 	});
 
 	it('should remove container from favourites', () => {
 		const mockAllFavouritesContainers = times(5, () => containerMockFactory({ isFavourite: true }))
 		const defaultStateWithAllFavourites = {
 			...INITIAL_STATE,
-			containers: mockAllFavouritesContainers
+			containers: {
+				[projectId]: mockAllFavouritesContainers
+			}
 		}
 		const resultState = containersReducer(
-			defaultStateWithAllFavourites,
-			ContainersActions.setFavouriteSuccess(mockAllFavouritesContainers[0]._id, false)
+				defaultStateWithAllFavourites,
+				ContainersActions.setFavouriteSuccess(projectId, mockAllFavouritesContainers[0]._id, false)
 		);
+		const resultContainers = resultState.containers[projectId];
 
-		expect(resultState.containers[0].isFavourite).toEqual(false);
-		expect(resultState.containers.slice(1).every(container => container.isFavourite)).toEqual(true);
-	})
+		expect(resultContainers[0].isFavourite).toEqual(false);
+		expect(resultContainers.slice(1).every(container => container.isFavourite)).toEqual(true);
+	});
+
+	describe('on setCurrentProject action', () => {
+		it('should set project name as current', () => {
+			const teamspaceName = 'teamspaceName';
+
+			const resultState = containersReducer(defaultState, ContainersActions.setCurrentProject(teamspaceName));
+
+			expect(resultState.currentProject).toEqual(teamspaceName);
+		});
+	});
 })

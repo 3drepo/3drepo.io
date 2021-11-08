@@ -19,6 +19,10 @@ import { FavouritePayload } from '@/v5/store/containers/containers.types';
 import { AxiosResponse } from 'axios';
 import api from './default';
 
+export const fetchContainerStats = (teamspace: string, projectId: string, containerId: string): Promise<any> => api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/stats`);
+
+export const fetchContainers = (teamspace: string, projectId: string): Promise<any> => api.get(`teamspaces/${teamspace}/projects/${projectId}/containers`);
+
 export const addFavourites = (
 	{ teamspace, projectId, containerId }: FavouritePayload,
 ): Promise<AxiosResponse<void>> => (

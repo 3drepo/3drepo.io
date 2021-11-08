@@ -15,17 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useParams } from 'react-router';
 import { useRouteMatch, Route, Switch, Redirect } from 'react-router-dom';
 
 import { discardSlash } from '@/v5/services/routing/routing';
+import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
+import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
+import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
 import { Federations } from './federations';
 import { Containers } from './containers';
 
 export const ProjectContent = () => {
+	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
+	const { teamspace } = useParams();
 	let { path } = useRouteMatch();
 	path = discardSlash(path);
+
+	useEffect(() => {
+		if (teamspaces.length) {
+			TeamspacesActionsDispatchers.fetchUsers(teamspace);
+		}
+	}, [teamspaces]);
 
 	return (
 		<Switch>

@@ -17,8 +17,9 @@
 
 import * as ContainersSaga from '@/v5/store/containers/containers.sagas';
 import { expectSaga } from 'redux-saga-test-plan';
-import { ContainersActions } from '@/v5/store/containers/containers.redux';
+
 import { mockServer } from '../../internals/testing/mockServer';
+import { ContainersActions } from '@/v5/store/containers/containers.redux';
 
 describe('Containers: sagas', () => {
 	const teamspace = 'teamspace';
@@ -28,52 +29,54 @@ describe('Containers: sagas', () => {
 	describe('addFavourite', () => {
 		it('should call addFavourite endpoint and dispatch TOGGLE_FAVOURITE_SUCCESS', async () => {
 			mockServer
-			.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
-			.reply(200)
+					.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
+					.reply(200)
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.addFavourite(teamspace, projectId, containerId))
-			.put(ContainersActions.setFavouriteSuccess(containerId, true))
-			.silentRun();
+					.dispatch(ContainersActions.addFavourite(teamspace, projectId, containerId))
+					.put(ContainersActions.setFavouriteSuccess(projectId, containerId, true))
+					.silentRun();
 		})
 
 		it('should call addFavourite endpoint with 404 and should not dispatch TOGGLE_FAVOURITE_SUCCESS', async () => {
 			mockServer
-			.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
-			.reply(404)
+					.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
+					.reply(404)
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.addFavourite(teamspace, projectId, containerId))
-			.silentRun()
-			.then(({ effects }: any) => {
-				expect(effects.put).toBeUndefined();
-			})
+					.dispatch(ContainersActions.addFavourite(teamspace, projectId, containerId))
+					.silentRun()
+					.then(({ effects }: any) => {
+						expect(effects.put).toBeUndefined();
+					})
 		})
 	})
 
 	describe('removeFavourite', () => {
 		it('should call removeFavourite endpoint and dispatch TOGGLE_FAVOURITE_SUCCESS', async () => {
 			mockServer
-			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
-			.reply(200)
+					.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
+					.reply(200)
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
-			.put(ContainersActions.setFavouriteSuccess(containerId, false))
-			.silentRun();
+					.dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
+					.put(ContainersActions.setFavouriteSuccess(projectId, containerId, false))
+					.silentRun();
 		})
 
 		it('should call removeFavourite endpoint with 404 and not dispatch TOGGLE_FAVOURITE_SUCCESS', async () => {
 			mockServer
-			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
-			.reply(404)
+					.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
+					.reply(404)
 
 			await expectSaga(ContainersSaga.default)
-			.dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
-			.silentRun()
-			.then(({ effects }: any) => {
-				expect(effects.put).toBeUndefined();
-			});
+					.dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
+					.silentRun()
+					.then(({ effects }: any) => {
+						expect(effects.put).toBeUndefined();
+					});
 		})
 	})
+
+
 })

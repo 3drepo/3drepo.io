@@ -62,11 +62,13 @@ declare module '@material-ui/core/styles/createPalette' {
 
 declare module '@material-ui/core/styles/createTypography' {
 	interface Typography {
+		link?: CSSProperties;
 		kickerTitle?: CSSProperties;
 		kicker?: CSSProperties;
 	}
 
 	interface TypographyOptions {
+		link?: CSSProperties;
 		kickerTitle?: CSSProperties;
 		kicker?: CSSProperties;
 	}
