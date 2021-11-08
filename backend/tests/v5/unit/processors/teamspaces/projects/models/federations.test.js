@@ -62,6 +62,11 @@ const federationSettings = {
 		angleFromNorth: 10,
 		timestamp: new Date(),
 		surveyPoints: [123],
+		errorReason: {
+			message: 'error reason',
+			timestamp: 123,
+			errorCode: 1,
+		},
 	},
 	federation2: {
 		_id: 2,

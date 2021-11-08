@@ -59,7 +59,11 @@ const containerSettings = {
 		surveyPoints: [123],
 		angleFromNorth: 10,
 		desc: 'One description',
-
+		errorReason: {
+			message: 'error reason',
+			timestamp: 123,
+			errorCode: 1,
+		},
 	},
 	container2: {
 		_id: 2,

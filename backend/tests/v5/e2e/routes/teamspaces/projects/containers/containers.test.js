@@ -87,12 +87,24 @@ const models = [
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
-		properties: { ...ServiceHelper.generateRandomModelProperties(), timestamp: new Date() },
+		properties: { ...ServiceHelper.generateRandomModelProperties(),
+			timestamp: new Date(),
+			errorReason: {
+				message: 'error reason',
+				timestamp: new Date(),
+				errorCode: 1,
+			},
+		},
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
-		properties: ServiceHelper.generateRandomModelProperties(),
+		properties: { ...ServiceHelper.generateRandomModelProperties(),
+			errorReason: {
+				message: 'error reason',
+				errorCode: 1,
+			},
+		},
 	},
 ];
 
@@ -479,6 +491,12 @@ const formatToSettings = (settings) => ({
 	angleFromNorth: settings.properties.angleFromNorth,
 	status: settings.properties.status,
 	surveyPoints: settings.properties.surveyPoints,
+	errorReason: settings.properties.errorReason ? {
+		message: settings.properties.errorReason.message,
+		timestamp: settings.properties.errorReason.timestamp
+			? settings.properties.errorReason.timestamp.getTime() : undefined,
+		errorCode: settings.properties.errorReason.errorCode,
+	} : undefined,
 });
 
 const testGetSettings = () => {

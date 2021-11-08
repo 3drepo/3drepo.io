@@ -212,7 +212,7 @@ Schemas.schemas.modelSettings = {
 		timestamp: {
 			type: 'integer',
 			example: '1629976656315',
-			description: 'The date the last model was uploaded',
+			description: 'The date the last model was uploaded (in ms)',
 		},
 		status: {
 			type: 'string',
@@ -241,6 +241,27 @@ Schemas.schemas.modelSettings = {
 			type: 'string',
 			description: 'The code of the model',
 			example: 'MOD1',
+		},
+		errorReason: {
+			type: 'object',
+			description: 'The the reason the model upload failed',
+			properties: {
+				message: {
+					type: 'string',
+					description: 'The error message',
+					example: 'System error occured. Please contact support.',
+				},
+				timestamp: {
+					type: 'integer',
+					description: 'The date the error occured (in ms)',
+					example: '1629976656315',
+				},
+				errorCode: {
+					type: 'string',
+					description: 'The error code',
+					example: 14,
+				},
+			},
 		},
 	},
 };

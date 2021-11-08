@@ -30,9 +30,24 @@ const respondFn = Responder.respond.mockImplementation((req, res, errCode) => er
 
 const testFormatModelSettings = () => {
 	const withTimestamp = { ...generateRandomModelProperties(), timestamp: new Date() };
+	const withErrorReason = { ...generateRandomModelProperties(),
+		errorReason: {
+			message: 'error message',
+			errorCode: 1,
+			timestamp: new Date(),
+		},
+	};
+	const withErrorReasonNoTimestamp = { ...generateRandomModelProperties(),
+		errorReason: {
+			message: 'error message',
+			errorCode: 1,
+		},
+	};
 	describe.each([
-		[generateRandomModelProperties(), 'no timestamp'],
+		[generateRandomModelProperties(), 'no timestamp, no errorReason'],
 		[withTimestamp, 'timestamp'],
+		[withErrorReason, 'errorReason'],
+		[withErrorReasonNoTimestamp, 'errorReason without timestamp'],
 	])('Format model settings data', (data, desc) => {
 		test(`should format correctly with ${desc}`,
 			() => {
@@ -46,6 +61,11 @@ const testFormatModelSettings = () => {
 					timestamp: data.timestamp ? data.timestamp.getTime() : undefined,
 					code: data.properties.code,
 					unit: data.properties.unit,
+					errorReason: data.errorReason ? {
+						message: data.errorReason.message,
+						errorCode: data.errorReason.errorCode,
+						timestamp: data.errorReason.timestamp ? data.errorReason.timestamp.getTime() : undefined,
+					} : undefined,
 				};
 				delete formattedSettings.properties;
 

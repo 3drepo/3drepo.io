@@ -27,11 +27,16 @@ ModelSettings.formatModelSettings = (req, res) => {
 		timestamp: settings.timestamp ? settings.timestamp.getTime() : undefined,
 		code: settings.properties.code,
 		unit: settings.properties.unit,
+		errorReason: settings.errorReason ? {
+			message: settings.errorReason.message,
+			timestamp: settings.errorReason.timestamp ? settings.errorReason.timestamp.getTime() : undefined,
+			errorCode: settings.errorReason.errorCode,
+		} : undefined,
 	};
 
 	delete formattedSettings.properties;
 
-	respond(req, res, templates.ok, { ...formattedSettings });
+	respond(req, res, templates.ok, formattedSettings);
 };
 
 module.exports = ModelSettings;
