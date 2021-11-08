@@ -45,9 +45,14 @@ YupHelper.types.surveyPoints = Yup.array()
 	);
 
 YupHelper.types.strings.username = YupHelper.validators.alphanumeric(Yup.string().min(2).max(65).strict(true));
+
 YupHelper.types.strings.title = Yup.string().min(1).max(120);
 
-YupHelper.types.strings.blob = Yup.string().min(1).max(650);
+// This is used for shorter descriptions such as revision desc, model desc, teamspace desc etc.
+YupHelper.types.strings.shortDescription = Yup.string().min(1).max(660);
+
+// This is used for longer descriptions such as groups, issues, risks
+YupHelper.types.strings.longDescription = Yup.string().min(1).max(1200);
 
 YupHelper.types.timestamp = Yup.number().min(new Date(2000, 1, 1).getTime()).integer()
 	.transform((value, originalValue) => {

@@ -25,6 +25,7 @@ const yup = require("yup");
 const uuidparse = require("uuid-parse");
 const mongo = require("mongodb");
 const crypto = require("crypto");
+const path = require("path");
 
 function Utils() {
 
@@ -415,6 +416,11 @@ function Utils() {
 			folders.push(folderName);
 		}
 		return folders.join("/");
+	};
+
+	this.getPugPath = (pugFileName) => {
+		const p = path.resolve(__dirname, "../../../resources/pug/", pugFileName);
+		return p;
 	};
 }
 

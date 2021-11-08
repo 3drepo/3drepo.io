@@ -29,7 +29,6 @@ const History = require("../models/history");
 const ModelHelper = require("../models/helper/model");
 const User = require("../models/user");
 const DEFAULT_PLUGIN_STRUCTURE = require("../plugin/plugin-structure.js").DEFAULT_PLUGIN_STRUCTURE;
-const path = require("path");
 const utils = require("../utils");
 
 const config = require("../config");
@@ -156,7 +155,7 @@ router.get("/config.js", function (req, res) {
 	const serializedConfig = serialize(clientConfig);
 
 	res.header("Content-Type", "text/javascript");
-	res.render(path.resolve(__dirname, "./../../../../resources/pug/config.pug"), {
+	res.render(utils.getPugPath("config.pug"), {
 		config: serializedConfig
 	});
 });

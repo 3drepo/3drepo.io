@@ -34,7 +34,7 @@ const convertBodyUUIDs = (req) => {
 ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
 	const schema = Yup.object().shape({
 		name: types.strings.title,
-		desc: types.strings.blob,
+		desc: types.strings.shortDescription,
 		surveyPoints: types.surveyPoints,
 		angleFromNorth: types.degrees,
 		type: Yup.string(),
