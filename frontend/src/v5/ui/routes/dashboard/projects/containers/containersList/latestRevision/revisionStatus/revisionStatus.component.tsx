@@ -21,7 +21,7 @@ import { Trans } from '@lingui/react';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { i18n } from '@lingui/core';
 import { TextOverflow } from '@controls/textOverflow';
-import { Name, QueuedStatus, ProcessingStatus } from './revisionStatus.styles';
+import { Name, ProcessingStatus, QueuedStatus } from './revisionStatus.styles';
 
 export interface IRevisionStatus {
 	name: string;
@@ -41,7 +41,11 @@ export const RevisionStatus = ({ status, error, name }: IRevisionStatus): JSX.El
 		);
 	}
 
-	if (status === ContainerStatuses.PROCESSING) {
+	if (
+		status === ContainerStatuses.PROCESSING
+		|| status === ContainerStatuses.GENERATING_BUNDLES
+		|| status === ContainerStatuses.QUEUED_FOR_UNITY
+	) {
 		return (
 			<ProcessingStatus>
 				<Trans id="containers.list.item.latestRevision.status.processing" message="Processing" />

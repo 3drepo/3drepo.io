@@ -19,22 +19,16 @@ import React from 'react';
 import { Trans } from '@lingui/react';
 import { RevisionStatus } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/revisionStatus';
 import { IRevisionStatus } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/revisionStatus/revisionStatus.component';
-import { Label, Container } from './latestRevision.styles';
+import { ContainerStatuses } from '@/v5/store/containers/containers.types';
+import { Container, Label } from './latestRevision.styles';
 
 interface ILatestRevision extends IRevisionStatus {
 	hasRevisions: boolean;
 }
 
-export const LatestRevision = ({ hasRevisions, ...props }: ILatestRevision): JSX.Element => (
+export const LatestRevision = ({ hasRevisions, status, ...props }: ILatestRevision): JSX.Element => (
 	<Container>
-		{!hasRevisions ? (
-			<Label>
-				<Trans
-					id="containers.list.item.latestRevision.emptyContainer"
-					message="Container empty"
-				/>
-			</Label>
-		) : (
+		{hasRevisions || status === ContainerStatuses.UPLOADING ? (
 			<>
 				<Label>
 					<Trans
@@ -42,8 +36,15 @@ export const LatestRevision = ({ hasRevisions, ...props }: ILatestRevision): JSX
 						message="Latest revision: "
 					/>
 				</Label>
-				<RevisionStatus {...props} />
+				<RevisionStatus status={status} {...props} />
 			</>
+		) : (
+			<Label>
+				<Trans
+					id="containers.list.item.latestRevision.emptyContainer"
+					message="Container empty"
+				/>
+			</Label>
 		)}
 	</Container>
 );

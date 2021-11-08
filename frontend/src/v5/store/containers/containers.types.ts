@@ -31,6 +31,8 @@ export enum ContainerStatuses {
 	UPLOADED = 'uploaded',
 	QUEUED = 'queued',
 	PROCESSING = 'processing',
+	GENERATING_BUNDLES = 'Generating Bundles',
+	QUEUED_FOR_UNITY = 'Queued for Unity',
 }
 
 export interface IContainer {
