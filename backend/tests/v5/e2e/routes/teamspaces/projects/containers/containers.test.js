@@ -89,6 +89,7 @@ const models = [
 		name: ServiceHelper.generateRandomString(),
 		properties: {
 			...ServiceHelper.generateRandomModelProperties(),
+			status: 'failed',
 			errorReason: {
 				message: ServiceHelper.generateRandomString(),
 				timestamp: new Date(),
