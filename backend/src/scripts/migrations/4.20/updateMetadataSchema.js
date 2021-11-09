@@ -18,30 +18,27 @@
 const { v5Path } = require('../../../interop');
 const { getTeamspaceList, getCollectionsEndsWith } = require('../utils');
 
-const { find, updateMany } = require(`${v5Path}/handler/db`);
+const { find, updateOne } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const processModel = async (teamspace, model) => {
-	const revs = await find(teamspace, model, {}, { current: 1 });
-	const proms = revs.map(({ _id, current }) => (current.length ? updateMany(
-		teamspace,
-		`${model}.scene`,
-		{ _id: { $in: current } },
-		{ $set: { rev_id: _id } },
-	) : Promise.resolve()));
-	await Promise.all(proms);
-
-	return updateMany(teamspace, `${model}.history`, {}, { $unset: { current: 1 } });
+const processModel = async (teamspace, scene) => {
+	const meta = await find(teamspace, scene, { type: 'meta' }, { metadata: 1 });
+	const proms = meta.map(({ _id, metadata }) => {
+		if (!Array.isArray(metadata)) {
+			const metaArr = Object.keys(metadata).map((key) => ({ key, value: metadata[key] }));
+			return updateOne(teamspace, scene, { _id }, { $set: { metadata: metaArr } });
+		}
+		return Promise.resolve();
+	});
+	return Promise.all(proms);
 };
 
 const processTeamspace = async (teamspace) => {
-	const histories = await getCollectionsEndsWith(teamspace, '.history');
-	for (let i = 0; i < histories.length; ++i) {
-		const model = histories[i].name.slice(0, -('.history'.length));
-		logger.logInfo(`\t\t\t${model}`);
+	const scenes = await getCollectionsEndsWith(teamspace, '.scene');
+	for (const { name } of scenes) {
+		logger.logInfo(`\t\t\t${name}`);
 		// eslint-disable-next-line no-await-in-loop
-		await processModel(teamspace, model);
-		// eslint-disable-next-line no-await-in-loop
+		await processModel(teamspace, name);
 	}
 };
 
