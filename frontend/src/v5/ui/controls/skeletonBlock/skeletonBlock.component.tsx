@@ -25,6 +25,11 @@ interface ISkeletonBlock {
 	widthPercentage?: number;
 }
 
-export const SkeletonBlock = ({ className, delay = 0, width = 100, widthPercentage }: ISkeletonBlock): JSX.Element => (
+export const SkeletonBlock = ({
+	className,
+	delay = 0,
+	width = 100,
+	widthPercentage,
+}: ISkeletonBlock): JSX.Element => (
 	<Block className={className} delay={delay} width={width} widthPercentage={widthPercentage} />
 );

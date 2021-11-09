@@ -38,6 +38,9 @@ const getContainerStats = async (req, res) => {
 		const statsSerialised = { ...stats };
 		statsSerialised.revisions.lastUpdated = stats.revisions.lastUpdated
 			? stats.revisions.lastUpdated.getTime() : undefined;
+		if (statsSerialised.errorReason?.timestamp) {
+			statsSerialised.errorReason.timestamp = stats.errorReason.timestamp.getTime();
+		}
 		statsSerialised.revisions.latestRevision = UUIDToString(stats.revisions.latestRevision);
 
 		respond(req, res, templates.ok, statsSerialised);

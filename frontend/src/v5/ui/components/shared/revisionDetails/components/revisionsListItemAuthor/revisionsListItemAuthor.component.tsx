@@ -61,7 +61,7 @@ export const RevisionsListItemAuthor = ({
 				aria-haspopup="true"
 				onMouseEnter={handlePopoverOpen}
 				onMouseLeave={handlePopoverClose}
-				active={active}
+				$active={active}
 			>
 				{author.firstName} {author.lastName}
 			</Text>

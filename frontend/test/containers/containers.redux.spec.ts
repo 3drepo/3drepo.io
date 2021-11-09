@@ -53,22 +53,12 @@ describe('Containers: redux', () => {
 			}
 		}
 		const resultState = containersReducer(
-				defaultStateWithAllFavourites,
-				ContainersActions.setFavouriteSuccess(projectId, mockAllFavouritesContainers[0]._id, false)
+			defaultStateWithAllFavourites,
+			ContainersActions.setFavouriteSuccess(projectId, mockAllFavouritesContainers[0]._id, false)
 		);
 		const resultContainers = resultState.containers[projectId];
 
 		expect(resultContainers[0].isFavourite).toEqual(false);
 		expect(resultContainers.slice(1).every(container => container.isFavourite)).toEqual(true);
-	});
-
-	describe('on setCurrentProject action', () => {
-		it('should set project name as current', () => {
-			const teamspaceName = 'teamspaceName';
-
-			const resultState = containersReducer(defaultState, ContainersActions.setCurrentProject(teamspaceName));
-
-			expect(resultState.currentProject).toEqual(teamspaceName);
-		});
 	});
 })

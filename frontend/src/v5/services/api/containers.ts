@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FavouritePayload } from '@/v5/store/containers/containers.types';
 import { AxiosResponse } from 'axios';
+import {
+	FavouritePayload,
+	FetchContainersPayload, FetchContainersResponse,
+	FetchContainerStatsPayload, FetchContainerStatsResponse,
+} from '@/v5/store/containers/containers.types';
 import api from './default';
-
-export const fetchContainerStats = (teamspace: string, projectId: string, containerId: string): Promise<any> => api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/stats`);
-
-export const fetchContainers = (teamspace: string, projectId: string): Promise<any> => api.get(`teamspaces/${teamspace}/projects/${projectId}/containers`);
 
 export const addFavourites = (
 	{ teamspace, projectId, containerId }: FavouritePayload,
@@ -38,3 +38,20 @@ export const removeFavourites = (
 		containers: [containerId],
 	})
 );
+
+export const fetchContainers = async ({
+	teamspace,
+	projectId,
+}: FetchContainersPayload): Promise<FetchContainersResponse> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers`);
+	return data;
+};
+
+export const fetchContainerStats = async ({
+	teamspace,
+	projectId,
+	containerId,
+}: FetchContainerStatsPayload): Promise<FetchContainerStatsResponse> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/stats`);
+	return data;
+};

@@ -17,34 +17,39 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '@/v5/store/common/actions.helper';
+import { prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import {
 	IContainersActionCreators,
 	IContainersState,
 	SetFilterQueryAction,
 	SetFavouriteSuccessAction,
+	FetchContainersSuccessAction,
+	SetIsListPendingAction,
+	FetchContainerStatsSuccessAction,
 } from './containers.types';
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({
 	setFilterQuery: ['query'],
 	addFavourite: ['teamspace', 'projectId', 'containerId'],
 	removeFavourite: ['teamspace', 'projectId', 'containerId'],
-	setFavouriteSuccess: ['projectId', 'containerId', 'isFavourite'],
 	fetchContainers: ['teamspace', 'projectId'],
 	fetchContainersSuccess: ['projectId', 'containers'],
+	fetchContainerStats: ['teamspace', 'projectId', 'containerId'],
+	fetchContainerStatsSuccess: ['projectId', 'containerId', 'containerStats'],
+	setIsListPending: ['isPending'],
+	setFavouriteSuccess: ['projectId', 'containerId', 'isFavourite'],
 	fetchRevisions: ['teamspace', 'projectId', 'containerId'],
 	setRevisionVoidStatus: ['teamspace', 'projectId', 'containerId', 'revisionId', 'isVoid'],
 	setRevisionVoidStatusSuccess: ['projectId', 'containerId', 'revisionId', 'isVoid'],
 	setRevisionsIsPending: ['projectId', 'containerId', 'isPending'],
 	fetchRevisionsSuccess: ['projectId', 'containerId', 'revisions'],
-	setCurrentProject: ['projectId'],
-	setIsPending: ['isPending'],
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
 
 export const INITIAL_STATE: IContainersState = {
 	containers: {},
 	filterQuery: '',
-	currentProject: '',
-	isPending: true,
+	isListPending: true,
+	areStatsPending: true,
 };
 
 export const setFilterQuery = (state = INITIAL_STATE, { query }: SetFilterQueryAction) => (
@@ -69,7 +74,7 @@ export const setFavourite = (state = INITIAL_STATE, {
 export const fetchContainersSuccess = (state = INITIAL_STATE, {
 	projectId,
 	containers,
-}) => ({
+}: FetchContainersSuccessAction) => ({
 	...state,
 	containers: {
 		...state.containers,
@@ -77,20 +82,30 @@ export const fetchContainersSuccess = (state = INITIAL_STATE, {
 	},
 });
 
-export const setCurrentProject = (state = INITIAL_STATE, { projectId }) => ({
+export const fetchStatsSuccess = (state = INITIAL_STATE, {
+	projectId,
+	containerId,
+	containerStats,
+}: FetchContainerStatsSuccessAction) => ({
 	...state,
-	currentProject: projectId,
+	containers: {
+		...state.containers,
+		[projectId]: state.containers[projectId].map((container) => {
+			if (containerId !== container._id) return container;
+			return prepareSingleContainerData(container, containerStats);
+		}),
+	},
 });
 
-export const setIsPending = (state = INITIAL_STATE, { isPending }) => ({
+export const setIsListPending = (state = INITIAL_STATE, { isPending }: SetIsListPendingAction) => ({
 	...state,
-	isPending,
+	isListPending: isPending,
 });
 
 export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
 	[ContainersTypes.SET_FILTER_QUERY]: setFilterQuery,
-	[ContainersTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
 	[ContainersTypes.FETCH_CONTAINERS_SUCCESS]: fetchContainersSuccess,
-	[ContainersTypes.SET_CURRENT_PROJECT]: setCurrentProject,
-	[ContainersTypes.SET_IS_PENDING]: setIsPending,
+	[ContainersTypes.SET_IS_LIST_PENDING]: setIsListPending,
+	[ContainersTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
+	[ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS]: fetchStatsSuccess,
 });

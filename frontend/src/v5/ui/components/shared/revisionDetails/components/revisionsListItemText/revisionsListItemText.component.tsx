@@ -35,7 +35,7 @@ export const RevisionsListItemText = ({
 	active = false,
 }: IDashboardListItemText): JSX.Element => (
 	<FixedOrGrowContainer width={width} className={className}>
-		<Text meta={meta} active={active}>
+		<Text $meta={meta} $active={active}>
 			{children}
 		</Text>
 	</FixedOrGrowContainer>
