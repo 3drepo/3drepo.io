@@ -19,6 +19,7 @@ const removeIndex = require('./removeIndices');
 const addRevId = require('./addRevIdToNodes');
 const updateMetaSchema = require('./updateMetadataSchema');
 const addIndex = require('./addIndices');
+const addSharedIdToMeshMap = require('./addSharedIdToMeshMap');
 
 const { v5Path } = require('../../../interop');
 
@@ -31,6 +32,7 @@ const scripts = [
 	{ script: addRevId, desc: 'Add revision id to all scene nodes' },
 	{ script: updateMetaSchema, desc: 'Update metadata schema' },
 	{ script: addIndex, desc: 'Add new indices to scene graph' },
+	{ script: addSharedIdToMeshMap, desc: 'Add shared id to super mesh mappings' },
 ];
 
 module.exports = scripts;
