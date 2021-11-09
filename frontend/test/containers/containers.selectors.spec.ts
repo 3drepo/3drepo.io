@@ -14,9 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import { INITIAL_STATE } from '@/v5/store/containers/containers.redux';
 import { times } from 'lodash';
-import { containerMockFactory } from '@/v5/store/containers/containers.fixtures';
+import { containerMockFactory } from './containers.fixtures';
 import {
 	selectContainers,
 	selectFilteredFavouriteContainers,
@@ -24,35 +25,39 @@ import {
 } from '@/v5/store/containers/containers.selectors';
 import { IContainersState } from '@/v5/store/containers/containers.types';
 
-const searchPhrase = 'test phrase'
+const searchPhrase = 'test phrase';
+const projectId = 'projectId';
 const defaultState: IContainersState = {
 	...INITIAL_STATE,
-	containers: [
-		containerMockFactory({ isFavourite: true, name: searchPhrase }),
-		...times(5, () => containerMockFactory({ isFavourite: true })),
-		...times(4, () => containerMockFactory({ isFavourite: false }))
-	],
+	containers:
+			{
+				[projectId]: [
+					containerMockFactory({ isFavourite: true, name: searchPhrase }),
+					...times(5, () => containerMockFactory({ isFavourite: true })),
+					...times(4, () => containerMockFactory({ isFavourite: false }))
+				],
+			},
 	filterQuery: searchPhrase
 }
 
 describe('Containers: selectors', () => {
 	describe('selectFavouriteContainers', () => {
 		it('should select favourite containers', () => {
-			const selected = selectFilteredFavouriteContainers.resultFunc(defaultState.containers);
+			const selected = selectFilteredFavouriteContainers.resultFunc(defaultState.containers[projectId]);
 			expect(selected).toHaveLength(6);
 		})
 	})
 
 	describe('selectContainers', () => {
 		it('should select all containers', () => {
-			const selected = selectContainers.resultFunc(defaultState);
+			const selected = selectContainers.resultFunc(defaultState, projectId);
 			expect(selected).toHaveLength(10);
 		})
 	})
 
 	describe('selectFilteredContainers', () => {
 		it('should select container with searchPhrase', () => {
-			const selected = selectFilteredContainers.resultFunc(defaultState.containers, searchPhrase);
+			const selected = selectFilteredContainers.resultFunc(defaultState.containers[projectId], searchPhrase);
 			expect(selected).toHaveLength(1);
 		})
 	})

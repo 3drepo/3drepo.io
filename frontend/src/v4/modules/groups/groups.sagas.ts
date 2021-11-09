@@ -179,22 +179,21 @@ function* deleteGroups({ teamspace, modelId, groups }) {
 		const isShowDetails = yield select(selectShowDetails);
 		const activeGroupId = yield select(selectActiveGroupId);
 
-		yield all(groupsToDelete.map((groupId) => {
+		const actions = [];
+
+		groupsToDelete.forEach((groupId) => {
 			const overriddenGroup = colorOverrides[groupId];
 			const group = groupsMap[groupId];
 
-			const actions = [
-				put(GroupsActions.dehighlightGroup(group)),
-				put(GroupsActions.deleteGroupsSuccess([groupId]))
-			];
+			actions.push(put(GroupsActions.dehighlightGroup(group)));
+			actions.push(put(GroupsActions.deleteGroupsSuccess([groupId])));
 
 			if (overriddenGroup) {
 				actions.push(put(GroupsActions.removeColorOverride(groupId)));
 			}
+		});
 
-			return actions;
-		}));
-
+		yield all(actions);
 		if (isShowDetails && groupsToDelete.includes(activeGroupId)) {
 			yield put(GroupsActions.setComponentState({ activeGroup: null, showDetails: false }));
 			const { name } = yield select(selectEditingGroupDetails);

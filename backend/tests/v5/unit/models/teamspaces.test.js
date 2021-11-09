@@ -62,6 +62,42 @@ const testTeamspaceAdmins = () => {
 	});
 };
 
+const testGetMembersInfo = () => {
+	describe('Get teamspace admins', () => {
+		test('should return list of users from teamspace with their details', async () => {
+			const mockData = [
+				{ user: 'A', customData: { firstName: 'a', lastName: 'b', billing: { billingInfo: { company: 'companyA' } } } },
+				{ user: 'B', customData: { firstName: 'a', lastName: 'b', billing: {} } },
+				{ user: 'C', customData: { firstName: 'a', lastName: 'b' } },
+				{ user: 'D', customData: { } },
+			];
+
+			const expectedData = [
+				{ user: 'A', firstName: 'a', lastName: 'b', company: 'companyA' },
+				{ user: 'B', firstName: 'a', lastName: 'b' },
+				{ user: 'C', firstName: 'a', lastName: 'b' },
+				{ user: 'D', firstName: undefined, lastName: undefined },
+			];
+			const ts = 'ts';
+			const fn = jest.spyOn(db, 'find').mockResolvedValue(mockData);
+			const res = await Teamspace.getMembersInfo(ts);
+			expect(res).toEqual(expectedData);
+
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][2]).toEqual({ 'roles.db': ts });
+		});
+		test('should return empty array if there are no members', async () => {
+			const ts = 'ts';
+			const fn = jest.spyOn(db, 'find').mockResolvedValue([]);
+			const res = await Teamspace.getMembersInfo(ts);
+			expect(res).toEqual([]);
+
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][2]).toEqual({ 'roles.db': ts });
+		});
+	});
+};
+
 const testGetSubscriptions = () => {
 	describe('Get teamspace subscriptions', () => {
 		test('should subscription if teamspace exists', async () => {
@@ -107,4 +143,5 @@ describe('models/teamspaces', () => {
 	testTeamspaceAdmins();
 	testHasAccessToTeamspace();
 	testGetSubscriptions();
+	testGetMembersInfo();
 });

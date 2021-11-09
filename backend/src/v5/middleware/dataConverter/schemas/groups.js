@@ -126,7 +126,7 @@ const schema = (group, strict = false) => {
 		name: types.strings.title,
 		author: types.strings.username.required(),
 		createdAt: types.timestamp.required(),
-		description: types.strings.blob.optional(),
+		description: types.strings.longDescription.optional(),
 		updatedAt: types.timestamp.optional().default(group.createdAt),
 		updatedBy: types.strings.username.optional().default(group.author),
 		...rulesOrObjects,

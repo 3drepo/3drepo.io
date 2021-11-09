@@ -55,9 +55,9 @@
 
 		let authStr = "";
 		if(username && password) {
-			authStr = `${username}:${password}@`;
+			authStr = `${username}:${encodeURIComponent(password)}@`;
 		} else if(config.db.username && config.db.password) {
-			authStr = `${config.db.username}:${config.db.password}@`;
+			authStr = `${config.db.username}:${encodeURIComponent(config.db.password)}@`;
 		}
 
 		let connectString = `mongodb://${authStr}${getHostPorts()}/`;
