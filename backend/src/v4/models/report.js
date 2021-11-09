@@ -114,7 +114,12 @@ class ReportGenerator {
 	getRevisionID() {
 		this.promises.push(
 			require("./history").findLatest(this.teamspace, this.modelID, {timestamp: 1, tag: 1}).then((entry) => {
-				this.rev = entry.tag ? entry.tag : "uploaded at " + formatDate(entry.timestamp);
+				if(entry){
+					this.rev = entry.tag ? entry.tag : "uploaded at " + formatDate(entry.timestamp);
+				}
+				else{
+					this.rev = "not uploaded"
+				}
 			})
 		);
 	}
