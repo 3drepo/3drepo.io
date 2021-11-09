@@ -33,6 +33,7 @@ import { EllipsisButtonWithMenu } from '@controls/ellipsisButtonWithMenu';
 import { getContainerMenuItems } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.helpers';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IContainer } from '@/v5/store/containers/containers.types';
+import { RevisionDetails } from '@components/shared/revisionDetails';
 
 interface IContainerListItem {
 	isSelected: boolean;
@@ -76,10 +77,7 @@ export const ContainerListItem = ({
 				</Highlight>
 			</DashboardListItemTitle>
 			<DashboardListItemButton
-				onClick={() => {
-					// eslint-disable-next-line no-console
-					console.log('handle revisions button');
-				}}
+				onClick={() => onToggleSelected(container._id)}
 				width={186}
 				tooltipTitle={
 					<Trans id="containers.list.item.revisions.tooltip" message="View revisions" />
@@ -112,6 +110,7 @@ export const ContainerListItem = ({
 				>
 					<FavouriteCheckbox
 						checked={container.isFavourite}
+						selected={isSelected}
 						onClick={(event) => {
 							event.stopPropagation();
 						}}
@@ -131,7 +130,10 @@ export const ContainerListItem = ({
 			</DashboardListItemIcon>
 		</DashboardListItemRow>
 		{isSelected && (
-			<div style={{ backgroundColor: '#2E405F', width: '100%', height: '100px' }} />
+			<RevisionDetails
+				containerId={container._id}
+				revisionsCount={container.revisionsCount || 1}
+			/>
 		)}
 	</DashboardListItem>
 );

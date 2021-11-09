@@ -15,9 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { INITIAL_STATE, reducer as containersReducer, ContainersActions } from '@/v5/store/containers/containers.redux';
+import {
+	INITIAL_STATE,
+	reducer as containersReducer,
+	ContainersActions,
+} from '@/v5/store/containers/containers.redux';
 import { times } from 'lodash';
-import { containerMockFactory } from '@/v5/store/containers/containers.fixtures';
+import { containerMockFactory } from './containers.fixtures';
 
 describe('Containers: redux', () => {
 	const projectId = 'projectId';
@@ -31,8 +35,8 @@ describe('Containers: redux', () => {
 
 	it('should add container to favourites', () => {
 		const resultState = containersReducer(
-			defaultState,
-			ContainersActions.setFavouriteSuccess(projectId, mockContainers[0]._id, true)
+				defaultState,
+				ContainersActions.setFavouriteSuccess(projectId, mockContainers[0]._id, true)
 		);
 		const resultContainers = resultState.containers[projectId];
 

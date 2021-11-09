@@ -46,5 +46,11 @@
   "notFound.contactSupportButton.label": "Contact support team",
   "notFound.goToDashboardButton.label": "Go to your Dashboard",
   "notFound.message": "You can return to our dashboard, or contact our support team if you can't find what you're looking for.",
-  "notFound.title": "Sorry, but the page you were looking for could not be found."
+  "notFound.title": "Sorry, but the page you were looking for could not be found.",
+  "revisionDetails.addedOn": "Added on",
+  "revisionDetails.addedBy": "Added by",
+  "revisionDetails.revisionCode": "Revision code",
+  "revisionDetails.description": "Description",
+  "revisionDetails.status.active": "Active",
+  "revisionDetails.status.void": "Void"
 }

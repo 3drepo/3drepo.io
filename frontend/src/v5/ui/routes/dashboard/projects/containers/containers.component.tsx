@@ -16,8 +16,9 @@
  */
 
 import React from 'react';
-import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
 import { Trans } from '@lingui/react';
+
+import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
 import { MainHeader } from '@controls/mainHeader';
 import { SearchInput } from '@controls/searchInput';
 import AddCircleIcon from '@assets/icons/add_circle.svg';

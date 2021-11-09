@@ -16,8 +16,9 @@
  */
 
 import React, { useMemo } from 'react';
+import uuid from 'uuidv4';
+
 import { DashboardList } from '@components/dashboard/dashboardList';
-import { DashboardListSkeletonItem } from '@components/dashboard/dashboardList/dashboardListSkeletonItem';
 
 interface IDashboardSkeletonList {
 	itemsAmount?: number;
@@ -30,15 +31,14 @@ export const DashboardSkeletonList = ({ itemsAmount = 10, itemComponent }: IDash
 	return (
 		<DashboardList>
 			{list.map((item, index) => (
-				<DashboardListSkeletonItem>
+				<div key={uuid()}>
 					{
 						React.cloneElement(itemComponent, {
-							key: itemComponent.props.name,
 							delay: index / 10,
 							...itemComponent.props,
 						})
 					}
-				</DashboardListSkeletonItem>
+				</div>
 			))}
 		</DashboardList>
 	);

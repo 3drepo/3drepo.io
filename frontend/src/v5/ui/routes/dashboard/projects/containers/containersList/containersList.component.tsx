@@ -52,7 +52,6 @@ export const ContainersList = ({
 	titleTooltips,
 }: IContainersList): JSX.Element => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
-
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const { sortedList, setSortConfig } = useOrderedList(containers, DEFAULT_SORT_CONFIG);
 	const filterQuery = ContainersHooksSelectors.selectFilterQuery();

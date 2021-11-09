@@ -18,7 +18,7 @@ import styled, { css } from 'styled-components';
 import { Divider as DividerComponent } from '@material-ui/core';
 
 export const Container = styled.div`
-	${({ isLoading }) => isLoading && css`
+	${({ $isLoading }) => $isLoading && css`
 		pointer-events: none;
 	`}
 `;
