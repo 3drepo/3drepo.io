@@ -52,10 +52,10 @@ queue.purgeQueues = async () => {
 
 // userCredentials should be the same format as the return value of generateUserCredentials
 db.createUser = async (userCredentials, tsList = [], customData = {}) => {
-	const { user, password, apiKey } = userCredentials;
+	const { user, password, apiKey, basicData = {} } = userCredentials;
 	const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));
 	const adminDB = await DbHandler.getAuthDB();
-	return adminDB.addUser(user, password, { customData: { ...customData, apiKey }, roles });
+	return adminDB.addUser(user, password, { customData: { ...basicData, ...customData, apiKey }, roles });
 };
 
 db.createTeamspaceRole = (ts) => createTeamSpaceRole(ts);
@@ -118,6 +118,8 @@ db.createGroups = (teamspace, modelId, groups = []) => {
 	return DbHandler.insertMany(teamspace, `${modelId}.groups`, toInsert);
 };
 
+db.createJobs = (teamspace, jobs) => DbHandler.insertMany(teamspace, 'jobs', jobs);
+
 db.createIssue = (teamspace, modelId, issue) => {
 	const formattedIssue = { ...issue, _id: stringToUUID(issue._id) };
 	return DbHandler.insertOne(teamspace, `${modelId}.issues`, formattedIssue);
@@ -149,6 +151,15 @@ ServiceHelper.generateUserCredentials = () => ({
 	user: ServiceHelper.generateRandomString(),
 	password: ServiceHelper.generateRandomString(),
 	apiKey: ServiceHelper.generateRandomString(),
+	basicData: {
+		firstName: ServiceHelper.generateRandomString(),
+		lastName: ServiceHelper.generateRandomString(),
+		billing: {
+			billingInfo: {
+				company: ServiceHelper.generateRandomString(),
+			},
+		},
+	},
 });
 
 ServiceHelper.generateRevisionEntry = (isVoid = false) => ({
@@ -161,27 +172,28 @@ ServiceHelper.generateRevisionEntry = (isVoid = false) => ({
 
 ServiceHelper.generateRandomModelProperties = () => ({
 	properties: {
-		code: ServiceHelper.generateUUIDString(),
+		code: ServiceHelper.generateRandomString(),
 		unit: 'm',
 	},
 	desc: ServiceHelper.generateRandomString(),
-	type: ServiceHelper.generateUUIDString(),
-	timestamp: Date.now(),
+	type: ServiceHelper.generateRandomString(),
 	status: 'ok',
 	surveyPoints: [
 		{
 			position: [
-				ServiceHelper.generateRandomNumber,
-				ServiceHelper.generateRandomNumber,
-				ServiceHelper.generateRandomNumber,
+				ServiceHelper.generateRandomNumber(),
+				ServiceHelper.generateRandomNumber(),
+				ServiceHelper.generateRandomNumber(),
 			],
 			latLong: [
-				ServiceHelper.generateRandomNumber,
-				ServiceHelper.generateRandomNumber,
+				ServiceHelper.generateRandomNumber(),
+				ServiceHelper.generateRandomNumber(),
 			],
 		},
 	],
-	anglefromNorth: 123,
+	angleFromNorth: 123,
+	defaultView: ServiceHelper.generateUUIDString(),
+	defaultLegend: ServiceHelper.generateUUIDString(),
 });
 
 ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {

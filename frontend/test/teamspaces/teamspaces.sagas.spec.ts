@@ -27,19 +27,19 @@ describe('Teamspaces: sagas', () => {
 	describe('fetch', () => {
 		it('should fetch teamspaces data and dispatch FETCH_SUCCESS', async () => {
 			mockServer
-			.get(`/teamspaces`)
-			.reply(200, { teamspaces })
+				.get(`/teamspaces`)
+				.reply(200, { teamspaces });
 
 			await expectSaga(TeamspacesSaga.default)
-				.dispatch(TeamspacesActions.fetch())
-				.put(TeamspacesActions.fetchSuccess([]))
-				.silentRun();
+					.dispatch(TeamspacesActions.fetch())
+					.put(TeamspacesActions.fetchSuccess(teamspaces))
+					.silentRun();
 		});
 
 		it('should handle teamspaces api error and dispatch FETCH_FAILURE', async () => {
 			mockServer
-			.get(`/teamspaces`)
-			.reply(404)
+				.get(`/teamspaces`)
+				.reply(404);
 
 			await expectSaga(TeamspacesSaga.default)
 				.dispatch(TeamspacesActions.fetch())

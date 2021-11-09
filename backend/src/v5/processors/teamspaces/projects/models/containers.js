@@ -24,6 +24,7 @@ const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
 const { logger } = require('../../../../utils/logger');
 const { queueModelUpload } = require('../../../../services/queue');
+const { timestampToString } = require('../../../../utils/helper/dates');
 
 const Containers = { ...Groups };
 
@@ -37,7 +38,7 @@ Containers.getContainerList = async (teamspace, project, user) => {
 Containers.getContainerStats = async (teamspace, project, container) => {
 	let latestRev = {};
 	const [settings, revCount] = await Promise.all([
-		getContainerById(teamspace, container, { name: 1, type: 1, properties: 1, status: 1 }),
+		getContainerById(teamspace, container, { name: 1, type: 1, properties: 1, status: 1, errorReason: 1 }),
 		getRevisionCount(teamspace, container),
 	]);
 
@@ -46,8 +47,7 @@ Containers.getContainerStats = async (teamspace, project, container) => {
 	} catch {
 		// do nothing. A container can have 0 revision.
 	}
-
-	return {
+	const stats = {
 		type: settings.type,
 		code: settings.properties.code,
 		status: settings.status,
@@ -55,13 +55,22 @@ Containers.getContainerStats = async (teamspace, project, container) => {
 		revisions: {
 			total: revCount,
 			lastUpdated: latestRev.timestamp,
-			latestRevision: latestRev.tag || latestRev._id,
+			latestRevision: latestRev.tag || timestampToString(latestRev.timestamp?.getTime()),
 		},
 	};
+
+	if (settings.status === 'failed' && settings.errorReason) {
+		stats.errorReason = {
+			message: settings.errorReason.message,
+			timestamp: settings.errorReason.timestamp,
+		};
+	}
+
+	return stats;
 };
 
 Containers.getRevisions = (teamspace, container, showVoid) => getRevisions(teamspace,
-	container, showVoid, { _id: 1, author: 1, timestamp: 1, tag: 1, void: 1 });
+	container, showVoid, { _id: 1, author: 1, timestamp: 1, tag: 1, void: 1, desc: 1 });
 
 Containers.newRevision = async (teamspace, mode, data, file) => queueModelUpload(teamspace, mode, data, file)
 	.finally(() => fs.rm(file.path).catch((e) => {
@@ -81,5 +90,8 @@ Containers.deleteFavourites = async (username, teamspace, project, favouritesToR
 };
 
 Containers.updateSettings = updateModelSettings;
+
+Containers.getSettings = async (teamspace, container) => getContainerById(teamspace,
+	container, { corID: 0, account: 0, permissions: 0 });
 
 module.exports = Containers;

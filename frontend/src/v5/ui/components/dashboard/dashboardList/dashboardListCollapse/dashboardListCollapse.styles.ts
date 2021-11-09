@@ -14,9 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
+
+import styled, { css } from 'styled-components';
 
 export const Container = styled.div`
+	${({ $isLoading }) => $isLoading && css`
+		pointer-events: none;
+	`}
 `;
 
 export const ButtonContainer = styled.div`

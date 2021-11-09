@@ -15,12 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useEffect } from 'react';
+import { useParams } from 'react-router';
+import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 
 export const useContainersData = () => {
+	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+
 	const filteredContainers = ContainersHooksSelectors.selectFilteredContainers();
 	const favouriteContainers = ContainersHooksSelectors.selectFilteredFavouriteContainers();
 	const hasContainers = ContainersHooksSelectors.selectHasContainers();
+	const isListPending = ContainersHooksSelectors.selectIsListPending();
+	const currentProject = ProjectsHooksSelectors.selectCurrentProject();
 
-	return { filteredContainers, favouriteContainers, hasContainers };
+	useEffect(() => {
+		if (hasContainers.all || currentProject !== project) return;
+
+		ContainersActionsDispatchers.fetchContainers(teamspace, project);
+	}, [currentProject]);
+
+	return { filteredContainers, favouriteContainers, hasContainers, isListPending };
 };

@@ -231,7 +231,7 @@ class ReportGenerator {
 	generateReport(res) {
 		this.entries.sort((a, b) => a.createdTS < b.createdTS ? 1 : -1);
 		return Promise.all(this.promises).then(() => {
-			res.render("report.pug", {
+			res.render(utils.getPugPath("report.pug"), {
 				baseURL: config.getBaseURL(),
 				url: function (path) {
 					return config.apiAlgorithm.apiUrl(C.GET_API, path);

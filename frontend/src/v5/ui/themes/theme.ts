@@ -116,6 +116,12 @@ const typography: TypographyOptions = {
 		letterSpacing: '0.18em',
 		textTransform: 'uppercase',
 	},
+	link: {
+		fontWeight: FONT_WEIGHT.MEDIUM,
+		fontSize: '0.75rem',
+		lineHeight: '1.125rem',
+		textDecoration: 'underline',
+	},
 	caption: {
 		fontWeight: FONT_WEIGHT.MEDIUM,
 		fontSize: '0.625rem',
@@ -464,6 +470,9 @@ export const theme = createMuiTheme({
 			},
 			containedPrimary: {
 				color: COLOR.PRIMARY_MAIN_CONTRAST,
+				'& $path': {
+					fill: COLOR.PRIMARY_MAIN_CONTRAST,
+				},
 				'&:hover': {
 					backgroundColor: COLOR.PRIMARY_DARK,
 				},
@@ -494,6 +503,9 @@ export const theme = createMuiTheme({
 				backgroundColor: 'transparent',
 				'&$disabled': {
 					color: COLOR.BASE_LIGHTEST,
+				},
+				'&$disabled $path': {
+					fill: COLOR.BASE_LIGHTEST,
 				},
 				'&.Mui-focusVisible': {
 					backgroundColor: COLOR.PRIMARY_MAIN_CONTRAST,

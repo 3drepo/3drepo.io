@@ -18,6 +18,7 @@ const { hasAccessToTeamspace, hasAdminAccessToContainer, hasReadAccessToContaine
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
+const { formatModelSettings } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
@@ -37,6 +38,9 @@ const getContainerStats = async (req, res) => {
 		const statsSerialised = { ...stats };
 		statsSerialised.revisions.lastUpdated = stats.revisions.lastUpdated
 			? stats.revisions.lastUpdated.getTime() : undefined;
+		if (statsSerialised.errorReason?.timestamp) {
+			statsSerialised.errorReason.timestamp = stats.errorReason.timestamp.getTime();
+		}
 		statsSerialised.revisions.latestRevision = UUIDToString(stats.revisions.latestRevision);
 
 		respond(req, res, templates.ok, statsSerialised);
@@ -70,6 +74,19 @@ const updateSettings = (req, res) => {
 	Containers.updateSettings(teamspace, container, req.body)
 		.then(() => respond(req, res, templates.ok)).catch(
 			// istanbul ignore next
+			(err) => respond(req, res, err),
+		);
+};
+
+const getSettings = (req, res, next) => {
+	const { teamspace, container } = req.params;
+	Containers.getSettings(teamspace, container)
+		.then((settings) => {
+			req.outputData = settings;
+			next();
+		})
+		.catch(
+		// istanbul ignore next
 			(err) => respond(req, res, err),
 		);
 };
@@ -383,6 +400,49 @@ const establishRoutes = () => {
 	 *         description: updates the settings of the container
 	 */
 	router.patch('/:container', hasAdminAccessToContainer, validateUpdateSettingsData, updateSettings);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}:
+	 *   get:
+	 *     description: Get the model settings of container
+	 *     tags: [Containers]
+	 *     operationId: getSettings
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - project:
+	 *         name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - container:
+	 *         name: container
+	 *         description: Container ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: returns the model settings of a container
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               $ref: "#/components/schemas/modelSettings"
+	 */
+	router.get('/:container', hasReadAccessToContainer, getSettings, formatModelSettings);
 	return router;
 };
 

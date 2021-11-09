@@ -15,7 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { INITIAL_STATE, reducer as teamspaceReducer, TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
+import {
+	INITIAL_STATE,
+	reducer as teamspaceReducer,
+	TeamspacesActions
+} from '@/v5/store/teamspaces/teamspaces.redux';
 
 describe('Teamspace: redux', () => {
 	const defaultState = {

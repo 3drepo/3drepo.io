@@ -30,19 +30,20 @@ export type IDashboardListCollapse = {
 	},
 	className?: string;
 	sideElement?: ReactNode;
+	isLoading?: boolean;
 };
 
 export const DashboardListCollapse = ({
-	children, title, tooltipTitles, className, sideElement,
+	children, title, tooltipTitles, className, sideElement, isLoading = false,
 }: IDashboardListCollapse): JSX.Element => {
 	const [isCollapsed, setIsCollapsed] = useState(false);
 
 	return (
-		<Container className={className}>
+		<Container className={className} $isLoading={isLoading}>
 			<ControlsContainer>
 				<ButtonContainer onClick={() => setIsCollapsed((state) => !state)}>
 					<Tooltip title={(!isCollapsed ? tooltipTitles?.visible : tooltipTitles?.collapsed) ?? ''}>
-						<ChevronButton isOn={!isCollapsed} />
+						<ChevronButton isOn={!isCollapsed} isLoading={isLoading} />
 					</Tooltip>
 					<Typography variant="h3" color="secondary">{title}</Typography>
 				</ButtonContainer>

@@ -37,8 +37,8 @@ export const Containers = (): JSX.Element => {
 		filteredContainers,
 		favouriteContainers,
 		hasContainers,
+		isListPending,
 	} = useContainersData();
-
 	const favouritesFilterQuery = ContainersHooksSelectors.selectFavouritesFilterQuery();
 	const allFilterQuery = ContainersHooksSelectors.selectAllFilterQuery();
 	const { setFavouritesFilterQuery, setAllFilterQuery } = ContainersActionsDispatchers;
@@ -47,7 +47,6 @@ export const Containers = (): JSX.Element => {
 		<Container>
 			<Content>
 				<ContainersList
-					hasContainers={hasContainers.favourites}
 					search={{
 						query: favouritesFilterQuery,
 						dispatcher: setFavouritesFilterQuery,
@@ -56,8 +55,7 @@ export const Containers = (): JSX.Element => {
 					title={(
 						<Trans
 							id="containers.favourites.collapseTitle"
-							message="Favourites ({count})"
-							values={{ count: favouriteContainers.length }}
+							message="Favourites"
 						/>
 					)}
 					titleTooltips={{
@@ -79,7 +77,6 @@ export const Containers = (): JSX.Element => {
 				/>
 				<Divider />
 				<ContainersList
-					hasContainers={hasContainers.all}
 					search={{
 						query: allFilterQuery,
 						dispatcher: setAllFilterQuery,
@@ -88,8 +85,7 @@ export const Containers = (): JSX.Element => {
 					title={(
 						<Trans
 							id="containers.all.collapseTitle"
-							message="All containerss ({count})"
-							values={{ count: filteredContainers.length }}
+							message="All containerss"
 						/>
 					)}
 					titleTooltips={{
@@ -108,6 +104,7 @@ export const Containers = (): JSX.Element => {
 									startIcon={<AddCircleIcon />}
 									variant="contained"
 									color="primary"
+									disabled={isListPending}
 								>
 									<Trans id="containers.all.newContainer" message="New Container" />
 								</Button>

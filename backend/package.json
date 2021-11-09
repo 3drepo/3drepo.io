@@ -1,6 +1,6 @@
 {
   "name": "3drepo.io",
-  "version": "4.19.1",
+  "version": "4.19.2",
   "engines": {
     "node": "14.x.x"
   },
@@ -34,6 +34,7 @@
     "cors": "2.8.5",
     "crypto-js": "4.0.0",
     "csv-parse": "4.8.5",
+    "dayjs": "1.10.7",
     "device": "0.3.12",
     "elastic-apm-node": "3.7.0",
     "express": "4.17.1",

@@ -112,6 +112,6 @@ const contrastFabStyles = css`
 
 export const StyledFab = styled(Fab)`
 	${({ size }) => getButtonSize(size)};
-	${({ variant }) => variant === 'main' && mainFabStyles}
-	${({ variant }) => variant === 'contrast' && contrastFabStyles}
+	${({ $variant }) => $variant === 'main' && mainFabStyles}
+	${({ $variant }) => $variant === 'contrast' && contrastFabStyles}
 `;

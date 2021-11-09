@@ -1,6 +1,6 @@
 {
 	"name": "3drepo.io-frontend",
-	"version": "4.19.1",
+	"version": "4.19.2",
 	"description": "The frontend for 3drepo.io",
 	"main": "index.js",
 	"directories": {
@@ -71,6 +71,7 @@
 		"query-string": "6.2.0",
 		"react": "16.8.6",
 		"react-autosuggest": "9.4.3",
+		"react-children-utilities": "2.6.3",
 		"react-copy-to-clipboard": "5.0.1",
 		"react-dom": "16.8.6",
 		"react-dropzone": "6.0.2",

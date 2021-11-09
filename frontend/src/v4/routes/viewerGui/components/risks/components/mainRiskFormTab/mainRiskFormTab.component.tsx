@@ -25,6 +25,7 @@ import {
 	RISK_CONSEQUENCES,
 	RISK_LIKELIHOODS,
 } from '../../../../../../constants/risks';
+import { LONG_TEXT_CHAR_LIM } from '../../../../../../constants/viewerGui';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { TextField } from '../../../../../components/textField/textField.component';
 import { UpdateButtons } from '../../../updateButtons/updateButtons.component';
@@ -84,6 +85,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 						disabled={!canEditBasicProperty}
 						mutable={!isNewRisk}
 						enableMarkdown
+						inputProps={{ maxLength: LONG_TEXT_CHAR_LIM }}
 					/>
 				)} />
 			</Container>
