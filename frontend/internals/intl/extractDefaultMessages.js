@@ -2,8 +2,9 @@ const { exec } = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { srcFiles } = require('./config.json');
 
-const FILES_GLOB = 'src/**/*[!.d].{ts,tsx}';
+const FILES_GLOB = srcFiles;
 
 const extractDefaultMessages = () =>
 	new Promise((resolve, reject) => {

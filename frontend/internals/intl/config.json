@@ -1,0 +1,6 @@
+{
+	"languages": ["en", "es"],
+	"defaultLanguage": "en",
+	"outDir": "src/locales",
+	"srcFiles": "src/**/*[!.d].{ts,tsx}"
+}

@@ -1,12 +1,13 @@
 const extractDefaultMessages = require('./extractDefaultMessages');
+const config = require('./config.json');
 
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const OUT_DIR = 'src/locales';
-const LANGUAGES = ['en', 'es'];
-const DEFAULT_LANGUAGE = 'en';
+const OUT_DIR = config.outDir;
+const LANGUAGES = config.languages;
+const DEFAULT_LANGUAGE = config.defaultLanguage;
 
 const removeElement = (arr, value) => arr.filter(elem => elem!==value);
 
