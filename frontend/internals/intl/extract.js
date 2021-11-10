@@ -1,65 +1,64 @@
-const { exec, spawn } = require('child_process');
+const extractDefaultMessages = require('./extractDefaultMessages');
+
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const filesGlob = 'src/**/*[!.d].{ts,tsx}';
 const OUT_DIR = 'src/locales';
 const LANGUAGES = ['en', 'es'];
+const DEFAULT_LANGUAGE = 'en';
 
-const extractLanguage = (language) =>
-	new Promise((resolve, reject) => {
-		const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'extract'));
-		const process = exec([
-				'yarn formatjs extract',
-				filesGlob,
-				`--out-file ${tmpDir}/messages.json`
-			].join(' ' )
-			, (err, stdout, stderr) => {
-			if (err) {
-				console.log(`stderr: ${stderr}`);
-				reject(err);
-				return null;
-			}
+const removeElement = (arr, value) => arr.filter(elem => elem!==value);
 
-			const messages = require(`${tmpDir}/messages.json`);
-			fs.rmSync(tmpDir, { recursive: true });
+const formatMessages = (messagesObj) => Object.keys(messagesObj)
+	.reduce((formatted, key) => {
+		formatted[key] = messagesObj[key].defaultMessage;
+		return formatted;
+},{});
 
-			resolve(messages);
-		});
+const purgeUnchangedMessages = (oldMessages, newMessages) => Object.keys(newMessages)
+	.reduce((purged, key) => {
+		if (oldMessages[key] !== newMessages[key]) {
+			// It blanks updated messages
+			purged[key] =  '' ;
+		} // Get rids of unchanged messages
 
-		process.stdout.on('data', console.log);
-		process.stderr.on('data', console.error);
-});
+		return purged;
+	},{});
 
-const mergeMessages = (oldMessages, newMessages) => ({...newMessages, ...oldMessages});
+//TODO: keep changed messages;
+const mergeMessages = (oldMessages, newMessages) => ({...oldMessages, ...newMessages});
 
 const getMessagesPath = (language, outDir) => path.join(process.cwd(), outDir, language, 'messages.json');
 
-const showStats = (stats) => console.log(JSON.stringify(stats, null, '\t'));
-
-const getStats = (oldMessages, newMessages) =>
-({
-	added:0,
-	removed:0,
-	unchanged:0,
-})
-
-const extract = async (languages, outdir) => {
-	for (let i = 0; i < languages.length ; i++) {
-		const lang = languages[i];
-		const oldMessages = require(getMessagesPath(lang, outdir));
-		const newMessages = await extractLanguage(lang);
-		fs.writeFileSync(getMessagesPath(lang, outdir),  JSON.stringify(mergeMessages(oldMessages, newMessages), null, '\t'));
-
-		if (i == languages.length-1) {
-			const messagesStats = await getStats(oldMessages, newMessages);
-			showStats(messagesStats);
-		}
-	}
+const messagesToString = (messages) => {
+	const orderedMessages = Object.keys(messages).sort().reduce((ordered, key) => {
+		ordered[key] = messages[key];
+		return ordered;
+	}, {});
+	return JSON.stringify(orderedMessages, null, '  ');
 }
 
-extract(LANGUAGES,OUT_DIR);
+const writeUntranslatedMessages = (language, purgedMessages, outDir) => {
+	const langOutdir = getMessagesPath(language, outDir);
+	const oldLangMessages = require(langOutdir);
+	const messagesToWrite = mergeMessages( oldLangMessages, purgedMessages);
+	fs.writeFileSync(getMessagesPath(language, outDir),messagesToString(messagesToWrite));
+}
 
-// extractLanguage('en').then(msgs => console.log(msgs));
+const extract = async ( defaultLanguage, languages, outDir) => {
+	const oldDefaultMessages = require(getMessagesPath(defaultLanguage, outDir));
+	const newDefaultMessages = formatMessages(await extractDefaultMessages());
+
+	// Writes default language
+	fs.writeFileSync(getMessagesPath(defaultLanguage, outDir),  messagesToString(mergeMessages(oldDefaultMessages, newDefaultMessages)));
+
+	// Writes rest of the languages
+	const purgedMessages = purgeUnchangedMessages(oldDefaultMessages, newDefaultMessages);
+
+	languages = removeElement(languages, defaultLanguage);
+	languages.forEach(lang => writeUntranslatedMessages(lang, purgedMessages, outDir));
+}
+
+extract(DEFAULT_LANGUAGE, LANGUAGES, OUT_DIR);
 
