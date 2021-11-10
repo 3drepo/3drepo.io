@@ -269,7 +269,7 @@ const testAddModel = () => {
 
 const testDeleteModel = () => {
 	describe('Delete model', () => {
-		test('should return deleted count on success', async () => {
+		test('should succeed', async () => {
 			const expectedData = { deletedCount: 1 };
 			const fn = jest.spyOn(db, 'deleteOne').mockResolvedValue(expectedData);
 
