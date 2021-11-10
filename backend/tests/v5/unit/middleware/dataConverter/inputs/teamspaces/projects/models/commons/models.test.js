@@ -19,7 +19,7 @@ const { src } = require('../../../../../../../../helper/path');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
-const { createResponseCode, templates } = require(`${src}/utils/responseCodes`);
+const { templates } = require(`${src}/utils/responseCodes`);
 
 const Models = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/models`);
 const { cloneDeep } = require(`${src}/utils/helper/objects`);
@@ -93,7 +93,7 @@ const testValidateAddModelData = () => {
 			unit: 'FT',
 			name: 'container name',
 			type: 'Structure',
-		} }, true, 'if model unit is uppercase'],
+		} }, false, 'if model unit is uppercase'],
 		[{ body: {
 			unit: 123,
 			name: 'container name',
