@@ -85,7 +85,6 @@ RuleHelper.checkRulesValidity = (rules) => {
 
 RuleHelper.buildQueryFromRule = (rule) => {
 	const clauses = [];
-	let expression = {};
 
 	if (RuleHelper.isValidRule(rule)) {
 		const fieldName = "metadata." + rule.field;
@@ -150,13 +149,8 @@ RuleHelper.buildQueryFromRule = (rule) => {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	if (clauses.length > 1) {
-		expression = { $or: clauses };
-	} else if (clauses.length === 1) {
-		expression = clauses[0];
-	}
+	return  {metadata: { $elemMatch : {key: fieldName, value: clauses.length > 1 ? {$or : clauses} : clauses[0]} }};
 
-	return expression;
 };
 
 RuleHelper.positiveRulesToQueries = (rules) => {

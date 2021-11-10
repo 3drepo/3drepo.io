@@ -51,11 +51,7 @@ async function getNodeBySharedId(account, model, shared_id, revisionIds, project
 async function findNodes(account, model, branch, revision, query = {}, projection = {}) {
 	const history = await History.getHistory(account, model, branch, revision);
 
-	if (!query._id) {
-		query._id = {"$in": history.current };
-	}
-
-	return cleanAll(await db.find(account, getSceneCollectionName(model), query, projection));
+	return cleanAll(await db.find(account, getSceneCollectionName(model), { rev_id: history._id, ...query}, projection));
 }
 
 const Scene = {};

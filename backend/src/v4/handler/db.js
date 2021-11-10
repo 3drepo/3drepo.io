@@ -271,6 +271,11 @@
 		return collection.dropIndex(indexName);
 	};
 
+	Handler.getAllValues = async (database, colName, key) => {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.distinct(key);
+	};
+
 	Handler.listDatabases = async () => {
 		try {
 			const res = await Handler.runCommand("admin", {listDatabases :1 });

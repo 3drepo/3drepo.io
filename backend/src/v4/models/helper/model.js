@@ -769,22 +769,21 @@ async function getModelPermission(username, setting, account) {
 }
 
 async function getMeshById(account, model, meshId) {
-	const historyRes =  (await History.findByObjectId(account, model, meshId, {current:1}));
-	if (!historyRes) {
-		throw responseCodes.RESOURCE_NOT_FOUND;
-	}
-
-	const revisionIds = historyRes.current;
 	const projection = {
-		"parents": 1,
-		"vertices": 1,
-		"faces": 1,
-		"_extRef": 1,
-		"primitive": 1
+		parents: 1,
+		vertices: 1,
+		faces: 1,
+		_extRef: 1,
+		primitive: 1,
+		rev_id: 1
 	};
 
 	const mesh = await getNodeById(account, model, utils.stringToUUID(meshId), projection);
-	mesh.matrix = await getParentMatrix(account, model, mesh.parents[0], revisionIds);
+
+	if (!mesh) {
+		throw responseCodes.RESOURCE_NOT_FOUND;
+	}
+	mesh.matrix = await getParentMatrix(account, model, mesh.parents[0], [mesh.rev_id]);
 
 	const vertices =  mesh.vertices ? new StreamBuffer({buffer: mesh.vertices.buffer, chunkSize: mesh.vertices.buffer.length}) : await getGridfsFileStream(account, model, mesh._extRef.vertices);
 	const faces = mesh.faces ?  new StreamBuffer({buffer: mesh.faces.buffer, chunkSize: mesh.faces.buffer.length})  : await getGridfsFileStream(account, model, mesh._extRef.faces);
