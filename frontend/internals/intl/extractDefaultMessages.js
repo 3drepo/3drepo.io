@@ -4,14 +4,12 @@ const os = require('os');
 const path = require('path');
 const { srcFiles } = require('./config.json');
 
-const FILES_GLOB = srcFiles;
-
 const extractDefaultMessages = () =>
 	new Promise((resolve, reject) => {
 		const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'extract'));
 		const process = exec([
 				'yarn formatjs extract',
-				FILES_GLOB,
+				srcFiles,
 				`--out-file ${tmpDir}/messages.json`
 			].join(' ' )
 			, (err, stdout, stderr) => {
