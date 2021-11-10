@@ -271,46 +271,7 @@ const testAddContainer = () => {
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
-		test('should fail if container name already exists', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.nameAlreadyExists.status).send({ name: models[0].name, unit: 'mm', type: 'a' });
-			expect(res.body.code).toEqual(templates.nameAlreadyExists.code);
-		});
-
-		test('should fail if name is not a string', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidArguments.status).send({ name: 123, unit: 'mm', type: 'a' });
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if name invalid', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidArguments.status).send({ name: '!"£$%^', unit: 'mm', type: 'a' });
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if name missing', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidArguments.status).send({ unit: 'mm', type: 'a' });
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if unit invalid', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidArguments.status).send({ name: ServiceHelper.generateRandomString(), unit: 123, type: 'a' });
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if unit missing', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidArguments.status).send({ name: ServiceHelper.generateRandomString(), type: 'a' });
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if type invalid', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidArguments.status).send({ name: ServiceHelper.generateRandomString(), unit: 'mm', type: 123 });
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if type missing', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidArguments.status).send({ name: ServiceHelper.generateRandomString(), unit: 'mm' });
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
+		// TODO - should also have a permission test ensure we output the right error code.
 		test('should return new container ID if the user has permissions', async () => {
 			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status).send({ name: 'container name', unit: 'mm', type: 'a' });
 			expect(isUUIDString(res.body._id)).toBe(true);
@@ -340,6 +301,12 @@ const testDeleteContainer = () => {
 			const res = await agent.delete(`${route(models[0]._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
 			expect(res.body).toEqual({});
 		});
+
+		// TODO
+		// add test for:
+		// lack of permissions
+		// container ID passed in is actually a federation.
+		// sub model error
 	});
 };
 

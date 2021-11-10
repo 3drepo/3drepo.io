@@ -22,244 +22,113 @@ const Responder = require(`${src}/utils/responder`);
 const { createResponseCode, templates } = require(`${src}/utils/responseCodes`);
 
 const Models = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/models`);
+const { cloneDeep } = require(`${src}/utils/helper/objects`);
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const testValidateAddModelData = () => {
-	describe('Validate model data', () => {
-		test('next() should be with a valid request body', async () => {
-			const mockCB = jest.fn(() => {});
-			const body = {
-				name: 'container name',
-				code: 'code1000',
-				unit: 'mm',
-				desc: 'this is a container',
-				type: 'Structure',
-				surveyPoints: [],
-				angleFromNorth: 10,
-				elevation: 10,
-			};
-			const expectedResult = { ...body,
-				properties: {
-					unit: body.unit,
-					code: body.code,
-				} };
-			delete expectedResult.unit;
-			delete expectedResult.code;
-
-			await Models.validateAddModelData({ body }, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(1);
-			expect(body).toEqual(expectedResult);
-		});
-
-		test('should respond with invalid arguments if request body is empty', async () => {
-			const mockCB = jest.fn(() => {});
-			await Models.validateAddModelData({ body: {} }, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should respond with invalid arguments if some unexpected fields in request body', async () => {
-			const mockCB = jest.fn(() => {});
-			const body = {
-				name: 'container name',
-				unit: 'mm',
-				desc: 'this is a container',
-				type: 'Structure',
-				extraField: 'abc',
-				badEntry: 123,
-				unexpectedKey: [],
-			};
-			await Models.validateAddModelData({ body }, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should respond with invalid arguments if fields unexpected', async () => {
-			const mockCB = jest.fn(() => {});
-			const body = {
-				badField: 'abc',
-				unexpectedEntry: 123,
-			};
-			await Models.validateAddModelData({ body }, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should respond with invalid arguments if name not a string', async () => {
-			const mockCB = jest.fn(() => {});
-			const body = {
-				name: 123,
-				unit: 'mm',
-				type: 'Structure',
-			};
-			await Models.validateAddModelData({ body }, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should respond with invalid arguments if name bad', async () => {
-			const mockCB = jest.fn(() => {});
-			const body = {
-				name: '"£$%^&*()_+',
-				unit: 'mm',
-				type: 'Structure',
-			};
-			await Models.validateAddModelData({ body }, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(createResponseCode(templates.invalidArguments,
-				'name cannot be longer than 120 characters and must only contain alphanumeric characters and underscores'));
-		});
-
-		test('should respond with invalid arguments if name too long', async () => {
-			const mockCB = jest.fn(() => {});
-			const body = {
-				name: '123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890a',
-				unit: 'mm',
-				type: 'Structure',
-			};
-			await Models.validateAddModelData({ body }, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(createResponseCode(templates.invalidArguments,
-				'name cannot be longer than 120 characters and must only contain alphanumeric characters and underscores'));
-		});
-
-		test('should respond with invalid arguments if name missing', async () => {
-			const mockCB = jest.fn(() => {});
-			const body = {
-				unit: 'mm',
-				type: 'Structure',
-			};
-			await Models.validateAddModelData({ body }, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(createResponseCode(templates.invalidArguments,
-				'name is a required field'));
-		});
-
-		test('next() should be called if no model code given', async () => {
-			const mockCB = jest.fn(() => {});
-			const body = {
-				name: 'container name',
-				unit: 'mm',
-				type: 'Structure',
-			};
-			await Models.validateAddModelData({ body }, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(1);
-		});
-
-		test('should respond with invalid arguments if code bad', async () => {
-			const mockCB = jest.fn(() => {});
-			const body = {
-				code: '"£$%^&*()_+',
-				name: 'container name',
-				unit: 'mm',
-				type: 'Structure',
-			};
-			await Models.validateAddModelData({ body }, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(createResponseCode(templates.invalidArguments,
-				'code cannot be longer than 50 characters and must only contain alphanumeric characters'));
-		});
-
-		test('should respond with invalid arguments if code too long', async () => {
-			const mockCB = jest.fn(() => {});
-			const body = {
-				code: '12345678901234567890123456789012345678901234567890a',
-				name: 'container name',
-				unit: 'mm',
-				type: 'Structure',
-			};
-			await Models.validateAddModelData({ body }, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(createResponseCode(templates.invalidArguments,
-				'code cannot be longer than 50 characters and must only contain alphanumeric characters'));
-		});
-
-		test('next() should be called if model unit is uppercase', async () => {
-			const mockCB = jest.fn(() => {});
-			const body = {
-				unit: 'FT',
-				name: 'container name',
-				type: 'Structure',
-			};
-			await Models.validateAddModelData({ body }, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(1);
-		});
-
-		test('should respond with invalid arguments if unit not a string', async () => {
-			const mockCB = jest.fn(() => {});
-			const body = {
-				unit: 123,
-				name: 'container name',
-				type: 'Structure',
-			};
-			await Models.validateAddModelData({ body }, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should respond with invalid arguments if not a recognised unit', async () => {
-			const mockCB = jest.fn(() => {});
-			const body = {
-				unit: 'x',
-				name: 'container name',
-				type: 'Structure',
-			};
-			await Models.validateAddModelData({ body }, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(createResponseCode(templates.invalidArguments,
-				'unit must be ft, mm, cm, dm, or m'));
-		});
-
-		test('should respond with invalid arguments if unit missing', async () => {
-			const mockCB = jest.fn(() => {});
-			const body = {
-				name: 'container name',
-				type: 'Structure',
-			};
-			await Models.validateAddModelData({ body }, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(createResponseCode(templates.invalidArguments,
-				'unit is a required field'));
-		});
-
-		test('should respond with invalid arguments if type not a string', async () => {
-			const mockCB = jest.fn(() => {});
-			const body = {
-				type: 123,
-				name: 'container name',
-				unit: 'mm',
-			};
-			await Models.validateAddModelData({ body }, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should respond with invalid arguments if type missing', async () => {
-			const mockCB = jest.fn(() => {});
-			const body = {
-				name: 'container name',
-				unit: 'mm',
-			};
-			await Models.validateAddModelData({ body }, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(createResponseCode(templates.invalidArguments,
-				'type is a required field'));
+	describe.each([
+		[{ body: {
+			name: 'container name',
+			code: 'code1000',
+			unit: 'mm',
+			desc: 'this is a container',
+			type: 'Structure',
+			surveyPoints: [],
+			angleFromNorth: 10,
+			elevation: 10,
+		} }, true, 'with a valid request body'],
+		[{ body: {} }, false, 'if request body is empty'],
+		[{ body: {
+			name: 'container name',
+			unit: 'mm',
+			desc: 'this is a container',
+			type: 'Structure',
+			extraField: 'abc',
+			badEntry: 123,
+			unexpectedKey: [],
+		} }, false, 'if some unexpected fields in request body'],
+		[{ body: {
+			badField: 'abc',
+			unexpectedEntry: 123,
+		} }, false, 'if fields unexpected'],
+		[{ body: {
+			name: 123,
+			unit: 'mm',
+			type: 'Structure',
+		} }, false, 'if name not a string'],
+		[{ body: {
+			name: '"£$%^&*()_+',
+			unit: 'mm',
+			type: 'Structure',
+		} }, false, 'if name bad'],
+		[{ body: {
+			name: '123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890a',
+			unit: 'mm',
+			type: 'Structure',
+		} }, false, 'if name too long'],
+		[{ body: {
+			unit: 'mm',
+			type: 'Structure',
+		} }, false, 'if name missing'],
+		[{ body: {
+			name: 'container name',
+			unit: 'mm',
+			type: 'Structure',
+		} }, true, 'if no model code given'],
+		[{ body: {
+			code: '"£$%^&*()_+',
+			name: 'container name',
+			unit: 'mm',
+			type: 'Structure',
+		} }, false, 'if code bad'],
+		[{ body: {
+			code: '12345678901234567890123456789012345678901234567890a',
+			name: 'container name',
+			unit: 'mm',
+			type: 'Structure',
+		} }, false, 'if code too long'],
+		[{ body: {
+			unit: 'FT',
+			name: 'container name',
+			type: 'Structure',
+		} }, true, 'if model unit is uppercase'],
+		[{ body: {
+			unit: 123,
+			name: 'container name',
+			type: 'Structure',
+		} }, false, 'if unit not a string'],
+		[{ body: {
+			unit: 'x',
+			name: 'container name',
+			type: 'Structure',
+		} }, false, 'if not a recognised unit'],
+		[{ body: {
+			name: 'container name',
+			type: 'Structure',
+		} }, false, 'if unit missing'],
+		[{ body: {
+			type: 123,
+			name: 'container name',
+			unit: 'mm',
+		} }, false, 'if type not a string'],
+		[{ body: {
+			name: 'container name',
+			unit: 'mm',
+		} }, false, 'if type missing'],
+	])('Check if req arguments for add model are valid', (data, shouldPass, desc) => {
+		test(`${desc} ${shouldPass ? ' should call next()' : 'should respond with invalidArguments'}`, async () => {
+			const mockCB = jest.fn();
+			const req = { ...cloneDeep(data) };
+			await Models.validateAddModelData(req, {}, mockCB);
+			if (shouldPass) {
+				expect(mockCB.mock.calls.length).toBe(1);
+			} else {
+				expect(mockCB.mock.calls.length).toBe(0);
+				expect(Responder.respond.mock.calls.length).toBe(1);
+				expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
+			}
 		});
 	});
 };

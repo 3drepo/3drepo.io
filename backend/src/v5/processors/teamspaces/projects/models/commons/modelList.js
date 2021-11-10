@@ -63,9 +63,11 @@ ModelList.deleteModel = async (teamspace, project, model) => {
 		logger.logDebug(`[Delete model] : ${JSON.stringify(err)}`);
 	}
 
-	await removeModelCollections(teamspace, model);
-	await deleteModel(teamspace, model);
-	await removeModelFromProject(teamspace, model);
+	await Promise.all([
+		removeModelCollections(teamspace, model),
+		deleteModel(teamspace, model),
+		removeModelFromProject(teamspace, model),
+	]);
 };
 
 ModelList.getModelList = async (teamspace, project, user, modelSettings) => {
