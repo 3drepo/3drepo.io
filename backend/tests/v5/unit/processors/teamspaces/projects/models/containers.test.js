@@ -74,20 +74,61 @@ const containerSettings = {
 		name: 'container 1',
 		type: 'type 1',
 		properties: {
-			units: 'm',
+			unit: 'm',
 			code: 'CTN1',
 		},
 		status: 'ok',
+		defaultView: 2,
+		defaultLegend: 3,
+		timestamp: new Date(),
+		surveyPoints: [123],
+		angleFromNorth: 10,
+		desc: 'One description',
+		errorReason: {
+			message: 'error reason',
+			timestamp: 123,
+			errorCode: 1,
+		},
 	},
 	container2: {
 		_id: 2,
 		name: 'container 2',
 		type: 'type 2',
 		properties: {
+			unit: 'mm',
+			code: 'CTN2',
+		},
+		status: 'processing',
+	},
+	container3: {
+		_id: 3,
+		name: 'container 3',
+		type: 'type 2',
+		properties: {
+			units: 'mm',
+			code: 'CTN2',
+		},
+		status: 'failed',
+		errorReason: {
+			message: 'abc',
+			bouncerValue: 1,
+			timestamp: new Date(),
+		},
+	},
+	container4: {
+		_id: 4,
+		name: 'container 4',
+		type: 'type 2',
+		properties: {
 			units: 'mm',
 			code: 'CTN2',
 		},
 		status: 'processing',
+		errorReason: {
+			message: 'abc',
+			bouncerValue: 1,
+			timestamp: new Date(),
+		},
 	},
 };
 
@@ -110,7 +151,8 @@ const model1Revisions = [
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getModelByName.mockImplementation((ts, models, name) => (name === 'model1' ? modelList[0] : undefined));
 ModelSettings.getContainers.mockImplementation(() => modelList);
-ModelSettings.getContainerById.mockImplementation((teamspace, container) => containerSettings[container]);
+const getContainerByIdMock = ModelSettings.getContainerById.mockImplementation((teamspace,
+	container) => containerSettings[container]);
 Views.checkViewExists.mockImplementation((teamspace, model, view) => {
 	if (view === 1) {
 		return 1;
@@ -236,27 +278,35 @@ const testDeleteFavourites = () => {
 	});
 };
 
-const formatToStats = (settings, revCount, latestRev) => ({
-	type: settings.type,
-	code: settings.properties.code,
-	status: settings.status,
-	units: settings.properties.unit,
-	revisions: {
-		total: revCount,
-		lastUpdated: latestRev.timestamp,
-		latestRevision: latestRev.tag || latestRev._id,
-	},
-});
+const formatToStats = (settings, revCount, latestRev) => {
+	const res = {
+		type: settings.type,
+		code: settings.properties.code,
+		status: settings.status,
+		units: settings.properties.unit,
+		revisions: {
+			total: revCount,
+			lastUpdated: latestRev.timestamp,
+			latestRevision: latestRev.tag || latestRev._id,
+		},
+	};
+
+	if (settings.status === 'failed') {
+		res.errorReason = { message: settings.errorReason.message, timestamp: settings.errorReason.timestamp };
+	}
+	return res;
+};
 
 const testGetContainerStats = () => {
-	describe('Get container stats', () => {
-		test('should return the stats if the container exists and have no revisions', async () => {
-			const res = await Containers.getContainerStats('teamspace', 'project', 'container1');
-			expect(res).toEqual(formatToStats(containerSettings.container1, 0, {}));
-		});
-		test('should return the stats if the container exists and have revisions', async () => {
-			const res = await Containers.getContainerStats('teamspace', 'project', 'container2');
-			expect(res).toEqual(formatToStats(containerSettings.container2, 10, container2Rev));
+	describe.each([
+		['the container exists and have no revisions', 'container1'],
+		['the container exists and have revisions', 'container2'],
+		['the container exists and latest revision processing have failed', 'container3'],
+		['the container exists and some previous revision processing have failed', 'container4'],
+	])('Get container stats', (desc, container) => {
+		test(`should return the stats if ${desc}[${container}]`, async () => {
+			const res = await Containers.getContainerStats('teamspace', 'project', container);
+			expect(res).toEqual(formatToStats(containerSettings[container], container === 'container2' ? 10 : 0, container === 'container2' ? container2Rev : {}));
 		});
 	});
 };
@@ -355,6 +405,18 @@ const testNewRevision = () => {
 	});
 };
 
+const testGetSettings = () => {
+	describe('Get container settings', () => {
+		test('should return the container settings', async () => {
+			const projection = { corID: 0, account: 0, permissions: 0 };
+			const res = await Containers.getSettings('teamspace', 'container1');
+			expect(res).toEqual(containerSettings.container1);
+			expect(getContainerByIdMock.mock.calls.length).toBe(1);
+			expect(getContainerByIdMock.mock.calls[0][2]).toEqual(projection);
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/containers', () => {
 	testGetContainerList();
 	testGetContainerStats();
@@ -364,4 +426,5 @@ describe('processors/teamspaces/projects/containers', () => {
 	testDeleteFavourites();
 	testGetRevisions();
 	testNewRevision();
+	testGetSettings();
 });

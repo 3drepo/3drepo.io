@@ -15,19 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as faker from 'faker';
-import { ContainerStatuses, IContainer } from '@/v5/store/containers/containers.types';
+import { createSelector } from 'reselect';
+import { IRevisionsState } from './revisions.types';
 
-export const containerMockFactory = (overrides?: Partial<IContainer>): IContainer => ({
-	_id: faker.datatype.uuid(),
-	latestRevision: faker.random.words(2),
-	revisionsCount: faker.datatype.number({ min: 10, max: 1200 }),
-	lastUpdated: faker.date.past(2),
-	name: faker.random.words(3),
-	role: faker.random.arrayElement(['admin', 'collaborator']),
-	type: faker.random.word(),
-	status: ContainerStatuses.OK,
-	code: faker.datatype.uuid(),
-	isFavourite: faker.datatype.boolean(),
-	...overrides,
-});
+const selectRevisionsDomain = (state: { revisions: IRevisionsState }) => state.revisions;
+const selectContainerIdParam = (_, containerId: string) => containerId;
+
+export const selectRevisions = createSelector(
+	selectRevisionsDomain,
+	selectContainerIdParam,
+	(state, containerId) => state.revisions[containerId] || [],
+);
+
+export const selectIsPending: (any, string) => boolean = createSelector(
+	selectRevisionsDomain,
+	selectContainerIdParam,
+	(state, containerId) => state.isPending[containerId],
+);

@@ -14,21 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Typography } from '@controls/typography';
+
 import styled from 'styled-components';
-import { FONT_WEIGHT } from '@/v4/styles';
 
-export const Name = styled(Typography).attrs({
-	variant: 'body1',
-	component: 'span',
-})`
-	font-weight: ${FONT_WEIGHT.BOLD};
+export const Container = styled.div`
+	display: flex;
+	padding-right: 10px;
 `;
 
-export const QueuedStatus = styled(Name)`
-	color: ${({ theme }) => theme.palette.favourite.dark};
-`;
-
-export const ProcessingStatus = styled(Name)`
-	color: ${({ theme }) => theme.palette.primary.main};
+export const Label = styled.span`
+	white-space: nowrap;
+	margin-right: 4px;
 `;

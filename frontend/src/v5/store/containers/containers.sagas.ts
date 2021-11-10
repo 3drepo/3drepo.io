@@ -15,33 +15,89 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
+import { all, put, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import {
 	ContainersActions,
 	ContainersTypes,
 } from '@/v5/store/containers/containers.redux';
-import { AddFavouriteAction, RemoveFavouriteAction } from './containers.types';
+import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
+import {
+	AddFavouriteAction,
+	RemoveFavouriteAction,
+	FetchContainersResponse,
+	FetchContainerStatsResponse,
+	FetchContainersAction,
+	FetchContainerStatsAction,
+} from './containers.types';
+import { prepareContainersData } from './containers.helpers';
+
+export function* fetchContainers({ teamspace, projectId }: FetchContainersAction) {
+	yield put(ContainersActions.setIsListPending(true));
+	try {
+		const { containers }: FetchContainersResponse = yield API.fetchContainers({ teamspace, projectId });
+		const containersWithoutStats = prepareContainersData(containers);
+
+		yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithoutStats));
+		yield put(ContainersActions.setIsListPending(false));
+
+		yield all(
+			containers.map(
+				(container) => put(ContainersActions.fetchContainerStats(teamspace, projectId, container._id)),
+			),
+		);
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to fetch containers',
+			error,
+		}));
+	}
+}
+
+export function* fetchContainerStats({ teamspace, projectId, containerId }: FetchContainerStatsAction) {
+	try {
+		const stats: FetchContainerStatsResponse = yield API.fetchContainerStats({
+			teamspace, projectId, containerId,
+		});
+
+		yield put(ContainersActions.fetchContainerStatsSuccess(projectId, containerId, stats));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to fetch containers',
+			error,
+		}));
+	}
+}
 
 export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
 	try {
+		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, true));
 		yield API.addFavourites({ teamspace, containerId, projectId });
-		yield put(ContainersActions.setFavouriteSuccess(containerId, true));
-	} catch (e) {
-		console.error(e);
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to add container to favourites',
+			error,
+		}));
+		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, false));
 	}
 }
 
 export function* removeFavourites({ containerId, teamspace, projectId }: RemoveFavouriteAction) {
 	try {
+		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, false));
 		yield API.removeFavourites({ containerId, teamspace, projectId });
-		yield put(ContainersActions.setFavouriteSuccess(containerId, false));
-	} catch (e) {
-		console.error(e);
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to remove container from favourites',
+			error,
+		}));
+		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, true));
 	}
 }
 
 export default function* ContainersSaga() {
 	yield takeLatest(ContainersTypes.ADD_FAVOURITE, addFavourites);
 	yield takeLatest(ContainersTypes.REMOVE_FAVOURITE, removeFavourites);
+	yield takeLatest(ContainersTypes.FETCH_CONTAINERS, fetchContainers);
+	yield takeEvery(ContainersTypes.FETCH_CONTAINER_STATS, fetchContainerStats);
 }

@@ -30,3 +30,7 @@ export const selectCurrentTeamspace = createSelector(
 export const selectCurrentProjects = createSelector(
 	selectCurrentTeamspace, selectProjects, (teamspace, state) => state[teamspace] || [],
 );
+
+export const selectCurrentProject = createSelector(
+	selectProjectsDomain, (state) => state.currentProject,
+);

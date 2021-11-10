@@ -40,5 +40,5 @@ export const DashboardListEmptyText = styled(Typography).attrs({
 	variant: 'body1',
 })`
 	color: ${({ theme }) => theme.palette.base.main};
-	margin-right: 27px;
+	margin-right: 17px;
 `;
