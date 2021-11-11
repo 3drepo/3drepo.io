@@ -67,7 +67,7 @@
 		if (Number.isInteger(config.db.timeout)) {
 			connectString += "&socketTimeoutMS=" + config.db.timeout;
 		}
-
+		console.log(connectString)
 		return connectString;
 	}
 
