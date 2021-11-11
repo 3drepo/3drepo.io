@@ -2,7 +2,7 @@ const { exec } = require('child_process');
 const path = require('path');
 
 const config = require('./config.json');
-const {getMessagesPath} = require('./utils')
+const {getRelativeMessagesPath} = require('./utils')
 
 
 // yarn compile lang/fr.json --ast --out-file compiled-lang/fr.json --format formatter.js
@@ -10,9 +10,9 @@ const compileMessages = (lang, outdir) =>
 	new Promise((resolve, reject) => {
 		const process = exec([
 				'yarn formatjs compile',
-				'--ast src/locales/en/messages.json',
-				`--out-file ${getMessagesPath(lang,outdir)}.c.json`,
-				`--format ${path.join(__dirname, 'formatter.js')}`
+				`--ast ${getRelativeMessagesPath(lang, outdir)}`,
+				`--out-file  ${getRelativeMessagesPath(lang, outdir, 'compiled.json')}`,
+				`--format "${path.join(__dirname, 'formatter.js')}"`
 			].join(' ' )
 			, (err, stdout, stderr) => {
 			if (err) {
@@ -21,10 +21,7 @@ const compileMessages = (lang, outdir) =>
 				return null;
 			}
 
-			const messages = require(`${tmpDir}/messages.json`);
-			fs.rmSync(tmpDir, { recursive: true });
-
-			resolve(messages);
+			resolve(true);
 		});
 
 		process.stdout.on('data', console.log);

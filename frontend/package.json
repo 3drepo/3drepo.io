@@ -25,7 +25,9 @@
 		"lint:fix": "yarn lint:ts --fix",
 		"docs": "typedoc --out ./docs ./globals --options ./internals/typedoc.js --logger none",
 		"extract": "node ./internals/intl/extract.js",
-		"compile": "lingui compile"
+		"compile": "node ./internals/intl/compile.js",
+		"extractl": "lingui extract",
+		"compilel": "lingui compile"
 	},
 	"keywords": [
 		"3drepo",

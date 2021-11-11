@@ -1,11 +1,14 @@
 const { existsSync } = require('fs');
 const path = require('path');
 
-const getMessagesPath = (language, outDir) => path.join(process.cwd(), outDir, language, 'messages.json');
+const getRelativeMessagesPath = (language, outDir, filename) =>  `${outDir}/${language}/${filename || 'messages.json'}`
+
+const getMessagesPath = (language, outDir, filename) => path.join(process.cwd(), outDir, language, filename || 'messages.json');
+
 
 const getMessages = (language, outDir)  => {
 	const path = getMessagesPath(language, outDir);
 	return existsSync(path) ? require(path) : {};
 }
 
-module.exports =  { getMessagesPath, getMessages };
+module.exports =  { getMessagesPath, getRelativeMessagesPath, getMessages };
