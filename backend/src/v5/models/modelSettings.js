@@ -33,15 +33,6 @@ const updateOneModel = (ts, query, action) => db.updateOne(ts, 'settings', query
 const noFederations = { federate: { $ne: true } };
 const onlyFederations = { federate: true };
 
-const getModelByQuery = async (ts, query, projection) => {
-	const res = await findOneModel(ts, query, projection);
-	if (!res) {
-		throw templates.modelNotFound;
-	}
-
-	return res;
-};
-
 Models.addModel = async (ts, data) => {
 	const newModelId = generateUUIDString();
 	await insertOneModel(ts, { _id: newModelId, ...data });
@@ -54,6 +45,15 @@ Models.deleteModel = async (ts, model) => {
 	if (deletedCount === 0) {
 		throw templates.modelNotFound;
 	}
+};
+
+Models.getModelByQuery = async (ts, query, projection) => {
+	const res = await findOneModel(ts, query, projection);
+	if (!res) {
+		throw templates.modelNotFound;
+	}
+
+	return res;
 };
 
 Models.isSubModel = async (ts, model) => {
@@ -75,11 +75,11 @@ Models.removeModelCollections = async (ts, model) => {
 	return Promise.all(promises);
 };
 
-Models.getModelById = (ts, model, projection) => getModelByQuery(ts, { _id: model }, projection);
+Models.getModelById = (ts, model, projection) => Models.getModelByQuery(ts, { _id: model }, projection);
 
 Models.getContainerById = async (ts, container, projection) => {
 	try {
-		const res = await getModelByQuery(ts, { _id: container, ...noFederations }, projection);
+		const res = await Models.getModelByQuery(ts, { _id: container, ...noFederations }, projection);
 		return res;
 	} catch (err) {
 		if (err?.code === templates.modelNotFound.code) {
@@ -92,7 +92,7 @@ Models.getContainerById = async (ts, container, projection) => {
 
 Models.getFederationById = async (ts, federation, projection) => {
 	try {
-		const res = await getModelByQuery(ts, { _id: federation, ...onlyFederations }, projection);
+		const res = await Models.getModelByQuery(ts, { _id: federation, ...onlyFederations }, projection);
 		return res;
 	} catch (err) {
 		if (err?.code === templates.modelNotFound.code) {
@@ -101,11 +101,6 @@ Models.getFederationById = async (ts, federation, projection) => {
 
 		throw err;
 	}
-};
-
-Models.getModelByName = async (ts, ids, name, projection) => {
-	const query = { _id: { $in: ids }, name };
-	return findOneModel(ts, query, projection);
 };
 
 Models.getContainers = (ts, ids, projection, sort) => {

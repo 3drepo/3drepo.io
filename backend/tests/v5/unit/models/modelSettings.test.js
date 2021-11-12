@@ -117,7 +117,7 @@ const testGetModelByName = () => {
 
 			jest.spyOn(db, 'findOne').mockResolvedValue(expectedData);
 
-			const res = await Model.getModelByName('someTS', ['someModel'], 'abc');
+			const res = await Model.getModelByQuery('someTS', ['someModel'], 'abc');
 			expect(res).toEqual(expectedData);
 		});
 	});

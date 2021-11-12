@@ -16,9 +16,37 @@
  */
 
 const FileRefs = {};
+const ExternalServices = require('../handler/externalServices');
 const db = require('../handler/db');
 
 const collectionName = (collection) => (collection.endsWith('.ref') ? collection : `${collection}.ref`);
+
+const ORIGINAL_FILE_REF_EXT = '.history.ref';
+const UNITY_BUNDLE_REF_EXT = '.stash.unity3d.ref';
+const STATE_FILE_REF_EXT = '.sequences.ref';
+const JSON_FILE_REF_EXT = '.stash.json_mpc.ref';
+const RESOURCES_FILE_REF_EXT = '.resources.ref';
+
+const ISSUES_FILE_REF_EXT = '.issues.ref';
+const RISKS_FILE_REF_EXT = '.risks.ref';
+
+const removeAllFiles = async (teamspace, collection) => {
+	const coll = await db.getCollection(teamspace, collection);
+
+	const query = [
+		{ $match: { noDelete: { $exists: false } } },
+		{ $group: { _id: '$type', links: { $addToSet: '$link' } } },
+	];
+
+	const results = coll ? await coll.aggregate(query).toArray() : [];
+	const deletePromises = [];
+
+	results.forEach((entry) => {
+		deletePromises.push(ExternalServices.removeFiles(teamspace, collection, entry._id, entry.links));
+	});
+
+	return Promise.all(deletePromises);
+};
 
 FileRefs.getTotalSize = async (teamspace, collection) => {
 	const pipelines = [
@@ -30,5 +58,15 @@ FileRefs.getTotalSize = async (teamspace, collection) => {
 
 	return res.length > 0 ? res[0].total : 0;
 };
+
+FileRefs.removeAllFilesFromModel = (teamspace, model) => Promise.all([
+	removeAllFiles(teamspace, model + ORIGINAL_FILE_REF_EXT),
+	removeAllFiles(teamspace, model + JSON_FILE_REF_EXT),
+	removeAllFiles(teamspace, model + UNITY_BUNDLE_REF_EXT),
+	removeAllFiles(teamspace, model + RESOURCES_FILE_REF_EXT),
+	removeAllFiles(teamspace, model + STATE_FILE_REF_EXT),
+	removeAllFiles(teamspace, model + ISSUES_FILE_REF_EXT),
+	removeAllFiles(teamspace, model + RISKS_FILE_REF_EXT),
+]);
 
 module.exports = FileRefs;

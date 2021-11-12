@@ -31,7 +31,11 @@ Projects.addModelToProject = (ts, project, model) => updateOneProject(
 	{ $push: { models: model } },
 );
 
-Projects.removeModelFromProject = (ts, model) => updateProjects(ts, { models: model }, { $pull: { models: model } });
+Projects.removeModelFromProject = (ts, project, model) => updateProjects(
+	ts,
+	{ _id: project },
+	{ $pull: { models: model } },
+);
 
 Projects.getProjectById = async (ts, project, projection) => {
 	const res = await findOneProject(ts, { _id: project }, projection);

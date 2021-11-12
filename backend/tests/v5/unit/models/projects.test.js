@@ -66,7 +66,7 @@ const testGetProjectList = () => {
 			expect(fn.mock.calls[0][0]).toEqual(teamspace);
 			expect(fn.mock.calls[0][1]).toEqual('projects');
 			expect(fn.mock.calls[0][2]).toEqual({});
-			expect(fn.mock.calls[0][3]).toEqual({ _id: 1, name : 1 });
+			expect(fn.mock.calls[0][3]).toEqual({ _id: 1, name: 1 });
 		});
 	});
 };
@@ -99,6 +99,7 @@ const testRemoveProjectModel = () => {
 	describe('Remove project model', () => {
 		test('should remove model from project models', async () => {
 			const teamspace = 'someTS';
+			const projectId = 'someProject';
 			const modelId = 'someModel';
 			const expectedData = {
 				matchedCount: 1,
@@ -106,12 +107,12 @@ const testRemoveProjectModel = () => {
 			};
 			const fn = jest.spyOn(db, 'updateMany').mockResolvedValue(expectedData);
 
-			const res = await Project.removeModelFromProject(teamspace, modelId);
+			const res = await Project.removeModelFromProject(teamspace, projectId, modelId);
 			expect(res).toEqual(expectedData);
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual(teamspace);
 			expect(fn.mock.calls[0][1]).toEqual('projects');
-			expect(fn.mock.calls[0][2]).toEqual({ models: modelId });
+			expect(fn.mock.calls[0][2]).toEqual({ _id: projectId });
 			expect(fn.mock.calls[0][3]).toEqual({ $pull: { models: modelId } });
 		});
 	});

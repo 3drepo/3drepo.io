@@ -15,13 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { v4Path } = require('../../../../../../interop');
-// eslint-disable-next-line require-sort/require-sort
 const {
 	addModel,
 	deleteModel,
 	getModelById,
-	getModelByName,
+	getModelByQuery,
 	isSubModel,
 	removeModelCollections,
 } = require('../../../../../models/modelSettings');
@@ -29,15 +27,15 @@ const { addModelToProject, getProjectById, removeModelFromProject } = require('.
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
 const { getFavourites } = require('../../../../../models/users');
 const { logger } = require('../../../../../utils/logger');
-// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require
-const { removeAllFilesFromModel } = require(`${v4Path}/models/fileRef`);
+const { removeAllFilesFromModel } = require('../../../../../models/fileRefs');
 const { templates } = require('../../../../../utils/responseCodes');
 
 const ModelList = {};
 
 ModelList.addModel = async (teamspace, project, user, data) => {
 	const { models } = await getProjectById(teamspace, project, { models: 1 });
-	const modelSetting = await getModelByName(teamspace, models, data.name, { _id: 0, name: 1 });
+	const query = { _id: { $in: models }, name: data.name };
+	const modelSetting = await getModelByQuery(teamspace, query, { _id: 0, name: 1 });
 
 	if (modelSetting) {
 		throw templates.nameAlreadyExists;
@@ -66,7 +64,7 @@ ModelList.deleteModel = async (teamspace, project, model) => {
 	await Promise.all([
 		removeModelCollections(teamspace, model),
 		deleteModel(teamspace, model),
-		removeModelFromProject(teamspace, model),
+		removeModelFromProject(teamspace, project, model),
 	]);
 };
 
