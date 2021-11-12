@@ -60,14 +60,14 @@
 			authStr = `${config.db.username}:${config.db.password}@`;
 		}
 
-		let connectString = `mongodb://${authStr}${getHostPorts()}/`;
+		let connectString = `mongodb://${authStr}${getHostPorts()}/?`;
 
 		connectString += config.db.replicaSet ? "&replicaSet=" + config.db.replicaSet : "";
+		connectString += config.db.authSource ? "&authSource=" + config.db.authSource : "";
 
 		if (Number.isInteger(config.db.timeout)) {
 			connectString += "&socketTimeoutMS=" + config.db.timeout;
 		}
-
 		return connectString;
 	}
 
