@@ -197,7 +197,10 @@ const updateModelSuccess = (state = INITIAL_STATE, { modelId, modelData }) => {
 
 const createModelSuccess = (state = INITIAL_STATE, { teamspace, modelData }) => {
 	const project = getProject(state, teamspace, modelData.projectName);
-	project.models = [...project.models, modelData.model];
+
+	if (!project.models.includes(modelData.model)) {
+		project.models = [...project.models, modelData.model];
+	}
 
 	const projects = { ...state.projects, [project._id]: project };
 	const models = { ...state.models, [modelData.model]: modelData };

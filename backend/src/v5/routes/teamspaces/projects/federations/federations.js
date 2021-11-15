@@ -18,6 +18,7 @@
 const { hasAccessToTeamspace, hasAdminAccessToFederation, hasReadAccessToFederation } = require('../../../../middleware/permissions/permissions');
 const Federations = require('../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
+const { formatModelSettings } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
@@ -68,6 +69,20 @@ const updateSettings = (req, res) => {
 	Federations.updateSettings(teamspace, federation, req.body)
 		.then(() => respond(req, res, templates.ok)).catch(
 			// istanbul ignore next
+			(err) => respond(req, res, err),
+		);
+};
+
+const getSettings = (req, res, next) => {
+	const { teamspace, federation } = req.params;
+
+	Federations.getSettings(teamspace, federation)
+		.then((settings) => {
+			req.outputData = settings;
+			next();
+		})
+		.catch(
+		// istanbul ignore next
 			(err) => respond(req, res, err),
 		);
 };
@@ -378,6 +393,49 @@ const establishRoutes = () => {
 	 *         description: updates the settings of the federation
 	 */
 	router.patch('/:federation', hasAdminAccessToFederation, validateUpdateSettingsData, updateSettings);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}:
+	 *   get:
+	 *     description: Get the model settings of federation
+	 *     tags: [Federations]
+	 *     operationId: getSettings
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	*       - project:
+	 *         name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - federation:
+	 *         name: federation
+	 *         description: Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: returns the model settings of a federation
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               $ref: "#/components/schemas/modelSettings"
+	 */
+	router.get('/:federation', hasReadAccessToFederation, getSettings, formatModelSettings);
 	return router;
 };
 

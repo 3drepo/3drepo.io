@@ -32,6 +32,9 @@ import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/c
 import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containerListItem';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/skeletonListItem';
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
+import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containerListItem';
+import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/skeletonListItem';
+import { useOrderedList } from './containersList.hooks';
 import { Container } from './containersList.styles';
 
 type IContainersList = {
@@ -51,7 +54,6 @@ export const ContainersList = ({
 	titleTooltips,
 }: IContainersList): JSX.Element => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
-
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const { sortedList, setSortConfig } = useOrderedList(containers, DEFAULT_SORT_CONFIG);
 	const filterQuery = ContainersHooksSelectors.selectFilterQuery();

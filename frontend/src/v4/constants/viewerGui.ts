@@ -107,4 +107,4 @@ export const VIEWER_RIGHT_PANELS = [
 
 export const VIEWER_PANEL_TITLE_HEIGHT = 40;
 
-export const LONG_TEXT_CHAR_LIM = 660;
+export const LONG_TEXT_CHAR_LIM = 1200;

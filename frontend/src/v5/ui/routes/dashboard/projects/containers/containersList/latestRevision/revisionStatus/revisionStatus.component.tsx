@@ -21,7 +21,7 @@ import { ErrorTooltip } from '@controls/errorTooltip';
 import { i18n } from '@lingui/core';
 import { TextOverflow } from '@controls/textOverflow';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
-import { Name, QueuedStatus, ProcessingStatus } from './revisionStatus.styles';
+import { Name, ProcessingStatus, QueuedStatus } from './revisionStatus.styles';
 
 export interface IRevisionStatus {
 	name: string;
@@ -41,7 +41,11 @@ export const RevisionStatus = ({ status, error, name }: IRevisionStatus): JSX.El
 		);
 	}
 
-	if (status === UploadStatuses.PROCESSING) {
+	if (
+		status === UploadStatuses.PROCESSING
+		|| status === UploadStatuses.GENERATING_BUNDLES
+		|| status === UploadStatuses.QUEUED_FOR_UNITY
+	) {
 		return (
 			<ProcessingStatus>
 				<Trans id="containers.list.item.latestRevision.status.processing" message="Processing" />

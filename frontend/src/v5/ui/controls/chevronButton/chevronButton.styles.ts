@@ -44,7 +44,7 @@ export const StyledIconButton = styled(IconButton)`
 		}
 	`}
 	
-	${({ isLoading }) => isLoading && css`
+	${({ $isLoading }) => $isLoading && css`
 		pointer-events: none;
 	`}
 

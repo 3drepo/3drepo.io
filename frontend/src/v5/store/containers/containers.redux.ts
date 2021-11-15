@@ -38,6 +38,17 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	fetchContainerStatsSuccess: ['projectId', 'containerId', 'containerStats'],
 	setIsListPending: ['isPending'],
 	setFavouriteSuccess: ['projectId', 'containerId', 'isFavourite'],
+	fetchContainers: ['teamspace', 'projectId'],
+	fetchContainersSuccess: ['projectId', 'containers'],
+	fetchContainerStats: ['teamspace', 'projectId', 'containerId'],
+	fetchContainerStatsSuccess: ['projectId', 'containerId', 'containerStats'],
+	setIsListPending: ['isPending'],
+	setFavouriteSuccess: ['projectId', 'containerId', 'isFavourite'],
+	fetchRevisions: ['teamspace', 'projectId', 'containerId'],
+	setRevisionVoidStatus: ['teamspace', 'projectId', 'containerId', 'revisionId', 'isVoid'],
+	setRevisionVoidStatusSuccess: ['projectId', 'containerId', 'revisionId', 'isVoid'],
+	setRevisionsIsPending: ['projectId', 'containerId', 'isPending'],
+	fetchRevisionsSuccess: ['projectId', 'containerId', 'revisions'],
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
 
 export const INITIAL_STATE: IContainersState = {
