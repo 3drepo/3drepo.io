@@ -16,7 +16,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { all, put, select, take, takeLatest } from 'redux-saga/effects';
+import { all, put, select, take, takeLatest, d } from 'redux-saga/effects';
 
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { GROUPS_TYPES } from '../../constants/groups';
@@ -51,10 +51,8 @@ import {
 function* fetchGroups({teamspace, modelId, revision}) {
 	yield put(GroupsActions.togglePendingState(true));
 	try {
-		const {data} = yield API.getGroups(teamspace, modelId, revision);
-
 		yield take(TreeTypes.UPDATE_DATA_REVISION);
-
+		const {data} = yield API.getGroups(teamspace, modelId, revision);
 		const preparedGroups = yield all(data.map(prepareGroupWithCount));
 		yield put(GroupsActions.fetchGroupsSuccess(preparedGroups));
 	} catch (error) {
