@@ -53,12 +53,7 @@ function* fetchGroups({teamspace, modelId, revision}) {
 	try {
 		const {data} = yield API.getGroups(teamspace, modelId, revision);
 
-		const treeList = yield select(selectTreeNodesList);
-
-		if (!treeList?.length) {
-			//Wait till tree is loaded
-			yield take(TreeTypes.UPDATE_DATA_REVISION);
-		}
+		yield take(TreeTypes.UPDATE_DATA_REVISION);
 
 		const preparedGroups = yield all(data.map(prepareGroupWithCount));
 		yield put(GroupsActions.fetchGroupsSuccess(preparedGroups));
