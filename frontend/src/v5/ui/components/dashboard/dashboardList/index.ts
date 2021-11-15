@@ -21,3 +21,4 @@ export { DashboardListHeaderLabel } from './dashboardListHeaderLabel';
 export { DashboardListCollapse } from './dashboardListCollapse';
 export { DashboardListItem } from './dashboardListItem';
 export { DashboardListEmptyContainer } from './dashboardList.styles';
+export { DashboardListEmptySearchResults } from './dashboardListEmptySearchResults';

@@ -23,6 +23,7 @@ import {
 	DashboardList,
 	DashboardListCollapse,
 	DashboardListEmptyContainer,
+	DashboardListEmptySearchResults,
 	DashboardListHeader,
 	DashboardListHeaderLabel,
 } from '@components/dashboard/dashboardList';
@@ -36,7 +37,6 @@ import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federati
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { Button } from '@controls/button';
 import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
-import { EmptySearchResults } from '@/v5/ui/routes/dashboard/projects/containers/containersList/emptySearchResults';
 import { CollapseSideElementGroup, Container } from './federationsList.styles';
 import { SkeletonListItem } from './skeletonListItem';
 
@@ -149,7 +149,7 @@ export const FederationsList = ({
 						) : (
 							<DashboardListEmptyContainer>
 								{filterQuery && hasFederations ? (
-									<EmptySearchResults searchPhrase={filterQuery} />
+									<DashboardListEmptySearchResults searchPhrase={filterQuery} />
 								) : emptyMessage}
 							</DashboardListEmptyContainer>
 						)}

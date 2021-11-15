@@ -18,16 +18,16 @@
 import React from 'react';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { Trans } from '@lingui/react';
-import { SearchPhrase } from './emptySearchResults.styles';
+import { SearchPhrase } from './dashboardListEmptySearchResults.styles';
 
-type IEmptySearchResults = {
+type IDashboardListEmptySearchResults = {
 	searchPhrase: string;
 };
 
-export const EmptySearchResults = ({ searchPhrase }: IEmptySearchResults): JSX.Element => (
+export const DashboardListEmptySearchResults = ({ searchPhrase }: IDashboardListEmptySearchResults): JSX.Element => (
 	<DashboardListEmptyText>
 		<Trans
-			id="containers.noSearchResults"
+			id="dashboardList.emptySearchResults.message"
 			message="We couldn't find a match for <0>“{searchPhrase}”</0>. Please try another search."
 			components={[<SearchPhrase />]}
 			values={{ searchPhrase }}

@@ -29,12 +29,12 @@ import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashb
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/skeletonListItem';
 import { Button } from '@controls/button';
 import { Content } from '@/v5/ui/routes/dashboard/projects/projects.styles';
+import { DashboardListEmptySearchResults } from '@components/dashboard/dashboardList';
 import {
 	Container,
 	HeaderButtonsGroup,
 } from './containers.styles';
 import { ContainersList } from './containersList';
-import { EmptySearchResults } from './containersList/emptySearchResults';
 import { useContainersData } from './containers.hooks';
 
 export const Containers = (): JSX.Element => {
@@ -104,7 +104,7 @@ export const Containers = (): JSX.Element => {
 							}}
 							emptyMessage={
 								filterQuery && hasContainers.favourites ? (
-									<EmptySearchResults searchPhrase={filterQuery} />
+									<DashboardListEmptySearchResults searchPhrase={filterQuery} />
 								) : (
 									<DashboardListEmptyText>
 										<Trans
@@ -130,7 +130,7 @@ export const Containers = (): JSX.Element => {
 							}}
 							emptyMessage={
 								filterQuery && hasContainers.all ? (
-									<EmptySearchResults searchPhrase={filterQuery} />
+									<DashboardListEmptySearchResults searchPhrase={filterQuery} />
 								) : (
 									<>
 										<DashboardListEmptyText>
