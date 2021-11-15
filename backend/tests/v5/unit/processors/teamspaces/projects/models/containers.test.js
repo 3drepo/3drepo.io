@@ -105,36 +105,6 @@ const containerSettings = {
 			timestamp: new Date(),
 		},
 	},
-	container3: {
-		_id: 3,
-		name: 'container 3',
-		type: 'type 2',
-		properties: {
-			units: 'mm',
-			code: 'CTN2',
-		},
-		status: 'failed',
-		errorReason: {
-			message: 'abc',
-			bouncerValue: 1,
-			timestamp: new Date(),
-		},
-	},
-	container4: {
-		_id: 4,
-		name: 'container 4',
-		type: 'type 2',
-		properties: {
-			units: 'mm',
-			code: 'CTN2',
-		},
-		status: 'processing',
-		errorReason: {
-			message: 'abc',
-			bouncerValue: 1,
-			timestamp: new Date(),
-		},
-	},
 };
 
 const user1Favourites = [1];
