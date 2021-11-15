@@ -16,7 +16,7 @@
  */
 
 import React from 'react';
-import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
+import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { Trans } from '@lingui/react';
 import { SearchPhrase } from './emptySearchResults.styles';
 

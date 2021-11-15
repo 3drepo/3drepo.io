@@ -16,7 +16,7 @@
  */
 
 import React from 'react';
-import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dasboardList.styles';
+import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { Trans } from '@lingui/react';
 import { MainHeader } from '@controls/mainHeader';
 import { SearchInput } from '@controls/searchInput';

@@ -30,7 +30,7 @@ export const CollapseSideElementGroup = styled.div`
 		margin-right: 15px;
 	}
 	
-	button {
-		margin: 0;
+	> :last-child {
+		margin-right: 0;
 	}
 `;

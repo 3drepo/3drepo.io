@@ -20,9 +20,8 @@ import { Trans } from '@lingui/react';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import {
 	DashboardListEmptyText,
-	DashboardListButton,
 	Divider,
-} from '@components/dashboard/dashboardList/dasboardList.styles';
+} from '@components/dashboard/dashboardList/dashboardList.styles';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
@@ -94,6 +93,7 @@ export const Federations = (): JSX.Element => {
 							collapsed: <Trans id="federations.all.collapse.tooltip.show" message="Show federations" />,
 							visible: <Trans id="federations.all.collapse.tooltip.hide" message="Hide federations" />,
 						}}
+						showBottomButton
 						emptyMessage={(
 							<>
 								<DashboardListEmptyText>
@@ -109,19 +109,6 @@ export const Federations = (): JSX.Element => {
 							</>
 						)}
 					/>
-					{
-						!isListPending && hasFederations.all && (
-							<DashboardListButton
-								startIcon={<AddCircleIcon />}
-								onClick={() => {
-									// eslint-disable-next-line no-console
-									console.log('->  handle add federation');
-								}}
-							>
-								<Trans id="federations.addFederationButton" message="Add new Federation" />
-							</DashboardListButton>
-						)
-					}
 				</>
 			)}
 		</Content>

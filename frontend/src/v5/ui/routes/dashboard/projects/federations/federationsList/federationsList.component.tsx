@@ -35,6 +35,8 @@ import { FederationListItem } from '@/v5/ui/routes/dashboard/projects/federation
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { Button } from '@controls/button';
+import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
+import { EmptySearchResults } from '@/v5/ui/routes/dashboard/projects/containers/containersList/emptySearchResults';
 import { CollapseSideElementGroup, Container } from './federationsList.styles';
 import { SkeletonListItem } from './skeletonListItem';
 
@@ -48,6 +50,7 @@ type IFederationsList = {
 	},
 	search: SearchInputConfig;
 	hasFederations: boolean;
+	showBottomButton?: boolean;
 };
 
 export const FederationsList = ({
@@ -56,6 +59,8 @@ export const FederationsList = ({
 	title,
 	titleTooltips,
 	search,
+	showBottomButton = false,
+	hasFederations,
 }: IFederationsList): JSX.Element => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 
@@ -143,11 +148,24 @@ export const FederationsList = ({
 							))
 						) : (
 							<DashboardListEmptyContainer>
-								{emptyMessage}
+								{filterQuery && hasFederations ? (
+									<EmptySearchResults searchPhrase={filterQuery} />
+								) : emptyMessage}
 							</DashboardListEmptyContainer>
 						)}
 					</DashboardList>
 				), [sortedList, filterQuery])}
+				{showBottomButton && !isListPending && hasFederations && (
+					<DashboardListButton
+						startIcon={<AddCircleIcon />}
+						onClick={() => {
+							// eslint-disable-next-line no-console
+							console.log('->  handle add federation');
+						}}
+					>
+						<Trans id="federations.addFederationButton" message="Add new Federation" />
+					</DashboardListButton>
+				)}
 			</DashboardListCollapse>
 		</Container>
 	);

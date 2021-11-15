@@ -22,7 +22,7 @@ import { range } from 'lodash';
 
 import { RevisionsListHeaderLabel } from '@components/shared/revisionDetails/components/revisionsListHeaderLabel';
 import { IRevision } from '@/v5/store/revisions/revisions.types';
-import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
+import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { Button } from '@controls/button';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { RevisionsListItem } from '@components/shared/revisionDetails/components/revisionsListItem';
