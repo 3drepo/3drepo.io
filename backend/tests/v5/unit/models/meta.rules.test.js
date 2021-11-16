@@ -132,7 +132,7 @@ const testToQuery = () => {
 			query: createQuery(fieldName, { $or: [{ $gte: 1000, $lte: 2000 }, { $gte: 100, $lte: 200 }] }),
 		},
 		{
-			desc: 'unknown operand',
+			desc: 'unknown operator,
 			data: generateRule(fieldName, 'INDSFDSF', [1000]),
 		},
 	];
