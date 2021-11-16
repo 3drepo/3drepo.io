@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { hasAccessToTeamspace, hasAdminAccessToContainer, hasReadAccessToContainer, isAdminToProject } = require('../../../../middleware/permissions/permissions');
+const { isContainer, validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
@@ -23,7 +24,6 @@ const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
 const { validateAddModelData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/models');
-const { validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings');
 
 const addContainer = (req, res) => {
 	const user = getUserFromSession(req.session);
@@ -435,7 +435,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: Container removed.
 	 */
-	router.delete('/:container', isAdminToProject, deleteContainer);
+	router.delete('/:container', isAdminToProject, isContainer, deleteContainer);
 
 	/**
 	 * @openapi

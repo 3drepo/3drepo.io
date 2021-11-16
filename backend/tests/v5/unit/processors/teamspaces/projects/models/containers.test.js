@@ -15,17 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src, modelFolder, srcV4, objModel } = require('../../../../../helper/path');
+const { src, modelFolder, objModel } = require('../../../../../helper/path');
 const ServiceHelper = require('../../../../../helper/services');
 const fs = require('fs/promises');
 const path = require('path');
 
-jest.mock('../../../../../../../src/v4/models/fileRef');
-const FileRef = require(`${srcV4}/models/fileRef`);
 jest.mock('../../../../../../../src/v5/models/projects');
 const ProjectsModel = require(`${src}/models/projects`);
 jest.mock('../../../../../../../src/v5/models/modelSettings');
-const newContainerId = 'newContainerId';
 const ModelSettings = require(`${src}/models/modelSettings`);
 jest.mock('../../../../../../../src/v5/models/users');
 const Users = require(`${src}/models/users`);
@@ -38,6 +35,7 @@ const Legends = require(`${src}/models/legends`);
 jest.mock('../../../../../../../src/v5/models/legends');
 const { templates } = require(`${src}/utils/responseCodes`);
 
+const newContainerId = 'newContainerId';
 ModelSettings.addModel.mockImplementation(() => newContainerId);
 ModelSettings.deleteModel.mockImplementation(async (ts, model) => {
 	if (Number.isInteger(model)) {
@@ -46,12 +44,6 @@ ModelSettings.deleteModel.mockImplementation(async (ts, model) => {
 	throw templates.containerNotFound;
 });
 ModelSettings.isSubModel.mockImplementation((ts, model) => model === 2);
-
-FileRef.removeAllFilesFromModel.mockImplementation(async (ts, model) => {
-	if (model === 3) {
-		throw templates.unknown;
-	}
-});
 
 const modelList = [
 	{ _id: 1, name: 'model1', permissions: [{ user: 'user1', permission: 'collaborator' }, { user: 'user2', permission: 'collaborator' }] },

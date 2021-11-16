@@ -26,7 +26,6 @@ const {
 const { addModelToProject, getProjectById, removeModelFromProject } = require('../../../../../models/projects');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
 const { getFavourites } = require('../../../../../models/users');
-const { logger } = require('../../../../../utils/logger');
 const { removeAllFilesFromModel } = require('../../../../../models/fileRefs');
 const { templates } = require('../../../../../utils/responseCodes');
 
@@ -55,13 +54,8 @@ ModelList.deleteModel = async (teamspace, project, model) => {
 		throw templates.containerIsSubModel;
 	}
 
-	try {
-		await removeAllFilesFromModel(teamspace, model);
-	} catch (err) {
-		logger.logDebug(`[Delete model] : ${JSON.stringify(err)}`);
-	}
-
 	await Promise.all([
+		removeAllFilesFromModel(teamspace, model),
 		removeModelCollections(teamspace, model),
 		deleteModel(teamspace, model),
 		removeModelFromProject(teamspace, project, model),

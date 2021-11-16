@@ -107,18 +107,39 @@ const testGetFederationById = () => {
 	});
 };
 
-const testGetModelByName = () => {
-	describe('Get model by name', () => {
+const testGetModelByQuery = () => {
+	describe('Get model by query', () => {
 		test('should return model ', async () => {
+			const existingModelId = 'someModel';
+			const existingModelName = 'model name';
 			const expectedData = {
-				_id: 'abc',
-				name: 'model name',
+				_id: existingModelId,
+				name: existingModelName,
 			};
 
-			jest.spyOn(db, 'findOne').mockResolvedValue(expectedData);
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(expectedData);
 
-			const res = await Model.getModelByQuery('someTS', ['someModel'], 'abc');
+			const teamspace = 'someTS';
+			const query = { _id: { $in: [existingModelId] }, name: existingModelName };
+			const res = await Model.getModelByQuery(teamspace, query);
 			expect(res).toEqual(expectedData);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual('settings');
+			expect(fn.mock.calls[0][2]).toEqual(query);
+		});
+
+		test('should return model not found with non-existent name', async () => {
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+
+			const teamspace = 'someTS';
+			const query = { _id: { $in: ['someModel'] }, name: 'badModelName' };
+			await expect(Model.getModelByQuery(teamspace, query))
+				.rejects.toEqual(templates.modelNotFound);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual('settings');
+			expect(fn.mock.calls[0][2]).toEqual(query);
 		});
 	});
 };
@@ -507,7 +528,7 @@ describe('models/modelSettings', () => {
 	testGetModelById();
 	testGetContainerById();
 	testGetFederationById();
-	testGetModelByName();
+	testGetModelByQuery();
 	testGetContainers();
 	testGetFederations();
 	testIsSubModel();
