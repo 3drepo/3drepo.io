@@ -22,9 +22,9 @@ import { Typography } from '@controls/typography';
 import { IProject } from '@/v5/store/projects/projects.redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { TopNavigation } from '@components/shared/topNavigation';
-import { Container, Wrapper } from './dashboardHeader.styles';
+import { Container, Wrapper } from './header.styles';
 
-export const DashboardHeader = (): JSX.Element => {
+export const Header = (): JSX.Element => {
 	const { project } = useParams();
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
 	const currentProject = projects.find(({ _id }) => project === _id);

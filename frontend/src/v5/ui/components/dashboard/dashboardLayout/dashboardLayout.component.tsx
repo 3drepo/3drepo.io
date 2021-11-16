@@ -20,7 +20,7 @@ import { useParams } from 'react-router-dom';
 
 import { AppBar } from '@components/shared/appBar';
 import { ModalsDispatcher } from '@components/shared/modals';
-import { DashboardHeader } from '@components/dashboard/dashboardHeader';
+import { Header as ProjectHeader } from '@/v5/ui/routes/dashboard/projects/header';
 import { Content } from './dashboardLayout.styles';
 
 interface IDashboardLayout {
@@ -32,7 +32,7 @@ export const DashboardLayout = ({ children }: IDashboardLayout): JSX.Element => 
 	return (
 		<>
 			<AppBar />
-			{project && <DashboardHeader />}
+			{project && <ProjectHeader />}
 			<Content>
 				{children}
 			</Content>
