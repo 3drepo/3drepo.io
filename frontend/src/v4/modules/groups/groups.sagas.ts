@@ -16,7 +16,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { all, put, select, take, takeLatest, d } from 'redux-saga/effects';
+import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { GROUPS_TYPES } from '../../constants/groups';
