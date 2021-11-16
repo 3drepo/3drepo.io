@@ -15,8 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Typography } from '@controls/typography';
 import styled from 'styled-components';
+
+import { Typography } from '@controls/typography';
+import { Divider as DividerComponent } from '@material-ui/core';
+import { Button } from '@controls/button';
 
 export const ListContainer = styled.ul`
 	display: flex;
@@ -41,4 +44,24 @@ export const DashboardListEmptyText = styled(Typography).attrs({
 })`
 	color: ${({ theme }) => theme.palette.base.main};
 	margin-right: 17px;
+`;
+
+export const Divider = styled(DividerComponent)`
+	margin-top: 16px;
+`;
+
+export const DashboardListButton = styled(Button).attrs({
+	variant: 'outlined',
+	color: 'primary',
+})`
+	${({ theme }) => theme.typography.h3}
+	width: 100%;
+	margin: 18px 0 0;
+	height: 80px;
+	border: 1px dashed ${({ theme }) => theme.palette.primary.main};
+	
+	svg {
+		width: 34px;
+		height: 34px;
+	}
 `;

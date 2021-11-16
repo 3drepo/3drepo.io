@@ -22,7 +22,6 @@ export interface IContainersState {
 	allFilterQuery: string;
 	favouritesFilterQuery: string;
 	isListPending: boolean;
-	areStatsPending: boolean;
 }
 
 export enum ContainerStatuses {

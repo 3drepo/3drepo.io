@@ -15,10 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { DashboardList } from './dashboardList.component';
-export { DashboardListHeader } from './dashboardListHeader';
-export { DashboardListHeaderLabel } from './dashboardListHeaderLabel';
-export { DashboardListCollapse } from './dashboardListCollapse';
-export { DashboardListItem } from './dashboardListItem';
-export { DashboardListEmptyContainer } from './dasboardList.styles';
-export { DashboardListEmptySearchResults } from './dashboardListEmptySearchResults';
+import React from 'react';
+import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
+import { Trans } from '@lingui/react';
+import { SearchPhrase } from './dashboardListEmptySearchResults.styles';
+
+type IDashboardListEmptySearchResults = {
+	searchPhrase: string;
+};
+
+export const DashboardListEmptySearchResults = ({ searchPhrase }: IDashboardListEmptySearchResults): JSX.Element => (
+	<DashboardListEmptyText>
+		<Trans
+			id="dashboardList.emptySearchResults.message"
+			message="We couldn't find a match for <0>“{searchPhrase}”</0>. Please try another search."
+			components={[<SearchPhrase />]}
+			values={{ searchPhrase }}
+		/>
+	</DashboardListEmptyText>
+);

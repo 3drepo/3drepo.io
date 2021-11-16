@@ -49,10 +49,9 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 
 export const INITIAL_STATE: IContainersState = {
 	containers: {},
-	isListPending: true,
-	areStatsPending: true,
 	favouritesFilterQuery: '',
 	allFilterQuery: '',
+	isListPending: true,
 };
 
 export const setAllFilterQuery = (state = INITIAL_STATE, { query }: SetFilterQueryAction) => (

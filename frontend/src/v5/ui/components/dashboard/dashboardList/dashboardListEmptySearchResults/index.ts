@@ -15,10 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { DashboardList } from './dashboardList.component';
-export { DashboardListHeader } from './dashboardListHeader';
-export { DashboardListHeaderLabel } from './dashboardListHeaderLabel';
-export { DashboardListCollapse } from './dashboardListCollapse';
-export { DashboardListItem } from './dashboardListItem';
-export { DashboardListEmptyContainer } from './dasboardList.styles';
-export { DashboardListEmptySearchResults } from './dashboardListEmptySearchResults';
+export { DashboardListEmptySearchResults } from './dashboardListEmptySearchResults.component';

@@ -14,11 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import styled from 'styled-components';
 
-export { DashboardList } from './dashboardList.component';
-export { DashboardListHeader } from './dashboardListHeader';
-export { DashboardListHeaderLabel } from './dashboardListHeaderLabel';
-export { DashboardListCollapse } from './dashboardListCollapse';
-export { DashboardListItem } from './dashboardListItem';
-export { DashboardListEmptyContainer } from './dasboardList.styles';
-export { DashboardListEmptySearchResults } from './dashboardListEmptySearchResults';
+export const SearchPhrase = styled.b`
+	color: ${({ theme }) => theme.palette.secondary.main};
+`;

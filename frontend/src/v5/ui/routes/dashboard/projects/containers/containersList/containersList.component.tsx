@@ -23,6 +23,7 @@ import {
 	DashboardList,
 	DashboardListCollapse,
 	DashboardListEmptyContainer,
+	DashboardListEmptySearchResults,
 	DashboardListHeader,
 	DashboardListHeaderLabel,
 } from '@components/dashboard/dashboardList';
@@ -33,6 +34,7 @@ import { IContainer } from '@/v5/store/containers/containers.types';
 import { SearchInput } from '@controls/searchInput';
 import { SearchInputConfig, useSearchInput } from '@controls/searchInput/searchInput.hooks';
 import { Button } from '@controls/button';
+import { DashboardListButton } from '@components/dashboard/dashboardList/dasboardList.styles';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containerListItem';
@@ -50,6 +52,8 @@ type IContainersList = {
 		visible: ReactNode;
 	},
 	search: SearchInputConfig;
+	hasContainers: boolean;
+	showBottomButton?: boolean;
 };
 
 export const ContainersList = ({
@@ -58,13 +62,15 @@ export const ContainersList = ({
 	title,
 	titleTooltips,
 	search,
+	hasContainers,
+	showBottomButton = false,
 }: IContainersList): JSX.Element => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const { sortedList, setSortConfig } = useOrderedList(containers, DEFAULT_SORT_CONFIG);
-	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
-	const isListPending = ContainersHooksSelectors.selectIsListPending();
 	const { searchInput, setSearchInput, filterQuery } = useSearchInput(search);
+	const isListPending = ContainersHooksSelectors.selectIsListPending();
+	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
 
 	const toggleSelectedId = (id: IContainer['_id']) => {
 		setSelectedId((state) => (state === id ? null : id));
@@ -78,7 +84,7 @@ export const ContainersList = ({
 		}
 	};
 
-	return useMemo(() => (
+	return (
 		<Container>
 			<DashboardListCollapse
 				title={<>{title} {!isListPending && `(${containers.length})`}</>}
@@ -134,28 +140,43 @@ export const ContainersList = ({
 						<Trans id="containers.list.header.lastUpdated" message="Last updated" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>
-				<DashboardList>
-					{!isEmpty(sortedList) ? (
-						sortedList.map((container, index) => (
-							container.hasStatsPending ? (
-								<SkeletonListItem key={container._id} delay={index / 10} />
-							) : (
-								<ContainerListItem
-									key={container._id}
-									isSelected={container._id === selectedId}
-									container={container}
-									filterQuery={filterQuery}
-									onFavouriteChange={setFavourite}
-									onToggleSelected={toggleSelectedId}
-								/>
-							)))
-					) : (
-						<DashboardListEmptyContainer>
-							{emptyMessage}
-						</DashboardListEmptyContainer>
-					)}
-				</DashboardList>
+				{useMemo(() => (
+					<DashboardList>
+						{!isEmpty(sortedList) ? (
+							sortedList.map((container, index) => (
+								container.hasStatsPending ? (
+									<SkeletonListItem key={container._id} delay={index / 10} />
+								) : (
+									<ContainerListItem
+										key={container._id}
+										isSelected={container._id === selectedId}
+										container={container}
+										filterQuery={filterQuery}
+										onFavouriteChange={setFavourite}
+										onToggleSelected={toggleSelectedId}
+									/>
+								)))
+						) : (
+							<DashboardListEmptyContainer>
+								{filterQuery && hasContainers ? (
+									<DashboardListEmptySearchResults searchPhrase={filterQuery} />
+								) : emptyMessage}
+							</DashboardListEmptyContainer>
+						)}
+					</DashboardList>
+				), [sortedList, filterQuery])}
+				{showBottomButton && !isListPending && hasContainers && (
+					<DashboardListButton
+						startIcon={<AddCircleIcon />}
+						onClick={() => {
+							// eslint-disable-next-line no-console
+							console.log('->  handle add container');
+						}}
+					>
+						<Trans id="federations.addFederationButton" message="Add new Federation" />
+					</DashboardListButton>
+				)}
 			</DashboardListCollapse>
 		</Container>
-	), [sortedList, selectedId, areStatsPending, isListPending]);
+	);
 };
