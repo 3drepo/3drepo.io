@@ -15,31 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { messagesEs } from '@/locales/messagesEs';
+import { messagesEn } from '@/locales/messagesEn';
 import { createIntl, createIntlCache, IntlShape } from 'react-intl';
 
 let intlInternal:IntlShape = null;
 
-export const initializeIntl = () => {
-	const messages = {
-		another: [
-			{
-				type: 0,
-				value: 'compiled: bites the dust',
-			},
-		],
-		myMessage: [
-			{
-				type: 0,
-				value: 'another compiled: My other message',
-			},
-		],
-		'projects.fetchErrorLocation': [
-			{
-				type: 0,
-				value: 'a compiled error message',
-			},
-		],
-	};
+const DEFAULT_LOCALE = 'en';
+
+export const initializeIntl = (locale: string) => {
+	let messages = {};
+
+	switch (locale.split('-')[0]) {
+		case 'es':
+			messages = messagesEs;
+			break;
+		default:
+			messages = messagesEn;
+	}
 
 	const cache = createIntlCache();
 
@@ -47,9 +40,9 @@ export const initializeIntl = () => {
 	intlInternal = createIntl(
 		{
 			// Locale of the application
-			locale: 'en',
+			locale,
 			// Locale of the fallback defaultMessage
-			defaultLocale: 'en',
+			defaultLocale: DEFAULT_LOCALE,
 			messages,
 		},
 		cache,
@@ -64,3 +57,9 @@ export const formatDate: typeof intlInternal.formatDate = (value, opts?): string
 
 // eslint-disable-next-line max-len
 export const formatPlural: typeof intlInternal.formatPlural = (value, opts?): string => intlInternal.formatPlural(value, opts);
+
+export const getIntlProviderProps = () => ({
+	messages: intlInternal.messages,
+	defaultLocal: intlInternal.defaultLocale,
+	locale: intlInternal.locale,
+});

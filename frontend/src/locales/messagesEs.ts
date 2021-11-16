@@ -1,0 +1,1 @@
+/*eslint-disable*/ export const messagesEs = {"hello.world":[{"type":0,"value":"Hola Mundo"}]};
