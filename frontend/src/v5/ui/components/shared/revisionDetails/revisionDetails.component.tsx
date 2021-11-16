@@ -22,16 +22,20 @@ import { range } from 'lodash';
 
 import { RevisionsListHeaderLabel } from '@components/shared/revisionDetails/components/revisionsListHeaderLabel';
 import { IRevision } from '@/v5/store/revisions/revisions.types';
-import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
 import { Button } from '@controls/button';
-import AddCircleIcon from '@assets/icons/add_circle.svg';
+import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
 import { RevisionsListItem } from '@components/shared/revisionDetails/components/revisionsListItem';
 import { SkeletonListItem } from '@components/shared/revisionDetails/components/skeletonListItem';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
 import {
-	Container, RevisionsListHeaderContainer, RevisionsListItemWrapper, RevisionsList, RevisionsListEmptyWrapper,
+	Container,
+	RevisionsListHeaderContainer,
+	RevisionsListItemWrapper,
+	RevisionsList,
+	RevisionsListEmptyWrapper,
 	RevisionsListEmptyContainer,
+	RevisionsListEmptyText,
 } from './revisionDetails.styles';
 
 interface IRevisionDetails {
@@ -56,11 +60,11 @@ export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDe
 		return (
 			<RevisionsListEmptyWrapper>
 				<RevisionsListEmptyContainer>
-					<DashboardListEmptyText>
+					<RevisionsListEmptyText>
 						<Trans id="containers.revisions.emptyMessage" message="You haven’t added any Files." />
-					</DashboardListEmptyText>
+					</RevisionsListEmptyText>
 					<Button
-						startIcon={<AddCircleIcon />}
+						startIcon={<ArrowUpCircleIcon />}
 						variant="contained"
 						color="primary"
 					>

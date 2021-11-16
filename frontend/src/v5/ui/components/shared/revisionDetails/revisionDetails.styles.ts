@@ -17,6 +17,7 @@
 
 import styled, { css } from 'styled-components';
 import { DashboardListEmptyContainer } from '@components/dashboard/dashboardList';
+import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
 
 export const Container = styled.div`
 	display: flex;
@@ -38,6 +39,11 @@ export const RevisionsListEmptyWrapper = styled.div`
 
 export const RevisionsListEmptyContainer = styled(DashboardListEmptyContainer)`
 	background-color: transparent;
+	border-color: ${({ theme }) => theme.palette.secondary.light};
+`;
+
+export const RevisionsListEmptyText = styled(DashboardListEmptyText)`
+	color: ${({ theme }) => theme.palette.primary.contrast};
 `;
 
 export const RevisionsListHeaderContainer = styled.header`

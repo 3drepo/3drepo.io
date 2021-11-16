@@ -46,7 +46,7 @@ const defaultState: IContainersState = {
 describe('Containers: selectors', () => {
 	describe('selectFavouriteContainers', () => {
 		it('should return favourite containers', () => {
-			const selected = selectFilteredFavouriteContainers.resultFunc(defaultState.containers[projectId]);
+			const selected = selectFilteredFavouriteContainers.resultFunc(defaultState.containers[projectId], '');
 			expect(selected).toHaveLength(6);
 		})
 	})

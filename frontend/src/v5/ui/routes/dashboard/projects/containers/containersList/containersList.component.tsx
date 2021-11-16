@@ -164,7 +164,7 @@ export const ContainersList = ({
 							</DashboardListEmptyContainer>
 						)}
 					</DashboardList>
-				), [sortedList, filterQuery])}
+				), [sortedList, filterQuery, selectedId])}
 				{showBottomButton && !isListPending && hasContainers && (
 					<DashboardListButton
 						startIcon={<AddCircleIcon />}
@@ -173,7 +173,7 @@ export const ContainersList = ({
 							console.log('->  handle add container');
 						}}
 					>
-						<Trans id="federations.addFederationButton" message="Add new Federation" />
+						<Trans id="containers.addContainerButton" message="Add new Container" />
 					</DashboardListButton>
 				)}
 			</DashboardListCollapse>
