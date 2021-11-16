@@ -1,9 +1,13 @@
 const { existsSync, mkdirSync, writeFileSync } = require('fs');
 const path = require('path');
 
-const getRelativeMessagesPath = (language, outDir, filename) =>  `${outDir}/${language}/${filename || 'messages.json'}`
+const capitalize = (str) => `${str[0].toUpperCase()}${str.slice(1).toLowerCase()}`;
 
-const getMessagesPath = (language, outDir, filename) => path.join(process.cwd(), outDir, language, filename || 'messages.json');
+const getRelativeMessagesPath = (language, outDir, filename) =>
+	`${outDir}/${filename || `messages${capitalize(language)}.json`}`
+
+const getMessagesPath = (language, outDir, filename) =>
+	path.join(process.cwd(), outDir, filename || `messages${capitalize(language)}.json`);
 
 const requireFileIfExists = (language, dir, filename)  => {
 	const path = getMessagesPath(language, dir, filename);
@@ -19,6 +23,5 @@ const writeFileSyncWithDirs = ( filename, data) => {
 	writeFileSync(filename, data);
 }
 
-const capitalize = (str) => `${str[0].toUpperCase()}${str.slice(1).toLowerCase()}`;
 
 module.exports =  { getMessagesPath, getRelativeMessagesPath, requireFileIfExists, writeFileSyncWithDirs, capitalize };
