@@ -1,10 +1,8 @@
 const extractDefaultMessages = require('./extractDefaultMessages');
 const config = require('./config.json');
-const {getMessagesPath, getMessages} = require('./utils');
+const {getMessagesPath, requireFileIfExists, writeFileSyncWithDirs} = require('./utils');
 
-const fs = require('fs');
-
-const OUT_DIR = config.outDir;
+const CATALOGS_DIR = config.catalogsDir;
 const LANGUAGES = config.languages;
 const DEFAULT_LANGUAGE = config.defaultLanguage;
 
@@ -39,17 +37,17 @@ const messagesToString = (messages) => {
 }
 
 const writeUntranslatedMessages = (language, purgedMessages, outDir) => {
-	const oldLangMessages = getMessages(language, outDir);
+	const oldLangMessages = requireFileIfExists(language, outDir);
 	const messagesToWrite = mergeMessages( oldLangMessages, purgedMessages);
-	fs.writeFileSync(getMessagesPath(language, outDir),messagesToString(messagesToWrite));
+	writeFileSyncWithDirs(getMessagesPath(language, outDir),messagesToString(messagesToWrite));
 }
 
 const extract = async ( defaultLanguage, languages, outDir) => {
-	const oldDefaultMessages = getMessages(defaultLanguage, outDir);
+	const oldDefaultMessages = requireFileIfExists(defaultLanguage, outDir);
 	const newDefaultMessages = formatMessages(await extractDefaultMessages());
 
 	// Writes default language
-	fs.writeFileSync(getMessagesPath(defaultLanguage, outDir),  messagesToString(mergeMessages(oldDefaultMessages, newDefaultMessages)));
+	writeFileSyncWithDirs(getMessagesPath(defaultLanguage, outDir),  messagesToString(mergeMessages(oldDefaultMessages, newDefaultMessages)));
 
 	// Writes rest of the languages
 	const purgedMessages = purgeUnchangedMessages(oldDefaultMessages, newDefaultMessages);
@@ -58,5 +56,5 @@ const extract = async ( defaultLanguage, languages, outDir) => {
 	languages.forEach(lang => writeUntranslatedMessages(lang, purgedMessages, outDir));
 }
 
-extract(DEFAULT_LANGUAGE, LANGUAGES, OUT_DIR);
+extract(DEFAULT_LANGUAGE, LANGUAGES, CATALOGS_DIR);
 
