@@ -38,7 +38,7 @@ const removeAllFiles = async (teamspace, collection) => {
 		{ $group: { _id: '$type', links: { $addToSet: '$link' } } },
 	];
 
-	const results = coll ? await coll.aggregate(query).toArray() : [];
+	const results = coll ? await db.aggregate(teamspace, collection, query) : [];
 	const deletePromises = [];
 
 	results.forEach((entry) => {

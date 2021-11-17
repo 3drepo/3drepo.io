@@ -17,6 +17,8 @@
 
 const { src } = require('../../helper/path');
 
+jest.mock('../../../../src/v5/handler/externalServices');
+const ExternalServices = require(`${src}/handler/externalServices`);
 const FileRefs = require(`${src}/models/fileRefs`);
 const db = require(`${src}/handler/db`);
 
@@ -57,6 +59,55 @@ const testGetTotalSize = () => {
 	});
 };
 
+const testRemoveAllFilesFromModel = () => {
+	describe('Remove all files from model', () => {
+		test('should remove files from all collections', async () => {
+			const fileCollsCount = 7;
+			const teamspace = 'someTS';
+			const modelId = 'someModel';
+
+			const fnGetColl = jest.spyOn(db, 'getCollection').mockImplementation(() => [{ _id: modelId, links: 'someLink' }]);
+			const fnAggregate = jest.spyOn(db, 'aggregate').mockImplementation(() => [{ _id: modelId, links: 'someLink' }]);
+
+			const res = await FileRefs.removeAllFilesFromModel(teamspace, modelId);
+			expect(res).toHaveLength(fileCollsCount);
+
+			const query = [
+				{ $match: { noDelete: { $exists: false } } },
+				{ $group: { _id: '$type', links: { $addToSet: '$link' } } },
+			];
+
+			expect(fnGetColl.mock.calls.length).toBe(fileCollsCount);
+			expect(fnAggregate.mock.calls.length).toBe(fileCollsCount);
+
+			fnGetColl.mock.calls.forEach((call, i) => {
+				expect(call[0]).toEqual(teamspace);
+				const collection = call[1];
+				expect(fnAggregate.mock.calls[i][0]).toEqual(teamspace);
+				expect(fnAggregate.mock.calls[i][1]).toEqual(`${collection}`);
+				expect(fnAggregate.mock.calls[i][2]).toEqual(query);
+			});
+		});
+
+		test('should return empty []s without matching collection', async () => {
+			const fileCollsCount = 7;
+			const teamspace = 'someTS';
+			const modelId = 'someModel';
+
+			const fnGetColl = jest.spyOn(db, 'getCollection').mockImplementation(() => undefined);
+
+			const res = await FileRefs.removeAllFilesFromModel(teamspace, modelId);
+			expect(res).toHaveLength(fileCollsCount);
+			res.forEach((element) => {
+				expect(element).toEqual([]);
+			});
+
+			expect(fnGetColl.mock.calls.length).toBe(fileCollsCount);
+		});
+	});
+};
+
 describe('models/fileRefs', () => {
 	testGetTotalSize();
+	testRemoveAllFilesFromModel();
 });

@@ -32,15 +32,7 @@ const Containers = { ...Groups };
 Containers.addContainer = addModel;
 
 Containers.deleteContainer = async (teamspace, project, container, user) => {
-	try {
-		await deleteModel(teamspace, project, container, user);
-	} catch (err) {
-		if (err?.code === templates.modelNotFound.code) {
-			throw templates.containerNotFound;
-		}
-
-		throw err;
-	}
+	await deleteModel(teamspace, project, container, user);
 };
 
 Containers.getContainerList = async (teamspace, project, user) => {
