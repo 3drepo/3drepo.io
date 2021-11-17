@@ -16,10 +16,10 @@
  */
 
 import React from 'react';
-import { Button, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
+import { Button, DialogContentText, DialogTitle } from '@material-ui/core';
 import WarningIcon from '@assets/icons/warning.svg';
 import { FormattedMessage } from 'react-intl';
-import { Container, Actions, Details, Status } from './alertModal.styles';
+import { Container, Content, Actions, Details, Status } from './alertModal.styles';
 
 interface IAlertModal {
 	onClickClose?: () => void,
@@ -48,12 +48,12 @@ export const AlertModal: React.FC<IAlertModal> = ({ onClickClose, currentActions
 					values={{ currentActions }}
 				/>
 			</DialogTitle>
-			<DialogContent>
+			<Content>
 				<DialogContentText>
 					{message || errorMessage}
 				</DialogContentText>
 				{!!status && <Status>{errorStatus}</Status>}
-			</DialogContent>
+			</Content>
 			<Actions bottomMargin={!details}>
 				<Button autoFocus type="submit" onClick={onClickClose} variant="contained" color="primary">
 					<FormattedMessage

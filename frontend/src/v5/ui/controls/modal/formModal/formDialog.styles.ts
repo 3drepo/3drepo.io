@@ -16,17 +16,47 @@
  */
 
 import styled from 'styled-components';
+import { IconButton } from '@material-ui/core';
+
 import { Typography } from '@controls/typography';
 
 export const Form = styled.form`
 	display: flex;
 	flex-direction: column;
 	min-width: 520px;
-	padding-top: 35px;
+`;
+
+export const Header = styled.header`
+	background: ${({ theme }) => `linear-gradient(89.98deg, ${theme.palette.secondary.main} 0.01%, ${theme.palette.secondary.mid} 99.99%)`};
+	height: 74px;
+	width: 100%;
+	padding: 15px 30px;
+	box-sizing: border-box;
 `;
 
 export const Title = styled(Typography).attrs({
 	variant: 'h2',
 })`
-	text-align: center;
+	text-align: left;
+	color: ${({ theme }) => theme.palette.primary.contrast};
+`;
+
+export const Subtitle = styled(Typography).attrs({
+	variant: 'h5',
+	component: 'span',
+})`
+	text-align: left;
+	color: ${({ theme }) => theme.palette.secondary.lightest};
+`;
+
+export const CloseButton = styled(IconButton)`
+	&& {
+		position: absolute;
+		top: 19px;
+		right: 11px;
+		
+		path {
+			stroke: ${({ theme }) => theme.palette.primary.contrast};
+		}
+	}
 `;

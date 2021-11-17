@@ -15,13 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { IconButton } from '@material-ui/core';
-
-export const CloseButton = styled(IconButton)`
-	&& {
-		position: absolute;
-		top: 10px;
-		right: 12px;
-	}
-`;
+export { UploadFileForm } from './uploadFileForm.component';

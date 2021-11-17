@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
 import { MainHeader } from '@controls/mainHeader';
@@ -27,6 +27,7 @@ import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/containers/c
 import { Button } from '@controls/button';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
+import { UploadFileForm } from '@/v5/ui/routes/dashboard/projects/containers/uploadFileForm';
 import {
 	Container,
 	Content,
@@ -37,14 +38,18 @@ import { EmptySearchResults } from './containersList/emptySearchResults';
 import { useContainersData, useContainersSearch } from './containers.hooks';
 
 export const Containers = (): JSX.Element => {
+	const [openState, setOpen] = useState(false);
 	const {
 		filteredContainers,
 		favouriteContainers,
 		hasContainers,
 		isListPending,
 	} = useContainersData();
-
 	const { searchInput, setSearchInput, filterQuery } = useContainersSearch();
+
+	const showNewContainerModal = () => setOpen(true);
+
+	const onClickClose = () => setOpen(false);
 
 	return (
 		<Container>
@@ -71,6 +76,7 @@ export const Containers = (): JSX.Element => {
 						variant="contained"
 						color="primary"
 						disabled={isListPending}
+						onClick={showNewContainerModal}
 					>
 						<FormattedMessage id="containers.mainHeader.uploadFile" defaultMessage="Upload file" />
 					</Button>
@@ -140,6 +146,7 @@ export const Containers = (): JSX.Element => {
 					</>
 				)}
 			</Content>
+			<UploadFileForm openState={openState} onClickClose={onClickClose} />
 		</Container>
 	);
 };

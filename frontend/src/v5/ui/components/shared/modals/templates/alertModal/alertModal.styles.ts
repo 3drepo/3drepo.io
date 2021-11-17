@@ -16,6 +16,8 @@
  */
 
 import styled, { css } from 'styled-components';
+import { DialogContent } from '@material-ui/core';
+
 import { Typography } from '@controls/typography';
 
 export const Container = styled.div`
@@ -32,6 +34,10 @@ export const Actions = styled.div`
 	${({ bottomMargin }) => bottomMargin && css`
 		margin-bottom: 25px;
 	`}
+`;
+
+export const Content = styled(DialogContent)`
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
 `;
 
 export const Details = styled(Typography).attrs({

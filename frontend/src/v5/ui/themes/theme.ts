@@ -231,14 +231,22 @@ export const theme = createMuiTheme({
 			paper: {
 				minWidth: '30%',
 				borderRadius: 10,
+				margin: 50,
 			},
 			paperWidthFalse: {
 				maxWidth: 633,
+			},
+			paperFullWidth: {
+				width: 'calc(100% - 100px)',
+			},
+			paperScrollPaper: {
+				maxHeight: '100vh',
 			},
 		},
 		MuiDialogActions: {
 			root: {
 				backgroundColor: COLOR.TERTIARY_LIGHTEST,
+				boxShadow: '0px 6px 10px rgba(0, 0, 0, 0.14), 0px 1px 18px rgba(0, 0, 0, 0.12), 0px 3px 5px rgba(0, 0, 0, 0.2);',
 			},
 		},
 		MuiDialogTitle: {
@@ -256,6 +264,7 @@ export const theme = createMuiTheme({
 				paddingTop: 7,
 				paddingBottom: 22,
 				flex: 0,
+				backgroundColor: COLOR.TERTIARY_LIGHTEST,
 			},
 		},
 		MuiDialogContentText: {

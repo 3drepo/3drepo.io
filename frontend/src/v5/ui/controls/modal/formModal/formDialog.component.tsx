@@ -15,38 +15,50 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Button, DialogActions, DialogContent } from '@material-ui/core';
 import React from 'react';
-import { Modal } from '@controls/modal';
-import { Form, Title } from './formDialog.styles';
+import { Dialog, Button, DialogActions, DialogContent } from '@material-ui/core';
+
+import { CloseButton } from '@controls/modal/modal.styles';
+import CloseIcon from '@assets/icons/close_form_modal.svg';
+import { Form, Header, Subtitle, Title } from './formDialog.styles';
 
 interface IFormDialog extends React.DetailedHTMLProps<React.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement> {
 	onClickClose?: () => void;
-	title?: string;
+	title: string;
+	subtitle?: string;
 	open?: boolean;
 	confirmLabel?: string;
 }
 
-export const FormModal = (props: IFormDialog) => {
-	const { onClickClose, title, confirmLabel, open, children, className, ...formProps } = props;
-	return (
-		<Modal onClickClose={onClickClose} open={open} className={className}>
-			<Form {...formProps}>
+export const FormModal = ({
+	onClickClose,
+	title,
+	subtitle,
+	confirmLabel,
+	open,
+	children,
+	className,
+	...formProps
+}: IFormDialog) => (
+	<Dialog open={open} onClose={onClickClose} className={className} maxWidth="xl" fullWidth>
+		<Form {...formProps}>
+			<Header>
 				<Title>
 					{title}
 				</Title>
-				<DialogContent>
-					{children}
-				</DialogContent>
-				<DialogActions>
-					<Button autoFocus onClick={onClickClose} variant="outlined" color="secondary" size="small">
-						Cancel
-					</Button>
-					<Button type="submit" variant="contained" color="primary" size="small">
-						{confirmLabel || 'OK'}
-					</Button>
-				</DialogActions>
-			</Form>
-		</Modal>
-	);
-};
+				{subtitle && <Subtitle>{subtitle}</Subtitle>}
+				<CloseButton aria-label="Close dialog" onClick={onClickClose}>
+					<CloseIcon />
+				</CloseButton>
+			</Header>
+			<DialogContent>
+				{children}
+			</DialogContent>
+			<DialogActions>
+				<Button type="submit" variant="contained" color="primary" size="small">
+					{confirmLabel || 'OK'}
+				</Button>
+			</DialogActions>
+		</Form>
+	</Dialog>
+);
