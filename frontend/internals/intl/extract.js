@@ -1,12 +1,11 @@
 const extractDefaultMessages = require('./extractDefaultMessages');
 const config = require('./config.json');
-const {getMessagesPath, requireFileIfExists, writeFileSyncWithDirs} = require('./utils');
+const {getMessagesPath, requireFileIfExists, writeFileSyncWithDirs, removeElement} = require('./utils');
 
 const CATALOGS_DIR = config.catalogsDir;
 const LANGUAGES = config.languages;
 const DEFAULT_LANGUAGE = config.defaultLanguage;
 
-const removeElement = (arr, value) => arr.filter(elem => elem!==value);
 
 const formatMessages = (messagesObj) => Object.keys(messagesObj)
 	.reduce((formatted, key) => {

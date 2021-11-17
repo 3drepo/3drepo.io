@@ -23,5 +23,6 @@ const writeFileSyncWithDirs = ( filename, data) => {
 	writeFileSync(filename, data);
 }
 
+const removeElement = (arr, value) => arr.filter(elem => elem!==value);
 
-module.exports =  { getMessagesPath, getRelativeMessagesPath, requireFileIfExists, writeFileSyncWithDirs, capitalize };
+module.exports =  { getMessagesPath, getRelativeMessagesPath, requireFileIfExists, writeFileSyncWithDirs, capitalize, removeElement };

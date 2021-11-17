@@ -16,7 +16,6 @@
  */
 
 import { messagesEs } from '@/locales/messagesEs';
-import { messagesEn } from '@/locales/messagesEn';
 import { createIntl, createIntlCache, IntlShape } from 'react-intl';
 
 let intlInternal:IntlShape = null;
@@ -31,7 +30,7 @@ export const initializeIntl = (locale: string) => {
 			messages = messagesEs;
 			break;
 		default:
-			messages = messagesEn;
+			messages = {};
 	}
 
 	const cache = createIntlCache();

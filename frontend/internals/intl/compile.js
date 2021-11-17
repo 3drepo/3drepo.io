@@ -3,7 +3,7 @@ const { writeFileSync, rmSync } = require('fs');
 const path = require('path');
 
 const config = require('./config.json');
-const {getRelativeMessagesPath, getMessagesPath, requireFileIfExists, capitalize} = require('./utils')
+const {getRelativeMessagesPath, getMessagesPath, requireFileIfExists, capitalize, removeElement} = require('./utils')
 
 const compiledFilename = (lang) => `compiled${lang}.json`;
 
@@ -39,7 +39,8 @@ const convertJSONToTS = (lang, dir) => {
 }
 
 const compile = async () => {
-	for (lang of config.languages){
+	const languages = removeElement(config.languages, config.defaultLanguage);
+	for (lang of languages){
 		await compileMessages(lang, config.catalogsDir, config.compileDir);
 		convertJSONToTS(lang, config.compileDir);
 	};
