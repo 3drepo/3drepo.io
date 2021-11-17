@@ -35,10 +35,6 @@ ModelSettings.getContainerById.mockImplementation((ts, container) => {
 });
 
 const testIsContainer = () => {
-	const mockValidatorTruthy = jest.fn((req, res, next) => { next(); });
-	const mockValidatorFalsey = jest.fn(() => {});
-	const mockCBNext = jest.fn(() => {});
-
 	describe('Is container', () => {
 		test('should call next if it is a container', async () => {
 			const mockCB = jest.fn(() => {});

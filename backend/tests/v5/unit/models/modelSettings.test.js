@@ -238,37 +238,6 @@ const testIsSubModel = () => {
 	});
 };
 
-const testRemoveModelCollections = () => {
-	describe('Remove model collections', () => {
-		test('should succeed', async () => {
-			const modelId = 'someModel';
-			const collectionList = [
-				{ name: `${modelId}.collA` },
-				{ name: `${modelId}.collB` },
-				{ name: 'otherModel.collA' },
-				{ name: 'otherModel.collB' },
-			];
-
-			const fnList = jest.spyOn(db, 'listCollections').mockResolvedValue(collectionList);
-			const fnDrop = jest.spyOn(db, 'dropCollection').mockResolvedValue(true);
-
-			const teamspace = 'someTS';
-			const res = await Model.removeModelCollections(teamspace, modelId);
-
-			expect(res).toEqual([true, true]);
-
-			expect(fnList.mock.calls.length).toBe(1);
-			expect(fnList.mock.calls[0][0]).toEqual(teamspace);
-
-			expect(fnDrop.mock.calls.length).toBe(2);
-			expect(fnDrop.mock.calls[0][0]).toEqual(teamspace);
-			expect(fnDrop.mock.calls[0][1]).toEqual(collectionList[0]);
-			expect(fnDrop.mock.calls[1][0]).toEqual(teamspace);
-			expect(fnDrop.mock.calls[1][1]).toEqual(collectionList[1]);
-		});
-	});
-};
-
 const testAddModel = () => {
 	describe('Add model', () => {
 		test('should return inserted ID on success', async () => {
@@ -532,7 +501,6 @@ describe('models/modelSettings', () => {
 	testGetContainers();
 	testGetFederations();
 	testIsSubModel();
-	testRemoveModelCollections();
 	testAddModel();
 	testDeleteModel();
 	testUpdateModelStatus();

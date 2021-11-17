@@ -17,6 +17,7 @@
 
 const { src, modelFolder, objModel } = require('../../../../../helper/path');
 const ServiceHelper = require('../../../../../helper/services');
+const db = require(`${src}/handler/db`);
 const fs = require('fs/promises');
 const path = require('path');
 
@@ -330,8 +331,29 @@ const testAddContainer = () => {
 const testDeleteContainer = () => {
 	describe('Delete container', () => {
 		test('should succeed', async () => {
-			const res = await Containers.deleteContainer('teamspace', 'project', 1, 'tsAdmin');
+			const modelId = 1;
+			const collectionList = [
+				{ name: `${modelId}.collA` },
+				{ name: `${modelId}.collB` },
+				{ name: 'otherModel.collA' },
+				{ name: 'otherModel.collB' },
+			];
+
+			const fnList = jest.spyOn(db, 'listCollections').mockResolvedValue(collectionList);
+			const fnDrop = jest.spyOn(db, 'dropCollection').mockResolvedValue(true);
+
+			const teamspace = 'teamspace';
+			const res = await Containers.deleteContainer(teamspace, 'project', modelId, 'tsAdmin');
 			expect(res).toEqual(undefined);
+
+			expect(fnList.mock.calls.length).toBe(1);
+			expect(fnList.mock.calls[0][0]).toEqual(teamspace);
+
+			expect(fnDrop.mock.calls.length).toBe(2);
+			expect(fnDrop.mock.calls[0][0]).toEqual(teamspace);
+			expect(fnDrop.mock.calls[0][1]).toEqual(collectionList[0]);
+			expect(fnDrop.mock.calls[1][0]).toEqual(teamspace);
+			expect(fnDrop.mock.calls[1][1]).toEqual(collectionList[1]);
 		});
 
 		test('should return container is a submodel if it is a submodel', async () => {

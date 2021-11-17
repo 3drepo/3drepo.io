@@ -21,13 +21,26 @@ const {
 	getModelById,
 	getModelByQuery,
 	isSubModel,
-	removeModelCollections,
 } = require('../../../../../models/modelSettings');
 const { addModelToProject, getProjectById, removeModelFromProject } = require('../../../../../models/projects');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
+const db = require('../../../../../handler/db');
 const { getFavourites } = require('../../../../../models/users');
 const { removeAllFilesFromModel } = require('../../../../../models/fileRefs');
 const { templates } = require('../../../../../utils/responseCodes');
+
+const removeModelCollections = async (ts, model) => {
+	const collections = await db.listCollections(ts);
+	const promises = [];
+
+	collections.forEach((collection) => {
+		if (collection.name.startsWith(`${model}.`)) {
+			promises.push(db.dropCollection(ts, collection));
+		}
+	});
+
+	return Promise.all(promises);
+};
 
 const ModelList = {};
 

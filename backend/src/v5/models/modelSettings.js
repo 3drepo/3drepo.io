@@ -62,19 +62,6 @@ Models.isSubModel = async (ts, model) => {
 	return subModelCount > 0;
 };
 
-Models.removeModelCollections = async (ts, model) => {
-	const collections = await db.listCollections(ts);
-	const promises = [];
-
-	collections.forEach((collection) => {
-		if (collection.name.startsWith(`${model}.`)) {
-			promises.push(db.dropCollection(ts, collection));
-		}
-	});
-
-	return Promise.all(promises);
-};
-
 Models.getModelById = (ts, model, projection) => Models.getModelByQuery(ts, { _id: model }, projection);
 
 Models.getContainerById = async (ts, container, projection) => {
