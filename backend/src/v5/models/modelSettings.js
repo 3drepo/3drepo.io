@@ -36,6 +36,9 @@ const onlyFederations = { federate: true };
 Models.addModel = async (ts, data) => {
 	const newModelId = generateUUIDString();
 	await insertOneModel(ts, { _id: newModelId, ...data });
+
+	publish(events.NEW_MODEL, { teamspace: ts, model: newModelId });
+
 	return newModelId;
 };
 
@@ -45,6 +48,8 @@ Models.deleteModel = async (ts, model) => {
 	if (deletedCount === 0) {
 		throw templates.modelNotFound;
 	}
+
+	publish(events.DELETE_MODEL, { teamspace: ts, model });
 };
 
 Models.getModelByQuery = async (ts, query, projection) => {

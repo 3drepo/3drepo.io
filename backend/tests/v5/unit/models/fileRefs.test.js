@@ -18,7 +18,6 @@
 const { src } = require('../../helper/path');
 
 jest.mock('../../../../src/v5/handler/externalServices');
-const ExternalServices = require(`${src}/handler/externalServices`);
 const FileRefs = require(`${src}/models/fileRefs`);
 const db = require(`${src}/handler/db`);
 

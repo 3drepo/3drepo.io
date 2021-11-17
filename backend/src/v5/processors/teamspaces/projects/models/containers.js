@@ -24,7 +24,6 @@ const fs = require('fs/promises');
 const { getProjectById } = require('../../../../models/projects');
 const { logger } = require('../../../../utils/logger');
 const { queueModelUpload } = require('../../../../services/queue');
-const { templates } = require('../../../../utils/responseCodes');
 const { timestampToString } = require('../../../../utils/helper/dates');
 
 const Containers = { ...Groups };
