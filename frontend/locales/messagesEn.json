@@ -29,6 +29,8 @@
   "containers.list.header.lastUpdated": "Last updated",
   "containers.list.header.revisions": "Revisions",
   "containers.list.item.favourite.tooltip": "Add to favourites",
+  "containers.list.item.latestRevision.emptyContainer": "Container empty",
+  "containers.list.item.latestRevision.label": "Latest revision:",
   "containers.list.item.latestRevision.status.error.tooltipMessageWithDate": "The latest upload on <b>{date}</b> at <b>{time}</b> has failed due to <b>{message}</b>.",
   "containers.list.item.latestRevision.status.error.tooltipMessageWithoutDate": "The latest upload has failed due to <b>{message}</b>.",
   "containers.list.item.latestRevision.status.processing": "Processing",
