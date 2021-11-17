@@ -57,11 +57,7 @@ const processMessages = (messages, messagesDiff) => {
 
 const writeUntranslatedMessages = (language, mesagesDiff, outDir) => {
 	const oldLangMessages = requireFileIfExists(language, outDir);
-	// purgeAndMerge(oldLangMessages, changedMessages);
 	const messagesToWrite = processMessages( oldLangMessages, mesagesDiff);
-	// console.log(`{{{{{{{{{{  lang: ${language}  }}}}}}}}}}`);
-	// console.log(messagesToString(messagesToWrite));
-
 	writeFileSyncWithDirs(getMessagesPath(language, outDir), messagesToString(messagesToWrite));
 }
 
