@@ -14,20 +14,6 @@ const formatMessages = (messagesObj) => Object.keys(messagesObj)
 		return formatted;
 },{});
 
-const purgeUnchangedMessages = (oldMessages, newMessages) => Object.keys(newMessages)
-	.reduce((purged, key) => {
-		if (oldMessages[key] !== newMessages[key]) {
-			// It blanks updated messages
-			purged[key] =  '' ;
-		} // Get rids of unchanged messages
-
-		return purged;
-	},{});
-
-//TODO: keep changed messages;
-const mergeMessages = (oldMessages, newMessages) => ({...oldMessages, ...newMessages});
-
-
 const messagesToString = (messages) => {
 	const orderedMessages = Object.keys(messages).sort().reduce((ordered, key) => {
 		ordered[key] = messages[key];
@@ -36,10 +22,48 @@ const messagesToString = (messages) => {
 	return JSON.stringify(orderedMessages, null, '  ');
 }
 
-const writeUntranslatedMessages = (language, purgedMessages, outDir) => {
+
+const getMessagesDiff = (oldMessages, newMessages) => {
+	const mergedData = {...oldMessages, ...newMessages};
+
+	return Object.keys(mergedData).map(id=> {
+		const added = newMessages.hasOwnProperty(id) && !oldMessages.hasOwnProperty(id);
+		const removed = !newMessages.hasOwnProperty(id) && oldMessages.hasOwnProperty(id);
+		const changed = newMessages.hasOwnProperty(id) && oldMessages.hasOwnProperty(id) && newMessages[id] !== oldMessages[id];
+
+		return {
+			id,
+			added,
+			removed,
+			changed
+		}
+	});
+}
+
+const processMessages = (messages, messagesDiff) => {
+	const newMessages = {};
+
+	messagesDiff.forEach(({id, changed, added, removed}) => {
+		if (!removed){
+			newMessages[id] = messages[id] || '';
+		}
+
+		if (changed) {
+			newMessages[id] = '';
+		}
+	});
+
+	return newMessages;
+};
+
+const writeUntranslatedMessages = (language, mesagesDiff, outDir) => {
 	const oldLangMessages = requireFileIfExists(language, outDir);
-	const messagesToWrite = mergeMessages( oldLangMessages, purgedMessages);
-	writeFileSyncWithDirs(getMessagesPath(language, outDir),messagesToString(messagesToWrite));
+	// purgeAndMerge(oldLangMessages, changedMessages);
+	const messagesToWrite = processMessages( oldLangMessages, mesagesDiff);
+	// console.log(`{{{{{{{{{{  lang: ${language}  }}}}}}}}}}`);
+	// console.log(messagesToString(messagesToWrite));
+
+	writeFileSyncWithDirs(getMessagesPath(language, outDir), messagesToString(messagesToWrite));
 }
 
 const extract = async ( defaultLanguage, languages, outDir) => {
@@ -47,13 +71,12 @@ const extract = async ( defaultLanguage, languages, outDir) => {
 	const newDefaultMessages = formatMessages(await extractDefaultMessages());
 
 	// Writes default language
-	writeFileSyncWithDirs(getMessagesPath(defaultLanguage, outDir),  messagesToString(mergeMessages(oldDefaultMessages, newDefaultMessages)));
+	writeFileSyncWithDirs(getMessagesPath(defaultLanguage, outDir),  messagesToString(newDefaultMessages));
 
-	// Writes rest of the languages
-	const purgedMessages = purgeUnchangedMessages(oldDefaultMessages, newDefaultMessages);
+	const messagesDiff = getMessagesDiff(oldDefaultMessages, newDefaultMessages);
 
 	languages = removeElement(languages, defaultLanguage);
-	languages.forEach(lang => writeUntranslatedMessages(lang, purgedMessages, outDir));
+	languages.forEach(lang => writeUntranslatedMessages(lang, messagesDiff, outDir));
 }
 
 extract(DEFAULT_LANGUAGE, LANGUAGES, CATALOGS_DIR);

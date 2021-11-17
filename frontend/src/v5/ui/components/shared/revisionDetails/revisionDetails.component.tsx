@@ -29,6 +29,7 @@ import { RevisionsListItem } from '@components/shared/revisionDetails/components
 import { SkeletonListItem } from '@components/shared/revisionDetails/components/skeletonListItem';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
+import { FormattedMessage } from 'react-intl';
 import {
 	Container, RevisionsListHeaderContainer, RevisionsListItemWrapper, RevisionsList, RevisionsListEmptyWrapper,
 	RevisionsListEmptyContainer,
@@ -57,14 +58,14 @@ export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDe
 			<RevisionsListEmptyWrapper>
 				<RevisionsListEmptyContainer>
 					<DashboardListEmptyText>
-						<Trans id="containers.revisions.emptyMessage" message="You haven’t added any Files." />
+						<FormattedMessage id="containers.revisions.emptyMessage" defaultMessage="You haven’t added any Files." />
 					</DashboardListEmptyText>
 					<Button
 						startIcon={<AddCircleIcon />}
 						variant="contained"
 						color="primary"
 					>
-						<Trans id="containers.revisions.uploadFile" message="Upload File" />
+						<FormattedMessage id="containers.revisions.uploadFile" defaultMessage="Upload File" />
 					</Button>
 				</RevisionsListEmptyContainer>
 			</RevisionsListEmptyWrapper>

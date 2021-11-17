@@ -1,3 +1,16 @@
 {
-  "hello.world": "Hola Mundo"
+  "containers.all.collapse.tooltip.hide": "Ocultar todo",
+  "containers.all.collapse.tooltip.show": "Mostrar todo",
+  "containers.all.collapseTitle": "Todos los contenedores",
+  "containers.all.emptyMessage": "No has creado ningún contenedor.",
+  "containers.all.newContainer": "Nuevo contenedor",
+  "containers.favourites.collapse.tooltip.hide": "Ocultar favoritos",
+  "containers.favourites.collapse.tooltip.show": "Mostrar favoritos",
+  "containers.favourites.collapseTitle": "Favoritos",
+  "containers.favourites.emptyMessage": "No has creado ningún favorito. Pica en la estrella del Contenedor para agregar tu primer Contenedor favorito a la lista de favoritos.",
+  "containers.mainHeader.newContainer": "Nuevo Contenedor",
+  "containers.mainHeader.uploadFile": "Subir archivo",
+  "containers.revisions.emptyMessage": "No has agregado ningún archivo",
+  "containers.revisions.uploadFile": "Subir archivo",
+  "containers.search.placeholder": "Buscar Contenedores..."
 }
