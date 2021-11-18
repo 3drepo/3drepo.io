@@ -5,7 +5,7 @@
   "alertModal.action.contactSupport": "Contact support",
   "alertModal.action.ok": "Ok, close window",
   "alertModal.header": "Something went wrong when {currentActions}",
-  "breadCrumbs.projectFetchError.details": "The project with id '{project}' was not found.",
+  "breadCrumbs.projectFetchError.details": "The project with id \"{project}\" was not found.",
   "breadCrumbs.projectFetchError.redirect": "You will be redirected to the main page of the dashboard.",
   "breadCrumbs.projectFetchError.title": "trying to find project",
   "containers.addFavourite.error": "trying to add container to favourites",
