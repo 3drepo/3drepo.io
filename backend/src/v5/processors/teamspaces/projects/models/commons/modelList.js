@@ -47,7 +47,7 @@ const ModelList = {};
 ModelList.addModel = async (teamspace, project, user, data) => {
 	const { models } = await getProjectById(teamspace, project, { models: 1 });
 	const query = { _id: { $in: models }, name: data.name };
-	const modelSetting = await getModelByQuery(teamspace, query, { _id: 0, name: 1 });
+	const modelSetting = await getModelByQuery(teamspace, query, { _id: 0, name: 1 }, true);
 
 	if (modelSetting) {
 		throw templates.nameAlreadyExists;

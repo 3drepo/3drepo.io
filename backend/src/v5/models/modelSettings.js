@@ -52,9 +52,9 @@ Models.deleteModel = async (ts, model) => {
 	publish(events.DELETE_MODEL, { teamspace: ts, model });
 };
 
-Models.getModelByQuery = async (ts, query, projection) => {
+Models.getModelByQuery = async (ts, query, projection, allowNoResult = false) => {
 	const res = await findOneModel(ts, query, projection);
-	if (!res) {
+	if (!allowNoResult && !res) {
 		throw templates.modelNotFound;
 	}
 

@@ -629,7 +629,7 @@ describe('E2E routes/teamspaces/projects/containers', () => {
 	testAppendFavourites();
 	testDeleteFavourites();
 	testAddContainer();
-	testDeleteContainer();
 	testUpdateContainerSettings();
 	testGetSettings();
+	testDeleteContainer();
 });
