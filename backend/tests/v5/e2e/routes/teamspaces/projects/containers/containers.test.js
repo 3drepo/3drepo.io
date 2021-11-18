@@ -274,7 +274,6 @@ const testAddContainer = () => {
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
-		// TODO - should also have a permission test ensure we output the right error code.
 		test('should return new container ID if the user has permissions', async () => {
 			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status).send({ name: 'container name', unit: 'mm', type: 'a' });
 			expect(isUUIDString(res.body._id)).toBe(true);
@@ -283,6 +282,11 @@ const testAddContainer = () => {
 		test('should fail if name already exists', async () => {
 			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.nameAlreadyExists.status).send({ name: 'container name', unit: 'mm', type: 'a' });
 			expect(res.body.code).toEqual(templates.nameAlreadyExists.code);
+		});
+
+		test('should fail if user has insufficient permissions', async () => {
+			const res = await agent.post(`${route}?key=${users.viewer.apiKey}`).expect(templates.notAuthorized.status).send({ name: 'container name', unit: 'mm', type: 'a' });
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
 	});
 };
@@ -310,14 +314,19 @@ const testDeleteContainer = () => {
 			expect(res.body).toEqual({});
 		});
 
-		// TODO
-		// add test for:
-		// lack of permissions
-		// container ID passed in is actually a federation.
+		test('should fail if container is federation', async () => {
+			const res = await agent.delete(`${route(models[2]._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.containerNotFound.status);
+			expect(res.body.code).toEqual(templates.containerNotFound.code);
+		});
 
 		test('should fail if container is submodel', async () => {
 			const res = await agent.delete(`${route(models[1]._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.containerIsSubModel.status);
 			expect(res.body.code).toEqual(templates.containerIsSubModel.code);
+		});
+
+		test('should fail if user lacks permissions', async () => {
+			const res = await agent.delete(`${route(models[1]._id)}?key=${users.viewer.apiKey}`).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
 	});
 };
