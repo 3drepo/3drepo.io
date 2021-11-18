@@ -108,6 +108,9 @@ const models = [
 	},
 ];
 
+// setup sub model
+models[2].properties.subModels = [ { model: models[1]._id, database: teamspace } ];
+
 const revisions = [
 	ServiceHelper.generateRevisionEntry(),
 	ServiceHelper.generateRevisionEntry(),
@@ -276,6 +279,11 @@ const testAddContainer = () => {
 			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status).send({ name: 'container name', unit: 'mm', type: 'a' });
 			expect(isUUIDString(res.body._id)).toBe(true);
 		});
+
+		test('should fail if name already exists', async () => {
+			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.nameAlreadyExists.status).send({ name: 'container name', unit: 'mm', type: 'a' });
+			expect(res.body.code).toEqual(templates.nameAlreadyExists.code);
+		});
 	});
 };
 
@@ -306,7 +314,11 @@ const testDeleteContainer = () => {
 		// add test for:
 		// lack of permissions
 		// container ID passed in is actually a federation.
-		// sub model error
+
+		test('should fail if container is submodel', async () => {
+			const res = await agent.delete(`${route(models[1]._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.containerIsSubModel.status);
+			expect(res.body.code).toEqual(templates.containerIsSubModel.code);
+		});
 	});
 };
 
