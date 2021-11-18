@@ -78,7 +78,7 @@ Meta.getMetadataById = async (account, model, id) => {
 		throw responseCodes.METADATA_NOT_FOUND;
 	}
 
-	return metadata;
+	return clean(metadata);
 };
 
 Meta.getAllMetadataByRules = async (account, model, branch, rev, rules) => {
