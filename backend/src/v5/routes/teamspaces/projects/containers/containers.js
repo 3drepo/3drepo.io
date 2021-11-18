@@ -142,20 +142,51 @@ const establishRoutes = () => {
 	 *             properties:
 	 *               name:
 	 *                 type: string
+	 *                 example: container1
+	 *                 description: Unique name of container
+	 *                 maxLength: 120
 	 *               unit:
 	 *                 type: string
+	 *                 enum: [mm, cm, dm, m, ft]
+	 *                 example: mm
+	 *                 description: Unit of measurement
 	 *               desc:
 	 *                 type: string
+	 *                 example: description1
+	 *                 description: Container description
+	 *                 maxLength: 50
 	 *               code:
 	 *                 type: string
+	 *                 example: code1
+	 *                 description: Container reference code
 	 *               type:
 	 *                 type: string
-   	 *           example:
-	 *             name: Awesome Model
-	 *             unit: mm
-	 *             desc: This is an awesome model
-	 *             code: awe12
-	 *             type: Mechanical
+	 *                 example: type1
+	 *                 description: Container type
+	 *               surveyPoints:
+	 *                 type: array
+	 *                 description: Survey points for container location
+	 *                 items:
+	 *                   type: object
+	 *                   properties:
+	 *                     position:
+	 *                       type: array
+	 *                       items:
+	 *                         type: float
+	 *                         example: 23.45
+	 *                     latLong:
+	 *                       type: array
+	 *                       items:
+	 *                         type: float
+	 *                         example: 23.45
+	 *               angleFromNorth:
+	 *                 type: integer
+	 *                 example: 100
+	 *                 description: Angle from North in degrees
+	 *               elevation:
+	 *                 type: integer
+	 *                 example: 20
+	 *                 description: Elevation from sea level
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -170,6 +201,7 @@ const establishRoutes = () => {
 	 *               properties:
 	 *                 _id:
 	 *                   type: string
+	 *                   format: uuid
 	 *                   description: Container ID
 	 *                   example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 */

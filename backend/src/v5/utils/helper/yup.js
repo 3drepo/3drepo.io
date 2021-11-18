@@ -20,7 +20,7 @@ const Yup = require('yup');
 
 const YupHelper = { validators: {}, types: { strings: {} } };
 
-YupHelper.validators.alphanumeric = (yupObj) => yupObj.matches(/^[\w]*$/,
+YupHelper.validators.alphanumeric = (yupObj) => yupObj.matches(/^[\w\s]*$/,
 	// eslint-disable-next-line no-template-curly-in-string
 	'${path} can only contain alpha-numeric characters or underscores');
 

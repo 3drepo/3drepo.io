@@ -118,7 +118,7 @@ const testValidateAddModelData = () => {
 			unit: 'mm',
 		} }, false, 'if type missing'],
 	])('Check if req arguments for add model are valid', (data, shouldPass, desc) => {
-		test(`${desc} ${shouldPass ? ' should call next()' : 'should respond with invalidArguments'}`, async () => {
+		test(`${desc} ${shouldPass ? 'should call next()' : 'should respond with invalidArguments'}`, async () => {
 			const mockCB = jest.fn();
 			const req = { ...cloneDeep(data) };
 			await Models.validateAddModelData(req, {}, mockCB);

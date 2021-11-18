@@ -24,11 +24,7 @@ const Models = {};
 
 Models.validateAddModelData = async (req, res, next) => {
 	const schema = Yup.object().strict(true).noUnknown().shape({
-		name: Yup.string('name must be of type string')
-			// eslint-disable-next-line
-			.matches(/^[\x00-\x7F]{1,120}$/,
-				'name cannot be longer than 120 characters and must only contain alphanumeric characters and underscores')
-			.required(),
+		name: YupHelper.validators.alphanumeric(YupHelper.types.strings.title).required(),
 		unit: YupHelper.types.strings.unit.required(),
 		desc: YupHelper.types.strings.blob,
 		code: YupHelper.types.strings.code,
