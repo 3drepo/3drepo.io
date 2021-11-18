@@ -48,17 +48,25 @@ export const initializeIntl = (locale: string) => {
 	);
 };
 
-// eslint-disable-next-line max-len
-export const formatMessage: typeof intlInternal.formatMessage = (descriptor, values?, opts?): string => intlInternal.formatMessage(descriptor, values, opts);
+const getIntl = () => {
+	if (!intlInternal) {
+		initializeIntl(DEFAULT_LOCALE);
+	}
+
+	return intlInternal;
+};
 
 // eslint-disable-next-line max-len
-export const formatDate: typeof intlInternal.formatDate = (value, opts?): string => intlInternal.formatDate(value, opts);
+export const formatMessage: typeof intlInternal.formatMessage = (descriptor, values?, opts?): string => getIntl().formatMessage(descriptor, values, opts);
 
 // eslint-disable-next-line max-len
-export const formatPlural: typeof intlInternal.formatPlural = (value, opts?): string => intlInternal.formatPlural(value, opts);
+export const formatDate: typeof intlInternal.formatDate = (value, opts?): string => getIntl().formatDate(value, opts);
+
+// eslint-disable-next-line max-len
+export const formatPlural: typeof intlInternal.formatPlural = (value, opts?): string => getIntl().formatPlural(value, opts);
 
 export const getIntlProviderProps = () => ({
-	messages: intlInternal.messages,
-	defaultLocal: intlInternal.defaultLocale,
-	locale: intlInternal.locale,
+	messages: getIntl().messages,
+	defaultLocal: getIntl().defaultLocale,
+	locale: getIntl().locale,
 });
