@@ -21,7 +21,6 @@ const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { formatModelSettings } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
 const { getUserFromSession } = require('../../../../utils/sessions');
-const { isContainer } = require('../../../../middleware/models/modelSettings');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
 
@@ -467,7 +466,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: Container removed.
 	 */
-	router.delete('/:container', isAdminToProject, isContainer, deleteContainer);
+	router.delete('/:container', hasAdminAccessToContainer, deleteContainer);
 
 	/**
 	 * @openapi

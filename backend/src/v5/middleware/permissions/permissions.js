@@ -29,6 +29,9 @@ const { validateMany } = require('../common');
 const Permissions = {};
 
 Permissions.hasAccessToTeamspace = validateMany([convertAllUUIDs, validSession, isTeamspaceMember]);
+
+Permissions.isAdminToProject = validateMany([Permissions.hasAccessToTeamspace, isProjectAdmin]);
+
 Permissions.hasReadAccessToContainer = validateMany([Permissions.hasAccessToTeamspace, hasReadAccessToContainer]);
 Permissions.hasCommenterAccessToContainer = validateMany([
 	Permissions.hasAccessToTeamspace, hasCommenterAccessToContainer]);
@@ -39,7 +42,6 @@ Permissions.hasReadAccessToFederation = validateMany([Permissions.hasAccessToTea
 Permissions.hasCommenterAccessToFederation = validateMany([
 	Permissions.hasAccessToTeamspace, hasCommenterAccessToFederation]);
 Permissions.hasWriteAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasWriteAccessToFederation]);
-Permissions.isAdminToProject = validateMany([Permissions.hasAccessToTeamspace, isProjectAdmin]);
 Permissions.hasAdminAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasAdminAccessToFederation]);
 
 module.exports = Permissions;
