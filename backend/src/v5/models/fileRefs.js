@@ -30,7 +30,7 @@ const removeAllFiles = async (teamspace, collection) => {
 
 	const deletePromises = results.map(
 		({ _id, links }) => {
-			if (_id && links.length) {
+			if (_id && links?.length) {
 				return ExternalServices.removeFiles(teamspace, collection, _id, links);
 			}
 			return Promise.resolve();

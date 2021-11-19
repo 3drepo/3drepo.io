@@ -93,6 +93,39 @@ const testRemoveAllFilesFromModel = () => {
 			});
 		});
 
+		test('should not fail if the the ref collection has no links', async () => {
+			const collections = [
+				{ name: 'a' },
+				{ name: 'b' },
+				{ name: 'c' },
+				{ name: 'd' },
+				{ name: 'e' },
+			];
+			const teamspace = 'someTS';
+			const modelId = 'someModel';
+
+			jest.spyOn(db, 'listCollections').mockImplementation(() => collections);
+			const fnAggregate = jest.spyOn(db, 'aggregate').mockImplementation(() => [{ _id: null, links: [] }]);
+
+			const res = await FileRefs.removeAllFilesFromModel(teamspace, modelId);
+			expect(res).toHaveLength(collections.length);
+
+			const query = [
+				{ $match: { noDelete: { $exists: false } } },
+				{ $group: { _id: '$type', links: { $addToSet: '$link' } } },
+			];
+
+			expect(fnAggregate.mock.calls.length).toBe(collections.length);
+
+			fnAggregate.mock.calls.forEach((call, i) => {
+				expect(call[0]).toEqual(teamspace);
+				const collection = call[1];
+				expect(fnAggregate.mock.calls[i][0]).toEqual(teamspace);
+				expect(fnAggregate.mock.calls[i][1]).toEqual(`${collection}`);
+				expect(fnAggregate.mock.calls[i][2]).toEqual(query);
+			});
+		});
+
 		test('should return empty []s without matching collection', async () => {
 			const teamspace = 'someTS';
 			const modelId = 'someModel';
