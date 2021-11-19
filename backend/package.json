@@ -18,7 +18,7 @@
     "lint:fix": "yarn lint --fix",
     "start": "cross-env NODE_CONFIG_DIR=../config node ./src/v4/3drepo.js",
     "watch": "cross-env NODE_CONFIG_DIR=../config nodemon ./src/v4/3drepo.js",
-	"run-script": "cross-env NODE_CONFIG_DIR=../config node"
+    "run-script": "cross-env NODE_CONFIG_DIR=../config node"
   },
   "dependencies": {
     "@elastic/elasticsearch": "7.12.0",
