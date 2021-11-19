@@ -101,14 +101,9 @@ const testRemoveProjectModel = () => {
 			const teamspace = 'someTS';
 			const projectId = 'someProject';
 			const modelId = 'someModel';
-			const expectedData = {
-				matchedCount: 1,
-				modifiedCount: 1,
-			};
-			const fn = jest.spyOn(db, 'updateMany').mockResolvedValue(expectedData);
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue();
 
-			const res = await Project.removeModelFromProject(teamspace, projectId, modelId);
-			expect(res).toEqual(expectedData);
+			await Project.removeModelFromProject(teamspace, projectId, modelId);
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual(teamspace);
 			expect(fn.mock.calls[0][1]).toEqual('projects');

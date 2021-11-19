@@ -34,12 +34,12 @@ const noFederations = { federate: { $ne: true } };
 const onlyFederations = { federate: true };
 
 Models.addModel = async (ts, data) => {
-	const newModelId = generateUUIDString();
-	await insertOneModel(ts, { _id: newModelId, ...data });
+	const _id = generateUUIDString();
+	await insertOneModel(ts, { ...data, _id });
 
-	publish(events.NEW_MODEL, { teamspace: ts, model: newModelId });
+	publish(events.NEW_MODEL, { teamspace: ts, model: _id });
 
-	return newModelId;
+	return _id;
 };
 
 Models.deleteModel = async (ts, model) => {
@@ -52,9 +52,9 @@ Models.deleteModel = async (ts, model) => {
 	publish(events.DELETE_MODEL, { teamspace: ts, model });
 };
 
-Models.getModelByQuery = async (ts, query, projection, allowNoResult = false) => {
+Models.getModelByQuery = async (ts, query, projection) => {
 	const res = await findOneModel(ts, query, projection);
-	if (!allowNoResult && !res) {
+	if (!res) {
 		throw templates.modelNotFound;
 	}
 
@@ -71,8 +71,7 @@ Models.getModelById = (ts, model, projection) => Models.getModelByQuery(ts, { _i
 
 Models.getContainerById = async (ts, container, projection) => {
 	try {
-		const res = await Models.getModelByQuery(ts, { _id: container, ...noFederations }, projection);
-		return res;
+		return await Models.getModelByQuery(ts, { _id: container, ...noFederations }, projection);
 	} catch (err) {
 		if (err?.code === templates.modelNotFound.code) {
 			throw templates.containerNotFound;
@@ -84,8 +83,7 @@ Models.getContainerById = async (ts, container, projection) => {
 
 Models.getFederationById = async (ts, federation, projection) => {
 	try {
-		const res = await Models.getModelByQuery(ts, { _id: federation, ...onlyFederations }, projection);
-		return res;
+		return await Models.getModelByQuery(ts, { _id: federation, ...onlyFederations }, projection);
 	} catch (err) {
 		if (err?.code === templates.modelNotFound.code) {
 			throw templates.federationNotFound;

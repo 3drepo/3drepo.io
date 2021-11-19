@@ -23,7 +23,6 @@ const { templates } = require('../utils/responseCodes');
 const findProjects = (ts, query, projection, sort) => db.find(ts, 'projects', query, projection, sort);
 const findOneProject = (ts, query, projection) => db.findOne(ts, 'projects', query, projection);
 const updateOneProject = (ts, query, data) => db.updateOne(ts, 'projects', query, data);
-const updateProjects = (ts, query, data) => db.updateMany(ts, 'projects', query, data);
 
 Projects.addModelToProject = (ts, project, model) => updateOneProject(
 	ts,
@@ -31,7 +30,7 @@ Projects.addModelToProject = (ts, project, model) => updateOneProject(
 	{ $push: { models: model } },
 );
 
-Projects.removeModelFromProject = (ts, project, model) => updateProjects(
+Projects.removeModelFromProject = (ts, project, model) => updateOneProject(
 	ts,
 	{ _id: project },
 	{ $pull: { models: model } },

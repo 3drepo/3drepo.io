@@ -143,7 +143,10 @@ const model1Revisions = [
 ];
 
 ProjectsModel.getProjectById.mockImplementation(() => project);
-ModelSettings.getModelByQuery.mockImplementation((ts, query) => (query.name === 'model1' ? modelList[0] : undefined));
+ModelSettings.getModelByQuery.mockImplementation((ts, query) => {
+	if (query.name === 'model1') Promise.resolve(modelList[0]);
+	else throw templates.modelNotFound;
+});
 ModelSettings.getContainers.mockImplementation(() => modelList);
 const getContainerByIdMock = ModelSettings.getContainerById.mockImplementation((teamspace,
 	container) => containerSettings[container]);
