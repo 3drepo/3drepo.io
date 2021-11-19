@@ -30,9 +30,7 @@ const Containers = { ...Groups };
 
 Containers.addContainer = addModel;
 
-Containers.deleteContainer = async (teamspace, project, container, user) => {
-	await deleteModel(teamspace, project, container, user);
-};
+Containers.deleteContainer = deleteModel;
 
 Containers.getContainerList = async (teamspace, project, user) => {
 	const { models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });

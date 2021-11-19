@@ -61,25 +61,30 @@ const testGetTotalSize = () => {
 const testRemoveAllFilesFromModel = () => {
 	describe('Remove all files from model', () => {
 		test('should remove files from all collections', async () => {
-			const fileCollsCount = 7;
+			const collections = [
+				{ name: 'a' },
+				{ name: 'b' },
+				{ name: 'c' },
+				{ name: 'd' },
+				{ name: 'e' },
+			];
 			const teamspace = 'someTS';
 			const modelId = 'someModel';
 
-			const fnGetColl = jest.spyOn(db, 'getCollection').mockImplementation(() => [{ _id: modelId, links: 'someLink' }]);
+			jest.spyOn(db, 'listCollections').mockImplementation(() => collections);
 			const fnAggregate = jest.spyOn(db, 'aggregate').mockImplementation(() => [{ _id: modelId, links: 'someLink' }]);
 
 			const res = await FileRefs.removeAllFilesFromModel(teamspace, modelId);
-			expect(res).toHaveLength(fileCollsCount);
+			expect(res).toHaveLength(collections.length);
 
 			const query = [
 				{ $match: { noDelete: { $exists: false } } },
 				{ $group: { _id: '$type', links: { $addToSet: '$link' } } },
 			];
 
-			expect(fnGetColl.mock.calls.length).toBe(fileCollsCount);
-			expect(fnAggregate.mock.calls.length).toBe(fileCollsCount);
+			expect(fnAggregate.mock.calls.length).toBe(collections.length);
 
-			fnGetColl.mock.calls.forEach((call, i) => {
+			fnAggregate.mock.calls.forEach((call, i) => {
 				expect(call[0]).toEqual(teamspace);
 				const collection = call[1];
 				expect(fnAggregate.mock.calls[i][0]).toEqual(teamspace);
@@ -89,19 +94,15 @@ const testRemoveAllFilesFromModel = () => {
 		});
 
 		test('should return empty []s without matching collection', async () => {
-			const fileCollsCount = 7;
 			const teamspace = 'someTS';
 			const modelId = 'someModel';
 
-			const fnGetColl = jest.spyOn(db, 'getCollection').mockImplementation(() => undefined);
+			const listCol = jest.spyOn(db, 'listCollections').mockImplementation(() => []);
 
 			const res = await FileRefs.removeAllFilesFromModel(teamspace, modelId);
-			expect(res).toHaveLength(fileCollsCount);
-			res.forEach((element) => {
-				expect(element).toEqual([]);
-			});
+			expect(res).toHaveLength(0);
 
-			expect(fnGetColl.mock.calls.length).toBe(fileCollsCount);
+			expect(listCol.mock.calls.length).toBe(1);
 		});
 	});
 };
