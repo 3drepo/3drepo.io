@@ -16,12 +16,12 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
+const { types, validators } = require('../../../../../../../utils/helper/yup');
 const Yup = require('yup');
 const { checkLegendExists } = require('../../../../../../../models/legends');
 const { checkViewExists } = require('../../../../../../../models/views');
 const { respond } = require('../../../../../../../utils/responder');
 const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
-const { types } = require('../../../../../../../utils/helper/yup');
 
 const ModelSettings = {};
 
@@ -29,6 +29,35 @@ const convertBodyUUIDs = (req) => {
 	Object.keys(req.body).forEach((key) => {
 		req.body[key] = stringToUUID(req.body[key]);
 	});
+};
+
+ModelSettings.validateAddModelData = async (req, res, next) => {
+	const schema = Yup.object().strict(true).noUnknown().shape({
+		name: validators.alphanumeric(types.strings.title).required(),
+		unit: types.strings.unit.required(),
+		desc: types.strings.blob,
+		code: types.strings.code,
+		type: Yup.string().required(),
+		surveyPoints: types.sureyPoints,
+		angleFromNorth: types.degrees,
+		elevation: Yup.number(),
+	});
+
+	try {
+		await schema.validate(req.body);
+
+		req.body.properties = { unit: req.body.unit.toLowerCase() };
+		delete req.body.unit;
+
+		if (req.body.code) {
+			req.body.properties.code = req.body.code;
+			delete req.body.code;
+		}
+
+		next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
 };
 
 ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
