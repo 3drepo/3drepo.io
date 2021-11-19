@@ -16,12 +16,12 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
-const { types, validators } = require('../../../../../../../utils/helper/yup');
 const Yup = require('yup');
 const { checkLegendExists } = require('../../../../../../../models/legends');
 const { checkViewExists } = require('../../../../../../../models/views');
 const { respond } = require('../../../../../../../utils/responder');
 const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
+const { types } = require('../../../../../../../utils/helper/yup');
 
 const ModelSettings = {};
 
@@ -31,19 +31,59 @@ const convertBodyUUIDs = (req) => {
 	});
 };
 
-ModelSettings.validateAddModelData = async (req, res, next) => {
-	const schema = Yup.object().strict(true).noUnknown().shape({
-		name: validators.alphanumeric(types.strings.title).required(),
-		unit: types.strings.unit.required(),
-		desc: types.strings.blob,
-		code: types.strings.code,
-		type: Yup.string().required(),
-		surveyPoints: types.sureyPoints,
-		angleFromNorth: types.degrees,
-		elevation: Yup.number(),
-	});
+const defaultViewType = (teamspace, model) => types.id.nullable().test('check-view-exists', 'View not found', async (value) => {
+	if (value) {
+		try {
+			await checkViewExists(teamspace, model, stringToUUID(value));
+		} catch (err) {
+			return false;
+		}
+	}
+	return true;
+});
 
+const defaultLegendType = (teamspace, model) => types.id.nullable().test('check-legend-exists', 'Legend not found', async (value) => {
+	if (value) {
+		try {
+			await checkLegendExists(teamspace, model, stringToUUID(value));
+		} catch (err) {
+			return false;
+		}
+	}
+	return true;
+});
+
+const generateSchema = (newEntry, teamspace, modelId) => {
+	const schema = {
+		name: newEntry ? types.strings.title.required() : types.strings.title,
+		unit: newEntry ? types.strings.unit.required() : types.strings.unit,
+		desc: types.strings.shortDescription,
+		code: types.strings.code,
+		type: newEntry ? Yup.string().required() : Yup.string(),
+		surveyPoints: types.surveyPoints,
+		angleFromNorth: types.degrees,
+		...(newEntry
+			? {}
+			: {
+				defaultView: defaultViewType(teamspace, modelId),
+				defaultLegend: defaultLegendType(teamspace, modelId),
+			}),
+	};
+
+	const yupObj = Yup.object().strict(true).noUnknown().required()
+		.shape(schema);
+	return newEntry
+		? yupObj
+		: yupObj.test(
+			'at-least-one-property',
+			'You must provide at least one setting value',
+			(value) => Object.keys(value).length,
+		);
+};
+
+ModelSettings.validateAddModelData = async (req, res, next) => {
 	try {
+		const schema = generateSchema(true);
 		await schema.validate(req.body);
 
 		req.body.properties = { unit: req.body.unit.toLowerCase() };
@@ -61,40 +101,10 @@ ModelSettings.validateAddModelData = async (req, res, next) => {
 };
 
 ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
-	const schema = Yup.object().shape({
-		name: types.strings.title,
-		desc: types.strings.shortDescription,
-		surveyPoints: types.surveyPoints,
-		angleFromNorth: types.degrees,
-		type: Yup.string(),
-		unit: types.strings.unit,
-		code: types.strings.code,
-		defaultView: types.id.nullable().test('check-view-exists', 'View not found', async (value) => {
-			if (value) {
-				try {
-					const model = req.params.container ?? req.params.federation;
-					await checkViewExists(req.params.teamspace, model, stringToUUID(value));
-				} catch (err) {
-					return false;
-				}
-			}
-			return true;
-		}),
-		defaultLegend: types.id.nullable().test('check-legend-exists', 'Legend not found', async (value) => {
-			if (value) {
-				try {
-					const model = req.params.container ?? req.params.federation;
-					await checkLegendExists(req.params.teamspace, model, stringToUUID(value));
-				} catch (err) {
-					return false;
-				}
-			}
-			return true;
-		}),
-	}).strict(true).noUnknown()
-		.required()
-		.test('at-least-one-property', 'You must provide at least one setting value', (value) => Object.keys(value).length);
 	try {
+		const { teamspace } = req.params;
+		const model = req.params.container ?? req.params.federation;
+		const schema = generateSchema(false, teamspace, model);
 		req.body = await schema.validate(req.body);
 		convertBodyUUIDs(req);
 		next();
