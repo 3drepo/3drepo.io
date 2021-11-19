@@ -137,11 +137,15 @@ const establishRoutes = () => {
    	 *         application/json:
    	 *           schema:
 	 *             type: object
+	 *             required:
+	 *               - name
+	 *               - unit
+	 *               - type
 	 *             properties:
 	 *               name:
 	 *                 type: string
-	 *                 example: container1
-	 *                 description: Unique name of container
+	 *                 example: Lego House Architecture
+	 *                 description: Name of the container - this has to be unique within the project
 	 *                 maxLength: 120
 	 *               unit:
 	 *                 type: string
@@ -150,16 +154,16 @@ const establishRoutes = () => {
 	 *                 description: Unit of measurement
 	 *               desc:
 	 *                 type: string
-	 *                 example: description1
+	 *                 example: The Architecture model of the Lego House
 	 *                 description: Container description
 	 *                 maxLength: 50
 	 *               code:
 	 *                 type: string
-	 *                 example: code1
+	 *                 example: LEGO_ARCHIT_001
 	 *                 description: Container reference code
 	 *               type:
 	 *                 type: string
-	 *                 example: type1
+	 *                 example: Architecture
 	 *                 description: Container type
 	 *               surveyPoints:
 	 *                 type: array
@@ -168,23 +172,25 @@ const establishRoutes = () => {
 	 *                   type: object
 	 *                   properties:
 	 *                     position:
+	 *                       description: The point coordinate that maps to the latLong value (should be in OpenGL axis conventions)
 	 *                       type: array
 	 *                       items:
 	 *                         type: float
 	 *                         example: 23.45
+	 *                         minItems: 3
+	 *                         maxItems: 3
 	 *                     latLong:
 	 *                       type: array
+	 *                       description: 'The latitude and longitude of the survey point'
 	 *                       items:
 	 *                         type: float
 	 *                         example: 23.45
+	 *                         minItems: 2
+	 *                         maxItems: 2
 	 *               angleFromNorth:
 	 *                 type: integer
 	 *                 example: 100
 	 *                 description: Angle from North in degrees
-	 *               elevation:
-	 *                 type: integer
-	 *                 example: 20
-	 *                 description: Elevation from sea level
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
