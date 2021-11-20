@@ -23,7 +23,6 @@ const { getInfoFromCode } = require('./modelSettings.constants');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
-const countModels = (ts, query) => db.count(ts, 'settings', query);
 const deleteOneModel = (ts, query) => db.deleteOne(ts, 'settings', query);
 const findOneModel = (ts, query, projection) => db.findOne(ts, 'settings', query, projection);
 const findModels = (ts, query, projection, sort) => db.find(ts, 'settings', query, projection, sort);
@@ -59,12 +58,6 @@ Models.getModelByQuery = async (ts, query, projection) => {
 	}
 
 	return res;
-};
-
-Models.isSubModel = async (ts, model) => {
-	const subModelCount = await countModels(ts, { 'subModels.model': model });
-
-	return subModelCount > 0;
 };
 
 Models.getModelById = (ts, model, projection) => Models.getModelByQuery(ts, { _id: model }, projection);

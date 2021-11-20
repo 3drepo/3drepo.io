@@ -19,6 +19,7 @@ const { validateAddModelData, validateUpdateSettingsData } = require('../../../.
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
+const { canDeleteContainer } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { formatModelSettings } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');
@@ -40,7 +41,10 @@ const deleteContainer = (req, res) => {
 	const { teamspace, project, container } = req.params;
 	Containers.deleteContainer(teamspace, project, container, user).then(() => {
 		respond(req, res, templates.ok);
-	}).catch((err) => respond(req, res, err));
+	}).catch(
+		// istanbul ignore next
+		(err) => respond(req, res, err),
+	);
 };
 
 const getContainerList = (req, res) => {
@@ -475,7 +479,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: Container removed.
 	 */
-	router.delete('/:container', hasAdminAccessToContainer, deleteContainer);
+	router.delete('/:container', hasAdminAccessToContainer, canDeleteContainer, deleteContainer);
 
 	/**
 	 * @openapi

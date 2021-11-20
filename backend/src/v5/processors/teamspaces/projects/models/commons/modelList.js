@@ -18,15 +18,12 @@
 const {
 	addModel,
 	deleteModel,
-	getModelById,
-	isSubModel,
 } = require('../../../../../models/modelSettings');
 const { addModelToProject, getProjectById, removeModelFromProject } = require('../../../../../models/projects');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
 const db = require('../../../../../handler/db');
 const { getFavourites } = require('../../../../../models/users');
 const { removeAllFilesFromModel } = require('../../../../../models/fileRefs');
-const { templates } = require('../../../../../utils/responseCodes');
 
 const removeModelCollections = async (ts, model) => {
 	const collections = await db.listCollections(ts);
@@ -51,20 +48,12 @@ ModelList.addModel = async (teamspace, project, user, data) => {
 	return insertedId;
 };
 
-ModelList.deleteModel = async (teamspace, project, model) => {
-	const setting = await getModelById(teamspace, model);
-
-	if (!setting.federate && (await isSubModel(teamspace, model))) {
-		throw templates.containerIsSubModel;
-	}
-
-	await Promise.all([
-		removeAllFilesFromModel(teamspace, model),
-		removeModelCollections(teamspace, model),
-		deleteModel(teamspace, model),
-		removeModelFromProject(teamspace, project, model),
-	]);
-};
+ModelList.deleteModel = async (teamspace, project, model) => Promise.all([
+	removeAllFilesFromModel(teamspace, model),
+	removeModelCollections(teamspace, model),
+	deleteModel(teamspace, model),
+	removeModelFromProject(teamspace, project, model),
+]);
 
 ModelList.getModelList = async (teamspace, project, user, modelSettings) => {
 	const { permissions } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });

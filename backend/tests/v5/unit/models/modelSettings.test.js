@@ -204,40 +204,6 @@ const testGetFederations = () => {
 	});
 };
 
-const testIsSubModel = () => {
-	describe('Is submodel', () => {
-		test('should return false if not submodel', async () => {
-			const teamspace = 'someTS';
-			const modelId = 'someModel';
-
-			const fn = jest.spyOn(db, 'count').mockResolvedValue(0);
-
-			const res = await Model.isSubModel(teamspace, modelId);
-			expect(res).toBe(false);
-
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][0]).toEqual(teamspace);
-			expect(fn.mock.calls[0][1]).toEqual('settings');
-			expect(fn.mock.calls[0][2]).toEqual({ 'subModels.model': modelId });
-		});
-
-		test('should return true if submodel', async () => {
-			const teamspace = 'someTS';
-			const modelId = 'subModel';
-
-			const fn = jest.spyOn(db, 'count').mockResolvedValue(1);
-
-			const res = await Model.isSubModel(teamspace, modelId);
-			expect(res).toBe(true);
-
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][0]).toEqual(teamspace);
-			expect(fn.mock.calls[0][1]).toEqual('settings');
-			expect(fn.mock.calls[0][2]).toEqual({ 'subModels.model': modelId });
-		});
-	});
-};
-
 const testAddModel = () => {
 	describe('Add model', () => {
 		test('should return inserted ID on success', async () => {
@@ -500,7 +466,6 @@ describe('models/modelSettings', () => {
 	testGetModelByQuery();
 	testGetContainers();
 	testGetFederations();
-	testIsSubModel();
 	testAddModel();
 	testDeleteModel();
 	testUpdateModelStatus();

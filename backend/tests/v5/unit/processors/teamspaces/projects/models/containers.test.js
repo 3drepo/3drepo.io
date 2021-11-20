@@ -45,7 +45,6 @@ ModelSettings.deleteModel.mockImplementation(async (ts, model) => {
 	}
 	throw templates.containerNotFound;
 });
-ModelSettings.isSubModel.mockImplementation((ts, model) => model === 2);
 
 const modelList = [
 	{ _id: 1, name: 'model1', permissions: [{ user: 'user1', permission: 'collaborator' }, { user: 'user2', permission: 'collaborator' }] },
@@ -339,8 +338,7 @@ const testDeleteContainer = () => {
 			const fnDrop = jest.spyOn(db, 'dropCollection').mockResolvedValue(true);
 
 			const teamspace = 'teamspace';
-			const res = await Containers.deleteContainer(teamspace, 'project', modelId, 'tsAdmin');
-			expect(res).toEqual(undefined);
+			await Containers.deleteContainer(teamspace, 'project', modelId, 'tsAdmin');
 
 			expect(fnList.mock.calls.length).toBe(2);
 			expect(fnList.mock.calls[0][0]).toEqual(teamspace);
@@ -352,19 +350,8 @@ const testDeleteContainer = () => {
 			expect(fnDrop.mock.calls[1][1]).toEqual(collectionList[1]);
 		});
 
-		test('should return container is a submodel if it is a submodel', async () => {
-			await expect(Containers.deleteContainer('teamspace', 'project', 2, 'tsAdmin'))
-				.rejects.toEqual(templates.containerIsSubModel);
-		});
-
 		test('should succeed if file removal fails', async () => {
-			const res = await Containers.deleteContainer('teamspace', 'project', 3, 'tsAdmin');
-			expect(res).toEqual(undefined);
-		});
-
-		test('should return container not found error if container does not exist', async () => {
-			await expect(Containers.deleteContainer('teamspace', 'project', 'badModel', 'tsAdmin'))
-				.rejects.toEqual(templates.containerNotFound);
+			await Containers.deleteContainer('teamspace', 'project', 3, 'tsAdmin');
 		});
 	});
 };
