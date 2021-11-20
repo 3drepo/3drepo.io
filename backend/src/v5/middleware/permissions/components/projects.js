@@ -15,28 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const EventManagerConst = {};
+const { isProjectAdmin, isTeamspaceAdmin } = require('../../../utils/permissions/permissions');
+const { getUserFromSession } = require('../../../utils/sessions');
+const { respond } = require('../../../utils/responder');
+const { templates } = require('../../../utils/responseCodes');
 
-const eventList = [
-	// Groups
-	'NEW_GROUPS', 'UPDATE_GROUP',
-	// Model settngs
-	'NEW_MODEL', 'DELETE_MODEL',
-	// Model import (including federation and toy project)
-	'MODEL_IMPORT_UPDATE', 'MODEL_IMPORT_FINISHED',
-	// Queue specific
-	'QUEUED_TASK_UPDATE', 'QUEUED_TASK_COMPLETED',
-];
+const ProjectPerms = {};
 
-const generateEventsMap = () => {
-	const res = {};
-	eventList.forEach((event) => {
-		res[event] = event;
-	});
+ProjectPerms.isProjectAdmin = async (req, res, next) => {
+	const { session, params } = req;
+	const user = getUserFromSession(session);
+	const { teamspace, project } = params;
 
-	return res;
+	const isAdmin = await isTeamspaceAdmin(teamspace, user) || await isProjectAdmin(teamspace, project, user);
+
+	if (isAdmin) {
+		next();
+	} else {
+		respond(req, res, templates.notAuthorized);
+	}
 };
 
-EventManagerConst.events = generateEventsMap();
-
-module.exports = EventManagerConst;
+module.exports = ProjectPerms;

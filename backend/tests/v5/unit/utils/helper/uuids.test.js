@@ -58,8 +58,8 @@ const testGenerateUUID = () => {
 	describe('Generate UUID', () => {
 		test('should return UUID string', () => {
 			const res = UUIDHelper.generateUUID();
-			expect(isUUIDString(res)).toEqual(false);
-			expect(isUUIDString(UUIDHelper.UUIDToString(res))).toEqual(true);
+			expect(isUUIDString(res)).toBe(false);
+			expect(isUUIDString(UUIDHelper.UUIDToString(res))).toBe(true);
 		});
 	});
 };
@@ -68,7 +68,7 @@ const testGenerateUUIDString = () => {
 	describe('Generate string UUID', () => {
 		test('should return UUID string', () => {
 			const res = UUIDHelper.generateUUIDString();
-			expect(isUUIDString(res)).toEqual(true);
+			expect(isUUIDString(res)).toBe(true);
 		});
 	});
 };

@@ -14,29 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const { v4Path } = require('../../interop');
+// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
+const ExternalServices = require(`${v4Path}/handler/externalServices`);
 
-const EventManagerConst = {};
-
-const eventList = [
-	// Groups
-	'NEW_GROUPS', 'UPDATE_GROUP',
-	// Model settngs
-	'NEW_MODEL', 'DELETE_MODEL',
-	// Model import (including federation and toy project)
-	'MODEL_IMPORT_UPDATE', 'MODEL_IMPORT_FINISHED',
-	// Queue specific
-	'QUEUED_TASK_UPDATE', 'QUEUED_TASK_COMPLETED',
-];
-
-const generateEventsMap = () => {
-	const res = {};
-	eventList.forEach((event) => {
-		res[event] = event;
-	});
-
-	return res;
-};
-
-EventManagerConst.events = generateEventsMap();
-
-module.exports = EventManagerConst;
+module.exports = ExternalServices;
