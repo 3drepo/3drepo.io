@@ -53,9 +53,11 @@ FileRefs.getTotalSize = async (teamspace, collection) => {
 
 FileRefs.removeAllFilesFromModel = async (teamspace, model) => {
 	const collList = await db.listCollections(teamspace);
-	// eslint-disable-next-line security/detect-non-literal-regexp
-	const refCols = collList.filter(({ name }) => name.match(new RegExp(`^${model}.*\\.ref$`)?.length));
-
+	const refCols = collList.filter(({ name }) => {
+		// eslint-disable-next-line security/detect-non-literal-regexp
+		const res = name.match(new RegExp(`^${model}.*\\.ref$`));
+		return !!res?.length;
+	});
 	return Promise.all(refCols.map(({ name }) => removeAllFiles(teamspace, name)));
 };
 

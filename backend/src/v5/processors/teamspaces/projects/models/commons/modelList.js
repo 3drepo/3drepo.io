@@ -48,12 +48,16 @@ ModelList.addModel = async (teamspace, project, user, data) => {
 	return insertedId;
 };
 
-ModelList.deleteModel = async (teamspace, project, model) => Promise.all([
-	removeAllFilesFromModel(teamspace, model),
-	removeModelCollections(teamspace, model),
-	deleteModel(teamspace, model),
-	removeModelFromProject(teamspace, project, model),
-]);
+ModelList.deleteModel = async (teamspace, project, model) => {
+	// This needs to be done before removeModelCollections or we risk the .ref col being deleted before we check it
+	await removeAllFilesFromModel(teamspace, model);
+
+	return Promise.all([
+		removeModelCollections(teamspace, model),
+		deleteModel(teamspace, model),
+		removeModelFromProject(teamspace, project, model),
+	]);
+};
 
 ModelList.getModelList = async (teamspace, project, user, modelSettings) => {
 	const { permissions } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
