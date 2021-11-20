@@ -277,6 +277,10 @@ const testAddContainer = () => {
 		test('should return new container ID if the user has permissions', async () => {
 			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status).send({ name: ServiceHelper.generateRandomString(), unit: 'mm', type: 'a' });
 			expect(isUUIDString(res.body._id)).toBe(true);
+
+			const getRes = await agent.get(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+
+			expect(getRes.body.containers.find(({ _id }) => _id === res.body._id)).not.toBe(undefined);
 		});
 
 		test('should fail if name already exists', async () => {
@@ -317,6 +321,9 @@ const testDeleteContainer = () => {
 		test('should return ok on success', async () => {
 			const res = await agent.delete(`${route(models[0]._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
 			expect(res.body).toEqual({});
+
+			const getRes = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			expect(getRes.body.containers.find(({ _id }) => _id === models[0]._id)).toBe(undefined);
 		});
 
 		test('should fail if container is federation', async () => {
