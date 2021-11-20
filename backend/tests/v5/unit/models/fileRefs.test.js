@@ -60,29 +60,31 @@ const testGetTotalSize = () => {
 
 const testRemoveAllFilesFromModel = () => {
 	describe('Remove all files from model', () => {
+		const modelId = 'someModel';
+		const collections = [
+			{ name: `${modelId}.ref` },
+			{ name: `${modelId}.a.ref` },
+			{ name: `${modelId}.c.ref` },
+			{ name: `${modelId}.b.ref` },
+			{ name: `${modelId}.e.ref` },
+			{ name: 'aaa.ref' },
+		];
+
 		test('should remove files from all collections', async () => {
-			const collections = [
-				{ name: 'a' },
-				{ name: 'b' },
-				{ name: 'c' },
-				{ name: 'd' },
-				{ name: 'e' },
-			];
 			const teamspace = 'someTS';
-			const modelId = 'someModel';
 
 			jest.spyOn(db, 'listCollections').mockImplementation(() => collections);
 			const fnAggregate = jest.spyOn(db, 'aggregate').mockImplementation(() => [{ _id: modelId, links: 'someLink' }]);
 
 			const res = await FileRefs.removeAllFilesFromModel(teamspace, modelId);
-			expect(res).toHaveLength(collections.length);
+			expect(res).toHaveLength(collections.length - 1);
 
 			const query = [
 				{ $match: { noDelete: { $exists: false } } },
 				{ $group: { _id: '$type', links: { $addToSet: '$link' } } },
 			];
 
-			expect(fnAggregate.mock.calls.length).toBe(collections.length);
+			expect(fnAggregate.mock.calls.length).toBe(collections.length - 1);
 
 			fnAggregate.mock.calls.forEach((call, i) => {
 				expect(call[0]).toEqual(teamspace);
@@ -94,28 +96,20 @@ const testRemoveAllFilesFromModel = () => {
 		});
 
 		test('should not fail if the the ref collection has no links', async () => {
-			const collections = [
-				{ name: 'a' },
-				{ name: 'b' },
-				{ name: 'c' },
-				{ name: 'd' },
-				{ name: 'e' },
-			];
 			const teamspace = 'someTS';
-			const modelId = 'someModel';
 
 			jest.spyOn(db, 'listCollections').mockImplementation(() => collections);
 			const fnAggregate = jest.spyOn(db, 'aggregate').mockImplementation(() => [{ _id: null, links: [] }]);
 
 			const res = await FileRefs.removeAllFilesFromModel(teamspace, modelId);
-			expect(res).toHaveLength(collections.length);
+			expect(res).toHaveLength(collections.length - 1);
 
 			const query = [
 				{ $match: { noDelete: { $exists: false } } },
 				{ $group: { _id: '$type', links: { $addToSet: '$link' } } },
 			];
 
-			expect(fnAggregate.mock.calls.length).toBe(collections.length);
+			expect(fnAggregate.mock.calls.length).toBe(collections.length - 1);
 
 			fnAggregate.mock.calls.forEach((call, i) => {
 				expect(call[0]).toEqual(teamspace);
@@ -128,7 +122,6 @@ const testRemoveAllFilesFromModel = () => {
 
 		test('should return empty []s without matching collection', async () => {
 			const teamspace = 'someTS';
-			const modelId = 'someModel';
 
 			const listCol = jest.spyOn(db, 'listCollections').mockImplementation(() => []);
 
