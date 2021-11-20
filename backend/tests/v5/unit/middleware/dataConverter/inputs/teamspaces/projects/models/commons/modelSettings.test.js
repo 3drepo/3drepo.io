@@ -16,6 +16,7 @@
  */
 
 const { src } = require('../../../../../../../../helper/path');
+const _ = require('lodash');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -23,6 +24,10 @@ jest.mock('../../../../../../../../../../src/v5/models/views');
 const Views = require(`${src}/models/views`);
 jest.mock('../../../../../../../../../../src/v5/models/legends');
 const Legends = require(`${src}/models/legends`);
+jest.mock('../../../../../../../../../../src/v5/models/modelSettings');
+const ModelSettingsModel = require(`${src}/models/modelSettings`);
+jest.mock('../../../../../../../../../../src/v5/models/projects');
+const Projects = require(`${src}/models/projects`);
 jest.mock('../../../../../../../../../../src/v5/utils/permissions/permissions');
 const ModelSettings = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings`);
 const { cloneDeep } = require(`${src}/utils/helper/objects`);
@@ -48,11 +53,22 @@ Legends.checkLegendExists.mockImplementation((teamspace, model, legend) => {
 	throw templates.legendNotFound;
 });
 
+const existingModelName = 'Another model name';
+ModelSettingsModel.getModelByQuery.mockImplementation((teamspace, { _id, name } = {}) => {
+	if (existingModelName === name && _id?.$in?.length) return {};
+	throw templates.modelNotFound;
+});
+
+Projects.getProjectById.mockResolvedValue({ models: ['234'] });
+
+const params = { teamspace: 'ts', federation: '123', project: '123', container: '123' };
 const testValidateUpdateSettingsData = () => {
-	const params = { teamspace: 'ts', federation: '123' };
 	describe.each([
 		[{ params, body: { name: null } }, false, 'with null name'],
+		[{ params, body: { name: existingModelName } }, false, 'with model name of some other model within the project'],
+		[{ params: { ...params, container: '234' }, body: { name: existingModelName } }, true, 'with current model name of the model'],
 		[{ params, body: { name: 'valid' } }, true, 'with valid name'],
+		[{ params: _.omit(params, ['container']), body: { name: 'valid' } }, true, 'with valid name (federation test)'],
 		[{ params, body: { desc: null } }, false, 'with null desc'],
 		[{ params, body: { desc: 'valid' } }, true, 'with valid desc'],
 		[{ params, body: { surveyPoints: 'invalid' } }, false, 'with invalid surveyPoints'],
@@ -105,88 +121,107 @@ const testValidateUpdateSettingsData = () => {
 
 const testValidateAddModelData = () => {
 	describe.each([
-		[{ body: {
-			name: 'container name',
-			code: 'code1000',
-			unit: 'mm',
-			desc: 'this is a container',
-			type: 'Structure',
-			surveyPoints: [],
-			angleFromNorth: 10,
-		} }, true, 'with a valid request body'],
-		[{ body: {} }, false, 'if request body is empty'],
-		[{ body: {
-			name: 'container name',
-			unit: 'mm',
-			desc: 'this is a container',
-			type: 'Structure',
-			extraField: 'abc',
-			badEntry: 123,
-			unexpectedKey: [],
-		} }, false, 'if some unexpected fields in request body'],
-		[{ body: {
-			badField: 'abc',
-			unexpectedEntry: 123,
-		} }, false, 'if fields unexpected'],
-		[{ body: {
-			name: 123,
-			unit: 'mm',
-			type: 'Structure',
-		} }, false, 'if name not a string'],
-		[{ body: {
-			name: '123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890a',
-			unit: 'mm',
-			type: 'Structure',
-		} }, false, 'if name too long'],
-		[{ body: {
-			unit: 'mm',
-			type: 'Structure',
-		} }, false, 'if name missing'],
-		[{ body: {
-			name: 'container name',
-			unit: 'mm',
-			type: 'Structure',
-		} }, true, 'if no model code given'],
-		[{ body: {
-			code: '"£$%^&*()_+',
-			name: 'container name',
-			unit: 'mm',
-			type: 'Structure',
-		} }, false, 'if code bad'],
-		[{ body: {
-			code: '12345678901234567890123456789012345678901234567890a',
-			name: 'container name',
-			unit: 'mm',
-			type: 'Structure',
-		} }, false, 'if code too long'],
-		[{ body: {
-			unit: 'FT',
-			name: 'container name',
-			type: 'Structure',
-		} }, false, 'if model unit is uppercase'],
-		[{ body: {
-			unit: 123,
-			name: 'container name',
-			type: 'Structure',
-		} }, false, 'if unit not a string'],
-		[{ body: {
-			unit: 'x',
-			name: 'container name',
-			type: 'Structure',
-		} }, false, 'if not a recognised unit'],
-		[{ body: {
-			name: 'container name',
-			type: 'Structure',
-		} }, false, 'if unit missing'],
-		[{ body: {
-			type: 123,
-			name: 'container name',
-			unit: 'mm',
-		} }, false, 'if type not a string'],
-		[{ body: {
-			name: 'container name',
-			unit: 'mm',
-		} }, false, 'if type missing'],
+		[{ params,
+			body: {
+				name: 'container name',
+				code: 'code1000',
+				unit: 'mm',
+				desc: 'this is a container',
+				type: 'Structure',
+				surveyPoints: [],
+				angleFromNorth: 10,
+			} }, true, 'with a valid request params, body'],
+		[{ params, body: {} }, false, 'if request params, body is empty'],
+		[{ params,
+			body: {
+				name: 'container name',
+				unit: 'mm',
+				desc: 'this is a container',
+				type: 'Structure',
+				extraField: 'abc',
+				badEntry: 123,
+				unexpectedKey: [],
+			} }, false, 'if some unexpected fields in request params, body'],
+		[{ params,
+			body: {
+				badField: 'abc',
+				unexpectedEntry: 123,
+			} }, false, 'if fields unexpected'],
+		[{ params,
+			body: {
+				name: existingModelName,
+			} }, false, 'if model name is already used by another model'],
+		[{ params,
+			body: {
+				name: 123,
+				unit: 'mm',
+				type: 'Structure',
+			} }, false, 'if name not a string'],
+		[{ params,
+			body: {
+				name: '123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890a',
+				unit: 'mm',
+				type: 'Structure',
+			} }, false, 'if name too long'],
+		[{ params,
+			body: {
+				unit: 'mm',
+				type: 'Structure',
+			} }, false, 'if name missing'],
+		[{ params,
+			body: {
+				name: 'container name',
+				unit: 'mm',
+				type: 'Structure',
+			} }, true, 'if no model code given'],
+		[{ params,
+			body: {
+				code: '"£$%^&*()_+',
+				name: 'container name',
+				unit: 'mm',
+				type: 'Structure',
+			} }, false, 'if code bad'],
+		[{ params,
+			body: {
+				code: '12345678901234567890123456789012345678901234567890a',
+				name: 'container name',
+				unit: 'mm',
+				type: 'Structure',
+			} }, false, 'if code too long'],
+		[{ params,
+			body: {
+				unit: 'FT',
+				name: 'container name',
+				type: 'Structure',
+			} }, false, 'if model unit is uppercase'],
+		[{ params,
+			body: {
+				unit: 123,
+				name: 'container name',
+				type: 'Structure',
+			} }, false, 'if unit not a string'],
+		[{ params,
+			body: {
+				unit: 'x',
+				name: 'container name',
+				type: 'Structure',
+			} }, false, 'if not a recognised unit'],
+		[{ params,
+			body: {
+				name: 'container name',
+				type: 'Structure',
+			} }, false, 'if unit missing'],
+		[{ params,
+			body: {
+				type: 123,
+				name: 'container name',
+				unit: 'mm',
+			} }, false, 'if type not a string'],
+		[{ params,
+			body: {
+				name: 'container name',
+				unit: 'mm',
+			} }, false, 'if type missing'],
 	])('Check if req arguments for add model are valid', (data, shouldPass, desc) => {
 		test(`${desc} ${shouldPass ? 'should call next()' : 'should respond with invalidArguments'}`, async () => {
 			const mockCB = jest.fn();

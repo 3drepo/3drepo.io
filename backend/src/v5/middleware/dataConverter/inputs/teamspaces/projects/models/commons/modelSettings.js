@@ -19,6 +19,8 @@ const { createResponseCode, templates } = require('../../../../../../../utils/re
 const Yup = require('yup');
 const { checkLegendExists } = require('../../../../../../../models/legends');
 const { checkViewExists } = require('../../../../../../../models/views');
+const { getModelByQuery } = require('../../../../../../../models/modelSettings');
+const { getProjectById } = require('../../../../../../../models/projects');
 const { respond } = require('../../../../../../../utils/responder');
 const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { types } = require('../../../../../../../utils/helper/yup');
@@ -53,9 +55,25 @@ const defaultLegendType = (teamspace, model) => types.id.nullable().test('check-
 	return true;
 });
 
-const generateSchema = (newEntry, teamspace, modelId) => {
+const modelNameType = (teamspace, project, model) => types.strings.title.test('name-already-used', 'Name is already used within the project', async (value) => {
+	try {
+		let { models } = await getProjectById(teamspace, project, { models: 1 });
+		if (model) {
+			models = models.flatMap((modelId) => (modelId === model ? [] : modelId));
+		}
+		const query = { _id: { $in: models }, name: value };
+		await getModelByQuery(teamspace, query, { _id: 1 });
+		return false;
+	} catch (err) {
+		// We want this to error out. This means there's no model with the same name
+		return true;
+	}
+});
+
+const generateSchema = (newEntry, teamspace, project, modelId) => {
+	const name = modelNameType(teamspace, project, modelId);
 	const schema = {
-		name: newEntry ? types.strings.title.required() : types.strings.title,
+		name: newEntry ? name.required() : name,
 		unit: newEntry ? types.strings.unit.required() : types.strings.unit,
 		desc: types.strings.shortDescription,
 		code: types.strings.code,
@@ -83,7 +101,8 @@ const generateSchema = (newEntry, teamspace, modelId) => {
 
 ModelSettings.validateAddModelData = async (req, res, next) => {
 	try {
-		const schema = generateSchema(true);
+		const { teamspace, project } = req.params;
+		const schema = generateSchema(true, teamspace, project);
 		await schema.validate(req.body);
 
 		req.body.properties = { unit: req.body.unit.toLowerCase() };
@@ -102,9 +121,9 @@ ModelSettings.validateAddModelData = async (req, res, next) => {
 
 ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
 	try {
-		const { teamspace } = req.params;
+		const { teamspace, project } = req.params;
 		const model = req.params.container ?? req.params.federation;
-		const schema = generateSchema(false, teamspace, model);
+		const schema = generateSchema(false, teamspace, project, model);
 		req.body = await schema.validate(req.body);
 		convertBodyUUIDs(req);
 		next();

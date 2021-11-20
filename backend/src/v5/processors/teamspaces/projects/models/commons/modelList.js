@@ -19,7 +19,6 @@ const {
 	addModel,
 	deleteModel,
 	getModelById,
-	getModelByQuery,
 	isSubModel,
 } = require('../../../../../models/modelSettings');
 const { addModelToProject, getProjectById, removeModelFromProject } = require('../../../../../models/projects');
@@ -45,17 +44,6 @@ const removeModelCollections = async (ts, model) => {
 const ModelList = {};
 
 ModelList.addModel = async (teamspace, project, user, data) => {
-	const { models } = await getProjectById(teamspace, project, { models: 1 });
-	const query = { _id: { $in: models }, name: data.name };
-	let nameUsed = true;
-	try {
-		await getModelByQuery(teamspace, query, { _id: 0, name: 1 });
-	} catch {
-		nameUsed = false;
-	}
-	if (nameUsed) {
-		throw templates.nameAlreadyExists;
-	}
 	const insertedId = await addModel(teamspace, data);
 
 	await addModelToProject(teamspace, project, insertedId);

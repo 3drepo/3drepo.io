@@ -29,7 +29,10 @@ const addContainer = (req, res) => {
 	const { teamspace, project } = req.params;
 	Containers.addContainer(teamspace, project, user, req.body).then((containerId) => {
 		respond(req, res, templates.ok, { _id: containerId });
-	}).catch((err) => respond(req, res, err));
+	}).catch(
+		// istanbul ignore next
+		(err) => respond(req, res, err),
+	);
 };
 
 const deleteContainer = (req, res) => {

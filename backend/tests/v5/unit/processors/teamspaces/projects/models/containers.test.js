@@ -143,6 +143,7 @@ const model1Revisions = [
 ];
 
 ProjectsModel.getProjectById.mockImplementation(() => project);
+ProjectsModel.addModelToProject.mockResolvedValue();
 ModelSettings.getModelByQuery.mockImplementation((ts, query) => {
 	if (query.name === 'model1') Promise.resolve(modelList[0]);
 	else throw templates.modelNotFound;
@@ -318,16 +319,7 @@ const testAddContainer = () => {
 			};
 			const res = await Containers.addContainer('teamspace', 'project', 'tsAdmin', data);
 			expect(res).toEqual(newContainerId);
-		});
-
-		test('should return error if model name exists', async () => {
-			const data = {
-				name: 'model1',
-				code: 'code99',
-				unit: 'mm',
-			};
-			await expect(Containers.addContainer('teamspace', 'project', 'tsAdmin', data))
-				.rejects.toEqual(templates.nameAlreadyExists);
+			expect(ProjectsModel.addModelToProject.mock.calls.length).toBe(1);
 		});
 	});
 };

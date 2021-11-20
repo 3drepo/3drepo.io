@@ -274,15 +274,14 @@ const testAddContainer = () => {
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
-		const reUsedModelName = ServiceHelper.generateRandomString();
 		test('should return new container ID if the user has permissions', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status).send({ name: reUsedModelName, unit: 'mm', type: 'a' });
+			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status).send({ name: ServiceHelper.generateRandomString(), unit: 'mm', type: 'a' });
 			expect(isUUIDString(res.body._id)).toBe(true);
 		});
 
 		test('should fail if name already exists', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.nameAlreadyExists.status).send({ name: reUsedModelName, unit: 'mm', type: 'a' });
-			expect(res.body.code).toEqual(templates.nameAlreadyExists.code);
+			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidArguments.status).send({ name: models[0].name, unit: 'mm', type: 'a' });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should fail if user has insufficient permissions', async () => {

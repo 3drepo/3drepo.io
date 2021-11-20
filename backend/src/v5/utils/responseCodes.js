@@ -64,7 +64,6 @@ ResponseCodes.templates = {
 
 	// Invalid Arguments
 	invalidArguments: { message: 'The arguments provided are not valid', status: 400 },
-	nameAlreadyExists: { message: 'Name already exists.', status: 400 },
 
 	// Queue related
 	queueConnectionError: { message: 'There was a problem connecting to the queue. Please contact support', status: 500 },
