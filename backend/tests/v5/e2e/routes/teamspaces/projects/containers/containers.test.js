@@ -106,6 +106,14 @@ const models = [
 			},
 		},
 	},
+	{
+		// NOTE: this model gets deleted after deleteContainer test
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		isFavourite: true,
+		permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
+		properties: ServiceHelper.generateRandomModelProperties(),
+	},
 ];
 
 // setup sub model
@@ -124,6 +132,7 @@ const modelWithViews = models[0];
 const modelWithLegends = models[0];
 const modelWithFailedProcess = models[3];
 const modelWithFailedProcess2 = models[4];
+const modelToDelete = models[5];
 
 const latestRevision = revisions.filter((rev) => !rev.void)
 	.reduce((a, b) => (a.timestamp > b.timestamp ? a : b));
@@ -304,12 +313,12 @@ const testDeleteContainer = () => {
 	const route = (containerId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${containerId}`;
 	describe('Delete container', () => {
 		test('should fail without a valid session', async () => {
-			const res = await agent.delete(route(models[0]._id)).expect(templates.notLoggedIn.status);
+			const res = await agent.delete(route(modelToDelete._id)).expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
 		test('should fail if the user is not a member of the teamspace', async () => {
-			const res = await agent.delete(`${route(models[0]._id)}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
+			const res = await agent.delete(`${route(modelToDelete._id)}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
@@ -319,11 +328,11 @@ const testDeleteContainer = () => {
 		});
 
 		test('should return ok on success', async () => {
-			const res = await agent.delete(`${route(models[0]._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			const res = await agent.delete(`${route(modelToDelete._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
 			expect(res.body).toEqual({});
 
 			const getRes = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(getRes.body.containers.find(({ _id }) => _id === models[0]._id)).toBe(undefined);
+			expect(getRes.body.containers.find(({ _id }) => _id === modelToDelete._id)).toBe(undefined);
 		});
 
 		test('should fail if container is federation', async () => {
