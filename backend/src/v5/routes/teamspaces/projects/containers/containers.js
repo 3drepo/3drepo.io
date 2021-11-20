@@ -257,7 +257,7 @@ const establishRoutes = () => {
 	 *                   items:
 	 *                     type: object
 	 *                     properties:
-	 *                       id:
+	 *                       _id:
 	 *                         type: string
 	 *                         description: Container ID
 	 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
