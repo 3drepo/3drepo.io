@@ -17,26 +17,42 @@
 
 import React, { ReactNode } from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
-import { Text } from './revisionsListItemText.styles';
+import { Text, OverflowWrapper } from './revisionsListItemText.styles';
 
 type IDashboardListItemText = {
 	children: ReactNode;
 	width?: number;
+	tabletWidth?: number;
+	mobileWidth?: number;
 	className?: string;
 	meta?: boolean;
 	active?: boolean;
+	hideBelowTablet?: boolean;
+	hover?: boolean;
 };
 
 export const RevisionsListItemText = ({
 	children,
 	width,
+	tabletWidth,
+	mobileWidth,
 	className,
 	meta = false,
 	active = false,
+	hideBelowTablet = false,
+	hover = false,
 }: IDashboardListItemText): JSX.Element => (
-	<FixedOrGrowContainer width={width} className={className}>
-		<Text $meta={meta} $active={active}>
-			{children}
-		</Text>
+	<FixedOrGrowContainer
+		width={width}
+		tabletWidth={tabletWidth}
+		mobileWidth={mobileWidth}
+		hideBelowTablet={hideBelowTablet}
+		className={className}
+	>
+		<OverflowWrapper $meta={meta} $hover={hover} $active={active}>
+			<Text $meta={meta} $active={active}>
+				{children}
+			</Text>
+		</OverflowWrapper>
 	</FixedOrGrowContainer>
 );

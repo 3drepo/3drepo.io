@@ -30,6 +30,10 @@ export const Container = styled.div`
 	max-height: 500px;
 	overflow: hidden;
 	overflow-y: scroll;
+
+	@media (max-width: 1024px) {
+		padding-left: 45px;
+	}
 `;
 
 export const RevisionsListEmptyWrapper = styled.div`
@@ -86,11 +90,11 @@ const revisionListItemStylesLineStyles = ({ theme, selected, isBeforeSelected })
 	&:after {
 		content: '';
 		display: block;
-		width: 10px;
+		width: 25px;
 		height: 52px;
 		position: absolute;
 		top: 50%;
-		left: -10px;
+		left: -25px;
 		z-index: -1;
 		border: solid 2px transparent;
 		background-origin: border-box;

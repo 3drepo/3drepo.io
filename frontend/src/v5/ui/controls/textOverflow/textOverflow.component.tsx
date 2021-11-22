@@ -22,9 +22,11 @@ import { Container, Tooltip } from './textOverflow.styles';
 
 interface ITextOverflow {
 	children: ReactNode;
+	className?: string;
+	tooltipText?: string;
 }
 
-export const TextOverflow = ({ children }: ITextOverflow): JSX.Element => {
+export const TextOverflow = ({ children, className, tooltipText }: ITextOverflow): JSX.Element => {
 	const [labelRef, setLabelRef] = useState<HTMLElement>(null);
 	const [isTruncated, setIsTruncated] = useState(false);
 
@@ -41,11 +43,11 @@ export const TextOverflow = ({ children }: ITextOverflow): JSX.Element => {
 
 	return (
 		<Tooltip
-			title={onlyText(children)}
+			title={tooltipText || onlyText(children)}
 			style={{ pointerEvents: isTruncated ? 'all' : 'none' }}
 			placement="bottom"
 		>
-			<Container ref={setLabelRef} isTruncated={isTruncated}>{children}</Container>
+			<Container ref={setLabelRef} isTruncated={isTruncated} className={className}>{children}</Container>
 		</Tooltip>
 	);
 };

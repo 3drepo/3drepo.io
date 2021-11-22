@@ -78,10 +78,10 @@ export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDe
 	return (
 		<Container>
 			<RevisionsListHeaderContainer>
-				<RevisionsListHeaderLabel width={130}><Trans id="revisionDetails.addedOn" message="Added on" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel width={228}><Trans id="revisionDetails.addedBy" message="Added by" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel width={330}><Trans id="revisionDetails.revisionCode" message="Revision code" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel><Trans id="revisionDetails.description" message="Description" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={130} tabletWidth={94}><Trans id="revisionDetails.addedOn" message="Added on" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={228} tabletWidth={155}><Trans id="revisionDetails.addedBy" message="Added by" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel tabletWidth={150}><Trans id="revisionDetails.revisionCode" message="Revision code" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel marginRight hideBelowTablet><Trans id="revisionDetails.description" message="Description" /></RevisionsListHeaderLabel>
 			</RevisionsListHeaderContainer>
 			<RevisionsList>
 				{isLoading ? (

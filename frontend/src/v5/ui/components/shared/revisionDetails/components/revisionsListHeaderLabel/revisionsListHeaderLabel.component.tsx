@@ -21,8 +21,12 @@ import { Container } from './revisionsListHeaderLabel.styles';
 
 type IDashboardListHeaderLabel = {
 	width?: number;
+	tabletWidth?: number;
+	mobileWidth?: number;
 	className?: string;
 	children?: ReactNode;
+	hideBelowTablet?: boolean;
+	marginRight?: boolean;
 };
 
 export const RevisionsListHeaderLabel = ({ children, ...props }: IDashboardListHeaderLabel) => (

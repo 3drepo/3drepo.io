@@ -198,6 +198,7 @@ export const theme = createMuiTheme({
 		},
 		gradient: {
 			main: GRADIENT.MAIN,
+			secondary: GRADIENT.SECONDARY,
 		},
 		shadows: {
 			level_1: SHADOW.LEVEL_1,

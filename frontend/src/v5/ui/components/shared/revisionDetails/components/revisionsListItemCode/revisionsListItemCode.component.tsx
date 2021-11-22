@@ -17,27 +17,34 @@
 
 import React, { Dispatch, ReactNode } from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
-import { Tooltip } from '@material-ui/core';
-import { Text } from './revisionsListItemCode.styles';
+import { Text, OverflowWrapper } from './revisionsListItemCode.styles';
 
 type IRevisionsListItemCode = {
 	children: ReactNode;
 	width?: number;
+	tabletWidth?: number;
+	mobileWidth?: number;
 	className?: string;
 	onClick?: Dispatch<void>;
+	active?: boolean;
+	hover?: boolean;
 };
 
 export const RevisionsListItemCode = ({
 	children,
 	width,
+	tabletWidth,
+	mobileWidth,
 	className,
 	onClick,
+	active,
+	hover,
 }: IRevisionsListItemCode): JSX.Element => (
-	<FixedOrGrowContainer width={width} className={className}>
-		<Tooltip title="Launch in Viewer">
+	<FixedOrGrowContainer width={width} tabletWidth={tabletWidth} mobileWidth={mobileWidth} className={className}>
+		<OverflowWrapper tooltipText="Launch in Viewer" $hover={hover} $active={active}>
 			<Text onClick={onClick}>
 				{children}
 			</Text>
-		</Tooltip>
+		</OverflowWrapper>
 	</FixedOrGrowContainer>
 );

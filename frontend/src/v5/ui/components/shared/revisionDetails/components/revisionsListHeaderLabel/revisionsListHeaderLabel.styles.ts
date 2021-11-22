@@ -15,10 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 
 export const Container = styled(FixedOrGrowContainer)`
 	align-items: center;
 	color: ${({ theme }) => theme.palette.secondary.lightest};
+	${({ marginRight }) => marginRight && css`
+		margin-right: 70px;
+	`}
 `;

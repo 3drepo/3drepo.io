@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@lingui/core';
 import { useParams } from 'react-router';
 
@@ -34,6 +34,7 @@ type IRevisionsListItem = {
 };
 
 export const RevisionsListItem = ({ revision, containerId, active = false }: IRevisionsListItem): JSX.Element => {
+	const [hover, setHover] = useState<boolean>(false);
 	const { teamspace, project } = useParams();
 	const { timestamp, desc, author, tag, void: voidStatus } = revision;
 
@@ -42,14 +43,23 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 		RevisionsActionsDispatchers.setVoidStatus(teamspace, project, containerId, tag || revision._id, !voidStatus);
 	};
 
+	const toggleHover = () => setHover(!hover);
+
 	return (
-		<Container>
-			<RevisionsListItemText meta width={130} active={active}>
+		<Container onMouseOver={toggleHover} onMouseOut={toggleHover}>
+			<RevisionsListItemText meta width={130} tabletWidth={94} active={active}>
 				{i18n.date(timestamp)}
 			</RevisionsListItemText>
-			<RevisionsListItemAuthor authorName={author} active={active} width={228} />
-			<RevisionsListItemCode width={330} onClick={() => {}}>{tag}</RevisionsListItemCode>
-			<RevisionsListItemText active={active}>{desc}</RevisionsListItemText>
+			<RevisionsListItemAuthor authorName={author} active={active} width={228} tabletWidth={155} />
+			<RevisionsListItemCode
+				hover={hover}
+				active={active}
+				tabletWidth={150}
+				onClick={() => {}}
+			>
+				{tag}
+			</RevisionsListItemCode>
+			<RevisionsListItemText hover={hover} hideBelowTablet active={active}>{desc}</RevisionsListItemText>
 			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} />
 		</Container>
 	);
