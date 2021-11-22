@@ -74,9 +74,9 @@ describe("Metadata", function () {
 
 	it("metadata search of a specific revision should succeed", function(done) {
 		const goldenData0 = {
-			"_id": "0062f1bb-b28e-4be2-a9d7-6f73abcdb760",
-			"metadata": { "value": "SYSTEM: PLATES" },
-			"parents": [ "dba918f9-e065-4f98-921e-ab7c05d89ee5" ]
+			"_id": "019d575a-189f-4de6-a10c-b5c2efe8afd2",
+			"metadata": { "value": "SYSTEM: BRICKS" },
+			"parents": [ "a7f7de13-52ae-4caa-9800-dbdf20d100d9" ]
 		};
 
 		agent.get(`/${username}/${model}/revision/${oldRevision}/meta/findObjsWith/Category.json`)
@@ -106,11 +106,11 @@ describe("Metadata", function () {
 
 	it("get metadata by revision tag should succeed", function(done) {
 		const goldenData0 = {
-			"_id": "0062f1bb-b28e-4be2-a9d7-6f73abcdb760",
-			"metadata": { "value": "SYSTEM: PLATES" },
-			"parents": [ "dba918f9-e065-4f98-921e-ab7c05d89ee5"
-			]
+			"_id": "019d575a-189f-4de6-a10c-b5c2efe8afd2",
+			"metadata": { "value": "SYSTEM: BRICKS" },
+			"parents": [ "a7f7de13-52ae-4caa-9800-dbdf20d100d9" ]
 		};
+
 
 		agent.get(`/${username}/${model}/revision/myTag/meta/findObjsWith/Category.json`)
 			.expect(200, function(err, res) {
