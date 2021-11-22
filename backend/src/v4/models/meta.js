@@ -69,7 +69,8 @@ Meta.getMetadataById = async (account, model, id) => {
 		paths: 0,
 		type: 0,
 		api: 0,
-		parents: 0
+		parents: 0,
+		rev_id: 0
 	};
 
 	const metadata = await getNodeById(account, model, utils.stringToUUID(id), projection);
@@ -159,8 +160,12 @@ Meta.getMetadataFields = async (account, model) => {
 		});
 	}
 
-	const keys = db.getAllValues(account, getSceneCollectionName(model), "metadata.key");
-	keys.forEach((item) => metaKeys.add(item));
+	const keys = await db.getAllValues(account, getSceneCollectionName(model), "metadata.key");
+	keys.forEach((item) => {
+		if(item !== null) {
+			metaKeys.add(item);
+		}
+	});
 
 	return Array.from(metaKeys);
 
@@ -321,7 +326,7 @@ const _getAllMetadata = async (account, model, branch, rev, stream) => {
 	const data = await findNodesByType(account, model, branch, rev, "meta", undefined, {_id: 1, parents: 1, metadata: 1});
 
 	stream.write("{\"data\":");
-	stream.write(JSON.stringify(data));
+	stream.write(JSON.stringify(cleanAll(data)));
 
 	const refs = await subModelPromise;
 	if(refs.length) {
