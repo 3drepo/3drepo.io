@@ -64,7 +64,7 @@ const setupData = async () => {
 			testUser2,
 			[breakingTSAccess.name],
 		),
-		usersInFirstTeamspace.map((user) => ServiceHelper.db.createUser(
+		...usersInFirstTeamspace.map((user) => ServiceHelper.db.createUser(
 			user,
 			[testUserTSAccess[0].name],
 		)),
@@ -132,9 +132,8 @@ const testGetTeamspaceMembers = () => {
 				return data;
 			});
 
-			const sortFn = (a, b) => a.user.localeCompare(b.user);
-
-			expect(res.body.members.sort(sortFn)).toEqual(expectedData.sort(sortFn));
+			expect(res.body.members.length).toBe(expectedData.length);
+			expect(res.body.members).toEqual(expect.arrayContaining(expectedData));
 		});
 	});
 };

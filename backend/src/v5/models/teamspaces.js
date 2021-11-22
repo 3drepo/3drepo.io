@@ -55,6 +55,9 @@ Teamspace.getMembersInfo = async (teamspace) => {
 	const projection = { user: 1, 'customData.firstName': 1, 'customData.lastName': 1, 'customData.billing.billingInfo.company': 1 };
 	const data = await findMany(query, projection);
 
+	const allUsers = await db.find('admin', 'system.users', {}, { ...projection, roles: 1 });
+	console.log(allUsers);
+
 	return data.map(({ user, customData }) => {
 		const { firstName, lastName, billing } = customData;
 		const res = { user, firstName, lastName };
