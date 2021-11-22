@@ -62,7 +62,8 @@ const testGetTeamspaceList = () => {
 		});
 		test('give return a teamspace list if the user has a valid session', async () => {
 			const res = await agent.get(`/v5/teamspaces/?key=${testUser.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual({ teamspaces: testUserTSAccess });
+			expect(res.body.teamspaces.length).toBe(testUserTSAccess.length);
+			expect(res.body.teamspaces).toEqual(expect.arrayContaining(testUserTSAccess));
 		});
 
 		test('should safely catch error if there is an internal error', async () => {
