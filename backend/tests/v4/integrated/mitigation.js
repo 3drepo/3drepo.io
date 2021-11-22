@@ -216,9 +216,6 @@ describe("Mitigations", function () {
 		]
 	};
 
-	const sortedGoldenCriteria = {};
-	// Object.keys(goldenCriteria).forEach((key) => sortedGoldenCriteria[key] = goldenCriteria[key].sort());
-
 	before(function(done) {
 
 		server = app.listen(8080, function () {
@@ -289,12 +286,12 @@ describe("Mitigations", function () {
 	describe("Find mitigation suggestions", function(done) {
 		const totalSuggestions = 201;
 		const expectedLengths = {
-			"category": 18,
-			"location_desc": 27,
-			"element": 20,
-			"risk_factor": 18,
-			"scope": 1,
-			"associated_activity": 22
+			"category": 162,
+			"location_desc": 46,
+			"element": 84,
+			"risk_factor": 115,
+			"scope": 163,
+			"associated_activity": 163
 		};
 		const invalidCriteria = {
 			"mitigation_desc": "Avoid trap hazards near openings.",
@@ -313,7 +310,7 @@ describe("Mitigations", function () {
 
 		});
 
-		/*
+
 		it("without criteria should succeed", function(done) {
 			agent.post(`/${username}/mitigations`)
 				.send({})
@@ -377,7 +374,6 @@ describe("Mitigations", function () {
 					});
 			});
 		});
-		*/
 
 		it("by multiple criteria should succeed", function(done) {
 			const criteria = {};
