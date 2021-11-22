@@ -56,8 +56,8 @@ const goldenColls = [
 	{ name: 'ca2cd8d0-c7e9-4362-baaf-e089bcb7b803.stash.json_mpc.ref', options: {} },
 	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.history.ref', options: {} },
 	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.history', options: {} },
-	{ name: 'teamspace', options: {} },
 	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.json_mpc.files', options: {} },
+	{ name: 'teamspace', options: {} },
 	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.history', options: {} },
 	{ name: 'ca2cd8d0-c7e9-4362-baaf-e089bcb7b803.history', options: {} },
 	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.json_mpc.ref', options: {} },
@@ -187,9 +187,6 @@ describe('Check DB handler', () => {
 	describe('listCollections', () => {
 		it('list collection with valid username should succeed', async () => {
 			const colls = await db.listCollections(account);
-			const sortFn = ({name: name1},{name: name2}) => name1 < name2;
-			colls.sort(sortFn);
-			goldenColls.sort(sortFn);
 			expect(colls).to.deep.equal(goldenColls);
 		});
 
