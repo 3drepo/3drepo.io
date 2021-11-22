@@ -252,7 +252,6 @@ Meta.findObjectIdsByRules = async (account, model, rules, branch, revId, convert
 		}).catch(() => {
 			// If search on a submodel failed (usually due to no revision in the submodel), it should not
 			// fail the whole API request.
-			return undefined;
 		}));
 	}
 

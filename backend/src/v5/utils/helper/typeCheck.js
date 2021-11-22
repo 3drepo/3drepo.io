@@ -19,6 +19,7 @@ const _ = require('lodash');
 
 const TypeChecker = {};
 
+TypeChecker.isArray = Array.isArray;
 TypeChecker.isBuffer = (buf) => !!(buf && Buffer.isBuffer(buf));
 TypeChecker.isString = (value) => _.isString(value);
 TypeChecker.isNumber = (value) => _.isNumber(value);

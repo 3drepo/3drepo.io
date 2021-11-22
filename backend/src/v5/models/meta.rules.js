@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { isArray } = require('../utils/helper/typeCheck');
 const { sanitiseRegex } = require('../utils/helper/strings');
 const { templates } = require('../utils/responseCodes');
 
@@ -35,9 +36,9 @@ Rules.toQuery = (rule) => {
 	}
 		break;
 	case 'REGEX': {
+		const regexArr = rule.values.map((val) => `(${val})`);
 		// eslint-disable-next-line security/detect-non-literal-regexp
-		const regexArr = rule.values.map((val) => ({ $regex: new RegExp(val) }));
-		valueClause = rule.values.length > 1 ? { $or: regexArr } : regexArr[0];
+		valueClause = { $regex: new RegExp(regexArr.join('|')) };
 	}
 		break;
 	case 'EQUALS':
@@ -65,19 +66,32 @@ Rules.toQuery = (rule) => {
 					$lte: Math.max(rangeVal1, rangeVal2),
 				});
 			}
-			valueClause = rangeClauses.length > 1 ? { $or: rangeClauses } : rangeClauses[0];
+			valueClause = rangeClauses.length > 1 ? rangeClauses : rangeClauses[0];
 		}
 		break;
 	default:
 		throw templates.invalidArguments;
 	}
 
-	const matchQuery = { metadata: { $elemMatch: { key: rule.field } } };
+	const createQuery = (value) => ({
+		metadata: {
+			$elemMatch: {
+				key: rule.field,
+				...(value !== undefined ? { value } : {}),
+			},
+		},
+	});
 
-	if (valueClause) {
-		matchQuery.metadata.$elemMatch.value = valueClause;
+	// We need to capture the 0s and nulls
+	if (valueClause !== undefined) {
+		if (isArray(valueClause)) {
+			return { $or: valueClause.map(createQuery) };
+		}
+
+		return createQuery(valueClause);
 	}
-	return matchQuery;
+
+	return createQuery();
 };
 
 module.exports = Rules;

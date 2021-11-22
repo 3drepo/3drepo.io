@@ -60,15 +60,12 @@ const testToQuery = () => {
 		{
 			desc: 'operator REGEX with 1 operand',
 			data: generateRule(fieldName, 'REGEX', ['$(\\w)+']),
-			query: createQuery(fieldName, { $regex: new RegExp('$(\\w)+') }),
+			query: createQuery(fieldName, { $regex: new RegExp('($(\\w)+)') }),
 		},
 		{
 			desc: 'operator REGEX with 1+ operand',
 			data: generateRule(fieldName, 'REGEX', ['(\\w)+$', '(a|b)*']),
-			query: createQuery(fieldName, { $or: [
-				{ $regex: new RegExp('(\\w)+$') },
-				{ $regex: new RegExp('(a|b)*') },
-			] }),
+			query: createQuery(fieldName, { $regex: new RegExp('((\\w)+$)|((a|b)*)') }),
 		},
 		{
 			desc: 'operator EQUALS with 1 operand',
@@ -129,7 +126,10 @@ const testToQuery = () => {
 		{
 			desc: 'operator IN_RANGE with 1+ sets of operands',
 			data: generateRule(fieldName, 'IN_RANGE', [1000, 2000, 200, 100]),
-			query: createQuery(fieldName, { $or: [{ $gte: 1000, $lte: 2000 }, { $gte: 100, $lte: 200 }] }),
+			query: { $or: [
+				createQuery(fieldName, { $gte: 1000, $lte: 2000 }),
+				createQuery(fieldName, { $gte: 100, $lte: 200 }),
+			] },
 		},
 		{
 			desc: 'unknown operator',
@@ -141,11 +141,14 @@ const testToQuery = () => {
 		testCases.map(({ desc, data, query }) => [desc, data, query]),
 	)('Smart rule to query', (desc, data, query) => {
 		test(`${desc} ${query ? ' should convert to the expected query' : 'should throw invalid arguments'}`, async () => {
-			try {
+			if (query) {
 				expect(MetaRules.toQuery(data)).toEqual(query);
-			} catch (err) {
-				expect(query).toBe(undefined);
-				expect(err.code).toEqual(templates.invalidArguments.code);
+			} else {
+				try {
+					expect(MetaRules.toQuery(data)).toEqual(query);
+				} catch (err) {
+					expect(err.code).toEqual(templates.invalidArguments.code);
+				}
 			}
 		});
 	});
