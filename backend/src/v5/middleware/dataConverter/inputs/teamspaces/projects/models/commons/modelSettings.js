@@ -19,6 +19,8 @@ const { createResponseCode, templates } = require('../../../../../../../utils/re
 const Yup = require('yup');
 const { checkLegendExists } = require('../../../../../../../models/legends');
 const { checkViewExists } = require('../../../../../../../models/views');
+const { getModelByQuery } = require('../../../../../../../models/modelSettings');
+const { getProjectById } = require('../../../../../../../models/projects');
 const { respond } = require('../../../../../../../utils/responder');
 const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { types } = require('../../../../../../../utils/helper/yup');
@@ -31,47 +33,97 @@ const convertBodyUUIDs = (req) => {
 	});
 };
 
-ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
-	const schema = Yup.object().shape({
-		name: types.strings.title,
-		desc: types.strings.shortDescription,
-		surveyPoints: Yup.array()
-			.of(
-				Yup.object().shape({
-					position: types.position.required(),
-					latLong: Yup.array().of(Yup.number()).length(2).required(),
-				}),
-			),
-		angleFromNorth: Yup.number().min(0).max(360),
-		type: Yup.string(),
-		unit: types.strings.unit,
-		code: types.strings.code,
-		defaultView: types.id.nullable().test('check-view-exists', 'View not found', async (value) => {
-			if (value) {
-				try {
-					const model = req.params.container ?? req.params.federation;
-					await checkViewExists(req.params.teamspace, model, stringToUUID(value));
-				} catch (err) {
-					return false;
-				}
-			}
-			return true;
-		}),
-		defaultLegend: types.id.nullable().test('check-legend-exists', 'Legend not found', async (value) => {
-			if (value) {
-				try {
-					const model = req.params.container ?? req.params.federation;
-					await checkLegendExists(req.params.teamspace, model, stringToUUID(value));
-				} catch (err) {
-					return false;
-				}
-			}
-			return true;
-		}),
-	}).strict(true).noUnknown()
-		.required()
-		.test('at-least-one-property', 'You must provide at least one setting value', (value) => Object.keys(value).length);
+const defaultViewType = (teamspace, model) => types.id.nullable().test('check-view-exists', 'View not found', async (value) => {
+	if (value) {
+		try {
+			await checkViewExists(teamspace, model, stringToUUID(value));
+		} catch (err) {
+			return false;
+		}
+	}
+	return true;
+});
+
+const defaultLegendType = (teamspace, model) => types.id.nullable().test('check-legend-exists', 'Legend not found', async (value) => {
+	if (value) {
+		try {
+			await checkLegendExists(teamspace, model, stringToUUID(value));
+		} catch (err) {
+			return false;
+		}
+	}
+	return true;
+});
+
+const modelNameType = (teamspace, project, model) => types.strings.title.test('name-already-used', 'Name is already used within the project', async (value) => {
 	try {
+		let { models } = await getProjectById(teamspace, project, { models: 1 });
+		if (model) {
+			models = models.flatMap((modelId) => (modelId === model ? [] : modelId));
+		}
+		const query = { _id: { $in: models }, name: value };
+		await getModelByQuery(teamspace, query, { _id: 1 });
+		return false;
+	} catch (err) {
+		// We want this to error out. This means there's no model with the same name
+		return true;
+	}
+});
+
+const generateSchema = (newEntry, teamspace, project, modelId) => {
+	const name = modelNameType(teamspace, project, modelId);
+	const schema = {
+		name: newEntry ? name.required() : name,
+		unit: newEntry ? types.strings.unit.required() : types.strings.unit,
+		desc: types.strings.shortDescription,
+		code: types.strings.code,
+		type: newEntry ? Yup.string().required() : Yup.string(),
+		surveyPoints: types.surveyPoints,
+		angleFromNorth: types.degrees,
+		...(newEntry
+			? {}
+			: {
+				defaultView: defaultViewType(teamspace, modelId),
+				defaultLegend: defaultLegendType(teamspace, modelId),
+			}),
+	};
+
+	const yupObj = Yup.object().strict(true).noUnknown().required()
+		.shape(schema);
+	return newEntry
+		? yupObj
+		: yupObj.test(
+			'at-least-one-property',
+			'You must provide at least one setting value',
+			(value) => Object.keys(value).length,
+		);
+};
+
+ModelSettings.validateAddModelData = async (req, res, next) => {
+	try {
+		const { teamspace, project } = req.params;
+		const schema = generateSchema(true, teamspace, project);
+		await schema.validate(req.body);
+
+		req.body.properties = { unit: req.body.unit.toLowerCase() };
+		delete req.body.unit;
+
+		if (req.body.code) {
+			req.body.properties.code = req.body.code;
+			delete req.body.code;
+		}
+
+		next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
+	try {
+		const { teamspace, project } = req.params;
+		const model = req.params.container ?? req.params.federation;
+		const schema = generateSchema(false, teamspace, project, model);
 		req.body = await schema.validate(req.body);
 		convertBodyUUIDs(req);
 		next();

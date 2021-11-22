@@ -23,6 +23,7 @@ import { reducer as containersReducer } from '@/v5/store/containers/containers.r
 import { reducer as dialogsReducer } from '../../v5/store/dialogs/dialogs.redux';
 import { reducer as projectsReducer } from '../../v5/store/projects/projects.redux';
 import { reducer as teamspaces2Reducer } from '../../v5/store/teamspaces/teamspaces.redux';
+import { reducer as revisionsReducer } from '../../v5/store/revisions/revisions.redux';
 import { CanvasHistoryTypes } from './canvasHistory';
 import { batchGroupBy } from './canvasHistory/canvasHistory.helpers';
 
@@ -102,6 +103,7 @@ export default function createReducer(history) {
 		activities: activitiesReducer,
 		legend: legendReducer,
 		containers: containersReducer,
+		revisions: revisionsReducer,
 		board: boardReducer // <-- INJECT MODULE REDUCER -->
 	});
 }

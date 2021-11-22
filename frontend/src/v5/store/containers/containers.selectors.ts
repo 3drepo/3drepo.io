@@ -18,19 +18,20 @@
 import { createSelector } from 'reselect';
 import { IContainersState } from '@/v5/store/containers/containers.types';
 import { isEmpty } from 'lodash';
+import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
 
-const selectProjectsDomain = (state: { containers: IContainersState }) => state.containers;
+const selectContainersDomain = (state: { containers: IContainersState }) => state.containers;
 
 export const selectContainers = createSelector(
-	selectProjectsDomain, (state) => state.containers,
+	selectContainersDomain, selectCurrentProject, (state, currentProject) => state.containers[currentProject] ?? [],
 );
 
 export const selectFilterQuery = createSelector(
-	selectProjectsDomain, (state) => state.filterQuery,
+	selectContainersDomain, (state) => state.filterQuery,
 );
 
 export const selectFilteredContainers = createSelector(
-	[selectContainers, selectFilterQuery],
+	selectContainers, selectFilterQuery,
 	(containers, filterQuery) => containers.filter((
 		{ name, code, type },
 	) => [name, code, type].join('').toLowerCase().includes(filterQuery.trim().toLowerCase())),
@@ -45,4 +46,12 @@ export const selectHasContainers = createSelector(
 		favourites: containers.some(({ isFavourite }) => isFavourite),
 		all: !isEmpty(containers),
 	}),
+);
+
+export const selectIsListPending = createSelector(
+	selectContainersDomain, (state) => state.isListPending,
+);
+
+export const selectAreStatsPending = createSelector(
+	selectContainers, (containers) => containers.some(({ hasStatsPending }) => hasStatsPending),
 );

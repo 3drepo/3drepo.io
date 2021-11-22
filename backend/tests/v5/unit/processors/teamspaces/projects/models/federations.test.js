@@ -56,6 +56,17 @@ const federationSettings = {
 		status: 'ok',
 		subModels: [{ model: 'container1' }, { model: 'container2' }],
 		category: 'category 1',
+		defaultView: 2,
+		defaultLegend: 3,
+		permissions: [1, 2, 3],
+		angleFromNorth: 10,
+		timestamp: new Date(),
+		surveyPoints: [123],
+		errorReason: {
+			message: 'error reason',
+			timestamp: 123,
+			errorCode: 1,
+		},
 	},
 	federation2: {
 		_id: 2,
@@ -87,7 +98,8 @@ const project = { _id: 1, name: 'project', models: federationList.map(({ _id }) 
 
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getFederations.mockImplementation(() => federationList);
-ModelSettings.getFederationById.mockImplementation((teamspace, federation) => federationSettings[federation]);
+const getFederationByIdMock = ModelSettings.getFederationById.mockImplementation((teamspace,
+	federation) => federationSettings[federation]);
 Issues.getIssuesCount.mockImplementation((teamspace, federation) => {
 	if (federation === 'federation1') return 1;
 	if (federation === 'federation2') return 2;
@@ -252,9 +264,22 @@ const testGetFederationStats = () => {
 	});
 };
 
+const testGetSettings = () => {
+	describe('Get federation settings', () => {
+		test('should return the federation settings', async () => {
+			const projection = { corID: 0, account: 0, permissions: 0, subModels: 0, federate: 0 };
+			const res = await Federations.getSettings('teamspace', 'federation1');
+			expect(res).toEqual(federationSettings.federation1);
+			expect(getFederationByIdMock.mock.calls.length).toBe(1);
+			expect(getFederationByIdMock.mock.calls[0][2]).toEqual(projection);
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/federations', () => {
 	testGetFederationList();
 	testAppendFavourites();
 	testDeleteFavourites();
 	testGetFederationStats();
+	testGetSettings();
 });
