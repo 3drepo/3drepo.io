@@ -208,7 +208,7 @@ function getObjectsArrayAsIfcGuids(data) {
 			Meta.uuidsToIfcGuids(account, model, sharedIds).then(ifcGuids => {
 				if (ifcGuids && ifcGuids.length > 0) {
 					for (let j = 0; j < ifcGuids.length; j++) {
-						ifcGuidsSet.add(ifcGuids[j].metadata["IFC GUID"]);
+						ifcGuidsSet.add(ifcGuids[j].metadata[0].value);
 
 						for (let k = 0; k < ifcGuids[j].parents.length; k++) {
 							sharedIdsSet.delete(utils.uuidToString(ifcGuids[j].parents[k]));
