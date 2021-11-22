@@ -57,13 +57,10 @@ async function findNodes(account, model, branch, revision, query = {}, projectio
 const Scene = {};
 
 Scene.findNodesByField = async function (account, model, branch, revision, fieldName, projection = {}) {
-	const query = {};
-	query[fieldName] = {"$exists" : true};
+	const query = {"metadata.key": fieldName};
+	const proj = {parents: 1, metadata: {$elemMatch: {key: fieldName}}, ...projection};
 
-	projection.parents = 1;
-	projection[fieldName] = 1;
-
-	return findNodes(account, model, branch, revision, query, projection);
+	return findNodes(account, model, branch, revision, query, proj);
 };
 
 Scene.findNodesByType = async function (account, model, branch, revision, type, searchString, projection) {

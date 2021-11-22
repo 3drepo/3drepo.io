@@ -261,13 +261,6 @@ Meta.findObjectIdsByRules = async (account, model, rules, branch, revId, convert
 };
 
 Meta.getAllIdsWithMetadataField = async (account, model, branch, rev, fieldName) => {
-	// Get the revision object to find all relevant IDs
-	let fullFieldName = "metadata";
-
-	if (fieldName && fieldName.length > 0) {
-		fullFieldName += "." + fieldName;
-	}
-
 	const getMeta = [];
 
 	await getSubModels(account, model, branch, rev, (subModelTS, subModel, subModelBranch, subModelRev) => {
@@ -288,18 +281,18 @@ Meta.getAllIdsWithMetadataField = async (account, model, branch, rev, fieldName)
 
 	const subMeta = await Promise.all(getMeta);
 
-	const obj = await findNodesByField(account, model, branch, rev, fullFieldName);
+	const obj = await findNodesByField(account, model, branch, rev, fieldName);
 
 	if (!obj) {
 		throw responseCodes.METADATA_NOT_FOUND;
 	}
 
-	// rename fieldName to "value"
-	const parsedObj = {data: obj};
-	if (obj.length > 0 && fieldName && fieldName.length > 0) {
-		const objStr = JSON.stringify(obj);
-		parsedObj.data = JSON.parse(objStr.replace(new RegExp(fieldName, "g"), "value"));
-	}
+	const data = obj.map((entry) => {
+		const metadata =  { value: entry.metadata[0].value };
+		return {...entry, metadata};
+	});
+
+	const parsedObj = {data};
 	if (subMeta.length > 0) {
 		parsedObj.subModels = subMeta;
 	}
