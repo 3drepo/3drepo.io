@@ -247,11 +247,9 @@ describe("Mitigations", function () {
 		it("should succeed", function(done) {
 			agent.get(`/${username}/mitigations/criteria`)
 				.expect(200, function(err, res) {
-					/*const sortedObj = {};
-					Object.keys(res.body).forEach((key) => sortedObj[key] = res.body[key].sort());
-					expect(sortedObj).to.deep.equal(sortedGoldenCriteria);
-					*/
-					expect(res.body).to.deep.equal(goldenCriteria);
+					const results = res.body;
+					expect(Object.keys(results).length).to.equal(Object.keys(goldenCriteria).length);
+					Object.keys(results).forEach((key) => expect(results[key]).to.deep.equalInAnyOrder(goldenCriteria[key]));
 					done(err);
 				});
 		});
@@ -259,12 +257,8 @@ describe("Mitigations", function () {
 		it("if user is not teamspace admin should succeed", function(done) {
 			agent.get(`/${collaboratorTeamspace}/mitigations/criteria`)
 				.expect(200, function(err, res) {
-					/*
-					const sortedObj = {};
-					Object.keys(res.body).forEach((key) => sortedObj[key] = res.body[key].sort());
-					expect(sortedObj).to.deep.equal(sortedGoldenCriteria);
-					*/
-					expect(res.body).to.deep.equal(goldenCriteria);
+					const results = res.body;
+					Object.keys(results).forEach((key) => expect(results[key]).to.deep.equalInAnyOrder(goldenCriteria[key]));
 					done(err);
 				});
 		});
@@ -390,24 +384,10 @@ describe("Mitigations", function () {
 			Object.keys(goldenCriteria).forEach((key) => {
 				criteria[key] = goldenCriteria[key][0];
 			});
-			/*const criteria = {
-				mitigation_stage: ['Preliminary Design'],
-				mitigation_type: ['Eliminate'],
-				category: ['Fall-From open edge'],
-				location_desc: ['High Level-Near Opening'],
-				element: ['Slab'],
-				risk_factor: ['Physical-Opening'],
-				scope: ['In situ concrete'],
-				associated_activity: ['Install construction']
-			}*/
-			console.log(criteria);
+
 			agent.post(`/${username}/mitigations`)
 				.send(criteria)
 				.expect(200, function(err, res) {
-					console.log("2021102615")
-					console.log(res.body)
-					console.log(res.body.length)
-					// expect(res.body.length).to.equal(0);
 					expect(res.body.length).to.equal(45);
 					done(err);
 				});
