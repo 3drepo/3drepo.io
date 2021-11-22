@@ -1122,7 +1122,6 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
-							console.log(res.body);
 							expect(res.body.objects[0].shared_ids.length).to.equal(375);
 							done(err);
 						});
