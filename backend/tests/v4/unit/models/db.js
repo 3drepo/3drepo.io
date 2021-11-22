@@ -187,6 +187,9 @@ describe('Check DB handler', () => {
 	describe('listCollections', () => {
 		it('list collection with valid username should succeed', async () => {
 			const colls = await db.listCollections(account);
+			const sortFn = ({name: name1},{name: name2}) => name1 < name2 ? -1 : 1;
+			colls.sort(sortFn);
+			goldenColls.sort(sortFn);
 			expect(colls).to.deep.equal(goldenColls);
 		});
 
