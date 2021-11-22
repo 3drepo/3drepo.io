@@ -34,13 +34,11 @@ import { VIEWER_EVENTS } from '../../constants/viewer';
 import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
 import { disableConflictingMeasurementActions, generateName } from '../../helpers/measurements';
 import { prepareResources } from '../../helpers/resources';
-import { prepareRisk } from '../../helpers/risks';
 import { chopShapesUuids } from '../../helpers/shapes';
 import { SuggestedTreatmentsDialog } from '../../routes/components/dialogContainer/components';
 import * as API from '../../services/api';
 import * as Exports from '../../services/export';
 import { Viewer } from '../../services/viewer/viewer';
-import { BimActions } from '../bim';
 import { BoardActions } from '../board';
 import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
@@ -52,7 +50,6 @@ import { selectSelectedStartingDate, SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { TreeActions } from '../tree';
-import { ViewerGuiActions } from '../viewerGui';
 import { ViewpointsActions } from '../viewpoints';
 import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
 import { RisksActions, RisksTypes } from './risks.redux';
@@ -168,10 +165,9 @@ function* updateRisk({riskData}) {
 		updatedRisk.resources = prepareResources(account, model, updatedRisk.resources);
 
 		updatedRisk = {...updatedRisk, ...riskData};
-		const preparedRisk = prepareRisk(updatedRisk);
 
 		yield put(RisksActions.setComponentState({ savedPin: position }));
-		yield put(RisksActions.saveRiskSuccess(preparedRisk));
+		yield put(RisksActions.saveRiskSuccess(updatedRisk));
 		yield put(SnackbarActions.show('Risk updated'));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('update', 'risk', error));

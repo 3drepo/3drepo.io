@@ -85,4 +85,7 @@ Federations.getFederationStats = async (teamspace, federation) => {
 
 Federations.updateSettings = updateModelSettings;
 
+Federations.getSettings = async (teamspace, federation) => getFederationById(teamspace,
+	federation, { corID: 0, account: 0, permissions: 0, subModels: 0, federate: 0 });
+
 module.exports = Federations;

@@ -167,10 +167,10 @@
 				return Promise.reject(responseCodes.BILLING_NOT_FOUND);
 			}
 
-			let template = "invoice.pug";
+			let template = utils.getPugPath("invoice.pug");
 
 			if(invoice.type === "refund") {
-				template = "refund.pug";
+				template =  utils.getPugPath("refund.pug");
 			}
 
 			res.render(template, {billing : invoice, baseURL: config.getBaseURL()});

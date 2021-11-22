@@ -23,7 +23,7 @@ const { v5Path } = require("../../interop");
  *
  * @returns
  */
-module.exports.createApp = function (config) {
+module.exports.createApp = function (config, v5Init = true) {
 	const express = require("express");
 	const compress = require("compression");
 	const responseCodes = require("../response_codes");
@@ -69,9 +69,11 @@ module.exports.createApp = function (config) {
 		}
 	});
 
-	require(`${v5Path}/services/eventsListener/eventsListener`).init();
-	require("../models/chatEvent").subscribeToV5Events();
-	require(`${v5Path}/services/queue`).init();
+	if(v5Init) {
+		require(`${v5Path}/services/eventsListener/eventsListener`).init();
+		require("../models/chatEvent").subscribeToV5Events();
+		require(`${v5Path}/services/queue`).init();
+	}
 	require(`${v5Path}/routes/routesManager`).init(app);
 
 	app.use("/", require("../routes/user"));

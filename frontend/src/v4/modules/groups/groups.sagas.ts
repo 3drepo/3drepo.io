@@ -51,15 +51,8 @@ import {
 function* fetchGroups({teamspace, modelId, revision}) {
 	yield put(GroupsActions.togglePendingState(true));
 	try {
+		yield take(TreeTypes.UPDATE_DATA_REVISION);
 		const {data} = yield API.getGroups(teamspace, modelId, revision);
-
-		const treeList = yield select(selectTreeNodesList);
-
-		if (!treeList?.length) {
-			//Wait till tree is loaded
-			yield take(TreeTypes.UPDATE_DATA_REVISION);
-		}
-
 		const preparedGroups = yield all(data.map(prepareGroupWithCount));
 		yield put(GroupsActions.fetchGroupsSuccess(preparedGroups));
 	} catch (error) {
@@ -179,22 +172,21 @@ function* deleteGroups({ teamspace, modelId, groups }) {
 		const isShowDetails = yield select(selectShowDetails);
 		const activeGroupId = yield select(selectActiveGroupId);
 
-		yield all(groupsToDelete.map((groupId) => {
+		const actions = [];
+
+		groupsToDelete.forEach((groupId) => {
 			const overriddenGroup = colorOverrides[groupId];
 			const group = groupsMap[groupId];
 
-			const actions = [
-				put(GroupsActions.dehighlightGroup(group)),
-				put(GroupsActions.deleteGroupsSuccess([groupId]))
-			];
+			actions.push(put(GroupsActions.dehighlightGroup(group)));
+			actions.push(put(GroupsActions.deleteGroupsSuccess([groupId])));
 
 			if (overriddenGroup) {
 				actions.push(put(GroupsActions.removeColorOverride(groupId)));
 			}
+		});
 
-			return actions;
-		}));
-
+		yield all(actions);
 		if (isShowDetails && groupsToDelete.includes(activeGroupId)) {
 			yield put(GroupsActions.setComponentState({ activeGroup: null, showDetails: false }));
 			const { name } = yield select(selectEditingGroupDetails);

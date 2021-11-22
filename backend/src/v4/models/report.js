@@ -114,7 +114,11 @@ class ReportGenerator {
 	getRevisionID() {
 		this.promises.push(
 			require("./history").findLatest(this.teamspace, this.modelID, {timestamp: 1, tag: 1}).then((entry) => {
-				this.rev = entry.tag ? entry.tag : "uploaded at " + formatDate(entry.timestamp);
+				if(entry) {
+					this.rev = entry.tag ? entry.tag : "uploaded at " + formatDate(entry.timestamp);
+				} else{
+					this.rev = "not uploaded";
+				}
 			})
 		);
 	}
@@ -190,7 +194,7 @@ class ReportGenerator {
 						if(!comment.action.propertyText) {
 							comment.action.propertyText = this.getPropertyLabel(comment.action.property);
 						}
-						if(comment.action.property === "position") {
+						if(comment.action.property === "position" || comment.action.property === "viewpoint" || comment.action.property === "screenshot") {
 							comment.action.to = comment.action.from = "";
 						} else if(!comment.action.to || comment.action.to === "") {
 							comment.action.to = "(empty)";
@@ -231,7 +235,7 @@ class ReportGenerator {
 	generateReport(res) {
 		this.entries.sort((a, b) => a.createdTS < b.createdTS ? 1 : -1);
 		return Promise.all(this.promises).then(() => {
-			res.render("report.pug", {
+			res.render(utils.getPugPath("report.pug"), {
 				baseURL: config.getBaseURL(),
 				url: function (path) {
 					return config.apiAlgorithm.apiUrl(C.GET_API, path);

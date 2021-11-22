@@ -15,12 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const _ = require('lodash');
 const { src } = require('../../../helper/path');
 
 const Teamspaces = require(`${src}/processors/teamspaces/teamspaces`);
 
 jest.mock('../../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
+
+jest.mock('../../../../../src/v5/models/jobs');
+const JobsModel = require(`${src}/models/jobs`);
+
+jest.mock('../../../../../src/v5/models/teamspaces');
+const TeamspacesModel = require(`${src}/models/teamspaces`);
+
 jest.mock('../../../../../src/v5/utils/permissions/permissions');
 const Permissions = require(`${src}/utils/permissions/permissions`);
 
@@ -43,6 +51,49 @@ const testGetTeamspaceListByUser = () => {
 	});
 };
 
+const testGetTeamspaceMembersInfo = () => {
+	describe('Get Teamspace members info', () => {
+		const tsWithUsers = 'withUsers';
+		const tsWithoutUsers = 'withoutUsers';
+		const tsWithoutJobs = 'noJobs';
+		const goldenData = [
+			{ user: 'abc', firstName: 'ab', lastName: 'c', company: 'yy', job: 'jobA' },
+			{ user: 'abcd', firstName: 'ab', lastName: 'cd', job: 'jobB' },
+			{ user: 'abcd2', firstName: 'ab', lastName: 'cd2', job: 'jobB', company: 'dxfd' },
+			{ user: 'abcde', firstName: 'ab', lastName: 'cde', company: 'dsfs' },
+		];
+		const jobList = [
+			{ _id: 'jobA', users: ['abc'] },
+			{ _id: 'jobB', users: ['abcd', 'abcd2'] },
+		];
+		TeamspacesModel.getMembersInfo.mockImplementation((ts) => {
+			if (tsWithoutUsers === ts) return Promise.resolve([]);
+			return Promise.resolve(goldenData.map((data) => _.omit(data, 'job')));
+		});
+
+		JobsModel.getJobsToUsers.mockImplementation((ts) => {
+			if (tsWithoutJobs === ts) return Promise.resolve([]);
+			return Promise.resolve(jobList);
+		});
+
+		test('should give the list of members within the given teamspace with their details', async () => {
+			const res = await Teamspaces.getTeamspaceMembersInfo(tsWithUsers);
+			expect(res).toEqual(goldenData);
+		});
+
+		test('should return empty array if the teamspace had no memebrs', async () => {
+			const res = await Teamspaces.getTeamspaceMembersInfo(tsWithoutUsers);
+			expect(res).toEqual([]);
+		});
+
+		test('should return the list of members with details if the teamspace had no jobs', async () => {
+			const res = await Teamspaces.getTeamspaceMembersInfo(tsWithoutJobs);
+			expect(res).toEqual(goldenData.map((data) => _.omit(data, 'job')));
+		});
+	});
+};
+
 describe('processors/teamspaces', () => {
 	testGetTeamspaceListByUser();
+	testGetTeamspaceMembersInfo();
 });

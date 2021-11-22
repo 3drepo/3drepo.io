@@ -43,6 +43,10 @@ export const StyledIconButton = styled(IconButton)`
 			}
 		}
 	`}
+	
+	${({ $isLoading }) => $isLoading && css`
+		pointer-events: none;
+	`}
 
 	border: 1px solid ${({ theme }) => theme.palette.secondary.main};
 

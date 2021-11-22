@@ -543,7 +543,7 @@
 	define("MIN_MS_TIMESTAMP", 100000000000);
 
 	// tickets
-	define("LONG_TEXT_CHAR_LIM", 660);
+	define("LONG_TEXT_CHAR_LIM", 1200);
 
 	// risks
 	define("RISK_FILTERS",{

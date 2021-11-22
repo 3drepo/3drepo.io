@@ -208,7 +208,7 @@ const testUpdateRevisionStatus = () => {
 				.send({ void: false }).expect(templates.ok.status);
 
 			const revs = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${modelWithRev._id}/revisions?key=${users.tsAdmin.apiKey}`);
-			expect(revs.body.revisions.find((r) => r._id === voidRevision._id).void).toEqual(false);
+			expect(revs.body.revisions.find((r) => r._id === voidRevision._id).void).toBe(false);
 		});
 	});
 };
