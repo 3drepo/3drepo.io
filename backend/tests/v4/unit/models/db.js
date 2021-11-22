@@ -581,7 +581,6 @@ describe("Check DB handler", function() {
 
 		it("insert should succeed", async function() {
 			const result = await db.insertOne(account, "jobs", newJob);
-			console.log(result);
 			expect(result.result.n).to.equal(1);
 			expect(result.result.ok).to.equal(1);
 			newJobIds.push(result.ops[0]._id);
@@ -598,14 +597,12 @@ describe("Check DB handler", function() {
 
 		it("incorrect username should succeed", async function() {
 			const result = await db.insertOne("wrong", "jobs", newJob);
-			console.log(result);
 			expect(result.result.n).to.equal(1);
 			expect(result.result.ok).to.equal(1);
 		});
 
 		it("insert without _id should succeed", async function() {
 			const result = await db.insertOne(account, "jobs", { users: ["no ID"] });
-			console.log(result);
 			expect(result.result.n).to.equal(1);
 			expect(result.result.ok).to.equal(1);
 			newJobIds.push(result.ops[0]._id);
@@ -626,7 +623,6 @@ describe("Check DB handler", function() {
 
 		it("insert many should succeed", async function() {
 			const result = await db.insertMany(account, "jobs", newJobs);
-			console.log(result);
 			expect(result.result.n).to.equal(newJobs.length);
 			expect(result.result.ok).to.equal(1);
 			result.ops.forEach((op) => {
@@ -645,7 +641,6 @@ describe("Check DB handler", function() {
 
 		it("incorrect username should succeed", async function() {
 			const result = await db.insertMany("wrong", "jobs", newJobs);
-			console.log(result);
 			expect(result.result.n).to.equal(newJobs.length);
 			expect(result.result.ok).to.equal(1);
 		});
@@ -656,7 +651,6 @@ describe("Check DB handler", function() {
 				{ users: ["no ID 2"] },
 				{ users: ["no ID 3"] }
 			]);
-			console.log(result);
 			expect(result.result.n).to.equal(3);
 			expect(result.result.ok).to.equal(1);
 			result.ops.forEach((op) => {
@@ -670,7 +664,6 @@ describe("Check DB handler", function() {
 			const query = { _id: "Test Job" };
 			const newData = { $set: { users: [ "updateOne" ] } };
 			const result = await db.updateOne(account, "jobs", query, newData);
-			console.log(result);
 			expect(result.result.n).to.equal(1);
 			expect(result.result.nModified).to.equal(1);
 			expect(result.result.ok).to.equal(1);
@@ -680,7 +673,6 @@ describe("Check DB handler", function() {
 			const query = { _id: "Test Job" };
 			const newData = { $set: { users: [ "updateOne", "updateTwo" ] } };
 			const result = await db.updateOne(account, "jobs", query, newData, true);
-			console.log(result);
 			expect(result.result.n).to.equal(1);
 			expect(result.result.nModified).to.equal(1);
 			expect(result.result.ok).to.equal(1);
@@ -690,7 +682,6 @@ describe("Check DB handler", function() {
 			const query = { _id: "updateOne upsert" };
 			const newData = { $set: { users: [ "updateOne", "updateTwo", "updateThree" ] } };
 			const result = await db.updateOne(account, "jobs", query, newData, true);
-			console.log(result);
 			expect(result.result.n).to.equal(1);
 			expect(result.result.nModified).to.equal(0);
 			expect(result.result.ok).to.equal(1);
@@ -701,7 +692,6 @@ describe("Check DB handler", function() {
 			const query = { _id: "updateOne upsert" };
 			const newData = { $set: { users: [ "uOne", "uTwo", "uThree", "uFour" ] } };
 			const result = await db.updateOne(account, "jobs", query, newData, true);
-			console.log(result);
 			expect(result.result.n).to.equal(1);
 			expect(result.result.nModified).to.equal(1);
 			expect(result.result.ok).to.equal(1);
@@ -713,7 +703,6 @@ describe("Check DB handler", function() {
 			const query = { _id: "Test Job 4" };
 			const newData = { $set: { users: [ "update1" ] } };
 			const result = await db.updateMany(account, "jobs", query, newData);
-			console.log(result);
 			expect(result.result.n).to.equal(1);
 			expect(result.result.nModified).to.equal(1);
 			expect(result.result.ok).to.equal(1);
@@ -723,7 +712,6 @@ describe("Check DB handler", function() {
 			const query = { _id: "Test Job 4" };
 			const newData = { $set: { users: [ "update1", "update2" ] } };
 			const result = await db.updateMany(account, "jobs", query, newData, true);
-			console.log(result);
 			expect(result.result.n).to.equal(1);
 			expect(result.result.nModified).to.equal(1);
 			expect(result.result.ok).to.equal(1);
@@ -733,7 +721,6 @@ describe("Check DB handler", function() {
 			const query = { _id: "updateMany upsert" };
 			const newData = { $set: { users: [ "update1", "update2", "update3" ] } };
 			const result = await db.updateMany(account, "jobs", query, newData, true);
-			console.log(result);
 			expect(result.result.n).to.equal(1);
 			expect(result.result.nModified).to.equal(0);
 			expect(result.result.ok).to.equal(1);
@@ -744,7 +731,6 @@ describe("Check DB handler", function() {
 			const query = { _id: "updateMany upsert" };
 			const newData = { $set: { users: [ "u1", "u2", "u3", "u4" ] } };
 			const result = await db.updateMany(account, "jobs", query, newData, true);
-			console.log(result);
 			expect(result.result.n).to.equal(1);
 			expect(result.result.nModified).to.equal(1);
 			expect(result.result.ok).to.equal(1);
@@ -754,7 +740,6 @@ describe("Check DB handler", function() {
 			const query = {};
 			const newData = { $set: { users: [] } };
 			const result = await db.updateMany(account, "jobs", query, newData);
-			console.log(result);
 			expect(result.result.n).to.equal(24);
 			expect(result.result.nModified).to.equal(8);
 			expect(result.result.ok).to.equal(1);
@@ -765,7 +750,6 @@ describe("Check DB handler", function() {
 		it("deleteOne should succeed", async function() {
 			const query = { _id: newJobIds.pop() };
 			const result = await db.deleteOne(account, "jobs", query);
-			console.log(result);
 			expect(result.result.n).to.equal(1);
 			expect(result.result.ok).to.equal(1);
 		});
@@ -773,7 +757,6 @@ describe("Check DB handler", function() {
 		it("deleteOne non-existent record should succeed", async function() {
 			const query = { _id: "notexist" };
 			const result = await db.deleteOne(account, "jobs", query);
-			console.log(result);
 			expect(result.result.n).to.equal(0);
 			expect(result.result.ok).to.equal(1);
 		});
@@ -781,7 +764,6 @@ describe("Check DB handler", function() {
 		it("deleteOne with incorrect username should succeed", async function() {
 			const query = { _id: "Test Job" };
 			const result = await db.deleteOne("wrong", "jobs", query);
-			console.log(result);
 			expect(result.result.n).to.equal(1);
 			expect(result.result.ok).to.equal(1);
 		});
@@ -791,7 +773,6 @@ describe("Check DB handler", function() {
 		it("find one and delete should succeed", async function() {
 			const query = { _id: newJobIds.pop() };
 			const result = await db.findOneAndDelete(account, "jobs", query);
-			console.log(result);
 			expect(result._id).to.deep.equal(query._id);
 			expect(result.users).to.exist;
 		});
@@ -800,7 +781,6 @@ describe("Check DB handler", function() {
 			const query = { _id: newJobIds.pop() };
 			const projection = { _id: 1, users: 0 };
 			const result = await db.findOneAndDelete(account, "jobs", query, projection);
-			console.log(result);
 			expect(result._id).to.deep.equal(query._id);
 			expect(result.users).to.exist;
 		});
@@ -809,7 +789,6 @@ describe("Check DB handler", function() {
 			const query = { _id: newJobIds.pop() };
 			const projection = { _id: 0, users: 0 };
 			const result = await db.findOneAndDelete(account, "jobs", query, projection);
-			console.log(result);
 			expect(result._id).to.deep.equal(query._id);
 			expect(result.users).to.exist;
 		});
