@@ -26,6 +26,7 @@ type IDashboardListItemButton = {
 	onClick: Dispatch<SyntheticEvent>;
 	tooltipTitle?: ReactNode;
 	className?: string;
+	hideBelowDesktop?: boolean;
 };
 
 export const DashboardListItemButton = ({
@@ -33,9 +34,10 @@ export const DashboardListItemButton = ({
 	width,
 	onClick,
 	tooltipTitle = '',
+	hideBelowDesktop = false,
 	className,
 }: IDashboardListItemButton): JSX.Element => (
-	<FixedOrGrowContainer width={width} className={className}>
+	<FixedOrGrowContainer width={width} hideBelowDesktop={hideBelowDesktop} className={className}>
 		<Tooltip title={tooltipTitle}>
 			<Button onClick={(event) => {
 				event.stopPropagation();

@@ -24,4 +24,30 @@ export const Container = styled.div<{width?: number}>`
 		min-width: ${width}px;
 		flex: 0;
 	`}
+	
+	${({ tabletWidth }) => tabletWidth && css`
+		@media (max-width: 1024px) {
+			min-width: ${tabletWidth}px;
+		}
+	`}
+	
+	${({ mobileWidth }) => mobileWidth && css`
+		@media (max-width: 768px) {
+			min-width: ${mobileWidth}px;
+		}
+	`}
+	
+	${({ hideBelowDesktop }) => hideBelowDesktop && css`
+		display: flex;
+		@media (max-width: 1024px) {
+			display: none;
+		}
+	`};
+	
+	${({ hideBelowTablet }) => hideBelowTablet && css`
+		display: flex;
+		@media (max-width: 768px) {
+			display: none;
+		}
+	`};
 `;

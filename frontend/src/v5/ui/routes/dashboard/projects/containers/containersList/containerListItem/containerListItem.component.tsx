@@ -68,6 +68,7 @@ export const ContainerListItem = ({
 					/>
 				)}
 				selected={isSelected}
+				tabletWidth={238}
 				tooltipTitle={
 					<Trans id="containers.list.item.title.tooltip" message="Launch latest revision" />
 				}
@@ -79,6 +80,7 @@ export const ContainerListItem = ({
 			<DashboardListItemButton
 				onClick={() => onToggleSelected(container._id)}
 				width={186}
+				hideBelowDesktop
 				tooltipTitle={
 					<Trans id="containers.list.item.revisions.tooltip" message="View revisions" />
 				}
@@ -94,7 +96,7 @@ export const ContainerListItem = ({
 					{container.code}
 				</Highlight>
 			</DashboardListItemText>
-			<DashboardListItemText width={188} selected={isSelected}>
+			<DashboardListItemText width={188} tabletWidth={125} hideBelowTablet selected={isSelected}>
 				<Highlight search={filterQuery}>
 					{container.type}
 				</Highlight>

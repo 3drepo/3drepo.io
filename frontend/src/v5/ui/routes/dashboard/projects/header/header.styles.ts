@@ -20,6 +20,8 @@ import styled from 'styled-components';
 export const Wrapper = styled.div`
 	width: 100%;
 	height: 114px;
+	padding: 0 30px;
+	box-sizing: border-box;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 	border-left-style: none;

@@ -24,6 +24,20 @@ import { Typography } from '@controls/typography';
 export const Container = styled(FixedOrGrowContainer)`
 	align-items: center;
 	display: flex;
+	
+	${({ hideBelowDesktop }) => hideBelowDesktop && css`
+		display: flex;
+		@media (max-width: 1024px) {
+			display: none;
+		}
+	`};
+	
+	${({ hideBelowTablet }) => hideBelowTablet && css`
+		display: flex;
+		@media (max-width: 768px) {
+			display: none;
+		}
+	`};
 `;
 
 export const Label = styled(Typography).attrs({

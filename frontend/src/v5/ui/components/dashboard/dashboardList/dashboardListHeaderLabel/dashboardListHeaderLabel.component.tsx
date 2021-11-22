@@ -26,8 +26,11 @@ type IDashboardListHeaderLabel = {
 	sort?: boolean;
 	onClick?: Dispatch<void>;
 	width?: number;
+	tabletWidth?: number;
 	className?: string;
 	name?: string;
+	hideBelowDesktop?: boolean;
+	hideBelowTablet?: boolean;
 };
 
 export const DashboardListHeaderLabel = ({
@@ -35,10 +38,19 @@ export const DashboardListHeaderLabel = ({
 	sortingDirection,
 	onClick,
 	width,
+	tabletWidth,
 	sort = false,
+	hideBelowDesktop = false,
+	hideBelowTablet = false,
 	className,
 }: IDashboardListHeaderLabel): JSX.Element => (
-	<Container width={width} className={className}>
+	<Container
+		width={width}
+		tabletWidth={tabletWidth}
+		className={className}
+		hideBelowDesktop={hideBelowDesktop}
+		hideBelowTablet={hideBelowTablet}
+	>
 		{sort ? (
 			<Button onClick={onClick}>
 				<Label>

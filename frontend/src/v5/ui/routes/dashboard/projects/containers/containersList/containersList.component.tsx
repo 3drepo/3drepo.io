@@ -124,16 +124,16 @@ export const ContainersList = ({
 				)}
 			>
 				<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
-					<DashboardListHeaderLabel name="name">
+					<DashboardListHeaderLabel name="name" tabletWidth={238}>
 						<Trans id="containers.list.header.container" message="Container" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="revisionsCount" width={186}>
+					<DashboardListHeaderLabel name="revisionsCount" width={186} hideBelowDesktop>
 						<Trans id="containers.list.header.revisions" message="Revisions" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="code">
 						<Trans id="containers.list.header.containerCode" message="Container code" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="type" width={188}>
+					<DashboardListHeaderLabel name="type" width={188} tabletWidth={125} hideBelowTablet>
 						<Trans id="containers.list.header.category" message="Category" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="lastUpdated" width={180}>

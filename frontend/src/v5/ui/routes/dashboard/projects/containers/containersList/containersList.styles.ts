@@ -27,7 +27,18 @@ export const CollapseSideElementGroup = styled.div`
 	align-items: center;
 
 	${SearchInputStyles.TextField} {
-		width: 405px;
 		margin-right: 15px;
+		
+		@media (max-width: 768px) {
+			width: 235px;
+		}
+		
+		@media (max-width: 1024px) {
+			max-width: 405px;
+		}
+		
+		@media (min-width: 1025px) {
+			width: 405px;
+		}
 	}
 `;

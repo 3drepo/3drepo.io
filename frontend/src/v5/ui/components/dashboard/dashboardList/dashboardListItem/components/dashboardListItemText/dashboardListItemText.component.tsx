@@ -21,8 +21,11 @@ import { Text } from './dashboardListItemText.styles';
 type IDashboardListItemText = {
 	children: ReactNode;
 	width?: number;
+	tabletWidth?: number;
+	mobileWidth?: number;
 	className?: string;
 	selected?: boolean;
+	hideBelowTablet?: boolean;
 };
 
 export const DashboardListItemText = ({
@@ -30,8 +33,17 @@ export const DashboardListItemText = ({
 	width,
 	className,
 	selected = false,
+	hideBelowTablet = false,
+	tabletWidth,
+	mobileWidth,
 }: IDashboardListItemText): JSX.Element => (
-	<FixedOrGrowContainer width={width} className={className}>
+	<FixedOrGrowContainer
+		width={width}
+		tabletWidth={tabletWidth}
+		mobileWidth={mobileWidth}
+		hideBelowTablet={hideBelowTablet}
+		className={className}
+	>
 		<Text selected={selected}>
 			{children}
 		</Text>

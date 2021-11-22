@@ -27,7 +27,7 @@ import { Items } from './appBar.styles';
 import { Breadcrumbs } from '../breadcrumbs';
 
 export const AppBar = (): JSX.Element => (
-	<MuiAppBar position="static" color="secondary">
+	<MuiAppBar position="static">
 		<Items>
 			<Logo />
 			<Breadcrumbs />

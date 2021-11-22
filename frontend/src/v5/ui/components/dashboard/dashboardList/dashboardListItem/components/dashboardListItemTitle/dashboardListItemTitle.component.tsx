@@ -24,6 +24,7 @@ type IDashboardListItemTitle = {
 	children?: ReactNode;
 	subtitle: ReactNode;
 	width?: number;
+	tabletWidth?: number;
 	onClick?: Dispatch<void>;
 	tooltipTitle?: ReactNode;
 	className?: string;
@@ -31,9 +32,9 @@ type IDashboardListItemTitle = {
 };
 
 export const DashboardListItemTitle = ({
-	children, subtitle, width, onClick, className, selected = false, tooltipTitle = '',
+	children, subtitle, width, tabletWidth, onClick, className, selected = false, tooltipTitle = '',
 }: IDashboardListItemTitle): JSX.Element => (
-	<FixedOrGrowContainer width={width} className={className}>
+	<FixedOrGrowContainer width={width} tabletWidth={tabletWidth} className={className}>
 		<Tooltip title={tooltipTitle}>
 			<Title
 				onClick={(event) => {

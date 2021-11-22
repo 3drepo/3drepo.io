@@ -22,10 +22,16 @@ export const Container = styled.div``;
 export const Content = styled.div`
 	max-width: 1289px;
 	margin: 18px auto 100px;
+	padding: 0 30px;
+	
+	@media (max-width: 1024px) {
+		margin-top: 30px;
+	}
 `;
 
 export const HeaderButtonsGroup = styled.div`
 	margin-left: auto;
+	min-width: 278px;
 
 	& > :last-child {
 		margin-right: 0;

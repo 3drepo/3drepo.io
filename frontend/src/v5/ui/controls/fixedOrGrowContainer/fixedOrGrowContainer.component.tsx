@@ -21,12 +21,29 @@ import { Container } from './fixedOrGrowContainer.styles';
 
 type IFixedOrGrowContainer = {
 	width?: number;
+	tabletWidth?: number;
+	mobileWidth?: number;
+	hideBelowDesktop?: boolean;
+	hideBelowTablet?: boolean;
 } & StyledComponentProps;
 
 export const FixedOrGrowContainer = ({
 	width,
+	tabletWidth,
+	mobileWidth,
 	children,
+	hideBelowDesktop = false,
+	hideBelowTablet = false,
 	...props
 }: IFixedOrGrowContainer): JSX.Element => (
-	<Container width={width} {...props}>{children}</Container>
+	<Container
+		width={width}
+		tabletWidth={tabletWidth}
+		mobileWidth={mobileWidth}
+		hideBelowDesktop={hideBelowDesktop}
+		hideBelowTablet={hideBelowTablet}
+		{...props}
+	>
+		{children}
+	</Container>
 );

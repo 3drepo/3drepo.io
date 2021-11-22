@@ -62,6 +62,7 @@ export const FONT_WEIGHT = {
 
 export const GRADIENT = {
 	MAIN: 'linear-gradient(90deg, #0047BB -5.07%, #00C1D4 105.07%)',
+	SECONDARY: 'linear-gradient(89.98deg, #172B4D 0.01%, #2E405F 99.99%)',
 };
 
 export const SHADOW = {
@@ -275,6 +276,7 @@ export const theme = createMuiTheme({
 				display: 'flex',
 				flexDirection: 'row',
 				alignItems: 'center',
+				background: GRADIENT.SECONDARY,
 			},
 		},
 		MuiAvatar: {
