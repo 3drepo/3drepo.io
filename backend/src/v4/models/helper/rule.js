@@ -20,7 +20,7 @@
 const responseCodes = require("../../response_codes.js");
 const { v5Path } = require("../../../interop");
 const { toQuery } =  require(`${v5Path}/models/meta.rules`);
-const RulesSchema =  require(`${v5Path}/middleware/dataConverter/schemas/components/rules`);
+const { schema: rulesSchema} =  require(`${v5Path}/middleware/dataConverter/schemas/components/rules`);
 
 const ruleOperators = {
 	"IS_EMPTY":	0,
@@ -87,40 +87,32 @@ RuleHelper.checkRulesValidity = (rules) => {
 
 RuleHelper.buildQueryFromRule = toQuery;
 RuleHelper.positiveRulesToQueries = (rulesRaw) => {
-	try {
-		const rules = RulesSchema.cast(rulesRaw);
+	const rules = rulesSchema.cast(rulesRaw);
 
-		const posRules = rules.filter(r=> !notOperators[r.operator]).map(RuleHelper.buildQueryFromRule);
+	const posRules = rules.filter(r=> !notOperators[r.operator]).map(RuleHelper.buildQueryFromRule);
 
-		// Except IS_EMPTY every neg rule needs that the field exists
-		rules.forEach(({field, operator})=> {
-			if (notOperators[operator] && operator !== "IS_EMPTY") {
-				const rule = { field, operator: "IS_NOT_EMPTY" };
-				posRules.push(RuleHelper.buildQueryFromRule(rule));
-			}
-		});
+	// Except IS_EMPTY every neg rule needs that the field exists
+	rules.forEach(({field, operator})=> {
+		if (notOperators[operator] && operator !== "IS_EMPTY") {
+			const rule = { field, operator: "IS_NOT_EMPTY" };
+			posRules.push(RuleHelper.buildQueryFromRule(rule));
+		}
+	});
 
-		return posRules;
-	} catch {
-		throw responseCodes.INVALID_ARGUMENTS;
-	}
+	return posRules;
 };
 
 RuleHelper.negativeRulesToQueries = (rulesRaw) => {
-	try {
-		const rules = RulesSchema.cast(rulesRaw);
-		return rules.filter(r=> notOperators[r.operator]).map(({field, values, operator}) => {
-			const negRule = {
-				field,
-				values,
-				operator: notOperators[operator]
-			};
+	const rules = rulesSchema.cast(rulesRaw);
+	return rules.filter(r=> notOperators[r.operator]).map(({field, values, operator}) => {
+		const negRule = {
+			field,
+			values,
+			operator: notOperators[operator]
+		};
 
-			return RuleHelper.buildQueryFromRule(negRule);
-		});
-	} catch {
-		throw responseCodes.INVALID_ARGUMENTS;
-	}
+		return RuleHelper.buildQueryFromRule(negRule);
+	});
 };
 
 module.exports = RuleHelper;
