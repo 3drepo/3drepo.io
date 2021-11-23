@@ -30,4 +30,13 @@ AuthMiddlewares.validSession = (req, res, next) => {
 	}
 };
 
+AuthMiddlewares.notValidSession = (req, res, next) => {			
+	const { header, session } = req;
+	if (isSessionValid(session, header.referer)) {
+		respond(req, res, templates.alreadyLoggedIn);		
+	} else {
+		next();
+	}
+};
+
 module.exports = AuthMiddlewares;
