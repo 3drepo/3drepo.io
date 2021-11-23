@@ -38,7 +38,6 @@ import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashb
 import { Button } from '@controls/button';
 import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { CollapseSideElementGroup, Container } from './federationsList.styles';
-import { SkeletonListItem } from './skeletonListItem';
 
 type IFederationsList = {
 	emptyMessage: ReactNode;
@@ -135,16 +134,13 @@ export const FederationsList = ({
 					<DashboardList>
 						{!isEmpty(sortedList) ? (
 							sortedList.map((federation, index) => (
-								federation.hasStatsPending ? (
-									<SkeletonListItem delay={index / 10} key={federation._id} />
-								) : (
-									<FederationListItem
-										key={federation._id}
-										federation={federation}
-										filterQuery={filterQuery}
-										onFavouriteChange={setFavourite}
-									/>
-								)
+								<FederationListItem
+									index={index}
+									key={federation._id}
+									federation={federation}
+									filterQuery={filterQuery}
+									onFavouriteChange={setFavourite}
+								/>
 							))
 						) : (
 							<DashboardListEmptyContainer>

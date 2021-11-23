@@ -39,7 +39,7 @@ export const DashboardListCollapse = ({
 	const [isCollapsed, setIsCollapsed] = useState(false);
 
 	return (
-		<Container className={className} $isLoading={isLoading}>
+		<Container className={className} isLoading={isLoading}>
 			<ControlsContainer>
 				<ButtonContainer onClick={() => setIsCollapsed((state) => !state)}>
 					<Tooltip title={(!isCollapsed ? tooltipTitles?.visible : tooltipTitles?.collapsed) ?? ''}>

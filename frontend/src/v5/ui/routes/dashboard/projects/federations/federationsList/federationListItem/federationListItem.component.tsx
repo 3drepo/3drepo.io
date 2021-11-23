@@ -32,113 +32,122 @@ import { EllipsisButtonWithMenu } from '@controls/ellipsisButtonWithMenu';
 import { getFederationMenuItems } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/federationsList.helpers';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IFederation } from '@/v5/store/federations/federations.types';
+import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 
 interface IFederationListItem {
+	index: number;
 	federation: IFederation;
 	filterQuery: string;
 	onFavouriteChange: (id: string, value: boolean) => void;
 }
 
 export const FederationListItem = ({
+	index,
 	federation,
 	filterQuery,
 	onFavouriteChange,
-}: IFederationListItem): JSX.Element => (
-	<DashboardListItem
-		key={federation._id}
-	>
-		<DashboardListItemRow>
-			<DashboardListItemTitle
-				tooltipTitle={
-					<Trans id="federations.list.item.title.tooltip" message="Launch in Viewer" />
-				}
-				subtitle={federation.code}
-			>
-				<Highlight search={filterQuery}>
-					{federation.name}
-				</Highlight>
-			</DashboardListItemTitle>
-			<DashboardListItemButton
-				onClick={() => {
-					// eslint-disable-next-line no-console
-					console.log('handle issues button');
-				}}
-				width={165}
-				tooltipTitle={
-					<Trans id="federations.list.item.issues.tooltip" message="View issues" />
-				}
-			>
-				<Trans
-					id="federations.list.item.issues"
-					message="{count} issues"
-					values={{ count: federation.issues }}
-				/>
-			</DashboardListItemButton>
-			<DashboardListItemButton
-				onClick={() => {
-					// eslint-disable-next-line no-console
-					console.log('handle risks button');
-				}}
-				width={165}
-				tooltipTitle={
-					<Trans id="federations.list.item.risks.tooltip" message="View risks" />
-				}
-			>
-				<Trans
-					id="federations.list.item.risks"
-					message="{count} risks"
-					values={{ count: federation.risks }}
-				/>
-			</DashboardListItemButton>
-			<DashboardListItemButton
-				onClick={() => {
-					// eslint-disable-next-line no-console
-					console.log('handle containers button');
-				}}
-				width={165}
-				tooltipTitle={
-					<Trans id="federations.list.item.containers.tooltip" message="View containers" />
-				}
-			>
-				<Trans
-					id="federations.list.item.containers"
-					message="{count} containers"
-					values={{ count: federation.containers }}
-				/>
-			</DashboardListItemButton>
-			<DashboardListItemText width={188}>
-				<Highlight search={filterQuery}>
-					{federation.category}
-				</Highlight>
-			</DashboardListItemText>
-			<DashboardListItemText width={97}>
-				{federation.lastUpdated ? i18n.date(federation.lastUpdated) : ''}
-			</DashboardListItemText>
-			<DashboardListItemIcon>
-				<Tooltip
-					title={
-						<Trans id="federations.list.item.favourite.tooltip" message="Add to favourites" />
+}: IFederationListItem): JSX.Element => {
+	if (federation.hasStatsPending) {
+		return <SkeletonListItem delay={index / 10} key={federation._id} />;
+	}
+
+	return (
+		<DashboardListItem
+			key={federation._id}
+		>
+			<DashboardListItemRow>
+				<DashboardListItemTitle
+					tooltipTitle={
+						<Trans id="federations.list.item.title.tooltip" message="Launch in Viewer" />
+					}
+					subtitle={federation.code}
+				>
+					<Highlight search={filterQuery}>
+						{federation.name}
+					</Highlight>
+				</DashboardListItemTitle>
+				<DashboardListItemButton
+					onClick={() => {
+						// eslint-disable-next-line no-console
+						console.log('handle issues button');
+					}}
+					width={165}
+					tooltipTitle={
+						<Trans id="federations.list.item.issues.tooltip" message="View issues" />
 					}
 				>
-					<FavouriteCheckbox
-						checked={federation.isFavourite}
-						onClick={(event) => {
-							event.stopPropagation();
-						}}
-						onChange={(event) => {
-							onFavouriteChange(
-								federation._id,
-								!!event.currentTarget.checked,
-							);
-						}}
+					<Trans
+						id="federations.list.item.issues"
+						message="{count} issues"
+						values={{ count: federation.issues }}
 					/>
-				</Tooltip>
-			</DashboardListItemIcon>
-			<DashboardListItemIcon>
-				<EllipsisButtonWithMenu
-					list={getFederationMenuItems(federation._id)}
-				/>
-			</DashboardListItemIcon>
-		</DashboardListItemRow>
-	</DashboardListItem>
-);
+				</DashboardListItemButton>
+				<DashboardListItemButton
+					onClick={() => {
+						// eslint-disable-next-line no-console
+						console.log('handle risks button');
+					}}
+					width={165}
+					tooltipTitle={
+						<Trans id="federations.list.item.risks.tooltip" message="View risks" />
+					}
+				>
+					<Trans
+						id="federations.list.item.risks"
+						message="{count} risks"
+						values={{ count: federation.risks }}
+					/>
+				</DashboardListItemButton>
+				<DashboardListItemButton
+					onClick={() => {
+						// eslint-disable-next-line no-console
+						console.log('handle containers button');
+					}}
+					width={165}
+					tooltipTitle={
+						<Trans id="federations.list.item.containers.tooltip" message="View containers" />
+					}
+				>
+					<Trans
+						id="federations.list.item.containers"
+						message="{count} containers"
+						values={{ count: federation.containers }}
+					/>
+				</DashboardListItemButton>
+				<DashboardListItemText width={188}>
+					<Highlight search={filterQuery}>
+						{federation.category}
+					</Highlight>
+				</DashboardListItemText>
+				<DashboardListItemText width={97}>
+					{federation.lastUpdated ? i18n.date(federation.lastUpdated) : ''}
+				</DashboardListItemText>
+				<DashboardListItemIcon>
+					<Tooltip
+						title={
+							<Trans id="federations.list.item.favourite.tooltip" message="Add to favourites" />
+						}
+					>
+						<FavouriteCheckbox
+							checked={federation.isFavourite}
+							onClick={(event) => {
+								event.stopPropagation();
+							}}
+							onChange={(event) => {
+								onFavouriteChange(
+									federation._id,
+									!!event.currentTarget.checked,
+								);
+							}}
+						/>
+					</Tooltip>
+				</DashboardListItemIcon>
+				<DashboardListItemIcon>
+					<EllipsisButtonWithMenu
+						list={getFederationMenuItems(federation._id)}
+					/>
+				</DashboardListItemIcon>
+			</DashboardListItemRow>
+		</DashboardListItem>
+	);
+};
