@@ -34,11 +34,14 @@ import { IS_DEVELOPMENT } from '@/v4/constants/environment';
 import { UnityUtil } from '@/globals/unity-util';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import * as OfflinePluginRuntime from 'offline-plugin/runtime';
-import { initializeActionsDispatchers } from './v5/services/actionsDispatchers/actionsDistpatchers.helper';
+import { initializeIntl } from '@/v5/services/intl';
+import { initializeActionsDispatchers } from '@/v5/services/actionsDispatchers/actionsDistpatchers.helper';
 
 window.UnityUtil = UnityUtil;
 
 initializeActionsDispatchers(dispatch);
+
+initializeIntl(navigator.language);
 
 const render = () => {
 	ReactDOM.render(

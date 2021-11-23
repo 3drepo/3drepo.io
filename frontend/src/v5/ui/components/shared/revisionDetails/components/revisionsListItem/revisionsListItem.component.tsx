@@ -16,7 +16,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@lingui/core';
 import { useParams } from 'react-router';
 
 import { RevisionsListItemText } from '@components/shared/revisionDetails/components/revisionsListItemText';
@@ -25,6 +24,7 @@ import { RevisionsListItemCode } from '@components/shared/revisionDetails/compon
 import { RevisionsListItemButton } from '@components/shared/revisionDetails/components/revisionsListItemButton';
 import { IRevision } from '@/v5/store/revisions/revisions.types';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
+import { formatDate } from '@/v5/services/intl';
 import { Container } from './revisionsListItem.styles';
 
 type IRevisionsListItem = {
@@ -45,7 +45,7 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 	return (
 		<Container>
 			<RevisionsListItemText meta width={130} active={active}>
-				{i18n.date(timestamp)}
+				{formatDate(timestamp)}
 			</RevisionsListItemText>
 			<RevisionsListItemAuthor authorName={author} active={active} width={228} />
 			<RevisionsListItemCode width={330} onClick={() => {}}>{tag}</RevisionsListItemCode>
