@@ -107,7 +107,9 @@ export const ContainerListItem = ({
 			<DashboardListItemIcon>
 				<Tooltip
 					title={
-						<Trans id="containers.list.item.favourite.tooltip" message="Add to favourites" />
+						container.isFavourite
+							? <Trans id="containers.list.item.favourite.removeTooltip" message="Remove from favourites" />
+							: <Trans id="containers.list.item.favourite.addTooltip" message="Add to favourites" />
 					}
 				>
 					<FavouriteCheckbox
