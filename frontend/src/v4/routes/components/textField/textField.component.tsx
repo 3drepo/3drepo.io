@@ -167,7 +167,6 @@ export class TextField extends React.PureComponent<IProps, IState> {
 
 		if (requiredConfirm) {
 			this.setState({ currentValue: event.target.value });
-			field.onChange(event);
 
 			if (onBeforeConfirmChange) {
 				onBeforeConfirmChange(event);
@@ -175,6 +174,8 @@ export class TextField extends React.PureComponent<IProps, IState> {
 		} else if (onChange) {
 			onChange(event);
 		}
+
+		field.onChange(event);
 	}
 
 	public handleEnterPress = (event) => {

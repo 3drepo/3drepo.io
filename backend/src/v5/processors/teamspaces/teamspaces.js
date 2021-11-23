@@ -16,6 +16,8 @@
  */
 
 const { getAccessibleTeamspaces } = require('../../models/users');
+const { getJobsToUsers } = require('../../models/jobs');
+const { getMembersInfo } = require('../../models/teamspaces');
 const { isTeamspaceAdmin } = require('../../utils/permissions/permissions');
 
 const Teamspaces = {};
@@ -23,6 +25,24 @@ const Teamspaces = {};
 Teamspaces.getTeamspaceListByUser = async (user) => {
 	const tsList = await getAccessibleTeamspaces(user);
 	return Promise.all(tsList.map(async (ts) => ({ name: ts, isAdmin: await isTeamspaceAdmin(ts, user) })));
+};
+
+Teamspaces.getTeamspaceMembersInfo = async (teamspace) => {
+	const [membersList, jobsList] = await Promise.all([
+		getMembersInfo(teamspace),
+		getJobsToUsers(teamspace),
+	]);
+
+	const usersToJob = {};
+	jobsList.forEach(({ _id, users }) => {
+		users.forEach((user) => {
+			usersToJob[user] = _id;
+		});
+	});
+
+	return membersList.map(
+		(member) => (usersToJob[member.user] ? { ...member, job: usersToJob[member.user] } : member),
+	);
 };
 
 module.exports = Teamspaces;

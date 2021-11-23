@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getSwaggerComponents } = require('../utils/responseCodes');
+const { getSwaggerComponents } = require('../../utils/responseCodes');
 
 const Schemas = { responses: getSwaggerComponents(), schemas: {} };
 
@@ -147,6 +147,122 @@ Schemas.schemas.group = {
 			},
 		},
 
+	},
+};
+
+Schemas.schemas.modelSettings = {
+	description: 'The settings of the model',
+	type: 'object',
+	properties: {
+		_id: {
+			type: 'string',
+			format: 'uuid',
+			description: 'Model ID',
+			example: '3549ddf6-885d-4977-87f1-eeac43a0e818',
+		},
+		name: {
+			type: 'string',
+			description: 'The name of the model',
+			example: 'Lego tree',
+		},
+		desc: {
+			type: 'string',
+			description: 'The description of the model',
+			example: 'Model description',
+		},
+		type: {
+			type: 'string',
+			description: 'The type of the model',
+			example: 'Structural',
+		},
+		surveyPoints: {
+			type: 'array',
+			description: 'The survey points of the model',
+			items: {
+				type: 'object',
+				properties: {
+					position: {
+						type: 'array',
+						description: 'The point coordinate that maps to the latLong value (should be in OpenGL axis conventions)',
+						items: {
+							type: 'float',
+							example: '23.56',
+						},
+						minItems: 3,
+						maxItems: 3,
+					},
+					latLong: {
+						type: 'array',
+						description: 'The latitude and longitude of the survey point',
+						items: {
+							type: 'float',
+							example: '23.56',
+						},
+						minItems: 2,
+						maxItems: 2,
+					},
+				},
+			},
+		},
+		angleFromNorth: {
+			type: 'integer',
+			description: 'The angle from north of the model',
+			example: 150,
+		},
+		timestamp: {
+			type: 'integer',
+			example: '1629976656315',
+			description: 'The date the last model was uploaded (in ms)',
+		},
+		status: {
+			type: 'string',
+			description: 'The status of the model',
+			example: 'ok',
+		},
+		defaultView: {
+			type: 'string',
+			format: 'uuid',
+			description: 'The ID of the view that is being used as default view',
+			example: '3549ddf6-885d-4977-87f1-eeac43a0e818',
+		},
+		defaultLegend: {
+			type: 'string',
+			format: 'uuid',
+			description: 'The ID of the legend that is being used as default legend',
+			example: '3549ddf6-885d-4977-87f1-eeac43a0e818',
+		},
+		unit: {
+			type: 'string',
+			description: 'The units of the model',
+			example: 'mm',
+			enum: ['mm', 'cm', 'dm', 'm', 'ft'],
+		},
+		code: {
+			type: 'string',
+			description: 'The code of the model',
+			example: 'MOD1',
+		},
+		errorReason: {
+			type: 'object',
+			description: 'The the reason the model upload failed',
+			properties: {
+				message: {
+					type: 'string',
+					description: 'The error message',
+					example: 'System error occured. Please contact support.',
+				},
+				timestamp: {
+					type: 'integer',
+					description: 'The date the error occured (in ms)',
+					example: '1629976656315',
+				},
+				errorCode: {
+					type: 'string',
+					description: 'The error code',
+					example: 14,
+				},
+			},
+		},
 	},
 };
 

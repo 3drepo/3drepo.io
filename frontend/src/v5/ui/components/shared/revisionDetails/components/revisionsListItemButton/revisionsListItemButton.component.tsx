@@ -15,19 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const EventManagerConst = {};
+import React from 'react';
+import { Tooltip } from '@material-ui/core';
+import { Button, Container } from './revisionsListItemButton.styles';
 
-const eventList = ['NEW_GROUPS', 'UPDATE_GROUP'];
-
-const generateEventsMap = () => {
-	const res = {};
-	eventList.forEach((event) => {
-		res[event] = event;
-	});
-
-	return res;
+type IRevisionsListItemButton= {
+	status?: boolean;
+	onClick?: (e: React.SyntheticEvent) => void;
 };
 
-EventManagerConst.events = generateEventsMap();
+export const RevisionsListItemButton = ({ status, onClick }: IRevisionsListItemButton): JSX.Element => {
+	const isVoid = !!status;
+	const textStatus = isVoid ? 'void' : 'active';
+	const changeToStatus = isVoid ? 'active' : 'void';
 
-module.exports = EventManagerConst;
+	return (
+		<Container>
+			<Tooltip title={`Change to ${changeToStatus}`}>
+				<Button $isVoid={isVoid} onClick={onClick}>
+					{textStatus}
+				</Button>
+			</Tooltip>
+		</Container>
+	);
+};

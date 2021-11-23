@@ -20,19 +20,31 @@ const Yup = require('yup');
 
 const YupHelper = { validators: {}, types: { strings: {} } };
 
+YupHelper.validators.alphanumeric = (yupObj) => yupObj.matches(/^[\w]*$/,
+	// eslint-disable-next-line no-template-curly-in-string
+	'${path} can only contain alpha-numeric characters or underscores');
+
 YupHelper.types.id = Yup.string().uuid('ids are expected to be of uuid format').transform((val, org) => UUIDToString(org));
 
 YupHelper.types.colorArr = Yup.array()
 	.of(Yup.number().min(0).max(255).integer())
 	.min(3).max(4);
 
-YupHelper.types.strings.username = Yup.string().min(2).max(65).strict(true)
-	.matches(/^[\w]{1,64}$/,
-	// eslint-disable-next-line no-template-curly-in-string
-		'${path} cannot be longer than 64 characters and must only contain alphanumeric characters and underscores');
+YupHelper.types.strings.code = YupHelper.validators.alphanumeric(
+	Yup.string().min(1).max(50).strict(true),
+);
+
+YupHelper.types.degrees = Yup.number().min(0).max(360);
+
+YupHelper.types.strings.username = YupHelper.validators.alphanumeric(Yup.string().min(2).max(65).strict(true));
+
 YupHelper.types.strings.title = Yup.string().min(1).max(120);
 
-YupHelper.types.strings.blob = Yup.string().min(1).max(650);
+// This is used for shorter descriptions such as revision desc, model desc, teamspace desc etc.
+YupHelper.types.strings.shortDescription = Yup.string().min(1).max(660);
+
+// This is used for longer descriptions such as groups, issues, risks
+YupHelper.types.strings.longDescription = Yup.string().min(1).max(1200);
 
 YupHelper.types.timestamp = Yup.number().min(new Date(2000, 1, 1).getTime()).integer()
 	.transform((value, originalValue) => {
@@ -50,6 +62,14 @@ YupHelper.types.position = Yup.array()
 	.of(
 		Yup.number(),
 	).length(3);
+
+YupHelper.types.surveyPoints = Yup.array()
+	.of(
+		Yup.object().shape({
+			position: YupHelper.types.position.required(),
+			latLong: Yup.array().of(Yup.number()).length(2).required(),
+		}),
+	);
 
 YupHelper.types.strings.unit = Yup.string()
 	.oneOf(['mm', 'cm', 'dm', 'm', 'ft']);

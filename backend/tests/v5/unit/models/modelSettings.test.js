@@ -17,9 +17,16 @@
 
 const { src } = require('../../helper/path');
 
+jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const Model = require(`${src}/models/modelSettings`);
+const { getInfoFromCode } = require(`${src}/models/modelSettings.constants`);
 const db = require(`${src}/handler/db`);
+const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 const { templates } = require(`${src}/utils/responseCodes`);
+
+const publishFn = EventsManager.publish.mockImplementation(() => { });
 
 const testGetModelById = () => {
 	describe('Get ModelById', () => {
@@ -100,6 +107,43 @@ const testGetFederationById = () => {
 	});
 };
 
+const testGetModelByQuery = () => {
+	describe('Get model by query', () => {
+		test('should return model ', async () => {
+			const existingModelId = 'someModel';
+			const existingModelName = 'model name';
+			const expectedData = {
+				_id: existingModelId,
+				name: existingModelName,
+			};
+
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(expectedData);
+
+			const teamspace = 'someTS';
+			const query = { _id: { $in: [existingModelId] }, name: existingModelName };
+			const res = await Model.getModelByQuery(teamspace, query);
+			expect(res).toEqual(expectedData);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual('settings');
+			expect(fn.mock.calls[0][2]).toEqual(query);
+		});
+
+		test('should return model not found with non-existent name', async () => {
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+
+			const teamspace = 'someTS';
+			const query = { _id: { $in: ['someModel'] }, name: 'badModelName' };
+			await expect(Model.getModelByQuery(teamspace, query))
+				.rejects.toEqual(templates.modelNotFound);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual('settings');
+			expect(fn.mock.calls[0][2]).toEqual(query);
+		});
+	});
+};
+
 const testGetContainers = () => {
 	describe('Get containers', () => {
 		test('should return the list of containers ', async () => {
@@ -114,10 +158,18 @@ const testGetContainers = () => {
 				},
 			];
 
-			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
 
-			const res = await Model.getContainers('someTS', ['someModel']);
+			const teamspace = 'someTS';
+			const modelIds = ['someModel'];
+			const res = await Model.getContainers(teamspace, modelIds);
 			expect(res).toEqual(expectedData);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual('settings');
+			expect(fn.mock.calls[0][2]).toEqual({ _id: { $in: modelIds }, federate: { $ne: true } });
+			expect(fn.mock.calls[0][3]).toEqual(undefined);
+			expect(fn.mock.calls[0][4]).toEqual(undefined);
 		});
 	});
 };
@@ -136,14 +188,182 @@ const testGetFederations = () => {
 				},
 			];
 
-			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
 
-			const res = await Model.getFederations('someTS', ['someModel']);
+			const teamspace = 'someTS';
+			const modelIds = ['someModel'];
+			const res = await Model.getFederations(teamspace, modelIds);
 			expect(res).toEqual(expectedData);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual('settings');
+			expect(fn.mock.calls[0][2]).toEqual({ _id: { $in: modelIds }, federate: true });
+			expect(fn.mock.calls[0][3]).toEqual(undefined);
+			expect(fn.mock.calls[0][4]).toEqual(undefined);
 		});
 	});
 };
 
+const testAddModel = () => {
+	describe('Add model', () => {
+		test('should return inserted ID on success', async () => {
+			const fn = jest.spyOn(db, 'insertOne');
+
+			const teamspace = 'someTS';
+			const res = await Model.addModel(teamspace, {});
+
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual('settings');
+			expect(fn.mock.calls[0][2]).toHaveProperty('_id');
+			expect(isUUIDString(fn.mock.calls[0][2]._id));
+
+			expect(res).toEqual(fn.mock.calls[0][2]._id);
+		});
+	});
+};
+
+const testDeleteModel = () => {
+	describe('Delete model', () => {
+		test('should succeed', async () => {
+			const expectedData = { deletedCount: 1 };
+			const fn = jest.spyOn(db, 'deleteOne').mockResolvedValue(expectedData);
+
+			const teamspace = 'someTS';
+			const modelId = 'someModel';
+			const res = await Model.deleteModel(teamspace, modelId);
+			expect(res).toEqual(undefined);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual('settings');
+			expect(fn.mock.calls[0][2]).toEqual({ _id: modelId });
+		});
+
+		test('should return model not found with invalid model ID', async () => {
+			const expectedData = { deletedCount: 0 };
+			const fn = jest.spyOn(db, 'deleteOne').mockResolvedValue(expectedData);
+
+			const teamspace = 'someTS';
+			const modelId = 'badModel';
+			await expect(Model.deleteModel(teamspace, modelId))
+				.rejects.toEqual(templates.modelNotFound);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual('settings');
+			expect(fn.mock.calls[0][2]).toEqual({ _id: modelId });
+		});
+	});
+};
+
+const testUpdateModelStatus = () => {
+	describe('Update model status', () => {
+		test(`should update model status and trigger a ${events.MODEL_IMPORT_UPDATE} event`, async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 1 });
+
+			const teamspace = 'ts';
+			const model = 'model';
+			const user = 'user';
+			const status = 'queued';
+			const corId = '123';
+			await expect(Model.updateModelStatus(teamspace, model, status, corId, user)).resolves.toBe(undefined);
+
+			expect(fn.mock.calls.length).toBe(1);
+			const action = fn.mock.calls[0][3];
+			expect(action.$set.corID).toEqual(corId);
+			expect(action.$set.status).toEqual(status);
+
+			expect(publishFn.mock.calls.length).toBe(1);
+			expect(publishFn.mock.calls[0][0]).toEqual(events.MODEL_IMPORT_UPDATE);
+			expect(publishFn.mock.calls[0][1]).toEqual({ teamspace, model, corId, status, user });
+		});
+
+		test('should not trigger event if model no longer exists ', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 0 });
+			publishFn.mockClear();
+
+			const status = 'queued';
+			await expect(Model.updateModelStatus('teamspace', 'model', status)).resolves.toBe(undefined);
+
+			expect(fn.mock.calls.length).toBe(1);
+			const action = fn.mock.calls[0][3];
+			expect(action.$set.status).toEqual(status);
+			expect(action.$set.corId).toEqual(undefined);
+
+			expect(publishFn.mock.calls.length).toBe(0);
+		});
+	});
+};
+
+const testNewRevisionProcessed = () => {
+	describe.each([
+		[0], [1], [14], [100],
+	])('Update with new revision', (retVal) => {
+		const teamspace = 'ts';
+		const model = 'model';
+		const user = 'user';
+		const corId = '123';
+		const { success, message, userErr } = getInfoFromCode(retVal);
+		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED} event`,
+			async () => {
+				const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 1 });
+				publishFn.mockClear();
+				await expect(Model.newRevisionProcessed(
+					teamspace, model, corId, retVal, user,
+				)).resolves.toBe(undefined);
+
+				expect(fn.mock.calls.length).toBe(1);
+				const action = fn.mock.calls[0][3];
+				if (success) {
+					expect(action.$set.status).toEqual('ok');
+					expect(action.$set).toHaveProperty('timestamp');
+				} else {
+					expect(action.$set.status).toEqual('failed');
+					expect(action.$set).not.toHaveProperty('timestamp');
+					expect(action.$set).toHaveProperty('errorReason');
+					expect(action.$set.errorReason.message).toEqual(message);
+					expect(action.$set.errorReason.errorCode).toEqual(retVal);
+					expect(action.$set.errorReason).toHaveProperty('timestamp');
+				}
+				expect(action.$unset).toEqual({ corID: 1 });
+
+				expect(publishFn.mock.calls.length).toBe(1);
+				expect(publishFn.mock.calls[0][0]).toEqual(events.MODEL_IMPORT_FINISHED);
+				expect(publishFn.mock.calls[0][1]).toEqual({
+					teamspace,
+					model,
+					corId,
+					userErr,
+					message,
+					success,
+					errCode: retVal,
+					user,
+				});
+			});
+	});
+	describe('Update with new revision when the model is already deleted', () => {
+		test('should not trigger event', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 0 });
+			publishFn.mockClear();
+
+			const teamspace = 'ts';
+			const model = 'model';
+			const user = 'user';
+			const retVal = 0;
+			const corId = '123';
+			await expect(Model.newRevisionProcessed(
+				teamspace, model, corId, retVal, user,
+			)).resolves.toBe(undefined);
+
+			expect(fn.mock.calls.length).toBe(1);
+			const action = fn.mock.calls[0][3];
+			expect(action.$set.status).toEqual('ok');
+			expect(action.$set).toHaveProperty('timestamp');
+			expect(action.$unset).toEqual({ corID: 1 });
+
+			expect(publishFn.mock.calls.length).toBe(0);
+		});
+	});
+};
 const testUpdateModelSettings = () => {
 	const checkResults = (fn, model, updateObject) => {
 		expect(fn.mock.calls.length).toBe(1);
@@ -243,7 +463,12 @@ describe('models/modelSettings', () => {
 	testGetModelById();
 	testGetContainerById();
 	testGetFederationById();
+	testGetModelByQuery();
 	testGetContainers();
 	testGetFederations();
+	testAddModel();
+	testDeleteModel();
+	testUpdateModelStatus();
+	testNewRevisionProcessed();
 	testUpdateModelSettings();
 });

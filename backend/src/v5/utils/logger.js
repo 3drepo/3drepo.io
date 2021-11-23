@@ -36,6 +36,7 @@ Logger.logger = systemLogger;
 Logger.labels = {
 	network: 'NET',
 	event: 'EVENT',
+	queue: 'AMQP',
 };
 
 module.exports = Logger;

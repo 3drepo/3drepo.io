@@ -17,6 +17,7 @@
 
 const { Router } = require('express');
 const Teamspaces = require('../../processors/teamspaces/teamspaces');
+const { hasAccessToTeamspace } = require('../../middleware/permissions/permissions');
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
 const { validSession } = require('../../middleware/auth');
@@ -26,6 +27,16 @@ const getTeamspaceList = (req, res) => {
 	Teamspaces.getTeamspaceListByUser(user).then((teamspaces) => {
 		respond(req, res, templates.ok, { teamspaces });
 	}).catch((err) => respond(req, res, err));
+};
+
+const getTeamspaceMembers = (req, res) => {
+	const { teamspace } = req.params;
+	Teamspaces.getTeamspaceMembersInfo(teamspace).then((members) => {
+		respond(req, res, templates.ok, { members });
+	}).catch(
+		/* istanbul ignore next */
+		(err) => respond(req, res, err),
+	);
 };
 
 const establishRoutes = () => {
@@ -64,6 +75,60 @@ const establishRoutes = () => {
 	 *
 	 */
 	router.get('/', validSession, getTeamspaceList);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/members:
+	 *   get:
+	 *     description: Get the list of members within the teamspace
+	 *     tags: [Teamspaces]
+	 *     operationId: getTeamspaceMembers
+	 *     parameters:
+   	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         description: returns list of teamspace members with their basic information
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 members:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       user:
+	 *                         type: string
+	 *                         description: User name
+	 *                         example: johnPaul01
+	 *                       firstName:
+	 *                         type: string
+	 *                         description: First name
+	 *                         example: John
+	 *                       lastName:
+	 *                         type: string
+	 *                         description: Last name
+	 *                         example: Paul
+	 *                       company:
+	 *                         type: string
+	 *                         description: Name of the company
+	 *                         example: 3D Repo Ltd
+	 *                       job:
+	 *                         type: string
+	 *                         description: Job within the teamspace
+	 *                         example: Project Manager
+	 *
+	 */
+	router.get('/:teamspace/members', hasAccessToTeamspace, getTeamspaceMembers);
 
 	return router;
 };

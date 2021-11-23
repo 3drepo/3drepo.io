@@ -148,6 +148,8 @@ config.db.host = (config.db.host.constructor === Array) ? config.db.host : [conf
 config.db.port = coalesce(config.db.port, 27017); // Default mongo port
 config.db.port = (config.db.port.constructor === Array) ? config.db.port : [config.db.port];
 
+config.db.authSource = config.db.authSource || "";
+
 if (config.db.port.length !== config.db.host.length) {
 	console.error("Incorrect number of hosts and ports");
 	// eslint-disable-next-line no-process-exit
@@ -261,6 +263,8 @@ config.paypal = coalesce(config.paypal, null);
 if(config.paypal) {
 	config.paypal.validateIPN = coalesce(config.paypal.validateIPN, true);
 }
+
+config.cn_queue = { maxRetries: 3, ...config.cn_queue};
 
 // upload size limit
 config.uploadSizeLimit = coalesce(config.uploadSizeLimit, 209715200);

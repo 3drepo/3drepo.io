@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src } = require('../../helper/path');
+const { src } = require('../../../helper/path');
 
-const EventsManager = require(`${src}/services/eventsManager`);
-const { events } = require(`${src}/services/eventsManager.constants`);
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 
-describe('services/eventsManager', () => {
+describe('services/eventsManager/eventsManager', () => {
 	test('Should throw an error if the user tries to subscribe to an unknown event', () => {
 		expect(() => EventsManager.subscribe('sdflkdsjflds', () => {})).toThrow();
 	});

@@ -235,10 +235,12 @@ describe("Issues", function () {
 			expect(res.body.viewpoint.near).to.equal(issue.viewpoint.near);
 		});
 
+		const generateRandomString = (length = 20) => require("crypto").randomBytes(Math.ceil(length / 2.0)).toString('hex');
+
 		it("with long desc should fail", function(done) {
 			const issue = Object.assign({"name":"Issue test"}, {
 				...baseIssue,
-				"desc":"LongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLong"
+				"desc": generateRandomString(1201)
 			});
 
 			agent.post(`/${username}/${model}/issues`)
@@ -1988,7 +1990,7 @@ describe("Issues", function () {
 			const issue = Object.assign({"name":"Issue test"}, baseIssue);
 			let issueId;
 
-			const desc = { desc: "LongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLong" };
+			const desc = { desc:  generateRandomString(1201) };
 
 			async.series([
 				function(done) {

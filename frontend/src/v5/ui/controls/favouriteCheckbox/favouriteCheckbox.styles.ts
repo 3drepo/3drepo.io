@@ -15,8 +15,41 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import styled, { css } from 'styled-components';
 import { Checkbox as CheckboxComponent } from '@material-ui/core';
-import styled from 'styled-components';
+
+const contrastStyles = css`
+	path {
+		fill: none;
+		stroke: ${({ theme }) => theme.palette.secondary.light};
+	}
+
+	&:hover {
+		&& {
+			background-color: ${({ theme }) => theme.palette.primary.contrast};
+		}
+	}
+
+	&.Mui-focusVisible {
+		&& {
+			border: 1px solid ${({ theme }) => theme.palette.primary.main};
+			path {
+				fill: ${({ theme }) => theme.palette.primary.main};
+			}
+		}
+	}
+
+	&:active {
+		&& {
+			background-color: ${({ theme }) => theme.palette.secondary.light};
+			border-color: ${({ theme }) => theme.palette.secondary.light};
+
+			path {
+				fill: ${({ theme }) => theme.palette.secondary.main};
+			}
+		}
+	}
+`;
 
 export const Checkbox = styled(CheckboxComponent)`
 	&& {
@@ -58,4 +91,6 @@ export const Checkbox = styled(CheckboxComponent)`
 			}
 		}
 	}
+
+	${({ selected }) => selected && contrastStyles}
 `;

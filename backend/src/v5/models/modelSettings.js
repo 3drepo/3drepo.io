@@ -17,24 +17,65 @@
 
 const Models = {};
 const db = require('../handler/db');
+const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUIDString } = require('../utils/helper/uuids');
+const { getInfoFromCode } = require('./modelSettings.constants');
+const { publish } = require('../services/eventsManager/eventsManager');
+const { events } = require('../services/eventsManager/eventsManager.constants');
+const { generateUUIDString } = require('../utils/helper/uuids');
+const deleteOneModel = (ts, query) => db.deleteOne(ts, 'settings', query);
+const { getInfoFromCode } = require('./modelSettings.constants');
+const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
-const countModels = (ts, query) => db.count(ts, 'settings', query);
 const deleteOneModel = (ts, query) => db.deleteOne(ts, 'settings', query);
-const insertOneModel = (ts, data) => db.insertOne(ts, 'settings', data);
 const findOneModel = (ts, query, projection) => db.findOne(ts, 'settings', query, projection);
-const findModel = (ts, query, projection, sort) => db.find(ts, 'settings', query, projection, sort);
+const findModels = (ts, query, projection, sort) => db.find(ts, 'settings', query, projection, sort);
+const insertOneModel = (ts, data) => db.insertOne(ts, 'settings', data);
+Models.addModel = async (ts, data) => {
+	const _id = generateUUIDString();
+	await insertOneModel(ts, { ...data, _id });
+
+	publish(events.NEW_MODEL, { teamspace: ts, model: _id });
+
+	return _id;
+};
+
+Models.deleteModel = async (ts, model) => {
+	const { deletedCount } = await deleteOneModel(ts, { _id: model });
+
+	if (deletedCount === 0) {
+		throw templates.modelNotFound;
+	}
+
+	publish(events.DELETE_MODEL, { teamspace: ts, model });
+};
+
+Models.getModelByQuery = async (ts, query, projection) => {
 
 const noFederations = { federate: { $ne: true } };
 const onlyFederations = { federate: true };
 
-Models.getModelByName = async (ts, ids, name, projection) => {
-	const query = { _id: { $in: ids }, name };
-	return findOneModel(ts, query, projection);
+Models.addModel = async (ts, data) => {
+	const _id = generateUUIDString();
+	await insertOneModel(ts, { ...data, _id });
+
+Models.getModelById = (ts, model, projection) => Models.getModelByQuery(ts, { _id: model }, projection);
+
+	return _id;
 };
 
-const getModelByQuery = async (ts, query, projection) => {
+Models.deleteModel = async (ts, model) => {
+	const { deletedCount } = await deleteOneModel(ts, { _id: model });
+
+	if (deletedCount === 0) {
+		throw templates.modelNotFound;
+	}
+
+	publish(events.DELETE_MODEL, { teamspace: ts, model });
+};
+
+Models.getModelByQuery = async (ts, query, projection) => {
 	const res = await findOneModel(ts, query, projection);
 	if (!res) {
 		throw templates.modelNotFound;
@@ -43,45 +84,11 @@ const getModelByQuery = async (ts, query, projection) => {
 	return res;
 };
 
-Models.addModel = async (ts, data) => {
-	const newModelId = generateUUIDString(); 
-	await insertOneModel(ts, { _id: newModelId, ...data });
-	return newModelId;
-};
-
-Models.deleteModel = async (ts, model) => {
-	const res = await deleteOneModel(ts, { _id: model });
-
-	if (res.deletedCount === 0) {
-		throw templates.modelNotFound;
-	}
-};
-
-Models.isSubModel = async (ts, model) => {
-	const subModelCount = await countModels(ts, { 'subModels.model': model });
-
-	return subModelCount > 0;
-};
-
-Models.removeModelCollections = async (ts, model) => {
-	const collections = await db.listCollections(ts);
-	const promises = [];
-
-	collections.forEach((collection) => {
-		if (collection.name.startsWith(`${model}.`)) {
-			promises.push(db.dropCollection(ts, collection));
-		}
-	});
-
-	return Promise.all(promises);
-};
-
-Models.getModelById = (ts, model, projection) => getModelByQuery(ts, { _id: model }, projection);
+Models.getModelById = (ts, model, projection) => Models.getModelByQuery(ts, { _id: model }, projection);
 
 Models.getContainerById = async (ts, container, projection) => {
 	try {
-		const res = await getModelByQuery(ts, { _id: container, ...noFederations }, projection);
-		return res;
+		return await Models.getModelByQuery(ts, { _id: container, ...noFederations }, projection);
 	} catch (err) {
 		if (err?.code === templates.modelNotFound.code) {
 			throw templates.containerNotFound;
@@ -93,8 +100,7 @@ Models.getContainerById = async (ts, container, projection) => {
 
 Models.getFederationById = async (ts, federation, projection) => {
 	try {
-		const res = await getModelByQuery(ts, { _id: federation, ...onlyFederations }, projection);
-		return res;
+		return await Models.getModelByQuery(ts, { _id: federation, ...onlyFederations }, projection);
 	} catch (err) {
 		if (err?.code === templates.modelNotFound.code) {
 			throw templates.federationNotFound;
@@ -104,14 +110,58 @@ Models.getFederationById = async (ts, federation, projection) => {
 	}
 };
 
-Models.getContainers = async (ts, ids, projection, sort) => {
+Models.getContainers = (ts, ids, projection, sort) => {
 	const query = { _id: { $in: ids }, ...noFederations };
-	return findModel(ts, query, projection, sort);
+	return findModels(ts, query, projection, sort);
 };
 
-Models.getFederations = async (ts, ids, projection, sort) => {
+Models.getFederations = (ts, ids, projection, sort) => {
 	const query = { _id: { $in: ids }, ...onlyFederations };
-	return findModel(ts, query, projection, sort);
+	return findModels(ts, query, projection, sort);
+};
+
+Models.updateModelStatus = async (teamspace, model, status, corId, user) => {
+	const query = { _id: model };
+	const updateObj = { status };
+	if (corId) {
+		updateObj.corID = corId;
+	}
+
+	const { matchedCount } = await updateOneModel(teamspace, query, { $set: updateObj });
+	if (matchedCount > 0) {
+		// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
+		// trigger notifications.
+		publish(events.MODEL_IMPORT_UPDATE, { teamspace, model, corId, status, user });
+	}
+};
+
+Models.newRevisionProcessed = async (teamspace, model, corId, retVal, user) => {
+	const { success, message, userErr } = getInfoFromCode(retVal);
+	const query = { _id: model };
+	const set = {};
+
+	if (success) {
+		set.status = 'ok';
+		set.timestamp = new Date();
+	} else {
+		set.status = 'failed';
+		set.errorReason = {
+			message,
+			timestamp: new Date(),
+			errorCode: retVal,
+
+		};
+	}
+
+	const unset = { corID: 1 };
+	const { matchedCount } = await updateOneModel(teamspace, query, { $set: set, $unset: unset });
+	if (matchedCount !== 0) {
+		// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
+		// trigger notifications.
+
+		publish(events.MODEL_IMPORT_FINISHED,
+			{ teamspace, model, success, message, userErr, corId, errCode: retVal, user });
+	}
 };
 
 Models.updateModelSettings = async (ts, model, data) => {
@@ -148,6 +198,5 @@ Models.updateModelSettings = async (ts, model, data) => {
 		throw templates.modelNotFound;
 	}
 };
-
 
 module.exports = Models;

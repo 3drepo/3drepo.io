@@ -25,6 +25,7 @@ ResponseCodes.templates = {
 	// Auth
 	notLoggedIn: { message: 'You are not logged in', status: 401 },
 	notAuthorized: { message: 'You do not have sufficient access rights for this action', status: 401 },
+	licenceExpired: { message: 'Licence expired.', status: 401 },
 
 	// Fail safe
 	unknown: { message: 'Unknown error occured. Please contact support.', status: 500 },
@@ -40,11 +41,20 @@ ResponseCodes.templates = {
 
 	// Model related error
 	modelNotFound: { message: 'Model not found.', status: 404 },
+
+	// Federation related error
 	federationNotFound: { message: 'Federation not found.', status: 404 },
+
+	// Container related error
 	containerNotFound: { message: 'Container not found.', status: 404 },
 	containerIsSubModel: { message: 'Container is a submodel.', status: 400 },
 	revisionNotFound: { message: 'Revision not found.', status: 404 },
 	groupNotFound: { message: 'Group not found.', status: 404 },
+
+	// File upload related error
+	unsupportedFileFormat: { message: 'The file format is not supported', status: 400 },
+	maxSizeExceeded: { message: 'The file is bigger than the maximum size allowed', status: 400 },
+	quotaLimitExceeded: { message: 'Insufficient quota.', status: 401 },
 
 	// View related error
 	viewNotFound: { message: 'View not found', status: 404 },
@@ -54,7 +64,10 @@ ResponseCodes.templates = {
 
 	// Invalid Arguments
 	invalidArguments: { message: 'The arguments provided are not valid', status: 400 },
-	nameAlreadyExists: { message: 'Name already exists.', status: 400 },
+
+	// Queue related
+	queueConnectionError: { message: 'There was a problem connecting to the queue. Please contact support', status: 500 },
+	queueInsertionFailed: { message: 'Failed to insert an item into the queue. Please contact support', status: 500 },
 };
 
 Object.keys(ResponseCodes.templates).forEach((key) => {

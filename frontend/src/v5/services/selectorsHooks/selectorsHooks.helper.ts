@@ -17,15 +17,16 @@
 
 import { useSelector } from 'react-redux';
 
+type SelectorTypes<F> = F extends (state:any, ...args: infer A) => infer T ? (...args: A) => T : never;
+
 type NameMap<Type> = {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	[Property in keyof Type]: () => ReturnType<Extract<Type[Property], (...args: any) => any >>;
+	[Property in keyof Type]: SelectorTypes<Type[Property]>
 };
 
 export const createHooksSelectors = <T>(moduleSelectors: T): NameMap<T> => {
 	const exportObject = {};
 	Object.keys(moduleSelectors).forEach((key) => {
-		exportObject[key] = () => useSelector(moduleSelectors[key]);
+		exportObject[key] = (...parameters) => useSelector((state) => moduleSelectors[key](state, ...parameters));
 	});
 
 	return exportObject as NameMap<T>;

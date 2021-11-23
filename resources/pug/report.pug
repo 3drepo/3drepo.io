@@ -38,6 +38,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 
 		p {
 			margin:5px 0;
+			overflow-wrap: break-word;
 		}
 
 		header {
@@ -172,6 +173,20 @@ html(lang="en" ng-app="3drepo").ng-scope
 			object-fit:cover;
 		}
 
+		.noImageBackground{
+			background-color:lightgray;	
+			height:200px;
+			margin-right:15px;
+			display:flex;
+			align-items:center;
+			justify-content:center;
+		}
+
+		.noImageText {
+			font-size:20px;
+			color:gray;
+		}
+
 	script.
 
 		function printDialog() {
@@ -210,7 +225,7 @@ html(lang="en" ng-app="3drepo").ng-scope
 				button(onclick="showHideElements(event, '.activityLog', 'Log')") Hide Log
 				button(onclick="changeImageSize(event)") Large Pictures
 				button(onclick="showHideElements(event, '.activityLog .row.screenshot', 'Log Pictures' )") Hide Log Pictures
-			img(src=baseURL+"/images/3drepo-logo-white.png" width="120px" style="margin-top: 5px;")
+			img(src=baseURL+"/assets/images/3drepo-logo-white.png" width="120px" style="margin-top: 5px;")
 
 		.container
 			.top-header
@@ -225,8 +240,12 @@ html(lang="en" ng-app="3drepo").ng-scope
 						span.right.grey.info.float-right #{entry.created}
 					.row.screenshot
 						.col.screenshot
-							a(href=entry.screenshotURL target='_blank')
-								img(class="fitImage" src=url(entry.screenshot) style="width:100%;")
+							if entry.screenshot
+								a(href=entry.screenshotURL target='_blank')
+									img(class="fitImage" src=url(entry.screenshot) style="width:100%;")
+							else 
+								div.noImageBackground
+									p.noImageText No Image
 						.col
 								table.details
 									each attri in entry.attributes

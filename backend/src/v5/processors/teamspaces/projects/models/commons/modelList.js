@@ -15,33 +15,37 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- const {
+const {
 	addModel,
 	deleteModel,
-	getModelById,
-	getModelByName,
-	isSubModel,
-	removeModelCollections,
 } = require('../../../../../models/modelSettings');
+const { addModelToProject, getProjectById, removeModelFromProject } = require('../../../../../models/projects');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
+const db = require('../../../../../handler/db');
 const { getFavourites } = require('../../../../../models/users');
-const { addModelToProject, getProjectById, removeProjectModel  } = require('../../../../../models/projects');
-// const { removeAllFilesFromModel } = require(`${v4Path}/models/fileRef`);
-const { templates } = require('../../../../../utils/responseCodes')
-const ModelList = {};
+const { removeAllFilesFromModel } = require('../../../../../models/fileRefs');
 
-ModelList.addModel = async (teamspace, project, data) => {
-	const { models } = await getProjectById(teamspace, project, { models: 1 });
+const removeModelCollections = async (ts, model) => {
+	const collections = await db.listCollections(ts);
+	const promises = [];
 
-	if(models){
-		const modelSetting = await getModelByName(teamspace, models, data.name, { _id: 0, name: 1 });
-
-		if (modelSetting) {
-			throw templates.nameAlreadyExists;
+	collections.forEach((collection) => {
+		if (collection.name.startsWith(`${model}.`)) {
+			promises.push(db.dropCollection(ts, collection));
 		}
-	}
-	
+	});
 
+	return Promise.all(promises);
+};
+
+	await Promise.all[
+		removeModelCollections(teamspace, model),
+		deleteModel(teamspace, model),
+		removeProjectModel(teamspace, model)
+	];	
+};
+
+ModelList.addModel = async (teamspace, project, user, data) => {
 	const insertedId = await addModel(teamspace, data);
 
 	await addModelToProject(teamspace, project, insertedId);
@@ -49,24 +53,15 @@ ModelList.addModel = async (teamspace, project, data) => {
 	return insertedId;
 };
 
-ModelList.deleteModel = async (teamspace, model) => {
-	const setting = await getModelById(teamspace, model, {});
+ModelList.deleteModel = async (teamspace, project, model) => {
+	// This needs to be done before removeModelCollections or we risk the .ref col being deleted before we check it
+	await removeAllFilesFromModel(teamspace, model);
 
-	if (!setting.federate && (await isSubModel(teamspace, model))) {
-		throw templates.containerIsSubModel;
-	}
-
-	// try {
-	// 	await removeAllFilesFromModel(teamspace, model);
-	// } catch (err) {
-	// 	logger.logDebug(`[Delete model] : ${JSON.stringify(err)}`);
-	// }
-
-	await Promise.all[
+	return Promise.all([
 		removeModelCollections(teamspace, model),
 		deleteModel(teamspace, model),
-		removeProjectModel(teamspace, model)
-	];	
+		removeModelFromProject(teamspace, project, model),
+	]);
 };
 
 ModelList.getModelList = async (teamspace, project, user, modelSettings) => {

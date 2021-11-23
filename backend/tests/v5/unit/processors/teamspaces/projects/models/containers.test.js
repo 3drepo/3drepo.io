@@ -15,7 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src } = require('../../../../../helper/path');
+const { src, modelFolder, objModel } = require('../../../../../helper/path');
+const ServiceHelper = require('../../../../../helper/services');
+
+const db = require(`${src}/handler/db`);
+const fs = require('fs/promises');
+const path = require('path');
 
 jest.mock('../../../../../../../src/v5/models/projects');
 const ProjectsModel = require(`${src}/models/projects`);
@@ -32,6 +37,15 @@ const Legends = require(`${src}/models/legends`);
 jest.mock('../../../../../../../src/v5/models/legends');
 const { templates } = require(`${src}/utils/responseCodes`);
 
+const newContainerId = 'newContainerId';
+ModelSettings.addModel.mockImplementation(() => newContainerId);
+ModelSettings.deleteModel.mockImplementation(async (ts, model) => {
+	if (Number.isInteger(model)) {
+		return undefined;
+	}
+	throw templates.containerNotFound;
+});
+
 const modelList = [
 	{ _id: 1, name: 'model1', permissions: [{ user: 'user1', permission: 'collaborator' }, { user: 'user2', permission: 'collaborator' }] },
 	{ _id: 2, name: 'model2', permissions: [{ user: 'user2', permission: 'commenter' }] },
@@ -40,26 +54,74 @@ const modelList = [
 	{ _id: 4, name: 'model4' },
 ];
 
+ModelSettings.getModelById.mockImplementation(async (ts, model) => {
+	if (Number.isInteger(model)) {
+		return modelList[model - 1];
+	}
+	throw templates.containerNotFound;
+});
+
 const containerSettings = {
 	container1: {
 		_id: 1,
 		name: 'container 1',
 		type: 'type 1',
 		properties: {
-			units: 'm',
+			unit: 'm',
 			code: 'CTN1',
 		},
 		status: 'ok',
+		defaultView: 2,
+		defaultLegend: 3,
+		timestamp: new Date(),
+		surveyPoints: [123],
+		angleFromNorth: 10,
+		desc: 'One description',
+		errorReason: {
+			message: 'error reason',
+			timestamp: 123,
+			errorCode: 1,
+		},
 	},
 	container2: {
 		_id: 2,
 		name: 'container 2',
 		type: 'type 2',
 		properties: {
+			unit: 'mm',
+			code: 'CTN2',
+		},
+		status: 'processing',
+	},
+	container3: {
+		_id: 3,
+		name: 'container 3',
+		type: 'type 2',
+		properties: {
+			units: 'mm',
+			code: 'CTN2',
+		},
+		status: 'failed',
+		errorReason: {
+			message: 'abc',
+			bouncerValue: 1,
+			timestamp: new Date(),
+		},
+	},
+	container4: {
+		_id: 4,
+		name: 'container 4',
+		type: 'type 2',
+		properties: {
 			units: 'mm',
 			code: 'CTN2',
 		},
 		status: 'processing',
+		errorReason: {
+			message: 'abc',
+			bouncerValue: 1,
+			timestamp: new Date(),
+		},
 	},
 };
 
@@ -80,8 +142,14 @@ const model1Revisions = [
 ];
 
 ProjectsModel.getProjectById.mockImplementation(() => project);
+ProjectsModel.addModelToProject.mockResolvedValue();
+ModelSettings.getModelByQuery.mockImplementation((ts, query) => {
+	if (query.name === 'model1') Promise.resolve(modelList[0]);
+	else throw templates.modelNotFound;
+});
 ModelSettings.getContainers.mockImplementation(() => modelList);
-ModelSettings.getContainerById.mockImplementation((teamspace, container) => containerSettings[container]);
+const getContainerByIdMock = ModelSettings.getContainerById.mockImplementation((teamspace,
+	container) => containerSettings[container]);
 Views.checkViewExists.mockImplementation((teamspace, model, view) => {
 	if (view === 1) {
 		return 1;
@@ -207,27 +275,83 @@ const testDeleteFavourites = () => {
 	});
 };
 
-const formatToStats = (settings, revCount, latestRev) => ({
-	type: settings.type,
-	code: settings.properties.code,
-	status: settings.status,
-	units: settings.properties.unit,
-	revisions: {
-		total: revCount,
-		lastUpdated: latestRev.timestamp,
-		latestRevision: latestRev.tag || latestRev._id,
-	},
-});
+const formatToStats = (settings, revCount, latestRev) => {
+	const res = {
+		type: settings.type,
+		code: settings.properties.code,
+		status: settings.status,
+		units: settings.properties.unit,
+		revisions: {
+			total: revCount,
+			lastUpdated: latestRev.timestamp,
+			latestRevision: latestRev.tag || latestRev._id,
+		},
+	};
+
+	if (settings.status === 'failed') {
+		res.errorReason = { message: settings.errorReason.message, timestamp: settings.errorReason.timestamp };
+	}
+	return res;
+};
 
 const testGetContainerStats = () => {
-	describe('Get container stats', () => {
-		test('should return the stats if the container exists and have no revisions', async () => {
-			const res = await Containers.getContainerStats('teamspace', 'project', 'container1');
-			expect(res).toEqual(formatToStats(containerSettings.container1, 0, {}));
+	describe.each([
+		['the container exists and have no revisions', 'container1'],
+		['the container exists and have revisions', 'container2'],
+		['the container exists and latest revision processing have failed', 'container3'],
+		['the container exists and some previous revision processing have failed', 'container4'],
+	])('Get container stats', (desc, container) => {
+		test(`should return the stats if ${desc}[${container}]`, async () => {
+			const res = await Containers.getContainerStats('teamspace', 'project', container);
+			expect(res).toEqual(formatToStats(containerSettings[container], container === 'container2' ? 10 : 0, container === 'container2' ? container2Rev : {}));
 		});
-		test('should return the stats if the container exists and have revisions', async () => {
-			const res = await Containers.getContainerStats('teamspace', 'project', 'container2');
-			expect(res).toEqual(formatToStats(containerSettings.container2, 10, container2Rev));
+	});
+};
+
+const testAddContainer = () => {
+	describe('Add container', () => {
+		test('should return the container ID on success', async () => {
+			const data = {
+				name: 'container name',
+				code: 'code99',
+				unit: 'mm',
+			};
+			const res = await Containers.addContainer('teamspace', 'project', 'tsAdmin', data);
+			expect(res).toEqual(newContainerId);
+			expect(ProjectsModel.addModelToProject.mock.calls.length).toBe(1);
+		});
+	});
+};
+
+const testDeleteContainer = () => {
+	describe('Delete container', () => {
+		test('should succeed', async () => {
+			const modelId = 1;
+			const collectionList = [
+				{ name: `${modelId}.collA` },
+				{ name: `${modelId}.collB` },
+				{ name: 'otherModel.collA' },
+				{ name: 'otherModel.collB' },
+			];
+
+			const fnList = jest.spyOn(db, 'listCollections').mockResolvedValue(collectionList);
+			const fnDrop = jest.spyOn(db, 'dropCollection').mockResolvedValue(true);
+
+			const teamspace = 'teamspace';
+			await Containers.deleteContainer(teamspace, 'project', modelId, 'tsAdmin');
+
+			expect(fnList.mock.calls.length).toBe(2);
+			expect(fnList.mock.calls[0][0]).toEqual(teamspace);
+
+			expect(fnDrop.mock.calls.length).toBe(2);
+			expect(fnDrop.mock.calls[0][0]).toEqual(teamspace);
+			expect(fnDrop.mock.calls[0][1]).toEqual(collectionList[0]);
+			expect(fnDrop.mock.calls[1][0]).toEqual(teamspace);
+			expect(fnDrop.mock.calls[1][1]).toEqual(collectionList[1]);
+		});
+
+		test('should succeed if file removal fails', async () => {
+			await Containers.deleteContainer('teamspace', 'project', 3, 'tsAdmin');
 		});
 	});
 };
@@ -239,7 +363,7 @@ const testGetRevisions = () => {
 			const res = await Containers.getRevisions('teamspace', 1, false);
 			expect(getRevisionsMock.mock.calls.length).toBe(idx + 1);
 			expect(getRevisionsMock.mock.calls[idx][1]).toEqual(1);
-			expect(getRevisionsMock.mock.calls[idx][2]).toEqual(false);
+			expect(getRevisionsMock.mock.calls[idx][2]).toBe(false);
 			expect(res).toEqual(model1Revisions);
 		});
 
@@ -248,8 +372,44 @@ const testGetRevisions = () => {
 			const res = await Containers.getRevisions('teamspace', 1, true);
 			expect(getRevisionsMock.mock.calls.length).toBe(idx + 1);
 			expect(getRevisionsMock.mock.calls[idx][1]).toEqual(1);
-			expect(getRevisionsMock.mock.calls[idx][2]).toEqual(true);
+			expect(getRevisionsMock.mock.calls[idx][2]).toBe(true);
 			expect(res).toEqual(model1Revisions);
+		});
+	});
+};
+
+const fileExists = (file) => fs.access(file).then(() => true).catch(() => false);
+
+const testNewRevision = () => {
+	const fileCreated = path.join(modelFolder, 'toRemove.obj');
+	describe('New container revisions', () => {
+		const teamspace = 'teamspace';
+		const model = '123';
+		const data = {};
+		const file = { path: fileCreated, originalname: 'hello.obj' };
+		test('should execute successfully if queueModelUpload returns', async () => {
+			await fs.copyFile(objModel, fileCreated);
+			await expect(Containers.newRevision(teamspace, model, data, file)).resolves.toBe(undefined);
+			await expect(fileExists(fileCreated)).resolves.toBe(false);
+		});
+
+		test('should return whatever error queueModelUpload returns should it fail', async () => {
+			await expect(Containers.newRevision(teamspace, model, data, file))
+				.rejects.toEqual(templates.queueInsertionFailed);
+			await expect(fileExists(fileCreated)).resolves.toBe(false);
+		});
+		afterAll(ServiceHelper.queue.purgeQueues);
+	});
+};
+
+const testGetSettings = () => {
+	describe('Get container settings', () => {
+		test('should return the container settings', async () => {
+			const projection = { corID: 0, account: 0, permissions: 0 };
+			const res = await Containers.getSettings('teamspace', 'container1');
+			expect(res).toEqual(containerSettings.container1);
+			expect(getContainerByIdMock.mock.calls.length).toBe(1);
+			expect(getContainerByIdMock.mock.calls[0][2]).toEqual(projection);
 		});
 	});
 };
@@ -257,7 +417,11 @@ const testGetRevisions = () => {
 describe('processors/teamspaces/projects/containers', () => {
 	testGetContainerList();
 	testGetContainerStats();
+	testAddContainer();
+	testDeleteContainer();
 	testAppendFavourites();
 	testDeleteFavourites();
 	testGetRevisions();
+	testNewRevision();
+	testGetSettings();
 });
