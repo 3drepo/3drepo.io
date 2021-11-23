@@ -36,6 +36,13 @@ Projects.removeModelFromProject = (ts, project, model) => updateOneProject(
 	{ $pull: { models: model } },
 );
 
+Projects.checkProjectExists = async (ts, project, projection) => {
+	const res = await findOneProject(ts, { _id: project }, projection);
+	if (!res) {
+		throw templates.projectNotFound;
+	}
+};
+
 Projects.getProjectById = async (ts, project, projection) => {
 	const res = await findOneProject(ts, { _id: project }, projection);
 	if (!res) {

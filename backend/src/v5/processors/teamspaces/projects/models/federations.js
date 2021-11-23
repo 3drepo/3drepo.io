@@ -27,6 +27,12 @@ const { templates } = require('../../../../utils/responseCodes');
 
 const Federations = { ...Groups };
 
+Federations.addFederation = async (teamspace, project, federation) =>{
+	return await addModel(teamspace, project, {...federation, federate: true});
+};
+
+Federations.deleteFederation = deleteModel;
+
 Federations.getFederationList = async (teamspace, project, user) => {
 	const { models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
 	const modelSettings = await getFederations(teamspace, models, { _id: 1, name: 1, permissions: 1 });
@@ -82,21 +88,6 @@ Federations.getFederationStats = async (teamspace, federation) => {
 		lastUpdated: lastUpdates,
 		tickets: { issues: issueCount, risks: riskCount },
 	};
-};
-
-Federations.addFederation = async (teamspace, project, federation) =>{
-	return await addModel(teamspace, project, {...federation, federate: true});;
-};
-
-Federations.deleteFederation = async (teamspace, federation, user) => {
-	try {
-		await deleteModel(teamspace, federation, user);
-	} catch (err) {
-		if (err?.code === templates.modelNotFound.code) {
-			throw templates.federationNotFound;
-		}
-		throw err;
-	}
 };
 
 Federations.updateSettings = updateModelSettings;

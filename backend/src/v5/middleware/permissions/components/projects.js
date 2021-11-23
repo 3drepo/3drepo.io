@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { checkProjectExists } = require("../../../models/projects")
 const { isProjectAdmin, isTeamspaceAdmin } = require('../../../utils/permissions/permissions');
 const { getUserFromSession } = require('../../../utils/sessions');
 const { respond } = require('../../../utils/responder');
@@ -27,12 +28,17 @@ ProjectPerms.isProjectAdmin = async (req, res, next) => {
 	const user = getUserFromSession(session);
 	const { teamspace, project } = params;
 
-	const isAdmin = await isTeamspaceAdmin(teamspace, user) || await isProjectAdmin(teamspace, project, user);
-
-	if (isAdmin) {
-		next();
-	} else {
-		respond(req, res, templates.notAuthorized);
+	try{
+		await checkProjectExists(teamspace, project);
+		const isAdmin = await isTeamspaceAdmin(teamspace, user) || await isProjectAdmin(teamspace, project, user);
+	
+		if (isAdmin) {
+			next();
+		}else{
+			throw templates.notAuthorized;
+		}
+	}catch(err){
+		respond(req, res, err);
 	}
 };
 

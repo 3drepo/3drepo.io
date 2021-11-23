@@ -264,6 +264,55 @@ const testGetFederationStats = () => {
 	});
 };
 
+const testAddFederation = () => {
+	describe('Add federation', () => {
+		test('should return the federation ID on success', async () => {
+			const data = {
+				name: 'federation name',
+				code: 'code99',
+				unit: 'mm',
+				federate: true
+			};
+			const res = await Federations.addFederation('teamspace', 'project', 'tsAdmin', data);
+			expect(res).toEqual(newFederationId);
+			expect(ProjectsModel.addModelToProject.mock.calls.length).toBe(1);
+		});
+	});
+};
+
+const testDeleteFederation = () => {
+	describe('Delete federation', () => {
+		test('should succeed', async () => {
+			const modelId = 1;
+			const collectionList = [
+				{ name: `${modelId}.collA` },
+				{ name: `${modelId}.collB` },
+				{ name: 'otherModel.collA' },
+				{ name: 'otherModel.collB' },
+			];
+
+			const fnList = jest.spyOn(db, 'listCollections').mockResolvedValue(collectionList);
+			const fnDrop = jest.spyOn(db, 'dropCollection').mockResolvedValue(true);
+
+			const teamspace = 'teamspace';
+			await Federations.deleteFederation(teamspace, 'project', modelId, 'tsAdmin');
+
+			expect(fnList.mock.calls.length).toBe(2);
+			expect(fnList.mock.calls[0][0]).toEqual(teamspace);
+
+			expect(fnDrop.mock.calls.length).toBe(2);
+			expect(fnDrop.mock.calls[0][0]).toEqual(teamspace);
+			expect(fnDrop.mock.calls[0][1]).toEqual(collectionList[0]);
+			expect(fnDrop.mock.calls[1][0]).toEqual(teamspace);
+			expect(fnDrop.mock.calls[1][1]).toEqual(collectionList[1]);
+		});
+
+		test('should succeed if file removal fails', async () => {
+			await Federations.deleteFederation('teamspace', 'project', 3, 'tsAdmin');
+		});
+	});
+};
+
 const testGetSettings = () => {
 	describe('Get federation settings', () => {
 		test('should return the federation settings', async () => {
@@ -281,5 +330,7 @@ describe('processors/teamspaces/projects/federations', () => {
 	testAppendFavourites();
 	testDeleteFavourites();
 	testGetFederationStats();
+	testAddFederation();
+	testDeleteFederation();
 	testGetSettings();
 });

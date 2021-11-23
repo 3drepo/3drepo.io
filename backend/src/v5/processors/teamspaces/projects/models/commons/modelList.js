@@ -38,14 +38,9 @@ const removeModelCollections = async (ts, model) => {
 	return Promise.all(promises);
 };
 
-	await Promise.all[
-		removeModelCollections(teamspace, model),
-		deleteModel(teamspace, model),
-		removeProjectModel(teamspace, model)
-	];	
-};
+const ModelList = {};
 
-ModelList.addModel = async (teamspace, project, user, data) => {
+ModelList.addModel = async (teamspace, project, data) => {
 	const insertedId = await addModel(teamspace, data);
 
 	await addModelToProject(teamspace, project, insertedId);
