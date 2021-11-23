@@ -14,20 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const { v4Path } = require('../../interop');
+// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
+const ExternalServices = require(`${v4Path}/handler/externalServices`);
 
-module.exports = {
-	mongodbMemoryServerOptions: {
-		binary: {
-			version: '5.0.2',
-			skipMD5: true,
-			downloadDir: './node_modules/.cache',
-		},
-		instance: {
-			auth: false,
-			dbName: "admin",
-			ip: "127.0.0.1",
-			port: 27227
-		},
-		autoStart: false,
-	},
-};
+module.exports = ExternalServices;

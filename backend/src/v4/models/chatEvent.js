@@ -186,6 +186,10 @@ const subscribeToV5Events = () => {
 		}
 	});
 
+	EventsManager.subscribe(EventsV5.NEW_MODEL, async ({teamspace, model}) => {
+		newModel(null, teamspace, { _id: model });
+	});
+
 	EventsManager.subscribe(EventsV5.MODEL_IMPORT_UPDATE, async ({teamspace, model, status, user}) => {
 		modelStatusChanged(null, teamspace, model, {status, user: user || "unknown"});
 	});
