@@ -25,7 +25,7 @@ const DEFAULT_LOCALE = 'en';
 export const initializeIntl = (locale: string) => {
 	let messages = {};
 
-	switch (locale.split('-')[0]) {
+	switch (locale.toLocaleLowerCase().split('-')[0]) {
 		case 'es':
 			messages = messagesEs;
 			break;
