@@ -28,8 +28,8 @@ import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { IProject } from '@/v5/store/projects/projects.redux';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
-import { Container, HomeIconBreadcrumb, Breadcrumb, InteractiveBreadcrumb } from './breadcrumbs.styles';
 import { NavigationMenu } from '../navigatonMenu';
+import { Container, HomeIconBreadcrumb, Breadcrumb, InteractiveBreadcrumb, OverflowWrapper } from './breadcrumbs.styles';
 
 const createToWithUrl = (url) => ({ to, title }) => ({ title, to: `${url}/${to}` });
 
@@ -110,7 +110,9 @@ export const Breadcrumbs = (): JSX.Element => {
 					return (
 						<div key={`${title}`}>
 							<InteractiveBreadcrumb onClick={handleClick} endIcon={<DownArrowIcon />}>
-								{title}
+								<OverflowWrapper>
+									{title}
+								</OverflowWrapper>
 							</InteractiveBreadcrumb>
 							<NavigationMenu list={list} anchorEl={anchorEl} handleClose={handleClose} />
 						</div>

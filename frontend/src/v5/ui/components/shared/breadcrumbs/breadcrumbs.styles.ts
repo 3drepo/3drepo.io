@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import { Button, Breadcrumbs } from '@material-ui/core';
 import { Link } from 'react-router-dom';
+import { TextOverflow } from '@controls/textOverflow';
 
 export const Container = styled(Breadcrumbs)`
 	&& {
@@ -33,6 +34,7 @@ export const InteractiveBreadcrumb = styled(Button).attrs({
 		color: ${({ theme }) => theme.palette.primary.main};
 		padding: 5px 9px;
 		margin: 0;
+		max-width: 100%;
 
 		&:hover {
 			text-decoration: none;
@@ -57,4 +59,8 @@ export const HomeIconBreadcrumb = styled(Breadcrumb)`
 	&& {
 		padding: 10px;
 	}
+`;
+
+export const OverflowWrapper = styled(TextOverflow)`
+	width: auto;
 `;

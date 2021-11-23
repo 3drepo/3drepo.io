@@ -17,16 +17,27 @@
 
 import styled from 'styled-components';
 
-export const Items = styled.div`
+import Logo from '@assets/icons/logo.svg';
+
+export const LogoIcon = styled(Logo)`
+	overflow: visible;
+`;
+
+export const LeftColumn = styled.div`
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	width: 50%;
+	flex: 1;
+	max-width: calc(100% - 200px);
+`;
 
-	&:last-child {
-		justify-content: flex-end;
-	}
-
+export const RightColumn = styled.div`
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-end;
+	min-width: 152px;
+	
 	& > *:last-child div {
 		margin-right: 0;
 	}

@@ -18,7 +18,6 @@
 import styled, { css } from 'styled-components';
 import { Typography } from '@material-ui/core';
 import { TextOverflow } from '@controls/textOverflow';
-import { fadeToLeft } from '@controls/textOverflow/textOverflow.styles';
 
 export const Text = styled(Typography)`
 	${({ theme }) => theme.typography.body1};
@@ -31,10 +30,4 @@ export const Text = styled(Typography)`
 
 export const OverflowWrapper = styled(TextOverflow)`
 	width: auto;
-	&:after {
-		${({ $active, $hover, $meta, theme }) => $meta || css`
-			${$active ? fadeToLeft(theme.palette.primary.main) : fadeToLeft(theme.palette.secondary.light)};
-			${$hover && fadeToLeft(theme.palette.secondary.main)};
-		`}
-	}
 `;

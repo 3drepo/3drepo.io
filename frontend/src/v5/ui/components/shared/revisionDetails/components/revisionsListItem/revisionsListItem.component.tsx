@@ -59,7 +59,7 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 			>
 				{tag}
 			</RevisionsListItemCode>
-			<RevisionsListItemText hover={hover} hideBelowTablet active={active}>{desc}</RevisionsListItemText>
+			<RevisionsListItemText hover={hover} hideBelowTablet active={active}>{desc}{desc}</RevisionsListItemText>
 			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} />
 		</Container>
 	);

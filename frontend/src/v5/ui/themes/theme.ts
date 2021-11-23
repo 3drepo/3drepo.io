@@ -277,6 +277,7 @@ export const theme = createMuiTheme({
 				display: 'flex',
 				flexDirection: 'row',
 				alignItems: 'center',
+				justifyContent: 'space-between',
 				background: GRADIENT.SECONDARY,
 			},
 		},
@@ -341,7 +342,16 @@ export const theme = createMuiTheme({
 			},
 		},
 		MuiBreadcrumbs: {
+			root: {
+				maxWidth: '100%',
+			},
+			ol: {
+				flexWrap: 'nowrap',
+			},
 			li: {
+				'&:last-child': {
+					overflow: 'hidden',
+				},
 				'& > a': {
 					margin: 0,
 					padding: '10px 8px',
