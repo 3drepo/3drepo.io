@@ -34,6 +34,11 @@ Responder.respond.mockImplementation((req, res, errCode) => errCode);
 Permissions.isTeamspaceAdmin.mockImplementation((teamspace, user) => user === 'tsAdmin');
 Permissions.isProjectAdmin.mockImplementation((teamspace, project, user) => user === 'projAdmin');
 Projects.getProjectById.mockImplementation(() => ({ permissions: [{ user: 'projAdmin', permissions: ['admin_project'] }] }));
+Projects.checkProjectExists.mockImplementation((teamspace, project) => {
+	if(project === 'pr2'){
+		throw templates.projectNotFound;
+	}
+});
 Sessions.isSessionValid.mockImplementation((session) => !!session);
 Sessions.getUserFromSession.mockImplementation(({ user }) => user.username);
 
@@ -69,6 +74,18 @@ const testIsProjectAdmin = () => {
 			expect(mockCB.mock.calls.length).toBe(0);
 			expect(Responder.respond.mock.calls.length).toBe(1);
 			expect(Responder.respond.mock.results[0].value).toEqual(templates.notAuthorized);
+		});
+
+		test('should respond with project not found if the project does not exist', async () => {
+			const mockCB = jest.fn(() => {});
+			await ProjectMiddlewares.isProjectAdmin(
+				{ params: { teamspace: 'ts1', project: 'pr2' }, session: { user: { username: 'hi' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(0);
+			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond.mock.results[0].value).toEqual(templates.projectNotFound);
 		});
 	});
 };
