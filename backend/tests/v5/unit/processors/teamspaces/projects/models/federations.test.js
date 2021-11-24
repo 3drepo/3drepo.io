@@ -17,6 +17,8 @@
 
 const { src } = require('../../../../../helper/path');
 
+const db = require(`${src}/handler/db`);
+
 jest.mock('../../../../../../../src/v5/models/projects');
 const ProjectsModel = require(`${src}/models/projects`);
 jest.mock('../../../../../../../src/v5/models/modelSettings');
@@ -35,6 +37,15 @@ jest.mock('../../../../../../../src/v5/models/views');
 const Legends = require(`${src}/models/legends`);
 jest.mock('../../../../../../../src/v5/models/legends');
 const { templates } = require(`${src}/utils/responseCodes`);
+
+const newFederationId = 'newFederationId';
+ModelSettings.addModel.mockImplementation(() => newFederationId);
+ModelSettings.deleteModel.mockImplementation(async (ts, model) => {
+	if (Number.isInteger(model)) {
+		return undefined;
+	}
+	throw templates.federationNotFound;
+});
 
 const federationList = [
 	{ _id: 1, name: 'federation 1', permissions: [{ user: 'user1', permission: 'collaborator' }, { user: 'user2', permission: 'collaborator' }] },
@@ -271,7 +282,7 @@ const testAddFederation = () => {
 				name: 'federation name',
 				code: 'code99',
 				unit: 'mm',
-				federate: true
+				federate: true,
 			};
 			const res = await Federations.addFederation('teamspace', 'project', 'tsAdmin', data);
 			expect(res).toEqual(newFederationId);

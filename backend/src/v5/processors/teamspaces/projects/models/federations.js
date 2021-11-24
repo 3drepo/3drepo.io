@@ -23,13 +23,11 @@ const { getIssuesCount } = require('../../../../models/issues');
 const { getLatestRevision } = require('../../../../models/revisions');
 const { getProjectById } = require('../../../../models/projects');
 const { getRisksCount } = require('../../../../models/risks');
-const { templates } = require('../../../../utils/responseCodes');
 
 const Federations = { ...Groups };
 
-Federations.addFederation = async (teamspace, project, federation) =>{
-	return await addModel(teamspace, project, {...federation, federate: true});
-};
+Federations.addFederation = async (teamspace, project, federation) => addModel(teamspace, project, 
+  { ...federation, federate: true });
 
 Federations.deleteFederation = deleteModel;
 

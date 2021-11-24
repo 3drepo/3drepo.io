@@ -212,7 +212,6 @@ const establishRoutes = () => {
 	 */
 	router.post('/', isAdminToProject, validateAddModelData, addFederation);
 
-
 	/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/federations:
@@ -433,7 +432,6 @@ const establishRoutes = () => {
 	 */
 	router.get('/:federation/stats', hasReadAccessToFederation, getFederationStats);
 
-	
 	/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}:
@@ -471,7 +469,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: Federation removed.
 	 */
-	 router.delete('/:federation', hasAdminAccessToFederation, deleteFederation);
+	router.delete('/:federation', hasAdminAccessToFederation, deleteFederation);
 
 	/**
 	 * @openapi

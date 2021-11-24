@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- const {
+const {
 	hasAdminAccessToContainer, hasAdminAccessToFederation, hasCommenterAccessToContainer,
 	hasCommenterAccessToFederation, hasReadAccessToContainer, hasReadAccessToFederation,
 	hasWriteAccessToContainer, hasWriteAccessToFederation,

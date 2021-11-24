@@ -31,11 +31,8 @@ UuidUtils.stringToUUID = (uuid) => {
 	const bytes = UUIDParse.parse(uuid);
 	// eslint-disable-next-line new-cap
 	const buf = new Buffer.from(bytes);
-
 	return Mongo.Binary(buf, 3);
 };
-
-UuidUtils.generateUUIDString = () => NodeUUID();
 
 UuidUtils.UUIDToString = (uuid) => {
 	try {
