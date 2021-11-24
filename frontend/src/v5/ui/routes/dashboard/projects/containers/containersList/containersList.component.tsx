@@ -31,7 +31,6 @@ import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/container
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containerListItem';
-import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/skeletonListItem';
 import { Container } from './containersList.styles';
 
 type IContainersList = {
@@ -96,18 +95,16 @@ export const ContainersList = ({
 				<DashboardList>
 					{!isEmpty(sortedList) ? (
 						sortedList.map((container, index) => (
-							container.hasStatsPending ? (
-								<SkeletonListItem key={container._id} delay={index / 10} />
-							) : (
-								<ContainerListItem
-									key={container._id}
-									isSelected={container._id === selectedId}
-									container={container}
-									filterQuery={filterQuery}
-									onFavouriteChange={setFavourite}
-									onToggleSelected={toggleSelectedId}
-								/>
-							)))
+							<ContainerListItem
+								index={index}
+								key={container._id}
+								isSelected={container._id === selectedId}
+								container={container}
+								filterQuery={filterQuery}
+								onFavouriteChange={setFavourite}
+								onToggleSelected={toggleSelectedId}
+							/>
+						))
 					) : (
 						<DashboardListEmptyContainer>
 							{emptyMessage}
