@@ -15,31 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode } from 'react';
-import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
-import { TextOverflow } from '@controls/textOverflow';
-import { Text } from './revisionsListItemText.styles';
+import styled from 'styled-components';
+import {
+	DashboardListItemTitle as DashboardListItemTitleComponent,
+} from '@components/dashboard/dashboardList/dashboardListItem/components';
 
-type IDashboardListItemText = {
-	children: ReactNode;
-	width?: number;
-	className?: string;
-	meta?: boolean;
-	active?: boolean;
-};
-
-export const RevisionsListItemText = ({
-	children,
-	width,
-	className,
-	meta = false,
-	active = false,
-}: IDashboardListItemText): JSX.Element => (
-	<FixedOrGrowContainer width={width} className={className}>
-		<TextOverflow>
-			<Text $meta={meta} $active={active}>
-				{children}
-			</Text>
-		</TextOverflow>
-	</FixedOrGrowContainer>
-);
+export const DashboardListItemTitle = styled(DashboardListItemTitleComponent)`
+	display: block;
+`;

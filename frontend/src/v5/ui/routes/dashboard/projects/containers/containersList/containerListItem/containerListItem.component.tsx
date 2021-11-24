@@ -16,13 +16,13 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from 'react-intl';
 import { Tooltip } from '@material-ui/core';
 import {
 	DashboardListItemButton,
 	DashboardListItemIcon,
 	DashboardListItemRow,
 	DashboardListItemText,
-	DashboardListItemTitle,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision';
 import { Highlight } from '@controls/highlight';
@@ -32,8 +32,8 @@ import { getContainerMenuItems } from '@/v5/ui/routes/dashboard/projects/contain
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { RevisionDetails } from '@components/shared/revisionDetails';
-import { FormattedMessage } from 'react-intl';
 import { formatDate } from '@/v5/services/intl';
+import { DashboardListItemTitle } from './containerListItem.styles';
 
 interface IContainerListItem {
 	isSelected: boolean;
