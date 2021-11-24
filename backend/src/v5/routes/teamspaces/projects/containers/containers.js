@@ -36,9 +36,8 @@ const addContainer = (req, res) => {
 };
 
 const deleteContainer = (req, res) => {
-	const user = getUserFromSession(req.session);
 	const { teamspace, project, container } = req.params;
-	Containers.deleteContainer(teamspace, project, container, user).then(() => {
+	Containers.deleteContainer(teamspace, project, container).then(() => {
 		respond(req, res, templates.ok);
 	}).catch(
 		// istanbul ignore next
