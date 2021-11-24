@@ -16,7 +16,8 @@
  */
 
 import React from 'react';
-import { Trans } from '@lingui/react';
+import { FormattedMessage } from 'react-intl';
+
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import {
 	DashboardListEmptyText,
@@ -57,20 +58,20 @@ export const Federations = (): JSX.Element => {
 						}}
 						federations={favouriteFederations}
 						title={(
-							<Trans
+							<FormattedMessage
 								id="federations.favourites.collapseTitle"
-								message="Favourites"
+								defaultMessage="Favourites"
 							/>
 						)}
 						titleTooltips={{
-							collapsed: <Trans id="federations.favourites.collapse.tooltip.show" message="Show favourites" />,
-							visible: <Trans id="federations.favourites.collapse.tooltip.hide" message="Hide favourites" />,
+							collapsed: <FormattedMessage id="federations.favourites.collapse.tooltip.show" defaultMessage="Show favourites" />,
+							visible: <FormattedMessage id="federations.favourites.collapse.tooltip.hide" defaultMessage="Hide favourites" />,
 						}}
 						emptyMessage={(
 							<DashboardListEmptyText>
-								<Trans
+								<FormattedMessage
 									id="federations.favourites.emptyMessage"
-									message="You haven’t added any Favourites. Click the star on a Federation to add your first favourite Federation."
+									defaultMessage="You haven’t added any Favourites. Click the star on a Federation to add your first favourite Federation."
 								/>
 							</DashboardListEmptyText>
 						)}
@@ -84,27 +85,27 @@ export const Federations = (): JSX.Element => {
 						}}
 						federations={filteredFederations}
 						title={(
-							<Trans
+							<FormattedMessage
 								id="federations.all.collapseTitle"
-								message="All Federations"
+								defaultMessage="All Federations"
 							/>
 						)}
 						titleTooltips={{
-							collapsed: <Trans id="federations.all.collapse.tooltip.show" message="Show federations" />,
-							visible: <Trans id="federations.all.collapse.tooltip.hide" message="Hide federations" />,
+							collapsed: <FormattedMessage id="federations.all.collapse.tooltip.show" defaultMessage="Show federations" />,
+							visible: <FormattedMessage id="federations.all.collapse.tooltip.hide" defaultMessage="Hide federations" />,
 						}}
 						showBottomButton
 						emptyMessage={(
 							<>
 								<DashboardListEmptyText>
-									<Trans id="federations.all.emptyMessage" message="You haven’t created any Federations." />
+									<FormattedMessage id="federations.all.emptyMessage" defaultMessage="You haven’t created any Federations." />
 								</DashboardListEmptyText>
 								<Button
 									startIcon={<AddCircleIcon />}
 									variant="contained"
 									color="primary"
 								>
-									<Trans id="federations.all.newFederation" message="New Federation" />
+									<FormattedMessage id="federations.all.newFederation" defaultMessage="New Federation" />
 								</Button>
 							</>
 						)}

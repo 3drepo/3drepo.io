@@ -15,50 +15,49 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { Trans } from '@lingui/react';
+import { formatMessage } from '@/v5/services/intl';
 import { IFederation } from '@/v5/store/federations/federations.types';
 
 export const getFederationMenuItems = (id: IFederation['_id']) => [
 	{
 		key: 1,
-		title: <Trans id="federations.ellipsisMenu.loadFederation" message="Load Federation in 3D Viewer" />,
+		title: formatMessage({ id: 'federations.ellipsisMenu.loadFederation', defaultMessage: 'Load Federation in 3D Viewer' }),
 		to: `/${id}`,
 	},
 	{
 		key: 2,
-		title: <Trans id="federations.ellipsisMenu.edit" message="Edit Federation" />,
+		title: formatMessage({ id: 'federations.ellipsisMenu.edit', defaultMessage: 'Edit Federation' }),
 		onClick: () => { },
 	},
 	{
 		key: 3,
-		title: <Trans id="federations.ellipsisMenu.viewIssues" message="View Issues" />,
+		title: formatMessage({ id: 'federations.ellipsisMenu.viewIssues', defaultMessage: 'View Issues' }),
 		onClick: () => { },
 	},
 	{
 		key: 4,
-		title: <Trans id="federations.ellipsisMenu.viewRisks" message="View Risks" />,
+		title: formatMessage({ id: 'federations.ellipsisMenu.viewRisks', defaultMessage: 'View Risks' }),
 		onClick: () => { },
 	},
 	{
 		key: 5,
-		title: <Trans id="federations.ellipsisMenu.editPermissions" message="Edit Permissions" />,
+		title: formatMessage({ id: 'federations.ellipsisMenu.editPermissions', defaultMessage: 'Edit Permissions' }),
 		onClick: () => { },
 	},
 	{
 		key: 6,
-		title: <Trans id="federations.ellipsisMenu.shareContainer" message="Share Container" />,
+		title: formatMessage({ id: 'federations.ellipsisMenu.shareContainer', defaultMessage: 'Share Container' }),
 		onClick: () => { },
 	},
 	{
 		key: 7,
-		title: <Trans id="federations.ellipsisMenu.settings" message="Settings" />,
+		title: formatMessage({ id: 'federations.ellipsisMenu.settings', defaultMessage: 'Settings' }),
 		onClick: () => {
 		},
 	},
 	{
 		key: 8,
-		title: <Trans id="federations.ellipsisMenu.delete" message="Delete" />,
+		title: formatMessage({ id: 'federations.ellipsisMenu.delete', defaultMessage: 'Delete' }),
 		onClick: () => { },
 	},
 ];

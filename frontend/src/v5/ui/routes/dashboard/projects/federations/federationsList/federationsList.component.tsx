@@ -18,7 +18,8 @@
 import React, { ReactNode, useMemo } from 'react';
 import { useParams } from 'react-router';
 import { isEmpty } from 'lodash';
-import { Trans } from '@lingui/react';
+import { FormattedMessage } from 'react-intl';
+
 import {
 	DashboardList,
 	DashboardListCollapse,
@@ -37,6 +38,7 @@ import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federati
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { Button } from '@controls/button';
 import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
+import { formatMessage } from '@/v5/services/intl';
 import { CollapseSideElementGroup, Container } from './federationsList.styles';
 
 type IFederationsList = {
@@ -88,46 +90,42 @@ export const FederationsList = ({
 				isLoading={areStatsPending}
 				sideElement={(
 					<CollapseSideElementGroup>
-						<Trans
-							id="federations.search.placeholder"
-							message="Search..."
-							render={({ translation }) => (
-								<SearchInput
-									onClear={() => setSearchInput('')}
-									onChange={(event) => setSearchInput(event.currentTarget.value)}
-									value={searchInput}
-									placeholder={translation as string}
-								/>
-							)}
+						<SearchInput
+							onClear={() => setSearchInput('')}
+							onChange={(event) => setSearchInput(event.currentTarget.value)}
+							value={searchInput}
+							placeholder={formatMessage({ id: 'federations.search.placeholder',
+								defaultMessage: 'Search...' })}
+							disabled={isListPending}
 						/>
 						<Button
 							startIcon={<AddCircleIcon />}
 							variant="contained"
 							color="primary"
 						>
-							<Trans id="federations.newFederation" message="New Federation" />
+							<FormattedMessage id="federations.newFederation" defaultMessage="New Federation" />
 						</Button>
 					</CollapseSideElementGroup>
 				)}
 			>
 				<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
 					<DashboardListHeaderLabel name="name">
-						<Trans id="federations.list.header.federation" message="Federation" />
+						<FormattedMessage id="federations.list.header.federation" defaultMessage="Federation" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="issues" width={165}>
-						<Trans id="federations.list.header.issues" message="Open issues" />
+						<FormattedMessage id="federations.list.header.issues" defaultMessage="Open issues" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="risks" width={165}>
-						<Trans id="federations.list.header.risks" message="Open risks" />
+						<FormattedMessage id="federations.list.header.risks" defaultMessage="Open risks" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="containers" width={165}>
-						<Trans id="federations.list.header.containers" message="Containers" />
+						<FormattedMessage id="federations.list.header.containers" defaultMessage="Containers" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="category" width={188}>
-						<Trans id="federations.list.header.category" message="Category" />
+						<FormattedMessage id="federations.list.header.category" defaultMessage="Category" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="lastUpdated" width={180}>
-						<Trans id="federations.list.header.lastUpdated" message="Last updated" />
+						<FormattedMessage id="federations.list.header.lastUpdated" defaultMessage="Last updated" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>
 				{useMemo(() => (
@@ -159,7 +157,7 @@ export const FederationsList = ({
 							console.log('->  handle add federation');
 						}}
 					>
-						<Trans id="federations.addFederationButton" message="Add new Federation" />
+						<FormattedMessage id="federations.addFederationButton" defaultMessage="Add new Federation" />
 					</DashboardListButton>
 				)}
 			</DashboardListCollapse>

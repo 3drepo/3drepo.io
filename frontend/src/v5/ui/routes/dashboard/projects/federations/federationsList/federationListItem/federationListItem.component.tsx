@@ -16,6 +16,9 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from 'react-intl';
+import { formatDate } from '@/v5/services/intl';
+
 import {
 	DashboardListItemButton,
 	DashboardListItemIcon,
@@ -23,9 +26,7 @@ import {
 	DashboardListItemText,
 	DashboardListItemTitle,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
-import { Trans } from '@lingui/react';
 import { Highlight } from '@controls/highlight';
-import { i18n } from '@lingui/core';
 import { Tooltip } from '@material-ui/core';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { EllipsisButtonWithMenu } from '@controls/ellipsisButtonWithMenu';
@@ -58,7 +59,7 @@ export const FederationListItem = ({
 			<DashboardListItemRow>
 				<DashboardListItemTitle
 					tooltipTitle={
-						<Trans id="federations.list.item.title.tooltip" message="Launch in Viewer" />
+						<FormattedMessage id="federations.list.item.title.tooltip" defaultMessage="Launch in Viewer" />
 					}
 					subtitle={federation.code}
 				>
@@ -73,12 +74,12 @@ export const FederationListItem = ({
 					}}
 					width={165}
 					tooltipTitle={
-						<Trans id="federations.list.item.issues.tooltip" message="View issues" />
+						<FormattedMessage id="federations.list.item.issues.tooltip" defaultMessage="View issues" />
 					}
 				>
-					<Trans
+					<FormattedMessage
 						id="federations.list.item.issues"
-						message="{count} issues"
+						defaultMessage="{count} issues"
 						values={{ count: federation.issues }}
 					/>
 				</DashboardListItemButton>
@@ -89,12 +90,12 @@ export const FederationListItem = ({
 					}}
 					width={165}
 					tooltipTitle={
-						<Trans id="federations.list.item.risks.tooltip" message="View risks" />
+						<FormattedMessage id="federations.list.item.risks.tooltip" defaultMessage="View risks" />
 					}
 				>
-					<Trans
+					<FormattedMessage
 						id="federations.list.item.risks"
-						message="{count} risks"
+						defaultMessage="{count} risks"
 						values={{ count: federation.risks }}
 					/>
 				</DashboardListItemButton>
@@ -105,12 +106,12 @@ export const FederationListItem = ({
 					}}
 					width={165}
 					tooltipTitle={
-						<Trans id="federations.list.item.containers.tooltip" message="View containers" />
+						<FormattedMessage id="federations.list.item.containers.tooltip" defaultMessage="View containers" />
 					}
 				>
-					<Trans
+					<FormattedMessage
 						id="federations.list.item.containers"
-						message="{count} containers"
+						defaultMessage="{count} containers"
 						values={{ count: federation.containers }}
 					/>
 				</DashboardListItemButton>
@@ -120,12 +121,12 @@ export const FederationListItem = ({
 					</Highlight>
 				</DashboardListItemText>
 				<DashboardListItemText width={97}>
-					{federation.lastUpdated ? i18n.date(federation.lastUpdated) : ''}
+					{federation.lastUpdated ? formatDate(federation.lastUpdated) : ''}
 				</DashboardListItemText>
 				<DashboardListItemIcon>
 					<Tooltip
 						title={
-							<Trans id="federations.list.item.favourite.tooltip" message="Add to favourites" />
+							<FormattedMessage id="federations.list.item.favourite.tooltip" defaultMessage="Add to favourites" />
 						}
 					>
 						<FavouriteCheckbox
