@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { discardSlash, discardUrlComponent } from '@/v5/services/routing/routing';
 import { useRouteMatch, useParams } from 'react-router-dom';
-
-import { Trans } from '@lingui/react';
 import React from 'react';
+import { FormattedMessage } from 'react-intl';
+
+import { discardSlash, discardUrlComponent } from '@/v5/services/routing/routing';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { IProject } from '@/v5/store/projects/projects.redux';
 import { Container, Link } from './topNavigaton.styles';
@@ -37,15 +37,9 @@ export const TopNavigation = (): JSX.Element => {
 			{hasValidProject
 			&& (
 				<>
-					<Link to={`${url}/t/federations`}>
-						<Trans id="navigation.federations" message="Federations" />
-					</Link>
-					<Link to={`${url}/t/containers`}>
-						<Trans id="navigation.containers" message="Containers" />
-					</Link>
-					<Link to={`${discardUrlComponent(url, 'settings')}/t/settings`}>
-						<Trans id="navigation.settings" message="Settings" />
-					</Link>
+					<Link to={`${url}/t/federations`}><FormattedMessage id="Federations" defaultMessage="Federations" /></Link>
+					<Link to={`${url}/t/containers`}><FormattedMessage id="Containers" defaultMessage="Containers" /></Link>
+					<Link to={`${discardUrlComponent(url, 'settings')}/t/settings`}><FormattedMessage id="Settings" defaultMessage="Settings" /></Link>
 				</>
 			)}
 		</Container>

@@ -15,55 +15,54 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { Trans } from '@lingui/react';
 import { IContainer } from '@/v5/store/containers/containers.types';
+import { formatMessage } from '@/v5/services/intl';
 
 export const getContainerMenuItems = (id: IContainer['_id']) => [
 	{
 		key: 1,
-		title: <Trans id="containers.ellipsisMenu.loadContainer" message="Load Container in 3D Viewer" />,
+		title: formatMessage({ id: 'containers.ellipsisMenu.loadContainer', defaultMessage: 'Load Container in 3D Viewer' }),
 		to: `/${id}`,
 	},
 	{
 		key: 2,
-		title: <Trans id="containers.ellipsisMenu.uploadNewRevision" message="Upload new Revision" />,
+		title: formatMessage({ id: 'containers.ellipsisMenu.uploadNewRevision', defaultMessage: 'Upload new Revision' }),
 		onClick: () => { },
 	},
 	{
 		key: 3,
-		title: <Trans id="containers.ellipsisMenu.viewIssues" message="View Issues" />,
+		title: formatMessage({ id: 'containers.ellipsisMenu.viewIssues', defaultMessage: 'View Issues' }),
 		onClick: () => { },
 	},
 	{
 		key: 4,
-		title: <Trans id="containers.ellipsisMenu.viewRisks" message="View Risks" />,
+		title: formatMessage({ id: 'containers.ellipsisMenu.viewRisks', defaultMessage: 'View Risks' }),
 		onClick: () => { },
 	},
 	{
 		key: 5,
-		title: <Trans id="containers.ellipsisMenu.viewRevisions" message="View Revisions" />,
+		title: formatMessage({ id: 'containers.ellipsisMenu.viewRevisions', defaultMessage: 'View Revisions' }),
 		onClick: () => { },
 	},
 	{
 		key: 6,
-		title: <Trans id="containers.ellipsisMenu.editPermissions" message="Edit Permissions" />,
+		title: formatMessage({ id: 'containers.ellipsisMenu.editPermissions', defaultMessage: 'Edit Permissions' }),
 		onClick: () => { },
 	},
 	{
 		key: 7,
-		title: <Trans id="containers.ellipsisMenu.shareContainer" message="Share Container" />,
+		title: formatMessage({ id: 'containers.ellipsisMenu.shareContainer', defaultMessage: 'Share Container' }),
 		onClick: () => { },
 	},
 	{
 		key: 8,
-		title: <Trans id="containers.ellipsisMenu.settings" message="Settings" />,
+		title: formatMessage({ id: 'containers.ellipsisMenu.settings', defaultMessage: 'Settings' }),
 		onClick: () => {
 		},
 	},
 	{
 		key: 9,
-		title: <Trans id="containers.ellipsisMenu.delete" message="Delete" />,
+		title: formatMessage({ id: 'containers.ellipsisMenu.delete', defaultMessage: 'Delete' }),
 		onClick: () => { },
 	},
 ];

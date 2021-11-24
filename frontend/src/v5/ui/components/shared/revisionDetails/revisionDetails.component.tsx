@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Trans } from '@lingui/react';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router';
 import { range } from 'lodash';
@@ -29,6 +28,7 @@ import { RevisionsListItem } from '@components/shared/revisionDetails/components
 import { SkeletonListItem } from '@components/shared/revisionDetails/components/skeletonListItem';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
+import { FormattedMessage } from 'react-intl';
 import {
 	Container, RevisionsListHeaderContainer, RevisionsListItemWrapper, RevisionsList, RevisionsListEmptyWrapper,
 	RevisionsListEmptyContainer,
@@ -57,14 +57,14 @@ export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDe
 			<RevisionsListEmptyWrapper>
 				<RevisionsListEmptyContainer>
 					<DashboardListEmptyText>
-						<Trans id="containers.revisions.emptyMessage" message="You haven’t added any Files." />
+						<FormattedMessage id="containers.revisions.emptyMessage" defaultMessage="You haven’t added any Files." />
 					</DashboardListEmptyText>
 					<Button
 						startIcon={<AddCircleIcon />}
 						variant="contained"
 						color="primary"
 					>
-						<Trans id="containers.revisions.uploadFile" message="Upload File" />
+						<FormattedMessage id="containers.revisions.uploadFile" defaultMessage="Upload File" />
 					</Button>
 				</RevisionsListEmptyContainer>
 			</RevisionsListEmptyWrapper>
@@ -74,10 +74,10 @@ export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDe
 	return (
 		<Container>
 			<RevisionsListHeaderContainer>
-				<RevisionsListHeaderLabel width={130}><Trans id="revisionDetails.addedOn" message="Added on" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel width={228}><Trans id="revisionDetails.addedBy" message="Added by" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel width={330}><Trans id="revisionDetails.revisionCode" message="Revision code" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel><Trans id="revisionDetails.description" message="Description" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={130}><FormattedMessage id="revisionDetails.addedOn" defaultMessage="Added on" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={228}><FormattedMessage id="revisionDetails.addedBy" defaultMessage="Added by" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={330}><FormattedMessage id="revisionDetails.revisionCode" defaultMessage="Revision code" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel><FormattedMessage id="revisionDetails.description" defaultMessage="Description" /></RevisionsListHeaderLabel>
 			</RevisionsListHeaderContainer>
 			<RevisionsList>
 				{isLoading ? (

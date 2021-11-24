@@ -16,8 +16,8 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from 'react-intl';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dashboardList.styles';
-import { Trans } from '@lingui/react';
 import { SearchPhrase } from './dashboardListEmptySearchResults.styles';
 
 type IDashboardListEmptySearchResults = {
@@ -26,11 +26,13 @@ type IDashboardListEmptySearchResults = {
 
 export const DashboardListEmptySearchResults = ({ searchPhrase }: IDashboardListEmptySearchResults): JSX.Element => (
 	<DashboardListEmptyText>
-		<Trans
-			id="dashboardList.emptySearchResults.message"
-			message="We couldn't find a match for <0>“{searchPhrase}”</0>. Please try another search."
-			components={[<SearchPhrase />]}
-			values={{ searchPhrase }}
+		<FormattedMessage
+			id="containers.noSearchResults"
+			defaultMessage="We couldn't find a match for <SearchPhrase>“{searchPhrase}”</SearchPhrase>. Please try another search."
+			values={{
+				SearchPhrase: (val: string) => <SearchPhrase>{val}</SearchPhrase>,
+				searchPhrase,
+			}}
 		/>
 	</DashboardListEmptyText>
 );

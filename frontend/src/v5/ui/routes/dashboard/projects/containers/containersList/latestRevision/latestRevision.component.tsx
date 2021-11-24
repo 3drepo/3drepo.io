@@ -16,7 +16,8 @@
  */
 
 import React from 'react';
-import { Trans } from '@lingui/react';
+import { FormattedMessage } from 'react-intl';
+
 import { RevisionStatus } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/revisionStatus';
 import { IRevisionStatus } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/revisionStatus/revisionStatus.component';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
@@ -31,18 +32,18 @@ export const LatestRevision = ({ hasRevisions, status, ...props }: ILatestRevisi
 		{hasRevisions || status === UploadStatuses.UPLOADING ? (
 			<>
 				<Label>
-					<Trans
+					<FormattedMessage
 						id="containers.list.item.latestRevision.label"
-						message="Latest revision: "
+						defaultMessage="Latest revision: "
 					/>
 				</Label>
 				<RevisionStatus status={status} {...props} />
 			</>
 		) : (
 			<Label>
-				<Trans
+				<FormattedMessage
 					id="containers.list.item.latestRevision.emptyContainer"
-					message="Container empty"
+					defaultMessage="Container empty"
 				/>
 			</Label>
 		)}

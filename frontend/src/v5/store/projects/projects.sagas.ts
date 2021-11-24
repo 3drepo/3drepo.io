@@ -18,6 +18,7 @@
 import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
+import { formatMessage } from '@/v5/services/intl';
 import { ProjectsActions, ProjectsTypes, IProject } from './projects.redux';
 
 export function* fetch({ teamspace }) {
@@ -26,7 +27,7 @@ export function* fetch({ teamspace }) {
 		yield put(ProjectsActions.fetchSuccess(teamspace, projects as IProject[]));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: 'trying to fetch projects',
+			currentActions: formatMessage({ id: 'projects.fetch.error', defaultMessage: 'trying to fetch projects' }),
 			error,
 		}));
 		yield put(ProjectsActions.fetchFailure());

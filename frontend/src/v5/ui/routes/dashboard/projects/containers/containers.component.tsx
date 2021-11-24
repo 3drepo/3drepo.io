@@ -16,8 +16,9 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from 'react-intl';
+
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
-import { Trans } from '@lingui/react';
 import { MainHeader } from '@controls/mainHeader';
 import { SearchInput } from '@controls/searchInput';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
@@ -30,6 +31,7 @@ import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/containers/c
 import { Button } from '@controls/button';
 import { Content } from '@/v5/ui/routes/dashboard/projects/projects.styles';
 import { DashboardListEmptySearchResults } from '@components/dashboard/dashboardList';
+import { formatMessage } from '@/v5/services/intl';
 import {
 	Container,
 	HeaderButtonsGroup,
@@ -53,18 +55,13 @@ export const Containers = (): JSX.Element => {
 	return (
 		<Container>
 			<MainHeader>
-				<Trans
-					id="containers.search.placeholder"
-					message="Search containers..."
-					render={({ translation }) => (
-						<SearchInput
-							onClear={() => setSearchInput('')}
-							onChange={(event) => setSearchInput(event.currentTarget.value)}
-							value={searchInput}
-							placeholder={translation as string}
-							disabled={isListPending}
-						/>
-					)}
+				<SearchInput
+					onClear={() => setSearchInput('')}
+					onChange={(event) => setSearchInput(event.currentTarget.value)}
+					value={searchInput}
+					placeholder={formatMessage({ id: 'containers.search.placeholder',
+						defaultMessage: 'Search containers...' })}
+					disabled={isListPending}
 				/>
 				<HeaderButtonsGroup>
 					<Button
@@ -73,7 +70,7 @@ export const Containers = (): JSX.Element => {
 						color="secondary"
 						disabled={isListPending}
 					>
-						<Trans id="containers.mainHeader.newContainer" message="New Container" />
+						<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New Container" />
 					</Button>
 					<Button
 						startIcon={<ArrowUpCircleIcon />}
@@ -81,7 +78,7 @@ export const Containers = (): JSX.Element => {
 						color="primary"
 						disabled={isListPending}
 					>
-						<Trans id="containers.mainHeader.uploadFile" message="Upload file" />
+						<FormattedMessage id="containers.mainHeader.uploadFile" defaultMessage="Upload file" />
 					</Button>
 				</HeaderButtonsGroup>
 			</MainHeader>
@@ -93,23 +90,23 @@ export const Containers = (): JSX.Element => {
 						<ContainersList
 							containers={favouriteContainers}
 							title={(
-								<Trans
+								<FormattedMessage
 									id="containers.favourites.collapseTitle"
-									message="Favourites"
+									defaultMessage="Favourites"
 								/>
 							)}
 							titleTooltips={{
-								collapsed: <Trans id="containers.favourites.collapse.tooltip.show" message="Show favourites" />,
-								visible: <Trans id="containers.favourites.collapse.tooltip.hide" message="Hide favourites" />,
+								collapsed: <FormattedMessage id="containers.favourites.collapse.tooltip.show" defaultMessage="Show favourites" />,
+								visible: <FormattedMessage id="containers.favourites.collapse.tooltip.hide" defaultMessage="Hide favourites" />,
 							}}
 							emptyMessage={
 								filterQuery && hasContainers.favourites ? (
 									<DashboardListEmptySearchResults searchPhrase={filterQuery} />
 								) : (
 									<DashboardListEmptyText>
-										<Trans
+										<FormattedMessage
 											id="containers.favourites.emptyMessage"
-											message="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
+											defaultMessage="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
 										/>
 									</DashboardListEmptyText>
 								)
@@ -119,14 +116,14 @@ export const Containers = (): JSX.Element => {
 						<ContainersList
 							containers={filteredContainers}
 							title={(
-								<Trans
+								<FormattedMessage
 									id="containers.all.collapseTitle"
-									message="All containers"
+									defaultMessage="All containers"
 								/>
 							)}
 							titleTooltips={{
-								collapsed: <Trans id="containers.all.collapse.tooltip.show" message="Show all" />,
-								visible: <Trans id="containers.all.collapse.tooltip.hide" message="Hide all" />,
+								collapsed: <FormattedMessage id="containers.all.collapse.tooltip.show" defaultMessage="Show all" />,
+								visible: <FormattedMessage id="containers.all.collapse.tooltip.hide" defaultMessage="Hide all" />,
 							}}
 							emptyMessage={
 								filterQuery && hasContainers.all ? (
@@ -134,14 +131,14 @@ export const Containers = (): JSX.Element => {
 								) : (
 									<>
 										<DashboardListEmptyText>
-											<Trans id="containers.all.emptyMessage" message="You haven’t created any Containers." />
+											<FormattedMessage id="containers.all.emptyMessage" defaultMessage="You haven’t created any Containers." />
 										</DashboardListEmptyText>
 										<Button
 											startIcon={<AddCircleIcon />}
 											variant="contained"
 											color="primary"
 										>
-											<Trans id="containers.all.newContainer" message="New Container" />
+											<FormattedMessage id="containers.all.newContainer" defaultMessage="New Container" />
 										</Button>
 									</>
 								)
