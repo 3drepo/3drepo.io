@@ -19,6 +19,7 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../helper/services');
 const { src } = require('../../../../../helper/path');
 
+const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 let server;
@@ -127,7 +128,12 @@ const modelSettings = [
 			},
 		},
 	},
-
+	// NOTE: this model gets deleted after deleteContainer test
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true },
+	},
 ];
 
 const issues = [
@@ -188,6 +194,7 @@ const revisions = [
 const federationWithRev = modelSettings[0];
 const federationWithoutRev = modelSettings[1];
 const federationWithoutSubModels = modelSettings[2];
+const federationToDelete = modelSettings[7];
 const federationWithRevIssues = [issues[0], issues[1]];
 const federationWithRevRisks = [risks[0], risks[1]];
 const federationWithoutRevIssues = [issues[2]];
@@ -338,6 +345,83 @@ const testGetFederationStats = () => {
 		test('should return the federation stats correctly if the user has access (no subModels)', async () => {
 			const res = await agent.get(`${route(federationWithoutSubModels._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
 			expect(res.body).toEqual(formatToStats(federationWithoutSubModels, 0, 0));
+		});
+	});
+};
+
+const testAddFederation = () => {
+	const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/federations`;
+	describe('Add federation', () => {
+		test('should fail without a valid session', async () => {
+			const res = await agent.post(route).expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user is not a member of the teamspace', async () => {
+			const res = await agent.post(`${route}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should return new federation ID if the user has permissions', async () => {
+			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status).send({ name: ServiceHelper.generateRandomString(), unit: 'mm', type: 'a' });
+			expect(isUUIDString(res.body._id)).toBe(true);
+
+			const getRes = await agent.get(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+
+			expect(getRes.body.federations.find(({ _id }) => _id === res.body._id)).not.toBe(undefined);
+		});
+
+		test('should fail if name already exists', async () => {
+			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidArguments.status).send({ name: modelSettings[0].name, unit: 'mm', type: 'a' });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if user has insufficient permissions', async () => {
+			const res = await agent.post(`${route}?key=${users.viewer.apiKey}`).expect(templates.notAuthorized.status).send({ name: ServiceHelper.generateRandomString(), unit: 'mm', type: 'a' });
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		});
+
+		test('should fail with invalid payload', async () => {
+			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidArguments.status).send({ name: ServiceHelper.generateRandomString() });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+	});
+};
+
+const testDeleteFederation = () => {
+	const route = (federationId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federationId}`;
+	describe('Delete federation', () => {
+		test('should fail without a valid session', async () => {
+			const res = await agent.delete(route(federationToDelete._id)).expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user is not a member of the teamspace', async () => {
+			const res = await agent.delete(`${route(federationToDelete._id)}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if federation does not exist', async () => {
+			const res = await agent.delete(`${route('badId')}?key=${users.tsAdmin.apiKey}`).expect(templates.federationNotFound.status);
+			expect(res.body.code).toEqual(templates.federationNotFound.code);
+		});
+
+		test('should return ok on success', async () => {
+			const res = await agent.delete(`${route(federationToDelete._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			expect(res.body).toEqual({});
+
+			const getRes = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			expect(getRes.body.federations.find(({ _id }) => _id === federationToDelete._id)).toBe(undefined);
+		});
+
+		test('should fail if federation is container', async () => {
+			const res = await agent.delete(`${route(container._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.federationNotFound.status);
+			expect(res.body.code).toEqual(templates.federationNotFound.code);
+		});
+
+		test('should fail if user lacks permissions', async () => {
+			const res = await agent.delete(`${route(modelSettings[1]._id)}?key=${users.viewer.apiKey}`).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
 	});
 };
@@ -660,6 +744,8 @@ describe('E2E routes/teamspaces/projects/federations', () => {
 	testGetFederationStats();
 	testAppendFavourites();
 	testDeleteFavourites();
+	testAddFederation();
+	testDeleteFederation();
 	testUpdateFederationSettings();
 	testGetSettings();
 });

@@ -35,7 +35,7 @@ Permissions.isTeamspaceAdmin.mockImplementation((teamspace, user) => user === 't
 Permissions.isProjectAdmin.mockImplementation((teamspace, project, user) => user === 'projAdmin');
 Projects.getProjectById.mockImplementation(() => ({ permissions: [{ user: 'projAdmin', permissions: ['admin_project'] }] }));
 Projects.checkProjectExists.mockImplementation((teamspace, project) => {
-	if(project === 'pr2'){
+	if (project === 'pr2') {
 		throw templates.projectNotFound;
 	}
 });

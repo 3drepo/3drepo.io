@@ -26,8 +26,8 @@ const { getRisksCount } = require('../../../../models/risks');
 
 const Federations = { ...Groups };
 
-Federations.addFederation = async (teamspace, project, federation) => addModel(teamspace, project, 
-  { ...federation, federate: true });
+Federations.addFederation = async (teamspace, project, federation) => addModel(teamspace, project,
+	{ ...federation, federate: true });
 
 Federations.deleteFederation = deleteModel;
 
