@@ -533,25 +533,28 @@ const findModelMeshIdsByRulesQueries = async (account, model, posRuleQueries, ne
  */
 const getRuleQueryResults = async (account, model, idToMeshesDict, revId, query, profiler) => {
 	profiler.metaQuery = 	profiler.metaQuery || [];
-	profiler.metaReduce = 	profiler.metaReduce || [];
 	profiler.batchProm = 	profiler.batchProm || [];
 	profiler.union = 	profiler.union || [];
 
 	const metaTime = {start: Date.now()};
 	profiler.metaQuery.push(metaTime);
-	const metaResults = await findObjectsByQuery(account, model, {rev_id: revId, ...query}, {parents: 1});
+
+	const fullQuery = {rev_id: revId, ...query};
+	const pipelines = [
+		{$match: fullQuery},
+		{$group: { _id: null, allParents: {$addToSet:"$parents"}}},
+		{$unwind: "$allParents"},
+		{$unwind: "$allParents"},
+		{$group: { _id: null, parents: {$addToSet:"$allParents"}}}
+	];
+
+	const metaResults = await db.aggregate(account, `${model}.scene`, pipelines);
 	metaTime.end = Date.now();
 
 	if (metaResults.length === 0) {
 		return new Set();
 	}
-	const metaReduceTime = {start: Date.now()};
-	profiler.metaReduce.push(metaReduceTime);
-	const parents = metaResults.reduce((acc, val) => {
-		Array.prototype.push.apply(acc, val.parents);
-		return acc;
-	} ,[]);
-	metaReduceTime.end = Date.now();
+	const parents = metaResults[0].parents;
 
 	const batchPromTime = {start: Date.now()};
 	profiler.batchProm.push(batchPromTime);
