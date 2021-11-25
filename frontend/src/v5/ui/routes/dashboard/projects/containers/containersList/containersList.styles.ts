@@ -30,7 +30,7 @@ export const CollapseSideElementGroup = styled.div`
 		margin-right: 15px;
 		
 		@media (max-width: 768px) {
-			width: 235px;
+			width: 225px;
 		}
 		
 		@media (max-width: 1024px) {

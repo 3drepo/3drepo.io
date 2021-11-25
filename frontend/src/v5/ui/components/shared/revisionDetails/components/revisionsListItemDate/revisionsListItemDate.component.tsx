@@ -17,20 +17,21 @@
 
 import React, { ReactNode } from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
-import { TextOverflow } from '@controls/textOverflow';
-import { Text } from './revisionsListItemText.styles';
+import { Text } from './revisionsListItemDate.styles';
 
-type IDashboardListItemText = {
+type IDashboardListItemDate = {
 	children: ReactNode;
 	width?: number;
 	tabletWidth?: number;
 	mobileWidth?: number;
 	className?: string;
+	meta?: boolean;
 	active?: boolean;
 	hideBelowTablet?: boolean;
+	hover?: boolean;
 };
 
-export const RevisionsListItemText = ({
+export const RevisionsListItemDate = ({
 	children,
 	width,
 	tabletWidth,
@@ -38,7 +39,7 @@ export const RevisionsListItemText = ({
 	className,
 	active = false,
 	hideBelowTablet = false,
-}: IDashboardListItemText): JSX.Element => (
+}: IDashboardListItemDate): JSX.Element => (
 	<FixedOrGrowContainer
 		width={width}
 		tabletWidth={tabletWidth}
@@ -46,10 +47,8 @@ export const RevisionsListItemText = ({
 		hideBelowTablet={hideBelowTablet}
 		className={className}
 	>
-		<TextOverflow>
-			<Text $active={active}>
-				{children}
-			</Text>
-		</TextOverflow>
+		<Text $active={active}>
+			{children}
+		</Text>
 	</FixedOrGrowContainer>
 );

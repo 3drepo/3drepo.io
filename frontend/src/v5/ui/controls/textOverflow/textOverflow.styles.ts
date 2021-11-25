@@ -40,16 +40,16 @@ export const Container = styled.div`
 	height: 100%;
 
 	${({ isTruncated }) => isTruncated && css`
-		&:hover {
-			& > * {
-				text-decoration: underline;
-			}
-		}
+    pointer-events: none;
+    mask: linear-gradient(to left, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 100%) left,
+    linear-gradient(to left, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.886) 37.72%, rgba(0, 0, 0, 1) 52.55%) right;
+    mask-size: calc(100% - 68px) 100%, 68px 100%;
+    mask-repeat: no-repeat;
 
-		pointer-events: none;
-		mask: linear-gradient(to left, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 100%) left,
-		linear-gradient(to left, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.886) 37.72%, rgba(0, 0, 0, 1) 52.55%) right;
-		mask-size: calc(100% - 68px) 100%, 68px 100%;
-		mask-repeat: no-repeat;
-	`}
+    &:hover {
+      & > * {
+        text-decoration: underline;
+      }
+    }
+  `}
 `;

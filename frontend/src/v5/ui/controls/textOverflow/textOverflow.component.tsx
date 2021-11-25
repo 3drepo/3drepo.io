@@ -16,8 +16,10 @@
  */
 
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
+import EventListener from 'react-event-listener';
 import { isNil } from 'lodash';
 import { onlyText } from 'react-children-utilities';
+
 import { Container, Tooltip } from './textOverflow.styles';
 
 interface ITextOverflow {
@@ -42,12 +44,15 @@ export const TextOverflow = ({ children, className, tooltipText }: ITextOverflow
 	}, [checkIfTruncated, setIsTruncated, children]);
 
 	return (
-		<Tooltip
-			title={tooltipText || onlyText(children)}
-			style={{ pointerEvents: isTruncated ? 'all' : 'none' }}
-			placement="bottom"
-		>
-			<Container ref={setLabelRef} isTruncated={isTruncated} className={className}>{children}</Container>
-		</Tooltip>
+		<>
+			<Tooltip
+				title={tooltipText || onlyText(children)}
+				style={{ pointerEvents: isTruncated ? 'all' : 'none' }}
+				placement="bottom"
+			>
+				<Container ref={setLabelRef} isTruncated={isTruncated} className={className}>{children}</Container>
+			</Tooltip>
+			<EventListener target="window" onResize={() => setIsTruncated(checkIfTruncated())} />
+		</>
 	);
 };

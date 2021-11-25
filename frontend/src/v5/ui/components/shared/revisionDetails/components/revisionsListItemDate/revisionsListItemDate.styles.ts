@@ -15,8 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+import { Typography } from '@material-ui/core';
 
-export const SearchPhrase = styled.b`
-	color: ${({ theme }) => theme.palette.secondary.main};
+export const Text = styled(Typography)`
+	color: ${({ theme, $active }) => ($active ? theme.palette.primary.contrast : theme.palette.base.light)};
+	${({ theme }) => theme && css`
+    ${theme.typography.kicker};
+	`}
 `;

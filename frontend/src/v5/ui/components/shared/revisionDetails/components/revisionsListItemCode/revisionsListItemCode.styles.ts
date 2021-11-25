@@ -14,24 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { Typography } from '@material-ui/core';
-import { TextOverflow } from '@controls/textOverflow';
-import { fadeToLeft } from '@controls/textOverflow/textOverflow.styles';
 
 export const Text = styled(Typography)`
 	${({ theme }) => theme.typography.link};
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	display: inline;
 	cursor: pointer;
-`;
-
-export const OverflowWrapper = styled(TextOverflow)`
-	width: auto;
-	&:after {
-		${({ $active, $hover, theme }) => css`
-			${$active ? fadeToLeft(theme.palette.primary.main) : fadeToLeft(theme.palette.secondary.light)};
-			${$hover && fadeToLeft(theme.palette.secondary.main)};
-		`}
-	}
 `;

@@ -16,7 +16,10 @@
  */
 
 import styled from 'styled-components';
+import {
+	DashboardListItemTitle as DashboardListItemTitleComponent,
+} from '@components/dashboard/dashboardList/dashboardListItem/components';
 
-export const SearchPhrase = styled.b`
-	color: ${({ theme }) => theme.palette.secondary.main};
+export const DashboardListItemTitle = styled(DashboardListItemTitleComponent)`
+	display: block;
 `;

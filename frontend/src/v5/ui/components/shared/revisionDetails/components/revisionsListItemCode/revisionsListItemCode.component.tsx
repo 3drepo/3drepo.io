@@ -17,7 +17,8 @@
 
 import React, { Dispatch, ReactNode } from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
-import { Text, OverflowWrapper } from './revisionsListItemCode.styles';
+import { TextOverflow } from '@controls/textOverflow';
+import { Text } from './revisionsListItemCode.styles';
 
 type IRevisionsListItemCode = {
 	children: ReactNode;
@@ -26,8 +27,6 @@ type IRevisionsListItemCode = {
 	mobileWidth?: number;
 	className?: string;
 	onClick?: Dispatch<void>;
-	active?: boolean;
-	hover?: boolean;
 };
 
 export const RevisionsListItemCode = ({
@@ -37,14 +36,12 @@ export const RevisionsListItemCode = ({
 	mobileWidth,
 	className,
 	onClick,
-	active,
-	hover,
 }: IRevisionsListItemCode): JSX.Element => (
 	<FixedOrGrowContainer width={width} tabletWidth={tabletWidth} mobileWidth={mobileWidth} className={className}>
-		<OverflowWrapper tooltipText="Launch in Viewer" $hover={hover} $active={active}>
+		<TextOverflow tooltipText="Launch in Viewer">
 			<Text onClick={onClick}>
 				{children}
 			</Text>
-		</OverflowWrapper>
+		</TextOverflow>
 	</FixedOrGrowContainer>
 );

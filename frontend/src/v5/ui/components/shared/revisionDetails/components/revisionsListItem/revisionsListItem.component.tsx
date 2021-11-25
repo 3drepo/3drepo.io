@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@lingui/core';
 import { useParams } from 'react-router';
 
 import { RevisionsListItemText } from '@components/shared/revisionDetails/components/revisionsListItemText';
+import { RevisionsListItemDate } from '@components/shared/revisionDetails/components/RevisionsListItemDate';
 import { RevisionsListItemAuthor } from '@components/shared/revisionDetails/components/revisionsListItemAuthor';
 import { RevisionsListItemCode } from '@components/shared/revisionDetails/components/revisionsListItemCode';
 import { RevisionsListItemButton } from '@components/shared/revisionDetails/components/revisionsListItemButton';
@@ -34,7 +35,6 @@ type IRevisionsListItem = {
 };
 
 export const RevisionsListItem = ({ revision, containerId, active = false }: IRevisionsListItem): JSX.Element => {
-	const [hover, setHover] = useState<boolean>(false);
 	const { teamspace, project } = useParams();
 	const { timestamp, desc, author, tag, void: voidStatus } = revision;
 
@@ -43,23 +43,19 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 		RevisionsActionsDispatchers.setVoidStatus(teamspace, project, containerId, tag || revision._id, !voidStatus);
 	};
 
-	const toggleHover = () => setHover(!hover);
-
 	return (
-		<Container onMouseOver={toggleHover} onMouseOut={toggleHover}>
-			<RevisionsListItemText meta width={130} tabletWidth={94} active={active}>
+		<Container>
+			<RevisionsListItemDate width={130} tabletWidth={94} active={active}>
 				{i18n.date(timestamp)}
-			</RevisionsListItemText>
+			</RevisionsListItemDate>
 			<RevisionsListItemAuthor authorName={author} active={active} width={228} tabletWidth={155} />
 			<RevisionsListItemCode
-				hover={hover}
-				active={active}
 				tabletWidth={150}
 				onClick={() => {}}
 			>
 				{tag}
 			</RevisionsListItemCode>
-			<RevisionsListItemText hover={hover} hideBelowTablet active={active}>{desc}{desc}</RevisionsListItemText>
+			<RevisionsListItemText hideBelowTablet active={active}>{desc}{desc}</RevisionsListItemText>
 			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} />
 		</Container>
 	);

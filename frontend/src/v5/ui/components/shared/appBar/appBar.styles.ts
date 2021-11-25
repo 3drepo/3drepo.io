@@ -17,28 +17,19 @@
 
 import styled from 'styled-components';
 
-import Logo from '@assets/icons/logo.svg';
-
-export const LogoIcon = styled(Logo)`
-	overflow: visible;
-`;
-
-export const LeftColumn = styled.div`
+export const Items = styled.div`
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 	flex: 1;
 	max-width: calc(100% - 200px);
-`;
-
-export const RightColumn = styled.div`
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: flex-end;
-	min-width: 152px;
 	
-	& > *:last-child div {
-		margin-right: 0;
+	&:last-child {
+		justify-content: flex-end;
+		min-width: 152px;
+	
+		& > *:last-child div {
+			margin-right: 0;
+		}
 	}
 `;
