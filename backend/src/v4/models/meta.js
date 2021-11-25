@@ -542,9 +542,13 @@ const getRuleQueryResults = async (account, model, idToMeshesDict, revId, query,
 	const fullQuery = {rev_id: revId, ...query};
 	const pipelines = [
 		{$match: fullQuery},
+		// merge all parents into a single array (all Parents: [[parentSet1], [parentSet2]])
 		{$group: { _id: null, allParents: {$addToSet:"$parents"}}},
+		// necessary prep to concatenate the parent arrays
 		{$unwind: "$allParents"},
+		// necessary prep to concatenate the parent arrays (yes , it has to be done twice)
 		{$unwind: "$allParents"},
+		// final concatenation
 		{$group: { _id: null, parents: {$addToSet:"$allParents"}}}
 	];
 
@@ -554,7 +558,7 @@ const getRuleQueryResults = async (account, model, idToMeshesDict, revId, query,
 	if (metaResults.length === 0) {
 		return new Set();
 	}
-	const parents = metaResults[0].parents;
+	const { parents } = metaResults[0];
 
 	const batchPromTime = {start: Date.now()};
 	profiler.batchProm.push(batchPromTime);
