@@ -539,7 +539,6 @@ const getRuleQueryResults = async (account, model, idToMeshesDict, revId, query,
 
 	const metaTime = {start: Date.now()};
 	profiler.metaQuery.push(metaTime);
-	console.dir(query, {depth: null});
 	const metaResults = await findObjectsByQuery(account, model, {rev_id: revId, ...query}, {parents: 1});
 	metaTime.end = Date.now();
 
