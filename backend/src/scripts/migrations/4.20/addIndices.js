@@ -26,8 +26,8 @@ const processTeamspace = async (teamspace) => {
 	const proms = collections.map(({ name: colName }) => {
 		logger.logInfo(`\t\t\t${colName}`);
 		return Promise.all([
-			createIndex(teamspace, colName, [['metadata.key', 1], ['metadata.value', 1], ['_id', 1]]),
-			createIndex(teamspace, colName, [['revId', 1], ['_id', 1], ['shared_id', 1]]),
+			createIndex(teamspace, colName, [['rev_id', 1], ['metadata.key', 1], ['metadata.value', 1], ['_id', 1]]),
+			createIndex(teamspace, colName, [['rev_id', 1], ['_id', 1], ['shared_id', 1]]),
 		]);
 	});
 
