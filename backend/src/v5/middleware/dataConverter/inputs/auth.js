@@ -20,12 +20,7 @@
  };
 
  Auth.validateLogoutData = async (req, res, next) => {
-  const schema = Yup.object().shape({
-    username: Yup.string().required(),
-  }).strict(true).noUnknown();
-
   try {
-		await schema.validate(req.body);
     await checkUserExists(req.body.username);
 		next();
 	} catch (err) {

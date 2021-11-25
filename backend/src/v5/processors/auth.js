@@ -21,7 +21,6 @@ Auth.login = async (userNameOrEmail, password, req) => {
 
 	const loginData = await login(user, password);
 	await createSession(req, loginData);
-	return loginData;
 };
 
 const isAccountLocked = function (user) {
@@ -34,28 +33,26 @@ const isAccountLocked = function (user) {
 };
 
 const createSession = async (req, user) => {
-	await regenerateAuthSession(req, config, user)
-		.then(() => {
-			saveLoginRecord(req.sessionID, user.username, req.ips[0] || req.ip, req.headers["user-agent"] ,req.header("Referer"));
-			return Auth.getSessionsByUsername(user.username);
-		})
-		.then(sessions => { // Remove other sessions with the same username
-			if (!req.session.user.webSession) {
-				return null;
-			}
+	req.body.username = user.username;
 
-			const ids = [];
+	await regenerateAuthSession(req, config, user);
+	await saveLoginRecord(req.sessionID, user.username, req.ips[0] || req.ip, req.headers["user-agent"] ,req.header("Referer"));
+	const sessions = await Auth.getSessionsByUsername(user.username);
+	if (!req.session.user.webSession) {
+		return null;
+	}
 
-			sessions.forEach(entry => {
-				if (entry._id === req.session.id || !entry.session.user.webSession) {
-					return;
-				}
-				ids.push(entry._id);
-				//chatEvent.loggedOut(entry.session.user.socketId);
-			});
+	const ids = [];
 
-			return Auth.removeSessions(ids);
-		});
+	sessions.forEach(entry => {
+		if (entry._id === req.session.id || !entry.session.user.webSession) {
+			return;
+		}
+		ids.push(entry._id);
+		//chatEvent.loggedOut(entry.session.user.socketId);
+	});
+
+	return Auth.removeSessions(ids);
 }
 
 

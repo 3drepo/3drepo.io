@@ -1,10 +1,9 @@
- "use strict";
  const db = require("../handler/db");
  
  // detects edge as browser but not device
 
  const Elastic = require("../handler/elastic");
- const getLocationFromIPAddress = require("../../v5/utils/helper/strings");
+ const { getLocationFromIPAddress } = require("../../v5/utils/helper/strings");
  const { getUserAgentInfoFromBrowser, getUserAgentInfoFromPlugin, 
     isUserAgentFromPlugin } = require("../utils/helper/strings");
  
