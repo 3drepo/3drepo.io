@@ -388,7 +388,10 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 			.then((sharedIdObjects) => {
 				result.objects = sharedIdObjects;
 				return clean(result);
-			}).catch(() => clean(result)).finally(()=>{
+			}).catch((err) => {
+				console.log(err);
+				return clean(result);
+			}).finally(()=>{
 				profile.findObjectIds[idx].end = Date.now();
 			});
 		sharedIdConversionPromises.push(getObjIdProm);

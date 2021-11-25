@@ -210,7 +210,7 @@ Meta.uuidsToIfcGuids = async (account, model, ids) => {
 
 Meta.findObjectIdsByRules = async (account, model, rules, branch, revId, convertSharedIDsToString, showIfcGuids = false, profile) => {
 	profile.rulesToQueries = profile.rulesToQueries || [];
-	profile.subModelFetch = profile.subModel || [];
+	profile.subModelFetch = profile.subModelFetch || [];
 	profile.subModelObjectIds = profile.subModelObjectIds || [];
 
 	const profileIdx = 	profile.rulesToQueries.length;
