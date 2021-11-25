@@ -529,7 +529,14 @@ function listGroups(req, res, next) {
 		}
 	}
 
-	Group.getList(account, model, branch, rid, ids, req.query, showIfcGuids).then(groups => {
+	const profile = { full: { start: Date.now()}};
+	Group.getList(account, model, branch, rid, ids, req.query, showIfcGuids, profile).then(groups => {
+		profile.full.end = Date.now();
+		Object.keys(profile).forEach((key) => {
+			const {start, end} = profile[key];
+			const time = (end - start) / 1000;
+			console.log(`${key}: => ${time}`);
+		});
 		responseCodes.respond(place, req, res, next, responseCodes.OK, groups);
 	}).catch(err => {
 		systemLogger.logError(err.stack);

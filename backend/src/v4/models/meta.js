@@ -208,11 +208,17 @@ Meta.uuidsToIfcGuids = async (account, model, ids) => {
 	return db.find(account, getSceneCollectionName(model), query, project);
 };
 
-Meta.findObjectIdsByRules = async (account, model, rules, branch, revId, convertSharedIDsToString, showIfcGuids = false) => {
+Meta.findObjectIdsByRules = async (account, model, rules, branch, revId, convertSharedIDsToString, showIfcGuids = false, profile) => {
+	profile.findObjectIds = profile.findObjectIds || [];
+	profile.rulesToQueries = profile.rulesToQueries || [];
+
+	profile.findObjectIds.push({start: Date.now()});
 	const objectIdPromises = [];
 
+	profile.rulesToQueries.push({start: Date.now()});
 	const positiveQueries = positiveRulesToQueries(rules);
 	const negativeQueries = negativeRulesToQueries(rules);
+	profile.rulesToQueries[	profile.rulesToQueries.length - 1].end = Date.now();
 
 	const models = new Set();
 	models.add(model);
