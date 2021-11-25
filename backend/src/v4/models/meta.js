@@ -209,28 +209,35 @@ Meta.uuidsToIfcGuids = async (account, model, ids) => {
 };
 
 Meta.findObjectIdsByRules = async (account, model, rules, branch, revId, convertSharedIDsToString, showIfcGuids = false, profile) => {
-	profile.findObjectIds = profile.findObjectIds || [];
 	profile.rulesToQueries = profile.rulesToQueries || [];
+	profile.subModelFetch = profile.subModel || [];
+	profile.subModelObjectIds = profile.subModelObjectIds || [];
 
-	profile.findObjectIds.push({start: Date.now()});
+	const profileIdx = 	profile.rulesToQueries.length;
+
 	const objectIdPromises = [];
 
 	profile.rulesToQueries.push({start: Date.now()});
 	const positiveQueries = positiveRulesToQueries(rules);
 	const negativeQueries = negativeRulesToQueries(rules);
-	profile.rulesToQueries[	profile.rulesToQueries.length - 1].end = Date.now();
+	profile.rulesToQueries[profileIdx].end = Date.now();
 
+	profile.subModelFetch.push({start: Date.now()});
 	const models = new Set();
 	models.add(model);
 
 	// Check submodels
 	await getSubModels(account, model, branch, revId, (ts, subModel) => models.add(subModel));
+	profile.subModelFetch[profileIdx].end = Date.now();
 
 	const modelsIter = models.values();
 
 	for (const submodel of modelsIter) {
 		const _branch = (model === submodel) ? branch : "master";
 		const _revId = (model === submodel) ? revId : null;
+
+		profile.subModelObjectIds.push({start: Date.now()});
+		const idx = profile.subModelObjectIds.length - 1;
 
 		objectIdPromises.push(findModelSharedIdsByRulesQueries(
 			account,
@@ -241,6 +248,8 @@ Meta.findObjectIdsByRules = async (account, model, rules, branch, revId, convert
 			_revId,
 			convertSharedIDsToString && !showIfcGuids // in the case of ifcguids I need the uuid for querying and geting the ifcguids
 		).then(shared_ids => {
+
+			profile.subModelObjectIds[idx].end = Date.now();
 			if(!shared_ids.length) {
 				return undefined;
 			}

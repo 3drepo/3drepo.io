@@ -381,12 +381,17 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 
 	profile.conversion = { start: Date.now()};
 	results.forEach(result => {
-		sharedIdConversionPromises.push(
-			getObjectIds(account, model, branch, revId, result, true, showIfcGuids, profile).then((sharedIdObjects) => {
+		profile.findObjectIds = profile.findObjectIds || [];
+		const idx = profile.findObjectIds.length;
+		profile.findObjectIds.push({start: Date.now()});
+		const getObjIdProm = getObjectIds(account, model, branch, revId, result, true, showIfcGuids, profile)
+			.then((sharedIdObjects) => {
 				result.objects = sharedIdObjects;
 				return clean(result);
-			}).catch(() => clean(result))
-		);
+			}).catch(() => clean(result)).finally(()=>{
+				profile.findObjectIds[idx].end = Date.now();
+			});
+		sharedIdConversionPromises.push(getObjIdProm);
 	});
 
 	const res = await Promise.all(sharedIdConversionPromises);

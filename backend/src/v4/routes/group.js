@@ -533,9 +533,22 @@ function listGroups(req, res, next) {
 	Group.getList(account, model, branch, rid, ids, req.query, showIfcGuids, profile).then(groups => {
 		profile.full.end = Date.now();
 		Object.keys(profile).forEach((key) => {
-			const {start, end} = profile[key];
-			const time = (end - start) / 1000;
-			console.log(`${key}: => ${time}`);
+			if(Array.isArray(profile[key])) {
+				// console.log(`${key}:`);
+				let totalTime = 0;
+				for(let i = 0; i < profile[key].length; ++i) {
+					const {start, end}  = profile[key][i];
+					const time = (end - start) / 1000;
+					//	console.log(`\t[${i}] => ${time}`);
+					totalTime += time;
+
+				}
+				console.log(`${key}: => ${totalTime}`);
+			} else {
+				const {start, end} = profile[key];
+				const time = (end - start) / 1000;
+				console.log(`${key}: => ${time}`);
+			}
 		});
 		responseCodes.respond(place, req, res, next, responseCodes.OK, groups);
 	}).catch(err => {
