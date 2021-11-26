@@ -111,9 +111,9 @@ function getGroupCollectionName(model) {
 	return model + ".groups";
 }
 
-function getObjectIds(account, model, branch, revId, groupData, convertSharedIDsToString, showIfcGuids = false, profile = {}) {
+function getObjectIds(account, model, branch, revId, groupData, convertSharedIDsToString, showIfcGuids = false) {
 	if (groupData.rules && groupData.rules.length > 0) {
-		return Meta.findObjectIdsByRules(account, model, groupData.rules, branch, revId, convertSharedIDsToString, showIfcGuids, profile);
+		return Meta.findObjectIdsByRules(account, model, groupData.rules, branch, revId, convertSharedIDsToString, showIfcGuids);
 	} else {
 		return getObjectsArray(model, branch, revId, groupData, convertSharedIDsToString, showIfcGuids);
 	}
@@ -333,8 +333,7 @@ Group.findByUID = async function (account, model, branch, revId, uid, showIfcGui
 	return (noClean) ? foundGroup : clean(foundGroup);
 };
 
-Group.getList = async function (account, model, branch, revId, ids, queryParams, showIfcGuids, profile) {
-	profile.getList = { start: Date.now()};
+Group.getList = async function (account, model, branch, revId, ids, queryParams, showIfcGuids) {
 	const query = {};
 
 	// If we want groups that aren't from issues
@@ -374,33 +373,19 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 		query._id = {$in: utils.stringsToUUIDs(ids)};
 	}
 
-	profile.dbQuery = { start: Date.now()};
 	const results = await db.find(account, getGroupCollectionName(model), query);
-	profile.dbQuery.end = Date.now();
 	const sharedIdConversionPromises = [];
 
-	profile.conversion = { start: Date.now()};
 	results.forEach(result => {
-		profile.findObjectIds = profile.findObjectIds || [];
-		const idx = profile.findObjectIds.length;
-		profile.findObjectIds.push({start: Date.now()});
-		const getObjIdProm = getObjectIds(account, model, branch, revId, result, true, showIfcGuids, profile)
+		const getObjIdProm = getObjectIds(account, model, branch, revId, result, true, showIfcGuids)
 			.then((sharedIdObjects) => {
 				result.objects = sharedIdObjects;
 				return clean(result);
-			}).catch((err) => {
-				console.log(err);
-				return clean(result);
-			}).finally(()=>{
-				profile.findObjectIds[idx].end = Date.now();
-			});
+			}).catch(() => clean(result));
 		sharedIdConversionPromises.push(getObjIdProm);
 	});
 
-	const res = await Promise.all(sharedIdConversionPromises);
-	profile.conversion.end = Date.now();
-	profile.getList.end = Date.now();
-	return res;
+	return Promise.all(sharedIdConversionPromises);
 };
 
 Group.update = async function (account, model, branch = "master", revId = null, sessionId, user = "", groupId, data) {

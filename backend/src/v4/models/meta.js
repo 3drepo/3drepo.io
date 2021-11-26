@@ -208,36 +208,23 @@ Meta.uuidsToIfcGuids = async (account, model, ids) => {
 	return db.find(account, getSceneCollectionName(model), query, project);
 };
 
-Meta.findObjectIdsByRules = async (account, model, rules, branch, revId, convertSharedIDsToString, showIfcGuids = false, profile) => {
-	profile.rulesToQueries = profile.rulesToQueries || [];
-	profile.subModelFetch = profile.subModelFetch || [];
-	profile.subModelObjectIds = profile.subModelObjectIds || [];
-
-	const profileIdx = 	profile.rulesToQueries.length;
+Meta.findObjectIdsByRules = async (account, model, rules, branch, revId, convertSharedIDsToString, showIfcGuids = false) => {
 
 	const objectIdPromises = [];
 
-	profile.rulesToQueries.push({start: Date.now()});
 	const positiveQueries = positiveRulesToQueries(rules);
 	const negativeQueries = negativeRulesToQueries(rules);
-	profile.rulesToQueries[profileIdx].end = Date.now();
-
-	profile.subModelFetch.push({start: Date.now()});
 	const models = new Set();
 	models.add(model);
 
 	// Check submodels
 	await getSubModels(account, model, branch, revId, (ts, subModel) => models.add(subModel));
-	profile.subModelFetch[profileIdx].end = Date.now();
 
 	const modelsIter = models.values();
 
 	for (const submodel of modelsIter) {
 		const _branch = (model === submodel) ? branch : "master";
 		const _revId = (model === submodel) ? revId : null;
-
-		profile.subModelObjectIds.push({start: Date.now()});
-		const idx = profile.subModelObjectIds.length - 1;
 
 		objectIdPromises.push(findModelSharedIdsByRulesQueries(
 			account,
@@ -247,10 +234,8 @@ Meta.findObjectIdsByRules = async (account, model, rules, branch, revId, convert
 			_branch,
 			_revId,
 			convertSharedIDsToString && !showIfcGuids // in the case of ifcguids I need the uuid for querying and geting the ifcguids
-			, profile
 		).then(shared_ids => {
 
-			profile.subModelObjectIds[idx].end = Date.now();
 			if(!shared_ids.length) {
 				return undefined;
 			}
@@ -456,49 +441,20 @@ const findObjectsByQuery = (account, model, query, project = { ...ifcGuidProject
  *
  * @returns {Promise<Array<string | object>>}
  */
-const findModelSharedIdsByRulesQueries = async (account, model, posRuleQueries, negRuleQueries, branch, revId, convertSharedIDsToString, profiler = {}) => {
-	try {
-		profiler.idsToSharedIds = profiler.idsToSharedIds || [];
-		profiler.findModelMeshIds = profiler.findModelMeshIds || [];
-		const idx = profiler.findModelMeshIds.length;
-		profiler.findModelMeshIds.push({start: Date.now()});
-		const ids = await findModelMeshIdsByRulesQueries(account, model, posRuleQueries, negRuleQueries, branch, revId, false, profiler);
-		profiler.findModelMeshIds[idx].end = Date.now();
-		profiler.idsToSharedIds.push({start: Date.now()});
-		const sharedIdIdx = profiler.idsToSharedIds.length - 1;
-		const res = await  idsToSharedIds(account, model, ids, convertSharedIDsToString) ;
-		profiler.idsToSharedIds[sharedIdIdx].end = Date.now();
-		return res;
-	} catch (err) {
-		console.log(err);
-	}
+const findModelSharedIdsByRulesQueries = async (account, model, posRuleQueries, negRuleQueries, branch, revId, convertSharedIDsToString) => {
+	const ids = await findModelMeshIdsByRulesQueries(account, model, posRuleQueries, negRuleQueries, branch, revId, false);
+	return idsToSharedIds(account, model, ids, convertSharedIDsToString) ;
 };
 
-const findModelMeshIdsByRulesQueries = async (account, model, posRuleQueries, negRuleQueries, branch, revId, toString = false, profiler) => {
-	profiler.getHistory = profiler.getHistory || [];
-	profiler.idToMesh = profiler.idToMesh || [];
-	profiler.posRules = profiler.posRules || [];
-	profiler.posRulesInt = profiler.posRulesInt || [];
-	const histTime = {start: Date.now()};
-	profiler.getHistory.push(histTime);
+const findModelMeshIdsByRulesQueries = async (account, model, posRuleQueries, negRuleQueries, branch, revId, toString = false) => {
 	const history = await  History.getHistory(account, model, branch, revId);
-	histTime.end = Date.now();
 
-	const idMeshTime = {start: Date.now()};
-	profiler.idToMesh.push(idMeshTime);
 	const idToMeshesDict = await getIdToMeshesDict(account, model, utils.uuidToString(history._id));
-	idMeshTime.end = Date.now();
 	let allRulesResults = null;
 
 	if (posRuleQueries.length !== 0) {
-		const posRulesTime = {start: Date.now()};
-		profiler.posRules.push(posRulesTime);
-		const eachPosRuleResults = await Promise.all(posRuleQueries.map(ruleQuery => getRuleQueryResults(account, model, idToMeshesDict, history._id, ruleQuery, profiler)));
-		posRulesTime.end = Date.now();
-		const posRulesIntTime = {start: Date.now()};
-		profiler.posRulesInt.push(posRulesIntTime);
+		const eachPosRuleResults = await Promise.all(posRuleQueries.map(ruleQuery => getRuleQueryResults(account, model, idToMeshesDict, history._id, ruleQuery)));
 		allRulesResults = intersection(eachPosRuleResults);
-		posRulesIntTime.end = Date.now();
 	} else {
 		const rootQuery =  { rev_id: history._id, "parents": {$exists: false} };
 		const rootId = (await findObjectsByQuery(account, model, rootQuery))[0]._id;
@@ -531,14 +487,7 @@ const findModelMeshIdsByRulesQueries = async (account, model, posRuleQueries, ne
  *
  * @returns {Promise<Set<string>>} Is a set of the ids that that matches the particular query rule
  */
-const getRuleQueryResults = async (account, model, idToMeshesDict, revId, query, profiler) => {
-	profiler.metaQuery = 	profiler.metaQuery || [];
-	profiler.batchProm = 	profiler.batchProm || [];
-	profiler.union = 	profiler.union || [];
-
-	const metaTime = {start: Date.now()};
-	profiler.metaQuery.push(metaTime);
-
+const getRuleQueryResults = async (account, model, idToMeshesDict, revId, query) => {
 	const fullQuery = {rev_id: revId, ...query};
 	const pipelines = [
 		{$match: fullQuery},
@@ -553,26 +502,20 @@ const getRuleQueryResults = async (account, model, idToMeshesDict, revId, query,
 	];
 
 	const metaResults = await db.aggregate(account, `${model}.scene`, pipelines);
-	metaTime.end = Date.now();
 
 	if (metaResults.length === 0) {
 		return new Set();
 	}
 	const { parents } = metaResults[0];
 
-	const batchPromTime = {start: Date.now()};
-	profiler.batchProm.push(batchPromTime);
 	const res = await batchPromises((parentsForQuery) => {
 		const meshQuery = { rev_id: revId, shared_id: { $in: parentsForQuery }, type: { $in: ["transformation", "mesh"]}};
 		const meshProject = { _id: 1, type: 1 };
 		return db.find(account, getSceneCollectionName(model), meshQuery, meshProject);
 	}, parents, 7000);
-	batchPromTime.end = Date.now();
 
 	const ids = new Set();
 
-	const unionTime = {start: Date.now()};
-	profiler.union.push(unionTime);
 	for (let i = 0; i < res.length ; i++) {
 		const resBatch = res[i];
 		for (let j = 0; j < resBatch.length ; j++) {
@@ -585,7 +528,6 @@ const getRuleQueryResults = async (account, model, idToMeshesDict, revId, query,
 			}
 		}
 	}
-	unionTime.end = Date.now();
 
 	return ids;
 };
