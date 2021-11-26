@@ -1,10 +1,10 @@
-const { getSessionsByUsername, removeSessions } = require('../models/sessions');
 const { login, getUserByEmail, getUserByUsername } = require('../models/users');
 const { hasEmailFormat } = require('../utils/helper/strings');
-const { regenerateAuthSession } = require('../../v4/services/session')
+const { getSessionsByUsername, regenerateAuthSession } = require('../services/sessions');
+const { publish } = require("../services/eventsManager/eventsManager");
+const { events } = require("../services/eventsManager/eventsManager.constants");
 const config = require('../utils/config');
 const Auth = {};
-const { saveLoginRecord } = require('../models/loginRecord');
 const { templates } = require('../utils/responseCodes');
 
 Auth.login = async (userNameOrEmail, password, req) => {
@@ -33,31 +33,12 @@ const isAccountLocked = function (user) {
 };
 
 const createSession = async (req, user) => {
-	req.body.username = user.username;
-
 	await regenerateAuthSession(req, config, user);
-	await saveLoginRecord(req.sessionID, user.username, req.ips[0] || req.ip, req.headers["user-agent"] ,req.header("Referer"));
-	const sessions = await Auth.getSessionsByUsername(user.username);
-	if (!req.session.user.webSession) {
-		return null;
-	}
+	
+	const sessions = req.session.user.webSession ? await getSessionsByUsername(user.username) : null;	
 
-	const ids = [];
-
-	sessions.forEach(entry => {
-		if (entry._id === req.session.id || !entry.session.user.webSession) {
-			return;
-		}
-		ids.push(entry._id);
-		//chatEvent.loggedOut(entry.session.user.socketId);
-	});
-
-	return Auth.removeSessions(ids);
+	publish(events.USER_LOGGED_IN, { username: user.username, sessionID: req.sessionID, 
+		ipAddress: req.ips[0] || req.ip , userAgent: req.headers["user-agent"], referrer: req.header("Referer"), oldSessionIds: sessions });
 }
-
-
-Auth.getSessionsByUsername = getSessionsByUsername;
-
-Auth.removeSessions = removeSessions;
 
 module.exports = Auth;

@@ -16,11 +16,13 @@
  */
 
 const modelEventsListener = require('./components/modelEvents');
+const authEventsListener = require('./components/authEvents');
 
 const EventsListener = {};
 
 EventsListener.init = () => {
 	modelEventsListener.init();
+	authEventsListener.init();
 };
 
 module.exports = EventsListener;

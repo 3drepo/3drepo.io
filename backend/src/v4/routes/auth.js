@@ -618,6 +618,7 @@ function logout(req, res, next) {
 	req.session.destroy(function() {
 		systemLogger.logDebug("User has logged out.");
 		res.clearCookie("connect.sid", { domain: config.cookie_domain, path: "/" });
+		req.user.username = username;
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {username: username});
 	});
 }
