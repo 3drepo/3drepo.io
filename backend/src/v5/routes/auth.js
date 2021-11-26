@@ -16,10 +16,12 @@ const login = (req, res) => {
 
 const logout = (req, res) => {
 	const username = req.session?.user?.username;
-	req.session.destroy(function() {
-		res.clearCookie("connect.sid", { domain: config.cookie_domain, path: "/" });
-		respond(req, res, templates.ok, {}, {}, username);
-	});
+	Auth.checkUserExists(username).then(() => {
+		req.session.destroy(function() {
+			res.clearCookie("connect.sid", { domain: config.cookie_domain, path: "/" });
+			respond(req, res, templates.ok, undefined, {}, username);
+		});
+	}).catch((err) => respond(req, res, err));
 };
 
 const getUsername = (req, res) => {

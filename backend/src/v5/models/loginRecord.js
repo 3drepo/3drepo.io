@@ -2,15 +2,14 @@
  
  // detects edge as browser but not device
 
- const Elastic = require("../handler/elastic");
  const { getLocationFromIPAddress } = require("../../v5/utils/helper/strings");
  const { getUserAgentInfoFromBrowser, getUserAgentInfoFromPlugin, 
     isUserAgentFromPlugin } = require("../utils/helper/strings");
  
  const LoginRecord = {};
  
- LoginRecord.saveLoginRecord = async (id, username, ipAddr, userAgent, referer) => {
-     let loginRecord = {_id: id,loginTime: new Date(),ipAddr: ipAddr};
+ LoginRecord.saveLoginRecord = async (sessionId, username, ipAddress, userAgent, referer) => {
+     let loginRecord = {_id: sessionId, loginTime: new Date(), ipAddr: ipAddress };
  
      const uaInfo = isUserAgentFromPlugin(userAgent) ?
          getUserAgentInfoFromPlugin(userAgent) : getUserAgentInfoFromBrowser(userAgent);
@@ -23,16 +22,10 @@
      if (referer) {
          loginRecord.referrer = referer;
      }
- 
-     return Promise.all([
-         db.insertOne("loginRecords", username, loginRecord),
-         Elastic.createLoginRecord(username, loginRecord)]);
+
+     await db.insertOne("loginRecords", username, loginRecord);
+     return loginRecord;     
  };
- 
- 
- 
-
-
  
  module.exports = LoginRecord;
  

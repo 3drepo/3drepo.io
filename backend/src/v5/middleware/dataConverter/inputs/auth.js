@@ -12,21 +12,12 @@
  
     try {
 		await schema.validate(req.body);
-    await checkUserExists(req.body.username);
+    	await checkUserExists(req.body.username);
 		next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
  };
-
- Auth.validateLogoutData = async (req, res, next) => {
-  try {
-    await checkUserExists(req.body.username);
-		next();
-	} catch (err) {
-		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
-	}
-}
  
  module.exports = Auth;
  

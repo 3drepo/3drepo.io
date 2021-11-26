@@ -1,4 +1,5 @@
  "use strict";
+ /* istanbul ignore next */
  (() => {
  
      const { uploadSizeLimit } = require("./utils/config");

@@ -109,25 +109,25 @@ User.getUserByEmail = async (email, projection) => {
 };
 
 User.getFavourites = async (user, teamspace) => {
-	const { customData } = await getUserByUsername(user, { 'customData.starredModels': 1 });
+	const { customData } = await User.getUserByUsername(user, { 'customData.starredModels': 1 });
 	const favs = customData.starredModels || {};
 	return favs[teamspace] || [];
 };
 
 User.getAccessibleTeamspaces = async (username) => {
-	const userDoc = await getUserByUsername(username, { roles: 1 });
+	const userDoc = await User.getUserByUsername(username, { roles: 1 });
 	return userDoc.roles.map((role) => role.db);
 };
 
-User.checkUserExists = async (user, projection) => {
-	const userDoc = await userQuery({ user }, projection);
+User.checkUserExists = async (user) => {
+	const userDoc = await userQuery({ user });
 	if (!userDoc) {
 		throw templates.userNotFound;
 	}
 };
 
 User.appendFavourites = async (username, teamspace, favouritesToAdd) => {
-	const userProfile = await getUserByUsername(username, { 'customData.starredModels': 1 });
+	const userProfile = await User.getUserByUsername(username, { 'customData.starredModels': 1 });
 
 	const favourites = userProfile.customData.starredModels || {};
 	if (!favourites[teamspace]) {
@@ -144,7 +144,7 @@ User.appendFavourites = async (username, teamspace, favouritesToAdd) => {
 };
 
 User.deleteFavourites = async (username, teamspace, favouritesToRemove) => {
-	const userProfile = await getUser(username, { 'customData.starredModels': 1 });
+	const userProfile = await User.getUserByUsername(username, { 'customData.starredModels': 1 });
 
 	const favourites = userProfile.customData.starredModels || {};
 

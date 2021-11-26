@@ -1,4 +1,4 @@
-const { login, getUserByEmail, getUserByUsername } = require('../models/users');
+const { checkUserExists, login, getUserByEmail, getUserByUsername } = require('../models/users');
 const { hasEmailFormat } = require('../utils/helper/strings');
 const { getSessionsByUsername, regenerateAuthSession } = require('../services/sessions');
 const { publish } = require("../services/eventsManager/eventsManager");
@@ -22,6 +22,8 @@ Auth.login = async (userNameOrEmail, password, req) => {
 	const loginData = await login(user, password);
 	await createSession(req, loginData);
 };
+
+Auth.checkUserExists = checkUserExists;
 
 const isAccountLocked = function (user) {
 	const currentTime = new Date();

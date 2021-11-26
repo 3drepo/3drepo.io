@@ -2,11 +2,11 @@
  const { events } = require('../../eventsManager/eventsManager.constants');
  const { saveLoginRecord } = require('../../../models/loginRecord');
  const { subscribe } = require('../../eventsManager/eventsManager');
- 
- const userLoggedIn = ({
+ const { createLoginRecord } = require("../../../handler/elastic");
+
+ const userLoggedIn = async ({
      username, sessionID, ipAddress, userAgent, referrer, oldSessions
  }) => {
-    saveLoginRecord(sessionID, username, ipAddress, userAgent , referrer);
 
 	if (oldSessions) {
         const ids = [];
@@ -21,6 +21,9 @@
 
 		removeSessions(ids);
 	}
+
+	const loginRecord = await saveLoginRecord(sessionID, username, ipAddress, userAgent , referrer);
+	createLoginRecord(username, loginRecord);
  };
  
  const AuthEventsListener = {};
