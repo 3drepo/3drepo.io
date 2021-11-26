@@ -27,7 +27,6 @@ type IDashboardListHeaderLabel = {
 	className?: string;
 	children?: ReactNode;
 	hideWhenSmallerThan?: Display;
-	marginRight?: boolean;
 };
 
 export const RevisionsListHeaderLabel = ({ children, ...props }: IDashboardListHeaderLabel) => (

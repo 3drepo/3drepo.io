@@ -16,6 +16,7 @@
  */
 
 import styled from 'styled-components';
+import { Display } from '@/v5/ui/themes/media';
 
 export const Container = styled.div``;
 
@@ -24,7 +25,7 @@ export const Content = styled.div`
 	margin: 18px auto 100px;
 	padding: 0 30px;
 	
-	@media (max-width: 1024px) {
+	@media (max-width: ${Display.Desktop}px) {
 		margin-top: 30px;
 	}
 `;

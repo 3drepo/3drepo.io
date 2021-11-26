@@ -18,6 +18,7 @@
 import styled, { css } from 'styled-components';
 import { DashboardListEmptyContainer } from '@components/dashboard/dashboardList';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
+import * as RevisionsListHeaderLabelStyles from './components/revisionsListHeaderLabel/revisionsListHeaderLabel.styles';
 
 export const Container = styled.div`
 	display: flex;
@@ -54,6 +55,12 @@ export const RevisionsListHeaderContainer = styled.header`
 	display: flex;
 	padding: 13px 20px 10px 23px;
 	margin-top: 17px;
+	
+	${RevisionsListHeaderLabelStyles.Container} {
+		&:last-child {
+			margin-right: 70px;
+		}
+	}
 `;
 
 export const RevisionsList = styled.ul`

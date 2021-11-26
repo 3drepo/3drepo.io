@@ -82,7 +82,7 @@ export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDe
 				<RevisionsListHeaderLabel width={130} tabletWidth={94}><Trans id="revisionDetails.addedOn" message="Added on" /></RevisionsListHeaderLabel>
 				<RevisionsListHeaderLabel width={228} tabletWidth={155}><Trans id="revisionDetails.addedBy" message="Added by" /></RevisionsListHeaderLabel>
 				<RevisionsListHeaderLabel tabletWidth={150}><Trans id="revisionDetails.revisionCode" message="Revision code" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel marginRight hideWhenSmallerThan={Display.Tablet}><Trans id="revisionDetails.description" message="Description" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel hideWhenSmallerThan={Display.Tablet}><Trans id="revisionDetails.description" message="Description" /></RevisionsListHeaderLabel>
 			</RevisionsListHeaderContainer>
 			<RevisionsList>
 				{isLoading ? (

@@ -28,13 +28,13 @@ export const Container = styled.div<{width?: number}>`
 	`}
 	
 	${({ tabletWidth }) => tabletWidth && css`
-		@media (max-width: 1024px) {
+		@media (max-width: ${Display.Desktop}px) {
 			min-width: ${tabletWidth}px;
 		}
 	`}
 	
 	${({ mobileWidth }) => mobileWidth && css`
-		@media (max-width: 768px) {
+		@media (max-width: ${Display.Tablet}px) {
 			min-width: ${mobileWidth}px;
 		}
 	`}

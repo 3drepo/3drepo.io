@@ -17,6 +17,7 @@
 
 import styled from 'styled-components';
 import * as SearchInputStyles from '@controls/searchInput/searchInput.styles';
+import { Display } from '@/v5/ui/themes/media';
 
 export const Container = styled.div`
 	margin: 16px 0;
@@ -29,15 +30,15 @@ export const CollapseSideElementGroup = styled.div`
 	${SearchInputStyles.TextField} {
 		margin-right: 15px;
 		
-		@media (max-width: 768px) {
+		@media (max-width: ${Display.Tablet}px) {
 			width: 225px;
 		}
 		
-		@media (max-width: 1024px) {
+		@media (max-width: ${Display.Desktop}px) {
 			max-width: 405px;
 		}
 		
-		@media (min-width: 1025px) {
+		@media (min-width: ${Display.Desktop}px) {
 			width: 405px;
 		}
 	}
