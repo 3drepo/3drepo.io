@@ -27,6 +27,7 @@ const processTeamspace = async (teamspace) => {
 		logger.logInfo(`\t\t\t${colName}`);
 		return Promise.all([
 			createIndex(teamspace, colName, [['rev_id', 1], ['metadata.key', 1], ['metadata.value', 1]]),
+			createIndex(teamspace, colName, [['metadata.key', 1], ['metadata.value', 1]]),
 			createIndex(teamspace, colName, [['rev_id', 1], ['shared_id', 1], ['type', 1]]),
 			createIndex(teamspace, colName, [['shared_id', 1]]),
 		]);
