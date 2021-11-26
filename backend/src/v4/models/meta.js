@@ -25,7 +25,7 @@ const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const { batchPromises } = require("./helper/promises");
 const { positiveRulesToQueries, negativeRulesToQueries } = require("./helper/rule");
-const {union, intersection, difference} = require("./helper/set");
+const {intersection, difference} = require("./helper/set");
 const utils = require("../utils");
 const Stream = require("stream");
 
@@ -569,18 +569,19 @@ const getRuleQueryResults = async (account, model, idToMeshesDict, revId, query,
 	}, parents, 7000);
 	batchPromTime.end = Date.now();
 
-	let ids = new Set();
+	const ids = new Set();
 
 	const unionTime = {start: Date.now()};
 	profiler.union.push(unionTime);
 	for (let i = 0; i < res.length ; i++) {
 		const resBatch = res[i];
 		for (let j = 0; j < resBatch.length ; j++) {
-			const element = resBatch[j];
-			if (element.type === "transformation") {
-				ids = union(ids, new Set(idToMeshesDict[utils.uuidToString(element._id)]));
+			const { type, _id } = resBatch[j];
+			const idStr = utils.uuidToString(_id);
+			if (type === "transformation") {
+				idToMeshesDict[idStr].forEach((meshId) => ids.add(meshId));
 			} else {
-				ids.add(utils.uuidToString(element._id));
+				ids.add(idStr);
 			}
 		}
 	}
