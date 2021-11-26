@@ -25,7 +25,7 @@ const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const { batchPromises } = require("./helper/promises");
 const { positiveRulesToQueries, negativeRulesToQueries } = require("./helper/rule");
-const {union, intersection, difference} = require("./helper/set");
+const {intersection, difference} = require("./helper/set");
 const utils = require("../utils");
 const Stream = require("stream");
 
@@ -457,21 +457,17 @@ const findObjectsByQuery = (account, model, query, project = { ...ifcGuidProject
  * @returns {Promise<Array<string | object>>}
  */
 const findModelSharedIdsByRulesQueries = async (account, model, posRuleQueries, negRuleQueries, branch, revId, convertSharedIDsToString, profiler = {}) => {
-	try {
-		profiler.idsToSharedIds = profiler.idsToSharedIds || [];
-		profiler.findModelMeshIds = profiler.findModelMeshIds || [];
-		const idx = profiler.findModelMeshIds.length;
-		profiler.findModelMeshIds.push({start: Date.now()});
-		const ids = await findModelMeshIdsByRulesQueries(account, model, posRuleQueries, negRuleQueries, branch, revId, false, profiler);
-		profiler.findModelMeshIds[idx].end = Date.now();
-		profiler.idsToSharedIds.push({start: Date.now()});
-		const sharedIdIdx = profiler.idsToSharedIds.length - 1;
-		const res = await  idsToSharedIds(account, model, ids, convertSharedIDsToString) ;
-		profiler.idsToSharedIds[sharedIdIdx].end = Date.now();
-		return res;
-	} catch (err) {
-		console.log(err);
-	}
+	profiler.idsToSharedIds = profiler.idsToSharedIds || [];
+	profiler.findModelMeshIds = profiler.findModelMeshIds || [];
+	const idx = profiler.findModelMeshIds.length;
+	profiler.findModelMeshIds.push({start: Date.now()});
+	const ids = await findModelMeshIdsByRulesQueries(account, model, posRuleQueries, negRuleQueries, branch, revId, false, profiler);
+	profiler.findModelMeshIds[idx].end = Date.now();
+	profiler.idsToSharedIds.push({start: Date.now()});
+	const sharedIdIdx = profiler.idsToSharedIds.length - 1;
+	const res = await  idsToSharedIds(account, model, ids, convertSharedIDsToString) ;
+	profiler.idsToSharedIds[sharedIdIdx].end = Date.now();
+	return res;
 };
 
 const findModelMeshIdsByRulesQueries = async (account, model, posRuleQueries, negRuleQueries, branch, revId, toString = false, profiler) => {
@@ -533,60 +529,54 @@ const findModelMeshIdsByRulesQueries = async (account, model, posRuleQueries, ne
  */
 const getRuleQueryResults = async (account, model, idToMeshesDict, revId, query, profiler) => {
 	profiler.metaQuery = 	profiler.metaQuery || [];
-	profiler.batchProm = 	profiler.batchProm || [];
 	profiler.union = 	profiler.union || [];
 
 	const metaTime = {start: Date.now()};
 	profiler.metaQuery.push(metaTime);
-
+	const sceneCol = `${model}.scene`;
 	const fullQuery = {rev_id: revId, ...query};
 	const pipelines = [
 		{$match: fullQuery},
 		// merge all parents into a single array (all Parents: [[parentSet1], [parentSet2]])
-		{$group: { _id: null, allParents: {$addToSet:"$parents"}}},
+		{$group: { _id: null, targetSharedIDs: {$addToSet:"$parents"}}},
 		// necessary prep to concatenate the parent arrays
-		{$unwind: "$allParents"},
+		{$unwind: "$targetSharedIDs"},
 		// necessary prep to concatenate the parent arrays (yes , it has to be done twice)
-		{$unwind: "$allParents"},
-		// final concatenation
-		{$group: { _id: null, parents: {$addToSet:"$allParents"}}}
+		{$unwind: "$targetSharedIDs"},
+		// go back to the collection and find all documents that have a shared_id that matches targetSharedIDs
+		{$lookup: {
+			from : sceneCol,
+			localField: "targetSharedIDs",
+			foreignField: "shared_id",
+			as: "result"
+		}},
+		// make sure these fields are from the target revision
+		{$match: { "result.rev_id": revId}},
+		// Note: once we upgrade mongo to 3.6+ we can put this $project inside the lookup
+		{$project: {"result._id": 1, "result.type": 1}},
+		// remove the array in the result embedded object.
+		{$unwind: "$result"}
 	];
 
-	const metaResults = await db.aggregate(account, `${model}.scene`, pipelines);
+	const metaResults = await db.aggregate(account, sceneCol, pipelines);
 	metaTime.end = Date.now();
-
-	if (metaResults.length === 0) {
-		return new Set();
-	}
-	const { parents } = metaResults[0];
-
-	const batchPromTime = {start: Date.now()};
-	profiler.batchProm.push(batchPromTime);
-	const res = await batchPromises((parentsForQuery) => {
-		const meshQuery = { rev_id: revId, shared_id: { $in: parentsForQuery }, type: { $in: ["transformation", "mesh"]}};
-		const meshProject = { _id: 1, type: 1 };
-		return db.find(account, getSceneCollectionName(model), meshQuery, meshProject);
-	}, parents, 7000);
-	batchPromTime.end = Date.now();
-
-	let ids = new Set();
+	const ids = new Set();
 
 	const unionTime = {start: Date.now()};
 	profiler.union.push(unionTime);
-	for (let i = 0; i < res.length ; i++) {
-		const resBatch = res[i];
-		for (let j = 0; j < resBatch.length ; j++) {
-			const element = resBatch[j];
-			if (element.type === "transformation") {
-				ids = union(ids, new Set(idToMeshesDict[utils.uuidToString(element._id)]));
-			} else {
-				ids.add(utils.uuidToString(element._id));
-			}
+	metaResults.forEach(({result: {_id, type}}) => {
+		const idStr = utils.uuidToString(_id);
+		if(type === "transformation") {
+			idToMeshesDict[idStr].forEach((meshId) => {
+				ids.add(meshId);
+			});
+		} else {
+			ids.add(idStr);
 		}
-	}
+	});
 	unionTime.end = Date.now();
-
 	return ids;
+
 };
 
 const getMetadataRuleQueryResults = async (account, model, query, projection) => {
