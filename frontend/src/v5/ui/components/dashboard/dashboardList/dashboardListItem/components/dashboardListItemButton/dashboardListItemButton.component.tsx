@@ -18,6 +18,7 @@
 import React, { Dispatch, ReactNode, SyntheticEvent } from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { Tooltip } from '@material-ui/core';
+import { Display } from '@/v5/ui/themes/media';
 import { Button } from './dashboardListItemButton.styles';
 
 type IDashboardListItemButton = {
@@ -26,7 +27,7 @@ type IDashboardListItemButton = {
 	onClick: Dispatch<SyntheticEvent>;
 	tooltipTitle?: ReactNode;
 	className?: string;
-	hideBelowDesktop?: boolean;
+	hideWhenSmallerThan?: Display;
 };
 
 export const DashboardListItemButton = ({
@@ -34,10 +35,10 @@ export const DashboardListItemButton = ({
 	width,
 	onClick,
 	tooltipTitle = '',
-	hideBelowDesktop = false,
+	hideWhenSmallerThan,
 	className,
 }: IDashboardListItemButton): JSX.Element => (
-	<FixedOrGrowContainer width={width} hideBelowDesktop={hideBelowDesktop} className={className}>
+	<FixedOrGrowContainer width={width} hideWhenSmallerThan={hideWhenSmallerThan} className={className}>
 		<Tooltip title={tooltipTitle}>
 			<Button onClick={(event) => {
 				event.stopPropagation();

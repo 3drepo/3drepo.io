@@ -15,33 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
-import { Display } from '@/v5/ui/themes/media';
-
-export const Container = styled.div<{width?: number}>`
-	display: flex;
-	flex: 1;
-	
-	${({ width }) => width && css`
-		min-width: ${width}px;
-		flex: 0;
-	`}
-	
-	${({ tabletWidth }) => tabletWidth && css`
-		@media (max-width: 1024px) {
-			min-width: ${tabletWidth}px;
-		}
-	`}
-	
-	${({ mobileWidth }) => mobileWidth && css`
-		@media (max-width: 768px) {
-			min-width: ${mobileWidth}px;
-		}
-	`}
-
-	${({ hideWhenSmallerThan }: { hideWhenSmallerThan: Display }) => hideWhenSmallerThan && css`
-		@media (max-width: ${hideWhenSmallerThan}px) {
-			display: none;
-		}
-  `};
-`;
+export enum Display {
+	Desktop = 1024,
+	Tablet = 768,
+}

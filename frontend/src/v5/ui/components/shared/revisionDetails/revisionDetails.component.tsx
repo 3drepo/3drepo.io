@@ -28,6 +28,7 @@ import { RevisionsListItem } from '@components/shared/revisionDetails/components
 import { SkeletonListItem } from '@components/shared/revisionDetails/components/skeletonListItem';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
+import { Display } from '@/v5/ui/themes/media';
 import {
 	Container,
 	RevisionsListHeaderContainer,
@@ -81,7 +82,7 @@ export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDe
 				<RevisionsListHeaderLabel width={130} tabletWidth={94}><Trans id="revisionDetails.addedOn" message="Added on" /></RevisionsListHeaderLabel>
 				<RevisionsListHeaderLabel width={228} tabletWidth={155}><Trans id="revisionDetails.addedBy" message="Added by" /></RevisionsListHeaderLabel>
 				<RevisionsListHeaderLabel tabletWidth={150}><Trans id="revisionDetails.revisionCode" message="Revision code" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel marginRight hideBelowTablet><Trans id="revisionDetails.description" message="Description" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel marginRight hideWhenSmallerThan={Display.Tablet}><Trans id="revisionDetails.description" message="Description" /></RevisionsListHeaderLabel>
 			</RevisionsListHeaderContainer>
 			<RevisionsList>
 				{isLoading ? (

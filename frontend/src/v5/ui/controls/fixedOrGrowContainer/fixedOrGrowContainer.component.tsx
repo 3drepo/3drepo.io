@@ -17,14 +17,14 @@
 
 import React from 'react';
 import { StyledComponentProps } from 'styled-components';
+import { Display } from '@/v5/ui/themes/media';
 import { Container } from './fixedOrGrowContainer.styles';
 
 type IFixedOrGrowContainer = {
 	width?: number;
 	tabletWidth?: number;
 	mobileWidth?: number;
-	hideBelowDesktop?: boolean;
-	hideBelowTablet?: boolean;
+	hideWhenSmallerThan?: Display;
 } & StyledComponentProps;
 
 export const FixedOrGrowContainer = ({
@@ -32,16 +32,14 @@ export const FixedOrGrowContainer = ({
 	tabletWidth,
 	mobileWidth,
 	children,
-	hideBelowDesktop = false,
-	hideBelowTablet = false,
+	hideWhenSmallerThan,
 	...props
 }: IFixedOrGrowContainer): JSX.Element => (
 	<Container
 		width={width}
 		tabletWidth={tabletWidth}
 		mobileWidth={mobileWidth}
-		hideBelowDesktop={hideBelowDesktop}
-		hideBelowTablet={hideBelowTablet}
+		hideWhenSmallerThan={hideWhenSmallerThan}
 		{...props}
 	>
 		{children}

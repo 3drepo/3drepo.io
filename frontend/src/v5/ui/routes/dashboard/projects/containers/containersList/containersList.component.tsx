@@ -39,6 +39,7 @@ import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/container
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containerListItem';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/skeletonListItem';
+import { Display } from '@/v5/ui/themes/media';
 import { useOrderedList } from './containersList.hooks';
 import { Container, CollapseSideElementGroup } from './containersList.styles';
 import { DEFAULT_SORT_CONFIG } from './containersList.constants';
@@ -127,13 +128,13 @@ export const ContainersList = ({
 					<DashboardListHeaderLabel name="name" tabletWidth={238}>
 						<Trans id="containers.list.header.container" message="Container" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="revisionsCount" width={186} hideBelowDesktop>
+					<DashboardListHeaderLabel name="revisionsCount" width={186} hideWhenSmallerThan={Display.Desktop}>
 						<Trans id="containers.list.header.revisions" message="Revisions" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="code">
 						<Trans id="containers.list.header.containerCode" message="Container code" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="type" width={188} tabletWidth={125} hideBelowTablet>
+					<DashboardListHeaderLabel name="type" width={188} tabletWidth={125} hideWhenSmallerThan={Display.Tablet}>
 						<Trans id="containers.list.header.category" message="Category" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="lastUpdated" width={180}>

@@ -20,12 +20,13 @@ import { i18n } from '@lingui/core';
 import { useParams } from 'react-router';
 
 import { RevisionsListItemText } from '@components/shared/revisionDetails/components/revisionsListItemText';
-import { RevisionsListItemDate } from '@components/shared/revisionDetails/components/RevisionsListItemDate';
+import { RevisionsListItemDate } from '@components/shared/revisionDetails/components/revisionsListItemDate';
 import { RevisionsListItemAuthor } from '@components/shared/revisionDetails/components/revisionsListItemAuthor';
 import { RevisionsListItemCode } from '@components/shared/revisionDetails/components/revisionsListItemCode';
 import { RevisionsListItemButton } from '@components/shared/revisionDetails/components/revisionsListItemButton';
 import { IRevision } from '@/v5/store/revisions/revisions.types';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
+import { Display } from '@/v5/ui/themes/media';
 import { Container } from './revisionsListItem.styles';
 
 type IRevisionsListItem = {
@@ -55,7 +56,12 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 			>
 				{tag}
 			</RevisionsListItemCode>
-			<RevisionsListItemText hideBelowTablet active={active}>{desc}{desc}</RevisionsListItemText>
+			<RevisionsListItemText
+				hideWhenSmallerThan={Display.Tablet}
+				active={active}
+			>
+				{desc}
+			</RevisionsListItemText>
 			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} />
 		</Container>
 	);

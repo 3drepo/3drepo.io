@@ -33,6 +33,7 @@ import { getContainerMenuItems } from '@/v5/ui/routes/dashboard/projects/contain
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { RevisionDetails } from '@components/shared/revisionDetails';
+import { Display } from '@/v5/ui/themes/media';
 import { DashboardListItemTitle } from './containerListItem.styles';
 
 interface IContainerListItem {
@@ -80,7 +81,7 @@ export const ContainerListItem = ({
 			<DashboardListItemButton
 				onClick={() => onToggleSelected(container._id)}
 				width={186}
-				hideBelowDesktop
+				hideWhenSmallerThan={Display.Desktop}
 				tooltipTitle={
 					<Trans id="containers.list.item.revisions.tooltip" message="View revisions" />
 				}
@@ -96,7 +97,12 @@ export const ContainerListItem = ({
 					{container.code}
 				</Highlight>
 			</DashboardListItemText>
-			<DashboardListItemText width={188} tabletWidth={125} hideBelowTablet selected={isSelected}>
+			<DashboardListItemText
+				width={188}
+				tabletWidth={125}
+				hideWhenSmallerThan={Display.Tablet}
+				selected={isSelected}
+			>
 				<Highlight search={filterQuery}>
 					{container.type}
 				</Highlight>

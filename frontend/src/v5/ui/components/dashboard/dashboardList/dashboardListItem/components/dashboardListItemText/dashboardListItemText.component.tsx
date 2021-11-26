@@ -16,6 +16,7 @@
  */
 import React, { ReactNode } from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
+import { Display } from '@/v5/ui/themes/media';
 import { Text } from './dashboardListItemText.styles';
 
 type IDashboardListItemText = {
@@ -25,7 +26,7 @@ type IDashboardListItemText = {
 	mobileWidth?: number;
 	className?: string;
 	selected?: boolean;
-	hideBelowTablet?: boolean;
+	hideWhenSmallerThan?: Display;
 };
 
 export const DashboardListItemText = ({
@@ -33,7 +34,7 @@ export const DashboardListItemText = ({
 	width,
 	className,
 	selected = false,
-	hideBelowTablet = false,
+	hideWhenSmallerThan,
 	tabletWidth,
 	mobileWidth,
 }: IDashboardListItemText): JSX.Element => (
@@ -41,7 +42,7 @@ export const DashboardListItemText = ({
 		width={width}
 		tabletWidth={tabletWidth}
 		mobileWidth={mobileWidth}
-		hideBelowTablet={hideBelowTablet}
+		hideWhenSmallerThan={hideWhenSmallerThan}
 		className={className}
 	>
 		<Text selected={selected}>

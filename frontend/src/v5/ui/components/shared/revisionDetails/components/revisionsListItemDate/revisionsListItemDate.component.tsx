@@ -17,6 +17,7 @@
 
 import React, { ReactNode } from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
+import { Display } from '@/v5/ui/themes/media';
 import { Text } from './revisionsListItemDate.styles';
 
 type IDashboardListItemDate = {
@@ -27,7 +28,7 @@ type IDashboardListItemDate = {
 	className?: string;
 	meta?: boolean;
 	active?: boolean;
-	hideBelowTablet?: boolean;
+	hideWhenSmallerThan?: Display;
 	hover?: boolean;
 };
 
@@ -38,13 +39,13 @@ export const RevisionsListItemDate = ({
 	mobileWidth,
 	className,
 	active = false,
-	hideBelowTablet = false,
+	hideWhenSmallerThan,
 }: IDashboardListItemDate): JSX.Element => (
 	<FixedOrGrowContainer
 		width={width}
 		tabletWidth={tabletWidth}
 		mobileWidth={mobileWidth}
-		hideBelowTablet={hideBelowTablet}
+		hideWhenSmallerThan={hideWhenSmallerThan}
 		className={className}
 	>
 		<Text $active={active}>

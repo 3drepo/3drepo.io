@@ -17,6 +17,7 @@
 
 import React, { ReactNode } from 'react';
 import { Typography } from '@controls/typography';
+import { Display } from '@/v5/ui/themes/media';
 import { Container } from './revisionsListHeaderLabel.styles';
 
 type IDashboardListHeaderLabel = {
@@ -25,7 +26,7 @@ type IDashboardListHeaderLabel = {
 	mobileWidth?: number;
 	className?: string;
 	children?: ReactNode;
-	hideBelowTablet?: boolean;
+	hideWhenSmallerThan?: Display;
 	marginRight?: boolean;
 };
 

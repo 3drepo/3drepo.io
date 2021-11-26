@@ -18,6 +18,7 @@
 import React, { Dispatch, ReactNode } from 'react';
 import ArrowIcon from '@assets/icons/arrow.svg';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
+import { Display } from '@/v5/ui/themes/media';
 import { Container, Button, Indicator, Label } from './dashboardListHeaderLabel.styles';
 
 type IDashboardListHeaderLabel = {
@@ -29,8 +30,7 @@ type IDashboardListHeaderLabel = {
 	tabletWidth?: number;
 	className?: string;
 	name?: string;
-	hideBelowDesktop?: boolean;
-	hideBelowTablet?: boolean;
+	hideWhenSmallerThan?: Display;
 };
 
 export const DashboardListHeaderLabel = ({
@@ -40,16 +40,14 @@ export const DashboardListHeaderLabel = ({
 	width,
 	tabletWidth,
 	sort = false,
-	hideBelowDesktop = false,
-	hideBelowTablet = false,
+	hideWhenSmallerThan,
 	className,
 }: IDashboardListHeaderLabel): JSX.Element => (
 	<Container
 		width={width}
 		tabletWidth={tabletWidth}
 		className={className}
-		hideBelowDesktop={hideBelowDesktop}
-		hideBelowTablet={hideBelowTablet}
+		hideWhenSmallerThan={hideWhenSmallerThan}
 	>
 		{sort ? (
 			<Button onClick={onClick}>

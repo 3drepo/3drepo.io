@@ -20,21 +20,14 @@ import { Button as ButtonComponent } from '@controls/button';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { Typography } from '@controls/typography';
+import { Display } from '@/v5/ui/themes/media';
 
 export const Container = styled(FixedOrGrowContainer)`
 	align-items: center;
 	display: flex;
 	
-	${({ hideBelowDesktop }) => hideBelowDesktop && css`
-		display: flex;
-		@media (max-width: 1024px) {
-			display: none;
-		}
-	`};
-	
-	${({ hideBelowTablet }) => hideBelowTablet && css`
-		display: flex;
-		@media (max-width: 768px) {
+	${({ hideWhenSmallerThan }: { hideWhenSmallerThan: Display }) => hideWhenSmallerThan && css`
+		@media (max-width: ${hideWhenSmallerThan}px) {
 			display: none;
 		}
 	`};
