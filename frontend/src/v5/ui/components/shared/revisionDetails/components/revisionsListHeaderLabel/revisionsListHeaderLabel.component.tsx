@@ -17,16 +17,12 @@
 
 import React, { ReactNode } from 'react';
 import { Typography } from '@controls/typography';
-import { Display } from '@/v5/ui/themes/media';
+import { IFixedOrGrowContainer as IFixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.component';
 import { Container } from './revisionsListHeaderLabel.styles';
 
-type IDashboardListHeaderLabel = {
-	width?: number;
-	tabletWidth?: number;
-	mobileWidth?: number;
+type IDashboardListHeaderLabel = IFixedOrGrowContainerProps & {
 	className?: string;
 	children?: ReactNode;
-	hideWhenSmallerThan?: Display;
 };
 
 export const RevisionsListHeaderLabel = ({ children, ...props }: IDashboardListHeaderLabel) => (

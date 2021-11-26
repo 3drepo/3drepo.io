@@ -20,7 +20,7 @@ import { StyledComponentProps } from 'styled-components';
 import { Display } from '@/v5/ui/themes/media';
 import { Container } from './fixedOrGrowContainer.styles';
 
-type IFixedOrGrowContainer = {
+export type IFixedOrGrowContainer = {
 	width?: number;
 	tabletWidth?: number;
 	mobileWidth?: number;

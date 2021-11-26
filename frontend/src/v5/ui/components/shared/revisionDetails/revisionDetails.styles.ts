@@ -18,6 +18,7 @@
 import styled, { css } from 'styled-components';
 import { DashboardListEmptyContainer } from '@components/dashboard/dashboardList';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
+import { Display } from '@/v5/ui/themes/media';
 import * as RevisionsListHeaderLabelStyles from './components/revisionsListHeaderLabel/revisionsListHeaderLabel.styles';
 
 export const Container = styled.div`
@@ -32,7 +33,7 @@ export const Container = styled.div`
 	overflow: hidden;
 	overflow-y: scroll;
 
-	@media (max-width: 1024px) {
+	@media (max-width: ${Display.Desktop}px) {
 		padding-left: 45px;
 	}
 `;
