@@ -18,7 +18,10 @@
 "use strict";
 
 const request = require("supertest");
-const expect = require("chai").expect;
+const chai = require("chai");
+const deepEqualInAnyOrder = require("deep-equal-in-any-order");
+chai.use(deepEqualInAnyOrder);
+const { expect } = chai;
 const app = require("../../../src/v4/services/api.js").createApp();
 const async = require("async");
 const responseCodes = require("../../../src/v4/response_codes");
@@ -241,7 +244,9 @@ describe("Mitigations", function () {
 		it("should succeed", function(done) {
 			agent.get(`/${username}/mitigations/criteria`)
 				.expect(200, function(err, res) {
-					expect(res.body).to.deep.equal(goldenCriteria);
+					const results = res.body;
+					expect(Object.keys(results).length).to.equal(Object.keys(goldenCriteria).length);
+					Object.keys(results).forEach((key) => expect(results[key]).to.deep.equalInAnyOrder(goldenCriteria[key]));
 					done(err);
 				});
 		});
@@ -249,7 +254,8 @@ describe("Mitigations", function () {
 		it("if user is not teamspace admin should succeed", function(done) {
 			agent.get(`/${collaboratorTeamspace}/mitigations/criteria`)
 				.expect(200, function(err, res) {
-					expect(res.body).to.deep.equal(goldenCriteria);
+					const results = res.body;
+					Object.keys(results).forEach((key) => expect(results[key]).to.deep.equalInAnyOrder(goldenCriteria[key]));
 					done(err);
 				});
 		});
@@ -303,6 +309,7 @@ describe("Mitigations", function () {
 				.expect(200, done);
 
 		});
+
 
 		it("without criteria should succeed", function(done) {
 			agent.post(`/${username}/mitigations`)

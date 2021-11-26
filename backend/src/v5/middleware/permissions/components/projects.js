@@ -15,19 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-module.exports = {
-	mongodbMemoryServerOptions: {
-		binary: {
-			version: '5.0.2',
-			skipMD5: true,
-			downloadDir: './node_modules/.cache',
-		},
-		instance: {
-			auth: false,
-			dbName: "admin",
-			ip: "127.0.0.1",
-			port: 27227
-		},
-		autoStart: false,
-	},
+const { isProjectAdmin, isTeamspaceAdmin } = require('../../../utils/permissions/permissions');
+const { getUserFromSession } = require('../../../utils/sessions');
+const { respond } = require('../../../utils/responder');
+const { templates } = require('../../../utils/responseCodes');
+
+const ProjectPerms = {};
+
+ProjectPerms.isProjectAdmin = async (req, res, next) => {
+	const { session, params } = req;
+	const user = getUserFromSession(session);
+	const { teamspace, project } = params;
+
+	const isAdmin = await isTeamspaceAdmin(teamspace, user) || await isProjectAdmin(teamspace, project, user);
+
+	if (isAdmin) {
+		next();
+	} else {
+		respond(req, res, templates.notAuthorized);
+	}
 };
+
+module.exports = ProjectPerms;

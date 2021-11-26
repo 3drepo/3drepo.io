@@ -18,32 +18,18 @@
 import React from 'react';
 import { useRouteMatch, useLocation, Route, Switch, Redirect } from 'react-router-dom';
 import { GlobalStyle } from '@/v5/ui/themes/global';
-import { i18n } from '@lingui/core';
-import { I18nProvider } from '@lingui/react';
-import { en, es } from 'make-plural/plurals';
-import { messages as esMessages } from '@/locales/es/messages';
-import { messages as enMessages } from '@/locales/en/messages';
 import { discardSlash } from '@/v5/services/routing/routing';
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { DashboardLayout } from '@components/dashboard/dashboardLayout';
 import { TeamspaceContent } from './teamspaces';
 import { ProjectContent } from './projects';
 
-i18n.load('en', enMessages);
-i18n.load('es', esMessages);
-i18n.loadLocaleData({
-	en: { plurals: en },
-	es: { plurals: es },
-});
-
-i18n.activate('en');
-
 export const Dashboard = () => {
 	const { path } = useRouteMatch();
 	const { pathname } = useLocation();
 
 	return (
-		<I18nProvider i18n={i18n}>
+		<>
 			<GlobalStyle />
 			<Switch>
 				<Route path={`${path}/dashboard/:teamspace?/:project?`}>
@@ -73,6 +59,6 @@ export const Dashboard = () => {
 					</DashboardLayout>
 				</Route>
 			</Switch>
-		</I18nProvider>
+		</>
 	);
 };

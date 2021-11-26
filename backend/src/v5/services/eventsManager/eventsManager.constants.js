@@ -20,10 +20,12 @@ const EventManagerConst = {};
 const eventList = [
 	// Groups
 	'NEW_GROUPS', 'UPDATE_GROUP',
-	// Queue specific
-	'QUEUED_TASK_UPDATE', 'QUEUED_TASK_COMPLETED',
+	// Model settngs
+	'NEW_MODEL', 'DELETE_MODEL',
 	// Model import (including federation and toy project)
 	'MODEL_IMPORT_UPDATE', 'MODEL_IMPORT_FINISHED',
+	// Queue specific
+	'QUEUED_TASK_UPDATE', 'QUEUED_TASK_COMPLETED',
 ];
 
 const generateEventsMap = () => {

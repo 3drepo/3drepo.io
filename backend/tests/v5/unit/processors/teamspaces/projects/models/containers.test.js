@@ -17,6 +17,8 @@
 
 const { src, modelFolder, objModel } = require('../../../../../helper/path');
 const ServiceHelper = require('../../../../../helper/services');
+
+const db = require(`${src}/handler/db`);
 const fs = require('fs/promises');
 const path = require('path');
 
@@ -35,6 +37,15 @@ const Legends = require(`${src}/models/legends`);
 jest.mock('../../../../../../../src/v5/models/legends');
 const { templates } = require(`${src}/utils/responseCodes`);
 
+const newContainerId = 'newContainerId';
+ModelSettings.addModel.mockImplementation(() => newContainerId);
+ModelSettings.deleteModel.mockImplementation(async (ts, model) => {
+	if (Number.isInteger(model)) {
+		return undefined;
+	}
+	throw templates.containerNotFound;
+});
+
 const modelList = [
 	{ _id: 1, name: 'model1', permissions: [{ user: 'user1', permission: 'collaborator' }, { user: 'user2', permission: 'collaborator' }] },
 	{ _id: 2, name: 'model2', permissions: [{ user: 'user2', permission: 'commenter' }] },
@@ -42,6 +53,13 @@ const modelList = [
 	{ _id: 4, name: 'model4', permissions: [] },
 	{ _id: 4, name: 'model4' },
 ];
+
+ModelSettings.getModelById.mockImplementation(async (ts, model) => {
+	if (Number.isInteger(model)) {
+		return modelList[model - 1];
+	}
+	throw templates.containerNotFound;
+});
 
 const containerSettings = {
 	container1: {
@@ -124,6 +142,11 @@ const model1Revisions = [
 ];
 
 ProjectsModel.getProjectById.mockImplementation(() => project);
+ProjectsModel.addModelToProject.mockResolvedValue();
+ModelSettings.getModelByQuery.mockImplementation((ts, query) => {
+	if (query.name === 'model1') Promise.resolve(modelList[0]);
+	else throw templates.modelNotFound;
+});
 ModelSettings.getContainers.mockImplementation(() => modelList);
 const getContainerByIdMock = ModelSettings.getContainerById.mockImplementation((teamspace,
 	container) => containerSettings[container]);
@@ -285,6 +308,54 @@ const testGetContainerStats = () => {
 	});
 };
 
+const testAddContainer = () => {
+	describe('Add container', () => {
+		test('should return the container ID on success', async () => {
+			const data = {
+				name: 'container name',
+				code: 'code99',
+				unit: 'mm',
+			};
+			const res = await Containers.addContainer('teamspace', 'project', 'tsAdmin', data);
+			expect(res).toEqual(newContainerId);
+			expect(ProjectsModel.addModelToProject.mock.calls.length).toBe(1);
+		});
+	});
+};
+
+const testDeleteContainer = () => {
+	describe('Delete container', () => {
+		test('should succeed', async () => {
+			const modelId = 1;
+			const collectionList = [
+				{ name: `${modelId}.collA` },
+				{ name: `${modelId}.collB` },
+				{ name: 'otherModel.collA' },
+				{ name: 'otherModel.collB' },
+			];
+
+			const fnList = jest.spyOn(db, 'listCollections').mockResolvedValue(collectionList);
+			const fnDrop = jest.spyOn(db, 'dropCollection').mockResolvedValue(true);
+
+			const teamspace = 'teamspace';
+			await Containers.deleteContainer(teamspace, 'project', modelId, 'tsAdmin');
+
+			expect(fnList.mock.calls.length).toBe(2);
+			expect(fnList.mock.calls[0][0]).toEqual(teamspace);
+
+			expect(fnDrop.mock.calls.length).toBe(2);
+			expect(fnDrop.mock.calls[0][0]).toEqual(teamspace);
+			expect(fnDrop.mock.calls[0][1]).toEqual(collectionList[0]);
+			expect(fnDrop.mock.calls[1][0]).toEqual(teamspace);
+			expect(fnDrop.mock.calls[1][1]).toEqual(collectionList[1]);
+		});
+
+		test('should succeed if file removal fails', async () => {
+			await Containers.deleteContainer('teamspace', 'project', 3, 'tsAdmin');
+		});
+	});
+};
+
 const testGetRevisions = () => {
 	describe('Get container revisions', () => {
 		test('should return non-void revisions if the container exists', async () => {
@@ -292,7 +363,7 @@ const testGetRevisions = () => {
 			const res = await Containers.getRevisions('teamspace', 1, false);
 			expect(getRevisionsMock.mock.calls.length).toBe(idx + 1);
 			expect(getRevisionsMock.mock.calls[idx][1]).toEqual(1);
-			expect(getRevisionsMock.mock.calls[idx][2]).toEqual(false);
+			expect(getRevisionsMock.mock.calls[idx][2]).toBe(false);
 			expect(res).toEqual(model1Revisions);
 		});
 
@@ -301,7 +372,7 @@ const testGetRevisions = () => {
 			const res = await Containers.getRevisions('teamspace', 1, true);
 			expect(getRevisionsMock.mock.calls.length).toBe(idx + 1);
 			expect(getRevisionsMock.mock.calls[idx][1]).toEqual(1);
-			expect(getRevisionsMock.mock.calls[idx][2]).toEqual(true);
+			expect(getRevisionsMock.mock.calls[idx][2]).toBe(true);
 			expect(res).toEqual(model1Revisions);
 		});
 	});
@@ -346,6 +417,8 @@ const testGetSettings = () => {
 describe('processors/teamspaces/projects/containers', () => {
 	testGetContainerList();
 	testGetContainerStats();
+	testAddContainer();
+	testDeleteContainer();
 	testAppendFavourites();
 	testDeleteFavourites();
 	testGetRevisions();
