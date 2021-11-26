@@ -16,8 +16,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@lingui/core';
-import { Trans } from '@lingui/react';
 import { Tooltip } from '@material-ui/core';
 import {
 	DashboardListItemButton,
@@ -34,6 +32,8 @@ import { getContainerMenuItems } from '@/v5/ui/routes/dashboard/projects/contain
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { RevisionDetails } from '@components/shared/revisionDetails';
+import { FormattedMessage } from 'react-intl';
+import { formatDate } from '@/v5/services/intl';
 
 interface IContainerListItem {
 	isSelected: boolean;
@@ -69,7 +69,7 @@ export const ContainerListItem = ({
 				)}
 				selected={isSelected}
 				tooltipTitle={
-					<Trans id="containers.list.item.title.tooltip" message="Launch latest revision" />
+					<FormattedMessage id="containers.list.item.title.tooltip" defaultMessage="Launch latest revision" />
 				}
 			>
 				<Highlight search={filterQuery}>
@@ -80,12 +80,12 @@ export const ContainerListItem = ({
 				onClick={() => onToggleSelected(container._id)}
 				width={186}
 				tooltipTitle={
-					<Trans id="containers.list.item.revisions.tooltip" message="View revisions" />
+					<FormattedMessage id="containers.list.item.revisions.tooltip" defaultMessage="View revisions" />
 				}
 			>
-				<Trans
+				<FormattedMessage
 					id="containers.list.item.revisions"
-					message="{count} revisions"
+					defaultMessage="{count} revisions"
 					values={{ count: container.revisionsCount }}
 				/>
 			</DashboardListItemButton>
@@ -100,12 +100,12 @@ export const ContainerListItem = ({
 				</Highlight>
 			</DashboardListItemText>
 			<DashboardListItemText width={97} selected={isSelected}>
-				{container.lastUpdated ? i18n.date(container.lastUpdated) : ''}
+				{container.lastUpdated ? formatDate(container.lastUpdated) : ''}
 			</DashboardListItemText>
 			<DashboardListItemIcon>
 				<Tooltip
 					title={
-						<Trans id="containers.list.item.favourite.tooltip" message="Add to favourites" />
+						<FormattedMessage id="containers.list.item.favourite.tooltip" defaultMessage="Add to favourites" />
 					}
 				>
 					<FavouriteCheckbox
