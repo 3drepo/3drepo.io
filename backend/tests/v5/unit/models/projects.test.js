@@ -138,27 +138,10 @@ const testModelExistsInProject = () => {
 	});
 };
 
-const testCheckProjectExists = () => {
-	describe('Project Exists', () => {
-		test('should return error if the project does not exist', async () => {
-			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
-
-			await expect(Project.checkProjectExists('someTS', 'someProject'))
-				.rejects.toEqual(templates.projectNotFound);
-		});
-
-		test('should not return error if the project exists', async () => {
-			jest.spyOn(db, 'findOne').mockResolvedValue('project');
-			await Project.checkProjectExists('someTS', 'someProject');
-		});
-	});
-};
-
 describe('models/projects', () => {
 	testProjectAdmins();
 	testGetProjectList();
 	testAddProjectModel();
 	testRemoveProjectModel();
 	testModelExistsInProject();
-	testCheckProjectExists();
 });

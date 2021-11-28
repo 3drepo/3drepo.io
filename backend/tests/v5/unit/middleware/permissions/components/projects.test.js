@@ -33,12 +33,12 @@ const ProjectMiddlewares = require(`${src}/middleware/permissions/components/pro
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 Permissions.isTeamspaceAdmin.mockImplementation((teamspace, user) => user === 'tsAdmin');
 Permissions.isProjectAdmin.mockImplementation((teamspace, project, user) => user === 'projAdmin');
-Projects.getProjectById.mockImplementation(() => ({ permissions: [{ user: 'projAdmin', permissions: ['admin_project'] }] }));
-Projects.checkProjectExists.mockImplementation((teamspace, project) => {
-	if (project === 'pr2') {
+Projects.getProjectById.mockImplementation((teamspace, project) => {
+	if(project !== 'p1'){
 		throw templates.projectNotFound;
-	}
+	};
 });
+
 Sessions.isSessionValid.mockImplementation((session) => !!session);
 Sessions.getUserFromSession.mockImplementation(({ user }) => user.username);
 

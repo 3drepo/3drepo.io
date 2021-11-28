@@ -128,7 +128,7 @@ const modelSettings = [
 			},
 		},
 	},
-	// NOTE: this model gets deleted after deleteContainer test
+	// NOTE: this model gets deleted after deleteFederation test
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
