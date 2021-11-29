@@ -34,9 +34,9 @@ Responder.respond.mockImplementation((req, res, errCode) => errCode);
 Permissions.isTeamspaceAdmin.mockImplementation((teamspace, user) => user === 'tsAdmin');
 Permissions.isProjectAdmin.mockImplementation((teamspace, project, user) => user === 'projAdmin');
 Projects.getProjectById.mockImplementation((teamspace, project) => {
-	if(project !== 'p1'){
+	if (project !== 'p1') {
 		throw templates.projectNotFound;
-	};
+	}
 });
 
 Sessions.isSessionValid.mockImplementation((session) => !!session);
