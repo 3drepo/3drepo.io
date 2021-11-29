@@ -54,6 +54,8 @@ const importErrorMapping = {
 	32: systemFailureMsg,
 	33: systemFailureMsg,
 	34: { message: 'An error occured whilst processing the geometry, please contact support.' },
+	35: systemFailureMsg,
+	36: { message: 'Asset bundle creator license activation failed'},
 };
 
 ModelSettingConstants.getInfoFromCode = (code) => importErrorMapping[code] || systemFailureMsg;
