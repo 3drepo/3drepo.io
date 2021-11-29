@@ -4,7 +4,10 @@
  
  const db = require(`${src}/handler/db`);
  const { templates } = require(`${src}/utils/responseCodes`);
- 
+ const Strings  = require(`${src}/helpers/strings`);
+
+ Strings.getLocationFromIPAddress.mockImplementation(() => { "United Kingdom", "London" });
+
  const LoginRecord = require(`${src}/models/loginRecord`);
  
  const testSaveLoginRecord = () => {    
