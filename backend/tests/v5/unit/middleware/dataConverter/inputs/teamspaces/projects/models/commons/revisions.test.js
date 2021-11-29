@@ -112,9 +112,9 @@ const testValidateNewRevisionData = () => {
 		['Request with unsupported model file', 'ts', standardBody, true, false, templates.unsupportedFileFormat],
 		['Request with insufficient quota', 'noQuota', standardBody, false, false, templates.quotaLimitExceeded],
 		['Request with no body should fail', 'ts', {}, false, false, templates.invalidArguments],
-		['Request with just tag should pass', 'ts', { tag: 'dkfjd' }, false, false],
+		['Request with just tag should pass', 'ts', { tag: 'dkf_j-d' }, false, false],
 		['Request with wrong tag type should fail', 'ts', { tag: false }, false, false, templates.invalidArguments],
-		['Request with tag that is not alphanumeric should fail', 'ts', { tag: '1-2-3' }, false, false, templates.invalidArguments],
+		['Request with tag that is not alphanumeric should fail', 'ts', { tag: '1%2%3' }, false, false, templates.invalidArguments],
 		['Request with no file should fail', 'ts', { tag: 'drflgdf' }, false, true, templates.invalidArguments],
 	])('Check new revision data', (desc, ts, bodyContent, badFile, noFile, error) => {
 		test(`${desc} should ${error ? `fail with ${error.code}` : ' succeed and next() should be called'}`, async () => {
