@@ -18,7 +18,7 @@
 import React from 'react';
 import { Button, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
 import WarningIcon from '@assets/icons/warning.svg';
-import { Trans } from '@lingui/react';
+import { FormattedMessage } from 'react-intl';
 import { Container, Actions, Details, Status } from './alertModal.styles';
 
 interface IAlertModal {
@@ -42,9 +42,9 @@ export const AlertModal: React.FC<IAlertModal> = ({ onClickClose, currentActions
 		<Container>
 			<WarningIcon />
 			<DialogTitle>
-				<Trans
+				<FormattedMessage
 					id="alertModal.header"
-					message="Something went wrong when {currentActions}"
+					defaultMessage="Something went wrong when {currentActions}"
 					values={{ currentActions }}
 				/>
 			</DialogTitle>
@@ -56,15 +56,15 @@ export const AlertModal: React.FC<IAlertModal> = ({ onClickClose, currentActions
 			</DialogContent>
 			<Actions bottomMargin={!details}>
 				<Button autoFocus type="submit" onClick={onClickClose} variant="contained" color="primary">
-					<Trans
+					<FormattedMessage
 						id="alertModal.action.ok"
-						message="Ok, close window"
+						defaultMessage="Ok, close window"
 					/>
 				</Button>
 				<Button href="https://3drepo.com/contact/" variant="outlined" color="secondary">
-					<Trans
+					<FormattedMessage
 						id="alertModal.action.contactSupport"
-						message="Contact support"
+						defaultMessage="Contact support"
 					/>
 				</Button>
 			</Actions>
