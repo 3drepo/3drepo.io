@@ -81,7 +81,6 @@ Models.getFederationById = async (ts, federation, projection) => {
 		if (err?.code === templates.modelNotFound.code) {
 			throw templates.federationNotFound;
 		}
-
 		throw err;
 	}
 };
@@ -105,8 +104,8 @@ Models.updateModelStatus = async (teamspace, model, status, corId, user) => {
 
 	const { matchedCount } = await updateOneModel(teamspace, query, { $set: updateObj });
 	if (matchedCount > 0) {
-		// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
-		// trigger notifications.
+	// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
+	// trigger notifications.
 		publish(events.MODEL_IMPORT_UPDATE, { teamspace, model, corId, status, user });
 	}
 };
@@ -121,19 +120,14 @@ Models.newRevisionProcessed = async (teamspace, model, corId, retVal, user) => {
 		set.timestamp = new Date();
 	} else {
 		set.status = 'failed';
-		set.errorReason = {
-			message,
-			timestamp: new Date(),
-			errorCode: retVal,
-
-		};
+		set.errorReason = { message, timestamp: new Date(), errorCode: retVal };
 	}
 
 	const unset = { corID: 1 };
 	const { matchedCount } = await updateOneModel(teamspace, query, { $set: set, $unset: unset });
 	if (matchedCount !== 0) {
-		// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
-		// trigger notifications.
+	// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
+	// trigger notifications.
 
 		publish(events.MODEL_IMPORT_FINISHED,
 			{ teamspace, model, success, message, userErr, corId, errCode: retVal, user });
