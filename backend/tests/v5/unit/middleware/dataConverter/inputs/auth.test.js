@@ -14,7 +14,7 @@ const Auth = require(`${src}/middleware/dataConverter/inputs/auth`);
  Responder.respond.mockImplementation((req, res, errCode) => errCode);
  
  const existingUsername = 'existingUser';
- Users.checkUserExists.mockImplementation((username) => {
+ Users.getUserByUsername.mockImplementation((username) => {
     if (username !== existingUsername) {
         throw templates.userNotFound;
     }

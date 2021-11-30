@@ -219,9 +219,92 @@ const testDeleteFromFavourites = () => {
 	});
 };
 
+
+const testGetUserByEmail = () => {
+	describe('Get user by email', () => {
+		test('should user if list of teamspaces if user exists', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValue({ user: 'user1' });			
+			const res = await User.getUserByEmail('user');
+			expect(res).toEqual({ user: 'user1' });
+		});
+
+		test('should return error if user does not exists', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+			await expect(User.getUserByEmail('user'))
+				.rejects.toEqual(templates.userNotFound);
+		});
+	});
+};
+
+const testLogin = () => {
+	describe('Login user', () => {
+		test('should log in successfully with user that has accepted the latest T&C', async () => {
+			const user = {
+				user: 'username1',
+				customData: {
+					lastLoginAt: new Date()
+				}
+			}
+			
+			jest.spyOn(db, 'authenticate').mockResolvedValue(undefined);
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
+			const res = await User.login(user, 'password');
+			expect(fn.mock.calls.length).toBe(1);
+		});
+
+		test('should log in successfully with user that has not accepted the latest T&C', async () => {
+			const user = {
+				user: 'username1',
+				customData: {
+					lastLoginAt: new Date('1/1/10')
+				}
+			}
+			
+			jest.spyOn(db, 'authenticate').mockResolvedValue(undefined);
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
+			const res = await User.login(user, 'password');
+			expect(fn.mock.calls.length).toBe(1);
+		});
+
+		test('should log in successfully with user that has no custom data', async () => {
+			const user = {
+				user: 'username1'				
+			}
+			
+			jest.spyOn(db, 'authenticate').mockResolvedValue(undefined);
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
+			const res = await User.login(user, 'password');
+			expect(fn.mock.calls.length).toBe(1);
+		});
+
+		test('should return error if user is not verified', async () => {
+			const user = {
+				user: 'username1',
+				customData: {
+					inactive: true
+				}
+			}
+			
+			jest.spyOn(db, 'authenticate').mockResolvedValue(undefined);
+			await expect(User.login(user, 'password')).rejects.toEqual(templates.userNotVerified);			
+		});
+
+		test('should return error if username is incorrect', async () => {
+			const user = {
+				user: 'username1',				
+			}
+			
+			jest.spyOn(db, 'authenticate').mockImplementation(() => { throw templates.incorrectUsernameOrPassword });
+			await expect(User.login(user, 'password')).rejects.toEqual(templates.userNotVerified);			
+		});
+	});
+};
+
 describe('models/users', () => {
 	testGetAccessibleTeamspaces();
 	testGetFavourites();
 	testAppendFavourites();
 	testDeleteFromFavourites();
+	testGetUserByEmail();
+	testLogin();
 });

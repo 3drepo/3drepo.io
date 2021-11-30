@@ -1,4 +1,4 @@
-const { checkUserExists, login, getUserByEmail, getUserByUsername } = require('../models/users');
+const { login, getUserByEmail, getUserByUsername } = require('../models/users');
 const { hasEmailFormat } = require('../utils/helper/strings');
 const { getSessionsByUsername, regenerateAuthSession } = require('../services/sessions');
 const { publish } = require("../services/eventsManager/eventsManager");
@@ -20,10 +20,14 @@ Auth.login = async (userNameOrEmail, password, req) => {
 	}
 
 	const loginData = await login(user, password);
-	await createSession(req, loginData);
+	await regenerateAuthSession(req, config, loginData);
+	
+	const sessions = req.session.user.webSession ? await getSessionsByUsername(user.username) : null;	
+	publish(events.USER_LOGGED_IN, { username: user.username, sessionID: req.sessionID, 
+		ipAddress: req.ips[0] || req.ip , userAgent: req.headers["user-agent"], referrer: req.header("Referer"), oldSessionIds: sessions });
 };
 
-Auth.checkUserExists = checkUserExists;
+Auth.getUserByUsername = getUserByUsername;
 
 const isAccountLocked = function (user) {
 	const currentTime = new Date();
@@ -33,14 +37,5 @@ const isAccountLocked = function (user) {
 		user.customData.loginInfo.failedLoginCount >= config.loginPolicy.maxUnsuccessfulLoginAttempts &&
 		currentTime - user.customData.loginInfo.lastFailedLoginAt < config.loginPolicy.lockoutDuration;
 };
-
-const createSession = async (req, user) => {
-	await regenerateAuthSession(req, config, user);
-	
-	const sessions = req.session.user.webSession ? await getSessionsByUsername(user.username) : null;	
-
-	publish(events.USER_LOGGED_IN, { username: user.username, sessionID: req.sessionID, 
-		ipAddress: req.ips[0] || req.ip , userAgent: req.headers["user-agent"], referrer: req.header("Referer"), oldSessionIds: sessions });
-}
 
 module.exports = Auth;

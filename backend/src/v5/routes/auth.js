@@ -16,7 +16,7 @@ const login = (req, res) => {
 
 const logout = (req, res) => {
 	const username = req.session?.user?.username;
-	Auth.checkUserExists(username).then(() => {
+	Auth.getUserByUsername(username).then(() => {
 		req.session.destroy(function() {
 			res.clearCookie("connect.sid", { domain: config.cookie_domain, path: "/" });
 			respond(req, res, templates.ok, undefined, {}, username);

@@ -16,6 +16,7 @@
  */
 
 const { createResponseCode, templates } = require('../utils/responseCodes');
+const { submitLoginLockoutEvent } = require('./intercom');
 const config = require('../utils/config');
 const db = require('../handler/db');
 
@@ -32,9 +33,10 @@ User.login = async (user, password) => {
 		const remainingLoginAttempts = await handleAuthenticateFail(user, user.user);
 
 		if(err.code === templates.incorrectUsernameOrPassword.code){
-			if (remainingLoginAttempts <= config.loginPolicy.remainingLoginAttemptsPromptThreshold) {
-				throw appendRemainingLoginsInfo(err, remainingLoginAttempts);
-			}	
+			if (remainingLoginAttempts <= config.loginPolicy.remainingLoginAttemptsPromptThreshold) {				
+				throw createResponseCode(templates.incorrectUsernameOrPassword,
+					 `${templates.incorrectUsernameOrPassword.message} (Remaining attempts: ${remainingLoginAttempts})`);
+			}
 
 			throw templates.incorrectUsernameOrPassword;
 		}
@@ -50,7 +52,7 @@ User.login = async (user, password) => {
 		user.customData = {};
 	}
 
-	const termsPrompt = !hasReadLatestTerms(user);
+	const termsPrompt = !user.customData.lastLoginAt || new Date(config.termsUpdatedAt) < user.customData.lastLoginAt;
 
 	user.customData.lastLoginAt = new Date();
 
@@ -60,10 +62,6 @@ User.login = async (user, password) => {
 	});
 
 	return { username: user.user, flags:{ termsPrompt } };
-};
-
-const hasReadLatestTerms = function (user) {
-	return !user.customData.lastLoginAt || new Date(config.termsUpdatedAt) < user.customData.lastLoginAt;
 };
 
 const handleAuthenticateFail = async function (user) {
@@ -83,9 +81,8 @@ const handleAuthenticateFail = async function (user) {
 
 	if (failedLoginCount >= config.loginPolicy.maxUnsuccessfulLoginAttempts) {
 		try {
-			await Intercom.submitLoginLockoutEvent(user.customData.email);
-		} catch (err) {
-			systemLogger.logError("Failed to submit login lockout event in intercom", username, err);
+			await submitLoginLockoutEvent(user.customData.email);
+		} catch (err) {			
 		}
 	}
 
@@ -117,13 +114,6 @@ User.getFavourites = async (user, teamspace) => {
 User.getAccessibleTeamspaces = async (username) => {
 	const userDoc = await User.getUserByUsername(username, { roles: 1 });
 	return userDoc.roles.map((role) => role.db);
-};
-
-User.checkUserExists = async (user) => {
-	const userDoc = await userQuery({ user });
-	if (!userDoc) {
-		throw templates.userNotFound;
-	}
 };
 
 User.appendFavourites = async (username, teamspace, favouritesToAdd) => {

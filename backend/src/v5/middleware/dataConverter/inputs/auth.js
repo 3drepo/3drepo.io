@@ -1,7 +1,7 @@
  const { createResponseCode, templates } = require('../../../utils/responseCodes');
  const Yup = require('yup');
  const { respond } = require('../../../utils/responder');
- const { checkUserExists } = require('../../../models/users');
+ const { getUserByUsername } = require('../../../models/users');
  const Auth = {};
  
  Auth.validateLoginData = async (req, res, next) => {
@@ -12,7 +12,7 @@
  
     try {
 		await schema.validate(req.body);
-    	await checkUserExists(req.body.username);
+    	await getUserByUsername(req.body.username);
 		next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
