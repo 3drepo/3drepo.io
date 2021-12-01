@@ -17,7 +17,7 @@
 
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../helper/services');
-const { src } = require('../../../../../helper/path');
+const { src, objModel } = require('../../../../../helper/path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -67,6 +67,7 @@ const revisions = [
 ];
 
 const modelWithRev = models[0];
+const federation = models[2];
 const voidRevision = revisions[2];
 
 const setupData = async () => {
@@ -207,7 +208,82 @@ const testUpdateRevisionStatus = () => {
 				.send({ void: false }).expect(templates.ok.status);
 
 			const revs = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${modelWithRev._id}/revisions?key=${users.tsAdmin.apiKey}`);
-			expect(revs.body.revisions.find((r) => r._id === voidRevision._id).void).toEqual(false);
+			expect(revs.body.revisions.find((r) => r._id === voidRevision._id).void).toBe(false);
+		});
+	});
+};
+
+const testNewRevision = () => {
+	const route = (
+		ts = teamspace,
+		projectId = project.id,
+		model = modelWithRev._id,
+	) => `/v5/teamspaces/${ts}/projects/${projectId}/containers/${model}/revisions`;
+	describe('New model upload', () => {
+		test('should fail without a valid session', async () => {
+			const res = await agent.post(route()).expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user is not a member of the teamspace', async () => {
+			const res = await agent.post(`${route()}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+		test('should fail if the user does not have access to the project', async () => {
+			const res = await agent.post(`${route()}?key=${users.noProjectAccess.apiKey}`).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		});
+
+		test('should fail if the user is a viewer', async () => {
+			const res = await agent.post(`${route()}?key=${users.viewer.apiKey}`).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		});
+
+		test('should fail if the user is a commenter', async () => {
+			const res = await agent.post(`${route()}?key=${users.commenter.apiKey}`).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		});
+
+		test('should fail if the project does not exist', async () => {
+			const res = await agent.post(`${route(teamspace, 'nelskfjdlsf')}?key=${users.tsAdmin.apiKey}`)
+				.expect(templates.projectNotFound.status);
+			expect(res.body.code).toEqual(templates.projectNotFound.code);
+		});
+
+		test('should fail if the container does not exist', async () => {
+			const res = await agent.post(`${route(teamspace, project.id, 'sdlfkds')}?key=${users.tsAdmin.apiKey}`)
+				.expect(templates.containerNotFound.status);
+			expect(res.body.code).toEqual(templates.containerNotFound.code);
+		});
+
+		test('should fail if the container is actually a federation', async () => {
+			const res = await agent.post(`${route(teamspace, project.id, federation._id)}?key=${users.tsAdmin.apiKey}`)
+				.expect(templates.containerNotFound.status);
+			expect(res.body.code).toEqual(templates.containerNotFound.code);
+		});
+
+		test('should succeed if correct parameters are sent', async () => {
+			await agent.post(`${route()}?key=${users.tsAdmin.apiKey}`)
+				.set('Content-Type', 'multipart/form-data')
+				.field('tag', '123')
+				.attach('file', objModel)
+				.expect(templates.ok.status);
+		});
+
+		test(`should fail with ${templates.invalidArguments.code} if incorrect parameters are sent`, async () => {
+			const res = await agent.post(`${route()}?key=${users.tsAdmin.apiKey}`)
+				.set('Content-Type', 'multipart/form-data')
+				.attach('file', objModel)
+				.expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if the file is missing', async () => {
+			const res = await agent.post(`${route()}?key=${users.tsAdmin.apiKey}`)
+				.set('Content-Type', 'multipart/form-data')
+				.field('tag', '123')
+				.expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 	});
 };
@@ -218,7 +294,11 @@ describe('E2E routes/teamspaces/projects/containers', () => {
 		agent = await SuperTest(server);
 		await setupData();
 	});
-	afterAll(() => ServiceHelper.closeApp(server));
+	afterAll(() => Promise.all([
+		ServiceHelper.queue.purgeQueues(),
+		ServiceHelper.closeApp(server),
+	]));
 	testGetRevisions();
 	testUpdateRevisionStatus();
+	testNewRevision();
 });

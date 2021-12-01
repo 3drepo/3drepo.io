@@ -29,24 +29,24 @@ describe('Teamspaces: sagas', () => {
 			const projects = [];
 
 			mockServer
-			.get(`/teamspaces/${teamspace}/projects`)
-			.reply(200, { projects })
+					.get(`/teamspaces/${teamspace}/projects`)
+					.reply(200, { projects })
 
 			await expectSaga(ProjectsSaga.default)
-			.dispatch(ProjectsActions.fetch(teamspace))
-			.put(ProjectsActions.fetchSuccess(teamspace, projects))
-			.silentRun();
+					.dispatch(ProjectsActions.fetch(teamspace))
+					.put(ProjectsActions.fetchSuccess(teamspace, projects))
+					.silentRun();
 		});
 
 		it('should handle projects api error and dispatch FETCH_FAILURE', async () => {
 			mockServer
-			.get(`/teamspaces/${teamspace}/projects`)
-			.reply(404)
+					.get(`/teamspaces/${teamspace}/projects`)
+					.reply(404)
 
 			await expectSaga(ProjectsSaga.default)
-			.dispatch(ProjectsActions.fetch(teamspace))
-			.put(ProjectsActions.fetchFailure())
-			.silentRun();
+					.dispatch(ProjectsActions.fetch(teamspace))
+					.put(ProjectsActions.fetchFailure())
+					.silentRun();
 		});
 	});
 });

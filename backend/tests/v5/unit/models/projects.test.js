@@ -37,6 +37,7 @@ const testProjectAdmins = () => {
 			const res = await Project.getProjectAdmins('someTS', 'someProject');
 			expect(res).toEqual(['personA', 'personC']);
 		});
+
 		test('should return error if project does not exists', async () => {
 			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
 
@@ -49,6 +50,7 @@ const testProjectAdmins = () => {
 const testGetProjectList = () => {
 	describe('Get project list', () => {
 		test('should return list of projects', async () => {
+			const teamspace = 'someTS';
 			const expectedData = [
 				{ _id: 1, name: 'proj1' },
 				{ _id: 2, name: 'proj2' },
@@ -56,10 +58,57 @@ const testGetProjectList = () => {
 				{ _id: 4, name: 'proj4' },
 				{ _id: 5, name: 'proj5' },
 			];
-			jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
 
-			const res = await Project.getProjectList('someTS');
+			const res = await Project.getProjectList(teamspace);
 			expect(res).toEqual(expectedData);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual('projects');
+			expect(fn.mock.calls[0][2]).toEqual({});
+			expect(fn.mock.calls[0][3]).toEqual({ _id: 1, name: 1 });
+		});
+	});
+};
+
+const testAddProjectModel = () => {
+	describe('Add project model', () => {
+		test('should add model to project models', async () => {
+			const teamspace = 'someTS';
+			const projectId = 'someProject';
+			const modelId = 'someModel';
+			const expectedData = {
+				matchedCount: 1,
+				modifiedCount: 1,
+				upsertedId: projectId,
+			};
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue(expectedData);
+
+			const res = await Project.addModelToProject(teamspace, projectId, modelId);
+			expect(res).toEqual(expectedData);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual('projects');
+			expect(fn.mock.calls[0][2]).toEqual({ _id: projectId });
+			expect(fn.mock.calls[0][3]).toEqual({ $push: { models: modelId } });
+		});
+	});
+};
+
+const testRemoveProjectModel = () => {
+	describe('Remove project model', () => {
+		test('should remove model from project models', async () => {
+			const teamspace = 'someTS';
+			const projectId = 'someProject';
+			const modelId = 'someModel';
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue();
+
+			await Project.removeModelFromProject(teamspace, projectId, modelId);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(teamspace);
+			expect(fn.mock.calls[0][1]).toEqual('projects');
+			expect(fn.mock.calls[0][2]).toEqual({ _id: projectId });
+			expect(fn.mock.calls[0][3]).toEqual({ $pull: { models: modelId } });
 		});
 	});
 };
@@ -77,14 +126,14 @@ const testModelExistsInProject = () => {
 			const project = { models: ['a', 'b', 'c'] };
 			jest.spyOn(db, 'findOne').mockResolvedValue(project);
 			const res = await Project.modelExistsInProject('someTS', 'someProject', 'a');
-			expect(res).toEqual(true);
+			expect(res).toBe(true);
 		});
 
 		test('should return false if a model is not part of a project', async () => {
 			const project = { models: ['a', 'b', 'c'] };
 			jest.spyOn(db, 'findOne').mockResolvedValue(project);
 			const res = await Project.modelExistsInProject('someTS', 'someProject', 'd');
-			expect(res).toEqual(false);
+			expect(res).toBe(false);
 		});
 	});
 };
@@ -92,5 +141,7 @@ const testModelExistsInProject = () => {
 describe('models/projects', () => {
 	testProjectAdmins();
 	testGetProjectList();
+	testAddProjectModel();
+	testRemoveProjectModel();
 	testModelExistsInProject();
 });

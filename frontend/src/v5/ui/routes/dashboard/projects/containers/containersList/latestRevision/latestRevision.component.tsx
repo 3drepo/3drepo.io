@@ -16,76 +16,35 @@
  */
 
 import React from 'react';
+import { RevisionStatus } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/revisionStatus';
+import { IRevisionStatus } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/revisionStatus/revisionStatus.component';
 import { ContainerStatuses } from '@/v5/store/containers/containers.types';
-import { Trans } from '@lingui/react';
-import { i18n } from '@lingui/core';
-import { ErrorTooltip } from '@controls/errorTooltip';
-import { Name, ProcessingStatus, QueuedStatus } from './latestRevision.styles';
+import { FormattedMessage } from 'react-intl';
+import { Container, Label } from './latestRevision.styles';
 
-interface ILatestRevision {
-	name: string;
-	status: ContainerStatuses;
-	error?: {
-		date: Date;
-		message: string;
-	}
+interface ILatestRevision extends IRevisionStatus {
+	hasRevisions: boolean;
 }
 
-export const LatestRevision = ({ name, status, error }: ILatestRevision): JSX.Element => (
-	<>
-		<Trans
-			id="containers.list.item.latestRevision.label"
-			message="Latest revision: "
-		/>
-		{(() => {
-			if (status === ContainerStatuses.QUEUED) {
-				return (
-					<QueuedStatus>
-						<Trans id="containers.list.item.latestRevision.status.queued" message="Queued" />
-					</QueuedStatus>
-				);
-			}
-
-			if (status === ContainerStatuses.PROCESSING) {
-				return (
-					<ProcessingStatus>
-						<Trans id="containers.list.item.latestRevision.status.processing" message="Processing" />
-					</ProcessingStatus>
-				);
-			}
-
-			if (status === ContainerStatuses.FAILED && error) {
-				return (
-					<>
-						<Name>
-							{name}
-						</Name>
-						<ErrorTooltip>
-							<Trans
-								id="containers.list.item.latestRevision.status.error.tooltipMessage"
-								message="The latest upload on <0>{date}</0> at <0>{time}</0> has failed due to <0>{message}</0>."
-								values={{
-									date: i18n.date(error.date),
-									time: i18n.date(error.date, {
-										hour: 'numeric',
-										minute: 'numeric',
-									}),
-									message: error.message,
-								}}
-								components={[
-									<b />,
-								]}
-							/>
-						</ErrorTooltip>
-					</>
-				);
-			}
-
-			return (
-				<Name>
-					{name}
-				</Name>
-			);
-		})()}
-	</>
+export const LatestRevision = ({ hasRevisions, status, ...props }: ILatestRevision): JSX.Element => (
+	<Container>
+		{hasRevisions || status === ContainerStatuses.UPLOADING ? (
+			<>
+				<Label>
+					<FormattedMessage
+						id="containers.list.item.latestRevision.label"
+						defaultMessage="Latest revision: "
+					/>
+				</Label>
+				<RevisionStatus status={status} {...props} />
+			</>
+		) : (
+			<Label>
+				<FormattedMessage
+					id="containers.list.item.latestRevision.emptyContainer"
+					defaultMessage="Container empty"
+				/>
+			</Label>
+		)}
+	</Container>
 );

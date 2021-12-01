@@ -59,8 +59,9 @@ const testUsername = () => {
 	describe.each([
 		['1', false],
 		['1a', true],
-		['5c6ea70f-a55f-4cf2-9055-93db43503944', false],
+		['5c6ea70f-a55f-4cf2-9055-93db43503944', true],
 		['5c6ea70f_a55f_4cf2_9055_93db43503944', true],
+		['5c6ea70f!a55f!4cf2!9055!93db43503944', false],
 		[generateRandomString(66), false],
 		[0, false],
 		[true, false],
@@ -83,14 +84,26 @@ const testTitle = () => {
 	});
 };
 
-const testBlob = () => {
+const testShortDesc = () => {
 	describe.each([
 		['', false],
-		[generateRandomString(650), true],
-		[generateRandomString(651), false],
-	])('Blob validator', (data, res) => {
+		[generateRandomString(660), true],
+		[generateRandomString(661), false],
+	])('Short description validator', (data, res) => {
 		test(`${data.length} characters should return ${res}`, async () => {
-			await expect(YupHelper.types.strings.blob.isValid(data)).resolves.toBe(res);
+			await expect(YupHelper.types.strings.shortDescription.isValid(data)).resolves.toBe(res);
+		});
+	});
+};
+
+const testLongDesc = () => {
+	describe.each([
+		['', false],
+		[generateRandomString(1200), true],
+		[generateRandomString(1201), false],
+	])('Long description validator', (data, res) => {
+		test(`${data.length} characters should return ${res}`, async () => {
+			await expect(YupHelper.types.strings.longDescription.isValid(data)).resolves.toBe(res);
 		});
 	});
 };
@@ -115,6 +128,7 @@ describe('utils/helper/yup', () => {
 	testColorArr();
 	testUsername();
 	testTitle();
-	testBlob();
+	testShortDesc();
+	testLongDesc();
 	testTimestamp();
 });

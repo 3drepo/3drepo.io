@@ -17,8 +17,8 @@
 
 "use strict";
 const { v5Path } = require("../../interop");
-const EventsManager = require(`${v5Path}/services/eventsManager`);
-const EventsV5 = require(`${v5Path}/services/eventsManager.constants`).events;
+const EventsManager = require(`${v5Path}/services/eventsManager/eventsManager`);
+const EventsV5 = require(`${v5Path}/services/eventsManager/eventsManager.constants`).events;
 const utils = require("../utils");
 const Queue = require("../services/queue");
 
@@ -169,22 +169,83 @@ function endPresentation(emitter, account, model, presentationId) {
 	return insertEventQueue("end", emitter, account, model, ["presentation", presentationId]);
 }
 
-// Handle v5 events
-EventsManager.subscribe(EventsV5.NEW_GROUPS, async ({teamspace, model, groups}) => {
-	const module = require("./group");
-	const groupsSerialised = await module.getList(teamspace, model, "master", undefined, groups.map(({_id}) => _id), {}, false);
-	if(groupsSerialised.length) {
-		groupsSerialised.map((newGroup) => newGroups(undefined, teamspace, model, newGroup));
-	}
-});
+const subscribeToV5Events = () => {
+	EventsManager.subscribe(EventsV5.NEW_GROUPS, async ({teamspace, model, groups}) => {
+		const module = require("./group");
+		const groupsSerialised = await module.getList(teamspace, model, "master", undefined, groups.map(({_id}) => _id), {}, false);
+		if(groupsSerialised.length) {
+			groupsSerialised.map((newGroup) => newGroups(undefined, teamspace, model, newGroup));
+		}
+	});
 
-EventsManager.subscribe(EventsV5.UPDATE_GROUP, async ({teamspace, model, _id}) => {
-	const module = require("./group");
-	const groupSerialised = await module.findByUID(teamspace, model, "master", undefined, _id, false, false);
-	if(groupSerialised) {
-		groupChanged(undefined, teamspace, model, groupSerialised);
-	}
-});
+	EventsManager.subscribe(EventsV5.UPDATE_GROUP, async ({teamspace, model, _id}) => {
+		const module = require("./group");
+		const groupSerialised = await module.findByUID(teamspace, model, "master", undefined, _id, false, false);
+		if(groupSerialised) {
+			groupChanged(undefined, teamspace, model, groupSerialised);
+		}
+	});
+
+	EventsManager.subscribe(EventsV5.NEW_MODEL, async ({teamspace, model}) => {
+		newModel(null, teamspace, { _id: model });
+	});
+
+	EventsManager.subscribe(EventsV5.MODEL_IMPORT_UPDATE, async ({teamspace, model, status, user}) => {
+		modelStatusChanged(null, teamspace, model, {status, user: user || "unknown"});
+	});
+
+	EventsManager.subscribe(EventsV5.MODEL_IMPORT_FINISHED, async ({teamspace, model, corId, success, user, userErr, errCode, message}) => {
+		const { revisionCount, findLatest } = require("./history");
+		const notifications = require("./notification");
+		const { findModelSettingById, prepareDefaultView } = require("./modelSetting");
+		const rawSettings =  await findModelSettingById(teamspace, model);
+		const [nRevisions, setting]  = await Promise.all([
+			revisionCount(teamspace, model),
+			prepareDefaultView(teamspace, model, rawSettings)
+		]);
+
+		const data = { user, nRevisions, ...setting };
+		modelStatusChanged(null, teamspace, model, data);
+
+		if(success) {
+			const { tag } = await findLatest(teamspace, model, {tag: 1});
+			const notes = await notifications.upsertModelUpdatedNotifications(teamspace, model, tag || corId);
+			notes.forEach((note) => upsertedNotification(null, note));
+		}
+		if(message) {
+			const Mailer = require("../mailer/mailer");
+			const notes = await notifications.insertModelUpdatedFailedNotifications(teamspace, model, user, message);
+			notes.forEach((note) => upsertedNotification(null, note));
+
+			if(!userErr) {
+				const attachments = [];
+				const path = require("path");
+				const sharedSpacePath = require("../config").cn_queue.shared_storage;
+				const sharedDir = path.join(sharedSpacePath, corId);
+				const files = require("fs").readdirSync(sharedDir);
+				files.forEach((file) => {
+					if(file.endsWith(".log")) {
+						attachments.push({
+							filename: file,
+							path: path.join(sharedDir, file)
+						});
+					}
+				});
+
+				Mailer.sendImportError({
+					account: teamspace,
+					model,
+					username: user,
+					err: message,
+					corID: corId,
+					bouncerErr: errCode,
+					attachments
+				});
+			}
+		}
+
+	});
+};
 
 module.exports = {
 	newIssues,
@@ -209,5 +270,6 @@ module.exports = {
 	resourceDeleted,
 	loggedOut,
 	streamPresentation,
-	endPresentation
+	endPresentation,
+	subscribeToV5Events
 };

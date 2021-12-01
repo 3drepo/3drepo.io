@@ -225,8 +225,10 @@ export const deleteGroupsSuccess = (state = INITIAL_STATE, { groupIds }) => {
 	}
 
 	groupIds.forEach((groupId) => {
-		groupsMap[groupId].willBeRemoved = false;
-		delete groupsMap[groupId];
+		if (groupsMap[groupId]) {
+			groupsMap[groupId].willBeRemoved = false;
+			delete groupsMap[groupId];
+		}
 	});
 
 	return { ...state, groupsMap, componentState: { ...state.componentState, editingGroup } };
@@ -249,7 +251,9 @@ export const showDeleteInfo = (state = INITIAL_STATE, { groupIds }) => {
 	}
 
 	groupIds.forEach((groupId) => {
-		groupsMap[groupId].willBeRemoved = true;
+		if (groupsMap[groupId]) {
+			groupsMap[groupId].willBeRemoved = true;
+		}
 	});
 
 	return { ...state, groupsMap, componentState: { ...state.componentState, editingGroup } };

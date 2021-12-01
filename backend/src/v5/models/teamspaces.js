@@ -22,6 +22,7 @@ const { templates } = require('../utils/responseCodes');
 const Teamspace = {};
 
 const teamspaceQuery = (query, projection, sort) => db.findOne('admin', 'system.users', query, projection, sort);
+const findMany = (query, projection, sort) => db.find('admin', 'system.users', query, projection, sort);
 
 const getTeamspace = async (ts, projection) => {
 	const tsDoc = await teamspaceQuery({ user: ts }, projection);
@@ -29,6 +30,11 @@ const getTeamspace = async (ts, projection) => {
 		throw templates.teamspaceNotFound;
 	}
 	return tsDoc;
+};
+
+Teamspace.getSubscriptions = async (ts) => {
+	const tsDoc = await getTeamspace(ts, { 'customData.billing.subscriptions': 1 });
+	return tsDoc.customData?.billing?.subscriptions || {};
 };
 
 Teamspace.getTeamspaceAdmins = async (ts) => {
@@ -42,6 +48,21 @@ Teamspace.hasAccessToTeamspace = async (teamspace, username) => {
 	const query = { user: username, 'roles.db': teamspace };
 	const userDoc = await teamspaceQuery(query, { _id: 1 });
 	return !!userDoc;
+};
+
+Teamspace.getMembersInfo = async (teamspace) => {
+	const query = { 'roles.db': teamspace };
+	const projection = { user: 1, 'customData.firstName': 1, 'customData.lastName': 1, 'customData.billing.billingInfo.company': 1 };
+	const data = await findMany(query, projection);
+
+	return data.map(({ user, customData }) => {
+		const { firstName, lastName, billing } = customData;
+		const res = { user, firstName, lastName };
+		if (billing?.billingInfo?.company) {
+			res.company = billing.billingInfo.company;
+		}
+		return res;
+	});
 };
 
 module.exports = Teamspace;

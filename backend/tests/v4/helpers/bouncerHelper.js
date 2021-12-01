@@ -65,7 +65,7 @@ function handleMessage(commandMsg, rid, callback){
 				project: cmdProject,
 				user
 			}), true);
-		}, 10000);
+		}, 1000);
 	} else {
 		const cmdArr = cmd.split(' ');
 		const cmdFile = require(cmdArr[2]);
@@ -86,7 +86,7 @@ function handleMessage(commandMsg, rid, callback){
 				project: cmdProject,
 				user
 			}), true);
-		}, 10000);
+		}, 1000);
 	}
 }
 /*

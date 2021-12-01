@@ -88,10 +88,10 @@ function* fetchData({ teamspace, model }) {
 
 		yield all([
 			put(ViewerGuiActions.loadModel()),
+			put(GroupsActions.fetchGroups(teamspace, model, revision)),
 			put(TreeActions.fetchFullTree(teamspace, model, revision)),
 			put(IssuesActions.fetchIssues(teamspace, model, revision)),
 			put(RisksActions.fetchRisks(teamspace, model, revision)),
-			put(GroupsActions.fetchGroups(teamspace, model, revision)),
 			put(ViewerGuiActions.getHelicopterSpeed(teamspace, model)),
 			put(SequencesActions.fetchSequenceList()),
 			put(StarredActions.fetchStarredMeta())

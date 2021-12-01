@@ -15,121 +15,130 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect, useState } from 'react';
-import { debounce } from 'lodash';
+import React from 'react';
+
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
-import { Trans } from '@lingui/react';
 import { MainHeader } from '@controls/mainHeader';
 import { SearchInput } from '@controls/searchInput';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
-import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
-import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
+import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
+import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/skeletonListItem';
+import { Button } from '@controls/button';
+import { FormattedMessage } from 'react-intl';
+import { formatMessage } from '@/v5/services/intl';
 import {
 	Container,
 	Content,
-	NewContainerButton,
-	NewContainerMainHeaderButton,
-	UploadFileButton,
+	HeaderButtonsGroup,
 } from './containers.styles';
 import { ContainersList } from './containersList';
 import { EmptySearchResults } from './containersList/emptySearchResults';
+import { useContainersData, useContainersSearch } from './containers.hooks';
 
 export const Containers = (): JSX.Element => {
-	const filteredContainers = ContainersHooksSelectors.selectFilteredContainers();
-	const favouriteContainers = ContainersHooksSelectors.selectFilteredFavouriteContainers();
-	const filterQuery = ContainersHooksSelectors.selectFilterQuery();
-	const hasContainers = ContainersHooksSelectors.selectHasContainers();
+	const {
+		filteredContainers,
+		favouriteContainers,
+		hasContainers,
+		isListPending,
+	} = useContainersData();
 
-	const [searchInput, setSearchInput] = useState(filterQuery);
-
-	const debounceSearchUpdate = debounce(
-		(value: string) => ContainersActionsDispatchers.setFilterQuery(value),
-		300,
-		{ trailing: true },
-	);
-
-	useEffect(() => {
-		debounceSearchUpdate(searchInput);
-	}, [searchInput]);
+	const { searchInput, setSearchInput, filterQuery } = useContainersSearch();
 
 	return (
 		<Container>
 			<MainHeader>
-				<Trans
-					id="containers.search.placeholder"
-					message="Search containers..."
-					render={({ translation }) => (
-						<SearchInput
-							onClear={() => setSearchInput('')}
-							onChange={(event) => setSearchInput(event.currentTarget.value)}
-							value={searchInput}
-							placeholder={translation as string}
-						/>
-					)}
+				<SearchInput
+					onClear={() => setSearchInput('')}
+					onChange={(event) => setSearchInput(event.currentTarget.value)}
+					value={searchInput}
+					placeholder={formatMessage({ id: 'containers.search.placeholder',
+						defaultMessage: 'Search containers...' })}
+					disabled={isListPending}
 				/>
-				<NewContainerMainHeaderButton startIcon={<AddCircleIcon />} variant="outlined" color="secondary">
-					<Trans id="containers.mainHeader.newContainer" message="New Container" />
-				</NewContainerMainHeaderButton>
-				<UploadFileButton startIcon={<ArrowUpCircleIcon />} variant="contained" color="primary">
-					<Trans id="containers.mainHeader.uploadFile" message="Upload file" />
-				</UploadFileButton>
+				<HeaderButtonsGroup>
+					<Button
+						startIcon={<AddCircleIcon />}
+						variant="outlined"
+						color="secondary"
+						disabled={isListPending}
+					>
+						<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New Container" />
+					</Button>
+					<Button
+						startIcon={<ArrowUpCircleIcon />}
+						variant="contained"
+						color="primary"
+						disabled={isListPending}
+					>
+						<FormattedMessage id="containers.mainHeader.uploadFile" defaultMessage="Upload file" />
+					</Button>
+				</HeaderButtonsGroup>
 			</MainHeader>
 			<Content>
-				<ContainersList
-					containers={favouriteContainers}
-					title={(
-						<Trans
-							id="containers.favourites.collapseTitle"
-							message="Favourites ({count})"
-							values={{ count: favouriteContainers.length }}
-						/>
-					)}
-					titleTooltips={{
-						collapsed: <Trans id="containers.favourites.collapse.tooltip.show" message="Show favourites" />,
-						visible: <Trans id="containers.favourites.collapse.tooltip.hide" message="Hide favourites" />,
-					}}
-					emptyMessage={
-						filterQuery && hasContainers.favourites ? (
-							<EmptySearchResults searchPhrase={filterQuery} />
-						) : (
-							<DashboardListEmptyText>
-								<Trans
-									id="containers.favourites.emptyMessage"
-									message="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
+				{isListPending ? (
+					<DashboardSkeletonList itemComponent={<SkeletonListItem />} />
+				) : (
+					<>
+						<ContainersList
+							containers={favouriteContainers}
+							title={(
+								<FormattedMessage
+									id="containers.favourites.collapseTitle"
+									defaultMessage="Favourites"
 								/>
-							</DashboardListEmptyText>
-						)
-					}
-				/>
-				<ContainersList
-					containers={filteredContainers}
-					title={(
-						<Trans
-							id="containers.all.collapseTitle"
-							message="All containers ({count})"
-							values={{ count: filteredContainers.length }}
+							)}
+							titleTooltips={{
+								collapsed: <FormattedMessage id="containers.favourites.collapse.tooltip.show" defaultMessage="Show favourites" />,
+								visible: <FormattedMessage id="containers.favourites.collapse.tooltip.hide" defaultMessage="Hide favourites" />,
+							}}
+							emptyMessage={
+								filterQuery && hasContainers.favourites ? (
+									<EmptySearchResults searchPhrase={filterQuery} />
+								) : (
+									<DashboardListEmptyText>
+										<FormattedMessage
+											id="containers.favourites.emptyMessage"
+											defaultMessage="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
+										/>
+									</DashboardListEmptyText>
+								)
+							}
 						/>
-					)}
-					titleTooltips={{
-						collapsed: <Trans id="containers.all.collapse.tooltip.show" message="Show all" />,
-						visible: <Trans id="containers.all.collapse.tooltip.hide" message="Hide all" />,
-					}}
-					emptyMessage={
-						filterQuery && hasContainers.all ? (
-							<EmptySearchResults searchPhrase={filterQuery} />
-						) : (
-							<>
-								<DashboardListEmptyText>
-									<Trans id="containers.all.emptyMessage" message="You haven’t created any Containers." />
-								</DashboardListEmptyText>
-								<NewContainerButton startIcon={<AddCircleIcon />}>
-									<Trans id="containers.all.newContainer" message="New Container" />
-								</NewContainerButton>
-							</>
-						)
-					}
-				/>
+						<ContainersList
+							containers={filteredContainers}
+							title={(
+								<FormattedMessage
+									id="containers.all.collapseTitle"
+									defaultMessage="All containers"
+								/>
+							)}
+							titleTooltips={{
+								collapsed: <FormattedMessage id="containers.all.collapse.tooltip.show" defaultMessage="Show all" />,
+								visible: <FormattedMessage id="containers.all.collapse.tooltip.hide" defaultMessage="Hide all" />,
+							}}
+							emptyMessage={
+								filterQuery && hasContainers.all ? (
+									<EmptySearchResults searchPhrase={filterQuery} />
+								) : (
+									<>
+										<DashboardListEmptyText>
+											<FormattedMessage id="containers.all.emptyMessage" defaultMessage="You haven’t created any Containers." />
+										</DashboardListEmptyText>
+										<Button
+											startIcon={<AddCircleIcon />}
+											variant="contained"
+											color="primary"
+										>
+											<FormattedMessage id="containers.all.newContainer" defaultMessage="New Container" />
+										</Button>
+									</>
+								)
+							}
+						/>
+					</>
+				)}
 			</Content>
 		</Container>
 	);

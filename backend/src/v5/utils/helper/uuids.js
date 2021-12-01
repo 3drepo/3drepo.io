@@ -17,16 +17,20 @@
 
 const Mongo = require('mongodb');
 const UUIDParse = require('uuid-parse');
+const NodeUUID = require('uuid').v1;
 const { isUUIDString } = require('./typeCheck');
 
 const UuidUtils = {};
+
+UuidUtils.generateUUID = () => UuidUtils.stringToUUID(NodeUUID());
+
+UuidUtils.generateUUIDString = () => NodeUUID();
 
 UuidUtils.stringToUUID = (uuid) => {
 	if (!isUUIDString(uuid) || uuid === '') return uuid;
 	const bytes = UUIDParse.parse(uuid);
 	// eslint-disable-next-line new-cap
 	const buf = new Buffer.from(bytes);
-
 	return Mongo.Binary(buf, 3);
 };
 

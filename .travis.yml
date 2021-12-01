@@ -34,13 +34,17 @@ matrix:
             - rabbitmq-server
       hosts:
         - test.127.0.0.1
+        - localhost
       services:
-        - mongodb
         - docker
 
       before_install:
-        # Disable alluxio setup
-        #- docker-compose up alluxio-proxy alluxio-worker alluxio-master &
+        - sudo apt remove mongodb && sudo apt purge mongodb && sudo apt autoremove && sudo rm -rf /var/lib/mongodb
+        - wget -qO - https://www.mongodb.org/static/pgp/server-5.0.asc | sudo apt-key add -
+        - echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/5.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-5.0.list
+        - sudo apt-get update
+        - sudo apt-get install -y gnupg mongodb-org=5.0.2 mongodb-org-database=5.0.2 mongodb-org-server=5.0.2 mongodb-org-shell=5.0.2 mongodb-org-tools=5.0.2
+        - sudo systemctl daemon-reload && sudo systemctl start mongod && echo $(mongod --version)
         - mkdir -p submodules
         - test_ver=`cat backend/testDBVersion`
         - cd submodules
@@ -48,12 +52,9 @@ matrix:
         - cd tests
         - git checkout $test_ver
         - git status
-        - sudo apt install mongo-tools -y
         - cd backend && mongorestore
         - cd ../../../
         - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
-        # Disable alluxio connection check
-        #- until nc -z localhost 39999; do echo Waiting for Alluxio; sleep 1; done
 
       install:
         - cd ./backend
@@ -65,7 +66,7 @@ matrix:
       script:
         - cd ../backend
         - mkdir coverage
-        - unbuffer yarn test
+        - unbuffer yarn  test
         - cd ../
         - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" &
         - cd ./frontend
@@ -74,6 +75,10 @@ matrix:
     - language: node_js
       dist: focal
       name: Backend tests  (V5)
+      addons:
+        apt:
+         packages:
+            - rabbitmq-server
       git:
       submodules: false
       depth: 1

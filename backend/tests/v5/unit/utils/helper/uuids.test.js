@@ -19,6 +19,7 @@ const { src } = require('../../../helper/path');
 const { generateUUIDString, generateUUID } = require('../../../helper/services');
 
 const UUIDHelper = require(`${src}/utils/helper/uuids`);
+const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 
 const matchHelper = (func, string, match) => {
 	const res = func(string);
@@ -49,6 +50,25 @@ const testUUIDToString = () => {
 	describe.each(uuidAndStringPairs)('UUID to String', (source, target) => {
 		test(`with ${source} should result in ${target}`, () => {
 			matchHelper(UUIDHelper.UUIDToString, source, target);
+		});
+	});
+};
+
+const testGenerateUUID = () => {
+	describe('Generate UUID', () => {
+		test('should return UUID string', () => {
+			const res = UUIDHelper.generateUUID();
+			expect(isUUIDString(res)).toBe(false);
+			expect(isUUIDString(UUIDHelper.UUIDToString(res))).toBe(true);
+		});
+	});
+};
+
+const testGenerateUUIDString = () => {
+	describe('Generate string UUID', () => {
+		test('should return UUID string', () => {
+			const res = UUIDHelper.generateUUIDString();
+			expect(isUUIDString(res)).toBe(true);
 		});
 	});
 };
@@ -90,5 +110,7 @@ const testLookUpTable = () => {
 describe('utils/helper/uuid', () => {
 	testStringToUUID();
 	testUUIDToString();
+	testGenerateUUID();
+	testGenerateUUIDString();
 	testLookUpTable();
 });

@@ -24,7 +24,6 @@ const config = require("../config");
 const utils = require("../utils");
 const C = require("../constants");
 const responseCodes = require("../response_codes.js");
-const path  = require("path");
 const db = require("../handler/db");
 const { set } = require("lodash");
 
@@ -195,9 +194,9 @@ Invoice.generatePDF =  function (invoice, user) {
 
 		const useNonPublicPort = true;
 
-		let template = path.join(__dirname, "../../resources/pug/invoice.pug");
+		let template = utils.getPugPath("invoice.pug");
 		if (invoice.type === "refund") {
-			template = path.join(__dirname, "../../resources/pug/refund.pug");
+			template = utils.getPugPath("refund.pug");
 		}
 
 		pug.renderFile(template, { billing: invoice, baseURL: config.getBaseURL(useNonPublicPort), user }, function (err, html) {

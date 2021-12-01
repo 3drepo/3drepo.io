@@ -1,6 +1,6 @@
 {
   "name": "3drepo.io",
-  "version": "4.19.1",
+  "version": "4.20.1",
   "engines": {
     "node": "14.x.x"
   },
@@ -17,7 +17,8 @@
     "lint": "eslint . --rulesdir eslint-rules/",
     "lint:fix": "yarn lint --fix",
     "start": "cross-env NODE_CONFIG_DIR=../config node ./src/v4/3drepo.js",
-    "watch": "cross-env NODE_CONFIG_DIR=../config nodemon ./src/v4/3drepo.js"
+    "watch": "cross-env NODE_CONFIG_DIR=../config nodemon ./src/v4/3drepo.js",
+    "run-script": "cross-env NODE_CONFIG_DIR=../config node"
   },
   "dependencies": {
     "@elastic/elasticsearch": "7.12.0",
@@ -34,6 +35,7 @@
     "cors": "2.8.5",
     "crypto-js": "4.0.0",
     "csv-parse": "4.8.5",
+    "dayjs": "1.10.7",
     "device": "0.3.12",
     "elastic-apm-node": "3.7.0",
     "express": "4.17.1",
@@ -46,7 +48,7 @@
     "mime-types": "2.1.24",
     "moment": "2.24.0",
     "moment-timezone": "0.5.23",
-    "mongodb": "3.6.10",
+    "mongodb": "3.6.12",
     "multer": "1.4.1",
     "nodemailer": "6.6.3",
     "paypal-rest-sdk": "1.8.1",
@@ -79,14 +81,17 @@
     "chai": "4.2.0",
     "chai-shallow-deep-equal": "1.4.6",
     "cross-env": "7.0.2",
+    "deep-equal-in-any-order": "1.1.15",
     "eslint": "7.19.0",
     "eslint-config-airbnb-base": "14.2.1",
     "eslint-plugin-import": "2.23.4",
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-require-sort": "1.2.2",
     "eslint-plugin-security": "1.4.0",
+    "form-data": "4.0.0",
     "jest": "27.0.6",
     "mocha": "9.0.2",
+    "mock-express-request": "0.2.2",
     "nodemon": "2.0.12",
     "proxyquire": "2.1.0",
     "sinon": "7.2.3",
