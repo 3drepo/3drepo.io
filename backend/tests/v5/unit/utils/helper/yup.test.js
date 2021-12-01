@@ -59,8 +59,9 @@ const testUsername = () => {
 	describe.each([
 		['1', false],
 		['1a', true],
-		['5c6ea70f-a55f-4cf2-9055-93db43503944', false],
+		['5c6ea70f-a55f-4cf2-9055-93db43503944', true],
 		['5c6ea70f_a55f_4cf2_9055_93db43503944', true],
+		['5c6ea70f!a55f!4cf2!9055!93db43503944', false],
 		[generateRandomString(66), false],
 		[0, false],
 		[true, false],

@@ -15,14 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { hasAccessToTeamspace, hasAdminAccessToFederation, hasReadAccessToFederation } = require('../../../../middleware/permissions/permissions');
+const { hasAccessToTeamspace, hasAdminAccessToFederation, hasReadAccessToFederation, isAdminToProject } = require('../../../../middleware/permissions/permissions');
+const { validateAddModelData, validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings');
 const Federations = require('../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
 const { formatModelSettings } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
-const { validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings');
+
+const addFederation = (req, res) => {
+	const { teamspace, project } = req.params;
+	Federations.addFederation(teamspace, project, req.body).then((federationId) => {
+		respond(req, res, templates.ok, { _id: federationId });
+	}).catch(
+		// istanbul ignore next
+		(err) => respond(req, res, err),
+	);
+};
+
+const deleteFederation = (req, res) => {
+	const { teamspace, project, federation } = req.params;
+	Federations.deleteFederation(teamspace, project, federation).then(() => {
+		respond(req, res, templates.ok);
+	}).catch(
+		// istanbul ignore next
+		(err) => respond(req, res, err),
+	);
+};
 
 const getFederationList = (req, res) => {
 	const user = getUserFromSession(req.session);
@@ -89,6 +109,107 @@ const getSettings = (req, res, next) => {
 
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/federations:
+	 *   post:
+	 *     description: Add a new federation to the specified project the user is admin of
+	 *     tags: [Federations]
+	 *     operationId: addFederation
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - project:
+	 *         name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     requestBody:
+	 *       content:
+   	 *         application/json:
+   	 *           schema:
+	 *             type: object
+	 *             required:
+	 *               - name
+	 *               - unit
+	 *               - type
+	 *             properties:
+	 *               name:
+	 *                 type: string
+	 *                 example: Lego House Architecture
+	 *                 description: Name of the federation - this has to be unique within the project
+	 *                 maxLength: 120
+	 *               unit:
+	 *                 type: string
+	 *                 enum: [mm, cm, dm, m, ft]
+	 *                 example: mm
+	 *                 description: Unit of measurement
+	 *               desc:
+	 *                 type: string
+	 *                 example: The Architecture model of the Lego House
+	 *                 description: Federation description
+	 *                 maxLength: 50
+	 *               code:
+	 *                 type: string
+	 *                 example: LEGO_ARCHIT_001
+	 *                 description: Federation reference code
+	 *               type:
+	 *                 type: string
+	 *                 example: Architecture
+	 *                 description: Federation type
+	 *               surveyPoints:
+	 *                 type: array
+	 *                 description: Survey points for federation location
+	 *                 items:
+	 *                   type: object
+	 *                   properties:
+	 *                     position:
+	 *                       description: The point coordinate that maps to the latLong value (should be in OpenGL axis conventions)
+	 *                       type: array
+	 *                       items:
+	 *                         type: float
+	 *                         example: 23.45
+	 *                         minItems: 3
+	 *                         maxItems: 3
+	 *                     latLong:
+	 *                       type: array
+	 *                       description: 'The latitude and longitude of the survey point'
+	 *                       items:
+	 *                         type: float
+	 *                         example: 23.45
+	 *                         minItems: 2
+	 *                         maxItems: 2
+	 *               angleFromNorth:
+	 *                 type: integer
+	 *                 example: 100
+	 *                 description: Angle from North in degrees
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/projectNotFound"
+	 *       200:
+	 *         description: Federation ID
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 _id:
+	 *                   type: string
+	 *                   format: uuid
+	 *                   description: Federation ID
+	 *                   example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	 */
+	router.post('/', isAdminToProject, validateAddModelData, addFederation);
 
 	/**
 	 * @openapi
@@ -309,6 +430,45 @@ const establishRoutes = () => {
 	 *                   example: 1630598072000
 	 */
 	router.get('/:federation/stats', hasReadAccessToFederation, getFederationStats);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}:
+	 *   delete:
+	 *     description: Delete federation from project the user is admin of
+	 *     tags: [Federations]
+	 *     operationId: deleteFederation
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - project:
+	 *         name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - federation:
+	 *         name: federation
+	 *         description: Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/federationNotFound"
+	 *       200:
+	 *         description: Federation removed.
+	 */
+	router.delete('/:federation', hasAdminAccessToFederation, deleteFederation);
 
 	/**
 	 * @openapi
