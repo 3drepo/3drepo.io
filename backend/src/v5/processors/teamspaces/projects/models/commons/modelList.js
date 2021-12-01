@@ -40,7 +40,7 @@ const removeModelCollections = async (ts, model) => {
 
 const ModelList = {};
 
-ModelList.addModel = async (teamspace, project, user, data) => {
+ModelList.addModel = async (teamspace, project, data) => {
 	const insertedId = await addModel(teamspace, data);
 
 	await addModelToProject(teamspace, project, insertedId);

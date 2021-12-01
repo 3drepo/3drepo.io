@@ -15,16 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { addModel, deleteModel, getModelList } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getFederationById, getFederations, updateModelSettings } = require('../../../../models/modelSettings');
 const Groups = require('./commons/groups');
 const { getIssuesCount } = require('../../../../models/issues');
 const { getLatestRevision } = require('../../../../models/revisions');
-const { getModelList } = require('./commons/modelList');
 const { getProjectById } = require('../../../../models/projects');
 const { getRisksCount } = require('../../../../models/risks');
 
 const Federations = { ...Groups };
+
+Federations.addFederation = async (teamspace, project, federation) => addModel(teamspace, project,
+	{ ...federation, federate: true });
+
+Federations.deleteFederation = deleteModel;
 
 Federations.getFederationList = async (teamspace, project, user) => {
 	const { models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
