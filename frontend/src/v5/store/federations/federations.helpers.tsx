@@ -34,18 +34,22 @@ export const filterFederations = (federations: IFederation[], filterQuery: strin
 export const prepareSingleFederationData = (
 	federation: FetchFederationsItemResponse,
 	stats?: FetchFederationStatsResponse,
-): IFederation => ({
-	...federation,
-	code: stats?.code ?? '',
-	status: stats?.status ?? UploadStatuses.OK,
-	subModels: stats?.subModels ?? [],
-	containers: stats?.subModels.length ?? 0,
-	issues: stats?.tickets.issues ?? 0,
-	risks: stats?.tickets.risks ?? 0,
-	lastUpdated: getNullableDate(stats?.lastUpdated),
-	category: stats?.category ?? '',
-	hasStatsPending: !stats,
-});
+): IFederation => {
+	const subModels = stats?.subModels ?? (federation as any).subModels ?? []
+
+	return {
+		...federation,
+		code: stats?.code ?? '',
+		status: stats?.status ?? UploadStatuses.OK,
+		subModels,
+		containers: subModels.length,
+		issues: stats?.tickets.issues ?? 0,
+		risks: stats?.tickets.risks ?? 0,
+		lastUpdated: getNullableDate(stats?.lastUpdated),
+		category: stats?.category ?? '',
+		hasStatsPending: !stats,
+	};
+};
 
 export const prepareFederationsData = (
 	federations: Array<FetchFederationsItemResponse>,
