@@ -249,7 +249,7 @@ const testLogin = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
 			const res = await User.login(user, 'password');
 			expect(fn.mock.calls.length).toBe(1);
-			expect(res).toEqual({ username: 'username1', flags: { termsPrompt: false } })
+			expect(res).toEqual({ username: 'username1', flags: { termsPrompt: false } });
 		});
 
 		test('should log in successfully with user that has not accepted the latest T&C', async () => {
@@ -264,7 +264,7 @@ const testLogin = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
 			const res = await User.login(user, 'password');
 			expect(fn.mock.calls.length).toBe(1);
-			expect(res).toEqual({ username: 'username1', flags: { termsPrompt: true } })
+			expect(res).toEqual({ username: 'username1', flags: { termsPrompt: true } });
 		});
 
 		test('should log in successfully with user that has no custom data', async () => {
@@ -273,7 +273,7 @@ const testLogin = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
 			const res = await User.login(user, 'password');
 			expect(fn.mock.calls.length).toBe(1);
-			expect(res).toEqual({ username: 'username1', flags: { termsPrompt: true } })
+			expect(res).toEqual({ username: 'username1', flags: { termsPrompt: true } });
 		});
 
 		test('should return error if user is not verified', async () => {

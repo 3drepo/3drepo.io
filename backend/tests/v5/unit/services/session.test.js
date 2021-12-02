@@ -25,6 +25,44 @@ const testRegenerateAuthSession = () => {
 	describe('Regenerate authentication session', () => {
 		test('Should regenerate a session with no error', async () => {
 			const config = {
+				cookie: {					
+					maxAge: 10,
+				},
+				cookie_domain: 'www.google.com'
+			};
+			const req = {
+				headers: {
+					'user-agent': 'some user agent',
+					'x-socket-id': 123,
+					referer: 'www.google.com'
+				},
+				session: {
+					cookie: {
+						domain: undefined
+					},
+					regenerate: (callback) => { callback(); },
+				},
+			};
+
+			const expectedSession = {
+				cookie:{
+					maxAge: 10,
+					domain: 'www.google.com',					
+				},
+				user:{
+					referer: 'www.google.com',
+					socketId: 123,
+					webSession: false,
+				},
+				regenerate: (callback) => { callback(); }
+			}
+			const res = await Sessions.regenerateAuthSession(req, config, {});
+			expect(res.cookie).toEqual(expectedSession.cookie);			
+			expect(res.user).toEqual(expectedSession.user);			
+		});
+
+		test('Should regenerate a session with error', async () => {
+			const config = {
 				cookie: {
 					maxAge: 10,
 				},
@@ -37,11 +75,11 @@ const testRegenerateAuthSession = () => {
 					cookie: {
 						domain: 'www.google.com',
 					},
-					regenerate: () => {},
+					regenerate: (callback) => { callback(1); },
 				},
 			};
-
-			await Sessions.regenerateAuthSession(req, config, {});
+			
+			await expect(Sessions.regenerateAuthSession(req, config, {})).rejects.toEqual(1);
 		});
 	});
 };
@@ -65,7 +103,7 @@ const testRemoveSessions = () => {
 };
 
 describe('services/sessions', () => {
-	// testRegenerateAuthSession();
+	testRegenerateAuthSession();
 	testGetSessionsByUsername();
 	testRemoveSessions();
 });

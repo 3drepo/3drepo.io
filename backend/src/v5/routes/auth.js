@@ -93,6 +93,30 @@ const establishRoutes = () => {
 	 *         description: Loggs the user out
 	 */
 	router.post('/logout', validSession, logout);
+
+	/**
+	 * @openapi
+	 * /login:
+	 *   get:
+	 *     description: Returns the username of the user currently logged in
+	 *     tags: [Auth]
+	 *     operationId: getUsername
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         description: Returns the username of the user currently logged in
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 username:
+	 *                   type: string
+	 *                   description: The username of the user currently logged in
+	 *                   example: Username1
+	 *
+	 */
 	router.get('/login', validSession, getUsername);
 	return router;
 };
