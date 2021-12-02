@@ -25,7 +25,7 @@ const eventList = [
 	// Model import (including federation and toy project)
 	'MODEL_IMPORT_UPDATE', 'MODEL_IMPORT_FINISHED',
 	// Authentication
-	'USER_LOGGED_IN'
+	'USER_LOGGED_IN',
 ];
 
 const generateEventsMap = () => {

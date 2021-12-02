@@ -219,11 +219,10 @@ const testDeleteFromFavourites = () => {
 	});
 };
 
-
 const testGetUserByEmail = () => {
 	describe('Get user by email', () => {
 		test('should user if list of teamspaces if user exists', async () => {
-			jest.spyOn(db, 'findOne').mockResolvedValue({ user: 'user1' });			
+			jest.spyOn(db, 'findOne').mockResolvedValue({ user: 'user1' });
 			const res = await User.getUserByEmail('user');
 			expect(res).toEqual({ user: 'user1' });
 		});
@@ -242,60 +241,102 @@ const testLogin = () => {
 			const user = {
 				user: 'username1',
 				customData: {
-					lastLoginAt: new Date()
-				}
-			}
-			
+					lastLoginAt: new Date(),
+				},
+			};
+
 			jest.spyOn(db, 'authenticate').mockResolvedValue(undefined);
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
 			const res = await User.login(user, 'password');
 			expect(fn.mock.calls.length).toBe(1);
+			expect(res).toEqual({ username: 'username1', flags: { termsPrompt: false } })
 		});
 
 		test('should log in successfully with user that has not accepted the latest T&C', async () => {
 			const user = {
 				user: 'username1',
 				customData: {
-					lastLoginAt: new Date('1/1/10')
-				}
-			}
-			
+					lastLoginAt: new Date('1/1/1960'),
+				},
+			};
+
 			jest.spyOn(db, 'authenticate').mockResolvedValue(undefined);
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
 			const res = await User.login(user, 'password');
 			expect(fn.mock.calls.length).toBe(1);
+			expect(res).toEqual({ username: 'username1', flags: { termsPrompt: true } })
 		});
 
 		test('should log in successfully with user that has no custom data', async () => {
-			const user = {
-				user: 'username1'				
-			}
-			
+			const user = { user: 'username1' };
 			jest.spyOn(db, 'authenticate').mockResolvedValue(undefined);
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
 			const res = await User.login(user, 'password');
 			expect(fn.mock.calls.length).toBe(1);
+			expect(res).toEqual({ username: 'username1', flags: { termsPrompt: true } })
 		});
 
 		test('should return error if user is not verified', async () => {
 			const user = {
 				user: 'username1',
 				customData: {
-					inactive: true
-				}
-			}
-			
+					inactive: true,
+				},
+			};
+
 			jest.spyOn(db, 'authenticate').mockResolvedValue(undefined);
-			await expect(User.login(user, 'password')).rejects.toEqual(templates.userNotVerified);			
+			await expect(User.login(user, 'password')).rejects.toEqual(templates.userNotVerified);
 		});
 
 		test('should return error if username is incorrect', async () => {
+			const user = { user: 'username1' };
+			jest.spyOn(db, 'authenticate').mockImplementation(() => { throw templates.incorrectUsernameOrPassword; });
+			await expect(User.login(user, 'password')).rejects.toEqual(templates.incorrectUsernameOrPassword);
+		});
+
+		test('should return error if db.authenticate throws a different error', async () => {
+			const user = { user: 'username1' };
+			jest.spyOn(db, 'authenticate').mockImplementation(() => { throw templates.unknown; });
+			await expect(User.login(user, 'password')).rejects.toEqual(templates.unknown);
+		});
+
+		test('should return error with custom message if invalid login attempts are more than prompt threshold', async () => {
+			const currentTime = new Date();
+			currentTime.setMinutes(currentTime.getMinutes() - 1);
 			const user = {
-				user: 'username1',				
-			}
-			
-			jest.spyOn(db, 'authenticate').mockImplementation(() => { throw templates.incorrectUsernameOrPassword });
-			await expect(User.login(user, 'password')).rejects.toEqual(templates.userNotVerified);			
+				user: 'username1',
+				customData: {
+					loginInfo: {
+						failedLoginCount: 5,
+						lastFailedLoginAt: currentTime,
+					},
+				},
+			};
+			jest.spyOn(db, 'authenticate').mockImplementation(() => { throw templates.incorrectUsernameOrPassword; });
+
+			await expect(User.login(user, 'password')).rejects.toEqual({
+				...templates.incorrectUsernameOrPassword, message: 'Incorrect username or password (Remaining attempts: 4)',
+			});
+		});
+
+		test('should return error and submit lockout event if invalid login attempts are more than the maximum', async () => {
+			const currentTime = new Date();
+			currentTime.setMinutes(currentTime.getMinutes() - 1);
+			const user = {
+				user: 'username1',
+				emaill: 'example@email.com',
+				customData: {
+					loginInfo: {
+						failedLoginCount: 10,
+						lastFailedLoginAt: currentTime,
+					},
+				},
+			};
+			jest.spyOn(db, 'authenticate').mockImplementation(() => { throw templates.incorrectUsernameOrPassword; });
+
+			await expect(User.login(user, 'password')).rejects.toEqual({
+				...templates.incorrectUsernameOrPassword, message: 'Incorrect username or password (Remaining attempts: 0)',
+			});
 		});
 	});
 };

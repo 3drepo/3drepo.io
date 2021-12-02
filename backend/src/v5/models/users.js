@@ -16,77 +16,81 @@
  */
 
 const { createResponseCode, templates } = require('../utils/responseCodes');
-const { submitLoginLockoutEvent } = require('./intercom');
 const config = require('../utils/config');
 const db = require('../handler/db');
+const { submitLoginLockoutEvent } = require('./intercom');
 
 const User = {};
 const COLL_NAME = 'system.users';
 
 const userQuery = (query, projection, sort) => db.findOne('admin', COLL_NAME, query, projection, sort);
-const updateUser = async (username, action) => await db.updateOne('admin', COLL_NAME, { user: username }, action);
+const updateUser = async (username, action) => db.updateOne('admin', COLL_NAME, { user: username }, action);
 
-User.login = async (user, password) => {
-	try {
-		await db.authenticate(user.user, password);
-	} catch (err) {
-		const remainingLoginAttempts = await handleAuthenticateFail(user, user.user);
-
-		if(err.code === templates.incorrectUsernameOrPassword.code){
-			if (remainingLoginAttempts <= config.loginPolicy.remainingLoginAttemptsPromptThreshold) {				
-				throw createResponseCode(templates.incorrectUsernameOrPassword,
-					 `${templates.incorrectUsernameOrPassword.message} (Remaining attempts: ${remainingLoginAttempts})`);
-			}
-
-			throw templates.incorrectUsernameOrPassword;
-		}
-		
-		throw err;
-	}
-
-	if (user.customData && user.customData.inactive) {
-		throw templates.userNotVerified;
-	}
-
-	if (!user.customData) {
-		user.customData = {};
-	}
-
-	const termsPrompt = !user.customData.lastLoginAt || new Date(config.termsUpdatedAt) < user.customData.lastLoginAt;
-
-	user.customData.lastLoginAt = new Date();
-
-	await updateUser(user.user, {
-		$set: {"customData.lastLoginAt": user.customData.lastLoginAt},
-		$unset: {"customData.loginInfo.failedLoginCount":""}
-	});
-
-	return { username: user.user, flags:{ termsPrompt } };
-};
-
-const handleAuthenticateFail = async function (user) {
+const handleAuthenticateFail = async (user) => {
 	const currentTime = new Date();
 
-	const elapsedTime = user.customData.loginInfo && user.customData.loginInfo.lastFailedLoginAt ?
-		currentTime - user.customData.loginInfo.lastFailedLoginAt : undefined;
+	const elapsedTime = user.customData?.loginInfo && user.customData.loginInfo.lastFailedLoginAt
+		? currentTime - user.customData.loginInfo.lastFailedLoginAt : undefined;
 
-	const failedLoginCount = user.customData.loginInfo && user.customData.loginInfo.failedLoginCount &&
-		elapsedTime && elapsedTime < config.loginPolicy.lockoutDuration ?
-		user.customData.loginInfo.failedLoginCount + 1 : 1;
+	const failedLoginCount = user.customData?.loginInfo && user.customData.loginInfo.failedLoginCount
+		&& elapsedTime && elapsedTime < config.loginPolicy.lockoutDuration
+		? user.customData.loginInfo.failedLoginCount + 1 : 1;
 
-	await db.updateOne("admin", COLL_NAME, {user: user.user}, {$set: {
-		"customData.loginInfo.lastFailedLoginAt": currentTime,
-		"customData.loginInfo.failedLoginCount": failedLoginCount
-	}});
+	await db.updateOne('admin', COLL_NAME, { user: user.user }, { $set: {
+		'customData.loginInfo.lastFailedLoginAt': currentTime,
+		'customData.loginInfo.failedLoginCount': failedLoginCount,
+	} });
 
 	if (failedLoginCount >= config.loginPolicy.maxUnsuccessfulLoginAttempts) {
 		try {
-			await submitLoginLockoutEvent(user.customData.email);
-		} catch (err) {			
+			await submitLoginLockoutEvent(user.customData?.email);
+		} catch (err) {
+			// Do nothing
 		}
 	}
 
 	return Math.max(config.loginPolicy.maxUnsuccessfulLoginAttempts - failedLoginCount, 0);
+};
+
+User.login = async (user, password) => {
+	const updatedUser = user;
+
+	try {
+		await db.authenticate(updatedUser.user, password);
+	} catch (err) {
+		const remainingLoginAttempts = await handleAuthenticateFail(updatedUser, updatedUser.user);
+
+		if (err.code === templates.incorrectUsernameOrPassword.code) {
+			if (remainingLoginAttempts <= config.loginPolicy.remainingLoginAttemptsPromptThreshold) {
+				throw createResponseCode(templates.incorrectUsernameOrPassword,
+					`${templates.incorrectUsernameOrPassword.message} (Remaining attempts: ${remainingLoginAttempts})`);
+			}
+
+			throw templates.incorrectUsernameOrPassword;
+		}
+
+		throw err;
+	}
+
+	if (updatedUser.customData && updatedUser.customData.inactive) {
+		throw templates.userNotVerified;
+	}
+
+	if (!updatedUser.customData) {
+		updatedUser.customData = {};
+	}
+
+	const termsPrompt = !updatedUser.customData.lastLoginAt || new Date(config.termsUpdatedAt)
+		> updatedUser.customData.lastLoginAt;
+
+	updatedUser.customData.lastLoginAt = new Date();
+
+	await updateUser(updatedUser.user, {
+		$set: { 'customData.lastLoginAt': updatedUser.customData.lastLoginAt },
+		$unset: { 'customData.loginInfo.failedLoginCount': '' },
+	});
+
+	return { username: updatedUser.user, flags: { termsPrompt } };
 };
 
 User.getUserByUsername = async (user, projection) => {
@@ -98,7 +102,7 @@ User.getUserByUsername = async (user, projection) => {
 };
 
 User.getUserByEmail = async (email, projection) => {
-	const userDoc = await userQuery({ "customData.email" : email }, projection);
+	const userDoc = await userQuery({ 'customData.email': email }, projection);
 	if (!userDoc) {
 		throw templates.userNotFound;
 	}

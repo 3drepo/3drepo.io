@@ -1,18 +1,33 @@
- const { loggedOut } = require('../../../models/chatEvent');
- const { events } = require('../../eventsManager/eventsManager.constants');
- const { saveLoginRecord } = require('../../../models/loginRecord');
- const { subscribe } = require('../../eventsManager/eventsManager');
- const { createLoginRecord } = require("../../../handler/elastic");
+/**
+ *  Copyright (C) 2021 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
- const userLoggedIn = async ({
-     username, sessionID, ipAddress, userAgent, referrer, oldSessions
- }) => {
+const { createLoginRecord } = require('../../../handler/elastic');
+const { events } = require('../../eventsManager/eventsManager.constants');
+const { loggedOut } = require('../../../models/chatEvent');
+const { removeSessions } = require('../../sessions');
+const { saveLoginRecord } = require('../../../models/loginRecord');
+const { subscribe } = require('../../eventsManager/eventsManager');
 
+const userLoggedIn = async ({ username, sessionID, ipAddress, userAgent, referer, oldSessions }) => {
 	if (oldSessions) {
-        const ids = [];
+		const ids = [];
 
-		oldSessions.forEach(entry => {
-			if (entry._id === req.session.id || !entry.session.user.webSession) {
+		oldSessions.forEach((entry) => {
+			if (entry._id === sessionID || !entry.session?.user?.webSession) {
 				return;
 			}
 			ids.push(entry._id);
@@ -22,15 +37,14 @@
 		removeSessions(ids);
 	}
 
-	const loginRecord = await saveLoginRecord(sessionID, username, ipAddress, userAgent , referrer);
-	createLoginRecord(username, loginRecord);
- };
- 
- const AuthEventsListener = {};
- 
- AuthEventsListener.init = () => {
-    subscribe(events.USER_LOGGED_IN, userLoggedIn); 
- };
- 
- module.exports = AuthEventsListener;
- 
+	const loginRecord = await saveLoginRecord(username, sessionID, ipAddress, userAgent, referer);
+	await createLoginRecord(username, loginRecord);
+};
+
+const AuthEventsListener = {};
+
+AuthEventsListener.init = () => {
+	subscribe(events.USER_LOGGED_IN, userLoggedIn);
+};
+
+module.exports = AuthEventsListener;

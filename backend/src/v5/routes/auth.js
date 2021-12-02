@@ -1,13 +1,30 @@
+/**
+ *  Copyright (C) 2021 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+const { notValidSession, validSession } = require('../middleware/auth');
 const Auth = require('../processors/auth');
 const { Router } = require('express');
+const config = require('../utils/config');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
 const { validateLoginData } = require('../middleware/dataConverter/inputs/auth');
-const { notValidSession, validSession } = require('../middleware/auth');
-const config = require('../utils/config');
 
 const login = (req, res) => {
-	const { username, password} = req.body;
+	const { username, password } = req.body;
 
 	Auth.login(username, password, req).then(() => {
 		respond(req, res, templates.ok);
@@ -17,8 +34,8 @@ const login = (req, res) => {
 const logout = (req, res) => {
 	const username = req.session?.user?.username;
 	Auth.getUserByUsername(username).then(() => {
-		req.session.destroy(function() {
-			res.clearCookie("connect.sid", { domain: config.cookie_domain, path: "/" });
+		req.session.destroy(() => {
+			res.clearCookie('connect.sid', { domain: config.cookie_domain, path: '/' });
 			respond(req, res, templates.ok, undefined, {}, username);
 		});
 	}).catch((err) => respond(req, res, err));
@@ -47,11 +64,11 @@ const establishRoutes = () => {
 	 *               username:
 	 *                 type: string
 	 *                 description: The username of the user
-	 *                 example: username1  
+	 *                 example: username1
 	 *               password:
 	 *                 type: string
 	 *                 description: The password of the user
-	 *                 example: password1                
+	 *                 example: password1
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/alreadyLoggedIn"
@@ -68,7 +85,7 @@ const establishRoutes = () => {
 	 *   post:
 	 *     description: Logs a user out
 	 *     tags: [Auth]
-	 *     operationId: logout             
+	 *     operationId: logout
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"

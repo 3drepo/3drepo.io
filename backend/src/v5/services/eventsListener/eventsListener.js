@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const modelEventsListener = require('./components/modelEvents');
 const authEventsListener = require('./components/authEvents');
+const modelEventsListener = require('./components/modelEvents');
 
 const EventsListener = {};
 

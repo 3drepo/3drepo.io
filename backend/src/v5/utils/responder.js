@@ -55,7 +55,7 @@ const mimeTypes = {
 
 Responder.respond = (req, res, resCode, body, { cache, customHeaders } = {}, username = undefined) => {
 	const finalResCode = createResponseCode(resCode);
-	const user = username ?? (req.session?.user?.username ?? 'unknown') 
+	const user = username ?? (req.session?.user?.username ?? 'unknown');
 
 	if (finalResCode.status > 200) {
 		createErrorResponse(req, res, finalResCode, user);
