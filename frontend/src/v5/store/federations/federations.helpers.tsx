@@ -35,7 +35,7 @@ export const prepareSingleFederationData = (
 	federation: FetchFederationsItemResponse,
 	stats?: FetchFederationStatsResponse,
 ): IFederation => {
-	const subModels = stats?.subModels ?? (federation as any).subModels ?? []
+	const subModels = stats?.subModels ?? (federation as any).subModels ?? [];
 
 	return {
 		...federation,
