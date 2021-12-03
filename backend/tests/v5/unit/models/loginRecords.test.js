@@ -86,8 +86,8 @@ const testSaveLoginRecord = () => {
 			location: {
 				country: ipAddr === '0.0.0.0' ? 'unknown' : 'United Kingdom',
 				city: ipAddr === '0.0.0.0' ? 'unknown' : 'London',
-			}
-		};	
+			},
+		};
 
 		if (referer) {
 			formattedLoginRecord.referrer = referer;

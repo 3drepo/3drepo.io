@@ -31,9 +31,9 @@ LoginRecord.saveLoginRecord = async (username, sessionId, ipAddress, userAgent, 
 	loginRecord = { ...loginRecord, ...uaInfo };
 
 	const location = getLocationFromIPAddress(loginRecord.ipAddr);
-	loginRecord.location = { 
-		country: location?.country ?? 'unknown', 
-		city: location?.city ?? 'unknown'
+	loginRecord.location = {
+		country: location?.country ?? 'unknown',
+		city: location?.city ?? 'unknown',
 	};
 
 	if (referer) {
