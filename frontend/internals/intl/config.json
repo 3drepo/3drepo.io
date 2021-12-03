@@ -1,0 +1,7 @@
+{
+	"languages": ["en", "es"],
+	"defaultLanguage": "en",
+	"catalogsDir": "locales/",
+	"compileDir": "src/locales/",
+	"srcFiles": "src/**/*[!.d].{ts,tsx}"
+}

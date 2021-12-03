@@ -18,7 +18,6 @@
 import React, { ReactNode, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 import { isEmpty } from 'lodash';
-import { Trans } from '@lingui/react';
 import {
 	DashboardList,
 	DashboardListCollapse,
@@ -31,6 +30,7 @@ import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/container
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containerListItem';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/skeletonListItem';
+import { FormattedMessage } from 'react-intl';
 import { useOrderedList } from './containersList.hooks';
 import { Container } from './containersList.styles';
 import { DEFAULT_SORT_CONFIG } from './containersList.constants';
@@ -79,19 +79,19 @@ export const ContainersList = ({
 			>
 				<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
 					<DashboardListHeaderLabel name="name">
-						<Trans id="containers.list.header.container" message="Container" />
+						<FormattedMessage id="containers.list.header.container" defaultMessage="Container" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="revisionsCount" width={186}>
-						<Trans id="containers.list.header.revisions" message="Revisions" />
+						<FormattedMessage id="containers.list.header.revisions" defaultMessage="Revisions" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="code">
-						<Trans id="containers.list.header.containerCode" message="Container code" />
+						<FormattedMessage id="containers.list.header.containerCode" defaultMessage="Container code" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="type" width={188}>
-						<Trans id="containers.list.header.category" message="Category" />
+						<FormattedMessage id="containers.list.header.category" defaultMessage="Category" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="lastUpdated" width={180}>
-						<Trans id="containers.list.header.lastUpdated" message="Last updated" />
+						<FormattedMessage id="containers.list.header.lastUpdated" defaultMessage="Last updated" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>
 				<DashboardList>

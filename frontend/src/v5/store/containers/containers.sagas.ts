@@ -22,6 +22,7 @@ import {
 	ContainersTypes,
 } from '@/v5/store/containers/containers.redux';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
+import { formatMessage } from '@/v5/services/intl';
 import {
 	AddFavouriteAction,
 	RemoveFavouriteAction,
@@ -48,7 +49,7 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 		);
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: 'trying to fetch containers',
+			currentActions: formatMessage({ id: 'containers.fetchAll.error', defaultMessage: 'trying to fetch containers' }),
 			error,
 		}));
 	}
@@ -63,7 +64,7 @@ export function* fetchContainerStats({ teamspace, projectId, containerId }: Fetc
 		yield put(ContainersActions.fetchContainerStatsSuccess(projectId, containerId, stats));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: 'trying to fetch containers',
+			currentActions: formatMessage({ id: 'containers.fetchStats.error', defaultMessage: 'trying to fetch containers details' }),
 			error,
 		}));
 	}
@@ -75,7 +76,7 @@ export function* addFavourites({ containerId, teamspace, projectId }: AddFavouri
 		yield API.addFavourites({ teamspace, containerId, projectId });
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: 'trying to add container to favourites',
+			currentActions: formatMessage({ id: 'containers.addFavourite.error', defaultMessage: 'trying to add container to favourites' }),
 			error,
 		}));
 		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, false));
@@ -88,7 +89,7 @@ export function* removeFavourites({ containerId, teamspace, projectId }: RemoveF
 		yield API.removeFavourites({ containerId, teamspace, projectId });
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: 'trying to remove container from favourites',
+			currentActions: formatMessage({ id: 'containers.removeFavourite.error', defaultMessage: 'trying to remove container from favourites' }),
 			error,
 		}));
 		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, true));

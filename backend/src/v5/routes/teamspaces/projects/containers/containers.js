@@ -26,9 +26,8 @@ const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
 
 const addContainer = (req, res) => {
-	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
-	Containers.addContainer(teamspace, project, user, req.body).then((containerId) => {
+	Containers.addContainer(teamspace, project, req.body).then((containerId) => {
 		respond(req, res, templates.ok, { _id: containerId });
 	}).catch(
 		// istanbul ignore next
@@ -37,9 +36,8 @@ const addContainer = (req, res) => {
 };
 
 const deleteContainer = (req, res) => {
-	const user = getUserFromSession(req.session);
 	const { teamspace, project, container } = req.params;
-	Containers.deleteContainer(teamspace, project, container, user).then(() => {
+	Containers.deleteContainer(teamspace, project, container).then(() => {
 		respond(req, res, templates.ok);
 	}).catch(
 		// istanbul ignore next
