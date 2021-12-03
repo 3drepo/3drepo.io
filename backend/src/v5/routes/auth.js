@@ -25,7 +25,6 @@ const { validateLoginData } = require('../middleware/dataConverter/inputs/auth')
 
 const login = (req, res) => {
 	const { username, password } = req.body;
-
 	Auth.login(username, password, req).then(() => {
 		respond(req, res, templates.ok);
 	}).catch((err) => respond(req, res, err));
@@ -33,12 +32,15 @@ const login = (req, res) => {
 
 const logout = (req, res) => {
 	const username = req.session?.user?.username;
-	Auth.getUserByUsername(username).then(() => {
+	try {
 		req.session.destroy(() => {
 			res.clearCookie('connect.sid', { domain: config.cookie_domain, path: '/' });
 			respond(req, res, templates.ok, undefined, {}, username);
 		});
-	}).catch((err) => respond(req, res, err));
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
 };
 
 const getUsername = (req, res) => {

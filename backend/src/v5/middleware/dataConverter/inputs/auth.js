@@ -17,7 +17,6 @@
 
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const Yup = require('yup');
-const { getUserByUsername } = require('../../../models/users');
 const { respond } = require('../../../utils/responder');
 
 const Auth = {};
@@ -26,11 +25,11 @@ Auth.validateLoginData = async (req, res, next) => {
 	const schema = Yup.object().shape({
 		username: Yup.string().required(),
 		password: Yup.string().required(),
-	}).strict(true).noUnknown();
+	}).strict(true).noUnknown()
+		.required();
 
 	try {
 		await schema.validate(req.body);
-		await getUserByUsername(req.body.username);
 		next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));

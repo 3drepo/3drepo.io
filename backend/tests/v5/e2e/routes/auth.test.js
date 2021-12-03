@@ -18,68 +18,114 @@
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../helper/services');
 const { src } = require('../../helper/path');
+const session = require('supertest-session');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
+let testSession;
 let server;
 let agent;
 
+// This is the user being used for tests
+const testUser = ServiceHelper.generateUserCredentials();
+const lockedUser = ServiceHelper.generateUserCredentials();
+const userWithFailedAttempts = ServiceHelper.generateUserCredentials();
+const userEmail = 'example@email.com';
+
 const setupData = async () => {
-	
+	await Promise.all([
+		ServiceHelper.db.createUser(testUser, [], { email: userEmail }),
+		ServiceHelper.db.createUser(lockedUser, [], { loginInfo: { failedLoginCount: 10,
+			lastFailedLoginAt: new Date() } }),
+		ServiceHelper.db.createUser(userWithFailedAttempts, [], { loginInfo: { failedLoginCount: 6,
+			lastFailedLoginAt: new Date() } }),
+	]);
 };
 
 const testLogin = () => {
 	describe('Login user', () => {
-		test('should fail if user is already logged in', async () => {
+		test('should log in a user using username', async () => {
+			await agent.post('/v5/login/')
+				.send({ username: testUser.user, password: testUser.password })
+				.expect(templates.ok.status);
+		});
+
+		test('should log in a user using email', async () => {
+			await agent.post('/v5/login/')
+				.send({ username: userEmail, password: testUser.password })
+				.expect(templates.ok.status);
+		});
+
+		test('should fail with an incorrect username', async () => {
 			const res = await agent.post('/v5/login/')
-			.send({ username: 'username1', password: 'password' })
-			.expect(templates.unknown.status);
-		});	
+				.send({ username: 'randomUsername', password: testUser.password })
+				.expect(templates.userNotFound.status);
+			expect(res.body.code).toEqual(templates.userNotFound.code);
+		});
+
+		test('should fail with an incorrect password', async () => {
+			const res = await agent.post('/v5/login/')
+				.send({ username: testUser.user, password: 'wrongPassword' })
+				.expect(templates.incorrectUsernameOrPassword.status);
+			expect(res.body.code).toEqual(templates.incorrectUsernameOrPassword.code);
+		});
+
+		test('should fail with a locked account', async () => {
+			const res = await agent.post('/v5/login/')
+				.send({ username: lockedUser.user, password: lockedUser.password })
+				.expect(templates.tooManyLoginAttempts.status);
+			expect(res.body.code).toEqual(templates.tooManyLoginAttempts.code);
+		});
+
+		test('should fail with wrong password and many failed login attempts', async () => {
+			const res = await agent.post('/v5/login/')
+				.send({ username: userWithFailedAttempts.user, password: 'wrongPassword' })
+				.expect(templates.incorrectUsernameOrPassword.status);
+			expect(res.body.code).toEqual(templates.incorrectUsernameOrPassword.code);
+			expect(res.body.message).toEqual('Incorrect username or password (Remaining attempts: 3)');
+		});
 	});
 };
 
 const testLogout = () => {
-	describe('Get teamspace list', () => {
-		test('should fail without a valid session', async () => {
-			const res = await agent.get('/v5/teamspaces/').expect(templates.notLoggedIn.status);
+	describe('Logout user', () => {
+		test('should fail if the user is not logged in', async () => {
+			const res = await agent.post('/v5/logout/').expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
-		test('give return a teamspace list if the user has a valid session', async () => {
-			const res = await agent.get(`/v5/teamspaces/?key=${testUser.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual({ teamspaces: testUserTSAccess });
-		});
 
-		test('should safely catch error if there is an internal error', async () => {
-			const res = await agent.get(`/v5/teamspaces/?key=${testUser2.apiKey}`).expect(templates.unknown.status);
-			expect(res.body.code).toEqual(templates.unknown.code);
+		test('should log the user out if they are logged in', async () => {
+			await testSession.post('/v5/login/').send({ username: testUser.user, password: testUser.password });
+			await testSession.post('/v5/logout/').expect(200);
 		});
 	});
 };
 
 const testGetUsername = () => {
-	describe('Get teamspace list', () => {
-		test('should fail without a valid session', async () => {
-			const res = await agent.get('/v5/teamspaces/').expect(templates.notLoggedIn.status);
+	describe('Get username of the logged in user', () => {
+		test('should fail if the user is not logged in', async () => {
+			const res = await agent.get('/v5/login/').expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
-		test('give return a teamspace list if the user has a valid session', async () => {
-			const res = await agent.get(`/v5/teamspaces/?key=${testUser.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual({ teamspaces: testUserTSAccess });
-		});
 
-		test('should safely catch error if there is an internal error', async () => {
-			const res = await agent.get(`/v5/teamspaces/?key=${testUser2.apiKey}`).expect(templates.unknown.status);
-			expect(res.body.code).toEqual(templates.unknown.code);
+		test('should return the username if the user is logged in', async () => {
+			await testSession.post('/v5/login/').send({ username: testUser.user, password: testUser.password });
+			const res = await testSession.get('/v5/login/').expect(200);
+			expect(res.body).toEqual({ username: testUser.user });
 		});
 	});
 };
 
 describe('E2E routes/auth', () => {
 	beforeAll(async () => {
-		server = await ServiceHelper.app();
+		const app = await ServiceHelper.app();
+		server = app;
+		testSession = session(app);
 		agent = await SuperTest(server);
 		await setupData();
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
 	testLogin();
+	testLogout();
+	testGetUsername();
 });

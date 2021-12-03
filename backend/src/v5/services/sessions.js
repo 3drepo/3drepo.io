@@ -58,7 +58,7 @@ Sessions.regenerateAuthSession = (req, config, user) => new Promise((resolve, re
 					.some((browserType) => ua[browserType]); // If any of these browser types matches then is a websession
 			}
 
-			if (req.headers.referer) {				
+			if (req.headers.referer) {
 				updatedUser.referer = getURLDomain(req.headers.referer);
 			}
 

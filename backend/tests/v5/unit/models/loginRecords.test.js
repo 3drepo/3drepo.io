@@ -23,9 +23,16 @@ const StringHelper = require(`${src}/utils/helper/strings`);
 
 StringHelper.isUserAgentFromPlugin.mockImplementation((userAgent) => userAgent.split(' ')[0] === 'PLUGIN:');
 
-StringHelper.getLocationFromIPAddress.mockImplementation(() => ({
-	country: 'United Kingdom',
-	city: 'London' }));
+StringHelper.getLocationFromIPAddress.mockImplementation((ipAddr) => {
+	if (ipAddr === '0.0.0.0') {
+		return null;
+	}
+
+	return {
+		country: 'United Kingdom',
+		city: 'London',
+	};
+});
 
 StringHelper.getUserAgentInfoFromBrowser.mockImplementation(() => ({
 	application: {
@@ -70,17 +77,17 @@ const referrer = 'www.google.com';
 const LoginRecord = require(`${src}/models/loginRecord`);
 
 const testSaveLoginRecord = () => {
-	const formatLoginRecord = (userAgentInfo, loginTime, referer) => {
+	const formatLoginRecord = (userAgentInfo, loginTime, referer, ipAddr = ipAddress) => {
 		const formattedLoginRecord = {
 			_id: sessionId,
 			loginTime,
-			ipAddr: ipAddress,
-			location: {
-				country: 'United Kingdom',
-				city: 'London',
-			},
+			ipAddr,
 			...userAgentInfo,
-		};
+			location: {
+				country: ipAddr === '0.0.0.0' ? 'unknown' : 'United Kingdom',
+				city: ipAddr === '0.0.0.0' ? 'unknown' : 'London',
+			}
+		};	
 
 		if (referer) {
 			formattedLoginRecord.referrer = referer;
@@ -119,6 +126,15 @@ const testSaveLoginRecord = () => {
 			const res = await LoginRecord.saveLoginRecord(username, sessionId, ipAddress, browserUserAgent);
 			checkResults(fn, username, res);
 			const formattedLoginRecord = formatLoginRecord(StringHelper.getUserAgentInfoFromBrowser(), res.loginTime);
+			expect(res).toEqual(formattedLoginRecord);
+		});
+
+		test('Should save a new login record if there is no location', async () => {
+			const fn = jest.spyOn(db, 'insertOne').mockResolvedValue(undefined);
+			const res = await LoginRecord.saveLoginRecord(username, sessionId, '0.0.0.0', browserUserAgent);
+			checkResults(fn, username, res);
+			const formattedLoginRecord = formatLoginRecord(StringHelper.getUserAgentInfoFromBrowser(), res.loginTime,
+				undefined, '0.0.0.0');
 			expect(res).toEqual(formattedLoginRecord);
 		});
 	});

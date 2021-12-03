@@ -18,50 +18,79 @@
 const { src } = require('../../helper/path');
 
 const Sessions = require(`${src}/services/sessions`);
-const { templates } = require(`${src}/utils/responseCodes`);
 const db = require(`${src}/handler/db`);
 
 const testRegenerateAuthSession = () => {
 	describe('Regenerate authentication session', () => {
 		test('Should regenerate a session with no error', async () => {
 			const config = {
-				cookie: {					
+				cookie: {
 					maxAge: 10,
 				},
-				cookie_domain: 'www.google.com'
+				cookie_domain: 'www.google.com',
 			};
 			const req = {
 				headers: {
 					'user-agent': 'some user agent',
 					'x-socket-id': 123,
-					referer: 'www.google.com'
+					referer: 'www.google.com',
 				},
 				session: {
 					cookie: {
-						domain: undefined
+						domain: undefined,
 					},
 					regenerate: (callback) => { callback(); },
 				},
 			};
 
 			const expectedSession = {
-				cookie:{
+				cookie: {
 					maxAge: 10,
-					domain: 'www.google.com',					
+					domain: 'www.google.com',
 				},
-				user:{
+				user: {
 					referer: 'www.google.com',
 					socketId: 123,
 					webSession: false,
 				},
-				regenerate: (callback) => { callback(); }
-			}
+				regenerate: (callback) => { callback(); },
+			};
 			const res = await Sessions.regenerateAuthSession(req, config, {});
-			expect(res.cookie).toEqual(expectedSession.cookie);			
-			expect(res.user).toEqual(expectedSession.user);			
+			expect(res.cookie).toEqual(expectedSession.cookie);
+			expect(res.user).toEqual(expectedSession.user);
 		});
 
-		test('Should regenerate a session with error', async () => {
+		test('Should regenerate a session with no error if there are no req.headers', async () => {
+			const config = {
+				cookie: { },
+				cookie_domain: 'www.google.com',
+			};
+			const req = {
+				headers: {},
+				session: {
+					cookie: {
+						domain: 'www.google.com',
+					},
+					regenerate: (callback) => { callback(); },
+				},
+			};
+
+			const expectedSession = {
+				cookie: {
+					domain: 'www.google.com',
+				},
+				user: {
+					socketId: undefined,
+					webSession: false,
+				},
+				regenerate: (callback) => { callback(); },
+			};
+			const res = await Sessions.regenerateAuthSession(req, config, {});
+			expect(res.cookie).toEqual(expectedSession.cookie);
+			expect(res.user).toEqual(expectedSession.user);
+		});
+
+		test('Should try regenerate a session and throw error', async () => {
 			const config = {
 				cookie: {
 					maxAge: 10,
@@ -78,7 +107,7 @@ const testRegenerateAuthSession = () => {
 					regenerate: (callback) => { callback(1); },
 				},
 			};
-			
+
 			await expect(Sessions.regenerateAuthSession(req, config, {})).rejects.toEqual(1);
 		});
 	});
