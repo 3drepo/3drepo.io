@@ -14,42 +14,22 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const { authenticate, canLogIn, getUserByUsername } = require('../models/users');
 const { getSessionsByUsername, regenerateAuthSession } = require('../services/sessions');
-const { getUserByEmail, getUserByUsername, login } = require('../models/users');
 const config = require('../utils/config');
 const { events } = require('../services/eventsManager/eventsManager.constants');
-const { hasEmailFormat } = require('../utils/helper/strings');
 const { publish } = require('../services/eventsManager/eventsManager');
 
 const Auth = {};
-const { templates } = require('../utils/responseCodes');
 
-const isAccountLocked = (user) => {
-	const currentTime = new Date();
+Auth.login = async (username, password, req) => {
+	await canLogIn(username);
 
-	return user && user.customData && user.customData.loginInfo
-		&& user.customData.loginInfo.failedLoginCount && user.customData.loginInfo.lastFailedLoginAt
-		&& user.customData.loginInfo.failedLoginCount >= config.loginPolicy.maxUnsuccessfulLoginAttempts
-		&& currentTime - user.customData.loginInfo.lastFailedLoginAt < config.loginPolicy.lockoutDuration;
-};
-
-Auth.login = async (userNameOrEmail, password, req) => {
-	let user = null;
-	if (hasEmailFormat(userNameOrEmail)) {
-		user = await getUserByEmail(userNameOrEmail);
-	} else {
-		user = await getUserByUsername(userNameOrEmail);
-	}
-
-	if (isAccountLocked(user)) {
-		throw templates.tooManyLoginAttempts;
-	}
-
-	const loginData = await login(user, password);
+	const loginData = await authenticate(username, password);
 	await regenerateAuthSession(req, config, loginData);
 
-	const sessions = req.session?.user?.webSession ? await getSessionsByUsername(user.user) : null;
-	publish(events.USER_LOGGED_IN, { username: user.user,
+	const sessions = req.session?.user?.webSession ? await getSessionsByUsername(username) : null;
+	publish(events.USER_LOGGED_IN, { username,
 		sessionID: req.sessionID,
 		ipAddress: req.ips[0] || req.ip,
 		userAgent: req.headers['user-agent'],

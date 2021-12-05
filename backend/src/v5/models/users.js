@@ -26,19 +26,33 @@ const COLL_NAME = 'system.users';
 const userQuery = (query, projection, sort) => db.findOne('admin', COLL_NAME, query, projection, sort);
 const updateUser = async (username, action) => db.updateOne('admin', COLL_NAME, { user: username }, action);
 
-const handleAuthenticateFail = async (user) => {
+const recordSuccessfulAuthAttempt = async (user) => {
+	const { customData: { lastLoginAt } = {} } = await User.getUserByUsername(user, { 'customData.lastLoginAt': 1 });
+
+	await updateUser(user, {
+		$set: { 'customData.lastLoginAt': new Date() },
+		$unset: { 'customData.loginInfo.failedLoginCount': '' },
+	});
+
+	const termsPrompt = !lastLoginAt || new Date(config.termsUpdatedAt) > lastLoginAt;
+
+	return { username: user, flags: { termsPrompt } };
+};
+
+const recordFailedAuthAttempt = async (user) => {
+	const { customData: { loginInfo } = {} } = await User.getUserByUsername(user, { 'customData.loginInfo': 1 });
+
 	const currentTime = new Date();
 
-	const elapsedTime = user.customData?.loginInfo && user.customData.loginInfo.lastFailedLoginAt
-		? currentTime - user.customData.loginInfo.lastFailedLoginAt : undefined;
+	const { lastFailedLoginAt = 0, failedLoginCount = 0 } = loginInfo || {};
 
-	const failedLoginCount = user.customData?.loginInfo && user.customData.loginInfo.failedLoginCount
-		&& elapsedTime && elapsedTime < config.loginPolicy.lockoutDuration
-		? user.customData.loginInfo.failedLoginCount + 1 : 1;
+	const resetCounter = (currentTime - lastFailedLoginAt) > config.loginPolicy.lockoutDuration;
+
+	const newCount = resetCounter ? 1 : failedLoginCount + 1;
 
 	await db.updateOne('admin', COLL_NAME, { user: user.user }, { $set: {
-		'customData.loginInfo.lastFailedLoginAt': currentTime,
-		'customData.loginInfo.failedLoginCount': failedLoginCount,
+		'customData.lastFailedLoginAt': currentTime,
+		'customData.failedLoginCount': newCount,
 	} });
 
 	if (failedLoginCount >= config.loginPolicy.maxUnsuccessfulLoginAttempts) {
@@ -49,48 +63,46 @@ const handleAuthenticateFail = async (user) => {
 		}
 	}
 
-	return Math.max(config.loginPolicy.maxUnsuccessfulLoginAttempts - failedLoginCount, 0);
+	return config.loginPolicy.maxUnsuccessfulLoginAttempts - newCount;
 };
 
-User.login = async (user, password) => {
-	const updatedUser = user;
+User.canLogIn = async (user) => {
+	const projection = { 'customData.loginInfo': 1, 'customData.inactive': 1 };
+	const { customData: { loginInfo, inactive } = {} } = await User.getUserByUsername(user, projection);
 
+	if (inactive) {
+		throw templates.userNotVerified;
+	}
+
+	const now = new Date();
+	const { lastFailedLoginAt = now, failedLoginCount } = loginInfo || {};
+	const timeElapsed = now - lastFailedLoginAt;
+
+	const { lockoutDuration, maxUnsuccessfulLoginAttempts } = config.loginPolicy;
+
+	if (lastFailedLoginAt
+		&& timeElapsed < lockoutDuration
+		&& failedLoginCount >= maxUnsuccessfulLoginAttempts) {
+		throw templates.tooManyLoginAttempts;
+	}
+};
+
+User.authenticate = async (user, password) => {
 	try {
-		await db.authenticate(updatedUser.user, password);
+		await db.authenticate(user, password);
 	} catch (err) {
-		const remainingLoginAttempts = await handleAuthenticateFail(updatedUser, updatedUser.user);
-
 		if (err.code === templates.incorrectUsernameOrPassword.code) {
+			const remainingLoginAttempts = await recordFailedAuthAttempt(user);
 			if (remainingLoginAttempts <= config.loginPolicy.remainingLoginAttemptsPromptThreshold) {
 				throw createResponseCode(templates.incorrectUsernameOrPassword,
 					`${templates.incorrectUsernameOrPassword.message} (Remaining attempts: ${remainingLoginAttempts})`);
 			}
-
-			throw templates.incorrectUsernameOrPassword;
 		}
 
 		throw err;
 	}
 
-	if (updatedUser.customData && updatedUser.customData.inactive) {
-		throw templates.userNotVerified;
-	}
-
-	if (!updatedUser.customData) {
-		updatedUser.customData = {};
-	}
-
-	const termsPrompt = !updatedUser.customData.lastLoginAt || new Date(config.termsUpdatedAt)
-		> updatedUser.customData.lastLoginAt;
-
-	updatedUser.customData.lastLoginAt = new Date();
-
-	await updateUser(updatedUser.user, {
-		$set: { 'customData.lastLoginAt': updatedUser.customData.lastLoginAt },
-		$unset: { 'customData.loginInfo.failedLoginCount': '' },
-	});
-
-	return { username: updatedUser.user, flags: { termsPrompt } };
+	return recordSuccessfulAuthAttempt(user);
 };
 
 User.getUserByUsername = async (user, projection) => {

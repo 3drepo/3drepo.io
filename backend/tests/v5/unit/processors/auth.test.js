@@ -53,21 +53,9 @@ const req = {
 
 const testLogin = () => {
 	describe('Login', () => {
-		test('should login with email', async () => {
-			UsersModel.getUserByEmail.mockImplementation(() => ({ user: username }));
-			await Auth.login('example@gmail.com', password, req);
-			expect(publishFn.mock.calls.length).toBe(1);
-			expect(publishFn.mock.calls[0][0]).toEqual(events.USER_LOGGED_IN);
-			expect(publishFn.mock.calls[0][1]).toEqual({ username,
-				sessionID: req.sessionID,
-				ipAddress: req.ip,
-				userAgent: req.headers['user-agent'],
-				referer: req.headers.referer,
-				oldSessions });
-		});
-
+		UsersModel.canLogIn.mockResolvedValue(undefined);
+		UsersModel.getUserByUsername.mockImplementation(() => ({ user: username }));
 		test('should login with username', async () => {
-			UsersModel.getUserByUsername.mockImplementation(() => ({ user: username }));
 			await Auth.login(username, password, req);
 			expect(publishFn.mock.calls.length).toBe(1);
 			expect(publishFn.mock.calls[0][0]).toEqual(events.USER_LOGGED_IN);
@@ -80,22 +68,12 @@ const testLogin = () => {
 		});
 
 		test('should return error if account is locked', async () => {
-			UsersModel.getUserByUsername.mockImplementation(() => ({
-				user: username,
-				customData: {
-					loginInfo: {
-						failedLoginCount: 20,
-						lastFailedLoginAt: 10000000000000,
-					},
-				},
-			}));
-
+			UsersModel.canLogIn.mockRejectedValueOnce(templates.tooManyLoginAttempts);
 			await expect(Auth.login(username, password, req)).rejects.toEqual(templates.tooManyLoginAttempts);
 			expect(publishFn.mock.calls.length).toBe(0);
 		});
 
 		test('should login if the session is not web session', async () => {
-			UsersModel.getUserByUsername.mockImplementation(() => ({ user: username }));
 			req.session.user.webSession = false;
 			await Auth.login(username, password, req);
 			expect(publishFn.mock.calls.length).toBe(1);
@@ -109,7 +87,6 @@ const testLogin = () => {
 		});
 
 		test('should login if the request has empty ips array', async () => {
-			UsersModel.getUserByUsername.mockImplementation(() => ({ user: username }));
 			req.ips = [];
 			await Auth.login(username, password, req);
 			expect(publishFn.mock.calls.length).toBe(1);
