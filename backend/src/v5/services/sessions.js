@@ -18,14 +18,13 @@
 const { getCollection, getSessionStore } = require('../handler/db');
 const expressSession = require('express-session');
 const { getURLDomain } = require('../utils/helper/strings');
-
-const store = getSessionStore(expressSession);
 const useragent = require('useragent');
 
 const Sessions = {};
 
 // istanbul ignore next
 Sessions.session = (config) => {
+	const store = getSessionStore(expressSession);
 	const isSSL = config.public_protocol === 'https';
 	return expressSession({
 		secret: config.cookie.secret,
