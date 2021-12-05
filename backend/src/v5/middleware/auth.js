@@ -30,9 +30,9 @@ AuthMiddlewares.validSession = (req, res, next) => {
 	}
 };
 
-AuthMiddlewares.notValidSession = (req, res, next) => {
+AuthMiddlewares.notLoggedIn = (req, res, next) => {
 	const { header, session } = req;
-	if (isSessionValid(session, header.referer)) {
+	if (isSessionValid(session, header.referer, true)) {
 		respond(req, res, templates.alreadyLoggedIn);
 	} else {
 		next();

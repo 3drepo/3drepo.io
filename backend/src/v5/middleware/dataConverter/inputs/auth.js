@@ -23,7 +23,7 @@ const Auth = {};
 
 Auth.validateLoginData = async (req, res, next) => {
 	const schema = Yup.object().shape({
-		username: Yup.string().required(),
+		user: Yup.string().required(),
 		password: Yup.string().required(),
 	}).strict(true).noUnknown()
 		.required();

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { notValidSession, validSession } = require('../middleware/auth');
+const { notLoggedIn, validSession } = require('../middleware/auth');
 const Auth = require('../processors/auth');
 const { Router } = require('express');
 const config = require('../utils/config');
@@ -63,9 +63,9 @@ const establishRoutes = () => {
 	 *           schema:
 	 *             type: object
 	 *             properties:
-	 *               username:
+	 *               user:
 	 *                 type: string
-	 *                 description: The username of the user
+	 *                 description: The username or email of the user
 	 *                 example: username1
 	 *               password:
 	 *                 type: string
@@ -79,7 +79,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: Loggs the user in
 	 */
-	router.post('/login', validateLoginData, notValidSession, login);
+	router.post('/login', validateLoginData, notLoggedIn, login);
 
 	/**
 	 * @openapi

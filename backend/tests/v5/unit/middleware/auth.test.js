@@ -52,11 +52,11 @@ const testValidSession = () => {
 	});
 };
 
-const testNotValidSession = () => {
+const testNotLoggedIn = () => {
 	describe('Not valid sessions', () => {
 		test('next() should be called if the session is not valid', () => {
 			const mockCB = jest.fn(() => {});
-			AuthMiddlewares.notValidSession(
+			AuthMiddlewares.notLoggedIn(
 				{ header: { referer: 'http://xyz.com' }, session: { user: { referer: 'http://abc.com' } } },
 				{},
 				mockCB,
@@ -66,7 +66,7 @@ const testNotValidSession = () => {
 
 		test('should respond with alreadyLoggedIn errCode if the session is valid', () => {
 			const mockCB = jest.fn(() => {});
-			AuthMiddlewares.notValidSession(
+			AuthMiddlewares.notLoggedIn(
 				{ header: { referer: 'http://abc.com/' }, session: { user: { referer: 'http://abc.com' } } },
 				{},
 				mockCB,
@@ -80,5 +80,5 @@ const testNotValidSession = () => {
 
 describe('middleware/auth', () => {
 	testValidSession();
-	testNotValidSession();
+	testNotLoggedIn();
 });
