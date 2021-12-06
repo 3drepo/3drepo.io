@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { authenticate, canLogIn, getUserByUsername } = require('../models/users');
-const { getSessionsByUsername, regenerateAuthSession } = require('../services/sessions');
+const { regenerateAuthSession } = require('../services/sessions');
 const config = require('../utils/config');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { publish } = require('../services/eventsManager/eventsManager');
@@ -28,13 +28,12 @@ Auth.login = async (username, password, req) => {
 	const loginData = await authenticate(username, password);
 	await regenerateAuthSession(req, config, loginData);
 
-	const sessions = req.session?.user?.webSession ? await getSessionsByUsername(username) : null;
 	publish(events.USER_LOGGED_IN, { username,
 		sessionID: req.sessionID,
 		ipAddress: req.ips[0] || req.ip,
 		userAgent: req.headers['user-agent'],
-		referer: req.headers.referer,
-		oldSessions: sessions });
+		referer: req.headers.referer
+	});
 };
 
 Auth.getUserByUsername = getUserByUsername;

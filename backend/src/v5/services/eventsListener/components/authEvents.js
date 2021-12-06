@@ -16,27 +16,13 @@
  */
 
 const { events } = require('../../eventsManager/eventsManager.constants');
-const { loggedOut } = require('../../../models/chatEvent');
-const { removeSessions } = require('../../sessions');
+const { removeOldSessions } = require('../../sessions');
 const { saveLoginRecord } = require('../../../models/loginRecord');
 const { subscribe } = require('../../eventsManager/eventsManager');
 
-const userLoggedIn = async ({ username, sessionID, ipAddress, userAgent, referer, oldSessions }) => {
-	if (oldSessions) {
-		const ids = [];
-
-		oldSessions.forEach((entry) => {
-			if (entry._id === sessionID || !entry.session?.user?.webSession) {
-				return;
-			}
-			ids.push(entry._id);
-			loggedOut(entry.session.user.socketId);
-		});
-
-		removeSessions(ids);
-	}
-
+const userLoggedIn = async ({ username, sessionID, ipAddress, userAgent, referer }) => {	
 	await saveLoginRecord(username, sessionID, ipAddress, userAgent, referer);
+	await removeOldSessions(username, sessionID);
 };
 
 const AuthEventsListener = {};

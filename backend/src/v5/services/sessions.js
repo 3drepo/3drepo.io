@@ -16,9 +16,11 @@
  */
 
 const { getCollection, getSessionStore } = require('../handler/db');
+const { events } = require('../services/eventsManager/eventsManager.constants');
 const expressSession = require('express-session');
 const { getURLDomain } = require('../utils/helper/strings');
 const useragent = require('useragent');
+const { publish } = require('../services/eventsManager/eventsManager');
 
 const Sessions = {};
 
@@ -75,6 +77,22 @@ Sessions.regenerateAuthSession = (req, config, user) => new Promise((resolve, re
 
 Sessions.getSessionsByUsername = (username) => getCollection('admin', 'sessions').then((_dbCol) => _dbCol.find({ 'session.user.username': username }).toArray());
 
-Sessions.removeSessions = (sessionIds) => getCollection('admin', 'sessions').then((_dbCol) => _dbCol.deleteMany({ _id: { $in: sessionIds } }));
+Sessions.removeOldSessions = async (username, currentSessionID) =>{
+	const userSessions = await Sessions.getSessionsByUsername(username);
+
+	if (userSessions) {
+		const sessionsToRemove = [];
+
+		userSessions.forEach((entry) => {
+			if (entry._id === currentSessionID || !entry.session?.user?.webSession) {
+				return;
+			}
+			sessionsToRemove.push(entry);
+		});
+
+		getCollection('admin', 'sessions').then((_dbCol) => _dbCol.deleteMany({ _id: { $in: sessionsToRemove.map(s => s._id) } }));
+		publish(events.SESSIONS_REMOVED, { removedSessions: sessionsToRemove });
+	}
+} 
 
 module.exports = Sessions;
