@@ -34,7 +34,7 @@ const MODELS_PERMISSION = ["collaborator", "commenter", "viewer"];
 
 const getCollection = async () => {
 	const coll = await db.getCollection("admin", "invitations");
-	coll.createIndex({ "teamSpaces.teamspace": 1 }, { "background": true, writeConcern: { w: "1" } } );
+	coll.createIndex({ "teamSpaces.teamspace": 1 }, { "background": true, writeConcern: { w: "1" } });
 	return coll;
 };
 
