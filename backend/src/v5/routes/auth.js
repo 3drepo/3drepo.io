@@ -24,8 +24,8 @@ const { templates } = require('../utils/responseCodes');
 const { validateLoginData } = require('../middleware/dataConverter/inputs/auth');
 
 const login = (req, res) => {
-	const { username, password } = req.body;
-	Auth.login(username, password, req).then(() => {
+	const { user, password } = req.body;
+	Auth.login(user, password, req).then(() => {
 		respond(req, res, templates.ok);
 	}).catch((err) => respond(req, res, err));
 };

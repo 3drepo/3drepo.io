@@ -27,7 +27,7 @@ const eventList = [
 	// Queue specific
 	'QUEUED_TASK_UPDATE', 'QUEUED_TASK_COMPLETED',
 	// Authentication
-	'USER_LOGGED_IN',
+	'USER_LOGGED_IN', 'FAILED_LOGIN_ATTEMPT', 'LOGIN_RECORD_CREATED'
 ];
 
 const generateEventsMap = () => {

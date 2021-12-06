@@ -20,6 +20,10 @@ const { Client } = require("@elastic/elasticsearch");
 const logger = require("../logger");
 const systemLogger = logger.systemLogger;
 const elasticConfig = require("../config").elastic;
+const { v5Path } = require("../../interop");
+const EventsV5 = require(`${v5Path}/services/eventsManager/eventsManager.constants`).events;
+const EventsManager = require(`${v5Path}/services/eventsManager/eventsManager`);
+
 const Elastic = {};
 
 const loginRecordIndex = "io-teamspace-loginrecord";
@@ -123,5 +127,11 @@ Elastic.createLoginRecord = async (username, loginRecord) => {
 
 	await createElasticRecord(loginRecordIndex, elasticBody, elasticBody.Id);
 };
+
+Elastic.subscribeToV5Events = () => {
+	EventsManager.subscribe(EventsV5.LOGIN_RECORD_CREATED, async ({username, loginRecord}) => {
+		await Elastic.createLoginRecord(username, loginRecord);
+	});
+}
 
 module.exports = Elastic;

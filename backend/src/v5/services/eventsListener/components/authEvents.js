@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createLoginRecord } = require('../../../handler/elastic');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { loggedOut } = require('../../../models/chatEvent');
 const { removeSessions } = require('../../sessions');
@@ -37,8 +36,7 @@ const userLoggedIn = async ({ username, sessionID, ipAddress, userAgent, referer
 		removeSessions(ids);
 	}
 
-	const loginRecord = await saveLoginRecord(username, sessionID, ipAddress, userAgent, referer);
-	await createLoginRecord(username, loginRecord);
+	await saveLoginRecord(username, sessionID, ipAddress, userAgent, referer);
 };
 
 const AuthEventsListener = {};
