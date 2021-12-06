@@ -27,19 +27,20 @@ const Responder = {};
 
 const constructApiInfo = ({ method, originalUrl }) => `${method} ${originalUrl}`;
 
-const genResponseLogging = ({ status, code }, contentLength, { startTime, method, originalUrl } = {}, user) => {
+const genResponseLogging = ({ status, code }, contentLength, { session, startTime, method, originalUrl } = {}) => {
+    const user = session?.user ? session.user.username : 'unknown';
 	const currentTime = Date.now();
 	const latency = startTime ? `${currentTime - startTime}` : '???';
 	return logger.formatResponseMsg({ status, code, latency, contentLength, user, method, originalUrl });
 };
 
-const createErrorResponse = (req, res, resCode, user) => {
+const createErrorResponse = (req, res, resCode) => {
 	const resObj = {
 		...resCode,
 		place: constructApiInfo(req),
 	};
 
-	logger.logInfo(genResponseLogging(resCode, JSON.stringify(resObj).length, req, user));
+	logger.logInfo(genResponseLogging(resCode, JSON.stringify(resObj).length, req));
 
 	res.status(resCode.status).send(resObj);
 };
@@ -53,12 +54,11 @@ const mimeTypes = {
 	jpg: 'image/jpg',
 };
 
-Responder.respond = (req, res, resCode, body, { cache, customHeaders } = {}, username = undefined) => {
+Responder.respond = (req, res, resCode, body, { cache, customHeaders } = {}) => {
 	const finalResCode = createResponseCode(resCode);
-	const user = username ?? (req.session?.user?.username ?? 'unknown');
 
 	if (finalResCode.status > 200) {
-		createErrorResponse(req, res, finalResCode, user);
+		createErrorResponse(req, res, finalResCode);
 		return;
 	}
 
@@ -86,7 +86,7 @@ Responder.respond = (req, res, resCode, body, { cache, customHeaders } = {}, use
 		}
 		res.status(finalResCode.status).send(body);
 	}
-	logger.logInfo(genResponseLogging(resCode, contentLength, req, user));
+    logger.logInfo(genResponseLogging(resCode, contentLength, req));
 };
 
 module.exports = Responder;

@@ -21,26 +21,29 @@ const expressSession = require('express-session');
 const { getURLDomain } = require('../utils/helper/strings');
 const useragent = require('useragent');
 const { publish } = require('../services/eventsManager/eventsManager');
-
+const Device = require('device');
+const UaParserJs = require('ua-parser-js');
+const geoip = require('geoip-lite');
 const Sessions = {};
 
 // istanbul ignore next
 Sessions.session = (config) => {
 	const store = getSessionStore(expressSession);
-	const isSSL = config.public_protocol === 'https';
+	const secure = config.public_protocol === 'https';
+	const {secret, maxAge, domain} = config.cookie; 
 	return expressSession({
-		secret: config.cookie.secret,
+		secret,
 		resave: true,
 		rolling: true,
 		saveUninitialized: false,
 		cookie: {
-			maxAge: config.cookie.maxAge,
-			domain: config.cookie.domain,
+			maxAge,
+			domain,
 			path: '/',
-			secure: isSSL,
+			secure,
 			// None can only applied with secure set to true, which requires SSL.
 			// None is required for embeddable viewer to work.
-			sameSite: isSSL ? 'None' : 'Lax',
+			sameSite: secure ? 'None' : 'Lax',
 		},
 		store,
 	});
@@ -94,5 +97,52 @@ Sessions.removeOldSessions = async (username, currentSessionID) =>{
 		publish(events.SESSIONS_REMOVED, { removedSessions: sessionsToRemove });
 	}
 } 
+
+// Format:
+// PLUGIN: {OS Name}/{OS Version} {Host Software Name}/{Host Software Version} {Plugin Type}/{Plugin Version}
+// Example:
+// PLUGIN: Windows/10.0.19042.0 REVIT/2021.1 PUBLISH/4.15.0
+Sessions.getUserAgentInfoFromPlugin = (userAgentString) => {
+	const [osInfo, appInfo, engineInfo] = userAgentString.replace('PLUGIN: ', '').split(' ');
+
+	const osInfoComponents = osInfo.split('/');
+	const appInfoComponents = appInfo.split('/');
+	const engineInfoComponents = engineInfo.split('/');
+
+	const userAgentInfo = {
+		application: {
+			name: appInfoComponents[0],
+			version: appInfoComponents[1],
+			type: 'plugin',
+		},
+		engine: {
+			name: '3drepoplugin',
+			version: engineInfoComponents[1],
+		},
+		os: {
+			name: osInfoComponents[0],
+			version: osInfoComponents[1],
+		},
+		device: 'desktop',
+	};
+
+	return userAgentInfo;
+};
+
+Sessions.getUserAgentInfoFromBrowser = (userAgentString) => {
+	const { browser, engine, os } = UaParserJs(userAgentString);
+	const userAgentInfo = {
+		application: browser.name ? { ...browser, type: 'browser' } : { type: 'unknown' },
+		engine,
+		os,
+		device: userAgentString ? Device(userAgentString).type : 'unknown',
+	};
+
+	return userAgentInfo;
+};
+
+Sessions.isUserAgentFromPlugin = (userAgent) => userAgent.split(' ')[0] === 'PLUGIN:';
+
+Sessions.getLocationFromIPAddress = (ipAddress) => geoip.lookup(ipAddress);
 
 module.exports = Sessions;

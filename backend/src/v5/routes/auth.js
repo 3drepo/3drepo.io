@@ -35,7 +35,8 @@ const logout = (req, res) => {
 	try {
 		req.session.destroy(() => {
 			res.clearCookie('connect.sid', { domain: config.cookie_domain, path: '/' });
-			respond(req, res, templates.ok, undefined, {}, username);
+			const session = { user: { username } };
+			respond({...req, session }, res, templates.ok);
 		});
 	} catch (err) {
 		// istanbul ignore next

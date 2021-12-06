@@ -17,7 +17,7 @@
 
 // detects edge as browser but not device
 const { getLocationFromIPAddress, getUserAgentInfoFromBrowser, getUserAgentInfoFromPlugin,
-	isUserAgentFromPlugin } = require('../utils/helper/strings');
+	isUserAgentFromPlugin } = require('../services/sessions');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { publish } = require('../services/eventsManager/eventsManager');
