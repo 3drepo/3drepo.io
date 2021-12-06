@@ -20,9 +20,9 @@ const Yup = require('yup');
 
 const YupHelper = { validators: {}, types: { strings: {} } };
 
-YupHelper.validators.alphanumeric = (yupObj) => yupObj.matches(/^[\w]*$/,
+YupHelper.validators.alphanumeric = (yupObj) => yupObj.matches(/^[\w|_|-]*$/,
 	// eslint-disable-next-line no-template-curly-in-string
-	'${path} can only contain alpha-numeric characters or underscores');
+	'${path} can only contain alpha-numeric characters, hypens or underscores');
 
 YupHelper.types.id = Yup.string().uuid('ids are expected to be of uuid format').transform((val, org) => UUIDToString(org));
 
@@ -73,7 +73,5 @@ YupHelper.types.surveyPoints = Yup.array()
 
 YupHelper.types.strings.unit = Yup.string()
 	.oneOf(['mm', 'cm', 'dm', 'm', 'ft']);
-
-YupHelper.types.strings.code = Yup.string().matches(/^[a-zA-Z0-9]*$/).min(1).max(50);
 
 module.exports = YupHelper;
