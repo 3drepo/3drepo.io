@@ -55,7 +55,7 @@ const importErrorMapping = {
 	33: systemFailureMsg,
 	34: { message: 'An error occured whilst processing the geometry, please contact support.' },
 	35: systemFailureMsg,
-	36: { message: '3D repo license check failed'}
+	36: { message: 'Failed to validate 3D Repo Server License. Please contact support.' },
 };
 
 ModelSettingConstants.getInfoFromCode = (code) => importErrorMapping[code] || systemFailureMsg;
