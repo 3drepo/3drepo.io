@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { notLoggedIn, validSession } = require('../middleware/auth');
+const { notLoggedIn, isLoggedIn } = require('../middleware/auth');
 const Auth = require('../processors/auth');
 const { Router } = require('express');
 const config = require('../utils/config');
@@ -94,13 +94,13 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: Loggs the user out
 	 */
-	router.post('/logout', validSession, logout);
+	router.post('/logout', isLoggedIn, logout);
 
 	/**
 	 * @openapi
 	 * /login:
 	 *   get:
-	 *     description: Returns the username of the user currently logged in
+	 *     description: Verifies if there is a valid session with the request and returns the name of the user
 	 *     tags: [Auth]
 	 *     operationId: getUsername
 	 *     responses:
@@ -119,7 +119,7 @@ const establishRoutes = () => {
 	 *                   example: Username1
 	 *
 	 */
-	router.get('/login', validSession, getUsername);
+	router.get('/login', isLoggedIn, getUsername);
 	return router;
 };
 
