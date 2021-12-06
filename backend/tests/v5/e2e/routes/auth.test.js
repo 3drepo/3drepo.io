@@ -116,7 +116,7 @@ const testGetUsername = () => {
 	});
 };
 
-describe('E2E routes/auth', () => {
+describe('E2E routes/users', () => {
 	beforeAll(async () => {
 		const app = await ServiceHelper.app();
 		server = app;

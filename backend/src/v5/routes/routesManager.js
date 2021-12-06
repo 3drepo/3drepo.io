@@ -16,7 +16,7 @@
  */
 
 const RoutesManager = {};
-const AuthRoutes = require('./auth');
+const AuthRoutes = require('./users');
 const ContainerGroupsRoutes = require('./teamspaces/projects/containers/groups');
 const ContainerRevisionRoutes = require('./teamspaces/projects/containers/revisions');
 const ContainerRoutes = require('./teamspaces/projects/containers/containers');

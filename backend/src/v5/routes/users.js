@@ -16,7 +16,7 @@
  */
 
 const { notLoggedIn, isLoggedIn } = require('../middleware/auth');
-const Auth = require('../processors/auth');
+const Users = require('../processors/users');
 const { Router } = require('express');
 const config = require('../utils/config');
 const { respond } = require('../utils/responder');
@@ -25,7 +25,7 @@ const { validateLoginData } = require('../middleware/dataConverter/inputs/auth')
 
 const login = (req, res) => {
 	const { user, password } = req.body;
-	Auth.login(user, password, req).then(() => {
+	Users.login(user, password, req).then(() => {
 		respond(req, res, templates.ok);
 	}).catch((err) => respond(req, res, err));
 };

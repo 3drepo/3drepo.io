@@ -18,7 +18,7 @@
 const { templates } = require('../../../../src/v5/utils/responseCodes');
 const { src } = require('../../helper/path');
 
-const Auth = require(`${src}/processors/auth`);
+const Users = require(`${src}/processors/users`);
 
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
@@ -56,7 +56,7 @@ const testLogin = () => {
 		UsersModel.canLogIn.mockResolvedValue(undefined);
 		UsersModel.getUserByUsername.mockImplementation(() => ({ user: username }));
 		test('should login with username', async () => {
-			await Auth.login(username, password, req);
+			await Users.login(username, password, req);
 			expect(publishFn.mock.calls.length).toBe(1);
 			expect(publishFn.mock.calls[0][0]).toEqual(events.USER_LOGGED_IN);
 			expect(publishFn.mock.calls[0][1]).toEqual({ username,
@@ -69,13 +69,13 @@ const testLogin = () => {
 
 		test('should return error if account is locked', async () => {
 			UsersModel.canLogIn.mockRejectedValueOnce(templates.tooManyLoginAttempts);
-			await expect(Auth.login(username, password, req)).rejects.toEqual(templates.tooManyLoginAttempts);
+			await expect(Users.login(username, password, req)).rejects.toEqual(templates.tooManyLoginAttempts);
 			expect(publishFn.mock.calls.length).toBe(0);
 		});
 
 		test('should login if the session is not web session', async () => {
 			req.session.user.webSession = false;
-			await Auth.login(username, password, req);
+			await Users.login(username, password, req);
 			expect(publishFn.mock.calls.length).toBe(1);
 			expect(publishFn.mock.calls[0][0]).toEqual(events.USER_LOGGED_IN);
 			expect(publishFn.mock.calls[0][1]).toEqual({ username,
@@ -88,7 +88,7 @@ const testLogin = () => {
 
 		test('should login if the request has empty ips array', async () => {
 			req.ips = [];
-			await Auth.login(username, password, req);
+			await Users.login(username, password, req);
 			expect(publishFn.mock.calls.length).toBe(1);
 			expect(publishFn.mock.calls[0][0]).toEqual(events.USER_LOGGED_IN);
 			expect(publishFn.mock.calls[0][1]).toEqual({ username,
@@ -101,6 +101,6 @@ const testLogin = () => {
 	});
 };
 
-describe('processors/auth', () => {
+describe('processors/users', () => {
 	testLogin();
 });
