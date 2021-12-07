@@ -21,7 +21,7 @@ import { Action } from 'redux';
 
 export interface IFederation {
 	_id: string;
-	description: string;
+	description?: string;
 	name: string;
 	role: string;
 	isFavourite: boolean;
