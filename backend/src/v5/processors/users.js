@@ -22,18 +22,9 @@ const { publish } = require('../services/eventsManager/eventsManager');
 
 const Auth = {};
 
-Auth.login = async (username, password, req) => {
+Auth.login = async (username, password) => {
 	await canLogIn(username);
-
-	const loginData = await authenticate(username, password);
-	await regenerateAuthSession(req, config, loginData);
-
-	publish(events.USER_LOGGED_IN, { username,
-		sessionID: req.sessionID,
-		ipAddress: req.ips[0] || req.ip,
-		userAgent: req.headers['user-agent'],
-		referer: req.headers.referer
-	});
+	return await authenticate(username, password);	
 };
 
 Auth.getUserByUsername = getUserByUsername;

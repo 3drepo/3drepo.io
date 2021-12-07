@@ -22,26 +22,14 @@ const config = require('../utils/config');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
 const { validateLoginData } = require('../middleware/dataConverter/inputs/auth');
+const { endSession, regenerateAuthSession } = require('../middleware/dataConverter/outputs/auth');
 
-const login = (req, res) => {
-	const { user, password } = req.body;
-	Users.login(user, password, req).then(() => {
-		respond(req, res, templates.ok);
+const login = (req, res, next) => {
+	const { user, password } = req.body;	
+	Users.login(user, password).then((loginData) => {
+		req.loginData = loginData;
+		next();		
 	}).catch((err) => respond(req, res, err));
-};
-
-const logout = (req, res) => {
-	const username = req.session?.user?.username;
-	try {
-		req.session.destroy(() => {
-			res.clearCookie('connect.sid', { domain: config.cookie_domain, path: '/' });
-			const session = { user: { username } };
-			respond({...req, session }, res, templates.ok);
-		});
-	} catch (err) {
-		// istanbul ignore next
-		respond(req, res, err);
-	}
 };
 
 const getUsername = (req, res) => {
@@ -80,7 +68,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: Loggs the user in
 	 */
-	router.post('/login', validateLoginData, notLoggedIn, login);
+	router.post('/login', validateLoginData, notLoggedIn, login, regenerateAuthSession);
 
 	/**
 	 * @openapi
@@ -95,7 +83,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: Loggs the user out
 	 */
-	router.post('/logout', isLoggedIn, logout);
+	router.post('/logout', isLoggedIn, endSession);
 
 	/**
 	 * @openapi
