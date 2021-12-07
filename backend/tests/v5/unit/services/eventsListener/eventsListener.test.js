@@ -21,8 +21,6 @@ jest.mock('../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
 jest.mock('../../../../../src/v5/models/loginRecord');
 const LoginRecord = require(`${src}/models/loginRecord`);
-jest.mock('../../../../../src/v5/models/chatEvent');
-const ChatEvent = require(`${src}/models/chatEvent`);
 jest.mock('../../../../../src/v5/services/sessions');
 const Sessions = require(`${src}/services/sessions`);
 jest.mock('../../../../../src/v5/handler/elastic');
