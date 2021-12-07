@@ -121,8 +121,8 @@ export const FederationsList = ({
 					<DashboardListHeaderLabel name="containers" width={165}>
 						<FormattedMessage id="federations.list.header.containers" defaultMessage="Containers" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="category" width={188}>
-						<FormattedMessage id="federations.list.header.category" defaultMessage="Category" />
+					<DashboardListHeaderLabel name="code" width={188}>
+						<FormattedMessage id="federations.list.header.code" defaultMessage="Code" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="lastUpdated" width={180}>
 						<FormattedMessage id="federations.list.header.lastUpdated" defaultMessage="Last updated" />

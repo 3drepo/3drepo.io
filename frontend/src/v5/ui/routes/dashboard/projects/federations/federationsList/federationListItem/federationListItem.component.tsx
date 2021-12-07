@@ -61,7 +61,7 @@ export const FederationListItem = ({
 					tooltipTitle={
 						<FormattedMessage id="federations.list.item.title.tooltip" defaultMessage="Launch in Viewer" />
 					}
-					subtitle={federation.code}
+					subtitle={federation.description}
 				>
 					<Highlight search={filterQuery}>
 						{federation.name}
@@ -117,7 +117,7 @@ export const FederationListItem = ({
 				</DashboardListItemButton>
 				<DashboardListItemText width={188}>
 					<Highlight search={filterQuery}>
-						{federation.category}
+						{federation.code}
 					</Highlight>
 				</DashboardListItemText>
 				<DashboardListItemText width={97}>
