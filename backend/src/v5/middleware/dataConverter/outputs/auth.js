@@ -2,9 +2,9 @@
  const { templates } = require('../../../utils/responseCodes');
  const config = require('../../../utils/config');
  const { getURLDomain } = require('../../../utils/helper/strings');
- const useragent = require('useragent');
  const { publish } = require('../../../services/eventsManager/eventsManager');
  const { events } = require('../../../services/eventsManager/eventsManager.constants');
+ const { isFromWebBrowser } = require('../../../utils/helper/userAgent');
 
  const Auth = {};
  
@@ -16,9 +16,7 @@
 			const updatedUser = { ...req.loginData, socketId: req.headers['x-socket-id'], webSession: false };
 
 			if (req?.headers['user-agent']) {
-				const ua = useragent.is(req.headers['user-agent']);
-				updatedUser.webSession = ['webkit', 'opera', 'ie', 'chrome', 'safari', 'mobile_safari', 'firefox', 'mozilla', 'android']
-					.some((browserType) => ua[browserType]); // If any of these browser types matches then is a websession
+				updatedUser.webSession = isFromWebBrowser(req.headers['user-agent']);
 			}
 
 			if (req.headers.referer) {
