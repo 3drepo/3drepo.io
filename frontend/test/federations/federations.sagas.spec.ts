@@ -24,6 +24,12 @@ import { federationMockFactory } from './federations.fixtures';
 import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
 import { FetchFederationStatsResponse, IFederation } from '@/v5/store/federations/federations.types';
 
+// TODO: review this
+// There is something weird as how the tests are setup
+// the ALWAYS timeout, with a lower value these run faster
+// but if the value is too low it wont actually finish the saga so it will fail
+expectSaga.DEFAULT_TIMEOUT = 100;
+
 describe('Federations: sagas', () => {
 	const teamspace = 'teamspace';
 	const projectId = 'projectId';
@@ -57,7 +63,7 @@ describe('Federations: sagas', () => {
 
 	describe('fetchFederations', () => {
 		const mockFederations = times(2, () => federationMockFactory());
-		const mockFederationsBaseResponse = mockFederations.map((federation) => pick(federation, ['_id', 'name', 'role', 'isFavourite']));
+		const mockFederationsBaseResponse = mockFederations.map((federation) => pick(federation, ['_id', 'name', 'role', 'isFavourite', 'subModels']));
 		const mockFederationsWithoutStats = prepareFederationsData(mockFederations);
 
 		it('should fetch federations data', async () => {
