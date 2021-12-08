@@ -103,6 +103,11 @@ const testLogout = () => {
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
+		test('should fail if the user is not logged in with API key', async () => {
+			const res = await agent.post(`/v5/logout?${testUser.apiKey}`).expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
 		test('should log the user out if they are logged in', async () => {
 			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
 			await testSession.post('/v5/logout/').expect(200);
@@ -114,6 +119,11 @@ const testGetUsername = () => {
 	describe('Get username of the logged in user', () => {
 		test('should fail if the user is not logged in', async () => {
 			const res = await agent.get('/v5/login/').expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user is not logged in with API key', async () => {
+			const res = await agent.get(`/v5/login?${testUser.apiKey}`).expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
