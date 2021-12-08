@@ -23,8 +23,6 @@ jest.mock('../../../../../src/v5/models/loginRecord');
 const LoginRecord = require(`${src}/models/loginRecord`);
 jest.mock('../../../../../src/v5/services/sessions');
 const Sessions = require(`${src}/services/sessions`);
-jest.mock('../../../../../src/v5/handler/elastic');
-const Elastic = require(`${src}/handler/elastic`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 
@@ -33,9 +31,7 @@ const EventsListener = require(`${src}/services/eventsListener/eventsListener`);
 ModelSettings.updateModelStatus.mockResolvedValue(() => {});
 ModelSettings.newRevisionProcessed.mockResolvedValue(() => {});
 LoginRecord.saveLoginRecord.mockImplementation(() => ({}));
-Elastic.createLoginRecord.mockImplementation(() => {});
-Sessions.removeSessions.mockImplementation(() => { });
-ChatEvent.loggedOut.mockImplementation(() => { });
+Sessions.removeOldSessions.mockImplementation(() => { });
 
 const eventTriggeredPromise = (event) => new Promise((resolve) => EventsManager.subscribe(event, resolve));
 
@@ -61,95 +57,31 @@ const testModelEventsListener = () => {
 			await waitOnEvent;
 			expect(ModelSettings.newRevisionProcessed.mock.calls.length).toBe(1);
 			expect(ModelSettings.newRevisionProcessed.mock.calls[0]).toEqual(
-
 				[data.teamspace, data.model, data.corId, data.value, data.user],
 			);
 		});
 	});
 };
 
-const oldSessions = [
-	{
-		_id: '1',
-		session: {
-			user: {
-				webSession: true,
-				socketId: '1234',
-			},
-		},
-	},
-	{
-		_id: '2',
-		session: {
-			user: {
-				webSession: true,
-				socketId: '5678',
-			},
-		},
-	},
-];
-
 const testAuthEventsListener = () => {
 	describe('Auth Events', () => {
 		test(`Should trigger UserLoggedIn if there is a ${events.USER_LOGGED_IN}`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.USER_LOGGED_IN);
-			const data = { username: 'username1',
+			const data = { 
+				username: 'username1',
 				sessionID: '123',
 				ipAddress: '1.2.3.4',
 				userAgent: 'user agent',
 				referer: 'www.google.com',
-				oldSessions };
+			};
 			EventsManager.publish(events.USER_LOGGED_IN, data);
 
 			await waitOnEvent;
 			expect(LoginRecord.saveLoginRecord.mock.calls.length).toBe(1);
 			expect(LoginRecord.saveLoginRecord.mock.calls[0]).toEqual(['username1', '123', '1.2.3.4', 'user agent', 'www.google.com']);
-			expect(Elastic.createLoginRecord.mock.calls.length).toBe(1);
-			expect(Elastic.createLoginRecord.mock.calls[0]).toEqual(['username1', {}]);
-			expect(Sessions.removeSessions.mock.calls.length).toBe(1);
-			expect(Sessions.removeSessions.mock.calls[0]).toEqual([['1', '2']]);
-			expect(ChatEvent.loggedOut.mock.calls.length).toBe(2);
-			expect(ChatEvent.loggedOut.mock.calls[0]).toEqual(['1234']);
-			expect(ChatEvent.loggedOut.mock.calls[1]).toEqual(['5678']);
-		});
-
-		test(`Should trigger UserLoggedIn if there is a ${events.USER_LOGGED_IN} without removing old sessions`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.USER_LOGGED_IN);
-			const data = { username: 'username1',
-				sessionID: '123',
-				ipAddress: '1.2.3.4',
-				userAgent: 'user agent',
-				referer: 'www.google.com',
-				oldSessions: [{ _id: '1' }] };
-			EventsManager.publish(events.USER_LOGGED_IN, data);
-
-			await waitOnEvent;
-			expect(LoginRecord.saveLoginRecord.mock.calls.length).toBe(1);
-			expect(LoginRecord.saveLoginRecord.mock.calls[0]).toEqual(['username1', '123', '1.2.3.4', 'user agent', 'www.google.com']);
-			expect(Elastic.createLoginRecord.mock.calls.length).toBe(1);
-			expect(Elastic.createLoginRecord.mock.calls[0]).toEqual(['username1', {}]);
-			expect(Sessions.removeSessions.mock.calls.length).toBe(1);
-			expect(Sessions.removeSessions.mock.calls[0]).toEqual([[]]);
-			expect(ChatEvent.loggedOut.mock.calls.length).toBe(0);
-		});
-
-		test(`Should trigger UserLoggedIn if there is a ${events.USER_LOGGED_IN} without any old sessions`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.USER_LOGGED_IN);
-			const data = { username: 'username1',
-				sessionID: '123',
-				ipAddress: '1.2.3.4',
-				userAgent: 'user agent',
-				referer: 'www.google.com' };
-			EventsManager.publish(events.USER_LOGGED_IN, data);
-
-			await waitOnEvent;
-			expect(LoginRecord.saveLoginRecord.mock.calls.length).toBe(1);
-			expect(LoginRecord.saveLoginRecord.mock.calls[0]).toEqual(['username1', '123', '1.2.3.4', 'user agent', 'www.google.com']);
-			expect(Elastic.createLoginRecord.mock.calls.length).toBe(1);
-			expect(Elastic.createLoginRecord.mock.calls[0]).toEqual(['username1', {}]);
-			expect(Sessions.removeSessions.mock.calls.length).toBe(0);
-			expect(ChatEvent.loggedOut.mock.calls.length).toBe(0);
-		});
+			expect(Sessions.removeOldSessions.mock.calls.length).toBe(1);
+			expect(Sessions.removeOldSessions.mock.calls[0]).toEqual(['username1', '123']);			
+		});			
 	});
 };
 

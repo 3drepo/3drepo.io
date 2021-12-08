@@ -44,7 +44,7 @@ Auth.validateLoginData = async (req, res, next) => {
 		next();
 	} catch (err) {
 		if(err === templates.userNotFound){
-			respond(req, res, templates.incorrectUsernameOrPassword);
+			return respond(req, res, templates.incorrectUsernameOrPassword);
 		}
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}

@@ -53,8 +53,8 @@ const testValidSession = () => {
 };
 
 const testNotLoggedIn = () => {
-	describe('Not valid sessions', () => {
-		test('next() should be called if the session is not valid', () => {
+	describe('Not logged in middleware', () => {
+		test('next() should be called if the session is invalid', () => {
 			const mockCB = jest.fn(() => {});
 			AuthMiddlewares.notLoggedIn(
 				{ header: { referer: 'http://xyz.com' }, session: { user: { referer: 'http://abc.com' } } },
@@ -63,6 +63,17 @@ const testNotLoggedIn = () => {
 			);
 			expect(mockCB.mock.calls.length).toBe(1);
 		});
+
+		test('next() should be called if the session is invalid and there is an API key', () => {
+			const mockCB = jest.fn(() => {});
+			AuthMiddlewares.notLoggedIn(
+				{ header: { referer: 'http://xyz.com' }, session: { user: { referer: 'http://abc.com', isAPIKey: true } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(1);
+		});
+
 
 		test('should respond with alreadyLoggedIn errCode if the session is valid', () => {
 			const mockCB = jest.fn(() => {});
@@ -78,7 +89,46 @@ const testNotLoggedIn = () => {
 	});
 };
 
+const testIsLoggedIn = () => {
+	describe('Is logged in middleware', () => {
+		test('next() should be called if the session is valid', () => {
+			const mockCB = jest.fn(() => {});
+			AuthMiddlewares.isLoggedIn(
+				{ header: { referer: 'http://abc.com/' }, session: { user: { referer: 'http://abc.com' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(1);
+		});
+
+		test('should respond with notLoggedIn errCode if the session is invalid', () => {
+			const mockCB = jest.fn(() => {});
+			AuthMiddlewares.isLoggedIn(
+				{ header: { referer: 'http://xyz.com' }, session: { user: { referer: 'http://abc.com' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(0);
+			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond.mock.results[0].value).toEqual(templates.notLoggedIn);
+		});
+
+		test('should respond with notLoggedIn errCode if the session is invalid and there is an API key', () => {
+			const mockCB = jest.fn(() => {});
+			AuthMiddlewares.isLoggedIn(
+				{ header: { referer: 'http://xyz.com' }, session: { user: { referer: 'http://abc.com', isAPIKey: true } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(0);
+			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond.mock.results[0].value).toEqual(templates.notLoggedIn);
+		});
+	});
+};
+
 describe('middleware/auth', () => {
 	testValidSession();
 	testNotLoggedIn();
+	testIsLoggedIn();
 });

@@ -18,55 +18,12 @@
 const { src } = require('../../helper/path');
 
 const db = require(`${src}/handler/db`);
-jest.mock('../../../../src/v5/utils/helper/strings');
-const StringHelper = require(`${src}/utils/helper/strings`);
+jest.mock('../../../../src/v5/utils/helper/userAgent');
+const UserAgentHelper = require(`${src}/utils/helper/userAgent`);
 
-StringHelper.isUserAgentFromPlugin.mockImplementation((userAgent) => userAgent.split(' ')[0] === 'PLUGIN:');
-
-StringHelper.getLocationFromIPAddress.mockImplementation((ipAddr) => {
-	if (ipAddr === '0.0.0.0') {
-		return null;
-	}
-
-	return {
-		country: 'United Kingdom',
-		city: 'London',
-	};
-});
-
-StringHelper.getUserAgentInfoFromBrowser.mockImplementation(() => ({
-	application: {
-		name: 'ua name',
-		version: '1',
-		type: 'browser',
-	},
-	engine: {
-		name: 'some browser',
-		version: '1',
-	},
-	os: {
-		name: 'os name',
-		version: '1',
-	},
-	device: 'desktop',
-}));
-
-StringHelper.getUserAgentInfoFromPlugin.mockImplementation(() => ({
-	application: {
-		name: 'ua name',
-		version: '1',
-		type: 'plugin',
-	},
-	engine: {
-		name: '3drepoplugin',
-		version: '1',
-	},
-	os: {
-		name: 'os name',
-		version: '1',
-	},
-	device: 'desktop',
-}));
+UserAgentHelper.isUserAgentFromPlugin.mockImplementation((userAgent) => userAgent.split(' ')[0] === 'PLUGIN:');
+UserAgentHelper.getUserAgentInfoFromBrowser.mockImplementation(() => ({	data: 'browser ua data' }));
+UserAgentHelper.getUserAgentInfoFromPlugin.mockImplementation(() => ({ data: 'plugin ua data' }));
 
 const sessionId = '123456';
 const username = 'someUsername';
@@ -77,16 +34,12 @@ const referrer = 'www.google.com';
 const LoginRecord = require(`${src}/models/loginRecord`);
 
 const testSaveLoginRecord = () => {
-	const formatLoginRecord = (userAgentInfo, loginTime, referer, ipAddr = ipAddress) => {
+	const formatLoginRecord = (userAgentInfo, referer, ipAddr = ipAddress) => {
 		const formattedLoginRecord = {
-			_id: sessionId,
-			loginTime,
+			_id: sessionId,			
 			ipAddr,
 			...userAgentInfo,
-			location: {
-				country: ipAddr === '0.0.0.0' ? 'unknown' : 'United Kingdom',
-				city: ipAddr === '0.0.0.0' ? 'unknown' : 'London',
-			},
+			location: {	country: 'unknown',	city: 'unknown' },
 		};
 
 		if (referer) {
@@ -96,46 +49,41 @@ const testSaveLoginRecord = () => {
 		return formattedLoginRecord;
 	};
 
-	const checkResults = (fn, user, dataInserted) => {
+	const checkResults = (fn, user, expectedResult) => {
 		expect(fn.mock.calls.length).toBe(1);
 		expect(fn.mock.calls[0][1]).toEqual(user);
-		expect(fn.mock.calls[0][2]).toEqual(dataInserted);
+		const result = fn.mock.calls[0][2];
+		expect(result).toEqual({ ...expectedResult, loginTime: result.loginTime });
 	};
 
 	describe('Save new login record', () => {
+		const fn = jest.spyOn(db, 'insertOne').mockResolvedValue(undefined);
+
 		test('Should save a new login record if user agent is from plugin', async () => {
-			const fn = jest.spyOn(db, 'insertOne').mockResolvedValue(undefined);
-			const res = await LoginRecord.saveLoginRecord(username, sessionId, ipAddress, pluginUserAgent, referrer);
-			checkResults(fn, username, res);
-			const formattedLoginRecord = formatLoginRecord(StringHelper.getUserAgentInfoFromPlugin(),
-				res.loginTime, referrer);
-			expect(res).toEqual(formattedLoginRecord);
+			await LoginRecord.saveLoginRecord(username, sessionId, ipAddress, pluginUserAgent, referrer);			
+			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfoFromPlugin(),
+				referrer);
+			checkResults(fn, username, formattedLoginRecord);			
 		});
 
 		test('Should save a new login record if user agent is from browser', async () => {
-			const fn = jest.spyOn(db, 'insertOne').mockResolvedValue(undefined);
-			const res = await LoginRecord.saveLoginRecord(username, sessionId, ipAddress, browserUserAgent, referrer);
-			checkResults(fn, username, res);
-			const formattedLoginRecord = formatLoginRecord(StringHelper.getUserAgentInfoFromBrowser(),
-				res.loginTime, referrer);
-			expect(res).toEqual(formattedLoginRecord);
+			await LoginRecord.saveLoginRecord(username, sessionId, ipAddress, browserUserAgent, referrer);			
+			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfoFromBrowser(),
+				referrer);
+			checkResults(fn, username, formattedLoginRecord);
 		});
 
 		test('Should save a new login record if there is no referrer', async () => {
-			const fn = jest.spyOn(db, 'insertOne').mockResolvedValue(undefined);
-			const res = await LoginRecord.saveLoginRecord(username, sessionId, ipAddress, browserUserAgent);
-			checkResults(fn, username, res);
-			const formattedLoginRecord = formatLoginRecord(StringHelper.getUserAgentInfoFromBrowser(), res.loginTime);
-			expect(res).toEqual(formattedLoginRecord);
+			await LoginRecord.saveLoginRecord(username, sessionId, ipAddress, browserUserAgent);			
+			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfoFromBrowser());
+			checkResults(fn, username, formattedLoginRecord);
 		});
 
 		test('Should save a new login record if there is no location', async () => {
-			const fn = jest.spyOn(db, 'insertOne').mockResolvedValue(undefined);
-			const res = await LoginRecord.saveLoginRecord(username, sessionId, '0.0.0.0', browserUserAgent);
-			checkResults(fn, username, res);
-			const formattedLoginRecord = formatLoginRecord(StringHelper.getUserAgentInfoFromBrowser(), res.loginTime,
+			await LoginRecord.saveLoginRecord(username, sessionId, '0.0.0.0', browserUserAgent);			
+			const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfoFromBrowser(), 
 				undefined, '0.0.0.0');
-			expect(res).toEqual(formattedLoginRecord);
+			checkResults(fn, username, formattedLoginRecord);
 		});
 	});
 };

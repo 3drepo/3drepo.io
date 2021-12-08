@@ -17,28 +17,23 @@
 
 const { src } = require('../../helper/path');
 
-const Sessions = require(`${src}/services/sessions`);
-const db = require(`${src}/handler/db`);
+const Users = require(`${src}/processors/users`);
 
-const testGetSessions = () => {
-	describe('Get sessions by username', () => {
-		test('Should return sessions by username', async () => {
-			jest.spyOn(db, 'find').mockResolvedValue([{ id: '1' }, { id: '2' }]);
-			await Sessions.getSessions('username1');
+jest.mock('../../../../src/v5/models/users');
+const UsersModel = require(`${src}/models/users`);
+
+UsersModel.canLogIn.mockImplementation((user) => user);
+UsersModel.authenticate.mockResolvedValue('user1');
+
+const testLogin = () => {
+	describe('Login', () => {
+		test('should login with username', async () => {
+			const res = await Users.login('user1');		
+			expect(res).toEqual('user1');
 		});
 	});
 };
 
-const testRemoveOldSessions = () => {
-	describe('Remove sessions', () => {
-		test('Should remove the sessions that have the provided ids', async () => {
-			jest.spyOn(db, 'deleteMany').mockResolvedValue(undefined);
-			await Sessions.removeOldSessions(['1', '2']);
-		});
-	});
-};
-
-describe('services/sessions', () => {
-	testGetSessions();
-	testRemoveOldSessions();
+describe('processors/users', () => {
+	testLogin();
 });

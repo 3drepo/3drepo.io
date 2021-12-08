@@ -15,11 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { authenticate, canLogIn, getUserByUsername } = require('../models/users');
-const { regenerateAuthSession } = require('../services/sessions');
-const config = require('../utils/config');
-const { events } = require('../services/eventsManager/eventsManager.constants');
-const { publish } = require('../services/eventsManager/eventsManager');
-
 const Auth = {};
 
 Auth.login = async (username, password) => {

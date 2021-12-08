@@ -11,7 +11,7 @@
  Auth.regenerateAuthSession = (req, res) => {
 	req.session.regenerate((err) => {
 		if (err) {
-			reject(err);
+			respond(req, res,templates.sessionCouldBeRegenerated);			
 		} else {
 			const updatedUser = { ...req.loginData, socketId: req.headers['x-socket-id'], webSession: false };
 
