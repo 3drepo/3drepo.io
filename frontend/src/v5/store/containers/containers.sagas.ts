@@ -30,6 +30,7 @@ import {
 	FetchContainerStatsResponse,
 	FetchContainersAction,
 	FetchContainerStatsAction,
+	DeleteContainerAction,
 } from './containers.types';
 import { prepareContainersData } from './containers.helpers';
 
@@ -96,9 +97,22 @@ export function* removeFavourites({ containerId, teamspace, projectId }: RemoveF
 	}
 }
 
+export function* deleteContainer({ teamspace, projectId, containerId }: DeleteContainerAction) {
+	try {
+		yield API.deleteContainer({ teamspace, projectId, containerId });
+		yield put(ContainersActions.deleteContainerSuccess(projectId, containerId));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to delete container',
+			error,
+		}));
+	}
+}
+
 export default function* ContainersSaga() {
 	yield takeLatest(ContainersTypes.ADD_FAVOURITE, addFavourites);
 	yield takeLatest(ContainersTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeLatest(ContainersTypes.FETCH_CONTAINERS, fetchContainers);
 	yield takeEvery(ContainersTypes.FETCH_CONTAINER_STATS, fetchContainerStats);
+	yield takeLatest(ContainersTypes.DELETE_CONTAINER, deleteContainer);
 }
