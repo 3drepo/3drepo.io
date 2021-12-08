@@ -98,6 +98,6 @@ Intercom.subscribeToV5Events = () => {
 			}
 		}
 	});
-}
+};
 
 module.exports = Intercom;

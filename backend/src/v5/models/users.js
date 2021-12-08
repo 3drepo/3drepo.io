@@ -18,8 +18,8 @@
 const { createResponseCode, templates } = require('../utils/responseCodes');
 const config = require('../utils/config');
 const db = require('../handler/db');
-const { publish } = require("../services/eventsManager/eventsManager");
-const { events } = require("../services/eventsManager/eventsManager.constants");
+const { events } = require('../services/eventsManager/eventsManager.constants');
+const { publish } = require('../services/eventsManager/eventsManager');
 
 const User = {};
 const COLL_NAME = 'system.users';
@@ -41,7 +41,7 @@ const recordSuccessfulAuthAttempt = async (user) => {
 };
 
 const recordFailedAuthAttempt = async (user) => {
-	const projection = {'customData.loginInfo': 1, 'customData.email': 1}
+	const projection = { 'customData.loginInfo': 1, 'customData.email': 1 };
 	const { customData: { loginInfo, email } = {} } = await User.getUserByUsername(user, projection);
 
 	const currentTime = new Date();
@@ -52,12 +52,12 @@ const recordFailedAuthAttempt = async (user) => {
 
 	const newCount = resetCounter ? 1 : failedLoginCount + 1;
 
-	await db.updateOne('admin', COLL_NAME, { user: user }, { $set: {
+	await db.updateOne('admin', COLL_NAME, { user }, { $set: {
 		'customData.loginInfo.lastFailedLoginAt': currentTime,
 		'customData.loginInfo.failedLoginCount': newCount,
-	} });	
+	} });
 
-	publish(events.FAILED_LOGIN_ATTEMPT, { email: email, failedLoginCount: newCount });
+	publish(events.FAILED_LOGIN_ATTEMPT, { email, failedLoginCount: newCount });
 
 	return config.loginPolicy.maxUnsuccessfulLoginAttempts - newCount;
 };

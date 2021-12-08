@@ -132,6 +132,6 @@ Elastic.subscribeToV5Events = () => {
 	EventsManager.subscribe(EventsV5.LOGIN_RECORD_CREATED, async ({username, loginRecord}) => {
 		await Elastic.createLoginRecord(username, loginRecord);
 	});
-}
+};
 
 module.exports = Elastic;

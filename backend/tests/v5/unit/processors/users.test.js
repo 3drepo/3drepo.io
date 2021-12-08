@@ -28,7 +28,7 @@ UsersModel.authenticate.mockResolvedValue('user1');
 const testLogin = () => {
 	describe('Login', () => {
 		test('should login with username', async () => {
-			const res = await Users.login('user1');		
+			const res = await Users.login('user1');
 			expect(res).toEqual('user1');
 		});
 	});

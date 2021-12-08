@@ -16,7 +16,7 @@
  */
 
 const { camelCase, snakeCase } = require('lodash');
-const { types } = require("./yup");
+const { types } = require('./yup');
 
 const StringHelper = {};
 // Turns thisIsUs to THIS_IS_US
@@ -30,8 +30,6 @@ StringHelper.getURLDomain = (url) => {
 	return domainRegexMatch ? domainRegexMatch[0].replace(/\/\s*$/, '') : url;
 };
 
-StringHelper.hasEmailFormat = (str) => {
-	return types.strings.email.isValidSync(str, { strict: true });
-};
+StringHelper.hasEmailFormat = (str) => types.strings.email.isValidSync(str, { strict: true });
 
 module.exports = StringHelper;

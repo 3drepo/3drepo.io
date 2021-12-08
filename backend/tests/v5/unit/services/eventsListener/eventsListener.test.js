@@ -67,7 +67,7 @@ const testAuthEventsListener = () => {
 	describe('Auth Events', () => {
 		test(`Should trigger UserLoggedIn if there is a ${events.USER_LOGGED_IN}`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.USER_LOGGED_IN);
-			const data = { 
+			const data = {
 				username: 'username1',
 				sessionID: '123',
 				ipAddress: '1.2.3.4',
@@ -80,8 +80,8 @@ const testAuthEventsListener = () => {
 			expect(LoginRecord.saveLoginRecord.mock.calls.length).toBe(1);
 			expect(LoginRecord.saveLoginRecord.mock.calls[0]).toEqual(['username1', '123', '1.2.3.4', 'user agent', 'www.google.com']);
 			expect(Sessions.removeOldSessions.mock.calls.length).toBe(1);
-			expect(Sessions.removeOldSessions.mock.calls[0]).toEqual(['username1', '123']);			
-		});			
+			expect(Sessions.removeOldSessions.mock.calls[0]).toEqual(['username1', '123']);
+		});
 	});
 };
 

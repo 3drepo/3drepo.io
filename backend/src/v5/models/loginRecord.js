@@ -16,12 +16,12 @@
  */
 
 // detects edge as browser but not device
-const { getUserAgentInfoFromBrowser, getUserAgentInfoFromPlugin, 
+const { getUserAgentInfoFromBrowser, getUserAgentInfoFromPlugin,
 	isUserAgentFromPlugin } = require('../utils/helper/userAgent');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
-const { publish } = require('../services/eventsManager/eventsManager');
 const geoip = require('geoip-lite');
+const { publish } = require('../services/eventsManager/eventsManager');
 
 const LoginRecord = {};
 
@@ -29,11 +29,11 @@ LoginRecord.saveLoginRecord = async (username, sessionId, ipAddress, userAgent, 
 	const uaInfo = isUserAgentFromPlugin(userAgent)
 		? getUserAgentInfoFromPlugin(userAgent) : getUserAgentInfoFromBrowser(userAgent);
 
-	const loginRecord = { 
+	const loginRecord = {
 		_id: sessionId,
 		loginTime: new Date(),
 		ipAddr: ipAddress,
-		...uaInfo 
+		...uaInfo,
 	};
 
 	const location = geoip.lookup(ipAddress);

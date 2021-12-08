@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { authenticate, canLogIn, getUserByUsername } = require('../models/users');
+
 const Auth = {};
 
 Auth.login = async (username, password) => {
 	await canLogIn(username);
-	return await authenticate(username, password);	
+	return authenticate(username, password);
 };
 
 Auth.getUserByUsername = getUserByUsername;

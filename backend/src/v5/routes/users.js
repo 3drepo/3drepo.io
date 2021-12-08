@@ -15,20 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { notLoggedIn, isLoggedIn } = require('../middleware/auth');
-const Users = require('../processors/users');
+const { endSession, regenerateAuthSession } = require('../middleware/dataConverter/outputs/auth');
+const { isLoggedIn, notLoggedIn } = require('../middleware/auth');
 const { Router } = require('express');
-const config = require('../utils/config');
+const Users = require('../processors/users');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
 const { validateLoginData } = require('../middleware/dataConverter/inputs/auth');
-const { endSession, regenerateAuthSession } = require('../middleware/dataConverter/outputs/auth');
 
 const login = (req, res, next) => {
-	const { user, password } = req.body;	
+	const { user, password } = req.body;
 	Users.login(user, password).then((loginData) => {
 		req.loginData = loginData;
-		next();		
+		next();
 	}).catch((err) => respond(req, res, err));
 };
 

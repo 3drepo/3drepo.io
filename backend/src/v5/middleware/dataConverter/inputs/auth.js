@@ -16,9 +16,9 @@
  */
 
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
-const { getUserByUsername, getUserByEmail } = require('../../../models/users');
-const { hasEmailFormat } = require('../../../utils/helper/strings');
+const { getUserByEmail, getUserByUsername } = require('../../../models/users');
 const Yup = require('yup');
+const { hasEmailFormat } = require('../../../utils/helper/strings');
 const { respond } = require('../../../utils/responder');
 
 const Auth = {};
@@ -27,24 +27,25 @@ Auth.validateLoginData = async (req, res, next) => {
 	const schema = Yup.object().shape({
 		user: Yup.string().required(),
 		password: Yup.string().required(),
-	}).strict(true).noUnknown().required();
+	}).strict(true).noUnknown()
+		.required();
 
 	try {
 		await schema.validate(req.body);
-		
+
 		const usernameOrEmail = req.body.user;
-		if(hasEmailFormat(usernameOrEmail)){
+		if (hasEmailFormat(usernameOrEmail)) {
 			const { user } = await getUserByEmail(usernameOrEmail);
 			req.body.user = user;
+		} else {
+			await getUserByUsername(usernameOrEmail);
 		}
-		else {
-			await getUserByUsername(usernameOrEmail);			
-		}
-		
+
 		next();
 	} catch (err) {
-		if(err === templates.userNotFound){
-			return respond(req, res, templates.incorrectUsernameOrPassword);
+		if (err === templates.userNotFound) {
+			respond(req, res, templates.incorrectUsernameOrPassword);
+			return;
 		}
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}

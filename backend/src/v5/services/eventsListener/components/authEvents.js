@@ -20,7 +20,7 @@ const { removeOldSessions } = require('../../sessions');
 const { saveLoginRecord } = require('../../../models/loginRecord');
 const { subscribe } = require('../../eventsManager/eventsManager');
 
-const userLoggedIn = async ({ username, sessionID, ipAddress, userAgent, referer }) => {	
+const userLoggedIn = async ({ username, sessionID, ipAddress, userAgent, referer }) => {
 	await saveLoginRecord(username, sessionID, ipAddress, userAgent, referer);
 	await removeOldSessions(username, sessionID);
 };

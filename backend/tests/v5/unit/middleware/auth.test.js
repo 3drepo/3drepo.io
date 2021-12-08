@@ -74,7 +74,6 @@ const testNotLoggedIn = () => {
 			expect(mockCB.mock.calls.length).toBe(1);
 		});
 
-
 		test('should respond with alreadyLoggedIn errCode if the session is valid', () => {
 			const mockCB = jest.fn(() => {});
 			AuthMiddlewares.notLoggedIn(

@@ -17,16 +17,17 @@
 
 const db = require('../handler/db');
 
-const { events } = require('../services/eventsManager/eventsManager.constants');
+const { events } = require('./eventsManager/eventsManager.constants');
 const expressSession = require('express-session');
-const { publish } = require('../services/eventsManager/eventsManager');
+const { publish } = require('./eventsManager/eventsManager');
+
 const Sessions = {};
 
 // istanbul ignore next
 Sessions.session = (config) => {
 	const store = db.getSessionStore(expressSession);
 	const secure = config.public_protocol === 'https';
-	const {secret, maxAge, domain} = config.cookie; 
+	const { secret, maxAge, domain } = config.cookie;
 	return expressSession({
 		secret,
 		resave: true,
@@ -45,20 +46,18 @@ Sessions.session = (config) => {
 	});
 };
 
-Sessions.getSessions = async (query, projection, sort) => { 
-	return await db.find('admin', 'sessions', query, projection, sort);
-}
+Sessions.getSessions = async (query, projection, sort) => db.find('admin', 'sessions', query, projection, sort);
 
-Sessions.removeOldSessions = async (username, currentSessionID) =>{
+Sessions.removeOldSessions = async (username, currentSessionID) => {
 	const query = {
 		'session.user.username': username,
 		'session.user.webSession': true,
-		_id: { '$ne': currentSessionID }
-	}
+		_id: { $ne: currentSessionID },
+	};
 	const sessionsToRemove = await Sessions.getSessions(query, { _id: 1, 'session.user.socketId': 1 });
 
-	await db.deleteMany('admin', 'sessions', { _id: { $in: sessionsToRemove.map(s => s._id) } });
+	await db.deleteMany('admin', 'sessions', { _id: { $in: sessionsToRemove.map((s) => s._id) } });
 	publish(events.SESSIONS_REMOVED, { removedSessions: sessionsToRemove });
-} 
+};
 
 module.exports = Sessions;

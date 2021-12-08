@@ -28,7 +28,7 @@ const Responder = {};
 const constructApiInfo = ({ method, originalUrl }) => `${method} ${originalUrl}`;
 
 const genResponseLogging = ({ status, code }, contentLength, { session, startTime, method, originalUrl } = {}) => {
-    const user = session?.user ? session.user.username : 'unknown';
+	const user = session?.user ? session.user.username : 'unknown';
 	const currentTime = Date.now();
 	const latency = startTime ? `${currentTime - startTime}` : '???';
 	return logger.formatResponseMsg({ status, code, latency, contentLength, user, method, originalUrl });
@@ -86,7 +86,7 @@ Responder.respond = (req, res, resCode, body, { cache, customHeaders } = {}) => 
 		}
 		res.status(finalResCode.status).send(body);
 	}
-    logger.logInfo(genResponseLogging(resCode, contentLength, req));
+	logger.logInfo(genResponseLogging(resCode, contentLength, req));
 };
 
 module.exports = Responder;

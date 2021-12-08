@@ -29,6 +29,7 @@ let agent;
 // This is the user being used for tests
 const testUser = ServiceHelper.generateUserCredentials();
 const lockedUser = ServiceHelper.generateUserCredentials();
+const lockedUserWithExpiredLock = ServiceHelper.generateUserCredentials();
 const userWithFailedAttempts = ServiceHelper.generateUserCredentials();
 const userEmail = 'example@email.com';
 
@@ -37,6 +38,8 @@ const setupData = async () => {
 		ServiceHelper.db.createUser(testUser, [], { email: userEmail }),
 		ServiceHelper.db.createUser(lockedUser, [], { loginInfo: { failedLoginCount: 10,
 			lastFailedLoginAt: new Date() } }),
+		ServiceHelper.db.createUser(lockedUserWithExpiredLock, [], { loginInfo: { failedLoginCount: 10,
+			lastFailedLoginAt: new Date('1/1/18') } }),
 		ServiceHelper.db.createUser(userWithFailedAttempts, [], { loginInfo: { failedLoginCount: 6,
 			lastFailedLoginAt: new Date() } }),
 	]);
@@ -77,6 +80,12 @@ const testLogin = () => {
 			expect(res.body.code).toEqual(templates.tooManyLoginAttempts.code);
 		});
 
+		test('should log in with a locked account with the lockout duration expired', async () => {
+			await agent.post('/v5/login/')
+				.send({ user: lockedUserWithExpiredLock.user, password: lockedUserWithExpiredLock.password })
+				.expect(templates.ok.status);
+		});
+
 		test('should fail with wrong password and many failed login attempts', async () => {
 			const res = await agent.post('/v5/login/')
 				.send({ user: userWithFailedAttempts.user, password: 'wrongPassword' })
@@ -92,11 +101,6 @@ const testLogout = () => {
 		test('should fail if the user is not logged in', async () => {
 			const res = await agent.post('/v5/logout/').expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
-		});
-		
-		test('should not log the user out if req.session has API key but its not valid', async () => {
-			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-			await testSession.post('/v5/logout/').expect(templates.notLoggedIn.code);
 		});
 
 		test('should log the user out if they are logged in', async () => {
