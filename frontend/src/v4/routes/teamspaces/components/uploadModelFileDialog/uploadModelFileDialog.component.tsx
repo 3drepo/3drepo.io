@@ -69,12 +69,14 @@ interface IProps {
 interface IState {
 	fileName: string;
 	allowImportAnimations: boolean;
+	allowSetTimezone: boolean;
 }
 
 export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 	public state = {
 		fileName: '',
 		allowImportAnimations: false,
+		allowSetTimezone: false
 	};
 
 	get modelDetails() {
@@ -179,11 +181,13 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 
 		if (extension === 'spm') {
 			this.setState({
-				allowImportAnimations: true
+				allowImportAnimations: true,
+				allowSetTimezone: true
 			}, () => setFieldValue('importAnimations', true));
 		} else if (this.state.allowImportAnimations) {
 			this.setState({
-				allowImportAnimations: false
+				allowImportAnimations: false,
+				allowSetTimezone: false
 			}, () => setFieldValue('importAnimations', false));
 		}
 
