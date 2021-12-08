@@ -46,40 +46,40 @@ const testLogin = () => {
 	describe('Login user', () => {
 		test('should log in a user using username', async () => {
 			await agent.post('/v5/login/')
-				.send({ username: testUser.user, password: testUser.password })
+				.send({ user: testUser.user, password: testUser.password })
 				.expect(templates.ok.status);
 		});
 
 		test('should log in a user using email', async () => {
 			await agent.post('/v5/login/')
-				.send({ username: userEmail, password: testUser.password })
+				.send({ user: userEmail, password: testUser.password })
 				.expect(templates.ok.status);
 		});
 
 		test('should fail with an incorrect username', async () => {
 			const res = await agent.post('/v5/login/')
-				.send({ username: 'randomUsername', password: testUser.password })
-				.expect(templates.userNotFound.status);
-			expect(res.body.code).toEqual(templates.userNotFound.code);
+				.send({ user: 'randomUsername', password: testUser.password })
+				.expect(templates.incorrectUsernameOrPassword.status);
+			expect(res.body.code).toEqual(templates.incorrectUsernameOrPassword.code);
 		});
 
 		test('should fail with an incorrect password', async () => {
 			const res = await agent.post('/v5/login/')
-				.send({ username: testUser.user, password: 'wrongPassword' })
+				.send({ user: testUser.user, password: 'wrongPassword' })
 				.expect(templates.incorrectUsernameOrPassword.status);
 			expect(res.body.code).toEqual(templates.incorrectUsernameOrPassword.code);
 		});
 
 		test('should fail with a locked account', async () => {
 			const res = await agent.post('/v5/login/')
-				.send({ username: lockedUser.user, password: lockedUser.password })
+				.send({ user: lockedUser.user, password: lockedUser.password })
 				.expect(templates.tooManyLoginAttempts.status);
 			expect(res.body.code).toEqual(templates.tooManyLoginAttempts.code);
 		});
 
 		test('should fail with wrong password and many failed login attempts', async () => {
 			const res = await agent.post('/v5/login/')
-				.send({ username: userWithFailedAttempts.user, password: 'wrongPassword' })
+				.send({ user: userWithFailedAttempts.user, password: 'wrongPassword' })
 				.expect(templates.incorrectUsernameOrPassword.status);
 			expect(res.body.code).toEqual(templates.incorrectUsernameOrPassword.code);
 			expect(res.body.message).toEqual('Incorrect username or password (Remaining attempts: 3)');
@@ -93,9 +93,14 @@ const testLogout = () => {
 			const res = await agent.post('/v5/logout/').expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
+		
+		test('should not log the user out if req.session has API key but its not valid', async () => {
+			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
+			await testSession.post('/v5/logout/').expect(templates.notLoggedIn.code);
+		});
 
 		test('should log the user out if they are logged in', async () => {
-			await testSession.post('/v5/login/').send({ username: testUser.user, password: testUser.password });
+			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
 			await testSession.post('/v5/logout/').expect(200);
 		});
 	});
@@ -109,7 +114,7 @@ const testGetUsername = () => {
 		});
 
 		test('should return the username if the user is logged in', async () => {
-			await testSession.post('/v5/login/').send({ username: testUser.user, password: testUser.password });
+			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
 			const res = await testSession.get('/v5/login/').expect(200);
 			expect(res.body).toEqual({ username: testUser.user });
 		});

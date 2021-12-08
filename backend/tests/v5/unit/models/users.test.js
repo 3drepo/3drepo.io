@@ -222,10 +222,12 @@ const testDeleteFromFavourites = () => {
 
 const testGetUserByEmail = () => {
 	describe('Get user by email', () => {
-		test('should user if list of teamspaces if user exists', async () => {
-			jest.spyOn(db, 'findOne').mockResolvedValue({ user: 'user1' });
-			const res = await User.getUserByEmail('user');
+		test('should return user if email exists', async () => {
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ user: 'user1' });
+			const res = await User.getUserByEmail('userEmail');
 			expect(res).toEqual({ user: 'user1' });
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][2]).toEqual({ 'customData.email': 'userEmail' });
 		});
 
 		test('should return error if user does not exists', async () => {
