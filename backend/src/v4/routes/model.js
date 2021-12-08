@@ -2152,7 +2152,7 @@ function uploadModel(req, res, next) {
 		const data = {
 			tag: req.body.tag,
 			desc: req.body.desc,
-			importAnimation: req.body.importAnimations !== false
+			importAnimations: req.body.importAnimations === true
 		};
 
 		const source = {
