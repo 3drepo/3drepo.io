@@ -16,13 +16,13 @@
  */
 const { authenticate, canLogIn, getUserByUsername } = require('../models/users');
 
-const Auth = {};
+const Users = {};
 
-Auth.login = async (username, password) => {
+Users.login = async (username, password) => {
 	await canLogIn(username);
 	return authenticate(username, password);
 };
 
-Auth.getUserByUsername = getUserByUsername;
+Users.getUserByUsername = getUserByUsername;
 
-module.exports = Auth;
+module.exports = Users;

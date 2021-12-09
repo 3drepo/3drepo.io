@@ -24,7 +24,7 @@ const { publish } = require('../services/eventsManager/eventsManager');
 const User = {};
 const COLL_NAME = 'system.users';
 
-const updateUser = async (username, action) => db.updateOne('admin', COLL_NAME, { user: username }, action);
+const updateUser = (username, action) => db.updateOne('admin', COLL_NAME, { user: username }, action);
 
 const recordSuccessfulAuthAttempt = async (user) => {
 	const { customData: { lastLoginAt } = {} } = await User.getUserByUsername(user, { 'customData.lastLoginAt': 1 });

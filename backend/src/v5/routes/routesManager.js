@@ -16,7 +16,7 @@
  */
 
 const RoutesManager = {};
-const AuthRoutes = require('./users');
+const UserRoutes  = require('./users');
 const ContainerGroupsRoutes = require('./teamspaces/projects/containers/groups');
 const ContainerRevisionRoutes = require('./teamspaces/projects/containers/revisions');
 const ContainerRoutes = require('./teamspaces/projects/containers/containers');
@@ -27,7 +27,7 @@ const TeamspaceRoutes = require('./teamspaces/teamspaces');
 
 RoutesManager.init = (app) => {
 	// Auth
-	app.use('/v5/', AuthRoutes);
+	app.use('/v5/', UserRoutes);
 
 	app.use('/v5/teamspaces/', TeamspaceRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects', ProjectRoutes);
