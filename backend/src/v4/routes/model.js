@@ -19,14 +19,11 @@
 
 const express = require("express");
 const router = express.Router({mergeParams: true});
-const multer = require("multer");
 const utils = require("../utils");
 const middlewares = require("../middlewares/middlewares");
 const ModelSetting = require("../models/modelSetting");
 const responseCodes = require("../response_codes");
 const C = require("../constants");
-const { modelStatusChanged } = require("../models/chatEvent");
-const { isValidTag } = require("../models/history");
 const ModelHelpers = require("../models/helper/model");
 const TextureHelpers = require("../models/helper/texture");
 const UnityAssets = require("../models/unityAssets");
@@ -2096,10 +2093,10 @@ function uploadModel(req, res, next) {
 	const { file } = req;
 	const revInfo = req.body;
 	const { teamspace, model } = req.params;
-	const owner = req.session.user ? req.session.user.username : undefined;	
+	const owner = req.session.user ? req.session.user.username : undefined;
 
 	ContainersV5.newRevision(teamspace, model, { ...revInfo, owner }, file).then(() => {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "uploaded"});		
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "uploaded"});
 	}).catch(err => {
 		err = err.resCode ? err.resCode : err;
 		responseCodes.respond(responsePlace, req, res, next, err, err);
