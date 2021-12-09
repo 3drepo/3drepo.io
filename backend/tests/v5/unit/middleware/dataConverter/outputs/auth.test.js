@@ -108,7 +108,7 @@ const testCreateSession = () => {
 		test('Should respond with error if the session cannot be regenerated', async () => {
 			await Sessions.createSession({ ...req, session: { regenerate: (callback) => { callback(1); } } }, {});
 			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value.code).toBe(templates.sessionCouldBeRegenerated.code);
+			expect(Responder.respond.mock.results[0].value.code).toBe(templates.unknown.code);
 		});
 	});
 };

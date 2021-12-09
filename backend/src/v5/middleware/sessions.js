@@ -11,7 +11,7 @@
  Sessions.createSession = (req, res) => {
      req.session.regenerate((err) => {
          if (err) {
-             respond(req, res, templates.sessionCouldBeRegenerated);
+             respond(req, res, templates.unknown);
          } else {
              const updatedUser = { ...req.loginData, socketId: req.headers['x-socket-id'], webSession: false };
  
