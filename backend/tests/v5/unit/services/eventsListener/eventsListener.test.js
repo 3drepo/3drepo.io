@@ -65,8 +65,8 @@ const testModelEventsListener = () => {
 
 const testAuthEventsListener = () => {
 	describe('Auth Events', () => {
-		test(`Should trigger UserLoggedIn if there is a ${events.USER_LOGGED_IN}`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.USER_LOGGED_IN);
+		test(`Should trigger UserLoggedIn if there is a ${events.SESSION_CREATED}`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.SESSION_CREATED);
 			const data = {
 				username: 'username1',
 				sessionID: '123',
@@ -74,7 +74,7 @@ const testAuthEventsListener = () => {
 				userAgent: 'user agent',
 				referer: 'www.google.com',
 			};
-			EventsManager.publish(events.USER_LOGGED_IN, data);
+			EventsManager.publish(events.SESSION_CREATED, data);
 
 			await waitOnEvent;
 			expect(LoginRecord.saveLoginRecord.mock.calls.length).toBe(1);

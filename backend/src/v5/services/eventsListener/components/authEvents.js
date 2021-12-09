@@ -28,7 +28,7 @@ const userLoggedIn = async ({ username, sessionID, ipAddress, userAgent, referer
 const AuthEventsListener = {};
 
 AuthEventsListener.init = () => {
-	subscribe(events.USER_LOGGED_IN, userLoggedIn);
+	subscribe(events.SESSION_CREATED, userLoggedIn);
 };
 
 module.exports = AuthEventsListener;

@@ -49,7 +49,7 @@ const testCreateSession = () => {
 		expect(Responder.respond.mock.calls.length).toBe(1);
 		expect(Responder.respond.mock.results[0].value.code).toBe(templates.ok.code);
 		expect(publishFn.mock.calls.length).toBe(1);
-		expect(publishFn.mock.calls[0][0]).toEqual(events.USER_LOGGED_IN);
+		expect(publishFn.mock.calls[0][0]).toEqual(events.SESSION_CREATED);
 		expect(publishFn.mock.calls[0][1]).toEqual({
 			username: request.body.user,
 			sessionID: request.sessionID,

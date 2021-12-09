@@ -30,7 +30,7 @@
                  req.session.cookie.maxAge = config.cookie.maxAge;
              }
  
-             publish(events.USER_LOGGED_IN, { username: req.body.user,
+             publish(events.SESSION_CREATED, { username: req.body.user,
                  sessionID: req.sessionID,
                  ipAddress: req.ips[0] || req.ip,
                  userAgent: req.headers['user-agent'],
