@@ -73,7 +73,7 @@ const validateRevisionUpload = async (req, res, next) => {
 	const schema = Yup.object().noUnknown().required()
 		.shape({
 			tag: YupHelper.types.strings.code.required(),
-			desc: YupHelper.types.strings.blob,
+			desc: YupHelper.types.strings.shortDescription,
 			importAnimations: Yup.bool().default(true),
 		});
 

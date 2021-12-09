@@ -34,6 +34,9 @@ const SrcAssets = require("../models/srcAssets");
 const JSONAssets = require("../models/jsonAssets");
 const Upload = require("../models/upload");
 const config = require("../config");
+const {v5Path} = require("../../interop");
+const { validateNewRevisionData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions`);
+const ContainersV5 = require(`${v5Path}/processors/teamspaces/projects/models/containers`);
 
 function convertProjectToParam(req, res, next) {
 	if (req.body.project) {
@@ -1714,7 +1717,7 @@ router.patch("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToM
  * ------WebKitFormBoundarySos0xligf1T8Sy8I-- *
  *
  */
-router.post("/:model/upload", middlewares.hasUploadAccessToModel, uploadModel);
+router.post("/:model/upload", middlewares.chechPermsAndFormatV5NewRevisionsData, validateNewRevisionData, uploadModel);
 
 /**
  * @api {get} /:teamspace/:model/download/latest Download model
@@ -2088,81 +2091,15 @@ async function uploadChunk(req, res, next) {
 	}
 }
 
-async function uploadFile(teamspace, model, username, req) {
-	if (!config.cn_queue) {
-		throw responseCodes.QUEUE_NO_CONFIG;
-	}
-
-	modelStatusChanged(null, teamspace, model, { status: "uploading", username });
-	// upload model with tag
-
-	const uploadedFile = await new Promise((resolve, reject) => {
-		const upload = multer({
-			dest: config.cn_queue.upload_dir,
-			fileFilter: async function(fileReq, file, cb) {
-				const size = parseInt(fileReq.headers[C.CONTENT_LENGTH_HEADER]);
-
-				try {
-					await Upload.checkFileFormat(file.originalname);
-					await middlewares.checkSufficientSpace(teamspace, size);
-					cb(null, true);
-				} catch (err) {
-					cb(err);
-				}
-			}
-		});
-
-		upload.single("file")(req, null, function (err) {
-			if (err) {
-				return reject(err);
-
-			} else if(!req.file.size) {
-				return reject(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
-
-			} else {
-				modelStatusChanged(null, teamspace, model, { status: "uploaded" });
-				return resolve(req.file);
-			}
-		});
-	});
-
-	// req.body.tag wont be defined after the file has been uploaded
-	await isValidTag(teamspace, model, req.body.tag);
-
-	return uploadedFile;
-}
-
 function uploadModel(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
-	const { account, model } = req.params;
-	const username = req.session.user.username;
+	const { file } = req;
+	const revInfo = req.body;
+	const { teamspace, model } = req.params;
+	const owner = req.session.user ? req.session.user.username : undefined;	
 
-	let modelSetting;
-
-	// check model exists before upload
-	return ModelSetting.findModelSettingById(account, model).then(_modelSetting => {
-		modelSetting = _modelSetting;
-
-		if (!modelSetting) {
-			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
-		} else {
-			return uploadFile(account, model, username, req);
-		}
-	}).then(file => {
-		const data = {
-			tag: req.body.tag,
-			desc: req.body.desc,
-			importAnimations: req.body.importAnimations === true
-		};
-
-		const source = {
-			type: "upload",
-			file: file
-		};
-
-		return ModelHelpers.importModel(account, model, username, modelSetting, source, data).then(() => {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "uploaded"});
-		});
+	ContainersV5.newRevision(teamspace, model, { ...revInfo, owner }, file).then(() => {
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "uploaded"});		
 	}).catch(err => {
 		err = err.resCode ? err.resCode : err;
 		responseCodes.respond(responsePlace, req, res, next, err, err);

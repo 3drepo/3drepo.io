@@ -160,6 +160,11 @@
 		checkPermissions([C.PERM_TEAMSPACE_ADMIN])(req, res, next);
 	}
 
+	function chechPermsAndFormatV5NewRevisionsData(req, res, next) {
+		req.params.teamspace = req.params.account;
+		checkPermissions([C.PERM_UPLOAD_FILES])(req, res, next);
+	}
+
 	const middlewares = {
 
 		project: require("./project"),
@@ -181,7 +186,7 @@
 		hasDeleteAccessToFedModel: checkPermissions([C.PERM_DELETE_FEDERATION]),
 		hasEditPermissionsAccessToModel: checkPermissions([C.PERM_MANAGE_MODEL_PERMISSION]),
 		hasEditPermissionsAccessToMulitpleModels: checkMultiplePermissions([C.PERM_MANAGE_MODEL_PERMISSION]),
-
+		chechPermsAndFormatV5NewRevisionsData,
 		isAccountAdmin: checkPermissions([C.PERM_TEAMSPACE_ADMIN]),
 		isAccountAdminOrSameUser,
 		hasCollaboratorQuota: [loggedIn, hasCollaboratorQuota],
