@@ -16,13 +16,14 @@
  */
 
 const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('../../../../middleware/permissions/permissions');
-const { validateNewRevisionData, validateUpdateRevisionData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');
 const { serialiseRevisionArray } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
 const { templates } = require('../../../../utils/responseCodes');
+const { validateNewRevisionData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
+const { validateUpdateRevisionData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 
 const getRevisions = async (req, res, next) => {
 	const { teamspace, container } = req.params;

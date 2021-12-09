@@ -69,12 +69,23 @@ const fileFilter = async (req, file, cb) => {
 	}
 };
 
-const validateRevisionUpload = async (req, res, next) => {
+const validateRevisionUpload = (isFederation) => async (req, res, next) => {
+	const schemaBase = {
+		tag: YupHelper.types.strings.code.required(),
+		desc: YupHelper.types.strings.shortDescription,
+	};
+
+	if (isFederation) {
+		schemaBase.subModels = Yup.array().of(YupHelper.types.id).min(1).required();
+	} else {
+		schemaBase.importAnimations = Yup.bool().default(true);
+	}
+
 	const schema = Yup.object().noUnknown().required()
 		.shape({
 			tag: YupHelper.types.strings.code.required(),
 			desc: YupHelper.types.strings.blob,
-			importAnimations: Yup.bool().default(true),
+
 		});
 
 	try {
@@ -86,6 +97,7 @@ const validateRevisionUpload = async (req, res, next) => {
 	}
 };
 
-Revisions.validateNewRevisionData = validateMany([singleFileUpload('file', fileFilter), validateRevisionUpload]);
+Revisions.validateNewRevisionData = (isFederation) => (isFederation ? validateRevisionUpload(isFederation)
+	: validateMany([singleFileUpload('file', fileFilter), validateRevisionUpload(isFederation)]));
 
 module.exports = Revisions;
