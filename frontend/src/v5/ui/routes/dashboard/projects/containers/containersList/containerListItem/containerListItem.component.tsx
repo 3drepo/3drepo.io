@@ -125,7 +125,7 @@ export const ContainerListItem = ({
 			</DashboardListItemIcon>
 			<DashboardListItemIcon selected={isSelected}>
 				<EllipsisButtonWithMenu
-					list={getContainerMenuItems(container._id)}
+					list={getContainerMenuItems(container._id, container.name)}
 				/>
 			</DashboardListItemIcon>
 		</DashboardListItemRow>

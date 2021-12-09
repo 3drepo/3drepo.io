@@ -19,9 +19,12 @@ import { useParams } from 'react-router';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { formatMessage } from '@/v5/services/intl';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
+import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
+import { useDispatch } from 'react-redux';
 
-export const getContainerMenuItems = (id: IContainer['_id']) => {
+export const getContainerMenuItems = (id: IContainer['_id'], name: IContainer['name']) => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const dispatch = useDispatch();
 
 	return [
 		{
@@ -69,7 +72,11 @@ export const getContainerMenuItems = (id: IContainer['_id']) => {
 			key: 9,
 			title: formatMessage({ id: 'containers.ellipsisMenu.delete', defaultMessage: 'Delete' }),
 			onClick: () => {
-				ContainersActionsDispatchers.deleteContainer(teamspace, project, id);
+				dispatch(DialogsActions.open('delete', {
+					title: formatMessage({ id: 'deleteModal.title', defaultMessage: `Delete ${name}?` }),
+					onClickConfirm: () => ContainersActionsDispatchers.deleteContainer(teamspace, project, id),
+					message: 'By deleting this Container your data will be lost permanently and will not be recoverable.',
+				}));
 			},
 		},
 	];
