@@ -111,6 +111,7 @@ export const deleteContainerSuccess = (state = INITIAL_STATE, {
 }: DeleteContainerSuccessAction) => ({
 	...state,
 	containers: {
+		...state.containers,
 		[projectId]: state.containers[projectId].filter((container) => containerId !== container._id),
 	},
 });
