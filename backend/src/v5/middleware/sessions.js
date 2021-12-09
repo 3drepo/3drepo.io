@@ -2,6 +2,7 @@
  const { events } = require('../services/eventsManager/eventsManager.constants');
  const { getURLDomain } = require('../utils/helper/strings');
  const { isFromWebBrowser } = require('../utils/helper/userAgent');
+ const { logger } = require('../utils/logger');
  const { publish } = require('../services/eventsManager/eventsManager');
  const { respond } = require('../utils/responder');
  const { templates } = require('../utils/responseCodes');
@@ -11,7 +12,8 @@
  Sessions.createSession = (req, res) => {
      req.session.regenerate((err) => {
          if (err) {
-             respond(req, res, templates.unknown);
+             logger.logError(`Failed to regenerate session: ${err.message}`);
+             respond(req, res, err);
          } else {
              const updatedUser = { ...req.loginData, socketId: req.headers['x-socket-id'], webSession: false };
  
