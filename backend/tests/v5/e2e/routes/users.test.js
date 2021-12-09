@@ -66,6 +66,23 @@ const testLogin = () => {
 			expect(res.body.code).toEqual(templates.incorrectUsernameOrPassword.code);
 		});
 
+		test('should fail with an invalid username', async () => {
+			const res = await agent.post('/v5/login/')
+				.send({ user: 12345, password: testUser.password })
+				.expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail with a user that has already logged in', async () => {
+			await agent.post('/v5/login/')
+				.send({ user: testUser.user, password: testUser.password })
+				.expect(templates.ok.status);
+			const res = await agent.post('/v5/login/')
+				.send({ user: testUser.user, password: testUser.password })
+				.expect(templates.alreadyLoggedIn.status);
+			expect(res.body.code).toEqual(templates.alreadyLoggedIn.code);
+		});
+
 		test('should fail with an incorrect password', async () => {
 			const res = await agent.post('/v5/login/')
 				.send({ user: testUser.user, password: 'wrongPassword' })
@@ -103,7 +120,7 @@ const testLogout = () => {
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
-		test('should fail if the user is not logged in with API key', async () => {
+		test('should fail if the user has a session via an API key', async () => {
 			const res = await agent.post(`/v5/logout?${testUser.apiKey}`).expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
@@ -122,7 +139,7 @@ const testGetUsername = () => {
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
-		test('should fail if the user is not logged in with API key', async () => {
+		test('should fail if the user has a session via an API key', async () => {
 			const res = await agent.get(`/v5/login?${testUser.apiKey}`).expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});

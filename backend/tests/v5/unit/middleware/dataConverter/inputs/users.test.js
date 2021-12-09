@@ -24,22 +24,17 @@ const { cloneDeep } = require(`${src}/utils/helper/objects`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 jest.mock('../../../../../../src/v5/models/users');
-const Users = require(`${src}/models/users`);
-const Auth = require(`${src}/middleware/dataConverter/inputs/auth`);
+const UsersModel = require(`${src}/models/users`);
+const Users = require(`${src}/middleware/dataConverter/inputs/users`);
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
-const existingUsername = 'existingUser';
-Users.getUserByUsername.mockImplementation((username) => {
-	if (username !== existingUsername) {
-		throw templates.userNotFound;
-	}
-});
+const nonExistingUsername = 'nonExistingUser';
+const existingUsername = 'existingUsername';
 
-const existingEmail = 'existing@email.com';
-Users.getUserByEmail.mockImplementation((email) => {
-	if (email !== existingEmail) {
+UsersModel.getUserByQuery.mockImplementation((query) => {
+	if(query['$or'][0].user === nonExistingUsername){
 		throw templates.userNotFound;
 	}
 
@@ -52,17 +47,17 @@ const testValidateLoginData = () => {
 		[{ body: { user: 1, password: '123' } }, false, 'with invalid username', templates.invalidArguments],
 		[{ body: { user: '123' } }, false, 'with no username', templates.invalidArguments],
 		[{ body: { user: existingUsername, password: 123 } }, false, 'with invalid password', templates.invalidArguments],
-		[{ body: { user: 'nonExistingUsername', password: 'validPassword' } }, false, 'with user that does not exist',
+		[{ body: { user: nonExistingUsername, password: 'validPassword' } }, false, 'with user that does not exist',
 			templates.incorrectUsernameOrPassword],
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
 		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
 		[{ body: { user: existingUsername, password: 'validPassword' } }, true, 'with user that exists'],
-		[{ body: { user: existingEmail, password: 'validPassword' } }, true, 'with user that exists using email'],
+		[{ body: { user: 'existing@email.com', password: 'validPassword' } }, true, 'with user that exists using email'],
 	])('Check if req arguments for loggin in are valid', (data, shouldPass, desc, expectedError) => {
 		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
 			const mockCB = jest.fn();
 			const req = { ...cloneDeep(data) };
-			await Auth.validateLoginData(req, {}, mockCB);
+			await Users.validateLoginData(req, {}, mockCB);
 			if (shouldPass) {
 				expect(mockCB.mock.calls.length).toBe(1);
 				expect(req.body.user).toEqual(existingUsername);
@@ -75,6 +70,6 @@ const testValidateLoginData = () => {
 	});
 };
 
-describe('middleware/dataConverter/inputs/auth', () => {
+describe('middleware/dataConverter/inputs/users', () => {
 	testValidateLoginData();
 });

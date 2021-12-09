@@ -21,7 +21,7 @@ const { Router } = require('express');
 const Users = require('../processors/users');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
-const { validateLoginData } = require('../middleware/dataConverter/inputs/auth');
+const { validateLoginData } = require('../middleware/dataConverter/inputs/users');
 
 const login = (req, res, next) => {
 	const { user, password } = req.body;

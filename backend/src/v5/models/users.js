@@ -24,6 +24,7 @@ const { publish } = require('../services/eventsManager/eventsManager');
 const User = {};
 const COLL_NAME = 'system.users';
 
+const userQuery = (query, projection, sort) => db.findOne('admin', COLL_NAME, query, projection, sort);
 const updateUser = (username, action) => db.updateOne('admin', COLL_NAME, { user: username }, action);
 
 const recordSuccessfulAuthAttempt = async (user) => {
@@ -100,17 +101,15 @@ User.authenticate = async (user, password) => {
 	return recordSuccessfulAuthAttempt(user);
 };
 
-User.getUserByQuery = async (query, projection, sort) => {
-	return await db.findOne('admin', COLL_NAME, query, projection, sort);
-};
-
-User.getUserByUsername = async (user, projection) => {
-	const userDoc = await User.getUserByQuery({ user }, projection);
+User.getUserByQuery = async (query, projection) => {
+	const userDoc = await userQuery(query, projection);
 	if (!userDoc) {
 		throw templates.userNotFound;
 	}
 	return userDoc;
 };
+
+User.getUserByUsername = async (user, projection) => await User.getUserByQuery({ user }, projection);
 
 User.getFavourites = async (user, teamspace) => {
 	const { customData } = await User.getUserByUsername(user, { 'customData.starredModels': 1 });

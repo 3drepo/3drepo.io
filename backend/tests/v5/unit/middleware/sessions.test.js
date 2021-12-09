@@ -114,7 +114,7 @@
      });
  };
  
- describe('middleware/dataConverter/outputs/auth', () => {
+ describe('middleware/sessions', () => {
      testCreateSession();
      testDestroySession();
  });

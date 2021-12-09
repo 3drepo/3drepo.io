@@ -20,9 +20,9 @@ const { getUserByQuery } = require('../../../models/users');
 const Yup = require('yup');
 const { respond } = require('../../../utils/responder');
 
-const Auth = {};
+const Users = {};
 
-Auth.validateLoginData = async (req, res, next) => {
+Users.validateLoginData = async (req, res, next) => {
 	const schema = Yup.object().shape({
 		user: Yup.string().required(),
 		password: Yup.string().required(),
@@ -46,4 +46,4 @@ Auth.validateLoginData = async (req, res, next) => {
 	}
 };
 
-module.exports = Auth;
+module.exports = Users;
