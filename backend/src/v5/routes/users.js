@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { destroySession, createSession } = require('../middleware/sessions');
+const { createSession, destroySession } = require('../middleware/sessions');
 const { isLoggedIn, notLoggedIn } = require('../middleware/auth');
 const { Router } = require('express');
 const Users = require('../processors/users');

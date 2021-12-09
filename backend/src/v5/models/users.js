@@ -109,7 +109,7 @@ User.getUserByQuery = async (query, projection) => {
 	return userDoc;
 };
 
-User.getUserByUsername = async (user, projection) => await User.getUserByQuery({ user }, projection);
+User.getUserByUsername = async (user, projection) => User.getUserByQuery({ user }, projection);
 
 User.getFavourites = async (user, teamspace) => {
 	const { customData } = await User.getUserByUsername(user, { 'customData.starredModels': 1 });

@@ -74,10 +74,10 @@ const testLogin = () => {
 		});
 
 		test('should fail with a user that has already logged in', async () => {
-			await agent.post('/v5/login/')
+			await testSession.post('/v5/login/')
 				.send({ user: testUser.user, password: testUser.password })
 				.expect(templates.ok.status);
-			const res = await agent.post('/v5/login/')
+			const res = await testSession.post('/v5/login/')
 				.send({ user: testUser.user, password: testUser.password })
 				.expect(templates.alreadyLoggedIn.status);
 			expect(res.body.code).toEqual(templates.alreadyLoggedIn.code);

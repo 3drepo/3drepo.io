@@ -64,6 +64,16 @@ const testNotLoggedIn = () => {
 			expect(mockCB.mock.calls.length).toBe(1);
 		});
 
+		test('next() should be called if there is no session in the req', () => {
+			const mockCB = jest.fn(() => {});
+			AuthMiddlewares.notLoggedIn(
+				{ header: { referer: 'http://xyz.com' } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(1);
+		});
+
 		test('next() should be called if the session is invalid and there is an API key', () => {
 			const mockCB = jest.fn(() => {});
 			AuthMiddlewares.notLoggedIn(

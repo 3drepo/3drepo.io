@@ -34,7 +34,7 @@ const nonExistingUsername = 'nonExistingUser';
 const existingUsername = 'existingUsername';
 
 UsersModel.getUserByQuery.mockImplementation((query) => {
-	if(query['$or'][0].user === nonExistingUsername){
+	if (query.$or[0].user === nonExistingUsername) {
 		throw templates.userNotFound;
 	}
 

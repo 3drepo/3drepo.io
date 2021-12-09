@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { templates } = require('../../../../src/v5/utils/responseCodes');
 const { src } = require('../../helper/path');
 
 const Users = require(`${src}/processors/users`);
@@ -30,6 +31,11 @@ const testLogin = () => {
 		test('should login with username', async () => {
 			const res = await Users.login('user1');
 			expect(res).toEqual('user1');
+		});
+
+		test('should fail if canLogIn fails', async () => {
+			UsersModel.canLogIn.mockImplementationOnce(() => { throw templates.userNotFound; });
+			await expect(Users.login('user1')).rejects.toEqual(templates.userNotFound);
 		});
 	});
 };
