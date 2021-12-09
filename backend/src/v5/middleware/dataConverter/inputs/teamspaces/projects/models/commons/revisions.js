@@ -71,7 +71,7 @@ const fileFilter = async (req, file, cb) => {
 
 const validateRevisionUpload = (isFederation) => async (req, res, next) => {
 	const schemaBase = {
-		tag: YupHelper.types.strings.code.required(),
+		tag: YupHelper.types.strings.code,
 		desc: YupHelper.types.strings.shortDescription,
 	};
 
@@ -79,14 +79,11 @@ const validateRevisionUpload = (isFederation) => async (req, res, next) => {
 		schemaBase.subModels = Yup.array().of(YupHelper.types.id).min(1).required();
 	} else {
 		schemaBase.importAnimations = Yup.bool().default(true);
+		schemaBase.tag = schemaBase.tag.required();
 	}
 
 	const schema = Yup.object().noUnknown().required()
-		.shape({
-			tag: YupHelper.types.strings.code.required(),
-			desc: YupHelper.types.strings.blob,
-
-		});
+		.shape(schemaBase);
 
 	try {
 		req.body = await schema.validate(req.body);
