@@ -24,7 +24,6 @@ const { publish } = require('../services/eventsManager/eventsManager');
 const User = {};
 const COLL_NAME = 'system.users';
 
-const userQuery = (query, projection, sort) => db.findOne('admin', COLL_NAME, query, projection, sort);
 const updateUser = async (username, action) => db.updateOne('admin', COLL_NAME, { user: username }, action);
 
 const recordSuccessfulAuthAttempt = async (user) => {
@@ -101,16 +100,12 @@ User.authenticate = async (user, password) => {
 	return recordSuccessfulAuthAttempt(user);
 };
 
-User.getUserByUsername = async (user, projection) => {
-	const userDoc = await userQuery({ user }, projection);
-	if (!userDoc) {
-		throw templates.userNotFound;
-	}
-	return userDoc;
+User.getUserByQuery = async (query, projection, sort) => {
+	return await db.findOne('admin', COLL_NAME, query, projection, sort);
 };
 
-User.getUserByEmail = async (email, projection) => {
-	const userDoc = await userQuery({ 'customData.email': email }, projection);
+User.getUserByUsername = async (user, projection) => {
+	const userDoc = await User.getUserByQuery({ user }, projection);
 	if (!userDoc) {
 		throw templates.userNotFound;
 	}

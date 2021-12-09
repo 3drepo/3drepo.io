@@ -32,7 +32,7 @@ const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 jest.mock('../../../../../../src/v5/services/eventsManager/eventsManager.constants');
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 
-const Auth = require(`${src}/middleware/dataConverter/outputs/auth`);
+const Sessions = require(`${src}/middleware/sessions`);
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
@@ -44,7 +44,7 @@ UserAgentHelper.isFromWebBrowser.mockImplementation((userAgent) => userAgent ===
 StringsHelper.getURLDomain.mockImplementation(() => urlDomain);
 const publishFn = EventsManager.publish.mockImplementation(() => { });
 
-const testRegenerateAuthSession = () => {
+const testCreateSession = () => {
 	const checkResults = (request) => {
 		expect(Responder.respond.mock.calls.length).toBe(1);
 		expect(Responder.respond.mock.results[0].value.code).toBe(templates.ok.code);
@@ -71,49 +71,49 @@ const testRegenerateAuthSession = () => {
 	describe('Regenerate auth session', () => {
 		test('Should regenerate session', async () => {
 			config.cookie.maxAge = 100;
-			await Auth.regenerateAuthSession(req, {});
+			await Sessions.createSession(req, {});
 			checkResults(req);
 		});
 
 		test('Should regenerate session with request with referer', async () => {
 			const reqWithReferer = { ...req, headers: { ...req.headers, referer: 'http://abc.com/' } };
-			await Auth.regenerateAuthSession(reqWithReferer, {});
+			await Sessions.createSession(reqWithReferer, {});
 			checkResults(reqWithReferer);
 		});
 
 		test('Should regenerate session with request with user agent', async () => {
 			const reqWithUserAgent = { ...req, headers: { ...req.headers, 'user-agent': 'some user agent' } };
-			await Auth.regenerateAuthSession(reqWithUserAgent, {});
+			await Sessions.createSession(reqWithUserAgent, {});
 			checkResults(reqWithUserAgent);
 		});
 
 		test('Should regenerate session with request with web user agent', async () => {
 			const reqWithWebUserAgent = { ...req, headers: { ...req.headers, 'user-agent': webBrowserUserAgent } };
-			await Auth.regenerateAuthSession(reqWithWebUserAgent, {});
+			await Sessions.createSession(reqWithWebUserAgent, {});
 			checkResults(reqWithWebUserAgent);
 		});
 
 		test('Should regenerate session without cookie.maxAge', async () => {
 			config.cookie.maxAge = undefined;
-			await Auth.regenerateAuthSession(req, {});
+			await Sessions.createSession(req, {});
 			checkResults(req);
 		});
 
 		test('Should regenerate session wit request with empty ips array', async () => {
 			const emptyIpsRequest = { ...req, ips: [] };
-			await Auth.regenerateAuthSession(emptyIpsRequest, {});
+			await Sessions.createSession(emptyIpsRequest, {});
 			checkResults(emptyIpsRequest);
 		});
 
 		test('Should respond with error if the session cannot be regenerated', async () => {
-			await Auth.regenerateAuthSession({ ...req, session: { regenerate: (callback) => { callback(1); } } }, {});
+			await Sessions.createSession({ ...req, session: { regenerate: (callback) => { callback(1); } } }, {});
 			expect(Responder.respond.mock.calls.length).toBe(1);
 			expect(Responder.respond.mock.results[0].value.code).toBe(templates.sessionCouldBeRegenerated.code);
 		});
 	});
 };
 
-const testEndSession = () => {
+const testDestroySession = () => {
 	const req = {
 		session: { destroy: (callback) => { callback(); }, user: { username: 'user1' } },
 		body: { user: 'user1' },
@@ -124,7 +124,7 @@ const testEndSession = () => {
 
 	describe('Destroy session', () => {
 		test('Should destroy session', async () => {
-			await Auth.endSession(req, res);
+			await Sessions.destroySession(req, res);
 			expect(Responder.respond.mock.calls.length).toBe(1);
 			expect(Responder.respond.mock.results[0].value.code).toBe(templates.ok.code);
 		});
@@ -132,6 +132,6 @@ const testEndSession = () => {
 };
 
 describe('middleware/dataConverter/outputs/auth', () => {
-	testRegenerateAuthSession();
-	testEndSession();
+	testCreateSession();
+	testDestroySession();
 });

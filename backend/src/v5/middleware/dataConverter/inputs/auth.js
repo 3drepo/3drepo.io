@@ -16,9 +16,8 @@
  */
 
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
-const { getUserByEmail, getUserByUsername } = require('../../../models/users');
+const { getUserByQuery } = require('../../../models/users');
 const Yup = require('yup');
-const { hasEmailFormat } = require('../../../utils/helper/strings');
 const { respond } = require('../../../utils/responder');
 
 const Auth = {};
@@ -34,12 +33,8 @@ Auth.validateLoginData = async (req, res, next) => {
 		await schema.validate(req.body);
 
 		const usernameOrEmail = req.body.user;
-		if (hasEmailFormat(usernameOrEmail)) {
-			const { user } = await getUserByEmail(usernameOrEmail);
-			req.body.user = user;
-		} else {
-			await getUserByUsername(usernameOrEmail);
-		}
+		const { user } = await getUserByQuery({$or: [ { user: usernameOrEmail }, { "customData.email": usernameOrEmail} ]});
+	    req.body.user = user;
 
 		next();
 	} catch (err) {
