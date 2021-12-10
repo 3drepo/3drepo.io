@@ -149,6 +149,13 @@ const testModelsExistInProject = () => {
 			const res = await Project.modelsExistInProject('someTS', 'someProject', ['a', 'b', 'd']);
 			expect(res).toBe(false);
 		});
+
+		test('should return false if the array is empty', async () => {
+			const project = { models: ['a', 'b', 'c'] };
+			jest.spyOn(db, 'findOne').mockResolvedValue(project);
+			const res = await Project.modelsExistInProject('someTS', 'someProject', []);
+			expect(res).toBe(false);
+		});
 	});
 };
 
