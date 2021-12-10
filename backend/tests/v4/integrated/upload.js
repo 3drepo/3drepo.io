@@ -23,6 +23,7 @@ const app = require("../../../src/v4/services/api.js").createApp();
 const logger = require("../../../src/v4/logger.js");
 const C = require("../../../src/v4/constants");
 const responseCodes = require("../../../src/v4/response_codes.js");
+const responseCodesV5 = require("../../../src/v5/utils/responseCodes");
 const helpers = require("../helpers/signUp");
 const moment = require("moment");
 const async = require("async");
@@ -91,7 +92,7 @@ describe("Uploading a model", function () {
 				.field("tag", "no_quota")
 				.attach("file", __dirname + "/../statics/3dmodels/8000cubes.obj")
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT_PAY.value);
+					expect(res.body.code).to.equal(responseCodesV5.quotaLimitExceeded.code);
 					done(err);
 				});
 		});
@@ -118,7 +119,7 @@ describe("Uploading a model", function () {
 				.field("tag", "no_space")
 				.attach("file", __dirname + "/../statics/3dmodels/8000cubes.obj")
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT_PAY.value);
+					expect(res.body.code).to.equal(responseCodesV5.quotaLimitExceeded.code);
 					done(err);
 				});
 
@@ -181,7 +182,7 @@ describe("Uploading a model", function () {
 			agent.post(`/${username}/${modelId}/upload`)
 				.attach("file", __dirname + "/../statics/3dmodels/8000cubes.obj")
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
+					expect(res.body.code).to.equal(responseCodesV5.invalidArguments.code);
 					done(err);
 				});
 		});
@@ -191,7 +192,7 @@ describe("Uploading a model", function () {
 				.field("tag", "bad tag!")
 				.attach("file", __dirname + "/../statics/3dmodels/8000cubes.obj")
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_TAG_NAME.value);
+					expect(res.body.code).to.equal(responseCodesV5.invalidArguments.code);
 					done(err);
 				});
 		});
@@ -202,7 +203,7 @@ describe("Uploading a model", function () {
 				.field("tag", "empty_file")
 				.attach("file", __dirname + "/../statics/3dmodels/empty.ifc")
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
+					expect(res.body.code).to.equal(responseCodesV5.unsupportedFileFormat.code);
 					done(err);
 				});
 
@@ -214,7 +215,7 @@ describe("Uploading a model", function () {
 				.field("tag", "unsupported_ext")
 				.attach("file", __dirname + "/../statics/3dmodels/toy.abc")
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.FILE_FORMAT_NOT_SUPPORTED.value);
+					expect(res.body.code).to.equal(responseCodesV5.unsupportedFileFormat.code);
 					done(err);
 				});
 
@@ -226,7 +227,7 @@ describe("Uploading a model", function () {
 				.field("tag", "no_ext")
 				.attach("file", __dirname + "/../statics/3dmodels/toy")
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.FILE_NO_EXT.value);
+					expect(res.body.code).to.equal(responseCodesV5.unsupportedFileFormat.code);
 					done(err);
 				});
 
@@ -238,7 +239,7 @@ describe("Uploading a model", function () {
 				.field("tag", "too_big")
 				.attach("file", __dirname + "/../statics/3dmodels/toy.ifc")
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.SIZE_LIMIT.value);
+					expect(res.body.code).to.equal(responseCodesV5.maxSizeExceeded.code);
 					done(err);
 				});
 
