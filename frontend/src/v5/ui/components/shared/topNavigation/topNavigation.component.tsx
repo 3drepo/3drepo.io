@@ -17,9 +17,8 @@
 
 import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { Trans } from '@lingui/react';
-
 import { discardSlash, discardUrlComponent } from '@/v5/services/routing/routing';
+import { FormattedMessage } from 'react-intl';
 import { Container, Link } from './topNavigaton.styles';
 
 export const TopNavigation = (): JSX.Element => {
@@ -28,9 +27,9 @@ export const TopNavigation = (): JSX.Element => {
 
 	return (
 		<Container>
-			<Link to={`${url}/t/federations`}><Trans id="Federations" /></Link>
-			<Link to={`${url}/t/containers`}><Trans id="Containers" /></Link>
-			<Link to={`${discardUrlComponent(url, 'settings')}/t/settings`}><Trans id="Project settings" /></Link>
+			<Link to={`${url}/t/federations`}><FormattedMessage id="Federations" defaultMessage="Federations" /></Link>
+			<Link to={`${url}/t/containers`}><FormattedMessage id="Containers" defaultMessage="Containers" /></Link>
+			<Link to={`${discardUrlComponent(url, 'settings')}/t/settings`}><FormattedMessage id="Settings" defaultMessage="Settings" /></Link>
 		</Container>
 	);
 };

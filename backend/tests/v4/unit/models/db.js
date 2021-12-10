@@ -32,48 +32,48 @@ const model = "af1ccf84-71c3-490e-9e5a-cb80e30ee519";
 const gridFsFilename = "cd561c86-de1a-482e-8f5d-89cfc49562e8LAB-BBD-00-ZZ-M3-A-0005_IFC2x3_FM_Handover_ifc";
 
 const goldenColls = [
-	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.history.files', options: {} },
-	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.3drepo.chunks', options: {} },
-	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.3drepo', options: {} },
-	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.json_mpc.chunks', options: {} },
-	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.json_mpc.chunks', options: {} },
-	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.groups', options: {} },
-	{ name: 'ca2cd8d0-c7e9-4362-baaf-e089bcb7b803.scene', options: {} },
-	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.history.files', options: {} },
-	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.issues', options: {} },
-	{ name: 'settings', options: {} },
-	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.json_mpc.ref', options: {} },
-	{ name: 'ca2cd8d0-c7e9-4362-baaf-e089bcb7b803.stash.json_mpc.files', options: {} },
-	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.unity3d.ref', options: {} },
-	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.unity3d.chunks', options: {} },
-	{ name: 'jobs', options: {} },
-	{ name: 'ca2cd8d0-c7e9-4362-baaf-e089bcb7b803.issues', options: {} },
-	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.json_mpc.files', options: {} },
-	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.unity3d.chunks', options: {} },
-	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.3drepo.files', options: {} },
-	{ name: 'ca2cd8d0-c7e9-4362-baaf-e089bcb7b803.stash.json_mpc.ref', options: {} },
-	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.history.ref', options: {} },
-	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.history', options: {} },
-	{ name: 'teamspace', options: {} },
-	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.json_mpc.files', options: {} },
-	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.history', options: {} },
-	{ name: 'ca2cd8d0-c7e9-4362-baaf-e089bcb7b803.history', options: {} },
-	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.json_mpc.ref', options: {} },
-	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.history.chunks', options: {} },
-	{ name: 'ca2cd8d0-c7e9-4362-baaf-e089bcb7b803.stash.json_mpc.chunks', options: {} },
 	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.groups', options: {} },
+	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.history', options: {} },
 	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.history.chunks', options: {} },
-	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.unity3d', options: {} },
+	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.history.files', options: {} },
+	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.history.ref', options: {} },
 	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.issues', options: {} },
 	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.scene', options: {} },
-	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.history.ref', options: {} },
-	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.unity3d.ref', options: {} },
-	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.3drepo', options: {} },
+	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.3drepo', options: {} },
+	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.json_mpc.chunks', options: {} },
+	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.json_mpc.files', options: {} },
+	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.json_mpc.ref', options: {} },
 	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.unity3d', options: {} },
+	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.unity3d.chunks', options: {} },
+	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.unity3d.files', options: {} },
+	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.unity3d.ref', options: {} },
+	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.groups', options: {} },
+	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.history', options: {} },
+	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.history.chunks', options: {} },
+	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.history.files', options: {} },
+	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.history.ref', options: {} },
+	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.issues', options: {} },
 	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.scene', options: {} },
-	{ name: 'projects', options: {} },
+	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.3drepo', options: {} },
+	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.3drepo.chunks', options: {} },
+	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.3drepo.files', options: {} },
+	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.json_mpc.chunks', options: {} },
+	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.json_mpc.files', options: {} },
+	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.json_mpc.ref', options: {} },
+	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.unity3d', options: {} },
+	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.unity3d.chunks', options: {} },
 	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.unity3d.files', options: {} },
-	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.unity3d.files', options: {} }
+	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.unity3d.ref', options: {} },
+	{ name: 'ca2cd8d0-c7e9-4362-baaf-e089bcb7b803.history', options: {} },
+	{ name: 'ca2cd8d0-c7e9-4362-baaf-e089bcb7b803.issues', options: {} },
+	{ name: 'ca2cd8d0-c7e9-4362-baaf-e089bcb7b803.scene', options: {} },
+	{ name: 'ca2cd8d0-c7e9-4362-baaf-e089bcb7b803.stash.json_mpc.chunks', options: {} },
+	{ name: 'ca2cd8d0-c7e9-4362-baaf-e089bcb7b803.stash.json_mpc.files', options: {} },
+	{ name: 'ca2cd8d0-c7e9-4362-baaf-e089bcb7b803.stash.json_mpc.ref', options: {} },
+	{ name: 'jobs', options: {} },
+	{ name: 'projects', options: {} },
+	{ name: 'settings', options: {} },
+	{ name: 'teamspace', options: {} },
 ];
 
 const goldenJobs = [
@@ -172,21 +172,18 @@ describe("Check DB handler", function() {
 			expect(stats.ok).to.equal(1);
 		});
 
-		it("get collection stats with incorrect username should fail", async function() {
-			try {
-				await db.getCollectionStats("notexist", "jobs");
-				throw {}; // should've failed at previous line
-			} catch (err) {
-				expect(err.name).to.equal("MongoError");
-				expect(err.message).to.equal("Database [notexist] not found.");
-			}
+		it("get collection stats with incorrect username should be size 0", async function() {
+			const stats = await db.getCollectionStats("notexist", "jobs");
+			expect(stats).to.exist;
+			expect(stats.size).to.equal(0);
 		});
 	});
 
 	describe("listCollections", function () {
 		it("list collection with valid username should succeed", async function() {
 			const colls = await db.listCollections(account);
-			expect(colls).to.deep.equal(goldenColls);
+			const listOrder = (a, b) => a.name < b.name ? -1 : 1;
+			expect(colls.sort(listOrder)).to.deep.equal(goldenColls.sort(listOrder));
 		});
 
 		it("list collection with incorrect username should be empty", async function() {
@@ -198,7 +195,7 @@ describe("Check DB handler", function() {
 	describe("find", function () {
 		it("find jobs should succeed", async function() {
 			const jobs = await db.find(account, "jobs", {});
-			expect(jobs).to.deep.equal(goldenJobs);
+			expect(jobs.sort()).to.deep.equal(goldenJobs.sort());
 		});
 
 		it("find Architect job should succeed", async function() {
@@ -466,7 +463,7 @@ describe("Check DB handler", function() {
 				await db.runCommand(account, createRoleCmd);
 				throw {}; // should've failed at previous line
 			} catch (err) {
-				expect(err.code).to.equal(11000);
+				expect(err.code).to.equal(51002);
 			}
 		});
 

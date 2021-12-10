@@ -41,8 +41,13 @@ ResponseCodes.templates = {
 
 	// Model related error
 	modelNotFound: { message: 'Model not found.', status: 404 },
+
+	// Federation related error
 	federationNotFound: { message: 'Federation not found.', status: 404 },
+
+	// Container related error
 	containerNotFound: { message: 'Container not found.', status: 404 },
+	containerIsSubModel: { message: 'Container is a submodel.', status: 400 },
 	revisionNotFound: { message: 'Revision not found.', status: 404 },
 	groupNotFound: { message: 'Group not found.', status: 404 },
 

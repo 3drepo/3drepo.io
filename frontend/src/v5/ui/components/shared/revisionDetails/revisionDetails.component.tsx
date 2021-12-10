@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Trans } from '@lingui/react';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router';
 import { range } from 'lodash';
@@ -29,6 +28,7 @@ import { SkeletonListItem } from '@components/shared/revisionDetails/components/
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
 import { Display } from '@/v5/ui/themes/media';
+import { FormattedMessage } from 'react-intl';
 import {
 	Container,
 	RevisionsListHeaderContainer,
@@ -62,14 +62,14 @@ export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDe
 			<RevisionsListEmptyWrapper>
 				<RevisionsListEmptyContainer>
 					<RevisionsListEmptyText>
-						<Trans id="containers.revisions.emptyMessage" message="You haven’t added any Files." />
+						<FormattedMessage id="containers.revisions.emptyMessage" defaultMessage="You haven’t added any Files." />
 					</RevisionsListEmptyText>
 					<Button
 						startIcon={<ArrowUpCircleIcon />}
 						variant="contained"
 						color="primary"
 					>
-						<Trans id="containers.revisions.uploadFile" message="Upload File" />
+						<FormattedMessage id="containers.revisions.uploadFile" defaultMessage="Upload File" />
 					</Button>
 				</RevisionsListEmptyContainer>
 			</RevisionsListEmptyWrapper>
@@ -79,10 +79,10 @@ export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDe
 	return (
 		<Container>
 			<RevisionsListHeaderContainer>
-				<RevisionsListHeaderLabel width={130} tabletWidth={94}><Trans id="revisionDetails.addedOn" message="Added on" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel width={228} tabletWidth={155}><Trans id="revisionDetails.addedBy" message="Added by" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel tabletWidth={150}><Trans id="revisionDetails.revisionCode" message="Revision code" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel hideWhenSmallerThan={Display.Tablet}><Trans id="revisionDetails.description" message="Description" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={130} tabletWidth={94}><FormattedMessage id="revisionDetails.addedOn" defaultMessage="Added on" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={228} tabletWidth={155}><FormattedMessage id="revisionDetails.addedBy" defaultMessage="Added by" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={330} tabletWidth={150}><FormattedMessage id="revisionDetails.revisionCode" defaultMessage="Revision code" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel hideWhenSmallerThan={Display.Tablet}><FormattedMessage id="revisionDetails.description" defaultMessage="Description" /></RevisionsListHeaderLabel>
 			</RevisionsListHeaderContainer>
 			<RevisionsList>
 				{isLoading ? (

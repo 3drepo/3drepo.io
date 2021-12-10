@@ -15,22 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
-import { Trans } from '@lingui/react';
-import { SearchPhrase } from './emptySearchResults.styles';
+import * as FederationsSelectors from '@/v5/store/federations/federations.selectors';
+import { createHooksSelectors } from './selectorsHooks.helper';
 
-type IEmptySearchResults = {
-	searchPhrase: string;
-};
-
-export const EmptySearchResults = ({ searchPhrase }: IEmptySearchResults): JSX.Element => (
-	<DashboardListEmptyText>
-		<Trans
-			id="containers.noSearchResults"
-			message="We couldn't find a match for <0>“{searchPhrase}”</0>. Please try another search."
-			components={[<SearchPhrase />]}
-			values={{ searchPhrase }}
-		/>
-	</DashboardListEmptyText>
-);
+export const FederationsHooksSelectors = createHooksSelectors(FederationsSelectors);

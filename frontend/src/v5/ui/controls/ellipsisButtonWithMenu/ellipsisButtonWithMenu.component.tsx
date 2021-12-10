@@ -16,10 +16,10 @@
  */
 
 import React, { MouseEvent } from 'react';
-import { Trans } from '@lingui/react';
 import { Tooltip } from '@material-ui/core';
 import { EllipsisButton } from '@controls/ellipsisButton';
 import { EllipsisMenu, IEllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
+import { formatMessage } from '@/v5/services/intl';
 
 export type IEllipsisButtonWithMenu = {
 	list: IEllipsisMenu['list'];
@@ -39,7 +39,7 @@ export const EllipsisButtonWithMenu = ({ list }: IEllipsisButtonWithMenu): JSX.E
 
 	return (
 		<>
-			<Tooltip title={<Trans id="ellipsisMenu.tooltip" message="More options" />}>
+			<Tooltip title={formatMessage({ id: 'ellipsisMenu.tooltip', defaultMessage: 'More options' })}>
 				<EllipsisButton
 					aria-controls="ellipsis-menu-list"
 					aria-haspopup="true"

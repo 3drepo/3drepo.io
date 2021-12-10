@@ -16,20 +16,22 @@
  */
 
 import React from 'react';
-import { Trans } from '@lingui/react';
-import Divider from '@material-ui/core/Divider';
 
 import AddCircleIcon from '@assets/icons/add_circle.svg';
-import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
+import { FormattedMessage } from 'react-intl';
+
+import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
 import { Button } from '@controls/button';
+import { Content } from '@/v5/ui/routes/dashboard/projects/projects.styles';
+import { DashboardListEmptySearchResults } from '@components/dashboard/dashboardList';
 import { ContainersList } from './containersList';
-import { EmptySearchResults } from './containersList/emptySearchResults';
 import { SkeletonListItem } from './containersList/skeletonListItem';
 import { useContainersData } from './containers.hooks';
-import { Container, Content } from './containers.styles';
+import { Container,
+} from './containers.styles';
 
 export const Containers = (): JSX.Element => {
 	const {
@@ -57,23 +59,23 @@ export const Containers = (): JSX.Element => {
 							}}
 							containers={favouriteContainers}
 							title={(
-								<Trans
+								<FormattedMessage
 									id="containers.favourites.collapseTitle"
-									message="Favourites"
+									defaultMessage="Favourites"
 								/>
 							)}
 							titleTooltips={{
-								collapsed: <Trans id="containers.favourites.collapse.tooltip.show" message="Show favourites" />,
-								visible: <Trans id="containers.favourites.collapse.tooltip.hide" message="Hide favourites" />,
+								collapsed: <FormattedMessage id="containers.favourites.collapse.tooltip.show" defaultMessage="Show favourites" />,
+								visible: <FormattedMessage id="containers.favourites.collapse.tooltip.hide" defaultMessage="Hide favourites" />,
 							}}
 							emptyMessage={
 								favouritesFilterQuery && hasContainers.favourites ? (
-									<EmptySearchResults searchPhrase={favouritesFilterQuery} />
+									<DashboardListEmptySearchResults searchPhrase={favouritesFilterQuery} />
 								) : (
 									<DashboardListEmptyText>
-										<Trans
+										<FormattedMessage
 											id="containers.favourites.emptyMessage"
-											message="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
+											defaultMessage="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
 										/>
 									</DashboardListEmptyText>
 								)
@@ -88,30 +90,30 @@ export const Containers = (): JSX.Element => {
 							}}
 							containers={filteredContainers}
 							title={(
-								<Trans
+								<FormattedMessage
 									id="containers.all.collapseTitle"
-									message="All Containers"
+									defaultMessage="All containers"
 								/>
 							)}
 							titleTooltips={{
-								collapsed: <Trans id="containers.all.collapse.tooltip.show" message="Show all" />,
-								visible: <Trans id="containers.all.collapse.tooltip.hide" message="Hide all" />,
+								collapsed: <FormattedMessage id="containers.all.collapse.tooltip.show" defaultMessage="Show all" />,
+								visible: <FormattedMessage id="containers.all.collapse.tooltip.hide" defaultMessage="Hide all" />,
 							}}
 							showBottomButton
 							emptyMessage={
 								allFilterQuery && hasContainers.all ? (
-									<EmptySearchResults searchPhrase={allFilterQuery} />
+									<DashboardListEmptySearchResults searchPhrase={allFilterQuery} />
 								) : (
 									<>
 										<DashboardListEmptyText>
-											<Trans id="containers.all.emptyMessage" message="You haven’t created any Containers." />
+											<FormattedMessage id="containers.all.emptyMessage" defaultMessage="You haven’t created any Containers." />
 										</DashboardListEmptyText>
 										<Button
 											startIcon={<AddCircleIcon />}
 											variant="contained"
 											color="primary"
 										>
-											<Trans id="containers.all.newContainer" message="New Container" />
+											<FormattedMessage id="containers.all.newContainer" defaultMessage="New Container" />
 										</Button>
 									</>
 								)

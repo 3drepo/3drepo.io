@@ -14,17 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import styled from 'styled-components';
+import { Display } from '@/v5/ui/themes/media';
 
-import React from 'react';
+export const Content = styled.div`
+	max-width: 1289px;
+	margin: 18px auto 100px;
+	padding: 0 30px;
 
-export const Federations = () => (
-	<>
-		Federations:
-		<ul>
-			<li>federation 1</li>
-			<li>federation 2</li>
-			<li>federation 3</li>
-			<li>federation 4</li>
-		</ul>
-	</>
-);
+	@media (max-width: ${Display.Desktop}px) {
+		margin-top: 30px;
+	}
+`;

@@ -64,7 +64,7 @@ const setupData = async () => {
 			testUser2,
 			[breakingTSAccess.name],
 		),
-		usersInFirstTeamspace.map((user) => ServiceHelper.db.createUser(
+		...usersInFirstTeamspace.map((user) => ServiceHelper.db.createUser(
 			user,
 			[testUserTSAccess[0].name],
 		)),
@@ -80,7 +80,8 @@ const testGetTeamspaceList = () => {
 		});
 		test('give return a teamspace list if the user has a valid session', async () => {
 			const res = await agent.get(`/v5/teamspaces/?key=${testUser.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual({ teamspaces: testUserTSAccess });
+			expect(res.body.teamspaces.length).toBe(testUserTSAccess.length);
+			expect(res.body.teamspaces).toEqual(expect.arrayContaining(testUserTSAccess));
 		});
 
 		test('should safely catch error if there is an internal error', async () => {
@@ -131,9 +132,8 @@ const testGetTeamspaceMembers = () => {
 				return data;
 			});
 
-			const sortFn = (a, b) => a.user.localeCompare(b.user);
-
-			expect(res.body.members.sort(sortFn)).toEqual(expectedData.sort(sortFn));
+			expect(res.body.members.length).toBe(expectedData.length);
+			expect(res.body.members).toEqual(expect.arrayContaining(expectedData));
 		});
 	});
 };

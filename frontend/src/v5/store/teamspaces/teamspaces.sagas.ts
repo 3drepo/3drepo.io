@@ -21,15 +21,16 @@ import { isEmpty } from 'lodash';
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { selectTeamspaceUsers } from '@/v5/store/teamspaces/teamspaces.selectors';
+import { formatMessage } from '@/v5/services/intl';
 import { TeamspacesActions, TeamspacesTypes, ITeamspace } from './teamspaces.redux';
 
 export function* fetch() {
 	try {
-		const { data: { teamspaces } } = yield API.fetchTeamspaces();
+		const { data: { teamspaces } } = yield API.Teamspaces.fetchTeamspaces();
 		yield put(TeamspacesActions.fetchSuccess(teamspaces as ITeamspace[]));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: 'trying to fetch teamspaces',
+			currentActions: formatMessage({ id: 'teamspaces.fetch.error', defaultMessage: 'trying to fetch teamspaces' }),
 			error,
 		}));
 		yield put(TeamspacesActions.fetchFailure());
@@ -41,13 +42,13 @@ export function* fetchUsers({ teamspace }) {
 		const users = yield select(selectTeamspaceUsers, teamspace);
 
 		if (isEmpty(users)) {
-			const { data: { members } } = yield API.fetchTeamspaceMembers(teamspace);
+			const { data: { members } } = yield API.Teamspaces.fetchTeamspaceMembers(teamspace);
 
 			yield put(TeamspacesActions.fetchUsersSuccess(teamspace, members));
 		}
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: 'trying to fetch users',
+			currentActions: formatMessage({ id: 'teamspaces.fetchUsers.error', defaultMessage: 'trying to fetch users' }),
 			error,
 		}));
 	}

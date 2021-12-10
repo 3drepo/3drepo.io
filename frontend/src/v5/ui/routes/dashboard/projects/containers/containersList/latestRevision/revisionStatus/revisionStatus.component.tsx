@@ -16,16 +16,16 @@
  */
 
 import React from 'react';
-import { ContainerStatuses } from '@/v5/store/containers/containers.types';
-import { Trans } from '@lingui/react';
+import { FormattedMessage } from 'react-intl';
+import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { ErrorTooltip } from '@controls/errorTooltip';
-import { i18n } from '@lingui/core';
 import { TextOverflow } from '@controls/textOverflow';
+import { formatDate } from '@/v5/services/intl';
 import { Name, ProcessingStatus, QueuedStatus } from './revisionStatus.styles';
 
 export interface IRevisionStatus {
 	name: string;
-	status: ContainerStatuses;
+	status: UploadStatuses;
 	error?: {
 		date: Date | null;
 		message: string;
@@ -33,27 +33,27 @@ export interface IRevisionStatus {
 }
 
 export const RevisionStatus = ({ status, error, name }: IRevisionStatus): JSX.Element => {
-	if (status === ContainerStatuses.QUEUED) {
+	if (status === UploadStatuses.QUEUED) {
 		return (
 			<QueuedStatus>
-				<Trans id="containers.list.item.latestRevision.status.queued" message="Queued" />
+				<FormattedMessage id="containers.list.item.latestRevision.status.queued" defaultMessage="Queued" />
 			</QueuedStatus>
 		);
 	}
 
 	if (
-		status === ContainerStatuses.PROCESSING
-		|| status === ContainerStatuses.GENERATING_BUNDLES
-		|| status === ContainerStatuses.QUEUED_FOR_UNITY
+		status === UploadStatuses.PROCESSING
+		|| status === UploadStatuses.GENERATING_BUNDLES
+		|| status === UploadStatuses.QUEUED_FOR_UNITY
 	) {
 		return (
 			<ProcessingStatus>
-				<Trans id="containers.list.item.latestRevision.status.processing" message="Processing" />
+				<FormattedMessage id="containers.list.item.latestRevision.status.processing" defaultMessage="Processing" />
 			</ProcessingStatus>
 		);
 	}
 
-	if (status === ContainerStatuses.FAILED && error) {
+	if (status === UploadStatuses.FAILED && error) {
 		return (
 			<>
 				<Name>
@@ -61,31 +61,27 @@ export const RevisionStatus = ({ status, error, name }: IRevisionStatus): JSX.El
 				</Name>
 				<ErrorTooltip>
 					{error.date ? (
-						<Trans
+						<FormattedMessage
 							id="containers.list.item.latestRevision.status.error.tooltipMessageWithDate"
-							message="The latest upload on <0>{date}</0> at <0>{time}</0> has failed due to <0>{message}</0>."
+							defaultMessage="The latest upload on <b>{date}</b> at <b>{time}</b> has failed due to <b>{message}</b>."
 							values={{
-								date: i18n.date(error.date),
-								time: i18n.date(error.date, {
+								date: formatDate(error.date),
+								time: formatDate(error.date, {
 									hour: 'numeric',
 									minute: 'numeric',
 								}),
 								message: error.message,
+								b: (val:string) => <b>{val}</b>,
 							}}
-							components={[
-								<b />,
-							]}
 						/>
 					) : (
-						<Trans
+						<FormattedMessage
 							id="containers.list.item.latestRevision.status.error.tooltipMessageWithoutDate"
-							message="The latest upload has failed due to <0>{message}</0>."
+							defaultMessage="The latest upload has failed due to <b>{message}</b>."
 							values={{
 								message: error.message,
+								b: (val:string) => <b>{val}</b>,
 							}}
-							components={[
-								<b />,
-							]}
 						/>
 					)}
 				</ErrorTooltip>

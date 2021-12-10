@@ -16,10 +16,11 @@
  */
 
 import React from 'react';
-import { Trans } from '@lingui/react';
+import { FormattedMessage } from 'react-intl';
+
 import { RevisionStatus } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/revisionStatus';
 import { IRevisionStatus } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/revisionStatus/revisionStatus.component';
-import { ContainerStatuses } from '@/v5/store/containers/containers.types';
+import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { Container, Label } from './latestRevision.styles';
 
 interface ILatestRevision extends IRevisionStatus {
@@ -28,21 +29,21 @@ interface ILatestRevision extends IRevisionStatus {
 
 export const LatestRevision = ({ hasRevisions, status, ...props }: ILatestRevision): JSX.Element => (
 	<Container>
-		{hasRevisions || status === ContainerStatuses.UPLOADING ? (
+		{hasRevisions || status === UploadStatuses.UPLOADING ? (
 			<>
 				<Label>
-					<Trans
+					<FormattedMessage
 						id="containers.list.item.latestRevision.label"
-						message="Latest revision: "
+						defaultMessage="Latest revision: "
 					/>
 				</Label>
 				<RevisionStatus status={status} {...props} />
 			</>
 		) : (
 			<Label>
-				<Trans
+				<FormattedMessage
 					id="containers.list.item.latestRevision.emptyContainer"
-					message="Container empty"
+					defaultMessage="Container empty"
 				/>
 			</Label>
 		)}

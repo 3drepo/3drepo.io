@@ -16,7 +16,7 @@
  */
 
 import {
-	ContainerStatuses,
+	UploadStatuses,
 	FetchContainersContainerItemResponse,
 	FetchContainerStatsResponse,
 	IContainer,
@@ -39,7 +39,7 @@ export const prepareSingleContainerData = (
 	latestRevision: stats?.revisions.latestRevision ?? '',
 	type: stats?.type ?? '',
 	code: stats?.code ?? '',
-	status: stats?.status ?? ContainerStatuses.OK,
+	status: stats?.status ?? UploadStatuses.OK,
 	units: stats?.units ?? '',
 	hasStatsPending: !stats,
 	errorResponse: stats?.errorReason && {

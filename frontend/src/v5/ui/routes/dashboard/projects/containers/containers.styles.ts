@@ -16,19 +16,8 @@
  */
 
 import styled from 'styled-components';
-import { Display } from '@/v5/ui/themes/media';
 
 export const Container = styled.div``;
-
-export const Content = styled.div`
-	max-width: 1289px;
-	margin: 18px auto 100px;
-	padding: 0 30px;
-	
-	@media (max-width: ${Display.Desktop}px) {
-		margin-top: 30px;
-	}
-`;
 
 export const HeaderButtonsGroup = styled.div`
 	margin-left: auto;

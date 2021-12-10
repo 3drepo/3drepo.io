@@ -16,6 +16,8 @@
  */
 
 import styled from 'styled-components';
+import { Divider as DividerComponent } from '@material-ui/core';
+import { Button } from '@controls/button';
 
 import { Typography } from '@controls/typography';
 import { Divider as DividerComponent } from '@material-ui/core';

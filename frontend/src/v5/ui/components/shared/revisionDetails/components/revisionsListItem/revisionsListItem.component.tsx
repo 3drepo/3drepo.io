@@ -16,7 +16,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@lingui/core';
 import { useParams } from 'react-router';
 
 import { RevisionsListItemText } from '@components/shared/revisionDetails/components/revisionsListItemText';
@@ -27,6 +26,7 @@ import { RevisionsListItemButton } from '@components/shared/revisionDetails/comp
 import { IRevision } from '@/v5/store/revisions/revisions.types';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
 import { Display } from '@/v5/ui/themes/media';
+import { formatDate } from '@/v5/services/intl';
 import { Container } from './revisionsListItem.styles';
 
 type IRevisionsListItem = {
@@ -47,7 +47,7 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 	return (
 		<Container>
 			<RevisionsListItemDate width={130} tabletWidth={94} active={active}>
-				{i18n.date(timestamp)}
+				{formatDate(timestamp)}
 			</RevisionsListItemDate>
 			<RevisionsListItemAuthor authorName={author} active={active} width={228} tabletWidth={155} />
 			<RevisionsListItemCode

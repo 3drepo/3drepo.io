@@ -18,7 +18,7 @@
 import React, { ReactNode, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 import { isEmpty } from 'lodash';
-import { Trans } from '@lingui/react';
+import { FormattedMessage } from 'react-intl';
 import {
 	DashboardList,
 	DashboardListCollapse,
@@ -34,15 +34,14 @@ import { IContainer } from '@/v5/store/containers/containers.types';
 import { SearchInput } from '@controls/searchInput';
 import { SearchInputConfig, useSearchInput } from '@controls/searchInput/searchInput.hooks';
 import { Button } from '@controls/button';
-import { DashboardListButton } from '@components/dashboard/dashboardList/dasboardList.styles';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
+import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containerListItem';
-import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/skeletonListItem';
 import { Display } from '@/v5/ui/themes/media';
-import { useOrderedList } from './containersList.hooks';
+import { formatMessage } from '@/v5/services/intl';
+import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { Container, CollapseSideElementGroup } from './containersList.styles';
-import { DEFAULT_SORT_CONFIG } from './containersList.constants';
 
 type IContainersList = {
 	emptyMessage: ReactNode;
@@ -73,7 +72,7 @@ export const ContainersList = ({
 	const isListPending = ContainersHooksSelectors.selectIsListPending();
 	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
 
-	const toggleSelectedId = (id: IContainer['_id']) => {
+	const toggleSelectedId = (id: string) => {
 		setSelectedId((state) => (state === id ? null : id));
 	};
 
@@ -93,17 +92,11 @@ export const ContainersList = ({
 				isLoading={areStatsPending}
 				sideElement={(
 					<CollapseSideElementGroup>
-						<Trans
-							id="containers.search.placeholder"
-							message="Search containers..."
-							render={({ translation }) => (
-								<SearchInput
-									onClear={() => setSearchInput('')}
-									onChange={(event) => setSearchInput(event.currentTarget.value)}
-									value={searchInput}
-									placeholder={translation as string}
-								/>
-							)}
+						<SearchInput
+							onClear={() => setSearchInput('')}
+							onChange={(event) => setSearchInput(event.currentTarget.value)}
+							value={searchInput}
+							placeholder={formatMessage({ id: 'containers.search.placeholder', defaultMessage: 'Search containers...' })}
 						/>
 						<HeaderButtonsGroup>
 							<Button
@@ -111,14 +104,14 @@ export const ContainersList = ({
 								variant="outlined"
 								color="secondary"
 							>
-								<Trans id="containers.mainHeader.newContainer" message="New container" />
+								<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New container" />
 							</Button>
 							<Button
 								startIcon={<ArrowUpCircleIcon />}
 								variant="contained"
 								color="primary"
 							>
-								<Trans id="containers.mainHeader.uploadFiles" message="Upload files" />
+								<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
 							</Button>
 						</HeaderButtonsGroup>
 					</CollapseSideElementGroup>
@@ -126,29 +119,28 @@ export const ContainersList = ({
 			>
 				<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
 					<DashboardListHeaderLabel name="name" tabletWidth={238}>
-						<Trans id="containers.list.header.container" message="Container" />
+						<FormattedMessage id="containers.list.header.container" defaultMessage="Container" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="revisionsCount" width={186} hideWhenSmallerThan={Display.Desktop}>
-						<Trans id="containers.list.header.revisions" message="Revisions" />
+						<FormattedMessage id="containers.list.header.revisions" defaultMessage="Revisions" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="code">
-						<Trans id="containers.list.header.containerCode" message="Container code" />
+						<FormattedMessage id="containers.list.header.containerCode" defaultMessage="Container code" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="type" width={188} tabletWidth={125} hideWhenSmallerThan={Display.Tablet}>
-						<Trans id="containers.list.header.category" message="Category" />
+						<FormattedMessage id="containers.list.header.category" defaultMessage="Category" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="lastUpdated" width={180}>
-						<Trans id="containers.list.header.lastUpdated" message="Last updated" />
+						<FormattedMessage id="containers.list.header.lastUpdated" defaultMessage="Last updated" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>
-				{useMemo(() => (
-					<DashboardList>
-						{!isEmpty(sortedList) ? (
-							sortedList.map((container, index) => (
-								container.hasStatsPending ? (
-									<SkeletonListItem key={container._id} delay={index / 10} />
-								) : (
+				{
+					useMemo(() => (
+						<DashboardList>
+							{!isEmpty(sortedList) ? (
+								sortedList.map((container, index) => (
 									<ContainerListItem
+										index={index}
 										key={container._id}
 										isSelected={container._id === selectedId}
 										container={container}
@@ -156,16 +148,18 @@ export const ContainersList = ({
 										onFavouriteChange={setFavourite}
 										onToggleSelected={toggleSelectedId}
 									/>
-								)))
-						) : (
-							<DashboardListEmptyContainer>
-								{filterQuery && hasContainers ? (
-									<DashboardListEmptySearchResults searchPhrase={filterQuery} />
-								) : emptyMessage}
-							</DashboardListEmptyContainer>
-						)}
-					</DashboardList>
-				), [sortedList, filterQuery, selectedId])}
+								))
+							) : (
+								<DashboardListEmptyContainer>
+									{filterQuery && hasContainers ? (
+										<DashboardListEmptySearchResults searchPhrase={filterQuery} />
+									) : emptyMessage}
+								</DashboardListEmptyContainer>
+							)}
+						</DashboardList>
+					),
+					[sortedList, filterQuery, selectedId])
+				}
 				{showBottomButton && !isListPending && hasContainers && (
 					<DashboardListButton
 						startIcon={<AddCircleIcon />}
@@ -174,9 +168,10 @@ export const ContainersList = ({
 							console.log('->  handle add container');
 						}}
 					>
-						<Trans id="containers.addContainerButton" message="Add new Container" />
+						<FormattedMessage id="containers.addContainerButton" defaultMessage="Add new Container" />
 					</DashboardListButton>
 				)}
+
 			</DashboardListCollapse>
 		</Container>
 	);

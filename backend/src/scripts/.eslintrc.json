@@ -1,0 +1,7 @@
+{
+	"rules": {
+		"require-sort/require-sort": 0,
+		"import/no-dynamic-require": 0,
+		"security/detect-non-literal-require": 0
+	}
+}

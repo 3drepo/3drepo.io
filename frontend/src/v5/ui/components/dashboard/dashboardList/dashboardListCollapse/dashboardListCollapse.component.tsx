@@ -33,7 +33,7 @@ export type IDashboardListCollapse = {
 };
 
 export const DashboardListCollapse = ({
-	children, title, tooltipTitles, className, sideElement, isLoading = false,
+	children, title, tooltipTitles, className, isLoading = false, sideElement,
 }: IDashboardListCollapse): JSX.Element => {
 	const [isCollapsed, setIsCollapsed] = useState(false);
 

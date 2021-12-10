@@ -193,7 +193,7 @@ Schemas.schemas.modelSettings = {
 					},
 					latLong: {
 						type: 'array',
-						description: 'The latitute and longitude of the survey point',
+						description: 'The latitude and longitude of the survey point',
 						items: {
 							type: 'float',
 							example: '23.56',

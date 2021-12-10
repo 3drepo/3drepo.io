@@ -16,22 +16,22 @@
  */
 
 import React from 'react';
-import { Trans } from '@lingui/react';
 import NotFoundIcon from '@assets/icons/404.svg';
 import { Link } from 'react-router-dom';
 import { Button } from '@controls/button';
+import { FormattedMessage } from 'react-intl';
 import { Container, Title, Message, ButtonsContainer } from './notFound.styles';
 
 export const NotFound = (): JSX.Element => (
 	<Container>
 		<NotFoundIcon />
 		<Title>
-			<Trans id="notFound.title" message="Sorry, but the page you were looking for could not be found." />
+			<FormattedMessage id="notFound.title" defaultMessage="Sorry, but the page you were looking for could not be found." />
 		</Title>
 		<Message>
-			<Trans
+			<FormattedMessage
 				id="notFound.message"
-				message="You can return to our dashboard, or contact our support team if you can't find what you're looking for."
+				defaultMessage="You can return to our dashboard, or contact our support team if you can't find what you're looking for."
 			/>
 		</Message>
 		<ButtonsContainer>
@@ -41,9 +41,9 @@ export const NotFound = (): JSX.Element => (
 				component={Link}
 				to="/v5/dashboard"
 			>
-				<Trans
+				<FormattedMessage
 					id="notFound.goToDashboardButton.label"
-					message="Go to your Dashboard"
+					defaultMessage="Go to your Dashboard"
 				/>
 			</Button>
 			<Button
@@ -51,9 +51,9 @@ export const NotFound = (): JSX.Element => (
 				color="primary"
 				href="https://3drepo.com/contact/"
 			>
-				<Trans
+				<FormattedMessage
 					id="notFound.contactSupportButton.label"
-					message="Contact support team"
+					defaultMessage="Contact support team"
 				/>
 			</Button>
 		</ButtonsContainer>
