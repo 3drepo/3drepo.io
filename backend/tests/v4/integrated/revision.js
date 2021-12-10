@@ -24,7 +24,7 @@ const app = require("../../../src/v4/services/api.js").createApp();
 const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
 const responseCodes = require("../../../src/v4/response_codes.js");
-const responseCodesV5 = require("../../../src/v5/utils/responseCodes");
+const { templates } = require("../../../src/v5/utils/responseCodes");
 const helpers = require("../helpers/signUp");
 const C = require("../../../src/v4/constants");
 const async = require("async");
@@ -230,7 +230,7 @@ describe("Revision", function () {
 			.field("tag", testTag)
 			.attach("file", __dirname + "/../statics/3dmodels/8000cubes.obj")
 			.expect(400, function(err, res) {
-				expect(res.body.code).to.equal(responseCodesV5.invalidArguments.code);
+				expect(res.body.code).to.equal(templates.invalidArguments.code);
 				done(err);
 			});
 
