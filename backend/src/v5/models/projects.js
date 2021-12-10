@@ -47,6 +47,7 @@ Projects.getProjectById = async (ts, project, projection) => {
 };
 
 Projects.modelsExistInProject = async (teamspace, project, models) => {
+	if (!models.length) return false;
 	const { models: projModels } = await Projects.getProjectById(teamspace, project, { models: 1 });
 	return _.intersection(models, projModels).length === models.length;
 };

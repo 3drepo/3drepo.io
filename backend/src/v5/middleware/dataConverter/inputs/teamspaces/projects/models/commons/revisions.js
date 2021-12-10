@@ -19,6 +19,8 @@ const { createResponseCode, templates } = require('../../../../../../../utils/re
 const Path = require('path');
 const Yup = require('yup');
 const YupHelper = require('../../../../../../../utils/helper/yup');
+const { getContainers } = require('../../../../../../../models/modelSettings');
+const { modelsExistInProject } = require('../../../../../../../models/projects');
 const { respond } = require('../../../../../../../utils/responder');
 const { singleFileUpload } = require('../../../../../multer');
 const { sufficientQuota } = require('../../../../../../../utils/quota');
@@ -76,7 +78,16 @@ const validateRevisionUpload = (isFederation) => async (req, res, next) => {
 	};
 
 	if (isFederation) {
-		schemaBase.subModels = Yup.array().of(YupHelper.types.id).min(1).required();
+		schemaBase.containers = Yup.array().of(YupHelper.types.id).min(1).required()
+			.test('containers-validation', 'Containers must exist within the same project', (value) => {
+				const { teamspace, project } = req.params;
+				return modelsExistInProject(teamspace, project, value).catch(() => false);
+			})
+			.test('containers-validation', 'IDs provided cannot be of type federation', async (value) => {
+				const { teamspace } = req.params;
+				const foundContainers = await getContainers(teamspace, value, { _id: 1 });
+				return foundContainers?.length === value?.length;
+			});
 	} else {
 		schemaBase.importAnimations = Yup.bool().default(true);
 		schemaBase.tag = schemaBase.tag.required();
@@ -87,7 +98,7 @@ const validateRevisionUpload = (isFederation) => async (req, res, next) => {
 
 	try {
 		req.body = await schema.validate(req.body);
-		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
+		if (!isFederation && !req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));

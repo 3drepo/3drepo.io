@@ -15,14 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src, modelFolder } = require('../../../../../../../helper/path');
-const MockExpressRequest = require('mock-express-request');
-const FormData = require('form-data');
-const fs = require('fs');
-const path = require('path');
-
-jest.mock('../../../../../../../../../src/v5/utils/quota');
-const Quota = require(`${src}/utils/quota`);
+const { src } = require('../../../../../../../helper/path');
+const { generateUUIDString } = require('../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -30,84 +24,53 @@ const Responder = require(`${src}/utils/responder`);
 jest.mock('../../../../../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
 
-const Containers = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/containers`);
+jest.mock('../../../../../../../../../src/v5/models/projects');
+const Projects = require(`${src}/models/projects`);
+
+const Federations = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/federations`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
-const subModelContainer = 'ImSub';
+const modelNotInProject = generateUUIDString();
 
-ModelSettings.getModelByQuery.mockImplementation((teamspace, query) => (query['subModels.model'] !== subModelContainer
-	? Promise.reject(templates.modelNotFound)
-	: Promise.resolve({ _id: 1, name: 'abc' })));
+Projects.modelsExistInProject.mockImplementation(
+	(teamspace, project, models) => {
+		if (project === 'throw') return Promise.reject(templates.projectNotFound);
+		return Promise.resolve(!models.includes(modelNotInProject));
+	},
+);
 
-const testCanDeleteContainer = () => {
-	describe.each([
-		['Container that is not a submodel', { params: { teamspace: '123', project: '234', container: '123' } }, true],
-		['Container that is a submodel', { params: { teamspace: '123', project: '234', container: subModelContainer } }, false, false],
-		['Invalid params', { }, false, true],
-	])('Can delete container', (desc, req, success, invalidArguments) => {
-		test(`${desc} ${success ? 'should call next()' : `should respond with ${invalidArguments ? 'invalidArguments' : 'containerIsSubModel'}`}`, async () => {
-			const mockCB = jest.fn();
-			await Containers.canDeleteContainer(req, {}, mockCB);
-
-			if (success) {
-				expect(mockCB.mock.calls.length).toBe(1);
-			} else {
-				const expectedError = invalidArguments ? templates.invalidArguments : templates.containerIsSubModel;
-				expect(mockCB.mock.calls.length).toBe(0);
-				expect(Responder.respond.mock.calls.length).toBe(1);
-				expect(Responder.respond.mock.results[0].value.code).toEqual(expectedError.code);
-			}
-		});
-	});
-};
-
-const createRequestWithFile = (teamspace, { tag, desc, importAnim }, unsupportedFile = false, noFile = false) => {
-	const form = new FormData();
-	if (!noFile) {
-		form.append('file',
-			fs.createReadStream(path.join(modelFolder, unsupportedFile ? 'dummy.png' : 'dummy.obj')));
-	}
-	if (tag) form.append('tag', tag);
-	if (desc) form.append('desc', desc);
-	if (importAnim) form.append('importAnim', importAnim);
-
-	const req = new MockExpressRequest({
-		method: 'POST',
-		host: 'localhost',
-		url: `/${teamspace}/upload`,
-		headers: form.getHeaders(),
-	});
-
-	form.pipe(req);
-	req.params = { teamspace };
-	return req;
-};
-
-Quota.sufficientQuota.mockImplementation((ts) => (ts === 'noQuota' ? Promise.reject(templates.quotaLimitExceeded) : Promise.resolve()));
+ModelSettings.getContainers.mockImplementation(
+	(teamspace, models) => (teamspace === 'Error' ? Promise.resolve([]) : Promise.resolve(models)),
+);
 
 const testValidateNewRevisionData = () => {
-	const standardBody = { tag: '123', description: 'this is a model', importAnim: false };
+	const createBody = (containers, tag, desc) => ({
+		containers,
+		...(tag ? { tag: '123' } : {}),
+		...(desc ? { desc: 'this is a model' } : {}),
+	});
 	describe.each([
-		['Request with valid data', 'ts', standardBody],
-		['Request with unsupported model file', 'ts', standardBody, true, false, templates.unsupportedFileFormat],
-		['Request with insufficient quota', 'noQuota', standardBody, false, false, templates.quotaLimitExceeded],
-		['Request with no body should fail', 'ts', {}, false, false, templates.invalidArguments],
-		['Request with just tag should pass', 'ts', { tag: 'dkf_j-d' }, false, false],
-		['Request with wrong tag type should fail', 'ts', { tag: false }, false, false, templates.invalidArguments],
-		['Request with tag that is not alphanumeric should fail', 'ts', { tag: '1%2%3' }, false, false, templates.invalidArguments],
-		['Request with no file should fail', 'ts', { tag: 'drflgdf' }, false, true, templates.invalidArguments],
-	])('Check new revision data', (desc, ts, bodyContent, badFile, noFile, error) => {
-		test(`${desc} should ${error ? `fail with ${error.code}` : ' succeed and next() should be called'}`, async () => {
-			const req = createRequestWithFile(ts, bodyContent, badFile, noFile);
+		['Request with valid data', createBody([generateUUIDString(), generateUUIDString()], 'tag', 'desc')],
+		['Request with valid data but no tag/desc', createBody([generateUUIDString(), generateUUIDString()])],
+		['Request with invalid model Ids (wrong type)', createBody([1, 2, 3]), true],
+		['Request with invalid model Ids (not uuid format', createBody(['model 1']), true],
+		['Request with empty container array', createBody([]), true],
+		['Request with container id that doesn\'t exist in the project', createBody([modelNotInProject]), true],
+		['Request with project that does not exist', createBody([generateUUIDString()]), true, 'ts', 'throw'],
+		['Request with container ids that is of federation', createBody([generateUUIDString()]), true, 'Error'],
+		['Request with empty body', {}, true],
+	])('Check new revision data', (desc, body, shouldFail, teamspace = 'a', project = 'b') => {
+		test(`${desc} should ${shouldFail ? 'fail' : ' succeed and next() should be called'}`, async () => {
+			const params = { teamspace, project, federation: 'c' };
 			const mockCB = jest.fn(() => {});
-			await Containers.validateNewRevisionData(req, {}, mockCB);
-			if (error) {
+			await Federations.validateNewRevisionData({ params, body }, {}, mockCB);
+			if (shouldFail) {
 				expect(mockCB.mock.calls.length).toBe(0);
 				expect(Responder.respond.mock.calls.length).toBe(1);
-				expect(Responder.respond.mock.results[0].value.code).toEqual(error.code);
+				expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
 			} else {
 				expect(mockCB.mock.calls.length).toBe(1);
 			}
@@ -115,7 +78,6 @@ const testValidateNewRevisionData = () => {
 	});
 };
 
-describe('middleware/dataConverter/inputs/teamspaces/projects/models/containers', () => {
-	testCanDeleteContainer();
+describe('middleware/dataConverter/inputs/teamspaces/projects/models/federations', () => {
 	testValidateNewRevisionData();
 });
