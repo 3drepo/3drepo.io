@@ -119,9 +119,28 @@ const testUpdateRevisionStatus = () => {
 	});
 };
 
+const testIsValidTag = () => {
+	describe('Is Valid Tag', () => {
+		test('Should return false if tag already exists', async () => {
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue('existingTag');
+			const res = await Revisions.isValidTag('someTS', 'someModel', 'someTag');
+			expect(res).toEqual(false);
+			expect(fn.mock.calls.length).toBe(1);
+		});
+
+		test('Should return true if tag is unique', async () => {
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+			const res = await Revisions.isValidTag('someTS', 'someModel', 'someTag');
+			expect(res).toEqual(true);
+			expect(fn.mock.calls.length).toBe(1);
+		});
+	});
+};
+
 describe('models/revisions', () => {
 	testGetRevisionCount();
 	testGetLatestRevision();
 	testGetRevisions();
 	testUpdateRevisionStatus();
+	testIsValidTag();
 });

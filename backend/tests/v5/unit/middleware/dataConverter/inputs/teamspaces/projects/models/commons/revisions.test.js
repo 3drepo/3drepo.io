@@ -26,6 +26,8 @@ const path = require('path');
 
 jest.mock('../../../../../../../../../../src/v5/utils/quota');
 const Quota = require(`${src}/utils/quota`);
+jest.mock('../../../../../../../../../../src/v5/models/revisions');
+const RevisionsModel = require(`${src}/models/revisions`);
 const Revisions = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -104,6 +106,7 @@ const createRequestWithFile = (teamspace, { tag, desc, importAnim }, unsupported
 };
 
 Quota.sufficientQuota.mockImplementation((ts) => (ts === 'noQuota' ? Promise.reject(templates.quotaLimitExceeded) : Promise.resolve()));
+RevisionsModel.isValidTag.mockImplementation(() => true);
 
 const testValidateNewRevisionData = () => {
 	const standardBody = { tag: '123', description: 'this is a model', importAnim: false };
@@ -128,6 +131,17 @@ const testValidateNewRevisionData = () => {
 			} else {
 				expect(mockCB.mock.calls.length).toBe(1);
 			}
+		});
+
+		test('Request with duplicate tag should fail', async () => {
+			const req = createRequestWithFile('ts', standardBody);
+			RevisionsModel.isValidTag.mockImplementationOnce(() => false);
+			const mockCB = jest.fn(() => {});
+			await Revisions.validateNewRevisionData(req, {}, mockCB);
+			expect(mockCB.mock.calls.length).toBe(0);
+			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
+			expect(Responder.respond.mock.results[0].value.message).toEqual("Revision name already exists");
 		});
 	});
 };
