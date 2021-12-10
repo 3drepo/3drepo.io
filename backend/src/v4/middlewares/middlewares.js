@@ -162,6 +162,7 @@
 
 	function chechPermsAndFormatV5NewRevisionsData(req, res, next) {
 		req.params.teamspace = req.params.account;
+		req.params.container = req.params.model;
 		checkPermissions([C.PERM_UPLOAD_FILES])(req, res, next);
 	}
 
