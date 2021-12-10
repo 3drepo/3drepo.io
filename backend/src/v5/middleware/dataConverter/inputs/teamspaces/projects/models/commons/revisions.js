@@ -56,7 +56,7 @@ const fileFilter = async (req, file, cb) => {
 	try {
 		const { originalname, size } = file;
 		const { teamspace } = req.params;
-		const fileExt = Path.extname(originalname);
+		const fileExt = Path.extname(originalname).toLowerCase();
 		if (!ACCEPTED_MODEL_EXT.includes(fileExt)) {
 			const err = createResponseCode(templates.unsupportedFileFormat, `${fileExt} is not a supported model format`);
 			cb(err, false);
