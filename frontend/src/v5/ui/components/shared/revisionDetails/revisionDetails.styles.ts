@@ -17,8 +17,8 @@
 
 import styled, { css } from 'styled-components';
 import { DashboardListEmptyContainer } from '@components/dashboard/dashboardList';
-import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
 import { Display } from '@/v5/ui/themes/media';
+import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dashboardList.styles';
 import * as RevisionsListHeaderLabelStyles from './components/revisionsListHeaderLabel/revisionsListHeaderLabel.styles';
 
 export const Container = styled.div`
@@ -56,7 +56,7 @@ export const RevisionsListHeaderContainer = styled.header`
 	display: flex;
 	padding: 13px 20px 10px 23px;
 	margin-top: 17px;
-	
+
 	${RevisionsListHeaderLabelStyles.Container} {
 		&:last-child {
 			margin-right: 70px;
@@ -124,11 +124,11 @@ export const RevisionsListItemWrapper = styled.li`
 	border-left-style: none;
 	position: relative;
 	cursor: pointer;
-	
+
 	&:hover {
 		background-color: ${({ theme }) => theme.palette.secondary.main};
 	}
-	
+
 	${({ isSingle }) => css`
 		${!isSingle && revisionListItemStylesLineStyles}
 		${isSingle && singleRevisionListItemStyles}
