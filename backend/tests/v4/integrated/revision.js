@@ -244,7 +244,7 @@ describe("Revision", function () {
 			.field("tag", "a!b")
 			.attach("file", __dirname + "/../statics/3dmodels/8000cubes.obj")
 			.expect(400, function(err, res) {
-				expect(res.body.code).to.equal(responseCodes.invalidArguments.code);
+				expect(res.body.code).to.equal(templates.invalidArguments.code);
 				done(err);
 			});
 
