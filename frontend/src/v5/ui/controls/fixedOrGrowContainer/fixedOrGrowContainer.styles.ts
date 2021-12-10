@@ -18,6 +18,7 @@
 import styled, { css } from 'styled-components';
 
 export const Container = styled.div<{width?: number}>`
+	display: flex;
 	flex: 1;
 	
 	${({ width }) => width && css`

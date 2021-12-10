@@ -37,6 +37,7 @@ export const Subtitle = styled(Typography).attrs({
 	variant: 'body1',
 	component: 'span',
 })`
+	white-space: nowrap;
 	display: block;
 	color: ${({ theme }) => theme.palette.base.main};
 
