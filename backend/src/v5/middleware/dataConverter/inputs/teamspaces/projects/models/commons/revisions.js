@@ -81,7 +81,7 @@ const validateRevisionUpload = async (req, res, next) => {
 	try {
 		req.body = await schema.validate(req.body);
 		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
-		
+
 		const isTagValid = await isValidTag(req.params.teamspace, req.params.container, req.body.tag);
 		if (!isTagValid) throw createResponseCode(templates.invalidArguments, 'Revision name already exists');
 		await next();

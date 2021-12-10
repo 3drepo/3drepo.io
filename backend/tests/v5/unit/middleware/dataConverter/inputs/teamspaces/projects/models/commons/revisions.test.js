@@ -141,7 +141,7 @@ const testValidateNewRevisionData = () => {
 			expect(mockCB.mock.calls.length).toBe(0);
 			expect(Responder.respond.mock.calls.length).toBe(1);
 			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
-			expect(Responder.respond.mock.results[0].value.message).toEqual("Revision name already exists");
+			expect(Responder.respond.mock.results[0].value.message).toEqual('Revision name already exists');
 		});
 	});
 };
