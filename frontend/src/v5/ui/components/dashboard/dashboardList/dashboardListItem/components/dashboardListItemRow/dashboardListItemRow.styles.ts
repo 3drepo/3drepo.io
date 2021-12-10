@@ -21,8 +21,6 @@ import * as FavouriteCheckboxStyles from '@controls/favouriteCheckbox/favouriteC
 import * as EllipsisButtonStyles from '@controls/ellipsisButton/ellipsisButton.styles';
 import * as TextOverflowStyles from '@controls/textOverflow/textOverflow.styles';
 
-const dashboardListItemRowShadow = '0px 0px 12px 6px rgba(9, 30, 66, 0.2), 0px 0px 1px rgba(9, 30, 66, 0.31)';
-
 export const Container = styled.div`
 	position: relative;
 	display: flex;
@@ -45,17 +43,6 @@ export const Container = styled.div`
 		border-radius: 5px;
 		visibility: hidden;
 		z-index: -1;
-	}
-
-	:hover {
-		border-color: ${({ theme }) => theme.palette.primary.contrast};
-		box-shadow: ${dashboardListItemRowShadow};
-		border-radius: 5px;
-		z-index: 100;
-
-		::before {
-			visibility: visible;
-		}
 	}
 
 	${({ theme, selected }) => selected && css`
