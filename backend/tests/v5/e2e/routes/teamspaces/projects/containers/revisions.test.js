@@ -270,6 +270,15 @@ const testNewRevision = () => {
 				.expect(templates.ok.status);
 		});
 
+		test('should succeed if correct parameters are sent and file has uppercase extension', async () => {
+			const filenameWithoutExtension = objModel.substring(0, objModel.length - 4);;
+			await agent.post(`${route()}?key=${users.tsAdmin.apiKey}`)
+				.set('Content-Type', 'multipart/form-data')
+				.field('tag', '123')
+				.attach('file', filenameWithoutExtension + '.OBJ')
+				.expect(templates.ok.status);
+		});
+
 		test(`should fail with ${templates.invalidArguments.code} if incorrect parameters are sent`, async () => {
 			const res = await agent.post(`${route()}?key=${users.tsAdmin.apiKey}`)
 				.set('Content-Type', 'multipart/form-data')
