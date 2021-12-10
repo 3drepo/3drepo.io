@@ -17,7 +17,7 @@
 
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../helper/services');
-const { src, objModel } = require('../../../../../helper/path');
+const { src, objModel, objModelUppercaseExt } = require('../../../../../helper/path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -271,11 +271,10 @@ const testNewRevision = () => {
 		});
 
 		test('should succeed if correct parameters are sent and file has uppercase extension', async () => {
-			const filenameWithoutExtension = objModel.substring(0, objModel.length - 4);
 			await agent.post(`${route()}?key=${users.tsAdmin.apiKey}`)
 				.set('Content-Type', 'multipart/form-data')
 				.field('tag', '123')
-				.attach('file', `${filenameWithoutExtension}.OBJ`)
+				.attach('file', objModelUppercaseExt)
 				.expect(templates.ok.status);
 		});
 
