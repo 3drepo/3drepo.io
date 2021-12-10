@@ -17,6 +17,7 @@
 
 const Projects = {};
 const { PROJECT_ADMIN } = require('../utils/permissions/permissions.constants');
+const _ = require('lodash');
 const db = require('../handler/db');
 const { templates } = require('../utils/responseCodes');
 
@@ -45,9 +46,9 @@ Projects.getProjectById = async (ts, project, projection) => {
 	return res;
 };
 
-Projects.modelExistsInProject = async (teamspace, project, model) => {
-	const proj = await Projects.getProjectById(teamspace, project, { models: 1 });
-	return proj.models.includes(model);
+Projects.modelsExistInProject = async (teamspace, project, models) => {
+	const { models: projModels } = await Projects.getProjectById(teamspace, project, { models: 1 });
+	return _.intersection(models, projModels).length === models.length;
 };
 
 Projects.getProjectList = async (ts, projection = { _id: 1, name: 1 }) => findProjects(ts, {}, projection);
