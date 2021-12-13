@@ -20,9 +20,12 @@ const crypto = require("crypto");
 const { intercom } = require("../config");
 const { get } = require("lodash");
 const axios = require("axios");
-
 const accessToken = get(intercom, "accessToken");
 const secretKey = get(intercom, "secretKey");
+const config = require("../config");
+const { v5Path } = require("../../interop");
+const EventsV5 = require(`${v5Path}/services/eventsManager/eventsManager.constants`).events;
+const EventsManager = require(`${v5Path}/services/eventsManager/eventsManager`);
 
 const headers = {
 	"Authorization": `Bearer ${accessToken}`,
@@ -83,6 +86,18 @@ Intercom.submitLoginLockoutEvent = async (email) => {
 			email
 		}
 		, { headers });
+};
+
+Intercom.subscribeToV5Events = () => {
+	EventsManager.subscribe(EventsV5.FAILED_LOGIN_ATTEMPT, async ({email, failedLoginCount}) => {
+		if (failedLoginCount >= config.loginPolicy.maxUnsuccessfulLoginAttempts) {
+			try {
+				await Intercom.submitLoginLockoutEvent(email);
+			} catch (err) {
+				// Do nothing
+			}
+		}
+	});
 };
 
 module.exports = Intercom;
