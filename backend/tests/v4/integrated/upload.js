@@ -219,7 +219,7 @@ describe('Uploading a model', () => {
 				.field('tag', 'empty_file')
 				.attach('file', `${__dirname}/../statics/3dmodels/empty.ifc`)
 				.expect(400, (err, res) => {
-					expect(res.body.code).to.equal(templates.unsupportedFileFormat.code);
+					expect(res.body.code).to.equal(templates.invalidArguments.code);
 					done(err);
 				});
 		});
