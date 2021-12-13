@@ -19,7 +19,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectDialogs } from '@/v5/store/dialogs/dialogs.selectors';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
-import { Dialog } from '@material-ui/core';
+import { Modal } from '@/v5/ui/controls/modal';
 import { MODAL_TEMPLATES } from './templates';
 
 const ModalTemplateContainer = ({ id, modalType, props }) => {
@@ -35,9 +35,9 @@ const ModalTemplateContainer = ({ id, modalType, props }) => {
 	const ModalTemplate = MODAL_TEMPLATES[modalType];
 
 	return (
-		<Dialog open={openState} maxWidth={false}>
+		<Modal open={openState} onClickClose={onClickClose}>
 			<ModalTemplate onClickClose={onClickClose} {...props} />
-		</Dialog>
+		</Modal>
 	);
 };
 

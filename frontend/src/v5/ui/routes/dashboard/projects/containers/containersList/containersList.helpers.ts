@@ -22,15 +22,14 @@ import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/c
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { useDispatch } from 'react-redux';
 
-export const getContainerMenuItems = (id: IContainer['_id'], name: IContainer['name']) => {
+export const getContainerMenuItems = (container: IContainer) => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 	const dispatch = useDispatch();
-
 	return [
 		{
 			key: 1,
 			title: formatMessage({ id: 'containers.ellipsisMenu.loadContainer', defaultMessage: 'Load Container in 3D Viewer' }),
-			to: `/${id}`,
+			to: `/${container._id}`,
 		},
 		{
 			key: 2,
@@ -73,8 +72,15 @@ export const getContainerMenuItems = (id: IContainer['_id'], name: IContainer['n
 			title: formatMessage({ id: 'containers.ellipsisMenu.delete', defaultMessage: 'Delete' }),
 			onClick: () => {
 				dispatch(DialogsActions.open('delete', {
-					title: formatMessage({ id: 'deleteModal.title', defaultMessage: `Delete ${name}?` }),
-					onClickConfirm: () => ContainersActionsDispatchers.deleteContainer(teamspace, project, id),
+					title: formatMessage(
+						{ id: 'deleteModal.title', defaultMessage: 'Delete {name}?' },
+						{ name: container.name },
+					),
+					onClickConfirm: () => ContainersActionsDispatchers.deleteContainer(
+						teamspace,
+						project,
+						container._id,
+					),
 					message: 'By deleting this Container your data will be lost permanently and will not be recoverable.',
 				}));
 			},

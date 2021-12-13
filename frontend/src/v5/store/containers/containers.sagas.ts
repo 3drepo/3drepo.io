@@ -104,7 +104,7 @@ export function* deleteContainer({ teamspace, projectId, containerId }: DeleteCo
 		yield put(ContainersActions.deleteContainerSuccess(projectId, containerId));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: 'trying to delete container',
+			currentActions: formatMessage({ id: 'container.delete.error', defaultMessage: 'trying to delete container' }),
 			error,
 		}));
 	}

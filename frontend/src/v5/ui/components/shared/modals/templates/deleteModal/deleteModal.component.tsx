@@ -21,14 +21,14 @@ import DeleteIcon from '@assets/icons/delete.svg';
 import { FormattedMessage } from 'react-intl';
 import { Container, Actions } from '@/v5/ui/components/shared/modals/modals.styles';
 
-interface IdeleteModal {
+interface IDeleteModal {
 	onClickClose?: () => void,
 	onClickConfirm: () => void,
 	title: string,
 	message?: string,
 }
 
-export const DeleteModal: React.FC<IdeleteModal> = ({ onClickConfirm, onClickClose, title, message }) => (
+export const DeleteModal = ({ onClickConfirm, onClickClose, title, message }: IDeleteModal) => (
 	<Container>
 		<DeleteIcon />
 		<DialogTitle>
