@@ -67,8 +67,21 @@ const testToConstantCase = () => {
 	});
 };
 
+const testHasEmailFormat = () => {
+	describe('Has email format', () => {
+		test('with email format should return true', () => {
+			matchHelper(StringHelper.hasEmailFormat, 'example@email.com', true);
+		});
+
+		test('with non email format should return false', () => {
+			matchHelper(StringHelper.hasEmailFormat, 'nonEmail', false);
+		});
+	});
+};
+
 describe('utils/helper/strings', () => {
 	testGetURLDomain();
 	testToCamelCase();
 	testToConstantCase();
+	testHasEmailFormat();
 });
