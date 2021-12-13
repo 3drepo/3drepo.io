@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
+const { codeExists, createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const Path = require('path');
 const Yup = require('yup');
 const YupHelper = require('../../../../../../../utils/helper/yup');
@@ -54,19 +54,13 @@ Revisions.validateUpdateRevisionData = async (req, res, next) => {
 };
 
 const fileFilter = async (req, file, cb) => {
-	try {
-		const { originalname, size } = file;
-		const { teamspace } = req.params;
-		const fileExt = Path.extname(originalname).toLowerCase();
-		if (!ACCEPTED_MODEL_EXT.includes(fileExt)) {
-			const err = createResponseCode(templates.unsupportedFileFormat, `${fileExt} is not a supported model format`);
-			cb(err, false);
-		} else {
-			await sufficientQuota(teamspace, size);
-			cb(null, true);
-		}
-	} catch (err) {
+	const { originalname } = file;
+	const fileExt = Path.extname(originalname).toLowerCase();
+	if (!ACCEPTED_MODEL_EXT.includes(fileExt)) {
+		const err = createResponseCode(templates.unsupportedFileFormat, `${fileExt} is not a supported model format`);
 		cb(err, false);
+	} else {
+		cb(null, true);
 	}
 };
 
@@ -82,11 +76,15 @@ const validateRevisionUpload = async (req, res, next) => {
 		req.body = await schema.validate(req.body);
 		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
 
+		const { teamspace } = req.params;
+		await sufficientQuota(teamspace, req.file.size);
+
 		const isTagValid = await isValidTag(req.params.teamspace, req.params.container, req.body.tag);
 		if (!isTagValid) throw createResponseCode(templates.invalidArguments, 'Revision name already exists');
 		await next();
 	} catch (err) {
-		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+		if (err?.code && codeExists(err.code)) respond(req, res, err);
+		else respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };
 
