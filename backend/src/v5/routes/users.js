@@ -65,7 +65,7 @@ const establishRoutes = () => {
 	 *       400:
 	 *         $ref: "#/components/responses/tooManyLoginAttempts"
 	 *       200:
-	 *         description: Loggs the user in
+	 *         description: Authenticates the user and establish a session
 	 */
 	router.post('/login', validateLoginData, notLoggedIn, login, createSession);
 
@@ -80,7 +80,7 @@ const establishRoutes = () => {
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       200:
-	 *         description: Loggs the user out
+	 *         description: User is logged out and session is destroyed.
 	 */
 	router.post('/logout', isLoggedIn, destroySession);
 
@@ -88,7 +88,7 @@ const establishRoutes = () => {
 	 * @openapi
 	 * /login:
 	 *   get:
-	 *     description: Verifies if there is a valid session with the request and returns the name of the user
+	 *     description: Verifies if there is a valid session with the request and returns the username
 	 *     tags: [Auth]
 	 *     operationId: getUsername
 	 *     responses:

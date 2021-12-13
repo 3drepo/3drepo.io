@@ -20,10 +20,10 @@ const { removeOldSessions } = require('../../sessions');
 const { saveLoginRecord } = require('../../../models/loginRecord');
 const { subscribe } = require('../../eventsManager/eventsManager');
 
-const userLoggedIn = async ({ username, sessionID, ipAddress, userAgent, referer }) => {
-	await saveLoginRecord(username, sessionID, ipAddress, userAgent, referer);
-	await removeOldSessions(username, sessionID);
-};
+const userLoggedIn = ({ username, sessionID, ipAddress, userAgent, referer }) => Promise.all([
+	saveLoginRecord(username, sessionID, ipAddress, userAgent, referer),
+	removeOldSessions(username, sessionID),
+]);
 
 const AuthEventsListener = {};
 

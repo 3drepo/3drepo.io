@@ -34,7 +34,7 @@ Sessions.createSession = (req, res) => {
 		} else {
 			const updatedUser = { ...req.loginData, socketId: req.headers['x-socket-id'], webSession: false };
 
-			if (req?.headers['user-agent']) {
+			if (req.headers['user-agent']) {
 				updatedUser.webSession = isFromWebBrowser(req.headers['user-agent']);
 			}
 
