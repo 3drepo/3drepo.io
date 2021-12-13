@@ -23,7 +23,7 @@ import { ProjectsActions, ProjectsTypes, IProject } from './projects.redux';
 
 export function* fetch({ teamspace }) {
 	try {
-		const { data: { projects } } = yield API.fetchProjects(teamspace);
+		const { data: { projects } } = yield API.Projects.fetchProjects(teamspace);
 		yield put(ProjectsActions.fetchSuccess(teamspace, projects as IProject[]));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {

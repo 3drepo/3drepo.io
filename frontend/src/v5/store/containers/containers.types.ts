@@ -21,10 +21,9 @@ export interface IContainersState {
 	containers: Record<string, IContainer[]>;
 	filterQuery: string;
 	isListPending: boolean;
-	areStatsPending: boolean;
 }
 
-export enum ContainerStatuses {
+export enum UploadStatuses {
 	OK = 'ok',
 	FAILED = 'failed',
 	UPLOADING = 'uploading',
@@ -43,8 +42,8 @@ export interface IContainer {
 	lastUpdated: Date;
 	type: string;
 	code: string;
+	status: UploadStatuses;
 	units: string;
-	status: ContainerStatuses;
 	isFavourite: boolean;
 	role: string;
 	hasStatsPending: boolean;
@@ -86,11 +85,11 @@ export type FetchContainerStatsResponse = {
 		latestRevision: string;
 	};
 	type: string;
-	status: ContainerStatuses;
 	errorReason?: {
 		message: string;
 		timestamp: number;
 	};
+	status: UploadStatuses;
 	units: string;
 	code: string;
 };

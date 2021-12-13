@@ -14,13 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import { useMemo, useState } from 'react';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
-
-export type ISortConfig = {
-	column: string;
-	direction: SortingDirection;
-};
+import { ISortConfig } from './useOrderedList.types';
 
 export const useOrderedList = <T>(items: T[], defaultConfig: ISortConfig) => {
 	const [sortConfig, setSortConfig] = useState<ISortConfig>(defaultConfig);

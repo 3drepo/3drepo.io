@@ -15,16 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
-export const Federations = () => (
-	<>
-		Federations:
-		<ul>
-			<li>federation 1</li>
-			<li>federation 2</li>
-			<li>federation 3</li>
-			<li>federation 4</li>
-		</ul>
-	</>
-);
+export { Federations } from './federations.component';

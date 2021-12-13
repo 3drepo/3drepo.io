@@ -34,17 +34,19 @@ export const DashboardListItemTitle = ({
 	children, subtitle, width, onClick, className, selected = false, tooltipTitle = '',
 }: IDashboardListItemTitle): JSX.Element => (
 	<FixedOrGrowContainer width={width} className={className}>
-		<Tooltip title={tooltipTitle}>
-			<Title
-				onClick={(event) => {
-					event.stopPropagation();
-					onClick(event);
-				}}
-				selected={selected}
-			>
-				{children}
-			</Title>
-		</Tooltip>
-		<Subtitle selected={selected}>{subtitle}</Subtitle>
+		<div>
+			<Tooltip title={tooltipTitle}>
+				<Title
+					onClick={(event) => {
+						event.stopPropagation();
+						onClick(event);
+					}}
+					selected={selected}
+				>
+					{children}
+				</Title>
+			</Tooltip>
+			<Subtitle selected={selected}>{subtitle}</Subtitle>
+		</div>
 	</FixedOrGrowContainer>
 );

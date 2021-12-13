@@ -20,7 +20,7 @@ import { createIntl, createIntlCache, IntlShape } from 'react-intl';
 
 let intlInternal:IntlShape = null;
 
-const DEFAULT_LOCALE = 'en';
+const DEFAULT_LOCALE = 'en-GB';
 
 export const initializeIntl = (locale: string) => {
 	let messages = {};
@@ -69,4 +69,11 @@ export const getIntlProviderProps = () => ({
 	messages: getIntl().messages,
 	defaultLocal: getIntl().defaultLocale,
 	locale: getIntl().locale,
+	onError: (error) => {
+		if (error.code === 'MISSING_TRANSLATION' && getIntl().locale === DEFAULT_LOCALE) {
+			return;
+		}
+
+		console.error(error);
+	},
 });
