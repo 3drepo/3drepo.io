@@ -17,6 +17,8 @@
 
 import React from 'react';
 import { Tooltip } from '@material-ui/core';
+import { FormattedMessage } from 'react-intl';
+import { formatMessage } from '@/v5/services/intl';
 import { Button, Container } from './revisionsListItemButton.styles';
 
 type IRevisionsListItemButton= {
@@ -26,12 +28,24 @@ type IRevisionsListItemButton= {
 
 export const RevisionsListItemButton = ({ status, onClick }: IRevisionsListItemButton): JSX.Element => {
 	const isVoid = !!status;
-	const textStatus = isVoid ? 'void' : 'active';
-	const changeToStatus = isVoid ? 'active' : 'void';
+	const textStatus = isVoid ?
+		formatMessage({id: 'revisionDetails.list.item.button.void', defaultMessage: 'void'}) :
+		formatMessage({id: 'revisionDetails.list.item.button.active', defaultMessage: 'active'});
+	const changeToStatus = isVoid ?
+		formatMessage({id: 'revisionDetails.list.item.button.tooltip.active', defaultMessage: 'active'}) :
+		formatMessage({id: 'revisionDetails.list.item.button.tooltip.void', defaultMessage: 'void'});
 
 	return (
 		<Container>
-			<Tooltip title={`Change to ${changeToStatus}`}>
+			<Tooltip
+				title={
+					<FormattedMessage
+						id="revisionDetails.list.item.button.tooltip"
+						defaultMessage={`Change to ${changeToStatus}`}
+						values={{ changeToStatus }}
+					/>
+				}
+			>
 				<Button $isVoid={isVoid} onClick={onClick}>
 					{textStatus}
 				</Button>
