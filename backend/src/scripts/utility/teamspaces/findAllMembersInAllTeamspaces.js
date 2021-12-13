@@ -18,6 +18,8 @@
 /**
  * This script is used to list out every active member in all teamspaces
  */
+
+const DayJS = require('dayjs');
 const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
@@ -26,19 +28,21 @@ const FS = require('fs');
 
 const { find } = require(`${v5Path}/handler/db`);
 
+const formatDate = (date) => (date ? DayJS(date).format('DD/MM/YYYY') : '');
+
 const findMembersInTS = async (teamspace) => {
-	const results = await find('admin', 'system.users', { 'roles.db': teamspace }, { user: 1 });
-	return results.map(({ user }) => user);
+	const results = await find('admin', 'system.users', { 'roles.db': teamspace }, { user: 1, 'customData.lastLoginAt': 1 });
+	return results.map(({ user, customData: { lastLoginAt } }) => ({ user, lastLoginAt }));
 };
 
 const writeResultsToFile = (results) => new Promise((resolve) => {
 	const outFile = 'membersInTeamspaces.csv';
 	logger.logInfo(`Writing results to ${outFile}`);
 	const writeStream = FS.createWriteStream(outFile);
-	writeStream.write('Teamspace,User\n');
+	writeStream.write('Teamspace,User,lastLogin\n');
 	results.forEach(({ teamspace, members }) => {
-		members.forEach((member) => {
-			writeStream.write(`${teamspace},${member}\n`);
+		members.forEach(({ user, lastLoginAt }) => {
+			writeStream.write(`${teamspace},${user},${formatDate(lastLoginAt)}\n`);
 		});
 	});
 
