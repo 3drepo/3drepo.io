@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { discardSlash, discardUrlComponent } from '@/v5/services/routing/routing';
 import { useRouteMatch, useParams } from 'react-router-dom';
-
 import React from 'react';
+import { FormattedMessage } from 'react-intl';
+
+import { discardSlash, discardUrlComponent } from '@/v5/services/routing/routing';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { IProject } from '@/v5/store/projects/projects.redux';
-import { FormattedMessage } from 'react-intl';
 import { Container, Link } from './topNavigaton.styles';
 
 export const TopNavigation = (): JSX.Element => {

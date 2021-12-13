@@ -19,6 +19,10 @@ const { src } = require('../../../helper/path');
 
 jest.mock('../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
+jest.mock('../../../../../src/v5/models/loginRecord');
+const LoginRecord = require(`${src}/models/loginRecord`);
+jest.mock('../../../../../src/v5/services/sessions');
+const Sessions = require(`${src}/services/sessions`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 
@@ -26,6 +30,8 @@ const EventsListener = require(`${src}/services/eventsListener/eventsListener`);
 
 ModelSettings.updateModelStatus.mockResolvedValue(() => {});
 ModelSettings.newRevisionProcessed.mockResolvedValue(() => {});
+LoginRecord.saveLoginRecord.mockImplementation(() => ({}));
+Sessions.removeOldSessions.mockImplementation(() => { });
 
 const eventTriggeredPromise = (event) => new Promise((resolve) => EventsManager.subscribe(event, resolve));
 
@@ -51,9 +57,30 @@ const testModelEventsListener = () => {
 			await waitOnEvent;
 			expect(ModelSettings.newRevisionProcessed.mock.calls.length).toBe(1);
 			expect(ModelSettings.newRevisionProcessed.mock.calls[0]).toEqual(
-
 				[data.teamspace, data.model, data.corId, data.value, data.user],
 			);
+		});
+	});
+};
+
+const testAuthEventsListener = () => {
+	describe('Auth Events', () => {
+		test(`Should trigger UserLoggedIn if there is a ${events.SESSION_CREATED}`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.SESSION_CREATED);
+			const data = {
+				username: 'username1',
+				sessionID: '123',
+				ipAddress: '1.2.3.4',
+				userAgent: 'user agent',
+				referer: 'www.google.com',
+			};
+			EventsManager.publish(events.SESSION_CREATED, data);
+
+			await waitOnEvent;
+			expect(LoginRecord.saveLoginRecord.mock.calls.length).toBe(1);
+			expect(LoginRecord.saveLoginRecord.mock.calls[0]).toEqual(['username1', '123', '1.2.3.4', 'user agent', 'www.google.com']);
+			expect(Sessions.removeOldSessions.mock.calls.length).toBe(1);
+			expect(Sessions.removeOldSessions.mock.calls[0]).toEqual(['username1', '123']);
 		});
 	});
 };
@@ -61,4 +88,5 @@ const testModelEventsListener = () => {
 describe('services/eventsListener/eventsListener', () => {
 	EventsListener.init();
 	testModelEventsListener();
+	testAuthEventsListener();
 });

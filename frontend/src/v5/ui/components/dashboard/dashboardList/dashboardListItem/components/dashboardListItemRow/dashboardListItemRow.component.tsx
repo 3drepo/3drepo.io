@@ -22,7 +22,7 @@ type IDashboardListItemRow = {
 	children: ReactNode;
 	className?: string;
 	selected?: boolean;
-	onClick: Dispatch<void>;
+	onClick?: Dispatch<void>;
 };
 
 export const DashboardListItemRow = ({

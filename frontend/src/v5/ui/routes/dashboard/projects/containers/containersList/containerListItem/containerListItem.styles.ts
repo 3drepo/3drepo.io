@@ -15,4 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { EmptySearchResults } from './emptySearchResults.component';
+import styled from 'styled-components';
+import {
+	DashboardListItemTitle as DashboardListItemTitleComponent,
+} from '@components/dashboard/dashboardList/dashboardListItem/components';
+
+export const DashboardListItemTitle = styled(DashboardListItemTitleComponent)`
+	display: block;
+`;

@@ -17,8 +17,10 @@
 import styled, { css } from 'styled-components';
 import { Typography } from '@material-ui/core';
 
-export const Text = styled(Typography)`
-	${({ theme }) => theme.typography.body1};
+export const Text = styled(Typography).attrs({
+	component: 'span',
+	variant: 'body1',
+})`
 	color: ${({ theme, $active }) => ($active ? theme.palette.primary.contrast : theme.palette.base.light)};
 
 	${({ $meta, theme }) => $meta && css`

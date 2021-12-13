@@ -16,25 +16,28 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from 'react-intl';
 
-import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
+import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { MainHeader } from '@controls/mainHeader';
 import { SearchInput } from '@controls/searchInput';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
+import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
+import { useSearchInput } from '@controls/searchInput/searchInput.hooks';
+import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/skeletonListItem';
 import { Button } from '@controls/button';
-import { FormattedMessage } from 'react-intl';
+import { Content } from '@/v5/ui/routes/dashboard/projects/projects.styles';
+import { DashboardListEmptySearchResults } from '@components/dashboard/dashboardList';
 import { formatMessage } from '@/v5/services/intl';
 import {
 	Container,
-	Content,
 	HeaderButtonsGroup,
 } from './containers.styles';
 import { ContainersList } from './containersList';
-import { EmptySearchResults } from './containersList/emptySearchResults';
-import { useContainersData, useContainersSearch } from './containers.hooks';
+import { useContainersData } from './containers.hooks';
 
 export const Containers = (): JSX.Element => {
 	const {
@@ -44,7 +47,10 @@ export const Containers = (): JSX.Element => {
 		isListPending,
 	} = useContainersData();
 
-	const { searchInput, setSearchInput, filterQuery } = useContainersSearch();
+	const { searchInput, setSearchInput, filterQuery } = useSearchInput({
+		query: ContainersHooksSelectors.selectFilterQuery(),
+		dispatcher: ContainersActionsDispatchers.setFilterQuery,
+	});
 
 	return (
 		<Container>
@@ -95,7 +101,7 @@ export const Containers = (): JSX.Element => {
 							}}
 							emptyMessage={
 								filterQuery && hasContainers.favourites ? (
-									<EmptySearchResults searchPhrase={filterQuery} />
+									<DashboardListEmptySearchResults searchPhrase={filterQuery} />
 								) : (
 									<DashboardListEmptyText>
 										<FormattedMessage
@@ -106,6 +112,7 @@ export const Containers = (): JSX.Element => {
 								)
 							}
 						/>
+						<Divider />
 						<ContainersList
 							containers={filteredContainers}
 							title={(
@@ -120,7 +127,7 @@ export const Containers = (): JSX.Element => {
 							}}
 							emptyMessage={
 								filterQuery && hasContainers.all ? (
-									<EmptySearchResults searchPhrase={filterQuery} />
+									<DashboardListEmptySearchResults searchPhrase={filterQuery} />
 								) : (
 									<>
 										<DashboardListEmptyText>
