@@ -17,6 +17,7 @@
 
 import React, { ReactNode } from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
+import { TextOverflow } from '@controls/textOverflow';
 import { Text } from './revisionsListItemText.styles';
 
 type IDashboardListItemText = {
@@ -35,8 +36,10 @@ export const RevisionsListItemText = ({
 	active = false,
 }: IDashboardListItemText): JSX.Element => (
 	<FixedOrGrowContainer width={width} className={className}>
-		<Text $meta={meta} $active={active}>
-			{children}
-		</Text>
+		<TextOverflow>
+			<Text $meta={meta} $active={active}>
+				{children}
+			</Text>
+		</TextOverflow>
 	</FixedOrGrowContainer>
 );

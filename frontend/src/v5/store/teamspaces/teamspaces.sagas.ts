@@ -26,7 +26,7 @@ import { TeamspacesActions, TeamspacesTypes, ITeamspace } from './teamspaces.red
 
 export function* fetch() {
 	try {
-		const { data: { teamspaces } } = yield API.fetchTeamspaces();
+		const { data: { teamspaces } } = yield API.Teamspaces.fetchTeamspaces();
 		yield put(TeamspacesActions.fetchSuccess(teamspaces as ITeamspace[]));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -42,7 +42,7 @@ export function* fetchUsers({ teamspace }) {
 		const users = yield select(selectTeamspaceUsers, teamspace);
 
 		if (isEmpty(users)) {
-			const { data: { members } } = yield API.fetchTeamspaceMembers(teamspace);
+			const { data: { members } } = yield API.Teamspaces.fetchTeamspaceMembers(teamspace);
 
 			yield put(TeamspacesActions.fetchUsersSuccess(teamspace, members));
 		}
