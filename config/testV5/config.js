@@ -152,4 +152,6 @@ module.exports = {
 		{title: "Cookies", type: "haveRead", page: "cookies", fileName: "cookies.html"}
 	],
 	userNotice: false,
+	termsUpdatedAt: 12345678
+
 }
