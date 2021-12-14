@@ -24,6 +24,8 @@ import DialogContent from '@material-ui/core/DialogContent';
 import TextField from '@material-ui/core/TextField';
 import FileIcon from '@material-ui/icons/InsertDriveFileOutlined';
 import Checkbox from '@material-ui/core/Checkbox';
+import InputLabel from '@material-ui/core/InputLabel';
+import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
 
 import { unitsMap } from '../../../../constants/model-parameters';
 import { schema } from '../../../../services/validation';
@@ -37,6 +39,7 @@ import {
 	CheckboxContainer,
 	FileContainer,
 	FileName,
+	FormControl,
 	Main,
 	ModelInfo,
 	StyledDialogActions,
@@ -64,6 +67,8 @@ interface IProps {
 	isPending: boolean;
 	values: any;
 	isModelUploading: boolean;
+	countries: any[];
+	timezones: any[];
 }
 
 interface IState {
@@ -167,6 +172,34 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		)} />
 	));
 
+	public renderCountries = renderWhenTrue(() => (
+		<FormControl margin = "normal">
+		<InputLabel shrink htmlFor="project-select">Project Country</InputLabel>
+		<CellSelect
+			placeholder="Select Country"
+			items={this.props.countries}
+			value={this.props.countries?.length ? this.props.countries.keys[0] : 'None'}
+			onChange={()=>{}}
+			disabledPlaceholder={false}
+			inputId="project-select"			
+		/>
+		</FormControl>
+	));
+
+	public renderTimezones = renderWhenTrue(() => (
+		<FormControl margin = "normal">
+		<InputLabel shrink htmlFor="project-select">Project Time Zone</InputLabel>
+		<CellSelect
+			placeholder="Select Time Zone"
+			items={this.props.timezones}
+			value={this.props.timezones?.length ? this.props.countries.keys[0] : 'None'}
+			onChange={()=>{}}
+			disabledPlaceholder={false}
+			inputId="project-select"
+		/>
+		</FormControl>
+	));
+
 	public renderFileName = renderWhenTrue(() => (
 		<FileName><FileIcon />{this.state.fileName}</FileName>
 	));
@@ -259,6 +292,8 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 									fullWidth
 								/>}
 						/>
+						{this.renderCountries(this.state.allowSetTimezone)}
+						{this.renderTimezones(this.state.allowSetTimezone)}
 						<StyledDialogActions>
 							<Field render={ () =>
 								<CancelButton
