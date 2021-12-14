@@ -22,6 +22,7 @@ const YupHelper = require('../../../../../../../utils/helper/yup');
 const { respond } = require('../../../../../../../utils/responder');
 const { singleFileUpload } = require('../../../../../multer');
 const { sufficientQuota } = require('../../../../../../../utils/quota');
+const tz = require('countries-and-timezones');
 const { validateMany } = require('../../../../../../common');
 
 const Revisions = {};
@@ -75,6 +76,16 @@ const validateRevisionUpload = async (req, res, next) => {
 			tag: YupHelper.types.strings.code.required(),
 			desc: YupHelper.types.strings.blob,
 			importAnimations: Yup.bool().default(true),
+			timezone: Yup.string().test('valid-timezone',
+				'The timezone provided is not valid',
+				async (value) => {
+					if(value != undefined){
+						const allTimezones = tz.getAllTimezones();
+						const allTimezoneNames = Object.values(allTimezones).map((t)=> t.name);
+						return allTimezoneNames.includes(value);
+					}
+					return true;				
+				}),
 		});
 
 	try {

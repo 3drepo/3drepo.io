@@ -33,6 +33,7 @@
     "compression": "1.7.3",
     "connect-mongodb-session": "2.4.1",
     "cors": "2.8.5",
+    "countries-and-timezones": "3.3.0",
     "crypto-js": "4.0.0",
     "csv-parse": "4.8.5",
     "dayjs": "1.10.7",
