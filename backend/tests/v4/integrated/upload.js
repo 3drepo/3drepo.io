@@ -249,7 +249,7 @@ describe('Uploading a model', () => {
 				.field('tag', 'too_big')
 				.attach('file', `${__dirname}/../statics/3dmodels/toy.ifc`)
 				.expect(400, (err, res) => {
-					expect(res.body.code).to.equal(templates.unsupportedFileFormat.code);
+					expect(res.body.code).to.equal(templates.maxSizeExceeded.code);
 					done(err);
 				});
 		});
