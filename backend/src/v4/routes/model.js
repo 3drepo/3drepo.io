@@ -1714,7 +1714,7 @@ router.patch("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToM
  * ------WebKitFormBoundarySos0xligf1T8Sy8I-- *
  *
  */
-router.post("/:model/upload", middlewares.chechPermsAndFormatV5NewRevisionsData, validateNewRevisionData, uploadModel);
+router.post("/:model/upload",  middlewares.hasUploadAccessToModel, middlewares.formatV5NewRevisionsData, validateNewRevisionData, uploadModel);
 
 /**
  * @api {get} /:teamspace/:model/download/latest Download model

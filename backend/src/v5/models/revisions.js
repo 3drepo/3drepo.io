@@ -67,12 +67,12 @@ Revisions.updateRevisionStatus = async (teamspace, model, revision, status) => {
 	}
 };
 
-Revisions.isValidTag = async (teamspace, model, tag) => {
+Revisions.isTagInUse = async (teamspace, model, tag) => {
 	try {
 		await findOneRevisionByQuery(teamspace, model, { tag });
-		return false;
-	} catch {
 		return true;
+	} catch {
+		return false;
 	}
 };
 

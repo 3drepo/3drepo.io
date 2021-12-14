@@ -19,7 +19,7 @@ const { codeExists, createResponseCode, templates } = require('../../../../../..
 const Path = require('path');
 const Yup = require('yup');
 const YupHelper = require('../../../../../../../utils/helper/yup');
-const { isValidTag } = require('../../../../../../../models/revisions');
+const { isTagInUse } = require('../../../../../../../models/revisions');
 const { respond } = require('../../../../../../../utils/responder');
 const { singleFileUpload } = require('../../../../../multer');
 const { sufficientQuota } = require('../../../../../../../utils/quota');
@@ -67,7 +67,14 @@ const fileFilter = async (req, file, cb) => {
 const validateRevisionUpload = async (req, res, next) => {
 	const schema = Yup.object().noUnknown().required()
 		.shape({
-			tag: YupHelper.types.strings.code.required(),
+			tag: YupHelper.types.strings.code.required().test('tag-not-in-use',
+				'Revision name is already used by an existing revision',
+				async () => {
+					const tagInUse = await isTagInUse(req.params.teamspace,
+						req.params.container, req.body.tag);
+
+					return !tagInUse;
+				}),
 			desc: YupHelper.types.strings.shortDescription,
 			importAnimations: Yup.bool().default(true),
 		});
@@ -75,14 +82,11 @@ const validateRevisionUpload = async (req, res, next) => {
 	try {
 		req.body = await schema.validate(req.body);
 		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
-
 		if (!req.file.size) throw createResponseCode(templates.invalidArguments, 'File cannot be empty');
 
 		const { teamspace } = req.params;
 		await sufficientQuota(teamspace, req.file.size);
 
-		const isTagValid = await isValidTag(req.params.teamspace, req.params.container, req.body.tag);
-		if (!isTagValid) throw createResponseCode(templates.invalidArguments, 'Revision name already exists');
 		await next();
 	} catch (err) {
 		if (err?.code && codeExists(err.code)) respond(req, res, err);
