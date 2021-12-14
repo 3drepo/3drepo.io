@@ -81,7 +81,10 @@ export const getContainerMenuItems = (container: IContainer) => {
 						project,
 						container._id,
 					),
-					message: 'By deleting this Container your data will be lost permanently and will not be recoverable.',
+					message: formatMessage({
+						id: 'deleteModal.message',
+						defaultMessage: 'By deleting this Container your data will be lost permanently and will not be recoverable.',
+					}),
 				}));
 			},
 		},
