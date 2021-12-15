@@ -19,10 +19,9 @@ const { codeExists, createResponseCode, templates } = require('../../../../../..
 const Path = require('path');
 const Yup = require('yup');
 const YupHelper = require('../../../../../../../utils/helper/yup');
-const { isTagInUse } = require('../../../../../../../models/revisions');
+const { isTagUnique } = require('../../../../../../../models/revisions');
 const { respond } = require('../../../../../../../utils/responder');
 const { singleFileUpload } = require('../../../../../multer');
-const { sufficientQuota } = require('../../../../../../../utils/quota');
 const { validateMany } = require('../../../../../../common');
 
 const Revisions = {};
@@ -70,10 +69,10 @@ const validateRevisionUpload = async (req, res, next) => {
 			tag: YupHelper.types.strings.code.required().test('tag-not-in-use',
 				'Revision name is already used by an existing revision',
 				async () => {
-					const tagInUse = await isTagInUse(req.params.teamspace,
+					const uniqueTag = await isTagUnique(req.params.teamspace,
 						req.params.container, req.body.tag);
 
-					return !tagInUse;
+					return uniqueTag;
 				}),
 			desc: YupHelper.types.strings.shortDescription,
 			importAnimations: Yup.bool().default(true),

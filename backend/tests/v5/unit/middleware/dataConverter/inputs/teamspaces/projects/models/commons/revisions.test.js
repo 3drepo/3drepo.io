@@ -110,7 +110,7 @@ const createRequestWithFile = (teamspace, { tag, desc, importAnim },
 };
 
 Quota.sufficientQuota.mockImplementation((ts) => (ts === 'noQuota' ? Promise.reject(templates.quotaLimitExceeded) : Promise.resolve()));
-RevisionsModel.isValidTag.mockImplementation(() => true);
+RevisionsModel.isTagUnique.mockImplementation(() => true);
 
 const testValidateNewRevisionData = () => {
 	const standardBody = { tag: '123', description: 'this is a model', importAnim: false };
@@ -124,8 +124,10 @@ const testValidateNewRevisionData = () => {
 		['Request with tag that is not alphanumeric should fail', 'ts', { tag: '1%2%3' }, false, false, false, templates.invalidArguments],
 		['Request with no file should fail', 'ts', { tag: 'drflgdf' }, false, true, false, templates.invalidArguments],
 		['Request with an empty file should fail', 'ts', { tag: 'drflgdf' }, false, false, true, templates.invalidArguments],
+		['Request with duplicate tag should fail', 'ts', { tag: 'duplicate' }, false, false, false, templates.invalidArguments],
 	])('Check new revision data', (desc, ts, bodyContent, badFile, noFile, emptyFile, error) => {
 		test(`${desc} should ${error ? `fail with ${error.code}` : ' succeed and next() should be called'}`, async () => {
+			RevisionsModel.isTagUnique.mockImplementationOnce((teamspace, model, tag) => tag !== 'duplicate');
 			const req = createRequestWithFile(ts, bodyContent, badFile, noFile, emptyFile);
 			const mockCB = jest.fn(() => {});
 			await Revisions.validateNewRevisionData(req, {}, mockCB);
@@ -136,17 +138,6 @@ const testValidateNewRevisionData = () => {
 			} else {
 				expect(mockCB.mock.calls.length).toBe(1);
 			}
-		});
-
-		test('Request with duplicate tag should fail', async () => {
-			const req = createRequestWithFile('ts', standardBody);
-			RevisionsModel.isValidTag.mockImplementationOnce(() => false);
-			const mockCB = jest.fn(() => {});
-			await Revisions.validateNewRevisionData(req, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
-			expect(Responder.respond.mock.results[0].value.message).toEqual('Revision name already exists');
 		});
 	});
 };
