@@ -31,18 +31,11 @@ export const Container = styled.div`
 	cursor: pointer;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 
-	::before {
-		content: '';
-		position: absolute;
-		left: 50%;
-		height: 100%;
-		width: calc(100% + 10px);
-		transform: translateX(-50%);
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
-		border: 1px solid ${({ theme }) => theme.palette.base.lightest};
-		border-radius: 5px;
-		visibility: hidden;
-		z-index: -1;
+	:hover {
+		background-color: ${({ theme }) => theme.palette.primary.accent};
+		${ButtonStyles.LabelButton} {
+			${ButtonStyles.labelButtonSecondaryStyles};
+		}
 	}
 
 	${({ theme, selected }) => selected && css`
@@ -51,6 +44,10 @@ export const Container = styled.div`
 		::before {
 			background-color: ${theme.palette.secondary.main};
 			border: none;
+		}
+
+		:hover {
+			background-color: ${theme.palette.secondary.main};
 		}
 		
 		${TextOverflowStyles.Container} {
