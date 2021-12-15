@@ -73,7 +73,7 @@ export const getContainerMenuItems = (container: IContainer) => {
 			onClick: () => {
 				dispatch(DialogsActions.open('delete', {
 					title: formatMessage(
-						{ id: 'deleteModal.title', defaultMessage: 'Delete {name}?' },
+						{ id: 'deleteModal.container.title', defaultMessage: 'Delete {name}?' },
 						{ name: container.name },
 					),
 					onClickConfirm: () => ContainersActionsDispatchers.deleteContainer(
@@ -82,7 +82,7 @@ export const getContainerMenuItems = (container: IContainer) => {
 						container._id,
 					),
 					message: formatMessage({
-						id: 'deleteModal.message',
+						id: 'deleteModal.container.message',
 						defaultMessage: 'By deleting this Container your data will be lost permanently and will not be recoverable.',
 					}),
 				}));
