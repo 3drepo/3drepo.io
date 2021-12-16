@@ -15,26 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { discardSlash } from '@/v5/services/routing/routing';
 import React from 'react';
-import { useRouteMatch, Route, Switch } from 'react-router-dom';
-import { ProjectList } from '@/v5/ui/routes/dashboard/projects/projectsList/projectsList.component';
+import { Link } from 'react-router-dom';
+import { DashboardListItem } from '@components/dashboard/dashboardList';
+import {
+	DashboardListItemRow,
+	DashboardListItemText,
+} from '@components/dashboard/dashboardList/dashboardListItem/components';
 
-export const TeamspaceContent = () => {
-	let { path } = useRouteMatch();
-	path = discardSlash(path);
-
+export const ProjectListItem = ({ projectId, name }): JSX.Element => {
 	return (
-		<>
-			<Switch>
-				<Route exact path={`${path}/t/settings`}>
-					Teamspace settings
-				</Route>
-
-				<Route exact path={`${path}`}>
-					<ProjectList />
-				</Route>
-			</Switch>
-		</>
+		<DashboardListItem>
+			<Link to={projectId}>
+				<DashboardListItemRow>
+					<DashboardListItemText>
+						{name}
+					</DashboardListItemText>
+				</DashboardListItemRow>
+			</Link>
+		</DashboardListItem>
 	);
 };
