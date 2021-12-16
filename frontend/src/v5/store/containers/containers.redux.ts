@@ -38,18 +38,12 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	fetchContainerStatsSuccess: ['projectId', 'containerId', 'containerStats'],
 	setIsListPending: ['isPending'],
 	setFavouriteSuccess: ['projectId', 'containerId', 'isFavourite'],
-	fetchRevisions: ['teamspace', 'projectId', 'containerId'],
-	setRevisionVoidStatus: ['teamspace', 'projectId', 'containerId', 'revisionId', 'isVoid'],
-	setRevisionVoidStatusSuccess: ['projectId', 'containerId', 'revisionId', 'isVoid'],
-	setRevisionsIsPending: ['projectId', 'containerId', 'isPending'],
-	fetchRevisionsSuccess: ['projectId', 'containerId', 'revisions'],
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
 
 export const INITIAL_STATE: IContainersState = {
 	containers: {},
 	filterQuery: '',
 	isListPending: true,
-	areStatsPending: true,
 };
 
 export const setFilterQuery = (state = INITIAL_STATE, { query }: SetFilterQueryAction) => (
