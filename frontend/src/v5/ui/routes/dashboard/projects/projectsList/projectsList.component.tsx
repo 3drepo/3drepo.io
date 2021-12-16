@@ -43,12 +43,13 @@ export const ProjectList = (): JSX.Element => {
 				<FormattedMessage id="dashboard.projectsList.header" defaultMessage="Projects" />
 				{
 					projects.length ? (
-						projects.map((project) => <ProjectListItem
+						projects.map((project) => (
+							<ProjectListItem
 								key={project._id}
 								projectId={project._id}
 								name={project.name}
 							/>
-						)
+						))
 					) : (
 						<DashboardListEmptyContainer>
 							<FormattedMessage
