@@ -19,6 +19,7 @@ import { Field, Form, Formik } from 'formik';
 import { snakeCase } from 'lodash';
 import React from 'react';
 import * as Yup from 'yup';
+import * as tz from 'countries-and-timezones';
 import Button from '@material-ui/core/Button';
 import DialogContent from '@material-ui/core/DialogContent';
 import TextField from '@material-ui/core/TextField';
@@ -67,21 +68,26 @@ interface IProps {
 	isPending: boolean;
 	values: any;
 	isModelUploading: boolean;
-	countries: any[];
-	timezones: any[];
 }
 
 interface IState {
 	fileName: string;
 	allowImportAnimations: boolean;
 	allowSetTimezone: boolean;
+	timezones: any[];
+	selectedCountry: string;
+	selectedTimezone: string;
 }
 
+const countries = Object.values(tz.getAllCountries());
 export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 	public state = {
 		fileName: '',
 		allowImportAnimations: false,
-		allowSetTimezone: false
+		allowSetTimezone: false,
+		timezones: [],
+		selectedCountry: '',
+		selectedTimezone: ''		
 	};
 
 	get modelDetails() {
@@ -96,10 +102,28 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		return this.props.isModelUploading;
 	}
 
+	public success(position) {
+		const latitude  = position.coords.latitude;
+		const longitude = position.coords.longitude;
+	
+		// status.textContent = '';
+		// mapLink.href = `https://www.openstreetmap.org/#map=18/${latitude}/${longitude}`;
+		// mapLink.textContent = `Latitude: ${latitude} °, Longitude: ${longitude} °`;
+	  }
+	
+	  public error() {
+		//status.textContent = 'Unable to retrieve your location';
+	  }
+
 	public componentDidMount() {
 		const { modelId, teamspaceName, fetchModelSettings, fetchRevisions } = this.props;
 		fetchRevisions(teamspaceName, modelId, true);
 		fetchModelSettings(teamspaceName, modelId);
+		const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone ?? 'Europe/London';
+		
+		const defaultCountry = countries.find((c)=> c.timezones.some((t) => t.match(browserTimezone)));	
+		const timezones = defaultCountry.timezones;
+		this.setState({ timezones, selectedCountry: defaultCountry.name, selectedTimezone: browserTimezone });
 	}
 
 	public componentDidUpdate(prevProps: Readonly<IProps>) {
@@ -120,6 +144,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 			tag: values.revisionName,
 			desc: values.revisionDesc,
 			importAnimations: values.importAnimations,
+			timezone: this.state.selectedTimezone
 		};
 
 		const modelData = {
@@ -172,30 +197,35 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		)} />
 	));
 
-	public renderCountries = renderWhenTrue(() => (
-		<FormControl margin = "normal">
-		<InputLabel shrink htmlFor="project-select">Project Country</InputLabel>
-		<CellSelect
-			placeholder="Select Country"
-			items={this.props.countries}
-			value={this.props.countries?.length ? this.props.countries.keys[0] : 'None'}
-			onChange={()=>{}}
-			disabledPlaceholder={false}
-			inputId="project-select"			
-		/>
-		</FormControl>
+	public renderTimezones = renderWhenTrue(() => (
+		<Field name="selectedTimezone" render={({ field }) => (
+			<FormControl margin = "normal">
+				<InputLabel shrink htmlFor="timezone-select">Project Timezone</InputLabel>
+					<CellSelect			
+						{...field}
+						items={this.state.timezones}
+						value = {this.state.selectedTimezone}
+						disabledPlaceholder
+						inputId="timezone-select"			
+					/>
+			</FormControl>
+		)} />
 	));
 
-	public renderTimezones = renderWhenTrue(() => (
+	public onCountryChanged = (event, country) => {
+		const countryTimezones = countries.find((t)=> t.name === country).timezones;
+		this.setState({ timezones: countryTimezones, selectedTimezone: countryTimezones[0]});
+	}	
+
+	public renderCountries = renderWhenTrue(() => (
 		<FormControl margin = "normal">
-		<InputLabel shrink htmlFor="project-select">Project Time Zone</InputLabel>
-		<CellSelect
-			placeholder="Select Time Zone"
-			items={this.props.timezones}
-			value={this.props.timezones?.length ? this.props.countries.keys[0] : 'None'}
-			onChange={()=>{}}
-			disabledPlaceholder={false}
-			inputId="project-select"
+		<InputLabel shrink htmlFor="country-select">Project Country</InputLabel>
+		<CellSelect			
+			value = {this.state.selectedCountry}
+			items = {countries.map((c)=>c.name)}			
+			onChange={this.onCountryChanged}
+			disabledPlaceholder
+			inputId="country-select"			
 		/>
 		</FormControl>
 	));
@@ -250,7 +280,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		return (
 			<Formik
 				onSubmit={this.handleFileUpload}
-				initialValues={{ revisionName: '', revisionDesc: '', file: '', importAnimations: false, }}
+				initialValues={{ revisionName: '', revisionDesc: '', file: '', importAnimations: false }}
 				enableReinitialize
 				validationSchema={UploadSchema}
 			>

@@ -22,13 +22,6 @@ import { selectUrlParams } from '../router/router.selectors';
 
 export const selectModelDomain = (state) => state.model;
 
-export const getCountries = createSelector(
-	selectModelDomain, (state) => ['UK', 'Greece']
-);
-
-export const getTimezones = createSelector(
-	selectModelDomain, (state) => ['time 1', 'time 2']
-);
 
 export const selectSettings = createSelector(
 	selectModelDomain, (state) => state.settings

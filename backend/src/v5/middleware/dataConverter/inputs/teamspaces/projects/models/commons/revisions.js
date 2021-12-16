@@ -81,8 +81,7 @@ const validateRevisionUpload = async (req, res, next) => {
 				async (value) => {
 					if(value != undefined){
 						const allTimezones = tz.getAllTimezones();
-						const allTimezoneNames = Object.values(allTimezones).map((t)=> t.name);
-						return allTimezoneNames.includes(value);
+						return Object.values(allTimezones).map((t)=> t.name).includes(value);
 					}
 					return true;				
 				}),

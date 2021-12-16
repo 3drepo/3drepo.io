@@ -64,6 +64,10 @@ export interface IModelState {
 	pendingRevision: any;
 	maps: any[];
 	subModels?: ISubModel[];
+	countries: any[];
+	timezones: any[];
+	selectedCountry: string;
+	selectedTimezone: string;	
 }
 
 export const INITIAL_STATE: IModelState = {
@@ -78,7 +82,11 @@ export const INITIAL_STATE: IModelState = {
 	isPending: true,
 	isModelUploading: false,
 	pendingRevision: null,
-	maps: []
+	maps: [],
+	countries: [],
+	timezones: [],
+	selectedCountry: '',
+	selectedTimezone: ''
 };
 
 const setPendingState = (state = INITIAL_STATE, { pendingState }) => {

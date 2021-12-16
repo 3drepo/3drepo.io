@@ -24,9 +24,7 @@ import {
 	selectIsPending,
 	selectRevisions,
 	selectSettings,
-	ModelActions,
-	getCountries,
-	getTimezones
+	ModelActions
 } from '../../../../modules/model';
 import { selectModels } from '../../../../modules/teamspaces';
 import { UploadModelFileDialog } from './uploadModelFileDialog.component';
@@ -37,8 +35,6 @@ const mapStateToProps = createStructuredSelector({
 	isPending: selectIsPending,
 	isModelUploading: selectIsModelUploading,
 	models: selectModels,
-	countries: getCountries,
-	timezones: getTimezones,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
