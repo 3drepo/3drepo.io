@@ -14,15 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const { authenticate, canLogIn, getUserByUsername } = require('../models/users');
 
-const authEventsListener = require('./components/authEvents');
-const modelEventsListener = require('./components/modelEvents');
+const Users = {};
 
-const EventsListener = {};
-
-EventsListener.init = () => {
-	modelEventsListener.init();
-	authEventsListener.init();
+Users.login = async (username, password) => {
+	await canLogIn(username);
+	return authenticate(username, password);
 };
 
-module.exports = EventsListener;
+Users.getUserByUsername = getUserByUsername;
+
+module.exports = Users;

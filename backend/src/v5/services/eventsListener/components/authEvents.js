@@ -15,14 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const authEventsListener = require('./components/authEvents');
-const modelEventsListener = require('./components/modelEvents');
+const { events } = require('../../eventsManager/eventsManager.constants');
+const { removeOldSessions } = require('../../sessions');
+const { saveLoginRecord } = require('../../../models/loginRecord');
+const { subscribe } = require('../../eventsManager/eventsManager');
 
-const EventsListener = {};
+const userLoggedIn = ({ username, sessionID, ipAddress, userAgent, referer }) => Promise.all([
+	saveLoginRecord(username, sessionID, ipAddress, userAgent, referer),
+	removeOldSessions(username, sessionID),
+]);
 
-EventsListener.init = () => {
-	modelEventsListener.init();
-	authEventsListener.init();
+const AuthEventsListener = {};
+
+AuthEventsListener.init = () => {
+	subscribe(events.SESSION_CREATED, userLoggedIn);
 };
 
-module.exports = EventsListener;
+module.exports = AuthEventsListener;
