@@ -60,7 +60,7 @@ export const Breadcrumbs = (): JSX.Element => {
 		}
 	}, [project, teamspace]);
 
-	if (projects.length && !projects.find(({ _id }) => _id === project)) {
+	if (project && projects.length && !projects.find(({ _id }) => _id === project)) {
 		dispatch(DialogsActions.open('alert', {
 			onClickClose: () => history.push('/'),
 			currentActions: formatMessage({ id: 'breadCrumbs.projectFetchError.title', defaultMessage: 'trying to find project' }),
