@@ -26,6 +26,7 @@ export const COLOR = {
 	PRIMARY_MID: '#45CCD9',
 	PRIMARY_LIGHT: '#80E0E9',
 	PRIMARY_LIGHTEST: '#E6F9FB',
+	PRIMARY_ACCENT: '#F6F8FA',
 	SECONDARY_MAIN: '#172B4D',
 	SECONDARY_DARK: '#121E33',
 	SECONDARY_MID: '#2E405F',
@@ -155,6 +156,7 @@ export const theme = createMuiTheme({
 			lightest: COLOR.PRIMARY_LIGHTEST,
 			contrastText: COLOR.PRIMARY_LIGHTEST,
 			contrast: COLOR.PRIMARY_MAIN_CONTRAST,
+			accent: COLOR.PRIMARY_ACCENT,
 		},
 		secondary: {
 			main: COLOR.SECONDARY_MAIN,
