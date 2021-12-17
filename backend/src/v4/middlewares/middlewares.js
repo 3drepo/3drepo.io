@@ -160,9 +160,10 @@
 		checkPermissions([C.PERM_TEAMSPACE_ADMIN])(req, res, next);
 	}
 
-	function formatV5NewRevisionsData(req) {
+	function formatV5NewRevisionsData(req, res, next) {
 		req.params.teamspace = req.params.account;
 		req.params.container = req.params.model;
+		next();
 	}
 
 	const middlewares = {

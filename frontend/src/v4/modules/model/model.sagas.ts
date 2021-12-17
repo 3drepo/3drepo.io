@@ -184,7 +184,8 @@ export function* uploadModelFile({ teamspace, project, modelData, fileData, hand
 			const formData = new FormData();
 			formData.append('file', fileData.file);
 			formData.append('tag', fileData.tag);
-			formData.append('desc', fileData.desc);
+			if(fileData.desc)
+				formData.append('desc', fileData.desc);
 			formData.append('importAnimations', fileData.importAnimations);
 
 			const { modelId, modelName } = modelData;
