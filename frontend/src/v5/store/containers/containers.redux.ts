@@ -27,6 +27,7 @@ import {
 	FetchContainersSuccessAction,
 	SetIsListPendingAction,
 	FetchContainerStatsSuccessAction,
+	DeleteContainerSuccessAction,
 } from './containers.types';
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({
@@ -40,6 +41,13 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	fetchContainerStatsSuccess: ['projectId', 'containerId', 'containerStats'],
 	setIsListPending: ['isPending'],
 	setFavouriteSuccess: ['projectId', 'containerId', 'isFavourite'],
+	fetchRevisions: ['teamspace', 'projectId', 'containerId'],
+	setRevisionVoidStatus: ['teamspace', 'projectId', 'containerId', 'revisionId', 'isVoid'],
+	setRevisionVoidStatusSuccess: ['projectId', 'containerId', 'revisionId', 'isVoid'],
+	setRevisionsIsPending: ['projectId', 'containerId', 'isPending'],
+	fetchRevisionsSuccess: ['projectId', 'containerId', 'revisions'],
+	deleteContainer: ['teamspace', 'projectId', 'containerId'],
+	deleteContainerSuccess: ['projectId', 'containerId'],
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
 
 export const INITIAL_STATE: IContainersState = {
@@ -103,6 +111,17 @@ export const setIsListPending = (state = INITIAL_STATE, { isPending }: SetIsList
 	isListPending: isPending,
 });
 
+export const deleteContainerSuccess = (state = INITIAL_STATE, {
+	projectId,
+	containerId,
+}: DeleteContainerSuccessAction) => ({
+	...state,
+	containers: {
+		...state.containers,
+		[projectId]: state.containers[projectId].filter((container) => containerId !== container._id),
+	},
+});
+
 export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
 	[ContainersTypes.SET_ALL_FILTER_QUERY]: setAllFilterQuery,
 	[ContainersTypes.SET_FAVOURITES_FILTER_QUERY]: setFavouritesFilterQuery,
@@ -110,4 +129,5 @@ export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
 	[ContainersTypes.SET_IS_LIST_PENDING]: setIsListPending,
 	[ContainersTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
 	[ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS]: fetchStatsSuccess,
+	[ContainersTypes.DELETE_CONTAINER_SUCCESS]: deleteContainerSuccess,
 });

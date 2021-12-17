@@ -95,6 +95,17 @@ export type FetchContainerStatsResponse = {
 	code: string;
 };
 
+export interface DeleteContainerPayload {
+	teamspace: string;
+	projectId: string;
+	containerId: string;
+}
+
+export interface DeleteContainerSuccessPayload {
+	projectId: string;
+	containerId: string;
+}
+
 export type SetFilterQueryAction = Action<'SET_FILTER_QUERY'> & { query: string};
 export type SetFavouritesFilterQueryAction = Action<'SET_FAVOURITES_FILTER_QUERY'> & { query: string};
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;
@@ -105,6 +116,8 @@ export type FetchContainersSuccessAction = Action<'FETCH_CONTAINERS_SUCCESS'> & 
 export type SetIsListPendingAction = Action<'SET_IS_LIST_PENDING'> & { isPending: boolean };
 export type FetchContainerStatsAction = Action<'FETCH_CONTAINER_STATS'> & FetchContainerStatsPayload;
 export type FetchContainerStatsSuccessAction = Action<'FETCH_CONTAINER_STATS_SUCCESS'> & FetchContainerStatsSuccessPayload;
+export type DeleteContainerAction = Action<'DELETE'> & DeleteContainerPayload;
+export type DeleteContainerSuccessAction = Action<'DELETE_SUCCESS'> & DeleteContainerSuccessPayload;
 
 export interface IContainersActionCreators {
 	setAllFilterQuery: (query: string) => SetFilterQueryAction;
@@ -121,4 +134,6 @@ export interface IContainersActionCreators {
 		containerStats: FetchContainerStatsResponse
 	) => FetchContainerStatsSuccessAction;
 	setIsListPending: (isPending: boolean) => SetIsListPendingAction;
+	deleteContainer: (teamspace: string, projectId: string, containerId: string) => DeleteContainerAction;
+	deleteContainerSuccess: (projectId: string, containerId: string) => DeleteContainerSuccessAction;
 }
