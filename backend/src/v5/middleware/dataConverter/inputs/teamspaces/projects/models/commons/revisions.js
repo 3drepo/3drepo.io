@@ -22,6 +22,7 @@ const YupHelper = require('../../../../../../../utils/helper/yup');
 const { isTagUnique } = require('../../../../../../../models/revisions');
 const { respond } = require('../../../../../../../utils/responder');
 const { singleFileUpload } = require('../../../../../multer');
+const { sufficientQuota } = require('../../../../../../../utils/quota');
 const { validateMany } = require('../../../../../../common');
 
 const Revisions = {};
