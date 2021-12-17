@@ -15,54 +15,78 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useParams } from 'react-router';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { formatMessage } from '@/v5/services/intl';
+import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
+import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
+import { useDispatch } from 'react-redux';
 
-export const getContainerMenuItems = (id: IContainer['_id']) => [
-	{
-		key: 1,
-		title: formatMessage({ id: 'containers.ellipsisMenu.loadContainer', defaultMessage: 'Load Container in 3D Viewer' }),
-		to: `/${id}`,
-	},
-	{
-		key: 2,
-		title: formatMessage({ id: 'containers.ellipsisMenu.uploadNewRevision', defaultMessage: 'Upload new Revision' }),
-		onClick: () => { },
-	},
-	{
-		key: 3,
-		title: formatMessage({ id: 'containers.ellipsisMenu.viewIssues', defaultMessage: 'View Issues' }),
-		onClick: () => { },
-	},
-	{
-		key: 4,
-		title: formatMessage({ id: 'containers.ellipsisMenu.viewRisks', defaultMessage: 'View Risks' }),
-		onClick: () => { },
-	},
-	{
-		key: 5,
-		title: formatMessage({ id: 'containers.ellipsisMenu.viewRevisions', defaultMessage: 'View Revisions' }),
-		onClick: () => { },
-	},
-	{
-		key: 6,
-		title: formatMessage({ id: 'containers.ellipsisMenu.editPermissions', defaultMessage: 'Edit Permissions' }),
-		onClick: () => { },
-	},
-	{
-		key: 7,
-		title: formatMessage({ id: 'containers.ellipsisMenu.shareContainer', defaultMessage: 'Share Container' }),
-		onClick: () => { },
-	},
-	{
-		key: 8,
-		title: formatMessage({ id: 'containers.ellipsisMenu.settings', defaultMessage: 'Settings' }),
-		onClick: () => {
+export const getContainerMenuItems = (container: IContainer) => {
+	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const dispatch = useDispatch();
+	return [
+		{
+			key: 1,
+			title: formatMessage({ id: 'containers.ellipsisMenu.loadContainer', defaultMessage: 'Load Container in 3D Viewer' }),
+			to: `/${container._id}`,
 		},
-	},
-	{
-		key: 9,
-		title: formatMessage({ id: 'containers.ellipsisMenu.delete', defaultMessage: 'Delete' }),
-		onClick: () => { },
-	},
-];
+		{
+			key: 2,
+			title: formatMessage({ id: 'containers.ellipsisMenu.uploadNewRevision', defaultMessage: 'Upload new Revision' }),
+			onClick: () => { },
+		},
+		{
+			key: 3,
+			title: formatMessage({ id: 'containers.ellipsisMenu.viewIssues', defaultMessage: 'View Issues' }),
+			onClick: () => { },
+		},
+		{
+			key: 4,
+			title: formatMessage({ id: 'containers.ellipsisMenu.viewRisks', defaultMessage: 'View Risks' }),
+			onClick: () => { },
+		},
+		{
+			key: 5,
+			title: formatMessage({ id: 'containers.ellipsisMenu.viewRevisions', defaultMessage: 'View Revisions' }),
+			onClick: () => { },
+		},
+		{
+			key: 6,
+			title: formatMessage({ id: 'containers.ellipsisMenu.editPermissions', defaultMessage: 'Edit Permissions' }),
+			onClick: () => { },
+		},
+		{
+			key: 7,
+			title: formatMessage({ id: 'containers.ellipsisMenu.shareContainer', defaultMessage: 'Share Container' }),
+			onClick: () => { },
+		},
+		{
+			key: 8,
+			title: formatMessage({ id: 'containers.ellipsisMenu.settings', defaultMessage: 'Settings' }),
+			onClick: () => {
+			},
+		},
+		{
+			key: 9,
+			title: formatMessage({ id: 'containers.ellipsisMenu.delete', defaultMessage: 'Delete' }),
+			onClick: () => {
+				dispatch(DialogsActions.open('delete', {
+					title: formatMessage(
+						{ id: 'deleteModal.container.title', defaultMessage: 'Delete {name}?' },
+						{ name: container.name },
+					),
+					onClickConfirm: () => ContainersActionsDispatchers.deleteContainer(
+						teamspace,
+						project,
+						container._id,
+					),
+					message: formatMessage({
+						id: 'deleteModal.container.message',
+						defaultMessage: 'By deleting this Container your data will be lost permanently and will not be recoverable.',
+					}),
+				}));
+			},
+		},
+	];
+};

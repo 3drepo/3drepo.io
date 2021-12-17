@@ -30,4 +30,22 @@ AuthMiddlewares.validSession = (req, res, next) => {
 	}
 };
 
+AuthMiddlewares.isLoggedIn = (req, res, next) => {
+	const { header, session } = req;
+	if (isSessionValid(session, header.referer, true)) {
+		next();
+	} else {
+		respond(req, res, templates.notLoggedIn);
+	}
+};
+
+AuthMiddlewares.notLoggedIn = (req, res, next) => {
+	const { header, session } = req;
+	if (isSessionValid(session, header.referer, true)) {
+		respond(req, res, templates.alreadyLoggedIn);
+	} else {
+		next();
+	}
+};
+
 module.exports = AuthMiddlewares;

@@ -15,13 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { IconButton } from '@material-ui/core';
+const { events } = require('../../eventsManager/eventsManager.constants');
+const { removeOldSessions } = require('../../sessions');
+const { saveLoginRecord } = require('../../../models/loginRecord');
+const { subscribe } = require('../../eventsManager/eventsManager');
 
-export const CloseButton = styled(IconButton)`
-	&& {
-		position: absolute;
-		top: 11px;
-		right: 11px;
-	}
-`;
+const userLoggedIn = ({ username, sessionID, ipAddress, userAgent, referer }) => Promise.all([
+	saveLoginRecord(username, sessionID, ipAddress, userAgent, referer),
+	removeOldSessions(username, sessionID),
+]);
+
+const AuthEventsListener = {};
+
+AuthEventsListener.init = () => {
+	subscribe(events.SESSION_CREATED, userLoggedIn);
+};
+
+module.exports = AuthEventsListener;

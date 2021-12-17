@@ -14,14 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const { authenticate, canLogIn, getUserByUsername } = require('../models/users');
 
-import styled from 'styled-components';
-import { IconButton } from '@material-ui/core';
+const Users = {};
 
-export const CloseButton = styled(IconButton)`
-	&& {
-		position: absolute;
-		top: 11px;
-		right: 11px;
-	}
-`;
+Users.login = async (username, password) => {
+	await canLogIn(username);
+	return authenticate(username, password);
+};
+
+Users.getUserByUsername = getUserByUsername;
+
+module.exports = Users;

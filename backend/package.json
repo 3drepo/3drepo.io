@@ -1,6 +1,6 @@
 {
   "name": "3drepo.io",
-  "version": "4.20.1",
+  "version": "4.20.3",
   "engines": {
     "node": "14.x.x"
   },
@@ -61,6 +61,7 @@
     "socket.io": "4.1.3",
     "socket.io-client": "4.1.3",
     "string-to-stream": "3.0.1",
+    "supertest-session": "4.1.0",
     "swagger-jsdoc": "6.1.0",
     "swagger-ui-express": "4.1.6",
     "ua-parser-js": "0.7.28",
