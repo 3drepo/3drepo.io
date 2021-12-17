@@ -28,12 +28,10 @@ type IRevisionsListItemButton= {
 
 export const RevisionsListItemButton = ({ status, onClick }: IRevisionsListItemButton): JSX.Element => {
 	const isVoid = !!status;
-	const textStatus = isVoid
-		? formatMessage({ id: 'revisionDetails.list.item.button.void', defaultMessage: 'void' })
-		: formatMessage({ id: 'revisionDetails.list.item.button.active', defaultMessage: 'active' });
-	const changeToStatus = isVoid
-		? formatMessage({ id: 'revisionDetails.list.item.button.tooltip.active', defaultMessage: 'active' })
-		: formatMessage({ id: 'revisionDetails.list.item.button.tooltip.void', defaultMessage: 'void' });
+	const voidStr = formatMessage({ id: 'revisionDetails.void', defaultMessage: 'void' });
+	const activeStr = formatMessage({ id: 'revisionDetails.active', defaultMessage: 'active' });
+	const textStatus = isVoid ? voidStr : activeStr;
+	const changeToStatus = isVoid ? activeStr : voidStr;
 
 	return (
 		<Container>
