@@ -23,7 +23,7 @@ export const Title = styled(Button).attrs({
 	variant: 'text',
 })`
 	${({ theme }) => theme.typography.h5};
-	
+
 	color: ${({ theme }) => theme.palette.secondary.main};
 	padding: 0;
 	margin: 0;
@@ -44,4 +44,9 @@ export const Subtitle = styled(Typography).attrs({
 	${({ theme, selected }) => selected && css`
 		color: ${theme.palette.base.light};
 	`}
+`;
+
+export const Container = styled.div`
+	display: block;
+	min-width: 0;
 `;

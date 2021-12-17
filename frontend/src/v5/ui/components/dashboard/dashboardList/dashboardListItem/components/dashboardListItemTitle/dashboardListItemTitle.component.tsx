@@ -18,7 +18,7 @@
 import React, { Dispatch, ReactNode } from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { Tooltip } from '@material-ui/core';
-import { Title, Subtitle } from './dashboardListItemTitle.styles';
+import { Title, Subtitle, Container } from './dashboardListItemTitle.styles';
 
 type IDashboardListItemTitle = {
 	children?: ReactNode;
@@ -35,7 +35,7 @@ export const DashboardListItemTitle = ({
 	children, subtitle, width, tabletWidth, onClick, className, selected = false, tooltipTitle = '',
 }: IDashboardListItemTitle): JSX.Element => (
 	<FixedOrGrowContainer width={width} tabletWidth={tabletWidth} className={className}>
-		<div>
+		<Container>
 			<Tooltip title={tooltipTitle}>
 				<Title
 					onClick={(event) => {
@@ -48,6 +48,6 @@ export const DashboardListItemTitle = ({
 				</Title>
 			</Tooltip>
 			<Subtitle selected={selected}>{subtitle}</Subtitle>
-		</div>
+		</Container>
 	</FixedOrGrowContainer>
 );

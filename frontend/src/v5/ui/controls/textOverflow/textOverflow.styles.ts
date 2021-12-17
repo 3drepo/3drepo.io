@@ -34,22 +34,15 @@ export const Container = styled.div`
 	position: relative;
 	overflow: hidden;
 	white-space: nowrap;
-	display: flex;
+	display: block;
 	flex-grow: 1;
-	width: 0;
+	min-width: 0;
 	height: 100%;
+	text-overflow: ellipsis;
 
-	${({ isTruncated }) => isTruncated && css`
-		pointer-events: none;
-		mask: linear-gradient(to left, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 100%) left,
-		linear-gradient(to left, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.886) 37.72%, rgba(0, 0, 0, 1) 52.55%) right;
-		mask-size: calc(100% - 68px) 100%, 68px 100%;
-		mask-repeat: no-repeat;
-
-		&:hover {
-			& > * {
-				text-decoration: underline;
-			}
+	&:hover {
+		& > * {
+			text-decoration: underline;
 		}
-	`}
+	}
 `;
