@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
@@ -31,6 +31,7 @@ import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/containers/c
 import { Button } from '@controls/button';
 import { Content } from '@/v5/ui/routes/dashboard/projects/projects.styles';
 import { DashboardListEmptySearchResults } from '@components/dashboard/dashboardList';
+import { CreateContainerForm } from '@/v5/ui/routes/dashboard/projects/containers/createContainerForm/createContainerForm.component';
 import { formatMessage } from '@/v5/services/intl';
 import {
 	Container,
@@ -52,6 +53,8 @@ export const Containers = (): JSX.Element => {
 		dispatcher: ContainersActionsDispatchers.setFilterQuery,
 	});
 
+	const [newContainerFormOpen, setCreateContainerFormOpen] = useState(false);
+
 	return (
 		<Container>
 			<MainHeader>
@@ -69,6 +72,7 @@ export const Containers = (): JSX.Element => {
 						variant="outlined"
 						color="secondary"
 						disabled={isListPending}
+						onClick={() => setCreateContainerFormOpen(true)}
 					>
 						<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New Container" />
 					</Button>
@@ -146,6 +150,10 @@ export const Containers = (): JSX.Element => {
 						/>
 					</>
 				)}
+				<CreateContainerForm
+					open={newContainerFormOpen}
+					close={() => setCreateContainerFormOpen(false)}
+				/>
 			</Content>
 		</Container>
 	);
