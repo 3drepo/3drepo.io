@@ -81,15 +81,16 @@ const testValidateUpdateRevisionData = () => {
 		});
 	});
 };
-const createRequestWithFile = (teamspace, { tag, desc, importAnim }, unsupportedFile = false, noFile = false) => {
+const createRequestWithFile = (teamspace, { tag, description, importAnimations, timezone }, unsupportedFile = false, noFile = false) => {
 	const form = new FormData();
 	if (!noFile) {
 		form.append('file',
 			fs.createReadStream(path.join(modelFolder, unsupportedFile ? 'dummy.png' : 'dummy.obj')));
 	}
 	if (tag) form.append('tag', tag);
-	if (desc) form.append('desc', desc);
-	if (importAnim) form.append('importAnim', importAnim);
+	if (description) form.append('description', description);
+	if (importAnimations) form.append('importAnimations', importAnimations);
+	if (timezone) form.append('timezone', timezone);
 
 	const req = new MockExpressRequest({
 		method: 'POST',
@@ -106,7 +107,7 @@ const createRequestWithFile = (teamspace, { tag, desc, importAnim }, unsupported
 Quota.sufficientQuota.mockImplementation((ts) => (ts === 'noQuota' ? Promise.reject(templates.quotaLimitExceeded) : Promise.resolve()));
 
 const testValidateNewRevisionData = () => {
-	const standardBody = { tag: '123', description: 'this is a model', importAnim: false };
+	const standardBody = { tag: '123', description: 'this is a model', importAnimations: false, timezone: 'Europe/Berlin' };
 	describe.each([
 		['Request with valid data', 'ts', standardBody],
 		['Request with unsupported model file', 'ts', standardBody, true, false, templates.unsupportedFileFormat],
@@ -116,6 +117,7 @@ const testValidateNewRevisionData = () => {
 		['Request with wrong tag type should fail', 'ts', { tag: false }, false, false, templates.invalidArguments],
 		['Request with tag that is not alphanumeric should fail', 'ts', { tag: '1%2%3' }, false, false, templates.invalidArguments],
 		['Request with no file should fail', 'ts', { tag: 'drflgdf' }, false, true, templates.invalidArguments],
+		['Request with invalid timezone should fail', 'ts', { tag: 'drflgdf', timezone: 'abc' }, false, false, templates.invalidArguments],
 	])('Check new revision data', (desc, ts, bodyContent, badFile, noFile, error) => {
 		test(`${desc} should ${error ? `fail with ${error.code}` : ' succeed and next() should be called'}`, async () => {
 			const req = createRequestWithFile(ts, bodyContent, badFile, noFile);
