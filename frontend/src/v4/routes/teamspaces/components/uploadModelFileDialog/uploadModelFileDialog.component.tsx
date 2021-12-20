@@ -102,25 +102,12 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		return this.props.isModelUploading;
 	}
 
-	public success(position) {
-		const latitude  = position.coords.latitude;
-		const longitude = position.coords.longitude;
-	
-		// status.textContent = '';
-		// mapLink.href = `https://www.openstreetmap.org/#map=18/${latitude}/${longitude}`;
-		// mapLink.textContent = `Latitude: ${latitude} °, Longitude: ${longitude} °`;
-	  }
-	
-	  public error() {
-		//status.textContent = 'Unable to retrieve your location';
-	  }
-
 	public componentDidMount() {
 		const { modelId, teamspaceName, fetchModelSettings, fetchRevisions } = this.props;
 		fetchRevisions(teamspaceName, modelId, true);
 		fetchModelSettings(teamspaceName, modelId);
-		const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone ?? 'Europe/London';
-		
+		const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
 		const defaultCountry = countries.find((c)=> c.timezones.some((t) => t.match(browserTimezone)));	
 		const timezones = defaultCountry.timezones;
 		this.setState({ timezones, selectedCountry: defaultCountry.name, selectedTimezone: browserTimezone });
