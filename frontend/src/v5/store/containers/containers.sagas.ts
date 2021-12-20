@@ -30,13 +30,41 @@ import {
 	FetchContainerStatsResponse,
 	FetchContainersAction,
 	FetchContainerStatsAction,
+	DeleteContainerAction,
+
 } from './containers.types';
 import { prepareContainersData } from './containers.helpers';
+
+export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
+	try {
+		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, true));
+		yield API.Containers.addFavourites({ teamspace, containerId, projectId });
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'containers.addFavourite.error', defaultMessage: 'trying to add container to favourites' }),
+			error,
+		}));
+		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, false));
+	}
+}
+
+export function* removeFavourites({ containerId, teamspace, projectId }: RemoveFavouriteAction) {
+	try {
+		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, false));
+		yield API.Containers.removeFavourites({ containerId, teamspace, projectId });
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'containers.removeFavourite.error', defaultMessage: 'trying to remove container from favourites' }),
+			error,
+		}));
+		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, true));
+	}
+}
 
 export function* fetchContainers({ teamspace, projectId }: FetchContainersAction) {
 	yield put(ContainersActions.setIsListPending(true));
 	try {
-		const { containers }: FetchContainersResponse = yield API.fetchContainers({ teamspace, projectId });
+		const { containers }: FetchContainersResponse = yield API.Containers.fetchContainers({ teamspace, projectId });
 		const containersWithoutStats = prepareContainersData(containers);
 
 		yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithoutStats));
@@ -57,7 +85,7 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 
 export function* fetchContainerStats({ teamspace, projectId, containerId }: FetchContainerStatsAction) {
 	try {
-		const stats: FetchContainerStatsResponse = yield API.fetchContainerStats({
+		const stats: FetchContainerStatsResponse = yield API.Containers.fetchContainerStats({
 			teamspace, projectId, containerId,
 		});
 
@@ -70,29 +98,15 @@ export function* fetchContainerStats({ teamspace, projectId, containerId }: Fetc
 	}
 }
 
-export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
+export function* deleteContainer({ teamspace, projectId, containerId }: DeleteContainerAction) {
 	try {
-		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, true));
-		yield API.addFavourites({ teamspace, containerId, projectId });
+		yield API.Containers.deleteContainer({ teamspace, projectId, containerId });
+		yield put(ContainersActions.deleteContainerSuccess(projectId, containerId));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'containers.addFavourite.error', defaultMessage: 'trying to add container to favourites' }),
+			currentActions: formatMessage({ id: 'container.delete.error', defaultMessage: 'trying to delete container' }),
 			error,
 		}));
-		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, false));
-	}
-}
-
-export function* removeFavourites({ containerId, teamspace, projectId }: RemoveFavouriteAction) {
-	try {
-		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, false));
-		yield API.removeFavourites({ containerId, teamspace, projectId });
-	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'containers.removeFavourite.error', defaultMessage: 'trying to remove container from favourites' }),
-			error,
-		}));
-		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, true));
 	}
 }
 
@@ -101,4 +115,5 @@ export default function* ContainersSaga() {
 	yield takeLatest(ContainersTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeLatest(ContainersTypes.FETCH_CONTAINERS, fetchContainers);
 	yield takeEvery(ContainersTypes.FETCH_CONTAINER_STATS, fetchContainerStats);
+	yield takeLatest(ContainersTypes.DELETE_CONTAINER, deleteContainer);
 }

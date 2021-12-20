@@ -15,15 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { expectSaga } from 'redux-saga-test-plan';
-import { pick, times } from 'lodash';
-
-import { mockServer } from '../../internals/testing/mockServer';
 import * as ContainersSaga from '@/v5/store/containers/containers.sagas';
+import { expectSaga } from 'redux-saga-test-plan';
 import { ContainersActions } from '@/v5/store/containers/containers.redux';
-import { containerMockFactory } from './containers.fixtures';
+import { mockServer } from '../../internals/testing/mockServer';
+import { pick, times } from 'lodash';
 import { prepareContainersData } from '@/v5/store/containers/containers.helpers';
 import { IContainer } from '@/v5/store/containers/containers.types';
+import { containerMockFactory } from './containers.fixtures';
 
 describe('Containers: sagas', () => {
 	const teamspace = 'teamspace';
@@ -135,6 +134,29 @@ describe('Containers: sagas', () => {
 			await expectSaga(ContainersSaga.default)
 			.dispatch(ContainersActions.fetchContainers(teamspace, projectId))
 			.put(ContainersActions.setIsListPending(true))
+			.silentRun();
+		})
+	})
+	
+	describe('deleteContainer', () => {
+		it('should call deleteContainer endpoint', async () => {
+			mockServer
+			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
+			.reply(200);
+
+			await expectSaga(ContainersSaga.default)
+			.dispatch(ContainersActions.deleteContainer(teamspace, projectId, containerId))
+			.put(ContainersActions.deleteContainerSuccess(projectId, containerId))
+			.silentRun();
+		})
+
+		it('should call deleteContainer endpoint with 404 and open alert modal', async () => {
+			mockServer
+			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
+			.reply(404);
+
+			await expectSaga(ContainersSaga.default)
+			.dispatch(ContainersActions.deleteContainer(teamspace, projectId, containerId))
 			.silentRun();
 		})
 	})

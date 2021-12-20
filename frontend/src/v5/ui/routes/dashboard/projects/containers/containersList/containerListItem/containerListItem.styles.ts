@@ -15,16 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import styled from 'styled-components';
+import {
+	DashboardListItemTitle as DashboardListItemTitleComponent,
+} from '@components/dashboard/dashboardList/dashboardListItem/components';
 
-export const Federations = () => (
-	<>
-		Federations:
-		<ul>
-			<li>federation 1</li>
-			<li>federation 2</li>
-			<li>federation 3</li>
-			<li>federation 4</li>
-		</ul>
-	</>
-);
+export const DashboardListItemTitle = styled(DashboardListItemTitleComponent)`
+	display: block;
+`;
