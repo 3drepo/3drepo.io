@@ -34,6 +34,18 @@ export enum UploadStatuses {
 	QUEUED_FOR_UNITY = 'Queued for Unity',
 }
 
+export enum ContainerUnit {
+	MM = 'mm',
+	CM = 'cm',
+	DM = 'dm',
+	M = 'm',
+	FT = 'ft',
+}
+
+export enum ContainerType {
+	GIS = 'GIS',
+}
+
 export interface IContainer {
 	_id: string;
 	name: string;
@@ -94,6 +106,24 @@ export type FetchContainerStatsResponse = {
 	code: string;
 };
 
+export type NewContainerPayload = {
+	name: string;
+	unit: string;
+	type: string;
+	desc?: string;
+	code?: string;
+};
+
+export type CreateContainerPayload = {
+	teamspace: string;
+	projectId: string;
+	newContainer: NewContainerPayload;
+};
+
+export type CreateContainerSuccessPayload = NewContainerPayload & {
+	_id: string;
+};
+
 export type SetFilterQueryAction = Action<'SET_FILTER_QUERY'> & { query: string};
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;
 export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & FavouritePayload;
@@ -103,6 +133,8 @@ export type FetchContainersSuccessAction = Action<'FETCH_CONTAINERS_SUCCESS'> & 
 export type SetIsListPendingAction = Action<'SET_IS_LIST_PENDING'> & { isPending: boolean };
 export type FetchContainerStatsAction = Action<'FETCH_CONTAINER_STATS'> & FetchContainerStatsPayload;
 export type FetchContainerStatsSuccessAction = Action<'FETCH_CONTAINER_STATS_SUCCESS'> & FetchContainerStatsSuccessPayload;
+export type CreateContainerAction = Action<'CREATE_CONTAINER'> & CreateContainerPayload;
+export type CreateContainerSuccessAction = Action<'CREATE_CONTAINER_SUCCESS'> & { projectId: string, container: CreateContainerSuccessPayload };
 
 export interface IContainersActionCreators {
 	setFilterQuery: (query: string) => SetFilterQueryAction;
@@ -118,4 +150,13 @@ export interface IContainersActionCreators {
 		containerStats: FetchContainerStatsResponse
 	) => FetchContainerStatsSuccessAction;
 	setIsListPending: (isPending: boolean) => SetIsListPendingAction;
+	createContainer: (
+		teamspace: string,
+		projectId: string,
+		newContainer: NewContainerPayload,
+	) => CreateContainerAction;
+	createContainerSuccess: (
+		projectId: string,
+		container: CreateContainerSuccessPayload,
+	) => CreateContainerSuccessAction;
 }

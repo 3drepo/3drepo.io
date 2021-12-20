@@ -20,6 +20,7 @@ import {
 	FavouritePayload,
 	FetchContainersPayload, FetchContainersResponse,
 	FetchContainerStatsPayload, FetchContainerStatsResponse,
+	CreateContainerPayload,
 } from '@/v5/store/containers/containers.types';
 import api from './default';
 
@@ -54,4 +55,13 @@ export const fetchContainerStats = async ({
 }: FetchContainerStatsPayload): Promise<FetchContainerStatsResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/stats`);
 	return data;
+};
+
+export const createContainer = async ({
+	teamspace,
+	projectId,
+	newContainer,
+}: CreateContainerPayload): Promise<string> => {
+	const { data } = await api.post(`teamspaces/${teamspace}/projects/${projectId}/containers`, newContainer);
+	return data._id;
 };

@@ -29,6 +29,7 @@ import {
 	FetchContainersResponse,
 	FetchContainerStatsResponse,
 	FetchContainersAction, FetchContainerStatsAction,
+	CreateContainerAction,
 } from './containers.types';
 import { prepareContainersData } from './containers.helpers';
 
@@ -95,9 +96,27 @@ export function* fetchContainerStats({ teamspace, projectId, containerId }: Fetc
 	}
 }
 
+export function* createContainer({ teamspace, projectId, newContainer }: CreateContainerAction) {
+	try {
+		const id = yield API.Containers.createContainer({ teamspace, projectId, newContainer });
+
+		const container = { _id: id, ...newContainer };
+		yield put(ContainersActions.createContainerSuccess(
+			projectId,
+			container,
+		));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'containers.creation.error', defaultMessage: 'trying to create container' }),
+			error,
+		}));
+	}
+}
+
 export default function* ContainersSaga() {
 	yield takeLatest(ContainersTypes.ADD_FAVOURITE, addFavourites);
 	yield takeLatest(ContainersTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeLatest(ContainersTypes.FETCH_CONTAINERS, fetchContainers);
 	yield takeEvery(ContainersTypes.FETCH_CONTAINER_STATS, fetchContainerStats);
+	yield takeLatest(ContainersTypes.CREATE_CONTAINER, createContainer);
 }
