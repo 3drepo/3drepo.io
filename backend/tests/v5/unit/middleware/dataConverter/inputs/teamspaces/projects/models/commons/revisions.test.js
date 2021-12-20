@@ -81,7 +81,8 @@ const testValidateUpdateRevisionData = () => {
 		});
 	});
 };
-const createRequestWithFile = (teamspace, { tag, description, importAnimations, timezone }, unsupportedFile = false, noFile = false) => {
+const createRequestWithFile = (teamspace, { tag, description, importAnimations, timezone },
+	unsupportedFile = false, noFile = false) => {
 	const form = new FormData();
 	if (!noFile) {
 		form.append('file',
