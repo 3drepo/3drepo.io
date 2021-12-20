@@ -87,7 +87,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		allowSetTimezone: false,
 		timezones: [],
 		selectedCountry: '',
-		selectedTimezone: ''		
+		selectedTimezone: ''
 	};
 
 	get modelDetails() {
@@ -108,7 +108,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		fetchModelSettings(teamspaceName, modelId);
 		const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-		const defaultCountry = countries.find((c)=> c.timezones.some((t) => t.match(browserTimezone)));	
+		const defaultCountry = countries.find((c) => c.timezones.some((t) => t === browserTimezone));
 		const timezones = defaultCountry.timezones;
 		this.setState({ timezones, selectedCountry: defaultCountry.name, selectedTimezone: browserTimezone });
 	}
@@ -186,33 +186,33 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 
 	public renderTimezones = renderWhenTrue(() => (
 		<Field name="selectedTimezone" render={({ field }) => (
-			<FormControl margin = "normal">
+			<FormControl margin="normal">
 				<InputLabel shrink htmlFor="timezone-select">Project Timezone</InputLabel>
-					<CellSelect			
+					<CellSelect
 						{...field}
 						items={this.state.timezones}
-						value = {this.state.selectedTimezone}
+						value={this.state.selectedTimezone}
 						disabledPlaceholder
-						inputId="timezone-select"			
+						inputId="timezone-select"
 					/>
 			</FormControl>
 		)} />
 	));
 
 	public onCountryChanged = (event, country) => {
-		const countryTimezones = countries.find((t)=> t.name === country).timezones;
+		const countryTimezones = countries.find((t) => t.name === country).timezones;
 		this.setState({ timezones: countryTimezones, selectedTimezone: countryTimezones[0]});
-	}	
+	}
 
 	public renderCountries = renderWhenTrue(() => (
-		<FormControl margin = "normal">
+		<FormControl margin="normal">
 		<InputLabel shrink htmlFor="country-select">Project Country</InputLabel>
-		<CellSelect			
-			value = {this.state.selectedCountry}
-			items = {countries.map((c)=>c.name)}			
+		<CellSelect
+			value={this.state.selectedCountry}
+			items={countries.map((c) => c.name)}
 			onChange={this.onCountryChanged}
 			disabledPlaceholder
-			inputId="country-select"			
+			inputId="country-select"
 		/>
 		</FormControl>
 	));

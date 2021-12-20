@@ -67,7 +67,7 @@ export interface IModelState {
 	countries: any[];
 	timezones: any[];
 	selectedCountry: string;
-	selectedTimezone: string;	
+	selectedTimezone: string;
 }
 
 export const INITIAL_STATE: IModelState = {
