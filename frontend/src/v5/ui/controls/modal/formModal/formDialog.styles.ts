@@ -17,16 +17,48 @@
 
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
+import { DialogActions, DialogContent, IconButton } from '@material-ui/core';
+
+export const CloseButton = styled(IconButton)`
+	&& {
+		position: absolute;
+		top: 11px;
+		right: 11px;
+
+		/* Turn SVG white */
+		filter: invert(100%) sepia(100%) saturate(7%) hue-rotate(159deg) brightness(104%) contrast(102%);
+	}
+`;
 
 export const Form = styled.form`
 	display: flex;
 	flex-direction: column;
 	min-width: 520px;
-	padding-top: 35px;
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 `;
 
 export const Title = styled(Typography).attrs({
 	variant: 'h2',
 })`
-	text-align: center;
+	color: ${({ theme }) => theme.palette.primary.contrast};
+	position: relative;
+	padding: 27px;
+	height: 74px;
+	user-select: none;
+	box-sizing: border-box;
+`;
+
+export const FormDialogContent = styled(DialogContent)`
+	margin: 20px 34px 43px;
+`;
+
+export const FormDialogActions = styled(DialogActions)`
+	background: ${({ theme }) => theme.palette.tertiary.lightest};
+	box-shadow: 0 6px 10px rgba(0, 0, 0, 0.14), 0 1px 18px rgba(0, 0, 0, 0.12), 0 3px 5px rgba(0, 0, 0, 0.2);
+`;
+
+export const Header = styled.div`
+	background: linear-gradient(89.98deg,
+	${({ theme }) => theme.palette.secondary.main} 0.01%,
+	${({ theme }) => theme.palette.secondary.mid} 99.99%);
 `;

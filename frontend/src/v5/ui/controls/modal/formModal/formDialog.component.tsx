@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Button, DialogActions, DialogContent } from '@material-ui/core';
+import { Button, Dialog } from '@material-ui/core';
 import React from 'react';
-import { Modal } from '@controls/modal';
-import { Form, Title } from './formDialog.styles';
+import CloseIcon from '@assets/icons/close.svg';
+import { Form, Title, Header, CloseButton, FormDialogContent, FormDialogActions } from './formDialog.styles';
 
 interface IFormDialog extends React.DetailedHTMLProps<React.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement> {
 	onClickClose?: () => void;
@@ -31,23 +31,28 @@ interface IFormDialog extends React.DetailedHTMLProps<React.FormHTMLAttributes<H
 export const FormModal = (props: IFormDialog) => {
 	const { onClickClose, title, confirmLabel, open, children, className, isValid = true, ...formProps } = props;
 	return (
-		<Modal onClickClose={onClickClose} open={open} className={className}>
+		<Dialog onClose={onClickClose} open={open} className={className}>
 			<Form {...formProps}>
-				<Title>
-					{title}
-				</Title>
-				<DialogContent>
+				<Header>
+					<Title>
+						{title}
+					</Title>
+					<CloseButton aria-label="Close dialog" onClick={onClickClose}>
+						<CloseIcon />
+					</CloseButton>
+				</Header>
+				<FormDialogContent>
 					{children}
-				</DialogContent>
-				<DialogActions>
+				</FormDialogContent>
+				<FormDialogActions>
 					<Button autoFocus onClick={onClickClose} variant="outlined" color="secondary" size="small">
 						Cancel
 					</Button>
 					<Button disabled={!isValid} type="submit" variant="contained" color="primary" size="small">
 						{confirmLabel || 'OK'}
 					</Button>
-				</DialogActions>
+				</FormDialogActions>
 			</Form>
-		</Modal>
+		</Dialog>
 	);
 };
