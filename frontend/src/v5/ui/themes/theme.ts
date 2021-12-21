@@ -362,7 +362,6 @@ export const theme = createMuiTheme({
 		MuiOutlinedInput:
 			{
 				root: {
-					marginTop: 6,
 					'& $notchedOutline, &$disabled:hover:not($error) $notchedOutline, &$disabled $notchedOutline': {
 						borderColor: COLOR.BASE_LIGHTEST,
 						borderRadius: 5,

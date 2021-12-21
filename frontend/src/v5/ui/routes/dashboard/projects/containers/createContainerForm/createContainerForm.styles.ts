@@ -16,10 +16,10 @@
  */
 
 import styled from 'styled-components';
-import { Select, Input } from '@material-ui/core';
+import { Select, TextField } from '@material-ui/core';
 import { Typography } from '@controls/typography';
 
-export const FormInput = styled(Input)`
+export const FormInput = styled(TextField)`
 	display: flex;
 	height: 35px;
 	width: auto;

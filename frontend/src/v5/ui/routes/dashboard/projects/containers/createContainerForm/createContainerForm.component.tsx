@@ -33,8 +33,19 @@ interface IFormInput {
 	type: string;
 }
 
+const errorMessage = {
+	name: {
+		required: formatMessage({ id: 'containers.creation.name.error.required', defaultMessage: 'Name is a required field' }),
+		maxLength: formatMessage({ id: 'containers.creation.name.error.length', defaultMessage: 'Name is limited to 120 characters' }),
+	},
+	code: {
+		maxLength: formatMessage({ id: 'containers.creation.code.error.length', defaultMessage: 'Code is limited to 50 characters' }),
+		pattern: formatMessage({ id: 'containers.creation.code.error.pattern', defaultMessage: 'Code is limited to letters and numbers' }),
+	},
+};
+
 export const CreateContainerForm = ({ open, close }): JSX.Element => {
-	const { register, handleSubmit, formState } = useForm<IFormInput>({
+	const { register, handleSubmit, formState, reset, formState: { errors } } = useForm<IFormInput>({
 		mode: 'onChange',
 	});
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
@@ -55,8 +66,12 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 			<Label className="required">
 				<FormattedMessage id="containers.creation.form.name" defaultMessage="Name" />
 			</Label>
-			<FormInput fullWidth {...register('name', { required: true })} />
-
+			<FormInput
+				fullWidth
+				error={errors.name}
+				helperText={errors.name && errorMessage.name[errors.name?.type]}
+				{...register('name', { required: true, maxLength: 120 })}
+			/>
 			<LabelGroup>
 				<Label className="required">
 					<FormattedMessage id="containers.creation.form.units" defaultMessage="Units" />
@@ -129,7 +144,15 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 			<Label>
 				<FormattedMessage id="containers.creation.form.code" defaultMessage="Code" />
 			</Label>
-			<FormInput fullWidth {...register('code')} />
+			<FormInput
+				fullWidth
+				error={errors.code}
+				helperText={(errors.code) && errorMessage.code[errors.code?.type]}
+				{...register('code', {
+					maxLength: 50,
+					pattern: /^[A-Za-z0-9]+$/,
+				})}
+			/>
 		</FormModal>
 	);
 };
