@@ -17,11 +17,13 @@
 
 import React from 'react';
 import { formatMessage } from '@/v5/services/intl';
-import { Input, Select } from '@material-ui/core';
+import { FormattedMessage } from 'react-intl';
+import { MenuItem } from '@material-ui/core';
 import { FormModal } from '@/v5/ui/controls/modal/formModal/formDialog.component';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
+import { FormInput, Label, FormSelect, LabelGroup } from './createContainerForm.styles';
 
 interface IFormInput {
 	name: string;
@@ -43,121 +45,91 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 
 	return (
 		<FormModal
-			title={formatMessage({ id: 'containers.creation.title', defaultMessage: 'Create new container' })}
+			title={formatMessage({ id: 'containers.creation.title', defaultMessage: 'Create new Container' })}
 			open={open}
 			onClickClose={close}
 			onSubmit={handleSubmit(onSubmit)}
+			confirmLabel={formatMessage({ id: 'containers.creation.ok', defaultMessage: 'Create Container' })}
 			isValid={formState.isValid}
 		>
-			<Input autoFocus fullWidth placeholder="Name" {...register('name')} />
-			<Select autoWidth placeholder="Units" {...register('unit')}>
-				<option selected value="mm">
-					{formatMessage({
-						id: 'containers.creation.unit.mm',
-						defaultMessage: 'Millimetres',
-					})}
-				</option>
-				<option value="cm">
-					{formatMessage({
-						id: 'containers.creation.unit.cm',
-						defaultMessage: 'Centimetres',
-					})}
-				</option>
-				<option value="dm">
-					{formatMessage({
-						id: 'containers.creation.unit.dm',
-						defaultMessage: 'Decimetres',
-					})}
-				</option>
-				<option value="m">
-					{formatMessage({
-						id: 'containers.creation.unit.m',
-						defaultMessage: 'Metres',
-					})}
-				</option>
-				<option value="ft">
-					{formatMessage({
-						id: 'containers.creation.unit.ft',
-						defaultMessage: 'Feet and inches',
-					})}
-				</option>
-			</Select>
-			<Select placeholder="Type" {...register('type')}>
-				<option value="Architectural">
-					{formatMessage({
-						id: 'containers.creation.type.architectural',
-						defaultMessage: 'Architectural',
-					})}
-				</option>
-				<option value="Existing">
-					{formatMessage({
-						id: 'containers.creation.type.existing',
-						defaultMessage: 'Existing',
-					})}
-				</option>
-				<option value="GIS">
-					{formatMessage({
-						id: 'containers.creation.type.gis',
-						defaultMessage: 'GIS',
-					})}
-				</option>
-				<option value="Infrastructure">
-					{formatMessage({
-						id: 'containers.creation.type.infrastructure',
-						defaultMessage: 'Infrastructure',
-					})}
-				</option>
-				<option value="Interior">
-					{formatMessage({
-						id: 'containers.creation.type.interior',
-						defaultMessage: 'Interior',
-					})}
-				</option>
-				<option value="Interior">
-					{formatMessage({
-						id: 'containers.creation.type.interior',
-						defaultMessage: 'Interior',
-					})}
-				</option>
-				<option value="Landscape">
-					{formatMessage({
-						id: 'containers.creation.type.landscape',
-						defaultMessage: 'Landscape',
-					})}
-				</option>
-				<option value="MEP">
-					{formatMessage({
-						id: 'containers.creation.type.mep',
-						defaultMessage: 'MEP',
-					})}
-				</option>
-				<option value="Mechanical">
-					{formatMessage({
-						id: 'containers.creation.type.mechanical',
-						defaultMessage: 'Mechanical',
-					})}
-				</option>
-				<option value="Structural">
-					{formatMessage({
-						id: 'containers.creation.type.structural',
-						defaultMessage: 'Structural',
-					})}
-				</option>
-				<option value="Survey">
-					{formatMessage({
-						id: 'containers.creation.type.survey',
-						defaultMessage: 'Survey',
-					})}
-				</option>
-				<option value="Other">
-					{formatMessage({
-						id: 'containers.creation.type.other',
-						defaultMessage: 'Other',
-					})}
-				</option>
-			</Select>
-			<Input fullWidth placeholder="Description" {...register('desc')} />
-			<Input fullWidth placeholder="Code" {...register('code')} />
+			<Label className="required">
+				<FormattedMessage id="containers.creation.form.name" defaultMessage="Name" />
+			</Label>
+			<FormInput fullWidth {...register('name', { required: true })} />
+
+			<LabelGroup>
+				<Label className="required">
+					<FormattedMessage id="containers.creation.form.units" defaultMessage="Units" />
+				</Label>
+				<FormSelect autoWidth {...register('unit', { required: true })}>
+					<MenuItem value="mm">
+						<FormattedMessage id="containers.creation.form.unit.mm" defaultMessage="Millimetres" />
+					</MenuItem>
+					<MenuItem value="cm">
+						<FormattedMessage id="containers.creation.form.unit.cm" defaultMessage="Centimetres" />
+					</MenuItem>
+					<MenuItem value="dm">
+						<FormattedMessage id="containers.creation.form.unit.dm" defaultMessage="Decimetres" />
+					</MenuItem>
+					<MenuItem value="m">
+						<FormattedMessage id="containers.creation.form.unit.m" defaultMessage="Metres" />
+					</MenuItem>
+					<MenuItem value="ft">
+						<FormattedMessage id="containers.creation.form.unit.ft" defaultMessage="Feet and inches" />
+					</MenuItem>
+				</FormSelect>
+			</LabelGroup>
+
+			<LabelGroup>
+				<Label className="required">
+					<FormattedMessage id="containers.creation.form.category" defaultMessage="Category" />
+				</Label>
+				<FormSelect displayEmpty {...register('type', { required: true })}>
+					<MenuItem value="Architectural">
+						<FormattedMessage id="containers.creation.form.type.architectural" defaultMessage="Architectural" />
+					</MenuItem>
+					<MenuItem value="Existing">
+						<FormattedMessage id="containers.creation.form.type.existing" defaultMessage="Existing" />
+					</MenuItem>
+					<MenuItem value="GIS">
+						<FormattedMessage id="containers.creation.form.type.gis" defaultMessage="GIS" />
+					</MenuItem>
+					<MenuItem value="Infrastructure">
+						<FormattedMessage id="containers.creation.form.type.infrastructure" defaultMessage="Infrastructure" />
+					</MenuItem>
+					<MenuItem value="Interior">
+						<FormattedMessage id="containers.creation.form.type.interior" defaultMessage="Interior" />
+					</MenuItem>
+					<MenuItem value="Landscape">
+						<FormattedMessage id="containers.creation.form.type.ladscape" defaultMessage="Landscape" />
+					</MenuItem>
+					<MenuItem value="MEP">
+						<FormattedMessage id="containers.creation.form.type.mep" defaultMessage="MEP" />
+					</MenuItem>
+					<MenuItem value="Mechanical">
+						<FormattedMessage id="containers.creation.form.type.mechanical" defaultMessage="Mechanical" />
+					</MenuItem>
+					<MenuItem value="Structural">
+						<FormattedMessage id="containers.creation.form.type.structural" defaultMessage="Structural" />
+					</MenuItem>
+					<MenuItem value="Survey">
+						<FormattedMessage id="containers.creation.form.type.survey" defaultMessage="Survey" />
+					</MenuItem>
+					<MenuItem value="Other">
+						<FormattedMessage id="containers.creation.form.type.other" defaultMessage="Other" />
+					</MenuItem>
+				</FormSelect>
+			</LabelGroup>
+
+			<Label>
+				<FormattedMessage id="containers.creation.form.description" defaultMessage="Description" />
+			</Label>
+			<FormInput fullWidth {...register('desc')} />
+
+			<Label>
+				<FormattedMessage id="containers.creation.form.code" defaultMessage="Code" />
+			</Label>
+			<FormInput fullWidth {...register('code')} />
 		</FormModal>
 	);
 };
