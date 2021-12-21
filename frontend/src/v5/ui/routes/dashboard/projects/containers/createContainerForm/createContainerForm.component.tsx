@@ -76,7 +76,7 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 				<Label className="required">
 					<FormattedMessage id="containers.creation.form.units" defaultMessage="Units" />
 				</Label>
-				<FormSelect autoWidth {...register('unit', { required: true })}>
+				<FormSelect defaultValue="" autoWidth {...register('unit', { required: true })}>
 					<MenuItem value="mm">
 						<FormattedMessage id="containers.creation.form.unit.mm" defaultMessage="Millimetres" />
 					</MenuItem>
@@ -99,7 +99,10 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 				<Label className="required">
 					<FormattedMessage id="containers.creation.form.category" defaultMessage="Category" />
 				</Label>
-				<FormSelect displayEmpty {...register('type', { required: true })}>
+				<FormSelect defaultValue="" displayEmpty {...register('type', { required: true })}>
+					<MenuItem disabled value="">
+						<FormattedMessage  id="containers.creation.form.type.uncategorised" defaultMessage="Uncategorised" />
+					</MenuItem>
 					<MenuItem value="Architectural">
 						<FormattedMessage id="containers.creation.form.type.architectural" defaultMessage="Architectural" />
 					</MenuItem>
