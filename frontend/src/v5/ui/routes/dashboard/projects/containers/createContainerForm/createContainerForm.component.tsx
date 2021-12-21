@@ -32,7 +32,9 @@ interface IFormInput {
 }
 
 export const CreateContainerForm = ({ open, close }): JSX.Element => {
-	const { register, handleSubmit } = useForm<IFormInput>();
+	const { register, handleSubmit, formState } = useForm<IFormInput>({
+		mode: 'onChange',
+	});
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 	const onSubmit: SubmitHandler<IFormInput> = (body) => {
 		ContainersActionsDispatchers.createContainer(teamspace, project, body);
@@ -45,7 +47,7 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 			open={open}
 			onClickClose={close}
 			onSubmit={handleSubmit(onSubmit)}
-			confirmLabel={formatMessage({ id: 'containers.creation.ok', defaultMessage: 'Create container' })}
+			isValid={formState.isValid}
 		>
 			<Input autoFocus fullWidth placeholder="Name" {...register('name')} />
 			<Select autoWidth placeholder="Units" {...register('unit')}>
