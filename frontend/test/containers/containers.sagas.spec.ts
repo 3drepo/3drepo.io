@@ -137,4 +137,35 @@ describe('Containers: sagas', () => {
 			.silentRun();
 		})
 	})
+
+	describe('createContainer', () => {
+		const newContainer = { // improve this with containerMockFactory when Issue #2919 resolved
+			name: 'Test Container',
+			type: 'Other',
+			unit: 'mm',
+		}
+
+		it('should call createContainer endpoint', async () => {
+			mockServer
+			.post(`/teamspaces/${teamspace}/projects/${projectId}/containers`, newContainer)
+			.reply(200, {
+				_id: '12345'
+			});
+			const container = { ...newContainer, _id: '12345'}
+
+			await expectSaga(ContainersSaga.default)
+				.dispatch(ContainersActions.createContainer(teamspace, projectId, newContainer))
+				.put(ContainersActions.createContainerSuccess( projectId, container))
+				.silentRun();
+		})
+		it('should call createContainer endpoint with 404', async () => {
+			mockServer
+			.post(`/teamspaces/${teamspace}/projects/${projectId}/containers`)
+			.reply(404);
+
+			await expectSaga(ContainersSaga.default)
+				.dispatch(ContainersActions.createContainer(teamspace, projectId, newContainer))
+				.silentRun();
+		})
+	})
 })
