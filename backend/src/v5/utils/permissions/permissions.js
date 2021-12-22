@@ -24,6 +24,11 @@ const {
 const { getContainerById, getFederationById, getModelById } = require('../../models/modelSettings');
 const { getProjectAdmins, modelExistsInProject } = require('../../models/projects');
 const { getTeamspaceAdmins, hasAccessToTeamspace } = require('../../models/teamspaces');
+const { hasAccessToReadLicenses,
+	hasAccessToReadSystemRole,
+	hasAccessToWriteLicenses,
+	hasAccessToWriteSystemRole,
+} = require('../../models/users');
 
 const Permissions = {};
 
@@ -132,5 +137,10 @@ Permissions.hasCommenterAccessToContainer = modelPermCheck(
 Permissions.hasReadAccessToContainer = modelPermCheck(
 	(perm) => MODEL_READ_ROLES.includes(perm.permission), modelType.CONTAINERS,
 );
+
+Permissions.hasWriteAccessToSystemRoles = async (username) => await hasAccessToWriteSystemRole(username);
+Permissions.hasReadAccessToSystemRoles = async (username) => await hasAccessToReadSystemRole(username);
+Permissions.hasWriteAccessToLicense = async (username) => await hasAccessToWriteLicenses(username);
+Permissions.hasReadAccessToLicense = async (username) => await hasAccessToReadLicenses(username);
 
 module.exports = Permissions;

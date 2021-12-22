@@ -16,10 +16,19 @@
  */
 
 const { createResponseCode, templates } = require('../utils/responseCodes');
+const {
+	LICENSE_ADMIN_READ,
+	LICENSE_ADMIN_WRITE,
+	SYSTEM_ADMIN_READ,
+	SYSTEM_ADMIN_WRITE,
+	SYSTEM_ROLES,
+} = require('../utils/permissions/permissions.constants');
+
 const config = require('../utils/config');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { publish } = require('../services/eventsManager/eventsManager');
+const { ReadPreference } = require('mongodb');
 
 const User = {};
 const COLL_NAME = 'system.users';
@@ -120,6 +129,120 @@ User.getFavourites = async (user, teamspace) => {
 User.getAccessibleTeamspaces = async (username) => {
 	const userDoc = await User.getUserByUsername(username, { roles: 1 });
 	return userDoc.roles.map((role) => role.db);
+};
+
+User.getUsersWithRole = async (users = 1, roles = []) => {
+	const usersInfoCmd = {
+		usersInfo: users,
+	};
+	const returningUsers = [];
+	const usersInfo = await db.runCommand('admin', usersInfoCmd);
+
+	usersInfo.users.forEach((user) => {
+		user.roles.forEach((role) => {
+			if (roles.length > 0 && roles.includes(role.role) && SYSTEM_ROLES.includes(role.role)) {
+				returningUsers.push(
+					{
+						user: user.user,
+						role: role.role,
+					},
+				);
+			} else if (SYSTEM_ROLES.includes(role.role)) {
+				returningUsers.push(
+					{
+						user: user.user,
+						role: role.role,
+					},
+				);
+			}
+		});
+	});
+
+	return returningUsers;
+};
+
+User.hasAccessToWriteSystemRole = async (username) => {
+	const usersInfoCmd = {
+		usersInfo: username,
+		showPrivileges: true,
+	};
+	const usersInfo = await db.runCommand('admin', usersInfoCmd);
+	usersInfo.users[0].inheritedRoles.forEach((role) => {
+		if (role.db = 'admin' && role.role === SYSTEM_ADMIN_WRITE) {
+			return true;
+		}
+	});
+	return false;
+};
+
+User.hasAccessToReadSystemRole = async (username) => {
+	const usersInfoCmd = {
+		usersInfo: username,
+		showPrivileges: true,
+	};
+	const usersInfo = await db.runCommand('admin', usersInfoCmd);
+	let foundPermission;
+	usersInfo.users[0].inheritedRoles.forEach((role) => {
+		if (role.db === 'admin' && role.role === SYSTEM_ADMIN_READ) {
+			foundPermission = true;
+		}
+	});
+	return foundPermission;
+};
+
+User.hasAccessToWriteLicenseRole = async (username) => {
+	const usersInfoCmd = {
+		usersInfo: username,
+		showPrivileges: true,
+	};
+	const usersInfo = await db.runCommand('admin', usersInfoCmd);
+	let foundPermission;
+	usersInfo.users[0].inheritedRoles.forEach((role) => {
+		if (role.db === 'admin' && role.role === LICENSE_ADMIN_WRITE) {
+			foundPermission = true;
+		}
+	});
+	return foundPermission;
+};
+
+User.hasAccessToReadLicenseRole = async (username) => {
+	const usersInfoCmd = {
+		usersInfo: username,
+		showPrivileges: true,
+	};
+	const usersInfo = await db.runCommand('admin', usersInfoCmd);
+	let foundPermission;
+	usersInfo.users[0].inheritedRoles.forEach((role) => {
+		if (role.db === 'admin' && role.role === LICENSE_ADMIN_READ) {
+			foundPermission = true;
+		}
+	});
+	return foundPermission;
+};
+
+User.grantAdministrativeRole = async (username, permission) => {
+	if (SYSTEM_ROLES.includes(permission)) {
+		const grantRolesToUserCmd = {
+			grantRolesToUser: username,
+			roles: [permission],
+		};
+		const grantRolesInfo = await db.runCommand('admin', grantRolesToUserCmd);
+		return grantRolesInfo.ok;
+	}
+
+	throw createResponseCode(templates.invalidArguments, 'permission provided not in SYSTEM_ROLES');
+};
+
+User.revokeAdministrativeRole = async (username, permission) => {
+	if (SYSTEM_ROLES.includes(permission)) {
+		const revokeRolesFromUserCmd = {
+			revokeRolesFromUser: username,
+			roles: [permission],
+		};
+		const grantRolesInfo = await db.runCommand('admin', revokeRolesFromUserCmd);
+		return grantRolesInfo.ok;
+	}
+	throw createResponseCode(templates.invalidArguments, 'permission provided not in SYSTEM_ROLES');
 };
 
 User.appendFavourites = async (username, teamspace, favouritesToAdd) => {

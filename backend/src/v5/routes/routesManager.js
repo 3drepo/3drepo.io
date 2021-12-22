@@ -23,11 +23,13 @@ const FederationGroupsRoutes = require('./teamspaces/projects/federations/groups
 const FederationRoutes = require('./teamspaces/projects/federations/federations');
 const ProjectRoutes = require('./teamspaces/projects/projects');
 const TeamspaceRoutes = require('./teamspaces/teamspaces');
+const AdminRoutes = require('./admin/admin');
 const UserRoutes = require('./users');
 
 RoutesManager.init = (app) => {
 	// Auth
 	app.use('/v5/', UserRoutes);
+	app.use('/v5/admin/', AdminRoutes);
 
 	app.use('/v5/teamspaces/', TeamspaceRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects', ProjectRoutes);
