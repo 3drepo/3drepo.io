@@ -54,6 +54,8 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 		close();
 	};
 
+	React.useEffect(() => {reset()}, [!open]);
+
 	return (
 		<FormModal
 			title={formatMessage({ id: 'containers.creation.title', defaultMessage: 'Create new Container' })}
