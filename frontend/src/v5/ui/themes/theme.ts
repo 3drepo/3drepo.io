@@ -291,9 +291,13 @@ export const theme = createMuiTheme({
 				backgroundColor: null,
 			},
 		},
+		MuiMenuItem: {
+			root: {
+				margin: '0',
+			},
+		},
 		MuiList: {
 			root: {
-				width: 226,
 				borderRadius: 5,
 				boxShadow: SHADOW.LEVEL_5,
 			},
@@ -362,6 +366,7 @@ export const theme = createMuiTheme({
 		MuiOutlinedInput:
 			{
 				root: {
+					background: COLOR.PRIMARY_MAIN_CONTRAST,
 					'& $notchedOutline, &$disabled:hover:not($error) $notchedOutline, &$disabled $notchedOutline': {
 						borderColor: COLOR.BASE_LIGHTEST,
 						borderRadius: 5,
@@ -376,6 +381,7 @@ export const theme = createMuiTheme({
 						height: 35,
 						color: COLOR.BASE_MAIN,
 						...typography.body1,
+						lineHeight: '35px',
 					},
 					'&$focused $input': {
 						color: COLOR.SECONDARY_MAIN,
@@ -399,10 +405,12 @@ export const theme = createMuiTheme({
 			},
 		MuiTextField: {
 			root: {
-				margin: '4px 8px 8px 8px',
+				margin: '38px 0 0',
+				width: '100%',
 				'& $label': {
 					...typography.kicker,
-					display: 'contents',
+					top: '-38px',
+					left: '-13px',
 					color: COLOR.BASE_MAIN,
 				},
 				'& $label:not(.Mui-error).Mui-focused': {
@@ -411,6 +419,11 @@ export const theme = createMuiTheme({
 				'& $label.Mui-disabled': {
 					color: COLOR.BASE_LIGHT,
 				},
+			},
+		},
+		MuiInputLabel: {
+			asterisk: {
+				color: COLOR.ERROR_MAIN,
 			},
 		},
 		MuiTouchRipple: {

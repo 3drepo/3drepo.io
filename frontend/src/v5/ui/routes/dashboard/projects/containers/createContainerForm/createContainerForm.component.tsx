@@ -18,12 +18,12 @@
 import React from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
-import { MenuItem } from '@material-ui/core';
+import { TextField, MenuItem } from '@material-ui/core';
 import { FormModal } from '@/v5/ui/controls/modal/formModal/formDialog.component';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
-import { FormInput, Label, FormSelect, LabelGroup } from './createContainerForm.styles';
+import { Select } from './createContainerForm.styles';
 
 interface IFormInput {
 	name: string;
@@ -54,7 +54,7 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 		close();
 	};
 
-	React.useEffect(() => {reset()}, [!open]);
+	React.useEffect(() => { reset(); }, [!open]);
 
 	return (
 		<FormModal
@@ -65,93 +65,86 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 			confirmLabel={formatMessage({ id: 'containers.creation.ok', defaultMessage: 'Create Container' })}
 			isValid={formState.isValid}
 		>
-			<Label className="required">
-				<FormattedMessage id="containers.creation.form.name" defaultMessage="Name" />
-			</Label>
-			<FormInput
-				fullWidth
-				error={errors.name}
+			<TextField
+				label={formatMessage({ id: 'containers.creation.form.name', defaultMessage: 'Name' })}
+				required
+				error={!!errors.name}
 				helperText={errors.name && errorMessage.name[errors.name?.type]}
 				{...register('name', { required: true, maxLength: 120 })}
 			/>
-			<LabelGroup>
-				<Label className="required">
-					<FormattedMessage id="containers.creation.form.units" defaultMessage="Units" />
-				</Label>
-				<FormSelect defaultValue="" autoWidth {...register('unit', { required: true })}>
-					<MenuItem value="mm">
-						<FormattedMessage id="containers.creation.form.unit.mm" defaultMessage="Millimetres" />
-					</MenuItem>
-					<MenuItem value="cm">
-						<FormattedMessage id="containers.creation.form.unit.cm" defaultMessage="Centimetres" />
-					</MenuItem>
-					<MenuItem value="dm">
-						<FormattedMessage id="containers.creation.form.unit.dm" defaultMessage="Decimetres" />
-					</MenuItem>
-					<MenuItem value="m">
-						<FormattedMessage id="containers.creation.form.unit.m" defaultMessage="Metres" />
-					</MenuItem>
-					<MenuItem value="ft">
-						<FormattedMessage id="containers.creation.form.unit.ft" defaultMessage="Feet and inches" />
-					</MenuItem>
-				</FormSelect>
-			</LabelGroup>
 
-			<LabelGroup>
-				<Label className="required">
-					<FormattedMessage id="containers.creation.form.category" defaultMessage="Category" />
-				</Label>
-				<FormSelect defaultValue="" displayEmpty {...register('type', { required: true })}>
-					<MenuItem disabled value="">
-						<FormattedMessage  id="containers.creation.form.type.uncategorised" defaultMessage="Uncategorised" />
-					</MenuItem>
-					<MenuItem value="Architectural">
-						<FormattedMessage id="containers.creation.form.type.architectural" defaultMessage="Architectural" />
-					</MenuItem>
-					<MenuItem value="Existing">
-						<FormattedMessage id="containers.creation.form.type.existing" defaultMessage="Existing" />
-					</MenuItem>
-					<MenuItem value="GIS">
-						<FormattedMessage id="containers.creation.form.type.gis" defaultMessage="GIS" />
-					</MenuItem>
-					<MenuItem value="Infrastructure">
-						<FormattedMessage id="containers.creation.form.type.infrastructure" defaultMessage="Infrastructure" />
-					</MenuItem>
-					<MenuItem value="Interior">
-						<FormattedMessage id="containers.creation.form.type.interior" defaultMessage="Interior" />
-					</MenuItem>
-					<MenuItem value="Landscape">
-						<FormattedMessage id="containers.creation.form.type.ladscape" defaultMessage="Landscape" />
-					</MenuItem>
-					<MenuItem value="MEP">
-						<FormattedMessage id="containers.creation.form.type.mep" defaultMessage="MEP" />
-					</MenuItem>
-					<MenuItem value="Mechanical">
-						<FormattedMessage id="containers.creation.form.type.mechanical" defaultMessage="Mechanical" />
-					</MenuItem>
-					<MenuItem value="Structural">
-						<FormattedMessage id="containers.creation.form.type.structural" defaultMessage="Structural" />
-					</MenuItem>
-					<MenuItem value="Survey">
-						<FormattedMessage id="containers.creation.form.type.survey" defaultMessage="Survey" />
-					</MenuItem>
-					<MenuItem value="Other">
-						<FormattedMessage id="containers.creation.form.type.other" defaultMessage="Other" />
-					</MenuItem>
-				</FormSelect>
-			</LabelGroup>
+			<Select
+				label={formatMessage({ id: 'containers.creation.form.unit', defaultMessage: 'Units' })}
+				defaultValue=""
+				required
+				{...register('unit', { required: true })}
+			>
+				<MenuItem value="mm">
+					<FormattedMessage id="containers.creation.form.unit.mm" defaultMessage="Millimetres" />
+				</MenuItem>
+				<MenuItem value="cm">
+					<FormattedMessage id="containers.creation.form.unit.cm" defaultMessage="Centimetres" />
+				</MenuItem>
+				<MenuItem value="dm">
+					<FormattedMessage id="containers.creation.form.unit.dm" defaultMessage="Decimetres" />
+				</MenuItem>
+				<MenuItem value="m">
+					<FormattedMessage id="containers.creation.form.unit.m" defaultMessage="Metres" />
+				</MenuItem>
+				<MenuItem value="ft">
+					<FormattedMessage id="containers.creation.form.unit.ft" defaultMessage="Feet and inches" />
+				</MenuItem>
+			</Select>
 
-			<Label>
-				<FormattedMessage id="containers.creation.form.description" defaultMessage="Description" />
-			</Label>
-			<FormInput fullWidth {...register('desc')} />
+			<Select
+				label={formatMessage({ id: 'containers.creation.form.category', defaultMessage: 'Category' })}
+				defaultValue=""
+				required
+				{...register('type', { required: true })}
+			>
+				<MenuItem value="Architectural">
+					<FormattedMessage id="containers.creation.form.type.architectural" defaultMessage="Architectural" />
+				</MenuItem>
+				<MenuItem value="Existing">
+					<FormattedMessage id="containers.creation.form.type.existing" defaultMessage="Existing" />
+				</MenuItem>
+				<MenuItem value="GIS">
+					<FormattedMessage id="containers.creation.form.type.gis" defaultMessage="GIS" />
+				</MenuItem>
+				<MenuItem value="Infrastructure">
+					<FormattedMessage id="containers.creation.form.type.infrastructure" defaultMessage="Infrastructure" />
+				</MenuItem>
+				<MenuItem value="Interior">
+					<FormattedMessage id="containers.creation.form.type.interior" defaultMessage="Interior" />
+				</MenuItem>
+				<MenuItem value="Landscape">
+					<FormattedMessage id="containers.creation.form.type.ladscape" defaultMessage="Landscape" />
+				</MenuItem>
+				<MenuItem value="MEP">
+					<FormattedMessage id="containers.creation.form.type.mep" defaultMessage="MEP" />
+				</MenuItem>
+				<MenuItem value="Mechanical">
+					<FormattedMessage id="containers.creation.form.type.mechanical" defaultMessage="Mechanical" />
+				</MenuItem>
+				<MenuItem value="Structural">
+					<FormattedMessage id="containers.creation.form.type.structural" defaultMessage="Structural" />
+				</MenuItem>
+				<MenuItem value="Survey">
+					<FormattedMessage id="containers.creation.form.type.survey" defaultMessage="Survey" />
+				</MenuItem>
+				<MenuItem value="Other">
+					<FormattedMessage id="containers.creation.form.type.other" defaultMessage="Other" />
+				</MenuItem>
+			</Select>
 
-			<Label>
-				<FormattedMessage id="containers.creation.form.code" defaultMessage="Code" />
-			</Label>
-			<FormInput
-				fullWidth
-				error={errors.code}
+			<TextField
+				label={formatMessage({ id: 'containers.creation.form.description', defaultMessage: 'Description' })}
+				{...register('desc')}
+			/>
+
+			<TextField
+				label={formatMessage({ id: 'containers.creation.form.code', defaultMessage: 'Code' })}
+				error={!!errors.code}
 				helperText={(errors.code) && errorMessage.code[errors.code?.type]}
 				{...register('code', {
 					maxLength: 50,
