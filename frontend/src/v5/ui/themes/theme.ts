@@ -401,6 +401,11 @@ export const theme = createMuiTheme({
 					'&$error $path': {
 						fill: COLOR.ERROR_MAIN,
 					},
+					'& $svg': {
+						pointerEvents: 'none',
+						right: '14px',
+						position: 'absolute',
+					},
 				},
 			},
 		MuiTextField: {

@@ -17,9 +17,13 @@
 
 import styled from 'styled-components';
 import { TextField } from '@material-ui/core';
+import ChevronIcon from '@assets/icons/chevron.svg'
 
 export const Select = styled(TextField).attrs({
 	select: true,
+	SelectProps: {
+		IconComponent: ChevronIcon,
+      }
 })`
 	width: 50%;
 	box-sizing: border-box;
@@ -28,5 +32,9 @@ export const Select = styled(TextField).attrs({
 	& + & {
 		padding: 0 0 0 5px;
 		label { padding: 0 0 0 5px }
+	}
+
+	svg path {
+		fill: ${({ theme }) => theme.palette.base.main};
 	}
 `;
