@@ -18,8 +18,19 @@
 import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 
+export const Container = styled.div`
+	position: relative;
+	width: 100%;
+	height: 100%;
+`;
+
 export const DropZone = styled.div`
-;
+	width: 100%;
+	height: 100%;
+	position: absolute;
+`;
+
+export const UploadDialog = styled.div`
 	width: 100%;
 	height: 100%;
 
@@ -32,6 +43,11 @@ export const DropZone = styled.div`
 	justify-content: center;
 	align-items: center;
 	flex-direction: column;
+
+	&.drag-over {
+		background: ${({ theme }) => theme.palette.primary.lightest};
+		border-style: solid;
+	}
 `;
 
 export const HelpText = styled(Typography).attrs({

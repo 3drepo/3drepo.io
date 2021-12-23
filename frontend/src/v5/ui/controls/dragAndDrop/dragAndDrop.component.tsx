@@ -15,32 +15,73 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
 
 import { FormattedMessage } from 'react-intl';
 import { Button } from '@controls/button';
 import { Typography } from '@controls/typography';
-import { DropZone, HelpText } from './dragAndDrop.styles';
+import { DropZone, HelpText, UploadDialog, Container } from './dragAndDrop.styles';
 
 interface IDragAndDrop {
 	message?: ReactNode,
+	processFiles: (files) => void,
 }
 
-export const DragAndDrop = ({ message }: IDragAndDrop) => (
-	<DropZone>
-		<Typography variant="h3" color="secondary">
-			<FormattedMessage id="draganddrop.drop" defaultMessage="Drop files here" />
-		</Typography>
+const preventDefualtBehaviour = (e) => {
+	e.preventDefault();
+	e.stopPropagation();
+};
 
-		<Typography variant="h5" color="secondary">
-			<FormattedMessage id="draganddrop.or" defaultMessage="or" />
-		</Typography>
+export const DragAndDrop = ({ message, processFiles }: IDragAndDrop) => {
+	const [dragOverlay, setDragOverlay] = useState(false);
 
-		<Button variant="contained" color="primary">
-			<FormattedMessage id="draganddrop.browse" defaultMessage="Browse" />
-		</Button>
-		<HelpText>
-			{message}
-		</HelpText>
-	</DropZone>
-);
+	const handleDrag = (e) => {
+		preventDefualtBehaviour(e);
+	};
+
+	const handleDragIn = (e) => {
+		preventDefualtBehaviour(e);
+		if (e.dataTransfer.items.length > 0) {
+			setDragOverlay(true);
+		}
+	};
+
+	const handleDragOut = (e) => {
+		preventDefualtBehaviour(e);
+		setDragOverlay(false);
+	};
+
+	const handleDrop = (e) => {
+		preventDefualtBehaviour(e);
+		const { files } = e.dataTransfer;
+		setDragOverlay(false);
+		processFiles(files);
+	};
+
+	return (
+		<Container>
+			<DropZone
+				onDragEnter={handleDragIn}
+				onDragLeave={handleDragOut}
+				onDragOver={handleDrag}
+				onDrop={handleDrop}
+			/>
+			<UploadDialog className={dragOverlay && 'drag-over'}>
+				<Typography variant="h3" color="secondary">
+					<FormattedMessage id="draganddrop.drop" defaultMessage="Drop files here" />
+				</Typography>
+
+				<Typography variant="h5" color="secondary">
+					<FormattedMessage id="draganddrop.or" defaultMessage="or" />
+				</Typography>
+
+				<Button variant="contained" color="primary">
+					<FormattedMessage id="draganddrop.browse" defaultMessage="Browse" />
+				</Button>
+				<HelpText>
+					{message}
+				</HelpText>
+			</UploadDialog>
+		</Container>
+	);
+};
