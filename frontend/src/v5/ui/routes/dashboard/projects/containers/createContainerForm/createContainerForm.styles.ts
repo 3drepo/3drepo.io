@@ -17,13 +17,13 @@
 
 import styled from 'styled-components';
 import { TextField } from '@material-ui/core';
-import ChevronIcon from '@assets/icons/chevron.svg'
+import ChevronIcon from '@assets/icons/chevron.svg';
 
 export const Select = styled(TextField).attrs({
 	select: true,
 	SelectProps: {
 		IconComponent: ChevronIcon,
-      }
+	},
 })`
 	width: 50%;
 	box-sizing: border-box;

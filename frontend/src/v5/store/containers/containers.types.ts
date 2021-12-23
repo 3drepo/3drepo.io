@@ -34,18 +34,6 @@ export enum UploadStatuses {
 	QUEUED_FOR_UNITY = 'Queued for Unity',
 }
 
-export enum ContainerUnit {
-	MM = 'mm',
-	CM = 'cm',
-	DM = 'dm',
-	M = 'm',
-	FT = 'ft',
-}
-
-export enum ContainerType {
-	GIS = 'GIS',
-}
-
 export interface IContainer {
 	_id: string;
 	name: string;
