@@ -23,7 +23,6 @@ const { templates } = require('../../utils/responseCodes');
 const { validSession } = require('../../middleware/auth');
 
 const getUsersWithRoles = (req, res) => {
-	const user = req.session.user.username;
 	Admin.getUsersWithRole().then((users) => {
 		respond(req, res, templates.ok, { users });
 	}).catch((err) => respond(req, res, err));
@@ -56,14 +55,14 @@ const establishRoutes = () => {
 	 *         in: path
 	 *         required: false
 	 *         schema:
-	 *           type: string
+	 *           type: array
    	 *       - user:
 	 *         name: user
 	 *         description: name of user
 	 *         in: path
 	 *         required: false
 	 *         schema:
-	 *           type: string
+	 *           type: array
 	 *     responses:
 	 *       400:
 	 *         $ref: "#/components/responses/invalidArguments"
@@ -88,7 +87,7 @@ const establishRoutes = () => {
 	 *                       role:
 	 *                         type: string
 	 *                         description: Name of additional role
-	 *                         example: systemAdmin
+	 *                         example: system_admin | license_admin | support_admin
 	 *
 	 */
 	router.get('/roles', hasReadAccessToSystemRoles, getUsersWithRoles);
@@ -100,19 +99,25 @@ const establishRoutes = () => {
 	 *     description: add roles to users
 	 *     tags: [Admin]
 	 *     operationId: getTeamspaceMembers
-	 *     parameters:
-   	 *       - teamspace:
-	 *         name: teamspace
-	 *         description: name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
+	 *     requestBody:
+	 *       content:
+	 *         application/json:
+	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *               user:
+	 *                 type: string
+	 *                 description: The username or email of the user
+	 *                 example: username1
+	 *               role:
+	 *                 type: string
+	 *                 description: The role of the user
+	 *                 example: support_admin
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       200:
-	 *         description: returns list of teamspace members with their basic information
+	 *         description: confirms objects modified
 	 *         content:
 	 *           application/json:
 	 *             schema:

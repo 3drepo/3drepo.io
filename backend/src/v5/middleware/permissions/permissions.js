@@ -47,9 +47,9 @@ Permissions.hasCommenterAccessToFederation = validateMany([
 Permissions.hasWriteAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasWriteAccessToFederation]);
 Permissions.hasAdminAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasAdminAccessToFederation]);
 
-Permissions.hasReadAccessToSystemRoles = hasReadAccessToSystemRoles;
-Permissions.hasReadAccessToLicense = hasReadAccessToLicense;
-Permissions.hasWriteAccessToSystemRoles = hasWriteAccessToSystemRoles;
-Permissions.hasWriteAccessToLicense = hasWriteAccessToLicense;
+Permissions.hasWriteAccessToSystemRoles = validateMany([validSession, hasWriteAccessToSystemRoles])
+Permissions.hasReadAccessToSystemRoles = validateMany([validSession, hasReadAccessToSystemRoles]);
+Permissions.hasWriteAccessToLicense = validateMany([validSession, hasWriteAccessToLicense]);
+Permissions.hasReadAccessToLicense = validateMany([validSession, hasReadAccessToLicense]);
 
 module.exports = Permissions;

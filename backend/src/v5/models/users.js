@@ -167,12 +167,13 @@ User.hasAccessToWriteSystemRole = async (username) => {
 		showPrivileges: true,
 	};
 	const usersInfo = await db.runCommand('admin', usersInfoCmd);
+	let foundPermission;
 	usersInfo.users[0].inheritedRoles.forEach((role) => {
-		if (role.db = 'admin' && role.role === SYSTEM_ADMIN_WRITE) {
-			return true;
+		if (role.db === 'admin' && role.role === SYSTEM_ADMIN_WRITE) {
+			foundPermission = true;
 		}
 	});
-	return false;
+	return foundPermission;
 };
 
 User.hasAccessToReadSystemRole = async (username) => {
