@@ -17,6 +17,7 @@
 
 import { AxiosResponse } from 'axios';
 import {
+	DeleteContainerPayload,
 	FavouritePayload,
 	FetchContainersPayload, FetchContainersResponse,
 	FetchContainerStatsPayload, FetchContainerStatsResponse,
@@ -65,3 +66,9 @@ export const createContainer = async ({
 	const { data } = await api.post(`teamspaces/${teamspace}/projects/${projectId}/containers`, newContainer);
 	return data._id;
 };
+
+export const deleteContainer = (
+	{ teamspace, projectId, containerId }: DeleteContainerPayload,
+): Promise<AxiosResponse<void>> => (
+	api.delete(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
+);

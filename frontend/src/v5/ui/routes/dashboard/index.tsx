@@ -21,6 +21,7 @@ import { GlobalStyle } from '@/v5/ui/themes/global';
 import { discardSlash } from '@/v5/services/routing/routing';
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { DashboardLayout } from '@components/dashboard/dashboardLayout';
+import { TeamspacesList } from '@/v5/ui/routes/dashboard/teamspaces/teamspacesList/teamspacesList.component';
 import { TeamspaceContent } from './teamspaces';
 import { ProjectContent } from './projects';
 
@@ -34,6 +35,9 @@ export const Dashboard = () => {
 			<Switch>
 				<Route path={`${path}/dashboard/:teamspace?/:project?`}>
 					<DashboardLayout>
+						<Route exact path={`${path}/dashboard/`}>
+							<TeamspacesList />
+						</Route>
 						<Route path={`${path}/dashboard/:teamspace/`}>
 							<TeamspaceContent />
 						</Route>

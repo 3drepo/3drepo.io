@@ -27,6 +27,7 @@ import {
 	SetIsListPendingAction,
 	FetchContainerStatsSuccessAction,
 	CreateContainerSuccessAction,
+	DeleteContainerSuccessAction,
 } from './containers.types';
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({
@@ -41,6 +42,13 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	setFavouriteSuccess: ['projectId', 'containerId', 'isFavourite'],
 	createContainer: ['teamspace', 'projectId', 'newContainer'],
 	createContainerSuccess: ['projectId', 'container'],
+	fetchRevisions: ['teamspace', 'projectId', 'containerId'],
+	setRevisionVoidStatus: ['teamspace', 'projectId', 'containerId', 'revisionId', 'isVoid'],
+	setRevisionVoidStatusSuccess: ['projectId', 'containerId', 'revisionId', 'isVoid'],
+	setRevisionsIsPending: ['projectId', 'containerId', 'isPending'],
+	fetchRevisionsSuccess: ['projectId', 'containerId', 'revisions'],
+	deleteContainer: ['teamspace', 'projectId', 'containerId'],
+	deleteContainerSuccess: ['projectId', 'containerId'],
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
 
 export const INITIAL_STATE: IContainersState = {
@@ -117,6 +125,17 @@ export const createContainerSuccess = (state = INITIAL_STATE, {
 	},
 });
 
+export const deleteContainerSuccess = (state = INITIAL_STATE, {
+	projectId,
+	containerId,
+}: DeleteContainerSuccessAction) => ({
+	...state,
+	containers: {
+		...state.containers,
+		[projectId]: state.containers[projectId].filter((container) => containerId !== container._id),
+	},
+});
+
 export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
 	[ContainersTypes.SET_FILTER_QUERY]: setFilterQuery,
 	[ContainersTypes.FETCH_CONTAINERS_SUCCESS]: fetchContainersSuccess,
@@ -124,4 +143,5 @@ export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
 	[ContainersTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
 	[ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS]: fetchStatsSuccess,
 	[ContainersTypes.CREATE_CONTAINER_SUCCESS]: createContainerSuccess,
+	[ContainersTypes.DELETE_CONTAINER_SUCCESS]: deleteContainerSuccess,
 });

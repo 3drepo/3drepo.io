@@ -41,7 +41,7 @@ export const INITIAL_STATE: IDialogState = {
 
 export const { Types: DialogsTypes, Creators: DialogsActions } = createActions({
 	open: ['modalType', 'props'],
-	close: ['id'],
+	close: ['dialogId'],
 }, { prefix: 'MODALS/' }) as { Types: Constants<IDialogActions>; Creators: IDialogActions };
 
 export const openHandler = (state = INITIAL_STATE, { modalType, props }): IDialogState => {

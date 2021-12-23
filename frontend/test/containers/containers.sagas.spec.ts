@@ -158,6 +158,7 @@ describe('Containers: sagas', () => {
 				.put(ContainersActions.createContainerSuccess( projectId, container))
 				.silentRun();
 		})
+		
 		it('should call createContainer endpoint with 404', async () => {
 			mockServer
 			.post(`/teamspaces/${teamspace}/projects/${projectId}/containers`)
@@ -166,6 +167,29 @@ describe('Containers: sagas', () => {
 			await expectSaga(ContainersSaga.default)
 				.dispatch(ContainersActions.createContainer(teamspace, projectId, newContainer))
 				.silentRun();
+		})
+	})
+	
+	describe('deleteContainer', () => {
+		it('should call deleteContainer endpoint', async () => {
+			mockServer
+			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
+			.reply(200);
+
+			await expectSaga(ContainersSaga.default)
+			.dispatch(ContainersActions.deleteContainer(teamspace, projectId, containerId))
+			.put(ContainersActions.deleteContainerSuccess(projectId, containerId))
+			.silentRun();
+		})
+
+		it('should call deleteContainer endpoint with 404 and open alert modal', async () => {
+			mockServer
+			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
+			.reply(404);
+
+			await expectSaga(ContainersSaga.default)
+			.dispatch(ContainersActions.deleteContainer(teamspace, projectId, containerId))
+			.silentRun();
 		})
 	})
 })

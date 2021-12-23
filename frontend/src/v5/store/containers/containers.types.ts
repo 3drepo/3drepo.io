@@ -111,6 +111,16 @@ export type CreateContainerPayload = {
 export type CreateContainerSuccessPayload = NewContainerPayload & {
 	_id: string;
 };
+export interface DeleteContainerPayload {
+	teamspace: string;
+	projectId: string;
+	containerId: string;
+}
+
+export interface DeleteContainerSuccessPayload {
+	projectId: string;
+	containerId: string;
+}
 
 export type SetFilterQueryAction = Action<'SET_FILTER_QUERY'> & { query: string};
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;
@@ -123,6 +133,8 @@ export type FetchContainerStatsAction = Action<'FETCH_CONTAINER_STATS'> & FetchC
 export type FetchContainerStatsSuccessAction = Action<'FETCH_CONTAINER_STATS_SUCCESS'> & FetchContainerStatsSuccessPayload;
 export type CreateContainerAction = Action<'CREATE_CONTAINER'> & CreateContainerPayload;
 export type CreateContainerSuccessAction = Action<'CREATE_CONTAINER_SUCCESS'> & { projectId: string, container: CreateContainerSuccessPayload };
+export type DeleteContainerAction = Action<'DELETE'> & DeleteContainerPayload;
+export type DeleteContainerSuccessAction = Action<'DELETE_SUCCESS'> & DeleteContainerSuccessPayload;
 
 export interface IContainersActionCreators {
 	setFilterQuery: (query: string) => SetFilterQueryAction;
@@ -147,4 +159,6 @@ export interface IContainersActionCreators {
 		projectId: string,
 		container: CreateContainerSuccessPayload,
 	) => CreateContainerSuccessAction;
+	deleteContainer: (teamspace: string, projectId: string, containerId: string) => DeleteContainerAction;
+	deleteContainerSuccess: (projectId: string, containerId: string) => DeleteContainerSuccessAction;
 }

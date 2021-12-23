@@ -16,12 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { IconButton } from '@material-ui/core';
 
-export const CloseButton = styled(IconButton)`
-	&& {
-		position: absolute;
-		top: 11px;
-		right: 11px;
-	}
+export const Container = styled.div`
+	margin: 16px;
 `;

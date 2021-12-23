@@ -41,7 +41,7 @@
   "containers.list.item.latestRevision.status.error.tooltipMessageWithoutDate": "No se ha podido subir última revisión por que se producido el siguiente error: <b>{message}</b>.",
   "containers.list.item.latestRevision.status.processing": "Procesado",
   "containers.list.item.latestRevision.status.queued": "En cola",
-  "containers.list.item.revisions": "Revisiones",
+  "containers.list.item.revisions": "{count} Revisiones",
   "containers.list.item.revisions.tooltip": "Ver revisiones",
   "containers.list.item.title.tooltip": "Lanzar última revisión",
   "containers.mainHeader.newContainer": "Nuevo Contenedor",

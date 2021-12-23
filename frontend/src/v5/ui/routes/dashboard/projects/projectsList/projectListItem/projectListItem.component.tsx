@@ -15,13 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { IconButton } from '@material-ui/core';
+import React from 'react';
+import { Link, useRouteMatch } from 'react-router-dom';
+import { DashboardListItem } from '@components/dashboard/dashboardList';
+import {
+	DashboardListItemRow,
+	DashboardListItemText,
+} from '@components/dashboard/dashboardList/dashboardListItem/components';
 
-export const CloseButton = styled(IconButton)`
-	&& {
-		position: absolute;
-		top: 11px;
-		right: 11px;
-	}
-`;
+import { discardSlash } from '@/v5/services/routing/routing';
+
+export const ProjectListItem = ({ projectId, name }): JSX.Element => {
+	let { url } = useRouteMatch();
+	url = discardSlash(url);
+
+	return (
+		<DashboardListItem>
+			<Link to={`${url}/${projectId}`}>
+				<DashboardListItemRow>
+					<DashboardListItemText>
+						{name}
+					</DashboardListItemText>
+				</DashboardListItemRow>
+			</Link>
+		</DashboardListItem>
+	);
+};
