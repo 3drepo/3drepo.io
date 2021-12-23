@@ -15,13 +15,53 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getUsersWithRole } = require('../models/users');
+const { getUsersWithRole,
+	grantAdministrativeRole,
+	hasAdministrativeRole,
+	revokeAdministrativeRole,
+} = require('../models/users');
 
 const Admin = {};
 
 Admin.getUsersWithRole = async (users, roles) => {
-	const userList = await getUsersWithRole(users, roles);
-	return userList;
+	return await getUsersWithRole(users, roles);
+};
+
+Admin.updateUsersWithRole = async (users) => {
+	const returnUsers = []
+	if (users.length > 0) {
+		users.forEach(async (user) => {
+			const hasPermission = await hasAdministrativeRole(user.user, user.role)
+			if (!hasPermission) {
+				if ( await grantAdministrativeRole(user.user, user.role) ) {
+					// future logging of actions
+					returnUsers.push(user)
+
+				} else {
+					// future logging of actions
+				};
+			}
+		});
+	}
+	return await returnUsers;
+};
+
+Admin.deleteUsersWithRole = async (users) => {
+	const returnUsers = []
+	if (users.length > 0) {
+		users.forEach(async (user) => {
+			const hasPermission = await hasAdministrativeRole(user.user, user.role)
+			if (hasPermission) {
+				if ( await revokeAdministrativeRole(user.user, user.role) ) {
+					// future logging of actions
+					returnUsers.push(user)
+				} else {
+					// future logging of actions
+				};
+			}
+		});
+	}
+	return await returnUsers;
 };
 
 // Admin.getTeamspaceMembersInfo = async (teamspace) => {

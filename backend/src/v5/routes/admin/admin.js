@@ -23,15 +23,25 @@ const { templates } = require('../../utils/responseCodes');
 const { validSession } = require('../../middleware/auth');
 
 const getUsersWithRoles = (req, res) => {
-	Admin.getUsersWithRole().then((users) => {
+	const { user, role } = req.query
+	Admin.getUsersWithRole(user,role).then((users) => {
 		respond(req, res, templates.ok, { users });
 	}).catch((err) => respond(req, res, err));
 };
 
 const updateUsersWithRoles = (req, res) => {
-	const { teamspace } = req.params;
-	Admin.getTeamspaceMembersInfo(teamspace).then((members) => {
-		respond(req, res, templates.ok, { members });
+	const { users } = req.body;
+	Admin.updateUsersWithRole(users).then((users) => {
+		respond(req, res, templates.ok, { users });
+	}).catch(
+		/* istanbul ignore next */
+		(err) => respond(req, res, err),
+	);
+};
+const deleteUsersWithRoles = (req, res) => {
+	const { users } = req.body;
+	Admin.deleteUsersWithRole(users).then((users) => {
+		respond(req, res, templates.ok, { users });
 	}).catch(
 		/* istanbul ignore next */
 		(err) => respond(req, res, err),
@@ -51,15 +61,15 @@ const establishRoutes = () => {
 	 *     parameters:
    	 *       - role:
 	 *         name: role
+	 *         in: query
 	 *         description: name of role
-	 *         in: path
 	 *         required: false
 	 *         schema:
 	 *           type: array
    	 *       - user:
 	 *         name: user
 	 *         description: name of user
-	 *         in: path
+	 *         in: query
 	 *         required: false
 	 *         schema:
 	 *           type: array
@@ -98,21 +108,26 @@ const establishRoutes = () => {
 	 *   post:
 	 *     description: add roles to users
 	 *     tags: [Admin]
-	 *     operationId: getTeamspaceMembers
+	 *     operationId: updateUsersWithRoles
 	 *     requestBody:
-	 *       content:
-	 *         application/json:
-	 *           schema:
-	 *             type: object
-	 *             properties:
-	 *               user:
-	 *                 type: string
-	 *                 description: The username or email of the user
-	 *                 example: username1
-	 *               role:
-	 *                 type: string
-	 *                 description: The role of the user
-	 *                 example: support_admin
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 users:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       user:
+	 *                         type: string
+	 *                         description: name of the user
+	 *                         example: abc
+	 *                       role:
+	 *                         type: string
+	 *                         description: Name of additional role
+	 *                         example: system_admin | license_admin | support_admin
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -123,34 +138,75 @@ const establishRoutes = () => {
 	 *             schema:
 	 *               type: object
 	 *               properties:
-	 *                 members:
+	 *                 users:
 	 *                   type: array
 	 *                   items:
 	 *                     type: object
 	 *                     properties:
 	 *                       user:
 	 *                         type: string
-	 *                         description: User name
-	 *                         example: johnPaul01
-	 *                       firstName:
+	 *                         description: name of the user
+	 *                         example: abc
+	 *                       role:
 	 *                         type: string
-	 *                         description: First name
-	 *                         example: John
-	 *                       lastName:
-	 *                         type: string
-	 *                         description: Last name
-	 *                         example: Paul
-	 *                       company:
-	 *                         type: string
-	 *                         description: Name of the company
-	 *                         example: 3D Repo Ltd
-	 *                       job:
-	 *                         type: string
-	 *                         description: Job within the teamspace
-	 *                         example: Project Manager
+	 *                         description: Name of additional role
+	 *                         example: system_admin | license_admin | support_admin
 	 *
 	 */
 	router.post('/roles', hasWriteAccessToSystemRoles, updateUsersWithRoles);
+
+	/**
+	 * @openapi
+	 * /admin/roles:
+	 *   delete:
+	 *     description: add roles to users
+	 *     tags: [Admin]
+	 *     operationId: deleteUsersWithRoles
+	 *     requestBody:
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 users:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       user:
+	 *                         type: string
+	 *                         description: name of the user
+	 *                         example: abc
+	 *                       role:
+	 *                         type: string
+	 *                         description: Name of additional role
+	 *                         example: system_admin | license_admin | support_admin
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         description: confirms objects modified
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 users:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       user:
+	 *                         type: string
+	 *                         description: name of the user
+	 *                         example: abc
+	 *                       role:
+	 *                         type: string
+	 *                         description: Name of additional role
+	 *                         example: system_admin | license_admin | support_admin
+	 *
+	 */
+	router.delete('/roles', hasWriteAccessToSystemRoles, deleteUsersWithRoles);
 
 	return router;
 };
