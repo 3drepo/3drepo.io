@@ -21,6 +21,7 @@ const { hasReadAccessToSystemRoles, hasWriteAccessToSystemRoles } = require('../
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
 const { validSession } = require('../../middleware/auth');
+const { getUserFromSession } = require('../../utils/sessions');
 
 const getUsersWithRoles = (req, res) => {
 	const { user, role } = req.query
@@ -29,18 +30,20 @@ const getUsersWithRoles = (req, res) => {
 	}).catch((err) => respond(req, res, err));
 };
 
-const updateUsersWithRoles = (req, res) => {
+const grantUsersRoles = (req, res) => {
+	const user = getUserFromSession(req.session);
 	const { users } = req.body;
-	Admin.updateUsersWithRole(users).then((users) => {
-		respond(req, res, templates.ok, { users });
+	Admin.grantUsersRoles(user,users).then( (users) => {
+		respond(req, res, templates.ok, { users } );
 	}).catch(
 		/* istanbul ignore next */
 		(err) => respond(req, res, err),
 	);
 };
-const deleteUsersWithRoles = (req, res) => {
+const revokeUsersRoles = (req, res) => {
+	const user = getUserFromSession(req.session);
 	const { users } = req.body;
-	Admin.deleteUsersWithRole(users).then((users) => {
+	Admin.revokeUsersRoles(user,users).then( (users) => {
 		respond(req, res, templates.ok, { users });
 	}).catch(
 		/* istanbul ignore next */
@@ -108,7 +111,7 @@ const establishRoutes = () => {
 	 *   post:
 	 *     description: add roles to users
 	 *     tags: [Admin]
-	 *     operationId: updateUsersWithRoles
+	 *     operationId: grantUsersRoles
 	 *     requestBody:
 	 *         content:
 	 *           application/json:
@@ -153,7 +156,7 @@ const establishRoutes = () => {
 	 *                         example: system_admin | license_admin | support_admin
 	 *
 	 */
-	router.post('/roles', hasWriteAccessToSystemRoles, updateUsersWithRoles);
+	router.post('/roles', hasWriteAccessToSystemRoles, grantUsersRoles);
 
 	/**
 	 * @openapi
@@ -161,7 +164,7 @@ const establishRoutes = () => {
 	 *   delete:
 	 *     description: add roles to users
 	 *     tags: [Admin]
-	 *     operationId: deleteUsersWithRoles
+	 *     operationId: revokeUsersRoles
 	 *     requestBody:
 	 *         content:
 	 *           application/json:
@@ -206,7 +209,7 @@ const establishRoutes = () => {
 	 *                         example: system_admin | license_admin | support_admin
 	 *
 	 */
-	router.delete('/roles', hasWriteAccessToSystemRoles, deleteUsersWithRoles);
+	router.delete('/roles', hasWriteAccessToSystemRoles, revokeUsersRoles);
 
 	return router;
 };
