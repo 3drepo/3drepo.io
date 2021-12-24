@@ -17,9 +17,6 @@
 
 const permConst = {};
 
-permConst.TEAMSPACE_ADMIN = 'teamspace_admin';
-permConst.PROJECT_ADMIN = 'admin_project';
-
 permConst.SYSTEM_ADMIN = 'system_admin';
 permConst.LICENSE_ADMIN = 'license_admin';
 permConst.SUPPORT_ADMIN = 'support_admin';
@@ -33,6 +30,8 @@ permConst.LICENSE_ADMIN_ROLES = [permConst.LICENSE_ADMIN_WRITE, permConst.LICENS
 permConst.SUPPORT_ADMIN_ROLES = [permConst.SYSTEM_ADMIN_READ, permConst.LICENSE_ADMIN_READ];
 permConst.ALL_SYSTEM_ADMIN_ROLES = [...new Set([...permConst.SYSTEM_ADMIN_ROLES, ...permConst.LICENSE_ADMIN_ROLES, ...permConst.SUPPORT_ADMIN_ROLES])];
 
+permConst.TEAMSPACE_ADMIN = 'teamspace_admin';
+permConst.PROJECT_ADMIN = 'admin_project';
 permConst.MODEL_COLLABORATOR = 'collaborator';
 permConst.MODEL_COMMENTER = 'commenter';
 permConst.MODEL_VIEWER = 'viewer';
