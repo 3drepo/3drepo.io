@@ -23,8 +23,8 @@ const { templates } = require('../../utils/responseCodes');
 const { getUserFromSession } = require('../../utils/sessions');
 
 const getUsersWithRoles = (req, res) => {
-	const { user, role } = req.query
-	Admin.getUsersWithRole(user,role).then((users) => {
+	const { user, role } = req.query;
+	Admin.getUsersWithRole(user, role).then((users) => {
 		respond(req, res, templates.ok, { users });
 	}).catch((err) => respond(req, res, err));
 };
@@ -32,8 +32,8 @@ const getUsersWithRoles = (req, res) => {
 const grantUsersRoles = (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { users } = req.body;
-	Admin.grantUsersRoles(user,users).then( (users) => {
-		respond(req, res, templates.ok, { users } );
+	Admin.grantUsersRoles(user, users).then((users) => {
+		respond(req, res, templates.ok, { users });
 	}).catch(
 		/* istanbul ignore next */
 		(err) => respond(req, res, err),
@@ -42,7 +42,7 @@ const grantUsersRoles = (req, res) => {
 const revokeUsersRoles = (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { users } = req.body;
-	Admin.revokeUsersRoles(user,users).then( (users) => {
+	Admin.revokeUsersRoles(user, users).then((users) => {
 		respond(req, res, templates.ok, { users });
 	}).catch(
 		/* istanbul ignore next */
@@ -99,7 +99,8 @@ const establishRoutes = () => {
 	 *                       role:
 	 *                         type: string
 	 *                         description: Name of additional role
-	 *                         example: system_admin | license_admin | support_admin
+	 *                         enum: [system_admin, support_admin, license_admin]
+	 *                         example: support_admin
 	 *
 	 */
 	router.get('/roles', hasReadAccessToSystemRoles, getUsersWithRoles);
@@ -129,7 +130,8 @@ const establishRoutes = () => {
 	 *                       role:
 	 *                         type: string
 	 *                         description: Name of additional role
-	 *                         example: system_admin | license_admin | support_admin
+	 *                         enum: [system_admin, support_admin, license_admin]
+	 *                         example: system_admin
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -144,17 +146,32 @@ const establishRoutes = () => {
 	 *                   type: array
 	 *                   items:
 	 *                     type: object
+	 *                     name: successUsers
 	 *                     properties:
-	 *                       user:
-	 *                         type: string
-	 *                         description: name of the user
-	 *                         example: abc
-	 *                       role:
-	 *                         type: string
-	 *                         description: Name of additional role
-	 *                         example: system_admin | license_admin | support_admin
+	 *                       successUsers:
+	 *                         type: object
+	 *                         properties:
+	 *                           user:
+	 *                             type: string
+	 *                             description: name of the user
+	 *                             example: abc
+	 *                           role:
+	 *                             type: string
+	 *                             description: Name of additional role
+	 *                             example: system_admin
+	 *                       failedUsers:
+	 *                         type: object
+	 *                         properties:
+	 *                           user:
+	 *                             type: string
+	 *                             description: name of the user
+	 *                             example: zyx
+	 *                           role:
+	 *                             type: string
+	 *                             description: Name of additional role
+	 *                             example: system_admin
 	 *
-	 */
+	 * */
 	router.post('/roles', hasWriteAccessToSystemRoles, grantUsersRoles);
 
 	/**
@@ -182,7 +199,8 @@ const establishRoutes = () => {
 	 *                       role:
 	 *                         type: string
 	 *                         description: Name of additional role
-	 *                         example: system_admin | license_admin | support_admin
+	 *                         enum: [system_admin, support_admin, license_admin]
+	 *                         example: system_admin
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -197,17 +215,32 @@ const establishRoutes = () => {
 	 *                   type: array
 	 *                   items:
 	 *                     type: object
+	 *                     name: successUsers
 	 *                     properties:
-	 *                       user:
-	 *                         type: string
-	 *                         description: name of the user
-	 *                         example: abc
-	 *                       role:
-	 *                         type: string
-	 *                         description: Name of additional role
-	 *                         example: system_admin | license_admin | support_admin
+	 *                       successUsers:
+	 *                         type: object
+	 *                         properties:
+	 *                           user:
+	 *                             type: string
+	 *                             description: name of the user
+	 *                             example: abc
+	 *                           role:
+	 *                             type: string
+	 *                             description: Name of additional role
+	 *                             example: system_admin
+	 *                       failedUsers:
+	 *                         type: object
+	 *                         properties:
+	 *                           user:
+	 *                             type: string
+	 *                             description: name of the user
+	 *                             example: zyx
+	 *                           role:
+	 *                             type: string
+	 *                             description: Name of additional role
+	 *                             example: system_admin
 	 *
-	 */
+	 * */
 	router.delete('/roles', hasWriteAccessToSystemRoles, revokeUsersRoles);
 
 	return router;
