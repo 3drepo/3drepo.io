@@ -135,10 +135,7 @@ User.getUsersWithRole = async (users = [], roles = []) => {
 	const returningUsers = [];
 	const checkUsers = users.length > 0
 	const checkRoles = roles.length > 0
-	if ( !checkUsers ){ 
-		usersObj = 1
-	} else {usersObj = users}
-
+	checkUsers ? usersObj = users : usersObj = 1
 	const usersInfoCmd = {
 		usersInfo: usersObj,
 	};
@@ -173,7 +170,9 @@ User.getUsersWithRole = async (users = [], roles = []) => {
 			} 
 		});
 	});
-
+	if (!returningUsers) {
+		throw templates.userNotFound;
+	}
 	return returningUsers;
 };
 
@@ -183,7 +182,7 @@ User.hasAccessToWriteSystemRole = async (username) => {
 		showPrivileges: true,
 	};
 	const usersInfo = await db.runCommand('admin', usersInfoCmd);
-	let foundrole;
+	let foundrole = false;
 	usersInfo.users[0].inheritedRoles.forEach((role) => {
 		if (role.db === 'admin' && role.role === SYSTEM_ADMIN_WRITE) {
 			foundrole = true;
@@ -198,7 +197,7 @@ User.hasAccessToReadSystemRole = async (username) => {
 		showPrivileges: true,
 	};
 	const usersInfo = await db.runCommand('admin', usersInfoCmd);
-	let foundrole;
+	let foundrole = false;
 	usersInfo.users[0].inheritedRoles.forEach((role) => {
 		if (role.db === 'admin' && role.role === SYSTEM_ADMIN_READ) {
 			foundrole = true;
@@ -213,7 +212,7 @@ User.hasAccessToWriteLicenseRole = async (username) => {
 		showPrivileges: true,
 	};
 	const usersInfo = await db.runCommand('admin', usersInfoCmd);
-	let foundrole;
+	let foundrole = false;
 	usersInfo.users[0].inheritedRoles.forEach((role) => {
 		if (role.db === 'admin' && role.role === LICENSE_ADMIN_WRITE) {
 			foundrole = true;
@@ -228,7 +227,7 @@ User.hasAccessToReadLicenseRole = async (username) => {
 		showPrivileges: true,
 	};
 	const usersInfo = await db.runCommand('admin', usersInfoCmd);
-	let foundrole;
+	let foundrole = false;
 	usersInfo.users[0].inheritedRoles.forEach((role) => {
 		if (role.db === 'admin' && role.role === LICENSE_ADMIN_READ) {
 			foundrole = true;
@@ -244,18 +243,20 @@ User.hasAdministrativeRole = async (username, role) => {
 			showPrivileges: true,
 		};
 		const usersInfo = await db.runCommand('admin', usersInfoCmd);
+		if (!usersInfo) {
+			throw templates.userNotFound;
+		}
 		let foundrole = false;
 		if (usersInfo.users.length === 1) {
-			usersInfo.users[0].inheritedRoles.forEach((inheritedRoles) => {
+			await usersInfo.users[0].inheritedRoles.forEach((inheritedRoles) => {
 				if (inheritedRoles.db === 'admin' && inheritedRoles.role === role) {
 					foundrole = true;
 				}
 			});
 			return foundrole;
 		}
-		throw createResponseCode(templates.userNotFound, 'asDdsvsdvdsvssdfasdfdfds');
 	} else {
-		throw createResponseCode(templates.invalidArguments, 'role provided not in SYSTEM_ROLES'); 
+		throw templates.invalidArguments 
 	}
 };
 
@@ -268,7 +269,6 @@ User.grantAdministrativeRole = async (username, role) => {
 		const grantRolesInfo = await db.runCommand('admin', grantRolesToUserCmd);
 		return grantRolesInfo.ok;
 	}
-
 	throw createResponseCode(templates.invalidArguments, 'role provided not in SYSTEM_ROLES');
 };
 

@@ -20,7 +20,6 @@ const Admin = require('../../processors/admin');
 const { hasReadAccessToSystemRoles, hasWriteAccessToSystemRoles } = require('../../middleware/permissions/permissions');
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
-const { validSession } = require('../../middleware/auth');
 const { getUserFromSession } = require('../../utils/sessions');
 
 const getUsersWithRoles = (req, res) => {
