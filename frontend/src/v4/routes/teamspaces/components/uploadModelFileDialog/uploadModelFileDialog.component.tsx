@@ -19,7 +19,7 @@ import { Field, Form, Formik } from 'formik';
 import { snakeCase } from 'lodash';
 import React from 'react';
 import * as Yup from 'yup';
-import * as tz from 'countries-and-timezones';
+import * as countriesAndTimezones from 'countries-and-timezones';
 import Button from '@material-ui/core/Button';
 import DialogContent from '@material-ui/core/DialogContent';
 import TextField from '@material-ui/core/TextField';
@@ -75,19 +75,21 @@ interface IState {
 	allowImportAnimations: boolean;
 	allowSetTimezone: boolean;
 	timezones: any[];
-	selectedCountry: string;
-	selectedTimezone: string;
+	selectedTimezone: any;
 }
 
-const countries = Object.values(tz.getAllCountries());
+const allTimezones = Object.values(countriesAndTimezones.getAllTimezones()).filter((tz) => tz.countries.length)
+	.sort((tz1, tz2) => {
+		return tz1.utcOffset - tz2.utcOffset;
+	});
+
 export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 	public state = {
 		fileName: '',
 		allowImportAnimations: false,
 		allowSetTimezone: false,
 		timezones: [],
-		selectedCountry: '',
-		selectedTimezone: ''
+		selectedTimezone: {name: '', label: ''}
 	};
 
 	get modelDetails() {
@@ -108,9 +110,16 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		fetchModelSettings(teamspaceName, modelId);
 		const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-		const defaultCountry = countries.find((c) => c.timezones.some((t) => t === browserTimezone));
-		const timezones = defaultCountry.timezones;
-		this.setState({ timezones, selectedCountry: defaultCountry.name, selectedTimezone: browserTimezone });
+		const timezones = allTimezones.map((tz) => {
+			return {
+				name: tz.name,
+				label: `(GMT ${tz.utcOffsetStr}) ${tz.name}`
+			}
+		});
+
+		const defaultTimezone = timezones.find((tz) => tz.name === browserTimezone)
+			??  timezones.find((tz) => tz.name === 'Europe/London');
+		this.setState({ timezones, selectedTimezone: defaultTimezone });
 	}
 
 	public componentDidUpdate(prevProps: Readonly<IProps>) {
@@ -131,7 +140,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 			tag: values.revisionName,
 			desc: values.revisionDesc,
 			importAnimations: values.importAnimations,
-			timezone: this.state.selectedTimezone
+			timezone: this.state.selectedTimezone.name
 		};
 
 		const modelData = {
@@ -190,8 +199,9 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 				<InputLabel shrink htmlFor="timezone-select">Project Timezone</InputLabel>
 					<CellSelect
 						{...field}
-						items={this.state.timezones}
-						value={this.state.selectedTimezone}
+						items={this.state.timezones.map((tz) => tz.label)}
+						value={this.state.selectedTimezone.label}
+						onChange={ this.onTimezoneChanged }
 						disabledPlaceholder
 						inputId="timezone-select"
 					/>
@@ -199,23 +209,9 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		)} />
 	));
 
-	public onCountryChanged = (event, country) => {
-		const countryTimezones = countries.find((t) => t.name === country).timezones;
-		this.setState({ timezones: countryTimezones, selectedTimezone: countryTimezones[0]});
+	public onTimezoneChanged = (event, newTimezone) => {
+		this.setState({ selectedTimezone: this.state.timezones.find((tz) => tz.label === newTimezone ) });
 	}
-
-	public renderCountries = renderWhenTrue(() => (
-		<FormControl margin="normal">
-		<InputLabel shrink htmlFor="country-select">Project Country</InputLabel>
-		<CellSelect
-			value={this.state.selectedCountry}
-			items={countries.map((c) => c.name)}
-			onChange={this.onCountryChanged}
-			disabledPlaceholder
-			inputId="country-select"
-		/>
-		</FormControl>
-	));
 
 	public renderFileName = renderWhenTrue(() => (
 		<FileName><FileIcon />{this.state.fileName}</FileName>
@@ -309,7 +305,6 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 									fullWidth
 								/>}
 						/>
-						{this.renderCountries(this.state.allowSetTimezone)}
 						{this.renderTimezones(this.state.allowSetTimezone)}
 						<StyledDialogActions>
 							<Field render={ () =>
