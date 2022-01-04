@@ -141,6 +141,7 @@ export const Containers = (): JSX.Element => {
 											startIcon={<AddCircleIcon />}
 											variant="contained"
 											color="primary"
+											onClick={() => setCreateContainerFormOpen(true)}
 										>
 											<FormattedMessage id="containers.all.newContainer" defaultMessage="New Container" />
 										</Button>
