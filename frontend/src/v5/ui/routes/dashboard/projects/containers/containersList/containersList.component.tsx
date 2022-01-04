@@ -118,7 +118,7 @@ export const ContainersList = ({
 				)}
 			>
 				<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
-					<DashboardListHeaderLabel name="name" tabletWidth={238}>
+					<DashboardListHeaderLabel name="name">
 						<FormattedMessage id="containers.list.header.container" defaultMessage="Container" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="revisionsCount" width={186} hideWhenSmallerThan={Display.Desktop}>
@@ -127,7 +127,7 @@ export const ContainersList = ({
 					<DashboardListHeaderLabel name="code">
 						<FormattedMessage id="containers.list.header.containerCode" defaultMessage="Container code" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="type" tabletWidth={120} hideWhenSmallerThan={Display.Tablet}>
+					<DashboardListHeaderLabel name="type" width={188} hideWhenSmallerThan={Display.Tablet}>
 						<FormattedMessage id="containers.list.header.category" defaultMessage="Category" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="lastUpdated" width={180}>

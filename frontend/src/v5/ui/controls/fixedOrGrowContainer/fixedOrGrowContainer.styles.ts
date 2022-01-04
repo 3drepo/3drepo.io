@@ -19,6 +19,8 @@ import styled, { css } from 'styled-components';
 import { Display } from '@/v5/ui/themes/media';
 
 export const Container = styled.div<{width?: number}>`
+	min-width: 0;
+
 	${({ width }) => (width
 		? css`
 		width: ${width}px;
@@ -27,18 +29,19 @@ export const Container = styled.div<{width?: number}>`
 		: css`
 		display: flex;
 		flex: 1;
-		min-width: 0;
 	`)}
 
 	${({ tabletWidth }) => tabletWidth && css`
 		@media (max-width: ${Display.Desktop}px) {
-			min-width: ${tabletWidth}px;
+			width: ${tabletWidth}px;
+			display: block;
 		}
 	`}
 
 	${({ mobileWidth }) => mobileWidth && css`
 		@media (max-width: ${Display.Tablet}px) {
-			min-width: ${mobileWidth}px;
+			width: ${mobileWidth}px;
+			display: block;
 		}
 	`}
 

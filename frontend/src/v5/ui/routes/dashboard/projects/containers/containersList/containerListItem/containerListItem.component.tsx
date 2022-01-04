@@ -77,7 +77,6 @@ export const ContainerListItem = ({
 						/>
 					)}
 					selected={isSelected}
-					tabletWidth={238}
 					tooltipTitle={
 						<FormattedMessage id="containers.list.item.title.tooltip" defaultMessage="Launch latest revision" />
 					}
