@@ -80,7 +80,7 @@ const validateRevisionUpload = async (req, res, next) => {
 			importAnimations: Yup.bool().default(true),
 			timezone: Yup.string().test('valid-timezone',
 				'The timezone provided is not valid',
-				async (value) => {
+				(value) => {
 					if (value !== undefined) {
 						const allTimezones = tz.getAllTimezones();
 						return Object.values(allTimezones).map((t) => t.name).includes(value);
