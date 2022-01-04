@@ -16,9 +16,9 @@
  */
 
 const { camelCase, snakeCase } = require('lodash');
+const { types } = require('./yup');
 
 const StringHelper = {};
-
 // Turns thisIsUs to THIS_IS_US
 StringHelper.toConstantCase = (str) => snakeCase(str).toUpperCase();
 StringHelper.toCamelCase = (str) => camelCase(str);
@@ -30,5 +30,7 @@ StringHelper.getURLDomain = (url) => {
 	const domainRegexMatch = url.match(/^(\w)*:\/\/.*?\//);
 	return domainRegexMatch ? domainRegexMatch[0].replace(/\/\s*$/, '') : url;
 };
+
+StringHelper.hasEmailFormat = (str) => types.strings.email.isValidSync(str, { strict: true });
 
 module.exports = StringHelper;

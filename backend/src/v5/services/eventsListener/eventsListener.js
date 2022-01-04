@@ -15,12 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const authEventsListener = require('./components/authEvents');
 const modelEventsListener = require('./components/modelEvents');
 
 const EventsListener = {};
 
 EventsListener.init = () => {
 	modelEventsListener.init();
+	authEventsListener.init();
 };
 
 module.exports = EventsListener;

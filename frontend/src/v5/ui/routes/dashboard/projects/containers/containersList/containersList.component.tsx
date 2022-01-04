@@ -18,6 +18,7 @@
 import React, { ReactNode, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 import { isEmpty } from 'lodash';
+import { FormattedMessage } from 'react-intl';
 import {
 	DashboardList,
 	DashboardListCollapse,
@@ -28,12 +29,9 @@ import {
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
+import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containerListItem';
-import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/skeletonListItem';
-import { FormattedMessage } from 'react-intl';
-import { useOrderedList } from './containersList.hooks';
 import { Container } from './containersList.styles';
-import { DEFAULT_SORT_CONFIG } from './containersList.constants';
 
 type IContainersList = {
 	emptyMessage: ReactNode;
@@ -58,7 +56,7 @@ export const ContainersList = ({
 	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
 	const isListPending = ContainersHooksSelectors.selectIsListPending();
 
-	const toggleSelectedId = (id: IContainer['_id']) => {
+	const toggleSelectedId = (id: string) => {
 		setSelectedId((state) => (state === id ? null : id));
 	};
 
@@ -97,18 +95,16 @@ export const ContainersList = ({
 				<DashboardList>
 					{!isEmpty(sortedList) ? (
 						sortedList.map((container, index) => (
-							container.hasStatsPending ? (
-								<SkeletonListItem key={container._id} delay={index / 10} />
-							) : (
-								<ContainerListItem
-									key={container._id}
-									isSelected={container._id === selectedId}
-									container={container}
-									filterQuery={filterQuery}
-									onFavouriteChange={setFavourite}
-									onToggleSelected={toggleSelectedId}
-								/>
-							)))
+							<ContainerListItem
+								index={index}
+								key={container._id}
+								isSelected={container._id === selectedId}
+								container={container}
+								filterQuery={filterQuery}
+								onFavouriteChange={setFavourite}
+								onToggleSelected={toggleSelectedId}
+							/>
+						))
 					) : (
 						<DashboardListEmptyContainer>
 							{emptyMessage}

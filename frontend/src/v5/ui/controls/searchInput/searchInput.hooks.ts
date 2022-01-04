@@ -14,25 +14,26 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { useEffect, useState } from 'react';
+import { debounce } from 'lodash';
 
-import React from 'react';
-import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
-import { FormattedMessage } from 'react-intl';
-import { SearchPhrase } from './emptySearchResults.styles';
-
-type IEmptySearchResults = {
-	searchPhrase: string;
+export type SearchInputConfig = {
+	query: string;
+	dispatcher: Function;
 };
 
-export const EmptySearchResults = ({ searchPhrase }: IEmptySearchResults): JSX.Element => (
-	<DashboardListEmptyText>
-		<FormattedMessage
-			id="containers.noSearchResults"
-			defaultMessage="We couldn't find a match for <SearchPhrase>“{searchPhrase}”</SearchPhrase>. Please try another search."
-			values={{
-				SearchPhrase: (val: string) => <SearchPhrase>{val}</SearchPhrase>,
-				searchPhrase,
-			}}
-		/>
-	</DashboardListEmptyText>
-);
+export const useSearchInput = ({ query, dispatcher }: SearchInputConfig) => {
+	const [searchInput, setSearchInput] = useState(query);
+
+	const debounceSearchUpdate = debounce(
+		(value: string) => dispatcher(value),
+		300,
+		{ trailing: true },
+	);
+
+	useEffect(() => {
+		debounceSearchUpdate(searchInput);
+	}, [searchInput]);
+
+	return { searchInput, setSearchInput, filterQuery: query };
+};
