@@ -143,6 +143,13 @@ const schema = (group, strict = false) => {
 };
 
 Group.validateSchema = (group) => schema(group, true).validate(group);
-Group.castSchema = (group) => schema(group).cast(group);
+Group.castSchema = (group) => {
+	const castedSchema = schema(group).cast(group);
 
+	if (typeof castedSchema.updatedAt !== 'number') {
+		castedSchema.updatedAt = castedSchema.createdAt;
+	}
+
+	return castedSchema;
+};
 module.exports = Group;
