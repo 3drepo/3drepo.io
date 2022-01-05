@@ -14,36 +14,22 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
-import { Display } from '@/v5/ui/themes/media';
+import { IFixedOrGrowContainer } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.component';
 import { Text } from './dashboardListItemText.styles';
 
-type IDashboardListItemText = {
-	children: ReactNode;
-	width?: number;
-	tabletWidth?: number;
-	mobileWidth?: number;
-	className?: string;
+interface IDashboardListItemText extends IFixedOrGrowContainer{
 	selected?: boolean;
-	hideWhenSmallerThan?: Display;
-};
+}
 
 export const DashboardListItemText = ({
-	children,
-	width,
-	className,
 	selected = false,
-	hideWhenSmallerThan,
-	tabletWidth,
-	mobileWidth,
+	children,
+	...containerProps
 }: IDashboardListItemText): JSX.Element => (
 	<FixedOrGrowContainer
-		width={width}
-		tabletWidth={tabletWidth}
-		mobileWidth={mobileWidth}
-		hideWhenSmallerThan={hideWhenSmallerThan}
-		className={className}
+		{...containerProps}
 	>
 		<Text selected={selected}>
 			{children}

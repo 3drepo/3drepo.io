@@ -19,7 +19,7 @@ import styled, { css } from 'styled-components';
 import { Display } from '@/v5/ui/themes/media';
 
 export const Container = styled.div<{width?: number}>`
-	min-width: 0;
+	min-width: ${({ minWidth }) => minWidth || 0}px;
 
 	${({ width }) => (width
 		? css`

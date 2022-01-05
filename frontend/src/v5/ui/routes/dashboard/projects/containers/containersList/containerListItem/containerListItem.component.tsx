@@ -99,7 +99,7 @@ export const ContainerListItem = ({
 						values={{ count: container.revisionsCount }}
 					/>
 				</DashboardListItemButton>
-				<DashboardListItemText selected={isSelected}>
+				<DashboardListItemText selected={isSelected} minWidth={112}>
 					<Highlight search={filterQuery}>
 						{container.code}
 					</Highlight>
@@ -114,7 +114,7 @@ export const ContainerListItem = ({
 						{container.type}
 					</Highlight>
 				</DashboardListItemText>
-				<DashboardListItemText width={97} selected={isSelected}>
+				<DashboardListItemText width={68} selected={isSelected}>
 					{container.lastUpdated ? formatDate(container.lastUpdated) : ''}
 				</DashboardListItemText>
 				<DashboardListItemIcon>

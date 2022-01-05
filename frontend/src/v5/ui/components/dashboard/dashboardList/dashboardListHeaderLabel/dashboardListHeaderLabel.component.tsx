@@ -18,36 +18,26 @@
 import React, { Dispatch, ReactNode } from 'react';
 import ArrowIcon from '@assets/icons/arrow.svg';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
-import { Display } from '@/v5/ui/themes/media';
+import { IFixedOrGrowContainer } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.component';
 import { Container, Button, Indicator, Label } from './dashboardListHeaderLabel.styles';
 
-type IDashboardListHeaderLabel = {
+interface IDashboardListHeaderLabel extends IFixedOrGrowContainer{
 	children?: ReactNode;
 	sortingDirection?: SortingDirection;
 	sort?: boolean;
-	onClick?: Dispatch<void>;
-	width?: number;
-	tabletWidth?: number;
-	className?: string;
 	name?: string;
-	hideWhenSmallerThan?: Display;
-};
+	onClick?: Dispatch<void>;
+}
 
 export const DashboardListHeaderLabel = ({
 	children,
 	sortingDirection,
 	onClick,
-	width,
-	tabletWidth,
 	sort = false,
-	hideWhenSmallerThan,
-	className,
+	...containerProps
 }: IDashboardListHeaderLabel): JSX.Element => (
 	<Container
-		width={width}
-		tabletWidth={tabletWidth}
-		className={className}
-		hideWhenSmallerThan={hideWhenSmallerThan}
+		{...containerProps}
 	>
 		{sort ? (
 			<Button onClick={onClick}>

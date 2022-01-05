@@ -124,13 +124,13 @@ export const ContainersList = ({
 					<DashboardListHeaderLabel name="revisionsCount" width={186} hideWhenSmallerThan={Display.Desktop}>
 						<FormattedMessage id="containers.list.header.revisions" defaultMessage="Revisions" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="code">
+					<DashboardListHeaderLabel name="code" minWidth={112}>
 						<FormattedMessage id="containers.list.header.containerCode" defaultMessage="Container code" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="type" width={188} hideWhenSmallerThan={Display.Tablet}>
 						<FormattedMessage id="containers.list.header.category" defaultMessage="Category" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="lastUpdated" width={180}>
+					<DashboardListHeaderLabel name="lastUpdated" width={160}>
 						<FormattedMessage id="containers.list.header.lastUpdated" defaultMessage="Last updated" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>
