@@ -74,9 +74,7 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 			/>
 
 			<Select
-				label={formatMessage({ id: 'containers.creation.form.unit', defaultMessage: 'Units' })}
-				defaultValue=""
-				required
+					defaultValue="mm"
 				{...register('unit', { required: true })}
 			>
 				<MenuItem value="mm">
@@ -97,11 +95,12 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 			</Select>
 
 			<Select
-				label={formatMessage({ id: 'containers.creation.form.category', defaultMessage: 'Category' })}
-				defaultValue=""
-				required
+					defaultValue="Uncategorised"
 				{...register('type', { required: true })}
 			>
+					<MenuItem value="Uncategorised">
+						<FormattedMessage id="containers.creation.form.type.uncategorised" defaultMessage="Uncategorised" />
+					</MenuItem>
 				<MenuItem value="Architectural">
 					<FormattedMessage id="containers.creation.form.type.architectural" defaultMessage="Architectural" />
 				</MenuItem>
