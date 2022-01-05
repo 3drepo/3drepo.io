@@ -340,7 +340,7 @@ const _getAllMetadata = async (account, model, branch, rev, stream) => {
 					"meta", undefined, {_id: 1, parents: 1, metadata: 1});
 				const result =
 					{
-						data: subModelData,
+						data: cleanAll(subModelData),
 						account: subModelTS,
 						model: subModelId
 					};
