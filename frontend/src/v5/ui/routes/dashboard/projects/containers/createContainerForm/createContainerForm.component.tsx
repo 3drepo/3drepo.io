@@ -18,6 +18,8 @@
 import React from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as Yup from 'yup';
 import { TextField, MenuItem, InputLabel, Select } from '@material-ui/core';
 import { FormModal } from '@/v5/ui/controls/modal/formModal/formDialog.component';
 import { useForm, SubmitHandler } from 'react-hook-form';
@@ -33,20 +35,20 @@ interface IFormInput {
 	type: string;
 }
 
-const errorMessage = {
-	name: {
-		required: formatMessage({ id: 'containers.creation.name.error.required', defaultMessage: 'Name is a required field' }),
-		maxLength: formatMessage({ id: 'containers.creation.name.error.length', defaultMessage: 'Name is limited to 120 characters' }),
-	},
-	code: {
-		maxLength: formatMessage({ id: 'containers.creation.code.error.length', defaultMessage: 'Code is limited to 50 characters' }),
-		pattern: formatMessage({ id: 'containers.creation.code.error.pattern', defaultMessage: 'Code is limited to letters and numbers' }),
-	},
-};
+const ContainerSchema = Yup.object().shape({
+	name: Yup.string()
+		.min(2, formatMessage({ id: 'containers.creation.name.error.min', defaultMessage: 'Container name must be at least 2 characters' }))
+		.max(120, formatMessage({ id: 'containers.creation.name.error.max', defaultMessage: 'Container name is limited to 120 characters' }))
+		.required(formatMessage({ id: 'containers.creation.name.error.required', defaultMessage: 'Container Name is a required field' })),
+	unit: Yup.string().required().default('mm'),
+	type: Yup.string().required().default('Uncategorised'),
+	code: Yup.string().max(50).matches(/^[A-Za-z0-9]+$/, 'Code can only consist of letters and numbers'),
+});
 
 export const CreateContainerForm = ({ open, close }): JSX.Element => {
 	const { register, handleSubmit, formState, reset, formState: { errors } } = useForm<IFormInput>({
 		mode: 'onChange',
+		resolver: yupResolver(ContainerSchema),
 	});
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 	const onSubmit: SubmitHandler<IFormInput> = (body) => {
@@ -69,8 +71,8 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 				label={formatMessage({ id: 'containers.creation.form.name', defaultMessage: 'Name' })}
 				required
 				error={!!errors.name}
-				helperText={errors.name && errorMessage.name[errors.name?.type]}
-				{...register('name', { required: true, maxLength: 120 })}
+				helperText={errors.name?.message}
+				{...register('name')}
 			/>
 			<SelectColumn>
 				<InputLabel id="unit-label" required>
@@ -79,7 +81,7 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 				<Select
 					labelId="unit-label"
 					defaultValue="mm"
-					{...register('unit', { required: true })}
+					{...register('unit')}
 				>
 					<MenuItem value="mm">
 						<FormattedMessage id="containers.creation.form.unit.mm" defaultMessage="Millimetres" />
@@ -106,7 +108,7 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 				<Select
 					labelId="category-label"
 					defaultValue="Uncategorised"
-					{...register('type', { required: true })}
+					{...register('type')}
 				>
 					<MenuItem value="Uncategorised">
 						<FormattedMessage id="containers.creation.form.type.uncategorised" defaultMessage="Uncategorised" />
@@ -155,11 +157,8 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 			<TextField
 				label={formatMessage({ id: 'containers.creation.form.code', defaultMessage: 'Code' })}
 				error={!!errors.code}
-				helperText={(errors.code) && errorMessage.code[errors.code?.type]}
-				{...register('code', {
-					maxLength: 50,
-					pattern: /^[A-Za-z0-9]+$/,
-				})}
+				helperText={errors.code?.message}
+				{...register('code')}
 			/>
 		</FormModal>
 	);
