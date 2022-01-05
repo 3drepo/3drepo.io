@@ -162,7 +162,7 @@ describe('Containers: sagas', () => {
 		it('should call createContainer endpoint with 404', async () => {
 			mockServer
 			.post(`/teamspaces/${teamspace}/projects/${projectId}/containers`)
-			.reply(404);
+			.reply(400);
 
 			await expectSaga(ContainersSaga.default)
 				.dispatch(ContainersActions.createContainer(teamspace, projectId, newContainer))
