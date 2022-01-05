@@ -16,7 +16,9 @@
  */
 
 import { AlertModal } from './alertModal/alertModal.component';
+import { DeleteModal } from './deleteModal/deleteModal.component';
 
 export const MODAL_TEMPLATES = {
 	alert: AlertModal,
+	delete: DeleteModal,
 };

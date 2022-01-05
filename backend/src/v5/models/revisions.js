@@ -67,4 +67,13 @@ Revisions.updateRevisionStatus = async (teamspace, model, revision, status) => {
 	}
 };
 
+Revisions.isTagUnique = async (teamspace, model, tag) => {
+	try {
+		await findOneRevisionByQuery(teamspace, model, { tag });
+		return false;
+	} catch {
+		return true;
+	}
+};
+
 module.exports = Revisions;
