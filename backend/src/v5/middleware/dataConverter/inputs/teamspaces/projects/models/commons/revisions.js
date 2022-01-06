@@ -81,9 +81,8 @@ const validateRevisionUpload = async (req, res, next) => {
 			timezone: Yup.string().test('valid-timezone',
 				'The timezone provided is not valid',
 				(value) => {
-					if (value !== undefined) {
-						const allTimezones = tz.getAllTimezones();
-						return Object.values(allTimezones).map((t) => t.name).includes(value);
+					if (value !== undefined) {						
+						return !!tz.getTimezone(value);
 					}
 					return true;
 				}),

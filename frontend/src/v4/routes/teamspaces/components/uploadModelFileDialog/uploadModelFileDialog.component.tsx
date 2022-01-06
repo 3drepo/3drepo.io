@@ -78,7 +78,7 @@ interface IState {
 	selectedTimezone: any;
 }
 
-const allTimezones = Object.values(countriesAndTimezones.getAllTimezones()).filter((tz) => tz.countries.length)
+const allTimezones = Object.values(countriesAndTimezones.getAllTimezones())
 	.sort((tz1, tz2) => {
 		return tz1.utcOffset - tz2.utcOffset;
 	});
@@ -118,7 +118,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		});
 
 		const defaultTimezone = timezones.find((tz) => tz.name === browserTimezone)
-			??  timezones.find((tz) => tz.name === 'Europe/London');
+			??  timezones.find((tz) => tz.name === 'Etc/UTC');
 		this.setState({ timezones, selectedTimezone: defaultTimezone });
 	}
 
