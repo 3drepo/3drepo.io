@@ -112,8 +112,8 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 
 		const timezones = [];
 		let defaultTimezone = null;
-		
-		for(let i = 0; i < allTimezones.length; i++){
+
+		for (let i = 0; i < allTimezones.length; i++) {
 			const tz = allTimezones[i];
 			const tzToAdd = {
 				name: tz.name,
@@ -122,12 +122,12 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 
 			timezones.push(tzToAdd);
 
-			if(tz.name === browserTimezone){
+			if (tz.name === browserTimezone) {
 				defaultTimezone = tzToAdd;
 			}
 		}
 
-		if(!defaultTimezone){
+		if (!defaultTimezone) {
 			defaultTimezone = timezones.find(tz => tz.name === 'Etc/UTC');
 		}
 
