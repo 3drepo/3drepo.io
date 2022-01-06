@@ -26,13 +26,14 @@ const MulterHelper = require(`${src}/middleware/dataConverter/multer`);
 
 jest.mock('../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
+const { templates } = require(`${src}/utils/responseCodes`);
 
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
-const createRequestWithFile = (filename = 'file') => {
+const createRequestWithFile = (filename = 'file', file = 'dummy.obj') => {
 	const form = new FormData();
 	form.append(filename,
-		fs.createReadStream(path.join(modelFolder, 'dummy.obj')));
+		fs.createReadStream(path.join(modelFolder, file)));
 
 	const req = new MockExpressRequest({
 		method: 'POST',
@@ -50,10 +51,11 @@ const testSingleFileUpload = () => {
 	describe.each([
 		['request provides the correct parameters and no filter', createRequestWithFile(), undefined, (a, b, cb) => { cb(null, true); }, true],
 		['request provides the correct parameters and no filter (2)', createRequestWithFile('a'), 'a', (a, b, cb) => { cb(null, true); }, true],
-		['request provides the incorrect parameters', createRequestWithFile('a'), undefined, (a, b, cb) => { cb(null, true); }, false],
-		['file filter rejected the file', 'a', (a, b, cb) => { cb('1', false); }, false],
-	])('Single file upload', (desc, req, reqParam, fileFilter, success) => {
-		test(`${success ? 'next() should be called' : 'should fail'} if ${desc}`, async () => {
+		['request provides the incorrect parameters', createRequestWithFile('a'), undefined, (a, b, cb) => { cb(null, true); }, false, 'LIMIT_UNEXPECTED_FILE'],
+		['file filter rejected the file', createRequestWithFile('a'), 'a', (a, b, cb) => { cb(templates.invalidArguments, false); }, false],
+		['file exceeded max file limit', createRequestWithFile('file', 'tooBig.ifc'), undefined, (a, b, cb) => { cb(null, true); }, false, templates.maxSizeExceeded.code],
+	])('Single file upload', (desc, req, reqParam, fileFilter, success, code = templates.invalidArguments.code) => {
+		test(`${success ? 'next() should be called' : `should fail with ${code}`} if ${desc}`, async () => {
 			const mockCB = jest.fn(() => {});
 			const resCallLength = Responder.respond.mock.calls.length;
 			await MulterHelper.singleFileUpload(reqParam, fileFilter)(req, {}, mockCB);
@@ -64,6 +66,7 @@ const testSingleFileUpload = () => {
 			} else {
 				expect(mockCB.mock.calls.length).toBe(0);
 				expect(Responder.respond.mock.calls.length).toBe(resCallLength + 1);
+				expect(Responder.respond.mock.calls[0][2].code).toEqual(code);
 			}
 		});
 	});

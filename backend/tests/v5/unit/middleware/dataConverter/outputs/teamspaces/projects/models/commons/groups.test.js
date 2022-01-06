@@ -50,6 +50,7 @@ const testSerialiseGroupArray = () => {
 			'3 different group types',
 		],
 		[[badRuleCast], 'Bad schema'],
+		[[{ ...generateGroup('a', 'b', true, false, false), updatedAt: undefined }], 'group with no updatedAt'],
 	])('Serialise Group array data', (data, desc) => {
 		test(`should serialise correctly with ${desc}`,
 			() => {
@@ -62,6 +63,7 @@ const testSerialiseGroupArray = () => {
 					const res = { ...group };
 
 					res._id = UUIDToString(group._id);
+					res.updatedAt = res.updatedAt ?? res.createdAt;
 
 					if ((group.objects || []).length) {
 						res.objects = group.objects.map((entry) => {
