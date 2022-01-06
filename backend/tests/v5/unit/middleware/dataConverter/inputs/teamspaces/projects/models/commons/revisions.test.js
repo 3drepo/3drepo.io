@@ -128,6 +128,7 @@ const testValidateNewRevisionData = () => {
 		['Request with duplicate tag should fail', 'ts', { tag: 'duplicate' }, false, false, false, templates.invalidArguments],
 		['Request with invalid timezone should fail', 'ts', { tag: 'drflgdf', timezone: 'abc' }, false, false, false, templates.invalidArguments],
 		['Request with invalid type timezone should fail', 'ts', { tag: 'drflgdf', timezone: 123 }, false, false, false, templates.invalidArguments],
+		['Request with null timezone should pass', 'ts', { tag: 'drflgdf', timezone: null }],
 	])('Check new revision data', (desc, ts, bodyContent, badFile, noFile, emptyFile, error) => {
 		test(`${desc} should ${error ? `fail with ${error.code}` : ' succeed and next() should be called'}`, async () => {
 			RevisionsModel.isTagUnique.mockImplementationOnce((teamspace, model, tag) => tag !== 'duplicate');
