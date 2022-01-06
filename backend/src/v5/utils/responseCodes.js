@@ -37,6 +37,9 @@ ResponseCodes.templates = {
 	// User document related error
 	userNotFound: { message: 'User not found.', status: 404 },
 
+	// Role related error
+	roleNotFound: { message: 'Role not found.', status: 400 },
+
 	// Teamspace related error
 	teamspaceNotFound: { message: 'Teamspace not found.', status: 404 },
 

@@ -138,9 +138,9 @@ Permissions.hasReadAccessToContainer = modelPermCheck(
 	(perm) => MODEL_READ_ROLES.includes(perm.permission), modelType.CONTAINERS,
 );
 
-Permissions.hasWriteAccessToSystemRoles = async (username) => await hasAccessToWriteSystemRole(username);
-Permissions.hasReadAccessToSystemRoles = async (username) => await hasAccessToReadSystemRole(username);
-Permissions.hasWriteAccessToLicense = async (username) => await hasAccessToWriteLicenses(username);
-Permissions.hasReadAccessToLicense = async (username) => await hasAccessToReadLicenses(username);
+Permissions.hasWriteAccessToSystemRoles = async (username) => hasAccessToWriteSystemRole(username);
+Permissions.hasReadAccessToSystemRoles = async (username) => hasAccessToReadSystemRole(username);
+Permissions.hasWriteAccessToLicense = async (username) => hasAccessToWriteLicenses(username);
+Permissions.hasReadAccessToLicense = async (username) => hasAccessToReadLicenses(username);
 
 module.exports = Permissions;

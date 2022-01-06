@@ -28,7 +28,9 @@ permConst.SYSTEM_ROLES = [permConst.SYSTEM_ADMIN, permConst.LICENSE_ADMIN, permC
 permConst.SYSTEM_ADMIN_ROLES = [permConst.SYSTEM_ADMIN_WRITE, permConst.SYSTEM_ADMIN_READ];
 permConst.LICENSE_ADMIN_ROLES = [permConst.LICENSE_ADMIN_WRITE, permConst.LICENSE_ADMIN_READ];
 permConst.SUPPORT_ADMIN_ROLES = [permConst.SYSTEM_ADMIN_READ, permConst.LICENSE_ADMIN_READ];
-permConst.ALL_SYSTEM_ADMIN_ROLES = [...new Set([...permConst.SYSTEM_ADMIN_ROLES, ...permConst.LICENSE_ADMIN_ROLES, ...permConst.SUPPORT_ADMIN_ROLES])];
+permConst.ALL_SYSTEM_ADMIN_ROLES = [...new Set([...permConst.SYSTEM_ADMIN_ROLES,
+	...permConst.LICENSE_ADMIN_ROLES,
+	...permConst.SUPPORT_ADMIN_ROLES])];
 
 permConst.TEAMSPACE_ADMIN = 'teamspace_admin';
 permConst.PROJECT_ADMIN = 'admin_project';

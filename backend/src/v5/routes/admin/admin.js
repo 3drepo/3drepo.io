@@ -14,13 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-const { Router } = require('express');
-const Admin = require('../../processors/admin');
 const { hasReadAccessToSystemRoles, hasWriteAccessToSystemRoles } = require('../../middleware/permissions/permissions');
-const { respond } = require('../../utils/responder');
-const { templates } = require('../../utils/responseCodes');
+const { validatePayload, validateQueries, validateUsersAndRoles } = require('../../middleware/dataConverter/inputs/admin/admin');
+const Admin = require('../../processors/admin');
 const { getUserFromSession } = require('../../utils/sessions');
+const { respond } = require('../../utils/responder');
+const { Router } = require('express');
+const { templates } = require('../../utils/responseCodes');
 
 const getUsersWithRoles = (req, res) => {
 	const { user, role } = req.query;
@@ -61,14 +61,14 @@ const establishRoutes = () => {
 	 *     tags: [Admin]
 	 *     operationId: getAllUsersWithRole
 	 *     parameters:
-   	 *       - role:
+		*       - role:
 	 *         name: role
 	 *         in: query
 	 *         description: name of role
 	 *         required: false
 	 *         schema:
 	 *           type: array
-   	 *       - user:
+		*       - user:
 	 *         name: user
 	 *         description: name of user
 	 *         in: query
@@ -103,7 +103,7 @@ const establishRoutes = () => {
 	 *                         example: support_admin
 	 *
 	 */
-	router.get('/roles', hasReadAccessToSystemRoles, getUsersWithRoles);
+	router.get('/roles', hasReadAccessToSystemRoles, validateQueries, getUsersWithRoles);
 
 	/**
 	 * @openapi
@@ -133,6 +133,8 @@ const establishRoutes = () => {
 	 *                         enum: [system_admin, support_admin, license_admin]
 	 *                         example: system_admin
 	 *     responses:
+	 *       400:
+	 *         $ref: "#/components/responses/invalidArguments"
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       200:
@@ -172,7 +174,7 @@ const establishRoutes = () => {
 	 *                             example: system_admin
 	 *
 	 * */
-	router.post('/roles', hasWriteAccessToSystemRoles, grantUsersRoles);
+	router.post('/roles', hasWriteAccessToSystemRoles, validatePayload, validateUsersAndRoles, grantUsersRoles);
 
 	/**
 	 * @openapi
@@ -202,6 +204,8 @@ const establishRoutes = () => {
 	 *                         enum: [system_admin, support_admin, license_admin]
 	 *                         example: system_admin
 	 *     responses:
+	 *       400:
+	 *         $ref: "#/components/responses/invalidArguments"
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       200:
@@ -215,9 +219,9 @@ const establishRoutes = () => {
 	 *                   type: array
 	 *                   items:
 	 *                     type: object
-	 *                     name: successUsers
+	 *                     name: users
 	 *                     properties:
-	 *                       successUsers:
+	 *                       users:
 	 *                         type: object
 	 *                         properties:
 	 *                           user:
@@ -241,7 +245,7 @@ const establishRoutes = () => {
 	 *                             example: system_admin
 	 *
 	 * */
-	router.delete('/roles', hasWriteAccessToSystemRoles, revokeUsersRoles);
+	router.delete('/roles', hasWriteAccessToSystemRoles, validatePayload, validateUsersAndRoles, revokeUsersRoles);
 
 	return router;
 };

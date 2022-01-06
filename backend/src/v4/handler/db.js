@@ -72,10 +72,12 @@
 	}
 
 	const connect = (username, password) => {
-		return MongoClient.connect(getURL(username, password), {
+		// handler for checking the roles exist in here
+		const mongoClient = MongoClient.connect(getURL(username, password), {
 			useNewUrlParser: true,
 			useUnifiedTopology: true
 		});
+		return mongoClient;
 	};
 
 	const Handler = {};
