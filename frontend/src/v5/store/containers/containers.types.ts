@@ -43,7 +43,7 @@ export interface IContainer {
 	type: string;
 	code: string;
 	status: UploadStatuses;
-	units: string;
+	unit: string;
 	isFavourite: boolean;
 	role: string;
 	hasStatsPending: boolean;
@@ -90,7 +90,7 @@ export type FetchContainerStatsResponse = {
 		timestamp: number;
 	};
 	status: UploadStatuses;
-	units: string;
+	unit: string;
 	code: string;
 };
 
