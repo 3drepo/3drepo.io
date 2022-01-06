@@ -21,7 +21,7 @@ import { FormattedMessage } from 'react-intl';
 import { HiddenFileInput, FileLabel } from './fileInputField.styles';
 
 interface IProps {
-	acceptedFormats: string;
+	acceptedFormats?: string;
 	handleChange: (files) => void;
 }
 

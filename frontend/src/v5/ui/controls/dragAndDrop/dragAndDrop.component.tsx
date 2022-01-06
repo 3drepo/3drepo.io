@@ -29,6 +29,7 @@ interface IDragAndDrop {
 
 export const DragAndDrop = ({ message, processFiles }: IDragAndDrop) => {
 	const [dragOverlay, setDragOverlay] = useState(false);
+	const acceptedFormats = ClientConfig.acceptedFormat.map((format) => `.${format}`).toString();
 
 	const handleDragIn = (e) => {
 		if (e.dataTransfer.items.length > 0) {
@@ -46,9 +47,10 @@ export const DragAndDrop = ({ message, processFiles }: IDragAndDrop) => {
 	};
 	return (
 		<Container
-				onDragEnter={handleDragIn}
-				onDragLeave={handleDragOut}
-				onDrop={handleDrop}
+			onDragEnter={handleDragIn}
+			onDragLeave={handleDragOut}
+			onDrop={handleDrop}
+			accept={acceptedFormats}
 			disableClick
 		>
 			<UploadDialog className={dragOverlay && 'drag-over'}>
@@ -61,6 +63,7 @@ export const DragAndDrop = ({ message, processFiles }: IDragAndDrop) => {
 				</Typography>
 
 				<FileInputField
+					acceptedFormats={acceptedFormats}
 					handleChange={(files) => processFiles(files)}
 				/>
 				<HelpText>
