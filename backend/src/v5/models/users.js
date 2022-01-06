@@ -28,7 +28,6 @@ const config = require('../utils/config');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { publish } = require('../services/eventsManager/eventsManager');
-const { ReadPreference } = require('mongodb');
 
 const User = {};
 const COLL_NAME = 'system.users';
@@ -156,7 +155,7 @@ User.getUsersWithRole = async (users = [], roles = []) => {
 					|| (
 						(roleExists && checkRoles && !checkUsers)
 					)
-					||	(
+					|| (
 						(userExists && checkUsers && !checkRoles)
 					)
 			)
@@ -254,8 +253,8 @@ User.hasAdministrativeRole = async (username, role) => {
 					foundrole = true;
 				}
 			});
-			return foundrole;
 		}
+		return foundrole;
 	} else {
 		throw templates.invalidArguments;
 	}
