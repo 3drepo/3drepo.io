@@ -17,9 +17,9 @@
 const { hasReadAccessToSystemRoles, hasWriteAccessToSystemRoles } = require('../../middleware/permissions/permissions');
 const { validatePayload, validateQueries, validateUsersAndRoles } = require('../../middleware/dataConverter/inputs/admin/admin');
 const Admin = require('../../processors/admin');
+const { Router } = require('express');
 const { getUserFromSession } = require('../../utils/sessions');
 const { respond } = require('../../utils/responder');
-const { Router } = require('express');
 const { templates } = require('../../utils/responseCodes');
 
 const getUsersWithRoles = (req, res) => {
@@ -32,8 +32,8 @@ const getUsersWithRoles = (req, res) => {
 const grantUsersRoles = (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { users } = req.body;
-	Admin.grantUsersRoles(user, users).then((users) => {
-		respond(req, res, templates.ok, { users });
+	Admin.grantUsersRoles(user, users).then((u) => {
+		respond(req, res, templates.ok, { users: u });
 	}).catch(
 		/* istanbul ignore next */
 		(err) => respond(req, res, err),
@@ -42,8 +42,8 @@ const grantUsersRoles = (req, res) => {
 const revokeUsersRoles = (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { users } = req.body;
-	Admin.revokeUsersRoles(user, users).then((users) => {
-		respond(req, res, templates.ok, { users });
+	Admin.revokeUsersRoles(user, users).then((u) => {
+		respond(req, res, templates.ok, { users: u });
 	}).catch(
 		/* istanbul ignore next */
 		(err) => respond(req, res, err),

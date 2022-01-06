@@ -16,11 +16,10 @@
  */
 const { createResponseCode, templates } = require('../../../../utils/responseCodes');
 const { SYSTEM_ROLES } = require('../../../../utils/permissions/permissions.constants');
+const Yup = require('yup');
 const { getUserByUsername } = require('../../../../models/users');
 const { isArray } = require('lodash');
 const { respond } = require('../../../../utils/responder');
-
-const Yup = require('yup');
 
 const Admin = {};
 

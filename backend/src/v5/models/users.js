@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createResponseCode, templates } = require('../utils/responseCodes');
 const {
 	LICENSE_ADMIN_READ,
 	LICENSE_ADMIN_WRITE,
@@ -23,6 +22,7 @@ const {
 	SYSTEM_ADMIN_WRITE,
 	SYSTEM_ROLES,
 } = require('../utils/permissions/permissions.constants');
+const { createResponseCode, templates } = require('../utils/responseCodes');
 
 const config = require('../utils/config');
 const db = require('../handler/db');

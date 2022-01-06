@@ -21,8 +21,8 @@ const { getUsersWithRole,
 	hasAdministrativeRole,
 	revokeAdministrativeRole,
 } = require('../models/users');
-const { logger } = require('../utils/logger');
 const { SYSTEM_ADMIN } = require('../utils/permissions/permissions.constants');
+const { logger } = require('../utils/logger');
 
 const Admin = {};
 
