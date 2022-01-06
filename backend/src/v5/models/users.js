@@ -255,9 +255,8 @@ User.hasAdministrativeRole = async (username, role) => {
 			});
 		}
 		return foundrole;
-	} else {
-		throw templates.invalidArguments;
 	}
+	throw templates.invalidArguments;
 };
 
 User.grantAdministrativeRole = async (username, role) => {
