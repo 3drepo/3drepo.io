@@ -17,17 +17,12 @@
 
 import { Typography } from '@controls/typography';
 import styled from 'styled-components';
+import Dropzone from 'react-dropzone';
 
-export const Container = styled.div`
+export const Container = styled(Dropzone)`
 	position: relative;
 	width: 100%;
 	height: 100%;
-`;
-
-export const DropZone = styled.div`
-	width: 100%;
-	height: 100%;
-	position: absolute;
 `;
 
 export const UploadDialog = styled.div`

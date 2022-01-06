@@ -18,54 +18,39 @@
 import React, { ReactNode, useState } from 'react';
 
 import { FormattedMessage } from 'react-intl';
-import { Button } from '@controls/button';
 import { Typography } from '@controls/typography';
-import { DropZone, HelpText, UploadDialog, Container } from './dragAndDrop.styles';
+import { HelpText, UploadDialog, Container } from './dragAndDrop.styles';
+import { FileInputField } from '../fileInputField/fileInputField.component';
 
 interface IDragAndDrop {
 	message?: ReactNode,
 	processFiles: (files) => void,
 }
 
-const preventDefualtBehaviour = (e) => {
-	e.preventDefault();
-	e.stopPropagation();
-};
-
 export const DragAndDrop = ({ message, processFiles }: IDragAndDrop) => {
 	const [dragOverlay, setDragOverlay] = useState(false);
 
-	const handleDrag = (e) => {
-		preventDefualtBehaviour(e);
-	};
-
 	const handleDragIn = (e) => {
-		preventDefualtBehaviour(e);
 		if (e.dataTransfer.items.length > 0) {
 			setDragOverlay(true);
 		}
 	};
 
-	const handleDragOut = (e) => {
-		preventDefualtBehaviour(e);
+	const handleDragOut = () => {
 		setDragOverlay(false);
 	};
 
-	const handleDrop = (e) => {
-		preventDefualtBehaviour(e);
-		const { files } = e.dataTransfer;
-		setDragOverlay(false);
+	const handleDrop = (files) => {
 		processFiles(files);
+		setDragOverlay(false);
 	};
-
 	return (
-		<Container>
-			<DropZone
+		<Container
 				onDragEnter={handleDragIn}
 				onDragLeave={handleDragOut}
-				onDragOver={handleDrag}
 				onDrop={handleDrop}
-			/>
+			disableClick
+		>
 			<UploadDialog className={dragOverlay && 'drag-over'}>
 				<Typography variant="h3" color="secondary">
 					<FormattedMessage id="draganddrop.drop" defaultMessage="Drop files here" />
@@ -75,9 +60,9 @@ export const DragAndDrop = ({ message, processFiles }: IDragAndDrop) => {
 					<FormattedMessage id="draganddrop.or" defaultMessage="or" />
 				</Typography>
 
-				<Button variant="contained" color="primary">
-					<FormattedMessage id="draganddrop.browse" defaultMessage="Browse" />
-				</Button>
+				<FileInputField
+					handleChange={(files) => processFiles(files)}
+				/>
 				<HelpText>
 					{message}
 				</HelpText>
