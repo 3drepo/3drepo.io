@@ -110,15 +110,27 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		fetchModelSettings(teamspaceName, modelId);
 		const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-		const timezones = allTimezones.map((tz) => {
-			return {
+		const timezones = [];
+		let defaultTimezone = null;
+		
+		for(let i = 0; i < allTimezones.length; i++){
+			const tz = allTimezones[i];
+			const tzToAdd = {
 				name: tz.name,
 				label: `(GMT ${tz.utcOffsetStr}) ${tz.name}`
-			}
-		});
+			};
 
-		const defaultTimezone = timezones.find((tz) => tz.name === browserTimezone)
-			??  timezones.find((tz) => tz.name === 'Etc/UTC');
+			timezones.push(tzToAdd);
+
+			if(tz.name === browserTimezone){
+				defaultTimezone = tzToAdd;
+			}
+		}
+
+		if(!defaultTimezone){
+			defaultTimezone = timezones.find(tz => tz.name === 'Etc/UTC');
+		}
+
 		this.setState({ timezones, selectedTimezone: defaultTimezone });
 	}
 
@@ -230,7 +242,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 				allowImportAnimations: true,
 				allowSetTimezone: true
 			}, () => setFieldValue('importAnimations', true));
-		} else if (this.state.allowImportAnimations) {
+		} else {
 			this.setState({
 				allowImportAnimations: false,
 				allowSetTimezone: false
@@ -263,7 +275,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		return (
 			<Formik
 				onSubmit={this.handleFileUpload}
-				initialValues={{ revisionName: '', revisionDesc: '', file: '', importAnimations: false }}
+				initialValues={{ revisionName: '', revisionDesc: '', file: '', importAnimations: false, allowSetTimezone: false }}
 				enableReinitialize
 				validationSchema={UploadSchema}
 			>

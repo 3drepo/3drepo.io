@@ -24,7 +24,7 @@ import {
 	selectIsPending,
 	selectRevisions,
 	selectSettings,
-	ModelActions
+	ModelActions,
 } from '../../../../modules/model';
 import { selectModels } from '../../../../modules/teamspaces';
 import { UploadModelFileDialog } from './uploadModelFileDialog.component';
