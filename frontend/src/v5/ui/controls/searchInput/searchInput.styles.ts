@@ -26,7 +26,6 @@ export const IconButton = styled(IconButtonComponent)`
 `;
 
 export const TextField = styled(TextFieldComponent)`
-	width: 300px;
 	margin: 0;
 
 	input {

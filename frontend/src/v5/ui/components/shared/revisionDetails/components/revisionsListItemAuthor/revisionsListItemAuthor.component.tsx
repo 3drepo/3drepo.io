@@ -27,6 +27,8 @@ import { Text } from './revisionsListItemAuthor.styles';
 
 type IRevisionsListItemAuthor = {
 	width?: number;
+	tabletWidth?: number;
+	mobileWidth?: number;
 	className?: string;
 	authorName: string;
 	active?: boolean;
@@ -34,6 +36,8 @@ type IRevisionsListItemAuthor = {
 
 export const RevisionsListItemAuthor = ({
 	width,
+	tabletWidth,
+	mobileWidth,
 	className,
 	authorName,
 	active = false,
@@ -55,7 +59,7 @@ export const RevisionsListItemAuthor = ({
 	const open = Boolean(anchorEl);
 
 	return (
-		<FixedOrGrowContainer width={width} className={className}>
+		<FixedOrGrowContainer width={width} tabletWidth={tabletWidth} mobileWidth={mobileWidth} className={className}>
 			<Text
 				aria-owns={open ? 'mouse-over-popover' : undefined}
 				aria-haspopup="true"
