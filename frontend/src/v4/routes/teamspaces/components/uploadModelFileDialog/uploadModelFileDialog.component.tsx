@@ -110,26 +110,22 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		fetchModelSettings(teamspaceName, modelId);
 		const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-		const timezones = [];
-		let defaultTimezone = null;
+		let defaultTimezone;
 
-		for (let i = 0; i < allTimezones.length; i++) {
-			const tz = allTimezones[i];
+
+		const timezones = allTimezones.map(({name, utcOffsetStr}) => {
 			const tzToAdd = {
-				name: tz.name,
-				label: `(GMT ${tz.utcOffsetStr}) ${tz.name}`
+				name,
+				label: `(UTC${utcOffsetStr}) ${name}`
 			};
 
-			timezones.push(tzToAdd);
-
-			if (tz.name === browserTimezone) {
+			if (name === browserTimezone ||
+				(!defaultTimezone && name === 'Etc/UTC')) {
 				defaultTimezone = tzToAdd;
 			}
-		}
 
-		if (!defaultTimezone) {
-			defaultTimezone = timezones.find(tz => tz.name === 'Etc/UTC');
-		}
+			return tzToAdd;
+		});
 
 		this.setState({ timezones, selectedTimezone: defaultTimezone });
 	}
