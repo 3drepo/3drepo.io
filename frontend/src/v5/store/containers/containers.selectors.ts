@@ -19,6 +19,7 @@ import { createSelector } from 'reselect';
 import { IContainersState } from '@/v5/store/containers/containers.types';
 import { isEmpty } from 'lodash';
 import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
+import { filterContainers } from '@/v5/store/containers/containers.helpers';
 
 const selectContainersDomain = (state: { containers: IContainersState }) => state.containers;
 
@@ -26,19 +27,22 @@ export const selectContainers = createSelector(
 	selectContainersDomain, selectCurrentProject, (state, currentProject) => state.containers[currentProject] ?? [],
 );
 
-export const selectFilterQuery = createSelector(
-	selectContainersDomain, (state) => state.filterQuery,
+export const selectFavouritesFilterQuery = createSelector(
+	selectContainersDomain, (state) => state.favouritesFilterQuery,
+);
+
+export const selectAllFilterQuery = createSelector(
+	selectContainersDomain, (state) => state.allFilterQuery,
 );
 
 export const selectFilteredContainers = createSelector(
-	selectContainers, selectFilterQuery,
-	(containers, filterQuery) => containers.filter((
-		{ name, code, type },
-	) => [name, code, type].join('').toLowerCase().includes(filterQuery.trim().toLowerCase())),
+	selectContainers, selectAllFilterQuery,
+	(federations, filterQuery) => filterContainers(federations, filterQuery),
 );
 
 export const selectFilteredFavouriteContainers = createSelector(
-	selectFilteredContainers, (containers) => containers.filter(({ isFavourite }) => isFavourite),
+	selectContainers, selectFavouritesFilterQuery,
+	(federations, filterQuery) => filterContainers(federations.filter(({ isFavourite }) => isFavourite), filterQuery),
 );
 
 export const selectHasContainers = createSelector(

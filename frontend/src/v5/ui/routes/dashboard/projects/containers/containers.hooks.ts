@@ -15,9 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'react-router';
-import { debounce } from 'lodash';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
@@ -38,22 +37,4 @@ export const useContainersData = () => {
 	}, [currentProject]);
 
 	return { filteredContainers, favouriteContainers, hasContainers, isListPending };
-};
-
-export const useContainersSearch = () => {
-	const filterQuery = ContainersHooksSelectors.selectFilterQuery();
-
-	const [searchInput, setSearchInput] = useState(filterQuery);
-
-	const debounceSearchUpdate = debounce(
-		(value: string) => ContainersActionsDispatchers.setFilterQuery(value),
-		300,
-		{ trailing: true },
-	);
-
-	useEffect(() => {
-		debounceSearchUpdate(searchInput);
-	}, [searchInput]);
-
-	return { searchInput, setSearchInput, filterQuery };
 };

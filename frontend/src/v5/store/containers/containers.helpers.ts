@@ -23,6 +23,12 @@ import {
 } from '@/v5/store/containers/containers.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 
+export const filterContainers = (federations: IContainer[], filterQuery: string) => (
+	federations.filter((
+		{ name, code, type },
+	) => [name, code, type].join('').toLowerCase().includes(filterQuery.trim().toLowerCase()))
+);
+
 export const prepareSingleContainerData = (
 	container: FetchContainersContainerItemResponse,
 	stats?: FetchContainerStatsResponse,

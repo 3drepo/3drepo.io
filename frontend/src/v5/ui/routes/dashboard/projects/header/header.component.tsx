@@ -15,28 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
 
-import { AppBar } from '@components/shared/appBar';
-import { ModalsDispatcher } from '@components/shared/modals';
-import { Header as ProjectHeader } from '@/v5/ui/routes/dashboard/projects/header';
-import { Content } from './dashboardLayout.styles';
+import { Typography } from '@controls/typography';
+import { IProject } from '@/v5/store/projects/projects.redux';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
+import { TopNavigation } from '@components/shared/topNavigation';
+import { Container, Wrapper } from './header.styles';
 
-interface IDashboardLayout {
-	children: ReactNode;
-}
-
-export const DashboardLayout = ({ children }: IDashboardLayout): JSX.Element => {
+export const Header = (): JSX.Element => {
 	const { project } = useParams();
+	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
+	const currentProject = projects.find(({ _id }) => project === _id);
+
 	return (
-		<>
-			<AppBar />
-			{project && <ProjectHeader />}
-			<Content>
-				{children}
-			</Content>
-			<ModalsDispatcher />
-		</>
+		<Wrapper>
+			<Container>
+				<Typography variant="h1">{currentProject ? currentProject.name : 'Loading project'}</Typography>
+				<TopNavigation />
+			</Container>
+		</Wrapper>
 	);
 };

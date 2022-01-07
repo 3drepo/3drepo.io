@@ -19,7 +19,8 @@ import { Action } from 'redux';
 
 export interface IContainersState {
 	containers: Record<string, IContainer[]>;
-	filterQuery: string;
+	allFilterQuery: string;
+	favouritesFilterQuery: string;
 	isListPending: boolean;
 }
 
@@ -106,6 +107,7 @@ export interface DeleteContainerSuccessPayload {
 }
 
 export type SetFilterQueryAction = Action<'SET_FILTER_QUERY'> & { query: string};
+export type SetFavouritesFilterQueryAction = Action<'SET_FAVOURITES_FILTER_QUERY'> & { query: string};
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;
 export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & FavouritePayload;
 export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & {projectId: string, containerId: string, isFavourite: boolean};
@@ -118,7 +120,8 @@ export type DeleteContainerAction = Action<'DELETE'> & DeleteContainerPayload;
 export type DeleteContainerSuccessAction = Action<'DELETE_SUCCESS'> & DeleteContainerSuccessPayload;
 
 export interface IContainersActionCreators {
-	setFilterQuery: (query: string) => SetFilterQueryAction;
+	setAllFilterQuery: (query: string) => SetFilterQueryAction;
+	setFavouritesFilterQuery: (query: string) => SetFavouritesFilterQueryAction;
 	addFavourite: (teamspace: string, projectId: string, containerId: string) => AddFavouriteAction;
 	removeFavourite: (teamspace: string, projectId: string, containerId: string) => RemoveFavouriteAction;
 	setFavouriteSuccess: (projectId: string, containerId: string, isFavourite: boolean) => SetFavouriteSuccessAction;
