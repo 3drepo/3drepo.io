@@ -98,7 +98,7 @@ const containerSettings = {
 		name: 'container 3',
 		type: 'type 2',
 		properties: {
-			units: 'mm',
+			unit: 'mm',
 			code: 'CTN2',
 		},
 		status: 'failed',
@@ -113,7 +113,7 @@ const containerSettings = {
 		name: 'container 4',
 		type: 'type 2',
 		properties: {
-			units: 'mm',
+			unit: 'mm',
 			code: 'CTN2',
 		},
 		status: 'processing',
@@ -280,7 +280,7 @@ const formatToStats = (settings, revCount, latestRev) => {
 		type: settings.type,
 		code: settings.properties.code,
 		status: settings.status,
-		units: settings.properties.unit,
+		unit: settings.properties.unit,
 		revisions: {
 			total: revCount,
 			lastUpdated: latestRev.timestamp,

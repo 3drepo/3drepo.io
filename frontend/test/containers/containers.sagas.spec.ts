@@ -109,7 +109,7 @@ describe('Containers: sagas', () => {
 				type: container.type,
 				status: container.status,
 				code: container.code,
-				units: container.units
+				unit: container.unit
 			})
 
 			mockContainers.forEach((container) => {
