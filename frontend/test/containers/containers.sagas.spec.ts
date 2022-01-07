@@ -159,7 +159,7 @@ describe('Containers: sagas', () => {
 				.silentRun();
 		})
 		
-		it('should call createContainer endpoint with 404', async () => {
+		it('should call createContainer endpoint with 400', async () => {
 			mockServer
 			.post(`/teamspaces/${teamspace}/projects/${projectId}/containers`)
 			.reply(400);
