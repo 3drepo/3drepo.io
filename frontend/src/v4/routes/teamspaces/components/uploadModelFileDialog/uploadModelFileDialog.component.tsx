@@ -74,14 +74,37 @@ interface IState {
 	fileName: string;
 	allowImportAnimations: boolean;
 	allowSetTimezone: boolean;
-	timezones: any[];
-	selectedTimezone: any;
 }
 
-const allTimezones = Object.values(countriesAndTimezones.getAllTimezones())
-	.sort((tz1, tz2) => {
-		return tz1.utcOffset - tz2.utcOffset;
-	});
+
+const generateTimezoneData = () => {
+	let defaultTimezone;
+	const timezoneList  = [];
+	const labelToTZName = {};
+	const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+	const tzData = countriesAndTimezones.getAllTimezones();
+	for (const tz in tzData) {
+		const {name, utcOffset, utcOffsetStr} = tzData[tz];
+		const tzToAdd = {
+			name,
+			label: `(UTC${utcOffsetStr}) ${name}`,
+			utcOffset
+		};
+
+		if (name === browserTimezone ||
+			(!defaultTimezone && name === 'Etc/UTC')) {
+			defaultTimezone = tzToAdd;
+		}
+		timezoneList.push(tzToAdd);
+
+		labelToTZName[tzToAdd.label] = tzToAdd.name;
+	}
+
+	const allTimezones = timezoneList.sort((tz1, tz2) => tz1.utcOffset - tz2.utcOffset);
+	return { defaultTimezone, allTimezones, labelToTZName };
+};
+
+const { allTimezones, defaultTimezone, labelToTZName } = generateTimezoneData();
 
 export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 	public state = {
@@ -108,26 +131,6 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		const { modelId, teamspaceName, fetchModelSettings, fetchRevisions } = this.props;
 		fetchRevisions(teamspaceName, modelId, true);
 		fetchModelSettings(teamspaceName, modelId);
-		const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-		let defaultTimezone;
-
-
-		const timezones = allTimezones.map(({name, utcOffsetStr}) => {
-			const tzToAdd = {
-				name,
-				label: `(UTC${utcOffsetStr}) ${name}`
-			};
-
-			if (name === browserTimezone ||
-				(!defaultTimezone && name === 'Etc/UTC')) {
-				defaultTimezone = tzToAdd;
-			}
-
-			return tzToAdd;
-		});
-
-		this.setState({ timezones, selectedTimezone: defaultTimezone });
 	}
 
 	public componentDidUpdate(prevProps: Readonly<IProps>) {
@@ -150,7 +153,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		};
 
 		if(this.state.allowSetTimezone) {
-			fileData.timezone =  this.state.selectedTimezone.name;
+			fileData.timezone =  values.selectedTimezone;
 		}
 
 		if(this.state.allowImportAnimations) {
@@ -162,6 +165,10 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		};
 
 		uploadModelFile(teamspaceName, projectName, modelData, fileData, handleClose);
+	}
+
+	public onTimezoneChanged = (newTimezone, { value, setFieldValue}) => {
+		setFieldValue('selectedTimezone', labelToTZName[newTimezone]);
 	}
 
 	public renderRevisionsInfo = renderWhenTrueOtherwise(() => (
@@ -208,24 +215,20 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 	));
 
 	public renderTimezones = renderWhenTrue(() => (
-		<Field name="selectedTimezone" render={({ field }) => (
+		<Field name="selectedTimezone" render={({ field, form }) => (
 			<FormControl margin="normal">
 				<InputLabel shrink htmlFor="timezone-select">Project Timezone</InputLabel>
 					<CellSelect
 						{...field}
-						items={this.state.timezones.map((tz) => tz.label)}
-						value={this.state.selectedTimezone.label}
-						onChange={ this.onTimezoneChanged }
+						items={allTimezones.map((tz) => tz.label)}
+						value={defaultTimezone.label}
+						onChange={ (event, data) => this.onTimezoneChanged(data, form) }
 						disabledPlaceholder
 						inputId="timezone-select"
 					/>
 			</FormControl>
 		)} />
 	));
-
-	public onTimezoneChanged = (event, newTimezone) => {
-		this.setState({ selectedTimezone: this.state.timezones.find((tz) => tz.label === newTimezone ) });
-	}
 
 	public renderFileName = renderWhenTrue(() => (
 		<FileName><FileIcon />{this.state.fileName}</FileName>
@@ -277,7 +280,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		return (
 			<Formik
 				onSubmit={this.handleFileUpload}
-				initialValues={{ revisionName: '', revisionDesc: '', file: '', importAnimations: false, allowSetTimezone: false }}
+				initialValues={{ revisionName: '', revisionDesc: '', file: '', importAnimations: false, selectedTimezone: defaultTimezone.name }}
 				enableReinitialize
 				validationSchema={UploadSchema}
 			>
