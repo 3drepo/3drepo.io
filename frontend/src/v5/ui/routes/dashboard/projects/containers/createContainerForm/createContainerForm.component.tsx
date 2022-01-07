@@ -37,12 +37,29 @@ interface IFormInput {
 
 const ContainerSchema = Yup.object().shape({
 	name: Yup.string()
-		.min(2, formatMessage({ id: 'containers.creation.name.error.min', defaultMessage: 'Container name must be at least 2 characters' }))
-		.max(120, formatMessage({ id: 'containers.creation.name.error.max', defaultMessage: 'Container name is limited to 120 characters' }))
-		.required(formatMessage({ id: 'containers.creation.name.error.required', defaultMessage: 'Container Name is a required field' })),
+		.min(2,
+			formatMessage({
+				id: 'containers.creation.name.error.min',
+				defaultMessage: 'Container Name must be at least 2 characters',
+			}))
+		.max(120,
+			formatMessage({
+				id: 'containers.creation.name.error.max',
+				defaultMessage: 'Container Name is limited to 120 characters',
+			}))
+		.required(
+			formatMessage({
+				id: 'containers.creation.name.error.required',
+				defaultMessage: 'Container Name is a required field',
+			}),
+		),
 	unit: Yup.string().required().default('mm'),
 	type: Yup.string().required().default('Uncategorised'),
-	code: Yup.string().max(50).matches(/^[A-Za-z0-9]+$/, 'Code can only consist of letters and numbers'),
+	code: Yup.string().max(50).matches(/^[A-Za-z0-9]+$/,
+		formatMessage({
+			id: 'containers.creation.code.error.characters',
+			defaultMessage: 'Code can only consist of letters and numbers',
+		})),
 });
 
 export const CreateContainerForm = ({ open, close }): JSX.Element => {
