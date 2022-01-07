@@ -40,7 +40,7 @@ export const prepareSingleContainerData = (
 	type: stats?.type ?? '',
 	code: stats?.code ?? '',
 	status: stats?.status ?? UploadStatuses.OK,
-	units: stats?.units ?? '',
+	unit: stats?.unit ?? '',
 	hasStatsPending: !stats,
 	errorResponse: stats?.errorReason && {
 		message: stats.errorReason.message,
