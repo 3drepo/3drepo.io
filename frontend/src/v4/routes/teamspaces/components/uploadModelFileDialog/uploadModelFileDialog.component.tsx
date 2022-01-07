@@ -143,13 +143,19 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 	public handleFileUpload = (values) => {
 		const { modelId, teamspaceName, projectName, handleClose, uploadModelFile, modelName } = this.props;
 
-		const fileData = {
+		let fileData = {
 			file: values.file,
 			tag: values.revisionName,
 			desc: values.revisionDesc,
-			importAnimations: values.importAnimations,
-			timezone: this.state.selectedTimezone.name
 		};
+
+		if(this.state.allowSetTimezone) {
+			fileData.timezone =  this.state.selectedTimezone.name;
+		}
+
+		if(this.state.allowImportAnimations) {
+			fileData.importAnimations = values.importAnimations;
+		}
 
 		const modelData = {
 			modelName, modelId
