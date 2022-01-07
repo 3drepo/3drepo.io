@@ -158,4 +158,20 @@ User.deleteFavourites = async (username, teamspace, favouritesToRemove) => {
 	}
 };
 
+User.updateProfile = async (username, updatedProfile) => {
+	if(updatedProfile.oldPassword){
+		await db.authenticate(username, updatedProfile.oldPassword);
+
+		const updateUserCmd = {
+			"updateUser": username,
+			"pwd": updatedProfile.newPassword
+		};
+
+		await db.runCommand("admin", updateUserCmd);
+		await db.updateOne("admin", COLL_NAME, {user: username}, {$set: {"customData.resetPasswordToken" : undefined }});
+
+
+	}	
+};
+
 module.exports = User;
