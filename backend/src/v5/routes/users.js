@@ -16,7 +16,7 @@
  */
 
 const { createSession, destroySession } = require('../middleware/sessions');
-const { isLoggedIn, notLoggedIn } = require('../middleware/auth');
+const { isLoggedIn, notLoggedIn, validSession } = require('../middleware/auth');
 const { Router } = require('express');
 const Users = require('../processors/users');
 const { respond } = require('../utils/responder');
@@ -33,6 +33,21 @@ const login = (req, res, next) => {
 
 const getUsername = (req, res) => {
 	respond(req, res, templates.ok, { username: req.session.user.username });
+};
+
+const getProfile = (req, res) => {
+	const username = req.session.user.username;
+	Users.getProfileByUsername(username).then((profile) => {
+		respond(req, res, templates.ok, { ...profile });
+	}).catch((err) => respond(req, res, err));
+};
+
+const updateProfile = (req, res) => {
+	const username = req.session.user.username;
+	const updatedProfile = req.session.body;
+	Users.updateProfile(username, updatedProfile).then(() => {
+		respond(req, res, templates.ok);
+	}).catch((err) => respond(req, res, err));
 };
 
 const establishRoutes = () => {
@@ -108,7 +123,55 @@ const establishRoutes = () => {
 	 *
 	 */
 	router.get('/login', isLoggedIn, getUsername);
-	return router;
+
+	/**
+	 * @openapi
+	 * /login:
+	 *   get:
+	 *     description: Verifies if there is a valid session with the request and returns the user details
+	 *     tags: [Auth]
+	 *     operationId: getProfile
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         description: Returns the details of the user currently logged in
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 username:
+	 *                   type: string
+	 *                   description: The username of the user currently logged in
+	 *                   example: Username1
+	 *                 firstName:
+	 *                   type: string
+	 *                   description: The first name of the user currently logged in
+	 *                   example: Jason
+	 *                 lastName:
+	 *                   type: string
+	 *                   description: The last name of the user currently logged in
+	 *                   example: Voorhees
+	 *                 email:
+	 *                   type: string
+	 *                   description: The email of the user currently logged in
+	 *                   example: jason@vorhees.com
+	 *                 hasAvatar:
+	 *                   type: boolean
+	 *                   description: Whether or not the user has an avatar
+	 *                   example: true
+	 *                 apiKey:
+	 *                   type: string
+	 *                   description: The API key of the user currently logged in
+	 *                   example: 23b61deadbba098fec517dc4fcc84d68
+	 *
+	 */
+	 router.get('/user', validSession, getProfile);
+
+	 router.put('/user', isLoggedIn, updateProfile);
+
+	 return router;
 };
 
 module.exports = establishRoutes();

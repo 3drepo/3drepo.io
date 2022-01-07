@@ -19,6 +19,7 @@ const { createResponseCode, templates } = require('../../../utils/responseCodes'
 const Yup = require('yup');
 const { getUserByQuery } = require('../../../models/users');
 const { respond } = require('../../../utils/responder');
+const { types } = require('../../../utils/helper/yup');
 
 const Users = {};
 
@@ -45,5 +46,37 @@ Users.validateLoginData = async (req, res, next) => {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };
+
+Users.validateUpdateData = async (req, res, next) => {
+	const schema = Yup.object().shape({
+		firstName: Yup.string(),
+		lastName: Yup.string(),
+		email: types.strings.email.test('checkEmailAvailable', 'Email already exists',
+			(value) => {
+				try{
+					await getUserByQuery({'customData.email': value });
+					return false;
+				} catch {
+					return true;
+				}
+			},
+		),
+		oldPassword: types.strings.password,
+		newPassword: types.strings.password.when("oldPassword", {
+			is: (oldPass) => oldPass.length > 0,			
+			then: types.strings.password.required()
+		  }),
+	}).strict(true).noUnknown()
+		.required();
+
+	try {
+		await schema.validate(req.body);
+		next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+}
+
+
 
 module.exports = Users;
