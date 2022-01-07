@@ -146,7 +146,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 	public handleFileUpload = (values) => {
 		const { modelId, teamspaceName, projectName, handleClose, uploadModelFile, modelName } = this.props;
 
-		const fileData = {
+		const fileData: any = {
 			file: values.file,
 			tag: values.revisionName,
 			desc: values.revisionDesc,
