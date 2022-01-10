@@ -17,9 +17,10 @@
 
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const Yup = require('yup');
-const { getUserByQuery } = require('../../../models/users');
+const { authenticate, getUserByQuery } = require('../../../models/users');
 const { respond } = require('../../../utils/responder');
 const { types } = require('../../../utils/helper/yup');
+const zxcvbn = require("zxcvbn");
 
 const Users = {};
 
@@ -52,27 +53,62 @@ Users.validateUpdateData = async (req, res, next) => {
 		firstName: Yup.string(),
 		lastName: Yup.string(),
 		email: types.strings.email.test('checkEmailAvailable', 'Email already exists',
-			(value) => {
-				try{
-					await getUserByQuery({'customData.email': value });
-					return false;
-				} catch {
-					return true;
+			async (value) => {
+				if (value) {
+					try {
+						await getUserByQuery({ 'customData.email': value });
+						return false;
+					} catch {
+						//do nothing
+					}
 				}
+				return true;
 			},
 		),
-		oldPassword: types.strings.password,
-		newPassword: types.strings.password.when("oldPassword", {
-			is: (oldPass) => oldPass.length > 0,			
+		oldPassword: types.strings.password.optional().when("newPassword", {
+			is: (newPass) => newPass?.length > 0,
 			then: types.strings.password.required()
-		  }),
-	}).strict(true).noUnknown()
+		}),
+		newPassword: types.strings.password.optional().when("oldPassword", {
+			is: (oldPass) => oldPass?.length > 0,
+			then: types.strings.password.required()
+		}).test('checkPasswordStrength', 'Password is too weak',
+			(value) => {
+				if (value) {
+					if (value.length < 8)
+						return false;
+					const passwordScore = zxcvbn(value).score;
+					return passwordScore >= 2;
+				}
+				return true;
+			},
+		).test({
+			name: 'notTheSameAsOldPassword',
+			exclusive: false,
+			params: {},
+			message: 'New password must be different than the old one',
+			test: function (value) {
+				const oldPassword = this.parent.oldPassword;	
+				return !oldPassword || (value !== oldPassword); 				
+			}
+		}),
+	}, [['oldPassword', 'newPassword']]).strict(true).noUnknown()
 		.required();
 
 	try {
 		await schema.validate(req.body);
+
+		if (req.body.oldPassword) {
+			await authenticate(req.session.user.username, req.body.oldPassword);
+		}
+
 		next();
 	} catch (err) {
+		if (err.code === templates.incorrectUsernameOrPassword.code) {
+			respond(req, res, templates.incorrectPassword);
+			return;
+		}
+
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 }

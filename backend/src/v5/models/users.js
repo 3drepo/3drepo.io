@@ -20,6 +20,7 @@ const config = require('../utils/config');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { publish } = require('../services/eventsManager/eventsManager');
+const { hasField } = require('../utils/helper/objects');
 
 const User = {};
 const COLL_NAME = 'system.users';
@@ -52,10 +53,12 @@ const recordFailedAuthAttempt = async (user) => {
 
 	const newCount = resetCounter ? 1 : failedLoginCount + 1;
 
-	await db.updateOne('admin', COLL_NAME, { user }, { $set: {
-		'customData.loginInfo.lastFailedLoginAt': currentTime,
-		'customData.loginInfo.failedLoginCount': newCount,
-	} });
+	await db.updateOne('admin', COLL_NAME, { user }, {
+		$set: {
+			'customData.loginInfo.lastFailedLoginAt': currentTime,
+			'customData.loginInfo.failedLoginCount': newCount,
+		}
+	});
 
 	publish(events.FAILED_LOGIN_ATTEMPT, { email, failedLoginCount: newCount });
 
@@ -158,20 +161,36 @@ User.deleteFavourites = async (username, teamspace, favouritesToRemove) => {
 	}
 };
 
-User.updateProfile = async (username, updatedProfile) => {
-	if(updatedProfile.oldPassword){
-		await db.authenticate(username, updatedProfile.oldPassword);
+const changePassword = async (username, newPassword) => {	
+	const updateUserCmd = {
+		"updateUser": username,
+		"pwd": newPassword
+	};
 
-		const updateUserCmd = {
-			"updateUser": username,
-			"pwd": updatedProfile.newPassword
-		};
-
-		await db.runCommand("admin", updateUserCmd);
-		await db.updateOne("admin", COLL_NAME, {user: username}, {$set: {"customData.resetPasswordToken" : undefined }});
-
-
-	}	
+	await db.runCommand("admin", updateUserCmd);
+	await db.updateOne("admin", COLL_NAME, { user: username },
+		{ $set: { "customData.resetPasswordToken": undefined } });
 };
+
+User.updateProfile = async (username, updatedProfile) => {
+	await changePassword(username, updatedProfile.newPassword);
+	const updateableFields = new Set(["firstName", "lastName", "email"]);
+	const updateData = {};
+
+	updateableFields.forEach(field => {
+		if (hasField(updatedProfile, field)) {
+			updateData[`customData.${field}`] = updatedProfile[field];
+		}
+	});
+
+	await updateUser(username, {$set: updateData});
+};
+
+User.generateApiKey = async (username) => {
+	const apiKey = utils.generateHashString();
+	const updateData = {"customData.apiKey" : apiKey};
+	await updateUser(username, {$set: updateData });
+	return apiKey;
+}
 
 module.exports = User;

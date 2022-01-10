@@ -21,4 +21,8 @@ const Objects = {};
 
 Objects.cloneDeep = _.cloneDeep;
 
+Objects.hasField = (obj, field) => {
+    return Object.prototype.hasOwnProperty.call(obj, field);
+};
+
 module.exports = Objects;

@@ -21,7 +21,7 @@ const { Router } = require('express');
 const Users = require('../processors/users');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
-const { validateLoginData } = require('../middleware/dataConverter/inputs/users');
+const { validateLoginData, validateUpdateData } = require('../middleware/dataConverter/inputs/users');
 
 const login = (req, res, next) => {
 	const { user, password } = req.body;
@@ -44,8 +44,16 @@ const getProfile = (req, res) => {
 
 const updateProfile = (req, res) => {
 	const username = req.session.user.username;
-	const updatedProfile = req.session.body;
+	const updatedProfile = req.body;
 	Users.updateProfile(username, updatedProfile).then(() => {
+		respond(req, res, templates.ok);
+	}).catch((err) => respond(req, res, err));
+};
+
+const generateApiKey = (req, res) => {
+	const username = req.session.user.username;
+	Users.generateApiKey(username).then((apiKey) => {
+		req.dataModel = { apiKey };
 		respond(req, res, templates.ok);
 	}).catch((err) => respond(req, res, err));
 };
@@ -103,7 +111,7 @@ const establishRoutes = () => {
 	 * @openapi
 	 * /login:
 	 *   get:
-	 *     description: Verifies if there is a valid session with the request and returns the username
+	 *     description: Gets the username of the logged in user
 	 *     tags: [Auth]
 	 *     operationId: getUsername
 	 *     responses:
@@ -118,7 +126,7 @@ const establishRoutes = () => {
 	 *               properties:
 	 *                 username:
 	 *                   type: string
-	 *                   description: The username of the user currently logged in
+	 *                   description: The username of the user
 	 *                   example: Username1
 	 *
 	 */
@@ -126,9 +134,9 @@ const establishRoutes = () => {
 
 	/**
 	 * @openapi
-	 * /login:
+	 * /user:
 	 *   get:
-	 *     description: Verifies if there is a valid session with the request and returns the user details
+	 *     description: Gets the profile of the logged in user
 	 *     tags: [Auth]
 	 *     operationId: getProfile
 	 *     responses:
@@ -143,19 +151,19 @@ const establishRoutes = () => {
 	 *               properties:
 	 *                 username:
 	 *                   type: string
-	 *                   description: The username of the user currently logged in
+	 *                   description: The username of the user
 	 *                   example: Username1
 	 *                 firstName:
 	 *                   type: string
-	 *                   description: The first name of the user currently logged in
+	 *                   description: The first name of the user
 	 *                   example: Jason
 	 *                 lastName:
 	 *                   type: string
-	 *                   description: The last name of the user currently logged in
+	 *                   description: The last name of the user
 	 *                   example: Voorhees
 	 *                 email:
 	 *                   type: string
-	 *                   description: The email of the user currently logged in
+	 *                   description: The email of the user
 	 *                   example: jason@vorhees.com
 	 *                 hasAvatar:
 	 *                   type: boolean
@@ -163,15 +171,60 @@ const establishRoutes = () => {
 	 *                   example: true
 	 *                 apiKey:
 	 *                   type: string
-	 *                   description: The API key of the user currently logged in
+	 *                   description: The API key of the user
 	 *                   example: 23b61deadbba098fec517dc4fcc84d68
 	 *
 	 */
-	 router.get('/user', validSession, getProfile);
+	router.get('/user', validSession, getProfile);
 
-	 router.put('/user', isLoggedIn, updateProfile);
+	/**
+	* @openapi
+	* /user:
+	*   put:
+	*     description: Updates the profile of the logged in user
+	*     tags: [Auth]
+	*     operationId: updateProfile
+	*     requestBody:
+	*       content:
+	*         application/json:
+	*           schema:
+	*             type: object
+	*             properties:
+	*               firstName:
+	*                 type: string
+	*                 description: The first name of the user
+	*                 example: Jason
+	*               lastName:
+	*                 type: string
+	*                 description: The last name of the user
+	*                 example: Voorhees
+	*               email:
+	*                 type: string
+	*                 description: The email of the user
+	*                 example: jason@vorhees.com
+	*                 format: email
+	*               oldPassport:
+	*                 type: string
+	*                 description: The old password of the user
+	*                 example: password12345
+    *                 format: password
+	*               newPassport:
+	*                 type: string
+	*                 description: The new password of the user
+	*                 example: password12345
+    *                 format: password
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: Updates the details of the user
+	*
+	*/
+	router.put('/user', isLoggedIn, validateUpdateData, updateProfile);
 
-	 return router;
+	router.post('/apikey', isLoggedIn, generateApiKey);
+
+	return router;
 };
 
 module.exports = establishRoutes();

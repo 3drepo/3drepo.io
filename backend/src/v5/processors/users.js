@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const User = require('../models/users');
 const { authenticate, canLogIn, getUserByUsername, updateProfile } = require('../models/users');
 
 const Users = {};
@@ -47,9 +46,11 @@ Users.getProfileByUsername = async (username) => {
 	};
 };
 
-User.updateProfile = async (username, updatedProfile) => {
-	await User.updateProfile(username, updateProfile);
+Users.updateProfile = async (username, updatedProfile) => {
+	await updateProfile(username, updatedProfile);
 }
+
+Users.generateApiKey = generateApiKey;
 
 Users.getUserByUsername = getUserByUsername;
 
