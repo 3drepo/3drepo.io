@@ -19,9 +19,8 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
-import { DragAndDrop } from '@controls/dragAndDrop';
 import { formatMessage } from '@/v5/services/intl';
-import { Container } from './uploadFileForm.styles';
+import { Container, DropZone } from './uploadFileForm.styles';
 
 type IUploadFileForm = {
 	openState: boolean;
@@ -46,10 +45,10 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		>
 			<Container>
 				<input {...register('firstName')} placeholder="First name" />
-				<DragAndDrop
+				<DropZone
 					message={formatMessage(
-						{ id: 'containers.upload.message', defaultMessage: 'Supported file formats: IFC, RVT, DGN, FBX, OBJ and { link }' },
-						{ link: <a href="https://help.3drepo.io/en/articles/4798885-supported-file-formats" target="_blank" rel="noreferrer">more</a> },
+						{ id: 'containers.upload.message', defaultMessage: 'Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink> }' },
+						{ MoreLink: (child: string) => <a href="https://help.3drepo.io/en/articles/4798885-supported-file-formats" target="_blank" rel="noreferrer">{child}</a> },
 					)}
 					processFiles={() => { }}
 				/>

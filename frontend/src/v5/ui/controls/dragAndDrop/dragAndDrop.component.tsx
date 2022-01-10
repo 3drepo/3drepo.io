@@ -25,9 +25,10 @@ import { FileInputField } from '../fileInputField/fileInputField.component';
 interface IDragAndDrop {
 	message?: ReactNode,
 	processFiles: (files) => void,
+	className: string;
 }
 
-export const DragAndDrop = ({ message, processFiles }: IDragAndDrop) => {
+export const DragAndDrop = ({ className, message, processFiles }: IDragAndDrop) => {
 	const [dragOverlay, setDragOverlay] = useState(false);
 	const acceptedFormats = ClientConfig.acceptedFormat.map((format) => `.${format}`).toString();
 
@@ -47,6 +48,7 @@ export const DragAndDrop = ({ message, processFiles }: IDragAndDrop) => {
 	};
 	return (
 		<Container
+			className={className}
 			onDragEnter={handleDragIn}
 			onDragLeave={handleDragOut}
 			onDrop={handleDrop}
