@@ -38,8 +38,6 @@ const defaultState: IContainersState = {
 				containerMockFactory({ isFavourite: false, hasStatsPending: true}),
 			],
 		},
-	favouritesFilterQuery: '',
-	allFilterQuery: searchPhrase,
 }
 
 describe('Containers: selectors', () => {

@@ -37,8 +37,6 @@ const defaultState: IFederationsState = {
 				federationMockFactory({ isFavourite: false, hasStatsPending: true }),
 			],
 		},
-	allFilterQuery: searchPhrase,
-	favouritesFilterQuery: searchPhrase,
 }
 
 describe('Federations: selectors', () => {
