@@ -330,6 +330,9 @@ export const theme = createMuiTheme({
 				boxShadow: 'none',
 				border: `1px solid ${COLOR.PRIMARY_MAIN_CONTRAST}`,
 				transition: 'none',
+				'&:active': {
+					boxShadow: 'none',
+				},
 			},
 			label: {
 				'& > *:first-child': {
