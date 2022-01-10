@@ -82,7 +82,6 @@ export const Containers = (): JSX.Element => {
 						<ContainersList
 							filterQuery={allFilterQuery}
 							onFilterQueryChange={setAllFilterQuery}
-
 							hasContainers={hasContainers.all}
 							containers={filterContainers(containers, allFilterQuery)}
 							title={(

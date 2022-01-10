@@ -24,7 +24,7 @@ import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/
 export const useFederationsData = () => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 
-	const filteredFederations = FederationsHooksSelectors.selectFilteredFederations();
+	const federations = FederationsHooksSelectors.selectFilteredFederations();
 	const favouriteFederations = FederationsHooksSelectors.selectFilteredFavouriteFederations();
 	const hasFederations = FederationsHooksSelectors.selectHasFederations();
 	const isListPending = FederationsHooksSelectors.selectIsListPending();
@@ -37,7 +37,7 @@ export const useFederationsData = () => {
 	}, [currentProject]);
 
 	return {
-		filteredFederations,
+		federations,
 		favouriteFederations,
 		hasFederations,
 		isListPending,

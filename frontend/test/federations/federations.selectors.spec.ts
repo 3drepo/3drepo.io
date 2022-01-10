@@ -18,8 +18,8 @@ import { INITIAL_STATE } from '@/v5/store/federations/federations.redux';
 import { times } from 'lodash';
 import {
 	selectFederations,
-	selectFilteredFavouriteFederations,
-	selectFilteredFederations, selectAreStatsPending, selectHasFederations
+	selectFavouriteFederations,
+	selectAreStatsPending, selectHasFederations
 } from '@/v5/store/federations/federations.selectors';
 import { IFederationsState } from '@/v5/store/federations/federations.types';
 import { federationMockFactory } from './federations.fixtures';
@@ -44,7 +44,7 @@ const defaultState: IFederationsState = {
 describe('Federations: selectors', () => {
 	describe('selectFavouriteFederations', () => {
 		it('should return favourite federations', () => {
-			const selected = selectFilteredFavouriteFederations.resultFunc(defaultState.federations[projectId], '');
+			const selected = selectFavouriteFederations.resultFunc(defaultState.federations[projectId]);
 			expect(selected).toHaveLength(6);
 		})
 	})
@@ -56,33 +56,23 @@ describe('Federations: selectors', () => {
 		})
 	})
 
-	describe('selectFilteredFederations', () => {
-		it('should return federation with searchPhrase', () => {
-			const selected = selectFilteredFederations.resultFunc(defaultState.federations[projectId], searchPhrase);
-			expect(selected).toHaveLength(1);
-		})
-	})
-
-	describe('selectFilteredFavouriteFederations', () => {
-		it('should return favourite federation with searchPhrase', () => {
-			const selected = selectFilteredFavouriteFederations.resultFunc(defaultState.federations[projectId], searchPhrase);
-			expect(selected).toHaveLength(1);
-		})
-	})
-
 	describe('selectHasFederations', () => {
 		it('should return correct values when favourite item is in federations', () => {
-			const selected = selectHasFederations.resultFunc(defaultState.federations[projectId]);
+			const federations = defaultState.federations[projectId];
+			const favourites = selectFavouriteFederations.resultFunc(federations);
+			const selected = selectHasFederations.resultFunc(federations, favourites);
 			expect(selected).toEqual({ favourites: true, all: true })
 		})
 
 		it('should return correct values when no favourite item is in federations', () => {
-			const selected = selectHasFederations.resultFunc([federationMockFactory({ isFavourite: false })]);
+			const federations = [federationMockFactory({ isFavourite: false })];
+			const favourites = selectFavouriteFederations.resultFunc(federations);
+			const selected = selectHasFederations.resultFunc(federations, favourites);
 			expect(selected).toEqual({ favourites: false, all: true })
 		})
 
 		it('should return correct values for empty federations', () => {
-			const selected = selectHasFederations.resultFunc([]);
+			const selected = selectHasFederations.resultFunc([],[]);
 			expect(selected).toEqual({ favourites: false, all: false })
 		})
 	})
