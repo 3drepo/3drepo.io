@@ -23,6 +23,7 @@ import {
 	DashboardListItemIcon,
 	DashboardListItemRow,
 	DashboardListItemText,
+	DashboardListItemTitle,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision';
 import { Highlight } from '@controls/highlight';
@@ -32,9 +33,9 @@ import { getContainerMenuItems } from '@/v5/ui/routes/dashboard/projects/contain
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { RevisionDetails } from '@components/shared/revisionDetails';
+import { Display } from '@/v5/ui/themes/media';
 import { formatDate } from '@/v5/services/intl';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
-import { DashboardListItemTitle } from './containerListItem.styles';
 
 interface IContainerListItem {
 	index: number;
@@ -87,6 +88,7 @@ export const ContainerListItem = ({
 				<DashboardListItemButton
 					onClick={() => onToggleSelected(container._id)}
 					width={186}
+					hideWhenSmallerThan={Display.Desktop}
 					tooltipTitle={
 						<FormattedMessage id="containers.list.item.revisions.tooltip" defaultMessage="View revisions" />
 					}
@@ -97,23 +99,30 @@ export const ContainerListItem = ({
 						values={{ count: container.revisionsCount }}
 					/>
 				</DashboardListItemButton>
-				<DashboardListItemText selected={isSelected}>
+				<DashboardListItemText selected={isSelected} minWidth={112}>
 					<Highlight search={filterQuery}>
 						{container.code}
 					</Highlight>
 				</DashboardListItemText>
-				<DashboardListItemText width={188} selected={isSelected}>
+				<DashboardListItemText
+					width={188}
+					tabletWidth={125}
+					hideWhenSmallerThan={Display.Tablet}
+					selected={isSelected}
+				>
 					<Highlight search={filterQuery}>
 						{container.type}
 					</Highlight>
 				</DashboardListItemText>
-				<DashboardListItemText width={97} selected={isSelected}>
+				<DashboardListItemText width={68} selected={isSelected}>
 					{container.lastUpdated ? formatDate(container.lastUpdated) : ''}
 				</DashboardListItemText>
 				<DashboardListItemIcon>
 					<Tooltip
 						title={
-							<FormattedMessage id="containers.list.item.favourite.tooltip" defaultMessage="Add to favourites" />
+							container.isFavourite
+								? <FormattedMessage id="containers.list.item.favourite.removeTooltip" defaultMessage="Remove from favourites" />
+								: <FormattedMessage id="containers.list.item.favourite.addTooltip" defaultMessage="Add to favourites" />
 						}
 					>
 						<FavouriteCheckbox

@@ -17,6 +17,9 @@
 
 import styled, { css } from 'styled-components';
 import { DashboardListEmptyContainer } from '@components/dashboard/dashboardList';
+import { Display } from '@/v5/ui/themes/media';
+import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dashboardList.styles';
+import * as RevisionsListHeaderLabelStyles from './components/revisionsListHeaderLabel/revisionsListHeaderLabel.styles';
 
 export const Container = styled.div`
 	display: flex;
@@ -29,6 +32,10 @@ export const Container = styled.div`
 	max-height: 500px;
 	overflow: hidden;
 	overflow-y: scroll;
+
+	@media (max-width: ${Display.Desktop}px) {
+		padding-left: 45px;
+	}
 `;
 
 export const RevisionsListEmptyWrapper = styled.div`
@@ -38,12 +45,23 @@ export const RevisionsListEmptyWrapper = styled.div`
 
 export const RevisionsListEmptyContainer = styled(DashboardListEmptyContainer)`
 	background-color: transparent;
+	border-color: ${({ theme }) => theme.palette.secondary.light};
+`;
+
+export const RevisionsListEmptyText = styled(DashboardListEmptyText)`
+	color: ${({ theme }) => theme.palette.primary.contrast};
 `;
 
 export const RevisionsListHeaderContainer = styled.header`
 	display: flex;
 	padding: 13px 20px 10px 23px;
 	margin-top: 17px;
+
+	${RevisionsListHeaderLabelStyles.Container} {
+		&:last-child {
+			margin-right: 70px;
+		}
+	}
 `;
 
 export const RevisionsList = styled.ul`
@@ -80,11 +98,11 @@ const revisionListItemStylesLineStyles = ({ theme, selected, isBeforeSelected })
 	&:after {
 		content: '';
 		display: block;
-		width: 10px;
+		width: 25px;
 		height: 52px;
 		position: absolute;
 		top: 50%;
-		left: -10px;
+		left: -25px;
 		z-index: -1;
 		border: solid 2px transparent;
 		background-origin: border-box;
@@ -106,11 +124,11 @@ export const RevisionsListItemWrapper = styled.li`
 	border-left-style: none;
 	position: relative;
 	cursor: pointer;
-	
+
 	&:hover {
 		background-color: ${({ theme }) => theme.palette.secondary.main};
 	}
-	
+
 	${({ isSingle }) => css`
 		${!isSingle && revisionListItemStylesLineStyles}
 		${isSingle && singleRevisionListItemStyles}

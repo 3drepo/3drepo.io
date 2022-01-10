@@ -34,7 +34,6 @@ export const uriCombine = (uri, path) => {
 	return val;
 };
 
-// eslint-disable-next-line react/prop-types
 export const RouteExcept = ({ path, exceptPath, children }) => (
 	<Switch>
 		<Route exact path={exceptPath} />

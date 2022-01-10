@@ -15,28 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode } from 'react';
-import { createPortal } from 'react-dom';
-import { MAIN_HEADER_PORTAL_TARGET_ID } from '../../routes/dashboard/index.constants';
-import { Container, Bar } from './mainHeader.styles';
-
-type IMainHeader = {
-	children: ReactNode;
-};
-
-export const MainHeader = ({ children }: IMainHeader): JSX.Element => {
-	const rootElement = document.getElementById(MAIN_HEADER_PORTAL_TARGET_ID);
-
-	if (rootElement === null) {
-		return null;
-	}
-
-	return createPortal(
-		<Container>
-			<Bar>
-				{children}
-			</Bar>
-		</Container>,
-		rootElement,
-	);
-};
+export enum Display {
+	Desktop = 1024,
+	Tablet = 768,
+}

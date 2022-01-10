@@ -14,26 +14,25 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useEffect, useState } from 'react';
-import { debounce } from 'lodash';
 
-export type SearchInputConfig = {
-	query: any;
-	dispatcher: any;
-};
+import styled from 'styled-components';
 
-export const useSearchInput = ({ query, dispatcher }: SearchInputConfig) => {
-	const [searchInput, setSearchInput] = useState(query);
+export const Wrapper = styled.div`
+	width: 100%;
+	height: 114px;
+	padding: 0 30px;
+	box-sizing: border-box;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+	border-left-style: none;
+	border-right-style: none;
+`;
 
-	const debounceSearchUpdate = debounce(
-		(value: string) => dispatcher(value),
-		300,
-		{ trailing: true },
-	);
-
-	useEffect(() => {
-		debounceSearchUpdate(searchInput);
-	}, [searchInput]);
-
-	return { searchInput, setSearchInput, filterQuery: query };
-};
+export const Container = styled.div`
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	width: 100%;
+	max-width: 1289px;
+	margin: 28px auto 0;
+`;

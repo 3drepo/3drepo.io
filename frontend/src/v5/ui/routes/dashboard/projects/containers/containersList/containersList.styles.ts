@@ -14,8 +14,32 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import styled from 'styled-components';
+import * as SearchInputStyles from '@controls/searchInput/searchInput.styles';
+import { Display } from '@/v5/ui/themes/media';
 
 export const Container = styled.div`
 	margin: 16px 0;
+`;
+
+export const CollapseSideElementGroup = styled.div`
+	display: flex;
+	align-items: center;
+
+	${SearchInputStyles.TextField} {
+		margin-right: 15px;
+		
+		@media (max-width: ${Display.Tablet}px) {
+			width: 225px;
+		}
+		
+		@media (max-width: ${Display.Desktop}px) {
+			max-width: 405px;
+		}
+		
+		@media (min-width: ${Display.Desktop}px) {
+			width: 405px;
+		}
+	}
 `;
