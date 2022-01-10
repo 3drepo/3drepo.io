@@ -14,7 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { authenticate, canLogIn, getUserByUsername, updateProfile } = require('../models/users');
+const { authenticate, canLogIn, deleteApiKey, generateApiKey, getAvatar,
+	getUserByUsername, updateProfile, uploadAvatar } = require('../models/users');
 
 const Users = {};
 
@@ -23,35 +24,40 @@ Users.login = async (username, password) => {
 	return authenticate(username, password);
 };
 
-
 Users.getProfileByUsername = async (username) => {
 	const user = await getUserByUsername(username, {
 		user: 1,
-		"customData.firstName" : 1,
-		"customData.lastName" : 1,
-		"customData.email" : 1,
-		"customData.avatar" : 1,
-		"customData.apiKey" : 1
+		'customData.firstName': 1,
+		'customData.lastName': 1,
+		'customData.email': 1,
+		'customData.avatar': 1,
+		'customData.apiKey': 1,
 	});
 
-	const customData =  user.customData;
+	const { customData } = user;
 
-	return 	{
+	return {
 		username: user.user,
 		firstName: customData.firstName,
 		lastName: customData.lastName,
 		email: customData.email,
 		hasAvatar: !!customData.avatar,
-		apiKey: customData.apiKey
+		apiKey: customData.apiKey,
 	};
 };
 
 Users.updateProfile = async (username, updatedProfile) => {
 	await updateProfile(username, updatedProfile);
-}
+};
 
 Users.generateApiKey = generateApiKey;
 
+Users.deleteApiKey = deleteApiKey;
+
 Users.getUserByUsername = getUserByUsername;
+
+Users.getAvatar = getAvatar;
+
+Users.uploadAvatar = uploadAvatar;
 
 module.exports = Users;

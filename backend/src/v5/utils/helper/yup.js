@@ -78,5 +78,4 @@ YupHelper.types.strings.password = Yup.string();
 
 YupHelper.types.strings.email = Yup.string().email();
 
-
 module.exports = YupHelper;

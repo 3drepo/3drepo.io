@@ -17,11 +17,12 @@
 
 const { createSession, destroySession } = require('../middleware/sessions');
 const { isLoggedIn, notLoggedIn, validSession } = require('../middleware/auth');
+const { validateAvatarFile, validateLoginData,
+	validateUpdateData } = require('../middleware/dataConverter/inputs/users');
 const { Router } = require('express');
 const Users = require('../processors/users');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
-const { validateLoginData, validateUpdateData } = require('../middleware/dataConverter/inputs/users');
 
 const login = (req, res, next) => {
 	const { user, password } = req.body;
@@ -36,14 +37,14 @@ const getUsername = (req, res) => {
 };
 
 const getProfile = (req, res) => {
-	const username = req.session.user.username;
+	const { username } = req.session.user;
 	Users.getProfileByUsername(username).then((profile) => {
 		respond(req, res, templates.ok, { ...profile });
 	}).catch((err) => respond(req, res, err));
 };
 
 const updateProfile = (req, res) => {
-	const username = req.session.user.username;
+	const { username } = req.session.user;
 	const updatedProfile = req.body;
 	Users.updateProfile(username, updatedProfile).then(() => {
 		respond(req, res, templates.ok);
@@ -51,9 +52,31 @@ const updateProfile = (req, res) => {
 };
 
 const generateApiKey = (req, res) => {
-	const username = req.session.user.username;
+	const { username } = req.session.user;
 	Users.generateApiKey(username).then((apiKey) => {
-		req.dataModel = { apiKey };
+		respond(req, res, templates.ok, { apiKey });
+	}).catch((err) => respond(req, res, err));
+};
+
+const deleteApiKey = (req, res) => {
+	const { username } = req.session.user;
+	Users.deleteApiKey(username).then(() => {
+		respond(req, res, templates.ok);
+	}).catch((err) => respond(req, res, err));
+};
+
+const getAvatar = (req, res) => {
+	const { username } = req.session.user;
+	Users.getAvatar(username).then((avatar) => {
+		res.write(avatar.data.buffer);
+		res.end();
+		respond(req, res, templates.ok);
+	}).catch((err) => respond(req, res, err));
+};
+
+const uploadAvatar = (req, res) => {
+	const { username } = req.session.user;
+	Users.uploadAvatar(username, req.file.buffer).then(() => {
 		respond(req, res, templates.ok);
 	}).catch((err) => respond(req, res, err));
 };
@@ -222,7 +245,13 @@ const establishRoutes = () => {
 	*/
 	router.put('/user', isLoggedIn, validateUpdateData, updateProfile);
 
-	router.post('/apikey', isLoggedIn, generateApiKey);
+	router.post('/user/key', isLoggedIn, generateApiKey);
+
+	router.delete('/user/key', isLoggedIn, deleteApiKey);
+
+	router.get('/user/avatar', isLoggedIn, getAvatar);
+
+	router.put('/user/avatar', isLoggedIn, validateAvatarFile, uploadAvatar);
 
 	return router;
 };

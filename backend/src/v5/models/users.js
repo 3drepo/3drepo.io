@@ -19,8 +19,9 @@ const { createResponseCode, templates } = require('../utils/responseCodes');
 const config = require('../utils/config');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
-const { publish } = require('../services/eventsManager/eventsManager');
+const { generateHashString } = require('../utils/helper/strings');
 const { hasField } = require('../utils/helper/objects');
+const { publish } = require('../services/eventsManager/eventsManager');
 
 const User = {};
 const COLL_NAME = 'system.users';
@@ -57,7 +58,7 @@ const recordFailedAuthAttempt = async (user) => {
 		$set: {
 			'customData.loginInfo.lastFailedLoginAt': currentTime,
 			'customData.loginInfo.failedLoginCount': newCount,
-		}
+		},
 	});
 
 	publish(events.FAILED_LOGIN_ATTEMPT, { email, failedLoginCount: newCount });
@@ -161,36 +162,56 @@ User.deleteFavourites = async (username, teamspace, favouritesToRemove) => {
 	}
 };
 
-const changePassword = async (username, newPassword) => {	
+const changePassword = async (username, newPassword) => {
 	const updateUserCmd = {
-		"updateUser": username,
-		"pwd": newPassword
+		updateUser: username,
+		pwd: newPassword,
 	};
 
-	await db.runCommand("admin", updateUserCmd);
-	await db.updateOne("admin", COLL_NAME, { user: username },
-		{ $set: { "customData.resetPasswordToken": undefined } });
+	await db.runCommand('admin', updateUserCmd);
+	await db.updateOne('admin', COLL_NAME, { user: username },
+		{ $set: { 'customData.resetPasswordToken': undefined } });
 };
 
 User.updateProfile = async (username, updatedProfile) => {
 	await changePassword(username, updatedProfile.newPassword);
-	const updateableFields = new Set(["firstName", "lastName", "email"]);
+	const updateableFields = new Set(['firstName', 'lastName', 'email']);
 	const updateData = {};
 
-	updateableFields.forEach(field => {
+	updateableFields.forEach((field) => {
 		if (hasField(updatedProfile, field)) {
 			updateData[`customData.${field}`] = updatedProfile[field];
 		}
 	});
 
-	await updateUser(username, {$set: updateData});
+	await updateUser(username, { $set: updateData });
 };
 
 User.generateApiKey = async (username) => {
-	const apiKey = utils.generateHashString();
-	const updateData = {"customData.apiKey" : apiKey};
-	await updateUser(username, {$set: updateData });
+	const apiKey = generateHashString();
+	const updateData = { 'customData.apiKey': apiKey };
+	await updateUser(username, { $set: updateData });
 	return apiKey;
-}
+};
+
+User.deleteApiKey = async (username) => {
+	const updateData = { 'customData.apiKey': 1 };
+	await updateUser(username, { $unset: updateData });
+};
+
+User.getAvatar = async (username) => {
+	const user = await User.getUserByUsername(username, { 'customData.avatar': 1 });
+	const avatar = user.customData?.avatar;
+
+	if (!avatar) {
+		throw templates.userDoesNotHaveAvatar;
+	}
+
+	return avatar;
+};
+
+User.uploadAvatar = async (username, avatarBuffer) => {
+	await updateUser(username, { $set: { 'customData.avatar': { data: avatarBuffer } } });
+};
 
 module.exports = User;

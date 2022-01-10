@@ -65,7 +65,7 @@ const fileFilter = async (req, file, cb) => {
 };
 
 const validateRevisionUpload = async (req, res, next) => {
-	const schema = Yup.object().noUnknown().required()
+	const schema = Yup.object().noUnknown().required().strict(true)
 		.shape({
 			tag: YupHelper.types.strings.code.required().test('tag-not-in-use',
 				'Revision name is already used by an existing revision',

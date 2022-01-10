@@ -22,12 +22,19 @@ const { respond } = require('../../utils/responder');
 
 const MulterHelper = {};
 
-const singleFileMulterPromise = (req, fileName, fileFilter) => new Promise((resolve, reject) => {
-	Multer({
-		dest: config.cn_queue.upload_dir,
+const singleFileMulterPromise = (req, fileName, fileFilter, storeInMemory) => new Promise((resolve, reject) => {
+	const options = {
 		limits: { fileSize: config.uploadSizeLimit },
 		fileFilter,
-	}).single(fileName)(req, null, (err) => {
+	};
+
+	if (storeInMemory) {
+		options.storage = Multer.memoryStorage();
+	} else {
+		options.dest = config.cn_queue.upload_dir;
+	}
+
+	Multer(options).single(fileName)(req, null, (err) => {
 		if (err) {
 			reject(err);
 		} else {
@@ -36,17 +43,20 @@ const singleFileMulterPromise = (req, fileName, fileFilter) => new Promise((reso
 	});
 });
 
-MulterHelper.singleFileUpload = (fileName = 'file', fileFilter) => async (req, res, next) => {
+MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, storeInMemory = false) => async (req, res, next) => {
 	try {
-		await singleFileMulterPromise(req, fileName, fileFilter);
+		await singleFileMulterPromise(req, fileName, fileFilter, storeInMemory);
 		await next();
 	} catch (err) {
+		let response = err;
+
 		if (err.code === 'LIMIT_FILE_SIZE') {
-			const response = createResponseCode(templates.maxSizeExceeded, `File cannot be bigger than ${config.uploadSizeLimit} bytes.`);
-			respond(req, res, response);
-		} else {
-			respond(req, res, err);
+			response = createResponseCode(templates.maxSizeExceeded, `File cannot be bigger than ${config.uploadSizeLimit} bytes.`);
+		} else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+			response = createResponseCode(templates.invalidArguments, `${fileName} is a required field`);
 		}
+
+		respond(req, res, response);
 	}
 };
 

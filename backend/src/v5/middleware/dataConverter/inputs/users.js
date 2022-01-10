@@ -15,12 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createResponseCode, templates } = require('../../../utils/responseCodes');
-const Yup = require('yup');
 const { authenticate, getUserByQuery } = require('../../../models/users');
+const { createResponseCode, templates } = require('../../../utils/responseCodes');
+const Path = require('path');
+const Yup = require('yup');
 const { respond } = require('../../../utils/responder');
+const { singleFileUpload } = require('../multer');
 const { types } = require('../../../utils/helper/yup');
-const zxcvbn = require("zxcvbn");
+const { validateMany } = require('../../common');
+const zxcvbn = require('zxcvbn');
 
 const Users = {};
 
@@ -59,38 +62,35 @@ Users.validateUpdateData = async (req, res, next) => {
 						await getUserByQuery({ 'customData.email': value });
 						return false;
 					} catch {
-						//do nothing
+						// do nothing
 					}
 				}
 				return true;
-			},
-		),
-		oldPassword: types.strings.password.optional().when("newPassword", {
+			}),
+		oldPassword: types.strings.password.optional().when('newPassword', {
 			is: (newPass) => newPass?.length > 0,
-			then: types.strings.password.required()
+			then: types.strings.password.required(),
 		}),
-		newPassword: types.strings.password.optional().when("oldPassword", {
+		newPassword: types.strings.password.optional().when('oldPassword', {
 			is: (oldPass) => oldPass?.length > 0,
-			then: types.strings.password.required()
+			then: types.strings.password.required(),
 		}).test('checkPasswordStrength', 'Password is too weak',
 			(value) => {
 				if (value) {
-					if (value.length < 8)
-						return false;
+					if (value.length < 8) return false;
 					const passwordScore = zxcvbn(value).score;
 					return passwordScore >= 2;
 				}
 				return true;
-			},
-		).test({
+			}).test({
 			name: 'notTheSameAsOldPassword',
 			exclusive: false,
 			params: {},
 			message: 'New password must be different than the old one',
-			test: function (value) {
-				const oldPassword = this.parent.oldPassword;	
-				return !oldPassword || (value !== oldPassword); 				
-			}
+			test(value) {
+				const { oldPassword } = this.parent;
+				return !oldPassword || (value !== oldPassword);
+			},
 		}),
 	}, [['oldPassword', 'newPassword']]).strict(true).noUnknown()
 		.required();
@@ -111,8 +111,39 @@ Users.validateUpdateData = async (req, res, next) => {
 
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
-}
+};
 
+const fileFilter = async (req, file, cb) => {
+	const format = Path.extname(file.originalname).toLowerCase();
+	const acceptedFormats = ['.png', '.jpg', '.gif'];
+	if (!acceptedFormats.includes(format)) {
+		const err = createResponseCode(templates.unsupportedFileFormat, `${format} is not a supported model format`);
+		cb(err, false);
+	}
 
+	const maxAvatarSize = 1048576;
+	const size = parseInt(req.headers['content-length'], 10);
+	if (size > maxAvatarSize) {
+		cb(templates.maxSizeExceeded, false);
+	}
+
+	cb(null, true);
+};
+
+const validateAvatarData = async (req, res, next) => {
+	const schema = Yup.object().shape({	}).strict(true).noUnknown().required();
+
+	try {
+		await schema.validate(req.body);
+		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
+		if (!req.file.size) throw createResponseCode(templates.invalidArguments, 'File cannot be empty');
+
+		next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+Users.validateAvatarFile = validateMany([singleFileUpload('file', fileFilter, true), validateAvatarData]);
 
 module.exports = Users;
