@@ -18,9 +18,8 @@ import { INITIAL_STATE } from '@/v5/store/containers/containers.redux';
 import { times } from 'lodash';
 import { containerMockFactory } from './containers.fixtures';
 import {
+	selectFavouriteContainers,
 	selectContainers,
-	selectFilteredFavouriteContainers,
-	selectFilteredContainers,
 	selectAreStatsPending,
 	selectHasContainers
 } from '@/v5/store/containers/containers.selectors';
@@ -46,7 +45,7 @@ const defaultState: IContainersState = {
 describe('Containers: selectors', () => {
 	describe('selectFavouriteContainers', () => {
 		it('should return favourite containers', () => {
-			const selected = selectFilteredFavouriteContainers.resultFunc(defaultState.containers[projectId], '');
+			const selected = selectFavouriteContainers.resultFunc(defaultState.containers[projectId]);
 			expect(selected).toHaveLength(6);
 		})
 	})
@@ -55,13 +54,6 @@ describe('Containers: selectors', () => {
 		it('should return all containers', () => {
 			const selected = selectContainers.resultFunc(defaultState, projectId);
 			expect(selected).toHaveLength(11);
-		})
-	})
-
-	describe('selectFilteredContainers', () => {
-		it('should return container with searchPhrase', () => {
-			const selected = selectFilteredContainers.resultFunc(defaultState.containers[projectId], searchPhrase);
-			expect(selected).toHaveLength(1);
 		})
 	})
 

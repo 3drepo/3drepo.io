@@ -15,18 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import AddCircleIcon from '@assets/icons/add_circle.svg';
-import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { FormattedMessage } from 'react-intl';
 
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
-import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
 import { Button } from '@controls/button';
 import { Content } from '@/v5/ui/routes/dashboard/projects/projects.styles';
 import { DashboardListEmptySearchResults } from '@components/dashboard/dashboardList';
+import { filterContainers } from '@/v5/store/containers/containers.helpers';
 import { ContainersList } from './containersList';
 import { SkeletonListItem } from './containersList/skeletonListItem';
 import { useContainersData } from './containers.hooks';
@@ -35,14 +34,14 @@ import { Container,
 
 export const Containers = (): JSX.Element => {
 	const {
-		filteredContainers,
+		containers,
 		favouriteContainers,
 		hasContainers,
 		isListPending,
 	} = useContainersData();
-	const favouritesFilterQuery = ContainersHooksSelectors.selectFavouritesFilterQuery();
-	const allFilterQuery = ContainersHooksSelectors.selectAllFilterQuery();
-	const { setFavouritesFilterQuery, setAllFilterQuery } = ContainersActionsDispatchers;
+
+	const [favouritesFilterQuery, setFavouritesFilterQuery] = useState<string>('');
+	const [allFilterQuery, setAllFilterQuery] = useState<string>('');
 
 	return (
 		<Container>
@@ -53,11 +52,9 @@ export const Containers = (): JSX.Element => {
 					<>
 						<ContainersList
 							hasContainers={hasContainers.favourites}
-							search={{
-								query: favouritesFilterQuery,
-								dispatcher: setFavouritesFilterQuery,
-							}}
-							containers={favouriteContainers}
+							filterQuery={favouritesFilterQuery}
+							onFilterQueryChange={setFavouritesFilterQuery}
+							containers={filterContainers(favouriteContainers, favouritesFilterQuery)}
 							title={(
 								<FormattedMessage
 									id="containers.favourites.collapseTitle"
@@ -83,12 +80,11 @@ export const Containers = (): JSX.Element => {
 						/>
 						<Divider />
 						<ContainersList
+							filterQuery={allFilterQuery}
+							onFilterQueryChange={setAllFilterQuery}
+
 							hasContainers={hasContainers.all}
-							search={{
-								query: allFilterQuery,
-								dispatcher: setAllFilterQuery,
-							}}
-							containers={filteredContainers}
+							containers={filterContainers(containers, allFilterQuery)}
 							title={(
 								<FormattedMessage
 									id="containers.all.collapseTitle"
