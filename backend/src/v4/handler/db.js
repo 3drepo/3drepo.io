@@ -18,10 +18,16 @@
 "use strict";
 (function() {
 	const config	  = require("../config.js");
+	const { v5Path } = require("../../interop");
 	const MongoClient = require("mongodb").MongoClient;
 	const GridFSBucket = require("mongodb").GridFSBucket;
 	const { PassThrough } = require("stream");
 	const responseCodes = require("../response_codes");
+	const { ALL_SYSTEM_ADMIN_ROLES,
+		SYSTEM_ROLES,
+		SYSTEM_ROLES_INIT
+	} = require(`${v5Path}/utils/permissions/permissions.constants.js`);
+	const systemLogger = require("../logger").systemLogger;
 
 	async function getGridFSBucket(database, collection, chunksize = null) {
 		try {
@@ -71,6 +77,43 @@
 		return connectString;
 	}
 
+	const createSystemRole = async function (role, roles = []) {
+		const roleFound = await Handler.findRoleByRoleName(role);
+		if (roleFound) {
+			return roleFound;
+		}
+
+		const createRoleCmd = {
+			"createRole": role,
+			"privileges":[{
+				"resource":{
+					"db": "admin",
+					"collection": "roles"
+				},
+				"actions": ["find"]}
+			],
+			"roles": roles
+		};
+
+		return await Handler.runCommand("admin", createRoleCmd);
+	};
+
+	const initaliseSystemRoles = async () => {
+		if (!config.initalisedSystemRoles) {
+			const baseRoles = await ALL_SYSTEM_ADMIN_ROLES.map(async (role) => {
+				systemLogger.logInfo("Initialising system role: " + role);
+				await createSystemRole(role);
+			});
+			await Promise.all(baseRoles);
+			SYSTEM_ROLES.forEach(async (role) => {
+				systemLogger.logInfo("Initialising system role: " + role);
+				await createSystemRole(role, SYSTEM_ROLES_INIT[role]);
+			});
+			config.initalisedSystemRoles = true;
+		}
+		return true;
+	};
+
 	const connect = (username, password) => {
 		// handler for checking the roles exist in here
 		const mongoClient = MongoClient.connect(getURL(username, password), {
@@ -88,6 +131,7 @@
 		let conn;
 		try {
 			conn = await connect(user, password);
+			await initaliseSystemRoles();
 			await conn.db("admin");
 		} catch (err) {
 			throw responseCodes.INCORRECT_USERNAME_OR_PASSWORD;
@@ -148,6 +192,10 @@
 		}
 
 		return collection.findOne(query, options);
+	};
+
+	Handler.findRoleByRoleName = async function(id) {
+		return await Handler.findOne("admin", "system.roles", { role: id});
 	};
 
 	Handler.findOneAndDelete = async function (database, colName, query, projection = {}) {

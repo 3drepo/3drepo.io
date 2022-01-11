@@ -31,6 +31,11 @@ permConst.SUPPORT_ADMIN_ROLES = [permConst.SYSTEM_ADMIN_READ, permConst.LICENSE_
 permConst.ALL_SYSTEM_ADMIN_ROLES = [...new Set([...permConst.SYSTEM_ADMIN_ROLES,
 	...permConst.LICENSE_ADMIN_ROLES,
 	...permConst.SUPPORT_ADMIN_ROLES])];
+permConst.SYSTEM_ROLES_INIT = {
+	system_admin: permConst.SYSTEM_ADMIN_ROLES,
+	license_admin: permConst.LICENSE_ADMIN_ROLES,
+	support_admin: permConst.SUPPORT_ADMIN_ROLES,
+};
 
 permConst.TEAMSPACE_ADMIN = 'teamspace_admin';
 permConst.PROJECT_ADMIN = 'admin_project';
