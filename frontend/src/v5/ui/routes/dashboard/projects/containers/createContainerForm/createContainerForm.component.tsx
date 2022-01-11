@@ -55,11 +55,23 @@ const ContainerSchema = Yup.object().shape({
 		),
 	unit: Yup.string().required().default('mm'),
 	type: Yup.string().required().default('Uncategorised'),
-	code: Yup.string().max(50).matches(/^[A-Za-z0-9]+$/,
-		formatMessage({
-			id: 'containers.creation.code.error.characters',
-			defaultMessage: 'Code can only consist of letters and numbers',
-		})),
+	code: Yup.string()
+		.max(50,
+			formatMessage({
+				id: 'containers.creation.code.error.max',
+				defaultMessage: 'Code is limited to 50 characters',
+			}))
+		.matches(/^[A-Za-z0-9]+$/,
+			formatMessage({
+				id: 'containers.creation.code.error.characters',
+				defaultMessage: 'Code can only consist of letters and numbers',
+			})),
+	desc: Yup.string()
+		.max(50,
+			formatMessage({
+				id: 'containers.creation.description.error.max',
+				defaultMessage: 'Container Description is limited to 50 characters',
+			})).default('Uncategorised'),
 });
 
 export const CreateContainerForm = ({ open, close }): JSX.Element => {
@@ -168,6 +180,8 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 
 			<TextField
 				label={formatMessage({ id: 'containers.creation.form.description', defaultMessage: 'Description' })}
+				error={!!errors.desc}
+				helperText={errors.desc?.message}
 				{...register('desc')}
 			/>
 
