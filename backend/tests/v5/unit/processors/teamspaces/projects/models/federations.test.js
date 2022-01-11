@@ -61,7 +61,7 @@ const federationSettings = {
 		name: 'federation 1',
 		type: 'type 1',
 		properties: {
-			units: 'm',
+			unit: 'm',
 			code: 'FED1',
 		},
 		status: 'ok',
@@ -84,7 +84,7 @@ const federationSettings = {
 		name: 'federation 2',
 		type: 'type 2',
 		properties: {
-			units: 'mm',
+			unit: 'mm',
 			code: 'FED2',
 		},
 		status: 'processing',
@@ -96,7 +96,7 @@ const federationSettings = {
 		name: 'federation 3',
 		type: 'type 3',
 		properties: {
-			units: 'mm',
+			unit: 'mm',
 			code: 'FED3',
 		},
 		status: 'processing',

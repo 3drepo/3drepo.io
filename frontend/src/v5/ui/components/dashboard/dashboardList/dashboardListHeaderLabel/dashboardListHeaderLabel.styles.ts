@@ -20,10 +20,17 @@ import { Button as ButtonComponent } from '@controls/button';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { Typography } from '@controls/typography';
+import { Display } from '@/v5/ui/themes/media';
 
 export const Container = styled(FixedOrGrowContainer)`
 	align-items: center;
 	display: flex;
+	
+	${({ hideWhenSmallerThan }: { hideWhenSmallerThan: Display }) => hideWhenSmallerThan && css`
+		@media (max-width: ${hideWhenSmallerThan}px) {
+			display: none;
+		}
+	`};
 `;
 
 export const Label = styled(Typography).attrs({

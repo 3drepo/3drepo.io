@@ -14,29 +14,26 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { useEffect, useState } from 'react';
+import { debounce } from 'lodash';
 
-import React, { ReactNode } from 'react';
-import { createPortal } from 'react-dom';
-import { MAIN_HEADER_PORTAL_TARGET_ID } from '../../routes/dashboard/index.constants';
-import { Container, Bar } from './mainHeader.styles';
-
-type IMainHeader = {
-	children: ReactNode;
+export type SearchInputConfig = {
+	query: any;
+	dispatcher: any;
 };
 
-export const MainHeader = ({ children }: IMainHeader): JSX.Element => {
-	const rootElement = document.getElementById(MAIN_HEADER_PORTAL_TARGET_ID);
+export const useSearchInput = ({ query, dispatcher }: SearchInputConfig) => {
+	const [searchInput, setSearchInput] = useState(query);
 
-	if (rootElement === null) {
-		return null;
-	}
-
-	return createPortal(
-		<Container>
-			<Bar>
-				{children}
-			</Bar>
-		</Container>,
-		rootElement,
+	const debounceSearchUpdate = debounce(
+		(value: string) => dispatcher(value),
+		300,
+		{ trailing: true },
 	);
+
+	useEffect(() => {
+		debounceSearchUpdate(searchInput);
+	}, [searchInput]);
+
+	return { searchInput, setSearchInput, filterQuery: query };
 };

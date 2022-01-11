@@ -26,6 +26,7 @@ export const COLOR = {
 	PRIMARY_MID: '#45CCD9',
 	PRIMARY_LIGHT: '#80E0E9',
 	PRIMARY_LIGHTEST: '#E6F9FB',
+	PRIMARY_ACCENT: '#F6F8FA',
 	SECONDARY_MAIN: '#172B4D',
 	SECONDARY_DARK: '#121E33',
 	SECONDARY_MID: '#2E405F',
@@ -62,6 +63,7 @@ export const FONT_WEIGHT = {
 
 export const GRADIENT = {
 	MAIN: 'linear-gradient(90deg, #0047BB -5.07%, #00C1D4 105.07%)',
+	SECONDARY: 'linear-gradient(89.98deg, #172B4D 0.01%, #2E405F 99.99%)',
 };
 
 export const SHADOW = {
@@ -154,6 +156,7 @@ export const theme = createMuiTheme({
 			lightest: COLOR.PRIMARY_LIGHTEST,
 			contrastText: COLOR.PRIMARY_LIGHTEST,
 			contrast: COLOR.PRIMARY_MAIN_CONTRAST,
+			accent: COLOR.PRIMARY_ACCENT,
 		},
 		secondary: {
 			main: COLOR.SECONDARY_MAIN,
@@ -197,6 +200,7 @@ export const theme = createMuiTheme({
 		},
 		gradient: {
 			main: GRADIENT.MAIN,
+			secondary: GRADIENT.SECONDARY,
 		},
 		shadows: {
 			level_1: SHADOW.LEVEL_1,
@@ -280,10 +284,12 @@ export const theme = createMuiTheme({
 				boxShadow: 'none',
 				paddingLeft: 20,
 				paddingRight: 20,
-				minHeight: 64,
+				minHeight: 65,
 				display: 'flex',
 				flexDirection: 'row',
 				alignItems: 'center',
+				justifyContent: 'space-between',
+				background: GRADIENT.SECONDARY,
 			},
 		},
 		MuiAvatar: {
@@ -347,23 +353,34 @@ export const theme = createMuiTheme({
 			},
 		},
 		MuiBreadcrumbs: {
+			root: {
+				maxWidth: '100%',
+			},
+			ol: {
+				flexWrap: 'nowrap',
+			},
 			li: {
+				'&:last-child': {
+					overflow: 'hidden',
+				},
 				'& > a': {
 					margin: 0,
-					padding: '10px 5px',
-					...typography.body1,
+					padding: '10px 8px',
+					color: COLOR.PRIMARY_MAIN_CONTRAST,
+					...typography.h3,
 				},
 				'& > button > span > span': {
 					marginLeft: '1px',
 				},
 				'& .MuiButton-endIcon': {
-					marginLeft: 0,
+					marginLeft: 6,
 				},
 			},
 			separator: {
 				marginLeft: 0,
 				marginRight: 0,
-				color: COLOR.BASE_MAIN,
+				color: COLOR.PRIMARY_MAIN_CONTRAST,
+				fontSize: 16,
 			},
 		},
 		MuiOutlinedInput:
@@ -514,12 +531,21 @@ export const theme = createMuiTheme({
 				'&$disabled $path': {
 					fill: COLOR.BASE_LIGHTEST,
 				},
+				'&:hover $path': {
+					fill: COLOR.PRIMARY_MAIN_CONTRAST,
+				},
+				'&:active $path': {
+					fill: COLOR.PRIMARY_MAIN_CONTRAST,
+				},
 				'&.Mui-focusVisible': {
 					backgroundColor: COLOR.PRIMARY_MAIN_CONTRAST,
 					boxShadow: SHADOW.LEVEL_5,
 				},
 			},
 			outlinedPrimary: {
+				'& $path': {
+					fill: COLOR.PRIMARY_MAIN,
+				},
 				'&:hover': {
 					backgroundColor: COLOR.PRIMARY_MAIN,
 					color: COLOR.PRIMARY_MAIN_CONTRAST,
@@ -538,15 +564,9 @@ export const theme = createMuiTheme({
 					color: COLOR.PRIMARY_MAIN_CONTRAST,
 					backgroundColor: COLOR.SECONDARY_MAIN,
 				},
-				'&:hover $path': {
-					fill: COLOR.PRIMARY_MAIN_CONTRAST,
-				},
 				'&:active': {
 					color: COLOR.PRIMARY_MAIN_CONTRAST,
 					backgroundColor: COLOR.SECONDARY_DARK,
-				},
-				'&:active $path': {
-					fill: COLOR.PRIMARY_MAIN_CONTRAST,
 				},
 			},
 			outlinedSizeSmall: {

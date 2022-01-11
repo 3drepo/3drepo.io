@@ -15,9 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useMemo } from 'react';
-import uuid from 'uuidv4';
-
+import React, { Fragment, useMemo } from 'react';
 import { DashboardList } from '@components/dashboard/dashboardList';
 
 interface IDashboardSkeletonList {
@@ -31,14 +29,14 @@ export const DashboardSkeletonList = ({ itemsAmount = 10, itemComponent }: IDash
 	return (
 		<DashboardList>
 			{list.map((item, index) => (
-				<div key={uuid()}>
+				<Fragment key={`${itemComponent.props.name as string}-${index as number}`}>
 					{
 						React.cloneElement(itemComponent, {
 							delay: index / 10,
 							...itemComponent.props,
 						})
 					}
-				</div>
+				</Fragment>
 			))}
 		</DashboardList>
 	);

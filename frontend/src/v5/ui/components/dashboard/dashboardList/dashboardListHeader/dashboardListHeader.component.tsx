@@ -16,8 +16,8 @@
  */
 
 import React, { Dispatch, useState } from 'react';
-import { ISortConfig } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.hooks';
 import { SortingDirection } from '../dashboardList.types';
+import { ISortConfig } from '../useOrderedList';
 import { DashboardListHeaderContainer } from './dashboardListHeader.styles';
 
 type IDashboardListHeader = {

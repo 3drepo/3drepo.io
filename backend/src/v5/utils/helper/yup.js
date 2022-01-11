@@ -74,4 +74,6 @@ YupHelper.types.surveyPoints = Yup.array()
 YupHelper.types.strings.unit = Yup.string()
 	.oneOf(['mm', 'cm', 'dm', 'm', 'ft']);
 
+YupHelper.types.strings.email = Yup.string().email();
+
 module.exports = YupHelper;

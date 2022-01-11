@@ -23,4 +23,5 @@ PathHelper.src = `${__dirname}/../../../src/v5`;
 PathHelper.srcV4 = `${__dirname}/../../../src/v4`;
 PathHelper.modelFolder = `${__dirname}/../resources/models`;
 PathHelper.objModel = Path.join(PathHelper.modelFolder, 'dummy.obj');
+PathHelper.objModelUppercaseExt = Path.join(PathHelper.modelFolder, 'dummyUppercaseExt.OBJ');
 module.exports = PathHelper;
