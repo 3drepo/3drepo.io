@@ -66,14 +66,14 @@ export const ContainersList = ({
 	showBottomButton = false,
 }: IContainersList): JSX.Element => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
-	const [selectedId, setSelectedId] = useState<string | null>(null);
+	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 	const { sortedList, setSortConfig } = useOrderedList(containers, DEFAULT_SORT_CONFIG);
 	const { searchInput, setSearchInput, filterQuery } = useSearchInput(search);
 	const isListPending = ContainersHooksSelectors.selectIsListPending();
 	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
 
-	const toggleSelectedId = (id: string) => {
-		setSelectedId((state) => (state === id ? null : id));
+	const selectOrToggleItem = (id: string) => {
+		setSelectedItemId((state) => (state === id ? null : id));
 	};
 
 	const setFavourite = (id: string, value: boolean) => {
@@ -142,11 +142,11 @@ export const ContainersList = ({
 									<ContainerListItem
 										index={index}
 										key={container._id}
-										isSelected={container._id === selectedId}
+										isSelected={container._id === selectedItemId}
 										container={container}
 										filterQuery={filterQuery}
 										onFavouriteChange={setFavourite}
-										onToggleSelected={toggleSelectedId}
+										onSelectOrToggleItem={selectOrToggleItem}
 									/>
 								))
 							) : (
@@ -158,7 +158,7 @@ export const ContainersList = ({
 							)}
 						</DashboardList>
 					),
-					[sortedList, filterQuery, selectedId])
+					[sortedList, filterQuery, selectedItemId])
 				}
 				{showBottomButton && !isListPending && hasContainers && (
 					<DashboardListButton
