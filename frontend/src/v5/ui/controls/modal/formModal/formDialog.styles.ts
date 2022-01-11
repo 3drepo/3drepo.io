@@ -29,8 +29,9 @@ export const CloseButton = styled(IconButton)`
 		top: 11px;
 		right: 11px;
 
-		/* Turn SVG white */
-		filter: invert(100%) sepia(100%) saturate(7%) hue-rotate(159deg) brightness(104%) contrast(102%);
+		svg path {
+			stroke: ${({ theme }) => theme.palette.primary.contrast}
+		}
 	}
 `;
 
@@ -61,11 +62,9 @@ export const FormDialogContent = styled(DialogContent)`
 
 export const FormDialogActions = styled(DialogActions)`
 	background: ${({ theme }) => theme.palette.tertiary.lightest};
-	box-shadow: 0 6px 10px rgba(0, 0, 0, 0.14), 0 1px 18px rgba(0, 0, 0, 0.12), 0 3px 5px rgba(0, 0, 0, 0.2);
+	box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
 `;
 
 export const Header = styled.div`
-	background: linear-gradient(89.98deg,
-	${({ theme }) => theme.palette.secondary.main} 0.01%,
-	${({ theme }) => theme.palette.secondary.mid} 99.99%);
+	background: ${({ theme }) => theme.palette.gradient.secondary}
 `;
