@@ -52,6 +52,7 @@ type IContainersList = {
 		visible: ReactNode;
 	},
 	search: SearchInputConfig;
+	onClickUpload: () => void;
 	hasContainers: boolean;
 	showBottomButton?: boolean;
 };
@@ -62,6 +63,7 @@ export const ContainersList = ({
 	title,
 	titleTooltips,
 	search,
+	onClickUpload,
 	hasContainers,
 	showBottomButton = false,
 }: IContainersList): JSX.Element => {
@@ -110,6 +112,7 @@ export const ContainersList = ({
 								startIcon={<ArrowUpCircleIcon />}
 								variant="contained"
 								color="primary"
+								onClick={onClickUpload}
 							>
 								<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
 							</Button>
