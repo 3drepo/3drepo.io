@@ -245,12 +245,78 @@ const establishRoutes = () => {
 	*/
 	router.put('/user', isLoggedIn, validateUpdateData, updateProfile);
 
+	/**
+	* @openapi
+	* /user/key:
+	*   post:
+	*     description: Generates a new API key for the logged in user
+	*     tags: [Auth]
+	*     operationId: generateApiKey
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: Updates the details of the user
+	*         content:
+	*           application/json:
+	*             schema:
+	*               type: object
+	*               properties:
+	*                 apiKey:
+	*                   type: string
+	*                   description: The new API key of the user
+	*                   example: 20f947a673dce5419ce187ca7998a68f
+	*/
 	router.post('/user/key', isLoggedIn, generateApiKey);
 
+	/**
+	* @openapi
+	* /user/key:
+	*   delete:
+	*     description: Deletes the API key of the logged in user
+	*     tags: [Auth]
+	*     operationId: deleteApiKey
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: Deletes the details of the user
+	*/
 	router.delete('/user/key', isLoggedIn, deleteApiKey);
 
+	/**
+	* @openapi
+	* /user/avatar:
+	*   get:
+	*     description: Gets the avatar of the logged in user
+	*     tags: [Auth]
+	*     operationId: getAvatar
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: Updates the details of the user
+	*         content:
+	*           image
+	*/
 	router.get('/user/avatar', isLoggedIn, getAvatar);
 
+	/**
+	* @openapi
+	* /user/avatar:
+	*   put:
+	*     description: Uploadns new avatar for the logged in user
+	*     tags: [Auth]
+	*     operationId: uploadAvatar
+	*     requestBody:
+	*       content:
+	*         image:
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: Updates the details of the user
+	*/
 	router.put('/user/avatar', isLoggedIn, validateAvatarFile, uploadAvatar);
 
 	return router;
