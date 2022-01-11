@@ -26,6 +26,8 @@ const eventList = [
 	'MODEL_IMPORT_UPDATE', 'MODEL_IMPORT_FINISHED',
 	// Queue specific
 	'QUEUED_TASK_UPDATE', 'QUEUED_TASK_COMPLETED',
+	// Authentication
+	'FAILED_LOGIN_ATTEMPT', 'LOGIN_RECORD_CREATED', 'SESSION_CREATED', 'SESSIONS_REMOVED',
 ];
 
 const generateEventsMap = () => {

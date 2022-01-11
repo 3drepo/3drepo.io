@@ -72,6 +72,8 @@ module.exports.createApp = function (config, v5Init = true) {
 	if(v5Init) {
 		require(`${v5Path}/services/eventsListener/eventsListener`).init();
 		require("../models/chatEvent").subscribeToV5Events();
+		require("../models/intercom").subscribeToV5Events();
+		require("../handler/elastic").subscribeToV5Events();
 		require(`${v5Path}/services/queue`).init();
 	}
 	require(`${v5Path}/routes/routesManager`).init(app);

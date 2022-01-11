@@ -15,18 +15,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { StyledComponentProps } from 'styled-components';
+import { Display } from '@/v5/ui/themes/media';
 import { Container } from './fixedOrGrowContainer.styles';
 
-type IFixedOrGrowContainer = {
+export interface IFixedOrGrowContainer extends StyledComponentProps {
 	width?: number;
-} & StyledComponentProps;
+	tabletWidth?: number;
+	mobileWidth?: number;
+	hideWhenSmallerThan?: Display;
+	minWidth?: number;
+	children?: JSX.Element | ReactNode | ReactNode[] ;
+	className?: string;
+}
 
 export const FixedOrGrowContainer = ({
 	width,
+	tabletWidth,
+	mobileWidth,
 	children,
+	hideWhenSmallerThan,
 	...props
 }: IFixedOrGrowContainer): JSX.Element => (
-	<Container width={width} {...props}>{children}</Container>
+	<Container
+		width={width}
+		tabletWidth={tabletWidth}
+		mobileWidth={mobileWidth}
+		hideWhenSmallerThan={hideWhenSmallerThan}
+		{...props}
+	>
+		{children}
+	</Container>
 );

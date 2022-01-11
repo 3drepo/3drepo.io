@@ -16,12 +16,38 @@
  */
 
 import styled, { css } from 'styled-components';
+import { Display } from '@/v5/ui/themes/media';
 
 export const Container = styled.div<{width?: number}>`
-	flex: 1;
-	
-	${({ width }) => width && css`
-		min-width: ${width}px;
-		flex: 0;
+	min-width: ${({ minWidth }) => minWidth || 0}px;
+
+	${({ width }) => (width
+		? css`
+		width: ${width}px;
+		display: block;
+	`
+		: css`
+		display: flex;
+		flex: 1;
+	`)}
+
+	${({ tabletWidth }) => tabletWidth && css`
+		@media (max-width: ${Display.Desktop}px) {
+			width: ${tabletWidth}px;
+			display: block;
+		}
 	`}
+
+	${({ mobileWidth }) => mobileWidth && css`
+		@media (max-width: ${Display.Tablet}px) {
+			width: ${mobileWidth}px;
+			display: block;
+		}
+	`}
+
+	${({ hideWhenSmallerThan }: { hideWhenSmallerThan: Display }) => hideWhenSmallerThan && css`
+		@media (max-width: ${hideWhenSmallerThan}px) {
+			display: none;
+		}
+  `};
 `;

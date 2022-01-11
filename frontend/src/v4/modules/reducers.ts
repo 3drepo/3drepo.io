@@ -19,6 +19,7 @@ import { connectRouter } from 'connected-react-router';
 import { combineReducers } from 'redux';
 import undoable from 'redux-undo';
 
+import { reducer as federationsReducer } from '@/v5/store/federations/federations.redux';
 import { reducer as containersReducer } from '@/v5/store/containers/containers.redux';
 import { reducer as dialogsReducer } from '../../v5/store/dialogs/dialogs.redux';
 import { reducer as projectsReducer } from '../../v5/store/projects/projects.redux';
@@ -103,6 +104,7 @@ export default function createReducer(history) {
 		activities: activitiesReducer,
 		legend: legendReducer,
 		containers: containersReducer,
+		federations: federationsReducer,
 		revisions: revisionsReducer,
 		board: boardReducer // <-- INJECT MODULE REDUCER -->
 	});

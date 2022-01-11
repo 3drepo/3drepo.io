@@ -19,8 +19,6 @@ import styled from 'styled-components';
 
 export const Content = styled.section`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	overflow-y: auto;
+	overflow-y: scroll;
 	flex-grow: 1;
 `;
-
-export const MainHeaderPortalRoot = styled.div``;

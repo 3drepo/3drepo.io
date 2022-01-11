@@ -19,7 +19,7 @@ import React from 'react';
 import { Button, DialogContentText, DialogTitle } from '@material-ui/core';
 import WarningIcon from '@assets/icons/warning.svg';
 import { FormattedMessage } from 'react-intl';
-import { Container, Content, Actions, Details, Status } from './alertModal.styles';
+import { Container, Content, Actions, Details, Status } from '@/v5/ui/components/shared/modals/modals.styles';
 
 interface IAlertModal {
 	onClickClose?: () => void,

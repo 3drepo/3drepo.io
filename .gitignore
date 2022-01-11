@@ -15,7 +15,6 @@ frontend/docs
 frontend/tests/e2e/built
 
 frontend/yarn.lock
-backend/yarn.lock
 
 yarn-error.log
 bower_components

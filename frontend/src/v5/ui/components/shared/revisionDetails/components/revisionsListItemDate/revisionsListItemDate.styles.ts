@@ -15,4 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const MAIN_HEADER_PORTAL_TARGET_ID = 'main-header-portal-target';
+import styled, { css } from 'styled-components';
+import { Typography } from '@material-ui/core';
+
+export const Text = styled(Typography)`
+	color: ${({ theme, $active }) => ($active ? theme.palette.primary.contrast : theme.palette.base.light)};
+	${({ theme }) => theme && css`
+    ${theme.typography.kicker};
+	`}
+`;

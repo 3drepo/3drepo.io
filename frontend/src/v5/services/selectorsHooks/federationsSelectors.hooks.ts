@@ -15,16 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import * as FederationsSelectors from '@/v5/store/federations/federations.selectors';
+import { createHooksSelectors } from './selectorsHooks.helper';
 
-export const Federations = () => (
-	<>
-		Federations:
-		<ul>
-			<li>federation 1</li>
-			<li>federation 2</li>
-			<li>federation 3</li>
-			<li>federation 4</li>
-		</ul>
-	</>
-);
+export const FederationsHooksSelectors = createHooksSelectors(FederationsSelectors);

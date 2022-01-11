@@ -18,12 +18,13 @@
 import React, { Dispatch, ReactNode } from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { Tooltip } from '@material-ui/core';
-import { Title, Subtitle } from './dashboardListItemTitle.styles';
+import { Title, Subtitle, Container } from './dashboardListItemTitle.styles';
 
 type IDashboardListItemTitle = {
 	children?: ReactNode;
 	subtitle: ReactNode;
 	width?: number;
+	tabletWidth?: number;
 	onClick?: Dispatch<void>;
 	tooltipTitle?: ReactNode;
 	className?: string;
@@ -31,20 +32,22 @@ type IDashboardListItemTitle = {
 };
 
 export const DashboardListItemTitle = ({
-	children, subtitle, width, onClick, className, selected = false, tooltipTitle = '',
+	children, subtitle, width, tabletWidth, onClick, className, selected = false, tooltipTitle = '',
 }: IDashboardListItemTitle): JSX.Element => (
-	<FixedOrGrowContainer width={width} className={className}>
-		<Tooltip title={tooltipTitle}>
-			<Title
-				onClick={(event) => {
-					event.stopPropagation();
-					onClick(event);
-				}}
-				selected={selected}
-			>
-				{children}
-			</Title>
-		</Tooltip>
-		<Subtitle selected={selected}>{subtitle}</Subtitle>
+	<FixedOrGrowContainer width={width} tabletWidth={tabletWidth} className={className}>
+		<Container>
+			<Tooltip title={tooltipTitle}>
+				<Title
+					onClick={(event) => {
+						event.stopPropagation();
+						onClick(event);
+					}}
+					selected={selected}
+				>
+					{children}
+				</Title>
+			</Tooltip>
+			<Subtitle selected={selected}>{subtitle}</Subtitle>
+		</Container>
 	</FixedOrGrowContainer>
 );

@@ -16,22 +16,27 @@
  */
 
 import React, { ReactNode } from 'react';
+import { useParams } from 'react-router-dom';
+
 import { AppBar } from '@components/shared/appBar';
 import { ModalsDispatcher } from '@components/shared/modals';
-import { Content, MainHeaderPortalRoot } from './dashboardLayout.styles';
-import { MAIN_HEADER_PORTAL_TARGET_ID } from './dashboardLayout.constants';
+import { Header as ProjectHeader } from '@/v5/ui/routes/dashboard/projects/header';
+import { Content } from './dashboardLayout.styles';
 
 interface IDashboardLayout {
 	children: ReactNode;
 }
 
-export const DashboardLayout = ({ children }: IDashboardLayout): JSX.Element => (
-	<>
-		<AppBar />
-		<MainHeaderPortalRoot id={MAIN_HEADER_PORTAL_TARGET_ID} />
-		<Content>
-			{children}
-		</Content>
-		<ModalsDispatcher />
-	</>
-);
+export const DashboardLayout = ({ children }: IDashboardLayout): JSX.Element => {
+	const { project } = useParams();
+	return (
+		<>
+			<AppBar />
+			{project && <ProjectHeader />}
+			<Content>
+				{children}
+			</Content>
+			<ModalsDispatcher />
+		</>
+	);
+};

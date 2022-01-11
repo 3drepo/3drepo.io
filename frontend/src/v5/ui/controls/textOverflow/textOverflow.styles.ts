@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { Tooltip as TooltipComponent, withStyles, fade } from '@material-ui/core';
 
 export const fadeToLeft = (color: string) => `
@@ -34,27 +34,15 @@ export const Container = styled.div`
 	position: relative;
 	overflow: hidden;
 	white-space: nowrap;
-	display: flex;
+	display: block;
 	flex-grow: 1;
-	width: 0;
+	min-width: 0;
 	height: 100%;
+	text-overflow: ellipsis;
 
-	${({ isTruncated, theme }) => isTruncated && css`
-		&:hover {
-			& > * {
-				text-decoration: underline;
-			}
+	&:hover {
+		& > * {
+			text-decoration: underline;
 		}
-
-		&:after {
-			content: "";
-			top: 0;
-			width: 68px;
-			height: 100%;
-			position: absolute;
-			overflow: hidden;
-			right: 0;
-			${fadeToLeft(theme.palette.primary.contrast)};
-		}
-	`}
+	}
 `;
