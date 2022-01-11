@@ -51,6 +51,7 @@ type IContainersList = {
 		collapsed: ReactNode;
 		visible: ReactNode;
 	},
+	onClickCreate: () => void;
 	search: SearchInputConfig;
 	hasContainers: boolean;
 	showBottomButton?: boolean;
@@ -62,6 +63,7 @@ export const ContainersList = ({
 	title,
 	titleTooltips,
 	search,
+	onClickCreate,
 	hasContainers,
 	showBottomButton = false,
 }: IContainersList): JSX.Element => {
@@ -103,6 +105,7 @@ export const ContainersList = ({
 								startIcon={<AddCircleIcon />}
 								variant="outlined"
 								color="secondary"
+								onClick={onClickCreate}
 							>
 								<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New container" />
 							</Button>
@@ -163,10 +166,7 @@ export const ContainersList = ({
 				{showBottomButton && !isListPending && hasContainers && (
 					<DashboardListButton
 						startIcon={<AddCircleIcon />}
-						onClick={() => {
-							// eslint-disable-next-line no-console
-							console.log('->  handle add container');
-						}}
+						onClick={onClickCreate}
 					>
 						<FormattedMessage id="containers.addContainerButton" defaultMessage="Add new Container" />
 					</DashboardListButton>

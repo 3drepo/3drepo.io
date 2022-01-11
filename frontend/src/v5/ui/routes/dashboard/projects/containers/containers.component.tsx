@@ -43,7 +43,7 @@ export const Containers = (): JSX.Element => {
 	const allFilterQuery = ContainersHooksSelectors.selectAllFilterQuery();
 	const { setFavouritesFilterQuery, setAllFilterQuery } = ContainersActionsDispatchers;
 
-	const [newContainerFormOpen, setCreateContainerFormOpen] = useState(false);
+	const [createContainerOpen, setCreateContainerOpen] = useState(false);
 
 	return (
 		<Container>
@@ -69,6 +69,7 @@ export const Containers = (): JSX.Element => {
 								collapsed: <FormattedMessage id="containers.favourites.collapse.tooltip.show" defaultMessage="Show favourites" />,
 								visible: <FormattedMessage id="containers.favourites.collapse.tooltip.hide" defaultMessage="Hide favourites" />,
 							}}
+							onClickCreate={() => setCreateContainerOpen(true)}
 							emptyMessage={
 								favouritesFilterQuery && hasContainers.favourites ? (
 									<DashboardListEmptySearchResults searchPhrase={favouritesFilterQuery} />
@@ -101,6 +102,7 @@ export const Containers = (): JSX.Element => {
 								visible: <FormattedMessage id="containers.all.collapse.tooltip.hide" defaultMessage="Hide all" />,
 							}}
 							showBottomButton
+							onClickCreate={() => setCreateContainerOpen(true)}
 							emptyMessage={
 								allFilterQuery && hasContainers.all ? (
 									<DashboardListEmptySearchResults searchPhrase={allFilterQuery} />
@@ -113,7 +115,7 @@ export const Containers = (): JSX.Element => {
 											startIcon={<AddCircleIcon />}
 											variant="contained"
 											color="primary"
-											onClick={() => setCreateContainerFormOpen(true)}
+											onClick={() => setCreateContainerOpen(true)}
 										>
 											<FormattedMessage id="containers.all.newContainer" defaultMessage="New Container" />
 										</Button>
@@ -124,8 +126,8 @@ export const Containers = (): JSX.Element => {
 					</>
 				)}
 				<CreateContainerForm
-					open={newContainerFormOpen}
-					close={() => setCreateContainerFormOpen(false)}
+					open={createContainerOpen}
+					close={() => setCreateContainerOpen(false)}
 				/>
 			</Content>
 		</Container>
