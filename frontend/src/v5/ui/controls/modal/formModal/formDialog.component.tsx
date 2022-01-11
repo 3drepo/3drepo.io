@@ -18,7 +18,7 @@
 import { Button, Dialog } from '@material-ui/core';
 import React from 'react';
 import CloseIcon from '@assets/icons/close.svg';
-import { Form, Title, Header, CloseButton, FormDialogContent, FormDialogActions } from './formDialog.styles';
+import { Form, Title, Header, CloseButton, FormDialogContent, FormDialogActions, RemoveWhiteCorners } from './formDialog.styles';
 
 interface IFormDialog extends React.DetailedHTMLProps<React.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement> {
 	onClickClose?: () => void;
@@ -31,7 +31,12 @@ interface IFormDialog extends React.DetailedHTMLProps<React.FormHTMLAttributes<H
 export const FormModal = (props: IFormDialog) => {
 	const { onClickClose, title, confirmLabel, open, children, className, isValid = true, ...formProps } = props;
 	return (
-		<Dialog onClose={onClickClose} open={open} className={className}>
+		<Dialog
+			onClose={onClickClose}
+			open={open}
+			PaperComponent={RemoveWhiteCorners}
+			className={className}
+		>
 			<Form {...formProps}>
 				<Header>
 					<Title>

@@ -17,7 +17,11 @@
 
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
-import { DialogActions, DialogContent, IconButton } from '@material-ui/core';
+import { DialogActions, DialogContent, IconButton, Paper } from '@material-ui/core';
+
+export const RemoveWhiteCorners = styled(Paper)`
+	background-color: rgba(0, 0, 0, 0);
+`;
 
 export const CloseButton = styled(IconButton)`
 	&& {
@@ -35,6 +39,7 @@ export const Form = styled.form`
 	flex-direction: column;
 	min-width: 520px;
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	border-radius: 15px; /* prevents white pixels in corners */
 `;
 
 export const Title = styled(Typography).attrs({
