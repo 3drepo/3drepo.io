@@ -32,13 +32,22 @@ Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const nonExistingUsername = 'nonExistingUser';
 const existingUsername = 'existingUsername';
+const nonExistingEmail = 'nonExistingEmail@email.com';
+const existingEmail = 'existingEmail@email.com';
+const existingPassword = 'Abcdef12345!';
 
-UsersModel.getUserByQuery.mockImplementation((query) => {
-	if (query.$or[0].user === nonExistingUsername) {
+UsersModel.getUserByQuery.mockImplementation((query) => {	
+	if ((query.$or && query.$or[0]?.user === nonExistingUsername) || query['customData.email'] === nonExistingEmail) {
 		throw templates.userNotFound;
 	}
 
 	return { user: existingUsername };
+});
+
+UsersModel.authenticate.mockImplementation((username, password) => {
+	if (password !== existingPassword) {
+		throw templates.incorrectUsernameOrPassword;
+	}
 });
 
 const testValidateLoginData = () => {
@@ -70,6 +79,37 @@ const testValidateLoginData = () => {
 	});
 };
 
+const testValidateUpdateData = () => {
+	describe.each([
+		[{ body: { email: 'invalid email' } }, false, 'with invalid email', templates.invalidArguments],
+		[{ body: { email: existingEmail } }, false, 'with email that already exists', templates.invalidArguments],
+		[{ body: { email: nonExistingEmail } }, true, 'with email that is available'],
+		[{ body: { oldPassword: existingPassword } }, false, 'with oldPassword but not newPassword', templates.invalidArguments],
+		[{ body: { newPassword: 'Abcdef123456!' } }, false, 'with newPassword but not oldPassword', templates.invalidArguments],
+		[{ body: { oldPassword: existingPassword, newPassword: 'abc' } }, false, 'with short newPassword', templates.invalidArguments],
+		[{ body: { oldPassword: existingPassword, newPassword: 'abcdefghi' } }, false, 'with weak newPassword', templates.invalidArguments],
+		[{ body: { oldPassword: existingPassword, newPassword: existingPassword } }, false, 'with newPassword same as old', templates.invalidArguments],
+		[{ body: { oldPassword: existingPassword, newPassword: 'Abcdef12345!!' } }, true, 'with strong newPassword'],
+		[{ body: { oldPassword: 'invalid password', newPassword: 'Abcdef123456!' } }, false, 'with wrong oldPassword', templates.incorrectPassword],		
+		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
+		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
+	])('Check if req arguments for loggin in are valid', (data, shouldPass, desc, expectedError) => {
+		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
+			const mockCB = jest.fn();
+			const req = { ...cloneDeep(data), session: { user: { username: existingUsername }} };
+			await Users.validateUpdateData(req, {}, mockCB);
+			if (shouldPass) {
+				expect(mockCB.mock.calls.length).toBe(1);
+			} else {
+				expect(mockCB.mock.calls.length).toBe(0);
+				expect(Responder.respond.mock.calls.length).toBe(1);
+				expect(Responder.respond.mock.results[0].value.code).toEqual(expectedError.code);
+			}
+		});
+	});
+};
+
 describe('middleware/dataConverter/inputs/users', () => {
 	testValidateLoginData();
+	testValidateUpdateData();
 });

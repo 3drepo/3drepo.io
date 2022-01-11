@@ -92,7 +92,11 @@ Users.validateUpdateData = async (req, res, next) => {
 				return !oldPassword || (value !== oldPassword);
 			},
 		}),
-	}, [['oldPassword', 'newPassword']]).strict(true).noUnknown()
+	}, [['oldPassword', 'newPassword']]).strict(true).noUnknown().test(
+		'at-least-one-property',
+		'You must provide at least one setting value',
+		(value) => Object.keys(value).length,
+	)
 		.required();
 
 	try {
