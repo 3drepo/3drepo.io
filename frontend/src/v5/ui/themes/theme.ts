@@ -310,6 +310,21 @@ export const theme = createMuiTheme({
 				paddingBottom: 0,
 			},
 		},
+		MuiListItem: {
+			root: {
+				'&$selected': {
+					backgroundColor: COLOR.TERTIARY_LIGHTEST,
+					'&:hover': {
+						backgroundColor: COLOR.TERTIARY_LIGHTEST,
+					},
+				},
+			},
+			button: {
+				'&:hover': {
+					backgroundColor: COLOR.TERTIARY_LIGHTEST,
+				},
+			},
+		},
 		MuiTooltip: {
 			tooltip: {
 				backgroundColor: COLOR.SECONDARY_DARK,
