@@ -19,7 +19,6 @@ import { createSelector } from 'reselect';
 import { isEmpty } from 'lodash';
 import { IFederationsState } from '@/v5/store/federations/federations.types';
 import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
-import { filterFederations } from './federations.helpers';
 
 const selectFederationsDomain = (state: { federations: IFederationsState }) => state.federations;
 
@@ -27,27 +26,14 @@ export const selectFederations = createSelector(
 	selectFederationsDomain, selectCurrentProject, (state, currentProject) => state.federations[currentProject] ?? [],
 );
 
-export const selectFavouritesFilterQuery = createSelector(
-	selectFederationsDomain, (state) => state.favouritesFilterQuery,
-);
-
-export const selectAllFilterQuery = createSelector(
-	selectFederationsDomain, (state) => state.allFilterQuery,
-);
-
-export const selectFilteredFederations = createSelector(
-	selectFederations, selectAllFilterQuery,
-	(federations, filterQuery) => filterFederations(federations, filterQuery),
-);
-
-export const selectFilteredFavouriteFederations = createSelector(
-	selectFederations, selectFavouritesFilterQuery,
-	(federations, filterQuery) => filterFederations(federations.filter(({ isFavourite }) => isFavourite), filterQuery),
+export const selectFavouriteFederations = createSelector(
+	selectFederations,
+	(federations) => federations.filter(({ isFavourite }) => isFavourite),
 );
 
 export const selectHasFederations = createSelector(
-	selectFederations, (federations) => ({
-		favourites: federations.some(({ isFavourite }) => isFavourite),
+	selectFederations, selectFavouriteFederations, (federations, favouriteFederations) => ({
+		favourites: !isEmpty(favouriteFederations),
 		all: !isEmpty(federations),
 	}),
 );
