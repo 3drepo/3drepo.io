@@ -22,7 +22,7 @@ export const Text = styled(Typography).attrs({
 })`
 	color: ${({ theme }) => theme.palette.base.main};
 	overflow: hidden;
-    text-overflow: ellipsis;
+	text-overflow: ellipsis;
 
 	${({ selected, theme }) => selected && css`
 		color: ${theme.palette.base.light};
