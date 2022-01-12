@@ -62,7 +62,7 @@ const ContainerSchema = Yup.object().shape({
 				id: 'containers.creation.code.error.max',
 				defaultMessage: 'Code is limited to 50 characters',
 			}))
-		.matches(/^[A-Za-z0-9]+$/,
+		.matches(/^[A-Za-z0-9]*$/,
 			formatMessage({
 				id: 'containers.creation.code.error.characters',
 				defaultMessage: 'Code can only consist of letters and numbers',
