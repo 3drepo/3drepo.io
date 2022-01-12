@@ -16,16 +16,17 @@
  */
 
 import React from 'react';
+import { ButtonProps } from '@material-ui/core';
 import { Button } from '@controls/button';
 import { FormattedMessage } from 'react-intl';
 import { HiddenFileInput, FileLabel } from './fileInputField.styles';
 
-interface IProps {
+type IFileInputField = ButtonProps & {
 	acceptedFormats?: string;
 	handleChange: (files) => void;
-}
+};
 
-export const FileInputField = ({ acceptedFormats, handleChange }: IProps) => (
+export const FileInputField = ({ acceptedFormats, handleChange, ...props }: IFileInputField) => (
 	<>
 		<FileLabel htmlFor="flat-button-file">
 			<HiddenFileInput
@@ -35,7 +36,7 @@ export const FileInputField = ({ acceptedFormats, handleChange }: IProps) => (
 				onChange={(event) => handleChange(event.target.files)}
 				multiple="multiple"
 			/>
-			<Button component="span" variant="contained" color="primary">
+			<Button component="span" {...props}>
 				<FormattedMessage id="fileInput.browse" defaultMessage="Browse" />
 			</Button>
 		</FileLabel>

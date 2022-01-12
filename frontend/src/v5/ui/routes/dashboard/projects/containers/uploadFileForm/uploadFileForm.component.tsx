@@ -47,7 +47,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 				<input {...register('firstName')} placeholder="First name" />
 				<DropZone
 					message={formatMessage(
-						{ id: 'containers.upload.message', defaultMessage: 'Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink> }' },
+						{ id: 'containers.upload.message', defaultMessage: 'Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>' },
 						{ MoreLink: (child: string) => <a href="https://help.3drepo.io/en/articles/4798885-supported-file-formats" target="_blank" rel="noreferrer">{child}</a> },
 					)}
 					processFiles={() => { }}

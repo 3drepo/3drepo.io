@@ -67,6 +67,9 @@ export const DragAndDrop = ({ className, message, processFiles }: IDragAndDrop) 
 				<FileInputField
 					acceptedFormats={acceptedFormats}
 					handleChange={(files) => processFiles(files)}
+					size="medium"
+					variant="contained"
+					color="primary"
 				/>
 				<HelpText>
 					{message}

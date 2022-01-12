@@ -29,7 +29,7 @@ export const UploadDialog = styled.div`
 	width: 100%;
 	height: 100%;
 
-	border: 2px dashed ${({ theme }) => theme.palette.primary.main};
+	border: 1px dashed ${({ theme }) => theme.palette.primary.main};
 	border-radius: 10px;
 	background: ${({ theme }) => theme.palette.primary.contrast};
 	user-select: none;
@@ -49,4 +49,5 @@ export const HelpText = styled(Typography).attrs({
 	variant: 'h5',
 })`
 	color: ${({ theme }) => theme.palette.base.main};
+	a { color: inherit }
 `;
