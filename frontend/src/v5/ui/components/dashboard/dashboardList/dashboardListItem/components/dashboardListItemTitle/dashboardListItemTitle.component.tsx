@@ -18,23 +18,25 @@
 import React, { Dispatch, ReactNode } from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { Tooltip } from '@material-ui/core';
+import { IFixedOrGrowContainer } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.component';
 import { Title, Subtitle, Container } from './dashboardListItemTitle.styles';
 
-type IDashboardListItemTitle = {
-	children?: ReactNode;
+interface IDashboardListItemTitle extends IFixedOrGrowContainer {
 	subtitle: ReactNode;
-	width?: number;
-	tabletWidth?: number;
 	onClick?: Dispatch<void>;
 	tooltipTitle?: ReactNode;
-	className?: string;
 	selected?: boolean;
-};
+}
 
 export const DashboardListItemTitle = ({
-	children, subtitle, width, tabletWidth, onClick, className, selected = false, tooltipTitle = '',
+	children,
+	subtitle,
+	onClick,
+	selected = false,
+	tooltipTitle = '',
+	...containerProps
 }: IDashboardListItemTitle): JSX.Element => (
-	<FixedOrGrowContainer width={width} tabletWidth={tabletWidth} className={className}>
+	<FixedOrGrowContainer {...containerProps}>
 		<Container>
 			<Tooltip title={tooltipTitle}>
 				<Title

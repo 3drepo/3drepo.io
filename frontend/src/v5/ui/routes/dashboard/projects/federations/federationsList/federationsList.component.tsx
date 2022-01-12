@@ -110,7 +110,7 @@ export const FederationsList = ({
 				)}
 			>
 				<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
-					<DashboardListHeaderLabel name="name">
+					<DashboardListHeaderLabel name="name" minWidth={90}>
 						<FormattedMessage id="federations.list.header.federation" defaultMessage="Federation" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="issues" width={165} hideWhenSmallerThan={1080}>
@@ -122,10 +122,10 @@ export const FederationsList = ({
 					<DashboardListHeaderLabel name="containers" width={165} hideWhenSmallerThan={Display.Tablet}>
 						<FormattedMessage id="federations.list.header.containers" defaultMessage="Containers" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="code" width={188}>
+					<DashboardListHeaderLabel name="code" width={188} minWidth={43}>
 						<FormattedMessage id="federations.list.header.code" defaultMessage="Code" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="lastUpdated" width={180}>
+					<DashboardListHeaderLabel name="lastUpdated" width={180} minWidth={150}>
 						<FormattedMessage id="federations.list.header.lastUpdated" defaultMessage="Last updated" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>

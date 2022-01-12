@@ -63,6 +63,8 @@ export const FederationListItem = ({
 						<FormattedMessage id="federations.list.item.title.tooltip" defaultMessage="Launch in Viewer" />
 					}
 					subtitle={federation.description}
+
+					minWidth={90}
 				>
 					<Highlight search={filterQuery}>
 						{federation.name}
@@ -124,7 +126,7 @@ export const FederationListItem = ({
 						{federation.code}
 					</Highlight>
 				</DashboardListItemText>
-				<DashboardListItemText width={97}>
+				<DashboardListItemText width={97} minWidth={73}>
 					{federation.lastUpdated ? formatDate(federation.lastUpdated) : ''}
 				</DashboardListItemText>
 				<DashboardListItemIcon>
