@@ -50,10 +50,10 @@ export const FormModal = (props: IFormDialog) => {
 					{children}
 				</FormDialogContent>
 				<FormDialogActions>
-					<Button autoFocus onClick={onClickClose} variant="outlined" color="secondary" size="small">
+					<Button autoFocus onClick={onClickClose} variant="outlined" color="secondary" size="medium">
 						Cancel
 					</Button>
-					<Button disabled={!isValid} type="submit" variant="contained" color="primary" size="small">
+					<Button disabled={!isValid} type="submit" variant="contained" color="primary" size="medium">
 						{confirmLabel || 'OK'}
 					</Button>
 				</FormDialogActions>
