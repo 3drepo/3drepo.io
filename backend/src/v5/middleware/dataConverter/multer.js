@@ -17,8 +17,10 @@
 
 const { createResponseCode, templates } = require('../../utils/responseCodes');
 const Multer = require('multer');
+const FileType = require('file-type');
 const config = require('../../utils/config');
 const { respond } = require('../../utils/responder');
+const { validateMany } = require('../common');
 
 const MulterHelper = {};
 
@@ -59,5 +61,43 @@ MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, storeInMemory = 
 		respond(req, res, response);
 	}
 };
+
+const acceptedImageFormats = ['png', 'jpg', 'gif'];
+
+const imageFilter = async (req, file, cb) => {
+	let format = file.originalname.split('.');
+	format = format.length <= 1 ? '' : format.splice(-1)[0];
+
+	if (!acceptedImageFormats.includes(format)) {
+		const err = createResponseCode(templates.unsupportedFileFormat, `${format} is not a supported image format`);
+		cb(err, false);
+		return;
+	}
+
+	const maxAvatarSize = 1048576;
+	const size = parseInt(req.headers['content-length'], 10);
+	if (size > maxAvatarSize) {
+		cb(templates.maxSizeExceeded, false);
+		return;
+	}
+
+	cb(null, true);
+};
+
+const ensureFileIsImage = async (req, res, next) => {
+	const fileBuffer = req.file?.buffer;
+	if (fileBuffer) {
+		const type = await FileType.fromBuffer(fileBuffer);
+
+		if (!acceptedImageFormats.includes(type?.ext)) {
+			respond(req, res, templates.unsupportedFileFormat);
+			return;
+		}
+	}
+
+	next();
+};
+
+MulterHelper.singleImageUpload = (fileName) => validateMany([MulterHelper.singleFileUpload(fileName, imageFilter, true), ensureFileIsImage]);
 
 module.exports = MulterHelper;

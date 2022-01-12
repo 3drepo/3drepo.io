@@ -17,10 +17,9 @@
 
 const { authenticate, getUserByQuery } = require('../../../models/users');
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
-const Path = require('path');
 const Yup = require('yup');
 const { respond } = require('../../../utils/responder');
-const { singleFileUpload } = require('../multer');
+const { singleImageUpload } = require('../multer');
 const { types } = require('../../../utils/helper/yup');
 const { validateMany } = require('../../common');
 const zxcvbn = require('zxcvbn');
@@ -92,11 +91,12 @@ Users.validateUpdateData = async (req, res, next) => {
 				return !oldPassword || (value !== oldPassword);
 			},
 		}),
-	}, [['oldPassword', 'newPassword']]).strict(true).noUnknown().test(
-		'at-least-one-property',
-		'You must provide at least one setting value',
-		(value) => Object.keys(value).length,
-	)
+	}, [['oldPassword', 'newPassword']]).strict(true).noUnknown()
+		.test(
+			'at-least-one-property',
+			'You must provide at least one setting value',
+			(value) => Object.keys(value).length,
+		)
 		.required();
 
 	try {
@@ -117,30 +117,13 @@ Users.validateUpdateData = async (req, res, next) => {
 	}
 };
 
-const fileFilter = async (req, file, cb) => {
-	const format = Path.extname(file.originalname).toLowerCase();
-	const acceptedFormats = ['.png', '.jpg', '.gif'];
-	if (!acceptedFormats.includes(format)) {
-		const err = createResponseCode(templates.unsupportedFileFormat, `${format} is not a supported model format`);
-		cb(err, false);
-	}
-
-	const maxAvatarSize = 1048576;
-	const size = parseInt(req.headers['content-length'], 10);
-	if (size > maxAvatarSize) {
-		cb(templates.maxSizeExceeded, false);
-	}
-
-	cb(null, true);
-};
-
 const validateAvatarData = async (req, res, next) => {
-	const schema = Yup.object().shape({	}).strict(true).noUnknown().required();
+	const schema = Yup.object().shape({}).strict(true).noUnknown()
+		.required();
 
 	try {
 		await schema.validate(req.body);
 		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
-		if (!req.file.size) throw createResponseCode(templates.invalidArguments, 'File cannot be empty');
 
 		next();
 	} catch (err) {
@@ -148,6 +131,6 @@ const validateAvatarData = async (req, res, next) => {
 	}
 };
 
-Users.validateAvatarFile = validateMany([singleFileUpload('file', fileFilter, true), validateAvatarData]);
+Users.validateAvatarFile = validateMany([singleImageUpload('file'), validateAvatarData]);
 
 module.exports = Users;

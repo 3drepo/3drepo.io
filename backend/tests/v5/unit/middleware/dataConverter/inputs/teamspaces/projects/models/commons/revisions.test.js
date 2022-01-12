@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src, modelFolder } = require('../../../../../../../../helper/path');
+const { src, modelFolder, imagesFolder } = require('../../../../../../../../helper/path');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -87,11 +87,10 @@ const createRequestWithFile = (teamspace, { tag, desc, importAnim },
 	unsupportedFile = false, noFile = false, emptyFile = false) => {
 	const form = new FormData();
 	if (!noFile) {
-		let filePath = unsupportedFile ? 'dummy.png' : 'dummy.obj';
+		let filePath = unsupportedFile ? 'valid.png' : 'dummy.obj';
 		filePath = emptyFile ? 'empty.ifc' : filePath;
-
-		form.append('file',
-			fs.createReadStream(path.join(modelFolder, filePath)));
+		const fileFolder = unsupportedFile ? imagesFolder : modelFolder;
+		form.append('file',	fs.createReadStream(path.join(fileFolder, filePath)));
 	}
 	if (tag) form.append('tag', tag);
 	if (desc) form.append('desc', desc);
