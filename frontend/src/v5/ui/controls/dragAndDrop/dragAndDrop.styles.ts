@@ -49,5 +49,6 @@ export const HelpText = styled(Typography).attrs({
 	variant: 'h5',
 })`
 	color: ${({ theme }) => theme.palette.base.main};
+	padding: 10px;
 	a { color: inherit }
 `;
