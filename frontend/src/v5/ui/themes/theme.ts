@@ -607,5 +607,27 @@ export const theme = createMuiTheme({
 				margin: '8px',
 			},
 		},
+		MuiLinearProgress: {
+			root: {
+				'&.failure': {
+					backgroundColor: COLOR.ERROR_LIGHTEST,
+					'&>*': {
+						backgroundColor: COLOR.ERROR_MAIN,
+					},
+				},
+				'&.success>*': {
+					backgroundColor: COLOR.PRIMARY_MAIN,
+				},
+				'&.inProgress>*': {
+					backgroundColor: COLOR.TERTIARY_MAIN,
+				},
+			},
+			barColorPrimary: {
+				backgroundColor: COLOR.TERTIARY_MAIN,
+			},
+			colorPrimary: {
+				backgroundColor: COLOR.TERTIARY_LIGHTEST,
+			},
+		},
 	},
 });
