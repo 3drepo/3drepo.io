@@ -40,7 +40,10 @@ const getProfile = (req, res) => {
 	const { username } = req.session.user;
 	Users.getProfileByUsername(username).then((profile) => {
 		respond(req, res, templates.ok, { ...profile });
-	}).catch((err) => respond(req, res, err));
+	}).catch(
+		// istanbul ignore next
+		(err) => respond(req, res, err),
+	);
 };
 
 const updateProfile = (req, res) => {
@@ -48,21 +51,30 @@ const updateProfile = (req, res) => {
 	const updatedProfile = req.body;
 	Users.updateProfile(username, updatedProfile).then(() => {
 		respond(req, res, templates.ok);
-	}).catch((err) => respond(req, res, err));
+	}).catch(
+		// istanbul ignore next
+		(err) => respond(req, res, err),
+	);
 };
 
 const generateApiKey = (req, res) => {
 	const { username } = req.session.user;
 	Users.generateApiKey(username).then((apiKey) => {
 		respond(req, res, templates.ok, { apiKey });
-	}).catch((err) => respond(req, res, err));
+	}).catch(
+		// istanbul ignore next
+		(err) => respond(req, res, err),
+	);
 };
 
 const deleteApiKey = (req, res) => {
 	const { username } = req.session.user;
 	Users.deleteApiKey(username).then(() => {
 		respond(req, res, templates.ok);
-	}).catch((err) => respond(req, res, err));
+	}).catch(
+		// istanbul ignore next
+		(err) => respond(req, res, err),
+	);
 };
 
 const getAvatar = (req, res) => {
@@ -78,7 +90,10 @@ const uploadAvatar = (req, res) => {
 	const { username } = req.session.user;
 	Users.uploadAvatar(username, req.file.buffer).then(() => {
 		respond(req, res, templates.ok);
-	}).catch((err) => respond(req, res, err));
+	}).catch(
+		// istanbul ignore next
+		(err) => respond(req, res, err),
+	);
 };
 
 const establishRoutes = () => {
@@ -299,7 +314,7 @@ const establishRoutes = () => {
 	*         content:
 	*           image
 	*/
-	router.get('/user/avatar', isLoggedIn, getAvatar);
+	router.get('/user/avatar', validSession, getAvatar);
 
 	/**
 	* @openapi

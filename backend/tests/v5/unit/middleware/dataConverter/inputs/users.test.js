@@ -49,6 +49,7 @@ UsersModel.getUserByQuery.mockImplementation((query) => {
 });
 
 UsersModel.authenticate.mockImplementation((username, password) => {
+	// eslint-disable-next-line security/detect-possible-timing-attacks
 	if (password !== existingPassword) {
 		throw templates.incorrectUsernameOrPassword;
 	}
@@ -115,21 +116,16 @@ const testValidateUpdateData = () => {
 	});
 };
 
-const createRequestWithFile = (unsupportedFile, badFile, noFile, extraProp) => {
+const createRequestWithFile = (filename = 'valid.png', extraProp = false, tooLargeFile = false) => {
 	const form = new FormData();
-	if (!noFile) {
-		let filePath = 'valid.png';
+	if (filename) {
 		let fileFolder = imagesFolder;
 
-		if (unsupportedFile) {
-			filePath = 'dummy.obj';
+		if (!filename.endsWith('.png')) {
 			fileFolder = modelFolder;
-		} else if (badFile) {
-			filePath = 'corrupted.png';
 		}
 
-		form.append('file',
-			fs.createReadStream(path.join(fileFolder, filePath)));
+		form.append('file', fs.createReadStream(path.join(fileFolder, filename)));
 	}
 
 	if (extraProp) form.append('extraProp', 'extra');
@@ -141,21 +137,26 @@ const createRequestWithFile = (unsupportedFile, badFile, noFile, extraProp) => {
 		headers: form.getHeaders(),
 	});
 
+	if (tooLargeFile) {
+		req.headers['content-length'] = 1048577;
+	}
+
 	form.pipe(req);
 	return req;
 };
 
 const testValidateAvatarData = () => {
 	describe.each([
-		['with valid file', true, false, false, false, false],
-		['with unsupported file', false, true, false, false, false, templates.unsupportedFileFormat],
-		['with corrupt file', false, false, true, false, false, templates.unsupportedFileFormat],
-		['with no file', false, false, false, true, false, templates.invalidArguments],
-		['with extra property', false, false, false, false, true, templates.invalidArguments],
-	])('Check if req arguments for new avatar upload are valid', (desc, shouldPass, unsupportedFile, badFile, noFile, extraProp, expectedError) => {
+		['with valid file', true],
+		['with unsupported file', false, 'dummy.obj', false, false, templates.unsupportedFileFormat],
+		['with corrupt file', false, 'corrupted.png', false, false, templates.unsupportedFileFormat],
+		['with no file', false, null, false, false, templates.invalidArguments],
+		['with too large file', false, 'valid.png', true, true, templates.maxSizeExceeded],
+		['with extra property', false, 'valid.png', true, false, templates.invalidArguments],
+	])('Check if req arguments for new avatar upload are valid', (desc, shouldPass, filename, extraProp, tooLargeFile, expectedError) => {
 		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
 			const mockCB = jest.fn();
-			const req = createRequestWithFile(unsupportedFile, badFile, noFile, extraProp);
+			const req = createRequestWithFile(filename, extraProp, tooLargeFile);
 			await Users.validateAvatarFile(req, {}, mockCB);
 			if (shouldPass) {
 				expect(mockCB.mock.calls.length).toBe(1);

@@ -90,7 +90,7 @@ const createRequestWithFile = (teamspace, { tag, desc, importAnim },
 		let filePath = unsupportedFile ? 'valid.png' : 'dummy.obj';
 		filePath = emptyFile ? 'empty.ifc' : filePath;
 		const fileFolder = unsupportedFile ? imagesFolder : modelFolder;
-		form.append('file',	fs.createReadStream(path.join(fileFolder, filePath)));
+		form.append('file', fs.createReadStream(path.join(fileFolder, filePath)));
 	}
 	if (tag) form.append('tag', tag);
 	if (desc) form.append('desc', desc);

@@ -26,6 +26,19 @@ const UsersModel = require(`${src}/models/users`);
 UsersModel.canLogIn.mockImplementation((user) => user);
 UsersModel.authenticate.mockResolvedValue('user1');
 
+const user = {
+	user: 'user1',
+	customData: {
+		firstname: 'Will',
+		lastname: 'Smith',
+		email: 'example@email.com',
+		avatar: true,
+		apiKey: 123,
+	},
+};
+const getUserByUsernameMock = UsersModel.getUserByUsername.mockImplementation(() => user);
+const updateUserByUsernameMock = UsersModel.updateProfile.mockImplementation(() => {});
+
 const testLogin = () => {
 	describe('Login', () => {
 		test('should login with username', async () => {
@@ -40,6 +53,51 @@ const testLogin = () => {
 	});
 };
 
+const formatUser = (userProfile) => ({
+	username: userProfile.user,
+	firstName: userProfile.customData.firstName,
+	lastName: userProfile.customData.lastName,
+	email: userProfile.customData.email,
+	hasAvatar: !!userProfile.customData.avatar,
+	apiKey: userProfile.customData.apiKey,
+});
+
+const tesGetProfileByUsername = () => {
+	describe('Get user profile by username', () => {
+		test('should return user profile', async () => {
+			const projection = {
+				user: 1,
+				'customData.firstName': 1,
+				'customData.lastName': 1,
+				'customData.email': 1,
+				'customData.avatar': 1,
+				'customData.apiKey': 1,
+			};
+
+			const res = await Users.getProfileByUsername();
+			expect(res).toEqual(formatUser(user));
+			expect(getUserByUsernameMock.mock.calls.length).toBe(1);
+			expect(getUserByUsernameMock.mock.calls[0][1]).toEqual(projection);
+		});
+	});
+};
+
+const tesUpdateProfile = () => {
+	describe('Update user profile by username', () => {
+		test('should return user profile', async () => {
+			const updatedProfile = {
+				firstname: 'Nick',
+			};
+
+			await Users.updateProfile('user 1', updatedProfile);
+			expect(updateUserByUsernameMock.mock.calls.length).toBe(1);
+			expect(updateUserByUsernameMock.mock.calls[0][1]).toEqual(updatedProfile);
+		});
+	});
+};
+
 describe('processors/users', () => {
 	testLogin();
+	tesGetProfileByUsername();
+	tesUpdateProfile();
 });

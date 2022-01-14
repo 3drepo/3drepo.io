@@ -16,8 +16,8 @@
  */
 
 const { createResponseCode, templates } = require('../../utils/responseCodes');
-const Multer = require('multer');
 const FileType = require('file-type');
+const Multer = require('multer');
 const config = require('../../utils/config');
 const { respond } = require('../../utils/responder');
 const { validateMany } = require('../common');
@@ -65,8 +65,7 @@ MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, storeInMemory = 
 const acceptedImageFormats = ['png', 'jpg', 'gif'];
 
 const imageFilter = async (req, file, cb) => {
-	let format = file.originalname.split('.');
-	format = format.length <= 1 ? '' : format.splice(-1)[0];
+	const format = file.originalname.split('.').splice(-1)[0];
 
 	if (!acceptedImageFormats.includes(format)) {
 		const err = createResponseCode(templates.unsupportedFileFormat, `${format} is not a supported image format`);
@@ -98,6 +97,7 @@ const ensureFileIsImage = async (req, res, next) => {
 	next();
 };
 
-MulterHelper.singleImageUpload = (fileName) => validateMany([MulterHelper.singleFileUpload(fileName, imageFilter, true), ensureFileIsImage]);
+MulterHelper.singleImageUpload = (fileName) => validateMany([MulterHelper.singleFileUpload(fileName, imageFilter, true),
+	ensureFileIsImage]);
 
 module.exports = MulterHelper;

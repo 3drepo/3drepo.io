@@ -169,12 +169,14 @@ const changePassword = async (username, newPassword) => {
 	};
 
 	await db.runCommand('admin', updateUserCmd);
-	await db.updateOne('admin', COLL_NAME, { user: username },
-		{ $set: { 'customData.resetPasswordToken': undefined } });
+	await updateUser(username, { $unset: { 'customData.resetPasswordToken': 1 } });
 };
 
 User.updateProfile = async (username, updatedProfile) => {
-	await changePassword(username, updatedProfile.newPassword);
+	if (updatedProfile.oldPassword) {
+		await changePassword(username, updatedProfile.newPassword);
+	}
+
 	const updateableFields = new Set(['firstName', 'lastName', 'email']);
 	const updateData = {};
 
@@ -189,14 +191,12 @@ User.updateProfile = async (username, updatedProfile) => {
 
 User.generateApiKey = async (username) => {
 	const apiKey = generateHashString();
-	const updateData = { 'customData.apiKey': apiKey };
-	await updateUser(username, { $set: updateData });
+	await updateUser(username, { $set: { 'customData.apiKey': apiKey } });
 	return apiKey;
 };
 
 User.deleteApiKey = async (username) => {
-	const updateData = { 'customData.apiKey': 1 };
-	await updateUser(username, { $unset: updateData });
+	await updateUser(username, { $unset: { 'customData.apiKey': 1 } });
 };
 
 User.getAvatar = async (username) => {
