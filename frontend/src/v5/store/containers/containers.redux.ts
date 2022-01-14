@@ -21,7 +21,6 @@ import { prepareSingleContainerData } from '@/v5/store/containers/containers.hel
 import {
 	IContainersActionCreators,
 	IContainersState,
-	SetFilterQueryAction,
 	SetFavouriteSuccessAction,
 	FetchContainersSuccessAction,
 	SetIsListPendingAction,
@@ -30,7 +29,6 @@ import {
 } from './containers.types';
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({
-	setFilterQuery: ['query'],
 	addFavourite: ['teamspace', 'projectId', 'containerId'],
 	removeFavourite: ['teamspace', 'projectId', 'containerId'],
 	fetchContainers: ['teamspace', 'projectId'],
@@ -50,13 +48,8 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 
 export const INITIAL_STATE: IContainersState = {
 	containers: {},
-	filterQuery: '',
 	isListPending: true,
 };
-
-export const setFilterQuery = (state = INITIAL_STATE, { query }: SetFilterQueryAction) => (
-	{ ...state, filterQuery: query }
-);
 
 export const setFavourite = (state = INITIAL_STATE, {
 	projectId,
@@ -116,7 +109,6 @@ export const deleteContainerSuccess = (state = INITIAL_STATE, {
 });
 
 export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
-	[ContainersTypes.SET_FILTER_QUERY]: setFilterQuery,
 	[ContainersTypes.FETCH_CONTAINERS_SUCCESS]: fetchContainersSuccess,
 	[ContainersTypes.SET_IS_LIST_PENDING]: setIsListPending,
 	[ContainersTypes.SET_FAVOURITE_SUCCESS]: setFavourite,

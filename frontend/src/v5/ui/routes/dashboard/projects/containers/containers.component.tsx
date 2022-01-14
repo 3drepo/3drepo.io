@@ -15,80 +15,46 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+
+import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { FormattedMessage } from 'react-intl';
 
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
-import { MainHeader } from '@controls/mainHeader';
-import { SearchInput } from '@controls/searchInput';
-import AddCircleIcon from '@assets/icons/add_circle.svg';
-import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
-import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
-import { useSearchInput } from '@controls/searchInput/searchInput.hooks';
-import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
-import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/skeletonListItem';
 import { Button } from '@controls/button';
 import { Content } from '@/v5/ui/routes/dashboard/projects/projects.styles';
 import { DashboardListEmptySearchResults } from '@components/dashboard/dashboardList';
-import { formatMessage } from '@/v5/services/intl';
-import {
-	Container,
-	HeaderButtonsGroup,
-} from './containers.styles';
+import { filterContainers } from '@/v5/store/containers/containers.helpers';
 import { ContainersList } from './containersList';
+import { SkeletonListItem } from './containersList/skeletonListItem';
 import { useContainersData } from './containers.hooks';
+import { Container,
+} from './containers.styles';
 
 export const Containers = (): JSX.Element => {
 	const {
-		filteredContainers,
+		containers,
 		favouriteContainers,
 		hasContainers,
 		isListPending,
 	} = useContainersData();
 
-	const { searchInput, setSearchInput, filterQuery } = useSearchInput({
-		query: ContainersHooksSelectors.selectFilterQuery(),
-		dispatcher: ContainersActionsDispatchers.setFilterQuery,
-	});
+	const [favouritesFilterQuery, setFavouritesFilterQuery] = useState<string>('');
+	const [allFilterQuery, setAllFilterQuery] = useState<string>('');
 
 	return (
 		<Container>
-			<MainHeader>
-				<SearchInput
-					onClear={() => setSearchInput('')}
-					onChange={(event) => setSearchInput(event.currentTarget.value)}
-					value={searchInput}
-					placeholder={formatMessage({ id: 'containers.search.placeholder',
-						defaultMessage: 'Search containers...' })}
-					disabled={isListPending}
-				/>
-				<HeaderButtonsGroup>
-					<Button
-						startIcon={<AddCircleIcon />}
-						variant="outlined"
-						color="secondary"
-						disabled={isListPending}
-					>
-						<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New Container" />
-					</Button>
-					<Button
-						startIcon={<ArrowUpCircleIcon />}
-						variant="contained"
-						color="primary"
-						disabled={isListPending}
-					>
-						<FormattedMessage id="containers.mainHeader.uploadFile" defaultMessage="Upload file" />
-					</Button>
-				</HeaderButtonsGroup>
-			</MainHeader>
 			<Content>
 				{isListPending ? (
 					<DashboardSkeletonList itemComponent={<SkeletonListItem />} />
 				) : (
 					<>
 						<ContainersList
-							containers={favouriteContainers}
+							hasContainers={hasContainers.favourites}
+							filterQuery={favouritesFilterQuery}
+							onFilterQueryChange={setFavouritesFilterQuery}
+							containers={filterContainers(favouriteContainers, favouritesFilterQuery)}
 							title={(
 								<FormattedMessage
 									id="containers.favourites.collapseTitle"
@@ -100,8 +66,8 @@ export const Containers = (): JSX.Element => {
 								visible: <FormattedMessage id="containers.favourites.collapse.tooltip.hide" defaultMessage="Hide favourites" />,
 							}}
 							emptyMessage={
-								filterQuery && hasContainers.favourites ? (
-									<DashboardListEmptySearchResults searchPhrase={filterQuery} />
+								favouritesFilterQuery && hasContainers.favourites ? (
+									<DashboardListEmptySearchResults searchPhrase={favouritesFilterQuery} />
 								) : (
 									<DashboardListEmptyText>
 										<FormattedMessage
@@ -114,7 +80,10 @@ export const Containers = (): JSX.Element => {
 						/>
 						<Divider />
 						<ContainersList
-							containers={filteredContainers}
+							filterQuery={allFilterQuery}
+							onFilterQueryChange={setAllFilterQuery}
+							hasContainers={hasContainers.all}
+							containers={filterContainers(containers, allFilterQuery)}
 							title={(
 								<FormattedMessage
 									id="containers.all.collapseTitle"
@@ -125,9 +94,10 @@ export const Containers = (): JSX.Element => {
 								collapsed: <FormattedMessage id="containers.all.collapse.tooltip.show" defaultMessage="Show all" />,
 								visible: <FormattedMessage id="containers.all.collapse.tooltip.hide" defaultMessage="Hide all" />,
 							}}
+							showBottomButton
 							emptyMessage={
-								filterQuery && hasContainers.all ? (
-									<DashboardListEmptySearchResults searchPhrase={filterQuery} />
+								allFilterQuery && hasContainers.all ? (
+									<DashboardListEmptySearchResults searchPhrase={allFilterQuery} />
 								) : (
 									<>
 										<DashboardListEmptyText>

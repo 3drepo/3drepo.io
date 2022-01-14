@@ -18,26 +18,37 @@
 import React, { ReactNode } from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { TextOverflow } from '@controls/textOverflow';
+import { Display } from '@/v5/ui/themes/media';
 import { Text } from './revisionsListItemText.styles';
 
 type IDashboardListItemText = {
 	children: ReactNode;
 	width?: number;
+	tabletWidth?: number;
+	mobileWidth?: number;
 	className?: string;
-	meta?: boolean;
 	active?: boolean;
+	hideWhenSmallerThan?: Display;
 };
 
 export const RevisionsListItemText = ({
 	children,
 	width,
+	tabletWidth,
+	mobileWidth,
 	className,
-	meta = false,
 	active = false,
+	hideWhenSmallerThan,
 }: IDashboardListItemText): JSX.Element => (
-	<FixedOrGrowContainer width={width} className={className}>
+	<FixedOrGrowContainer
+		width={width}
+		tabletWidth={tabletWidth}
+		mobileWidth={mobileWidth}
+		hideWhenSmallerThan={hideWhenSmallerThan}
+		className={className}
+	>
 		<TextOverflow>
-			<Text $meta={meta} $active={active}>
+			<Text $active={active}>
 				{children}
 			</Text>
 		</TextOverflow>

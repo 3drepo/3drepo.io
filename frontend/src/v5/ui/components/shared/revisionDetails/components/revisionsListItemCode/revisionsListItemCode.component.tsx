@@ -17,12 +17,14 @@
 
 import React, { Dispatch, ReactNode } from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
-import { Tooltip } from '@material-ui/core';
+import { TextOverflow } from '@controls/textOverflow';
 import { Text } from './revisionsListItemCode.styles';
 
 type IRevisionsListItemCode = {
 	children: ReactNode;
 	width?: number;
+	tabletWidth?: number;
+	mobileWidth?: number;
 	className?: string;
 	onClick?: Dispatch<void>;
 };
@@ -30,14 +32,16 @@ type IRevisionsListItemCode = {
 export const RevisionsListItemCode = ({
 	children,
 	width,
+	tabletWidth,
+	mobileWidth,
 	className,
 	onClick,
 }: IRevisionsListItemCode): JSX.Element => (
-	<FixedOrGrowContainer width={width} className={className}>
-		<Tooltip title="Launch in Viewer">
+	<FixedOrGrowContainer width={width} tabletWidth={tabletWidth} mobileWidth={mobileWidth} className={className}>
+		<TextOverflow tooltipText="Launch in Viewer">
 			<Text onClick={onClick}>
 				{children}
 			</Text>
-		</Tooltip>
+		</TextOverflow>
 	</FixedOrGrowContainer>
 );

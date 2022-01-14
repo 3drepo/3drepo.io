@@ -14,15 +14,5 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
-import { Display } from '@/v5/ui/themes/media';
 
-export const Content = styled.div`
-	max-width: 1289px;
-	margin: 18px auto 100px;
-	padding: 0 30px;
-
-	@media (max-width: ${Display.Desktop}px) {
-		margin-top: 30px;
-	}
-`;
+export { Header } from './header.component';

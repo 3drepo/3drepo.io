@@ -21,17 +21,22 @@ import { range } from 'lodash';
 
 import { RevisionsListHeaderLabel } from '@components/shared/revisionDetails/components/revisionsListHeaderLabel';
 import { IRevision } from '@/v5/store/revisions/revisions.types';
-import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { Button } from '@controls/button';
-import AddCircleIcon from '@assets/icons/add_circle.svg';
+import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
 import { RevisionsListItem } from '@components/shared/revisionDetails/components/revisionsListItem';
 import { SkeletonListItem } from '@components/shared/revisionDetails/components/skeletonListItem';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
+import { Display } from '@/v5/ui/themes/media';
 import { FormattedMessage } from 'react-intl';
 import {
-	Container, RevisionsListHeaderContainer, RevisionsListItemWrapper, RevisionsList, RevisionsListEmptyWrapper,
+	Container,
+	RevisionsListHeaderContainer,
+	RevisionsListItemWrapper,
+	RevisionsList,
+	RevisionsListEmptyWrapper,
 	RevisionsListEmptyContainer,
+	RevisionsListEmptyText,
 } from './revisionDetails.styles';
 
 interface IRevisionDetails {
@@ -56,11 +61,11 @@ export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDe
 		return (
 			<RevisionsListEmptyWrapper>
 				<RevisionsListEmptyContainer>
-					<DashboardListEmptyText>
+					<RevisionsListEmptyText>
 						<FormattedMessage id="containers.revisions.emptyMessage" defaultMessage="You haven’t added any Files." />
-					</DashboardListEmptyText>
+					</RevisionsListEmptyText>
 					<Button
-						startIcon={<AddCircleIcon />}
+						startIcon={<ArrowUpCircleIcon />}
 						variant="contained"
 						color="primary"
 					>
@@ -74,10 +79,10 @@ export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDe
 	return (
 		<Container>
 			<RevisionsListHeaderContainer>
-				<RevisionsListHeaderLabel width={130}><FormattedMessage id="revisionDetails.addedOn" defaultMessage="Added on" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel width={228}><FormattedMessage id="revisionDetails.addedBy" defaultMessage="Added by" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel width={330}><FormattedMessage id="revisionDetails.revisionCode" defaultMessage="Revision code" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel><FormattedMessage id="revisionDetails.description" defaultMessage="Description" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={130} tabletWidth={94}><FormattedMessage id="revisionDetails.addedOn" defaultMessage="Added on" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={228} tabletWidth={155}><FormattedMessage id="revisionDetails.addedBy" defaultMessage="Added by" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={330} tabletWidth={150}><FormattedMessage id="revisionDetails.revisionCode" defaultMessage="Revision code" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel hideWhenSmallerThan={Display.Tablet}><FormattedMessage id="revisionDetails.description" defaultMessage="Description" /></RevisionsListHeaderLabel>
 			</RevisionsListHeaderContainer>
 			<RevisionsList>
 				{isLoading ? (

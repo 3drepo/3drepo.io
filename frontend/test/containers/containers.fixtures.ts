@@ -28,7 +28,7 @@ export const containerMockFactory = (overrides?: Partial<IContainer>): IContaine
 	type: faker.random.word(),
 	status: UploadStatuses.OK,
 	code: faker.datatype.uuid(),
-	units: 'mm',
+	unit: 'mm',
 	isFavourite: faker.datatype.boolean(),
 	hasStatsPending: true,
 	...overrides,
@@ -43,5 +43,5 @@ export const prepareMockStatsReply = (container: IContainer): FetchContainerStat
 	type: container.type,
 	status: container.status,
 	code: container.code,
-	units: container.units,
+	unit: container.unit,
 });

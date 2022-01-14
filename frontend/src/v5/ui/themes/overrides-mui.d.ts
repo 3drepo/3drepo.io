@@ -20,6 +20,7 @@ import '@material-ui/core/styles';
 
 interface IGradient {
 	main: string;
+	secondary: string;
 }
 
 interface IShadow {

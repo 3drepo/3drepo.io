@@ -15,28 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode } from 'react';
-import { createPortal } from 'react-dom';
-import { MAIN_HEADER_PORTAL_TARGET_ID } from '../../routes/dashboard/index.constants';
-import { Container, Bar } from './mainHeader.styles';
+import styled from 'styled-components';
 
-type IMainHeader = {
-	children: ReactNode;
-};
+export const Wrapper = styled.div`
+	width: 100%;
+	height: 114px;
+	padding: 0 30px;
+	box-sizing: border-box;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+	border-left-style: none;
+	border-right-style: none;
+`;
 
-export const MainHeader = ({ children }: IMainHeader): JSX.Element => {
-	const rootElement = document.getElementById(MAIN_HEADER_PORTAL_TARGET_ID);
-
-	if (rootElement === null) {
-		return null;
-	}
-
-	return createPortal(
-		<Container>
-			<Bar>
-				{children}
-			</Bar>
-		</Container>,
-		rootElement,
-	);
-};
+export const Container = styled.div`
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	width: 100%;
+	max-width: 1289px;
+	margin: 28px auto 0;
+`;

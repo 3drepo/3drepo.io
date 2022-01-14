@@ -15,4 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const MAIN_HEADER_PORTAL_TARGET_ID = 'main-header-portal-target';
+export enum Display {
+	Desktop = 1024,
+	Tablet = 768,
+}

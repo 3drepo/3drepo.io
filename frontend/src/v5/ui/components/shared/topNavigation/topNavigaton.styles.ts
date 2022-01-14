@@ -33,13 +33,18 @@ export const Link = styled(LinkComponent).attrs({
 		display: flex;
 		align-items: center;
 		position: relative;
-		padding-left: 13px;
-		padding-right: 13px;
-		height: 64px;
-		color: ${({ theme }) => theme.palette.primary.contrast};
+		margin-left: 13px;
+		margin-right: 13px;
+		padding-top: 4px;
+		height: 56px;
+		color: ${({ theme }) => theme.palette.base.main};
 		font-family: ${({ theme }) => theme.typography.fontFamily};
-		${({ theme }) => theme.typography.kicker};
-
+		${({ theme }) => theme.typography.kickerTitle};
+		
+		&:first-child {
+			margin-left: 0;
+		}
+		
 		&:hover {
 			text-decoration: none;
 			color: ${({ theme }) => theme.palette.primary.main};
@@ -59,16 +64,14 @@ export const Link = styled(LinkComponent).attrs({
 	`};
 
 	&.active {
-		color: ${({ theme }) => theme.palette.primary.main};
-
 		&::after {
 			content: '';
 			background-color: ${({ theme }) => theme.palette.primary.main};
 			display: block;
-			height: 3px;
+			height: 4px;
 			width: 100%;
 			position: absolute;
-			bottom: 0;
+			bottom: 4px;
 			left: 0;
 		}
 	}

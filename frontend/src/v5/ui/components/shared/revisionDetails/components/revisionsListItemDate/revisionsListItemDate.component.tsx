@@ -16,35 +16,40 @@
  */
 
 import React, { ReactNode } from 'react';
-import { StyledComponentProps } from 'styled-components';
+import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { Display } from '@/v5/ui/themes/media';
-import { Container } from './fixedOrGrowContainer.styles';
+import { Text } from './revisionsListItemDate.styles';
 
-export interface IFixedOrGrowContainer extends StyledComponentProps {
+type IDashboardListItemDate = {
+	children: ReactNode;
 	width?: number;
 	tabletWidth?: number;
 	mobileWidth?: number;
-	hideWhenSmallerThan?: Display;
-	minWidth?: number;
-	children?: JSX.Element | ReactNode | ReactNode[] ;
 	className?: string;
-}
+	meta?: boolean;
+	active?: boolean;
+	hideWhenSmallerThan?: Display;
+	hover?: boolean;
+};
 
-export const FixedOrGrowContainer = ({
+export const RevisionsListItemDate = ({
+	children,
 	width,
 	tabletWidth,
 	mobileWidth,
-	children,
+	className,
+	active = false,
 	hideWhenSmallerThan,
-	...props
-}: IFixedOrGrowContainer): JSX.Element => (
-	<Container
+}: IDashboardListItemDate): JSX.Element => (
+	<FixedOrGrowContainer
 		width={width}
 		tabletWidth={tabletWidth}
 		mobileWidth={mobileWidth}
 		hideWhenSmallerThan={hideWhenSmallerThan}
-		{...props}
+		className={className}
 	>
-		{children}
-	</Container>
+		<Text $active={active}>
+			{children}
+		</Text>
+	</FixedOrGrowContainer>
 );
