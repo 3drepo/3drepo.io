@@ -24,9 +24,9 @@ const { validateMany } = require('../common');
 
 const MulterHelper = {};
 
-const singleFileMulterPromise = (req, fileName, fileFilter, storeInMemory) => new Promise((resolve, reject) => {
+const singleFileMulterPromise = (req, fileName, fileFilter, maxSize, storeInMemory) => new Promise((resolve, reject) => {
 	const options = {
-		limits: { fileSize: config.uploadSizeLimit },
+		limits: { fileSize: maxSize },
 		fileFilter,
 	};
 
@@ -45,24 +45,26 @@ const singleFileMulterPromise = (req, fileName, fileFilter, storeInMemory) => ne
 	});
 });
 
-MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, storeInMemory = false) => async (req, res, next) => {
-	try {
-		await singleFileMulterPromise(req, fileName, fileFilter, storeInMemory);
-		await next();
-	} catch (err) {
-		let response = err;
+MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, maxSize = config.uploadSizeLimit
+	, storeInMemory = false) => async (req, res, next) => {
+		try {
+			await singleFileMulterPromise(req, fileName, fileFilter, maxSize, storeInMemory);
+			await next();
+		} catch (err) {
+			let response = err;
 
-		if (err.code === 'LIMIT_FILE_SIZE') {
-			response = createResponseCode(templates.maxSizeExceeded, `File cannot be bigger than ${config.uploadSizeLimit} bytes.`);
-		} else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
-			response = createResponseCode(templates.invalidArguments, `${fileName} is a required field`);
+			if (err.code === 'LIMIT_FILE_SIZE') {
+				response = createResponseCode(templates.maxSizeExceeded, `File cannot be bigger than ${config.uploadSizeLimit} bytes.`);
+			} else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+				response = createResponseCode(templates.invalidArguments, `${fileName} is a required field`);
+			}
+
+			respond(req, res, response);
 		}
-
-		respond(req, res, response);
-	}
-};
+	};
 
 const acceptedImageFormats = ['png', 'jpg', 'gif'];
+const maxAvatarSize = 1048576;
 
 const imageFilter = async (req, file, cb) => {
 	const format = file.originalname.split('.').splice(-1)[0];
@@ -70,13 +72,6 @@ const imageFilter = async (req, file, cb) => {
 	if (!acceptedImageFormats.includes(format)) {
 		const err = createResponseCode(templates.unsupportedFileFormat, `${format} is not a supported image format`);
 		cb(err, false);
-		return;
-	}
-
-	const maxAvatarSize = 1048576;
-	const size = parseInt(req.headers['content-length'], 10);
-	if (size > maxAvatarSize) {
-		cb(templates.maxSizeExceeded, false);
 		return;
 	}
 
@@ -97,7 +92,7 @@ const ensureFileIsImage = async (req, res, next) => {
 	next();
 };
 
-MulterHelper.singleImageUpload = (fileName) => validateMany([MulterHelper.singleFileUpload(fileName, imageFilter, true),
-	ensureFileIsImage]);
+MulterHelper.singleImageUpload = (fileName) => validateMany(
+	[MulterHelper.singleFileUpload(fileName, imageFilter, maxAvatarSize, true),	ensureFileIsImage]);
 
 module.exports = MulterHelper;

@@ -109,11 +109,7 @@ Users.validateUpdateData = async (req, res, next) => {
 };
 
 const validateAvatarData = async (req, res, next) => {
-	const schema = Yup.object().shape({}).strict(true).noUnknown()
-		.required();
-
 	try {
-		await schema.validate(req.body);
 		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
 
 		next();
