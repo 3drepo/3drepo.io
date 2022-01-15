@@ -33,11 +33,12 @@ const lockedUser = ServiceHelper.generateUserCredentials();
 const lockedUserWithExpiredLock = ServiceHelper.generateUserCredentials();
 const userWithFailedAttempts = ServiceHelper.generateUserCredentials();
 const userEmail = 'example@email.com';
+const userWithNoAvatarEmail = 'example2@email.com';
 const userAvatar = { data: { buffer: 'image buffer data' } };
 const setupData = async () => {
 	await Promise.all([
 		ServiceHelper.db.createUser(testUser, [], { email: userEmail, avatar: userAvatar }),
-		ServiceHelper.db.createUser(testUserWithNoAvatar, [], { }),
+		ServiceHelper.db.createUser(testUserWithNoAvatar, [], { email: userWithNoAvatarEmail }),
 		ServiceHelper.db.createUser(lockedUser, [], { loginInfo: { failedLoginCount: 10,
 			lastFailedLoginAt: new Date() } }),
 		ServiceHelper.db.createUser(lockedUserWithExpiredLock, [], { loginInfo: { failedLoginCount: 10,
@@ -205,6 +206,19 @@ const testUpdateProfile = () => {
 			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
 			const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if the update data have existing email', async () => {
+			const data = { email: userWithNoAvatarEmail };
+			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
+			const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should update the profile if the update data have existing email but belongs to the user', async () => {
+			const data = { email: userEmail };
+			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
+			await testSession.put('/v5/user/').send(data).expect(200);
 		});
 
 		test('should fail if the update data have extra properties', async () => {

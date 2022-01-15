@@ -58,7 +58,7 @@ Users.validateUpdateData = async (req, res, next) => {
 			async (value) => {
 				if (value) {
 					try {
-						await getUserByQuery({ 'customData.email': value });
+						await getUserByQuery({ 'customData.email': value, user: { $ne: req.session?.user?.username } }, { _id: 1 });
 						return false;
 					} catch {
 						// do nothing
