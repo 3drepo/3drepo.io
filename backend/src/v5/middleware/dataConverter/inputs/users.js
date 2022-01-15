@@ -22,7 +22,6 @@ const { respond } = require('../../../utils/responder');
 const { singleImageUpload } = require('../multer');
 const { types } = require('../../../utils/helper/yup');
 const { validateMany } = require('../../common');
-const zxcvbn = require('zxcvbn');
 
 const Users = {};
 
@@ -66,22 +65,14 @@ Users.validateUpdateData = async (req, res, next) => {
 				}
 				return true;
 			}),
-		oldPassword: types.strings.password.optional().when('newPassword', {
+		oldPassword: Yup.string().optional().when('newPassword', {
 			is: (newPass) => newPass?.length > 0,
-			then: types.strings.password.required(),
+			then: Yup.string().required(),
 		}),
 		newPassword: types.strings.password.optional().when('oldPassword', {
 			is: (oldPass) => oldPass?.length > 0,
 			then: types.strings.password.required(),
-		}).test('checkPasswordStrength', 'Password is too weak',
-			(value) => {
-				if (value) {
-					if (value.length < 8) return false;
-					const passwordScore = zxcvbn(value).score;
-					return passwordScore >= 2;
-				}
-				return true;
-			}).test({
+		}).test({
 			name: 'notTheSameAsOldPassword',
 			exclusive: false,
 			params: {},

@@ -17,6 +17,7 @@
 
 const { UUIDToString } = require('./uuids');
 const Yup = require('yup');
+const zxcvbn = require('zxcvbn');
 
 const YupHelper = { validators: {}, types: { strings: {} } };
 
@@ -74,7 +75,16 @@ YupHelper.types.surveyPoints = Yup.array()
 YupHelper.types.strings.unit = Yup.string()
 	.oneOf(['mm', 'cm', 'dm', 'm', 'ft']);
 
-YupHelper.types.strings.password = Yup.string();
+YupHelper.types.strings.password = Yup.string()
+	.test('checkPasswordStrength', 'Password is too weak',
+	(value) => {
+		if (value) {
+			if (value.length < 8) return false;
+			const passwordScore = zxcvbn(value).score;
+			return passwordScore >= 2;
+		}
+		return true;
+	});
 
 YupHelper.types.strings.email = Yup.string().email();
 

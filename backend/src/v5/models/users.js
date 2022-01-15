@@ -186,7 +186,9 @@ User.updateProfile = async (username, updatedProfile) => {
 		}
 	});
 
-	await updateUser(username, { $set: updateData });
+	if(Object.keys(updateData).length){
+		await updateUser(username, { $set: updateData });
+	}
 };
 
 User.generateApiKey = async (username) => {
