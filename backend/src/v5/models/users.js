@@ -20,8 +20,8 @@ const config = require('../utils/config');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
-const { hasField } = require('../utils/helper/objects');
 const { publish } = require('../services/eventsManager/eventsManager');
+const _ = require("lodash");
 
 const User = {};
 const COLL_NAME = 'system.users';
@@ -177,16 +177,15 @@ User.updateProfile = async (username, updatedProfile) => {
 		await changePassword(username, updatedProfile.newPassword);
 	}
 
-	const updateableFields = new Set(['firstName', 'lastName', 'email']);
-	const updateData = {};
+	const fieldsToUpdate = _.omit(updatedProfile, "oldPassword", "newPassword");
 
-	updateableFields.forEach((field) => {
-		if (hasField(updatedProfile, field)) {
-			updateData[`customData.${field}`] = updatedProfile[field];
+	if (!_.isEmpty(fieldsToUpdate)) {
+		const updateData = {};	
+
+		for(const field in fieldsToUpdate){
+			updateData[`customData.${field}`] = fieldsToUpdate[field];
 		}
-	});
 
-	if(Object.keys(updateData).length){
 		await updateUser(username, { $set: updateData });
 	}
 };
