@@ -52,8 +52,8 @@ Users.validateLoginData = async (req, res, next) => {
 
 Users.validateUpdateData = async (req, res, next) => {
 	const schema = Yup.object().shape({
-		firstName: Yup.string(),
-		lastName: Yup.string(),
+		firstName: types.strings.name,
+		lastName: types.strings.name,
 		email: types.strings.email.test('checkEmailAvailable', 'Email already exists',
 			async (value) => {
 				if (value) {

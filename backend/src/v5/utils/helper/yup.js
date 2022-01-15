@@ -78,4 +78,6 @@ YupHelper.types.strings.password = Yup.string();
 
 YupHelper.types.strings.email = Yup.string().email();
 
+YupHelper.types.strings.name = Yup.string().min(1).max(35);
+
 module.exports = YupHelper;

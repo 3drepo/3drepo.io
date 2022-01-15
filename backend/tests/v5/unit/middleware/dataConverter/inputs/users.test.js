@@ -87,6 +87,8 @@ const testValidateLoginData = () => {
 
 const testValidateUpdateData = () => {
 	describe.each([
+		[{ body: { firstName: 'this is a very very large string that should fail' } }, false, 'with too large firstName', templates.invalidArguments],
+		[{ body: { lastName: 'this is a very very large string that should fail' } }, false, 'with too large lastName', templates.invalidArguments],
 		[{ body: { email: 'invalid email' } }, false, 'with invalid email', templates.invalidArguments],
 		[{ body: { email: existingEmail } }, false, 'with email that already exists', templates.invalidArguments],
 		[{ body: { email: nonExistingEmail } }, true, 'with email that is available'],
