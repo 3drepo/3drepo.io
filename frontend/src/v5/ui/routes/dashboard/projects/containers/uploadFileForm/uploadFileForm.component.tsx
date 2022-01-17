@@ -44,7 +44,6 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 			subtitle="Drag and drop or browse your computer"
 		>
 			<Container>
-				<input {...register('firstName')} placeholder="First name" />
 				<DropZone
 					message={formatMessage(
 						{ id: 'containers.upload.message', defaultMessage: 'Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>' },
