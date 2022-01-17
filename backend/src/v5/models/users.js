@@ -196,9 +196,7 @@ User.generateApiKey = async (username) => {
 	return apiKey;
 };
 
-User.deleteApiKey = async (username) => {
-	await updateUser(username, { $unset: { 'customData.apiKey': 1 } });
-};
+User.deleteApiKey = async (username) => updateUser(username, { $unset: { 'customData.apiKey': 1 } });
 
 User.getAvatar = async (username) => {
 	const user = await User.getUserByUsername(username, { 'customData.avatar': 1 });
@@ -211,8 +209,7 @@ User.getAvatar = async (username) => {
 	return avatar;
 };
 
-User.uploadAvatar = async (username, avatarBuffer) => {
-	await updateUser(username, { $set: { 'customData.avatar': { data: avatarBuffer } } });
-};
+User.uploadAvatar = (username, avatarBuffer) => 
+	updateUser(username, { $set: { 'customData.avatar': { data: avatarBuffer } } });
 
 module.exports = User;

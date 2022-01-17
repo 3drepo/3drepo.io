@@ -46,9 +46,7 @@ Users.getProfileByUsername = async (username) => {
 	};
 };
 
-Users.updateProfile = async (username, updatedProfile) => {
-	await updateProfile(username, updatedProfile);
-};
+Users.updateProfile = updateProfile;
 
 Users.generateApiKey = generateApiKey;
 

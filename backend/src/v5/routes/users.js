@@ -21,6 +21,7 @@ const { validateAvatarFile, validateLoginData,
 	validateUpdateData } = require('../middleware/dataConverter/inputs/users');
 const { Router } = require('express');
 const Users = require('../processors/users');
+const { getUserFromSession } = require('../utils/sessions');
 const { respond } = require('../utils/responder');
 const { templates } = require('../utils/responseCodes');
 
@@ -37,8 +38,8 @@ const getUsername = (req, res) => {
 };
 
 const getProfile = (req, res) => {
-	const { username } = req.session.user;
-	Users.getProfileByUsername(username).then((profile) => {
+	const user = getUserFromSession(req.session);
+	Users.getProfileByUsername(user).then((profile) => {
 		respond(req, res, templates.ok, { ...profile });
 	}).catch(
 		// istanbul ignore next
@@ -47,9 +48,9 @@ const getProfile = (req, res) => {
 };
 
 const updateProfile = (req, res) => {
-	const { username } = req.session.user;
+	const user = getUserFromSession(req.session);
 	const updatedProfile = req.body;
-	Users.updateProfile(username, updatedProfile).then(() => {
+	Users.updateProfile(user, updatedProfile).then(() => {
 		respond(req, res, templates.ok);
 	}).catch(
 		// istanbul ignore next
@@ -58,8 +59,8 @@ const updateProfile = (req, res) => {
 };
 
 const generateApiKey = (req, res) => {
-	const { username } = req.session.user;
-	Users.generateApiKey(username).then((apiKey) => {
+	const user = getUserFromSession(req.session);
+	Users.generateApiKey(user).then((apiKey) => {
 		respond(req, res, templates.ok, { apiKey });
 	}).catch(
 		// istanbul ignore next
@@ -68,8 +69,8 @@ const generateApiKey = (req, res) => {
 };
 
 const deleteApiKey = (req, res) => {
-	const { username } = req.session.user;
-	Users.deleteApiKey(username).then(() => {
+	const user = getUserFromSession(req.session);
+	Users.deleteApiKey(user).then(() => {
 		respond(req, res, templates.ok);
 	}).catch(
 		// istanbul ignore next
@@ -78,8 +79,8 @@ const deleteApiKey = (req, res) => {
 };
 
 const getAvatar = (req, res) => {
-	const { username } = req.session.user;
-	Users.getAvatar(username).then((avatar) => {
+	const user = getUserFromSession(req.session);
+	Users.getAvatar(user).then((avatar) => {
 		res.write(avatar.data.buffer);
 		res.end();
 		respond(req, res, templates.ok);
@@ -87,8 +88,8 @@ const getAvatar = (req, res) => {
 };
 
 const uploadAvatar = (req, res) => {
-	const { username } = req.session.user;
-	Users.uploadAvatar(username, req.file.buffer).then(() => {
+	const user = getUserFromSession(req.session);
+	Users.uploadAvatar(user, req.file.buffer).then(() => {
 		respond(req, res, templates.ok);
 	}).catch(
 		// istanbul ignore next
