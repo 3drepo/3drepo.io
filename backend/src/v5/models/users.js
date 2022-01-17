@@ -182,10 +182,9 @@ User.updateProfile = async (username, updatedProfile) => {
 	if (!_.isEmpty(fieldsToUpdate)) {
 		const updateData = {};
 
-		for (let i = 0; i < fieldsToUpdate.length; i++) {
-			const field = fieldsToUpdate[i];
-			updateData[`customData.${field}`] = fieldsToUpdate[field];
-		}
+		Object.keys(fieldsToUpdate).forEach((key) => {
+			updateData[`customData.${key}`] = fieldsToUpdate[key];
+		});
 
 		await updateUser(username, { $set: updateData });
 	}
