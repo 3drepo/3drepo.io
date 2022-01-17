@@ -53,6 +53,9 @@ export const ProjectContent = () => {
 			<Route exact path={`${path}/t/settings`}>
 				Project settings
 			</Route>
+			<Route exact path={`${path}/t/users_permissions`}>
+				Users permissions
+			</Route>
 			<Route path="*">
 				<Redirect to={NOT_FOUND_ROUTE_PATH} />
 			</Route>
