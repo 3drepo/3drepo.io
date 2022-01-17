@@ -39,12 +39,24 @@ const setupData = async () => {
 	await Promise.all([
 		ServiceHelper.db.createUser(testUser, [], { email: userEmail, avatar: userAvatar }),
 		ServiceHelper.db.createUser(testUserWithNoAvatar, [], { email: userWithNoAvatarEmail }),
-		ServiceHelper.db.createUser(lockedUser, [], { loginInfo: { failedLoginCount: 10,
-			lastFailedLoginAt: new Date() } }),
-		ServiceHelper.db.createUser(lockedUserWithExpiredLock, [], { loginInfo: { failedLoginCount: 10,
-			lastFailedLoginAt: new Date('1/1/18') } }),
-		ServiceHelper.db.createUser(userWithFailedAttempts, [], { loginInfo: { failedLoginCount: 6,
-			lastFailedLoginAt: new Date() } }),
+		ServiceHelper.db.createUser(lockedUser, [], {
+			loginInfo: {
+				failedLoginCount: 10,
+				lastFailedLoginAt: new Date()
+			}
+		}),
+		ServiceHelper.db.createUser(lockedUserWithExpiredLock, [], {
+			loginInfo: {
+				failedLoginCount: 10,
+				lastFailedLoginAt: new Date('1/1/18')
+			}
+		}),
+		ServiceHelper.db.createUser(userWithFailedAttempts, [], {
+			loginInfo: {
+				failedLoginCount: 6,
+				lastFailedLoginAt: new Date()
+			}
+		}),
 	]);
 };
 
@@ -149,10 +161,18 @@ const testGetUsername = () => {
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
-		test('should return the username if the user is logged in', async () => {
-			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-			const res = await testSession.get('/v5/login/').expect(200);
-			expect(res.body).toEqual({ username: testUser.user });
+		describe("With valid authentication", () => {
+			beforeAll(async () => {
+				await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
+			});
+			afterAll(async () => {
+				await testSession.post('/v5/logout/');
+			});
+
+			test('should return the username if the user is logged in', async () => {
+				const res = await testSession.get('/v5/login/').expect(200);
+				expect(res.body).toEqual({ username: testUser.user });
+			});
 		});
 	});
 };
@@ -173,15 +193,23 @@ const testGetProfile = () => {
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
-		test('should return the user profile if the user is logged in', async () => {
-			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-			const res = await testSession.get('/v5/user/').expect(200);
-			expect(res.body).toEqual(formatUserProfile(testUser));
-		});
-
 		test('should return the user profile if the user has a session via an API key', async () => {
 			const res = await agent.get(`/v5/user?key=${testUser.apiKey}`).expect(200);
 			expect(res.body).toEqual(formatUserProfile(testUser));
+		});
+
+		describe("With valid authentication", () => {
+			beforeAll(async () => {
+				await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
+			});
+			afterAll(async () => {
+				await testSession.post('/v5/logout/');
+			});
+
+			test('should return the user profile if the user is logged in', async () => {
+				const res = await testSession.get('/v5/user/').expect(200);
+				expect(res.body).toEqual(formatUserProfile(testUser));
+			});
 		});
 	});
 };
@@ -199,80 +227,80 @@ const testUpdateProfile = () => {
 			const res = await agent.put(`/v5/user?key=${testUser.apiKey}`)
 				.send(data).expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
-		});		
+		});
 
 		describe("With valid authentication", () => {
 			beforeAll(async () => {
 				await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-		   });
-			afterAll(async() => {
+			});
+			afterAll(async () => {
 				await testSession.post('/v5/logout/');
 			});
-		
+
 			test('should fail if the update data have invalid email', async () => {
-				const data = { email: 'invalid' };				
+				const data = { email: 'invalid' };
 				const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
 				expect(res.body.code).toEqual(templates.invalidArguments.code);
 			});
-	
+
 			test('should fail if the update data have existing email', async () => {
-				const data = { email: userWithNoAvatarEmail };				
+				const data = { email: userWithNoAvatarEmail };
 				const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
 				expect(res.body.code).toEqual(templates.invalidArguments.code);
 			});
-	
+
 			test('should update the profile if the update data have existing email but belongs to the user', async () => {
-				const data = { email: userEmail };				
+				const data = { email: userEmail };
 				await testSession.put('/v5/user/').send(data).expect(200);
 				const updatedProfileRes = await testSession.get('/v5/user/');
 				expect(updatedProfileRes.body.email).toEqual(userEmail);
 			});
-	
+
 			test('should fail if the update data have extra properties', async () => {
-				const data = { firstName: 'newName', extra: 'extraProp' };				
+				const data = { firstName: 'newName', extra: 'extraProp' };
 				const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
 				expect(res.body.code).toEqual(templates.invalidArguments.code);
 			});
-	
+
 			test('should fail if the oldPassword is not correct', async () => {
-				const data = { oldPassword: 'invalid', newPassword: 'newPassword123.' };				
+				const data = { oldPassword: 'invalid', newPassword: 'newPassword123.' };
 				const res = await testSession.put('/v5/user/').send(data).expect(templates.incorrectPassword.status);
 				expect(res.body.code).toEqual(templates.incorrectPassword.code);
 			});
-	
+
 			test('should fail if the update data have oldPassword but not newPassword', async () => {
-				const data = { oldPassword: testUser.password };				
+				const data = { oldPassword: testUser.password };
 				const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
 				expect(res.body.code).toEqual(templates.invalidArguments.code);
 			});
-	
+
 			test('should fail if the update data have newPassword but not oldPassword', async () => {
-				const data = { newPassword: 'newPassword123.' };				
+				const data = { newPassword: 'newPassword123.' };
 				const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
 				expect(res.body.code).toEqual(templates.invalidArguments.code);
 			});
-	
+
 			test('should fail if the update data have weak newPassword', async () => {
-				const data = { oldPassword: testUser.password, newPassword: 'abc' };				
+				const data = { oldPassword: testUser.password, newPassword: 'abc' };
 				const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
 				expect(res.body.code).toEqual(templates.invalidArguments.code);
 			});
-	
+
 			test('should fail if the update data have a newPassword which is the same as the old one', async () => {
-				const data = { oldPassword: testUser.password, newPassword: testUser.password };				
+				const data = { oldPassword: testUser.password, newPassword: testUser.password };
 				const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
 				expect(res.body.code).toEqual(templates.invalidArguments.code);
 			});
-	
+
 			test('should update the profile if the user is logged in', async () => {
-				const data = { firstName: 'newName' };				
+				const data = { firstName: 'newName' };
 				await testSession.put('/v5/user/').send(data).expect(200);
 				const updatedProfileRes = await testSession.get('/v5/user/');
 				expect(updatedProfileRes.body.firstName).toEqual('newName');
 			});
-	
+
 			test('should update the profile and change password if the user is logged in', async () => {
-				const data = { firstName: 'newName', oldPassword: testUser.password, newPassword: 'Passport123!' };				
+				const data = { firstName: 'newName', oldPassword: testUser.password, newPassword: 'Passport123!' };
 				await testSession.put('/v5/user/').send(data).expect(200);
 				const updatedProfileRes = await testSession.get('/v5/user/');
 				expect(updatedProfileRes.body.firstName).toEqual('newName');
@@ -280,6 +308,63 @@ const testUpdateProfile = () => {
 				await testSession.put('/v5/user/').send({ oldPassword: 'Passport123!', newPassword: testUser.password });
 			});
 		})
+	});
+};
+
+const testGetAvatar = () => {
+	describe('Get the avatar of the logged in user', () => {
+		test('should fail if the user is not logged in', async () => {
+			const res = await agent.get('/v5/user/avatar').expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+		
+		test('should get the avatar if the user has a session via an API key', async () => {
+			const res = await agent.get(`/v5/user/avatar?key=${testUser.apiKey}`).expect(200);
+			expect(res.text).toEqual(userAvatar.data.buffer);
+		});
+
+		test('should get the avatar if the user is logged in', async () => {
+			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
+			const res = await testSession.get('/v5/user/avatar').expect(200);
+			expect(res.text).toEqual(userAvatar.data.buffer);
+			await testSession.post('/v5/logout/');
+		});
+
+		test('should fail if the user has no avatar', async () => {
+			await testSession.post('/v5/login/').send({ user: testUserWithNoAvatar.user, password: testUserWithNoAvatar.password });
+			await testSession.get('/v5/user/avatar').expect(templates.userDoesNotHaveAvatar.status);
+			await testSession.post('/v5/logout/');
+		});		
+	});
+};
+
+const testUploadAvatar = () => {
+	describe('Upload a new avatar for the logged in user', () => {
+		test('should fail if the user is not logged in', async () => {
+			const res = await agent.put('/v5/user/avatar')
+				.expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user has a session via an API key', async () => {
+			const res = await agent.put(`/v5/user/avatar?key=${testUser.apiKey}`)
+				.expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});	
+
+		describe("With valid authentication", () => {
+			beforeAll(async () => {
+				await testSession.post('/v5/login/').send({ user: testUserWithNoAvatar.user, password: testUserWithNoAvatar.password });
+			});
+			afterAll(async () => {
+				await testSession.post('/v5/logout/');
+			});
+
+			test('should upload the avatar if the user is logged in', async () => {
+				await testSession.put('/v5/user/avatar').set('Content-Type', 'image/png').attach('file', image)
+					.expect(templates.ok.status);
+			});
+		});
 	});
 };
 
@@ -301,6 +386,10 @@ const testGenerateApiKey = () => {
 			const res = await testSession.post('/v5/user/key').expect(200);
 			const userProfileRes = await testSession.get('/v5/user');
 			expect(res.body).toEqual({ apiKey: userProfileRes.body.apiKey });
+			await testSession.post('/v5/logout/');
+
+			//ensure new API key works
+			await agent.get(`/v5/user?key=${res.body.apiKey}`).expect(200);
 		});
 	});
 };
@@ -318,60 +407,19 @@ const testDeleteApiKey = () => {
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
-		test('should delete the Api key if the user is logged in', async () => {
-			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-			await testSession.delete('/v5/user/key').expect(200);
-			const userProfileRes = await testSession.get('/v5/user');
-			expect(userProfileRes.body.apiKey).toEqual(undefined);
-		});
-	});
-};
+		describe("With valid authentication", () => {
+			beforeAll(async () => {
+				await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
+			});
+			afterAll(async () => {
+				await testSession.post('/v5/logout/');
+			});
 
-const testGetAvatar = () => {
-	describe('Get the avatar of the logged in user', () => {
-		test('should fail if the user is not logged in', async () => {
-			const res = await agent.get('/v5/user/avatar').expect(templates.notLoggedIn.status);
-			expect(res.body.code).toEqual(templates.notLoggedIn.code);
-		});
-
-		test('should fail if the user has a session via an API key', async () => {
-			const res = await agent.get(`/v5/user/avatar?key=${testUser.apiKey}`)
-				.expect(templates.notLoggedIn.status);
-			expect(res.body.code).toEqual(templates.notLoggedIn.code);
-		});
-
-		test('should get the avatar if the user is logged in', async () => {
-			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-			const res = await testSession.get('/v5/user/avatar').expect(200);
-			expect(res.text).toEqual(userAvatar.data.buffer);
-		});
-
-		test('should fail if the user has no avatar', async () => {
-			await testSession.post('/v5/logout/');
-			await testSession.post('/v5/login/').send({ user: testUserWithNoAvatar.user, password: testUserWithNoAvatar.password });
-			await testSession.get('/v5/user/avatar').expect(templates.userDoesNotHaveAvatar.status);
-		});
-	});
-};
-
-const testUploadAvatar = () => {
-	describe('Upload a new avatar for the logged in user', () => {
-		test('should fail if the user is not logged in', async () => {
-			const res = await agent.put('/v5/user/avatar')
-				.expect(templates.notLoggedIn.status);
-			expect(res.body.code).toEqual(templates.notLoggedIn.code);
-		});
-
-		test('should fail if the user has a session via an API key', async () => {
-			const res = await agent.put(`/v5/user/avatar?key=${testUser.apiKey}`)
-				.expect(templates.notLoggedIn.status);
-			expect(res.body.code).toEqual(templates.notLoggedIn.code);
-		});
-
-		test('should upload the avatar if the user is logged in', async () => {
-			await testSession.post('/v5/login/').send({ user: testUserWithNoAvatar.user, password: testUserWithNoAvatar.password });
-			await testSession.put('/v5/user/avatar').set('Content-Type', 'image/png').attach('file', image)
-				.expect(templates.ok.status);
+			test('should delete the Api key if the user is logged in', async () => {
+				await testSession.delete('/v5/user/key').expect(200);
+				const userProfileRes = await testSession.get('/v5/user');
+				expect(userProfileRes.body.apiKey).toEqual(undefined);
+			});
 		});
 	});
 };
@@ -391,9 +439,10 @@ describe('E2E routes/users', () => {
 	testLogout();
 	testGetUsername();
 	testGetProfile();
-	testUpdateProfile();
-	testGenerateApiKey();
-	testDeleteApiKey();
+	testUpdateProfile();	
 	testGetAvatar();
 	testUploadAvatar();
+	//should be called last as they update user Api key
+	testGenerateApiKey();
+	testDeleteApiKey();
 });
