@@ -22,7 +22,7 @@ import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/c
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { useDispatch } from 'react-redux';
 
-export const getContainerMenuItems = (container: IContainer) => {
+export const getContainerMenuItems = (container: IContainer, openShareModal: () => void) => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 	const dispatch = useDispatch();
 	return [
@@ -59,7 +59,7 @@ export const getContainerMenuItems = (container: IContainer) => {
 		{
 			key: 7,
 			title: formatMessage({ id: 'containers.ellipsisMenu.shareContainer', defaultMessage: 'Share Container' }),
-			onClick: () => { },
+			onClick: openShareModal,
 		},
 		{
 			key: 8,
