@@ -18,19 +18,18 @@
 import React, { useState } from 'react';
 
 import AddCircleIcon from '@assets/icons/add_circle.svg';
-import { FormattedMessage } from 'react-intl';
-
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
 import { Button } from '@controls/button';
 import { Content } from '@/v5/ui/routes/dashboard/projects/projects.styles';
 import { DashboardListEmptySearchResults } from '@components/dashboard/dashboardList';
+import { CreateContainerForm } from '@/v5/ui/routes/dashboard/projects/containers/createContainerForm/createContainerForm.component';
+import { FormattedMessage } from 'react-intl';
 import { filterContainers } from '@/v5/store/containers/containers.helpers';
 import { ContainersList } from './containersList';
 import { SkeletonListItem } from './containersList/skeletonListItem';
 import { useContainersData } from './containers.hooks';
-import { Container,
-} from './containers.styles';
+import { Container } from './containers.styles';
 
 export const Containers = (): JSX.Element => {
 	const {
@@ -42,6 +41,8 @@ export const Containers = (): JSX.Element => {
 
 	const [favouritesFilterQuery, setFavouritesFilterQuery] = useState<string>('');
 	const [allFilterQuery, setAllFilterQuery] = useState<string>('');
+
+	const [createContainerOpen, setCreateContainerOpen] = useState(false);
 
 	return (
 		<Container>
@@ -65,6 +66,7 @@ export const Containers = (): JSX.Element => {
 								collapsed: <FormattedMessage id="containers.favourites.collapse.tooltip.show" defaultMessage="Show favourites" />,
 								visible: <FormattedMessage id="containers.favourites.collapse.tooltip.hide" defaultMessage="Hide favourites" />,
 							}}
+							onClickCreate={() => setCreateContainerOpen(true)}
 							emptyMessage={
 								favouritesFilterQuery && hasContainers.favourites ? (
 									<DashboardListEmptySearchResults searchPhrase={favouritesFilterQuery} />
@@ -95,6 +97,7 @@ export const Containers = (): JSX.Element => {
 								visible: <FormattedMessage id="containers.all.collapse.tooltip.hide" defaultMessage="Hide all" />,
 							}}
 							showBottomButton
+							onClickCreate={() => setCreateContainerOpen(true)}
 							emptyMessage={
 								allFilterQuery && hasContainers.all ? (
 									<DashboardListEmptySearchResults searchPhrase={allFilterQuery} />
@@ -107,6 +110,7 @@ export const Containers = (): JSX.Element => {
 											startIcon={<AddCircleIcon />}
 											variant="contained"
 											color="primary"
+											onClick={() => setCreateContainerOpen(true)}
 										>
 											<FormattedMessage id="containers.all.newContainer" defaultMessage="New Container" />
 										</Button>
@@ -116,6 +120,10 @@ export const Containers = (): JSX.Element => {
 						/>
 					</>
 				)}
+				<CreateContainerForm
+					open={createContainerOpen}
+					close={() => setCreateContainerOpen(false)}
+				/>
 			</Content>
 		</Container>
 	);
