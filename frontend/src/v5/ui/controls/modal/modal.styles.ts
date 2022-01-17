@@ -21,7 +21,7 @@ import { IconButton } from '@material-ui/core';
 export const CloseButton = styled(IconButton)`
 	&& {
 		position: absolute;
-		top: 10px;
-		right: 12px;
+		top: 11px;
+		right: 11px;
 	}
 `;

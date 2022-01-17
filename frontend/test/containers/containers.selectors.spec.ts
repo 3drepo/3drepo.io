@@ -14,15 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import { INITIAL_STATE } from '@/v5/store/containers/containers.redux';
 import { times } from 'lodash';
 import { containerMockFactory } from './containers.fixtures';
 import {
+	selectFavouriteContainers,
 	selectContainers,
-	selectFilteredFavouriteContainers,
-	selectFilteredContainers,
-	selectAreStatsPending
+	selectAreStatsPending,
+	selectHasContainers
 } from '@/v5/store/containers/containers.selectors';
 import { IContainersState } from '@/v5/store/containers/containers.types';
 
@@ -39,13 +38,12 @@ const defaultState: IContainersState = {
 				containerMockFactory({ isFavourite: false, hasStatsPending: true}),
 			],
 		},
-	filterQuery: searchPhrase
 }
 
 describe('Containers: selectors', () => {
 	describe('selectFavouriteContainers', () => {
 		it('should return favourite containers', () => {
-			const selected = selectFilteredFavouriteContainers.resultFunc(defaultState.containers[projectId]);
+			const selected = selectFavouriteContainers.resultFunc(defaultState.containers[projectId]);
 			expect(selected).toHaveLength(6);
 		})
 	})
@@ -57,10 +55,24 @@ describe('Containers: selectors', () => {
 		})
 	})
 
-	describe('selectFilteredContainers', () => {
-		it('should return container with searchPhrase', () => {
-			const selected = selectFilteredContainers.resultFunc(defaultState.containers[projectId], searchPhrase);
-			expect(selected).toHaveLength(1);
+	describe('selectHasContainers', () => {
+		it('should return correct values when favourite item is in federations', () => {
+			const containers = defaultState.containers[projectId];
+			const favourites = selectFavouriteContainers.resultFunc(containers);
+			const selected = selectHasContainers.resultFunc(containers, favourites);
+			expect(selected).toEqual({ favourites: true, all: true })
+		})
+
+		it('should return correct values when no favourite item is in containers', () => {
+			const containers = [containerMockFactory({ isFavourite: false })];
+			const favourites = selectFavouriteContainers.resultFunc(containers);
+			const selected = selectHasContainers.resultFunc(containers, favourites);
+			expect(selected).toEqual({ favourites: false, all: true })
+		})
+
+		it('should return correct values for empty containers', () => {
+			const selected = selectHasContainers.resultFunc([], []);
+			expect(selected).toEqual({ favourites: false, all: false })
 		})
 	})
 

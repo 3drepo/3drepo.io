@@ -22,5 +22,3 @@ export const Content = styled.section`
 	overflow-y: auto;
 	flex-grow: 1;
 `;
-
-export const MainHeaderPortalRoot = styled.div``;

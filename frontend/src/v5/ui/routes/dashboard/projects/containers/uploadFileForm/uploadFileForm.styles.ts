@@ -16,12 +16,15 @@
  */
 
 import styled from 'styled-components';
+import { DragAndDrop } from '@controls/dragAndDrop';
 
 export const Container = styled.div`
 	display: flex;
 	flex-grow: 1;
 	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	height: calc(550px);
+	height: 550px;
+`;
+
+export const DropZone = styled(DragAndDrop)`
+	max-height: 190px;
 `;

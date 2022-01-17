@@ -19,12 +19,10 @@ import { Action } from 'redux';
 
 export interface IContainersState {
 	containers: Record<string, IContainer[]>;
-	filterQuery: string;
 	isListPending: boolean;
-	areStatsPending: boolean;
 }
 
-export enum ContainerStatuses {
+export enum UploadStatuses {
 	OK = 'ok',
 	FAILED = 'failed',
 	UPLOADING = 'uploading',
@@ -43,8 +41,8 @@ export interface IContainer {
 	lastUpdated: Date;
 	type: string;
 	code: string;
-	units: string;
-	status: ContainerStatuses;
+	status: UploadStatuses;
+	unit: string;
 	isFavourite: boolean;
 	role: string;
 	hasStatsPending: boolean;
@@ -86,16 +84,44 @@ export type FetchContainerStatsResponse = {
 		latestRevision: string;
 	};
 	type: string;
-	status: ContainerStatuses;
 	errorReason?: {
 		message: string;
 		timestamp: number;
 	};
-	units: string;
+	status: UploadStatuses;
+	unit: string;
 	code: string;
 };
 
-export type SetFilterQueryAction = Action<'SET_FILTER_QUERY'> & { query: string};
+export type NewContainerPayload = {
+	name: string;
+	unit: string;
+	type: string;
+	desc?: string;
+	code?: string;
+};
+
+export type CreateContainerPayload = {
+	teamspace: string;
+	projectId: string;
+	newContainer: NewContainerPayload;
+};
+
+export type CreateContainerSuccessPayload = NewContainerPayload & {
+	_id: string;
+};
+
+export type DeleteContainerPayload = {
+	teamspace: string;
+	projectId: string;
+	containerId: string;
+};
+
+export type DeleteContainerSuccessPayload = {
+	projectId: string;
+	containerId: string;
+};
+
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;
 export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & FavouritePayload;
 export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & {projectId: string, containerId: string, isFavourite: boolean};
@@ -104,9 +130,12 @@ export type FetchContainersSuccessAction = Action<'FETCH_CONTAINERS_SUCCESS'> & 
 export type SetIsListPendingAction = Action<'SET_IS_LIST_PENDING'> & { isPending: boolean };
 export type FetchContainerStatsAction = Action<'FETCH_CONTAINER_STATS'> & FetchContainerStatsPayload;
 export type FetchContainerStatsSuccessAction = Action<'FETCH_CONTAINER_STATS_SUCCESS'> & FetchContainerStatsSuccessPayload;
+export type CreateContainerAction = Action<'CREATE_CONTAINER'> & CreateContainerPayload;
+export type CreateContainerSuccessAction = Action<'CREATE_CONTAINER_SUCCESS'> & { projectId: string, container: CreateContainerSuccessPayload };
+export type DeleteContainerAction = Action<'DELETE'> & DeleteContainerPayload;
+export type DeleteContainerSuccessAction = Action<'DELETE_SUCCESS'> & DeleteContainerSuccessPayload;
 
 export interface IContainersActionCreators {
-	setFilterQuery: (query: string) => SetFilterQueryAction;
 	addFavourite: (teamspace: string, projectId: string, containerId: string) => AddFavouriteAction;
 	removeFavourite: (teamspace: string, projectId: string, containerId: string) => RemoveFavouriteAction;
 	setFavouriteSuccess: (projectId: string, containerId: string, isFavourite: boolean) => SetFavouriteSuccessAction;
@@ -119,4 +148,15 @@ export interface IContainersActionCreators {
 		containerStats: FetchContainerStatsResponse
 	) => FetchContainerStatsSuccessAction;
 	setIsListPending: (isPending: boolean) => SetIsListPendingAction;
+	createContainer: (
+		teamspace: string,
+		projectId: string,
+		newContainer: NewContainerPayload,
+	) => CreateContainerAction;
+	createContainerSuccess: (
+		projectId: string,
+		container: CreateContainerSuccessPayload,
+	) => CreateContainerSuccessAction;
+	deleteContainer: (teamspace: string, projectId: string, containerId: string) => DeleteContainerAction;
+	deleteContainerSuccess: (projectId: string, containerId: string) => DeleteContainerSuccessAction;
 }

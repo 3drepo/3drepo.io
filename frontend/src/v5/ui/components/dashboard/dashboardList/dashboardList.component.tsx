@@ -16,7 +16,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import { ListContainer } from './dasboardList.styles';
+import { ListContainer } from './dashboardList.styles';
 
 type IDashboardList = {
 	children?: ReactNode;

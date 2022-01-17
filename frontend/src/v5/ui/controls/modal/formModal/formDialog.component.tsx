@@ -15,12 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Button, Dialog } from '@material-ui/core';
 import React from 'react';
-import { Dialog, Button, DialogActions, DialogContent } from '@material-ui/core';
-
-import { CloseButton } from '@controls/modal/modal.styles';
-import CloseIcon from '@assets/icons/close_form_modal.svg';
-import { Form, Header, Subtitle, Title } from './formDialog.styles';
+import CloseIcon from '@assets/icons/close.svg';
+import { Form, Title, Header, CloseButton, FormDialogContent, FormDialogActions, RemoveWhiteCorners, Subtitle } from './formDialog.styles';
 
 interface IFormDialog extends React.DetailedHTMLProps<React.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement> {
 	onClickClose?: () => void;
@@ -28,6 +26,8 @@ interface IFormDialog extends React.DetailedHTMLProps<React.FormHTMLAttributes<H
 	subtitle?: string;
 	open?: boolean;
 	confirmLabel?: string;
+	maxWidth?: false | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+	isValid?: boolean;
 }
 
 export const FormModal = ({
@@ -38,27 +38,42 @@ export const FormModal = ({
 	open,
 	children,
 	className,
+	maxWidth = 'xl',
+	isValid = true,
 	...formProps
 }: IFormDialog) => (
-	<Dialog open={open} onClose={onClickClose} className={className} maxWidth="xl" fullWidth>
+	<Dialog
+		open={open}
+		onClose={onClickClose}
+		className={className}
+		maxWidth={maxWidth}
+		PaperComponent={RemoveWhiteCorners}
+		fullWidth
+	>
 		<Form {...formProps}>
 			<Header>
-				<Title>
-					{title}
-				</Title>
-				{subtitle && <Subtitle>{subtitle}</Subtitle>}
+				<div>
+					<Title>
+						{title}
+					</Title>
+					{subtitle && <Subtitle>{subtitle}</Subtitle>}
+				</div>
+
 				<CloseButton aria-label="Close dialog" onClick={onClickClose}>
 					<CloseIcon />
 				</CloseButton>
 			</Header>
-			<DialogContent>
+			<FormDialogContent>
 				{children}
-			</DialogContent>
-			<DialogActions>
-				<Button type="submit" variant="contained" color="primary" size="small">
+			</FormDialogContent>
+			<FormDialogActions>
+				<Button autoFocus onClick={onClickClose} variant="outlined" color="secondary" size="medium">
+					Cancel
+				</Button>
+				<Button disabled={!isValid} type="submit" variant="contained" color="primary" size="medium">
 					{confirmLabel || 'OK'}
 				</Button>
-			</DialogActions>
+			</FormDialogActions>
 		</Form>
 	</Dialog>
 );
