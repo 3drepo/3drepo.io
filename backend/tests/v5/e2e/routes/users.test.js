@@ -42,20 +42,20 @@ const setupData = async () => {
 		ServiceHelper.db.createUser(lockedUser, [], {
 			loginInfo: {
 				failedLoginCount: 10,
-				lastFailedLoginAt: new Date()
-			}
+				lastFailedLoginAt: new Date(),
+			},
 		}),
 		ServiceHelper.db.createUser(lockedUserWithExpiredLock, [], {
 			loginInfo: {
 				failedLoginCount: 10,
-				lastFailedLoginAt: new Date('1/1/18')
-			}
+				lastFailedLoginAt: new Date('1/1/18'),
+			},
 		}),
 		ServiceHelper.db.createUser(userWithFailedAttempts, [], {
 			loginInfo: {
 				failedLoginCount: 6,
-				lastFailedLoginAt: new Date()
-			}
+				lastFailedLoginAt: new Date(),
+			},
 		}),
 	]);
 };
@@ -161,7 +161,7 @@ const testGetUsername = () => {
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
-		describe("With valid authentication", () => {
+		describe('With valid authentication', () => {
 			beforeAll(async () => {
 				await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
 			});
@@ -198,7 +198,7 @@ const testGetProfile = () => {
 			expect(res.body).toEqual(formatUserProfile(testUser));
 		});
 
-		describe("With valid authentication", () => {
+		describe('With valid authentication', () => {
 			beforeAll(async () => {
 				await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
 			});
@@ -229,7 +229,7 @@ const testUpdateProfile = () => {
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
-		describe("With valid authentication", () => {
+		describe('With valid authentication', () => {
 			beforeAll(async () => {
 				await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
 			});
@@ -304,10 +304,10 @@ const testUpdateProfile = () => {
 				await testSession.put('/v5/user/').send(data).expect(200);
 				const updatedProfileRes = await testSession.get('/v5/user/');
 				expect(updatedProfileRes.body.firstName).toEqual('newName');
-				//change password back to the original
+				// change password back to the original
 				await testSession.put('/v5/user/').send({ oldPassword: 'Passport123!', newPassword: testUser.password });
 			});
-		})
+		});
 	});
 };
 
@@ -317,7 +317,7 @@ const testGetAvatar = () => {
 			const res = await agent.get('/v5/user/avatar').expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
-		
+
 		test('should get the avatar if the user has a session via an API key', async () => {
 			const res = await agent.get(`/v5/user/avatar?key=${testUser.apiKey}`).expect(200);
 			expect(res.text).toEqual(userAvatar.data.buffer);
@@ -334,7 +334,7 @@ const testGetAvatar = () => {
 			await testSession.post('/v5/login/').send({ user: testUserWithNoAvatar.user, password: testUserWithNoAvatar.password });
 			await testSession.get('/v5/user/avatar').expect(templates.userDoesNotHaveAvatar.status);
 			await testSession.post('/v5/logout/');
-		});		
+		});
 	});
 };
 
@@ -350,9 +350,9 @@ const testUploadAvatar = () => {
 			const res = await agent.put(`/v5/user/avatar?key=${testUser.apiKey}`)
 				.expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
-		});	
+		});
 
-		describe("With valid authentication", () => {
+		describe('With valid authentication', () => {
 			beforeAll(async () => {
 				await testSession.post('/v5/login/').send({ user: testUserWithNoAvatar.user, password: testUserWithNoAvatar.password });
 			});
@@ -388,7 +388,8 @@ const testGenerateApiKey = () => {
 			expect(res.body).toEqual({ apiKey: userProfileRes.body.apiKey });
 			await testSession.post('/v5/logout/');
 
-			//ensure new API key works
+			// ensure new API key works and the old one does not
+			await agent.get(`/v5/user?key=${testUser.apiKey}`).expect(templates.notLoggedIn.status);
 			await agent.get(`/v5/user?key=${res.body.apiKey}`).expect(200);
 		});
 	});
@@ -407,7 +408,7 @@ const testDeleteApiKey = () => {
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
-		describe("With valid authentication", () => {
+		describe('With valid authentication', () => {
 			beforeAll(async () => {
 				await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
 			});
@@ -416,9 +417,13 @@ const testDeleteApiKey = () => {
 			});
 
 			test('should delete the Api key if the user is logged in', async () => {
+				const userProfileResBeforeDelete = await testSession.get('/v5/user');
 				await testSession.delete('/v5/user/key').expect(200);
 				const userProfileRes = await testSession.get('/v5/user');
 				expect(userProfileRes.body.apiKey).toEqual(undefined);
+
+				// ensure new API does not key works
+				await agent.get(`/v5/user?key=${userProfileResBeforeDelete.body.apiKey}`).expect(templates.notLoggedIn.status);
 			});
 		});
 	});
@@ -439,10 +444,10 @@ describe('E2E routes/users', () => {
 	testLogout();
 	testGetUsername();
 	testGetProfile();
-	testUpdateProfile();	
+	testUpdateProfile();
 	testGetAvatar();
 	testUploadAvatar();
-	//should be called last as they update user Api key
+	// should be called last as they update user Api key
 	testGenerateApiKey();
 	testDeleteApiKey();
 });

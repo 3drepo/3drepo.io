@@ -77,14 +77,14 @@ YupHelper.types.strings.unit = Yup.string()
 
 YupHelper.types.strings.password = Yup.string()
 	.test('checkPasswordStrength', 'Password is too weak',
-	(value) => {
-		if (value) {
-			if (value.length < 8) return false;
-			const passwordScore = zxcvbn(value).score;
-			return passwordScore >= 2;
-		}
-		return true;
-	});
+		(value) => {
+			if (value) {
+				if (value.length < 8) return false;
+				const passwordScore = zxcvbn(value).score;
+				return passwordScore >= 2;
+			}
+			return true;
+		});
 
 YupHelper.types.strings.email = Yup.string().email();
 

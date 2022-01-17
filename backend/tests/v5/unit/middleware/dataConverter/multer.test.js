@@ -21,7 +21,7 @@ const fs = require('fs');
 const path = require('path');
 
 const { src, modelFolder } = require('../../../helper/path');
-const config = require('../../../../../src/v5/utils/config')
+const config = require('../../../../../src/v5/utils/config');
 
 const MulterHelper = require(`${src}/middleware/dataConverter/multer`);
 

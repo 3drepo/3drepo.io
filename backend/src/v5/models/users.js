@@ -16,12 +16,12 @@
  */
 
 const { createResponseCode, templates } = require('../utils/responseCodes');
+const _ = require('lodash');
 const config = require('../utils/config');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
 const { publish } = require('../services/eventsManager/eventsManager');
-const _ = require("lodash");
 
 const User = {};
 const COLL_NAME = 'system.users';
@@ -177,12 +177,13 @@ User.updateProfile = async (username, updatedProfile) => {
 		await changePassword(username, updatedProfile.newPassword);
 	}
 
-	const fieldsToUpdate = _.omit(updatedProfile, "oldPassword", "newPassword");
+	const fieldsToUpdate = _.omit(updatedProfile, 'oldPassword', 'newPassword');
 
 	if (!_.isEmpty(fieldsToUpdate)) {
-		const updateData = {};	
+		const updateData = {};
 
-		for(const field in fieldsToUpdate){
+		for (let i = 0; i < fieldsToUpdate.length; i++) {
+			const field = fieldsToUpdate[i];
 			updateData[`customData.${field}`] = fieldsToUpdate[field];
 		}
 
@@ -209,7 +210,6 @@ User.getAvatar = async (username) => {
 	return avatar;
 };
 
-User.uploadAvatar = (username, avatarBuffer) => 
-	updateUser(username, { $set: { 'customData.avatar': { data: avatarBuffer } } });
+User.uploadAvatar = (username, avatarBuffer) => updateUser(username, { $set: { 'customData.avatar': { data: avatarBuffer } } });
 
 module.exports = User;
