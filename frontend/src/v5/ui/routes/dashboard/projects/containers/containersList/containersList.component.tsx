@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode, useMemo, useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { useParams } from 'react-router';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
@@ -32,7 +32,6 @@ import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
 import { HeaderButtonsGroup } from '@/v5/ui/routes/dashboard/projects/containers/containers.styles';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { SearchInput } from '@controls/searchInput';
-import { SearchInputConfig, useSearchInput } from '@controls/searchInput/searchInput.hooks';
 import { Button } from '@controls/button';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
@@ -43,7 +42,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { Container, CollapseSideElementGroup } from './containersList.styles';
 
-type IContainersList = {
+interface IContainersList {
 	emptyMessage: ReactNode;
 	containers: IContainer[];
 	title: ReactNode;
@@ -51,24 +50,28 @@ type IContainersList = {
 		collapsed: ReactNode;
 		visible: ReactNode;
 	},
-	search: SearchInputConfig;
 	hasContainers: boolean;
 	showBottomButton?: boolean;
-};
+	onFilterQueryChange? : (query: string) => void;
+	filterQuery?: string;
+	onClickCreate: () => void;
+}
 
 export const ContainersList = ({
 	containers,
 	emptyMessage,
 	title,
 	titleTooltips,
-	search,
+	onClickCreate,
+	filterQuery,
+	onFilterQueryChange,
 	hasContainers,
 	showBottomButton = false,
 }: IContainersList): JSX.Element => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 	const { sortedList, setSortConfig } = useOrderedList(containers, DEFAULT_SORT_CONFIG);
-	const { searchInput, setSearchInput, filterQuery } = useSearchInput(search);
+
 	const isListPending = ContainersHooksSelectors.selectIsListPending();
 	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
 
@@ -93,9 +96,9 @@ export const ContainersList = ({
 				sideElement={(
 					<CollapseSideElementGroup>
 						<SearchInput
-							onClear={() => setSearchInput('')}
-							onChange={(event) => setSearchInput(event.currentTarget.value)}
-							value={searchInput}
+							onClear={() => onFilterQueryChange('')}
+							onChange={(event) => onFilterQueryChange(event.currentTarget.value)}
+							value={filterQuery}
 							placeholder={formatMessage({ id: 'containers.search.placeholder', defaultMessage: 'Search containers...' })}
 						/>
 						<HeaderButtonsGroup>
@@ -103,6 +106,7 @@ export const ContainersList = ({
 								startIcon={<AddCircleIcon />}
 								variant="outlined"
 								color="secondary"
+								onClick={onClickCreate}
 							>
 								<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New container" />
 							</Button>
@@ -134,39 +138,31 @@ export const ContainersList = ({
 						<FormattedMessage id="containers.list.header.lastUpdated" defaultMessage="Last updated" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>
-				{
-					useMemo(() => (
-						<DashboardList>
-							{!isEmpty(sortedList) ? (
-								sortedList.map((container, index) => (
-									<ContainerListItem
-										index={index}
-										key={container._id}
-										isSelected={container._id === selectedItemId}
-										container={container}
-										filterQuery={filterQuery}
-										onFavouriteChange={setFavourite}
-										onSelectOrToggleItem={selectOrToggleItem}
-									/>
-								))
-							) : (
-								<DashboardListEmptyContainer>
-									{filterQuery && hasContainers ? (
-										<DashboardListEmptySearchResults searchPhrase={filterQuery} />
-									) : emptyMessage}
-								</DashboardListEmptyContainer>
-							)}
-						</DashboardList>
-					),
-					[sortedList, filterQuery, selectedItemId])
-				}
+				<DashboardList>
+					{!isEmpty(sortedList) ? (
+						sortedList.map((container, index) => (
+							<ContainerListItem
+								index={index}
+								key={container._id}
+								isSelected={container._id === selectedItemId}
+								container={container}
+								filterQuery={filterQuery}
+								onFavouriteChange={setFavourite}
+								onSelectOrToggleItem={selectOrToggleItem}
+							/>
+						))
+					) : (
+						<DashboardListEmptyContainer>
+							{filterQuery && hasContainers ? (
+								<DashboardListEmptySearchResults searchPhrase={filterQuery} />
+							) : emptyMessage}
+						</DashboardListEmptyContainer>
+					)}
+				</DashboardList>
 				{showBottomButton && !isListPending && hasContainers && (
 					<DashboardListButton
 						startIcon={<AddCircleIcon />}
-						onClick={() => {
-							// eslint-disable-next-line no-console
-							console.log('->  handle add container');
-						}}
+						onClick={onClickCreate}
 					>
 						<FormattedMessage id="containers.addContainerButton" defaultMessage="Add new Container" />
 					</DashboardListButton>

@@ -24,8 +24,8 @@ import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSel
 export const useContainersData = () => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 
-	const filteredContainers = ContainersHooksSelectors.selectFilteredContainers();
-	const favouriteContainers = ContainersHooksSelectors.selectFilteredFavouriteContainers();
+	const containers = ContainersHooksSelectors.selectContainers();
+	const favouriteContainers = ContainersHooksSelectors.selectFavouriteContainers();
 	const hasContainers = ContainersHooksSelectors.selectHasContainers();
 	const isListPending = ContainersHooksSelectors.selectIsListPending();
 	const currentProject = ProjectsHooksSelectors.selectCurrentProject();
@@ -36,5 +36,5 @@ export const useContainersData = () => {
 		ContainersActionsDispatchers.fetchContainers(teamspace, project);
 	}, [currentProject]);
 
-	return { filteredContainers, favouriteContainers, hasContainers, isListPending };
+	return { containers, favouriteContainers, hasContainers, isListPending };
 };
