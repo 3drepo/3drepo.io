@@ -20,6 +20,7 @@ import { TextField } from '@material-ui/core';
 import Tooltip, { TooltipProps } from '@material-ui/core/Tooltip';
 import copyToClipboardIcon from '@assets/icons/copy_to_clipboard';
 import tick from '@assets/icons/tick';
+import { withStyles } from '@material-ui/core';
 
 export const Container = styled.div`
 	display: flex;
@@ -65,13 +66,25 @@ export const MailToButton = styled.a`
 	width: fit-content;
 `;
 
+export const CopyToClipboardIcon = styled(copyToClipboardIcon)``;
+
+export const Tick = styled(tick)``;
+
+const SVG_PADDING_IN_PX = 9;
+
+export const CopyToClipboardTooltip = withStyles(() => ({
+	popper: {
+		marginTop: -SVG_PADDING_IN_PX,
+	},
+}))(Tooltip);
+
 type CopiedToClipboardTooltipProps = TooltipProps & {
 	theme: any
 };
 
 export const CopiedToClipboardTooltip = styled(
 	({ className, theme, ...props }: CopiedToClipboardTooltipProps) => (
-		<Tooltip
+		<CopyToClipboardTooltip
 			{...props}
 			PopperProps={{ keepMounted: true }}
 			classes={{ popper: className }}
@@ -85,12 +98,8 @@ export const CopiedToClipboardTooltip = styled(
 
 export const CopyToClipboardIconContainer = styled.div`
 	display: grid;
-	padding: 9px;
+	padding: ${SVG_PADDING_IN_PX}px;
 `;
-
-export const CopyToClipboardIcon = styled(copyToClipboardIcon)``;
-
-export const Tick = styled(tick)``;
 
 export const UrlContainer = styled(TextField)`
 	margin: 6px 0 0 0;
@@ -98,7 +107,7 @@ export const UrlContainer = styled(TextField)`
 	.MuiInputBase-root {
 		cursor: pointer;
 		margin-top: 0;
-		padding-right: 0px;
+		padding-right: ${9 - SVG_PADDING_IN_PX}px;
 
 		&:hover .MuiOutlinedInput-notchedOutline {
 			border-color: ${({ theme }) => theme.palette.base.lightest};

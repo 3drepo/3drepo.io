@@ -31,6 +31,7 @@ import {
 	LinkLabel,
 	MailToButton,
 	Tick,
+	CopyToClipboardTooltip,
 	CopyToClipboardIcon,
 	CopyToClipboardIconContainer,
 	CopiedToClipboardTooltip,
@@ -91,7 +92,7 @@ export const ShareModal = ({ openState, container, onClickClose }: IShareModal):
 								<InputAdornment position="end">
 									{isCopying
 										? (
-											<Tooltip
+											<CopyToClipboardTooltip
 												title={formatMessage({
 													id: 'shareModal.copyToClipboard',
 													defaultMessage: 'Copy to clipboard',
@@ -100,7 +101,7 @@ export const ShareModal = ({ openState, container, onClickClose }: IShareModal):
 												<CopyToClipboardIconContainer>
 													<CopyToClipboardIcon />
 												</CopyToClipboardIconContainer>
-											</Tooltip>
+											</CopyToClipboardTooltip>
 										) : (
 											<CopiedToClipboardTooltip
 												title={formatMessage({
