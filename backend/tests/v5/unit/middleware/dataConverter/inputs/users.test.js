@@ -118,7 +118,7 @@ const testValidateUpdateData = () => {
 	});
 };
 
-const createRequestWithFile = (filename = 'valid.png', extraProp = false, tooLargeFile = false) => {
+const createRequestWithFile = (filename = 'valid.png', extraProp = false) => {
 	const form = new FormData();
 	if (filename) {
 		let fileFolder = imagesFolder;
@@ -139,10 +139,6 @@ const createRequestWithFile = (filename = 'valid.png', extraProp = false, tooLar
 		headers: form.getHeaders(),
 	});
 
-	if (tooLargeFile) {
-		req.headers['content-length'] = 1048577;
-	}
-
 	form.pipe(req);
 	return req;
 };
@@ -150,15 +146,15 @@ const createRequestWithFile = (filename = 'valid.png', extraProp = false, tooLar
 const testValidateAvatarData = () => {
 	describe.each([
 		['with valid file', true],
-		['with unsupported file', false, 'dummy.obj', false, false, templates.unsupportedFileFormat],
-		['with corrupt file', false, 'corrupted.png', false, false, templates.unsupportedFileFormat],
-		['with no file', false, null, false, false, templates.invalidArguments],
-		['with too large file', false, 'valid.png', true, true, templates.maxSizeExceeded],
-		['with extra property', false, 'valid.png', true, false, templates.invalidArguments],
-	])('Check if req arguments for new avatar upload are valid', (desc, shouldPass, filename, extraProp, tooLargeFile, expectedError) => {
+		['with unsupported file', false, 'dummy.obj', false, templates.unsupportedFileFormat],
+		['with corrupt file', false, 'corrupted.png', false, templates.unsupportedFileFormat],
+		['with no file', false, null, false, templates.invalidArguments],
+		['with too large file', false, 'tooBig.png', false, templates.maxSizeExceeded],
+		['with extra property', true, 'valid.png', true],
+	])('Check if req arguments for new avatar upload are valid', (desc, shouldPass, filename, extraProp, expectedError) => {
 		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
 			const mockCB = jest.fn();
-			const req = createRequestWithFile(filename, extraProp, tooLargeFile);
+			const req = createRequestWithFile(filename, extraProp);
 			await Users.validateAvatarFile(req, {}, mockCB);
 			if (shouldPass) {
 				expect(mockCB.mock.calls.length).toBe(1);

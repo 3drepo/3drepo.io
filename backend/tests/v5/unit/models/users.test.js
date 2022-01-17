@@ -357,6 +357,17 @@ const testUpdateProfile = () => {
 			expect(fn2.mock.calls[0][1]).toEqual({ updateUser: 'user 1', pwd: 1234 });
 		});
 
+		test('should update a user password', async () => {
+			const fn1 = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
+			const fn2 = jest.spyOn(db, 'runCommand').mockImplementation(() => { });
+			const updatedProfile = { oldPassword: 123, newPassword: 1234 };
+			await expect(User.updateProfile('user 1', updatedProfile)).resolves.toBe(undefined);
+			expect(fn1.mock.calls.length).toBe(1);
+			expect(fn1.mock.calls[0][3]).toEqual({ $unset: { 'customData.resetPasswordToken': 1 } });
+			expect(fn2.mock.calls.length).toBe(1);
+			expect(fn2.mock.calls[0][1]).toEqual({ updateUser: 'user 1', pwd: 1234 });
+		});
+
 		test('should update a user profile without password change', async () => {
 			const fn1 = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
 			const updatedProfile = { email: 'example@email.com' };

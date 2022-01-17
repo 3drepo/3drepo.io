@@ -21,6 +21,7 @@ const fs = require('fs');
 const path = require('path');
 
 const { src, modelFolder } = require('../../../helper/path');
+const config = require('../../../../../src/v5/utils/config')
 
 const MulterHelper = require(`${src}/middleware/dataConverter/multer`);
 
@@ -49,17 +50,17 @@ const createRequestWithFile = (filename = 'file', file = 'dummy.obj') => {
 
 const testSingleFileUpload = () => {
 	describe.each([
-		['request provides the correct parameters and no filter', createRequestWithFile(), undefined, (a, b, cb) => { cb(null, true); }, false, true],
-		['request provides the correct parameters and no filter (2)', createRequestWithFile('a'), 'a', (a, b, cb) => { cb(null, true); }, false, true],
-		['request provides the correct parameters and no filter and store file in memory', createRequestWithFile(), undefined, (a, b, cb) => { cb(null, true); }, true, true],
-		['request provides the incorrect parameters', createRequestWithFile('a'), undefined, (a, b, cb) => { cb(null, true); }, false, false],
-		['file filter rejected the file', createRequestWithFile('a'), 'a', (a, b, cb) => { cb(templates.invalidArguments, false); }, false, false],
-		['file exceeded max file limit', createRequestWithFile('file', 'tooBig.ifc'), undefined, (a, b, cb) => { cb(null, true); }, false, false, templates.maxSizeExceeded.code],
-	])('Single file upload', (desc, req, reqParam, fileFilter, storeInMemory, success, code = templates.invalidArguments.code) => {
+		['request provides the correct parameters and no filter', createRequestWithFile(), undefined, (a, b, cb) => { cb(null, true); }, config.uploadSizeLimit, false, true],
+		['request provides the correct parameters and no filter (2)', createRequestWithFile('a'), 'a', (a, b, cb) => { cb(null, true); }, config.uploadSizeLimit, false, true],
+		['request provides the correct parameters and no filter and store file in memory', createRequestWithFile(), undefined, (a, b, cb) => { cb(null, true); }, config.uploadSizeLimit, true, true],
+		['request provides the incorrect parameters', createRequestWithFile('a'), undefined, (a, b, cb) => { cb(null, true); }, config.uploadSizeLimit, false, false],
+		['file filter rejected the file', createRequestWithFile('a'), 'a', (a, b, cb) => { cb(templates.invalidArguments, false); }, config.uploadSizeLimit, false, false],
+		['file exceeded max file limit', createRequestWithFile('file', 'tooBig.ifc'), undefined, (a, b, cb) => { cb(null, true); }, config.uploadSizeLimit, false, false, templates.maxSizeExceeded.code],
+	])('Single file upload', (desc, req, reqParam, fileFilter, maxSize, storeInMemory, success, code = templates.invalidArguments.code) => {
 		test(`${success ? 'next() should be called' : `should fail with ${code}`} if ${desc}`, async () => {
 			const mockCB = jest.fn(() => { });
 			const resCallLength = Responder.respond.mock.calls.length;
-			await MulterHelper.singleFileUpload(reqParam, fileFilter, storeInMemory)(req, {}, mockCB);
+			await MulterHelper.singleFileUpload(reqParam, fileFilter, maxSize, storeInMemory)(req, {}, mockCB);
 
 			if (success) {
 				expect(mockCB.mock.calls.length).toBe(1);
