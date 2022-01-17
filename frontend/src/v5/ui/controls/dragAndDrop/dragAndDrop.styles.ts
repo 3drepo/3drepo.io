@@ -15,18 +15,40 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Typography } from '@controls/typography';
 import styled from 'styled-components';
-import { DragAndDrop } from '@controls/dragAndDrop';
+import Dropzone from 'react-dropzone';
 
-export const Container = styled.div`
-	display: flex;
-	flex-grow: 1;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	height: calc(550px);
+export const Container = styled(Dropzone)`
+	position: relative;
+	width: 100%;
+	height: 100%;
 `;
 
-export const DropZone = styled(DragAndDrop)`
-	max-height: 190px;
+export const UploadDialog = styled.div`
+	width: 100%;
+	height: 100%;
+
+	border: 1px dashed ${({ theme }) => theme.palette.primary.main};
+	border-radius: 10px;
+	background: ${({ theme }) => theme.palette.primary.contrast};
+	user-select: none;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+
+	&.drag-over {
+		background: ${({ theme }) => theme.palette.primary.lightest};
+		border-style: solid;
+	}
+`;
+
+export const HelpText = styled(Typography).attrs({
+	variant: 'h5',
+})`
+	color: ${({ theme }) => theme.palette.base.main};
+	padding: 10px;
+	a { color: inherit }
 `;

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2017 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,17 +16,15 @@
  */
 
 import styled from 'styled-components';
-import { DragAndDrop } from '@controls/dragAndDrop';
 
-export const Container = styled.div`
-	display: flex;
-	flex-grow: 1;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	height: calc(550px);
+export const HiddenFileInput = styled.input`
+	visibility: hidden;
+	height: 0;
+	width: 0;
 `;
 
-export const DropZone = styled(DragAndDrop)`
-	max-height: 190px;
+export const FileLabel = styled.label`
+	&& {
+		margin: 0 4px 0 0;
+	}
 `;
