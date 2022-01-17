@@ -50,12 +50,11 @@ interface IContainersList {
 		collapsed: ReactNode;
 		visible: ReactNode;
 	},
-	search: SearchInputConfig;
 	hasContainers: boolean;
 	showBottomButton?: boolean;
 	onFilterQueryChange? : (query: string) => void;
 	filterQuery?: string;
-  onClickCreate: () => void;
+	onClickCreate: () => void;
 }
 
 export const ContainersList = ({
@@ -63,7 +62,6 @@ export const ContainersList = ({
 	emptyMessage,
 	title,
 	titleTooltips,
-	search,
 	onClickCreate,
 	filterQuery,
 	onFilterQueryChange,

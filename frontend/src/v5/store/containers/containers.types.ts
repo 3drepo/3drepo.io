@@ -115,12 +115,12 @@ export type DeleteContainerPayload = {
 	teamspace: string;
 	projectId: string;
 	containerId: string;
-}
+};
 
 export type DeleteContainerSuccessPayload = {
 	projectId: string;
 	containerId: string;
-}
+};
 
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;
 export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & FavouritePayload;
