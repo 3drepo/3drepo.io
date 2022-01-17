@@ -18,33 +18,33 @@
 import React, { useState } from 'react';
 
 import AddCircleIcon from '@assets/icons/add_circle.svg';
-import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
-import { FormattedMessage } from 'react-intl';
-
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
-import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
 import { Button } from '@controls/button';
 import { Content } from '@/v5/ui/routes/dashboard/projects/projects.styles';
 import { DashboardListEmptySearchResults } from '@components/dashboard/dashboardList';
+import { CreateContainerForm } from '@/v5/ui/routes/dashboard/projects/containers/createContainerForm/createContainerForm.component';
+import { FormattedMessage } from 'react-intl';
+import { filterContainers } from '@/v5/store/containers/containers.helpers';
 import { ContainersList } from './containersList';
 import { SkeletonListItem } from './containersList/skeletonListItem';
 import { useContainersData } from './containers.hooks';
-import { Container,
-} from './containers.styles';
 import { UploadFileForm } from './uploadFileForm/uploadFileForm.component';
+import { Container } from './containers.styles';
 
 export const Containers = (): JSX.Element => {
 	const [uploadModalOpen, setUploadModalOpen] = useState(false);
 	const {
-		filteredContainers,
+		containers,
 		favouriteContainers,
 		hasContainers,
 		isListPending,
 	} = useContainersData();
-	const favouritesFilterQuery = ContainersHooksSelectors.selectFavouritesFilterQuery();
-	const allFilterQuery = ContainersHooksSelectors.selectAllFilterQuery();
-	const { setFavouritesFilterQuery, setAllFilterQuery } = ContainersActionsDispatchers;
+
+	const [favouritesFilterQuery, setFavouritesFilterQuery] = useState<string>('');
+	const [allFilterQuery, setAllFilterQuery] = useState<string>('');
+
+	const [createContainerOpen, setCreateContainerOpen] = useState(false);
 
 	const onClickClose = () => setUploadModalOpen(false);
 
@@ -57,12 +57,10 @@ export const Containers = (): JSX.Element => {
 					<>
 						<ContainersList
 							hasContainers={hasContainers.favourites}
-							search={{
-								query: favouritesFilterQuery,
-								dispatcher: setFavouritesFilterQuery,
-							}}
+							filterQuery={favouritesFilterQuery}
+							onFilterQueryChange={setFavouritesFilterQuery}
+							containers={filterContainers(favouriteContainers, favouritesFilterQuery)}
 							onClickUpload={() => setUploadModalOpen(true)}
-							containers={favouriteContainers}
 							title={(
 								<FormattedMessage
 									id="containers.favourites.collapseTitle"
@@ -73,6 +71,7 @@ export const Containers = (): JSX.Element => {
 								collapsed: <FormattedMessage id="containers.favourites.collapse.tooltip.show" defaultMessage="Show favourites" />,
 								visible: <FormattedMessage id="containers.favourites.collapse.tooltip.hide" defaultMessage="Hide favourites" />,
 							}}
+							onClickCreate={() => setCreateContainerOpen(true)}
 							emptyMessage={
 								favouritesFilterQuery && hasContainers.favourites ? (
 									<DashboardListEmptySearchResults searchPhrase={favouritesFilterQuery} />
@@ -88,13 +87,11 @@ export const Containers = (): JSX.Element => {
 						/>
 						<Divider />
 						<ContainersList
+							filterQuery={allFilterQuery}
+							onFilterQueryChange={setAllFilterQuery}
 							hasContainers={hasContainers.all}
-							search={{
-								query: allFilterQuery,
-								dispatcher: setAllFilterQuery,
-							}}
+							containers={filterContainers(containers, allFilterQuery)}
 							onClickUpload={() => setUploadModalOpen(true)}
-							containers={filteredContainers}
 							title={(
 								<FormattedMessage
 									id="containers.all.collapseTitle"
@@ -106,6 +103,7 @@ export const Containers = (): JSX.Element => {
 								visible: <FormattedMessage id="containers.all.collapse.tooltip.hide" defaultMessage="Hide all" />,
 							}}
 							showBottomButton
+							onClickCreate={() => setCreateContainerOpen(true)}
 							emptyMessage={
 								allFilterQuery && hasContainers.all ? (
 									<DashboardListEmptySearchResults searchPhrase={allFilterQuery} />
@@ -118,6 +116,7 @@ export const Containers = (): JSX.Element => {
 											startIcon={<AddCircleIcon />}
 											variant="contained"
 											color="primary"
+											onClick={() => setCreateContainerOpen(true)}
 										>
 											<FormattedMessage id="containers.all.newContainer" defaultMessage="New Container" />
 										</Button>
@@ -127,6 +126,10 @@ export const Containers = (): JSX.Element => {
 						/>
 					</>
 				)}
+				<CreateContainerForm
+					open={createContainerOpen}
+					close={() => setCreateContainerOpen(false)}
+				/>
 			</Content>
 			<UploadFileForm openState={uploadModalOpen} onClickClose={onClickClose} />
 		</Container>
