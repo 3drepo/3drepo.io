@@ -19,7 +19,7 @@ import React, { useState } from 'react';
 
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { InputAdornment } from '@material-ui/core';
+import { InputAdornment, Tooltip } from '@material-ui/core';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { viewerShareLink } from '@/v5/services/routing/routing';
@@ -33,7 +33,7 @@ import {
 	Tick,
 	CopyToClipboardIcon,
 	CopyToClipboardIconContainer,
-	CopyToClipboardTooltip,
+	CopiedToClipboardTooltip,
 } from './shareModal.styles';
 
 const COPY_ACTION_DISABLED_DURATION_MS = 3000;
@@ -49,17 +49,20 @@ type IShareModal = {
 };
 
 export const ShareModal = ({ openState, container, onClickClose }: IShareModal): JSX.Element => {
-	const [isCopiable, setIsCopiable] = useState(true);
+	const [isCopying, setIsCopying] = useState(true);
 	const containerName = container.name;
 	const { teamspace } = useParams();
 	const containerLink = viewerShareLink(teamspace, container._id);
 	let isCopiedTimer;
 
 	const handleCopyToClipboard = () => {
-		setIsCopiable(false);
+		if (!isCopying) {
+			return;
+		}
+		setIsCopying(false);
 		clearTimeout(isCopiedTimer);
 		isCopiedTimer = setTimeout(() => {
-			setIsCopiable(true);
+			setIsCopying(true);
 		}, COPY_ACTION_DISABLED_DURATION_MS);
 	};
 
@@ -86,30 +89,31 @@ export const ShareModal = ({ openState, container, onClickClose }: IShareModal):
 							readOnly: true,
 							endAdornment: (
 								<InputAdornment position="end">
-									<CopyToClipboardTooltip
-										title={
-											isCopiable ? (
-												<FormattedMessage
-													id="shareModal.copyToClipboard"
-													defaultMessage="Copy to clipboard"
-												/>
-											) : (
-												<FormattedMessage
-													id="shareModal.copied"
-													defaultMessage="Copied to clipboard"
-												/>
-											)
-										}
-										isCopiable={isCopiable}
-									>
-										<CopyToClipboardIconContainer>
-											{
-												isCopiable
-													? <CopyToClipboardIcon />
-													: <Tick />
-											}
-										</CopyToClipboardIconContainer>
-									</CopyToClipboardTooltip>
+									{isCopying
+										? (
+											<Tooltip
+												title={formatMessage({
+													id: 'shareModal.copyToClipboard',
+													defaultMessage: 'Copy to clipboard',
+												})}
+											>
+												<CopyToClipboardIconContainer>
+													<CopyToClipboardIcon />
+												</CopyToClipboardIconContainer>
+											</Tooltip>
+										) : (
+											<CopiedToClipboardTooltip
+												title={formatMessage({
+													id: 'shareModal.copied',
+													defaultMessage: 'Copied to clipboard',
+												})}
+												open
+											>
+												<CopyToClipboardIconContainer>
+													<Tick />
+												</CopyToClipboardIconContainer>
+											</CopiedToClipboardTooltip>
+										)}
 								</InputAdornment>
 							),
 						}}

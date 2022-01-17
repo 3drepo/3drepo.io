@@ -162,8 +162,7 @@ export const ContainerListItem = ({
 				/>
 			)}
 			<ShareModal
-				openState={true}
-				// openState={shareModalOpen}
+				openState={shareModalOpen}
 				onClickClose={closeShareModal}
 				container={container}
 			/>

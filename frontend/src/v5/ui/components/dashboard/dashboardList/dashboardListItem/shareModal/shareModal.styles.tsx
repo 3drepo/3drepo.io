@@ -18,7 +18,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { TextField } from '@material-ui/core';
 import Tooltip, { TooltipProps } from '@material-ui/core/Tooltip';
-import CopyToClipboard from '@assets/icons/copy_to_clipboard';
+import copyToClipboardIcon from '@assets/icons/copy_to_clipboard';
 import tick from '@assets/icons/tick';
 
 export const Container = styled.div`
@@ -65,28 +65,32 @@ export const MailToButton = styled.a`
 	width: fit-content;
 `;
 
-export const Tick = styled(tick)``;
-
-type CopyToClipboardTooltipProps = TooltipProps & {
-	isCopiable: boolean;
+type CopiedToClipboardTooltipProps = TooltipProps & {
 	theme: any
 };
 
-export const CopyToClipboardTooltip = styled(
-	({ className, theme, isCopiable, ...props }: CopyToClipboardTooltipProps) => (
-		<Tooltip {...props} classes={{ popper: className }} />
+export const CopiedToClipboardTooltip = styled(
+	({ className, theme, ...props }: CopiedToClipboardTooltipProps) => (
+		<Tooltip
+			{...props}
+			PopperProps={{ keepMounted: true }}
+			classes={{ popper: className }}
+		/>
 	),
 )`
-	${({ theme, isCopiable }) => !isCopiable && (
-		`& .MuiTooltip-tooltip {
-			background-color: ${theme.palette.primary.main};
-		}`
-	)};
+	& .MuiTooltip-tooltip {
+		background-color: ${({ theme }) => theme.palette.primary.main};
+	}
 `;
 
 export const CopyToClipboardIconContainer = styled.div`
 	display: grid;
+	padding: 9px;
 `;
+
+export const CopyToClipboardIcon = styled(copyToClipboardIcon)``;
+
+export const Tick = styled(tick)``;
 
 export const UrlContainer = styled(TextField)`
 	margin: 6px 0 0 0;
@@ -94,6 +98,7 @@ export const UrlContainer = styled(TextField)`
 	.MuiInputBase-root {
 		cursor: pointer;
 		margin-top: 0;
+		padding-right: 0px;
 
 		&:hover .MuiOutlinedInput-notchedOutline {
 			border-color: ${({ theme }) => theme.palette.base.lightest};
@@ -118,17 +123,7 @@ export const UrlContainer = styled(TextField)`
 		}
 	}
 
-	/* &:hover ${CopyToClipboardIcon} {
+	&:hover ${CopyToClipboardIcon} {
 		fill: ${({ theme }) => theme.palette.primary.main};
-	} */
-`;
-
-export const CopyToClipboardIcon = styled(({ className }) => (
-	<CopyToClipboard className={className} />
-))`
-	&& {
-		${UrlContainer}:hover {
-			fill: ${({ theme }) => theme.palette.primary.main};;
-		}
 	}
 `;
