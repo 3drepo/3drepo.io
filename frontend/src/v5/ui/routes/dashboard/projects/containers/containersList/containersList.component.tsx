@@ -54,6 +54,7 @@ interface IContainersList {
 	showBottomButton?: boolean;
 	onFilterQueryChange? : (query: string) => void;
 	filterQuery?: string;
+	onClickCreate: () => void;
 }
 
 export const ContainersList = ({
@@ -61,6 +62,7 @@ export const ContainersList = ({
 	emptyMessage,
 	title,
 	titleTooltips,
+	onClickCreate,
 	filterQuery,
 	onFilterQueryChange,
 	hasContainers,
@@ -104,6 +106,7 @@ export const ContainersList = ({
 								startIcon={<AddCircleIcon />}
 								variant="outlined"
 								color="secondary"
+								onClick={onClickCreate}
 							>
 								<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New container" />
 							</Button>
@@ -159,10 +162,7 @@ export const ContainersList = ({
 				{showBottomButton && !isListPending && hasContainers && (
 					<DashboardListButton
 						startIcon={<AddCircleIcon />}
-						onClick={() => {
-							// eslint-disable-next-line no-console
-							console.log('->  handle add container');
-						}}
+						onClick={onClickCreate}
 					>
 						<FormattedMessage id="containers.addContainerButton" defaultMessage="Add new Container" />
 					</DashboardListButton>
