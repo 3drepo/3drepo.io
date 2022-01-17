@@ -110,13 +110,14 @@ export type CreateContainerPayload = {
 export type CreateContainerSuccessPayload = NewContainerPayload & {
 	_id: string;
 };
-export interface DeleteContainerPayload {
+
+export type DeleteContainerPayload = {
 	teamspace: string;
 	projectId: string;
 	containerId: string;
 }
 
-export interface DeleteContainerSuccessPayload {
+export type DeleteContainerSuccessPayload = {
 	projectId: string;
 	containerId: string;
 }
