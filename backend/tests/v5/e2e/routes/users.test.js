@@ -199,82 +199,87 @@ const testUpdateProfile = () => {
 			const res = await agent.put(`/v5/user?key=${testUser.apiKey}`)
 				.send(data).expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
-		});
+		});		
 
-		test('should fail if the update data have invalid email', async () => {
-			const data = { email: 'invalid' };
-			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-			const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if the update data have existing email', async () => {
-			const data = { email: userWithNoAvatarEmail };
-			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-			const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should update the profile if the update data have existing email but belongs to the user', async () => {
-			const data = { email: userEmail };
-			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-			await testSession.put('/v5/user/').send(data).expect(200);
-		});
-
-		test('should fail if the update data have extra properties', async () => {
-			const data = { firstName: 'newName', extra: 'extraProp' };
-			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-			const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if the oldPassword is not correct', async () => {
-			const data = { oldPassword: 'invalid', newPassword: 'newPassword123.' };
-			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-			const res = await testSession.put('/v5/user/').send(data).expect(templates.incorrectPassword.status);
-			expect(res.body.code).toEqual(templates.incorrectPassword.code);
-		});
-
-		test('should fail if the update data have oldPassword but not newPassword', async () => {
-			const data = { oldPassword: testUser.password };
-			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-			const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if the update data have newPassword but not oldPassword', async () => {
-			const data = { newPassword: 'newPassword123.' };
-			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-			const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if the update data have weak newPassword', async () => {
-			const data = { oldPassword: testUser.password, newPassword: 'abc' };
-			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-			const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if the update data have a newPassword which is the same as the old one', async () => {
-			const data = { oldPassword: testUser.password, newPassword: testUser.password };
-			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-			const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should update the profile if the user is logged in', async () => {
-			const data = { firstName: 'newName' };
-			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-			await testSession.put('/v5/user/').send(data).expect(200);
-		});
-
-		test('should update the profile and change password if the user is logged in', async () => {
-			const data = { firstName: 'newName', oldPassword: testUser.password, newPassword: 'Passport123!' };
-			await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
-			await testSession.put('/v5/user/').send(data).expect(200);
-			await testSession.put('/v5/user/').send({ oldPassword: 'Passport123!', newPassword: testUser.password });
-		});
+		describe("With valid authentication", () => {
+			beforeAll(async () => {
+				await testSession.post('/v5/login/').send({ user: testUser.user, password: testUser.password });
+		   });
+			afterAll(async() => {
+				await testSession.post('/v5/logout/');
+			});
+		
+			test('should fail if the update data have invalid email', async () => {
+				const data = { email: 'invalid' };				
+				const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
+				expect(res.body.code).toEqual(templates.invalidArguments.code);
+			});
+	
+			test('should fail if the update data have existing email', async () => {
+				const data = { email: userWithNoAvatarEmail };				
+				const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
+				expect(res.body.code).toEqual(templates.invalidArguments.code);
+			});
+	
+			test('should update the profile if the update data have existing email but belongs to the user', async () => {
+				const data = { email: userEmail };				
+				await testSession.put('/v5/user/').send(data).expect(200);
+				const updatedProfileRes = await testSession.get('/v5/user/');
+				expect(updatedProfileRes.body.email).toEqual(userEmail);
+			});
+	
+			test('should fail if the update data have extra properties', async () => {
+				const data = { firstName: 'newName', extra: 'extraProp' };				
+				const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
+				expect(res.body.code).toEqual(templates.invalidArguments.code);
+			});
+	
+			test('should fail if the oldPassword is not correct', async () => {
+				const data = { oldPassword: 'invalid', newPassword: 'newPassword123.' };				
+				const res = await testSession.put('/v5/user/').send(data).expect(templates.incorrectPassword.status);
+				expect(res.body.code).toEqual(templates.incorrectPassword.code);
+			});
+	
+			test('should fail if the update data have oldPassword but not newPassword', async () => {
+				const data = { oldPassword: testUser.password };				
+				const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
+				expect(res.body.code).toEqual(templates.invalidArguments.code);
+			});
+	
+			test('should fail if the update data have newPassword but not oldPassword', async () => {
+				const data = { newPassword: 'newPassword123.' };				
+				const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
+				expect(res.body.code).toEqual(templates.invalidArguments.code);
+			});
+	
+			test('should fail if the update data have weak newPassword', async () => {
+				const data = { oldPassword: testUser.password, newPassword: 'abc' };				
+				const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
+				expect(res.body.code).toEqual(templates.invalidArguments.code);
+			});
+	
+			test('should fail if the update data have a newPassword which is the same as the old one', async () => {
+				const data = { oldPassword: testUser.password, newPassword: testUser.password };				
+				const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
+				expect(res.body.code).toEqual(templates.invalidArguments.code);
+			});
+	
+			test('should update the profile if the user is logged in', async () => {
+				const data = { firstName: 'newName' };				
+				await testSession.put('/v5/user/').send(data).expect(200);
+				const updatedProfileRes = await testSession.get('/v5/user/');
+				expect(updatedProfileRes.body.firstName).toEqual('newName');
+			});
+	
+			test('should update the profile and change password if the user is logged in', async () => {
+				const data = { firstName: 'newName', oldPassword: testUser.password, newPassword: 'Passport123!' };				
+				await testSession.put('/v5/user/').send(data).expect(200);
+				const updatedProfileRes = await testSession.get('/v5/user/');
+				expect(updatedProfileRes.body.firstName).toEqual('newName');
+				//change password back to the original
+				await testSession.put('/v5/user/').send({ oldPassword: 'Passport123!', newPassword: testUser.password });
+			});
+		})
 	});
 };
 

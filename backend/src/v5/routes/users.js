@@ -40,7 +40,7 @@ const getUsername = (req, res) => {
 const getProfile = (req, res) => {
 	const user = getUserFromSession(req.session);
 	Users.getProfileByUsername(user).then((profile) => {
-		respond(req, res, templates.ok, { ...profile });
+		respond(req, res, templates.ok, profile);
 	}).catch(
 		// istanbul ignore next
 		(err) => respond(req, res, err),
