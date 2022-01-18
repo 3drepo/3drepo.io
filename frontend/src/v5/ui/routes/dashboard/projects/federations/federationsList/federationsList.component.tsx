@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode, useMemo } from 'react';
+import React, { ReactNode } from 'react';
 import { useParams } from 'react-router';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
@@ -30,7 +30,6 @@ import {
 } from '@components/dashboard/dashboardList';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { SearchInput } from '@controls/searchInput';
-import { SearchInputConfig, useSearchInput } from '@controls/searchInput/searchInput.hooks';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { FederationListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/federationListItem';
@@ -50,9 +49,10 @@ type IFederationsList = {
 		collapsed: ReactNode;
 		visible: ReactNode;
 	},
-	search: SearchInputConfig;
 	hasFederations: boolean;
 	showBottomButton?: boolean;
+	onFilterQueryChange? : (query: string) => void;
+	filterQuery?: string;
 };
 
 export const FederationsList = ({
@@ -60,18 +60,15 @@ export const FederationsList = ({
 	federations,
 	title,
 	titleTooltips,
-	search,
+	filterQuery,
+	onFilterQueryChange,
 	showBottomButton = false,
 	hasFederations,
 }: IFederationsList): JSX.Element => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 
 	const { sortedList, setSortConfig } = useOrderedList(federations, DEFAULT_SORT_CONFIG);
-	const {
-		setSearchInput,
-		searchInput,
-		filterQuery,
-	} = useSearchInput(search);
+
 	const isListPending = FederationsHooksSelectors.selectIsListPending();
 	const areStatsPending = FederationsHooksSelectors.selectAreStatsPending();
 
@@ -92,9 +89,9 @@ export const FederationsList = ({
 				sideElement={(
 					<CollapseSideElementGroup>
 						<SearchInput
-							onClear={() => setSearchInput('')}
-							onChange={(event) => setSearchInput(event.currentTarget.value)}
-							value={searchInput}
+							onClear={() => onFilterQueryChange('')}
+							onChange={(event) => onFilterQueryChange(event.currentTarget.value)}
+							value={filterQuery}
 							placeholder={formatMessage({ id: 'federations.search.placeholder',
 								defaultMessage: 'Search...' })}
 							disabled={isListPending}
@@ -129,27 +126,25 @@ export const FederationsList = ({
 						<FormattedMessage id="federations.list.header.lastUpdated" defaultMessage="Last updated" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>
-				{useMemo(() => (
-					<DashboardList>
-						{!isEmpty(sortedList) ? (
-							sortedList.map((federation, index) => (
-								<FederationListItem
-									index={index}
-									key={federation._id}
-									federation={federation}
-									filterQuery={filterQuery}
-									onFavouriteChange={setFavourite}
-								/>
-							))
-						) : (
-							<DashboardListEmptyContainer>
-								{filterQuery && hasFederations ? (
-									<DashboardListEmptySearchResults searchPhrase={filterQuery} />
-								) : emptyMessage}
-							</DashboardListEmptyContainer>
-						)}
-					</DashboardList>
-				), [sortedList, filterQuery])}
+				<DashboardList>
+					{!isEmpty(sortedList) ? (
+						sortedList.map((federation, index) => (
+							<FederationListItem
+								index={index}
+								key={federation._id}
+								federation={federation}
+								filterQuery={filterQuery}
+								onFavouriteChange={setFavourite}
+							/>
+						))
+					) : (
+						<DashboardListEmptyContainer>
+							{filterQuery && hasFederations ? (
+								<DashboardListEmptySearchResults searchPhrase={filterQuery} />
+							) : emptyMessage}
+						</DashboardListEmptyContainer>
+					)}
+				</DashboardList>
 				{showBottomButton && !isListPending && hasFederations && (
 					<DashboardListButton
 						startIcon={<AddCircleIcon />}
