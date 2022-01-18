@@ -18,7 +18,7 @@
 import React, { ReactNode, useState } from 'react';
 import { Collapse, Tooltip } from '@material-ui/core';
 import { ChevronButton } from '@controls/chevronButton';
-import { Container, ButtonContainer, ControlsContainer, CollapsedItemContainer, Title, SideElementContainer } from './dashboardListCollapse.styles';
+import { Container, ButtonContainer, ControlsContainer, CollapsedItemContainer, Title } from './dashboardListCollapse.styles';
 
 export type IDashboardListCollapse = {
 	children: ReactNode;
@@ -46,9 +46,7 @@ export const DashboardListCollapse = ({
 					</Tooltip>
 					<Title variant="h3" color="secondary">{title}</Title>
 				</ButtonContainer>
-				<SideElementContainer>
-					{sideElement}
-				</SideElementContainer>
+				{sideElement}
 			</ControlsContainer>
 			<Collapse in={!isCollapsed}>
 				<CollapsedItemContainer>

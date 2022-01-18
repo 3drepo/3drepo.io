@@ -46,9 +46,3 @@ export const ControlsContainer = styled.div`
 	display: flex;
 	justify-content: space-between;
 `;
-
-export const SideElementContainer = styled.div`
-	@media (max-width: ${Display.Tablet}px) {
-		padding-left: 25px;
-	}
-`;
