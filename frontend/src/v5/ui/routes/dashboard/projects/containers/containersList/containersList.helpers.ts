@@ -22,7 +22,11 @@ import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/c
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { useDispatch } from 'react-redux';
 
-export const getContainerMenuItems = (container: IContainer) => {
+export const getContainerMenuItems = (
+	container: IContainer,
+	isSelected: boolean,
+	onSelectOrToggleItem: (id: string) => void,
+) => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 	const dispatch = useDispatch();
 	return [
@@ -48,8 +52,12 @@ export const getContainerMenuItems = (container: IContainer) => {
 		},
 		{
 			key: 5,
-			title: formatMessage({ id: 'containers.ellipsisMenu.viewRevisions', defaultMessage: 'View Revisions' }),
-			onClick: () => { },
+			title: formatMessage(
+				isSelected
+					? { id: 'containers.ellipsisMenu.hideRevisions', defaultMessage: 'Hide Revisions' }
+					: { id: 'containers.ellipsisMenu.viewRevisions', defaultMessage: 'View Revisions' },
+			),
+			onClick: () => onSelectOrToggleItem(container._id),
 		},
 		{
 			key: 6,
