@@ -14,17 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled, { css } from 'styled-components';
-import { Typography } from '@material-ui/core';
 
-export const Text = styled(Typography).attrs({
-	variant: 'body1',
-})`
-	color: ${({ theme }) => theme.palette.base.main};
-	overflow: hidden;
-	text-overflow: ellipsis;
+import React from 'react';
 
-	${({ selected, theme }) => selected && css`
-		color: ${theme.palette.base.light};
-	`}
-`;
+import ChevronIcon from '@assets/icons/chevron.svg';
+import { SelectProps } from '@material-ui/core';
+import { SelectInput } from './select.styles';
+
+export const SelectBase = ({ children, ...props }: SelectProps, ref: React.Ref<HTMLButtonElement>) => (
+	<SelectInput IconComponent={ChevronIcon} ref={ref} {...props}>
+		{children}
+	</SelectInput>
+);
+
+export const Select = React.forwardRef(SelectBase);
