@@ -17,6 +17,7 @@
 
 import styled, { css } from 'styled-components';
 import { Typography } from '@controls/typography';
+import { Display } from '@/v5/ui/themes/media';
 
 export const Container = styled.div`
 	${({ isLoading }) => isLoading && css`
@@ -44,4 +45,10 @@ export const CollapsedItemContainer = styled.div`
 export const ControlsContainer = styled.div`
 	display: flex;
 	justify-content: space-between;
+`;
+
+export const SideElementContainer = styled.div`
+	@media (max-width: ${Display.Tablet}px) {
+		padding-left: 25px;
+	}
 `;
