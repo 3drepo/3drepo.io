@@ -187,7 +187,7 @@ User.generateApiKey = async (username) => {
 	return apiKey;
 };
 
-User.deleteApiKey = async (username) => updateUser(username, { $unset: { 'customData.apiKey': 1 } });
+User.deleteApiKey = (username) => updateUser(username, { $unset: { 'customData.apiKey': 1 } });
 
 User.getAvatar = async (username) => {
 	const user = await User.getUserByUsername(username, { 'customData.avatar': 1 });

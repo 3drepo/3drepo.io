@@ -18,8 +18,8 @@
 const { createResponseCode, templates } = require('../../utils/responseCodes');
 const FileType = require('file-type');
 const Multer = require('multer');
-const config = require('../../utils/config');
 const { respond } = require('../../utils/responder');
+const { fileUploads: uploadConfig } = require('../../utils/config');
 const { validateMany } = require('../common');
 
 const MulterHelper = {};
@@ -34,7 +34,7 @@ const singleFileMulterPromise = (req, fileName, fileFilter, maxSize,
 	if (storeInMemory) {
 		options.storage = Multer.memoryStorage();
 	} else {
-		options.dest = config.cn_queue.upload_dir;
+		options.dest = uploadConfig.uploadDir;
 	}
 
 	Multer(options).single(fileName)(req, null, (err) => {
@@ -46,13 +46,10 @@ const singleFileMulterPromise = (req, fileName, fileFilter, maxSize,
 	});
 });
 
-const acceptedImageFormats = ['png', 'jpg', 'gif'];
-const maxAvatarSize = 1048576;
-
 const imageFilter = async (req, file, cb) => {
 	const format = file.originalname.split('.').splice(-1)[0];
 
-	if (!acceptedImageFormats.includes(format)) {
+	if (!uploadConfig.imageExtensions.includes(format)) {
 		const err = createResponseCode(templates.unsupportedFileFormat, `${format} is not a supported image format`);
 		cb(err, false);
 		return;
@@ -66,16 +63,16 @@ const ensureFileIsImage = async (req, res, next) => {
 	if (fileBuffer) {
 		const type = await FileType.fromBuffer(fileBuffer);
 
-		if (!acceptedImageFormats.includes(type?.ext)) {
+		if (!uploadConfig.imageExtensions.includes(type?.ext)) {
 			respond(req, res, templates.unsupportedFileFormat);
 			return;
 		}
 	}
 
-	next();
+	await next();
 };
 
-MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, maxSize = config.uploadSizeLimit,
+MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, maxSize = uploadConfig.uploadSizeLimit,
 	storeInMemory = false) => async (req, res, next) => {
 	try {
 		await singleFileMulterPromise(req, fileName, fileFilter, maxSize, storeInMemory);
@@ -84,7 +81,7 @@ MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, maxSize = config
 		let response = err;
 
 		if (err.code === 'LIMIT_FILE_SIZE') {
-			response = createResponseCode(templates.maxSizeExceeded, `File cannot be bigger than ${config.uploadSizeLimit} bytes.`);
+			response = createResponseCode(templates.maxSizeExceeded, `File cannot be bigger than ${maxSize} bytes.`);
 		} else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
 			response = createResponseCode(templates.invalidArguments, `${fileName} is a required field`);
 		}
@@ -94,7 +91,7 @@ MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, maxSize = config
 };
 
 MulterHelper.singleImageUpload = (fileName) => validateMany(
-	[MulterHelper.singleFileUpload(fileName, imageFilter, maxAvatarSize, true), ensureFileIsImage],
+	[MulterHelper.singleFileUpload(fileName, imageFilter, uploadConfig.avatarSizeLimit, true), ensureFileIsImage],
 );
 
 module.exports = MulterHelper;
