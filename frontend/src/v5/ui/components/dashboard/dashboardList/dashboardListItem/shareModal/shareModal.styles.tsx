@@ -124,6 +124,7 @@ export const UrlContainer = styled(TextField)`
 
 		.MuiOutlinedInput-input {
 			cursor: pointer;
+			pointer-events: none;
 	
 			&:active {
 				color: ${({ theme }) => theme.palette.base.main};
