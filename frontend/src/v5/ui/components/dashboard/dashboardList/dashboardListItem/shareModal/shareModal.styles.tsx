@@ -16,11 +16,10 @@
  */
 import React from 'react';
 import styled from 'styled-components';
-import { TextField } from '@material-ui/core';
+import { TextField, withStyles } from '@material-ui/core';
 import Tooltip, { TooltipProps } from '@material-ui/core/Tooltip';
 import copyToClipboardIcon from '@assets/icons/copy_to_clipboard';
 import tick from '@assets/icons/tick';
-import { withStyles } from '@material-ui/core';
 
 export const Container = styled.div`
 	display: flex;
