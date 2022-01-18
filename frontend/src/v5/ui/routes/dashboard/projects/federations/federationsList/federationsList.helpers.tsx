@@ -15,49 +15,74 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import { formatMessage } from '@/v5/services/intl';
+import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { IFederation } from '@/v5/store/federations/federations.types';
+import { useDispatch } from 'react-redux';
+import { useParams } from 'react-router';
 
-export const getFederationMenuItems = (id: IFederation['_id']) => [
-	{
-		key: 1,
-		title: formatMessage({ id: 'federations.ellipsisMenu.loadFederation', defaultMessage: 'Load Federation in 3D Viewer' }),
-		to: `/${id}`,
-	},
-	{
-		key: 2,
-		title: formatMessage({ id: 'federations.ellipsisMenu.edit', defaultMessage: 'Edit Federation' }),
-		onClick: () => { },
-	},
-	{
-		key: 3,
-		title: formatMessage({ id: 'federations.ellipsisMenu.viewIssues', defaultMessage: 'View Issues' }),
-		onClick: () => { },
-	},
-	{
-		key: 4,
-		title: formatMessage({ id: 'federations.ellipsisMenu.viewRisks', defaultMessage: 'View Risks' }),
-		onClick: () => { },
-	},
-	{
-		key: 5,
-		title: formatMessage({ id: 'federations.ellipsisMenu.editPermissions', defaultMessage: 'Edit Permissions' }),
-		onClick: () => { },
-	},
-	{
-		key: 6,
-		title: formatMessage({ id: 'federations.ellipsisMenu.shareContainer', defaultMessage: 'Share Container' }),
-		onClick: () => { },
-	},
-	{
-		key: 7,
-		title: formatMessage({ id: 'federations.ellipsisMenu.settings', defaultMessage: 'Settings' }),
-		onClick: () => {
+export const getFederationMenuItems = (federation: IFederation) => {
+	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const dispatch = useDispatch();
+
+	return [
+		{
+			key: 1,
+			title: formatMessage({ id: 'federations.ellipsisMenu.loadFederation', defaultMessage: 'Load Federation in 3D Viewer' }),
+			to: `/${federation._id}`,
 		},
-	},
-	{
-		key: 8,
-		title: formatMessage({ id: 'federations.ellipsisMenu.delete', defaultMessage: 'Delete' }),
-		onClick: () => { },
-	},
-];
+		{
+			key: 2,
+			title: formatMessage({ id: 'federations.ellipsisMenu.edit', defaultMessage: 'Edit Federation' }),
+			onClick: () => { },
+		},
+		{
+			key: 3,
+			title: formatMessage({ id: 'federations.ellipsisMenu.viewIssues', defaultMessage: 'View Issues' }),
+			onClick: () => { },
+		},
+		{
+			key: 4,
+			title: formatMessage({ id: 'federations.ellipsisMenu.viewRisks', defaultMessage: 'View Risks' }),
+			onClick: () => { },
+		},
+		{
+			key: 5,
+			title: formatMessage({ id: 'federations.ellipsisMenu.editPermissions', defaultMessage: 'Edit Permissions' }),
+			onClick: () => { },
+		},
+		{
+			key: 6,
+			title: formatMessage({ id: 'federations.ellipsisMenu.shareContainer', defaultMessage: 'Share Container' }),
+			onClick: () => { },
+		},
+		{
+			key: 7,
+			title: formatMessage({ id: 'federations.ellipsisMenu.settings', defaultMessage: 'Settings' }),
+			onClick: () => {
+			},
+		},
+		{
+			key: 8,
+			title: formatMessage({ id: 'federations.ellipsisMenu.delete', defaultMessage: 'Delete' }),
+			onClick: () => {
+				dispatch(DialogsActions.open('delete', {
+					title: formatMessage(
+						{ id: 'deleteFederation.federation.title', defaultMessage: 'Delete {name}?' },
+						{ name: federation.name },
+					),
+					onClickConfirm: () => FederationsActionsDispatchers.deleteFederation(
+						teamspace,
+						project,
+						federation._id,
+					),
+					message: formatMessage({
+						id: 'deleteFederation.federation.message',
+						defaultMessage: 'By deleting this Federation your data will be lost permanently and will not be recoverable.',
+					}),
+				}));
+			},
+		},
+	];
+};

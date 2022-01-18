@@ -80,6 +80,17 @@ export type FetchFederationStatsSuccessPayload = {
 	federationStats: FetchFederationStatsResponse;
 };
 
+export interface DeleteFederationPayload {
+	teamspace: string;
+	projectId: string;
+	federationId: string;
+}
+
+export interface DeleteFederationSuccessPayload {
+	projectId: string;
+	federationId: string;
+}
+
 export type FetchFederationsAction = Action<'FETCH_FEDERATIONS'> & FetchFederationsPayload;
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;
 export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & FavouritePayload;
@@ -90,6 +101,8 @@ export type SetFilterQueryAction = Action<'SET_ALL_FILTER_QUERY'> & { query: str
 export type SetFavouritesFilterQueryAction = Action<'SET_FAVOURITES_FILTER_QUERY'> & { query: string};
 export type FetchFederationStatsAction = Action<'FETCH_FEDERATION_STATS'> & FetchFederationStatsPayload;
 export type FetchFederationStatsSuccessAction = Action<'FETCH_FEDERATION_STATS_SUCCESS'> & FetchFederationStatsSuccessPayload;
+export type DeleteFederationAction = Action<'DELETE'> & DeleteFederationPayload;
+export type DeleteFederationSuccessAction = Action<'DELETE_SUCCESS'> & DeleteFederationSuccessPayload;
 
 export interface IFederationsActionCreators {
 	fetchFederations: (teamspace: string, projectId: string) => FetchFederationsAction;
@@ -106,4 +119,6 @@ export interface IFederationsActionCreators {
 	setAllFilterQuery: (query: string) => SetFilterQueryAction;
 	setFavouritesFilterQuery: (query: string) => SetFavouritesFilterQueryAction;
 	setIsListPending: (isPending: boolean) => SetIsListPendingAction;
+	deleteFederation: (teamspace: string, projectId: string, federationId: string) => DeleteFederationAction;
+	deleteFederationSuccess: (projectId: string, federationId: string) => DeleteFederationSuccessAction;
 }
