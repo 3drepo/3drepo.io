@@ -21,6 +21,7 @@ import { Display } from '@/v5/ui/themes/media';
 
 export const Container = styled.div`
 	margin: 16px 0;
+	min-width: 380px;
 `;
 
 export const CollapseSideElementGroup = styled.div`

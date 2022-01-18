@@ -14,17 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled, { css } from 'styled-components';
-import { Typography } from '@material-ui/core';
 
-export const Text = styled(Typography).attrs({
-	variant: 'body1',
-})`
-	color: ${({ theme }) => theme.palette.base.main};
-	overflow: hidden;
-	text-overflow: ellipsis;
+import styled from 'styled-components';
+import { Select } from '@material-ui/core';
 
-	${({ selected, theme }) => selected && css`
-		color: ${theme.palette.base.light};
-	`}
+export const SelectInput = styled(Select)`
+	svg {
+		position: absolute;
+		pointer-events: none;
+		right: 14px;
+		margin-top: 40px;
+		path { 
+			fill: ${({ theme }) => theme.palette.base.main}
+		}
+	}
 `;
