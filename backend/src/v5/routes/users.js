@@ -242,12 +242,12 @@ const establishRoutes = () => {
 	*                 description: The email of the user
 	*                 example: jason@vorhees.com
 	*                 format: email
-	*               oldPassport:
+	*               oldPassword:
 	*                 type: string
 	*                 description: The old password of the user
 	*                 example: password12345
     *                 format: password
-	*               newPassport:
+	*               newPassword:
 	*                 type: string
 	*                 description: The new password of the user
 	*                 example: password12345
