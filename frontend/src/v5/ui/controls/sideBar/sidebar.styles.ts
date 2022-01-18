@@ -22,7 +22,7 @@ export const Container = styled.span`
 	width: 0;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	transition: width 0.1s;
-
+	position: relative;
 	:not(.isOpen) {
 		svg {
 			transform: scaleX(-1);
@@ -32,10 +32,9 @@ export const Container = styled.span`
 	&.isOpen {
 		width: 400px;
 		transition: width 0.1s;
-
-		svg {
-			transform: scaleX(1);
-		}
+		padding: 29px;
+		box-sizing: border-box;
+		flex-shrink: 0;
 	}
 `;
 
