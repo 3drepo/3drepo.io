@@ -176,7 +176,7 @@ const establishRoutes = () => {
 	 * /user:
 	 *   get:
 	 *     description: Gets the profile of the logged in user
-	 *     tags: [Auth]
+	 *     tags: [User]
 	 *     operationId: getProfile
 	 *     responses:
 	 *       401:
@@ -221,7 +221,7 @@ const establishRoutes = () => {
 	* /user:
 	*   put:
 	*     description: Updates the profile of the logged in user
-	*     tags: [Auth]
+	*     tags: [User]
 	*     operationId: updateProfile
 	*     requestBody:
 	*       content:
@@ -266,7 +266,7 @@ const establishRoutes = () => {
 	* /user/key:
 	*   post:
 	*     description: Generates a new API key for the logged in user
-	*     tags: [Auth]
+	*     tags: [User]
 	*     operationId: generateApiKey
 	*     responses:
 	*       401:
@@ -290,7 +290,7 @@ const establishRoutes = () => {
 	* /user/key:
 	*   delete:
 	*     description: Deletes the API key of the logged in user
-	*     tags: [Auth]
+	*     tags: [User]
 	*     operationId: deleteApiKey
 	*     responses:
 	*       401:
@@ -305,7 +305,7 @@ const establishRoutes = () => {
 	* /user/avatar:
 	*   get:
 	*     description: Gets the avatar of the logged in user
-	*     tags: [Auth]
+	*     tags: [User]
 	*     operationId: getAvatar
 	*     responses:
 	*       401:
@@ -322,7 +322,7 @@ const establishRoutes = () => {
 	* /user/avatar:
 	*   put:
 	*     description: Uploadns new avatar for the logged in user
-	*     tags: [Auth]
+	*     tags: [User]
 	*     operationId: uploadAvatar
 	*     requestBody:
 	*       content:
