@@ -43,7 +43,7 @@ interface IContainerListItem {
 	container: IContainer;
 	filterQuery: string;
 	onFavouriteChange: (id: string, value: boolean) => void;
-	onToggleSelected: (id: string) => void;
+	onSelectOrToggleItem: (id: string) => void;
 }
 
 export const ContainerListItem = ({
@@ -51,7 +51,7 @@ export const ContainerListItem = ({
 	isSelected,
 	container,
 	filterQuery,
-	onToggleSelected,
+	onSelectOrToggleItem,
 	onFavouriteChange,
 }: IContainerListItem): JSX.Element => {
 	if (container.hasStatsPending) {
@@ -65,7 +65,7 @@ export const ContainerListItem = ({
 		>
 			<DashboardListItemRow
 				selected={isSelected}
-				onClick={() => onToggleSelected(container._id)}
+				onClick={() => onSelectOrToggleItem(container._id)}
 			>
 				<DashboardListItemTitle
 					subtitle={(
@@ -86,7 +86,7 @@ export const ContainerListItem = ({
 					</Highlight>
 				</DashboardListItemTitle>
 				<DashboardListItemButton
-					onClick={() => onToggleSelected(container._id)}
+					onClick={() => onSelectOrToggleItem(container._id)}
 					width={186}
 					hideWhenSmallerThan={Display.Desktop}
 					tooltipTitle={
@@ -142,7 +142,7 @@ export const ContainerListItem = ({
 				</DashboardListItemIcon>
 				<DashboardListItemIcon selected={isSelected}>
 					<EllipsisButtonWithMenu
-						list={getContainerMenuItems(container)}
+						list={getContainerMenuItems(container, isSelected, onSelectOrToggleItem)}
 					/>
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
