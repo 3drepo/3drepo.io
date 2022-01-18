@@ -18,7 +18,7 @@ const { authenticate, canLogIn, deleteApiKey, generateApiKey, getAvatar,
 	getUserByUsername, updatePassword, updateProfile, uploadAvatar } = require('../models/users');
 
 const Users = {};
-const _ = require('lodash');
+const { isEmpty, removeFields } = require('../utils/helper/objects');
 
 Users.login = async (username, password) => {
 	await canLogIn(username);
@@ -52,8 +52,8 @@ Users.updateProfile = async (username, updatedProfile) => {
 		await updatePassword(username, updatedProfile.newPassword);
 	}
 
-	const fieldsToUpdate = _.omit(updatedProfile, 'oldPassword', 'newPassword');
-	if (!_.isEmpty(fieldsToUpdate)) {
+	const fieldsToUpdate = removeFields(updatedProfile, 'oldPassword', 'newPassword');
+	if (!isEmpty(fieldsToUpdate)) {
 		await updateProfile(username, fieldsToUpdate);
 	}
 };
