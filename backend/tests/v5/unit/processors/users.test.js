@@ -38,6 +38,7 @@ const user = {
 };
 const getUserByUsernameMock = UsersModel.getUserByUsername.mockImplementation(() => user);
 const updateUserByUsernameMock = UsersModel.updateProfile.mockImplementation(() => {});
+const updatePasswordMock = UsersModel.updatePassword.mockImplementation(() => {});
 
 const testLogin = () => {
 	describe('Login', () => {
@@ -84,14 +85,28 @@ const tesGetProfileByUsername = () => {
 
 const tesUpdateProfile = () => {
 	describe('Update user profile by username', () => {
-		test('should return user profile', async () => {
-			const updatedProfile = {
-				firstname: 'Nick',
-			};
-
+		test('should update user profile', async () => {
+			const updatedProfile = { firstName: 'Nick' };
 			await Users.updateProfile('user 1', updatedProfile);
 			expect(updateUserByUsernameMock.mock.calls.length).toBe(1);
 			expect(updateUserByUsernameMock.mock.calls[0][1]).toEqual(updatedProfile);
+		});
+
+		test('should update user profile and password', async () => {
+			const updatedProfile = { firstName: 'Nick', oldPassword: 'oldPass', newPassword: 'newPass' };
+			await Users.updateProfile('user 1', updatedProfile);
+			expect(updateUserByUsernameMock.mock.calls.length).toBe(1);
+			expect(updateUserByUsernameMock.mock.calls[0][1]).toEqual({ firstName: 'Nick' });
+			expect(updatePasswordMock.mock.calls.length).toBe(1);
+			expect(updatePasswordMock.mock.calls[0][1]).toEqual('newPass');
+		});
+
+		test('should update password', async () => {
+			const updatedProfile = { oldPassword: 'oldPass', newPassword: 'newPass' };
+			await Users.updateProfile('user 1', updatedProfile);
+			expect(updateUserByUsernameMock.mock.calls.length).toBe(0);
+			expect(updatePasswordMock.mock.calls.length).toBe(1);
+			expect(updatePasswordMock.mock.calls[0][1]).toEqual('newPass');
 		});
 	});
 };

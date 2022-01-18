@@ -81,9 +81,8 @@ const deleteApiKey = (req, res) => {
 const getAvatar = (req, res) => {
 	const user = getUserFromSession(req.session);
 	Users.getAvatar(user).then((avatar) => {
-		res.write(avatar.data.buffer);
-		res.end();
-		respond(req, res, templates.ok);
+		req.params.format = 'png';
+		respond(req, res, templates.ok, avatar.data.buffer);
 	}).catch((err) => respond(req, res, err));
 };
 
@@ -272,7 +271,7 @@ const establishRoutes = () => {
 	*       401:
 	*         $ref: "#/components/responses/notLoggedIn"
 	*       200:
-	*         description: Updates the details of the user
+	*         description: Generates a new API key for the user
 	*         content:
 	*           application/json:
 	*             schema:
@@ -311,9 +310,14 @@ const establishRoutes = () => {
 	*       401:
 	*         $ref: "#/components/responses/notLoggedIn"
 	*       200:
-	*         description: Updates the details of the user
+	*         description: Gets the avatar of the user
+	*         produces:
+	*           image/png:
 	*         content:
-	*           image
+	*           image/png:
+	*             schema:
+	*               type: string
+	*               format: binary
 	*/
 	router.get('/user/avatar', validSession, getAvatar);
 
@@ -331,7 +335,7 @@ const establishRoutes = () => {
 	*       401:
 	*         $ref: "#/components/responses/notLoggedIn"
 	*       200:
-	*         description: Updates the details of the user
+	*         description: Uploads a new avatar for the user
 	*/
 	router.put('/user/avatar', isLoggedIn, validateAvatarFile, uploadAvatar);
 

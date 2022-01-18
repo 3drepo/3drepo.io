@@ -16,7 +16,6 @@
  */
 
 const { createResponseCode, templates } = require('../utils/responseCodes');
-const _ = require('lodash');
 const config = require('../utils/config');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
@@ -162,7 +161,7 @@ User.deleteFavourites = async (username, teamspace, favouritesToRemove) => {
 	}
 };
 
-const changePassword = async (username, newPassword) => {
+User.updatePassword = async (username, newPassword) => {
 	const updateUserCmd = {
 		updateUser: username,
 		pwd: newPassword,
@@ -173,21 +172,13 @@ const changePassword = async (username, newPassword) => {
 };
 
 User.updateProfile = async (username, updatedProfile) => {
-	if (updatedProfile.oldPassword) {
-		await changePassword(username, updatedProfile.newPassword);
-	}
+	const updateData = {};
 
-	const fieldsToUpdate = _.omit(updatedProfile, 'oldPassword', 'newPassword');
+	Object.keys(updatedProfile).forEach((key) => {
+		updateData[`customData.${key}`] = updatedProfile[key];
+	});
 
-	if (!_.isEmpty(fieldsToUpdate)) {
-		const updateData = {};
-
-		Object.keys(fieldsToUpdate).forEach((key) => {
-			updateData[`customData.${key}`] = fieldsToUpdate[key];
-		});
-
-		await updateUser(username, { $set: updateData });
-	}
+	await updateUser(username, { $set: updateData });
 };
 
 User.generateApiKey = async (username) => {

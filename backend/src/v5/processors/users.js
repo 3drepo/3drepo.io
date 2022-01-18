@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { authenticate, canLogIn, deleteApiKey, generateApiKey, getAvatar,
-	getUserByUsername, updateProfile, uploadAvatar } = require('../models/users');
+	getUserByUsername, updatePassword, updateProfile, uploadAvatar } = require('../models/users');
 
 const Users = {};
+const _ = require('lodash');
 
 Users.login = async (username, password) => {
 	await canLogIn(username);
@@ -46,7 +47,16 @@ Users.getProfileByUsername = async (username) => {
 	};
 };
 
-Users.updateProfile = updateProfile;
+Users.updateProfile = async (username, updatedProfile) => {
+	if (updatedProfile.oldPassword) {
+		await updatePassword(username, updatedProfile.newPassword);
+	}
+
+	const fieldsToUpdate = _.omit(updatedProfile, 'oldPassword', 'newPassword');
+	if (!_.isEmpty(fieldsToUpdate)) {
+		await updateProfile(username, fieldsToUpdate);
+	}
+};
 
 Users.generateApiKey = generateApiKey;
 
