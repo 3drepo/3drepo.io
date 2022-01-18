@@ -19,7 +19,7 @@ import React, { useState } from 'react';
 
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { InputAdornment, Tooltip } from '@material-ui/core';
+import { InputAdornment } from '@material-ui/core';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { viewerShareLink } from '@/v5/services/routing/routing';
@@ -37,7 +37,7 @@ import {
 	CopiedToClipboardTooltip,
 } from './shareModal.styles';
 
-const COPY_ACTION_DISABLED_DURATION_MS = 3000;
+const IS_COPYING_DURATION_MS = 3000;
 const MODAL_TITLE = formatMessage({
 	id: 'ShareModal.title',
 	defaultMessage: 'Share Container URL',
@@ -64,7 +64,7 @@ export const ShareModal = ({ openState, container, onClickClose }: IShareModal):
 		clearTimeout(isCopiedTimer);
 		isCopiedTimer = setTimeout(() => {
 			setIsCopying(true);
-		}, COPY_ACTION_DISABLED_DURATION_MS);
+		}, IS_COPYING_DURATION_MS);
 	};
 
 	return (
@@ -72,6 +72,7 @@ export const ShareModal = ({ openState, container, onClickClose }: IShareModal):
 			open={openState}
 			onClickClose={onClickClose}
 			title={MODAL_TITLE}
+			showButtons={false}
 		>
 			<Container>
 				<LinkLabel>
@@ -85,7 +86,7 @@ export const ShareModal = ({ openState, container, onClickClose }: IShareModal):
 					text={containerLink}
 				>
 					<UrlContainer
-						value={containerName}
+						value={containerLink}
 						InputProps={{
 							readOnly: true,
 							endAdornment: (
