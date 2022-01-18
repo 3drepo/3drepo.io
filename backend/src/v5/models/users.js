@@ -16,7 +16,7 @@
  */
 
 const { createResponseCode, templates } = require('../utils/responseCodes');
-const _ = require('lodash');
+const { isEmpty, removeFields } = require('../utils/helper/objects');
 const config = require('../utils/config');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
@@ -177,9 +177,9 @@ User.updateProfile = async (username, updatedProfile) => {
 		await changePassword(username, updatedProfile.newPassword);
 	}
 
-	const fieldsToUpdate = _.omit(updatedProfile, 'oldPassword', 'newPassword');
+	const fieldsToUpdate = removeFields(updatedProfile, 'oldPassword', 'newPassword');
 
-	if (!_.isEmpty(fieldsToUpdate)) {
+	if (!isEmpty(fieldsToUpdate)) {
 		const updateData = {};
 
 		Object.keys(fieldsToUpdate).forEach((key) => {
