@@ -17,8 +17,8 @@
 
 import React from 'react';
 import { Typography } from '@material-ui/core';
-import { MenuList, MenuItem } from './navigationMenu.styles';
 import { useParams } from 'react-router-dom';
+import { MenuList, MenuItem } from './navigationMenu.styles';
 
 interface IListItem {
 	title: string;
