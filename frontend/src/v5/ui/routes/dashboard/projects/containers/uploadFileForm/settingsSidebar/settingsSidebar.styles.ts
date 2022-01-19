@@ -16,23 +16,40 @@
  */
 
 import styled from 'styled-components';
-import { DragAndDrop } from '@controls/dragAndDrop';
+import { Typography } from '@controls/typography';
+import { Select } from '@controls/select';
+import { FormControl as FormControlMui, TextField } from '@material-ui/core';
 
-export const Container = styled.div`
-	display: flex;
-	flex-direction: row;
-	height: 550px;
-	width:100%;
+export const Title = styled(Typography).attrs({
+	variant: 'h3',
+})`
+	color: ${({ theme }) => theme.palette.secondary.main};
 `;
 
-export const DropZone = styled(DragAndDrop)`
-	max-height: 190px;
+export const UnitSelect = styled(Select)`
+	width: 109px;
+	margin-top: 32px;
 `;
 
-export const Content = styled.span`
-	width: 100%;
-	overflow-y: auto;
-	overflow-x: hidden;
-	padding: 15px;
+export const TypeSelect = styled(Select)`
+	width: 221px;
+	margin-top: 32px;
+`;
 
+export const Input = styled(TextField)`
+	margin-top: 32px;
+`;
+
+export const FormControl = styled(FormControlMui)`
+	width: auto;
+	& + & {
+		padding: 0 0 0 10px;
+		label { padding: 0 0 0 10px }
+	}
+`;
+
+export const RevisionTitle = styled(Typography).attrs({
+	variant: 'h3',
+})`
+	margin-top: 32px;
 `;

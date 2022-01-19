@@ -32,7 +32,7 @@ export const Container = styled.span`
 	&.isOpen {
 		width: 400px;
 		transition: width 0.1s;
-		padding: 29px;
+		padding: 30px;
 		box-sizing: border-box;
 		flex-shrink: 0;
 	}

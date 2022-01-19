@@ -15,24 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { DragAndDrop } from '@controls/dragAndDrop';
-
-export const Container = styled.div`
-	display: flex;
-	flex-direction: row;
-	height: 550px;
-	width:100%;
-`;
-
-export const DropZone = styled(DragAndDrop)`
-	max-height: 190px;
-`;
-
-export const Content = styled.span`
-	width: 100%;
-	overflow-y: auto;
-	overflow-x: hidden;
-	padding: 15px;
-
-`;
+export { SettingsSidebar } from './settingsSidebar.component';

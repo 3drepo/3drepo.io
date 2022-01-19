@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { formatMessage } from '@/v5/services/intl';
-import { Container, DropZone } from './uploadFileForm.styles';
+import { SettingsSidebar } from './settingsSidebar';
 
 type IUploadFileForm = {
 	openState: boolean;
@@ -28,10 +28,10 @@ type IUploadFileForm = {
 };
 
 export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JSX.Element => {
-	const { register, handleSubmit } = useForm();
+	const [sidebarOpen, setSidebarOpen] = useState(false);
+	const [sidebarHidden, setSidebarHidden] = useState(true);
 
-	const onSubmit = () => {
-		onClickClose();
+	const revisions = [ ];
 	};
 
 	return (
@@ -50,6 +50,11 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 						{ MoreLink: (child: string) => <a href="https://help.3drepo.io/en/articles/4798885-supported-file-formats" target="_blank" rel="noreferrer">{child}</a> },
 					)}
 					processFiles={() => { }}
+				<SettingsSidebar
+					isOpen={sidebarOpen}
+					onClick={() => setSidebarOpen(!sidebarOpen)}
+					revision={revisions.find((rev) => rev.upload.uploadId === currentUploadId)}
+					hidden={sidebarHidden}
 				/>
 			</Container>
 		</FormModal>

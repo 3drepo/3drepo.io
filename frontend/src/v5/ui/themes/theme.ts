@@ -489,6 +489,12 @@ export const theme = createMuiTheme({
 		MuiInput: {
 			root: {
 				width: '100%',
+				'&$disabled $input': {
+					color: COLOR.BASE_LIGHT,
+				},
+				'&$disabled $path': {
+					fill: COLOR.BASE_LIGHT,
+				},
 			},
 			underline: {
 				'&:before': {
@@ -517,10 +523,14 @@ export const theme = createMuiTheme({
 				'&:not(.Mui-error).Mui-focused': {
 					color: COLOR.TERTIARY_MAIN,
 				},
+				'&$disabled .MuiInputLabel-asterisk': {
+					display: 'none',
+				},
 			},
 			formControl: {
 				top: '20px',
 				left: '1px',
+				transform: 'none',
 			},
 			asterisk: {
 				color: COLOR.ERROR_MAIN,
