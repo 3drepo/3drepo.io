@@ -38,8 +38,6 @@ export interface IFederation {
 
 export interface IFederationsState {
 	federations: Record<string, IFederation[]>;
-	allFilterQuery: string;
-	favouritesFilterQuery: string;
 	isListPending: boolean;
 }
 
@@ -86,8 +84,6 @@ export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & FavouritePayloa
 export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & {projectId: string, federationId: string, isFavourite: boolean};
 export type FetchFederationsSuccessAction = Action<'FETCH_FEDERATIONS_SUCCESS'> & { projectId: string, federations: IFederation[] };
 export type SetIsListPendingAction = Action<'SET_IS_LIST_PENDING'> & { isPending: boolean };
-export type SetFilterQueryAction = Action<'SET_ALL_FILTER_QUERY'> & { query: string};
-export type SetFavouritesFilterQueryAction = Action<'SET_FAVOURITES_FILTER_QUERY'> & { query: string};
 export type FetchFederationStatsAction = Action<'FETCH_FEDERATION_STATS'> & FetchFederationStatsPayload;
 export type FetchFederationStatsSuccessAction = Action<'FETCH_FEDERATION_STATS_SUCCESS'> & FetchFederationStatsSuccessPayload;
 
@@ -103,7 +99,5 @@ export interface IFederationsActionCreators {
 	addFavourite: (teamspace: string, projectId: string, federationId: string) => AddFavouriteAction;
 	removeFavourite: (teamspace: string, projectId: string, federationId: string) => RemoveFavouriteAction;
 	setFavouriteSuccess: (projectId: string, federationId: string, isFavourite: boolean) => SetFavouriteSuccessAction;
-	setAllFilterQuery: (query: string) => SetFilterQueryAction;
-	setFavouritesFilterQuery: (query: string) => SetFavouritesFilterQueryAction;
 	setIsListPending: (isPending: boolean) => SetIsListPendingAction;
 }

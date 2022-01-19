@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 
 import AddCircleIcon from '@assets/icons/add_circle.svg';
@@ -23,26 +23,24 @@ import {
 	DashboardListEmptyText,
 	Divider,
 } from '@components/dashboard/dashboardList/dashboardList.styles';
-import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
-import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
 import { Content } from '@/v5/ui/routes/dashboard/projects/projects.styles';
 import { Button } from '@controls/button';
+import { filterFederations } from '@/v5/store/federations/federations.helpers';
 import { useFederationsData } from './federations.hooks';
 import { FederationsList } from './federationsList';
 import { SkeletonListItem } from './federationsList/skeletonListItem';
 
 export const Federations = (): JSX.Element => {
 	const {
-		filteredFederations,
+		federations,
 		favouriteFederations,
 		hasFederations,
 		isListPending,
 	} = useFederationsData();
 
-	const favouritesFilterQuery = FederationsHooksSelectors.selectFavouritesFilterQuery();
-	const allFilterQuery = FederationsHooksSelectors.selectAllFilterQuery();
-	const { setFavouritesFilterQuery, setAllFilterQuery } = FederationsActionsDispatchers;
+	const [favouritesFilterQuery, setFavouritesFilterQuery] = useState<string>('');
+	const [allFilterQuery, setAllFilterQuery] = useState<string>('');
 
 	return (
 		<Content>
@@ -52,11 +50,9 @@ export const Federations = (): JSX.Element => {
 				<>
 					<FederationsList
 						hasFederations={hasFederations.favourites}
-						search={{
-							query: favouritesFilterQuery,
-							dispatcher: setFavouritesFilterQuery,
-						}}
-						federations={favouriteFederations}
+						filterQuery={favouritesFilterQuery}
+						onFilterQueryChange={setFavouritesFilterQuery}
+						federations={filterFederations(favouriteFederations, favouritesFilterQuery)}
 						title={(
 							<FormattedMessage
 								id="federations.favourites.collapseTitle"
@@ -79,11 +75,9 @@ export const Federations = (): JSX.Element => {
 					<Divider />
 					<FederationsList
 						hasFederations={hasFederations.all}
-						search={{
-							query: allFilterQuery,
-							dispatcher: setAllFilterQuery,
-						}}
-						federations={filteredFederations}
+						filterQuery={allFilterQuery}
+						onFilterQueryChange={setAllFilterQuery}
+						federations={filterFederations(federations, allFilterQuery)}
 						title={(
 							<FormattedMessage
 								id="federations.all.collapseTitle"
