@@ -23,6 +23,7 @@ export const Container = styled.div`
 	flex-direction: row;
 	height: 550px;
 	width:100%;
+	overflow-x: hidden;
 `;
 
 export const DropZone = styled(DragAndDrop)`
