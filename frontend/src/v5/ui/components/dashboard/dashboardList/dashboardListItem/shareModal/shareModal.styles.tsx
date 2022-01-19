@@ -70,23 +70,43 @@ export const CopyToClipboardTooltip = withStyles(() => ({
 	},
 }))(Tooltip);
 
-type CopiedToClipboardTooltipProps = TooltipProps & {
-	theme: any
-};
+// export const CopyToClipboardTooltip = styled(
+// 	({ className, theme, ...props }: CopiedToClipboardTooltipProps) => (
+// 		<CopyToClipboardTooltip
+// 			{...props}
+// 			PopperProps={{ keepMounted: true }}
+// 			classes={{ popper: className }}
+// 		/>
+// 	),
+// )`
+// 	margin-top: -${SVG_PADDING_IN_PX}px;
+// `;
 
-export const CopiedToClipboardTooltip = styled(
-	({ className, theme, ...props }: CopiedToClipboardTooltipProps) => (
-		<CopyToClipboardTooltip
-			{...props}
-			PopperProps={{ keepMounted: true }}
-			classes={{ popper: className }}
-		/>
-	),
-)`
+// type CopiedToClipboardTooltipProps = TooltipProps & {
+// 	theme: any
+// };
+
+export const CopiedToClipboardTooltip = styled(CopyToClipboardTooltip).attrs({
+	PopperPros: { keepMounted: true },
+})`
 	& .MuiTooltip-tooltip {
 		background-color: ${({ theme }) => theme.palette.primary.main};
 	}
 `;
+
+// export const CopiedToClipboardTooltip = styled(
+// 	({ className, theme, ...props }: CopiedToClipboardTooltipProps) => (
+// 		<CopyToClipboardTooltip
+// 			{...props}
+// 			PopperProps={{ keepMounted: true }}
+// 			classes={{ popper: className }}
+// 		/>
+// 	),
+// )`
+// 	& .MuiTooltip-tooltip {
+// 		background-color: ${({ theme }) => theme.palette.primary.main};
+// 	}
+// `;
 
 export const CopyToClipboardIconContainer = styled.div`
 	display: grid;
