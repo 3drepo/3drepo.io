@@ -17,7 +17,6 @@
 
 import styled, { css } from 'styled-components';
 import { Typography } from '@controls/typography';
-import { Display } from '@/v5/ui/themes/media';
 
 export const Container = styled.div`
 	${({ isLoading }) => isLoading && css`
