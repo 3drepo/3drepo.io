@@ -194,7 +194,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 		if (this.treatmentsUpdatedAt) {
 			return (
 				<>
-					Last updated:&nbsp;
+					Last imported:&nbsp;
 					<DateTime value={this.treatmentsUpdatedAt} format={LONG_DATE_TIME_FORMAT} />
 				</>
 			);
