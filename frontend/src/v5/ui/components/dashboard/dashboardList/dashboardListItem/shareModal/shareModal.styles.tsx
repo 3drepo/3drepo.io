@@ -21,12 +21,7 @@ import Tooltip, { TooltipProps } from '@material-ui/core/Tooltip';
 import copyToClipboardIcon from '@assets/icons/copy_to_clipboard';
 import tick from '@assets/icons/tick';
 
-export const Container = styled.div`
-	display: flex;
-	flex-grow: 1;
-	flex-direction: column;
-	justify-content: center;
-`;
+const SVG_PADDING_IN_PX = 9;
 
 export const LinkLabel = styled.span`
 	${({ theme }) => theme.typography.kicker};
@@ -68,8 +63,6 @@ export const MailToButton = styled.a`
 export const CopyToClipboardIcon = styled(copyToClipboardIcon)``;
 
 export const Tick = styled(tick)``;
-
-const SVG_PADDING_IN_PX = 9;
 
 export const CopyToClipboardTooltip = withStyles(() => ({
 	popper: {
@@ -125,6 +118,7 @@ export const UrlContainer = styled(TextField)`
 		.MuiOutlinedInput-input {
 			cursor: pointer;
 			pointer-events: none;
+			padding-right: ${9 - SVG_PADDING_IN_PX}px;
 	
 			&:active {
 				color: ${({ theme }) => theme.palette.base.main};

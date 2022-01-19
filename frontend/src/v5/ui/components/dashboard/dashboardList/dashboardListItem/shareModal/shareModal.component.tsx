@@ -27,7 +27,6 @@ import { IContainer } from '@/v5/store/containers/containers.types';
 import { useParams } from 'react-router-dom';
 import {
 	UrlContainer,
-	Container,
 	LinkLabel,
 	MailToButton,
 	Tick,
@@ -38,10 +37,6 @@ import {
 } from './shareModal.styles';
 
 const IS_COPYING_DURATION_MS = 3000;
-const MODAL_TITLE = formatMessage({
-	id: 'ShareModal.title',
-	defaultMessage: 'Share Container URL',
-});
 
 type IShareModal = {
 	openState: boolean;
@@ -71,63 +66,64 @@ export const ShareModal = ({ openState, container, onClickClose }: IShareModal):
 		<FormModal
 			open={openState}
 			onClickClose={onClickClose}
-			title={MODAL_TITLE}
+			title={formatMessage({
+				id: 'ShareModal.title',
+				defaultMessage: 'Share Container URL',
+			})}
 			showButtons={false}
 		>
-			<Container>
-				<LinkLabel>
-					<FormattedMessage
-						id="shareModal.linkLabel"
-						defaultMessage="Link"
-					/>
-				</LinkLabel>
-				<CopyToClipboard
-					onCopy={handleCopyToClipboard}
-					text={containerLink}
-				>
-					<UrlContainer
-						value={containerLink}
-						InputProps={{
-							readOnly: true,
-							endAdornment: (
-								<InputAdornment position="end">
-									{isCopying
-										? (
-											<CopyToClipboardTooltip
-												title={formatMessage({
-													id: 'shareModal.copyToClipboard',
-													defaultMessage: 'Copy to clipboard',
-												})}
-											>
-												<CopyToClipboardIconContainer>
-													<CopyToClipboardIcon />
-												</CopyToClipboardIconContainer>
-											</CopyToClipboardTooltip>
-										) : (
-											<CopiedToClipboardTooltip
-												title={formatMessage({
-													id: 'shareModal.copied',
-													defaultMessage: 'Copied to clipboard',
-												})}
-												open
-											>
-												<CopyToClipboardIconContainer>
-													<Tick />
-												</CopyToClipboardIconContainer>
-											</CopiedToClipboardTooltip>
-										)}
-								</InputAdornment>
-							),
-						}}
-					/>
-				</CopyToClipboard>
-				<MailToButton href={`mailto:?subject=3D Repo container - ${containerName}&body=${containerLink}`}>
-					<FormattedMessage
-						id="shareModal.mailTo"
-						defaultMessage="Send by email"
-					/>
-				</MailToButton>
-			</Container>
+			<LinkLabel>
+				<FormattedMessage
+					id="shareModal.linkLabel"
+					defaultMessage="Link"
+				/>
+			</LinkLabel>
+			<CopyToClipboard
+				onCopy={handleCopyToClipboard}
+				text={containerLink}
+			>
+				<UrlContainer
+					value={containerLink}
+					InputProps={{
+						readOnly: true,
+						endAdornment: (
+							<InputAdornment position="end">
+								{isCopying
+									? (
+										<CopyToClipboardTooltip
+											title={formatMessage({
+												id: 'shareModal.copyToClipboard',
+												defaultMessage: 'Copy to clipboard',
+											})}
+										>
+											<CopyToClipboardIconContainer>
+												<CopyToClipboardIcon />
+											</CopyToClipboardIconContainer>
+										</CopyToClipboardTooltip>
+									) : (
+										<CopiedToClipboardTooltip
+											title={formatMessage({
+												id: 'shareModal.copied',
+												defaultMessage: 'Copied to clipboard',
+											})}
+											open
+										>
+											<CopyToClipboardIconContainer>
+												<Tick />
+											</CopyToClipboardIconContainer>
+										</CopiedToClipboardTooltip>
+									)}
+							</InputAdornment>
+						),
+					}}
+				/>
+			</CopyToClipboard>
+			<MailToButton href={`mailto:?subject=3D Repo container - ${containerName}&body=${containerLink}`}>
+				<FormattedMessage
+					id="shareModal.mailTo"
+					defaultMessage="Send by email"
+				/>
+			</MailToButton>
 		</FormModal>
 	);
 };
