@@ -23,11 +23,11 @@ import { formatMessage } from '@/v5/services/intl';
 import {
 	LinkLabel,
 	LinkBar,
-	CopyToClipboardIcon,
 	CopyToClipboardIconContainer,
+	CopyToClipboardIcon,
+	Tick,
 	CopyToClipboardTooltip,
 	CopiedToClipboardTooltip,
-	Tick,
 } from './shareTextField.styles';
 
 type IShareTextField = {

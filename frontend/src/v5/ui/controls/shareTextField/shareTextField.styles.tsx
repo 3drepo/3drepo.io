@@ -29,13 +29,18 @@ export const LinkLabel = styled.span`
 	font-family: ${({ theme }) => theme.typography.fontFamily};
 `;
 
-export const CopyToClipboardIcon = styled(copyToClipboardIcon)``;
+export const CopyToClipboardIcon = styled(copyToClipboardIcon)`
+	padding: ${SVG_PADDING_IN_PX}px;
+`;
 
-export const Tick = styled(tick)``;
+export const Tick = styled(tick)`
+	padding: ${SVG_PADDING_IN_PX}px;
+	padding-left: ${SVG_PADDING_IN_PX - 2}px;
+	padding-right: ${SVG_PADDING_IN_PX + 2}px;
+`;
 
 export const CopyToClipboardIconContainer = styled.div`
 	display: grid;
-	padding: ${SVG_PADDING_IN_PX}px;
 `;
 
 export const LinkBar = styled(TextField)`
