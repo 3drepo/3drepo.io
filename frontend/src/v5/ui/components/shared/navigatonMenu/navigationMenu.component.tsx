@@ -18,6 +18,7 @@
 import React from 'react';
 import { Typography } from '@material-ui/core';
 import { MenuList, MenuItem } from './navigationMenu.styles';
+import { useParams } from 'react-router-dom';
 
 interface IListItem {
 	title: string;
@@ -42,11 +43,20 @@ export const NavigationMenu = ({ anchorEl, handleClose, list }: INavigationMenu)
 			horizontal: 'left',
 		},
 	};
+ 
+	const { project: selectedProject } = useParams();
+	const isSelected = (url: string) => url.endsWith(selectedProject);
 
 	return (
 		<MenuList anchorEl={anchorEl} onClose={handleClose} open={Boolean(anchorEl)} {...menuPosition}>
-			{list.map(({ title, ...props }) => (
-				<MenuItem key={title} {...props} onClick={handleClose}>
+			{list.map(({ title, to, ...props }) => (
+				<MenuItem
+					key={title}
+					to={to}
+					{...props}
+					onClick={handleClose}
+					selected={isSelected(to)}
+				>
 					<Typography variant="body1" noWrap>
 						{title}
 					</Typography>
