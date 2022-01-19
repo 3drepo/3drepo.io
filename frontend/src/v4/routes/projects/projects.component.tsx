@@ -76,7 +76,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 
 	public get isProjectViewActive() {
 		return this.state.currentView !== PERMISSIONS_VIEWS.MODELS;
-	} asss
+	}
 
 	public updateUrlParams = (params) => {
 		const {location: {pathname, search}} = this.props;

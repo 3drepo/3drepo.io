@@ -17,17 +17,20 @@
 import React, { useEffect } from 'react';
 import { UserManagementActions } from '@/v4/modules/userManagement';
 
-import V4Users from '@/v4/routes/users/users.container';
+import { ProjectsPermissions as V4ProjectsPermissions } from '@/v4/routes/projects/projectsPermissions';
 import { useDispatch } from 'react-redux';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 
 export const UsersPermissions = () => {
 	const dispatch = useDispatch();
+	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails().name;
 
 	useEffect(() => {
 		dispatch(UserManagementActions.fetchTeamspaceUsers());
+		dispatch(UserManagementActions.fetchProject(projectName));
 	});
 
 	return (
-		<V4Users />
+		<V4ProjectsPermissions />
 	);
 };

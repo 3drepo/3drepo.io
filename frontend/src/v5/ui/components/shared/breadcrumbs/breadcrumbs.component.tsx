@@ -53,7 +53,7 @@ export const Breadcrumbs = (): JSX.Element => {
 	let { project } = useParams();
 
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
-	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
+	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjectDetails();
 
 	React.useEffect(() => {
 		if (project) {

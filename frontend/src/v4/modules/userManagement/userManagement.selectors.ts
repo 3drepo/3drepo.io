@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { selectCurrentProjectDetails as v5selectCurrentProjectDetails } from '@/v5/store/projects/projects.selectors';
 import { pick, values } from 'lodash';
 import { orderBy } from 'lodash';
 import * as queryString from 'query-string';
@@ -41,8 +42,12 @@ export const selectProjectsPending = createSelector(
 
 export const selectCurrentTeamspace = createSelector(
 	selectLocation, (location) =>  {
+		/** getting the teamspace from v5 routing  */
+		const v5Params = matchPath(location.pathname, { path: '/v5/dashboard/:teamspace' });
+		/*******************************************/
+
 		const userManagementParams = matchPath(location.pathname, { path: ROUTES.USER_MANAGEMENT_TEAMSPACE });
-		return ((userManagementParams || {}).params || {}).teamspace;
+		return ((userManagementParams || v5Params || {}).params || {}).teamspace;
 	}
 );
 
@@ -111,7 +116,14 @@ export const selectProjects = createSelector(
 );
 
 export const selectUrlQueryProject = createSelector(
-	selectLocation, selectProjects , (location, projects) =>  {
+	selectLocation, selectProjects, v5selectCurrentProjectDetails, (location, projects, v5currentProject) =>  {
+		/** v5 bit */
+		if (v5currentProject) {
+			return v5currentProject.name;
+		}
+		/**********/
+
+
 		const { project } = queryString.parse(location.search);
 		const projectFound = projects.find(({ name }) => name === project);
 		return projectFound ? project : '';
