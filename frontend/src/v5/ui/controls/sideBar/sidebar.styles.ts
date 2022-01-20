@@ -23,13 +23,13 @@ export const Container = styled.span`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	transition: width 0.1s;
 	position: relative;
-	:not(.isOpen) {
+	:not(.open) {
 		svg {
 			transform: scaleX(-1);
 		}
 	}
 
-	&.isOpen {
+	&.open {
 		width: 400px;
 		transition: width 0.1s;
 	}

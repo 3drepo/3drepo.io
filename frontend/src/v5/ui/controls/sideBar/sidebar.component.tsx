@@ -20,7 +20,7 @@ import ExpandIcon from '@assets/icons/expand_panel.svg';
 import { Container, Content, Button } from './sidebar.styles';
 
 interface ISidebar {
-	isOpen: boolean;
+	open: boolean;
 	noButton?: boolean;
 	onClick: () => void;
 	className: string;
@@ -30,13 +30,13 @@ interface ISidebar {
 
 export const Sidebar = ({
 	className,
-	isOpen,
+	open,
 	onClick,
 	noButton = false,
 	hidden = false,
 	children,
 }: ISidebar): JSX.Element => (
-	<Container className={`${className} ${isOpen && 'isOpen'}`} hidden={hidden}>
+	<Container className={`${className} ${open && 'open'}`} hidden={hidden}>
 		<Button onClick={onClick} variant="main" hidden={noButton}>
 			<ExpandIcon />
 		</Button>

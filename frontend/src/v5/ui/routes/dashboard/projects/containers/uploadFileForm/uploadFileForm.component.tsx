@@ -16,7 +16,7 @@
  */
 
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { formatMessage } from '@/v5/services/intl';
@@ -28,10 +28,46 @@ type IUploadFileForm = {
 };
 
 export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JSX.Element => {
+	const { control, register, handleSubmit, formState: { errors } } = useForm();
 	const [sidebarOpen, setSidebarOpen] = useState(false);
 	const [sidebarHidden, setSidebarHidden] = useState(true);
+	const [currentIndex, setcurrentIndex] = useState(0);
 
-	const revisions = [ ];
+	const { fields, append } = useFieldArray({
+		control,
+		name: 'uploads',
+	});
+
+	const processFiles = (files) => {
+		const filesToAppend = [];
+		for (const file of files) {
+			filesToAppend.push({
+				upload: {
+					progress: 0,
+					failure: false,
+				},
+				revision: {
+					file,
+					tag: file.name,
+					desc: '',
+					importAnimations: false,
+				},
+				container: {
+					_id: '',
+					name: '',
+					unit: 'mm',
+					type: 'Uncategorised',
+					desc: '',
+					code: '',
+				},
+			});
+		}
+		append(filesToAppend);
+	};
+
+	const onSubmit = () => {
+		onClickClose();
+	};
 	};
 
 	return (
@@ -44,17 +80,22 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 			subtitle="Drag and drop or browse your computer"
 		>
 			<Container>
-				<DropZone
-					message={formatMessage(
-						{ id: 'containers.upload.message', defaultMessage: 'Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>' },
-						{ MoreLink: (child: string) => <a href="https://help.3drepo.io/en/articles/4798885-supported-file-formats" target="_blank" rel="noreferrer">{child}</a> },
-					)}
-					processFiles={() => { }}
+					<DropZone
+						message={formatMessage(
+							{ id: 'containers.upload.message', defaultMessage: 'Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>' },
+							{ MoreLink: (child: string) => <a href="https://help.3drepo.io/en/articles/4798885-supported-file-formats" target="_blank" rel="noreferrer">{child}</a> },
+						)}
+						processFiles={(files) => { processFiles(files); }}
+					/>
 				<SettingsSidebar
-					isOpen={sidebarOpen}
+					item={fields.length ? fields[currentIndex] : null}
+					index={currentIndex}
+					open={sidebarOpen}
 					onClick={() => setSidebarOpen(!sidebarOpen)}
-					revision={revisions.find((rev) => rev.upload.uploadId === currentUploadId)}
 					hidden={sidebarHidden}
+					register={register}
+					errors={errors}
+					control={control}
 				/>
 			</Container>
 		</FormModal>

@@ -17,50 +17,50 @@
 
 import React from 'react';
 
-import { yupResolver } from '@hookform/resolvers/yup';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { Sidebar } from '@controls/sideBar';
 import { Typography } from '@controls/typography';
 import { InputLabel, MenuItem } from '@material-ui/core';
-import { useForm } from 'react-hook-form';
-import { ContainerSchema, IFormInput as IContainerForm } from '../../createContainerForm/createContainerForm.component';
+import { Controller, Control } from 'react-hook-form';
 import { TypeSelect, UnitSelect, Input, RevisionTitle, FormControl } from './settingsSidebar.styles';
 
 type IContainerSidebar = {
-	isOpen: boolean;
+	open: boolean;
 	onClick: () => void;
 	containerId: string;
 	className?: string;
 	hidden?: boolean;
-	newContainerName?: string;
+	isNewContainerName?: string;
+	control: Control;
 };
 
-type IRevisionForm = IContainerForm & {
-	revisionDesc: string;
-};
+export const SettingsSidebar = ({
+	className,
+	item,
+	index,
+	open,
+	hidden,
+	onClick,
+	register,
+	errors,
+	control,
+}: IContainerSidebar): JSX.Element => {
+	if (!item) return <></>;
+	const isNewContainer = !item.container._id;
 
-export const SettingsSidebar = ({ className, isOpen, onClick, revision }: IContainerSidebar): JSX.Element => {
-	const { register, formState: { errors } } = useForm<IRevisionForm>({
-		mode: 'onChange',
-		resolver: yupResolver(ContainerSchema),
-	});
-
-	if (!revision) return <></>;
-
-	const newContainer = !revision.container._id;
 	return (
-		<Sidebar isOpen={isOpen} onClick={onClick} className={className}>
-			<Typography variant="h3">{revision.container.name}</Typography>
-			<FormControl disabled={!newContainer}>
+		<Sidebar key={item.id} open={open} onClick={onClick} className={className} hidden={hidden}>
+			<Typography variant="h3">{item.container.name}</Typography>
+			<FormControl key={item.id} disabled={!isNewContainer}>
 				<InputLabel id="unit-label" shrink required>
 					<FormattedMessage id="containers.creation.form.unit" defaultMessage="Units" />
 				</InputLabel>
 				<UnitSelect
-					value={revision.container.unit}
+					// value={item.container.unit}
 					labelId="unit-label"
-					defaultValue="mm"
-					{...register('unit')}
+					defaultValue={item.container.unit}
+					{...register(`uploads.${index}.container.unit` as const)}
 				>
 					<MenuItem value="mm">
 						<FormattedMessage id="containers.creation.form.unit.mm" defaultMessage="Millimetres" />
@@ -79,15 +79,14 @@ export const SettingsSidebar = ({ className, isOpen, onClick, revision }: IConta
 					</MenuItem>
 				</UnitSelect>
 			</FormControl>
-			<FormControl disabled={!newContainer}>
+			<FormControl disabled={!isNewContainer}>
 				<InputLabel id="type-label" shrink required>
 					<FormattedMessage id="containers.creation.form.type" defaultMessage="Category" />
 				</InputLabel>
 				<TypeSelect
-					value={revision.container.type}
-					defaultValue="Uncategorised"
+					defaultValue={item.container.type}
 					labelId="type-label"
-					{...register('type')}
+					{...register(`uploads.${index}.container.type` as const)}
 				>
 					<MenuItem value="Uncategorised">
 						<FormattedMessage id="containers.creation.form.type.uncategorised" defaultMessage="Uncategorised" />
@@ -130,30 +129,54 @@ export const SettingsSidebar = ({ className, isOpen, onClick, revision }: IConta
 					</MenuItem>
 				</TypeSelect>
 			</FormControl>
-			<Input
-				label={formatMessage({ id: 'containers.creation.form.code', defaultMessage: 'Container Code' })}
-				error={!!errors.code}
-				helperText={errors.code?.message}
-				{...register('code')}
-				value={revision.container.code}
-				disabled={!newContainer}
+			<Controller
+				control={control}
+				name={`uploads.${index}.container.code`}
+				render={({
+					field,
+				}) => (
+					<Input
+						label={formatMessage({ id: 'uploadFileForm.settingsSidebar.containerCode', defaultMessage: 'Container Code' })}
+						error={!!errors.code}
+						helperText={errors.code?.message}
+						disabled={!isNewContainer}
+						{...field}
+					/>
+				)}
 			/>
-			<Input
-				label={formatMessage({ id: 'containers.creation.form.description', defaultMessage: 'Container Description' })}
-				error={!!errors.desc}
-				helperText={errors.desc?.message}
-				{...register('desc')}
-				value={revision.container.desc}
-				disabled={!newContainer}
+			<Controller
+				control={control}
+				name={`uploads.${index}.container.desc`}
+				render={({
+					field,
+				}) => (
+					<Input
+						label={formatMessage({ id: 'uploadFileForm.settingsSidebar.containerDesc', defaultMessage: 'Container Description' })}
+						error={!!errors.desc}
+						helperText={errors.desc?.message}
+						disabled={!isNewContainer}
+						{...field}
+					/>
+				)}
 			/>
 			<RevisionTitle>
 				<FormattedMessage id="uploadFileForm.settingsSidebar.revisionDetails" defaultMessage="Revision details" />
 			</RevisionTitle>
-			<Input
-				label={formatMessage({ id: 'uploadFileForm.settingsSidebar.revisionDescription', defaultMessage: 'Revision description' })}
-				error={!!errors.revisionDesc}
-				helperText={errors.revisionDesc?.message}
-				{...register('revisionDesc')}
+
+			<Controller
+				control={control}
+				name={`uploads.${index}.revision.desc`}
+				render={({
+					field,
+				}) => (
+					<Input
+						label={formatMessage({ id: 'uploadFileForm.settingsSidebar.revisionDescription', defaultMessage: 'Revision description' })}
+						error={!!errors.desc}
+						helperText={errors.desc?.message}
+						disabled={!isNewContainer}
+						{...field}
+					/>
+				)}
 			/>
 		</Sidebar>
 	);
