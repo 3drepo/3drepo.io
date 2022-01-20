@@ -50,7 +50,7 @@ export const Breadcrumbs = (): JSX.Element => {
 	const { teamspace } = useParams();
 	let { project } = useParams();
 
-	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
+	const teamspaces: ITeamspace[] = [{ name: 'otherTeamspace' }, ...TeamspacesHooksSelectors.selectTeamspaces()];
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
 
 	React.useEffect(() => {
@@ -83,18 +83,18 @@ export const Breadcrumbs = (): JSX.Element => {
 	url = teamspace ? uriCombine(url, '../') : url;
 	url = project ? uriCombine(url, '../') : url;
 
-	const getBreadcrumbs = [];
+	const breadcrumbs = [];
 
 	const teamspaceTo = `${url}/${teamspace}`;
 
 	let list: any[] = !project ? teamspaceList2LinkList(teamspaces) : projectList2LinkList(projects) || [];
 
 	if (teamspace) {
-		getBreadcrumbs.push(teamspace);
+		breadcrumbs.push(teamspace);
 	}
 
 	if (project && projects.length) {
-		getBreadcrumbs.push(list.find(({ to }) => to === project).title);
+		breadcrumbs.push(list.find(({ to }) => to === project).title);
 	}
 
 	list = list.map(createToWithUrl(project ? urlProject : url));
@@ -109,8 +109,8 @@ export const Breadcrumbs = (): JSX.Element => {
 				<HomeIcon />
 			</HomeIconBreadcrumb>
 
-			{getBreadcrumbs.map((title, index) => {
-				const isLastItem = (getBreadcrumbs.length - 1) === index;
+			{breadcrumbs.map((title, index) => {
+				const isLastItem = (breadcrumbs.length - 1) === index;
 
 				if (isLastItem) {
 					return (

@@ -20,6 +20,7 @@ import { Typography } from '@material-ui/core';
 import { useParams } from 'react-router-dom';
 import { MenuList, MenuItem } from './navigationMenu.styles';
 
+const lastItemOf = (list: any[]) => list[list.length - 1];
 interface IListItem {
 	title: string;
 	to: string;
@@ -43,17 +44,16 @@ export const NavigationMenu = ({ anchorEl, handleClose, list }: INavigationMenu)
 			horizontal: 'left',
 		},
 	};
-
-	const { project: selectedProject } = useParams();
-	const isSelected = (url: string) => url.endsWith(selectedProject);
+	const { project, teamspace } = useParams();
+	const selectedItem = project || teamspace;
+	const isSelected = (to: string) => lastItemOf(to.split('/')) === selectedItem;
 
 	return (
 		<MenuList anchorEl={anchorEl} onClose={handleClose} open={Boolean(anchorEl)} {...menuPosition}>
-			{list.map(({ title, to, ...props }) => (
+			{list.map(({ title, to }) => (
 				<MenuItem
 					key={title}
 					to={to}
-					{...props}
 					onClick={handleClose}
 					selected={isSelected(to)}
 				>
