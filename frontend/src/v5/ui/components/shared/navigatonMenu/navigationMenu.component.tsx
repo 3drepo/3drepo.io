@@ -43,7 +43,7 @@ export const NavigationMenu = ({ anchorEl, handleClose, list }: INavigationMenu)
 			horizontal: 'left',
 		},
 	};
- 
+
 	const { project: selectedProject } = useParams();
 	const isSelected = (url: string) => url.endsWith(selectedProject);
 
