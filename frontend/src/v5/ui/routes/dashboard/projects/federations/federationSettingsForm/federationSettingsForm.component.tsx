@@ -140,7 +140,7 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 	const [currentUnit, setCurrentUnit] = useState('mm');
 
 	const onSubmit: SubmitHandler<IFormInput> = (body) => {
-		// FederationsActionsDispatchers.createFederation(teamspace, project, body);
+		// FederationsActionsDispatchers.editFederation(teamspace, project, body);
 		onClose();
 	};
 
