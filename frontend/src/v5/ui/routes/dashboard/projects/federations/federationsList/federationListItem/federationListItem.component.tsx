@@ -34,6 +34,7 @@ import { getFederationMenuItems } from '@/v5/ui/routes/dashboard/projects/federa
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
+import { Display } from '@/v5/ui/themes/media';
 
 interface IFederationListItem {
 	index: number;
@@ -62,12 +63,15 @@ export const FederationListItem = ({
 						<FormattedMessage id="federations.list.item.title.tooltip" defaultMessage="Launch in Viewer" />
 					}
 					subtitle={federation.description}
+
+					minWidth={90}
 				>
 					<Highlight search={filterQuery}>
 						{federation.name}
 					</Highlight>
 				</DashboardListItemTitle>
 				<DashboardListItemButton
+					hideWhenSmallerThan={1080}
 					onClick={() => {
 						// eslint-disable-next-line no-console
 						console.log('handle issues button');
@@ -84,6 +88,7 @@ export const FederationListItem = ({
 					/>
 				</DashboardListItemButton>
 				<DashboardListItemButton
+					hideWhenSmallerThan={890}
 					onClick={() => {
 						// eslint-disable-next-line no-console
 						console.log('handle risks button');
@@ -100,6 +105,7 @@ export const FederationListItem = ({
 					/>
 				</DashboardListItemButton>
 				<DashboardListItemButton
+					hideWhenSmallerThan={Display.Tablet}
 					onClick={() => {
 						// eslint-disable-next-line no-console
 						console.log('handle containers button');
@@ -120,7 +126,7 @@ export const FederationListItem = ({
 						{federation.code}
 					</Highlight>
 				</DashboardListItemText>
-				<DashboardListItemText width={97}>
+				<DashboardListItemText width={97} minWidth={73}>
 					{federation.lastUpdated ? formatDate(federation.lastUpdated) : ''}
 				</DashboardListItemText>
 				<DashboardListItemIcon>

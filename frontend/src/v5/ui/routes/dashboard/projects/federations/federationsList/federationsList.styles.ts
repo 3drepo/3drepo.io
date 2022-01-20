@@ -20,6 +20,7 @@ import * as SearchInputStyles from '@controls/searchInput/searchInput.styles';
 
 export const Container = styled.div`
 	margin: 16px 0;
+	min-width: 380px;
 `;
 
 export const CollapseSideElementGroup = styled.div`

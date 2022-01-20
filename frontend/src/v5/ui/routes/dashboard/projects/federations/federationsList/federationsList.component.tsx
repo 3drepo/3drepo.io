@@ -38,6 +38,7 @@ import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashb
 import { Button } from '@controls/button';
 import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { formatMessage } from '@/v5/services/intl';
+import { Display } from '@/v5/ui/themes/media';
 import { CollapseSideElementGroup, Container } from './federationsList.styles';
 
 type IFederationsList = {
@@ -106,22 +107,22 @@ export const FederationsList = ({
 				)}
 			>
 				<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
-					<DashboardListHeaderLabel name="name">
+					<DashboardListHeaderLabel name="name" minWidth={90}>
 						<FormattedMessage id="federations.list.header.federation" defaultMessage="Federation" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="issues" width={165}>
+					<DashboardListHeaderLabel name="issues" width={165} hideWhenSmallerThan={1080}>
 						<FormattedMessage id="federations.list.header.issues" defaultMessage="Open issues" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="risks" width={165}>
+					<DashboardListHeaderLabel name="risks" width={165} hideWhenSmallerThan={890}>
 						<FormattedMessage id="federations.list.header.risks" defaultMessage="Open risks" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="containers" width={165}>
+					<DashboardListHeaderLabel name="containers" width={165} hideWhenSmallerThan={Display.Tablet}>
 						<FormattedMessage id="federations.list.header.containers" defaultMessage="Containers" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="code" width={188}>
+					<DashboardListHeaderLabel name="code" width={188} minWidth={43}>
 						<FormattedMessage id="federations.list.header.code" defaultMessage="Code" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="lastUpdated" width={180}>
+					<DashboardListHeaderLabel name="lastUpdated" width={180} minWidth={150}>
 						<FormattedMessage id="federations.list.header.lastUpdated" defaultMessage="Last updated" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>
