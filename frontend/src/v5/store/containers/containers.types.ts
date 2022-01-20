@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { formatMessage } from '@/v5/services/intl';
 import { Action } from 'redux';
 
 export interface IContainersState {
@@ -32,6 +33,44 @@ export enum UploadStatuses {
 	GENERATING_BUNDLES = 'Generating Bundles',
 	QUEUED_FOR_UNITY = 'Queued for Unity',
 }
+
+export const CONTAINER_TYPES = [
+	{ value: formatMessage({ id: 'containers.type.uncategorised', defaultMessage: 'Uncategorised' }) },
+	{ value: formatMessage({ id: 'containers.type.architectural', defaultMessage: 'Architectural' }) },
+	{ value: formatMessage({ id: 'containers.type.existing', defaultMessage: 'Existing' }) },
+	{ value: formatMessage({ id: 'containers.type.gis', defaultMessage: 'GIS' }) },
+	{ value: formatMessage({ id: 'containers.type.infrastructure', defaultMessage: 'Infrastructure' }) },
+	{ value: formatMessage({ id: 'containers.type.interior', defaultMessage: 'Interior' }) },
+	{ value: formatMessage({ id: 'containers.type.landscape', defaultMessage: 'Landscape' }) },
+	{ value: formatMessage({ id: 'containers.type.mep', defaultMessage: 'MEP' }) },
+	{ value: formatMessage({ id: 'containers.type.mechanical', defaultMessage: 'Mechanical' }) },
+	{ value: formatMessage({ id: 'containers.type.structural', defaultMessage: 'Structural' }) },
+	{ value: formatMessage({ id: 'containers.type.survey', defaultMessage: 'Survey' }) },
+	{ value: formatMessage({ id: 'containers.type.other', defaultMessage: 'Other' }) },
+];
+
+export const CONTAINER_UNITS = [
+	{ 
+		value: formatMessage({ id: 'containers.unit.value.mm', defaultMessage: 'mm' }),
+		name: formatMessage({ id: 'containers.unit.name.mm', defaultMessage: 'Millimetres' }),
+	},
+	{ 
+		value: formatMessage({ id: 'containers.unit.value.cm', defaultMessage: 'cm' }),
+		name: formatMessage({ id: 'containers.unit.name.cm', defaultMessage: 'Centimetres' }),
+	},
+	{ 
+		value: formatMessage({ id: 'containers.unit.value.dm', defaultMessage: 'dm' }),
+		name: formatMessage({ id: 'containers.unit.name.dm', defaultMessage: 'Decimetres' }),
+	},
+	{ 
+		value: formatMessage({ id: 'containers.unit.value.m', defaultMessage: 'm' }),
+		name: formatMessage({ id: 'containers.unit.name.m', defaultMessage: 'Metres' }),
+	},
+	{ 
+		value: formatMessage({ id: 'containers.unit.value.ft', defaultMessage: 'ft' }),
+		name: formatMessage({ id: 'containers.unit.name.ft', defaultMessage: 'Feet and Inches' }),
+	},
+];
 
 export interface IContainer {
 	_id: string;

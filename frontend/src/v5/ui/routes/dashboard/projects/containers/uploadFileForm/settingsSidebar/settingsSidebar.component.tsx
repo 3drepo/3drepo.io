@@ -24,6 +24,7 @@ import { Typography } from '@controls/typography';
 import { InputLabel, MenuItem } from '@material-ui/core';
 import { Controller, Control } from 'react-hook-form';
 import { TypeSelect, UnitSelect, Input, RevisionTitle, FormControl } from './settingsSidebar.styles';
+import { CONTAINER_TYPES, CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
 
 type IContainerSidebar = {
 	open: boolean;
@@ -62,21 +63,13 @@ export const SettingsSidebar = ({
 					defaultValue={item.container.unit}
 					{...register(`uploads.${index}.container.unit` as const)}
 				>
-					<MenuItem value="mm">
-						<FormattedMessage id="containers.creation.form.unit.mm" defaultMessage="Millimetres" />
-					</MenuItem>
-					<MenuItem value="cm">
-						<FormattedMessage id="containers.creation.form.unit.cm" defaultMessage="Centimetres" />
-					</MenuItem>
-					<MenuItem value="dm">
-						<FormattedMessage id="containers.creation.form.unit.dm" defaultMessage="Decimetres" />
-					</MenuItem>
-					<MenuItem value="m">
-						<FormattedMessage id="containers.creation.form.unit.m" defaultMessage="Metres" />
-					</MenuItem>
-					<MenuItem value="ft">
-						<FormattedMessage id="containers.creation.form.unit.ft" defaultMessage="Feet and inches" />
-					</MenuItem>
+					{
+						CONTAINER_UNITS.map((unit) => (
+							<MenuItem key={unit.value} value={unit.value}>
+								{unit.name}
+							</MenuItem>
+						))
+					}
 				</UnitSelect>
 			</FormControl>
 			<FormControl disabled={!isNewContainer}>
@@ -88,45 +81,13 @@ export const SettingsSidebar = ({
 					labelId="type-label"
 					{...register(`uploads.${index}.container.type` as const)}
 				>
-					<MenuItem value="Uncategorised">
-						<FormattedMessage id="containers.creation.form.type.uncategorised" defaultMessage="Uncategorised" />
-					</MenuItem>
-					<MenuItem value="sample">
-						<FormattedMessage id="containers.creation.form.type.sample" defaultMessage="Sample" />
-					</MenuItem>
-					<MenuItem value="Architecture">
-						<FormattedMessage id="containers.creation.form.type.architectural" defaultMessage="Architectural" />
-					</MenuItem>
-					<MenuItem value="Existing">
-						<FormattedMessage id="containers.creation.form.type.existing" defaultMessage="Existing" />
-					</MenuItem>
-					<MenuItem value="GIS">
-						<FormattedMessage id="containers.creation.form.type.gis" defaultMessage="GIS" />
-					</MenuItem>
-					<MenuItem value="Infrastructure">
-						<FormattedMessage id="containers.creation.form.type.infrastructure" defaultMessage="Infrastructure" />
-					</MenuItem>
-					<MenuItem value="Interior">
-						<FormattedMessage id="containers.creation.form.type.interior" defaultMessage="Interior" />
-					</MenuItem>
-					<MenuItem value="Landscape">
-						<FormattedMessage id="containers.creation.form.type.ladscape" defaultMessage="Landscape" />
-					</MenuItem>
-					<MenuItem value="MEP">
-						<FormattedMessage id="containers.creation.form.type.mep" defaultMessage="MEP" />
-					</MenuItem>
-					<MenuItem value="Mechanical">
-						<FormattedMessage id="containers.creation.form.type.mechanical" defaultMessage="Mechanical" />
-					</MenuItem>
-					<MenuItem value="Structural">
-						<FormattedMessage id="containers.creation.form.type.structural" defaultMessage="Structural" />
-					</MenuItem>
-					<MenuItem value="Survey">
-						<FormattedMessage id="containers.creation.form.type.survey" defaultMessage="Survey" />
-					</MenuItem>
-					<MenuItem value="Other">
-						<FormattedMessage id="containers.creation.form.type.other" defaultMessage="Other" />
-					</MenuItem>
+					{
+						CONTAINER_TYPES.map((unit) => (
+							<MenuItem key={unit.value} value={unit.value}>
+								{unit.value}
+							</MenuItem>
+						))
+					}
 				</TypeSelect>
 			</FormControl>
 			<Controller
