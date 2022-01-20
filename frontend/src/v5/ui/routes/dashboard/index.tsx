@@ -32,6 +32,7 @@ export const Dashboard = () => {
 	return (
 		<>
 			<GlobalStyle />
+			hey
 			<Switch>
 				<Route path={`${path}/dashboard/:teamspace?/:project?`}>
 					<DashboardLayout>
