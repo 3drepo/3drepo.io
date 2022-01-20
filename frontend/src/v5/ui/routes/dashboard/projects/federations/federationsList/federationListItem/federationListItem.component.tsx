@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { formatDate } from '@/v5/services/intl';
 
@@ -35,6 +35,7 @@ import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { Display } from '@/v5/ui/themes/media';
+import { FederationSettingsForm } from '@/v5/ui/routes/dashboard/projects/federations/federationSettingsForm/federationSettingsForm.component';
 
 interface IFederationListItem {
 	index: number;
@@ -53,108 +54,119 @@ export const FederationListItem = ({
 		return <SkeletonListItem delay={index / 10} key={federation._id} />;
 	}
 
-	return (
-		<DashboardListItem
-			key={federation._id}
-		>
-			<DashboardListItemRow>
-				<DashboardListItemTitle
-					tooltipTitle={
-						<FormattedMessage id="federations.list.item.title.tooltip" defaultMessage="Launch in Viewer" />
-					}
-					subtitle={federation.description}
+	const [federationSettingsOpen, setFederationSettingsOpen] = useState(false);
+	const closeFederation = () => setFederationSettingsOpen(false);
+	const openFederation = () => setFederationSettingsOpen(true);
 
-					minWidth={90}
-				>
-					<Highlight search={filterQuery}>
-						{federation.name}
-					</Highlight>
-				</DashboardListItemTitle>
-				<DashboardListItemButton
-					hideWhenSmallerThan={1080}
-					onClick={() => {
-						// eslint-disable-next-line no-console
-						console.log('handle issues button');
-					}}
-					width={165}
-					tooltipTitle={
-						<FormattedMessage id="federations.list.item.issues.tooltip" defaultMessage="View issues" />
-					}
-				>
-					<FormattedMessage
-						id="federations.list.item.issues"
-						defaultMessage="{count} issues"
-						values={{ count: federation.issues }}
-					/>
-				</DashboardListItemButton>
-				<DashboardListItemButton
-					hideWhenSmallerThan={890}
-					onClick={() => {
-						// eslint-disable-next-line no-console
-						console.log('handle risks button');
-					}}
-					width={165}
-					tooltipTitle={
-						<FormattedMessage id="federations.list.item.risks.tooltip" defaultMessage="View risks" />
-					}
-				>
-					<FormattedMessage
-						id="federations.list.item.risks"
-						defaultMessage="{count} risks"
-						values={{ count: federation.risks }}
-					/>
-				</DashboardListItemButton>
-				<DashboardListItemButton
-					hideWhenSmallerThan={Display.Tablet}
-					onClick={() => {
-						// eslint-disable-next-line no-console
-						console.log('handle containers button');
-					}}
-					width={165}
-					tooltipTitle={
-						<FormattedMessage id="federations.list.item.containers.tooltip" defaultMessage="View containers" />
-					}
-				>
-					<FormattedMessage
-						id="federations.list.item.containers"
-						defaultMessage="{count} containers"
-						values={{ count: federation.containers }}
-					/>
-				</DashboardListItemButton>
-				<DashboardListItemText width={188}>
-					<Highlight search={filterQuery}>
-						{federation.code}
-					</Highlight>
-				</DashboardListItemText>
-				<DashboardListItemText width={97} minWidth={73}>
-					{federation.lastUpdated ? formatDate(federation.lastUpdated) : ''}
-				</DashboardListItemText>
-				<DashboardListItemIcon>
-					<Tooltip
-						title={
-							<FormattedMessage id="federations.list.item.favourite.tooltip" defaultMessage="Add to favourites" />
+	return (
+		<>
+			<DashboardListItem
+				key={federation._id}
+			>
+				<DashboardListItemRow>
+					<DashboardListItemTitle
+						tooltipTitle={
+							<FormattedMessage id="federations.list.item.title.tooltip" defaultMessage="Launch in Viewer" />
+						}
+						subtitle={federation.description}
+
+						minWidth={90}
+					>
+						<Highlight search={filterQuery}>
+							{federation.name}
+						</Highlight>
+					</DashboardListItemTitle>
+					<DashboardListItemButton
+						hideWhenSmallerThan={1080}
+						onClick={() => {
+							// eslint-disable-next-line no-console
+							console.log('handle issues button');
+						}}
+						width={165}
+						tooltipTitle={
+							<FormattedMessage id="federations.list.item.issues.tooltip" defaultMessage="View issues" />
 						}
 					>
-						<FavouriteCheckbox
-							checked={federation.isFavourite}
-							onClick={(event) => {
-								event.stopPropagation();
-							}}
-							onChange={(event) => {
-								onFavouriteChange(
-									federation._id,
-									!!event.currentTarget.checked,
-								);
-							}}
+						<FormattedMessage
+							id="federations.list.item.issues"
+							defaultMessage="{count} issues"
+							values={{ count: federation.issues }}
 						/>
-					</Tooltip>
-				</DashboardListItemIcon>
-				<DashboardListItemIcon>
-					<EllipsisButtonWithMenu
-						list={getFederationMenuItems(federation._id)}
-					/>
-				</DashboardListItemIcon>
-			</DashboardListItemRow>
-		</DashboardListItem>
+					</DashboardListItemButton>
+					<DashboardListItemButton
+						hideWhenSmallerThan={890}
+						onClick={() => {
+							// eslint-disable-next-line no-console
+							console.log('handle risks button');
+						}}
+						width={165}
+						tooltipTitle={
+							<FormattedMessage id="federations.list.item.risks.tooltip" defaultMessage="View risks" />
+						}
+					>
+						<FormattedMessage
+							id="federations.list.item.risks"
+							defaultMessage="{count} risks"
+							values={{ count: federation.risks }}
+						/>
+					</DashboardListItemButton>
+					<DashboardListItemButton
+						hideWhenSmallerThan={Display.Tablet}
+						onClick={() => {
+							// eslint-disable-next-line no-console
+							console.log('handle containers button');
+						}}
+						width={165}
+						tooltipTitle={
+							<FormattedMessage id="federations.list.item.containers.tooltip" defaultMessage="View containers" />
+						}
+					>
+						<FormattedMessage
+							id="federations.list.item.containers"
+							defaultMessage="{count} containers"
+							values={{ count: federation.containers }}
+						/>
+					</DashboardListItemButton>
+					<DashboardListItemText width={188}>
+						<Highlight search={filterQuery}>
+							{federation.code}
+						</Highlight>
+					</DashboardListItemText>
+					<DashboardListItemText width={97} minWidth={73}>
+						{federation.lastUpdated ? formatDate(federation.lastUpdated) : ''}
+					</DashboardListItemText>
+					<DashboardListItemIcon>
+						<Tooltip
+							title={
+								<FormattedMessage id="federations.list.item.favourite.tooltip" defaultMessage="Add to favourites" />
+							}
+						>
+							<FavouriteCheckbox
+								checked={federation.isFavourite}
+								onClick={(event) => {
+									event.stopPropagation();
+								}}
+								onChange={(event) => {
+									onFavouriteChange(
+										federation._id,
+										!!event.currentTarget.checked,
+									);
+								}}
+							/>
+						</Tooltip>
+					</DashboardListItemIcon>
+					<DashboardListItemIcon>
+						<EllipsisButtonWithMenu
+							list={getFederationMenuItems(federation._id, openFederation)}
+						/>
+					</DashboardListItemIcon>
+				</DashboardListItemRow>
+			</DashboardListItem>
+			<FederationSettingsForm
+				open={federationSettingsOpen}
+				federation={federation}
+				onClose={closeFederation}
+			/>
+		</>
 	);
 };

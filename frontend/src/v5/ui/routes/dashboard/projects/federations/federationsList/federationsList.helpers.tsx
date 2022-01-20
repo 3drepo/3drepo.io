@@ -18,7 +18,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { IFederation } from '@/v5/store/federations/federations.types';
 
-export const getFederationMenuItems = (id: IFederation['_id']) => [
+export const getFederationMenuItems = (id: IFederation['_id'], openFederationSettings: () => void) => [
 	{
 		key: 1,
 		title: formatMessage({ id: 'federations.ellipsisMenu.loadFederation', defaultMessage: 'Load Federation in 3D Viewer' }),
@@ -52,8 +52,7 @@ export const getFederationMenuItems = (id: IFederation['_id']) => [
 	{
 		key: 7,
 		title: formatMessage({ id: 'federations.ellipsisMenu.settings', defaultMessage: 'Settings' }),
-		onClick: () => {
-		},
+		onClick: openFederationSettings,
 	},
 	{
 		key: 8,
