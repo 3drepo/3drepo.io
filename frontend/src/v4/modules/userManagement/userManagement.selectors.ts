@@ -118,7 +118,7 @@ export const selectProjects = createSelector(
 export const selectUrlQueryProject = createSelector(
 	selectLocation, selectProjects, v5selectCurrentProjectDetails, (location, projects, v5currentProject) =>  {
 		/** v5 bit */
-		if (v5currentProject) {
+		if (v5currentProject?.name) {
 			return v5currentProject.name;
 		}
 		/**********/
