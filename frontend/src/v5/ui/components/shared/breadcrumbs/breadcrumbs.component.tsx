@@ -50,7 +50,7 @@ export const Breadcrumbs = (): JSX.Element => {
 	const { teamspace } = useParams();
 	let { project } = useParams();
 
-	const teamspaces: ITeamspace[] = [{ name: 'otherTeamspace' }, ...TeamspacesHooksSelectors.selectTeamspaces()];
+	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
 
 	React.useEffect(() => {
