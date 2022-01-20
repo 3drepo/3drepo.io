@@ -148,30 +148,16 @@ const establishRoutes = () => {
 	 *                   type: array
 	 *                   items:
 	 *                     type: object
-	 *                     name: successUsers
 	 *                     properties:
-	 *                       successUsers:
-	 *                         type: object
-	 *                         properties:
-	 *                           user:
-	 *                             type: string
-	 *                             description: name of the user
-	 *                             example: abc
-	 *                           role:
-	 *                             type: string
-	 *                             description: Name of additional role
-	 *                             example: system_admin
-	 *                       failedUsers:
-	 *                         type: object
-	 *                         properties:
-	 *                           user:
-	 *                             type: string
-	 *                             description: name of the user
-	 *                             example: zyx
-	 *                           role:
-	 *                             type: string
-	 *                             description: Name of additional role
-	 *                             example: system_admin
+	 *                       user:
+	 *                         type: string
+	 *                         description: name of the user
+	 *                         example: abc
+	 *                       role:
+	 *                         type: string
+	 *                         description: Name of additional role
+	 *                         enum: [system_admin, support_admin, license_admin]
+	 *                         example: system_admin
 	 *
 	 * */
 	router.post('/roles', hasWriteAccessToSystemRoles, validatePayload, validateUsersAndRoles, grantUsersRoles);
@@ -219,30 +205,16 @@ const establishRoutes = () => {
 	 *                   type: array
 	 *                   items:
 	 *                     type: object
-	 *                     name: users
 	 *                     properties:
-	 *                       users:
-	 *                         type: object
-	 *                         properties:
-	 *                           user:
-	 *                             type: string
-	 *                             description: name of the user
-	 *                             example: abc
-	 *                           role:
-	 *                             type: string
-	 *                             description: Name of additional role
-	 *                             example: system_admin
-	 *                       failedUsers:
-	 *                         type: object
-	 *                         properties:
-	 *                           user:
-	 *                             type: string
-	 *                             description: name of the user
-	 *                             example: zyx
-	 *                           role:
-	 *                             type: string
-	 *                             description: Name of additional role
-	 *                             example: system_admin
+	 *                       user:
+	 *                         type: string
+	 *                         description: name of the user
+	 *                         example: abc
+	 *                       role:
+	 *                         type: string
+	 *                         description: Name of additional role
+	 *                         enum: [system_admin, support_admin, license_admin]
+	 *                         example: system_admin
 	 *
 	 * */
 	router.delete('/roles', hasWriteAccessToSystemRoles, validatePayload, validateUsersAndRoles, revokeUsersRoles);
