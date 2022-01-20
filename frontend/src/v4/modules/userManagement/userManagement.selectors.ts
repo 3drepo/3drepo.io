@@ -16,7 +16,7 @@
  */
 
 import { selectCurrentProjectDetails as v5selectCurrentProjectDetails } from '@/v5/store/projects/projects.selectors';
-import { pick, values } from 'lodash';
+import { isEmpty, pick, values } from 'lodash';
 import { orderBy } from 'lodash';
 import * as queryString from 'query-string';
 import { matchPath } from 'react-router';

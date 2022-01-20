@@ -18,9 +18,12 @@ import React, { useEffect, useState } from 'react';
 import { UserManagementActions } from '@/v4/modules/userManagement';
 
 import { ProjectsPermissions as V4ProjectsPermissions } from '@/v4/routes/projects/projectsPermissions';
-import { useDispatch } from 'react-redux';
+import { ModelsPermissions as V4ModelsPermissions } from '@/v4/routes/modelsPermissions';
+import { useDispatch, useSelector } from 'react-redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { Button } from '@material-ui/core';
+import { TeamspacesActions } from '@/v4/modules/teamspaces';
+import { selectCurrentUser } from '@/v4/modules/currentUser';
 
 enum TABS {
 	PROJECT,
@@ -30,6 +33,8 @@ enum TABS {
 export const UsersPermissions = () => {
 	const dispatch = useDispatch();
 	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails().name;
+	const currentUser = useSelector(selectCurrentUser);
+
 	const [selectedTab, setSelectedTab] = useState(TABS.PROJECT);
 
 	const onClickTab = (tab) => () => setSelectedTab(tab);
@@ -37,6 +42,7 @@ export const UsersPermissions = () => {
 	useEffect(() => {
 		dispatch(UserManagementActions.fetchTeamspaceUsers());
 		dispatch(UserManagementActions.fetchProject(projectName));
+		dispatch(TeamspacesActions.fetchTeamspacesIfNecessary(currentUser.username));
 	});
 
 	return (
@@ -48,7 +54,7 @@ export const UsersPermissions = () => {
 				Container & Federation permissions
 			</Button>
 			{selectedTab === TABS.PROJECT && <V4ProjectsPermissions />}
-			{selectedTab === TABS.FEDERATIONS_AND_CONTAINERS && <>Containers stuff</>}
+			{selectedTab === TABS.FEDERATIONS_AND_CONTAINERS && <V4ModelsPermissions />}
 		</>
 	);
 };
