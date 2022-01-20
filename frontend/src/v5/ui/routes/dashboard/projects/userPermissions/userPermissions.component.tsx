@@ -14,16 +14,25 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { UserManagementActions } from '@/v4/modules/userManagement';
 
 import { ProjectsPermissions as V4ProjectsPermissions } from '@/v4/routes/projects/projectsPermissions';
 import { useDispatch } from 'react-redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
+import { Button } from '@material-ui/core';
+
+enum TABS {
+	PROJECT,
+	FEDERATIONS_AND_CONTAINERS,
+}
 
 export const UsersPermissions = () => {
 	const dispatch = useDispatch();
 	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails().name;
+	const [selectedTab, setSelectedTab] = useState(TABS.PROJECT);
+
+	const onClickTab = (tab) => () => setSelectedTab(tab);
 
 	useEffect(() => {
 		dispatch(UserManagementActions.fetchTeamspaceUsers());
@@ -31,6 +40,15 @@ export const UsersPermissions = () => {
 	});
 
 	return (
-		<V4ProjectsPermissions />
+		<>
+			<Button onClick={onClickTab(TABS.PROJECT)}>
+				Project Permissions
+			</Button>
+			<Button onClick={onClickTab(TABS.FEDERATIONS_AND_CONTAINERS)}>
+				Container & Federation permissions
+			</Button>
+			{selectedTab === TABS.PROJECT && <V4ProjectsPermissions />}
+			{selectedTab === TABS.FEDERATIONS_AND_CONTAINERS && <>Containers stuff</>}
+		</>
 	);
 };
