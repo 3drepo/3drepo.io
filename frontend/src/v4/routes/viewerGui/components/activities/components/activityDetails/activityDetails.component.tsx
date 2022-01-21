@@ -18,8 +18,9 @@
 import React from 'react';
 
 import Grid from '@material-ui/core/Grid';
-import { map } from 'lodash';
+import { map, isString } from 'lodash';
 
+import { formatShortDateTime } from "../../../../../../services/formatting/formatDate";
 import { Loader } from '../../../../../components/loader/loader.component';
 import { LoaderContainer } from '../../../viewerPanel/viewerPanel.styles';
 import { TimeIcon } from '../timeIcon/';
@@ -29,6 +30,29 @@ interface IProps {
 	isPending: boolean;
 	activityDetails: { data: any[] };
 	setSelectedDate: (value: number) => void;
+}
+
+const renderValue = (key, value, setSelectedDate) => {
+
+	let found = false;
+	let processedValue = value;
+	let dateToSelect;
+
+	if(isString(value)) {
+		const epochRegex = /EPOCH::\d+/g;
+		found = value.match(epochRegex);
+	}
+
+	if(found && found.length) {
+		found.forEach((timestamp) => {
+			dateToSelect = Number(timestamp.slice('EPOCH::'.length));
+			processedValue = processedValue.replace(timestamp, formatShortDateTime(dateToSelect));
+		});
+	}
+
+	return (
+		<Grid item xs={6}>{processedValue} <TimeIcon name={dateToSelect? undefined : key} value={dateToSelect || value} handleOnClick={setSelectedDate} /></Grid>
+	);
 }
 
 export const ActivityDetails = ({ isPending, activityDetails, setSelectedDate }: IProps) => {
@@ -47,7 +71,7 @@ export const ActivityDetails = ({ isPending, activityDetails, setSelectedDate }:
 				<Grid key={key} item xs={12} >
 					<Row container justify="center">
 						<Grid item xs={6}>{key}</Grid>
-						<Grid item xs={6}>{value} <TimeIcon name={key} value={value} handleOnClick={setSelectedDate} /></Grid>
+						{renderValue(key, value, setSelectedDate)}
 					</Row>
 				</Grid>
 			))}
