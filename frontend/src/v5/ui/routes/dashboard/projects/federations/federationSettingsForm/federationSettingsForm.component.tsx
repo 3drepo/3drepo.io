@@ -140,7 +140,7 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 
 	const [currentUnit, setCurrentUnit] = useState('mm');
 
-	const defaultViews = ['None', ...FederationsHooksSelectors.selectViewpoints()];
+	const defaultViews = ['None'];
 
 	const onSubmit: SubmitHandler<IFormInput> = ({
 		name,
@@ -182,7 +182,7 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 			<SectionTitle>Federation information</SectionTitle>
 			{/* <ShareTextField
 				label="ID"
-				text={federation._id}
+				value={federation._id}
 			/> */}
 			<TextField
 				label={formatMessage({ id: 'federations.settings.form.name', defaultMessage: 'Name' })}

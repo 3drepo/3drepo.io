@@ -45,8 +45,3 @@ export const selectIsListPending = createSelector(
 export const selectAreStatsPending = createSelector(
 	selectFederations, (federations) => federations.some(({ hasStatsPending }) => hasStatsPending),
 );
-
-// TODO - correctly implement this selector
-export const selectViewpoints = createSelector(
-	selectFederations, (federations) => federations.map(({ settings }) => 'Viewpoint' + Math.random()),
-);

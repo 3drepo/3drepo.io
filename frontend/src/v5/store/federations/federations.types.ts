@@ -106,7 +106,7 @@ export type FetchFederationsSuccessAction = Action<'FETCH_FEDERATIONS_SUCCESS'> 
 export type SetIsListPendingAction = Action<'SET_IS_LIST_PENDING'> & { isPending: boolean };
 export type FetchFederationStatsAction = Action<'FETCH_FEDERATION_STATS'> & FetchFederationStatsPayload;
 export type FetchFederationStatsSuccessAction = Action<'FETCH_FEDERATION_STATS_SUCCESS'> & FetchFederationStatsSuccessPayload;
-export type UpdateFederationSettingsAction = Action<'UPDATE_FEDERATION_SETTING'> & UpdateFederationSettingsPayload;
+export type UpdateFederationSettingsAction = Action<'UPDATE_FEDERATION_SETTINGS'> & UpdateFederationSettingsPayload;
 
 export interface IFederationsActionCreators {
 	fetchFederations: (teamspace: string, projectId: string) => FetchFederationsAction;
