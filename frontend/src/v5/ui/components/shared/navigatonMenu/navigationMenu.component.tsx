@@ -17,10 +17,9 @@
 
 import React from 'react';
 import { Typography } from '@material-ui/core';
-import { useParams } from 'react-router-dom';
 import { MenuList, MenuItem } from './navigationMenu.styles';
 
-const lastItemOf = (list: any[]) => list[list.length - 1];
+// const isSelected = (selectedItem: string, to: string) => lastItemOf(to.split('/')) === selectedItem;
 interface IListItem {
 	title: string;
 	to: string;
@@ -28,11 +27,12 @@ interface IListItem {
 
 interface INavigationMenu {
 	anchorEl: null | HTMLElement;
+	selectedItem: string;
 	handleClose: () => void;
 	list: IListItem[];
 }
 
-export const NavigationMenu = ({ anchorEl, handleClose, list }: INavigationMenu): JSX.Element => {
+export const NavigationMenu = ({ anchorEl, selectedItem, handleClose, list }: INavigationMenu): JSX.Element => {
 	const menuPosition = {
 		getContentAnchorEl: null,
 		anchorOrigin: {
@@ -44,9 +44,6 @@ export const NavigationMenu = ({ anchorEl, handleClose, list }: INavigationMenu)
 			horizontal: 'left',
 		},
 	};
-	const { project, teamspace } = useParams();
-	const selectedItem = project || teamspace;
-	const isSelected = (to: string) => lastItemOf(to.split('/')) === selectedItem;
 
 	return (
 		<MenuList anchorEl={anchorEl} onClose={handleClose} open={Boolean(anchorEl)} {...menuPosition}>
@@ -55,7 +52,7 @@ export const NavigationMenu = ({ anchorEl, handleClose, list }: INavigationMenu)
 					key={title}
 					to={to}
 					onClick={handleClose}
-					selected={isSelected(to)}
+					selected={selectedItem === title}
 				>
 					<Typography variant="body1" noWrap>
 						{title}

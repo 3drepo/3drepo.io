@@ -44,6 +44,8 @@ const projectList2LinkList = (projects: IProject[]) => (projects.length ? projec
 	title: name,
 })) : []);
 
+const lastItemOf = (list: any[]) => list[list.length - 1];
+
 export const Breadcrumbs = (): JSX.Element => {
 	const history = useHistory();
 	const dispatch = useDispatch();
@@ -97,6 +99,8 @@ export const Breadcrumbs = (): JSX.Element => {
 		breadcrumbs.push(list.find(({ to }) => to === project).title);
 	}
 
+	const selectedItem = lastItemOf(breadcrumbs);
+
 	list = list.map(createToWithUrl(project ? urlProject : url));
 
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -120,7 +124,12 @@ export const Breadcrumbs = (): JSX.Element => {
 									{title}
 								</OverflowWrapper>
 							</InteractiveBreadcrumb>
-							<NavigationMenu list={list} anchorEl={anchorEl} handleClose={handleClose} />
+							<NavigationMenu
+								list={list}
+								anchorEl={anchorEl}
+								selectedItem={selectedItem}
+								handleClose={handleClose}
+							/>
 						</div>
 					);
 				}
