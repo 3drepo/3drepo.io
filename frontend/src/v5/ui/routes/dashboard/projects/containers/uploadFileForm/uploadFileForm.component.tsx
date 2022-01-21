@@ -23,6 +23,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { formatMessage } from '@/v5/services/intl';
 import { SettingsSidebar } from './settingsSidebar';
+import { Container, Content, DropZone } from './uploadFileForm.styles';
 
 type IUploadFileForm = {
 	openState: boolean;
@@ -130,12 +131,14 @@ const UploadsSchema = Yup.object().shape({
 export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JSX.Element => {
 	const [sidebarOpen, setSidebarOpen] = useState(false);
 	const [sidebarHidden, setSidebarHidden] = useState(true);
-	const [currentIndex, setcurrentIndex] = useState(0);
+	const [currentIndex, setcurrentIndex] = useState(null);
 
 	const { control, register, handleSubmit, formState, formState: { errors } } = useForm<IUploadFormFields>({
 		mode: 'onChange',
 		resolver: yupResolver(UploadsSchema),
 	});
+
+	const { fields, append } = useFieldArray({
 		control,
 		name: 'uploads',
 	});
@@ -166,7 +169,6 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 	const onSubmit = () => {
 		onClickClose();
 	};
-	};
 
 	return (
 		<FormModal
@@ -179,6 +181,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 			isValid={formState.isValid}
 		>
 			<Container>
+				<Content>
 					<DropZone
 						message={formatMessage(
 							{ id: 'containers.upload.message', defaultMessage: 'Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>' },
@@ -186,8 +189,9 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 						)}
 						processFiles={(files) => { processFiles(files); }}
 					/>
+				</Content>
 				<SettingsSidebar
-					item={fields.length ? fields[currentIndex] : null}
+					item={Number.isInteger(currentIndex) ? fields[currentIndex] : null}
 					index={currentIndex}
 					open={sidebarOpen}
 					onClick={() => setSidebarOpen(!sidebarOpen)}

@@ -26,8 +26,8 @@ import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
-import { Container, SelectColumn } from './createContainerForm.styles';
 import { CONTAINER_TYPES, CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
+import { Container, SelectColumn } from './createContainerForm.styles';
 
 interface IFormInput {
 	name: string;
@@ -73,7 +73,7 @@ const ContainerSchema = Yup.object().shape({
 			formatMessage({
 				id: 'containers.creation.description.error.max',
 				defaultMessage: 'Container Description is limited to 50 characters',
-			})).default('Uncategorised'),
+			})),
 });
 
 export const CreateContainerForm = ({ open, close }): JSX.Element => {
