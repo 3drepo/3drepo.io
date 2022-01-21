@@ -49,6 +49,7 @@ const setupDocEndpoint = (app) => {
 	const uiOptions = {
 		explorer: true,
 	};
+	app.use('/docs/openapi.json', (req, res) => res.json(docs));
 	app.use('/docs', swaggerUi.serve, swaggerUi.setup(docs, uiOptions));
 };
 
