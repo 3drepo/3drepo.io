@@ -22,6 +22,9 @@ import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { formatMessage } from '@/v5/services/intl';
+import { UploadListHeader } from './uploadListHeader';
+import { UploadListHeaderLabel } from './uploadListHeader/uploadListHeaderLabel';
+import { UploadList } from './uploadList';
 import { SettingsSidebar } from './settingsSidebar';
 import { Container, Content, DropZone } from './uploadFileForm.styles';
 
@@ -107,14 +110,15 @@ export const RevisionSchema = Yup.object({
 			formatMessage({
 				id: 'uploadFileForm.revision.tag.error.required',
 				defaultMessage: 'Revision Name is a required field',
-			})),
+			}),
+		),
 	desc: Yup.string()
 		.max(50,
 			formatMessage({
 				id: 'uploadFileForm.revision.description.error.max',
 				defaultMessage: 'Revision Description is limited to 50 characters',
 			})),
-	
+
 });
 
 const UploadsSchema = Yup.object().shape({
@@ -138,7 +142,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		resolver: yupResolver(UploadsSchema),
 	});
 
-	const { fields, append } = useFieldArray({
+	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'uploads',
 	});
@@ -166,6 +170,17 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		append(filesToAppend);
 	};
 
+	const onClickEdit = (id) => {
+		setSidebarOpen(id === currentIndex ? !sidebarOpen : true);
+		setcurrentIndex(id);
+		setSidebarHidden(false);
+	};
+
+	const onClickDelete = (id) => {
+		setSidebarHidden(id === currentIndex);
+		remove(id);
+	};
+
 	const onSubmit = () => {
 		onClickClose();
 	};
@@ -182,6 +197,24 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		>
 			<Container>
 				<Content>
+					<UploadListHeader>
+						<UploadListHeaderLabel name="filename">
+							<span> Filename </span>
+						</UploadListHeaderLabel>
+						<UploadListHeaderLabel name="destination">
+							<span> Destination </span>
+						</UploadListHeaderLabel>
+						<UploadListHeaderLabel name="revisionName">
+							<span> Revision Name </span>
+						</UploadListHeaderLabel>
+					</UploadListHeader>
+					<UploadList
+						items={fields}
+						onClickEdit={(id) => onClickEdit(id)}
+						onClickDelete={(id) => onClickDelete(id)}
+						control={control}
+						errors={errors}
+					/>
 					<DropZone
 						message={formatMessage(
 							{ id: 'containers.upload.message', defaultMessage: 'Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>' },

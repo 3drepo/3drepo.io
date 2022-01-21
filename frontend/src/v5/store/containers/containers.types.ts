@@ -50,23 +50,23 @@ export const CONTAINER_TYPES = [
 ];
 
 export const CONTAINER_UNITS = [
-	{ 
+	{
 		value: formatMessage({ id: 'containers.unit.value.mm', defaultMessage: 'mm' }),
 		name: formatMessage({ id: 'containers.unit.name.mm', defaultMessage: 'Millimetres' }),
 	},
-	{ 
+	{
 		value: formatMessage({ id: 'containers.unit.value.cm', defaultMessage: 'cm' }),
 		name: formatMessage({ id: 'containers.unit.name.cm', defaultMessage: 'Centimetres' }),
 	},
-	{ 
+	{
 		value: formatMessage({ id: 'containers.unit.value.dm', defaultMessage: 'dm' }),
 		name: formatMessage({ id: 'containers.unit.name.dm', defaultMessage: 'Decimetres' }),
 	},
-	{ 
+	{
 		value: formatMessage({ id: 'containers.unit.value.m', defaultMessage: 'm' }),
 		name: formatMessage({ id: 'containers.unit.name.m', defaultMessage: 'Metres' }),
 	},
-	{ 
+	{
 		value: formatMessage({ id: 'containers.unit.value.ft', defaultMessage: 'ft' }),
 		name: formatMessage({ id: 'containers.unit.name.ft', defaultMessage: 'Feet and Inches' }),
 	},
