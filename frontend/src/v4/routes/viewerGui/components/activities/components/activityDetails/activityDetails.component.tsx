@@ -34,7 +34,7 @@ interface IProps {
 
 const renderValue = (key, value, setSelectedDate) => {
 
-	let found :any = false;
+	let found: any = false;
 	let processedValue = value;
 	let dateToSelect;
 
