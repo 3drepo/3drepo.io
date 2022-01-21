@@ -34,11 +34,22 @@ export interface IFederation {
 	category: string;
 	lastUpdated: Date;
 	hasStatsPending: boolean;
+	settings?: IFederationSettings;
 }
 
 export interface IFederationsState {
 	federations: Record<string, IFederation[]>;
 	isListPending: boolean;
+}
+
+export interface IFederationSettings {
+	angleFromNorth: number,
+	defaultView: string,
+	surveyPoint: {
+		latLong: [number, number],
+		position: [number, number, number],
+	},
+	unit: string,
 }
 
 export type FetchFederationsPayload = {
@@ -78,14 +89,24 @@ export type FetchFederationStatsSuccessPayload = {
 	federationStats: FetchFederationStatsResponse;
 };
 
+export type FederationSettingsPayload = IFederationSettings & Pick<IFederation, 'name' | 'description' | 'code'>;
+
+export type UpdateFederationSettingsPayload = {
+	teamspace: string,
+	projectId: string,
+	federationId: string;
+	settings: FederationSettingsPayload;
+};
+
 export type FetchFederationsAction = Action<'FETCH_FEDERATIONS'> & FetchFederationsPayload;
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;
 export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & FavouritePayload;
-export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & {projectId: string, federationId: string, isFavourite: boolean};
+export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & { projectId: string, federationId: string, isFavourite: boolean };
 export type FetchFederationsSuccessAction = Action<'FETCH_FEDERATIONS_SUCCESS'> & { projectId: string, federations: IFederation[] };
 export type SetIsListPendingAction = Action<'SET_IS_LIST_PENDING'> & { isPending: boolean };
 export type FetchFederationStatsAction = Action<'FETCH_FEDERATION_STATS'> & FetchFederationStatsPayload;
 export type FetchFederationStatsSuccessAction = Action<'FETCH_FEDERATION_STATS_SUCCESS'> & FetchFederationStatsSuccessPayload;
+export type UpdateFederationSettingsAction = Action<'UPDATE_FEDERATION_SETTING'> & UpdateFederationSettingsPayload;
 
 export interface IFederationsActionCreators {
 	fetchFederations: (teamspace: string, projectId: string) => FetchFederationsAction;
@@ -100,4 +121,10 @@ export interface IFederationsActionCreators {
 	removeFavourite: (teamspace: string, projectId: string, federationId: string) => RemoveFavouriteAction;
 	setFavouriteSuccess: (projectId: string, federationId: string, isFavourite: boolean) => SetFavouriteSuccessAction;
 	setIsListPending: (isPending: boolean) => SetIsListPendingAction;
+	updateFederationSettings: (
+		teamspace: string,
+		projectId: string,
+		federationId: string,
+		settings: FederationSettingsPayload
+	) => UpdateFederationSettingsAction;
 }

@@ -36,6 +36,7 @@ export const { Types: FederationsTypes, Creators: FederationsActions } = createA
 	fetchFederationStats: ['teamspace', 'projectId', 'federationId'],
 	fetchFederationStatsSuccess: ['projectId', 'federationId', 'federationStats'],
 	setIsListPending: ['isPending'],
+	updateFederationSettings: ['teamspace', 'projectId', 'federationId', 'settings'],
 }, { prefix: 'FEDERATIONS/' }) as { Types: Constants<IFederationsActionCreators>; Creators: IFederationsActionCreators };
 
 export const INITIAL_STATE: IFederationsState = {

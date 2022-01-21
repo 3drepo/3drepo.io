@@ -26,18 +26,19 @@ import { FormModal } from '@/v5/ui/controls/modal/formModal/formDialog.component
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
-import { IFederation } from '@/v5/store/federations/federations.types';
+import { FederationSettingsPayload, IFederation } from '@/v5/store/federations/federations.types';
+import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 import { FlexContainer, SectionTitle } from './federationSettingsForm.styles';
 
 interface IFormInput {
 	name: string;
 	unit: string;
-	desc: string;
+	description: string;
 	code: string;
-	view: string;
+	defaultView: string;
 	lat: number;
 	long: number;
-	angle: number;
+	angleFromNorth: number;
 	x: number;
 	y: number;
 	z: number;
@@ -61,7 +62,7 @@ const FederationSchema = Yup.object().shape({
 				defaultMessage: 'Federation Name is a required field',
 			}),
 		),
-	desc: Yup.string()
+	description: Yup.string()
 		.max(600,
 			formatMessage({
 				id: 'federations.settings.description.error.max',
@@ -79,7 +80,7 @@ const FederationSchema = Yup.object().shape({
 				id: 'federations.settings.code.error.characters',
 				defaultMessage: 'Code can only consist of letters and numbers',
 			})),
-	view: Yup.string().default('None'),
+	defaultView: Yup.string().default('None'),
 	lat: Yup.number()
 		.min(-90,
 			formatMessage({
@@ -102,7 +103,7 @@ const FederationSchema = Yup.object().shape({
 				id: 'federations.settings.longitude.error.max',
 				defaultMessage: 'Longitude cannot be greater than 180',
 			})),
-	angle: Yup.number()
+	angleFromNorth: Yup.number()
 		.min(-180,
 			formatMessage({
 				id: 'federations.settings.angle.error.min',
@@ -139,8 +140,31 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 
 	const [currentUnit, setCurrentUnit] = useState('mm');
 
-	const onSubmit: SubmitHandler<IFormInput> = (body) => {
-		// FederationsActionsDispatchers.editFederation(teamspace, project, body);
+	const defaultViews = ['None', ...FederationsHooksSelectors.selectViewpoints()];
+
+	const onSubmit: SubmitHandler<IFormInput> = ({
+		name,
+		description,
+		unit,
+		code,
+		defaultView,
+		lat, long,
+		angleFromNorth,
+		x, y, z,
+	}) => {
+		const payload: FederationSettingsPayload = {
+			surveyPoint: {
+				latLong: [lat, long],
+				position: [x, y, z],
+			},
+			name,
+			description,
+			code,
+			unit,
+			angleFromNorth,
+			defaultView,
+		};
+		FederationsActionsDispatchers.updateFederationSettings(teamspace, project, federation._id, payload);
 		onClose();
 	};
 
@@ -171,7 +195,7 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 			</TextField>
 			<TextField
 				label={formatMessage({ id: 'federations.settings.form.description', defaultMessage: 'Description' })}
-				{...register('desc')}
+				{...register('description')}
 			>
 				{federation.description}
 			</TextField>
@@ -211,35 +235,19 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 				/>
 			</FlexContainer>
 			<FormControl>
-				<InputLabel id="view-label">
+				<InputLabel id="default-view-label">
 					<FormattedMessage id="federations.settings.form.view" defaultMessage="Default View" />
 				</InputLabel>
 				<Select
-					labelId="view-label"
+					labelId="default-view-label"
 					defaultValue="None"
-					{...register('view')}
+					{...register('defaultView')}
 				>
-					<MenuItem value="None">
-						<FormattedMessage id="federations.settings.form.unit.none" defaultMessage="None" />
-					</MenuItem>
-					<MenuItem value="Front">
-						<FormattedMessage id="federations.settings.form.unit.front" defaultMessage="Front" />
-					</MenuItem>
-					<MenuItem value="Left">
-						<FormattedMessage id="federations.settings.form.unit.left" defaultMessage="Left" />
-					</MenuItem>
-					<MenuItem value="Right">
-						<FormattedMessage id="federations.settings.form.unit.right" defaultMessage="Right" />
-					</MenuItem>
-					<MenuItem value="Back">
-						<FormattedMessage id="federations.settings.form.unit.back" defaultMessage="Back" />
-					</MenuItem>
-					<MenuItem value="Top">
-						<FormattedMessage id="federations.settings.form.unit.top" defaultMessage="Top" />
-					</MenuItem>
-					<MenuItem value="Bottom">
-						<FormattedMessage id="federations.settings.form.unit.bottom" defaultMessage="Bottom" />
-					</MenuItem>
+					{defaultViews.map((view) => (
+						<MenuItem key={view} value={view}>
+							{view}
+						</MenuItem>
+					))}
 				</Select>
 			</FormControl>
 			<SectionTitle>GIS servey point</SectionTitle>
@@ -249,22 +257,22 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 					type="number"
 					{...register('lat')}
 				>
-					{federation.lat}
+					{federation.settings?.surveyPoint.latLong[0]}
 				</TextField>
 				<TextField
 					label={formatMessage({ id: 'federations.settings.form.long', defaultMessage: 'LONGITUDE (decimal)' })}
 					type="number"
 					{...register('long')}
 				>
-					{federation.long}
+					{federation.settings?.surveyPoint.latLong[1]}
 				</TextField>
 			</FlexContainer>
 			<TextField
-				label={formatMessage({ id: 'federations.settings.form.angle', defaultMessage: 'ANGLE FROM NORTH (clockwise degrees)' })}
+				label={formatMessage({ id: 'federations.settings.form.angleFromNorth', defaultMessage: 'ANGLE FROM NORTH (clockwise degrees)' })}
 				type="number"
-				{...register('angle')}
+				{...register('angleFromNorth')}
 			>
-				{federation.angle}
+				{federation.settings?.angleFromNorth}
 			</TextField>
 			<FlexContainer>
 				<TextField

@@ -28,6 +28,7 @@ export const useFederationsData = () => {
 	const favouriteFederations = FederationsHooksSelectors.selectFavouriteFederations();
 	const hasFederations = FederationsHooksSelectors.selectHasFederations();
 	const isListPending = FederationsHooksSelectors.selectIsListPending();
+	const viewpoints = FederationsHooksSelectors.selectViewpoints();
 	const currentProject = ProjectsHooksSelectors.selectCurrentProject();
 
 	useEffect(() => {
@@ -41,5 +42,6 @@ export const useFederationsData = () => {
 		favouriteFederations,
 		hasFederations,
 		isListPending,
+		viewpoints,
 	};
 };

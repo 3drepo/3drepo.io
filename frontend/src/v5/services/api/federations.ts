@@ -21,6 +21,7 @@ import {
 	FetchFederationStatsPayload,
 	FetchFederationStatsResponse,
 	FavouritePayload,
+	UpdateFederationSettingsPayload,
 } from '@/v5/store/federations/federations.types';
 import { AxiosResponse } from 'axios';
 import api from './default';
@@ -56,4 +57,19 @@ export const fetchFederationStats = async ({
 }: FetchFederationStatsPayload): Promise<FetchFederationStatsResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/stats`);
 	return data;
+};
+
+export const updateFederationSettings = async ({
+	teamspace,
+	projectId,
+	federationId,
+	settings,
+}: UpdateFederationSettingsPayload): Promise<AxiosResponse<void>> => {
+	console.log("Got here")
+	// const { data } = await api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`, {
+	// 	settings,
+	// });
+	console.log(`CALLING: teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}\nwith ${settings}`);
+	return null;
+	// return data;
 };
