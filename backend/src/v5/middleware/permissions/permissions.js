@@ -26,7 +26,7 @@ const { hasReadAccessToLicense, hasReadAccessToSystemRoles, hasWriteAccessToLice
 const { convertAllUUIDs } = require('../dataConverter/pathParams');
 const { isProjectAdmin } = require('./components/projects');
 const { isTeamspaceMember } = require('./components/teamspaces');
-const { validSession } = require('../auth');
+const { isLoggedIn, validSession } = require('../auth');
 const { validateMany } = require('../common');
 
 const Permissions = {};
@@ -47,9 +47,9 @@ Permissions.hasCommenterAccessToFederation = validateMany([
 Permissions.hasWriteAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasWriteAccessToFederation]);
 Permissions.hasAdminAccessToFederation = validateMany([Permissions.hasAccessToTeamspace, hasAdminAccessToFederation]);
 
-Permissions.hasWriteAccessToSystemRoles = validateMany([validSession, hasWriteAccessToSystemRoles]);
-Permissions.hasReadAccessToSystemRoles = validateMany([validSession, hasReadAccessToSystemRoles]);
-Permissions.hasWriteAccessToLicense = validateMany([validSession, hasWriteAccessToLicense]);
-Permissions.hasReadAccessToLicense = validateMany([validSession, hasReadAccessToLicense]);
+Permissions.hasWriteAccessToSystemRoles = validateMany([isLoggedIn, hasWriteAccessToSystemRoles]);
+Permissions.hasReadAccessToSystemRoles = validateMany([isLoggedIn, hasReadAccessToSystemRoles]);
+Permissions.hasWriteAccessToLicense = validateMany([isLoggedIn, hasWriteAccessToLicense]);
+Permissions.hasReadAccessToLicense = validateMany([isLoggedIn, hasReadAccessToLicense]);
 
 module.exports = Permissions;
