@@ -14,25 +14,19 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { BodyWrapper as CustomTableBody } from '@/v4/routes/components/customTable/customTable.styles';
+import styled from 'styled-components';
 
-import { createGlobalStyle } from 'styled-components';
+export const Container = styled.div`
+	display: flex;
+	flex-direction: column;
+	height: calc(100% - 40px);
 
-export const GlobalStyle = createGlobalStyle`
-	html, body {
-		height: 100%;
-		position: relative;
-		overflow-y: hidden;
-	}
-	
-	body {
-		margin: 0;
-		padding: 0;
-		${({ theme }) => theme.typography.body1};
-	}
-	
-	#app {
-		height: 100%;
-		display: flex;
-		flex-direction: column;
+	padding: 20px;
+
+	${CustomTableBody} {
+		border: 1px solid #D0D9EB;
+		border-radius: 5px;
+		background-color: white;
 	}
 `;

@@ -24,6 +24,8 @@ import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSel
 import { Button } from '@material-ui/core';
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
 import { selectCurrentUser } from '@/v4/modules/currentUser';
+import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
+import { Container } from './userPermissions.styles';
 
 enum TABS {
 	PROJECT,
@@ -33,28 +35,38 @@ enum TABS {
 export const UsersPermissions = () => {
 	const dispatch = useDispatch();
 	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails().name;
-	const currentUser = useSelector(selectCurrentUser);
+	const username = useSelector(selectCurrentUser)?.username;
 
 	const [selectedTab, setSelectedTab] = useState(TABS.PROJECT);
 
 	const onClickTab = (tab) => () => setSelectedTab(tab);
 
 	useEffect(() => {
+		if (!username || !projectName) {
+			return;
+		}
+
 		dispatch(UserManagementActions.fetchTeamspaceUsers());
 		dispatch(UserManagementActions.fetchProject(projectName));
-		dispatch(TeamspacesActions.fetchTeamspacesIfNecessary(currentUser.username));
-	});
+		dispatch(TeamspacesActions.fetchTeamspacesIfNecessary(username));
+	}, [projectName, username]);
+
+	if (!username || !projectName) {
+		return (<></>);
+	}
 
 	return (
-		<>
+		<Container>
 			<Button onClick={onClickTab(TABS.PROJECT)}>
 				Project Permissions
 			</Button>
 			<Button onClick={onClickTab(TABS.FEDERATIONS_AND_CONTAINERS)}>
 				Container & Federation permissions
 			</Button>
-			{selectedTab === TABS.PROJECT && <V4ProjectsPermissions />}
-			{selectedTab === TABS.FEDERATIONS_AND_CONTAINERS && <V4ModelsPermissions />}
-		</>
+			<FixedOrGrowContainer>
+				{selectedTab === TABS.PROJECT && <V4ProjectsPermissions />}
+				{selectedTab === TABS.FEDERATIONS_AND_CONTAINERS && <V4ModelsPermissions />}
+			</FixedOrGrowContainer>
+		</Container>
 	);
 };
