@@ -34,16 +34,16 @@ interface IProps {
 
 const renderValue = (key, value, setSelectedDate) => {
 
-	let found = false;
+	let found :any = false;
 	let processedValue = value;
 	let dateToSelect;
 
-	if(isString(value)) {
+	if (isString(value)) {
 		const epochRegex = /EPOCH::\d+/g;
 		found = value.match(epochRegex);
 	}
 
-	if(found && found.length) {
+	if (found && found.length) {
 		found.forEach((timestamp) => {
 			dateToSelect = Number(timestamp.slice('EPOCH::'.length));
 			processedValue = processedValue.replace(timestamp, formatShortDateTime(dateToSelect));
@@ -51,7 +51,7 @@ const renderValue = (key, value, setSelectedDate) => {
 	}
 
 	return (
-		<Grid item xs={6}>{processedValue} <TimeIcon name={dateToSelect? undefined : key} value={dateToSelect || value} handleOnClick={setSelectedDate} /></Grid>
+		<Grid item xs={6}>{processedValue} <TimeIcon name={dateToSelect ? undefined : key} value={dateToSelect || value} handleOnClick={setSelectedDate} /></Grid>
 	);
 }
 
