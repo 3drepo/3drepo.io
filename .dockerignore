@@ -1,0 +1,37 @@
+# ignore .git and .cache folders
+.git
+.cache
+.vscode
+.github
+.elasticbeanstalk
+.travis.yml
+.hg
+.svn
+.dockerignore
+uploads/
+backend/uploads/
+backend/coverage
+backend/.nyc_output
+backend/mongodb-prebuilt-*
+backend/3drepo.log
+backend/docs/
+**/node_modules
+*/node_modules
+npm-debug.log
+docker-compose.yml
+docker/
+
+npm-debug.log.*
+.vscode/
+*.swo
+
+# ignore all markdown files (md) beside all README*.md other than README-secret.md
+*.md
+!README*.md
+README-secret.md
+LICENSE
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
