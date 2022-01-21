@@ -61,14 +61,14 @@ const establishRoutes = () => {
 	 *     tags: [Admin]
 	 *     operationId: getAllUsersWithRole
 	 *     parameters:
-		*       - role:
+	 *       - role:
 	 *         name: role
 	 *         in: query
 	 *         description: name of role
 	 *         required: false
 	 *         schema:
 	 *           type: array
-		*       - user:
+	 *	     - user:
 	 *         name: user
 	 *         description: name of user
 	 *         in: query
