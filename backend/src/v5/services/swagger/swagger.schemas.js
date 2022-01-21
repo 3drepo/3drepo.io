@@ -185,7 +185,7 @@ Schemas.schemas.modelSettings = {
 						type: 'array',
 						description: 'The point coordinate that maps to the latLong value (should be in OpenGL axis conventions)',
 						items: {
-							type: 'float',
+							type: 'number',
 							example: '23.56',
 						},
 						minItems: 3,
@@ -195,7 +195,7 @@ Schemas.schemas.modelSettings = {
 						type: 'array',
 						description: 'The latitude and longitude of the survey point',
 						items: {
-							type: 'float',
+							type: 'number',
 							example: '23.56',
 						},
 						minItems: 2,
