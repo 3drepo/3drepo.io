@@ -29,6 +29,28 @@ type IUploadFileForm = {
 	onClickClose: () => void;
 };
 
+export type IUploadItemFields = {
+	id?: string;
+	container: {
+		_id: string;
+		containerName: string;
+		unit: string;
+		type: string;
+		desc?: string;
+		code?: string;
+	};
+	revision: {
+		tag: string;
+		file: File;
+		desc?: string;
+		importAnimations?: boolean;
+	};
+};
+
+export type IUploadFormFields = {
+	uploads: IUploadItemFields[];
+};
+
 const ContainerSchema = Yup.object({
 	containerName: Yup.string()
 		.min(3,

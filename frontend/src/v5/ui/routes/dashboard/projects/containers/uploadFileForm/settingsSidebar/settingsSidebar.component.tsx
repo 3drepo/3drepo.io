@@ -21,19 +21,22 @@ import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { Sidebar } from '@controls/sideBar';
 import { InputLabel, MenuItem } from '@material-ui/core';
-import { Controller, Control } from 'react-hook-form';
-import { TypeSelect, UnitSelect, Input, RevisionTitle, FormControl } from './settingsSidebar.styles';
+import { Controller, Control, DeepMap, FieldError, UseFormRegister } from 'react-hook-form';
 import { CONTAINER_TYPES, CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
 import { Title, TypeSelect, UnitSelect, Input, RevisionTitle, FormControl } from './settingsSidebar.styles';
+import { IUploadFormFields, IUploadItemFields } from '../uploadFileForm.component';
 
 type IContainerSidebar = {
 	open: boolean;
 	onClick: () => void;
-	containerId: string;
 	className?: string;
 	hidden?: boolean;
 	isNewContainerName?: string;
-	control: Control;
+	control: Control<IUploadFormFields>;
+	index: number;
+	item: IUploadItemFields;
+	errors: DeepMap<IUploadFormFields, FieldError>;
+	register: UseFormRegister<IUploadFormFields>;
 };
 
 export const SettingsSidebar = ({
