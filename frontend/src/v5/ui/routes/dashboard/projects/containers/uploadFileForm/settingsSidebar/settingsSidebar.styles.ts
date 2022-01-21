@@ -24,6 +24,12 @@ export const Title = styled(Typography).attrs({
 	variant: 'h3',
 })`
 	color: ${({ theme }) => theme.palette.secondary.main};
+	width: 310px;
+	height: 21px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	user-select: none;
 `;
 
 export const UnitSelect = styled(Select)`

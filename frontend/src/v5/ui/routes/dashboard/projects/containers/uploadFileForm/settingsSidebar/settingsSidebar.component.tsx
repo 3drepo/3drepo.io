@@ -20,11 +20,11 @@ import React from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { Sidebar } from '@controls/sideBar';
-import { Typography } from '@controls/typography';
 import { InputLabel, MenuItem } from '@material-ui/core';
 import { Controller, Control } from 'react-hook-form';
 import { TypeSelect, UnitSelect, Input, RevisionTitle, FormControl } from './settingsSidebar.styles';
 import { CONTAINER_TYPES, CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
+import { Title, TypeSelect, UnitSelect, Input, RevisionTitle, FormControl } from './settingsSidebar.styles';
 
 type IContainerSidebar = {
 	open: boolean;
@@ -52,7 +52,9 @@ export const SettingsSidebar = ({
 
 	return (
 		<Sidebar key={item.id} open={open} onClick={onClick} className={className} hidden={hidden}>
-			<Typography variant="h3">{item.container.name}</Typography>
+			<Title>
+				{item.container.containerName}
+			</Title>
 			<FormControl key={item.id} disabled={!isNewContainer}>
 				<InputLabel id="unit-label" shrink required>
 					<FormattedMessage id="containers.creation.form.unit" defaultMessage="Units" />

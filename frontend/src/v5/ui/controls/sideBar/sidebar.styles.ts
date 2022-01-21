@@ -43,6 +43,7 @@ export const Content = styled.div`
 
 export const Button = styled(CircleButton)`
 	position: absolute;
-	right: 10px;
-	top: 5px;
+	right: 11px;
+	top: 14px;
+	z-index: 1;
 `;
