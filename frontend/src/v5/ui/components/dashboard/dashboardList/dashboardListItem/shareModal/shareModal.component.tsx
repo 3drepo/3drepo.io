@@ -52,7 +52,7 @@ export const ShareModal = ({ openState, container, onClickClose }: IShareModal):
 					id: 'shareModal.linkLabel',
 					defaultMessage: 'Link',
 				})}
-				text={containerLink}
+				value={containerLink}
 			/>
 			<MailToButton href={`mailto:?subject=3D Repo container - ${containerName}&body=${containerLink}`}>
 				<FormattedMessage

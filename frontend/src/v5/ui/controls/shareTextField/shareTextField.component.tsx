@@ -32,12 +32,12 @@ import {
 
 type IShareTextField = {
 	label: string,
-	text: string,
+	value: string,
 };
 
 const IS_COPYING_DURATION_MS = 3000;
 
-export const ShareTextField = ({ label, text }: IShareTextField) => {
+export const ShareTextField = ({ label, value }: IShareTextField) => {
 	let isCopiedTimer;
 	const [isCopying, setIsCopying] = useState(true);
 
@@ -53,15 +53,13 @@ export const ShareTextField = ({ label, text }: IShareTextField) => {
 	};
 	return (
 		<>
-			<LinkLabel>
-				{label}
-			</LinkLabel>
+			<LinkLabel value={label} />
 			<CopyToClipboard
 				onCopy={handleCopyToClipboard}
-				text={text}
+				text={value}
 			>
 				<LinkBar
-					value={text}
+					value={value}
 					InputProps={{
 						readOnly: true,
 						endAdornment: (

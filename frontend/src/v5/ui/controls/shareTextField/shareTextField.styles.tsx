@@ -23,10 +23,20 @@ import tick from '@assets/icons/tick';
 
 const SVG_PADDING_IN_PX = 9;
 
-export const LinkLabel = styled.span`
-	${({ theme }) => theme.typography.kicker};
-	color: ${({ theme }) => theme.palette.base.main};
-	font-family: ${({ theme }) => theme.typography.fontFamily};
+export const LinkLabel = styled(TextField)`
+	&&,
+	&& *{
+		height: 19px;
+		${({ theme }) => theme.typography.kicker};
+		font-family: ${({ theme }) => theme.typography.fontFamily};
+		padding: 0;
+		margin: 0;
+		color: ${({ theme }) => theme.palette.base.main};
+		background: transparent;
+		border: none;
+		pointer-events: none;
+		user-select: none;
+	}
 `;
 
 export const CopyToClipboardIcon = styled(copyToClipboardIcon)`
@@ -85,12 +95,8 @@ export const LinkBar = styled(TextField)`
 	}
 `;
 
-type CopiedToClipboardTooltipProps = TooltipProps & {
-	theme: any
-};
-
 export const CopyToClipboardTooltip = styled(
-	({ className, theme, ...props }: CopiedToClipboardTooltipProps) => (
+	({ className, theme, ...props }: TooltipProps & { theme: any }) => (
 		<Tooltip
 			{...props}
 			PopperProps={{ keepMounted: true }}
