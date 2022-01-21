@@ -18,6 +18,8 @@
 import React, { useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 
+import * as Yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { formatMessage } from '@/v5/services/intl';
 import { SettingsSidebar } from './settingsSidebar';
@@ -27,13 +29,91 @@ type IUploadFileForm = {
 	onClickClose: () => void;
 };
 
+const ContainerSchema = Yup.object({
+	containerName: Yup.string()
+		.min(3,
+			formatMessage({
+				id: 'containers.creation.name.error.min',
+				defaultMessage: 'Container Name must be at least 2 characters',
+			}))
+		.max(120,
+			formatMessage({
+				id: 'containers.creation.name.error.max',
+				defaultMessage: 'Container Name is limited to 120 characters',
+			}))
+		.required(
+			formatMessage({
+				id: 'containers.creation.name.error.required',
+				defaultMessage: 'Container Name is a required field',
+			}),
+		),
+	unit: Yup.string().required().default('mm'),
+	type: Yup.string().required().default('Uncategorised'),
+	code: Yup.string()
+		.max(50,
+			formatMessage({
+				id: 'containers.creation.code.error.max',
+				defaultMessage: 'Code is limited to 50 characters',
+			}))
+		.matches(/^[A-Za-z0-9]*$/,
+			formatMessage({
+				id: 'containers.creation.code.error.characters',
+				defaultMessage: 'Code can only consist of letters and numbers',
+			})),
+	desc: Yup.string()
+		.max(50,
+			formatMessage({
+				id: 'containers.creation.description.error.max',
+				defaultMessage: 'Container Description is limited to 50 characters',
+			})),
+});
+
+export const RevisionSchema = Yup.object({
+	tag: Yup.string()
+		.min(2,
+			formatMessage({
+				id: 'uploadFileForm.revision.tag.error.min',
+				defaultMessage: 'Container Name must be at least 2 characters',
+			}))
+		.max(120,
+			formatMessage({
+				id: 'uploadFileForm.revision.tag.error.max',
+				defaultMessage: 'Revision Name is limited to 120 characters',
+			}))
+		.required(
+			formatMessage({
+				id: 'uploadFileForm.revision.tag.error.required',
+				defaultMessage: 'Revision Name is a required field',
+			})),
+	desc: Yup.string()
+		.max(50,
+			formatMessage({
+				id: 'uploadFileForm.revision.description.error.max',
+				defaultMessage: 'Revision Description is limited to 50 characters',
+			})),
+	
+});
+
+const UploadsSchema = Yup.object().shape({
+	uploads: Yup
+		.array()
+		.of(Yup.object().shape({
+			container: ContainerSchema,
+			revision: RevisionSchema,
+		}))
+		.required()
+		.min(1),
+});
+
 export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JSX.Element => {
-	const { control, register, handleSubmit, formState: { errors } } = useForm();
 	const [sidebarOpen, setSidebarOpen] = useState(false);
 	const [sidebarHidden, setSidebarHidden] = useState(true);
 	const [currentIndex, setcurrentIndex] = useState(0);
 
-	const { fields, append } = useFieldArray({
+	const { control, register, handleSubmit, formState, formState: { errors } } = useForm<IUploadFormFields>({
+		mode: 'onChange',
+		resolver: yupResolver(UploadsSchema),
+	});
 		control,
 		name: 'uploads',
 	});
@@ -42,10 +122,6 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		const filesToAppend = [];
 		for (const file of files) {
 			filesToAppend.push({
-				upload: {
-					progress: 0,
-					failure: false,
-				},
 				revision: {
 					file,
 					tag: file.name,
@@ -54,7 +130,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 				},
 				container: {
 					_id: '',
-					name: '',
+					containerName: '',
 					unit: 'mm',
 					type: 'Uncategorised',
 					desc: '',
@@ -78,6 +154,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 			confirmLabel="Upload files"
 			title="Add files for upload"
 			subtitle="Drag and drop or browse your computer"
+			isValid={formState.isValid}
 		>
 			<Container>
 					<DropZone

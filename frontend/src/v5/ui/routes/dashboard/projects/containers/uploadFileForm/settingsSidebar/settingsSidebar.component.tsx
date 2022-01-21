@@ -60,7 +60,6 @@ export const SettingsSidebar = ({
 					<FormattedMessage id="containers.creation.form.unit" defaultMessage="Units" />
 				</InputLabel>
 				<UnitSelect
-					// value={item.container.unit}
 					labelId="unit-label"
 					defaultValue={item.container.unit}
 					{...register(`uploads.${index}.container.unit` as const)}
@@ -100,8 +99,9 @@ export const SettingsSidebar = ({
 				}) => (
 					<Input
 						label={formatMessage({ id: 'uploadFileForm.settingsSidebar.containerCode', defaultMessage: 'Container Code' })}
-						error={!!errors.code}
-						helperText={errors.code?.message}
+						error={!!errors.uploads?.[index]?.container?.code}
+						helperText={errors.uploads?.[index]?.container?.code?.message}
+						defaultValue={item.container.code}
 						disabled={!isNewContainer}
 						{...field}
 					/>
@@ -115,8 +115,9 @@ export const SettingsSidebar = ({
 				}) => (
 					<Input
 						label={formatMessage({ id: 'uploadFileForm.settingsSidebar.containerDesc', defaultMessage: 'Container Description' })}
-						error={!!errors.desc}
-						helperText={errors.desc?.message}
+						error={!!errors.uploads?.[index]?.container?.desc}
+						helperText={errors.uploads?.[index]?.container?.desc?.message}
+						defaultValue={item.container.desc}
 						disabled={!isNewContainer}
 						{...field}
 					/>
@@ -134,8 +135,9 @@ export const SettingsSidebar = ({
 				}) => (
 					<Input
 						label={formatMessage({ id: 'uploadFileForm.settingsSidebar.revisionDescription', defaultMessage: 'Revision description' })}
-						error={!!errors.desc}
-						helperText={errors.desc?.message}
+						error={!!errors.uploads?.[index]?.revision?.desc}
+						helperText={errors.uploads?.[index]?.revision?.desc?.message}
+						defaultValue={item.revision.desc}
 						disabled={!isNewContainer}
 						{...field}
 					/>
