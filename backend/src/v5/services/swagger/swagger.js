@@ -24,9 +24,6 @@ const { apiUrls } = require(`${v4Path}/config`);
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
-// const { respond } = require('../../utils/responder');
-// const { templates } = require('../../utils/responseCodes');
-
 const options = {
 	definition: {
 		openapi: '3.0.0',
