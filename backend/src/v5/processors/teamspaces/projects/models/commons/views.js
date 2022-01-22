@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,19 +16,16 @@
  */
 
 const Views = {};
-const db = require('../handler/db');
-const { templates } = require('../utils/responseCodes');
+const { getViews } = require('../../../../../models/views');
 
-const getCollectionName = (model) => `${model}.views`;
+Views.getViewList = (teamspace, model) => {
+	const projection = {
+		_id: 1,
+		name: 1,
+		thumbnail: 1,
+	};
 
-Views.checkViewExists = async (teamspace, model, view) => {
-	const foundView = await db.findOne(teamspace, getCollectionName(model), { _id: view });
-
-	if (!foundView) {
-		throw templates.viewNotFound;
-	}
+	return getViews(teamspace, model, projection);
 };
-
-Views.getViews = (teamspace, model, projection) => db.find(teamspace, getCollectionName(model), {}, projection);
 
 module.exports = Views;
