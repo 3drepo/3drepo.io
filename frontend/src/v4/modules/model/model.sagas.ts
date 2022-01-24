@@ -187,10 +187,10 @@ export function* uploadModelFile({ teamspace, project, modelData, fileData, hand
 			if (fileData.desc) {
 				formData.append('desc', fileData.desc);
 			}
-			if (fileData.importAnimations !== undefined) {
+			if (fileData.importAnimations) {
 				formData.append('importAnimations', fileData.importAnimations);
 			}
-			if (fileData.timezone !== undefined) {
+			if (fileData.timezone) {
 				formData.append('timezone', fileData.timezone);
 			}
 

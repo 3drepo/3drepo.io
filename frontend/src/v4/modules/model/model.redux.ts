@@ -64,7 +64,6 @@ export interface IModelState {
 	pendingRevision: any;
 	maps: any[];
 	subModels?: ISubModel[];
-	countries: any[];
 }
 
 export const INITIAL_STATE: IModelState = {
@@ -80,7 +79,6 @@ export const INITIAL_STATE: IModelState = {
 	isModelUploading: false,
 	pendingRevision: null,
 	maps: [],
-	countries: [],
 };
 
 const setPendingState = (state = INITIAL_STATE, { pendingState }) => {

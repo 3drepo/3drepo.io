@@ -22,7 +22,6 @@ import { selectUrlParams } from '../router/router.selectors';
 
 export const selectModelDomain = (state) => state.model;
 
-
 export const selectSettings = createSelector(
 	selectModelDomain, (state) => state.settings
 );
