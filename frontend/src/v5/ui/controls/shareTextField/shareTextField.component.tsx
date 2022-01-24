@@ -21,7 +21,6 @@ import { InputAdornment } from '@material-ui/core';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { formatMessage } from '@/v5/services/intl';
 import {
-	LinkLabel,
 	LinkBar,
 	CopyToClipboardIconContainer,
 	CopyToClipboardIcon,
