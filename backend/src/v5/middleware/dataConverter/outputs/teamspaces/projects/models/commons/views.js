@@ -25,11 +25,12 @@ Views.serialiseViews = (req, res) => {
 	const views = req.outputData.map((view) => {
 		const output = { ...view };
 		output._id = UUIDToString(view._id);
-		if (output.thumbnail) {
-			output.hasThumbnail = true;
-			delete output.thumbnail;
-		}
+		output.hasThumbnail = !!(output.thumbnail?.buffer
+			|| output.thumbnail?.content?.buffer
+			|| output.screenshot?.buffer);
 
+		delete output.thumbnail;
+		delete output.screenshot;
 		return output;
 	});
 
