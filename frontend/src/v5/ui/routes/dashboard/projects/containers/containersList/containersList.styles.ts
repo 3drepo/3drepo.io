@@ -32,6 +32,8 @@ export const CollapseSideElementGroup = styled.div`
 		
 		@media (max-width: ${Display.Tablet}px) {
 			width: 225px;
+			padding-left: 25px;
+			box-sizing: border-box;
 		}
 		
 		@media (max-width: ${Display.Desktop}px) {
