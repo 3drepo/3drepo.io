@@ -28,7 +28,7 @@ import { IUploadFormFields, IUploadItemFields } from '../uploadFileForm.componen
 
 type IContainerSidebar = {
 	open: boolean;
-	onClick: () => void;
+	onClose: () => void;
 	className?: string;
 	hidden?: boolean;
 	isNewContainerName?: string;
@@ -43,109 +43,110 @@ export const SettingsSidebar = ({
 	className,
 	item,
 	index,
-	open,
-	hidden,
-	onClick,
+	onClose,
 	register,
 	errors,
 	control,
 }: IContainerSidebar): JSX.Element => {
-	if (!item) return <></>;
-	const isNewContainer = !item.container._id;
-
+	const isNewContainer = !item?.container?._id;
+	const open = 'id' in item;
 	return (
-		<Sidebar key={item.id} open={open} onClick={onClick} className={className} hidden={hidden}>
-			<Title>
-				{item.container.containerName}
-			</Title>
-			<FormControl key={item.id} disabled={!isNewContainer}>
-				<InputLabel id="unit-label" shrink required>
-					<FormattedMessage id="containers.creation.form.unit" defaultMessage="Units" />
-				</InputLabel>
-				<UnitSelect
-					labelId="unit-label"
-					defaultValue={item.container.unit}
-					{...register(`uploads.${index}.container.unit` as const)}
-				>
-					{
-						CONTAINER_UNITS.map((unit) => (
-							<MenuItem key={unit.value} value={unit.value}>
-								{unit.name}
-							</MenuItem>
-						))
-					}
-				</UnitSelect>
-			</FormControl>
-			<FormControl disabled={!isNewContainer}>
-				<InputLabel id="type-label" shrink required>
-					<FormattedMessage id="containers.creation.form.type" defaultMessage="Category" />
-				</InputLabel>
-				<TypeSelect
-					defaultValue={item.container.type}
-					labelId="type-label"
-					{...register(`uploads.${index}.container.type` as const)}
-				>
-					{
-						CONTAINER_TYPES.map((unit) => (
-							<MenuItem key={unit.value} value={unit.value}>
-								{unit.value}
-							</MenuItem>
-						))
-					}
-				</TypeSelect>
-			</FormControl>
-			<Controller
-				control={control}
-				name={`uploads.${index}.container.code`}
-				render={({
-					field,
-				}) => (
-					<Input
-						label={formatMessage({ id: 'uploadFileForm.settingsSidebar.containerCode', defaultMessage: 'Container Code' })}
-						error={!!errors.uploads?.[index]?.container?.code}
-						helperText={errors.uploads?.[index]?.container?.code?.message}
-						defaultValue={item.container.code}
-						disabled={!isNewContainer}
-						{...field}
+		<Sidebar open={open} onClick={onClose} className={className} noButton={!open}>
+			{ !open ? <></> : (
+				<>
+					<Title>
+						{item?.container?.containerName}
+					</Title>
+					<FormControl key={item?.id} disabled={!isNewContainer}>
+						<InputLabel id="unit-label" shrink required>
+							<FormattedMessage id="containers.creation.form.unit" defaultMessage="Units" />
+						</InputLabel>
+						<UnitSelect
+							labelId="unit-label"
+							defaultValue={item?.container?.unit}
+							{...register(`uploads.${index}.container?.unit` as const)}
+						>
+							{
+								CONTAINER_UNITS.map((unit) => (
+									<MenuItem key={unit.value} value={unit.value}>
+										{unit.name}
+									</MenuItem>
+								))
+							}
+						</UnitSelect>
+					</FormControl>
+					<FormControl disabled={!isNewContainer}>
+						<InputLabel id="type-label" shrink required>
+							<FormattedMessage id="containers.creation.form.type" defaultMessage="Category" />
+						</InputLabel>
+						<TypeSelect
+							defaultValue={item?.container?.type}
+							labelId="type-label"
+							{...register(`uploads.${index}.container?.type` as const)}
+						>
+							{
+								CONTAINER_TYPES.map((unit) => (
+									<MenuItem key={unit.value} value={unit.value}>
+										{unit.value}
+									</MenuItem>
+								))
+							}
+						</TypeSelect>
+					</FormControl>
+					<Controller
+						control={control}
+						name={`uploads.${index}.container?.code`}
+						render={({
+							field,
+						}) => (
+							<Input
+								label={formatMessage({ id: 'uploadFileForm.settingsSidebar.containerCode', defaultMessage: 'Container Code' })}
+								error={!!errors.uploads?.[index]?.container?.code}
+								helperText={errors.uploads?.[index]?.container?.code?.message}
+								defaultValue={item?.container?.code}
+								disabled={!isNewContainer}
+								{...field}
+							/>
+						)}
 					/>
-				)}
-			/>
-			<Controller
-				control={control}
-				name={`uploads.${index}.container.desc`}
-				render={({
-					field,
-				}) => (
-					<Input
-						label={formatMessage({ id: 'uploadFileForm.settingsSidebar.containerDesc', defaultMessage: 'Container Description' })}
-						error={!!errors.uploads?.[index]?.container?.desc}
-						helperText={errors.uploads?.[index]?.container?.desc?.message}
-						defaultValue={item.container.desc}
-						disabled={!isNewContainer}
-						{...field}
+					<Controller
+						control={control}
+						name={`uploads.${index}.container?.desc`}
+						render={({
+							field,
+						}) => (
+							<Input
+								label={formatMessage({ id: 'uploadFileForm.settingsSidebar.containerDesc', defaultMessage: 'Container Description' })}
+								error={!!errors.uploads?.[index]?.container?.desc}
+								helperText={errors.uploads?.[index]?.container?.desc?.message}
+								defaultValue={item?.container?.desc}
+								disabled={!isNewContainer}
+								{...field}
+							/>
+						)}
 					/>
-				)}
-			/>
-			<RevisionTitle>
-				<FormattedMessage id="uploadFileForm.settingsSidebar.revisionDetails" defaultMessage="Revision details" />
-			</RevisionTitle>
+					<RevisionTitle>
+						<FormattedMessage id="uploadFileForm.settingsSidebar.revisionDetails" defaultMessage="Revision details" />
+					</RevisionTitle>
 
-			<Controller
-				control={control}
-				name={`uploads.${index}.revision.desc`}
-				render={({
-					field,
-				}) => (
-					<Input
-						label={formatMessage({ id: 'uploadFileForm.settingsSidebar.revisionDescription', defaultMessage: 'Revision description' })}
-						error={!!errors.uploads?.[index]?.revision?.desc}
-						helperText={errors.uploads?.[index]?.revision?.desc?.message}
-						defaultValue={item.revision.desc}
-						disabled={!isNewContainer}
-						{...field}
+					<Controller
+						control={control}
+						name={`uploads.${index}.revision?.desc`}
+						render={({
+							field,
+						}) => (
+							<Input
+								label={formatMessage({ id: 'uploadFileForm.settingsSidebar.revisionDescription', defaultMessage: 'Revision description' })}
+								error={!!errors.uploads?.[index]?.revision?.desc}
+								helperText={errors.uploads?.[index]?.revision?.desc?.message}
+								defaultValue={item?.revision?.desc}
+								disabled={!isNewContainer}
+								{...field}
+							/>
+						)}
 					/>
-				)}
-			/>
+				</>
+			)}
 		</Sidebar>
 	);
 };

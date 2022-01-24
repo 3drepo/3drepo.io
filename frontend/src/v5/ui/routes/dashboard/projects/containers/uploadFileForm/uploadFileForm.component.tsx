@@ -133,9 +133,8 @@ const UploadsSchema = Yup.object().shape({
 });
 
 export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JSX.Element => {
-	const [sidebarOpen, setSidebarOpen] = useState(false);
-	const [sidebarHidden, setSidebarHidden] = useState(true);
 	const [currentIndex, setcurrentIndex] = useState(null);
+	const [selectedItem, setSelectedItem] = useState({});
 
 	const { control, register, handleSubmit, formState, formState: { errors } } = useForm<IUploadFormFields>({
 		mode: 'onChange',
@@ -171,13 +170,12 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 	};
 
 	const onClickEdit = (id) => {
-		setSidebarOpen(id === currentIndex ? !sidebarOpen : true);
 		setcurrentIndex(id);
-		setSidebarHidden(false);
+		setSelectedItem(fields[id]);
 	};
 
 	const onClickDelete = (id) => {
-		setSidebarHidden(id === currentIndex);
+		setSelectedItem({});
 		remove(id);
 	};
 
@@ -224,11 +222,9 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 					/>
 				</Content>
 				<SettingsSidebar
-					item={Number.isInteger(currentIndex) ? fields[currentIndex] : null}
+					item={selectedItem}
 					index={currentIndex}
-					open={sidebarOpen}
-					onClick={() => setSidebarOpen(!sidebarOpen)}
-					hidden={sidebarHidden}
+					onClose={() => setSelectedItem({})}
 					register={register}
 					errors={errors}
 					control={control}

@@ -24,7 +24,7 @@ interface ISidebar {
 	noButton?: boolean;
 	onClick: () => void;
 	className: string;
-	children: JSX.Element[];
+	children: JSX.Element;
 	hidden?: boolean;
 }
 
@@ -36,7 +36,7 @@ export const Sidebar = ({
 	hidden = false,
 	children,
 }: ISidebar): JSX.Element => (
-	<Container className={`${className} ${open && 'open'}`} hidden={hidden}>
+	<Container className={`${className}`} open={open} hidden={hidden}>
 		<Button onClick={onClick} variant="main" hidden={noButton}>
 			<ExpandIcon />
 		</Button>

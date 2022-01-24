@@ -19,20 +19,9 @@ import styled from 'styled-components';
 import { CircleButton } from '@controls/circleButton';
 
 export const Container = styled.span`
-	width: 0;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	transition: width 0.1s;
 	position: relative;
-	:not(.open) {
-		svg {
-			transform: scaleX(-1);
-		}
-	}
-
-	&.open {
-		width: 400px;
-		transition: width 0.1s;
-	}
+	${({ open }) => (open ? 'width: 400px; transition: width 0.1s;' : 'width: 0; transition: width 0.1s;')}
 `;
 
 export const Content = styled.div`
