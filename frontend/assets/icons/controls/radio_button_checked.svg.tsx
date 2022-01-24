@@ -14,24 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { BodyWrapper as CustomTableBody } from '@/v4/routes/components/customTable/customTable.styles';
-import styled from 'styled-components';
+import React from 'react';
 
-export const Container = styled.div`
-	display: flex;
-	flex-direction: column;
-	height: calc(100% - 40px);
-
-	padding: 20px;
-
-	${CustomTableBody} {
-		border: 1px solid #D0D9EB;
-		border-radius: 5px;
-		overflow: hidden;
-	}
-
-	${CustomTableBody} .simplebar-content {
-		border-right: 3px solid #D0D9EB;
-		background-color: white;
-	}
-`;
+export default (props) => (
+	// eslint-disable-next-line react/destructuring-assignment
+	<svg width="24" height="24" viewBox="0 0 24 24" className={props.className} xmlns="http://www.w3.org/2000/svg">
+		<circle cx="12" cy="12" r="11.5" fill="none" />
+		<circle cx="12" cy="12" r="7" fill="currentColor" />
+		<defs>
+			<linearGradient id="paint0_linear_3329_48113" x1="12" y1="0" x2="12" y2="24" gradientUnits="userSpaceOnUse">
+				<stop stopColor="white" />
+				<stop offset="1" stopColor="white" stopOpacity="0" />
+			</linearGradient>
+		</defs>
+	</svg>
+);

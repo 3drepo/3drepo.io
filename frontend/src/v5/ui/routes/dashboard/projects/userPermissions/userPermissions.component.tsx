@@ -63,7 +63,7 @@ export const UsersPermissions = () => {
 			<Button onClick={onClickTab(TABS.FEDERATIONS_AND_CONTAINERS)}>
 				Container & Federation permissions
 			</Button>
-			<FixedOrGrowContainer>
+			<FixedOrGrowContainer style={{ minHeight: 200 }}>
 				{selectedTab === TABS.PROJECT && <V4ProjectsPermissions />}
 				{selectedTab === TABS.FEDERATIONS_AND_CONTAINERS && <V4ModelsPermissions />}
 			</FixedOrGrowContainer>

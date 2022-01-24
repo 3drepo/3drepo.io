@@ -14,9 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import React from 'react';
 import { createMuiTheme } from '@material-ui/core/styles';
 import { TypographyOptions } from '@material-ui/core/styles/createTypography';
+import RadioButtonIcon from '@assets/icons/controls/radio_button.svg';
+import RadioButtonCheckedIcon from '@assets/icons/controls/radio_button_checked.svg';
 
 export const COLOR = {
 	PRIMARY_MAIN_CONTRAST: '#fff',
@@ -222,6 +224,11 @@ export const theme = createMuiTheme({
 			InputLabelProps: {
 				shrink: false,
 			},
+		},
+		MuiRadio: {
+			color: 'primary',
+			icon: React.createElement(RadioButtonIcon),
+			checkedIcon: React.createElement(RadioButtonCheckedIcon),
 		},
 	},
 	overrides: {
@@ -534,6 +541,16 @@ export const theme = createMuiTheme({
 			root: {
 				transition: 'none',
 			},
+			colorPrimary: {
+				stroke: COLOR.PRIMARY_MAIN,
+				'&$disabled': {
+					stroke: COLOR.BASE_LIGHTEST,
+				},
+
+			},
+			colorSecondary: {
+				stroke: COLOR.SECONDARY_MAIN,
+			},
 		},
 		MuiButton: {
 			iconSizeMedium: {
@@ -687,6 +704,12 @@ export const theme = createMuiTheme({
 		MuiButtonBase: {
 			root: {
 				margin: '8px',
+			},
+		},
+		MuiRadio: {
+			root: {
+				// this is for letting the color prop decide the color
+				color: null,
 			},
 		},
 	},
