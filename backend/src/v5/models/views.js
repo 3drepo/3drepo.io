@@ -21,12 +21,14 @@ const { templates } = require('../utils/responseCodes');
 
 const getCollectionName = (model) => `${model}.views`;
 
-Views.checkViewExists = async (teamspace, model, view) => {
-	const foundView = await db.findOne(teamspace, getCollectionName(model), { _id: view });
+Views.getViewById = async (teamspace, model, id, projection) => {
+	const foundView = await db.findOne(teamspace, getCollectionName(model), { _id: id }, projection);
 
 	if (!foundView) {
 		throw templates.viewNotFound;
 	}
+
+	return foundView;
 };
 
 Views.getViews = (teamspace, model, projection) => db.find(teamspace, getCollectionName(model), {}, projection);
