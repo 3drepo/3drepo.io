@@ -18,9 +18,9 @@
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const Yup = require('yup');
 const { checkLegendExists } = require('../../../../../../../models/legends');
-const { checkViewExists } = require('../../../../../../../models/views');
 const { getModelByQuery } = require('../../../../../../../models/modelSettings');
 const { getProjectById } = require('../../../../../../../models/projects');
+const { getViewById } = require('../../../../../../../models/views');
 const { respond } = require('../../../../../../../utils/responder');
 const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { types } = require('../../../../../../../utils/helper/yup');
@@ -36,7 +36,7 @@ const convertBodyUUIDs = (req) => {
 const defaultViewType = (teamspace, model) => types.id.nullable().test('check-view-exists', 'View not found', async (value) => {
 	if (value) {
 		try {
-			await checkViewExists(teamspace, model, stringToUUID(value));
+			await getViewById(teamspace, model, stringToUUID(value), { _id: 1 });
 		} catch (err) {
 			return false;
 		}

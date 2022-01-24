@@ -15,11 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { mimeTypes, respond } = require('../../../../utils/responder');
 const { Router } = require('express');
 const Views = require('../../../../processors/teamspaces/projects/models/federations');
+const { fromBuffer: fileTypeFromBuffer } = require('file-type');
 const { hasReadAccessToFederation } = require('../../../../middleware/permissions/permissions');
-const { respond } = require('../../../../utils/responder');
 const { serialiseViews } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/views');
+const { templates } = require('../../../../utils/responseCodes');
 
 const getViewList = (req, res, next) => {
 	const { teamspace, federation } = req.params;
@@ -27,11 +29,23 @@ const getViewList = (req, res, next) => {
 		.then((views) => {
 			req.outputData = views;
 			next();
-		})
-		.catch(
+		}).catch(
 			// istanbul ignore next
 			(err) => respond(req, res, err),
 		);
+};
+
+const getViewThumbnail = async (req, res) => {
+	const { teamspace, federation, view } = req.params;
+
+	try {
+		const image = await Views.getThumbnail(teamspace, federation, view);
+		const mimeType = await fileTypeFromBuffer(image)?.mime || mimeTypes.png;
+		respond(req, res, templates.ok, image, { cache: true, mimeType });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
 };
 
 const establishRoutes = () => {
@@ -94,7 +108,61 @@ const establishRoutes = () => {
 	 *                         type: boolean
 	 *                         description: indicates whether a thumbnail is available for the view
 	 */
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/views/{view}/thumbnail:
+	 *   get:
+	 *     description: Get the thumbnail of the view specified
+	 *     tags: [Federations]
+	 *     operationId: FederationViewThumbnail
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+   	 *       - project:
+	 *         name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - federation:
+	 *         name: federation
+	 *         description: Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - view:
+	 *         name: view
+	 *         description: View ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *         type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/thumbnailNotFound"
+	 *       200:
+	 *         description: returns a png of the thumbnail
+	 *         content:
+	 *           image/png:
+	 *             schema:
+	 *               type: string
+	 *               format: binary
+	 */
 	router.get('/', hasReadAccessToFederation, getViewList, serialiseViews);
+	router.get('/:view/thumbnail', hasReadAccessToFederation, getViewThumbnail);
 
 	return router;
 };

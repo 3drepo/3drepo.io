@@ -16,7 +16,8 @@
  */
 
 const Views = {};
-const { getViews } = require('../../../../../models/views');
+const { getViewById, getViews } = require('../../../../../models/views');
+const { templates } = require('../../../../../utils/responseCodes');
 
 Views.getViewList = (teamspace, model) => {
 	const projection = {
@@ -26,6 +27,24 @@ Views.getViewList = (teamspace, model) => {
 	};
 
 	return getViews(teamspace, model, projection);
+};
+
+Views.getThumbnail = async (teamspace, model, view) => {
+	// Legacy: thumbnail used stored inside screenshot instead of thumbnail
+	const projection = { thumbnail: 1, screenshot: 1, _id: 0 };
+	const { thumbnail, screenshot } = await getViewById(teamspace, model, view, projection);
+
+	const img = thumbnail || screenshot;
+	if (img) {
+		// Legacy: image buffer may be inside content
+		const buffer = img.buffer || img.content?.buffer;
+
+		if (buffer) {
+			return buffer;
+		}
+	}
+
+	throw templates.thumbnailNotFound;
 };
 
 module.exports = Views;
