@@ -53,13 +53,13 @@ export const ShareTextField = ({ label, value }: IShareTextField) => {
 	};
 	return (
 		<>
-			<LinkLabel value={label} />
 			<CopyToClipboard
 				onCopy={handleCopyToClipboard}
 				text={value}
 			>
 				<LinkBar
 					value={value}
+					label={label}
 					InputProps={{
 						readOnly: true,
 						endAdornment: (

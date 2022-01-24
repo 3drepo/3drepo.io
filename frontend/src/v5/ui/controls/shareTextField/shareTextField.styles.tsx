@@ -23,22 +23,6 @@ import tick from '@assets/icons/tick';
 
 const SVG_PADDING_IN_PX = 9;
 
-export const LinkLabel = styled(TextField)`
-	&&,
-	&& *{
-		height: 19px;
-		${({ theme }) => theme.typography.kicker};
-		font-family: ${({ theme }) => theme.typography.fontFamily};
-		padding: 0;
-		margin: 0;
-		color: ${({ theme }) => theme.palette.base.main};
-		background: transparent;
-		border: none;
-		pointer-events: none;
-		user-select: none;
-	}
-`;
-
 export const CopyToClipboardIcon = styled(copyToClipboardIcon)`
 	padding: ${SVG_PADDING_IN_PX}px;
 `;
@@ -54,7 +38,10 @@ export const CopyToClipboardIconContainer = styled.div`
 `;
 
 export const LinkBar = styled(TextField)`
-	margin: 6px 0 0 0;
+
+	& > label:not(.Mui-error).Mui-focused {
+		color: ${({ theme }) => theme.palette.base.main};
+	}
 
 	.MuiInputBase-root {
 		cursor: pointer;
