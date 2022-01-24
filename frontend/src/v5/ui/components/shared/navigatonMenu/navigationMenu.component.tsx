@@ -19,6 +19,7 @@ import React from 'react';
 import { Typography } from '@material-ui/core';
 import { MenuList, MenuItem } from './navigationMenu.styles';
 
+// const isSelected = (selectedItem: string, to: string) => lastItemOf(to.split('/')) === selectedItem;
 interface IListItem {
 	title: string;
 	to: string;
@@ -26,11 +27,12 @@ interface IListItem {
 
 interface INavigationMenu {
 	anchorEl: null | HTMLElement;
+	selectedItem: string;
 	handleClose: () => void;
 	list: IListItem[];
 }
 
-export const NavigationMenu = ({ anchorEl, handleClose, list }: INavigationMenu): JSX.Element => {
+export const NavigationMenu = ({ anchorEl, selectedItem, handleClose, list }: INavigationMenu): JSX.Element => {
 	const menuPosition = {
 		getContentAnchorEl: null,
 		anchorOrigin: {
@@ -45,8 +47,13 @@ export const NavigationMenu = ({ anchorEl, handleClose, list }: INavigationMenu)
 
 	return (
 		<MenuList anchorEl={anchorEl} onClose={handleClose} open={Boolean(anchorEl)} {...menuPosition}>
-			{list.map(({ title, ...props }) => (
-				<MenuItem key={title} {...props} onClick={handleClose}>
+			{list.map(({ title, to }) => (
+				<MenuItem
+					key={title}
+					to={to}
+					onClick={handleClose}
+					selected={selectedItem === title}
+				>
 					<Typography variant="body1" noWrap>
 						{title}
 					</Typography>
