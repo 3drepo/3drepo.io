@@ -23,6 +23,9 @@ import { pick, times } from 'lodash';
 import { federationMockFactory } from './federations.fixtures';
 import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
 import { FetchFederationStatsResponse, IFederation } from '@/v5/store/federations/federations.types';
+import { FederationSettingsPayload } from '@/v5/store/federations/federations.types';
+import { IFederationSettings } from './../../src/v5/store/federations/federations.types';
+import { FederationSettingsPayload } from '@/v5/store/federations/federations.types';
 
 // TODO: review this
 // There is something weird as how the tests are setup
@@ -122,10 +125,9 @@ describe('Federations: sagas', () => {
 
 	describe('updateFederationSettings', () => {
 		const newSettings = { 
-			_id: federationId,
-			name: 'newName',
-			role: 'newRole',
-			isFavourite: true,
+			name: 'new name',
+			description: 'new description',
+			code: 'new code',
 			angleFromNorth: 90,
 			defaultView: "None",
 			surveyPoint: {
@@ -138,25 +140,33 @@ describe('Federations: sagas', () => {
 		// Successful call
 		it('should call updateFederationSettings endpoint', async () => {
 			mockServer
-			.post(`/teamspaces/${teamspace}/projects/${projectId}/federations`, newSettings)
-			.reply(200, {
-				_id: '12345'
-			});
-			const container = { ...newSettings, _id: '12345'}
+			.patch(`/teamspaces/${teamspace}/projects/${projectId}/federations`, newSettings)
+			.reply(200, {});
+			const federation = { ...newSettings }
 
 			await expectSaga(FederationsSaga.default)
-				.dispatch(FederationsActions.updateFederationSettings(teamspace, projectId, federationId, newSettings))
+				.dispatch(FederationsActions.updateFederationSettings(
+					teamspace, 
+					projectId, 
+					federationId, 
+					newSettings as FederationSettingsPayload
+				))
 				.silentRun();
 		})
 		
 		// Unsuccessful call
 		it('should call updateFederationSettings endpoint with 400', async () => {
 			mockServer
-			.post(`/teamspaces/${teamspace}/projects/${projectId}/Federations`)
+			.post(`/teamspaces/${teamspace}/projects/${projectId}/federations`)
 			.reply(400);
 
 			await expectSaga(FederationsSaga.default)
-				.dispatch(FederationsActions.updateFederationSettings(teamspace, projectId, federationId, newSettings))
+				.dispatch(FederationsActions.updateFederationSettings(
+					teamspace, 
+					projectId, 
+					federationId, 
+					newSettings as FederationSettingsPayload
+				))
 				.silentRun();
 		})
 	})
