@@ -15,14 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { mimeTypes, respond } = require('../../../../utils/responder');
 const { Router } = require('express');
 const Views = require('../../../../processors/teamspaces/projects/models/federations');
+const { fromBuffer: fileTypeFromBuffer } = require('file-type');
 const { hasReadAccessToFederation } = require('../../../../middleware/permissions/permissions');
-const { mimeTypes, respond } = require('../../../../utils/responder');
 const { serialiseViews } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/views');
 const { templates } = require('../../../../utils/responseCodes');
-
-const { fromBuffer: fileTypeFromBuffer } = require('file-type');
 
 const getViewList = (req, res, next) => {
 	const { teamspace, federation } = req.params;

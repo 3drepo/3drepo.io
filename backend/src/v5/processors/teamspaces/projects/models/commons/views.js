@@ -36,7 +36,7 @@ Views.getThumbnail = async (teamspace, model, view) => {
 
 	const img = thumbnail || screenshot;
 	if (img) {
-		// Legacy: image buffer may be instead content
+		// Legacy: image buffer may be inside content
 		const buffer = img.buffer || img.content?.buffer;
 
 		if (buffer) {
