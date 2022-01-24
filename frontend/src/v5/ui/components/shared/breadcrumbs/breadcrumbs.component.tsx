@@ -82,7 +82,7 @@ export const Breadcrumbs = (): JSX.Element => {
 
 	const selectedItem = lastItemOf(breadcrumbs);
 
-	list = list.map(createToWithUrl(project ? urlProject : url));
+	list = list.map(createToWithUrl(projectId ? urlProject : url));
 
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
