@@ -50,6 +50,7 @@ const testGetThumbnail = () => {
 		[' (legacy) buffer in thumbnail.content ', { thumbnail: { content: { buffer } } }, true],
 		[' (legacy) buffer in screenshot object ', { screenshot: { buffer } }, true],
 		[' no thumbnail ', { }, false],
+		[' no thumbnail but have thumbnail object ', { thumbnail: {} }, false],
 	])('Get View Thumbnail', (desc, data, shouldSucceed) => {
 		test(`${desc} should ${shouldSucceed ? '' : 'NOT'} succeed`, async () => {
 			ViewsModel.getViewById.mockResolvedValueOnce(data);
