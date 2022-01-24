@@ -34,6 +34,15 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 	issues: faker.datatype.number(120),
 	risks: faker.datatype.number(120),
 	hasStatsPending: false,
+	settings: {
+		angleFromNorth: faker.datatype.number(90),
+		defaultView: faker.random.arrayElement(['None']),
+		surveyPoint: {
+			latLong: [faker.datatype.number(0), faker.datatype.number(0)],
+			position: [faker.datatype.number(0), faker.datatype.number(0), faker.datatype.number(0)],
+		},
+		unit: faker.random.arrayElement(['mm', 'cm', 'dm', 'm', 'ft']),
+	},
 	...overrides,
 });
 

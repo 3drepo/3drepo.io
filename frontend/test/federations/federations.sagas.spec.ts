@@ -119,4 +119,45 @@ describe('Federations: sagas', () => {
 			.silentRun();
 		})
 	})
+
+	describe('updateFederationSettings', () => {
+		const newSettings = { 
+			_id: federationId,
+			name: 'newName',
+			role: 'newRole',
+			isFavourite: true,
+			angleFromNorth: 90,
+			defaultView: "None",
+			surveyPoint: {
+				latLong: [0, 0],
+				position: [0, 0, 0],
+			},
+			unit: "mm",
+		}
+
+		// Successful call
+		it('should call updateFederationSettings endpoint', async () => {
+			mockServer
+			.post(`/teamspaces/${teamspace}/projects/${projectId}/federations`, newSettings)
+			.reply(200, {
+				_id: '12345'
+			});
+			const container = { ...newSettings, _id: '12345'}
+
+			await expectSaga(FederationsSaga.default)
+				.dispatch(FederationsActions.updateFederationSettings(teamspace, projectId, federationId, newSettings))
+				.silentRun();
+		})
+		
+		// Unsuccessful call
+		it('should call updateFederationSettings endpoint with 400', async () => {
+			mockServer
+			.post(`/teamspaces/${teamspace}/projects/${projectId}/Federations`)
+			.reply(400);
+
+			await expectSaga(FederationsSaga.default)
+				.dispatch(FederationsActions.updateFederationSettings(teamspace, projectId, federationId, newSettings))
+				.silentRun();
+		})
+	})
 })

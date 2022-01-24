@@ -23,7 +23,7 @@ import {
 	FetchFederationsResponse,
 	FetchFederationStatsResponse,
 	AddFavouriteAction,
-	RemoveFavouriteAction, FetchFederationStatsAction,
+	RemoveFavouriteAction, FetchFederationStatsAction, UpdateFederationSettingsAction,
 } from '@/v5/store/federations/federations.types';
 import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
@@ -94,9 +94,25 @@ export function* fetchFederationStats({ teamspace, projectId, federationId }: Fe
 	}
 }
 
+export function* updateFederationSettings({
+	teamspace, projectId, federationId, settings,
+}: UpdateFederationSettingsAction) {
+	try {
+		yield API.Federations.updateFederationSettings({
+			teamspace, projectId, federationId, settings,
+		});
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to update federation settings',
+			error,
+		}));
+	}
+}
+
 export default function* FederationsSagas() {
 	yield takeLatest(FederationsTypes.ADD_FAVOURITE, addFavourites);
 	yield takeLatest(FederationsTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeLatest(FederationsTypes.FETCH_FEDERATIONS, fetchFederations);
 	yield takeEvery(FederationsTypes.FETCH_FEDERATION_STATS, fetchFederationStats);
+	yield takeLatest(FederationsTypes.UPDATE_FEDERATION_SETTINGS, updateFederationSettings);
 }

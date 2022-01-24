@@ -65,11 +65,8 @@ export const updateFederationSettings = async ({
 	federationId,
 	settings,
 }: UpdateFederationSettingsPayload): Promise<AxiosResponse<void>> => {
-	console.log("Got here")
-	// const { data } = await api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`, {
-	// 	settings,
-	// });
-	console.log(`CALLING: teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}\nwith ${settings}`);
-	return null;
-	// return data;
+	const { data } = await api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`, {
+		settings,
+	});
+	return data;
 };

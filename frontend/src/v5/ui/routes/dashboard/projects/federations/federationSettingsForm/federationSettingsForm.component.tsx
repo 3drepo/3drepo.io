@@ -27,7 +27,6 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import { FederationSettingsPayload, IFederation } from '@/v5/store/federations/federations.types';
-import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 import { FlexContainer, SectionTitle } from './federationSettingsForm.styles';
 
 interface IFormInput {
