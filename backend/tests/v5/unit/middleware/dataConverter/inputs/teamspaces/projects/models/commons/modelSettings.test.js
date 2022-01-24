@@ -38,7 +38,7 @@ const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const existingViewID = '3752b630-065f-11ec-8edf-ab0f7cc84da8';
-Views.checkViewExists.mockImplementation((teamspace, model, view) => {
+Views.getViewById.mockImplementation((teamspace, model, view) => {
 	if (UUIDToString(view) === existingViewID) {
 		return true;
 	}
