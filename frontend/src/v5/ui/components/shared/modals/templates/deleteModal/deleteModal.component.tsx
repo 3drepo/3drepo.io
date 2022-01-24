@@ -19,7 +19,7 @@ import React from 'react';
 import { Button, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
 import DeleteIcon from '@assets/icons/delete.svg';
 import { FormattedMessage } from 'react-intl';
-import { Container, Actions } from '@/v5/ui/components/shared/modals/modals.styles';
+import { Container, Actions, CircledIcon } from '@/v5/ui/components/shared/modals/modals.styles';
 
 interface IDeleteModal {
 	onClickClose?: () => void,
@@ -30,7 +30,9 @@ interface IDeleteModal {
 
 export const DeleteModal = ({ onClickConfirm, onClickClose, title, message }: IDeleteModal) => (
 	<Container>
-		<DeleteIcon />
+		<CircledIcon colour={({ theme }) => theme.palette.error.main}>
+			<DeleteIcon />
+		</CircledIcon>
 		<DialogTitle>
 			<FormattedMessage
 				id="deleteModal.header"

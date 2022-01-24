@@ -17,7 +17,6 @@
 
 import styled, { css } from 'styled-components';
 import { DialogContent } from '@material-ui/core';
-
 import { Typography } from '@controls/typography';
 
 export const Container = styled.div`
@@ -56,4 +55,16 @@ export const Status = styled(Typography).attrs({
 	margin-top: 8px;
 	margin-bottom: 0;
 	color: ${({ theme }) => theme.palette.base.main};
+`;
+
+export const CircledIcon = styled.div`
+	height: 28px;
+	padding: 33px;
+	border: 2px solid ${({ colour, theme }) => (colour || theme.palette.primary.main)};
+	border-radius: 50%;
+	svg {
+		height: 100%;
+		width: auto;
+		path { fill: ${({ colour, theme }) => (colour || theme.palette.primary.main)} };
+	}
 `;
