@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { BodyWrapper as CustomTableBody } from '@/v4/routes/components/customTable/customTable.styles';
+import { BodyWrapper as CustomTableBody, Head } from '@/v4/routes/components/customTable/customTable.styles';
 import styled from 'styled-components';
 
 export const Container = styled.div`
@@ -28,5 +28,9 @@ export const Container = styled.div`
 		border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 		border-radius: 5px;
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
+	}
+
+	${Head} {
+		border: 0;
 	}
 `;
