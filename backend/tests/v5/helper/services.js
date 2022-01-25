@@ -106,7 +106,7 @@ db.createGroups = (teamspace, modelId, groups = []) => {
 			converted.objects = entry.objects.map((objectEntry) => {
 				const convertedObj = { ...objectEntry };
 				if (objectEntry.shared_ids) {
-					convertedObj.shared_ids = objectEntry.shared_ids.map();
+					convertedObj.shared_ids = objectEntry.shared_ids.map(UUIDToString);
 				}
 				return convertedObj;
 			});
