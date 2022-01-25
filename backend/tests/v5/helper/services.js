@@ -24,7 +24,7 @@ const { createApp } = require(`${srcV4}/services/api`);
 const DbHandler = require(`${src}/handler/db`);
 const config = require(`${src}/utils/config`);
 const { createTeamSpaceRole } = require(`${srcV4}/models/role`);
-const { generateUUID, uuidToString, stringToUUID } = require(`${srcV4}/utils`);
+const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { PROJECT_ADMIN, TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 
 const db = {};
@@ -106,7 +106,7 @@ db.createGroups = (teamspace, modelId, groups = []) => {
 			converted.objects = entry.objects.map((objectEntry) => {
 				const convertedObj = { ...objectEntry };
 				if (objectEntry.shared_ids) {
-					convertedObj.shared_ids = objectEntry.shared_ids.map(uuidToString);
+					convertedObj.shared_ids = objectEntry.shared_ids.map();
 				}
 				return convertedObj;
 			});
@@ -140,9 +140,10 @@ db.createLegends = (teamspace, modelId, legends) => {
 	return DbHandler.insertMany(teamspace, `${modelId}.sequences.legends`, formattedLegends);
 };
 
-ServiceHelper.generateUUIDString = () => uuidToString(generateUUID());
+ServiceHelper.generateUUIDString = () => UUIDToString(generateUUID());
 ServiceHelper.generateUUID = () => generateUUID();
 ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex');
+ServiceHelper.generateRandomBuffer = (length = 20) => Buffer.from(ServiceHelper.generateRandomString(length));
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
     + Math.random() * (end.getTime() - start.getTime()));
 ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
@@ -236,6 +237,12 @@ ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = fal
 
 	return group;
 };
+
+ServiceHelper.generateView = (account, model, hasThumbnail = true) => ({
+	_id: ServiceHelper.generateUUIDString(),
+	name: ServiceHelper.generateRandomString(),
+	...(hasThumbnail ? { thumbnail: ServiceHelper.generateRandomBuffer() } : {}),
+});
 
 ServiceHelper.app = () => createApp().listen(8080);
 
