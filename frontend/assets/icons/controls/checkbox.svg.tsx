@@ -18,8 +18,7 @@ import React from 'react';
 
 export default (props) => (
 	// eslint-disable-next-line react/destructuring-assignment
-	<svg width="24" height="24" viewBox="0 0 24 24" className={props.className} xmlns="http://www.w3.org/2000/svg">
-		<circle cx="12" cy="12" r="11.5" fill="none" stroke="currentColor" />
-		<circle cx="12" cy="12" r="7" fill="currentColor" />
+	<svg width="18" height="18" viewBox="0 0 18 18" className={props.className} fill="none" xmlns="http://www.w3.org/2000/svg">
+		<rect x="0.5" y="0.5" width="17" height="17" rx="2.5" stroke="currentColor" />
 	</svg>
 );

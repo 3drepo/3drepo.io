@@ -1,0 +1,39 @@
+/**
+ *  Copyright (C) 2021 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+import React from 'react';
+
+export default (props) => (
+	// eslint-disable-next-line react/destructuring-assignment
+	<svg width="18" height="18" viewBox="0 0 18 18" className={props.className} xmlns="http://www.w3.org/2000/svg">
+		<path
+			id="rect26"
+			fill="currentColor"
+			d="M 3 0 C 1.338 0 0 1.338 0 3 L 0 15 C 0 16.662 1.338 18 3 18 L 15 18 C 16.662 18 18 16.662 18 15 L 18 3 C 18 1.338 16.662 0 15 0 L 3 0 z M 13.671875 5 C 13.812625 5 13.953147 5.0527713 14.060547 5.1601562 L 14.839844 5.9394531 C 15.054644 6.1542331 15.054644 6.5019969 14.839844 6.7167969 L 8.5136719 13.041016 C 8.2988719 13.255716 7.9511081 13.255816 7.7363281 13.041016 L 4.1601562 9.4667969 C 3.9453862 9.2520169 3.9453863 8.9042531 4.1601562 8.6894531 L 4.9394531 7.9101562 C 5.1542331 7.6953563 5.5020169 7.6953563 5.7167969 7.9101562 L 8.125 10.320312 L 13.283203 5.1601562 C 13.390603 5.0527713 13.531125 5 13.671875 5 z "
+		/>
+		<g
+			aria-label="?"
+			id="text1638"
+			fill="Black"
+			transform="matrix(0.53354383,0,0,0.53812629,0.10045045,12.847232)"
+		>
+			<path
+				d="m 14.235222,3.6126289 h 3.964844 V 8.5735664 H 14.235222 Z M 18.082879,0.74153519 H 14.35241 V -2.2662773 q 0,-1.9726563 0.546875,-3.2421875 0.546875,-1.2695313 2.304687,-2.9492188 l 1.757813,-1.7382814 q 1.113281,-1.035156 1.601562,-1.953125 0.507813,-0.917969 0.507813,-1.875 0,-1.738281 -1.289063,-2.8125 -1.269531,-1.074219 -3.378906,-1.074219 -1.542969,0 -3.300781,0.683594 -1.738281,0.683594 -3.6328127,1.992188 v -3.671875 q 1.8359377,-1.113282 3.7109377,-1.660157 1.894531,-0.546875 3.90625,-0.546875 3.59375,0 5.761719,1.894532 2.1875,1.894531 2.1875,5 0,1.484375 -0.703125,2.832031 -0.703125,1.328125 -2.460938,3.0078124 l -1.71875,1.6796875 q -0.917969,0.9179688 -1.308594,1.4453125 -0.371093,0.5078125 -0.527343,0.9960938 -0.117188,0.4101562 -0.175782,0.9960937 -0.05859,0.5859375 -0.05859,1.6015625 z"
+				id="path5186"
+			/>
+		</g>
+	</svg>
+);

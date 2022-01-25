@@ -19,6 +19,9 @@ import { createMuiTheme } from '@material-ui/core/styles';
 import { TypographyOptions } from '@material-ui/core/styles/createTypography';
 import RadioButtonIcon from '@assets/icons/controls/radio_button.svg';
 import RadioButtonCheckedIcon from '@assets/icons/controls/radio_button_checked.svg';
+import CheckboxIcon from '@assets/icons/controls/checkbox.svg';
+import CheckboxCheckedIcon from '@assets/icons/controls/checkbox_checked.svg';
+import CheckboxIndeterminatedIcon from '@assets/icons/controls/checkbox_indeterminated.svg';
 
 export const COLOR = {
 	PRIMARY_MAIN_CONTRAST: '#fff',
@@ -224,6 +227,12 @@ export const theme = createMuiTheme({
 			InputLabelProps: {
 				shrink: false,
 			},
+		},
+		MuiCheckbox: {
+			color: 'primary',
+			icon: React.createElement(CheckboxIcon),
+			checkedIcon: React.createElement(CheckboxCheckedIcon),
+			indeterminateIcon: React.createElement(CheckboxIndeterminatedIcon),
 		},
 		MuiRadio: {
 			color: 'primary',
@@ -541,15 +550,10 @@ export const theme = createMuiTheme({
 			root: {
 				transition: 'none',
 			},
+		},
+		MuiCheckbox: {
 			colorPrimary: {
-				stroke: COLOR.PRIMARY_MAIN,
-				'&$disabled': {
-					stroke: COLOR.BASE_LIGHTEST,
-				},
-
-			},
-			colorSecondary: {
-				stroke: COLOR.SECONDARY_MAIN,
+				color: COLOR.BASE_LIGHTEST,
 			},
 		},
 		MuiButton: {
