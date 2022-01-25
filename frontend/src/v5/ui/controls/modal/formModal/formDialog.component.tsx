@@ -26,10 +26,21 @@ interface IFormDialog extends React.DetailedHTMLProps<React.FormHTMLAttributes<H
 	open?: boolean;
 	confirmLabel?: string;
 	isValid?: boolean;
+	showButtons?: boolean;
 }
 
 export const FormModal = (props: IFormDialog) => {
-	const { onClickClose, title, confirmLabel, open, children, className, isValid = true, ...formProps } = props;
+	const {
+		onClickClose,
+		title,
+		confirmLabel,
+		open,
+		children,
+		className,
+		isValid = true,
+		showButtons = true,
+		...formProps
+	} = props;
 	return (
 		<Dialog
 			onClose={onClickClose}
@@ -49,14 +60,16 @@ export const FormModal = (props: IFormDialog) => {
 				<FormDialogContent>
 					{children}
 				</FormDialogContent>
-				<FormDialogActions>
-					<Button autoFocus onClick={onClickClose} variant="outlined" color="secondary" size="medium">
-						Cancel
-					</Button>
-					<Button disabled={!isValid} type="submit" variant="contained" color="primary" size="medium">
-						{confirmLabel || 'OK'}
-					</Button>
-				</FormDialogActions>
+				{showButtons && (
+					<FormDialogActions>
+						<Button autoFocus onClick={onClickClose} variant="outlined" color="secondary" size="medium">
+							Cancel
+						</Button>
+						<Button disabled={!isValid} type="submit" variant="contained" color="primary" size="medium">
+							{confirmLabel || 'OK'}
+						</Button>
+					</FormDialogActions>
+				)}
 			</Form>
 		</Dialog>
 	);
