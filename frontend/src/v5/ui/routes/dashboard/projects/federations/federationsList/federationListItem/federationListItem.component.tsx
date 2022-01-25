@@ -151,7 +151,7 @@ export const FederationListItem = ({
 				</DashboardListItemIcon>
 				<DashboardListItemIcon>
 					<EllipsisButtonWithMenu
-						list={getFederationMenuItems(federation._id)}
+						list={getFederationMenuItems(federation)}
 					/>
 				</DashboardListItemIcon>
 			</DashboardListItemRow>

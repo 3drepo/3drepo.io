@@ -119,4 +119,27 @@ describe('Federations: sagas', () => {
 			.silentRun();
 		})
 	})
+	
+	describe('deleteFederation', () => {
+		it('should call deleteFederation endpoint', async () => {
+			mockServer
+			.delete(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
+			.reply(200);
+
+			await expectSaga(FederationsSaga.default)
+			.dispatch(FederationsActions.deleteFederation(teamspace, projectId, federationId))
+			.put(FederationsActions.deleteFederationSuccess(projectId, federationId))
+			.silentRun();
+		})
+
+		it('should call deleteFederation endpoint with 404 and open alert modal', async () => {
+			mockServer
+			.delete(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
+			.reply(404);
+
+			await expectSaga(FederationsSaga.default)
+			.dispatch(FederationsActions.deleteFederation(teamspace, projectId, federationId))
+			.silentRun();
+		})
+	})
 })
