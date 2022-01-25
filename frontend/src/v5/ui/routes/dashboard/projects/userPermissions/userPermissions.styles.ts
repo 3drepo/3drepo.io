@@ -24,14 +24,9 @@ export const Container = styled.div`
 
 	padding: 20px;
 
-	${CustomTableBody} {
-		border: 1px solid #D0D9EB;
-		border-radius: 5px;
-		overflow: hidden;
-	}
-
 	${CustomTableBody} .simplebar-content {
-		border-right: 3px solid #D0D9EB;
-		background-color: white;
+		border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+		border-radius: 5px;
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
 	}
 `;

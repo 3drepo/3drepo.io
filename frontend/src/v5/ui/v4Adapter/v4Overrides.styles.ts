@@ -26,7 +26,6 @@ export const V4OverridesContainer = styled.div`
 	}
 
 	${BoardContainer} {
-		background-color: red;
 		height: 2000px;
 	}
 `;
