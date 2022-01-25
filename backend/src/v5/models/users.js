@@ -161,12 +161,15 @@ User.getUsersWithRole = async (users = [], roles = []) => {
 			)
 				&& validRole;
 			if (returnUser) {
-				returningUsers.push(
-					{
-						user: user.user,
-						role: role.role,
-					},
-				);
+				if (!returningUsers.includes(user.user)) {
+					returningUsers.push(
+						{
+							user: user.user,
+							roles: []
+						}
+					)
+				}
+				returningUsers(user.user.roles).push(role.role),
 			}
 		});
 	});

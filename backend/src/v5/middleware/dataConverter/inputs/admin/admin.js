@@ -24,16 +24,24 @@ const { respond } = require('../../../../utils/responder');
 const Admin = {};
 
 Admin.validatePayload = async (req, res, next) => {
-	const schema = Yup.object().shape({ users:
-		Yup.array().of(
-			Yup.object().shape({
-				user: Yup.string().required(),
-				role: Yup.string().required(),
-			}),
-		).min(1, 'users array must have at least 1')
-		,
-	}).strict(true).noUnknown()
-		.required();
+	const schema = Yup.object().shape(
+		{ 
+		users: Yup.array().of(
+				Yup.object().shape(
+					{
+					user: Yup.string().required().min(2),
+					roles: Yup.array().of(
+							Yup.string().required()
+						).min(1, 'role array must have at least 1'),
+					}
+				)),
+		}
+	)
+	.min(1, 'users array must have at least 1')
+	.strict(true)
+	.noUnknown()
+	.required();
+
 	try {
 		await schema.validate(req.body);
 		next();
@@ -74,7 +82,7 @@ Admin.validateUsersAndRoles = async (req, res, next) => {
 		const checkedValues = users.map(async (user) => {
 			const [userExists, roleExists] = await Promise.all([
 				getUserByUsername(user.user),
-				SYSTEM_ROLES.includes(user.role),
+				user.user.roles.forEach(role => SYSTEM_ROLES.includes(role)),
 			]);
 			if (!userExists) throw createResponseCode(templates.userNotFound, `${user.user} is not a user`);
 			if (!roleExists) throw createResponseCode(templates.roleNotFound, `The role ${user.role} provided is not a system role`);
