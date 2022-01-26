@@ -21,25 +21,17 @@ import { ProjectsPermissions as V4ProjectsPermissions } from '@/v4/routes/projec
 import { ModelsPermissions as V4ModelsPermissions } from '@/v4/routes/modelsPermissions';
 import { useDispatch, useSelector } from 'react-redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
-import { Button } from '@material-ui/core';
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
 import { selectCurrentUser } from '@/v4/modules/currentUser';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
-import { Container } from './userPermissions.styles';
-
-enum TABS {
-	PROJECT,
-	FEDERATIONS_AND_CONTAINERS,
-}
+import { Container, Tab, Tabs } from './userPermissions.styles';
 
 export const UsersPermissions = () => {
 	const dispatch = useDispatch();
 	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails().name;
 	const username = useSelector(selectCurrentUser)?.username;
 
-	const [selectedTab, setSelectedTab] = useState(TABS.PROJECT);
-
-	const onClickTab = (tab) => () => setSelectedTab(tab);
+	const [selectedTab, setSelectedTab] = useState(0);
 
 	useEffect(() => {
 		if (!username || !projectName) {
@@ -55,17 +47,20 @@ export const UsersPermissions = () => {
 		return (<></>);
 	}
 
+
+	const handleChange = (event, newValue) => {
+		setSelectedTab(newValue);
+	};
 	return (
 		<Container>
-			<Button onClick={onClickTab(TABS.PROJECT)}>
-				Project Permissions
-			</Button>
-			<Button onClick={onClickTab(TABS.FEDERATIONS_AND_CONTAINERS)}>
-				Container & Federation permissions
-			</Button>
+			<Tabs value={selectedTab} onChange={handleChange} >
+				<Tab label="Project Permissions" />
+				<Tab label="Container & Federation permissions"  />
+			</Tabs>
+
 			<FixedOrGrowContainer style={{ minHeight: 200 }}>
-				{selectedTab === TABS.PROJECT && <V4ProjectsPermissions />}
-				{selectedTab === TABS.FEDERATIONS_AND_CONTAINERS && <V4ModelsPermissions />}
+				{selectedTab === 0 && <V4ProjectsPermissions />}
+				{selectedTab === 1 && <V4ModelsPermissions />}
 			</FixedOrGrowContainer>
 		</Container>
 	);

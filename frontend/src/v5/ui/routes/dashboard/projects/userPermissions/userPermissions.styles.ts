@@ -16,6 +16,45 @@
  */
 import { Row } from '@/v4/routes/components/customTable/customTable.styles';
 import styled from 'styled-components';
+import { Tab as MuiTab, Tabs as MuiTabs } from '@material-ui/core';
+
+export const Tab = styled(MuiTab).attrs({color:'secondary'})`
+	${({ theme }) => theme.typography.kicker};
+	color: ${({ theme }) => theme.palette.base.main};
+	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+	margin-right: -1px;
+    margin-left: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+	white-space: nowrap;
+	min-height: 0;
+	padding: 12px 10px;
+
+	&.Mui-selected {
+		color: ${({ theme }) => theme.palette.tertiary.main};
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+		border: 1px solid ${({ theme }) => theme.palette.tertiary.main};
+		z-index: 1;
+	}
+
+	&:first-child {
+		border-radius: 5px 0px 0px 5px;
+	}
+
+	&:last-child{
+		border-radius: 0px 5px 5px 0px;
+	}
+
+` as typeof MuiTab;
+
+export const Tabs = styled(MuiTabs)`
+	.MuiTabs-indicator {
+		display: none;
+	}
+
+	margin-bottom: 30px;
+`;
+
 
 export const Container = styled.div`
 	${Row} > :nth-child(2) {
