@@ -23,7 +23,13 @@ import {
 	FetchFederationsResponse,
 	FetchFederationStatsResponse,
 	AddFavouriteAction,
-	RemoveFavouriteAction, FetchFederationStatsAction, UpdateFederationSettingsAction,
+	RemoveFavouriteAction,
+	FetchFederationStatsAction,
+	UpdateFederationSettingsAction,
+	FetchFederationViewsAction,
+	FetchFederationViewsResponse,
+	FetchFederationSettingsAction,
+	FetchFederationSettingsResponse,
 } from '@/v5/store/federations/federations.types';
 import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
@@ -94,6 +100,46 @@ export function* fetchFederationStats({ teamspace, projectId, federationId }: Fe
 	}
 }
 
+export function* fetchFederationViews({
+	teamspace,
+	projectId,
+	federationId,
+}: FetchFederationViewsAction) {
+	try {
+		const views: FetchFederationViewsResponse = yield API.Federations.fetchFederationViews({
+			teamspace,
+			projectId,
+			federationId,
+		});
+		yield put(FederationsActions.fetchFederationViewsSuccess(federationId, projectId, views));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to fetch federation views',
+			error,
+		}));
+	}
+}
+
+export function* fetchFederationSettings({
+	teamspace,
+	projectId,
+	federationId,
+}: FetchFederationSettingsAction) {
+	try {
+		const settings: FetchFederationSettingsResponse = yield API.Federations.fetchFederationSettings({
+			teamspace,
+			projectId,
+			federationId,
+		});
+		yield put(FederationsActions.fetchFederationSettingsSuccess(projectId, federationId, settings));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to fetch federation settings',
+			error,
+		}));
+	}
+}
+
 export function* updateFederationSettings({
 	teamspace, projectId, federationId, settings,
 }: UpdateFederationSettingsAction) {
@@ -114,5 +160,7 @@ export default function* FederationsSagas() {
 	yield takeLatest(FederationsTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeLatest(FederationsTypes.FETCH_FEDERATIONS, fetchFederations);
 	yield takeEvery(FederationsTypes.FETCH_FEDERATION_STATS, fetchFederationStats);
+	yield takeLatest(FederationsTypes.FETCH_FEDERATION_VIEWS, fetchFederationViews);
+	yield takeLatest(FederationsTypes.FETCH_FEDERATION_SETTINGS, fetchFederationSettings);
 	yield takeLatest(FederationsTypes.UPDATE_FEDERATION_SETTINGS, updateFederationSettings);
 }

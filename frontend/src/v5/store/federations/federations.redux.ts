@@ -23,6 +23,8 @@ import {
 	SetFavouriteSuccessAction,
 	FetchFederationStatsSuccessAction,
 	SetIsListPendingAction,
+	FetchFederationSettingsSuccessAction,
+	FetchFederationViewsSuccessAction,
 } from '@/v5/store/federations/federations.types';
 import { prepareSingleFederationData } from '@/v5/store/federations/federations.helpers';
 import { Constants } from '../common/actions.helper';
@@ -36,6 +38,10 @@ export const { Types: FederationsTypes, Creators: FederationsActions } = createA
 	fetchFederationStats: ['teamspace', 'projectId', 'federationId'],
 	fetchFederationStatsSuccess: ['projectId', 'federationId', 'federationStats'],
 	setIsListPending: ['isPending'],
+	fetchFederationViews: ['teamspace', 'projectId', 'federationId'],
+	fetchFederationViewsSuccess: ['teamspace', 'projectId', 'federationId', 'views'],
+	fetchFederationSettings: ['teamspace', 'projectId', 'federationId'],
+	fetchFederationSettingsSuccess: ['teamspace', 'projectId', 'federationId', 'settings'],
 	updateFederationSettings: ['teamspace', 'projectId', 'federationId', 'settings'],
 }, { prefix: 'FEDERATIONS/' }) as { Types: Constants<IFederationsActionCreators>; Creators: IFederationsActionCreators };
 
@@ -90,9 +96,47 @@ export const setIsListPending = (state = INITIAL_STATE, { isPending }: SetIsList
 	isListPending: isPending,
 });
 
+export const fetchFederationViewsSuccess = (state = INITIAL_STATE, {
+	projectId,
+	federationId,
+	views,
+}: FetchFederationViewsSuccessAction) => ({
+	...state,
+	federations: {
+		...state.federations,
+		[projectId]: state.federations[projectId].map((federation) => {
+			if (federationId !== federation._id) return federation;
+			return {
+				...federation,
+				views,
+			};
+		}),
+	},
+});
+
+export const fetchFederationSettingsSuccess = (state = INITIAL_STATE, {
+	projectId,
+	federationId,
+	settings,
+}: FetchFederationSettingsSuccessAction) => ({
+	...state,
+	federations: {
+		...state.federations,
+		[projectId]: state.federations[projectId].map((federation) => {
+			if (federationId !== federation._id) return federation;
+			return {
+				...federation,
+				settings,
+			};
+		}),
+	},
+});
+
 export const reducer = createReducer<IFederationsState>(INITIAL_STATE, {
 	[FederationsTypes.FETCH_FEDERATIONS_SUCCESS]: fetchFederationsSuccess,
 	[FederationsTypes.FETCH_FEDERATION_STATS_SUCCESS]: fetchStatsSuccess,
 	[FederationsTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
 	[FederationsTypes.SET_IS_LIST_PENDING]: setIsListPending,
+	[FederationsTypes.FETCH_FEDERATION_VIEWS_SUCCESS]: fetchFederationViewsSuccess,
+	[FederationsTypes.FETCH_FEDERATION_SETTINGS_SUCCESS]: fetchFederationSettingsSuccess,
 });

@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { Typography } from '@material-ui/core';
+import styled, { css } from 'styled-components';
+import { Typography, Select, MenuItem, TextField } from '@material-ui/core';
 
 export const SectionTitle = styled(Typography).attrs({
 	variant: 'h5',
@@ -41,5 +41,58 @@ export const FlexContainer = styled.div`
 		&:not(:last-child) {
 			margin-right: 9px;
 		}
+	}
+`;
+
+const ThumbnailStyles = css`
+	width: 43px;
+	height: 35px;
+	border-radius: 3px;
+	margin-right: 11px;
+	display: inline-block;
+`;
+
+export const Thumbnail = styled.img`
+	${ThumbnailStyles};
+`;
+
+export const ThumbnailPlaceholder = styled.div`
+	${ThumbnailStyles};
+	background-color: ${({ theme }) => theme.palette.base.light};
+`;
+
+export const SelectView = styled(Select)`
+	display: flex;
+    padding-left: 0;
+
+	${ThumbnailPlaceholder} {
+		display: none;
+	}
+`;
+
+export const ViewLabel = styled.div`
+	display: flex;
+	flex-direction: column;
+`;
+
+export const MenuItemView = styled(MenuItem)`
+	&.Mui-selected ${ViewLabel}::after {
+		content: "Selected";
+		color: ${({ theme }) => theme.palette.primary.main};
+		${({ theme }) => theme.typography.caption};
+	}
+`;
+
+export const UnitTextField = styled(TextField).attrs((props) => ({
+	label: ` (${props.labelunit})`,
+}))`
+	.MuiInputLabel-formControl {
+		&::before {
+			content: "${(props) => props.labelname}";
+		}
+		
+		text-transform: none;
+		letter-spacing: 0px;
+		${(props) => props.theme.typography.caption};
 	}
 `;
