@@ -509,25 +509,24 @@ class Ticket extends View {
 		return newTicket;
 	}
 
-	getScreenshot(account, model, uid, vid) {
+	async getScreenshot(account, model, uid, vid) {
 		uid = utils.stringToUUID(uid);
 		vid = utils.stringToUUID(vid);
 
-		return this.findByUID(account, model, uid, {
-			viewpoints: { $elemMatch: { guid: vid } },
-			"viewpoints.screenshot.resizedContent": 0
-		}, true).then((foundTicket) => {
-			if (!_.get(foundTicket, "viewpoints[0].screenshot.content.buffer") && !_.get(foundTicket, "viewpoints[0].screenshot_ref")) {
-				return Promise.reject(responseCodes.SCREENSHOT_NOT_FOUND);
-			} else {
-				if (foundTicket.viewpoints[0].screenshot_ref) {
-					return FileRef.fetchFile(account, model, this.collName, foundTicket.viewpoints[0].screenshot_ref);
-				}
+		const foundTicket = await this.findByUID(account, model, uid, {
+			viewpoints: { $elemMatch: { guid: vid } }
+		}, true);
 
-				// this is being kept for legacy reasons
-				return foundTicket.viewpoints[0].screenshot.content.buffer;
-			}
-		});
+		if (!_.get(foundTicket, "viewpoints[0].screenshot.content.buffer") && !_.get(foundTicket, "viewpoints[0].screenshot_ref")) {
+			throw responseCodes.SCREENSHOT_NOT_FOUND;
+		}
+
+		if (foundTicket.viewpoints[0].screenshot_ref) {
+			return FileRef.fetchFile(account, model, this.collName, foundTicket.viewpoints[0].screenshot_ref);
+		}
+
+		// this is being kept for legacy reasons
+		return foundTicket.viewpoints[0].screenshot.content.buffer;
 	}
 
 	async processFilter(account, model, branch, revId, filters) {
