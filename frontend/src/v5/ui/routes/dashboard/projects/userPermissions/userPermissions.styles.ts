@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { BodyWrapper as CustomTableBody, Head } from '@/v4/routes/components/customTable/customTable.styles';
+import { BodyWrapper as CustomTableBody, Head, Row } from '@/v4/routes/components/customTable/customTable.styles';
 import styled from 'styled-components';
 import { Name as UserNameCell } from '@/v4/routes/components/userItem/userItem.styles';
 
@@ -38,5 +38,9 @@ export const Container = styled.div`
 	${UserNameCell} {
 		${({ theme }) => theme.typography.h5};
 		color: ${({ theme }) => theme.palette.secondary.main};
+	}
+
+	${Row} {
+		min-height: 80px;
 	}
 `;
