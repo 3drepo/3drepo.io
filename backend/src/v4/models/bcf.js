@@ -573,7 +573,7 @@ function parseMarkupBuffer(markupBuffer) {
 			}
 			_.get(xml, "Topic[0].ReferenceLink") && (issue.extras.ReferenceLink = _.get(xml, "Topic[0].ReferenceLink"));
 			issue.name = _.get(xml, "Markup.Topic[0].Title[0]._");
-			issue.priority = sanitise(_.get(xml, "Markup.Topic[0].Priority[0]._"), priorityEnum);
+			issue.priority = sanitise(_.get(xml, "Markup.Topic[0].Priority[0]._"), priorityEnum) || "None";
 			_.get(xml, "Markup.Topic[0].Index[0]._") && (issue.extras.Index = _.get(xml, "Markup.Topic[0].Index[0]._"));
 			_.get(xml, "Markup.Topic[0].Labels[0]._") && (issue.extras.Labels = _.get(xml, "Markup.Topic[0].Labels[0]._"));
 			issue.created = utils.isoStringToTimestamp(_.get(xml, "Markup.Topic[0].CreationDate[0]._"));
@@ -652,7 +652,7 @@ function parseViewpointClippingPlanes(clippingPlanes, scale) {
 }
 
 async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, issueName, issueId, ifcToModelMap) {
-	const vp = {};
+	const vp = { extras: {}};
 	const groupPromises = [];
 
 	for (let componentsIdx = 0; componentsIdx < vpComponents.length; componentsIdx++) {
