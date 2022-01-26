@@ -19,9 +19,9 @@ import { Display } from '@/v5/ui/themes/media';
 
 export const Content = styled.div`
 	max-width: 1289px;
-	margin: 18px auto 18px;
+	margin: 18px auto;
 	padding: 0 30px;
-	height: calc(100% - 36px);
+	height: auto;
 
 	@media (max-width: ${Display.Desktop}px) {
 		margin-top: 30px;

@@ -19,11 +19,9 @@ import styled from 'styled-components';
 import { Container as BoardContainer } from '@/v4/routes/board/board.styles';
 
 export const V4OverridesContainer = styled.div`
-	& {
-		display: flex;
-		flex-direction: column;
-		height: 100%;
-	}
+	display: flex;
+	flex-direction: column;
+	height: 100%;
 
 	${BoardContainer} {
 		height: 2000px;

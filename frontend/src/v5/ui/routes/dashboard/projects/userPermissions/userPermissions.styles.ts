@@ -20,7 +20,12 @@ import { Name as UserNameCell } from '@/v4/routes/components/userItem/userItem.s
 
 export const Container = styled.div`
 
-	${CustomTableBody}, ${CustomTableBody} div {
+	${CustomTableBody} {
+		position: relative;
+		height: auto;
+	}
+
+	${CustomTableBody} div {
 		position: relative;
 		height: auto;
 	}
@@ -54,7 +59,7 @@ export const Container = styled.div`
 	}
 
 	${Row} > :nth-child(2) {
-		width: 292px;;
+		width: 292px;
 		min-width: 0;
 	}
 `;
