@@ -15,8 +15,51 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { BodyWrapper as CustomTableBody, Head, Row } from '@/v4/routes/components/customTable/customTable.styles';
+import styled, { css } from 'styled-components';
 import { Container as BoardContainer } from '@/v4/routes/board/board.styles';
+import { Name as UserNameCell } from '@/v4/routes/components/userItem/userItem.styles';
+
+// all the .simplebar-... stuff is to disable simplebar
+const customTableStyling = css`
+	${CustomTableBody} {
+		position: relative;
+		height: auto;
+	}
+
+	${CustomTableBody} div {
+		position: relative;
+		height: auto;
+	}
+
+	${CustomTableBody} .simplebar-content {
+		border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+		border-radius: 5px;
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+	}
+
+	${CustomTableBody} .simplebar-content-wrapper {
+		height: auto !important;
+		max-height: initial;
+	}
+
+	${CustomTableBody} .simplebar-placeholder {
+		display: none;
+	}
+
+	${Head} {
+		border: 0;
+	}
+
+	${UserNameCell} {
+		${({ theme }) => theme.typography.h5};
+		color: ${({ theme }) => theme.palette.secondary.main};
+	}
+
+	${Row} {
+		min-height: 80px;
+	}
+`;
 
 export const V4OverridesContainer = styled.div`
 	display: flex;
@@ -26,5 +69,7 @@ export const V4OverridesContainer = styled.div`
 	${BoardContainer} {
 		height: 2000px;
 	}
+
+	${customTableStyling}
 
 `;

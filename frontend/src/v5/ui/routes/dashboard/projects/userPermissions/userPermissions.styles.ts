@@ -14,50 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { BodyWrapper as CustomTableBody, Head, Row } from '@/v4/routes/components/customTable/customTable.styles';
+import { Row } from '@/v4/routes/components/customTable/customTable.styles';
 import styled from 'styled-components';
-import { Name as UserNameCell } from '@/v4/routes/components/userItem/userItem.styles';
 
 export const Container = styled.div`
-
-	${CustomTableBody} {
-		position: relative;
-		height: auto;
-	}
-
-	${CustomTableBody} div {
-		position: relative;
-		height: auto;
-	}
-
-	${CustomTableBody} .simplebar-content {
-		border: 1px solid ${({ theme }) => theme.palette.base.lightest};
-		border-radius: 5px;
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
-	}
-
-	${CustomTableBody} .simplebar-content-wrapper {
-		height: auto !important;
-		max-height: initial;
-	}
-
-	${CustomTableBody} .simplebar-placeholder {
-		display: none;
-	}
-
-	${Head} {
-		border: 0;
-	}
-
-	${UserNameCell} {
-		${({ theme }) => theme.typography.h5};
-		color: ${({ theme }) => theme.palette.secondary.main};
-	}
-
-	${Row} {
-		min-height: 80px;
-	}
-
 	${Row} > :nth-child(2) {
 		width: 292px;
 		min-width: 0;
