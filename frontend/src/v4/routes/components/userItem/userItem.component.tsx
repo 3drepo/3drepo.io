@@ -45,7 +45,7 @@ export const UserItem = (props: IProps) => {
 			<Name item>
 				<Highlight
 					{...highlightProps}
-					text={`${upperCase(props.lastName)}, ${props.firstName}`}
+					text={`${props.firstName} ${props.lastName}`}
 				/>
 			</Name>
 			<Detail item>
