@@ -16,37 +16,30 @@
  */
 
 import React from 'react';
-import { Control, FieldError, DeepMap } from 'react-hook-form/dist/types';
 import { UploadListItem } from './uploadListItem';
 import { Container } from './uploadList.styles';
-import { IUploadFormFields, IUploadItemFields } from '../uploadFileForm.component';
+import { IUploadItemFields } from '../uploadFileForm.component';
 
 type IUploadList = {
 	onClickEdit: (index) => void;
 	onClickDelete: (index) => void;
-	items: IUploadItemFields[];
-	control: Control<IUploadFormFields>;
-	errors: DeepMap<IUploadFormFields, FieldError>;
+	values: IUploadItemFields[];
 };
 
 export const UploadList = ({
-	items,
+	values,
 	onClickEdit,
 	onClickDelete,
-	control,
-	errors,
 }: IUploadList): JSX.Element => (
 	<Container>
 		{
-			items.map((item, index) => (
+			values.map((item, index) => (
 				<UploadListItem
 					key={item.id}
+					index={index}
 					item={item}
 					onClickEdit={() => onClickEdit(index)}
 					onClickDelete={() => onClickDelete(index)}
-					control={control}
-					index={index}
-					errors={errors}
 				/>
 			))
 		}

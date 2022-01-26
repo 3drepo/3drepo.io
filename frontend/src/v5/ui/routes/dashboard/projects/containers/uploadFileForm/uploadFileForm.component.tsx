@@ -16,16 +16,17 @@
  */
 
 import React, { useState } from 'react';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
 
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { formatMessage } from '@/v5/services/intl';
+import { Sidebar } from '@controls/sideBar';
 import { UploadListHeader } from './uploadListHeader';
 import { UploadListHeaderLabel } from './uploadListHeader/uploadListHeaderLabel';
 import { UploadList } from './uploadList';
-import { SettingsSidebar } from './settingsSidebar';
+import { SidebarForm } from './sidebarForm';
 import { Container, Content, DropZone } from './uploadFileForm.styles';
 
 type IUploadFileForm = {
@@ -34,28 +35,41 @@ type IUploadFileForm = {
 };
 
 export type IUploadItemFields = {
-	id?: string;
-	container: {
-		_id: string;
-		containerName: string;
-		unit: string;
-		type: string;
-		desc?: string;
-		code?: string;
-	};
-	revision: {
-		tag: string;
-		file: File;
-		desc?: string;
-		importAnimations?: boolean;
-	};
+	id: string;
+	file: File;
+	revisionTag: string;
+	revisionDesc?: string;
+	importAnimations?: boolean;
+	containerId?: string;
+	containerName: string;
+	containerUnit: string;
+	containerType: string;
+	containerDesc?: string;
+	containerCode?: string;
 };
 
 export type IUploadFormFields = {
 	uploads: IUploadItemFields[];
 };
 
-const ContainerSchema = Yup.object({
+export const UploadSchema = Yup.object().shape({
+	revisionTag: Yup.string()
+		.min(2,
+			formatMessage({
+				id: 'uploadFileForm.revision.tag.error.min',
+				defaultMessage: 'Container Name must be at least 2 characters',
+			}))
+		.max(120,
+			formatMessage({
+				id: 'uploadFileForm.revision.tag.error.max',
+				defaultMessage: 'Revision Name is limited to 120 characters',
+			}))
+		.required(
+			formatMessage({
+				id: 'uploadFileForm.revision.tag.error.required',
+				defaultMessage: 'Revision Name is a required field',
+			}),
+		),
 	containerName: Yup.string()
 		.min(3,
 			formatMessage({
@@ -75,7 +89,7 @@ const ContainerSchema = Yup.object({
 		),
 	unit: Yup.string().required().default('mm'),
 	type: Yup.string().required().default('Uncategorised'),
-	code: Yup.string()
+	containerCode: Yup.string()
 		.max(50,
 			formatMessage({
 				id: 'containers.creation.code.error.max',
@@ -86,96 +100,66 @@ const ContainerSchema = Yup.object({
 				id: 'containers.creation.code.error.characters',
 				defaultMessage: 'Code can only consist of letters and numbers',
 			})),
-	desc: Yup.string()
+	containerDesc: Yup.string()
 		.max(50,
 			formatMessage({
 				id: 'containers.creation.description.error.max',
 				defaultMessage: 'Container Description is limited to 50 characters',
 			})),
-});
-
-export const RevisionSchema = Yup.object({
-	tag: Yup.string()
-		.min(2,
-			formatMessage({
-				id: 'uploadFileForm.revision.tag.error.min',
-				defaultMessage: 'Container Name must be at least 2 characters',
-			}))
-		.max(120,
-			formatMessage({
-				id: 'uploadFileForm.revision.tag.error.max',
-				defaultMessage: 'Revision Name is limited to 120 characters',
-			}))
-		.required(
-			formatMessage({
-				id: 'uploadFileForm.revision.tag.error.required',
-				defaultMessage: 'Revision Name is a required field',
-			}),
-		),
-	desc: Yup.string()
+	revisionDesc: Yup.string()
 		.max(50,
 			formatMessage({
-				id: 'uploadFileForm.revision.description.error.max',
+				id: 'uploadSidebar.revisionDesc.error.max',
 				defaultMessage: 'Revision Description is limited to 50 characters',
 			})),
-
 });
 
 const UploadsSchema = Yup.object().shape({
 	uploads: Yup
 		.array()
-		.of(Yup.object().shape({
-			container: ContainerSchema,
-			revision: RevisionSchema,
-		}))
+		.of(UploadSchema)
 		.required()
 		.min(1),
 });
 
 export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JSX.Element => {
-	const [currentIndex, setcurrentIndex] = useState(null);
-	const [selectedItem, setSelectedItem] = useState({});
-
-	const { control, register, handleSubmit, formState, formState: { errors } } = useForm<IUploadFormFields>({
+	const [currentIndex, setCurrentIndex] = useState(null);
+	const methods = useForm<IUploadFormFields>({
 		mode: 'onChange',
 		resolver: yupResolver(UploadsSchema),
 	});
-
+	const { control, handleSubmit, formState } = methods;
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'uploads',
 	});
+	const isSidebarOpen = Number.isInteger(currentIndex) && 'id' in fields[currentIndex];
 
 	const processFiles = (files) => {
 		const filesToAppend = [];
 		for (const file of files) {
 			filesToAppend.push({
-				revision: {
-					file,
-					tag: file.name,
-					desc: '',
-					importAnimations: false,
-				},
-				container: {
-					_id: '',
-					containerName: '',
-					unit: 'mm',
-					type: 'Uncategorised',
-					desc: '',
-					code: '',
-				},
+				file,
+				revisionTag: file.name,
+				revisionDesc: '',
+				importAnimations: false,
+				containerName: '',
+				containerId: '',
+				containerUnit: 'mm',
+				containerType: 'Uncategorised',
+				containerCode: '',
+				containerDesc: '',
 			});
 		}
 		append(filesToAppend);
 	};
 
 	const onClickEdit = (id) => {
-		setcurrentIndex(id);
-		setSelectedItem(fields[id]);
+		setCurrentIndex(id);
 	};
 
 	const onClickDelete = (id) => {
-		setSelectedItem({});
+		setCurrentIndex(null);
 		remove(id);
 	};
 
@@ -184,52 +168,60 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 	};
 
 	return (
-		<FormModal
-			open={openState}
-			onSubmit={handleSubmit(onSubmit)}
-			onClickClose={onClickClose}
-			confirmLabel="Upload files"
-			title="Add files for upload"
-			subtitle="Drag and drop or browse your computer"
-			isValid={formState.isValid}
-		>
-			<Container>
-				<Content>
-					<UploadListHeader>
-						<UploadListHeaderLabel name="filename">
-							<span> Filename </span>
-						</UploadListHeaderLabel>
-						<UploadListHeaderLabel name="destination">
-							<span> Destination </span>
-						</UploadListHeaderLabel>
-						<UploadListHeaderLabel name="revisionName">
-							<span> Revision Name </span>
-						</UploadListHeaderLabel>
-					</UploadListHeader>
-					<UploadList
-						items={fields}
-						onClickEdit={(id) => onClickEdit(id)}
-						onClickDelete={(id) => onClickDelete(id)}
-						control={control}
-						errors={errors}
-					/>
-					<DropZone
-						message={formatMessage(
-							{ id: 'containers.upload.message', defaultMessage: 'Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>' },
-							{ MoreLink: (child: string) => <a href="https://help.3drepo.io/en/articles/4798885-supported-file-formats" target="_blank" rel="noreferrer">{child}</a> },
-						)}
-						processFiles={(files) => { processFiles(files); }}
-					/>
-				</Content>
-				<SettingsSidebar
-					item={selectedItem}
-					index={currentIndex}
-					onClose={() => setSelectedItem({})}
-					register={register}
-					errors={errors}
-					control={control}
-				/>
-			</Container>
-		</FormModal>
+		<FormProvider {...methods}>
+			<FormModal
+				open={openState}
+				onSubmit={handleSubmit(onSubmit)}
+				onClickClose={onClickClose}
+				confirmLabel="Upload files"
+				title="Add files for upload"
+				subtitle="Drag and drop or browse your computer"
+				isValid={formState.isValid}
+			>
+				<Container>
+					<Content>
+						<UploadListHeader>
+							<UploadListHeaderLabel name="filename">
+								<span> Filename </span>
+							</UploadListHeaderLabel>
+							<UploadListHeaderLabel name="destination">
+								<span> Destination </span>
+							</UploadListHeaderLabel>
+							<UploadListHeaderLabel name="revisionName">
+								<span> Revision Name </span>
+							</UploadListHeaderLabel>
+						</UploadListHeader>
+						<UploadList
+							values={fields}
+							onClickEdit={(id) => onClickEdit(id)}
+							onClickDelete={(id) => onClickDelete(id)}
+						/>
+						<DropZone
+							message={formatMessage(
+								{ id: 'containers.upload.message', defaultMessage: 'Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>' },
+								{ MoreLink: (child: string) => <a href="https://help.3drepo.io/en/articles/4798885-supported-file-formats" target="_blank" rel="noreferrer">{child}</a> },
+							)}
+							processFiles={(files) => { processFiles(files); }}
+						/>
+					</Content>
+					<Sidebar
+						open={isSidebarOpen}
+						onClick={() => setCurrentIndex(null)}
+						noButton={!isSidebarOpen}
+					>
+						{
+							fields.length
+								? (
+									<SidebarForm
+										index={currentIndex}
+										fieldKey={Number.isInteger(currentIndex) ? fields[currentIndex].id : ''}
+									/>
+								)
+								: <></>
+						}
+					</Sidebar>
+				</Container>
+			</FormModal>
+		</FormProvider>
 	);
 };

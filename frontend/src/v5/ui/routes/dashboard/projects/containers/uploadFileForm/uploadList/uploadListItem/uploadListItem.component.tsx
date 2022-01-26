@@ -18,8 +18,8 @@
 import React from 'react';
 import DeleteIcon from '@assets/icons/delete.svg';
 import EditIcon from '@assets/icons/edit.svg';
-import { Control, Controller, DeepMap, FieldError } from 'react-hook-form';
-import { IUploadFormFields, IUploadItemFields } from '@/v5/ui/routes/dashboard/projects/containers/uploadFileForm/uploadFileForm.component';
+import { Controller, useFormContext } from 'react-hook-form';
+import { IUploadItemFields } from '@/v5/ui/routes/dashboard/projects/containers/uploadFileForm/uploadFileForm.component';
 import { UploadListItemIconButton } from './components/uploadListItemIconButton/uploadListItemIconButton.component';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/fileListItemRow/uploadListItemRow.component';
@@ -30,56 +30,50 @@ type IUploadListItem = {
 	item: IUploadItemFields;
 	onClickEdit: () => void;
 	onClickDelete: () => void;
-	control: Control<IUploadFormFields>;
 	index: number;
-	errors: DeepMap<IUploadFormFields, FieldError>;
 };
 
 export const UploadListItem = ({
 	item,
 	onClickEdit,
 	onClickDelete,
-	control,
 	index,
-	errors,
+	...props
 }: IUploadListItem): JSX.Element => {
 	const filesize = '400MB';
+	const { control, formState: { errors } } = useFormContext();
 
 	return (
-		<UploadListItemRow key={item.id} onClick={() => { }}>
+		<UploadListItemRow key={item.id} onClick={() => { }} {...props}>
 			<span>
 				<UploadListItemFileIcon>
-					{item.revision.file.name.split('.').at(-1)[0]}
+					{item.file.name.split('.').at(-1)[0]}
 				</UploadListItemFileIcon>
 			</span>
 			<UploadListItemTitle
-				name={item.revision.file.name}
+				name={item.file.name}
 				filesize={filesize}
 			/>
 			<Controller
 				control={control}
-				name={`uploads.${index}.container.containerName`}
-				defaultValue={item.container.containerName}
-
+				name={`uploads.${index}.containerName`}
 				render={({
 					field,
 				}) => (
 					<Input
-						error={!!errors.uploads?.[index]?.container?.containerName}
-						onChange={(e) => field.onChange(e.target.value)}
+						error={!!errors.uploads?.[index]?.containerName}
 						{...field}
 					/>
 				)}
 			/>
 			<Controller
 				control={control}
-				name={`uploads.${index}.revision.tag`}
-				defaultValue={item.revision.tag}
+				name={`uploads.${index}.revisionTag`}
 				render={({
 					field,
 				}) => (
 					<Input
-						error={!!errors.uploads?.[index]?.revision?.tag}
+						error={!!errors.uploads?.[index]?.revisionTag}
 						{...field}
 					/>
 				)}

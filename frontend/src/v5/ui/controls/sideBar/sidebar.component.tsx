@@ -23,7 +23,7 @@ interface ISidebar {
 	open: boolean;
 	noButton?: boolean;
 	onClick: () => void;
-	className: string;
+	className?: string;
 	children: JSX.Element;
 	hidden?: boolean;
 }
