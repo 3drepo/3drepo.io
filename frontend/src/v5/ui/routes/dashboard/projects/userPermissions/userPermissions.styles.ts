@@ -16,6 +16,7 @@
  */
 import { BodyWrapper as CustomTableBody, Head } from '@/v4/routes/components/customTable/customTable.styles';
 import styled from 'styled-components';
+import { Name as UserNameCell } from '@/v4/routes/components/userItem/userItem.styles';
 
 export const Container = styled.div`
 	display: flex;
@@ -32,5 +33,10 @@ export const Container = styled.div`
 
 	${Head} {
 		border: 0;
+	}
+
+	${UserNameCell} {
+		${({ theme }) => theme.typography.h5};
+		color: ${({ theme }) => theme.palette.secondary.main};
 	}
 `;

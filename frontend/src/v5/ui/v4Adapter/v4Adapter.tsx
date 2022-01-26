@@ -20,7 +20,7 @@ import { SnackbarContainer } from '@/v4/routes/components/snackbarContainer';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import React from 'react';
 import DayJsUtils from '@date-io/dayjs';
-import { V4OverridesContainer } from './v4overrides.styles';
+import { V4OverridesContainer } from './v4Overrides.styles';
 
 export const V4Adapter = ({ children }) => (
 	<V4OverridesContainer>
