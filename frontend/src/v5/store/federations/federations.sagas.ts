@@ -30,9 +30,11 @@ import {
 	FetchFederationViewsResponse,
 	FetchFederationSettingsAction,
 	FetchFederationSettingsResponse,
+	DeleteFederationAction,
 } from '@/v5/store/federations/federations.types';
 import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
+import { formatMessage } from '@/v5/services/intl';
 
 export function* addFavourites({ federationId, teamspace, projectId }: AddFavouriteAction) {
 	try {
@@ -155,6 +157,18 @@ export function* updateFederationSettings({
 	}
 }
 
+export function* deleteFederation({ teamspace, projectId, federationId }: DeleteFederationAction) {
+	try {
+		yield API.Federations.deleteFederation({ teamspace, projectId, federationId });
+		yield put(FederationsActions.deleteFederationSuccess(projectId, federationId));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'federation.delete.error', defaultMessage: 'trying to delete federation' }),
+			error,
+		}));
+	}
+}
+
 export default function* FederationsSagas() {
 	yield takeLatest(FederationsTypes.ADD_FAVOURITE, addFavourites);
 	yield takeLatest(FederationsTypes.REMOVE_FAVOURITE, removeFavourites);
@@ -163,4 +177,5 @@ export default function* FederationsSagas() {
 	yield takeLatest(FederationsTypes.FETCH_FEDERATION_VIEWS, fetchFederationViews);
 	yield takeLatest(FederationsTypes.FETCH_FEDERATION_SETTINGS, fetchFederationSettings);
 	yield takeLatest(FederationsTypes.UPDATE_FEDERATION_SETTINGS, updateFederationSettings);
+	yield takeLatest(FederationsTypes.DELETE_FEDERATION, deleteFederation);
 }

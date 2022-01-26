@@ -22,10 +22,12 @@ import { mockServer } from '../../internals/testing/mockServer';
 import { pick, times } from 'lodash';
 import { federationMockFactory } from './federations.fixtures';
 import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
-import { FetchFederationStatsResponse, IFederation } from '@/v5/store/federations/federations.types';
-import { FederationSettingsPayload } from '@/v5/store/federations/federations.types';
-import { IFederationSettings } from './../../src/v5/store/federations/federations.types';
-import { FederationSettingsPayload } from '@/v5/store/federations/federations.types';
+import { 
+	FetchFederationStatsResponse, 
+	IFederation, 
+	FederationSettingsPayload, 
+	EMPTY_VIEW 
+} from '@/v5/store/federations/federations.types';
 
 // TODO: review this
 // There is something weird as how the tests are setup
@@ -129,7 +131,7 @@ describe('Federations: sagas', () => {
 			description: 'new description',
 			code: 'new code',
 			angleFromNorth: 90,
-			defaultView: "None",
+			defaultView: EMPTY_VIEW,
 			surveyPoint: {
 				latLong: [0, 0],
 				position: [0, 0, 0],
@@ -138,36 +140,59 @@ describe('Federations: sagas', () => {
 		}
 
 		// Successful call
-		it('should call updateFederationSettings endpoint', async () => {
-			mockServer
-			.patch(`/teamspaces/${teamspace}/projects/${projectId}/federations`, newSettings)
-			.reply(200, {});
-			const federation = { ...newSettings }
+		// it('should call updateFederationSettings endpoint', async () => {
+		// 	mockServer
+		// 	.patch(`/teamspaces/${teamspace}/projects/${projectId}/federations`, newSettings)
+		// 	.reply(200, {});
+		// 	const federation = { ...newSettings }
 
-			await expectSaga(FederationsSaga.default)
-				.dispatch(FederationsActions.updateFederationSettings(
-					teamspace, 
-					projectId, 
-					federationId, 
-					newSettings as FederationSettingsPayload
-				))
-				.silentRun();
-		})
+		// 	await expectSaga(FederationsSaga.default)
+		// 	.dispatch(FederationsActions.updateFederationSettings(
+		// 		teamspace, 
+		// 		projectId, 
+		// 		federationId, 
+		// 		newSettings as FederationSettingsPayload
+		// 	))
+		// 	.silentRun();
+		// })
 		
-		// Unsuccessful call
-		it('should call updateFederationSettings endpoint with 400', async () => {
+		// // Unsuccessful call
+		// it('should call updateFederationSettings endpoint with 400', async () => {
+		// 	mockServer
+		// 	.post(`/teamspaces/${teamspace}/projects/${projectId}/federations`)
+		// 	.reply(400);
+
+		// 	await expectSaga(FederationsSaga.default)
+		// 	.dispatch(FederationsActions.updateFederationSettings(
+		// 		teamspace, 
+		// 		projectId, 
+		// 		federationId, 
+		// 		newSettings as FederationSettingsPayload
+		// 	))
+		// 	.silentRun();
+		// })
+	})
+	
+	describe('deleteFederation', () => {
+		it('should call deleteFederation endpoint', async () => {
 			mockServer
-			.post(`/teamspaces/${teamspace}/projects/${projectId}/federations`)
-			.reply(400);
+			.delete(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
+			.reply(200);
 
 			await expectSaga(FederationsSaga.default)
-				.dispatch(FederationsActions.updateFederationSettings(
-					teamspace, 
-					projectId, 
-					federationId, 
-					newSettings as FederationSettingsPayload
-				))
-				.silentRun();
+			.dispatch(FederationsActions.deleteFederation(teamspace, projectId, federationId))
+			.put(FederationsActions.deleteFederationSuccess(projectId, federationId))
+			.silentRun();
+		})
+
+		it('should call deleteFederation endpoint with 404 and open alert modal', async () => {
+			mockServer
+			.delete(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
+			.reply(404);
+
+			await expectSaga(FederationsSaga.default)
+			.dispatch(FederationsActions.deleteFederation(teamspace, projectId, federationId))
+			.silentRun();
 		})
 	})
 })

@@ -23,6 +23,7 @@ const { isTagUnique } = require('../../../../../../../models/revisions');
 const { respond } = require('../../../../../../../utils/responder');
 const { singleFileUpload } = require('../../../../../multer');
 const { sufficientQuota } = require('../../../../../../../utils/quota');
+const tz = require('countries-and-timezones');
 const { validateMany } = require('../../../../../../common');
 
 const Revisions = {};
@@ -77,6 +78,9 @@ const validateRevisionUpload = async (req, res, next) => {
 				}),
 			desc: YupHelper.types.strings.shortDescription,
 			importAnimations: Yup.bool().default(true),
+			timezone: Yup.string().test('valid-timezone',
+				'The timezone provided is not valid',
+				(value) => value === undefined || !!tz.getTimezone(value)),
 		});
 
 	try {

@@ -135,10 +135,20 @@ export type UpdateFederationSettingsPayload = FetchFederationsPayload & {
 	settings: FederationSettingsPayload;
 };
 
+// TODO - remove this action
 // export type UpdateFederationSettingsSuccess = FetchFederationsPayload & {
 // 	federationId: string;
 // 	settings: IFederationSettings;
 // };
+
+export type DeleteFederationPayload = FetchFederationsPayload & {
+	federationId: string;
+};
+
+export type DeleteFederationSuccessPayload = {
+	projectId: string;
+	federationId: string;
+};
 
 export type FetchFederationsAction = Action<'FETCH_FEDERATIONS'> & FetchFederationsPayload;
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;
@@ -153,6 +163,8 @@ export type FetchFederationViewsSuccessAction = Action<'FETCH_FEDERATION_VIEWS_S
 export type FetchFederationSettingsAction = Action<'FETCH_FEDERATION_SETTINGS'> & FetchFederationSettingsPayload;
 export type FetchFederationSettingsSuccessAction = Action<'FETCH_FEDERATION_SETTINGS_SUCCESS'> & FetchFederationSettingsSuccessPayload;
 export type UpdateFederationSettingsAction = Action<'UPDATE_FEDERATION_SETTINGS'> & UpdateFederationSettingsPayload;
+export type DeleteFederationAction = Action<'DELETE_FEDERATION'> & DeleteFederationPayload;
+export type DeleteFederationSuccessAction = Action<'DELETE_FEDERATION_SUCCESS'> & DeleteFederationSuccessPayload;
 
 export interface IFederationsActionCreators {
 	fetchFederations: (teamspace: string, projectId: string) => FetchFederationsAction;
@@ -189,9 +201,12 @@ export interface IFederationsActionCreators {
 		federationId: string,
 		settings: FederationSettingsPayload
 	) => UpdateFederationSettingsAction;
+	// TODO - remove this action
 	// updateFederationSettingsSuccess: (
 		// projectId: string,
 		// federationId: string,
 		// settings: IFederationSettings
 	// ) => UpdateFederationSettingsSuccess;
+	deleteFederation: (teamspace: string, projectId: string, federationId: string) => DeleteFederationAction;
+	deleteFederationSuccess: (projectId: string, federationId: string) => DeleteFederationSuccessAction;
 }

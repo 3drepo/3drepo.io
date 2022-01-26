@@ -17,7 +17,7 @@
 
 import * as faker from 'faker';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
-import { FetchFederationStatsResponse, IFederation } from '@/v5/store/federations/federations.types';
+import { EMPTY_VIEW, FetchFederationStatsResponse, IFederation } from '@/v5/store/federations/federations.types';
 import { times } from 'lodash';
 
 export const federationMockFactory = (overrides?: Partial<IFederation>): IFederation => ({
@@ -36,7 +36,7 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 	hasStatsPending: false,
 	settings: {
 		angleFromNorth: faker.datatype.number(90),
-		defaultView: faker.random.arrayElement(['None']),
+		defaultView: faker.random.arrayElement([EMPTY_VIEW]),
 		surveyPoint: {
 			latLong: [faker.datatype.number(0), faker.datatype.number(0)],
 			position: [faker.datatype.number(0), faker.datatype.number(0), faker.datatype.number(0)],
