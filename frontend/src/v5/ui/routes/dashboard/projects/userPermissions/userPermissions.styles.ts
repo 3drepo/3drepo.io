@@ -19,16 +19,25 @@ import styled from 'styled-components';
 import { Name as UserNameCell } from '@/v4/routes/components/userItem/userItem.styles';
 
 export const Container = styled.div`
-	display: flex;
-	flex-direction: column;
-	height: calc(100% - 40px);
 
-	padding: 20px;
+	${CustomTableBody}, ${CustomTableBody} div {
+		position: relative;
+		height: auto;
+	}
 
 	${CustomTableBody} .simplebar-content {
 		border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 		border-radius: 5px;
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
+	}
+
+	${CustomTableBody} .simplebar-content-wrapper {
+		height: auto !important;
+		max-height: initial;
+	}
+
+	${CustomTableBody} .simplebar-placeholder {
+		display: none;
 	}
 
 	${Head} {
@@ -42,5 +51,10 @@ export const Container = styled.div`
 
 	${Row} {
 		min-height: 80px;
+	}
+
+	${Row} > :nth-child(2) {
+		width: 292px;;
+		min-width: 0;
 	}
 `;
