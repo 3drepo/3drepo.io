@@ -425,7 +425,6 @@ class Ticket extends View {
 			const validTypes = [].concat(this.fieldTypes[key]);
 			const value = newTicket[key];
 			const fieldType = Object.prototype.toString.call(value);
-
 			if (this.fieldTypes[key] && validTypes.every(t => {
 				return (t === "[object Number]" && isNaN(parseFloat(value))) || (t !== "[object Number]" && t !== fieldType);
 			})) {
