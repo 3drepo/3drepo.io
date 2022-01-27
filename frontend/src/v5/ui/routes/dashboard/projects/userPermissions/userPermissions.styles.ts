@@ -17,16 +17,13 @@
 import { Row } from '@/v4/routes/components/customTable/customTable.styles';
 import styled from 'styled-components';
 import { Tab as MuiTab, Tabs as MuiTabs } from '@material-ui/core';
-import { SortLabel } from '@/v4/routes/components/customTable/components/tableHeading/tableHeading.styles';
+import { ProjectsPermissions } from '@/v4/routes/projects/projectsPermissions';
 
 export const Tab = styled(MuiTab)`
 	${({ theme }) => theme.typography.kicker};
 	color: ${({ theme }) => theme.palette.base.main};
 	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
-	margin-right: -1px;
-    margin-left: 0;
-    margin-top: 0;
-    margin-bottom: 0;
+	margin: 0 -1px 0 0;
 	white-space: nowrap;
 	min-height: 0;
 	padding: 12px 10px;
@@ -39,19 +36,12 @@ export const Tab = styled(MuiTab)`
 	}
 
 	&:first-child {
-		border-radius: 5px 0px 0px 5px;
+		border-radius: 5px 0 0 5px;
 	}
 
 	&:last-child{
-		border-radius: 0px 5px 5px 0px;
+		border-radius: 0 5px 5px 0;
 	}
-
-
-	${SortLabel} {
-		border: 1px solid black;
-		background-color: violet;
-	}
-
 ` as typeof MuiTab;
 
 export const Tabs = styled(MuiTabs)`
@@ -62,9 +52,12 @@ export const Tabs = styled(MuiTabs)`
 	margin-bottom: 30px;
 `;
 
-export const Container = styled.div`
+export const V4ProjectsPermissions = styled(ProjectsPermissions)`
 	${Row} > :nth-child(2) {
 		width: 292px;
 		min-width: 0;
 	}
+`;
+
+export const Container = styled.div`
 `;

@@ -17,14 +17,13 @@
 import React, { useEffect, useState } from 'react';
 import { UserManagementActions } from '@/v4/modules/userManagement';
 
-import { ProjectsPermissions as V4ProjectsPermissions } from '@/v4/routes/projects/projectsPermissions';
 import { ModelsPermissions as V4ModelsPermissions } from '@/v4/routes/modelsPermissions';
 import { useDispatch, useSelector } from 'react-redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
 import { selectCurrentUser } from '@/v4/modules/currentUser';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
-import { Container, Tab, Tabs } from './userPermissions.styles';
+import { Container, Tab, Tabs, V4ProjectsPermissions } from './userPermissions.styles';
 
 export const UsersPermissions = () => {
 	const dispatch = useDispatch();

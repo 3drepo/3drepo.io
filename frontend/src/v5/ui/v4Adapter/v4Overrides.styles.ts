@@ -71,7 +71,7 @@ const customTableStyling = css`
 		svg {
 			fill: transparent;
 			width: 10px;
-		    margin-left: 2px;
+			margin-left: 2px;
 		}
 	}
 
@@ -81,9 +81,11 @@ const customTableStyling = css`
 		}
 	}
 
+	/* stylelint-disable */
 	${SortLabel}::before {
 		background: transparent;
 	}
+	/* stylelint-enable */
 
 	${PermissionsCellContainer} {
 		justify-content: flex-start;
