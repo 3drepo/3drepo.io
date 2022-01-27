@@ -18,36 +18,23 @@
 import React, { useState } from 'react';
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
 
-import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { formatMessage } from '@/v5/services/intl';
 import { Sidebar } from '@controls/sideBar';
 import { UploadFieldArray, UploadSidebarFields } from '@/v5/store/containers/containers.types';
+import { UploadsSchema } from '@/v5/validation/containers';
 import { UploadListHeader } from './uploadListHeader';
 import { UploadListHeaderLabel } from './uploadListHeader/uploadListHeaderLabel';
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
 import { Container, Content, DropZone } from './uploadFileForm.styles';
-import { SidebarSchema } from './sidebarForm/sidebarForm.component';
-import { ListItemSchema } from './uploadList/uploadListItem/uploadListItem.component';
 import { Title } from './sidebarForm/sidebarForm.styles';
 
 type IUploadFileForm = {
 	openState: boolean;
 	onClickClose: () => void;
 };
-
-const UploadsSchema = Yup.object().shape({
-	uploads: Yup
-		.array()
-		.of(Yup.object().shape({
-			listItem: ListItemSchema,
-			sidebar: SidebarSchema,
-		}))
-		.required()
-		.min(1),
-});
 
 export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JSX.Element => {
 	const [selectedIndex, setSelectedIndex] = useState<number>(null);

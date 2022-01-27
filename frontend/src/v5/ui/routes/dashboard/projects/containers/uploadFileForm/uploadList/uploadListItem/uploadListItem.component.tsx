@@ -18,11 +18,10 @@
 import React from 'react';
 import DeleteIcon from '@assets/icons/delete.svg';
 import EditIcon from '@assets/icons/edit.svg';
-import * as Yup from 'yup';
 import { Controller, useForm } from 'react-hook-form';
-import { formatMessage } from '@/v5/services/intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { UploadItemFields } from '@/v5/store/containers/containers.types';
+import { ListItemSchema } from '@/v5/validation/containers';
 import { UploadListItemIconButton } from './components/uploadListItemIconButton/uploadListItemIconButton.component';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/fileListItemRow/uploadListItemRow.component';
@@ -35,43 +34,6 @@ type IUploadListItem = {
 	onClickDelete: () => void;
 	onChange: (val) => void;
 };
-
-export const ListItemSchema = Yup.object().shape({
-	revisionTag: Yup.string()
-		.min(2,
-			formatMessage({
-				id: 'uploadFileForm.revision.tag.error.min',
-				defaultMessage: 'Container Name must be at least 2 characters',
-			}))
-		.max(120,
-			formatMessage({
-				id: 'uploadFileForm.revision.tag.error.max',
-				defaultMessage: 'Revision Name is limited to 120 characters',
-			}))
-		.required(
-			formatMessage({
-				id: 'uploadFileForm.revision.tag.error.required',
-				defaultMessage: 'Revision Name is a required field',
-			}),
-		),
-	containerName: Yup.string()
-		.min(3,
-			formatMessage({
-				id: 'containers.creation.name.error.min',
-				defaultMessage: 'Container Name must be at least 2 characters',
-			}))
-		.max(120,
-			formatMessage({
-				id: 'containers.creation.name.error.max',
-				defaultMessage: 'Container Name is limited to 120 characters',
-			}))
-		.required(
-			formatMessage({
-				id: 'containers.creation.name.error.required',
-				defaultMessage: 'Container Name is a required field',
-			}),
-		),
-});
 
 export const UploadListItem = ({
 	item,

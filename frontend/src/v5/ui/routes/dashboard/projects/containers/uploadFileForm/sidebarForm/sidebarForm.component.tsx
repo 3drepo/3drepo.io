@@ -17,13 +17,13 @@
 
 import React from 'react';
 
-import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { InputLabel, MenuItem } from '@material-ui/core';
 import { Controller, useForm } from 'react-hook-form';
 import { CONTAINER_TYPES, CONTAINER_UNITS, UploadSidebarFields } from '@/v5/store/containers/containers.types';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { SidebarSchema } from '@/v5/validation/containers';
 import { TypeSelect, UnitSelect, Input, RevisionTitle, FormControl } from './sidebarForm.styles';
 
 type ISidebarForm = {
@@ -32,34 +32,6 @@ type ISidebarForm = {
 	isNewContainer: boolean;
 	onChange: (val) => void;
 };
-
-export const SidebarSchema = Yup.object().shape({
-	unit: Yup.string().required().default('mm'),
-	type: Yup.string().required().default('Uncategorised'),
-	containerCode: Yup.string()
-		.max(50,
-			formatMessage({
-				id: 'containers.creation.code.error.max',
-				defaultMessage: 'Code is limited to 50 characters',
-			}))
-		.matches(/^[A-Za-z0-9]*$/,
-			formatMessage({
-				id: 'containers.creation.code.error.characters',
-				defaultMessage: 'Code can only consist of letters and numbers',
-			})),
-	containerDesc: Yup.string()
-		.max(50,
-			formatMessage({
-				id: 'containers.creation.description.error.max',
-				defaultMessage: 'Container Description is limited to 50 characters',
-			})),
-	revisionDesc: Yup.string()
-		.max(50,
-			formatMessage({
-				id: 'uploadSidebar.revisionDesc.error.max',
-				defaultMessage: 'Revision Description is limited to 50 characters',
-			})),
-});
 
 export const SidebarForm = ({
 	value,
