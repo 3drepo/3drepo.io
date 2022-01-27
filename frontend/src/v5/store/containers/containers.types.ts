@@ -161,6 +161,30 @@ export type DeleteContainerSuccessPayload = {
 	containerId: string;
 };
 
+export type UploadSidebarFields = {
+	_id?: string;
+	containerUnit: string;
+	containerType: string;
+	containerDesc?: string;
+	containerCode?: string;
+	revisionDesc?: string;
+	importAnimations?: boolean;
+};
+
+export type UploadItemFields = {
+	id: string;
+	file: File;
+	listItem: {
+		containerName: string;
+		revisionTag: string;
+	};
+	sidebar: UploadSidebarFields;
+};
+
+export type UploadFieldArray = {
+	uploads: UploadItemFields[];
+};
+
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;
 export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & FavouritePayload;
 export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & {projectId: string, containerId: string, isFavourite: boolean};

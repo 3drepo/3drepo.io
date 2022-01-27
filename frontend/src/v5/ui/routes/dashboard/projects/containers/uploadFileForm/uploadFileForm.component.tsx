@@ -23,143 +23,73 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { formatMessage } from '@/v5/services/intl';
 import { Sidebar } from '@controls/sideBar';
+import { UploadFieldArray, UploadSidebarFields } from '@/v5/store/containers/containers.types';
 import { UploadListHeader } from './uploadListHeader';
 import { UploadListHeaderLabel } from './uploadListHeader/uploadListHeaderLabel';
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
 import { Container, Content, DropZone } from './uploadFileForm.styles';
+import { SidebarSchema } from './sidebarForm/sidebarForm.component';
+import { ListItemSchema } from './uploadList/uploadListItem/uploadListItem.component';
+import { Title } from './sidebarForm/sidebarForm.styles';
 
 type IUploadFileForm = {
 	openState: boolean;
 	onClickClose: () => void;
 };
 
-export type IUploadItemFields = {
-	id: string;
-	file: File;
-	revisionTag: string;
-	revisionDesc?: string;
-	importAnimations?: boolean;
-	containerId?: string;
-	containerName: string;
-	containerUnit: string;
-	containerType: string;
-	containerDesc?: string;
-	containerCode?: string;
-};
-
-export type IUploadFormFields = {
-	uploads: IUploadItemFields[];
-};
-
-export const UploadSchema = Yup.object().shape({
-	revisionTag: Yup.string()
-		.min(2,
-			formatMessage({
-				id: 'uploadFileForm.revision.tag.error.min',
-				defaultMessage: 'Container Name must be at least 2 characters',
-			}))
-		.max(120,
-			formatMessage({
-				id: 'uploadFileForm.revision.tag.error.max',
-				defaultMessage: 'Revision Name is limited to 120 characters',
-			}))
-		.required(
-			formatMessage({
-				id: 'uploadFileForm.revision.tag.error.required',
-				defaultMessage: 'Revision Name is a required field',
-			}),
-		),
-	containerName: Yup.string()
-		.min(3,
-			formatMessage({
-				id: 'containers.creation.name.error.min',
-				defaultMessage: 'Container Name must be at least 2 characters',
-			}))
-		.max(120,
-			formatMessage({
-				id: 'containers.creation.name.error.max',
-				defaultMessage: 'Container Name is limited to 120 characters',
-			}))
-		.required(
-			formatMessage({
-				id: 'containers.creation.name.error.required',
-				defaultMessage: 'Container Name is a required field',
-			}),
-		),
-	unit: Yup.string().required().default('mm'),
-	type: Yup.string().required().default('Uncategorised'),
-	containerCode: Yup.string()
-		.max(50,
-			formatMessage({
-				id: 'containers.creation.code.error.max',
-				defaultMessage: 'Code is limited to 50 characters',
-			}))
-		.matches(/^[A-Za-z0-9]*$/,
-			formatMessage({
-				id: 'containers.creation.code.error.characters',
-				defaultMessage: 'Code can only consist of letters and numbers',
-			})),
-	containerDesc: Yup.string()
-		.max(50,
-			formatMessage({
-				id: 'containers.creation.description.error.max',
-				defaultMessage: 'Container Description is limited to 50 characters',
-			})),
-	revisionDesc: Yup.string()
-		.max(50,
-			formatMessage({
-				id: 'uploadSidebar.revisionDesc.error.max',
-				defaultMessage: 'Revision Description is limited to 50 characters',
-			})),
-});
-
 const UploadsSchema = Yup.object().shape({
 	uploads: Yup
 		.array()
-		.of(UploadSchema)
+		.of(Yup.object().shape({
+			listItem: ListItemSchema,
+			sidebar: SidebarSchema,
+		}))
 		.required()
 		.min(1),
 });
 
 export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JSX.Element => {
-	const [currentIndex, setCurrentIndex] = useState(null);
-	const methods = useForm<IUploadFormFields>({
+	const [selectedIndex, setSelectedIndex] = useState<number>(null);
+	const methods = useForm<UploadFieldArray>({
 		mode: 'onChange',
 		resolver: yupResolver(UploadsSchema),
 	});
-	const { control, handleSubmit, formState } = methods;
+	const { control, handleSubmit, formState, trigger, getValues, setValue } = methods;
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'uploads',
 	});
-	const isSidebarOpen = Number.isInteger(currentIndex) && 'id' in fields[currentIndex];
 
 	const processFiles = (files) => {
 		const filesToAppend = [];
 		for (const file of files) {
 			filesToAppend.push({
 				file,
-				revisionTag: file.name,
-				revisionDesc: '',
-				importAnimations: false,
-				containerName: '',
-				containerId: '',
-				containerUnit: 'mm',
-				containerType: 'Uncategorised',
-				containerCode: '',
-				containerDesc: '',
+				listItem: {
+					revisionTag: file.name,
+					containerName: '',
+				},
+				sidebar: {
+					_id: '',
+					containerUnit: 'mm',
+					containerType: 'Uncategorised',
+					containerCode: '',
+					containerDesc: '',
+					revisionDesc: '',
+					importAnimations: false,
+				},
 			});
 		}
 		append(filesToAppend);
 	};
 
 	const onClickEdit = (id) => {
-		setCurrentIndex(id);
+		setSelectedIndex(id);
 	};
 
 	const onClickDelete = (id) => {
-		setCurrentIndex(null);
+		setSelectedIndex(null);
 		remove(id);
 	};
 
@@ -204,18 +134,26 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 							processFiles={(files) => { processFiles(files); }}
 						/>
 					</Content>
-					<Sidebar
-						open={isSidebarOpen}
-						onClick={() => setCurrentIndex(null)}
-						noButton={!isSidebarOpen}
-					>
+					<Sidebar open={Number.isInteger(selectedIndex) && 'id' in fields[selectedIndex]} onClick={() => setSelectedIndex(null)} noButton={!(Number.isInteger(selectedIndex) && 'id' in fields[selectedIndex])}>
 						{
-							fields.length
+							Number.isInteger(selectedIndex)
 								? (
-									<SidebarForm
-										index={currentIndex}
-										fieldKey={Number.isInteger(currentIndex) ? fields[currentIndex].id : ''}
-									/>
+									<>
+										<Title>
+											{getValues([`uploads.${selectedIndex}.listItem.containerName`])}
+										</Title>
+										<SidebarForm
+											value={fields[selectedIndex].sidebar}
+											key={fields[selectedIndex].id}
+											isNewContainer={!!fields[selectedIndex].id}
+											onChange={(newSidebarFields: UploadSidebarFields) => {
+												for (const [key, val] of Object.entries(newSidebarFields)) {
+													setValue(`uploads.${selectedIndex}.sidebar.${key}`, val);
+												}
+												trigger(`uploads.${selectedIndex}.sidebar`);
+											}}
+										/>
+									</>
 								)
 								: <></>
 						}

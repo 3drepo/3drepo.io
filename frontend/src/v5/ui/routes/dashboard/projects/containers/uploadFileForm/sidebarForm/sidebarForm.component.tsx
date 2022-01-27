@@ -21,14 +21,16 @@ import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { InputLabel, MenuItem } from '@material-ui/core';
-import { useFormContext, Controller } from 'react-hook-form';
-import { CONTAINER_TYPES, CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
-import { Title, TypeSelect, UnitSelect, Input, RevisionTitle, FormControl } from './sidebarForm.styles';
+import { Controller, useForm } from 'react-hook-form';
+import { CONTAINER_TYPES, CONTAINER_UNITS, UploadSidebarFields } from '@/v5/store/containers/containers.types';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { TypeSelect, UnitSelect, Input, RevisionTitle, FormControl } from './sidebarForm.styles';
 
 type ISidebarForm = {
 	className?: string;
-	index: number;
-	fieldKey: string;
+	value: UploadSidebarFields,
+	isNewContainer: boolean;
+	onChange: (val) => void;
 };
 
 export const SidebarSchema = Yup.object().shape({
@@ -60,33 +62,42 @@ export const SidebarSchema = Yup.object().shape({
 });
 
 export const SidebarForm = ({
-	className,
-	index,
-	fieldKey,
+	value,
+	onChange,
+	isNewContainer,
 }: ISidebarForm): JSX.Element => {
-	if (index === null) return <></>;
-	const { getValues, control, formState: { errors } } = useFormContext();
-	const isNewContainer = !getValues(`uploads.${index}.containerId`).length;
+	const { control, formState: { errors }, getValues, setValue } = useForm({
+		defaultValues: value,
+		mode: 'onChange',
+		resolver: yupResolver(SidebarSchema),
+	});
+
+	const updateValues = () => {
+		onChange(getValues());
+	};
+
 	return (
-		<div className={className} key={fieldKey}>
-			<Title>
-				{getValues([`uploads.${index}?.containerName`])}
-			</Title>
+		<div onChange={updateValues}>
 			<FormControl disabled={!isNewContainer}>
 				<InputLabel id="unit-label" shrink required>
 					<FormattedMessage id="containers.creation.form.unit" defaultMessage="Units" />
 				</InputLabel>
 				<Controller
 					control={control}
-					name={`uploads.${index}.containerUnit`}
-					key={fieldKey}
+					name="containerUnit"
 					render={({
-						field,
+						field: { ref, ...extras },
 					}) => (
 						<UnitSelect
 							labelId="unit-label"
 							disabled={!isNewContainer}
-							{...field}
+							{...extras}
+							onChange={
+								(e) => {
+									setValue(e.target.name, e.target.value);
+									updateValues();
+								}
+							}
 						>
 							{
 								CONTAINER_UNITS.map((unit) => (
@@ -106,14 +117,20 @@ export const SidebarForm = ({
 
 				<Controller
 					control={control}
-					name={`uploads.${index}.containerType`}
+					name="containerType"
 					render={({
-						field,
+						field: { ref, ...extras },
 					}) => (
 						<TypeSelect
 							labelId="type-label"
 							disabled={!isNewContainer}
-							{...field}
+							{...extras}
+							onChange={
+								(e) => {
+									setValue(e.target.name, e.target.value);
+									updateValues();
+								}
+							}
 						>
 							{
 								CONTAINER_TYPES.map((type) => (
@@ -128,31 +145,31 @@ export const SidebarForm = ({
 			</FormControl>
 			<Controller
 				control={control}
-				name={`uploads.${index}.containerCode`}
+				name="containerCode"
 				render={({
-					field,
+					field: { ref, ...extras },
 				}) => (
 					<Input
 						label={formatMessage({ id: 'uploadFileForm.settingsSidebar.containerCode', defaultMessage: 'Container Code' })}
-						error={!!errors.uploads?.[index]?.containerCode}
-						helperText={errors.uploads?.[index]?.containerCode?.message}
+						error={!!errors.containerCode}
+						helperText={errors.containerCode?.message}
 						disabled={!isNewContainer}
-						{...field}
+						{...extras}
 					/>
 				)}
 			/>
 			<Controller
 				control={control}
-				name={`uploads.${index}.containerDesc`}
+				name="containerDesc"
 				render={({
-					field,
+					field: { ref, ...extras },
 				}) => (
 					<Input
 						label={formatMessage({ id: 'uploadFileForm.settingsSidebar.containerDesc', defaultMessage: 'Container Description' })}
-						error={!!errors.uploads?.[index]?.containerDesc}
-						helperText={errors.uploads?.[index]?.containerDesc?.message}
+						error={!!errors.containerDesc}
+						helperText={errors.containerDesc?.message}
 						disabled={!isNewContainer}
-						{...field}
+						{...extras}
 					/>
 				)}
 			/>
@@ -162,15 +179,15 @@ export const SidebarForm = ({
 
 			<Controller
 				control={control}
-				name={`uploads.${index}.revisionDesc`}
+				name="revisionDesc"
 				render={({
-					field,
+					field: { ref, ...extras },
 				}) => (
 					<Input
 						label={formatMessage({ id: 'uploadFileForm.settingsSidebar.revisionDesc', defaultMessage: 'Revision Description' })}
-						error={!!errors.uploads?.[index]?.revisionDesc}
-						helperText={errors.uploads?.[index]?.revisionDesc?.message}
-						{...field}
+						error={!!errors.revisionDesc}
+						helperText={errors.revisionDesc?.message}
+						{...extras}
 					/>
 				)}
 			/>

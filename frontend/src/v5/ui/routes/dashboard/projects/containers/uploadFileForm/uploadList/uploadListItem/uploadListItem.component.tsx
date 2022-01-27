@@ -18,8 +18,11 @@
 import React from 'react';
 import DeleteIcon from '@assets/icons/delete.svg';
 import EditIcon from '@assets/icons/edit.svg';
-import { Controller, useFormContext } from 'react-hook-form';
-import { IUploadItemFields } from '@/v5/ui/routes/dashboard/projects/containers/uploadFileForm/uploadFileForm.component';
+import * as Yup from 'yup';
+import { Controller, useForm } from 'react-hook-form';
+import { formatMessage } from '@/v5/services/intl';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { UploadItemFields } from '@/v5/store/containers/containers.types';
 import { UploadListItemIconButton } from './components/uploadListItemIconButton/uploadListItemIconButton.component';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/fileListItemRow/uploadListItemRow.component';
@@ -27,24 +30,64 @@ import { UploadListItemTitle } from './components/uploadListItemTitle/uploadList
 import { Input } from './fileListItem.styles';
 
 type IUploadListItem = {
-	item: IUploadItemFields;
+	item: UploadItemFields;
 	onClickEdit: () => void;
 	onClickDelete: () => void;
-	index: number;
+	onChange: (val) => void;
 };
+
+export const ListItemSchema = Yup.object().shape({
+	revisionTag: Yup.string()
+		.min(2,
+			formatMessage({
+				id: 'uploadFileForm.revision.tag.error.min',
+				defaultMessage: 'Container Name must be at least 2 characters',
+			}))
+		.max(120,
+			formatMessage({
+				id: 'uploadFileForm.revision.tag.error.max',
+				defaultMessage: 'Revision Name is limited to 120 characters',
+			}))
+		.required(
+			formatMessage({
+				id: 'uploadFileForm.revision.tag.error.required',
+				defaultMessage: 'Revision Name is a required field',
+			}),
+		),
+	containerName: Yup.string()
+		.min(3,
+			formatMessage({
+				id: 'containers.creation.name.error.min',
+				defaultMessage: 'Container Name must be at least 2 characters',
+			}))
+		.max(120,
+			formatMessage({
+				id: 'containers.creation.name.error.max',
+				defaultMessage: 'Container Name is limited to 120 characters',
+			}))
+		.required(
+			formatMessage({
+				id: 'containers.creation.name.error.required',
+				defaultMessage: 'Container Name is a required field',
+			}),
+		),
+});
 
 export const UploadListItem = ({
 	item,
 	onClickEdit,
 	onClickDelete,
-	index,
-	...props
+	onChange,
 }: IUploadListItem): JSX.Element => {
 	const filesize = '400MB';
-	const { control, formState: { errors } } = useFormContext();
+	const { control, getValues, formState: { errors } } = useForm({
+		defaultValues: item.listItem,
+		mode: 'onChange',
+		resolver: yupResolver(ListItemSchema),
+	});
 
 	return (
-		<UploadListItemRow key={item.id} onClick={() => { }} {...props}>
+		<UploadListItemRow key={item.id} onClick={() => { }} onChange={() => onChange(getValues())}>
 			<span>
 				<UploadListItemFileIcon>
 					{item.file.name.split('.').at(-1)[0]}
@@ -56,25 +99,25 @@ export const UploadListItem = ({
 			/>
 			<Controller
 				control={control}
-				name={`uploads.${index}.containerName`}
+				name="containerName"
 				render={({
-					field,
+					field: { ref, ...extras },
 				}) => (
 					<Input
-						error={!!errors.uploads?.[index]?.containerName}
-						{...field}
+						error={!!errors.containerName}
+						{...extras}
 					/>
 				)}
 			/>
 			<Controller
 				control={control}
-				name={`uploads.${index}.revisionTag`}
+				name="revisionTag"
 				render={({
-					field,
+					field: { ref, ...extras },
 				}) => (
 					<Input
-						error={!!errors.uploads?.[index]?.revisionTag}
-						{...field}
+						error={!!errors.revisionTag}
+						{...extras}
 					/>
 				)}
 			/>

@@ -16,32 +16,41 @@
  */
 
 import React from 'react';
+import { useFormContext } from 'react-hook-form';
+import { UploadItemFields } from '@/v5/store/containers/containers.types';
 import { UploadListItem } from './uploadListItem';
 import { Container } from './uploadList.styles';
-import { IUploadItemFields } from '../uploadFileForm.component';
 
 type IUploadList = {
 	onClickEdit: (index) => void;
 	onClickDelete: (index) => void;
-	values: IUploadItemFields[];
+	values: UploadItemFields[];
 };
 
 export const UploadList = ({
 	values,
 	onClickEdit,
 	onClickDelete,
-}: IUploadList): JSX.Element => (
-	<Container>
-		{
-			values.map((item, index) => (
-				<UploadListItem
-					key={item.id}
-					index={index}
-					item={item}
-					onClickEdit={() => onClickEdit(index)}
-					onClickDelete={() => onClickDelete(index)}
-				/>
-			))
-		}
-	</Container>
-);
+}: IUploadList): JSX.Element => {
+	const { trigger, setValue } = useFormContext();
+	return (
+		<Container>
+			{
+				values.map((item, index) => (
+					<UploadListItem
+						key={item.id}
+						item={item}
+						onClickEdit={() => onClickEdit(index)}
+						onClickDelete={() => onClickDelete(index)}
+						onChange={(e) => {
+							for (const [key, value] of Object.entries(e)) {
+								setValue(`uploads.${index}.listItem.${key}`, value);
+							}
+							trigger(`uploads.${index}.listItem`);
+						}}
+					/>
+				))
+			}
+		</Container>
+	);
+};
