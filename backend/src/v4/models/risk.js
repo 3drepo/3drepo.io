@@ -22,6 +22,7 @@ const C = require("../constants");
 const responseCodes = require("../response_codes.js");
 const ChatEvent = require("./chatEvent");
 const Ticket = require("./ticket");
+const Mitigation = require("./mitigation");
 const utils = require("../utils");
 
 const fieldTypes = {
@@ -162,6 +163,8 @@ class Risk extends Ticket {
 			updatedRisk.updatedTicket = {...updatedRisk.updatedTicket, ...levelOfRisk};
 			updatedRisk.data = {...updatedRisk.data, ...levelOfRisk};
 		}
+
+		await Mitigation.updateMitigationsFromRisk(user, model, updatedRisk.oldTicket, updatedRisk.updatedTicket);
 
 		return updatedRisk;
 	}
