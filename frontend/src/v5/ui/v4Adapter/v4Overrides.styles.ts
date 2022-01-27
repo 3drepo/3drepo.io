@@ -19,6 +19,9 @@ import { BodyWrapper as CustomTableBody, Head, Row } from '@/v4/routes/component
 import styled, { css } from 'styled-components';
 import { Container as BoardContainer } from '@/v4/routes/board/board.styles';
 import { Name as UserNameCell } from '@/v4/routes/components/userItem/userItem.styles';
+import { SortLabel } from '@/v4/routes/components/customTable/components/tableHeading/tableHeading.styles';
+import { PermissionsCellContainer } from '@/v4/routes/components/permissionsTable/permissionsTable.styles';
+import { RadioContainer } from '@/v4/routes/components/customTable/components/tableHeadingRadio/tableHeadingRadio.styles';
 
 // all the .simplebar-... stuff is to disable simplebar
 const customTableStyling = css`
@@ -58,6 +61,37 @@ const customTableStyling = css`
 
 	${Row} {
 		min-height: 80px;
+	}
+
+	${SortLabel} {
+		margin: 0;
+		padding-left: 10px;
+		${({ theme }) => theme.typography.kicker};
+		flex-direction: row;
+		svg {
+			fill: transparent;
+			width: 10px;
+		    margin-left: 2px;
+		}
+	}
+
+	${SortLabel}.MuiTableSortLabel-active {
+		svg {
+			fill: ${({ theme }) => theme.palette.base.main};
+		}
+	}
+
+	${SortLabel}::before {
+		background: transparent;
+	}
+
+	${PermissionsCellContainer} {
+		justify-content: flex-start;
+	}
+
+	${RadioContainer} {
+		justify-content: flex-start;
+		align-items: baseline;
 	}
 `;
 

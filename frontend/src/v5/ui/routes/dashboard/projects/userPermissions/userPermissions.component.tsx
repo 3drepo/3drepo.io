@@ -47,15 +47,15 @@ export const UsersPermissions = () => {
 		return (<></>);
 	}
 
-
 	const handleChange = (event, newValue) => {
 		setSelectedTab(newValue);
 	};
+
 	return (
 		<Container>
-			<Tabs value={selectedTab} onChange={handleChange} >
+			<Tabs value={selectedTab} onChange={handleChange}>
 				<Tab label="Project Permissions" />
-				<Tab label="Container & Federation permissions"  />
+				<Tab label="Container & Federation permissions" />
 			</Tabs>
 
 			<FixedOrGrowContainer style={{ minHeight: 200 }}>
