@@ -18,5 +18,7 @@
 import { UnityUtil } from './unity-util';
 
 if (window && !window.UnityUtil) {
+	console.log('set window UnityUtil start');
 	(window as any).UnityUtil = UnityUtil;
+	console.log('set window UnityUtil done');
 }
