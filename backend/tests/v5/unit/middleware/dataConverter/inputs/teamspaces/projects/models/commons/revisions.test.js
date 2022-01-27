@@ -134,7 +134,8 @@ const testValidateNewRevisionData = () => {
 			RevisionsModel.isTagUnique.mockImplementationOnce((teamspace, model, tag) => tag !== 'duplicate');
 			const req = createRequestWithFile(ts, bodyContent, badFile, noFile, emptyFile);
 			const mockCB = jest.fn(() => {});
-			await Revisions.validateNewRevisionData(req, {}, mockCB);
+			const funcToTest = Revisions.validateNewRevisionData(false);
+			await funcToTest(req, {}, mockCB);
 			if (error) {
 				expect(mockCB.mock.calls.length).toBe(0);
 				expect(Responder.respond.mock.calls.length).toBe(1);

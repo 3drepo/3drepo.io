@@ -69,7 +69,10 @@ const fileFilter = async (req, file, cb) => {
 
 const validateRevisionUpload = (isFederation) => async (req, res, next) => {
 	const schemaBase = {
-		tag: YupHelper.types.strings.code,
+		tag: YupHelper.types.strings.code.test('tag-not-in-use',
+			'Revision name is already used by an existing revision',
+			(value) => value === undefined || isTagUnique(req.params.teamspace,
+				req.params.container, value)),
 		desc: YupHelper.types.strings.shortDescription,
 	};
 
@@ -87,20 +90,12 @@ const validateRevisionUpload = (isFederation) => async (req, res, next) => {
 	} else {
 		schemaBase.importAnimations = Yup.bool().default(true);
 		schemaBase.tag = schemaBase.tag.required();
+		schemaBase.timezone = Yup.string().test('valid-timezone',
+			'The timezone provided is not valid',
+			(value) => value === undefined || !!tz.getTimezone(value));
 	}
 
-	const schema = Yup.object().noUnknown().required()
-		.shape({
-			tag: YupHelper.types.strings.code.required().test('tag-not-in-use',
-				'Revision name is already used by an existing revision',
-				(value) => isTagUnique(req.params.teamspace,
-					req.params.container, value)),
-			desc: YupHelper.types.strings.shortDescription,
-			importAnimations: Yup.bool().default(true),
-			timezone: Yup.string().test('valid-timezone',
-				'The timezone provided is not valid',
-				(value) => value === undefined || !!tz.getTimezone(value)),
-		});
+	const schema = Yup.object().noUnknown().required().shape(schemaBase);
 
 	try {
 		req.body = await schema.validate(req.body);
