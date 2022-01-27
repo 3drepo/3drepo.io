@@ -115,7 +115,7 @@ matrix:
       node_js:
         - "14.17.1"
       before_install:
-        - wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 ; chmod +x /usr/local/bin/yq
+        - sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 ; sudo chmod +x /usr/local/bin/yq
       script:
         - if ( $(yq eval '.variables.customHelmOverride | contains("rabbitmq")' .azure/build-and-deploy.yaml) === "true" ); then echo $(yq eval '.variables.customHelmOverride' .azure/build-and-deploy.yaml); travis_terminate 1;  fi
 
