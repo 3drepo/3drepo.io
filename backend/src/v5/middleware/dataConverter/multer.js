@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { createResponseCode, templates } = require('../../utils/responseCodes');
 const Multer = require('multer');
 const config = require('../../utils/config');
 const { respond } = require('../../utils/responder');
@@ -24,6 +25,7 @@ const MulterHelper = {};
 const singleFileMulterPromise = (req, fileName, fileFilter) => new Promise((resolve, reject) => {
 	Multer({
 		dest: config.cn_queue.upload_dir,
+		limits: { fileSize: config.uploadSizeLimit },
 		fileFilter,
 	}).single(fileName)(req, null, (err) => {
 		if (err) {
@@ -39,7 +41,12 @@ MulterHelper.singleFileUpload = (fileName = 'file', fileFilter) => async (req, r
 		await singleFileMulterPromise(req, fileName, fileFilter);
 		await next();
 	} catch (err) {
-		respond(req, res, err);
+		if (err.code === 'LIMIT_FILE_SIZE') {
+			const response = createResponseCode(templates.maxSizeExceeded, `File cannot be bigger than ${config.uploadSizeLimit} bytes.`);
+			respond(req, res, response);
+		} else {
+			respond(req, res, err);
+		}
 	}
 };
 

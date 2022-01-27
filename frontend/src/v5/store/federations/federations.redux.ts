@@ -20,18 +20,15 @@ import {
 	FetchFederationsSuccessAction,
 	IFederationsActionCreators,
 	IFederationsState,
-	SetFavouritesFilterQueryAction,
-	SetFilterQueryAction,
 	SetFavouriteSuccessAction,
 	FetchFederationStatsSuccessAction,
 	SetIsListPendingAction,
+	DeleteFederationSuccessAction,
 } from '@/v5/store/federations/federations.types';
 import { prepareSingleFederationData } from '@/v5/store/federations/federations.helpers';
 import { Constants } from '../common/actions.helper';
 
 export const { Types: FederationsTypes, Creators: FederationsActions } = createActions({
-	setAllFilterQuery: ['query'],
-	setFavouritesFilterQuery: ['query'],
 	addFavourite: ['teamspace', 'projectId', 'federationId'],
 	removeFavourite: ['teamspace', 'projectId', 'federationId'],
 	setFavouriteSuccess: ['projectId', 'federationId', 'isFavourite'],
@@ -40,22 +37,14 @@ export const { Types: FederationsTypes, Creators: FederationsActions } = createA
 	fetchFederationStats: ['teamspace', 'projectId', 'federationId'],
 	fetchFederationStatsSuccess: ['projectId', 'federationId', 'federationStats'],
 	setIsListPending: ['isPending'],
+	deleteFederation: ['teamspace', 'projectId', 'federationId'],
+	deleteFederationSuccess: ['projectId', 'federationId'],
 }, { prefix: 'FEDERATIONS/' }) as { Types: Constants<IFederationsActionCreators>; Creators: IFederationsActionCreators };
 
 export const INITIAL_STATE: IFederationsState = {
 	federations: {},
-	favouritesFilterQuery: '',
-	allFilterQuery: '',
 	isListPending: true,
 };
-
-export const setAllFilterQuery = (state = INITIAL_STATE, { query }: SetFilterQueryAction) => (
-	{ ...state, allFilterQuery: query }
-);
-
-export const setFavouritesFilterQuery = (state = INITIAL_STATE, { query }: SetFavouritesFilterQueryAction) => (
-	{ ...state, favouritesFilterQuery: query }
-);
 
 export const setFavourite = (state = INITIAL_STATE, {
 	projectId,
@@ -103,11 +92,21 @@ export const setIsListPending = (state = INITIAL_STATE, { isPending }: SetIsList
 	isListPending: isPending,
 });
 
+export const deleteFederationSuccess = (state = INITIAL_STATE, {
+	projectId,
+	federationId,
+}: DeleteFederationSuccessAction) => ({
+	...state,
+	federations: {
+		...state.federations,
+		[projectId]: state.federations[projectId].filter((federation) => federationId !== federation._id),
+	},
+});
+
 export const reducer = createReducer<IFederationsState>(INITIAL_STATE, {
-	[FederationsTypes.SET_ALL_FILTER_QUERY]: setAllFilterQuery,
-	[FederationsTypes.SET_FAVOURITES_FILTER_QUERY]: setFavouritesFilterQuery,
 	[FederationsTypes.FETCH_FEDERATIONS_SUCCESS]: fetchFederationsSuccess,
 	[FederationsTypes.FETCH_FEDERATION_STATS_SUCCESS]: fetchStatsSuccess,
 	[FederationsTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
 	[FederationsTypes.SET_IS_LIST_PENDING]: setIsListPending,
+	[FederationsTypes.DELETE_FEDERATION_SUCCESS]: deleteFederationSuccess,
 });

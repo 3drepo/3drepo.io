@@ -213,8 +213,8 @@ describe('Implied permission::', () => {
 		it('can upload model', (done) => {
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/upload`)
-				.field('tag', 'teamspace_admin_upload')
-				.attach('file', `${__dirname}/../../../src/v4/statics/3dmodels/upper.OBJ`)
+				.field("tag", "teamspace_admin_upload")
+				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/dummy.ifc")
 				.expect(200, done);
 		});
 
@@ -475,8 +475,8 @@ describe('Implied permission::', () => {
 		it('can upload model in your project', (done) => {
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/upload`)
-				.field('tag', 'project_admin_upload')
-				.attach('file', `${__dirname}/../../../src/v4/statics/3dmodels/upper.OBJ`)
+				.field("tag", "project_admin_upload")
+				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/dummy.ifc")
 				.expect(200, done);
 		});
 
@@ -785,8 +785,8 @@ describe('Implied permission::', () => {
 		it('can upload model', (done) => {
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/upload`)
-				.field('tag', 'model_admin_upload')
-				.attach('file', `${__dirname}/../../../src/v4/statics/3dmodels/upper.OBJ`)
+				.field("tag", "model_admin_upload")
+				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/dummy.ifc")
 				.expect(200, done);
 		});
 
@@ -1387,8 +1387,8 @@ describe('Implied permission::', () => {
 		it('can upload model', (done) => {
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/upload`)
-				.field('tag', 'project_upload')
-				.attach('file', `${__dirname}/../../../src/v4/statics/3dmodels/upper.OBJ`)
+				.field("tag", "project_upload")
+				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/dummy.ifc")
 				.expect(200, done);
 		});
 

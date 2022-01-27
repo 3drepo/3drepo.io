@@ -21,6 +21,7 @@ import {
 	FetchFederationStatsPayload,
 	FetchFederationStatsResponse,
 	FavouritePayload,
+	DeleteFederationPayload,
 } from '@/v5/store/federations/federations.types';
 import { AxiosResponse } from 'axios';
 import api from './default';
@@ -57,3 +58,11 @@ export const fetchFederationStats = async ({
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/stats`);
 	return data;
 };
+
+export const deleteFederation = ({
+	teamspace,
+	projectId,
+	federationId,
+}: DeleteFederationPayload): Promise<AxiosResponse<void>> => (
+	api.delete(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
+);

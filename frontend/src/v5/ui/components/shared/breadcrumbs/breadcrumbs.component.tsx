@@ -18,8 +18,9 @@
 import React from 'react';
 import { useParams, useRouteMatch, useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
+import HomeIcon from '@assets/icons/home.svg';
+import DownArrowIcon from '@assets/icons/down_arrow.svg';
 import { uriCombine } from '@/v5/services/routing/routing';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
@@ -28,8 +29,8 @@ import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSel
 import { IProject } from '@/v5/store/projects/projects.redux';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
-import { Container, Breadcrumb, InteractiveBreadcrumb } from './breadcrumbs.styles';
 import { NavigationMenu } from '../navigatonMenu';
+import { Container, HomeIconBreadcrumb, Breadcrumb, InteractiveBreadcrumb, OverflowWrapper } from './breadcrumbs.styles';
 
 const createToWithUrl = (url) => ({ to, title }) => ({ title, to: `${url}/${to}` });
 
@@ -42,6 +43,8 @@ const projectList2LinkList = (projects: IProject[]) => (projects.length ? projec
 	to: _id,
 	title: name,
 })) : []);
+
+const lastItemOf = (list: any[]) => list[list.length - 1];
 
 export const Breadcrumbs = (): JSX.Element => {
 	const history = useHistory();
@@ -59,7 +62,7 @@ export const Breadcrumbs = (): JSX.Element => {
 		}
 	}, [project, teamspace]);
 
-	if (projects.length && !projects.find(({ _id }) => _id === project)) {
+	if (project && projects.length && !projects.find(({ _id }) => _id === project)) {
 		dispatch(DialogsActions.open('alert', {
 			onClickClose: () => history.push('/'),
 			currentActions: formatMessage({ id: 'breadCrumbs.projectFetchError.title', defaultMessage: 'trying to find project' }),
@@ -82,19 +85,21 @@ export const Breadcrumbs = (): JSX.Element => {
 	url = teamspace ? uriCombine(url, '../') : url;
 	url = project ? uriCombine(url, '../') : url;
 
-	const getBreadcrumbs = [];
+	const breadcrumbs = [];
 
 	const teamspaceTo = `${url}/${teamspace}`;
 
 	let list: any[] = !project ? teamspaceList2LinkList(teamspaces) : projectList2LinkList(projects) || [];
 
 	if (teamspace) {
-		getBreadcrumbs.push(teamspace);
+		breadcrumbs.push(teamspace);
 	}
 
 	if (project && projects.length) {
-		getBreadcrumbs.push(list.find(({ to }) => to === project).title);
+		breadcrumbs.push(list.find(({ to }) => to === project).title);
 	}
+
+	const selectedItem = lastItemOf(breadcrumbs);
 
 	list = list.map(createToWithUrl(project ? urlProject : url));
 
@@ -104,16 +109,27 @@ export const Breadcrumbs = (): JSX.Element => {
 
 	return (
 		<Container aria-label="breadcrumb">
-			{getBreadcrumbs.map((title, index) => {
-				const isLastItem = (getBreadcrumbs.length - 1) === index;
+			<HomeIconBreadcrumb color="inherit" to={teamspaceTo}>
+				<HomeIcon />
+			</HomeIconBreadcrumb>
+
+			{breadcrumbs.map((title, index) => {
+				const isLastItem = (breadcrumbs.length - 1) === index;
 
 				if (isLastItem) {
 					return (
-						<div key={title}>
-							<InteractiveBreadcrumb onClick={handleClick} endIcon={<ExpandMoreIcon />}>
-								{title}
+						<div key={`${title}`}>
+							<InteractiveBreadcrumb onClick={handleClick} endIcon={<DownArrowIcon />}>
+								<OverflowWrapper>
+									{title}
+								</OverflowWrapper>
 							</InteractiveBreadcrumb>
-							<NavigationMenu list={list} anchorEl={anchorEl} handleClose={handleClose} />
+							<NavigationMenu
+								list={list}
+								anchorEl={anchorEl}
+								selectedItem={selectedItem}
+								handleClose={handleClose}
+							/>
 						</div>
 					);
 				}

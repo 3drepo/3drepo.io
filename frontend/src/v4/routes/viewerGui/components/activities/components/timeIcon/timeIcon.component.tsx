@@ -29,7 +29,7 @@ interface IProps {
 }
 
 export const TimeIcon = ({ name, value, handleOnClick }: IProps) => {
-	if (!DATE_FIELDS.includes(name)) {
+	if (name && !DATE_FIELDS.includes(name)) {
 		return null;
 	}
 

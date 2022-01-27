@@ -63,6 +63,7 @@ export const FONT_WEIGHT = {
 
 export const GRADIENT = {
 	MAIN: 'linear-gradient(90deg, #0047BB -5.07%, #00C1D4 105.07%)',
+	SECONDARY: 'linear-gradient(89.98deg, #172B4D 0.01%, #2E405F 99.99%)',
 };
 
 export const SHADOW = {
@@ -199,6 +200,7 @@ export const theme = createMuiTheme({
 		},
 		gradient: {
 			main: GRADIENT.MAIN,
+			secondary: GRADIENT.SECONDARY,
 		},
 		shadows: {
 			level_1: SHADOW.LEVEL_1,
@@ -273,10 +275,12 @@ export const theme = createMuiTheme({
 				boxShadow: 'none',
 				paddingLeft: 20,
 				paddingRight: 20,
-				minHeight: 64,
+				minHeight: 65,
 				display: 'flex',
 				flexDirection: 'row',
 				alignItems: 'center',
+				justifyContent: 'space-between',
+				background: GRADIENT.SECONDARY,
 			},
 		},
 		MuiAvatar: {
@@ -291,15 +295,34 @@ export const theme = createMuiTheme({
 				backgroundColor: null,
 			},
 		},
+		MuiMenuItem: {
+			root: {
+				margin: '0',
+			},
+		},
 		MuiList: {
 			root: {
-				width: 226,
 				borderRadius: 5,
 				boxShadow: SHADOW.LEVEL_5,
 			},
 			padding: {
 				paddingTop: 0,
 				paddingBottom: 0,
+			},
+		},
+		MuiListItem: {
+			root: {
+				'&$selected': {
+					backgroundColor: COLOR.TERTIARY_LIGHTEST,
+					'&:hover': {
+						backgroundColor: COLOR.TERTIARY_LIGHTEST,
+					},
+				},
+			},
+			button: {
+				'&:hover': {
+					backgroundColor: COLOR.TERTIARY_LIGHTEST,
+				},
 			},
 		},
 		MuiTooltip: {
@@ -340,29 +363,40 @@ export const theme = createMuiTheme({
 			},
 		},
 		MuiBreadcrumbs: {
+			root: {
+				maxWidth: '100%',
+			},
+			ol: {
+				flexWrap: 'nowrap',
+			},
 			li: {
+				'&:last-child': {
+					overflow: 'hidden',
+				},
 				'& > a': {
 					margin: 0,
-					padding: '10px 5px',
-					...typography.body1,
+					padding: '10px 8px',
+					color: COLOR.PRIMARY_MAIN_CONTRAST,
+					...typography.h3,
 				},
 				'& > button > span > span': {
 					marginLeft: '1px',
 				},
 				'& .MuiButton-endIcon': {
-					marginLeft: 0,
+					marginLeft: 6,
 				},
 			},
 			separator: {
 				marginLeft: 0,
 				marginRight: 0,
-				color: COLOR.BASE_MAIN,
+				color: COLOR.PRIMARY_MAIN_CONTRAST,
+				fontSize: 16,
 			},
 		},
 		MuiOutlinedInput:
 			{
 				root: {
-					marginTop: 6,
+					background: COLOR.PRIMARY_MAIN_CONTRAST,
 					'& $notchedOutline, &$disabled:hover:not($error) $notchedOutline, &$disabled $notchedOutline': {
 						borderColor: COLOR.BASE_LIGHTEST,
 						borderRadius: 5,
@@ -377,6 +411,7 @@ export const theme = createMuiTheme({
 						height: 35,
 						color: COLOR.BASE_MAIN,
 						...typography.body1,
+						lineHeight: '35px',
 					},
 					'&$focused $input': {
 						color: COLOR.SECONDARY_MAIN,
@@ -398,12 +433,37 @@ export const theme = createMuiTheme({
 					},
 				},
 			},
+		MuiSelect: {
+			root: {
+				background: COLOR.PRIMARY_MAIN_CONTRAST,
+				margin: '38px 0 0',
+				width: '100%',
+				height: 35,
+				boxSizing: 'border-box',
+			},
+			select: {
+				border: `1px solid ${COLOR.BASE_LIGHTEST}`,
+				borderRadius: 5,
+				color: COLOR.BASE_MAIN,
+				lineHeight: '35px',
+				'&:focus': {
+					borderRadius: 5,
+				},
+			},
+			icon: {
+				marginTop: '38px',
+				top: 'inherit',
+				right: '5px',
+			},
+		},
 		MuiTextField: {
 			root: {
-				margin: '4px 8px 8px 8px',
+				margin: '38px 0 0',
+				width: '100%',
 				'& $label': {
 					...typography.kicker,
-					display: 'contents',
+					top: '-38px',
+					left: '-13px',
 					color: COLOR.BASE_MAIN,
 				},
 				'& $label:not(.Mui-error).Mui-focused': {
@@ -412,6 +472,52 @@ export const theme = createMuiTheme({
 				'& $label.Mui-disabled': {
 					color: COLOR.BASE_LIGHT,
 				},
+			},
+		},
+		MuiInput: {
+			root: {
+				width: '100%',
+			},
+			underline: {
+				'&:before': {
+					display: 'none',
+				},
+				'&:after': {
+					display: 'none',
+				},
+			},
+			input: {
+				padding: '0px 14px',
+			},
+			formControl: {
+				'label + &': {
+					marginTop: 0,
+				},
+			},
+		},
+		MuiInputLabel: {
+			root: {
+				position: 'absolute',
+				...typography.kicker,
+				fontSize: '12px',
+				color: COLOR.BASE_MAIN,
+
+				'&:not(.Mui-error).Mui-focused': {
+					color: COLOR.TERTIARY_MAIN,
+				},
+			},
+			formControl: {
+				top: '20px',
+				left: '1px',
+			},
+			asterisk: {
+				color: COLOR.ERROR_MAIN,
+			},
+		},
+		MuiFormControl: {
+			root: {
+				width: '100%',
+				boxSizing: 'border-box',
 			},
 		},
 		MuiTouchRipple: {

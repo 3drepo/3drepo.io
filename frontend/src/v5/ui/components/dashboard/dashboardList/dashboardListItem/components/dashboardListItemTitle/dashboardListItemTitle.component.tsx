@@ -18,23 +18,26 @@
 import React, { Dispatch, ReactNode } from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { Tooltip } from '@material-ui/core';
-import { Title, Subtitle } from './dashboardListItemTitle.styles';
+import { IFixedOrGrowContainer } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.component';
+import { Title, Subtitle, Container } from './dashboardListItemTitle.styles';
 
-type IDashboardListItemTitle = {
-	children?: ReactNode;
+interface IDashboardListItemTitle extends IFixedOrGrowContainer {
 	subtitle: ReactNode;
-	width?: number;
 	onClick?: Dispatch<void>;
 	tooltipTitle?: ReactNode;
-	className?: string;
 	selected?: boolean;
-};
+}
 
 export const DashboardListItemTitle = ({
-	children, subtitle, width, onClick, className, selected = false, tooltipTitle = '',
+	children,
+	subtitle,
+	onClick,
+	selected = false,
+	tooltipTitle = '',
+	...containerProps
 }: IDashboardListItemTitle): JSX.Element => (
-	<FixedOrGrowContainer width={width} className={className}>
-		<div>
+	<FixedOrGrowContainer {...containerProps}>
+		<Container>
 			<Tooltip title={tooltipTitle}>
 				<Title
 					onClick={(event) => {
@@ -47,6 +50,6 @@ export const DashboardListItemTitle = ({
 				</Title>
 			</Tooltip>
 			<Subtitle selected={selected}>{subtitle}</Subtitle>
-		</div>
+		</Container>
 	</FixedOrGrowContainer>
 );
