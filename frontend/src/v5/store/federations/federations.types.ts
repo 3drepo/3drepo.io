@@ -59,12 +59,6 @@ export type FederationView = {
 	hasThumbnail: boolean,
 };
 
-export const EMPTY_VIEW: FederationView = {
-	_id: '',
-	name: 'None',
-	hasThumbnail: false,
-};
-
 export type FetchFederationsPayload = {
 	projectId: string;
 	teamspace: string;
@@ -106,13 +100,11 @@ export type FetchFederationViewsPayload = FetchFederationsPayload & {
 	federationId: string;
 };
 
-export type FetchFederationViewsResponse = {
-	views: FederationView[];
-};
+export type FetchFederationViewsResponse = FederationView[];
 
 export type FetchFederationViewsSuccessPayload = {
-	federationId: string;
 	projectId: string;
+	federationId: string;
 	views: FetchFederationViewsResponse;
 };
 
@@ -123,8 +115,8 @@ export type FetchFederationSettingsPayload = FetchFederationsPayload & {
 export type FetchFederationSettingsResponse = IFederationSettings;
 
 export type FetchFederationSettingsSuccessPayload = {
-	federationId: string,
 	projectId: string;
+	federationId: string,
 	settings: FetchFederationSettingsResponse;
 };
 

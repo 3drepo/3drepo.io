@@ -43,6 +43,7 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 		},
 		unit: faker.random.arrayElement(['mm', 'cm', 'dm', 'm', 'ft']),
 	},
+	views: [EMPTY_VIEW],
 	...overrides,
 });
 

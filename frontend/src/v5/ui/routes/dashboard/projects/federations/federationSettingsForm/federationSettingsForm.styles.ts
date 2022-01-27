@@ -61,18 +61,28 @@ export const ThumbnailPlaceholder = styled.div`
 	background-color: ${({ theme }) => theme.palette.base.light};
 `;
 
-export const SelectView = styled(Select)`
+export const ViewLabel = styled.div`
 	display: flex;
-    padding-left: 0;
+	flex-direction: column;
+`;
+
+export const SelectView = styled(Select)`
+	.MuiSelect-selectMenu {
+		display: flex;
+		padding-left: 0;
+	}
+
+	img {
+		margin-right: 0;
+	}
+
+	${ViewLabel} {
+		padding-left: 14px;
+	}
 
 	${ThumbnailPlaceholder} {
 		display: none;
 	}
-`;
-
-export const ViewLabel = styled.div`
-	display: flex;
-	flex-direction: column;
 `;
 
 export const MenuItemView = styled(MenuItem)`

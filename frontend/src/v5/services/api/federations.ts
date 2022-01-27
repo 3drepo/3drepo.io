@@ -71,8 +71,8 @@ export const fetchFederationViews = async ({
 }: FetchFederationViewsPayload): Promise<FetchFederationViewsResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/views`);
 	// TODO - remove this
-	return data.length ? data : {
-		views: [{
+	return data.length ? data.views : [
+		{
 			_id: '1',
 			name: 'fakeView1',
 			hasThumbnail: true,
@@ -81,8 +81,8 @@ export const fetchFederationViews = async ({
 			_id: '2',
 			name: 'fakeView2',
 			hasThumbnail: true,
-		}],
-	};
+		},
+	];
 };
 
 export const fetchFederationSettings = async ({
@@ -91,7 +91,7 @@ export const fetchFederationSettings = async ({
 	federationId,
 }: FetchFederationSettingsPayload): Promise<FetchFederationSettingsResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`);
-	return data;
+	return data.settings;
 };
 
 export const updateFederationSettings = async ({

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -23,27 +23,64 @@ import * as Yup from 'yup';
 import { TextField, MenuItem, InputLabel, FormControl } from '@material-ui/core';
 import { Select } from '@controls/select';
 import { FormModal } from '@/v5/ui/controls/modal/formModal/formDialog.component';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { useParams } from 'react-router';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
-import { EMPTY_VIEW, FederationSettingsPayload, IFederation, FederationView } from '@/v5/store/federations/federations.types';
-// TODO - remove this import
-import * as API from '@/v5/services/api';
+import { FederationSettingsPayload, IFederation, FederationView } from '@/v5/store/federations/federations.types';
+import { ShareTextField } from '@controls/shareTextField';
 import { FlexContainer, SectionTitle, Thumbnail, ThumbnailPlaceholder, SelectView, ViewLabel, MenuItemView, UnitTextField } from './federationSettingsForm.styles';
 
+const EMPTY_VIEW: FederationView = {
+	_id: ' ',
+	name: 'None',
+	hasThumbnail: false,
+};
+
+const UNITS = {
+	mm: 'Millimetres',
+	cm: 'Centimetres',
+	dm: 'Decimetres',
+	m: 'Metres',
+	ft: 'Feet and inches',
+};
 interface IFormInput {
 	name: string;
 	unit: string;
 	description: string;
 	code: string;
-	defaultView: string;
-	lat: number;
-	long: number;
+	defaultViewId: string;
+	latitude: number;
+	longitude: number;
 	angleFromNorth: number;
 	x: number;
 	y: number;
 	z: number;
 }
+
+const getDefaultValues = (federation: IFederation) => {
+	const { unit = 'mm', angleFromNorth } = federation.settings || {};
+	const {
+		latLong = [],
+		position = [],
+	} = federation.settings?.surveyPoint || {};
+	const [x, y, z] = position;
+	const [latitude, longitude] = latLong;
+	const { code, name, description } = federation;
+	const defaultViewId = (federation?.settings?.defaultView || EMPTY_VIEW)._id;
+	return {
+		name,
+		description,
+		code,
+		unit,
+		defaultViewId,
+		latitude,
+		longitude,
+		angleFromNorth,
+		x,
+		y,
+		z,
+	};
+};
 
 const FederationSchema = Yup.object().shape({
 	name: Yup.string()
@@ -81,9 +118,9 @@ const FederationSchema = Yup.object().shape({
 				id: 'federations.settings.code.error.characters',
 				defaultMessage: 'Code can only consist of letters and numbers',
 			})),
-	defaultView: Yup.string(),
-	lat: Yup.number().required(),
-	long: Yup.number().required()
+	defaultViewId: Yup.string(),
+	latitude: Yup.number().required(),
+	longitude: Yup.number().required()
 		.min(-180,
 			formatMessage({
 				id: 'federations.settings.longitude.error.min',
@@ -121,56 +158,49 @@ type IFederationSettingsForm = {
 };
 
 export const FederationSettingsForm = ({ open, federation, onClose }: IFederationSettingsForm) => {
+	const defaultValues = getDefaultValues(federation);
 	const {
 		register,
 		handleSubmit,
 		reset,
 		watch,
+		control,
 		formState,
 		formState: { errors },
 	} = useForm<IFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(FederationSchema),
+		defaultValues,
 	});
+
+	const currentUnit = watch('unit');
 
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 	const getThumbnail = getThumbnailBasicPath(teamspace, project, federation._id);
-
-	const [currentUnit, setCurrentUnit] = useState(federation.settings?.unit || 'mm');
-
-	watch((value, { name }) => {
-		if (name === 'unit') {
-			setCurrentUnit(value[name]);
-		}
-	});
 
 	useEffect(reset, [!open]);
 
 	useEffect(() => {
 		FederationsActionsDispatchers.fetchFederationSettings(teamspace, project, federation._id);
 		FederationsActionsDispatchers.fetchFederationViews(teamspace, project, federation._id);
-		// API.Federations.fetchFederationViews({
-		// 	teamspace,
-		// 	projectId: project,
-		// 	federationId: federation._id,
-		// }).then((res) => setViews([EMPTY_VIEW, ...res.views]));
-	}, []);
+	}, [!open]);
 
 	const onSubmit: SubmitHandler<IFormInput> = ({
 		name,
 		description,
 		unit,
 		code,
-		defaultView,
-		lat, long,
+		defaultViewId,
+		latitude, longitude,
 		angleFromNorth,
 		x, y, z,
 	}) => {
+		const defaultView = federation.views.find((view) => view._id === defaultViewId) || EMPTY_VIEW;
 		const payload: FederationSettingsPayload = {
 			angleFromNorth,
-			defaultView: JSON.parse(defaultView),
+			defaultView,
 			surveyPoint: {
-				latLong: [lat, long],
+				latLong: [latitude, longitude],
 				position: [x, y, z],
 			},
 			unit,
@@ -192,22 +222,34 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 			isValid={formState.isValid}
 		>
 			<SectionTitle>Federation information</SectionTitle>
-			{/* <ShareTextField
+			<ShareTextField
 				label="ID"
 				value={federation._id}
-			/> */}
-			<TextField
-				label={formatMessage({ id: 'federations.settings.form.name', defaultMessage: 'Name' })}
-				required
-				error={!!errors.name}
-				helperText={errors.name?.message}
-				defaultValue={federation.name}
-				{...register('name')}
 			/>
-			<TextField
-				label={formatMessage({ id: 'federations.settings.form.description', defaultMessage: 'Description' })}
-				defaultValue={federation.description}
-				{...register('description')}
+			<Controller
+				name="name"
+				control={control}
+				render={({ field }) => (
+					<TextField
+						{...field}
+						label={formatMessage({ id: 'federations.settings.form.name', defaultMessage: 'Name' })}
+						required
+						error={!!errors.name}
+						helperText={errors.name?.message}
+					/>
+				)}
+			/>
+			<Controller
+				name="description"
+				control={control}
+				render={({ field }) => (
+					<TextField
+						{...field}
+						label={formatMessage({ id: 'federations.settings.form.description', defaultMessage: 'Description' })}
+						error={!!errors.description}
+						helperText={errors.description?.message}
+					/>
+				)}
 			/>
 			<FlexContainer>
 				<FormControl>
@@ -216,33 +258,27 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 					</InputLabel>
 					<Select
 						labelId="unit-label"
-						defaultValue={currentUnit}
-						onChange={(e) => setCurrentUnit(e.target.value as string)}
+						defaultValue={defaultValues.unit}
 						{...register('unit')}
 					>
-						<MenuItem value="mm">
-							<FormattedMessage id="federations.settings.form.unit.mm" defaultMessage="Millimetres" />
-						</MenuItem>
-						<MenuItem value="cm">
-							<FormattedMessage id="federations.settings.form.unit.cm" defaultMessage="Centimetres" />
-						</MenuItem>
-						<MenuItem value="dm">
-							<FormattedMessage id="federations.settings.form.unit.dm" defaultMessage="Decimetres" />
-						</MenuItem>
-						<MenuItem value="m">
-							<FormattedMessage id="federations.settings.form.unit.m" defaultMessage="Metres" />
-						</MenuItem>
-						<MenuItem value="ft">
-							<FormattedMessage id="federations.settings.form.unit.ft" defaultMessage="Feet and inches" />
-						</MenuItem>
+						{Object.keys(UNITS).map((unit) => (
+							<MenuItem key={unit} value={unit}>
+								<FormattedMessage id={`federations.settings.form.unit.${unit}`} defaultMessage={UNITS[unit]} />
+							</MenuItem>
+						))}
 					</Select>
 				</FormControl>
-				<TextField
-					label={formatMessage({ id: 'federation.settings.form.code', defaultMessage: 'Code' })}
-					error={!!errors.code}
-					helperText={errors.code?.message}
-					defaultValue={federation.code}
-					{...register('code')}
+				<Controller
+					name="code"
+					control={control}
+					render={({ field }) => (
+						<TextField
+							{...field}
+							label={formatMessage({ id: 'federation.settings.form.code', defaultMessage: 'Code' })}
+							error={!!errors.code}
+							helperText={errors.code?.message}
+						/>
+					)}
 				/>
 			</FlexContainer>
 			<FormControl>
@@ -251,13 +287,13 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 				</InputLabel>
 				<SelectView
 					labelId="default-view-label"
-					defaultValue={JSON.stringify(EMPTY_VIEW)}
-					{...register('defaultView')}
+					defaultValue={defaultValues.defaultViewId}
+					{...register('defaultViewId')}
 				>
-					{federation.views?.map((view) => (
+					{[EMPTY_VIEW].concat(federation.views || []).map((view) => (
 						<MenuItemView
 							key={view._id}
-							value={JSON.stringify(view)}
+							value={view._id}
 						>
 							{view.hasThumbnail ? (
 								<Thumbnail
@@ -276,54 +312,83 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 			</FormControl>
 			<SectionTitle>GIS servey point</SectionTitle>
 			<FlexContainer>
-				<UnitTextField
-					labelname={formatMessage({ id: 'federations.settings.form.lat', defaultMessage: 'LATITUTE' })}
-					labelunit={formatMessage({ id: 'federations.settings.form.lat.unit', defaultMessage: 'decimal' })}
-					type="number"
-					required
-					defaultValue={federation.settings?.surveyPoint.latLong[0]}
-					{...register('lat')}
+				<Controller
+					name="latitude"
+					control={control}
+					render={({ field }) => (
+						<UnitTextField
+							{...field}
+							labelname={formatMessage({ id: 'federations.settings.form.lat', defaultMessage: 'LATITUDE' })}
+							labelunit={formatMessage({ id: 'federations.settings.form.lat.unit', defaultMessage: 'decimal' })}
+							type="number"
+							required
+						/>
+					)}
 				/>
-				<UnitTextField
-					labelname={formatMessage({ id: 'federations.settings.form.long', defaultMessage: 'LONGITUDE' })}
-					labelunit={formatMessage({ id: 'federations.settings.form.long.unit', defaultMessage: 'decimal' })}
-					type="number"
-					required
-					defaultValue={federation.settings?.surveyPoint.latLong[1]}
-					{...register('long')}
+				<Controller
+					name="longitude"
+					control={control}
+					render={({ field }) => (
+						<UnitTextField
+							{...field}
+							labelname={formatMessage({ id: 'federations.settings.form.long', defaultMessage: 'LONGITUDE' })}
+							labelunit={formatMessage({ id: 'federations.settings.form.long.unit', defaultMessage: 'decimal' })}
+							type="number"
+						/>
+					)}
 				/>
 			</FlexContainer>
-			<UnitTextField
-				labelname={formatMessage({ id: 'federations.settings.form.angleFromNorth', defaultMessage: 'ANGLE FROM NORTH' })}
-				labelunit={formatMessage({ id: 'federations.settings.form.angleFromNorth.unit', defaultMessage: 'clockwise degrees' })}
-				type="number"
-				defaultValue={federation.settings?.angleFromNorth}
-				{...register('angleFromNorth')}
+			<Controller
+				name="angleFromNorth"
+				control={control}
+				render={({ field }) => (
+					<UnitTextField
+						{...field}
+						labelname={formatMessage({ id: 'federations.settings.form.angleFromNorth', defaultMessage: 'ANGLE FROM NORTH' })}
+						labelunit={formatMessage({ id: 'federations.settings.form.angleFromNorth.unit', defaultMessage: 'clockwise degrees' })}
+						type="number"
+					/>
+				)}
 			/>
 			<FlexContainer>
-				<UnitTextField
-					labelname="X"
-					labelunit={currentUnit}
-					type="number"
-					required
-					defaultValue={federation.settings?.surveyPoint.position[0]}
-					{...register('x')}
+				<Controller
+					name="x"
+					control={control}
+					render={({ field }) => (
+						<UnitTextField
+							labelname="X"
+							labelunit={currentUnit}
+							type="number"
+							required
+							{...field}
+						/>
+					)}
 				/>
-				<UnitTextField
-					labelname="Y"
-					labelunit={currentUnit}
-					type="number"
-					required
-					defaultValue={federation.settings?.surveyPoint.position[1]}
-					{...register('y')}
+				<Controller
+					name="y"
+					control={control}
+					render={({ field }) => (
+						<UnitTextField
+							labelname="Y"
+							labelunit={currentUnit}
+							type="number"
+							required
+							{...field}
+						/>
+					)}
 				/>
-				<UnitTextField
-					labelname="Z"
-					labelunit={currentUnit}
-					type="number"
-					required
-					defaultValue={federation.settings?.surveyPoint.position[2]}
-					{...register('z')}
+				<Controller
+					name="z"
+					control={control}
+					render={({ field }) => (
+						<UnitTextField
+							labelname="Z"
+							labelunit={currentUnit}
+							type="number"
+							required
+							{...field}
+						/>
+					)}
 				/>
 			</FlexContainer>
 		</FormModal>

@@ -113,7 +113,7 @@ export function* fetchFederationViews({
 			projectId,
 			federationId,
 		});
-		yield put(FederationsActions.fetchFederationViewsSuccess(federationId, projectId, views));
+		yield put(FederationsActions.fetchFederationViewsSuccess(projectId, federationId, views));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: 'trying to fetch federation views',
@@ -175,7 +175,7 @@ export default function* FederationsSagas() {
 	yield takeLatest(FederationsTypes.FETCH_FEDERATIONS, fetchFederations);
 	yield takeEvery(FederationsTypes.FETCH_FEDERATION_STATS, fetchFederationStats);
 	yield takeLatest(FederationsTypes.FETCH_FEDERATION_VIEWS, fetchFederationViews);
-	yield takeLatest(FederationsTypes.FETCH_FEDERATION_SETTINGS, fetchFederationSettings);
-	yield takeLatest(FederationsTypes.UPDATE_FEDERATION_SETTINGS, updateFederationSettings);
+	// yield takeLatest(FederationsTypes.FETCH_FEDERATION_SETTINGS, fetchFederationSettings);
+	// yield takeLatest(FederationsTypes.UPDATE_FEDERATION_SETTINGS, updateFederationSettings);
 	yield takeLatest(FederationsTypes.DELETE_FEDERATION, deleteFederation);
 }
