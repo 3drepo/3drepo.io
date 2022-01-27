@@ -24,7 +24,7 @@ const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
 
 // NB: Order of fieldTypes important for importCSV
-const fieldTypes = {
+const csvFieldTypes = {
 	"mitigation_desc": "[object String]",
 	"mitigation_detail": "[object String]",
 	"mitigation_stage": "[object String]",
@@ -34,8 +34,44 @@ const fieldTypes = {
 	"element": "[object String]",
 	"risk_factor": "[object String]",
 	"scope": "[object String]",
-	"associated_activity": "[object String]"
+	"associated_activity": "[object String]",
 };
+
+const fieldTypes = {
+	"mitigation_desc": "[object String]",
+	"mitigation_detail": "[object String]",
+	"mitigation_stage": "[object String]",
+	"mitigation_type": "[object String]",
+	"mitigation_status": "[object String]",
+	"category": "[object String]",
+	"location_desc": "[object String]",
+	"element": "[object String]",
+	"risk_factor": "[object String]",
+	"scope": "[object String]",
+	"associated_activity": "[object String]",
+	"referencedRisks": "[object Array]",
+};
+
+
+const mitigationFieldsBlacklist = [
+	"mitigation_desc",
+	"mitigation_detail",
+	"mitigation_stage",
+	"mitigation_type"
+];
+
+const mitigationCriteriaBlacklist = [
+	"mitigation_desc",
+	"mitigation_detail"
+];
+
+const isMitigationStatusResolved = (mitigationStatus) => {
+	return mitigationStatus == 'agreed_partial' || mitigationStatus == 'agreed_fully';
+}
+
+const formatRiskReference = (teamspace, modelId, riskId) => {
+	return teamspace + "::" + modelId + "::" + riskId;
+}
 
 class Mitigation {
 	getMitigationCollection(account) {
@@ -47,9 +83,14 @@ class Mitigation {
 		return await mitigationColl.deleteMany({});
 	}
 
-	async getCriteria(account) {
+	async deleteOne(account, id) {
 		const mitigationColl = await this.getMitigationCollection(account);
-		const attributeBlacklist = ["mitigation_desc", "mitigation_detail"];
+		return await mitigationColl.deleteOne({ _id: id });
+	}
+
+	async getCriteria(account, attributeBlacklist = mitigationCriteriaBlacklist) {
+		const mitigationColl = await this.getMitigationCollection(account);
+
 		const criteriaFields = Object.keys(_.omit(fieldTypes, attributeBlacklist));
 		const criteriaPromises = [];
 		const criteria = {};
@@ -73,28 +114,44 @@ class Mitigation {
 		return criteria;
 	}
 
-	async findMitigationSuggestions(account, criteria) {
+	async findMitigationSuggestions(account, mitigationCriteria, attributeBlacklist = mitigationFieldsBlacklist) {
 		const mitigationColl = await this.getMitigationCollection(account);
-		const attributeBlacklist = [
-			"mitigation_desc",
-			"mitigation_detail",
-			"mitigation_stage",
-			"mitigation_type"
-		];
+		const criteria = { ...mitigationCriteria };
 		const criteriaFilterFields = Object.keys(_.omit(fieldTypes, attributeBlacklist));
 
 		// Only pick supported fields and clean empty criteria
 		Object.keys(criteria).forEach((key) => {
-			if (!criteriaFilterFields.includes(key) || criteria[key] === null || criteria[key] === "") {
+			if (!criteriaFilterFields.includes(key) || criteria[key] === null || criteria[key] === undefined || criteria[key] === "") {
 				delete criteria[key];
 			}
 		});
 
-		return await mitigationColl.find(criteria).toArray();
+		const matchedMitigations = await mitigationColl.find(criteria).toArray();
+		return matchedMitigations;
+	}
+
+	async findMitigationSuggestion(account, criteria, attributeBlacklist = mitigationFieldsBlacklist) {
+		const mitigationSuggestions = await this.findMitigationSuggestions(account, criteria, attributeBlacklist);
+		return mitigationSuggestions[0];
+	}
+
+	async removeRiskFromMitigation(account, risk) {
+		const mitigation = this.findMitigationFromDetails(account, risk);
+		const mitigationRisks = mitigationRisks;
+		const formattedReference = formatRiskReference(account, model, risk._id);
+
+		if (mitigation && mitigationRisks.includes(formattedReference)) {
+			if (mitigationRisks.length === 1) {
+				await this.update(account, mitigation._id, { $unset: { referencedRisks: 1 } })
+			} else {
+				const newReferencedRisks = mitigationRisks.filter((r) => r !== formattedReference);
+				await this.update(account, mitigation._id, { referencedRisks: newReferencedRisks });
+			}
+		}
 	}
 
 	async importCSV(account, data) {
-		const csvFields = Object.keys(fieldTypes);
+		const csvFields = Object.keys(csvFieldTypes);
 
 		const records = parse(data, {
 			columns: csvFields,
@@ -106,7 +163,7 @@ class Mitigation {
 		return this.insert(account, records);
 	}
 
-	async insert(account, mitigations) {
+	async insert(account, mitigations, clearAll = true) {
 		const mitigationColl = await this.getMitigationCollection(account);
 		const requiredFields = ["mitigation_desc"];
 		const optionalFields = Object.keys(_.omit(fieldTypes, requiredFields));
@@ -132,10 +189,104 @@ class Mitigation {
 			mitigations[i] = newMitigation;
 		}
 
-		await this.clearAll(account);
+		if (clearAll) {
+			await this.clearAll(account);
+		}
+
 		await mitigationColl.insertMany(mitigations);
 
 		return mitigations;
+	}
+
+	async update(account, id, updateData) {
+		await db.updateOne(account, "mitigations", { _id: id }, updateData);
+	}
+
+	async findOrCreateMitigationFromDetails(account, mitigationDetails) {
+		let mitigation = await this.findMitigationSuggestion(account, mitigationDetails, []);
+		if (!mitigation) {
+			try {
+				const mitigations = await this.insert(account, [{ ...mitigationDetails }], false);
+				mitigation = mitigations[0];
+			} catch {
+				//do nothing if the mitigation was not inserted
+			}
+		}
+
+		return mitigation;
+	}
+
+	async addRiskRefToMitigation(account, mitigation, riskReference) {
+		let referencedRisks = mitigation?.referencedRisks;
+		if (!referencedRisks) {
+			referencedRisks = [];
+		}
+
+		if (!referencedRisks.includes(riskReference)) {
+			referencedRisks.push(riskReference);
+			await this.update(account, mitigation._id, { $set: { referencedRisks: referencedRisks } })
+		}
+	}
+
+	async updateMitigationsFromRisk(account, model, oldRisk, updatedRisk) {
+		const riskId = oldRisk._id;
+		const oldStatusIsResolved = isMitigationStatusResolved(oldRisk.mitigation_status);
+		const newStatusIsResolved = isMitigationStatusResolved(updatedRisk.mitigation_status);
+
+		//if risk was and remains unresolved
+		if (!oldStatusIsResolved && !newStatusIsResolved) {
+			return;
+		}
+
+		const mitigationDetails = {
+			mitigation_desc: updatedRisk.mitigation_desc,
+			mitigation_stage: updatedRisk.mitigation_stage,
+			mitigation_type: updatedRisk.mitigation_type,
+			mitigation_status: updatedRisk.mitigation_status,
+			category: updatedRisk.category,
+			location_desc: updatedRisk.location_desc,
+			element: updatedRisk.element,
+			risk_factor: updatedRisk.risk_factor,
+			scope: updatedRisk.scope,
+			associated_activity: updatedRisk.associated_activity
+		};
+		const formattedReference = formatRiskReference(account, model, riskId);
+
+		//if risk becomes resolved
+		if (!oldStatusIsResolved && newStatusIsResolved) {
+			const mitigation = await this.findOrCreateMitigationFromDetails(account, mitigationDetails);
+			if (mitigation) {
+				await this.addRiskRefToMitigation(account, mitigation, formattedReference);
+			}
+		}
+		//if risk was already resolved
+		else {
+			const mitigations = await this.findMitigationSuggestions(account, {}, []);
+			const mitigation = mitigations.find((m) => m.referencedRisks
+				&& m.referencedRisks.includes(formattedReference));
+
+			if (!mitigation && !newStatusIsResolved) {
+				return;
+			}
+
+			//remove old ref 
+			if (mitigation) {
+				if (mitigation.referencedRisks.length === 1) {
+					await this.deleteOne(account, mitigation._id);
+				} else {
+					const newReferencedRisks = mitigation.referencedRisks.filter((r) => r !== formattedReference);
+					await this.update(account, mitigation._id, { $set: { referencedRisks: newReferencedRisks } });
+				}
+			}
+
+			if (newStatusIsResolved) {
+				const newMitigation = await this.findOrCreateMitigationFromDetails(account, mitigationDetails);
+				if (newMitigation) {
+					await this.addRiskRefToMitigation(account, newMitigation, formattedReference);
+				}
+			}
+		}
+
 	}
 }
 
