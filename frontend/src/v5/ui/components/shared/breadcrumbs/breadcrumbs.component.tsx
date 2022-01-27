@@ -44,6 +44,8 @@ const projectList2LinkList = (projects: IProject[]) => (projects.length ? projec
 	title: name,
 })) : []);
 
+const lastItemOf = (list: any[]) => list[list.length - 1];
+
 export const Breadcrumbs = (): JSX.Element => {
 	const history = useHistory();
 	const dispatch = useDispatch();
@@ -83,19 +85,21 @@ export const Breadcrumbs = (): JSX.Element => {
 	url = teamspace ? uriCombine(url, '../') : url;
 	url = project ? uriCombine(url, '../') : url;
 
-	const getBreadcrumbs = [];
+	const breadcrumbs = [];
 
 	const teamspaceTo = `${url}/${teamspace}`;
 
 	let list: any[] = !project ? teamspaceList2LinkList(teamspaces) : projectList2LinkList(projects) || [];
 
 	if (teamspace) {
-		getBreadcrumbs.push(teamspace);
+		breadcrumbs.push(teamspace);
 	}
 
 	if (project && projects.length) {
-		getBreadcrumbs.push(list.find(({ to }) => to === project).title);
+		breadcrumbs.push(list.find(({ to }) => to === project).title);
 	}
+
+	const selectedItem = lastItemOf(breadcrumbs);
 
 	list = list.map(createToWithUrl(project ? urlProject : url));
 
@@ -109,8 +113,8 @@ export const Breadcrumbs = (): JSX.Element => {
 				<HomeIcon />
 			</HomeIconBreadcrumb>
 
-			{getBreadcrumbs.map((title, index) => {
-				const isLastItem = (getBreadcrumbs.length - 1) === index;
+			{breadcrumbs.map((title, index) => {
+				const isLastItem = (breadcrumbs.length - 1) === index;
 
 				if (isLastItem) {
 					return (
@@ -120,7 +124,12 @@ export const Breadcrumbs = (): JSX.Element => {
 									{title}
 								</OverflowWrapper>
 							</InteractiveBreadcrumb>
-							<NavigationMenu list={list} anchorEl={anchorEl} handleClose={handleClose} />
+							<NavigationMenu
+								list={list}
+								anchorEl={anchorEl}
+								selectedItem={selectedItem}
+								handleClose={handleClose}
+							/>
 						</div>
 					);
 				}

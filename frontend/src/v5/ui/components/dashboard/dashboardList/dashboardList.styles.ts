@@ -31,7 +31,7 @@ export const ListContainer = styled.ul`
 export const DashboardListEmptyContainer = styled.div`
 	display: flex;
 	align-items: center;
-	height: 75px;
+	height: 80px;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	border: 1px dashed ${({ theme }) => theme.palette.base.light};
 	border-radius: 5px;

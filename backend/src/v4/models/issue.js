@@ -172,9 +172,12 @@ class Issue extends Ticket {
 			branch = "master";
 		}
 
-		const history = await  History.getHistory(account, model, branch, revId, {_id: 1});
-
-		revId = history._id;
+		try {
+			const history = await  History.getHistory(account, model, branch, revId, {_id: 1});
+			revId = history._id;
+		} catch (err) {
+			// it's ok if we don't have a revision. this should still import.
+		}
 
 		const settings = await findModelSettingById(account, model);
 		const bcfIssues = await BCF.importBCF(requester, account, model, dataBuffer, settings);
@@ -196,7 +199,9 @@ class Issue extends Ticket {
 
 		for (let i = 0; i < data.length; i++) {
 			const issueToMerge = data[i];
-			issueToMerge.rev_id = revId;
+			if (revId) {
+				issueToMerge.rev_id = revId;
+			}
 
 			const matchIndex = existingIssuesMap[utils.uuidToString(issueToMerge._id)];
 
