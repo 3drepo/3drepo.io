@@ -115,7 +115,7 @@ const customTableStyling = css`
 
 		.search-field__label {
 			margin-top: 3px;
-			transform: translate(13px,41px) scale(1);
+			transform: translate(13px,39px) scale(1);
 
 			&[data-shrink='true'] {
 				transform: translate(13px, 20px) scale(1) !important;

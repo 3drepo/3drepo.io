@@ -18,6 +18,9 @@ import { Row } from '@/v4/routes/components/customTable/customTable.styles';
 import styled from 'styled-components';
 import { Tab as MuiTab, Tabs as MuiTabs } from '@material-ui/core';
 import { ProjectsPermissions } from '@/v4/routes/projects/projectsPermissions';
+import { ModelsPermissions } from '@/v4/routes/modelsPermissions';
+import { ModelsContainer } from '@/v4/routes/modelsPermissions/modelsPermissions.styles';
+import { Container as TextOverlay } from '@/v4/routes/components/textOverlay/textOverlay.styles';
 
 export const Tab = styled(MuiTab)`
 	${({ theme }) => theme.typography.kicker};
@@ -56,6 +59,19 @@ export const V4ProjectsPermissions = styled(ProjectsPermissions)`
 	${Row} > :nth-child(2) {
 		width: 292px;
 		min-width: 0;
+	}
+`;
+
+export const V4ModelsPermissions = styled(ModelsPermissions)`
+	${ModelsContainer} {
+		border: 0;
+		margin-right: 30px;
+	}
+
+	${TextOverlay} {
+		background: rgba(255, 255, 255, 0.89);
+		${({ theme }) => theme.typography.h4};
+		color: ${({ theme }) => theme.palette.secondary.main};
 	}
 `;
 

@@ -58,6 +58,7 @@ interface IProps {
 	models: any[];
 	selectedModels: any[];
 	permissions: any[];
+	className?: string;
 	onSelectionChange: (selectedModels) => void;
 	onPermissionsChange: (modelsWithPermissions) => void;
 }
@@ -151,7 +152,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { models, permissions, selectedModels } = this.props;
+		const { models, permissions, selectedModels, className } = this.props;
 		const { permissionsRevision } = this.state;
 
 		return (
@@ -159,6 +160,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 				container
 				direction="row"
 				wrap="nowrap"
+				className={className}
 			>
 				<ModelsContainer item>
 					<CustomTable

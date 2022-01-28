@@ -497,14 +497,6 @@ export const theme = createMuiTheme({
 			root: {
 				width: '100%',
 			},
-			// underline: {
-			// 	'&:before': {
-			// 		display: 'none',
-			// 	},
-			// 	'&:after': {
-			// 		display: 'none',
-			// 	},
-			// },
 			input: {
 				padding: '0px 14px',
 			},
