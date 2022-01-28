@@ -158,7 +158,7 @@ type IFederationSettingsForm = {
 };
 
 export const FederationSettingsForm = ({ open, federation, onClose }: IFederationSettingsForm) => {
-	const defaultValues = getDefaultValues(federation);
+	const defaultValues = getDefaultValues(federation) as any;
 	const {
 		register,
 		handleSubmit,
