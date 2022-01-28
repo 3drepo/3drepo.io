@@ -27,7 +27,7 @@ import {
 	selectSelectedModels,
 	UserManagementActions
 } from '../../modules/userManagement';
-import { IProps, ModelsPermissions } from './modelsPermissions.component';
+import { ModelsPermissions } from './modelsPermissions.component';
 
 const mapStateToProps = createStructuredSelector({
 	models: selectProjectModels,
