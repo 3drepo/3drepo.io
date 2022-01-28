@@ -22,9 +22,10 @@ const parse = require("csv-parse/lib/sync");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
+const { Parser } = require('json2csv');
 
 // NB: Order of fieldTypes important for importCSV
-const csvFieldTypes = {
+const csvImportFieldTypes = {
 	"mitigation_desc": "[object String]",
 	"mitigation_detail": "[object String]",
 	"mitigation_stage": "[object String]",
@@ -38,17 +39,8 @@ const csvFieldTypes = {
 };
 
 const fieldTypes = {
-	"mitigation_desc": "[object String]",
-	"mitigation_detail": "[object String]",
-	"mitigation_stage": "[object String]",
-	"mitigation_type": "[object String]",
+	...csvImportFieldTypes,
 	"mitigation_status": "[object String]",
-	"category": "[object String]",
-	"location_desc": "[object String]",
-	"element": "[object String]",
-	"risk_factor": "[object String]",
-	"scope": "[object String]",
-	"associated_activity": "[object String]",
 	"referencedRisks": "[object Array]",
 };
 
@@ -126,8 +118,7 @@ class Mitigation {
 			}
 		});
 
-		const matchedMitigations = await mitigationColl.find(criteria).toArray();
-		return matchedMitigations;
+		return await mitigationColl.find(criteria).toArray();
 	}
 
 	async findMitigationSuggestion(account, criteria, attributeBlacklist = mitigationFieldsBlacklist) {
@@ -151,7 +142,7 @@ class Mitigation {
 	}
 
 	async importCSV(account, data) {
-		const csvFields = Object.keys(csvFieldTypes);
+		const csvFields = Object.keys(csvImportFieldTypes);
 
 		const records = parse(data, {
 			columns: csvFields,
@@ -161,6 +152,14 @@ class Mitigation {
 		});
 
 		return this.insert(account, records);
+	}
+
+	async exportCSV(account) {
+		const csvFields = Object.keys(fieldTypes);
+		const parser = new Parser({fields: csvFields});
+  	
+		const mitigations = await this.findMitigationSuggestions(account, {}, []);
+		return parser.parse(mitigations);
 	}
 
 	async insert(account, mitigations, clearAll = true) {

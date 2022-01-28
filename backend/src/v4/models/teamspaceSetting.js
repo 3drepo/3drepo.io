@@ -21,7 +21,7 @@ const _ = require("lodash");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes");
 const utils = require("../utils");
-const FileRef = require("./fileRef");
+const Mitigation = require("./mitigation");
 const colName = "teamspace";
 
 class TeamspaceSettings {
@@ -104,7 +104,6 @@ class TeamspaceSettings {
 			const Mitigation = require("./mitigation");
 			const importedMitigations = await Mitigation.importCSV(account, file);
 
-			await FileRef.storeMitigationsFile(account, username, filename, file);
 
 			const settingsCol = await this.getTeamspaceSettingsCollection(account, true);
 			const updatedAt = new Date();
@@ -116,8 +115,8 @@ class TeamspaceSettings {
 		}
 	}
 
-	async getMitigationsStream(account) {
-		return await FileRef.getMitigationsStream(account);
+	async getMitigationsFile(account) {		
+		return await Mitigation.exportCSV(account);
 	}
 
 	async update(account, data) {

@@ -547,9 +547,9 @@
 	}
 
 	function getMitigationsFile(req, res, next) {
-		TeamspaceSettings.getMitigationsStream(req.params.account).then((mitigations) => {
+		TeamspaceSettings.getMitigationsFile(req.params.account).then((mitigationsFile) => {
 			const timestamp = (new Date()).toLocaleString();
-			const filenamePrefix = (req.params.account + "_" + timestamp + "_").replace(/\W+/g, "_");
+			const filenamePrefix = (req.params.account + "_" + timestamp).replace(/\W+/g, "_");
 
 			const headers = {
 				"Content-Disposition": "attachment;filename=" + filenamePrefix + "mitigations.csv",
@@ -557,8 +557,8 @@
 			};
 
 			res.set(headers);
-
-			responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, mitigations.readStream, headers);
+			res.send(mitigationsFile);
+			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});
