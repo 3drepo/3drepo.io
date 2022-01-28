@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import memoizeOne from 'memoize-one';
 import * as queryString from 'query-string';
 import React from 'react';
@@ -41,6 +40,15 @@ const MODEL_TABLE_CELLS = [{
 	searchBy: ['name']
 }];
 
+const MODEL_TABLE_CELLS_V5 = [{
+	name: 'Container/federation',
+	type: CELL_TYPES.NAME,
+	HeadingComponent: CellUserSearch,
+	CellComponent: ModelItem,
+	searchBy: ['name']
+}];
+
+
 const getModelsTableRows = memoizeOne((models = [], selectedModels = []) => {
 	return models.map((model) => {
 		const data = [{
@@ -61,6 +69,7 @@ interface IProps {
 	className?: string;
 	onSelectionChange: (selectedModels) => void;
 	onPermissionsChange: (modelsWithPermissions) => void;
+	isV5: boolean;
 }
 
 interface IState {
@@ -152,8 +161,11 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { models, permissions, selectedModels, className } = this.props;
+		const { models, permissions, selectedModels, className, isV5 } = this.props;
 		const { permissionsRevision } = this.state;
+		const CELLS = isV5 ? MODEL_TABLE_CELLS_V5 : MODEL_TABLE_CELLS ;
+		// eslint-disable-next-line max-len
+		const textOverlayMessage = `Select a ${ isV5 ? 'container or federation' : 'model'} to view the users' permissions`;
 
 		return (
 			<Container
@@ -164,7 +176,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 			>
 				<ModelsContainer item>
 					<CustomTable
-						cells={MODEL_TABLE_CELLS}
+						cells={CELLS}
 						rows={getModelsTableRows(models, selectedModels)}
 						onSelectionChange={this.props.onSelectionChange}
 						onSearch={this.handleModelsSearch}
@@ -184,7 +196,7 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 							/>
 					{
 						!selectedModels.length ?
-							<TextOverlay content="Select a model to view the users' permissions" /> :
+							<TextOverlay content={textOverlayMessage} /> :
 							null
 					}
 				</PermissionsContainer>

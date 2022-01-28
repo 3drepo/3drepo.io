@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { withVersion } from '@/v4/helpers/withVersion';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import { bindActionCreators } from 'redux';
@@ -26,7 +27,7 @@ import {
 	selectSelectedModels,
 	UserManagementActions
 } from '../../modules/userManagement';
-import { ModelsPermissions } from './modelsPermissions.component';
+import { IProps, ModelsPermissions } from './modelsPermissions.component';
 
 const mapStateToProps = createStructuredSelector({
 	models: selectProjectModels,
@@ -39,4 +40,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	onPermissionsChange: UserManagementActions.updateModelsPermissionsPre
 }, dispatch);
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ModelsPermissions));
+export default withVersion(withRouter(connect(mapStateToProps, mapDispatchToProps)(ModelsPermissions)));
