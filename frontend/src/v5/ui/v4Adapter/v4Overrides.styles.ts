@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BodyWrapper as CustomTableBody, Head, Row } from '@/v4/routes/components/customTable/customTable.styles';
+import { BodyWrapper as CustomTableBody, Cell, Head, Row } from '@/v4/routes/components/customTable/customTable.styles';
 import styled, { css } from 'styled-components';
-import { Container as BoardContainer } from '@/v4/routes/board/board.styles';
 import { Name as UserNameCell } from '@/v4/routes/components/userItem/userItem.styles';
 import { SortLabel } from '@/v4/routes/components/customTable/components/tableHeading/tableHeading.styles';
 import { PermissionsCellContainer } from '@/v4/routes/components/permissionsTable/permissionsTable.styles';
-import { RadioContainer } from '@/v4/routes/components/customTable/components/tableHeadingRadio/tableHeadingRadio.styles';
+import { RadioContainer as TableHeadingRadioContainer } from '@/v4/routes/components/customTable/components/tableHeadingRadio/tableHeadingRadio.styles';
+import { SearchField } from '@/v4/routes/components/customTable/components/cellUserSearch/cellUserSearch.styles';
 
 // all the .simplebar-... stuff is to disable simplebar
 const customTableStyling = css`
@@ -52,6 +52,10 @@ const customTableStyling = css`
 
 	${Head} {
 		border: 0;
+
+		${Cell} {
+			padding-top: 22px;
+		}
 	}
 
 	${UserNameCell} {
@@ -91,9 +95,25 @@ const customTableStyling = css`
 		justify-content: flex-start;
 	}
 
-	${RadioContainer} {
+	${TableHeadingRadioContainer} {
 		justify-content: flex-start;
 		align-items: baseline;
+		margin-top: -22px;
+	}
+
+	${SearchField} {
+		label, input {
+			${({ theme }) => theme.typography.kicker};
+		}
+
+		.search-field__label {
+			margin-top: 3px;
+			transform: translate(13px,41px) scale(1);
+
+			&[data-shrink='true'] {
+				transform: translate(13px, 20px) scale(1) !important;
+			}
+		}
 	}
 `;
 
@@ -102,10 +122,5 @@ export const V4OverridesContainer = styled.div`
 	flex-direction: column;
 	height: 100%;
 
-	${BoardContainer} {
-		height: 2000px;
-	}
-
 	${customTableStyling}
-
 `;

@@ -228,6 +228,9 @@ export const theme = createMuiTheme({
 				shrink: false,
 			},
 		},
+		MuiInput: {
+			disableUnderline: true,
+		},
 		MuiCheckbox: {
 			color: 'primary',
 			icon: React.createElement(CheckboxIcon),
@@ -494,14 +497,14 @@ export const theme = createMuiTheme({
 			root: {
 				width: '100%',
 			},
-			underline: {
-				'&:before': {
-					display: 'none',
-				},
-				'&:after': {
-					display: 'none',
-				},
-			},
+			// underline: {
+			// 	'&:before': {
+			// 		display: 'none',
+			// 	},
+			// 	'&:after': {
+			// 		display: 'none',
+			// 	},
+			// },
 			input: {
 				padding: '0px 14px',
 			},

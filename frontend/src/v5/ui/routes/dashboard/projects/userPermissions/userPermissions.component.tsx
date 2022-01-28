@@ -56,8 +56,7 @@ export const UsersPermissions = () => {
 				<Tab label="Project Permissions" />
 				<Tab label="Container & Federation permissions" />
 			</Tabs>
-
-			<FixedOrGrowContainer style={{ minHeight: 200 }}>
+			<FixedOrGrowContainer>
 				{selectedTab === 0 && <V4ProjectsPermissions />}
 				{selectedTab === 1 && <V4ModelsPermissions />}
 			</FixedOrGrowContainer>
