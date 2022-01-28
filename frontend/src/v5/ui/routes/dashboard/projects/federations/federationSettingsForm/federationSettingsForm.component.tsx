@@ -58,13 +58,13 @@ interface IFormInput {
 }
 
 const getDefaultValues = (federation: IFederation) => {
-	const { unit = 'mm', angleFromNorth = '' } = federation.settings || {};
+	const { unit = 'mm', angleFromNorth } = federation.settings || {};
 	const {
-		latLong = [],
-		position = [],
+		latLong = [0, 0],
+		position = [0, 0, 0],
 	} = federation.settings?.surveyPoint || {};
-	const [x = '', y = '', z = ''] = position;
-	const [latitude = '', longitude = ''] = latLong;
+	const [x, y, z] = position;
+	const [latitude, longitude] = latLong;
 	const { code = '', name, description = '' } = federation;
 	const defaultViewId = (federation?.settings?.defaultView || EMPTY_VIEW)._id;
 	return {
@@ -120,17 +120,7 @@ const FederationSchema = Yup.object().shape({
 			})),
 	defaultViewId: Yup.string(),
 	latitude: Yup.number().required(),
-	longitude: Yup.number().required()
-		.min(-180,
-			formatMessage({
-				id: 'federations.settings.longitude.error.min',
-				defaultMessage: 'Longitude cannot be smaller than -180',
-			}))
-		.max(180,
-			formatMessage({
-				id: 'federations.settings.longitude.error.max',
-				defaultMessage: 'Longitude cannot be greater than 180',
-			})),
+	longitude: Yup.number().required(),
 	angleFromNorth: Yup.number()
 		.min(0,
 			formatMessage({
@@ -141,7 +131,8 @@ const FederationSchema = Yup.object().shape({
 			formatMessage({
 				id: 'federations.settings.angle.error.max',
 				defaultMessage: 'Angle cannot be greater than 360',
-			})),
+			}))
+		.transform((value) => value || 0),
 	x: Yup.number().required(),
 	y: Yup.number().required(),
 	z: Yup.number().required(),
