@@ -22,11 +22,10 @@ import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { UploadItemFields } from '@/v5/store/containers/containers.types';
 import { ListItemSchema } from '@/v5/validation/containers';
-import { UploadListItemIconButton } from './components/uploadListItemIconButton/uploadListItemIconButton.component';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
-import { UploadListItemRow } from './components/fileListItemRow/uploadListItemRow.component';
+import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
 import { UploadListItemTitle } from './components/uploadListItemTitle/uploadListItemTitle.component';
-import { Input } from './fileListItem.styles';
+import { Button, DeleteButton, Input } from './uploadListItem.styles';
 
 type IUploadListItem = {
 	item: UploadItemFields;
@@ -83,12 +82,12 @@ export const UploadListItem = ({
 					/>
 				)}
 			/>
-			<UploadListItemIconButton onClick={onClickEdit}>
+			<Button onClick={onClickEdit}>
 				<EditIcon />
-			</UploadListItemIconButton>
-			<UploadListItemIconButton onClick={onClickDelete}>
+			</Button>
+			<DeleteButton onClick={onClickDelete}>
 				<DeleteIcon />
-			</UploadListItemIconButton>
+			</DeleteButton>
 		</UploadListItemRow>
 	);
 };
