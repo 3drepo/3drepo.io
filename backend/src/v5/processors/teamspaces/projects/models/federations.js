@@ -23,6 +23,7 @@ const { getIssuesCount } = require('../../../../models/issues');
 const { getLatestRevision } = require('../../../../models/revisions');
 const { getProjectById } = require('../../../../models/projects');
 const { getRisksCount } = require('../../../../models/risks');
+const { queueFederationUpdate } = require('../../../../services/queue');
 
 const Federations = { ...Groups };
 
@@ -47,6 +48,8 @@ Federations.deleteFavourites = async (username, teamspace, project, favouritesTo
 	const accessibleFederations = await Federations.getFederationList(teamspace, project, username);
 	await deleteFavourites(username, teamspace, accessibleFederations, favouritesToRemove);
 };
+
+Federations.newRevision = queueFederationUpdate;
 
 const getLastUpdatesFromModels = async (teamspace, models) => {
 	const lastUpdates = [];

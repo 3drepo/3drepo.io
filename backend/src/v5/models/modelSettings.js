@@ -110,7 +110,7 @@ Models.updateModelStatus = async (teamspace, model, status, corId, user) => {
 	}
 };
 
-Models.newRevisionProcessed = async (teamspace, model, corId, retVal, user) => {
+Models.newRevisionProcessed = async (teamspace, model, corId, retVal, user, containers) => {
 	const { success, message, userErr } = getInfoFromCode(retVal);
 	const query = { _id: model };
 	const set = {};
@@ -118,6 +118,9 @@ Models.newRevisionProcessed = async (teamspace, model, corId, retVal, user) => {
 	if (success) {
 		set.status = 'ok';
 		set.timestamp = new Date();
+		if (containers) {
+			set.subModels = containers.map(({ project }) => project);
+		}
 	} else {
 		set.status = 'failed';
 		set.errorReason = { message, timestamp: new Date(), errorCode: retVal };

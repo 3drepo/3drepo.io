@@ -129,6 +129,11 @@ ResponseCodes.createResponseCode = (errCode, message) => {
 	const codeExists = ResponseCodes.codeExists(errCode?.code);
 	if (!codeExists) {
 		const isError = errCode instanceof Error;
+		if (isError) {
+			// eslint-disable-next-line
+			console.error(errCode)
+		}
+
 		logger.logError('Unrecognised error code', isError ? JSON.stringify(errCode, ['message', 'arguments', 'type', 'name', 'stack']) : errCode);
 	}
 	const res = codeExists ? errCode : ResponseCodes.templates.unknown;
