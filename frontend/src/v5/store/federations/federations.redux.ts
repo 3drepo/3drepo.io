@@ -44,6 +44,7 @@ export const { Types: FederationsTypes, Creators: FederationsActions } = createA
 	fetchFederationSettings: ['teamspace', 'projectId', 'federationId'],
 	fetchFederationSettingsSuccess: ['projectId', 'federationId', 'settings'],
 	updateFederationSettings: ['teamspace', 'projectId', 'federationId', 'settings'],
+	updateFederationSettingsSuccess: ['projectId', 'federationId', 'settings'],
 	deleteFederation: ['teamspace', 'projectId', 'federationId'],
 	deleteFederationSuccess: ['projectId', 'federationId'],
 }, { prefix: 'FEDERATIONS/' }) as { Types: Constants<IFederationsActionCreators>; Creators: IFederationsActionCreators };
@@ -129,6 +130,30 @@ export const fetchFederationSettingsSuccess = (state = INITIAL_STATE, {
 			if (federationId !== federation._id) return federation;
 			return {
 				...federation,
+				name: settings.name,
+				description: settings.desc,
+				code: settings.code,
+				settings,
+			};
+		}),
+	},
+});
+
+export const updateFederationSettingsSuccess = (state = INITIAL_STATE, {
+	projectId,
+	federationId,
+	settings,
+}: FetchFederationSettingsSuccessAction) => ({
+	...state,
+	federations: {
+		...state.federations,
+		[projectId]: state.federations[projectId].map((federation) => {
+			if (federationId !== federation._id) return federation;
+			return {
+				...federation,
+				name: settings.name,
+				description: settings.desc,
+				code: settings.code,
 				settings,
 			};
 		}),
@@ -153,5 +178,6 @@ export const reducer = createReducer<IFederationsState>(INITIAL_STATE, {
 	[FederationsTypes.SET_IS_LIST_PENDING]: setIsListPending,
 	[FederationsTypes.FETCH_FEDERATION_VIEWS_SUCCESS]: fetchFederationViewsSuccess,
 	[FederationsTypes.FETCH_FEDERATION_SETTINGS_SUCCESS]: fetchFederationSettingsSuccess,
+	[FederationsTypes.UPDATE_FEDERATION_SETTINGS_SUCCESS]: updateFederationSettingsSuccess,
 	[FederationsTypes.DELETE_FEDERATION_SUCCESS]: deleteFederationSuccess,
 });

@@ -20,12 +20,11 @@ import { expectSaga } from 'redux-saga-test-plan';
 import { FederationsActions } from '@/v5/store/federations/federations.redux';
 import { mockServer } from '../../internals/testing/mockServer';
 import { pick, times } from 'lodash';
-import { federationMockFactory } from './federations.fixtures';
+import { federationMockFactory, prepareMockSettingsReply, prepareMockViewsReply } from './federations.fixtures';
 import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
 import { 
 	FetchFederationStatsResponse, 
 	IFederation, 
-	FederationSettingsPayload, 
 	EMPTY_VIEW 
 } from '@/v5/store/federations/federations.types';
 
@@ -126,35 +125,45 @@ describe('Federations: sagas', () => {
 	})
 	
 	describe('fetchFederationViews', () => {
-		const mockFederations = federationMockFactory();
-		const mockFederationsBaseResponse = { views: mockFederations.views };
+		const mockFederation = federationMockFactory();
+		const mockFederationsViewsResponse = prepareMockViewsReply(mockFederation);
 
 		it('should call fetchFederationViews endpoint', async () => {
 			mockServer
 			.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/views`)
-			.reply(200, mockFederationsBaseResponse);
+			.reply(200, mockFederationsViewsResponse);
 
 			await expectSaga(FederationsSaga.default)
 			.dispatch(FederationsActions.fetchFederationViews(teamspace, projectId, federationId))
-			.put(FederationsActions.fetchFederationViewsSuccess(projectId, federationId, mockFederationsBaseResponse))
+			.put(FederationsActions.fetchFederationViewsSuccess(
+				projectId, 
+				federationId, 
+				mockFederationsViewsResponse.views
+			))
 			.silentRun();
 		})
 	})
 	
-	// describe('fetchFederationSettings', () => {
-	// 	const mockFederations = federationMockFactory();
-	// 	const mockFederationsBaseResponse = mockFederations.settings;
-	// 	it('should call fetchFederationSettings endpoint', async () => {
-	// 		mockServer
-	// 		.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
-	// 		.reply(200, mockFederationsBaseResponse);
+	describe('fetchFederationSettings', () => {
+		const mockFederation = federationMockFactory();
+		const mockFederationsSettingsResponse = prepareMockSettingsReply(mockFederation);
+		
 
-	// 		await expectSaga(FederationsSaga.default)
-	// 		.dispatch(FederationsActions.fetchFederationSettings(teamspace, projectId, federationId))
-	// 		.put(FederationsActions.fetchFederationSettingsSuccess(projectId, federationId))
-	// 		.silentRun();
-	// 	})
-	// })
+		it('should call fetchFederationSettings endpoint', async () => {
+			mockServer
+			.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
+			.reply(200, mockFederationsSettingsResponse);
+
+			await expectSaga(FederationsSaga.default)
+			.dispatch(FederationsActions.fetchFederationSettings(teamspace, projectId, federationId))
+			.put(FederationsActions.fetchFederationSettingsSuccess(
+				projectId, 
+				federationId, 
+				mockFederationsSettingsResponse.settings
+			))
+			.silentRun();
+		})
+	})
 
 	describe('updateFederationSettings', () => {
 		const newSettings = { 
@@ -227,3 +236,4 @@ describe('Federations: sagas', () => {
 		})
 	})
 })
+

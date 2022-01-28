@@ -43,20 +43,30 @@ export interface IFederationsState {
 	isListPending: boolean;
 }
 
+interface SurveyPoint {
+	latLong: [number, number];
+	position: [number, number, number];
+}
 export interface IFederationSettings {
-	angleFromNorth: number,
-	defaultView: FederationView,
-	surveyPoint: {
-		latLong: [number, number],
-		position: [number, number, number],
-	},
-	unit: string,
+	surveyPoint: SurveyPoint;
+	angleFromNorth: number;
+	defaultView: string;
+	unit: string;
+	name: string;
+	desc: string;
+	code?: string;
 }
 
 export type FederationView = {
-	_id: string,
-	name: string,
-	hasThumbnail: boolean,
+	_id: string;
+	name: string;
+	hasThumbnail: boolean;
+};
+
+export const EMPTY_VIEW: FederationView = {
+	_id: ' ',
+	name: 'None',
+	hasThumbnail: false,
 };
 
 export type FetchFederationsPayload = {
@@ -91,7 +101,7 @@ export type FetchFederationStatsPayload = FetchFederationsPayload & {
 };
 
 export type FetchFederationStatsSuccessPayload = {
-	federationId: string,
+	federationId: string;
 	projectId: string;
 	federationStats: FetchFederationStatsResponse;
 };
@@ -114,28 +124,38 @@ export type FetchFederationSettingsPayload = FetchFederationsPayload & {
 	federationId: string;
 };
 
+export type RawFederationSettings = Omit<IFederationSettings, 'surveyPoint'> & {
+	_id?: string;
+	unit: string;
+	timestamp?: number;
+	status?: UploadStatuses[];
+	surveyPoints: SurveyPoint[];
+	errorReason?: {
+		message: string;
+		timestamp: number;
+		errorCode: string;
+	}
+};
 export type FetchFederationSettingsResponse = {
 	settings: IFederationSettings;
 };
 
-export type FetchFederationSettingsSuccessPayload = {
+export type FetchFederationSettingsSuccessPayload = Omit<IFederationSettings, 'surveyPoint'> & {
 	projectId: string;
-	federationId: string,
-	settings: FetchFederationSettingsResponse;
+	federationId: string;
+	settings: RawFederationSettings;
 };
-
-export type FederationSettingsPayload = IFederationSettings & Pick<IFederation, 'name' | 'description' | 'code'>;
 
 export type UpdateFederationSettingsPayload = FetchFederationsPayload & {
+	settings: RawFederationSettings;
 	federationId: string;
-	settings: FederationSettingsPayload;
 };
 
-// TODO - remove this action
-// export type UpdateFederationSettingsSuccess = FetchFederationsPayload & {
-// 	federationId: string;
-// 	settings: IFederationSettings;
-// };
+export type UpdateFederationSettingsSuccessPayload = Pick<RawFederationSettings, 'name' | 'desc' | 'code'> &
+FetchFederationsPayload & {
+	federationId: string;
+	settings: IFederationSettings;
+};
 
 export type DeleteFederationPayload = FetchFederationsPayload & {
 	federationId: string;
@@ -159,6 +179,7 @@ export type FetchFederationViewsSuccessAction = Action<'FETCH_FEDERATION_VIEWS_S
 export type FetchFederationSettingsAction = Action<'FETCH_FEDERATION_SETTINGS'> & FetchFederationSettingsPayload;
 export type FetchFederationSettingsSuccessAction = Action<'FETCH_FEDERATION_SETTINGS_SUCCESS'> & FetchFederationSettingsSuccessPayload;
 export type UpdateFederationSettingsAction = Action<'UPDATE_FEDERATION_SETTINGS'> & UpdateFederationSettingsPayload;
+export type UpdateFederationSettingsSuccessAction = Action<'UPDATE_FEDERATION_SETTINGS_SUCCESS'> & UpdateFederationSettingsSuccessPayload;
 export type DeleteFederationAction = Action<'DELETE_FEDERATION'> & DeleteFederationPayload;
 export type DeleteFederationSuccessAction = Action<'DELETE_FEDERATION_SUCCESS'> & DeleteFederationSuccessPayload;
 
@@ -189,20 +210,19 @@ export interface IFederationsActionCreators {
 	fetchFederationSettingsSuccess: (
 		projectId: string,
 		federationId: string,
-		federationSettings: IFederationSettings,
+		settings: IFederationSettings,
 	) => FetchFederationSettingsSuccessAction;
 	updateFederationSettings: (
 		teamspace: string,
 		projectId: string,
 		federationId: string,
-		settings: FederationSettingsPayload,
+		settings: RawFederationSettings,
 	) => UpdateFederationSettingsAction;
-	// TODO - remove this action
-	// updateFederationSettingsSuccess: (
-		// projectId: string,
-		// federationId: string,
-		// settings: IFederationSettings,
-	// ) => UpdateFederationSettingsSuccess;
+	updateFederationSettingsSuccess: (
+		projectId: string,
+		federationId: string,
+		settings: RawFederationSettings,
+	) => UpdateFederationSettingsSuccessAction;
 	deleteFederation: (teamspace: string, projectId: string, federationId: string) => DeleteFederationAction;
 	deleteFederationSuccess: (projectId: string, federationId: string) => DeleteFederationSuccessAction;
 }

@@ -17,7 +17,7 @@
 
 import * as faker from 'faker';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
-import { EMPTY_VIEW, FetchFederationStatsResponse, IFederation } from '@/v5/store/federations/federations.types';
+import { EMPTY_VIEW, FetchFederationSettingsResponse, FetchFederationStatsResponse, FetchFederationViewsResponse, IFederation } from '@/v5/store/federations/federations.types';
 import { times } from 'lodash';
 
 export const federationMockFactory = (overrides?: Partial<IFederation>): IFederation => ({
@@ -34,16 +34,16 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 	issues: faker.datatype.number(120),
 	risks: faker.datatype.number(120),
 	hasStatsPending: false,
+	views: [EMPTY_VIEW],
 	settings: {
 		angleFromNorth: faker.datatype.number(90),
-		defaultView: faker.random.arrayElement([EMPTY_VIEW]),
+		defaultView: EMPTY_VIEW._id,
 		surveyPoint: {
 			latLong: [faker.datatype.number(0), faker.datatype.number(0)],
 			position: [faker.datatype.number(0), faker.datatype.number(0), faker.datatype.number(0)],
 		},
 		unit: faker.random.arrayElement(['mm', 'cm', 'dm', 'm', 'ft']),
 	},
-	views: [EMPTY_VIEW],
 	...overrides,
 });
 
@@ -57,4 +57,12 @@ export const prepareMockStatsReply = (federation: IFederation): FetchFederationS
 	category: federation.category,
 	status: federation.status,
 	code: federation.code,
+});
+
+export const prepareMockViewsReply = (federation: IFederation): FetchFederationViewsResponse => ({
+	views: federation.views,
+})
+
+export const prepareMockSettingsReply = (federation: IFederation): FetchFederationSettingsResponse => ({
+	settings: federation.settings,
 });

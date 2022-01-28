@@ -27,6 +27,7 @@ import {
 	FetchFederationSettingsPayload,
 	FetchFederationSettingsResponse,
 	DeleteFederationPayload,
+	RawFederationSettings,
 } from '@/v5/store/federations/federations.types';
 import { AxiosResponse } from 'axios';
 import api from './default';
@@ -70,21 +71,7 @@ export const fetchFederationViews = async ({
 	federationId,
 }: FetchFederationViewsPayload): Promise<FetchFederationViewsResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/views`);
-	// TODO - remove this
-	return data.length ? data : {
-		views: [
-			{
-				_id: '1',
-				name: 'fakeView1',
-				hasThumbnail: true,
-			},
-			{
-				_id: '2',
-				name: 'fakeView2',
-				hasThumbnail: true,
-			},
-		],
-	};
+	return data;
 };
 
 export const fetchFederationSettings = async ({
@@ -92,8 +79,28 @@ export const fetchFederationSettings = async ({
 	projectId,
 	federationId,
 }: FetchFederationSettingsPayload): Promise<FetchFederationSettingsResponse> => {
-	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`);
-	return data;
+	const {
+		data: {
+			surveyPoints = [null],
+			angleFromNorth,
+			defaultView,
+			unit,
+			name,
+			code,
+			desc,
+		},
+	}: { data: RawFederationSettings } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`);
+	return {
+		settings: {
+			surveyPoint: surveyPoints[0],
+			angleFromNorth,
+			defaultView,
+			unit,
+			name,
+			code,
+			desc,
+		},
+	};
 };
 
 export const updateFederationSettings = async ({
@@ -103,7 +110,7 @@ export const updateFederationSettings = async ({
 	settings,
 }: UpdateFederationSettingsPayload): Promise<AxiosResponse<void>> => {
 	const { data } = await api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`, {
-		settings,
+		...settings,
 	});
 	return data;
 };
