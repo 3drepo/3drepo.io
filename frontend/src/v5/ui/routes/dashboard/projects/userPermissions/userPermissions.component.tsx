@@ -22,6 +22,7 @@ import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSel
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
 import { selectCurrentUser } from '@/v4/modules/currentUser';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
+import { formatMessage } from '@/v5/services/intl';
 import { Container, Tab, Tabs, V4ModelsPermissions, V4ProjectsPermissions } from './userPermissions.styles';
 
 export const UsersPermissions = () => {
@@ -52,8 +53,8 @@ export const UsersPermissions = () => {
 	return (
 		<Container>
 			<Tabs value={selectedTab} onChange={handleChange}>
-				<Tab label="Project Permissions" />
-				<Tab label="Container & Federation permissions" />
+				<Tab label={formatMessage({ id: 'usersPermissions.projectPermissions', defaultMessage: 'Project Permissions' })} />
+				<Tab label={formatMessage({ id: 'usersPermissions.contAndFedPermissions', defaultMessage: 'Container & Federation permissions' })} />
 			</Tabs>
 			<FixedOrGrowContainer>
 				{selectedTab === 0 && <V4ProjectsPermissions />}
