@@ -32,7 +32,7 @@ const JSONAssets = require("../models/jsonAssets");
 const Upload = require("../models/upload");
 const config = require("../config");
 const {v5Path} = require("../../interop");
-const { validateNewRevisionData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions`);
+const { validateNewRevisionData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/containers`);
 const ContainersV5 = require(`${v5Path}/processors/teamspaces/projects/models/containers`);
 
 function convertProjectToParam(req, res, next) {
@@ -2089,6 +2089,7 @@ async function uploadChunk(req, res, next) {
 }
 
 function uploadModel(req, res, next) {
+	console.log("in upload model");
 	const responsePlace = utils.APIInfo(req);
 	const { file } = req;
 	const revInfo = req.body;
