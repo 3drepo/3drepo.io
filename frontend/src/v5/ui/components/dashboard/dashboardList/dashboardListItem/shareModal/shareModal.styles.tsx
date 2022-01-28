@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2020 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,30 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import styled from 'styled-components';
 
-import React from 'react';
-
-import MovieIcon from '@material-ui/icons/Movie';
-
-import { DATE_FIELDS } from './timeIcon.constants';
-import { StyledIconButton } from './timeIcon.styles';
-
-interface IProps {
-	name: string;
-	value: number;
-	handleOnClick: (value: number) => void;
-}
-
-export const TimeIcon = ({ name, value, handleOnClick }: IProps) => {
-	if (name && !DATE_FIELDS.includes(name)) {
-		return null;
-	}
-
-	const handleOnIconClick = () => handleOnClick(value);
-
-	return (
-		<StyledIconButton onClick={handleOnIconClick}>
-			<MovieIcon />
-		</StyledIconButton>
-	);
-};
+export const MailToButton = styled.a`
+	${({ theme }) => theme.typography.link};
+	color: ${({ theme }) => theme.palette.base.main};
+	font-family: ${({ theme }) => theme.typography.fontFamily};
+	margin-top: 20px;
+	width: fit-content;
+`;

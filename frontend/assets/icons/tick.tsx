@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2020 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,27 +17,19 @@
 
 import React from 'react';
 
-import MovieIcon from '@material-ui/icons/Movie';
-
-import { DATE_FIELDS } from './timeIcon.constants';
-import { StyledIconButton } from './timeIcon.styles';
-
-interface IProps {
-	name: string;
-	value: number;
-	handleOnClick: (value: number) => void;
-}
-
-export const TimeIcon = ({ name, value, handleOnClick }: IProps) => {
-	if (name && !DATE_FIELDS.includes(name)) {
-		return null;
-	}
-
-	const handleOnIconClick = () => handleOnClick(value);
-
-	return (
-		<StyledIconButton onClick={handleOnIconClick}>
-			<MovieIcon />
-		</StyledIconButton>
-	);
+type IProps = {
+	className?: any;
 };
+
+export default ({ className }: IProps) => (
+	<svg
+		width="15"
+		height="15"
+		viewBox="0 0 16 12"
+		fill="none"
+		xmlns="http://www.w3.org/2000/svg"
+		className={className}
+	>
+		<path d="M1 6L7 11L15 1" stroke="#00C1D4" strokeWidth="1.33333" />
+	</svg>
+);

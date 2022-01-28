@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2020 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,29 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
-import MovieIcon from '@material-ui/icons/Movie';
-
-import { DATE_FIELDS } from './timeIcon.constants';
-import { StyledIconButton } from './timeIcon.styles';
-
-interface IProps {
-	name: string;
-	value: number;
-	handleOnClick: (value: number) => void;
-}
-
-export const TimeIcon = ({ name, value, handleOnClick }: IProps) => {
-	if (name && !DATE_FIELDS.includes(name)) {
-		return null;
-	}
-
-	const handleOnIconClick = () => handleOnClick(value);
-
-	return (
-		<StyledIconButton onClick={handleOnIconClick}>
-			<MovieIcon />
-		</StyledIconButton>
-	);
-};
+export { ShareTextField } from './shareTextField.component';
