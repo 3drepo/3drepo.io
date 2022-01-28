@@ -60,8 +60,7 @@ const onCallbackQMsg = async ({ content, properties }) => {
 		} else {
 			const fedDataPath = `${sharedDir}/${properties.correlationId}/obj.json`;
 
-			const isFed = !!await stat(fedDataPath);
-
+			const isFed = !!await stat(fedDataPath).catch(() => false);
 			const fedData = { };
 			if (isFed) {
 				// eslint-disable-next-line

@@ -46,7 +46,7 @@ const createFakeConnection = (sendToQueue, consume) => {
 	};
 };
 
-const publishFn = EventsManager.publish.mockImplementation(() => {});
+const publishFn = EventsManager.publish.mockImplementation(() => { });
 const fn = jest.spyOn(AMQP, 'connect').mockRejectedValue(undefined);
 
 const testQueueModelUpload = () => {
@@ -121,7 +121,7 @@ const testCallbackQueueConsumer = () => {
 			const properties = {
 				correlationId: generateRandomString(),
 			};
-			callbackFn({ content: JSON.stringify(content), properties });
+			await callbackFn({ content: JSON.stringify(content), properties });
 
 			expect(publishFn.mock.calls.length).toBe(1);
 			expect(publishFn.mock.calls[0][0]).toEqual(events.QUEUED_TASK_UPDATE);
@@ -133,6 +133,7 @@ const testCallbackQueueConsumer = () => {
 				user: content.user,
 			});
 		});
+
 		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event if there is a task failed message`, async () => {
 			publishFn.mockClear();
 			const waitForConsume = new Promise((resolve) => {
@@ -156,7 +157,7 @@ const testCallbackQueueConsumer = () => {
 			const properties = {
 				correlationId: generateRandomString(),
 			};
-			callbackFn({ content: JSON.stringify(content), properties });
+			await callbackFn({ content: JSON.stringify(content), properties });
 
 			expect(publishFn.mock.calls.length).toBe(1);
 			expect(publishFn.mock.calls[0][0]).toEqual(events.QUEUED_TASK_COMPLETED);
@@ -187,7 +188,7 @@ const testCallbackQueueConsumer = () => {
 			const properties = {
 				correlationId: generateRandomString(),
 			};
-			callbackFn({ content: {}, properties });
+			await callbackFn({ content: {}, properties });
 
 			expect(publishFn.mock.calls.length).toBe(0);
 		});

@@ -314,7 +314,7 @@ const testNewRevisionProcessed = () => {
 				expect(fn.mock.calls.length).toBe(1);
 				const action = fn.mock.calls[0][3];
 				if (success) {
-					expect(action.$set.status).toEqual('ok');
+					expect(action.$set.status).toBe(undefined);
 					expect(action.$set).toHaveProperty('timestamp');
 				} else {
 					expect(action.$set.status).toEqual('failed');
@@ -324,7 +324,7 @@ const testNewRevisionProcessed = () => {
 					expect(action.$set.errorReason.errorCode).toEqual(retVal);
 					expect(action.$set.errorReason).toHaveProperty('timestamp');
 				}
-				expect(action.$unset).toEqual({ corID: 1 });
+				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 
 				expect(publishFn.mock.calls.length).toBe(1);
 				expect(publishFn.mock.calls[0][0]).toEqual(events.MODEL_IMPORT_FINISHED);
@@ -356,9 +356,9 @@ const testNewRevisionProcessed = () => {
 
 			expect(fn.mock.calls.length).toBe(1);
 			const action = fn.mock.calls[0][3];
-			expect(action.$set.status).toEqual('ok');
+			expect(action.$unset.status).toEqual(1);
 			expect(action.$set).toHaveProperty('timestamp');
-			expect(action.$unset).toEqual({ corID: 1 });
+			expect(action.$unset).toEqual({ corID: 1, status: 1 });
 
 			expect(publishFn.mock.calls.length).toBe(0);
 		});
