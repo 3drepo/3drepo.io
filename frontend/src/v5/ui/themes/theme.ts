@@ -542,6 +542,17 @@ export const theme = createMuiTheme({
 				boxSizing: 'border-box',
 			},
 		},
+		MuiFormControlLabel: {
+			label: {
+				color: COLOR.BASE_MAIN,
+			},
+		},
+		MuiCheckbox: {
+			root: {
+				color: COLOR.BASE_MAIN,
+				padding: 0,
+			},
+		},
 		MuiTouchRipple: {
 			root: {
 				visibility: 'hidden',

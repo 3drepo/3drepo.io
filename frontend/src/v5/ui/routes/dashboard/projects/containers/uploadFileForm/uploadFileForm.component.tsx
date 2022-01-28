@@ -53,6 +53,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		for (const file of files) {
 			filesToAppend.push({
 				file,
+				extension: file.name.split('.').slice(-1)[0],
 				listItem: {
 					revisionTag: file.name,
 					containerName: '',
@@ -133,6 +134,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 											value={fields[selectedIndex].sidebar}
 											key={fields[selectedIndex].id}
 											isNewContainer={!!fields[selectedIndex].id}
+											isSpm={fields[selectedIndex].extension === 'spm'}
 											onChange={(newSidebarFields: UploadSidebarFields) => {
 												for (const [key, val] of Object.entries(newSidebarFields)) {
 													setValue(`uploads.${selectedIndex}.sidebar.${key}`, val);

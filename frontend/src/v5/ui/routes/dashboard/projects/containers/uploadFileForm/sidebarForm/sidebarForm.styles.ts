@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
 import { Select } from '@controls/select';
-import { FormControl as FormControlMui, TextField } from '@material-ui/core';
+import { FormControl as FormControlMui, FormControlLabel, TextField } from '@material-ui/core';
 
 export const Title = styled(Typography).attrs({
 	variant: 'h3',
@@ -58,4 +58,8 @@ export const RevisionTitle = styled(Typography).attrs({
 	variant: 'h3',
 })`
 	margin-top: 32px;
+`;
+
+export const AnimationsCheckbox = styled(FormControlLabel)`
+	padding: 10px 0;
 `;

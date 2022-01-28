@@ -48,4 +48,4 @@ export const DeleteButton = styled(Button)`
 			stroke: none;
 			fill: ${({ theme }) => theme.palette.secondary.main};
 	}
-`
+`;

@@ -30,6 +30,7 @@ type ISidebarForm = {
 	className?: string;
 	value: UploadSidebarFields,
 	isNewContainer: boolean;
+	isSpm: boolean;
 	onChange: (val) => void;
 };
 
@@ -37,6 +38,7 @@ export const SidebarForm = ({
 	value,
 	onChange,
 	isNewContainer,
+	isSpm,
 }: ISidebarForm): JSX.Element => {
 	const { control, formState: { errors }, getValues, setValue } = useForm({
 		defaultValues: value,
@@ -159,6 +161,22 @@ export const SidebarForm = ({
 						label={formatMessage({ id: 'uploadFileForm.settingsSidebar.revisionDesc', defaultMessage: 'Revision Description' })}
 						error={!!errors.revisionDesc}
 						helperText={errors.revisionDesc?.message}
+						{...extras}
+					/>
+				)}
+			/>
+
+			<Controller
+				control={control}
+				name="importAnimations"
+				render={({
+					field: { ref, ...extras },
+				}) => (
+					<AnimationsCheckbox
+						control={<Checkbox />}
+						hidden={!isSpm}
+						label={formatMessage({ id: 'uploadFileForm.settingsSidebar.importAnimations', defaultMessage: 'Import transformations' })}
+						checked={extras.value}
 						{...extras}
 					/>
 				)}

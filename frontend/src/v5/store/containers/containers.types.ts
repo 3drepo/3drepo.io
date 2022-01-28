@@ -174,7 +174,7 @@ export type UploadSidebarFields = {
 export type UploadItemFields = {
 	id: string;
 	file: File;
-	listItem: {
+	extension: string;
 		containerName: string;
 		revisionTag: string;
 	};
