@@ -22,6 +22,7 @@ import { SortLabel } from '@/v4/routes/components/customTable/components/tableHe
 import { PermissionsCellContainer } from '@/v4/routes/components/permissionsTable/permissionsTable.styles';
 import { RadioContainer as TableHeadingRadioContainer } from '@/v4/routes/components/customTable/components/tableHeadingRadio/tableHeadingRadio.styles';
 import { SearchField } from '@/v4/routes/components/customTable/components/cellUserSearch/cellUserSearch.styles';
+import { Mark as HighlighterMark } from '@/v4/routes/components/highlight/highlight.styles';
 
 // all the .simplebar-... stuff is to disable simplebar
 const customTableStyling = css`
@@ -106,6 +107,12 @@ const customTableStyling = css`
 			${({ theme }) => theme.typography.kicker};
 		}
 
+		input {
+			padding-bottom: 5px;
+			padding-left: 0;
+			padding-top: 0;
+		}
+
 		.search-field__label {
 			margin-top: 3px;
 			transform: translate(13px,41px) scale(1);
@@ -123,4 +130,9 @@ export const V4OverridesContainer = styled.div`
 	height: 100%;
 
 	${customTableStyling}
+
+	${HighlighterMark} {
+		background-color: ${({ theme }) => theme.palette.primary.light};
+		font-weight: inherit;
+	}
 `;
