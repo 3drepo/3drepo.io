@@ -58,14 +58,14 @@ interface IFormInput {
 }
 
 const getDefaultValues = (federation: IFederation) => {
-	const { unit = 'mm', angleFromNorth } = federation.settings || {};
+	const { unit = 'mm', angleFromNorth = '' } = federation.settings || {};
 	const {
 		latLong = [],
 		position = [],
 	} = federation.settings?.surveyPoint || {};
-	const [x, y, z] = position;
-	const [latitude, longitude] = latLong;
-	const { code, name, description } = federation;
+	const [x = '', y = '', z = ''] = position;
+	const [latitude = '', longitude = ''] = latLong;
+	const { code = '', name, description = '' } = federation;
 	const defaultViewId = (federation?.settings?.defaultView || EMPTY_VIEW)._id;
 	return {
 		name,
@@ -334,6 +334,7 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 							labelname={formatMessage({ id: 'federations.settings.form.long', defaultMessage: 'LONGITUDE' })}
 							labelunit={formatMessage({ id: 'federations.settings.form.long.unit', defaultMessage: 'decimal' })}
 							type="number"
+							required
 						/>
 					)}
 				/>
