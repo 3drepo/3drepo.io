@@ -138,6 +138,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 											isSpm={fields[selectedIndex].extension === 'spm'}
 											onChange={(newSidebarFields: UploadSidebarFields) => {
 												for (const [key, val] of Object.entries(newSidebarFields)) {
+													//@ts-ignore
 													setValue(`uploads.${selectedIndex}.sidebar.${key}`, val);
 												}
 												trigger(`uploads.${selectedIndex}.sidebar`);

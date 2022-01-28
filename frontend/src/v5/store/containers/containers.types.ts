@@ -176,6 +176,7 @@ export type UploadItemFields = {
 	id: string;
 	file: File;
 	extension: string;
+	listItem: {
 		containerName: string;
 		revisionTag: string;
 	};

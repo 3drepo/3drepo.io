@@ -88,7 +88,6 @@ export const SidebarForm = ({
 					}) => (
 						<UnitSelect
 							labelId="unit-label"
-							disabled={!isNewContainer}
 							{...extras}
 							onChange={
 								(e) => {
@@ -121,7 +120,6 @@ export const SidebarForm = ({
 					}) => (
 						<TypeSelect
 							labelId="type-label"
-							disabled={!isNewContainer}
 							{...extras}
 							onChange={
 								(e) => {
