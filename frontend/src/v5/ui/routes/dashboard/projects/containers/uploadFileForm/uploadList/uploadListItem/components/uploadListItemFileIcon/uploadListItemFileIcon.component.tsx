@@ -19,12 +19,15 @@ import React from 'react';
 import { StyledIconButton } from './uploadListItemFileIcon.styles';
 
 type IUploadListItemFileIcon = {
-	children: string;
-	// children: React.ReactNode
+	filename: string;
 };
 
-export const UploadListItemFileIcon = ({ children }: IUploadListItemFileIcon): JSX.Element => (
-	<StyledIconButton>
-		{children || '?'}
-	</StyledIconButton>
-);
+export const UploadListItemFileIcon = ({ filename }: IUploadListItemFileIcon): JSX.Element => {
+	const extension = filename.split('.').slice(-1)[0];
+	const iconLetter = extension[0]
+	return (
+		<StyledIconButton>
+			{iconLetter || '?'}
+		</StyledIconButton>
+	);
+}

@@ -50,9 +50,7 @@ export const UploadListItem = ({
 	return (
 		<UploadListItemRow key={item.id} onClick={() => { }} onChange={() => onChange(getValues())}>
 			<span>
-				<UploadListItemFileIcon>
-					{item.file.name.split('.').at(-1)[0]}
-				</UploadListItemFileIcon>
+				<UploadListItemFileIcon filename={item.file.name} />
 			</span>
 			<UploadListItemTitle
 				name={item.file.name}
