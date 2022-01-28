@@ -100,7 +100,9 @@ export type FetchFederationViewsPayload = FetchFederationsPayload & {
 	federationId: string;
 };
 
-export type FetchFederationViewsResponse = FederationView[];
+export type FetchFederationViewsResponse = {
+	views: FederationView[];
+};
 
 export type FetchFederationViewsSuccessPayload = {
 	projectId: string;
@@ -112,7 +114,9 @@ export type FetchFederationSettingsPayload = FetchFederationsPayload & {
 	federationId: string;
 };
 
-export type FetchFederationSettingsResponse = IFederationSettings;
+export type FetchFederationSettingsResponse = {
+	settings: IFederationSettings;
+};
 
 export type FetchFederationSettingsSuccessPayload = {
 	projectId: string;
@@ -175,29 +179,29 @@ export interface IFederationsActionCreators {
 	fetchFederationViewsSuccess: (
 		projectId: string,
 		federationId: string,
-		federationViews: FetchFederationViewsResponse
+		views: FederationView[],
 	) => FetchFederationViewsSuccessAction;
 	fetchFederationSettings: (
 		teamspace: string,
 		projectId: string,
-		federationId: string
+		federationId: string,
 	) => FetchFederationSettingsAction;
 	fetchFederationSettingsSuccess: (
 		projectId: string,
 		federationId: string,
-		federationSettings: FetchFederationSettingsResponse
+		federationSettings: IFederationSettings,
 	) => FetchFederationSettingsSuccessAction;
 	updateFederationSettings: (
 		teamspace: string,
 		projectId: string,
 		federationId: string,
-		settings: FederationSettingsPayload
+		settings: FederationSettingsPayload,
 	) => UpdateFederationSettingsAction;
 	// TODO - remove this action
 	// updateFederationSettingsSuccess: (
 		// projectId: string,
 		// federationId: string,
-		// settings: IFederationSettings
+		// settings: IFederationSettings,
 	// ) => UpdateFederationSettingsSuccess;
 	deleteFederation: (teamspace: string, projectId: string, federationId: string) => DeleteFederationAction;
 	deleteFederationSuccess: (projectId: string, federationId: string) => DeleteFederationSuccessAction;

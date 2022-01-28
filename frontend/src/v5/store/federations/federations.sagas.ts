@@ -108,7 +108,7 @@ export function* fetchFederationViews({
 	federationId,
 }: FetchFederationViewsAction) {
 	try {
-		const views: FetchFederationViewsResponse = yield API.Federations.fetchFederationViews({
+		const { views }: FetchFederationViewsResponse = yield API.Federations.fetchFederationViews({
 			teamspace,
 			projectId,
 			federationId,
@@ -128,7 +128,7 @@ export function* fetchFederationSettings({
 	federationId,
 }: FetchFederationSettingsAction) {
 	try {
-		const settings: FetchFederationSettingsResponse = yield API.Federations.fetchFederationSettings({
+		const { settings }: FetchFederationSettingsResponse = yield API.Federations.fetchFederationSettings({
 			teamspace,
 			projectId,
 			federationId,
