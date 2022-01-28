@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
@@ -40,11 +40,15 @@ export const SidebarForm = ({
 	isNewContainer,
 	isSpm,
 }: ISidebarForm): JSX.Element => {
-	const { control, formState: { errors }, getValues, setValue } = useForm({
+	const { control, formState: { errors }, getValues, setValue, trigger } = useForm<UploadSidebarFields>({
 		defaultValues: value,
 		mode: 'onChange',
 		resolver: yupResolver(SidebarSchema),
 	});
+
+	useEffect(() => {
+		trigger();
+	}, []);
 
 	const updateValues = () => {
 		onChange(getValues());
