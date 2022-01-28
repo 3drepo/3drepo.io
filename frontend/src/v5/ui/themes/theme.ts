@@ -547,6 +547,13 @@ export const theme = createMuiTheme({
 				color: COLOR.BASE_MAIN,
 			},
 		},
+		MuiFormHelperText: {
+			contained: {
+				position: 'absolute',
+				bottom: '-14px',
+				'&&': { margin: 0 },
+			},
+		},
 		MuiCheckbox: {
 			root: {
 				color: COLOR.BASE_MAIN,

@@ -34,7 +34,6 @@ export const Title = styled(Typography).attrs({
 
 export const UnitSelect = styled(Select)`
 	width: 109px;
-	margin-top: 32px;
 `;
 
 export const TypeSelect = styled(Select)`
@@ -43,7 +42,7 @@ export const TypeSelect = styled(Select)`
 `;
 
 export const Input = styled(TextField)`
-	margin-top: 32px;
+	margin-top: 33px;
 `;
 
 export const FormControl = styled(FormControlMui)`
@@ -57,9 +56,10 @@ export const FormControl = styled(FormControlMui)`
 export const RevisionTitle = styled(Typography).attrs({
 	variant: 'h3',
 })`
-	margin-top: 32px;
+	margin-top: 29px;
 `;
 
 export const AnimationsCheckbox = styled(FormControlLabel)`
-	padding: 10px 0;
+	padding: 15px 0 0;
+	height: 24px;
 `;
