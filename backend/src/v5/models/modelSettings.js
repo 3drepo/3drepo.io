@@ -114,9 +114,10 @@ Models.newRevisionProcessed = async (teamspace, model, corId, retVal, user, cont
 	const { success, message, userErr } = getInfoFromCode(retVal);
 	const query = { _id: model };
 	const set = {};
+	const unset = { corID: 1 };
 
 	if (success) {
-		set.status = 'ok';
+		unset.status = 1;
 		set.timestamp = new Date();
 		if (containers) {
 			set.subModels = containers.map(({ project }) => project);
@@ -126,7 +127,6 @@ Models.newRevisionProcessed = async (teamspace, model, corId, retVal, user, cont
 		set.errorReason = { message, timestamp: new Date(), errorCode: retVal };
 	}
 
-	const unset = { corID: 1 };
 	const { matchedCount } = await updateOneModel(teamspace, query, { $set: set, $unset: unset });
 	if (matchedCount !== 0) {
 	// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
