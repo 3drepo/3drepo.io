@@ -56,7 +56,7 @@ Revisions.validateUpdateRevisionData = async (req, res, next) => {
 	}
 };
 
-const fileFilter = async (req, file, cb) => {
+const fileFilter = (req, file, cb) => {
 	const { originalname } = file;
 	const fileExt = Path.extname(originalname).toLowerCase();
 	if (!ACCEPTED_MODEL_EXT.includes(fileExt)) {

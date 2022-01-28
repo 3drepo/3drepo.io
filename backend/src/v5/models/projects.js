@@ -52,7 +52,7 @@ Projects.modelsExistInProject = async (teamspace, project, models) => {
 	return _.intersection(models, projModels).length === models.length;
 };
 
-Projects.getProjectList = async (ts, projection = { _id: 1, name: 1 }) => findProjects(ts, {}, projection);
+Projects.getProjectList = (ts, projection = { _id: 1, name: 1 }) => findProjects(ts, {}, projection);
 
 Projects.getProjectAdmins = async (ts, project) => {
 	const { permissions } = await Projects.getProjectById(ts, project, { permissions: 1 });

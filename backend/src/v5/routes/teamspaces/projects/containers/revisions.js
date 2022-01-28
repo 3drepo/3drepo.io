@@ -25,7 +25,7 @@ const { templates } = require('../../../../utils/responseCodes');
 const { validateNewRevisionData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { validateUpdateRevisionData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 
-const getRevisions = async (req, res, next) => {
+const getRevisions = (req, res, next) => {
 	const { teamspace, container } = req.params;
 	const showVoid = req.query.showVoid === 'true';
 
@@ -38,7 +38,7 @@ const getRevisions = async (req, res, next) => {
 	);
 };
 
-const updateRevisionStatus = async (req, res) => {
+const updateRevisionStatus = (req, res) => {
 	const { teamspace, container, revision } = req.params;
 	const status = req.body.void;
 
@@ -47,7 +47,7 @@ const updateRevisionStatus = async (req, res) => {
 	}).catch((err) => respond(req, res, err));
 };
 
-const newRevision = async (req, res) => {
+const newRevision = (req, res) => {
 	const { file } = req;
 	const revInfo = req.body;
 	const { teamspace, container } = req.params;
@@ -178,6 +178,10 @@ const establishRoutes = () => {
 	 *               importAnimations:
 	 *                 type: bool
 	 *                 description: Whether animations should be imported (Only relevant for .SPM uploads)
+	 *               timezone:
+	 *                 type: string
+	 *                 description: tz database name of the timezone for the sequence(Only relevant for .SPM uploads)
+	 *                 example: Europe/Paris
 	 *               file:
 	 *                 type: string
 	 *                 format: binary
