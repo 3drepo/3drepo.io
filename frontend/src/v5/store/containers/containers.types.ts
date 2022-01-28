@@ -169,6 +169,7 @@ export type UploadSidebarFields = {
 	containerCode?: string;
 	revisionDesc?: string;
 	importAnimations?: boolean;
+	timezone?: string;
 };
 
 export type UploadItemFields = {

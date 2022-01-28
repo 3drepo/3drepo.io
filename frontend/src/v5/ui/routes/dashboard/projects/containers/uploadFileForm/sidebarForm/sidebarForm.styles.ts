@@ -38,7 +38,10 @@ export const UnitSelect = styled(Select)`
 
 export const TypeSelect = styled(Select)`
 	width: 221px;
-	margin-top: 32px;
+`;
+
+export const TimezoneSelect = styled(Select)`
+	width: 340px;
 `;
 
 export const Input = styled(TextField)`

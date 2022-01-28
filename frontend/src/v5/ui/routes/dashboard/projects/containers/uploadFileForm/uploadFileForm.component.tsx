@@ -66,6 +66,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 					containerDesc: '',
 					revisionDesc: '',
 					importAnimations: false,
+					timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/London',
 				},
 			});
 		}

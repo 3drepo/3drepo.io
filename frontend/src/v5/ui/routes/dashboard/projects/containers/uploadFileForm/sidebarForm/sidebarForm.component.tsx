@@ -19,12 +19,13 @@ import React, { useEffect } from 'react';
 
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
-import { InputLabel, MenuItem } from '@material-ui/core';
+import { Checkbox, InputLabel, MenuItem } from '@material-ui/core';
 import { Controller, useForm } from 'react-hook-form';
 import { CONTAINER_TYPES, CONTAINER_UNITS, UploadSidebarFields } from '@/v5/store/containers/containers.types';
+import * as countriesAndTimezones from 'countries-and-timezones';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SidebarSchema } from '@/v5/validation/containers';
-import { TypeSelect, UnitSelect, Input, RevisionTitle, FormControl } from './sidebarForm.styles';
+import { TypeSelect, UnitSelect, Input, RevisionTitle, FormControl, AnimationsCheckbox, TimezoneSelect } from './sidebarForm.styles';
 
 type ISidebarForm = {
 	className?: string;
@@ -32,6 +33,25 @@ type ISidebarForm = {
 	isNewContainer: boolean;
 	isSpm: boolean;
 	onChange: (val) => void;
+};
+
+const generateTimezoneData = () => {
+	const tzList = [];
+	const tzData = countriesAndTimezones.getAllTimezones();
+
+	Object.keys(tzData).forEach((tz) => {
+		const { name, utcOffset, utcOffsetStr } = tzData[tz];
+		const tzToAdd = {
+			name,
+			label: `(UTC${utcOffsetStr}) ${name}`,
+			utcOffset,
+		};
+
+		tzList.push(tzToAdd);
+	});
+
+	const allTimezones = tzList.sort((tz1, tz2) => tz1.utcOffset - tz2.utcOffset);
+	return allTimezones;
 };
 
 export const SidebarForm = ({
@@ -185,6 +205,38 @@ export const SidebarForm = ({
 					/>
 				)}
 			/>
+
+			<FormControl hidden={!isSpm}>
+				<InputLabel id="timezone-label" shrink required>
+					<FormattedMessage id="uploadFileForm.settingsSidebar.timezone" defaultMessage="Timezone" />
+				</InputLabel>
+				<Controller
+					control={control}
+					name="timezone"
+					render={({
+						field: { ref, ...extras },
+					}) => (
+						<TimezoneSelect
+							labelId="timezone-label"
+							{...extras}
+							onChange={
+								(e) => {
+									setValue(e.target.name, e.target.value);
+									updateValues();
+								}
+							}
+						>
+							{
+								generateTimezoneData().map((unit) => (
+									<MenuItem key={unit.name} value={unit.name}>
+										{unit.label}
+									</MenuItem>
+								))
+							}
+						</TimezoneSelect>
+					)}
+				/>
+			</FormControl>
 		</div>
 	);
 };
