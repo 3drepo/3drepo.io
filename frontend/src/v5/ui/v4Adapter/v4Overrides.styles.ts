@@ -103,7 +103,7 @@ const customTableStyling = css`
 	}
 
 	${SearchField} {
-		label, input {
+		label {
 			${({ theme }) => theme.typography.kicker};
 		}
 
@@ -111,6 +111,7 @@ const customTableStyling = css`
 			padding-bottom: 5px;
 			padding-left: 0;
 			padding-top: 0;
+			${({ theme }) => theme.typography.body1};
 		}
 
 		.search-field__label {
