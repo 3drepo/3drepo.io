@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { CircleButton } from '@controls/circleButton';
+import * as EllipsisButtonStyles from '@controls/ellipsisButton/ellipsisButton.styles';
 import { TextField } from '@material-ui/core';
 import styled from 'styled-components';
 
@@ -22,3 +24,28 @@ export const Input = styled(TextField)`
 	margin: 0;
 	width: 200px;
 `;
+
+export const Button = styled(CircleButton)`
+	margin: 0 5px;
+	color: ${({ theme }) => theme.palette.secondary.light};
+
+	&& path {
+		stroke: ${({ theme }) => theme.palette.secondary.main};
+		fill: none;
+	} 
+
+	&:hover {
+		${EllipsisButtonStyles.StyledIconButton} {
+			circle {
+				fill: ${({ theme }) => theme.palette.primary.contrast};
+			}
+		}
+	}
+`;
+
+export const DeleteButton = styled(Button)`
+	&& path {
+			stroke: none;
+			fill: ${({ theme }) => theme.palette.secondary.main};
+	}
+`

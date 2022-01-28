@@ -56,8 +56,8 @@ export const ListItemSchema = Yup.object().shape({
 });
 
 export const SidebarSchema = Yup.object().shape({
-	unit: Yup.string().required().default('mm'),
-	type: Yup.string().required().default('Uncategorised'),
+	containerUnit: Yup.string().required().default('mm'),
+	containerType: Yup.string().required().default('Uncategorised'),
 	containerCode: Yup.string()
 		.max(50,
 			formatMessage({
