@@ -93,16 +93,34 @@ export type FetchContainerStatsResponse = {
 	code: string;
 };
 
-export interface DeleteContainerPayload {
+export type NewContainerPayload = {
+	name: string;
+	unit: string;
+	type: string;
+	desc?: string;
+	code?: string;
+};
+
+export type CreateContainerPayload = {
+	teamspace: string;
+	projectId: string;
+	newContainer: NewContainerPayload;
+};
+
+export type CreateContainerSuccessPayload = NewContainerPayload & {
+	_id: string;
+};
+
+export type DeleteContainerPayload = {
 	teamspace: string;
 	projectId: string;
 	containerId: string;
-}
+};
 
-export interface DeleteContainerSuccessPayload {
+export type DeleteContainerSuccessPayload = {
 	projectId: string;
 	containerId: string;
-}
+};
 
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;
 export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & FavouritePayload;
@@ -112,6 +130,8 @@ export type FetchContainersSuccessAction = Action<'FETCH_CONTAINERS_SUCCESS'> & 
 export type SetIsListPendingAction = Action<'SET_IS_LIST_PENDING'> & { isPending: boolean };
 export type FetchContainerStatsAction = Action<'FETCH_CONTAINER_STATS'> & FetchContainerStatsPayload;
 export type FetchContainerStatsSuccessAction = Action<'FETCH_CONTAINER_STATS_SUCCESS'> & FetchContainerStatsSuccessPayload;
+export type CreateContainerAction = Action<'CREATE_CONTAINER'> & CreateContainerPayload;
+export type CreateContainerSuccessAction = Action<'CREATE_CONTAINER_SUCCESS'> & { projectId: string, container: CreateContainerSuccessPayload };
 export type DeleteContainerAction = Action<'DELETE'> & DeleteContainerPayload;
 export type DeleteContainerSuccessAction = Action<'DELETE_SUCCESS'> & DeleteContainerSuccessPayload;
 
@@ -128,6 +148,15 @@ export interface IContainersActionCreators {
 		containerStats: FetchContainerStatsResponse
 	) => FetchContainerStatsSuccessAction;
 	setIsListPending: (isPending: boolean) => SetIsListPendingAction;
+	createContainer: (
+		teamspace: string,
+		projectId: string,
+		newContainer: NewContainerPayload,
+	) => CreateContainerAction;
+	createContainerSuccess: (
+		projectId: string,
+		container: CreateContainerSuccessPayload,
+	) => CreateContainerSuccessAction;
 	deleteContainer: (teamspace: string, projectId: string, containerId: string) => DeleteContainerAction;
 	deleteContainerSuccess: (projectId: string, containerId: string) => DeleteContainerSuccessAction;
 }

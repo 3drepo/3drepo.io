@@ -16,32 +16,13 @@
  */
 
 import styled from 'styled-components';
-import * as SearchInputStyles from '@controls/searchInput/searchInput.styles';
-import { Display } from '@/v5/ui/themes/media';
+import { FormControl } from '@material-ui/core';
 
-export const Container = styled.div`
-	margin: 16px 0;
-`;
-
-export const CollapseSideElementGroup = styled.div`
-	display: flex;
-	align-items: center;
-
-	${SearchInputStyles.TextField} {
-		margin-right: 15px;
-		
-		@media (max-width: ${Display.Tablet}px) {
-			width: 225px;
-			padding-left: 25px;
-			box-sizing: border-box;
-		}
-		
-		@media (max-width: ${Display.Desktop}px) {
-			max-width: 405px;
-		}
-		
-		@media (min-width: ${Display.Desktop}px) {
-			width: 405px;
-		}
+export const SelectColumn = styled(FormControl)`
+	width: 50%;
+	padding-right: 5px;
+	& + & {
+		padding: 0 0 0 5px;
+		label { padding: 0 0 0 5px }
 	}
 `;

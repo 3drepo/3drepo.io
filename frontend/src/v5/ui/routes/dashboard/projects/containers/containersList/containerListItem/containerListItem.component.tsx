@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { Tooltip } from '@material-ui/core';
 import {
@@ -36,6 +36,7 @@ import { RevisionDetails } from '@components/shared/revisionDetails';
 import { Display } from '@/v5/ui/themes/media';
 import { formatDate } from '@/v5/services/intl';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
+import { ShareModal } from '../../../../../../components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
 
 interface IContainerListItem {
 	index: number;
@@ -43,7 +44,7 @@ interface IContainerListItem {
 	container: IContainer;
 	filterQuery: string;
 	onFavouriteChange: (id: string, value: boolean) => void;
-	onToggleSelected: (id: string) => void;
+	onSelectOrToggleItem: (id: string) => void;
 }
 
 export const ContainerListItem = ({
@@ -51,12 +52,17 @@ export const ContainerListItem = ({
 	isSelected,
 	container,
 	filterQuery,
-	onToggleSelected,
+	onSelectOrToggleItem,
 	onFavouriteChange,
 }: IContainerListItem): JSX.Element => {
 	if (container.hasStatsPending) {
 		return <SkeletonListItem delay={index / 10} key={container._id} />;
 	}
+	const [shareModalOpen, setShareModalOpen] = useState(false);
+
+	const closeShareModal = () => {
+		setShareModalOpen(false);
+	};
 
 	return (
 		<DashboardListItem
@@ -65,7 +71,7 @@ export const ContainerListItem = ({
 		>
 			<DashboardListItemRow
 				selected={isSelected}
-				onClick={() => onToggleSelected(container._id)}
+				onClick={() => onSelectOrToggleItem(container._id)}
 			>
 				<DashboardListItemTitle
 					subtitle={(
@@ -86,7 +92,7 @@ export const ContainerListItem = ({
 					</Highlight>
 				</DashboardListItemTitle>
 				<DashboardListItemButton
-					onClick={() => onToggleSelected(container._id)}
+					onClick={() => onSelectOrToggleItem(container._id)}
 					width={186}
 					hideWhenSmallerThan={Display.Desktop}
 					tooltipTitle={
@@ -142,7 +148,12 @@ export const ContainerListItem = ({
 				</DashboardListItemIcon>
 				<DashboardListItemIcon selected={isSelected}>
 					<EllipsisButtonWithMenu
-						list={getContainerMenuItems(container)}
+						list={getContainerMenuItems(
+							container,
+							isSelected,
+							onSelectOrToggleItem,
+							() => setShareModalOpen(true),
+						)}
 					/>
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
@@ -152,6 +163,11 @@ export const ContainerListItem = ({
 					revisionsCount={container.revisionsCount || 1}
 				/>
 			)}
+			<ShareModal
+				openState={shareModalOpen}
+				onClickClose={closeShareModal}
+				container={container}
+			/>
 		</DashboardListItem>
 	);
 };

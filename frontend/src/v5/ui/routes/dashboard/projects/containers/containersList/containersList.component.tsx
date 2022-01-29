@@ -54,6 +54,7 @@ interface IContainersList {
 	showBottomButton?: boolean;
 	onFilterQueryChange? : (query: string) => void;
 	filterQuery?: string;
+	onClickCreate: () => void;
 }
 
 export const ContainersList = ({
@@ -61,20 +62,21 @@ export const ContainersList = ({
 	emptyMessage,
 	title,
 	titleTooltips,
+	onClickCreate,
 	filterQuery,
 	onFilterQueryChange,
 	hasContainers,
 	showBottomButton = false,
 }: IContainersList): JSX.Element => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
-	const [selectedId, setSelectedId] = useState<string | null>(null);
+	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 	const { sortedList, setSortConfig } = useOrderedList(containers, DEFAULT_SORT_CONFIG);
 
 	const isListPending = ContainersHooksSelectors.selectIsListPending();
 	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
 
-	const toggleSelectedId = (id: string) => {
-		setSelectedId((state) => (state === id ? null : id));
+	const selectOrToggleItem = (id: string) => {
+		setSelectedItemId((state) => (state === id ? null : id));
 	};
 
 	const setFavourite = (id: string, value: boolean) => {
@@ -104,6 +106,7 @@ export const ContainersList = ({
 								startIcon={<AddCircleIcon />}
 								variant="outlined"
 								color="secondary"
+								onClick={onClickCreate}
 							>
 								<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New container" />
 							</Button>
@@ -141,11 +144,11 @@ export const ContainersList = ({
 							<ContainerListItem
 								index={index}
 								key={container._id}
-								isSelected={container._id === selectedId}
+								isSelected={container._id === selectedItemId}
 								container={container}
 								filterQuery={filterQuery}
 								onFavouriteChange={setFavourite}
-								onToggleSelected={toggleSelectedId}
+								onSelectOrToggleItem={selectOrToggleItem}
 							/>
 						))
 					) : (
@@ -159,10 +162,7 @@ export const ContainersList = ({
 				{showBottomButton && !isListPending && hasContainers && (
 					<DashboardListButton
 						startIcon={<AddCircleIcon />}
-						onClick={() => {
-							// eslint-disable-next-line no-console
-							console.log('->  handle add container');
-						}}
+						onClick={onClickCreate}
 					>
 						<FormattedMessage id="containers.addContainerButton" defaultMessage="Add new Container" />
 					</DashboardListButton>

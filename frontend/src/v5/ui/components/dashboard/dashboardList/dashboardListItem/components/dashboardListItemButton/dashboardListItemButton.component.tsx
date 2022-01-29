@@ -18,27 +18,21 @@
 import React, { Dispatch, ReactNode, SyntheticEvent } from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { Tooltip } from '@material-ui/core';
-import { Display } from '@/v5/ui/themes/media';
+import { IFixedOrGrowContainer } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.component';
 import { Button } from './dashboardListItemButton.styles';
 
-type IDashboardListItemButton = {
-	children: ReactNode;
-	width?: number;
+interface IDashboardListItemButton extends IFixedOrGrowContainer {
 	onClick: Dispatch<SyntheticEvent>;
 	tooltipTitle?: ReactNode;
-	className?: string;
-	hideWhenSmallerThan?: Display;
-};
+}
 
 export const DashboardListItemButton = ({
-	children,
-	width,
 	onClick,
 	tooltipTitle = '',
-	hideWhenSmallerThan,
-	className,
+	children,
+	...containerProps
 }: IDashboardListItemButton): JSX.Element => (
-	<FixedOrGrowContainer width={width} hideWhenSmallerThan={hideWhenSmallerThan} className={className}>
+	<FixedOrGrowContainer {...containerProps}>
 		<Tooltip title={tooltipTitle}>
 			<Button onClick={(event) => {
 				event.stopPropagation();

@@ -16,32 +16,16 @@
  */
 
 import styled from 'styled-components';
-import * as SearchInputStyles from '@controls/searchInput/searchInput.styles';
-import { Display } from '@/v5/ui/themes/media';
+import { Select } from '@material-ui/core';
 
-export const Container = styled.div`
-	margin: 16px 0;
-`;
-
-export const CollapseSideElementGroup = styled.div`
-	display: flex;
-	align-items: center;
-
-	${SearchInputStyles.TextField} {
-		margin-right: 15px;
-		
-		@media (max-width: ${Display.Tablet}px) {
-			width: 225px;
-			padding-left: 25px;
-			box-sizing: border-box;
-		}
-		
-		@media (max-width: ${Display.Desktop}px) {
-			max-width: 405px;
-		}
-		
-		@media (min-width: ${Display.Desktop}px) {
-			width: 405px;
+export const SelectInput = styled(Select)`
+	svg {
+		position: absolute;
+		pointer-events: none;
+		right: 14px;
+		margin-top: 40px;
+		path { 
+			fill: ${({ theme }) => theme.palette.base.main}
 		}
 	}
 `;
