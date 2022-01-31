@@ -22,6 +22,7 @@ const AMQP = require('amqplib');
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+const config = require(`${src}/utils/config`);
 const fs = require('fs/promises');
 const path = require('path');
 
@@ -171,6 +172,53 @@ const testCallbackQueueConsumer = () => {
 			});
 		});
 
+		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event with container information if the task was a federation`, async () => {
+			publishFn.mockClear();
+			const waitForConsume = new Promise((resolve) => {
+				fn.mockResolvedValueOnce(createFakeConnection(undefined, (a, cb) => {
+					callbackFn = cb;
+					resolve();
+				}));
+				Queue.init();
+			});
+
+			await waitForConsume;
+
+			expect(callbackFn).not.toBe(undefined);
+			const content = {
+				database: generateRandomString(),
+				value: 0,
+				project: generateRandomString(),
+				user: generateRandomString(),
+			};
+			const properties = {
+				correlationId: generateRandomString(),
+			};
+
+			const containers = [
+				generateRandomString(),
+				generateRandomString(),
+				generateRandomString(),
+			];
+
+			await fs.mkdir(`${config.cn_queue.shared_storage}/${properties.correlationId}`);
+			await fs.writeFile(`${config.cn_queue.shared_storage}/${properties.correlationId}/obj.json`,
+				JSON.stringify({ subProjects: containers }));
+			await callbackFn({ content: JSON.stringify(content), properties });
+
+			expect(publishFn.mock.calls.length).toBe(1);
+			expect(publishFn.mock.calls[0][0]).toEqual(events.QUEUED_TASK_COMPLETED);
+			expect(publishFn.mock.calls[0][1]).toEqual({
+				teamspace: content.database,
+				model: content.project,
+				corId: properties.correlationId,
+				value: content.value,
+				message: content.message,
+				user: content.user,
+				containers,
+			});
+		});
+
 		test('Should fail gracefully if the service failed to process the message', async () => {
 			publishFn.mockClear();
 			const waitForConsume = new Promise((resolve) => {
@@ -199,5 +247,6 @@ const testCallbackQueueConsumer = () => {
 
 describe('services/queue', () => {
 	testQueueModelUpload();
+	testQueueFederationUpdate();
 	testCallbackQueueConsumer();
 });
