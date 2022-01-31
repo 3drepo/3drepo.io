@@ -22,7 +22,7 @@ const parse = require("csv-parse/lib/sync");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
-const { Parser } = require('json2csv');
+const { Parser } = require("json2csv");
 
 // NB: Order of fieldTypes important for importCSV
 const csvImportFieldTypes = {
@@ -35,15 +35,14 @@ const csvImportFieldTypes = {
 	"element": "[object String]",
 	"risk_factor": "[object String]",
 	"scope": "[object String]",
-	"associated_activity": "[object String]",
+	"associated_activity": "[object String]"
 };
 
 const fieldTypes = {
 	...csvImportFieldTypes,
 	"mitigation_status": "[object String]",
-	"referencedRisks": "[object Array]",
+	"referencedRisks": "[object Array]"
 };
-
 
 const mitigationFieldsBlacklist = [
 	"mitigation_desc",
@@ -58,12 +57,12 @@ const mitigationCriteriaBlacklist = [
 ];
 
 const isMitigationStatusResolved = (mitigationStatus) => {
-	return mitigationStatus == 'agreed_partial' || mitigationStatus == 'agreed_fully';
-}
+	return mitigationStatus === "agreed_partial" || mitigationStatus === "agreed_fully";
+};
 
 const formatRiskReference = (teamspace, modelId, riskId) => {
 	return teamspace + "::" + modelId + "::" + riskId;
-}
+};
 
 class Mitigation {
 	getMitigationCollection(account) {
@@ -126,21 +125,6 @@ class Mitigation {
 		return mitigationSuggestions[0];
 	}
 
-	async removeRiskFromMitigation(account, risk) {
-		const mitigation = this.findMitigationFromDetails(account, risk);
-		const mitigationRisks = mitigationRisks;
-		const formattedReference = formatRiskReference(account, model, risk._id);
-
-		if (mitigation && mitigationRisks.includes(formattedReference)) {
-			if (mitigationRisks.length === 1) {
-				await this.update(account, mitigation._id, { $unset: { referencedRisks: 1 } })
-			} else {
-				const newReferencedRisks = mitigationRisks.filter((r) => r !== formattedReference);
-				await this.update(account, mitigation._id, { referencedRisks: newReferencedRisks });
-			}
-		}
-	}
-
 	async importCSV(account, data) {
 		const csvFields = Object.keys(csvImportFieldTypes);
 
@@ -157,7 +141,7 @@ class Mitigation {
 	async exportCSV(account) {
 		const csvFields = Object.keys(fieldTypes);
 		const parser = new Parser({fields: csvFields});
-  	
+
 		const mitigations = await this.findMitigationSuggestions(account, {}, []);
 		return parser.parse(mitigations);
 	}
@@ -208,7 +192,7 @@ class Mitigation {
 				const mitigations = await this.insert(account, [{ ...mitigationDetails }], false);
 				mitigation = mitigations[0];
 			} catch {
-				//do nothing if the mitigation was not inserted
+				// do nothing if the mitigation was not inserted
 			}
 		}
 
@@ -216,14 +200,14 @@ class Mitigation {
 	}
 
 	async addRiskRefToMitigation(account, mitigation, riskReference) {
-		let referencedRisks = mitigation?.referencedRisks;
+		let referencedRisks = mitigation.referencedRisks;
 		if (!referencedRisks) {
 			referencedRisks = [];
 		}
 
 		if (!referencedRisks.includes(riskReference)) {
 			referencedRisks.push(riskReference);
-			await this.update(account, mitigation._id, { $set: { referencedRisks: referencedRisks } })
+			await this.update(account, mitigation._id, { $set: { referencedRisks: referencedRisks } });
 		}
 	}
 
@@ -232,7 +216,7 @@ class Mitigation {
 		const oldStatusIsResolved = isMitigationStatusResolved(oldRisk.mitigation_status);
 		const newStatusIsResolved = isMitigationStatusResolved(updatedRisk.mitigation_status);
 
-		//if risk was and remains unresolved
+		// if risk was and remains unresolved
 		if (!oldStatusIsResolved && !newStatusIsResolved) {
 			return;
 		}
@@ -251,15 +235,14 @@ class Mitigation {
 		};
 		const formattedReference = formatRiskReference(account, model, riskId);
 
-		//if risk becomes resolved
+		// if risk becomes resolved
 		if (!oldStatusIsResolved && newStatusIsResolved) {
 			const mitigation = await this.findOrCreateMitigationFromDetails(account, mitigationDetails);
 			if (mitigation) {
 				await this.addRiskRefToMitigation(account, mitigation, formattedReference);
 			}
-		}
-		//if risk was already resolved
-		else {
+		} else {
+			// if risk was already resolved
 			const mitigations = await this.findMitigationSuggestions(account, {}, []);
 			const mitigation = mitigations.find((m) => m.referencedRisks
 				&& m.referencedRisks.includes(formattedReference));
@@ -268,7 +251,7 @@ class Mitigation {
 				return;
 			}
 
-			//remove old ref 
+			// remove old ref
 			if (mitigation) {
 				if (mitigation.referencedRisks.length === 1) {
 					await this.deleteOne(account, mitigation._id);

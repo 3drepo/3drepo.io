@@ -166,7 +166,7 @@ class Risk extends Ticket {
 		}
 
 		const teamspaceSettings = await TeamspaceSetting.getTeamspaceSettings(user,	{  _id: 0, createTreatmentSuggestions: 1});
-		if(teamspaceSettings.createTreatmentSuggestions){
+		if(teamspaceSettings.createTreatmentSuggestions) {
 			await Mitigation.updateMitigationsFromRisk(user, model, updatedRisk.oldTicket, updatedRisk.updatedTicket);
 		}
 

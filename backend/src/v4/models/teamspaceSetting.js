@@ -100,9 +100,7 @@ class TeamspaceSettings {
 				throw responseCodes.FILE_FORMAT_NOT_SUPPORTED;
 			}
 
-			const Mitigation = require("./mitigation");
 			const importedMitigations = await Mitigation.importCSV(account, file);
-
 
 			const settingsCol = await this.getTeamspaceSettingsCollection(account, true);
 			const updatedAt = new Date();
@@ -114,7 +112,7 @@ class TeamspaceSettings {
 		}
 	}
 
-	async getMitigationsFile(account) {		
+	async getMitigationsFile(account) {
 		return await Mitigation.exportCSV(account);
 	}
 
