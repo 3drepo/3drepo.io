@@ -34,6 +34,12 @@ export const uriCombine = (uri, path) => {
 	return val;
 };
 
+const getBaseDomain = () => `${window.location.protocol}//${window.location.hostname}`;
+
+export const viewerShareLink = (teamspace: string, containerOrFederationId: string) => (
+	`${getBaseDomain()}/viewer/${teamspace}/${containerOrFederationId}`
+);
+
 export const RouteExcept = ({ path, exceptPath, children }) => (
 	<Switch>
 		<Route exact path={exceptPath} />

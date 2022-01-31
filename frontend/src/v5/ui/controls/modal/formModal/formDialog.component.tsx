@@ -28,6 +28,7 @@ interface IFormDialog extends React.DetailedHTMLProps<React.FormHTMLAttributes<H
 	confirmLabel?: string;
 	maxWidth?: false | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 	isValid?: boolean;
+	showButtons?: boolean;
 }
 
 export const FormModal = ({

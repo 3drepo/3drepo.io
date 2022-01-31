@@ -80,7 +80,7 @@ const testRemoveAllFilesFromModel = () => {
 			expect(res).toHaveLength(collections.length - 1);
 
 			const query = [
-				{ $match: { noDelete: { $exists: false } } },
+				{ $match: { noDelete: { $exists: false }, type: { $ne: 'http' } } },
 				{ $group: { _id: '$type', links: { $addToSet: '$link' } } },
 			];
 
@@ -105,7 +105,7 @@ const testRemoveAllFilesFromModel = () => {
 			expect(res).toHaveLength(collections.length - 1);
 
 			const query = [
-				{ $match: { noDelete: { $exists: false } } },
+				{ $match: { noDelete: { $exists: false }, type: { $ne: 'http' } } },
 				{ $group: { _id: '$type', links: { $addToSet: '$link' } } },
 			];
 

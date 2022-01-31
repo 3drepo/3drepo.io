@@ -31,7 +31,7 @@ Schemas.securitySchemes = {
 Schemas.schemas.roleDefinitions = {
 	type: 'string',
 	enum: ['admin', 'collaborator', 'commenter', 'viewer'],
-	description: 'Possible Values:\n* `admin` - Administrator of the container/federation\n* `collaborator` - User has `commenter` right, plus the ability to upload new revisions\n* `commenter` - User has `viewer` rights, plus write access to tickets, groups and views\n* `viewer` - User has read access to the project',
+	description: 'Possible Values:<br/><br/>* `admin` - Administrator of the container/federation<br/><br/>* `collaborator` - User has `commenter` right, plus the ability to upload new revisions<br/><br/>* `commenter` - User has `viewer` rights, plus write access to tickets, groups and views<br/><br/>* `viewer` - User has read access to the project',
 };
 
 Schemas.schemas.group = {
@@ -185,7 +185,7 @@ Schemas.schemas.modelSettings = {
 						type: 'array',
 						description: 'The point coordinate that maps to the latLong value (should be in OpenGL axis conventions)',
 						items: {
-							type: 'float',
+							type: 'number',
 							example: '23.56',
 						},
 						minItems: 3,
@@ -195,7 +195,7 @@ Schemas.schemas.modelSettings = {
 						type: 'array',
 						description: 'The latitude and longitude of the survey point',
 						items: {
-							type: 'float',
+							type: 'number',
 							example: '23.56',
 						},
 						minItems: 2,
