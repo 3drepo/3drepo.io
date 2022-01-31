@@ -20,6 +20,7 @@ import DeleteIcon from '@assets/icons/delete.svg';
 import EditIcon from '@assets/icons/edit.svg';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import filesize from 'filesize';
 import { UploadItemFields } from '@/v5/store/containers/containers.types';
 import { ListItemSchema } from '@/v5/validation/containers';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
@@ -40,7 +41,6 @@ export const UploadListItem = ({
 	onClickDelete,
 	onChange,
 }: IUploadListItem): JSX.Element => {
-	const filesize = '400MB';
 	const { control, getValues, formState: { errors } } = useForm({
 		defaultValues: item.listItem,
 		mode: 'onChange',
@@ -54,7 +54,7 @@ export const UploadListItem = ({
 			</span>
 			<UploadListItemTitle
 				name={item.file.name}
-				filesize={filesize}
+				filesize={filesize(item.file.size)}
 			/>
 			<Controller
 				control={control}
