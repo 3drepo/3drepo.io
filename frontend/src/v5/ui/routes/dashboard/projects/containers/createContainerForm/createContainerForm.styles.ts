@@ -18,6 +18,10 @@
 import styled from 'styled-components';
 import { FormControl } from '@material-ui/core';
 
+export const Container = styled.div`
+	padding: 30px 58px 60px;
+`;
+
 export const SelectColumn = styled(FormControl)`
 	width: 50%;
 	padding-right: 5px;

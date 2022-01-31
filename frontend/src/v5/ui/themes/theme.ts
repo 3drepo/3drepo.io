@@ -355,6 +355,9 @@ export const theme = createMuiTheme({
 				boxShadow: 'none',
 				border: `1px solid ${COLOR.PRIMARY_MAIN_CONTRAST}`,
 				transition: 'none',
+				'&:active': {
+					boxShadow: 'none',
+				},
 			},
 			label: {
 				'& > *:first-child': {
@@ -486,6 +489,12 @@ export const theme = createMuiTheme({
 		MuiInput: {
 			root: {
 				width: '100%',
+				'&$disabled $input': {
+					color: COLOR.BASE_LIGHT,
+				},
+				'&$disabled $path': {
+					fill: COLOR.BASE_LIGHT,
+				},
 			},
 			underline: {
 				'&:before': {
@@ -514,10 +523,14 @@ export const theme = createMuiTheme({
 				'&:not(.Mui-error).Mui-focused': {
 					color: COLOR.TERTIARY_MAIN,
 				},
+				'&$disabled .MuiInputLabel-asterisk': {
+					display: 'none',
+				},
 			},
 			formControl: {
 				top: '20px',
 				left: '1px',
+				transform: 'none',
 			},
 			asterisk: {
 				color: COLOR.ERROR_MAIN,
@@ -527,6 +540,24 @@ export const theme = createMuiTheme({
 			root: {
 				width: '100%',
 				boxSizing: 'border-box',
+			},
+		},
+		MuiFormControlLabel: {
+			label: {
+				color: COLOR.BASE_MAIN,
+			},
+		},
+		MuiFormHelperText: {
+			contained: {
+				position: 'absolute',
+				bottom: '-14px',
+				'&&': { margin: 0 },
+			},
+		},
+		MuiCheckbox: {
+			root: {
+				color: COLOR.BASE_MAIN,
+				padding: 0,
 			},
 		},
 		MuiTouchRipple: {
