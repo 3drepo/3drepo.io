@@ -120,7 +120,7 @@ class TeamspaceSettings {
 	}
 
 	async update(account, data) {
-		const labelFields = ["riskCategories", "topicTypes"];
+		const labelFields = ["riskCategories", "topicTypes", "createTreatmentSuggestions"];
 
 		const oldSettings = await this.getTeamspaceSettings(account);
 
@@ -145,8 +145,8 @@ class TeamspaceSettings {
 						}
 					}
 					toUpdate[key] = arrayUpdated;
-				} else if (data[key]) {
-					throw responseCodes.INVALID_ARGUMENTS;
+				} else if (Object.prototype.toString.call(data[key]) === "[object Boolean]") {
+					toUpdate[key] = data[key] === true;
 				}
 			}
 		});
