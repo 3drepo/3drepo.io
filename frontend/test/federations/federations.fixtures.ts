@@ -17,7 +17,7 @@
 
 import * as faker from 'faker';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
-import { EMPTY_VIEW, FetchFederationSettingsResponse, FetchFederationStatsResponse, FetchFederationViewsResponse, IFederation } from '@/v5/store/federations/federations.types';
+import { EMPTY_VIEW, FetchFederationSettingsResponse, FetchFederationStatsResponse, FetchFederationViewsResponse, IFederation, IFederationSettings, RawFederationSettings } from '@/v5/store/federations/federations.types';
 import { times } from 'lodash';
 
 export const federationMockFactory = (overrides?: Partial<IFederation>): IFederation => ({
@@ -63,16 +63,27 @@ export const prepareMockViewsReply = (federation: IFederation): FetchFederationV
 	views: federation.views,
 })
 
-export const prepareMockSettingsReply = (federation: IFederation): FetchFederationSettingsResponse => {
-	const { surveyPoint, ...otherSettings } = federation.settings;
+
+
+export const refineFederationSettins = (RawFederationSettings: RawFederationSettings): IFederationSettings => {
+	const { unit, angleFromNorth, defaultView, surveyPoints } = RawFederationSettings
+	
+	return {
+		unit,
+		angleFromNorth,
+		defaultView,
+		surveyPoint: surveyPoints[0],
+	};
+}
+
+export const prepareMockRawSettingsReply = (federation: IFederation): RawFederationSettings => {
+	const { surveyPoint, ...settings } = federation.settings;
 	const { name, description: desc, code} = federation;
 	return {
-		rawSettings: {
-			...otherSettings,
-			name, 
-			desc, 
-			code,
-			surveyPoints: [surveyPoint],
-		},
+		name, 
+		desc, 
+		code,
+		...settings,
+		surveyPoints: [surveyPoint],
 	};
 };

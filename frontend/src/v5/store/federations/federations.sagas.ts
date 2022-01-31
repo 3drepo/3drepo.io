@@ -177,8 +177,8 @@ export default function* FederationsSagas() {
 	yield takeLatest(FederationsTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeLatest(FederationsTypes.FETCH_FEDERATIONS, fetchFederations);
 	yield takeEvery(FederationsTypes.FETCH_FEDERATION_STATS, fetchFederationStats);
-	yield takeLatest(FederationsTypes.FETCH_FEDERATION_VIEWS, fetchFederationViews);
-	yield takeLatest(FederationsTypes.FETCH_FEDERATION_SETTINGS, fetchFederationSettings);
+	yield takeEvery(FederationsTypes.FETCH_FEDERATION_VIEWS, fetchFederationViews);
+	yield takeEvery(FederationsTypes.FETCH_FEDERATION_SETTINGS, fetchFederationSettings);
 	yield takeLatest(FederationsTypes.UPDATE_FEDERATION_SETTINGS, updateFederationSettings);
 	yield takeLatest(FederationsTypes.DELETE_FEDERATION, deleteFederation);
 }

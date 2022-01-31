@@ -107,14 +107,11 @@ describe('Federations: redux', () => {
 		}
 		const resultState = federationsReducer(
 			defaultStateWithNoSettings,
-			FederationsActions.fetchFederationSettingsSuccess(projectId, mockFederation._id, RAW_MOCK_SETTINGS),
+			FederationsActions.fetchFederationSettingsSuccess(projectId, mockFederation._id, MOCK_SETTINGS),
 		);
 		const result = resultState.federations[projectId];
 
 		expect(result[0].settings).toEqual(MOCK_SETTINGS);
-		expect(result[0].name).toEqual(RAW_MOCK_SETTINGS.name);
-		expect(result[0].description).toEqual(RAW_MOCK_SETTINGS.desc);
-		expect(result[0].code).toEqual(RAW_MOCK_SETTINGS.code);
 	});
 
 	it('should update settings changed from form', () => {
