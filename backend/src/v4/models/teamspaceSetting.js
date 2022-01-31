@@ -66,8 +66,7 @@ class TeamspaceSettings {
 	}
 
 	async getTeamspaceSettings(account, projection = {}) {
-		const settingsColl = await this.getTeamspaceSettingsCollection(account);
-		const foundSettings = await settingsColl.findOne({ _id: account }, projection);
+		const foundSettings = await db.findOne(account, colName , {}, projection);
 
 		if (!foundSettings) {
 			return Promise.reject(responseCodes.TEAMSPACE_SETTINGS_NOT_FOUND);

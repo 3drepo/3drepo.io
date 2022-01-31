@@ -23,6 +23,7 @@ const responseCodes = require("../response_codes.js");
 const ChatEvent = require("./chatEvent");
 const Ticket = require("./ticket");
 const Mitigation = require("./mitigation");
+const TeamspaceSetting = require("./teamspaceSetting");
 const utils = require("../utils");
 
 const fieldTypes = {
@@ -164,7 +165,10 @@ class Risk extends Ticket {
 			updatedRisk.data = {...updatedRisk.data, ...levelOfRisk};
 		}
 
-		await Mitigation.updateMitigationsFromRisk(user, model, updatedRisk.oldTicket, updatedRisk.updatedTicket);
+		const teamspaceSettings = await TeamspaceSetting.getTeamspaceSettings(user,	{  _id: 0, createTreatmentSuggestions: 1});
+		if(teamspaceSettings.createTreatmentSuggestions){
+			await Mitigation.updateMitigationsFromRisk(user, model, updatedRisk.oldTicket, updatedRisk.updatedTicket);
+		}
 
 		return updatedRisk;
 	}
