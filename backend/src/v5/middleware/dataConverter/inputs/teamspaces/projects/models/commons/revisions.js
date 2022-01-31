@@ -80,12 +80,15 @@ const validateRevisionUpload = (isFederation) => async (req, res, next) => {
 		schemaBase.containers = Yup.array().of(YupHelper.types.id).min(1).required()
 			.test('containers-validation', 'Containers must exist within the same project', (value) => {
 				const { teamspace, project } = req.params;
-				return modelsExistInProject(teamspace, project, value).catch(() => false);
+				return value?.length && modelsExistInProject(teamspace, project, value).catch(() => false);
 			})
 			.test('containers-validation', 'IDs provided cannot be of type federation', async (value) => {
-				const { teamspace } = req.params;
-				const foundContainers = await getContainers(teamspace, value, { _id: 1 });
-				return foundContainers?.length === value?.length;
+				if (value?.length) {
+					const { teamspace } = req.params;
+					const foundContainers = await getContainers(teamspace, value, { _id: 1 });
+					return foundContainers?.length === value?.length;
+				}
+				return false;
 			});
 	} else {
 		schemaBase.importAnimations = Yup.bool().default(true);
