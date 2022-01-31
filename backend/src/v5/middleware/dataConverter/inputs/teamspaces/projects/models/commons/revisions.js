@@ -67,17 +67,38 @@ const fileFilter = (req, file, cb) => {
 	}
 };
 
-const validateRevisionUpload = (isFederation) => async (req, res, next) => {
+const validateContainerRevisionUpload = async (req, res, next) => {
 	const schemaBase = {
 		tag: YupHelper.types.strings.code.test('tag-not-in-use',
 			'Revision name is already used by an existing revision',
 			(value) => value === undefined || isTagUnique(req.params.teamspace,
-				req.params.container, value)),
+				req.params.container, value)).required(),
 		desc: YupHelper.types.strings.shortDescription,
+		importAnimations: Yup.bool().default(true),
+		timezone: Yup.string().test('valid-timezone',
+			'The timezone provided is not valid',
+			(value) => value === undefined || !!tz.getTimezone(value)),
 	};
 
-	if (isFederation) {
-		schemaBase.containers = Yup.array().of(YupHelper.types.id).min(1).required()
+	const schema = Yup.object().noUnknown().required().shape(schemaBase);
+
+	try {
+		req.body = await schema.validate(req.body);
+		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
+		if (!req.file.size) throw createResponseCode(templates.invalidArguments, 'File cannot be empty');
+		const { teamspace } = req.params;
+		await sufficientQuota(teamspace, req.file.size);
+
+		await next();
+	} catch (err) {
+		if (err?.code && codeExists(err.code)) respond(req, res, err);
+		else respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+const validateFederationRevisionUpload = async (req, res, next) => {
+	const schemaBase = {
+		containers: Yup.array().of(YupHelper.types.id).min(1).required()
 			.test('containers-validation', 'Containers must exist within the same project', (value) => {
 				const { teamspace, project } = req.params;
 				return value?.length && modelsExistInProject(teamspace, project, value).catch(() => false);
@@ -89,35 +110,20 @@ const validateRevisionUpload = (isFederation) => async (req, res, next) => {
 					return foundContainers?.length === value?.length;
 				}
 				return false;
-			});
-	} else {
-		schemaBase.importAnimations = Yup.bool().default(true);
-		schemaBase.tag = schemaBase.tag.required();
-		schemaBase.timezone = Yup.string().test('valid-timezone',
-			'The timezone provided is not valid',
-			(value) => value === undefined || !!tz.getTimezone(value));
-	}
+			}),
+	};
 
 	const schema = Yup.object().noUnknown().required().shape(schemaBase);
 
 	try {
 		req.body = await schema.validate(req.body);
-
-		if (!isFederation) {
-			if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
-			if (!req.file.size) throw createResponseCode(templates.invalidArguments, 'File cannot be empty');
-			const { teamspace } = req.params;
-			await sufficientQuota(teamspace, req.file.size);
-		}
-
 		await next();
 	} catch (err) {
-		if (err?.code && codeExists(err.code)) respond(req, res, err);
-		else respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };
 
-Revisions.validateNewRevisionData = (isFederation) => (isFederation ? validateRevisionUpload(isFederation)
-	: validateMany([singleFileUpload('file', fileFilter), validateRevisionUpload(isFederation)]));
+Revisions.validateNewRevisionData = (isFederation) => (isFederation ? validateFederationRevisionUpload
+	: validateMany([singleFileUpload('file', fileFilter), validateContainerRevisionUpload]));
 
 module.exports = Revisions;

@@ -73,14 +73,6 @@ const establishRoutes = () => {
 	 *           schema:
 	 *             type: object
 	 *             properties:
-	 *               tag:
-	 *                 description: Unique revision name
-     *                 type: string
-	 *                 example: rev01
-	 *               desc:
-	 *                 description: Description of the revision
-	 *                 type: string
-	 *                 example: Initial design
 	 *               containers:
 	 *                 description: array of container Ids to federate together
 	 *                 type: array

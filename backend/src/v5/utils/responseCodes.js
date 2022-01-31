@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { toCamelCase, toConstantCase } = require('./helper/strings');
+const { logfile } = require('./config');
 const { logger } = require('./logger');
 
 const ResponseCodes = {};
@@ -129,7 +130,7 @@ ResponseCodes.createResponseCode = (errCode, message) => {
 	const codeExists = ResponseCodes.codeExists(errCode?.code);
 	if (!codeExists) {
 		const isError = errCode instanceof Error;
-		if (isError) {
+		if (isError && !logfile.silent) {
 			// eslint-disable-next-line
 			console.error(errCode)
 		}

@@ -47,14 +47,11 @@ ModelSettings.getContainers.mockImplementation(
 );
 
 const testValidateNewRevisionData = () => {
-	const createBody = (containers, tag, desc) => ({
+	const createBody = (containers) => ({
 		containers,
-		...(tag ? { tag: '123' } : {}),
-		...(desc ? { desc: 'this is a model' } : {}),
 	});
 	describe.each([
-		['Request with valid data', createBody([generateUUIDString(), generateUUIDString()], 'tag', 'desc')],
-		['Request with valid data but no tag/desc', createBody([generateUUIDString(), generateUUIDString()])],
+		['Request with valid data', createBody([generateUUIDString(), generateUUIDString()])],
 		['Request with invalid model Ids (wrong type)', createBody([1, 2, 3]), true],
 		['Request with invalid model Ids (not uuid format', createBody(['model 1']), true],
 		['Request with empty container array', createBody([]), true],
