@@ -26,6 +26,7 @@ import {
 	FetchFederationSettingsSuccessAction,
 	FetchFederationViewsSuccessAction,
 	DeleteFederationSuccessAction,
+	UpdateFederationSettingsSuccessAction,
 } from '@/v5/store/federations/federations.types';
 import { prepareSingleFederationData } from '@/v5/store/federations/federations.helpers';
 import { Constants } from '../common/actions.helper';
@@ -43,8 +44,8 @@ export const { Types: FederationsTypes, Creators: FederationsActions } = createA
 	fetchFederationViewsSuccess: ['projectId', 'federationId', 'views'],
 	fetchFederationSettings: ['teamspace', 'projectId', 'federationId'],
 	fetchFederationSettingsSuccess: ['projectId', 'federationId', 'settings'],
-	updateFederationSettings: ['teamspace', 'projectId', 'federationId', 'settings'],
-	updateFederationSettingsSuccess: ['projectId', 'federationId', 'settings'],
+	updateFederationSettings: ['teamspace', 'projectId', 'federationId', 'rawSettings'],
+	updateFederationSettingsSuccess: ['projectId', 'federationId', 'rawSettings'],
 	deleteFederation: ['teamspace', 'projectId', 'federationId'],
 	deleteFederationSuccess: ['projectId', 'federationId'],
 }, { prefix: 'FEDERATIONS/' }) as { Types: Constants<IFederationsActionCreators>; Creators: IFederationsActionCreators };
@@ -130,9 +131,6 @@ export const fetchFederationSettingsSuccess = (state = INITIAL_STATE, {
 			if (federationId !== federation._id) return federation;
 			return {
 				...federation,
-				name: settings.name,
-				description: settings.desc,
-				code: settings.code,
 				settings,
 			};
 		}),
@@ -142,19 +140,29 @@ export const fetchFederationSettingsSuccess = (state = INITIAL_STATE, {
 export const updateFederationSettingsSuccess = (state = INITIAL_STATE, {
 	projectId,
 	federationId,
-	settings,
-}: FetchFederationSettingsSuccessAction) => ({
+	rawSettings,
+}: UpdateFederationSettingsSuccessAction) => ({
 	...state,
 	federations: {
 		...state.federations,
 		[projectId]: state.federations[projectId].map((federation) => {
 			if (federationId !== federation._id) return federation;
+			const {
+				name,
+				desc: description,
+				code,
+				surveyPoints = [null],
+				...otherSettings
+			} = rawSettings;
 			return {
 				...federation,
-				name: settings.name,
-				description: settings.desc,
-				code: settings.code,
-				settings,
+				name,
+				description,
+				code,
+				settings: {
+					...otherSettings,
+					surveyPoint: surveyPoints[0],
+				},
 			};
 		}),
 	},

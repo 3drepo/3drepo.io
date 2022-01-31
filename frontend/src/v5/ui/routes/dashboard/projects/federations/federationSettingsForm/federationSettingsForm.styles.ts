@@ -22,6 +22,7 @@ export const SectionTitle = styled(Typography).attrs({
 	variant: 'h5',
 })`
 	margin-top: 11px;
+	color: ${({ theme }) => theme.palette.secondary.main};
 
 	&:not(:first-of-type) {
 		margin-top: 38px;

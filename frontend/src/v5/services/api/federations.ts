@@ -79,27 +79,15 @@ export const fetchFederationSettings = async ({
 	projectId,
 	federationId,
 }: FetchFederationSettingsPayload): Promise<FetchFederationSettingsResponse> => {
-	const {
-		data: {
-			surveyPoints = [null],
-			angleFromNorth,
-			defaultView,
-			unit,
-			name,
-			code,
-			desc,
-		},
-	}: { data: RawFederationSettings } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`);
+	const { data: rawSettings }: { data: RawFederationSettings } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`);
 	return {
 		settings: {
-			surveyPoint: surveyPoints[0],
-			angleFromNorth,
-			defaultView,
-			unit,
-			name,
-			code,
-			desc,
+			surveyPoint: rawSettings.surveyPoints?.[0],
+			unit: rawSettings.unit,
+			angleFromNorth: rawSettings.angleFromNorth,
+			defaultView: rawSettings.defaultView,
 		},
+		rawSettings,
 	};
 };
 
@@ -107,13 +95,13 @@ export const updateFederationSettings = async ({
 	teamspace,
 	projectId,
 	federationId,
-	settings,
-}: UpdateFederationSettingsPayload): Promise<AxiosResponse<void>> => {
-	const { data } = await api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`, {
-		...settings,
-	});
-	return data;
-};
+	rawSettings,
+}: UpdateFederationSettingsPayload): Promise<AxiosResponse<void>> => (
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`, {
+		...rawSettings,
+	})
+);
+
 export const deleteFederation = ({
 	teamspace,
 	projectId,

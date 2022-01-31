@@ -63,6 +63,16 @@ export const prepareMockViewsReply = (federation: IFederation): FetchFederationV
 	views: federation.views,
 })
 
-export const prepareMockSettingsReply = (federation: IFederation): FetchFederationSettingsResponse => ({
-	settings: federation.settings,
-});
+export const prepareMockSettingsReply = (federation: IFederation): FetchFederationSettingsResponse => {
+	const { surveyPoint, ...otherSettings } = federation.settings;
+	const { name, description: desc, code} = federation;
+	return {
+		rawSettings: {
+			...otherSettings,
+			name, 
+			desc, 
+			code,
+			surveyPoints: [surveyPoint],
+		},
+	};
+};

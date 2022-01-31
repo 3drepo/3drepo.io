@@ -18,6 +18,8 @@
 import { INITIAL_STATE, reducer as federationsReducer, FederationsActions } from '@/v5/store/federations/federations.redux';
 import { times } from 'lodash';
 import { federationMockFactory } from './federations.fixtures';
+import { EMPTY_VIEW, RawFederationSettings } from '@/v5/store/federations/federations.types';
+import { IFederationSettings } from '@/v5/store/federations/federations.types';
 
 describe('Federations: redux', () => {
 	const projectId = 'projectId';
@@ -28,6 +30,26 @@ describe('Federations: redux', () => {
 			[projectId]: mockFederations
 		}
 	};
+	
+	const RAW_MOCK_SETTINGS: RawFederationSettings = {
+		name: 'Federation Name',
+		desc: 'Federation Description',
+		code: '0000',
+		surveyPoints: [{
+			latLong: [0, 0],
+			position: [0, 0, 0],
+		}],
+		angleFromNorth: 90,
+		defaultView: EMPTY_VIEW._id,
+		unit: "mm",
+	};
+
+	const MOCK_SETTINGS: IFederationSettings = {
+		surveyPoint: RAW_MOCK_SETTINGS.surveyPoints[0],
+		angleFromNorth: RAW_MOCK_SETTINGS.angleFromNorth,
+		defaultView: RAW_MOCK_SETTINGS.defaultView,
+		unit: RAW_MOCK_SETTINGS.unit,
+	}
 
 	it('should add federation to favourites', () => {
 		const resultState = federationsReducer(
@@ -56,5 +78,62 @@ describe('Federations: redux', () => {
 
 		expect(result[0].isFavourite).toEqual(false);
 		expect(result.slice(1).every(federation => federation.isFavourite)).toEqual(true);
+	});
+
+	it('should load fetched views', () => {
+		const mockFederation = federationMockFactory({ views: [] });
+		const defaultStateWithNoViews = {
+			...INITIAL_STATE,
+			federations: {
+				[projectId]: [mockFederation]
+			}
+		}
+		const resultState = federationsReducer(
+			defaultStateWithNoViews,
+			FederationsActions.fetchFederationViewsSuccess(projectId, mockFederation._id, [EMPTY_VIEW]),
+		);
+		const result = resultState.federations[projectId];
+
+		expect(result[0].views).toEqual([EMPTY_VIEW]);
+	});
+
+	it('should load fetched settings', () => {
+		const mockFederation = federationMockFactory({ settings: null });
+		const defaultStateWithNoSettings = {
+			...INITIAL_STATE,
+			federations: {
+				[projectId]: [mockFederation]
+			}
+		}
+		const resultState = federationsReducer(
+			defaultStateWithNoSettings,
+			FederationsActions.fetchFederationSettingsSuccess(projectId, mockFederation._id, RAW_MOCK_SETTINGS),
+		);
+		const result = resultState.federations[projectId];
+
+		expect(result[0].settings).toEqual(MOCK_SETTINGS);
+		expect(result[0].name).toEqual(RAW_MOCK_SETTINGS.name);
+		expect(result[0].description).toEqual(RAW_MOCK_SETTINGS.desc);
+		expect(result[0].code).toEqual(RAW_MOCK_SETTINGS.code);
+	});
+
+	it('should update settings changed from form', () => {
+		const mockFederation = federationMockFactory({ settings: null });
+		const defaultStateWithNoSettings = {
+			...INITIAL_STATE,
+			federations: {
+				[projectId]: [mockFederation]
+			}
+		}
+		const resultState = federationsReducer(
+			defaultStateWithNoSettings,
+			FederationsActions.updateFederationSettingsSuccess(projectId, mockFederation._id, RAW_MOCK_SETTINGS),
+		);
+		const result = resultState.federations[projectId];
+
+		expect(result[0].settings).toEqual(MOCK_SETTINGS);
+		expect(result[0].name).toEqual(RAW_MOCK_SETTINGS.name);
+		expect(result[0].description).toEqual(RAW_MOCK_SETTINGS.desc);
+		expect(result[0].code).toEqual(RAW_MOCK_SETTINGS.code);
 	});
 })

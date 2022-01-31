@@ -14,9 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import {
-	UploadStatuses,
-} from '@/v5/store/containers/containers.types';
 import { Action } from 'redux';
 
 export interface IFederation {
@@ -26,7 +23,7 @@ export interface IFederation {
 	role: string;
 	isFavourite: boolean;
 	code: string;
-	status: UploadStatuses;
+	status: string;
 	subModels: string[];
 	containers: number;
 	issues: number;
@@ -52,10 +49,23 @@ export interface IFederationSettings {
 	angleFromNorth: number;
 	defaultView: string;
 	unit: string;
-	name: string;
-	desc: string;
-	code?: string;
 }
+
+export type RawFederationSettings = Omit<IFederationSettings, 'surveyPoint'> & {
+	_id?: string;
+	name?: string;
+	desc?: string;
+	code?: string;
+	unit: string;
+	timestamp?: number;
+	status?: string[];
+	surveyPoints: SurveyPoint[];
+	errorReason?: {
+		message: string;
+		timestamp: number;
+		errorCode: string;
+	}
+};
 
 export type FederationView = {
 	_id: string;
@@ -86,7 +96,7 @@ export type FavouritePayload = FetchFederationsPayload & {
 
 export type FetchFederationStatsResponse = {
 	code: string;
-	status: UploadStatuses;
+	status: string;
 	subModels: string[];
 	tickets: {
 		issues: number;
@@ -124,37 +134,26 @@ export type FetchFederationSettingsPayload = FetchFederationsPayload & {
 	federationId: string;
 };
 
-export type RawFederationSettings = Omit<IFederationSettings, 'surveyPoint'> & {
-	_id?: string;
-	unit: string;
-	timestamp?: number;
-	status?: UploadStatuses[];
-	surveyPoints: SurveyPoint[];
-	errorReason?: {
-		message: string;
-		timestamp: number;
-		errorCode: string;
-	}
-};
 export type FetchFederationSettingsResponse = {
 	settings: IFederationSettings;
+	rawSettings: RawFederationSettings;
 };
 
-export type FetchFederationSettingsSuccessPayload = Omit<IFederationSettings, 'surveyPoint'> & {
+export type FetchFederationSettingsSuccessPayload = {
 	projectId: string;
 	federationId: string;
-	settings: RawFederationSettings;
+	settings: IFederationSettings;
 };
 
 export type UpdateFederationSettingsPayload = FetchFederationsPayload & {
-	settings: RawFederationSettings;
 	federationId: string;
+	rawSettings: RawFederationSettings;
 };
 
-export type UpdateFederationSettingsSuccessPayload = Pick<RawFederationSettings, 'name' | 'desc' | 'code'> &
-FetchFederationsPayload & {
+export type UpdateFederationSettingsSuccessPayload = {
+	projectId: string;
 	federationId: string;
-	settings: IFederationSettings;
+	rawSettings: RawFederationSettings;
 };
 
 export type DeleteFederationPayload = FetchFederationsPayload & {
@@ -216,12 +215,12 @@ export interface IFederationsActionCreators {
 		teamspace: string,
 		projectId: string,
 		federationId: string,
-		settings: RawFederationSettings,
+		rawSettings: RawFederationSettings,
 	) => UpdateFederationSettingsAction;
 	updateFederationSettingsSuccess: (
 		projectId: string,
 		federationId: string,
-		settings: RawFederationSettings,
+		rawSettings: RawFederationSettings,
 	) => UpdateFederationSettingsSuccessAction;
 	deleteFederation: (teamspace: string, projectId: string, federationId: string) => DeleteFederationAction;
 	deleteFederationSuccess: (projectId: string, federationId: string) => DeleteFederationSuccessAction;

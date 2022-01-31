@@ -23,9 +23,10 @@ import { pick, times } from 'lodash';
 import { federationMockFactory, prepareMockSettingsReply, prepareMockViewsReply } from './federations.fixtures';
 import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
 import { 
+	EMPTY_VIEW, 
+	RawFederationSettings,
 	FetchFederationStatsResponse, 
 	IFederation, 
-	EMPTY_VIEW 
 } from '@/v5/store/federations/federations.types';
 
 // TODO: review this
@@ -159,23 +160,23 @@ describe('Federations: sagas', () => {
 			.put(FederationsActions.fetchFederationSettingsSuccess(
 				projectId, 
 				federationId, 
-				mockFederationsSettingsResponse.settings
+				mockFederationsSettingsResponse.rawSettings,
 			))
 			.silentRun();
 		})
 	})
 
 	describe('updateFederationSettings', () => {
-		const newSettings = { 
+		const newRawSettings: RawFederationSettings = { 
 			name: 'new name',
-			description: 'new description',
+			desc: 'new description',
 			code: 'new code',
 			angleFromNorth: 90,
-			defaultView: EMPTY_VIEW,
-			surveyPoint: {
+			defaultView: EMPTY_VIEW._id,
+			surveyPoints: [{
 				latLong: [0, 0],
 				position: [0, 0, 0],
-			},
+			}],
 			unit: "mm",
 		}
 

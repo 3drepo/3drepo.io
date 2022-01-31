@@ -55,11 +55,11 @@ interface IFormInput {
 const getDefaultValues = (federation: IFederation) => {
 	const { unit = 'mm', angleFromNorth } = federation.settings || {};
 	const {
-		latLong = [0, 0],
-		position = [0, 0, 0],
+		latLong,
+		position,
 	} = federation.settings?.surveyPoint || {};
-	const [x, y, z] = position;
-	const [latitude, longitude] = latLong;
+	const [x, y, z] = position || [0, 0, 0];
+	const [latitude, longitude] = latLong || [0, 0];
 	const { code = '', name, description: desc = '' } = federation;
 	const defaultView = federation?.settings?.defaultView || EMPTY_VIEW._id;
 	return {
@@ -105,7 +105,8 @@ const FederationSchema = Yup.object().shape({
 			formatMessage({
 				id: 'federations.settings.description.error.max',
 				defaultMessage: 'Federation Description is limited to 600 characters',
-			})).default('Uncategorised'),
+			}))
+		.default('Uncategorised'),
 	unit: Yup.string().required().default('mm'),
 	code: Yup.string()
 		.min(1,
@@ -220,6 +221,7 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 			<ShareTextField
 				label="ID"
 				value={federation._id}
+				lightLabel
 			/>
 			<Controller
 				name="name"
