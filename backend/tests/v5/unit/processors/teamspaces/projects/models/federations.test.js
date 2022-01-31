@@ -44,7 +44,7 @@ ModelSettings.deleteModel.mockImplementation((ts, model) => {
 	if (Number.isInteger(model)) {
 		return Promise.resolve(undefined);
 	}
-	Promise.reject(templates.federationNotFound);
+	return Promise.reject(templates.federationNotFound);
 });
 
 const federationList = [

@@ -2089,7 +2089,6 @@ async function uploadChunk(req, res, next) {
 }
 
 function uploadModel(req, res, next) {
-	console.log("in upload model");
 	const responsePlace = utils.APIInfo(req);
 	const { file } = req;
 	const revInfo = req.body;
