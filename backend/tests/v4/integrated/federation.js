@@ -309,7 +309,7 @@ describe("Federated Model", function () {
 				}]
 			})
 			.expect(400, function(err ,res) {
-
+				console.log("!!!", res.body);
 				expect(res.body.value).to.equal(responseCodes.MODEL_IS_NOT_A_FED.value);
 				done(err);
 
@@ -351,6 +351,7 @@ describe("Federated Model", function () {
 				}]
 			})
 			.expect(200, function(err ,res) {
+				console.log("!!!", res.body);
 				return done(err);
 			});
 	});

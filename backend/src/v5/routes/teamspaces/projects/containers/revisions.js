@@ -178,10 +178,6 @@ const establishRoutes = () => {
 	 *               importAnimations:
 	 *                 type: bool
 	 *                 description: Whether animations should be imported (Only relevant for .SPM uploads)
-	 *               timezone:
-	 *                 type: string
-	 *                 description: tz database name of the timezone for the sequence(Only relevant for .SPM uploads)
-	 *                 example: Europe/Paris
 	 *               file:
 	 *                 type: string
 	 *                 format: binary
