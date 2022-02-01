@@ -15,11 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { difference } = require('lodash');
+const { difference, intersection } = require('lodash');
 
 const ArrayHelper = {};
 
 // Returns the elements of the second arrary that are not included in the first
-ArrayHelper.getArrayDifference = (firstArray, secondArray) => difference(secondArray, firstArray);
+ArrayHelper.getArrayDifference = difference;
+
+ArrayHelper.getCommonElements = intersection;
 
 module.exports = ArrayHelper;
