@@ -60,7 +60,7 @@ export const ShareTextField = ({ label, value, lightLabel }: IShareTextField) =>
 				<LinkBar
 					value={value}
 					label={label}
-					lightLabel={lightLabel}
+					className={lightLabel && 'lightLabel'}
 					InputProps={{
 						readOnly: true,
 						endAdornment: (
