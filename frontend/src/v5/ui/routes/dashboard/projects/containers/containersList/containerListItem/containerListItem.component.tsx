@@ -34,9 +34,9 @@ import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { RevisionDetails } from '@components/shared/revisionDetails';
 import { Display } from '@/v5/ui/themes/media';
-import { formatDate } from '@/v5/services/intl';
+import { formatDate, formatMessage } from '@/v5/services/intl';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
-import { ShareModal } from '../../../../../../components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
+import { ShareModal } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
 
 interface IContainerListItem {
 	index: number;
@@ -59,10 +59,6 @@ export const ContainerListItem = ({
 		return <SkeletonListItem delay={index / 10} key={container._id} />;
 	}
 	const [shareModalOpen, setShareModalOpen] = useState(false);
-
-	const closeShareModal = () => {
-		setShareModalOpen(false);
-	};
 
 	return (
 		<DashboardListItem
@@ -165,8 +161,13 @@ export const ContainerListItem = ({
 			)}
 			<ShareModal
 				openState={shareModalOpen}
-				onClickClose={closeShareModal}
-				container={container}
+				onClickClose={() => setShareModalOpen(false)}
+				title={formatMessage({
+					id: 'ShareModal.component.title',
+					defaultMessage: 'Share Container URL',
+				})}
+				elementId={container._id}
+				elementName={container.name}
 			/>
 		</DashboardListItem>
 	);

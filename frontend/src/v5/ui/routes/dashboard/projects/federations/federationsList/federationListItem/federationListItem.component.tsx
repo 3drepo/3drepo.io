@@ -17,7 +17,7 @@
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
-import { formatDate } from '@/v5/services/intl';
+import { formatDate, formatMessage } from '@/v5/services/intl';
 
 import {
 	DashboardListItemButton,
@@ -35,6 +35,8 @@ import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { Display } from '@/v5/ui/themes/media';
+import { ShareModal } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
+import { useState } from 'react';
 
 interface IFederationListItem {
 	index: number;
@@ -52,6 +54,7 @@ export const FederationListItem = ({
 	if (federation.hasStatsPending) {
 		return <SkeletonListItem delay={index / 10} key={federation._id} />;
 	}
+	const [shareModalOpen, setShareModalOpen] = useState(false);
 
 	return (
 		<DashboardListItem
@@ -151,10 +154,23 @@ export const FederationListItem = ({
 				</DashboardListItemIcon>
 				<DashboardListItemIcon>
 					<EllipsisButtonWithMenu
-						list={getFederationMenuItems(federation)}
+						list={getFederationMenuItems(
+							federation,
+							() => setShareModalOpen(true),
+						)}
 					/>
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
+			<ShareModal
+				openState={shareModalOpen}
+				onClickClose={() => setShareModalOpen(false)}
+				title={formatMessage({
+					id: 'ShareModal.federation.title',
+					defaultMessage: 'Share Federation URL',
+				})}
+				elementId={federation._id}
+				elementName={federation.name}
+			/>
 		</DashboardListItem>
 	);
 };

@@ -22,7 +22,10 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router';
 
-export const getFederationMenuItems = (federation: IFederation) => {
+export const getFederationMenuItems = (
+	federation: IFederation,
+	openShareModal: () => void,
+) => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 	const dispatch = useDispatch();
 
@@ -54,8 +57,8 @@ export const getFederationMenuItems = (federation: IFederation) => {
 		},
 		{
 			key: 6,
-			title: formatMessage({ id: 'federations.ellipsisMenu.shareContainer', defaultMessage: 'Share Container' }),
-			onClick: () => { },
+			title: formatMessage({ id: 'federations.ellipsisMenu.shareFederation', defaultMessage: 'Share Federation' }),
+			onClick: openShareModal,
 		},
 		{
 			key: 7,
