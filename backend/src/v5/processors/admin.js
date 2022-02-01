@@ -21,7 +21,8 @@ const { getUsersWithRole,
 	hasAdministrativeRole,
 	revokeAdministrativeRole,
 } = require('../models/users');
-const { SYSTEM_ADMIN } = require('../utils/permissions/permissions.constants');
+const { SYSTEM_ADMIN, SYSTEM_ROLES } = require('../utils/permissions/permissions.constants');
+const { getArrayDifference } = require('../utils/helper/arrays');
 const { logger } = require('../utils/logger');
 
 const Admin = {};
@@ -31,52 +32,63 @@ Admin.getUsersWithRole = async (users, roles) => {
 	if (!returnUsers) throw createResponseCode(templates.userNotFound, 'No users found that match the query.');
 	return returnUsers;
 };
-Admin.grantUsersRoles = async (currentUser, users) => {
-	const returnUsers = [];
-	const results = users.map(async (user) => {
-		const userHasRole = await hasAdministrativeRole(user.user, user.role);
-		if (!userHasRole) {
-			const grantedRole = await grantAdministrativeRole(user.user, user.role);
-			if (grantedRole) {
-				returnUsers.push(user);
-				logger.logInfo(`${currentUser} granted role ${user.role} to ${user.user}`);
-			} else {
-				logger.logError(`${currentUser} failed to grant ${user.role} to ${user.user}: ${grantedRole}`);
-			}
-		} else {
-			logger.logInfo(`${currentUser} failed to grant ${user.role} to ${user.user}: User already has role`);
-		}
-	});
-	await Promise.all(results);
-	return returnUsers;
-};
 
-Admin.revokeUsersRoles = async (currentUser, users) => {
-	const returnUsers = [];
-	const results = users.map(async (user) => {
-		const userHasRole = await hasAdministrativeRole(user.user, user.role);
-		const safeToContinue = !(user.user === currentUser && user.role === SYSTEM_ADMIN && userHasRole);
+const grantRolesToUser = async (currentUser,user,roles) => {
+	const results = roles.map(async (role) => {
+		const userHasRole = await hasAdministrativeRole(user, role);
+		if (!userHasRole) {
+			const grantedRole = await grantAdministrativeRole(user, role);
+			if (grantedRole) {
+				logger.logInfo(`${currentUser} granted ${role} to ${user}`);
+			} else {
+				logger.logError(`${currentUser} failed to grant ${role} to ${user}: ${grantedRole}`);
+			}
+		}
+	})
+	return Promise.all(results);
+}
+const revokeRolesFromUser = async (currentUser,user,roles) => {
+	const results = roles.map(async (role) => {
+		const userHasRole = await hasAdministrativeRole(user, role);
+		const safeToContinue = !(user === currentUser && role === SYSTEM_ADMIN && userHasRole);
 		if (!safeToContinue) {
-			logger.logError(`${currentUser} failed to revoked role ${user.role} to ${user.user} : cannot revoke own system permissions`);
+			logger.logError(`${currentUser} failed to revoked role ${role} from ${user} : cannot revoke own system permissions`);
 			return false;
 		}
 		if (userHasRole) {
-			const revokedRole = await revokeAdministrativeRole(user.user, user.role);
+			const revokedRole = await revokeAdministrativeRole(user, role);
 			if (revokedRole) {
-				returnUsers.push(user);
-				logger.logInfo(`${currentUser} revoked role ${user.role} from ${user.user}`);
+				logger.logInfo(`${currentUser} revoked role ${role} from ${user}`);
 			} else {
-				logger.logError(`${currentUser} failed to revoke ${user.role} from ${user.user}: ${revokedRole}`);
+				logger.logError(`${currentUser} failed to revoke ${role} from ${user}: ${revokedRole}`);
 				return false;
 			}
-		} else {
-			logger.logInfo(`${currentUser} failed to revoke ${user.role} from ${user.user} as user does not have role.`);
-			return false;
 		}
 		return true;
 	});
+	return Promise.all(results);
+}
+
+Admin.putUsersRoles = async (currentUser,users) => {
+	let putUsers = []
+	const results = users.map(async (user) => {
+		putUsers.push(user.user)
+		await grantRolesToUser(currentUser,user.user,user.roles)
+	});
 	await Promise.all(results);
-	return returnUsers;
+	return await getUsersWithRole(putUsers);
+};
+
+Admin.patchUsersRoles = async (currentUser, users) => {
+	let patchUsers = []
+	const results = users.map(async (user) => {
+		patchUsers.push(user.user)
+		const missingRoles = await getArrayDifference(user.roles,SYSTEM_ROLES)
+		await revokeRolesFromUser(currentUser,user.user,missingRoles)
+		await grantRolesToUser(currentUser,user.user,user.roles)
+	});
+	await Promise.all(results);
+	return await getUsersWithRole(patchUsers);
 };
 
 module.exports = Admin;

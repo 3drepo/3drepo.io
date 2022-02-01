@@ -20,27 +20,28 @@ const Yup = require('yup');
 const { getUserByUsername } = require('../../../../models/users');
 const { isArray } = require('lodash');
 const { respond } = require('../../../../utils/responder');
+const e = require('express');
 
 const Admin = {};
 
 Admin.validatePayload = async (req, res, next) => {
 	const schema = Yup.object().shape(
-		{ 
-		users: Yup.array().of(
+		{
+			users: Yup.array().of(
 				Yup.object().shape(
 					{
-					user: Yup.string().required().min(2),
-					roles: Yup.array().of(
-							Yup.string().required()
-						).min(1, 'role array must have at least 1'),
-					}
-				)),
-		}
+						user: Yup.string().required().min(2),
+						roles: Yup.array().of(
+							Yup.string().required(),
+						),
+					},
+				),
+			).min(1, 'users array must have at least 1'),
+		},
 	)
-	.min(1, 'users array must have at least 1')
-	.strict(true)
-	.noUnknown()
-	.required();
+		.strict(true)
+		.noUnknown()
+		.required();
 
 	try {
 		await schema.validate(req.body);
@@ -76,20 +77,33 @@ Admin.validateQueries = async (req, res, next) => {
 	}
 };
 
+
+function isSystemRole(element, index, array) {
+	return SYSTEM_ROLES.includes(element) ;
+  }
+
+Admin.isValidSystemRole = async (roles) => {
+	if (roles.length > 0 ){
+		return roles.some(isSystemRole)
+	}
+	else { return true }
+}
+
 Admin.validateUsersAndRoles = async (req, res, next) => {
 	try {
 		const { users } = req.body;
 		const checkedValues = users.map(async (user) => {
 			const [userExists, roleExists] = await Promise.all([
 				getUserByUsername(user.user),
-				user.user.roles.forEach(role => SYSTEM_ROLES.includes(role)),
+				Admin.isValidSystemRole(user.roles)
 			]);
 			if (!userExists) throw createResponseCode(templates.userNotFound, `${user.user} is not a user`);
-			if (!roleExists) throw createResponseCode(templates.roleNotFound, `The role ${user.role} provided is not a system role`);
+			if (!roleExists) throw createResponseCode(templates.roleNotFound, `One of the roles provided is not a system role`);
 		});
 		await Promise.all(checkedValues);
 		next();
 	} catch (err) {
+		console.log(err)
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };

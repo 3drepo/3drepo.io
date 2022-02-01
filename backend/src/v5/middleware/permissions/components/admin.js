@@ -32,7 +32,7 @@ AdminPerms.hasWriteAccessToSystemRoles = async (req, res, next) => {
 	if (user && hasAccess) {
 		next();
 	} else if (!hasAccess) {
-		respond(req, res, templates.notAuthorized);
+		respond(req, res, templates.notAuthorizedForbidden);
 	} else {
 		respond(req, res, templates.userNotFound);
 	}
@@ -45,7 +45,7 @@ AdminPerms.hasWriteAccessToLicense = async (req, res, next) => {
 	if (user && hasAccess) {
 		next();
 	} else if (!hasAccess) {
-		respond(req, res, templates.notAuthorized);
+		respond(req, res, templates.notAuthorizedForbidden);
 	} else {
 		respond(req, res, templates.userNotFound);
 	}
@@ -58,7 +58,7 @@ AdminPerms.hasReadAccessToSystemRoles = async (req, res, next) => {
 	if (user && hasAccess) {
 		next();
 	} else if (!hasAccess) {
-		respond(req, res, templates.notAuthorized);
+		respond(req, res, templates.notAuthorizedForbidden);
 	} else {
 		respond(req, res, templates.userNotFound);
 	}
@@ -71,7 +71,7 @@ AdminPerms.hasReadAccessToLicense = async (req, res, next) => {
 	if (user && hasAccess) {
 		next();
 	} else if (!hasAccess) {
-		respond(req, res, templates.notAuthorized);
+		respond(req, res, templates.notAuthorizedForbidden);
 	} else {
 		respond(req, res, templates.userNotFound);
 	}

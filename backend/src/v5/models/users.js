@@ -143,6 +143,7 @@ User.getUsersWithRole = async (users = [], roles = []) => {
 	const usersInfo = await db.runCommand('admin', usersInfoCmd);
 
 	usersInfo.users.forEach((user) => {
+		const returningUserObject = { user: user.user, roles: [] };
 		user.roles.forEach((role) => {
 			const userExists = users.includes(user.user);
 			const roleExists = roles.includes(role.role);
@@ -161,17 +162,10 @@ User.getUsersWithRole = async (users = [], roles = []) => {
 			)
 				&& validRole;
 			if (returnUser) {
-				if (!returningUsers.includes(user.user)) {
-					returningUsers.push(
-						{
-							user: user.user,
-							roles: []
-						}
-					)
-				}
-				returningUsers(user.user.roles).push(role.role),
+				returningUserObject.roles.push(role.role);
 			}
 		});
+		if (returningUserObject.roles.length > 0) { returningUsers.push(returningUserObject); }
 	});
 	if (!returningUsers) {
 		throw templates.userNotFound;

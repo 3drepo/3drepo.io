@@ -29,20 +29,21 @@ const getUsersWithRoles = (req, res) => {
 	}).catch((err) => respond(req, res, err));
 };
 
-const grantUsersRoles = (req, res) => {
+const patchUsersRoles = (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { users } = req.body;
-	Admin.grantUsersRoles(user, users).then((u) => {
+	Admin.patchUsersRoles(user, users).then((u) => {
 		respond(req, res, templates.ok, { users: u });
 	}).catch(
 		/* istanbul ignore next */
 		(err) => respond(req, res, err),
 	);
 };
-const revokeUsersRoles = (req, res) => {
+
+const putUsersRoles = (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { users } = req.body;
-	Admin.revokeUsersRoles(user, users).then((u) => {
+	Admin.putUsersRoles(user, users).then((u) => {
 		respond(req, res, templates.ok, { users: u });
 	}).catch(
 		/* istanbul ignore next */
@@ -57,31 +58,35 @@ const establishRoutes = () => {
 	 * @openapi
 	 * /admin/roles:
 	 *   get:
-	 *     description: Return a list of all users with additional roles
+	 *     description: Get User and Role Information
 	 *     tags: [Admin]
 	 *     operationId: getAllUsersWithRole
 	 *     parameters:
-	 *       - role:
-	 *         name: role
+	 *       - name: role
 	 *         in: query
 	 *         description: name of role
 	 *         required: false
 	 *         schema:
 	 *           type: array
-	 *	     - user:
-	 *         name: user
+	 *           items:
+	 *             type: string
+	 *       - name: user
 	 *         description: name of user
 	 *         in: query
 	 *         required: false
 	 *         schema:
 	 *           type: array
+	 *           items:
+	 *             type: string
 	 *     responses:
 	 *       400:
 	 *         $ref: "#/components/responses/invalidArguments"
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       403:
+	 *         $ref: "#/components/responses/notAuthorizedForbidden"
 	 *       200:
-	 *         description: returns list of users with additional roles
+	 *         description: returns a list of users and roles assigned that meet the search terms, returns everything assigned with no parameters given.
 	 *         content:
 	 *           application/json:
 	 *             schema:
@@ -96,11 +101,13 @@ const establishRoutes = () => {
 	 *                         type: string
 	 *                         description: name of the user
 	 *                         example: abc
-	 *                       role:
-	 *                         type: string
-	 *                         description: Name of additional role
-	 *                         enum: [system_admin, support_admin, license_admin]
-	 *                         example: support_admin
+	 *                       roles:
+	 *                         type: array
+	 *                         items:
+	 *                           type: string
+	 *                           description: Name of additional role
+	 *                           enum: [system_admin, support_admin, license_admin]
+	 *                           example: support_admin
 	 *
 	 */
 	router.get('/roles', hasReadAccessToSystemRoles, validateQueries, getUsersWithRoles);
@@ -108,10 +115,10 @@ const establishRoutes = () => {
 	/**
 	 * @openapi
 	 * /admin/roles:
-	 *   post:
-	 *     description: add roles to users
+	 *   put:
+	 *     description: Grant roles to users
 	 *     tags: [Admin]
-	 *     operationId: grantUsersRoles
+	 *     operationId: putUsersRoles
 	 *     requestBody:
 	 *         content:
 	 *           application/json:
@@ -127,18 +134,22 @@ const establishRoutes = () => {
 	 *                         type: string
 	 *                         description: name of the user
 	 *                         example: abc
-	 *                       role:
-	 *                         type: string
-	 *                         description: Name of additional role
-	 *                         enum: [system_admin, support_admin, license_admin]
-	 *                         example: system_admin
+	 *                       roles:
+	 *                         type: array
+	 *                         items:
+	 *                           type: string
+	 *                           description: Name of additional role
+	 *                           enum: [system_admin, support_admin, license_admin]
+	 *                           example: support_admin
 	 *     responses:
 	 *       400:
 	 *         $ref: "#/components/responses/invalidArguments"
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       403:
+	 *         $ref: "#/components/responses/notAuthorizedForbidden"
 	 *       200:
-	 *         description: confirms objects modified
+	 *         description: confirms objects modified, returns current state of users submitted
 	 *         content:
 	 *           application/json:
 	 *             schema:
@@ -153,22 +164,24 @@ const establishRoutes = () => {
 	 *                         type: string
 	 *                         description: name of the user
 	 *                         example: abc
-	 *                       role:
-	 *                         type: string
-	 *                         description: Name of additional role
-	 *                         enum: [system_admin, support_admin, license_admin]
-	 *                         example: system_admin
+	 *                       roles:
+	 *                         type: array
+	 *                         items:
+	 *                           type: string
+	 *                           description: Name of additional role
+	 *                           enum: [system_admin, support_admin, license_admin]
+	 *                           example: support_admin
 	 *
 	 * */
-	router.post('/roles', hasWriteAccessToSystemRoles, validatePayload, validateUsersAndRoles, grantUsersRoles);
+	router.put('/roles', hasWriteAccessToSystemRoles, validatePayload, validateUsersAndRoles, putUsersRoles);
 
 	/**
 	 * @openapi
 	 * /admin/roles:
-	 *   delete:
-	 *     description: add roles to users
+	 *   patch:
+	 *     description: Modify existing roles
 	 *     tags: [Admin]
-	 *     operationId: revokeUsersRoles
+	 *     operationId: patchUsersRoles
 	 *     requestBody:
 	 *         content:
 	 *           application/json:
@@ -184,18 +197,22 @@ const establishRoutes = () => {
 	 *                         type: string
 	 *                         description: name of the user
 	 *                         example: abc
-	 *                       role:
-	 *                         type: string
-	 *                         description: Name of additional role
-	 *                         enum: [system_admin, support_admin, license_admin]
-	 *                         example: system_admin
+	 *                       roles:
+	 *                         type: array
+	 *                         items:
+	 *                           type: string
+	 *                           description: Name of additional role
+	 *                           enum: [system_admin, support_admin, license_admin]
+	 *                           example: support_admin
 	 *     responses:
 	 *       400:
 	 *         $ref: "#/components/responses/invalidArguments"
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       200:
-	 *         description: confirms objects modified
+	 *       403:
+	 *         $ref: "#/components/responses/notAuthorizedForbidden"
+     *       200:
+	 *         description: confirms objects modified, returns current state of users submitted
 	 *         content:
 	 *           application/json:
 	 *             schema:
@@ -210,14 +227,16 @@ const establishRoutes = () => {
 	 *                         type: string
 	 *                         description: name of the user
 	 *                         example: abc
-	 *                       role:
-	 *                         type: string
-	 *                         description: Name of additional role
-	 *                         enum: [system_admin, support_admin, license_admin]
-	 *                         example: system_admin
+	 *                       roles:
+	 *                         type: array
+	 *                         items:
+	 *                           type: string
+	 *                           description: Name of additional role
+	 *                           enum: [system_admin, support_admin, license_admin]
+	 *                           example: support_admin
 	 *
 	 * */
-	router.delete('/roles', hasWriteAccessToSystemRoles, validatePayload, validateUsersAndRoles, revokeUsersRoles);
+	router.patch('/roles', hasWriteAccessToSystemRoles, validatePayload, validateUsersAndRoles, patchUsersRoles);
 
 	return router;
 };
