@@ -497,6 +497,17 @@ export const theme = createMuiTheme({
 			root: {
 				width: '100%',
 			},
+			underline: {
+				'&:before': {
+					borderBottom: `1px solid ${COLOR.BASE_LIGHTEST}`,
+				},
+				'&:after': {
+					borderBottom: `1px solid ${COLOR.BASE_LIGHTEST}`,
+				},
+				'&:hover:not($disabled):before': {
+					borderBottom: `1px solid ${COLOR.BASE_LIGHTEST}`,
+				},
+			},
 			input: {
 				padding: '0px 14px',
 			},

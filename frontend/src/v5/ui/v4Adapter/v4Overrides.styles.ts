@@ -29,26 +29,26 @@ const customTableStyling = css`
 	${CustomTableBody} {
 		position: relative;
 		height: auto;
-	}
 
-	${CustomTableBody} div {
-		position: relative;
-		height: auto;
-	}
+		div {
+			position: relative;
+			height: auto;
+		}
 
-	${CustomTableBody} .simplebar-content {
-		border: 1px solid ${({ theme }) => theme.palette.base.lightest};
-		border-radius: 5px;
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
-	}
+		.simplebar-content {
+			border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+			border-radius: 5px;
+			background-color: ${({ theme }) => theme.palette.primary.contrast};
+		}
 
-	${CustomTableBody} .simplebar-content-wrapper {
-		height: auto !important;
-		max-height: initial;
-	}
+		.simplebar-content-wrapper {
+			height: auto !important;
+			max-height: initial;
+		}
 
-	${CustomTableBody} .simplebar-placeholder {
-		display: none;
+		.simplebar-placeholder {
+			display: none;
+		}
 	}
 
 	${Head} {
@@ -78,19 +78,19 @@ const customTableStyling = css`
 			width: 10px;
 			margin-left: 2px;
 		}
-	}
 
-	${SortLabel}.MuiTableSortLabel-active {
-		svg {
-			fill: ${({ theme }) => theme.palette.base.main};
+		::before {
+			background: transparent;
+		}
+
+		&.MuiTableSortLabel-active {
+			svg {
+				fill: ${({ theme }) => theme.palette.base.main};
+			}
 		}
 	}
 
-	/* stylelint-disable */
-	${SortLabel}::before {
-		background: transparent;
-	}
-	/* stylelint-enable */
+
 
 	${PermissionsCellContainer} {
 		justify-content: flex-start;
