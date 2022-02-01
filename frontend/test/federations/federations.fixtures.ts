@@ -17,7 +17,15 @@
 
 import * as faker from 'faker';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
-import { EMPTY_VIEW, FetchFederationSettingsResponse, FetchFederationStatsResponse, FetchFederationViewsResponse, IFederation, IFederationSettings, RawFederationSettings } from '@/v5/store/federations/federations.types';
+import { 
+	EMPTY_VIEW, 
+	FetchFederationSettingsResponse, 
+	FetchFederationStatsResponse, 
+	FetchFederationViewsResponse, 
+	IFederation, 
+	IFederationSettings, 
+	RawFederationSettings 
+} from '@/v5/store/federations/federations.types';
 import { times } from 'lodash';
 
 export const federationMockFactory = (overrides?: Partial<IFederation>): IFederation => ({
@@ -65,7 +73,7 @@ export const prepareMockViewsReply = (federation: IFederation): FetchFederationV
 
 
 
-export const refineFederationSettins = (RawFederationSettings: RawFederationSettings): IFederationSettings => {
+export const refineFederationSettings = (RawFederationSettings: RawFederationSettings): IFederationSettings => {
 	const { unit, angleFromNorth, defaultView, surveyPoints } = RawFederationSettings
 	
 	return {
