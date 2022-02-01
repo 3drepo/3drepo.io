@@ -87,7 +87,7 @@ export const SelectView = styled(Select)`
 `;
 
 export const MenuItemView = styled(MenuItem)`
-	&.Mui-selected ${ViewLabel}::after {
+	&.Mui-selected ${/* sc-selector */ ViewLabel}::after {
 		content: "Selected";
 		color: ${({ theme }) => theme.palette.primary.main};
 		${({ theme }) => theme.typography.caption};
