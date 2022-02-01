@@ -131,6 +131,12 @@ class Risk extends Ticket {
 		}
 
 		newRisk = await super.create(account, model, newRisk);
+
+		const teamspaceSettings = await TeamspaceSetting.getTeamspaceSettings(account,	{  _id: 0, createTreatmentSuggestions: 1});
+		if(teamspaceSettings.createTreatmentSuggestions) {
+			await Mitigation.updateMitigationsFromRisk(account, model, null, newRisk);
+		}
+
 		ChatEvent.newRisks(sessionId, account, model, [newRisk]);
 		return newRisk;
 	}

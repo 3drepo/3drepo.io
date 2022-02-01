@@ -162,7 +162,7 @@ class Mitigation {
 			});
 
 			optionalFields.forEach((key) => {
-				if (newMitigation[key] === "") {
+				if (!newMitigation[key]) {
 					delete newMitigation[key];
 				}
 			});
@@ -212,8 +212,8 @@ class Mitigation {
 	}
 
 	async updateMitigationsFromRisk(account, model, oldRisk, updatedRisk) {
-		const riskId = oldRisk._id;
-		const oldStatusIsResolved = isMitigationStatusResolved(oldRisk.mitigation_status);
+		const riskId = updatedRisk._id;
+		const oldStatusIsResolved = oldRisk && isMitigationStatusResolved(oldRisk.mitigation_status);
 		const newStatusIsResolved = isMitigationStatusResolved(updatedRisk.mitigation_status);
 
 		// if risk was and remains unresolved
@@ -223,6 +223,7 @@ class Mitigation {
 
 		const mitigationDetails = {
 			mitigation_desc: updatedRisk.mitigation_desc,
+			mitigation_detail: updatedRisk.mitigation_detail,
 			mitigation_stage: updatedRisk.mitigation_stage,
 			mitigation_type: updatedRisk.mitigation_type,
 			mitigation_status: updatedRisk.mitigation_status,
