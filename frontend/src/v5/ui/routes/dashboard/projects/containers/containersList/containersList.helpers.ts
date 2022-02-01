@@ -26,6 +26,7 @@ export const getContainerMenuItems = (
 	container: IContainer,
 	isSelected: boolean,
 	onSelectOrToggleItem: (id: string) => void,
+	openShareModal: () => void,
 ) => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 	const dispatch = useDispatch();
@@ -67,7 +68,7 @@ export const getContainerMenuItems = (
 		{
 			key: 7,
 			title: formatMessage({ id: 'containers.ellipsisMenu.shareContainer', defaultMessage: 'Share Container' }),
-			onClick: () => { },
+			onClick: openShareModal,
 		},
 		{
 			key: 8,

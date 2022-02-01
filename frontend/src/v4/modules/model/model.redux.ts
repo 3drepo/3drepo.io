@@ -78,7 +78,7 @@ export const INITIAL_STATE: IModelState = {
 	isPending: true,
 	isModelUploading: false,
 	pendingRevision: null,
-	maps: []
+	maps: [],
 };
 
 const setPendingState = (state = INITIAL_STATE, { pendingState }) => {
