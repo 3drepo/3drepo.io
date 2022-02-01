@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { formatDate, formatMessage } from '@/v5/services/intl';
 
@@ -36,7 +36,6 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { Display } from '@/v5/ui/themes/media';
 import { ShareModal } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
-import { useState } from 'react';
 
 interface IFederationListItem {
 	index: number;
