@@ -109,7 +109,7 @@ describe('Containers: sagas', () => {
 				type: container.type,
 				status: container.status,
 				code: container.code,
-				units: container.units
+				unit: container.unit
 			})
 
 			mockContainers.forEach((container) => {
@@ -135,6 +135,38 @@ describe('Containers: sagas', () => {
 			.dispatch(ContainersActions.fetchContainers(teamspace, projectId))
 			.put(ContainersActions.setIsListPending(true))
 			.silentRun();
+		})
+	})
+
+	describe('createContainer', () => {
+		const newContainer = { // improve this with containerMockFactory when Issue #2919 resolved
+			name: 'Test Container',
+			type: 'Other',
+			unit: 'mm',
+		}
+
+		it('should call createContainer endpoint', async () => {
+			mockServer
+			.post(`/teamspaces/${teamspace}/projects/${projectId}/containers`, newContainer)
+			.reply(200, {
+				_id: '12345'
+			});
+			const container = { ...newContainer, _id: '12345'}
+
+			await expectSaga(ContainersSaga.default)
+				.dispatch(ContainersActions.createContainer(teamspace, projectId, newContainer))
+				.put(ContainersActions.createContainerSuccess( projectId, container))
+				.silentRun();
+		})
+		
+		it('should call createContainer endpoint with 400', async () => {
+			mockServer
+			.post(`/teamspaces/${teamspace}/projects/${projectId}/containers`)
+			.reply(400);
+
+			await expectSaga(ContainersSaga.default)
+				.dispatch(ContainersActions.createContainer(teamspace, projectId, newContainer))
+				.silentRun();
 		})
 	})
 	

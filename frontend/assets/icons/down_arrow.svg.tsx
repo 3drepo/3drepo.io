@@ -15,28 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode } from 'react';
-import { createPortal } from 'react-dom';
-import { MAIN_HEADER_PORTAL_TARGET_ID } from '../../routes/dashboard/index.constants';
-import { Container, Bar } from './mainHeader.styles';
+import React from 'react';
 
-type IMainHeader = {
-	children: ReactNode;
-};
-
-export const MainHeader = ({ children }: IMainHeader): JSX.Element => {
-	const rootElement = document.getElementById(MAIN_HEADER_PORTAL_TARGET_ID);
-
-	if (rootElement === null) {
-		return null;
-	}
-
-	return createPortal(
-		<Container>
-			<Bar>
-				{children}
-			</Bar>
-		</Container>,
-		rootElement,
-	);
-};
+export default () => (
+	<svg width="11" height="6" viewBox="0 0 11 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+		<path d="M9.67016 0L5.64453 3.61719L1.6189 0L0.292969 1.19141L5.64453 6L10.9961 1.19141L9.67016 0Z" fill="#00C1D4" />
+	</svg>
+);

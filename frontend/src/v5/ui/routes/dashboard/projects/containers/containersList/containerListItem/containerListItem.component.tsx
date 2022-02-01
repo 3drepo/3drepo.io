@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { Tooltip } from '@material-ui/core';
 import {
@@ -23,6 +23,7 @@ import {
 	DashboardListItemIcon,
 	DashboardListItemRow,
 	DashboardListItemText,
+	DashboardListItemTitle,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision';
 import { Highlight } from '@controls/highlight';
@@ -32,9 +33,10 @@ import { getContainerMenuItems } from '@/v5/ui/routes/dashboard/projects/contain
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { RevisionDetails } from '@components/shared/revisionDetails';
+import { Display } from '@/v5/ui/themes/media';
 import { formatDate } from '@/v5/services/intl';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
-import { DashboardListItemTitle } from './containerListItem.styles';
+import { ShareModal } from '../../../../../../components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
 
 interface IContainerListItem {
 	index: number;
@@ -42,7 +44,7 @@ interface IContainerListItem {
 	container: IContainer;
 	filterQuery: string;
 	onFavouriteChange: (id: string, value: boolean) => void;
-	onToggleSelected: (id: string) => void;
+	onSelectOrToggleItem: (id: string) => void;
 }
 
 export const ContainerListItem = ({
@@ -50,12 +52,17 @@ export const ContainerListItem = ({
 	isSelected,
 	container,
 	filterQuery,
-	onToggleSelected,
+	onSelectOrToggleItem,
 	onFavouriteChange,
 }: IContainerListItem): JSX.Element => {
 	if (container.hasStatsPending) {
 		return <SkeletonListItem delay={index / 10} key={container._id} />;
 	}
+	const [shareModalOpen, setShareModalOpen] = useState(false);
+
+	const closeShareModal = () => {
+		setShareModalOpen(false);
+	};
 
 	return (
 		<DashboardListItem
@@ -64,7 +71,7 @@ export const ContainerListItem = ({
 		>
 			<DashboardListItemRow
 				selected={isSelected}
-				onClick={() => onToggleSelected(container._id)}
+				onClick={() => onSelectOrToggleItem(container._id)}
 			>
 				<DashboardListItemTitle
 					subtitle={(
@@ -85,8 +92,9 @@ export const ContainerListItem = ({
 					</Highlight>
 				</DashboardListItemTitle>
 				<DashboardListItemButton
-					onClick={() => onToggleSelected(container._id)}
+					onClick={() => onSelectOrToggleItem(container._id)}
 					width={186}
+					hideWhenSmallerThan={Display.Desktop}
 					tooltipTitle={
 						<FormattedMessage id="containers.list.item.revisions.tooltip" defaultMessage="View revisions" />
 					}
@@ -97,23 +105,30 @@ export const ContainerListItem = ({
 						values={{ count: container.revisionsCount }}
 					/>
 				</DashboardListItemButton>
-				<DashboardListItemText selected={isSelected}>
+				<DashboardListItemText selected={isSelected} minWidth={112}>
 					<Highlight search={filterQuery}>
 						{container.code}
 					</Highlight>
 				</DashboardListItemText>
-				<DashboardListItemText width={188} selected={isSelected}>
+				<DashboardListItemText
+					width={188}
+					tabletWidth={125}
+					hideWhenSmallerThan={Display.Tablet}
+					selected={isSelected}
+				>
 					<Highlight search={filterQuery}>
 						{container.type}
 					</Highlight>
 				</DashboardListItemText>
-				<DashboardListItemText width={97} selected={isSelected}>
+				<DashboardListItemText width={68} selected={isSelected}>
 					{container.lastUpdated ? formatDate(container.lastUpdated) : ''}
 				</DashboardListItemText>
 				<DashboardListItemIcon>
 					<Tooltip
 						title={
-							<FormattedMessage id="containers.list.item.favourite.tooltip" defaultMessage="Add to favourites" />
+							container.isFavourite
+								? <FormattedMessage id="containers.list.item.favourite.removeTooltip" defaultMessage="Remove from favourites" />
+								: <FormattedMessage id="containers.list.item.favourite.addTooltip" defaultMessage="Add to favourites" />
 						}
 					>
 						<FavouriteCheckbox
@@ -133,7 +148,12 @@ export const ContainerListItem = ({
 				</DashboardListItemIcon>
 				<DashboardListItemIcon selected={isSelected}>
 					<EllipsisButtonWithMenu
-						list={getContainerMenuItems(container)}
+						list={getContainerMenuItems(
+							container,
+							isSelected,
+							onSelectOrToggleItem,
+							() => setShareModalOpen(true),
+						)}
 					/>
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
@@ -143,6 +163,11 @@ export const ContainerListItem = ({
 					revisionsCount={container.revisionsCount || 1}
 				/>
 			)}
+			<ShareModal
+				openState={shareModalOpen}
+				onClickClose={closeShareModal}
+				container={container}
+			/>
 		</DashboardListItem>
 	);
 };

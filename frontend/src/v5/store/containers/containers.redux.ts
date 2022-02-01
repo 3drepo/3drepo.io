@@ -21,16 +21,15 @@ import { prepareSingleContainerData } from '@/v5/store/containers/containers.hel
 import {
 	IContainersActionCreators,
 	IContainersState,
-	SetFilterQueryAction,
 	SetFavouriteSuccessAction,
 	FetchContainersSuccessAction,
 	SetIsListPendingAction,
 	FetchContainerStatsSuccessAction,
+	CreateContainerSuccessAction,
 	DeleteContainerSuccessAction,
 } from './containers.types';
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({
-	setFilterQuery: ['query'],
 	addFavourite: ['teamspace', 'projectId', 'containerId'],
 	removeFavourite: ['teamspace', 'projectId', 'containerId'],
 	fetchContainers: ['teamspace', 'projectId'],
@@ -39,6 +38,8 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	fetchContainerStatsSuccess: ['projectId', 'containerId', 'containerStats'],
 	setIsListPending: ['isPending'],
 	setFavouriteSuccess: ['projectId', 'containerId', 'isFavourite'],
+	createContainer: ['teamspace', 'projectId', 'newContainer'],
+	createContainerSuccess: ['projectId', 'container'],
 	fetchRevisions: ['teamspace', 'projectId', 'containerId'],
 	setRevisionVoidStatus: ['teamspace', 'projectId', 'containerId', 'revisionId', 'isVoid'],
 	setRevisionVoidStatusSuccess: ['projectId', 'containerId', 'revisionId', 'isVoid'],
@@ -50,13 +51,8 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 
 export const INITIAL_STATE: IContainersState = {
 	containers: {},
-	filterQuery: '',
 	isListPending: true,
 };
-
-export const setFilterQuery = (state = INITIAL_STATE, { query }: SetFilterQueryAction) => (
-	{ ...state, filterQuery: query }
-);
 
 export const setFavourite = (state = INITIAL_STATE, {
 	projectId,
@@ -104,6 +100,24 @@ export const setIsListPending = (state = INITIAL_STATE, { isPending }: SetIsList
 	isListPending: isPending,
 });
 
+export const createContainerSuccess = (state = INITIAL_STATE, {
+	projectId,
+	container,
+}: CreateContainerSuccessAction) => ({
+	...state,
+	containers: {
+		...state.containers,
+		[projectId]: [
+			...state.containers[projectId],
+			{
+				...container,
+				revisionsCount: 0,
+				units: container.unit,
+			},
+		],
+	},
+});
+
 export const deleteContainerSuccess = (state = INITIAL_STATE, {
 	projectId,
 	containerId,
@@ -116,10 +130,10 @@ export const deleteContainerSuccess = (state = INITIAL_STATE, {
 });
 
 export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
-	[ContainersTypes.SET_FILTER_QUERY]: setFilterQuery,
 	[ContainersTypes.FETCH_CONTAINERS_SUCCESS]: fetchContainersSuccess,
 	[ContainersTypes.SET_IS_LIST_PENDING]: setIsListPending,
 	[ContainersTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
 	[ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS]: fetchStatsSuccess,
+	[ContainersTypes.CREATE_CONTAINER_SUCCESS]: createContainerSuccess,
 	[ContainersTypes.DELETE_CONTAINER_SUCCESS]: deleteContainerSuccess,
 });

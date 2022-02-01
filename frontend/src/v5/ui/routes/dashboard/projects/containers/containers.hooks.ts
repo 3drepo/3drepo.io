@@ -15,9 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'react-router';
-import { debounce } from 'lodash';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
@@ -25,8 +24,8 @@ import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSel
 export const useContainersData = () => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 
-	const filteredContainers = ContainersHooksSelectors.selectFilteredContainers();
-	const favouriteContainers = ContainersHooksSelectors.selectFilteredFavouriteContainers();
+	const containers = ContainersHooksSelectors.selectContainers();
+	const favouriteContainers = ContainersHooksSelectors.selectFavouriteContainers();
 	const hasContainers = ContainersHooksSelectors.selectHasContainers();
 	const isListPending = ContainersHooksSelectors.selectIsListPending();
 	const currentProject = ProjectsHooksSelectors.selectCurrentProject();
@@ -37,23 +36,5 @@ export const useContainersData = () => {
 		ContainersActionsDispatchers.fetchContainers(teamspace, project);
 	}, [currentProject]);
 
-	return { filteredContainers, favouriteContainers, hasContainers, isListPending };
-};
-
-export const useContainersSearch = () => {
-	const filterQuery = ContainersHooksSelectors.selectFilterQuery();
-
-	const [searchInput, setSearchInput] = useState(filterQuery);
-
-	const debounceSearchUpdate = debounce(
-		(value: string) => ContainersActionsDispatchers.setFilterQuery(value),
-		300,
-		{ trailing: true },
-	);
-
-	useEffect(() => {
-		debounceSearchUpdate(searchInput);
-	}, [searchInput]);
-
-	return { searchInput, setSearchInput, filterQuery };
+	return { containers, favouriteContainers, hasContainers, isListPending };
 };

@@ -14,7 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import styled, { css } from 'styled-components';
+import { Typography } from '@controls/typography';
 
 export const Container = styled.div`
 	${({ isLoading }) => isLoading && css`
@@ -28,6 +30,11 @@ export const ButtonContainer = styled.div`
 	cursor: pointer;
 	width: max-content;
 	user-select: none;
+`;
+
+export const Title = styled(Typography)`
+	white-space: nowrap;
+	margin-right: 10px;
 `;
 
 export const CollapsedItemContainer = styled.div`

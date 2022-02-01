@@ -180,7 +180,7 @@ const establishRoutes = () => {
 	 *                       description: The point coordinate that maps to the latLong value (should be in OpenGL axis conventions)
 	 *                       type: array
 	 *                       items:
-	 *                         type: float
+	 *                         type: number
 	 *                         example: 23.45
 	 *                         minItems: 3
 	 *                         maxItems: 3
@@ -188,7 +188,7 @@ const establishRoutes = () => {
 	 *                       type: array
 	 *                       description: 'The latitude and longitude of the survey point'
 	 *                       items:
-	 *                         type: float
+	 *                         type: number
 	 *                         example: 23.45
 	 *                         minItems: 2
 	 *                         maxItems: 2
@@ -331,7 +331,7 @@ const establishRoutes = () => {
 	 *                   type: string
 	 *                   description: Current status of the container
 	 *                   example: ok
-	 *                 units:
+	 *                 unit:
 	 *                   type: string
 	 *                   enum: [mm, cm, dm, m, ft]
 	 *                   description: Container units
@@ -531,12 +531,12 @@ const establishRoutes = () => {
 	 *                     position:
 	 *                       type: array
 	 *                       items:
-	 *                         type: float
+	 *                         type: number
 	 *                         example: 23.45
 	 *                     latLong:
 	 *                       type: array
 	 *                       items:
-	 *                         type: float
+	 *                         type: number
 	 *                         example: 23.45
 	 *               angleFromNorth:
 	 *                 type: integer

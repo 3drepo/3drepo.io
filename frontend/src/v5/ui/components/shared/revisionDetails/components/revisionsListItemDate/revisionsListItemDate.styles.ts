@@ -14,26 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useEffect, useState } from 'react';
-import { debounce } from 'lodash';
 
-export type SearchInputConfig = {
-	query: string;
-	dispatcher: Function;
-};
+import styled, { css } from 'styled-components';
+import { Typography } from '@material-ui/core';
 
-export const useSearchInput = ({ query, dispatcher }: SearchInputConfig) => {
-	const [searchInput, setSearchInput] = useState(query);
-
-	const debounceSearchUpdate = debounce(
-		(value: string) => dispatcher(value),
-		300,
-		{ trailing: true },
-	);
-
-	useEffect(() => {
-		debounceSearchUpdate(searchInput);
-	}, [searchInput]);
-
-	return { searchInput, setSearchInput, filterQuery: query };
-};
+export const Text = styled(Typography)`
+	color: ${({ theme, $active }) => ($active ? theme.palette.primary.contrast : theme.palette.base.light)};
+	${({ theme }) => theme && css`
+    ${theme.typography.kicker};
+	`}
+`;

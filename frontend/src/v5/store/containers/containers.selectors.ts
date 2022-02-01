@@ -26,24 +26,14 @@ export const selectContainers = createSelector(
 	selectContainersDomain, selectCurrentProject, (state, currentProject) => state.containers[currentProject] ?? [],
 );
 
-export const selectFilterQuery = createSelector(
-	selectContainersDomain, (state) => state.filterQuery,
-);
-
-export const selectFilteredContainers = createSelector(
-	selectContainers, selectFilterQuery,
-	(containers, filterQuery) => containers.filter((
-		{ name, code, type },
-	) => [name, code, type].join('').toLowerCase().includes(filterQuery.trim().toLowerCase())),
-);
-
-export const selectFilteredFavouriteContainers = createSelector(
-	selectFilteredContainers, (containers) => containers.filter(({ isFavourite }) => isFavourite),
+export const selectFavouriteContainers = createSelector(
+	selectContainers,
+	(containers) => containers.filter(({ isFavourite }) => isFavourite),
 );
 
 export const selectHasContainers = createSelector(
-	selectContainers, (containers) => ({
-		favourites: containers.some(({ isFavourite }) => isFavourite),
+	selectContainers, selectFavouriteContainers, (containers, favouriteContainers) => ({
+		favourites: !isEmpty(favouriteContainers),
 		all: !isEmpty(containers),
 	}),
 );
