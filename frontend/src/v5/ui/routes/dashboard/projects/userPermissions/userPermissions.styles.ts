@@ -29,7 +29,7 @@ export const Tab = styled(MuiTab)`
 	margin: 0 -1px 0 0;
 	white-space: nowrap;
 	min-height: 0;
-	padding: 12px 10px;
+	padding: 12px 17px;
 
 	&.Mui-selected {
 		color: ${({ theme }) => theme.palette.tertiary.main};
@@ -52,6 +52,7 @@ export const Tabs = styled(MuiTabs)`
 		display: none;
 	}
 
+	margin-top: 10px;
 	margin-bottom: 30px;
 `;
 
@@ -76,4 +77,5 @@ export const V4ModelsPermissions = styled(ModelsPermissions)`
 `;
 
 export const Container = styled.div`
+	padding-top: 5px;
 `;

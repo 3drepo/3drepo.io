@@ -25,10 +25,12 @@ export const RadioContainer = styled(Grid)`
 	}
 `;
 
-export const RadioButton = styled(Radio)`
+export const TableHeadingRadioButton = styled(Radio)`
 	&& {
 		height: 40px;
 		width: 40px;
 		box-sizing: border-box;
 	}
 `;
+
+TableHeadingRadioButton.displayName = 'TableHeadingRadioButton';

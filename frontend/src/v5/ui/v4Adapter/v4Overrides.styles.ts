@@ -20,7 +20,7 @@ import styled, { css } from 'styled-components';
 import { Name as UserNameCell } from '@/v4/routes/components/userItem/userItem.styles';
 import { SortLabel } from '@/v4/routes/components/customTable/components/tableHeading/tableHeading.styles';
 import { PermissionsCellContainer } from '@/v4/routes/components/permissionsTable/permissionsTable.styles';
-import { RadioContainer as TableHeadingRadioContainer } from '@/v4/routes/components/customTable/components/tableHeadingRadio/tableHeadingRadio.styles';
+import { RadioContainer as TableHeadingRadioContainer, TableHeadingRadioButton } from '@/v4/routes/components/customTable/components/tableHeadingRadio/tableHeadingRadio.styles';
 import { SearchField } from '@/v4/routes/components/customTable/components/cellUserSearch/cellUserSearch.styles';
 import { Mark as HighlighterMark } from '@/v4/routes/components/highlight/highlight.styles';
 
@@ -100,6 +100,10 @@ const customTableStyling = css`
 		justify-content: flex-start;
 		align-items: baseline;
 		margin-top: -22px;
+	}
+
+	${TableHeadingRadioButton} {
+		height: 20px;
 	}
 
 	${SearchField} {

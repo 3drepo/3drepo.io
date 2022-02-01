@@ -19,7 +19,7 @@ import { Grid, Tooltip } from '@material-ui/core';
 import React from 'react';
 
 import { SortLabel } from '../tableHeading/tableHeading.styles';
-import { RadioButton, RadioContainer } from './tableHeadingRadio.styles';
+import { TableHeadingRadioButton, RadioContainer } from './tableHeadingRadio.styles';
 
 interface IProps {
 	label: string;
@@ -70,7 +70,7 @@ export class TableHeadingRadio extends React.PureComponent<IProps, any> {
 						</SortLabel>
 					</Grid>
 					<Grid item>
-						<RadioButton
+						<TableHeadingRadioButton
 							checked={checked}
 							name={name || label}
 							disabled={disabled}

@@ -46,13 +46,13 @@ export const UsersPermissions = () => {
 		return (<></>);
 	}
 
-	const handleChange = (event, newValue) => {
+	const handleTabChange = (event, newValue) => {
 		setSelectedTab(newValue);
 	};
 
 	return (
 		<Container>
-			<Tabs value={selectedTab} onChange={handleChange}>
+			<Tabs value={selectedTab} onChange={handleTabChange}>
 				<Tab label={formatMessage({ id: 'usersPermissions.projectPermissions', defaultMessage: 'Project Permissions' })} />
 				<Tab label={formatMessage({ id: 'usersPermissions.contAndFedPermissions', defaultMessage: 'Container & Federation permissions' })} />
 			</Tabs>
