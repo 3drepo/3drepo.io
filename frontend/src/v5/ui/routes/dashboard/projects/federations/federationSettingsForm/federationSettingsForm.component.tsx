@@ -41,8 +41,8 @@ const UNITS = {
 interface IFormInput {
 	name: string;
 	unit: string;
-	desc: string;
-	code: string;
+	desc?: string;
+	code?: string;
 	defaultView: string;
 	latitude: number;
 	longitude: number;
@@ -53,14 +53,14 @@ interface IFormInput {
 }
 
 const getDefaultValues = (federation: IFederation) => {
-	const { unit = 'mm', angleFromNorth } = federation.settings || {};
+	const { unit = 'mm', angleFromNorth = 0 } = federation.settings || {};
 	const {
 		latLong,
 		position,
 	} = federation.settings?.surveyPoint || {};
 	const [x, y, z] = position || [0, 0, 0];
 	const [latitude, longitude] = latLong || [0, 0];
-	const { code = '', name, description: desc = '' } = federation;
+	const { code, name, description: desc } = federation;
 	const defaultView = federation?.settings?.defaultView || EMPTY_VIEW._id;
 	return {
 		name,
@@ -95,36 +95,45 @@ const FederationSchema = Yup.object().shape({
 				defaultMessage: 'Federation Name is a required field',
 			}),
 		),
-	desc: Yup.string()
-		.min(1,
-			formatMessage({
-				id: 'federations.settings.description.error.min',
-				defaultMessage: 'Federation Description must be at least 1 character',
-			}))
-		.max(600,
-			formatMessage({
-				id: 'federations.settings.description.error.max',
-				defaultMessage: 'Federation Description is limited to 600 characters',
-			}))
-		.default('Uncategorised'),
+	desc: Yup.lazy((value) => (
+		value === ''
+			? Yup.string().strip()
+			: Yup.string()
+				.min(1,
+					formatMessage({
+						id: 'federations.settings.description.error.min',
+						defaultMessage: 'Federation Description must be at least 1 character',
+					}))
+				.max(600,
+					formatMessage({
+						id: 'federations.settings.description.error.max',
+						defaultMessage: 'Federation Description is limited to 600 characters',
+					}))
+	)),
 	unit: Yup.string().required().default('mm'),
-	code: Yup.string()
-		.min(1,
-			formatMessage({
-				id: 'federations.settings.code.error.min',
-				defaultMessage: 'Code must be at least 1 character',
-			}))
-		.max(50,
-			formatMessage({
-				id: 'federations.settings.code.error.max',
-				defaultMessage: 'Code is limited to 50 characters',
-			}))
-		.matches(/^[A-Za-z0-9]*$/,
-			formatMessage({
-				id: 'federations.settings.code.error.characters',
-				defaultMessage: 'Code can only consist of letters and numbers',
-			})),
-	defaultView: Yup.string(),
+	code: Yup.lazy((value) => (
+		value === ''
+			? Yup.string().strip()
+			: Yup.string()
+				.min(1,
+					formatMessage({
+						id: 'federations.settings.code.error.min',
+						defaultMessage: 'Code must be at least 1 character',
+					}))
+				.max(50,
+					formatMessage({
+						id: 'federations.settings.code.error.max',
+						defaultMessage: 'Code is limited to 50 characters',
+					}))
+				.matches(/^[\w|_|-]*$/,
+					formatMessage({
+						id: 'federations.settings.code.error.characters',
+						defaultMessage: 'Code can only consist of letters and numbers',
+					}))
+	)),
+	defaultView: Yup.string()
+		.nullable()
+		.transform((value) => (value === EMPTY_VIEW._id ? null : value)),
 	latitude: Yup.number().required(),
 	longitude: Yup.number().required(),
 	angleFromNorth: Yup.number()
@@ -138,7 +147,7 @@ const FederationSchema = Yup.object().shape({
 				id: 'federations.settings.angle.error.max',
 				defaultMessage: 'Angle cannot be greater than 360',
 			}))
-		.transform((value) => value || 0),
+		.transform((value) => value ?? 0),
 	x: Yup.number().required(),
 	y: Yup.number().required(),
 	z: Yup.number().required(),
@@ -183,26 +192,16 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 	}, [open]);
 
 	const onSubmit: SubmitHandler<IFormInput> = ({
-		name,
-		desc,
-		unit,
-		code,
-		defaultView,
 		latitude, longitude,
-		angleFromNorth,
 		x, y, z,
+		...otherSettings
 	}) => {
 		const payload: RawFederationSettings = {
-			angleFromNorth,
-			defaultView: defaultView === EMPTY_VIEW._id ? null : defaultView,
 			surveyPoints: [{
 				latLong: [latitude, longitude],
 				position: [x, y, z],
 			}],
-			unit,
-			name,
-			desc,
-			code,
+			...otherSettings,
 		};
 		FederationsActionsDispatchers.updateFederationSettings(teamspace, project, federation._id, payload);
 		onClose();
@@ -318,8 +317,8 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 							labelname={formatMessage({ id: 'federations.settings.form.lat', defaultMessage: 'LATITUDE' })}
 							labelunit={formatMessage({ id: 'federations.settings.form.lat.unit', defaultMessage: 'decimal' })}
 							type="number"
-							error={!!errors.code}
-							helperText={errors.code?.message}
+							error={!!errors.latitude}
+							helperText={errors.latitude?.message}
 							required
 						/>
 					)}
@@ -333,8 +332,8 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 							labelname={formatMessage({ id: 'federations.settings.form.long', defaultMessage: 'LONGITUDE' })}
 							labelunit={formatMessage({ id: 'federations.settings.form.long.unit', defaultMessage: 'decimal' })}
 							type="number"
-							error={!!errors.code}
-							helperText={errors.code?.message}
+							error={!!errors.longitude}
+							helperText={errors.longitude?.message}
 							required
 						/>
 					)}
@@ -348,8 +347,8 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 						{...field}
 						labelname={formatMessage({ id: 'federations.settings.form.angleFromNorth', defaultMessage: 'ANGLE FROM NORTH' })}
 						labelunit={formatMessage({ id: 'federations.settings.form.angleFromNorth.unit', defaultMessage: 'clockwise degrees' })}
-						error={!!errors.code}
-						helperText={errors.code?.message}
+						error={!!errors.angleFromNorth}
+						helperText={errors.angleFromNorth?.message}
 						type="number"
 					/>
 				)}
@@ -363,8 +362,8 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 							labelname="X"
 							labelunit={currentUnit}
 							type="number"
-							error={!!errors.code}
-							helperText={errors.code?.message}
+							error={!!errors.x}
+							helperText={errors.x?.message}
 							required
 							{...field}
 						/>
@@ -378,8 +377,8 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 							labelname="Y"
 							labelunit={currentUnit}
 							type="number"
-							error={!!errors.code}
-							helperText={errors.code?.message}
+							error={!!errors.y}
+							helperText={errors.y?.message}
 							required
 							{...field}
 						/>
@@ -393,8 +392,8 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 							labelname="Z"
 							labelunit={currentUnit}
 							type="number"
-							error={!!errors.code}
-							helperText={errors.code?.message}
+							error={!!errors.z}
+							helperText={errors.z?.message}
 							required
 							{...field}
 						/>

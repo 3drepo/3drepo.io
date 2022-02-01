@@ -33,7 +33,7 @@ export const FlexContainer = styled.div`
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
-	align-items: center;
+	align-items: flex-start;
 	width: 100%;
 
 	& > * {
