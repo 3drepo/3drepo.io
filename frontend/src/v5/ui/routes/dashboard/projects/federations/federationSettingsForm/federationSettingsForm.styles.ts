@@ -103,7 +103,7 @@ export const UnitTextField = styled(TextField).attrs((props) => ({
 		}
 		
 		text-transform: none;
-		letter-spacing: 0px;
+		letter-spacing: 0;
 		${(props) => props.theme.typography.caption};
 	}
 `;
