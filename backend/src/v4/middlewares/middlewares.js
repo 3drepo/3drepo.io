@@ -166,12 +166,23 @@
 		next();
 	}
 
-	function formatV5NewFedRevisionsData(req, res, next) {
+	async function formatV5NewFedRevisionsData(req, res, next) {
 		req.params.teamspace = req.params.account;
 		req.params.federation = req.params.model;
-		if(req.body?.containers?.length) {
-			req.body.containers = req.body.containers.map(({model}) => model);
+
+		const { findOneProject } = require("../models/project");
+
+		try {
+			const { _id : projectId} = await findOneProject(req.params.teamspace, { models: req.params.federation}, {_id: 1});
+			req.params.project = projectId;
+		} catch(err) {
+			// do nothing if it errored, the next middleware will sort this out.
 		}
+
+		if(req.body?.subModels?.length) {
+			req.body.containers = req.body.subModels.map(({model}) => model);
+		}
+
 		next();
 	}
 
