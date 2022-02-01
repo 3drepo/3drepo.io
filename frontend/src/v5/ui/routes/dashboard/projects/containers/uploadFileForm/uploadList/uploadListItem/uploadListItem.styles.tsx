@@ -16,36 +16,36 @@
  */
 
 import { CircleButton } from '@controls/circleButton';
-import * as EllipsisButtonStyles from '@controls/ellipsisButton/ellipsisButton.styles';
 import { TextField } from '@material-ui/core';
 import styled from 'styled-components';
 
 export const Input = styled(TextField)`
-	margin: 0;
+	margin: 0 7px;
 	width: 200px;
+	${({ $selectedrow, theme }) => $selectedrow && `
+		div { background-color: ${theme.palette.secondary.light} }
+		&&& input { color: ${theme.palette.primary.contrast} }
+		&& fieldset { border-color: transparent; }
+	`}
 `;
 
 export const Button = styled(CircleButton)`
-	margin: 0 5px;
-	color: ${({ theme }) => theme.palette.secondary.light};
-
-	&& path {
-		stroke: ${({ theme }) => theme.palette.secondary.main};
-		fill: none;
-	} 
-
-	&:hover {
-		${EllipsisButtonStyles.StyledIconButton} {
-			circle {
-				fill: ${({ theme }) => theme.palette.primary.contrast};
+	&&&&& {
+		:hover { 
+				background-color: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.secondary.light : theme.palette.secondary.lightest)}
 			}
+	}
+	&& {
+		background-color: transparent;
+		path { 
+			stroke: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.primary.contrast : theme.palette.secondary.main)}
 		}
 	}
 `;
 
 export const DeleteButton = styled(Button)`
 	&& path {
-			stroke: none;
-			fill: ${({ theme }) => theme.palette.secondary.main};
+		stroke: none;
+		fill: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.primary.contrast : theme.palette.secondary.main)}
 	}
 `;

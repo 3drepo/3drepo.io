@@ -268,7 +268,6 @@ export const theme = createMuiTheme({
 				paddingTop: 7,
 				paddingBottom: 22,
 				flex: 0,
-				backgroundColor: COLOR.TERTIARY_LIGHTEST,
 			},
 		},
 		MuiDialogContentText: {
@@ -434,7 +433,7 @@ export const theme = createMuiTheme({
 					'&$disabled $path': {
 						fill: COLOR.BASE_LIGHT,
 					},
-					'&$error $input': {
+					'&&$error $input': {
 						color: COLOR.ERROR_MAIN,
 					},
 					'&$error': {
@@ -442,6 +441,13 @@ export const theme = createMuiTheme({
 					},
 					'&$error $path': {
 						fill: COLOR.ERROR_MAIN,
+					},
+				},
+				adornedStart: {
+					'& $svg': {
+						height: '15px',
+						overflow: 'clip',
+						margin: '3px -7px 0 0',
 					},
 				},
 			},

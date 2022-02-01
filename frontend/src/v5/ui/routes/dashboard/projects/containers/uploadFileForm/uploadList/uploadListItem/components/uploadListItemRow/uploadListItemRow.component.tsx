@@ -19,13 +19,23 @@ import React from 'react';
 import { Container } from './uploadListItemRow.styles';
 
 type IUploadListItemRow = {
+	selected: boolean;
 	onClick: () => void;
 	onChange: () => void;
 	children: React.ReactNode;
 };
 
-export const UploadListItemRow = ({ onClick, onChange, children }: IUploadListItemRow): JSX.Element => (
-	<Container onClick={onClick} onChange={onChange}>
+export const UploadListItemRow = ({
+	onClick,
+	onChange,
+	selected,
+	children,
+}: IUploadListItemRow): JSX.Element => (
+	<Container
+		selected={selected}
+		onClick={onClick}
+		onChange={onChange}
+	>
 		{children}
 	</Container>
 );

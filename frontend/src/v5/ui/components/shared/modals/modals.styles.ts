@@ -65,6 +65,6 @@ export const CircledIcon = styled.div`
 	svg {
 		height: 100%;
 		width: auto;
-		path { fill: ${({ colour, theme }) => (colour || theme.palette.primary.main)} };
+		path { fill: ${({ colour, theme }) => (colour || theme.palette.primary.main)} }
 	}
 `;

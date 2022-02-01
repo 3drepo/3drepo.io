@@ -15,18 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { DashboardListItemRow } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import styled from 'styled-components';
 
-export const Container = styled.li`
+export const Container = styled(DashboardListItemRow)`
 	height: 51px;
 	width: 100%;
-	border: 1px solid #D0D9EB;
+	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 	border-bottom-style: none;
-	background: #fff;
 	box-sizing: border-box;
-	display: inline-flex;
-	align-items: center;
-	cursor: pointer;
 	&:first-child {
 		border-top-left-radius: 5px;
 		border-top-right-radius: 5px;

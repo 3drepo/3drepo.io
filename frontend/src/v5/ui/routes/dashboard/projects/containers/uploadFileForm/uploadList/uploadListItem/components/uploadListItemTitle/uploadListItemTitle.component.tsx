@@ -15,24 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import React from 'react';
-import { Filename, Filesize } from './uploadListItemTitle.styles';
+
+import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
+import { Tooltip } from '@material-ui/core';
+import { Container, Filename, Filesize } from './uploadListItemTitle.styles';
 
 type IUploadListItemTitle = {
 	name: string;
 	filesize: string;
+	selectedrow: boolean;
 };
 
-export const UploadListItemTitle = ({ name, filesize }: IUploadListItemTitle): JSX.Element => (
+export const UploadListItemTitle = ({ name, filesize, selectedrow }: IUploadListItemTitle): JSX.Element => (
 	<FixedOrGrowContainer>
-		<div>
-			<Filename>
-				{name}
-			</Filename>
-			<Filesize>
-				{filesize}
-			</Filesize>
-		</div>
+		<Tooltip title={name} placement="bottom-start">
+			<Container>
+				<Filename focused={selectedrow} $focused={selectedrow} $selectedrow={selectedrow}>
+					{name}
+				</Filename>
+				<Filesize>
+					{filesize}
+				</Filesize>
+			</Container>
+		</Tooltip>
 	</FixedOrGrowContainer>
 );

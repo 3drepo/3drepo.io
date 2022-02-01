@@ -17,12 +17,14 @@
 
 import React from 'react';
 import DeleteIcon from '@assets/icons/delete.svg';
+import ErrorIcon from '@assets/icons/error_circle.svg';
 import EditIcon from '@assets/icons/edit.svg';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import filesize from 'filesize';
 import { UploadItemFields } from '@/v5/store/containers/containers.types';
 import { ListItemSchema } from '@/v5/validation/containers';
+import { Tooltip } from '@material-ui/core';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
 import { UploadListItemTitle } from './components/uploadListItemTitle/uploadListItemTitle.component';
@@ -30,6 +32,8 @@ import { Button, DeleteButton, Input } from './uploadListItem.styles';
 
 type IUploadListItem = {
 	item: UploadItemFields;
+	isSelected: boolean;
+	onClickRow: () => void;
 	onClickEdit: () => void;
 	onClickDelete: () => void;
 	onChange: (val) => void;
@@ -37,8 +41,10 @@ type IUploadListItem = {
 
 export const UploadListItem = ({
 	item,
+	onClickRow,
 	onClickEdit,
 	onClickDelete,
+	isSelected,
 	onChange,
 }: IUploadListItem): JSX.Element => {
 	const { control, getValues, formState: { errors } } = useForm({
@@ -48,13 +54,17 @@ export const UploadListItem = ({
 	});
 
 	return (
-		<UploadListItemRow key={item.id} onClick={() => { }} onChange={() => onChange(getValues())}>
-			<span>
-				<UploadListItemFileIcon extension={item.extension} />
-			</span>
+		<UploadListItemRow
+			key={item.id}
+			onClick={onClickRow}
+			onChange={() => onChange(getValues())}
+			selected={isSelected}
+		>
+			<UploadListItemFileIcon extension={item.extension} />
 			<UploadListItemTitle
 				name={item.file.name}
 				filesize={filesize(item.file.size)}
+				selectedrow={isSelected}
 			/>
 			<Controller
 				control={control}
@@ -75,15 +85,26 @@ export const UploadListItem = ({
 					field: { ref, ...extras },
 				}) => (
 					<Input
+						$selectedrow={isSelected}
 						error={!!errors.revisionTag}
+						// helperText={errors.revisionTag && 'Icon'}
+						InputProps={{
+							startAdornment: !!errors.revisionTag && (
+								<Tooltip title={errors.revisionTag.message} placement="bottom-start">
+									<span>
+										<ErrorIcon />
+									</span>
+								</Tooltip>
+							),
+						}}
 						{...extras}
 					/>
 				)}
 			/>
-			<Button onClick={onClickEdit}>
+			<Button $selectedrow={isSelected} onClick={onClickEdit}>
 				<EditIcon />
 			</Button>
-			<DeleteButton onClick={onClickDelete}>
+			<DeleteButton $selectedrow={isSelected} onClick={onClickDelete}>
 				<DeleteIcon />
 			</DeleteButton>
 		</UploadListItemRow>
