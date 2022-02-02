@@ -286,6 +286,7 @@ const testGetFederationList = () => {
 
 const formatToStats = (fed, issueCount, riskCount, latestRev) => {
 	const formattedStats = {
+		...(fed.properties.desc ? { desc: fed.properties.desc } : {}),
 		code: fed.properties.properties.code,
 		status: fed.properties.status,
 		subModels: fed.properties.subModels

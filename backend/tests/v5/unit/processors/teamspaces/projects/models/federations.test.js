@@ -66,13 +66,13 @@ const federationSettings = {
 		},
 		status: 'ok',
 		subModels: [{ model: 'container1' }, { model: 'container2' }],
-		category: 'category 1',
 		defaultView: 2,
 		defaultLegend: 3,
 		permissions: [1, 2, 3],
 		angleFromNorth: 10,
 		timestamp: new Date(),
 		surveyPoints: [123],
+		desc: 'This is a fed',
 		errorReason: {
 			message: 'error reason',
 			timestamp: 123,
@@ -89,7 +89,6 @@ const federationSettings = {
 		},
 		status: 'processing',
 		subModels: [{ model: 'container3' }],
-		category: 'category 2',
 	},
 	federation3: {
 		_id: 3,
@@ -100,7 +99,6 @@ const federationSettings = {
 			code: 'FED3',
 		},
 		status: 'processing',
-		category: 'category 3',
 	},
 };
 
@@ -247,10 +245,10 @@ const testDeleteFavourites = () => {
 };
 
 const formatToStats = (settings, issueCount, riskCount, lastUpdated) => ({
+	...(settings.desc ? { desc: settings.desc } : {}),
 	code: settings.properties.code,
 	status: settings.status,
 	subModels: settings.subModels,
-	category: settings.category,
 	lastUpdated,
 	tickets: {
 		issues: issueCount ?? 0,
