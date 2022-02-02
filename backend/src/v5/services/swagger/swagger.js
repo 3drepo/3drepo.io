@@ -21,6 +21,7 @@ const { v4Path } = require('../../../interop');
 // FIXME: can remove the disable once we migrated config
 // eslint-disable-next-line
 const { apiUrls } = require(`${v4Path}/config`);
+let docs;
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
@@ -42,7 +43,7 @@ const options = {
 };
 
 const setupDocEndpoint = (app) => {
-	const docs = swaggerJsdoc(options);
+	docs = swaggerJsdoc(options);
 	docs.components = docs.components || {};
 	docs.components = { ...docs.components, ...Schemas };
 	const uiOptions = {

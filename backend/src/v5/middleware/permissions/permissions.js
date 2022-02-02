@@ -23,10 +23,10 @@ const {
 const { hasReadAccessToLicense, hasReadAccessToSystemRoles, hasWriteAccessToLicense,
 	hasWriteAccessToSystemRoles,
 } = require('./components/admin');
+const { isLoggedIn, validSession } = require('../auth');
 const { convertAllUUIDs } = require('../dataConverter/pathParams');
 const { isProjectAdmin } = require('./components/projects');
 const { isTeamspaceMember } = require('./components/teamspaces');
-const { isLoggedIn, validSession } = require('../auth');
 const { validateMany } = require('../common');
 
 const Permissions = {};

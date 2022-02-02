@@ -15,25 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { SYSTEM_ADMIN, SYSTEM_ROLES } = require('../utils/permissions/permissions.constants');
 const { createResponseCode, templates } = require('../utils/responseCodes');
 const { getUsersWithRole,
 	grantAdministrativeRole,
 	hasAdministrativeRole,
 	revokeAdministrativeRole,
 } = require('../models/users');
-const { SYSTEM_ADMIN, SYSTEM_ROLES } = require('../utils/permissions/permissions.constants');
 const { getArrayDifference } = require('../utils/helper/arrays');
 const { logger } = require('../utils/logger');
 
-const Admin = {};
-
-Admin.getUsersWithRole = async (users, roles) => {
-	const returnUsers = await getUsersWithRole(users, roles);
-	if (!returnUsers) throw createResponseCode(templates.userNotFound, 'No users found that match the query.');
-	return returnUsers;
-};
-
-const grantRolesToUser = async (currentUser,user,roles) => {
+const grantRolesToUser = async (currentUser, user, roles) => {
 	const results = roles.map(async (role) => {
 		const userHasRole = await hasAdministrativeRole(user, role);
 		if (!userHasRole) {
@@ -44,10 +36,10 @@ const grantRolesToUser = async (currentUser,user,roles) => {
 				logger.logError(`${currentUser} failed to grant ${role} to ${user}: ${grantedRole}`);
 			}
 		}
-	})
+	});
 	return Promise.all(results);
-}
-const revokeRolesFromUser = async (currentUser,user,roles) => {
+};
+const revokeRolesFromUser = async (currentUser, user, roles) => {
 	const results = roles.map(async (role) => {
 		const userHasRole = await hasAdministrativeRole(user, role);
 		const safeToContinue = !(user === currentUser && role === SYSTEM_ADMIN && userHasRole);
@@ -67,28 +59,36 @@ const revokeRolesFromUser = async (currentUser,user,roles) => {
 		return true;
 	});
 	return Promise.all(results);
-}
+};
 
-Admin.putUsersRoles = async (currentUser,users) => {
-	let putUsers = []
+const Admin = {};
+
+Admin.getUsersWithRole = async (users, roles) => {
+	const returnUsers = await getUsersWithRole(users, roles);
+	if (!returnUsers) throw createResponseCode(templates.userNotFound, 'No users found that match the query.');
+	return returnUsers;
+};
+
+Admin.putUsersRoles = async (currentUser, users) => {
+	const putUsers = [];
 	const results = users.map(async (user) => {
-		putUsers.push(user.user)
-		await grantRolesToUser(currentUser,user.user,user.roles)
+		putUsers.push(user.user);
+		await grantRolesToUser(currentUser, user.user, user.roles);
 	});
 	await Promise.all(results);
-	return await getUsersWithRole(putUsers);
+	return getUsersWithRole(putUsers);
 };
 
 Admin.patchUsersRoles = async (currentUser, users) => {
-	let patchUsers = []
+	const patchUsers = [];
 	const results = users.map(async (user) => {
-		patchUsers.push(user.user)
-		const missingRoles = await getArrayDifference(user.roles,SYSTEM_ROLES)
-		await revokeRolesFromUser(currentUser,user.user,missingRoles)
-		await grantRolesToUser(currentUser,user.user,user.roles)
+		patchUsers.push(user.user);
+		const missingRoles = await getArrayDifference(user.roles, SYSTEM_ROLES);
+		await revokeRolesFromUser(currentUser, user.user, missingRoles);
+		await grantRolesToUser(currentUser, user.user, user.roles);
 	});
 	await Promise.all(results);
-	return await getUsersWithRole(patchUsers);
+	return getUsersWithRole(patchUsers);
 };
 
 module.exports = Admin;

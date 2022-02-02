@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { SYSTEM_ADMIN, LICENSE_ADMIN, SUPPORT_ADMIN } = require('../../../../../src/v5/utils/permissions/permissions.constants');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../helper/services');
 const { src } = require('../../../helper/path');
 const session = require('supertest-session');
-const AdminProcessor = require('../../../../../src/v5/processors/admin')
+const AdminProcessor = require('../../../../../src/v5/processors/admin');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -36,102 +37,19 @@ const testAdminUserEmail = 'system_admin@email.com';
 const testSupportUserEmail = 'support_admin@email.com';
 const testLicenseUserEmail = 'license_admin@email.com';
 
+const goldenAdminUser = { users: [{ user: testAdminUser.user, roles: [SYSTEM_ADMIN] }] };
+// const goldenLicenseUser = { users: [{ user: testLicenseUser.user, roles: [LICENSE_ADMIN] }] };
+// const goldenSupportUser = { users: [{ user: testSupportUser.user, roles: [SUPPORT_ADMIN] }] };
+// const goldenAllUsers = { users: [...goldenAdminUser.users, ...goldenLicenseUser.users, ...goldenSupportUser.users] };
+
 const setupData = async () => {
 	await Promise.all([
 		ServiceHelper.db.createUser(testAdminUser, [], { email: testAdminUserEmail }),
-		AdminProcessor.grantRolesToUser("testing",[testAdminUser.user],[AdminProcessor.SYSTEM_ADMIN]),
+		AdminProcessor.grantRolesToUser('testing', [testAdminUser.user], [SYSTEM_ADMIN]),
 		ServiceHelper.db.createUser(testLicenseUser, [], { email: testLicenseUserEmail }),
 		ServiceHelper.db.createUser(testSupportUser, [], { email: testSupportUserEmail }),
 	]);
 };
-
-// const testLogin = () => {
-// 	describe('Login user', () => {
-// 		test('should log in a user using username', async () => {
-// 			await agent.post('/v5/login/')
-// 				.send({ user: testAdminUser.user, password: testAdminUser.password })
-// 				.expect(templates.ok.status);
-// 		});
-
-// 		test('should log in a user using email', async () => {
-// 			await agent.post('/v5/login/')
-// 				.send({ user: userEmail, password: testAdminUser.password })
-// 				.expect(templates.ok.status);
-// 		});
-
-// 		test('should fail with an incorrect username', async () => {
-// 			const res = await agent.post('/v5/login/')
-// 				.send({ user: 'randomUsername', password: testAdminUser.password })
-// 				.expect(templates.incorrectUsernameOrPassword.status);
-// 			expect(res.body.code).toEqual(templates.incorrectUsernameOrPassword.code);
-// 		});
-
-// 		test('should fail with an invalid username', async () => {
-// 			const res = await agent.post('/v5/login/')
-// 				.send({ user: 12345, password: testAdminUser.password })
-// 				.expect(templates.invalidArguments.status);
-// 			expect(res.body.code).toEqual(templates.invalidArguments.code);
-// 		});
-
-// 		test('should fail with a user that has already logged in', async () => {
-// 			await testSession.post('/v5/login/')
-// 				.send({ user: testAdminUser.user, password: testAdminUser.password })
-// 				.expect(templates.ok.status);
-// 			const res = await testSession.post('/v5/login/')
-// 				.send({ user: testAdminUser.user, password: testAdminUser.password })
-// 				.expect(templates.alreadyLoggedIn.status);
-// 			expect(res.body.code).toEqual(templates.alreadyLoggedIn.code);
-// 		});
-
-// 		test('should fail with an incorrect password', async () => {
-// 			const res = await agent.post('/v5/login/')
-// 				.send({ user: testAdminUser.user, password: 'wrongPassword' })
-// 				.expect(templates.incorrectUsernameOrPassword.status);
-// 			expect(res.body.code).toEqual(templates.incorrectUsernameOrPassword.code);
-// 		});
-
-// 		test('should fail with a locked account', async () => {
-// 			const res = await agent.post('/v5/login/')
-// 				.send({ user: lockedUser.user, password: lockedUser.password })
-// 				.expect(templates.tooManyLoginAttempts.status);
-// 			expect(res.body.code).toEqual(templates.tooManyLoginAttempts.code);
-// 		});
-
-// 		test('should log in with a locked account with the lockout duration expired', async () => {
-// 			await agent.post('/v5/login/')
-// 				.send({ user: lockedUserWithExpiredLock.user, password: lockedUserWithExpiredLock.password })
-// 				.expect(templates.ok.status);
-// 		});
-
-// 		test('should fail with wrong password and many failed login attempts', async () => {
-// 			const res = await agent.post('/v5/login/')
-// 				.send({ user: userWithFailedAttempts.user, password: 'wrongPassword' })
-// 				.expect(templates.incorrectUsernameOrPassword.status);
-// 			expect(res.body.code).toEqual(templates.incorrectUsernameOrPassword.code);
-// 			expect(res.body.message).toEqual('Incorrect username or password (Remaining attempts: 3)');
-// 		});
-// 	});
-// };
-
-// const testLogout = () => {
-// 	describe('Logout user', () => {
-// 		test('should fail if the user is not logged in', async () => {
-// 			const res = await agent.post('/v5/logout/').expect(templates.notLoggedIn.status);
-// 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
-// 		});
-
-// 		test('should fail if the user has a session via an API key', async () => {
-// 			const res = await agent.post(`/v5/logout?${testAdminUser.apiKey}`).expect(templates.notLoggedIn.status);
-// 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
-// 		});
-
-// 		test('should log the user out if they are logged in', async () => {
-// 			await testSession.post('/v5/login/').send({ user: testAdminUser.user, password: testAdminUser.password });
-// 			await testSession.post('/v5/logout/').expect(200);
-// 		});
-// 	});
-// };
-
 const testHasSystemRole = () => {
 	describe('This tests getting the existing users and roles assigned', () => {
 		test('should fail if the user is not logged in', async () => {
@@ -144,10 +62,10 @@ const testHasSystemRole = () => {
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
-		test('should return the username if the user is logged in', async () => {
+		test('should return the usernames if the user is logged in', async () => {
 			await testSession.post('/v5/login/').send({ user: testAdminUser.user, password: testAdminUser.password });
 			const res = await testSession.get('/v5/admin/roles/').expect(200);
-			expect(res.body).toEqual({ users: [{ user: testAdminUser.user, roles: [AdminProcessor.SYSTEM_ADMIN] } ] });
+			expect(res.body).toEqual(goldenAdminUser);
 		});
 	});
 };
@@ -169,7 +87,56 @@ const testDoesNotHaveSystemRole = () => {
 			const res = await testSession.get('/v5/admin/roles/').expect(200);
 			expect(res.body.code).toEqual(templates.notAuthorizedForbidden.code);
 		});
+	});
+};
 
+const testSearchUsersAndRoles = () => {
+	describe('This tests a searching for a specific user', () => {
+		test('should succeed', async () => {
+			await testSession.post('/v5/login/').send({ user: testAdminUser.user, password: testAdminUser.password });
+			const res = await testSession.get('/v5/admin/roles/').expect(200);
+			expect(res.body.code).toEqual(templates.ok.status);
+		});
+
+		test('should succeed searching system user', async () => {
+			await testSession.post('/v5/login/').send({ user: testAdminUser.user, password: testAdminUser.password });
+			const res = await testSession.get(`/v5/admin/roles/?user=${testAdminUser.user}`).expect(200);
+			expect(res.body).toEqual(goldenAdminUser);
+		});
+
+		test('should succeed searching system role', async () => {
+			await testSession.post('/v5/login/').send({ user: testAdminUser.user, password: testAdminUser.password });
+			const res = await testSession.get(`/v5/admin/roles/?role=${SYSTEM_ADMIN}`).expect(200);
+			expect(res.body).toEqual(goldenAdminUser);
+		});
+	});
+};
+
+const testPutRoute = () => {
+	describe('This tests putting a set of roles up', () => {
+		test('should fail with a user that has already logged in', async () => {
+			await testSession.post('/v5/login/')
+				.send({ user: testAdminUser.user, password: testAdminUser.password })
+				.expect(templates.ok.status);
+			const res = await testSession.post('/v5/login/')
+				.send({ user: testAdminUser.user, password: testAdminUser.password })
+				.expect(templates.alreadyLoggedIn.status);
+			expect(res.body.code).toEqual(templates.alreadyLoggedIn.code);
+		});
+	});
+};
+
+const testPatchRoute = () => {
+	describe('This tests putting a set of roles up with Patch', () => {
+		test('should fail with a user that has already logged in', async () => {
+			await testSession.post('/v5/login/')
+				.send({ user: testAdminUser.user, password: testAdminUser.password })
+				.expect(templates.ok.status);
+			const res = await testSession.post('/v5/login/')
+				.send({ user: testAdminUser.user, password: testAdminUser.password })
+				.expect(templates.alreadyLoggedIn.status);
+			expect(res.body.code).toEqual(templates.alreadyLoggedIn.code);
+		});
 	});
 };
 
@@ -181,11 +148,10 @@ describe('E2E routes/admin', () => {
 		agent = await SuperTest(server);
 		await setupData();
 	});
-	afterAll(() => ServiceHelper.closeApp(server));
 	testHasSystemRole();
 	testDoesNotHaveSystemRole();
-	testSearchUsers();
-	testSearchRoles();
 	testPutRoute();
 	testPatchRoute();
+	testSearchUsersAndRoles();
+	afterAll(() => ServiceHelper.closeApp(server));
 });

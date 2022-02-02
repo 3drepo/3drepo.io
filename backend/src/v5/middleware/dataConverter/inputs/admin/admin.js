@@ -20,7 +20,6 @@ const Yup = require('yup');
 const { getUserByUsername } = require('../../../../models/users');
 const { isArray } = require('lodash');
 const { respond } = require('../../../../utils/responder');
-const e = require('express');
 
 const Admin = {};
 
@@ -77,17 +76,16 @@ Admin.validateQueries = async (req, res, next) => {
 	}
 };
 
-
-function isSystemRole(element, index, array) {
-	return SYSTEM_ROLES.includes(element) ;
-  }
+function isSystemRole(element) {
+	return SYSTEM_ROLES.includes(element);
+}
 
 Admin.isValidSystemRole = async (roles) => {
-	if (roles.length > 0 ){
-		return roles.some(isSystemRole)
+	if (roles.length > 0) {
+		return roles.some(isSystemRole);
 	}
-	else { return true }
-}
+	return true;
+};
 
 Admin.validateUsersAndRoles = async (req, res, next) => {
 	try {
@@ -95,15 +93,14 @@ Admin.validateUsersAndRoles = async (req, res, next) => {
 		const checkedValues = users.map(async (user) => {
 			const [userExists, roleExists] = await Promise.all([
 				getUserByUsername(user.user),
-				Admin.isValidSystemRole(user.roles)
+				Admin.isValidSystemRole(user.roles),
 			]);
 			if (!userExists) throw createResponseCode(templates.userNotFound, `${user.user} is not a user`);
-			if (!roleExists) throw createResponseCode(templates.roleNotFound, `One of the roles provided is not a system role`);
+			if (!roleExists) throw createResponseCode(templates.roleNotFound, 'One of the roles provided is not a system role');
 		});
 		await Promise.all(checkedValues);
 		next();
 	} catch (err) {
-		console.log(err)
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };
