@@ -28,15 +28,14 @@ import {
 import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision';
 import { Highlight } from '@controls/highlight';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
-import { EllipsisButtonWithMenu } from '@controls/ellipsisButtonWithMenu';
-import { getContainerMenuItems } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.helpers';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { RevisionDetails } from '@components/shared/revisionDetails';
 import { Display } from '@/v5/ui/themes/media';
 import { formatDate } from '@/v5/services/intl';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
-import { ShareModal } from '../../../../../../components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
+import { ShareModal } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
+import { ContainerEllipsisMenu } from './containerEllipsisMenu/containerEllipsisMenu.component';
 
 interface IContainerListItem {
 	index: number;
@@ -147,13 +146,11 @@ export const ContainerListItem = ({
 					</Tooltip>
 				</DashboardListItemIcon>
 				<DashboardListItemIcon selected={isSelected}>
-					<EllipsisButtonWithMenu
-						list={getContainerMenuItems(
-							container,
-							isSelected,
-							onSelectOrToggleItem,
-							() => setShareModalOpen(true),
-						)}
+					<ContainerEllipsisMenu
+						selected={isSelected}
+						container={container}
+						onSelectOrToggleItem={onSelectOrToggleItem}
+						openShareModal={() => setShareModalOpen(true)}
 					/>
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
