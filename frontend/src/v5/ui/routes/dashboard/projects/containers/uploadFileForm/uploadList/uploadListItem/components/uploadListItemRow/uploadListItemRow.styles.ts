@@ -24,6 +24,7 @@ export const Container = styled(DashboardListItemRow)`
 	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 	border-bottom-style: none;
 	box-sizing: border-box;
+	padding: 0 5px;
 	&:first-child {
 		border-top-left-radius: 5px;
 		border-top-right-radius: 5px;

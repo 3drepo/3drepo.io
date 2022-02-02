@@ -39,7 +39,6 @@ export const Content = styled.span`
 `;
 
 export const UploadsListHeader = styled(DashboardListHeader)`
-	padding-left: 54px;
-	padding: 0 20px 13px 54px;
+	padding: 0 20px 13px 20px;
 	margin-top: 0;
 `;

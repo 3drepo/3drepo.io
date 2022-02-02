@@ -31,7 +31,7 @@ export const UploadListItemTitle = ({ name, filesize, selectedrow }: IUploadList
 	<FixedOrGrowContainer>
 		<Tooltip title={name} placement="bottom-start">
 			<Container>
-				<Filename focused={selectedrow} $focused={selectedrow} $selectedrow={selectedrow}>
+				<Filename $selectedrow={selectedrow}>
 					{name}
 				</Filename>
 				<Filesize>
