@@ -15,4 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { UploadListItemRevision } from './uploadListItemRevision.component';
+import React from 'react';
+
+import { Tooltip } from '@material-ui/core';
+import ErrorIcon from '@assets/icons/error_circle.svg';
+import { Input } from './uploadListItemRevisionTag.styles';
+
+type IUploadListItemRevision = {
+	isSelected: boolean;
+	errorMessage?: string;
+};
+
+export const UploadListItemRevisionTag = ({
+	isSelected,
+	errorMessage,
+	...props
+}: IUploadListItemRevision): JSX.Element => (
+	<Input
+		$selectedrow={isSelected}
+		error={!!errorMessage}
+		InputProps={{
+			startAdornment: !!errorMessage && (
+				<Tooltip title={errorMessage} placement="bottom-start">
+					<span>
+						<ErrorIcon />
+					</span>
+				</Tooltip>
+			),
+		}}
+		{...props}
+	/>
+);

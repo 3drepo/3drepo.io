@@ -15,14 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { Container, RevisionInput } from './uploadListItemRevision.styles';
+import styled from 'styled-components';
+import { TextField } from '@material-ui/core';
 
-// type IUploadListItemRevision = {
-// };
-
-export const UploadListItemRevision = (): JSX.Element => (
-	<Container>
-		<RevisionInput>Placeholder</RevisionInput>
-	</Container>
-);
+export const Input = styled(TextField)`
+	margin: 0 7px;
+	width: 200px;
+	${({ $selectedrow, theme }) => $selectedrow && `
+		div { background-color: ${theme.palette.secondary.light} }
+		&&& input { color: ${theme.palette.primary.contrast} }
+		&& fieldset { border-color: transparent; }
+	`}
+`;

@@ -17,18 +17,18 @@
 
 import React from 'react';
 import DeleteIcon from '@assets/icons/delete.svg';
-import ErrorIcon from '@assets/icons/error_circle.svg';
 import EditIcon from '@assets/icons/edit.svg';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import filesize from 'filesize';
 import { UploadItemFields } from '@/v5/store/containers/containers.types';
 import { ListItemSchema } from '@/v5/validation/containers';
-import { Tooltip } from '@material-ui/core';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
 import { UploadListItemTitle } from './components/uploadListItemTitle/uploadListItemTitle.component';
-import { Button, DeleteButton, Input } from './uploadListItem.styles';
+import { Button, DeleteButton } from './uploadListItem.styles';
+import { UploadListItemRevisionTag } from './components/uploadListItemRevisionTag';
+import { UploadListItemDestination } from './components/uploadListItemDestination';
 
 type IUploadListItem = {
 	item: UploadItemFields;
@@ -72,8 +72,8 @@ export const UploadListItem = ({
 				render={({
 					field: { ref, ...extras },
 				}) => (
-					<Input
-						error={!!errors.containerName}
+					<UploadListItemDestination
+						errorMessage={errors.containerName?.message}
 						{...extras}
 					/>
 				)}
@@ -84,19 +84,9 @@ export const UploadListItem = ({
 				render={({
 					field: { ref, ...extras },
 				}) => (
-					<Input
-						$selectedrow={isSelected}
-						error={!!errors.revisionTag}
-						// helperText={errors.revisionTag && 'Icon'}
-						InputProps={{
-							startAdornment: !!errors.revisionTag && (
-								<Tooltip title={errors.revisionTag.message} placement="bottom-start">
-									<span>
-										<ErrorIcon />
-									</span>
-								</Tooltip>
-							),
-						}}
+					<UploadListItemRevisionTag
+						isSelected={isSelected}
+						errorMessage={errors.revisionTag?.message}
 						{...extras}
 					/>
 				)}

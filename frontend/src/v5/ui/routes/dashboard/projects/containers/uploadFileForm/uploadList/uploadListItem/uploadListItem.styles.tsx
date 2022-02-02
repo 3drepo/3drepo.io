@@ -16,18 +16,7 @@
  */
 
 import { CircleButton } from '@controls/circleButton';
-import { TextField } from '@material-ui/core';
 import styled from 'styled-components';
-
-export const Input = styled(TextField)`
-	margin: 0 7px;
-	width: 200px;
-	${({ $selectedrow, theme }) => $selectedrow && `
-		div { background-color: ${theme.palette.secondary.light} }
-		&&& input { color: ${theme.palette.primary.contrast} }
-		&& fieldset { border-color: transparent; }
-	`}
-`;
 
 export const Button = styled(CircleButton)`
 	&&&&& {
