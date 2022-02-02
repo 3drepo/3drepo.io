@@ -14,27 +14,24 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React, { Dispatch, ReactNode } from 'react';
+import React, { ReactNode, SyntheticEvent } from 'react';
 import { Typography } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import { MenuItem } from './ellipsisMenuItem.styles';
 
-interface IEllipsisMenuItem {
+type EllipsisMenuItemLinkProps = {
 	title: ReactNode;
-	to?: string;
-	handleClose: () => void;
-	onClick?: Dispatch<void>;
-}
+	to: string;
+	key?: string;
+	onClick?: (event: SyntheticEvent) => void;
+};
 
-export const EllipsisMenuItem = ({ to, title, onClick, handleClose }: IEllipsisMenuItem) => (
+export const EllipsisMenuItemLink = ({ to, title, key, onClick }: EllipsisMenuItemLinkProps) => (
 	<MenuItem
 		component={to ? Link : null}
 		to={to}
-		onClick={(event) => {
-			event.stopPropagation();
-			onClick?.call(event);
-			handleClose();
-		}}
+		key={key}
+		onClick={onClick}
 	>
 		<Typography variant="body1" noWrap>
 			{title}
