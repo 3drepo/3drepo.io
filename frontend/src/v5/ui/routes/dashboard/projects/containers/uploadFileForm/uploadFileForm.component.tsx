@@ -24,11 +24,13 @@ import { formatMessage } from '@/v5/services/intl';
 import { Sidebar } from '@controls/sideBar';
 import { UploadFieldArray, UploadSidebarFields } from '@/v5/store/containers/containers.types';
 import { UploadsSchema } from '@/v5/validation/containers';
-import { UploadListHeader } from './uploadListHeader';
-import { UploadListHeaderLabel } from './uploadListHeader/uploadListHeaderLabel';
+import { DashboardListHeaderLabel } from '@components/dashboard/dashboardList';
+import { FormattedMessage } from 'react-intl';
+import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
+import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
-import { Container, Content, DropZone } from './uploadFileForm.styles';
+import { Container, Content, DropZone, UploadsListHeader } from './uploadFileForm.styles';
 import { Title } from './sidebarForm/sidebarForm.styles';
 
 type IUploadFileForm = {
@@ -47,6 +49,12 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		control,
 		name: 'uploads',
 	});
+
+	const DEFAULT_SORT_CONFIG = {
+		column: 'file.name',
+		direction: SortingDirection.DESCENDING,
+	};
+	const { sortedList, setSortConfig } = useOrderedList(fields, DEFAULT_SORT_CONFIG);
 
 	const processFiles = (files) => {
 		const filesToAppend = [];
@@ -99,19 +107,21 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 			>
 				<Container>
 					<Content>
-						<UploadListHeader>
-							<UploadListHeaderLabel name="filename">
-								<span> Filename </span>
-							</UploadListHeaderLabel>
-							<UploadListHeaderLabel name="destination">
-								<span> Destination </span>
-							</UploadListHeaderLabel>
-							<UploadListHeaderLabel name="revisionName">
-								<span> Revision Name </span>
-							</UploadListHeaderLabel>
-						</UploadListHeader>
+						<div hidden={!fields.length}>
+							<UploadsListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
+								<DashboardListHeaderLabel name="file">
+									<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
+								</DashboardListHeaderLabel>
+								<DashboardListHeaderLabel name="containerName" width={285}>
+									<FormattedMessage id="uploads.list.header.destination" defaultMessage="Destination" />
+								</DashboardListHeaderLabel>
+								<DashboardListHeaderLabel name="revisionTag" width={297}>
+									<FormattedMessage id="uploads.list.header.revisionName" defaultMessage="Revision Name" />
+								</DashboardListHeaderLabel>
+							</UploadsListHeader>
+						</div>
 						<UploadList
-							values={fields}
+							values={sortedList}
 							onClickEdit={(id) => onClickEdit(id)}
 							onClickDelete={(id) => onClickDelete(id)}
 						/>

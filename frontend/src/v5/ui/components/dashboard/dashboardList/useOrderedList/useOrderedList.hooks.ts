@@ -38,6 +38,10 @@ export const useOrderedList = <T>(items: T[], defaultConfig: ISortConfig) => {
 				return a[column].getTime() - b[column].getTime();
 			}
 
+			if (a[column] instanceof File) {
+				return a[column].name.localeCompare(b[column].name);
+			}
+
 			return 0;
 		};
 
