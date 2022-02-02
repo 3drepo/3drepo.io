@@ -20,7 +20,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { useDispatch } from 'react-redux';
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
-import { EllipsisMenuItemLink } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
+import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 
@@ -36,7 +36,7 @@ export const FederationEllipsisMenu = ({
 
 	return (
 		<EllipsisMenu>
-			<EllipsisMenuItemLink
+			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'federations.ellipsisMenu.loadFederation',
 					defaultMessage: 'Load Federation in 3D Viewer',
@@ -44,49 +44,49 @@ export const FederationEllipsisMenu = ({
 				to={`/${federation._id}`}
 			/>
 
-			<EllipsisMenuItemLink
+			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'federations.ellipsisMenu.edit',
 					defaultMessage: 'Edit Federation',
 				})}
 			/>
 
-			<EllipsisMenuItemLink
+			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'federations.ellipsisMenu.viewIssues',
 					defaultMessage: 'View Issues',
 				})}
 			/>
 
-			<EllipsisMenuItemLink
+			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'federations.ellipsisMenu.viewRisks',
 					defaultMessage: 'View Risks',
 				})}
 			/>
 
-			<EllipsisMenuItemLink
+			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'federations.ellipsisMenu.editPermissions',
 					defaultMessage: 'Edit Permissions',
 				})}
 			/>
 
-			<EllipsisMenuItemLink
+			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'federations.ellipsisMenu.shareContainer',
 					defaultMessage: 'Share Container',
 				})}
 			/>
 
-			<EllipsisMenuItemLink
+			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'federations.ellipsisMenu.settings',
 					defaultMessage: 'Settings',
 				})}
 			/>
 
-			<EllipsisMenuItemLink
+			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'federations.ellipsisMenu.delete',
 					defaultMessage: 'Delete',
