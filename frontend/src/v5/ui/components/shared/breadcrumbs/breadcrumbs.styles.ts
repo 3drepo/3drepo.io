@@ -32,12 +32,16 @@ export const InteractiveBreadcrumb = styled(Button).attrs({
 	&& {
 		${({ theme }) => theme.typography.h3};
 		color: ${({ theme }) => theme.palette.primary.main};
-		padding: 5px 9px;
-		margin: 0;
+		padding: 5px 9px 5px 5px;
+		margin: 0 0 0 4px;
 		max-width: 100%;
 
 		&:hover {
 			text-decoration: none;
+		}
+
+		&.MuiButton-text.Mui-focusVisible {
+			background-color: ${({ theme }) => theme.palette.secondary.mid};
 		}
 	}
 `;
