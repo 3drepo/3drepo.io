@@ -29,13 +29,12 @@ import {
 import { Highlight } from '@controls/highlight';
 import { Tooltip } from '@material-ui/core';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
-import { EllipsisButtonWithMenu } from '@controls/ellipsisButtonWithMenu';
-import { getFederationMenuItems } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/federationsList.helpers';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { Display } from '@/v5/ui/themes/media';
 import { ShareModal } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
+import { FederationEllipsisMenu } from './federationEllipsisMenu/federationEllipsisMenu.component';
 
 interface IFederationListItem {
 	index: number;
@@ -152,11 +151,9 @@ export const FederationListItem = ({
 					</Tooltip>
 				</DashboardListItemIcon>
 				<DashboardListItemIcon>
-					<EllipsisButtonWithMenu
-						list={getFederationMenuItems(
-							federation,
-							() => setShareModalOpen(true),
-						)}
+					<FederationEllipsisMenu
+						federation={federation}
+						openFederationSettings={() => setShareModalOpen(true)}
 					/>
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
