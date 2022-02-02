@@ -21,7 +21,7 @@ import { ISortConfig } from '../useOrderedList';
 import { DashboardListHeaderContainer } from './dashboardListHeader.styles';
 
 type IDashboardListHeader = {
-	className: string;
+	className?: string;
 	onSortingChange: Dispatch<ISortConfig>;
 	children: JSX.Element[];
 	defaultSortConfig: ISortConfig;
