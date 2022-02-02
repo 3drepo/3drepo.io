@@ -20,7 +20,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { useDispatch } from 'react-redux';
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
-import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
+import { EllipsisMenuItemLink } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 
@@ -36,7 +36,7 @@ export const FederationEllipsisMenu = ({
 
 	return (
 		<EllipsisMenu>
-			<EllipsisMenuItem
+			<EllipsisMenuItemLink
 				title={formatMessage({
 					id: 'federations.ellipsisMenu.loadFederation',
 					defaultMessage: 'Load Federation in 3D Viewer',
@@ -45,7 +45,7 @@ export const FederationEllipsisMenu = ({
 				onClick={() => { }}
 			/>
 
-			<EllipsisMenuItem
+			<EllipsisMenuItemLink
 				title={formatMessage({
 					id: 'federations.ellipsisMenu.edit',
 					defaultMessage: 'Edit Federation',
@@ -54,7 +54,7 @@ export const FederationEllipsisMenu = ({
 				onClick={() => { }}
 			/>
 
-			<EllipsisMenuItem
+			<EllipsisMenuItemLink
 				title={formatMessage({
 					id: 'federations.ellipsisMenu.viewIssues',
 					defaultMessage: 'View Issues',
@@ -63,7 +63,7 @@ export const FederationEllipsisMenu = ({
 				onClick={() => { }}
 			/>
 
-			<EllipsisMenuItem
+			<EllipsisMenuItemLink
 				title={formatMessage({
 					id: 'federations.ellipsisMenu.viewRisks',
 					defaultMessage: 'View Risks',
@@ -72,7 +72,7 @@ export const FederationEllipsisMenu = ({
 				onClick={() => { }}
 			/>
 
-			<EllipsisMenuItem
+			<EllipsisMenuItemLink
 				title={formatMessage({
 					id: 'federations.ellipsisMenu.editPermissions',
 					defaultMessage: 'Edit Permissions',
@@ -81,7 +81,7 @@ export const FederationEllipsisMenu = ({
 				onClick={() => { }}
 			/>
 
-			<EllipsisMenuItem
+			<EllipsisMenuItemLink
 				title={formatMessage({
 					id: 'federations.ellipsisMenu.shareContainer',
 					defaultMessage: 'Share Container',
@@ -90,7 +90,7 @@ export const FederationEllipsisMenu = ({
 				onClick={() => { }}
 			/>
 
-			<EllipsisMenuItem
+			<EllipsisMenuItemLink
 				title={formatMessage({
 					id: 'federations.ellipsisMenu.settings',
 					defaultMessage: 'Settings',
@@ -99,7 +99,7 @@ export const FederationEllipsisMenu = ({
 				onClick={() => { }}
 			/>
 
-			<EllipsisMenuItem
+			<EllipsisMenuItemLink
 				title={formatMessage({
 					id: 'federations.ellipsisMenu.delete',
 					defaultMessage: 'Delete',

@@ -15,4 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { EllipsisMenuItem } from './ellipsisMenutItem.component';
+export { EllipsisMenuItemLink } from './ellipsisMenutItem.component';
