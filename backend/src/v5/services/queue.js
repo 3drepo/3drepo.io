@@ -201,10 +201,8 @@ Queue.queueFederationUpdate = async (teamspace, federation, info) => {
 
 		const filePath = `${SHARED_SPACE_TAG}/${corId}/obj.json`;
 
-		await Promise.all([
-			mkdir(`${sharedDir}/${corId}`),
-			writeFile(`${sharedDir}/${corId}/obj.json`, JSON.stringify(data)),
-		]);
+		await mkdir(`${sharedDir}/${corId}`);
+		await writeFile(`${sharedDir}/${corId}/obj.json`, JSON.stringify(data));
 
 		await queueFederationJob(corId, teamspace, filePath);
 		publish(events.QUEUED_TASK_UPDATE, { teamspace, federation, corId, status: 'queued' });
@@ -212,7 +210,7 @@ Queue.queueFederationUpdate = async (teamspace, federation, info) => {
 		// Clean up files we created
 		rm(`${sharedDir}/${corId}/obj.json`).catch((cleanUpErr) => {
 			logger.logError(`Failed to remove files (clean up on failure : ${cleanUpErr}`);
-		});
+		}).catch(() => {});
 
 		if (err?.code && codeExists(err.code)) {
 			throw err;
