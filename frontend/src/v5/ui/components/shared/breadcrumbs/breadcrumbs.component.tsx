@@ -68,7 +68,8 @@ export const Breadcrumbs = (): JSX.Element => {
 			currentActions: formatMessage({ id: 'breadCrumbs.projectFetchError.title', defaultMessage: 'trying to find project' }),
 			errorMessage: formatMessage({
 				id: 'breadCrumbs.projectFetchError.details',
-				defaultMessage: 'The project with id "{project}" was not found.' },
+				defaultMessage: 'The project with id "{project}" was not found.',
+			},
 			{
 				project,
 			}),
@@ -113,11 +114,9 @@ export const Breadcrumbs = (): JSX.Element => {
 				<HomeIcon />
 			</HomeIconBreadcrumb>
 
-			{breadcrumbs.map((title, index) => {
-				const isLastItem = (breadcrumbs.length - 1) === index;
-
-				if (isLastItem) {
-					return (
+			{breadcrumbs.map((title, index) => (
+				(breadcrumbs.length - 1) === index
+					? (
 						<div key={`${title}`}>
 							<InteractiveBreadcrumb onClick={handleClick} endIcon={<DownArrowIcon />}>
 								<OverflowWrapper>
@@ -131,15 +130,12 @@ export const Breadcrumbs = (): JSX.Element => {
 								handleClose={handleClose}
 							/>
 						</div>
-					);
-				}
-
-				return (
-					<Breadcrumb key={title} color="inherit" to={teamspaceTo}>
-						{title}
-					</Breadcrumb>
-				);
-			})}
+					) : (
+						<Breadcrumb key={title} color="inherit" to={teamspaceTo}>
+							{title}
+						</Breadcrumb>
+					)
+			))}
 		</Container>
 	);
 };

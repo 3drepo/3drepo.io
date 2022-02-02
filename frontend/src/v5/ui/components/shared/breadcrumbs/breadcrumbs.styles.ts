@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Button, Breadcrumbs } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import { TextOverflow } from '@controls/textOverflow';
@@ -23,6 +23,16 @@ import { TextOverflow } from '@controls/textOverflow';
 export const Container = styled(Breadcrumbs)`
 	&& {
 		margin-left: 15px;
+	}
+`;
+
+const BreadcrumbTabbedStyle = css`
+	&:hover {
+		text-decoration: none;
+	}
+
+	&.MuiButton-text.Mui-focusVisible {
+		background-color: ${({ theme }) => theme.palette.secondary.mid};
 	}
 `;
 
@@ -36,13 +46,7 @@ export const InteractiveBreadcrumb = styled(Button).attrs({
 		margin: 0 0 0 4px;
 		max-width: 100%;
 
-		&:hover {
-			text-decoration: none;
-		}
-
-		&.MuiButton-text.Mui-focusVisible {
-			background-color: ${({ theme }) => theme.palette.secondary.mid};
-		}
+		${BreadcrumbTabbedStyle}
 	}
 `;
 
@@ -52,10 +56,10 @@ export const Breadcrumb = styled(Button).attrs({
 })`
 	&& {
 		color: ${({ theme }) => theme.palette.primary.contrast};
+		padding: 5px;
+		margin: 0 4px;
 
-		&:hover {
-			text-decoration: none;
-		}
+		${BreadcrumbTabbedStyle}
 	}
 `;
 
