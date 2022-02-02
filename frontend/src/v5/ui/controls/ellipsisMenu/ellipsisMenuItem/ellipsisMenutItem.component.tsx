@@ -19,14 +19,14 @@ import { Typography } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import { MenuItem } from './ellipsisMenuItem.styles';
 
-type EllipsisMenuItemLinkProps = {
+type EllipsisMenuItemProps = {
 	title: ReactNode;
-	to: string;
+	to?: string;
 	key?: string;
 	onClick?: (event: SyntheticEvent) => void;
 };
 
-export const EllipsisMenuItemLink = ({ to, title, key, onClick }: EllipsisMenuItemLinkProps) => (
+export const EllipsisMenuItem = ({ to, title, key, onClick }: EllipsisMenuItemProps) => (
 	<MenuItem
 		component={to ? Link : null}
 		to={to}

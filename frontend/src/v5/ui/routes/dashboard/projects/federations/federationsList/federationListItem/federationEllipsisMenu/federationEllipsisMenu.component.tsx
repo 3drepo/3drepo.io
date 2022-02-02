@@ -42,7 +42,6 @@ export const FederationEllipsisMenu = ({
 					defaultMessage: 'Load Federation in 3D Viewer',
 				})}
 				to={`/${federation._id}`}
-				onClick={() => { }}
 			/>
 
 			<EllipsisMenuItemLink
@@ -50,8 +49,6 @@ export const FederationEllipsisMenu = ({
 					id: 'federations.ellipsisMenu.edit',
 					defaultMessage: 'Edit Federation',
 				})}
-				to=""
-				onClick={() => { }}
 			/>
 
 			<EllipsisMenuItemLink
@@ -59,8 +56,6 @@ export const FederationEllipsisMenu = ({
 					id: 'federations.ellipsisMenu.viewIssues',
 					defaultMessage: 'View Issues',
 				})}
-				to=""
-				onClick={() => { }}
 			/>
 
 			<EllipsisMenuItemLink
@@ -68,8 +63,6 @@ export const FederationEllipsisMenu = ({
 					id: 'federations.ellipsisMenu.viewRisks',
 					defaultMessage: 'View Risks',
 				})}
-				to=""
-				onClick={() => { }}
 			/>
 
 			<EllipsisMenuItemLink
@@ -77,8 +70,6 @@ export const FederationEllipsisMenu = ({
 					id: 'federations.ellipsisMenu.editPermissions',
 					defaultMessage: 'Edit Permissions',
 				})}
-				to=""
-				onClick={() => { }}
 			/>
 
 			<EllipsisMenuItemLink
@@ -86,8 +77,6 @@ export const FederationEllipsisMenu = ({
 					id: 'federations.ellipsisMenu.shareContainer',
 					defaultMessage: 'Share Container',
 				})}
-				to=""
-				onClick={() => { }}
 			/>
 
 			<EllipsisMenuItemLink
@@ -95,8 +84,6 @@ export const FederationEllipsisMenu = ({
 					id: 'federations.ellipsisMenu.settings',
 					defaultMessage: 'Settings',
 				})}
-				to=""
-				onClick={() => { }}
 			/>
 
 			<EllipsisMenuItemLink
@@ -104,7 +91,6 @@ export const FederationEllipsisMenu = ({
 					id: 'federations.ellipsisMenu.delete',
 					defaultMessage: 'Delete',
 				})}
-				to=""
 				onClick={() => {
 					dispatch(DialogsActions.open('delete', {
 						title: formatMessage(

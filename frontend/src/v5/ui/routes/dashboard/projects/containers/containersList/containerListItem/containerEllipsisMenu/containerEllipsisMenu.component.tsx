@@ -22,7 +22,7 @@ import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/c
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { useDispatch } from 'react-redux';
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
-import { EllipsisMenuItemLink } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
+import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 
 type ContainerEllipsisMenuProps = {
 	selected: boolean,
@@ -42,84 +42,68 @@ export const ContainerEllipsisMenu = ({
 
 	return (
 		<EllipsisMenu>
-			<EllipsisMenuItemLink
+			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.loadContainer',
 					defaultMessage: 'Load Container in 3D Viewer',
 				})}
-				to=""
-				onClick={() => { }}
 			/>
-			<EllipsisMenuItemLink
+			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.loadContainer',
 					defaultMessage: 'Load Container in 3D Viewer',
 				})}
 				to={`/${container._id}`}
-				onClick={() => { }}
 			/>
-			<EllipsisMenuItemLink
+			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.uploadNewRevision',
 					defaultMessage: 'Upload new Revision',
 				})}
-				to=""
-				onClick={() => { }}
 			/>
-			<EllipsisMenuItemLink
+			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.viewIssues',
 					defaultMessage: 'View Issues',
 				})}
-				to=""
-				onClick={() => { }}
 
 			/>
-			<EllipsisMenuItemLink
+			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.viewRisks',
 					defaultMessage: 'View Risks',
 				})}
-				to=""
-				onClick={() => { }}
 			/>
-			<EllipsisMenuItemLink
+			<EllipsisMenuItem
 				title={formatMessage(selected
 					? { id: 'containers.ellipsisMenu.hideRevisions', defaultMessage: 'Hide Revisions' }
 					: { id: 'containers.ellipsisMenu.viewRevisions', defaultMessage: 'View Revisions' })}
-				to=""
 				onClick={() => onSelectOrToggleItem(container._id)}
 			/>
-			<EllipsisMenuItemLink
+			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.editPermissions',
 					defaultMessage: 'Edit Permissions',
 				})}
-				to=""
-				onClick={() => { }}
 			/>
-			<EllipsisMenuItemLink
+			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.shareContainer',
 					defaultMessage: 'Share Container',
 				})}
-				to=""
 				onClick={openShareModal}
 			/>
-			<EllipsisMenuItemLink
+			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.settings',
 					defaultMessage: 'Settings',
 				})}
-				to=""
-				onClick={() => { }}
 			/>
-			<EllipsisMenuItemLink
+			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.delete',
 					defaultMessage: 'Delete',
 				})}
-				to=""
 				onClick={() => dispatch(DialogsActions.open('delete', {
 					title: formatMessage(
 						{ id: 'deleteModal.container.title', defaultMessage: 'Delete {name}?' },
