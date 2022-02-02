@@ -53,7 +53,9 @@ const mitigationFieldsBlacklist = [
 
 const mitigationCriteriaBlacklist = [
 	"mitigation_desc",
-	"mitigation_detail"
+	"mitigation_detail",
+	"mitigation_status",
+	"referencedRisks"
 ];
 
 const isMitigationStatusResolved = (mitigationStatus) => {
@@ -120,11 +122,6 @@ class Mitigation {
 		return await mitigationColl.find(criteria).toArray();
 	}
 
-	async findMitigationSuggestion(account, criteria, attributeBlacklist = mitigationFieldsBlacklist) {
-		const mitigationSuggestions = await this.findMitigationSuggestions(account, criteria, attributeBlacklist);
-		return mitigationSuggestions[0];
-	}
-
 	async importCSV(account, data) {
 		const csvFields = Object.keys(csvImportFieldTypes);
 
@@ -186,7 +183,8 @@ class Mitigation {
 	}
 
 	async findOrCreateMitigationFromDetails(account, mitigationDetails) {
-		let mitigation = await this.findMitigationSuggestion(account, mitigationDetails, []);
+		const mitigations = await this.findMitigationSuggestions(account, mitigationDetails, []);
+		let mitigation = mitigations[0];
 		if (!mitigation) {
 			try {
 				const mitigations = await this.insert(account, [{ ...mitigationDetails }], false);
