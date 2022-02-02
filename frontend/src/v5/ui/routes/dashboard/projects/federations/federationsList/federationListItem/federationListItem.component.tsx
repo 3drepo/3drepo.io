@@ -54,8 +54,6 @@ export const FederationListItem = ({
 	}
 
 	const [federationSettingsOpen, setFederationSettingsOpen] = useState(false);
-	const closeFederation = () => setFederationSettingsOpen(false);
-	const openFederation = () => setFederationSettingsOpen(true);
 
 	return (
 		<>
@@ -157,7 +155,7 @@ export const FederationListItem = ({
 					<DashboardListItemIcon>
 						<FederationEllipsisMenu
 							federation={federation}
-							openFederationSettings={openFederation}
+							openFederationSettings={() => setFederationSettingsOpen(true)}
 						/>
 					</DashboardListItemIcon>
 				</DashboardListItemRow>
@@ -165,7 +163,7 @@ export const FederationListItem = ({
 			<FederationSettingsForm
 				open={federationSettingsOpen}
 				federation={federation}
-				onClose={closeFederation}
+				onClose={() => setFederationSettingsOpen(false)}
 			/>
 		</>
 	);
