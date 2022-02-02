@@ -166,8 +166,7 @@ export const ContainerListItem = ({
 					id: 'ShareModal.component.title',
 					defaultMessage: 'Share Container URL',
 				})}
-				elementId={container._id}
-				elementName={container.name}
+				containerOrFederation={container}
 			/>
 		</DashboardListItem>
 	);

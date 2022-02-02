@@ -167,8 +167,7 @@ export const FederationListItem = ({
 					id: 'ShareModal.federation.title',
 					defaultMessage: 'Share Federation URL',
 				})}
-				elementId={federation._id}
-				elementName={federation.name}
+				containerOrFederation={federation}
 			/>
 		</DashboardListItem>
 	);
