@@ -210,7 +210,10 @@ Queue.queueFederationUpdate = async (teamspace, federation, info) => {
 		// Clean up files we created
 		rm(`${sharedDir}/${corId}/obj.json`).catch((cleanUpErr) => {
 			logger.logError(`Failed to remove files (clean up on failure : ${cleanUpErr}`);
-		}).catch(() => {});
+		}).catch(
+			// istanbul ignore next
+			() => {},
+		);
 
 		if (err?.code && codeExists(err.code)) {
 			throw err;
