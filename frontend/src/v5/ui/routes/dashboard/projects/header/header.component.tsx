@@ -21,7 +21,7 @@ import { useParams } from 'react-router-dom';
 import { Typography } from '@controls/typography';
 import { IProject } from '@/v5/store/projects/projects.redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
-import { TopNavigation } from '@components/shared/topNavigation';
+import { ProjectNavigation } from '@components/shared/projectNavigation';
 import { Container, Wrapper } from './header.styles';
 
 export const Header = (): JSX.Element => {
@@ -33,7 +33,7 @@ export const Header = (): JSX.Element => {
 		<Wrapper>
 			<Container>
 				<Typography variant="h1">{currentProject ? currentProject.name : 'Loading project'}</Typography>
-				<TopNavigation />
+				<ProjectNavigation />
 			</Container>
 		</Wrapper>
 	);
