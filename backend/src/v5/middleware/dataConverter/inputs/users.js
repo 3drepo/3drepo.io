@@ -68,8 +68,8 @@ Users.validateUpdateData = async (req, res, next) => {
 			}),
 		company: Yup.string(),
 		country: Yup.string().test('valid-country',
-				'The country provided is not valid',
-				(value) => value === undefined || !!tz.getCountry(value)),
+			'The country provided is not valid',
+			(value) => value === undefined || !!tz.getCountry(value)),
 		oldPassword: Yup.string().optional().when('newPassword', {
 			is: (newPass) => newPass?.length > 0,
 			then: Yup.string().required(),

@@ -37,9 +37,9 @@ const user = {
 		billing: {
 			billingInfo: {
 				countryCode: 'GB',
-				company: '3D Repo'
-			}
-		}
+				company: '3D Repo',
+			},
+		},
 	},
 };
 const getUserByUsernameMock = UsersModel.getUserByUsername.mockImplementation(() => user);
