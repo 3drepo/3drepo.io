@@ -131,7 +131,7 @@ const customTableStyling = css`
 	}
 `;
 
-export const V4OverridesContainer = styled.div.attrs({ id: 'v4Overrides' })`
+export const V4OverridesContainer = styled.div`
 	display: flex;
 	flex-direction: column;
 	height: 100%;

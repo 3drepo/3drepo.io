@@ -23,7 +23,7 @@ import DayJsUtils from '@date-io/dayjs';
 import { V4OverridesContainer } from './v4Overrides.styles';
 
 export const V4Adapter = ({ children }) => (
-	<V4OverridesContainer>
+	<V4OverridesContainer id="v4Overrides">
 		<MuiPickersUtilsProvider utils={DayJsUtils}>
 
 			{children}
