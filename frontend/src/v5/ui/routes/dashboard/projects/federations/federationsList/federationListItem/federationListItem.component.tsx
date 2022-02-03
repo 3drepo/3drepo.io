@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { formatDate } from '@/v5/services/intl';
+import { formatDate, formatMessage } from '@/v5/services/intl';
 
 import {
 	DashboardListItemButton,
@@ -29,12 +29,12 @@ import {
 import { Highlight } from '@controls/highlight';
 import { Tooltip } from '@material-ui/core';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
-import { EllipsisButtonWithMenu } from '@controls/ellipsisButtonWithMenu';
-import { getFederationMenuItems } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/federationsList.helpers';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { Display } from '@/v5/ui/themes/media';
+import { ShareModal } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
+import { FederationEllipsisMenu } from './federationEllipsisMenu/federationEllipsisMenu.component';
 
 interface IFederationListItem {
 	index: number;
@@ -52,6 +52,7 @@ export const FederationListItem = ({
 	if (federation.hasStatsPending) {
 		return <SkeletonListItem delay={index / 10} key={federation._id} />;
 	}
+	const [shareModalOpen, setShareModalOpen] = useState(false);
 
 	return (
 		<DashboardListItem
@@ -150,11 +151,21 @@ export const FederationListItem = ({
 					</Tooltip>
 				</DashboardListItemIcon>
 				<DashboardListItemIcon>
-					<EllipsisButtonWithMenu
-						list={getFederationMenuItems(federation)}
+					<FederationEllipsisMenu
+						federation={federation}
+						openShareModal={() => setShareModalOpen(true)}
 					/>
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
+			<ShareModal
+				openState={shareModalOpen}
+				onClickClose={() => setShareModalOpen(false)}
+				title={formatMessage({
+					id: 'ShareModal.federation.title',
+					defaultMessage: 'Share Federation URL',
+				})}
+				containerOrFederation={federation}
+			/>
 		</DashboardListItem>
 	);
 };
