@@ -138,7 +138,7 @@ class Risk extends Ticket {
 				await Mitigation.updateMitigationsFromRisk(account, model, null, newRisk);
 			}
 		} catch {
-			//do nothing
+			// do nothing
 		}
 
 		ChatEvent.newRisks(sessionId, account, model, [newRisk]);
@@ -181,7 +181,7 @@ class Risk extends Ticket {
 				await Mitigation.updateMitigationsFromRisk(user, model, updatedRisk.oldTicket, updatedRisk.updatedTicket);
 			}
 		} catch {
-			//do nothing
+			// do nothing
 		}
 
 		return updatedRisk;

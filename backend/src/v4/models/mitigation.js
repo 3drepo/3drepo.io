@@ -189,8 +189,8 @@ class Mitigation {
 		let mitigation = mitigations[0];
 		if (!mitigation) {
 			try {
-				const mitigations = await this.insert(account, [{ ...mitigationDetails }], false);
-				mitigation = mitigations[0];
+				const newMitigations = await this.insert(account, [{ ...mitigationDetails }], false);
+				mitigation = newMitigations[0];
 			} catch {
 				// do nothing if the mitigation was not inserted
 			}
