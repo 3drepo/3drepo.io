@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,34 +14,27 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import React, { ReactNode, SyntheticEvent } from 'react';
+import { Typography } from '@material-ui/core';
+import { Link } from 'react-router-dom';
+import { MenuItem } from './ellipsisMenuItem.styles';
 
-import styled from 'styled-components';
-import * as SearchInputStyles from '@controls/searchInput/searchInput.styles';
-import { Display } from '@/v5/ui/themes/media';
+type EllipsisMenuItemProps = {
+	title: ReactNode;
+	to?: string;
+	key?: string;
+	onClick?: (event: SyntheticEvent) => void;
+};
 
-export const Container = styled.div`
-	margin: 16px 0;
-`;
-
-export const CollapseSideElementGroup = styled.div`
-	display: flex;
-	align-items: center;
-
-	${SearchInputStyles.TextField} {
-		margin-right: 15px;
-		
-		@media (max-width: ${Display.Tablet}px) {
-			width: 225px;
-			padding-left: 25px;
-			box-sizing: border-box;
-		}
-		
-		@media (max-width: ${Display.Desktop}px) {
-			max-width: 405px;
-		}
-		
-		@media (min-width: ${Display.Desktop}px) {
-			width: 405px;
-		}
-	}
-`;
+export const EllipsisMenuItem = ({ to, title, key, onClick }: EllipsisMenuItemProps) => (
+	<MenuItem
+		component={to ? Link : null}
+		to={to}
+		key={key}
+		onClick={onClick}
+	>
+		<Typography variant="body1" noWrap>
+			{title}
+		</Typography>
+	</MenuItem>
+);

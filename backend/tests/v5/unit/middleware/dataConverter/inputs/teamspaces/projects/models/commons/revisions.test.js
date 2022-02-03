@@ -83,7 +83,7 @@ const testValidateUpdateRevisionData = () => {
 		});
 	});
 };
-const createRequestWithFile = (teamspace, { tag, desc, importAnim },
+const createRequestWithFile = (teamspace, { tag, desc, importAnim, timezone },
 	unsupportedFile = false, noFile = false, emptyFile = false) => {
 	const form = new FormData();
 	if (!noFile) {
@@ -95,6 +95,7 @@ const createRequestWithFile = (teamspace, { tag, desc, importAnim },
 	if (tag) form.append('tag', tag);
 	if (desc) form.append('desc', desc);
 	if (importAnim) form.append('importAnim', importAnim);
+	if (timezone) form.append('timezone', timezone);
 
 	const req = new MockExpressRequest({
 		method: 'POST',
@@ -112,7 +113,7 @@ Quota.sufficientQuota.mockImplementation((ts) => (ts === 'noQuota' ? Promise.rej
 RevisionsModel.isTagUnique.mockImplementation(() => true);
 
 const testValidateNewRevisionData = () => {
-	const standardBody = { tag: '123', description: 'this is a model', importAnim: false };
+	const standardBody = { tag: '123', description: 'this is a model', importAnimations: false, timezone: 'Europe/Berlin' };
 	describe.each([
 		['Request with valid data', 'ts', standardBody],
 		['Request with unsupported model file', 'ts', standardBody, true, false, false, templates.unsupportedFileFormat],
@@ -124,6 +125,9 @@ const testValidateNewRevisionData = () => {
 		['Request with no file should fail', 'ts', { tag: 'drflgdf' }, false, true, false, templates.invalidArguments],
 		['Request with an empty file should fail', 'ts', { tag: 'drflgdf' }, false, false, true, templates.invalidArguments],
 		['Request with duplicate tag should fail', 'ts', { tag: 'duplicate' }, false, false, false, templates.invalidArguments],
+		['Request with invalid timezone should fail', 'ts', { tag: 'drflgdf', timezone: 'abc' }, false, false, false, templates.invalidArguments],
+		['Request with invalid type timezone should fail', 'ts', { tag: 'drflgdf', timezone: 123 }, false, false, false, templates.invalidArguments],
+		['Request with null timezone should pass', 'ts', { tag: 'drflgdf', timezone: null }],
 	])('Check new revision data', (desc, ts, bodyContent, badFile, noFile, emptyFile, error) => {
 		test(`${desc} should ${error ? `fail with ${error.code}` : ' succeed and next() should be called'}`, async () => {
 			RevisionsModel.isTagUnique.mockImplementationOnce((teamspace, model, tag) => tag !== 'duplicate');
