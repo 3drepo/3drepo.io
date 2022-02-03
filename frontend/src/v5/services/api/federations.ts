@@ -21,11 +21,11 @@ import {
 	FetchFederationStatsPayload,
 	FetchFederationStatsResponse,
 	FavouritePayload,
-	UpdateFederationSettingsPayload,
 	FetchFederationViewsPayload,
 	FetchFederationViewsResponse,
 	FetchFederationSettingsPayload,
 	FetchFederationSettingsResponse,
+	UpdateFederationSettingsAPIPayload,
 	DeleteFederationPayload,
 } from '@/v5/store/federations/federations.types';
 import { AxiosResponse } from 'axios';
@@ -87,7 +87,7 @@ export const updateFederationSettings = async ({
 	projectId,
 	federationId,
 	rawSettings,
-}: UpdateFederationSettingsPayload): Promise<AxiosResponse<void>> => (
+}: UpdateFederationSettingsAPIPayload): Promise<AxiosResponse<void>> => (
 	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`, rawSettings)
 );
 

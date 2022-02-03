@@ -17,16 +17,17 @@
 
 import React from 'react';
 import { Select, InputLabel, FormControl } from '@material-ui/core';
+import { FederationView } from '@/v5/store/federations/federations.types';
 
-type FormSelectProps = {
+export type FormSelectProps = {
 	inputId: string;
-	inputLabel: string;
 	label: string;
 	selectId: string;
-	defaultValue: string;
+	defaultValue: FederationView;
 	required?: boolean;
 	children: JSX.Element[];
 	useFormRegisterProps: any;
+	className?: string;
 };
 
 export const FormSelect = ({
@@ -37,6 +38,7 @@ export const FormSelect = ({
 	defaultValue,
 	children,
 	useFormRegisterProps,
+	className,
 }: FormSelectProps) => (
 	<FormControl>
 		<InputLabel
@@ -50,6 +52,7 @@ export const FormSelect = ({
 			id={selectId}
 			defaultValue={defaultValue}
 			{...useFormRegisterProps}
+			className={className}
 		>
 			{children}
 		</Select>

@@ -147,14 +147,14 @@ export function* fetchFederationSettings({
 }
 
 export function* updateFederationSettings({
-	teamspace, projectId, federationId, settings, extraSettings
+	teamspace, projectId, federationId, settings, extraSettings,
 }: UpdateFederationSettingsAction) {
 	try {
 		const rawSettings = prepareFederationSettingsForBackend(settings, extraSettings);
 		yield API.Federations.updateFederationSettings({
 			teamspace, projectId, federationId, rawSettings,
 		});
-		yield put(FederationsActions.updateFederationSettingsSuccess(projectId, federationId, rawSettings));
+		yield put(FederationsActions.updateFederationSettingsSuccess(projectId, federationId, settings, extraSettings));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: 'trying to update federation settings',

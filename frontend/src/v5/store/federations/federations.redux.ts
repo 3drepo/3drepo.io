@@ -44,7 +44,7 @@ export const { Types: FederationsTypes, Creators: FederationsActions } = createA
 	fetchFederationViewsSuccess: ['projectId', 'federationId', 'views'],
 	fetchFederationSettings: ['teamspace', 'projectId', 'federationId'],
 	fetchFederationSettingsSuccess: ['projectId', 'federationId', 'settings'],
-	updateFederationSettings: ['teamspace', 'projectId', 'federation', 'settings'],
+	updateFederationSettings: ['teamspace', 'projectId', 'federationId', 'settings', 'extraSettings'],
 	updateFederationSettingsSuccess: ['projectId', 'federationId', 'rawSettings'],
 	deleteFederation: ['teamspace', 'projectId', 'federationId'],
 	deleteFederationSuccess: ['projectId', 'federationId'],
@@ -140,29 +140,24 @@ export const fetchFederationSettingsSuccess = (state = INITIAL_STATE, {
 export const updateFederationSettingsSuccess = (state = INITIAL_STATE, {
 	projectId,
 	federationId,
-	rawSettings,
+	settings,
+	extraSettings: {
+		name,
+		desc: description,
+		code,
+	},
 }: UpdateFederationSettingsSuccessAction) => ({
 	...state,
 	federations: {
 		...state.federations,
 		[projectId]: state.federations[projectId].map((federation) => {
 			if (federationId !== federation._id) return federation;
-			const {
-				name,
-				desc: description,
-				code,
-				surveyPoints = [null],
-				...otherSettings
-			} = rawSettings;
 			return {
 				...federation,
 				name,
 				description,
 				code,
-				settings: {
-					...otherSettings,
-					surveyPoint: surveyPoints[0],
-				},
+				settings,
 			};
 		}),
 	},

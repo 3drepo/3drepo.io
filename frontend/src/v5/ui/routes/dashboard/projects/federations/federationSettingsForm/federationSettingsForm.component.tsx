@@ -17,26 +17,41 @@
 
 import React, { useEffect } from 'react';
 import { formatMessage } from '@/v5/services/intl';
-import { FormattedMessage } from 'react-intl';
 import { yupResolver } from '@hookform/resolvers/yup';
-import * as Yup from 'yup';
-import { MenuItem, InputLabel, FormControl } from '@material-ui/core';
-import { Select } from '@controls/select';
+import { MenuItem } from '@material-ui/core';
 import { FormModal } from '@/v5/ui/controls/modal/formModal/formDialog.component';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { useParams } from 'react-router';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
-import { IFederation, EMPTY_VIEW, RawFederationSettings } from '@/v5/store/federations/federations.types';
+import { IFederation, EMPTY_VIEW, IFederationExtraSettings, IFederationSettings } from '@/v5/store/federations/federations.types';
 import { ShareTextField } from '@controls/shareTextField';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
-import { FlexContainer, SectionTitle, Thumbnail, ThumbnailPlaceholder, SelectView, ViewLabel, MenuItemView, UnitTextField } from './federationSettingsForm.styles';
+import { FormSelectView } from '@controls/formSelect/formSelectView/formSelectView.component';
+import { FormSelect } from '@controls/formSelect/formSelect.component';
+import { FederationSettingsSchema } from '@/v5/validation/Schemas';
+import { FlexContainer, SectionTitle, UnitTextField } from './federationSettingsForm.styles';
 
 const UNITS = {
-	mm: 'Millimetres',
-	cm: 'Centimetres',
-	dm: 'Decimetres',
-	m: 'Metres',
-	ft: 'Feet and inches',
+	mm: {
+		name: formatMessage({ id: 'units.mm.name', defaultMessage: 'Millimetres' }),
+		abbreviation: formatMessage({ id: 'units.mm.abbreviation', defaultMessage: 'mm' }),
+	},
+	cm: {
+		name: formatMessage({ id: 'units.cm.name', defaultMessage: 'Centimetres' }),
+		abbreviation: formatMessage({ id: 'units.cm.abbreviation', defaultMessage: 'cm' }),
+	},
+	dm: {
+		name: formatMessage({ id: 'units.dm.name', defaultMessage: 'Decimetres' }),
+		abbreviation: formatMessage({ id: 'units.dm.abbreviation', defaultMessage: 'dm' }),
+	},
+	m: {
+		name: formatMessage({ id: 'units.m.name', defaultMessage: 'Metres' }),
+		abbreviation: formatMessage({ id: 'units.m.abbreviation', defaultMessage: 'm' }),
+	},
+	ft: {
+		name: formatMessage({ id: 'units.ft.name', defaultMessage: 'Feet and inches' }),
+		abbreviation: formatMessage({ id: 'units.ft.abbreviation', defaultMessage: 'ft' }),
+	},
 };
 
 interface IFormInput {
@@ -54,7 +69,7 @@ interface IFormInput {
 }
 
 const getDefaultValues = (federation: IFederation) => {
-	const { unit = 'mm', angleFromNorth = 0 } = federation.settings || {};
+	const { unit = UNITS.mm.abbreviation, angleFromNorth = 0 } = federation.settings || {};
 	const {
 		latLong,
 		position,
@@ -78,86 +93,6 @@ const getDefaultValues = (federation: IFederation) => {
 	};
 };
 
-const FederationSchema = Yup.object().shape({
-	name: Yup.string()
-		.min(2,
-			formatMessage({
-				id: 'federations.settings.name.error.min',
-				defaultMessage: 'Federation Name must be at least 2 characters',
-			}))
-		.max(120,
-			formatMessage({
-				id: 'federations.settings.name.error.max',
-				defaultMessage: 'Federation Name is limited to 120 characters',
-			}))
-		.required(
-			formatMessage({
-				id: 'federations.settings.name.error.required',
-				defaultMessage: 'Federation Name is a required field',
-			}),
-		),
-	desc: Yup.lazy((value) => (
-		value === ''
-			? Yup.string().strip()
-			: Yup.string()
-				.min(1,
-					formatMessage({
-						id: 'federations.settings.description.error.min',
-						defaultMessage: 'Federation Description must be at least 1 character',
-					}))
-				.max(600,
-					formatMessage({
-						id: 'federations.settings.description.error.max',
-						defaultMessage: 'Federation Description is limited to 600 characters',
-					}))
-	)),
-	unit: Yup.string().required().default('mm'),
-	code: Yup.lazy((value) => (
-		value === ''
-			? Yup.string().strip()
-			: Yup.string()
-				.min(1,
-					formatMessage({
-						id: 'federations.settings.code.error.min',
-						defaultMessage: 'Code must be at least 1 character',
-					}))
-				.max(50,
-					formatMessage({
-						id: 'federations.settings.code.error.max',
-						defaultMessage: 'Code is limited to 50 characters',
-					}))
-				.matches(/^[\w|_|-]*$/,
-					formatMessage({
-						id: 'federations.settings.code.error.characters',
-						defaultMessage: 'Code can only consist of letters and numbers',
-					}))
-	)),
-	defaultView: Yup.string()
-		.nullable()
-		.transform((value) => (value === EMPTY_VIEW._id ? null : value)),
-	latitude: Yup.number().required(),
-	longitude: Yup.number().required(),
-	angleFromNorth: Yup.number()
-		.min(0,
-			formatMessage({
-				id: 'federations.settings.angle.error.min',
-				defaultMessage: 'Angle cannot be smaller than 0',
-			}))
-		.max(360,
-			formatMessage({
-				id: 'federations.settings.angle.error.max',
-				defaultMessage: 'Angle cannot be greater than 360',
-			}))
-		.transform((value) => value ?? 0),
-	x: Yup.number().required(),
-	y: Yup.number().required(),
-	z: Yup.number().required(),
-});
-
-const getThumbnailBasicPath = (teamspace: string, projectId: string, federationId: string) => (
-	(viewId: string) => `teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/views/${viewId}/thumbnail`
-);
-
 type IFederationSettingsForm = {
 	open: boolean;
 	federation: IFederation;
@@ -176,14 +111,13 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 		formState: { errors },
 	} = useForm<IFormInput>({
 		mode: 'onChange',
-		resolver: yupResolver(FederationSchema),
+		resolver: yupResolver(FederationSettingsSchema),
 		defaultValues,
 	});
 
 	const currentUnit = watch('unit');
 
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
-	const getThumbnail = getThumbnailBasicPath(teamspace, project, federation._id);
 
 	useEffect(() => {
 		defaultValues = getDefaultValues(federation) as any;
@@ -195,16 +129,26 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 	const onSubmit: SubmitHandler<IFormInput> = ({
 		latitude, longitude,
 		x, y, z,
+		name,
+		desc,
+		code,
 		...otherSettings
 	}) => {
-		const payload: RawFederationSettings = {
-			surveyPoints: [{
+		const settings: IFederationSettings = {
+			surveyPoint: {
 				latLong: [latitude, longitude],
 				position: [x, y, z],
-			}],
+			},
 			...otherSettings,
 		};
-		FederationsActionsDispatchers.updateFederationSettings(teamspace, project, federation._id, payload);
+		const extraSettings: IFederationExtraSettings = { name, desc, code };
+		FederationsActionsDispatchers.updateFederationSettings(
+			teamspace,
+			project,
+			federation._id,
+			settings,
+			extraSettings,
+		);
 		onClose();
 	};
 
@@ -239,22 +183,23 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 				helperText={errors.desc?.message}
 			/>
 			<FlexContainer>
-				<FormControl>
-					<InputLabel id="unit-label" required>
-						<FormattedMessage id="federations.settings.form.unit" defaultMessage="Units" />
-					</InputLabel>
-					<Select
-						labelId="unit-label"
-						defaultValue={defaultValues.unit}
-						{...register('unit')}
-					>
-						{Object.keys(UNITS).map((unit) => (
-							<MenuItem key={unit} value={unit}>
-								<FormattedMessage id={`federations.settings.form.unit.${unit}`} defaultMessage={UNITS[unit]} />
-							</MenuItem>
-						))}
-					</Select>
-				</FormControl>
+				<FormSelect
+					required
+					inputId="unit-label"
+					label={formatMessage({
+						id: 'federations.settings.form.unit',
+						defaultMessage: 'Units',
+					})}
+					selectId="unit-label"
+					defaultValue={defaultValues.unit}
+					useFormRegisterProps={register('unit')}
+				>
+					{Object.keys(UNITS).map((unit) => (
+						<MenuItem key={UNITS[unit].abbreviation} value={UNITS[unit].abbreviation}>
+							{UNITS[unit].name}
+						</MenuItem>
+					))}
+				</FormSelect>
 				<FormTextField
 					name="code"
 					control={control}
@@ -263,35 +208,20 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 					helperText={errors.code?.message}
 				/>
 			</FlexContainer>
-			<FormControl>
-				<InputLabel id="default-view-label">
-					<FormattedMessage id="federations.settings.form.view" defaultMessage="Default View" />
-				</InputLabel>
-				<SelectView
-					labelId="default-view-label"
-					defaultValue={defaultValues.defaultView}
-					{...register('defaultView')}
-				>
-					{[EMPTY_VIEW].concat(federation.views || []).map((view) => (
-						<MenuItemView
-							key={view._id}
-							value={view._id}
-						>
-							{view.hasThumbnail ? (
-								<Thumbnail
-									src={getThumbnail(view._id)}
-									alt={view.name}
-								/>
-							) : (
-								<ThumbnailPlaceholder />
-							)}
-							<ViewLabel>
-								{view.name}
-							</ViewLabel>
-						</MenuItemView>
-					))}
-				</SelectView>
-			</FormControl>
+			<FormSelectView
+				views={[EMPTY_VIEW].concat(federation.views || [])}
+				federationId={federation._id}
+				// TODO check this
+				defaultView={defaultValues.defaultView}
+				defaultValue={defaultValues.defaultView}
+				inputId="default-view-label"
+				label={formatMessage({
+					id: 'federations.settings.form.view',
+					defaultMessage: 'Default View',
+				})}
+				selectId="default-view-label"
+				useFormRegisterProps={register('defaultView')}
+			/>
 			<SectionTitle>GIS servey point</SectionTitle>
 			<FlexContainer>
 				<Controller
