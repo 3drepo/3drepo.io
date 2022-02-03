@@ -17,6 +17,7 @@
 
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
+import { EMPTY_VIEW } from '@/v5/store/federations/federations.types';
 
 export const FederationSettingsSchema = Yup.object().shape({
 	name: Yup.string()

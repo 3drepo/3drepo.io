@@ -20,8 +20,8 @@ import { useParams } from 'react-router';
 import { FederationView } from '@/v5/store/federations/federations.types';
 import { generateV5ApiUrl } from '@/v5/services/api/default';
 import { clientConfigService } from '@/v4/services/clientConfig';
-import { FormSelect, FormSelectProps } from '../formSelect.component';
-import { Thumbnail, ThumbnailPlaceholder, SelectView, ViewLabel, MenuItemView } from './formSelectView.styles';
+import { FormSelectProps } from '@controls/formSelect/formSelect.component';
+import { Thumbnail, ThumbnailPlaceholder, FormSelect, ViewLabel, MenuItemView } from './formSelectView.styles';
 
 const getThumbnailBasicPath = (teamspace: string, projectId: string, federationId: string) => (
 	(viewId: string) => generateV5ApiUrl(
@@ -32,7 +32,6 @@ const getThumbnailBasicPath = (teamspace: string, projectId: string, federationI
 
 type FormSelectViewProps = Omit<FormSelectProps, 'children'> & {
 	views: FederationView[];
-	defaultView: FederationView;
 	federationId: string;
 };
 
