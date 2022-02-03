@@ -24,12 +24,11 @@ import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { useParams } from 'react-router';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import { IFederation, EMPTY_VIEW, IFederationExtraSettings, IFederationSettings } from '@/v5/store/federations/federations.types';
-import { ShareTextField } from '@controls/shareTextField';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelectView } from '@controls/formSelectView/formSelectView.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { FederationSettingsSchema } from '@/v5/validation/schemes';
-import { FlexContainer, SectionTitle, UnitTextField } from './federationSettingsForm.styles';
+import { FlexContainer, SectionTitle, UnitTextField, ShareTextField } from './federationSettingsForm.styles';
 
 const UNITS = [
 	{
@@ -166,7 +165,6 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 			<ShareTextField
 				label="ID"
 				value={federation._id}
-				lightLabel
 			/>
 			<FormTextField
 				name="name"

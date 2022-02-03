@@ -32,12 +32,12 @@ import {
 type IShareTextField = {
 	label: string,
 	value: string,
-	lightLabel?: boolean,
+	className?: string,
 };
 
 const IS_COPYING_DURATION_MS = 3000;
 
-export const ShareTextField = ({ label, value, lightLabel }: IShareTextField) => {
+export const ShareTextField = ({ label, value, className }: IShareTextField) => {
 	let isCopiedTimer;
 	const [isCopying, setIsCopying] = useState(true);
 
@@ -60,7 +60,7 @@ export const ShareTextField = ({ label, value, lightLabel }: IShareTextField) =>
 				<LinkBar
 					value={value}
 					label={label}
-					className={lightLabel && 'lightLabel'}
+					className={className}
 					InputProps={{
 						readOnly: true,
 						endAdornment: (

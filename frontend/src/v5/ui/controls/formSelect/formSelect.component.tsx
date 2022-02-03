@@ -51,8 +51,8 @@ export const FormSelect = ({
 			labelId={inputId}
 			id={selectId}
 			defaultValue={defaultValue}
-			{...useFormRegisterProps}
 			className={className}
+			{...useFormRegisterProps}
 		>
 			{children}
 		</Select>

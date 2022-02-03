@@ -43,14 +43,6 @@ export const LinkBar = styled(TextField)`
 		color: ${({ theme }) => theme.palette.base.main};
 	}
 
-	
-	&.lightLabel > label:not(.Mui-error) {
-		&,
-		&.Mui-focused {
-			color: ${({ theme }) => theme.palette.base.light};
-		}
-	}
-
 	.MuiInputBase-root {
 		cursor: pointer;
 		margin-top: 0;
