@@ -26,6 +26,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import { Field, Formik } from 'formik';
 import { isEmpty } from 'lodash';
 
+import { Switch } from '@material-ui/core';
 import { ROUTES } from '../../constants/routes';
 import { LONG_DATE_TIME_FORMAT } from '../../services/formatting/formatDate';
 import { ChipsInput } from '../components/chipsInput/chipsInput.component';
@@ -50,7 +51,6 @@ import {
 	StyledIconButton,
 	SuggestionsContainer
 } from './teamspaceSettings.styles';
-import { Switch } from '@material-ui/core';
 
 const PANEL_PROPS = {
 	paperProps: {
@@ -252,7 +252,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 	}
 
 	private renderCreateTreatmentSuggestionsOption = () => {
-		return (	
+		return (
 			<SuggestionsContainer container direction="column" wrap="nowrap">
 				<CreateMitigationsGrid container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
 					<InfoColumnWrapper container>
