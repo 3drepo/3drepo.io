@@ -44,11 +44,13 @@ const fieldTypes = {
 	"referencedRisks": "[object Array]"
 };
 
-const mitigationFieldsBlacklist = [
+const mitigationSuggestionsBlacklist = [
 	"mitigation_desc",
 	"mitigation_detail",
 	"mitigation_stage",
-	"mitigation_type"
+	"mitigation_type",
+	"mitigation_status",
+	"referencedRisks"
 ];
 
 const mitigationCriteriaBlacklist = [
@@ -81,10 +83,10 @@ class Mitigation {
 		return await mitigationColl.deleteOne({ _id: id });
 	}
 
-	async getCriteria(account, attributeBlacklist = mitigationCriteriaBlacklist) {
+	async getCriteria(account) {
 		const mitigationColl = await this.getMitigationCollection(account);
 
-		const criteriaFields = Object.keys(_.omit(fieldTypes, attributeBlacklist));
+		const criteriaFields = Object.keys(_.omit(fieldTypes, mitigationCriteriaBlacklist));
 		const criteriaPromises = [];
 		const criteria = {};
 
@@ -107,7 +109,7 @@ class Mitigation {
 		return criteria;
 	}
 
-	async findMitigationSuggestions(account, mitigationCriteria, attributeBlacklist = mitigationFieldsBlacklist) {
+	async findMitigationSuggestions(account, mitigationCriteria, attributeBlacklist = mitigationSuggestionsBlacklist) {
 		const mitigationColl = await this.getMitigationCollection(account);
 		const criteria = { ...mitigationCriteria };
 		const criteriaFilterFields = Object.keys(_.omit(fieldTypes, attributeBlacklist));

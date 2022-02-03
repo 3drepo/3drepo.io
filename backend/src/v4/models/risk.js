@@ -132,9 +132,13 @@ class Risk extends Ticket {
 
 		newRisk = await super.create(account, model, newRisk);
 
-		const teamspaceSettings = await TeamspaceSetting.getTeamspaceSettings(account,	{  _id: 0, createTreatmentSuggestions: 1});
-		if(teamspaceSettings.createTreatmentSuggestions) {
-			await Mitigation.updateMitigationsFromRisk(account, model, null, newRisk);
+		try{
+			const teamspaceSettings = await TeamspaceSetting.getTeamspaceSettings(account,	{  _id: 0, createTreatmentSuggestions: 1});
+			if(teamspaceSettings.createTreatmentSuggestions) {
+				await Mitigation.updateMitigationsFromRisk(account, model, null, newRisk);
+			}
+		} catch {
+			//do nothing
 		}
 
 		ChatEvent.newRisks(sessionId, account, model, [newRisk]);
@@ -171,9 +175,13 @@ class Risk extends Ticket {
 			updatedRisk.data = {...updatedRisk.data, ...levelOfRisk};
 		}
 
-		const teamspaceSettings = await TeamspaceSetting.getTeamspaceSettings(user,	{  _id: 0, createTreatmentSuggestions: 1});
-		if(teamspaceSettings.createTreatmentSuggestions) {
-			await Mitigation.updateMitigationsFromRisk(user, model, updatedRisk.oldTicket, updatedRisk.updatedTicket);
+		try{
+			const teamspaceSettings = await TeamspaceSetting.getTeamspaceSettings(user,	{  _id: 0, createTreatmentSuggestions: 1});
+			if(teamspaceSettings.createTreatmentSuggestions) {
+				await Mitigation.updateMitigationsFromRisk(user, model, updatedRisk.oldTicket, updatedRisk.updatedTicket);
+			}
+		} catch {
+			//do nothing
 		}
 
 		return updatedRisk;
