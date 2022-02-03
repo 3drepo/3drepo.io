@@ -88,9 +88,7 @@ export const updateFederationSettings = async ({
 	federationId,
 	rawSettings,
 }: UpdateFederationSettingsPayload): Promise<AxiosResponse<void>> => (
-	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`, {
-		...rawSettings,
-	})
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`, rawSettings)
 );
 
 export const deleteFederation = ({
