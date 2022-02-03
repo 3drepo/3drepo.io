@@ -90,8 +90,6 @@ const customTableStyling = css`
 		}
 	}
 
-
-
 	${PermissionsCellContainer} {
 		justify-content: flex-start;
 	}
