@@ -157,6 +157,7 @@ ServiceHelper.generateUserCredentials = () => ({
 		billing: {
 			billingInfo: {
 				company: ServiceHelper.generateRandomString(),
+				countryCode: 'GB'
 			},
 		},
 	},

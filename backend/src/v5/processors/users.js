@@ -33,6 +33,8 @@ Users.getProfileByUsername = async (username) => {
 		'customData.email': 1,
 		'customData.avatar': 1,
 		'customData.apiKey': 1,
+		'customData.billing.billingInfo.company': 1,
+		'customData.billing.billingInfo.countryCode': 1,
 	});
 
 	const { customData } = user;
@@ -44,6 +46,8 @@ Users.getProfileByUsername = async (username) => {
 		email: customData.email,
 		hasAvatar: !!customData.avatar,
 		apiKey: customData.apiKey,
+		company: customData.billing?.billingInfo?.company,
+		country: customData.billing?.billingInfo?.countryCode
 	};
 };
 

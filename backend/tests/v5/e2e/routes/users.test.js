@@ -184,6 +184,8 @@ const formatUserProfile = (user, hasAvatar = true) => ({
 	email: userEmail,
 	apiKey: user.apiKey,
 	hasAvatar,
+	country: user.basicData.billing.billingInfo.countryCode,
+	company: user.basicData.billing.billingInfo.company,
 });
 
 const testGetProfile = () => {

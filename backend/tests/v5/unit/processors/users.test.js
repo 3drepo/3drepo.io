@@ -29,11 +29,17 @@ UsersModel.authenticate.mockResolvedValue('user1');
 const user = {
 	user: 'user1',
 	customData: {
-		firstname: 'Will',
-		lastname: 'Smith',
+		firstName: 'Will',
+		lastName: 'Smith',
 		email: 'example@email.com',
 		avatar: true,
 		apiKey: 123,
+		billing: {
+			billingInfo: {
+				countryCode: 'GB',
+				company: '3D Repo'
+			}
+		}
 	},
 };
 const getUserByUsernameMock = UsersModel.getUserByUsername.mockImplementation(() => user);
@@ -61,6 +67,8 @@ const formatUser = (userProfile) => ({
 	email: userProfile.customData.email,
 	hasAvatar: !!userProfile.customData.avatar,
 	apiKey: userProfile.customData.apiKey,
+	country: userProfile.customData.billing.billingInfo.countryCode,
+	company: userProfile.customData.billing.billingInfo.company,
 });
 
 const tesGetProfileByUsername = () => {
@@ -73,6 +81,8 @@ const tesGetProfileByUsername = () => {
 				'customData.email': 1,
 				'customData.avatar': 1,
 				'customData.apiKey': 1,
+				'customData.billing.billingInfo.countryCode': 1,
+				'customData.billing.billingInfo.company': 1,
 			};
 
 			const res = await Users.getProfileByUsername();

@@ -173,9 +173,14 @@ User.updatePassword = async (username, newPassword) => {
 
 User.updateProfile = async (username, updatedProfile) => {
 	const updateData = {};
+	const billingInfoFields = ['country', 'company']
 
 	Object.keys(updatedProfile).forEach((key) => {
-		updateData[`customData.${key}`] = updatedProfile[key];
+		if(billingInfoFields.includes(key)){
+			updateData[`customData.billing.billingInfo.${key}`] = updatedProfile[key];
+		} else {
+			updateData[`customData.${key}`] = updatedProfile[key];
+		}
 	});
 
 	await updateUser(username, { $set: updateData });
