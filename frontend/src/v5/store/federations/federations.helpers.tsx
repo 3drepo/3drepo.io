@@ -21,6 +21,7 @@ import {
 	IFederation,
 	RawFederationSettings,
 	IFederationSettings,
+	IFederationExtraSettings,
 } from '@/v5/store/federations/federations.types';
 import {
 	UploadStatuses,
@@ -61,7 +62,7 @@ export const prepareFederationsData = (
 	return prepareSingleFederationData(federation, federationStats);
 });
 
-export const refineFederationSettings = ({
+export const prepareFederationSettingsForFrontend = ({
 	surveyPoints,
 	unit,
 	angleFromNorth,
@@ -72,5 +73,18 @@ export const refineFederationSettings = ({
 		unit,
 		angleFromNorth,
 		defaultView,
+	}
+);
+
+export const prepareFederationSettingsForBackend = (
+	{ surveyPoint, ...otherSettings }: IFederationSettings,
+	{ name, desc, code }: IFederationExtraSettings,
+): RawFederationSettings => (
+	{
+		...otherSettings,
+		surveyPoints: [surveyPoint],
+		name,
+		desc,
+		code,
 	}
 );

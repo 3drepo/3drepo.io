@@ -44,7 +44,7 @@ export const { Types: FederationsTypes, Creators: FederationsActions } = createA
 	fetchFederationViewsSuccess: ['projectId', 'federationId', 'views'],
 	fetchFederationSettings: ['teamspace', 'projectId', 'federationId'],
 	fetchFederationSettingsSuccess: ['projectId', 'federationId', 'settings'],
-	updateFederationSettings: ['teamspace', 'projectId', 'federationId', 'rawSettings'],
+	updateFederationSettings: ['teamspace', 'projectId', 'federation', 'settings'],
 	updateFederationSettingsSuccess: ['projectId', 'federationId', 'rawSettings'],
 	deleteFederation: ['teamspace', 'projectId', 'federationId'],
 	deleteFederationSuccess: ['projectId', 'federationId'],

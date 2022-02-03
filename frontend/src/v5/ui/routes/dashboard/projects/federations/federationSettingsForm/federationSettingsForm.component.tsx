@@ -20,7 +20,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { TextField, MenuItem, InputLabel, FormControl } from '@material-ui/core';
+import { MenuItem, InputLabel, FormControl } from '@material-ui/core';
 import { Select } from '@controls/select';
 import { FormModal } from '@/v5/ui/controls/modal/formModal/formDialog.component';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
@@ -28,6 +28,7 @@ import { useParams } from 'react-router';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import { IFederation, EMPTY_VIEW, RawFederationSettings } from '@/v5/store/federations/federations.types';
 import { ShareTextField } from '@controls/shareTextField';
+import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FlexContainer, SectionTitle, Thumbnail, ThumbnailPlaceholder, SelectView, ViewLabel, MenuItemView, UnitTextField } from './federationSettingsForm.styles';
 
 const UNITS = {
@@ -222,30 +223,20 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 				value={federation._id}
 				lightLabel
 			/>
-			<Controller
+			<FormTextField
 				name="name"
 				control={control}
-				render={({ field }) => (
-					<TextField
-						{...field}
-						label={formatMessage({ id: 'federations.settings.form.name', defaultMessage: 'Name' })}
-						required
-						error={!!errors.name}
-						helperText={errors.name?.message}
-					/>
-				)}
+				label={formatMessage({ id: 'federations.settings.form.name', defaultMessage: 'Name' })}
+				required
+				hasError={!!errors.name}
+				helperText={errors.name?.message}
 			/>
-			<Controller
+			<FormTextField
 				name="desc"
 				control={control}
-				render={({ field }) => (
-					<TextField
-						{...field}
-						label={formatMessage({ id: 'federations.settings.form.description', defaultMessage: 'Description' })}
-						error={!!errors.desc}
-						helperText={errors.desc?.message}
-					/>
-				)}
+				label={formatMessage({ id: 'federations.settings.form.description', defaultMessage: 'Description' })}
+				hasError={!!errors.desc}
+				helperText={errors.desc?.message}
 			/>
 			<FlexContainer>
 				<FormControl>
@@ -264,17 +255,12 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 						))}
 					</Select>
 				</FormControl>
-				<Controller
+				<FormTextField
 					name="code"
 					control={control}
-					render={({ field }) => (
-						<TextField
-							{...field}
-							label={formatMessage({ id: 'federation.settings.form.code', defaultMessage: 'Code' })}
-							error={!!errors.code}
-							helperText={errors.code?.message}
-						/>
-					)}
+					label={formatMessage({ id: 'federation.settings.form.code', defaultMessage: 'Code' })}
+					hasError={!!errors.code}
+					helperText={errors.code?.message}
 				/>
 			</FlexContainer>
 			<FormControl>

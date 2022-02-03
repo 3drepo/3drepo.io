@@ -51,12 +51,14 @@ export interface IFederationSettings {
 	unit: string;
 }
 
-export type RawFederationSettings = Omit<IFederationSettings, 'surveyPoint'> & {
-	_id?: string;
+export interface IFederationExtraSettings {
 	name?: string;
 	desc?: string;
 	code?: string;
-	unit: string;
+}
+
+export type RawFederationSettings = Omit<IFederationSettings, 'surveyPoint'> & IFederationExtraSettings & {
+	_id?: string;
 	timestamp?: number;
 	status?: string[];
 	surveyPoints: SurveyPoint[];

@@ -31,7 +31,11 @@ import {
 	FetchFederationSettingsAction,
 	DeleteFederationAction,
 } from '@/v5/store/federations/federations.types';
-import { prepareFederationsData, refineFederationSettings } from '@/v5/store/federations/federations.helpers';
+import {
+	prepareFederationsData,
+	prepareFederationSettingsForFrontend,
+	prepareFederationSettingsForBackend,
+} from '@/v5/store/federations/federations.helpers';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 
@@ -132,7 +136,7 @@ export function* fetchFederationSettings({
 			projectId,
 			federationId,
 		});
-		const settings = refineFederationSettings(rawSettings);
+		const settings = prepareFederationSettingsForFrontend(rawSettings);
 		yield put(FederationsActions.fetchFederationSettingsSuccess(projectId, federationId, settings));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -143,9 +147,10 @@ export function* fetchFederationSettings({
 }
 
 export function* updateFederationSettings({
-	teamspace, projectId, federationId, rawSettings,
+	teamspace, projectId, federationId, settings, extraSettings
 }: UpdateFederationSettingsAction) {
 	try {
+		const rawSettings = prepareFederationSettingsForBackend(settings, extraSettings);
 		yield API.Federations.updateFederationSettings({
 			teamspace, projectId, federationId, rawSettings,
 		});
