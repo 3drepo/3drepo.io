@@ -29,10 +29,9 @@ import {
 	FetchFederationViewsAction,
 	FetchFederationViewsResponse,
 	FetchFederationSettingsAction,
-	FetchFederationSettingsResponse,
 	DeleteFederationAction,
 } from '@/v5/store/federations/federations.types';
-import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
+import { prepareFederationsData, refineFederationSettings } from '@/v5/store/federations/federations.helpers';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 
@@ -128,13 +127,12 @@ export function* fetchFederationSettings({
 	federationId,
 }: FetchFederationSettingsAction) {
 	try {
-		const {
-			settings,
-		}: FetchFederationSettingsResponse = yield API.Federations.fetchFederationSettings({
+		const rawSettings = yield API.Federations.fetchFederationSettings({
 			teamspace,
 			projectId,
 			federationId,
 		});
+		const settings = refineFederationSettings(rawSettings);
 		yield put(FederationsActions.fetchFederationSettingsSuccess(projectId, federationId, settings));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {

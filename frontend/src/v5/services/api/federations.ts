@@ -27,7 +27,6 @@ import {
 	FetchFederationSettingsPayload,
 	FetchFederationSettingsResponse,
 	DeleteFederationPayload,
-	RawFederationSettings,
 } from '@/v5/store/federations/federations.types';
 import { AxiosResponse } from 'axios';
 import api from './default';
@@ -79,16 +78,8 @@ export const fetchFederationSettings = async ({
 	projectId,
 	federationId,
 }: FetchFederationSettingsPayload): Promise<FetchFederationSettingsResponse> => {
-	const { data: rawSettings }: { data: RawFederationSettings } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`);
-	return {
-		settings: {
-			surveyPoint: rawSettings.surveyPoints?.[0],
-			unit: rawSettings.unit,
-			angleFromNorth: rawSettings.angleFromNorth,
-			defaultView: rawSettings.defaultView,
-		},
-		rawSettings,
-	};
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`);
+	return data;
 };
 
 export const updateFederationSettings = async ({

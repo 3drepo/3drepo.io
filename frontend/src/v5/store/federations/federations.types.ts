@@ -135,7 +135,6 @@ export type FetchFederationSettingsPayload = FetchFederationsPayload & {
 };
 
 export type FetchFederationSettingsResponse = {
-	settings: IFederationSettings;
 	rawSettings: RawFederationSettings;
 };
 
