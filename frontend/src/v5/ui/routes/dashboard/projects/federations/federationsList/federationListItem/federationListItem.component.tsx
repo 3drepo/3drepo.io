@@ -153,7 +153,7 @@ export const FederationListItem = ({
 				<DashboardListItemIcon>
 					<FederationEllipsisMenu
 						federation={federation}
-						openFederationSettings={() => setShareModalOpen(true)}
+						openShareModal={() => setShareModalOpen(true)}
 					/>
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
