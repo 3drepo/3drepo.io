@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Tooltip, TooltipProps } from '@material-ui/core';
+import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import Radio from '@material-ui/core/Radio';
 import styled from 'styled-components';
@@ -32,5 +34,9 @@ export const TableHeadingRadioButton = styled(Radio)`
 		box-sizing: border-box;
 	}
 `;
+
+export const TableHeadingRadioTooltip = styled(({className, ...rest}: TooltipProps) =>
+	React.createElement(Tooltip, {classes: { popper: className }, ...rest })
+)``;
 
 TableHeadingRadioButton.displayName = 'TableHeadingRadioButton';

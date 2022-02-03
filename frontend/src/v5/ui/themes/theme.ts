@@ -242,6 +242,12 @@ export const theme = createMuiTheme({
 			icon: React.createElement(RadioButtonIcon),
 			checkedIcon: React.createElement(RadioButtonCheckedIcon),
 		},
+		MuiTooltip: {
+			PopperProps: {
+				// This is necessary for overriding styles of v4 tooltips
+				container: () => document.getElementById('v4Overrides'),
+			},
+		},
 	},
 	overrides: {
 		MuiBackdrop: {

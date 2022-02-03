@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Grid, Tooltip } from '@material-ui/core';
+import { Grid } from '@material-ui/core';
 import React from 'react';
 
 import { SortLabel } from '../tableHeading/tableHeading.styles';
-import { TableHeadingRadioButton, RadioContainer } from './tableHeadingRadio.styles';
+import { TableHeadingRadioButton, RadioContainer, TableHeadingRadioTooltip } from './tableHeadingRadio.styles';
 
 interface IProps {
 	label: string;
@@ -52,7 +52,7 @@ export class TableHeadingRadio extends React.PureComponent<IProps, any> {
 		const RadioContainerProps = { width };
 
 		return (
-			<Tooltip title={tooltipText}>
+			<TableHeadingRadioTooltip title={tooltipText}>
 				<RadioContainer
 					container
 					direction="column"
@@ -79,7 +79,7 @@ export class TableHeadingRadio extends React.PureComponent<IProps, any> {
 						/>
 					</Grid>
 				</RadioContainer>
-			</Tooltip>
+			</TableHeadingRadioTooltip>
 		);
 	}
 }
