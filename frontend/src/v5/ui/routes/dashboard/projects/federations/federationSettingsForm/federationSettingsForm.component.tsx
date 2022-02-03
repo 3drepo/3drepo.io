@@ -31,28 +31,28 @@ import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { FederationSettingsSchema } from '@/v5/validation/schemes';
 import { FlexContainer, SectionTitle, UnitTextField } from './federationSettingsForm.styles';
 
-const UNITS = {
-	mm: {
+const UNITS = [
+	{
 		name: formatMessage({ id: 'units.mm.name', defaultMessage: 'Millimetres' }),
 		abbreviation: formatMessage({ id: 'units.mm.abbreviation', defaultMessage: 'mm' }),
 	},
-	cm: {
+	{
 		name: formatMessage({ id: 'units.cm.name', defaultMessage: 'Centimetres' }),
 		abbreviation: formatMessage({ id: 'units.cm.abbreviation', defaultMessage: 'cm' }),
 	},
-	dm: {
+	{
 		name: formatMessage({ id: 'units.dm.name', defaultMessage: 'Decimetres' }),
 		abbreviation: formatMessage({ id: 'units.dm.abbreviation', defaultMessage: 'dm' }),
 	},
-	m: {
+	{
 		name: formatMessage({ id: 'units.m.name', defaultMessage: 'Metres' }),
 		abbreviation: formatMessage({ id: 'units.m.abbreviation', defaultMessage: 'm' }),
 	},
-	ft: {
+	{
 		name: formatMessage({ id: 'units.ft.name', defaultMessage: 'Feet and inches' }),
 		abbreviation: formatMessage({ id: 'units.ft.abbreviation', defaultMessage: 'ft' }),
 	},
-};
+];
 
 interface IFormInput {
 	name: string;
@@ -69,7 +69,8 @@ interface IFormInput {
 }
 
 const getDefaultValues = (federation: IFederation) => {
-	const { unit = UNITS.mm.abbreviation, angleFromNorth = 0 } = federation.settings || {};
+	const DEFAULT_UNIT = UNITS[0];
+	const { unit = DEFAULT_UNIT.abbreviation, angleFromNorth = 0 } = federation.settings || {};
 	const {
 		latLong,
 		position,
@@ -194,9 +195,9 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 					defaultValue={defaultValues.unit}
 					useFormRegisterProps={register('unit')}
 				>
-					{Object.keys(UNITS).map((unit) => (
-						<MenuItem key={UNITS[unit].abbreviation} value={UNITS[unit].abbreviation}>
-							{UNITS[unit].name}
+					{UNITS.map(({ name, abbreviation }) => (
+						<MenuItem key={abbreviation} value={abbreviation}>
+							{name}
 						</MenuItem>
 					))}
 				</FormSelect>
