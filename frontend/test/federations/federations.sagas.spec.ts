@@ -22,13 +22,13 @@ import { mockServer } from '../../internals/testing/mockServer';
 import { omit, pick, times } from 'lodash';
 import { 
 	federationMockFactory, 
+	prepareMockExtraSettingsReply, 
 	prepareMockRawSettingsReply, 
+	prepareMockSettingsReply, 
 	prepareMockViewsReply, 
-	refineFederationSettings
 } from './federations.fixtures';
-import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
+import { prepareFederationsData, prepareFederationSettingsForFrontend } from '@/v5/store/federations/federations.helpers';
 import {  
-	EMPTY_VIEW,
 	FetchFederationStatsResponse, 
 	IFederation, 
 } from '@/v5/store/federations/federations.types';
@@ -165,12 +165,12 @@ describe('Federations: sagas', () => {
 			.put(FederationsActions.fetchFederationSettingsSuccess(
 				projectId, 
 				mockFederations[0]._id, 
-				refineFederationSettings(prepareMockRawSettingsReply(mockFederations[0])),
+				prepareFederationSettingsForFrontend(prepareMockRawSettingsReply(mockFederations[0])),
 			))
 			.put(FederationsActions.fetchFederationSettingsSuccess(
 				projectId, 
 				mockFederations[1]._id, 
-				refineFederationSettings(prepareMockRawSettingsReply(mockFederations[1])),
+				prepareFederationSettingsForFrontend(prepareMockRawSettingsReply(mockFederations[1])),
 			))
 			.silentRun();
 		})
@@ -178,19 +178,28 @@ describe('Federations: sagas', () => {
 
 	describe('updateFederationSettings', () => {
 		const mockFederation = federationMockFactory();
-		const mockFederationsRawSettingsResponse = prepareMockRawSettingsReply(mockFederation);
+		const mockSettings = prepareMockSettingsReply(mockFederation);
+		const mockExtraSettings = prepareMockExtraSettingsReply(mockFederation);
+		
 
 		it('should call updateFederationSettings endpoint', async () => {
 			mockServer
 			.patch(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
-			.reply(200, mockFederationsRawSettingsResponse);
+			.reply(200);
 
 			await expectSaga(FederationsSaga.default)
-			.dispatch(FederationsActions.updateFederationSettings(teamspace, projectId, federationId, mockFederationsRawSettingsResponse))
+			.dispatch(FederationsActions.updateFederationSettings(
+				teamspace, 
+				projectId, 
+				federationId, 
+				mockSettings,
+				mockExtraSettings
+			))
 			.put(FederationsActions.updateFederationSettingsSuccess(
 				projectId, 
 				federationId, 
-				mockFederationsRawSettingsResponse,
+				mockSettings,
+				mockExtraSettings,
 			))
 			.silentRun();
 		})

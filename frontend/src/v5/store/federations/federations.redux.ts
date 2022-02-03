@@ -45,7 +45,7 @@ export const { Types: FederationsTypes, Creators: FederationsActions } = createA
 	fetchFederationSettings: ['teamspace', 'projectId', 'federationId'],
 	fetchFederationSettingsSuccess: ['projectId', 'federationId', 'settings'],
 	updateFederationSettings: ['teamspace', 'projectId', 'federationId', 'settings', 'extraSettings'],
-	updateFederationSettingsSuccess: ['projectId', 'federationId', 'rawSettings'],
+	updateFederationSettingsSuccess: ['projectId', 'federationId', 'settings', 'extraSettings'],
 	deleteFederation: ['teamspace', 'projectId', 'federationId'],
 	deleteFederationSuccess: ['projectId', 'federationId'],
 }, { prefix: 'FEDERATIONS/' }) as { Types: Constants<IFederationsActionCreators>; Creators: IFederationsActionCreators };

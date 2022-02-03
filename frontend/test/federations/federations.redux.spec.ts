@@ -17,9 +17,9 @@
 
 import { INITIAL_STATE, reducer as federationsReducer, FederationsActions } from '@/v5/store/federations/federations.redux';
 import { times } from 'lodash';
-import { federationMockFactory } from './federations.fixtures';
+import { federationMockFactory, prepareMockExtraSettingsReply, prepareMockSettingsReply } from './federations.fixtures';
 import { EMPTY_VIEW, RawFederationSettings } from '@/v5/store/federations/federations.types';
-import { IFederationSettings } from '@/v5/store/federations/federations.types';
+import { prepareFederationSettingsForFrontend } from '@/v5/store/federations/federations.helpers';
 
 describe('Federations: redux', () => {
 	const projectId = 'projectId';
@@ -30,26 +30,6 @@ describe('Federations: redux', () => {
 			[projectId]: mockFederations
 		}
 	};
-	
-	const RAW_MOCK_SETTINGS: RawFederationSettings = {
-		name: 'Federation Name',
-		desc: 'Federation Description',
-		code: '0000',
-		surveyPoints: [{
-			latLong: [0, 0],
-			position: [0, 0, 0],
-		}],
-		angleFromNorth: 90,
-		defaultView: EMPTY_VIEW._id,
-		unit: "mm",
-	};
-
-	const MOCK_SETTINGS: IFederationSettings = {
-		surveyPoint: RAW_MOCK_SETTINGS.surveyPoints[0],
-		angleFromNorth: RAW_MOCK_SETTINGS.angleFromNorth,
-		defaultView: RAW_MOCK_SETTINGS.defaultView,
-		unit: RAW_MOCK_SETTINGS.unit,
-	}
 
 	it('should add federation to favourites', () => {
 		const resultState = federationsReducer(
@@ -105,13 +85,15 @@ describe('Federations: redux', () => {
 				[projectId]: [mockFederation]
 			}
 		}
+		const mockSettings = prepareMockSettingsReply(federationMockFactory());
+
 		const resultState = federationsReducer(
 			defaultStateWithNoSettings,
-			FederationsActions.fetchFederationSettingsSuccess(projectId, mockFederation._id, MOCK_SETTINGS),
+			FederationsActions.fetchFederationSettingsSuccess(projectId, mockFederation._id, mockSettings),
 		);
 		const result = resultState.federations[projectId];
 
-		expect(result[0].settings).toEqual(MOCK_SETTINGS);
+		expect(result[0].settings).toEqual(mockSettings);
 	});
 
 	it('should update settings changed from form', () => {
@@ -122,15 +104,20 @@ describe('Federations: redux', () => {
 				[projectId]: [mockFederation]
 			}
 		}
+
+		const mockFederationForReply = federationMockFactory();
+		const mockSettings = prepareMockSettingsReply(mockFederationForReply);
+		const mockExtraSettings = prepareMockExtraSettingsReply(mockFederationForReply);
+
 		const resultState = federationsReducer(
 			defaultStateWithNoSettings,
-			FederationsActions.updateFederationSettingsSuccess(projectId, mockFederation._id, RAW_MOCK_SETTINGS),
+			FederationsActions.updateFederationSettingsSuccess(projectId, mockFederation._id, mockSettings, mockExtraSettings),
 		);
 		const result = resultState.federations[projectId];
 
-		expect(result[0].settings).toEqual(MOCK_SETTINGS);
-		expect(result[0].name).toEqual(RAW_MOCK_SETTINGS.name);
-		expect(result[0].description).toEqual(RAW_MOCK_SETTINGS.desc);
-		expect(result[0].code).toEqual(RAW_MOCK_SETTINGS.code);
+		expect(result[0].settings).toEqual(mockSettings);
+		expect(result[0].name).toEqual(mockFederationForReply.name);
+		expect(result[0].description).toEqual(mockFederationForReply.description);
+		expect(result[0].code).toEqual(mockFederationForReply.code);
 	});
 })

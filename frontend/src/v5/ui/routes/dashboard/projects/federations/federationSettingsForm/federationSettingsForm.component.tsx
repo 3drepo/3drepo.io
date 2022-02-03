@@ -26,9 +26,9 @@ import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/
 import { IFederation, EMPTY_VIEW, IFederationExtraSettings, IFederationSettings } from '@/v5/store/federations/federations.types';
 import { ShareTextField } from '@controls/shareTextField';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
-import { FormSelectView } from '@controls/formSelect/formSelectView/formSelectView.component';
+import { FormSelectView } from '@controls/formSelectView/formSelectView.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
-import { FederationSettingsSchema } from '@/v5/validation/Schemas';
+import { FederationSettingsSchema } from '@/v5/validation/schemes';
 import { FlexContainer, SectionTitle, UnitTextField } from './federationSettingsForm.styles';
 
 const UNITS = {
@@ -211,8 +211,6 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 			<FormSelectView
 				views={[EMPTY_VIEW].concat(federation.views || [])}
 				federationId={federation._id}
-				// TODO check this
-				defaultView={defaultValues.defaultView}
 				defaultValue={defaultValues.defaultView}
 				inputId="default-view-label"
 				label={formatMessage({

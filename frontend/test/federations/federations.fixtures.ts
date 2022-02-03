@@ -19,14 +19,28 @@ import * as faker from 'faker';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { 
 	EMPTY_VIEW, 
-	FetchFederationSettingsResponse, 
 	FetchFederationStatsResponse, 
 	FetchFederationViewsResponse, 
 	IFederation, 
+	IFederationExtraSettings, 
 	IFederationSettings, 
 	RawFederationSettings 
 } from '@/v5/store/federations/federations.types';
 import { times } from 'lodash';
+import { prepareFederationSettingsForBackend, prepareFederationSettingsForFrontend } from '@/v5/store/federations/federations.helpers';
+
+const RAW_MOCK_SETTINGS: RawFederationSettings = {
+	name: 'Federation Name',
+	desc: 'Federation Description',
+	code: '0000',
+	surveyPoints: [{
+		latLong: [0, 0],
+		position: [0, 0, 0],
+	}],
+	angleFromNorth: 90,
+	defaultView: EMPTY_VIEW._id,
+	unit: "mm",
+};
 
 export const federationMockFactory = (overrides?: Partial<IFederation>): IFederation => ({
 	_id: faker.datatype.uuid(),
@@ -69,29 +83,22 @@ export const prepareMockStatsReply = (federation: IFederation): FetchFederationS
 
 export const prepareMockViewsReply = (federation: IFederation): FetchFederationViewsResponse => ({
 	views: federation.views,
-})
+});
 
+export const prepareMockSettingsReply = (federation: IFederation): IFederationSettings => ({
+	...federation.settings,
+});
 
+export const prepareMockExtraSettingsReply = (federation: IFederation): IFederationExtraSettings => ({
+	name: federation.name,
+	desc: federation.description,
+	code: federation.code,
+});
 
-export const refineFederationSettings = (RawFederationSettings: RawFederationSettings): IFederationSettings => {
-	const { unit, angleFromNorth, defaultView, surveyPoints } = RawFederationSettings
-	
-	return {
-		unit,
-		angleFromNorth,
-		defaultView,
-		surveyPoint: surveyPoints[0],
-	};
-}
-
-export const prepareMockRawSettingsReply = (federation: IFederation): RawFederationSettings => {
-	const { surveyPoint, ...settings } = federation.settings;
-	const { name, description: desc, code} = federation;
-	return {
-		name, 
-		desc, 
-		code,
-		...settings,
-		surveyPoints: [surveyPoint],
-	};
-};
+export const prepareMockRawSettingsReply = (federation: IFederation): RawFederationSettings => (
+	prepareFederationSettingsForBackend(federation.settings, {
+		name: federation.name,
+		desc: federation.description,
+		code: federation.code,
+	})
+);
