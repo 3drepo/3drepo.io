@@ -44,6 +44,7 @@ export const FormTextField = ({
 		render={({ field }) => (
 			<TextField
 				{...field}
+				innerRef={field.ref}
 				className={className}
 				label={label}
 				required={required}
