@@ -2121,7 +2121,7 @@ describe("Risks", function () {
 					});
 			});
 
-			it("with resolving risk on creation should add ref to a mitigationn", function (done) {
+			it("with resolving risk on creation should add ref to a mitigation", function (done) {
 				const risk = Object.assign({}, baseRisk, { "name": "Risk test2", "mitigation_desc": "1", "mitigation_status": "agreed_partial" });
 				let riskId = null;
 				async.series([
@@ -2160,7 +2160,9 @@ describe("Risks", function () {
 					function (done) {
 						agent.patch(`/${username}/${model}/risks/${riskId}`)
 							.send({ "mitigation_status": "agreed_partial" })
-							.expect(200, done);
+							.expect(200, function (err, res) {
+								done(err);
+							});
 					},
 					function (done) {
 						agent.post(`/${username}/mitigations`)
