@@ -101,6 +101,7 @@ const customTableStyling = css`
 	}
 
 	${TableHeadingRadioTooltip} {
+		margin-left: -50px;
 	}
 
 	${TableHeadingRadioButton} {
