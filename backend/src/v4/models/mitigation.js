@@ -143,7 +143,7 @@ class Mitigation {
 
 		const mitigations = await this.findMitigationSuggestions(account, {}, []);
 
-		if(!mitigations.length){
+		if(!mitigations.length) {
 			throw responseCodes.NO_MITIGATIONS_FOUND;
 		}
 
