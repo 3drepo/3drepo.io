@@ -76,7 +76,7 @@ const getDefaultValues = (federation: IFederation) => {
 	} = federation.settings?.surveyPoint || {};
 	const [x, y, z] = position || [0, 0, 0];
 	const [latitude, longitude] = latLong || [0, 0];
-	const { code, name, description = "" } = federation;
+	const { code, name, description = '' } = federation;
 	const defaultView = federation?.settings?.defaultView || EMPTY_VIEW._id;
 	return {
 		name,
@@ -102,7 +102,6 @@ type IFederationSettingsForm = {
 export const FederationSettingsForm = ({ open, federation, onClose }: IFederationSettingsForm) => {
 	let defaultValues = getDefaultValues(federation) as any;
 	const {
-		register,
 		handleSubmit,
 		reset,
 		watch,

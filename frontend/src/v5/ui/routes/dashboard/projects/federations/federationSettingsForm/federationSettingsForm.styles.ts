@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { Typography, Select, MenuItem, TextField } from '@material-ui/core';
+import { Typography, TextField } from '@material-ui/core';
 import { ShareTextField as ShareTextFieldBase } from '@controls/shareTextField';
 
 export const SectionTitle = styled(Typography).attrs({

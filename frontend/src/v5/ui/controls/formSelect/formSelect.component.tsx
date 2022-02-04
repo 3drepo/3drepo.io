@@ -16,10 +16,8 @@
  */
 
 import React from 'react';
-import { Select, InputLabel, FormControl } from '@material-ui/core';
-import { FederationView } from '@/v5/store/federations/federations.types';
+import { Select, InputLabel, FormControl, SelectProps } from '@material-ui/core';
 import { Controller } from 'react-hook-form';
-import { SelectProps } from '@material-ui/core';
 
 export type FormSelectProps = SelectProps & {
 	control: any;
@@ -44,7 +42,7 @@ export const FormSelect = ({
 			control={control}
 			name={name}
 			render={({ field }) => (
-				<Select 
+				<Select
 					{...field}
 					inputRef={field.ref}
 					labelId={`${name}-label`}
