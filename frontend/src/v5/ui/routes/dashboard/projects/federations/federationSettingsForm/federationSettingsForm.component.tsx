@@ -171,15 +171,13 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 				control={control}
 				label={formatMessage({ id: 'federations.settings.form.name', defaultMessage: 'Name' })}
 				required
-				hasError={!!errors.name}
-				helperText={errors.name?.message}
+				error={errors.name}
 			/>
 			<FormTextField
 				name="desc"
 				control={control}
 				label={formatMessage({ id: 'federations.settings.form.description', defaultMessage: 'Description' })}
-				hasError={!!errors.desc}
-				helperText={errors.desc?.message}
+				error={errors.desc}
 			/>
 			<FlexContainer>
 				<FormSelect
@@ -203,8 +201,7 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 					name="code"
 					control={control}
 					label={formatMessage({ id: 'federation.settings.form.code', defaultMessage: 'Code' })}
-					hasError={!!errors.code}
-					helperText={errors.code?.message}
+					error={errors.code}
 				/>
 			</FlexContainer>
 			<FormSelectView
