@@ -19,7 +19,6 @@ import React from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { yupResolver } from '@hookform/resolvers/yup';
-import * as Yup from 'yup';
 import { TextField, MenuItem, InputLabel } from '@material-ui/core';
 import { Select } from '@controls/select';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
@@ -27,6 +26,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { CONTAINER_TYPES, CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
+import { CreateContainerSchema } from '@/v5/validation/containers';
 import { Container, SelectColumn } from './createContainerForm.styles';
 
 interface IFormInput {
@@ -37,49 +37,10 @@ interface IFormInput {
 	type: string;
 }
 
-const ContainerSchema = Yup.object().shape({
-	name: Yup.string()
-		.min(2,
-			formatMessage({
-				id: 'containers.creation.name.error.min',
-				defaultMessage: 'Container Name must be at least 2 characters',
-			}))
-		.max(120,
-			formatMessage({
-				id: 'containers.creation.name.error.max',
-				defaultMessage: 'Container Name is limited to 120 characters',
-			}))
-		.required(
-			formatMessage({
-				id: 'containers.creation.name.error.required',
-				defaultMessage: 'Container Name is a required field',
-			}),
-		),
-	unit: Yup.string().required().default('mm'),
-	type: Yup.string().required().default('Uncategorised'),
-	code: Yup.string()
-		.max(50,
-			formatMessage({
-				id: 'containers.creation.code.error.max',
-				defaultMessage: 'Code is limited to 50 characters',
-			}))
-		.matches(/^[A-Za-z0-9]*$/,
-			formatMessage({
-				id: 'containers.creation.code.error.characters',
-				defaultMessage: 'Code can only consist of letters and numbers',
-			})),
-	desc: Yup.string()
-		.max(50,
-			formatMessage({
-				id: 'containers.creation.description.error.max',
-				defaultMessage: 'Container Description is limited to 50 characters',
-			})),
-});
-
 export const CreateContainerForm = ({ open, close }): JSX.Element => {
 	const { register, handleSubmit, formState, reset, formState: { errors } } = useForm<IFormInput>({
 		mode: 'onChange',
-		resolver: yupResolver(ContainerSchema),
+		resolver: yupResolver(CreateContainerSchema),
 	});
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 	const onSubmit: SubmitHandler<IFormInput> = (body) => {
