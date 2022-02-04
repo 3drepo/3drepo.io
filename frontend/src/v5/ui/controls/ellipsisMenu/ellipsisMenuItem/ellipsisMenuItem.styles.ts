@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,4 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { TopNavigation } from './topNavigation.component';
+import styled from 'styled-components';
+import { MenuItem as MenuItemComponent } from '@material-ui/core';
+
+export const MenuItem = styled(MenuItemComponent)`
+	color: ${({ theme }) => theme.palette.secondary.main};
+	margin: 0;
+	height: 40px;
+	padding-right: 14px;
+	justify-content: space-between;
+
+	&:hover {
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	}
+
+	&:focus {
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	}
+
+	&:active {
+		background-color: ${({ theme }) => theme.palette.base.light};
+	}
+`;

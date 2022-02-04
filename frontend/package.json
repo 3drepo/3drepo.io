@@ -1,6 +1,6 @@
 {
 	"name": "3drepo.io-frontend",
-	"version": "4.20.3",
+	"version": "4.20.4",
 	"description": "The frontend for 3drepo.io",
 	"main": "index.js",
 	"directories": {
@@ -9,7 +9,7 @@
 	"scripts": {
 		"build:base:development": "webpack --watch --progress --config ./internals/webpack/webpack.dev.config.js",
 		"build:base:production": "webpack --progress --config ./internals/webpack/webpack.prod.config.js",
-		"watch": "yarn build:base:development --no-type-checking",
+		"watch": "yarn build:base:development --no-type-checking --debug --devtool source-map --output-pathinfo",
 		"build": "yarn compile && yarn build:base:production --no-type-checking",
 		"build:test": "cross-env NODE_OPTIONS='--max-old-space-size=4096' yarn build:base:production",
 		"build:dev": "yarn build --config ./internals/webpack/webpack.dev.config.js",
@@ -19,7 +19,7 @@
 		"wdm:update": "webdriver-manager update --standalone",
 		"test": "cross-env NODE_ENV=test yarn jest --runInBand --silent",
 		"unity-util": "webpack --config ./internals/webpack/webpack.unityutil.config.js",
-		"lint:ts": "eslint . --quiet --rulesdir internals/eslint-rules/",
+		"lint:ts": "eslint . --rulesdir internals/eslint-rules/",
 		"lint:css": "stylelint ./**/*.styles.ts",
 		"lint": "yarn lint:ts && yarn lint:css",
 		"lint:fix": "yarn lint:ts --fix",

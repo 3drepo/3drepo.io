@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2014 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,31 +14,27 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import React, { ReactNode, SyntheticEvent } from 'react';
+import { Typography } from '@material-ui/core';
+import { Link } from 'react-router-dom';
+import { MenuItem } from './ellipsisMenuItem.styles';
 
-"use strict";
-const html = data => `
-	Model failed to import. Please help this user out.
-	<br>
-	account: ${data.account}
-	<br>
-	model: ${data.model}
-	<br>
-	user: ${data.username}
-	<br>
-	Error: ${data.err}
-	<br>
-	Bouncer Error Code : ${data.bouncerErr}
-	<br>
-	correlationId: ${data.corID}
-	<br>
-	appId: ${data.appId}
-	<br>
-	domain: ${data.domain}
-`;
-
-const subject = data => `[System][${data.domain}] Model import error - ${data.account}`;
-
-module.exports =  {
-	html: html,
-	subject: subject
+type EllipsisMenuItemProps = {
+	title: ReactNode;
+	to?: string;
+	key?: string;
+	onClick?: (event: SyntheticEvent) => void;
 };
+
+export const EllipsisMenuItem = ({ to, title, key, onClick }: EllipsisMenuItemProps) => (
+	<MenuItem
+		component={to ? Link : null}
+		to={to}
+		key={key}
+		onClick={onClick}
+	>
+		<Typography variant="body1" noWrap>
+			{title}
+		</Typography>
+	</MenuItem>
+);
