@@ -2030,6 +2030,7 @@ describe("Risks", function () {
 
 			agent.post(`/${username}/mitigations`)
 				.expect(200, function (err, res) {
+					console.log(res.body);
 					const mitigation = res.body.find((m) => m.mitigation_desc === "1");
 					expect(!!mitigation).to.equal(true);
 				});
@@ -2051,6 +2052,8 @@ describe("Risks", function () {
 					agent.post(`/${username}/mitigations`)
 						.expect(200, function (err, res) {
 							const mitigation = res.body.find((m) => m.mitigation_desc === "1");
+							console.log(riskId);
+							console.log(mitigation);
 							const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
 							expect(!!reference).to.equal(true);
 							done(err);
