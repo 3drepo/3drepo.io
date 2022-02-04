@@ -78,7 +78,8 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 	};
 
 	const onClickDelete = (id) => {
-		setSelectedIndex(null);
+		if (id < selectedIndex) setSelectedIndex(selectedIndex - 1);
+		if (id === selectedIndex) setSelectedIndex(null);
 		remove(id);
 	};
 
