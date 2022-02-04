@@ -18,43 +18,43 @@
 import React from 'react';
 import { Select, InputLabel, FormControl } from '@material-ui/core';
 import { FederationView } from '@/v5/store/federations/federations.types';
+import { Controller } from 'react-hook-form';
+import { SelectProps } from '@material-ui/core';
 
-export type FormSelectProps = {
-	inputId: string;
-	label: string;
-	selectId: string;
-	defaultValue: FederationView;
-	required?: boolean;
-	children: JSX.Element[];
-	useFormRegisterProps: any;
-	className?: string;
+export type FormSelectProps = SelectProps & {
+	control: any;
 };
 
 export const FormSelect = ({
-	inputId,
+	name,
 	required,
 	label,
-	selectId,
-	defaultValue,
 	children,
-	useFormRegisterProps,
-	className,
+	control,
+	...otherProps
 }: FormSelectProps) => (
 	<FormControl>
 		<InputLabel
-			id={inputId}
+			id={`${name}-label`}
 			required={required}
 		>
 			{label}
 		</InputLabel>
-		<Select
-			labelId={inputId}
-			id={selectId}
-			defaultValue={defaultValue}
-			className={className}
-			{...useFormRegisterProps}
-		>
-			{children}
-		</Select>
+		<Controller
+			control={control}
+			name={name}
+			render={({ field }) => (
+				<Select 
+					{...field}
+					inputRef={field.ref}
+					labelId={`${name}-label`}
+					id={name}
+					label={label}
+					{...otherProps}
+				>
+					{children}
+				</Select>
+			)}
+		/>
 	</FormControl>
 );

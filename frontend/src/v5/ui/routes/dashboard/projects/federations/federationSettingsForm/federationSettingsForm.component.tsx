@@ -56,7 +56,7 @@ const UNITS = [
 interface IFormInput {
 	name: string;
 	unit: string;
-	desc?: string;
+	description?: string;
 	code?: string;
 	defaultView: string;
 	latitude: number;
@@ -76,11 +76,11 @@ const getDefaultValues = (federation: IFederation) => {
 	} = federation.settings?.surveyPoint || {};
 	const [x, y, z] = position || [0, 0, 0];
 	const [latitude, longitude] = latLong || [0, 0];
-	const { code, name, description: desc } = federation;
+	const { code, name, description = "" } = federation;
 	const defaultView = federation?.settings?.defaultView || EMPTY_VIEW._id;
 	return {
 		name,
-		desc,
+		description,
 		code,
 		unit,
 		defaultView,
@@ -130,7 +130,7 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 		latitude, longitude,
 		x, y, z,
 		name,
-		desc,
+		description,
 		code,
 		...otherSettings
 	}) => {
@@ -141,7 +141,7 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 			},
 			...otherSettings,
 		};
-		const extraSettings: IFederationExtraSettings = { name, desc, code };
+		const extraSettings: IFederationExtraSettings = { name, desc: description, code };
 		FederationsActionsDispatchers.updateFederationSettings(
 			teamspace,
 			project,
@@ -171,25 +171,24 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 				control={control}
 				label={formatMessage({ id: 'federations.settings.form.name', defaultMessage: 'Name' })}
 				required
-				error={errors.name}
+				formError={errors.name}
 			/>
 			<FormTextField
-				name="desc"
+				name="description"
 				control={control}
 				label={formatMessage({ id: 'federations.settings.form.description', defaultMessage: 'Description' })}
-				error={errors.desc}
+				formError={errors.description}
 			/>
 			<FlexContainer>
 				<FormSelect
 					required
-					inputId="unit-label"
+					name="unit"
 					label={formatMessage({
 						id: 'federations.settings.form.unit',
 						defaultMessage: 'Units',
 					})}
-					selectId="unit-label"
+					control={control}
 					defaultValue={defaultValues.unit}
-					useFormRegisterProps={register('unit')}
 				>
 					{UNITS.map(({ name, abbreviation }) => (
 						<MenuItem key={abbreviation} value={abbreviation}>
@@ -201,20 +200,19 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 					name="code"
 					control={control}
 					label={formatMessage({ id: 'federation.settings.form.code', defaultMessage: 'Code' })}
-					error={errors.code}
+					formError={errors.code}
 				/>
 			</FlexContainer>
 			<FormSelectView
+				control={control}
 				views={[EMPTY_VIEW].concat(federation.views || [])}
 				federationId={federation._id}
 				defaultValue={defaultValues.defaultView}
-				inputId="default-view-label"
+				name="default-view"
 				label={formatMessage({
 					id: 'federations.settings.form.view',
 					defaultMessage: 'Default View',
 				})}
-				selectId="default-view-label"
-				useFormRegisterProps={register('defaultView')}
 			/>
 			<SectionTitle>GIS servey point</SectionTitle>
 			<FlexContainer>

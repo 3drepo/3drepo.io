@@ -37,7 +37,7 @@ export const FederationSettingsSchema = Yup.object().shape({
 				defaultMessage: 'Federation Name is a required field',
 			}),
 		),
-	desc: Yup.lazy((value) => (
+	description: Yup.lazy((value) => (
 		value === ''
 			? Yup.string().strip()
 			: Yup.string()

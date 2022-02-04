@@ -17,17 +17,17 @@
 
 import { TextField, TextFieldProps } from '@material-ui/core';
 import React from 'react';
-import { Controller, FormState } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 
 type FormTextFieldProps = TextFieldProps & { 
 	control: any, 
-	error: any,
+	formError: any,
 };
 
 export const FormTextField = ({
 	name,
 	control,
-	error,
+	formError,
 	...otherProps
 }: FormTextFieldProps) => (
 	<Controller
@@ -36,8 +36,8 @@ export const FormTextField = ({
 		render={({ field }) => (
 			<TextField
 				inputRef={field.ref}
-				error={!!error}
-				helperText={error?.message}
+				error={!!formError}
+				helperText={formError?.message}
 				{...field}
 				{...otherProps}
 			/>

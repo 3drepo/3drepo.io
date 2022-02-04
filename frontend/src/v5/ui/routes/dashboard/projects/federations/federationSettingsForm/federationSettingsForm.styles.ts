@@ -77,33 +77,6 @@ export const ViewLabel = styled.div`
 	flex-direction: column;
 `;
 
-export const SelectView = styled(Select)`
-	.MuiSelect-selectMenu {
-		display: flex;
-		padding-left: 0;
-	}
-
-	img {
-		margin-right: 0;
-	}
-
-	${ViewLabel} {
-		padding-left: 14px;
-	}
-
-	${ThumbnailPlaceholder} {
-		display: none;
-	}
-`;
-
-export const MenuItemView = styled(MenuItem)`
-	&.Mui-selected ${/* sc-selector */ ViewLabel}::after {
-		content: "Selected";
-		color: ${({ theme }) => theme.palette.primary.main};
-		${({ theme }) => theme.typography.caption};
-	}
-`;
-
 export const UnitTextField = styled(TextField).attrs((props) => ({
 	label: ` (${props.labelunit})`,
 }))`
