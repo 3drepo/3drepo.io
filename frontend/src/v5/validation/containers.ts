@@ -20,36 +20,36 @@ import { formatMessage } from '../services/intl';
 
 export const ListItemSchema = Yup.object().shape({
 	revisionTag: Yup.string()
-		.min(2,
+		.min(3,
 			formatMessage({
-				id: 'uploadFileForm.revision.tag.error.min',
-				defaultMessage: 'Container Name must be at least 2 characters',
+				id: 'validation.revision.tag.error.min',
+				defaultMessage: 'Revision Name must be at least 2 characters',
 			}))
 		.max(120,
 			formatMessage({
-				id: 'uploadFileForm.revision.tag.error.max',
+				id: 'validation.revision.tag.error.max',
 				defaultMessage: 'Revision Name is limited to 120 characters',
 			}))
 		.required(
 			formatMessage({
-				id: 'uploadFileForm.revision.tag.error.required',
+				id: 'validation.revision.tag.error.required',
 				defaultMessage: 'Revision Name is a required field',
 			}),
 		),
 	containerName: Yup.string()
 		.min(3,
 			formatMessage({
-				id: 'containers.creation.name.error.min',
+				id: 'validation.container.name.error.min',
 				defaultMessage: 'Container Name must be at least 2 characters',
 			}))
 		.max(120,
 			formatMessage({
-				id: 'containers.creation.name.error.max',
+				id: 'validation.container.name.error.max',
 				defaultMessage: 'Container Name is limited to 120 characters',
 			}))
 		.required(
 			formatMessage({
-				id: 'containers.creation.name.error.required',
+				id: 'validation.container.name.error.required',
 				defaultMessage: 'Container Name is a required field',
 			}),
 		),
@@ -61,24 +61,24 @@ export const SidebarSchema = Yup.object().shape({
 	containerCode: Yup.string()
 		.max(50,
 			formatMessage({
-				id: 'containers.creation.code.error.max',
+				id: 'validation.container.code.error.max',
 				defaultMessage: 'Code is limited to 50 characters',
 			}))
 		.matches(/^[A-Za-z0-9]*$/,
 			formatMessage({
-				id: 'containers.creation.code.error.characters',
+				id: 'validation.container.code.error.characters',
 				defaultMessage: 'Code can only consist of letters and numbers',
 			})),
 	containerDesc: Yup.string()
 		.max(50,
 			formatMessage({
-				id: 'containers.creation.description.error.max',
+				id: 'validation.container.description.error.max',
 				defaultMessage: 'Container Description is limited to 50 characters',
 			})),
 	revisionDesc: Yup.string()
 		.max(50,
 			formatMessage({
-				id: 'uploadSidebar.revisionDesc.error.max',
+				id: 'validation.revision.description.error.max',
 				defaultMessage: 'Revision Description is limited to 50 characters',
 			})),
 });
