@@ -19,7 +19,7 @@
 		"wdm:update": "webdriver-manager update --standalone",
 		"test": "cross-env NODE_ENV=test yarn jest --runInBand --silent",
 		"unity-util": "webpack --config ./internals/webpack/webpack.unityutil.config.js",
-		"lint:ts": "eslint . --quiet --rulesdir internals/eslint-rules/",
+		"lint:ts": "eslint . --rulesdir internals/eslint-rules/",
 		"lint:css": "stylelint ./**/*.styles.ts",
 		"lint": "yarn lint:ts && yarn lint:css",
 		"lint:fix": "yarn lint:ts --fix",

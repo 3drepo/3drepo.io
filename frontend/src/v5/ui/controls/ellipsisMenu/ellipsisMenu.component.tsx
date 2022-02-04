@@ -15,71 +15,82 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { Dispatch, ReactNode } from 'react';
-import { ClickAwayListener, Grow, Paper, Typography } from '@material-ui/core';
-import { Link } from 'react-router-dom';
-import { MenuList, MenuItem, Popper } from './ellipsisMenu.styles';
-
-interface IListItem {
-	title: ReactNode;
-	onClick?: Dispatch<void>;
-	to?: string;
-	key: number;
-}
+import React, { MouseEvent } from 'react';
+import { formatMessage } from '@/v5/services/intl';
+import { ClickAwayListener, Grow, Paper, Tooltip } from '@material-ui/core';
+import { EllipsisButton } from '@controls/ellipsisButton';
+import { MenuList, Popper } from './ellipsisMenu.styles';
 
 export interface IEllipsisMenu {
-	anchorEl: null | HTMLElement;
-	handleClose: () => void;
-	list: IListItem[];
+	children: JSX.Element[];
 }
 
-export const EllipsisMenu = ({ anchorEl, handleClose, list }: IEllipsisMenu): JSX.Element => {
+export const EllipsisMenu = ({ children }: IEllipsisMenu): JSX.Element => {
+	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+
+	const handleClickDropdown = (event: MouseEvent<HTMLButtonElement>) => {
+		event.stopPropagation();
+		setAnchorEl(event.currentTarget);
+	};
+
+	const handleCloseDropdown = () => {
+		setAnchorEl(null);
+	};
+
 	const handleListKeyDown = (event) => {
 		if (event.key === 'Tab') {
 			event.preventDefault();
-			handleClose();
+			handleCloseDropdown();
 		}
 	};
 
 	return (
-		<Popper
-			open={Boolean(anchorEl)}
-			anchorEl={anchorEl}
-			transition
-			disablePortal
-			placement="bottom-end"
-		>
-			{({ TransitionProps, placement }) => (
-				<Grow
-					{...TransitionProps}
-					style={{ transformOrigin: placement === 'bottom-end' ? 'center top' : 'center bottom' }}
-				>
-					<Paper>
-						<ClickAwayListener onClickAway={handleClose}>
-							<MenuList autoFocusItem={Boolean(anchorEl)} id="ellipsis-menu-list" onKeyDown={handleListKeyDown}>
-								{list.map(({ title, onClick, to = '', key }) => (
-									<MenuItem
-										key={key}
-										component={to ? Link : null}
-										to={to}
-										onClick={(event) => {
-											event.stopPropagation();
-											if (onClick) {
-												onClick(event);
-											}
-											handleClose();
-										}}
-									>
-										<Typography variant="body1" noWrap>
-											{title}
-										</Typography>
-									</MenuItem>
-								))}
-							</MenuList>
-						</ClickAwayListener>
-					</Paper>
-				</Grow>
-			)}
-		</Popper>
+		<>
+			<Tooltip
+				title={formatMessage({ id: 'ellipsisMenu.tooltip', defaultMessage: 'More options' })}
+			>
+				<EllipsisButton
+					aria-controls="ellipsis-menu-list"
+					aria-haspopup="true"
+					onClick={(event) => {
+						event.stopPropagation();
+						handleClickDropdown(event);
+					}}
+					isOn={Boolean(anchorEl)}
+				/>
+			</Tooltip>
+			<Popper
+				open={Boolean(anchorEl)}
+				anchorEl={anchorEl}
+				transition
+				disablePortal
+				placement="bottom-end"
+			>
+				{({ TransitionProps, placement }) => (
+					<Grow
+						{...TransitionProps}
+						style={{ transformOrigin: placement === 'bottom-end' ? 'center top' : 'center bottom' }}
+					>
+						<Paper>
+							<ClickAwayListener onClickAway={handleCloseDropdown}>
+								<MenuList autoFocusItem={Boolean(anchorEl)} id="ellipsis-menu-list" onKeyDown={handleListKeyDown}>
+									{children.map((child) => (
+										React.cloneElement(child, {
+											...child.props,
+											key: child.props.title,
+											onClick: (event) => {
+												event.stopPropagation();
+												child.props.onClick?.call(event);
+												handleCloseDropdown();
+											},
+										})
+									))}
+								</MenuList>
+							</ClickAwayListener>
+						</Paper>
+					</Grow>
+				)}
+			</Popper>
+		</>
 	);
 };
