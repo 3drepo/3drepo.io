@@ -2021,6 +2021,237 @@ describe("Risks", function () {
 			], done);
 		});
 
+		it("with resolving risk on creation should create new mitigation", function (done) {
+			const risk = Object.assign({}, baseRisk, { "name": "Risk test", "mitigation_desc": "1", "mitigation_status": "agreed_partial" });
+
+			agent.post(`/${username}/${model}/risks`)
+				.send(risk)
+				.expect(200, done);
+
+			agent.post(`/${username}/mitigations`)
+				.expect(200, function (err, res) {
+					const mitigation = res.body.find((m) => m.mitigation_desc === "1");
+					expect(!!mitigation).to.equal(true);
+				});
+		});
+
+		it("with resolving risk on creation should add ref to a mitigation", function (done) {
+			const risk = Object.assign({}, baseRisk, { "name": "Risk test2", "mitigation_desc": "1", "mitigation_status": "agreed_partial" });
+			let riskId = null;
+			async.series([
+				function (done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function (err, res) {
+							riskId = res.body._id;
+							done(err);
+						});
+				},
+				function (done) {
+					agent.post(`/${username}/mitigations`)
+						.expect(200, function (err, res) {
+							const mitigation = res.body.find((m) => m.mitigation_desc === "1");
+							const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
+							expect(!!reference).to.equal(true);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("with resolving risk on update should create new mitigation", function (done) {
+			const risk = Object.assign({}, baseRisk, { "name": "Risk test3", "mitigation_desc": "2" });
+			let riskId = null;
+			async.series([
+				function (done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function (err, res) {
+							riskId = res.body._id;
+							done(err);
+						});
+				},
+				function (done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send({ "mitigation_status": "agreed_partial" })
+						.expect(200, function (err, res) {
+							done(err);
+						});
+				},
+				function (done) {
+					agent.post(`/${username}/mitigations`)
+						.expect(200, function (err, res) {
+							const mitigation = res.body.find((m) => m.mitigation_desc === "2");
+							const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
+							expect(!!reference).to.equal(true);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("with resolving risk on update should add risk ref to mitigation", function (done) {
+			const risk = Object.assign({}, baseRisk, { "name": "Risk test4", "mitigation_desc": "2" });
+			let riskId = null;
+			async.series([
+				function (done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function (err, res) {
+							riskId = res.body._id;
+							done(err);
+						});
+				},
+				function (done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send({ "mitigation_status": "agreed_partial" })
+						.expect(200, done);
+				},
+				function (done) {
+					agent.post(`/${username}/mitigations`)
+						.expect(200, function (err, res) {
+							const mitigation = res.body.find((m) => m.mitigation_desc === "2");
+							const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
+							expect(!!reference).to.equal(true);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("with editing a resolved risk should remove ref from existing mitigation and create new", function (done) {
+			const risk = Object.assign({}, baseRisk, { "name": "Risk test5", "mitigation_desc": "2", "mitigation_status": "agreed_partial" });
+			let riskId = null;
+			async.series([
+				function (done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function (err, res) {
+							riskId = res.body._id;
+							done(err);
+						});
+				},
+				function (done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send({ "mitigation_desc": "3" })
+						.expect(200, done);
+				},
+				function (done) {
+					agent.post(`/${username}/mitigations`)
+						.expect(200, function (err, res) {
+							const mitigation = res.body.find((m) => m.mitigation_desc === "2");
+							const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
+							expect(!!reference).to.equal(false);
+							done(err);
+						});
+				},
+				function (done) {
+					agent.post(`/${username}/mitigations`)
+						.expect(200, function (err, res) {
+							const mitigation = res.body.find((m) => m.mitigation_desc === "3");
+							const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
+							expect(!!reference).to.equal(true);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("with editing a resolved risk should remove ref from existing mitigation and add ref to another", function (done) {
+			const risk = Object.assign({}, baseRisk, { "name": "Risk test6", "mitigation_desc": "2", "mitigation_status": "agreed_partial" });
+			let riskId = null;
+			async.series([
+				function (done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function (err, res) {
+							riskId = res.body._id;
+							done(err);
+						});
+				},
+				function (done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send({ "mitigation_desc": "3" })
+						.expect(200, done);
+				},
+				function (done) {
+					agent.post(`/${username}/mitigations`)
+						.expect(200, function (err, res) {
+							const mitigation = res.body.find((m) => m.mitigation_desc === "2");
+							const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
+							expect(!!reference).to.equal(false);
+							done(err);
+						});
+				},
+				function (done) {
+					agent.post(`/${username}/mitigations`)
+						.expect(200, function (err, res) {
+							const mitigation = res.body.find((m) => m.mitigation_desc === "3");
+							const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
+							expect(!!reference).to.equal(true);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("with unresolving a risk should remove ref from existing mitigation", function (done) {
+			const risk = Object.assign({}, baseRisk, { "name": "Risk test7", "mitigation_desc": "2", "mitigation_status": "agreed_partial" });
+			let riskId = null;
+			async.series([
+				function (done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function (err, res) {
+							riskId = res.body._id;
+							done(err);
+						});
+				},
+				function (done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send({ "mitigation_status": "proposed" })
+						.expect(200, done);
+				},
+				function (done) {
+					agent.post(`/${username}/mitigations`)
+						.expect(200, function (err, res) {
+							const mitigation = res.body.find((m) => m.mitigation_desc === "2");
+							const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
+							expect(!!reference).to.equal(false);
+							done(err);
+						});
+				}
+			], done);
+		});	
+
+		it("with unresolving a risk should remove mitigation", function (done) {
+			const risk = Object.assign({}, baseRisk, { "name": "Risk test8", "mitigation_desc": "4", "mitigation_status": "agreed_partial" });
+			let riskId = null;
+			async.series([
+				function (done) {
+					agent.post(`/${username}/${model}/risks`)
+						.send(risk)
+						.expect(200, function (err, res) {
+							riskId = res.body._id;
+							done(err);
+						});
+				},
+				function (done) {
+					agent.patch(`/${username}/${model}/risks/${riskId}`)
+						.send({ "mitigation_status": "proposed" })
+						.expect(200, done);
+				},
+				function (done) {
+					agent.post(`/${username}/mitigations`)
+						.expect(200, function (err, res) {
+							const mitigation = res.body.find((m) => m.mitigation_desc === "4");
+							expect(!!mitigation).to.equal(false);
+							done(err);
+						});
+				}
+			], done);
+		});	
+
 		describe("and then commenting", function () {
 			let riskId;
 			let commentId = null
@@ -2105,236 +2336,7 @@ describe("Risks", function () {
 				agent.patch(`/${username}/${model}/risks/${invalidId}`)
 					.send(comment)
 					.expect(404, done);
-			});
-
-			it("with resolving risk on creation should create new mitigation", function (done) {
-				const risk = Object.assign({}, baseRisk, { "name": "Risk test", "mitigation_desc": "1", "mitigation_status": "agreed_partial" });
-
-				agent.post(`/${username}/${model}/risks`)
-					.send(risk)
-					.expect(200, done);
-
-				agent.post(`/${username}/mitigations`)
-					.expect(200, function (err, res) {
-						const mitigation = res.body.find((m) => m.mitigation_desc === "1");
-						expect(!!mitigation).to.equal(true);
-					});
-			});
-
-			it("with resolving risk on creation should add ref to a mitigation", function (done) {
-				const risk = Object.assign({}, baseRisk, { "name": "Risk test2", "mitigation_desc": "1", "mitigation_status": "agreed_partial" });
-				let riskId = null;
-				async.series([
-					function (done) {
-						agent.post(`/${username}/${model}/risks`)
-							.send(risk)
-							.expect(200, function (err, res) {
-								riskId = res.body._id;
-								done(err);
-							});
-					},
-					function (done) {
-						agent.post(`/${username}/mitigations`)
-							.expect(200, function (err, res) {
-								const mitigation = res.body.find((m) => m.mitigation_desc === "1");
-								const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
-								expect(!!reference).to.equal(true);
-								done(err);
-							});
-					}
-				], done);
-			});
-
-			it("with resolving risk on update should create new mitigation", function (done) {
-				const risk = Object.assign({}, baseRisk, { "name": "Risk test3", "mitigation_desc": "2" });
-				let riskId = null;
-				async.series([
-					function (done) {
-						agent.post(`/${username}/${model}/risks`)
-							.send(risk)
-							.expect(200, function (err, res) {
-								riskId = res.body._id;
-								done(err);
-							});
-					},
-					function (done) {
-						agent.patch(`/${username}/${model}/risks/${riskId}`)
-							.send({ "mitigation_status": "agreed_partial" })
-							.expect(200, function (err, res) {
-								done(err);
-							});
-					},
-					function (done) {
-						agent.post(`/${username}/mitigations`)
-							.expect(200, function (err, res) {
-								const mitigation = res.body.find((m) => m.mitigation_desc === "2");
-								const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
-								expect(!!reference).to.equal(true);
-								done(err);
-							});
-					}
-				], done);
-			});
-
-			it("with resolving risk on update should add risk ref to mitigation", function (done) {
-				const risk = Object.assign({}, baseRisk, { "name": "Risk test4", "mitigation_desc": "2" });
-				let riskId = null;
-				async.series([
-					function (done) {
-						agent.post(`/${username}/${model}/risks`)
-							.send(risk)
-							.expect(200, function (err, res) {
-								riskId = res.body._id;
-								done(err);
-							});
-					},
-					function (done) {
-						agent.patch(`/${username}/${model}/risks/${riskId}`)
-							.send({ "mitigation_status": "agreed_partial" })
-							.expect(200, done);
-					},
-					function (done) {
-						agent.post(`/${username}/mitigations`)
-							.expect(200, function (err, res) {
-								const mitigation = res.body.find((m) => m.mitigation_desc === "2");
-								const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
-								expect(!!reference).to.equal(true);
-								done(err);
-							});
-					}
-				], done);
-			});
-
-			it("with editing a resolved risk should remove ref from existing mitigation and create new", function (done) {
-				const risk = Object.assign({}, baseRisk, { "name": "Risk test5", "mitigation_desc": "2", "mitigation_status": "agreed_partial" });
-				let riskId = null;
-				async.series([
-					function (done) {
-						agent.post(`/${username}/${model}/risks`)
-							.send(risk)
-							.expect(200, function (err, res) {
-								riskId = res.body._id;
-								done(err);
-							});
-					},
-					function (done) {
-						agent.patch(`/${username}/${model}/risks/${riskId}`)
-							.send({ "mitigation_desc": "3" })
-							.expect(200, done);
-					},
-					function (done) {
-						agent.post(`/${username}/mitigations`)
-							.expect(200, function (err, res) {
-								const mitigation = res.body.find((m) => m.mitigation_desc === "2");
-								const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
-								expect(!!reference).to.equal(false);
-								done(err);
-							});
-					},
-					function (done) {
-						agent.post(`/${username}/mitigations`)
-							.expect(200, function (err, res) {
-								const mitigation = res.body.find((m) => m.mitigation_desc === "3");
-								const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
-								expect(!!reference).to.equal(true);
-								done(err);
-							});
-					}
-				], done);
-			});
-
-			it("with editing a resolved risk should remove ref from existing mitigation and add ref to another", function (done) {
-				const risk = Object.assign({}, baseRisk, { "name": "Risk test6", "mitigation_desc": "2", "mitigation_status": "agreed_partial" });
-				let riskId = null;
-				async.series([
-					function (done) {
-						agent.post(`/${username}/${model}/risks`)
-							.send(risk)
-							.expect(200, function (err, res) {
-								riskId = res.body._id;
-								done(err);
-							});
-					},
-					function (done) {
-						agent.patch(`/${username}/${model}/risks/${riskId}`)
-							.send({ "mitigation_desc": "3" })
-							.expect(200, done);
-					},
-					function (done) {
-						agent.post(`/${username}/mitigations`)
-							.expect(200, function (err, res) {
-								const mitigation = res.body.find((m) => m.mitigation_desc === "2");
-								const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
-								expect(!!reference).to.equal(false);
-								done(err);
-							});
-					},
-					function (done) {
-						agent.post(`/${username}/mitigations`)
-							.expect(200, function (err, res) {
-								const mitigation = res.body.find((m) => m.mitigation_desc === "3");
-								const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
-								expect(!!reference).to.equal(true);
-								done(err);
-							});
-					}
-				], done);
-			});
-			it("with unresolving a risk should remove ref from existing mitigation", function (done) {
-				const risk = Object.assign({}, baseRisk, { "name": "Risk test7", "mitigation_desc": "2", "mitigation_status": "agreed_partial" });
-				let riskId = null;
-				async.series([
-					function (done) {
-						agent.post(`/${username}/${model}/risks`)
-							.send(risk)
-							.expect(200, function (err, res) {
-								riskId = res.body._id;
-								done(err);
-							});
-					},
-					function (done) {
-						agent.patch(`/${username}/${model}/risks/${riskId}`)
-							.send({ "mitigation_status": "proposed" })
-							.expect(200, done);
-					},
-					function (done) {
-						agent.post(`/${username}/mitigations`)
-							.expect(200, function (err, res) {
-								const mitigation = res.body.find((m) => m.mitigation_desc === "2");
-								const reference = mitigation.referencedRisks.find((r) => r === formatReference(riskId));
-								expect(!!reference).to.equal(false);
-								done(err);
-							});
-					}
-				], done);
-			});	
-			it("with unresolving a risk should remove mitigation", function (done) {
-				const risk = Object.assign({}, baseRisk, { "name": "Risk test8", "mitigation_desc": "4", "mitigation_status": "agreed_partial" });
-				let riskId = null;
-				async.series([
-					function (done) {
-						agent.post(`/${username}/${model}/risks`)
-							.send(risk)
-							.expect(200, function (err, res) {
-								riskId = res.body._id;
-								done(err);
-							});
-					},
-					function (done) {
-						agent.patch(`/${username}/${model}/risks/${riskId}`)
-							.send({ "mitigation_status": "proposed" })
-							.expect(200, done);
-					},
-					function (done) {
-						agent.post(`/${username}/mitigations`)
-							.expect(200, function (err, res) {
-								const mitigation = res.body.find((m) => m.mitigation_desc === "4");
-								expect(!!mitigation).to.equal(false);
-								done(err);
-							});
-					}
-				], done);
-			});			
+			});				
 		});
 
 		describe("Tagging a user in a comment", function () {
