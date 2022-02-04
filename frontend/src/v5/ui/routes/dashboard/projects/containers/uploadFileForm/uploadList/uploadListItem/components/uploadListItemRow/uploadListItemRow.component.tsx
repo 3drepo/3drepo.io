@@ -20,7 +20,7 @@ import { Container } from './uploadListItemRow.styles';
 
 type IUploadListItemRow = {
 	onClick: () => void;
-	onChange: () => void;
+	onChange: (e) => void;
 	children: React.ReactNode;
 };
 

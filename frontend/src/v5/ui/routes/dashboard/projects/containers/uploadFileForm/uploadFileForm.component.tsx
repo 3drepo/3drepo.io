@@ -22,14 +22,13 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { formatMessage } from '@/v5/services/intl';
 import { Sidebar } from '@controls/sideBar';
-import { UploadFieldArray, UploadSidebarFields } from '@/v5/store/containers/containers.types';
+import { UploadFieldArray } from '@/v5/store/containers/containers.types';
 import { UploadsSchema } from '@/v5/validation/containers';
 import { UploadListHeader } from './uploadListHeader';
 import { UploadListHeaderLabel } from './uploadListHeader/uploadListHeaderLabel';
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
 import { Container, Content, DropZone } from './uploadFileForm.styles';
-import { Title } from './sidebarForm/sidebarForm.styles';
 
 type IUploadFileForm = {
 	openState: boolean;
@@ -48,36 +47,32 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		name: 'uploads',
 	});
 
-	const processFiles = (files) => {
+	const processFiles = (files: File[]) => {
 		const filesToAppend = [];
 		for (const file of files) {
 			filesToAppend.push({
 				file,
 				extension: file.name.split('.').slice(-1)[0],
-				listItem: {
-					revisionTag: file.name,
-					containerName: '',
-				},
-				sidebar: {
-					_id: '',
-					containerUnit: 'mm',
-					containerType: 'Uncategorised',
-					containerCode: '',
-					containerDesc: '',
-					revisionDesc: '',
-					importAnimations: false,
-					timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/London',
-				},
+				revisionTag: file.name,
+				containerName: '',
+				containerId: '',
+				containerUnit: 'mm',
+				containerType: 'Uncategorised',
+				containerCode: '',
+				containerDesc: '',
+				revisionDesc: '',
+				importAnimations: false,
+				timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/London',
 			});
 		}
 		append(filesToAppend);
 	};
 
-	const onClickEdit = (id) => {
+	const onClickEdit = (id: number) => {
 		setSelectedIndex(id);
 	};
 
-	const onClickDelete = (id) => {
+	const onClickDelete = (id: number) => {
 		if (id < selectedIndex) setSelectedIndex(selectedIndex - 1);
 		if (id === selectedIndex) setSelectedIndex(null);
 		remove(id);
@@ -129,20 +124,16 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 							Number.isInteger(selectedIndex)
 								? (
 									<>
-										<Title>
-											{getValues([`uploads.${selectedIndex}.listItem.containerName`])}
-										</Title>
 										<SidebarForm
-											value={fields[selectedIndex].sidebar}
+											value={getValues(`uploads.${selectedIndex}`)}
 											key={fields[selectedIndex].id}
-											isNewContainer={!!fields[selectedIndex].id}
+											isNewContainer={!fields[selectedIndex].containerId}
 											isSpm={fields[selectedIndex].extension === 'spm'}
-											onChange={(newSidebarFields: UploadSidebarFields) => {
-												for (const [key, val] of Object.entries(newSidebarFields)) {
-													// @ts-ignore
-													setValue(`uploads.${selectedIndex}.sidebar.${key}`, val);
-												}
-												trigger(`uploads.${selectedIndex}.sidebar`);
+											onChange={(field: string, val: string | boolean) => {
+												// @ts-ignore
+												setValue(`uploads.${selectedIndex}.${field}`, val);
+												// @ts-ignore
+												trigger(`uploads.${selectedIndex}.${field}`);
 											}}
 										/>
 									</>

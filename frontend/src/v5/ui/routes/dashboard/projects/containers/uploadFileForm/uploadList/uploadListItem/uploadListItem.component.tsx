@@ -31,7 +31,7 @@ type IUploadListItem = {
 	item: UploadItemFields;
 	onClickEdit: () => void;
 	onClickDelete: () => void;
-	onChange: (val) => void;
+	onChange: (name, val) => void;
 };
 
 export const UploadListItem = ({
@@ -42,13 +42,15 @@ export const UploadListItem = ({
 }: IUploadListItem): JSX.Element => {
 	const filesize = '400MB';
 	const { control, getValues, formState: { errors } } = useForm({
-		defaultValues: item.listItem,
+		defaultValues: item,
 		mode: 'onChange',
 		resolver: yupResolver(ListItemSchema),
 	});
 
+	const updateValue = (name) => onChange(name, getValues(name));
+
 	return (
-		<UploadListItemRow key={item.id} onClick={() => { }} onChange={() => onChange(getValues())}>
+		<UploadListItemRow key={item.id} onClick={() => { }} onChange={(e) => updateValue(e.target.name)}>
 			<span>
 				<UploadListItemFileIcon extension={item.extension} />
 			</span>

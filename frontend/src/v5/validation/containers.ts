@@ -86,10 +86,7 @@ export const SidebarSchema = Yup.object().shape({
 export const UploadsSchema = Yup.object().shape({
 	uploads: Yup
 		.array()
-		.of(Yup.object().shape({
-			listItem: ListItemSchema,
-			sidebar: SidebarSchema,
-		}))
+		.of(ListItemSchema.concat(SidebarSchema))
 		.required()
 		.min(1),
 });

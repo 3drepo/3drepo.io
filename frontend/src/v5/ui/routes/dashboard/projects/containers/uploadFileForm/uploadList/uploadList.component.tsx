@@ -42,11 +42,9 @@ export const UploadList = ({
 						item={item}
 						onClickEdit={() => onClickEdit(index)}
 						onClickDelete={() => onClickDelete(index)}
-						onChange={(e) => {
-							for (const [key, value] of Object.entries(e)) {
-								setValue(`uploads.${index}.listItem.${key}`, value);
-							}
-							trigger(`uploads.${index}.listItem`);
+						onChange={(field, val) => {
+							setValue(`uploads.${index}.${field}`, val);
+							trigger(`uploads.${index}.${field}`);
 						}}
 					/>
 				))

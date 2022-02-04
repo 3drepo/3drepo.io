@@ -162,7 +162,8 @@ export type DeleteContainerSuccessPayload = {
 };
 
 export type UploadSidebarFields = {
-	_id?: string;
+	containerId?: string;
+	containerName?: string;
 	containerUnit: string;
 	containerType: string;
 	containerDesc?: string;
@@ -172,15 +173,11 @@ export type UploadSidebarFields = {
 	timezone?: string;
 };
 
-export type UploadItemFields = {
+export type UploadItemFields = UploadSidebarFields & {
 	id: string;
 	file: File;
 	extension: string;
-	listItem: {
-		containerName: string;
-		revisionTag: string;
-	};
-	sidebar: UploadSidebarFields;
+	revisionTag: string;
 };
 
 export type UploadFieldArray = {
