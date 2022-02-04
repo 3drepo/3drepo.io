@@ -2023,17 +2023,24 @@ describe("Risks", function () {
 
 		it("with resolving risk on creation should create new mitigation", function (done) {
 			const risk = Object.assign({}, baseRisk, { "name": "Risk test", "mitigation_desc": "1", "mitigation_status": "agreed_partial" });
-
-			agent.post(`/${username}/${model}/risks`)
-				.send(risk)
-				.expect(200, done);
-
-			agent.post(`/${username}/mitigations`)
-				.expect(200, function (err, res) {
-					console.log(res.body);
-					const mitigation = res.body.find((m) => m.mitigation_desc === "1");
-					expect(!!mitigation).to.equal(true);
-				});
+			async.series([
+				function (done) {
+					agent.post(`/${username}/${model}/risks`)
+					.send(risk)
+					.expect(200, function (err, res) {
+						done(err);
+					});
+				},
+				function (done) {
+					agent.post(`/${username}/mitigations`)
+					.expect(200, function (err, res) {
+						console.log(res.body);						
+						const mitigation = res.body.find((m) => m.mitigation_desc === "1");
+						expect(!!mitigation).to.equal(true);
+						done(err);
+					});
+				}
+			], done);
 		});
 
 		it("with resolving risk on creation should add ref to a mitigation", function (done) {
