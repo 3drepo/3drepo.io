@@ -59,7 +59,7 @@ const containerDesc = Yup.string()
 		}));
 
 const revisionTag = Yup.string()
-	.min(3,
+	.min(2,
 		formatMessage({
 			id: 'validation.revision.tag.error.min',
 			defaultMessage: 'Revision Name must be at least 2 characters',
