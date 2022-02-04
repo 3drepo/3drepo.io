@@ -536,6 +536,42 @@ export const theme = createMuiTheme({
 				color: COLOR.ERROR_MAIN,
 			},
 		},
+		MuiAutocomplete: {
+			root: {
+				height: '35px',
+				'&&& $input': {
+					padding: '0px',
+				},
+			},
+			inputRoot: {
+				height: '100%',
+				'&&&&': {
+					padding: '0 6px',
+				},
+			},
+			endAdornment: {
+				height: '100%',
+				top: 'unset',
+			},
+			popupIndicator: {
+				width: '24px',
+				margin: '13px 0px',
+			},
+			clearIndicator: {
+				margin: 0,
+			},
+			option: {
+				'&&': {
+					height: '100%',
+					alignItems: 'baseline',
+					margin: 'auto 0',
+					display: 'flex',
+					flexDirection: 'column',
+					padding: '12px',
+					wordWrap: 'break-word',
+				},
+			},
+		},
 		MuiFormControl: {
 			root: {
 				width: '100%',

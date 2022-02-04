@@ -15,20 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
-import { Autocomplete } from '@controls/autocomplete';
-import { createFilterOptions } from '@material-ui/lab';
-import React from 'react';
-
-type IUploadListItemDestination = {
-	errorMessage: string;
-};
-
-export const UploadListItemDestination = ({ errorMessage, ...props }: IUploadListItemDestination): JSX.Element => {
-	const filter = createFilterOptions<{_id: string; name: string; latestRevision: string;}>();
-	const containers = ContainersHooksSelectors.selectContainers();
-
-	return (
-		<Autocomplete filter={filter} errorMessage={errorMessage} list={containers} {...props} />
-	);
-};
+export { Autocomplete } from './autocomplete.component';

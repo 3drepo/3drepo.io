@@ -26,6 +26,7 @@ import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uplo
 import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
 import { UploadListItemTitle } from './components/uploadListItemTitle/uploadListItemTitle.component';
 import { Button, DeleteButton, Input } from './uploadListItem.styles';
+import { UploadListItemDestination } from './components/uploadListItemDestination';
 
 type IUploadListItem = {
 	item: UploadItemFields;
@@ -64,10 +65,7 @@ export const UploadListItem = ({
 				render={({
 					field: { ref, ...extras },
 				}) => (
-					<Input
-						error={!!errors.containerName}
-						{...extras}
-					/>
+					<UploadListItemDestination errorMessage={errors.containerName?.message || ''} {...extras} />
 				)}
 			/>
 			<Controller

@@ -15,21 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { TextField } from '@material-ui/core';
 import styled from 'styled-components';
-import { Typography } from '@controls/typography';
 
-export const Container = styled.div`
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	color: ${({ theme }) => theme.palette.secondary.main};
-	border-radius: 5px;
-	padding: 9px 12px;
+export const Input = styled(TextField)`
+	margin: 0;
 	width: 271px;
-	margin: 0 10px;
-
-	box-sizing: border-box;
-`;
-
-export const ContainerInput = styled(Typography).attrs({
-	variant: 'h5',
-})`
+	height: 35px;
 `;
