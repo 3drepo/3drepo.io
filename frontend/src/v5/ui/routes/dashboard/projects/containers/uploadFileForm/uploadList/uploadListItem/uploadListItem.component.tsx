@@ -50,7 +50,7 @@ export const UploadListItem = ({
 	const updateValue = (name) => onChange(name, getValues(name));
 
 	return (
-		<UploadListItemRow key={item.id} onClick={() => { }} onChange={(e) => updateValue(e.target.name)}>
+		<UploadListItemRow key={item.uploadId} onClick={() => { }} onChange={(e) => updateValue(e.target.name)}>
 			<span>
 				<UploadListItemFileIcon extension={item.extension} />
 			</span>

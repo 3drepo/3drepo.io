@@ -21,7 +21,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { Checkbox, InputLabel, MenuItem } from '@material-ui/core';
 import { Controller, useForm } from 'react-hook-form';
-import { CONTAINER_TYPES, CONTAINER_UNITS, UploadSidebarFields } from '@/v5/store/containers/containers.types';
+import { CONTAINER_TYPES, CONTAINER_UNITS, UploadItemFields } from '@/v5/store/containers/containers.types';
 import * as countriesAndTimezones from 'countries-and-timezones';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SidebarSchema } from '@/v5/validation/containers';
@@ -29,7 +29,7 @@ import { TypeSelect, UnitSelect, Input, RevisionTitle, FormControl, AnimationsCh
 
 type ISidebarForm = {
 	className?: string;
-	value: UploadSidebarFields,
+	value: UploadItemFields,
 	isNewContainer: boolean;
 	isSpm: boolean;
 	onChange: (name: string, val: string | boolean) => void;
@@ -61,7 +61,7 @@ export const SidebarForm = ({
 	isNewContainer,
 	isSpm,
 }: ISidebarForm): JSX.Element => {
-	const { control, formState: { errors }, getValues, setValue, trigger } = useForm<UploadSidebarFields>({
+	const { control, formState: { errors }, getValues, setValue, trigger } = useForm<UploadItemFields>({
 		defaultValues: value,
 		mode: 'onChange',
 		resolver: yupResolver(SidebarSchema),

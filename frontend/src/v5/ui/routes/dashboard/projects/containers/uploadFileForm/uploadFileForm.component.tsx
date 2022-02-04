@@ -45,6 +45,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'uploads',
+		keyName: 'uploadId',
 	});
 
 	const processFiles = (files: File[]) => {
@@ -119,14 +120,18 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 							processFiles={(files) => { processFiles(files); }}
 						/>
 					</Content>
-					<Sidebar open={Number.isInteger(selectedIndex) && 'id' in fields[selectedIndex]} onClick={() => setSelectedIndex(null)} noButton={!(Number.isInteger(selectedIndex) && 'id' in fields[selectedIndex])}>
+					<Sidebar
+						open={Number.isInteger(selectedIndex)}
+						onClick={() => setSelectedIndex(null)}
+						noButton={!(Number.isInteger(selectedIndex))}
+					>
 						{
 							Number.isInteger(selectedIndex)
 								? (
 									<>
 										<SidebarForm
 											value={getValues(`uploads.${selectedIndex}`)}
-											key={fields[selectedIndex].id}
+											key={fields[selectedIndex].uploadId}
 											isNewContainer={!fields[selectedIndex].containerId}
 											isSpm={fields[selectedIndex].extension === 'spm'}
 											onChange={(field: string, val: string | boolean) => {

@@ -38,7 +38,7 @@ export const UploadList = ({
 			{
 				values.map((item, index) => (
 					<UploadListItem
-						key={item.id}
+						key={item.uploadId}
 						item={item}
 						onClickEdit={() => onClickEdit(index)}
 						onClickDelete={() => onClickDelete(index)}

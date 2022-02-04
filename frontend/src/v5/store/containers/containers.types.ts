@@ -161,23 +161,20 @@ export type DeleteContainerSuccessPayload = {
 	containerId: string;
 };
 
-export type UploadSidebarFields = {
+export type UploadItemFields = {
+	uploadId: string;
+	file: File;
+	extension: string;
 	containerId?: string;
 	containerName?: string;
 	containerUnit: string;
 	containerType: string;
 	containerDesc?: string;
 	containerCode?: string;
+	revisionTag: string;
 	revisionDesc?: string;
 	importAnimations?: boolean;
 	timezone?: string;
-};
-
-export type UploadItemFields = UploadSidebarFields & {
-	id: string;
-	file: File;
-	extension: string;
-	revisionTag: string;
 };
 
 export type UploadFieldArray = {
