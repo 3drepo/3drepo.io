@@ -21,7 +21,7 @@ import { Container } from './uploadListItemRow.styles';
 type IUploadListItemRow = {
 	selected: boolean;
 	onClick: () => void;
-	onChange: () => void;
+	onChange: (e) => void;
 	children: React.ReactNode;
 };
 

@@ -39,16 +39,14 @@ export const UploadList = ({
 			{
 				values.map((item, index) => (
 					<UploadListItem
-						key={item.id}
+						key={item.uploadId}
 						item={item}
 						onClickRow={() => setSelectedListItem(index)}
 						onClickEdit={() => onClickEdit(index)}
 						onClickDelete={() => onClickDelete(index)}
-						onChange={(e) => {
-							for (const [key, value] of Object.entries(e)) {
-								setValue(`uploads.${index}.listItem.${key}`, value);
-							}
-							trigger(`uploads.${index}.listItem`);
+						onChange={(field, val) => {
+							setValue(`uploads.${index}.${field}`, val);
+							trigger(`uploads.${index}.${field}`);
 						}}
 						isSelected={index === selectedListItem}
 					/>

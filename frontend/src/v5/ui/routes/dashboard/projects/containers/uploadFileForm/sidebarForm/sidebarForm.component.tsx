@@ -21,27 +21,28 @@ import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { Checkbox, InputLabel, MenuItem } from '@material-ui/core';
 import { Controller, useForm } from 'react-hook-form';
-import { CONTAINER_TYPES, CONTAINER_UNITS, UploadSidebarFields } from '@/v5/store/containers/containers.types';
+import { CONTAINER_TYPES, CONTAINER_UNITS, UploadItemFields } from '@/v5/store/containers/containers.types';
 import * as countriesAndTimezones from 'countries-and-timezones';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SidebarSchema } from '@/v5/validation/containers';
-import { TypeSelect, UnitSelect, Input, RevisionTitle, FormControl, AnimationsCheckbox, TimezoneSelect } from './sidebarForm.styles';
+import { TypeSelect, UnitSelect, Input, RevisionTitle, FormControl, AnimationsCheckbox, TimezoneSelect, Title } from './sidebarForm.styles';
 
 type ISidebarForm = {
 	className?: string;
-	value: UploadSidebarFields,
+	value: UploadItemFields,
 	isNewContainer: boolean;
 	isSpm: boolean;
-	onChange: (val) => void;
+	onChange: (name: string, val: string | boolean) => void;
 };
 
 const generateTimezoneData = () => {
-	const tzList = [];
+	type ITimezone = { name: string; label: string; utcOffset: number; };
+	const tzList: ITimezone[] = [];
 	const tzData = countriesAndTimezones.getAllTimezones();
 
 	Object.keys(tzData).forEach((tz) => {
 		const { name, utcOffset, utcOffsetStr } = tzData[tz];
-		const tzToAdd = {
+		const tzToAdd: ITimezone = {
 			name,
 			label: `(UTC${utcOffsetStr}) ${name}`,
 			utcOffset,
@@ -50,7 +51,7 @@ const generateTimezoneData = () => {
 		tzList.push(tzToAdd);
 	});
 
-	const allTimezones = tzList.sort((tz1, tz2) => tz1.utcOffset - tz2.utcOffset);
+	const allTimezones: ITimezone[] = tzList.sort((tz1, tz2) => tz1.utcOffset - tz2.utcOffset);
 	return allTimezones;
 };
 
@@ -60,7 +61,7 @@ export const SidebarForm = ({
 	isNewContainer,
 	isSpm,
 }: ISidebarForm): JSX.Element => {
-	const { control, formState: { errors }, getValues, setValue, trigger } = useForm<UploadSidebarFields>({
+	const { control, formState: { errors }, getValues, setValue, trigger } = useForm<UploadItemFields>({
 		defaultValues: value,
 		mode: 'onChange',
 		resolver: yupResolver(SidebarSchema),
@@ -70,12 +71,13 @@ export const SidebarForm = ({
 		trigger();
 	}, []);
 
-	const updateValues = () => {
-		onChange(getValues());
-	};
+	const updateValue = (name) => onChange(name, getValues(name));
 
 	return (
-		<div onChange={updateValues}>
+		<div onChange={(e: any) => updateValue(e.target.name)}>
+			<Title>
+				{value.containerName}
+			</Title>
 			<FormControl disabled={!isNewContainer}>
 				<InputLabel id="unit-label" shrink required>
 					<FormattedMessage id="containers.creation.form.unit" defaultMessage="Units" />
@@ -91,8 +93,8 @@ export const SidebarForm = ({
 							{...extras}
 							onChange={
 								(e) => {
-									setValue(e.target.name, e.target.value);
-									updateValues();
+									setValue('containerUnit', e.target.value);
+									updateValue('containerUnit');
 								}
 							}
 						>
@@ -123,8 +125,8 @@ export const SidebarForm = ({
 							{...extras}
 							onChange={
 								(e) => {
-									setValue(e.target.name, e.target.value);
-									updateValues();
+									setValue('containerType', e.target.value);
+									updateValue('containerType');
 								}
 							}
 						>
@@ -219,8 +221,8 @@ export const SidebarForm = ({
 							{...extras}
 							onChange={
 								(e) => {
-									setValue(e.target.name, e.target.value);
-									updateValues();
+									setValue('timezone', e.target.value);
+									updateValue('timezone');
 								}
 							}
 						>

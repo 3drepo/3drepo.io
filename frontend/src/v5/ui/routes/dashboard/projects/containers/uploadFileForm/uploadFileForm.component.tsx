@@ -22,7 +22,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { formatMessage } from '@/v5/services/intl';
 import { Sidebar } from '@controls/sideBar';
-import { UploadFieldArray, UploadSidebarFields } from '@/v5/store/containers/containers.types';
+import { UploadFieldArray } from '@/v5/store/containers/containers.types';
 import { UploadsSchema } from '@/v5/validation/containers';
 import { DashboardListHeaderLabel } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
@@ -31,7 +31,6 @@ import { SortingDirection } from '@components/dashboard/dashboardList/dashboardL
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
 import { Container, Content, DropZone, UploadsListHeader } from './uploadFileForm.styles';
-import { Title } from './sidebarForm/sidebarForm.styles';
 
 type IUploadFileForm = {
 	openState: boolean;
@@ -48,45 +47,43 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'uploads',
+		keyName: 'uploadId',
 	});
 
 	const DEFAULT_SORT_CONFIG = {
-		column: 'file.name',
+		column: 'file',
 		direction: SortingDirection.DESCENDING,
 	};
 	const { sortedList, setSortConfig } = useOrderedList(fields, DEFAULT_SORT_CONFIG);
 
-	const processFiles = (files) => {
+	const processFiles = (files: File[]) => {
 		const filesToAppend = [];
 		for (const file of files) {
 			filesToAppend.push({
 				file,
 				extension: file.name.split('.').slice(-1)[0],
-				listItem: {
-					revisionTag: file.name,
-					containerName: '',
-				},
-				sidebar: {
-					_id: '',
-					containerUnit: 'mm',
-					containerType: 'Uncategorised',
-					containerCode: '',
-					containerDesc: '',
-					revisionDesc: '',
-					importAnimations: false,
-					timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/London',
-				},
+				revisionTag: file.name,
+				containerName: '',
+				containerId: '',
+				containerUnit: 'mm',
+				containerType: 'Uncategorised',
+				containerCode: '',
+				containerDesc: '',
+				revisionDesc: '',
+				importAnimations: false,
+				timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/London',
 			});
 		}
 		append(filesToAppend);
 	};
 
-	const onClickEdit = (id) => {
+	const onClickEdit = (id: number) => {
 		setSelectedIndex(id);
 	};
 
-	const onClickDelete = (id) => {
-		setSelectedIndex(null);
+	const onClickDelete = (id: number) => {
+		if (id < selectedIndex) setSelectedIndex(selectedIndex - 1);
+		if (id === selectedIndex) setSelectedIndex(null);
 		remove(id);
 	};
 
@@ -133,25 +130,25 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 							processFiles={(files) => { processFiles(files); }}
 						/>
 					</Content>
-					<Sidebar open={Number.isInteger(selectedIndex) && 'id' in fields[selectedIndex]} onClick={() => setSelectedIndex(null)} noButton={!(Number.isInteger(selectedIndex) && 'id' in fields[selectedIndex])}>
+					<Sidebar
+						open={Number.isInteger(selectedIndex)}
+						onClick={() => setSelectedIndex(null)}
+						noButton={!(Number.isInteger(selectedIndex))}
+					>
 						{
 							Number.isInteger(selectedIndex)
 								? (
 									<>
-										<Title>
-											{getValues([`uploads.${selectedIndex}.listItem.containerName`])}
-										</Title>
 										<SidebarForm
-											value={fields[selectedIndex].sidebar}
-											key={fields[selectedIndex].id}
-											isNewContainer={!!fields[selectedIndex].id}
+											value={getValues(`uploads.${selectedIndex}`)}
+											key={fields[selectedIndex].uploadId}
+											isNewContainer={!fields[selectedIndex].containerId}
 											isSpm={fields[selectedIndex].extension === 'spm'}
-											onChange={(newSidebarFields: UploadSidebarFields) => {
-												for (const [key, val] of Object.entries(newSidebarFields)) {
-													// @ts-ignore
-													setValue(`uploads.${selectedIndex}.sidebar.${key}`, val);
-												}
-												trigger(`uploads.${selectedIndex}.sidebar`);
+											onChange={(field: string, val: string | boolean) => {
+												// @ts-ignore
+												setValue(`uploads.${selectedIndex}.${field}`, val);
+												// @ts-ignore
+												trigger(`uploads.${selectedIndex}.${field}`);
 											}}
 										/>
 									</>
