@@ -139,7 +139,7 @@ class Mitigation {
 
 	async exportCSV(account) {
 		const csvFields = Object.keys(fieldTypes);
-		const parser = new Parser({fields: csvFields});
+		const parser = new Parser({ fields: csvFields });
 
 		const mitigations = await this.findMitigationSuggestions(account, {}, []);
 		return parser.parse(mitigations);
@@ -184,37 +184,19 @@ class Mitigation {
 		await db.updateOne(account, "mitigations", { _id: id }, updateData);
 	}
 
-	async findOrCreateMitigationFromDetails(account, mitigationDetails) {
-		const mitigations = await this.findMitigationSuggestions(account, mitigationDetails, []);
-		let mitigation = mitigations[0];
-		if (!mitigation) {
-			try {
-				const newMitigations = await this.insert(account, [{ ...mitigationDetails }], false);
-				mitigation = newMitigations[0];
-			} catch {
-				// do nothing if the mitigation was not inserted
-			}
-		}
-
-		return mitigation;
-	}
-
 	async addRiskRefToMitigation(account, mitigation, riskReference) {
-		let referencedRisks = mitigation.referencedRisks;
-		if (!referencedRisks) {
-			referencedRisks = [];
-		}
+		const referencedRisks = mitigation.referencedRisks;
 
 		if (!referencedRisks.includes(riskReference)) {
 			referencedRisks.push(riskReference);
-			await this.update(account, mitigation._id, { $set: { referencedRisks: referencedRisks } });
+			await this.update(account, mitigation._id, { $set: { referencedRisks } });
 		}
 	}
 
 	async updateMitigationsFromRisk(account, model, oldRisk, updatedRisk) {
 		const riskId = updatedRisk._id;
-		const oldStatusIsResolved = oldRisk && isMitigationStatusResolved(oldRisk.mitigation_status);
-		const newStatusIsResolved = isMitigationStatusResolved(updatedRisk.mitigation_status);
+		const oldStatusIsResolved = !!oldRisk?.mitigation_desc && isMitigationStatusResolved(oldRisk.mitigation_status);
+		const newStatusIsResolved = !!updatedRisk?.mitigation_desc && isMitigationStatusResolved(updatedRisk.mitigation_status);
 
 		// if risk was and remains unresolved
 		if (!oldStatusIsResolved && !newStatusIsResolved) {
@@ -238,33 +220,48 @@ class Mitigation {
 
 		// if risk becomes resolved
 		if (!oldStatusIsResolved && newStatusIsResolved) {
-			const mitigation = await this.findOrCreateMitigationFromDetails(account, mitigationDetails);
-			if (mitigation) {
+			const mitigations = await this.findMitigationSuggestions(account, mitigationDetails, []);
+			const mitigation = mitigations[0];
+			if (!mitigation) {
+				try {
+					await this.insert(account, [{ ...mitigationDetails, referencedRisks: [formattedReference] }], false);
+				} catch {
+					// do nothing if the mitigation was not inserted
+				}
+			} else if (mitigation.referencedRisks) {
 				await this.addRiskRefToMitigation(account, mitigation, formattedReference);
 			}
 		} else {
 			// if risk was already resolved
-			const mitigations = await this.findMitigationSuggestions(account, {}, []);
-			const mitigation = mitigations.find((m) => m.referencedRisks
+			const allMitigations = await this.findMitigationSuggestions(account, {}, []);
+			const oldMitigation = allMitigations.find((m) => m.referencedRisks
 				&& m.referencedRisks.includes(formattedReference));
 
-			if (!mitigation && !newStatusIsResolved) {
+			// if the mitigation was manually removed and now the risk is unresolved
+			if (!oldMitigation && !newStatusIsResolved) {
 				return;
 			}
 
 			// remove old ref
-			if (mitigation) {
-				if (mitigation.referencedRisks.length === 1) {
-					await this.deleteOne(account, mitigation._id);
+			if (oldMitigation) {
+				if (oldMitigation.referencedRisks.length === 1) {
+					await this.deleteOne(account, oldMitigation._id);
 				} else {
-					const newReferencedRisks = mitigation.referencedRisks.filter((r) => r !== formattedReference);
-					await this.update(account, mitigation._id, { $set: { referencedRisks: newReferencedRisks } });
+					const newReferencedRisks = oldMitigation.referencedRisks.filter((r) => r !== formattedReference);
+					await this.update(account, oldMitigation._id, { $set: { referencedRisks: newReferencedRisks } });
 				}
 			}
 
 			if (newStatusIsResolved) {
-				const newMitigation = await this.findOrCreateMitigationFromDetails(account, mitigationDetails);
-				if (newMitigation) {
+				const mitigations = await this.findMitigationSuggestions(account, mitigationDetails, []);
+				const newMitigation = mitigations[0];
+				if (!newMitigation) {
+					try {
+						await this.insert(account, [{ ...mitigationDetails, referencedRisks: [formattedReference] }], false);
+					} catch {
+						// do nothing if the mitigation was not inserted
+					}
+				} else if (newMitigation.referencedRisks) {
 					await this.addRiskRefToMitigation(account, newMitigation, formattedReference);
 				}
 			}
