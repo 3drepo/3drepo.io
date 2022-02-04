@@ -212,6 +212,7 @@
 		BILLING_NOT_FOUND: { message: "Billing not found", status: 404 },
 		PAYPAL_ERROR: { status: 400 },
 		NO_FILE_FOUND: { message: "No file can be downloaded", status: 404 },
+		NO_MITIGATIONS_FOUND: { message: "No mitigations found", status: 404 },
 
 		MODEL_NO_UNIT: { status: 400, message: "Unit is not specified" },
 

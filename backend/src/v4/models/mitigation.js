@@ -142,6 +142,11 @@ class Mitigation {
 		const parser = new Parser({ fields: csvFields });
 
 		const mitigations = await this.findMitigationSuggestions(account, {}, []);
+
+		if(!mitigations.length){
+			throw responseCodes.NO_MITIGATIONS_FOUND;
+		}
+
 		return parser.parse(mitigations);
 	}
 
