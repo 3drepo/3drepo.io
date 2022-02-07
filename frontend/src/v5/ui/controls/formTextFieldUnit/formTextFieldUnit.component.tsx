@@ -15,32 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TextField, TextFieldProps } from '@material-ui/core';
+import { FormTextFieldProps } from '@controls/formTextField/formTextField.component';
 import React from 'react';
-import { Controller } from 'react-hook-form';
+import { UnitTextField } from './formTextFieldUnit.styles';
 
-export type FormTextFieldProps = TextFieldProps & {
-	control: any,
-	formError: any,
+type FormTextFieldUnitProps = Omit<FormTextFieldProps, 'label'> & {
+	$labelName: string;
+	$labelUnit: string;
 };
 
-export const FormTextField = ({
-	name,
-	control,
-	formError,
-	...otherProps
-}: FormTextFieldProps) => (
-	<Controller
-		name={name}
-		control={control}
-		render={({ field }) => (
-			<TextField
-				inputRef={field.ref}
-				error={!!formError}
-				helperText={formError?.message}
-				{...field}
-				{...otherProps}
-			/>
-		)}
+export const FormTextFieldUnit = (props: FormTextFieldUnitProps) => (
+	<UnitTextField
+		{...props}
 	/>
 );

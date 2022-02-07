@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { Typography, TextField } from '@material-ui/core';
+import { Typography } from '@material-ui/core';
 import { ShareTextField as ShareTextFieldBase } from '@controls/shareTextField';
 
 export const SectionTitle = styled(Typography).attrs({
@@ -75,18 +75,4 @@ export const ThumbnailPlaceholder = styled.div`
 export const ViewLabel = styled.div`
 	display: flex;
 	flex-direction: column;
-`;
-
-export const UnitTextField = styled(TextField).attrs((props) => ({
-	label: ` (${props.labelunit})`,
-}))`
-	.MuiInputLabel-formControl {
-		&::before {
-			content: "${(props) => props.labelname}";
-		}
-		
-		text-transform: none;
-		letter-spacing: 0;
-		${(props) => props.theme.typography.caption};
-	}
 `;

@@ -20,7 +20,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { MenuItem } from '@material-ui/core';
 import { FormModal } from '@/v5/ui/controls/modal/formModal/formDialog.component';
-import { useForm, SubmitHandler, Controller } from 'react-hook-form';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import { IFederation, EMPTY_VIEW, IFederationExtraSettings, IFederationSettings } from '@/v5/store/federations/federations.types';
@@ -28,7 +28,8 @@ import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelectView } from '@controls/formSelectView/formSelectView.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { FederationSettingsSchema } from '@/v5/validation/schemes';
-import { FlexContainer, SectionTitle, UnitTextField, ShareTextField } from './federationSettingsForm.styles';
+import { FormTextFieldUnit } from '@controls/formTextFieldUnit/formTextFieldUnit.component';
+import { FlexContainer, SectionTitle, ShareTextField } from './federationSettingsForm.styles';
 
 const UNITS = [
 	{
@@ -207,103 +208,64 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 				views={[EMPTY_VIEW].concat(federation.views || [])}
 				federationId={federation._id}
 				name="defaultView"
-				label={formatMessage({
-					id: 'federations.settings.form.view',
-					defaultMessage: 'Default View',
-				})}
+				label={formatMessage({ id: 'federations.settings.form.defaultView', defaultMessage: 'Default View' })}
 			/>
 			<SectionTitle>GIS servey point</SectionTitle>
 			<FlexContainer>
-				<Controller
+				<FormTextFieldUnit
 					name="latitude"
 					control={control}
-					render={({ field }) => (
-						<UnitTextField
-							{...field}
-							labelname={formatMessage({ id: 'federations.settings.form.lat', defaultMessage: 'LATITUDE' })}
-							labelunit={formatMessage({ id: 'federations.settings.form.lat.unit', defaultMessage: 'decimal' })}
-							type="number"
-							error={!!errors.latitude}
-							helperText={errors.latitude?.message}
-							required
-						/>
-					)}
+					$labelName={formatMessage({ id: 'federations.settings.form.lat', defaultMessage: 'LATITUDE' })}
+					$labelUnit={formatMessage({ id: 'federations.settings.form.lat.unit', defaultMessage: 'decimal' })}
+					type="number"
+					formError={errors.latitude}
+					required
 				/>
-				<Controller
+				<FormTextFieldUnit
 					name="longitude"
 					control={control}
-					render={({ field }) => (
-						<UnitTextField
-							{...field}
-							labelname={formatMessage({ id: 'federations.settings.form.long', defaultMessage: 'LONGITUDE' })}
-							labelunit={formatMessage({ id: 'federations.settings.form.long.unit', defaultMessage: 'decimal' })}
-							type="number"
-							error={!!errors.longitude}
-							helperText={errors.longitude?.message}
-							required
-						/>
-					)}
+					$labelName={formatMessage({ id: 'federations.settings.form.long', defaultMessage: 'LONGITUDE' })}
+					$labelUnit={formatMessage({ id: 'federations.settings.form.long.unit', defaultMessage: 'decimal' })}
+					type="number"
+					formError={errors.longitude}
+					required
 				/>
 			</FlexContainer>
-			<Controller
+			<FormTextFieldUnit
 				name="angleFromNorth"
 				control={control}
-				render={({ field }) => (
-					<UnitTextField
-						{...field}
-						labelname={formatMessage({ id: 'federations.settings.form.angleFromNorth', defaultMessage: 'ANGLE FROM NORTH' })}
-						labelunit={formatMessage({ id: 'federations.settings.form.angleFromNorth.unit', defaultMessage: 'clockwise degrees' })}
-						error={!!errors.angleFromNorth}
-						helperText={errors.angleFromNorth?.message}
-						type="number"
-					/>
-				)}
+				$labelName={formatMessage({ id: 'federations.settings.form.angleFromNorth', defaultMessage: 'ANGLE FROM NORTH' })}
+				$labelUnit={formatMessage({ id: 'federations.settings.form.angleFromNorth.unit', defaultMessage: 'clockwise degrees' })}
+				formError={errors.angleFromNorth}
+				type="number"
 			/>
 			<FlexContainer>
-				<Controller
+				<FormTextFieldUnit
 					name="x"
 					control={control}
-					render={({ field }) => (
-						<UnitTextField
-							labelname="X"
-							labelunit={currentUnit}
-							type="number"
-							error={!!errors.x}
-							helperText={errors.x?.message}
-							required
-							{...field}
-						/>
-					)}
+					$labelName="X"
+					$labelUnit={currentUnit}
+					type="number"
+					formError={errors.x}
+					required
 				/>
-				<Controller
+				<FormTextFieldUnit
 					name="y"
 					control={control}
-					render={({ field }) => (
-						<UnitTextField
-							labelname="Y"
-							labelunit={currentUnit}
-							type="number"
-							error={!!errors.y}
-							helperText={errors.y?.message}
-							required
-							{...field}
-						/>
-					)}
+					$labelName="Y"
+					$labelUnit={currentUnit}
+					type="number"
+					formError={errors.y}
+					required
 				/>
-				<Controller
+				<FormTextFieldUnit
 					name="z"
 					control={control}
-					render={({ field }) => (
-						<UnitTextField
-							labelname="Z"
-							labelunit={currentUnit}
-							type="number"
-							error={!!errors.z}
-							helperText={errors.z?.message}
-							required
-							{...field}
-						/>
-					)}
+					$labelName="Z"
+					$labelUnit={currentUnit}
+					type="number"
+					formError={errors.z}
+					required
 				/>
 			</FlexContainer>
 		</FormModal>

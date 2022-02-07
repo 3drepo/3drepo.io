@@ -15,32 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TextField, TextFieldProps } from '@material-ui/core';
-import React from 'react';
-import { Controller } from 'react-hook-form';
+import { FormTextField } from '@controls/formTextField/formTextField.component';
+import styled from 'styled-components';
 
-export type FormTextFieldProps = TextFieldProps & {
-	control: any,
-	formError: any,
-};
-
-export const FormTextField = ({
-	name,
-	control,
-	formError,
-	...otherProps
-}: FormTextFieldProps) => (
-	<Controller
-		name={name}
-		control={control}
-		render={({ field }) => (
-			<TextField
-				inputRef={field.ref}
-				error={!!formError}
-				helperText={formError?.message}
-				{...field}
-				{...otherProps}
-			/>
-		)}
-	/>
-);
+export const UnitTextField = styled(FormTextField).attrs((props) => ({
+	label: ` (${props.$labelUnit})`,
+}))`
+	.MuiInputLabel-formControl {
+		&::before {
+			content: "${(props) => props.$labelName}";
+		}
+		
+		text-transform: none; 
+		letter-spacing: 0;
+		${(props) => props.theme.typography.caption};
+	}
+`;
