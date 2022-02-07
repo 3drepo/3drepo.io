@@ -106,13 +106,13 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 					<Content>
 						<div hidden={!fields.length}>
 							<UploadsListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
-								<DashboardListHeaderLabel name="file">
+								<DashboardListHeaderLabel key="file" name="file">
 									<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
 								</DashboardListHeaderLabel>
-								<DashboardListHeaderLabel name="containerName" width={285}>
+								<DashboardListHeaderLabel key="destination" width={285}>
 									<FormattedMessage id="uploads.list.header.destination" defaultMessage="Destination" />
 								</DashboardListHeaderLabel>
-								<DashboardListHeaderLabel name="revisionTag" width={297}>
+								<DashboardListHeaderLabel key="revisionName" width={297}>
 									<FormattedMessage id="uploads.list.header.revisionName" defaultMessage="Revision Name" />
 								</DashboardListHeaderLabel>
 							</UploadsListHeader>
