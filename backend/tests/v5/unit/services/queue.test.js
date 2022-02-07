@@ -134,7 +134,7 @@ const testQueueFederationUpdate = () => {
 
 			expect(publishFn.mock.calls.length).toBe(1);
 			expect(publishFn.mock.calls[0][0]).toEqual(events.QUEUED_TASK_UPDATE);
-			expect(publishFn.mock.calls[0][1]).toEqual({ teamspace, federation, corId, status: 'queued' });
+			expect(publishFn.mock.calls[0][1]).toEqual({ teamspace, model: federation, corId, status: 'queued' });
 		});
 	});
 

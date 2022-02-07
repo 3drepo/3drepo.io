@@ -205,15 +205,12 @@ Queue.queueFederationUpdate = async (teamspace, federation, info) => {
 		await writeFile(`${sharedDir}/${corId}/obj.json`, JSON.stringify(data));
 
 		await queueFederationJob(corId, teamspace, filePath);
-		publish(events.QUEUED_TASK_UPDATE, { teamspace, federation, corId, status: 'queued' });
+		publish(events.QUEUED_TASK_UPDATE, { teamspace, model: federation, corId, status: 'queued' });
 	} catch (err) {
 		// Clean up files we created
 		rm(`${sharedDir}/${corId}/obj.json`).catch((cleanUpErr) => {
 			logger.logError(`Failed to remove files (clean up on failure : ${cleanUpErr}`);
-		}).catch(
-			// istanbul ignore next
-			() => {},
-		);
+		});
 
 		if (err?.code && codeExists(err.code)) {
 			throw err;
