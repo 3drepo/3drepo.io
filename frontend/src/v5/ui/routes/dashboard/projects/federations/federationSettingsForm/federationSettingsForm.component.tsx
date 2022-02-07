@@ -206,8 +206,7 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 				control={control}
 				views={[EMPTY_VIEW].concat(federation.views || [])}
 				federationId={federation._id}
-				defaultValue={defaultValues.defaultView}
-				name="default-view"
+				name="defaultView"
 				label={formatMessage({
 					id: 'federations.settings.form.view',
 					defaultMessage: 'Default View',
