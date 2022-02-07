@@ -27,20 +27,8 @@ import {
 	RawFederationSettings 
 } from '@/v5/store/federations/federations.types';
 import { times } from 'lodash';
-import { prepareFederationSettingsForBackend, prepareFederationSettingsForFrontend } from '@/v5/store/federations/federations.helpers';
+import { prepareFederationSettingsForBackend } from '@/v5/store/federations/federations.helpers';
 
-const RAW_MOCK_SETTINGS: RawFederationSettings = {
-	name: 'Federation Name',
-	desc: 'Federation Description',
-	code: '0000',
-	surveyPoints: [{
-		latLong: [0, 0],
-		position: [0, 0, 0],
-	}],
-	angleFromNorth: 90,
-	defaultView: EMPTY_VIEW._id,
-	unit: "mm",
-};
 
 export const federationMockFactory = (overrides?: Partial<IFederation>): IFederation => ({
 	_id: faker.datatype.uuid(),
@@ -91,14 +79,14 @@ export const prepareMockSettingsReply = (federation: IFederation): IFederationSe
 
 export const prepareMockExtraSettingsReply = (federation: IFederation): IFederationExtraSettings => ({
 	name: federation.name,
-	desc: federation.description,
+	desc: federation.desc,
 	code: federation.code,
 });
 
 export const prepareMockRawSettingsReply = (federation: IFederation): RawFederationSettings => (
 	prepareFederationSettingsForBackend(federation.settings, {
 		name: federation.name,
-		desc: federation.description,
+		desc: federation.desc,
 		code: federation.code,
 	})
 );

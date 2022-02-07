@@ -57,7 +57,7 @@ const UNITS = [
 interface IFormInput {
 	name: string;
 	unit: string;
-	description?: string;
+	desc?: string;
 	code?: string;
 	defaultView: string;
 	latitude: number;
@@ -77,11 +77,11 @@ const getDefaultValues = (federation: IFederation) => {
 	} = federation.settings?.surveyPoint || {};
 	const [x, y, z] = position || [0, 0, 0];
 	const [latitude, longitude] = latLong || [0, 0];
-	const { code, name, description = '' } = federation;
+	const { code, name, desc = '' } = federation;
 	const defaultView = federation?.settings?.defaultView || EMPTY_VIEW._id;
 	return {
 		name,
-		description,
+		desc,
 		code,
 		unit,
 		defaultView,
@@ -130,7 +130,7 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 		latitude, longitude,
 		x, y, z,
 		name,
-		description,
+		desc,
 		code,
 		...otherSettings
 	}) => {
@@ -141,7 +141,7 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 			},
 			...otherSettings,
 		};
-		const extraSettings: IFederationExtraSettings = { name, desc: description, code };
+		const extraSettings: IFederationExtraSettings = { name, desc, code };
 		FederationsActionsDispatchers.updateFederationSettings(
 			teamspace,
 			project,
@@ -174,10 +174,10 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 				formError={errors.name}
 			/>
 			<FormTextField
-				name="description"
+				name="desc"
 				control={control}
-				label={formatMessage({ id: 'federations.settings.form.description', defaultMessage: 'Description' })}
-				formError={errors.description}
+				label={formatMessage({ id: 'federations.settings.form.desc', defaultMessage: 'Description' })}
+				formError={errors.desc}
 			/>
 			<FlexContainer>
 				<FormSelect

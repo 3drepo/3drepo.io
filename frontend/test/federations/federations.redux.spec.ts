@@ -18,8 +18,7 @@
 import { INITIAL_STATE, reducer as federationsReducer, FederationsActions } from '@/v5/store/federations/federations.redux';
 import { times } from 'lodash';
 import { federationMockFactory, prepareMockExtraSettingsReply, prepareMockSettingsReply } from './federations.fixtures';
-import { EMPTY_VIEW, RawFederationSettings } from '@/v5/store/federations/federations.types';
-import { prepareFederationSettingsForFrontend } from '@/v5/store/federations/federations.helpers';
+import { EMPTY_VIEW } from '@/v5/store/federations/federations.types';
 
 describe('Federations: redux', () => {
 	const projectId = 'projectId';
@@ -117,7 +116,7 @@ describe('Federations: redux', () => {
 
 		expect(result[0].settings).toEqual(mockSettings);
 		expect(result[0].name).toEqual(mockFederationForReply.name);
-		expect(result[0].description).toEqual(mockFederationForReply.description);
+		expect(result[0].desc).toEqual(mockFederationForReply.desc);
 		expect(result[0].code).toEqual(mockFederationForReply.code);
 	});
 })

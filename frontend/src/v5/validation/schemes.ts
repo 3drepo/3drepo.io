@@ -37,18 +37,18 @@ export const FederationSettingsSchema = Yup.object().shape({
 				defaultMessage: 'Federation Name is a required field',
 			}),
 		),
-	description: Yup.lazy((value) => (
+	desc: Yup.lazy((value) => (
 		value === ''
 			? Yup.string().strip()
 			: Yup.string()
 				.min(1,
 					formatMessage({
-						id: 'federations.settings.description.error.min',
+						id: 'federations.settings.desc.error.min',
 						defaultMessage: 'Federation Description must be at least 1 character',
 					}))
 				.max(600,
 					formatMessage({
-						id: 'federations.settings.description.error.max',
+						id: 'federations.settings.desc.error.max',
 						defaultMessage: 'Federation Description is limited to 600 characters',
 					}))
 	)),

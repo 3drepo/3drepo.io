@@ -65,7 +65,7 @@ export const FederationListItem = ({
 						tooltipTitle={
 							<FormattedMessage id="federations.list.item.title.tooltip" defaultMessage="Launch in Viewer" />
 						}
-						subtitle={federation.description}
+						subtitle={federation.desc}
 
 						minWidth={90}
 					>

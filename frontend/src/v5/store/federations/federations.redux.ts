@@ -143,7 +143,7 @@ export const updateFederationSettingsSuccess = (state = INITIAL_STATE, {
 	settings,
 	extraSettings: {
 		name,
-		desc: description,
+		desc,
 		code,
 	},
 }: UpdateFederationSettingsSuccessAction) => ({
@@ -155,7 +155,7 @@ export const updateFederationSettingsSuccess = (state = INITIAL_STATE, {
 			return {
 				...federation,
 				name,
-				description,
+				desc,
 				code,
 				settings,
 			};
