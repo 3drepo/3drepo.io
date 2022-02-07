@@ -52,9 +52,9 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 
 	const DEFAULT_SORT_CONFIG = {
 		column: 'file',
-		direction: SortingDirection.DESCENDING,
+		direction: SortingDirection.ASCENDING,
 	};
-	const { sortedList, setSortConfig } = useOrderedList(fields, DEFAULT_SORT_CONFIG);
+	const { sortedList, setSortConfig } = useOrderedList(fields || [], DEFAULT_SORT_CONFIG);
 
 	const processFiles = (files: File[]) => {
 		const filesToAppend = [];
@@ -76,6 +76,9 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		}
 		append(filesToAppend);
 	};
+
+	const indexMap = new Map(fields.map(({ uploadId }, index) => [uploadId, index]));
+	const getOriginalIndex = (sortedIndex) => indexMap.get(sortedList[sortedIndex].uploadId);
 
 	const onClickEdit = (id: number) => {
 		setSelectedIndex(id);
@@ -140,15 +143,17 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 								? (
 									<>
 										<SidebarForm
-											value={getValues(`uploads.${selectedIndex}`)}
-											key={fields[selectedIndex].uploadId}
-											isNewContainer={!fields[selectedIndex].containerId}
-											isSpm={fields[selectedIndex].extension === 'spm'}
+											value={
+												getValues(`uploads.${getOriginalIndex(selectedIndex)}`)
+											}
+											key={sortedList[selectedIndex].uploadId}
+											isNewContainer={!sortedList[selectedIndex].containerId}
+											isSpm={sortedList[selectedIndex].extension === 'spm'}
 											onChange={(field: string, val: string | boolean) => {
 												// @ts-ignore
-												setValue(`uploads.${selectedIndex}.${field}`, val);
+												setValue(`uploads.${getOriginalIndex(selectedIndex)}.${field}`, val);
 												// @ts-ignore
-												trigger(`uploads.${selectedIndex}.${field}`);
+												trigger(`uploads.${getOriginalIndex(selectedIndex)}.${field}`);
 											}}
 										/>
 									</>
