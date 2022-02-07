@@ -40,7 +40,6 @@ const csvImportFieldTypes = {
 
 const fieldTypes = {
 	...csvImportFieldTypes,
-	"mitigation_status": "[object String]",
 	"referencedRisks": "[object Array]"
 };
 
@@ -49,38 +48,36 @@ const mitigationSuggestionsBlacklist = [
 	"mitigation_detail",
 	"mitigation_stage",
 	"mitigation_type",
-	"mitigation_status",
 	"referencedRisks"
 ];
 
 const mitigationCriteriaBlacklist = [
 	"mitigation_desc",
 	"mitigation_detail",
-	"mitigation_status",
 	"referencedRisks"
 ];
+
+const colName = "mitigations";
 
 const isMitigationStatusResolved = (mitigationStatus) => {
 	return mitigationStatus === "agreed_partial" || mitigationStatus === "agreed_fully";
 };
 
 const formatRiskReference = (teamspace, modelId, riskId) => {
-	return teamspace + "::" + modelId + "::" + riskId;
+	return `${teamspace}::${modelId}::${riskId};`
 };
 
 class Mitigation {
 	getMitigationCollection(account) {
-		return db.getCollection(account, "mitigations");
+		return db.getCollection(account, colName);
 	}
 
 	async clearAll(account) {
-		const mitigationColl = await this.getMitigationCollection(account);
-		return await mitigationColl.deleteMany({});
+		return await db.deleteMany(account, colName);
 	}
 
 	async deleteOne(account, id) {
-		const mitigationColl = await this.getMitigationCollection(account);
-		return await mitigationColl.deleteOne({ _id: id });
+		return await db.deleteOne(account, colName, { _id: id });
 	}
 
 	async getCriteria(account) {
@@ -109,19 +106,18 @@ class Mitigation {
 		return criteria;
 	}
 
-	async findMitigationSuggestions(account, mitigationCriteria, attributeBlacklist = mitigationSuggestionsBlacklist) {
-		const mitigationColl = await this.getMitigationCollection(account);
-		const criteria = { ...mitigationCriteria };
+	async findMitigationSuggestions(account, criteria) {
+		const attributeBlacklist = mitigationSuggestionsBlacklist;
 		const criteriaFilterFields = Object.keys(_.omit(fieldTypes, attributeBlacklist));
 
 		// Only pick supported fields and clean empty criteria
 		Object.keys(criteria).forEach((key) => {
-			if (!criteriaFilterFields.includes(key) || criteria[key] === null || criteria[key] === undefined || criteria[key] === "") {
+			if (!criteriaFilterFields.includes(key) || criteria[key] === null || criteria[key] === undefined) {
 				delete criteria[key];
 			}
 		});
 
-		return await mitigationColl.find(criteria).toArray();
+		return await db.find(account, colName, criteria);
 	}
 
 	async importCSV(account, data) {
@@ -141,7 +137,7 @@ class Mitigation {
 		const csvFields = Object.keys(fieldTypes);
 		const parser = new Parser({ fields: csvFields });
 
-		const mitigations = await this.findMitigationSuggestions(account, {}, []);
+		const mitigations = await db.find(account, colName);
 
 		if(!mitigations.length) {
 			throw responseCodes.NO_MITIGATIONS_FOUND;
@@ -151,7 +147,6 @@ class Mitigation {
 	}
 
 	async insert(account, mitigations, clearAll = true) {
-		const mitigationColl = await this.getMitigationCollection(account);
 		const requiredFields = ["mitigation_desc"];
 		const optionalFields = Object.keys(_.omit(fieldTypes, requiredFields));
 
@@ -180,21 +175,19 @@ class Mitigation {
 			await this.clearAll(account);
 		}
 
-		await mitigationColl.insertMany(mitigations);
+		await db.insertMany(account, colName, mitigations);
 
 		return mitigations;
 	}
 
 	async update(account, id, updateData) {
-		await db.updateOne(account, "mitigations", { _id: id }, updateData);
+		await db.updateOne(account, colName, { _id: id }, updateData);
 	}
 
-	async addRiskRefToMitigation(account, mitigation, riskReference) {
-		const referencedRisks = mitigation.referencedRisks;
-
+	async addRiskRefToMitigation(account, {referencedRisks, _id}, riskReference) {
 		if (!referencedRisks.includes(riskReference)) {
 			referencedRisks.push(riskReference);
-			await this.update(account, mitigation._id, { $set: { referencedRisks } });
+			await this.update(account, _id, { $set: { referencedRisks } });
 		}
 	}
 
@@ -213,7 +206,6 @@ class Mitigation {
 			mitigation_detail: updatedRisk.mitigation_detail,
 			mitigation_stage: updatedRisk.mitigation_stage,
 			mitigation_type: updatedRisk.mitigation_type,
-			mitigation_status: updatedRisk.mitigation_status,
 			category: updatedRisk.category,
 			location_desc: updatedRisk.location_desc,
 			element: updatedRisk.element,
@@ -221,12 +213,18 @@ class Mitigation {
 			scope: updatedRisk.scope,
 			associated_activity: updatedRisk.associated_activity
 		};
+
+		for (const key of Object.keys(mitigationDetails)) {
+			if(!mitigationDetails[key]){
+				delete mitigationDetails[key];
+			}
+		}
+
 		const formattedReference = formatRiskReference(account, model, riskId);
 
 		// if risk becomes resolved
 		if (!oldStatusIsResolved && newStatusIsResolved) {
-			const mitigations = await this.findMitigationSuggestions(account, mitigationDetails, []);
-			const mitigation = mitigations[0];
+			const mitigation = await db.findOne(account, colName, mitigationDetails);
 			if (!mitigation) {
 				try {
 					await this.insert(account, [{ ...mitigationDetails, referencedRisks: [formattedReference] }], false);
@@ -238,7 +236,7 @@ class Mitigation {
 			}
 		} else {
 			// if risk was already resolved
-			const allMitigations = await this.findMitigationSuggestions(account, {}, []);
+			const allMitigations = await db.find(account, colName);
 			const oldMitigation = allMitigations.find((m) => m.referencedRisks
 				&& m.referencedRisks.includes(formattedReference));
 
@@ -258,7 +256,7 @@ class Mitigation {
 			}
 
 			if (newStatusIsResolved) {
-				const mitigations = await this.findMitigationSuggestions(account, mitigationDetails, []);
+				const mitigations = await db.find(account, colName, mitigationDetails);
 				const newMitigation = mitigations[0];
 				if (!newMitigation) {
 					try {

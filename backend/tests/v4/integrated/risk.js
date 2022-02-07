@@ -72,7 +72,7 @@ describe("Risks", function () {
 	};
 
 	const formatReference = (riskId) => {
-		return username + "::" + model + "::" + riskId;
+		`${username}::${model}::${riskId};`
 	}
 
 	before(function (done) {
