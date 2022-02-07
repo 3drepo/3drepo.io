@@ -215,8 +215,8 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 				<FormTextFieldUnit
 					name="latitude"
 					control={control}
-					$labelName={formatMessage({ id: 'federations.settings.form.lat', defaultMessage: 'LATITUDE' })}
-					$labelUnit={formatMessage({ id: 'federations.settings.form.lat.unit', defaultMessage: 'decimal' })}
+					labelName={formatMessage({ id: 'federations.settings.form.lat', defaultMessage: 'LATITUDE' })}
+					labelUnit={formatMessage({ id: 'federations.settings.form.lat.unit', defaultMessage: 'decimal' })}
 					type="number"
 					formError={errors.latitude}
 					required
@@ -224,8 +224,8 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 				<FormTextFieldUnit
 					name="longitude"
 					control={control}
-					$labelName={formatMessage({ id: 'federations.settings.form.long', defaultMessage: 'LONGITUDE' })}
-					$labelUnit={formatMessage({ id: 'federations.settings.form.long.unit', defaultMessage: 'decimal' })}
+					labelName={formatMessage({ id: 'federations.settings.form.long', defaultMessage: 'LONGITUDE' })}
+					labelUnit={formatMessage({ id: 'federations.settings.form.long.unit', defaultMessage: 'decimal' })}
 					type="number"
 					formError={errors.longitude}
 					required
@@ -234,8 +234,8 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 			<FormTextFieldUnit
 				name="angleFromNorth"
 				control={control}
-				$labelName={formatMessage({ id: 'federations.settings.form.angleFromNorth', defaultMessage: 'ANGLE FROM NORTH' })}
-				$labelUnit={formatMessage({ id: 'federations.settings.form.angleFromNorth.unit', defaultMessage: 'clockwise degrees' })}
+				labelName={formatMessage({ id: 'federations.settings.form.angleFromNorth', defaultMessage: 'ANGLE FROM NORTH' })}
+				labelUnit={formatMessage({ id: 'federations.settings.form.angleFromNorth.unit', defaultMessage: 'clockwise degrees' })}
 				formError={errors.angleFromNorth}
 				type="number"
 			/>
@@ -243,8 +243,8 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 				<FormTextFieldUnit
 					name="x"
 					control={control}
-					$labelName="X"
-					$labelUnit={currentUnit}
+					labelName="X"
+					labelUnit={currentUnit}
 					type="number"
 					formError={errors.x}
 					required
@@ -252,8 +252,8 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 				<FormTextFieldUnit
 					name="y"
 					control={control}
-					$labelName="Y"
-					$labelUnit={currentUnit}
+					labelName="Y"
+					labelUnit={currentUnit}
 					type="number"
 					formError={errors.y}
 					required
@@ -261,8 +261,8 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 				<FormTextFieldUnit
 					name="z"
 					control={control}
-					$labelName="Z"
-					$labelUnit={currentUnit}
+					labelName="Z"
+					labelUnit={currentUnit}
 					type="number"
 					formError={errors.z}
 					required

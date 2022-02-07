@@ -20,12 +20,14 @@ import React from 'react';
 import { UnitTextField } from './formTextFieldUnit.styles';
 
 type FormTextFieldUnitProps = Omit<FormTextFieldProps, 'label'> & {
-	$labelName: string;
-	$labelUnit: string;
+	labelName: string;
+	labelUnit: string;
 };
 
-export const FormTextFieldUnit = (props: FormTextFieldUnitProps) => (
+export const FormTextFieldUnit = ({ labelName, labelUnit, ...otherProps }: FormTextFieldUnitProps) => (
 	<UnitTextField
-		{...props}
+		$labelName={labelName}
+		$labelUnit={labelUnit}
+		{...otherProps}
 	/>
 );
