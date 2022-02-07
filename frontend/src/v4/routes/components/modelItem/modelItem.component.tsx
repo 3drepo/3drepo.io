@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 
 import { Tooltip } from '@material-ui/core';
 
+import { Version, VersionContext } from '@/versionContext';
 import { Highlight } from '../highlight/highlight.component';
 import { Container, Detail, Name } from './modelItem.styles';
 
@@ -29,6 +30,8 @@ interface IProps {
 }
 
 export const ModelItem = ({name, isFederation, searchText = ''}: IProps) => {
+	const isV5 = useContext(VersionContext) === Version.V5;
+
 	return (
 		<Container>
 			<Tooltip title={name}>
@@ -42,7 +45,7 @@ export const ModelItem = ({name, isFederation, searchText = ''}: IProps) => {
 			<Detail>
 				<Highlight
 					search={searchText}
-					text={isFederation ? 'Federation' : 'Model'}
+					text={isFederation ? 'Federation' : isV5 ? 'Container' : 'Model'}
 				/>
 			</Detail>
 		</Container>

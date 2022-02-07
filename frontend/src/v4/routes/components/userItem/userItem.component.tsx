@@ -41,11 +41,12 @@ export const UserItem = (props: IProps) => {
 			direction="column"
 			justify="center"
 			alignItems="flex-start"
+			style={{minWidth: 0}}
 		>
 			<Name item>
 				<Highlight
 					{...highlightProps}
-					text={`${upperCase(props.lastName)}, ${props.firstName}`}
+					text={`${props.firstName} ${props.lastName}`}
 				/>
 			</Name>
 			<Detail item>

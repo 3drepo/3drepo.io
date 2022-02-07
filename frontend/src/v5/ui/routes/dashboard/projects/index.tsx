@@ -26,6 +26,8 @@ import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
 import { Federations } from './federations';
 import { Containers } from './containers';
+import { UsersPermissions } from './userPermissions/userPermissions.component';
+import { Content } from './projects.styles';
 
 export const ProjectContent = () => {
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
@@ -40,22 +42,27 @@ export const ProjectContent = () => {
 	}, [teamspaces]);
 
 	return (
-		<Switch>
-			<Route exact path={path}>
-				project content
-			</Route>
-			<Route exact path={`${path}/t/federations`}>
-				<Federations />
-			</Route>
-			<Route exact path={`${path}/t/containers`}>
-				<Containers />
-			</Route>
-			<Route exact path={`${path}/t/settings`}>
-				Project settings
-			</Route>
-			<Route path="*">
-				<Redirect to={NOT_FOUND_ROUTE_PATH} />
-			</Route>
-		</Switch>
+		<Content>
+			<Switch>
+				<Route exact path={path}>
+					project content
+				</Route>
+				<Route exact path={`${path}/t/federations`}>
+					<Federations />
+				</Route>
+				<Route exact path={`${path}/t/containers`}>
+					<Containers />
+				</Route>
+				<Route exact path={`${path}/t/settings`}>
+					Project settings
+				</Route>
+				<Route exact path={`${path}/t/users_permissions`}>
+					<UsersPermissions />
+				</Route>
+				<Route path="*">
+					<Redirect to={NOT_FOUND_ROUTE_PATH} />
+				</Route>
+			</Switch>
+		</Content>
 	);
 };

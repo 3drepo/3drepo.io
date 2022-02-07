@@ -14,25 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import React from 'react';
 
-import { createGlobalStyle } from 'styled-components';
-
-export const GlobalStyle = createGlobalStyle`
-	html, body {
-		height: 100%;
-		position: relative;
-		overflow-y: hidden;
-	}
-	
-	body {
-		margin: 0;
-		padding: 0;
-		${({ theme }) => theme.typography.body1};
-	}
-	
-	#app {
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-	}
-`;
+export default (props) => (
+	// eslint-disable-next-line react/destructuring-assignment
+	<svg width="18" height="18" viewBox="0 0 18 18" className={props.className} xmlns="http://www.w3.org/2000/svg">
+		<path
+			id="rect2"
+			fill="currentColor"
+			d="M 3 0 C 1.338 0 0 1.338 0 3 L 0 15 C 0 16.662 1.338 18 3 18 L 15 18 C 16.662 18 18 16.662 18 15 L 18 3 C 18 1.338 16.662 0 15 0 L 3 0 z M 5 8 L 13 8 C 13.554 8 14 8.446 14 9 C 14 9.554 13.554 10 13 10 L 5 10 C 4.446 10 4 9.554 4 9 C 4 8.446 4.446 8 5 8 z "
+		/>
+	</svg>
+);
