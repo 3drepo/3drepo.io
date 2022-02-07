@@ -16,7 +16,7 @@
  */
 
 import React from 'react';
-import { Container } from './uploadListItemRow.styles';
+import { Container, DashboardRow } from './uploadListItemRow.styles';
 
 type IUploadListItemRow = {
 	selected: boolean;
@@ -31,11 +31,12 @@ export const UploadListItemRow = ({
 	selected,
 	children,
 }: IUploadListItemRow): JSX.Element => (
-	<Container
+	<DashboardRow
 		selected={selected}
 		onClick={onClick}
-		onChange={onChange}
 	>
-		{children}
-	</Container>
+		<Container onChange={onChange}>
+			{children}
+		</Container>
+	</DashboardRow>
 );

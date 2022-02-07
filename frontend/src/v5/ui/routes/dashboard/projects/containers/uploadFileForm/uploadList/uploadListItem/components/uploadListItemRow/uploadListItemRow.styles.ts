@@ -18,7 +18,7 @@
 import { DashboardListItemRow } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import styled from 'styled-components';
 
-export const Container = styled(DashboardListItemRow)`
+export const DashboardRow = styled(DashboardListItemRow)`
 	height: 51px;
 	width: 100%;
 	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
@@ -34,4 +34,12 @@ export const Container = styled(DashboardListItemRow)`
 		border-bottom-right-radius: 5px;
 		border-bottom-style: solid;
 	}
+`;
+
+export const Container = styled.div`
+	width: 100%;
+	height: 51px;
+	display: inline-flex;
+	align-content: center;
+	align-items: center;
 `;
