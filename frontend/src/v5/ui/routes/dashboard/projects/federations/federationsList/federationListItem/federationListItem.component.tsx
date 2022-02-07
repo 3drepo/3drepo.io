@@ -34,8 +34,14 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { Display } from '@/v5/ui/themes/media';
 import { ShareModal } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
+import { EditFederationModal } from '@/v5/ui/routes/dashboard/projects/federations/editFederationModal/editFederationModal.component';
 import { FederationEllipsisMenu } from './federationEllipsisMenu/federationEllipsisMenu.component';
 
+const MODALS = {
+	share: 'share',
+	editFederation: 'editFederation',
+	none: 'none',
+};
 interface IFederationListItem {
 	index: number;
 	federation: IFederation;
@@ -52,7 +58,8 @@ export const FederationListItem = ({
 	if (federation.hasStatsPending) {
 		return <SkeletonListItem delay={index / 10} key={federation._id} />;
 	}
-	const [shareModalOpen, setShareModalOpen] = useState(false);
+	const [openModal, setOpenModal] = useState(MODALS.none);
+	const closeModal = () => setOpenModal(MODALS.none);
 
 	return (
 		<DashboardListItem
@@ -153,18 +160,23 @@ export const FederationListItem = ({
 				<DashboardListItemIcon>
 					<FederationEllipsisMenu
 						federation={federation}
-						openShareModal={() => setShareModalOpen(true)}
+						openShareModal={() => setOpenModal(MODALS.share)}
+						openEditFederationModal={() => setOpenModal(MODALS.editFederation)}
 					/>
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
 			<ShareModal
-				openState={shareModalOpen}
-				onClickClose={() => setShareModalOpen(false)}
+				openState={openModal === MODALS.share}
+				onClickClose={closeModal}
 				title={formatMessage({
 					id: 'ShareModal.federation.title',
 					defaultMessage: 'Share Federation URL',
 				})}
 				containerOrFederation={federation}
+			/>
+			<EditFederationModal
+				openState={openModal === MODALS.editFederation}
+				federation={federation}
 			/>
 		</DashboardListItem>
 	);

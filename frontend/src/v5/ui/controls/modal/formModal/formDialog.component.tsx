@@ -20,7 +20,10 @@ import React from 'react';
 import CloseIcon from '@assets/icons/close.svg';
 import { Form, Title, Header, CloseButton, FormDialogContent, FormDialogActions, RemoveWhiteCorners } from './formDialog.styles';
 
-interface IFormDialog extends React.DetailedHTMLProps<React.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement> {
+export interface IFormModal extends React.DetailedHTMLProps<
+React.FormHTMLAttributes<HTMLFormElement>,
+HTMLFormElement
+> {
 	onClickClose?: () => void;
 	title?: string;
 	open?: boolean;
@@ -29,7 +32,7 @@ interface IFormDialog extends React.DetailedHTMLProps<React.FormHTMLAttributes<H
 	showButtons?: boolean;
 }
 
-export const FormModal = (props: IFormDialog) => {
+export const FormModal = (props: IFormModal) => {
 	const {
 		onClickClose,
 		title,
