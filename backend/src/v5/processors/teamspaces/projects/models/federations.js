@@ -68,11 +68,11 @@ const getLastUpdatesFromModels = async (teamspace, models) => {
 };
 
 Federations.getFederationStats = async (teamspace, federation) => {
-	const { properties, status, subModels, category } = await getFederationById(teamspace, federation, {
+	const { properties, status, subModels, desc } = await getFederationById(teamspace, federation, {
 		properties: 1,
 		status: 1,
 		subModels: 1,
-		category: 1,
+		desc: 1,
 	});
 
 	const [issueCount, riskCount, lastUpdates] = await Promise.all([
@@ -85,7 +85,7 @@ Federations.getFederationStats = async (teamspace, federation) => {
 		code: properties.code,
 		status,
 		subModels,
-		category,
+		desc,
 		lastUpdated: lastUpdates,
 		tickets: { issues: issueCount, risks: riskCount },
 	};
