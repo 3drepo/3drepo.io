@@ -42,7 +42,7 @@ export const UploadListItem = ({
 	onChange,
 }: IUploadListItem): JSX.Element => {
 	const filesize = '400MB';
-	const { control, getValues, formState: { errors } } = useForm({
+	const { control, getValues, setValue, formState: { errors }, trigger } = useForm({
 		defaultValues: item,
 		mode: 'onChange',
 		resolver: yupResolver(ListItemSchema),
@@ -65,7 +65,17 @@ export const UploadListItem = ({
 				render={({
 					field: { ref, ...extras },
 				}) => (
-					<UploadListItemDestination errorMessage={errors.containerName?.message || ''} {...extras} />
+					<UploadListItemDestination
+						errorMessage={errors.containerName?.message || ''}
+						{...extras}
+						onChange={({ _id, name }) => {
+							setValue('containerId', _id);
+							setValue('containerName', name);
+							updateValue('containerId');
+							updateValue('containerName');
+							trigger('containerName');
+						}}
+					/>
 				)}
 			/>
 			<Controller

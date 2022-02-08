@@ -22,13 +22,18 @@ import React from 'react';
 
 type IUploadListItemDestination = {
 	errorMessage: string;
+	onChange: (option) => void;
 };
 
-export const UploadListItemDestination = ({ errorMessage, ...props }: IUploadListItemDestination): JSX.Element => {
+export const UploadListItemDestination = ({
+	errorMessage,
+	onChange,
+	...props
+}: IUploadListItemDestination): JSX.Element => {
 	const filter = createFilterOptions<{_id: string; name: string; latestRevision: string;}>();
 	const containers = ContainersHooksSelectors.selectContainers();
 
 	return (
-		<Autocomplete filter={filter} errorMessage={errorMessage} list={containers} {...props} />
+		<Autocomplete filter={filter} errorMessage={errorMessage} list={containers} onChange={onChange} {...props} />
 	);
 };

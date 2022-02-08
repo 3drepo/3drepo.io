@@ -82,6 +82,7 @@ export interface IContainer {
 	code: string;
 	status: UploadStatuses;
 	unit: string;
+	desc?: string;
 	isFavourite: boolean;
 	role: string;
 	hasStatsPending: boolean;
@@ -179,6 +180,12 @@ export type UploadItemFields = {
 
 export type UploadFieldArray = {
 	uploads: UploadItemFields[];
+};
+
+export type DestinationOption = {
+	name: string;
+	_id: string;
+	latestRevision?: string;
 };
 
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;

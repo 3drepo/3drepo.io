@@ -20,21 +20,19 @@ import ChevronIcon from '@assets/icons/chevron.svg';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { FormattedMessage } from 'react-intl';
+import { DestinationOption } from '@/v5/store/containers/containers.types';
 import { Input, TextInput, LastRevision, ContainerName, NewContainer, ExistingContainer } from './autocomplete.styles';
-
-type IOption = {
-	name: string;
-	_id: string;
-	latestRevision: string;
-};
 
 interface IAutocomplete {
 	list: any[];
-	filter: (opts, params) => IOption[];
+	filter: (opts, params) => DestinationOption[];
+	onChange: (option) => void;
 	errorMessage: string;
 	disabled?: boolean;
 	className?: string;
 }
+
+const emptyOption = { name: '', _id: '', latestRevision: '' };
 
 export const Autocomplete: React.FC<IAutocomplete> = ({
 	list,
@@ -42,9 +40,10 @@ export const Autocomplete: React.FC<IAutocomplete> = ({
 	filter,
 	disabled = false,
 	className,
+	onChange,
 	...props
 }) => {
-	const [value, setValue] = React.useState({ name: '', _id: '', latestRevision: '' });
+	const [value, setValue] = React.useState(emptyOption);
 	const [state, setState] = React.useState(errorMessage ? 'error' : 'empty');
 	return (
 		<Input
@@ -53,13 +52,18 @@ export const Autocomplete: React.FC<IAutocomplete> = ({
 			openText=""
 			closeText=""
 			clearText=""
-			selectOnFocus
-			clearOnBlur
 			handleHomeEndKeys
 			value={value}
 			onChange={(event, newValue) => {
-				setValue(newValue);
-				setState(!newValue._id.length ? 'new' : 'existing');
+				if (!newValue) {
+					setValue(emptyOption);
+					setState('');
+					onChange(emptyOption);
+				} else {
+					setValue(newValue);
+					setState(!newValue._id.length ? 'new' : 'existing');
+					onChange(newValue);
+				}
 			}}
 			options={list.map((val) => ({
 				name: val.name,
@@ -67,9 +71,9 @@ export const Autocomplete: React.FC<IAutocomplete> = ({
 				latestRevision: val.latestRevision,
 			}))}
 			filterOptions={(options, params) => {
-				const filtered: IOption[] = filter(options, params);
+				const filtered: DestinationOption[] = filter(options, params);
 				const { inputValue } = params;
-				const isExisting = options.some((option: IOption) => inputValue === option.name);
+				const isExisting = options.some((option: DestinationOption) => inputValue === option.name);
 				if (inputValue !== '' && !isExisting) {
 					filtered.unshift({
 						_id: '',
@@ -80,7 +84,7 @@ export const Autocomplete: React.FC<IAutocomplete> = ({
 
 				return filtered;
 			}}
-			getOptionLabel={(option: IOption) => option.name}
+			getOptionLabel={(option: DestinationOption) => option.name}
 			renderInput={({ InputProps, ...params }) => (
 				<TextInput
 					error={!!errorMessage}
@@ -96,7 +100,7 @@ export const Autocomplete: React.FC<IAutocomplete> = ({
 					}}
 				/>
 			)}
-			renderOption={(option: IOption) => {
+			renderOption={(option: DestinationOption) => {
 				if (option.name && !option._id) {
 					return (
 						<NewContainer>
