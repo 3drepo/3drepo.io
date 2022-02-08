@@ -39,7 +39,6 @@ export const CheckboxField = (props) => {
 	return (
 		<Checkbox
 			{...props}
-			color="secondary"
 		/>
 	);
 };

@@ -17,8 +17,6 @@
 
 import styled from 'styled-components';
 
-export const Container = styled.div``;
-
 export const HeaderButtonsGroup = styled.div`
 	margin-left: auto;
 	min-width: 278px;

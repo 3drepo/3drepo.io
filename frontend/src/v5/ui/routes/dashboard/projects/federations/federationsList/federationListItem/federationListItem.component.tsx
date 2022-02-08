@@ -17,7 +17,7 @@
 
 import React, { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { formatDate } from '@/v5/services/intl';
+import { formatDate, formatMessage } from '@/v5/services/intl';
 
 import {
 	DashboardListItemButton,
@@ -34,6 +34,7 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { Display } from '@/v5/ui/themes/media';
 import { FederationSettingsForm } from '@/v5/ui/routes/dashboard/projects/federations/federationSettingsForm/federationSettingsForm.component';
+import { ShareModal } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
 import { FederationEllipsisMenu } from './federationEllipsisMenu/federationEllipsisMenu.component';
 
 interface IFederationListItem {
@@ -52,6 +53,7 @@ export const FederationListItem = ({
 	if (federation.hasStatsPending) {
 		return <SkeletonListItem delay={index / 10} key={federation._id} />;
 	}
+	const [shareModalOpen, setShareModalOpen] = useState(false);
 
 	const [federationSettingsOpen, setFederationSettingsOpen] = useState(false);
 
@@ -155,16 +157,26 @@ export const FederationListItem = ({
 					<DashboardListItemIcon>
 						<FederationEllipsisMenu
 							federation={federation}
+							openShareModal={() => setShareModalOpen(true)}
 							openFederationSettings={() => setFederationSettingsOpen(true)}
 						/>
 					</DashboardListItemIcon>
 				</DashboardListItemRow>
+				<ShareModal
+					openState={shareModalOpen}
+					onClickClose={() => setShareModalOpen(false)}
+					title={formatMessage({
+						id: 'ShareModal.federation.title',
+						defaultMessage: 'Share Federation URL',
+					})}
+					containerOrFederation={federation}
+				/>
+				<FederationSettingsForm
+					open={federationSettingsOpen}
+					federation={federation}
+					onClose={() => setFederationSettingsOpen(false)}
+				/>
 			</DashboardListItem>
-			<FederationSettingsForm
-				open={federationSettingsOpen}
-				federation={federation}
-				onClose={() => setFederationSettingsOpen(false)}
-			/>
 		</>
 	);
 };

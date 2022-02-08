@@ -15,24 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createGlobalStyle } from 'styled-components';
+import { DialogContainer } from '@/v4/routes/components/dialogContainer';
+import { SnackbarContainer } from '@/v4/routes/components/snackbarContainer';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import React from 'react';
+import DayJsUtils from '@date-io/dayjs';
+import { V4OverridesContainer } from './v4Overrides.styles';
 
-export const GlobalStyle = createGlobalStyle`
-	html, body {
-		height: 100%;
-		position: relative;
-		overflow-y: hidden;
-	}
-	
-	body {
-		margin: 0;
-		padding: 0;
-		${({ theme }) => theme.typography.body1};
-	}
-	
-	#app {
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-	}
-`;
+export const V4Adapter = ({ children }) => (
+	<V4OverridesContainer id="v4Overrides">
+		<MuiPickersUtilsProvider utils={DayJsUtils}>
+
+			{children}
+			<DialogContainer />
+			<SnackbarContainer />
+		</MuiPickersUtilsProvider>
+	</V4OverridesContainer>
+);

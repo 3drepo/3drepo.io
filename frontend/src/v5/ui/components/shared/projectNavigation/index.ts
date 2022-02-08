@@ -15,24 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createGlobalStyle } from 'styled-components';
-
-export const GlobalStyle = createGlobalStyle`
-	html, body {
-		height: 100%;
-		position: relative;
-		overflow-y: hidden;
-	}
-	
-	body {
-		margin: 0;
-		padding: 0;
-		${({ theme }) => theme.typography.body1};
-	}
-	
-	#app {
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-	}
-`;
+export { ProjectNavigation } from './projectNavigation.component';

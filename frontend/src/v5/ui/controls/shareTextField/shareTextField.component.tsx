@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { InputAdornment } from '@material-ui/core';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
@@ -51,6 +51,7 @@ export const ShareTextField = ({ label, value, className }: IShareTextField) => 
 			setIsCopying(true);
 		}, IS_COPYING_DURATION_MS);
 	};
+	useEffect(() => () => clearTimeout(isCopiedTimer), []);
 	return (
 		<>
 			<CopyToClipboard

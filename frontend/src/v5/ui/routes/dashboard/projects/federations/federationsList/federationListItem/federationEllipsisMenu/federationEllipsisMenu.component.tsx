@@ -27,11 +27,13 @@ import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/
 type FederationEllipsisMenuProps = {
 	federation: IFederation,
 	openFederationSettings: () => void,
+	openShareModal: () => void,
 };
 
 export const FederationEllipsisMenu = ({
 	federation,
 	openFederationSettings,
+	openShareModal,
 }: FederationEllipsisMenuProps) => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 	const dispatch = useDispatch();
@@ -76,9 +78,10 @@ export const FederationEllipsisMenu = ({
 
 			<EllipsisMenuItem
 				title={formatMessage({
-					id: 'federations.ellipsisMenu.shareContainer',
-					defaultMessage: 'Share Container',
+					id: 'federations.ellipsisMenu.shareFederation',
+					defaultMessage: 'Share Federation',
 				})}
+				onClick={openShareModal}
 			/>
 
 			<EllipsisMenuItem
