@@ -35,7 +35,11 @@ export const SearchField = styled(TextField).attrs({
 		classes: {
 			root: 'search-field__label'
 		}
-	}
+	},
+	InputProps: {
+		disableUnderline: false,
+	},
+	variant: 'standard'
 })`
 	&& {
 		margin: 0;

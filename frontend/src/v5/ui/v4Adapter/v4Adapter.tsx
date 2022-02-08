@@ -15,21 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { DialogContainer } from '@/v4/routes/components/dialogContainer';
+import { SnackbarContainer } from '@/v4/routes/components/snackbarContainer';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import React from 'react';
-import { useRouteMatch } from 'react-router-dom';
-import { discardSlash, discardUrlComponent } from '@/v5/services/routing/routing';
-import { FormattedMessage } from 'react-intl';
-import { Container, Link } from './topNavigaton.styles';
+import DayJsUtils from '@date-io/dayjs';
+import { V4OverridesContainer } from './v4Overrides.styles';
 
-export const TopNavigation = (): JSX.Element => {
-	let { url } = useRouteMatch();
-	url = discardSlash(url);
+export const V4Adapter = ({ children }) => (
+	<V4OverridesContainer id="v4Overrides">
+		<MuiPickersUtilsProvider utils={DayJsUtils}>
 
-	return (
-		<Container>
-			<Link to={`${url}/t/federations`}><FormattedMessage id="Federations" defaultMessage="Federations" /></Link>
-			<Link to={`${url}/t/containers`}><FormattedMessage id="Containers" defaultMessage="Containers" /></Link>
-			<Link to={`${discardUrlComponent(url, 'settings')}/t/settings`}><FormattedMessage id="Settings" defaultMessage="Settings" /></Link>
-		</Container>
-	);
-};
+			{children}
+			<DialogContainer />
+			<SnackbarContainer />
+		</MuiPickersUtilsProvider>
+	</V4OverridesContainer>
+);
