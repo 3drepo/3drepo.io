@@ -23,6 +23,7 @@ const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
 const { Parser } = require("json2csv");
+const { systemLogger } = require("../logger");
 
 // NB: Order of fieldTypes important for importCSV
 const csvImportFieldTypes = {
@@ -85,8 +86,8 @@ class Mitigation {
 			const TeamspaceSettings = require("./teamspaceSetting");
 			const settings = await TeamspaceSettings.getTeamspaceSettings(account,	{  _id: 0, createMitigationSuggestions: 1});
 			return settings.createMitigationSuggestions;
-		} catch {
-			// do nothing
+		} catch (error) {
+			systemLogger.logError(error);
 		}
 		return false;
 	}
@@ -194,10 +195,17 @@ class Mitigation {
 		await db.updateOne(account, colName, { _id: id }, updateData);
 	}
 
-	async addRiskRefToMitigation(account, {referencedRisks, _id}, riskReference) {
-		if (!referencedRisks.includes(riskReference)) {
-			referencedRisks.push(riskReference);
-			await this.update(account, _id, { $set: { referencedRisks } });
+	async createOrAddRefToMitigation (account, mitigationDetails, ref){
+		const mitigation = await db.findOne(account, colName, mitigationDetails, {referencedRisks: 1});
+		if (!mitigation) {
+			try {
+				await this.insert(account, [{ ...mitigationDetails, referencedRisks: [ref] }], false);
+			} catch (error) {
+				systemLogger.logError(error);
+			}
+		} else if (mitigation.referencedRisks && !referencedRisks.includes(ref)) {
+			mitigation.referencedRisks.push(riskReference);
+			await this.update(account, _id, { $set: { referencedRisks: mitigation.referencedRisks } });
 		}
 	}
 
@@ -228,16 +236,7 @@ class Mitigation {
 
 		// if risk becomes resolved
 		if (!oldStatusIsResolved && newStatusIsResolved) {
-			const mitigation = await db.findOne(account, colName, mitigationDetails, {referencedRisks: 1});
-			if (!mitigation) {
-				try {
-					await this.insert(account, [{ ...mitigationDetails, referencedRisks: [formattedReference] }], false);
-				} catch {
-					// do nothing if the mitigation was not inserted
-				}
-			} else if (mitigation.referencedRisks) {
-				await this.addRiskRefToMitigation(account, mitigation, formattedReference);
-			}
+			await this.createOrAddRefToMitigation(account, mitigationDetails, formattedReference);
 		} else {
 			// if risk was already resolved		
 			const oldMitigation = await db.findOne(account, colName, { referencedRisks: formattedReference });
@@ -247,7 +246,7 @@ class Mitigation {
 				return;
 			}
 
-			// remove old ref
+			// remove old mitigation or remove ref
 			if (oldMitigation) {
 				if (oldMitigation.referencedRisks.length === 1) {
 					await this.deleteOne(account, oldMitigation._id);
@@ -257,16 +256,7 @@ class Mitigation {
 			}
 
 			if (newStatusIsResolved) {
-				const newMitigation = await db.findOne(account, colName, mitigationDetails);
-				if (!newMitigation) {
-					try {
-						await this.insert(account, [{ ...mitigationDetails, referencedRisks: [formattedReference] }], false);
-					} catch {
-						// do nothing if the mitigation was not inserted
-					}
-				} else if (newMitigation.referencedRisks) {
-					await this.addRiskRefToMitigation(account, newMitigation, formattedReference);
-				}
+				await this.createOrAddRefToMitigation(account, mitigationDetails, formattedReference);				
 			}
 		}
 

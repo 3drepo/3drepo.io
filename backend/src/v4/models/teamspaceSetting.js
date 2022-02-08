@@ -112,8 +112,8 @@ class TeamspaceSettings {
 		}
 	}
 
-	async getMitigationsFile(account) {
-		return await Mitigation.exportCSV(account);
+	getMitigationsFile(account) {
+		return Mitigation.exportCSV(account);
 	}
 
 	async update(account, data) {
