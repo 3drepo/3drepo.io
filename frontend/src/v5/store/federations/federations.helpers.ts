@@ -16,12 +16,11 @@
  */
 
 import {
+	FetchFederationRawSettingsResponse,
+	FetchFederationSettingsResponse,
 	FetchFederationsItemResponse,
 	FetchFederationStatsResponse,
 	IFederation,
-	RawFederationSettings,
-	IFederationSettings,
-	IFederationExtraSettings,
 } from '@/v5/store/federations/federations.types';
 import {
 	UploadStatuses,
@@ -64,27 +63,20 @@ export const prepareFederationsData = (
 
 export const prepareFederationSettingsForFrontend = ({
 	surveyPoints,
-	unit,
-	angleFromNorth,
-	defaultView,
-}: RawFederationSettings): IFederationSettings => (
+	...otherProps
+}: FetchFederationRawSettingsResponse): FetchFederationSettingsResponse => (
 	{
 		surveyPoint: surveyPoints?.[0],
-		unit,
-		angleFromNorth,
-		defaultView,
+		...otherProps,
 	}
 );
 
-export const prepareFederationSettingsForBackend = (
-	{ surveyPoint, ...otherSettings }: IFederationSettings,
-	{ name, desc, code }: IFederationExtraSettings,
-): RawFederationSettings => (
+export const prepareFederationSettingsForBackend = ({
+	surveyPoint,
+	...otherProps
+}: FetchFederationSettingsResponse): FetchFederationRawSettingsResponse => (
 	{
-		...otherSettings,
 		surveyPoints: [surveyPoint],
-		name,
-		desc,
-		code,
+		...otherProps,
 	}
 );

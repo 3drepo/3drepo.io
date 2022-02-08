@@ -44,8 +44,8 @@ export const { Types: FederationsTypes, Creators: FederationsActions } = createA
 	fetchFederationViewsSuccess: ['projectId', 'federationId', 'views'],
 	fetchFederationSettings: ['teamspace', 'projectId', 'federationId'],
 	fetchFederationSettingsSuccess: ['projectId', 'federationId', 'settings'],
-	updateFederationSettings: ['teamspace', 'projectId', 'federationId', 'settings', 'extraSettings'],
-	updateFederationSettingsSuccess: ['projectId', 'federationId', 'settings', 'extraSettings'],
+	updateFederationSettings: ['teamspace', 'projectId', 'federationId', 'updatedSettings'],
+	updateFederationSettingsSuccess: ['projectId', 'federationId', 'updatedSettings'],
 	deleteFederation: ['teamspace', 'projectId', 'federationId'],
 	deleteFederationSuccess: ['projectId', 'federationId'],
 }, { prefix: 'FEDERATIONS/' }) as { Types: Constants<IFederationsActionCreators>; Creators: IFederationsActionCreators };
@@ -131,7 +131,7 @@ export const fetchFederationSettingsSuccess = (state = INITIAL_STATE, {
 			if (federationId !== federation._id) return federation;
 			return {
 				...federation,
-				settings,
+				...settings,
 			};
 		}),
 	},
@@ -140,12 +140,7 @@ export const fetchFederationSettingsSuccess = (state = INITIAL_STATE, {
 export const updateFederationSettingsSuccess = (state = INITIAL_STATE, {
 	projectId,
 	federationId,
-	settings,
-	extraSettings: {
-		name,
-		desc,
-		code,
-	},
+	updatedSettings,
 }: UpdateFederationSettingsSuccessAction) => ({
 	...state,
 	federations: {
@@ -154,10 +149,7 @@ export const updateFederationSettingsSuccess = (state = INITIAL_STATE, {
 			if (federationId !== federation._id) return federation;
 			return {
 				...federation,
-				name,
-				desc,
-				code,
-				settings,
+				...updatedSettings,
 			};
 		}),
 	},

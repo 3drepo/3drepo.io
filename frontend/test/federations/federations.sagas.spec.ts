@@ -22,12 +22,12 @@ import { mockServer } from '../../internals/testing/mockServer';
 import { omit, pick, times } from 'lodash';
 import { 
 	federationMockFactory, 
-	prepareMockExtraSettingsReply, 
 	prepareMockRawSettingsReply, 
 	prepareMockSettingsReply, 
 	prepareMockViewsReply, 
 } from './federations.fixtures';
-import { prepareFederationsData, prepareFederationSettingsForFrontend } from '@/v5/store/federations/federations.helpers';
+import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
+import { prepareFederationSettingsForFrontend } from '@/v5/store/federations/federations.helpers';
 import {  
 	FetchFederationStatsResponse, 
 	IFederation, 
@@ -72,8 +72,9 @@ describe('Federations: sagas', () => {
 
 	describe('fetchFederations', () => {
 		const mockFederations = times(2, () => federationMockFactory());
-		const mockFederationsBaseResponse = mockFederations.map((federation) => pick(federation, ['_id', 'name', 'role', 'isFavourite', 'subModels']));
-		const mockFederationsWithoutStats = prepareFederationsData(mockFederations).map((federation) => omit(federation, ['views', 'settings']));
+		const mockFederationsBaseResponse = mockFederations.map((federation) => pick(federation, ['_id', 'desc', 'name', 'role', 'isFavourite', 'subModels']));
+		const mockFederationsWithoutStats = prepareFederationsData(mockFederations).map(
+			(federation) => omit(federation, ['views', 'surveyPoint', 'angleFromNorth', 'defaultView', 'unit']));
 
 		it('should fetch federations data', async () => {
 			mockServer
@@ -179,7 +180,6 @@ describe('Federations: sagas', () => {
 	describe('updateFederationSettings', () => {
 		const mockFederation = federationMockFactory();
 		const mockSettings = prepareMockSettingsReply(mockFederation);
-		const mockExtraSettings = prepareMockExtraSettingsReply(mockFederation);
 		
 
 		it('should call updateFederationSettings endpoint', async () => {
@@ -193,13 +193,11 @@ describe('Federations: sagas', () => {
 				projectId, 
 				federationId, 
 				mockSettings,
-				mockExtraSettings
 			))
 			.put(FederationsActions.updateFederationSettingsSuccess(
 				projectId, 
 				federationId, 
 				mockSettings,
-				mockExtraSettings,
 			))
 			.silentRun();
 		})

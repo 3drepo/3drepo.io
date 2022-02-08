@@ -17,8 +17,15 @@
 
 import { INITIAL_STATE, reducer as federationsReducer, FederationsActions } from '@/v5/store/federations/federations.redux';
 import { times } from 'lodash';
-import { federationMockFactory, prepareMockExtraSettingsReply, prepareMockSettingsReply } from './federations.fixtures';
+import { federationMockFactory, prepareMockSettingsReply } from './federations.fixtures';
 import { EMPTY_VIEW } from '@/v5/store/federations/federations.types';
+
+const EMPTY_SETTINGS = {
+	surveyPoint: undefined,
+	angleFromNorth: undefined,
+	defaultView: undefined,
+	unit: undefined,
+};
 
 describe('Federations: redux', () => {
 	const projectId = 'projectId';
@@ -77,7 +84,7 @@ describe('Federations: redux', () => {
 	});
 
 	it('should load fetched settings', () => {
-		const mockFederation = federationMockFactory({ settings: null });
+		const mockFederation = federationMockFactory(EMPTY_SETTINGS);
 		const defaultStateWithNoSettings = {
 			...INITIAL_STATE,
 			federations: {
@@ -92,11 +99,17 @@ describe('Federations: redux', () => {
 		);
 		const result = resultState.federations[projectId];
 
-		expect(result[0].settings).toEqual(mockSettings);
+		expect(result[0].surveyPoint).toEqual(mockSettings.surveyPoint);
+		expect(result[0].defaultView).toEqual(mockSettings.defaultView);
+		expect(result[0].angleFromNorth).toEqual(mockSettings.angleFromNorth);
+		expect(result[0].unit).toEqual(mockSettings.unit);
+		expect(result[0].name).toEqual(mockSettings.name);
+		expect(result[0].code).toEqual(mockSettings.code);
+		expect(result[0].desc).toEqual(mockSettings.desc);
 	});
 
 	it('should update settings changed from form', () => {
-		const mockFederation = federationMockFactory({ settings: null });
+		const mockFederation = federationMockFactory(EMPTY_SETTINGS);
 		const defaultStateWithNoSettings = {
 			...INITIAL_STATE,
 			federations: {
@@ -105,18 +118,20 @@ describe('Federations: redux', () => {
 		}
 
 		const mockFederationForReply = federationMockFactory();
-		const mockSettings = prepareMockSettingsReply(mockFederationForReply);
-		const mockExtraSettings = prepareMockExtraSettingsReply(mockFederationForReply);
+		const mockUpdatedFederationPropertiesReply = prepareMockSettingsReply(mockFederationForReply);
 
 		const resultState = federationsReducer(
 			defaultStateWithNoSettings,
-			FederationsActions.updateFederationSettingsSuccess(projectId, mockFederation._id, mockSettings, mockExtraSettings),
+			FederationsActions.updateFederationSettingsSuccess(projectId, mockFederation._id, mockUpdatedFederationPropertiesReply),
 		);
 		const result = resultState.federations[projectId];
 
-		expect(result[0].settings).toEqual(mockSettings);
-		expect(result[0].name).toEqual(mockFederationForReply.name);
-		expect(result[0].desc).toEqual(mockFederationForReply.desc);
-		expect(result[0].code).toEqual(mockFederationForReply.code);
+		expect(result[0].surveyPoint).toEqual(mockUpdatedFederationPropertiesReply.surveyPoint);
+		expect(result[0].defaultView).toEqual(mockUpdatedFederationPropertiesReply.defaultView);
+		expect(result[0].angleFromNorth).toEqual(mockUpdatedFederationPropertiesReply.angleFromNorth);
+		expect(result[0].unit).toEqual(mockUpdatedFederationPropertiesReply.unit);
+		expect(result[0].name).toEqual(mockUpdatedFederationPropertiesReply.name);
+		expect(result[0].desc).toEqual(mockUpdatedFederationPropertiesReply.desc);
+		expect(result[0].code).toEqual(mockUpdatedFederationPropertiesReply.code);
 	});
 })

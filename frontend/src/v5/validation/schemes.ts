@@ -23,17 +23,17 @@ export const FederationSettingsSchema = Yup.object().shape({
 	name: Yup.string()
 		.min(2,
 			formatMessage({
-				id: 'federations.settings.name.error.min',
+				id: 'federations.name.error.min',
 				defaultMessage: 'Federation Name must be at least 2 characters',
 			}))
 		.max(120,
 			formatMessage({
-				id: 'federations.settings.name.error.max',
+				id: 'federations.name.error.max',
 				defaultMessage: 'Federation Name is limited to 120 characters',
 			}))
 		.required(
 			formatMessage({
-				id: 'federations.settings.name.error.required',
+				id: 'federations.name.error.required',
 				defaultMessage: 'Federation Name is a required field',
 			}),
 		),
@@ -43,12 +43,12 @@ export const FederationSettingsSchema = Yup.object().shape({
 			: Yup.string()
 				.min(1,
 					formatMessage({
-						id: 'federations.settings.desc.error.min',
+						id: 'federations.desc.error.min',
 						defaultMessage: 'Federation Description must be at least 1 character',
 					}))
 				.max(600,
 					formatMessage({
-						id: 'federations.settings.desc.error.max',
+						id: 'federations.desc.error.max',
 						defaultMessage: 'Federation Description is limited to 600 characters',
 					}))
 	)),
@@ -59,17 +59,17 @@ export const FederationSettingsSchema = Yup.object().shape({
 			: Yup.string()
 				.min(1,
 					formatMessage({
-						id: 'federations.settings.code.error.min',
+						id: 'federations.code.error.min',
 						defaultMessage: 'Code must be at least 1 character',
 					}))
 				.max(50,
 					formatMessage({
-						id: 'federations.settings.code.error.max',
+						id: 'federations.code.error.max',
 						defaultMessage: 'Code is limited to 50 characters',
 					}))
 				.matches(/^[\w|_|-]*$/,
 					formatMessage({
-						id: 'federations.settings.code.error.characters',
+						id: 'federations.code.error.characters',
 						defaultMessage: 'Code can only consist of letters and numbers',
 					}))
 	)),
@@ -81,12 +81,12 @@ export const FederationSettingsSchema = Yup.object().shape({
 	angleFromNorth: Yup.number()
 		.min(0,
 			formatMessage({
-				id: 'federations.settings.angle.error.min',
+				id: 'federations.angle.error.min',
 				defaultMessage: 'Angle cannot be smaller than 0',
 			}))
 		.max(360,
 			formatMessage({
-				id: 'federations.settings.angle.error.max',
+				id: 'federations.angle.error.max',
 				defaultMessage: 'Angle cannot be greater than 360',
 			}))
 		.transform((value) => value ?? 0),

@@ -23,7 +23,7 @@ import { FormModal } from '@/v5/ui/controls/modal/formModal/formDialog.component
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
-import { IFederation, EMPTY_VIEW, IFederationExtraSettings, IFederationSettings } from '@/v5/store/federations/federations.types';
+import { IFederation, EMPTY_VIEW, FederationSettings } from '@/v5/store/federations/federations.types';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelectView } from '@controls/formSelectView/formSelectView.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
@@ -54,11 +54,13 @@ const UNITS = [
 	},
 ];
 
+const DECIMAL_UNIT = UNITS[2];
+
 interface IFormInput {
 	name: string;
 	unit: string;
-	desc?: string;
-	code?: string;
+	desc: string;
+	code: string;
 	defaultView: string;
 	latitude: number;
 	longitude: number;
@@ -70,15 +72,17 @@ interface IFormInput {
 
 const getDefaultValues = (federation: IFederation) => {
 	const DEFAULT_UNIT = UNITS[0];
-	const { unit = DEFAULT_UNIT.abbreviation, angleFromNorth = 0 } = federation.settings || {};
 	const {
-		latLong,
-		position,
-	} = federation.settings?.surveyPoint || {};
+		unit = DEFAULT_UNIT.abbreviation,
+		angleFromNorth = 0,
+		code,
+		name,
+		desc = '',
+	} = federation;
+	const defaultView = federation.defaultView || EMPTY_VIEW._id;
+	const { latLong, position } = federation.surveyPoint || {};
 	const [x, y, z] = position || [0, 0, 0];
 	const [latitude, longitude] = latLong || [0, 0];
-	const { code, name, desc = '' } = federation;
-	const defaultView = federation?.settings?.defaultView || EMPTY_VIEW._id;
 	return {
 		name,
 		desc,
@@ -129,25 +133,20 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 	const onSubmit: SubmitHandler<IFormInput> = ({
 		latitude, longitude,
 		x, y, z,
-		name,
-		desc,
-		code,
 		...otherSettings
 	}) => {
-		const settings: IFederationSettings = {
+		const settings: FederationSettings = {
 			surveyPoint: {
 				latLong: [latitude, longitude],
 				position: [x, y, z],
 			},
 			...otherSettings,
 		};
-		const extraSettings: IFederationExtraSettings = { name, desc, code };
 		FederationsActionsDispatchers.updateFederationSettings(
 			teamspace,
 			project,
 			federation._id,
 			settings,
-			extraSettings,
 		);
 		onClose();
 	};
@@ -216,7 +215,7 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 					name="latitude"
 					control={control}
 					labelName={formatMessage({ id: 'federations.settings.form.lat', defaultMessage: 'LATITUDE' })}
-					labelUnit={formatMessage({ id: 'federations.settings.form.lat.unit', defaultMessage: 'decimal' })}
+					labelUnit={DECIMAL_UNIT.name}
 					type="number"
 					formError={errors.latitude}
 					required
@@ -225,7 +224,7 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 					name="longitude"
 					control={control}
 					labelName={formatMessage({ id: 'federations.settings.form.long', defaultMessage: 'LONGITUDE' })}
-					labelUnit={formatMessage({ id: 'federations.settings.form.long.unit', defaultMessage: 'decimal' })}
+					labelUnit={DECIMAL_UNIT.name}
 					type="number"
 					formError={errors.longitude}
 					required

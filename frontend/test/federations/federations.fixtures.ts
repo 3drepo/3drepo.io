@@ -19,20 +19,23 @@ import * as faker from 'faker';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { 
 	EMPTY_VIEW, 
+	FederationRawSettings, 
+	FederationSettings, 
 	FetchFederationStatsResponse, 
 	FetchFederationViewsResponse, 
 	IFederation, 
-	IFederationExtraSettings, 
-	IFederationSettings, 
-	RawFederationSettings 
 } from '@/v5/store/federations/federations.types';
+import {
+	prepareFederationSettingsForFrontend,
+	prepareFederationSettingsForBackend,
+} from '@/v5/store/federations/federations.helpers';
 import { times } from 'lodash';
-import { prepareFederationSettingsForBackend } from '@/v5/store/federations/federations.helpers';
 
 
 export const federationMockFactory = (overrides?: Partial<IFederation>): IFederation => ({
 	_id: faker.datatype.uuid(),
 	name: faker.random.words(3),
+	desc: faker.random.words(3),
 	role: faker.random.arrayElement(['admin', 'collaborator']),
 	lastUpdated: faker.date.past(2),
 	status: UploadStatuses.OK,
@@ -45,15 +48,20 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 	risks: faker.datatype.number(120),
 	hasStatsPending: false,
 	views: [EMPTY_VIEW],
-	settings: {
-		angleFromNorth: faker.datatype.number(90),
-		defaultView: EMPTY_VIEW._id,
-		surveyPoint: {
-			latLong: [faker.datatype.number(0), faker.datatype.number(0)],
-			position: [faker.datatype.number(0), faker.datatype.number(0), faker.datatype.number(0)],
-		},
-		unit: faker.random.arrayElement(['mm', 'cm', 'dm', 'm', 'ft']),
+	angleFromNorth: faker.datatype.number({ min: 0, max: 360 }),
+	defaultView: EMPTY_VIEW._id,
+	surveyPoint: {
+		latLong: [
+			faker.datatype.number({ min: -100, max: 100 }), 
+			faker.datatype.number({ min: -100, max: 100 }),
+		],
+		position: [
+			faker.datatype.number({ min: -100, max: 100 }), 
+			faker.datatype.number({ min: -100, max: 100 }), 
+			faker.datatype.number({ min: -100, max: 100 }),
+		],
 	},
+	unit: faker.random.arrayElement(['mm', 'cm', 'dm', 'm', 'ft']),
 	...overrides,
 });
 
@@ -73,20 +81,23 @@ export const prepareMockViewsReply = (federation: IFederation): FetchFederationV
 	views: federation.views,
 });
 
-export const prepareMockSettingsReply = (federation: IFederation): IFederationSettings => ({
-	...federation.settings,
-});
-
-export const prepareMockExtraSettingsReply = (federation: IFederation): IFederationExtraSettings => ({
+const prepareMockSettingsWithoutSurveyPoint = (federation: IFederation): Omit<FederationSettings, 'surveyPoint'> => ({
+	angleFromNorth: federation.angleFromNorth,
+	defaultView: federation.defaultView,
+	unit: federation.unit,
 	name: federation.name,
-	desc: federation.desc,
 	code: federation.code,
+	// uncomment description after backend is ready, right now it would break
+	// fetch federation settings saga tests
+	desc: federation.desc,
 });
 
-export const prepareMockRawSettingsReply = (federation: IFederation): RawFederationSettings => (
-	prepareFederationSettingsForBackend(federation.settings, {
-		name: federation.name,
-		desc: federation.desc,
-		code: federation.code,
-	})
-);
+export const prepareMockSettingsReply = (federation: IFederation): FederationSettings => ({
+	...prepareMockSettingsWithoutSurveyPoint(federation),
+	surveyPoint: federation.surveyPoint,
+});
+
+export const prepareMockRawSettingsReply = (federation: IFederation): FederationRawSettings => ({
+	...prepareMockSettingsWithoutSurveyPoint(federation),
+	surveyPoints: [federation.surveyPoint],
+});
