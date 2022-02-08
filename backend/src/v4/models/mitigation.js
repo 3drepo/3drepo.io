@@ -80,6 +80,17 @@ class Mitigation {
 		return await db.deleteOne(account, colName, { _id: id });
 	}
 
+	async isMitigationCreationFeatureOn (account) {
+		try{			
+			const TeamspaceSettings = require("./teamspaceSetting");
+			const settings = await TeamspaceSettings.getTeamspaceSettings(account,	{  _id: 0, createTreatmentSuggestions: 1});
+			return settings.createTreatmentSuggestions;
+		} catch {
+			// do nothing
+		}
+		return false;
+	}
+
 	async getCriteria(account) {
 		const mitigationColl = await this.getMitigationCollection(account);
 
@@ -88,7 +99,6 @@ class Mitigation {
 		const criteria = {};
 
 		const TeamspaceSettings = require("./teamspaceSetting");
-
 		// Get teamspace categories
 		const teamspaceCategories = await TeamspaceSettings.getRiskCategories(account);
 
@@ -192,6 +202,11 @@ class Mitigation {
 	}
 
 	async updateMitigationsFromRisk(account, model, oldRisk, updatedRisk) {
+		const isFeatureOn = await this.isMitigationCreationFeatureOn(account);
+		if(!isFeatureOn){
+			return;
+		}
+
 		const riskId = updatedRisk._id;
 		const oldStatusIsResolved = !!oldRisk?.mitigation_desc && isMitigationStatusResolved(oldRisk.mitigation_status);
 		const newStatusIsResolved = !!updatedRisk?.mitigation_desc && isMitigationStatusResolved(updatedRisk.mitigation_status);

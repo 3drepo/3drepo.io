@@ -23,7 +23,6 @@ const responseCodes = require("../response_codes.js");
 const ChatEvent = require("./chatEvent");
 const Ticket = require("./ticket");
 const Mitigation = require("./mitigation");
-const TeamspaceSetting = require("./teamspaceSetting");
 const utils = require("../utils");
 
 const fieldTypes = {
@@ -130,16 +129,9 @@ class Risk extends Ticket {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}
 
-		newRisk = await super.create(account, model, newRisk);
+		newRisk = await super.create(account, model, newRisk);		
 
-		try{
-			const teamspaceSettings = await TeamspaceSetting.getTeamspaceSettings(account,	{  _id: 0, createTreatmentSuggestions: 1});
-			if(teamspaceSettings.createTreatmentSuggestions) {
-				await Mitigation.updateMitigationsFromRisk(account, model, null, newRisk);
-			}
-		} catch {
-			// do nothing
-		}
+		await Mitigation.updateMitigationsFromRisk(account, model, null, newRisk);
 
 		ChatEvent.newRisks(sessionId, account, model, [newRisk]);
 		return newRisk;
@@ -175,14 +167,7 @@ class Risk extends Ticket {
 			updatedRisk.data = {...updatedRisk.data, ...levelOfRisk};
 		}
 
-		try{
-			const teamspaceSettings = await TeamspaceSetting.getTeamspaceSettings(user,	{  _id: 0, createTreatmentSuggestions: 1});
-			if(teamspaceSettings.createTreatmentSuggestions) {
-				await Mitigation.updateMitigationsFromRisk(user, model, updatedRisk.oldTicket, updatedRisk.updatedTicket);
-			}
-		} catch {
-			// do nothing
-		}
+		await Mitigation.updateMitigationsFromRisk(user, model, updatedRisk.oldTicket, updatedRisk.updatedTicket);
 
 		return updatedRisk;
 	}
