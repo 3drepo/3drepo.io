@@ -25,6 +25,7 @@ import { CONTAINER_TYPES, CONTAINER_UNITS, UploadItemFields } from '@/v5/store/c
 import * as countriesAndTimezones from 'countries-and-timezones';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SidebarSchema } from '@/v5/validation/containers';
+import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { TypeSelect, UnitSelect, Input, RevisionTitle, FormControl, AnimationsCheckbox, TimezoneSelect, Title } from './sidebarForm.styles';
 
 type ISidebarForm = {
@@ -61,8 +62,18 @@ export const SidebarForm = ({
 	isNewContainer,
 	isSpm,
 }: ISidebarForm): JSX.Element => {
+	let defaultValues;
+	const containers = ContainersHooksSelectors.selectContainers();
+	if (value.containerId) {
+		const { unit, type, code, desc } = containers.find((c) => c._id === value.containerId);
+		defaultValues = {
+			...value,
+			...{ containerUnit: unit, containerType: type, containerCode: code, containerDesc: desc },
+		};
+	} else defaultValues = value;
+
 	const { control, formState: { errors }, getValues, setValue, trigger } = useForm<UploadItemFields>({
-		defaultValues: value,
+		defaultValues,
 		mode: 'onChange',
 		resolver: yupResolver(SidebarSchema),
 	});

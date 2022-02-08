@@ -133,8 +133,8 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 											value={getValues(`uploads.${selectedIndex}`)}
 											key={fields[selectedIndex].uploadId}
 											isNewContainer={
-												!getValues(`uploads.${selectedIndex}.containerId`) &&
-												!!getValues(`uploads.${selectedIndex}.containerName`)
+												!getValues(`uploads.${selectedIndex}.containerId`)
+												&& !!getValues(`uploads.${selectedIndex}.containerName`)
 											}
 											isSpm={fields[selectedIndex].extension === 'spm'}
 											onChange={(field: string, val: string | boolean) => {
