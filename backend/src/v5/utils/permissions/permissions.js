@@ -22,7 +22,7 @@ const {
 	PROJECT_ADMIN,
 } = require('./permissions.constants');
 const { getContainerById, getFederationById, getModelById } = require('../../models/modelSettings');
-const { getProjectAdmins, modelExistsInProject } = require('../../models/projects');
+const { getProjectAdmins, modelsExistInProject } = require('../../models/projects');
 const { getTeamspaceAdmins, hasAccessToTeamspace } = require('../../models/teamspaces');
 
 const Permissions = {};
@@ -69,7 +69,7 @@ const modelPermCheck = (permCheck, mode) => async (teamspace, project, modelID, 
 
 	const model = await getModelFn(teamspace, modelID, { permissions: 1 });
 
-	const modelExists = await modelExistsInProject(teamspace, project, modelID);
+	const modelExists = await modelsExistInProject(teamspace, project, [modelID]);
 	if (!modelExists) {
 		return false;
 	}
@@ -98,7 +98,7 @@ Permissions.hasReadAccessToModel = modelPermCheck(
 Permissions.hasAdminAccessToFederation = async (teamspace, project, federation, username) => {
 	const [fed, federationExistsInProject, hasAdminPerms] = await Promise.all([
 		getFederationById(teamspace, federation, { _id: 1 }),
-		modelExistsInProject(teamspace, project, federation),
+		modelsExistInProject(teamspace, project, [federation]),
 		hasAdminPermissions(teamspace, project, username),
 	]);
 
@@ -117,7 +117,7 @@ Permissions.hasReadAccessToFederation = modelPermCheck(
 Permissions.hasAdminAccessToContainer = async (teamspace, project, container, username) => {
 	const [con, containerExistsInProject, hasAdminPerms] = await Promise.all([
 		getContainerById(teamspace, container, { _id: 1 }),
-		modelExistsInProject(teamspace, project, container),
+		modelsExistInProject(teamspace, project, [container]),
 		hasAdminPermissions(teamspace, project, username),
 	]);
 

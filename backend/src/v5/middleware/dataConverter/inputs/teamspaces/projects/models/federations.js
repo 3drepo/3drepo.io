@@ -15,18 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Issues = {};
-const db = require('../handler/db');
+const { validateNewRevisionData } = require('./commons/revisions');
 
-const collectionName = (model) => `${model}.issues`;
+const Federations = {};
 
-const excludeResolvedIssues = {
-	status: { $nin: [
-		'closed',
-		'void',
-	] },
-};
-
-Issues.getIssuesCount = (teamspace, model) => db.count(teamspace, collectionName(model), excludeResolvedIssues);
-
-module.exports = Issues;
+Federations.validateNewRevisionData = validateNewRevisionData(true);
+module.exports = Federations;

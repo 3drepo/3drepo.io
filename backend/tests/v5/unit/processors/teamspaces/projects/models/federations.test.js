@@ -40,11 +40,11 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 const newFederationId = 'newFederationId';
 ModelSettings.addModel.mockImplementation(() => newFederationId);
-ModelSettings.deleteModel.mockImplementation(async (ts, model) => {
+ModelSettings.deleteModel.mockImplementation((ts, model) => {
 	if (Number.isInteger(model)) {
-		return undefined;
+		return Promise.resolve(undefined);
 	}
-	throw templates.federationNotFound;
+	return Promise.reject(templates.federationNotFound);
 });
 
 const federationList = [

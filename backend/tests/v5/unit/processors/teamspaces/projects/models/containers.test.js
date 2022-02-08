@@ -39,11 +39,11 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 const newContainerId = 'newContainerId';
 ModelSettings.addModel.mockImplementation(() => newContainerId);
-ModelSettings.deleteModel.mockImplementation(async (ts, model) => {
+ModelSettings.deleteModel.mockImplementation((ts, model) => {
 	if (Number.isInteger(model)) {
-		return undefined;
+		return Promise.resolve(undefined);
 	}
-	throw templates.containerNotFound;
+	return Promise.reject(templates.containerNotFound);
 });
 
 const modelList = [
@@ -54,11 +54,11 @@ const modelList = [
 	{ _id: 4, name: 'model4' },
 ];
 
-ModelSettings.getModelById.mockImplementation(async (ts, model) => {
+ModelSettings.getModelById.mockImplementation((ts, model) => {
 	if (Number.isInteger(model)) {
-		return modelList[model - 1];
+		return Promise.resolve(modelList[model - 1]);
 	}
-	throw templates.containerNotFound;
+	return Promise.reject(templates.containerNotFound);
 });
 
 const containerSettings = {
