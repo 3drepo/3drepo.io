@@ -53,7 +53,7 @@ const getContainerList = (req, res) => {
 	}).catch((err) => respond(req, res, err));
 };
 
-const getContainerStats = async (req, res) => {
+const getContainerStats = (req, res) => {
 	const { teamspace, project, container } = req.params;
 	Containers.getContainerStats(teamspace, project, container).then((stats) => {
 		const statsSerialised = { ...stats };
