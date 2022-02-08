@@ -14,15 +14,3 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import styled from 'styled-components';
-
-export const Container = styled.div`
-    margin: 16px 0;
-    width: 100%;
-`;
-
-export const CollapseSideElementGroup = styled.div`
-    display: flex;
-    align-items: center;
-`;

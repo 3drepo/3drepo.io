@@ -177,6 +177,7 @@ export const FederationListItem = ({
 			<EditFederationModal
 				openState={openModal === MODALS.editFederation}
 				federation={federation}
+				onClickClose={closeModal}
 			/>
 		</DashboardListItem>
 	);

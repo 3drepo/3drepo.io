@@ -19,11 +19,26 @@ import styled from 'styled-components';
 import { FormDialogContent } from '@controls/modal/formModal/formDialog.styles';
 import { FormModal as FormModalBase } from '@controls/modal/formModal/formDialog.component';
 import { HeaderButtonsGroup } from '@/v5/ui/routes/dashboard/projects/containers/containers.styles';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+
+export const removeAllButtonTheme = createTheme({
+	palette: {
+		error: {
+			main: '#f44336',
+		},
+	},
+});
 
 export const FormModal = styled(FormModalBase)`
+
+	.MuiDialog-paper {
+		max-width: fit-content;
+	}
+
 	${FormDialogContent} {
 		margin: 0;
 		padding-bottom: 0;
+		max-width: 1289px;
 	}
 
 	${HeaderButtonsGroup} {
@@ -31,13 +46,4 @@ export const FormModal = styled(FormModalBase)`
 		justify-content: flex-end;
 		margin-right: 15px;
 	}
-`;
-
-export const Container = styled.div`
-	margin: 16px 0;
-`;
-
-export const CollapseSideElementGroup = styled.div`
-	display: flex;
-	align-items: center;
 `;
