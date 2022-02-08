@@ -201,18 +201,7 @@ class Mitigation {
 			return;
 		}
 
-		const mitigationDetails = {
-			mitigation_desc: updatedRisk.mitigation_desc,
-			mitigation_detail: updatedRisk.mitigation_detail,
-			mitigation_stage: updatedRisk.mitigation_stage,
-			mitigation_type: updatedRisk.mitigation_type,
-			category: updatedRisk.category,
-			location_desc: updatedRisk.location_desc,
-			element: updatedRisk.element,
-			risk_factor: updatedRisk.risk_factor,
-			scope: updatedRisk.scope,
-			associated_activity: updatedRisk.associated_activity
-		};
+		const mitigationDetails = _.pick(updatedRisk, Object.keys(fieldTypes))		
 
 		for (const key of Object.keys(mitigationDetails)) {
 			if(!mitigationDetails[key]){
@@ -224,7 +213,7 @@ class Mitigation {
 
 		// if risk becomes resolved
 		if (!oldStatusIsResolved && newStatusIsResolved) {
-			const mitigation = await db.findOne(account, colName, mitigationDetails);
+			const mitigation = await db.findOne(account, colName, mitigationDetails, {referencedRisks: 1});
 			if (!mitigation) {
 				try {
 					await this.insert(account, [{ ...mitigationDetails, referencedRisks: [formattedReference] }], false);
@@ -235,10 +224,8 @@ class Mitigation {
 				await this.addRiskRefToMitigation(account, mitigation, formattedReference);
 			}
 		} else {
-			// if risk was already resolved
-			const allMitigations = await db.find(account, colName);
-			const oldMitigation = allMitigations.find((m) => m.referencedRisks
-				&& m.referencedRisks.includes(formattedReference));
+			// if risk was already resolved		
+			const oldMitigation = await db.findOne(account, colName, { referencedRisks: formattedReference });
 
 			// if the mitigation was manually removed and now the risk is unresolved
 			if (!oldMitigation && !newStatusIsResolved) {
@@ -250,14 +237,12 @@ class Mitigation {
 				if (oldMitigation.referencedRisks.length === 1) {
 					await this.deleteOne(account, oldMitigation._id);
 				} else {
-					const newReferencedRisks = oldMitigation.referencedRisks.filter((r) => r !== formattedReference);
-					await this.update(account, oldMitigation._id, { $set: { referencedRisks: newReferencedRisks } });
+					await db.updateOne(account, colName, { _id: oldMitigation._id }, { $pull: { referencedRisks: formattedReference } });
 				}
 			}
 
 			if (newStatusIsResolved) {
-				const mitigations = await db.find(account, colName, mitigationDetails);
-				const newMitigation = mitigations[0];
+				const newMitigation = await db.findOne(account, colName, mitigationDetails);
 				if (!newMitigation) {
 					try {
 						await this.insert(account, [{ ...mitigationDetails, referencedRisks: [formattedReference] }], false);
