@@ -117,7 +117,7 @@ class TeamspaceSettings {
 	}
 
 	async update(account, data) {
-		const labelFields = ["riskCategories", "topicTypes", "createTreatmentSuggestions"];
+		const labelFields = ["riskCategories", "topicTypes", "createMitigationSuggestions"];
 
 		const oldSettings = await this.getTeamspaceSettings(account);
 

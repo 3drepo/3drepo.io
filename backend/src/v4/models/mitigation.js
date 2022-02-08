@@ -83,8 +83,8 @@ class Mitigation {
 	async isMitigationCreationFeatureOn (account) {
 		try{			
 			const TeamspaceSettings = require("./teamspaceSetting");
-			const settings = await TeamspaceSettings.getTeamspaceSettings(account,	{  _id: 0, createTreatmentSuggestions: 1});
-			return settings.createTreatmentSuggestions;
+			const settings = await TeamspaceSettings.getTeamspaceSettings(account,	{  _id: 0, createMitigationSuggestions: 1});
+			return settings.createMitigationSuggestions;
 		} catch {
 			// do nothing
 		}

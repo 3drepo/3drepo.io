@@ -62,7 +62,7 @@ interface IState {
 	topicTypes?: string[];
 	riskCategories?: string[];
 	fileName: string;
-	createTreatmentSuggestions: boolean;
+	createMitigationSuggestions: boolean;
 }
 
 interface IProps {
@@ -83,7 +83,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 		topicTypes: [],
 		riskCategories: [],
 		fileName: '',
-		createTreatmentSuggestions: false,
+		createMitigationSuggestions: false,
 	};
 
 	get teamspace() {
@@ -118,7 +118,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 			changes.riskCategories = riskCategories;
 		}
 
-		changes.createTreatmentSuggestions = properties.createTreatmentSuggestions;
+		changes.createMitigationSuggestions = properties.createMitigationSuggestions;
 
 		if (this.props.treatmentsUpdatedAt !== prevProps.treatmentsUpdatedAt && this.state.fileName !== '') {
 			this.setState({
@@ -133,19 +133,19 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 
 	private handleUpdateSettings = (values, { resetForm }) => {
 		const { teamspace } = this.props.match.params;
-		const { topicTypes, riskCategories, file, createTreatmentSuggestions } = values;
+		const { topicTypes, riskCategories, file, createMitigationSuggestions } = values;
 		const settings = {
 			topicTypes,
 			riskCategories,
 			file,
-			createTreatmentSuggestions
+			createMitigationSuggestions
 		};
 
 		this.props.updateTeamspaceSettings(teamspace, settings);
 		resetForm({
 			topicTypes,
 			riskCategories,
-			createTreatmentSuggestions
+			createMitigationSuggestions
 		});
 		this.setState({
 			fileName: '',
@@ -251,7 +251,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 		);
 	}
 
-	private renderCreateTreatmentSuggestionsOption = () => {
+	private renderCreateMitigationSuggestionsOption = () => {
 		return (
 			<SuggestionsContainer container direction="column" wrap="nowrap">
 				<CreateMitigationsGrid container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
@@ -260,7 +260,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 							Create Treatment Suggestions from Agreed Risks
 						</DataText>
 					</InfoColumnWrapper>
-					<Field name="createTreatmentSuggestions" render={ ({ field }) => (
+					<Field name="createMitigationSuggestions" render={ ({ field }) => (
 						<Switch checked={field.value} {...field} value="true" color="secondary" />
 					)} />
 				</CreateMitigationsGrid>
@@ -269,7 +269,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderForm = () => {
-		const { topicTypes, riskCategories, createTreatmentSuggestions  } = this.state;
+		const { topicTypes, riskCategories, createMitigationSuggestions  } = this.state;
 
 		return	(
 			<Container>
@@ -277,7 +277,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 					initialValues={{
 						topicTypes,
 						riskCategories,
-						createTreatmentSuggestions
+						createMitigationSuggestions
 					}}
 					onSubmit={this.handleUpdateSettings}
 				>
@@ -309,7 +309,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 						</StyledGrid>
 
 						{this.renderTreatmentSuggestionsSection()}
-						{this.renderCreateTreatmentSuggestionsOption()}
+						{this.renderCreateMitigationSuggestionsOption()}
 						<ButtonContainer container direction="column" alignItems="flex-end">
 							<Field render={({ form }) =>
 								<Button
