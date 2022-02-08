@@ -132,7 +132,10 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 										<SidebarForm
 											value={getValues(`uploads.${selectedIndex}`)}
 											key={fields[selectedIndex].uploadId}
-											isNewContainer={!fields[selectedIndex].containerId}
+											isNewContainer={
+												!getValues(`uploads.${selectedIndex}.containerId`) &&
+												!!getValues(`uploads.${selectedIndex}.containerName`)
+											}
 											isSpm={fields[selectedIndex].extension === 'spm'}
 											onChange={(field: string, val: string | boolean) => {
 												// @ts-ignore
