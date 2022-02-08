@@ -120,6 +120,10 @@ Models.newRevisionProcessed = async (teamspace, model, corId, retVal, user, cont
 		unset.status = 1;
 		set.timestamp = new Date();
 		if (containers) {
+			/* LEGACY DATA: Containers have data in the form of { database, project }
+			   containers used to be called models in v4, and models used to be called
+			   projects. This data came from 3drepobouncer, which still calls containers projects.
+			*/
 			set.subModels = containers.map(({ project }) => project);
 		}
 	} else {
