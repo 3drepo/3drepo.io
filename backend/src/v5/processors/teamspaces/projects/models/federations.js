@@ -23,10 +23,11 @@ const { getIssuesCount } = require('../../../../models/issues');
 const { getLatestRevision } = require('../../../../models/revisions');
 const { getProjectById } = require('../../../../models/projects');
 const { getRisksCount } = require('../../../../models/risks');
+const { queueFederationUpdate } = require('../../../../services/queue');
 
 const Federations = { ...Groups };
 
-Federations.addFederation = async (teamspace, project, federation) => addModel(teamspace, project,
+Federations.addFederation = (teamspace, project, federation) => addModel(teamspace, project,
 	{ ...federation, federate: true });
 
 Federations.deleteFederation = deleteModel;
@@ -47,6 +48,8 @@ Federations.deleteFavourites = async (username, teamspace, project, favouritesTo
 	const accessibleFederations = await Federations.getFederationList(teamspace, project, username);
 	await deleteFavourites(username, teamspace, accessibleFederations, favouritesToRemove);
 };
+
+Federations.newRevision = queueFederationUpdate;
 
 const getLastUpdatesFromModels = async (teamspace, models) => {
 	const lastUpdates = [];
@@ -90,7 +93,7 @@ Federations.getFederationStats = async (teamspace, federation) => {
 
 Federations.updateSettings = updateModelSettings;
 
-Federations.getSettings = async (teamspace, federation) => getFederationById(teamspace,
+Federations.getSettings = (teamspace, federation) => getFederationById(teamspace,
 	federation, { corID: 0, account: 0, permissions: 0, subModels: 0, federate: 0 });
 
 module.exports = Federations;

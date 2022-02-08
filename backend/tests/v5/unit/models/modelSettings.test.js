@@ -314,7 +314,7 @@ const testNewRevisionProcessed = () => {
 				expect(fn.mock.calls.length).toBe(1);
 				const action = fn.mock.calls[0][3];
 				if (success) {
-					expect(action.$set.status).toEqual('ok');
+					expect(action.$set.status).toBe(undefined);
 					expect(action.$set).toHaveProperty('timestamp');
 				} else {
 					expect(action.$set.status).toEqual('failed');
@@ -324,7 +324,7 @@ const testNewRevisionProcessed = () => {
 					expect(action.$set.errorReason.errorCode).toEqual(retVal);
 					expect(action.$set.errorReason).toHaveProperty('timestamp');
 				}
-				expect(action.$unset).toEqual({ corID: 1 });
+				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 
 				expect(publishFn.mock.calls.length).toBe(1);
 				expect(publishFn.mock.calls[0][0]).toEqual(events.MODEL_IMPORT_FINISHED);
@@ -340,6 +340,46 @@ const testNewRevisionProcessed = () => {
 				});
 			});
 	});
+
+	describe('Update with new revision (Federation)', () => {
+		const retVal = 0;
+		const teamspace = 'ts';
+		const model = 'model';
+		const user = 'user';
+		const corId = '123';
+		const containers = ['a', 'b', 'c'];
+		const { success, message, userErr } = getInfoFromCode(retVal);
+		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED} event`,
+			async () => {
+				const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 1 });
+				publishFn.mockClear();
+				await expect(Model.newRevisionProcessed(
+					teamspace, model, corId, retVal, user, containers.map((project) => ({ project })),
+				)).resolves.toBe(undefined);
+
+				expect(fn.mock.calls.length).toBe(1);
+				const action = fn.mock.calls[0][3];
+				expect(action.$set.status).toBe(undefined);
+				expect(action.$set).toHaveProperty('timestamp');
+				expect(action.$set.subModels).toEqual(containers);
+
+				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
+
+				expect(publishFn.mock.calls.length).toBe(1);
+				expect(publishFn.mock.calls[0][0]).toEqual(events.MODEL_IMPORT_FINISHED);
+				expect(publishFn.mock.calls[0][1]).toEqual({
+					teamspace,
+					model,
+					corId,
+					userErr,
+					message,
+					success,
+					errCode: retVal,
+					user,
+				});
+			});
+	});
+
 	describe('Update with new revision when the model is already deleted', () => {
 		test('should not trigger event', async () => {
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 0 });
@@ -356,9 +396,9 @@ const testNewRevisionProcessed = () => {
 
 			expect(fn.mock.calls.length).toBe(1);
 			const action = fn.mock.calls[0][3];
-			expect(action.$set.status).toEqual('ok');
+			expect(action.$unset.status).toEqual(1);
 			expect(action.$set).toHaveProperty('timestamp');
-			expect(action.$unset).toEqual({ corID: 1 });
+			expect(action.$unset).toEqual({ corID: 1, status: 1 });
 
 			expect(publishFn.mock.calls.length).toBe(0);
 		});

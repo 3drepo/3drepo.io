@@ -70,7 +70,7 @@ const deleteFavourites = (req, res) => {
 		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
 };
 
-const getFederationStats = async (req, res) => {
+const getFederationStats = (req, res) => {
 	const { teamspace, federation } = req.params;
 	Federations.getFederationStats(teamspace, federation).then((stats) => {
 		const statsSerialised = { ...stats };

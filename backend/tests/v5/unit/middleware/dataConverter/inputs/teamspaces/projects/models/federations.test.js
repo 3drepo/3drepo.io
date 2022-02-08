@@ -16,15 +16,24 @@
  */
 
 const { src } = require('../../../../../../../helper/path');
+const { generateUUIDString } = require('../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
+
+jest.mock('../../../../../../../../../src/v5/models/modelSettings');
+const ModelSettings = require(`${src}/models/modelSettings`);
+
+jest.mock('../../../../../../../../../src/v5/models/projects');
+const Projects = require(`${src}/models/projects`);
 
 const Federations = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/federations`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
+
+const modelNotInProject = generateUUIDString();
 
 const testValidateUpdateSettingsData = () => {
 	describe('Update federation settings', () => {
@@ -38,6 +47,47 @@ const testValidateUpdateSettingsData = () => {
 	});
 };
 
+Projects.modelsExistInProject.mockImplementation(
+	(teamspace, project, models) => {
+		if (project === 'throw') return Promise.reject(templates.projectNotFound);
+		return Promise.resolve(!models.includes(modelNotInProject));
+	},
+);
+
+ModelSettings.getContainers.mockImplementation(
+	(teamspace, models) => (teamspace === 'Error' ? Promise.resolve([]) : Promise.resolve(models)),
+);
+
+const testValidateNewRevisionData = () => {
+	const createBody = (containers) => ({
+		containers,
+	});
+	describe.each([
+		['Request with valid data', createBody([generateUUIDString(), generateUUIDString()])],
+		['Request with invalid model Ids (wrong type)', createBody([1, 2, 3]), true],
+		['Request with invalid model Ids (not uuid format', createBody(['model 1']), true],
+		['Request with empty container array', createBody([]), true],
+		['Request with container id that doesn\'t exist in the project', createBody([modelNotInProject]), true],
+		['Request with project that does not exist', createBody([generateUUIDString()]), true, 'ts', 'throw'],
+		['Request with container ids that is of federation', createBody([generateUUIDString()]), true, 'Error'],
+		['Request with empty body', {}, true],
+	])('Check new revision data', (desc, body, shouldFail, teamspace = 'a', project = 'b') => {
+		test(`${desc} should ${shouldFail ? 'fail' : ' succeed and next() should be called'}`, async () => {
+			const params = { teamspace, project, federation: 'c' };
+			const mockCB = jest.fn(() => {});
+			await Federations.validateNewRevisionData({ params, body }, {}, mockCB);
+			if (shouldFail) {
+				expect(mockCB.mock.calls.length).toBe(0);
+				expect(Responder.respond.mock.calls.length).toBe(1);
+				expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
+			} else {
+				expect(mockCB.mock.calls.length).toBe(1);
+			}
+		});
+	});
+};
+
 describe('middleware/dataConverter/inputs/teamspaces/projects/models/federations', () => {
 	testValidateUpdateSettingsData();
+	testValidateNewRevisionData();
 });

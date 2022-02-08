@@ -46,7 +46,7 @@ Sessions.session = (config) => {
 	});
 };
 
-Sessions.getSessions = async (query, projection, sort) => db.find('admin', 'sessions', query, projection, sort);
+Sessions.getSessions = (query, projection, sort) => db.find('admin', 'sessions', query, projection, sort);
 
 Sessions.removeOldSessions = async (username, currentSessionID) => {
 	const query = {
