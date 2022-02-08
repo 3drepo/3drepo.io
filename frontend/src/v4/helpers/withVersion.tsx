@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,24 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createGlobalStyle } from 'styled-components';
+import { Version, VersionContext } from '@/versionContext';
+import React, { useContext } from 'react';
 
-export const GlobalStyle = createGlobalStyle`
-	html, body {
-		height: 100%;
-		position: relative;
-		overflow-y: hidden;
-	}
-	
-	body {
-		margin: 0;
-		padding: 0;
-		${({ theme }) => theme.typography.body1};
-	}
-	
-	#app {
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-	}
-`;
+
+export const withVersion = (WrappedComponent) => (props) => {
+	const version = useContext(VersionContext);
+	 return (
+		<WrappedComponent {...props} isV5={version === Version.V5} />
+	);
+};
+

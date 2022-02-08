@@ -14,25 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import React from 'react';
 
-import { createGlobalStyle } from 'styled-components';
+export const enum Version{
+	V4,
+	V5,
+}
 
-export const GlobalStyle = createGlobalStyle`
-	html, body {
-		height: 100%;
-		position: relative;
-		overflow-y: hidden;
-	}
-	
-	body {
-		margin: 0;
-		padding: 0;
-		${({ theme }) => theme.typography.body1};
-	}
-	
-	#app {
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-	}
-`;
+export const VersionContext = React.createContext(Version.V4);
+VersionContext.displayName = 'VersionContext';
