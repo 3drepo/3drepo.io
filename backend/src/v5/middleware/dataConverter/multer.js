@@ -46,7 +46,7 @@ const singleFileMulterPromise = (req, fileName, fileFilter, maxSize,
 	});
 });
 
-const imageFilter = async (req, file, cb) => {
+const imageFilter = (req, file, cb) => {
 	const format = file.originalname.split('.').splice(-1)[0];
 
 	if (!uploadConfig.imageExtensions.includes(format)) {

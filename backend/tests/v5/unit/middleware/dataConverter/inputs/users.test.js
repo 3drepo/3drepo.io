@@ -112,9 +112,6 @@ const testValidateUpdateData = () => {
 			const req = { ...cloneDeep(data), session: { user: { username: existingUsername } } };
 			await Users.validateUpdateData(req, {}, mockCB);
 			if (shouldPass) {
-				if (Responder.respond.mock.calls.length) {
-					console.log(Responder.respond.mock.results[0].value);
-				}
 				expect(mockCB.mock.calls.length).toBe(1);
 			} else {
 				expect(mockCB.mock.calls.length).toBe(0);
