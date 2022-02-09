@@ -173,7 +173,7 @@ User.updatePassword = async (username, newPassword) => {
 
 User.updateProfile = async (username, updatedProfile) => {
 	const updateData = {};
-	const billingInfoFields = ['country', 'company'];
+	const billingInfoFields = ['countryCode', 'company'];
 
 	Object.keys(updatedProfile).forEach((key) => {
 		if (billingInfoFields.includes(key)) {

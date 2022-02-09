@@ -93,6 +93,7 @@ const testValidateUpdateData = () => {
 		[{ body: { email: existingEmail } }, false, 'with email that already exists', templates.invalidArguments],
 		[{ body: { email: nonExistingEmail } }, true, 'with email that is available'],
 		[{ body: { email: nonExistingEmail, extraProp: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
+		[{ body: { company: '' } }, false, 'with empty company', templates.invalidArguments],
 		[{ body: { company: 'Some company' } }, true, 'with company'],
 		[{ body: { country: 'invalid country' } }, false, 'with invalid country', templates.invalidArguments],
 		[{ body: { country: 'GB' } }, true, 'with valid country'],

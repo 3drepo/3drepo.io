@@ -17,6 +17,7 @@
 
 const { UUIDToString } = require('./uuids');
 const Yup = require('yup');
+const tz = require('countries-and-timezones');
 const zxcvbn = require('zxcvbn');
 
 const YupHelper = { validators: {}, types: { strings: {} } };
@@ -40,6 +41,9 @@ YupHelper.types.degrees = Yup.number().min(0).max(360);
 YupHelper.types.strings.username = YupHelper.validators.alphanumeric(Yup.string().min(2).max(65).strict(true));
 
 YupHelper.types.strings.title = Yup.string().min(1).max(120);
+
+YupHelper.types.strings.country = Yup.string().test('valid-country',
+	'The country provided is not valid', (value) => value === undefined || !!tz.getCountry(value));
 
 // This is used for shorter descriptions such as revision desc, model desc, teamspace desc etc.
 YupHelper.types.strings.shortDescription = Yup.string().min(1).max(660);

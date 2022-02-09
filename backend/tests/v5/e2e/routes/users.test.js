@@ -295,10 +295,12 @@ const testUpdateProfile = () => {
 			});
 
 			test('should update the profile if the user is logged in', async () => {
-				const data = { firstName: 'newName' };
+				const data = { firstName: 'newName', company: 'newCompany', country: 'GR' };
 				await testSession.put('/v5/user/').send(data).expect(200);
 				const updatedProfileRes = await testSession.get('/v5/user/');
 				expect(updatedProfileRes.body.firstName).toEqual('newName');
+				expect(updatedProfileRes.body.country).toEqual('GR');
+				expect(updatedProfileRes.body.company).toEqual('newCompany');
 			});
 
 			test('should update the profile and change password if the user is logged in', async () => {
