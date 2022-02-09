@@ -37,6 +37,7 @@ export interface ITeamspacesActions {
 	fetchFailure: () => any;
 	fetchUsers: (teamspace: string) => any;
 	fetchUsersSuccess: (teamspace: string, users: IUser[]) => any;
+	setCurrentTeamspace: (teamspace: string) => any;
 }
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
@@ -45,17 +46,22 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 	fetchFailure: [],
 	fetchUsers: ['teamspace'],
 	fetchUsersSuccess: ['teamspace', 'users'],
+	setCurrentTeamspace: ['currentTeamspace'],
 }, { prefix: 'TEAMSPACES2/' }) as { Types: Constants<ITeamspacesActions>; Creators: ITeamspacesActions };
 
-interface ITeamspacesState {
+export interface ITeamspacesState {
 	teamspaces: ITeamspace[];
-	users: Record<string, IUser[]>
+	users: Record<string, IUser[]>;
+	currentTeamspace: string;
 }
 
 export const INITIAL_STATE: ITeamspacesState = {
 	teamspaces: [],
+	currentTeamspace: null,
 	users: {},
 };
+
+export const setCurrentTeamspace = (state = INITIAL_STATE, { currentTeamspace }) => ({ ...state, currentTeamspace });
 
 export const fetchSuccess = (state = INITIAL_STATE, { teamspaces }) => ({ ...state, teamspaces });
 
@@ -69,5 +75,6 @@ export const fetchUsersSuccess = (state = INITIAL_STATE, { teamspace, users }) =
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[TeamspacesTypes.FETCH_SUCCESS]: fetchSuccess,
+	[TeamspacesTypes.SET_CURRENT_TEAMSPACE]: setCurrentTeamspace,
 	[TeamspacesTypes.FETCH_USERS_SUCCESS]: fetchUsersSuccess,
 });

@@ -39,7 +39,7 @@ export const selectHasFederations = createSelector(
 );
 
 export const selectIsListPending = createSelector(
-	selectFederationsDomain, (state) => state.isListPending,
+	selectFederationsDomain, selectCurrentProject, (state, currentProject) => !state.federations[currentProject],
 );
 
 export const selectAreStatsPending = createSelector(

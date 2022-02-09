@@ -16,15 +16,12 @@
  */
 
 import { createSelector } from 'reselect';
+import { selectCurrentTeamspace } from '../teamspaces/teamspaces.selectors';
 
 const selectProjectsDomain = (state) => state.projects;
 
 export const selectProjects = createSelector(
 	selectProjectsDomain, (state) => state.projects,
-);
-
-export const selectCurrentTeamspace = createSelector(
-	selectProjectsDomain, (state) => state.currentTeamspace,
 );
 
 export const selectCurrentProjects = createSelector(
