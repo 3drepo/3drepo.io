@@ -129,7 +129,7 @@ class Risk extends Ticket {
 			throw responseCodes.INVALID_ARGUMENTS;
 		}
 
-		newRisk = await super.create(account, model, newRisk);		
+		newRisk = await super.create(account, model, newRisk);
 
 		await Mitigation.updateMitigationsFromRisk(account, model, null, newRisk);
 

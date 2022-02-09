@@ -20,7 +20,7 @@
 const _ = require("lodash");
 const parse = require("csv-parse/lib/sync");
 const db = require("../handler/db");
-const {Duplex} = require('stream');
+const {Duplex} = require("stream");
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
 const Stream = require("stream");
@@ -67,7 +67,7 @@ const isMitigationStatusResolved = (mitigationStatus) => {
 };
 
 const formatRiskReference = (teamspace, modelId, riskId) => {
-	return `${teamspace}::${modelId}::${riskId};`
+	return `${teamspace}::${modelId}::${riskId};`;
 };
 
 class Mitigation {
@@ -84,7 +84,7 @@ class Mitigation {
 	}
 
 	async isMitigationCreationFeatureOn (account) {
-		try{			
+		try{
 			const TeamspaceSettings = require("./teamspaceSetting");
 			const settings = await TeamspaceSettings.getTeamspaceSettings(account,	{  _id: 0, createMitigationSuggestions: 1});
 			return settings.createMitigationSuggestions;
@@ -147,7 +147,7 @@ class Mitigation {
 	}
 
 	bufferToStream(myBuuffer) {
-		let tmp = new Duplex();
+		const tmp = new Duplex();
 		tmp.push(myBuuffer);
 		tmp.push(null);
 		return tmp;
@@ -160,11 +160,11 @@ class Mitigation {
 			throw responseCodes.NO_MITIGATIONS_FOUND;
 		}
 
-		var mitigationsBuffer = Buffer.from(JSON.stringify(mitigations));
+		const mitigationsBuffer = Buffer.from(JSON.stringify(mitigations));
 
 		const fields = Object.keys(fieldTypes);
 		const opts = { fields };
-		const transformOpts = { highWaterMark: 16384, encoding: 'utf-8' };
+		const transformOpts = { highWaterMark: 16384, encoding: "utf-8" };
 
 		const input = this.bufferToStream(mitigationsBuffer);
 		const output = Stream.PassThrough();
@@ -212,7 +212,7 @@ class Mitigation {
 		await db.updateOne(account, colName, { _id: id }, updateData);
 	}
 
-	async createOrAddRefToMitigation (account, mitigationDetails, ref){
+	async createOrAddRefToMitigation (account, mitigationDetails, ref) {
 		const mitigation = await db.findOne(account, colName, mitigationDetails, {referencedRisks: 1});
 		if (!mitigation) {
 			try {
@@ -228,7 +228,7 @@ class Mitigation {
 
 	async updateMitigationsFromRisk(account, model, oldRisk, updatedRisk) {
 		const isFeatureOn = await this.isMitigationCreationFeatureOn(account);
-		if(!isFeatureOn){
+		if(!isFeatureOn) {
 			return;
 		}
 
@@ -241,10 +241,10 @@ class Mitigation {
 			return;
 		}
 
-		const mitigationDetails = _.pick(updatedRisk, Object.keys(fieldTypes))		
+		const mitigationDetails = _.pick(updatedRisk, Object.keys(fieldTypes));
 
 		for (const key of Object.keys(mitigationDetails)) {
-			if(!mitigationDetails[key]){
+			if(!mitigationDetails[key]) {
 				delete mitigationDetails[key];
 			}
 		}
@@ -255,7 +255,7 @@ class Mitigation {
 		if (!oldStatusIsResolved && newStatusIsResolved) {
 			await this.createOrAddRefToMitigation(account, mitigationDetails, formattedReference);
 		} else {
-			// if risk was already resolved		
+			// if risk was already resolved
 			const oldMitigation = await db.findOne(account, colName, { referencedRisks: formattedReference });
 
 			// if the mitigation was manually removed and now the risk is unresolved
@@ -273,7 +273,7 @@ class Mitigation {
 			}
 
 			if (newStatusIsResolved) {
-				await this.createOrAddRefToMitigation(account, mitigationDetails, formattedReference);				
+				await this.createOrAddRefToMitigation(account, mitigationDetails, formattedReference);
 			}
 		}
 
