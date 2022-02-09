@@ -20,10 +20,12 @@
 const _ = require("lodash");
 const parse = require("csv-parse/lib/sync");
 const db = require("../handler/db");
+const {Duplex} = require('stream');
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
-const { Parser } = require("json2csv");
+const Stream = require("stream");
 const { systemLogger } = require("../logger");
+const { Transform } = require("json2csv");
 
 // NB: Order of fieldTypes important for importCSV
 const csvImportFieldTypes = {
@@ -144,17 +146,32 @@ class Mitigation {
 		return this.insert(account, records);
 	}
 
-	async exportCSV(account) {
-		const csvFields = Object.keys(fieldTypes);
-		const parser = new Parser({ fields: csvFields });
+	bufferToStream(myBuuffer) {
+		let tmp = new Duplex();
+		tmp.push(myBuuffer);
+		tmp.push(null);
+		return tmp;
+	}
 
+	async exportCSV(account) {
 		const mitigations = await db.find(account, colName);
 
 		if(!mitigations.length) {
 			throw responseCodes.NO_MITIGATIONS_FOUND;
 		}
 
-		return parser.parse(mitigations);
+		var mitigationsBuffer = Buffer.from(JSON.stringify(mitigations));
+
+		const fields = Object.keys(fieldTypes);
+		const opts = { fields };
+		const transformOpts = { highWaterMark: 16384, encoding: 'utf-8' };
+
+		const input = this.bufferToStream(mitigationsBuffer);
+		const output = Stream.PassThrough();
+		const json2csv = new Transform(opts, transformOpts);
+
+		input.pipe(json2csv).pipe(output);
+		return output;
 	}
 
 	async insert(account, mitigations, clearAll = true) {
@@ -203,9 +220,9 @@ class Mitigation {
 			} catch (error) {
 				systemLogger.logError(error);
 			}
-		} else if (mitigation.referencedRisks && !referencedRisks.includes(ref)) {
-			mitigation.referencedRisks.push(riskReference);
-			await this.update(account, _id, { $set: { referencedRisks: mitigation.referencedRisks } });
+		} else if (mitigation.referencedRisks && !mitigation.referencedRisks.includes(ref)) {
+			mitigation.referencedRisks.push(ref);
+			await this.update(account, mitigation._id, { $set: { referencedRisks: mitigation.referencedRisks } });
 		}
 	}
 
