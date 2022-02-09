@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { toCamelCase, toConstantCase } = require('./helper/strings');
+const { logfile } = require('./config');
 const { logger } = require('./logger');
 
 const ResponseCodes = {};
@@ -131,6 +132,11 @@ ResponseCodes.createResponseCode = (errCode, message) => {
 	const codeExists = ResponseCodes.codeExists(errCode?.code);
 	if (!codeExists) {
 		const isError = errCode instanceof Error;
+		if (isError && !logfile.silent) {
+			// eslint-disable-next-line
+			console.error(errCode)
+		}
+
 		logger.logError('Unrecognised error code', isError ? JSON.stringify(errCode, ['message', 'arguments', 'type', 'name', 'stack']) : errCode);
 	}
 	const res = codeExists ? errCode : ResponseCodes.templates.unknown;

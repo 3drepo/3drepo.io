@@ -15,19 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src, modelFolder, imagesFolder } = require('../../../../../../../../helper/path');
+const { src } = require('../../../../../../../../helper/path');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
-const MockExpressRequest = require('mock-express-request');
-const FormData = require('form-data');
-const fs = require('fs');
-const path = require('path');
 
-jest.mock('../../../../../../../../../../src/v5/utils/quota');
-const Quota = require(`${src}/utils/quota`);
-jest.mock('../../../../../../../../../../src/v5/models/revisions');
-const RevisionsModel = require(`${src}/models/revisions`);
 const Revisions = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -83,69 +75,7 @@ const testValidateUpdateRevisionData = () => {
 		});
 	});
 };
-const createRequestWithFile = (teamspace, { tag, desc, importAnim, timezone },
-	unsupportedFile = false, noFile = false, emptyFile = false) => {
-	const form = new FormData();
-	if (!noFile) {
-		let filePath = unsupportedFile ? 'valid.png' : 'dummy.obj';
-		filePath = emptyFile ? 'empty.ifc' : filePath;
-		const fileFolder = unsupportedFile ? imagesFolder : modelFolder;
-		form.append('file', fs.createReadStream(path.join(fileFolder, filePath)));
-	}
-	if (tag) form.append('tag', tag);
-	if (desc) form.append('desc', desc);
-	if (importAnim) form.append('importAnim', importAnim);
-	if (timezone) form.append('timezone', timezone);
-
-	const req = new MockExpressRequest({
-		method: 'POST',
-		host: 'localhost',
-		url: `/${teamspace}/upload`,
-		headers: form.getHeaders(),
-	});
-
-	form.pipe(req);
-	req.params = { teamspace };
-	return req;
-};
-
-Quota.sufficientQuota.mockImplementation((ts) => (ts === 'noQuota' ? Promise.reject(templates.quotaLimitExceeded) : Promise.resolve()));
-RevisionsModel.isTagUnique.mockImplementation(() => true);
-
-const testValidateNewRevisionData = () => {
-	const standardBody = { tag: '123', description: 'this is a model', importAnimations: false, timezone: 'Europe/Berlin' };
-	describe.each([
-		['Request with valid data', 'ts', standardBody],
-		['Request with unsupported model file', 'ts', standardBody, true, false, false, templates.unsupportedFileFormat],
-		['Request with insufficient quota', 'noQuota', standardBody, false, false, false, templates.quotaLimitExceeded],
-		['Request with no body should fail', 'ts', {}, false, false, false, templates.invalidArguments],
-		['Request with just tag should pass', 'ts', { tag: 'dkf_j-d' }, false, false, false],
-		['Request with wrong tag type should fail', 'ts', { tag: false }, false, false, false, templates.invalidArguments],
-		['Request with tag that is not alphanumeric should fail', 'ts', { tag: '1%2%3' }, false, false, false, templates.invalidArguments],
-		['Request with no file should fail', 'ts', { tag: 'drflgdf' }, false, true, false, templates.invalidArguments],
-		['Request with an empty file should fail', 'ts', { tag: 'drflgdf' }, false, false, true, templates.invalidArguments],
-		['Request with duplicate tag should fail', 'ts', { tag: 'duplicate' }, false, false, false, templates.invalidArguments],
-		['Request with invalid timezone should fail', 'ts', { tag: 'drflgdf', timezone: 'abc' }, false, false, false, templates.invalidArguments],
-		['Request with invalid type timezone should fail', 'ts', { tag: 'drflgdf', timezone: 123 }, false, false, false, templates.invalidArguments],
-		['Request with null timezone should pass', 'ts', { tag: 'drflgdf', timezone: null }],
-	])('Check new revision data', (desc, ts, bodyContent, badFile, noFile, emptyFile, error) => {
-		test(`${desc} should ${error ? `fail with ${error.code}` : ' succeed and next() should be called'}`, async () => {
-			RevisionsModel.isTagUnique.mockImplementationOnce((teamspace, model, tag) => tag !== 'duplicate');
-			const req = createRequestWithFile(ts, bodyContent, badFile, noFile, emptyFile);
-			const mockCB = jest.fn(() => {});
-			await Revisions.validateNewRevisionData(req, {}, mockCB);
-			if (error) {
-				expect(mockCB.mock.calls.length).toBe(0);
-				expect(Responder.respond.mock.calls.length).toBe(1);
-				expect(Responder.respond.mock.results[0].value.code).toEqual(error.code);
-			} else {
-				expect(mockCB.mock.calls.length).toBe(1);
-			}
-		});
-	});
-};
 
 describe('middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions', () => {
 	testValidateUpdateRevisionData();
-	testValidateNewRevisionData();
 });

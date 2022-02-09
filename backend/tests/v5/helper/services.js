@@ -171,13 +171,13 @@ ServiceHelper.generateRevisionEntry = (isVoid = false) => ({
 	void: !!isVoid,
 });
 
-ServiceHelper.generateRandomModelProperties = () => ({
+ServiceHelper.generateRandomModelProperties = (isFed = false) => ({
 	properties: {
 		code: ServiceHelper.generateRandomString(),
 		unit: 'm',
 	},
 	desc: ServiceHelper.generateRandomString(),
-	type: ServiceHelper.generateRandomString(),
+	...(isFed ? { federate: true } : { type: ServiceHelper.generateRandomString() }),
 	status: 'ok',
 	surveyPoints: [
 		{

@@ -34,3 +34,8 @@ export const selectCurrentProjects = createSelector(
 export const selectCurrentProject = createSelector(
 	selectProjectsDomain, (state) => state.currentProject,
 );
+
+export const selectCurrentProjectDetails = createSelector(
+	selectCurrentProject, selectCurrentProjects,
+	(project, projects) => projects.find(({ _id }) => _id === project) || {},
+);

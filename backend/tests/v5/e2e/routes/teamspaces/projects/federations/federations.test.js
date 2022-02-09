@@ -75,8 +75,7 @@ const modelSettings = [
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
 		isFavourite: true,
-		properties: { ...ServiceHelper.generateRandomModelProperties(),
-			federate: true,
+		properties: { ...ServiceHelper.generateRandomModelProperties(true),
 			subModels: [{ model: modelWithRevId }],
 		},
 		permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
@@ -84,15 +83,14 @@ const modelSettings = [
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
-		properties: { ...ServiceHelper.generateRandomModelProperties(),
-			federate: true,
+		properties: { ...ServiceHelper.generateRandomModelProperties(true),
 			subModels: [{ model: modelWithoutRevId }],
 		},
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
-		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true },
+		properties: ServiceHelper.generateRandomModelProperties(true),
 	},
 	{
 		_id: modelWithRevId,
@@ -107,8 +105,7 @@ const modelSettings = [
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
-		properties: { ...ServiceHelper.generateRandomModelProperties(),
-			federate: true,
+		properties: { ...ServiceHelper.generateRandomModelProperties(true),
 			timestamp: new Date(),
 			errorReason: {
 				message: 'error reason',
@@ -120,8 +117,7 @@ const modelSettings = [
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
-		properties: { ...ServiceHelper.generateRandomModelProperties(),
-			federate: true,
+		properties: { ...ServiceHelper.generateRandomModelProperties(true),
 			errorReason: {
 				message: 'error reason',
 				errorCode: 1,
@@ -132,7 +128,7 @@ const modelSettings = [
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
-		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true },
+		properties: ServiceHelper.generateRandomModelProperties(true),
 	},
 ];
 
@@ -286,6 +282,7 @@ const testGetFederationList = () => {
 
 const formatToStats = (fed, issueCount, riskCount, latestRev) => {
 	const formattedStats = {
+		...(fed.properties.desc ? { desc: fed.properties.desc } : {}),
 		code: fed.properties.properties.code,
 		status: fed.properties.status,
 		subModels: fed.properties.subModels
@@ -363,7 +360,7 @@ const testAddFederation = () => {
 		});
 
 		test('should return new federation ID if the user has permissions', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status).send({ name: ServiceHelper.generateRandomString(), unit: 'mm', type: 'a' });
+			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status).send({ name: ServiceHelper.generateRandomString(), unit: 'mm' });
 			expect(isUUIDString(res.body._id)).toBe(true);
 
 			const getRes = await agent.get(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
@@ -372,12 +369,13 @@ const testAddFederation = () => {
 		});
 
 		test('should fail if name already exists', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidArguments.status).send({ name: modelSettings[0].name, unit: 'mm', type: 'a' });
+			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidArguments.status).send({ name: modelSettings[0].name, unit: 'mm' });
+
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should fail if user has insufficient permissions', async () => {
-			const res = await agent.post(`${route}?key=${users.viewer.apiKey}`).expect(templates.notAuthorized.status).send({ name: ServiceHelper.generateRandomString(), unit: 'mm', type: 'a' });
+			const res = await agent.post(`${route}?key=${users.viewer.apiKey}`).expect(templates.notAuthorized.status).send({ name: ServiceHelper.generateRandomString(), unit: 'mm' });
 			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
 
@@ -604,7 +602,6 @@ const testUpdateFederationSettings = () => {
 					},
 				],
 				angleFromNorth: 180,
-				type: 'someType',
 				unit: 'mm',
 				code: 'CODE1',
 				defaultView: views[1]._id,
@@ -625,7 +622,6 @@ const testUpdateFederationSettings = () => {
 					},
 				],
 				angleFromNorth: 180,
-				type: 'someType',
 				unit: 'mm',
 				code: 'CODE1',
 				defaultView: null,
@@ -646,7 +642,6 @@ const testUpdateFederationSettings = () => {
 					},
 				],
 				angleFromNorth: 180,
-				type: 'someType',
 				unit: 'mm',
 				code: 'CODE1',
 				defaultView: views[1]._id,
@@ -671,7 +666,6 @@ const formatToSettings = (settings) => ({
 	_id: settings._id,
 	name: settings.name,
 	desc: settings.properties.desc,
-	type: settings.properties.type,
 	code: settings.properties.properties.code,
 	unit: settings.properties.properties.unit,
 	defaultView: settings.properties.defaultView,

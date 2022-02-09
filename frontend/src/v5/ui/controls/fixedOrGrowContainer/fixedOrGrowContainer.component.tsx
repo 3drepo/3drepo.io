@@ -28,6 +28,7 @@ export interface IFixedOrGrowContainer extends StyledComponentProps {
 	minWidth?: number;
 	children?: JSX.Element | ReactNode | ReactNode[] ;
 	className?: string;
+	style?: React.CSSProperties;
 }
 
 export const FixedOrGrowContainer = ({

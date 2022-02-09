@@ -40,11 +40,11 @@ export const Link = styled(LinkComponent).attrs({
 		color: ${({ theme }) => theme.palette.base.main};
 		font-family: ${({ theme }) => theme.typography.fontFamily};
 		${({ theme }) => theme.typography.kickerTitle};
-		
+
 		&:first-child {
 			margin-left: 0;
 		}
-		
+
 		&:hover {
 			text-decoration: none;
 			color: ${({ theme }) => theme.palette.primary.main};
