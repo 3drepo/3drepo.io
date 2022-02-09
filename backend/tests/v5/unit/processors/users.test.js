@@ -67,7 +67,7 @@ const formatUser = (userProfile) => ({
 	email: userProfile.customData.email,
 	hasAvatar: !!userProfile.customData.avatar,
 	apiKey: userProfile.customData.apiKey,
-	country: userProfile.customData.billing.billingInfo.countryCode,
+	countryCode: userProfile.customData.billing.billingInfo.countryCode,
 	company: userProfile.customData.billing.billingInfo.company,
 });
 

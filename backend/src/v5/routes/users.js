@@ -203,6 +203,14 @@ const establishRoutes = () => {
 	 *                   type: string
 	 *                   description: The email of the user
 	 *                   example: jason@vorhees.com
+	 *                 company:
+	 *                   type: string
+	 *                   description: Name of the company
+	 *                   example: 3D Repo
+	 *                 countryCode:
+	 *                   type: string
+	 *                   description: Country Code
+	 *                   example: GB
 	 *                 hasAvatar:
 	 *                   type: boolean
 	 *                   description: Whether or not the user has an avatar
@@ -241,6 +249,14 @@ const establishRoutes = () => {
 	*                 description: The email of the user
 	*                 example: jason@vorhees.com
 	*                 format: email
+	*               company:
+	*                 type: string
+	*                 description: Name of the company
+	*                 example: 3D Repo
+	*               countryCode:
+	*                 type: string
+	*                 description: Country Code
+	*                 example: GB
 	*               oldPassword:
 	*                 type: string
 	*                 description: The old password of the user

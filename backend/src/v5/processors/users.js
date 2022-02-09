@@ -47,7 +47,7 @@ Users.getProfileByUsername = async (username) => {
 		hasAvatar: !!customData.avatar,
 		apiKey: customData.apiKey,
 		company: customData.billing?.billingInfo?.company,
-		country: customData.billing?.billingInfo?.countryCode,
+		countryCode: customData.billing?.billingInfo?.countryCode,
 	};
 };
 
