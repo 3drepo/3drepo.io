@@ -95,8 +95,8 @@ const testValidateUpdateData = () => {
 		[{ body: { email: nonExistingEmail, extraProp: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
 		[{ body: { company: '' } }, false, 'with empty company', templates.invalidArguments],
 		[{ body: { company: 'Some company' } }, true, 'with company'],
-		[{ body: { country: 'invalid country' } }, false, 'with invalid country', templates.invalidArguments],
-		[{ body: { country: 'GB' } }, true, 'with valid country'],
+		[{ body: { countryCode: 'invalid country' } }, false, 'with invalid country', templates.invalidArguments],
+		[{ body: { countryCode: 'GB' } }, true, 'with valid country'],
 		[{ body: { oldPassword: existingPassword } }, false, 'with oldPassword but not newPassword', templates.invalidArguments],
 		[{ body: { newPassword: 'Abcdef123456!' } }, false, 'with newPassword but not oldPassword', templates.invalidArguments],
 		[{ body: { oldPassword: existingPassword, newPassword: 'abc' } }, false, 'with short newPassword', templates.invalidArguments],
@@ -112,6 +112,9 @@ const testValidateUpdateData = () => {
 			const req = { ...cloneDeep(data), session: { user: { username: existingUsername } } };
 			await Users.validateUpdateData(req, {}, mockCB);
 			if (shouldPass) {
+				if (Responder.respond.mock.calls.length) {
+					console.log(Responder.respond.mock.results[0].value);
+				}
 				expect(mockCB.mock.calls.length).toBe(1);
 			} else {
 				expect(mockCB.mock.calls.length).toBe(0);

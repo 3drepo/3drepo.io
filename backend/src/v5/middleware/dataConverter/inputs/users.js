@@ -66,7 +66,7 @@ Users.validateUpdateData = async (req, res, next) => {
 				return true;
 			}),
 		company: types.strings.title,
-		country: types.strings.country,
+		countryCode: types.strings.countryCode.optional(),
 		oldPassword: Yup.string().optional().when('newPassword', {
 			is: (newPass) => newPass?.length > 0,
 			then: Yup.string().required(),
@@ -99,11 +99,6 @@ Users.validateUpdateData = async (req, res, next) => {
 			await authenticate(req.session.user.username, req.body.oldPassword);
 		}
 
-		if (req.body.country) {
-			req.body.countryCode = req.body.country;
-			delete req.body.country;
-		}
-
 		next();
 	} catch (err) {
 		if (err.code === templates.incorrectUsernameOrPassword.code) {
@@ -119,7 +114,7 @@ const validateAvatarData = async (req, res, next) => {
 	try {
 		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
 
-		next();
+		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}

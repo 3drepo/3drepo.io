@@ -370,14 +370,14 @@ const testUpdateProfile = () => {
 
 		test('should update a user profile with billing data', async () => {
 			const fn1 = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
-			const updatedProfile = { firstName: 'John', company: '3D Repo', country: 'GB' };
+			const updatedProfile = { firstName: 'John', company: '3D Repo', countryCode: 'GB' };
 			await expect(User.updateProfile('user 1', updatedProfile)).resolves.toBe(undefined);
 			expect(fn1.mock.calls.length).toBe(1);
 			expect(fn1.mock.calls[0][3]).toEqual({
 				$set: {
 					'customData.firstName': 'John',
 					'customData.billing.billingInfo.company': '3D Repo',
-					'customData.billing.billingInfo.country': 'GB',
+					'customData.billing.billingInfo.countryCode': 'GB',
 				},
 			});
 		});

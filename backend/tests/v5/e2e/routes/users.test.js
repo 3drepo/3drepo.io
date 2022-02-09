@@ -184,7 +184,7 @@ const formatUserProfile = (user, hasAvatar = true) => ({
 	email: userEmail,
 	apiKey: user.apiKey,
 	hasAvatar,
-	country: user.basicData.billing.billingInfo.countryCode,
+	countryCode: user.basicData.billing.billingInfo.countryCode,
 	company: user.basicData.billing.billingInfo.company,
 });
 
@@ -295,11 +295,11 @@ const testUpdateProfile = () => {
 			});
 
 			test('should update the profile if the user is logged in', async () => {
-				const data = { firstName: 'newName', company: 'newCompany', country: 'GR' };
+				const data = { firstName: 'newName', company: 'newCompany', countryCode: 'GR' };
 				await testSession.put('/v5/user/').send(data).expect(200);
 				const updatedProfileRes = await testSession.get('/v5/user/');
 				expect(updatedProfileRes.body.firstName).toEqual('newName');
-				expect(updatedProfileRes.body.country).toEqual('GR');
+				expect(updatedProfileRes.body.countryCode).toEqual('GR');
 				expect(updatedProfileRes.body.company).toEqual('newCompany');
 			});
 
