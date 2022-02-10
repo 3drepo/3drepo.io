@@ -133,3 +133,27 @@ export const LabelButton = styled(Button)`
 		return '';
 	}}
 `;
+
+export const ErrorButton = styled(Button).attrs({
+	variant: 'outlined',
+})`
+	height: 35px;
+	color: ${({ theme }) => theme.palette.error.main};
+	border-color: ${({ theme }) => theme.palette.error.main};
+
+	&.Mui-focusVisible {
+		background-color: ${({ theme }) => theme.palette.error.main};
+	}
+
+	&:hover {
+		color: ${({ theme }) => theme.palette.error.contrastText};
+		background-color: ${({ theme }) => theme.palette.error.main};
+		text-decoration-line: none;
+	}
+
+	&:active {
+		color: ${({ theme }) => theme.palette.error.contrastText};
+		border-color: ${({ theme }) => theme.palette.error.dark};
+		background-color: ${({ theme }) => theme.palette.error.dark};
+	}
+`;

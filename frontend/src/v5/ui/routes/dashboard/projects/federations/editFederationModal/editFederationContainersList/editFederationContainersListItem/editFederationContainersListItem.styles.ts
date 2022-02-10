@@ -28,16 +28,4 @@ export const DashboardListItemRow = styled(DashboardListItemRowBase)`
         min-width: 32px;
         margin-right: 20px;
     }
-
-
-	// TODO Remove
-	& > div:nth-child(even) {
-		height: 100%;
-		background: darkred;
-	}
-
-	& > div:nth-child(4) {
-		height: 100%;
-		background: darkgreen;
-	}
 `;
