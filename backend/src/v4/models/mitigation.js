@@ -67,7 +67,7 @@ const isMitigationStatusResolved = (mitigationStatus) => {
 };
 
 const formatRiskReference = (teamspace, modelId, riskId) => {
-	return `${teamspace}::${modelId}::${riskId};`;
+	return `${teamspace}::${modelId}::${riskId}`;
 };
 
 class Mitigation {
