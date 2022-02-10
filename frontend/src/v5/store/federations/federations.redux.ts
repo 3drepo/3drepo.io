@@ -51,7 +51,7 @@ export const { Types: FederationsTypes, Creators: FederationsActions } = createA
 }, { prefix: 'FEDERATIONS/' }) as { Types: Constants<IFederationsActionCreators>; Creators: IFederationsActionCreators };
 
 export const INITIAL_STATE: IFederationsState = {
-	federations: {},
+	federationsByProject: {},
 	isListPending: true,
 };
 
@@ -61,9 +61,9 @@ export const setFavourite = (state = INITIAL_STATE, {
 	isFavourite,
 }: SetFavouriteSuccessAction): IFederationsState => ({
 	...state,
-	federations: {
-		...state.federations,
-		[projectId]: state.federations[projectId].map((federation) => ({
+	federationsByProject: {
+		...state.federationsByProject,
+		[projectId]: state.federationsByProject[projectId].map((federation) => ({
 			...federation,
 			isFavourite: federation._id === federationId ? isFavourite : federation.isFavourite,
 		})),
@@ -75,8 +75,8 @@ export const fetchFederationsSuccess = (state = INITIAL_STATE, {
 	federations,
 }: FetchFederationsSuccessAction): IFederationsState => ({
 	...state,
-	federations: {
-		...state.federations,
+	federationsByProject: {
+		...state.federationsByProject,
 		[projectId]: federations,
 	},
 });
@@ -87,9 +87,9 @@ export const fetchStatsSuccess = (state = INITIAL_STATE, {
 	federationStats,
 }: FetchFederationStatsSuccessAction): IFederationsState => ({
 	...state,
-	federations: {
-		...state.federations,
-		[projectId]: state.federations[projectId].map((federation) => {
+	federationsByProject: {
+		...state.federationsByProject,
+		[projectId]: state.federationsByProject[projectId].map((federation) => {
 			if (federationId !== federation._id) return federation;
 			return prepareSingleFederationData(federation, federationStats);
 		}),
@@ -160,9 +160,9 @@ export const deleteFederationSuccess = (state = INITIAL_STATE, {
 	federationId,
 }: DeleteFederationSuccessAction): IFederationsState => ({
 	...state,
-	federations: {
-		...state.federations,
-		[projectId]: state.federations[projectId].filter((federation) => federationId !== federation._id),
+	federationsByProject: {
+		...state.federationsByProject,
+		[projectId]: state.federationsByProject[projectId].filter((federation) => federationId !== federation._id),
 	},
 });
 

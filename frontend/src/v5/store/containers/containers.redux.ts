@@ -50,7 +50,7 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
 
 export const INITIAL_STATE: IContainersState = {
-	containers: {},
+	containersByProject: {},
 	isListPending: true,
 };
 
@@ -60,9 +60,9 @@ export const setFavourite = (state = INITIAL_STATE, {
 	isFavourite,
 }: SetFavouriteSuccessAction):IContainersState => ({
 	...state,
-	containers: {
-		...state.containers,
-		[projectId]: state.containers[projectId].map((container) => ({
+	containersByProject: {
+		...state.containersByProject,
+		[projectId]: state.containersByProject[projectId].map((container) => ({
 			...container,
 			isFavourite: container._id === containerId ? isFavourite : container.isFavourite,
 		})),
@@ -74,8 +74,8 @@ export const fetchContainersSuccess = (state = INITIAL_STATE, {
 	containers,
 }: FetchContainersSuccessAction): IContainersState => ({
 	...state,
-	containers: {
-		...state.containers,
+	containersByProject: {
+		...state.containersByProject,
 		[projectId]: containers,
 	},
 });
@@ -86,9 +86,9 @@ export const fetchStatsSuccess = (state = INITIAL_STATE, {
 	containerStats,
 }: FetchContainerStatsSuccessAction): IContainersState => ({
 	...state,
-	containers: {
-		...state.containers,
-		[projectId]: state.containers[projectId].map((container) => {
+	containersByProject: {
+		...state.containersByProject,
+		[projectId]: state.containersByProject[projectId].map((container) => {
 			if (containerId !== container._id) return container;
 			return prepareSingleContainerData(container, containerStats);
 		}),
@@ -105,10 +105,10 @@ export const createContainerSuccess = (state = INITIAL_STATE, {
 	container,
 }: CreateContainerSuccessAction): IContainersState => ({
 	...state,
-	containers: {
-		...state.containers,
+	containersByProject: {
+		...state.containersByProject,
 		[projectId]: [
-			...state.containers[projectId],
+			...state.containersByProject[projectId],
 			{
 				...container,
 				revisionsCount: 0,
@@ -122,9 +122,9 @@ export const deleteContainerSuccess = (state = INITIAL_STATE, {
 	containerId,
 }: DeleteContainerSuccessAction): IContainersState => ({
 	...state,
-	containers: {
-		...state.containers,
-		[projectId]: state.containers[projectId].filter((container) => containerId !== container._id),
+	containersByProject: {
+		...state.containersByProject,
+		[projectId]: state.containersByProject[projectId].filter((container) => containerId !== container._id),
 	},
 });
 

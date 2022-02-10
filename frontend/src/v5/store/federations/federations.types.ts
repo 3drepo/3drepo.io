@@ -39,7 +39,7 @@ export interface IFederation {
 }
 
 export interface IFederationsState {
-	federations: Record<string, IFederation[]>;
+	federationsByProject: Record<string, IFederation[]>;
 	isListPending: boolean;
 }
 

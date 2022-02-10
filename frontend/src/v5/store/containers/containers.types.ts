@@ -18,7 +18,7 @@
 import { Action } from 'redux';
 
 export interface IContainersState {
-	containers: Record<string, IContainer[]>;
+	containersByProject: Record<string, IContainer[]>;
 	isListPending: boolean;
 }
 

@@ -23,7 +23,8 @@ import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
 const selectFederationsDomain = (state): IFederationsState => state.federations;
 
 export const selectFederations = createSelector(
-	selectFederationsDomain, selectCurrentProject, (state, currentProject) => state.federations[currentProject] ?? [],
+	selectFederationsDomain, selectCurrentProject,
+	(state, currentProject) => state.federationsByProject[currentProject] ?? [],
 );
 
 export const selectFavouriteFederations = createSelector(
@@ -39,7 +40,8 @@ export const selectHasFederations = createSelector(
 );
 
 export const selectIsListPending = createSelector(
-	selectFederationsDomain, selectCurrentProject, (state, currentProject) => !state.federations[currentProject],
+	selectFederationsDomain, selectCurrentProject,
+	(state, currentProject) => !state.federationsByProject[currentProject],
 );
 
 export const selectAreStatsPending = createSelector(
