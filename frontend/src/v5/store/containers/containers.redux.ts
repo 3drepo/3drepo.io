@@ -121,4 +121,4 @@ export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
 	[ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS]: fetchStatsSuccess,
 	[ContainersTypes.CREATE_CONTAINER_SUCCESS]: createContainerSuccess,
 	[ContainersTypes.DELETE_CONTAINER_SUCCESS]: deleteContainerSuccess,
-});
+}) as (state: IContainersState, action:any) => IContainersState;

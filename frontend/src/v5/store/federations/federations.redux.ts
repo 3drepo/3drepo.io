@@ -166,4 +166,4 @@ export const reducer = createReducer<IFederationsState>(INITIAL_STATE, {
 	[FederationsTypes.FETCH_FEDERATION_SETTINGS_SUCCESS]: fetchFederationSettingsSuccess,
 	[FederationsTypes.UPDATE_FEDERATION_SETTINGS_SUCCESS]: updateFederationSettingsSuccess,
 	[FederationsTypes.DELETE_FEDERATION_SUCCESS]: deleteFederationSuccess,
-});
+}) as (state: IFederationsState, action:any) => IFederationsState;
