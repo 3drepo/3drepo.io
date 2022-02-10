@@ -48,3 +48,7 @@ export const prepareMockStatsReply = (federation: IFederation): FetchFederationS
 	status: federation.status,
 	code: federation.code,
 });
+
+export const prepareMockSubModels = (min = 1, max = 10): string[] => (
+	times(faker.datatype.number({ max, min }), () => faker.random.uuid())
+);

@@ -23,6 +23,7 @@ import { pick, times } from 'lodash';
 import { federationMockFactory } from './federations.fixtures';
 import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
 import { FetchFederationStatsResponse, IFederation } from '@/v5/store/federations/federations.types';
+import { prepareMockSubModels } from './federations.fixtures';
 
 // TODO: review this
 // There is something weird as how the tests are setup
@@ -38,26 +39,26 @@ describe('Federations: sagas', () => {
 	describe('addFavourite', () => {
 		it('should call addFavourite endpoint', async () => {
 			mockServer
-			.patch(`/teamspaces/${teamspace}/projects/${projectId}/federations/favourites`)
-			.reply(200)
+				.patch(`/teamspaces/${teamspace}/projects/${projectId}/federations/favourites`)
+				.reply(200)
 
 			await expectSaga(FederationsSaga.default)
-			.dispatch(FederationsActions.addFavourite(teamspace, projectId, federationId))
-			.put(FederationsActions.setFavouriteSuccess(projectId, federationId, true))
-			.silentRun();
+				.dispatch(FederationsActions.addFavourite(teamspace, projectId, federationId))
+				.put(FederationsActions.setFavouriteSuccess(projectId, federationId, true))
+				.silentRun();
 		})
 	})
 
 	describe('removeFavourite', () => {
 		it('should call removeFavourite endpoint', async () => {
 			mockServer
-			.delete(`/teamspaces/${teamspace}/projects/${projectId}/federations/favourites`)
-			.reply(200)
+				.delete(`/teamspaces/${teamspace}/projects/${projectId}/federations/favourites`)
+				.reply(200)
 
 			await expectSaga(FederationsSaga.default)
-			.dispatch(FederationsActions.removeFavourite(teamspace, projectId, federationId))
-			.put(FederationsActions.setFavouriteSuccess(projectId, federationId, false))
-			.silentRun();
+				.dispatch(FederationsActions.removeFavourite(teamspace, projectId, federationId))
+				.put(FederationsActions.setFavouriteSuccess(projectId, federationId, false))
+				.silentRun();
 		})
 	})
 
@@ -68,17 +69,17 @@ describe('Federations: sagas', () => {
 
 		it('should fetch federations data', async () => {
 			mockServer
-			.get(`/teamspaces/${teamspace}/projects/${projectId}/federations`)
-			.reply(200, {
-				federations: mockFederationsBaseResponse
-			});
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations`)
+				.reply(200, {
+					federations: mockFederationsBaseResponse
+				});
 
 			await expectSaga(FederationsSaga.default)
-			.dispatch(FederationsActions.fetchFederations(teamspace, projectId))
-			.put(FederationsActions.setIsListPending(true))
-			.put(FederationsActions.fetchFederationsSuccess(projectId, mockFederationsWithoutStats))
-			.put(FederationsActions.setIsListPending(false))
-			.silentRun();
+				.dispatch(FederationsActions.fetchFederations(teamspace, projectId))
+				.put(FederationsActions.setIsListPending(true))
+				.put(FederationsActions.fetchFederationsSuccess(projectId, mockFederationsWithoutStats))
+				.put(FederationsActions.setIsListPending(false))
+				.silentRun();
 		})
 
 		it('should fetch stats', async () => {
@@ -96,50 +97,64 @@ describe('Federations: sagas', () => {
 
 			mockFederations.forEach((federation) => {
 				mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federation._id}/stats`)
-				.reply(200, prepareMockStatsReply(federation));
+					.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federation._id}/stats`)
+					.reply(200, prepareMockStatsReply(federation));
 			})
 
 			await expectSaga(FederationsSaga.default)
-			.dispatch(FederationsActions.fetchFederationStats(teamspace, projectId, mockFederations[0]._id))
-			.dispatch(FederationsActions.fetchFederationStats(teamspace, projectId, mockFederations[1]._id))
-			.put(FederationsActions.fetchFederationStatsSuccess(projectId, mockFederations[0]._id, prepareMockStatsReply(mockFederations[0])))
-			.put(FederationsActions.fetchFederationStatsSuccess(projectId, mockFederations[1]._id, prepareMockStatsReply(mockFederations[1])))
-			.silentRun();
+				.dispatch(FederationsActions.fetchFederationStats(teamspace, projectId, mockFederations[0]._id))
+				.dispatch(FederationsActions.fetchFederationStats(teamspace, projectId, mockFederations[1]._id))
+				.put(FederationsActions.fetchFederationStatsSuccess(projectId, mockFederations[0]._id, prepareMockStatsReply(mockFederations[0])))
+				.put(FederationsActions.fetchFederationStatsSuccess(projectId, mockFederations[1]._id, prepareMockStatsReply(mockFederations[1])))
+				.silentRun();
 		})
 
 		it('should call federations endpoint with 404', async () => {
 			mockServer
-			.get(`/teamspaces/${teamspace}/projects/${projectId}/federations`)
-			.reply(404);
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations`)
+				.reply(404);
 
 			await expectSaga(FederationsSaga.default)
-			.dispatch(FederationsActions.fetchFederations(teamspace, projectId))
-			.put(FederationsActions.setIsListPending(true))
-			.silentRun();
+				.dispatch(FederationsActions.fetchFederations(teamspace, projectId))
+				.put(FederationsActions.setIsListPending(true))
+				.silentRun();
 		})
 	})
-	
+
+	describe('updateFederationSubModels', () => {
+		const mockSubModels = prepareMockSubModels();
+		it('should call updateFederationSubModels endpoint', async () => {
+			mockServer
+				.post(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/revisions`)
+				.reply(200);
+
+			await expectSaga(FederationsSaga.default)
+				.dispatch(FederationsActions.updateFederationSubModels(teamspace, projectId, federationId, mockSubModels))
+				.put(FederationsActions.updateFederationSubModelsSuccess(projectId, federationId, mockSubModels))
+				.silentRun();
+		})
+	})
+
 	describe('deleteFederation', () => {
 		it('should call deleteFederation endpoint', async () => {
 			mockServer
-			.delete(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
-			.reply(200);
+				.delete(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
+				.reply(200);
 
 			await expectSaga(FederationsSaga.default)
-			.dispatch(FederationsActions.deleteFederation(teamspace, projectId, federationId))
-			.put(FederationsActions.deleteFederationSuccess(projectId, federationId))
-			.silentRun();
+				.dispatch(FederationsActions.deleteFederation(teamspace, projectId, federationId))
+				.put(FederationsActions.deleteFederationSuccess(projectId, federationId))
+				.silentRun();
 		})
 
 		it('should call deleteFederation endpoint with 404 and open alert modal', async () => {
 			mockServer
-			.delete(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
-			.reply(404);
+				.delete(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
+				.reply(404);
 
 			await expectSaga(FederationsSaga.default)
-			.dispatch(FederationsActions.deleteFederation(teamspace, projectId, federationId))
-			.silentRun();
+				.dispatch(FederationsActions.deleteFederation(teamspace, projectId, federationId))
+				.silentRun();
 		})
 	})
 })

@@ -18,6 +18,7 @@
 import { INITIAL_STATE, reducer as federationsReducer, FederationsActions } from '@/v5/store/federations/federations.redux';
 import { times } from 'lodash';
 import { federationMockFactory } from './federations.fixtures';
+import { prepareMockSubModels } from './federations.fixtures';
 
 describe('Federations: redux', () => {
 	const projectId = 'projectId';
@@ -56,5 +57,23 @@ describe('Federations: redux', () => {
 
 		expect(result[0].isFavourite).toEqual(false);
 		expect(result.slice(1).every(federation => federation.isFavourite)).toEqual(true);
+	});
+
+	it('should update federation subModels', () => {
+		const mockFederation = federationMockFactory({ subModels: [] });
+		const mockSubModels = prepareMockSubModels();
+		const defaultStateWithSubModels = {
+			...INITIAL_STATE,
+			federations: {
+				[projectId]: [mockFederation]
+			}
+		}
+		const resultState = federationsReducer(
+			defaultStateWithSubModels,
+			FederationsActions.updateFederationSubModelsSuccess(projectId, mockFederation._id, mockSubModels)
+		);
+		const result = resultState.federations[projectId];
+
+		expect(result[0].subModels).toEqual(mockSubModels);
 	});
 })

@@ -68,7 +68,7 @@ export const deleteFederation = ({
 	api.delete(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
 );
 
-export const updateFederationSubModels = ({
+export const updateFederationSubModels = async ({
 	teamspace,
 	projectId,
 	federationId,
