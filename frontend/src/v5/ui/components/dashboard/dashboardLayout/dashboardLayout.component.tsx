@@ -22,6 +22,7 @@ import { AppBar } from '@components/shared/appBar';
 import { ModalsDispatcher } from '@components/shared/modals';
 import { Header as ProjectHeader } from '@/v5/ui/routes/dashboard/projects/header';
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
+import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
 import { Content } from './dashboardLayout.styles';
 
 interface IDashboardLayout {
@@ -32,8 +33,10 @@ export const DashboardLayout = ({ children }: IDashboardLayout): JSX.Element => 
 	const { teamspace, project } = useParams();
 
 	useEffect(() => {
-		if (!teamspace) return;
-		TeamspacesActionsDispatchers.setCurrentTeamspace(teamspace);
+		if (teamspace) {
+			ProjectsActionsDispatchers.fetch(teamspace);
+			TeamspacesActionsDispatchers.setCurrentTeamspace(teamspace);
+		}
 	}, [teamspace]);
 
 	return (

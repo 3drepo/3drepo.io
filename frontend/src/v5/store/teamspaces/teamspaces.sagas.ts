@@ -33,7 +33,6 @@ export function* fetch() {
 			currentActions: formatMessage({ id: 'teamspaces.fetch.error', defaultMessage: 'trying to fetch teamspaces' }),
 			error,
 		}));
-		yield put(TeamspacesActions.fetchFailure());
 	}
 }
 

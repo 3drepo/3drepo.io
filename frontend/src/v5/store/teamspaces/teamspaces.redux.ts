@@ -34,7 +34,6 @@ export interface ITeamspace {
 export interface ITeamspacesActions {
 	fetch: () => any;
 	fetchSuccess: (teamspaces: ITeamspace[]) => any;
-	fetchFailure: () => any;
 	fetchUsers: (teamspace: string) => any;
 	fetchUsersSuccess: (teamspace: string, users: IUser[]) => any;
 	setCurrentTeamspace: (teamspace: string) => any;
@@ -43,7 +42,6 @@ export interface ITeamspacesActions {
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
 	fetch: [],
 	fetchSuccess: ['teamspaces'],
-	fetchFailure: [],
 	fetchUsers: ['teamspace'],
 	fetchUsersSuccess: ['teamspace', 'users'],
 	setCurrentTeamspace: ['currentTeamspace'],

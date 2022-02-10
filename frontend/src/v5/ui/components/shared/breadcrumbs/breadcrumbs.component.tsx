@@ -51,12 +51,6 @@ export const Breadcrumbs = (): JSX.Element => {
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
 	const project: IProject = ProjectsHooksSelectors.selectCurrentProjectDetails();
 
-	React.useEffect(() => {
-		if (projectId) {
-			ProjectsActionsDispatchers.fetch(teamspace);
-		}
-	}, [projectId, teamspace]);
-
 	ProjectsActionsDispatchers.setCurrentProject(projectId);
 
 	let { url } = useRouteMatch();
