@@ -17,6 +17,6 @@
 
 import { FederationsActions } from '@/v5/store/federations/federations.redux';
 import { IFederationsActionCreators } from '@/v5/store/federations/federations.types';
-import { createActionsDispatchers } from './actionsDistpatchers.helper';
+import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 
 export const FederationsActionsDispatchers = createActionsDispatchers<IFederationsActionCreators>(FederationsActions);
