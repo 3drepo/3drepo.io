@@ -23,9 +23,9 @@ import { containerMockFactory } from './containers.fixtures';
 describe('Containers: redux', () => {
 	const projectId = 'projectId';
 	const mockContainers = times(5, () => containerMockFactory({ isFavourite: false }));
-	const defaultState = {
+	const defaultState:IContainersState = {
 		...INITIAL_STATE,
-		containers: {
+		containersByProject: {
 			[projectId]: mockContainers
 		}
 	};

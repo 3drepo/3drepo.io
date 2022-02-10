@@ -39,13 +39,14 @@ describe('Projects: redux', () => {
 				isAdmin: false,
 			}];
 
-			expect(projectsReducer(defaultState, ProjectsActions.fetchSuccess(teamspaceName, projects))).toEqual({
+			const resultState: IProjectsState = {
 				...defaultState,
-				currentTeamspace: teamspaceName,
 				projectsByTeamspace: {
 					[teamspaceName]: projects,
 				},
-			} as IProjectsState);
+			};
+
+			expect(projectsReducer(defaultState, ProjectsActions.fetchSuccess(teamspaceName, projects))).toEqual(resultState);
 		});
 	});
 });
