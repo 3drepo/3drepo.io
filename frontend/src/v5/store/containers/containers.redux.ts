@@ -23,7 +23,6 @@ import {
 	IContainersState,
 	SetFavouriteSuccessAction,
 	FetchContainersSuccessAction,
-	SetIsListPendingAction,
 	FetchContainerStatsSuccessAction,
 	CreateContainerSuccessAction,
 	DeleteContainerSuccessAction,
@@ -86,11 +85,6 @@ export const fetchStatsSuccess = (state = INITIAL_STATE, {
 			return prepareSingleContainerData(container, containerStats);
 		}),
 	},
-});
-
-export const setIsListPending = (state = INITIAL_STATE, { isPending }: SetIsListPendingAction) => ({
-	...state,
-	isListPending: isPending,
 });
 
 export const createContainerSuccess = (state = INITIAL_STATE, {

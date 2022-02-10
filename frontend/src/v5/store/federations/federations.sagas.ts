@@ -66,7 +66,6 @@ export function* removeFavourites({ federationId, teamspace, projectId }: Remove
 }
 
 export function* fetchFederations({ teamspace, projectId }: FetchFederationsAction) {
-	yield put(FederationsActions.setIsListPending(true));
 	try {
 		const { federations }: FetchFederationsResponse = yield API.Federations.fetchFederations({
 			teamspace,
@@ -75,7 +74,6 @@ export function* fetchFederations({ teamspace, projectId }: FetchFederationsActi
 		const federationsWithoutStats = prepareFederationsData(federations);
 
 		yield put(FederationsActions.fetchFederationsSuccess(projectId, federationsWithoutStats));
-		yield put(FederationsActions.setIsListPending(false));
 
 		yield all(
 			federations.map(

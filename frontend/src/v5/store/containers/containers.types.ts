@@ -126,7 +126,6 @@ export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & FavouritePayloa
 export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & {projectId: string, containerId: string, isFavourite: boolean};
 export type FetchContainersAction = Action<'FETCH_CONTAINERS'> & FetchContainersPayload;
 export type FetchContainersSuccessAction = Action<'FETCH_CONTAINERS_SUCCESS'> & { projectId: string, containers: IContainer[] };
-export type SetIsListPendingAction = Action<'SET_IS_LIST_PENDING'> & { isPending: boolean };
 export type FetchContainerStatsAction = Action<'FETCH_CONTAINER_STATS'> & FetchContainerStatsPayload;
 export type FetchContainerStatsSuccessAction = Action<'FETCH_CONTAINER_STATS_SUCCESS'> & FetchContainerStatsSuccessPayload;
 export type CreateContainerAction = Action<'CREATE_CONTAINER'> & CreateContainerPayload;
@@ -146,7 +145,6 @@ export interface IContainersActionCreators {
 		containerId: string,
 		containerStats: FetchContainerStatsResponse
 	) => FetchContainerStatsSuccessAction;
-	setIsListPending: (isPending: boolean) => SetIsListPendingAction;
 	createContainer: (
 		teamspace: string,
 		projectId: string,
