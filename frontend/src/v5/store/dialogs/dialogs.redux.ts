@@ -25,7 +25,7 @@ interface IDialogActions {
 	close: (id: string) => any;
 }
 
-interface IDialogConfig {
+export interface IDialogConfig {
 	id: string;
 	modalType?: 'error' | 'info' | 'alert';
 	props: any;

@@ -93,9 +93,7 @@ describe('Containers: sagas', () => {
 
 			await expectSaga(ContainersSaga.default)
 			.dispatch(ContainersActions.fetchContainers(teamspace, projectId))
-			.put(ContainersActions.setIsListPending(true))
 			.put(ContainersActions.fetchContainersSuccess(projectId, mockContainersWithoutStats))
-			.put(ContainersActions.setIsListPending(false))
 			.silentRun();
 		})
 
@@ -133,7 +131,6 @@ describe('Containers: sagas', () => {
 
 			await expectSaga(ContainersSaga.default)
 			.dispatch(ContainersActions.fetchContainers(teamspace, projectId))
-			.put(ContainersActions.setIsListPending(true))
 			.silentRun();
 		})
 	})
