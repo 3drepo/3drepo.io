@@ -24,7 +24,7 @@ const selectContainerIdParam = (_, containerId: string) => containerId;
 export const selectRevisions = createSelector(
 	selectRevisionsDomain,
 	selectContainerIdParam,
-	(state, containerId) => state.revisions[containerId] || [],
+	(state, containerId) => state.revisionsByContainer[containerId] || [],
 );
 
 export const selectIsPending: (any, string) => boolean = createSelector(
