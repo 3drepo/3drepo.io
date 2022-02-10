@@ -20,7 +20,7 @@ import { isEmpty } from 'lodash';
 import { IFederationsState } from '@/v5/store/federations/federations.types';
 import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
 
-const selectFederationsDomain = (state: { federations: IFederationsState }) => state.federations;
+const selectFederationsDomain = (state): IFederationsState => state.federations;
 
 export const selectFederations = createSelector(
 	selectFederationsDomain, selectCurrentProject, (state, currentProject) => state.federations[currentProject] ?? [],

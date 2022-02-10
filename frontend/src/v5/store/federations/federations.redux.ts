@@ -29,7 +29,7 @@ import {
 	UpdateFederationSettingsSuccessAction,
 } from '@/v5/store/federations/federations.types';
 import { prepareSingleFederationData } from '@/v5/store/federations/federations.helpers';
-import { Constants } from '../common/actions.helper';
+import { Constants } from '../../helpers/actions.helper';
 
 export const { Types: FederationsTypes, Creators: FederationsActions } = createActions({
 	addFavourite: ['teamspace', 'projectId', 'federationId'],

@@ -18,7 +18,7 @@
 import { createActions, createReducer } from 'reduxsauce';
 import uuid from 'uuidv4';
 
-import { Constants } from '../common/actions.helper';
+import { Constants } from '../../helpers/actions.helper';
 
 interface IDialogActions {
 	open: (type?: string, props?: any) => any;
@@ -31,7 +31,7 @@ interface IDialogConfig {
 	props: any;
 }
 
-interface IDialogState {
+export interface IDialogState {
 	dialogs: IDialogConfig[];
 }
 

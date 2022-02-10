@@ -16,7 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { Constants } from '@/v5/store/common/actions.helper';
+import { Constants } from '@/v5/helpers/actions.helper';
 import { IRevisionsActionCreators, IRevisionsState } from '@/v5/store/revisions/revisions.types';
 
 export const { Types: RevisionsTypes, Creators: RevisionsActions } = createActions({

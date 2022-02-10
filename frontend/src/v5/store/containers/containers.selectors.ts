@@ -20,7 +20,7 @@ import { IContainersState } from '@/v5/store/containers/containers.types';
 import { isEmpty } from 'lodash';
 import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
 
-const selectContainersDomain = (state: { containers: IContainersState }) => state.containers;
+const selectContainersDomain = (state): IContainersState => state.containers;
 
 export const selectContainers = createSelector(
 	selectContainersDomain, selectCurrentProject, (state, currentProject) => state.containers[currentProject] ?? [],

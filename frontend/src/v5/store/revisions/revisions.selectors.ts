@@ -18,7 +18,7 @@
 import { createSelector } from 'reselect';
 import { IRevisionsState } from './revisions.types';
 
-const selectRevisionsDomain = (state: { revisions: IRevisionsState }) => state.revisions;
+const selectRevisionsDomain = (state): IRevisionsState => state.revisions;
 const selectContainerIdParam = (_, containerId: string) => containerId;
 
 export const selectRevisions = createSelector(

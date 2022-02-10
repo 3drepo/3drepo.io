@@ -16,7 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { Constants } from '../common/actions.helper';
+import { Constants } from '../../helpers/actions.helper';
 
 export interface IProject {
 	_id: string;
@@ -38,7 +38,7 @@ export const { Types: ProjectsTypes, Creators: ProjectsActions } = createActions
 	setCurrentProject: ['projectId'],
 }, { prefix: 'PROJECTS/' }) as { Types: Constants<IProjectsActions>; Creators: IProjectsActions };
 
-interface IProjectsState {
+export interface IProjectsState {
 	projects: Record<string, IProject[]> | [];
 	currentTeamspace: string;
 	currentProject: string;
