@@ -24,7 +24,6 @@ import {
 	Divider,
 } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
-import { Content } from '@/v5/ui/routes/dashboard/projects/projects.styles';
 import { Button } from '@controls/button';
 import { filterFederations } from '@/v5/store/federations/federations.helpers';
 import { useFederationsData } from './federations.hooks';
@@ -43,7 +42,7 @@ export const Federations = (): JSX.Element => {
 	const [allFilterQuery, setAllFilterQuery] = useState<string>('');
 
 	return (
-		<Content>
+		<>
 			{isListPending ? (
 				<DashboardSkeletonList itemComponent={<SkeletonListItem />} />
 			) : (
@@ -106,6 +105,6 @@ export const Federations = (): JSX.Element => {
 					/>
 				</>
 			)}
-		</Content>
+		</>
 	);
 };

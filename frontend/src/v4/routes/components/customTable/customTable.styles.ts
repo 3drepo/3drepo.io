@@ -44,10 +44,15 @@ export const Cell = styled.div`
 	width: ${(props: any) => props.width || 'auto'};
 `;
 
+Cell.displayName = 'CustomTableCell';
+
 export const CheckboxCell = styled(Cell)`
 	overflow: visible;
 	padding: 0 0 0 12px;
 `;
+
+CheckboxCell.displayName = 'CustomTableCheckboxCell';
+
 
 export const Container = styled.div`
 	&& {
@@ -80,11 +85,13 @@ export const Row = styled.div`
 
 export const Head = styled(Row)`
 	flex: none;
-
 	${Cell} {
 		font-weight: ${FONT_WEIGHT.SEMIBOLD};
 	}
 `;
+
+Head.displayName = 'CustomTableHead';
+
 
 export const Body = styled.div`
 	height: inherit;

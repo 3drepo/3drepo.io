@@ -23,10 +23,11 @@ const { getIssuesCount } = require('../../../../models/issues');
 const { getLatestRevision } = require('../../../../models/revisions');
 const { getProjectById } = require('../../../../models/projects');
 const { getRisksCount } = require('../../../../models/risks');
+const { queueFederationUpdate } = require('../../../../services/queue');
 
 const Federations = { ...Groups };
 
-Federations.addFederation = async (teamspace, project, federation) => addModel(teamspace, project,
+Federations.addFederation = (teamspace, project, federation) => addModel(teamspace, project,
 	{ ...federation, federate: true });
 
 Federations.deleteFederation = deleteModel;
@@ -48,6 +49,8 @@ Federations.deleteFavourites = async (username, teamspace, project, favouritesTo
 	await deleteFavourites(username, teamspace, accessibleFederations, favouritesToRemove);
 };
 
+Federations.newRevision = queueFederationUpdate;
+
 const getLastUpdatesFromModels = async (teamspace, models) => {
 	const lastUpdates = [];
 	if (models) {
@@ -65,11 +68,11 @@ const getLastUpdatesFromModels = async (teamspace, models) => {
 };
 
 Federations.getFederationStats = async (teamspace, federation) => {
-	const { properties, status, subModels, category } = await getFederationById(teamspace, federation, {
+	const { properties, status, subModels, desc } = await getFederationById(teamspace, federation, {
 		properties: 1,
 		status: 1,
 		subModels: 1,
-		category: 1,
+		desc: 1,
 	});
 
 	const [issueCount, riskCount, lastUpdates] = await Promise.all([
@@ -82,7 +85,7 @@ Federations.getFederationStats = async (teamspace, federation) => {
 		code: properties.code,
 		status,
 		subModels,
-		category,
+		desc,
 		lastUpdated: lastUpdates,
 		tickets: { issues: issueCount, risks: riskCount },
 	};
@@ -90,7 +93,7 @@ Federations.getFederationStats = async (teamspace, federation) => {
 
 Federations.updateSettings = updateModelSettings;
 
-Federations.getSettings = async (teamspace, federation) => getFederationById(teamspace,
+Federations.getSettings = (teamspace, federation) => getFederationById(teamspace,
 	federation, { corID: 0, account: 0, permissions: 0, subModels: 0, federate: 0 });
 
 module.exports = Federations;

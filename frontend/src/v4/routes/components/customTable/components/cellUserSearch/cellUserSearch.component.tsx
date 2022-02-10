@@ -64,9 +64,9 @@ export class CellUserSearch extends React.PureComponent<IProps, IState> {
 					label={label}
 					value={searchText}
 					onChange={this.handleChange}
-					InputProps={ {
+					InputProps={{
 						disableUnderline: false
-					} }
+					}}
 				/>
 			</>
 		);

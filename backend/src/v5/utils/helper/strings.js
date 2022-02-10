@@ -16,6 +16,7 @@
  */
 
 const { camelCase, snakeCase } = require('lodash');
+const crypto = require('crypto');
 const { types } = require('./yup');
 
 const StringHelper = {};
@@ -31,5 +32,7 @@ StringHelper.getURLDomain = (url) => {
 };
 
 StringHelper.hasEmailFormat = (str) => types.strings.email.isValidSync(str, { strict: true });
+
+StringHelper.generateHashString = (length = 32) => crypto.randomBytes(length / 2).toString('hex');
 
 module.exports = StringHelper;
