@@ -64,4 +64,4 @@ export const setCurrentProject = (state = INITIAL_STATE, { projectId }): IProjec
 export const reducer = createReducer(INITIAL_STATE, {
 	[ProjectsTypes.FETCH_SUCCESS]: fetchSuccess,
 	[ProjectsTypes.SET_CURRENT_PROJECT]: setCurrentProject,
-});
+}) as (state: IProjectsState, action: any) => IProjectsState;

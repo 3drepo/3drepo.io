@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { INITIAL_STATE, reducer as projectsReducer, ProjectsActions } from "@/v5/store/projects/projects.redux";
+import { INITIAL_STATE, reducer as projectsReducer, ProjectsActions, IProjectsState } from "@/v5/store/projects/projects.redux";
 
 describe('Projects: redux', () => {
-	const defaultState = {
+	const defaultState: IProjectsState = {
 		...INITIAL_STATE,
 	};
 
@@ -42,10 +42,10 @@ describe('Projects: redux', () => {
 			expect(projectsReducer(defaultState, ProjectsActions.fetchSuccess(teamspaceName, projects))).toEqual({
 				...defaultState,
 				currentTeamspace: teamspaceName,
-				projects: {
+				projectsByTeamspace: {
 					[teamspaceName]: projects,
 				},
-			});
+			} as IProjectsState);
 		});
 	});
 });
