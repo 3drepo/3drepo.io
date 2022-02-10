@@ -59,7 +59,7 @@ export const setFavourite = (state = INITIAL_STATE, {
 	projectId,
 	federationId,
 	isFavourite,
-}: SetFavouriteSuccessAction) => ({
+}: SetFavouriteSuccessAction): IFederationsState => ({
 	...state,
 	federations: {
 		...state.federations,
@@ -73,7 +73,7 @@ export const setFavourite = (state = INITIAL_STATE, {
 export const fetchFederationsSuccess = (state = INITIAL_STATE, {
 	projectId,
 	federations,
-}: FetchFederationsSuccessAction) => ({
+}: FetchFederationsSuccessAction): IFederationsState => ({
 	...state,
 	federations: {
 		...state.federations,
@@ -85,7 +85,7 @@ export const fetchStatsSuccess = (state = INITIAL_STATE, {
 	projectId,
 	federationId,
 	federationStats,
-}: FetchFederationStatsSuccessAction) => ({
+}: FetchFederationStatsSuccessAction): IFederationsState => ({
 	...state,
 	federations: {
 		...state.federations,
@@ -96,7 +96,7 @@ export const fetchStatsSuccess = (state = INITIAL_STATE, {
 	},
 });
 
-export const setIsListPending = (state = INITIAL_STATE, { isPending }: SetIsListPendingAction) => ({
+export const setIsListPending = (state = INITIAL_STATE, { isPending }: SetIsListPendingAction): IFederationsState => ({
 	...state,
 	isListPending: isPending,
 });
@@ -158,7 +158,7 @@ export const updateFederationSettingsSuccess = (state = INITIAL_STATE, {
 export const deleteFederationSuccess = (state = INITIAL_STATE, {
 	projectId,
 	federationId,
-}: DeleteFederationSuccessAction) => ({
+}: DeleteFederationSuccessAction): IFederationsState => ({
 	...state,
 	federations: {
 		...state.federations,

@@ -37,12 +37,12 @@ export interface IContainer {
 	_id: string;
 	name: string;
 	latestRevision: string;
-	revisionsCount: number;
+	revisionsCount?: number;
 	lastUpdated: Date;
 	type: string;
 	code: string;
 	status: UploadStatuses;
-	unit: string;
+	unit?: string;
 	isFavourite: boolean;
 	role: string;
 	hasStatsPending: boolean;
@@ -131,7 +131,7 @@ export type SetIsListPendingAction = Action<'SET_IS_LIST_PENDING'> & { isPending
 export type FetchContainerStatsAction = Action<'FETCH_CONTAINER_STATS'> & FetchContainerStatsPayload;
 export type FetchContainerStatsSuccessAction = Action<'FETCH_CONTAINER_STATS_SUCCESS'> & FetchContainerStatsSuccessPayload;
 export type CreateContainerAction = Action<'CREATE_CONTAINER'> & CreateContainerPayload;
-export type CreateContainerSuccessAction = Action<'CREATE_CONTAINER_SUCCESS'> & { projectId: string, container: CreateContainerSuccessPayload };
+export type CreateContainerSuccessAction = Action<'CREATE_CONTAINER_SUCCESS'> & { projectId: string, container: IContainer };
 export type DeleteContainerAction = Action<'DELETE'> & DeleteContainerPayload;
 export type DeleteContainerSuccessAction = Action<'DELETE_SUCCESS'> & DeleteContainerSuccessPayload;
 

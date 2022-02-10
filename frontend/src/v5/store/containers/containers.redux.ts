@@ -58,7 +58,7 @@ export const setFavourite = (state = INITIAL_STATE, {
 	projectId,
 	containerId,
 	isFavourite,
-}: SetFavouriteSuccessAction) => ({
+}: SetFavouriteSuccessAction):IContainersState => ({
 	...state,
 	containers: {
 		...state.containers,
@@ -72,7 +72,7 @@ export const setFavourite = (state = INITIAL_STATE, {
 export const fetchContainersSuccess = (state = INITIAL_STATE, {
 	projectId,
 	containers,
-}: FetchContainersSuccessAction) => ({
+}: FetchContainersSuccessAction): IContainersState => ({
 	...state,
 	containers: {
 		...state.containers,
@@ -84,7 +84,7 @@ export const fetchStatsSuccess = (state = INITIAL_STATE, {
 	projectId,
 	containerId,
 	containerStats,
-}: FetchContainerStatsSuccessAction) => ({
+}: FetchContainerStatsSuccessAction): IContainersState => ({
 	...state,
 	containers: {
 		...state.containers,
@@ -103,7 +103,7 @@ export const setIsListPending = (state = INITIAL_STATE, { isPending }: SetIsList
 export const createContainerSuccess = (state = INITIAL_STATE, {
 	projectId,
 	container,
-}: CreateContainerSuccessAction) => ({
+}: CreateContainerSuccessAction): IContainersState => ({
 	...state,
 	containers: {
 		...state.containers,
@@ -112,7 +112,6 @@ export const createContainerSuccess = (state = INITIAL_STATE, {
 			{
 				...container,
 				revisionsCount: 0,
-				units: container.unit,
 			},
 		],
 	},
@@ -121,7 +120,7 @@ export const createContainerSuccess = (state = INITIAL_STATE, {
 export const deleteContainerSuccess = (state = INITIAL_STATE, {
 	projectId,
 	containerId,
-}: DeleteContainerSuccessAction) => ({
+}: DeleteContainerSuccessAction): IContainersState => ({
 	...state,
 	containers: {
 		...state.containers,

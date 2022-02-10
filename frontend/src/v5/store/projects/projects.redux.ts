@@ -39,27 +39,24 @@ export const { Types: ProjectsTypes, Creators: ProjectsActions } = createActions
 }, { prefix: 'PROJECTS/' }) as { Types: Constants<IProjectsActions>; Creators: IProjectsActions };
 
 export interface IProjectsState {
-	projects: Record<string, IProject[]> | [];
-	currentTeamspace: string;
+	projectsByTeamspace: Record<string, IProject[]>;
 	currentProject: string;
 }
 
 export const INITIAL_STATE: IProjectsState = {
-	projects: [],
-	currentTeamspace: '',
+	projectsByTeamspace: {},
 	currentProject: '',
 };
 
-export const fetchSuccess = (state = INITIAL_STATE, { teamspace, projects }) => ({
+export const fetchSuccess = (state = INITIAL_STATE, { teamspace, projects }): IProjectsState => ({
 	...state,
-	currentTeamspace: teamspace,
-	projects: {
-		...state.projects,
+	projectsByTeamspace: {
+		...state.projectsByTeamspace,
 		[teamspace]: projects,
 	},
 });
 
-export const setCurrentProject = (state = INITIAL_STATE, { projectId }) => ({
+export const setCurrentProject = (state = INITIAL_STATE, { projectId }): IProjectsState => ({
 	...state,
 	currentProject: projectId,
 });

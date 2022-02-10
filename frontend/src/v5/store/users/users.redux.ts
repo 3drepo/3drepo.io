@@ -44,7 +44,7 @@ export const INITIAL_STATE: IUsersState = {
 	usersByTeamspace: {},
 };
 
-export const fetchUsersSuccess = (state = INITIAL_STATE, { teamspace, users }) => ({
+export const fetchUsersSuccess = (state = INITIAL_STATE, { teamspace, users }): IUsersState => ({
 	...state,
 	usersByTeamspace: {
 		...state.usersByTeamspace,

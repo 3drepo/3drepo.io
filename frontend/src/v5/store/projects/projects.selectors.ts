@@ -22,7 +22,7 @@ import { IProjectsState } from './projects.redux';
 const selectProjectsDomain = (state):IProjectsState => state.projects;
 
 export const selectProjects = createSelector(
-	selectProjectsDomain, (state) => state.projects,
+	selectProjectsDomain, (state) => state.projectsByTeamspace,
 );
 
 export const selectCurrentProjects = createSelector(

@@ -36,7 +36,7 @@ export const setVoidStatusSuccess = (state = INITIAL_STATE, {
 	containerId,
 	revisionId,
 	isVoid,
-}) => ({
+}): IRevisionsState => ({
 	...state,
 	revisions: {
 		...state.revisions,
@@ -50,7 +50,7 @@ export const setVoidStatusSuccess = (state = INITIAL_STATE, {
 export const fetchSuccess = (state = INITIAL_STATE, {
 	containerId,
 	revisions,
-}) => ({
+}): IRevisionsState => ({
 	...state,
 	revisions: {
 		...state.revisions,
@@ -58,7 +58,7 @@ export const fetchSuccess = (state = INITIAL_STATE, {
 	},
 });
 
-export const setIsPending = (state = INITIAL_STATE, { isPending, containerId }) => ({
+export const setIsPending = (state = INITIAL_STATE, { isPending, containerId }): IRevisionsState => ({
 	...state,
 	isPending: {
 		...state.isPending,

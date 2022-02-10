@@ -39,6 +39,12 @@ export const DashboardLayout = ({ children }: IDashboardLayout): JSX.Element => 
 		}
 	}, [teamspace]);
 
+	useEffect(() => {
+		if (project) {
+			ProjectsActionsDispatchers.setCurrentProject(project);
+		}
+	}, [project]);
+
 	return (
 		<>
 			<AppBar />

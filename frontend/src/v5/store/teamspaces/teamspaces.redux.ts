@@ -45,9 +45,10 @@ export const INITIAL_STATE: ITeamspacesState = {
 	currentTeamspace: null,
 };
 
-export const setCurrentTeamspace = (state = INITIAL_STATE, { currentTeamspace }) => ({ ...state, currentTeamspace });
+// eslint-disable-next-line max-len
+export const setCurrentTeamspace = (state = INITIAL_STATE, { currentTeamspace }): ITeamspacesState => ({ ...state, currentTeamspace });
 
-export const fetchSuccess = (state = INITIAL_STATE, { teamspaces }) => ({ ...state, teamspaces });
+export const fetchSuccess = (state = INITIAL_STATE, { teamspaces }): ITeamspacesState => ({ ...state, teamspaces });
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[TeamspacesTypes.FETCH_SUCCESS]: fetchSuccess,
