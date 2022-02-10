@@ -20,7 +20,6 @@
 const express = require("express");
 const router = express.Router({ mergeParams: true });
 const middlewares = require("../middlewares/middlewares");
-const C = require("../constants");
 const responseCodes = require("../response_codes.js");
 const Group = require("../models/group");
 const {v5Path} = require("../../interop");
@@ -554,7 +553,7 @@ function findGroup(req, res, next) {
 function createGroup(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model } = req.params;
-	const sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const sessionId = req.session.user?.socketId;
 	const rid = req.params.rid ? req.params.rid : null;
 	const branch = rid ? null : "master";
 
@@ -566,7 +565,7 @@ function createGroup(req, res, next) {
 }
 
 function deleteGroups(req, res, next) {
-	const sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const sessionId = req.session.user?.socketId;
 	const place = utils.APIInfo(req);
 	const { account, model } = req.params;
 
@@ -586,7 +585,7 @@ function deleteGroups(req, res, next) {
 function updateGroup(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, uid } = req.params;
-	const sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const sessionId = req.session.user?.socketId;
 
 	const rid = req.params.rid ? req.params.rid : null;
 	const branch = rid ? null : "master";

@@ -895,7 +895,7 @@ router.delete("/issues/:issueId/resources",middlewares.issue.canComment, detachR
 
 function storeIssue(req, res, next) {
 	const data = req.body;
-	const sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const sessionId = req.session.user?.socketId;
 
 	data.owner = req.session.user.username;
 	delete data._id; // Ignore _id field
@@ -920,7 +920,7 @@ function updateIssue(req, res, next) {
 	const updateData = req.body;
 
 	const user = req.session.user.username;
-	const sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const sessionId = req.session.user?.socketId;
 
 	return Issue.update(user, sessionId, account, model, issueId, updateData).then(({updatedTicket, oldTicket, data}) => {
 		req.dataModel = updatedTicket;
@@ -1042,7 +1042,7 @@ function importBCF(req, res, next) {
 		if (err) {
 			return responseCodes.respond(place, req, res, next, err.resCode || err, err.resCode || err);
 		}
-		Issue.importBCF({ socketId: req.headers[C.HEADER_SOCKET_ID], user: req.session.user.username }, req.params.account, req.params.model, req.params.rid, req.file.buffer).then(() => {
+		Issue.importBCF({ socketId: req.session.user?.socketId, user: req.session.user.username }, req.params.account, req.params.model, req.params.rid, req.file.buffer).then(() => {
 			responseCodes.respond(place, req, res, next, responseCodes.OK, { "status": "ok" });
 		}).catch(error => {
 			responseCodes.respond(place, req, res, next, error, error);
@@ -1076,7 +1076,7 @@ function addComment(req, res, next) {
 	const user = req.session.user.username;
 	const data =  req.body;
 	const {account, model, issueId} = req.params;
-	const sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const sessionId = req.session.user?.socketId;
 
 	Issue.addComment(account, model, issueId, user, data, sessionId).then(({comment, userRefs}) => {
 		req.dataModel = comment;
@@ -1103,7 +1103,7 @@ function deleteComment(req, res, next) {
 function attachResourcesToIssue(req, res, next) {
 	const place = utils.APIInfo(req);
 	const {account, model, issueId} = req.params;
-	const sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const sessionId = req.session.user?.socketId;
 	const user = req.session.user.username;
 	const upload = multer({
 		storage: multer.memoryStorage()
@@ -1137,7 +1137,7 @@ function detachResourcefromIssue(req, res, next) {
 	const place = utils.APIInfo(req);
 	const {account, model, issueId} = req.params;
 	const resourceId = req.body._id;
-	const sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const sessionId = req.session.user?.socketId;
 	const user = req.session.user.username;
 
 	Issue.detachResource(account, model, issueId, resourceId, user, sessionId).then(ref => {

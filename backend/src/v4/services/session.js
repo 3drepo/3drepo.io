@@ -19,13 +19,14 @@
 
 const expressSession = require("express-session");
 const { getCollection, getSessionStore } = require("../handler/db");
+const config = require("../config");
 const C = require("../constants");
 const utils = require("../utils");
 const { systemLogger } = require("../logger");
 const store = getSessionStore(expressSession);
 const useragent = require("useragent");
 
-module.exports.session = function(config) {
+const initialiseSession = () => {
 	const isSSL = config.public_protocol === "https";
 	return expressSession({
 		secret: config.cookie.secret,
@@ -45,7 +46,9 @@ module.exports.session = function(config) {
 	});
 };
 
-module.exports.regenerateAuthSession = (req, config, user) => {
+module.exports.session = initialiseSession();
+
+module.exports.regenerateAuthSession = (req, user) => {
 	return new Promise((resolve, reject) => {
 		req.session.regenerate((err) => {
 			systemLogger.logDebug(`Creating session for ${user.username}`);

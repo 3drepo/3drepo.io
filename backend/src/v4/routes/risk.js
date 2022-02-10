@@ -747,7 +747,7 @@ function storeRisk(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model } = req.params;
 	const data = req.body;
-	const sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const sessionId = req.session.user?.socketId;
 
 	data.owner = req.session.user.username;
 	data.revId = req.params.rid;
@@ -765,7 +765,7 @@ function updateRisk(req, res, next) {
 	const updateData = req.body;
 
 	const user = req.session.user.username;
-	const sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const sessionId = req.session.user?.socketId;
 
 	return Risk.update(user, sessionId, account, model, riskId, updateData).then(({updatedTicket, oldTicket, data}) => {
 		req.dataModel = updatedTicket;
@@ -859,7 +859,7 @@ function addComment(req, res, next) {
 	const user = req.session.user.username;
 	const data =  req.body;
 	const {account, model, riskId} = req.params;
-	const sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const sessionId = req.session.user?.socketId;
 
 	Risk.addComment(account, model, riskId, user, data, sessionId).then(({comment, userRefs}) => {
 		req.dataModel = comment;
@@ -887,7 +887,7 @@ function deleteComment(req, res, next) {
 function attachResourcesToRisk(req, res, next) {
 	const place = utils.APIInfo(req);
 	const {account, model, riskId} = req.params;
-	const sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const sessionId = req.session.user?.socketId;
 	const user = req.session.user.username;
 	const upload = multer({
 		storage: multer.memoryStorage()
@@ -921,7 +921,7 @@ function detachResourcefromRisk(req, res, next) {
 	const place = utils.APIInfo(req);
 	const {account, model, riskId} = req.params;
 	const resourceId = req.body._id;
-	const sessionId = req.headers[C.HEADER_SOCKET_ID];
+	const sessionId = req.session.user?.socketId;
 	const user = req.session.user.username;
 
 	Risk.detachResource(account, model, riskId, resourceId, user, sessionId).then(ref => {
