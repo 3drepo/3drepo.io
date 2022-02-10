@@ -27,7 +27,7 @@ import { Container, Tab, Tabs, V4ModelsPermissions, V4ProjectsPermissions } from
 
 export const UsersPermissions = () => {
 	const dispatch = useDispatch();
-	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails().name;
+	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails()?.name;
 	const username = useSelector(selectCurrentUser)?.username;
 
 	const [selectedTab, setSelectedTab] = useState(0);
