@@ -24,6 +24,7 @@ import {
 	FetchFederationStatsSuccessAction,
 	SetIsListPendingAction,
 	DeleteFederationSuccessAction,
+	UpdateFederationSubModelsActionSuccess,
 } from '@/v5/store/federations/federations.types';
 import { prepareSingleFederationData } from '@/v5/store/federations/federations.helpers';
 import { Constants } from '../common/actions.helper';
@@ -39,6 +40,8 @@ export const { Types: FederationsTypes, Creators: FederationsActions } = createA
 	setIsListPending: ['isPending'],
 	deleteFederation: ['teamspace', 'projectId', 'federationId'],
 	deleteFederationSuccess: ['projectId', 'federationId'],
+	updateFederationSubModels: ['teamspace', 'projectId', 'federationId', 'subModels'],
+	updateFederationSubModelsSuccess: ['projectId', 'federationId', 'subModels'],
 }, { prefix: 'FEDERATIONS/' }) as { Types: Constants<IFederationsActionCreators>; Creators: IFederationsActionCreators };
 
 export const INITIAL_STATE: IFederationsState = {
@@ -103,10 +106,26 @@ export const deleteFederationSuccess = (state = INITIAL_STATE, {
 	},
 });
 
+export const updateFederationSubModelSuccess = (state = INITIAL_STATE, {
+	projectId,
+	federationId,
+	subModels,
+}: UpdateFederationSubModelsActionSuccess) => ({
+	...state,
+	federations: {
+		...state.federations,
+		[projectId]: state.federations[projectId].map((federation) => ({
+			...federation,
+			subModels: federation._id === federationId ? subModels : federation.subModels,
+		})),
+	},
+});
+
 export const reducer = createReducer<IFederationsState>(INITIAL_STATE, {
 	[FederationsTypes.FETCH_FEDERATIONS_SUCCESS]: fetchFederationsSuccess,
 	[FederationsTypes.FETCH_FEDERATION_STATS_SUCCESS]: fetchStatsSuccess,
 	[FederationsTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
 	[FederationsTypes.SET_IS_LIST_PENDING]: setIsListPending,
 	[FederationsTypes.DELETE_FEDERATION_SUCCESS]: deleteFederationSuccess,
+	[FederationsTypes.UPDATE_FEDERATION_SUB_MODELS_SUCCESS]: updateFederationSubModelSuccess,
 });

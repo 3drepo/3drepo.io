@@ -26,6 +26,7 @@ import {
 	RemoveFavouriteAction,
 	FetchFederationStatsAction,
 	DeleteFederationAction,
+	UpdateFederationSubModelsAction,
 } from '@/v5/store/federations/federations.types';
 import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
@@ -109,10 +110,31 @@ export function* deleteFederation({ teamspace, projectId, federationId }: Delete
 	}
 }
 
+export function* updateFederationSubModels({
+	teamspace,
+	projectId,
+	federationId,
+	subModels,
+}: UpdateFederationSubModelsAction) {
+	try {
+		yield API.Federations.updateFederationSubModels({ teamspace, projectId, federationId, subModels });
+		yield put(FederationsActions.updateFederationSubModelsSuccess(projectId, federationId, subModels));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({
+				id: 'federation.update.subModels.error',
+				defaultMessage: 'trying to update federation submodels',
+			}),
+			error,
+		}));
+	}
+}
+
 export default function* FederationsSagas() {
 	yield takeLatest(FederationsTypes.ADD_FAVOURITE, addFavourites);
 	yield takeLatest(FederationsTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeLatest(FederationsTypes.FETCH_FEDERATIONS, fetchFederations);
 	yield takeEvery(FederationsTypes.FETCH_FEDERATION_STATS, fetchFederationStats);
 	yield takeLatest(FederationsTypes.DELETE_FEDERATION, deleteFederation);
+	yield takeLatest(FederationsTypes.UPDATE_FEDERATION_SUB_MODELS, updateFederationSubModels);
 }
