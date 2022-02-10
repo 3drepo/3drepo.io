@@ -16,6 +16,7 @@
  */
 
 import { INITIAL_STATE, reducer as containersReducer, ContainersActions } from '@/v5/store/containers/containers.redux';
+import { IContainersState } from '@/v5/store/containers/containers.types';
 import { times } from 'lodash';
 import { containerMockFactory } from './containers.fixtures';
 
@@ -30,11 +31,11 @@ describe('Containers: redux', () => {
 	};
 
 	it('should add container to favourites', () => {
-		const resultState = containersReducer(
+		const resultState: IContainersState = containersReducer(
 			defaultState,
 			ContainersActions.setFavouriteSuccess(projectId, mockContainers[0]._id, true)
 		);
-		const resultContainers = resultState.containers[projectId];
+		const resultContainers = resultState.containersByProject[projectId];
 
 		expect(resultContainers[0].isFavourite).toEqual(true);
 		expect(resultContainers.slice(1).every(container => container.isFavourite)).toEqual(false);
@@ -42,9 +43,9 @@ describe('Containers: redux', () => {
 
 	it('should remove container from favourites', () => {
 		const mockAllFavouritesContainers = times(5, () => containerMockFactory({ isFavourite: true }))
-		const defaultStateWithAllFavourites = {
+		const defaultStateWithAllFavourites: IContainersState = {
 			...INITIAL_STATE,
-			containers: {
+			containersByProject: {
 				[projectId]: mockAllFavouritesContainers
 			}
 		}
