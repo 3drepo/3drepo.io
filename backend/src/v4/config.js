@@ -269,6 +269,17 @@ config.cn_queue = { maxRetries: 3, ...config.cn_queue};
 // upload size limit
 config.uploadSizeLimit = coalesce(config.uploadSizeLimit, 209715200);
 config.resourceUploadSizeLimit =  config.resourceUploadSizeLimit || 104857600;
+
+// upload configurations (v5)
+config.fileUploads = {
+	modelSizeLimit: config.uploadSizeLimit,
+	resourceSizeLimit:config.resourceUploadSizeLimit,
+	avatarSizeLimit: 1048576,
+	imageExtensions: ["png", "jpg", "gif"],
+	uploadDir: config.cn_queue.upload_dir
+
+};
+
 config.version = VERSION;
 config.userNotice = coalesce(config.userNotice, "");
 

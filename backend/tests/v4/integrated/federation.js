@@ -23,6 +23,7 @@ const app = require("../../../src/v4/services/api.js").createApp();
 const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
 const responseCodes = require("../../../src/v4/response_codes.js");
+const { templates: responseCodesV5 } = require("../../../src/v5/utils/responseCodes");
 const helpers = require("../helpers/signUp");
 const C = require("../../../src/v4/constants");
 const async = require("async");
@@ -37,7 +38,7 @@ describe("Federated Model", function () {
 	let agent;
 	const username = "fed";
 	const password = "123456";
-	const subModels = ["proj1", "proj2"];
+	const subModels = ["proj1", "f4ec3efb-3de8-4eeb-81a1-1c62cb2fed40"];
 	const desc = "desc";
 	const type = "type";
 	const fedModelName = "fedproj";
@@ -308,9 +309,8 @@ describe("Federated Model", function () {
 					"model": subModels[0]
 				}]
 			})
-			.expect(400, function(err ,res) {
-
-				expect(res.body.value).to.equal(responseCodes.MODEL_IS_NOT_A_FED.value);
+			.expect(responseCodesV5.invalidArguments.status, function(err ,res) {
+				expect(res.body.code).to.equal(responseCodesV5.invalidArguments.code);
 				done(err);
 
 			});
