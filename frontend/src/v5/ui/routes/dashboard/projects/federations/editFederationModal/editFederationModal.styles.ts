@@ -19,15 +19,8 @@ import styled from 'styled-components';
 import { FormDialogContent } from '@controls/modal/formModal/formDialog.styles';
 import { FormModal as FormModalBase } from '@controls/modal/formModal/formDialog.component';
 import { HeaderButtonsGroup } from '@/v5/ui/routes/dashboard/projects/containers/containers.styles';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-
-export const removeAllButtonTheme = createTheme({
-	palette: {
-		error: {
-			main: '#f44336',
-		},
-	},
-});
+import BaseIncludeIcon from '@assets/icons/include_element.svg';
+import BaseRemoveIcon from '@assets/icons/remove_element.svg';
 
 export const FormModal = styled(FormModalBase)`
 
@@ -45,5 +38,54 @@ export const FormModal = styled(FormModalBase)`
 		display: flex;
 		justify-content: flex-end;
 		margin-right: 15px;
+	}
+`;
+
+export const IconContainer = styled.div`
+	display: grid;
+	min-width: 46px;
+`;
+
+export const IncludeIcon = styled(BaseIncludeIcon)`
+	&:hover {
+		circle {
+			fill: ${({ theme }) => theme.palette.primary.dark};
+		}
+	}
+
+	&:active {
+		circle {
+			fill: ${({ theme }) => theme.palette.primary.darkest};
+		}
+	}
+
+	${({ theme, isSelected }) => isSelected && `
+		&:hover {
+			circle {
+				fill: ${theme.palette.primary.lightest};
+			}
+			path {
+				fill: ${theme.palette.primary.dark};
+		}
+
+		&:active {
+			circle {
+				fill: ${theme.palette.primary.darkest};
+			}
+		}
+	`}
+`;
+
+export const RemoveIcon = styled(BaseRemoveIcon)`
+	&:hover {
+		circle {
+			fill: ${({ theme }) => theme.palette.error.dark};
+		}
+	}
+
+	&:active {
+		circle {
+			fill: ${({ theme }) => theme.palette.error.darkest};
+		}
 	}
 `;

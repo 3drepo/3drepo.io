@@ -15,67 +15,77 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router';
+import React, { SyntheticEvent, useState, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { IContainer } from '@/v5/store/containers/containers.types';
-import { SearchInput } from '@controls/searchInput';
 import { Button } from '@controls/button';
-import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
-import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
+// import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { formatMessage } from '@/v5/services/intl';
 import { IFederation } from '@/v5/store/federations/federations.types';
-import { Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
+import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
+import { Tooltip } from '@material-ui/core';
+import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
+import { useParams } from 'react-router-dom';
+import { isEmpty } from 'lodash';
+import { FormModal, IconContainer, IncludeIcon, RemoveIcon } from './editFederationModal.styles';
+import { ActionButtonProps, EditFederationContainers, IconButtonProps } from './editFederationContainersList/editFederationContainersList.component';
+import { useContainersData } from '../../containers/containers.hooks';
 
-import { FormModal } from './editFederationModal.styles';
-import { EditFederationContainers } from './editFederationContainersList/editFederationContainersList.component';
-import { ThemeProvider } from '@material-ui/core';
-import { removeAllButtonTheme } from './editFederationModal.styles';
-
-type IEditFederationModal = {
+type EditFederationModalProps = {
 	openState: boolean;
 	federation: IFederation;
-	filterQuery?: string;
-	onFilterQueryChange?: (query: string) => void;
 	onClickClose: () => void;
 };
 
 export const EditFederationModal = ({
 	openState,
 	federation,
-	filterQuery,
-	onFilterQueryChange,
 	onClickClose,
-}: IEditFederationModal): JSX.Element => {
-	const containers = ContainersHooksSelectors.selectContainers();
+}: EditFederationModalProps): JSX.Element => {
+	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const { containers } = useContainersData();
 	const getContainerById = (id: string) => containers.find((container: IContainer) => container._id === id);
-	// const { teamspace, project } = useParams() as { teamspace: string, project: string };
-	// const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
-	// const isListPending = ContainersHooksSelectors.selectIsListPending();
-	// const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
-	// const { sortedList, setSortConfig } = useOrderedList(containers, DEFAULT_SORT_CONFIG);
-	const [includedContainers, setIncludedContainers] = useState(federation.subModels.map(getContainerById));
-	const [availableContainers, setAvailableContainer] = useState(
-		includedContainers.filter((container) => !includedContainers.includes(container))
-	);
+	const [includedContainers, setIncludedContainers] = useState<IContainer[]>([]);
+	const [availableContainers, setAvailableContainers] = useState<IContainer[]>([]);
+
+	useEffect(() => {
+		setAvailableContainers(
+			containers.filter((container) => !includedContainers.includes(container)),
+		);
+		setIncludedContainers(federation.subModels.map(getContainerById));
+	}, [containers]);
 
 	const includeContainer = (containerToAdd: IContainer) => {
 		setIncludedContainers([...includedContainers, containerToAdd]);
-		setAvailableContainer(availableContainers.filter((container) => container._id !== containerToAdd._id));
+		setAvailableContainers(availableContainers.filter((container) => container._id !== containerToAdd._id));
+	};
+
+	const includeAllContainers = () => {
+		setIncludedContainers(containers);
+		setAvailableContainers([]);
 	};
 
 	const removeContainer = (containerToRemove: IContainer) => {
-		setIncludedContainers([...includedContainers, containerToRemove]);
+		setAvailableContainers([...availableContainers, containerToRemove]);
 		setIncludedContainers(includedContainers.filter((container) => container._id !== containerToRemove._id));
 	};
 
-	useEffect(() => {
-		// containers = ContainersHooksSelectors.selectContainers();
-	}, [openState]);
-	// useEffect(() => {
-	// 	setAvaicontainers.);
-	// }, [includedContainers, containers]);
+	const removeAllContainers = () => {
+		setIncludedContainers([]);
+		setAvailableContainers(containers);
+	};
+
+	const saveChanges = (event: SyntheticEvent) => {
+		FederationsActionsDispatchers.updateFederationSubModels(
+			teamspace,
+			project,
+			federation._id,
+			includedContainers.map((container) => container._id),
+		);
+		event.preventDefault();
+		onClickClose();
+	};
 
 	return (
 		<FormModal
@@ -86,8 +96,11 @@ export const EditFederationModal = ({
 			}, { federationName: federation.name })}
 			confirmLabel={formatMessage({ id: 'modal.editFederation.confirm', defaultMessage: 'Save Changes' })}
 			onClickClose={onClickClose}
+			onSubmit={saveChanges}
 		>
 			<EditFederationContainers
+				containers={includedContainers}
+				hasContainers={!isEmpty(includedContainers)}
 				title={
 					formatMessage({
 						id: 'modal.editFederation.containers.title',
@@ -99,25 +112,47 @@ export const EditFederationModal = ({
 					visible: <FormattedMessage id="modal.editFederation.available.collapse.tooltip.hide" defaultMessage="Hide available containers" />,
 				}}
 				emptyListMessage={(
-					<FormattedMessage
-						id="modal.editFederation.included.emptyMessage"
-						defaultMessage="You haven’t added any Containers to this Federation. Add Federations from the list of Containers below."
-					/>
+					<DashboardListEmptyText>
+						<FormattedMessage
+							id="modal.editFederation.included.emptyMessage"
+							defaultMessage="You haven’t added any Containers to this Federation. Add Federations from the list of Containers below."
+						/>
+					</DashboardListEmptyText>
 				)}
-				containers={includedContainers}
-				actionButton={(
-					<ThemeProvider theme={removeAllButtonTheme}>
-						<Button
-							variant="outlined"
-							color="error"
+				actionButton={({ children, disabled }: ActionButtonProps) => (
+					<Button
+						errorButton
+						onClick={removeAllContainers}
+						disabled={disabled}
+					>
+						{children}
+					</Button>
+				)}
+				actionButtonTexts={{
+					allResults: <FormattedMessage id="modal.editFederation.included.removeAll" defaultMessage="Remove all" />,
+					filteredResults: <FormattedMessage id="modal.editFederation.included.removeShown" defaultMessage="Remove shown" />,
+				}}
+				iconButton={({ container }: IconButtonProps) => (
+					<Tooltip title={formatMessage({
+						id: 'modal.editFederation.available.remove.tooltip',
+						defaultMessage: 'Remove container',
+					})}
+					>
+						<IconContainer
+							onClick={(event) => {
+								event.stopPropagation();
+								removeContainer(container);
+							}}
 						>
-							<FormattedMessage id="modal.editFederation.included.removeAll" defaultMessage="Remove All" />
-						</Button>
-					</ThemeProvider>
+							<RemoveIcon />
+						</IconContainer>
+					</Tooltip>
 				)}
 			/>
 			<Divider />
 			<EditFederationContainers
+				containers={availableContainers}
+				hasContainers={!isEmpty(availableContainers)}
 				title={
 					formatMessage({
 						id: 'modal.editFederation.containers.title',
@@ -129,19 +164,42 @@ export const EditFederationModal = ({
 					visible: <FormattedMessage id="modal.editFederation.included.collapse.tooltip.hide" defaultMessage="Hide included federations" />,
 				}}
 				emptyListMessage={(
-					<FormattedMessage
-						id="modal.editFederation.available.emptyMessage"
-						defaultMessage="You don’t have any available Containers."
-					/>
+					<DashboardListEmptyText>
+						<FormattedMessage
+							id="modal.editFederation.available.emptyMessage"
+							defaultMessage="You don’t have any available Containers."
+						/>
+					</DashboardListEmptyText>
 				)}
-				containers={getAvailableContainers() || []}
-				actionButton={(
+				actionButton={({ children, disabled }) => (
 					<Button
 						variant="outlined"
 						color="primary"
+						onClick={includeAllContainers}
+						disabled={disabled}
 					>
-						<FormattedMessage id="modal.editFederation.included.addAll" defaultMessage="Add All" />
+						{children}
 					</Button>
+				)}
+				actionButtonTexts={{
+					allResults: <FormattedMessage id="modal.editFederation.available.includeAll" defaultMessage="Include all" />,
+					filteredResults: <FormattedMessage id="modal.editFederation.available.includeShown" defaultMessage="Include shown" />,
+				}}
+				iconButton={({ container, isSelected }: IconButtonProps) => (
+					<Tooltip title={formatMessage({
+						id: 'modal.editFederation.available.include.tooltip',
+						defaultMessage: 'Include container',
+					})}
+					>
+						<IconContainer
+							onClick={(event) => {
+								event.stopPropagation();
+								includeContainer(container);
+							}}
+						>
+							<IncludeIcon isSelected={isSelected} />
+						</IconContainer>
+					</Tooltip>
 				)}
 			/>
 		</FormModal>

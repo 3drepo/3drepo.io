@@ -15,30 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DashboardListEmptyContainer } from '@components/dashboard/dashboardList';
-import { DashboardListHeaderContainer } from '@components/dashboard/dashboardList/dashboardListHeader/dashboardListHeader.styles';
 import styled from 'styled-components';
+import {
+	DashboardListItemRow as DashboardListItemRowBase,
+	DashboardListItemIcon,
+} from '@components/dashboard/dashboardList/dashboardListItem/components';
 
-export const Container = styled.div`
-    margin: 16px 0;
-    width: 100%;
+export const DashboardListItemRow = styled(DashboardListItemRowBase)`
+    padding-left: 20px;
 
-    ${DashboardListEmptyContainer} {
-		background: transparent;
+    ${DashboardListItemIcon} {
+        min-width: 32px;
+        margin-right: 20px;
+    }
+
+
+	// TODO Remove
+	& > div:nth-child(even) {
+		height: 100%;
+		background: darkred;
 	}
 
-	${DashboardListHeaderContainer} {
-        margin-left: 46px;
-		padding-right: 10px;
+	& > div:nth-child(4) {
+		height: 100%;
+		background: darkgreen;
 	}
-`;
-
-export const CollapseSideElementGroup = styled.div`
-    display: flex;
-    align-items: center;
-`;
-
-export const IconButtonContainer = styled.div`
-    padding: 0 8px;
-    cursor: pointer;
 `;
