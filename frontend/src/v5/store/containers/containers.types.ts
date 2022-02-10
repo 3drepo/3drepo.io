@@ -19,7 +19,6 @@ import { Action } from 'redux';
 
 export interface IContainersState {
 	containersByProject: Record<string, IContainer[]>;
-	isListPending: boolean;
 }
 
 export enum UploadStatuses {

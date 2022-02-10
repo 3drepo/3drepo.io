@@ -39,19 +39,12 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	fetchContainerStatsSuccess: ['projectId', 'containerId', 'containerStats'],
 	createContainer: ['teamspace', 'projectId', 'newContainer'],
 	createContainerSuccess: ['projectId', 'container'],
-	fetchRevisions: ['teamspace', 'projectId', 'containerId'],
-	fetchRevisionsSuccess: ['projectId', 'containerId', 'revisions'],
-	setRevisionVoidStatus: ['teamspace', 'projectId', 'containerId', 'revisionId', 'isVoid'],
-	setRevisionVoidStatusSuccess: ['projectId', 'containerId', 'revisionId', 'isVoid'],
-	setRevisionsIsPending: ['projectId', 'containerId', 'isPending'],
-	setIsListPending: ['isPending'],
 	deleteContainer: ['teamspace', 'projectId', 'containerId'],
 	deleteContainerSuccess: ['projectId', 'containerId'],
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
 
 export const INITIAL_STATE: IContainersState = {
 	containersByProject: {},
-	isListPending: true,
 };
 
 export const setFavourite = (state = INITIAL_STATE, {
@@ -130,7 +123,6 @@ export const deleteContainerSuccess = (state = INITIAL_STATE, {
 
 export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
 	[ContainersTypes.FETCH_CONTAINERS_SUCCESS]: fetchContainersSuccess,
-	[ContainersTypes.SET_IS_LIST_PENDING]: setIsListPending,
 	[ContainersTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
 	[ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS]: fetchStatsSuccess,
 	[ContainersTypes.CREATE_CONTAINER_SUCCESS]: createContainerSuccess,
