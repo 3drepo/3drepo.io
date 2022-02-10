@@ -89,6 +89,19 @@ export interface DeleteFederationSuccessPayload {
 	federationId: string;
 }
 
+export interface UpdateFederationSubModelsPayload {
+	teamspace: string;
+	projectId: string;
+	federationId: string;
+	subModels: string[];
+}
+
+export interface UpdateFederationSubModelsSuccessPayload {
+	projectId: string;
+	federationId: string;
+	subModels: string[];
+}
+
 export type FetchFederationsAction = Action<'FETCH_FEDERATIONS'> & FetchFederationsPayload;
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;
 export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & FavouritePayload;
@@ -99,6 +112,8 @@ export type FetchFederationStatsAction = Action<'FETCH_FEDERATION_STATS'> & Fetc
 export type FetchFederationStatsSuccessAction = Action<'FETCH_FEDERATION_STATS_SUCCESS'> & FetchFederationStatsSuccessPayload;
 export type DeleteFederationAction = Action<'DELETE'> & DeleteFederationPayload;
 export type DeleteFederationSuccessAction = Action<'DELETE_SUCCESS'> & DeleteFederationSuccessPayload;
+export type UpdateFederationSubModelsAction = Action<'UPDATE_FEDERATION_SUB_MODELS'> & UpdateFederationSubModelsPayload;
+export type UpdateFederationSubModelsActionSuccess = Action<'UPDATE_FEDERATION_SUB_MODELS_SUCCESS'> & UpdateFederationSubModelsSuccessPayload;
 
 export interface IFederationsActionCreators {
 	fetchFederations: (teamspace: string, projectId: string) => FetchFederationsAction;
@@ -115,4 +130,15 @@ export interface IFederationsActionCreators {
 	setIsListPending: (isPending: boolean) => SetIsListPendingAction;
 	deleteFederation: (teamspace: string, projectId: string, federationId: string) => DeleteFederationAction;
 	deleteFederationSuccess: (projectId: string, federationId: string) => DeleteFederationSuccessAction;
+	updateFederationSubModels: (
+		teamspace: string,
+		projectId: string,
+		federationId: string,
+		subModels: string[]
+	) => UpdateFederationSubModelsAction;
+	updateFederationSubModelsSuccess: (
+		projectId: string,
+		federationId: string,
+		subModels: string[],
+	) => UpdateFederationSubModelsActionSuccess;
 }
