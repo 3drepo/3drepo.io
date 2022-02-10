@@ -42,6 +42,7 @@ export const selectHasContainers = createSelector(
 
 export const selectIsListPending = createSelector(
 	selectContainersDomain, selectCurrentProject,
+	// Checks if the containers for the project have been fetched
 	(state, currentProject) => !state.containersByProject[currentProject],
 );
 

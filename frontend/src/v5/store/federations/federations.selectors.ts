@@ -41,6 +41,7 @@ export const selectHasFederations = createSelector(
 
 export const selectIsListPending = createSelector(
 	selectFederationsDomain, selectCurrentProject,
+	// Checks if the federations for the project have been fetched
 	(state, currentProject) => !state.federationsByProject[currentProject],
 );
 
