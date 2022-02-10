@@ -227,10 +227,10 @@ class Mitigation {
 	}
 
 	async updateMitigationsFromRisk(account, model, oldRisk, updatedRisk) {
-		// const isFeatureOn = await this.isMitigationCreationFeatureOn(account);
-		// if(!isFeatureOn) {
-		// 	return;
-		// }
+		const isFeatureOn = await this.isMitigationCreationFeatureOn(account);
+		if(!isFeatureOn) {
+			return;
+		}
 
 		const riskId = updatedRisk._id;
 		const oldStatusIsResolved = !!oldRisk?.mitigation_desc && isMitigationStatusResolved(oldRisk.mitigation_status);
