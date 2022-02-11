@@ -18,7 +18,7 @@
 "use strict";
 
 module.exports.createApp = function (server, serverConfig) {
-	const userToSocket = {};
+	const socketIdToSockets = {};
 
 	const { session } = require("./session");
 
@@ -51,12 +51,12 @@ module.exports.createApp = function (server, serverConfig) {
 			try {
 			// consume event queue and fire msg to clients if they have subscribed related event
 				if(msg.event && msg.channel && !msg.dm) {
-					const emitter = userToSocket[msg.emitter]?.broadcast || io;
-					console.log(`${emitter === io ? "General" : "User"} emitter ${msg.emitter}`, Object.keys(userToSocket));
+					const emitter = socketIdToSockets[msg.emitter]?.broadcast || io;
+					console.log(`${emitter === io ? "General" : "User"} emitter ${msg.emitter}`, Object.keys(socketIdToSockets));
 					emitter.to(msg.channel).emit(msg.event, msg.data);
 				}
 				if (msg.dm && msg.event && msg.data) {
-					const recipient = userToSocket[msg.recipient];
+					const recipient = socketIdToSockets[msg.recipient];
 					if (recipient) {
 						recipient.send({event: msg.event, data: msg.data });
 					}
@@ -66,8 +66,6 @@ module.exports.createApp = function (server, serverConfig) {
 			}
 		});
 	}
-
-	const socketIdBySession = {};
 
 	function initiateSocket() {
 		subscribeToEventMessages();
@@ -80,18 +78,11 @@ module.exports.createApp = function (server, serverConfig) {
 				systemLogger.logError(err.stack);
 			});
 
-			const sessionRef = socket?.handshake?.session?.user?.socketId;
+			socketIdToSockets[socket.id] = socket;
+
 			const sessionId = socket?.handshake?.session?.id;
 
-			if (sessionRef) {
-				if (socketIdBySession[sessionRef]) {
-					delete userToSocket[socketIdBySession[sessionRef]];
-				}
-
-				userToSocket[socket.id] = socket;
-				socketIdBySession[sessionRef] = socket.id;
-				console.log("session joined", socket.id);
-			}
+			console.log("session joined", socket.id);
 
 			socket.on("join", data => {
 				// check permission if the user have permission to join room
