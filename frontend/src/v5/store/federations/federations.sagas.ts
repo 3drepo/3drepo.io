@@ -123,7 +123,7 @@ export function* updateFederationContainers({
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({
 				id: 'federation.update.containers.error',
-				defaultMessage: 'trying to update federation submodels',
+				defaultMessage: 'trying to update federation containers',
 			}),
 			error,
 		}));

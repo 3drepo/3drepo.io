@@ -49,10 +49,10 @@ export const EditFederationModal = ({
 	const [availableContainers, setAvailableContainers] = useState<IContainer[]>([]);
 
 	useEffect(() => {
+		setIncludedContainers(federation.containers.map(getContainerById));
 		setAvailableContainers(
-			containers.filter((container) => !includedContainers.includes(container)),
+			containers.filter((container) => !federation.containers.includes(container._id)),
 		);
-		setIncludedContainers(federation?.containers.map(getContainerById));
 	}, [containers]);
 
 	const includeContainer = (containerToAdd: IContainer) => {
