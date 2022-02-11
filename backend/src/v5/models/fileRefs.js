@@ -61,4 +61,14 @@ FileRefs.removeAllFilesFromModel = async (teamspace, model) => {
 	return Promise.all(refCols.map(({ name }) => removeAllFiles(teamspace, name)));
 };
 
+FileRefs.downloadRevisionFiles = async (teamspace, model) => {
+	const collList = await db.listCollections(teamspace);
+	const refCols = collList.filter(({ name }) => {
+		// eslint-disable-next-line security/detect-non-literal-regexp
+		const res = name.match(new RegExp(`^${model}.*\\.ref$`));
+		return !!res?.length;
+	});
+	return Promise.all(refCols.map(({ name }) => removeAllFiles(teamspace, name)));
+};
+
 module.exports = FileRefs;

@@ -60,6 +60,14 @@ const newRevision = (req, res) => {
 	);
 };
 
+const downloadRevisionFiles = (req, res) => {
+	const { teamspace, container, revision } = req.params;
+
+	Containers.downloadRevisionFiles(teamspace, container, revision).then((fileBuffer) => {
+		respond(req, res, templates.ok, fileBuffer);
+	}).catch((err) => respond(req, res, err));
+};
+
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 	/**
@@ -253,6 +261,65 @@ const establishRoutes = () => {
 	 *         description: updates the status of the revision
 	 */
 	router.patch('/:revision', hasWriteAccessToContainer, validateUpdateRevisionData, updateRevisionStatus);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions/{revision}/files:
+	 *   get:
+	 *     description: Downloads the model files of the selected revision
+	 *     tags: [Containers]
+	 *     operationId: downloadRevisionFiles
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - project:
+	 *         name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *         type: string
+	 *       - container:
+	 *         name: container
+	 *         description: Container ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *         type: string
+	 *       - revision:
+	 *         name: revision
+	 *         description: Revision ID or Revision tag
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *         type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: downloads the revision files
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 revisions:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       file:
+	 *                         type: string
+	 *                         format: binary
+	 */
+	 router.get('/:revision/files', downloadRevisionFiles);
 
 	return router;
 };
