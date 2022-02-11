@@ -18,12 +18,12 @@
 "use strict";
 
 const expressSession = require("express-session");
-const { getCollection, getSessionStore } = require("../handler/db");
+const db = require("../handler/db");
 const config = require("../config");
 const C = require("../constants");
 const utils = require("../utils");
 const { systemLogger } = require("../logger");
-const store = getSessionStore(expressSession);
+const store = db.getSessionStore(expressSession);
 const useragent = require("useragent");
 
 const initialiseSession = () => {
@@ -47,6 +47,10 @@ const initialiseSession = () => {
 };
 
 module.exports.session = initialiseSession();
+
+const updateSocketReference = (ref, socketId) => {
+
+};
 
 module.exports.regenerateAuthSession = (req, user) => {
 	return new Promise((resolve, reject) => {
@@ -86,10 +90,10 @@ module.exports.getSessionsByUsername = (username) => {
 		"session.user.username": username
 	};
 
-	return getCollection("admin", "sessions").then(_dbCol => _dbCol.find(query).toArray());
+	return db.find("admin", "sessions", query);
 };
 
 module.exports.removeSessions = (sessionIds) => {
 	const query = { _id: { $in: sessionIds } };
-	return getCollection("admin", "sessions").then(_dbCol => _dbCol.deleteMany(query));
+	return db.deleteMany("admin", "sessions", query);
 };
