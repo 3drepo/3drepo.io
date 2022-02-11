@@ -25,7 +25,6 @@ export const DashboardListItemRow = styled(DashboardListItemRowBase)`
     padding-left: 20px;
 
     ${DashboardListItemIcon} {
-        min-width: 32px;
         margin-right: 20px;
     }
 `;

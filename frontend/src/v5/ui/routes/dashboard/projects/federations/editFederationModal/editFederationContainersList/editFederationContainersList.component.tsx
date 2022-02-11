@@ -112,19 +112,19 @@ export const EditFederationContainers = ({
 				)}
 			>
 				<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
-					<DashboardListHeaderLabel name="name" width={380}>
+					<DashboardListHeaderLabel name="name" minWidth={116}>
 						<FormattedMessage id="modal.editFederation.list.header.container" defaultMessage="Container" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="revisionsCount" width={181} hideWhenSmallerThan={Display.Desktop}>
+					<DashboardListHeaderLabel name="revisionsCount" width={186} hideWhenSmallerThan={Display.Desktop}>
 						<FormattedMessage id="modal.editFederation.list.header.revisions" defaultMessage="Revisions" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="code" width={280}>
+					<DashboardListHeaderLabel name="code" width={160}>
 						<FormattedMessage id="modal.editFederation.list.header.containerCode" defaultMessage="Container code" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="type" width={186} hideWhenSmallerThan={Display.Tablet}>
+					<DashboardListHeaderLabel name="type" width={160} hideWhenSmallerThan={Display.Tablet}>
 						<FormattedMessage id="modal.editFederation.list.header.category" defaultMessage="Category" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="lastUpdated" width={180} minWidth={150}>
+					<DashboardListHeaderLabel name="lastUpdated" width={188}>
 						<FormattedMessage id="modal.editFederation.list.header.lastUpdated" defaultMessage="Last updated" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>

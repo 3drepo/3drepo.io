@@ -57,11 +57,14 @@ export const EditFederationContainersListItem = ({
 				selected={isSelected}
 				onClick={() => onSelectOrToggleItem(container._id)}
 			>
-				<DashboardListItemIcon width={46}>
+				<DashboardListItemIcon
+					width={46}
+					minWidth={46}
+				>
 					<Icon />
 				</DashboardListItemIcon>
 				<DashboardListItemTitle
-					width={380}
+					minWidth={116}
 					subtitle={(
 						<LatestRevision
 							name={container.latestRevision}
@@ -80,7 +83,7 @@ export const EditFederationContainersListItem = ({
 					</Highlight>
 				</DashboardListItemTitle>
 				<DashboardListItemButton
-					width={181}
+					width={186}
 					onClick={() => onSelectOrToggleItem(container._id)}
 					hideWhenSmallerThan={Display.Desktop}
 					tooltipTitle={
@@ -94,7 +97,7 @@ export const EditFederationContainersListItem = ({
 					/>
 				</DashboardListItemButton>
 				<DashboardListItemText
-					width={280}
+					width={160}
 					selected={isSelected}
 				>
 					<Highlight search={filterQuery}>
@@ -102,8 +105,7 @@ export const EditFederationContainersListItem = ({
 					</Highlight>
 				</DashboardListItemText>
 				<DashboardListItemText
-					width={186}
-					tabletWidth={125}
+					width={160}
 					hideWhenSmallerThan={Display.Tablet}
 					selected={isSelected}
 				>
@@ -111,7 +113,10 @@ export const EditFederationContainersListItem = ({
 						{container.type}
 					</Highlight>
 				</DashboardListItemText>
-				<DashboardListItemText width={180} selected={isSelected}>
+				<DashboardListItemText
+					width={188}
+					selected={isSelected}
+				>
 					{container.lastUpdated ? formatDate(container.lastUpdated) : ''}
 				</DashboardListItemText>
 			</DashboardListItemRow>
