@@ -22,9 +22,9 @@ import {
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
 
 export const DashboardListItemRow = styled(DashboardListItemRowBase)`
-    padding-left: 20px;
+	padding-left: 20px;
 
-    ${DashboardListItemIcon} {
-        margin-right: 20px;
-    }
+	${DashboardListItemIcon} {
+		margin-right: 20px;
+	}
 `;

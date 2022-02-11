@@ -20,25 +20,25 @@ import { DashboardListHeaderContainer } from '@components/dashboard/dashboardLis
 import styled from 'styled-components';
 
 export const Container = styled.div`
-    margin: 16px 0;
-    width: 100%;
+	margin: 16px 0;
+	width: 100%;
 
-    ${DashboardListEmptyContainer} {
+	${DashboardListEmptyContainer} {
 		background: transparent;
 	}
 
 	${DashboardListHeaderContainer} {
-        margin-left: 46px;
+		margin-left: 46px;
 		padding-right: 10px;
 	}
 `;
 
 export const CollapseSideElementGroup = styled.div`
-    display: flex;
-    align-items: center;
+	display: flex;
+	align-items: center;
 `;
 
 export const IconButtonContainer = styled.div`
-    padding: 0 8px;
-    cursor: pointer;
+	padding: 0 8px;
+	cursor: pointer;
 `;
