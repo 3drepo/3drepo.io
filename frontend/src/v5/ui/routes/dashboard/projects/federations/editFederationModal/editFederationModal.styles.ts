@@ -60,17 +60,28 @@ export const IncludeIcon = styled(BaseIncludeIcon)`
 	}
 
 	${({ theme, isSelected }) => isSelected && `
+		circle {
+			fill: ${theme.palette.primary.lightest};
+		}
+		path {
+			fill: ${theme.palette.primary.dark};
+		}
+
 		&:hover {
 			circle {
-				fill: ${theme.palette.primary.lightest};
+				fill: ${theme.palette.primary.dark};
 			}
 			path {
-				fill: ${theme.palette.primary.dark};
+				fill: ${theme.palette.primary.lightest};
+			}
 		}
 
 		&:active {
 			circle {
 				fill: ${theme.palette.primary.darkest};
+			}
+			path {
+				fill: ${theme.palette.primary.lightest};
 			}
 		}
 	`}
