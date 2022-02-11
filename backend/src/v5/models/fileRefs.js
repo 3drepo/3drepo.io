@@ -40,6 +40,10 @@ const removeAllFiles = async (teamspace, collection) => {
 	return Promise.all(deletePromises);
 };
 
+const findOne = async (teamspace, collection, query, projection, sort) => {
+	return await db.find(teamspace, collectionName(collection), query, projection, sort);
+};
+
 FileRefs.getTotalSize = async (teamspace, collection) => {
 	const pipelines = [
 		{ $match: {} },
