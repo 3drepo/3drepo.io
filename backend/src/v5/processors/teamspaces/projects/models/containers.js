@@ -20,6 +20,7 @@ const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const Groups = require('./commons/groups');
+const { downloadRevisionFiles } = require('../../../../models/fileRefs');
 const fs = require('fs/promises');
 const { getProjectById } = require('../../../../models/projects');
 const { logger } = require('../../../../utils/logger');
@@ -84,7 +85,8 @@ Containers.newRevision = (teamspace, model, data, file) => queueModelUpload(team
 Containers.updateRevisionStatus = updateRevisionStatus;
 
 Containers.downloadRevisionFiles = async (teamspace, container, revision) => {
-	
+	const fileEntry = 
+	return await downloadRevisionFiles(teamspace, container, revision);
 };
 
 
