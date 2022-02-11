@@ -22,6 +22,7 @@ const router = express.Router({ mergeParams: true });
 const middlewares = require("../middlewares/middlewares");
 const responseCodes = require("../response_codes.js");
 const Group = require("../models/group");
+const C = require("../constants");
 const {v5Path} = require("../../interop");
 const GroupsV5 = require(`${v5Path}/processors/teamspaces/projects/models/commons/groups`);
 const { serialiseGroupArray} = require(`${v5Path}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups`);
@@ -553,7 +554,7 @@ function findGroup(req, res, next) {
 function createGroup(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model } = req.params;
-	const sessionId = req.session.user?.socketId;
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 	const rid = req.params.rid ? req.params.rid : null;
 	const branch = rid ? null : "master";
 
@@ -565,7 +566,7 @@ function createGroup(req, res, next) {
 }
 
 function deleteGroups(req, res, next) {
-	const sessionId = req.session.user?.socketId;
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 	const place = utils.APIInfo(req);
 	const { account, model } = req.params;
 
@@ -585,7 +586,7 @@ function deleteGroups(req, res, next) {
 function updateGroup(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, uid } = req.params;
-	const sessionId = req.session.user?.socketId;
+	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
 	const rid = req.params.rid ? req.params.rid : null;
 	const branch = rid ? null : "master";

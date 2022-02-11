@@ -51,8 +51,8 @@ module.exports.createApp = function (server, serverConfig) {
 			try {
 			// consume event queue and fire msg to clients if they have subscribed related event
 				if(msg.event && msg.channel && !msg.dm) {
-					const socketId = socketIdBySession[msg.emitter];
-					const emitter = userToSocket[socketId]?.broadcast || io;
+					const emitter = userToSocket[msg.emitter]?.broadcast || io;
+					console.log(`${emitter === io ? "General" : "User"} emitter ${msg.emitter}`, Object.keys(userToSocket));
 					emitter.to(msg.channel).emit(msg.event, msg.data);
 				}
 				if (msg.dm && msg.event && msg.data) {
@@ -88,8 +88,9 @@ module.exports.createApp = function (server, serverConfig) {
 					delete userToSocket[socketIdBySession[sessionRef]];
 				}
 
-				userToSocket[socket.client.id] = socket;
-				socketIdBySession[sessionRef] = socket.client.id;
+				userToSocket[socket.id] = socket;
+				socketIdBySession[sessionRef] = socket.id;
+				console.log("session joined", socket.id);
 			}
 
 			socket.on("join", data => {
@@ -110,7 +111,7 @@ module.exports.createApp = function (server, serverConfig) {
 						socket.emit(joinedEventName, { account: data.account, model: data.model});
 					} else {
 						socket.emit(credentialErrorEventName, { message: `You have no access to join room ${data.account}${modelNameSpace}`});
-						systemLogger.logError(`${username} - ${sessionId} - ${socket.client.id} has no access to join room ${data.account}${modelNameSpace}`, {
+						systemLogger.logError(`${username} - ${sessionId} - ${socket.id} has no access to join room ${data.account}${modelNameSpace}`, {
 							username,
 							account: data.account,
 							model: data.model
@@ -126,7 +127,7 @@ module.exports.createApp = function (server, serverConfig) {
 				const modelNameSpace = data.model ?  `::${data.model}` : "";
 
 				socket.leave(`${data.account}${modelNameSpace}`);
-				systemLogger.logInfo(`${sessionId} - ${socket.client.id} has left room ${data.account}${modelNameSpace}`, {
+				systemLogger.logInfo(`${sessionId} - ${socket.id} has left room ${data.account}${modelNameSpace}`, {
 					account: data.account,
 					model: data.model
 				});
