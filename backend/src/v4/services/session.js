@@ -46,46 +46,54 @@ const initialiseSession = () => {
 	});
 };
 
-module.exports.session = initialiseSession();
+const SessionService = {};
 
-const updateSocketReference = (ref, socketId) => {
+SessionService.session = initialiseSession();
 
+SessionService.updateSocketReference = (ref, socketId) => db.updateOne("admin", "sessions.sockets", { _id: ref}, { $set:  {socketId}}, true);
+
+SessionService.getSocketIdByReference = async (ref) => {
+	const entry = await db.findOne("admin", "sessions.sockets", { _id: ref });
+	return entry?.socketId;
 };
 
-module.exports.regenerateAuthSession = (req, user) => {
+SessionService.regenerateAuthSession = (req, user) => {
 	return new Promise((resolve, reject) => {
-		req.session.regenerate((err) => {
+		req.session.regenerate(async (err) => {
 			systemLogger.logDebug(`Creating session for ${user.username}`);
 			if(err) {
 				reject(err);
-			} else {
-				systemLogger.logDebug("Authenticated user and signed token.");
-				user = {...user, socketId: req.headers[C.HEADER_SOCKET_ID], webSession: false};
-
-				if (req.headers && req.headers["user-agent"]) {
-					const ua = useragent.is(req.headers["user-agent"]);
-					user.webSession = ["webkit", "opera", "ie", "chrome", "safari", "mobile_safari", "firefox", "mozilla", "android"].
-						some(browserType => ua[browserType]); // If any of these browser types matches then is a websession
-				}
-
-				if (req.headers.referer) {
-					user.referer = utils.getURLDomain(req.headers.referer);
-				}
-
-				req.session[C.REPO_SESSION_USER] = user;
-				req.session.cookie.domain = config.cookie_domain;
-
-				if (config.cookie.maxAge) {
-					req.session.cookie.maxAge = config.cookie.maxAge;
-				}
-
-				resolve(req.session);
+				return;
 			}
+
+			const socketId = utils.generateHashString();
+			await SessionService.updateSocketReference(socketId, req.headers[C.HEADER_SOCKET_ID]);
+			user = {...user, socketId, webSession: false};
+
+			if (req.headers && req.headers["user-agent"]) {
+				const ua = useragent.is(req.headers["user-agent"]);
+				user.webSession = ["webkit", "opera", "ie", "chrome", "safari", "mobile_safari", "firefox", "mozilla", "android"].
+					some(browserType => ua[browserType]); // If any of these browser types matches then is a websession
+			}
+
+			if (req.headers.referer) {
+				user.referer = utils.getURLDomain(req.headers.referer);
+			}
+
+			req.session[C.REPO_SESSION_USER] = user;
+			req.session.cookie.domain = config.cookie_domain;
+
+			if (config.cookie.maxAge) {
+				req.session.cookie.maxAge = config.cookie.maxAge;
+			}
+
+			resolve(req.session);
+
 		});
 	});
 };
 
-module.exports.getSessionsByUsername = (username) => {
+SessionService.getSessionsByUsername = (username) => {
 	const query = {
 		"session.user.username": username
 	};
@@ -93,7 +101,9 @@ module.exports.getSessionsByUsername = (username) => {
 	return db.find("admin", "sessions", query);
 };
 
-module.exports.removeSessions = (sessionIds) => {
+SessionService.removeSessions = (sessionIds) => {
 	const query = { _id: { $in: sessionIds } };
 	return db.deleteMany("admin", "sessions", query);
 };
+
+module.exports = SessionService;
