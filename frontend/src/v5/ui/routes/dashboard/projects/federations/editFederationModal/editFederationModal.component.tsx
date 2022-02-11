@@ -19,7 +19,6 @@ import React, { SyntheticEvent, useState, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { Button } from '@controls/button';
-// import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { formatMessage } from '@/v5/services/intl';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
@@ -53,7 +52,7 @@ export const EditFederationModal = ({
 		setAvailableContainers(
 			containers.filter((container) => !includedContainers.includes(container)),
 		);
-		setIncludedContainers(federation.subModels.map(getContainerById));
+		setIncludedContainers(federation.containers.map(getContainerById));
 	}, [containers]);
 
 	const includeContainer = (containerToAdd: IContainer) => {
@@ -77,7 +76,7 @@ export const EditFederationModal = ({
 	};
 
 	const saveChanges = (event: SyntheticEvent) => {
-		FederationsActionsDispatchers.updateFederationSubModels(
+		FederationsActionsDispatchers.updateFederationContainers(
 			teamspace,
 			project,
 			federation._id,

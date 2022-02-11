@@ -35,14 +35,13 @@ export const prepareSingleFederationData = (
 	federation: FetchFederationsItemResponse,
 	stats?: FetchFederationStatsResponse,
 ): IFederation => {
-	const subModels = stats?.subModels ?? (federation as any).subModels ?? [];
+	const containers = stats?.containers ?? (federation as any).containers ?? [];
 
 	return {
 		...federation,
 		code: stats?.code ?? '',
 		status: stats?.status ?? UploadStatuses.OK,
-		subModels,
-		containers: subModels.length,
+		containers: containers.length,
 		issues: stats?.tickets.issues ?? 0,
 		risks: stats?.tickets.risks ?? 0,
 		lastUpdated: getNullableDate(stats?.lastUpdated),

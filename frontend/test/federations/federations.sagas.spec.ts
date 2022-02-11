@@ -23,7 +23,7 @@ import { pick, times } from 'lodash';
 import { federationMockFactory } from './federations.fixtures';
 import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
 import { FetchFederationStatsResponse, IFederation } from '@/v5/store/federations/federations.types';
-import { prepareMockSubModels } from './federations.fixtures';
+import { prepareMockContainers } from './federations.fixtures';
 
 // TODO: review this
 // There is something weird as how the tests are setup
@@ -64,7 +64,7 @@ describe('Federations: sagas', () => {
 
 	describe('fetchFederations', () => {
 		const mockFederations = times(2, () => federationMockFactory());
-		const mockFederationsBaseResponse = mockFederations.map((federation) => pick(federation, ['_id', 'name', 'role', 'isFavourite', 'subModels']));
+		const mockFederationsBaseResponse = mockFederations.map((federation) => pick(federation, ['_id', 'name', 'role', 'isFavourite', 'containers']));
 		const mockFederationsWithoutStats = prepareFederationsData(mockFederations);
 
 		it('should fetch federations data', async () => {
@@ -84,7 +84,7 @@ describe('Federations: sagas', () => {
 
 		it('should fetch stats', async () => {
 			const prepareMockStatsReply = (federation: IFederation): FetchFederationStatsResponse => ({
-				subModels: federation.subModels,
+				containers: federation.containers,
 				tickets: {
 					issues: federation.issues,
 					risks: federation.risks,
@@ -121,16 +121,16 @@ describe('Federations: sagas', () => {
 		})
 	})
 
-	describe('updateFederationSubModels', () => {
-		const mockSubModels = prepareMockSubModels();
-		it('should call updateFederationSubModels endpoint', async () => {
+	describe('updateFederationContainers', () => {
+		const mockContainers = prepareMockContainers();
+		it('should call updateFederationContainers endpoint', async () => {
 			mockServer
 				.post(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/revisions`)
 				.reply(200);
 
 			await expectSaga(FederationsSaga.default)
-				.dispatch(FederationsActions.updateFederationSubModels(teamspace, projectId, federationId, mockSubModels))
-				.put(FederationsActions.updateFederationSubModelsSuccess(projectId, federationId, mockSubModels))
+				.dispatch(FederationsActions.updateFederationContainers(teamspace, projectId, federationId, mockContainers))
+				.put(FederationsActions.updateFederationContainersSuccess(projectId, federationId, mockContainers))
 				.silentRun();
 		})
 	})
