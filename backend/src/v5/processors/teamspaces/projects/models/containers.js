@@ -83,6 +83,11 @@ Containers.newRevision = (teamspace, model, data, file) => queueModelUpload(team
 
 Containers.updateRevisionStatus = updateRevisionStatus;
 
+Containers.downloadRevisionFiles = async (teamspace, container, revision) => {
+	
+};
+
+
 Containers.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {
 	const accessibleContainers = await Containers.getContainerList(teamspace, project, username);
 	return appendFavourites(username, teamspace, accessibleContainers, favouritesToAdd);
