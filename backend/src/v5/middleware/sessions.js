@@ -17,6 +17,7 @@
 
 const config = require('../utils/config');
 const { events } = require('../services/eventsManager/eventsManager.constants');
+const { generateUUIDString } = require('../utils/helper/uuids');
 const { getURLDomain } = require('../utils/helper/strings');
 const { isFromWebBrowser } = require('../utils/helper/userAgent');
 const { logger } = require('../utils/logger');
@@ -32,7 +33,7 @@ Sessions.createSession = (req, res) => {
 			logger.logError(`Failed to regenerate session: ${err.message}`);
 			respond(req, res, err);
 		} else {
-			const updatedUser = { ...req.loginData, socketId: req.headers['x-socket-id'], webSession: false };
+			const updatedUser = { ...req.loginData, socketId: generateUUIDString(), webSession: false };
 
 			if (req.headers['user-agent']) {
 				updatedUser.webSession = isFromWebBrowser(req.headers['user-agent']);
