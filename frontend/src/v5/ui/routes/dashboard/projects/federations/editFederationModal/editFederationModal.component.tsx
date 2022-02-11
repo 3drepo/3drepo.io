@@ -55,9 +55,9 @@ export const EditFederationModal = ({
 		);
 	}, [containers]);
 
-	const includeContainer = (containerToAdd: IContainer) => {
-		setIncludedContainers([...includedContainers, containerToAdd]);
-		setAvailableContainers(availableContainers.filter((container) => container._id !== containerToAdd._id));
+	const includeContainer = (container: IContainer) => {
+		setIncludedContainers([...includedContainers, container]);
+		setAvailableContainers(availableContainers.filter(({ _id }) => _id !== container._id));
 	};
 
 	const includeAllContainers = () => {
@@ -65,9 +65,9 @@ export const EditFederationModal = ({
 		setAvailableContainers([]);
 	};
 
-	const removeContainer = (containerToRemove: IContainer) => {
-		setAvailableContainers([...availableContainers, containerToRemove]);
-		setIncludedContainers(includedContainers.filter((container) => container._id !== containerToRemove._id));
+	const removeContainer = (container: IContainer) => {
+		setAvailableContainers([...availableContainers, container]);
+		setIncludedContainers(includedContainers.filter(({ _id }) => _id !== container._id));
 	};
 
 	const removeAllContainers = () => {
