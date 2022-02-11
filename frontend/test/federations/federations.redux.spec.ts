@@ -17,8 +17,7 @@
 
 import { INITIAL_STATE, reducer as federationsReducer, FederationsActions } from '@/v5/store/federations/federations.redux';
 import { times } from 'lodash';
-import { federationMockFactory } from './federations.fixtures';
-import { prepareMockSubModels } from './federations.fixtures';
+import { federationMockFactory, prepareMockContainers } from './federations.fixtures';
 
 describe('Federations: redux', () => {
 	const projectId = 'projectId';
@@ -59,21 +58,21 @@ describe('Federations: redux', () => {
 		expect(result.slice(1).every(federation => federation.isFavourite)).toEqual(true);
 	});
 
-	it('should update federation subModels', () => {
-		const mockFederation = federationMockFactory({ subModels: [] });
-		const mockSubModels = prepareMockSubModels();
-		const defaultStateWithSubModels = {
+	it('should update federation containers', () => {
+		const mockFederation = federationMockFactory({ containers: [] });
+		const mockContainers = prepareMockContainers();
+		const defaultStateWithContainers = {
 			...INITIAL_STATE,
 			federations: {
 				[projectId]: [mockFederation]
 			}
 		}
 		const resultState = federationsReducer(
-			defaultStateWithSubModels,
-			FederationsActions.updateFederationSubModelsSuccess(projectId, mockFederation._id, mockSubModels)
+			defaultStateWithContainers,
+			FederationsActions.updateFederationContainersSuccess(projectId, mockFederation._id, mockContainers)
 		);
 		const result = resultState.federations[projectId];
 
-		expect(result[0].subModels).toEqual(mockSubModels);
+		expect(result[0].containers).toEqual(mockContainers);
 	});
 })

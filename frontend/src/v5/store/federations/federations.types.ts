@@ -27,8 +27,7 @@ export interface IFederation {
 	isFavourite: boolean;
 	code: string;
 	status: UploadStatuses;
-	subModels: string[];
-	containers: number;
+	containers: string[];
 	issues: number;
 	risks: number;
 	category: string;
@@ -59,7 +58,7 @@ export type FavouritePayload = FetchFederationsPayload & {
 export type FetchFederationStatsResponse = {
 	code: string;
 	status: UploadStatuses;
-	subModels: string[];
+	containers: string[];
 	tickets: {
 		issues: number;
 		risks: number;
@@ -89,17 +88,17 @@ export interface DeleteFederationSuccessPayload {
 	federationId: string;
 }
 
-export interface UpdateFederationSubModelsPayload {
+export interface UpdateFederationContainersPayload {
 	teamspace: string;
 	projectId: string;
 	federationId: string;
-	subModels: string[];
+	containers: string[];
 }
 
-export interface UpdateFederationSubModelsSuccessPayload {
+export interface UpdateFederationContainersSuccessPayload {
 	projectId: string;
 	federationId: string;
-	subModels: string[];
+	containers: string[];
 }
 
 export type FetchFederationsAction = Action<'FETCH_FEDERATIONS'> & FetchFederationsPayload;
@@ -112,8 +111,8 @@ export type FetchFederationStatsAction = Action<'FETCH_FEDERATION_STATS'> & Fetc
 export type FetchFederationStatsSuccessAction = Action<'FETCH_FEDERATION_STATS_SUCCESS'> & FetchFederationStatsSuccessPayload;
 export type DeleteFederationAction = Action<'DELETE'> & DeleteFederationPayload;
 export type DeleteFederationSuccessAction = Action<'DELETE_SUCCESS'> & DeleteFederationSuccessPayload;
-export type UpdateFederationSubModelsAction = Action<'UPDATE_FEDERATION_SUB_MODELS'> & UpdateFederationSubModelsPayload;
-export type UpdateFederationSubModelsActionSuccess = Action<'UPDATE_FEDERATION_SUB_MODELS_SUCCESS'> & UpdateFederationSubModelsSuccessPayload;
+export type UpdateFederationContainersAction = Action<'UPDATE_FEDERATION_CONTAINERS'> & UpdateFederationContainersPayload;
+export type UpdateFederationContainersActionSuccess = Action<'UPDATE_FEDERATION_CONTAINERS_SUCCESS'> & UpdateFederationContainersSuccessPayload;
 
 export interface IFederationsActionCreators {
 	fetchFederations: (teamspace: string, projectId: string) => FetchFederationsAction;
@@ -130,15 +129,15 @@ export interface IFederationsActionCreators {
 	setIsListPending: (isPending: boolean) => SetIsListPendingAction;
 	deleteFederation: (teamspace: string, projectId: string, federationId: string) => DeleteFederationAction;
 	deleteFederationSuccess: (projectId: string, federationId: string) => DeleteFederationSuccessAction;
-	updateFederationSubModels: (
+	updateFederationContainers: (
 		teamspace: string,
 		projectId: string,
 		federationId: string,
-		subModels: string[]
-	) => UpdateFederationSubModelsAction;
-	updateFederationSubModelsSuccess: (
+		containers: string[]
+	) => UpdateFederationContainersAction;
+	updateFederationContainersSuccess: (
 		projectId: string,
 		federationId: string,
-		subModels: string[],
-	) => UpdateFederationSubModelsActionSuccess;
+		containers: string[],
+	) => UpdateFederationContainersActionSuccess;
 }

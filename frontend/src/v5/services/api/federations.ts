@@ -22,7 +22,7 @@ import {
 	FetchFederationStatsResponse,
 	FavouritePayload,
 	DeleteFederationPayload,
-	UpdateFederationSubModelsPayload,
+	UpdateFederationContainersPayload,
 } from '@/v5/store/federations/federations.types';
 import { AxiosResponse } from 'axios';
 import api from './default';
@@ -68,13 +68,13 @@ export const deleteFederation = ({
 	api.delete(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
 );
 
-export const updateFederationSubModels = async ({
+export const updateFederationContainers = async ({
 	teamspace,
 	projectId,
 	federationId,
-	subModels,
-}: UpdateFederationSubModelsPayload): Promise<AxiosResponse<void>> => (
+	containers,
+}: UpdateFederationContainersPayload): Promise<AxiosResponse<void>> => (
 	api.post(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/revisions`, {
-		containers: subModels,
+		containers,
 	})
 );

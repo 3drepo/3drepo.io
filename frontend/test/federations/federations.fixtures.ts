@@ -28,8 +28,7 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 	status: UploadStatuses.OK,
 	code: faker.datatype.uuid(),
 	category: faker.random.words(2),
-	containers: faker.datatype.number(120),
-	subModels: times(faker.datatype.number({ max: 10, min: 1 }), () => faker.datatype.uuid()),
+	containers: times(faker.datatype.number({ max: 10, min: 1 }), () => faker.datatype.uuid()),
 	isFavourite: faker.datatype.boolean(),
 	issues: faker.datatype.number(120),
 	risks: faker.datatype.number(120),
@@ -38,7 +37,7 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 });
 
 export const prepareMockStatsReply = (federation: IFederation): FetchFederationStatsResponse => ({
-	subModels: federation.subModels,
+	containers: federation.containers,
 	tickets: {
 		issues: federation.issues,
 		risks: federation.risks,
@@ -49,6 +48,6 @@ export const prepareMockStatsReply = (federation: IFederation): FetchFederationS
 	code: federation.code,
 });
 
-export const prepareMockSubModels = (min = 1, max = 10): string[] => (
+export const prepareMockContainers = (min = 1, max = 10): string[] => (
 	times(faker.datatype.number({ max, min }), () => faker.random.uuid())
 );

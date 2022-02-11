@@ -24,7 +24,7 @@ import {
 	FetchFederationStatsSuccessAction,
 	SetIsListPendingAction,
 	DeleteFederationSuccessAction,
-	UpdateFederationSubModelsActionSuccess,
+	UpdateFederationContainersActionSuccess,
 } from '@/v5/store/federations/federations.types';
 import { prepareSingleFederationData } from '@/v5/store/federations/federations.helpers';
 import { Constants } from '../common/actions.helper';
@@ -40,8 +40,8 @@ export const { Types: FederationsTypes, Creators: FederationsActions } = createA
 	setIsListPending: ['isPending'],
 	deleteFederation: ['teamspace', 'projectId', 'federationId'],
 	deleteFederationSuccess: ['projectId', 'federationId'],
-	updateFederationSubModels: ['teamspace', 'projectId', 'federationId', 'subModels'],
-	updateFederationSubModelsSuccess: ['projectId', 'federationId', 'subModels'],
+	updateFederationContainers: ['teamspace', 'projectId', 'federationId', 'containers'],
+	updateFederationContainersSuccess: ['projectId', 'federationId', 'containers'],
 }, { prefix: 'FEDERATIONS/' }) as { Types: Constants<IFederationsActionCreators>; Creators: IFederationsActionCreators };
 
 export const INITIAL_STATE: IFederationsState = {
@@ -109,14 +109,14 @@ export const deleteFederationSuccess = (state = INITIAL_STATE, {
 export const updateFederationSubModelSuccess = (state = INITIAL_STATE, {
 	projectId,
 	federationId,
-	subModels,
-}: UpdateFederationSubModelsActionSuccess) => ({
+	containers,
+}: UpdateFederationContainersActionSuccess) => ({
 	...state,
 	federations: {
 		...state.federations,
 		[projectId]: state.federations[projectId].map((federation) => ({
 			...federation,
-			subModels: federation._id === federationId ? subModels : federation.subModels,
+			containers: federation._id === federationId ? containers : federation.containers,
 		})),
 	},
 });
@@ -127,5 +127,5 @@ export const reducer = createReducer<IFederationsState>(INITIAL_STATE, {
 	[FederationsTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
 	[FederationsTypes.SET_IS_LIST_PENDING]: setIsListPending,
 	[FederationsTypes.DELETE_FEDERATION_SUCCESS]: deleteFederationSuccess,
-	[FederationsTypes.UPDATE_FEDERATION_SUB_MODELS_SUCCESS]: updateFederationSubModelSuccess,
+	[FederationsTypes.UPDATE_FEDERATION_CONTAINERS_SUCCESS]: updateFederationSubModelSuccess,
 });
