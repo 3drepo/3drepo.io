@@ -52,7 +52,7 @@ export const EditFederationModal = ({
 		setAvailableContainers(
 			containers.filter((container) => !includedContainers.includes(container)),
 		);
-		setIncludedContainers(federation.containers.map(getContainerById));
+		setIncludedContainers(federation?.containers.map(getContainerById));
 	}, [containers]);
 
 	const includeContainer = (containerToAdd: IContainer) => {

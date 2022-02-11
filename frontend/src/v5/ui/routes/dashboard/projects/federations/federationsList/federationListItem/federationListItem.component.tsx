@@ -126,7 +126,7 @@ export const FederationListItem = ({
 					<FormattedMessage
 						id="federations.list.item.containers"
 						defaultMessage="{count} containers"
-						values={{ count: federation.containers }}
+						values={{ count: federation.containers.length }}
 					/>
 				</DashboardListItemButton>
 				<DashboardListItemText width={188}>

@@ -41,7 +41,7 @@ export const prepareSingleFederationData = (
 		...federation,
 		code: stats?.code ?? '',
 		status: stats?.status ?? UploadStatuses.OK,
-		containers: containers.length,
+		containers,
 		issues: stats?.tickets.issues ?? 0,
 		risks: stats?.tickets.risks ?? 0,
 		lastUpdated: getNullableDate(stats?.lastUpdated),
