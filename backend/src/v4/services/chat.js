@@ -53,7 +53,6 @@ module.exports.createApp = function (server, serverConfig) {
 				if(msg.event && msg.channel && !msg.dm) {
 					const socketId = socketIdBySession[msg.emitter];
 					const emitter = userToSocket[socketId]?.broadcast || io;
-					console.log(`${emitter === io ? "General" : "User"} emitter ${socketId} ${msg.emitter}`);
 					emitter.to(msg.channel).emit(msg.event, msg.data);
 				}
 				if (msg.dm && msg.event && msg.data) {
@@ -86,14 +85,11 @@ module.exports.createApp = function (server, serverConfig) {
 
 			if (sessionRef) {
 				if (socketIdBySession[sessionRef]) {
-					console.log(`${socket?.handshake?.session?.user?.username} socket removed ${userToSocket[socketIdBySession[sessionRef]]}`);
 					delete userToSocket[socketIdBySession[sessionRef]];
 				}
 
 				userToSocket[socket.client.id] = socket;
 				socketIdBySession[sessionRef] = socket.client.id;
-				// save the new socket-id
-				console.log(`${socket?.handshake?.session?.user?.username} connected on socket ${socket.client.id} (${sessionRef})`);
 			}
 
 			socket.on("join", data => {
