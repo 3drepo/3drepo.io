@@ -57,13 +57,7 @@ export const fetchFederationStats = async ({
 	federationId,
 }: FetchFederationStatsPayload): Promise<FetchFederationStatsResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/stats`);
-	return {
-		...data,
-		containers: [
-			"582fee60-8b55-11ec-a792-31dd2f81314c",
-			'93b2c390-8b55-11ec-a792-31dd2f81314c'
-		]
-	};
+	return data;
 };
 
 export const deleteFederation = ({
