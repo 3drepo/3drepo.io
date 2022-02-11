@@ -76,12 +76,12 @@ Federations.getFederationStats = async (teamspace, federation) => {
 	});
 
 	// Legacy schema compatibility
-	const containers = subModels.map((m) => m.model || m);
+	const containers = subModels ? subModels.map((m) => m.model || m) : undefined;
 
 	const [issueCount, riskCount, lastUpdates] = await Promise.all([
 		getIssuesCount(teamspace, federation),
 		getRisksCount(teamspace, federation),
-		getLastUpdatesFromModels(teamspace, subModels),
+		getLastUpdatesFromModels(teamspace, containers),
 	]);
 
 	return {
