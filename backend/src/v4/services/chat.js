@@ -20,7 +20,7 @@
 module.exports.createApp = function (server, serverConfig) {
 	const userToSocket = {};
 
-	const { session, getSocketIdByReference, updateSocketReference } = require("./session");
+	const { session } = require("./session");
 
 	const logger = require("../logger.js");
 	const middlewares = require("../middlewares/middlewares");
@@ -51,7 +51,7 @@ module.exports.createApp = function (server, serverConfig) {
 			try {
 			// consume event queue and fire msg to clients if they have subscribed related event
 				if(msg.event && msg.channel && !msg.dm) {
-					const socketId = msg.emitter ? await getSocketIdByReference(msg.emitter) : undefined ;
+					const socketId = socketIdBySession[msg.emitter];
 					const emitter = userToSocket[socketId]?.broadcast || io;
 					console.log(`${emitter === io ? "General" : "User"} emitter ${socketId} ${msg.emitter}`);
 					emitter.to(msg.channel).emit(msg.event, msg.data);
@@ -94,8 +94,6 @@ module.exports.createApp = function (server, serverConfig) {
 				socketIdBySession[sessionRef] = socket.client.id;
 				// save the new socket-id
 				console.log(`${socket?.handshake?.session?.user?.username} connected on socket ${socket.client.id} (${sessionRef})`);
-
-				updateSocketReference(sessionRef, socket.client.id);
 			}
 
 			socket.on("join", data => {

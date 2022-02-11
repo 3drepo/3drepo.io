@@ -50,13 +50,6 @@ const SessionService = {};
 
 SessionService.session = initialiseSession();
 
-SessionService.updateSocketReference = (ref, socketId) => db.updateOne("admin", "sessions.sockets", { _id: ref}, { $set:  {socketId}}, true);
-
-SessionService.getSocketIdByReference = async (ref) => {
-	const entry = await db.findOne("admin", "sessions.sockets", { _id: ref });
-	return entry?.socketId;
-};
-
 SessionService.regenerateAuthSession = (req, user) => {
 	return new Promise((resolve, reject) => {
 		req.session.regenerate(async (err) => {
@@ -67,7 +60,6 @@ SessionService.regenerateAuthSession = (req, user) => {
 			}
 
 			const socketId = utils.generateHashString();
-			await SessionService.updateSocketReference(socketId, req.headers[C.HEADER_SOCKET_ID]);
 			user = {...user, socketId, webSession: false};
 
 			if (req.headers && req.headers["user-agent"]) {
