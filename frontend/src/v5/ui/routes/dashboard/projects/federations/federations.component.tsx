@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 
 import AddCircleIcon from '@assets/icons/add_circle.svg';
@@ -26,17 +26,22 @@ import {
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
 import { Button } from '@controls/button';
 import { filterFederations } from '@/v5/store/federations/federations.helpers';
+import { enableRealtimeFederationUpdates } from '@/v5/services/realtime/realtime.service';
+import { useParams } from 'react-router';
 import { useFederationsData } from './federations.hooks';
 import { FederationsList } from './federationsList';
 import { SkeletonListItem } from './federationsList/skeletonListItem';
 
 export const Federations = (): JSX.Element => {
+	const { project } = useParams();
 	const {
 		federations,
 		favouriteFederations,
 		hasFederations,
 		isListPending,
 	} = useFederationsData();
+
+	useEffect(enableRealtimeFederationUpdates('teamSpace1', '5ce7dd19-1252-4548-a9c9-4a5414f2e0c5', project, federations[0]?._id), [isListPending]);
 
 	const [favouritesFilterQuery, setFavouritesFilterQuery] = useState<string>('');
 	const [allFilterQuery, setAllFilterQuery] = useState<string>('');

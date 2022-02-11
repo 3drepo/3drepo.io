@@ -37,12 +37,15 @@ import * as OfflinePluginRuntime from 'offline-plugin/runtime';
 import { initializeIntl } from '@/v5/services/intl';
 import { initializeActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 import { Version, VersionContext } from './versionContext';
+import { initializeSocket } from './v5/services/realtime/realtime.service';
 
 window.UnityUtil = UnityUtil;
 
 initializeActionsDispatchers(dispatch);
 
 initializeIntl(navigator.language);
+
+initializeSocket();
 
 const render = () => {
 	ReactDOM.render(
