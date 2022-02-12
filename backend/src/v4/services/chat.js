@@ -32,6 +32,8 @@ module.exports.createApp = function (server, serverConfig) {
 
 	const Queue = require("./queue");
 
+	const sessionToSocketIds = {};
+
 	io.use((socket, next) => {
 		if(socket.handshake.query["connect.sid"] && !socket.handshake.headers.cookie) {
 			socket.handshake.headers.cookie = "connect.sid=" + socket.handshake.query["connect.sid"] + "; ";
@@ -49,16 +51,19 @@ module.exports.createApp = function (server, serverConfig) {
 	function subscribeToEventMessages() {
 		Queue.subscribeToEventMessages(async (msg) => {
 			try {
-			// consume event queue and fire msg to clients if they have subscribed related event
 				if(msg.event && msg.channel && !msg.dm) {
 					const emitter = socketIdToSockets[msg.emitter]?.broadcast || io;
-					console.log(`${emitter === io ? "General" : "User"} emitter ${msg.emitter}`, Object.keys(socketIdToSockets));
 					emitter.to(msg.channel).emit(msg.event, msg.data);
 				}
 				if (msg.dm && msg.event && msg.data) {
-					const recipient = socketIdToSockets[msg.recipient];
-					if (recipient) {
-						recipient.send({event: msg.event, data: msg.data });
+					const recipients = sessionToSocketIds[msg.recipient];
+					if (recipients) {
+						recipients.forEach((socketId) => {
+							const recipientSocket = socketIdToSockets[socketId];
+							if(recipientSocket) {
+								recipientSocket.send({event: msg.event, data: msg.data });
+							}
+						});
 					}
 				}
 			} catch(err) {
@@ -82,7 +87,21 @@ module.exports.createApp = function (server, serverConfig) {
 
 			const sessionId = socket?.handshake?.session?.id;
 
-			console.log("session joined", socket.id);
+			if(sessionId) {
+				if(!sessionToSocketIds[sessionId]) {
+					sessionToSocketIds[sessionId] = new Set();
+				}
+				sessionToSocketIds[sessionId].add(socket.id);
+			}
+
+			socket.on("disconnect", () => {
+				if(sessionToSocketIds[sessionId].size === 1) {
+					delete sessionToSocketIds[sessionId];
+				} else {
+					sessionToSocketIds[sessionId].delete(socket.id);
+				}
+				delete socketIdToSockets[socket.id];
+			});
 
 			socket.on("join", data => {
 				// check permission if the user have permission to join room

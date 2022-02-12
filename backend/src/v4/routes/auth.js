@@ -570,7 +570,7 @@ function createSession(place, req, res, next, user) {
 					return;
 				}
 				ids.push(entry._id);
-				chatEvent.loggedOut(entry.session.user.socketId);
+				chatEvent.loggedOut(entry._id);
 			});
 
 			return removeSessions(ids);
