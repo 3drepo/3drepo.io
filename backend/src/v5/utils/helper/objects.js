@@ -21,4 +21,8 @@ const Objects = {};
 
 Objects.cloneDeep = _.cloneDeep;
 
+Objects.removeFields = _.omit;
+
+Objects.isEmpty = _.isEmpty;
+
 module.exports = Objects;

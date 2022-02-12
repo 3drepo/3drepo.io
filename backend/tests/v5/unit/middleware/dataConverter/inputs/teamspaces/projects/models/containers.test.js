@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src, modelFolder } = require('../../../../../../../helper/path');
+const { src, imagesFolder, modelFolder } = require('../../../../../../../helper/path');
 const MockExpressRequest = require('mock-express-request');
 const FormData = require('form-data');
 const fs = require('fs');
@@ -71,11 +71,10 @@ const createRequestWithFile = (teamspace, { tag, desc, importAnim, timezone },
 	unsupportedFile = false, noFile = false, emptyFile = false) => {
 	const form = new FormData();
 	if (!noFile) {
-		let filePath = unsupportedFile ? 'dummy.png' : 'dummy.obj';
-		filePath = emptyFile ? 'empty.ifc' : filePath;
+		const filePath = unsupportedFile ? path.join(imagesFolder, 'valid.png') : path.join(modelFolder, emptyFile ? 'empty.ifc' : 'dummy.obj');
 
 		form.append('file',
-			fs.createReadStream(path.join(modelFolder, filePath)));
+			fs.createReadStream(filePath));
 	}
 	if (tag) form.append('tag', tag);
 	if (desc) form.append('desc', desc);

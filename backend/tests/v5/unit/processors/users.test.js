@@ -26,6 +26,26 @@ const UsersModel = require(`${src}/models/users`);
 UsersModel.canLogIn.mockImplementation((user) => user);
 UsersModel.authenticate.mockResolvedValue('user1');
 
+const user = {
+	user: 'user1',
+	customData: {
+		firstName: 'Will',
+		lastName: 'Smith',
+		email: 'example@email.com',
+		avatar: true,
+		apiKey: 123,
+		billing: {
+			billingInfo: {
+				countryCode: 'GB',
+				company: '3D Repo',
+			},
+		},
+	},
+};
+const getUserByUsernameMock = UsersModel.getUserByUsername.mockImplementation(() => user);
+const updateUserByUsernameMock = UsersModel.updateProfile.mockImplementation(() => {});
+const updatePasswordMock = UsersModel.updatePassword.mockImplementation(() => {});
+
 const testLogin = () => {
 	describe('Login', () => {
 		test('should login with username', async () => {
@@ -40,6 +60,69 @@ const testLogin = () => {
 	});
 };
 
+const formatUser = (userProfile) => ({
+	username: userProfile.user,
+	firstName: userProfile.customData.firstName,
+	lastName: userProfile.customData.lastName,
+	email: userProfile.customData.email,
+	hasAvatar: !!userProfile.customData.avatar,
+	apiKey: userProfile.customData.apiKey,
+	countryCode: userProfile.customData.billing.billingInfo.countryCode,
+	company: userProfile.customData.billing.billingInfo.company,
+});
+
+const tesGetProfileByUsername = () => {
+	describe('Get user profile by username', () => {
+		test('should return user profile', async () => {
+			const projection = {
+				user: 1,
+				'customData.firstName': 1,
+				'customData.lastName': 1,
+				'customData.email': 1,
+				'customData.avatar': 1,
+				'customData.apiKey': 1,
+				'customData.billing.billingInfo.countryCode': 1,
+				'customData.billing.billingInfo.company': 1,
+			};
+
+			const res = await Users.getProfileByUsername();
+			expect(res).toEqual(formatUser(user));
+			expect(getUserByUsernameMock.mock.calls.length).toBe(1);
+			expect(getUserByUsernameMock.mock.calls[0][1]).toEqual(projection);
+		});
+	});
+};
+
+const tesUpdateProfile = () => {
+	describe('Update user profile by username', () => {
+		test('should update user profile', async () => {
+			const updatedProfile = { firstName: 'Nick' };
+			await Users.updateProfile('user 1', updatedProfile);
+			expect(updateUserByUsernameMock.mock.calls.length).toBe(1);
+			expect(updateUserByUsernameMock.mock.calls[0][1]).toEqual(updatedProfile);
+		});
+
+		test('should update user profile and password', async () => {
+			const updatedProfile = { firstName: 'Nick', oldPassword: 'oldPass', newPassword: 'newPass' };
+			await Users.updateProfile('user 1', updatedProfile);
+			expect(updateUserByUsernameMock.mock.calls.length).toBe(1);
+			expect(updateUserByUsernameMock.mock.calls[0][1]).toEqual({ firstName: 'Nick' });
+			expect(updatePasswordMock.mock.calls.length).toBe(1);
+			expect(updatePasswordMock.mock.calls[0][1]).toEqual('newPass');
+		});
+
+		test('should update password', async () => {
+			const updatedProfile = { oldPassword: 'oldPass', newPassword: 'newPass' };
+			await Users.updateProfile('user 1', updatedProfile);
+			expect(updateUserByUsernameMock.mock.calls.length).toBe(0);
+			expect(updatePasswordMock.mock.calls.length).toBe(1);
+			expect(updatePasswordMock.mock.calls[0][1]).toEqual('newPass');
+		});
+	});
+};
+
 describe('processors/users', () => {
 	testLogin();
+	tesGetProfileByUsername();
+	tesUpdateProfile();
 });
