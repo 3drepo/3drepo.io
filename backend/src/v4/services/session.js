@@ -59,8 +59,7 @@ SessionService.regenerateAuthSession = (req, user) => {
 				return;
 			}
 
-			const socketId = utils.generateHashString();
-			user = {...user, socketId, webSession: false};
+			user = {...user, webSession: false};
 
 			if (req.headers && req.headers["user-agent"]) {
 				const ua = useragent.is(req.headers["user-agent"]);
