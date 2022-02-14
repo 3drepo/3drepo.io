@@ -117,7 +117,7 @@ export const Breadcrumbs = (): JSX.Element => {
 			{breadcrumbs.map((title, index) => (
 				(breadcrumbs.length - 1) === index
 					? (
-						<div key={`${title}`}>
+						<div key={title}>
 							<InteractiveBreadcrumb onClick={handleClick} endIcon={<DownArrowIcon />}>
 								<OverflowWrapper>
 									{title}
