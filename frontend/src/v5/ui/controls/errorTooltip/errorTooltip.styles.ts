@@ -19,6 +19,7 @@ import { Tooltip as TooltipComponent, withStyles } from '@material-ui/core';
 
 export const Container = styled.div`
 	display: inline-block;
+	height: 15px;
 `;
 
 export const Tooltip = withStyles((theme: any) => ({
