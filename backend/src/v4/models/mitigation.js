@@ -28,7 +28,7 @@ const { systemLogger } = require("../logger");
 const { Transform } = require("json2csv");
 
 // NB: Order of fieldTypes important for importCSV
-const csvImportFieldTypes = {
+const fieldTypes = {
 	"mitigation_desc": "[object String]",
 	"mitigation_detail": "[object String]",
 	"mitigation_stage": "[object String]",
@@ -38,11 +38,7 @@ const csvImportFieldTypes = {
 	"element": "[object String]",
 	"risk_factor": "[object String]",
 	"scope": "[object String]",
-	"associated_activity": "[object String]"
-};
-
-const fieldTypes = {
-	...csvImportFieldTypes,
+	"associated_activity": "[object String]",
 	"referencedRisks": "[object Array]"
 };
 
@@ -125,7 +121,7 @@ class Mitigation {
 
 		// Only pick supported fields and clean empty criteria
 		Object.keys(criteria).forEach((key) => {
-			if (!criteriaFilterFields.includes(key) || criteria[key] === null || criteria[key] === undefined) {
+			if (!criteriaFilterFields.includes(key) || criteria[key] === null || criteria[key] === undefined || criteria[key] === "") {
 				delete criteria[key];
 			}
 		});
@@ -134,21 +130,40 @@ class Mitigation {
 	}
 
 	async importCSV(account, data) {
-		const csvFields = Object.keys(csvImportFieldTypes);
+		const csvFields = Object.keys(fieldTypes);
 
 		const records = parse(data, {
 			columns: csvFields,
 			skip_empty_lines: true,
 			from_line: 2,
-			trim: true
+			trim: true,
+			relax_column_count: true
 		});
 
+		for(const record of records){
+			if(record.referencedRisks){
+				const newReferencedRisks = [];
+				const riskRefsArray = record.referencedRisks.substring(1, record.referencedRisks.length - 1).split(',');
+	
+				for (var riskRef of riskRefsArray){
+					const newRef = riskRef.substring(1, riskRef.length - 1);
+					const teamspace = newRef.split('::')[0];
+
+					if(teamspace === account){
+						newReferencedRisks.push(newRef);
+					}
+				}
+
+				record.referencedRisks = newReferencedRisks;
+			}
+		}
+		
 		return this.insert(account, records);
 	}
 
-	bufferToStream(myBuuffer) {
+	bufferToStream(myBuffer) {
 		const tmp = new Duplex();
-		tmp.push(myBuuffer);
+		tmp.push(myBuffer);
 		tmp.push(null);
 		return tmp;
 	}
@@ -212,20 +227,6 @@ class Mitigation {
 		await db.updateOne(account, colName, { _id: id }, updateData);
 	}
 
-	async createOrAddRefToMitigation (account, mitigationDetails, ref) {
-		const mitigation = await db.findOne(account, colName, mitigationDetails, {referencedRisks: 1});
-		if (!mitigation) {
-			try {
-				await this.insert(account, [{ ...mitigationDetails, referencedRisks: [ref] }], false);
-			} catch (error) {
-				systemLogger.logError(error);
-			}
-		} else if (mitigation.referencedRisks && !mitigation.referencedRisks.includes(ref)) {
-			mitigation.referencedRisks.push(ref);
-			await this.update(account, mitigation._id, { $set: { referencedRisks: mitigation.referencedRisks } });
-		}
-	}
-
 	async updateMitigationsFromRisk(account, model, oldRisk, updatedRisk) {
 		const isFeatureOn = await this.isMitigationCreationFeatureOn(account);
 		if(!isFeatureOn) {
@@ -236,34 +237,11 @@ class Mitigation {
 		const oldStatusIsResolved = !!oldRisk?.mitigation_desc && isMitigationStatusResolved(oldRisk.mitigation_status);
 		const newStatusIsResolved = !!updatedRisk?.mitigation_desc && isMitigationStatusResolved(updatedRisk.mitigation_status);
 
-		// if risk was and remains unresolved
-		if (!oldStatusIsResolved && !newStatusIsResolved) {
-			return;
-		}
-
-		const mitigationDetails = _.pick(updatedRisk, Object.keys(fieldTypes));
-
-		for (const key of Object.keys(mitigationDetails)) {
-			if(!mitigationDetails[key]) {
-				delete mitigationDetails[key];
-			}
-		}
-
+		const mitigationDetails = _.pickBy(updatedRisk,  (value, key) => value && fieldTypes[key]);
 		const formattedReference = formatRiskReference(account, model, riskId);
 
-		// if risk becomes resolved
-		if (!oldStatusIsResolved && newStatusIsResolved) {
-			await this.createOrAddRefToMitigation(account, mitigationDetails, formattedReference);
-		} else {
-			// if risk was already resolved
+		if(oldStatusIsResolved){
 			const oldMitigation = await db.findOne(account, colName, { referencedRisks: formattedReference });
-
-			// if the mitigation was manually removed and now the risk is unresolved
-			if (!oldMitigation && !newStatusIsResolved) {
-				return;
-			}
-
-			// remove old mitigation or remove ref
 			if (oldMitigation) {
 				if (oldMitigation.referencedRisks.length === 1) {
 					await this.deleteOne(account, oldMitigation._id);
@@ -271,12 +249,21 @@ class Mitigation {
 					await db.updateOne(account, colName, { _id: oldMitigation._id }, { $pull: { referencedRisks: formattedReference } });
 				}
 			}
-
-			if (newStatusIsResolved) {
-				await this.createOrAddRefToMitigation(account, mitigationDetails, formattedReference);
-			}
 		}
 
+		if(newStatusIsResolved){
+			const mitigation = await db.findOne(account, colName, mitigationDetails, {referencedRisks: 1});
+			if (!mitigation) {
+				try {
+					await this.insert(account, [{ ...mitigationDetails, referencedRisks: [formattedReference] }], false);
+				} catch (error) {
+					systemLogger.logError(error);
+				}
+			} else if (mitigation.referencedRisks && !mitigation.referencedRisks.includes(formattedReference)) {
+				mitigation.referencedRisks.push(formattedReference);
+				await this.update(account, mitigation._id, { $set: { referencedRisks: mitigation.referencedRisks } });
+			}
+		}
 	}
 }
 

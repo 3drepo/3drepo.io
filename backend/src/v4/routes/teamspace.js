@@ -549,7 +549,7 @@
 	function getMitigationsFile(req, res, next) {
 		TeamspaceSettings.getMitigationsFile(req.params.account).then((mitigationsStream) => {
 			const timestamp = (new Date()).toLocaleString();
-			const filenamePrefix = (req.params.account + "_" + timestamp).replace(/\W+/g, "_");
+			const filenamePrefix = (req.params.account + "_" + timestamp + "_").replace(/\W+/g, "_");
 
 			const headers = {
 				"Content-Disposition": "attachment;filename=" + filenamePrefix + "mitigations.csv",

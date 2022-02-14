@@ -167,7 +167,7 @@ class Risk extends Ticket {
 			updatedRisk.data = {...updatedRisk.data, ...levelOfRisk};
 		}
 
-		await Mitigation.updateMitigationsFromRisk(user, model, updatedRisk.oldTicket, updatedRisk.updatedTicket);
+		await Mitigation.updateMitigationsFromRisk(account, model, updatedRisk.oldTicket, updatedRisk.updatedTicket);
 
 		return updatedRisk;
 	}
