@@ -18,11 +18,11 @@
 import React from 'react';
 import ChevronIcon from '@assets/icons/chevron.svg';
 import ClearIcon from '@assets/icons/clear_circle.svg';
-import AddCircleIcon from '@assets/icons/add_circle.svg';
-import { FormattedMessage } from 'react-intl';
 import MuiAutocomplete from '@material-ui/lab/Autocomplete';
 import { DestinationOption } from '@/v5/store/containers/containers.types';
-import { TextInput, LastRevision, ContainerName, NewContainer, ExistingContainer, ErrorIcon } from './autocomplete.styles';
+import { TextInput, ErrorIcon } from './autocomplete.styles';
+import { NewContainer } from './options/newContainer';
+import { ExistingContainer } from './options/existingContainer';
 
 interface IAutocomplete {
 	list: any[];
@@ -101,33 +101,8 @@ export const Autocomplete: React.FC<IAutocomplete> = ({
 				/>
 			)}
 			renderOption={(option: DestinationOption) => {
-				if (option.name && !option._id) {
-					return (
-						<NewContainer>
-							<AddCircleIcon />
-							<ContainerName>
-								<FormattedMessage
-									id="placeholder"
-									defaultMessage="Add <Bold>{containerName}</Bold> as a new container"
-									values={{
-										Bold: (val: string) => <b>{val}</b>,
-										containerName: option.name,
-									}}
-								/>
-							</ContainerName>
-						</NewContainer>
-					);
-				}
-				return (
-					<ExistingContainer>
-						<ContainerName>
-							{option.name}
-						</ContainerName>
-						<LastRevision>
-							Last revision: {option.latestRevision || 'none'}
-						</LastRevision>
-					</ExistingContainer>
-				);
+				if (option.name && !option._id) return (<NewContainer {...option} />);
+				return (<ExistingContainer {...option} />);
 			}}
 			disabled={disabled}
 		/>

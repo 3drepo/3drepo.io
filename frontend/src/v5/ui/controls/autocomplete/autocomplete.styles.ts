@@ -18,7 +18,6 @@
 import styled from 'styled-components';
 
 import { TextField } from '@material-ui/core';
-import { Typography } from '@controls/typography';
 import { ErrorTooltip } from '@controls/errorTooltip';
 
 export const TextInput = styled(TextField)`
@@ -49,46 +48,6 @@ export const TextInput = styled(TextField)`
 		}
 		return '';
 	}}
-	}
-`;
-
-export const ContainerName = styled(Typography).attrs({
-	variant: 'h5',
-	component: 'span',
-
-})`
-	width: calc(100% - 30px);
-`;
-
-export const LastRevision = styled(Typography).attrs({
-	component: 'div',
-	variant: 'h5',
-})`
-	width: 100%;
-	color: ${({ theme }) => theme.palette.base.main};
-`;
-
-export const ExistingContainer = styled.div`
-	display: flex;
-	flex-direction: column;
-	color: ${({ theme }) => theme.palette.secondary.main};
-	width: 100%;
-`;
-
-export const NewContainer = styled.div`
-	color: ${({ theme, error }) => (error ? theme.palette.error.main : theme.palette.primary.dark)};
-	display: inline-flex;
-	width: 100%;
-	
-	svg {
-		height: 18px;
-		width: 18px;
-		box-sizing: border-box;
-		margin: 6px;
-		flex-shrink: 0;
-		path {
-			fill: ${({ theme }) => theme.palette.primary.dark};
-		}
 	}
 `;
 
