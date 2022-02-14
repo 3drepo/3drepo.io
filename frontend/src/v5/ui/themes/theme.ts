@@ -14,9 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import React from 'react';
 import { createMuiTheme } from '@material-ui/core/styles';
 import { TypographyOptions } from '@material-ui/core/styles/createTypography';
+import RadioButtonIcon from '@assets/icons/controls/radio_button.svg';
+import RadioButtonCheckedIcon from '@assets/icons/controls/radio_button_checked.svg';
+import CheckboxIcon from '@assets/icons/controls/checkbox.svg';
+import CheckboxCheckedIcon from '@assets/icons/controls/checkbox_checked.svg';
+import CheckboxIndeterminatedIcon from '@assets/icons/controls/checkbox_indeterminated.svg';
 
 export const COLOR = {
 	PRIMARY_MAIN_CONTRAST: '#fff',
@@ -221,6 +226,26 @@ export const theme = createMuiTheme({
 			variant: 'outlined',
 			InputLabelProps: {
 				shrink: false,
+			},
+		},
+		MuiInput: {
+			disableUnderline: true,
+		},
+		MuiCheckbox: {
+			color: 'primary',
+			icon: React.createElement(CheckboxIcon),
+			checkedIcon: React.createElement(CheckboxCheckedIcon),
+			indeterminateIcon: React.createElement(CheckboxIndeterminatedIcon),
+		},
+		MuiRadio: {
+			color: 'primary',
+			icon: React.createElement(RadioButtonIcon),
+			checkedIcon: React.createElement(RadioButtonCheckedIcon),
+		},
+		MuiTooltip: {
+			PopperProps: {
+				// This is necessary for overriding styles of v4 tooltips
+				container: () => document.getElementById('v4Overrides'),
 			},
 		},
 	},
@@ -480,10 +505,13 @@ export const theme = createMuiTheme({
 			},
 			underline: {
 				'&:before': {
-					display: 'none',
+					borderBottom: `1px solid ${COLOR.BASE_LIGHTEST}`,
 				},
 				'&:after': {
-					display: 'none',
+					borderBottom: `1px solid ${COLOR.BASE_LIGHTEST}`,
+				},
+				'&:hover:not($disabled):before': {
+					borderBottom: `1px solid ${COLOR.BASE_LIGHTEST}`,
 				},
 			},
 			input: {
@@ -533,6 +561,11 @@ export const theme = createMuiTheme({
 		MuiIconButton: {
 			root: {
 				transition: 'none',
+			},
+		},
+		MuiCheckbox: {
+			colorPrimary: {
+				color: COLOR.BASE_LIGHTEST,
 			},
 		},
 		MuiButton: {
@@ -687,6 +720,12 @@ export const theme = createMuiTheme({
 		MuiButtonBase: {
 			root: {
 				margin: '8px',
+			},
+		},
+		MuiRadio: {
+			root: {
+				// this is for letting the color prop decide the color
+				color: null,
 			},
 		},
 	},
