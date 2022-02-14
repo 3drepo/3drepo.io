@@ -26,8 +26,9 @@ export const Container = styled(Breadcrumbs)`
 	}
 `;
 
-export const BaseBreadcrumb = styled(Button).attrs({
+export const Breadcrumb = styled(Button).attrs({
 	variant: 'text',
+	component: Link,
 })`
 	&& {
 		color: ${({ theme }) => theme.palette.primary.contrast};
@@ -44,7 +45,7 @@ export const BaseBreadcrumb = styled(Button).attrs({
 	}
 `;
 
-export const InteractiveBreadcrumb = styled(BaseBreadcrumb).attrs({
+export const InteractiveBreadcrumb = styled(Breadcrumb).attrs({
 	variant: 'text',
 })`
 	&& {
@@ -55,10 +56,6 @@ export const InteractiveBreadcrumb = styled(BaseBreadcrumb).attrs({
 		max-width: 100%;
 	}
 `;
-
-export const Breadcrumb = styled(BaseBreadcrumb).attrs({
-	component: Link,
-})``;
 
 export const HomeIconBreadcrumb = styled(Breadcrumb)`
 	&& {
