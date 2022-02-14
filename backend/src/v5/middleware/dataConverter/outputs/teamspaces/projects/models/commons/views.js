@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,22 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
+const { respond } = require('../../../../../../../utils/responder');
+const { templates } = require('../../../../../../../utils/responseCodes');
+
 const Views = {};
-const db = require('../handler/db');
-const { templates } = require('../utils/responseCodes');
 
-const getCollectionName = (model) => `${model}.views`;
+Views.serialiseViews = (req, res) => {
+	const views = req.outputData.map((view) => {
+		const output = { ...view };
+		output._id = UUIDToString(view._id);
+		output.hasThumbnail = !!(output.thumbnail?.buffer
+			|| output.thumbnail?.content?.buffer
+			|| output.screenshot?.buffer);
 
-Views.getViewById = async (teamspace, model, id, projection) => {
-	const foundView = await db.findOne(teamspace, getCollectionName(model), { _id: id }, projection);
+		delete output.thumbnail;
+		delete output.screenshot;
+		return output;
+	});
 
-	if (!foundView) {
-		throw templates.viewNotFound;
-	}
-
-	return foundView;
+	respond(req, res, templates.ok, { views });
 };
-
-Views.getViews = (teamspace, model, projection) => db.find(teamspace, getCollectionName(model), {}, projection);
 
 module.exports = Views;

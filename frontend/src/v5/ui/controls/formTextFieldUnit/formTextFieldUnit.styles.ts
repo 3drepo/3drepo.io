@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,22 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Views = {};
-const db = require('../handler/db');
-const { templates } = require('../utils/responseCodes');
+import { FormTextField } from '@controls/formTextField/formTextField.component';
+import styled from 'styled-components';
 
-const getCollectionName = (model) => `${model}.views`;
-
-Views.getViewById = async (teamspace, model, id, projection) => {
-	const foundView = await db.findOne(teamspace, getCollectionName(model), { _id: id }, projection);
-
-	if (!foundView) {
-		throw templates.viewNotFound;
+export const UnitTextField = styled(FormTextField).attrs((props) => ({
+	label: ` (${props.$labelUnit})`,
+}))`
+	.MuiInputLabel-formControl {
+		&::before {
+			content: "${(props) => props.$labelName}";
+		}
+		
+		text-transform: none; 
+		letter-spacing: 0;
+		${(props) => props.theme.typography.caption};
 	}
-
-	return foundView;
-};
-
-Views.getViews = (teamspace, model, projection) => db.find(teamspace, getCollectionName(model), {}, projection);
-
-module.exports = Views;
+`;

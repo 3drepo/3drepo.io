@@ -66,6 +66,9 @@ ResponseCodes.templates = {
 	// View related error
 	viewNotFound: { message: 'View not found', status: 404 },
 
+	// Image related error
+	thumbnailNotFound: { message: 'Thumbnail not available', status: 404 },
+
 	// Legend related error
 	legendNotFound: { message: 'Legend not found', status: 404 },
 
