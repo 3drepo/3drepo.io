@@ -25,9 +25,17 @@ import {
 	AddFavouriteAction,
 	RemoveFavouriteAction,
 	FetchFederationStatsAction,
+	UpdateFederationSettingsAction,
+	FetchFederationViewsAction,
+	FetchFederationViewsResponse,
+	FetchFederationSettingsAction,
 	DeleteFederationAction,
 } from '@/v5/store/federations/federations.types';
-import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
+import {
+	prepareFederationsData,
+	prepareFederationSettingsForFrontend,
+	prepareFederationSettingsForBackend,
+} from '@/v5/store/federations/federations.helpers';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 
@@ -97,6 +105,64 @@ export function* fetchFederationStats({ teamspace, projectId, federationId }: Fe
 	}
 }
 
+export function* fetchFederationViews({
+	teamspace,
+	projectId,
+	federationId,
+}: FetchFederationViewsAction) {
+	try {
+		const { views }: FetchFederationViewsResponse = yield API.Federations.fetchFederationViews({
+			teamspace,
+			projectId,
+			federationId,
+		});
+		yield put(FederationsActions.fetchFederationViewsSuccess(projectId, federationId, views));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to fetch federation views',
+			error,
+		}));
+	}
+}
+
+export function* fetchFederationSettings({
+	teamspace,
+	projectId,
+	federationId,
+}: FetchFederationSettingsAction) {
+	try {
+		const rawSettings = yield API.Federations.fetchFederationSettings({
+			teamspace,
+			projectId,
+			federationId,
+		});
+		const settings = prepareFederationSettingsForFrontend(rawSettings);
+		yield put(FederationsActions.fetchFederationSettingsSuccess(projectId, federationId, settings));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to fetch federation settings',
+			error,
+		}));
+	}
+}
+
+export function* updateFederationSettings({
+	teamspace, projectId, federationId, updatedSettings,
+}: UpdateFederationSettingsAction) {
+	try {
+		const rawUpdatedSettings = prepareFederationSettingsForBackend(updatedSettings);
+		yield API.Federations.updateFederationSettings({
+			teamspace, projectId, federationId, updatedSettings: rawUpdatedSettings,
+		});
+		yield put(FederationsActions.updateFederationSettingsSuccess(projectId, federationId, updatedSettings));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to update federation settings',
+			error,
+		}));
+	}
+}
+
 export function* deleteFederation({ teamspace, projectId, federationId }: DeleteFederationAction) {
 	try {
 		yield API.Federations.deleteFederation({ teamspace, projectId, federationId });
@@ -114,5 +180,8 @@ export default function* FederationsSagas() {
 	yield takeLatest(FederationsTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeLatest(FederationsTypes.FETCH_FEDERATIONS, fetchFederations);
 	yield takeEvery(FederationsTypes.FETCH_FEDERATION_STATS, fetchFederationStats);
+	yield takeEvery(FederationsTypes.FETCH_FEDERATION_VIEWS, fetchFederationViews);
+	yield takeEvery(FederationsTypes.FETCH_FEDERATION_SETTINGS, fetchFederationSettings);
+	yield takeLatest(FederationsTypes.UPDATE_FEDERATION_SETTINGS, updateFederationSettings);
 	yield takeLatest(FederationsTypes.DELETE_FEDERATION, deleteFederation);
 }

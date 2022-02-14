@@ -16,6 +16,8 @@
  */
 
 import {
+	FetchFederationRawSettingsResponse,
+	FetchFederationSettingsResponse,
 	FetchFederationsItemResponse,
 	FetchFederationStatsResponse,
 	IFederation,
@@ -58,3 +60,23 @@ export const prepareFederationsData = (
 	const federationStats = stats?.[index];
 	return prepareSingleFederationData(federation, federationStats);
 });
+
+export const prepareFederationSettingsForFrontend = ({
+	surveyPoints,
+	...otherProps
+}: FetchFederationRawSettingsResponse): FetchFederationSettingsResponse => (
+	{
+		surveyPoint: surveyPoints?.[0],
+		...otherProps,
+	}
+);
+
+export const prepareFederationSettingsForBackend = ({
+	surveyPoint,
+	...otherProps
+}: FetchFederationSettingsResponse): FetchFederationRawSettingsResponse => (
+	{
+		surveyPoints: [surveyPoint],
+		...otherProps,
+	}
+);

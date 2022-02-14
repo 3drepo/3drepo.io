@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,22 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Views = {};
-const db = require('../handler/db');
-const { templates } = require('../utils/responseCodes');
+import { FormTextFieldProps } from '@controls/formTextField/formTextField.component';
+import React from 'react';
+import { UnitTextField } from './formTextFieldUnit.styles';
 
-const getCollectionName = (model) => `${model}.views`;
-
-Views.getViewById = async (teamspace, model, id, projection) => {
-	const foundView = await db.findOne(teamspace, getCollectionName(model), { _id: id }, projection);
-
-	if (!foundView) {
-		throw templates.viewNotFound;
-	}
-
-	return foundView;
+type FormTextFieldUnitProps = Omit<FormTextFieldProps, 'label'> & {
+	labelName: string;
+	labelUnit: string;
 };
 
-Views.getViews = (teamspace, model, projection) => db.find(teamspace, getCollectionName(model), {}, projection);
-
-module.exports = Views;
+export const FormTextFieldUnit = ({ labelName, labelUnit, ...otherProps }: FormTextFieldUnitProps) => (
+	<UnitTextField
+		$labelName={labelName}
+		$labelUnit={labelUnit}
+		{...otherProps}
+	/>
+);
