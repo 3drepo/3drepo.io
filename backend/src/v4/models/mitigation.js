@@ -140,16 +140,16 @@ class Mitigation {
 			relax_column_count: true
 		});
 
-		for(const record of records){
-			if(record.referencedRisks){
+		for(const record of records) {
+			if(record.referencedRisks) {
 				const newReferencedRisks = [];
-				const riskRefsArray = record.referencedRisks.substring(1, record.referencedRisks.length - 1).split(',');
-	
-				for (var riskRef of riskRefsArray){
-					const newRef = riskRef.substring(1, riskRef.length - 1);
-					const teamspace = newRef.split('::')[0];
+				const riskRefsArray = record.referencedRisks.substring(1, record.referencedRisks.length - 1).split(",");
 
-					if(teamspace === account){
+				for (const riskRef of riskRefsArray) {
+					const newRef = riskRef.substring(1, riskRef.length - 1);
+					const teamspace = newRef.split("::")[0];
+
+					if(teamspace === account) {
 						newReferencedRisks.push(newRef);
 					}
 				}
@@ -157,7 +157,7 @@ class Mitigation {
 				record.referencedRisks = newReferencedRisks;
 			}
 		}
-		
+
 		return this.insert(account, records);
 	}
 
@@ -240,7 +240,7 @@ class Mitigation {
 		const mitigationDetails = _.pickBy(updatedRisk,  (value, key) => value && fieldTypes[key]);
 		const formattedReference = formatRiskReference(account, model, riskId);
 
-		if(oldStatusIsResolved){
+		if(oldStatusIsResolved) {
 			const oldMitigation = await db.findOne(account, colName, { referencedRisks: formattedReference });
 			if (oldMitigation) {
 				if (oldMitigation.referencedRisks.length === 1) {
@@ -251,7 +251,7 @@ class Mitigation {
 			}
 		}
 
-		if(newStatusIsResolved){
+		if(newStatusIsResolved) {
 			const mitigation = await db.findOne(account, colName, mitigationDetails, {referencedRisks: 1});
 			if (!mitigation) {
 				try {
