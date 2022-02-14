@@ -246,12 +246,8 @@ const subscribeToV5Events = () => {
 
 	});
 
-	EventsManager.subscribe(EventsV5.SESSIONS_REMOVED, async ({removedSessions}) => {
-		if (removedSessions) {
-			removedSessions.forEach((entry) => {
-				loggedOut(entry.session.user.socketId);
-			});
-		}
+	EventsManager.subscribe(EventsV5.SESSIONS_REMOVED, async ({ids}) => {
+		ids.forEach(loggedOut);
 	});
 
 };
