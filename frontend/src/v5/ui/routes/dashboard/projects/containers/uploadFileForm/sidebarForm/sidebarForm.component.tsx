@@ -137,6 +137,9 @@ export const SidebarForm = ({
 									</MenuItem>
 								))
 							}
+							<MenuItem key="sample" value="sample" hidden>
+								<FormattedMessage id="uploadFileForm.settingsSidebar.containerType.sample" defaultMessage="Sample" />
+							</MenuItem>
 						</TypeSelect>
 					)}
 				/>
