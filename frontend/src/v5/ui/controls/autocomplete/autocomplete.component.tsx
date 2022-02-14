@@ -17,11 +17,11 @@
 
 import React from 'react';
 import ChevronIcon from '@assets/icons/chevron.svg';
+import ClearIcon from '@assets/icons/clear_circle.svg';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
-import { ErrorTooltip } from '@controls/errorTooltip';
 import { FormattedMessage } from 'react-intl';
 import { DestinationOption } from '@/v5/store/containers/containers.types';
-import { Input, TextInput, LastRevision, ContainerName, NewContainer, ExistingContainer } from './autocomplete.styles';
+import { Input, TextInput, LastRevision, ContainerName, NewContainer, ExistingContainer, ErrorIcon } from './autocomplete.styles';
 
 interface IAutocomplete {
 	list: any[];
@@ -49,6 +49,7 @@ export const Autocomplete: React.FC<IAutocomplete> = ({
 		<Input
 			state={state}
 			popupIcon={<ChevronIcon />}
+			closeIcon={<ClearIcon />}
 			openText=""
 			closeText=""
 			clearText=""
@@ -93,9 +94,9 @@ export const Autocomplete: React.FC<IAutocomplete> = ({
 					{...props}
 					InputProps={{ ...InputProps,
 						startAdornment: !!errorMessage && (
-							<ErrorTooltip>
+							<ErrorIcon>
 								{errorMessage}
-							</ErrorTooltip>
+							</ErrorIcon>
 						),
 					}}
 				/>

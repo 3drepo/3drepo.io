@@ -20,6 +20,7 @@ import styled from 'styled-components';
 import { TextField } from '@material-ui/core';
 import { Typography } from '@controls/typography';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import { ErrorTooltip } from '@controls/errorTooltip';
 
 export const Input = styled(Autocomplete)`
 `;
@@ -96,5 +97,12 @@ export const NewContainer = styled.div`
 		path {
 			fill: ${({ theme }) => theme.palette.primary.dark};
 		}
+	}
+`;
+
+export const ErrorIcon = styled(ErrorTooltip)`
+	margin-right: 9px;
+	svg {
+		transform: translateY(0%);
 	}
 `;

@@ -538,9 +538,11 @@ export const theme = createMuiTheme({
 		},
 		MuiAutocomplete: {
 			root: {
-				height: '35px',
+				height: '31px',
 				'&&& $input': {
 					padding: '0px',
+					height: '31px',
+					lineHeight: '31px',
 				},
 			},
 			inputRoot: {
@@ -552,13 +554,21 @@ export const theme = createMuiTheme({
 			endAdornment: {
 				height: '100%',
 				top: 'unset',
+				display: 'flex',
+				alignItems: 'center',
 			},
 			popupIndicator: {
-				width: '24px',
-				margin: '13px 0px',
+				width: '20px',
+				height: '20px',
+				margin: '8px 0px',
 			},
 			clearIndicator: {
-				margin: 0,
+				'&': {
+					width: '20px',
+					height: '20px',
+					margin: '0 5px 0 0',
+					padding: '2px',
+				},
 			},
 			option: {
 				'&&': {
