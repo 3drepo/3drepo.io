@@ -16,10 +16,15 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../../utils/responseCodes');
+const { validateAddModelData, validateUpdateSettingsData } = require('./commons/modelSettings');
 const { getModelByQuery } = require('../../../../../../models/modelSettings');
 const { respond } = require('../../../../../../utils/responder');
+const { validateNewRevisionData } = require('./commons/revisions');
 
 const Containers = {};
+
+Containers.validateAddModelData = validateAddModelData(false);
+Containers.validateUpdateSettingsData = validateUpdateSettingsData(false);
 
 Containers.canDeleteContainer = async (req, res, next) => {
 	try {
@@ -34,5 +39,7 @@ Containers.canDeleteContainer = async (req, res, next) => {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };
+
+Containers.validateNewRevisionData = validateNewRevisionData(false);
 
 module.exports = Containers;

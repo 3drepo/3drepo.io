@@ -16,7 +16,7 @@
  */
 
 const { hasAccessToTeamspace, hasAdminAccessToFederation, hasReadAccessToFederation, isAdminToProject } = require('../../../../middleware/permissions/permissions');
-const { validateAddModelData, validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings');
+const { validateAddModelData, validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
 const Federations = require('../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
 const { formatModelSettings } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
@@ -70,7 +70,7 @@ const deleteFavourites = (req, res) => {
 		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
 };
 
-const getFederationStats = async (req, res) => {
+const getFederationStats = (req, res) => {
 	const { teamspace, federation } = req.params;
 	Federations.getFederationStats(teamspace, federation).then((stats) => {
 		const statsSerialised = { ...stats };
@@ -327,7 +327,7 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-		   *       - project:
+	 *       - project:
 	 *         name: project
 	 *         description: ID of project
 	 *         in: path
@@ -420,10 +420,10 @@ const establishRoutes = () => {
 	 *                     risks:
 	 *                       type: integer
 	 *                       description: The number of unmitigated risks of the federation
-     *                 category:
+     *                 desc:
 	 *                   type: string
-	 *                   description: Category of the federation
-	 *                   example:
+	 *                   description: Federation description
+	 *                   example: Floor 1 MEP with Facade
      *                 lastUpdated:
 	 *                   type: integer
 	 *                   description: Timestamp(ms) of when any of the submodels was updated
@@ -511,9 +511,6 @@ const establishRoutes = () => {
 	 *               desc:
 	 *                 type: String
 	 *                 example: description1
-	 *               type:
-	 *                 type: String
-	 *                 example: type1
 	 *               surveyPoints:
 	 *                 type: array
 	 *                 items:

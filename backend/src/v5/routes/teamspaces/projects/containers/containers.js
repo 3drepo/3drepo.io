@@ -14,12 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const { canDeleteContainer, validateAddModelData, validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { hasAccessToTeamspace, hasAdminAccessToContainer, hasReadAccessToContainer, isAdminToProject } = require('../../../../middleware/permissions/permissions');
-const { validateAddModelData, validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
-const { canDeleteContainer } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { formatModelSettings } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');
@@ -53,7 +52,7 @@ const getContainerList = (req, res) => {
 	}).catch((err) => respond(req, res, err));
 };
 
-const getContainerStats = async (req, res) => {
+const getContainerStats = (req, res) => {
 	const { teamspace, project, container } = req.params;
 	Containers.getContainerStats(teamspace, project, container).then((stats) => {
 		const statsSerialised = { ...stats };
