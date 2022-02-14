@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Button, Breadcrumbs } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import { TextOverflow } from '@controls/textOverflow';
@@ -26,15 +26,13 @@ export const Container = styled(Breadcrumbs)`
 	}
 `;
 
-export const InteractiveBreadcrumb = styled(Button).attrs({
+export const BaseBreadcrumb = styled(Button).attrs({
 	variant: 'text',
 })`
 	&& {
-		${({ theme }) => theme.typography.h3};
-		color: ${({ theme }) => theme.palette.primary.main};
-		padding: 5px 9px 5px 5px;
-		margin: 0 0 0 4px;
-		max-width: 100%;
+		color: ${({ theme }) => theme.palette.primary.contrast};
+		padding: 5px;
+		margin: 0 4px;
 
 		&:hover {
 			text-decoration: none;
@@ -46,15 +44,21 @@ export const InteractiveBreadcrumb = styled(Button).attrs({
 	}
 `;
 
-export const Breadcrumb = styled(InteractiveBreadcrumb).attrs({
-	component: Link,
+export const InteractiveBreadcrumb = styled(BaseBreadcrumb).attrs({
+	variant: 'text',
 })`
 	&& {
-		color: ${({ theme }) => theme.palette.primary.contrast};
-		padding: 5px;
-		margin: 0 4px;
+		${({ theme }) => theme.typography.h3};
+		color: ${({ theme }) => theme.palette.primary.main};
+		padding-right: 9px;
+		margin-right: 0;
+		max-width: 100%;
 	}
 `;
+
+export const Breadcrumb = styled(BaseBreadcrumb).attrs({
+	component: Link,
+})``;
 
 export const HomeIconBreadcrumb = styled(Breadcrumb)`
 	&& {
