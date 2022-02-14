@@ -17,8 +17,25 @@
 
 "use strict";
 
+const { v5Path } = require("../../interop");
+const { subscribe: subscribeV5 } = require(`${v5Path}/services/eventsManager/eventsManager`);
+const EventsV5 = require(`${v5Path}/services/eventsManager/eventsManager.constants`).events;
+
+const socketIdToSockets = {};
+const sessionToSocketIds = {};
+
+const subscribeToSessionV5Events = () => {
+	subscribeV5(EventsV5.SESSION_CREATED, ({ sessionID, socketId }) => {
+		if(socketIdToSockets[socketId]) {
+			if(!sessionToSocketIds[sessionID]) {
+				sessionToSocketIds[sessionID] = new Set();
+			}
+			sessionToSocketIds[sessionID].add(socketId);
+		}
+	});
+};
+
 module.exports.createApp = function (server, serverConfig) {
-	const socketIdToSockets = {};
 
 	const { session } = require("./session");
 
@@ -32,8 +49,6 @@ module.exports.createApp = function (server, serverConfig) {
 
 	const Queue = require("./queue");
 
-	const sessionToSocketIds = {};
-
 	io.use((socket, next) => {
 		if(socket.handshake.query["connect.sid"] && !socket.handshake.headers.cookie) {
 			socket.handshake.headers.cookie = "connect.sid=" + socket.handshake.query["connect.sid"] + "; ";
@@ -44,6 +59,8 @@ module.exports.createApp = function (server, serverConfig) {
 
 	io.use(sharedSession(session, { autoSave: true }));
 	initiateSocket();
+
+	subscribeToSessionV5Events();
 
 	const credentialErrorEventName = "credentialError";
 	const joinedEventName = "joined";
@@ -85,20 +102,22 @@ module.exports.createApp = function (server, serverConfig) {
 
 			socketIdToSockets[socket.id] = socket;
 
-			const sessionId = socket?.handshake?.session?.id;
+			const sessionID = socket?.handshake?.session?.id;
 
-			if(sessionId) {
-				if(!sessionToSocketIds[sessionId]) {
-					sessionToSocketIds[sessionId] = new Set();
+			if(sessionID && socket?.handshake?.session?.user?.username) {
+				if(!sessionToSocketIds[sessionID]) {
+					sessionToSocketIds[sessionID] = new Set();
 				}
-				sessionToSocketIds[sessionId].add(socket.id);
+				sessionToSocketIds[sessionID].add(socket.id);
 			}
 
 			socket.on("disconnect", () => {
-				if(sessionToSocketIds[sessionId].size === 1) {
-					delete sessionToSocketIds[sessionId];
-				} else {
-					sessionToSocketIds[sessionId].delete(socket.id);
+				if(sessionToSocketIds[sessionID]) {
+					if(sessionToSocketIds[sessionID].size === 1) {
+						delete sessionToSocketIds[sessionID];
+					} else {
+						sessionToSocketIds[sessionID].delete(socket.id);
+					}
 				}
 				delete socketIdToSockets[socket.id];
 			});
@@ -121,7 +140,7 @@ module.exports.createApp = function (server, serverConfig) {
 						socket.emit(joinedEventName, { account: data.account, model: data.model});
 					} else {
 						socket.emit(credentialErrorEventName, { message: `You have no access to join room ${data.account}${modelNameSpace}`});
-						systemLogger.logError(`${username} - ${sessionId} - ${socket.id} has no access to join room ${data.account}${modelNameSpace}`, {
+						systemLogger.logError(`${username} - ${sessionID} - ${socket.id} has no access to join room ${data.account}${modelNameSpace}`, {
 							username,
 							account: data.account,
 							model: data.model
@@ -137,7 +156,7 @@ module.exports.createApp = function (server, serverConfig) {
 				const modelNameSpace = data.model ?  `::${data.model}` : "";
 
 				socket.leave(`${data.account}${modelNameSpace}`);
-				systemLogger.logInfo(`${sessionId} - ${socket.id} has left room ${data.account}${modelNameSpace}`, {
+				systemLogger.logInfo(`${sessionID} - ${socket.id} has left room ${data.account}${modelNameSpace}`, {
 					account: data.account,
 					model: data.model
 				});

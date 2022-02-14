@@ -28,7 +28,6 @@ const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
 const User = require("../models/user");
 
-const LoginRecord = require("../models/loginRecord");
 const Mailer = require("../mailer/mailer");
 const httpsPost = require("../libs/httpsReq").post;
 
@@ -555,7 +554,6 @@ function createSession(place, req, res, next, user) {
 
 	regenerateAuthSession(req, user)
 		.then(() => {
-			LoginRecord.saveLoginRecord(req.sessionID, user.username, req.ips[0] || req.ip, req.headers["user-agent"] ,req.header("Referer"));
 			return getSessionsByUsername(user.username);
 		})
 		.then(sessions => { // Remove other sessions with the same username

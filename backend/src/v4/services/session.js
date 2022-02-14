@@ -17,6 +17,9 @@
 
 "use strict";
 
+const { v5Path } = require("../../interop");
+const { publish: publishV5Event} = require(`${v5Path}/services/eventsManager/eventsManager`);
+const EventsV5 = require(`${v5Path}/services/eventsManager/eventsManager.constants`).events;
 const expressSession = require("express-session");
 const db = require("../handler/db");
 const config = require("../config");
@@ -78,6 +81,13 @@ SessionService.regenerateAuthSession = (req, user) => {
 				req.session.cookie.maxAge = config.cookie.maxAge;
 			}
 
+			publishV5Event(EventsV5.SESSION_CREATED, {
+				username: user.username,
+				sessionID: req.sessionID,
+				ipAddress: req.ips[0] || req.ip,
+				userAgent: req.headers["user-agent"],
+				socketId: req.headers[C.HEADER_SOCKET_ID],
+				referer: req.headers.referer });
 			resolve(req.session);
 
 		});
