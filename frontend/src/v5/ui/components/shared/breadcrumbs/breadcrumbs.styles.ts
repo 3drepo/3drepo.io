@@ -26,16 +26,6 @@ export const Container = styled(Breadcrumbs)`
 	}
 `;
 
-const BreadcrumbTabbedStyle = css`
-	&:hover {
-		text-decoration: none;
-	}
-
-	&.MuiButton-text.Mui-focusVisible {
-		background-color: ${({ theme }) => theme.palette.secondary.mid};
-	}
-`;
-
 export const InteractiveBreadcrumb = styled(Button).attrs({
 	variant: 'text',
 })`
@@ -46,20 +36,23 @@ export const InteractiveBreadcrumb = styled(Button).attrs({
 		margin: 0 0 0 4px;
 		max-width: 100%;
 
-		${BreadcrumbTabbedStyle}
+		&:hover {
+			text-decoration: none;
+		}
+
+		&.MuiButton-text.Mui-focusVisible {
+			background-color: ${({ theme }) => theme.palette.secondary.mid};
+		}
 	}
 `;
 
-export const Breadcrumb = styled(Button).attrs({
-	variant: 'text',
+export const Breadcrumb = styled(InteractiveBreadcrumb).attrs({
 	component: Link,
 })`
 	&& {
 		color: ${({ theme }) => theme.palette.primary.contrast};
 		padding: 5px;
 		margin: 0 4px;
-
-		${BreadcrumbTabbedStyle}
 	}
 `;
 
