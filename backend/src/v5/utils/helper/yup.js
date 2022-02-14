@@ -17,6 +17,8 @@
 
 const { UUIDToString } = require('./uuids');
 const Yup = require('yup');
+const tz = require('countries-and-timezones');
+const zxcvbn = require('zxcvbn');
 
 const YupHelper = { validators: {}, types: { strings: {} } };
 
@@ -39,6 +41,9 @@ YupHelper.types.degrees = Yup.number().min(0).max(360);
 YupHelper.types.strings.username = YupHelper.validators.alphanumeric(Yup.string().min(2).max(65).strict(true));
 
 YupHelper.types.strings.title = Yup.string().min(1).max(120);
+
+YupHelper.types.strings.countryCode = Yup.string().min(1).test('valid-country-code',
+	'The country code provided is not valid', (value) => value === undefined || !!tz.getCountry(value));
 
 // This is used for shorter descriptions such as revision desc, model desc, teamspace desc etc.
 YupHelper.types.strings.shortDescription = Yup.string().min(1).max(660);
@@ -74,6 +79,19 @@ YupHelper.types.surveyPoints = Yup.array()
 YupHelper.types.strings.unit = Yup.string()
 	.oneOf(['mm', 'cm', 'dm', 'm', 'ft']);
 
+YupHelper.types.strings.password = Yup.string()
+	.test('checkPasswordStrength', 'Password is too weak',
+		(value) => {
+			if (value) {
+				if (value.length < 8) return false;
+				const passwordScore = zxcvbn(value).score;
+				return passwordScore >= 2;
+			}
+			return true;
+		});
+
 YupHelper.types.strings.email = Yup.string().email();
+
+YupHelper.types.strings.name = Yup.string().min(1).max(35);
 
 module.exports = YupHelper;

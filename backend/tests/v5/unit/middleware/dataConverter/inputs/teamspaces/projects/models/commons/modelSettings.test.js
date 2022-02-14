@@ -107,7 +107,7 @@ const testValidateUpdateSettingsData = () => {
 		test(`${desc} ${shouldPass ? ' should call next()' : 'should respond with invalidArguments'}`, async () => {
 			const mockCB = jest.fn();
 			const req = { ...cloneDeep(data) };
-			await ModelSettings.validateUpdateSettingsData(req, {}, mockCB);
+			await ModelSettings.validateUpdateSettingsData(false)(req, {}, mockCB);
 			if (shouldPass) {
 				expect(mockCB.mock.calls.length).toBe(1);
 			} else {
@@ -226,7 +226,7 @@ const testValidateAddModelData = () => {
 		test(`${desc} ${shouldPass ? 'should call next()' : 'should respond with invalidArguments'}`, async () => {
 			const mockCB = jest.fn();
 			const req = { ...cloneDeep(data) };
-			await ModelSettings.validateAddModelData(req, {}, mockCB);
+			await ModelSettings.validateAddModelData(false)(req, {}, mockCB);
 			if (shouldPass) {
 				expect(mockCB.mock.calls.length).toBe(1);
 			} else {

@@ -94,12 +94,10 @@ export const Breadcrumbs = (): JSX.Element => {
 				<HomeIcon />
 			</HomeIconBreadcrumb>
 
-			{breadcrumbs.map((title, index) => {
-				const isLastItem = (breadcrumbs.length - 1) === index;
-
-				if (isLastItem) {
-					return (
-						<div key={`${title}`}>
+			{breadcrumbs.map((title, index) => (
+				(breadcrumbs.length - 1) === index
+					? (
+						<div key={title}>
 							<InteractiveBreadcrumb onClick={handleClick} endIcon={<DownArrowIcon />}>
 								<OverflowWrapper>
 									{title}
@@ -112,15 +110,12 @@ export const Breadcrumbs = (): JSX.Element => {
 								handleClose={handleClose}
 							/>
 						</div>
-					);
-				}
-
-				return (
-					<Breadcrumb key={title} color="inherit" to={teamspaceTo}>
-						{title}
-					</Breadcrumb>
-				);
-			})}
+					) : (
+						<Breadcrumb key={title} color="inherit" to={teamspaceTo}>
+							{title}
+						</Breadcrumb>
+					)
+			))}
 		</Container>
 	);
 };
