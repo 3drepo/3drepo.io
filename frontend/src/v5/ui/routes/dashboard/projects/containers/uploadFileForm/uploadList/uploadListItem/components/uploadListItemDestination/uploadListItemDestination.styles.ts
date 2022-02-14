@@ -15,11 +15,45 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TextField } from '@material-ui/core';
 import styled from 'styled-components';
 
-export const Input = styled(TextField)`
+import { TextField } from '@material-ui/core';
+import { ErrorTooltip } from '@controls/errorTooltip';
+
+export const TextInput = styled(TextField)`
 	margin: 0;
 	width: 271px;
-	height: 35px;
+	border: none;
+	>.MuiInputBase-root {
+		>.MuiInputBase-input {
+			font-weight: bold;
+		}
+		${({ state, theme, error }) => {
+		if (error) return '';
+		if (state === 'new') {
+			return `
+					>.MuiInputBase-input { color: ${theme.palette.primary.main}; };
+					path { fill: ${theme.palette.primary.main}}
+					background-color: ${theme.palette.primary.lightest};
+					fieldset { border: none; }
+				`;
+		}
+		if (state === 'existing') {
+			return `
+					>.MuiInputBase-input { color: ${theme.palette.secondary.main} };
+					path { fill: ${theme.palette.secondary.main}}
+					background-color: ${theme.palette.tertiary.lightest};
+					fieldset { border: none; }
+				`;
+		}
+		return '';
+	}}
+	}
+`;
+
+export const ErrorIcon = styled(ErrorTooltip)`
+	margin-right: 9px;
+	svg {
+		transform: translateY(0%);
+	}
 `;

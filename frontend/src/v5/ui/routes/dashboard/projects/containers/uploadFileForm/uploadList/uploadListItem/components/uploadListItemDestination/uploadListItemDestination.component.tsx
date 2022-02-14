@@ -15,25 +15,95 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
-import { Autocomplete } from '@controls/autocomplete';
-import { createFilterOptions } from '@material-ui/lab';
 import React from 'react';
+import ChevronIcon from '@assets/icons/chevron.svg';
+import ClearIcon from '@assets/icons/clear_circle.svg';
+import MuiAutocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
+import { DestinationOption } from '@/v5/store/containers/containers.types';
+import { TextInput, ErrorIcon } from './uploadListItemDestination.styles';
+import { NewContainer } from './options/newContainer';
+import { ExistingContainer } from './options/existingContainer';
+import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 
-type IUploadListItemDestination = {
-	errorMessage: string;
+interface IUploadListItemDestination {
 	onChange: (option) => void;
-};
+	errorMessage: string;
+	disabled?: boolean;
+	className?: string;
+}
 
-export const UploadListItemDestination = ({
+const emptyOption = { name: '', _id: '', latestRevision: '' };
+const filter = createFilterOptions<{_id: string; name: string; latestRevision: string;}>();
+
+export const UploadListItemDestination: React.FC<IUploadListItemDestination> = ({
 	errorMessage,
+	disabled = false,
+	className,
 	onChange,
 	...props
-}: IUploadListItemDestination): JSX.Element => {
-	const filter = createFilterOptions<{_id: string; name: string; latestRevision: string;}>();
+}) => {
+	const [value, setValue] = React.useState(emptyOption);
+	const [state, setState] = React.useState(errorMessage ? 'error' : 'empty');
 	const containers = ContainersHooksSelectors.selectContainers();
-
 	return (
-		<Autocomplete filter={filter} errorMessage={errorMessage} list={containers} onChange={onChange} {...props} />
+		<MuiAutocomplete
+			popupIcon={<ChevronIcon />}
+			closeIcon={<ClearIcon />}
+			openText=""
+			closeText=""
+			clearText=""
+			handleHomeEndKeys
+			value={value}
+			onChange={(event, newValue: DestinationOption) => {
+				if (!newValue) {
+					setValue(emptyOption);
+					setState('');
+					onChange(emptyOption);
+				} else {
+					setValue(newValue);
+					setState(!newValue._id.length ? 'new' : 'existing');
+					onChange(newValue);
+				}
+			}}
+			options={containers.map((val) => ({
+				name: val.name,
+				_id: val._id,
+				latestRevision: val.latestRevision,
+			}))}
+			filterOptions={(options, params) => {
+				const filtered: DestinationOption[] = filter(options, params);
+				const { inputValue } = params;
+				const isExisting = options.some((option: DestinationOption) => inputValue === option.name);
+				if (inputValue !== '' && !isExisting) {
+					filtered.unshift({
+						_id: '',
+						name: inputValue,
+						latestRevision: '',
+					});
+				}
+				return filtered;
+			}}
+			getOptionLabel={(option: DestinationOption) => option.name}
+			renderInput={({ InputProps, ...params }) => (
+				<TextInput
+					error={!!errorMessage}
+					state={state}
+					{...params}
+					{...props}
+					InputProps={{ ...InputProps,
+						startAdornment: !!errorMessage && (
+							<ErrorIcon>
+								{errorMessage}
+							</ErrorIcon>
+						),
+					}}
+				/>
+			)}
+			renderOption={(option: DestinationOption) => {
+				if (option.name && !option._id) return (<NewContainer {...option} />);
+				return (<ExistingContainer {...option} />);
+			}}
+			disabled={disabled}
+		/>
 	);
 };
