@@ -185,7 +185,7 @@ export type UploadFieldArray = {
 export type DestinationOption = {
 	name: string;
 	_id: string;
-	latestRevision?: string;
+	latestRevision: string;
 };
 
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;

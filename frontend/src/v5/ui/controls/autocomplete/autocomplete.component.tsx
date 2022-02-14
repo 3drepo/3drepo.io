@@ -20,8 +20,9 @@ import ChevronIcon from '@assets/icons/chevron.svg';
 import ClearIcon from '@assets/icons/clear_circle.svg';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { FormattedMessage } from 'react-intl';
+import MuiAutocomplete from '@material-ui/lab/Autocomplete';
 import { DestinationOption } from '@/v5/store/containers/containers.types';
-import { Input, TextInput, LastRevision, ContainerName, NewContainer, ExistingContainer, ErrorIcon } from './autocomplete.styles';
+import { TextInput, LastRevision, ContainerName, NewContainer, ExistingContainer, ErrorIcon } from './autocomplete.styles';
 
 interface IAutocomplete {
 	list: any[];
@@ -46,8 +47,7 @@ export const Autocomplete: React.FC<IAutocomplete> = ({
 	const [value, setValue] = React.useState(emptyOption);
 	const [state, setState] = React.useState(errorMessage ? 'error' : 'empty');
 	return (
-		<Input
-			state={state}
+		<MuiAutocomplete
 			popupIcon={<ChevronIcon />}
 			closeIcon={<ClearIcon />}
 			openText=""
@@ -55,7 +55,7 @@ export const Autocomplete: React.FC<IAutocomplete> = ({
 			clearText=""
 			handleHomeEndKeys
 			value={value}
-			onChange={(event, newValue) => {
+			onChange={(event, newValue: DestinationOption) => {
 				if (!newValue) {
 					setValue(emptyOption);
 					setState('');
@@ -82,7 +82,6 @@ export const Autocomplete: React.FC<IAutocomplete> = ({
 						latestRevision: '',
 					});
 				}
-
 				return filtered;
 			}}
 			getOptionLabel={(option: DestinationOption) => option.name}

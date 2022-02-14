@@ -19,11 +19,7 @@ import styled from 'styled-components';
 
 import { TextField } from '@material-ui/core';
 import { Typography } from '@controls/typography';
-import Autocomplete from '@material-ui/lab/Autocomplete';
 import { ErrorTooltip } from '@controls/errorTooltip';
-
-export const Input = styled(Autocomplete)`
-`;
 
 export const TextInput = styled(TextField)`
 	margin: 0;
@@ -33,10 +29,12 @@ export const TextInput = styled(TextField)`
 		>.MuiInputBase-input {
 			font-weight: bold;
 		}
-		${({ state, theme }) => {
+		${({ state, theme, error }) => {
+		if (error) return '';
 		if (state === 'new') {
 			return `
 					>.MuiInputBase-input { color: ${theme.palette.primary.main}; };
+					path { fill: ${theme.palette.primary.main}}
 					background-color: ${theme.palette.primary.lightest};
 					fieldset { border: none; }
 				`;
@@ -44,14 +42,8 @@ export const TextInput = styled(TextField)`
 		if (state === 'existing') {
 			return `
 					>.MuiInputBase-input { color: ${theme.palette.secondary.main} };
+					path { fill: ${theme.palette.secondary.main}}
 					background-color: ${theme.palette.tertiary.lightest};
-					fieldset { border: none; }
-				`;
-		}
-		if (state === 'error') {
-			return `
-					>.MuiInputBase-input { color: ${theme.palette.error.main} };
-					background-color: ${theme.palette.error.lightest};
 					fieldset { border: none; }
 				`;
 		}
