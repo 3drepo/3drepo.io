@@ -102,9 +102,4 @@ SessionService.getSessionsByUsername = (username) => {
 	return db.find("admin", "sessions", query);
 };
 
-SessionService.removeSessions = (sessionIds) => {
-	const query = { _id: { $in: sessionIds } };
-	return db.deleteMany("admin", "sessions", query);
-};
-
 module.exports = SessionService;

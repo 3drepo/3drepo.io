@@ -36,7 +36,7 @@ const FileType = require("file-type");
 
 const multer = require("multer");
 
-const { regenerateAuthSession, getSessionsByUsername, removeSessions } = require("../services/session");
+const { regenerateAuthSession, getSessionsByUsername } = require("../services/session");
 
 /**
  * @api {post} /login Login
@@ -571,7 +571,6 @@ function createSession(place, req, res, next, user) {
 				chatEvent.loggedOut(entry._id);
 			});
 
-			return removeSessions(ids);
 		}).then(() => {
 			responseCodes.respond(place, req, res, next, responseCodes.OK, user);
 		}).catch((err) => {
