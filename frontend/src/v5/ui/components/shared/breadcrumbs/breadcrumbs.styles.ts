@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { Button, Breadcrumbs } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import { TextOverflow } from '@controls/textOverflow';
