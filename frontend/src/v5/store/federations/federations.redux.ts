@@ -97,9 +97,9 @@ export const fetchFederationViewsSuccess = (state = INITIAL_STATE, {
 	projectId,
 	federationId,
 	views,
-}: FetchFederationViewsSuccessAction) => ({
+}: FetchFederationViewsSuccessAction): IFederationsState => ({
 	...state,
-	federations: {
+	federationsByProject: {
 		...state.federationsByProject,
 		[projectId]: state.federationsByProject[projectId].map((federation) => {
 			if (federationId !== federation._id) return federation;
@@ -115,9 +115,9 @@ export const fetchFederationSettingsSuccess = (state = INITIAL_STATE, {
 	projectId,
 	federationId,
 	settings,
-}: FetchFederationSettingsSuccessAction) => ({
+}: FetchFederationSettingsSuccessAction): IFederationsState => ({
 	...state,
-	federations: {
+	federationsByProject: {
 		...state.federationsByProject,
 		[projectId]: state.federationsByProject[projectId].map((federation) => {
 			if (federationId !== federation._id) return federation;
@@ -133,9 +133,9 @@ export const updateFederationSettingsSuccess = (state = INITIAL_STATE, {
 	projectId,
 	federationId,
 	updatedSettings,
-}: UpdateFederationSettingsSuccessAction) => ({
+}: UpdateFederationSettingsSuccessAction): IFederationsState => ({
 	...state,
-	federations: {
+	federationsByProject: {
 		...state.federationsByProject,
 		[projectId]: state.federationsByProject[projectId].map((federation) => {
 			if (federationId !== federation._id) return federation;

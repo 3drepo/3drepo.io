@@ -113,7 +113,7 @@ export type FetchFederationViewsResponse = {
 export type FetchFederationViewsSuccessPayload = {
 	projectId: string;
 	federationId: string;
-	views: FetchFederationViewsResponse;
+	views: FederationView[];
 };
 
 export type FetchFederationSettingsPayload = FetchFederationsPayload & {
