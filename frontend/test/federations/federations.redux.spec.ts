@@ -69,9 +69,9 @@ describe('Federations: redux', () => {
 
 	it('should load fetched views', () => {
 		const mockFederation = federationMockFactory({ views: [] });
-		const defaultStateWithNoViews = {
+		const defaultStateWithNoViews:IFederationsState = {
 			...INITIAL_STATE,
-			federations: {
+			federationsByProject: {
 				[projectId]: [mockFederation]
 			}
 		}
@@ -79,16 +79,16 @@ describe('Federations: redux', () => {
 			defaultStateWithNoViews,
 			FederationsActions.fetchFederationViewsSuccess(projectId, mockFederation._id, [EMPTY_VIEW]),
 		);
-		const result = resultState.federations[projectId];
+		const result = resultState.federationsByProject[projectId];
 
 		expect(result[0].views).toEqual([EMPTY_VIEW]);
 	});
 
 	it('should load fetched settings', () => {
 		const mockFederation = federationMockFactory(EMPTY_SETTINGS);
-		const defaultStateWithNoSettings = {
+		const defaultStateWithNoSettings: IFederationsState = {
 			...INITIAL_STATE,
-			federations: {
+			federationsByProject: {
 				[projectId]: [mockFederation]
 			}
 		}
@@ -98,7 +98,7 @@ describe('Federations: redux', () => {
 			defaultStateWithNoSettings,
 			FederationsActions.fetchFederationSettingsSuccess(projectId, mockFederation._id, mockSettings),
 		);
-		const result = resultState.federations[projectId];
+		const result = resultState.federationsByProject[projectId];
 
 		expect(result[0].surveyPoint).toEqual(mockSettings.surveyPoint);
 		expect(result[0].defaultView).toEqual(mockSettings.defaultView);
@@ -111,9 +111,9 @@ describe('Federations: redux', () => {
 
 	it('should update settings changed from form', () => {
 		const mockFederation = federationMockFactory(EMPTY_SETTINGS);
-		const defaultStateWithNoSettings = {
+		const defaultStateWithNoSettings: IFederationsState = {
 			...INITIAL_STATE,
-			federations: {
+			federationsByProject: {
 				[projectId]: [mockFederation]
 			}
 		}
@@ -125,7 +125,7 @@ describe('Federations: redux', () => {
 			defaultStateWithNoSettings,
 			FederationsActions.updateFederationSettingsSuccess(projectId, mockFederation._id, mockUpdatedFederationPropertiesReply),
 		);
-		const result = resultState.federations[projectId];
+		const result = resultState.federationsByProject[projectId];
 
 		expect(result[0].surveyPoint).toEqual(mockUpdatedFederationPropertiesReply.surveyPoint);
 		expect(result[0].defaultView).toEqual(mockUpdatedFederationPropertiesReply.defaultView);
