@@ -580,6 +580,12 @@ export const theme = createMuiTheme({
 					padding: '12px',
 					wordWrap: 'break-word',
 				},
+				'&:focus': {
+					backgroundColor: COLOR.TERTIARY_LIGHTEST,
+				},
+				'&[data-focus]': {
+					backgroundColor: COLOR.TERTIARY_LIGHTEST,
+				},
 			},
 		},
 		MuiFormControl: {
