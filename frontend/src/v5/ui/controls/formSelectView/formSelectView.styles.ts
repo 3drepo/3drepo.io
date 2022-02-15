@@ -54,10 +54,6 @@ export const FormSelect = styled(FormSelectBase)`
 	${ViewLabel} {
 		padding-left: 14px;
 	}
-
-	${ThumbnailPlaceholder} {
-		display: none;
-	}
 `;
 
 export const MenuItemView = styled(MenuItem)`

@@ -25,6 +25,7 @@ export const UnitTextField = styled(FormTextField).attrs((props) => ({
 	.MuiInputLabel-formControl {
 		&::before {
 			content: "${(props) => props.$labelName}";
+			${(props) => props.theme.typography.kicker};
 		}
 		
 		text-transform: none; 
