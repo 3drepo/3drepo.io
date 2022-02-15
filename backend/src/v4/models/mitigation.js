@@ -137,7 +137,7 @@ class Mitigation {
 		});
 
 		for(const record of records) {
-			if(record.referencedRisks && record.referencedRisk.length > 2) {
+			if(record?.referencedRisks?.length > 2) {
 				const riskRefsArray = record.referencedRisks.substring(1, record.referencedRisks.length - 1).split(",");
 				record.referencedRisks = riskRefsArray;
 			}
