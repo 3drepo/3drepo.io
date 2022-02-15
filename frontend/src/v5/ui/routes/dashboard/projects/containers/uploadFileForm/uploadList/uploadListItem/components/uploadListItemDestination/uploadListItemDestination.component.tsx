@@ -81,6 +81,14 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 						latestRevision: '',
 					});
 				}
+
+				(function hideSelectedOption() {
+					const index = filtered.findIndex((x) => x.name === value.name);
+					if (index > -1) {
+						filtered.splice(index, 1);
+					}
+				}());
+
 				return filtered;
 			}}
 			getOptionLabel={(option: DestinationOption) => option.name}
