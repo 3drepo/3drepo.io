@@ -58,13 +58,9 @@ const mitigationCriteriaBlacklist = [
 
 const colName = "mitigations";
 
-const isMitigationStatusResolved = (mitigationStatus) => {
-	return mitigationStatus === "agreed_partial" || mitigationStatus === "agreed_fully";
-};
+const isMitigationStatusResolved = (mitigationStatus) => mitigationStatus === "agreed_partial" || mitigationStatus === "agreed_fully";
 
-const formatRiskReference = (teamspace, modelId, riskId) => {
-	return `${teamspace}::${modelId}::${riskId}`;
-};
+const formatRiskReference = (teamspace, modelId, riskId) => `${teamspace}::${modelId}::${riskId}`;
 
 class Mitigation {
 	getMitigationCollection(account) {
@@ -141,20 +137,9 @@ class Mitigation {
 		});
 
 		for(const record of records) {
-			if(record.referencedRisks) {
-				const newReferencedRisks = [];
+			if(record.referencedRisks && record.referencedRisk.length > 2) {
 				const riskRefsArray = record.referencedRisks.substring(1, record.referencedRisks.length - 1).split(",");
-
-				for (const riskRef of riskRefsArray) {
-					const newRef = riskRef.substring(1, riskRef.length - 1);
-					const teamspace = newRef.split("::")[0];
-
-					if(teamspace === account) {
-						newReferencedRisks.push(newRef);
-					}
-				}
-
-				record.referencedRisks = newReferencedRisks;
+				record.referencedRisks = riskRefsArray;
 			}
 		}
 

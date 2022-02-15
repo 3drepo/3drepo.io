@@ -125,7 +125,8 @@ class TeamspaceSettings {
 
 		labelFields.forEach((key) => {
 			if (utils.hasField(data, key)) {
-				if (Object.prototype.toString.call(data[key]) === "[object Array]") {
+				const isMitigationSuggestion =  "createMitigationSuggestions" === key;
+				if (!isMitigationSuggestion && Object.prototype.toString.call(data[key]) === "[object Array]") {
 					const arrayUpdated = [];
 					const foundKeys = {};
 					for (let i = 0; i < data[key].length; ++i) {
@@ -142,8 +143,10 @@ class TeamspaceSettings {
 						}
 					}
 					toUpdate[key] = arrayUpdated;
-				} else if (Object.prototype.toString.call(data[key]) === "[object Boolean]") {
+				} else if (isMitigationSuggestion && utils.isBoolean(data[key])) {
 					toUpdate[key] = data[key] === true;
+				} else {
+					throw responseCodes.INVALID_ARGUMENTS;
 				}
 			}
 		});
