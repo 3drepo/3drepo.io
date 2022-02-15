@@ -582,12 +582,6 @@ export const theme = createMuiTheme({
 				'&&': { margin: 0 },
 			},
 		},
-		MuiCheckbox: {
-			root: {
-				color: COLOR.BASE_MAIN,
-				padding: 0,
-			},
-		},
 		MuiTouchRipple: {
 			root: {
 				visibility: 'hidden',
@@ -601,11 +595,6 @@ export const theme = createMuiTheme({
 		MuiIconButton: {
 			root: {
 				transition: 'none',
-			},
-		},
-		MuiCheckbox: {
-			colorPrimary: {
-				color: COLOR.BASE_LIGHTEST,
 			},
 		},
 		MuiButton: {
