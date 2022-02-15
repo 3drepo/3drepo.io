@@ -17,6 +17,6 @@
 
 import { RevisionsActions } from '@/v5/store/revisions/revisions.redux';
 import { IRevisionsActionCreators } from '@/v5/store/revisions/revisions.types';
-import { createActionsDispatchers } from './actionsDistpatchers.helper';
+import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 
 export const RevisionsActionsDispatchers = createActionsDispatchers<IRevisionsActionCreators>(RevisionsActions);

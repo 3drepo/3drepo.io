@@ -28,7 +28,6 @@ const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
 const User = require("../models/user");
 
-const LoginRecord = require("../models/loginRecord");
 const Mailer = require("../mailer/mailer");
 const httpsPost = require("../libs/httpsReq").post;
 
@@ -37,7 +36,7 @@ const FileType = require("file-type");
 
 const multer = require("multer");
 
-const { regenerateAuthSession, getSessionsByUsername, removeSessions } = require("../services/session");
+const { regenerateAuthSession, getSessionsByUsername } = require("../services/session");
 
 /**
  * @api {post} /login Login
@@ -553,9 +552,8 @@ router.put("/:account/password", resetPassword);
 function createSession(place, req, res, next, user) {
 	req.body.username = user.username;
 
-	regenerateAuthSession(req, config, user)
+	regenerateAuthSession(req, user)
 		.then(() => {
-			LoginRecord.saveLoginRecord(req.sessionID, user.username, req.ips[0] || req.ip, req.headers["user-agent"] ,req.header("Referer"));
 			return getSessionsByUsername(user.username);
 		})
 		.then(sessions => { // Remove other sessions with the same username
@@ -570,10 +568,9 @@ function createSession(place, req, res, next, user) {
 					return;
 				}
 				ids.push(entry._id);
-				chatEvent.loggedOut(entry.session.user.socketId);
+				chatEvent.loggedOut(entry._id);
 			});
 
-			return removeSessions(ids);
 		}).then(() => {
 			responseCodes.respond(place, req, res, next, responseCodes.OK, user);
 		}).catch((err) => {

@@ -27,7 +27,7 @@ export interface IRevision {
 }
 
 export interface IRevisionsState {
-	revisions: Record<string, IRevision[]>;
+	revisionsByContainer: Record<string, IRevision[]>;
 	isPending: Record<string, boolean>;
 }
 

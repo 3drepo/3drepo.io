@@ -18,11 +18,11 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectDialogs } from '@/v5/store/dialogs/dialogs.selectors';
-import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
+import { DialogsActions, IDialogConfig } from '@/v5/store/dialogs/dialogs.redux';
 import { Modal } from '@/v5/ui/controls/modal';
 import { MODAL_TEMPLATES } from './templates';
 
-const ModalTemplateContainer = ({ id, modalType, props }) => {
+const ModalTemplateContainer = ({ id, modalType, props }: IDialogConfig) => {
 	const [openState, setOpenState] = useState(true);
 
 	const dispatch = useDispatch();
