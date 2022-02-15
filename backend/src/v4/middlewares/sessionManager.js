@@ -17,8 +17,7 @@
 
 "use strict";
 const { systemLogger } = require("../logger");
-const config = require("../config");
-const session = require("../services/session").session(config);
+const { session } = require("../services/session");
 
 module.exports = async (req, res, next) => {
 	// In case other middleware sets the session

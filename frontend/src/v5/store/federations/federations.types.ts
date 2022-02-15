@@ -14,19 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import {
-	UploadStatuses,
-} from '@/v5/store/containers/containers.types';
 import { Action } from 'redux';
 
 export interface IFederation {
 	_id: string;
-	description?: string;
+	desc?: string;
 	name: string;
 	role: string;
 	isFavourite: boolean;
 	code: string;
-	status: UploadStatuses;
+	status: string;
 	subModels: string[];
 	containers: number;
 	issues: number;
@@ -34,16 +31,43 @@ export interface IFederation {
 	category: string;
 	lastUpdated: Date;
 	hasStatsPending: boolean;
+	views?: FederationView[];
+	surveyPoint?: SurveyPoint;
+	angleFromNorth?: number;
+	defaultView?: string;
+	unit?: string;
 }
 
 export interface IFederationsState {
-	federations: Record<string, IFederation[]>;
-	isListPending: boolean;
+	federationsByProject: Record<string, IFederation[]>;
 }
 
+export interface SurveyPoint {
+	latLong: [number, number];
+	position: [number, number, number];
+}
+
+export type FederationSettings = Pick<IFederation, 'surveyPoint' | 'angleFromNorth' | 'defaultView' | 'unit' | 'desc' | 'name' | 'code'>;
+
+export type FederationRawSettings = Omit<FederationSettings, 'surveyPoint'> & {
+	surveyPoints: SurveyPoint[];
+};
+
+export type FederationView = {
+	_id: string;
+	name: string;
+	hasThumbnail: boolean;
+};
+
+export const EMPTY_VIEW: FederationView = {
+	_id: ' ',
+	name: 'None',
+	hasThumbnail: false,
+};
+
 export type FetchFederationsPayload = {
-	teamspace: string;
 	projectId: string;
+	teamspace: string;
 };
 
 export type FetchFederationsItemResponse = Pick<IFederation, '_id' | 'name' | 'role' | 'isFavourite'>;
@@ -58,7 +82,7 @@ export type FavouritePayload = FetchFederationsPayload & {
 
 export type FetchFederationStatsResponse = {
 	code: string;
-	status: UploadStatuses;
+	status: string;
 	subModels: string[];
 	tickets: {
 		issues: number;
@@ -73,32 +97,85 @@ export type FetchFederationStatsPayload = FetchFederationsPayload & {
 };
 
 export type FetchFederationStatsSuccessPayload = {
-	federationId: string,
+	federationId: string;
 	projectId: string;
 	federationStats: FetchFederationStatsResponse;
 };
 
-export interface DeleteFederationPayload {
-	teamspace: string;
-	projectId: string;
+export type FetchFederationViewsPayload = FetchFederationsPayload & {
 	federationId: string;
-}
+};
 
-export interface DeleteFederationSuccessPayload {
+export type FetchFederationViewsResponse = {
+	views: FederationView[];
+};
+
+export type FetchFederationViewsSuccessPayload = {
 	projectId: string;
 	federationId: string;
-}
+	views: FederationView[];
+};
+
+export type FetchFederationSettingsPayload = FetchFederationsPayload & {
+	federationId: string;
+};
+
+export type FetchFederationSettingsResponse = FederationSettings & {
+	timestamp?: number;
+	status?: string[];
+	errorReason?: {
+		message: string;
+		timestamp: number;
+		errorCode: string;
+	}
+};
+
+export type FetchFederationRawSettingsResponse = Omit<FetchFederationSettingsResponse, 'surveyPoint'> & {
+	surveyPoints: SurveyPoint[];
+};
+
+export type FetchFederationSettingsSuccessPayload = {
+	projectId: string;
+	federationId: string;
+	settings: FederationSettings;
+};
+
+// TODO rename updatedSettings to settings
+export type UpdateFederationSettingsPayload = FetchFederationsPayload & {
+	federationId: string;
+	updatedSettings: FederationSettings;
+};
+
+export type UpdateFederationSettingsSuccessPayload = {
+	projectId: string;
+	federationId: string;
+	updatedSettings: FederationSettings;
+};
+
+export type DeleteFederationPayload = FetchFederationsPayload & {
+	federationId: string;
+};
+
+export type DeleteFederationSuccessPayload = {
+	projectId: string;
+	federationId: string;
+};
 
 export type FetchFederationsAction = Action<'FETCH_FEDERATIONS'> & FetchFederationsPayload;
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;
 export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & FavouritePayload;
-export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & {projectId: string, federationId: string, isFavourite: boolean};
+export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & { projectId: string, federationId: string, isFavourite: boolean };
 export type FetchFederationsSuccessAction = Action<'FETCH_FEDERATIONS_SUCCESS'> & { projectId: string, federations: IFederation[] };
-export type SetIsListPendingAction = Action<'SET_IS_LIST_PENDING'> & { isPending: boolean };
 export type FetchFederationStatsAction = Action<'FETCH_FEDERATION_STATS'> & FetchFederationStatsPayload;
 export type FetchFederationStatsSuccessAction = Action<'FETCH_FEDERATION_STATS_SUCCESS'> & FetchFederationStatsSuccessPayload;
-export type DeleteFederationAction = Action<'DELETE'> & DeleteFederationPayload;
-export type DeleteFederationSuccessAction = Action<'DELETE_SUCCESS'> & DeleteFederationSuccessPayload;
+export type FetchFederationViewsAction = Action<'FETCH_FEDERATION_VIEWS'> & FetchFederationViewsPayload;
+export type FetchFederationViewsSuccessAction = Action<'FETCH_FEDERATION_VIEWS_SUCCESS'> & FetchFederationViewsSuccessPayload;
+export type FetchFederationSettingsAction = Action<'FETCH_FEDERATION_SETTINGS'> & FetchFederationSettingsPayload;
+export type FetchFederationSettingsSuccessAction = Action<'FETCH_FEDERATION_SETTINGS_SUCCESS'> & FetchFederationSettingsSuccessPayload;
+export type UpdateFederationSettingsAction = Action<'UPDATE_FEDERATION_SETTINGS'> & UpdateFederationSettingsPayload;
+export type UpdateFederationSettingsSuccessAction = Action<'UPDATE_FEDERATION_SETTINGS_SUCCESS'> & UpdateFederationSettingsSuccessPayload;
+export type DeleteFederationAction = Action<'DELETE_FEDERATION'> & DeleteFederationPayload;
+export type DeleteFederationSuccessAction = Action<'DELETE_FEDERATION_SUCCESS'> & DeleteFederationSuccessPayload;
 
 export interface IFederationsActionCreators {
 	fetchFederations: (teamspace: string, projectId: string) => FetchFederationsAction;
@@ -112,7 +189,33 @@ export interface IFederationsActionCreators {
 	addFavourite: (teamspace: string, projectId: string, federationId: string) => AddFavouriteAction;
 	removeFavourite: (teamspace: string, projectId: string, federationId: string) => RemoveFavouriteAction;
 	setFavouriteSuccess: (projectId: string, federationId: string, isFavourite: boolean) => SetFavouriteSuccessAction;
-	setIsListPending: (isPending: boolean) => SetIsListPendingAction;
+	fetchFederationViews: (teamspace: string, projectId: string, federationId: string) => FetchFederationViewsAction;
+	fetchFederationViewsSuccess: (
+		projectId: string,
+		federationId: string,
+		views: FederationView[],
+	) => FetchFederationViewsSuccessAction;
+	fetchFederationSettings: (
+		teamspace: string,
+		projectId: string,
+		federationId: string,
+	) => FetchFederationSettingsAction;
+	fetchFederationSettingsSuccess: (
+		projectId: string,
+		federationId: string,
+		settings: FederationSettings,
+	) => FetchFederationSettingsSuccessAction;
+	updateFederationSettings: (
+		teamspace: string,
+		projectId: string,
+		federationId: string,
+		updatedSettings: FederationSettings,
+	) => UpdateFederationSettingsAction;
+	updateFederationSettingsSuccess: (
+		projectId: string,
+		federationId: string,
+		updatedSettings: FederationSettings,
+	) => UpdateFederationSettingsSuccessAction;
 	deleteFederation: (teamspace: string, projectId: string, federationId: string) => DeleteFederationAction;
 	deleteFederationSuccess: (projectId: string, federationId: string) => DeleteFederationSuccessAction;
 }

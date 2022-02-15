@@ -20,10 +20,11 @@ import { IContainersState } from '@/v5/store/containers/containers.types';
 import { isEmpty } from 'lodash';
 import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
 
-const selectContainersDomain = (state: { containers: IContainersState }) => state.containers;
+const selectContainersDomain = (state): IContainersState => state.containers;
 
 export const selectContainers = createSelector(
-	selectContainersDomain, selectCurrentProject, (state, currentProject) => state.containers[currentProject] ?? [],
+	selectContainersDomain, selectCurrentProject,
+	(state, currentProject) => state.containersByProject[currentProject] ?? [],
 );
 
 export const selectFavouriteContainers = createSelector(
@@ -32,16 +33,20 @@ export const selectFavouriteContainers = createSelector(
 );
 
 export const selectHasContainers = createSelector(
-	selectContainers, selectFavouriteContainers, (containers, favouriteContainers) => ({
+	selectContainers, selectFavouriteContainers,
+	(containers, favouriteContainers) => ({
 		favourites: !isEmpty(favouriteContainers),
 		all: !isEmpty(containers),
 	}),
 );
 
 export const selectIsListPending = createSelector(
-	selectContainersDomain, (state) => state.isListPending,
+	selectContainersDomain, selectCurrentProject,
+	// Checks if the containers for the project have been fetched
+	(state, currentProject) => !state.containersByProject[currentProject],
 );
 
 export const selectAreStatsPending = createSelector(
-	selectContainers, (containers) => containers.some(({ hasStatsPending }) => hasStatsPending),
+	selectContainers,
+	(containers) => containers.some(({ hasStatsPending }) => hasStatsPending),
 );

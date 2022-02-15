@@ -29,7 +29,7 @@ const searchPhrase = 'test phrase';
 const projectId = 'projectId';
 const defaultState: IContainersState = {
 	...INITIAL_STATE,
-	containers:
+	containersByProject:
 		{
 			[projectId]: [
 				containerMockFactory({ isFavourite: true, name: searchPhrase }),
@@ -43,7 +43,7 @@ const defaultState: IContainersState = {
 describe('Containers: selectors', () => {
 	describe('selectFavouriteContainers', () => {
 		it('should return favourite containers', () => {
-			const selected = selectFavouriteContainers.resultFunc(defaultState.containers[projectId]);
+			const selected = selectFavouriteContainers.resultFunc(defaultState.containersByProject[projectId]);
 			expect(selected).toHaveLength(6);
 		})
 	})
@@ -57,7 +57,7 @@ describe('Containers: selectors', () => {
 
 	describe('selectHasContainers', () => {
 		it('should return correct values when favourite item is in federations', () => {
-			const containers = defaultState.containers[projectId];
+			const containers = defaultState.containersByProject[projectId];
 			const favourites = selectFavouriteContainers.resultFunc(containers);
 			const selected = selectHasContainers.resultFunc(containers, favourites);
 			expect(selected).toEqual({ favourites: true, all: true })
@@ -78,7 +78,7 @@ describe('Containers: selectors', () => {
 
 	describe('selectAreStatsPending', () => {
 		it('should return true if at least one item has pending stats', () => {
-			const selected = selectAreStatsPending.resultFunc(defaultState.containers[projectId]);
+			const selected = selectAreStatsPending.resultFunc(defaultState.containersByProject[projectId]);
 			expect(selected).toBeTruthy();
 		})
 
