@@ -18,11 +18,11 @@
 import { Typography } from '@controls/typography';
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
-import { Container, LastRevision } from './existingContainer.styles';
+import { Container, LastRevision, ErrorText } from './existingContainer.styles';
 
 const noneText = <FormattedMessage id="uploads.destination.existing.none" defaultMessage="None" />;
 
-export const ExistingContainer = ({ name, latestRevision }) => (
+export const ExistingContainer = ({ name, latestRevision, inUse }) => (
 	<Container>
 		<Typography variant="h5">
 			{name}
@@ -31,5 +31,8 @@ export const ExistingContainer = ({ name, latestRevision }) => (
 			<FormattedMessage id="uploads.destination.existing.lastRevision" defaultMessage="Last revision: " />
 			{latestRevision || noneText}
 		</LastRevision>
+		<ErrorText hidden={!inUse}>
+			<FormattedMessage id="uploads.destination.existing.inUse" defaultMessage="Already in use in another file upload" />
+		</ErrorText>
 	</Container>
 );

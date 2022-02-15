@@ -15,15 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import ChevronIcon from '@assets/icons/chevron.svg';
 import ClearIcon from '@assets/icons/clear_circle.svg';
 import MuiAutocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
 import { DestinationOption } from '@/v5/store/containers/containers.types';
+import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
+import { useFormContext } from 'react-hook-form';
 import { TextInput, ErrorIcon } from './uploadListItemDestination.styles';
 import { NewContainer } from './options/newContainer';
 import { ExistingContainer } from './options/existingContainer';
-import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 
 interface IUploadListItemDestination {
 	onChange: (option) => void;
@@ -42,9 +43,17 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 	onChange,
 	...props
 }) => {
-	const [value, setValue] = React.useState(emptyOption);
-	const [state, setState] = React.useState(errorMessage ? 'error' : 'empty');
+	const [value, setValue] = useState(emptyOption);
+	const [state, setState] = useState(errorMessage ? 'error' : '');
 	const containers = ContainersHooksSelectors.selectContainers();
+
+	const [containersInUse, setContainersInUse] = useState([]);
+	const { getValues } = useFormContext();
+	const forceUpdate = React.useCallback(() => {
+		const values = getValues().uploads;
+		setContainersInUse(values.map((value) => value.containerName));
+	}, []);
+
 	return (
 		<MuiAutocomplete
 			popupIcon={<ChevronIcon />}
@@ -65,6 +74,7 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 					onChange(newValue);
 				}
 			}}
+			onOpen={forceUpdate}
 			options={containers.map((val) => ({
 				name: val.name,
 				_id: val._id,
@@ -107,9 +117,15 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 					}}
 				/>
 			)}
+			getOptionDisabled={(option: DestinationOption) => containersInUse.indexOf(option.name) > -1}
 			renderOption={(option: DestinationOption) => {
 				if (option.name && !option._id) return (<NewContainer {...option} />);
-				return (<ExistingContainer {...option} />);
+				return (
+					<ExistingContainer
+						inUse={containersInUse.indexOf(option.name) > -1}
+						{...option}
+					/>
+				);
 			}}
 			disabled={disabled}
 		/>

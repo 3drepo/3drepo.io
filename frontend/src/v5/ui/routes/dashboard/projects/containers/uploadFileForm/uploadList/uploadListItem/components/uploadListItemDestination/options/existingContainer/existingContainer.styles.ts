@@ -32,3 +32,11 @@ export const LastRevision = styled(Typography).attrs({
 	width: 100%;
 	color: ${({ theme }) => theme.palette.base.main};
 `;
+
+export const ErrorText = styled(Typography).attrs({
+	component: 'div',
+	variant: 'h5',
+})`
+	width: 100%;
+	color: ${({ theme }) => theme.palette.error.main};
+`;
