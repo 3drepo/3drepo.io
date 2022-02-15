@@ -16,6 +16,7 @@
  */
 
 import { INITIAL_STATE, reducer as federationsReducer, FederationsActions } from '@/v5/store/federations/federations.redux';
+import { IFederationsState } from '@/v5/store/federations/federations.types';
 import { times } from 'lodash';
 import { federationMockFactory, prepareMockSettingsReply } from './federations.fixtures';
 import { EMPTY_VIEW } from '@/v5/store/federations/federations.types';
@@ -30,9 +31,9 @@ const EMPTY_SETTINGS = {
 describe('Federations: redux', () => {
 	const projectId = 'projectId';
 	const mockFederations = times(5, () => federationMockFactory({ isFavourite: false }));
-	const defaultState = {
+	const defaultState: IFederationsState = {
 		...INITIAL_STATE,
-		federations: {
+		federationsByProject: {
 			[projectId]: mockFederations
 		}
 	};
@@ -42,7 +43,7 @@ describe('Federations: redux', () => {
 			defaultState,
 			FederationsActions.setFavouriteSuccess(projectId, mockFederations[0]._id, true)
 		);
-		const result = resultState.federations[projectId];
+		const result = resultState.federationsByProject[projectId];
 
 		expect(result[0].isFavourite).toEqual(true);
 		expect(result.slice(1).every(federation => federation.isFavourite)).toEqual(false);
@@ -50,17 +51,17 @@ describe('Federations: redux', () => {
 
 	it('should remove federation from favourites', () => {
 		const mockAllFavouritesFederations = times(5, () => federationMockFactory({ isFavourite: true }))
-		const defaultStateWithAllFavourites = {
+		const defaultStateWithAllFavourites: IFederationsState = {
 			...INITIAL_STATE,
-			federations: {
+			federationsByProject: {
 				[projectId]: mockAllFavouritesFederations
 			}
 		}
-		const resultState = federationsReducer(
+		const resultState: IFederationsState = federationsReducer(
 			defaultStateWithAllFavourites,
 			FederationsActions.setFavouriteSuccess(projectId, mockAllFavouritesFederations[0]._id, false)
 		);
-		const result = resultState.federations[projectId];
+		const result = resultState.federationsByProject[projectId];
 
 		expect(result[0].isFavourite).toEqual(false);
 		expect(result.slice(1).every(federation => federation.isFavourite)).toEqual(true);
@@ -68,9 +69,9 @@ describe('Federations: redux', () => {
 
 	it('should load fetched views', () => {
 		const mockFederation = federationMockFactory({ views: [] });
-		const defaultStateWithNoViews = {
+		const defaultStateWithNoViews:IFederationsState = {
 			...INITIAL_STATE,
-			federations: {
+			federationsByProject: {
 				[projectId]: [mockFederation]
 			}
 		}
@@ -78,16 +79,16 @@ describe('Federations: redux', () => {
 			defaultStateWithNoViews,
 			FederationsActions.fetchFederationViewsSuccess(projectId, mockFederation._id, [EMPTY_VIEW]),
 		);
-		const result = resultState.federations[projectId];
+		const result = resultState.federationsByProject[projectId];
 
 		expect(result[0].views).toEqual([EMPTY_VIEW]);
 	});
 
 	it('should load fetched settings', () => {
 		const mockFederation = federationMockFactory(EMPTY_SETTINGS);
-		const defaultStateWithNoSettings = {
+		const defaultStateWithNoSettings: IFederationsState = {
 			...INITIAL_STATE,
-			federations: {
+			federationsByProject: {
 				[projectId]: [mockFederation]
 			}
 		}
@@ -97,7 +98,7 @@ describe('Federations: redux', () => {
 			defaultStateWithNoSettings,
 			FederationsActions.fetchFederationSettingsSuccess(projectId, mockFederation._id, mockSettings),
 		);
-		const result = resultState.federations[projectId];
+		const result = resultState.federationsByProject[projectId];
 
 		expect(result[0].surveyPoint).toEqual(mockSettings.surveyPoint);
 		expect(result[0].defaultView).toEqual(mockSettings.defaultView);
@@ -110,9 +111,9 @@ describe('Federations: redux', () => {
 
 	it('should update settings changed from form', () => {
 		const mockFederation = federationMockFactory(EMPTY_SETTINGS);
-		const defaultStateWithNoSettings = {
+		const defaultStateWithNoSettings: IFederationsState = {
 			...INITIAL_STATE,
-			federations: {
+			federationsByProject: {
 				[projectId]: [mockFederation]
 			}
 		}
@@ -124,7 +125,7 @@ describe('Federations: redux', () => {
 			defaultStateWithNoSettings,
 			FederationsActions.updateFederationSettingsSuccess(projectId, mockFederation._id, mockUpdatedFederationPropertiesReply),
 		);
-		const result = resultState.federations[projectId];
+		const result = resultState.federationsByProject[projectId];
 
 		expect(result[0].surveyPoint).toEqual(mockUpdatedFederationPropertiesReply.surveyPoint);
 		expect(result[0].defaultView).toEqual(mockUpdatedFederationPropertiesReply.defaultView);

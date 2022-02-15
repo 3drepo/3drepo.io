@@ -20,5 +20,6 @@ import * as Projects from './projects';
 import * as Containers from './containers';
 import * as Federations from './federations';
 import * as Revisions from './revisions';
+import * as Users from './users';
 
-export { Teamspaces, Projects, Containers, Federations, Revisions };
+export { Teamspaces, Projects, Containers, Federations, Revisions, Users };

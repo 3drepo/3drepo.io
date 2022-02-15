@@ -20,17 +20,17 @@ import { expectSaga } from 'redux-saga-test-plan';
 import { FederationsActions } from '@/v5/store/federations/federations.redux';
 import { mockServer } from '../../internals/testing/mockServer';
 import { omit, pick, times } from 'lodash';
-import { 
-	federationMockFactory, 
-	prepareMockRawSettingsReply, 
-	prepareMockSettingsReply, 
-	prepareMockViewsReply, 
+import {
+	federationMockFactory,
+	prepareMockRawSettingsReply,
+	prepareMockSettingsReply,
+	prepareMockViewsReply,
 } from './federations.fixtures';
 import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
 import { prepareFederationSettingsForFrontend } from '@/v5/store/federations/federations.helpers';
-import {  
-	FetchFederationStatsResponse, 
-	IFederation, 
+import {
+	FetchFederationStatsResponse,
+	IFederation,
 } from '@/v5/store/federations/federations.types';
 
 // TODO: review this
@@ -85,9 +85,7 @@ describe('Federations: sagas', () => {
 
 			await expectSaga(FederationsSaga.default)
 			.dispatch(FederationsActions.fetchFederations(teamspace, projectId))
-			.put(FederationsActions.setIsListPending(true))
 			.put(FederationsActions.fetchFederationsSuccess(projectId, mockFederationsWithoutStats))
-			.put(FederationsActions.setIsListPending(false))
 			.put(FederationsActions.fetchFederationStats(teamspace, projectId, mockFederations[0]._id))
 			.put(FederationsActions.fetchFederationStats(teamspace, projectId, mockFederations[1]._id))
 			.silentRun();
@@ -127,7 +125,6 @@ describe('Federations: sagas', () => {
 
 			await expectSaga(FederationsSaga.default)
 			.dispatch(FederationsActions.fetchFederations(teamspace, projectId))
-			.put(FederationsActions.setIsListPending(true))
 			.silentRun();
 		})
 
@@ -142,17 +139,17 @@ describe('Federations: sagas', () => {
 			.dispatch(FederationsActions.fetchFederationViews(teamspace, projectId, mockFederations[0]._id))
 			.dispatch(FederationsActions.fetchFederationViews(teamspace, projectId, mockFederations[1]._id))
 			.put(FederationsActions.fetchFederationViewsSuccess(
-				projectId, 
-				mockFederations[0]._id, 
+				projectId,
+				mockFederations[0]._id,
 				prepareMockViewsReply(mockFederations[0]).views)
 			).put(FederationsActions.fetchFederationViewsSuccess(
-				projectId, 
-				mockFederations[1]._id, 
+				projectId,
+				mockFederations[1]._id,
 				prepareMockViewsReply(mockFederations[1]).views)
 			)
 			.silentRun();
 		})
-		
+
 		it('should fetch federation settings', async () => {
 			mockFederations.forEach((federation) => {
 				mockServer
@@ -164,13 +161,13 @@ describe('Federations: sagas', () => {
 			.dispatch(FederationsActions.fetchFederationSettings(teamspace, projectId, mockFederations[0]._id))
 			.dispatch(FederationsActions.fetchFederationSettings(teamspace, projectId, mockFederations[1]._id))
 			.put(FederationsActions.fetchFederationSettingsSuccess(
-				projectId, 
-				mockFederations[0]._id, 
+				projectId,
+				mockFederations[0]._id,
 				prepareFederationSettingsForFrontend(prepareMockRawSettingsReply(mockFederations[0])),
 			))
 			.put(FederationsActions.fetchFederationSettingsSuccess(
-				projectId, 
-				mockFederations[1]._id, 
+				projectId,
+				mockFederations[1]._id,
 				prepareFederationSettingsForFrontend(prepareMockRawSettingsReply(mockFederations[1])),
 			))
 			.silentRun();
@@ -180,7 +177,7 @@ describe('Federations: sagas', () => {
 	describe('updateFederationSettings', () => {
 		const mockFederation = federationMockFactory();
 		const mockSettings = prepareMockSettingsReply(mockFederation);
-		
+
 
 		it('should call updateFederationSettings endpoint', async () => {
 			mockServer
@@ -189,20 +186,20 @@ describe('Federations: sagas', () => {
 
 			await expectSaga(FederationsSaga.default)
 			.dispatch(FederationsActions.updateFederationSettings(
-				teamspace, 
-				projectId, 
-				federationId, 
+				teamspace,
+				projectId,
+				federationId,
 				mockSettings,
 			))
 			.put(FederationsActions.updateFederationSettingsSuccess(
-				projectId, 
-				federationId, 
+				projectId,
+				federationId,
 				mockSettings,
 			))
 			.silentRun();
 		})
 	})
-	
+
 	describe('deleteFederation', () => {
 		it('should call deleteFederation endpoint', async () => {
 			mockServer

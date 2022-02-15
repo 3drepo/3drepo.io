@@ -17,6 +17,6 @@
 
 import { ContainersActions } from '@/v5/store/containers/containers.redux';
 import { IContainersActionCreators } from '@/v5/store/containers/containers.types';
-import { createActionsDispatchers } from './actionsDistpatchers.helper';
+import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 
 export const ContainersActionsDispatchers = createActionsDispatchers<IContainersActionCreators>(ContainersActions);
