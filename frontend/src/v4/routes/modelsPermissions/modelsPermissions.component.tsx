@@ -70,6 +70,7 @@ interface IProps {
 	onSelectionChange: (selectedModels) => void;
 	onPermissionsChange: (modelsWithPermissions) => void;
 	isV5: boolean;
+	selectedContFedId?: string;
 }
 
 interface IState {
@@ -79,6 +80,7 @@ interface IState {
 }
 
 export class ModelsPermissions extends React.PureComponent<IProps, IState> {
+
 	public state = {
 		modelRows: [],
 		currentUser: {},
@@ -156,12 +158,12 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 	public componentDidMount() {
 		const queryParams = queryString.parse(this.props.location.search);
 		if (queryParams.modelId) {
-			this.props.onSelectionChange([{model: queryParams.modelId}]);
+			this.props.onSelectionChange([{ model: queryParams.modelId }]);
 		}
 	}
 
 	public render() {
-		const { models, permissions, selectedModels, className, isV5 } = this.props;
+		const { models, permissions, selectedModels, className, isV5, location } = this.props;
 		const { permissionsRevision } = this.state;
 		const CELLS = isV5 ? MODEL_TABLE_CELLS_V5 : MODEL_TABLE_CELLS ;
 		// eslint-disable-next-line max-len

@@ -72,6 +72,10 @@ export const FederationEllipsisMenu = ({
 					id: 'federations.ellipsisMenu.editPermissions',
 					defaultMessage: 'Edit Permissions',
 				})}
+				to={{
+					pathname: './containers_federations_permissions',
+					search: `?modelId=${federation._id}`,
+				}}
 			/>
 
 			<EllipsisMenuItem
