@@ -32,7 +32,7 @@ import { ModelsPermissions } from './modelsPermissions.component';
 const mapStateToProps = createStructuredSelector({
 	models: selectProjectModels,
 	selectedModels: selectSelectedModels,
-	permissions: selectModelsPermissions
+	permissions: selectModelsPermissions,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
