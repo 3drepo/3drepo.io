@@ -15,10 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { authenticate, getUserByQuery } = require('../../../models/users');
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const Yup = require('yup');
-const { getUserByQuery } = require('../../../models/users');
 const { respond } = require('../../../utils/responder');
+const { singleImageUpload } = require('../multer');
+const { types } = require('../../../utils/helper/yup');
+const { validateMany } = require('../../common');
 
 const Users = {};
 
@@ -45,5 +48,78 @@ Users.validateLoginData = async (req, res, next) => {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };
+
+Users.validateUpdateData = async (req, res, next) => {
+	const schema = Yup.object().shape({
+		firstName: types.strings.name,
+		lastName: types.strings.name,
+		email: types.strings.email.test('checkEmailAvailable', 'Email already exists',
+			async (value) => {
+				if (value) {
+					try {
+						await getUserByQuery({ 'customData.email': value, user: { $ne: req.session?.user?.username } }, { _id: 1 });
+						return false;
+					} catch {
+						// do nothing
+					}
+				}
+				return true;
+			}),
+		company: types.strings.title,
+		countryCode: types.strings.countryCode.optional(),
+		oldPassword: Yup.string().optional().when('newPassword', {
+			is: (newPass) => newPass?.length > 0,
+			then: Yup.string().required(),
+		}),
+		newPassword: types.strings.password.optional().when('oldPassword', {
+			is: (oldPass) => oldPass?.length > 0,
+			then: types.strings.password.required(),
+		}).test({
+			name: 'notTheSameAsOldPassword',
+			exclusive: false,
+			params: {},
+			message: 'New password must be different than the old one',
+			test(value) {
+				const { oldPassword } = this.parent;
+				return !oldPassword || (value !== oldPassword);
+			},
+		}),
+	}, [['oldPassword', 'newPassword']]).strict(true).noUnknown()
+		.test(
+			'at-least-one-property',
+			'You must provide at least one setting value',
+			(value) => Object.keys(value).length,
+		)
+		.required();
+
+	try {
+		await schema.validate(req.body);
+
+		if (req.body.oldPassword) {
+			await authenticate(req.session.user.username, req.body.oldPassword);
+		}
+
+		next();
+	} catch (err) {
+		if (err.code === templates.incorrectUsernameOrPassword.code) {
+			respond(req, res, templates.incorrectPassword);
+			return;
+		}
+
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+const validateAvatarData = async (req, res, next) => {
+	try {
+		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
+
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+Users.validateAvatarFile = validateMany([singleImageUpload('file'), validateAvatarData]);
 
 module.exports = Users;

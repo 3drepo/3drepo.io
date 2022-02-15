@@ -62,31 +62,30 @@ axios.interceptors.response.use(
 		}
 	},
 );
-
-const generateV5ApiUrl = (url: string): string => `v5/${url}`;
+export const generateV5ApiUrl = (url: string, requestMethod: string): string => encodeURI(clientConfigService.apiUrl(requestMethod, `v5/${url}`));
 
 const getRequest = (url, ...options) => {
-	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.GET_API, generateV5ApiUrl(url)));
+	const requestUrl = generateV5ApiUrl(url, clientConfigService.GET_API);
 	return axios.get(requestUrl, ...options);
 };
 
 const postRequest = (url, ...options) => {
-	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, generateV5ApiUrl(url)));
+	const requestUrl = generateV5ApiUrl(url, clientConfigService.POST_API);
 	return axios.post(requestUrl, ...options);
 };
 
 const putRequest = (url, ...options) => {
-	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, generateV5ApiUrl(url)));
+	const requestUrl = generateV5ApiUrl(url, clientConfigService.POST_API);
 	return axios.put(requestUrl, ...options);
 };
 
 const deleteRequest = (url, data?) => {
-	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, generateV5ApiUrl(url)));
+	const requestUrl = generateV5ApiUrl(url, clientConfigService.POST_API);
 	return axios.delete(requestUrl, { data });
 };
 
 const patchRequest = (url, ...options) => {
-	const requestUrl = encodeURI(clientConfigService.apiUrl(clientConfigService.POST_API, generateV5ApiUrl(url)));
+	const requestUrl = generateV5ApiUrl(url, clientConfigService.POST_API);
 	return axios.patch(requestUrl, ...options);
 };
 

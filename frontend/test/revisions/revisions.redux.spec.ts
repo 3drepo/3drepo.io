@@ -20,15 +20,16 @@ import {
 	reducer as revisionsReducer,
 	RevisionsActions,
 } from '@/v5/store/revisions/revisions.redux';
+import { IRevisionsState } from '@/v5/store/revisions/revisions.types';
 import { times } from 'lodash';
 import { revisionsMockFactory } from './revisions.fixtures';
 
 describe('Revisions: redux', () => {
 	const containerId = 'containerId';
 	const mockRevisions = times(5, () => revisionsMockFactory());
-	const defaultState = {
+	const defaultState:IRevisionsState = {
 		...INITIAL_STATE,
-		revisions: {
+		revisionsByContainer: {
 			[containerId]: mockRevisions
 		}
 	};
@@ -48,17 +49,15 @@ describe('Revisions: redux', () => {
 		it('should set revisions for given container', () => {
 			const mockRevisions = times(5, () => revisionsMockFactory());
 			const mockRevisionsLength = mockRevisions.length;
-			const defaultState = {
+			const defaultState: IRevisionsState = {
 				...INITIAL_STATE,
-				revisions: {
-					[containerId]: {}
-				}
+				revisionsByContainer: {}
 			};
-			const resultState = revisionsReducer(
+			const resultState:IRevisionsState = revisionsReducer(
 					defaultState,
 					RevisionsActions.fetchSuccess(containerId, mockRevisions)
 			);
-			const resultRevisions = resultState.revisions[containerId];
+			const resultRevisions = resultState.revisionsByContainer[containerId];
 
 			expect(resultRevisions.length).toEqual(mockRevisionsLength);
 		});

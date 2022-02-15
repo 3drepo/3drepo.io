@@ -16,7 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { Constants } from '@/v5/store/common/actions.helper';
+import { Constants } from '@/v5/helpers/actions.helper';
 import { IRevisionsActionCreators, IRevisionsState } from '@/v5/store/revisions/revisions.types';
 
 export const { Types: RevisionsTypes, Creators: RevisionsActions } = createActions({
@@ -28,7 +28,7 @@ export const { Types: RevisionsTypes, Creators: RevisionsActions } = createActio
 }, { prefix: 'REVISIONS/' }) as { Types: Constants<IRevisionsActionCreators>; Creators: IRevisionsActionCreators };
 
 export const INITIAL_STATE: IRevisionsState = {
-	revisions: {},
+	revisionsByContainer: {},
 	isPending: {},
 };
 
@@ -36,11 +36,11 @@ export const setVoidStatusSuccess = (state = INITIAL_STATE, {
 	containerId,
 	revisionId,
 	isVoid,
-}) => ({
+}): IRevisionsState => ({
 	...state,
-	revisions: {
-		...state.revisions,
-		[containerId]: state.revisions[containerId].map((revision) => ({
+	revisionsByContainer: {
+		...state.revisionsByContainer,
+		[containerId]: state.revisionsByContainer[containerId].map((revision) => ({
 			...revision,
 			void: [revision.tag, revision._id].includes(revisionId) ? isVoid : revision.void,
 		})),
@@ -50,15 +50,15 @@ export const setVoidStatusSuccess = (state = INITIAL_STATE, {
 export const fetchSuccess = (state = INITIAL_STATE, {
 	containerId,
 	revisions,
-}) => ({
+}): IRevisionsState => ({
 	...state,
-	revisions: {
-		...state.revisions,
+	revisionsByContainer: {
+		...state.revisionsByContainer,
 		[containerId]: revisions,
 	},
 });
 
-export const setIsPending = (state = INITIAL_STATE, { isPending, containerId }) => ({
+export const setIsPending = (state = INITIAL_STATE, { isPending, containerId }): IRevisionsState => ({
 	...state,
 	isPending: {
 		...state.isPending,

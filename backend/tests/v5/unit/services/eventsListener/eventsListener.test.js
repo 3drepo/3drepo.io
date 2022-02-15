@@ -57,7 +57,7 @@ const testModelEventsListener = () => {
 			await waitOnEvent;
 			expect(ModelSettings.newRevisionProcessed.mock.calls.length).toBe(1);
 			expect(ModelSettings.newRevisionProcessed.mock.calls[0]).toEqual(
-				[data.teamspace, data.model, data.corId, data.value, data.user],
+				[data.teamspace, data.model, data.corId, data.value, data.user, undefined],
 			);
 		});
 	});
