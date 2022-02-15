@@ -20,7 +20,11 @@ import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { FormattedMessage } from 'react-intl';
 import { Container, Message } from './newContainer.styles';
 
-export const NewContainer = ({ name }) => (
+interface INewContainer {
+	name: string;
+}
+
+export const NewContainer = ({ name }: INewContainer) => (
 	<Container>
 		<AddCircleIcon />
 		<Message>

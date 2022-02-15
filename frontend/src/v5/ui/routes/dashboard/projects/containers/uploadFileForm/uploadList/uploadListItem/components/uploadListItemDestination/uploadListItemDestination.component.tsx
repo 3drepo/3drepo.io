@@ -51,7 +51,7 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 	const { getValues } = useFormContext();
 	const forceUpdate = React.useCallback(() => {
 		const values = getValues().uploads;
-		setContainersInUse(values.map((value) => value.containerName));
+		setContainersInUse(values.map((val) => val.containerName));
 	}, []);
 
 	return (

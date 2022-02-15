@@ -20,9 +20,15 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import { Container, LastRevision, ErrorText } from './existingContainer.styles';
 
+interface IExistingContainer {
+	name: string;
+	latestRevision: string;
+	inUse: boolean;
+}
+
 const noneText = <FormattedMessage id="uploads.destination.existing.none" defaultMessage="None" />;
 
-export const ExistingContainer = ({ name, latestRevision, inUse }) => (
+export const ExistingContainer = ({ name, latestRevision, inUse }: IExistingContainer) => (
 	<Container>
 		<Typography variant="h5">
 			{name}
