@@ -71,7 +71,7 @@ const ContainerSchema = Yup.object().shape({
 	desc: Yup.string()
 		.max(50,
 			formatMessage({
-				id: 'containers.creation.description.error.max',
+				id: 'containers.creation.desc.error.max',
 				defaultMessage: 'Container Description is limited to 50 characters',
 			})),
 });

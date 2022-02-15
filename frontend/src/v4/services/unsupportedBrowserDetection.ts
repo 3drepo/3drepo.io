@@ -37,7 +37,13 @@ const DEFAULT_SUPPORTED_BROWSERS_CONFIG = {
 	tablet: [{
 		os: 'ios', minos: '9', browser: 'mobile safari',
 	}, {
+		os: 'ios', minos: '9', browser: 'chrome',
+	}, {
+		os: 'ios', minos: '9', browser: 'firefox',
+	}, {
 		os: 'android', minos: '5.0', browser: 'chrome',
+	}, {
+		os: 'android', minos: '5.0', browser: 'firefox',
 	}, {
 		browser: 'edge',
 	}],
@@ -47,6 +53,10 @@ const DEFAULT_SUPPORTED_BROWSERS_CONFIG = {
 		os: 'ios', minos: '5.0', browser: 'chrome',
 	}, {
 		os: 'android', minos: '5.0', browser: 'chrome', minversion: 50,
+	}, {
+		os: 'android', minos: '5.0', browser: 'firefox',
+	}, {
+		os: 'android', minos: '5.0', browser: 'edge',
 	}],
 };
 
@@ -102,6 +112,7 @@ export default class UnsupportedBrowserDetection {
 	}
 
 	public isSupported() {
+
 		if (this.isInAppBrowser) {
 			return this.isInAppBrowserSupported;
 		}

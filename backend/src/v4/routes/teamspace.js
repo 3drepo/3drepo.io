@@ -547,7 +547,7 @@
 	}
 
 	function getMitigationsFile(req, res, next) {
-		TeamspaceSettings.getMitigationsStream(req.params.account).then((mitigations) => {
+		TeamspaceSettings.getMitigationsFile(req.params.account).then((mitigationsStream) => {
 			const timestamp = (new Date()).toLocaleString();
 			const filenamePrefix = (req.params.account + "_" + timestamp + "_").replace(/\W+/g, "_");
 
@@ -557,8 +557,7 @@
 			};
 
 			res.set(headers);
-
-			responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, mitigations.readStream, headers);
+			responseCodes.writeStreamRespond(utils.APIInfo(req), req, res, next, mitigationsStream, headers);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});

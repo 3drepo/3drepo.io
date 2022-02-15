@@ -17,6 +17,6 @@
 
 import { CurrentUserActions } from '@/v4/modules/currentUser';
 import { ICurrentUserActions } from '@/v4/modules/currentUser/currentUser.redux';
-import { createActionsDispatchers } from './actionsDistpatchers.helper';
+import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 
 export const CurrentUserActionsDispatchers = createActionsDispatchers<ICurrentUserActions>(CurrentUserActions);

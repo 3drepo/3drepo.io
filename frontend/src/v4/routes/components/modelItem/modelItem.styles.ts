@@ -20,7 +20,9 @@ import styled from 'styled-components';
 
 import { COLOR } from '../../../styles';
 
-export const Container = styled.div``;
+export const Container = styled.div` 
+	max-width: 100%;
+`;
 
 const BaseStyles = styled(Grid)`
 	white-space: nowrap;

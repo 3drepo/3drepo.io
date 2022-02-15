@@ -23,8 +23,8 @@ const queueStatusUpdate = ({
 	teamspace, model, corId, status, user,
 }) => updateModelStatus(teamspace, model, status, corId, user);
 const queueTasksCompleted = ({
-	teamspace, model, value, corId, user,
-}) => newRevisionProcessed(teamspace, model, corId, value, user);
+	teamspace, model, value, corId, user, containers,
+}) => newRevisionProcessed(teamspace, model, corId, value, user, containers);
 
 const ModelEventsListener = {};
 

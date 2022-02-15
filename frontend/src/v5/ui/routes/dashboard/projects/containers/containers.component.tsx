@@ -21,7 +21,6 @@ import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
 import { Button } from '@controls/button';
-import { Content } from '@/v5/ui/routes/dashboard/projects/projects.styles';
 import { DashboardListEmptySearchResults } from '@components/dashboard/dashboardList';
 import { CreateContainerForm } from '@/v5/ui/routes/dashboard/projects/containers/createContainerForm/createContainerForm.component';
 import { FormattedMessage } from 'react-intl';
@@ -30,7 +29,6 @@ import { ContainersList } from './containersList';
 import { SkeletonListItem } from './containersList/skeletonListItem';
 import { useContainersData } from './containers.hooks';
 import { UploadFileForm } from './uploadFileForm/uploadFileForm.component';
-import { Container } from './containers.styles';
 
 export const Containers = (): JSX.Element => {
 	const [uploadModalOpen, setUploadModalOpen] = useState(false);
@@ -49,89 +47,87 @@ export const Containers = (): JSX.Element => {
 	const onClickClose = () => setUploadModalOpen(false);
 
 	return (
-		<Container>
-			<Content>
-				{isListPending ? (
-					<DashboardSkeletonList itemComponent={<SkeletonListItem />} />
-				) : (
-					<>
-						<ContainersList
-							hasContainers={hasContainers.favourites}
-							filterQuery={favouritesFilterQuery}
-							onFilterQueryChange={setFavouritesFilterQuery}
-							containers={filterContainers(favouriteContainers, favouritesFilterQuery)}
-							onClickUpload={() => setUploadModalOpen(true)}
-							title={(
-								<FormattedMessage
-									id="containers.favourites.collapseTitle"
-									defaultMessage="Favourites"
-								/>
-							)}
-							titleTooltips={{
-								collapsed: <FormattedMessage id="containers.favourites.collapse.tooltip.show" defaultMessage="Show favourites" />,
-								visible: <FormattedMessage id="containers.favourites.collapse.tooltip.hide" defaultMessage="Hide favourites" />,
-							}}
-							onClickCreate={() => setCreateContainerOpen(true)}
-							emptyMessage={
-								favouritesFilterQuery && hasContainers.favourites ? (
-									<DashboardListEmptySearchResults searchPhrase={favouritesFilterQuery} />
-								) : (
+		<>
+			{isListPending ? (
+				<DashboardSkeletonList itemComponent={<SkeletonListItem />} />
+			) : (
+				<>
+					<ContainersList
+						hasContainers={hasContainers.favourites}
+						filterQuery={favouritesFilterQuery}
+						onFilterQueryChange={setFavouritesFilterQuery}
+						containers={filterContainers(favouriteContainers, favouritesFilterQuery)}
+						title={(
+							<FormattedMessage
+								id="containers.favourites.collapseTitle"
+								defaultMessage="Favourites"
+							/>
+						)}
+						titleTooltips={{
+							collapsed: <FormattedMessage id="containers.favourites.collapse.tooltip.show" defaultMessage="Show favourites" />,
+							visible: <FormattedMessage id="containers.favourites.collapse.tooltip.hide" defaultMessage="Hide favourites" />,
+						}}
+						onClickCreate={() => setCreateContainerOpen(true)}
+						onClickUpload={() => setUploadModalOpen(true)}
+						emptyMessage={
+							favouritesFilterQuery && hasContainers.favourites ? (
+								<DashboardListEmptySearchResults searchPhrase={favouritesFilterQuery} />
+							) : (
+								<DashboardListEmptyText>
+									<FormattedMessage
+										id="containers.favourites.emptyMessage"
+										defaultMessage="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
+									/>
+								</DashboardListEmptyText>
+							)
+						}
+					/>
+					<Divider />
+					<ContainersList
+						filterQuery={allFilterQuery}
+						onFilterQueryChange={setAllFilterQuery}
+						hasContainers={hasContainers.all}
+						containers={filterContainers(containers, allFilterQuery)}
+						title={(
+							<FormattedMessage
+								id="containers.all.collapseTitle"
+								defaultMessage="All containers"
+							/>
+						)}
+						titleTooltips={{
+							collapsed: <FormattedMessage id="containers.all.collapse.tooltip.show" defaultMessage="Show all" />,
+							visible: <FormattedMessage id="containers.all.collapse.tooltip.hide" defaultMessage="Hide all" />,
+						}}
+						showBottomButton
+						onClickCreate={() => setCreateContainerOpen(true)}
+						onClickUpload={() => setUploadModalOpen(true)}
+						emptyMessage={
+							allFilterQuery && hasContainers.all ? (
+								<DashboardListEmptySearchResults searchPhrase={allFilterQuery} />
+							) : (
+								<>
 									<DashboardListEmptyText>
-										<FormattedMessage
-											id="containers.favourites.emptyMessage"
-											defaultMessage="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
-										/>
+										<FormattedMessage id="containers.all.emptyMessage" defaultMessage="You haven’t created any Containers." />
 									</DashboardListEmptyText>
-								)
-							}
-						/>
-						<Divider />
-						<ContainersList
-							filterQuery={allFilterQuery}
-							onFilterQueryChange={setAllFilterQuery}
-							hasContainers={hasContainers.all}
-							containers={filterContainers(containers, allFilterQuery)}
-							onClickUpload={() => setUploadModalOpen(true)}
-							title={(
-								<FormattedMessage
-									id="containers.all.collapseTitle"
-									defaultMessage="All containers"
-								/>
-							)}
-							titleTooltips={{
-								collapsed: <FormattedMessage id="containers.all.collapse.tooltip.show" defaultMessage="Show all" />,
-								visible: <FormattedMessage id="containers.all.collapse.tooltip.hide" defaultMessage="Hide all" />,
-							}}
-							showBottomButton
-							onClickCreate={() => setCreateContainerOpen(true)}
-							emptyMessage={
-								allFilterQuery && hasContainers.all ? (
-									<DashboardListEmptySearchResults searchPhrase={allFilterQuery} />
-								) : (
-									<>
-										<DashboardListEmptyText>
-											<FormattedMessage id="containers.all.emptyMessage" defaultMessage="You haven’t created any Containers." />
-										</DashboardListEmptyText>
-										<Button
-											startIcon={<AddCircleIcon />}
-											variant="contained"
-											color="primary"
-											onClick={() => setCreateContainerOpen(true)}
-										>
-											<FormattedMessage id="containers.all.newContainer" defaultMessage="New Container" />
-										</Button>
-									</>
-								)
-							}
-						/>
-					</>
-				)}
-				<CreateContainerForm
-					open={createContainerOpen}
-					close={() => setCreateContainerOpen(false)}
-				/>
-			</Content>
+									<Button
+										startIcon={<AddCircleIcon />}
+										variant="contained"
+										color="primary"
+										onClick={() => setCreateContainerOpen(true)}
+									>
+										<FormattedMessage id="containers.all.newContainer" defaultMessage="New Container" />
+									</Button>
+								</>
+							)
+						}
+					/>
+				</>
+			)}
+			<CreateContainerForm
+				open={createContainerOpen}
+				close={() => setCreateContainerOpen(false)}
+			/>
 			<UploadFileForm openState={uploadModalOpen} onClickClose={onClickClose} />
-		</Container>
+		</>
 	);
 };
