@@ -18,11 +18,35 @@ import styled from 'styled-components';
 import { ModelsPermissions } from '@/v4/routes/modelsPermissions';
 import { ModelsContainer } from '@/v4/routes/modelsPermissions/modelsPermissions.styles';
 import { Container as TextOverlay } from '@/v4/routes/components/textOverlay/textOverlay.styles';
+import { Row, BodyWrapper } from '@/v4/routes/components/customTable/customTable.styles';
+import { Detail, Name } from '@/v4/routes/components/modelItem/modelItem.styles';
 
 export const V4ModelsPermissions = styled(ModelsPermissions)`
 	${ModelsContainer} {
 		border: 0;
 		margin-right: 30px;
+				
+		.MuiIconButton-label {
+			border-radius: 3px;
+			background-color: ${({ theme }) => theme.palette.primary.contrast};
+		}
+
+		${BodyWrapper} .simplebar-content {
+			overflow: hidden;
+		
+			${Row}.selected {
+
+				${Name} {
+					color: ${({ theme }) => theme.palette.primary.contrast};
+				}
+				
+				background-color: ${({ theme }) => theme.palette.secondary.main};
+			}
+		}
+
+		${Detail} {
+			color: ${({ theme }) => theme.palette.base.main}
+		}
 	}
 
 	${TextOverlay} {

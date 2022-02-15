@@ -189,13 +189,13 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 					}
 				</ModelsContainer>
 				<PermissionsContainer item>
-							<PermissionsTable
-								key={permissionsRevision}
-								permissions={permissions}
-								roles={MODEL_ROLES_LIST}
-								onPermissionsChange={this.handlePermissionsChange}
-								rowStateInterceptor={this.hasDisabledPermissions}
-							/>
+					<PermissionsTable
+						key={permissionsRevision}
+						permissions={permissions}
+						roles={MODEL_ROLES_LIST}
+						onPermissionsChange={this.handlePermissionsChange}
+						rowStateInterceptor={this.hasDisabledPermissions}
+					/>
 					{
 						!selectedModels.length ?
 							<TextOverlay content={textOverlayMessage} /> :
