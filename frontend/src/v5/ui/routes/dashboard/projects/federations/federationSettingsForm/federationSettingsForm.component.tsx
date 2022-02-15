@@ -216,7 +216,6 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 					control={control}
 					labelName={formatMessage({ id: 'federations.settings.form.lat', defaultMessage: 'LATITUDE' })}
 					labelUnit={DECIMAL_UNIT.name}
-					type="number"
 					formError={errors.latitude}
 					required
 				/>
@@ -225,7 +224,6 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 					control={control}
 					labelName={formatMessage({ id: 'federations.settings.form.long', defaultMessage: 'LONGITUDE' })}
 					labelUnit={DECIMAL_UNIT.name}
-					type="number"
 					formError={errors.longitude}
 					required
 				/>
@@ -236,7 +234,6 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 				labelName={formatMessage({ id: 'federations.settings.form.angleFromNorth', defaultMessage: 'ANGLE FROM NORTH' })}
 				labelUnit={formatMessage({ id: 'federations.settings.form.angleFromNorth.unit', defaultMessage: 'clockwise degrees' })}
 				formError={errors.angleFromNorth}
-				type="number"
 			/>
 			<FlexContainer>
 				<FormTextFieldUnit
@@ -244,7 +241,6 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 					control={control}
 					labelName="X"
 					labelUnit={currentUnit}
-					type="number"
 					formError={errors.x}
 					required
 				/>
@@ -253,7 +249,6 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 					control={control}
 					labelName="Y"
 					labelUnit={currentUnit}
-					type="number"
 					formError={errors.y}
 					required
 				/>
@@ -262,7 +257,6 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 					control={control}
 					labelName="Z"
 					labelUnit={currentUnit}
-					type="number"
 					formError={errors.z}
 					required
 				/>
