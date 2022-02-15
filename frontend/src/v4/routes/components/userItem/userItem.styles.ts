@@ -24,6 +24,7 @@ const BaseStyles = styled(Grid)`
 	text-overflow: ellipsis;
 	overflow: hidden;
 	width: 100%;
+	display: block;
 `;
 
 export const Name = styled(BaseStyles)`

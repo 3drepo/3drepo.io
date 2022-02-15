@@ -76,7 +76,7 @@ Containers.getContainerStats = async (teamspace, project, container) => {
 Containers.getRevisions = (teamspace, container, showVoid) => getRevisions(teamspace,
 	container, showVoid, { _id: 1, author: 1, timestamp: 1, tag: 1, void: 1, desc: 1 });
 
-Containers.newRevision = async (teamspace, model, data, file) => queueModelUpload(teamspace, model, data, file)
+Containers.newRevision = (teamspace, model, data, file) => queueModelUpload(teamspace, model, data, file)
 	.finally(() => fs.rm(file.path).catch((e) => {
 		logger.logError(`Failed to delete uploaded file: ${e.message}`);
 	}));
@@ -95,7 +95,7 @@ Containers.deleteFavourites = async (username, teamspace, project, favouritesToR
 
 Containers.updateSettings = updateModelSettings;
 
-Containers.getSettings = async (teamspace, container) => getContainerById(teamspace,
+Containers.getSettings = (teamspace, container) => getContainerById(teamspace,
 	container, { corID: 0, account: 0, permissions: 0 });
 
 module.exports = Containers;

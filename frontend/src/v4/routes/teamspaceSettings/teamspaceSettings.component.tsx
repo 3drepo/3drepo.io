@@ -26,6 +26,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import { Field, Formik } from 'formik';
 import { isEmpty } from 'lodash';
 
+import { Switch } from '@material-ui/core';
 import { ROUTES } from '../../constants/routes';
 import { LONG_DATE_TIME_FORMAT } from '../../services/formatting/formatDate';
 import { ChipsInput } from '../components/chipsInput/chipsInput.component';
@@ -37,6 +38,7 @@ import {
 	BackButton,
 	ButtonContainer,
 	Container,
+	CreateMitigationsGrid,
 	DataText,
 	FileGrid,
 	Headline,
@@ -60,6 +62,7 @@ interface IState {
 	topicTypes?: string[];
 	riskCategories?: string[];
 	fileName: string;
+	createMitigationSuggestions: boolean;
 }
 
 interface IProps {
@@ -80,6 +83,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 		topicTypes: [],
 		riskCategories: [],
 		fileName: '',
+		createMitigationSuggestions: false,
 	};
 
 	get teamspace() {
@@ -114,6 +118,8 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 			changes.riskCategories = riskCategories;
 		}
 
+		changes.createMitigationSuggestions = properties.createMitigationSuggestions;
+
 		if (this.props.treatmentsUpdatedAt !== prevProps.treatmentsUpdatedAt && this.state.fileName !== '') {
 			this.setState({
 				fileName: '',
@@ -127,17 +133,19 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 
 	private handleUpdateSettings = (values, { resetForm }) => {
 		const { teamspace } = this.props.match.params;
-		const { topicTypes, riskCategories, file } = values;
+		const { topicTypes, riskCategories, file, createMitigationSuggestions } = values;
 		const settings = {
 			topicTypes,
 			riskCategories,
 			file,
+			createMitigationSuggestions
 		};
 
 		this.props.updateTeamspaceSettings(teamspace, settings);
 		resetForm({
 			topicTypes,
 			riskCategories,
+			createMitigationSuggestions
 		});
 		this.setState({
 			fileName: '',
@@ -194,7 +202,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 		if (this.treatmentsUpdatedAt) {
 			return (
 				<>
-					Last updated:&nbsp;
+					Last imported:&nbsp;
 					<DateTime value={this.treatmentsUpdatedAt} format={LONG_DATE_TIME_FORMAT} />
 				</>
 			);
@@ -243,15 +251,33 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 		);
 	}
 
+	private renderCreateMitigationSuggestionsOption = () => {
+		return (
+			<SuggestionsContainer container direction="column" wrap="nowrap">
+				<CreateMitigationsGrid container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
+					<InfoColumnWrapper container>
+						<DataText variant="body1">
+							Create Treatment Suggestions from Agreed Risks
+						</DataText>
+					</InfoColumnWrapper>
+					<Field name="createMitigationSuggestions" render={ ({ field }) => (
+						<Switch checked={field.value} {...field} value="true" color="secondary" />
+					)} />
+				</CreateMitigationsGrid>
+			</SuggestionsContainer>
+		);
+	}
+
 	public renderForm = () => {
-		const { topicTypes, riskCategories } = this.state;
+		const { topicTypes, riskCategories, createMitigationSuggestions  } = this.state;
 
 		return	(
 			<Container>
 				<Formik
 					initialValues={{
 						topicTypes,
-						riskCategories
+						riskCategories,
+						createMitigationSuggestions
 					}}
 					onSubmit={this.handleUpdateSettings}
 				>
@@ -283,7 +309,7 @@ export class TeamspaceSettings extends React.PureComponent<IProps, IState> {
 						</StyledGrid>
 
 						{this.renderTreatmentSuggestionsSection()}
-
+						{this.renderCreateMitigationSuggestionsOption()}
 						<ButtonContainer container direction="column" alignItems="flex-end">
 							<Field render={({ form }) =>
 								<Button

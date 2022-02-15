@@ -21,6 +21,12 @@ import {
 	FetchFederationStatsPayload,
 	FetchFederationStatsResponse,
 	FavouritePayload,
+	FetchFederationViewsPayload,
+	FetchFederationViewsResponse,
+	FetchFederationSettingsPayload,
+	DeleteFederationPayload,
+	FetchFederationRawSettingsResponse,
+	UpdateFederationSettingsPayload,
 } from '@/v5/store/federations/federations.types';
 import { AxiosResponse } from 'axios';
 import api from './default';
@@ -57,3 +63,38 @@ export const fetchFederationStats = async ({
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/stats`);
 	return data;
 };
+
+export const fetchFederationViews = async ({
+	teamspace,
+	projectId,
+	federationId,
+}: FetchFederationViewsPayload): Promise<FetchFederationViewsResponse> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/views`);
+	return data;
+};
+
+export const fetchFederationSettings = async ({
+	teamspace,
+	projectId,
+	federationId,
+}: FetchFederationSettingsPayload): Promise<FetchFederationRawSettingsResponse> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`);
+	return data;
+};
+
+export const updateFederationSettings = async ({
+	teamspace,
+	projectId,
+	federationId,
+	updatedSettings,
+}: UpdateFederationSettingsPayload): Promise<AxiosResponse<void>> => (
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`, updatedSettings)
+);
+
+export const deleteFederation = ({
+	teamspace,
+	projectId,
+	federationId,
+}: DeleteFederationPayload): Promise<AxiosResponse<void>> => (
+	api.delete(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
+);

@@ -19,43 +19,34 @@ import { createSelector } from 'reselect';
 import { IContainersState } from '@/v5/store/containers/containers.types';
 import { isEmpty } from 'lodash';
 import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
-import { filterContainers } from '@/v5/store/containers/containers.helpers';
 
-const selectContainersDomain = (state: { containers: IContainersState }) => state.containers;
+const selectContainersDomain = (state): IContainersState => state.containers;
 
 export const selectContainers = createSelector(
-	selectContainersDomain, selectCurrentProject, (state, currentProject) => state.containers[currentProject] ?? [],
+	selectContainersDomain, selectCurrentProject,
+	(state, currentProject) => state.containersByProject[currentProject] ?? [],
 );
 
-export const selectFavouritesFilterQuery = createSelector(
-	selectContainersDomain, (state) => state.favouritesFilterQuery,
-);
-
-export const selectAllFilterQuery = createSelector(
-	selectContainersDomain, (state) => state.allFilterQuery,
-);
-
-export const selectFilteredContainers = createSelector(
-	selectContainers, selectAllFilterQuery,
-	(federations, filterQuery) => filterContainers(federations, filterQuery),
-);
-
-export const selectFilteredFavouriteContainers = createSelector(
-	selectContainers, selectFavouritesFilterQuery,
-	(federations, filterQuery) => filterContainers(federations.filter(({ isFavourite }) => isFavourite), filterQuery),
+export const selectFavouriteContainers = createSelector(
+	selectContainers,
+	(containers) => containers.filter(({ isFavourite }) => isFavourite),
 );
 
 export const selectHasContainers = createSelector(
-	selectContainers, (containers) => ({
-		favourites: containers.some(({ isFavourite }) => isFavourite),
+	selectContainers, selectFavouriteContainers,
+	(containers, favouriteContainers) => ({
+		favourites: !isEmpty(favouriteContainers),
 		all: !isEmpty(containers),
 	}),
 );
 
 export const selectIsListPending = createSelector(
-	selectContainersDomain, (state) => state.isListPending,
+	selectContainersDomain, selectCurrentProject,
+	// Checks if the containers for the project have been fetched
+	(state, currentProject) => !state.containersByProject[currentProject],
 );
 
 export const selectAreStatsPending = createSelector(
-	selectContainers, (containers) => containers.some(({ hasStatsPending }) => hasStatsPending),
+	selectContainers,
+	(containers) => containers.some(({ hasStatsPending }) => hasStatsPending),
 );

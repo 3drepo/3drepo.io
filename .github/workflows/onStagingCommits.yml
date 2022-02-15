@@ -1,0 +1,22 @@
+name: Tag merged issues
+on:
+  push:
+    branches:
+      - 'staging'
+jobs:
+  tagOnPRMerge:
+    name: Tag merged issues as In staging
+    runs-on: ubuntu-latest
+    steps:
+      - name: Is PR merge commit
+        uses: carmenfan/extract-issue-number-from-PR-merge@v1.0
+        with:
+          commit-message: ${{ github.event.head_commit.message }}
+        id: commitMsgParser
+      - name: Apply in staging label
+        if: steps.commitMsgParser.outputs.issue-number
+        uses: carmenfan/any-issue-labeller@v1.0
+        with:
+          issue-number: ${{ steps.commitMsgParser.outputs.issue-number }}
+          label: 'in staging'
+          github-token: ${{ secrets.GITHUB_TOKEN }}

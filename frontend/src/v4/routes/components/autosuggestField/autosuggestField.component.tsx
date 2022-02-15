@@ -65,7 +65,7 @@ export class AutosuggestField extends React.PureComponent<IProps, IState> {
 		const inputLength = inputValue.length;
 
 		return inputLength === 0 ? [] : this.props.suggestions.filter((suggestion) =>
-			suggestion.toLowerCase().slice(0, inputLength) === inputValue
+			suggestion.toLowerCase().indexOf(inputValue) !== -1
 		);
 	}
 

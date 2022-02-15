@@ -14,9 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import React from 'react';
 import { createMuiTheme } from '@material-ui/core/styles';
 import { TypographyOptions } from '@material-ui/core/styles/createTypography';
+import RadioButtonIcon from '@assets/icons/controls/radio_button.svg';
+import RadioButtonCheckedIcon from '@assets/icons/controls/radio_button_checked.svg';
+import CheckboxIcon from '@assets/icons/controls/checkbox.svg';
+import CheckboxCheckedIcon from '@assets/icons/controls/checkbox_checked.svg';
+import CheckboxIndeterminatedIcon from '@assets/icons/controls/checkbox_indeterminated.svg';
 
 export const COLOR = {
 	PRIMARY_MAIN_CONTRAST: '#fff',
@@ -223,6 +228,26 @@ export const theme = createMuiTheme({
 				shrink: false,
 			},
 		},
+		MuiInput: {
+			disableUnderline: true,
+		},
+		MuiCheckbox: {
+			color: 'primary',
+			icon: React.createElement(CheckboxIcon),
+			checkedIcon: React.createElement(CheckboxCheckedIcon),
+			indeterminateIcon: React.createElement(CheckboxIndeterminatedIcon),
+		},
+		MuiRadio: {
+			color: 'primary',
+			icon: React.createElement(RadioButtonIcon),
+			checkedIcon: React.createElement(RadioButtonCheckedIcon),
+		},
+		MuiTooltip: {
+			PopperProps: {
+				// This is necessary for overriding styles of v4 tooltips
+				container: () => document.getElementById('v4Overrides'),
+			},
+		},
 	},
 	overrides: {
 		MuiBackdrop: {
@@ -304,15 +329,34 @@ export const theme = createMuiTheme({
 				backgroundColor: null,
 			},
 		},
+		MuiMenuItem: {
+			root: {
+				margin: '0',
+			},
+		},
 		MuiList: {
 			root: {
-				width: 226,
 				borderRadius: 5,
 				boxShadow: SHADOW.LEVEL_5,
 			},
 			padding: {
 				paddingTop: 0,
 				paddingBottom: 0,
+			},
+		},
+		MuiListItem: {
+			root: {
+				'&$selected': {
+					backgroundColor: COLOR.TERTIARY_LIGHTEST,
+					'&:hover': {
+						backgroundColor: COLOR.TERTIARY_LIGHTEST,
+					},
+				},
+			},
+			button: {
+				'&:hover': {
+					backgroundColor: COLOR.TERTIARY_LIGHTEST,
+				},
 			},
 		},
 		MuiTooltip: {
@@ -336,6 +380,9 @@ export const theme = createMuiTheme({
 				boxShadow: 'none',
 				border: `1px solid ${COLOR.PRIMARY_MAIN_CONTRAST}`,
 				transition: 'none',
+				'&:active': {
+					boxShadow: 'none',
+				},
 			},
 			label: {
 				'& > *:first-child': {
@@ -386,7 +433,7 @@ export const theme = createMuiTheme({
 		MuiOutlinedInput:
 			{
 				root: {
-					marginTop: 6,
+					background: COLOR.PRIMARY_MAIN_CONTRAST,
 					'& $notchedOutline, &$disabled:hover:not($error) $notchedOutline, &$disabled $notchedOutline': {
 						borderColor: COLOR.BASE_LIGHTEST,
 						borderRadius: 5,
@@ -401,6 +448,7 @@ export const theme = createMuiTheme({
 						height: 35,
 						color: COLOR.BASE_MAIN,
 						...typography.body1,
+						lineHeight: '35px',
 					},
 					'&$focused $input': {
 						color: COLOR.SECONDARY_MAIN,
@@ -422,12 +470,37 @@ export const theme = createMuiTheme({
 					},
 				},
 			},
+		MuiSelect: {
+			root: {
+				background: COLOR.PRIMARY_MAIN_CONTRAST,
+				margin: '38px 0 0',
+				width: '100%',
+				height: 35,
+				boxSizing: 'border-box',
+			},
+			select: {
+				border: `1px solid ${COLOR.BASE_LIGHTEST}`,
+				borderRadius: 5,
+				color: COLOR.BASE_MAIN,
+				lineHeight: '35px',
+				'&:focus': {
+					borderRadius: 5,
+				},
+			},
+			icon: {
+				marginTop: '38px',
+				top: 'inherit',
+				right: '5px',
+			},
+		},
 		MuiTextField: {
 			root: {
-				margin: '4px 8px 8px 8px',
+				margin: '38px 0 0',
+				width: '100%',
 				'& $label': {
 					...typography.kicker,
-					display: 'contents',
+					top: '-38px',
+					left: '-13px',
 					color: COLOR.BASE_MAIN,
 				},
 				'& $label:not(.Mui-error).Mui-focused': {
@@ -436,6 +509,77 @@ export const theme = createMuiTheme({
 				'& $label.Mui-disabled': {
 					color: COLOR.BASE_LIGHT,
 				},
+			},
+		},
+		MuiInput: {
+			root: {
+				width: '100%',
+				'&$disabled $input': {
+					color: COLOR.BASE_LIGHT,
+				},
+				'&$disabled $path': {
+					fill: COLOR.BASE_LIGHT,
+				},
+			},
+			underline: {
+				'&:before': {
+					borderBottom: `1px solid ${COLOR.BASE_LIGHTEST}`,
+				},
+				'&:after': {
+					borderBottom: `1px solid ${COLOR.BASE_LIGHTEST}`,
+				},
+				'&:hover:not($disabled):before': {
+					borderBottom: `1px solid ${COLOR.BASE_LIGHTEST}`,
+				},
+			},
+			input: {
+				padding: '0px 14px',
+			},
+			formControl: {
+				'label + &': {
+					marginTop: 0,
+				},
+			},
+		},
+		MuiInputLabel: {
+			root: {
+				position: 'absolute',
+				...typography.kicker,
+				fontSize: '12px',
+				color: COLOR.BASE_MAIN,
+
+				'&:not(.Mui-error).Mui-focused': {
+					color: COLOR.TERTIARY_MAIN,
+				},
+				'&$disabled .MuiInputLabel-asterisk': {
+					display: 'none',
+				},
+			},
+			formControl: {
+				top: '20px',
+				left: '1px',
+				transform: 'none',
+			},
+			asterisk: {
+				color: COLOR.ERROR_MAIN,
+			},
+		},
+		MuiFormControl: {
+			root: {
+				width: '100%',
+				boxSizing: 'border-box',
+			},
+		},
+		MuiFormControlLabel: {
+			label: {
+				color: COLOR.BASE_MAIN,
+			},
+		},
+		MuiFormHelperText: {
+			contained: {
+				position: 'absolute',
+				bottom: '-14px',
+				'&&': { margin: 0 },
 			},
 		},
 		MuiTouchRipple: {
@@ -627,6 +771,12 @@ export const theme = createMuiTheme({
 			},
 			colorPrimary: {
 				backgroundColor: COLOR.TERTIARY_LIGHTEST,
+			},
+		},
+		MuiRadio: {
+			root: {
+				// this is for letting the color prop decide the color
+				color: null,
 			},
 		},
 	},

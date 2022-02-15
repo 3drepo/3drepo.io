@@ -18,6 +18,7 @@
 import Button from '@material-ui/core/Button';
 import DialogActions from '@material-ui/core/DialogActions';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControlBase from '@material-ui/core/FormControl';
 import styled from 'styled-components';
 
 import { COLOR } from '../../../../styles';
@@ -72,5 +73,11 @@ export const CheckboxContainer = styled(FormControlLabel)`
 		& > span {
 			padding-left: 0;
 		}
+	}
+`;
+
+export const FormControl = styled(FormControlBase)`
+	&& {
+		display: flex;
 	}
 `;

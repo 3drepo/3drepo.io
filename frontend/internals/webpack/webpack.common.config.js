@@ -42,7 +42,7 @@ module.exports = (options) => {
 				{ from: 'unity/**', to: '../' },
 				//backwards compatibility to Unity 2019 (added on 4.12)
 				{ from: 'unity/Build/unity.loader.js', to: '../unity/Build/UnityLoader.js' },
-				{ from: 'manifest-icons/*', to: '../' },
+				{ from: 'assets/manifest-icons/*', to: '../' },
 				{ from: 'serviceWorkerExtras.js', to: '../' },
 				{ context: '../resources', from: '**/*.html', to: '../templates' },
 				{ context: '../resources', from: '**/*.csv', to: '../templates' }

@@ -18,9 +18,8 @@ import { INITIAL_STATE } from '@/v5/store/containers/containers.redux';
 import { times } from 'lodash';
 import { containerMockFactory } from './containers.fixtures';
 import {
+	selectFavouriteContainers,
 	selectContainers,
-	selectFilteredFavouriteContainers,
-	selectFilteredContainers,
 	selectAreStatsPending,
 	selectHasContainers
 } from '@/v5/store/containers/containers.selectors';
@@ -30,7 +29,7 @@ const searchPhrase = 'test phrase';
 const projectId = 'projectId';
 const defaultState: IContainersState = {
 	...INITIAL_STATE,
-	containers:
+	containersByProject:
 		{
 			[projectId]: [
 				containerMockFactory({ isFavourite: true, name: searchPhrase }),
@@ -39,14 +38,12 @@ const defaultState: IContainersState = {
 				containerMockFactory({ isFavourite: false, hasStatsPending: true}),
 			],
 		},
-	favouritesFilterQuery: '',
-	allFilterQuery: searchPhrase,
 }
 
 describe('Containers: selectors', () => {
 	describe('selectFavouriteContainers', () => {
 		it('should return favourite containers', () => {
-			const selected = selectFilteredFavouriteContainers.resultFunc(defaultState.containers[projectId], '');
+			const selected = selectFavouriteContainers.resultFunc(defaultState.containersByProject[projectId]);
 			expect(selected).toHaveLength(6);
 		})
 	})
@@ -58,33 +55,30 @@ describe('Containers: selectors', () => {
 		})
 	})
 
-	describe('selectFilteredContainers', () => {
-		it('should return container with searchPhrase', () => {
-			const selected = selectFilteredContainers.resultFunc(defaultState.containers[projectId], searchPhrase);
-			expect(selected).toHaveLength(1);
-		})
-	})
-
 	describe('selectHasContainers', () => {
 		it('should return correct values when favourite item is in federations', () => {
-			const selected = selectHasContainers.resultFunc(defaultState.containers[projectId]);
+			const containers = defaultState.containersByProject[projectId];
+			const favourites = selectFavouriteContainers.resultFunc(containers);
+			const selected = selectHasContainers.resultFunc(containers, favourites);
 			expect(selected).toEqual({ favourites: true, all: true })
 		})
 
 		it('should return correct values when no favourite item is in containers', () => {
-			const selected = selectHasContainers.resultFunc([containerMockFactory({ isFavourite: false })]);
+			const containers = [containerMockFactory({ isFavourite: false })];
+			const favourites = selectFavouriteContainers.resultFunc(containers);
+			const selected = selectHasContainers.resultFunc(containers, favourites);
 			expect(selected).toEqual({ favourites: false, all: true })
 		})
 
 		it('should return correct values for empty containers', () => {
-			const selected = selectHasContainers.resultFunc([]);
+			const selected = selectHasContainers.resultFunc([], []);
 			expect(selected).toEqual({ favourites: false, all: false })
 		})
 	})
 
 	describe('selectAreStatsPending', () => {
 		it('should return true if at least one item has pending stats', () => {
-			const selected = selectAreStatsPending.resultFunc(defaultState.containers[projectId]);
+			const selected = selectAreStatsPending.resultFunc(defaultState.containersByProject[projectId]);
 			expect(selected).toBeTruthy();
 		})
 

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { toCamelCase, toConstantCase } = require('./helper/strings');
+const { logfile } = require('./config');
 const { logger } = require('./logger');
 
 const ResponseCodes = {};
@@ -30,6 +31,8 @@ ResponseCodes.templates = {
 	tooManyLoginAttempts: { message: 'Too many unsuccessful login attempts! Account locked', status: 400 },
 	userNotVerified: { message: 'Account not yet verified. Please check your email.', status: 400 },
 	incorrectUsernameOrPassword: { message: 'Incorrect username or password', status: 400 },
+	incorrectPassword: { message: 'Incorrect password', status: 400 },
+	userDoesNotHaveAvatar: { message: 'User does not have an avatar', status: 404 },
 
 	// Fail safe
 	unknown: { message: 'Unknown error occured. Please contact support.', status: 500 },
@@ -62,6 +65,9 @@ ResponseCodes.templates = {
 
 	// View related error
 	viewNotFound: { message: 'View not found', status: 404 },
+
+	// Image related error
+	thumbnailNotFound: { message: 'Thumbnail not available', status: 404 },
 
 	// Legend related error
 	legendNotFound: { message: 'Legend not found', status: 404 },
@@ -129,6 +135,11 @@ ResponseCodes.createResponseCode = (errCode, message) => {
 	const codeExists = ResponseCodes.codeExists(errCode?.code);
 	if (!codeExists) {
 		const isError = errCode instanceof Error;
+		if (isError && !logfile.silent) {
+			// eslint-disable-next-line
+			console.error(errCode)
+		}
+
 		logger.logError('Unrecognised error code', isError ? JSON.stringify(errCode, ['message', 'arguments', 'type', 'name', 'stack']) : errCode);
 	}
 	const res = codeExists ? errCode : ResponseCodes.templates.unknown;

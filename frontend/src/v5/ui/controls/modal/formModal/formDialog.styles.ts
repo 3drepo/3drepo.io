@@ -16,26 +16,48 @@
  */
 
 import styled from 'styled-components';
-import { IconButton } from '@material-ui/core';
 
 import { Typography } from '@controls/typography';
+import { DialogActions, DialogContent, IconButton, Paper } from '@material-ui/core';
+
+export const RemoveWhiteCorners = styled(Paper)`
+	background-color: rgba(0, 0, 0, 0);
+`;
+
+export const CloseButton = styled(IconButton)`
+	&& {
+		position: absolute;
+		top: 10px;
+		right: 10px;
+
+		svg path {
+			stroke: ${({ theme }) => theme.palette.primary.contrast}
+		}
+	}
+`;
 
 export const Form = styled.form`
 	display: flex;
 	flex-direction: column;
 	min-width: 520px;
+
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	border-radius: 15px; /* prevents white pixels in corners */
 `;
 
-export const Header = styled.header`
-	background: ${({ theme }) => `linear-gradient(89.98deg, ${theme.palette.secondary.main} 0.01%, ${theme.palette.secondary.mid} 99.99%)`};
+export const Header = styled.div`
+	background: ${({ theme }) => theme.palette.gradient.secondary};
 	height: 74px;
 	width: 100%;
-	padding: 15px 30px;
 	box-sizing: border-box;
+	align-items: center;
+	display: flex;
+	padding: 0 27px;
 `;
 
 export const Title = styled(Typography).attrs({
 	variant: 'h2',
+	component: 'div',
 })`
 	text-align: left;
 	color: ${({ theme }) => theme.palette.primary.contrast};
@@ -43,20 +65,19 @@ export const Title = styled(Typography).attrs({
 
 export const Subtitle = styled(Typography).attrs({
 	variant: 'h5',
-	component: 'span',
+	component: 'div',
 })`
 	text-align: left;
 	color: ${({ theme }) => theme.palette.secondary.lightest};
 `;
 
-export const CloseButton = styled(IconButton)`
-	&& {
-		position: absolute;
-		top: 19px;
-		right: 11px;
-		
-		path {
-			stroke: ${({ theme }) => theme.palette.primary.contrast};
-		}
-	}
+export const FormDialogContent = styled(DialogContent)`
+	display: inline-flex;
+	flex-flow: row wrap;
+	padding: 0;
+`;
+
+export const FormDialogActions = styled(DialogActions)`
+	background: ${({ theme }) => theme.palette.tertiary.lightest};
+	box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
 `;

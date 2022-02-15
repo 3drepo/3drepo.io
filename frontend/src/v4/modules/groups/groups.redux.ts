@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { keyBy } from 'lodash';
+import { cloneDeep, keyBy } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
@@ -199,14 +199,13 @@ export const setColorOverrides = (state = INITIAL_STATE, { groupIds }) => {
 
 export const updateGroupSuccess = (state = INITIAL_STATE, { group }) => {
 	const groupsMap = { ...state.groupsMap };
-	const editingGroup = { ...state.componentState.editingGroup };
+	let editingGroup = { ...state.componentState.editingGroup };
 
 	groupsMap[group._id] = group;
 
-	if (editingGroup) {
+	if (editingGroup && editingGroup._id === group._id) {
 		editingGroup.willBeUpdated = false;
-		editingGroup.objects = group.objects;
-		editingGroup.totalSavedMeshes = group.totalSavedMeshes;
+		editingGroup = cloneDeep(group);
 	}
 
 	if (state.componentState.allOverridden) {

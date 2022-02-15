@@ -14,12 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const { canDeleteContainer, validateAddModelData, validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { hasAccessToTeamspace, hasAdminAccessToContainer, hasReadAccessToContainer, isAdminToProject } = require('../../../../middleware/permissions/permissions');
-const { validateAddModelData, validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
-const { canDeleteContainer } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { formatModelSettings } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');
@@ -53,7 +52,7 @@ const getContainerList = (req, res) => {
 	}).catch((err) => respond(req, res, err));
 };
 
-const getContainerStats = async (req, res) => {
+const getContainerStats = (req, res) => {
 	const { teamspace, project, container } = req.params;
 	Containers.getContainerStats(teamspace, project, container).then((stats) => {
 		const statsSerialised = { ...stats };
@@ -180,7 +179,7 @@ const establishRoutes = () => {
 	 *                       description: The point coordinate that maps to the latLong value (should be in OpenGL axis conventions)
 	 *                       type: array
 	 *                       items:
-	 *                         type: float
+	 *                         type: number
 	 *                         example: 23.45
 	 *                         minItems: 3
 	 *                         maxItems: 3
@@ -188,7 +187,7 @@ const establishRoutes = () => {
 	 *                       type: array
 	 *                       description: 'The latitude and longitude of the survey point'
 	 *                       items:
-	 *                         type: float
+	 *                         type: number
 	 *                         example: 23.45
 	 *                         minItems: 2
 	 *                         maxItems: 2
@@ -531,12 +530,12 @@ const establishRoutes = () => {
 	 *                     position:
 	 *                       type: array
 	 *                       items:
-	 *                         type: float
+	 *                         type: number
 	 *                         example: 23.45
 	 *                     latLong:
 	 *                       type: array
 	 *                       items:
-	 *                         type: float
+	 *                         type: number
 	 *                         example: 23.45
 	 *               angleFromNorth:
 	 *                 type: integer

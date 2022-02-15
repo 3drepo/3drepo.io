@@ -26,6 +26,7 @@ interface IProps {
 	projectName: string;
 	permissions: any[];
 	onPermissionsChange: (project) => void;
+	className?: string;
 }
 
 interface IState {
@@ -83,7 +84,7 @@ export class ProjectsPermissions extends React.PureComponent<IProps, IState> {
 		const { permissions } = this.props;
 
 		return (
-			<Container>
+			<Container className={this.props.className}>
 				<PermissionsTable
 					permissions={permissions}
 					roles={PROJECT_ROLES_LIST}

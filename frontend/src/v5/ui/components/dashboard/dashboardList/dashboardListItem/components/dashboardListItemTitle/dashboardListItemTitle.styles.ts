@@ -27,10 +27,17 @@ export const Title = styled(Button).attrs({
 	color: ${({ theme }) => theme.palette.secondary.main};
 	padding: 0;
 	margin: 0;
+	max-width: 100%;
 
 	${({ theme, selected }) => selected && css`
 		color: ${theme.palette.primary.contrast};
 	`}
+
+	& span{
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		overflow: hidden;
+	}
 `;
 
 export const Subtitle = styled(Typography).attrs({
@@ -47,6 +54,7 @@ export const Subtitle = styled(Typography).attrs({
 `;
 
 export const Container = styled.div`
-	display: block;
 	min-width: 0;
+	display: block;
+	overflow: hidden;
 `;

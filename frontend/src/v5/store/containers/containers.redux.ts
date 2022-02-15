@@ -16,64 +16,45 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { Constants } from '@/v5/store/common/actions.helper';
+import { Constants } from '@/v5/helpers/actions.helper';
 import { prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import {
 	IContainersActionCreators,
 	IContainersState,
-	SetFilterQueryAction,
-	SetFavouritesFilterQueryAction,
 	SetFavouriteSuccessAction,
 	FetchContainersSuccessAction,
-	SetIsListPendingAction,
 	FetchContainerStatsSuccessAction,
+	CreateContainerSuccessAction,
 	DeleteContainerSuccessAction,
 } from './containers.types';
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({
-	setAllFilterQuery: ['query'],
-	setFavouritesFilterQuery: ['query'],
 	addFavourite: ['teamspace', 'projectId', 'containerId'],
 	removeFavourite: ['teamspace', 'projectId', 'containerId'],
+	setFavouriteSuccess: ['projectId', 'containerId', 'isFavourite'],
 	fetchContainers: ['teamspace', 'projectId'],
 	fetchContainersSuccess: ['projectId', 'containers'],
 	fetchContainerStats: ['teamspace', 'projectId', 'containerId'],
 	fetchContainerStatsSuccess: ['projectId', 'containerId', 'containerStats'],
-	setIsListPending: ['isPending'],
-	setFavouriteSuccess: ['projectId', 'containerId', 'isFavourite'],
-	fetchRevisions: ['teamspace', 'projectId', 'containerId'],
-	setRevisionVoidStatus: ['teamspace', 'projectId', 'containerId', 'revisionId', 'isVoid'],
-	setRevisionVoidStatusSuccess: ['projectId', 'containerId', 'revisionId', 'isVoid'],
-	setRevisionsIsPending: ['projectId', 'containerId', 'isPending'],
-	fetchRevisionsSuccess: ['projectId', 'containerId', 'revisions'],
+	createContainer: ['teamspace', 'projectId', 'newContainer'],
+	createContainerSuccess: ['projectId', 'container'],
 	deleteContainer: ['teamspace', 'projectId', 'containerId'],
 	deleteContainerSuccess: ['projectId', 'containerId'],
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
 
 export const INITIAL_STATE: IContainersState = {
-	containers: {},
-	favouritesFilterQuery: '',
-	allFilterQuery: '',
-	isListPending: true,
+	containersByProject: {},
 };
-
-export const setAllFilterQuery = (state = INITIAL_STATE, { query }: SetFilterQueryAction) => (
-	{ ...state, allFilterQuery: query }
-);
-
-export const setFavouritesFilterQuery = (state = INITIAL_STATE, { query }: SetFavouritesFilterQueryAction) => (
-	{ ...state, favouritesFilterQuery: query }
-);
 
 export const setFavourite = (state = INITIAL_STATE, {
 	projectId,
 	containerId,
 	isFavourite,
-}: SetFavouriteSuccessAction) => ({
+}: SetFavouriteSuccessAction):IContainersState => ({
 	...state,
-	containers: {
-		...state.containers,
-		[projectId]: state.containers[projectId].map((container) => ({
+	containersByProject: {
+		...state.containersByProject,
+		[projectId]: state.containersByProject[projectId].map((container) => ({
 			...container,
 			isFavourite: container._id === containerId ? isFavourite : container.isFavourite,
 		})),
@@ -83,10 +64,10 @@ export const setFavourite = (state = INITIAL_STATE, {
 export const fetchContainersSuccess = (state = INITIAL_STATE, {
 	projectId,
 	containers,
-}: FetchContainersSuccessAction) => ({
+}: FetchContainersSuccessAction): IContainersState => ({
 	...state,
-	containers: {
-		...state.containers,
+	containersByProject: {
+		...state.containersByProject,
 		[projectId]: containers,
 	},
 });
@@ -95,39 +76,49 @@ export const fetchStatsSuccess = (state = INITIAL_STATE, {
 	projectId,
 	containerId,
 	containerStats,
-}: FetchContainerStatsSuccessAction) => ({
+}: FetchContainerStatsSuccessAction): IContainersState => ({
 	...state,
-	containers: {
-		...state.containers,
-		[projectId]: state.containers[projectId].map((container) => {
+	containersByProject: {
+		...state.containersByProject,
+		[projectId]: state.containersByProject[projectId].map((container) => {
 			if (containerId !== container._id) return container;
 			return prepareSingleContainerData(container, containerStats);
 		}),
 	},
 });
 
-export const setIsListPending = (state = INITIAL_STATE, { isPending }: SetIsListPendingAction) => ({
+export const createContainerSuccess = (state = INITIAL_STATE, {
+	projectId,
+	container,
+}: CreateContainerSuccessAction): IContainersState => ({
 	...state,
-	isListPending: isPending,
+	containersByProject: {
+		...state.containersByProject,
+		[projectId]: [
+			...state.containersByProject[projectId],
+			{
+				...container,
+				revisionsCount: 0,
+			},
+		],
+	},
 });
 
 export const deleteContainerSuccess = (state = INITIAL_STATE, {
 	projectId,
 	containerId,
-}: DeleteContainerSuccessAction) => ({
+}: DeleteContainerSuccessAction): IContainersState => ({
 	...state,
-	containers: {
-		...state.containers,
-		[projectId]: state.containers[projectId].filter((container) => containerId !== container._id),
+	containersByProject: {
+		...state.containersByProject,
+		[projectId]: state.containersByProject[projectId].filter((container) => containerId !== container._id),
 	},
 });
 
 export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
-	[ContainersTypes.SET_ALL_FILTER_QUERY]: setAllFilterQuery,
-	[ContainersTypes.SET_FAVOURITES_FILTER_QUERY]: setFavouritesFilterQuery,
 	[ContainersTypes.FETCH_CONTAINERS_SUCCESS]: fetchContainersSuccess,
-	[ContainersTypes.SET_IS_LIST_PENDING]: setIsListPending,
 	[ContainersTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
 	[ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS]: fetchStatsSuccess,
+	[ContainersTypes.CREATE_CONTAINER_SUCCESS]: createContainerSuccess,
 	[ContainersTypes.DELETE_CONTAINER_SUCCESS]: deleteContainerSuccess,
-});
+}) as (state: IContainersState, action:any) => IContainersState;

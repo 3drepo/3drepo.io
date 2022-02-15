@@ -15,13 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { formatMessage } from '@/v5/services/intl';
 import { Action } from 'redux';
 
 export interface IContainersState {
-	containers: Record<string, IContainer[]>;
-	allFilterQuery: string;
-	favouritesFilterQuery: string;
-	isListPending: boolean;
+	containersByProject: Record<string, IContainer[]>;
 }
 
 export enum UploadStatuses {
@@ -35,16 +33,54 @@ export enum UploadStatuses {
 	QUEUED_FOR_UNITY = 'Queued for Unity',
 }
 
+export const CONTAINER_TYPES = [
+	{ value: formatMessage({ id: 'containers.type.uncategorised', defaultMessage: 'Uncategorised' }) },
+	{ value: formatMessage({ id: 'containers.type.architectural', defaultMessage: 'Architectural' }) },
+	{ value: formatMessage({ id: 'containers.type.existing', defaultMessage: 'Existing' }) },
+	{ value: formatMessage({ id: 'containers.type.gis', defaultMessage: 'GIS' }) },
+	{ value: formatMessage({ id: 'containers.type.infrastructure', defaultMessage: 'Infrastructure' }) },
+	{ value: formatMessage({ id: 'containers.type.interior', defaultMessage: 'Interior' }) },
+	{ value: formatMessage({ id: 'containers.type.landscape', defaultMessage: 'Landscape' }) },
+	{ value: formatMessage({ id: 'containers.type.mep', defaultMessage: 'MEP' }) },
+	{ value: formatMessage({ id: 'containers.type.mechanical', defaultMessage: 'Mechanical' }) },
+	{ value: formatMessage({ id: 'containers.type.structural', defaultMessage: 'Structural' }) },
+	{ value: formatMessage({ id: 'containers.type.survey', defaultMessage: 'Survey' }) },
+	{ value: formatMessage({ id: 'containers.type.other', defaultMessage: 'Other' }) },
+];
+
+export const CONTAINER_UNITS = [
+	{
+		value: formatMessage({ id: 'containers.unit.value.mm', defaultMessage: 'mm' }),
+		name: formatMessage({ id: 'containers.unit.name.mm', defaultMessage: 'Millimetres' }),
+	},
+	{
+		value: formatMessage({ id: 'containers.unit.value.cm', defaultMessage: 'cm' }),
+		name: formatMessage({ id: 'containers.unit.name.cm', defaultMessage: 'Centimetres' }),
+	},
+	{
+		value: formatMessage({ id: 'containers.unit.value.dm', defaultMessage: 'dm' }),
+		name: formatMessage({ id: 'containers.unit.name.dm', defaultMessage: 'Decimetres' }),
+	},
+	{
+		value: formatMessage({ id: 'containers.unit.value.m', defaultMessage: 'm' }),
+		name: formatMessage({ id: 'containers.unit.name.m', defaultMessage: 'Metres' }),
+	},
+	{
+		value: formatMessage({ id: 'containers.unit.value.ft', defaultMessage: 'ft' }),
+		name: formatMessage({ id: 'containers.unit.name.ft', defaultMessage: 'Feet and Inches' }),
+	},
+];
+
 export interface IContainer {
 	_id: string;
 	name: string;
 	latestRevision: string;
-	revisionsCount: number;
+	revisionsCount?: number;
 	lastUpdated: Date;
 	type: string;
 	code: string;
 	status: UploadStatuses;
-	unit: string;
+	unit?: string;
 	isFavourite: boolean;
 	role: string;
 	hasStatsPending: boolean;
@@ -95,33 +131,68 @@ export type FetchContainerStatsResponse = {
 	code: string;
 };
 
-export interface DeleteContainerPayload {
+export type NewContainerPayload = {
+	name: string;
+	unit: string;
+	type: string;
+	desc?: string;
+	code?: string;
+};
+
+export type CreateContainerPayload = {
+	teamspace: string;
+	projectId: string;
+	newContainer: NewContainerPayload;
+};
+
+export type CreateContainerSuccessPayload = NewContainerPayload & {
+	_id: string;
+};
+
+export type DeleteContainerPayload = {
 	teamspace: string;
 	projectId: string;
 	containerId: string;
-}
+};
 
-export interface DeleteContainerSuccessPayload {
+export type DeleteContainerSuccessPayload = {
 	projectId: string;
 	containerId: string;
-}
+};
 
-export type SetFilterQueryAction = Action<'SET_FILTER_QUERY'> & { query: string};
-export type SetFavouritesFilterQueryAction = Action<'SET_FAVOURITES_FILTER_QUERY'> & { query: string};
+export type UploadItemFields = {
+	uploadId: string;
+	file: File;
+	extension: string;
+	containerId?: string;
+	containerName?: string;
+	containerUnit: string;
+	containerType: string;
+	containerDesc?: string;
+	containerCode?: string;
+	revisionTag: string;
+	revisionDesc?: string;
+	importAnimations?: boolean;
+	timezone?: string;
+};
+
+export type UploadFieldArray = {
+	uploads: UploadItemFields[];
+};
+
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;
 export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & FavouritePayload;
 export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & {projectId: string, containerId: string, isFavourite: boolean};
 export type FetchContainersAction = Action<'FETCH_CONTAINERS'> & FetchContainersPayload;
 export type FetchContainersSuccessAction = Action<'FETCH_CONTAINERS_SUCCESS'> & { projectId: string, containers: IContainer[] };
-export type SetIsListPendingAction = Action<'SET_IS_LIST_PENDING'> & { isPending: boolean };
 export type FetchContainerStatsAction = Action<'FETCH_CONTAINER_STATS'> & FetchContainerStatsPayload;
 export type FetchContainerStatsSuccessAction = Action<'FETCH_CONTAINER_STATS_SUCCESS'> & FetchContainerStatsSuccessPayload;
+export type CreateContainerAction = Action<'CREATE_CONTAINER'> & CreateContainerPayload;
+export type CreateContainerSuccessAction = Action<'CREATE_CONTAINER_SUCCESS'> & { projectId: string, container: IContainer };
 export type DeleteContainerAction = Action<'DELETE'> & DeleteContainerPayload;
 export type DeleteContainerSuccessAction = Action<'DELETE_SUCCESS'> & DeleteContainerSuccessPayload;
 
 export interface IContainersActionCreators {
-	setAllFilterQuery: (query: string) => SetFilterQueryAction;
-	setFavouritesFilterQuery: (query: string) => SetFavouritesFilterQueryAction;
 	addFavourite: (teamspace: string, projectId: string, containerId: string) => AddFavouriteAction;
 	removeFavourite: (teamspace: string, projectId: string, containerId: string) => RemoveFavouriteAction;
 	setFavouriteSuccess: (projectId: string, containerId: string, isFavourite: boolean) => SetFavouriteSuccessAction;
@@ -133,7 +204,15 @@ export interface IContainersActionCreators {
 		containerId: string,
 		containerStats: FetchContainerStatsResponse
 	) => FetchContainerStatsSuccessAction;
-	setIsListPending: (isPending: boolean) => SetIsListPendingAction;
+	createContainer: (
+		teamspace: string,
+		projectId: string,
+		newContainer: NewContainerPayload,
+	) => CreateContainerAction;
+	createContainerSuccess: (
+		projectId: string,
+		container: CreateContainerSuccessPayload,
+	) => CreateContainerSuccessAction;
 	deleteContainer: (teamspace: string, projectId: string, containerId: string) => DeleteContainerAction;
 	deleteContainerSuccess: (projectId: string, containerId: string) => DeleteContainerSuccessAction;
 }

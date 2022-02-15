@@ -23,7 +23,7 @@ const collectionName = (collection) => (collection.endsWith('.ref') ? collection
 
 const removeAllFiles = async (teamspace, collection) => {
 	const pipeline = [
-		{ $match: { noDelete: { $exists: false } } },
+		{ $match: { noDelete: { $exists: false }, type: { $ne: 'http' } } },
 		{ $group: { _id: '$type', links: { $addToSet: '$link' } } },
 	];
 	const results = await db.aggregate(teamspace, collection, pipeline);
