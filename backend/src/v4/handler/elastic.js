@@ -20,6 +20,7 @@ const { Client } = require("@elastic/elasticsearch");
 const logger = require("../logger");
 const systemLogger = logger.systemLogger;
 const elasticConfig = require("../config").elastic;
+const repoLicense = require("../config").repoLicense;
 const { v5Path } = require("../../interop");
 const EventsV5 = require(`${v5Path}/services/eventsManager/eventsManager.constants`).events;
 const EventsManager = require(`${v5Path}/services/eventsManager/eventsManager`);
@@ -44,7 +45,9 @@ const loginRecordMapping = {
 	"engine.version": { "type": "text" },
 	"os.name": { "type": "text" },
 	"os.version": { "type": "text" },
-	"device": { "type": "text" }
+	"device": { "type": "text" },
+	"device": { "type": "text" },
+	"licenseKey": { "type": "keyword" },
 };
 
 const indicesMappings = [
@@ -125,7 +128,8 @@ Elastic.createLoginRecord = async (username, loginRecord) => {
 		"Engine.Version" : loginRecord.engine.version,
 		"OS.Name" : loginRecord.os.name,
 		"OS.Version" : loginRecord.os.version,
-		"Device" : loginRecord.device
+		"Device" : loginRecord.device,
+		"licenseKey": repoLicense
 	};
 
 	await createElasticRecord(loginRecordIndex, elasticBody, elasticBody.Id);
