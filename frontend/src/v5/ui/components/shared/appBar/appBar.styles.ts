@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { Button, Popper as PopperBase } from '@material-ui/core';
+import { Button, Paper as PaperBase, Popper as PopperBase } from '@material-ui/core';
 
 export const Items = styled.div`
 	display: flex;
@@ -36,7 +36,18 @@ export const Items = styled.div`
 `;
 
 export const Popper = styled(PopperBase)`
-	z-index: 100;
+	&& {
+		z-index: 1101;
+		margin-top: -2px;
+	}
+`;
+
+export const Paper = styled(PaperBase)`
+	border-radius: 5px;
+	box-shadow: 
+		0px 6px 10px rgb(0 0 0 / 14%),
+		0px 1px 18px rgb(0 0 0 / 12%),
+		0px 3px 5px rgb(0 0 0 / 20%);
 `;
 
 export const UserMenu = styled.div`
@@ -70,12 +81,12 @@ export const UserUserName = styled.div`
 	color: ${({ theme }) => theme.palette.base.main};
 `;
 
-export const EditProfileButton = styled(Button).attrs({
-	variant: 'text',
-	color: 'primary',
-})`
+export const EditProfileButton = styled.a`
+	cursor: pointer;
 	${({ theme }) => theme.typography.link};
 	text-underline-offset: 2px;
+	color: ${({ theme }) => theme.palette.primary.main};
+	margin: 11px;
 `;
 
 export const SignOutButton = styled(Button).attrs({

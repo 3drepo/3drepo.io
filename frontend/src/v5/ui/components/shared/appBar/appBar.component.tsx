@@ -16,7 +16,7 @@
  */
 
 import React, { MouseEvent, useState } from 'react';
-import { AppBar as MuiAppBar, Avatar, ClickAwayListener, Grow, Paper } from '@material-ui/core';
+import { AppBar as MuiAppBar, Avatar, ClickAwayListener, Grow } from '@material-ui/core';
 
 import LogoIcon from '@assets/icons/logo.svg';
 import IntercomIcon from '@assets/icons/intercom.svg';
@@ -36,6 +36,7 @@ import {
 	Section,
 	AvatarSection,
 	Popper,
+	Paper,
 	UserFullName,
 	UserUserName,
 	SignOutButton,

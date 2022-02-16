@@ -22,10 +22,11 @@ import ListItemText from '@material-ui/core/ListItemText';
 
 export const MenuItem = styled(ListItem)`
 	&& {
-		height: 44px;
+		height: 39px;
 		margin: 0;
 		padding: 11px;
 		transition: all 0s;
+		border-radius: 3px;
 	}
 `;
 
