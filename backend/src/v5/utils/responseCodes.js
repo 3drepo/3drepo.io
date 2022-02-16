@@ -64,7 +64,7 @@ ResponseCodes.templates = {
 	quotaLimitExceeded: { message: 'Insufficient quota.', status: 401 },
 
 	// File download related error
-	noFileFound: { message: "No file can be downloaded", status: 404 },
+	noFileFound: { message: 'No file can be downloaded', status: 404 },
 
 	// View related error
 	viewNotFound: { message: 'View not found', status: 404 },

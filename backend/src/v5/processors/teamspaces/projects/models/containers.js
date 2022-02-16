@@ -89,7 +89,6 @@ Containers.downloadRevisionFiles = async (teamspace, container, revisionId) => {
 	return await downloadRevisionFiles(teamspace, container, revision);
 };
 
-
 Containers.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {
 	const accessibleContainers = await Containers.getContainerList(teamspace, project, username);
 	return appendFavourites(username, teamspace, accessibleContainers, favouritesToAdd);

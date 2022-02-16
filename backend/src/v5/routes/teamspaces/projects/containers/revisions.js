@@ -19,7 +19,7 @@ const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('../../.
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../utils/sessions');
-const { respond } = require('../../../../utils/responder');
+const { respond, writeStreamRespond } = require('../../../../utils/responder');
 const { serialiseRevisionArray } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
 const { templates } = require('../../../../utils/responseCodes');
 const { validateNewRevisionData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
@@ -63,8 +63,13 @@ const newRevision = (req, res) => {
 const downloadRevisionFiles = (req, res) => {
 	const { teamspace, container, revision } = req.params;
 
-	Containers.downloadRevisionFiles(teamspace, container, revision).then((fileBuffer) => {
-		respond(req, res, templates.ok, fileBuffer);
+	Containers.downloadRevisionFiles(teamspace, container, revision).then((file) => {
+		const headers = {
+			'Content-Length': file.size,
+			'Content-Disposition': `attachment;filename=${file.fileName}`,
+		};
+
+		writeStreamRespond(req, res, templates.ok, file.readStream, headers);
 	}).catch((err) => respond(req, res, err));
 };
 
@@ -306,20 +311,11 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: downloads the revision files
 	 *         content:
-	 *           application/json:
+	 *           application/octet-stream:
 	 *             schema:
-	 *               type: object
-	 *               properties:
-	 *                 revisions:
-	 *                   type: array
-	 *                   items:
-	 *                     type: object
-	 *                     properties:
-	 *                       file:
-	 *                         type: string
-	 *                         format: binary
+	 *               type: file
 	 */
-	 router.get('/:revision/files', downloadRevisionFiles);
+	 router.get('/:revision/files', hasWriteAccessToContainer, downloadRevisionFiles);
 
 	return router;
 };

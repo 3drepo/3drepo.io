@@ -54,6 +54,34 @@ const mimeTypes = {
 	jpg: 'image/jpg',
 };
 
+Responder.writeStreamRespond = function (req, res, resCode, readStream, customHeaders) {
+	let length = 0;
+	let response = createResponseCode(resCode);
+
+	readStream.on('error', (error) => {
+		// logger.logError(`Stream failed: [${error.code} - ${error.message}] @ ${place}`, undefined, logLabels.network);
+		response = templates.noFileFound;
+		res.status(response.status);
+		res.end();
+	}).once('data', () => {
+		if (customHeaders) {
+			res.writeHead(response.status, customHeaders);
+		} else {
+			res.status(response.status);
+		}
+	}).on('data', (data) => {
+		res.write(data);
+		length += data.length;
+	}).on('end', () => {
+		res.end();
+		// logger.logInfo(genResponseLogging(response, {
+		// 	place,
+		// 	httpCode: response.status,
+		// 	contentLength: length
+		// }, req), undefined, logLabels.network);
+	});
+};
+
 Responder.respond = (req, res, resCode, body, { cache, customHeaders } = {}) => {
 	const finalResCode = createResponseCode(resCode);
 
