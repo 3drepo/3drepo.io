@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
 
+import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { formatMessage } from '@/v5/services/intl';
@@ -56,13 +57,27 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 	};
 	const { sortedList, setSortConfig } = useOrderedList(fields || [], DEFAULT_SORT_CONFIG);
 
-	const processFiles = (files: File[]) => {
+	const revTagMaxValue = useMemo(() => {
+		const schemaDescription = Yup.reach(UploadsSchema, 'uploads.revisionTag').describe();
+		const revTagMax = schemaDescription.tests.find((t) => t.name === 'max');
+		return revTagMax.params.max;
+	}, []);
+
+	const parseFilename = (filename: string): string => {
+		const baseName = filename.split('.').slice(0)[0];
+		const noSpecialChars = baseName.replace(/[^a-zA-Z0-9_\- ]/g, '');
+		const noSpaces = noSpecialChars.replace(/ /g, '_');
+		const noExceedingMax = noSpaces.substring(0, revTagMaxValue);
+		return noExceedingMax;
+	};
+
+	const processFiles = (files: File[]): void => {
 		const filesToAppend = [];
 		for (const file of files) {
 			filesToAppend.push({
 				file,
 				extension: file.name.split('.').slice(-1)[0],
-				revisionTag: file.name,
+				revisionTag: parseFilename(file.name),
 				containerName: '',
 				containerId: '',
 				containerUnit: 'mm',
