@@ -96,6 +96,7 @@ export const EditFederationModal = ({
 			confirmLabel={formatMessage({ id: 'modal.editFederation.confirm', defaultMessage: 'Save Changes' })}
 			onClickClose={onClickClose}
 			onSubmit={saveChanges}
+			isValid={includedContainers.length > 0}
 		>
 			<EditFederationContainers
 				containers={includedContainers}
