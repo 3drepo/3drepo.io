@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { createResponseCode, templates } = require('./responseCodes');
+const { isBuffer, isString } = require('./helper/typeCheck');
 const networkLabel = require('./logger').labels.network;
 const logger = require('./logger').logWithLabel(networkLabel);
-const { isBuffer, isString } = require('./helper/typeCheck');
-const { createResponseCode } = require('./responseCodes');
 const { v4Path } = require('../../interop');
 // eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
 const { cachePolicy } = require(`${v4Path}/config`);
@@ -54,12 +54,13 @@ const mimeTypes = {
 	jpg: 'image/jpg',
 };
 
-Responder.writeStreamRespond = function (req, res, resCode, readStream, customHeaders) {
+Responder.writeStreamRespond = (req, res, resCode, readStream, customHeaders) => {
 	let length = 0;
 	let response = createResponseCode(resCode);
+	const place = `${req.method} ${req.originalUrl}`;
 
 	readStream.on('error', (error) => {
-		// logger.logError(`Stream failed: [${error.code} - ${error.message}] @ ${place}`, undefined, logLabels.network);
+		logger.logError(`Stream failed: [${error.code} - ${error.message}] @ ${place}`, undefined, networkLabel);
 		response = templates.noFileFound;
 		res.status(response.status);
 		res.end();
@@ -74,11 +75,11 @@ Responder.writeStreamRespond = function (req, res, resCode, readStream, customHe
 		length += data.length;
 	}).on('end', () => {
 		res.end();
-		// logger.logInfo(genResponseLogging(response, {
-		// 	place,
-		// 	httpCode: response.status,
-		// 	contentLength: length
-		// }, req), undefined, logLabels.network);
+		logger.logInfo(genResponseLogging(response, {
+			place,
+			httpCode: response.status,
+			contentLength: length,
+		}, req), undefined, networkLabel);
 	});
 };
 

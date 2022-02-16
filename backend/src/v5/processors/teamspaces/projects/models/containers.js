@@ -17,10 +17,10 @@
 
 const { addModel, deleteModel, getModelList } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
+const { downloadRevisionFiles, findRevision } = require('../../../../models/fileRefs');
 const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const Groups = require('./commons/groups');
-const { downloadRevisionFiles, findRevision } = require('../../../../models/fileRefs');
 const fs = require('fs/promises');
 const { getProjectById } = require('../../../../models/projects');
 const { logger } = require('../../../../utils/logger');
@@ -86,7 +86,7 @@ Containers.updateRevisionStatus = updateRevisionStatus;
 
 Containers.downloadRevisionFiles = async (teamspace, container, revisionId) => {
 	const revision = await findRevision(teamspace, container, { _id: revisionId }, { rFile: 1 });
-	return await downloadRevisionFiles(teamspace, container, revision);
+	return downloadRevisionFiles(teamspace, container, revision);
 };
 
 Containers.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {

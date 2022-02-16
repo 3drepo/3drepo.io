@@ -16,10 +16,10 @@
  */
 
 const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('../../../../middleware/permissions/permissions');
+const { respond, writeStreamRespond } = require('../../../../utils/responder');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../utils/sessions');
-const { respond, writeStreamRespond } = require('../../../../utils/responder');
 const { serialiseRevisionArray } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
 const { templates } = require('../../../../utils/responseCodes');
 const { validateNewRevisionData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
@@ -315,7 +315,7 @@ const establishRoutes = () => {
 	 *             schema:
 	 *               type: file
 	 */
-	 router.get('/:revision/files', hasWriteAccessToContainer, downloadRevisionFiles);
+	router.get('/:revision/files', hasWriteAccessToContainer, downloadRevisionFiles);
 
 	return router;
 };

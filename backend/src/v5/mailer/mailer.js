@@ -16,7 +16,7 @@
  */
 
 const { v4Path } = require('../../interop');
-
+// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
 const Mailer = require(`${v4Path}/mailer/mailer`);
 
 module.exports = Mailer;
