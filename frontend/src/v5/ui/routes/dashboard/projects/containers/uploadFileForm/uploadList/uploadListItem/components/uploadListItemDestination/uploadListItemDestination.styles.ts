@@ -21,9 +21,7 @@ import { TextField } from '@material-ui/core';
 export const Input = styled(TextField)`
 	margin: 0 7px;
 	width: 271px;
-	${({ $selectedrow, theme }) => $selectedrow && `
-		div { background-color: ${theme.palette.secondary.light} }
-		&&& input { color: ${theme.palette.primary.contrast} }
-		&& fieldset { border-color: transparent; }
+	${({ $selectedrow }) => $selectedrow && `
+		&& .MuiInputBase-root.MuiOutlinedInput-root fieldset { border-color: transparent; }
 	`}
 `;

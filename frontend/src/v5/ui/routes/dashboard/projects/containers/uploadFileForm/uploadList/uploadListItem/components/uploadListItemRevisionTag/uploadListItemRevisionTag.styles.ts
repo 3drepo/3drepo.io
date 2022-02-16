@@ -22,8 +22,10 @@ export const Input = styled(TextField)`
 	margin: 0 7px;
 	width: 200px;
 	${({ $selectedrow, theme }) => $selectedrow && `
-		div { background-color: ${theme.palette.secondary.light} }
-		&&& input { color: ${theme.palette.primary.contrast} }
-		&& fieldset { border-color: transparent; }
+		.MuiInputBase-root.MuiOutlinedInput-root {
+			input { color: ${theme.palette.primary.contrast}; }
+			&.MuiInputBase-formControl fieldset { border-color: transparent; }
+			background-color: ${theme.palette.secondary.light};
+		}
 	`}
 `;

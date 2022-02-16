@@ -22,11 +22,17 @@ import ErrorIcon from '@assets/icons/error_circle.svg';
 import { Input } from './uploadListItemDestination.styles';
 
 type IUploadListItemDestination = {
+	isSelected: boolean;
 	errorMessage?: string;
 };
 
-export const UploadListItemDestination = ({ errorMessage, ...props }: IUploadListItemDestination): JSX.Element => (
+export const UploadListItemDestination = ({
+	errorMessage,
+	isSelected,
+	...props
+}: IUploadListItemDestination): JSX.Element => (
 	<Input
+		$selectedrow={isSelected}
 		error={!!errorMessage}
 		InputProps={{
 			startAdornment: !!errorMessage && (
