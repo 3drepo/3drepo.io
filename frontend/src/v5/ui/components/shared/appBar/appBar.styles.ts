@@ -16,6 +16,7 @@
  */
 
 import styled from 'styled-components';
+import { Button, Popper as PopperBase } from '@material-ui/core';
 
 export const Items = styled.div`
 	display: flex;
@@ -31,5 +32,57 @@ export const Items = styled.div`
 		& > *:last-child div {
 			margin-right: 0;
 		}
+	}
+`;
+
+export const Popper = styled(PopperBase)`
+	z-index: 100;
+`;
+
+export const UserMenu = styled.div`
+	display: flex;
+	flex-direction: column;
+	width: 230px;
+`;
+
+export const Section = styled.div`
+	display: flex;
+	flex-direction: column;
+	padding: 11px;
+
+	&:not(:last-of-type) {
+		border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
+	}
+`;
+
+export const AvatarSection = styled(Section)`
+	justify-content: center;
+	align-items: center;
+`;
+
+export const UserFullName = styled.div`
+	${({ theme }) => theme.typography.h3};
+	color: ${({ theme }) => theme.palette.secondary.main};
+`;
+
+export const UserUserName = styled.div`
+	font-size: 12px;
+	color: ${({ theme }) => theme.palette.base.main};
+`;
+
+export const EditProfileButton = styled(Button).attrs({
+	variant: 'text',
+	color: 'primary',
+})`
+	${({ theme }) => theme.typography.link};
+	text-underline-offset: 2px;
+`;
+
+export const SignOutButton = styled(Button).attrs({
+	variant: 'contained',
+	color: 'primary',
+})`
+	&& {
+		margin: 0;
 	}
 `;

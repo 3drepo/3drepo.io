@@ -24,6 +24,8 @@ export interface IUser {
 	lastName: string;
 	company?: string;
 	job?: string;
+	email?: string;
+	hasAvatar?: boolean;
 }
 
 export interface IUsersActions {

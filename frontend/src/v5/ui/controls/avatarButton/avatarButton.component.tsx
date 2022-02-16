@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, { MouseEvent } from 'react';
 
 import Avatar from '@material-ui/core/Avatar';
 import { StyledIconButton } from './avatarButton.styles';
 
 interface IAvatarButton {
 	disabled?: boolean;
+	onClick: (event: MouseEvent) => void;
 }
 
 export const AvatarButton: React.FC<IAvatarButton> = ({ children, ...props }) => (

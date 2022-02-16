@@ -14,21 +14,29 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { createSelector } from 'reselect';
-import { IUser, IUsersState } from './users.redux';
+import React from 'react';
+import { MenuIcon, MenuItem, MenuText } from './userMenuButton.styles';
 
-const selectUsersDomain = (state): IUsersState => state.users;
+type UserMenuButtonProps = {
+	className?: string;
+	label: string;
+	onClick: () => void;
+	onClickClose: () => void;
+	Icon: any;
+};
 
-export const selectUsersByTeamspace = createSelector(
-	selectUsersDomain,
-	(_, teamspace) => teamspace,
-	(state, teamspace) => state.usersByTeamspace[teamspace] || [],
-);
-
-export const selectUser = createSelector(
-	selectUsersDomain,
-	(_, teamspace) => teamspace,
-	(_, userName) => userName,
-	(state, teamspace, userName): IUser | null => (state.usersByTeamspace[teamspace] || [])
-		.find((teamspaceUser) => teamspaceUser.user === userName),
+export const UserMenuButton = ({ Icon, label, onClick, onClickClose, ...props }: UserMenuButtonProps) => (
+	<MenuItem
+		button
+		onClick={() => {
+			onClick();
+			onClickClose();
+		}}
+		{...props}
+	>
+		<MenuIcon>
+			<Icon />
+		</MenuIcon>
+		<MenuText primary={label} />
+	</MenuItem>
 );

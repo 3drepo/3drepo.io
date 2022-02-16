@@ -14,21 +14,35 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { createSelector } from 'reselect';
-import { IUser, IUsersState } from './users.redux';
 
-const selectUsersDomain = (state): IUsersState => state.users;
+import styled from 'styled-components';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
 
-export const selectUsersByTeamspace = createSelector(
-	selectUsersDomain,
-	(_, teamspace) => teamspace,
-	(state, teamspace) => state.usersByTeamspace[teamspace] || [],
-);
+export const MenuItem = styled(ListItem)`
+	&& {
+		height: 44px;
+		margin: 0;
+		padding: 11px;
+		transition: all 0s;
+	}
+`;
 
-export const selectUser = createSelector(
-	selectUsersDomain,
-	(_, teamspace) => teamspace,
-	(_, userName) => userName,
-	(state, teamspace, userName): IUser | null => (state.usersByTeamspace[teamspace] || [])
-		.find((teamspaceUser) => teamspaceUser.user === userName),
-);
+export const MenuIcon = styled(ListItemIcon)`
+	&& {    
+		margin-right: 10px;
+		min-width: 0;
+	}
+`;
+
+export const MenuText = styled(ListItemText).attrs({
+	disableTypography: true,
+})`
+	&& {
+		color: ${({ theme }) => theme.palette.secondary.main};
+		${({ theme }) => theme.typography.body1};
+		font-size: 14px;
+		margin: 0;
+	}
+`;
