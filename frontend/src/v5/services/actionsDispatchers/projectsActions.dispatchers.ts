@@ -16,6 +16,6 @@
  */
 
 import { IProjectsActions, ProjectsActions } from '@/v5/store/projects/projects.redux';
-import { createActionsDispatchers } from './actionsDistpatchers.helper';
+import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 
 export const ProjectsActionsDispatchers = createActionsDispatchers<IProjectsActions>(ProjectsActions);

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -32,11 +32,12 @@ import {
 type IShareTextField = {
 	label: string,
 	value: string,
+	className?: string,
 };
 
 const IS_COPYING_DURATION_MS = 3000;
 
-export const ShareTextField = ({ label, value }: IShareTextField) => {
+export const ShareTextField = ({ label, value, className }: IShareTextField) => {
 	let isCopiedTimer;
 	const [isCopying, setIsCopying] = useState(true);
 
@@ -60,6 +61,7 @@ export const ShareTextField = ({ label, value }: IShareTextField) => {
 				<LinkBar
 					value={value}
 					label={label}
+					className={className}
 					InputProps={{
 						readOnly: true,
 						endAdornment: (

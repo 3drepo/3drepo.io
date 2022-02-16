@@ -17,12 +17,25 @@
 
 import * as faker from 'faker';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
-import { FetchFederationStatsResponse, IFederation } from '@/v5/store/federations/federations.types';
+import { 
+	EMPTY_VIEW, 
+	FederationRawSettings, 
+	FederationSettings, 
+	FetchFederationStatsResponse, 
+	FetchFederationViewsResponse, 
+	IFederation, 
+} from '@/v5/store/federations/federations.types';
+import {
+	prepareFederationSettingsForFrontend,
+	prepareFederationSettingsForBackend,
+} from '@/v5/store/federations/federations.helpers';
 import { times } from 'lodash';
+
 
 export const federationMockFactory = (overrides?: Partial<IFederation>): IFederation => ({
 	_id: faker.datatype.uuid(),
 	name: faker.random.words(3),
+	desc: faker.random.words(3),
 	role: faker.random.arrayElement(['admin', 'collaborator']),
 	lastUpdated: faker.date.past(2),
 	status: UploadStatuses.OK,
@@ -33,6 +46,21 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 	issues: faker.datatype.number(120),
 	risks: faker.datatype.number(120),
 	hasStatsPending: false,
+	views: [EMPTY_VIEW],
+	defaultView: EMPTY_VIEW._id,
+	angleFromNorth: faker.datatype.number({ min: 0, max: 360 }),
+	surveyPoint: {
+		latLong: [
+			faker.datatype.number({ min: -100, max: 100 }), 
+			faker.datatype.number({ min: -100, max: 100 }),
+		],
+		position: [
+			faker.datatype.number({ min: -100, max: 100 }), 
+			faker.datatype.number({ min: -100, max: 100 }), 
+			faker.datatype.number({ min: -100, max: 100 }),
+		],
+	},
+	unit: faker.random.arrayElement(['mm', 'cm', 'dm', 'm', 'ft']),
 	...overrides,
 });
 
@@ -51,3 +79,26 @@ export const prepareMockStatsReply = (federation: IFederation): FetchFederationS
 export const prepareMockContainers = (min = 1, max = 10): string[] => (
 	times(faker.datatype.number({ max, min }), () => faker.random.uuid())
 );
+
+export const prepareMockViewsReply = (federation: IFederation): FetchFederationViewsResponse => ({
+	views: federation.views,
+});
+
+const prepareMockSettingsWithoutSurveyPoint = (federation: IFederation): Omit<FederationSettings, 'surveyPoint'> => ({
+	angleFromNorth: federation.angleFromNorth,
+	defaultView: federation.defaultView,
+	unit: federation.unit,
+	name: federation.name,
+	code: federation.code,
+	desc: federation.desc,
+});
+
+export const prepareMockSettingsReply = (federation: IFederation): FederationSettings => ({
+	...prepareMockSettingsWithoutSurveyPoint(federation),
+	surveyPoint: federation.surveyPoint,
+});
+
+export const prepareMockRawSettingsReply = (federation: IFederation): FederationRawSettings => ({
+	...prepareMockSettingsWithoutSurveyPoint(federation),
+	surveyPoints: [federation.surveyPoint],
+});

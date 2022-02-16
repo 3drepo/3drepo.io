@@ -63,13 +63,11 @@ export function* removeFavourites({ containerId, teamspace, projectId }: RemoveF
 }
 
 export function* fetchContainers({ teamspace, projectId }: FetchContainersAction) {
-	yield put(ContainersActions.setIsListPending(true));
 	try {
 		const { containers }: FetchContainersResponse = yield API.Containers.fetchContainers({ teamspace, projectId });
 		const containersWithoutStats = prepareContainersData(containers);
 
 		yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithoutStats));
-		yield put(ContainersActions.setIsListPending(false));
 
 		yield all(
 			containers.map(

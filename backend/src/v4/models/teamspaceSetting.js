@@ -21,7 +21,7 @@ const _ = require("lodash");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes");
 const utils = require("../utils");
-const FileRef = require("./fileRef");
+const Mitigation = require("./mitigation");
 const colName = "teamspace";
 
 class TeamspaceSettings {
@@ -66,8 +66,7 @@ class TeamspaceSettings {
 	}
 
 	async getTeamspaceSettings(account, projection = {}) {
-		const settingsColl = await this.getTeamspaceSettingsCollection(account);
-		const foundSettings = await settingsColl.findOne({ _id: account }, projection);
+		const foundSettings = await db.findOne(account, colName , {}, projection);
 
 		if (!foundSettings) {
 			return Promise.reject(responseCodes.TEAMSPACE_SETTINGS_NOT_FOUND);
@@ -101,10 +100,7 @@ class TeamspaceSettings {
 				throw responseCodes.FILE_FORMAT_NOT_SUPPORTED;
 			}
 
-			const Mitigation = require("./mitigation");
 			const importedMitigations = await Mitigation.importCSV(account, file);
-
-			await FileRef.storeMitigationsFile(account, username, filename, file);
 
 			const settingsCol = await this.getTeamspaceSettingsCollection(account, true);
 			const updatedAt = new Date();
@@ -116,12 +112,12 @@ class TeamspaceSettings {
 		}
 	}
 
-	async getMitigationsStream(account) {
-		return await FileRef.getMitigationsStream(account);
+	getMitigationsFile(account) {
+		return Mitigation.exportCSV(account);
 	}
 
 	async update(account, data) {
-		const labelFields = ["riskCategories", "topicTypes"];
+		const labelFields = ["riskCategories", "topicTypes", "createMitigationSuggestions"];
 
 		const oldSettings = await this.getTeamspaceSettings(account);
 
@@ -129,7 +125,8 @@ class TeamspaceSettings {
 
 		labelFields.forEach((key) => {
 			if (utils.hasField(data, key)) {
-				if (Object.prototype.toString.call(data[key]) === "[object Array]") {
+				const isMitigationSuggestion =  "createMitigationSuggestions" === key;
+				if (!isMitigationSuggestion && Object.prototype.toString.call(data[key]) === "[object Array]") {
 					const arrayUpdated = [];
 					const foundKeys = {};
 					for (let i = 0; i < data[key].length; ++i) {
@@ -146,7 +143,9 @@ class TeamspaceSettings {
 						}
 					}
 					toUpdate[key] = arrayUpdated;
-				} else if (data[key]) {
+				} else if (isMitigationSuggestion && utils.isBoolean(data[key])) {
+					toUpdate[key] = data[key] === true;
+				} else {
 					throw responseCodes.INVALID_ARGUMENTS;
 				}
 			}

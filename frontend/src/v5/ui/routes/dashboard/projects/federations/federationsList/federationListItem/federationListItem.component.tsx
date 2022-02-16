@@ -33,6 +33,7 @@ import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { Display } from '@/v5/ui/themes/media';
+import { FederationSettingsForm } from '@/v5/ui/routes/dashboard/projects/federations/federationSettingsForm/federationSettingsForm.component';
 import { ShareModal } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
 import { EditFederationModal } from '@/v5/ui/routes/dashboard/projects/federations/editFederationModal/editFederationModal.component';
 import { FederationEllipsisMenu } from './federationEllipsisMenu/federationEllipsisMenu.component';
@@ -40,6 +41,7 @@ import { FederationEllipsisMenu } from './federationEllipsisMenu/federationEllip
 const MODALS = {
 	share: 'share',
 	editFederation: 'editFederation',
+	federationSettings: 'federationSettings',
 	none: 'none',
 };
 interface IFederationListItem {
@@ -62,123 +64,130 @@ export const FederationListItem = ({
 	const closeModal = () => setOpenModal(MODALS.none);
 
 	return (
-		<DashboardListItem
-			key={federation._id}
-		>
-			<DashboardListItemRow>
-				<DashboardListItemTitle
-					tooltipTitle={
-						<FormattedMessage id="federations.list.item.title.tooltip" defaultMessage="Launch in Viewer" />
-					}
-					subtitle={federation.description}
-
-					minWidth={90}
-				>
-					<Highlight search={filterQuery}>
-						{federation.name}
-					</Highlight>
-				</DashboardListItemTitle>
-				<DashboardListItemButton
-					hideWhenSmallerThan={1080}
-					onClick={() => {
-						// eslint-disable-next-line no-console
-						console.log('handle issues button');
-					}}
-					width={165}
-					tooltipTitle={
-						<FormattedMessage id="federations.list.item.issues.tooltip" defaultMessage="View issues" />
-					}
-				>
-					<FormattedMessage
-						id="federations.list.item.issues"
-						defaultMessage="{count} issues"
-						values={{ count: federation.issues }}
-					/>
-				</DashboardListItemButton>
-				<DashboardListItemButton
-					hideWhenSmallerThan={890}
-					onClick={() => {
-						// eslint-disable-next-line no-console
-						console.log('handle risks button');
-					}}
-					width={165}
-					tooltipTitle={
-						<FormattedMessage id="federations.list.item.risks.tooltip" defaultMessage="View risks" />
-					}
-				>
-					<FormattedMessage
-						id="federations.list.item.risks"
-						defaultMessage="{count} risks"
-						values={{ count: federation.risks }}
-					/>
-				</DashboardListItemButton>
-				<DashboardListItemButton
-					hideWhenSmallerThan={Display.Tablet}
-					onClick={() => {
-						// eslint-disable-next-line no-console
-						console.log('handle containers button');
-					}}
-					width={165}
-					tooltipTitle={
-						<FormattedMessage id="federations.list.item.containers.tooltip" defaultMessage="View containers" />
-					}
-				>
-					<FormattedMessage
-						id="federations.list.item.containers"
-						defaultMessage="{count} containers"
-						values={{ count: federation.containers.length }}
-					/>
-				</DashboardListItemButton>
-				<DashboardListItemText width={188}>
-					<Highlight search={filterQuery}>
-						{federation.code}
-					</Highlight>
-				</DashboardListItemText>
-				<DashboardListItemText width={97} minWidth={73}>
-					{federation.lastUpdated ? formatDate(federation.lastUpdated) : ''}
-				</DashboardListItemText>
-				<DashboardListItemIcon>
-					<Tooltip
-						title={
-							<FormattedMessage id="federations.list.item.favourite.tooltip" defaultMessage="Add to favourites" />
+		<>
+			<DashboardListItem
+				key={federation._id}
+			>
+				<DashboardListItemRow>
+					<DashboardListItemTitle
+						tooltipTitle={
+							<FormattedMessage id="federations.list.item.title.tooltip" defaultMessage="Launch in Viewer" />
+						}
+						subtitle={federation.desc}
+						minWidth={90}
+					>
+						<Highlight search={filterQuery}>
+							{federation.name}
+						</Highlight>
+					</DashboardListItemTitle>
+					<DashboardListItemButton
+						hideWhenSmallerThan={1080}
+						onClick={() => {
+							// eslint-disable-next-line no-console
+							console.log('handle issues button');
+						}}
+						width={165}
+						tooltipTitle={
+							<FormattedMessage id="federations.list.item.issues.tooltip" defaultMessage="View issues" />
 						}
 					>
-						<FavouriteCheckbox
-							checked={federation.isFavourite}
-							onClick={(event) => {
-								event.stopPropagation();
-							}}
-							onChange={(event) => {
-								onFavouriteChange(
-									federation._id,
-									!!event.currentTarget.checked,
-								);
-							}}
+						<FormattedMessage
+							id="federations.list.item.issues"
+							defaultMessage="{count} issues"
+							values={{ count: federation.issues }}
 						/>
-					</Tooltip>
-				</DashboardListItemIcon>
-				<DashboardListItemIcon>
-					<FederationEllipsisMenu
-						federation={federation}
-						openShareModal={() => setOpenModal(MODALS.share)}
-						openEditFederationModal={() => setOpenModal(MODALS.editFederation)}
-					/>
-				</DashboardListItemIcon>
-			</DashboardListItemRow>
-			<ShareModal
-				openState={openModal === MODALS.share}
-				onClickClose={closeModal}
-				title={formatMessage({
-					id: 'ShareModal.federation.title',
-					defaultMessage: 'Share Federation URL',
-				})}
-				containerOrFederation={federation}
-			/>
-			<EditFederationModal
-				openState={openModal === MODALS.editFederation}
-				federation={federation}
-				onClickClose={closeModal}
-			/>
-		</DashboardListItem>
+					</DashboardListItemButton>
+					<DashboardListItemButton
+						hideWhenSmallerThan={890}
+						onClick={() => {
+							// eslint-disable-next-line no-console
+							console.log('handle risks button');
+						}}
+						width={165}
+						tooltipTitle={
+							<FormattedMessage id="federations.list.item.risks.tooltip" defaultMessage="View risks" />
+						}
+					>
+						<FormattedMessage
+							id="federations.list.item.risks"
+							defaultMessage="{count} risks"
+							values={{ count: federation.risks }}
+						/>
+					</DashboardListItemButton>
+					<DashboardListItemButton
+						hideWhenSmallerThan={Display.Tablet}
+						onClick={() => {
+							// eslint-disable-next-line no-console
+							console.log('handle containers button');
+						}}
+						width={165}
+						tooltipTitle={
+							<FormattedMessage id="federations.list.item.containers.tooltip" defaultMessage="View containers" />
+						}
+					>
+						<FormattedMessage
+							id="federations.list.item.containers"
+							defaultMessage="{count} containers"
+							values={{ count: federation.containers.length }}
+						/>
+					</DashboardListItemButton>
+					<DashboardListItemText width={188}>
+						<Highlight search={filterQuery}>
+							{federation.code}
+						</Highlight>
+					</DashboardListItemText>
+					<DashboardListItemText width={97} minWidth={73}>
+						{federation.lastUpdated ? formatDate(federation.lastUpdated) : ''}
+					</DashboardListItemText>
+					<DashboardListItemIcon>
+						<Tooltip
+							title={
+								<FormattedMessage id="federations.list.item.favourite.tooltip" defaultMessage="Add to favourites" />
+							}
+						>
+							<FavouriteCheckbox
+								checked={federation.isFavourite}
+								onClick={(event) => {
+									event.stopPropagation();
+								}}
+								onChange={(event) => {
+									onFavouriteChange(
+										federation._id,
+										!!event.currentTarget.checked,
+									);
+								}}
+							/>
+						</Tooltip>
+					</DashboardListItemIcon>
+					<DashboardListItemIcon>
+						<FederationEllipsisMenu
+							federation={federation}
+							openShareModal={() => setOpenModal(MODALS.share)}
+							openEditFederationModal={() => setOpenModal(MODALS.editFederation)}
+							openFederationSettings={() => setOpenModal(MODALS.federationSettings)}
+						/>
+					</DashboardListItemIcon>
+				</DashboardListItemRow>
+				<ShareModal
+					openState={openModal === MODALS.share}
+					onClickClose={closeModal}
+					title={formatMessage({
+						id: 'ShareModal.federation.title',
+						defaultMessage: 'Share Federation URL',
+					})}
+					containerOrFederation={federation}
+				/>
+				<EditFederationModal
+					openState={openModal === MODALS.editFederation}
+					federation={federation}
+					onClickClose={closeModal}
+				/>
+				<FederationSettingsForm
+					open={openModal === MODALS.federationSettings}
+					federation={federation}
+					onClose={closeModal}
+				/>
+			</DashboardListItem>
+		</>
 	);
 };

@@ -70,7 +70,7 @@ const ContainerSchema = Yup.object().shape({
 	desc: Yup.string()
 		.max(50,
 			formatMessage({
-				id: 'containers.creation.description.error.max',
+				id: 'containers.creation.desc.error.max',
 				defaultMessage: 'Container Description is limited to 50 characters',
 			})).default('Uncategorised'),
 });
@@ -180,7 +180,7 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 			</SelectColumn>
 
 			<TextField
-				label={formatMessage({ id: 'containers.creation.form.description', defaultMessage: 'Description' })}
+				label={formatMessage({ id: 'containers.creation.form.desc', defaultMessage: 'Description' })}
 				error={!!errors.desc}
 				helperText={errors.desc?.message}
 				{...register('desc')}

@@ -22,6 +22,7 @@ const C = require("../constants");
 const responseCodes = require("../response_codes.js");
 const ChatEvent = require("./chatEvent");
 const Ticket = require("./ticket");
+const Mitigation = require("./mitigation");
 const utils = require("../utils");
 
 const fieldTypes = {
@@ -129,6 +130,9 @@ class Risk extends Ticket {
 		}
 
 		newRisk = await super.create(account, model, newRisk);
+
+		await Mitigation.updateMitigationsFromRisk(account, model, null, newRisk);
+
 		ChatEvent.newRisks(sessionId, account, model, [newRisk]);
 		return newRisk;
 	}
@@ -162,6 +166,8 @@ class Risk extends Ticket {
 			updatedRisk.updatedTicket = {...updatedRisk.updatedTicket, ...levelOfRisk};
 			updatedRisk.data = {...updatedRisk.data, ...levelOfRisk};
 		}
+
+		await Mitigation.updateMitigationsFromRisk(account, model, updatedRisk.oldTicket, updatedRisk.updatedTicket);
 
 		return updatedRisk;
 	}
