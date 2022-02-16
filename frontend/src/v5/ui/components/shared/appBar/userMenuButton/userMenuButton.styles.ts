@@ -19,6 +19,11 @@ import styled from 'styled-components';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import { Link as LinkBase } from 'react-router-dom';
+
+export const Link = styled(LinkBase)`
+	text-decoration: none;
+`;
 
 export const MenuItem = styled(ListItem)`
 	&& {
@@ -43,7 +48,8 @@ export const MenuText = styled(ListItemText).attrs({
 	&& {
 		color: ${({ theme }) => theme.palette.secondary.main};
 		${({ theme }) => theme.typography.body1};
-		font-size: 14px;
+		font-size: 12px;
+		text-decoration: none;
 		margin: 0;
 	}
 `;

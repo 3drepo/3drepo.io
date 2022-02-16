@@ -15,28 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import React from 'react';
-import { MenuIcon, MenuItem, MenuText } from './userMenuButton.styles';
+import { MenuIcon, MenuItem, MenuText, Link } from './userMenuButton.styles';
 
 type UserMenuButtonProps = {
 	className?: string;
 	label: string;
-	onClick: () => void;
-	onClickClose: () => void;
 	Icon: any;
+	to?: string;
+	onClickClose: () => void;
 };
 
-export const UserMenuButton = ({ Icon, label, onClick, onClickClose, ...props }: UserMenuButtonProps) => (
-	<MenuItem
-		button
-		onClick={() => {
-			onClick();
-			onClickClose();
-		}}
-		{...props}
-	>
-		<MenuIcon>
-			<Icon />
-		</MenuIcon>
-		<MenuText primary={label} />
-	</MenuItem>
+export const UserMenuButton = ({ to, Icon, label, onClickClose, ...props }: UserMenuButtonProps) => (
+	<Link to={to}>
+		<MenuItem
+			button
+			{...props}
+			onClick={onClickClose}
+		>
+			<MenuIcon>
+				<Icon />
+			</MenuIcon>
+			<MenuText primary={label} />
+		</MenuItem>
+	</Link>
 );

@@ -17,6 +17,7 @@
 
 import styled from 'styled-components';
 import { Button, Paper as PaperBase, Popper as PopperBase } from '@material-ui/core';
+import { Link } from 'react-router-dom';
 
 export const Items = styled.div`
 	display: flex;
@@ -81,7 +82,7 @@ export const UserUserName = styled.div`
 	color: ${({ theme }) => theme.palette.base.main};
 `;
 
-export const EditProfileButton = styled.a`
+export const EditProfileButton = styled(Link)`
 	cursor: pointer;
 	${({ theme }) => theme.typography.link};
 	text-underline-offset: 2px;

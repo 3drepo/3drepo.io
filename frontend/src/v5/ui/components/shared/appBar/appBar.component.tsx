@@ -16,6 +16,8 @@
  */
 
 import React, { MouseEvent, useState } from 'react';
+import { useParams } from 'react-router';
+import { useRouteMatch } from 'react-router-dom';
 import { AppBar as MuiAppBar, Avatar, ClickAwayListener, Grow } from '@material-ui/core';
 
 import LogoIcon from '@assets/icons/logo.svg';
@@ -29,7 +31,6 @@ import TeamspacesIcon from '@assets/icons/teamspaces.svg';
 import VisualSettingsIcon from '@assets/icons/settings.svg';
 import SupportCentreIcon from '@assets/icons/question_mark.svg';
 // import { UsersHooksSelectors } from '@/v5/services/selectorsHooks/usersSelectors.hooks';
-// import { useParams } from 'react-router';
 import {
 	Items,
 	UserMenu,
@@ -52,7 +53,9 @@ const getUserNameInitials = (name: string) => (
 );
 
 export const AppBar = (): JSX.Element => {
-	// const { teamspace } = useParams();
+	const { teamspace } = useParams();
+	const { url } = useRouteMatch();
+	const baseUrl = url.split('/').slice(0, 3).join('/');
 	const user = {
 		hasAvatar: false,
 		user: 'Alessandro Local',
@@ -121,6 +124,7 @@ export const AppBar = (): JSX.Element => {
 										<UserFullName>{user.firstName} {user.lastName}</UserFullName>
 										<UserUserName>{user.user}</UserUserName>
 										<EditProfileButton
+											to="."
 											onClick={handleCloseDropdown}
 										>
 											Edit your profile
@@ -131,13 +135,12 @@ export const AppBar = (): JSX.Element => {
 											Icon={TeamspacesIcon}
 											label="Teamspaces"
 											onClickClose={handleCloseDropdown}
-											onClick={() => {}}
+											to={`${baseUrl}/${teamspace}`}
 										/>
 										<UserMenuButton
 											Icon={VisualSettingsIcon}
 											label="Visual Settings"
 											onClickClose={handleCloseDropdown}
-											onClick={() => {}}
 										/>
 									</Section>
 									<Section>
@@ -145,19 +148,16 @@ export const AppBar = (): JSX.Element => {
 											Icon={SupportCentreIcon}
 											label="Support centre"
 											onClickClose={handleCloseDropdown}
-											onClick={() => {}}
 										/>
 										<UserMenuButton
 											Icon={ContactUsIcon}
 											label="Contact us"
 											onClickClose={handleCloseDropdown}
-											onClick={() => {}}
 										/>
 										<UserMenuButton
 											Icon={InviteAFriendIcon}
 											label="Invite a friend"
 											onClickClose={handleCloseDropdown}
-											onClick={() => {}}
 										/>
 									</Section>
 									<Section>
