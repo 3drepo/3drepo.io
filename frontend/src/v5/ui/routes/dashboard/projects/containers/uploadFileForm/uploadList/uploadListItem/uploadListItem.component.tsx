@@ -33,7 +33,6 @@ import { UploadListItemDestination } from './components/uploadListItemDestinatio
 type IUploadListItem = {
 	item: UploadItemFields;
 	isSelected: boolean;
-	onClickRow: () => void;
 	onClickEdit: () => void;
 	onClickDelete: () => void;
 	onChange: (name, val) => void;
@@ -41,7 +40,6 @@ type IUploadListItem = {
 
 export const UploadListItem = ({
 	item,
-	onClickRow,
 	onClickEdit,
 	onClickDelete,
 	isSelected,
@@ -58,7 +56,6 @@ export const UploadListItem = ({
 	return (
 		<UploadListItemRow
 			key={item.uploadId}
-			onClick={onClickRow}
 			onChange={(e) => updateValue(e.target.name)}
 			selected={isSelected}
 		>

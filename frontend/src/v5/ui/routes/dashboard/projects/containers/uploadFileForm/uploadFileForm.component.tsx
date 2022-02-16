@@ -122,6 +122,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 						</div>
 						<UploadList
 							values={sortedList}
+							selectedIndex={selectedIndex}
 							onClickEdit={(id) => onClickEdit(id)}
 							onClickDelete={(id) => onClickDelete(id)}
 						/>

@@ -20,20 +20,17 @@ import { Container, DashboardRow } from './uploadListItemRow.styles';
 
 type IUploadListItemRow = {
 	selected: boolean;
-	onClick: () => void;
 	onChange: (e) => void;
 	children: React.ReactNode;
 };
 
 export const UploadListItemRow = ({
-	onClick,
 	onChange,
 	selected,
 	children,
 }: IUploadListItemRow): JSX.Element => (
 	<DashboardRow
 		selected={selected}
-		onClick={onClick}
 	>
 		<Container onChange={onChange}>
 			{children}

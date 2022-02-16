@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { UploadItemFields } from '@/v5/store/containers/containers.types';
 import { UploadListItem } from './uploadListItem';
@@ -25,15 +25,16 @@ type IUploadList = {
 	onClickEdit: (index) => void;
 	onClickDelete: (index) => void;
 	values: UploadItemFields[];
+	selectedIndex: number | null;
 };
 
 export const UploadList = ({
 	values,
+	selectedIndex,
 	onClickEdit,
 	onClickDelete,
 }: IUploadList): JSX.Element => {
 	const { trigger, setValue } = useFormContext();
-	const [selectedListItem, setSelectedListItem] = useState(null);
 	return (
 		<Container>
 			{
@@ -41,14 +42,13 @@ export const UploadList = ({
 					<UploadListItem
 						key={item.uploadId}
 						item={item}
-						onClickRow={() => setSelectedListItem(index)}
 						onClickEdit={() => onClickEdit(index)}
 						onClickDelete={() => onClickDelete(index)}
 						onChange={(field, val) => {
 							setValue(`uploads.${index}.${field}`, val);
 							trigger(`uploads.${index}.${field}`);
 						}}
-						isSelected={index === selectedListItem}
+						isSelected={index === selectedIndex}
 					/>
 				))
 			}
