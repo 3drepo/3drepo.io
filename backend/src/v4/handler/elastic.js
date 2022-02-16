@@ -46,7 +46,7 @@ const loginRecordMapping = {
 	"os.name": { "type": "text" },
 	"os.version": { "type": "text" },
 	"device": { "type": "text" },
-	"licenseKey": { "type": "keyword" },
+	"licenseKey": { "type": "keyword" }
 };
 
 const indicesMappings = [
