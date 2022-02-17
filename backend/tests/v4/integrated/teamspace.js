@@ -111,6 +111,11 @@ describe("Teamspace", function() {
 		password: "123456"
 	};
 
+	const impliedViewAllModelsTeamspace = {
+		user: "impliedViewAllModels",
+		password: "impliedViewAllModels"
+	};
+
 	const fakeTeamspace = "fakeTeamspace";
 	const notMemberOfTeamspace = "fed";
 	const collaboratorTeamspace = "teamSpace1";
@@ -747,7 +752,7 @@ describe("Teamspace", function() {
 	});
 
 	describe("Download mitigations file", function(done) {
-		const user =  imsharedTeamspace;
+		const user =  impliedViewAllModelsTeamspace;
 
 		before(function(done) {
 			this.timeout(timeout);
@@ -757,10 +762,10 @@ describe("Teamspace", function() {
 
 		});
 
-		it("that doesn't exist should fail", function(done) {
+		it("with user that doesn't have mitigations should fail", function(done) {
 			agent.get(`/${user.user}/settings/mitigations.csv`)
 				.expect(404, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.NO_FILE_FOUND.value);
+					expect(res.body.value).to.equal(responseCodes.NO_MITIGATIONS_FOUND.value);
 					done(err);
 				});
 		});

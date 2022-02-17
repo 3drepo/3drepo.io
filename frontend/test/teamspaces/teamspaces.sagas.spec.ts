@@ -43,7 +43,6 @@ describe('Teamspaces: sagas', () => {
 
 			await expectSaga(TeamspacesSaga.default)
 				.dispatch(TeamspacesActions.fetch())
-				.put(TeamspacesActions.fetchFailure())
 				.silentRun();
 		});
 	});

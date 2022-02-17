@@ -21,7 +21,6 @@ import HomeIcon from '@assets/icons/home.svg';
 import DownArrowIcon from '@assets/icons/down_arrow.svg';
 import { uriCombine } from '@/v5/services/routing/routing';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
-import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { IProject } from '@/v5/store/projects/projects.redux';
@@ -50,14 +49,6 @@ export const Breadcrumbs = (): JSX.Element => {
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
 	const project: IProject = ProjectsHooksSelectors.selectCurrentProjectDetails();
-
-	React.useEffect(() => {
-		if (projectId) {
-			ProjectsActionsDispatchers.fetch(teamspace);
-		}
-	}, [projectId, teamspace]);
-
-	ProjectsActionsDispatchers.setCurrentProject(projectId);
 
 	let { url } = useRouteMatch();
 
