@@ -21,20 +21,11 @@ import styled from 'styled-components';
 export const Button = styled(CircleButton)`
 	&&&&& {
 		:hover { 
-				background-color: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.secondary.light : theme.palette.secondary.lightest)}
-			}
+			background-color: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.secondary.light : theme.palette.secondary.lightest)}
+		}
 	}
 	&& {
 		background-color: transparent;
-		path { 
-			stroke: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.primary.contrast : theme.palette.secondary.main)}
-		}
-	}
-`;
-
-export const DeleteButton = styled(Button)`
-	&& path {
-		stroke: none;
-		fill: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.primary.contrast : theme.palette.secondary.main)}
+		color: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.primary.contrast : theme.palette.secondary.main)}
 	}
 `;

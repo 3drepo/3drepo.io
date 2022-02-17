@@ -26,7 +26,7 @@ import { ListItemSchema } from '@/v5/validation/containers';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
 import { UploadListItemTitle } from './components/uploadListItemTitle/uploadListItemTitle.component';
-import { Button, DeleteButton } from './uploadListItem.styles';
+import { Button } from './uploadListItem.styles';
 import { UploadListItemRevisionTag } from './components/uploadListItemRevisionTag';
 import { UploadListItemDestination } from './components/uploadListItemDestination';
 
@@ -94,9 +94,9 @@ export const UploadListItem = ({
 			<Button $selectedrow={isSelected} onClick={onClickEdit}>
 				<EditIcon />
 			</Button>
-			<DeleteButton $selectedrow={isSelected} onClick={onClickDelete}>
+			<Button $selectedrow={isSelected} onClick={onClickDelete}>
 				<DeleteIcon />
-			</DeleteButton>
+			</Button>
 		</UploadListItemRow>
 	);
 };
