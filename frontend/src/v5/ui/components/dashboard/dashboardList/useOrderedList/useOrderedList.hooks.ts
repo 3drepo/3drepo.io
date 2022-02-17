@@ -25,21 +25,26 @@ export const useOrderedList = <T>(items: T[], defaultConfig: ISortConfig) => {
 	const sortedList = useMemo(() => {
 		const { column, direction } = sortConfig;
 
+		const extractValueFromObj = (obj: T) => {
+			const splitPath = column.split('.');
+			const getEndValue = splitPath.reduce((i, j) => i[j], obj);
+			return getEndValue;
+		};
+
 		const sortingFunction = (a: T, b: T): number => {
-			if (typeof a[column] === 'string') {
-				return a[column].localeCompare(b[column]);
+			const aValue = extractValueFromObj(a);
+			const bValue = extractValueFromObj(b);
+
+			if (typeof aValue === 'string') {
+				return aValue.localeCompare(bValue);
 			}
 
-			if (typeof a[column] === 'number') {
-				return a[column] - b[column];
+			if (typeof aValue === 'number') {
+				return aValue - bValue;
 			}
 
-			if (a[column] instanceof Date) {
-				return a[column].getTime() - b[column].getTime();
-			}
-
-			if (a[column] instanceof File) {
-				return a[column].name.localeCompare(b[column].name);
+			if (aValue instanceof Date) {
+				return aValue.getTime() - bValue.getTime();
 			}
 
 			return 0;
