@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import { Button, Paper as PaperBase, Popper as PopperBase } from '@material-ui/core';
 import { Link } from 'react-router-dom';
+import { AvatarButton as AvatarButtonBase } from '@controls/avatarButton';
 
 export const Items = styled.div`
 	display: flex;
@@ -46,9 +47,9 @@ export const Popper = styled(PopperBase)`
 export const Paper = styled(PaperBase)`
 	border-radius: 5px;
 	box-shadow: 
-		0px 6px 10px rgb(0 0 0 / 14%),
-		0px 1px 18px rgb(0 0 0 / 12%),
-		0px 3px 5px rgb(0 0 0 / 20%);
+		0 6px 10px rgb(0 0 0 / 14%),
+		0 1px 18px rgb(0 0 0 / 12%),
+		0 3px 5px rgb(0 0 0 / 20%);
 `;
 
 export const UserMenu = styled.div`
@@ -96,5 +97,25 @@ export const SignOutButton = styled(Button).attrs({
 })`
 	&& {
 		margin: 0;
+	}
+`;
+
+export const AvatarImg = styled.img`
+	width: 38px;
+	height: 38px;
+`;
+
+export const AvatarButton = styled(AvatarButtonBase)`
+	&& {
+		width: 38px;
+		height: 38px;
+		margin-left: 4px;
+	
+		&.Mui-focusVisible .MuiAvatar-circle {
+			width: 38px;
+			height: 38px;
+			border: 0;
+			outline: 1px solid ${({ theme }) => theme.palette.primary.main};
+		}
 	}
 `;

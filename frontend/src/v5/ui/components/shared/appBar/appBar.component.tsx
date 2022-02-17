@@ -24,13 +24,12 @@ import LogoIcon from '@assets/icons/logo.svg';
 import IntercomIcon from '@assets/icons/intercom.svg';
 import NotificationsIcon from '@assets/icons/notifications.svg';
 import { CircleButton } from '@/v5/ui/controls/circleButton';
-import { AvatarButton } from '@/v5/ui/controls/avatarButton';
 import ContactUsIcon from '@assets/icons/email.svg';
 import InviteAFriendIcon from '@assets/icons/add_user.svg';
 import TeamspacesIcon from '@assets/icons/teamspaces.svg';
 import VisualSettingsIcon from '@assets/icons/settings.svg';
 import SupportCentreIcon from '@assets/icons/question_mark.svg';
-// import { UsersHooksSelectors } from '@/v5/services/selectorsHooks/usersSelectors.hooks';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import {
 	Items,
 	UserMenu,
@@ -42,13 +41,15 @@ import {
 	UserUserName,
 	SignOutButton,
 	EditProfileButton,
+	AvatarImg,
+	AvatarButton,
 } from './appBar.styles';
 import { Breadcrumbs } from '../breadcrumbs';
 import { UserMenuButton } from './userMenuButton/userMenuButton.component';
 
-const getUserNameInitials = (name: string) => (
-	name.split(' ')
-		.map((n) => n.charAt(0).trim().toUpperCase())
+const getUserNamesInitials = ({ firstName, lastName }) => (
+	[firstName, lastName]
+		.map((name) => name.trim().charAt(0).toUpperCase())
 		.join('')
 );
 
@@ -56,12 +57,9 @@ export const AppBar = (): JSX.Element => {
 	const { teamspace } = useParams();
 	const { url } = useRouteMatch();
 	const baseUrl = url.split('/').slice(0, 3).join('/');
-	const user = {
-		hasAvatar: false,
-		user: 'Alessandro Local',
-		firstName: 'Alessandro',
-		lastName: 'Local',
-	}; // UsersHooksSelectors.selectUser(teamspace, "AlessandroLocal");
+	const userIsPending = CurrentUserHooksSelectors.selectIsPending();
+	const user = CurrentUserHooksSelectors.selectCurrentUser();
+
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
 	const handleCloseDropdown = () => {
@@ -90,11 +88,13 @@ export const AppBar = (): JSX.Element => {
 					<AvatarButton
 						onClick={handleClickDropdown}
 					>
-						{user?.hasAvatar ? (
-							<img src="" alt="avatar" />
-						) : (
-							<span>{getUserNameInitials(user.user)}</span>
-						)}
+						{user?.user}
+						{!userIsPending
+							&& (user?.hasAvatar ? (
+								<AvatarImg src={user.avatarUrl} alt="avatar" />
+							) : (
+								getUserNamesInitials(user)
+							))}
 					</AvatarButton>
 				</Items>
 			</MuiAppBar>
@@ -116,13 +116,13 @@ export const AppBar = (): JSX.Element => {
 									<AvatarSection>
 										<Avatar>
 											{user?.hasAvatar ? (
-												<img src="" alt="avatar" />
+												<AvatarImg src={user.avatarUrl} alt="avatar" />
 											) : (
-												<span>{getUserNameInitials(user.user)}</span>
+												getUserNamesInitials(user)
 											)}
 										</Avatar>
 										<UserFullName>{user.firstName} {user.lastName}</UserFullName>
-										<UserUserName>{user.user}</UserUserName>
+										<UserUserName>{user.username}</UserUserName>
 										<EditProfileButton
 											to="."
 											onClick={handleCloseDropdown}
