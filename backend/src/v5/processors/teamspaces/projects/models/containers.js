@@ -17,9 +17,9 @@
 
 const { addModel, deleteModel, getModelList } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
-const { downloadRevisionFiles, findRevision } = require('../../../../models/fileRefs');
+const { downloadFiles } = require('../../../../models/fileRefs');
 const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
-const { getLatestRevision, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
+const { getLatestRevision, getRevisionCount, getRevisions, getRevisionById, updateRevisionStatus } = require('../../../../models/revisions');
 const Groups = require('./commons/groups');
 const fs = require('fs/promises');
 const { getProjectById } = require('../../../../models/projects');
@@ -85,8 +85,8 @@ Containers.newRevision = (teamspace, model, data, file) => queueModelUpload(team
 Containers.updateRevisionStatus = updateRevisionStatus;
 
 Containers.downloadRevisionFiles = async (teamspace, container, revisionId) => {
-	const revision = await findRevision(teamspace, container, { _id: revisionId }, { rFile: 1 });
-	return downloadRevisionFiles(teamspace, container, revision);
+	const revision = await getRevisionById(teamspace, container, revisionId, { rFile: 1 });
+	return downloadFiles(teamspace, container, revision);
 };
 
 Containers.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {

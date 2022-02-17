@@ -79,16 +79,6 @@ const removeAllFiles = async (teamspace, collection) => {
 	return Promise.all(deletePromises);
 };
 
-FileRefs.findRevision = async (teamspace, model, query, projection, sort) => {
-	const revision = await db.findOne(teamspace, `${model}.history`, {}, projection, sort);
-
-	if (!revision) {
-		throw templates.revisionNotFound;
-	}
-
-	return revision;
-};
-
 FileRefs.getTotalSize = async (teamspace, collection) => {
 	const pipelines = [
 		{ $match: {} },
@@ -110,7 +100,7 @@ FileRefs.removeAllFilesFromModel = async (teamspace, model) => {
 	return Promise.all(refCols.map(({ name }) => removeAllFiles(teamspace, name)));
 };
 
-FileRefs.downloadRevisionFiles = async (teamspace, model, revision) => {
+FileRefs.downloadFiles = async (teamspace, model, revision) => {
 	if (!revision || !revision.rFile || !revision.rFile.length) {
 		throw templates.noFileFound;
 	}

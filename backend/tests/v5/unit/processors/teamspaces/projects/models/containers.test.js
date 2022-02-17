@@ -35,6 +35,12 @@ const Views = require(`${src}/models/views`);
 jest.mock('../../../../../../../src/v5/models/views');
 const Legends = require(`${src}/models/legends`);
 jest.mock('../../../../../../../src/v5/models/legends');
+const FileRefs = require(`${src}/models/fileRefs`);
+jest.mock('../../../../../../../src/v5/models/fileRefs', () => ({
+	...jest.requireActual('../../../../../../../src/v5/models/fileRefs'),
+	downloadFiles: jest.fn(),
+  }));
+
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const newContainerId = 'newContainerId';
@@ -171,6 +177,8 @@ Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 });
 
 const getRevisionsMock = Revisions.getRevisions.mockImplementation(() => model1Revisions);
+const getRevisionMock = Revisions.getRevision.mockImplementation(() => model1Revisions[0]);
+FileRefs.downloadFiles.mockImplementation(() => {});
 
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
 Users.appendFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
@@ -414,6 +422,18 @@ const testGetSettings = () => {
 	});
 };
 
+const testDownloadRevisionFiles = () => {
+	describe('Download revision files', () => {
+		test('should return non-void revisions if the container exists', async () => {
+			await Containers.downloadRevisionFiles('teamspace', 'container', 1);
+			expect(getRevisionMock.mock.calls.length).toBe(1);
+			expect(getRevisionMock.mock.calls[0][2]).toEqual({ _id: 1 });
+			expect(getRevisionMock.mock.calls[0][3]).toStrictEqual({ rFile: 1});
+		});
+	});
+};
+
+
 describe('processors/teamspaces/projects/containers', () => {
 	testGetContainerList();
 	testGetContainerStats();
@@ -424,4 +444,5 @@ describe('processors/teamspaces/projects/containers', () => {
 	testGetRevisions();
 	testNewRevision();
 	testGetSettings();
+	testDownloadRevisionFiles();
 });
