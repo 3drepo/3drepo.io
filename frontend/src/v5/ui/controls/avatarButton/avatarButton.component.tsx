@@ -23,10 +23,11 @@ import { StyledIconButton } from './avatarButton.styles';
 interface IAvatarButton {
 	disabled?: boolean;
 	onClick: (event: MouseEvent) => void;
+	src?: string | null
 }
 
-export const AvatarButton: React.FC<IAvatarButton> = ({ children, ...props }) => (
+export const AvatarButton: React.FC<IAvatarButton> = ({ children, src, ...props }) => (
 	<StyledIconButton {...props}>
-		<Avatar>{children}</Avatar>
+		<Avatar src={src}>{children}</Avatar>
 	</StyledIconButton>
 );

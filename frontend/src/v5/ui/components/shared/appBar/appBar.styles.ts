@@ -16,9 +16,13 @@
  */
 
 import styled from 'styled-components';
-import { Button, Paper as PaperBase, Popper as PopperBase } from '@material-ui/core';
-import { Link } from 'react-router-dom';
-import { AvatarButton as AvatarButtonBase } from '@controls/avatarButton';
+import { Button } from '@controls/button';
+import {
+	Avatar as AvatarBase,
+	Link,
+	Paper as PaperBase,
+	Popper as PopperBase,
+} from '@material-ui/core';
 
 export const Items = styled.div`
 	display: flex;
@@ -30,10 +34,6 @@ export const Items = styled.div`
 	&:last-child {
 		justify-content: flex-end;
 		min-width: 152px;
-	
-		& > *:last-child div {
-			margin-right: 0;
-		}
 	}
 `;
 
@@ -73,6 +73,13 @@ export const AvatarSection = styled(Section)`
 	align-items: center;
 `;
 
+export const Avatar = styled(AvatarBase)`
+	&& {
+		height: 48px;
+		width: 48px;
+	}
+`;
+
 export const UserFullName = styled.div`
 	${({ theme }) => theme.typography.h3};
 	color: ${({ theme }) => theme.palette.secondary.main};
@@ -97,25 +104,5 @@ export const SignOutButton = styled(Button).attrs({
 })`
 	&& {
 		margin: 0;
-	}
-`;
-
-export const AvatarImg = styled.img`
-	width: 38px;
-	height: 38px;
-`;
-
-export const AvatarButton = styled(AvatarButtonBase)`
-	&& {
-		width: 38px;
-		height: 38px;
-		margin-left: 4px;
-	
-		&.Mui-focusVisible .MuiAvatar-circle {
-			width: 38px;
-			height: 38px;
-			border: 0;
-			outline: 1px solid ${({ theme }) => theme.palette.primary.main};
-		}
 	}
 `;

@@ -20,8 +20,14 @@ import { IconButton } from '@material-ui/core';
 
 export const StyledIconButton = styled(IconButton)`
 	&& {
-		margin: 0;
 		padding: 0;
+		margin: 8px 7px;
+	}
+
+	.MuiAvatar-circle {
+		margin: 0;
+		height: 38px;
+		width: 38px;
 	}
 
 	${({ disabled }) => disabled && css`
@@ -33,17 +39,20 @@ export const StyledIconButton = styled(IconButton)`
 			}
 		}
 	`};
-	&:hover {
-		.MuiAvatar-root {
-			background-color: ${({ theme }) => theme.palette.tertiary.mid};
-		}
-	}
 
 	&.Mui-focusVisible {
 		.MuiAvatar-root {
-			height: 36px;
-			width: 36px;
-			border: 1px solid ${({ theme }) => theme.palette.primary.main};
+			outline: 1px solid ${({ theme }) => theme.palette.primary.main};
+			box-shadow: 
+				0px 3px 5px -1px rgb(0 0 0 / 20%),
+				0px 6px 10px 0px rgb(0 0 0 / 14%),
+				0px 1px 18px 0px rgb(0 0 0 / 12%);
+		}
+	}
+	
+	&:hover {
+		.MuiAvatar-root {
+			background-color: ${({ theme }) => theme.palette.tertiary.mid};
 		}
 	}
 

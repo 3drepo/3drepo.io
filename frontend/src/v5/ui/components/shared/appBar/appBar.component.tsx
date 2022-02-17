@@ -18,7 +18,7 @@
 import React, { MouseEvent, useState } from 'react';
 import { useParams } from 'react-router';
 import { useRouteMatch } from 'react-router-dom';
-import { AppBar as MuiAppBar, Avatar, ClickAwayListener, Grow } from '@material-ui/core';
+import { AppBar as MuiAppBar, ClickAwayListener, Grow } from '@material-ui/core';
 
 import LogoIcon from '@assets/icons/logo.svg';
 import IntercomIcon from '@assets/icons/intercom.svg';
@@ -30,6 +30,7 @@ import TeamspacesIcon from '@assets/icons/teamspaces.svg';
 import VisualSettingsIcon from '@assets/icons/settings.svg';
 import SupportCentreIcon from '@assets/icons/question_mark.svg';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
+import { AvatarButton } from '@controls/avatarButton';
 import {
 	Items,
 	UserMenu,
@@ -41,8 +42,7 @@ import {
 	UserUserName,
 	SignOutButton,
 	EditProfileButton,
-	AvatarImg,
-	AvatarButton,
+	Avatar,
 } from './appBar.styles';
 import { Breadcrumbs } from '../breadcrumbs';
 import { UserMenuButton } from './userMenuButton/userMenuButton.component';
@@ -87,14 +87,9 @@ export const AppBar = (): JSX.Element => {
 					</CircleButton>
 					<AvatarButton
 						onClick={handleClickDropdown}
+						src={user.hasAvatar ? user.avatarUrl : null}
 					>
-						{user?.user}
-						{!userIsPending
-							&& (user?.hasAvatar ? (
-								<AvatarImg src={user.avatarUrl} alt="avatar" />
-							) : (
-								getUserNamesInitials(user)
-							))}
+						{!userIsPending && getUserNamesInitials(user)}
 					</AvatarButton>
 				</Items>
 			</MuiAppBar>
@@ -114,12 +109,10 @@ export const AppBar = (): JSX.Element => {
 							<ClickAwayListener onClickAway={handleCloseDropdown}>
 								<UserMenu>
 									<AvatarSection>
-										<Avatar>
-											{user?.hasAvatar ? (
-												<AvatarImg src={user.avatarUrl} alt="avatar" />
-											) : (
-												getUserNamesInitials(user)
-											)}
+										<Avatar
+											src={user.hasAvatar ? user.avatarUrl : null}
+										>
+											{!userIsPending && getUserNamesInitials(user)}
 										</Avatar>
 										<UserFullName>{user.firstName} {user.lastName}</UserFullName>
 										<UserUserName>{user.username}</UserUserName>
