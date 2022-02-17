@@ -58,9 +58,7 @@ Revisions.getRevisions = (teamspace, model, showVoid, projection = {}) => {
 	return findRevisionsByQuery(teamspace, model, query, projection, { timestamp: -1 });
 };
 
-Revisions.getRevisionById = (teamspace, model, revisionId, projection = {}) => {
-	return findOneRevisionByQuery(teamspace, model, { _id: revisionId }, projection);
-};
+Revisions.getRevisionById = (teamspace, model, revisionId, projection = {}) => findOneRevisionByQuery(teamspace, model, { _id: revisionId }, projection);
 
 Revisions.updateRevisionStatus = async (teamspace, model, revision, status) => {
 	const query = { $or: [{ _id: revision }, { tag: revision }] };

@@ -177,7 +177,7 @@ Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 });
 
 const getRevisionsMock = Revisions.getRevisions.mockImplementation(() => model1Revisions);
-const getRevisionMock = Revisions.getRevision.mockImplementation(() => model1Revisions[0]);
+const getRevisionByIdMock = Revisions.getRevisionById.mockImplementation(() => model1Revisions[0]);
 FileRefs.downloadFiles.mockImplementation(() => {});
 
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
@@ -426,9 +426,9 @@ const testDownloadRevisionFiles = () => {
 	describe('Download revision files', () => {
 		test('should return non-void revisions if the container exists', async () => {
 			await Containers.downloadRevisionFiles('teamspace', 'container', 1);
-			expect(getRevisionMock.mock.calls.length).toBe(1);
-			expect(getRevisionMock.mock.calls[0][2]).toEqual({ _id: 1 });
-			expect(getRevisionMock.mock.calls[0][3]).toStrictEqual({ rFile: 1});
+			expect(getRevisionByIdMock.mock.calls.length).toBe(1);
+			expect(getRevisionByIdMock.mock.calls[0][2]).toEqual(1);
+			expect(getRevisionByIdMock.mock.calls[0][3]).toStrictEqual({ rFile: 1});
 		});
 	});
 };
