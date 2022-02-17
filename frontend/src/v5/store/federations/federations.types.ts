@@ -139,7 +139,6 @@ export type FetchFederationSettingsSuccessPayload = {
 	settings: FederationSettings;
 };
 
-// TODO rename settings to settings
 export type UpdateFederationSettingsPayload = FetchFederationsPayload & {
 	federationId: string;
 	settings: FederationSettings;
@@ -180,8 +179,6 @@ export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & { proj
 export type FetchFederationsSuccessAction = Action<'FETCH_FEDERATIONS_SUCCESS'> & { projectId: string, federations: IFederation[] };
 export type FetchFederationStatsAction = Action<'FETCH_FEDERATION_STATS'> & FetchFederationStatsPayload;
 export type FetchFederationStatsSuccessAction = Action<'FETCH_FEDERATION_STATS_SUCCESS'> & FetchFederationStatsSuccessPayload;
-// export type DeleteFederationAction = Action<'DELETE'> & DeleteFederationPayload;
-// export type DeleteFederationSuccessAction = Action<'DELETE_SUCCESS'> & DeleteFederationSuccessPayload;
 export type UpdateFederationContainersAction = Action<'UPDATE_FEDERATION_CONTAINERS'> & UpdateFederationContainersPayload;
 export type UpdateFederationContainersActionSuccess = Action<'UPDATE_FEDERATION_CONTAINERS_SUCCESS'> & UpdateFederationContainersSuccessPayload;
 export type FetchFederationViewsAction = Action<'FETCH_FEDERATION_VIEWS'> & FetchFederationViewsPayload;

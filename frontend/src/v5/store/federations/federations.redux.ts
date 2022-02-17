@@ -161,7 +161,7 @@ export const deleteFederationSuccess = (state = INITIAL_STATE, {
 	},
 });
 
-export const updateFederationSubModelSuccess = (state = INITIAL_STATE, {
+export const updateFederationContainersSuccess = (state = INITIAL_STATE, {
 	projectId,
 	federationId,
 	containers,
@@ -184,5 +184,5 @@ export const reducer = createReducer<IFederationsState>(INITIAL_STATE, {
 	[FederationsTypes.FETCH_FEDERATION_SETTINGS_SUCCESS]: fetchFederationSettingsSuccess,
 	[FederationsTypes.UPDATE_FEDERATION_SETTINGS_SUCCESS]: updateFederationSettingsSuccess,
 	[FederationsTypes.DELETE_FEDERATION_SUCCESS]: deleteFederationSuccess,
-	[FederationsTypes.UPDATE_FEDERATION_CONTAINERS_SUCCESS]: updateFederationSubModelSuccess,
+	[FederationsTypes.UPDATE_FEDERATION_CONTAINERS_SUCCESS]: updateFederationContainersSuccess,
 }) as (state: IFederationsState, action:any) => IFederationsState;
