@@ -32,7 +32,7 @@ const getInitials = (name) => name.split(' ').slice(0, 2).map((text) => text[0])
 export const UserPopover = ({ user: { firstName, lastName, company, job } }: IUserPopover) => (
 	<Container>
 		<AvatarWrapper>
-			<AvatarButton>{getInitials(`${firstName} ${lastName}`)}</AvatarButton>
+			<AvatarButton onClick={() => {}}>{getInitials(`${firstName} ${lastName}`)}</AvatarButton>
 		</AvatarWrapper>
 		<UserData>
 			<Name>{firstName} {lastName}</Name>
