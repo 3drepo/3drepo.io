@@ -25,31 +25,34 @@ const FileRefs = {};
 
 const collectionName = (collection) => (collection.endsWith('.ref') ? collection : `${collection}.ref`);
 
-const getRefEntry = (account, collection, fileName) => db.getCollection(account, collection)
-	.then((col) => (col ? col.findOne({ _id: fileName }) : Promise.reject(templates.noFileFound)));
+const getRefEntry = async (account, collection, fileName) => {
+	const col = await db.getCollection(account, collection);
 
-const fetchFileStream = (account, model, collection, fileName, useLegacyNameOnFallback = false) => {
-	getRefEntry(account, collection, fileName).then((entry) => {
-		if (!entry) {
-			return templates.noFileFound;
-		}
-		return ExternalServices.getFileStream(account, collection, entry.type, entry.link)
-			.then((stream) => ({ readStream: stream, size: entry.size })).catch(() => {
-				logger.logError(`Failed to fetch file from ${entry.type}. Trying GridFS....`);
-				Mailer.sendFileMissingError({
-					account,
-					model,
-					collection,
-					refId: entry._id,
-					link: entry.link,
-				});
+	if (!col) {
+		return templates.noFileFound;
+	}
 
-				const fullName = useLegacyNameOnFallback
-					? `/${account}/${model}/${fileName.split('/').length > 1 ? 'revision/' : ''}${fileName}`
-					: fileName;
-				return ExternalServices.getFileStream(account, collection, 'gridfs', fullName).then((stream) => ({ readStream: stream, size: entry.size }));
-			});
-	});
+	return col.findOne({ _id: fileName });
+};
+
+const fetchFileStream = async (account, model, collection, fileName, useLegacyNameOnFallback = false) => {
+	const entry = await getRefEntry(account, collection, fileName);
+	if (!entry) {
+		return templates.noFileFound;
+	}
+	try {
+		const stream = await ExternalServices.getFileStream(account, collection, entry.type, entry.link);
+		return { readStream: stream, size: entry.size };
+	} catch {
+		logger.logError(`Failed to fetch file from ${entry.type}. Trying GridFS....`);
+		Mailer.sendFileMissingError({ account, model, collection, refId: entry._id, link: entry.link });
+
+		const fullName = useLegacyNameOnFallback
+			? `/${account}/${model}/${fileName.split('/').length > 1 ? 'revision/' : ''}${fileName}`
+			: fileName;
+		const stream = await ExternalServices.getFileStream(account, collection, 'gridfs', fullName);
+		return { readStream: stream, size: entry.size };
+	}
 };
 
 const getOriginalFile = (account, model, fileName) => {
@@ -107,7 +110,7 @@ FileRefs.removeAllFilesFromModel = async (teamspace, model) => {
 	return Promise.all(refCols.map(({ name }) => removeAllFiles(teamspace, name)));
 };
 
-FileRefs.downloadRevisionFiles = (teamspace, model, revision) => {
+FileRefs.downloadRevisionFiles = async (teamspace, model, revision) => {
 	if (!revision || !revision.rFile || !revision.rFile.length) {
 		throw templates.noFileFound;
 	}
@@ -117,9 +120,8 @@ FileRefs.downloadRevisionFiles = (teamspace, model, revision) => {
 	const fileNameArr = fileName.split('_');
 	const ext = fileNameArr.length > 1 ? `.${fileNameArr.pop()}` : '';
 	const fileNameFormatted = fileNameArr.join('_').substr(36) + ext;
-	const filePromise = getOriginalFile(teamspace, model, fileName);
-
-	return filePromise.then((file) => ({ ...file, filename: fileNameFormatted }));
+	const file = await getOriginalFile(teamspace, model, fileName);
+	return { ...file, filename: fileNameFormatted };
 };
 
 module.exports = FileRefs;
