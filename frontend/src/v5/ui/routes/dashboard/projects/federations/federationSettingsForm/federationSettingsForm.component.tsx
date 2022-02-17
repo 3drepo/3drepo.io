@@ -209,7 +209,7 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 				name="defaultView"
 				label={formatMessage({ id: 'federations.settings.form.defaultView', defaultMessage: 'Default View' })}
 			/>
-			<SectionTitle>GIS servey point</SectionTitle>
+			<SectionTitle>GIS survey point</SectionTitle>
 			<FlexContainer>
 				<FormTextFieldUnit
 					name="latitude"
