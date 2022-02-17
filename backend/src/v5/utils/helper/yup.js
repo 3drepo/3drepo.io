@@ -22,7 +22,7 @@ const YupHelper = { validators: {}, types: { strings: {} } };
 
 YupHelper.validators.alphanumeric = (yupObj) => yupObj.matches(/^[\w|_|-]*$/,
 	// eslint-disable-next-line no-template-curly-in-string
-	'${path} can only contain alpha-numeric characters, hypens or underscores');
+	'${path} can only contain alpha-numeric characters, hyphens or underscores');
 
 YupHelper.types.id = Yup.string().uuid('ids are expected to be of uuid format').transform((val, org) => UUIDToString(org));
 
