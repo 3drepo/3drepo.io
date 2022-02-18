@@ -18,7 +18,6 @@
 import styled from 'styled-components';
 
 import { TextField } from '@material-ui/core';
-import { ErrorTooltip } from '@controls/errorTooltip';
 
 export const TextInput = styled(TextField)`
 	margin: 0;
@@ -48,12 +47,5 @@ export const TextInput = styled(TextField)`
 		}
 		return '';
 	}}
-	}
-`;
-
-export const ErrorIcon = styled(ErrorTooltip)`
-	margin-right: 9px;
-	svg {
-		transform: translateY(0%);
 	}
 `;

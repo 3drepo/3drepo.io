@@ -22,9 +22,10 @@ import MuiAutocomplete, { createFilterOptions } from '@material-ui/lab/Autocompl
 import { DestinationOption } from '@/v5/store/containers/containers.types';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { useFormContext } from 'react-hook-form';
-import { TextInput, ErrorIcon } from './uploadListItemDestination.styles';
+import { TextInput } from './uploadListItemDestination.styles';
 import { NewContainer } from './options/newContainer';
 import { ExistingContainer } from './options/existingContainer';
+import { ErrorTooltip } from '@controls/errorTooltip';
 
 interface IUploadListItemDestination {
 	onChange: (option) => void;
@@ -110,9 +111,9 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 					{...props}
 					InputProps={{ ...InputProps,
 						startAdornment: !!errorMessage && (
-							<ErrorIcon>
+							<ErrorTooltip>
 								{errorMessage}
-							</ErrorIcon>
+							</ErrorTooltip>
 						),
 					}}
 				/>
