@@ -22,7 +22,7 @@ const { findProjectByModelId } = require('../../models/projects');
 const { hasReadAccessToModel } = require('../../utils/permissions/permissions');
 const logger = require('../../utils/logger').logWithLabel(chatLabel);
 
-const socketIdToSockets = {};
+const socketIdToSocket = {};
 const sessionToSocketIds = {};
 const SocketsManager = {};
 
@@ -39,11 +39,11 @@ const removeSocket = (socket) => {
 		}
 	}
 	logger.logDebug(`[${getUserNameFromSocket(socket)}][${socketId}] disconnected`);
-	delete socketIdToSockets[socketId];
+	delete socketIdToSocket[socketId];
 };
 
 const addSocket = (socket) => {
-	socketIdToSockets[socket.id] = socket;
+	socketIdToSocket[socket.id] = socket;
 	const sessionId = socket?.handshake?.session?.id;
 	SocketsManager.addSocketIdToSession(sessionId, socket.id);
 };
@@ -124,7 +124,7 @@ const subscribeToSocketEvents = (socket) => {
 	socket.on('leave', (data) => (data.account ? leaveRoomV4(socket, data) : leaveRoom(socket, data)));
 };
 
-SocketsManager.getSocketById = (id) => socketIdToSockets[id];
+SocketsManager.getSocketById = (id) => socketIdToSocket[id];
 
 SocketsManager.addSocketIdToSession = (session, socketId) => {
 	if (!sessionToSocketIds[session]) {
@@ -139,6 +139,16 @@ SocketsManager.addSocket = (socket) => {
 	logger.logDebug(`[${getUserNameFromSocket(socket)}][${socket.id}] connected`);
 	addSocket(socket);
 	subscribeToSocketEvents(socket);
+};
+
+// Used for testing only - should not be called in real life.
+SocketsManager.reset = () => {
+	Object.keys(sessionToSocketIds).forEach((session) => {
+		delete sessionToSocketIds[session];
+	});
+	Object.keys(socketIdToSocket).forEach((id) => {
+		delete socketIdToSocket[id];
+	});
 };
 
 module.exports = SocketsManager;
