@@ -84,7 +84,7 @@ const testDoesNotHaveSystemRole = () => {
 
 		test('should fail if the user does not have permission to read roles', async () => {
 			await testSession.post('/v5/login/').send({ user: testLicenseUser.user, password: testLicenseUser.password });
-			const res = await testSession.get('/v5/admin/roles/').expect(200);
+			const res = await testSession.get('/v5/admin/roles/').expect(templates.notAuthorizedForbidden.code);
 			expect(res.body.code).toEqual(templates.notAuthorizedForbidden.code);
 		});
 	});
@@ -113,30 +113,21 @@ const testSearchUsersAndRoles = () => {
 };
 
 const testPutRoute = () => {
-	describe('This tests putting a set of roles up', () => {
-		test('should fail with a user that has already logged in', async () => {
-			await testSession.post('/v5/login/')
-				.send({ user: testAdminUser.user, password: testAdminUser.password })
-				.expect(templates.ok.status);
-			const res = await testSession.post('/v5/login/')
-				.send({ user: testAdminUser.user, password: testAdminUser.password })
-				.expect(templates.alreadyLoggedIn.status);
-			expect(res.body.code).toEqual(templates.alreadyLoggedIn.code);
-		});
+	describe('This tests putting a set of roles up with Patch', () => {
+
 	});
 };
 
 const testPatchRoute = () => {
 	describe('This tests putting a set of roles up with Patch', () => {
-		test('should fail with a user that has already logged in', async () => {
-			await testSession.post('/v5/login/')
-				.send({ user: testAdminUser.user, password: testAdminUser.password })
-				.expect(templates.ok.status);
-			const res = await testSession.post('/v5/login/')
-				.send({ user: testAdminUser.user, password: testAdminUser.password })
-				.expect(templates.alreadyLoggedIn.status);
-			expect(res.body.code).toEqual(templates.alreadyLoggedIn.code);
-		});
+ 
+	});
+};
+
+
+const testDeleteRoute = () => {
+	describe('This tests putting a set of roles up with Delete', () => {
+
 	});
 };
 
@@ -150,8 +141,9 @@ describe('E2E routes/admin', () => {
 	});
 	testHasSystemRole();
 	testDoesNotHaveSystemRole();
+	testSearchUsersAndRoles();
 	testPutRoute();
 	testPatchRoute();
-	testSearchUsersAndRoles();
+	testDeleteRoute();
 	afterAll(() => ServiceHelper.closeApp(server));
 });
