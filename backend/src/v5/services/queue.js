@@ -79,6 +79,16 @@ const onCallbackQMsg = async ({ content, properties }) => {
 	}
 };
 
+const onEventQMsg = ({ content }) => {
+	try {
+		const data = JSON.parse(content);
+		logger.logDebug(`[${eventExchange}][CONSUME]\t${JSON.stringify(data)}`);
+		eventCallbacks.forEach((func) => { func(data); });
+	} catch (err) {
+		logger.logError(`[${eventExchange}][CONSUME]\t${err?.message}`);
+	}
+};
+
 const initCallbackQueueListener = async (conn) => {
 	const channel = await conn.createChannel();
 	const { queue } = await channel.assertQueue(callbackq);
@@ -89,17 +99,9 @@ const initCallbackQueueListener = async (conn) => {
 const initEventQueueListener = async (conn) => {
 	const channel = await conn.createChannel();
 	await channel.assertExchange(eventExchange, 'fanout', { durable: true });
-	const queue = await channel.assertQueue('', { exclusive: true });
-	await channel.bindQueue(queue.queue, eventExchange, '');
-	channel.consume(queue.queue, ({ content }) => {
-		try {
-			const data = JSON.parse(content);
-			logger.logDebug(`[${eventExchange}][CONSUME]\t${JSON.stringify(data)}`);
-			eventCallbacks.forEach((func) => { func(data); });
-		} catch (err) {
-			logger.logError(`[${eventExchange}][CONSUME]\t${err?.message}`);
-		}
-	}, { noAck: true });
+	const { queue } = await channel.assertQueue('', { exclusive: true });
+	await channel.bindQueue(queue, eventExchange, '');
+	channel.consume(queue, onEventQMsg, { noAck: true });
 };
 
 const connect = async () => {

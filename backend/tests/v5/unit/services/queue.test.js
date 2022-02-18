@@ -17,6 +17,8 @@
 
 const { src, modelFolder, objModel } = require('../../helper/path');
 const { generateRandomString } = require('../../helper/services');
+
+jest.mock('amqplib');
 const AMQP = require('amqplib');
 
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
@@ -30,15 +32,21 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 const Queue = require(`${src}/services/queue`);
 
-const createFakeConnection = (sendToQueue, consume) => {
+const createFakeConnection = (sendToQueue, callbackConsume, eventConsume) => {
 	const dummyFn = () => Promise.resolve();
+	const consumeFn = ({ queue }, msg) => {
+		if (queue === config.cn_queue.callback_queue) (callbackConsume || dummyFn)(queue, msg);
+		else (eventConsume || dummyFn)(queue, msg);
+	};
 	const dummyChannel = {
-		assertQueue: () => Promise.resolve({
-			queue: {},
+		assertQueue: (qName) => Promise.resolve({
+			queue: { queue: qName },
 		}),
 		sendToQueue: sendToQueue || dummyFn,
-		consume: consume || dummyFn,
+		consume: consumeFn,
 		close: dummyFn,
+		assertExchange: dummyFn,
+		bindQueue: dummyFn,
 	};
 	return {
 		createChannel: () => Promise.resolve(dummyChannel),
@@ -48,7 +56,7 @@ const createFakeConnection = (sendToQueue, consume) => {
 };
 
 const publishFn = EventsManager.publish.mockImplementation(() => { });
-const fn = jest.spyOn(AMQP, 'connect').mockRejectedValue(undefined);
+AMQP.connect.mockRejectedValue(undefined);
 
 const testQueueModelUpload = () => {
 	const fileCreated = path.join(modelFolder, 'queueObjectTest.obj');
@@ -80,7 +88,7 @@ const testQueueModelUpload = () => {
 		test('should succeed with job inserted into the queue', async () => {
 			await fs.copyFile(objModel, fileCreated);
 			const sendToQueueFn = jest.fn(() => {});
-			fn.mockResolvedValueOnce(createFakeConnection(sendToQueueFn));
+			AMQP.connect.mockResolvedValueOnce(createFakeConnection(sendToQueueFn));
 
 			await expect(Queue.queueModelUpload(teamspace, model, data, file)).resolves.toBe(undefined);
 
@@ -125,7 +133,7 @@ const testQueueFederationUpdate = () => {
 
 		test('should succeed with job inserted into the queue', async () => {
 			const sendToQueueFn = jest.fn(() => {});
-			fn.mockResolvedValueOnce(createFakeConnection(sendToQueueFn));
+			AMQP.connect.mockResolvedValueOnce(createFakeConnection(sendToQueueFn));
 
 			await expect(Queue.queueFederationUpdate(teamspace, federation, data)).resolves.toBe(undefined);
 
@@ -147,7 +155,7 @@ const testCallbackQueueConsumer = () => {
 		test(`Should trigger ${events.QUEUED_TASK_UPDATE} event if there is a task update message`, async () => {
 			publishFn.mockClear();
 			const waitForConsume = new Promise((resolve) => {
-				fn.mockResolvedValueOnce(createFakeConnection(undefined, (a, cb) => {
+				AMQP.connect.mockResolvedValueOnce(createFakeConnection(undefined, (a, cb) => {
 					callbackFn = cb;
 					resolve();
 				}));
@@ -182,7 +190,7 @@ const testCallbackQueueConsumer = () => {
 		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event if there is a task failed message`, async () => {
 			publishFn.mockClear();
 			const waitForConsume = new Promise((resolve) => {
-				fn.mockResolvedValueOnce(createFakeConnection(undefined, (a, cb) => {
+				AMQP.connect.mockResolvedValueOnce(createFakeConnection(undefined, (a, cb) => {
 					callbackFn = cb;
 					resolve();
 				}));
@@ -219,7 +227,7 @@ const testCallbackQueueConsumer = () => {
 		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event with container information if the task was a federation`, async () => {
 			publishFn.mockClear();
 			const waitForConsume = new Promise((resolve) => {
-				fn.mockResolvedValueOnce(createFakeConnection(undefined, (a, cb) => {
+				AMQP.connect.mockResolvedValueOnce(createFakeConnection(undefined, (a, cb) => {
 					callbackFn = cb;
 					resolve();
 				}));
@@ -266,7 +274,7 @@ const testCallbackQueueConsumer = () => {
 		test('Should fail gracefully if the service failed to process the message', async () => {
 			publishFn.mockClear();
 			const waitForConsume = new Promise((resolve) => {
-				fn.mockResolvedValueOnce(createFakeConnection(undefined, (a, cb) => {
+				AMQP.connect.mockResolvedValueOnce(createFakeConnection(undefined, (a, cb) => {
 					callbackFn = cb;
 					resolve();
 				}));
