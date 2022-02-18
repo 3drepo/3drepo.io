@@ -22,10 +22,10 @@ import MuiAutocomplete, { createFilterOptions } from '@material-ui/lab/Autocompl
 import { DestinationOption } from '@/v5/store/containers/containers.types';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { useFormContext } from 'react-hook-form';
+import { ErrorTooltip } from '@controls/errorTooltip';
 import { TextInput } from './uploadListItemDestination.styles';
 import { NewContainer } from './options/newContainer';
 import { ExistingContainer } from './options/existingContainer';
-import { ErrorTooltip } from '@controls/errorTooltip';
 
 interface IUploadListItemDestination {
 	onChange: (option) => void;
@@ -82,23 +82,18 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 				latestRevision: val.latestRevision,
 			}))}
 			filterOptions={(options, params) => {
-				const filtered: DestinationOption[] = filter(options, params);
+				let filtered: DestinationOption[] = filter(options, params);
 				const { inputValue } = params;
 				const isExisting = options.some((option: DestinationOption) => inputValue === option.name);
 				if (inputValue !== '' && !isExisting) {
-					filtered.unshift({
+					filtered = [{
 						_id: '',
 						name: inputValue,
 						latestRevision: '',
-					});
+					}, ...filtered];
 				}
 
-				(function hideSelectedOption() {
-					const index = filtered.findIndex((x) => x.name === value.name);
-					if (index > -1) {
-						filtered.splice(index, 1);
-					}
-				}());
+				filtered = filtered.filter((x) => x.name !== value.name);
 
 				return filtered;
 			}}
@@ -118,12 +113,12 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 					}}
 				/>
 			)}
-			getOptionDisabled={(option: DestinationOption) => containersInUse.indexOf(option.name) > -1}
+			getOptionDisabled={(option: DestinationOption) => containersInUse.includes(option.name)}
 			renderOption={(option: DestinationOption) => {
 				if (option.name && !option._id) return (<NewContainer {...option} />);
 				return (
 					<ExistingContainer
-						inUse={containersInUse.indexOf(option.name) > -1}
+						inUse={containersInUse.includes(option.name)}
 						{...option}
 					/>
 				);
