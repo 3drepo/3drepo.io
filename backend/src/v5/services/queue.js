@@ -16,7 +16,7 @@
  */
 
 const { codeExists, createResponseCode, templates } = require('../utils/responseCodes');
-const { copyFile, mkdir, rm, writeFile } = require('fs/promises');
+const { copyFile, mkdir, rm, stat, writeFile } = require('fs/promises');
 const amqp = require('amqplib');
 const { events } = require('./eventsManager/eventsManager.constants');
 const { generateUUIDString } = require('../utils/helper/uuids');
@@ -31,6 +31,7 @@ const SHARED_SPACE_TAG = '$SHARED_SPACE';
 const {
 	maxRetries,
 	callback_queue: callbackq,
+	worker_queue: jobq,
 	model_queue: modelq,
 	shared_storage: sharedDir,
 } = queueConfig;
@@ -49,7 +50,7 @@ const reconnect = () => {
 	throw createResponseCode(templates.queueConnectionError, 'Max number of retries reached.');
 };
 
-const onCallbackQMsg = ({ content, properties }) => {
+const onCallbackQMsg = async ({ content, properties }) => {
 	try {
 		logger.logInfo(`[${callbackq}][CONSUME]\t${properties.correlationId}\t${content}`);
 		const { status, database: teamspace, project: model, user, value, message } = JSON.parse(content);
@@ -57,8 +58,18 @@ const onCallbackQMsg = ({ content, properties }) => {
 			publish(events.QUEUED_TASK_UPDATE,
 				{ teamspace, model, corId: properties.correlationId, status, user });
 		} else {
+			const fedDataPath = `${sharedDir}/${properties.correlationId}/obj.json`;
+
+			const isFed = !!await stat(fedDataPath).catch(() => false);
+			const fedData = { };
+			if (isFed) {
+				// eslint-disable-next-line
+				const { subProjects } = require(fedDataPath);
+				fedData.containers = subProjects;
+			}
+
 			publish(events.QUEUED_TASK_COMPLETED,
-				{ teamspace, model, corId: properties.correlationId, user, value, message });
+				{ teamspace, model, corId: properties.correlationId, user, value, message, ...fedData });
 		}
 	} catch (err) {
 		logger.logInfo(`[${callbackq}][CONSUME]\t${err?.message}\t${properties.correlationId}`);
@@ -128,6 +139,7 @@ const queueJob = async (queueName, correlationId, msg) => {
 };
 
 const queueModelJob = (corId, msg) => queueJob(modelq, corId, msg);
+const queueFederationJob = (corId, teamspace, dataPath) => queueJob(jobq, corId, `genFed ${dataPath} ${teamspace}`);
 
 Queue.queueModelUpload = async (teamspace, model, data, { originalname, path }) => {
 	const revId = generateUUIDString();
@@ -172,6 +184,39 @@ Queue.queueModelUpload = async (teamspace, model, data, { originalname, path }) 
 		}
 
 		logger.logError('Failed to queue model job', err?.message);
+		throw templates.queueInsertionFailed;
+	}
+};
+
+Queue.queueFederationUpdate = async (teamspace, federation, info) => {
+	const corId = generateUUIDString();
+	try {
+		const data = {
+			...info,
+			database: teamspace,
+			project: federation,
+			subProjects: info.containers.map((container) => ({ database: teamspace, project: container })),
+		};
+		delete data.containers;
+
+		const filePath = `${SHARED_SPACE_TAG}/${corId}/obj.json`;
+
+		await mkdir(`${sharedDir}/${corId}`);
+		await writeFile(`${sharedDir}/${corId}/obj.json`, JSON.stringify(data));
+
+		await queueFederationJob(corId, teamspace, filePath);
+		publish(events.QUEUED_TASK_UPDATE, { teamspace, model: federation, corId, status: 'queued' });
+	} catch (err) {
+		// Clean up files we created
+		rm(`${sharedDir}/${corId}/obj.json`).catch((cleanUpErr) => {
+			logger.logError(`Failed to remove files (clean up on failure : ${cleanUpErr}`);
+		});
+
+		if (err?.code && codeExists(err.code)) {
+			throw err;
+		}
+
+		logger.logError('Failed to queue federate job', err?.message);
 		throw templates.queueInsertionFailed;
 	}
 };

@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { createSelector } from 'reselect';
+import { IDialogState } from './dialogs.redux';
 
-export const selectDialogDomain = (state) => state.dialogsV5;
+export const selectDialogDomain = (state):IDialogState => state.dialogsV5;
 
 export const selectDialogs = createSelector(
 	selectDialogDomain, (state) => state.dialogs,

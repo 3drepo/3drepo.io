@@ -22,8 +22,8 @@ const { templates } = require('../utils/responseCodes');
 const AuthMiddlewares = {};
 
 AuthMiddlewares.validSession = (req, res, next) => {
-	const { header, session } = req;
-	if (isSessionValid(session, header.referer)) {
+	const { headers, session } = req;
+	if (isSessionValid(session, headers.referer)) {
 		next();
 	} else {
 		respond(req, res, templates.notLoggedIn);
@@ -31,8 +31,8 @@ AuthMiddlewares.validSession = (req, res, next) => {
 };
 
 AuthMiddlewares.isLoggedIn = (req, res, next) => {
-	const { header, session } = req;
-	if (isSessionValid(session, header.referer, true)) {
+	const { headers, session } = req;
+	if (isSessionValid(session, headers.referer, true)) {
 		next();
 	} else {
 		respond(req, res, templates.notLoggedIn);
@@ -40,8 +40,8 @@ AuthMiddlewares.isLoggedIn = (req, res, next) => {
 };
 
 AuthMiddlewares.notLoggedIn = (req, res, next) => {
-	const { header, session } = req;
-	if (isSessionValid(session, header.referer, true)) {
+	const { headers, session } = req;
+	if (isSessionValid(session, headers.referer, true)) {
 		respond(req, res, templates.alreadyLoggedIn);
 	} else {
 		next();

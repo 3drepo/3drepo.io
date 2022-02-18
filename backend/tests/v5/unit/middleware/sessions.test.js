@@ -56,6 +56,7 @@ const testCreateSession = () => {
 			ipAddress: request.ips[0] || request.ip,
 			userAgent: request.headers['user-agent'],
 			referer: request.headers.referer,
+			socketId: request.headers['x-socket-id'],
 		});
 	};
 
@@ -65,7 +66,7 @@ const testCreateSession = () => {
 		sessionID: '123',
 		ips: ['0.1.2.3'],
 		ip: '0.1.2.3',
-		headers: { 'x-socket-id': '123' },
+		headers: {},
 	};
 
 	describe('Regenerate auth session', () => {
@@ -79,6 +80,12 @@ const testCreateSession = () => {
 			const reqWithReferer = { ...req, headers: { ...req.headers, referer: 'http://abc.com/' } };
 			await Sessions.createSession(reqWithReferer, {});
 			checkResults(reqWithReferer);
+		});
+
+		test('Should regenerate session with request with socket id', async () => {
+			const reqWithSocket = { ...req, headers: { ...req.headers, 'x-socket-id': 'socketsdlfkdsj' } };
+			await Sessions.createSession(reqWithSocket, {});
+			checkResults(reqWithSocket);
 		});
 
 		test('Should regenerate session with request with user agent', async () => {

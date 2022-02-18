@@ -21,30 +21,33 @@ import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { viewerShareLink } from '@/v5/services/routing/routing';
-import { IContainer } from '@/v5/store/containers/containers.types';
 import { useParams } from 'react-router-dom';
 import { ShareTextField } from '@controls/shareTextField';
+import { IContainer } from '@/v5/store/containers/containers.types';
+import { IFederation } from '@/v5/store/federations/federations.types';
 import { MailToButton } from './shareModal.styles';
 
 type IShareModal = {
 	openState: boolean;
-	container: IContainer;
+	title: string;
+	containerOrFederation: IContainer | IFederation;
 	onClickClose: () => void;
 };
 
-export const ShareModal = ({ openState, container, onClickClose }: IShareModal): JSX.Element => {
+export const ShareModal = ({
+	openState,
+	title,
+	containerOrFederation,
+	onClickClose,
+}: IShareModal): JSX.Element => {
 	const { teamspace } = useParams();
-	const containerName = container.name;
-	const containerLink = viewerShareLink(teamspace, container._id);
+	const link = viewerShareLink(teamspace, containerOrFederation._id);
 
 	return (
 		<FormModal
 			open={openState}
 			onClickClose={onClickClose}
-			title={formatMessage({
-				id: 'ShareModal.title',
-				defaultMessage: 'Share Container URL',
-			})}
+			title={title}
 			showButtons={false}
 		>
 			<ShareTextField
@@ -52,9 +55,9 @@ export const ShareModal = ({ openState, container, onClickClose }: IShareModal):
 					id: 'shareModal.linkLabel',
 					defaultMessage: 'Link',
 				})}
-				value={containerLink}
+				value={link}
 			/>
-			<MailToButton href={`mailto:?subject=3D Repo container - ${containerName}&body=${containerLink}`}>
+			<MailToButton href={`mailto:?subject=3D Repo container - ${containerOrFederation.name}&body=${link}`}>
 				<FormattedMessage
 					id="shareModal.mailTo"
 					defaultMessage="Send by email"

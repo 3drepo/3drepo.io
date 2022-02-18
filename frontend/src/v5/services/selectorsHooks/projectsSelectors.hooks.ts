@@ -16,6 +16,6 @@
  */
 
 import * as ProjectsSelectors from '@/v5/store/projects/projects.selectors';
-import { createHooksSelectors } from './selectorsHooks.helper';
+import { createHooksSelectors } from '@/v5/helpers/selectorsHooks.helper';
 
 export const ProjectsHooksSelectors = createHooksSelectors(ProjectsSelectors);

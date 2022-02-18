@@ -45,7 +45,7 @@ const createErrorResponse = (req, res, resCode) => {
 	res.status(resCode.status).send(resObj);
 };
 
-const mimeTypes = {
+Responder.mimeTypes = {
 	src: 'text/plain',
 	gltf: 'application/json',
 	bin: 'text/plain',
@@ -54,7 +54,7 @@ const mimeTypes = {
 	jpg: 'image/jpg',
 };
 
-Responder.respond = (req, res, resCode, body, { cache, customHeaders } = {}) => {
+Responder.respond = (req, res, resCode, body, { cache, customHeaders, mimeType = Responder.mimeTypes.json } = {}) => {
 	const finalResCode = createResponseCode(resCode);
 
 	if (finalResCode.status > 200) {
@@ -73,7 +73,7 @@ Responder.respond = (req, res, resCode, body, { cache, customHeaders } = {}) => 
 	}
 
 	if (isBuffer(body)) {
-		const contentType = mimeTypes[req.params.format] || 'application/json';
+		const contentType = Responder.mimeTypes[req.params.format] || mimeType;
 		res.setHeader('Content-Type', contentType);
 		res.status(finalResCode.status);
 		contentLength = body.length;

@@ -22,6 +22,7 @@ const AMQP = require('amqplib');
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+const config = require(`${src}/utils/config`);
 const fs = require('fs/promises');
 const path = require('path');
 
@@ -46,7 +47,7 @@ const createFakeConnection = (sendToQueue, consume) => {
 	};
 };
 
-const publishFn = EventsManager.publish.mockImplementation(() => {});
+const publishFn = EventsManager.publish.mockImplementation(() => { });
 const fn = jest.spyOn(AMQP, 'connect').mockRejectedValue(undefined);
 
 const testQueueModelUpload = () => {
@@ -96,6 +97,50 @@ const testQueueModelUpload = () => {
 	afterEach(Queue.close);
 };
 
+const testQueueFederationUpdate = () => {
+	describe('queue federation update', () => {
+		const teamspace = generateRandomString();
+		const federation = generateRandomString();
+		const data = {
+			containers: [generateRandomString(), generateRandomString(), generateRandomString()],
+			owner: generateRandomString(),
+		};
+
+		test(`should fail with ${templates.queueInsertionFailed.code} if there is some generic error`, async () => {
+			expect.assertions(1);
+			try {
+				await Queue.queueFederationUpdate(teamspace, federation, {});
+			} catch (err) {
+				expect(err.code).toEqual(templates.queueInsertionFailed.code);
+			}
+		});
+		test(`should fail with ${templates.queueConnectionError.code} if it cannot connect to queue`, async () => {
+			expect.assertions(1);
+			try {
+				await Queue.queueFederationUpdate(teamspace, federation, data);
+			} catch (err) {
+				expect(err.code).toEqual(templates.queueConnectionError.code);
+			}
+		});
+
+		test('should succeed with job inserted into the queue', async () => {
+			const sendToQueueFn = jest.fn(() => {});
+			fn.mockResolvedValueOnce(createFakeConnection(sendToQueueFn));
+
+			await expect(Queue.queueFederationUpdate(teamspace, federation, data)).resolves.toBe(undefined);
+
+			expect(sendToQueueFn.mock.calls.length).toBe(1);
+			const { correlationId: corId } = sendToQueueFn.mock.calls[0][2];
+
+			expect(publishFn.mock.calls.length).toBe(1);
+			expect(publishFn.mock.calls[0][0]).toEqual(events.QUEUED_TASK_UPDATE);
+			expect(publishFn.mock.calls[0][1]).toEqual({ teamspace, model: federation, corId, status: 'queued' });
+		});
+	});
+
+	afterEach(Queue.close);
+};
+
 const testCallbackQueueConsumer = () => {
 	describe('Callback queue consumption', () => {
 		let callbackFn;
@@ -121,7 +166,7 @@ const testCallbackQueueConsumer = () => {
 			const properties = {
 				correlationId: generateRandomString(),
 			};
-			callbackFn({ content: JSON.stringify(content), properties });
+			await callbackFn({ content: JSON.stringify(content), properties });
 
 			expect(publishFn.mock.calls.length).toBe(1);
 			expect(publishFn.mock.calls[0][0]).toEqual(events.QUEUED_TASK_UPDATE);
@@ -133,6 +178,7 @@ const testCallbackQueueConsumer = () => {
 				user: content.user,
 			});
 		});
+
 		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event if there is a task failed message`, async () => {
 			publishFn.mockClear();
 			const waitForConsume = new Promise((resolve) => {
@@ -156,7 +202,7 @@ const testCallbackQueueConsumer = () => {
 			const properties = {
 				correlationId: generateRandomString(),
 			};
-			callbackFn({ content: JSON.stringify(content), properties });
+			await callbackFn({ content: JSON.stringify(content), properties });
 
 			expect(publishFn.mock.calls.length).toBe(1);
 			expect(publishFn.mock.calls[0][0]).toEqual(events.QUEUED_TASK_COMPLETED);
@@ -167,6 +213,53 @@ const testCallbackQueueConsumer = () => {
 				value: content.value,
 				message: content.message,
 				user: content.user,
+			});
+		});
+
+		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event with container information if the task was a federation`, async () => {
+			publishFn.mockClear();
+			const waitForConsume = new Promise((resolve) => {
+				fn.mockResolvedValueOnce(createFakeConnection(undefined, (a, cb) => {
+					callbackFn = cb;
+					resolve();
+				}));
+				Queue.init();
+			});
+
+			await waitForConsume;
+
+			expect(callbackFn).not.toBe(undefined);
+			const content = {
+				database: generateRandomString(),
+				value: 0,
+				project: generateRandomString(),
+				user: generateRandomString(),
+			};
+			const properties = {
+				correlationId: generateRandomString(),
+			};
+
+			const containers = [
+				generateRandomString(),
+				generateRandomString(),
+				generateRandomString(),
+			];
+
+			await fs.mkdir(`${config.cn_queue.shared_storage}/${properties.correlationId}`);
+			await fs.writeFile(`${config.cn_queue.shared_storage}/${properties.correlationId}/obj.json`,
+				JSON.stringify({ subProjects: containers }));
+			await callbackFn({ content: JSON.stringify(content), properties });
+
+			expect(publishFn.mock.calls.length).toBe(1);
+			expect(publishFn.mock.calls[0][0]).toEqual(events.QUEUED_TASK_COMPLETED);
+			expect(publishFn.mock.calls[0][1]).toEqual({
+				teamspace: content.database,
+				model: content.project,
+				corId: properties.correlationId,
+				value: content.value,
+				message: content.message,
+				user: content.user,
+				containers,
 			});
 		});
 
@@ -187,7 +280,7 @@ const testCallbackQueueConsumer = () => {
 			const properties = {
 				correlationId: generateRandomString(),
 			};
-			callbackFn({ content: {}, properties });
+			await callbackFn({ content: {}, properties });
 
 			expect(publishFn.mock.calls.length).toBe(0);
 		});
@@ -198,5 +291,6 @@ const testCallbackQueueConsumer = () => {
 
 describe('services/queue', () => {
 	testQueueModelUpload();
+	testQueueFederationUpdate();
 	testCallbackQueueConsumer();
 });

@@ -27,6 +27,7 @@ const { createResponseCode, templates } = require('../utils/responseCodes');
 const config = require('../utils/config');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
+const { generateHashString } = require('../utils/helper/strings');
 const { publish } = require('../services/eventsManager/eventsManager');
 
 const User = {};
@@ -60,10 +61,12 @@ const recordFailedAuthAttempt = async (user) => {
 
 	const newCount = resetCounter ? 1 : failedLoginCount + 1;
 
-	await db.updateOne('admin', COLL_NAME, { user }, { $set: {
-		'customData.loginInfo.lastFailedLoginAt': currentTime,
-		'customData.loginInfo.failedLoginCount': newCount,
-	} });
+	await db.updateOne('admin', COLL_NAME, { user }, {
+		$set: {
+			'customData.loginInfo.lastFailedLoginAt': currentTime,
+			'customData.loginInfo.failedLoginCount': newCount,
+		},
+	});
 
 	publish(events.FAILED_LOGIN_ATTEMPT, { email, failedLoginCount: newCount });
 
@@ -117,7 +120,7 @@ User.getUserByQuery = async (query, projection) => {
 	return userDoc;
 };
 
-User.getUserByUsername = async (user, projection) => User.getUserByQuery({ user }, projection);
+User.getUserByUsername = (user, projection) => User.getUserByQuery({ user }, projection);
 
 User.getFavourites = async (user, teamspace) => {
 	const { customData } = await User.getUserByUsername(user, { 'customData.starredModels': 1 });
@@ -309,5 +312,51 @@ User.deleteFavourites = async (username, teamspace, favouritesToRemove) => {
 		throw createResponseCode(templates.invalidArguments, "The IDs provided are not in the user's favourites list");
 	}
 };
+
+User.updatePassword = async (username, newPassword) => {
+	const updateUserCmd = {
+		updateUser: username,
+		pwd: newPassword,
+	};
+
+	await db.runCommand('admin', updateUserCmd);
+	await updateUser(username, { $unset: { 'customData.resetPasswordToken': 1 } });
+};
+
+User.updateProfile = async (username, updatedProfile) => {
+	const updateData = {};
+	const billingInfoFields = ['countryCode', 'company'];
+
+	Object.keys(updatedProfile).forEach((key) => {
+		if (billingInfoFields.includes(key)) {
+			updateData[`customData.billing.billingInfo.${key}`] = updatedProfile[key];
+		} else {
+			updateData[`customData.${key}`] = updatedProfile[key];
+		}
+	});
+
+	await updateUser(username, { $set: updateData });
+};
+
+User.generateApiKey = async (username) => {
+	const apiKey = generateHashString();
+	await updateUser(username, { $set: { 'customData.apiKey': apiKey } });
+	return apiKey;
+};
+
+User.deleteApiKey = (username) => updateUser(username, { $unset: { 'customData.apiKey': 1 } });
+
+User.getAvatar = async (username) => {
+	const user = await User.getUserByUsername(username, { 'customData.avatar': 1 });
+	const avatar = user.customData?.avatar;
+
+	if (!avatar) {
+		throw templates.userDoesNotHaveAvatar;
+	}
+
+	return avatar;
+};
+
+User.uploadAvatar = (username, avatarBuffer) => updateUser(username, { $set: { 'customData.avatar': { data: avatarBuffer } } });
 
 module.exports = User;

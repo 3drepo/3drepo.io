@@ -43,6 +43,11 @@ export const MuiTheme = createMuiTheme({
 			contrastText: theme.colors.WHITE
 		}
 	},
+	props: {
+		MuiCheckbox: {
+			color: 'secondary',
+		}
+	},
 	overrides: {
 		MuiButton: {
 			root: {
