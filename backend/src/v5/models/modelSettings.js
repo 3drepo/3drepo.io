@@ -110,20 +110,27 @@ Models.updateModelStatus = async (teamspace, model, status, corId, user) => {
 	}
 };
 
-Models.newRevisionProcessed = async (teamspace, model, corId, retVal, user) => {
+Models.newRevisionProcessed = async (teamspace, model, corId, retVal, user, containers) => {
 	const { success, message, userErr } = getInfoFromCode(retVal);
 	const query = { _id: model };
 	const set = {};
+	const unset = { corID: 1 };
 
 	if (success) {
-		set.status = 'ok';
+		unset.status = 1;
 		set.timestamp = new Date();
+		if (containers) {
+			/* LEGACY DATA: Project is container id here.
+			 *  containers used to be called models in v4, and models used to be called
+			 *  projects. This data came from 3drepobouncer, which still calls containers projects.
+			 */
+			set.subModels = containers.map(({ project }) => project);
+		}
 	} else {
 		set.status = 'failed';
 		set.errorReason = { message, timestamp: new Date(), errorCode: retVal };
 	}
 
-	const unset = { corID: 1 };
 	const { matchedCount } = await updateOneModel(teamspace, query, { $set: set, $unset: unset });
 	if (matchedCount !== 0) {
 	// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to

@@ -32,11 +32,7 @@ const { omit } = require("lodash");
 
 const MODELS_PERMISSION = ["collaborator", "commenter", "viewer"];
 
-const getCollection = async () => {
-	const coll = await db.getCollection("admin", "invitations");
-	coll.createIndex({ "teamSpaces.teamspace": 1 }, { "background": true, writeConcern: { w: "1" } });
-	return coll;
-};
+const getCollection = () => db.getCollection("admin", "invitations");
 
 const invitations = {};
 
@@ -125,6 +121,7 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 
 	email = email.toLowerCase();
 	const coll = await getCollection();
+	coll.ensureIndex({ "teamSpaces.teamspace": 1 }, { "background": true });
 	const result = await coll.findOne({_id:email});
 	const teamspaceEntry = { teamspace, job, permissions };
 
@@ -251,5 +248,11 @@ invitations.getInvitationsByTeamspace = async (teamspaceName) => {
 		return { email, ...teamspaceData };
 	});
 };
+
+// Ensure the index exists at init
+getCollection().then((coll) => coll.createIndex({ "teamSpaces.teamspace": 1 }, { "background": true }))
+	.catch((err)=> {
+		systemLogger.logError("failed to create index for invitations", err);
+	});
 
 module.exports = invitations;

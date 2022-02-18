@@ -19,10 +19,10 @@ import React from 'react';
 import { useParams } from 'react-router';
 
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
-import { IUser } from '@/v5/store/teamspaces/teamspaces.redux';
 import { Popover } from '@/v4/routes/components/messagesList/components/message/components/markdownMessage/ticketReference/ticketReference.styles';
 import { UserPopover } from '@components/shared/userPopover/userPopover.component';
-import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
+import { UsersHooksSelectors } from '@/v5/services/selectorsHooks/usersSelectors.hooks';
+import { IUser } from '@/v5/store/users/users.redux';
 import { Text } from './revisionsListItemAuthor.styles';
 
 type IRevisionsListItemAuthor = {
@@ -44,9 +44,7 @@ export const RevisionsListItemAuthor = ({
 }: IRevisionsListItemAuthor): JSX.Element => {
 	const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
 	const { teamspace } = useParams();
-	const teamspaceUsers: IUser[] = TeamspacesHooksSelectors.selectTeamspaceUsers(teamspace);
-
-	const author = teamspaceUsers.find(({ user }) => user === authorName);
+	const author: IUser | null = UsersHooksSelectors.selectUser(teamspace, authorName);
 
 	const handlePopoverOpen = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
 		setAnchorEl(event.currentTarget);

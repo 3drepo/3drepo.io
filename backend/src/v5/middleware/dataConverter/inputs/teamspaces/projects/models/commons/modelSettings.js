@@ -18,9 +18,9 @@
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const Yup = require('yup');
 const { checkLegendExists } = require('../../../../../../../models/legends');
-const { checkViewExists } = require('../../../../../../../models/views');
 const { getModelByQuery } = require('../../../../../../../models/modelSettings');
 const { getProjectById } = require('../../../../../../../models/projects');
+const { getViewById } = require('../../../../../../../models/views');
 const { respond } = require('../../../../../../../utils/responder');
 const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { types } = require('../../../../../../../utils/helper/yup');
@@ -36,7 +36,7 @@ const convertBodyUUIDs = (req) => {
 const defaultViewType = (teamspace, model) => types.id.nullable().test('check-view-exists', 'View not found', async (value) => {
 	if (value) {
 		try {
-			await checkViewExists(teamspace, model, stringToUUID(value));
+			await getViewById(teamspace, model, stringToUUID(value), { _id: 1 });
 		} catch (err) {
 			return false;
 		}
@@ -70,16 +70,16 @@ const modelNameType = (teamspace, project, model) => types.strings.title.test('n
 	}
 });
 
-const generateSchema = (newEntry, teamspace, project, modelId) => {
+const generateSchema = (newEntry, isFed, teamspace, project, modelId) => {
 	const name = modelNameType(teamspace, project, modelId);
 	const schema = {
 		name: newEntry ? name.required() : name,
 		unit: newEntry ? types.strings.unit.required() : types.strings.unit,
 		desc: types.strings.shortDescription,
 		code: types.strings.code,
-		type: newEntry ? Yup.string().required() : Yup.string(),
 		surveyPoints: types.surveyPoints,
 		angleFromNorth: types.degrees,
+		...(isFed ? {} : { type: newEntry ? Yup.string().required() : Yup.string() }),
 		...(newEntry
 			? {}
 			: {
@@ -99,10 +99,10 @@ const generateSchema = (newEntry, teamspace, project, modelId) => {
 		);
 };
 
-ModelSettings.validateAddModelData = async (req, res, next) => {
+ModelSettings.validateAddModelData = (isFed) => async (req, res, next) => {
 	try {
 		const { teamspace, project } = req.params;
-		const schema = generateSchema(true, teamspace, project);
+		const schema = generateSchema(true, isFed, teamspace, project);
 		await schema.validate(req.body);
 
 		req.body.properties = { unit: req.body.unit.toLowerCase() };
@@ -119,11 +119,11 @@ ModelSettings.validateAddModelData = async (req, res, next) => {
 	}
 };
 
-ModelSettings.validateUpdateSettingsData = async (req, res, next) => {
+ModelSettings.validateUpdateSettingsData = (isFed) => async (req, res, next) => {
 	try {
 		const { teamspace, project } = req.params;
-		const model = req.params.container ?? req.params.federation;
-		const schema = generateSchema(false, teamspace, project, model);
+		const model = isFed ? req.params.federation : req.params.container;
+		const schema = generateSchema(false, isFed, teamspace, project, model);
 		req.body = await schema.validate(req.body);
 		convertBodyUUIDs(req);
 		next();

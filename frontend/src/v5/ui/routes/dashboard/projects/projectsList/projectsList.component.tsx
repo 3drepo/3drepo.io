@@ -16,7 +16,6 @@
  */
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import {
 	DashboardList,
@@ -24,18 +23,11 @@ import {
 } from '@components/dashboard/dashboardList';
 import { IProject } from '@/v5/store/projects/projects.redux';
 import { ProjectListItem } from '@/v5/ui/routes/dashboard/projects/projectsList/projectListItem/projectListItem.component';
-import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { Container } from './projectsList.styles';
 
 export const ProjectList = (): JSX.Element => {
-	const { teamspace } = useParams();
-
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
-
-	React.useEffect(() => {
-		if (teamspace) ProjectsActionsDispatchers.fetch(teamspace);
-	}, [teamspace]);
 
 	return (
 		<Container>

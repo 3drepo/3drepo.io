@@ -20,8 +20,12 @@
 const _ = require("lodash");
 const parse = require("csv-parse/lib/sync");
 const db = require("../handler/db");
+const {Duplex} = require("stream");
 const responseCodes = require("../response_codes.js");
 const utils = require("../utils");
+const Stream = require("stream");
+const { systemLogger } = require("../logger");
+const { Transform } = require("json2csv");
 
 // NB: Order of fieldTypes important for importCSV
 const fieldTypes = {
@@ -34,28 +38,62 @@ const fieldTypes = {
 	"element": "[object String]",
 	"risk_factor": "[object String]",
 	"scope": "[object String]",
-	"associated_activity": "[object String]"
+	"associated_activity": "[object String]",
+	"referencedRisks": "[object Array]"
 };
+
+const mitigationSuggestionsBlacklist = [
+	"mitigation_desc",
+	"mitigation_detail",
+	"mitigation_stage",
+	"mitigation_type",
+	"referencedRisks"
+];
+
+const mitigationCriteriaBlacklist = [
+	"mitigation_desc",
+	"mitigation_detail",
+	"referencedRisks"
+];
+
+const colName = "mitigations";
+
+const isMitigationStatusResolved = (mitigationStatus) => mitigationStatus === "agreed_partial" || mitigationStatus === "agreed_fully";
+
+const formatRiskReference = (teamspace, modelId, riskId) => `${teamspace}::${modelId}::${riskId}`;
 
 class Mitigation {
 	getMitigationCollection(account) {
-		return db.getCollection(account, "mitigations");
+		return db.getCollection(account, colName);
 	}
 
 	async clearAll(account) {
-		const mitigationColl = await this.getMitigationCollection(account);
-		return await mitigationColl.deleteMany({});
+		return await db.deleteMany(account, colName);
+	}
+
+	async deleteOne(account, id) {
+		return await db.deleteOne(account, colName, { _id: id });
+	}
+
+	async isMitigationCreationFeatureOn (account) {
+		try{
+			const TeamspaceSettings = require("./teamspaceSetting");
+			const settings = await TeamspaceSettings.getTeamspaceSettings(account,	{  _id: 0, createMitigationSuggestions: 1});
+			return settings.createMitigationSuggestions;
+		} catch (error) {
+			systemLogger.logError(error);
+		}
+		return false;
 	}
 
 	async getCriteria(account) {
 		const mitigationColl = await this.getMitigationCollection(account);
-		const attributeBlacklist = ["mitigation_desc", "mitigation_detail"];
-		const criteriaFields = Object.keys(_.omit(fieldTypes, attributeBlacklist));
+
+		const criteriaFields = Object.keys(_.omit(fieldTypes, mitigationCriteriaBlacklist));
 		const criteriaPromises = [];
 		const criteria = {};
 
 		const TeamspaceSettings = require("./teamspaceSetting");
-
 		// Get teamspace categories
 		const teamspaceCategories = await TeamspaceSettings.getRiskCategories(account);
 
@@ -74,23 +112,17 @@ class Mitigation {
 	}
 
 	async findMitigationSuggestions(account, criteria) {
-		const mitigationColl = await this.getMitigationCollection(account);
-		const attributeBlacklist = [
-			"mitigation_desc",
-			"mitigation_detail",
-			"mitigation_stage",
-			"mitigation_type"
-		];
+		const attributeBlacklist = mitigationSuggestionsBlacklist;
 		const criteriaFilterFields = Object.keys(_.omit(fieldTypes, attributeBlacklist));
 
 		// Only pick supported fields and clean empty criteria
 		Object.keys(criteria).forEach((key) => {
-			if (!criteriaFilterFields.includes(key) || criteria[key] === null || criteria[key] === "") {
+			if (!criteriaFilterFields.includes(key) || criteria[key] === null || criteria[key] === undefined || criteria[key] === "") {
 				delete criteria[key];
 			}
 		});
 
-		return await mitigationColl.find(criteria).toArray();
+		return await db.find(account, colName, criteria);
 	}
 
 	async importCSV(account, data) {
@@ -100,14 +132,53 @@ class Mitigation {
 			columns: csvFields,
 			skip_empty_lines: true,
 			from_line: 2,
-			trim: true
+			trim: true,
+			relax_column_count: true
 		});
+
+		for(const record of records) {
+			if(record?.referencedRisks?.length > 2
+				&& record.referencedRisks.match(/^\[(.+::.+::.+)*\]$/)?.length
+			) {
+				const riskRefsArray = record.referencedRisks.substring(1, record.referencedRisks.length - 1).split(",");
+				record.referencedRisks = riskRefsArray.map((entry) => entry.replace(/"|'/g, ""));
+			} else {
+				delete record.referencedRisks;
+			}
+		}
 
 		return this.insert(account, records);
 	}
 
-	async insert(account, mitigations) {
-		const mitigationColl = await this.getMitigationCollection(account);
+	bufferToStream(myBuffer) {
+		const tmp = new Duplex();
+		tmp.push(myBuffer);
+		tmp.push(null);
+		return tmp;
+	}
+
+	async exportCSV(account) {
+		const mitigations = await db.find(account, colName);
+
+		if(!mitigations.length) {
+			throw responseCodes.NO_MITIGATIONS_FOUND;
+		}
+
+		const mitigationsBuffer = Buffer.from(JSON.stringify(mitigations));
+
+		const fields = Object.keys(fieldTypes);
+		const opts = { fields };
+		const transformOpts = { highWaterMark: 16384, encoding: "utf-8" };
+
+		const input = this.bufferToStream(mitigationsBuffer);
+		const output = Stream.PassThrough();
+		const json2csv = new Transform(opts, transformOpts);
+
+		input.pipe(json2csv).pipe(output);
+		return output;
+	}
+
+	async insert(account, mitigations, clearAll = true) {
 		const requiredFields = ["mitigation_desc"];
 		const optionalFields = Object.keys(_.omit(fieldTypes, requiredFields));
 
@@ -122,7 +193,7 @@ class Mitigation {
 			});
 
 			optionalFields.forEach((key) => {
-				if (newMitigation[key] === "") {
+				if (!newMitigation[key]) {
 					delete newMitigation[key];
 				}
 			});
@@ -132,10 +203,56 @@ class Mitigation {
 			mitigations[i] = newMitigation;
 		}
 
-		await this.clearAll(account);
-		await mitigationColl.insertMany(mitigations);
+		if (clearAll) {
+			await this.clearAll(account);
+		}
+
+		await db.insertMany(account, colName, mitigations);
 
 		return mitigations;
+	}
+
+	async update(account, id, updateData) {
+		await db.updateOne(account, colName, { _id: id }, updateData);
+	}
+
+	async updateMitigationsFromRisk(account, model, oldRisk, updatedRisk) {
+		const isFeatureOn = await this.isMitigationCreationFeatureOn(account);
+		if(!isFeatureOn) {
+			return;
+		}
+
+		const riskId = updatedRisk._id;
+		const oldStatusIsResolved = !!oldRisk?.mitigation_desc && isMitigationStatusResolved(oldRisk.mitigation_status);
+		const newStatusIsResolved = !!updatedRisk?.mitigation_desc && isMitigationStatusResolved(updatedRisk.mitigation_status);
+
+		const mitigationDetails = _.pickBy(updatedRisk,  (value, key) => value && fieldTypes[key]);
+		const formattedReference = formatRiskReference(account, model, riskId);
+
+		if(oldStatusIsResolved) {
+			const oldMitigation = await db.findOne(account, colName, { referencedRisks: formattedReference });
+			if (oldMitigation) {
+				if (oldMitigation.referencedRisks.length === 1) {
+					await this.deleteOne(account, oldMitigation._id);
+				} else {
+					await db.updateOne(account, colName, { _id: oldMitigation._id }, { $pull: { referencedRisks: formattedReference } });
+				}
+			}
+		}
+
+		if(newStatusIsResolved) {
+			const mitigation = await db.findOne(account, colName, mitigationDetails, {referencedRisks: 1});
+			if (!mitigation) {
+				try {
+					await this.insert(account, [{ ...mitigationDetails, referencedRisks: [formattedReference] }], false);
+				} catch (error) {
+					systemLogger.logError(error);
+				}
+			} else if (mitigation.referencedRisks && !mitigation.referencedRisks.includes(formattedReference)) {
+				mitigation.referencedRisks.push(formattedReference);
+				await this.update(account, mitigation._id, { $set: { referencedRisks: mitigation.referencedRisks } });
+			}
+		}
 	}
 }
 

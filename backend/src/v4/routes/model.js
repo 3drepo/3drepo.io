@@ -32,8 +32,10 @@ const JSONAssets = require("../models/jsonAssets");
 const Upload = require("../models/upload");
 const config = require("../config");
 const {v5Path} = require("../../interop");
-const { validateNewRevisionData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions`);
+const { validateNewRevisionData : validateNewModelRevisionData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/containers`);
+const { validateNewRevisionData : validateNewFedRevisionData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/federations`);
 const ContainersV5 = require(`${v5Path}/processors/teamspaces/projects/models/containers`);
+const FederationsV5 = require(`${v5Path}/processors/teamspaces/projects/models/federations`);
 
 function convertProjectToParam(req, res, next) {
 	if (req.body.project) {
@@ -609,7 +611,7 @@ router.get("/:model/revision/master/head/srcAssets.json", middlewares.hasReadAcc
  *
  */
 
-router.put("/:model", middlewares.hasEditAccessToFedModel, updateModel);
+router.put("/:model", middlewares.hasEditAccessToFedModel, middlewares.formatV5NewFedRevisionsData, validateNewFedRevisionData, updateModel);
 
 /**
  * @api {post} /:teamspace/models/permissions Update multiple models permissions
@@ -1714,7 +1716,7 @@ router.patch("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToM
  * ------WebKitFormBoundarySos0xligf1T8Sy8I-- *
  *
  */
-router.post("/:model/upload",  middlewares.hasUploadAccessToModel, middlewares.formatV5NewRevisionsData, validateNewRevisionData, uploadModel);
+router.post("/:model/upload",  middlewares.hasUploadAccessToModel, middlewares.formatV5NewModelRevisionsData, validateNewModelRevisionData, uploadModel);
 
 /**
  * @api {get} /:teamspace/:model/download/latest Download model
@@ -1875,32 +1877,22 @@ function createModel(req, res, next) {
 	}
 }
 
-function updateModel(req, res, next) {
+async function updateModel(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
-	const {account, model} = req.params;
-	const username = req.session.user.username;
+	const {teamspace, federation} = req.params;
+	const owner = req.session.user.username;
 
-	let promise = null;
-
-	if (Object.keys(req.body).length >= 1 && Array.isArray(req.body.subModels)) {
-		if (req.body.subModels.length > 0) {
-			promise = ModelSetting.isFederation(account, model).then(() => {
-				return ModelHelpers.createFederatedModel(account, model, username, req.body.subModels);
-			}).then(() => {
-				return ModelSetting.updateSubModels(account, model, req.body.subModels);
-			});
-		} else {
-			promise = Promise.reject(responseCodes.SUBMODEL_IS_MISSING);
-		}
-	} else {
-		promise = Promise.reject(responseCodes.INVALID_ARGUMENTS);
-	}
-
-	promise.then((setting) => {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, model, setting });
-	}).catch(err => {
+	try {
+		await FederationsV5.newRevision(teamspace, federation, {owner, ...req.body});
+		const setting = await ModelHelpers.getModelSetting(teamspace, federation, owner);
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
+			account: teamspace,
+			model: federation,
+			setting: {...setting, subModels: req.body.containers }
+		});
+	} catch(err) {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
+	}
 }
 
 function deleteModel(req, res, next) {
@@ -2092,10 +2084,10 @@ function uploadModel(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
 	const { file } = req;
 	const revInfo = req.body;
-	const { teamspace, model } = req.params;
+	const { teamspace, container } = req.params;
 	const owner = req.session.user ? req.session.user.username : undefined;
 
-	ContainersV5.newRevision(teamspace, model, { ...revInfo, owner }, file).then(() => {
+	ContainersV5.newRevision(teamspace, container, { ...revInfo, owner }, file).then(() => {
 		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "uploaded"});
 	}).catch(err => {
 		err = err.resCode ? err.resCode : err;

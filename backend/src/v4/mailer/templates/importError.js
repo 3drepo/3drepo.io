@@ -36,7 +36,7 @@ const html = data => `
 	domain: ${data.domain}
 `;
 
-const subject = data => `[System][${data.domain}] Model import error ${data.corID}`;
+const subject = data => `[System][${data.domain}] Model import error - ${data.account}`;
 
 module.exports =  {
 	html: html,
