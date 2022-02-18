@@ -23,15 +23,11 @@ import {
 import { TeamspaceListItem } from '@/v5/ui/routes/dashboard/teamspaces/teamspacesList/teamspaceListItem/teamspaceListItem.component';
 import { FormattedMessage } from 'react-intl';
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
-import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
 import { Container } from './teamspacesList.styles';
 
 export const TeamspacesList = (): JSX.Element => {
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
-	React.useEffect(() => {
-		TeamspacesActionsDispatchers.fetch();
-	});
 
 	return (
 		<Container>

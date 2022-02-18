@@ -122,7 +122,7 @@ Risks.getRisksCount.mockImplementation((teamspace, federation) => {
 });
 
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
-Views.checkViewExists.mockImplementation((teamspace, model, view) => {
+Views.getViewById.mockImplementation((teamspace, model, view) => {
 	if (view === 1) {
 		return 1;
 	}

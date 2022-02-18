@@ -19,7 +19,6 @@ import React from 'react';
 import { Typography } from '@material-ui/core';
 import { MenuList, MenuItem } from './navigationMenu.styles';
 
-// const isSelected = (selectedItem: string, to: string) => lastItemOf(to.split('/')) === selectedItem;
 interface IListItem {
 	title: string;
 	to: string;
