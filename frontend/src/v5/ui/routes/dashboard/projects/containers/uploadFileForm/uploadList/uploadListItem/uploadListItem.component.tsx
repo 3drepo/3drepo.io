@@ -45,7 +45,7 @@ export const UploadListItem = ({
 	isSelected,
 	onChange,
 }: IUploadListItem): JSX.Element => {
-	const { control, getValues, formState: { errors }, watch } = useForm({
+	const { control, getValues, formState: { errors } } = useForm({
 		defaultValues: item,
 		mode: 'onChange',
 		resolver: yupResolver(ListItemSchema),
