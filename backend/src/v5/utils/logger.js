@@ -37,6 +37,7 @@ Logger.labels = {
 	network: 'NET',
 	event: 'EVENT',
 	queue: 'AMQP',
+	chat: 'CHAT',
 };
 
 module.exports = Logger;

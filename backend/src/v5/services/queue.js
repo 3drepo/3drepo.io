@@ -33,12 +33,15 @@ const {
 	callback_queue: callbackq,
 	worker_queue: jobq,
 	model_queue: modelq,
+	event_exchange: eventExchange,
 	shared_storage: sharedDir,
 } = queueConfig;
 
 let retry = 0;
 let connClosed = false;
 let connectionPromise;
+
+const eventCallbacks = new Set();
 
 const reconnect = () => {
 	if (++retry <= maxRetries) {
@@ -83,6 +86,22 @@ const initCallbackQueueListener = async (conn) => {
 	channel.consume(queue, onCallbackQMsg, { noAck: true });
 };
 
+const initEventQueueListener = async (conn) => {
+	const channel = await conn.createChannel();
+	await channel.assertExchange(eventExchange, 'fanout', { durable: true });
+	const queue = await channel.assertQueue('', { exclusive: true });
+	await channel.bindQueue(queue.queue, eventExchange, '');
+	channel.consume(queue.queue, ({ content }) => {
+		try {
+			const data = JSON.parse(content);
+			logger.logDebug(`[${eventExchange}][CONSUME]\t${JSON.stringify(data)}`);
+			eventCallbacks.forEach((func) => { func(data); });
+		} catch (err) {
+			logger.logError(`[${eventExchange}][CONSUME]\t${err?.message}`);
+		}
+	}, { noAck: true });
+};
+
 const connect = async () => {
 	/* istanbul ignore next */
 	if (connectionPromise) return connectionPromise;
@@ -93,6 +112,7 @@ const connect = async () => {
 		retry = 0;
 		connClosed = false;
 		initCallbackQueueListener(conn);
+		initEventQueueListener(conn);
 
 		conn.on('close',
 			/* istanbul ignore next */
@@ -219,6 +239,10 @@ Queue.queueFederationUpdate = async (teamspace, federation, info) => {
 		logger.logError('Failed to queue federate job', err?.message);
 		throw templates.queueInsertionFailed;
 	}
+};
+
+Queue.subscribeToEventsQueue = (func) => {
+	eventCallbacks.add(func);
 };
 
 Queue.init = () => connect();

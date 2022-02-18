@@ -18,40 +18,19 @@
 "use strict";
 
 const { v5Path } = require("../../interop");
+const SessionV5 = require(`${v5Path}/services/sessions`);
 const { publish: publishV5Event} = require(`${v5Path}/services/eventsManager/eventsManager`);
 const EventsV5 = require(`${v5Path}/services/eventsManager/eventsManager.constants`).events;
-const expressSession = require("express-session");
 const db = require("../handler/db");
 const config = require("../config");
 const C = require("../constants");
 const utils = require("../utils");
 const { systemLogger } = require("../logger");
-const store = db.getSessionStore(expressSession);
 const useragent = require("useragent");
-
-const initialiseSession = () => {
-	const isSSL = config.public_protocol === "https";
-	return expressSession({
-		secret: config.cookie.secret,
-		resave: true,
-		rolling: true,
-		saveUninitialized: false,
-		cookie: {
-			maxAge: config.cookie.maxAge,
-			domain: config.cookie.domain,
-			path: "/",
-			secure: isSSL,
-			// None can only applied with secure set to true, which requires SSL.
-			// None is required for embeddable viewer to work.
-			sameSite:  isSSL ? "None" : "Lax"
-		},
-		store: store
-	});
-};
 
 const SessionService = {};
 
-SessionService.session = initialiseSession();
+SessionService.session = SessionV5.session;
 
 SessionService.regenerateAuthSession = (req, user) => {
 	return new Promise((resolve, reject) => {

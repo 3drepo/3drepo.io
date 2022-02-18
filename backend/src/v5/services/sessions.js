@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const config = require('../utils/config');
 const db = require('../handler/db');
 
 const { events } = require('./eventsManager/eventsManager.constants');
 const expressSession = require('express-session');
 const { publish } = require('./eventsManager/eventsManager');
 
-const Sessions = {};
+const Sessions = { SESSION_HEADER: 'connect.sid' };
 
-// istanbul ignore next
-Sessions.session = (config) => {
+const initialiseSession = () => {
 	const store = db.getSessionStore(expressSession);
 	const secure = config.public_protocol === 'https';
 	const { secret, maxAge, domain } = config.cookie;
@@ -45,6 +45,8 @@ Sessions.session = (config) => {
 		store,
 	});
 };
+
+Sessions.session = initialiseSession();
 
 Sessions.getSessions = (query, projection, sort) => db.find('admin', 'sessions', query, projection, sort);
 
