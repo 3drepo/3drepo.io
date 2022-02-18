@@ -39,6 +39,7 @@ const grantRolesToUser = async (currentUser, user, roles) => {
 	});
 	return Promise.all(results);
 };
+
 const revokeRolesFromUser = async (currentUser, user, roles) => {
 	const results = roles.map(async (role) => {
 		const userHasRole = await hasAdministrativeRole(user, role);
