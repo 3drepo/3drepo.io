@@ -15,8 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Button from '@material-ui/core/Button';
+import MuiButtonBase from '@material-ui/core/Button';
 import styled, { css } from 'styled-components';
+
+export const MuiButton = styled(MuiButtonBase)`
+	white-space: nowrap;
+`;
 
 export const labelButtonPrimaryStyles = css`
 	color: ${({ theme }) => theme.palette.primary.contrast};
@@ -98,7 +102,7 @@ export const labelOutlinedButtonSecondaryStyles = css`
 	}
 `;
 
-export const LabelButton = styled(Button)`
+export const LabelButton = styled(MuiButton)`
 	align-items: center;
 	padding: 8px 12px 8px 15px;
 
@@ -134,7 +138,7 @@ export const LabelButton = styled(Button)`
 	}}
 `;
 
-export const ErrorButton = styled(Button).attrs({
+export const ErrorButton = styled(MuiButton).attrs({
 	variant: 'outlined',
 })`
 	height: 35px;

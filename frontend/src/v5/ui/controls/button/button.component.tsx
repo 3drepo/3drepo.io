@@ -16,10 +16,10 @@
  */
 
 import React from 'react';
-import MuiButton, { ButtonProps } from '@material-ui/core/Button';
+import { ButtonProps } from '@material-ui/core/Button';
 import { Typography } from '@/v5/ui/controls/typography';
 import { ButtonTypeMap } from '@material-ui/core/Button/Button';
-import { ErrorButton, LabelButton } from './button.styles';
+import { MuiButton, ErrorButton, LabelButton } from './button.styles';
 
 type ButtonVariants = ButtonProps['variant'] | 'label' | 'label-outlined';
 

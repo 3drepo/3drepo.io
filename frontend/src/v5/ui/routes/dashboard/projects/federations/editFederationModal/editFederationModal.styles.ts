@@ -16,37 +16,15 @@
  */
 
 import styled from 'styled-components';
-import { FormDialogContent } from '@controls/modal/formModal/formDialog.styles';
-import { FormModal as FormModalBase } from '@controls/modal/formModal/formDialog.component';
-import { HeaderButtonsGroup } from '@/v5/ui/routes/dashboard/projects/containers/containers.styles';
-import BaseIncludeIcon from '@assets/icons/include_element.svg';
-import BaseRemoveIcon from '@assets/icons/remove_element.svg';
-
-export const FormModal = styled(FormModalBase)`
-
-	.MuiDialog-paper {
-		max-width: fit-content;
-	}
-
-	${FormDialogContent} {
-		margin: 0;
-		padding-bottom: 0;
-		max-width: 1289px;
-	}
-
-	${HeaderButtonsGroup} {
-		display: flex;
-		justify-content: flex-end;
-		margin-right: 15px;
-	}
-`;
+import IncludeIconBase from '@assets/icons/include_element.svg';
+import RemoveIconBase from '@assets/icons/remove_element.svg';
 
 export const IconContainer = styled.div`
 	display: grid;
 	min-width: 46px;
 `;
 
-export const IncludeIcon = styled(BaseIncludeIcon)`
+export const IncludeIcon = styled(IncludeIconBase)`
 	&:hover {
 		circle {
 			fill: ${({ theme }) => theme.palette.primary.dark};
@@ -87,7 +65,7 @@ export const IncludeIcon = styled(BaseIncludeIcon)`
 	`}
 `;
 
-export const RemoveIcon = styled(BaseRemoveIcon)`
+export const RemoveIcon = styled(RemoveIconBase)`
 	&:hover {
 		circle {
 			fill: ${({ theme }) => theme.palette.error.dark};

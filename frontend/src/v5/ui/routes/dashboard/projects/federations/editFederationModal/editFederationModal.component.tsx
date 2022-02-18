@@ -26,7 +26,8 @@ import { Tooltip } from '@material-ui/core';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import { useParams } from 'react-router-dom';
 import { isEmpty } from 'lodash';
-import { FormModal, IconContainer, IncludeIcon, RemoveIcon } from './editFederationModal.styles';
+import { FormModal } from '@controls/modal/formModal/formDialog.component';
+import { IconContainer, IncludeIcon, RemoveIcon } from './editFederationModal.styles';
 import { ActionButtonProps, EditFederationContainers, IconButtonProps } from './editFederationContainersList/editFederationContainersList.component';
 import { useContainersData } from '../../containers/containers.hooks';
 
@@ -97,6 +98,8 @@ export const EditFederationModal = ({
 			onClickClose={onClickClose}
 			onSubmit={saveChanges}
 			isValid={includedContainers.length > 0}
+			maxWidth="lg"
+			zeroMargin
 		>
 			<EditFederationContainers
 				containers={includedContainers}
