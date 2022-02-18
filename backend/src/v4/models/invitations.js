@@ -32,15 +32,7 @@ const { omit } = require("lodash");
 
 const MODELS_PERMISSION = ["collaborator", "commenter", "viewer"];
 
-<<<<<<< HEAD
-const getCollection = async () => {
-	const coll = await db.getCollection("admin", "invitations");
-	coll.createIndex({ "teamSpaces.teamspace": 1 }, { "background": true });
-	return coll;
-};
-=======
 const getCollection = () => db.getCollection("admin", "invitations");
->>>>>>> staging
 
 const invitations = {};
 
