@@ -23,7 +23,7 @@ const { events } = require('../eventsManager/eventsManager.constants');
 const logger = require('../../utils/logger').logWithLabel(chatLabel);
 const sharedSession = require('express-socket.io-session');
 const { subscribe } = require('../eventsManager/eventsManager');
-const { subscribeToEventsQueue } = require('../queue');
+const { subscribeToEventQueue } = require('../queue');
 
 const ChatService = {};
 
@@ -84,7 +84,7 @@ const init = (server) => {
 ChatService.createApp = (server) => {
 	const service = init(server);
 	subscribeToEvents();
-	subscribeToEventsQueue((msg) => onMessage(service, msg));
+	subscribeToEventQueue((msg) => onMessage(service, msg));
 };
 
 module.exports = ChatService;

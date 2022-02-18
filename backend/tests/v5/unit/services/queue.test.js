@@ -150,19 +150,17 @@ const testQueueFederationUpdate = () => {
 };
 
 const testCallbackQueueConsumer = () => {
+	const waitForConsumer = () => new Promise((resolve) => {
+		AMQP.connect.mockResolvedValueOnce(createFakeConnection(undefined, (a, cb) => {
+			resolve(cb);
+		}));
+		Queue.init();
+	});
+
 	describe('Callback queue consumption', () => {
-		let callbackFn;
 		test(`Should trigger ${events.QUEUED_TASK_UPDATE} event if there is a task update message`, async () => {
 			publishFn.mockClear();
-			const waitForConsume = new Promise((resolve) => {
-				AMQP.connect.mockResolvedValueOnce(createFakeConnection(undefined, (a, cb) => {
-					callbackFn = cb;
-					resolve();
-				}));
-				Queue.init();
-			});
-
-			await waitForConsume;
+			const callbackFn = await waitForConsumer();
 
 			expect(callbackFn).not.toBe(undefined);
 			const content = {
@@ -189,15 +187,7 @@ const testCallbackQueueConsumer = () => {
 
 		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event if there is a task failed message`, async () => {
 			publishFn.mockClear();
-			const waitForConsume = new Promise((resolve) => {
-				AMQP.connect.mockResolvedValueOnce(createFakeConnection(undefined, (a, cb) => {
-					callbackFn = cb;
-					resolve();
-				}));
-				Queue.init();
-			});
-
-			await waitForConsume;
+			const callbackFn = await waitForConsumer();
 
 			expect(callbackFn).not.toBe(undefined);
 			const content = {
@@ -226,16 +216,7 @@ const testCallbackQueueConsumer = () => {
 
 		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event with container information if the task was a federation`, async () => {
 			publishFn.mockClear();
-			const waitForConsume = new Promise((resolve) => {
-				AMQP.connect.mockResolvedValueOnce(createFakeConnection(undefined, (a, cb) => {
-					callbackFn = cb;
-					resolve();
-				}));
-				Queue.init();
-			});
-
-			await waitForConsume;
-
+			const callbackFn = await waitForConsumer();
 			expect(callbackFn).not.toBe(undefined);
 			const content = {
 				database: generateRandomString(),
@@ -273,16 +254,7 @@ const testCallbackQueueConsumer = () => {
 
 		test('Should fail gracefully if the service failed to process the message', async () => {
 			publishFn.mockClear();
-			const waitForConsume = new Promise((resolve) => {
-				AMQP.connect.mockResolvedValueOnce(createFakeConnection(undefined, (a, cb) => {
-					callbackFn = cb;
-					resolve();
-				}));
-				Queue.init();
-			});
-
-			await waitForConsume;
-
+			const callbackFn = await waitForConsumer();
 			expect(callbackFn).not.toBe(undefined);
 
 			const properties = {
@@ -297,8 +269,56 @@ const testCallbackQueueConsumer = () => {
 	afterEach(Queue.close);
 };
 
+const testEventQueueConsumer = () => {
+	describe('Event queue consumption', () => {
+		const waitForConsumer = () => new Promise((resolve) => {
+			AMQP.connect.mockResolvedValueOnce(createFakeConnection(undefined, undefined, (a, cb) => {
+				resolve(cb);
+			}));
+			Queue.init();
+		});
+
+		test('Should pass the message on if there are consumers', async () => {
+			const con1 = jest.fn();
+			const con2 = jest.fn();
+			const callbackFn = await waitForConsumer();
+			expect(callbackFn).not.toBe(undefined);
+
+			Queue.subscribeToEventQueue(con1);
+			Queue.subscribeToEventQueue(con2);
+
+			const content1 = { someData: generateRandomString() };
+			const content2 = { someData: generateRandomString() };
+
+			callbackFn({ content: JSON.stringify(content1) });
+			callbackFn({ content: JSON.stringify(content2) });
+
+			expect(con1.mock.calls.length).toBe(2);
+			expect(con2.mock.calls.length).toBe(2);
+			expect(con1.mock.calls[0][0]).toEqual(content1);
+			expect(con2.mock.calls[0][0]).toEqual(content1);
+			expect(con1.mock.calls[1][0]).toEqual(content2);
+			expect(con2.mock.calls[1][0]).toEqual(content2);
+		});
+
+		test('Should not fail if there are no consumers for events', async () => {
+			const callbackFn = await waitForConsumer();
+			expect(callbackFn).not.toBe(undefined);
+			callbackFn({ content: { someData: generateRandomString() } });
+		});
+
+		test('Should fail gracefully if the service failed to process the message', async () => {
+			const callbackFn = await waitForConsumer();
+			expect(callbackFn).not.toBe(undefined);
+			callbackFn({ });
+		});
+	});
+	afterEach(Queue.close);
+};
+
 describe('services/queue', () => {
 	testQueueModelUpload();
 	testQueueFederationUpdate();
 	testCallbackQueueConsumer();
+	testEventQueueConsumer();
 });

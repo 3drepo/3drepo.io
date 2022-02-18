@@ -83,6 +83,7 @@ const onEventQMsg = ({ content }) => {
 	try {
 		const data = JSON.parse(content);
 		logger.logDebug(`[${eventExchange}][CONSUME]\t${JSON.stringify(data)}`);
+
 		eventCallbacks.forEach((func) => { func(data); });
 	} catch (err) {
 		logger.logError(`[${eventExchange}][CONSUME]\t${err?.message}`);
@@ -243,7 +244,7 @@ Queue.queueFederationUpdate = async (teamspace, federation, info) => {
 	}
 };
 
-Queue.subscribeToEventsQueue = (func) => {
+Queue.subscribeToEventQueue = (func) => {
 	eventCallbacks.add(func);
 };
 
@@ -253,6 +254,7 @@ Queue.close = async () => {
 		(await connectionPromise).close();
 		connectionPromise = undefined;
 	}
+	eventCallbacks.clear();
 };
 
 module.exports = Queue;
