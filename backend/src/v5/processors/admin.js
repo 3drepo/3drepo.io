@@ -91,4 +91,14 @@ Admin.patchUsersRoles = async (currentUser, users) => {
 	return getUsersWithRole(patchUsers);
 };
 
+Admin.revokeUsersRoles = async (currentUser, users) => {
+	const revokeUsers = [];
+	const results = users.map(async (user) => {
+		revokeUsers.push(user.user);
+		await revokeRolesFromUser(currentUser, user.user, user.roles);
+	});
+	await Promise.all(results);
+	return getUsersWithRole(revokeUsers);
+};
+
 module.exports = Admin;

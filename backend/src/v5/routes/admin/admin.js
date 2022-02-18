@@ -51,6 +51,17 @@ const putUsersRoles = (req, res) => {
 	);
 };
 
+const revokeUsersRoles = (req, res) => {
+	const user = getUserFromSession(req.session);
+	const { users } = req.body;
+	Admin.revokeUsersRoles(user, users).then((u) => {
+		respond(req, res, templates.ok, { users: u });
+	}).catch(
+		/* istanbul ignore next */
+		(err) => respond(req, res, err),
+	);
+};
+
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 
@@ -237,6 +248,70 @@ const establishRoutes = () => {
 	 *
 	 * */
 	router.patch('/roles', hasWriteAccessToSystemRoles, validatePayload, validateUsersAndRoles, patchUsersRoles);
+
+	/**
+	 * @openapi
+	 * /admin/roles:
+	 *   delete:
+	 *     description: delete existing roles
+	 *     tags: [Admin]
+	 *     operationId: deleteUserRoles
+	 *     requestBody:
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 users:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       user:
+	 *                         type: string
+	 *                         description: name of the user
+	 *                         example: abc
+	 *                       roles:
+	 *                         type: array
+	 *                         items:
+	 *                           type: string
+	 *                           description: Name of additional role
+	 *                           enum: [system_admin, support_admin, license_admin]
+	 *                           example: support_admin
+	 *     responses:
+	 *       400:
+	 *         $ref: "#/components/responses/invalidArguments"
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       403:
+	 *         $ref: "#/components/responses/notAuthorizedForbidden"
+     *       200:
+	 *         description: confirms objects modified, returns current state of users submitted
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 users:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       user:
+	 *                         type: string
+	 *                         description: name of the user
+	 *                         example: abc
+	 *                       roles:
+	 *                         type: array
+	 *                         items:
+	 *                           type: string
+	 *                           description: Name of additional role
+	 *                           enum: [system_admin, support_admin, license_admin]
+	 *                           example: support_admin
+	 *
+	 * */
+
+	router.delete('/roles', hasWriteAccessToSystemRoles, validatePayload, validateUsersAndRoles, revokeUsersRoles);
 
 	return router;
 };
