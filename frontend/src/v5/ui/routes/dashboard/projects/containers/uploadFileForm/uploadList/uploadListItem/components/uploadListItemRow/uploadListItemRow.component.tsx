@@ -21,17 +21,15 @@ import { Content } from './uploadListItemRow.styles';
 
 type IUploadListItemRow = {
 	selected: boolean;
-	onChange: (e) => void;
 	children: React.ReactNode;
 };
 
 export const UploadListItemRow = ({
-	onChange,
 	selected,
 	children,
 }: IUploadListItemRow): JSX.Element => (
 	<UploadListItem selected={selected}>
-		<Content selected={selected} onChange={onChange}>
+		<Content selected={selected}>
 			{children}
 		</Content>
 	</UploadListItem>

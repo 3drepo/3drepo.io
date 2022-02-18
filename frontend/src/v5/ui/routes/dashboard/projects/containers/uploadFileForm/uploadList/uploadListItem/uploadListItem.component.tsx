@@ -45,18 +45,18 @@ export const UploadListItem = ({
 	isSelected,
 	onChange,
 }: IUploadListItem): JSX.Element => {
-	const { control, getValues, formState: { errors } } = useForm({
+	const { control, getValues, formState: { errors }, watch } = useForm({
 		defaultValues: item,
 		mode: 'onChange',
 		resolver: yupResolver(ListItemSchema),
 	});
 
-	const updateValue = (name) => onChange(name, getValues(name));
+	onChange('containerName', getValues('containerName'));
+	onChange('revisionTag', getValues('revisionTag'));
 
 	return (
 		<UploadListItemRow
 			key={item.uploadId}
-			onChange={(e) => updateValue(e.target.name)}
 			selected={isSelected}
 		>
 			<UploadListItemFileIcon extension={item.extension} />
