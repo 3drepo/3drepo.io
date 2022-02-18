@@ -21,7 +21,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
 import { selectCurrentUser } from '@/v4/modules/currentUser';
-import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { Container, V4ModelsPermissions } from './containersAndFederationsPermissions.styles';
 
 export const ContainersAndFederationsPermissions = () => {
@@ -45,9 +44,7 @@ export const ContainersAndFederationsPermissions = () => {
 
 	return (
 		<Container>
-			<FixedOrGrowContainer>
-				<V4ModelsPermissions />
-			</FixedOrGrowContainer>
+			<V4ModelsPermissions />
 		</Container>
 	);
 };

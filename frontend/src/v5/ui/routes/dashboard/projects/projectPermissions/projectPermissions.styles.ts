@@ -17,6 +17,7 @@
 import { Row } from '@/v4/routes/components/customTable/customTable.styles';
 import styled from 'styled-components';
 import { ProjectsPermissions } from '@/v4/routes/projects/projectsPermissions';
+import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 
 export const V4ProjectsPermissions = styled(ProjectsPermissions)`
 	${Row} > :nth-child(2) {
@@ -25,6 +26,6 @@ export const V4ProjectsPermissions = styled(ProjectsPermissions)`
 	}
 `;
 
-export const Container = styled.div`
+export const Container = styled(FixedOrGrowContainer)`
 	padding-top: 5px;
 `;

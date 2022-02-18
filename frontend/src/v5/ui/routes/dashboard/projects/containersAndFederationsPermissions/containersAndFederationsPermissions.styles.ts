@@ -20,6 +20,7 @@ import { ModelsContainer } from '@/v4/routes/modelsPermissions/modelsPermissions
 import { Container as TextOverlay } from '@/v4/routes/components/textOverlay/textOverlay.styles';
 import { Row, BodyWrapper } from '@/v4/routes/components/customTable/customTable.styles';
 import { Detail, Name } from '@/v4/routes/components/modelItem/modelItem.styles';
+import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 
 export const V4ModelsPermissions = styled(ModelsPermissions)`
 	${ModelsContainer} {
@@ -56,6 +57,6 @@ export const V4ModelsPermissions = styled(ModelsPermissions)`
 	}
 `;
 
-export const Container = styled.div`
+export const Container = styled(FixedOrGrowContainer)`
 	padding-top: 5px;
 `;
