@@ -41,7 +41,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		mode: 'onChange',
 		resolver: yupResolver(UploadsSchema),
 	});
-	const { control, handleSubmit, formState, trigger, getValues, setValue } = methods;
+	const { control, handleSubmit, formState, trigger, getValues, setValue, watch } = methods;
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'uploads',
@@ -121,6 +121,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 						/>
 					</Content>
 					<Sidebar
+						key={watch(`uploads.${selectedIndex}.containerId`)}
 						open={Number.isInteger(selectedIndex)}
 						onClick={() => setSelectedIndex(null)}
 						noButton={!(Number.isInteger(selectedIndex))}
