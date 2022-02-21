@@ -28,7 +28,7 @@ const searchPhrase = 'test phrase';
 const projectId = 'projectId';
 const defaultState: IFederationsState = {
 	...INITIAL_STATE,
-	federations:
+	federationsByProject:
 		{
 			[projectId]: [
 				federationMockFactory({ isFavourite: true, name: searchPhrase }),
@@ -42,7 +42,7 @@ const defaultState: IFederationsState = {
 describe('Federations: selectors', () => {
 	describe('selectFavouriteFederations', () => {
 		it('should return favourite federations', () => {
-			const selected = selectFavouriteFederations.resultFunc(defaultState.federations[projectId]);
+			const selected = selectFavouriteFederations.resultFunc(defaultState.federationsByProject[projectId]);
 			expect(selected).toHaveLength(6);
 		})
 	})
@@ -56,7 +56,7 @@ describe('Federations: selectors', () => {
 
 	describe('selectHasFederations', () => {
 		it('should return correct values when favourite item is in federations', () => {
-			const federations = defaultState.federations[projectId];
+			const federations = defaultState.federationsByProject[projectId];
 			const favourites = selectFavouriteFederations.resultFunc(federations);
 			const selected = selectHasFederations.resultFunc(federations, favourites);
 			expect(selected).toEqual({ favourites: true, all: true })
@@ -77,7 +77,7 @@ describe('Federations: selectors', () => {
 
 	describe('selectAreStatsPending', () => {
 		it('should return true if at least one item has pending stats', () => {
-			const selected = selectAreStatsPending.resultFunc(defaultState.federations[projectId]);
+			const selected = selectAreStatsPending.resultFunc(defaultState.federationsByProject[projectId]);
 			expect(selected).toBeTruthy();
 		})
 

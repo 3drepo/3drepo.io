@@ -18,7 +18,7 @@
 import React from 'react';
 
 import { AvatarButton } from '@controls/avatarButton';
-import { IUser } from '@/v5/store/teamspaces/teamspaces.redux';
+import { IUser } from '@/v5/store/users/users.redux';
 import { AvatarWrapper, Container, Company, Job, Name, UserData } from './userPopover.styles';
 
 interface IUserPopover {

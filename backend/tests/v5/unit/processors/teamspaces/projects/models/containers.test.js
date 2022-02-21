@@ -156,7 +156,7 @@ ModelSettings.getModelByQuery.mockImplementation((ts, query) => {
 ModelSettings.getContainers.mockImplementation(() => modelList);
 const getContainerByIdMock = ModelSettings.getContainerById.mockImplementation((teamspace,
 	container) => containerSettings[container]);
-Views.checkViewExists.mockImplementation((teamspace, model, view) => {
+Views.getViewById.mockImplementation((teamspace, model, view) => {
 	if (view === 1) {
 		return 1;
 	}

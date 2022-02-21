@@ -45,13 +45,48 @@ const createErrorResponse = (req, res, resCode) => {
 	res.status(resCode.status).send(resObj);
 };
 
-const mimeTypes = {
+Responder.mimeTypes = {
 	src: 'text/plain',
 	gltf: 'application/json',
 	bin: 'text/plain',
 	json: 'application/json',
 	png: 'image/png',
 	jpg: 'image/jpg',
+};
+
+Responder.respond = (req, res, resCode, body, { cache, customHeaders, mimeType = Responder.mimeTypes.json } = {}) => {
+	const finalResCode = createResponseCode(resCode);
+
+	if (finalResCode.status > 200) {
+		createErrorResponse(req, res, finalResCode);
+		return;
+	}
+
+	let contentLength = 0;
+
+	if (cache) {
+		res.setHeader('Cache-Control', `private, max-age=${cachePolicy.maxAge}`);
+	}
+
+	if (customHeaders) {
+		res.writeHead(resCode.status, customHeaders);
+	}
+
+	if (isBuffer(body)) {
+		const contentType = Responder.mimeTypes[req.params.format] || mimeType;
+		res.setHeader('Content-Type', contentType);
+		res.status(finalResCode.status);
+		contentLength = body.length;
+		res.write(body, 'binary');
+		res.flush();
+		res.end();
+	} else {
+		if (body) {
+			contentLength = isString(body) ? body.length : JSON.stringify(body).length;
+		}
+		res.status(finalResCode.status).send(body);
+	}
+	logger.logInfo(genResponseLogging(resCode, contentLength, req));
 };
 
 Responder.writeStreamRespond = (req, res, resCode, readStream, customHeaders) => {
@@ -83,39 +118,5 @@ Responder.writeStreamRespond = (req, res, resCode, readStream, customHeaders) =>
 	});
 };
 
-Responder.respond = (req, res, resCode, body, { cache, customHeaders } = {}) => {
-	const finalResCode = createResponseCode(resCode);
-
-	if (finalResCode.status > 200) {
-		createErrorResponse(req, res, finalResCode);
-		return;
-	}
-
-	let contentLength = 0;
-
-	if (cache) {
-		res.setHeader('Cache-Control', `private, max-age=${cachePolicy.maxAge}`);
-	}
-
-	if (customHeaders) {
-		res.writeHead(resCode.status, customHeaders);
-	}
-
-	if (isBuffer(body)) {
-		const contentType = mimeTypes[req.params.format] || 'application/json';
-		res.setHeader('Content-Type', contentType);
-		res.status(finalResCode.status);
-		contentLength = body.length;
-		res.write(body, 'binary');
-		res.flush();
-		res.end();
-	} else {
-		if (body) {
-			contentLength = isString(body) ? body.length : JSON.stringify(body).length;
-		}
-		res.status(finalResCode.status).send(body);
-	}
-	logger.logInfo(genResponseLogging(resCode, contentLength, req));
-};
 
 module.exports = Responder;

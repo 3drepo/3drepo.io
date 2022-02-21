@@ -17,6 +17,6 @@
 
 import { AuthActions } from '@/v4/modules/auth';
 import { IAuthActions } from '@/v4/modules/auth/auth.redux';
-import { createActionsDispatchers } from './actionsDistpatchers.helper';
+import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 
 export const AuthActionsDispatchers = createActionsDispatchers<IAuthActions>(AuthActions);
