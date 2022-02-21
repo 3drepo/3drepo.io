@@ -17,6 +17,7 @@ module.exports = {
 	rules: {
 		'license-header': 'error',
 		'arrow-parens': ['error', 'always'],
+		'implicit-arrow-linebreak': ['error', 'below'],
 		'no-tabs': [
 			'error',
 			{

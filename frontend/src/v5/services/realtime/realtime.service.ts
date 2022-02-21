@@ -15,12 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { io } from 'socket.io-client';
-import { FederationsActionsDispatchers } from '../actionsDispatchers/federationsActions.dispatchers';
+import { io, Socket } from 'socket.io-client';
 
 const CHAT_SERVER = 'http://local.3drepo.io:3000';
 
-let socket = null;
+interface IRoomType {
+	teamspace: string;
+	model?: string;
+	project: string;
+}
+
+let socket:Socket = null;
 
 export const initializeSocket = () => {
 	socket = io(CHAT_SERVER, {
@@ -29,33 +34,28 @@ export const initializeSocket = () => {
 	});
 };
 
-const joinRoom = (account, model) => {
-	socket.emit('join', { account, model });
+export const joinRoom = (roomType : IRoomType) => {
+	socket.emit('join', roomType);
 };
 
-const leaveRoom = (account, model) => {
-	socket.emit('leave', { account, model });
+export const leaveRoom = (roomType : IRoomType) => {
+	socket.emit('leave', roomType);
 };
 
-const subscribeToEvent = (event, callback) => {
+export const subscribeToEvent = (event, callback) => {
 	socket.on(event, callback);
 };
 
-const unsubscribeToEvent = () => {
-	socket.off();
+export const unsubscribeToEvent = (event, callback) => {
+	socket.off(event, callback);
 };
 
-export const enableRealtimeFederationUpdates = (teamspace, model, projectId, federationId) => () => {
-	joinRoom(teamspace, model);
-
-	subscribeToEvent(`${teamspace}:${model}:issueUpdated`, (payload) => {
-		FederationsActionsDispatchers.updateFederationSuccess(projectId, federationId, {
-			name: payload.name,
-		});
-	});
+export const subscribeToRoomEvent = (roomType: IRoomType, event, callback) => {
+	joinRoom(roomType);
+	subscribeToEvent(event, callback);
 
 	return () => {
-		leaveRoom(teamspace, model);
-		unsubscribeToEvent();
+		unsubscribeToEvent(event, callback);
+		leaveRoom(roomType);
 	};
 };
