@@ -49,7 +49,7 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 	...props
 }) => {
 	const [value, setValue] = useState<DestinationOption>(emptyOption);
-	const [state, setState] = useState(errorMessage ? 'error' : '');
+	const [newOrExisting, setNewOrExisting] = useState('unset');
 	const containers = ContainersHooksSelectors.selectContainers();
 
 	const [containersInUse, setContainersInUse] = useState([]);
@@ -68,14 +68,14 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 			clearText=""
 			handleHomeEndKeys
 			value={value}
-			onChange={(event, newValue: DestinationOption) => {
+			onChange={async (event, newValue: DestinationOption) => {
 				if (!newValue) {
 					setValue(emptyOption);
-					setState('');
+					setNewOrExisting('unset');
 					onChange(emptyOption);
 				} else {
 					setValue(newValue);
-					setState(!newValue.containerId.length ? 'new' : 'existing');
+					setNewOrExisting(!newValue.containerId.length ? 'new' : 'existing');
 					onChange(newValue);
 				}
 			}}
@@ -109,7 +109,7 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 			renderInput={({ InputProps, ...params }) => (
 				<TextInput
 					error={!!errorMessage}
-					state={state}
+					newOrExisting={!errorMessage && newOrExisting}
 					{...params}
 					{...props}
 					InputProps={{ ...InputProps,

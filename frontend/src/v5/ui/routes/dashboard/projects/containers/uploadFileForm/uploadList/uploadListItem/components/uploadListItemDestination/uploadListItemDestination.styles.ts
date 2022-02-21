@@ -27,20 +27,19 @@ export const TextInput = styled(TextField)`
 		>.MuiInputBase-input {
 			font-weight: bold;
 		}
-		${({ state, theme, error }) => {
-		if (error) return '';
-		if (state === 'new') {
+		${({ newOrExisting, theme }) => {
+		if (newOrExisting === 'new') {
 			return `
 					>.MuiInputBase-input { color: ${theme.palette.primary.main}; };
-					path { fill: ${theme.palette.primary.main}}
+					color: ${theme.palette.primary.main};
 					background-color: ${theme.palette.primary.lightest};
 					fieldset { border: none; }
 				`;
 		}
-		if (state === 'existing') {
+		if (newOrExisting === 'existing') {
 			return `
 					>.MuiInputBase-input { color: ${theme.palette.secondary.main} };
-					path { fill: ${theme.palette.secondary.main}}
+					color: ${theme.palette.secondary.main};
 					background-color: ${theme.palette.tertiary.lightest};
 					fieldset { border: none; }
 				`;

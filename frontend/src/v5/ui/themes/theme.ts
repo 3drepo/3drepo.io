@@ -625,6 +625,7 @@ export const theme = createMuiTheme({
 		MuiIconButton: {
 			root: {
 				transition: 'none',
+				color: 'inherit',
 			},
 		},
 		MuiButton: {
