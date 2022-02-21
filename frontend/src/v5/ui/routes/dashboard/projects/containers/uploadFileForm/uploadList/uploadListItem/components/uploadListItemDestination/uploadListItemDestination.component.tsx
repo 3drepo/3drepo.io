@@ -34,8 +34,12 @@ interface IUploadListItemDestination {
 	className?: string;
 }
 
-const emptyOption = { name: '', _id: '', latestRevision: '' };
-const filter = createFilterOptions<{_id: string; name: string; latestRevision: string;}>();
+const emptyOption = {
+	containerId: '',
+	containerName: '',
+	latestRevision: '',
+};
+const filter = createFilterOptions<DestinationOption>();
 
 export const UploadListItemDestination: React.FC<IUploadListItemDestination> = ({
 	errorMessage,
@@ -44,7 +48,7 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 	onChange,
 	...props
 }) => {
-	const [value, setValue] = useState(emptyOption);
+	const [value, setValue] = useState<DestinationOption>(emptyOption);
 	const [state, setState] = useState(errorMessage ? 'error' : '');
 	const containers = ContainersHooksSelectors.selectContainers();
 
@@ -71,33 +75,37 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 					onChange(emptyOption);
 				} else {
 					setValue(newValue);
-					setState(!newValue._id.length ? 'new' : 'existing');
+					setState(!newValue.containerId.length ? 'new' : 'existing');
 					onChange(newValue);
 				}
 			}}
 			onOpen={forceUpdate}
 			options={containers.map((val) => ({
-				name: val.name,
-				_id: val._id,
+				containerId: val._id,
+				containerName: val.name,
+				containerUnit: val.unit,
+				containerType: val.type,
+				containerDesc: val.desc,
+				containerCode: val.code,
 				latestRevision: val.latestRevision,
 			}))}
-			filterOptions={(options, params) => {
+			filterOptions={(options: DestinationOption[], params) => {
 				let filtered: DestinationOption[] = filter(options, params);
 				const { inputValue } = params;
-				const isExisting = options.some((option: DestinationOption) => inputValue === option.name);
+				const isExisting = options.some((option: DestinationOption) => inputValue === option.containerName);
 				if (inputValue !== '' && !isExisting) {
 					filtered = [{
-						_id: '',
-						name: inputValue,
+						containerId: '',
+						containerName: inputValue,
 						latestRevision: '',
 					}, ...filtered];
 				}
 
-				filtered = filtered.filter((x) => x.name !== value.name);
+				filtered = filtered.filter((x) => x.containerName !== value.containerName);
 
 				return filtered;
 			}}
-			getOptionLabel={(option: DestinationOption) => option.name}
+			getOptionLabel={(option: DestinationOption) => option.containerName}
 			renderInput={({ InputProps, ...params }) => (
 				<TextInput
 					error={!!errorMessage}
@@ -113,16 +121,16 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 					}}
 				/>
 			)}
-			getOptionDisabled={(option: DestinationOption) => containersInUse.includes(option.name)}
-			renderOption={(option: DestinationOption) => {
-				if (option.name && !option._id) return (<NewContainer {...option} />);
-				return (
+			getOptionDisabled={(option: DestinationOption) => containersInUse.includes(option.containerName)}
+			renderOption={(option: DestinationOption) => (option.containerName && !option.containerId
+				? <NewContainer containerName={option.containerName} />
+				: (
 					<ExistingContainer
-						inUse={containersInUse.includes(option.name)}
-						{...option}
+						inUse={containersInUse.includes(option.containerName)}
+						containerName={option.containerName}
+						latestRevision={option.latestRevision}
 					/>
-				);
-			}}
+				))}
 			disabled={disabled}
 		/>
 	);

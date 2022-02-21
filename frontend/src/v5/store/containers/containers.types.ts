@@ -183,8 +183,12 @@ export type UploadFieldArray = {
 };
 
 export type DestinationOption = {
-	name: string;
-	_id: string;
+	containerId: string;
+	containerName: string;
+	containerUnit?: string;
+	containerType?: string;
+	containerDesc?: string;
+	containerCode?: string;
 	latestRevision: string;
 };
 

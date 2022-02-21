@@ -21,17 +21,17 @@ import { FormattedMessage } from 'react-intl';
 import { Container, LastRevision, ErrorText } from './existingContainer.styles';
 
 interface IExistingContainer {
-	name: string;
+	containerName: string;
 	latestRevision: string;
 	inUse: boolean;
 }
 
 const noneText = <FormattedMessage id="uploads.destination.existing.none" defaultMessage="None" />;
 
-export const ExistingContainer = ({ name, latestRevision, inUse }: IExistingContainer) => (
+export const ExistingContainer = ({ containerName, latestRevision, inUse }: IExistingContainer) => (
 	<Container>
 		<Typography variant="h5">
-			{name}
+			{containerName}
 		</Typography>
 		<LastRevision>
 			<FormattedMessage id="uploads.destination.existing.lastRevision" defaultMessage="Last revision: " />

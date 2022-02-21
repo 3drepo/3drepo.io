@@ -35,5 +35,4 @@ export const Content = styled.span`
 	overflow-y: auto;
 	overflow-x: hidden;
 	padding: 15px;
-
 `;

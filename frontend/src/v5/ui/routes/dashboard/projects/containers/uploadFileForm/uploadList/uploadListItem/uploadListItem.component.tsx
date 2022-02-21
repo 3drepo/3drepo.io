@@ -20,7 +20,7 @@ import DeleteIcon from '@assets/icons/delete.svg';
 import EditIcon from '@assets/icons/edit.svg';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { UploadItemFields } from '@/v5/store/containers/containers.types';
+import { DestinationOption, UploadItemFields } from '@/v5/store/containers/containers.types';
 import { ListItemSchema } from '@/v5/validation/containers';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
@@ -68,11 +68,12 @@ export const UploadListItem = ({
 					<UploadListItemDestination
 						errorMessage={errors.containerName?.message || ''}
 						{...extras}
-						onChange={({ _id, name }) => {
-							setValue('containerId', _id);
-							setValue('containerName', name);
-							updateValue('containerId');
-							updateValue('containerName');
+						onChange={(vals: DestinationOption) => {
+							Object.keys(vals).forEach((key: keyof DestinationOption) => {
+								if (key === 'latestRevision') return;
+								setValue(key, vals[key]);
+								updateValue(key);
+							});
 							trigger('containerName');
 						}}
 					/>

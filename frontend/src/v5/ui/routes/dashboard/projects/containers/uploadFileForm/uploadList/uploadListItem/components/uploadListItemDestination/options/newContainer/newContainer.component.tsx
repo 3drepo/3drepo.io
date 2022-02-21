@@ -21,10 +21,10 @@ import { FormattedMessage } from 'react-intl';
 import { Container, Message } from './newContainer.styles';
 
 interface INewContainer {
-	name: string;
+	containerName: string;
 }
 
-export const NewContainer = ({ name }: INewContainer) => (
+export const NewContainer = ({ containerName }: INewContainer) => (
 	<Container>
 		<AddCircleIcon />
 		<Message>
@@ -33,7 +33,7 @@ export const NewContainer = ({ name }: INewContainer) => (
 				defaultMessage="Add <Bold>{containerName}</Bold> as a new container"
 				values={{
 					Bold: (val: string) => <b>{val}</b>,
-					containerName: name,
+					containerName,
 				}}
 			/>
 		</Message>
