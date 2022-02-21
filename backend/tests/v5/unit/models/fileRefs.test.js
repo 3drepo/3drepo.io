@@ -17,9 +17,21 @@
 
 const { src } = require('../../helper/path');
 
-jest.mock('../../../../src/v5/handler/externalServices');
+const unrecognisedType = 'qwerrtyuui';
+
+jest.mock('../../../../src/v5/handler/externalServices', () => ({
+	...jest.requireActual('../../../../src/v5/handler/externalServices'),
+	getFileStream: jest.fn().mockImplementation((account, collection, type) => {
+		if (type === unrecognisedType) {
+			throw new Error();
+		}
+	}),
+	removeFiles: jest.fn(),
+}));
+
 const FileRefs = require(`${src}/models/fileRefs`);
 const db = require(`${src}/handler/db`);
+const { templates } = require(`${src}/utils/responseCodes`);
 
 const testGetTotalSize = () => {
 	describe('Get total size', () => {
@@ -133,7 +145,65 @@ const testRemoveAllFilesFromModel = () => {
 	});
 };
 
+const testDownloadFiles = () => {
+	describe('Download files', () => {
+		test('should throw error if the revision has no files', async () => {
+			const revision = { rFile: [] };
+			await expect(FileRefs.downloadFiles('someTS', 'someModel', revision)).rejects.toEqual(templates.noFileFound);
+		});
+
+		test('should throw error if the revision has no entry', async () => {
+			const revision = { rFile: ['b74ba13b-71db-4fcc-9ff8-7f640aa3dec2P2006823-BDP-XX-A-Stanmore-Envelope_optimized_ifc'] };
+			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+			await expect(FileRefs.downloadFiles('someTS', 'someModel', revision)).rejects.toEqual(templates.noFileFound);
+		});
+
+		test('should download the revision files using grid fs if entry has invalid type', async () => {
+			const filename = 'b74ba13b-71db-4fcc-9ff8-7f640aa3dec2P2006823-BDP-XX-A-Stanmore-Envelope_optimized_ifc';
+			const revision = { rFile: ['b74ba13b-71db-4fcc-9ff8-7f640aa3dec2P2006823-BDP-XX-A-Stanmore-Envelope_optimized_ifc'] };
+			const fileEntry = { size: '12345', type: unrecognisedType };
+			const expectedData = { filename: 'P2006823-BDP-XX-A-Stanmore-Envelope_optimized.ifc', readStream: undefined, size: '12345' };
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(fileEntry);
+			const res = await FileRefs.downloadFiles('someTS', 'someModel', revision);
+			expect(res).toEqual(expectedData);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual('someTS');
+			expect(fn.mock.calls[0][1]).toEqual('someModel.history.ref');
+			expect(fn.mock.calls[0][2]).toEqual({ _id: filename });
+		});
+
+		test('should download the revision files', async () => {
+			const filename = 'b74ba13b-71db-4fcc-9ff8-7f640aa3dec2P2006823-BDP-XX-A-Stanmore-Envelope_optimized_ifc';
+			const revision = { rFile: ['b74ba13b-71db-4fcc-9ff8-7f640aa3dec2P2006823-BDP-XX-A-Stanmore-Envelope_optimized_ifc'] };
+			const fileEntry = { size: '12345', type: 'fs' };
+			const expectedData = { filename: 'P2006823-BDP-XX-A-Stanmore-Envelope_optimized.ifc', readStream: undefined, size: '12345' };
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(fileEntry);
+			const res = await FileRefs.downloadFiles('someTS', 'someModel', revision);
+			expect(res).toEqual(expectedData);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual('someTS');
+			expect(fn.mock.calls[0][1]).toEqual('someModel.history.ref');
+			expect(fn.mock.calls[0][2]).toEqual({ _id: filename });
+		});
+
+		test('should download the revision files with no valid extension', async () => {
+			const filename = 'b74ba13b-71db-4fcc-9ff8-7f640aa3dec2P2006823-BDP-XX-A-Stanmore-Envelope';
+			const revision = { rFile: [filename] };
+			const fileEntry = { size: '12345', type: 'fs' };
+			const expectedData = { filename: 'P2006823-BDP-XX-A-Stanmore-Envelope', readStream: undefined, size: '12345' };
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(fileEntry);
+			const res = await FileRefs.downloadFiles('someTS', 'someModel', revision);
+			expect(res).toEqual(expectedData);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual('someTS');
+			expect(fn.mock.calls[0][1]).toEqual('someModel.history.ref');
+			expect(fn.mock.calls[0][2]).toEqual({ _id: filename });
+		});
+	});
+};
+
 describe('models/fileRefs', () => {
 	testGetTotalSize();
 	testRemoveAllFilesFromModel();
+	testDownloadFiles();
 });

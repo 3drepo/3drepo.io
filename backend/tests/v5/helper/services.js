@@ -26,6 +26,7 @@ const config = require(`${src}/utils/config`);
 const { createTeamSpaceRole } = require(`${srcV4}/models/role`);
 const { generateUUID, uuidToString, stringToUUID } = require(`${srcV4}/utils`);
 const { PROJECT_ADMIN, TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
+const ExternalServices = require('../../../src/v5/handler/externalServices');
 
 const db = {};
 const queue = {};
@@ -93,6 +94,13 @@ db.createModel = (teamspace, _id, name, props) => {
 db.createRevision = (teamspace, modelId, revision) => {
 	const formattedRevision = { ...revision, _id: stringToUUID(revision._id) };
 	return DbHandler.insertOne(teamspace, `${modelId}.history`, formattedRevision);
+};
+
+db.createRevisionRef = async (teamspace, modelId, refId) => {
+	const data = 'test data';
+	let refInfo = await ExternalServices.storeFile(teamspace, `${modelId}.history.ref`, data);
+	refInfo = { ...refInfo, _id: refId };
+	return DbHandler.insertOne(teamspace, `${modelId}.history.ref`, refInfo);
 };
 
 db.createGroups = (teamspace, modelId, groups = []) => {
@@ -163,12 +171,22 @@ ServiceHelper.generateUserCredentials = () => ({
 	},
 });
 
-ServiceHelper.generateRevisionEntry = (isVoid = false) => ({
-	_id: ServiceHelper.generateUUIDString(),
-	tag: ServiceHelper.generateRandomString(),
-	author: ServiceHelper.generateRandomString(),
-	timestamp: ServiceHelper.generateRandomDate(),
-	void: !!isVoid,
+ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true) => {
+	const _id = ServiceHelper.generateUUIDString();
+	return {
+		_id,
+		tag: ServiceHelper.generateRandomString(),
+		author: ServiceHelper.generateRandomString(),
+		timestamp: ServiceHelper.generateRandomDate(),
+		void: !!isVoid,
+		rFile: hasFile ? [`${_id}P2006823-BDP-XX-A-Stanmore-Envelope_optimized_ifc`] : undefined,
+	};
+};
+
+ServiceHelper.generateRevisionRef = (revisionId, hasValidType = true) => ({
+	_id: `${revisionId}P2006823-BDP-XX-A-Stanmore-Envelope_optimized_ifc`,
+	size: 12345,
+	type: hasValidType ? 'fs' : 'invalid type',
 });
 
 ServiceHelper.generateRandomModelProperties = (isFed = false) => ({

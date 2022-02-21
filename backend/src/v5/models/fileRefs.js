@@ -26,39 +26,32 @@ const FileRefs = {};
 const collectionName = (collection) => (collection.endsWith('.ref') ? collection : `${collection}.ref`);
 
 const getRefEntry = async (account, collection, fileName) => {
-	const col = await db.getCollection(account, collection);
+	const entry = await db.findOne(account, collection, { _id: fileName });
 
-	if (!col) {
-		return templates.noFileFound;
+	if (!entry) {
+		throw templates.noFileFound;
 	}
 
-	return col.findOne({ _id: fileName });
+	return entry;
 };
 
-const fetchFileStream = async (account, model, collection, fileName, useLegacyNameOnFallback = false) => {
+const fetchFileStream = async (account, model, collection, fileName) => {
 	const entry = await getRefEntry(account, collection, fileName);
-	if (!entry) {
-		return templates.noFileFound;
-	}
 	try {
 		const stream = await ExternalServices.getFileStream(account, collection, entry.type, entry.link);
 		return { readStream: stream, size: entry.size };
 	} catch {
 		logger.logError(`Failed to fetch file from ${entry.type}. Trying GridFS....`);
-		Mailer.sendFileMissingError({ account, model, collection, refId: entry._id, link: entry.link });
+		Mailer.sendFileMissingError({ account, model, collection, refId: entry._id, link: entry.link }).catch(() => {
+			logger.logError('Failed to send file missing error.');
+		});
 
-		const fullName = useLegacyNameOnFallback
-			? `/${account}/${model}/${fileName.split('/').length > 1 ? 'revision/' : ''}${fileName}`
-			: fileName;
-		const stream = await ExternalServices.getFileStream(account, collection, 'gridfs', fullName);
+		const stream = await ExternalServices.getFileStream(account, collection, 'gridfs', fileName);
 		return { readStream: stream, size: entry.size };
 	}
 };
 
-const getOriginalFile = (account, model, fileName) => {
-	const collection = `${model}.history.ref`;
-	return fetchFileStream(account, model, collection, fileName, false);
-};
+const getOriginalFile = (account, model, fileName) => fetchFileStream(account, model, `${model}.history.ref`, fileName);
 
 const removeAllFiles = async (teamspace, collection) => {
 	const pipeline = [

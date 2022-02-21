@@ -17,10 +17,10 @@
 
 const { addModel, deleteModel, getModelList } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
-const { downloadFiles } = require('../../../../models/fileRefs');
 const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
-const { getLatestRevision, getRevisionCount, getRevisions, getRevisionById, updateRevisionStatus } = require('../../../../models/revisions');
+const { getLatestRevision, getRevisionById, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const Groups = require('./commons/groups');
+const { downloadFiles } = require('../../../../models/fileRefs');
 const fs = require('fs/promises');
 const { getProjectById } = require('../../../../models/projects');
 const { logger } = require('../../../../utils/logger');

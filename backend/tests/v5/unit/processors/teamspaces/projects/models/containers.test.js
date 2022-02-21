@@ -39,7 +39,7 @@ const FileRefs = require(`${src}/models/fileRefs`);
 jest.mock('../../../../../../../src/v5/models/fileRefs', () => ({
 	...jest.requireActual('../../../../../../../src/v5/models/fileRefs'),
 	downloadFiles: jest.fn(),
-  }));
+}));
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -428,11 +428,10 @@ const testDownloadRevisionFiles = () => {
 			await Containers.downloadRevisionFiles('teamspace', 'container', 1);
 			expect(getRevisionByIdMock.mock.calls.length).toBe(1);
 			expect(getRevisionByIdMock.mock.calls[0][2]).toEqual(1);
-			expect(getRevisionByIdMock.mock.calls[0][3]).toStrictEqual({ rFile: 1});
+			expect(getRevisionByIdMock.mock.calls[0][3]).toStrictEqual({ rFile: 1 });
 		});
 	});
 };
-
 
 describe('processors/teamspaces/projects/containers', () => {
 	testGetContainerList();
