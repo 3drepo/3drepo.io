@@ -9,7 +9,7 @@ const outputNames = {
   unity: '../unity/unity-util.js'
 };
 
-module.exports = getWebpackConfig({
+module.exports = (env) => getWebpackConfig(env, {
   mode: MODES.PRODUCTION,
   entry: {
     unity: './src/globals/unity-util-external.ts'

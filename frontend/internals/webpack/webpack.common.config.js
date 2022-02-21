@@ -1,14 +1,13 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
 const OfflinePlugin = require('offline-plugin');
+const webpack = require('webpack');
 
 const PATHS = require('./tools/paths');
 const MODES = require('./tools/modes');
 const loaders = require('./tools/loaders');
 
-const transpileOnly = process.argv.includes('--no-type-checking');
-
-module.exports = (options) => {
+module.exports = (env, options) => {
 	const config = {
 		mode: options.mode || MODES.DEVELOPMENT,
 		context: PATHS.APP_DIR,
@@ -20,11 +19,13 @@ module.exports = (options) => {
 		},
 		output: {
 			path: PATHS.DIST_DIR,
-			filename: '[name].[chunkhash].js'
-		, ...options.output },
+			filename: '[name].[chunkhash].js', 
+			pathinfo: true,
+			...options.output 
+		},
 		module: {
 			rules: [
-				loaders.TSLoader({transpileOnly}),
+				loaders.TSLoader({ transpileOnly: env.noTypeChecking }),
 				loaders.LodashTSLoader,
 				loaders.CSSLoader,
 				loaders.CSSExternalLoader,
@@ -34,19 +35,20 @@ module.exports = (options) => {
 			],
 		},
 		plugins: [
-			new CopyWebpackPlugin([
-				{ from: 'node_modules/zxcvbn/dist/zxcvbn.js' },
-				{ from: 'manifest.json', to: '../' },
-				{ from: 'assets/images/**', to: '../' },
-				{ from: 'assets/icons/*', to: '../' },
-				{ from: 'unity/**', to: '../' },
-				//backwards compatibility to Unity 2019 (added on 4.12)
-				{ from: 'unity/Build/unity.loader.js', to: '../unity/Build/UnityLoader.js' },
-				{ from: 'assets/manifest-icons/*', to: '../' },
-				{ from: 'serviceWorkerExtras.js', to: '../' },
-				{ context: '../resources', from: '**/*.html', to: '../templates' },
-				{ context: '../resources', from: '**/*.csv', to: '../templates' }
-			], options),
+			new CopyWebpackPlugin({
+				patterns:[
+					{ from: 'node_modules/zxcvbn/dist/zxcvbn.js' },
+					{ from: 'manifest.json', to: '../' },
+					{ from: 'assets/images/**', to: '../' },
+					{ from: 'assets/icons/*', to: '../' },
+					{ from: 'unity/**', to: '../' },
+					//backwards compatibility to Unity 2019 (added on 4.12)
+					{ from: 'unity/Build/unity.loader.js', to: '../unity/Build/UnityLoader.js' },
+					{ from: 'assets/manifest-icons/*', to: '../' },
+					{ from: 'serviceWorkerExtras.js', to: '../' },
+					{ context: '../resources', from: '**/*.html', to: '../templates' },
+					{ context: '../resources', from: '**/*.csv', to: '../templates' }
+				]}, options),
 			new HTMLWebpackPlugin({
 				template: './index.html',
 				filename: '../index.html',
@@ -61,9 +63,11 @@ module.exports = (options) => {
 				minifyCSS: true,
 				minifyURLs: true,
 			}),
-			...(options.plugins || [])
+			new webpack.ProvidePlugin({
+				process: 'process/browser',
+			   "React": "react",
+			}),
 		],
-
 		resolve: {
 			extensions: ['.ts', '.js', '.tsx'],
 			descriptionFiles: ['package.json'],
@@ -73,9 +77,8 @@ module.exports = (options) => {
 				'@assets': PATHS.ASSETS_DIR,
 				'@components': PATHS.COMPONENTS,
 				'@controls': PATHS.CONTROLS,
-			  },
+			},
 		},
-
 		target: 'web',
 
 		stats: options.stats
