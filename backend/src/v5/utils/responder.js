@@ -118,5 +118,4 @@ Responder.writeStreamRespond = (req, res, resCode, readStream, customHeaders) =>
 	});
 };
 
-
 module.exports = Responder;
