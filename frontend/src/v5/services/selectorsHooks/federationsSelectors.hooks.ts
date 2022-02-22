@@ -16,6 +16,6 @@
  */
 
 import * as FederationsSelectors from '@/v5/store/federations/federations.selectors';
-import { createHooksSelectors } from './selectorsHooks.helper';
+import { createHooksSelectors } from '@/v5/helpers/selectorsHooks.helper';
 
 export const FederationsHooksSelectors = createHooksSelectors(FederationsSelectors);

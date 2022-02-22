@@ -25,7 +25,7 @@ import { Container, V4ModelsPermissions } from './containersAndFederationsPermis
 
 export const ContainersAndFederationsPermissions = () => {
 	const dispatch = useDispatch();
-	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails().name;
+	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails()?.name;
 	const username = useSelector(selectCurrentUser)?.username;
 
 	useEffect(() => {

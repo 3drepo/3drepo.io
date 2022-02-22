@@ -21,7 +21,6 @@ import HomeIcon from '@assets/icons/home.svg';
 import DownArrowIcon from '@assets/icons/down_arrow.svg';
 import { uriCombine } from '@/v5/services/routing/routing';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
-import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { IProject } from '@/v5/store/projects/projects.redux';
@@ -50,14 +49,6 @@ export const Breadcrumbs = (): JSX.Element => {
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
 	const project: IProject = ProjectsHooksSelectors.selectCurrentProjectDetails();
-
-	React.useEffect(() => {
-		if (projectId) {
-			ProjectsActionsDispatchers.fetch(teamspace);
-		}
-	}, [projectId, teamspace]);
-
-	ProjectsActionsDispatchers.setCurrentProject(projectId);
 
 	let { url } = useRouteMatch();
 
@@ -94,12 +85,10 @@ export const Breadcrumbs = (): JSX.Element => {
 				<HomeIcon />
 			</HomeIconBreadcrumb>
 
-			{breadcrumbs.map((title, index) => {
-				const isLastItem = (breadcrumbs.length - 1) === index;
-
-				if (isLastItem) {
-					return (
-						<div key={`${title}`}>
+			{breadcrumbs.map((title, index) => (
+				(breadcrumbs.length - 1) === index
+					? (
+						<div key={title}>
 							<InteractiveBreadcrumb onClick={handleClick} endIcon={<DownArrowIcon />}>
 								<OverflowWrapper>
 									{title}
@@ -112,15 +101,12 @@ export const Breadcrumbs = (): JSX.Element => {
 								handleClose={handleClose}
 							/>
 						</div>
-					);
-				}
-
-				return (
-					<Breadcrumb key={title} color="inherit" to={teamspaceTo}>
-						{title}
-					</Breadcrumb>
-				);
-			})}
+					) : (
+						<Breadcrumb key={title} color="inherit" to={teamspaceTo}>
+							{title}
+						</Breadcrumb>
+					)
+			))}
 		</Container>
 	);
 };

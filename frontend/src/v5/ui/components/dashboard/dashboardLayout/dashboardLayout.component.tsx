@@ -15,12 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { AppBar } from '@components/shared/appBar';
 import { ModalsDispatcher } from '@components/shared/modals';
 import { Header as ProjectHeader } from '@/v5/ui/routes/dashboard/projects/header';
+import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
+import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
 import { Content } from './dashboardLayout.styles';
 
 interface IDashboardLayout {
@@ -28,7 +30,21 @@ interface IDashboardLayout {
 }
 
 export const DashboardLayout = ({ children }: IDashboardLayout): JSX.Element => {
-	const { project } = useParams();
+	const { teamspace, project } = useParams();
+
+	useEffect(() => {
+		if (teamspace) {
+			ProjectsActionsDispatchers.fetch(teamspace);
+			TeamspacesActionsDispatchers.setCurrentTeamspace(teamspace);
+		}
+	}, [teamspace]);
+
+	useEffect(() => {
+		if (project) {
+			ProjectsActionsDispatchers.setCurrentProject(project);
+		}
+	}, [project]);
+
 	return (
 		<>
 			<AppBar />
