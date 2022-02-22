@@ -33,17 +33,16 @@
  */
 
 import Tooltip from '@material-ui/core/Tooltip';
-import { memo } from 'react';
-import * as React from 'react';
+import { memo, ReactNode } from 'react';
 import TruncateBase from 'react-truncate';
 
 import { Container } from './truncate.styles';
 
 interface IProps {
 	className?: string;
-	children: string | React.ReactNode;
+	children: string | ReactNode;
 	lines: number | boolean;
-	ellipsis?: string | React.ReactNode;
+	ellipsis?: string | ReactNode;
 	trimWhitespace?: boolean;
 	width?: number;
 	onTruncate?: () => void;

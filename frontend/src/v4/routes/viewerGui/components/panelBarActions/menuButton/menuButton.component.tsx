@@ -14,20 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { FunctionComponent, ReactNode } from 'react';
 import { ButtonMenu } from '../../../../components/buttonMenu/buttonMenu.component';
 import { MenuButton as MenuButtonComponent } from '../../../../components/menuButton/menuButton.component';
 
 export interface IMenuButton {
 	hidden?: boolean;
 	label?: string;
-	content?: (props?) => React.ReactNode;
+	content?: (props?) => ReactNode;
 	disabled?: boolean;
 	open?: boolean;
 	onClose?: () => void;
 	onOpen?: () => void;
 }
 
-export const MenuButton: React.FunctionComponent<IMenuButton> = ({
+export const MenuButton: FunctionComponent<IMenuButton> = ({
 	hidden, label, content, disabled = false, open, onOpen, onClose
 }) => {
 	const renderButton = (props) => (

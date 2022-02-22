@@ -31,9 +31,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import * as React from 'react';
-
+import { useState } from 'react';
 import { Popover } from '../markdownMessage/ticketReference/ticketReference.styles';
 import { UserAvatar } from '../userAvatar';
 import { IUser, UserPopover } from '../userPopover/userPopover.component';
@@ -48,7 +46,7 @@ interface IProps {
 
 export const UserMarker = ({ name, children, currentUser, urlParams }: IProps): JSX.Element => {
 	const teamspace = urlParams ? urlParams.teamspace : '';
-	const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 	const open = Boolean(anchorEl);
 
 	if (!teamspace || !name) {

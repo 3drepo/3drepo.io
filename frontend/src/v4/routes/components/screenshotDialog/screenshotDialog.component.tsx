@@ -14,8 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import * as React from 'react';
+import { PureComponent, createRef } from 'react';
 import EventListener from 'react-event-listener';
 import { Layer } from 'react-konva';
 
@@ -67,7 +66,7 @@ interface IProps {
 	initHistory: () => void;
 }
 
-export class ScreenshotDialog extends React.PureComponent<IProps, any> {
+export class ScreenshotDialog extends PureComponent<IProps, any> {
 	public state = {
 		color: INITIAL_VALUES.color,
 		strokeWidth: INITIAL_VALUES.brushSize,
@@ -86,11 +85,11 @@ export class ScreenshotDialog extends React.PureComponent<IProps, any> {
 		selectedObjectName: '',
 	};
 
-	public containerRef = React.createRef<any>();
-	public layerRef = React.createRef<any>();
-	public imageLayerRef = React.createRef<any>();
-	public drawingLayerRef = React.createRef<any>();
-	public stageRef = React.createRef<any>();
+	public containerRef = createRef<any>();
+	public layerRef = createRef<any>();
+	public imageLayerRef = createRef<any>();
+	public drawingLayerRef = createRef<any>();
+	public stageRef = createRef<any>();
 
 	public lastImageCanvasWidth = null;
 

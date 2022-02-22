@@ -31,9 +31,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import * as React from 'react';
-
+import { FunctionComponent, useState, useEffect, useCallback, useRef } from 'react';
 import { GhostElement } from '../../../../../components/screenshotDialog/components/editableText/editableText.styles';
 import { TextField } from '../../../../../components/textField/textField.component';
 import { ExpandAction } from '../riskDetails/riskDetails.styles';
@@ -43,13 +41,13 @@ interface IProps {
 	disableExpandable: boolean;
 }
 
-export const ExpandableTextField: React.FunctionComponent<IProps> = ({ value, disableExpandable = true, ...props }) => {
-	const textareaRef = React.useRef<HTMLTextAreaElement>(null);
-	const ghostElementRef = React.useRef<HTMLPreElement>(null);
-	const [isExpanded, setIsExpanded] = React.useState<boolean>(false);
-	const [isLongContent, setIsLongContent] = React.useState<boolean>(false);
+export const ExpandableTextField: FunctionComponent<IProps> = ({ value, disableExpandable = true, ...props }) => {
+	const textareaRef = useRef<HTMLTextAreaElement>(null);
+	const ghostElementRef = useRef<HTMLPreElement>(null);
+	const [isExpanded, setIsExpanded] = useState<boolean>(false);
+	const [isLongContent, setIsLongContent] = useState<boolean>(false);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (textareaRef && ghostElementRef) {
 			const height = ghostElementRef.current.offsetHeight;
 
@@ -65,7 +63,7 @@ export const ExpandableTextField: React.FunctionComponent<IProps> = ({ value, di
 
 	const handleOnExpand = () => setIsExpanded(!isExpanded);
 
-	const renderHelperText = React.useCallback(() => {
+	const renderHelperText = useCallback(() => {
 		if (isExpandable) {
 			return <ExpandAction onClick={handleOnExpand}>{isExpanded ? 'Less' : 'More'}</ExpandAction>;
 		}
@@ -73,7 +71,7 @@ export const ExpandableTextField: React.FunctionComponent<IProps> = ({ value, di
 		return null;
 	}, [isExpandable, isExpanded]);
 
-	const additionalProps = React.useCallback(() => {
+	const additionalProps = useCallback(() => {
 		if (isExpandable) {
 			return {
 				rowsMax: isExpanded ? null : 3,

@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { PureComponent } from 'react';
 import RemoveCircle from '@material-ui/icons/RemoveCircle';
 import ReactDOM from 'react-dom';
 
@@ -66,7 +66,7 @@ interface IState {
 	panelKey: number;
 }
 
-export class Jobs extends React.PureComponent<IProps, IState> {
+export class Jobs extends PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps(nextProps: IProps, prevState) {
 		return {
 			panelKey: nextProps.jobs.length !== prevState.rows.length ? Math.random() : prevState.panelKey

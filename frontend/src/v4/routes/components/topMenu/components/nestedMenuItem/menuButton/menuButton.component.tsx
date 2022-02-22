@@ -31,9 +31,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import * as React from 'react';
-
+import { FunctionComponent, ReactNode } from 'react';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import { COLOR } from '../../../../../../styles';
 import { MenuIcon, MenuItem, MenuText } from '../../mainMenu/menuContent/menuContent.styles';
@@ -41,11 +39,11 @@ import { MenuIcon, MenuItem, MenuText } from '../../mainMenu/menuContent/menuCon
 interface IProps {
 	IconProps?: any;
 	Icon?: any;
-	icon?: React.ReactNode;
+	icon?: ReactNode;
 	label: string;
 }
 
-export const MenuButton: React.FunctionComponent<IProps> = ({ IconProps, Icon, label, icon, ...props }) => (
+export const MenuButton: FunctionComponent<IProps> = ({ IconProps, Icon, label, icon, ...props }) => (
 	<MenuItem
 		{...props}
 		button

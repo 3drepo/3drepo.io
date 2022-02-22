@@ -14,9 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { FC } from 'react';
 import { Link, Paragraph } from '../../presentationForm.styles';
 
-export const SectionBottom: React.FC = ({ children }) => {
+export const SectionBottom: FC = ({ children }) => {
 	return (
 		<Paragraph>
 			{children}<br /><br />

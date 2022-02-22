@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { useState, useEffect, useCallback } from 'react';
 import Konva from 'konva';
 import { isEmpty } from 'lodash';
 
@@ -37,14 +37,14 @@ interface IProps {
 export const TypingHandler = ({
 	selected, mode, stage, layer, boxRef, fontSize, size, color, onRefreshDrawingLayer, onAddNewText,
 	}: IProps) => {
-	const [value, setValue] = React.useState<string>('');
-	const [visible, setVisible] = React.useState<boolean>(false);
-	const [styles, setStyles] = React.useState<React.CSSProperties>({});
-	const [positionLocked, setPositionLocked] = React.useState<boolean>(false);
+	const [value, setValue] = useState<string>('');
+	const [visible, setVisible] = useState<boolean>(false);
+	const [styles, setStyles] = useState<CSSProperties>({});
+	const [positionLocked, setPositionLocked] = useState<boolean>(false);
 
 	const handleTextEdit = ({ target }) => setValue(target.value);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (stage) {
 			if (mode === MODES.TEXT && !visible && !positionLocked && !selected) {
 				stage.on('mousemove touchmove', handleMouseMove);
@@ -72,14 +72,14 @@ export const TypingHandler = ({
 		};
 	};
 
-	const handleMouseMove = React.useCallback(() => {
+	const handleMouseMove = useCallback(() => {
 		if (!positionLocked) {
 			const { x, y } = getPosition();
 			setStyles({ top: y, left: x });
 		}
 	}, [stage, layer, positionLocked]);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (!isEmpty(boxRef) && !isEmpty(styles) && onRefreshDrawingLayer) {
 			boxRef.x(Number(styles.left) - Math.max(3, size));
 			boxRef.y(Number(styles.top) - Math.max(3, size));
@@ -87,7 +87,7 @@ export const TypingHandler = ({
 		}
 	}, [styles]);
 
-	const handleMouseDown = React.useCallback(() => {
+	const handleMouseDown = useCallback(() => {
 		setVisible(true);
 		setPositionLocked(true);
 	}, []);

@@ -31,9 +31,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import * as React from 'react';
-
+import { FunctionComponent } from 'react';
 import { Resources } from '../../../../../components/resources/resources.component';
 import { Content } from '../riskDetails/riskDetails.styles';
 
@@ -48,7 +46,7 @@ interface IProps {
 	formRef: any;
 }
 
-export const AttachmentsFormTab: React.FunctionComponent<IProps> = ({
+export const AttachmentsFormTab: FunctionComponent<IProps> = ({
 	active, resources, showDialog, attachFileResources, attachLinkResources, onRemoveResource, canComment, formRef,
 }) => {
 	return (

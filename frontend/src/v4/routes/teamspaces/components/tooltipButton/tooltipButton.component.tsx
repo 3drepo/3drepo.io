@@ -31,15 +31,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { ComponentType } from 'react';
 import Tooltip from '@material-ui/core/Tooltip';
 import { TooltipProps } from '@material-ui/core/Tooltip';
-import * as React from 'react';
 import { StyledIconButton } from './tooltipButton.styles';
 
 interface IProps {
 	label: string;
-	Icon: React.ComponentType;
+	Icon: ComponentType;
 	color?: string;
 	disabled?: boolean;
 	className?: string;

@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { useCallback } from 'react';
 import CopyIcon from '@material-ui/icons/FileCopy';
 import ShareIcon from '@material-ui/icons/Share';
 
@@ -29,12 +30,12 @@ interface IProps {
 }
 
 export const SessionTop = ({ sessionCode, showSnackbar, presentationUrl }: IProps): JSX.Element => {
-	const handleCopyButtonClick = React.useCallback(() => {
+	const handleCopyButtonClick = useCallback(() => {
 		copy(sessionCode);
 		showSnackbar('Invitation code copied to the clipboard');
 	}, [sessionCode, showSnackbar]);
 
-	const handleShareButtonClick = React.useCallback(() => {
+	const handleShareButtonClick = useCallback(() => {
 		copy(presentationUrl);
 		showSnackbar('Invitation link copied to clipboard');
 	}, [sessionCode, showSnackbar]);

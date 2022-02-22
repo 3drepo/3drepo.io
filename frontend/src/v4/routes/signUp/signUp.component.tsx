@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { PureComponent, createRef } from 'react';
 import Checkbox from '@material-ui/core/Checkbox';
 import Divider from '@material-ui/core/Divider';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -124,15 +125,15 @@ const TermsLabel = () => (
 		</>
 );
 
-export class SignUp extends React.PureComponent<IProps, IState> {
+export class SignUp extends PureComponent<IProps, IState> {
 	public state = {
 		passwordStrengthMessage: '',
 		countries: []
 	};
 
-	public form: any = React.createRef();
+	public form: any = createRef();
 
-	public reCaptchaWrapperRef = React.createRef<any>();
+	public reCaptchaWrapperRef = createRef<any>();
 
 	public componentDidMount() {
 		const defaultCountry = clientConfigService.countries.find((country) => country.code === 'GB');

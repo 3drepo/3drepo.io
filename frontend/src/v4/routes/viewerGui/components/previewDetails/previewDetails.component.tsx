@@ -31,11 +31,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { PureComponent, ReactNode, createRef } from 'react';
+import { Field, Formik } from 'formik';
 import { Tooltip } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
-import { Field, Formik } from 'formik';
-import * as React from 'react';
 import * as Yup from 'yup';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { schema } from '../../../../services/validation';
@@ -87,7 +86,7 @@ interface IProps {
 	onNameChange?: (event, name: string) => void;
 	renderCollapsable?: () => JSX.Element | JSX.Element[];
 	renderNotCollapsable?: () => JSX.Element | JSX.Element[];
-	actionButton?: React.ReactNode;
+	actionButton?: ReactNode;
 	clone?: boolean;
 	isSmartGroup?: boolean;
 }
@@ -96,15 +95,15 @@ const ValidationSchema = Yup.object().shape({
 	name: schema.required
 });
 
-export class PreviewDetails extends React.PureComponent<IProps, any> {
+export class PreviewDetails extends PureComponent<IProps, any> {
 	public state = {
 		expanded: true,
 		collapsed: false,
 	};
 
-	public headerRef = React.createRef<any>();
-	public textFieldRef = React.createRef<any>();
-	public scrollableContainerRef = React.createRef<HTMLDivElement>();
+	public headerRef = createRef<any>();
+	public textFieldRef = createRef<any>();
+	public scrollableContainerRef = createRef<HTMLDivElement>();
 
 	public renderName = renderWhenTrue(() => (
 		<Tooltip title={this.props.name}>

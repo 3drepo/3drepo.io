@@ -31,23 +31,22 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { PureComponent, SyntheticEvent, ComponentType } from 'react';
 import { Tooltip } from '@material-ui/core';
 import { TooltipProps } from '@material-ui/core/Tooltip';
-import * as React from 'react';
 import { renderWhenTrueOtherwise } from '../../../helpers/rendering';
 import { SmallIconButtonStyled } from './smallIconButton.styles';
 
 interface IProps {
-	onClick?: (event: React.SyntheticEvent) => void;
-	Icon: React.ComponentType;
+	onClick?: (event: SyntheticEvent) => void;
+	Icon: ComponentType;
 	ariaLabel?: string;
 	tooltip?: string;
 	disabled?: boolean;
 	tooltipPlacement?: TooltipProps['placement'];
 }
 
-export class SmallIconButton extends React.PureComponent<IProps, any> {
+export class SmallIconButton extends PureComponent<IProps, any> {
 	public static defaultProps = {
 		tooltipPlacement: 'bottom',
 	};

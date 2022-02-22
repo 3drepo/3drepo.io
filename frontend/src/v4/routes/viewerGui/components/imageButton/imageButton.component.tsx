@@ -31,9 +31,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import * as React from 'react';
-
+import { FC, useRef, forwardRef } from 'react';
 import Tooltip from '@material-ui/core/Tooltip';
 import ImageIcon from '@material-ui/icons/Image';
 import { noop } from 'lodash';
@@ -62,7 +60,7 @@ interface IProps {
 }
 
 const UploadImage = ({ uploadScreenshot, showScreenshotDialog, close = noop, asMenuItem = false, ...props }) => {
-	const fileInputRef = React.useRef<HTMLInputElement>(null);
+	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	const resetFileInput = (e) => {
 		if (fileInputRef.current) {
@@ -136,7 +134,7 @@ const CreateScreenshot = ({ disableScreenshot, takeScreenshot, ...props }) => {
 	);
 };
 
-export const UpdateImageButton: React.FC<IProps> = React.forwardRef(({ hasImage, disabled, ...props }, ref) => {
+export const UpdateImageButton: FC<IProps> = forwardRef(({ hasImage, disabled, ...props }, ref) => {
 	const imageLabel = !hasImage ? 'Add Image' : 'Edit Image';
 
 	return (

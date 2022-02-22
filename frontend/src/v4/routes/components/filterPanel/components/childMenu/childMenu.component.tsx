@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { FunctionComponent, ReactNode, useState, useEffect, useRef } from 'react';
 import List from '@material-ui/core/List';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
@@ -21,14 +22,14 @@ import { Wrapper } from './childMenu.styles';
 
 interface IProps {
 	item: any;
-	renderItem: (subItem) => React.ReactNode;
+	renderItem: (subItem) => ReactNode;
 }
 
 export const ChildMenu = ({ item, renderItem }: IProps) => {
-	const [top, setTop] = React.useState(0);
-	const wrapperRef = React.useRef<HTMLDivElement>(null);
+	const [top, setTop] = useState(0);
+	const wrapperRef = useRef<HTMLDivElement>(null);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		const rect = wrapperRef.current.getBoundingClientRect();
 
 		if (rect.top !== top) {

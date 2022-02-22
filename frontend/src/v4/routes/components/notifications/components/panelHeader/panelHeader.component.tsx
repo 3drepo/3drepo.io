@@ -13,7 +13,9 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */import { ItemLabel } from '../../../components.styles';
+ */
+import { PureComponent } from 'react';
+import { ItemLabel } from '../../../components.styles';
 import { NotificationsPanelItem } from '../../notifications.styles';
 import { NotificationsPanelHeaderContainer } from './panelHeader.styles';
 
@@ -23,7 +25,7 @@ interface IProps {
 	labelRight?: string;
 }
 
-export class NotificationsPanelHeader extends React.PureComponent<IProps, any> {
+export class NotificationsPanelHeader extends PureComponent<IProps, any> {
 	public render() {
 		const { labelLeft, labelRight, className } = this.props;
 		return (

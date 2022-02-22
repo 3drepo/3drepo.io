@@ -13,7 +13,9 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */import { useParams, useRouteMatch } from 'react-router-dom';
+ */
+import { useState } from 'react';
+import { useParams, useRouteMatch } from 'react-router-dom';
 import HomeIcon from '@assets/icons/home.svg';
 import DownArrowIcon from '@assets/icons/down_arrow.svg';
 import { uriCombine } from '@/v5/services/routing/routing';
@@ -72,8 +74,8 @@ export const Breadcrumbs = (): JSX.Element => {
 
 	list = list.map(createToWithUrl(projectId ? urlProject : url));
 
-	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
+	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+	const handleClick = (event: MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
 	const handleClose = () => setAnchorEl(null);
 
 	return (

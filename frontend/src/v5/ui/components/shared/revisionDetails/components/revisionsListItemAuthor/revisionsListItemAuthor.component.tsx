@@ -13,7 +13,9 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */import { useParams } from 'react-router';
+ */
+import { useState } from 'react';
+import { useParams } from 'react-router';
 
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { Popover } from '@/v4/routes/components/messagesList/components/message/components/markdownMessage/ticketReference/ticketReference.styles';
@@ -39,7 +41,7 @@ export const RevisionsListItemAuthor = ({
 	authorName,
 	active = false,
 }: IRevisionsListItemAuthor): JSX.Element => {
-	const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 	const { teamspace } = useParams();
 	const author: IUser | null = UsersHooksSelectors.selectUser(teamspace, authorName);
 

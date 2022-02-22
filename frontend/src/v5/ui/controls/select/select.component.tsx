@@ -14,14 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { forwardRef, Ref } from 'react';
 import ChevronIcon from '@assets/icons/chevron.svg';
 import { SelectProps } from '@material-ui/core';
 import { SelectInput } from './select.styles';
 
-export const SelectBase = ({ children, ...props }: SelectProps, ref: React.Ref<HTMLButtonElement>) => (
+export const SelectBase = ({ children, ...props }: SelectProps, ref: Ref<HTMLButtonElement>) => (
 	<SelectInput IconComponent={ChevronIcon} ref={ref} {...props}>
 		{children}
 	</SelectInput>
 );
 
-export const Select = React.forwardRef(SelectBase);
+export const Select = forwardRef(SelectBase);

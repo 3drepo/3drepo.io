@@ -13,7 +13,10 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */import ReactDOM from 'react-dom';
+ */
+
+import { PureComponent } from 'react';
+import ReactDOM from 'react-dom';
 
 import Tooltip from '@material-ui/core/Tooltip';
 import Add from '@material-ui/icons/Add';
@@ -33,7 +36,7 @@ interface IState {
 	open: boolean;
 }
 
-export class FloatingActionPanel extends React.PureComponent<IProps, IState> {
+export class FloatingActionPanel extends PureComponent<IProps, IState> {
 	public state = {
 		anchorEl: null,
 		open: false

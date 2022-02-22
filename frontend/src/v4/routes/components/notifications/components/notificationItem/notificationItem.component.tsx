@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { PureComponent, ComponentType, SyntheticEvent } from 'react';
 import { Tooltip } from '@material-ui/core';
 import Avatar from '@material-ui/core/Avatar';
 import Place from '@material-ui/icons/Place';
@@ -60,12 +60,12 @@ interface IProps extends INotification {
 	sendUpdateNotificationRead: (id: string, read: boolean) => void;
 	sendDeleteNotification: (id: string) => void;
 	showUpdatedFailedError: (errorMessage: string) => void;
-	onClick?: (e: React.SyntheticEvent) => void;
+	onClick?: (e: SyntheticEvent) => void;
 	history: any;
 }
 
 interface IState {
-	icon: React.ComponentType;
+	icon: ComponentType;
 	details: string;
 	summary: string;
 }
@@ -148,7 +148,7 @@ const getDetails = (notification: IProps) => {
 
 const getSummary  = (notification) =>  `In ${notification.modelName}`;
 
-export class NotificationItem extends React.PureComponent<IProps, IState> {
+export class NotificationItem extends PureComponent<IProps, IState> {
 	public gotoNotification = () => {
 		this.props.sendUpdateNotificationRead(this.props._id, true);
 
@@ -184,7 +184,7 @@ export class NotificationItem extends React.PureComponent<IProps, IState> {
 		history.push({pathname, search});
 	}
 
-	public onClick = (e: React.SyntheticEvent) => {
+	public onClick = (e: SyntheticEvent) => {
 		if (this.props.onClick) {
 			this.props.onClick(e);
 		}
@@ -192,17 +192,17 @@ export class NotificationItem extends React.PureComponent<IProps, IState> {
 		this.gotoNotification();
 	}
 
-	public delete = (e: React.SyntheticEvent) => {
+	public delete = (e: SyntheticEvent) => {
 		e.stopPropagation();
 		this.props.sendDeleteNotification(this.props._id);
 	}
 
-	public markAsRead = (e: React.SyntheticEvent) => {
+	public markAsRead = (e: SyntheticEvent) => {
 		e.stopPropagation();
 		this.props.sendUpdateNotificationRead(this.props._id, true);
 	}
 
-	public markAsUnread = (e: React.SyntheticEvent) => {
+	public markAsUnread = (e: SyntheticEvent) => {
 		e.stopPropagation();
 		this.props.sendUpdateNotificationRead(this.props._id, false);
 	}

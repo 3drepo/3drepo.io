@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { useMemo } from 'react';
 import Konva from 'konva';
 import { MODES } from '../../screenshotDialog.helpers';
 import { HandleCalloutDrawing } from './handleCalloutDrawing/handleCalloutDrawing.component';
@@ -50,7 +50,7 @@ const COMPONENTS_MAP = {
 export const DrawingHandler = (props: IProps) => {
 	const { mode } = props;
 
-	const Component = React.useMemo(() => {
+	const Component = useMemo(() => {
 		return COMPONENTS_MAP[mode] || null;
 	}, [mode]);
 

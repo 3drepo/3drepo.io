@@ -31,10 +31,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { PureComponent, SyntheticEvent } from 'react';
 import { Button } from '@material-ui/core';
 import { Form } from 'formik';
-import * as React from 'react';
 
 import {
 	DeleteButton,
@@ -51,7 +50,7 @@ interface IProps {
 	onDeleteApiKey: () => void;
 }
 
-export class APIKeyForm extends React.PureComponent<IProps> {
+export class APIKeyForm extends PureComponent<IProps> {
 	public render() {
 		const apiKey =  this.props.apiKey || '';
 		return (
@@ -91,12 +90,12 @@ export class APIKeyForm extends React.PureComponent<IProps> {
 		);
 	}
 
-	private onClickGenerate = (e: React.SyntheticEvent) => {
+	private onClickGenerate = (e: SyntheticEvent) => {
 		e.stopPropagation();
 		this.props.onGenerateApiKey();
 	}
 
-	private onClickDelete = (e: React.SyntheticEvent) => {
+	private onClickDelete = (e: SyntheticEvent) => {
 		e.stopPropagation();
 		this.props.onDeleteApiKey();
 	}

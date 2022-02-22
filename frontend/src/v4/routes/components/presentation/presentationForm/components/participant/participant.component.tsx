@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { FC } from 'react';
 import PauseIcon from '@material-ui/icons/Pause';
 import PlayIcon from '@material-ui/icons/PlayArrow';
 
@@ -33,7 +34,7 @@ const renderPlayButtonContent = (isPaused: boolean) => renderWhenTrueOtherwise(
 () => <><PauseIcon /> Pause</>,
 )(isPaused);
 
-export const Participant: React.FC<IProps> = ({ leavePresentation, isPaused, togglePause }) => (
+export const Participant: FC<IProps> = ({ leavePresentation, isPaused, togglePause }) => (
 	<Container>
 		<SessionTop />
 		<ButtonContainer>

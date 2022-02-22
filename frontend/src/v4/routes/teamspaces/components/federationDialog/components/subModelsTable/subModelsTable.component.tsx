@@ -31,11 +31,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { ComponentType } from 'react';
 import IconButton from '@material-ui/core/IconButton';
 import TableBody from '@material-ui/core/TableBody';
 import Typography from '@material-ui/core/Typography';
-import * as React from 'react';
 
 import {
 	HeaderCell,
@@ -52,7 +51,7 @@ interface IProps {
 	title: string;
 	models: any[];
 	selectedModels: any[];
-	Icon: React.ComponentType;
+	Icon: ComponentType;
 	handleAllClick: (event) => void;
 	handleIconClick: () => void;
 	handleItemClick: (event, modelName) => void;

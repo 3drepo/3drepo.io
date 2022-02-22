@@ -14,19 +14,19 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { FunctionComponent, ReactNode } from 'react';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { Container, Content } from './loader.styles';
 
 interface IProps {
-	content?: React.ReactNode;
+	content?: ReactNode;
 	size?: number;
 	horizontal?: boolean;
 	className?: string;
 }
 
-export const Loader: React.FunctionComponent<IProps> = (props) => {
+export const Loader: FunctionComponent<IProps> = (props) => {
 	const styleProps = {
 		horizontal: props.horizontal
 	};

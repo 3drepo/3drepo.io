@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { PureComponent, createRef } from 'react';
 import Divider from '@material-ui/core/Divider';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
@@ -60,8 +60,8 @@ interface IState {
 	password: string;
 }
 
-export class Login extends React.PureComponent<IProps, IState> {
-	public formRef = React.createRef<any>();
+export class Login extends PureComponent<IProps, IState> {
+	public formRef = createRef<any>();
 
 	public state = {
 		login: '',

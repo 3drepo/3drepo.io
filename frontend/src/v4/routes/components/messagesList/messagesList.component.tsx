@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { useRef, useLayoutEffect, useState, useMemo, ChangeEvent } from 'react';
 import MenuItem from '@material-ui/core/MenuItem';
 import { cond, matches, stubTrue } from 'lodash';
 
@@ -54,10 +55,10 @@ const Loader = () => (
 const maxScrollTop = (element) => element.scrollHeight - element.clientHeight;
 
 export const MessagesList = ({ teamspace, isPending, messages, ...props }: IProps) => {
-	const [filter, setFilter] = React.useState('comments');
-	const listRef = React.useRef<HTMLDivElement>();
+	const [filter, setFilter] = useState('comments');
+	const listRef = useRef<HTMLDivElement>();
 
-	React.useLayoutEffect(() => {
+	useLayoutEffect(() => {
 		if (listRef.current) {
 			const list = listRef.current;
 			const currentScroll = Math.ceil(list.scrollTop);
@@ -72,7 +73,7 @@ export const MessagesList = ({ teamspace, isPending, messages, ...props }: IProp
 		}
 	}, [isPending, messages.length, filter]);
 
-	const messagesList = React.useMemo(() => messages
+	const messagesList = useMemo(() => messages
 		.filter((message) => cond([
 			[matches('comments'), () => !Boolean(message.action)],
 			[matches('systemLogs'), () => Boolean(message.action)],
@@ -93,7 +94,7 @@ export const MessagesList = ({ teamspace, isPending, messages, ...props }: IProp
 		)).reverse()
 	, [messages, filter]);
 
-	const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+	const handleChange = (event: ChangeEvent<{ value: unknown }>) => {
 		setFilter(event.target.value as string);
 	};
 

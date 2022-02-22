@@ -13,7 +13,9 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */import { useParams } from 'react-router';
+ */
+import { SyntheticEvent } from 'react';
+import { useParams } from 'react-router';
 
 import { RevisionsListItemText } from '@components/shared/revisionDetails/components/revisionsListItemText';
 import { RevisionsListItemDate } from '@components/shared/revisionDetails/components/revisionsListItemDate';
@@ -36,7 +38,7 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 	const { teamspace, project } = useParams();
 	const { timestamp, desc, author, tag, void: voidStatus } = revision;
 
-	const toggleVoidStatus = (e: React.SyntheticEvent) => {
+	const toggleVoidStatus = (e: SyntheticEvent) => {
 		e.stopPropagation();
 		RevisionsActionsDispatchers.setVoidStatus(teamspace, project, containerId, tag || revision._id, !voidStatus);
 	};

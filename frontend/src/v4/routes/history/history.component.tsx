@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { PureComponent } from 'react';
 import CloudDownload from '@material-ui/icons/CloudDownload';
 import { isEmpty, isEqual } from 'lodash';
 
@@ -55,7 +55,7 @@ interface IState {
 	rows: any[];
 }
 
-export class History extends React.PureComponent<IProps, IState> {
+export class History extends PureComponent<IProps, IState> {
 	public state = { invoices: [], rows: [] };
 
 	public componentDidMount() {

@@ -14,8 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { forwardRef } from 'react';
+import { forwardRef, Ref } from 'react';
 import EllipsisIcon from '@assets/icons/ellipsis.svg';
 import { IconButtonProps } from '@material-ui/core/IconButton';
 import { StyledIconButton } from './ellipsisButton.styles';
@@ -25,7 +24,7 @@ export type IEllipsisButton = IconButtonProps & {
 };
 
 export const EllipsisButton = forwardRef(
-	({ isOn, ...props }: IEllipsisButton, ref: React.Ref<HTMLSpanElement>): JSX.Element => (
+	({ isOn, ...props }: IEllipsisButton, ref: Ref<HTMLSpanElement>): JSX.Element => (
 		<StyledIconButton $isOn={isOn} {...props} ref={ref}>
 			<EllipsisIcon />
 		</StyledIconButton>

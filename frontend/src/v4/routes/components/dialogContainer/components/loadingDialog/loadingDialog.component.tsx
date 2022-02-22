@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { FunctionComponent } from 'react';
 import DialogContent from '@material-ui/core/DialogContent';
 import { Loader } from '../../../loader/loader.component';
 import { LoaderContainer } from './loadingDialog.styles';
@@ -22,7 +23,7 @@ interface IProps {
 	content?: string;
 }
 
-export const LoadingDialog: React.FunctionComponent<IProps> = (props) => {
+export const LoadingDialog: FunctionComponent<IProps> = (props) => {
 	return (
 		<>
 			<DialogContent>

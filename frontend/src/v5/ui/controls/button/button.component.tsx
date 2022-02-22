@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ElementType, forwardRef } from 'react';
+import { ElementType, forwardRef, Ref } from 'react';
 import MuiButton, { ButtonProps } from '@material-ui/core/Button';
 import { Typography } from '@/v5/ui/controls/typography';
 import { ButtonTypeMap } from '@material-ui/core/Button/Button';
@@ -28,11 +28,11 @@ type IButton<T extends ElementType = ButtonTypeMap['defaultComponent']> = Omit<B
 	className?: string;
 };
 
-export const ButtonBase = <T extends React.ElementType>({
+export const ButtonBase = <T extends ElementType>({
 	children,
 	variant,
 	...props
-}: IButton<T>, ref: React.Ref<HTMLButtonElement>): JSX.Element => {
+}: IButton<T>, ref: Ref<HTMLButtonElement>): JSX.Element => {
 	if (variant === 'label') {
 		return (
 			<LabelButton {...props} ref={ref}>

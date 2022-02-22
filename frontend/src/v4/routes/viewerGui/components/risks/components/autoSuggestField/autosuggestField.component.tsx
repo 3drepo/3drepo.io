@@ -31,9 +31,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import * as React from 'react';
-
+import { FunctionComponent, useState, useEffect } from 'react';
 import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
 import Portal from '@material-ui/core/Portal';
@@ -86,16 +84,16 @@ interface IProps {
 	saveOnChange?: boolean;
 }
 
-export const AutoSuggestField: React.FunctionComponent<IProps> = ({
+export const AutoSuggestField: FunctionComponent<IProps> = ({
 	label, placeholder, field, form, disabled, saveOnChange, suggestions: allSuggestions = []
 }) => {
-	const [suggestions, setSuggestions] = React.useState([]);
-	const [value, setValue] = React.useState('');
-	const [nodeRef, setNodeRef] = React.useState(null);
-	const [popperElement, setPopperElement] = React.useState(null);
+	const [suggestions, setSuggestions] = useState([]);
+	const [value, setValue] = useState('');
+	const [nodeRef, setNodeRef] = useState(null);
+	const [popperElement, setPopperElement] = useState(null);
 	const { styles, attributes } = usePopper(nodeRef, popperElement, { placement: 'top-start' });
 
-	React.useEffect(() => {
+	useEffect(() => {
 		setValue(field.value);
 	}, [field.value]);
 

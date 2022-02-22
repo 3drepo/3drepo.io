@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { PureComponent } from 'react';
 import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
 import ExpandIcon from '@material-ui/icons/ChevronRight';
@@ -166,7 +166,7 @@ const mapFiltersToSuggestions = (filters, selectedFilters) => {
 	}, []);
 };
 
-export class FilterPanel extends React.PureComponent<IProps, IState> {
+export class FilterPanel extends PureComponent<IProps, IState> {
 	public get onlyCopyButton() {
 		const onlyQueryFilters = this.props.filters.every((filter) => filter.type === FILTER_TYPES.QUERY);
 		return onlyQueryFilters;

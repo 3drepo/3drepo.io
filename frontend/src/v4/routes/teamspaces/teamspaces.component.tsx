@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { PureComponent } from 'react';
 import CancelIcon from '@material-ui/icons/Cancel';
 import SearchIcon from '@material-ui/icons/Search';
 import { cond, matches, stubTrue } from 'lodash';
@@ -124,7 +124,7 @@ const SortingIcon = ({Icon, isDesc}) => {
 	}
 	return <Icon.ASC IconProps={iconProps} />;
 };
-export class Teamspaces extends React.PureComponent<IProps, IState> {
+export class Teamspaces extends PureComponent<IProps, IState> {
 	public static defaultProps = {
 		teamspaces: []
 	};

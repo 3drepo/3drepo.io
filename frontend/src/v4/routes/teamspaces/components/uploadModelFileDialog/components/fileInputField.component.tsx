@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { PureComponent } from 'react';
 import { clientConfigService } from '../../../../../services/clientConfig';
 import { ContainedButton } from '../../../../viewerGui/components/containedButton/containedButton.component';
 import { FileLabel, HiddenFileInput } from './fileInputField.styles';
@@ -30,7 +31,7 @@ interface IState {
 	value: any[];
 }
 
-export class FileInputField extends React.PureComponent<IProps, IState> {
+export class FileInputField extends PureComponent<IProps, IState> {
 	public state = {
 		value: []
 	};

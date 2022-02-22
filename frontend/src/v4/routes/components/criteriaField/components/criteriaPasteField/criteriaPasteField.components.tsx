@@ -43,7 +43,7 @@ const areValidCriteria = (value) => {
 	}
 };
 
-export class CriteriaPasteField extends React.PureComponent<IProps, IState> {
+export class CriteriaPasteField extends PureComponent<IProps, IState> {
 	public state = {
 		currentValue: '',
 		isValid: true

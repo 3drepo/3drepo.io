@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { PureComponent } from 'react';
 import { Grid } from '@material-ui/core';
 
 import { SortLabel } from '../tableHeading/tableHeading.styles';
@@ -34,7 +34,7 @@ interface IProps {
 	onClick?: () => void;
 }
 
-export class TableHeadingRadio extends React.PureComponent<IProps, any> {
+export class TableHeadingRadio extends PureComponent<IProps, any> {
 	public state = {
 		selectedValue: ''
 	};

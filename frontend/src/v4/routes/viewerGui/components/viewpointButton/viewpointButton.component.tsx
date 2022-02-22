@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { Ref, forwardRef, FC } from 'react';
 import Tooltip from '@material-ui/core/Tooltip';
 
 import { renderWhenTrueOtherwise } from '../../../../helpers/rendering';
@@ -26,8 +27,8 @@ interface IProps {
 	disabled?: boolean;
 }
 
-const UpdateViewpointButton: React.FC<IProps> = React.forwardRef(
-	({ disabled, onUpdate, ...props }: IProps, ref: React.Ref<HTMLSpanElement>) => (
+const UpdateViewpointButton: FC<IProps> = forwardRef(
+	({ disabled, onUpdate, ...props }: IProps, ref: Ref<HTMLSpanElement>) => (
 		<ButtonContainer ref={ref} {...props}>
 			<ContainedButton
 				onClick={onUpdate}

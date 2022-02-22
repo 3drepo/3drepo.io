@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { PureComponent } from 'react';
 import { pick } from 'lodash';
 
 import { Panel } from '../components/panel/panel.component';
@@ -33,7 +33,7 @@ interface IProps {
 	isAvatarPending: boolean;
 }
 
-export class Profile extends React.PureComponent<IProps, any> {
+export class Profile extends PureComponent<IProps, any> {
 	public render() {
 		const { currentUser, onUserDataChange, onAvatarChange,
 				isAvatarPending, onPasswordChange, onGenerateApiKey, onDeleteApiKey} = this.props;

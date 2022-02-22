@@ -31,9 +31,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import * as React from 'react';
-
+import { FunctionComponent } from 'react';
 import InputLabel from '@material-ui/core/InputLabel';
 import { Field } from 'formik';
 
@@ -75,7 +73,7 @@ interface IProps {
 	showScreenshotDialog: (config: any) => void;
 }
 
-export const MainIssueFormTab: React.FunctionComponent<IProps> = ({
+export const MainIssueFormTab: FunctionComponent<IProps> = ({
 	active, issue, permissions, topicTypes, currentUser, myJob, isNew, canChangeAssigned,
 	canEditBasicProperty, canEditViewpoint, jobs, disableViewer, ...props
 }) => {

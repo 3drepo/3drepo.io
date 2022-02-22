@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { PureComponent } from 'react';
 import Button from '@material-ui/core/Button';
 import DialogActions from '@material-ui/core/DialogActions';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -84,7 +84,7 @@ interface IState {
 
 const getModelsName = (models) => models.map(({ name}) => name);
 
-export class FederationDialog extends React.PureComponent<IProps, IState> {
+export class FederationDialog extends PureComponent<IProps, IState> {
 	public static defaultProps = {
 		name: '',
 		teamspace: '',

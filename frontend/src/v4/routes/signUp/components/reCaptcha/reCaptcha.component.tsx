@@ -13,8 +13,9 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */import ReCAPTCHA from 'react-google-recaptcha';
-
+ */
+import { PureComponent, createRef } from 'react';
+import ReCAPTCHA from 'react-google-recaptcha';
 import { Container } from './reCaptcha.styles';
 
 interface IProps {
@@ -29,12 +30,12 @@ interface IState {
 	value: any[];
 }
 
-export class ReCaptcha extends React.PureComponent<IProps, IState> {
+export class ReCaptcha extends PureComponent<IProps, IState> {
 	public state = {
 		value: []
 	};
 
-	public reCaptchaRef = React.createRef<HTMLElement>();
+	public reCaptchaRef = createRef<HTMLElement>();
 
 	public componentDidMount() {
 		this.setState({ value: this.props.value });

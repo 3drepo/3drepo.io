@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { FunctionComponent, useState, useMemo } from 'react';
 import Grid from '@material-ui/core/Grid';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -37,7 +38,7 @@ interface ITextWrapper {
 	variant?: string;
 }
 
-const TextWrapper: React.FunctionComponent<ITextWrapper> = ({
+const TextWrapper: FunctionComponent<ITextWrapper> = ({
 	children, color = 'textPrimary', variant = 'caption', inline, ...props
 }) => (
 	<StyledTypography component="span" inline={inline ? 1 : 0} variant={variant} color={color} {...props}>
@@ -87,8 +88,8 @@ interface IProps {
 }
 
 export const SuggestedTreatmentsDialog = ({ suggestions, setFieldValue, handleClose }: IProps) => {
-	const [type, setType] = React.useState('');
-	const [stage, setStage] = React.useState('');
+	const [type, setType] = useState('');
+	const [stage, setStage] = useState('');
 
 	const handleClick = (suggestion) => {
 		const mitigationProperties = pick(suggestion, MITIGATION_PROPERTIES);
@@ -96,7 +97,7 @@ export const SuggestedTreatmentsDialog = ({ suggestions, setFieldValue, handleCl
 		handleClose();
 	};
 
-	const getSuggestions = React.useMemo(() => suggestions.filter((suggestion) => {
+	const getSuggestions = useMemo(() => suggestions.filter((suggestion) => {
 		const hasProperStage = stage ? suggestion.mitigation_stage === stage : true;
 		const hasProperType = type ? suggestion.mitigation_type === type : true;
 

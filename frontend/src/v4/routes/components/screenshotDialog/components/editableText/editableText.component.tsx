@@ -14,9 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { useState, useRef, useEffect, CSSProperties } from 'react';
 import Konva from 'konva';
-import * as React from 'react';
 
 import { isEmpty } from 'lodash';
 import { useFocus, useOutsideClick } from '../../../../../hooks';
@@ -26,7 +25,7 @@ import { AssistantElement, Textarea } from './editableText.styles';
 interface IProps {
 	value: string;
 	visible: boolean;
-	styles: React.CSSProperties;
+	styles: CSSProperties;
 	onTextEdit: (props: any) => void;
 	onTextareaKeyDown: (props: any) => void;
 	onAddText: () => void;
@@ -39,11 +38,11 @@ export const EditableText = ({
 	value, visible, styles, onTextEdit, onTextareaKeyDown, boxRef, onRefreshDrawingLayer, onAddText, size
 	}: IProps) => {
 	const [textareaRef, setTextareaFocus] = useFocus();
-	const assistantElementRef = React.useRef<HTMLPreElement>(null);
-	const [initialTextareaWidth, setInitialTextareaWidth] = React.useState<number>(0);
-	const [additionalStyles, setAdditionalStyles] = React.useState<object>({});
+	const assistantElementRef = useRef<HTMLPreElement>(null);
+	const [initialTextareaWidth, setInitialTextareaWidth] = useState<number>(0);
+	const [additionalStyles, setAdditionalStyles] = useState<object>({});
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (textareaRef.current && !value) {
 			const currentTextarea = textareaRef.current;
 			currentTextarea.setAttribute('size', currentTextarea.getAttribute('placeholder').length.toString());
@@ -55,13 +54,13 @@ export const EditableText = ({
 		}
 	}, [styles.fontSize, value]);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		setTimeout(() => {
 			setTextareaFocus();
 		});
 	}, [visible, textareaRef.current]);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (textareaRef && assistantElementRef) {
 			const shouldExpand = assistantElementRef.current.offsetWidth > initialTextareaWidth;
 			const width = shouldExpand ? assistantElementRef.current.offsetWidth : initialTextareaWidth;

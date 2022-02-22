@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, FunctionComponent, forwardRef } from 'react';
 
 import Button from '@material-ui/core/Button';
 import DialogBase from '@material-ui/core/Dialog';
@@ -38,7 +38,7 @@ interface IProps {
 	searchEnabled?: boolean;
 }
 
-export const Dialog: React.FunctionComponent<IProps> = React.forwardRef((props, ref) => {
+export const Dialog: FunctionComponent<IProps> = forwardRef((props, ref) => {
 	const [isOpen, setIsOpen] = useState(true);
 	const [closeDisabled, setCloseDisabled] = useState(false);
 

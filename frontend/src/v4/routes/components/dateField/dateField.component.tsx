@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { PureComponent } from 'react';
 import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date';
 import { Container, StyledDatePicker, StyledDateTimePicker } from './dateField.styles';
 
@@ -37,7 +38,7 @@ interface IState {
 	value: any;
 }
 
-export class DateField extends React.PureComponent<IProps, IState> {
+export class DateField extends PureComponent<IProps, IState> {
 	public state = {
 		value: new Date().valueOf()
 	};

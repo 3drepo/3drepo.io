@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { PureComponent } from 'react';
 import Grid from '@material-ui/core/Grid';
 import * as queryString from 'query-string';
 import { Link } from 'react-router-dom';
@@ -36,7 +36,7 @@ interface IState {
 	message: string;
 }
 
-export class RegisterVerify extends React.PureComponent<IProps, IState> {
+export class RegisterVerify extends PureComponent<IProps, IState> {
 	public state = {
 		message: ''
 	};

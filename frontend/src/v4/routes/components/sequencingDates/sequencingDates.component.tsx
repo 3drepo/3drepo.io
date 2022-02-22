@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import * as React from 'react';
-
+import { PureComponent } from 'react';
 import InputLabel from '@material-ui/core/InputLabel';
 import CloseIcon from '@material-ui/icons/Close';
 import SequencesIcon from '@material-ui/icons/Movie';
@@ -70,7 +68,7 @@ const SequenceDate = ({ value, name, onChange, showSequenceDate, min, max, initi
 	);
 };
 
-export class SequencingDates extends React.PureComponent<IProps, IState> {
+export class SequencingDates extends PureComponent<IProps, IState> {
 	get additionalProps() {
 		const { endTimeValue, startTimeValue, selectedDate, startDate } = this.props;
 		const newTime = selectedDate ? selectedDate : endTimeValue;
