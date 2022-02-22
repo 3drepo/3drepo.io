@@ -17,27 +17,26 @@
 
 import React from 'react';
 
-import { AvatarButton } from '@controls/avatarButton';
 import { IUser } from '@/v5/store/users/users.redux';
+import { AvatarButton } from '@controls/avatarButton';
 import { AvatarWrapper, Container, Company, Job, Name, UserData } from './userPopover.styles';
 
 interface IUserPopover {
 	user: IUser;
 }
 
-const getInitials = (name) => name.split(' ').slice(0, 2).map((text) => text[0]).join('')
-	.trim()
-	.toUpperCase();
-
-export const UserPopover = ({ user: { firstName, lastName, company, job } }: IUserPopover) => (
-	<Container>
-		<AvatarWrapper>
-			<AvatarButton onClick={() => {}}>{getInitials(`${firstName} ${lastName}`)}</AvatarButton>
-		</AvatarWrapper>
-		<UserData>
-			<Name>{firstName} {lastName}</Name>
-			<Company>{company}</Company>
-			<Job>{job}</Job>
-		</UserData>
-	</Container>
-);
+export const UserPopover = ({ user }: IUserPopover) => {
+	const { firstName, lastName, company, job } = user;
+	return (
+		<Container>
+			<AvatarWrapper>
+				<AvatarButton user={user} />
+			</AvatarWrapper>
+			<UserData>
+				<Name>{firstName} {lastName}</Name>
+				<Company>{company}</Company>
+				<Job>{job}</Job>
+			</UserData>
+		</Container>
+	);
+};

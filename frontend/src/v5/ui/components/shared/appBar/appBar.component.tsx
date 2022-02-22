@@ -30,7 +30,7 @@ import TeamspacesIcon from '@assets/icons/teamspaces.svg';
 import VisualSettingsIcon from '@assets/icons/settings.svg';
 import SupportCentreIcon from '@assets/icons/question_mark.svg';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
-import { AvatarButton } from '@controls/avatarButton';
+import { Avatar } from '@controls/avatarButton';
 import {
 	Items,
 	UserMenu,
@@ -42,22 +42,15 @@ import {
 	UserUserName,
 	SignOutButton,
 	EditProfileButton,
-	Avatar,
 } from './appBar.styles';
 import { Breadcrumbs } from '../breadcrumbs';
 import { UserMenuButton } from './userMenuButton/userMenuButton.component';
-
-const getUserNamesInitials = ({ firstName, lastName }) => (
-	[firstName, lastName]
-		.map((name) => name.trim().charAt(0).toUpperCase())
-		.join('')
-);
 
 export const AppBar = (): JSX.Element => {
 	const { teamspace } = useParams();
 	const { url } = useRouteMatch();
 	const baseUrl = url.split('/').slice(0, 3).join('/');
-	const userIsPending = CurrentUserHooksSelectors.selectIsPending();
+
 	const user = CurrentUserHooksSelectors.selectCurrentUser();
 
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -85,12 +78,10 @@ export const AppBar = (): JSX.Element => {
 					<CircleButton variant="contrast" aria-label="notifications">
 						<NotificationsIcon />
 					</CircleButton>
-					<AvatarButton
+					<Avatar
 						onClick={handleClickDropdown}
-						src={user.hasAvatar ? user.avatarUrl : null}
-					>
-						{!userIsPending && getUserNamesInitials(user)}
-					</AvatarButton>
+						user={user}
+					/>
 				</Items>
 			</MuiAppBar>
 			<Popper
@@ -110,10 +101,9 @@ export const AppBar = (): JSX.Element => {
 								<UserMenu>
 									<AvatarSection>
 										<Avatar
-											src={user.hasAvatar ? user.avatarUrl : null}
-										>
-											{!userIsPending && getUserNamesInitials(user)}
-										</Avatar>
+											user={user}
+											$largeIcon
+										/>
 										<UserFullName>{user.firstName} {user.lastName}</UserFullName>
 										<UserUserName>{user.username}</UserUserName>
 										<EditProfileButton

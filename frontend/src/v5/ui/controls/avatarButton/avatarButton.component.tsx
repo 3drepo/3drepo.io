@@ -17,17 +17,30 @@
 
 import React, { MouseEvent } from 'react';
 
-import Avatar from '@material-ui/core/Avatar';
+import AvatarIcon from '@material-ui/core/Avatar';
+import { IUser } from '@/v5/store/users/users.redux';
 import { StyledIconButton } from './avatarButton.styles';
 
-interface IAvatarButton {
-	disabled?: boolean;
-	onClick: (event: MouseEvent) => void;
-	src?: string | null
-}
+const getUserNamesInitials = ({ firstName, lastName }) => {
+	if (!(firstName || lastName)) return '';
 
-export const AvatarButton: React.FC<IAvatarButton> = ({ children, src, ...props }) => (
+	return [firstName, lastName]
+		.map((name) => name.trim().charAt(0).toUpperCase())
+		.join('');
+};
+
+type AvatarProps = {
+	disabled?: boolean;
+	onClick?: (event: MouseEvent) => void;
+	src?: string | null;
+	user: IUser;
+	$largeIcon?: boolean;
+};
+
+export const Avatar = ({ src, user, ...props }: AvatarProps) => (
 	<StyledIconButton {...props}>
-		<Avatar src={src}>{children}</Avatar>
+		<AvatarIcon src={user.hasAvatar ? user.avatarUrl : null}>
+			{getUserNamesInitials(user)}
+		</AvatarIcon>
 	</StyledIconButton>
 );

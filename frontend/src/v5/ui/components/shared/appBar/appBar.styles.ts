@@ -18,7 +18,6 @@
 import styled from 'styled-components';
 import { Button } from '@controls/button';
 import {
-	Avatar as AvatarBase,
 	Link,
 	Paper as PaperBase,
 	Popper as PopperBase,
@@ -72,14 +71,6 @@ export const AvatarSection = styled(Section)`
 	justify-content: center;
 	align-items: center;
 `;
-
-export const Avatar = styled(AvatarBase)`
-	&& {
-		height: 48px;
-		width: 48px;
-	}
-`;
-
 export const UserFullName = styled.div`
 	${({ theme }) => theme.typography.h3};
 	color: ${({ theme }) => theme.palette.secondary.main};

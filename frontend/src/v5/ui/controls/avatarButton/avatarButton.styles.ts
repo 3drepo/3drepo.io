@@ -26,8 +26,10 @@ export const StyledIconButton = styled(IconButton)`
 
 	.MuiAvatar-circle {
 		margin: 0;
-		height: 38px;
-		width: 38px;
+		${({ $largeIcon }) => `
+			height: ${$largeIcon ? '48px' : '38px'};
+			width: ${$largeIcon ? '48px' : '38px'};
+		`}
 	}
 
 	${({ disabled }) => disabled && css`
@@ -49,16 +51,22 @@ export const StyledIconButton = styled(IconButton)`
 				0 1px 18px 0 rgb(0 0 0 / 12%);
 		}
 	}
-	
-	&:hover {
-		.MuiAvatar-root {
-			background-color: ${({ theme }) => theme.palette.tertiary.mid};
-		}
-	}
 
-	&:active {
-		.MuiAvatar-root {
-			background-color: ${({ theme }) => theme.palette.tertiary.main};
+	${({ onClick, theme }) => (typeof onClick === 'function' ? `
+		cursor: pointer;
+		
+		&:hover {
+			.MuiAvatar-root {
+				background-color: ${theme.palette.tertiary.mid};
+			}
 		}
-	}
+
+		&:active {
+			.MuiAvatar-root {
+				background-color: ${theme.palette.tertiary.main};
+			}
+		}
+	` : `
+		cursor: default;
+	`)}
 `;
