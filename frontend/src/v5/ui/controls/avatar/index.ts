@@ -15,28 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
-import { IUser } from '@/v5/store/users/users.redux';
-import { Avatar } from '@controls/avatar';
-import { AvatarWrapper, Container, Company, Job, Name, UserData } from './userPopover.styles';
-
-interface IUserPopover {
-	user: IUser;
-}
-
-export const UserPopover = ({ user }: IUserPopover) => {
-	const { firstName, lastName, company, job } = user;
-	return (
-		<Container>
-			<AvatarWrapper>
-				<Avatar user={user} />
-			</AvatarWrapper>
-			<UserData>
-				<Name>{firstName} {lastName}</Name>
-				<Company>{company}</Company>
-				<Job>{job}</Job>
-			</UserData>
-		</Container>
-	);
-};
+export { Avatar } from './avatar.component';

@@ -51,26 +51,13 @@ export const Paper = styled(PaperBase)`
 		0 3px 5px rgb(0 0 0 / 20%);
 `;
 
-export const UserMenu = styled.div`
+export const AvatarSection = styled.div`
 	display: flex;
 	flex-direction: column;
-	width: 230px;
-`;
-
-export const Section = styled.div`
-	display: flex;
-	flex-direction: column;
-	padding: 11px;
-
-	&:not(:last-of-type) {
-		border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
-	}
-`;
-
-export const AvatarSection = styled(Section)`
 	justify-content: center;
 	align-items: center;
 `;
+
 export const UserFullName = styled.div`
 	${({ theme }) => theme.typography.h3};
 	color: ${({ theme }) => theme.palette.secondary.main};

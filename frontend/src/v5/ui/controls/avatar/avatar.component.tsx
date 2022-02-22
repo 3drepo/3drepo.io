@@ -19,7 +19,7 @@ import React, { MouseEvent } from 'react';
 
 import AvatarIcon from '@material-ui/core/Avatar';
 import { IUser } from '@/v5/store/users/users.redux';
-import { StyledIconButton } from './avatarButton.styles';
+import { StyledIconButton } from './avatar.styles';
 
 const getUserNamesInitials = ({ firstName, lastName }) => {
 	if (!(firstName || lastName)) return '';

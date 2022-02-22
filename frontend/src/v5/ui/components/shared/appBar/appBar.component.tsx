@@ -18,7 +18,7 @@
 import React, { MouseEvent, useState } from 'react';
 import { useParams } from 'react-router';
 import { useRouteMatch } from 'react-router-dom';
-import { AppBar as MuiAppBar, ClickAwayListener, Grow } from '@material-ui/core';
+import { AppBar as MuiAppBar } from '@material-ui/core';
 
 import LogoIcon from '@assets/icons/logo.svg';
 import IntercomIcon from '@assets/icons/intercom.svg';
@@ -30,21 +30,18 @@ import TeamspacesIcon from '@assets/icons/teamspaces.svg';
 import VisualSettingsIcon from '@assets/icons/settings.svg';
 import SupportCentreIcon from '@assets/icons/question_mark.svg';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
-import { Avatar } from '@controls/avatarButton';
+import { Avatar } from '@controls/avatar';
+import { ActionMenu, ActionMenuSection } from '@controls/actionMenu';
+import { ActionMenuButton } from '@controls/actionMenu/actionMenuButton';
 import {
 	Items,
-	UserMenu,
-	Section,
 	AvatarSection,
-	Popper,
-	Paper,
 	UserFullName,
 	UserUserName,
 	SignOutButton,
 	EditProfileButton,
 } from './appBar.styles';
 import { Breadcrumbs } from '../breadcrumbs';
-import { UserMenuButton } from './userMenuButton/userMenuButton.component';
 
 export const AppBar = (): JSX.Element => {
 	const { teamspace } = useParams();
@@ -55,11 +52,11 @@ export const AppBar = (): JSX.Element => {
 
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-	const handleCloseDropdown = () => {
+	const handleCloseActionMenu = () => {
 		setAnchorEl(null);
 	};
 
-	const handleClickDropdown = (event: MouseEvent<HTMLButtonElement>) => {
+	const handleClickActionMenu = (event: MouseEvent<HTMLButtonElement>) => {
 		event.stopPropagation();
 		setAnchorEl(event.currentTarget);
 	};
@@ -79,79 +76,65 @@ export const AppBar = (): JSX.Element => {
 						<NotificationsIcon />
 					</CircleButton>
 					<Avatar
-						onClick={handleClickDropdown}
+						onClick={handleClickActionMenu}
 						user={user}
 					/>
 				</Items>
 			</MuiAppBar>
-			<Popper
-				open={Boolean(anchorEl)}
+			<ActionMenu
 				anchorEl={anchorEl}
-				transition
-				disablePortal
-				placement="bottom-end"
+				handleClose={handleCloseActionMenu}
 			>
-				{({ TransitionProps, placement }) => (
-					<Grow
-						{...TransitionProps}
-						style={{ transformOrigin: placement === 'bottom-end' ? 'center top' : 'center bottom' }}
-					>
-						<Paper>
-							<ClickAwayListener onClickAway={handleCloseDropdown}>
-								<UserMenu>
-									<AvatarSection>
-										<Avatar
-											user={user}
-											$largeIcon
-										/>
-										<UserFullName>{user.firstName} {user.lastName}</UserFullName>
-										<UserUserName>{user.username}</UserUserName>
-										<EditProfileButton
-											to="."
-											onClick={handleCloseDropdown}
-										>
-											Edit your profile
-										</EditProfileButton>
-									</AvatarSection>
-									<Section>
-										<UserMenuButton
-											Icon={TeamspacesIcon}
-											label="Teamspaces"
-											onClickClose={handleCloseDropdown}
-											to={`${baseUrl}/${teamspace}`}
-										/>
-										<UserMenuButton
-											Icon={VisualSettingsIcon}
-											label="Visual Settings"
-											onClickClose={handleCloseDropdown}
-										/>
-									</Section>
-									<Section>
-										<UserMenuButton
-											Icon={SupportCentreIcon}
-											label="Support centre"
-											onClickClose={handleCloseDropdown}
-										/>
-										<UserMenuButton
-											Icon={ContactUsIcon}
-											label="Contact us"
-											onClickClose={handleCloseDropdown}
-										/>
-										<UserMenuButton
-											Icon={InviteAFriendIcon}
-											label="Invite a friend"
-											onClickClose={handleCloseDropdown}
-										/>
-									</Section>
-									<Section>
-										<SignOutButton>Sign out</SignOutButton>
-									</Section>
-								</UserMenu>
-							</ClickAwayListener>
-						</Paper>
-					</Grow>
-				)}
-			</Popper>
+				<ActionMenuSection>
+					<AvatarSection>
+						<Avatar
+							user={user}
+							$largeIcon
+						/>
+						<UserFullName>{user.firstName} {user.lastName}</UserFullName>
+						<UserUserName>{user.username}</UserUserName>
+						<EditProfileButton
+							to="."
+							onClick={handleCloseActionMenu}
+						>
+							Edit your profile
+						</EditProfileButton>
+					</AvatarSection>
+				</ActionMenuSection>
+				<ActionMenuSection>
+					<ActionMenuButton
+						Icon={TeamspacesIcon}
+						label="Teamspaces"
+						onClickClose={handleCloseActionMenu}
+						to={`${baseUrl}/${teamspace}`}
+					/>
+					<ActionMenuButton
+						Icon={VisualSettingsIcon}
+						label="Visual Settings"
+						onClickClose={handleCloseActionMenu}
+					/>
+				</ActionMenuSection>
+				<ActionMenuSection>
+					<ActionMenuButton
+						Icon={SupportCentreIcon}
+						label="Support centre"
+						onClickClose={handleCloseActionMenu}
+					/>
+					<ActionMenuButton
+						Icon={ContactUsIcon}
+						label="Contact us"
+						onClickClose={handleCloseActionMenu}
+					/>
+					<ActionMenuButton
+						Icon={InviteAFriendIcon}
+						label="Invite a friend"
+						onClickClose={handleCloseActionMenu}
+					/>
+				</ActionMenuSection>
+				<ActionMenuSection>
+					<SignOutButton>Sign out</SignOutButton>
+				</ActionMenuSection>
+			</ActionMenu>
 		</>
 	);
 };

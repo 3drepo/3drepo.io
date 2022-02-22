@@ -14,28 +14,40 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React from 'react';
-import { MenuIcon, MenuItem, MenuText, Link } from './userMenuButton.styles';
 
-type UserMenuButtonProps = {
-	className?: string;
-	label: string;
-	Icon: any;
-	to?: string;
-	onClickClose: () => void;
-};
+import styled from 'styled-components';
+import {
+	Paper as PaperBase,
+	Popper as PopperBase,
+} from '@material-ui/core';
 
-export const UserMenuButton = ({ to, Icon, label, onClickClose, ...props }: UserMenuButtonProps) => (
-	<Link to={to}>
-		<MenuItem
-			button
-			{...props}
-			onClick={onClickClose}
-		>
-			<MenuIcon>
-				<Icon />
-			</MenuIcon>
-			<MenuText primary={label} />
-		</MenuItem>
-	</Link>
-);
+export const ActionMenuSection = styled.div`
+	display: flex;
+	flex-direction: column;
+	padding: 11px;
+
+	&:not(:last-of-type) {
+		border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
+	}
+`;
+
+export const Popper = styled(PopperBase)`
+	&& {
+		z-index: 1101;
+		margin-top: -2px;
+	}
+`;
+
+export const Paper = styled(PaperBase)`
+	border-radius: 5px;
+	box-shadow: 
+		0 6px 10px rgb(0 0 0 / 14%),
+		0 1px 18px rgb(0 0 0 / 12%),
+		0 3px 5px rgb(0 0 0 / 20%);
+`;
+
+export const Menu = styled.div`
+	display: flex;
+	flex-direction: column;
+	width: 230px;
+`;
