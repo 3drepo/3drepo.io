@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { PureComponent } from 'react';
 import { get } from 'lodash';
 import * as Yup from 'yup';
 
@@ -90,7 +90,7 @@ interface IState {
 	filterAlreadyExistsError: boolean;
 }
 
-class NewCreaterionFormComponent extends React.PureComponent<IProps, IState> {
+class NewCreaterionFormComponent extends PureComponent<IProps, IState> {
 	public state = {
 		filterAlreadyExistsError: false
 	};
