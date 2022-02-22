@@ -24,6 +24,7 @@ const generateSocket = (session = generateRandomString()) => ({
 	id: generateRandomString(),
 	on: jest.fn(),
 	handshake: { session: { id: session } },
+	emit: jest.fn(),
 
 });
 
@@ -78,6 +79,26 @@ const testSocketsCollection = () => {
 	afterEach(SocketsManager.reset);
 };
 
+const testSocketsEvents = () => {
+	describe('Socket events', () => {
+		const eventFuncs = {};
+		const socket = generateSocket();
+		socket.on = (event, fn) => { eventFuncs[event] = fn; };
+
+		beforeEach(() => SocketsManager.addSocket(socket));
+		afterEach(SocketsManager.reset);
+
+		test('should handle errors gracefully', () => {
+			socket.on.error();
+		});
+
+		test('should handle errors gracefully', () => {
+			socket.on.error();
+		});
+	});
+};
+
 describe('services/chat/socketsManager', () => {
 	testSocketsCollection();
+	testSocketsEvents();
 });
