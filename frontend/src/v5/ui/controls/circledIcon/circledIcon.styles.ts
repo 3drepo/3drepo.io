@@ -16,43 +16,57 @@
  */
 
 import styled, { css } from 'styled-components';
-import { DialogContent } from '@material-ui/core';
-import { Typography } from '@controls/typography';
+
+const SIZE_MAP = {
+	small: 50,
+	medium: 70,
+	large: 90,
+};
+
+const COLOUR_MAP = {
+	main: ({ theme }) => theme.palette.primary.main,
+	contrast: ({ theme }) => theme.palette.secondary.main,
+	error: ({ theme }) => theme.palette.error.main,
+};
+
+const getIconSize = (size) => {
+	const iconSize = SIZE_MAP[size];
+	if (iconSize) {
+		return css`
+			height: ${iconSize}px;
+			width: ${iconSize}px;
+			
+		`;
+	}
+
+	return null;
+};
+
+const getIconColour = (variant) => {
+	const iconColour = COLOUR_MAP[variant];
+	if (iconColour) {
+		return css`
+			border-color: ${iconColour};
+			color: ${iconColour};
+		`;
+	}
+
+	return null;
+};
 
 export const Container = styled.div`
+	${({ size }) => getIconSize(size)};
+	${({ $variant }) => getIconColour($variant)}
 	display: flex;
-	flex-direction: column;
 	align-items: center;
-	min-width: 633px;
-	min-height: 295px;
-	padding-top: 43px;
-`;
+	justify-content: center;
 
-export const Actions = styled.div`
-	display: flex;
-	${({ bottomMargin }) => bottomMargin && css`
-		margin-bottom: 25px;
-	`}
-`;
+	> * {
+		height: 33%;
+		width: auto;
+		overflow: visible;
+	}
 
-export const Content = styled(DialogContent)`
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-`;
-
-export const Details = styled(Typography).attrs({
-	variant: 'body1',
-})`
-	margin-top: 5px;
-	margin-bottom: 25px;
-	color: ${({ theme }) => theme.palette.base.main};
-`;
-
-export const Status = styled(Typography).attrs({
-	variant: 'h5',
-	component: 'p',
-})`
-	text-align: center;
-	margin-top: 8px;
-	margin-bottom: 0;
-	color: ${({ theme }) => theme.palette.base.main};
+	border: 2px solid;
+	border-radius: 50%;
 `;

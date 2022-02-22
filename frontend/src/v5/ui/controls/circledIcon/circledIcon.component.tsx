@@ -15,22 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { Typography } from '@controls/typography';
+import React from 'react';
 
-export const Container = styled.div`
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	color: ${({ theme }) => theme.palette.base.main};
-	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
-	border-radius: 5px;
-	padding: 9px 12px;
-	width: 200px;
-	margin: 0 10px;
+import { Container } from './circledIcon.styles';
 
-	box-sizing: border-box;
-`;
+interface ICircledIcon {
+	variant: 'main' | 'contrast' | 'error';
+	size: 'small' | 'medium' | 'large';
+}
 
-export const RevisionInput = styled(Typography).attrs({
-	variant: 'h5',
-})`
-`;
+export const CircledIcon: React.FC<ICircledIcon> = ({ size = 'large', variant = 'main', children, ...props }) => (
+	<Container size={size} $variant={variant} {...props}>
+		{children}
+	</Container>
+);

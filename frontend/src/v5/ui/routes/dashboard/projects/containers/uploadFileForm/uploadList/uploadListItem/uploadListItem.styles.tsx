@@ -16,36 +16,16 @@
  */
 
 import { CircleButton } from '@controls/circleButton';
-import * as EllipsisButtonStyles from '@controls/ellipsisButton/ellipsisButton.styles';
-import { TextField } from '@material-ui/core';
 import styled from 'styled-components';
 
-export const Input = styled(TextField)`
-	margin: 0;
-	width: 200px;
-`;
-
 export const Button = styled(CircleButton)`
-	margin: 0 5px;
-	color: ${({ theme }) => theme.palette.secondary.light};
-
-	&& path {
-		stroke: ${({ theme }) => theme.palette.secondary.main};
-		fill: none;
-	} 
-
-	&:hover {
-		${EllipsisButtonStyles.StyledIconButton} {
-			circle {
-				fill: ${({ theme }) => theme.palette.primary.contrast};
-			}
+	&&&&& {
+		:hover { 
+			background-color: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.secondary.light : theme.palette.secondary.lightest)}
 		}
 	}
-`;
-
-export const DeleteButton = styled(Button)`
-	&& path {
-			stroke: none;
-			fill: ${({ theme }) => theme.palette.secondary.main};
+	&& {
+		background-color: transparent;
+		color: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.primary.contrast : theme.palette.secondary.main)}
 	}
 `;

@@ -20,15 +20,19 @@ import DeleteIcon from '@assets/icons/delete.svg';
 import EditIcon from '@assets/icons/edit.svg';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import filesize from 'filesize';
 import { UploadItemFields } from '@/v5/store/containers/containers.types';
 import { ListItemSchema } from '@/v5/validation/containers';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
 import { UploadListItemTitle } from './components/uploadListItemTitle/uploadListItemTitle.component';
-import { Button, DeleteButton, Input } from './uploadListItem.styles';
+import { Button } from './uploadListItem.styles';
+import { UploadListItemRevisionTag } from './components/uploadListItemRevisionTag';
+import { UploadListItemDestination } from './components/uploadListItemDestination';
 
 type IUploadListItem = {
 	item: UploadItemFields;
+	isSelected: boolean;
 	onClickEdit: () => void;
 	onClickDelete: () => void;
 	onChange: (name, val) => void;
@@ -38,25 +42,28 @@ export const UploadListItem = ({
 	item,
 	onClickEdit,
 	onClickDelete,
+	isSelected,
 	onChange,
 }: IUploadListItem): JSX.Element => {
-	const filesize = '400MB';
 	const { control, getValues, formState: { errors } } = useForm({
 		defaultValues: item,
 		mode: 'onChange',
 		resolver: yupResolver(ListItemSchema),
 	});
 
-	const updateValue = (name) => onChange(name, getValues(name));
+	onChange('containerName', getValues('containerName'));
+	onChange('revisionTag', getValues('revisionTag'));
 
 	return (
-		<UploadListItemRow key={item.uploadId} onClick={() => { }} onChange={(e) => updateValue(e.target.name)}>
-			<span>
-				<UploadListItemFileIcon extension={item.extension} />
-			</span>
+		<UploadListItemRow
+			key={item.uploadId}
+			selected={isSelected}
+		>
+			<UploadListItemFileIcon extension={item.extension} />
 			<UploadListItemTitle
 				name={item.file.name}
-				filesize={filesize}
+				filesize={filesize(item.file.size)}
+				selectedrow={isSelected}
 			/>
 			<Controller
 				control={control}
@@ -64,8 +71,9 @@ export const UploadListItem = ({
 				render={({
 					field: { ref, ...extras },
 				}) => (
-					<Input
-						error={!!errors.containerName}
+					<UploadListItemDestination
+						isSelected={isSelected}
+						errorMessage={errors.containerName?.message}
 						{...extras}
 					/>
 				)}
@@ -76,18 +84,19 @@ export const UploadListItem = ({
 				render={({
 					field: { ref, ...extras },
 				}) => (
-					<Input
-						error={!!errors.revisionTag}
+					<UploadListItemRevisionTag
+						isSelected={isSelected}
+						errorMessage={errors.revisionTag?.message}
 						{...extras}
 					/>
 				)}
 			/>
-			<Button onClick={onClickEdit}>
+			<Button $selectedrow={isSelected} onClick={onClickEdit}>
 				<EditIcon />
 			</Button>
-			<DeleteButton onClick={onClickDelete}>
+			<Button $selectedrow={isSelected} onClick={onClickDelete}>
 				<DeleteIcon />
-			</DeleteButton>
+			</Button>
 		</UploadListItemRow>
 	);
 };

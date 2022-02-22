@@ -15,14 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { Container, RevisionInput } from './uploadListItemRevision.styles';
-
-// type IUploadListItemRevision = {
-// };
-
-export const UploadListItemRevision = (): JSX.Element => (
-	<Container>
-		<RevisionInput>Placeholder</RevisionInput>
-	</Container>
-);
+export { CircledIcon } from './circledIcon.component';

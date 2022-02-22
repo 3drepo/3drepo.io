@@ -16,14 +16,33 @@
  */
 
 import React from 'react';
-import { Container, ContainerInput } from './uploadListItemDestination.styles';
+
+import { Tooltip } from '@material-ui/core';
+import ErrorIcon from '@assets/icons/error_circle.svg';
+import { Input } from './uploadListItemDestination.styles';
 
 type IUploadListItemDestination = {
-	onClickDestination: () => void;
+	isSelected: boolean;
+	errorMessage?: string;
 };
 
-export const UploadListItemDestination = ({ onClickDestination }: IUploadListItemDestination): JSX.Element => (
-	<Container onClick={() => onClickDestination()}>
-		<ContainerInput>Placeholder</ContainerInput>
-	</Container>
+export const UploadListItemDestination = ({
+	errorMessage,
+	isSelected,
+	...props
+}: IUploadListItemDestination): JSX.Element => (
+	<Input
+		$selectedrow={isSelected}
+		error={!!errorMessage}
+		InputProps={{
+			startAdornment: !!errorMessage && (
+				<Tooltip title={errorMessage} placement="bottom-start">
+					<span>
+						<ErrorIcon />
+					</span>
+				</Tooltip>
+			),
+		}}
+		{...props}
+	/>
 );

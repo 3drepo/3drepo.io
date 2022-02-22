@@ -15,10 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DashboardListItemRow } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import styled from 'styled-components';
+import { TextField } from '@material-ui/core';
 
-export const Content = styled(DashboardListItemRow)`
-	padding: 0 0 0 5px;
-	height: 51px;
+export const Input = styled(TextField)`
+	margin: 0 7px;
+	width: 200px;
+	${({ $selectedrow, theme }) => $selectedrow && `
+		.MuiInputBase-root.MuiOutlinedInput-root {
+			input { color: ${theme.palette.primary.contrast}; }
+			&.MuiInputBase-formControl fieldset { border-color: transparent; }
+			background-color: ${theme.palette.secondary.light};
+		}
+	`}
 `;
