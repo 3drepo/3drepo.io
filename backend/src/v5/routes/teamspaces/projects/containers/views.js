@@ -18,7 +18,7 @@
 const { mimeTypes, respond } = require('../../../../utils/responder');
 const { Router } = require('express');
 const Views = require('../../../../processors/teamspaces/projects/models/containers');
-const { fromBuffer: fileTypeFromBuffer } = require('file-type');
+const { fileTypeFromBuffer } = require('../../../../utils/helper/typeCheck');
 const { hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
 const { serialiseViews } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/views');
 const { templates } = require('../../../../utils/responseCodes');
@@ -108,6 +108,7 @@ const establishRoutes = () => {
 	 *                         type: boolean
 	 *                         description: indicates whether a thumbnail is available for the view
 	 */
+	router.get('/', hasReadAccessToContainer, getViewList, serialiseViews);
 
 	/**
 	 * @openapi
@@ -161,7 +162,6 @@ const establishRoutes = () => {
 	 *               type: string
 	 *               format: binary
 	 */
-	router.get('/', hasReadAccessToContainer, getViewList, serialiseViews);
 	router.get('/:view/thumbnail', hasReadAccessToContainer, getViewThumbnail);
 
 	return router;
