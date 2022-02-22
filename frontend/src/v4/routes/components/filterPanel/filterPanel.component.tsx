@@ -21,7 +21,6 @@ import ExpandIcon from '@material-ui/icons/ChevronRight';
 import CollapseIcon from '@material-ui/icons/ExpandMore';
 import SearchIcon from '@material-ui/icons/Search';
 import { isEqual, isNil, keyBy, omit, uniqBy } from 'lodash';
-import React from 'react';
 import Autosuggest from 'react-autosuggest';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import * as yup from 'yup';

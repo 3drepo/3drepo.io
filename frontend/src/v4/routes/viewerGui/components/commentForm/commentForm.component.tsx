@@ -1,4 +1,21 @@
 /**
+ *  Copyright (C) 2022 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
  *  Copyright (C) 2020 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -25,7 +42,7 @@ import ShortTextIcon from '@material-ui/icons/ShortText';
 import ReactTextareaAutocomplete from '@webscopeio/react-textarea-autocomplete';
 import { Field, Formik } from 'formik';
 import { lowerCase, pick, values as _values } from 'lodash';
-import React from 'react';
+import { createRef, forwardRef, PureComponent } from 'react';
 import * as Yup from 'yup';
 
 import { RISK_CONSEQUENCES, RISK_LIKELIHOODS } from '../../../../constants/risks';
@@ -105,7 +122,7 @@ const TicketSuggestionItem = ({ entity: { ... ticketData } }) => (
 	<TicketSuggestion {...ticketData} />
 );
 
-export class CommentForm extends React.PureComponent<IProps, IState> {
+export class CommentForm extends PureComponent<IProps, IState> {
 	get commentTypeIcon() {
 		return this.state.isResidualRiskInputActive ? ReportProblemIcon : ShortTextIcon;
 	}
@@ -136,7 +153,7 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 		optionsCaret: 'start',
 	};
 
-	public fileInputRef = React.createRef<HTMLInputElement>();
+	public fileInputRef = createRef<HTMLInputElement>();
 
 	public renderScreenshotButton = renderWhenTrue(() => (
 		<TooltipButton
@@ -169,7 +186,7 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 		/>
 	));
 
-	private renderTextAreaComponent = React.forwardRef((props, ref) => {
+	private renderTextAreaComponent = forwardRef((props, ref) => {
 		const counterValue = this.props.commentRef.current?.textareaRef.value.length;
 		return (
 			<>

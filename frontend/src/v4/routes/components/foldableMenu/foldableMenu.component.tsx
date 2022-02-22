@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 
 import { ListItemProps } from '@material-ui/core/ListItem';
 import { Check } from '@material-ui/icons';

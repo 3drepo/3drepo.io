@@ -1,4 +1,21 @@
 /**
+ *  Copyright (C) 2022 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
  *  Copyright (C) 2017 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -22,7 +39,7 @@ import GisIcon from '@material-ui/icons/Layers';
 import ViewsIcon from '@material-ui/icons/PhotoCamera';
 import IssuesIcon from '@material-ui/icons/Place';
 import RisksIcon from '@material-ui/icons/Warning';
-import React from 'react';
+import { PureComponent } from 'react';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { Container } from './panelsMenu.styles';
 
@@ -40,7 +57,7 @@ const PANELS = {
 	GIS: 'GIS'
 };
 
-export class PanelsMenu extends React.PureComponent<any, IState> {
+export class PanelsMenu extends PureComponent<any, IState> {
 	public state = {
 		activePanels: {}
 	};

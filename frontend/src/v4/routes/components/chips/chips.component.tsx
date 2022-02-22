@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { PureComponent } from 'react';
 import { snakeCase } from 'lodash';
-import React from 'react';
 
 import { Chip, Input } from '@material-ui/core';
 import { ENTER_KEY } from '../../../constants/keys';
@@ -34,7 +34,7 @@ interface IState {
 	value: any[];
 }
 
-export class Chips extends React.PureComponent<IProps, IState> {
+export class Chips extends PureComponent<IProps, IState> {
 	public state = {
 		value: []
 	};

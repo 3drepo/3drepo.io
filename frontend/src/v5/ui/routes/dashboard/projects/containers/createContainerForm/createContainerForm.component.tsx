@@ -13,10 +13,7 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-import React from 'react';
-import { formatMessage } from '@/v5/services/intl';
+ */import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';

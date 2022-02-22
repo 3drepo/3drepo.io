@@ -23,7 +23,6 @@ import ArrowBack from '@material-ui/icons/ArrowBack';
 import ArrowForward from '@material-ui/icons/ArrowForward';
 import { Field, Form, Formik } from 'formik';
 import { differenceBy, includes, isEmpty, values } from 'lodash';
-import React from 'react';
 import * as Yup from 'yup';
 
 import { clientConfigService } from '../../../../services/clientConfig';

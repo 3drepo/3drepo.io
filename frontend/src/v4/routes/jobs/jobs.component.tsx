@@ -16,7 +16,6 @@
  */
 
 import RemoveCircle from '@material-ui/icons/RemoveCircle';
-import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { ColorPicker } from '../components/colorPicker/colorPicker.component';

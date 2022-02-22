@@ -14,9 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
 import List from '@material-ui/core/List';
 import ArrowRight from '@material-ui/icons/ArrowRight';
 import Check from '@material-ui/icons/Check';

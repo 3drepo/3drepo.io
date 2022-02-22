@@ -17,7 +17,6 @@
 
 import CloudDownload from '@material-ui/icons/CloudDownload';
 import { isEmpty, isEqual } from 'lodash';
-import React from 'react';
 
 import { LoaderContainer } from '../billing/billing.styles';
 import { CustomTable, CELL_TYPES, TableButton } from '../components/customTable/customTable.component';

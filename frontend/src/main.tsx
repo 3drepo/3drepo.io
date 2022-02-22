@@ -19,7 +19,6 @@ import { ConnectedRouter } from 'connected-react-router';
 import { Route, Switch } from 'react-router-dom';
 import 'font-awesome/css/font-awesome.min.css';
 import 'normalize.css/normalize.css';
-import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import '@/v4/services/fontAwesome';

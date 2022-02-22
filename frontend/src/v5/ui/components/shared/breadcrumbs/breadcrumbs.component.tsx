@@ -13,10 +13,7 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-import React from 'react';
-import { useParams, useRouteMatch } from 'react-router-dom';
+ */import { useParams, useRouteMatch } from 'react-router-dom';
 import HomeIcon from '@assets/icons/home.svg';
 import DownArrowIcon from '@assets/icons/down_arrow.svg';
 import { uriCombine } from '@/v5/services/routing/routing';

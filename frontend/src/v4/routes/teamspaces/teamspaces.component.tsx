@@ -19,7 +19,6 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import SearchIcon from '@material-ui/icons/Search';
 import { cond, matches, stubTrue } from 'lodash';
 import memoizeOne from 'memoize-one';
-import React from 'react';
 import SimpleBar from 'simplebar-react';
 import { IconButton, MenuItem, Tabs } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';

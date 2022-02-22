@@ -16,7 +16,6 @@
  */
 
 import { Tooltip, TooltipProps } from '@material-ui/core';
-import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import Radio from '@material-ui/core/Radio';
 import styled from 'styled-components';

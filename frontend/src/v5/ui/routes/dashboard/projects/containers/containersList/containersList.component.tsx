@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode, useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { useParams } from 'react-router';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';

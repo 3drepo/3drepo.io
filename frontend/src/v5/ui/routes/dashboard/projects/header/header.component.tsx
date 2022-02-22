@@ -13,10 +13,7 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-import React from 'react';
-import { useParams } from 'react-router-dom';
+ */import { useParams } from 'react-router-dom';
 
 import { Typography } from '@controls/typography';
 import { IProject } from '@/v5/store/projects/projects.redux';

@@ -13,10 +13,7 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-import React from 'react';
-import { FormattedMessage } from 'react-intl';
+ */import { FormattedMessage } from 'react-intl';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { TextOverflow } from '@controls/textOverflow';

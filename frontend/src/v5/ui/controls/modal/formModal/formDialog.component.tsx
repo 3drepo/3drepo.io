@@ -16,7 +16,6 @@
  */
 
 import { Button, Dialog } from '@material-ui/core';
-import React from 'react';
 import CloseIcon from '@assets/icons/close.svg';
 import { Form, Title, Header, CloseButton, FormDialogContent, FormDialogActions, RemoveWhiteCorners } from './formDialog.styles';
 

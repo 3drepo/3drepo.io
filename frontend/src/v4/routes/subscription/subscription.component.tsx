@@ -13,10 +13,7 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-import React from 'react';
-import { LoaderContainer } from '../billing/billing.styles';
+ */import { LoaderContainer } from '../billing/billing.styles';
 import { Loader } from '../components/loader/loader.component';
 import { clientConfigService } from './../../services/clientConfig';
 import { SubscriptionForm } from './components/subscriptionForm.component';

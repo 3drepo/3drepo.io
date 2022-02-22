@@ -14,9 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import { Field, Formik } from 'formik';

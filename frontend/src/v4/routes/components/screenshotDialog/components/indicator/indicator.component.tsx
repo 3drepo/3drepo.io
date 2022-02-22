@@ -13,10 +13,7 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-import React from 'react';
-import EventListener from 'react-event-listener';
+ */import EventListener from 'react-event-listener';
 
 import { StyledIndicator } from './indicator.styles';
 

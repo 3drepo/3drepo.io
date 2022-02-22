@@ -16,7 +16,6 @@
  */
 
 import Grid from '@material-ui/core/Grid';
-import React from 'react';
 import { Panel } from '../components/panel/panel.component';
 
 import { Container, Paragraph } from './registerRequest.styles';

@@ -65,7 +65,6 @@ module.exports = (env, options) => {
 			}),
 			new webpack.ProvidePlugin({
 				process: 'process/browser',
-			   "React": "react",
 			}),
 		],
 		resolve: {

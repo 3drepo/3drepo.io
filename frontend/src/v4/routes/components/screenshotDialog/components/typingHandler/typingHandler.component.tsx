@@ -17,7 +17,6 @@
 
 import Konva from 'konva';
 import { isEmpty } from 'lodash';
-import React from 'react';
 
 import { MODES } from '../../screenshotDialog.helpers';
 import { EditableText } from '../editableText/editableText.component';

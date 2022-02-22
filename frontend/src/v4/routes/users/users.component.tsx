@@ -27,7 +27,6 @@ import {
 	pickBy,
 	values
 } from 'lodash';
-import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';

@@ -18,7 +18,6 @@
 import { Button, DialogContent, Input, ListItem, Tab, Tabs, Tooltip } from '@material-ui/core';
 import { TooltipProps } from '@material-ui/core/Tooltip';
 import { omit } from 'lodash';
-import React from 'react';
 import styled from 'styled-components';
 import { COLOR, FONT_WEIGHT } from '../../../../../styles';
 

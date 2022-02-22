@@ -19,7 +19,6 @@ import Divider from '@material-ui/core/Divider';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import { Field, Form, Formik } from 'formik';
-import React from 'react';
 import { Link, Redirect } from 'react-router-dom';
 import * as Yup from 'yup';
 

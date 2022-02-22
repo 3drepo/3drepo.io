@@ -16,7 +16,6 @@
  */
 
 import { debounce } from 'lodash';
-import React from 'react';
 
 import { SortLabel } from '../tableHeading/tableHeading.styles';
 import { SearchField, SearchIcon } from './cellUserSearch.styles';

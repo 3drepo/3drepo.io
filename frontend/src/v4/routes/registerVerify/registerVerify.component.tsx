@@ -17,7 +17,6 @@
 
 import Grid from '@material-ui/core/Grid';
 import * as queryString from 'query-string';
-import React from 'react';
 import { Link } from 'react-router-dom';
 
 import { Panel } from '../components/panel/panel.component';

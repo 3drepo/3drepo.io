@@ -16,7 +16,6 @@
  */
 
 import Konva from 'konva';
-import React from 'react';
 import { MODES } from '../../screenshotDialog.helpers';
 import { HandleCalloutDrawing } from './handleCalloutDrawing/handleCalloutDrawing.component';
 import { HandleLineDrawing } from './handleLineDrawing/handleLineDrawing.component';

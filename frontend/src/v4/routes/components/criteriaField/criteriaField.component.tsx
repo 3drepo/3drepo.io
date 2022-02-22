@@ -16,7 +16,6 @@
  */
 
 import { isEqual, uniqBy } from 'lodash';
-import React from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import { getCriteriaLabel, getUpdatedCriteria, prepareCriterion } from '../../../helpers/criteria';

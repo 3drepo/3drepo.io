@@ -16,7 +16,6 @@
  */
 import memoizeOne from 'memoize-one';
 import * as queryString from 'query-string';
-import React from 'react';
 
 import { MODEL_ROLES_LIST } from '../../constants/model-permissions';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';

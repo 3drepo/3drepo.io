@@ -16,7 +16,6 @@
  */
 
 import Notifications from '@material-ui/icons/Notifications';
-import React from 'react';
 import { EmptyItem, EmptyItemText } from './emptyItem.styles';
 
 export class NotificationEmptyItem extends React.PureComponent {

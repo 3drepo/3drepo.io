@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { forwardRef } from 'react';
 import ChevronIcon from '@assets/icons/chevron.svg';
 import { IconButtonProps } from '@material-ui/core';
 import { SpinnerLoader } from '@controls/spinnerLoader';
@@ -26,7 +26,7 @@ export type IChevronButton = IconButtonProps & {
 	isLoading?: boolean;
 };
 
-export const ChevronButton = React.forwardRef(
+export const ChevronButton = forwardRef(
 	({ isOn, isLoading = false, ...props }: IChevronButton, ref: React.Ref<HTMLSpanElement>): JSX.Element => (
 		<StyledIconButton $isOn={isOn} $isLoading={isLoading} {...props} ref={ref}>
 			{isLoading ? (

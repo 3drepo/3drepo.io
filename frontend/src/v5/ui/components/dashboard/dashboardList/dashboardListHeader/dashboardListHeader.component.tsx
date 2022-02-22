@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { Dispatch, useState } from 'react';
+import { Dispatch, useState } from 'react';
 import { SortingDirection } from '../dashboardList.types';
 import { ISortConfig } from '../useOrderedList';
 import { DashboardListHeaderContainer } from './dashboardListHeader.styles';
