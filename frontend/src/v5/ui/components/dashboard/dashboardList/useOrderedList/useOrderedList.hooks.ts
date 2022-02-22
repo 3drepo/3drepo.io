@@ -17,6 +17,7 @@
 
 import { useMemo, useState } from 'react';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
+import { get } from 'lodash';
 import { ISortConfig } from './useOrderedList.types';
 
 export const useOrderedList = <T>(items: T[], defaultConfig: ISortConfig) => {
@@ -25,15 +26,9 @@ export const useOrderedList = <T>(items: T[], defaultConfig: ISortConfig) => {
 	const sortedList = useMemo(() => {
 		const { column, direction } = sortConfig;
 
-		const extractValueFromObj = (obj: T) => {
-			const splitPath = column.split('.');
-			const getEndValue = splitPath.reduce((i, j) => i[j], obj);
-			return getEndValue;
-		};
-
 		const sortingFunction = (a: T, b: T): number => {
-			const aValue = extractValueFromObj(a);
-			const bValue = extractValueFromObj(b);
+			const aValue = get(a, column);
+			const bValue = get(b, column);
 
 			if (typeof aValue === 'string') {
 				return aValue.localeCompare(bValue);
