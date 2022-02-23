@@ -15,20 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
 
+import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { formatMessage } from '@/v5/services/intl';
 import { Sidebar } from '@controls/sideBar';
 import { UploadFieldArray } from '@/v5/store/containers/containers.types';
 import { UploadsSchema } from '@/v5/validation/containers';
-import { UploadListHeader } from './uploadListHeader';
-import { UploadListHeaderLabel } from './uploadListHeader/uploadListHeaderLabel';
+import { DashboardListHeaderLabel } from '@components/dashboard/dashboardList';
+import { FormattedMessage } from 'react-intl';
+import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
+import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
-import { Container, Content, DropZone } from './uploadFileForm.styles';
+import { Container, Content, DropZone, UploadsListHeader } from './uploadFileForm.styles';
 
 type IUploadFileForm = {
 	openState: boolean;
@@ -48,13 +51,33 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		keyName: 'uploadId',
 	});
 
-	const processFiles = (files: File[]) => {
+	const DEFAULT_SORT_CONFIG = {
+		column: 'file',
+		direction: SortingDirection.ASCENDING,
+	};
+	const { sortedList, setSortConfig } = useOrderedList(fields || [], DEFAULT_SORT_CONFIG);
+
+	const revTagMaxValue = useMemo(() => {
+		const schemaDescription = Yup.reach(UploadsSchema, 'uploads.revisionTag').describe();
+		const revTagMax = schemaDescription.tests.find((t) => t.name === 'max');
+		return revTagMax.params.max;
+	}, []);
+
+	const parseFilename = (filename: string): string => {
+		const baseName = filename.split('.').slice(0)[0];
+		const noSpecialChars = baseName.replace(/[^a-zA-Z0-9_\- ]/g, '');
+		const noSpaces = noSpecialChars.replace(/ /g, '_');
+		const noExceedingMax = noSpaces.substring(0, revTagMaxValue);
+		return noExceedingMax;
+	};
+
+	const processFiles = (files: File[]): void => {
 		const filesToAppend = [];
 		for (const file of files) {
 			filesToAppend.push({
 				file,
 				extension: file.name.split('.').slice(-1)[0],
-				revisionTag: file.name,
+				revisionTag: parseFilename(file.name),
 				containerName: '',
 				containerId: '',
 				containerUnit: 'mm',
@@ -68,6 +91,9 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		}
 		append(filesToAppend);
 	};
+
+	const indexMap = new Map(fields.map(({ uploadId }, index) => [uploadId, index]));
+	const getOriginalIndex = (sortedIndex) => indexMap.get(sortedList[sortedIndex].uploadId);
 
 	const onClickEdit = (id: number) => {
 		setSelectedIndex(id);
@@ -92,23 +118,27 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 				confirmLabel="Upload files"
 				title="Add files for upload"
 				subtitle="Drag and drop or browse your computer"
+				onKeyPress={(e) => e.key === 'Enter' && e.preventDefault()}
 				isValid={formState.isValid}
 			>
 				<Container>
 					<Content>
-						<UploadListHeader>
-							<UploadListHeaderLabel name="filename">
-								<span> Filename </span>
-							</UploadListHeaderLabel>
-							<UploadListHeaderLabel name="destination">
-								<span> Destination </span>
-							</UploadListHeaderLabel>
-							<UploadListHeaderLabel name="revisionName">
-								<span> Revision Name </span>
-							</UploadListHeaderLabel>
-						</UploadListHeader>
+						<div hidden={!fields.length}>
+							<UploadsListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
+								<DashboardListHeaderLabel key="file" name="file.name">
+									<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
+								</DashboardListHeaderLabel>
+								<DashboardListHeaderLabel key="destination" width={285}>
+									<FormattedMessage id="uploads.list.header.destination" defaultMessage="Destination" />
+								</DashboardListHeaderLabel>
+								<DashboardListHeaderLabel key="revisionName" width={297}>
+									<FormattedMessage id="uploads.list.header.revisionName" defaultMessage="Revision Name" />
+								</DashboardListHeaderLabel>
+							</UploadsListHeader>
+						</div>
 						<UploadList
-							values={fields}
+							values={sortedList}
+							selectedIndex={selectedIndex}
 							onClickEdit={(id) => onClickEdit(id)}
 							onClickDelete={(id) => onClickDelete(id)}
 						/>
@@ -131,18 +161,20 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 								? (
 									<>
 										<SidebarForm
-											value={getValues(`uploads.${selectedIndex}`)}
-											key={fields[selectedIndex].uploadId}
-											isNewContainer={
-												!getValues(`uploads.${selectedIndex}.containerId`)
-												&& !!getValues(`uploads.${selectedIndex}.containerName`)
+											value={
+												getValues(`uploads.${getOriginalIndex(selectedIndex)}`)
 											}
-											isSpm={fields[selectedIndex].extension === 'spm'}
+											key={sortedList[selectedIndex].uploadId}
+											isNewContainer={
+												!getValues(`uploads.${getOriginalIndex(selectedIndex)}.containerId`)
+												&& !!getValues(`uploads.${getOriginalIndex(selectedIndex)}.containerName`)
+											}
+											isSpm={sortedList[selectedIndex].extension === 'spm'}
 											onChange={(field: string, val: string | boolean) => {
 												// @ts-ignore
-												setValue(`uploads.${selectedIndex}.${field}`, val);
+												setValue(`uploads.${getOriginalIndex(selectedIndex)}.${field}`, val);
 												// @ts-ignore
-												trigger(`uploads.${selectedIndex}.${field}`);
+												trigger(`uploads.${getOriginalIndex(selectedIndex)}.${field}`);
 											}}
 										/>
 									</>

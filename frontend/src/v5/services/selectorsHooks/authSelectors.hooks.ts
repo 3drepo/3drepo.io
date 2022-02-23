@@ -16,6 +16,6 @@
  */
 
 import * as AuthSelectors from '@/v4/modules/auth/auth.selectors';
-import { createHooksSelectors } from './selectorsHooks.helper';
+import { createHooksSelectors } from '@/v5/helpers/selectorsHooks.helper';
 
 export const AuthHooksSelectors = createHooksSelectors(AuthSelectors);

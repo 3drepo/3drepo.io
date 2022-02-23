@@ -25,10 +25,12 @@ type IUploadList = {
 	onClickEdit: (index) => void;
 	onClickDelete: (index) => void;
 	values: UploadItemFields[];
+	selectedIndex: number | null;
 };
 
 export const UploadList = ({
 	values,
+	selectedIndex,
 	onClickEdit,
 	onClickDelete,
 }: IUploadList): JSX.Element => {
@@ -46,6 +48,7 @@ export const UploadList = ({
 							setValue(`uploads.${index}.${field}`, val);
 							trigger(`uploads.${index}.${field}`);
 						}}
+						isSelected={index === selectedIndex}
 					/>
 				))
 			}

@@ -39,11 +39,11 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 const newContainerId = 'newContainerId';
 ModelSettings.addModel.mockImplementation(() => newContainerId);
-ModelSettings.deleteModel.mockImplementation(async (ts, model) => {
+ModelSettings.deleteModel.mockImplementation((ts, model) => {
 	if (Number.isInteger(model)) {
-		return undefined;
+		return Promise.resolve(undefined);
 	}
-	throw templates.containerNotFound;
+	return Promise.reject(templates.containerNotFound);
 });
 
 const modelList = [
@@ -54,11 +54,11 @@ const modelList = [
 	{ _id: 4, name: 'model4' },
 ];
 
-ModelSettings.getModelById.mockImplementation(async (ts, model) => {
+ModelSettings.getModelById.mockImplementation((ts, model) => {
 	if (Number.isInteger(model)) {
-		return modelList[model - 1];
+		return Promise.resolve(modelList[model - 1]);
 	}
-	throw templates.containerNotFound;
+	return Promise.reject(templates.containerNotFound);
 });
 
 const containerSettings = {
@@ -150,7 +150,7 @@ ModelSettings.getModelByQuery.mockImplementation((ts, query) => {
 ModelSettings.getContainers.mockImplementation(() => modelList);
 const getContainerByIdMock = ModelSettings.getContainerById.mockImplementation((teamspace,
 	container) => containerSettings[container]);
-Views.checkViewExists.mockImplementation((teamspace, model, view) => {
+Views.getViewById.mockImplementation((teamspace, model, view) => {
 	if (view === 1) {
 		return 1;
 	}

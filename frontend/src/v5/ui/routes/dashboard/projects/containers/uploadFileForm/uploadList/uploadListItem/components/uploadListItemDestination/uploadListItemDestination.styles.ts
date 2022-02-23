@@ -27,8 +27,8 @@ export const TextInput = styled(TextField)`
 		>.MuiInputBase-input {
 			font-weight: bold;
 		}
-		${({ newOrExisting, theme }) => {
-		if (newOrExisting === 'new') {
+		${({ neworexisting, theme }) => {
+		if (neworexisting === 'new') {
 			return `
 					>.MuiInputBase-input { color: ${theme.palette.primary.main}; };
 					color: ${theme.palette.primary.main};
@@ -36,7 +36,7 @@ export const TextInput = styled(TextField)`
 					fieldset { border: none; }
 				`;
 		}
-		if (newOrExisting === 'existing') {
+		if (neworexisting === 'existing') {
 			return `
 					>.MuiInputBase-input { color: ${theme.palette.secondary.main} };
 					color: ${theme.palette.secondary.main};

@@ -18,11 +18,27 @@
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
 
+export const Container = styled.div`
+	width: fit-content;
+	min-width: 120px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	user-select: none;
+`;
+
 export const Filename = styled(Typography).attrs({
 	variant: 'h3',
-	component: 'div',
 })`
-	color: ${({ theme }) => theme.palette.secondary.main};
+	width: fit-content;
+	max-width: 100%;
+	color: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.primary.contrast : theme.palette.secondary.main)};
+	height: 21px;
+
+	white-space: nowrap;
+	user-select: none;
+	overflow: hidden;
+	text-overflow: ellipsis;
 `;
 
 export const Filesize = styled(Typography).attrs({

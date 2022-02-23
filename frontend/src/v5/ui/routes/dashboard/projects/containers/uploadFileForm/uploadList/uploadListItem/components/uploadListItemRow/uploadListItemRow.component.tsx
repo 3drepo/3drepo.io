@@ -16,16 +16,21 @@
  */
 
 import React from 'react';
-import { Container } from './uploadListItemRow.styles';
+import { DashboardListItem as UploadListItem } from '@components/dashboard/dashboardList';
+import { Content } from './uploadListItemRow.styles';
 
 type IUploadListItemRow = {
-	onClick: () => void;
-	onChange: (e) => void;
+	selected: boolean;
 	children: React.ReactNode;
 };
 
-export const UploadListItemRow = ({ onClick, onChange, children }: IUploadListItemRow): JSX.Element => (
-	<Container onClick={onClick} onChange={onChange}>
-		{children}
-	</Container>
+export const UploadListItemRow = ({
+	selected,
+	children,
+}: IUploadListItemRow): JSX.Element => (
+	<UploadListItem selected={selected}>
+		<Content selected={selected}>
+			{children}
+		</Content>
+	</UploadListItem>
 );

@@ -26,7 +26,6 @@ export const UploadListHeader = ({ children }: IUploadListHeader): JSX.Element =
 	<Container>
 		{children.map((child) => React.cloneElement(child, {
 			key: child.props.name,
-			// ...registerSort(child.props.name),
 			...child.props,
 		}))}
 	</Container>

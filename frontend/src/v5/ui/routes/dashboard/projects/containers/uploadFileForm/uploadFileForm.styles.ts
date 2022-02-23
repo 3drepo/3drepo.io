@@ -17,6 +17,7 @@
 
 import styled from 'styled-components';
 import { DragAndDrop } from '@controls/dragAndDrop';
+import { DashboardListHeader } from '@components/dashboard/dashboardList/dashboardListHeader';
 
 export const Container = styled.div`
 	display: flex;
@@ -34,5 +35,10 @@ export const Content = styled.span`
 	width: 100%;
 	overflow-y: auto;
 	overflow-x: hidden;
-	padding: 15px;
+	padding: 30px;
+`;
+
+export const UploadsListHeader = styled(DashboardListHeader)`
+	padding: 0 20px 13px;
+	margin-top: 0;
 `;

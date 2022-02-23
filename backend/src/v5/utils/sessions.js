@@ -29,8 +29,17 @@ const referrerMatch = (sessionReferrer, headerReferrer) => {
 
 const SessionUtils = {};
 
-SessionUtils.isSessionValid = (session, referrer, ignoreApiKey = false) => !!(session?.user
-	&& ((!ignoreApiKey && session.user.isAPIKey) || (!referrer || referrerMatch(session.user.referer, referrer))));
+SessionUtils.isSessionValid = (session, referrer, ignoreApiKey = false) => {
+	const user = session?.user;
+
+	if (user) {
+		const validSession = session.user.isAPIKey ? !ignoreApiKey
+			: (!referrer || referrerMatch(session.user.referer, referrer));
+		return validSession;
+	}
+
+	return false;
+};
 
 SessionUtils.getUserFromSession = ({ user } = {}) => (user ? user.username : undefined);
 

@@ -109,7 +109,7 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 			renderInput={({ InputProps, ...params }) => (
 				<TextInput
 					error={!!errorMessage}
-					newOrExisting={!errorMessage && newOrExisting}
+					neworexisting={!errorMessage && newOrExisting}
 					{...params}
 					{...props}
 					InputProps={{ ...InputProps,

@@ -19,7 +19,9 @@ const { codeExists, createResponseCode, templates } = require('../../../../../..
 const Path = require('path');
 const Yup = require('yup');
 const YupHelper = require('../../../../../../../utils/helper/yup');
+const { getContainers } = require('../../../../../../../models/modelSettings');
 const { isTagUnique } = require('../../../../../../../models/revisions');
+const { modelsExistInProject } = require('../../../../../../../models/projects');
 const { respond } = require('../../../../../../../utils/responder');
 const { singleFileUpload } = require('../../../../../multer');
 const { sufficientQuota } = require('../../../../../../../utils/quota');
@@ -36,7 +38,7 @@ const ACCEPTED_MODEL_EXT = [
 	'.dae', '.ter', '.csm', '.3d', '.lws', '.xml', '.ogex',
 	'.ms3d', '.cob', '.scn', '.blend', '.pk3', '.ndo',
 	'.ifc', '.xgl', '.zgl', '.fbx', '.assbin', '.bim', '.dgn',
-	'.rvt', '.rfa', '.spm', '.dwg', '.dxf',
+	'.rvt', '.rfa', '.spm', '.dwg', '.dxf', '.nwd',
 ];
 
 Revisions.validateUpdateRevisionData = async (req, res, next) => {
@@ -54,7 +56,7 @@ Revisions.validateUpdateRevisionData = async (req, res, next) => {
 	}
 };
 
-const fileFilter = async (req, file, cb) => {
+const fileFilter = (req, file, cb) => {
 	const { originalname } = file;
 	const fileExt = Path.extname(originalname).toLowerCase();
 	if (!ACCEPTED_MODEL_EXT.includes(fileExt)) {
@@ -65,29 +67,25 @@ const fileFilter = async (req, file, cb) => {
 	}
 };
 
-const validateRevisionUpload = async (req, res, next) => {
-	const schema = Yup.object().noUnknown().required()
-		.shape({
-			tag: YupHelper.types.strings.code.required().test('tag-not-in-use',
-				'Revision name is already used by an existing revision',
-				async () => {
-					const uniqueTag = await isTagUnique(req.params.teamspace,
-						req.params.container, req.body.tag);
+const validateContainerRevisionUpload = async (req, res, next) => {
+	const schemaBase = {
+		tag: YupHelper.types.strings.code.test('tag-not-in-use',
+			'Revision name is already used by an existing revision',
+			(value) => value === undefined || isTagUnique(req.params.teamspace,
+				req.params.container, value)).required(),
+		desc: YupHelper.types.strings.shortDescription,
+		importAnimations: Yup.bool().default(true),
+		timezone: Yup.string().test('valid-timezone',
+			'The timezone provided is not valid',
+			(value) => value === undefined || !!tz.getTimezone(value)),
+	};
 
-					return uniqueTag;
-				}),
-			desc: YupHelper.types.strings.shortDescription,
-			importAnimations: Yup.bool().default(true),
-			timezone: Yup.string().test('valid-timezone',
-				'The timezone provided is not valid',
-				(value) => value === undefined || !!tz.getTimezone(value)),
-		});
+	const schema = Yup.object().noUnknown().required().shape(schemaBase);
 
 	try {
 		req.body = await schema.validate(req.body);
 		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
 		if (!req.file.size) throw createResponseCode(templates.invalidArguments, 'File cannot be empty');
-
 		const { teamspace } = req.params;
 		await sufficientQuota(teamspace, req.file.size);
 
@@ -98,6 +96,34 @@ const validateRevisionUpload = async (req, res, next) => {
 	}
 };
 
-Revisions.validateNewRevisionData = validateMany([singleFileUpload('file', fileFilter), validateRevisionUpload]);
+const validateFederationRevisionUpload = async (req, res, next) => {
+	const schemaBase = {
+		containers: Yup.array().of(YupHelper.types.id).min(1).required()
+			.test('containers-validation', 'Containers must exist within the same project', (value) => {
+				const { teamspace, project } = req.params;
+				return value?.length && modelsExistInProject(teamspace, project, value).catch(() => false);
+			})
+			.test('containers-validation', 'IDs provided cannot be of type federation', async (value) => {
+				if (value?.length) {
+					const { teamspace } = req.params;
+					const foundContainers = await getContainers(teamspace, value, { _id: 1 });
+					return foundContainers?.length === value?.length;
+				}
+				return false;
+			}),
+	};
+
+	const schema = Yup.object().noUnknown().required().shape(schemaBase);
+
+	try {
+		req.body = await schema.validate(req.body);
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+Revisions.validateNewRevisionData = (isFederation) => (isFederation ? validateFederationRevisionUpload
+	: validateMany([singleFileUpload('file', fileFilter), validateContainerRevisionUpload]));
 
 module.exports = Revisions;

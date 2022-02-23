@@ -32,7 +32,7 @@ Sessions.createSession = (req, res) => {
 			logger.logError(`Failed to regenerate session: ${err.message}`);
 			respond(req, res, err);
 		} else {
-			const updatedUser = { ...req.loginData, socketId: req.headers['x-socket-id'], webSession: false };
+			const updatedUser = { ...req.loginData, webSession: false };
 
 			if (req.headers['user-agent']) {
 				updatedUser.webSession = isFromWebBrowser(req.headers['user-agent']);
@@ -53,6 +53,7 @@ Sessions.createSession = (req, res) => {
 				sessionID: req.sessionID,
 				ipAddress: req.ips[0] || req.ip,
 				userAgent: req.headers['user-agent'],
+				socketId: req.headers['x-socket-id'],
 				referer: req.headers.referer });
 
 			respond(req, res, templates.ok);

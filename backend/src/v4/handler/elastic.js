@@ -29,7 +29,10 @@ const Elastic = {};
 const loginRecordIndex = "io-teamspace-loginrecord";
 const loginRecordMapping = {
 	"username" : { "type": "text" },
-	"loginTime" : { "type": "date" },
+	"loginTime" : {
+		"type": "date",
+		"format": "ccc MMM dd uuuu HH:mm:ss zZ (zzzz)||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+	},
 	"ipAddr" : { "type": "ip" },
 	"location.country" : { "type": "text" },
 	"location.city" : { "type": "text" },

@@ -16,6 +16,6 @@
  */
 
 import * as ContainersSelectors from '@/v5/store/containers/containers.selectors';
-import { createHooksSelectors } from './selectorsHooks.helper';
+import { createHooksSelectors } from '@/v5/helpers/selectorsHooks.helper';
 
 export const ContainersHooksSelectors = createHooksSelectors(ContainersSelectors);
