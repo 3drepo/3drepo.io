@@ -20,7 +20,6 @@ import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
 
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { formatMessage } from '@/v5/services/intl';
 import { Sidebar } from '@controls/sideBar';
 import { UploadFieldArray } from '@/v5/store/containers/containers.types';
@@ -31,7 +30,7 @@ import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedLi
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
-import { Container, Content, DropZone, UploadsListHeader } from './uploadFileForm.styles';
+import { Container, Content, DropZone, Modal, UploadsListHeader } from './uploadFileForm.styles';
 
 type IUploadFileForm = {
 	openState: boolean;
@@ -111,7 +110,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 
 	return (
 		<FormProvider {...methods}>
-			<FormModal
+			<Modal
 				open={openState}
 				onSubmit={handleSubmit(onSubmit)}
 				onClickClose={onClickClose}
@@ -183,7 +182,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 						}
 					</Sidebar>
 				</Container>
-			</FormModal>
+			</Modal>
 		</FormProvider>
 	);
 };
