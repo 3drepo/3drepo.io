@@ -20,11 +20,12 @@ import ErrorCircleIcon from '@assets/icons/error_circle.svg';
 import { Container, Tooltip, IconWrapper } from './errorTooltip.styles';
 
 interface IErrorTooltip {
+	className?: string;
 	children: ReactNode;
 }
 
-export const ErrorTooltip = ({ children }: IErrorTooltip): JSX.Element => (
-	<Container>
+export const ErrorTooltip = ({ className, children }: IErrorTooltip): JSX.Element => (
+	<Container className={className}>
 		<Tooltip
 			placement="right-start"
 			title={children}

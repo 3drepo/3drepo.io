@@ -16,20 +16,35 @@
  */
 
 import styled from 'styled-components';
-import { Typography } from '@controls/typography';
 
-export const Container = styled.div`
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	color: ${({ theme }) => theme.palette.secondary.main};
-	border-radius: 5px;
-	padding: 9px 12px;
+import { TextField } from '@material-ui/core';
+
+export const TextInput = styled(TextField)`
+	margin: 0;
 	width: 271px;
-	margin: 0 10px;
-
-	box-sizing: border-box;
-`;
-
-export const ContainerInput = styled(Typography).attrs({
-	variant: 'h5',
-})`
+	border: none;
+	>.MuiInputBase-root {
+		>.MuiInputBase-input {
+			font-weight: bold;
+		}
+		${({ neworexisting, theme }) => {
+		if (neworexisting === 'new') {
+			return `
+					>.MuiInputBase-input { color: ${theme.palette.primary.main}; };
+					color: ${theme.palette.primary.main};
+					background-color: ${theme.palette.primary.lightest};
+					fieldset { border: none; }
+				`;
+		}
+		if (neworexisting === 'existing') {
+			return `
+					>.MuiInputBase-input { color: ${theme.palette.secondary.main} };
+					color: ${theme.palette.secondary.main};
+					background-color: ${theme.palette.tertiary.lightest};
+					fieldset { border: none; }
+				`;
+		}
+		return '';
+	}}
+	}
 `;

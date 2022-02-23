@@ -15,10 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DashboardListItemRow } from '@components/dashboard/dashboardList/dashboardListItem/components';
-import styled from 'styled-components';
-
-export const Content = styled(DashboardListItemRow)`
-	padding: 0 0 0 5px;
-	height: 51px;
-`;
+export { UploadListItemRevisionTag } from './uploadListItemRevisionTag.component';

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,10 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DashboardListItemRow } from '@components/dashboard/dashboardList/dashboardListItem/components';
-import styled from 'styled-components';
+import React from 'react';
+import AddCircleIcon from '@assets/icons/add_circle.svg';
+import { FormattedMessage } from 'react-intl';
+import { Container, Message } from './newContainer.styles';
 
-export const Content = styled(DashboardListItemRow)`
-	padding: 0 0 0 5px;
-	height: 51px;
-`;
+interface INewContainer {
+	containerName: string;
+}
+
+export const NewContainer = ({ containerName }: INewContainer) => (
+	<Container>
+		<AddCircleIcon />
+		<Message>
+			<FormattedMessage
+				id="uploads.destination.newContainer.message"
+				defaultMessage="Add <Bold>{containerName}</Bold> as a new container"
+				values={{
+					Bold: (val: string) => <b>{val}</b>,
+					containerName,
+				}}
+			/>
+		</Message>
+	</Container>
+);

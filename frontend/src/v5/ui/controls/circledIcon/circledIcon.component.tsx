@@ -15,10 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DashboardListItemRow } from '@components/dashboard/dashboardList/dashboardListItem/components';
-import styled from 'styled-components';
+import React from 'react';
 
-export const Content = styled(DashboardListItemRow)`
-	padding: 0 0 0 5px;
-	height: 51px;
-`;
+import { Container } from './circledIcon.styles';
+
+interface ICircledIcon {
+	variant: 'main' | 'contrast' | 'error';
+	size: 'small' | 'medium' | 'large';
+}
+
+export const CircledIcon: React.FC<ICircledIcon> = ({ size = 'large', variant = 'main', children, ...props }) => (
+	<Container size={size} $variant={variant} {...props}>
+		{children}
+	</Container>
+);

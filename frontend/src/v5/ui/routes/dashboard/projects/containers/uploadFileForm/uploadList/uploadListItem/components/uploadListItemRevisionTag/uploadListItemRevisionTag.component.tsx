@@ -15,10 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DashboardListItemRow } from '@components/dashboard/dashboardList/dashboardListItem/components';
-import styled from 'styled-components';
+import React from 'react';
 
-export const Content = styled(DashboardListItemRow)`
-	padding: 0 0 0 5px;
-	height: 51px;
-`;
+import { Tooltip } from '@material-ui/core';
+import ErrorIcon from '@assets/icons/error_circle.svg';
+import { Input } from './uploadListItemRevisionTag.styles';
+
+type IUploadListItemRevision = {
+	isSelected: boolean;
+	errorMessage?: string;
+};
+
+export const UploadListItemRevisionTag = ({
+	isSelected,
+	errorMessage,
+	...props
+}: IUploadListItemRevision): JSX.Element => (
+	<Input
+		$selectedrow={isSelected}
+		error={!!errorMessage}
+		InputProps={{
+			startAdornment: !!errorMessage && (
+				<Tooltip title={errorMessage} placement="bottom-start">
+					<span>
+						<ErrorIcon />
+					</span>
+				</Tooltip>
+			),
+		}}
+		{...props}
+	/>
+);

@@ -22,6 +22,8 @@ import RadioButtonCheckedIcon from '@assets/icons/controls/radio_button_checked.
 import CheckboxIcon from '@assets/icons/controls/checkbox.svg';
 import CheckboxCheckedIcon from '@assets/icons/controls/checkbox_checked.svg';
 import CheckboxIndeterminatedIcon from '@assets/icons/controls/checkbox_indeterminated.svg';
+import ClearIcon from '@assets/icons/controls/clear_circle.svg';
+import ChevronIcon from '@assets/icons/chevron.svg';
 
 export const COLOR = {
 	PRIMARY_MAIN_CONTRAST: '#fff',
@@ -248,6 +250,14 @@ export const theme = createMuiTheme({
 				container: () => document.getElementById('v4Overrides'),
 			},
 		},
+		MuiAutocomplete: {
+			popupIcon: React.createElement(ChevronIcon),
+			closeIcon: React.createElement(ClearIcon),
+			openText: '',
+			closeText: '',
+			clearText: '',
+			handleHomeEndKeys: true,
+		},
 	},
 	overrides: {
 		MuiBackdrop: {
@@ -293,7 +303,6 @@ export const theme = createMuiTheme({
 				paddingTop: 7,
 				paddingBottom: 22,
 				flex: 0,
-				backgroundColor: COLOR.TERTIARY_LIGHTEST,
 			},
 		},
 		MuiDialogContentText: {
@@ -469,6 +478,13 @@ export const theme = createMuiTheme({
 						fill: COLOR.ERROR_MAIN,
 					},
 				},
+				adornedStart: {
+					'& $svg': {
+						height: '15px',
+						overflow: 'clip',
+						margin: '3px -7px 0 0',
+					},
+				},
 			},
 		MuiSelect: {
 			root: {
@@ -564,6 +580,58 @@ export const theme = createMuiTheme({
 				color: COLOR.ERROR_MAIN,
 			},
 		},
+		MuiAutocomplete: {
+			root: {
+				height: '31px',
+				'&&& $input': {
+					padding: '0px',
+					height: '31px',
+					lineHeight: '31px',
+				},
+			},
+			inputRoot: {
+				height: '100%',
+				'&&&&': {
+					padding: '0 6px',
+				},
+			},
+			endAdornment: {
+				height: '100%',
+				top: 'unset',
+				display: 'flex',
+				alignItems: 'center',
+			},
+			popupIndicator: {
+				width: '20px',
+				height: '20px',
+				margin: '8px 0px',
+			},
+			clearIndicator: {
+				'&': {
+					width: '20px',
+					height: '20px',
+					margin: '0 5px 0 0',
+					padding: '2px',
+				},
+			},
+			option: {
+				'&&': {
+					height: '100%',
+					alignItems: 'baseline',
+					margin: 'auto 0',
+					display: 'flex',
+					flexDirection: 'column',
+					padding: '12px',
+					wordWrap: 'break-word',
+				},
+				'&:focus': {
+					backgroundColor: COLOR.TERTIARY_LIGHTEST,
+				},
+				'&[data-focus]': {
+					backgroundColor: COLOR.TERTIARY_LIGHTEST,
+				},
+			},
+		},
 		MuiFormControl: {
 			root: {
 				width: '100%',
@@ -595,6 +663,7 @@ export const theme = createMuiTheme({
 		MuiIconButton: {
 			root: {
 				transition: 'none',
+				color: 'inherit',
 			},
 		},
 		MuiButton: {

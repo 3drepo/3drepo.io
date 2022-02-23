@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,10 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DashboardListItemRow } from '@components/dashboard/dashboardList/dashboardListItem/components';
+import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 
-export const Content = styled(DashboardListItemRow)`
-	padding: 0 0 0 5px;
-	height: 51px;
+export const Container = styled.div`
+	color: ${({ theme, error }) => (error ? theme.palette.error.main : theme.palette.primary.dark)};
+	display: inline-flex;
+	width: 100%;
+	
+	svg {
+		height: 18px;
+		width: 18px;
+		box-sizing: border-box;
+		margin: 6px;
+		flex-shrink: 0;
+		path {
+			fill: ${({ theme }) => theme.palette.primary.dark};
+		}
+	}
+`;
+
+export const Message = styled(Typography).attrs({
+	variant: 'h5',
+	component: 'span',
+
+})`
+	width: calc(100% - 30px);
 `;

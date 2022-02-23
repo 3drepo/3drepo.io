@@ -80,7 +80,8 @@ export interface IContainer {
 	type: string;
 	code: string;
 	status: UploadStatuses;
-	unit?: string;
+	unit: string;
+	desc?: string;
 	isFavourite: boolean;
 	role: string;
 	hasStatsPending: boolean;
@@ -178,6 +179,16 @@ export type UploadItemFields = {
 
 export type UploadFieldArray = {
 	uploads: UploadItemFields[];
+};
+
+export type DestinationOption = {
+	containerId: string;
+	containerName: string;
+	containerUnit?: string;
+	containerType?: string;
+	containerDesc?: string;
+	containerCode?: string;
+	latestRevision: string;
 };
 
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;

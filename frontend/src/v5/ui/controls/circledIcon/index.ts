@@ -15,22 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { Typography } from '@controls/typography';
-
-export const Container = styled.div`
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	color: ${({ theme }) => theme.palette.base.main};
-	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
-	border-radius: 5px;
-	padding: 9px 12px;
-	width: 200px;
-	margin: 0 10px;
-
-	box-sizing: border-box;
-`;
-
-export const RevisionInput = styled(Typography).attrs({
-	variant: 'h5',
-})`
-`;
+export { CircledIcon } from './circledIcon.component';
