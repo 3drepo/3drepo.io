@@ -60,17 +60,16 @@ const newRevision = (req, res) => {
 	);
 };
 
-const downloadRevisionFiles = (req, res) => {
+const downloadRevisionFiles = async (req, res) => {
 	const { teamspace, container, revision } = req.params;
 
-	Containers.downloadRevisionFiles(teamspace, container, revision).then((file) => {
-		const headers = {
-			'Content-Length': file.size,
-			'Content-Disposition': `attachment;filename=${file.fileName}`,
-		};
-
-		writeStreamRespond(req, res, templates.ok, file.readStream, headers);
-	}).catch((err) => respond(req, res, err));
+	try{
+		const file = await Containers.downloadRevisionFiles(teamspace, container, revision);
+		
+		writeStreamRespond(req, res, templates.ok, file.readStream, file.filename, file.size);
+	} catch (err){
+		respond(req, res, err)
+	}
 };
 
 const establishRoutes = () => {

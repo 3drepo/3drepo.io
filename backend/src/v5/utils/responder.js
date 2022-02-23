@@ -89,31 +89,34 @@ Responder.respond = (req, res, resCode, body, { cache, customHeaders, mimeType =
 	logger.logInfo(genResponseLogging(resCode, contentLength, req));
 };
 
-Responder.writeStreamRespond = (req, res, resCode, readStream, customHeaders) => {
-	let length = 0;
+Responder.writeStreamRespond = (req, res, resCode, readStream, fileName, fileSize) => {
+	const headers = {
+		'Content-Length': fileSize,
+		'Content-Disposition': `attachment;filename=${fileName}`,
+	};
+
 	let response = createResponseCode(resCode);
 	const place = `${req.method} ${req.originalUrl}`;
 
 	readStream.on('error', (error) => {
 		logger.logError(`Stream failed: [${error.code} - ${error.message}] @ ${place}`, undefined, networkLabel);
-		response = templates.noFileFound;
+		response = templates.unknown;
 		res.status(response.status);
 		res.end();
 	}).once('data', () => {
-		if (customHeaders) {
-			res.writeHead(response.status, customHeaders);
+		if (headers) {
+			res.writeHead(response.status, headers);
 		} else {
 			res.status(response.status);
 		}
 	}).on('data', (data) => {
 		res.write(data);
-		length += data.length;
 	}).on('end', () => {
 		res.end();
 		logger.logInfo(genResponseLogging(response, {
 			place,
 			httpCode: response.status,
-			contentLength: length,
+			contentLength: fileSize,
 		}, req), undefined, networkLabel);
 	});
 };

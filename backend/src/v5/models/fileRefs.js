@@ -16,7 +16,7 @@
  */
 
 const ExternalServices = require('../handler/externalServices');
-const Mailer = require('../services/mailer');
+const {sendFileMissingError} = require('../services/mailer');
 const db = require('../handler/db');
 const { logger } = require('../utils/logger');
 const { templates } = require('../utils/responseCodes');
@@ -42,7 +42,7 @@ const fetchFileStream = async (teamspace, model, extension, fileName) => {
 		return { readStream: stream, size: entry.size };
 	} catch {
 		logger.logError(`Failed to fetch file from ${entry.type}. Trying GridFS....`);
-		Mailer.sendFileMissingError({ teamspace, model, collection: `${model}.${extension}`, refId: entry._id, link: entry.link }).catch((err) => {
+		sendFileMissingError({ teamspace, model, collection: `${model}.${extension}`, refId: entry._id, link: entry.link }).catch((err) => {
 			logger.logError(`Failed to send file missing error: ${err.message}`);
 		});
 
@@ -94,7 +94,7 @@ FileRefs.removeAllFilesFromModel = async (teamspace, model) => {
 };
 
 FileRefs.downloadFiles = async (teamspace, model, revision) => {
-	if (!revision || !revision.rFile || !revision.rFile.length) {
+	if (!revision?.rFile?.length) {
 		throw templates.noFileFound;
 	}
 
