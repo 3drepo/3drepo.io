@@ -103,15 +103,21 @@ Responder.writeStreamRespond = (req, res, resCode, readStream, fileName, fileSiz
 		response = templates.unknown;
 		res.status(response.status);
 		res.end();
-	}).once('data', () => {
+	});
+	
+	readStream.once('data', () => {
 		if (headers) {
 			res.writeHead(response.status, headers);
 		} else {
 			res.status(response.status);
 		}
-	}).on('data', (data) => {
+	});
+
+	readStream.on('data', (data) => {
 		res.write(data);
-	}).on('end', () => {
+	});
+	
+	readStream.on('end', () => {
 		res.end();
 		logger.logInfo(genResponseLogging(response, {
 			place,

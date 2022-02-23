@@ -35,24 +35,6 @@ const getRefEntry = async (account, collection, id) => {
 	return entry;
 };
 
-const fetchFileStream = async (teamspace, model, extension, fileName) => {
-	const entry = await getRefEntry(teamspace, `${model}.${extension}`, fileName);
-	try {
-		const stream = await ExternalServices.getFileStream(teamspace, `${model}.${extension}`, entry.type, entry.link);
-		return { readStream: stream, size: entry.size };
-	} catch {
-		logger.logError(`Failed to fetch file from ${entry.type}. Trying GridFS....`);
-		sendFileMissingError({ teamspace, model, collection: `${model}.${extension}`, refId: entry._id, link: entry.link }).catch((err) => {
-			logger.logError(`Failed to send file missing error: ${err.message}`);
-		});
-
-		const stream = await ExternalServices.getFileStream(teamspace, `${model}.${extension}`, 'gridfs', fileName);
-		return { readStream: stream, size: entry.size };
-	}
-};
-
-const getOriginalFile = (account, model, fileName) => fetchFileStream(account, model, 'history.ref', fileName);
-
 const removeAllFiles = async (teamspace, collection) => {
 	const pipeline = [
 		{ $match: { noDelete: { $exists: false }, type: { $ne: 'http' } } },
@@ -70,6 +52,22 @@ const removeAllFiles = async (teamspace, collection) => {
 	);
 
 	return Promise.all(deletePromises);
+};
+
+FileRefs.fetchFileStream = async (teamspace, model, extension, fileName) => {
+	const entry = await getRefEntry(teamspace, `${model}.${extension}`, fileName);
+	try {
+		const stream = await ExternalServices.getFileStream(teamspace, `${model}.${extension}`, entry.type, entry.link);
+		return { readStream: stream, size: entry.size };
+	} catch {
+		logger.logError(`Failed to fetch file from ${entry.type}. Trying GridFS....`);
+		sendFileMissingError({ teamspace, model, collection: `${model}.${extension}`, refId: entry._id, link: entry.link }).catch((err) => {
+			logger.logError(`Failed to send file missing error: ${err.message}`);
+		});
+
+		const stream = await ExternalServices.getFileStream(teamspace, `${model}.${extension}`, 'gridfs', fileName);
+		return { readStream: stream, size: entry.size };
+	}
 };
 
 FileRefs.getTotalSize = async (teamspace, collection) => {
@@ -91,20 +89,6 @@ FileRefs.removeAllFilesFromModel = async (teamspace, model) => {
 		return !!res?.length;
 	});
 	return Promise.all(refCols.map(({ name }) => removeAllFiles(teamspace, name)));
-};
-
-FileRefs.downloadFiles = async (teamspace, model, revision) => {
-	if (!revision?.rFile?.length) {
-		throw templates.noFileFound;
-	}
-
-	// We currently only support single file fetches
-	const fileName = revision.rFile[0];
-	const fileNameArr = fileName.split('_');
-	const ext = fileNameArr.length > 1 ? `.${fileNameArr.pop()}` : '';
-	const fileNameFormatted = fileNameArr.join('_').substr(36) + ext;
-	const file = await getOriginalFile(teamspace, model, fileName);
-	return { ...file, filename: fileNameFormatted };
 };
 
 module.exports = FileRefs;

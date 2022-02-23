@@ -20,7 +20,7 @@ const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionById, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const Groups = require('./commons/groups');
-const { downloadFiles } = require('../../../../models/fileRefs');
+const { fetchFileStream } = require('../../../../models/fileRefs');
 const fs = require('fs/promises');
 const { getProjectById } = require('../../../../models/projects');
 const { logger } = require('../../../../utils/logger');
@@ -86,7 +86,16 @@ Containers.updateRevisionStatus = updateRevisionStatus;
 
 Containers.downloadRevisionFiles = async (teamspace, container, revisionId) => {
 	const revision = await getRevisionById(teamspace, container, revisionId, { rFile: 1 });
-	return downloadFiles(teamspace, container, revision);
+	
+	if (!revision?.rFile?.length) {
+		throw templates.noFileFound;
+	}
+
+	// We currently only support single file fetches
+	const fileName = revision.rFile[0];
+	const fileNameFormatted = fileName.substr(36).replace(/_([^_]*)$/, '.$1');
+	const file = await fetchFileStream(teamspace, container, 'history.ref', fileName);
+	return { ...file, filename: fileNameFormatted };
 };
 
 Containers.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {
