@@ -17,15 +17,15 @@
 
 const { mimeTypes, respond } = require('../../../../utils/responder');
 const { Router } = require('express');
-const Views = require('../../../../processors/teamspaces/projects/models/federations');
+const Views = require('../../../../processors/teamspaces/projects/models/containers');
 const { fileMimeFromBuffer } = require('../../../../utils/helper/typeCheck');
-const { hasReadAccessToFederation } = require('../../../../middleware/permissions/permissions');
+const { hasReadAccessToContainer } = require('../../../../middleware/permissions/permissions');
 const { serialiseViews } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/views');
 const { templates } = require('../../../../utils/responseCodes');
 
 const getViewList = (req, res, next) => {
-	const { teamspace, federation } = req.params;
-	Views.getViewList(teamspace, federation)
+	const { teamspace, container } = req.params;
+	Views.getViewList(teamspace, container)
 		.then((views) => {
 			req.outputData = views;
 			next();
@@ -36,10 +36,10 @@ const getViewList = (req, res, next) => {
 };
 
 const getViewThumbnail = async (req, res) => {
-	const { teamspace, federation, view } = req.params;
+	const { teamspace, container, view } = req.params;
 
 	try {
-		const image = await Views.getThumbnail(teamspace, federation, view);
+		const image = await Views.getThumbnail(teamspace, container, view);
 		const mimeType = await fileMimeFromBuffer(image) || mimeTypes.png;
 		respond(req, res, templates.ok, image, { cache: true, mimeType });
 	} catch (err) {
@@ -52,11 +52,11 @@ const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/views:
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/views:
 	 *   get:
-	 *     description: Get the list of views available within the federation
-	 *     tags: [Federations]
-	 *     operationId: FederationViewsList
+	 *     description: Get the list of views available within the container
+	 *     tags: [Containers]
+	 *     operationId: ContainerViewsList
 	 *     parameters:
 	 *       - teamspace:
 	 *         name: teamspace
@@ -72,9 +72,9 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *         type: string
-	 *       - federation:
-	 *         name: federation
-	 *         description: Federation ID
+	 *       - container:
+	 *         name: container
+	 *         description: Container ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -83,7 +83,7 @@ const establishRoutes = () => {
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       404:
-	 *         $ref: "#/components/responses/federationsNotFound"
+	 *         $ref: "#/components/responses/containersNotFound"
 	 *       200:
 	 *         description: returns list of views
 	 *         content:
@@ -108,15 +108,15 @@ const establishRoutes = () => {
 	 *                         type: boolean
 	 *                         description: indicates whether a thumbnail is available for the view
 	 */
-	router.get('/:view/thumbnail', hasReadAccessToFederation, getViewThumbnail);
+	router.get('/', hasReadAccessToContainer, getViewList, serialiseViews);
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/views/{view}/thumbnail:
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/views/{view}/thumbnail:
 	 *   get:
 	 *     description: Get the thumbnail of the view specified
-	 *     tags: [Federations]
-	 *     operationId: FederationViewThumbnail
+	 *     tags: [Containers]
+	 *     operationId: ContainerViewThumbnail
 	 *     parameters:
 	 *       - teamspace:
 	 *         name: teamspace
@@ -133,9 +133,9 @@ const establishRoutes = () => {
 	 *         schema:
 	 *           type: string
 	 *           format: uuid
-	 *       - federation:
-	 *         name: federation
-	 *         description: Federation ID
+	 *       - container:
+	 *         name: container
+	 *         description: Container ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -162,7 +162,7 @@ const establishRoutes = () => {
 	 *               type: string
 	 *               format: binary
 	 */
-	router.get('/', hasReadAccessToFederation, getViewList, serialiseViews);
+	router.get('/:view/thumbnail', hasReadAccessToContainer, getViewThumbnail);
 
 	return router;
 };
