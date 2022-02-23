@@ -28,6 +28,15 @@ TypeChecker.isUUIDString = (uuid) => {
 	const hasMatch = uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
 	return hasMatch?.length > 0;
 };
-TypeChecker.fileTypeFromBuffer = (fileBuffer) => fileTypeFromBuffer(fileBuffer);
+
+const getTypeFromBuffer = (fileBuffer) => (Buffer.isBuffer(fileBuffer) ? fileTypeFromBuffer(fileBuffer) : null);
+TypeChecker.fileMimeFromBuffer = async (fileBuffer) => {
+	const type = await getTypeFromBuffer(fileBuffer);
+	return type?.mime;
+};
+TypeChecker.fileExtensionFromBuffer = async (fileBuffer) => {
+	const type = await getTypeFromBuffer(fileBuffer);
+	return type?.ext;
+};
 
 module.exports = TypeChecker;

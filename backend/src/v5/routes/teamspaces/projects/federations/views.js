@@ -18,7 +18,7 @@
 const { mimeTypes, respond } = require('../../../../utils/responder');
 const { Router } = require('express');
 const Views = require('../../../../processors/teamspaces/projects/models/federations');
-const { fileTypeFromBuffer } = require('../../../../utils/helper/typeCheck');
+const { fileMimeFromBuffer } = require('../../../../utils/helper/typeCheck');
 const { hasReadAccessToFederation } = require('../../../../middleware/permissions/permissions');
 const { serialiseViews } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/views');
 const { templates } = require('../../../../utils/responseCodes');
@@ -40,7 +40,7 @@ const getViewThumbnail = async (req, res) => {
 
 	try {
 		const image = await Views.getThumbnail(teamspace, federation, view);
-		const mimeType = await fileTypeFromBuffer(image)?.mime || mimeTypes.png;
+		const mimeType = await fileMimeFromBuffer(image) || mimeTypes.png;
 		respond(req, res, templates.ok, image, { cache: true, mimeType });
 	} catch (err) {
 		// istanbul ignore next
