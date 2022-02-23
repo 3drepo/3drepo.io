@@ -19,6 +19,7 @@ import { Tooltip as TooltipComponent, withStyles } from '@material-ui/core';
 
 export const Container = styled.div`
 	display: inline-block;
+	height: 15px;
 `;
 
 export const Tooltip = withStyles((theme: any) => ({
@@ -42,9 +43,8 @@ export const Tooltip = withStyles((theme: any) => ({
 export const IconWrapper = styled.div`
 	height: max-content;
 	width: max-content;
-	margin-left: 6px;
+	margin: 0 5px;
 
-	svg {
-		transform: translateY(20%);
-	}
+	align-items: center;
+	display: flex;
 `;

@@ -16,12 +16,35 @@
  */
 
 import styled from 'styled-components';
+
 import { TextField } from '@material-ui/core';
 
-export const Input = styled(TextField)`
-	margin: 0 7px;
+export const TextInput = styled(TextField)`
+	margin: 0;
 	width: 271px;
-	${({ $selectedrow }) => $selectedrow && `
-		&& .MuiInputBase-root.MuiOutlinedInput-root fieldset { border-color: transparent; }
-	`}
+	border: none;
+	>.MuiInputBase-root {
+		>.MuiInputBase-input {
+			font-weight: bold;
+		}
+		${({ neworexisting, theme }) => {
+		if (neworexisting === 'new') {
+			return `
+					>.MuiInputBase-input { color: ${theme.palette.primary.main}; };
+					color: ${theme.palette.primary.main};
+					background-color: ${theme.palette.primary.lightest};
+					fieldset { border: none; }
+				`;
+		}
+		if (neworexisting === 'existing') {
+			return `
+					>.MuiInputBase-input { color: ${theme.palette.secondary.main} };
+					color: ${theme.palette.secondary.main};
+					background-color: ${theme.palette.tertiary.lightest};
+					fieldset { border: none; }
+				`;
+		}
+		return '';
+	}}
+	}
 `;

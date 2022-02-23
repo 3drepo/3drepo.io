@@ -20,8 +20,8 @@ import DeleteIcon from '@assets/icons/delete.svg';
 import EditIcon from '@assets/icons/edit.svg';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { DestinationOption, UploadItemFields } from '@/v5/store/containers/containers.types';
 import filesize from 'filesize';
-import { UploadItemFields } from '@/v5/store/containers/containers.types';
 import { ListItemSchema } from '@/v5/validation/containers';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
@@ -45,14 +45,14 @@ export const UploadListItem = ({
 	isSelected,
 	onChange,
 }: IUploadListItem): JSX.Element => {
-	const { control, getValues, formState: { errors } } = useForm({
+	const { control, formState: { errors }, setValue, trigger, watch } = useForm({
 		defaultValues: item,
 		mode: 'onChange',
 		resolver: yupResolver(ListItemSchema),
 	});
 
-	onChange('containerName', getValues('containerName'));
-	onChange('revisionTag', getValues('revisionTag'));
+	const updateValue = (name) => onChange(name, watch(name));
+	updateValue('revisionTag');
 
 	return (
 		<UploadListItemRow
@@ -72,9 +72,16 @@ export const UploadListItem = ({
 					field: { ref, ...extras },
 				}) => (
 					<UploadListItemDestination
-						isSelected={isSelected}
 						errorMessage={errors.containerName?.message}
 						{...extras}
+						onChange={(vals: DestinationOption) => {
+							Object.keys(vals).forEach((key: keyof DestinationOption) => {
+								if (key === 'latestRevision') return;
+								setValue(key, vals[key]);
+								updateValue(key);
+							});
+							trigger('containerName');
+						}}
 					/>
 				)}
 			/>

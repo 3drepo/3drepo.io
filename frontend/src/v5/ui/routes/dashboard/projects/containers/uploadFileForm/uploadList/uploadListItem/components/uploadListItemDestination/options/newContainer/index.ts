@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,24 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode } from 'react';
-import ErrorCircleIcon from '@assets/icons/error_circle.svg';
-import { Container, Tooltip, IconWrapper } from './errorTooltip.styles';
-
-interface IErrorTooltip {
-	className?: string;
-	children: ReactNode;
-}
-
-export const ErrorTooltip = ({ className, children }: IErrorTooltip): JSX.Element => (
-	<Container className={className}>
-		<Tooltip
-			placement="right-start"
-			title={children}
-		>
-			<IconWrapper>
-				<ErrorCircleIcon />
-			</IconWrapper>
-		</Tooltip>
-	</Container>
-);
+export { NewContainer } from './newContainer.component';
