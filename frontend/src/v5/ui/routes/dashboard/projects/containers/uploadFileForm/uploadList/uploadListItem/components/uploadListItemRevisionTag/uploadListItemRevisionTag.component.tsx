@@ -17,8 +17,7 @@
 
 import React from 'react';
 
-import { Tooltip } from '@material-ui/core';
-import ErrorIcon from '@assets/icons/error_circle.svg';
+import { ErrorTooltip } from '@controls/errorTooltip';
 import { Input } from './uploadListItemRevisionTag.styles';
 
 type IUploadListItemRevision = {
@@ -36,11 +35,9 @@ export const UploadListItemRevisionTag = ({
 		error={!!errorMessage}
 		InputProps={{
 			startAdornment: !!errorMessage && (
-				<Tooltip title={errorMessage} placement="bottom-start">
-					<span>
-						<ErrorIcon />
-					</span>
-				</Tooltip>
+				<ErrorTooltip>
+					{errorMessage}
+				</ErrorTooltip>
 			),
 		}}
 		{...props}

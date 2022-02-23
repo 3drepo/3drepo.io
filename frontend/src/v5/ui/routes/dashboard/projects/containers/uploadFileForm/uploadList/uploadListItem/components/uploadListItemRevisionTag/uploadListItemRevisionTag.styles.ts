@@ -16,16 +16,19 @@
  */
 
 import styled from 'styled-components';
-import { TextField } from '@material-ui/core';
+import { FormTextField } from '@controls/formTextField/formTextField.component';
 
-export const Input = styled(TextField)`
+export const Input = styled(FormTextField)`
 	margin: 0 7px;
 	width: 200px;
-	${({ $selectedrow, theme }) => $selectedrow && `
-		.MuiInputBase-root.MuiOutlinedInput-root {
-			input { color: ${theme.palette.primary.contrast}; }
-			&.MuiInputBase-formControl fieldset { border-color: transparent; }
-			background-color: ${theme.palette.secondary.light};
-		}
-	`}
+	.MuiOutlinedInput-root {
+		input { height: 31px }
+		${({ $selectedrow, theme }) => $selectedrow && `
+			&.MuiOutlinedInput-root:not(.Mui-error) {
+				input { color: ${theme.palette.primary.contrast}; }
+				&.MuiInputBase-formControl fieldset { border-color: transparent; }
+				background-color: ${theme.palette.secondary.light};
+			}
+		`}
+	}
 `;
