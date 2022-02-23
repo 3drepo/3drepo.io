@@ -17,24 +17,41 @@
 
 import { io, Socket } from 'socket.io-client';
 
-const CHAT_SERVER = 'http://local.3drepo.io:3000';
-
 interface IRoomType {
-	teamspace: string;
+	teamspace?: string;
 	model?: string;
-	project: string;
+	project?: string;
+	notifications?: boolean
 }
 
 let socket:Socket = null;
 const roomsJoined:Record<string, number> = {};
 
-const roomTypeToId = (roomType:IRoomType) => `${roomType.teamspace}.${roomType.project}.${roomType.model}`;
+const roomTypeToId = (roomType:IRoomType) => (roomType.notifications ? 'notifications'
+	: JSON.stringify(roomType, Object.keys(roomType).sort()));
 
-export const initializeSocket = () => {
-	socket = io(CHAT_SERVER, {
-		path: '/chat',
+const idToRoomType = (id: string): IRoomType => {
+	if (id === 'notifications') return { notifications: true };
+	return JSON.parse(id);
+};
+
+interface IChatConfig {
+	host: string;
+	path: string;
+	reconnectionAttempts: number
+}
+
+export const initializeSocket = ({ host, path, reconnectionAttempts }: IChatConfig) => {
+	socket = io(host, {
+		path,
+		reconnectionAttempts,
 		transports: ['websocket'],
+		reconnection: true,
+		reconnectionDelay: 500,
 	});
+
+	// eslint-disable-next-line @typescript-eslint/no-use-before-define
+	socket.on('connect', reJoinRooms);
 };
 
 export const joinRoom = (roomType : IRoomType) => {
@@ -55,6 +72,11 @@ export const leaveRoom = (roomType : IRoomType) => {
 	socket.emit('leave', roomType);
 };
 
+const reJoinRooms = () => {
+	const roomTypes = Object.keys(roomsJoined).map(idToRoomType);
+	roomTypes.forEach(joinRoom);
+};
+
 export const subscribeToEvent = (event, callback) => {
 	socket.on(event, callback);
 };
@@ -72,3 +94,13 @@ export const subscribeToRoomEvent = (roomType: IRoomType, event, callback) => {
 		leaveRoom(roomType);
 	};
 };
+
+export const subscribeToDm = (callback) => {
+	subscribeToEvent('message', callback);
+
+	return () => {
+		unsubscribeToEvent('message', callback);
+	};
+};
+
+export const getSocketId = () => socket.id;

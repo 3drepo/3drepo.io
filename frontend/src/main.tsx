@@ -37,7 +37,8 @@ import * as OfflinePluginRuntime from 'offline-plugin/runtime';
 import { initializeIntl } from '@/v5/services/intl';
 import { initializeActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 import { Version, VersionContext } from './versionContext';
-import { initializeSocket } from './v5/services/realtime/realtime.service';
+import { getSocketId, initializeSocket, subscribeToEvent } from './v5/services/realtime/realtime.service';
+import { setSocketIdHeader } from './v4/services/api';
 
 window.UnityUtil = UnityUtil;
 
@@ -45,7 +46,8 @@ initializeActionsDispatchers(dispatch);
 
 initializeIntl(navigator.language);
 
-initializeSocket();
+initializeSocket(clientConfigService.chatConfig);
+subscribeToEvent('connect', () => setSocketIdHeader(getSocketId()));
 
 const render = () => {
 	ReactDOM.render(
