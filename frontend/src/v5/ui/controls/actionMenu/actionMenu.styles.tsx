@@ -31,6 +31,9 @@ export const ActionMenuSection = styled.div`
 	}
 `;
 
+export const ActionMenuTriggerButton = styled.div``;
+ActionMenuTriggerButton.name = 'ActionMenuTriggerButton';
+
 export const Popper = styled(PopperBase)`
 	&& {
 		z-index: 1101;

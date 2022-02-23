@@ -15,5 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { ActionMenuSection } from './actionMenu.styles';
 export { ActionMenu } from './actionMenu.component';
+export { ActionMenuItem } from './actionMenuItem/actionMenuItem.component';
+export { ActionMenuItemButton } from './actionMenuItem/actionMenuItemButton/actionMenuItemButton.component';
+export { ActionMenuSection, ActionMenuTriggerButton } from './actionMenu.styles';

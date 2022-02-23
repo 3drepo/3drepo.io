@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { MouseEvent, useState } from 'react';
+import React from 'react';
 import { useParams } from 'react-router';
 import { useRouteMatch } from 'react-router-dom';
 import { AppBar as MuiAppBar } from '@material-ui/core';
@@ -31,8 +31,7 @@ import VisualSettingsIcon from '@assets/icons/settings.svg';
 import SupportCentreIcon from '@assets/icons/question_mark.svg';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { Avatar } from '@controls/avatar';
-import { ActionMenu, ActionMenuSection } from '@controls/actionMenu';
-import { ActionMenuButton } from '@controls/actionMenu/actionMenuButton';
+import { ActionMenu, ActionMenuSection, ActionMenuItem, ActionMenuTriggerButton } from '@controls/actionMenu';
 import {
 	Items,
 	AvatarSection,
@@ -40,6 +39,7 @@ import {
 	UserUserName,
 	SignOutButton,
 	EditProfileButton,
+	AvatarContainer,
 } from './appBar.styles';
 import { Breadcrumbs } from '../breadcrumbs';
 
@@ -49,17 +49,6 @@ export const AppBar = (): JSX.Element => {
 	const baseUrl = url.split('/').slice(0, 3).join('/');
 
 	const user = CurrentUserHooksSelectors.selectCurrentUser();
-
-	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
-	const handleCloseActionMenu = () => {
-		setAnchorEl(null);
-	};
-
-	const handleClickActionMenu = (event: MouseEvent<HTMLButtonElement>) => {
-		event.stopPropagation();
-		setAnchorEl(event.currentTarget);
-	};
 
 	return (
 		<>
@@ -75,66 +64,60 @@ export const AppBar = (): JSX.Element => {
 					<CircleButton variant="contrast" aria-label="notifications">
 						<NotificationsIcon />
 					</CircleButton>
-					<Avatar
-						onClick={handleClickActionMenu}
-						user={user}
-					/>
+					<AvatarContainer>
+						<ActionMenu>
+							<ActionMenuTriggerButton>
+								<Avatar user={user} button />
+							</ActionMenuTriggerButton>
+							<ActionMenuSection>
+								<AvatarSection>
+									<Avatar
+										user={user}
+										largeIcon
+									/>
+									<UserFullName>{user.firstName} {user.lastName}</UserFullName>
+									<UserUserName>{user.username}</UserUserName>
+									<EditProfileButton to="">
+										<ActionMenuItem>
+											Edit your profile
+										</ActionMenuItem>
+									</EditProfileButton>
+								</AvatarSection>
+							</ActionMenuSection>
+							<ActionMenuSection>
+								<ActionMenuItem
+									Icon={TeamspacesIcon}
+									label="Teamspaces"
+									to={`${baseUrl}/${teamspace}`}
+								/>
+								<ActionMenuItem
+									Icon={VisualSettingsIcon}
+									label="Visual Settings"
+								/>
+							</ActionMenuSection>
+							<ActionMenuSection>
+								<ActionMenuItem
+									Icon={SupportCentreIcon}
+									label="Support centre"
+								/>
+								<ActionMenuItem
+									Icon={ContactUsIcon}
+									label="Contact us"
+								/>
+								<ActionMenuItem
+									Icon={InviteAFriendIcon}
+									label="Invite a friend"
+								/>
+							</ActionMenuSection>
+							<ActionMenuSection>
+								<ActionMenuItem>
+									<SignOutButton>Sign out</SignOutButton>
+								</ActionMenuItem>
+							</ActionMenuSection>
+						</ActionMenu>
+					</AvatarContainer>
 				</Items>
 			</MuiAppBar>
-			<ActionMenu
-				anchorEl={anchorEl}
-				handleClose={handleCloseActionMenu}
-			>
-				<ActionMenuSection>
-					<AvatarSection>
-						<Avatar
-							user={user}
-							$largeIcon
-						/>
-						<UserFullName>{user.firstName} {user.lastName}</UserFullName>
-						<UserUserName>{user.username}</UserUserName>
-						<EditProfileButton
-							to="."
-							onClick={handleCloseActionMenu}
-						>
-							Edit your profile
-						</EditProfileButton>
-					</AvatarSection>
-				</ActionMenuSection>
-				<ActionMenuSection>
-					<ActionMenuButton
-						Icon={TeamspacesIcon}
-						label="Teamspaces"
-						onClickClose={handleCloseActionMenu}
-						to={`${baseUrl}/${teamspace}`}
-					/>
-					<ActionMenuButton
-						Icon={VisualSettingsIcon}
-						label="Visual Settings"
-						onClickClose={handleCloseActionMenu}
-					/>
-				</ActionMenuSection>
-				<ActionMenuSection>
-					<ActionMenuButton
-						Icon={SupportCentreIcon}
-						label="Support centre"
-						onClickClose={handleCloseActionMenu}
-					/>
-					<ActionMenuButton
-						Icon={ContactUsIcon}
-						label="Contact us"
-						onClickClose={handleCloseActionMenu}
-					/>
-					<ActionMenuButton
-						Icon={InviteAFriendIcon}
-						label="Invite a friend"
-						onClickClose={handleCloseActionMenu}
-					/>
-				</ActionMenuSection>
-				<ActionMenuSection>
-					<SignOutButton>Sign out</SignOutButton>
-				</ActionMenuSection>
-			</ActionMenu>
 		</>
 	);
 };

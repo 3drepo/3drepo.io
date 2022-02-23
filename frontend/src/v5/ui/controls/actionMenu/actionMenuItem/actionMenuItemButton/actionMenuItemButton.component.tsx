@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,4 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { ActionMenuButton } from './actionMenuButton.component';
+import React from 'react';
+import { ItemButton, ItemIcon, ItemText } from './actionMenuItemButton.styles';
+
+type ActionMenuItemProps = {
+	className?: string;
+	label?: string;
+	Icon?: any;
+};
+
+export const ActionMenuItemButton = ({
+	Icon,
+	label,
+}: ActionMenuItemProps) => (
+	<ItemButton>
+		<ItemIcon>
+			<Icon />
+		</ItemIcon>
+		<ItemText primary={label} />
+	</ItemButton>
+);

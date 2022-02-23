@@ -25,24 +25,18 @@ export const Link = styled(LinkBase)`
 	text-decoration: none;
 `;
 
-export const MenuItem = styled(ListItem)`
-	&& {
-		height: 39px;
-		margin: 0;
-		padding: 11px;
-		transition: all 0s;
-		border-radius: 3px;
-	}
+export const MenuItemContainer = styled.div`
+	display: flex;
 `;
 
-export const MenuIcon = styled(ListItemIcon)`
+export const ItemIcon = styled(ListItemIcon)`
 	&& {    
 		margin-right: 10px;
 		min-width: 0;
 	}
 `;
 
-export const MenuText = styled(ListItemText).attrs({
+export const ItemText = styled(ListItemText).attrs({
 	disableTypography: true,
 })`
 	&& {
@@ -51,5 +45,14 @@ export const MenuText = styled(ListItemText).attrs({
 		font-size: 12px;
 		text-decoration: none;
 		margin: 0;
+	}
+`;
+
+export const MenuItem = styled(ListItem)`
+	&& {
+		transition: all 0s;
+		border-radius: 3px;
+		margin: 0;
+		padding: 0 11px;
 	}
 `;

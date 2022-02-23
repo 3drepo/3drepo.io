@@ -15,45 +15,88 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState, Children, ReactElement } from 'react';
 import { ClickAwayListener, Grow } from '@material-ui/core';
+import { ActionMenuTriggerButton } from '@controls/actionMenu';
+import { ACTION_MENU_ITEM_NAME } from './actionMenuItem/actionMenuItem.component';
 import {
 	Menu,
 	Popper,
 	Paper,
 } from './actionMenu.styles';
 
-type ActionMenuProps = {
-	className?: string;
-	anchorEl: HTMLElement | null;
-	children: ReactNode
-	handleClose: () => void;
+const applyCloseMenuToActionMenuItems = (el: any, handleClose: () => void) => {
+	if (el?.type?.name === ACTION_MENU_ITEM_NAME) {
+		return React.cloneElement(el, {
+			onClick: () => {
+				el.props.onClick?.();
+				handleClose();
+			},
+		});
+	}
+
+	if (el?.props?.children) {
+		return React.cloneElement(el, {
+			children: Children.map(el.props.children, (child) => applyCloseMenuToActionMenuItems(child, handleClose)),
+		});
+	}
+
+	return el;
 };
 
-export const ActionMenu = ({ className, anchorEl, children, handleClose }: ActionMenuProps) => (
-	<Popper
-		open={Boolean(anchorEl)}
-		anchorEl={anchorEl}
-		transition
-		disablePortal
-		className={className}
-		placement="bottom-end"
-	>
-		{({ TransitionProps, placement }) => (
-			<Grow
-				{...TransitionProps}
-				style={{
-					transformOrigin: placement === 'bottom-end' ? 'center top' : 'center bottom',
-				}}
+type ActionMenuProps = {
+	className?: string;
+	children: ReactNode;
+};
+
+export const ActionMenu = ({ className, children }: ActionMenuProps) => {
+	const [anchorEl, setAnchorEl] = useState(null);
+	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
+	const handleClose = () => setAnchorEl(null);
+
+	if (Children.count(children) < 2) {
+		throw new Error('ActionMenu must have at least 2 children: a trigger button and the menu list');
+	}
+	const [triggerButton, ...menuChildren] = Children.toArray(children);
+
+	if ((triggerButton as any)?.type?.name !== ActionMenuTriggerButton.name) {
+		throw new Error('ActionMenu\'s first child must be of type ActionMenuTriggerButton');
+	}
+
+	const TriggerButton = React.cloneElement(triggerButton as ReactElement, {
+		onClick: handleClick,
+	});
+
+	const MenuChildren = menuChildren.map((child) => applyCloseMenuToActionMenuItems(child, handleClose));
+
+	return (
+		<>
+			{TriggerButton}
+			<Popper
+				open={Boolean(anchorEl)}
+				anchorEl={anchorEl}
+				transition
+				disablePortal
+				className={className}
+				placement="bottom-end"
 			>
-				<Paper>
-					<ClickAwayListener onClickAway={handleClose}>
-						<Menu>
-							{children}
-						</Menu>
-					</ClickAwayListener>
-				</Paper>
-			</Grow>
-		)}
-	</Popper>
-);
+				{({ TransitionProps, placement }) => (
+					<Grow
+						{...TransitionProps}
+						style={{
+							transformOrigin: placement === 'bottom-end' ? 'center top' : 'center bottom',
+						}}
+					>
+						<Paper>
+							<ClickAwayListener onClickAway={handleClose}>
+								<Menu data-name="menu">
+									{MenuChildren}
+								</Menu>
+							</ClickAwayListener>
+						</Paper>
+					</Grow>
+				)}
+			</Popper>
+		</>
+	);
+};

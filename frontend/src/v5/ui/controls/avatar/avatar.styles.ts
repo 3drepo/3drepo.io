@@ -21,14 +21,13 @@ import { IconButton } from '@material-ui/core';
 export const StyledIconButton = styled(IconButton)`
 	&& {
 		padding: 0;
-		margin: 8px 7px;
 	}
 
 	.MuiAvatar-circle {
 		margin: 0;
-		${({ $largeIcon }) => `
-			height: ${$largeIcon ? '48px' : '38px'};
-			width: ${$largeIcon ? '48px' : '38px'};
+		${({ largeIcon }) => `
+			height: ${largeIcon ? '48px' : '38px'};
+			width: ${largeIcon ? '48px' : '38px'};
 		`}
 	}
 
@@ -52,7 +51,7 @@ export const StyledIconButton = styled(IconButton)`
 		}
 	}
 
-	${({ onClick, theme }) => (typeof onClick === 'function' ? `
+	${({ button, theme }) => (button ? `
 		cursor: pointer;
 		
 		&:hover {

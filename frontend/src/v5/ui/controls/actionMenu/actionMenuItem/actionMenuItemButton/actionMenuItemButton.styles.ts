@@ -14,28 +14,35 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React from 'react';
-import { MenuIcon, MenuItem, MenuText, Link } from './actionMenuButton.styles';
 
-type ActionMenuButtonProps = {
-	className?: string;
-	label: string;
-	Icon: any;
-	to?: string;
-	onClickClose: () => void;
-};
+import styled from 'styled-components';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
 
-export const ActionMenuButton = ({ to, Icon, label, onClickClose, ...props }: ActionMenuButtonProps) => (
-	<Link to={to}>
-		<MenuItem
-			button
-			{...props}
-			onClick={onClickClose}
-		>
-			<MenuIcon>
-				<Icon />
-			</MenuIcon>
-			<MenuText primary={label} />
-		</MenuItem>
-	</Link>
-);
+export const ItemIcon = styled(ListItemIcon)`
+	&& {    
+		margin-right: 10px;
+		min-width: 0;
+	}
+`;
+
+export const ItemText = styled(ListItemText).attrs({
+	disableTypography: true,
+})`
+	&& {
+		color: ${({ theme }) => theme.palette.secondary.main};
+		${({ theme }) => theme.typography.body1};
+		font-size: 12px;
+		text-decoration: none;
+		margin: 0;
+	}
+`;
+
+export const ItemButton = styled.div`
+	width: 100%;
+	height: 39px;
+	display: flex;
+	flex-direction: row;
+    align-items: center;
+    text-align: left;
+`;

@@ -23,6 +23,13 @@ import {
 	Popper as PopperBase,
 } from '@material-ui/core';
 
+export const AvatarContainer = styled.div`
+	&& {
+		padding: 0;
+		margin: 8px 0;
+	}
+`;
+
 export const Items = styled.div`
 	display: flex;
 	flex-direction: row;
@@ -81,6 +88,7 @@ export const SignOutButton = styled(Button).attrs({
 	color: 'primary',
 })`
 	&& {
+		width: 100%;
 		margin: 0;
 	}
 `;
