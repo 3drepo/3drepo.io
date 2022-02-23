@@ -16,7 +16,7 @@
  */
 
 const ExternalServices = require('../handler/externalServices');
-const Mailer = require('../mailer/mailer');
+const Mailer = require('../services/mailer');
 const db = require('../handler/db');
 const { logger } = require('../utils/logger');
 const { templates } = require('../utils/responseCodes');
@@ -35,23 +35,23 @@ const getRefEntry = async (account, collection, id) => {
 	return entry;
 };
 
-const fetchFileStream = async (account, model, collection, fileName) => {
-	const entry = await getRefEntry(account, collection, fileName);
+const fetchFileStream = async (teamspace, model, extension, fileName) => {
+	const entry = await getRefEntry(teamspace, `${model}.${extension}`, fileName);
 	try {
-		const stream = await ExternalServices.getFileStream(account, collection, entry.type, entry.link);
+		const stream = await ExternalServices.getFileStream(teamspace, `${model}.${extension}`, entry.type, entry.link);
 		return { readStream: stream, size: entry.size };
 	} catch {
 		logger.logError(`Failed to fetch file from ${entry.type}. Trying GridFS....`);
-		Mailer.sendFileMissingError({ account, model, collection, refId: entry._id, link: entry.link }).catch(() => {
-			logger.logError('Failed to send file missing error.');
+		Mailer.sendFileMissingError({ teamspace, model, collection: `${model}.${extension}`, refId: entry._id, link: entry.link }).catch((err) => {
+			logger.logError(`Failed to send file missing error: ${err.message}`);
 		});
 
-		const stream = await ExternalServices.getFileStream(account, collection, 'gridfs', fileName);
+		const stream = await ExternalServices.getFileStream(teamspace, `${model}.${extension}`, 'gridfs', fileName);
 		return { readStream: stream, size: entry.size };
 	}
 };
 
-const getOriginalFile = (account, model, fileName) => fetchFileStream(account, model, `${model}.history.ref`, fileName);
+const getOriginalFile = (account, model, fileName) => fetchFileStream(account, model, 'history.ref', fileName);
 
 const removeAllFiles = async (teamspace, collection) => {
 	const pipeline = [
