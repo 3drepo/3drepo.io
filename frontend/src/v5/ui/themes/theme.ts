@@ -479,9 +479,11 @@ export const theme = createMuiTheme({
 					},
 				},
 				adornedStart: {
-					paddingLeft: '6px',
-					'& $input': {
-						paddingLeft: '0px',
+					'&$error': {
+						paddingLeft: '6px',
+						'& $input': {
+							paddingLeft: '0px',
+						},
 					},
 				},
 			},
