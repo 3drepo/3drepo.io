@@ -118,6 +118,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 				title="Add files for upload"
 				subtitle="Drag and drop or browse your computer"
 				onKeyPress={(e) => e.key === 'Enter' && e.preventDefault()}
+				maxWidth="xl"
 				isValid={formState.isValid}
 			>
 				<Container>

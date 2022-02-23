@@ -39,7 +39,7 @@ export const FormModal = ({
 	open,
 	children,
 	className,
-	maxWidth = 'xl',
+	maxWidth,
 	isValid = true,
 	...formProps
 }: IFormDialog) => (
