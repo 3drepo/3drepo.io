@@ -19,8 +19,9 @@ import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
+import filesize from 'filesize';
 import { RevisionsActions, RevisionsTypes } from './revisions.redux';
-import { FetchAction, SetRevisionVoidStatusAction } from './revisions.types';
+import { FetchAction, SetRevisionVoidStatusAction, CreateRevisionAction } from './revisions.types';
 
 export function* fetch({ teamspace, projectId, containerId }: FetchAction) {
 	yield put(RevisionsActions.setIsPending(containerId, true));
@@ -49,7 +50,49 @@ export function* setVoidStatus({ teamspace, projectId, containerId, revisionId, 
 	}
 }
 
+export function* createRevision({ teamspace, projectId, containerId, progressBar, body }: CreateRevisionAction) {
+	try {
+		const formData = new FormData();
+		let containerIdForRevision = containerId;
+		if (!containerId) {
+			const newContainer = {
+				name: body.containerName,
+				unit: body.containerUnit,
+				type: body.containerType,
+				code: body.containerCode || undefined,
+				desc: body.containerDesc || undefined,
+			};
+			// const test = yield put(ContainersActions.createContainer(teamspace, projectId, newContainer))
+			containerIdForRevision = yield API.Containers.createContainer({ teamspace, projectId, newContainer }); // Change this to dispatch redux action!
+		}
+		if (body.file.size > ClientConfig.uploadSizeLimit) {
+			const maxSize = filesize(ClientConfig.uploadSizeLimit);
+			const MAX_SIZE_MESSAGE = `File exceeds size limit of ${maxSize}mb`;
+			throw new Error(MAX_SIZE_MESSAGE);
+		}
+		formData.append('file', body.file);
+		formData.append('tag', body.revisionTag);
+		formData.append('desc', body.revisionDesc || undefined);
+		formData.append('importAnimations', body.importAnimations.toString());
+		formData.append('timezone', body.timezone);
+		yield API.Revisions.createRevision(
+			teamspace,
+			projectId,
+			containerIdForRevision,
+			(a) => progressBar((a / body.file.size) * 100),
+			formData,
+		);
+	} catch (error) {
+		// yield put(RevisionsActions.setUploadFailed(error)); // this should turn this upload red and add error to hover over text
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'revisions.createRevision.error', defaultMessage: 'trying to create a revision' }),
+			error,
+		}));
+	}
+}
+
 export default function* RevisionsSaga() {
 	yield takeLatest(RevisionsTypes.FETCH, fetch);
 	yield takeLatest(RevisionsTypes.SET_VOID_STATUS, setVoidStatus);
+	yield takeLatest(RevisionsTypes.CREATE_REVISION, createRevision);
 }

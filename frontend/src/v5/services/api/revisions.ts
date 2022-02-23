@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { AxiosResponse } from 'axios';
 import api from './default';
 
 export const fetchRevisions = (teamspace: string, projectId: string, containerId: string, showVoid = true): Promise<any> => api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions${showVoid ? '?showVoid=true' : ''}`);
@@ -22,3 +23,10 @@ export const fetchRevisions = (teamspace: string, projectId: string, containerId
 export const setRevisionVoidStatus = (teamspace: string, projectId: string, containerId: string, revision: string, isVoid = true) => api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions/${revision}`, {
 	void: isVoid,
 });
+
+export const createRevision = (teamspace, projectId, containerId, updateBar, body): Promise<AxiosResponse<void>> => {
+	const config = {
+		onUploadProgress: (progressEvent) => updateBar(progressEvent.loaded),
+	};
+	return api.post(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions`, body, config);
+};

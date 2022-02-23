@@ -16,6 +16,7 @@
  */
 
 import { Action } from 'redux';
+import { UploadItemFields } from '../containers/containers.types';
 
 export interface IRevision {
 	_id: string;
@@ -45,11 +46,20 @@ export type RevisionVoidStatusPayload = {
 	isVoid: boolean;
 };
 
+export type CreateRevisionPayload = {
+	teamspace: string;
+	projectId: string;
+	containerId: string;
+	body: UploadItemFields;
+	progressBar: (val) => void;
+};
+
 export type SetRevisionVoidStatusAction = Action<'SET_REVISION_VOID_STATUS'> & RevisionVoidStatusPayload;
 export type SetRevisionVoidStatusSuccessAction = Action<'SET_REVISION_VOID_STATUS_SUCCESS'> & { projectId: string, containerId: string; revisionId: string, isVoid: boolean };
 export type FetchAction = Action<'FETCH'> & FetchRevisionsPayload;
 export type FetchSuccessAction = Action<'FETCH_SUCCESS'> & { containerId: string, revisions: IRevision[] };
 export type SetIsPendingAction = Action<'SET_IS_PENDING'> & { containerId: string, isPending: boolean };
+export type CreateRevisionAction = Action<'CREATE_REVISION'> & CreateRevisionPayload;
 
 export interface IRevisionsActionCreators {
 	setVoidStatus: (teamspace: string, projectId: string, containerId: string, revisionId: string, isVoid: boolean) =>
@@ -59,4 +69,10 @@ export interface IRevisionsActionCreators {
 	fetch: (teamspace: string, projectId: string, containerId: string) => FetchAction;
 	fetchSuccess: (containerId: string, revisions: IRevision[]) => FetchSuccessAction;
 	setIsPending: (containerId: string, isPending: boolean) => SetIsPendingAction;
+	createRevision: (teamspace: string,
+		projectId: string,
+		containerId: string,
+		progressBar: (val) => void,
+		body: UploadItemFields
+	) =>CreateRevisionAction;
 }

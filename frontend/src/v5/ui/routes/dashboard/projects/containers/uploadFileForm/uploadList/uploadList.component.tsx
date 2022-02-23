@@ -34,7 +34,7 @@ export const UploadList = ({
 	onClickEdit,
 	onClickDelete,
 }: IUploadList): JSX.Element => {
-	const { trigger, setValue } = useFormContext();
+	const { trigger, setValue, watch } = useFormContext();
 	return (
 		<Container>
 			{
@@ -49,6 +49,7 @@ export const UploadList = ({
 							trigger(`uploads.${index}.${field}`);
 						}}
 						isSelected={index === selectedIndex}
+						progress={watch(`uploads.${index}.progress`)}
 					/>
 				))
 			}

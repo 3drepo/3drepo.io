@@ -164,6 +164,7 @@ export type DeleteContainerSuccessPayload = {
 export type UploadItemFields = {
 	uploadId: string;
 	file: File;
+	progress: number;
 	extension: string;
 	containerId?: string;
 	containerName?: string;

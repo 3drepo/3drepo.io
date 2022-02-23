@@ -17,6 +17,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
+import { useParams } from 'react-router';
 
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -29,9 +30,10 @@ import { DashboardListHeaderLabel } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
 import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
-import { UploadList } from './uploadList';
-import { SidebarForm } from './sidebarForm';
+import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
 import { Container, Content, DropZone, UploadsListHeader } from './uploadFileForm.styles';
+import { SidebarForm } from './sidebarForm';
+import { UploadList } from './uploadList';
 
 type IUploadFileForm = {
 	openState: boolean;
@@ -39,6 +41,8 @@ type IUploadFileForm = {
 };
 
 export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JSX.Element => {
+	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+
 	const [selectedIndex, setSelectedIndex] = useState<number>(null);
 	const methods = useForm<UploadFieldArray>({
 		mode: 'onChange',
@@ -76,6 +80,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		for (const file of files) {
 			filesToAppend.push({
 				file,
+				progress: 0,
 				extension: file.name.split('.').slice(-1)[0],
 				revisionTag: parseFilename(file.name),
 				containerName: '',
@@ -105,8 +110,10 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		remove(id);
 	};
 
-	const onSubmit = () => {
-		onClickClose();
+	const onSubmit = async (data: UploadFieldArray) => {
+		data.uploads.forEach((revision, i) => {
+			RevisionsActionsDispatchers.createRevision(teamspace, project, revision.containerId, (value) => setValue(`uploads.${i}.progress`, value), revision);
+		});
 	};
 
 	return (

@@ -29,6 +29,7 @@ import { UploadListItemTitle } from './components/uploadListItemTitle/uploadList
 import { Button } from './uploadListItem.styles';
 import { UploadListItemRevisionTag } from './components/uploadListItemRevisionTag';
 import { UploadListItemDestination } from './components/uploadListItemDestination';
+import { UploadProgress } from './uploadProgress';
 
 type IUploadListItem = {
 	item: UploadItemFields;
@@ -36,6 +37,7 @@ type IUploadListItem = {
 	onClickEdit: () => void;
 	onClickDelete: () => void;
 	onChange: (name, val) => void;
+	progress: number;
 };
 
 export const UploadListItem = ({
@@ -44,6 +46,7 @@ export const UploadListItem = ({
 	onClickDelete,
 	isSelected,
 	onChange,
+	progress,
 }: IUploadListItem): JSX.Element => {
 	const { control, formState: { errors }, setValue, trigger, watch } = useForm({
 		defaultValues: item,
@@ -98,6 +101,7 @@ export const UploadListItem = ({
 					/>
 				)}
 			/>
+			<UploadProgress progress={progress} failure={false} />
 			<Button $selectedrow={isSelected} onClick={onClickEdit}>
 				<EditIcon />
 			</Button>
