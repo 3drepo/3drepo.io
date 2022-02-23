@@ -20,7 +20,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 
 export const ItemIcon = styled(ListItemIcon)`
-	&& {    
+	&& {
 		margin-right: 10px;
 		min-width: 0;
 	}
@@ -43,6 +43,6 @@ export const ItemButton = styled.div`
 	height: 39px;
 	display: flex;
 	flex-direction: row;
-    align-items: center;
-    text-align: left;
+	align-items: center;
+	text-align: left;
 `;
