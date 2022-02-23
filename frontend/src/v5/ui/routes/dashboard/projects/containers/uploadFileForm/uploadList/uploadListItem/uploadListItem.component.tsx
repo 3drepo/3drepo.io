@@ -72,7 +72,6 @@ export const UploadListItem = ({
 					field: { ref, ...extras },
 				}) => (
 					<UploadListItemDestination
-						// isSelected={isSelected}
 						errorMessage={errors.containerName?.message}
 						{...extras}
 						onChange={(vals: DestinationOption) => {

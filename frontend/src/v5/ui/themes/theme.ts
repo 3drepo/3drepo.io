@@ -22,6 +22,8 @@ import RadioButtonCheckedIcon from '@assets/icons/controls/radio_button_checked.
 import CheckboxIcon from '@assets/icons/controls/checkbox.svg';
 import CheckboxCheckedIcon from '@assets/icons/controls/checkbox_checked.svg';
 import CheckboxIndeterminatedIcon from '@assets/icons/controls/checkbox_indeterminated.svg';
+import ClearIcon from '@assets/icons/controls/clear_circle.svg';
+import ChevronIcon from '@assets/icons/chevron.svg';
 
 export const COLOR = {
 	PRIMARY_MAIN_CONTRAST: '#fff',
@@ -247,6 +249,14 @@ export const theme = createMuiTheme({
 				// This is necessary for overriding styles of v4 tooltips
 				container: () => document.getElementById('v4Overrides'),
 			},
+		},
+		MuiAutocomplete: {
+			popupIcon: React.createElement(ChevronIcon),
+			closeIcon: React.createElement(ClearIcon),
+			openText: '',
+			closeText: '',
+			clearText: '',
+			handleHomeEndKeys: true,
 		},
 	},
 	overrides: {

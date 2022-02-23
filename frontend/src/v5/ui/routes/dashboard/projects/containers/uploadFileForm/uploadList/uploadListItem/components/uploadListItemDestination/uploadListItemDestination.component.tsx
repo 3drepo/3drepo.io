@@ -16,8 +16,6 @@
  */
 
 import React, { useState } from 'react';
-import ChevronIcon from '@assets/icons/chevron.svg';
-import ClearIcon from '@assets/icons/clear_circle.svg';
 import MuiAutocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
 import { DestinationOption } from '@/v5/store/containers/containers.types';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
@@ -61,12 +59,6 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 
 	return (
 		<MuiAutocomplete
-			popupIcon={<ChevronIcon />}
-			closeIcon={<ClearIcon />}
-			openText=""
-			closeText=""
-			clearText=""
-			handleHomeEndKeys
 			value={value}
 			onChange={async (event, newValue: DestinationOption) => {
 				if (!newValue) {
