@@ -42,7 +42,7 @@ export const Federations = (): JSX.Element => {
 	} = useFederationsData();
 
 	useEffect(() => {
-		if (isListPending) return null;
+		if (isListPending) return undefined;
 		return enableRealtimeFederationUpdates(teamspace, project);
 	}, [isListPending]);
 

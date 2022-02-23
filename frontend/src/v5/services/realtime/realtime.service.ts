@@ -26,6 +26,9 @@ interface IRoomType {
 }
 
 let socket:Socket = null;
+const roomsJoined:Record<string, number> = {};
+
+const roomTypeToId = (roomType:IRoomType) => `${roomType.teamspace}.${roomType.project}.${roomType.model}`;
 
 export const initializeSocket = () => {
 	socket = io(CHAT_SERVER, {
@@ -35,10 +38,20 @@ export const initializeSocket = () => {
 };
 
 export const joinRoom = (roomType : IRoomType) => {
+	const joinedCount = (roomsJoined[roomTypeToId(roomType)] || 0);
+	roomsJoined[roomTypeToId(roomType)] = joinedCount + 1;
+	if (joinedCount > 0) return;
+
 	socket.emit('join', roomType);
 };
 
 export const leaveRoom = (roomType : IRoomType) => {
+	roomsJoined[roomTypeToId(roomType)]--;
+	const joinedCount = roomsJoined[roomTypeToId(roomType)];
+
+	if (joinedCount !== 0) return;
+	delete roomsJoined[roomTypeToId(roomType)];
+
 	socket.emit('leave', roomType);
 };
 
