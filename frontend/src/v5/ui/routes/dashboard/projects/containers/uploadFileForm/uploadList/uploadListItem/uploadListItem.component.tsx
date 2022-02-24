@@ -18,7 +18,7 @@
 import React from 'react';
 import DeleteIcon from '@assets/icons/delete.svg';
 import EditIcon from '@assets/icons/edit.svg';
-import { Controller, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { DestinationOption, UploadItemFields } from '@/v5/store/containers/containers.types';
 import filesize from 'filesize';
@@ -65,38 +65,22 @@ export const UploadListItem = ({
 				filesize={filesize(item.file.size)}
 				selectedrow={isSelected}
 			/>
-			<Controller
+			<UploadListItemDestination
 				control={control}
-				name="containerName"
-				render={({
-					field: { ref, ...extras },
-				}) => (
-					<UploadListItemDestination
-						errorMessage={errors.containerName?.message}
-						{...extras}
-						onChange={(vals: DestinationOption) => {
-							Object.keys(vals).forEach((key: keyof DestinationOption) => {
-								if (key === 'latestRevision') return;
-								setValue(key, vals[key]);
-								updateValue(key);
-							});
-							trigger('containerName');
-						}}
-					/>
-				)}
+				errorMessage={errors.containerName?.message}
+				onChange={(vals: DestinationOption) => {
+					Object.keys(vals).forEach((key: keyof DestinationOption) => {
+						if (key === 'latestRevision') return;
+						setValue(key, vals[key]);
+						updateValue(key);
+					});
+					trigger('containerName');
+				}}
 			/>
-			<Controller
+			<UploadListItemRevisionTag
 				control={control}
-				name="revisionTag"
-				render={({
-					field: { ref, ...extras },
-				}) => (
-					<UploadListItemRevisionTag
-						isSelected={isSelected}
-						errorMessage={errors.revisionTag?.message}
-						{...extras}
-					/>
-				)}
+				isSelected={isSelected}
+				errorMessage={errors.revisionTag?.message}
 			/>
 			<Button $selectedrow={isSelected} onClick={onClickEdit}>
 				<EditIcon />

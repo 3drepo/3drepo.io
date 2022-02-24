@@ -17,15 +17,16 @@
 
 import React, { useState } from 'react';
 import MuiAutocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
-import { DestinationOption } from '@/v5/store/containers/containers.types';
+import { DestinationOption, UploadItemFields } from '@/v5/store/containers/containers.types';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
-import { useFormContext } from 'react-hook-form';
+import { Control, useFormContext } from 'react-hook-form';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { TextInput } from './uploadListItemDestination.styles';
 import { NewContainer } from './options/newContainer';
 import { ExistingContainer } from './options/existingContainer';
 
 interface IUploadListItemDestination {
+	control: Control<UploadItemFields>;
 	onChange: (option) => void;
 	errorMessage: string;
 	disabled?: boolean;
@@ -40,6 +41,7 @@ const emptyOption = {
 const filter = createFilterOptions<DestinationOption>();
 
 export const UploadListItemDestination: React.FC<IUploadListItemDestination> = ({
+	control,
 	errorMessage,
 	disabled = false,
 	className,
@@ -100,8 +102,10 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 			getOptionLabel={(option: DestinationOption) => option.containerName}
 			renderInput={({ InputProps, ...params }) => (
 				<TextInput
-					error={!!errorMessage}
+					name="containerName"
+					control={control}
 					neworexisting={!errorMessage && newOrExisting}
+					formError={errorMessage}
 					{...params}
 					{...props}
 					InputProps={{ ...InputProps,

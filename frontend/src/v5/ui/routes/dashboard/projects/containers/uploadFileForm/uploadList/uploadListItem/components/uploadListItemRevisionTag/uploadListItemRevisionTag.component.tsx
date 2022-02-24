@@ -18,21 +18,28 @@
 import React from 'react';
 
 import { ErrorTooltip } from '@controls/errorTooltip';
-import { Input } from './uploadListItemRevisionTag.styles';
+import { Control } from 'react-hook-form/dist/types';
+import { UploadItemFields } from '@/v5/store/containers/containers.types';
+import { TextField } from './uploadListItemRevisionTag.styles';
 
 type IUploadListItemRevision = {
 	isSelected: boolean;
 	errorMessage?: string;
+	control: Control<UploadItemFields>;
 };
 
 export const UploadListItemRevisionTag = ({
+	control,
 	isSelected,
 	errorMessage,
 	...props
 }: IUploadListItemRevision): JSX.Element => (
-	<Input
+	<TextField
+		control={control}
 		$selectedrow={isSelected}
-		error={!!errorMessage}
+		name="revisionTag"
+		formError={errorMessage}
+		required
 		InputProps={{
 			startAdornment: !!errorMessage && (
 				<ErrorTooltip>

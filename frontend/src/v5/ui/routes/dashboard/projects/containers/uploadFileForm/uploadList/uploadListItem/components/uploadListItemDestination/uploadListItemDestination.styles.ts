@@ -17,9 +17,9 @@
 
 import styled from 'styled-components';
 
-import { TextField } from '@material-ui/core';
+import { FormTextField } from '@controls/formTextField/formTextField.component';
 
-export const TextInput = styled(TextField)`
+export const TextInput = styled(FormTextField)`
 	margin: 0;
 	width: 271px;
 	border: none;

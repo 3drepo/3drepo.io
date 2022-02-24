@@ -19,13 +19,15 @@ import React, { useEffect } from 'react';
 
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
-import { Checkbox, InputLabel, MenuItem } from '@material-ui/core';
+import { Checkbox, MenuItem } from '@material-ui/core';
 import { Controller, useForm } from 'react-hook-form';
 import { CONTAINER_TYPES, CONTAINER_UNITS, UploadItemFields } from '@/v5/store/containers/containers.types';
 import * as countriesAndTimezones from 'countries-and-timezones';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SidebarSchema } from '@/v5/validation/containers';
-import { TypeSelect, UnitSelect, Input, RevisionTitle, FormControl, AnimationsCheckbox, TimezoneSelect, Title } from './sidebarForm.styles';
+import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { FormSelect } from '@controls/formSelect/formSelect.component';
+import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer } from './sidebarForm.styles';
 
 type ISidebarForm = {
 	className?: string;
@@ -33,26 +35,6 @@ type ISidebarForm = {
 	isNewContainer: boolean;
 	isSpm: boolean;
 	onChange: (name: string, val: string | boolean) => void;
-};
-
-const generateTimezoneData = () => {
-	type ITimezone = { name: string; label: string; utcOffset: number; };
-	const tzList: ITimezone[] = [];
-	const tzData = countriesAndTimezones.getAllTimezones();
-
-	Object.keys(tzData).forEach((tz) => {
-		const { name, utcOffset, utcOffsetStr } = tzData[tz];
-		const tzToAdd: ITimezone = {
-			name,
-			label: `(UTC${utcOffsetStr}) ${name}`,
-			utcOffset,
-		};
-
-		tzList.push(tzToAdd);
-	});
-
-	const allTimezones: ITimezone[] = tzList.sort((tz1, tz2) => tz1.utcOffset - tz2.utcOffset);
-	return allTimezones;
 };
 
 export const SidebarForm = ({
@@ -67,6 +49,25 @@ export const SidebarForm = ({
 		resolver: yupResolver(SidebarSchema),
 	});
 
+	const generateTimezoneData = () => {
+		type ITimezone = { name: string; label: string; utcOffset: number; };
+		const tzList: ITimezone[] = [];
+		const tzData = countriesAndTimezones.getAllTimezones();
+		Object.keys(tzData).forEach((tz) => {
+			const { name, utcOffset, utcOffsetStr } = tzData[tz];
+			const tzToAdd: ITimezone = {
+				name,
+				label: `(UTC${utcOffsetStr}) ${name}`,
+				utcOffset,
+			};
+
+			tzList.push(tzToAdd);
+		});
+
+		const allTimezones: ITimezone[] = tzList.sort((tz1, tz2) => tz1.utcOffset - tz2.utcOffset);
+		return allTimezones;
+	};
+
 	useEffect(() => {
 		trigger();
 	}, []);
@@ -78,119 +79,72 @@ export const SidebarForm = ({
 			<Title>
 				{value.containerName}
 			</Title>
-			<FormControl disabled={!isNewContainer}>
-				<InputLabel id="unit-label" shrink required>
-					<FormattedMessage id="containers.creation.form.unit" defaultMessage="Units" />
-				</InputLabel>
-				<Controller
+			<FlexContainer>
+				<FormSelect
+					required
 					control={control}
 					name="containerUnit"
-					render={({
-						field: { ref, ...extras },
-					}) => (
-						<UnitSelect
-							labelId="unit-label"
-							{...extras}
-							onChange={
-								(e) => {
-									setValue('containerUnit', e.target.value);
-									updateValue('containerUnit');
-								}
-							}
-						>
-							{
-								CONTAINER_UNITS.map((unit) => (
-									<MenuItem key={unit.value} value={unit.value}>
-										{unit.name}
-									</MenuItem>
-								))
-							}
-						</UnitSelect>
-					)}
-				/>
-			</FormControl>
-			<FormControl disabled={!isNewContainer}>
-				<InputLabel id="type-label" shrink required>
-					<FormattedMessage id="containers.creation.form.type" defaultMessage="Category" />
-				</InputLabel>
-
-				<Controller
+					label={formatMessage({ id: 'containers.creation.form.units', defaultMessage: 'Units' })}
+					onChange={
+						(e: React.ChangeEvent<HTMLInputElement>) => {
+							setValue('containerUnit', e.currentTarget.value);
+							updateValue('containerUnit');
+						}
+					}
+				>
+					{
+						CONTAINER_UNITS.map((unit) => (
+							<MenuItem key={unit.value} value={unit.value}>
+								{unit.name}
+							</MenuItem>
+						))
+					}
+				</FormSelect>
+				<FormSelect
+					required
 					control={control}
 					name="containerType"
-					render={({
-						field: { ref, ...extras },
-					}) => (
-						<TypeSelect
-							labelId="type-label"
-							{...extras}
-							onChange={
-								(e) => {
-									setValue('containerType', e.target.value);
-									updateValue('containerType');
-								}
-							}
-						>
-							{
-								CONTAINER_TYPES.map((type) => (
-									<MenuItem key={type.value} value={type.value}>
-										{type.value}
-									</MenuItem>
-								))
-							}
-							<MenuItem key="sample" value="sample" hidden>
-								<FormattedMessage id="uploadFileForm.settingsSidebar.containerType.sample" defaultMessage="Sample" />
+					label={formatMessage({ id: 'containers.creation.form.type', defaultMessage: 'Category' })}
+					onChange={
+						(e: React.ChangeEvent<HTMLInputElement>) => {
+							setValue('containerType', e.target.value);
+							updateValue('containerType');
+						}
+					}
+				>
+					{
+						CONTAINER_TYPES.map((type) => (
+							<MenuItem key={type.value} value={type.value}>
+								{type.value}
 							</MenuItem>
-						</TypeSelect>
-					)}
-				/>
-			</FormControl>
-			<Controller
+						))
+					}
+				</FormSelect>
+			</FlexContainer>
+			<FormTextField
 				control={control}
 				name="containerCode"
-				render={({
-					field: { ref, ...extras },
-				}) => (
-					<Input
-						label={formatMessage({ id: 'uploadFileForm.settingsSidebar.containerCode', defaultMessage: 'Container Code' })}
-						error={!!errors.containerCode}
-						helperText={errors.containerCode?.message}
-						disabled={!isNewContainer}
-						{...extras}
-					/>
-				)}
+				label={formatMessage({ id: 'uploadFileForm.settingsSidebar.containerCode', defaultMessage: 'Container Code' })}
+				formError={errors.containerCode}
+				disabled={!isNewContainer}
 			/>
-			<Controller
+			<FormTextField
 				control={control}
 				name="containerDesc"
-				render={({
-					field: { ref, ...extras },
-				}) => (
-					<Input
-						label={formatMessage({ id: 'uploadFileForm.settingsSidebar.containerDesc', defaultMessage: 'Container Description' })}
-						error={!!errors.containerDesc}
-						helperText={errors.containerDesc?.message}
-						disabled={!isNewContainer}
-						{...extras}
-					/>
-				)}
+				label={formatMessage({ id: 'uploadFileForm.settingsSidebar.containerDesc', defaultMessage: 'Container Description' })}
+				formError={errors.containerDesc}
+				disabled={!isNewContainer}
 			/>
-			<RevisionTitle>
-				<FormattedMessage id="uploadFileForm.settingsSidebar.revisionDetails" defaultMessage="Revision details" />
-			</RevisionTitle>
 
-			<Controller
+			<Heading>
+				<FormattedMessage id="uploadFileForm.settingsSidebar.revisionDetails" defaultMessage="Revision details" />
+			</Heading>
+
+			<FormTextField
 				control={control}
 				name="revisionDesc"
-				render={({
-					field: { ref, ...extras },
-				}) => (
-					<Input
-						label={formatMessage({ id: 'uploadFileForm.settingsSidebar.revisionDesc', defaultMessage: 'Revision Description' })}
-						error={!!errors.revisionDesc}
-						helperText={errors.revisionDesc?.message}
-						{...extras}
-					/>
-				)}
+				label={formatMessage({ id: 'uploadFileForm.settingsSidebar.revisionDesc', defaultMessage: 'Revision Description' })}
+				formError={errors.revisionDesc}
 			/>
 
 			<Controller
@@ -208,38 +162,25 @@ export const SidebarForm = ({
 					/>
 				)}
 			/>
-
-			<FormControl hidden={!isSpm}>
-				<InputLabel id="timezone-label" shrink required>
-					<FormattedMessage id="uploadFileForm.settingsSidebar.timezone" defaultMessage="Timezone" />
-				</InputLabel>
-				<Controller
-					control={control}
-					name="timezone"
-					render={({
-						field: { ref, ...extras },
-					}) => (
-						<TimezoneSelect
-							labelId="timezone-label"
-							{...extras}
-							onChange={
-								(e) => {
-									setValue('timezone', e.target.value);
-									updateValue('timezone');
-								}
-							}
-						>
-							{
-								generateTimezoneData().map((unit) => (
-									<MenuItem key={unit.name} value={unit.name}>
-										{unit.label}
-									</MenuItem>
-								))
-							}
-						</TimezoneSelect>
-					)}
-				/>
-			</FormControl>
+			<TimezoneSelect
+				control={control}
+				name="timezone"
+				label={formatMessage({ id: 'uploadFileForm.settingsSidebar.timezone', defaultMessage: 'Timezone' })}
+				onChange={
+					(e: React.ChangeEvent<HTMLInputElement>) => {
+						setValue('timezone', e.target.value);
+						updateValue('timezone');
+					}
+				}
+			>
+				{
+					generateTimezoneData().map((unit) => (
+						<MenuItem key={unit.name} value={unit.name}>
+							{unit.label}
+						</MenuItem>
+					))
+				}
+			</TimezoneSelect>
 		</div>
 	);
 };

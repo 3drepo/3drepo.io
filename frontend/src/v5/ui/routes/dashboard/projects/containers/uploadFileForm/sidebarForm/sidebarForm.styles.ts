@@ -17,8 +17,8 @@
 
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
-import { Select } from '@controls/select';
-import { FormControl as FormControlMui, FormControlLabel, TextField } from '@material-ui/core';
+import { FormControlLabel } from '@material-ui/core';
+import { FormSelect } from '@controls/formSelect/formSelect.component';
 
 export const Title = styled(Typography).attrs({
 	variant: 'h3',
@@ -32,31 +32,11 @@ export const Title = styled(Typography).attrs({
 	user-select: none;
 `;
 
-export const UnitSelect = styled(Select)`
-	width: 109px;
-`;
-
-export const TypeSelect = styled(Select)`
-	width: 221px;
-`;
-
-export const TimezoneSelect = styled(Select)`
+export const TimezoneSelect = styled(FormSelect)`
 	width: 340px;
 `;
 
-export const Input = styled(TextField)`
-	margin-top: 33px;
-`;
-
-export const FormControl = styled(FormControlMui)`
-	width: auto;
-	& + & {
-		padding: 0 0 0 10px;
-		label { padding: 0 0 0 10px }
-	}
-`;
-
-export const RevisionTitle = styled(Typography).attrs({
+export const Heading = styled(Typography).attrs({
 	variant: 'h3',
 })`
 	margin-top: 29px;
@@ -65,4 +45,20 @@ export const RevisionTitle = styled(Typography).attrs({
 export const AnimationsCheckbox = styled(FormControlLabel)`
 	padding: 15px 0 0;
 	height: 24px;
+`;
+
+export const FlexContainer = styled.div`
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: flex-start;
+	width: 100%;
+
+	> div:first-child {
+		flex: 0.5;
+		margin-right: 9px;
+	}
+	> div:last-child {
+		flex: 1;
+	}
 `;
