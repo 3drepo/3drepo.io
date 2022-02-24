@@ -14,14 +14,38 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const { toConstantCase } = require('../../utils/helper/strings');
 
 const ChatConstants = {};
 
-ChatConstants.EVENTS = {
-	AUTH_ERROR: 'Unauthorised',
-	NOT_FOUND: 'NotFound',
-	JOINED: 'Joined',
+const events = [
+	'message',
+	'error',
+	// message events
+	'success',
+];
 
+const errors = [
+	'unauthorised',
+	'room not found',
+];
+
+const actions = [
+	'leave',
+	'join',
+];
+
+const createConstantsMapping = (data) => {
+	const constants = {};
+	data.forEach((value) => {
+		const valueConstCase = toConstantCase(value);
+		constants[valueConstCase] = valueConstCase;
+	});
+	return constants;
 };
+
+ChatConstants.EVENTS = createConstantsMapping(events);
+ChatConstants.ERRORS = createConstantsMapping(errors);
+ChatConstants.ACTIONS = createConstantsMapping(actions);
 
 module.exports = ChatConstants;

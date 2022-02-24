@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { ACTIONS, ERRORS, EVENTS } = require('./chat.constants');
 const { UUIDToString, stringToUUID } = require('../../utils/helper/uuids');
-const { EVENTS } = require('./chat.constants');
 const chatLabel = require('../../utils/logger').labels.chat;
 const { findProjectByModelId } = require('../../models/projects');
 const { hasReadAccessToModel } = require('../../utils/permissions/permissions');
@@ -42,45 +42,51 @@ const removeSocket = (socket) => {
 	delete socketIdToSocket[socketId];
 };
 
+const emitError = (socket, error, message, action, data) => {
+	socket.emit(EVENTS.ERROR, { code: error, message, details: { action, data } });
+};
+
 const addSocket = (socket) => {
 	socketIdToSocket[socket.id] = socket;
 	const sessionId = socket?.handshake?.session?.id;
 	SocketsManager.addSocketIdToSession(sessionId, socket.id);
 };
 
-const join = (socket, channelName, data) => {
-	socket.join(channelName);
-	socket.emit(EVENTS.JOINED, data);
-	logger.logDebug(`[${getUserNameFromSocket(socket)}][${socket.id}] has joined ${channelName}`);
-};
-
-const joinRoom = async (socket, { teamspace, model, project, notifications }) => {
+const joinRoom = async (socket, data) => {
+	const { teamspace, model, project, notifications } = data;
 	const username = getUserNameFromSocket(socket);
 	if (!username) {
-		socket.emit(EVENTS.AUTH_ERROR, { message: 'You are not authenticated to the service' });
+		emitError(socket, ERRORS.UNAUTHORISED, 'You are not authenticated to the service.', ACTIONS.JOIN, data);
 		return;
 	}
 
+	let channelName;
+
 	if (notifications) {
-		join(socket, `notifications::${username}`, { notifications, username });
+		channelName = `notifications::${username}`;
 	} else if (teamspace && project && model) {
-		const channelName = `${teamspace}::${project}::${model}`;
-		if (await hasReadAccessToModel(teamspace, stringToUUID(project), model, username)) {
-			join(socket, channelName, { teamspace, project, model });
-		} else {
-			socket.emit(EVENTS.AUTH_ERROR, { message: `You do not have sufficient access rights to join ${channelName}` });
+		channelName = `${teamspace}::${project}::${model}`;
+		if (!await hasReadAccessToModel(teamspace, stringToUUID(project), model, username)) {
+			emitError(socket, ERRORS.UNAUTHORISED, 'You do not have sufficient access rights to join the room requested', ACTIONS.JOIN, data);
+			return;
 		}
 	} else {
-		socket.emit(EVENTS.NOT_FOUND, { message: 'Trying to join an unindentified resource' });
+		emitError(socket, ERRORS.NOT_FOUND, 'Cannot identified the room indicated', ACTIONS.JOIN, data);
+		return;
 	}
+
+	socket.join(channelName);
+	socket.emit(EVENTS.MESSAGE, { event: EVENTS.SUCCESS, data: { action: ACTIONS.JOIN, data } });
+	logger.logDebug(`[${getUserNameFromSocket(socket)}][${socket.id}] has joined ${channelName}`);
 };
 
-const joinRoomV4 = async (socket, { account, model }) => {
+const joinRoomV4 = async (socket, data) => {
+	const { account, model } = data;
 	// connects from v4 - convert them to v5 compatible room names
 	if (model) {
 		const project = await findProjectByModelId(account, model, { _id: 1 });
 		if (!project) {
-			socket.emit(EVENTS.AUTH_ERROR, { message: `Model ${model} does not belong in any project.` });
+			emitError(socket, ERRORS.ROOM_NOT_FOUND, `Model ${model} does not belong in any project.`, ACTIONS.JOIN, data);
 		}
 		const projectId = UUIDToString(project._id);
 
@@ -88,28 +94,33 @@ const joinRoomV4 = async (socket, { account, model }) => {
 	} else if (account === getUserNameFromSocket(socket)) {
 		joinRoom(socket, { notifications: true });
 	} else {
-		socket.emit(EVENTS.AUTH_ERROR, { message: 'You cannot subscribe to someone else\'s notifications.' });
+		emitError(socket, ERRORS.UNAUTHORISED, 'You cannot subscribe to someone else\'s notifications.', ACTIONS.JOIN, data);
 	}
 };
 
-const leave = (socket, channelName) => {
+const leaveRoom = (socket, data) => {
+	const { teamspace, model, project, notifications } = data;
+	let channelName;
+	if (notifications) {
+		channelName = `notifications::${getUserNameFromSocket(socket)}`;
+	} else if (teamspace && model && project) {
+		channelName = `${teamspace}::${project}::${model}`;
+	} else {
+		throw { code: ERRORS.ROOM_NOT_FOUND, message: 'Cannot identified the room indicated' };
+	}
+
 	socket.leave(channelName);
 	logger.logDebug(`[${getUserNameFromSocket(socket)}][${socket.Id}] has left ${channelName}`);
 };
 
-const leaveRoom = (socket, { teamspace, model, project, notifications }) => {
-	if (notifications) {
-		leave(socket, `notifications::${getUserNameFromSocket(socket)}`);
-	} else if (teamspace && model && project) {
-		leave(socket, `${teamspace}::${project}::${model}`);
-	}
-};
-
-const leaveRoomV4 = async (socket, { account, model }) => {
+const leaveRoomV4 = async (socket, data) => {
+	const { account, model } = data;
 	if (model) {
 		const project = await findProjectByModelId(account, model, { _id: 1 });
 		if (project) {
 			leaveRoom(socket, { teamspace: account, model, project: project._id });
+		} else {
+			throw { code: ERRORS.ROOM_NOT_FOUND, message: `Model ${model} does not belong in any project.` };
 		}
 	} else {
 		leaveRoom(socket, { notifications: true });
@@ -121,7 +132,18 @@ const subscribeToSocketEvents = (socket) => {
 	socket.on('error', (err) => logger.logError(`[${socketId}] Socket error: ${err?.message}`));
 	socket.on('disconnect', () => removeSocket(socket));
 	socket.on('join', (data) => (data.account ? joinRoomV4(socket, data) : joinRoom(socket, data)));
-	socket.on('leave', (data) => (data.account ? leaveRoomV4(socket, data) : leaveRoom(socket, data)));
+	socket.on('leave', async (data) => {
+		try {
+			if (data.account) {
+				await leaveRoomV4(socket, data);
+			} else {
+				leaveRoom(socket, data);
+			}
+			socket.emit(EVENTS.MESSAGE, { event: EVENTS.SUCCESS, data: { action: ACTIONS.LEAVE, data } });
+		} catch (err) {
+			emitError(socket, err.code, err.message, ACTIONS.LEAVE, data);
+		}
+	});
 };
 
 SocketsManager.getSocketById = (id) => socketIdToSocket[id];
