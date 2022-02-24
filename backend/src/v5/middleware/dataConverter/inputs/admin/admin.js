@@ -80,11 +80,11 @@ function isSystemRole(element) {
 	return SYSTEM_ROLES.includes(element);
 }
 
-Admin.isValidSystemRole = async (roles) => {
+Admin.isValidSystemRole = (roles) => {
 	if (roles.length > 0) {
 		return roles.some(isSystemRole);
 	}
-	return true;
+	return true; // if roles are empty just succeed.
 };
 
 Admin.validateUsersAndRoles = async (req, res, next) => {
