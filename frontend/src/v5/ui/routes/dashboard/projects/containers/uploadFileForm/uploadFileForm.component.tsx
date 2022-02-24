@@ -44,6 +44,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 
 	const [selectedIndex, setSelectedIndex] = useState<number>(null);
+	const [isUploading, setIsUploading] = useState<boolean>(false);
 	const methods = useForm<UploadFieldArray>({
 		mode: 'onChange',
 		resolver: yupResolver(UploadsSchema),
@@ -111,6 +112,8 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 	};
 
 	const onSubmit = async (data: UploadFieldArray) => {
+		setIsUploading(true);
+		setSelectedIndex(null);
 		data.uploads.forEach((revision, i) => {
 			RevisionsActionsDispatchers.createRevision(teamspace, project, revision.containerId, (value) => setValue(`uploads.${i}.progress`, value), revision);
 		});
@@ -122,9 +125,21 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 				open={openState}
 				onSubmit={handleSubmit(onSubmit)}
 				onClickClose={onClickClose}
-				confirmLabel="Upload files"
-				title="Add files for upload"
-				subtitle="Drag and drop or browse your computer"
+				confirmLabel={
+					isUploading
+						? formatMessage({ id: 'uploads.modal.buttonText.uploading', defaultMessage: 'Finished' })
+						: formatMessage({ id: 'uploads.modal.buttonText.preparing', defaultMessage: 'Upload files' })
+				}
+				title={
+					isUploading
+						? formatMessage({ id: 'uploads.modal.title.uploading', defaultMessage: 'Uploading files' })
+						: formatMessage({ id: 'uploads.modal.title.preparing', defaultMessage: 'Prepare files for upload' })
+				}
+				subtitle={
+					isUploading
+						? formatMessage({ id: 'uploads.modal.subtitle.uploading', defaultMessage: 'Do not close this window until uploads are complete' })
+						: formatMessage({ id: 'uploads.modal.subtitle.preparing', defaultMessage: 'Select a file to add Container/Revision details' })
+				}
 				onKeyPress={(e) => e.key === 'Enter' && e.preventDefault()}
 				isValid={formState.isValid}
 			>
@@ -146,6 +161,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 						<UploadList
 							values={sortedList}
 							selectedIndex={selectedIndex}
+							isUploading={isUploading}
 							onClickEdit={(id) => onClickEdit(id)}
 							onClickDelete={(id) => onClickDelete(id)}
 						/>
@@ -155,11 +171,12 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 								{ MoreLink: (child: string) => <a href="https://help.3drepo.io/en/articles/4798885-supported-file-formats" target="_blank" rel="noreferrer">{child}</a> },
 							)}
 							processFiles={(files) => { processFiles(files); }}
+							hidden={isUploading}
 						/>
 					</Content>
 					<Sidebar
 						key={watch(`uploads.${selectedIndex}.containerId`)}
-						open={Number.isInteger(selectedIndex)}
+						open={Number.isInteger(selectedIndex) && !isUploading}
 						onClick={() => setSelectedIndex(null)}
 						noButton={!(Number.isInteger(selectedIndex))}
 					>

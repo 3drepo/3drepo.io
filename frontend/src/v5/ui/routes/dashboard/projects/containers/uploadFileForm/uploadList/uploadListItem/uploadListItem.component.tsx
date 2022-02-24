@@ -34,6 +34,7 @@ import { UploadProgress } from './uploadProgress';
 type IUploadListItem = {
 	item: UploadItemFields;
 	isSelected: boolean;
+	isUploading: boolean;
 	onClickEdit: () => void;
 	onClickDelete: () => void;
 	onChange: (name, val) => void;
@@ -45,6 +46,7 @@ export const UploadListItem = ({
 	onClickEdit,
 	onClickDelete,
 	isSelected,
+	isUploading,
 	onChange,
 	progress,
 }: IUploadListItem): JSX.Element => {
@@ -101,13 +103,15 @@ export const UploadListItem = ({
 					/>
 				)}
 			/>
-			<UploadProgress progress={progress} failure={false} />
-			<Button $selectedrow={isSelected} onClick={onClickEdit}>
-				<EditIcon />
-			</Button>
-			<Button $selectedrow={isSelected} onClick={onClickDelete}>
-				<DeleteIcon />
-			</Button>
+			<UploadProgress progress={progress} failure={false} hidden={!isUploading} />
+			<span hidden={isUploading}>
+				<Button $selectedrow={isSelected} onClick={onClickEdit}>
+					<EditIcon />
+				</Button>
+				<Button $selectedrow={isSelected} onClick={onClickDelete}>
+					<DeleteIcon />
+				</Button>
+			</span>
 		</UploadListItemRow>
 	);
 };

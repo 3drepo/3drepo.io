@@ -24,11 +24,12 @@ import { FileInputField } from '../fileInputField/fileInputField.component';
 
 interface IDragAndDrop {
 	message?: ReactNode,
+	hidden?: boolean;
 	processFiles: (files) => void,
 	className: string;
 }
 
-export const DragAndDrop = ({ className, message, processFiles }: IDragAndDrop) => {
+export const DragAndDrop = ({ className, message, processFiles, hidden = false }: IDragAndDrop) => {
 	const [dragOverlay, setDragOverlay] = useState(false);
 	const acceptedFormats = ClientConfig.acceptedFormat.map((format) => `.${format}`).toString();
 
@@ -53,6 +54,7 @@ export const DragAndDrop = ({ className, message, processFiles }: IDragAndDrop) 
 			onDragLeave={handleDragOut}
 			onDrop={handleDrop}
 			accept={acceptedFormats}
+			hidden={hidden}
 			disableClick
 		>
 			<UploadDialog className={dragOverlay && 'drag-over'}>

@@ -24,9 +24,10 @@ import { CompletionMark, Container, StatusText } from './UploadProgress.styles';
 type IUploadProgress = {
 	progress: number;
 	failure: boolean;
+	hidden: boolean;
 };
 
-export const UploadProgress = ({ progress, failure }: IUploadProgress): JSX.Element => {
+export const UploadProgress = ({ progress, failure, hidden }: IUploadProgress): JSX.Element => {
 	let statusText = <span />;
 	if (Math.round(progress) === 100) statusText = <StatusText className="success">Upload complete</StatusText>;
 	else if (failure) statusText = <StatusText className="failure">Upload failed <ErrorCircleIcon /></StatusText>;
@@ -34,7 +35,7 @@ export const UploadProgress = ({ progress, failure }: IUploadProgress): JSX.Elem
 	else if (progress === 0) statusText = <StatusText className="waiting">Waiting to upload</StatusText>;
 	else statusText = <StatusText className="error">Unexpected Error</StatusText>;
 
-	return (
+	return hidden ? (<></>) : (
 		<Container>
 			{statusText}
 			<ProgressBar failure={failure} progress={progress} />
