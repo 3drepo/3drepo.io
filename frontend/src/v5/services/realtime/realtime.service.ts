@@ -85,7 +85,7 @@ export const unsubscribeToEvent = (event, callback) => {
 	socket.off(event, callback);
 };
 
-export const subscribeToRoomEvent = (roomType: IRoomType, event, callback) => {
+export const subscribeToRoomEvent = (roomType: IRoomType, event: string, callback) => {
 	joinRoom(roomType);
 	subscribeToEvent(event, callback);
 
@@ -95,11 +95,21 @@ export const subscribeToRoomEvent = (roomType: IRoomType, event, callback) => {
 	};
 };
 
-export const subscribeToDm = (callback) => {
-	subscribeToEvent('message', callback);
+interface IDirectMessage {
+	event: string;
+	data: any;
+}
+
+export const subscribeToDM = (event: string, callback) => {
+	const dmCallback = (message: IDirectMessage) => {
+		if (message.event !== event) return;
+		callback(message.data);
+	};
+
+	subscribeToEvent('message', dmCallback);
 
 	return () => {
-		unsubscribeToEvent('message', callback);
+		unsubscribeToEvent('message', dmCallback);
 	};
 };
 
