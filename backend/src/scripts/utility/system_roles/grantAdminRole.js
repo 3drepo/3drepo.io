@@ -28,27 +28,27 @@ const { SYSTEM_ROLES } = require(`${v5Path}/utils/permissions/permissions.consta
 const yargs = require('yargs/yargs')
 
 const run = async () => {
-    const username = argv.username
-    let isUser
-    try {
-        isUser = getUserByUsername(username)
-    } catch (error) {
-        logger.logError(`${username} not found, please check and try again.`);
-    }
-    if (!SYSTEM_ROLES.includes(argv.role)) {
-        logger.logError(`${argv.role} not found, can't grant ${argv.role}.`);
-        return false
-    }
-    if (isUser){
-        logger.logInfo(`Adding ${argv.role} to ${username}`);
-        try {
-            await grantAdministrativeRole(username,argv.role)
-        } catch (error) {
-            logger.logError(`We encountered an unexpected error.`,error);
-        }
-    } else {
-        logger.logError(`${username} not found, can't grant ${argv.role}.`);
-    }
+	const username = argv.username
+	let isUser
+	try {
+		isUser = getUserByUsername(username)
+	} catch (error) {
+		logger.logError(`${username} not found, please check and try again.`);
+	}
+	if (!SYSTEM_ROLES.includes(argv.role)) {
+		logger.logError(`${argv.role} not found, can't grant ${argv.role}.`);
+		return false
+	}
+	if (isUser){
+		logger.logInfo(`Adding ${argv.role} to ${username}`);
+		try {
+			await grantAdministrativeRole(username,argv.role)
+		} catch (error) {
+			logger.logError(`We encountered an unexpected error.`,error);
+		}
+	} else {
+		logger.logError(`${username} not found, can't grant ${argv.role}.`);
+	}
 };
 
 const argv = yargs(hideBin(process.argv)).argv
