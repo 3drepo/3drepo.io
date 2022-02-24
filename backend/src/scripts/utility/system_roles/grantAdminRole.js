@@ -23,7 +23,6 @@ const { v5Path } = require('../../../interop');
 
 const { getUserByUsername, grantAdministrativeRole } = require(`${v5Path}/models/users`);
 const { hideBin } = require('yargs/helpers');
-
 const { logger } = require(`${v5Path}/utils/logger`);
 const { SYSTEM_ROLES } = require(`${v5Path}/utils/permissions/permissions.constants`);
 const yargs = require('yargs/yargs');
