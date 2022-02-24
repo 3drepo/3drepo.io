@@ -19,19 +19,19 @@ import { mapValues } from 'lodash';
 
 import { hexToGLColor, hexToRgba } from '../helpers/colors';
 
-export const BLACK = '#000000';
+export const BLACK = '#172B4D';
 export const WHITE = '#ffffff';
-export const PRIMARY_MAIN = '#0c2f54';
-export const SECONDARY_MAIN = '#06563c';
+export const PRIMARY_MAIN = '#00C1D4';
+export const SECONDARY_MAIN = '#172B4D';
 
 export const COLOR = {
 	PRIMARY_MAIN,
-	PRIMARY_LIGHT: '#3c5876',
-	PRIMARY_DARK: '#08203a',
-	SECONDARY_MAIN: '#06563c',
+	PRIMARY_LIGHT: '#80E0E9',
+	PRIMARY_DARK: '#01ACBD',
+	SECONDARY_MAIN: '#172B4D',
 	SECONDARY_MAIN_54: hexToRgba(SECONDARY_MAIN, .54),
-	SECONDARY_LIGHT: '#377763',
-	SECONDARY_DARK: '#043827',
+	SECONDARY_LIGHT: '#405779',
+	SECONDARY_DARK: '#121E33',
 	PRIMARY_MAIN_80: hexToRgba(PRIMARY_MAIN, .8),
 	PRIMARY_MAIN_6: hexToRgba(PRIMARY_MAIN, .06),
 

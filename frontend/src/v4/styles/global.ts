@@ -23,7 +23,7 @@ const appBackgroundImage = clientConfigService.getCustomBackgroundImagePath() ||
 
 export const GlobalStyle = createGlobalStyle`
 	* {
-		font-family: Roboto, 'Helvetica Neue', sans-serif;
+		font-family: Inter, 'Helvetica Neue', sans-serif;
 		font-size: 100%;
 	}
 
