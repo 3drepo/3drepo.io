@@ -525,6 +525,9 @@ export const theme = createMuiTheme({
 				'label + &': {
 					marginTop: 0,
 				},
+				'& .MuiSelect-selectMenu': {
+					height: 35,
+				},
 				'& svg': {
 					right: 14,
 					marginTop: 40,

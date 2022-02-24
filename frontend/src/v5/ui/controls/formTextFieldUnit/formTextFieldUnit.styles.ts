@@ -30,6 +30,5 @@ export const UnitTextField = styled(FormTextField).attrs((props) => ({
 		
 		text-transform: none; 
 		letter-spacing: 0;
-		${(props) => props.theme.typography.caption};
 	}
 `;
