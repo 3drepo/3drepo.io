@@ -151,7 +151,7 @@
 	};
 
 	Handler.findRoleByRoleName = async function(id) {
-		return await Handler.findOne("admin", "system.roles", { role: id});
+		return await Handler.findOne("admin", "system.roles", { role: id });
 	};
 
 	Handler.findOneAndDelete = async function (database, colName, query, projection = {}) {
@@ -306,6 +306,25 @@
 	Handler.count = async function (database, colName, query, options) {
 		const collection = await Handler.getCollection(database, colName);
 		return collection.countDocuments(query, options);
+	};
+
+	Handler.createSystemRole = async function (role, roles = []) {
+		const roleFound = await Handler.findRoleByRoleName(role);
+		if (roleFound) {
+			return roleFound;
+		}
+		const createRoleCmd = {
+			"createRole": role,
+			"privileges":[{
+				"resource":{
+					"db": "admin",
+					"collection": "roles"
+				},
+				"actions": ["find"]}
+			],
+			"roles": roles
+		};
+		return await Handler.runCommand("admin", createRoleCmd);
 	};
 
 	module.exports = Handler;
