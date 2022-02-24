@@ -331,13 +331,13 @@ const testDownloadRevisionFiles = () => {
 		});
 
 		test('should fail if revision has no file', async () => {
-			const res = await agent.get(`${route(teamspace, project.id, modelWithRev._id, noFileRevision._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.noFileFound.status);
-			expect(res.body.code).toEqual(templates.noFileFound.code);
+			const res = await agent.get(`${route(teamspace, project.id, modelWithRev._id, noFileRevision._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.fileNotFound.status);
+			expect(res.body.code).toEqual(templates.fileNotFound.code);
 		});
 
 		test('should fail if revision has file but no ref', async () => {
-			const res = await agent.get(`${route(teamspace, project.id, modelWithRev._id, noRefRevision._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.noFileFound.status);
-			expect(res.body.code).toEqual(templates.noFileFound.code);
+			const res = await agent.get(`${route(teamspace, project.id, modelWithRev._id, noRefRevision._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.fileNotFound.status);
+			expect(res.body.code).toEqual(templates.fileNotFound.code);
 		});
 
 		test('should download files if there is a valid ref', async () => {

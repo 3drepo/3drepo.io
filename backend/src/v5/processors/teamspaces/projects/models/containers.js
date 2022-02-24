@@ -18,7 +18,7 @@
 const { addModel, deleteModel, getModelList } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
-const { getLatestRevision, getRevisionById, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
+const { getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const Groups = require('./commons/groups');
 const { fetchFileStream } = require('../../../../models/fileRefs');
 const fs = require('fs/promises');
@@ -84,15 +84,15 @@ Containers.newRevision = (teamspace, model, data, file) => queueModelUpload(team
 
 Containers.updateRevisionStatus = updateRevisionStatus;
 
-Containers.downloadRevisionFiles = async (teamspace, container, revisionId) => {
-	const revision = await getRevisionById(teamspace, container, revisionId, { rFile: 1 });
+Containers.downloadRevisionFiles = async (teamspace, container, revision) => {
+	const rev = await getRevisionByIdOrTag(teamspace, container, revision, { rFile: 1 });
 	
-	if (!revision?.rFile?.length) {
-		throw templates.noFileFound;
+	if (!rev?.rFile?.length) {
+		throw templates.fileNotFound;
 	}
 
 	// We currently only support single file fetches
-	const fileName = revision.rFile[0];
+	const fileName = rev.rFile[0];
 	const fileNameFormatted = fileName.substr(36).replace(/_([^_]*)$/, '.$1');
 	const file = await fetchFileStream(teamspace, container, 'history.ref', fileName);
 	return { ...file, filename: fileNameFormatted };

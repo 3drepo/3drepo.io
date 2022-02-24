@@ -29,7 +29,7 @@ const getRefEntry = async (account, collection, id) => {
 	const entry = await db.findOne(account, collection, { _id: id });
 
 	if (!entry) {
-		throw templates.noFileFound;
+		throw templates.fileNotFound;
 	}
 
 	return entry;

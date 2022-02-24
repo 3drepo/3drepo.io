@@ -149,13 +149,13 @@ const testDownloadFiles = () => {
 	describe('Download files', () => {
 		test('should throw error if the revision has no files', async () => {
 			const revision = { rFile: [] };
-			await expect(FileRefs.downloadFiles('someTS', 'someModel', revision)).rejects.toEqual(templates.noFileFound);
+			await expect(FileRefs.downloadFiles('someTS', 'someModel', revision)).rejects.toEqual(templates.fileNotFound);
 		});
 
 		test('should throw error if the revision has no entry', async () => {
 			const revision = { rFile: ['b74ba13b-71db-4fcc-9ff8-7f640aa3dec2P2006823-BDP-XX-A-Stanmore-Envelope_optimized_ifc'] };
 			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
-			await expect(FileRefs.downloadFiles('someTS', 'someModel', revision)).rejects.toEqual(templates.noFileFound);
+			await expect(FileRefs.downloadFiles('someTS', 'someModel', revision)).rejects.toEqual(templates.fileNotFound);
 		});
 
 		test('should download the revision files using grid fs if entry has invalid type', async () => {
