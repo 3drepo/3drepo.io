@@ -24,6 +24,11 @@ interface IRoomType {
 	notifications?: boolean
 }
 
+export enum SocketEvents {
+	CONNECT = 'connect',
+	DISCONNECT = 'disconnect',
+}
+
 let socket:Socket = null;
 const roomsJoined:Record<string, number> = {};
 
@@ -41,25 +46,19 @@ interface IChatConfig {
 	reconnectionAttempts: number
 }
 
-export const initializeSocket = ({ host, path, reconnectionAttempts }: IChatConfig) => {
-	socket = io(host, {
-		path,
-		reconnectionAttempts,
-		transports: ['websocket'],
-		reconnection: true,
-		reconnectionDelay: 500,
-	});
-
-	// eslint-disable-next-line @typescript-eslint/no-use-before-define
-	socket.on('connect', reJoinRooms);
-};
-
 export const joinRoom = (roomType : IRoomType) => {
 	const joinedCount = (roomsJoined[roomTypeToId(roomType)] || 0);
 	roomsJoined[roomTypeToId(roomType)] = joinedCount + 1;
 	if (joinedCount > 0) return;
 
 	socket.emit('join', roomType);
+};
+
+const reJoinRooms = () => {
+	const roomTypes = Object.keys(roomsJoined).map(idToRoomType);
+	roomTypes.forEach((roomType) => {
+		socket.emit('join', roomType);
+	});
 };
 
 export const leaveRoom = (roomType : IRoomType) => {
@@ -72,16 +71,23 @@ export const leaveRoom = (roomType : IRoomType) => {
 	socket.emit('leave', roomType);
 };
 
-const reJoinRooms = () => {
-	const roomTypes = Object.keys(roomsJoined).map(idToRoomType);
-	roomTypes.forEach(joinRoom);
+export const initializeSocket = ({ host, path, reconnectionAttempts }: IChatConfig) => {
+	socket = io(host, {
+		path,
+		reconnectionAttempts,
+		transports: ['websocket'],
+		reconnection: true,
+		reconnectionDelay: 500,
+	});
+
+	socket.on('connect', reJoinRooms);
 };
 
-export const subscribeToEvent = (event, callback) => {
+const subscribeToEvent = (event, callback) => {
 	socket.on(event, callback);
 };
 
-export const unsubscribeToEvent = (event, callback) => {
+const unsubscribeToEvent = (event, callback) => {
 	socket.off(event, callback);
 };
 
@@ -110,6 +116,14 @@ export const subscribeToDM = (event: string, callback) => {
 
 	return () => {
 		unsubscribeToEvent('message', dmCallback);
+	};
+};
+
+export const subscribeToSocketEvent = (socketEvent:SocketEvents, callback) => {
+	subscribeToEvent(socketEvent.toString(), callback);
+
+	return () => {
+		unsubscribeToEvent(socketEvent.toString(), callback);
 	};
 };
 
