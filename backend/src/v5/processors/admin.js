@@ -25,22 +25,7 @@ const { getUsersWithRole,
 const { getArrayDifference } = require('../utils/helper/arrays');
 const { logger } = require('../utils/logger');
 
-const grantRolesToUser = async (currentUser, user, roles) => {
-	const results = roles.map(async (role) => {
-		const userHasRole = await hasAdministrativeRole(user, role);
-		if (!userHasRole) {
-			const grantedRole = await grantAdministrativeRole(user, role);
-			if (grantedRole) {
-				logger.logInfo(`${currentUser} granted ${role} to ${user}`);
-			} else {
-				logger.logError(`${currentUser} failed to grant ${role} to ${user}: ${grantedRole}`);
-			}
-		}
-	});
-	return Promise.all(results);
-};
-
-const revokeRolesFromUser = async (currentUser, user, roles) => {
+const revokeRolesFromUser = (currentUser, user, roles) => {
 	const results = roles.map(async (role) => {
 		const userHasRole = await hasAdministrativeRole(user, role);
 		const safeToContinue = !(user === currentUser && role === SYSTEM_ADMIN && userHasRole);
@@ -64,6 +49,21 @@ const revokeRolesFromUser = async (currentUser, user, roles) => {
 
 const Admin = {};
 
+Admin.grantRolesToUser = (currentUser, user, roles) => {
+	const results = roles.map(async (role) => {
+		const userHasRole = await hasAdministrativeRole(user, role);
+		if (!userHasRole) {
+			const grantedRole = await grantAdministrativeRole(user, role);
+			if (grantedRole) {
+				logger.logInfo(`${currentUser} granted ${role} to ${user}`);
+			} else {
+				logger.logError(`${currentUser} failed to grant ${role} to ${user}: ${grantedRole}`);
+			}
+		}
+	});
+	return Promise.all(results);
+};
+
 Admin.getUsersWithRole = async (users, roles) => {
 	const returnUsers = await getUsersWithRole(users, roles);
 	if (!returnUsers) throw createResponseCode(templates.userNotFound, 'No users found that match the query.');
@@ -74,7 +74,7 @@ Admin.putUsersRoles = async (currentUser, users) => {
 	const putUsers = [];
 	const results = users.map(async (user) => {
 		putUsers.push(user.user);
-		await grantRolesToUser(currentUser, user.user, user.roles);
+		await Admin.grantRolesToUser(currentUser, user.user, user.roles);
 	});
 	await Promise.all(results);
 	return getUsersWithRole(putUsers);
@@ -86,7 +86,7 @@ Admin.patchUsersRoles = async (currentUser, users) => {
 		patchUsers.push(user.user);
 		const missingRoles = await getArrayDifference(user.roles, SYSTEM_ROLES);
 		await revokeRolesFromUser(currentUser, user.user, missingRoles);
-		await grantRolesToUser(currentUser, user.user, user.roles);
+		await Admin.grantRolesToUser(currentUser, user.user, user.roles);
 	});
 	await Promise.all(results);
 	return getUsersWithRole(patchUsers);
