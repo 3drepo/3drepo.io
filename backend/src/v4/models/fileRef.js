@@ -30,9 +30,6 @@ const STATE_FILE_REF_EXT = ".sequences.ref";
 const JSON_FILE_REF_EXT = ".stash.json_mpc.ref";
 const RESOURCES_FILE_REF_EXT = ".resources.ref";
 
-const MITIGATIONS_FILE_REF = "mitigations.ref";
-const MITIGATIONS_ID = "mitigations";
-
 const ISSUES_FILE_REF_EXT = ".issues.ref";
 const RISKS_FILE_REF_EXT = ".risks.ref";
 
@@ -209,10 +206,6 @@ FileRef.getJSONFile = function(account, model, fileName) {
 	return _fetchFile(account, model, JSON_FILE_REF_EXT, fileName, false, true);
 };
 
-FileRef.getMitigationsStream = function(account) {
-	return fetchFileStream(account, undefined, MITIGATIONS_FILE_REF, MITIGATIONS_ID, false);
-};
-
 FileRef.getResourceFile = function(account, model, fileName) {
 	return _fetchFile(account, model, RESOURCES_FILE_REF_EXT, fileName, true, false);
 };
@@ -271,17 +264,6 @@ FileRef.removeResourceFromEntity  = async function(account, model, property, pro
 
 	ref[property] = [propertyId]; // This is to identify from where this ref has been dettached
 	return ref;
-};
-
-FileRef.storeMitigationsFile = async function(account, user, name, data) {
-	const collName = MITIGATIONS_FILE_REF;
-
-	await removeAllFiles(account, collName);
-	await db.deleteMany(account, collName, {});
-
-	const extraFields = {"_id":MITIGATIONS_ID};
-
-	return await this.storeFile(account, collName, user, name, data, extraFields);
 };
 
 FileRef.storeFileAsResource = async function(account, model, user, name, data, extraFields = null) {

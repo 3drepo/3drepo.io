@@ -39,8 +39,7 @@ export interface IFederation {
 }
 
 export interface IFederationsState {
-	federations: Record<string, IFederation[]>;
-	isListPending: boolean;
+	federationsByProject: Record<string, IFederation[]>;
 }
 
 export interface SurveyPoint {
@@ -114,7 +113,7 @@ export type FetchFederationViewsResponse = {
 export type FetchFederationViewsSuccessPayload = {
 	projectId: string;
 	federationId: string;
-	views: FetchFederationViewsResponse;
+	views: FederationView[];
 };
 
 export type FetchFederationSettingsPayload = FetchFederationsPayload & {
@@ -167,7 +166,6 @@ export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;
 export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & FavouritePayload;
 export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & { projectId: string, federationId: string, isFavourite: boolean };
 export type FetchFederationsSuccessAction = Action<'FETCH_FEDERATIONS_SUCCESS'> & { projectId: string, federations: IFederation[] };
-export type SetIsListPendingAction = Action<'SET_IS_LIST_PENDING'> & { isPending: boolean };
 export type FetchFederationStatsAction = Action<'FETCH_FEDERATION_STATS'> & FetchFederationStatsPayload;
 export type FetchFederationStatsSuccessAction = Action<'FETCH_FEDERATION_STATS_SUCCESS'> & FetchFederationStatsSuccessPayload;
 export type FetchFederationViewsAction = Action<'FETCH_FEDERATION_VIEWS'> & FetchFederationViewsPayload;
@@ -191,7 +189,6 @@ export interface IFederationsActionCreators {
 	addFavourite: (teamspace: string, projectId: string, federationId: string) => AddFavouriteAction;
 	removeFavourite: (teamspace: string, projectId: string, federationId: string) => RemoveFavouriteAction;
 	setFavouriteSuccess: (projectId: string, federationId: string, isFavourite: boolean) => SetFavouriteSuccessAction;
-	setIsListPending: (isPending: boolean) => SetIsListPendingAction;
 	fetchFederationViews: (teamspace: string, projectId: string, federationId: string) => FetchFederationViewsAction;
 	fetchFederationViewsSuccess: (
 		projectId: string,
