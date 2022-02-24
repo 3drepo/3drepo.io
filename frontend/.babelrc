@@ -4,7 +4,6 @@
 		"@babel/react",
 		["@babel/preset-react", {
 			"runtime": "automatic"
-		}],
-		"@lingui/babel-preset-react"
+		}]
 	]
 }
