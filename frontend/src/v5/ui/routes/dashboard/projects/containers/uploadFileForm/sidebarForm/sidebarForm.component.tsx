@@ -15,18 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { Checkbox, MenuItem } from '@material-ui/core';
 import { Controller, useForm } from 'react-hook-form';
 import { CONTAINER_TYPES, CONTAINER_UNITS, UploadItemFields } from '@/v5/store/containers/containers.types';
-import * as countriesAndTimezones from 'countries-and-timezones';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SidebarSchema } from '@/v5/validation/containers';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
+import * as countriesAndTimezones from 'countries-and-timezones';
 import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer } from './sidebarForm.styles';
 
 type ISidebarForm = {
@@ -49,7 +49,7 @@ export const SidebarForm = ({
 		resolver: yupResolver(SidebarSchema),
 	});
 
-	const generateTimezoneData = () => {
+	const TimezoneOptions = useMemo(() => {
 		type ITimezone = { name: string; label: string; utcOffset: number; };
 		const tzList: ITimezone[] = [];
 		const tzData = countriesAndTimezones.getAllTimezones();
@@ -66,7 +66,7 @@ export const SidebarForm = ({
 
 		const allTimezones: ITimezone[] = tzList.sort((tz1, tz2) => tz1.utcOffset - tz2.utcOffset);
 		return allTimezones;
-	};
+	}, []);
 
 	useEffect(() => {
 		trigger();
@@ -174,9 +174,9 @@ export const SidebarForm = ({
 				}
 			>
 				{
-					generateTimezoneData().map((unit) => (
-						<MenuItem key={unit.name} value={unit.name}>
-							{unit.label}
+					TimezoneOptions.map((opt) => (
+						<MenuItem key={opt.name} value={opt.name}>
+							{opt.label}
 						</MenuItem>
 					))
 				}
