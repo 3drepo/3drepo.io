@@ -16,9 +16,8 @@
  */
 
 import React from 'react';
-import { InputLabel, FormControl, SelectProps } from '@material-ui/core';
+import { InputLabel, FormControl, SelectProps, Select } from '@material-ui/core';
 import { Controller } from 'react-hook-form';
-import { Select } from '@controls/select';
 
 export type FormSelectProps = SelectProps & {
 	control: any;
@@ -30,7 +29,7 @@ export const FormSelect = ({
 	label,
 	children,
 	control,
-	className,
+	...otherProps
 }: FormSelectProps) => (
 	<FormControl>
 		<InputLabel
@@ -49,7 +48,7 @@ export const FormSelect = ({
 					labelId={`${name}-label`}
 					id={name}
 					label={label}
-					className={className}
+					{...otherProps}
 				>
 					{children}
 				</Select>

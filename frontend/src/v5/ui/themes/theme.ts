@@ -22,6 +22,8 @@ import RadioButtonCheckedIcon from '@assets/icons/controls/radio_button_checked.
 import CheckboxIcon from '@assets/icons/controls/checkbox.svg';
 import CheckboxCheckedIcon from '@assets/icons/controls/checkbox_checked.svg';
 import CheckboxIndeterminatedIcon from '@assets/icons/controls/checkbox_indeterminated.svg';
+import ChevronIcon from '@assets/icons/chevron.svg';
+import { red } from '@material-ui/core/colors';
 
 export const COLOR = {
 	PRIMARY_MAIN_CONTRAST: '#fff',
@@ -241,6 +243,9 @@ export const theme = createMuiTheme({
 			color: 'primary',
 			icon: React.createElement(RadioButtonIcon),
 			checkedIcon: React.createElement(RadioButtonCheckedIcon),
+		},
+		MuiSelect: {
+			IconComponent: ChevronIcon,
 		},
 		MuiTooltip: {
 			PopperProps: {
@@ -476,9 +481,8 @@ export const theme = createMuiTheme({
 				},
 			},
 			icon: {
-				marginTop: '38px',
+				backgroundColor: COLOR.ERROR_DARK,
 				top: 'inherit',
-				right: '5px',
 			},
 		},
 		MuiTextField: {
@@ -520,6 +524,15 @@ export const theme = createMuiTheme({
 			formControl: {
 				'label + &': {
 					marginTop: 0,
+				},
+				'& svg': {
+					right: 14,
+					marginTop: 40,
+					position: 'absolute',
+					pointerEvents: 'none',
+					'& path': {
+						fill: COLOR.BASE_MAIN,
+					},
 				},
 			},
 		},

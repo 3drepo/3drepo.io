@@ -29,6 +29,7 @@ import { FormSelectView } from '@controls/formSelectView/formSelectView.componen
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { FederationSettingsSchema } from '@/v5/validation/schemes';
 import { FormTextFieldUnit } from '@controls/formTextFieldUnit/formTextFieldUnit.component';
+import { FormattedMessage } from 'react-intl';
 import { FlexContainer, SectionTitle, ShareTextField } from './federationSettingsForm.styles';
 
 const UNITS = [
@@ -160,7 +161,12 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 			confirmLabel={formatMessage({ id: 'federations.settings.ok', defaultMessage: 'Save Changes' })}
 			isValid={formState.isValid}
 		>
-			<SectionTitle>Federation information</SectionTitle>
+			<SectionTitle>
+				<FormattedMessage
+					id="federations.settings.form.informationTitle"
+					defaultMessage="Federation information"
+				/>
+			</SectionTitle>
 			<ShareTextField
 				label="ID"
 				value={federation._id}
@@ -209,7 +215,12 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 				name="defaultView"
 				label={formatMessage({ id: 'federations.settings.form.defaultView', defaultMessage: 'Default View' })}
 			/>
-			<SectionTitle>GIS survey point</SectionTitle>
+			<SectionTitle>
+				<FormattedMessage
+					id="federations.settings.form.gisTitle"
+					defaultMessage="GIS survey point"
+				/>
+			</SectionTitle>
 			<FlexContainer>
 				<FormTextFieldUnit
 					name="latitude"
