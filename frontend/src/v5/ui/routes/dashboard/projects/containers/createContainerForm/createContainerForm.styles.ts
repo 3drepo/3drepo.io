@@ -16,17 +16,18 @@
  */
 
 import styled from 'styled-components';
-import { FormControl } from '@material-ui/core';
 
-export const Container = styled.div`
-	/* padding: 30px 58px 60px; */
-`;
+export const FlexContainer = styled.div`
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: flex-start;
+	width: 100%;
 
-export const SelectColumn = styled(FormControl)`
-	width: 50%;
-	padding-right: 5px;
-	& + & {
-		padding: 0 0 0 5px;
-		label { padding: 0 0 0 5px }
+	> div {
+		:first-child {
+			margin-right: 9px;
+		}
+		flex: 1;
 	}
 `;
