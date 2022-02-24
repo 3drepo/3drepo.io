@@ -23,7 +23,6 @@ import CheckboxIcon from '@assets/icons/controls/checkbox.svg';
 import CheckboxCheckedIcon from '@assets/icons/controls/checkbox_checked.svg';
 import CheckboxIndeterminatedIcon from '@assets/icons/controls/checkbox_indeterminated.svg';
 import ChevronIcon from '@assets/icons/chevron.svg';
-import { red } from '@material-ui/core/colors';
 
 export const COLOR = {
 	PRIMARY_MAIN_CONTRAST: '#fff',
@@ -328,6 +327,7 @@ export const theme = createMuiTheme({
 		MuiMenuItem: {
 			root: {
 				margin: '0',
+				padding: '8px 16px',
 			},
 		},
 		MuiList: {
