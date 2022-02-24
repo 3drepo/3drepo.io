@@ -29,9 +29,11 @@ export const ActionMenuItemButton = ({
 	label,
 }: ActionMenuItemProps) => (
 	<ItemButton>
-		<ItemIcon>
-			<Icon />
-		</ItemIcon>
+		{Icon && (
+			<ItemIcon>
+				<Icon />
+			</ItemIcon>
+		)}
 		<ItemText primary={label} />
 	</ItemButton>
 );

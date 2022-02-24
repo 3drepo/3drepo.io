@@ -16,40 +16,19 @@
  */
 
 import React from 'react';
-import { useParams } from 'react-router';
-import { useRouteMatch } from 'react-router-dom';
 import { AppBar as MuiAppBar } from '@material-ui/core';
 
 import LogoIcon from '@assets/icons/logo.svg';
 import IntercomIcon from '@assets/icons/intercom.svg';
 import NotificationsIcon from '@assets/icons/notifications.svg';
 import { CircleButton } from '@/v5/ui/controls/circleButton';
-import ContactUsIcon from '@assets/icons/email.svg';
-import InviteAFriendIcon from '@assets/icons/add_user.svg';
-import TeamspacesIcon from '@assets/icons/teamspaces.svg';
-import VisualSettingsIcon from '@assets/icons/settings.svg';
-import SupportCentreIcon from '@assets/icons/question_mark.svg';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
-import { Avatar } from '@controls/avatar';
-import { ActionMenu, ActionMenuSection, ActionMenuItem, ActionMenuTriggerButton } from '@controls/actionMenu';
-import {
-	Items,
-	AvatarSection,
-	UserFullName,
-	UserUserName,
-	SignOutButton,
-	EditProfileButton,
-	AvatarContainer,
-} from './appBar.styles';
+import { UserMenu } from '../userMenu';
+import { Items } from './appBar.styles';
 import { Breadcrumbs } from '../breadcrumbs';
 
 export const AppBar = (): JSX.Element => {
-	const { teamspace } = useParams();
-	const { url } = useRouteMatch();
-	const baseUrl = url.split('/').slice(0, 3).join('/');
-
 	const user = CurrentUserHooksSelectors.selectCurrentUser();
-
 	return (
 		<>
 			<MuiAppBar position="static">
@@ -64,58 +43,7 @@ export const AppBar = (): JSX.Element => {
 					<CircleButton variant="contrast" aria-label="notifications">
 						<NotificationsIcon />
 					</CircleButton>
-					<AvatarContainer>
-						<ActionMenu>
-							<ActionMenuTriggerButton>
-								<Avatar user={user} button />
-							</ActionMenuTriggerButton>
-							<ActionMenuSection>
-								<AvatarSection>
-									<Avatar
-										user={user}
-										largeIcon
-									/>
-									<UserFullName>{user.firstName} {user.lastName}</UserFullName>
-									<UserUserName>{user.username}</UserUserName>
-									<EditProfileButton to="">
-										<ActionMenuItem>
-											Edit your profile
-										</ActionMenuItem>
-									</EditProfileButton>
-								</AvatarSection>
-							</ActionMenuSection>
-							<ActionMenuSection>
-								<ActionMenuItem
-									Icon={TeamspacesIcon}
-									label="Teamspaces"
-									to={`${baseUrl}/${teamspace}`}
-								/>
-								<ActionMenuItem
-									Icon={VisualSettingsIcon}
-									label="Visual Settings"
-								/>
-							</ActionMenuSection>
-							<ActionMenuSection>
-								<ActionMenuItem
-									Icon={SupportCentreIcon}
-									label="Support centre"
-								/>
-								<ActionMenuItem
-									Icon={ContactUsIcon}
-									label="Contact us"
-								/>
-								<ActionMenuItem
-									Icon={InviteAFriendIcon}
-									label="Invite a friend"
-								/>
-							</ActionMenuSection>
-							<ActionMenuSection>
-								<ActionMenuItem>
-									<SignOutButton>Sign out</SignOutButton>
-								</ActionMenuItem>
-							</ActionMenuSection>
-						</ActionMenu>
-					</AvatarContainer>
+					<UserMenu user={user} />
 				</Items>
 			</MuiAppBar>
 		</>

@@ -15,17 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-
-export const Items = styled.div`
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	flex: 1;
-	max-width: calc(100% - 200px);
-	
-	&:last-child {
-		justify-content: flex-end;
-		min-width: 152px;
-	}
-`;
+export { UserMenu } from './userMenu.component';
