@@ -41,7 +41,11 @@ const run = async () => {
     }
     if (isUser){
         logger.logInfo(`Adding ${argv.role} to ${username}`);
-        await grantAdministrativeRole(username,argv.role)
+        try {
+            await grantAdministrativeRole(username,argv.role)
+        } catch (error) {
+            logger.logError(`We encountered an unexpected error.`,error);
+        }
     } else {
         logger.logError(`${username} not found, can't grant ${argv.role}.`);
     }
