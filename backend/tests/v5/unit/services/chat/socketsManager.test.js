@@ -22,6 +22,9 @@ const { generateRandomString } = require('../../../helper/services');
 jest.mock('../../../../../src/v5/models/projects');
 const Projects = require(`${src}/models/projects`);
 
+jest.mock('../../../../../src/v5/utils/permissions/permissions');
+const Permissions = require(`${src}/utils/permissions/permissions`);
+
 const SocketsManager = require(`${src}/services/chat/socketsManager`);
 const { ACTIONS, ERRORS, EVENTS } = require(`${src}/services/chat/chat.constants`);
 
@@ -31,6 +34,7 @@ const generateSocket = (session = generateRandomString()) => ({
 	handshake: { session: { id: session, user: { username: generateRandomString() } } },
 	emit: jest.fn(),
 	leave: jest.fn(),
+	join: jest.fn(),
 
 });
 
@@ -181,7 +185,113 @@ const testSocketsEvents = () => {
 				const project = generateRandomString();
 				const model = generateRandomString();
 
-				Projects.findProjectByModelId.mockImplementationOnce(() => ({ _id: project }));
+				Projects.findProjectByModelId.mockResolvedValueOnce({ _id: project });
+
+				const data = { account, model };
+				await eventFns.leave(data);
+				expect(socket.leave).toHaveBeenCalledWith(`${account}::${project}::${model}`);
+				checkMessageCall(socket.emit, ACTIONS.LEAVE, data);
+
+				const data2 = { account };
+				await eventFns.leave(data2);
+				expect(socket.leave).toHaveBeenCalledWith(`notifications::${account}`);
+				checkMessageCall(socket.emit, ACTIONS.LEAVE, data2);
+			});
+
+			test('should message the socket with error if the parameters do not match', async () => {
+				const { eventFns, socket } = createSocketWithEvents();
+				SocketsManager.addSocket(socket);
+
+				const data = { [generateRandomString()]: generateRandomString() };
+				await eventFns.leave(data);
+				expect(socket.leave).not.toHaveBeenCalled();
+				checkErrorCall(socket.emit, ERRORS.ROOM_NOT_FOUND, ACTIONS.LEAVE, data);
+			});
+
+			test('should message the socket with error if the project is not found (v4)', async () => {
+				const { eventFns, socket } = createSocketWithEvents();
+				SocketsManager.addSocket(socket);
+
+				const account = getUserNameFromSocket(socket);
+				const model = generateRandomString();
+
+				Projects.findProjectByModelId.mockResolvedValueOnce(undefined);
+
+				const data = { account, model };
+				await eventFns.leave(data);
+				expect(socket.leave).not.toHaveBeenCalled();
+				checkErrorCall(socket.emit, ERRORS.ROOM_NOT_FOUND, ACTIONS.LEAVE, data);
+			});
+		});
+
+		describe('On Join', () => {
+			afterEach(SocketsManager.reset);
+			test('should join the model room successfully if the user is authorised to do so', async () => {
+				const { eventFns, socket } = createSocketWithEvents();
+				SocketsManager.addSocket(socket);
+
+				const teamspace = generateRandomString();
+				const project = generateRandomString();
+				const model = generateRandomString();
+
+				Permissions.hasReadAccessToModel.mockResolvedValueOnce(true);
+
+				const data = { teamspace, model, project };
+				await eventFns.join(data);
+				expect(socket.join).toHaveBeenCalledWith(`${teamspace}::${project}::${model}`);
+				checkMessageCall(socket.emit, ACTIONS.JOIN, data);
+			});
+
+			test('should join the notification room successfully if the user is authorised to do so', async () => {
+				const { eventFns, socket } = createSocketWithEvents();
+				SocketsManager.addSocket(socket);
+
+				Permissions.hasReadAccessToModel.mockResolvedValueOnce(true);
+
+				const data = { notifications: true };
+				await eventFns.join(data);
+				expect(socket.join).toHaveBeenCalledWith(`notifications::${getUserNameFromSocket(socket)}`);
+				checkMessageCall(socket.emit, ACTIONS.JOIN, data);
+			});
+
+			test('should join the model room successfully if the user is authorised to do so (v4)', async () => {
+				const { eventFns, socket } = createSocketWithEvents();
+				SocketsManager.addSocket(socket);
+
+				const account = generateRandomString();
+				const project = generateRandomString();
+				const model = generateRandomString();
+
+				Permissions.hasReadAccessToModel.mockResolvedValueOnce(true);
+				Projects.findProjectByModelId.mockResolvedValueOnce({ _id: project });
+
+				const data = { account, model, project };
+				await eventFns.join(data);
+				console.log(socket.emit.mock.calls);
+				expect(socket.join).toHaveBeenCalledWith(`${account}::${project}::${model}`);
+				checkMessageCall(socket.emit, ACTIONS.JOIN, data);
+			});
+
+			test('should join the notification room successfully if the user is authorised to do so (v4)', async () => {
+				const { eventFns, socket } = createSocketWithEvents();
+				SocketsManager.addSocket(socket);
+
+				const username = getUserNameFromSocket(socket);
+				const data = { account: username };
+				await eventFns.join(data);
+				expect(socket.join).toHaveBeenCalledWith(`notifications::${username}`);
+				checkMessageCall(socket.emit, ACTIONS.JOIN, data);
+			});
+			/*
+			test('should process the leave function appropriately (v4)', async () => {
+				const { eventFns, socket } = createSocketWithEvents();
+				SocketsManager.addSocket(socket);
+
+				const account = getUserNameFromSocket(socket);
+				const project = generateRandomString();
+				const model = generateRandomString();
+
+				Projects.findyyProjectByModelId.mockImplementationOnce(() => ({ _id: project }));
 
 				const data = { account, model };
 				await eventFns.leave(data);
@@ -217,7 +327,7 @@ const testSocketsEvents = () => {
 				await eventFns.leave(data);
 				expect(socket.leave).not.toHaveBeenCalled();
 				checkErrorCall(socket.emit, ERRORS.ROOM_NOT_FOUND, ACTIONS.LEAVE, data);
-			});
+			}); */
 		});
 	});
 };

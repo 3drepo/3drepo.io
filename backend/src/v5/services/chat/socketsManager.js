@@ -67,16 +67,13 @@ const joinRoom = async (socket, data) => {
 	} else if (teamspace && project && model) {
 		channelName = `${teamspace}::${project}::${model}`;
 		if (!await hasReadAccessToModel(teamspace, stringToUUID(project), model, username)) {
-			emitError(socket, ERRORS.UNAUTHORISED, 'You do not have sufficient access rights to join the room requested', ACTIONS.JOIN, data);
-			return;
+			throw { code: ERRORS.UNAUTHORISED, message: 'You do not have sufficient access rights to join the room requested' };
 		}
 	} else {
-		emitError(socket, ERRORS.NOT_FOUND, 'Cannot identified the room indicated', ACTIONS.JOIN, data);
-		return;
+		throw { code: ERRORS.NOT_FOUND, message: 'Cannot identify the room indicated' };
 	}
 
 	socket.join(channelName);
-	socket.emit(EVENTS.MESSAGE, { event: EVENTS.SUCCESS, data: { action: ACTIONS.JOIN, data } });
 	logger.logDebug(`[${getUserNameFromSocket(socket)}][${socket.id}] has joined ${channelName}`);
 };
 
@@ -86,15 +83,14 @@ const joinRoomV4 = async (socket, data) => {
 	if (model) {
 		const project = await findProjectByModelId(account, model, { _id: 1 });
 		if (!project) {
-			emitError(socket, ERRORS.ROOM_NOT_FOUND, `Model ${model} does not belong in any project.`, ACTIONS.JOIN, data);
+			throw { code: ERRORS.ROOM_NOT_FOUND, message: `Model ${model} does not belong in any project.` };
 		}
 		const projectId = UUIDToString(project._id);
-
-		joinRoom(socket, { teamspace: account, model, project: projectId });
+		await joinRoom(socket, { teamspace: account, model, project: projectId });
 	} else if (account === getUserNameFromSocket(socket)) {
-		joinRoom(socket, { notifications: true });
+		await joinRoom(socket, { notifications: true });
 	} else {
-		emitError(socket, ERRORS.UNAUTHORISED, 'You cannot subscribe to someone else\'s notifications.', ACTIONS.JOIN, data);
+		throw { code: ERRORS.UNAUTHORISED, message: 'You cannot subscribe to someone else\'s notifications.' };
 	}
 };
 
@@ -106,7 +102,7 @@ const leaveRoom = (socket, data) => {
 	} else if (teamspace && model && project) {
 		channelName = `${teamspace}::${project}::${model}`;
 	} else {
-		throw { code: ERRORS.ROOM_NOT_FOUND, message: 'Cannot identified the room indicated' };
+		throw { code: ERRORS.ROOM_NOT_FOUND, message: 'Cannot identify the room indicated' };
 	}
 
 	socket.leave(channelName);
@@ -131,7 +127,18 @@ const subscribeToSocketEvents = (socket) => {
 	const socketId = socket.id;
 	socket.on('error', (err) => logger.logError(`[${socketId}] Socket error: ${err?.message}`));
 	socket.on('disconnect', () => removeSocket(socket));
-	socket.on('join', (data) => (data.account ? joinRoomV4(socket, data) : joinRoom(socket, data)));
+	socket.on('join', async (data) => {
+		try {
+			if (data.account) {
+				await joinRoomV4(socket, data);
+			} else {
+				await joinRoom(socket, data);
+			}
+			socket.emit(EVENTS.MESSAGE, { event: EVENTS.SUCCESS, data: { action: ACTIONS.JOIN, data } });
+		} catch (err) {
+			emitError(socket, err.code, err.message, ACTIONS.JOIN, data);
+		}
+	});
 	socket.on('leave', async (data) => {
 		try {
 			if (data.account) {
