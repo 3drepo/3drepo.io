@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { createElement } from 'react';
 import { Tooltip, TooltipProps } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import Radio from '@material-ui/core/Radio';
@@ -35,7 +35,7 @@ export const TableHeadingRadioButton = styled(Radio)`
 `;
 
 export const TableHeadingRadioTooltip = styled(({className, ...rest}: TooltipProps) =>
-	React.createElement(Tooltip, {classes: { popper: className }, ...rest })
+	createElement(Tooltip, {classes: { popper: className }, ...rest })
 )``;
 
 TableHeadingRadioButton.displayName = 'TableHeadingRadioButton';

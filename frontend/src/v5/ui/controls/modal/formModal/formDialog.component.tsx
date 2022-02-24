@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { DetailedHTMLProps, HTMLAttributes } from 'react';
+import { DetailedHTMLProps } from 'react';
 import { Button, Dialog } from '@material-ui/core';
 import CloseIcon from '@assets/icons/close.svg';
 import { Form, Title, Header, CloseButton, FormDialogContent, FormDialogActions, RemoveWhiteCorners } from './formDialog.styles';
