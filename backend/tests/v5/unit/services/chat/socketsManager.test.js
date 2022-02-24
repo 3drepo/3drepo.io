@@ -267,7 +267,6 @@ const testSocketsEvents = () => {
 
 				const data = { account, model, project };
 				await eventFns.join(data);
-				console.log(socket.emit.mock.calls);
 				expect(socket.join).toHaveBeenCalledWith(`${account}::${project}::${model}`);
 				checkMessageCall(socket.emit, ACTIONS.JOIN, data);
 			});
