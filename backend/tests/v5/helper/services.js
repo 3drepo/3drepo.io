@@ -91,15 +91,15 @@ db.createModel = (teamspace, _id, name, props) => {
 	return DbHandler.insertOne(teamspace, 'settings', settings);
 };
 
-db.createRevision = async (teamspace, modelId, revision) => {	
+db.createRevision = async (teamspace, modelId, revision) => {
 	const formattedRevision = { ...revision, _id: stringToUUID(revision._id) };
-	await DbHandler.insertOne(teamspace, `${modelId}.history`, formattedRevision);	
+	await DbHandler.insertOne(teamspace, `${modelId}.history`, formattedRevision);
 
-	if(revision.rFile){
+	if (revision.rFile) {
 		const refId = revision.rFile[0];
 		const data = 'test data';
-		let refInfo = await ExternalServices.storeFile(teamspace, `${modelId}.history.ref`, data);
-		DbHandler.insertOne(teamspace, `${modelId}.history.ref`, { ...refInfo, _id: refId });	
+		const refInfo = await ExternalServices.storeFile(teamspace, `${modelId}.history.ref`, data);
+		DbHandler.insertOne(teamspace, `${modelId}.history.ref`, { ...refInfo, _id: refId });
 	}
 };
 
@@ -182,7 +182,7 @@ ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true) => {
 		void: !!isVoid,
 	};
 
-	if(hasFile){
+	if (hasFile) {
 		entry.rFile = [`${_id}${ServiceHelper.generateUUIDString()}`];
 	}
 

@@ -99,12 +99,13 @@ Responder.writeStreamRespond = (req, res, resCode, readStream, fileName, fileSiz
 	const place = `${req.method} ${req.originalUrl}`;
 
 	readStream.on('error', (error) => {
-		logger.logError(`Stream failed: [${error.code} - ${error.message}] @ ${place}`, undefined, networkLabel);
+		logger.logInfo(genResponseLogging(response, { place, httpCode: error.code, contentLength: fileSize }, req),
+			undefined, networkLabel);
 		response = templates.unknown;
 		res.status(response.status);
 		res.end();
 	});
-	
+
 	readStream.once('data', () => {
 		if (headers) {
 			res.writeHead(response.status, headers);
@@ -116,14 +117,11 @@ Responder.writeStreamRespond = (req, res, resCode, readStream, fileName, fileSiz
 	readStream.on('data', (data) => {
 		res.write(data);
 	});
-	
+
 	readStream.on('end', () => {
 		res.end();
-		logger.logInfo(genResponseLogging(response, {
-			place,
-			httpCode: response.status,
-			contentLength: fileSize,
-		}, req), undefined, networkLabel);
+		logger.logInfo(genResponseLogging(response, { place, httpCode: response.status, contentLength: fileSize }, req),
+			undefined, networkLabel);
 	});
 };
 

@@ -63,12 +63,12 @@ const newRevision = (req, res) => {
 const downloadRevisionFiles = async (req, res) => {
 	const { teamspace, container, revision } = req.params;
 
-	try{
+	try {
 		const file = await Containers.downloadRevisionFiles(teamspace, container, revision);
-		
+
 		writeStreamRespond(req, res, templates.ok, file.readStream, file.filename, file.size);
-	} catch (err){
-		respond(req, res, err)
+	} catch (err) {
+		respond(req, res, err);
 	}
 };
 

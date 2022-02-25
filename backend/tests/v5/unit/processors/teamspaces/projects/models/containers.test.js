@@ -181,9 +181,8 @@ Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 
 const getRevisionsMock = Revisions.getRevisions.mockImplementation(() => model1Revisions);
 
-const getRevisionByIdOrTagMock = Revisions.getRevisionByIdOrTag.mockImplementation((teamspace, container, revision) => {
-	return model1Revisions.find((rev) => rev._id === revision); 
-});
+const getRevisionByIdOrTagMock = Revisions.getRevisionByIdOrTag.mockImplementation((teamspace,
+	container, revision) => model1Revisions.find((rev) => rev._id === revision));
 
 FileRefs.downloadFiles.mockImplementation(() => {});
 
@@ -429,23 +428,21 @@ const testGetSettings = () => {
 	});
 };
 
-const formatFilename = (filename) => {
-	return  filename.substr(36).replace(/_([^_]*)$/, '.$1');
-}
+const formatFilename = (name) => name.substr(36).replace(/_([^_]*)$/, '.$1');
 
 const testDownloadRevisionFiles = () => {
 	describe('Download revision files', () => {
 		test('should throw error if revision has no file', async () => {
-			await expect (Containers.downloadRevisionFiles('teamspace', 'container', model1Revisions[1]._id))
+			await expect(Containers.downloadRevisionFiles('teamspace', 'container', model1Revisions[1]._id))
 				.rejects.toEqual(templates.fileNotFound);
 		});
 
 		test('should download files if revision has file', async () => {
-			const res = await Containers.downloadRevisionFiles('teamspace', 'container', model1Revisions[0]._id);		
+			const res = await Containers.downloadRevisionFiles('teamspace', 'container', model1Revisions[0]._id);
 			expect(getRevisionByIdOrTagMock.mock.calls.length).toBe(1);
 			expect(getRevisionByIdOrTagMock.mock.calls[0][2]).toEqual(model1Revisions[0]._id);
 			expect(getRevisionByIdOrTagMock.mock.calls[0][3]).toStrictEqual({ rFile: 1 });
-			expect(res).toEqual({readStream: 'some stream', filename: formatFilename(model1Revisions[0].rFile[0])});
+			expect(res).toEqual({ readStream: 'some stream', filename: formatFilename(model1Revisions[0].rFile[0]) });
 		});
 	});
 };

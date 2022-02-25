@@ -16,9 +16,9 @@
  */
 
 const ExternalServices = require('../handler/externalServices');
-const {sendFileMissingError} = require('../services/mailer');
 const db = require('../handler/db');
 const { logger } = require('../utils/logger');
+const { sendFileMissingError } = require('../services/mailer');
 const { templates } = require('../utils/responseCodes');
 
 const FileRefs = {};

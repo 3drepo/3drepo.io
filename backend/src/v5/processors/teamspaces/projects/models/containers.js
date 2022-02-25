@@ -25,8 +25,8 @@ const fs = require('fs/promises');
 const { getProjectById } = require('../../../../models/projects');
 const { logger } = require('../../../../utils/logger');
 const { queueModelUpload } = require('../../../../services/queue');
-const { timestampToString } = require('../../../../utils/helper/dates');
 const { templates } = require('../../../../utils/responseCodes');
+const { timestampToString } = require('../../../../utils/helper/dates');
 
 const Containers = { ...Groups };
 
@@ -88,7 +88,7 @@ Containers.updateRevisionStatus = updateRevisionStatus;
 Containers.downloadRevisionFiles = async (teamspace, container, revision) => {
 	const rev = await getRevisionByIdOrTag(teamspace, container, revision, { rFile: 1 });
 
-	if (!rev.rFile?.length) {		
+	if (!rev.rFile?.length) {
 		throw templates.fileNotFound;
 	}
 

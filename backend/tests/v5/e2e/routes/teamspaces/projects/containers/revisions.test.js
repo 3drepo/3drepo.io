@@ -71,7 +71,6 @@ const modelWithRev = models[0];
 const federation = models[2];
 const noFileRevision = revisions[1];
 const validRefTypeRevision = revisions[0];
-const noRefRevision = revisions[3];
 const voidRevision = revisions[2];
 
 const setupData = async () => {
@@ -91,15 +90,19 @@ const setupData = async () => {
 		...modelProms,
 		ServiceHelper.db.createUser(nobody),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
-		...revisions.map((revision) => ServiceHelper.db.createRevision(teamspace, modelWithRev._id, revision))
+		...revisions.map((revision) => ServiceHelper.db.createRevision(teamspace, modelWithRev._id, revision)),
 	]);
 };
 
 const formatRevisions = (revs, includeVoid = false) => {
 	const formattedRevisions = revs
 		.sort((a, b) => b.timestamp - a.timestamp)
-		.flatMap((rev) => (includeVoid
-			|| !rev.void ? { _id: rev._id, tag: rev.tag, author: rev.author, void: rev.void, timestamp: rev.timestamp.getTime() } : []));
+		.flatMap((rev) => (includeVoid || !rev.void ? {
+			_id: rev._id,
+			tag: rev.tag,
+			author: rev.author,
+			void: rev.void,
+			timestamp: rev.timestamp.getTime() } : []));
 	return { revisions: formattedRevisions };
 };
 
@@ -356,7 +359,7 @@ const testDownloadRevisionFiles = () => {
 
 		test('should download files if there is a valid ref (using revision tag)', async () => {
 			const res = await agent.get(`${route(teamspace, project.id, modelWithRev._id, validRefTypeRevision.tag)}?key=${users.tsAdmin.apiKey}`)
-			.expect(templates.ok.status);
+				.expect(templates.ok.status);
 			expect(res.text).toEqual('test data');
 		});
 	});

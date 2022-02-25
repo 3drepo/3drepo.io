@@ -146,7 +146,7 @@ const testRemoveAllFilesFromModel = () => {
 };
 
 const testFetchFileStream = () => {
-	describe('Fetch file stream', () => {	
+	describe('Fetch file stream', () => {
 		test('should throw error if the revision has no entry', async () => {
 			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
 			await expect(FileRefs.fetchFileStream('someTS', 'someModel', 'history.ref', 'filename')).rejects.toEqual(templates.fileNotFound);
