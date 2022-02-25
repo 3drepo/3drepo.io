@@ -1,6 +1,6 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
-const OfflinePlugin = require('offline-plugin');
+const { InjectManifest } = require('workbox-webpack-plugin');
 const webpack = require('webpack');
 
 const PATHS = require('./tools/paths');
@@ -48,7 +48,8 @@ module.exports = (env, options) => {
 					{ from: 'serviceWorkerExtras.js', to: '../' },
 					{ context: '../resources', from: '**/*.html', to: '../templates' },
 					{ context: '../resources', from: '**/*.csv', to: '../templates' }
-				]}, options),
+				]
+			}),
 			new HTMLWebpackPlugin({
 				template: './index.html',
 				filename: '../index.html',
@@ -66,6 +67,7 @@ module.exports = (env, options) => {
 			new webpack.ProvidePlugin({
 				process: 'process/browser',
 			}),
+			...(options.plugins || []),
 		],
 		resolve: {
 			extensions: ['.ts', '.js', '.tsx'],
@@ -85,14 +87,11 @@ module.exports = (env, options) => {
 
 	if (options.mode !== MODES.DEVELOPMENT) {
 		config.plugins.push(
-		new OfflinePlugin({
-			responseStrategy: 'network-first',
-					ServiceWorker: {
-						output: '../sw.js',
-						entry: './serviceWorkerExtras.js'
-					},
-					excludes: ['**/*.map']
-			})
+			new InjectManifest({
+				swSrc: './serviceWorkerExtras.js',
+				swDest: '../sw.js',
+				exclude: ['**/*.map']
+			}),
 		);
 	}
 

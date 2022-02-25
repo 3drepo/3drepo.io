@@ -29,10 +29,8 @@ import { dispatch, history, store } from '@/v4/modules/store';
 import V4Root from '@/v4/routes/index';
 import { Root as V5Root } from '@/v5/ui/routes';
 
-import { IS_DEVELOPMENT } from '@/v4/constants/environment';
 import { UnityUtil } from '@/globals/unity-util';
 import { clientConfigService } from '@/v4/services/clientConfig';
-import * as OfflinePluginRuntime from 'offline-plugin/runtime';
 import { initializeIntl } from '@/v5/services/intl';
 import { initializeActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 import { Version, VersionContext } from './versionContext';
@@ -75,7 +73,3 @@ const initApp = () => {
 };
 
 initApp();
-
-if (!IS_DEVELOPMENT) {
-	OfflinePluginRuntime.install();
-}

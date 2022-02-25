@@ -1,3 +1,7 @@
+import { precacheAndRoute } from 'workbox-precaching';
+
+precacheAndRoute(self.__WB_MANIFEST);
+
 const CACHE_NAME = 'externalResources';
 
 self.addEventListener('fetch', function (event) {
