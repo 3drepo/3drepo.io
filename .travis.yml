@@ -41,7 +41,7 @@ matrix:
       before_install:
         - sudo apt remove mongodb && sudo apt purge mongodb && sudo apt autoremove && sudo rm -rf /var/lib/mongodb
         - wget -qO - https://www.mongodb.org/static/pgp/server-3.2.asc | sudo apt-key add -
-        - echo "deb [ arch=amd64,arm64 ] deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+        - echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
         - sudo apt-get update
         - sudo apt-get install -y gnupg mongodb-org=3.2.22 mongodb-org-database=3.2.22 mongodb-org-server=3.2.22 mongodb-org-shell=3.2.22 mongodb-org-tools=3.2.22
         - sudo systemctl daemon-reload && sudo systemctl start mongod && echo $(mongod --version)
