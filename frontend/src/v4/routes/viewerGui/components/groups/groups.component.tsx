@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent, createRef } from 'react';
+import { PureComponent, createRef, SyntheticEvent, MouseEvent } from 'react';
 import fileDialog from 'file-dialog';
 
 import IconButton from '@material-ui/core/IconButton';

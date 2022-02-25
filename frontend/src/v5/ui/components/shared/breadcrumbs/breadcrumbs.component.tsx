@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useState } from 'react';
+import { useState, MouseEvent } from 'react';
 import { useParams, useRouteMatch } from 'react-router-dom';
 import HomeIcon from '@assets/icons/home.svg';
 import DownArrowIcon from '@assets/icons/down_arrow.svg';
