@@ -27,6 +27,7 @@ const initialiseSession = () => {
 	const store = db.getSessionStore(expressSession);
 	const secure = config.public_protocol === 'https';
 	const { secret, maxAge, domain } = config.cookie;
+	// istanbul ignore next
 	return expressSession({
 		secret,
 		resave: true,
@@ -40,7 +41,6 @@ const initialiseSession = () => {
 			// None can only applied with secure set to true, which requires SSL.
 			// None is required for embeddable viewer to work.
 			// FIXME: this should be deduced inside config.js
-			// istanbul ignore next
 			sameSite: secure ? 'None' : 'Lax',
 		},
 		store,
