@@ -23,7 +23,6 @@ const expressSession = require('express-session');
 const { publish } = require('./eventsManager/eventsManager');
 
 const Sessions = { SESSION_HEADER: 'connect.sid' };
-
 const initialiseSession = () => {
 	const store = db.getSessionStore(expressSession);
 	const secure = config.public_protocol === 'https';
@@ -63,5 +62,4 @@ Sessions.removeOldSessions = async (username, currentSessionID) => {
 	await db.deleteMany('admin', 'sessions', { _id: { $in: sessionIds } });
 	publish(events.SESSIONS_REMOVED, { ids: sessionIds });
 };
-
 module.exports = Sessions;

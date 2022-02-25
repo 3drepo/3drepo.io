@@ -17,6 +17,12 @@
 
 const { src } = require('../../helper/path');
 
+// Need to mock these 2 to ensure we are not trying to create a real session configuration
+jest.mock('express-session', () => () => {});
+jest.mock('../../../../src/v5/handler/db', () => ({
+	...jest.requireActual('../../../../src/v5/handler/db'),
+	getSessionStore: () => {},
+}));
 const Sessions = require(`${src}/services/sessions`);
 const db = require(`${src}/handler/db`);
 

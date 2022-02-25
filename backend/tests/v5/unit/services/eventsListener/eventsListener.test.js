@@ -21,11 +21,17 @@ jest.mock('../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
 jest.mock('../../../../../src/v5/models/loginRecord');
 const LoginRecord = require(`${src}/models/loginRecord`);
+
+// Need to mock these 2 to ensure we are not trying to create a real session configuration
+jest.mock('express-session', () => () => {});
+jest.mock('../../../../../src/v5/handler/db', () => ({
+	...jest.requireActual('../../../../../src/v5/handler/db'),
+	getSessionStore: () => {},
+}));
 jest.mock('../../../../../src/v5/services/sessions');
 const Sessions = require(`${src}/services/sessions`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
-
 const EventsListener = require(`${src}/services/eventsListener/eventsListener`);
 
 ModelSettings.updateModelStatus.mockResolvedValue(() => {});
