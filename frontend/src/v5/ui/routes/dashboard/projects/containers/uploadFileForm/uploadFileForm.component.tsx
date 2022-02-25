@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
 import { useParams } from 'react-router';
 
@@ -49,12 +49,16 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		mode: 'onChange',
 		resolver: yupResolver(UploadsSchema),
 	});
-	const { control, handleSubmit, formState, trigger, getValues, setValue, watch } = methods;
+	const { control, handleSubmit, formState, trigger, getValues, setValue, watch, reset } = methods;
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'uploads',
 		keyName: 'uploadId',
 	});
+
+	useEffect(() => {
+		if (formState.isSubmitSuccessful) reset();
+	}, [isUploading]);
 
 	const DEFAULT_SORT_CONFIG = {
 		column: 'file',
@@ -112,11 +116,16 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 	};
 
 	const onSubmit = async (data: UploadFieldArray) => {
-		setIsUploading(true);
-		setSelectedIndex(null);
-		data.uploads.forEach((revision, i) => {
-			RevisionsActionsDispatchers.createRevision(teamspace, project, revision.containerId, (value) => setValue(`uploads.${i}.progress`, value), revision);
-		});
+		if (isUploading) {
+			setIsUploading(false);
+			onClickClose();
+		} else {
+			setIsUploading(true);
+			setSelectedIndex(null);
+			data.uploads.forEach((revision, i) => {
+				RevisionsActionsDispatchers.createRevision(teamspace, project, revision.containerId, (value) => setValue(`uploads.${i}.progress`, value), revision);
+			});
+		}
 	};
 
 	return (
