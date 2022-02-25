@@ -21,6 +21,7 @@ const { getContainerById, getContainers, updateModelSettings } = require('../../
 const { getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const Groups = require('./commons/groups');
 const { fetchFileStream } = require('../../../../models/fileRefs');
+const Views = require('./commons/views');
 const fs = require('fs/promises');
 const { getProjectById } = require('../../../../models/projects');
 const { logger } = require('../../../../utils/logger');
@@ -28,7 +29,7 @@ const { queueModelUpload } = require('../../../../services/queue');
 const { templates } = require('../../../../utils/responseCodes');
 const { timestampToString } = require('../../../../utils/helper/dates');
 
-const Containers = { ...Groups };
+const Containers = { ...Groups, ...Views };
 
 Containers.addContainer = addModel;
 
