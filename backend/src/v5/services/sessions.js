@@ -39,6 +39,8 @@ const initialiseSession = () => {
 			secure,
 			// None can only applied with secure set to true, which requires SSL.
 			// None is required for embeddable viewer to work.
+			// FIXME: this should be deduced inside config.js
+			// istanbul ignore next
 			sameSite: secure ? 'None' : 'Lax',
 		},
 		store,
