@@ -105,14 +105,14 @@ const testGetRevisionByIdOrTag = () => {
 			const res = await Revisions.getRevisionByIdOrTag('someTS', 'someModel', 1);
 			expect(res).toEqual(revision);
 			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][2]).toEqual({ _id: 1 });
+			expect(fn.mock.calls[0][2]).toEqual({ $or: [{ _id: 1 }, { tag: 1 }] });
 		});
 
 		test('Should throw REVISION_NOT_FOUND if it cannot find the revision in the revisions table', async () => {
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
 			await expect(Revisions.getRevisionByIdOrTag('someTS', 'someModel', 1)).rejects.toEqual(templates.revisionNotFound);
 			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][2]).toEqual({ _id: 1 });
+			expect(fn.mock.calls[0][2]).toEqual({ $or: [{ _id: 1 }, { tag: 1 }] });
 		});
 	});
 };

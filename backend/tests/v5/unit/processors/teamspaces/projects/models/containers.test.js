@@ -39,6 +39,7 @@ const FileRefs = require(`${src}/models/fileRefs`);
 jest.mock('../../../../../../../src/v5/models/fileRefs', () => ({
 	...jest.requireActual('../../../../../../../src/v5/models/fileRefs'),
 	downloadFiles: jest.fn(),
+	fetchFileStream: jest.fn().mockImplementation(() => ({ readStream: 'some stream' })),
 }));
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -141,10 +142,12 @@ const container2Rev = {
 	timestamp: 1630606846000,
 };
 
+const revWithFileId = ServiceHelper.generateUUIDString();
+const filename = `${revWithFileId}${ServiceHelper.generateUUIDString()}.ifc`;
 const model1Revisions = [
-	{ _id: 1, author: 'user1', timestamp: new Date() },
-	{ _id: 2, author: 'user1', timestamp: new Date() },
-	{ _id: 3, author: 'user1', timestamp: new Date(), void: true },
+	{ _id: revWithFileId, author: 'user1', timestamp: new Date(), rFile: [filename] },
+	{ _id: ServiceHelper.generateUUIDString(), author: 'user1', timestamp: new Date() },
+	{ _id: ServiceHelper.generateUUIDString(), author: 'user1', timestamp: new Date(), void: true },
 ];
 
 ProjectsModel.getProjectById.mockImplementation(() => project);
@@ -177,7 +180,11 @@ Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 });
 
 const getRevisionsMock = Revisions.getRevisions.mockImplementation(() => model1Revisions);
-const getRevisionByIdOrTagMock = Revisions.getRevisionByIdOrTag.mockImplementation(() => model1Revisions[0]);
+
+const getRevisionByIdOrTagMock = Revisions.getRevisionByIdOrTag.mockImplementation((teamspace, container, revision) => {
+	return model1Revisions.find((rev) => rev._id === revision); 
+});
+
 FileRefs.downloadFiles.mockImplementation(() => {});
 
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
@@ -422,13 +429,23 @@ const testGetSettings = () => {
 	});
 };
 
+const formatFilename = (filename) => {
+	return  filename.substr(36).replace(/_([^_]*)$/, '.$1');
+}
+
 const testDownloadRevisionFiles = () => {
 	describe('Download revision files', () => {
-		test('should return non-void revisions if the container exists', async () => {
-			await Containers.downloadRevisionFiles('teamspace', 'container', 1);
+		test('should throw error if revision has no file', async () => {
+			await expect (Containers.downloadRevisionFiles('teamspace', 'container', model1Revisions[1]._id))
+				.rejects.toEqual(templates.fileNotFound);
+		});
+
+		test('should download files if revision has file', async () => {
+			const res = await Containers.downloadRevisionFiles('teamspace', 'container', model1Revisions[0]._id);		
 			expect(getRevisionByIdOrTagMock.mock.calls.length).toBe(1);
-			expect(getRevisionByIdOrTagMock.mock.calls[0][2]).toEqual(1);
+			expect(getRevisionByIdOrTagMock.mock.calls[0][2]).toEqual(model1Revisions[0]._id);
 			expect(getRevisionByIdOrTagMock.mock.calls[0][3]).toStrictEqual({ rFile: 1 });
+			expect(res).toEqual({readStream: 'some stream', filename: formatFilename(model1Revisions[0].rFile[0])});
 		});
 	});
 };
