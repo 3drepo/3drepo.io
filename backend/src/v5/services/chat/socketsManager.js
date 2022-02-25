@@ -21,6 +21,7 @@ const chatLabel = require('../../utils/logger').labels.chat;
 const { findProjectByModelId } = require('../../models/projects');
 const { hasReadAccessToModel } = require('../../utils/permissions/permissions');
 const logger = require('../../utils/logger').logWithLabel(chatLabel);
+const { templates } = require('../../utils/responseCodes');
 
 const socketIdToSocket = {};
 const sessionToSocketIds = {};
@@ -56,8 +57,7 @@ const joinRoom = async (socket, data) => {
 	const { teamspace, model, project, notifications } = data;
 	const username = getUserNameFromSocket(socket);
 	if (!username) {
-		emitError(socket, ERRORS.UNAUTHORISED, 'You are not authenticated to the service.', ACTIONS.JOIN, data);
-		return;
+		throw { code: ERRORS.UNAUTHORISED, message: 'You are not authenticated to the service.' };
 	}
 
 	let channelName;
@@ -70,7 +70,7 @@ const joinRoom = async (socket, data) => {
 			throw { code: ERRORS.UNAUTHORISED, message: 'You do not have sufficient access rights to join the room requested' };
 		}
 	} else {
-		throw { code: ERRORS.NOT_FOUND, message: 'Cannot identify the room indicated' };
+		throw { code: ERRORS.ROOM_NOT_FOUND, message: 'Cannot identify the room indicated' };
 	}
 
 	socket.join(channelName);
@@ -81,12 +81,16 @@ const joinRoomV4 = async (socket, data) => {
 	const { account, model } = data;
 	// connects from v4 - convert them to v5 compatible room names
 	if (model) {
-		const project = await findProjectByModelId(account, model, { _id: 1 });
-		if (!project) {
-			throw { code: ERRORS.ROOM_NOT_FOUND, message: `Model ${model} does not belong in any project.` };
+		try {
+			const project = await findProjectByModelId(account, model, { _id: 1 });
+			const projectId = UUIDToString(project._id);
+			await joinRoom(socket, { teamspace: account, model, project: projectId });
+		} catch (err) {
+			if (err.code === templates.projectNotFound.code) {
+				throw { code: ERRORS.ROOM_NOT_FOUND, message: `Model ${model} does not belong in any project.` };
+			}
+			throw err;
 		}
-		const projectId = UUIDToString(project._id);
-		await joinRoom(socket, { teamspace: account, model, project: projectId });
 	} else if (account === getUserNameFromSocket(socket)) {
 		await joinRoom(socket, { notifications: true });
 	} else {
@@ -112,11 +116,14 @@ const leaveRoom = (socket, data) => {
 const leaveRoomV4 = async (socket, data) => {
 	const { account, model } = data;
 	if (model) {
-		const project = await findProjectByModelId(account, model, { _id: 1 });
-		if (project) {
+		try {
+			const project = await findProjectByModelId(account, model, { _id: 1 });
 			leaveRoom(socket, { teamspace: account, model, project: project._id });
-		} else {
-			throw { code: ERRORS.ROOM_NOT_FOUND, message: `Model ${model} does not belong in any project.` };
+		} catch (err) {
+			if (err.code === templates.projectNotFound.code) {
+				throw { code: ERRORS.ROOM_NOT_FOUND, message: `Model ${model} does not belong in any project.` };
+			}
+			throw err;
 		}
 	} else {
 		leaveRoom(socket, { notifications: true });
