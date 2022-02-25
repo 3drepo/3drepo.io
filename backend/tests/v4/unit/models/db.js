@@ -165,20 +165,6 @@ describe("Check DB handler", function() {
 		});
 	});
 
-	describe("getCollectionStats", function () {
-		it("get collection stats should succeed", async function() {
-			const stats = await db.getCollectionStats(account, "jobs");
-			expect(stats).to.exist;
-			expect(stats.ok).to.equal(1);
-		});
-
-		it("get collection stats with incorrect username should be size 0", async function() {
-			const stats = await db.getCollectionStats("notexist", "jobs");
-			expect(stats).to.exist;
-			expect(stats.size).to.equal(0);
-		});
-	});
-
 	describe("listCollections", function () {
 		it("list collection with valid username should succeed", async function() {
 			const colls = await db.listCollections(account);
@@ -463,7 +449,7 @@ describe("Check DB handler", function() {
 				await db.runCommand(account, createRoleCmd);
 				throw {}; // should've failed at previous line
 			} catch (err) {
-				expect(err.code).to.equal(51002);
+				expect(!!err.code).to.equal(true);
 			}
 		});
 

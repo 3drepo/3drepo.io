@@ -187,15 +187,6 @@
 		});
 	};
 
-	Handler.getCollectionStats = function (database, colName) {
-		return Handler.getDB(database).then(dbConn => {
-			return dbConn.collection(colName).stats();
-		}).catch(err => {
-			Handler.disconnect();
-			return Promise.reject(err);
-		});
-	};
-
 	Handler.getFileStreamFromGridFS = function (database, collection, filename) {
 		return getGridFSBucket(database,collection).then((bucket) => {
 			return bucket.find({filename}).toArray().then(file => {
