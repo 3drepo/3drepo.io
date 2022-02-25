@@ -39,6 +39,8 @@ matrix:
         - docker
 
       before_install:
+        - wget $SSL_INSTALLER
+        - sudo apt install $PWD/libssl1.0.0_1.0.2n-1ubuntu5.7_amd64.deb
         - sudo apt remove mongodb && sudo apt purge mongodb && sudo apt autoremove && sudo rm -rf /var/lib/mongodb
         - wget -qO - https://www.mongodb.org/static/pgp/server-3.2.asc | sudo apt-key add -
         - echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
