@@ -20,23 +20,31 @@ import { Button, DialogContent, DialogContentText, DialogTitle } from '@material
 import WarningIcon from '@assets/icons/warning.svg';
 import { FormattedMessage } from 'react-intl';
 import { Container, Actions, Details, Status } from '@/v5/ui/components/shared/modals/modals.styles';
+import { AxiosError } from 'axios';
 
 interface IAlertModal {
 	onClickClose?: () => void,
 	currentActions?: string
 	errorMessage?: string;
-	error?: {
-		request: {
-			response: string;
-		};
-	};
+	error: AxiosError;
 	details?: string
 }
 
 export const AlertModal: React.FC<IAlertModal> = ({ onClickClose, currentActions = '', error, details, errorMessage }) => {
-	const responseData = error?.request?.response ? JSON.parse(error?.request?.response) : {};
-	const { message, status, code } = responseData;
-	const errorStatus = `${status} - ${code}`;
+	let message; let code;
+
+	const { response } = error;
+	const { status, headers } = response;
+	const responseType = headers['content-type'];
+
+	if (responseType === 'application/json; charset=utf-8') {
+		const { data } = response;
+		message = data.message;
+		code = data.code;
+	} else {
+		code = response.statusText;
+	}
+	const errorStatus = status && code ? `${status} - ${code}` : '';
 
 	return (
 		<Container>
