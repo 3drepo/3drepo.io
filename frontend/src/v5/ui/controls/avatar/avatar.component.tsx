@@ -30,15 +30,18 @@ const getUserNamesInitials = ({ firstName, lastName }) => {
 };
 
 type AvatarProps = {
-	disabled?: boolean;
 	onClick?: (event: MouseEvent) => void;
 	user: IUser;
-	button?: boolean;
 	largeIcon?: boolean;
+	isButton?: boolean;
 };
 
-export const Avatar = ({ user, ...props }: AvatarProps) => (
-	<StyledIconButton {...props}>
+export const Avatar = ({ user, largeIcon, isButton, ...props }: AvatarProps) => (
+	<StyledIconButton
+		$largeIcon={largeIcon}
+		$isButton={isButton}
+		{...props}
+	>
 		<AvatarIcon src={user.hasAvatar ? user.avatarUrl : null}>
 			{getUserNamesInitials(user)}
 		</AvatarIcon>

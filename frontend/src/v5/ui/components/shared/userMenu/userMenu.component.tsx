@@ -49,7 +49,10 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 		<AvatarContainer>
 			<ActionMenu>
 				<ActionMenuTriggerButton>
-					<Avatar user={user} button />
+					<Avatar
+						user={user}
+						isButton
+					/>
 				</ActionMenuTriggerButton>
 				<ActionMenuSection>
 					<AvatarSection>
@@ -58,7 +61,7 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 							largeIcon
 						/>
 						<UserFullName>{user.firstName} {user.lastName}</UserFullName>
-						<UserUserName>{user.username}</UserUserName>
+						<UserUserName>{user.user}</UserUserName>
 						<EditProfileButton to="">
 							<ActionMenuItem>
 								Edit your profile
