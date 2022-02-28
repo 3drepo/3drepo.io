@@ -34,7 +34,7 @@
 	const isAccountAdminHelper = require("./checkPermissions").isAccountAdminHelper;
 	const validateUserSession = require("./checkPermissions").validateUserSession;
 
-	const { isLoggedIn } = require(`${v5Path}/middleware/auth`);
+	const { validSession } = require(`${v5Path}/middleware/auth`);
 
 	const readAccessToModel = [C.PERM_VIEW_MODEL];
 
@@ -53,7 +53,7 @@
 		if (skipLoggedIn(req)) {
 			next();
 		} else {
-			isLoggedIn(req,res,next);
+			validSession(req,res,next);
 		}
 	}
 

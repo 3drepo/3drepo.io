@@ -17,10 +17,11 @@
 
 "use strict";
 
+const { v5Path } = require("../../interop");
 const _ = require("lodash");
 const C	= require("../constants");
 const getPermissionsAdapter = require("./getPermissionsAdapter");
-const sessionCheck = require("./sessionCheck");
+const { validSession } = require(`${v5Path}/middleware/auth`);
 const responseCodes = require("../response_codes");
 
 // logic to check permissions
@@ -71,13 +72,9 @@ function checkPermissionsHelper(username, account, project, model, requiredPerms
 	});
 }
 
-function validateUserSession(req) {
-	if (!sessionCheck(req)) {
-		return Promise.reject(responseCodes.NOT_LOGGED_IN);
-	}
-
-	return Promise.resolve();
-}
+const validateUserSession = (req) => new Promise((resolve, reject) => {
+	validSession(req, reject, resolve);
+});
 
 function validatePermissions(next, result) {
 	const results = _.isArray(result) ? result : [result];
