@@ -16,8 +16,13 @@
  */
 
 import React from 'react';
-import { Link, MenuItem, MenuItemContainer } from './actionMenuItem.styles';
-import { ActionMenuItemButton } from './actionMenuItemButton/actionMenuItemButton.component';
+import {
+	ActionMenuItemButton,
+	ItemIcon,
+	Link,
+	MenuItem,
+	ItemText,
+} from './actionMenuItem.styles';
 
 export const ACTION_MENU_ITEM_NAME = 'ActionMenuItem';
 
@@ -27,6 +32,7 @@ type ActionMenuItemProps = {
 	Icon?: any;
 	to?: string;
 	children?: React.ReactNode;
+	actionButton?: boolean;
 	onClick?: () => void;
 };
 
@@ -34,19 +40,23 @@ export const ActionMenuItem = ({
 	children,
 	to,
 	Icon,
-	label,
-	onClick,
+	actionButton,
 	...props
 }: ActionMenuItemProps) => (
-	<MenuItemContainer onClick={onClick}>
-		{children
-			? <>{children}</>
-			: (
-				<MenuItem {...props} button>
-					<Link to={to}>
-						<ActionMenuItemButton Icon={Icon} label={label} />
-					</Link>
-				</MenuItem>
-			)}
-	</MenuItemContainer>
+	<MenuItem data-name="menuItem" {...props} button={!!actionButton}>
+		{actionButton ? (
+			<Link to={to}>
+				<ActionMenuItemButton>
+					{Icon && (
+						<ItemIcon>
+							<Icon />
+						</ItemIcon>
+					)}
+					<ItemText>{children}</ItemText>
+				</ActionMenuItemButton>
+			</Link>
+		) : (
+			children
+		)}
+	</MenuItem>
 );

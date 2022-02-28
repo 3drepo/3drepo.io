@@ -18,27 +18,56 @@
 import styled from 'styled-components';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
 import { Link as LinkBase } from 'react-router-dom';
 
 export const Link = styled(LinkBase)`
 	text-decoration: none;
+	width: 100%;
 `;
 
-export const MenuItemContainer = styled.div`
-	display: flex;
-`;
-
-export const ItemIcon = styled(ListItemIcon)`
-	&& {    
-		margin-right: 10px;
-		min-width: 0;
+export const MenuItem = styled.div`
+	&& {
+		padding: 0;
+		margin: 0;
 	}
 `;
 
-export const ItemText = styled(ListItemText).attrs({
-	disableTypography: true,
-})`
+export const ActionMenuItemButton = styled(ListItem)`
+	&& {
+		cursor: pointer;
+		transition: all 0s;
+		border-radius: 3px;
+		width: 100%;
+		height: 39px;
+		padding: 0 11px;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		text-align: left;
+
+		&:hover {
+			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+		}
+
+		&:focus {
+			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+		}
+
+		&:active {
+			background-color: ${({ theme }) => theme.palette.base.light};
+		}
+	}
+`;
+
+export const ItemIcon = styled(ListItemIcon)`
+	&& {
+		margin-right: 10px;
+		min-width: 0;
+		color: ${({ theme }) => theme.palette.base.main};
+	}
+`;
+
+export const ItemText = styled.div`
 	&& {
 		color: ${({ theme }) => theme.palette.secondary.main};
 		${({ theme }) => theme.typography.body1};
@@ -46,19 +75,4 @@ export const ItemText = styled(ListItemText).attrs({
 		text-decoration: none;
 		margin: 0;
 	}
-`;
-
-export const MenuItem = styled(ListItem)`
-	&& {
-		transition: all 0s;
-		border-radius: 3px;
-		margin: 0;
-		padding: 0;
-
-		& > * {
-			width: 100%;
-			padding: 0 11px;
-		}
-	}
-
 `;

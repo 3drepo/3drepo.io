@@ -18,6 +18,7 @@
 import React from 'react';
 import { useParams } from 'react-router';
 import { useRouteMatch } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 
 import ContactUsIcon from '@assets/icons/email.svg';
 import InviteAFriendIcon from '@assets/icons/add_user.svg';
@@ -62,41 +63,74 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 						/>
 						<UserFullName>{user.firstName} {user.lastName}</UserFullName>
 						<UserUserName>{user.user}</UserUserName>
-						<EditProfileButton to="">
-							<ActionMenuItem>
-								Edit your profile
-							</ActionMenuItem>
-						</EditProfileButton>
+						<ActionMenuItem>
+							<EditProfileButton>
+								<FormattedMessage
+									id="userMenu.editYourProfile"
+									defaultMessage="Edit your profile"
+								/>
+							</EditProfileButton>
+						</ActionMenuItem>
 					</AvatarSection>
 				</ActionMenuSection>
 				<ActionMenuSection>
 					<ActionMenuItem
 						Icon={TeamspacesIcon}
-						label="Teamspaces"
 						to={`${baseUrl}/${teamspace}`}
-					/>
+						actionButton
+					>
+						<FormattedMessage
+							id="userMenu.teamspaces"
+							defaultMessage="Teamspaces"
+						/>
+					</ActionMenuItem>
 					<ActionMenuItem
 						Icon={VisualSettingsIcon}
-						label="Visual Settings"
-					/>
+						actionButton
+					>
+						<FormattedMessage
+							id="userMenu.visualSettings"
+							defaultMessage="Visual settings"
+						/>
+					</ActionMenuItem>
 				</ActionMenuSection>
 				<ActionMenuSection>
 					<ActionMenuItem
 						Icon={SupportCentreIcon}
-						label="Support centre"
-					/>
+						actionButton
+					>
+						<FormattedMessage
+							id="userMenu.supportCentre"
+							defaultMessage="Support centre"
+						/>
+					</ActionMenuItem>
 					<ActionMenuItem
 						Icon={ContactUsIcon}
-						label="Contact us"
-					/>
+						actionButton
+					>
+						<FormattedMessage
+							id="userMenu.contactUs"
+							defaultMessage="Contact us"
+						/>
+					</ActionMenuItem>
 					<ActionMenuItem
 						Icon={InviteAFriendIcon}
-						label="Invite a friend"
-					/>
+						actionButton
+					>
+						<FormattedMessage
+							id="userMenu.inviteAFriend"
+							defaultMessage="Invite a friend"
+						/>
+					</ActionMenuItem>
 				</ActionMenuSection>
 				<ActionMenuSection>
 					<ActionMenuItem>
-						<SignOutButton>Sign out</SignOutButton>
+						<SignOutButton>
+							<FormattedMessage
+								id="userMenu.signOut"
+								defaultMessage="Sign out"
+							/>
+						</SignOutButton>
 					</ActionMenuItem>
 				</ActionMenuSection>
 			</ActionMenu>
