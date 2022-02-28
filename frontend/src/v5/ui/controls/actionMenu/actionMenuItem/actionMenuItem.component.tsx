@@ -43,13 +43,9 @@ export const ActionMenuItem = ({
 			? <>{children}</>
 			: (
 				<MenuItem {...props} button>
-					{to ? (
-						<Link to={to}>
-							<ActionMenuItemButton Icon={Icon} label={label} />
-						</Link>
-					) : (
+					<Link to={to}>
 						<ActionMenuItemButton Icon={Icon} label={label} />
-					)}
+					</Link>
 				</MenuItem>
 			)}
 	</MenuItemContainer>
