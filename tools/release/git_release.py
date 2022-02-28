@@ -67,13 +67,6 @@ execExitOnFail("git commit -m \"Version " + version + "\"", "Failed to commit")
 execExitOnFail("git push origin :refs/tags/" + version, "Failed to push tag")
 execExitOnFail("git tag -fa " + version + " -m \" Version " + version + " \"", "Failed to add tag")
 
-if production:
-    execExitOnFail("git push origin :refs/tags/latest","Failed to push tag")
-    execExitOnFail("git tag -fa latest -m \"Update latest\"", "Failed to add tag")
-else:
-    execExitOnFail("git push origin :refs/tags/dev_latest", "Failed to push tag")
-    execExitOnFail("git tag -fa dev_latest -m \"Update latest\"", "Failed to add tag")
-
 execExitOnFail("git push origin --tags", "Failed to update tag")
 execExitOnFail("git push", "Failed to push upstream")
 

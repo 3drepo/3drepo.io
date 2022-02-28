@@ -16,8 +16,8 @@
  */
 
 const { createResponseCode, templates } = require('../../utils/responseCodes');
-const FileType = require('file-type');
 const Multer = require('multer');
+const { fileExtensionFromBuffer } = require('../../utils/helper/typeCheck');
 const { respond } = require('../../utils/responder');
 const { fileUploads: uploadConfig } = require('../../utils/config');
 const { validateMany } = require('../common');
@@ -61,9 +61,9 @@ const imageFilter = (req, file, cb) => {
 const ensureFileIsImage = async (req, res, next) => {
 	const fileBuffer = req.file?.buffer;
 	if (fileBuffer) {
-		const type = await FileType.fromBuffer(fileBuffer);
+		const ext = await fileExtensionFromBuffer(fileBuffer);
 
-		if (!uploadConfig.imageExtensions.includes(type?.ext)) {
+		if (!uploadConfig.imageExtensions.includes(ext)) {
 			respond(req, res, templates.unsupportedFileFormat);
 			return;
 		}
