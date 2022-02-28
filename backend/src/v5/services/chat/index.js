@@ -23,17 +23,8 @@ const { events } = require('../eventsManager/eventsManager.constants');
 const logger = require('../../utils/logger').logWithLabel(chatLabel);
 const sharedSession = require('express-socket.io-session');
 const { subscribe } = require('../eventsManager/eventsManager');
-const { subscribeToEventQueue } = require('../queue');
 
 const ChatService = {};
-
-const subscribeToEvents = () => {
-	subscribe(events.SESSION_CREATED, ({ sessionID, socketId }) => {
-		if (SocketsManager.getSocketById(socketId)) {
-			SocketsManager.addSocketIdToSession(sessionID, socketId);
-		}
-	});
-};
 
 const onMessageV4 = (service, msg) => {
 	try {
@@ -65,6 +56,16 @@ const onMessage = (service, msg) => {
 	}
 };
 
+const subscribeToEvents = (service) => {
+	subscribe(events.SESSION_CREATED, ({ sessionID, socketId }) => {
+		if (SocketsManager.getSocketById(socketId)) {
+			SocketsManager.addSocketIdToSession(sessionID, socketId);
+		}
+	});
+
+	subscribe(events.CHAT_EVENT, (msg) => onMessage(service, msg));
+};
+
 const init = (server) => {
 	logger.logDebug('Initialising service');
 	const service = SocketIO(server, { path: '/chat' });
@@ -83,8 +84,7 @@ const init = (server) => {
 
 ChatService.createApp = (server) => {
 	const service = init(server);
-	subscribeToEvents();
-	subscribeToEventQueue((msg) => onMessage(service, msg));
+	subscribeToEvents(service);
 };
 
 module.exports = ChatService;

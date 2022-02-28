@@ -41,8 +41,6 @@ let retry = 0;
 let connClosed = false;
 let connectionPromise;
 
-const eventCallbacks = new Set();
-
 const reconnect = () => {
 	if (++retry <= maxRetries) {
 		logger.logError(`Trying to reconnect[${retry}/${maxRetries}]...`);
@@ -83,8 +81,7 @@ const onEventQMsg = ({ content }) => {
 	try {
 		const data = JSON.parse(content);
 		logger.logDebug(`[${eventExchange}][CONSUME]\t${JSON.stringify(data)}`);
-
-		eventCallbacks.forEach((func) => { func(data); });
+		publish(events.NEW_EVENT_MESSAGE, data);
 	} catch (err) {
 		logger.logError(`[${eventExchange}][CONSUME]\t${err?.message}`);
 	}
@@ -244,17 +241,12 @@ Queue.queueFederationUpdate = async (teamspace, federation, info) => {
 	}
 };
 
-Queue.subscribeToEventQueue = (func) => {
-	eventCallbacks.add(func);
-};
-
 Queue.init = () => connect();
 Queue.close = async () => {
 	if (connectionPromise) {
 		(await connectionPromise).close();
 		connectionPromise = undefined;
 	}
-	eventCallbacks.clear();
 };
 
 module.exports = Queue;

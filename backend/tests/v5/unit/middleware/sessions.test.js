@@ -32,6 +32,13 @@ const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager.constants');
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 
+// Need to mock these 2 to ensure we are not trying to create a real session configuration
+jest.mock('express-session', () => () => {});
+jest.mock('../../../../src/v5/handler/db', () => ({
+	...jest.requireActual('../../../../src/v5/handler/db'),
+	getSessionStore: () => {},
+}));
+
 const Sessions = require(`${src}/middleware/sessions`);
 
 // Mock respond function to just return the resCode

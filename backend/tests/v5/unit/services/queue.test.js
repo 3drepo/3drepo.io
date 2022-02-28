@@ -278,39 +278,24 @@ const testEventQueueConsumer = () => {
 			Queue.init();
 		});
 
-		test('Should pass the message on if there are consumers', async () => {
-			const con1 = jest.fn();
-			const con2 = jest.fn();
+		test('Should pass the message to eventManager', async () => {
+			publishFn.mockClear();
 			const callbackFn = await waitForConsumer();
 			expect(callbackFn).not.toBe(undefined);
 
-			Queue.subscribeToEventQueue(con1);
-			Queue.subscribeToEventQueue(con2);
+			const content = { someData: generateRandomString() };
 
-			const content1 = { someData: generateRandomString() };
-			const content2 = { someData: generateRandomString() };
+			callbackFn({ content: JSON.stringify(content) });
 
-			callbackFn({ content: JSON.stringify(content1) });
-			callbackFn({ content: JSON.stringify(content2) });
-
-			expect(con1.mock.calls.length).toBe(2);
-			expect(con2.mock.calls.length).toBe(2);
-			expect(con1.mock.calls[0][0]).toEqual(content1);
-			expect(con2.mock.calls[0][0]).toEqual(content1);
-			expect(con1.mock.calls[1][0]).toEqual(content2);
-			expect(con2.mock.calls[1][0]).toEqual(content2);
-		});
-
-		test('Should not fail if there are no consumers for events', async () => {
-			const callbackFn = await waitForConsumer();
-			expect(callbackFn).not.toBe(undefined);
-			callbackFn({ content: { someData: generateRandomString() } });
+			expect(publishFn).toBeCalledWith(events.CHAT_MESSAGE, content);
 		});
 
 		test('Should fail gracefully if the service failed to process the message', async () => {
+			publishFn.mockClear();
 			const callbackFn = await waitForConsumer();
 			expect(callbackFn).not.toBe(undefined);
 			callbackFn({ });
+			expect(publishFn).not.toBeCalled();
 		});
 	});
 	afterEach(Queue.close);
