@@ -23,6 +23,7 @@ export const ItemIcon = styled(ListItemIcon)`
 	&& {
 		margin-right: 10px;
 		min-width: 0;
+		color: ${({ theme }) => theme.palette.base.main};
 	}
 `;
 

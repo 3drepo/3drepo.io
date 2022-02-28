@@ -53,6 +53,12 @@ export const MenuItem = styled(ListItem)`
 		transition: all 0s;
 		border-radius: 3px;
 		margin: 0;
-		padding: 0 11px;
+		padding: 0;
+
+		& > * {
+			width: 100%;
+			padding: 0 11px;
+		}
 	}
+
 `;
