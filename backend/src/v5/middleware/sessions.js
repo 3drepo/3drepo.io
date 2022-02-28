@@ -56,7 +56,7 @@ Sessions.createSession = (req, res) => {
 				socketId: req.headers['x-socket-id'],
 				referer: req.headers.referer });
 
-			respond(req, res, templates.ok);
+			respond(req, res, templates.ok, req.v4 ? updatedUser : undefined);
 		}
 	});
 };

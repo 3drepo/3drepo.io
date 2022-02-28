@@ -160,6 +160,14 @@
 		checkPermissions([C.PERM_TEAMSPACE_ADMIN])(req, res, next);
 	}
 
+	function formatV5LogInData(req, res, next) {
+		if (req.body.username) {
+			req.body.user = req.body.username;
+			delete req.body.username;
+		}
+		next();
+	}
+
 	function formatV5NewModelRevisionsData(req, res, next) {
 		req.params.teamspace = req.params.account;
 		req.params.container = req.params.model;
@@ -207,8 +215,6 @@
 		hasDeleteAccessToFedModel: checkPermissions([C.PERM_DELETE_FEDERATION]),
 		hasEditPermissionsAccessToModel: checkPermissions([C.PERM_MANAGE_MODEL_PERMISSION]),
 		hasEditPermissionsAccessToMulitpleModels: checkMultiplePermissions([C.PERM_MANAGE_MODEL_PERMISSION]),
-		formatV5NewModelRevisionsData,
-		formatV5NewFedRevisionsData,
 		isAccountAdmin: checkPermissions([C.PERM_TEAMSPACE_ADMIN]),
 		isAccountAdminOrSameUser,
 		hasCollaboratorQuota: [loggedIn, hasCollaboratorQuota],
@@ -221,7 +227,12 @@
 		checkSufficientSpace,
 		hasReadAccessToModelHelper,
 		isAccountAdminHelper,
-		checkPermissionsHelper
+		checkPermissionsHelper,
+
+		// v5 converters
+		formatV5LogInData,
+		formatV5NewModelRevisionsData,
+		formatV5NewFedRevisionsData
 
 	};
 
