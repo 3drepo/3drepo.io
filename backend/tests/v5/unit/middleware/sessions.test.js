@@ -39,6 +39,11 @@ jest.mock('../../../../src/v5/handler/db', () => ({
 	getSessionStore: () => {},
 }));
 
+jest.mock('../../../../src/v5/services/sessions');
+const SessionService = require(`${src}/services/sessions`);
+
+SessionService.session = jest.fn().mockImplementation((req, res, next) => next());
+
 const Sessions = require(`${src}/middleware/sessions`);
 
 // Mock respond function to just return the resCode
@@ -113,6 +118,11 @@ const testCreateSession = () => {
 			checkResults(req);
 		});
 
+		test('Should regenerate session and respond with user data if v4 is flagged', async () => {
+			await Sessions.createSession({ ...req, v4: true }, {});
+			checkResults(req);
+		});
+
 		test('Should regenerate session wit request with empty ips array', async () => {
 			const emptyIpsRequest = { ...req, ips: [] };
 			await Sessions.createSession(emptyIpsRequest, {});
@@ -145,7 +155,32 @@ const testDestroySession = () => {
 	});
 };
 
+const testManageSession = () => {
+	describe('Manage session', () => {
+		test('Should call next() immedately if session was already established', () => {
+			const fn = jest.fn();
+			Sessions.manageSessions({ session: {} }, {}, fn);
+			expect(SessionService.session).not.toBeCalled();
+			expect(fn).toBeCalled();
+		});
+		test('Should call next() after trying to establish a session', () => {
+			const fn = jest.fn();
+			Sessions.manageSessions({ }, {}, fn);
+			expect(SessionService.session).toBeCalled();
+			expect(fn).toBeCalled();
+		});
+		test('Should call next() after trying to establish a session even if it errored', () => {
+			const fn = jest.fn();
+			SessionService.session.mockImplementationOnce((req, res, next) => { next('some error'); });
+			Sessions.manageSessions({}, {}, fn);
+			expect(SessionService.session).toBeCalled();
+			expect(fn).toBeCalled();
+		});
+	});
+};
+
 describe('middleware/sessions', () => {
 	testCreateSession();
 	testDestroySession();
+	testManageSession();
 });
