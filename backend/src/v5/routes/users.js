@@ -341,7 +341,7 @@ const establishRoutes = () => {
 	* @openapi
 	* /user/avatar:
 	*   put:
-	*     description: Uploadns new avatar for the logged in user
+	*     description: Uploads new avatar for the logged in user
 	*     tags: [User]
 	*     operationId: uploadAvatar
 	*     requestBody:
