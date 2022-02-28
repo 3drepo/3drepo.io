@@ -15,27 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { LinearProgress } from '@material-ui/core';
 import React from 'react';
-import { LabelledProgressBar, LinearProgressBar, ProgressBarPercentageLight, ProgressBarPercentageDark } from './progressBar.styles';
+import { LabelledProgressBar, ProgressBarLabelLight, ProgressBarLabelDark } from './progressBar.styles';
 
 type IProgressBar = {
 	progress: number;
+	uploadStatus: 'queued' | 'uploading' | 'uploaded' | 'failed';
 	noLabel?: boolean;
 	failure?: boolean;
+	hidden?: boolean;
 };
 
-export const ProgressBar = ({ progress, noLabel = false, failure = false, ...props }: IProgressBar): JSX.Element => {
-	let statusClass = 'error';
-	if (failure) statusClass = 'failure';
-	else if (progress === 100) statusClass = 'success';
-	else if (progress < 100 && progress > 0) statusClass = 'inProgress';
-	else if (progress === 0) statusClass = 'waiting';
-
-	return (
-		<LabelledProgressBar>
-			<LinearProgressBar className={statusClass} color="primary" variant="determinate" value={progress} {...props} />
-			<ProgressBarPercentageLight hidden={noLabel}>{`${Math.round(progress)}%`}</ProgressBarPercentageLight>
-			<ProgressBarPercentageDark className={statusClass} style={{ clipPath: `inset(0 0 0 ${progress}%)` }} hidden={noLabel}>{`${Math.round(progress)}%`}</ProgressBarPercentageDark>
-		</LabelledProgressBar>
-	);
-};
+export const ProgressBar = ({
+	progress,
+	uploadStatus,
+	noLabel = false,
+	hidden = false,
+	...props
+}: IProgressBar): JSX.Element => (
+	<LabelledProgressBar uploadStatus={uploadStatus} hidden={hidden}>
+		<LinearProgress value={progress} {...props} />
+		<ProgressBarLabelLight hidden={noLabel}>{`${progress}%`}</ProgressBarLabelLight>
+		<ProgressBarLabelDark progress={progress} hidden={noLabel}>{`${progress}%`}</ProgressBarLabelDark>
+	</LabelledProgressBar>
+);

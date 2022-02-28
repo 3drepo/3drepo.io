@@ -17,6 +17,8 @@
 
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
+import { PROGRESS_BAR_COLOUR_MAP } from '@controls/progressBar/progressBar.styles';
+import { ProgressBar } from '@controls/progressBar';
 
 export const Container = styled.div`
 	width: auto;
@@ -31,15 +33,15 @@ export const StatusText = styled(Typography).attrs({
 	font-weight: bold;
 	user-select: none;
 	display: inline-flex;
-	&.failure { color: ${({ theme }) => theme.palette.error.main} }
-	&.success { color: ${({ theme }) => theme.palette.primary.main} }
-	&.uploading { color: ${({ theme }) => theme.palette.tertiary.main} }
-	&.waiting { color: ${({ theme }) => theme.palette.base.main} }
-	svg { margin: auto; }
+	color: ${({ uploadStatus }) => PROGRESS_BAR_COLOUR_MAP[uploadStatus]};
 `;
 
 export const CompletionMark = styled.div`
 	width: 25px;
 	margin: auto 10px;
-	svg path { stroke: ${({ theme }) => theme.palette.primary.main} }
+	color: ${PROGRESS_BAR_COLOUR_MAP.uploaded};
+`;
+
+export const Progress = styled(ProgressBar)`
+	width: 174px;
 `;

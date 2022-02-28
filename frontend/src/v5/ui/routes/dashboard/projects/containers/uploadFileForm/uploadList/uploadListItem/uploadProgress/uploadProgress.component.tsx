@@ -16,10 +16,9 @@
  */
 
 import React from 'react';
-import ErrorCircleIcon from '@assets/icons/error_circle.svg';
-import { ProgressBar } from '@controls/progressBar/progressBar.component';
 import TickIcon from '@assets/icons/tick';
-import { CompletionMark, Container, StatusText } from './UploadProgress.styles';
+import { UploadStatuses } from '@/v5/store/containers/containers.types';
+import { CompletionMark, Container, Progress, StatusText } from './UploadProgress.styles';
 
 type IUploadProgress = {
 	progress: number;
@@ -28,18 +27,29 @@ type IUploadProgress = {
 };
 
 export const UploadProgress = ({ progress, failure, hidden }: IUploadProgress): JSX.Element => {
-	let statusText = <span />;
-	if (Math.round(progress) === 100) statusText = <StatusText className="success">Upload complete</StatusText>;
-	else if (failure) statusText = <StatusText className="failure">Upload failed <ErrorCircleIcon /></StatusText>;
-	else if (progress < 100 && progress > 0) statusText = <StatusText className="uploading">Uploading</StatusText>;
-	else if (progress === 0) statusText = <StatusText className="waiting">Waiting to upload</StatusText>;
-	else statusText = <StatusText className="error">Unexpected Error</StatusText>;
+	let statusText: string;
+	let uploadStatus;
+	if (progress === 100) {
+		statusText = 'Upload complete';
+		uploadStatus = 'uploaded';
+	} else if (failure) {
+		statusText = 'Upload failed';
+		uploadStatus = 'failed';
+	} else if (progress < 100 && progress > 0) {
+		statusText = 'Uploading';
+		uploadStatus = 'uploading';
+	} else if (progress === 0) {
+		uploadStatus = UploadStatuses.QUEUED;
+		statusText = 'Waiting to upload';
+	} else statusText = 'Unexpected Error';
 
 	return hidden ? (<></>) : (
 		<Container>
-			{statusText}
-			<ProgressBar failure={failure} progress={progress} />
-			<CompletionMark> {Math.round(progress) === 100 && <TickIcon />} </CompletionMark>
+			<StatusText uploadStatus={uploadStatus}>
+				{statusText}
+			</StatusText>
+			<Progress uploadStatus={uploadStatus} progress={progress} />
+			<CompletionMark> {uploadStatus === 'uploaded' && <TickIcon />} </CompletionMark>
 		</Container>
 	);
 };

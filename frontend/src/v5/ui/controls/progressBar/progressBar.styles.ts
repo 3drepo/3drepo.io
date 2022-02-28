@@ -16,7 +16,13 @@
  */
 
 import styled from 'styled-components';
-import { LinearProgress } from '@material-ui/core';
+
+export const PROGRESS_BAR_COLOUR_MAP = {
+	failed: ({ theme }) => theme.palette.error.main,
+	queued: ({ theme }) => theme.palette.base.main,
+	uploading: ({ theme }) => theme.palette.tertiary.main,
+	uploaded: ({ theme }) => theme.palette.primary.main,
+};
 
 const ProgressBarPercentage = styled.div`
 	position: absolute;
@@ -37,28 +43,22 @@ const ProgressBarPercentage = styled.div`
 	display: flex;
 `;
 
-export const ProgressBarPercentageLight = styled(ProgressBarPercentage)`
+export const ProgressBarLabelLight = styled(ProgressBarPercentage)`
 	color: ${({ theme }) => theme.palette.primary.contrast};
 `;
 
-export const ProgressBarPercentageDark = styled(ProgressBarPercentage)`
-	&.failure, &.error {
-		color: ${({ theme }) => theme.palette.error.main};
-	}
-	&.inProgress {
-		color: ${({ theme }) => theme.palette.tertiary.main};
-	}
+export const ProgressBarLabelDark = styled(ProgressBarPercentage)`
+	${({ progress }) => `clip-path: inset(0 0 0 ${progress}%)`};
+
+	color: ${({ uploadStatus }) => PROGRESS_BAR_COLOUR_MAP[uploadStatus]};
 `;
 
 export const LabelledProgressBar = styled.div`
 	position: relative;
 	height: 16px;
-`;
 
-export const LinearProgressBar = styled(LinearProgress)`
-	display: block;
-	width: 174px;
-	margin: auto 10px;
-	height: 16px;
-	border-radius: 5px;
+	color: ${({ uploadStatus }) => PROGRESS_BAR_COLOUR_MAP[uploadStatus]};
+	.MuiLinearProgress-barColorPrimary {
+			background-color: ${({ uploadStatus }) => PROGRESS_BAR_COLOUR_MAP[uploadStatus]};
+	}
 `;

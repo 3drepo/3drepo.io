@@ -258,6 +258,10 @@ export const theme = createMuiTheme({
 			clearText: '',
 			handleHomeEndKeys: true,
 		},
+		MuiLinearProgress: {
+			color: 'primary',
+			variant: 'determinate',
+		},
 	},
 	overrides: {
 		MuiBackdrop: {
@@ -822,24 +826,18 @@ export const theme = createMuiTheme({
 		},
 		MuiLinearProgress: {
 			root: {
-				'&.failure': {
-					backgroundColor: COLOR.ERROR_LIGHTEST,
-					'&>*': {
-						backgroundColor: COLOR.ERROR_MAIN,
-					},
-				},
-				'&.success>*': {
-					backgroundColor: COLOR.PRIMARY_MAIN,
-				},
-				'&.inProgress>*': {
-					backgroundColor: COLOR.TERTIARY_MAIN,
-				},
+				borderRadius: '5px',
+				height: '16px',
+				margin: 'auto 10px',
 			},
 			barColorPrimary: {
 				backgroundColor: COLOR.TERTIARY_MAIN,
 			},
 			colorPrimary: {
 				backgroundColor: COLOR.TERTIARY_LIGHTEST,
+			},
+			bar1Determinate: {
+				transition: 'none',
 			},
 		},
 		MuiRadio: {
