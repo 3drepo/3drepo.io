@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
+import { put, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
-import filesize from 'filesize';
 import { RevisionsActions, RevisionsTypes } from './revisions.redux';
 import { FetchAction, SetRevisionVoidStatusAction, CreateRevisionAction } from './revisions.types';
+import { ContainersActions } from '../containers/containers.redux';
 
 export function* fetch({ teamspace, projectId, containerId }: FetchAction) {
 	yield put(RevisionsActions.setIsPending(containerId, true));
@@ -51,38 +51,47 @@ export function* setVoidStatus({ teamspace, projectId, containerId, revisionId, 
 }
 
 export function* createRevision({ teamspace, projectId, containerId, progressBar, body }: CreateRevisionAction) {
+	let newContainerId: string;
+	const newContainer = {
+		name: body.containerName,
+		unit: body.containerUnit,
+		type: body.containerType,
+		code: body.containerCode || undefined,
+		desc: body.containerDesc || undefined,
+	};
+	if (!containerId) {
+		try {
+			newContainerId = yield API.Containers.createContainer({ teamspace, projectId, newContainer });
+		} catch (error) {
+			yield put(DialogsActions.open('alert', {
+				currentActions: formatMessage({ id: 'containers.creation.error', defaultMessage: 'trying to create container' }),
+				error,
+			}));
+		}
+	}
 	try {
+		if (!containerId && !newContainerId) {
+			throw new Error(
+				formatMessage({ id: 'placeholder', defaultMessage: 'Failed to create Container' }),
+			);
+		}
 		const formData = new FormData();
-		let containerIdForRevision = containerId;
-		if (!containerId) {
-			const newContainer = {
-				name: body.containerName,
-				unit: body.containerUnit,
-				type: body.containerType,
-				code: body.containerCode || undefined,
-				desc: body.containerDesc || undefined,
-			};
-			// const test = yield put(ContainersActions.createContainer(teamspace, projectId, newContainer))
-			containerIdForRevision = yield API.Containers.createContainer({ teamspace, projectId, newContainer }); // Change this to dispatch redux action!
-		}
-		if (body.file.size > ClientConfig.uploadSizeLimit) {
-			const maxSize = filesize(ClientConfig.uploadSizeLimit);
-			const MAX_SIZE_MESSAGE = `File exceeds size limit of ${maxSize}`;
-			throw new Error(MAX_SIZE_MESSAGE);
-		}
-
 		formData.append('file', body.file);
 		formData.append('tag', body.revisionTag);
 		formData.append('desc', body.revisionDesc || undefined);
 		formData.append('importAnimations', body.importAnimations.toString());
 		formData.append('timezone', body.timezone);
+
 		yield API.Revisions.createRevision(
 			teamspace,
 			projectId,
-			containerIdForRevision,
+			containerId || newContainerId,
 			progressBar,
 			formData,
 		);
+		if (!containerId && newContainerId) {
+			yield put(ContainersActions.createContainerSuccess(projectId, { _id: newContainerId, ...newContainer }));
+		}
 	} catch (error) {
 		yield put(RevisionsActions.setUploadFailed(containerId, error));
 	}
@@ -91,5 +100,5 @@ export function* createRevision({ teamspace, projectId, containerId, progressBar
 export default function* RevisionsSaga() {
 	yield takeLatest(RevisionsTypes.FETCH, fetch);
 	yield takeLatest(RevisionsTypes.SET_VOID_STATUS, setVoidStatus);
-	yield takeLatest(RevisionsTypes.CREATE_REVISION, createRevision);
+	yield takeEvery(RevisionsTypes.CREATE_REVISION, createRevision);
 }
