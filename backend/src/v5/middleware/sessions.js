@@ -22,9 +22,25 @@ const { isFromWebBrowser } = require('../utils/helper/userAgent');
 const { logger } = require('../utils/logger');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { respond } = require('../utils/responder');
+const { session } = require('../services/sessions');
 const { templates } = require('../utils/responseCodes');
 
 const Sessions = {};
+
+Sessions.manageSessions = (req, res, next) => {
+	// In case other middleware sets the session
+	if (req.session) {
+		next();
+		return;
+	}
+
+	session(req, res, (err) => {
+		if (err) {
+			logger.logError(`Error processing session: ${err.message}`);
+		}
+		next();
+	});
+};
 
 Sessions.createSession = (req, res) => {
 	req.session.regenerate((err) => {
@@ -66,8 +82,8 @@ Sessions.destroySession = (req, res) => {
 	try {
 		req.session.destroy(() => {
 			res.clearCookie('connect.sid', { domain: config.cookie_domain, path: '/' });
-			const session = { user: { username } };
-			respond({ ...req, session }, res, templates.ok);
+			const sessionData = { user: { username } };
+			respond({ ...req, session: sessionData }, res, templates.ok);
 		});
 	} catch (err) {
 		// istanbul ignore next
