@@ -17,5 +17,4 @@
 
 export { ActionMenu } from './actionMenu.component';
 export { ActionMenuItem } from './actionMenuItem/actionMenuItem.component';
-export { ActionMenuItemButton } from './actionMenuItem/actionMenuItemButton/actionMenuItemButton.component';
 export { ActionMenuSection, ActionMenuTriggerButton } from './actionMenu.styles';
