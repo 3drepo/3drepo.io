@@ -30,22 +30,20 @@ import { Breadcrumbs } from '../breadcrumbs';
 export const AppBar = (): JSX.Element => {
 	const user = CurrentUserHooksSelectors.selectCurrentUser();
 	return (
-		<>
-			<MuiAppBar position="static">
-				<Items>
-					<LogoIcon />
-					<Breadcrumbs />
-				</Items>
-				<Items>
-					<CircleButton variant="contrast" aria-label="intercom">
-						<IntercomIcon />
-					</CircleButton>
-					<CircleButton variant="contrast" aria-label="notifications">
-						<NotificationsIcon />
-					</CircleButton>
-					<UserMenu user={user} />
-				</Items>
-			</MuiAppBar>
-		</>
+		<MuiAppBar position="static">
+			<Items>
+				<LogoIcon />
+				<Breadcrumbs />
+			</Items>
+			<Items>
+				<CircleButton variant="contrast" aria-label="intercom">
+					<IntercomIcon />
+				</CircleButton>
+				<CircleButton variant="contrast" aria-label="notifications">
+					<NotificationsIcon />
+				</CircleButton>
+				<UserMenu user={user} />
+			</Items>
+		</MuiAppBar>
 	);
 };

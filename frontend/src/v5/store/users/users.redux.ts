@@ -19,7 +19,7 @@ import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
 
 export interface IUser {
-	username: string;
+	user: string;
 	firstName: string;
 	lastName: string;
 	company?: string;
