@@ -18,6 +18,7 @@
 "use strict";
 (() => {
 
+	const { v5Path } = require("../../interop");
 	const responseCodes = require("../response_codes");
 	const C				= require("../constants");
 	const { findModelSettingById } = require("../models/modelSetting");
@@ -32,7 +33,8 @@
 	const hasReadAccessToModelHelper = require("./checkPermissions").hasReadAccessToModelHelper;
 	const isAccountAdminHelper = require("./checkPermissions").isAccountAdminHelper;
 	const validateUserSession = require("./checkPermissions").validateUserSession;
-	const sessionCheck = require("./sessionCheck");
+
+	const { isLoggedIn } = require(`${v5Path}/middleware/auth`);
 
 	const readAccessToModel = [C.PERM_VIEW_MODEL];
 
@@ -50,10 +52,8 @@
 	function loggedIn(req, res, next) {
 		if (skipLoggedIn(req)) {
 			next();
-		} else if (!sessionCheck(req)) {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.NOT_LOGGED_IN, null, {});
 		} else {
-			next();
+			isLoggedIn(req,res,next);
 		}
 	}
 
