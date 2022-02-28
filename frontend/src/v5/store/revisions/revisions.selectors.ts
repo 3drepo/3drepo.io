@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { AxiosError } from 'axios';
 import { createSelector } from 'reselect';
 import { IRevisionsState } from './revisions.types';
 
@@ -31,4 +32,10 @@ export const selectIsPending: (any, string) => boolean = createSelector(
 	selectRevisionsDomain,
 	selectContainerIdParam,
 	(state, containerId) => state.isPending[containerId],
+);
+
+export const selectUploadError: (any, string) => AxiosError = createSelector(
+	selectRevisionsDomain,
+	selectContainerIdParam,
+	(state, containerId) => state.uploadFailed[containerId],
 );

@@ -70,6 +70,7 @@ export function* createRevision({ teamspace, projectId, containerId, progressBar
 			const MAX_SIZE_MESSAGE = `File exceeds size limit of ${maxSize}mb`;
 			throw new Error(MAX_SIZE_MESSAGE);
 		}
+
 		formData.append('file', body.file);
 		formData.append('tag', body.revisionTag);
 		formData.append('desc', body.revisionDesc || undefined);
@@ -83,11 +84,7 @@ export function* createRevision({ teamspace, projectId, containerId, progressBar
 			formData,
 		);
 	} catch (error) {
-		// yield put(RevisionsActions.setUploadFailed(error)); // this should turn this upload red and add error to hover over text
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'revisions.createRevision.error', defaultMessage: 'trying to create a revision' }),
-			error,
-		}));
+		yield put(RevisionsActions.setUploadFailed(containerId, error));
 	}
 }
 

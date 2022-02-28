@@ -23,6 +23,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { DestinationOption, UploadItemFields } from '@/v5/store/containers/containers.types';
 import filesize from 'filesize';
 import { ListItemSchema } from '@/v5/validation/containers';
+import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
 import { UploadListItemTitle } from './components/uploadListItemTitle/uploadListItemTitle.component';
@@ -55,6 +56,8 @@ export const UploadListItem = ({
 		mode: 'onChange',
 		resolver: yupResolver(ListItemSchema),
 	});
+
+	const uploadError = RevisionsHooksSelectors.selectUploadError(item.containerId);
 
 	const updateValue = (name) => onChange(name, watch(name));
 	updateValue('revisionTag');
@@ -103,7 +106,7 @@ export const UploadListItem = ({
 					/>
 				)}
 			/>
-			<UploadProgress progress={progress} failure={false} hidden={!isUploading} />
+			<UploadProgress progress={progress} error={uploadError} hidden={!isUploading} />
 			<span hidden={isUploading}>
 				<Button $selectedrow={isSelected} onClick={onClickEdit}>
 					<EditIcon />

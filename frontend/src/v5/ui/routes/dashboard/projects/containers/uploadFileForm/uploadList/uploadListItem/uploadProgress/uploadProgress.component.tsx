@@ -18,35 +18,47 @@
 import React from 'react';
 import TickIcon from '@assets/icons/tick';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
+import { ErrorTooltip } from '@controls/errorTooltip';
+import { AxiosError } from 'axios';
 import { CompletionMark, Container, Progress, StatusText } from './UploadProgress.styles';
 
 type IUploadProgress = {
 	progress: number;
-	failure: boolean;
+	error: AxiosError;
 	hidden: boolean;
 };
 
-export const UploadProgress = ({ progress, failure, hidden }: IUploadProgress): JSX.Element => {
+export const UploadProgress = ({ progress, error, hidden }: IUploadProgress): JSX.Element => {
 	let statusText: string;
 	let uploadStatus;
-	if (progress === 100) {
-		statusText = 'Upload complete';
-		uploadStatus = 'uploaded';
-	} else if (failure) {
+	let errorMessage = '';
+	if (error) {
 		statusText = 'Upload failed';
-		uploadStatus = 'failed';
+		uploadStatus = UploadStatuses.FAILED;
+		if (Object.prototype.hasOwnProperty.call(error, 'response')) {
+			const { response: { data: { message, status, code } } } = error;
+			errorMessage = `${status} - ${code} (${message})`;
+		} else errorMessage = error.message;
+	} else if (progress === 100) {
+		statusText = 'Upload complete';
+		uploadStatus = UploadStatuses.UPLOADED;
 	} else if (progress < 100 && progress > 0) {
 		statusText = 'Uploading';
-		uploadStatus = 'uploading';
+		uploadStatus = UploadStatuses.UPLOADING;
 	} else if (progress === 0) {
-		uploadStatus = UploadStatuses.QUEUED;
 		statusText = 'Waiting to upload';
+		uploadStatus = UploadStatuses.QUEUED;
 	} else statusText = 'Unexpected Error';
 
 	return hidden ? (<></>) : (
 		<Container>
 			<StatusText uploadStatus={uploadStatus}>
 				{statusText}
+				{errorMessage && (
+					<ErrorTooltip>
+						{errorMessage}
+					</ErrorTooltip>
+				)}
 			</StatusText>
 			<Progress uploadStatus={uploadStatus} progress={progress} />
 			<CompletionMark> {uploadStatus === 'uploaded' && <TickIcon />} </CompletionMark>

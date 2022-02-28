@@ -36,14 +36,14 @@ export const UploadList = ({
 	onClickEdit,
 	onClickDelete,
 }: IUploadList): JSX.Element => {
-	const { trigger, setValue, watch } = useFormContext();
+	const { trigger, setValue, watch, getValues } = useFormContext();
 	return (
 		<Container>
 			{
 				values.map((item, index) => (
 					<UploadListItem
 						key={item.uploadId}
-						item={item}
+						item={getValues(`uploads.${index}`)}
 						onClickEdit={() => onClickEdit(index)}
 						onClickDelete={() => onClickDelete(index)}
 						onChange={(field, val) => {

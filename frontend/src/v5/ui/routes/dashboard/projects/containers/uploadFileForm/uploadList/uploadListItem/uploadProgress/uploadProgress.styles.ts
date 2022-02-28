@@ -34,6 +34,7 @@ export const StatusText = styled(Typography).attrs({
 	user-select: none;
 	display: inline-flex;
 	color: ${({ uploadStatus }) => PROGRESS_BAR_COLOUR_MAP[uploadStatus]};
+	align-items: center;
 `;
 
 export const CompletionMark = styled.div`
