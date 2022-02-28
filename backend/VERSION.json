@@ -28,7 +28,7 @@
     "supported": ["1.2.0", "1.0.1"]
   },
   "powerbi" : {
-	  "current": "0.0.1",
+	  "current": "4.22.0",
 	  "supported": []
   }
 }
