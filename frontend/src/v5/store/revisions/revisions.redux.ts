@@ -69,9 +69,6 @@ export const setIsPending = (state = INITIAL_STATE, { isPending, containerId }):
 	},
 });
 
-export const createRevision = (state = INITIAL_STATE) => ({
-	...state,
-	// TODO
 export const setUploadFailed = (state = INITIAL_STATE, { containerId, message }): IRevisionsState => ({
 	...state,
 	uploadFailed: {
@@ -84,6 +81,5 @@ export const reducer = createReducer<IRevisionsState>(INITIAL_STATE, {
 	[RevisionsTypes.FETCH_SUCCESS]: fetchSuccess,
 	[RevisionsTypes.SET_IS_PENDING]: setIsPending,
 	[RevisionsTypes.SET_VOID_STATUS_SUCCESS]: setVoidStatusSuccess,
-	[RevisionsTypes.CREATE_REVISION]: createRevision,
 	[RevisionsTypes.SET_UPLOAD_FAILED]: setUploadFailed,
 });

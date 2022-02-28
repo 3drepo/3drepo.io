@@ -77,5 +77,6 @@ export interface IRevisionsActionCreators {
 		containerId: string,
 		progressBar: (val) => void,
 		body: UploadItemFields
+	) => CreateRevisionAction;
 	setUploadFailed: (containerId: string, error: AxiosError) => SetUploadFailedAction
 }

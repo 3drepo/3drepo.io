@@ -26,7 +26,7 @@ export const setRevisionVoidStatus = (teamspace: string, projectId: string, cont
 
 export const createRevision = (teamspace, projectId, containerId, updateBar, body): Promise<AxiosResponse<void>> => {
 	const config = {
-		onUploadProgress: (progressEvent) => updateBar(progressEvent.loaded),
+		onUploadProgress: (progressEvent) => updateBar(Math.round((progressEvent.loaded * 100) / progressEvent.total)),
 	};
 	return api.post(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions`, body, config);
 };

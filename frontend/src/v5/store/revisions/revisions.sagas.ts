@@ -67,7 +67,7 @@ export function* createRevision({ teamspace, projectId, containerId, progressBar
 		}
 		if (body.file.size > ClientConfig.uploadSizeLimit) {
 			const maxSize = filesize(ClientConfig.uploadSizeLimit);
-			const MAX_SIZE_MESSAGE = `File exceeds size limit of ${maxSize}mb`;
+			const MAX_SIZE_MESSAGE = `File exceeds size limit of ${maxSize}`;
 			throw new Error(MAX_SIZE_MESSAGE);
 		}
 
@@ -80,7 +80,7 @@ export function* createRevision({ teamspace, projectId, containerId, progressBar
 			teamspace,
 			projectId,
 			containerIdForRevision,
-			(a) => progressBar((a / body.file.size) * 100),
+			progressBar,
 			formData,
 		);
 	} catch (error) {
