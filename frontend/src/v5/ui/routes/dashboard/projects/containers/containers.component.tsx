@@ -15,122 +15,112 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect, useState } from 'react';
-import { debounce } from 'lodash';
-import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dasboardList.styles';
-import { Trans } from '@lingui/react';
-import { MainHeader } from '@controls/mainHeader';
-import { SearchInput } from '@controls/searchInput';
+import React, { useState } from 'react';
+
 import AddCircleIcon from '@assets/icons/add_circle.svg';
-import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
-import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
-import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
-import {
-	Container,
-	Content,
-	NewContainerButton,
-	NewContainerMainHeaderButton,
-	UploadFileButton,
-} from './containers.styles';
+import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
+import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList';
+import { Button } from '@controls/button';
+import { DashboardListEmptySearchResults } from '@components/dashboard/dashboardList';
+import { CreateContainerForm } from '@/v5/ui/routes/dashboard/projects/containers/createContainerForm/createContainerForm.component';
+import { FormattedMessage } from 'react-intl';
+import { filterContainers } from '@/v5/store/containers/containers.helpers';
 import { ContainersList } from './containersList';
-import { EmptySearchResults } from './containersList/emptySearchResults';
+import { SkeletonListItem } from './containersList/skeletonListItem';
+import { useContainersData } from './containers.hooks';
 
 export const Containers = (): JSX.Element => {
-	const filteredContainers = ContainersHooksSelectors.selectFilteredContainers();
-	const favouriteContainers = ContainersHooksSelectors.selectFilteredFavouriteContainers();
-	const filterQuery = ContainersHooksSelectors.selectFilterQuery();
-	const hasContainers = ContainersHooksSelectors.selectHasContainers();
+	const {
+		containers,
+		favouriteContainers,
+		hasContainers,
+		isListPending,
+	} = useContainersData();
 
-	const [searchInput, setSearchInput] = useState(filterQuery);
+	const [favouritesFilterQuery, setFavouritesFilterQuery] = useState<string>('');
+	const [allFilterQuery, setAllFilterQuery] = useState<string>('');
 
-	const debounceSearchUpdate = debounce(
-		(value: string) => ContainersActionsDispatchers.setFilterQuery(value),
-		300,
-		{ trailing: true },
-	);
-
-	useEffect(() => {
-		debounceSearchUpdate(searchInput);
-	}, [searchInput]);
+	const [createContainerOpen, setCreateContainerOpen] = useState(false);
 
 	return (
-		<Container>
-			<MainHeader>
-				<Trans
-					id="containers.search.placeholder"
-					message="Search containers..."
-					render={({ translation }) => (
-						<SearchInput
-							onClear={() => setSearchInput('')}
-							onChange={(event) => setSearchInput(event.currentTarget.value)}
-							value={searchInput}
-							placeholder={translation as string}
-						/>
-					)}
-				/>
-				<NewContainerMainHeaderButton startIcon={<AddCircleIcon />} variant="outlined" color="secondary">
-					<Trans id="containers.mainHeader.newContainer" message="New Container" />
-				</NewContainerMainHeaderButton>
-				<UploadFileButton startIcon={<ArrowUpCircleIcon />} variant="contained" color="primary">
-					<Trans id="containers.mainHeader.uploadFile" message="Upload file" />
-				</UploadFileButton>
-			</MainHeader>
-			<Content>
-				<ContainersList
-					containers={favouriteContainers}
-					title={(
-						<Trans
-							id="containers.favourites.collapseTitle"
-							message="Favourites ({count})"
-							values={{ count: favouriteContainers.length }}
-						/>
-					)}
-					titleTooltips={{
-						collapsed: <Trans id="containers.favourites.collapse.tooltip.show" message="Show favourites" />,
-						visible: <Trans id="containers.favourites.collapse.tooltip.hide" message="Hide favourites" />,
-					}}
-					emptyMessage={
-						filterQuery && hasContainers.favourites ? (
-							<EmptySearchResults searchPhrase={filterQuery} />
-						) : (
-							<DashboardListEmptyText>
-								<Trans
-									id="containers.favourites.emptyMessage"
-									message="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
-								/>
-							</DashboardListEmptyText>
-						)
-					}
-				/>
-				<ContainersList
-					containers={filteredContainers}
-					title={(
-						<Trans
-							id="containers.all.collapseTitle"
-							message="All containers ({count})"
-							values={{ count: filteredContainers.length }}
-						/>
-					)}
-					titleTooltips={{
-						collapsed: <Trans id="containers.all.collapse.tooltip.show" message="Show all" />,
-						visible: <Trans id="containers.all.collapse.tooltip.hide" message="Hide all" />,
-					}}
-					emptyMessage={
-						filterQuery && hasContainers.all ? (
-							<EmptySearchResults searchPhrase={filterQuery} />
-						) : (
-							<>
+		<>
+			{isListPending ? (
+				<DashboardSkeletonList itemComponent={<SkeletonListItem />} />
+			) : (
+				<>
+					<ContainersList
+						hasContainers={hasContainers.favourites}
+						filterQuery={favouritesFilterQuery}
+						onFilterQueryChange={setFavouritesFilterQuery}
+						containers={filterContainers(favouriteContainers, favouritesFilterQuery)}
+						title={(
+							<FormattedMessage
+								id="containers.favourites.collapseTitle"
+								defaultMessage="Favourites"
+							/>
+						)}
+						titleTooltips={{
+							collapsed: <FormattedMessage id="containers.favourites.collapse.tooltip.show" defaultMessage="Show favourites" />,
+							visible: <FormattedMessage id="containers.favourites.collapse.tooltip.hide" defaultMessage="Hide favourites" />,
+						}}
+						onClickCreate={() => setCreateContainerOpen(true)}
+						emptyMessage={
+							favouritesFilterQuery && hasContainers.favourites ? (
+								<DashboardListEmptySearchResults searchPhrase={favouritesFilterQuery} />
+							) : (
 								<DashboardListEmptyText>
-									<Trans id="containers.all.emptyMessage" message="You haven’t created any Containers." />
+									<FormattedMessage
+										id="containers.favourites.emptyMessage"
+										defaultMessage="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
+									/>
 								</DashboardListEmptyText>
-								<NewContainerButton startIcon={<AddCircleIcon />}>
-									<Trans id="containers.all.newContainer" message="New Container" />
-								</NewContainerButton>
-							</>
-						)
-					}
-				/>
-			</Content>
-		</Container>
+							)
+						}
+					/>
+					<Divider />
+					<ContainersList
+						filterQuery={allFilterQuery}
+						onFilterQueryChange={setAllFilterQuery}
+						hasContainers={hasContainers.all}
+						containers={filterContainers(containers, allFilterQuery)}
+						title={(
+							<FormattedMessage
+								id="containers.all.collapseTitle"
+								defaultMessage="All containers"
+							/>
+						)}
+						titleTooltips={{
+							collapsed: <FormattedMessage id="containers.all.collapse.tooltip.show" defaultMessage="Show all" />,
+							visible: <FormattedMessage id="containers.all.collapse.tooltip.hide" defaultMessage="Hide all" />,
+						}}
+						showBottomButton
+						onClickCreate={() => setCreateContainerOpen(true)}
+						emptyMessage={
+							allFilterQuery && hasContainers.all ? (
+								<DashboardListEmptySearchResults searchPhrase={allFilterQuery} />
+							) : (
+								<>
+									<DashboardListEmptyText>
+										<FormattedMessage id="containers.all.emptyMessage" defaultMessage="You haven’t created any Containers." />
+									</DashboardListEmptyText>
+									<Button
+										startIcon={<AddCircleIcon />}
+										variant="contained"
+										color="primary"
+										onClick={() => setCreateContainerOpen(true)}
+									>
+										<FormattedMessage id="containers.all.newContainer" defaultMessage="New Container" />
+									</Button>
+								</>
+							)
+						}
+					/>
+				</>
+			)}
+			<CreateContainerForm
+				open={createContainerOpen}
+				close={() => setCreateContainerOpen(false)}
+			/>
+		</>
 	);
 };

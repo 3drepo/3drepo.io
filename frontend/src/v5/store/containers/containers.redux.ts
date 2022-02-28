@@ -16,50 +16,109 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { times } from 'lodash';
-import { Constants } from '@/v5/store/common/actions.helper';
-import { containerMockFactory } from './containers.fixtures';
+import { Constants } from '@/v5/helpers/actions.helper';
+import { prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import {
 	IContainersActionCreators,
 	IContainersState,
-	ContainerStatuses,
-	SetFilterQueryAction,
 	SetFavouriteSuccessAction,
+	FetchContainersSuccessAction,
+	FetchContainerStatsSuccessAction,
+	CreateContainerSuccessAction,
+	DeleteContainerSuccessAction,
 } from './containers.types';
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({
-	setFilterQuery: ['query'],
 	addFavourite: ['teamspace', 'projectId', 'containerId'],
 	removeFavourite: ['teamspace', 'projectId', 'containerId'],
-	setFavouriteSuccess: ['containerId', 'isFavourite'],
+	setFavouriteSuccess: ['projectId', 'containerId', 'isFavourite'],
+	fetchContainers: ['teamspace', 'projectId'],
+	fetchContainersSuccess: ['projectId', 'containers'],
+	fetchContainerStats: ['teamspace', 'projectId', 'containerId'],
+	fetchContainerStatsSuccess: ['projectId', 'containerId', 'containerStats'],
+	createContainer: ['teamspace', 'projectId', 'newContainer'],
+	createContainerSuccess: ['projectId', 'container'],
+	deleteContainer: ['teamspace', 'projectId', 'containerId'],
+	deleteContainerSuccess: ['projectId', 'containerId'],
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
 
 export const INITIAL_STATE: IContainersState = {
-	containers: [
-		containerMockFactory({ status: ContainerStatuses.PROCESSING }),
-		containerMockFactory({ status: ContainerStatuses.QUEUED }),
-		containerMockFactory({ status: ContainerStatuses.FAILED }),
-		...times(10, () => containerMockFactory()),
-	],
-	filterQuery: '',
+	containersByProject: {},
 };
 
-export const setFilterQuery = (state = INITIAL_STATE, { query }: SetFilterQueryAction) => (
-	{ ...state, filterQuery: query }
-);
-
 export const setFavourite = (state = INITIAL_STATE, {
+	projectId,
 	containerId,
 	isFavourite,
-}: SetFavouriteSuccessAction) => ({
+}: SetFavouriteSuccessAction):IContainersState => ({
 	...state,
-	containers: state.containers.map((container) => ({
-		...container,
-		isFavourite: container._id === containerId ? isFavourite : container.isFavourite,
-	})),
+	containersByProject: {
+		...state.containersByProject,
+		[projectId]: state.containersByProject[projectId].map((container) => ({
+			...container,
+			isFavourite: container._id === containerId ? isFavourite : container.isFavourite,
+		})),
+	},
+});
+
+export const fetchContainersSuccess = (state = INITIAL_STATE, {
+	projectId,
+	containers,
+}: FetchContainersSuccessAction): IContainersState => ({
+	...state,
+	containersByProject: {
+		...state.containersByProject,
+		[projectId]: containers,
+	},
+});
+
+export const fetchStatsSuccess = (state = INITIAL_STATE, {
+	projectId,
+	containerId,
+	containerStats,
+}: FetchContainerStatsSuccessAction): IContainersState => ({
+	...state,
+	containersByProject: {
+		...state.containersByProject,
+		[projectId]: state.containersByProject[projectId].map((container) => {
+			if (containerId !== container._id) return container;
+			return prepareSingleContainerData(container, containerStats);
+		}),
+	},
+});
+
+export const createContainerSuccess = (state = INITIAL_STATE, {
+	projectId,
+	container,
+}: CreateContainerSuccessAction): IContainersState => ({
+	...state,
+	containersByProject: {
+		...state.containersByProject,
+		[projectId]: [
+			...state.containersByProject[projectId],
+			{
+				...container,
+				revisionsCount: 0,
+			},
+		],
+	},
+});
+
+export const deleteContainerSuccess = (state = INITIAL_STATE, {
+	projectId,
+	containerId,
+}: DeleteContainerSuccessAction): IContainersState => ({
+	...state,
+	containersByProject: {
+		...state.containersByProject,
+		[projectId]: state.containersByProject[projectId].filter((container) => containerId !== container._id),
+	},
 });
 
 export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
-	[ContainersTypes.SET_FILTER_QUERY]: setFilterQuery,
+	[ContainersTypes.FETCH_CONTAINERS_SUCCESS]: fetchContainersSuccess,
 	[ContainersTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
-});
+	[ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS]: fetchStatsSuccess,
+	[ContainersTypes.CREATE_CONTAINER_SUCCESS]: createContainerSuccess,
+	[ContainersTypes.DELETE_CONTAINER_SUCCESS]: deleteContainerSuccess,
+}) as (state: IContainersState, action:any) => IContainersState;

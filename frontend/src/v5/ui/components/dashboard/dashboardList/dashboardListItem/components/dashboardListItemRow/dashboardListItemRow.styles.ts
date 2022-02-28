@@ -19,8 +19,7 @@ import { fade } from '@material-ui/core/styles';
 import * as ButtonStyles from '@controls/button/button.styles';
 import * as FavouriteCheckboxStyles from '@controls/favouriteCheckbox/favouriteCheckbox.styles';
 import * as EllipsisButtonStyles from '@controls/ellipsisButton/ellipsisButton.styles';
-
-const dashboardListItemRowShadow = '0px 0px 12px 6px rgba(9, 30, 66, 0.2), 0px 0px 1px rgba(9, 30, 66, 0.31)';
+import * as TextOverflowStyles from '@controls/textOverflow/textOverflow.styles';
 
 export const Container = styled.div`
 	position: relative;
@@ -32,28 +31,10 @@ export const Container = styled.div`
 	cursor: pointer;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 
-	::before {
-		content: '';
-		position: absolute;
-		left: 50%;
-		height: 100%;
-		width: calc(100% + 10px);
-		transform: translateX(-50%);
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
-		border: 1px solid ${({ theme }) => theme.palette.base.lightest};
-		border-radius: 5px;
-		visibility: hidden;
-		z-index: -1;
-	}
-
 	:hover {
-		border-color: ${({ theme }) => theme.palette.primary.contrast};
-		box-shadow: ${dashboardListItemRowShadow};
-		border-radius: 5px;
-		z-index: 100;
-
-		::before {
-			visibility: visible;
+		background-color: ${({ theme }) => theme.palette.primary.accent};
+		${ButtonStyles.LabelButton} {
+			${ButtonStyles.labelButtonSecondaryStyles};
 		}
 	}
 
@@ -63,6 +44,16 @@ export const Container = styled.div`
 		::before {
 			background-color: ${theme.palette.secondary.main};
 			border: none;
+		}
+
+		:hover {
+			background-color: ${theme.palette.secondary.main};
+		}
+		
+		${TextOverflowStyles.Container} {
+			&:after {
+				${TextOverflowStyles.fadeToLeft(theme.palette.secondary.main)}
+			}
 		}
 
 		${ButtonStyles.LabelButton} {

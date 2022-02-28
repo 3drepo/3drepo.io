@@ -15,23 +15,44 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+
 import { AppBar } from '@components/shared/appBar';
 import { ModalsDispatcher } from '@components/shared/modals';
-import { Content, MainHeaderPortalRoot } from './dashboardLayout.styles';
-import { MAIN_HEADER_PORTAL_TARGET_ID } from './dashboardLayout.constants';
+import { Header as ProjectHeader } from '@/v5/ui/routes/dashboard/projects/header';
+import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
+import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
+import { Content } from './dashboardLayout.styles';
 
 interface IDashboardLayout {
 	children: ReactNode;
 }
 
-export const DashboardLayout = ({ children }: IDashboardLayout): JSX.Element => (
-	<>
-		<AppBar />
-		<MainHeaderPortalRoot id={MAIN_HEADER_PORTAL_TARGET_ID} />
-		<Content>
-			{children}
-		</Content>
-		<ModalsDispatcher />
-	</>
-);
+export const DashboardLayout = ({ children }: IDashboardLayout): JSX.Element => {
+	const { teamspace, project } = useParams();
+
+	useEffect(() => {
+		if (teamspace) {
+			ProjectsActionsDispatchers.fetch(teamspace);
+			TeamspacesActionsDispatchers.setCurrentTeamspace(teamspace);
+		}
+	}, [teamspace]);
+
+	useEffect(() => {
+		if (project) {
+			ProjectsActionsDispatchers.setCurrentProject(project);
+		}
+	}, [project]);
+
+	return (
+		<>
+			<AppBar />
+			{project && <ProjectHeader />}
+			<Content>
+				{children}
+			</Content>
+			<ModalsDispatcher />
+		</>
+	);
+};

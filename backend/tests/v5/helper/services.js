@@ -24,7 +24,7 @@ const { createApp } = require(`${srcV4}/services/api`);
 const DbHandler = require(`${src}/handler/db`);
 const config = require(`${src}/utils/config`);
 const { createTeamSpaceRole } = require(`${srcV4}/models/role`);
-const { generateUUID, uuidToString, stringToUUID } = require(`${srcV4}/utils`);
+const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { PROJECT_ADMIN, TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 
 const db = {};
@@ -52,10 +52,10 @@ queue.purgeQueues = async () => {
 
 // userCredentials should be the same format as the return value of generateUserCredentials
 db.createUser = async (userCredentials, tsList = [], customData = {}) => {
-	const { user, password, apiKey } = userCredentials;
+	const { user, password, apiKey, basicData = {} } = userCredentials;
 	const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));
 	const adminDB = await DbHandler.getAuthDB();
-	return adminDB.addUser(user, password, { customData: { ...customData, apiKey }, roles });
+	return adminDB.addUser(user, password, { customData: { ...basicData, ...customData, apiKey }, roles });
 };
 
 db.createTeamspaceRole = (ts) => createTeamSpaceRole(ts);
@@ -106,7 +106,7 @@ db.createGroups = (teamspace, modelId, groups = []) => {
 			converted.objects = entry.objects.map((objectEntry) => {
 				const convertedObj = { ...objectEntry };
 				if (objectEntry.shared_ids) {
-					convertedObj.shared_ids = objectEntry.shared_ids.map(uuidToString);
+					convertedObj.shared_ids = objectEntry.shared_ids.map(UUIDToString);
 				}
 				return convertedObj;
 			});
@@ -117,6 +117,8 @@ db.createGroups = (teamspace, modelId, groups = []) => {
 
 	return DbHandler.insertMany(teamspace, `${modelId}.groups`, toInsert);
 };
+
+db.createJobs = (teamspace, jobs) => DbHandler.insertMany(teamspace, 'jobs', jobs);
 
 db.createIssue = (teamspace, modelId, issue) => {
 	const formattedIssue = { ...issue, _id: stringToUUID(issue._id) };
@@ -138,9 +140,10 @@ db.createLegends = (teamspace, modelId, legends) => {
 	return DbHandler.insertMany(teamspace, `${modelId}.sequences.legends`, formattedLegends);
 };
 
-ServiceHelper.generateUUIDString = () => uuidToString(generateUUID());
+ServiceHelper.generateUUIDString = () => UUIDToString(generateUUID());
 ServiceHelper.generateUUID = () => generateUUID();
 ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex');
+ServiceHelper.generateRandomBuffer = (length = 20) => Buffer.from(ServiceHelper.generateRandomString(length));
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
     + Math.random() * (end.getTime() - start.getTime()));
 ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
@@ -149,6 +152,16 @@ ServiceHelper.generateUserCredentials = () => ({
 	user: ServiceHelper.generateRandomString(),
 	password: ServiceHelper.generateRandomString(),
 	apiKey: ServiceHelper.generateRandomString(),
+	basicData: {
+		firstName: ServiceHelper.generateRandomString(),
+		lastName: ServiceHelper.generateRandomString(),
+		billing: {
+			billingInfo: {
+				company: ServiceHelper.generateRandomString(),
+				countryCode: 'GB',
+			},
+		},
+	},
 });
 
 ServiceHelper.generateRevisionEntry = (isVoid = false) => ({
@@ -159,29 +172,30 @@ ServiceHelper.generateRevisionEntry = (isVoid = false) => ({
 	void: !!isVoid,
 });
 
-ServiceHelper.generateRandomModelProperties = () => ({
+ServiceHelper.generateRandomModelProperties = (isFed = false) => ({
 	properties: {
-		code: ServiceHelper.generateUUIDString(),
+		code: ServiceHelper.generateRandomString(),
 		unit: 'm',
 	},
 	desc: ServiceHelper.generateRandomString(),
-	type: ServiceHelper.generateUUIDString(),
-	timestamp: Date.now(),
+	...(isFed ? { federate: true } : { type: ServiceHelper.generateRandomString() }),
 	status: 'ok',
 	surveyPoints: [
 		{
 			position: [
-				ServiceHelper.generateRandomNumber,
-				ServiceHelper.generateRandomNumber,
-				ServiceHelper.generateRandomNumber,
+				ServiceHelper.generateRandomNumber(),
+				ServiceHelper.generateRandomNumber(),
+				ServiceHelper.generateRandomNumber(),
 			],
 			latLong: [
-				ServiceHelper.generateRandomNumber,
-				ServiceHelper.generateRandomNumber,
+				ServiceHelper.generateRandomNumber(),
+				ServiceHelper.generateRandomNumber(),
 			],
 		},
 	],
-	anglefromNorth: 123,
+	angleFromNorth: 123,
+	defaultView: ServiceHelper.generateUUIDString(),
+	defaultLegend: ServiceHelper.generateUUIDString(),
 });
 
 ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {
@@ -224,6 +238,12 @@ ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = fal
 
 	return group;
 };
+
+ServiceHelper.generateView = (account, model, hasThumbnail = true) => ({
+	_id: ServiceHelper.generateUUIDString(),
+	name: ServiceHelper.generateRandomString(),
+	...(hasThumbnail ? { thumbnail: ServiceHelper.generateRandomBuffer() } : {}),
+});
 
 ServiceHelper.app = () => createApp().listen(8080);
 

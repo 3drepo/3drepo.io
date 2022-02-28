@@ -17,6 +17,7 @@
 
 const { src } = require('../../helper/path');
 
+jest.mock('../../../../src/v5/handler/externalServices');
 const FileRefs = require(`${src}/models/fileRefs`);
 const db = require(`${src}/handler/db`);
 
@@ -57,6 +58,82 @@ const testGetTotalSize = () => {
 	});
 };
 
+const testRemoveAllFilesFromModel = () => {
+	describe('Remove all files from model', () => {
+		const modelId = 'someModel';
+		const collections = [
+			{ name: `${modelId}.ref` },
+			{ name: `${modelId}.a.ref` },
+			{ name: `${modelId}.c.ref` },
+			{ name: `${modelId}.b.ref` },
+			{ name: `${modelId}.e.ref` },
+			{ name: 'aaa.ref' },
+		];
+
+		test('should remove files from all collections', async () => {
+			const teamspace = 'someTS';
+
+			jest.spyOn(db, 'listCollections').mockImplementation(() => collections);
+			const fnAggregate = jest.spyOn(db, 'aggregate').mockImplementation(() => [{ _id: modelId, links: 'someLink' }]);
+
+			const res = await FileRefs.removeAllFilesFromModel(teamspace, modelId);
+			expect(res).toHaveLength(collections.length - 1);
+
+			const query = [
+				{ $match: { noDelete: { $exists: false }, type: { $ne: 'http' } } },
+				{ $group: { _id: '$type', links: { $addToSet: '$link' } } },
+			];
+
+			expect(fnAggregate.mock.calls.length).toBe(collections.length - 1);
+
+			fnAggregate.mock.calls.forEach((call, i) => {
+				expect(call[0]).toEqual(teamspace);
+				const collection = call[1];
+				expect(fnAggregate.mock.calls[i][0]).toEqual(teamspace);
+				expect(fnAggregate.mock.calls[i][1]).toEqual(`${collection}`);
+				expect(fnAggregate.mock.calls[i][2]).toEqual(query);
+			});
+		});
+
+		test('should not fail if the the ref collection has no links', async () => {
+			const teamspace = 'someTS';
+
+			jest.spyOn(db, 'listCollections').mockImplementation(() => collections);
+			const fnAggregate = jest.spyOn(db, 'aggregate').mockImplementation(() => [{ _id: null, links: [] }]);
+
+			const res = await FileRefs.removeAllFilesFromModel(teamspace, modelId);
+			expect(res).toHaveLength(collections.length - 1);
+
+			const query = [
+				{ $match: { noDelete: { $exists: false }, type: { $ne: 'http' } } },
+				{ $group: { _id: '$type', links: { $addToSet: '$link' } } },
+			];
+
+			expect(fnAggregate.mock.calls.length).toBe(collections.length - 1);
+
+			fnAggregate.mock.calls.forEach((call, i) => {
+				expect(call[0]).toEqual(teamspace);
+				const collection = call[1];
+				expect(fnAggregate.mock.calls[i][0]).toEqual(teamspace);
+				expect(fnAggregate.mock.calls[i][1]).toEqual(`${collection}`);
+				expect(fnAggregate.mock.calls[i][2]).toEqual(query);
+			});
+		});
+
+		test('should return empty []s without matching collection', async () => {
+			const teamspace = 'someTS';
+
+			const listCol = jest.spyOn(db, 'listCollections').mockImplementation(() => []);
+
+			const res = await FileRefs.removeAllFilesFromModel(teamspace, modelId);
+			expect(res).toHaveLength(0);
+
+			expect(listCol.mock.calls.length).toBe(1);
+		});
+	});
+};
+
 describe('models/fileRefs', () => {
 	testGetTotalSize();
+	testRemoveAllFilesFromModel();
 });

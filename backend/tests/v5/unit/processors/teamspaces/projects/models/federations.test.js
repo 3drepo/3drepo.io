@@ -17,6 +17,8 @@
 
 const { src } = require('../../../../../helper/path');
 
+const db = require(`${src}/handler/db`);
+
 jest.mock('../../../../../../../src/v5/models/projects');
 const ProjectsModel = require(`${src}/models/projects`);
 jest.mock('../../../../../../../src/v5/models/modelSettings');
@@ -36,6 +38,15 @@ const Legends = require(`${src}/models/legends`);
 jest.mock('../../../../../../../src/v5/models/legends');
 const { templates } = require(`${src}/utils/responseCodes`);
 
+const newFederationId = 'newFederationId';
+ModelSettings.addModel.mockImplementation(() => newFederationId);
+ModelSettings.deleteModel.mockImplementation((ts, model) => {
+	if (Number.isInteger(model)) {
+		return Promise.resolve(undefined);
+	}
+	return Promise.reject(templates.federationNotFound);
+});
+
 const federationList = [
 	{ _id: 1, name: 'federation 1', permissions: [{ user: 'user1', permission: 'collaborator' }, { user: 'user2', permission: 'collaborator' }] },
 	{ _id: 2, name: 'federation 2', permissions: [{ user: 'user2', permission: 'commenter' }] },
@@ -50,35 +61,44 @@ const federationSettings = {
 		name: 'federation 1',
 		type: 'type 1',
 		properties: {
-			units: 'm',
+			unit: 'm',
 			code: 'FED1',
 		},
 		status: 'ok',
 		subModels: [{ model: 'container1' }, { model: 'container2' }],
-		category: 'category 1',
+		defaultView: 2,
+		defaultLegend: 3,
+		permissions: [1, 2, 3],
+		angleFromNorth: 10,
+		timestamp: new Date(),
+		surveyPoints: [123],
+		desc: 'This is a fed',
+		errorReason: {
+			message: 'error reason',
+			timestamp: 123,
+			errorCode: 1,
+		},
 	},
 	federation2: {
 		_id: 2,
 		name: 'federation 2',
 		type: 'type 2',
 		properties: {
-			units: 'mm',
+			unit: 'mm',
 			code: 'FED2',
 		},
 		status: 'processing',
 		subModels: [{ model: 'container3' }],
-		category: 'category 2',
 	},
 	federation3: {
 		_id: 3,
 		name: 'federation 3',
 		type: 'type 3',
 		properties: {
-			units: 'mm',
+			unit: 'mm',
 			code: 'FED3',
 		},
 		status: 'processing',
-		category: 'category 3',
 	},
 };
 
@@ -87,7 +107,8 @@ const project = { _id: 1, name: 'project', models: federationList.map(({ _id }) 
 
 ProjectsModel.getProjectById.mockImplementation(() => project);
 ModelSettings.getFederations.mockImplementation(() => federationList);
-ModelSettings.getFederationById.mockImplementation((teamspace, federation) => federationSettings[federation]);
+const getFederationByIdMock = ModelSettings.getFederationById.mockImplementation((teamspace,
+	federation) => federationSettings[federation]);
 Issues.getIssuesCount.mockImplementation((teamspace, federation) => {
 	if (federation === 'federation1') return 1;
 	if (federation === 'federation2') return 2;
@@ -101,7 +122,7 @@ Risks.getRisksCount.mockImplementation((teamspace, federation) => {
 });
 
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
-Views.checkViewExists.mockImplementation((teamspace, model, view) => {
+Views.getViewById.mockImplementation((teamspace, model, view) => {
 	if (view === 1) {
 		return 1;
 	}
@@ -224,10 +245,10 @@ const testDeleteFavourites = () => {
 };
 
 const formatToStats = (settings, issueCount, riskCount, lastUpdated) => ({
+	...(settings.desc ? { desc: settings.desc } : {}),
 	code: settings.properties.code,
 	status: settings.status,
 	subModels: settings.subModels,
-	category: settings.category,
 	lastUpdated,
 	tickets: {
 		issues: issueCount ?? 0,
@@ -252,9 +273,73 @@ const testGetFederationStats = () => {
 	});
 };
 
+const testAddFederation = () => {
+	describe('Add federation', () => {
+		test('should return the federation ID on success', async () => {
+			const data = {
+				name: 'federation name',
+				code: 'code99',
+				unit: 'mm',
+				federate: true,
+			};
+			const res = await Federations.addFederation('teamspace', 'project', 'tsAdmin', data);
+			expect(res).toEqual(newFederationId);
+			expect(ProjectsModel.addModelToProject.mock.calls.length).toBe(1);
+		});
+	});
+};
+
+const testDeleteFederation = () => {
+	describe('Delete federation', () => {
+		test('should succeed', async () => {
+			const modelId = 1;
+			const collectionList = [
+				{ name: `${modelId}.collA` },
+				{ name: `${modelId}.collB` },
+				{ name: 'otherModel.collA' },
+				{ name: 'otherModel.collB' },
+			];
+
+			const fnList = jest.spyOn(db, 'listCollections').mockResolvedValue(collectionList);
+			const fnDrop = jest.spyOn(db, 'dropCollection').mockResolvedValue(true);
+
+			const teamspace = 'teamspace';
+			await Federations.deleteFederation(teamspace, 'project', modelId, 'tsAdmin');
+
+			expect(fnList.mock.calls.length).toBe(2);
+			expect(fnList.mock.calls[0][0]).toEqual(teamspace);
+
+			expect(fnDrop.mock.calls.length).toBe(2);
+			expect(fnDrop.mock.calls[0][0]).toEqual(teamspace);
+			expect(fnDrop.mock.calls[0][1]).toEqual(collectionList[0]);
+			expect(fnDrop.mock.calls[1][0]).toEqual(teamspace);
+			expect(fnDrop.mock.calls[1][1]).toEqual(collectionList[1]);
+		});
+
+		test('should succeed if file removal fails', async () => {
+			await Federations.deleteFederation('teamspace', 'project', 3, 'tsAdmin');
+		});
+	});
+};
+
+const testGetSettings = () => {
+	describe('Get federation settings', () => {
+		test('should return the federation settings', async () => {
+			const projection = { corID: 0, account: 0, permissions: 0, subModels: 0, federate: 0 };
+			const res = await Federations.getSettings('teamspace', 'federation1');
+			expect(res).toEqual(federationSettings.federation1);
+			expect(getFederationByIdMock.mock.calls.length).toBe(1);
+			expect(getFederationByIdMock.mock.calls[0][2]).toEqual(projection);
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/federations', () => {
 	testGetFederationList();
 	testAppendFavourites();
 	testDeleteFavourites();
 	testGetFederationStats();
+	testAddFederation();
+	testDeleteFederation();
+	testGetSettings();
 });

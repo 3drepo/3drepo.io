@@ -16,7 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { Constants } from '../common/actions.helper';
+import { Constants } from '../../helpers/actions.helper';
 
 export interface ITeamspace {
 	name: string;
@@ -26,25 +26,31 @@ export interface ITeamspace {
 export interface ITeamspacesActions {
 	fetch: () => any;
 	fetchSuccess: (teamspaces: ITeamspace[]) => any;
-	fetchFailure: () => any;
+	setCurrentTeamspace: (teamspace: string) => any;
 }
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
 	fetch: [],
 	fetchSuccess: ['teamspaces'],
-	fetchFailure: [],
+	setCurrentTeamspace: ['currentTeamspace'],
 }, { prefix: 'TEAMSPACES2/' }) as { Types: Constants<ITeamspacesActions>; Creators: ITeamspacesActions };
 
-interface ITeamspacesState {
+export interface ITeamspacesState {
 	teamspaces: ITeamspace[];
+	currentTeamspace: string;
 }
 
 export const INITIAL_STATE: ITeamspacesState = {
 	teamspaces: [],
+	currentTeamspace: null,
 };
 
-export const fetchSuccess = (state = INITIAL_STATE, { teamspaces }) => ({ ...state, teamspaces });
+// eslint-disable-next-line max-len
+export const setCurrentTeamspace = (state = INITIAL_STATE, { currentTeamspace }): ITeamspacesState => ({ ...state, currentTeamspace });
+
+export const fetchSuccess = (state = INITIAL_STATE, { teamspaces }): ITeamspacesState => ({ ...state, teamspaces });
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[TeamspacesTypes.FETCH_SUCCESS]: fetchSuccess,
+	[TeamspacesTypes.SET_CURRENT_TEAMSPACE]: setCurrentTeamspace,
 });

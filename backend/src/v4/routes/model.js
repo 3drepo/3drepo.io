@@ -19,14 +19,11 @@
 
 const express = require("express");
 const router = express.Router({mergeParams: true});
-const multer = require("multer");
 const utils = require("../utils");
 const middlewares = require("../middlewares/middlewares");
 const ModelSetting = require("../models/modelSetting");
 const responseCodes = require("../response_codes");
 const C = require("../constants");
-const { modelStatusChanged } = require("../models/chatEvent");
-const { isValidTag } = require("../models/history");
 const ModelHelpers = require("../models/helper/model");
 const TextureHelpers = require("../models/helper/texture");
 const UnityAssets = require("../models/unityAssets");
@@ -34,6 +31,11 @@ const SrcAssets = require("../models/srcAssets");
 const JSONAssets = require("../models/jsonAssets");
 const Upload = require("../models/upload");
 const config = require("../config");
+const {v5Path} = require("../../interop");
+const { validateNewRevisionData : validateNewModelRevisionData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/containers`);
+const { validateNewRevisionData : validateNewFedRevisionData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/federations`);
+const ContainersV5 = require(`${v5Path}/processors/teamspaces/projects/models/containers`);
+const FederationsV5 = require(`${v5Path}/processors/teamspaces/projects/models/federations`);
 
 function convertProjectToParam(req, res, next) {
 	if (req.body.project) {
@@ -609,7 +611,7 @@ router.get("/:model/revision/master/head/srcAssets.json", middlewares.hasReadAcc
  *
  */
 
-router.put("/:model", middlewares.hasEditAccessToFedModel, updateModel);
+router.put("/:model", middlewares.hasEditAccessToFedModel, middlewares.formatV5NewFedRevisionsData, validateNewFedRevisionData, updateModel);
 
 /**
  * @api {post} /:teamspace/models/permissions Update multiple models permissions
@@ -1714,7 +1716,7 @@ router.patch("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToM
  * ------WebKitFormBoundarySos0xligf1T8Sy8I-- *
  *
  */
-router.post("/:model/upload", middlewares.hasUploadAccessToModel, uploadModel);
+router.post("/:model/upload",  middlewares.hasUploadAccessToModel, middlewares.formatV5NewModelRevisionsData, validateNewModelRevisionData, uploadModel);
 
 /**
  * @api {get} /:teamspace/:model/download/latest Download model
@@ -1875,32 +1877,22 @@ function createModel(req, res, next) {
 	}
 }
 
-function updateModel(req, res, next) {
+async function updateModel(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
-	const {account, model} = req.params;
-	const username = req.session.user.username;
+	const {teamspace, federation} = req.params;
+	const owner = req.session.user.username;
 
-	let promise = null;
-
-	if (Object.keys(req.body).length >= 1 && Array.isArray(req.body.subModels)) {
-		if (req.body.subModels.length > 0) {
-			promise = ModelSetting.isFederation(account, model).then(() => {
-				return ModelHelpers.createFederatedModel(account, model, username, req.body.subModels);
-			}).then(() => {
-				return ModelSetting.updateSubModels(account, model, req.body.subModels);
-			});
-		} else {
-			promise = Promise.reject(responseCodes.SUBMODEL_IS_MISSING);
-		}
-	} else {
-		promise = Promise.reject(responseCodes.INVALID_ARGUMENTS);
-	}
-
-	promise.then((setting) => {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account, model, setting });
-	}).catch(err => {
+	try {
+		await FederationsV5.newRevision(teamspace, federation, {owner, ...req.body});
+		const setting = await ModelHelpers.getModelSetting(teamspace, federation, owner);
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {
+			account: teamspace,
+			model: federation,
+			setting: {...setting, subModels: req.body.containers }
+		});
+	} catch(err) {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
+	}
 }
 
 function deleteModel(req, res, next) {
@@ -2088,81 +2080,15 @@ async function uploadChunk(req, res, next) {
 	}
 }
 
-async function uploadFile(teamspace, model, username, req) {
-	if (!config.cn_queue) {
-		throw responseCodes.QUEUE_NO_CONFIG;
-	}
-
-	modelStatusChanged(null, teamspace, model, { status: "uploading", username });
-	// upload model with tag
-
-	const uploadedFile = await new Promise((resolve, reject) => {
-		const upload = multer({
-			dest: config.cn_queue.upload_dir,
-			fileFilter: async function(fileReq, file, cb) {
-				const size = parseInt(fileReq.headers[C.CONTENT_LENGTH_HEADER]);
-
-				try {
-					await Upload.checkFileFormat(file.originalname);
-					await middlewares.checkSufficientSpace(teamspace, size);
-					cb(null, true);
-				} catch (err) {
-					cb(err);
-				}
-			}
-		});
-
-		upload.single("file")(req, null, function (err) {
-			if (err) {
-				return reject(err);
-
-			} else if(!req.file.size) {
-				return reject(responseCodes.FILE_FORMAT_NOT_SUPPORTED);
-
-			} else {
-				modelStatusChanged(null, teamspace, model, { status: "uploaded" });
-				return resolve(req.file);
-			}
-		});
-	});
-
-	// req.body.tag wont be defined after the file has been uploaded
-	await isValidTag(teamspace, model, req.body.tag);
-
-	return uploadedFile;
-}
-
 function uploadModel(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
-	const { account, model } = req.params;
-	const username = req.session.user.username;
+	const { file } = req;
+	const revInfo = req.body;
+	const { teamspace, container } = req.params;
+	const owner = req.session.user ? req.session.user.username : undefined;
 
-	let modelSetting;
-
-	// check model exists before upload
-	return ModelSetting.findModelSettingById(account, model).then(_modelSetting => {
-		modelSetting = _modelSetting;
-
-		if (!modelSetting) {
-			return Promise.reject(responseCodes.MODEL_NOT_FOUND);
-		} else {
-			return uploadFile(account, model, username, req);
-		}
-	}).then(file => {
-		const data = {
-			tag: req.body.tag,
-			desc: req.body.desc,
-			importAnimation: req.body.importAnimations !== false
-		};
-
-		const source = {
-			type: "upload",
-			file: file
-		};
-
-		return ModelHelpers.importModel(account, model, username, modelSetting, source, data).then(() => {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "uploaded"});
-		});
+	ContainersV5.newRevision(teamspace, container, { ...revInfo, owner }, file).then(() => {
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "uploaded"});
 	}).catch(err => {
 		err = err.resCode ? err.resCode : err;
 		responseCodes.respond(responsePlace, req, res, next, err, err);

@@ -17,7 +17,7 @@
 
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../helper/services');
-const { src, objModel } = require('../../../../../helper/path');
+const { src, objModel, objModelUppercaseExt } = require('../../../../../helper/path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -208,7 +208,7 @@ const testUpdateRevisionStatus = () => {
 				.send({ void: false }).expect(templates.ok.status);
 
 			const revs = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${modelWithRev._id}/revisions?key=${users.tsAdmin.apiKey}`);
-			expect(revs.body.revisions.find((r) => r._id === voidRevision._id).void).toEqual(false);
+			expect(revs.body.revisions.find((r) => r._id === voidRevision._id).void).toBe(false);
 		});
 	});
 };
@@ -267,6 +267,14 @@ const testNewRevision = () => {
 				.set('Content-Type', 'multipart/form-data')
 				.field('tag', '123')
 				.attach('file', objModel)
+				.expect(templates.ok.status);
+		});
+
+		test('should succeed if correct parameters are sent and file has uppercase extension', async () => {
+			await agent.post(`${route()}?key=${users.tsAdmin.apiKey}`)
+				.set('Content-Type', 'multipart/form-data')
+				.field('tag', '123')
+				.attach('file', objModelUppercaseExt)
 				.expect(templates.ok.status);
 		});
 

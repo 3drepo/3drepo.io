@@ -20,14 +20,17 @@ import StarIcon from '@assets/icons/star.svg';
 import { CheckboxProps } from '@material-ui/core';
 import { Checkbox } from './favouriteCheckbox.styles';
 
-type IFavouriteCheckbox = Omit<Omit<CheckboxProps, 'icon'>, 'checkedIcon'>;
+interface IFavouriteCheckbox extends Omit<Omit<CheckboxProps, 'icon'>, 'checkedIcon'> {
+	selected?: boolean;
+}
 
 export const FavouriteCheckbox = React.forwardRef(
-	({ ...props }: IFavouriteCheckbox, ref: React.Ref<HTMLElement>): JSX.Element => (
+	({ selected = false, ...props }: IFavouriteCheckbox, ref: React.Ref<HTMLElement>): JSX.Element => (
 		<Checkbox
 			icon={<StarIcon />}
 			checkedIcon={<StarIcon />}
 			ref={ref}
+			selected={selected}
 			{...props}
 		/>
 	),

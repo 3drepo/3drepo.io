@@ -18,10 +18,24 @@
 const Projects = {};
 const { PROJECT_ADMIN } = require('../utils/permissions/permissions.constants');
 const db = require('../handler/db');
+const { getCommonElements } = require('../utils/helper/arrays');
 const { templates } = require('../utils/responseCodes');
 
-const findProject = (ts, query, projection, sort) => db.find(ts, 'projects', query, projection, sort);
+const findProjects = (ts, query, projection, sort) => db.find(ts, 'projects', query, projection, sort);
 const findOneProject = (ts, query, projection) => db.findOne(ts, 'projects', query, projection);
+const updateOneProject = (ts, query, data) => db.updateOne(ts, 'projects', query, data);
+
+Projects.addModelToProject = (ts, project, model) => updateOneProject(
+	ts,
+	{ _id: project },
+	{ $push: { models: model } },
+);
+
+Projects.removeModelFromProject = (ts, project, model) => updateOneProject(
+	ts,
+	{ _id: project },
+	{ $pull: { models: model } },
+);
 
 Projects.getProjectById = async (ts, project, projection) => {
 	const res = await findOneProject(ts, { _id: project }, projection);
@@ -32,12 +46,13 @@ Projects.getProjectById = async (ts, project, projection) => {
 	return res;
 };
 
-Projects.modelExistsInProject = async (teamspace, project, model) => {
-	const proj = await Projects.getProjectById(teamspace, project, { models: 1 });
-	return proj.models.includes(model);
+Projects.modelsExistInProject = async (teamspace, project, models) => {
+	if (!models.length) return false;
+	const { models: projModels } = await Projects.getProjectById(teamspace, project, { models: 1 });
+	return getCommonElements(models, projModels).length === models.length;
 };
 
-Projects.getProjectList = async (ts, projection = { _id: 1, name: 1 }) => findProject(ts, {}, projection);
+Projects.getProjectList = (ts, projection = { _id: 1, name: 1 }) => findProjects(ts, {}, projection);
 
 Projects.getProjectAdmins = async (ts, project) => {
 	const { permissions } = await Projects.getProjectById(ts, project, { permissions: 1 });

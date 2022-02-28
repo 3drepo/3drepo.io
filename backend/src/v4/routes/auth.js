@@ -28,16 +28,14 @@ const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
 const User = require("../models/user");
 
-const LoginRecord = require("../models/loginRecord");
 const Mailer = require("../mailer/mailer");
 const httpsPost = require("../libs/httpsReq").post;
 
-const chatEvent = require("../models/chatEvent");
 const FileType = require("file-type");
 
 const multer = require("multer");
 
-const { regenerateAuthSession, getSessionsByUsername, removeSessions } = require("../services/session");
+const { regenerateAuthSession } = require("../services/session");
 
 /**
  * @api {post} /login Login
@@ -553,32 +551,11 @@ router.put("/:account/password", resetPassword);
 function createSession(place, req, res, next, user) {
 	req.body.username = user.username;
 
-	regenerateAuthSession(req, config, user)
-		.then(() => {
-			LoginRecord.saveLoginRecord(req.sessionID, user.username, req.ips[0] || req.ip, req.headers["user-agent"] ,req.header("Referer"));
-			return getSessionsByUsername(user.username);
-		})
-		.then(sessions => { // Remove other sessions with the same username
-			if (!req.session.user.webSession) {
-				return null;
-			}
-
-			const ids = [];
-
-			sessions.forEach(entry => {
-				if (entry._id === req.session.id || !entry.session.user.webSession) {
-					return;
-				}
-				ids.push(entry._id);
-				chatEvent.loggedOut(entry.session.user.socketId);
-			});
-
-			return removeSessions(ids);
-		}).then(() => {
-			responseCodes.respond(place, req, res, next, responseCodes.OK, user);
-		}).catch((err) => {
-			responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {username: user.username});
-		});
+	regenerateAuthSession(req, user).then(()=>{
+		responseCodes.respond(place, req, res, next, responseCodes.OK, user);
+	}).catch((err) => {
+		responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {username: user.username});
+	});
 }
 
 function login(req, res, next) {

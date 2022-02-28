@@ -14,10 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
-import { Divider as DividerComponent } from '@material-ui/core';
 
-export const Container = styled.div``;
+import styled, { css } from 'styled-components';
+import { Typography } from '@controls/typography';
+
+export const Container = styled.div`
+	${({ isLoading }) => isLoading && css`
+		pointer-events: none;
+	`}
+`;
 
 export const ButtonContainer = styled.div`
 	display: flex;
@@ -27,10 +32,16 @@ export const ButtonContainer = styled.div`
 	user-select: none;
 `;
 
+export const Title = styled(Typography)`
+	white-space: nowrap;
+	margin-right: 10px;
+`;
+
 export const CollapsedItemContainer = styled.div`
 	margin-bottom: 16px;
 `;
 
-export const Divider = styled(DividerComponent)`
-	margin-top: 16px;
+export const ControlsContainer = styled.div`
+	display: flex;
+	justify-content: space-between;
 `;

@@ -15,40 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode, useMemo, useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { useParams } from 'react-router';
 import { isEmpty } from 'lodash';
-import { Trans } from '@lingui/react';
-import { i18n } from '@lingui/core';
-import { Tooltip } from '@material-ui/core';
+import { FormattedMessage } from 'react-intl';
 import {
 	DashboardList,
 	DashboardListCollapse,
 	DashboardListEmptyContainer,
+	DashboardListEmptySearchResults,
 	DashboardListHeader,
 	DashboardListHeaderLabel,
-	DashboardListItem,
 } from '@components/dashboard/dashboardList';
-import {
-	DashboardListItemButton,
-	DashboardListItemIcon,
-	DashboardListItemRow,
-	DashboardListItemText,
-	DashboardListItemTitle,
-} from '@components/dashboard/dashboardList/dashboardListItem/components';
-import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
-import { EllipsisButtonWithMenu } from '@controls/ellipsisButtonWithMenu';
+import AddCircleIcon from '@assets/icons/add_circle.svg';
+import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
+import { HeaderButtonsGroup } from '@/v5/ui/routes/dashboard/projects/containers/containers.styles';
 import { IContainer } from '@/v5/store/containers/containers.types';
-import { getContainerMenuItems } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.helpers';
+import { SearchInput } from '@controls/searchInput';
+import { Button } from '@controls/button';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
-import { Highlight } from '@controls/highlight';
-import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
-import { useOrderedList } from './containersList.hooks';
-import { Container } from './containersList.styles';
-import { DEFAULT_SORT_CONFIG } from './containersList.constants';
+import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
+import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containerListItem';
+import { Display } from '@/v5/ui/themes/media';
+import { formatMessage } from '@/v5/services/intl';
+import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
+import { Container, CollapseSideElementGroup } from './containersList.styles';
 
-type IContainersList = {
+interface IContainersList {
 	emptyMessage: ReactNode;
 	containers: IContainer[];
 	title: ReactNode;
@@ -56,22 +50,33 @@ type IContainersList = {
 		collapsed: ReactNode;
 		visible: ReactNode;
 	},
-};
+	hasContainers: boolean;
+	showBottomButton?: boolean;
+	onFilterQueryChange? : (query: string) => void;
+	filterQuery?: string;
+	onClickCreate: () => void;
+}
 
 export const ContainersList = ({
 	containers,
 	emptyMessage,
 	title,
 	titleTooltips,
+	onClickCreate,
+	filterQuery,
+	onFilterQueryChange,
+	hasContainers,
+	showBottomButton = false,
 }: IContainersList): JSX.Element => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
-
-	const [selectedId, setSelectedId] = useState<string | null>(null);
+	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 	const { sortedList, setSortConfig } = useOrderedList(containers, DEFAULT_SORT_CONFIG);
-	const filterQuery = ContainersHooksSelectors.selectFilterQuery();
 
-	const toggleSelectedId = (id: IContainer['_id']) => {
-		setSelectedId((state) => (state === id ? null : id));
+	const isListPending = ContainersHooksSelectors.selectIsListPending();
+	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
+
+	const selectOrToggleItem = (id: string) => {
+		setSelectedItemId((state) => (state === id ? null : id));
 	};
 
 	const setFavourite = (id: string, value: boolean) => {
@@ -82,122 +87,88 @@ export const ContainersList = ({
 		}
 	};
 
-	return useMemo(() => (
+	return (
 		<Container>
 			<DashboardListCollapse
-				title={title}
+				title={<>{title} {!isListPending && `(${containers.length})`}</>}
 				tooltipTitles={titleTooltips}
+				isLoading={areStatsPending}
+				sideElement={(
+					<CollapseSideElementGroup>
+						<SearchInput
+							onClear={() => onFilterQueryChange('')}
+							onChange={(event) => onFilterQueryChange(event.currentTarget.value)}
+							value={filterQuery}
+							placeholder={formatMessage({ id: 'containers.search.placeholder', defaultMessage: 'Search containers...' })}
+						/>
+						<HeaderButtonsGroup>
+							<Button
+								startIcon={<AddCircleIcon />}
+								variant="outlined"
+								color="secondary"
+								onClick={onClickCreate}
+							>
+								<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New container" />
+							</Button>
+							<Button
+								startIcon={<ArrowUpCircleIcon />}
+								variant="contained"
+								color="primary"
+							>
+								<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
+							</Button>
+						</HeaderButtonsGroup>
+					</CollapseSideElementGroup>
+				)}
 			>
 				<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
 					<DashboardListHeaderLabel name="name">
-						<Trans id="containers.list.header.container" message="Container" />
+						<FormattedMessage id="containers.list.header.container" defaultMessage="Container" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="revisionsCount" width={186}>
-						<Trans id="containers.list.header.revisions" message="Revisions" />
+					<DashboardListHeaderLabel name="revisionsCount" width={186} hideWhenSmallerThan={Display.Desktop}>
+						<FormattedMessage id="containers.list.header.revisions" defaultMessage="Revisions" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="code">
-						<Trans id="containers.list.header.containerCode" message="Container code" />
+					<DashboardListHeaderLabel name="code" minWidth={112}>
+						<FormattedMessage id="containers.list.header.containerCode" defaultMessage="Container code" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="type" width={188}>
-						<Trans id="containers.list.header.category" message="Category" />
+					<DashboardListHeaderLabel name="type" width={188} hideWhenSmallerThan={Display.Tablet}>
+						<FormattedMessage id="containers.list.header.category" defaultMessage="Category" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="lastUpdated" width={180}>
-						<Trans id="containers.list.header.lastUpdated" message="Last updated" />
+					<DashboardListHeaderLabel name="lastUpdated" width={160}>
+						<FormattedMessage id="containers.list.header.lastUpdated" defaultMessage="Last updated" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>
 				<DashboardList>
 					{!isEmpty(sortedList) ? (
-						sortedList.map((container) => (
-							<DashboardListItem
-								selected={container._id === selectedId}
+						sortedList.map((container, index) => (
+							<ContainerListItem
+								index={index}
 								key={container._id}
-							>
-								<DashboardListItemRow
-									selected={container._id === selectedId}
-									onClick={() => toggleSelectedId(container._id)}
-								>
-									<DashboardListItemTitle
-										subtitle={(
-											<LatestRevision
-												name={container.latestRevision}
-												status={container.status}
-												error={{
-													date: new Date(),
-													message: 'Mock error message',
-												}}
-											/>
-										)}
-										selected={container._id === selectedId}
-										tooltipTitle={
-											<Trans id="containers.list.item.title.tooltip" message="Launch latest revision" />
-										}
-									>
-										<Highlight search={filterQuery}>
-											{container.name}
-										</Highlight>
-									</DashboardListItemTitle>
-									<DashboardListItemButton
-										onClick={() => {
-											// eslint-disable-next-line no-console
-											console.log('handle revisions button');
-										}}
-										width={186}
-										tooltipTitle={
-											<Trans id="containers.list.item.revisions.tooltip" message="View revisions" />
-										}
-									>
-										<Trans
-											id="containers.list.item.revisions"
-											message="{count} revisions"
-											values={{ count: container.revisionsCount }}
-										/>
-									</DashboardListItemButton>
-									<DashboardListItemText selected={container._id === selectedId}>
-										<Highlight search={filterQuery}>
-											{container.code}
-										</Highlight>
-									</DashboardListItemText>
-									<DashboardListItemText width={188} selected={container._id === selectedId}>
-										<Highlight search={filterQuery}>
-											{container.type}
-										</Highlight>
-									</DashboardListItemText>
-									<DashboardListItemText width={97} selected={container._id === selectedId}>
-										{i18n.date(container.lastUpdated)}
-									</DashboardListItemText>
-									<DashboardListItemIcon>
-										<Tooltip
-											title={
-												<Trans id="containers.list.item.favourite.tooltip" message="Add to favourites" />
-											}
-										>
-											<FavouriteCheckbox
-												checked={container.isFavourite}
-												onClick={(event) => {
-													event.stopPropagation();
-												}}
-												onChange={(event) => {
-													setFavourite(container._id, !!event.currentTarget.checked);
-												}}
-											/>
-										</Tooltip>
-									</DashboardListItemIcon>
-									<DashboardListItemIcon selected={container._id === selectedId}>
-										<EllipsisButtonWithMenu list={getContainerMenuItems(container._id)} />
-									</DashboardListItemIcon>
-								</DashboardListItemRow>
-								{container._id === selectedId && (
-									<div style={{ backgroundColor: '#2E405F', width: '100%', height: '100px' }} />
-								)}
-							</DashboardListItem>
+								isSelected={container._id === selectedItemId}
+								container={container}
+								filterQuery={filterQuery}
+								onFavouriteChange={setFavourite}
+								onSelectOrToggleItem={selectOrToggleItem}
+							/>
 						))
 					) : (
 						<DashboardListEmptyContainer>
-							{emptyMessage}
+							{filterQuery && hasContainers ? (
+								<DashboardListEmptySearchResults searchPhrase={filterQuery} />
+							) : emptyMessage}
 						</DashboardListEmptyContainer>
 					)}
 				</DashboardList>
+				{showBottomButton && !isListPending && hasContainers && (
+					<DashboardListButton
+						startIcon={<AddCircleIcon />}
+						onClick={onClickCreate}
+					>
+						<FormattedMessage id="containers.addContainerButton" defaultMessage="Add new Container" />
+					</DashboardListButton>
+				)}
+
 			</DashboardListCollapse>
 		</Container>
-	), [sortedList, selectedId]);
+	);
 };

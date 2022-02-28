@@ -16,9 +16,29 @@
  */
 
 const FileRefs = {};
+const ExternalServices = require('../handler/externalServices');
 const db = require('../handler/db');
 
 const collectionName = (collection) => (collection.endsWith('.ref') ? collection : `${collection}.ref`);
+
+const removeAllFiles = async (teamspace, collection) => {
+	const pipeline = [
+		{ $match: { noDelete: { $exists: false }, type: { $ne: 'http' } } },
+		{ $group: { _id: '$type', links: { $addToSet: '$link' } } },
+	];
+	const results = await db.aggregate(teamspace, collection, pipeline);
+
+	const deletePromises = results.map(
+		({ _id, links }) => {
+			if (_id && links?.length) {
+				return ExternalServices.removeFiles(teamspace, collection, _id, links);
+			}
+			return Promise.resolve();
+		},
+	);
+
+	return Promise.all(deletePromises);
+};
 
 FileRefs.getTotalSize = async (teamspace, collection) => {
 	const pipelines = [
@@ -29,6 +49,16 @@ FileRefs.getTotalSize = async (teamspace, collection) => {
 	const res = await db.aggregate(teamspace, collectionName(collection), pipelines);
 
 	return res.length > 0 ? res[0].total : 0;
+};
+
+FileRefs.removeAllFilesFromModel = async (teamspace, model) => {
+	const collList = await db.listCollections(teamspace);
+	const refCols = collList.filter(({ name }) => {
+		// eslint-disable-next-line security/detect-non-literal-regexp
+		const res = name.match(new RegExp(`^${model}.*\\.ref$`));
+		return !!res?.length;
+	});
+	return Promise.all(refCols.map(({ name }) => removeAllFiles(teamspace, name)));
 };
 
 module.exports = FileRefs;

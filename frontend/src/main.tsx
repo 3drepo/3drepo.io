@@ -34,19 +34,31 @@ import { IS_DEVELOPMENT } from '@/v4/constants/environment';
 import { UnityUtil } from '@/globals/unity-util';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import * as OfflinePluginRuntime from 'offline-plugin/runtime';
-import { initializeActionsDispatchers } from './v5/services/actionsDispatchers/actionsDistpatchers.helper';
+import { initializeIntl } from '@/v5/services/intl';
+import { initializeActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
+import { Version, VersionContext } from './versionContext';
 
 window.UnityUtil = UnityUtil;
 
 initializeActionsDispatchers(dispatch);
+
+initializeIntl(navigator.language);
 
 const render = () => {
 	ReactDOM.render(
 		<Provider store={store as any}>
 			<ConnectedRouter history={history as History}>
 				<Switch>
-					<Route path="/v5"><V5Root /></Route>
-					<Route><V4Root /></Route>
+					<Route path="/v5">
+						<VersionContext.Provider value={Version.V5}>
+							<V5Root />
+						</VersionContext.Provider>
+					</Route>
+					<Route>
+						<VersionContext.Provider value={Version.V4}>
+							<V4Root />
+						</VersionContext.Provider>
+					</Route>
 				</Switch>
 			</ConnectedRouter>
 		</Provider>,

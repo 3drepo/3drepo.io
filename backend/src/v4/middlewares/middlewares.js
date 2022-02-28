@@ -160,6 +160,32 @@
 		checkPermissions([C.PERM_TEAMSPACE_ADMIN])(req, res, next);
 	}
 
+	function formatV5NewModelRevisionsData(req, res, next) {
+		req.params.teamspace = req.params.account;
+		req.params.container = req.params.model;
+		next();
+	}
+
+	async function formatV5NewFedRevisionsData(req, res, next) {
+		req.params.teamspace = req.params.account;
+		req.params.federation = req.params.model;
+
+		const { findOneProject } = require("../models/project");
+
+		try {
+			const { _id : projectId} = await findOneProject(req.params.teamspace, { models: req.params.federation}, {_id: 1});
+			req.params.project = projectId;
+		} catch(err) {
+			// do nothing if it errored, the next middleware will sort this out.
+		}
+
+		if(req.body?.subModels?.length) {
+			req.body.containers = req.body.subModels.map(({model}) => model);
+		}
+
+		next();
+	}
+
 	const middlewares = {
 
 		project: require("./project"),
@@ -181,7 +207,8 @@
 		hasDeleteAccessToFedModel: checkPermissions([C.PERM_DELETE_FEDERATION]),
 		hasEditPermissionsAccessToModel: checkPermissions([C.PERM_MANAGE_MODEL_PERMISSION]),
 		hasEditPermissionsAccessToMulitpleModels: checkMultiplePermissions([C.PERM_MANAGE_MODEL_PERMISSION]),
-
+		formatV5NewModelRevisionsData,
+		formatV5NewFedRevisionsData,
 		isAccountAdmin: checkPermissions([C.PERM_TEAMSPACE_ADMIN]),
 		isAccountAdminOrSameUser,
 		hasCollaboratorQuota: [loggedIn, hasCollaboratorQuota],

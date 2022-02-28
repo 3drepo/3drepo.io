@@ -27,7 +27,10 @@ import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.h
 import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authActions.dispatchers';
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
+import { getIntlProviderProps } from '@/v5/services/intl';
+import { IntlProvider } from 'react-intl';
 import { Dashboard } from './dashboard';
+import { V4Adapter } from '../v4Adapter/v4Adapter';
 
 export const Root = () => {
 	const history = useHistory();
@@ -56,7 +59,11 @@ export const Root = () => {
 		<ThemeProvider theme={theme}>
 			<MuiThemeProvider theme={theme}>
 				<StylesProvider injectFirst>
-					<Dashboard />
+					<IntlProvider {...getIntlProviderProps()}>
+						<V4Adapter>
+							<Dashboard />
+						</V4Adapter>
+					</IntlProvider>
 				</StylesProvider>
 			</MuiThemeProvider>
 		</ThemeProvider>

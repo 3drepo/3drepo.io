@@ -19,6 +19,7 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../helper/services');
 const { src } = require('../../../../../helper/path');
 
+const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 let server;
@@ -84,7 +85,39 @@ const models = [
 		name: ServiceHelper.generateRandomString(),
 		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true },
 	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: {
+			...ServiceHelper.generateRandomModelProperties(),
+			status: 'failed',
+			errorReason: {
+				message: ServiceHelper.generateRandomString(),
+				timestamp: new Date(),
+			} },
+	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: { ...ServiceHelper.generateRandomModelProperties(),
+			errorReason: {
+				message: ServiceHelper.generateRandomString(),
+				errorCode: 1,
+			},
+		},
+	},
+	{
+		// NOTE: this model gets deleted after deleteContainer test
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		isFavourite: true,
+		permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
+		properties: ServiceHelper.generateRandomModelProperties(),
+	},
 ];
+
+// setup sub model
+models[2].properties.subModels = [{ model: models[1]._id, database: teamspace }];
 
 const revisions = [
 	ServiceHelper.generateRevisionEntry(),
@@ -97,6 +130,9 @@ const modelWithoutRev = models[1];
 const federation = models[2];
 const modelWithViews = models[0];
 const modelWithLegends = models[0];
+const modelWithFailedProcess = models[3];
+const modelWithFailedProcess2 = models[4];
+const modelToDelete = models[5];
 
 const latestRevision = revisions.filter((rev) => !rev.void)
 	.reduce((a, b) => (a.timestamp > b.timestamp ? a : b));
@@ -158,17 +194,27 @@ const testGetContainerList = () => {
 	});
 };
 
-const formatToStats = (settings, revCount, latestRev) => ({
-	type: settings.type,
-	code: settings.properties.code,
-	status: settings.status,
-	units: settings.properties.unit,
-	revisions: {
-		total: revCount,
-		lastUpdated: latestRev.timestamp ? latestRev.timestamp.getTime() : undefined,
-		latestRevision: latestRev.tag || latestRev._id,
-	},
-});
+const formatToStats = (settings, revCount, latestRev) => {
+	const res = {
+		type: settings.type,
+		code: settings.properties.code,
+		status: settings.status,
+		unit: settings.properties.unit,
+		revisions: {
+			total: revCount,
+			lastUpdated: latestRev.timestamp ? latestRev.timestamp.getTime() : undefined,
+			latestRevision: latestRev.tag || latestRev._id,
+		},
+	};
+
+	if (settings.status === 'failed') {
+		res.errorReason = {
+			message: settings.errorReason.message,
+			timestamp: settings.errorReason.timestamp ? settings.errorReason.timestamp.getTime() : undefined,
+		};
+	}
+	return res;
+};
 
 const testGetContainerStats = () => {
 	const route = (containerId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${containerId}/stats`;
@@ -211,6 +257,97 @@ const testGetContainerStats = () => {
 		test('should return the container stats correctly if the user has access (no revisions)', async () => {
 			const res = await agent.get(`${route(modelWithoutRev._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
 			expect(res.body).toEqual(formatToStats(modelWithoutRev.properties, 0, {}));
+		});
+		test('should return the container stats correctly if the latest revision process failed', async () => {
+			const res = await agent.get(`${route(modelWithFailedProcess._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			expect(res.body).toEqual(formatToStats(modelWithFailedProcess.properties, 0, {}));
+		});
+
+		test('should return the container stats correctly if the latest revision process failed (2)', async () => {
+			const res = await agent.get(`${route(modelWithFailedProcess2._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			expect(res.body).toEqual(formatToStats(modelWithFailedProcess2.properties, 0, {}));
+		});
+	});
+};
+
+const testAddContainer = () => {
+	const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/containers`;
+	describe('Add container', () => {
+		test('should fail without a valid session', async () => {
+			const res = await agent.post(route).expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user is not a member of the teamspace', async () => {
+			const res = await agent.post(`${route}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should return new container ID if the user has permissions', async () => {
+			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status).send({ name: ServiceHelper.generateRandomString(), unit: 'mm', type: 'a' });
+			expect(isUUIDString(res.body._id)).toBe(true);
+
+			const getRes = await agent.get(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+
+			expect(getRes.body.containers.find(({ _id }) => _id === res.body._id)).not.toBe(undefined);
+		});
+
+		test('should fail if name already exists', async () => {
+			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidArguments.status).send({ name: models[0].name, unit: 'mm', type: 'a' });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if user has insufficient permissions', async () => {
+			const res = await agent.post(`${route}?key=${users.viewer.apiKey}`).expect(templates.notAuthorized.status).send({ name: ServiceHelper.generateRandomString(), unit: 'mm', type: 'a' });
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		});
+
+		test('should fail with invalid payload', async () => {
+			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.invalidArguments.status).send({ name: ServiceHelper.generateRandomString() });
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+	});
+};
+
+const testDeleteContainer = () => {
+	const route = (containerId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${containerId}`;
+	describe('Delete container', () => {
+		test('should fail without a valid session', async () => {
+			const res = await agent.delete(route(modelToDelete._id)).expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user is not a member of the teamspace', async () => {
+			const res = await agent.delete(`${route(modelToDelete._id)}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if container does not exist', async () => {
+			const res = await agent.delete(`${route('badId')}?key=${users.tsAdmin.apiKey}`).expect(templates.containerNotFound.status);
+			expect(res.body.code).toEqual(templates.containerNotFound.code);
+		});
+
+		test('should return ok on success', async () => {
+			const res = await agent.delete(`${route(modelToDelete._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			expect(res.body).toEqual({});
+
+			const getRes = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			expect(getRes.body.containers.find(({ _id }) => _id === modelToDelete._id)).toBe(undefined);
+		});
+
+		test('should fail if container is federation', async () => {
+			const res = await agent.delete(`${route(models[2]._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.containerNotFound.status);
+			expect(res.body.code).toEqual(templates.containerNotFound.code);
+		});
+
+		test('should fail if container is submodel', async () => {
+			const res = await agent.delete(`${route(models[1]._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.containerIsSubModel.status);
+			expect(res.body.code).toEqual(templates.containerIsSubModel.code);
+		});
+
+		test('should fail if user lacks permissions', async () => {
+			const res = await agent.delete(`${route(models[1]._id)}?key=${users.viewer.apiKey}`).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
 	});
 };
@@ -456,6 +593,72 @@ const testUpdateContainerSettings = () => {
 	});
 };
 
+const formatToSettings = (settings) => ({
+	_id: settings._id,
+	name: settings.name,
+	desc: settings.properties.desc,
+	type: settings.properties.type,
+	code: settings.properties.properties.code,
+	unit: settings.properties.properties.unit,
+	defaultView: settings.properties.defaultView,
+	defaultLegend: settings.properties.defaultLegend,
+	timestamp: settings.properties.timestamp ? settings.properties.timestamp.getTime() : undefined,
+	angleFromNorth: settings.properties.angleFromNorth,
+	status: settings.properties.status,
+	surveyPoints: settings.properties.surveyPoints,
+	errorReason: settings.properties.errorReason ? {
+		message: settings.properties.errorReason.message,
+		timestamp: settings.properties.errorReason.timestamp
+			? settings.properties.errorReason.timestamp.getTime() : undefined,
+		errorCode: settings.properties.errorReason.errorCode,
+	} : undefined,
+});
+
+const testGetSettings = () => {
+	const route = (containerId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${containerId}`;
+	describe('Get container settings', () => {
+		test('should fail without a valid session', async () => {
+			const res = await agent.get(route(models[3]._id)).expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user is not a member of the teamspace', async () => {
+			const res = await agent.get(`${route(models[3]._id)}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if the project does not exist', async () => {
+			const res = await agent.get(`/v5/teamspaces/${teamspace}/projects/dflkdsjfs/containers/${models[3]._id}?key=${users.tsAdmin.apiKey}`).expect(templates.projectNotFound.status);
+			expect(res.body.code).toEqual(templates.projectNotFound.code);
+		});
+
+		test('should fail if the user does not have access to the container', async () => {
+			const res = await agent.get(`${route(models[3]._id)}?key=${users.noProjectAccess.apiKey}`).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		});
+
+		test('should fail if the model is a federation', async () => {
+			const res = await agent.get(`${route(federation._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.containerNotFound.status);
+			expect(res.body.code).toEqual(templates.containerNotFound.code);
+		});
+
+		test('should fail if the container does not exist', async () => {
+			const res = await agent.get(`${route('jibberish')}?key=${users.tsAdmin.apiKey}`).expect(templates.containerNotFound.status);
+			expect(res.body.code).toEqual(templates.containerNotFound.code);
+		});
+
+		test('should return the container settings correctly if the user has access', async () => {
+			const res = await agent.get(`${route(models[3]._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			expect(res.body).toEqual(formatToSettings(models[3]));
+		});
+
+		test('should return the container settings correctly if the user has access (no timestamp)', async () => {
+			const res = await agent.get(`${route(models[4]._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			expect(res.body).toEqual(formatToSettings(models[4]));
+		});
+	});
+};
+
 describe('E2E routes/teamspaces/projects/containers', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -467,5 +670,8 @@ describe('E2E routes/teamspaces/projects/containers', () => {
 	testGetContainerStats();
 	testAppendFavourites();
 	testDeleteFavourites();
+	testAddContainer();
 	testUpdateContainerSettings();
+	testGetSettings();
+	testDeleteContainer();
 });

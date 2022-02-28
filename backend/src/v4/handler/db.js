@@ -279,7 +279,8 @@
 	Handler.getSessionStore = function (session) {
 		const MongoDBStore = require("connect-mongodb-session")(session);
 		return new MongoDBStore({
-			uri: getURL("admin"),
+			uri: getURL(),
+			databaseName:"admin",
 			collection: "sessions"
 		});
 	};

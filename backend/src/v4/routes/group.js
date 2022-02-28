@@ -20,9 +20,9 @@
 const express = require("express");
 const router = express.Router({ mergeParams: true });
 const middlewares = require("../middlewares/middlewares");
-const C = require("../constants");
 const responseCodes = require("../response_codes.js");
 const Group = require("../models/group");
+const C = require("../constants");
 const {v5Path} = require("../../interop");
 const GroupsV5 = require(`${v5Path}/processors/teamspaces/projects/models/commons/groups`);
 const { serialiseGroupArray} = require(`${v5Path}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups`);

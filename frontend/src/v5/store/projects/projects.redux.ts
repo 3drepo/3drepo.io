@@ -16,7 +16,7 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
-import { Constants } from '../common/actions.helper';
+import { Constants } from '../../helpers/actions.helper';
 
 export interface IProject {
 	_id: string;
@@ -28,32 +28,40 @@ export interface IProjectsActions {
 	fetch: (teamspace: string) => any;
 	fetchSuccess: (teamspace: string, projects: IProject[]) => any;
 	fetchFailure: () => any;
+	setCurrentProject: (projectId: string) => any;
 }
 
 export const { Types: ProjectsTypes, Creators: ProjectsActions } = createActions({
 	fetch: ['teamspace'],
 	fetchSuccess: ['teamspace', 'projects'],
 	fetchFailure: [],
+	setCurrentProject: ['projectId'],
 }, { prefix: 'PROJECTS/' }) as { Types: Constants<IProjectsActions>; Creators: IProjectsActions };
 
-interface IProjectsState {
-	projects: Record<string, IProject[]> | [];
-	currentTeamspace: string;
+export interface IProjectsState {
+	projectsByTeamspace: Record<string, IProject[]>;
+	currentProject: string;
 }
 
 export const INITIAL_STATE: IProjectsState = {
-	projects: [],
-	currentTeamspace: '',
+	projectsByTeamspace: {},
+	currentProject: '',
 };
 
-export const fetchSuccess = (state = INITIAL_STATE, { teamspace, projects }) => ({ ...state,
-	currentTeamspace: teamspace,
-	projects: {
-		...state.projects,
+export const fetchSuccess = (state = INITIAL_STATE, { teamspace, projects }): IProjectsState => ({
+	...state,
+	projectsByTeamspace: {
+		...state.projectsByTeamspace,
 		[teamspace]: projects,
 	},
 });
 
+export const setCurrentProject = (state = INITIAL_STATE, { projectId }): IProjectsState => ({
+	...state,
+	currentProject: projectId,
+});
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[ProjectsTypes.FETCH_SUCCESS]: fetchSuccess,
-});
+	[ProjectsTypes.SET_CURRENT_PROJECT]: setCurrentProject,
+}) as (state: IProjectsState, action: any) => IProjectsState;
