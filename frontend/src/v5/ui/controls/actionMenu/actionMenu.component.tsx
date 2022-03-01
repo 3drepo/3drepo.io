@@ -14,8 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React, { ReactNode, useState, Children, ReactElement } from 'react';
+import { ReactNode, useState, Children, ReactElement, cloneElement } from 'react';
 import { ClickAwayListener, Grow } from '@material-ui/core';
 import { ActionMenuTriggerButton } from '@controls/actionMenu';
 import { ACTION_MENU_ITEM_NAME } from './actionMenuItem/actionMenuItem.component';
@@ -27,7 +26,7 @@ import {
 
 const applyCloseMenuToActionMenuItems = (el: any, handleClose: () => void) => {
 	if (el?.type?.name === ACTION_MENU_ITEM_NAME) {
-		return React.cloneElement(el, {
+		return cloneElement(el, {
 			onClick: () => {
 				el.props.onClick?.();
 				handleClose();
@@ -36,7 +35,7 @@ const applyCloseMenuToActionMenuItems = (el: any, handleClose: () => void) => {
 	}
 
 	if (el?.props?.children) {
-		return React.cloneElement(el, {
+		return cloneElement(el, {
 			children: Children.map(el.props.children, (child) => applyCloseMenuToActionMenuItems(child, handleClose)),
 		});
 	}
@@ -63,7 +62,7 @@ export const ActionMenu = ({ className, children }: ActionMenuProps) => {
 		throw new Error('ActionMenu\'s first child must be of type ActionMenuTriggerButton');
 	}
 
-	const TriggerButton = React.cloneElement(triggerButton as ReactElement, {
+	const TriggerButton = cloneElement(triggerButton as ReactElement, {
 		onClick: handleClick,
 	});
 

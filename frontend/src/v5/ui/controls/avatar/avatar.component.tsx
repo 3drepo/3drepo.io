@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React, { MouseEvent } from 'react';
-
+import { MouseEvent } from 'react';
 import AvatarIcon from '@material-ui/core/Avatar';
 import { IUser } from '@/v5/store/users/users.redux';
 import { StyledIconButton } from './avatar.styles';
