@@ -140,7 +140,7 @@ const testToQuery = () => {
 	describe.each(
 		testCases.map(({ desc, data, query }) => [desc, data, query]),
 	)('Smart rule to query', (desc, data, query) => {
-		test(`${desc} ${query ? ' should convert to the expected query' : 'should throw invalid arguments'}`, async () => {
+		test(`${desc} ${query ? ' should convert to the expected query' : 'should throw invalid arguments'}`, () => {
 			if (query) {
 				expect(MetaRules.toQuery(data)).toEqual(query);
 			} else {
