@@ -56,7 +56,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 	});
 
 	useEffect(() => {
-		if (formState.isSubmitSuccessful) reset();
+		if (!isUploading) reset();
 	}, [isUploading]);
 
 	const DEFAULT_SORT_CONFIG = {
