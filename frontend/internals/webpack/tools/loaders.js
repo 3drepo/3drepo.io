@@ -1,5 +1,3 @@
-const MODES = require('./modes');
-
 const TSLoader = ({ transpileOnly }) => ({
   test: /\.(ts|tsx)$/,
   loader: 'ts-loader',

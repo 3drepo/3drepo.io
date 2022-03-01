@@ -111,7 +111,6 @@
 		"sw-precache": "5.2.0",
 		"type-fest": "2.3.2",
 		"uuidv4": "5.0.1",
-		"workbox-webpack-plugin": "6.5.0",
 		"worker-loader": "3.0.8",
 		"yup": "0.32.11",
 		"zxcvbn": "4.4.2"
