@@ -74,7 +74,7 @@ export const Subtitle = styled(Typography).attrs({
 export const FormDialogContent = styled(DialogContent)`
 	display: inline-flex;
 	flex-flow: row wrap;
-	padding: 0;
+	margin: 20px 34px 43px;
 `;
 
 export const FormDialogActions = styled(DialogActions)`

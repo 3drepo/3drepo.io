@@ -21,8 +21,8 @@ import { useParams } from 'react-router';
 
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { formatMessage } from '@/v5/services/intl';
+import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
 import { Sidebar } from '@controls/sideBar';
 import { UploadFieldArray } from '@/v5/store/containers/containers.types';
 import { UploadsSchema } from '@/v5/validation/containers';
@@ -30,10 +30,9 @@ import { DashboardListHeaderLabel } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
 import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
-import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
-import { Container, Content, DropZone, UploadsListHeader } from './uploadFileForm.styles';
-import { SidebarForm } from './sidebarForm';
 import { UploadList } from './uploadList';
+import { SidebarForm } from './sidebarForm';
+import { Container, Content, DropZone, Modal, UploadsListHeader } from './uploadFileForm.styles';
 
 type IUploadFileForm = {
 	openState: boolean;
@@ -130,7 +129,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 
 	return (
 		<FormProvider {...methods}>
-			<FormModal
+			<Modal
 				open={openState}
 				onSubmit={handleSubmit(onSubmit)}
 				onClickClose={onClickClose}
@@ -150,6 +149,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 						: formatMessage({ id: 'uploads.modal.subtitle.preparing', defaultMessage: 'Select a file to add Container/Revision details' })
 				}
 				onKeyPress={(e) => e.key === 'Enter' && e.preventDefault()}
+				maxWidth="xl"
 				isValid={formState.isValid}
 			>
 				<Container>
@@ -216,7 +216,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 						}
 					</Sidebar>
 				</Container>
-			</FormModal>
+			</Modal>
 		</FormProvider>
 	);
 };

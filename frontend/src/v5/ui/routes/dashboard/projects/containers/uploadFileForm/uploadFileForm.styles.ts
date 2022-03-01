@@ -18,6 +18,16 @@
 import styled from 'styled-components';
 import { DragAndDrop } from '@controls/dragAndDrop';
 import { DashboardListHeader } from '@components/dashboard/dashboardList/dashboardListHeader';
+import { FormModal } from '@controls/modal/formModal/formDialog.component';
+
+export const Modal = styled(FormModal)`
+	.MuiDialogContent-root {
+		padding: 0;
+		margin: 0;
+	}
+	padding: 0;
+	margin: 0;
+`;
 
 export const Container = styled.div`
 	display: flex;
@@ -39,6 +49,6 @@ export const Content = styled.span`
 `;
 
 export const UploadsListHeader = styled(DashboardListHeader)`
-	padding: 0 20px 13px;
+	padding: 0 15px 13px 20px;
 	margin-top: 0;
 `;

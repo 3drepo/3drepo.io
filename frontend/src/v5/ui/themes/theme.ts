@@ -483,10 +483,11 @@ export const theme = createMuiTheme({
 					},
 				},
 				adornedStart: {
-					'& $svg': {
-						height: '15px',
-						overflow: 'clip',
-						margin: '3px -7px 0 0',
+					'&$error': {
+						paddingLeft: '6px',
+						'& $input': {
+							paddingLeft: '0px',
+						},
 					},
 				},
 			},

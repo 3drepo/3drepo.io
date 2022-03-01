@@ -17,30 +17,34 @@
 
 import React from 'react';
 
-import { Tooltip } from '@material-ui/core';
-import ErrorIcon from '@assets/icons/error_circle.svg';
-import { Input } from './uploadListItemRevisionTag.styles';
+import { ErrorTooltip } from '@controls/errorTooltip';
+import { Control } from 'react-hook-form/dist/types';
+import { UploadItemFields } from '@/v5/store/containers/containers.types';
+import { TextField } from './uploadListItemRevisionTag.styles';
 
 type IUploadListItemRevision = {
 	isSelected: boolean;
 	errorMessage?: string;
+	control: Control<UploadItemFields>;
 };
 
 export const UploadListItemRevisionTag = ({
+	control,
 	isSelected,
 	errorMessage,
 	...props
 }: IUploadListItemRevision): JSX.Element => (
-	<Input
+	<TextField
+		control={control}
 		$selectedrow={isSelected}
-		error={!!errorMessage}
+		name="revisionTag"
+		formError={errorMessage}
+		required
 		InputProps={{
 			startAdornment: !!errorMessage && (
-				<Tooltip title={errorMessage} placement="bottom-start">
-					<span>
-						<ErrorIcon />
-					</span>
-				</Tooltip>
+				<ErrorTooltip>
+					{errorMessage}
+				</ErrorTooltip>
 			),
 		}}
 		{...props}
