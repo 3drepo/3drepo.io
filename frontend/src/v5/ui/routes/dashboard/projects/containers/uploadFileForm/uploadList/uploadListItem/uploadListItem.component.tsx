@@ -75,6 +75,7 @@ export const UploadListItem = ({
 			/>
 			<UploadListItemDestination
 				control={control}
+				disabled={isUploading}
 				errorMessage={errors.containerName?.message}
 				onChange={(vals: DestinationOption) => {
 					Object.keys(vals).forEach((key: keyof DestinationOption) => {
@@ -87,6 +88,7 @@ export const UploadListItem = ({
 			/>
 			<UploadListItemRevisionTag
 				control={control}
+				disabled={isUploading}
 				isSelected={isSelected}
 				errorMessage={errors.revisionTag?.message}
 			/>

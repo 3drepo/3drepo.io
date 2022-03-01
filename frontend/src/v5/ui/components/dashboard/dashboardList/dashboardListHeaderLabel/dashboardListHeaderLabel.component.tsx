@@ -27,17 +27,20 @@ interface IDashboardListHeaderLabel extends IFixedOrGrowContainer{
 	sort?: boolean;
 	name?: string;
 	onClick?: Dispatch<void>;
+	hidden?: boolean;
 }
 
 export const DashboardListHeaderLabel = ({
 	children,
 	sortingDirection,
 	onClick,
+	hidden = false,
 	sort = false,
 	...containerProps
 }: IDashboardListHeaderLabel): JSX.Element => (
 	<Container
 		{...containerProps}
+		hidden={hidden}
 	>
 		{sort ? (
 			<Button onClick={onClick}>

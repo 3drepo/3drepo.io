@@ -19,7 +19,7 @@ import styled from 'styled-components';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 
 export const TextField = styled(FormTextField)`
-	margin: 0 7px;
+	margin: 0 12px;
 	width: 200px;
 	.MuiOutlinedInput-root {
 		input { height: 31px }
@@ -30,5 +30,14 @@ export const TextField = styled(FormTextField)`
 				background-color: ${theme.palette.secondary.light};
 			}
 		`}
+		&.Mui-disabled {
+			width: 255px;
+			input {
+				font-weight: bold;
+				color: ${({ theme }) => theme.palette.secondary.main};
+			};
+			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+			fieldset { border: none; }
+		}
 	}
 `;

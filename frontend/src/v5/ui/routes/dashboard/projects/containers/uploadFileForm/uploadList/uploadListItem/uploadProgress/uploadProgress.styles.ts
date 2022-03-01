@@ -24,6 +24,7 @@ export const Container = styled.div`
 	width: auto;
 	display: inline-flex;
 	align-items: center;
+	margin-left: 70px;
 `;
 
 export const StatusText = styled(Typography).attrs({

@@ -159,11 +159,14 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 								<DashboardListHeaderLabel key="file" name="file.name">
 									<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
 								</DashboardListHeaderLabel>
-								<DashboardListHeaderLabel key="destination" width={285}>
+								<DashboardListHeaderLabel key="destination" width={282}>
 									<FormattedMessage id="uploads.list.header.destination" defaultMessage="Destination" />
 								</DashboardListHeaderLabel>
-								<DashboardListHeaderLabel key="revisionName" width={297}>
+								<DashboardListHeaderLabel key="revisionName" width={isUploading ? 282 : 302}>
 									<FormattedMessage id="uploads.list.header.revisionName" defaultMessage="Revision Name" />
+								</DashboardListHeaderLabel>
+								<DashboardListHeaderLabel key="progress" width={337} hidden={!isUploading}>
+									<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
 								</DashboardListHeaderLabel>
 							</UploadsListHeader>
 						</div>
