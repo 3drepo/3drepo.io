@@ -16,7 +16,6 @@
  */
 
 import { Field } from 'formik';
-import React from 'react';
 import SaveIcon from '@material-ui/icons/Save';
 
 import { ViewerPanelButton, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';

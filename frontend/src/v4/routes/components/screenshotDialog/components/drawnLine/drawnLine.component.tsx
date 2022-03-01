@@ -14,8 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import * as React from 'react';
+import { useEffect, useRef } from 'react';
 import { Group, Line, Rect, Transformer } from 'react-konva';
 
 interface IProps {
@@ -28,19 +27,19 @@ export const DrawnLine = ({ element, isSelected, handleChange }: IProps) => {
 	const {
 		color, isEraser, draggable, groupX, groupY, rotation, initScaleX, initScaleY, scaleX, scaleY, ...elementProps
 	} = element;
-	const line = React.useRef<any>();
-	const transformer = React.useRef<any>();
-	const rect = React.useRef<any>(null);
-	const group = React.useRef<any>(null);
+	const line = useRef<any>();
+	const transformer = useRef<any>();
+	const rect = useRef<any>(null);
+	const group = useRef<any>(null);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (isSelected && transformer.current) {
 			transformer.current.setNode(group.current);
 			transformer.current.getLayer().batchDraw();
 		}
 	}, [transformer.current, isSelected]);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (line.current) {
 			const selfRect = line.current.getSelfRect();
 			const width = line.current.width() || selfRect.width;

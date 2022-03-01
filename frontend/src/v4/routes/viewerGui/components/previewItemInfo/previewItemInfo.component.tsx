@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { PureComponent, ReactNode } from 'react';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { NAMED_MONTH_DATE_FORMAT } from '../../../../services/formatting/formatDate';
 import { DateTime } from '../../../components/dateTime/dateTime.component';
@@ -29,7 +27,7 @@ interface IProps {
 	StatusIconComponent: any;
 	statusColor: string;
 	extraInfo?: string;
-	actionButton?: React.ReactNode;
+	actionButton?: ReactNode;
 	panelType?: string;
 	showModelButton?: boolean;
 	type?: string;
@@ -37,7 +35,7 @@ interface IProps {
 	urlParams?: any;
 }
 
-export class PreviewItemInfo extends React.PureComponent<IProps, any> {
+export class PreviewItemInfo extends PureComponent<IProps, any> {
 
 	public renderViewModel = renderWhenTrue(() => {
 		const { type, id } = this.props;

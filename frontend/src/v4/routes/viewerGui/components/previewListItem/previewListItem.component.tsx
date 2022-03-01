@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 import removeMd from 'remove-markdown';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -72,7 +72,7 @@ interface IProps {
 	panelType?: string;
 }
 
-export class PreviewListItem extends React.PureComponent<IProps, any> {
+export class PreviewListItem extends PureComponent<IProps, any> {
 	get isExpiredDate() {
 		const { due_date } = this.props;
 		return Number(!!(due_date && new Date().valueOf() >= due_date));

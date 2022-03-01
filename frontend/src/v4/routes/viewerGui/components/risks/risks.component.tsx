@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 
 import { isEmpty } from 'lodash';
 
@@ -68,7 +68,7 @@ interface IProps {
 	setSortBy: (field) => void;
 	id?: string;
 }
-export class Risks extends React.PureComponent<IProps, any> {
+export class Risks extends PureComponent<IProps, any> {
 	get filters() {
 		const { criteria } = this.props;
 		if (isEmpty(criteria)) {

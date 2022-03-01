@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { PureComponent } from 'react';
 import Button from '@material-ui/core/Button';
 import DialogActions from '@material-ui/core/DialogActions';
 
@@ -48,7 +46,7 @@ interface IProps {
 	handleClose: () => void;
 }
 
-export class RevisionsDialog extends React.PureComponent<IProps, any> {
+export class RevisionsDialog extends PureComponent<IProps, any> {
 	public componentWillUnmount() {
 		if (this.props.type === TYPES.TEAMSPACES) {
 			this.props.resetModelRevisions();

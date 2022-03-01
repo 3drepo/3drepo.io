@@ -16,7 +16,6 @@
  */
 import { Button } from '@material-ui/core';
 import { Field } from 'formik';
-import * as React from 'react';
 import {
 	NeutralActionButton,
 	VisualSettingsButtonsContainer

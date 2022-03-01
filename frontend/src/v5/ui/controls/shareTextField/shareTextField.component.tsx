@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { InputAdornment } from '@material-ui/core';
 import { CopyToClipboard } from 'react-copy-to-clipboard';

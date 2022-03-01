@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React from 'react';
+import { createElement } from 'react';
 import { createMuiTheme } from '@material-ui/core/styles';
 import { TypographyOptions } from '@material-ui/core/styles/createTypography';
 import RadioButtonIcon from '@assets/icons/controls/radio_button.svg';
@@ -235,14 +235,14 @@ export const theme = createMuiTheme({
 		},
 		MuiCheckbox: {
 			color: 'primary',
-			icon: React.createElement(CheckboxIcon),
-			checkedIcon: React.createElement(CheckboxCheckedIcon),
-			indeterminateIcon: React.createElement(CheckboxIndeterminatedIcon),
+			icon: createElement(CheckboxIcon),
+			checkedIcon: createElement(CheckboxCheckedIcon),
+			indeterminateIcon: createElement(CheckboxIndeterminatedIcon),
 		},
 		MuiRadio: {
 			color: 'primary',
-			icon: React.createElement(RadioButtonIcon),
-			checkedIcon: React.createElement(RadioButtonCheckedIcon),
+			icon: createElement(RadioButtonIcon),
+			checkedIcon: createElement(RadioButtonCheckedIcon),
 		},
 		MuiTooltip: {
 			PopperProps: {

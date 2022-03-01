@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { Tooltip } from '@material-ui/core';
 import {
@@ -100,14 +100,16 @@ export const ContainerListItem = ({
 						values={{ count: container.revisionsCount }}
 					/>
 				</DashboardListItemButton>
-				<DashboardListItemText selected={isSelected} minWidth={112}>
+				<DashboardListItemText
+					selected={isSelected}
+					width={160}
+				>
 					<Highlight search={filterQuery}>
 						{container.code}
 					</Highlight>
 				</DashboardListItemText>
 				<DashboardListItemText
 					width={188}
-					tabletWidth={125}
 					hideWhenSmallerThan={Display.Tablet}
 					selected={isSelected}
 				>
@@ -115,7 +117,10 @@ export const ContainerListItem = ({
 						{container.type}
 					</Highlight>
 				</DashboardListItemText>
-				<DashboardListItemText width={68} selected={isSelected}>
+				<DashboardListItemText
+					width={78}
+					selected={isSelected}
+				>
 					{container.lastUpdated ? formatDate(container.lastUpdated) : ''}
 				</DashboardListItemText>
 				<DashboardListItemIcon>

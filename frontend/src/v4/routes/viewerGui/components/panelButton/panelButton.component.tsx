@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
 import { VIEWER_PANELS_ICONS } from '../../../../constants/viewerGui';
 import { Button, ButtonWrapper } from './panelButton.styles';
 

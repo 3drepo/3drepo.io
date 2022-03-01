@@ -18,7 +18,7 @@
 import IconButton from '@material-ui/core/IconButton';
 import MoreVert from '@material-ui/icons/MoreVert';
 import { isEmpty } from 'lodash';
-import React from 'react';
+import { PureComponent } from 'react';
 
 import { StyledGrid, StyledGridActions } from './rowMenu.styles';
 
@@ -33,7 +33,7 @@ interface IState {
 	pointerEvents: boolean;
 }
 
-export class RowMenu extends React.PureComponent<IProps, IState> {
+export class RowMenu extends PureComponent<IProps, IState> {
 	public state = {
 		pointerEvents: false
 	};

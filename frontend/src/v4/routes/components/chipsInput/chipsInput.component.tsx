@@ -14,11 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
-import { snakeCase } from 'lodash';
-
+import { FunctionComponent } from 'react';
 import { StyledChipInput } from './chipsInput.styles';
 
 interface IProps {
@@ -28,7 +24,7 @@ interface IProps {
 	placeholder?: string;
 }
 
-export const ChipsInput: React.FunctionComponent<IProps> = ({ name, onChange, ...props }) => {
+export const ChipsInput: FunctionComponent<IProps> = ({ name, onChange, ...props }) => {
 	const getValues = () => [...props.value];
 
 	const handleAddChip = (value) => {

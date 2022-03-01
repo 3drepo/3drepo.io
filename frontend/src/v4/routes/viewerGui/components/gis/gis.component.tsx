@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 
 import { IconButton, MenuItem } from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
@@ -66,7 +66,7 @@ interface IState {
 	activeMapIndex: number;
 }
 
-export class Gis extends React.PureComponent<IProps, IState> {
+export class Gis extends PureComponent<IProps, IState> {
 
 	get type() {
 		return VIEWER_PANELS.GIS;

@@ -189,6 +189,7 @@ export type UpdateFederationSettingsAction = Action<'UPDATE_FEDERATION_SETTINGS'
 export type UpdateFederationSettingsSuccessAction = Action<'UPDATE_FEDERATION_SETTINGS_SUCCESS'> & UpdateFederationSettingsSuccessPayload;
 export type DeleteFederationAction = Action<'DELETE_FEDERATION'> & DeleteFederationPayload;
 export type DeleteFederationSuccessAction = Action<'DELETE_FEDERATION_SUCCESS'> & DeleteFederationSuccessPayload;
+export type UpdateFederationSuccessAction = Action<'UPDATE_FEDERATION'> & {projectId: string, federationId: string, updatedFederation: IFederation};
 
 export interface IFederationsActionCreators {
 	fetchFederations: (teamspace: string, projectId: string) => FetchFederationsAction;
@@ -242,4 +243,9 @@ export interface IFederationsActionCreators {
 		federationId: string,
 		containers: string[],
 	) => UpdateFederationContainersActionSuccess;
+	updateFederationSuccess: (
+		projectId: string, 
+		federationId: string, 
+		updatedFederation: Partial<IFederation>
+	) => UpdateFederationSuccessAction;
 }

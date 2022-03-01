@@ -25,7 +25,7 @@ import ShortTextIcon from '@material-ui/icons/ShortText';
 import ReactTextareaAutocomplete from '@webscopeio/react-textarea-autocomplete';
 import { Field, Formik } from 'formik';
 import { lowerCase, pick, values as _values } from 'lodash';
-import React from 'react';
+import { createRef, forwardRef, PureComponent } from 'react';
 import * as Yup from 'yup';
 
 import { RISK_CONSEQUENCES, RISK_LIKELIHOODS } from '../../../../constants/risks';
@@ -105,7 +105,7 @@ const TicketSuggestionItem = ({ entity: { ... ticketData } }) => (
 	<TicketSuggestion {...ticketData} />
 );
 
-export class CommentForm extends React.PureComponent<IProps, IState> {
+export class CommentForm extends PureComponent<IProps, IState> {
 	get commentTypeIcon() {
 		return this.state.isResidualRiskInputActive ? ReportProblemIcon : ShortTextIcon;
 	}
@@ -136,7 +136,7 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 		optionsCaret: 'start',
 	};
 
-	public fileInputRef = React.createRef<HTMLInputElement>();
+	public fileInputRef = createRef<HTMLInputElement>();
 
 	public renderScreenshotButton = renderWhenTrue(() => (
 		<TooltipButton
@@ -169,7 +169,7 @@ export class CommentForm extends React.PureComponent<IProps, IState> {
 		/>
 	));
 
-	private renderTextAreaComponent = React.forwardRef((props, ref) => {
+	private renderTextAreaComponent = forwardRef((props, ref) => {
 		const counterValue = this.props.commentRef.current?.textareaRef.value.length;
 		return (
 			<>

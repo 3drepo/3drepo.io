@@ -16,7 +16,7 @@
  */
 
 import OpenInBrowser from '@material-ui/icons/OpenInBrowser';
-import React, { memo } from 'react';
+import { memo } from 'react';
 
 import { ROUTES } from '../../../constants/routes';
 import { TooltipButton } from '../../teamspaces/components/tooltipButton/tooltipButton.component';

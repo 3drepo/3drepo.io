@@ -14,9 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { DetailedHTMLProps, FormHTMLAttributes } from 'react';
 import { Button, Dialog } from '@material-ui/core';
-import React from 'react';
 import CloseIcon from '@assets/icons/close.svg';
 import { DialogProps } from '@material-ui/core/Dialog';
 import {
@@ -29,10 +28,7 @@ import {
 	RemoveWhiteCorners,
 } from './formDialog.styles';
 
-export interface IFormModal extends React.DetailedHTMLProps<
-React.FormHTMLAttributes<HTMLFormElement>,
-HTMLFormElement
-> {
+interface IFormModal extends DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement> {
 	onClickClose?: () => void;
 	title?: string;
 	open?: boolean;
