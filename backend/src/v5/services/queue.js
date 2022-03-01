@@ -81,7 +81,7 @@ const onEventQMsg = ({ content }) => {
 	try {
 		const data = JSON.parse(content);
 		logger.logDebug(`[${eventExchange}][CONSUME]\t${JSON.stringify(data)}`);
-		publish(events.NEW_EVENT_MESSAGE, data);
+		publish(events.CHAT_EVENT, data);
 	} catch (err) {
 		logger.logError(`[${eventExchange}][CONSUME]\t${err?.message}`);
 	}
