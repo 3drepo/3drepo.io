@@ -1,9 +1,0 @@
-{
-	"presets": [
-		"@babel/env",
-		"@babel/react",
-		["@babel/preset-react", {
-			"runtime": "automatic"
-		}]
-	]
-}
