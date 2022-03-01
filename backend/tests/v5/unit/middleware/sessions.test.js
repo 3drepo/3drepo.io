@@ -55,7 +55,7 @@ const testCreateSession = () => {
 			sessionID: request.sessionID,
 			ipAddress: request.ips[0] || request.ip,
 			userAgent: request.headers['user-agent'],
-			referer: request.headers.referer,
+			referer: request?.session?.user?.referer,
 			socketId: request.headers['x-socket-id'],
 		});
 	};

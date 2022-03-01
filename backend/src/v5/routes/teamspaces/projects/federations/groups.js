@@ -143,7 +143,7 @@ const establishRoutes = () => {
 	 *         schema:
 	 *         type: string
 	 *     requestBody:
-	 *       description: List of group ids to export
+	 *       description: List of group ids to import
 	 *       content:
 	 *         application/json:
 	 *           schema:
