@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode, ComponentType, useState } from 'react';
+import { ReactNode, ComponentType, useState } from 'react';
 import {
 	DashboardList,
 	DashboardListCollapse,

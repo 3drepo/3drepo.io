@@ -244,8 +244,8 @@ export interface IFederationsActionCreators {
 		containers: string[],
 	) => UpdateFederationContainersActionSuccess;
 	updateFederationSuccess: (
-		projectId: string, 
-		federationId: string, 
+		projectId: string,
+		federationId: string,
 		updatedFederation: Partial<IFederation>
 	) => UpdateFederationSuccessAction;
 }
