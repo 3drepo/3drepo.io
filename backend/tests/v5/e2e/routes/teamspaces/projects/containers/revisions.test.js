@@ -354,13 +354,13 @@ const testDownloadRevisionFiles = () => {
 		test('should download files if there is a valid ref', async () => {
 			const res = await agent.get(`${route(teamspace, project.id, modelWithRev._id, validRefTypeRevision._id)}?key=${users.tsAdmin.apiKey}`)
 				.expect(templates.ok.status);
-			expect(res.text).toEqual('test data');
+			expect(res.text).toEqual(validRefTypeRevision.refData);
 		});
 
 		test('should download files if there is a valid ref (using revision tag)', async () => {
 			const res = await agent.get(`${route(teamspace, project.id, modelWithRev._id, validRefTypeRevision.tag)}?key=${users.tsAdmin.apiKey}`)
 				.expect(templates.ok.status);
-			expect(res.text).toEqual('test data');
+			expect(res.text).toEqual(validRefTypeRevision.refData);
 		});
 	});
 };

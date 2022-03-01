@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createResponseCode, templates } = require('./responseCodes');
 const { isBuffer, isString } = require('./helper/typeCheck');
+const { createResponseCode } = require('./responseCodes');
 const networkLabel = require('./logger').labels.network;
 const logger = require('./logger').logWithLabel(networkLabel);
 const { v4Path } = require('../../interop');
@@ -96,22 +96,16 @@ Responder.writeStreamRespond = (req, res, resCode, readStream, fileName, fileSiz
 	};
 
 	let response = createResponseCode(resCode);
-	const place = `${req.method} ${req.originalUrl}`;
 
 	readStream.on('error', (error) => {
-		logger.logInfo(genResponseLogging(response, { place, httpCode: error.code, contentLength: fileSize }, req),
-			undefined, networkLabel);
-		response = templates.unknown;
+		response = createResponseCode(error);
+		logger.logInfo(genResponseLogging(response.code, fileSize, req));
 		res.status(response.status);
 		res.end();
 	});
 
 	readStream.once('data', () => {
-		if (headers) {
-			res.writeHead(response.status, headers);
-		} else {
-			res.status(response.status);
-		}
+		res.writeHead(response.status, headers);
 	});
 
 	readStream.on('data', (data) => {
@@ -120,8 +114,7 @@ Responder.writeStreamRespond = (req, res, resCode, readStream, fileName, fileSiz
 
 	readStream.on('end', () => {
 		res.end();
-		logger.logInfo(genResponseLogging(response, { place, httpCode: response.status, contentLength: fileSize }, req),
-			undefined, networkLabel);
+		logger.logInfo(genResponseLogging(response.code, fileSize, req));
 	});
 };
 

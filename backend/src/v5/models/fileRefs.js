@@ -55,13 +55,14 @@ const removeAllFiles = async (teamspace, collection) => {
 };
 
 FileRefs.fetchFileStream = async (teamspace, model, extension, fileName) => {
-	const entry = await getRefEntry(teamspace, `${model}.${extension}`, fileName);
+	const collection = `${model}.${extension}`;
+	const entry = await getRefEntry(teamspace, collection, fileName);
 	try {
-		const stream = await ExternalServices.getFileStream(teamspace, `${model}.${extension}`, entry.type, entry.link);
+		const stream = await ExternalServices.getFileStream(teamspace, collection, entry.type, entry.link);
 		return { readStream: stream, size: entry.size };
 	} catch {
 		logger.logError(`Failed to fetch file from ${entry.type}. Trying GridFS....`);
-		sendFileMissingError({ teamspace, model, collection: `${model}.${extension}`, refId: entry._id, link: entry.link }).catch((err) => {
+		sendFileMissingError({ teamspace, model, collection, refId: entry._id, link: entry.link }).catch((err) => {
 			logger.logError(`Failed to send file missing error: ${err.message}`);
 		});
 

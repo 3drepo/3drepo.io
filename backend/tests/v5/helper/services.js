@@ -92,15 +92,14 @@ db.createModel = (teamspace, _id, name, props) => {
 };
 
 db.createRevision = async (teamspace, modelId, revision) => {
-	const formattedRevision = { ...revision, _id: stringToUUID(revision._id) };
-	await DbHandler.insertOne(teamspace, `${modelId}.history`, formattedRevision);
-
 	if (revision.rFile) {
 		const refId = revision.rFile[0];
-		const data = 'test data';
-		const refInfo = await ExternalServices.storeFile(teamspace, `${modelId}.history.ref`, data);
+		const refInfo = await ExternalServices.storeFile(teamspace, `${modelId}.history.ref`, revision.refData);
 		DbHandler.insertOne(teamspace, `${modelId}.history.ref`, { ...refInfo, _id: refId });
 	}
+	const formattedRevision = { ...revision, _id: stringToUUID(revision._id) };
+	delete formattedRevision.refData;
+	await DbHandler.insertOne(teamspace, `${modelId}.history`, formattedRevision);
 };
 
 db.createGroups = (teamspace, modelId, groups = []) => {
@@ -184,6 +183,7 @@ ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true) => {
 
 	if (hasFile) {
 		entry.rFile = [`${_id}${ServiceHelper.generateUUIDString()}`];
+		entry.refData = ServiceHelper.generateRandomString();
 	}
 
 	return entry;
