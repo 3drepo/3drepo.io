@@ -154,7 +154,6 @@ module.exports.createApp = function (server, serverConfig) {
 			socket.on("leave", data => {
 
 				const modelNameSpace = data.model ?  `::${data.model}` : "";
-
 				socket.leave(`${data.account}${modelNameSpace}`);
 				systemLogger.logInfo(`${sessionID} - ${socket.id} has left room ${data.account}${modelNameSpace}`, {
 					account: data.account,

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 
 import { Grid, Tooltip } from '@material-ui/core';
 
@@ -51,7 +51,7 @@ const SequenceItem = ({name, modelName, startDate, endDate, onClick}) => (
 	</SequenceItemContainer>
 );
 
-export class SequencesList extends React.PureComponent<IProps, {}> {
+export class SequencesList extends PureComponent<IProps, {}> {
 	public render = () => {
 		const { setSelectedSequence, sequences } = this.props;
 

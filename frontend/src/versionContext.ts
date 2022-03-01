@@ -14,12 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React from 'react';
+import { createContext } from 'react';
 
 export const enum Version{
 	V4,
 	V5,
 }
 
-export const VersionContext = React.createContext(Version.V4);
+export const VersionContext = createContext(Version.V4);
 VersionContext.displayName = 'VersionContext';

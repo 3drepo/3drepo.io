@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { SkeletonBlock } from '@controls/skeletonBlock';
 import { Container } from './skeletonListItem.styles';

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { useRef } from 'react';
 
 import { Tooltip } from '@material-ui/core';
 import { Field, Formik } from 'formik';
@@ -52,7 +52,7 @@ interface IProps extends ILegend {
 export const LegendItem = ({
 	name, color, updateLegendItem, deleteLegendItem, legendNames, editMode, setComponentState, ...props
 }: IProps) => {
-	const textFieldRef = React.useRef(null);
+	const textFieldRef = useRef(null);
 
 	const getLegendSchema = LegendSchema(legendNames.filter((item) => item !== name));
 

@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { UserManagementActions } from '@/v4/modules/userManagement';
 
 import { useDispatch, useSelector } from 'react-redux';

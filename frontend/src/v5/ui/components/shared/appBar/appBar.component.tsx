@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
 import { AppBar as MuiAppBar } from '@material-ui/core';
 
 import LogoIcon from '@assets/icons/logo.svg';

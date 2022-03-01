@@ -17,7 +17,6 @@
 import { TextField } from '@material-ui/core';
 import { Field } from 'formik';
 import { get } from 'lodash';
-import * as React from 'react';
 import {
 	FieldsRow,
 	StyledFormControl

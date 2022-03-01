@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { FunctionComponent } from 'react';
 import SystemInfoIcon from '@material-ui/icons/InfoOutlined';
 
 import { DATE_TIME_FORMAT } from '../../../../../../../services/formatting/formatDate';
@@ -30,7 +28,7 @@ interface IProps {
 	propertyName: string;
 }
 
-const Comment: React.FunctionComponent<{teamspace, propertyName}> = ({teamspace, children , propertyName}) => {
+const Comment: FunctionComponent<{teamspace, propertyName}> = ({teamspace, children , propertyName}) => {
 	if (propertyName === 'issue_referenced') {
 		return (<MarkdownComment teamspace={teamspace}>{children}</MarkdownComment>);
 	}

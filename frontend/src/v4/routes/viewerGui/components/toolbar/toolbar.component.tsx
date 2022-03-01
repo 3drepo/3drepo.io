@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { PureComponent } from 'react';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import Fade from '@material-ui/core/Fade';
 import FocusIcon from '@material-ui/icons/CenterFocusStrong';
@@ -106,7 +104,7 @@ const ClipIconWithNumber = ({clipNumber}) => (
 	</ClipIconWrapper>
 );
 
-export class Toolbar extends React.PureComponent<IProps, IState> {
+export class Toolbar extends PureComponent<IProps, IState> {
 	public state = {
 		activeButton: '',
 		activeSubMenu: ''

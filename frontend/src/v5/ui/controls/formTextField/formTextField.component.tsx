@@ -16,7 +16,6 @@
  */
 
 import { TextField, TextFieldProps } from '@material-ui/core';
-import React from 'react';
 import { Controller } from 'react-hook-form';
 
 export type FormTextFieldProps = TextFieldProps & {
