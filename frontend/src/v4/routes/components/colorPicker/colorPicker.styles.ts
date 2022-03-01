@@ -14,8 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React from 'react';
-
+import { createElement } from 'react';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
@@ -113,7 +112,7 @@ export const ColorPointer = styled.div`
 `;
 
 export const SelectedColor = styled(({ color, ...rest}) =>
-	React.createElement('div', {...rest, style : {backgroundColor: color} }))`
+	createElement('div', {...rest, style : {backgroundColor: color} }))`
 	width: 55px;
 	height: 20px;
 	border: ${(props) => props.color && props.color !== COLOR.WHITE ? 0 : 1 }px solid ${COLOR.BLACK_6};
@@ -150,7 +149,7 @@ export const StyledAdornment = styled(InputAdornment)`
 	}
 `;
 
-export const SelectedHash = styled(({withOpacity, ...rest}) => React.createElement(Input, rest))`
+export const SelectedHash = styled(({withOpacity, ...rest}) => createElement(Input, rest))`
 	&& {
 		margin-left: 25px;
 		font-weight: ${FONT_WEIGHT.NORMAL};

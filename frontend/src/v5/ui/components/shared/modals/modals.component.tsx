@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectDialogs } from '@/v5/store/dialogs/dialogs.selectors';
 import { DialogsActions, IDialogConfig } from '@/v5/store/dialogs/dialogs.redux';

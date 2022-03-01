@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 import { getStaticFile } from '../../../services/staticPages';
 import { MainMenu } from '../topMenu/components/mainMenu/mainMenu.component';
 import { Container, Content, Header, Logo, MenuContainer, Title } from './staticPageRoute.styles';
@@ -29,7 +29,7 @@ interface IState {
 	fileContent: string;
 }
 
-export default class PageTemplate extends React.PureComponent<IProps, IState> {
+export default class PageTemplate extends PureComponent<IProps, IState> {
 	public state = {
 		fileContent: ''
 	};

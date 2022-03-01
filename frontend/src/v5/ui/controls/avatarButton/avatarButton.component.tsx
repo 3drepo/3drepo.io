@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { FC } from 'react';
 
 import Avatar from '@material-ui/core/Avatar';
 import { StyledIconButton } from './avatarButton.styles';
@@ -24,7 +24,7 @@ interface IAvatarButton {
 	disabled?: boolean;
 }
 
-export const AvatarButton: React.FC<IAvatarButton> = ({ children, ...props }) => (
+export const AvatarButton: FC<IAvatarButton> = ({ children, ...props }) => (
 	<StyledIconButton {...props}>
 		<Avatar>{children}</Avatar>
 	</StyledIconButton>

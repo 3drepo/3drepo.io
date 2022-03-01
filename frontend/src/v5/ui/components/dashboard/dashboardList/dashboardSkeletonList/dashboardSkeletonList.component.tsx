@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { Fragment, useMemo } from 'react';
+import { Fragment, useMemo, cloneElement } from 'react';
 import { DashboardList } from '@components/dashboard/dashboardList';
 
 interface IDashboardSkeletonList {
@@ -31,7 +31,7 @@ export const DashboardSkeletonList = ({ itemsAmount = 10, itemComponent }: IDash
 			{list.map((item, index) => (
 				<Fragment key={`${itemComponent.props.name as string}-${index as number}`}>
 					{
-						React.cloneElement(itemComponent, {
+						cloneElement(itemComponent, {
 							delay: index / 10,
 							...itemComponent.props,
 						})

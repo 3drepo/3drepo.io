@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode, useCallback, useEffect, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useState } from 'react';
 import EventListener from 'react-event-listener';
 import { isNil } from 'lodash';
 import { onlyText } from 'react-children-utilities';

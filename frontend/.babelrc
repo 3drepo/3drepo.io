@@ -1,3 +1,10 @@
 {
-	"presets": ["@babel/env", "@babel/react", "@lingui/babel-preset-react"]
+	"presets": [
+		"@babel/env",
+		"@babel/react",
+		["@babel/preset-react", {
+			"runtime": "automatic"
+		}],
+		"@lingui/babel-preset-react"
+	]
 }

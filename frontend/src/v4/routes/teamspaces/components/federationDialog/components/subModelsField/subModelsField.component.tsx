@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 
 import { SubModelsTable } from './../subModelsTable/subModelsTable.component';
 import { ModelsTableContainer } from './subModelsField.styles';
@@ -44,7 +44,7 @@ interface IState {
 	value: any[];
 }
 
-export class SubModelsField extends React.PureComponent<IProps, IState> {
+export class SubModelsField extends PureComponent<IProps, IState> {
 	public state = {
 		value: []
 	};

@@ -14,20 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { FC, ReactNode } from 'react';
 import { ButtonProps } from '@material-ui/core/Button';
 
 import { StyledButton } from './containedButton.styles';
 
 interface IProps extends ButtonProps {
-	children: React.ReactNode;
+	children: ReactNode;
 	icon?: any;
 	onClick?: (e) => void;
 }
 
-export const ContainedButton: React.FC<IProps> = ({ children, icon, onClick, ...props }) => {
+export const ContainedButton: FC<IProps> = ({ children, icon, onClick, ...props }) => {
 	const IconComponent = icon;
 
 	return (

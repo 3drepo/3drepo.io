@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
 import MovieIcon from '@material-ui/icons/Movie';
 
 import { DATE_FIELDS } from './timeIcon.constants';

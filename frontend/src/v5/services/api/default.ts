@@ -89,6 +89,10 @@ const patchRequest = (url, ...options) => {
 	return axios.patch(requestUrl, ...options);
 };
 
+export const setSocketIdHeader = (socketId) => {
+	axios.defaults.headers['x-socket-id'] = socketId;
+};
+
 export default {
 	get: getRequest,
 	post: postRequest,

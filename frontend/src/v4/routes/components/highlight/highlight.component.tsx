@@ -16,7 +16,7 @@
  */
 
 import { trim } from 'lodash';
-import React, { memo } from 'react';
+import { memo } from 'react';
 import Highlighter from 'react-highlight-words';
 
 import { Mark } from './highlight.styles';

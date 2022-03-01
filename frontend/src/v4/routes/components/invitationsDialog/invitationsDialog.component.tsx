@@ -19,7 +19,6 @@ import Button from '@material-ui/core/Button';
 import Delete from '@material-ui/icons/Delete';
 import Edit from '@material-ui/icons/Edit';
 import { get } from 'lodash';
-import React from 'react';
 
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { EmptyStateInfo } from '../components.styles';

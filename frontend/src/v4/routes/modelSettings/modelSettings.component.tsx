@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { PureComponent } from 'react';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import { Field, Formik } from 'formik';
@@ -97,7 +95,7 @@ interface IProps {
 	searchEnabled?: boolean;
 }
 
-export class ModelSettings extends React.PureComponent<IProps, IState> {
+export class ModelSettings extends PureComponent<IProps, IState> {
 	public state = {
 		latitude: 0,
 		longitude: 0,

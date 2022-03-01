@@ -14,9 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
 import { AvatarButton } from '@controls/avatarButton';
 import { IUser } from '@/v5/store/users/users.redux';
 import { AvatarWrapper, Container, Company, Job, Name, UserData } from './userPopover.styles';

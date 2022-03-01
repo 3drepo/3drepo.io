@@ -341,12 +341,18 @@ const establishRoutes = () => {
 	* @openapi
 	* /user/avatar:
 	*   put:
-	*     description: Uploadns new avatar for the logged in user
+	*     description: Uploads new avatar for the logged in user
 	*     tags: [User]
 	*     operationId: uploadAvatar
 	*     requestBody:
 	*       content:
-	*         image:
+	*         multipart/form-data:
+	*           schema:
+	*             type: object
+	*             properties:
+	*               file:
+	*                 type: string
+	*                 format: binary
 	*     responses:
 	*       401:
 	*         $ref: "#/components/responses/notLoggedIn"

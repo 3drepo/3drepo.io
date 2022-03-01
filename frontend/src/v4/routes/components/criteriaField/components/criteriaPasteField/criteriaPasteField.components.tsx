@@ -14,12 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { PureComponent } from 'react';
 import { ENTER_KEY } from '../../../../../constants/keys';
 import { PasteButton, PasteContainer, PasteField, StyledCloseIcon, StyledSaveIcon } from './criteriaPasteField.styles';
-
 interface IProps {
 	name?: string;
 	initialValue?: string;
@@ -46,7 +43,7 @@ const areValidCriteria = (value) => {
 	}
 };
 
-export class CriteriaPasteField extends React.PureComponent<IProps, IState> {
+export class CriteriaPasteField extends PureComponent<IProps, IState> {
 	public state = {
 		currentValue: '',
 		isValid: true

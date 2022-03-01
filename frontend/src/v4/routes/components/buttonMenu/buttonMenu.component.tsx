@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { ComponentType, createRef, PureComponent, ReactNode } from 'react';
 import { IconProps as IIconProps } from '@material-ui/core/Icon';
 import IconButton, { IconButtonProps } from '@material-ui/core/IconButton';
-import React from 'react';
 
 import { StyledPopover } from './buttonMenu.styles';
 
 interface IProps {
-	Icon?: React.ComponentType;
+	Icon?: ComponentType;
 	open?: boolean;
 	ripple?: boolean;
 	ButtonProps?: IconButtonProps;
@@ -30,8 +30,8 @@ interface IProps {
 	PopoverProps?: any;
 	PaperProps?: any;
 	container?: any;
-	renderButton?: (props?) => React.ReactNode;
-	renderContent?: (props?) => React.ReactNode;
+	renderButton?: (props?) => ReactNode;
+	renderContent?: (props?) => ReactNode;
 	onClose?: () => void;
 	onOpen?: () => void;
 }
@@ -50,7 +50,7 @@ const DefaultButton = ({IconProps, Icon, ...props}) => (
 	</IconButton>
 );
 
-export class ButtonMenu extends React.PureComponent<IProps, IState> {
+export class ButtonMenu extends PureComponent<IProps, IState> {
 	public static defaultProps = {
 		renderButton: DefaultButton,
 		renderContent: () => null
@@ -60,7 +60,7 @@ export class ButtonMenu extends React.PureComponent<IProps, IState> {
 		activeMenu: false
 	};
 
-	public buttonRef = React.createRef<HTMLElement>();
+	public buttonRef = createRef<HTMLElement>();
 
 	public toggleMenu = (forceHide) => (event) => {
 		event.stopPropagation();
