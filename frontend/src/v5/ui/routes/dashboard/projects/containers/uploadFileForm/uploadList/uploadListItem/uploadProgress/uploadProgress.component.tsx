@@ -52,7 +52,7 @@ export const UploadProgress = ({ progress, error, hidden }: IUploadProgress): JS
 
 	return hidden ? (<></>) : (
 		<Container>
-			<StatusText uploadStatus={uploadStatus}>
+			<StatusText uploadstatus={uploadStatus}>
 				{statusText}
 				{errorMessage && (
 					<ErrorTooltip>

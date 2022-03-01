@@ -59,6 +59,6 @@ export const LabelledProgressBar = styled.div`
 
 	color: ${({ uploadStatus }) => PROGRESS_BAR_COLOUR_MAP[uploadStatus]};
 	.MuiLinearProgress-barColorPrimary {
-			background-color: ${({ uploadStatus }) => PROGRESS_BAR_COLOUR_MAP[uploadStatus]};
+		background-color: ${({ uploadstatus }) => PROGRESS_BAR_COLOUR_MAP[uploadstatus]};
 	}
 `;

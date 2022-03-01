@@ -34,7 +34,7 @@ export const ProgressBar = ({
 	hidden = false,
 	...props
 }: IProgressBar): JSX.Element => (
-	<LabelledProgressBar uploadStatus={uploadStatus} hidden={hidden}>
+	<LabelledProgressBar uploadstatus={uploadStatus} hidden={hidden}>
 		<LinearProgress value={progress} {...props} />
 		<ProgressBarLabelLight hidden={noLabel}>{`${progress}%`}</ProgressBarLabelLight>
 		<ProgressBarLabelDark progress={progress} hidden={noLabel}>{`${progress}%`}</ProgressBarLabelDark>

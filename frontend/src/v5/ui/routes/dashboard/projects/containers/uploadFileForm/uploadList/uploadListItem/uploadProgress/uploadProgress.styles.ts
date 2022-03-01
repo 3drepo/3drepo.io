@@ -34,7 +34,7 @@ export const StatusText = styled(Typography).attrs({
 	font-weight: bold;
 	user-select: none;
 	display: inline-flex;
-	color: ${({ uploadStatus }) => PROGRESS_BAR_COLOUR_MAP[uploadStatus]};
+	color: ${({ uploadstatus }) => PROGRESS_BAR_COLOUR_MAP[uploadstatus]};
 	align-items: center;
 `;
 
