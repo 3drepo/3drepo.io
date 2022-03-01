@@ -33,11 +33,6 @@ export const Container = styled.div`
 	}
 `;
 
-export const CollapseSideElementGroup = styled.div`
-	display: flex;
-	align-items: center;
-`;
-
 export const IconButtonContainer = styled.div`
 	padding: 0 8px;
 	cursor: pointer;

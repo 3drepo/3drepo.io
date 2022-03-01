@@ -34,8 +34,9 @@ import { ButtonProps } from '@material-ui/core/Button';
 import { isEmpty } from 'lodash';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { filterContainers } from '@/v5/store/containers/containers.helpers';
+import { CollapseSideElementGroup } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.styles';
 import { EditFederationContainersListItem } from './editFederationContainersListItem/editFederationContainersListItem.component';
-import { CollapseSideElementGroup, Container } from './editFederationContainersList.styles';
+import { Container } from './editFederationContainersList.styles';
 
 export type ActionButtonProps = {
 	children: ReactNode;
