@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 
 import AddCircleIcon from '@assets/icons/add_circle.svg';

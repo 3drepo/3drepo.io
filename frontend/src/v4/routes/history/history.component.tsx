@@ -14,10 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { PureComponent } from 'react';
 import CloudDownload from '@material-ui/icons/CloudDownload';
 import { isEmpty, isEqual } from 'lodash';
-import React from 'react';
 
 import { LoaderContainer } from '../billing/billing.styles';
 import { CustomTable, CELL_TYPES, TableButton } from '../components/customTable/customTable.component';
@@ -56,7 +55,7 @@ interface IState {
 	rows: any[];
 }
 
-export class History extends React.PureComponent<IProps, IState> {
+export class History extends PureComponent<IProps, IState> {
 	public state = { invoices: [], rows: [] };
 
 	public componentDidMount() {

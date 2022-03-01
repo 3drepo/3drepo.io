@@ -14,10 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
+import { PureComponent } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-
 import { ROUTES } from '../../constants/routes';
 import Billing from '../billing/billing.container';
 import Board from '../board/board.container';
@@ -62,7 +60,7 @@ interface IProps {
 	push: (path) => void;
 }
 
-export class Dashboard extends React.PureComponent<IProps, any> {
+export class Dashboard extends PureComponent<IProps, any> {
 	public componentDidMount() {
 		this.props.fetchUser(this.props.currentUser.username);
 	}

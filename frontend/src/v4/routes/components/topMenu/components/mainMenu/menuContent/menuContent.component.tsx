@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import * as React from 'react';
-
+import { FunctionComponent, Fragment } from 'react';
 import Divider from '@material-ui/core/Divider';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import LogoutIcon from '@material-ui/icons/ExitToApp';
@@ -32,7 +30,7 @@ import { IUserData } from '../mainMenu.helpers';
 import { MenuIcon, MenuItem, MenuText, MenuUser } from './menuContent.styles';
 
 const ExternalLink = ({ ...props }) => {
-	const Icon = props.icon || React.Fragment;
+	const Icon = props.icon || Fragment;
 	const iconProps = props.icon ? { style: { color: COLOR.BLACK_54 } } : {};
 	return (
 		<MenuItem button aria-label={props.label} onClick={props.onButtonClick}>
@@ -67,7 +65,7 @@ interface IProps {
 	close: (args?: any) => void;
 }
 
-export const MenuContent: React.FunctionComponent<IProps> = ({
+export const MenuContent: FunctionComponent<IProps> = ({
 	isAuthenticated, userData, onTeamspacesClick, onSettingClick, onLogout, close,
 }) => {
 	const invokeAndClose = (callback) => (...args) => {
@@ -83,7 +81,7 @@ export const MenuContent: React.FunctionComponent<IProps> = ({
 
 	if (isAuthenticated) {
 		menuItems.push(
-			<React.Fragment key="accountSettings">
+			<Fragment key="accountSettings">
 				<MenuUser>
 					<ListItemAvatar>
 						<Avatar
@@ -107,7 +105,7 @@ export const MenuContent: React.FunctionComponent<IProps> = ({
 					onButtonClick={invokeAndClose(onSettingClick)}
 				/>
 				<Divider />
-			</React.Fragment>
+			</Fragment>
 		);
 	}
 
@@ -138,14 +136,14 @@ export const MenuContent: React.FunctionComponent<IProps> = ({
 
 	if (isAuthenticated) {
 		menuItems.push(
-			<React.Fragment key="logout">
+			<Fragment key="logout">
 				<Divider />
 				<UserMenuButton
 					Icon={LogoutIcon}
 					label="Logout"
 					onButtonClick={invokeAndClose(onLogout)}
 				/>
-			</React.Fragment>
+			</Fragment>
 		);
 	}
 

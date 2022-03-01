@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
 import { PRESET_VIEW } from '../../../../../../modules/viewpoints/viewpoints.constants';
 
 const PRESET_VIEW_ICONS = {

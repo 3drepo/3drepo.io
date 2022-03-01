@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { Dispatch } from 'react';
+import { Dispatch } from 'react';
 import { TextFieldProps } from '@material-ui/core';
 import SearchIcon from '@assets/icons/search.svg';
 import CloseIcon from '@assets/icons/close_rounded.svg';

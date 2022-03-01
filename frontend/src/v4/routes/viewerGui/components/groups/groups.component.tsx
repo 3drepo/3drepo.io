@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { PureComponent, createRef, SyntheticEvent, MouseEvent } from 'react';
 import fileDialog from 'file-dialog';
 
 import IconButton from '@material-ui/core/IconButton';
@@ -98,7 +96,7 @@ interface IProps {
 	id?: string	;
 }
 
-export class Groups extends React.PureComponent<IProps> {
+export class Groups extends PureComponent<IProps> {
 
 	get type() {
 		return VIEWER_PANELS.GROUPS;
@@ -139,7 +137,7 @@ export class Groups extends React.PureComponent<IProps> {
 		}
 		return false;
 	}
-	public groupsContainerRef = React.createRef<any>();
+	public groupsContainerRef = createRef<any>();
 
 	public renderHeaderNavigation = () => {
 		const initialIndex = this.props.groups.findIndex(({ _id }) => this.props.activeGroupId === _id);
@@ -189,7 +187,7 @@ export class Groups extends React.PureComponent<IProps> {
 	public renderListView = renderWhenTrue(() => (
 		<>
 			<ViewerPanelContent onClick={this.resetActiveGroup}>
-				<div onClick={(event: React.MouseEvent<HTMLDivElement>) => event.stopPropagation()}>
+				<div onClick={(event: MouseEvent<HTMLDivElement>) => event.stopPropagation()}>
 					{this.renderEmptyState(!this.props.searchEnabled && !this.props.groups.length)}
 					{this.renderNotFound(this.props.searchEnabled && !this.props.groups.length)}
 					{this.renderGroupsList(this.props.groups.length)}
@@ -382,12 +380,12 @@ export class Groups extends React.PureComponent<IProps> {
 		}
 	}
 
-	public handleColorOverride = (group) => (e: React.SyntheticEvent) => {
+	public handleColorOverride = (group) => (e: SyntheticEvent) => {
 		e.stopPropagation();
 		this.props.toggleColorOverride(group._id);
 	}
 
-	public handleGroupIsolate = (group) => (e: React.SyntheticEvent) => {
+	public handleGroupIsolate = (group) => (e: SyntheticEvent) => {
 		e.stopPropagation();
 		this.props.isolateGroup(group);
 	}

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 
 import { TARGET_MODEL_TYPE } from '../../../../../../constants/compare';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
@@ -39,7 +39,7 @@ interface IProps {
 	handleItemSelect: (modelProps) => (event, selected) => void;
 }
 
-export class CompareClash extends React.PureComponent<IProps, any> {
+export class CompareClash extends PureComponent<IProps, any> {
 
 	public renderEmptyState = renderWhenTrue(() => (
 		<EmptyStateInfo>No models matched</EmptyStateInfo>
