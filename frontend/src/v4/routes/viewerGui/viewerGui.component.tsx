@@ -16,7 +16,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import React from 'react';
+import { PureComponent } from 'react';
 
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { VIEWER_LEFT_PANELS, VIEWER_PANELS } from '../../constants/viewerGui';
@@ -91,7 +91,7 @@ interface IState {
 	loaderProgress: number;
 }
 
-export class ViewerGui extends React.PureComponent<IProps, IState> {
+export class ViewerGui extends PureComponent<IProps, IState> {
 
 	private get urlParams() {
 		return this.props.match.params;

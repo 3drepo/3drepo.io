@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { FC } from 'react';
 
 import { StyledFab } from './circleButton.styles';
 
@@ -25,7 +25,7 @@ interface ICircleButton {
 	disabled?: boolean;
 }
 
-export const CircleButton: React.FC<ICircleButton> = ({ size = 'large', variant = 'main', children, ...props }) => (
+export const CircleButton: FC<ICircleButton> = ({ size = 'large', variant = 'main', children, ...props }) => (
 	<StyledFab size={size} $variant={variant} {...props}>
 		{children}
 	</StyledFab>

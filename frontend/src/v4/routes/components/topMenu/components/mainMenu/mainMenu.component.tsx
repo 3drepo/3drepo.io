@@ -14,16 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import * as React from 'react';
-
+import { FunctionComponent, ReactNode } from 'react';
 import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';
 import { getNormalizedUserData, ICurrentUser } from './mainMenu.helpers';
 import { MainMenuButton } from './mainMenuButton/mainMenuButton.component';
 import { MenuContent } from './menuContent/menuContent.component';
 
 interface IProps {
-	children?: React.ReactNode;
+	children?: ReactNode;
 	isAuthenticated: boolean;
 	currentUser?: ICurrentUser;
 	onTeamspacesClick?: () => void;
@@ -32,7 +30,7 @@ interface IProps {
 	id?: string;
 }
 
-export const MainMenu: React.FunctionComponent<IProps> =
+export const MainMenu: FunctionComponent<IProps> =
 		({ isAuthenticated, isInitialised, currentUser, id, ...mainMenuProps }) => {
 
 	const renderMenuContent = (props) => {

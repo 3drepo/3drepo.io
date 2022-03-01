@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
+import { PureComponent } from 'react';
 import { MODE_OPERATION } from '../../screenshotDialog.helpers';
 
 declare const Konva;
@@ -30,7 +30,7 @@ interface IProps {
 	stage: any;
 }
 
-export class Erasing extends React.PureComponent<IProps, any> {
+export class Erasing extends PureComponent<IProps, any> {
 	public state = {
 		isCurrentlyDrawn: false
 	};

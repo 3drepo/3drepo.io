@@ -26,6 +26,7 @@ const config = require(`${src}/utils/config`);
 const { createTeamSpaceRole } = require(`${srcV4}/models/role`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { PROJECT_ADMIN, TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
+const ExternalServices = require('../../../src/v5/handler/externalServices');
 
 const db = {};
 const queue = {};
@@ -90,9 +91,15 @@ db.createModel = (teamspace, _id, name, props) => {
 	return DbHandler.insertOne(teamspace, 'settings', settings);
 };
 
-db.createRevision = (teamspace, modelId, revision) => {
+db.createRevision = async (teamspace, modelId, revision) => {
+	if (revision.rFile) {
+		const refId = revision.rFile[0];
+		const refInfo = await ExternalServices.storeFile(teamspace, `${modelId}.history.ref`, revision.refData);
+		DbHandler.insertOne(teamspace, `${modelId}.history.ref`, { ...refInfo, _id: refId });
+	}
 	const formattedRevision = { ...revision, _id: stringToUUID(revision._id) };
-	return DbHandler.insertOne(teamspace, `${modelId}.history`, formattedRevision);
+	delete formattedRevision.refData;
+	await DbHandler.insertOne(teamspace, `${modelId}.history`, formattedRevision);
 };
 
 db.createGroups = (teamspace, modelId, groups = []) => {
@@ -164,13 +171,23 @@ ServiceHelper.generateUserCredentials = () => ({
 	},
 });
 
-ServiceHelper.generateRevisionEntry = (isVoid = false) => ({
-	_id: ServiceHelper.generateUUIDString(),
-	tag: ServiceHelper.generateRandomString(),
-	author: ServiceHelper.generateRandomString(),
-	timestamp: ServiceHelper.generateRandomDate(),
-	void: !!isVoid,
-});
+ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true) => {
+	const _id = ServiceHelper.generateUUIDString();
+	const entry = {
+		_id,
+		tag: ServiceHelper.generateRandomString(),
+		author: ServiceHelper.generateRandomString(),
+		timestamp: ServiceHelper.generateRandomDate(),
+		void: !!isVoid,
+	};
+
+	if (hasFile) {
+		entry.rFile = [`${_id}${ServiceHelper.generateUUIDString()}`];
+		entry.refData = ServiceHelper.generateRandomString();
+	}
+
+	return entry;
+};
 
 ServiceHelper.generateRandomModelProperties = (isFed = false) => ({
 	properties: {

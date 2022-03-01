@@ -17,7 +17,7 @@
 
 import { Field, Form, Formik } from 'formik';
 import { omit } from 'lodash';
-import React from 'react';
+import { PureComponent } from 'react';
 import * as Yup from 'yup';
 
 import {
@@ -54,7 +54,7 @@ interface IState {
 	newPasswordStrengthMessage: string;
 }
 
-export class PasswordChangeForm extends React.PureComponent<IProps, IState> {
+export class PasswordChangeForm extends PureComponent<IProps, IState> {
 	public state = {
 		newPasswordStrengthMessage: ''
 	};

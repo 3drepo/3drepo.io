@@ -15,14 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Version, VersionContext } from '@/versionContext';
-import { useContext } from 'react';
+const { v4Path } = require('../../interop');
+// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
+const Mailer = require(`${v4Path}/mailer/mailer`);
 
-
-export const withVersion = (WrappedComponent) => (props) => {
-	const version = useContext(VersionContext);
-	return (
-		<WrappedComponent {...props} isV5={version === Version.V5} />
-	);
-};
-
+module.exports = Mailer;

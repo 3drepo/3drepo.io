@@ -14,9 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { PureComponent } from 'react';
 import { isEqual, uniqBy } from 'lodash';
-import React from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import { getCriteriaLabel, getUpdatedCriteria, prepareCriterion } from '../../../helpers/criteria';
@@ -80,7 +79,7 @@ const emptyCriterion = {
 	values: []
 };
 
-export class CriteriaField extends React.PureComponent<IProps, IState> {
+export class CriteriaField extends PureComponent<IProps, IState> {
 	public state = {
 		selectedCriteria: [],
 		criterionForm: { ...emptyCriterion }

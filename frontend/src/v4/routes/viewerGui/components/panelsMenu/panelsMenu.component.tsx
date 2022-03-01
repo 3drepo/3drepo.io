@@ -22,7 +22,7 @@ import GisIcon from '@material-ui/icons/Layers';
 import ViewsIcon from '@material-ui/icons/PhotoCamera';
 import IssuesIcon from '@material-ui/icons/Place';
 import RisksIcon from '@material-ui/icons/Warning';
-import React from 'react';
+import { PureComponent } from 'react';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { Container } from './panelsMenu.styles';
 
@@ -40,7 +40,7 @@ const PANELS = {
 	GIS: 'GIS'
 };
 
-export class PanelsMenu extends React.PureComponent<any, IState> {
+export class PanelsMenu extends PureComponent<any, IState> {
 	public state = {
 		activePanels: {}
 	};

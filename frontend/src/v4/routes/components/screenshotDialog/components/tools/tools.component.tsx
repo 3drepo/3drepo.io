@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import * as React from 'react';
-
+import { PureComponent } from 'react';
 import { MenuItem, Select, Tooltip } from '@material-ui/core';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import BorderColorIcon from '@material-ui/icons/BorderColor';
@@ -75,7 +73,7 @@ interface IProps {
 	onSave: () => void;
 }
 
-export class Tools extends React.PureComponent<IProps, any> {
+export class Tools extends PureComponent<IProps, any> {
 	public renderToolset = renderWhenTrue(() => {
 		const {
 			size, textSize, color, onDrawClick, onTextClick, onClearClick,

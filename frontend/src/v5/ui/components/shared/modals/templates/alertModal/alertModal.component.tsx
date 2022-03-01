@@ -14,8 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
+import { FC } from 'react';
 import { Button, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
 import WarningIcon from '@assets/icons/warning.svg';
 import { FormattedMessage } from 'react-intl';
@@ -30,7 +29,7 @@ interface IAlertModal {
 	details?: string
 }
 
-export const AlertModal: React.FC<IAlertModal> = ({ onClickClose, currentActions = '', error, details, errorMessage }) => {
+export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '', error, details, errorMessage }) => {
 	let message; let code;
 
 	const { response } = error;

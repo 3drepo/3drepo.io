@@ -16,7 +16,7 @@
  */
 
 import { debounce } from 'lodash';
-import React, { ReactNodeArray } from 'react';
+import { PureComponent, ReactNodeArray } from 'react';
 import Autosuggest from 'react-autosuggest';
 
 import Checkbox from '@material-ui/core/Checkbox';
@@ -62,7 +62,7 @@ interface IState {
 	userNotExists: boolean;
 }
 
-export class NewUserForm extends React.PureComponent<IProps, IState> {
+export class NewUserForm extends PureComponent<IProps, IState> {
 	public state = {
 		name: '',
 		job: '',

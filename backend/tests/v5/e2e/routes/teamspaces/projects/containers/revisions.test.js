@@ -62,12 +62,15 @@ const models = [
 
 const revisions = [
 	ServiceHelper.generateRevisionEntry(),
-	ServiceHelper.generateRevisionEntry(),
+	ServiceHelper.generateRevisionEntry(false, false),
 	ServiceHelper.generateRevisionEntry(true),
+	ServiceHelper.generateRevisionEntry(),
 ];
 
 const modelWithRev = models[0];
 const federation = models[2];
+const noFileRevision = revisions[1];
+const validRefTypeRevision = revisions[0];
 const voidRevision = revisions[2];
 
 const setupData = async () => {
@@ -94,9 +97,12 @@ const setupData = async () => {
 const formatRevisions = (revs, includeVoid = false) => {
 	const formattedRevisions = revs
 		.sort((a, b) => b.timestamp - a.timestamp)
-		.flatMap((rev) => (includeVoid
-			|| !rev.void ? { ...rev, timestamp: rev.timestamp.getTime() } : []));
-
+		.flatMap((rev) => (includeVoid || !rev.void ? {
+			_id: rev._id,
+			tag: rev.tag,
+			author: rev.author,
+			void: rev.void,
+			timestamp: rev.timestamp.getTime() } : []));
 	return { revisions: formattedRevisions };
 };
 
@@ -296,6 +302,69 @@ const testNewRevision = () => {
 	});
 };
 
+const testDownloadRevisionFiles = () => {
+	const route = (ts, proj, container, revision) => `/v5/teamspaces/${ts}/projects/${proj}/containers/${container}/revisions/${revision}/files`;
+	describe('Download revision files', () => {
+		test('should fail without a valid session', async () => {
+			const res = await agent.get(route(teamspace, project.id, modelWithRev._id, validRefTypeRevision._id))
+				.expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user is not a member of the teamspace', async () => {
+			const res = await agent.get(`${route(teamspace, project.id, modelWithRev._id, validRefTypeRevision._id)}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if the project does not exist', async () => {
+			const res = await agent.get(`${route(teamspace, 'dflkdsjfs', modelWithRev._id, validRefTypeRevision._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.projectNotFound.status);
+			expect(res.body.code).toEqual(templates.projectNotFound.code);
+		});
+
+		test('should fail if the container does not exist', async () => {
+			const res = await agent.get(`${route(teamspace, project.id, 'jibberish', validRefTypeRevision._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.containerNotFound.status);
+			expect(res.body.code).toEqual(templates.containerNotFound.code);
+		});
+
+		test('should fail if the user does not have access to the container', async () => {
+			const res = await agent.get(`${route(teamspace, project.id, modelWithRev._id, validRefTypeRevision._id)}?key=${users.noProjectAccess.apiKey}`).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		});
+
+		test('should fail if the user does not have adequate permissions to the container (viewer)', async () => {
+			const res = await agent.get(`${route(teamspace, project.id, modelWithRev._id, validRefTypeRevision._id)}?key=${users.viewer.apiKey}`).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		});
+
+		test('should fail if the user does not have adequate permissions to the container (commenter)', async () => {
+			const res = await agent.get(`${route(teamspace, project.id, modelWithRev._id, validRefTypeRevision._id)}?key=${users.commenter.apiKey}`).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
+		});
+
+		test('should fail if revision is not found', async () => {
+			const res = await agent.get(`${route(teamspace, project.id, modelWithRev._id, 'invalid id')}?key=${users.tsAdmin.apiKey}`).expect(templates.revisionNotFound.status);
+			expect(res.body.code).toEqual(templates.revisionNotFound.code);
+		});
+
+		test('should fail if revision has no file', async () => {
+			const res = await agent.get(`${route(teamspace, project.id, modelWithRev._id, noFileRevision._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.fileNotFound.status);
+			expect(res.body.code).toEqual(templates.fileNotFound.code);
+		});
+
+		test('should download files if there is a valid ref', async () => {
+			const res = await agent.get(`${route(teamspace, project.id, modelWithRev._id, validRefTypeRevision._id)}?key=${users.tsAdmin.apiKey}`)
+				.expect(templates.ok.status);
+			expect(res.text).toEqual(validRefTypeRevision.refData);
+		});
+
+		test('should download files if there is a valid ref (using revision tag)', async () => {
+			const res = await agent.get(`${route(teamspace, project.id, modelWithRev._id, validRefTypeRevision.tag)}?key=${users.tsAdmin.apiKey}`)
+				.expect(templates.ok.status);
+			expect(res.text).toEqual(validRefTypeRevision.refData);
+		});
+	});
+};
+
 describe('E2E routes/teamspaces/projects/containers', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -309,4 +378,5 @@ describe('E2E routes/teamspaces/projects/containers', () => {
 	testGetRevisions();
 	testUpdateRevisionStatus();
 	testNewRevision();
+	testDownloadRevisionFiles();
 });
