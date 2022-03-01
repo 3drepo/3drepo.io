@@ -72,6 +72,7 @@ export const EditFederationContainers = ({
 	actionButton: ActionButton,
 	actionButtonTexts,
 	iconButton: IconButton,
+	hasContainers,
 }: EditFederationContainersProps) => {
 	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 	const [filterQuery, setFilterQuery] = useState<string>('');
@@ -145,7 +146,7 @@ export const EditFederationContainers = ({
 						))
 					) : (
 						<DashboardListEmptyContainer>
-							{filterQuery && isEmpty(containers) ? (
+							{filterQuery && hasContainers ? (
 								<DashboardListEmptySearchResults searchPhrase={filterQuery} />
 							) : emptyListMessage}
 						</DashboardListEmptyContainer>
