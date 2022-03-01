@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { SyntheticEvent, useState, useEffect } from 'react';
+import { SyntheticEvent, useState, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { Button } from '@controls/button';
