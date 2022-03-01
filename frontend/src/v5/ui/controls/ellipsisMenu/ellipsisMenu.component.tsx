@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { MouseEvent } from 'react';
+import { useState, cloneElement, MouseEvent } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { ClickAwayListener, Grow, Paper, Tooltip } from '@material-ui/core';
 import { EllipsisButton } from '@controls/ellipsisButton';
@@ -26,7 +26,7 @@ export interface IEllipsisMenu {
 }
 
 export const EllipsisMenu = ({ children }: IEllipsisMenu): JSX.Element => {
-	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
 	const handleClickDropdown = (event: MouseEvent<HTMLButtonElement>) => {
 		event.stopPropagation();
@@ -75,7 +75,7 @@ export const EllipsisMenu = ({ children }: IEllipsisMenu): JSX.Element => {
 							<ClickAwayListener onClickAway={handleCloseDropdown}>
 								<MenuList autoFocusItem={Boolean(anchorEl)} id="ellipsis-menu-list" onKeyDown={handleListKeyDown}>
 									{children.map((child) => (
-										React.cloneElement(child, {
+										cloneElement(child, {
 											...child.props,
 											key: child.props.title,
 											onClick: (event) => {

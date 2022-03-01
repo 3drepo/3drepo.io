@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
 import { groupBy } from 'lodash';
 
 import IssueDetails from '../viewerGui/components/issues/components/issueDetails/issueDetails.container';

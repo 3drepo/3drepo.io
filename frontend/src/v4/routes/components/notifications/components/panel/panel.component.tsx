@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { PureComponent, SyntheticEvent } from 'react';
 import { NotificationsPanelItem } from '../../notifications.styles';
 import { INotification, NotificationItem } from '../notificationItem/notificationItem.component';
 import { NotificationsPanelHeader } from '../panelHeader/panelHeader.component';
@@ -29,10 +27,10 @@ interface IProps {
 	sendUpdateNotificationRead: (id: string, read: boolean) => void;
 	sendDeleteNotification: (id: string) => void;
 	showUpdatedFailedError: (errorMessage: string) => void;
-	closePanel: (e: React.SyntheticEvent) => void;
+	closePanel: (e: SyntheticEvent) => void;
 }
 
-export class NotificationsPanel extends React.PureComponent<IProps, any> {
+export class NotificationsPanel extends PureComponent<IProps, any> {
 	public renderNotifications = (notifications) => {
 		return notifications.map((notification) => (
 			<NotificationItem key={notification._id} {...notification} {...this.props} onClick={this.props.closePanel} />

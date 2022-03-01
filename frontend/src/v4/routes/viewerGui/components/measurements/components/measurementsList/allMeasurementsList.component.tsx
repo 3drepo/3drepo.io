@@ -16,7 +16,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GLToHexColor } from '../../../../../../helpers/colors';
 import { MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
 import { IMeasure } from '../measureItem/measureItem.component';

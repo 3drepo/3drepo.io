@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { PureComponent, ChangeEvent } from 'react';
 import { debounce } from 'lodash';
 
 import IconButton from '@material-ui/core/IconButton';
@@ -52,7 +50,7 @@ interface IState {
 	listCollapsed: boolean;
 }
 
-export class Activities extends React.PureComponent<IProps, IState> {
+export class Activities extends PureComponent<IProps, IState> {
 
 	public state = {
 		listCollapsed: true,
@@ -121,7 +119,7 @@ export class Activities extends React.PureComponent<IProps, IState> {
 		this.props.setComponentState({ searchQuery });
 	}, 200);
 
-	public handleSearchQueryChange = ({ currentTarget }: React.ChangeEvent<HTMLInputElement>) => {
+	public handleSearchQueryChange = ({ currentTarget }: ChangeEvent<HTMLInputElement>) => {
 		const searchQuery = currentTarget.value.toLowerCase();
 		this.debounceSearchQueryChange(searchQuery);
 	}

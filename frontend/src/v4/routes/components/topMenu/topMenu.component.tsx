@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 
 import { matchPath, Prompt } from 'react-router';
 import { ROUTES } from '../../../constants/routes';
@@ -45,7 +45,7 @@ interface IProps {
 	pathname: string;
 }
 
-export class TopMenu extends React.PureComponent<IProps, any> {
+export class TopMenu extends PureComponent<IProps, any> {
 
 	get isViewerPage() {
 		return this.props.pathname.includes(ROUTES.VIEWER);

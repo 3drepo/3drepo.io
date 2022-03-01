@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 
 import { Tab } from '@material-ui/core';
 import InfoIcon from '@material-ui/icons/Info';
@@ -58,7 +58,7 @@ interface IProps {
 	showConfirmDialog: (config) => void;
 }
 
-export class Bim extends React.PureComponent<IProps, any> {
+export class Bim extends PureComponent<IProps, any> {
 	get menuActionsMap() {
 		const { clearStarredMetadata, teamspace, model } = this.props;
 		return {

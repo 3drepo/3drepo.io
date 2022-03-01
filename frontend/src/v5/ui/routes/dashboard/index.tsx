@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
 import { useRouteMatch, useLocation, Route, Switch, Redirect } from 'react-router-dom';
 import { GlobalStyle } from '@/v5/ui/themes/global';
 import { discardSlash } from '@/v5/services/routing/routing';
