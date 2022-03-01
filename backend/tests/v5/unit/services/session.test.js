@@ -39,7 +39,12 @@ const testRemoveOldSessions = () => {
 	describe('Remove sessions', () => {
 		test('Should remove the sessions that have the provided ids', async () => {
 			jest.spyOn(db, 'deleteMany').mockResolvedValue(undefined);
-			await Sessions.removeOldSessions(['1', '2']);
+			await Sessions.removeOldSessions(['1', '2'], 'a', 'ref');
+		});
+
+		test('Should not remove the sessions if there is no referrer', async () => {
+			jest.spyOn(db, 'deleteMany').mockResolvedValue(undefined);
+			await Sessions.removeOldSessions(['1', '2'], 'a');
 		});
 	});
 };

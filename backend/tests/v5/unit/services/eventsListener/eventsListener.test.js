@@ -86,7 +86,7 @@ const testAuthEventsListener = () => {
 			expect(LoginRecord.saveLoginRecord.mock.calls.length).toBe(1);
 			expect(LoginRecord.saveLoginRecord.mock.calls[0]).toEqual(['username1', '123', '1.2.3.4', 'user agent', 'www.google.com']);
 			expect(Sessions.removeOldSessions.mock.calls.length).toBe(1);
-			expect(Sessions.removeOldSessions.mock.calls[0]).toEqual(['username1', '123']);
+			expect(Sessions.removeOldSessions.mock.calls[0]).toEqual(['username1', '123', 'www.google.com']);
 		});
 	});
 };

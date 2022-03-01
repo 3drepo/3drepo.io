@@ -51,12 +51,15 @@ Sessions.session = initialiseSession();
 
 Sessions.getSessions = (query, projection, sort) => db.find('admin', 'sessions', query, projection, sort);
 
-Sessions.removeOldSessions = async (username, currentSessionID) => {
+Sessions.removeOldSessions = async (username, currentSessionID, referrer) => {
+	if (!referrer) return;
 	const query = {
 		'session.user.username': username,
 		'session.user.webSession': true,
+		'session.user.referer': referrer,
 		_id: { $ne: currentSessionID },
 	};
+
 	const sessionsToRemove = await Sessions.getSessions(query, { _id: 1 });
 
 	const sessionIds = sessionsToRemove.map((s) => s._id);
