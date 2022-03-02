@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
 import NotFoundIcon from '@assets/icons/404.svg';
 import { Link } from 'react-router-dom';
 import { Button } from '@controls/button';

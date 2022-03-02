@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import ErrorCircleIcon from '@assets/icons/error_circle.svg';
 import { Container, Tooltip, IconWrapper } from './errorTooltip.styles';
 

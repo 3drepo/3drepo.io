@@ -14,16 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { FunctionComponent } from 'react';
 import { Content, StyledDivider, Wrapper } from './dividerWithText.styles';
 
 interface IProps {
 	className: string;
 }
 
-export const DividerWithText: React.FunctionComponent<IProps> = ({ children, className }) => {
+export const DividerWithText: FunctionComponent<IProps> = ({ children, className }) => {
 	return (
 		<Wrapper className={className}>
 			<Content>

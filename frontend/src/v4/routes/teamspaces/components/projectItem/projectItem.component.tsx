@@ -17,7 +17,7 @@
 
 import Label from '@material-ui/icons/Label';
 import LabelOutlined from '@material-ui/icons/LabelOutlined';
-import React from 'react';
+import { PureComponent } from 'react';
 
 import { ROUTES } from '../../../../constants/routes';
 import { encodeElementId } from '../../../../helpers/html';
@@ -53,7 +53,7 @@ interface IState {
 	actionsMenuOpen: boolean;
 }
 
-export class ProjectItem extends React.PureComponent<IProps, IState> {
+export class ProjectItem extends PureComponent<IProps, IState> {
 	public state = {
 		actionsMenuOpen: false
 	};

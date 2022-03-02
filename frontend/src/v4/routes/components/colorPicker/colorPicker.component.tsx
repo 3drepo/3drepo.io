@@ -20,7 +20,7 @@ import Grid from '@material-ui/core/Grid';
 import RootRef from '@material-ui/core/RootRef';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import { identity, memoize } from 'lodash';
-import React, { useEffect, useRef, useState } from 'react';
+import { PureComponent, useEffect, useRef, useState, createRef } from 'react';
 
 import { componentToHex, hexToGLColor, rgbaToHex, GLToHexColor } from '../../../helpers/colors';
 import {
@@ -349,7 +349,7 @@ const OpacityControl = ({ opacity, onOpacityChanged, sliderVisible, onSliderVisi
 	);
 };
 
-export class ColorPicker extends React.PureComponent<IProps, IState> {
+export class ColorPicker extends PureComponent<IProps, IState> {
 	public static defaultProps: IProps = {
 		predefinedColors: [],
 		onChange: identity,
@@ -368,7 +368,7 @@ export class ColorPicker extends React.PureComponent<IProps, IState> {
 		opacitySliderVisibility: false
 	};
 
-	public colorSelectRef = React.createRef();
+	public colorSelectRef = createRef();
 
 	public openPanel = (event) => {
 		if (!this.props.disabled) {

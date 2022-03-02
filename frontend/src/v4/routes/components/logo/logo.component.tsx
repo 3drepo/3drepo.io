@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
 import DEFAULT_LOGO from '@assets/images/3drepo-logo-white.png';
 import { clientConfigService } from '../../../services/clientConfig';
 import { Image } from './logo.styles';

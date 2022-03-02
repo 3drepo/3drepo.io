@@ -14,10 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { PureComponent, ReactChild, createRef } from 'react';
 
 import { Checkbox, IconButton, Tooltip } from '@material-ui/core';
 import { cond, isEmpty, isEqual, matchesProperty, orderBy, pick, stubTrue, values } from 'lodash';
-import React from 'react';
 import SimpleBar from 'simplebar-react';
 
 import { SORT_ORDER_TYPES } from '../../../constants/sorting';
@@ -172,7 +172,7 @@ interface IProps {
 	rows: any[];
 	defaultSort?: number;
 	onSelectionChange?: (selectedRows) => void;
-	renderCheckbox?: (props, data) => React.ReactChild;
+	renderCheckbox?: (props, data) => ReactChild;
 	onSearch?: (props) => any[];
 	rowStyle?: any;
 	checkboxDisabled?: boolean;
@@ -190,7 +190,7 @@ interface IState {
 	selectedRows: any[];
 }
 
-export class CustomTable extends React.PureComponent<IProps, IState> {
+export class CustomTable extends PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps(nextProps, prevState) {
 		const searchFields = getSearchFields(nextProps.cells);
 		return {searchFields};
@@ -208,7 +208,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		selectedRows: []
 	};
 
-	private rowsContainerRef = React.createRef<HTMLElement>();
+	private rowsContainerRef = createRef<HTMLElement>();
 
 	public componentDidMount() {
 		const { currentSort, searchFields, searchText } = this.state;
@@ -393,7 +393,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		});
 	}
 
-	public renderCheckbox({row = {}, ...props}): React.ReactChild {
+	public renderCheckbox({row = {}, ...props}): ReactChild {
 		if (this.props.renderCheckbox) {
 			return this.props.renderCheckbox(props, row);
 		}

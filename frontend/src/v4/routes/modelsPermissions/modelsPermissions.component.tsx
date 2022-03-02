@@ -14,9 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { PureComponent } from 'react';
 import memoizeOne from 'memoize-one';
 import * as queryString from 'query-string';
-import React from 'react';
 
 import { MODEL_ROLES_LIST } from '../../constants/model-permissions';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
@@ -28,7 +28,6 @@ import { TextOverlay } from '../components/textOverlay/textOverlay.component';
 import {
 	Container,
 	ModelsContainer,
-	OverflowWrapper,
 	PermissionsContainer
 } from './modelsPermissions.styles';
 
@@ -79,8 +78,7 @@ interface IState {
 	permissionsRevision: number;
 }
 
-export class ModelsPermissions extends React.PureComponent<IProps, IState> {
-
+export class ModelsPermissions extends PureComponent<IProps, IState> {
 	public state = {
 		modelRows: [],
 		currentUser: {},

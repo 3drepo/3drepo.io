@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { PureComponent, ReactChildren, createRef } from 'react';
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import ArrowBack from '@material-ui/icons/ArrowBack';
@@ -64,7 +62,7 @@ interface IProps {
 	onToggleFilters: (isActive) => void;
 	onChangeFilters: (selectedFilters) => void;
 	toggleShowPins: (showPins: boolean) => void;
-	renderDetailsView: (statement) => React.ReactChildren[];
+	renderDetailsView: (statement) => ReactChildren[];
 	sortByField?: string;
 	id?: string;
 }
@@ -73,7 +71,7 @@ interface IState {
 	prevScroll: number;
 }
 
-export class ReportedItems extends React.PureComponent<IProps, IState> {
+export class ReportedItems extends PureComponent<IProps, IState> {
 
 	get activeItemIndex() {
 		return this.props.items.findIndex((item) => item._id === this.props.activeItemId);
@@ -92,8 +90,8 @@ export class ReportedItems extends React.PureComponent<IProps, IState> {
 		prevScroll: 0
 	};
 
-	public listViewRef = React.createRef<HTMLElement>();
-	public listContainerRef = React.createRef<any>();
+	public listViewRef = createRef<HTMLElement>();
+	public listContainerRef = createRef<any>();
 
 	public handleClickOutside = () => {
 		const { onDeactivateItem } = this.props;

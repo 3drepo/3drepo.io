@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { PureComponent, Component } from 'react';
 import Input from '@material-ui/core/Input';
 import { Item, StyledSelect } from './cellSelect.styles';
 
@@ -26,7 +24,7 @@ interface IProps {
 	placeholder?: string;
 	readOnly?: boolean;
 	value?: string;
-	itemTemplate?: React.Component;
+	itemTemplate?: Component;
 	disabled?: boolean;
 	disabledPlaceholder?: boolean;
 	hidden?: boolean;
@@ -39,7 +37,7 @@ interface IState {
 	selectedValue: string;
 }
 
-export class CellSelect extends React.PureComponent<IProps, IState> {
+export class CellSelect extends PureComponent<IProps, IState> {
 	public static defaultProps = {
 		value: '',
 		items: [],

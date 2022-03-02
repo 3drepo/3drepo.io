@@ -17,9 +17,21 @@
 
 const { src } = require('../../helper/path');
 
-jest.mock('../../../../src/v5/handler/externalServices');
+const unrecognisedType = 'qwerrtyuui';
+
+jest.mock('../../../../src/v5/handler/externalServices', () => ({
+	...jest.requireActual('../../../../src/v5/handler/externalServices'),
+	getFileStream: jest.fn().mockImplementation((account, collection, type) => {
+		if (type === unrecognisedType) {
+			throw new Error();
+		}
+	}),
+	removeFiles: jest.fn(),
+}));
+
 const FileRefs = require(`${src}/models/fileRefs`);
 const db = require(`${src}/handler/db`);
+const { templates } = require(`${src}/utils/responseCodes`);
 
 const testGetTotalSize = () => {
 	describe('Get total size', () => {
@@ -133,7 +145,41 @@ const testRemoveAllFilesFromModel = () => {
 	});
 };
 
+const testFetchFileStream = () => {
+	describe('Fetch file stream', () => {
+		test('should throw error if the revision has no entry', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+			await expect(FileRefs.fetchFileStream('someTS', 'someModel', 'history.ref', 'filename')).rejects.toEqual(templates.fileNotFound);
+		});
+
+		test('should download the revision files using grid fs if entry has invalid type', async () => {
+			const fileEntry = { size: '12345', type: unrecognisedType };
+			const expectedData = { readStream: undefined, size: '12345' };
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(fileEntry);
+			const res = await FileRefs.fetchFileStream('someTS', 'someModel', 'history.ref', 'filename');
+			expect(res).toEqual(expectedData);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual('someTS');
+			expect(fn.mock.calls[0][1]).toEqual('someModel.history.ref');
+			expect(fn.mock.calls[0][2]).toEqual({ _id: 'filename' });
+		});
+
+		test('should download the revision files using grid fs if entry has valid type', async () => {
+			const fileEntry = { size: '12345', type: 'valid type' };
+			const expectedData = { readStream: undefined, size: '12345' };
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(fileEntry);
+			const res = await FileRefs.fetchFileStream('someTS', 'someModel', 'history.ref', 'filename');
+			expect(res).toEqual(expectedData);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual('someTS');
+			expect(fn.mock.calls[0][1]).toEqual('someModel.history.ref');
+			expect(fn.mock.calls[0][2]).toEqual({ _id: 'filename' });
+		});
+	});
+};
+
 describe('models/fileRefs', () => {
 	testGetTotalSize();
 	testRemoveAllFilesFromModel();
+	testFetchFileStream();
 });

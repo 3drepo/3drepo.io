@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const networkLabel = require('./logger').labels.network;
-const logger = require('./logger').logWithLabel(networkLabel);
 const { isBuffer, isString } = require('./helper/typeCheck');
 const { createResponseCode } = require('./responseCodes');
+const networkLabel = require('./logger').labels.network;
+const logger = require('./logger').logWithLabel(networkLabel);
 const { v4Path } = require('../../interop');
 // eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
 const { cachePolicy } = require(`${v4Path}/config`);
@@ -87,6 +87,35 @@ Responder.respond = (req, res, resCode, body, { cache, customHeaders, mimeType =
 		res.status(finalResCode.status).send(body);
 	}
 	logger.logInfo(genResponseLogging(resCode, contentLength, req));
+};
+
+Responder.writeStreamRespond = (req, res, resCode, readStream, fileName, fileSize) => {
+	const headers = {
+		'Content-Length': fileSize,
+		'Content-Disposition': `attachment;filename=${fileName}`,
+	};
+
+	let response = createResponseCode(resCode);
+
+	readStream.on('error', (error) => {
+		response = createResponseCode(error);
+		logger.logInfo(genResponseLogging(response.code, fileSize, req));
+		res.status(response.status);
+		res.end();
+	});
+
+	readStream.once('data', () => {
+		res.writeHead(response.status, headers);
+	});
+
+	readStream.on('data', (data) => {
+		res.write(data);
+	});
+
+	readStream.on('end', () => {
+		res.end();
+		logger.logInfo(genResponseLogging(response.code, fileSize, req));
+	});
 };
 
 module.exports = Responder;

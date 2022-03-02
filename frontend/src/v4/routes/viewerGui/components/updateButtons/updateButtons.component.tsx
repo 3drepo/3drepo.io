@@ -14,9 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
 import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../../helpers/rendering';
 import { ImageButton } from '../imageButton/imageButton.component';
 import PinButton from '../pinButton/pinButton.container';

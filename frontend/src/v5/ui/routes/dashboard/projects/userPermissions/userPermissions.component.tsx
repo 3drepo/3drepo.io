@@ -14,16 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { UserManagementActions } from '@/v4/modules/userManagement';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
 import { selectCurrentUser } from '@/v4/modules/currentUser';
-import { Container, V4ModelsPermissions } from './containersAndFederationsPermissions.styles';
+import { Container, V4ModelsPermissions } from './userPermissions.styles';
 
-export const ContainersAndFederationsPermissions = () => {
+export const UserPermissions = () => {
 	const dispatch = useDispatch();
 	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails()?.name;
 	const username = useSelector(selectCurrentUser)?.username;

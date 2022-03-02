@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { PureComponent, createRef } from 'react';
 import { difference, differenceBy, isEqual } from 'lodash';
 import {queuableFunction} from '../../helpers/async';
 
@@ -61,8 +59,8 @@ interface IProps {
 	risksHighlightedShapes: any[];
 }
 
-export class ViewerCanvas extends React.PureComponent<IProps, any> {
-	private containerRef = React.createRef<HTMLElement>();
+export class ViewerCanvas extends PureComponent<IProps, any> {
+	private containerRef = createRef<HTMLElement>();
 
 	constructor(props) {
 		super(props);

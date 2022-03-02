@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { PureComponent, createRef } from 'react';
 import RemoveCircle from '@material-ui/icons/RemoveCircle';
 import {
 	cond,
@@ -27,7 +27,6 @@ import {
 	pickBy,
 	values
 } from 'lodash';
-import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
@@ -119,8 +118,8 @@ const teamspacePermissions = values(TEAMSPACE_PERMISSIONS).map(
 	})
 );
 
-export class Users extends React.PureComponent<IProps, IState> {
-	public formRef = React.createRef<any>();
+export class Users extends PureComponent<IProps, IState> {
+	public formRef = createRef<any>();
 	public static defaultProps = {
 		jobs: [],
 		users: []

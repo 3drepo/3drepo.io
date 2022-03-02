@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
 import AddIcon from '@material-ui/icons/Add';
 
 import { ILegend } from '../../../../../../modules/legend/legend.redux';

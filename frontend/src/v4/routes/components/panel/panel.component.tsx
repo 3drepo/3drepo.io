@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
 import { pick } from 'lodash';
 
 import { Container, Content, ContentWrapper, Title } from './panel.styles';
