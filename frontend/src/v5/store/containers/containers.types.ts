@@ -167,7 +167,7 @@ export type UploadItemFields = {
 	progress: number;
 	extension: string;
 	containerId?: string;
-	containerName?: string;
+	containerName: string;
 	containerUnit: string;
 	containerType: string;
 	containerDesc?: string;

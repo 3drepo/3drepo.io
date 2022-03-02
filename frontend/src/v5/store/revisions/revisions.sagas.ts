@@ -93,7 +93,10 @@ export function* createRevision({ teamspace, projectId, containerId, progressBar
 			yield put(ContainersActions.createContainerSuccess(projectId, { _id: newContainerId, ...newContainer }));
 		}
 	} catch (error) {
-		yield put(RevisionsActions.setUploadFailed(containerId, error));
+		if (Object.prototype.hasOwnProperty.call(error, 'response')) {
+			const { response: { data: { message, status, code } } } = error;
+			yield put(RevisionsActions.setUploadFailed(containerId, `${status} - ${code} (${message})`));
+		} else yield put(RevisionsActions.setUploadFailed(containerId, error.message));
 	}
 }
 

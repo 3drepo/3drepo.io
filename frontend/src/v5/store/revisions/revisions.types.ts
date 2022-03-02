@@ -15,9 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AxiosError } from 'axios';
 import { Action } from 'redux';
-import { UploadItemFields } from '../containers/containers.types';
 
 export interface IRevision {
 	_id: string;
@@ -31,7 +29,7 @@ export interface IRevision {
 export interface IRevisionsState {
 	revisionsByContainer: Record<string, IRevision[]>;
 	isPending: Record<string, boolean>;
-	uploadFailed: Record<string, AxiosError>;
+	uploadFailed: Record<string, string>;
 }
 
 export type FetchRevisionsPayload = {
@@ -48,11 +46,27 @@ export type RevisionVoidStatusPayload = {
 	isVoid: boolean;
 };
 
+export type CreateRevisionBody = {
+	revisionTag: string;
+	revisionDesc?: string;
+	file: File;
+	importAnimations?: boolean;
+	timezone?: string;
+};
+
+export type CreateContainerBody = {
+	containerName: string;
+	containerType: string;
+	containerUnit: string;
+	containerDesc?: string;
+	containerCode?: string;
+};
+
 export type CreateRevisionPayload = {
 	teamspace: string;
 	projectId: string;
 	containerId: string;
-	body: UploadItemFields;
+	body: CreateRevisionBody & CreateContainerBody;
 	progressBar: (val) => void;
 };
 
@@ -62,7 +76,7 @@ export type FetchAction = Action<'FETCH'> & FetchRevisionsPayload;
 export type FetchSuccessAction = Action<'FETCH_SUCCESS'> & { containerId: string, revisions: IRevision[] };
 export type SetIsPendingAction = Action<'SET_IS_PENDING'> & { containerId: string, isPending: boolean };
 export type CreateRevisionAction = Action<'CREATE_REVISION'> & CreateRevisionPayload;
-export type SetUploadFailedAction = Action<'SET_UPLOAD_FAILED'> & { containerId: string, error: AxiosError };
+export type SetUploadFailedAction = Action<'SET_UPLOAD_FAILED'> & { containerId: string, errorMessage: string };
 
 export interface IRevisionsActionCreators {
 	setVoidStatus: (teamspace: string, projectId: string, containerId: string, revisionId: string, isVoid: boolean) =>
@@ -76,7 +90,7 @@ export interface IRevisionsActionCreators {
 		projectId: string,
 		containerId: string,
 		progressBar: (val) => void,
-		body: UploadItemFields
+		body: CreateRevisionBody & CreateContainerBody,
 	) => CreateRevisionAction;
-	setUploadFailed: (containerId: string, error: AxiosError) => SetUploadFailedAction
+	setUploadFailed: (containerId: string, errorMessage: string) => SetUploadFailedAction
 }
