@@ -19,7 +19,7 @@ import { SearchInput } from '@controls/searchInput';
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
-	title: 'Controls/SearchInput',
+	title: 'Inputs/SearchInput',
 	component: SearchInput,
 } as ComponentMeta<typeof SearchInput>;
 

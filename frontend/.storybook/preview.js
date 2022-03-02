@@ -1,5 +1,7 @@
 import { muiTheme } from 'storybook-addon-material-ui'
 import { theme } from '@/v5/ui/themes/theme';
+import { ThemeProvider } from "styled-components";
+import { withThemesProvider } from "storybook-addon-styled-component-theme";
 
 export const parameters = {
   actions: { argTypesRegex: "^on[A-Z].*" },
@@ -13,4 +15,5 @@ export const parameters = {
 
 export const decorators = [
 	muiTheme([theme]),
+  withThemesProvider([theme])
 ];
