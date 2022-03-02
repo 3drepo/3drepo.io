@@ -17,6 +17,7 @@
 
 const removeIndex = require('./removeIndices');
 const addRevId = require('./addRevIdToNodes');
+const removeCurrentIds = require('./removeCurrentIds');
 const updateMetaSchema = require('./updateMetadataSchema');
 const addIndex = require('./addIndices');
 const addSharedIdToMeshMap = require('./addSharedIdToMeshMap');
@@ -33,6 +34,7 @@ const scripts = [
 	{ script: updateMetaSchema, desc: 'Update metadata schema' },
 	{ script: addIndex, desc: 'Add new indices to scene graph' },
 	{ script: addSharedIdToMeshMap, desc: 'Add shared id to super mesh mappings' },
+	{ script: removeCurrentIds, desc: 'Remove current id array from revision nodes' },
 ];
 
 module.exports = scripts;

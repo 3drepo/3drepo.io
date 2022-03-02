@@ -18,19 +18,10 @@
 const { v5Path } = require('../../../interop');
 const { getTeamspaceList, getCollectionsEndsWith } = require('../utils');
 
-const { find, updateMany } = require(`${v5Path}/handler/db`);
+const { updateMany } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const processModel = async (teamspace, model) => {
-	const revs = await find(teamspace, `${model}.history`, {}, { current: 1 });
-	const proms = revs.map(({ _id, current = [] }) => (current.length ? updateMany(
-		teamspace,
-		`${model}.scene`,
-		{ _id: { $in: current } },
-		{ $set: { rev_id: _id } },
-	) : Promise.resolve()));
-	return Promise.all(proms);
-};
+const processModel = (teamspace, model) => updateMany(teamspace, `${model}.history`, {}, { $unset: { current: 1 } });
 
 const processTeamspace = async (teamspace) => {
 	const histories = await getCollectionsEndsWith(teamspace, '.history');
@@ -39,7 +30,6 @@ const processTeamspace = async (teamspace) => {
 		logger.logInfo(`\t\t\t${model}`);
 		// eslint-disable-next-line no-await-in-loop
 		await processModel(teamspace, model);
-		// eslint-disable-next-line no-await-in-loop
 	}
 };
 
