@@ -124,7 +124,30 @@ describe("Chat service", function () {
 							.send({ username: account, password })
 							.expect(200, done);
 					},
-					done => agent.delete("/notifications").expect(200, done)
+					done => agent.delete("/notifications").expect(200, done),
+					done => {
+						socket = io(config.chat_server.chat_host, {path: "/" + config.chat_server.subdirectory, extraHeaders:{
+							Cookie: `connect.sid=${connectSid}; `
+						}});
+
+						socket.on("connect", function(data) {
+
+							socket.emit("join", {account, model});
+
+							socket.emit("join", {account: username});
+
+							socket.on("joined", function(data) {
+								if(data.account === account && data.model === model) {
+									socket.off("joined");
+									done();
+								}
+							});
+
+							socket.on("credentialError", done);
+						});
+
+					}
+
 				], done);
 
 			});
@@ -368,7 +391,7 @@ describe("Chat service", function () {
 					createIssue(teamSpace1Agent, jobAIssue)((err, iss) => issueId = iss._id);
 				},
 				notificationUpsertEvent,
-				(notifications, done) => {
+					(notifications, done) => {
 					expect(notifications[0], 'Should have receive a ISSUE_ASSIGNED').to
 						.shallowDeepEqual({
 							type:"ISSUE_ASSIGNED",

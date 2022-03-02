@@ -30,7 +30,7 @@ const eventTypes = Object.freeze({
 
 async function insertEventQueue(event, emitter, account, model, extraKeys, data) {
 
-	let channel = account;
+	let channel = `notifications::${account}`;
 	if(model) {
 		const { findOneProject } = require("./project");
 
@@ -76,7 +76,7 @@ function insertEventQueueDM(event, recipient, data) {
 function upsertedNotification(session, notification) {
 	const msg = {
 		event : notification.username + "::notificationUpserted",
-		channel : notification.username,
+		channel : `notifications::${notification.username}`,
 		emitter : session,
 		data : notification.notification
 	};
@@ -86,7 +86,7 @@ function upsertedNotification(session, notification) {
 const deletedNotification = function(session, notification) {
 	const msg = {
 		event : notification.username + "::notificationDeleted",
-		channel : notification.username,
+		channel : `notifications::${notification.username}`,
 		emitter : session,
 		data : {_id:notification.notification._id}
 	};
