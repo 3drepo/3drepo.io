@@ -187,7 +187,7 @@ describe("Metadata", function () {
 			.expect(200, function(err, res) {
 				expect(res.body.data).to.exist;
 				expect(res.body.data.length).to.equal(675);
-				expect(res.body.data[0]).to.deep.equal(goldenData0);
+				expect(res.body.data.find(({_id})=> goldenData0._id === _id)).to.deep.equal(goldenData0);
 				done(err);
 			});
 	});
@@ -230,7 +230,7 @@ describe("Metadata", function () {
 			.expect(200, function(err, res) {
 				expect(res.body.data).to.exist;
 				expect(res.body.data.length).to.equal(675);
-				expect(res.body.data[0]).to.deep.equal(goldenData0);
+				expect(res.body.data.find(({_id})=> goldenData0._id === _id)).to.deep.equal(goldenData0);
 				done(err);
 			});
 	});
@@ -459,6 +459,8 @@ describe("Metadata", function () {
 			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules?meshids=true`)
 				.send(query)
 				.expect(200, function(err, res) {
+					res.body[0].mesh_ids.sort();
+					goldenIfcStairFlight[0].mesh_ids.sort();
 					expect(res.body).to.deep.equal(goldenIfcStairFlight);
 					done(err);
 				});
