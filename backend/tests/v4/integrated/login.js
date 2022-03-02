@@ -21,6 +21,7 @@ const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
 const responseCodes = require("../../../src/v4/response_codes.js");
+const { templates: responseCodesV5 } = require("../../../src/v5/utils/responseCodes");
 
 describe("Login", function () {
 	const User = require("../../../src/v4/models/user");
@@ -111,7 +112,7 @@ describe("Login", function () {
 					.post("/login")
 					.send({ username: username_not_verified, password })
 					.expect(400, function(err, res) {
-						expect(res.body.value).to.equal(responseCodes.USER_NOT_VERIFIED.value);
+						expect(res.body.code).to.equal(responseCodesV5.userNotVerified.code);
 						err ? reject(err) : resolve();
 					});
 			});
@@ -125,7 +126,7 @@ describe("Login", function () {
 			.post("/login")
 			.send({ username: email("nonexistent"), password })
 			.expect(400, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value);
+				expect(res.body.code).to.equal(responseCodesV5.incorrectUsernameOrPassword.code);
 				done(err);
 
 			});
@@ -136,7 +137,7 @@ describe("Login", function () {
 			.post("/login")
 			.send({ username, password: password + "123" })
 			.expect(400, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value);
+				expect(res.body.code).to.equal(responseCodesV5.incorrectUsernameOrPassword.code);
 				done(err);
 			});
 	});
@@ -147,7 +148,7 @@ describe("Login", function () {
 			.send({ username: username  + "123", password: password + "123" })
 			.expect(400, function(err, res) {
 
-				expect(res.body.value).to.equal(responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value);
+				expect(res.body.code).to.equal(responseCodesV5.incorrectUsernameOrPassword.code);
 				done(err);
 
 			});
@@ -163,7 +164,8 @@ describe("Login", function () {
 			// double login
 				agent.post("/login").send({ username: username , password: password })
 					.expect(400, function(err, res) {
-						expect(res.body.value).to.equal(responseCodes.ALREADY_LOGGED_IN.value);
+						 console.log(res.body);
+						expect(res.body.code).to.equal(responseCodesV5.alreadyLoggedIn.code);
 						done(err);
 					});
 
@@ -176,7 +178,7 @@ describe("Login", function () {
 			.send({ password: password + "123" })
 			.expect(400, function(err, res) {
 
-				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+				expect(res.body.code).to.equal(responseCodesV5.invalidArguments.code);
 				done(err);
 
 			});
@@ -188,7 +190,7 @@ describe("Login", function () {
 			.send({ username: username })
 			.expect(400, function(err, res) {
 
-				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+				expect(res.body.code).to.equal(responseCodesV5.invalidArguments.code);
 				done(err);
 
 			});
@@ -200,7 +202,7 @@ describe("Login", function () {
 			.send({ username: true , password})
 			.expect(400, function(err, res) {
 
-				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+				expect(res.body.code).to.equal(responseCodesV5.invalidArguments.code);
 				done(err);
 
 			});
@@ -212,7 +214,7 @@ describe("Login", function () {
 			.send({ username, password: true})
 			.expect(400, function(err, res) {
 
-				expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+				expect(res.body.code).to.equal(responseCodesV5.invalidArguments.code);
 				done(err);
 
 			});
@@ -310,7 +312,7 @@ describe("Login", function () {
 					.send({ username, password: "wrongPassword" })
 					.expect(400);
 
-				expect(body.value).to.equal(responseCodes.INCORRECT_USERNAME_OR_PASSWORD.value);
+				expect(body.code).to.equal(responseCodesV5.incorrectUsernameOrPassword.code);
 
 				if (remaining <= 5) {
 					expect(body.message).to.equal("Incorrect username or password (Remaining attempts: " + remaining + ")");
@@ -338,7 +340,7 @@ describe("Login", function () {
 				.send({ username, password: newPassword })
 				.expect(400);
 
-			expect(body.value).to.equal(responseCodes.TOO_MANY_LOGIN_ATTEMPTS.value);
+			expect(body.code).to.equal(responseCodesV5.tooManyLoginAttempts.code);
 		});
 
 		it("correct credentials for expired lockout should succeed", async function() {
