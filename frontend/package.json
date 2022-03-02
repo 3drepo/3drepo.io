@@ -166,6 +166,7 @@
 		"path": "0.12.7",
 		"postcss-loader": "6.2.1",
 		"redux-saga-test-plan": "4.0.3",
+		"storybook-addon-material-ui": "^0.9.0-alpha.24",
 		"style-loader": "3.3.1",
 		"stylelint": "9.8.0",
 		"stylelint-config-recommended": "2.1.0",
