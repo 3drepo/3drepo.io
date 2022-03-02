@@ -71,7 +71,7 @@ const multer = require("multer");
  * 	"username": "alice"
  * }
  */
-router.post("/login", middlewares.formatV5LogInData, validateLoginData, login, createSession);
+router.post("/login", middlewares.formatV5LogInData, validateLoginData, login, middlewares.flagAsV4Request, createSession);
 
 /**
  * @api {post} /logout Logout
@@ -92,7 +92,7 @@ router.post("/login", middlewares.formatV5LogInData, validateLoginData, login, c
  * }
  *
  */
-router.post("/logout", middlewares.loggedIn, destroySession);
+router.post("/logout", middlewares.loggedIn, middlewares.flagAsV4Request, destroySession);
 
 /**
  * @api {get} /login Get current username
@@ -555,7 +555,6 @@ function login(req, res, next) {
 	const { user, password } = req.body;
 	UsersV5.login(user, password).then((loginData) => {
 		req.loginData = loginData;
-		req.v4 = true;
 		next();
 	}).catch((err) => respondV5(req, res, err));
 }

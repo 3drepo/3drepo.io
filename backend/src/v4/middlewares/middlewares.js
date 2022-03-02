@@ -160,6 +160,11 @@
 		checkPermissions([C.PERM_TEAMSPACE_ADMIN])(req, res, next);
 	}
 
+	function flagAsV4Request(req, res, next) {
+		req.v4 = true;
+		next();
+	}
+
 	function formatV5LogInData(req, res, next) {
 		if (req.body.username) {
 			req.body.user = req.body.username;
@@ -232,7 +237,8 @@
 		// v5 converters
 		formatV5LogInData,
 		formatV5NewModelRevisionsData,
-		formatV5NewFedRevisionsData
+		formatV5NewFedRevisionsData,
+		flagAsV4Request
 
 	};
 

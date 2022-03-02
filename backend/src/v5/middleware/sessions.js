@@ -83,7 +83,7 @@ Sessions.destroySession = (req, res) => {
 		req.session.destroy(() => {
 			res.clearCookie('connect.sid', { domain: config.cookie_domain, path: '/' });
 			const sessionData = { user: { username } };
-			respond({ ...req, session: sessionData }, res, templates.ok);
+			respond({ ...req, session: sessionData }, res, templates.ok, req.v4 ? { username } : undefined);
 		});
 	} catch (err) {
 		// istanbul ignore next
