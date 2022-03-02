@@ -24,6 +24,7 @@ const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
 const deleteOneModel = (ts, query) => db.deleteOne(ts, 'settings', query);
+const deleteModels = (ts, query) => db.deleteMany(ts, 'settings', query);
 const findOneModel = (ts, query, projection) => db.findOne(ts, 'settings', query, projection);
 const findModels = (ts, query, projection, sort) => db.find(ts, 'settings', query, projection, sort);
 const insertOneModel = (ts, data) => db.insertOne(ts, 'settings', data);
@@ -39,6 +40,16 @@ Models.addModel = async (ts, data) => {
 	publish(events.NEW_MODEL, { teamspace: ts, model: _id });
 
 	return _id;
+};
+
+Models.deleteModels = async (ts, models) => {
+	const { deletedCount } = await deleteModels(ts, { _id: { $in: models } });
+
+	if (deletedCount === 0) {
+		throw templates.modelNotFound;
+	}
+
+	publish(events.DELETE_MODEL, { teamspace: ts, models });
 };
 
 Models.deleteModel = async (ts, model) => {

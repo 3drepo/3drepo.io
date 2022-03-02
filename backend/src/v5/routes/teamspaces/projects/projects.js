@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { hasAccessToTeamspace, isAdminToProject, isTeamspaceAdmin } = require('../../../middleware/permissions/permissions');
 const Projects = require('../../../processors/teamspaces/projects/projects');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../utils/helper/uuids');
 const { getUserFromSession } = require('../../../utils/sessions');
-const { hasAccessToTeamspace } = require('../../../middleware/permissions/permissions');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
+const { validateProjectData } = require('../../../middleware/dataConverter/inputs/teamspaces/projects/projects');
 
 const serialiseProject = (project) => ({ ...project, _id: UUIDToString(project._id) });
 
@@ -31,6 +32,42 @@ const getProjectList = (req, res) => {
 	Projects.getProjectList(teamspace, user).then((projects) => {
 		respond(req, res, templates.ok, { projects: projects.map(serialiseProject) });
 	}).catch((err) => respond(req, res, err));
+};
+
+const createProject = async (req, res) => {
+	const user = getUserFromSession(req.session);
+	const { teamspace } = req.params;
+	const { name } = req.body;
+
+	try {
+		const newProject = await Projects.createProject(user, teamspace, name, req.session.user.permissions);
+		respond(req, res, templates.ok, { ...newProject, _id: UUIDToString(newProject._id) });
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
+const deleteProject = async (req, res) => {
+	const { teamspace, project } = req.params;
+
+	try {
+		await Projects.deleteProject(teamspace, project);
+		respond(req, res, templates.ok);
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
+const editProject = async (req, res) => {
+	const { teamspace, project } = req.params;
+	const updatedProject = req.body;
+
+	try {
+		await Projects.editProject(teamspace, project, updatedProject);
+		respond(req, res, templates.ok);
+	} catch (err) {
+		respond(req, res, err);
+	}
 };
 
 const establishRoutes = () => {
@@ -82,6 +119,12 @@ const establishRoutes = () => {
 	 *
 	 */
 	router.get('/', hasAccessToTeamspace, getProjectList);
+
+	router.post('/', isTeamspaceAdmin, validateProjectData, createProject);
+
+	router.delete('/:project', isTeamspaceAdmin, deleteProject);
+
+	router.patch('/:project', isAdminToProject, validateProjectData, editProject);
 
 	return router;
 };

@@ -18,12 +18,15 @@
 const Projects = {};
 const { PROJECT_ADMIN } = require('../utils/permissions/permissions.constants');
 const db = require('../handler/db');
+const { generateUUID } = require('../utils/helper/uuids');
 const { getCommonElements } = require('../utils/helper/arrays');
 const { templates } = require('../utils/responseCodes');
 
 const findProjects = (ts, query, projection, sort) => db.find(ts, 'projects', query, projection, sort);
 const findOneProject = (ts, query, projection) => db.findOne(ts, 'projects', query, projection);
 const updateOneProject = (ts, query, data) => db.updateOne(ts, 'projects', query, data);
+const addOneProject = (ts, data) => db.insertOne(ts, 'projects', data);
+const deleteOneProject = (ts, query) => db.deleteOne(ts, 'projects', query);
 
 Projects.addModelToProject = (ts, project, model) => updateOneProject(
 	ts,
@@ -37,8 +40,19 @@ Projects.removeModelFromProject = (ts, project, model) => updateOneProject(
 	{ $pull: { models: model } },
 );
 
-Projects.getProjectById = async (ts, project, projection) => {
-	const res = await findOneProject(ts, { _id: project }, projection);
+Projects.getProjectById = async (ts, projectId, projection) => {
+	const res = await findOneProject(ts, { _id: projectId }, projection);
+
+	if (!res) {
+		throw templates.projectNotFound;
+	}
+
+	return res;
+};
+
+Projects.getProjectByName = async (ts, projectName, projection) => {
+	const res = await findOneProject(ts, { name: projectName }, projection);
+
 	if (!res) {
 		throw templates.projectNotFound;
 	}
@@ -57,6 +71,28 @@ Projects.getProjectList = (ts, projection = { _id: 1, name: 1 }) => findProjects
 Projects.getProjectAdmins = async (ts, project) => {
 	const { permissions } = await Projects.getProjectById(ts, project, { permissions: 1 });
 	return permissions.flatMap((entry) => (entry.permissions.includes(PROJECT_ADMIN) ? [entry.user] : []));
+};
+
+Projects.createProject = async (teamspace, project) => {
+	const addedProject = { _id: generateUUID(), ...project };
+	await addOneProject(teamspace, addedProject);
+	return addedProject;
+};
+
+Projects.deleteProject = async (teamspace, projectId) => {
+	const { deletedCount } = await deleteOneProject(teamspace, { _id: projectId });
+
+	if (deletedCount === 0) {
+		throw templates.projectNotFound;
+	}
+};
+
+Projects.editProject = async (teamspace, projectId, updatedProject) => {
+	const { matchedCount } = await updateOneProject(teamspace, { _id: projectId }, { $set: updatedProject });
+
+	if (matchedCount === 0) {
+		throw templates.projectNotFound;
+	}
 };
 
 module.exports = Projects;

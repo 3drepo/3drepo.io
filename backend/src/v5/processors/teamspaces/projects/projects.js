@@ -15,12 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { createProject, deleteProject, editProject, getProjectById, getProjectList } = require('../../../models/projects');
 const {
 	hasProjectAdminPermissions,
 	hasReadAccessToModel,
 	isTeamspaceAdmin,
 } = require('../../../utils/permissions/permissions');
-const { getProjectList } = require('../../../models/projects');
+const { deleteModels } = require('../../../models/modelSettings');
 
 const Projects = {};
 
@@ -37,6 +38,41 @@ Projects.getProjectList = async (teamspace, user) => {
 		const hasAccess = isAdmin || await hasSomeModelAccess(teamspace, models, user);
 		return hasAccess ? { _id, name, isAdmin } : [];
 	}))).flat();
+};
+
+const projAdminPermissions = [
+	'create_model',
+	'create_federation',
+	'admin_project',
+	'edit_project',
+	'delete_project',
+	'upload_files_all_models',
+	'edit_federation_all_models',
+	'create_issue_all_models',
+	'comment_issue_all_models',
+	'view_issue_all_models',
+	'view_model_all_models',
+	'download_model_all_models',
+	'change_model_settings_all_models',
+];
+
+Projects.createProject = async (username, teamspace, name) => {
+	const project = { name, models: [], permissions: [] };
+	const addedProject = await createProject(teamspace, project);
+	return { ...addedProject, permissions: projAdminPermissions };
+};
+
+Projects.deleteProject = async (teamspace, projectId) => {
+	const project = await getProjectById(teamspace, projectId, { models: 1 });
+	await deleteProject(teamspace, projectId);
+
+	if (project.models.length > 0) {
+		await deleteModels(teamspace, project.models);
+	}
+};
+
+Projects.editProject = async (teamspace, projectId, updatedProject) => {
+	await editProject(teamspace, projectId, updatedProject);
 };
 
 module.exports = Projects;
