@@ -19,6 +19,7 @@ import React from 'react';
 import TickIcon from '@assets/icons/tick';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { ErrorTooltip } from '@controls/errorTooltip';
+import { formatMessage } from '@/v5/services/intl';
 import { CompletionMark, Container, Progress, StatusText } from './UploadProgress.styles';
 
 type IUploadProgress = {
@@ -31,18 +32,18 @@ export const UploadProgress = ({ progress, errorMessage, hidden }: IUploadProgre
 	let statusText: string;
 	let uploadStatus;
 	if (errorMessage) {
-		statusText = 'Upload failed';
+		statusText = formatMessage({ id: 'upload.progress.status.failed', defaultMessage: 'Upload failed' });
 		uploadStatus = UploadStatuses.FAILED;
 	} else if (progress === 100) {
-		statusText = 'Upload complete';
+		statusText = formatMessage({ id: 'upload.progress.status.uploaded', defaultMessage: 'Upload complete' });
 		uploadStatus = UploadStatuses.UPLOADED;
 	} else if (progress < 100 && progress > 0) {
-		statusText = 'Uploading';
+		statusText = formatMessage({ id: 'upload.progress.status.uploading', defaultMessage: 'Uploading' });
 		uploadStatus = UploadStatuses.UPLOADING;
 	} else if (progress === 0) {
-		statusText = 'Waiting to upload';
+		statusText = formatMessage({ id: 'upload.progress.status.queued', defaultMessage: 'Waiting to upload' });
 		uploadStatus = UploadStatuses.QUEUED;
-	} else statusText = 'Unexpected Error';
+	} else statusText = formatMessage({ id: 'upload.progress.status.unexpectedError', defaultMessage: 'Unexpected error' });
 
 	return hidden ? (<></>) : (
 		<Container>
@@ -55,7 +56,7 @@ export const UploadProgress = ({ progress, errorMessage, hidden }: IUploadProgre
 				)}
 			</StatusText>
 			<Progress uploadStatus={uploadStatus} progress={progress} />
-			<CompletionMark> {uploadStatus === 'uploaded' && <TickIcon />} </CompletionMark>
+			<CompletionMark> {uploadStatus === UploadStatuses.UPLOADED && <TickIcon />} </CompletionMark>
 		</Container>
 	);
 };
