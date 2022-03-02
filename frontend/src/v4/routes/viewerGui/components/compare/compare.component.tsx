@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 
 import { Tab, Tooltip } from '@material-ui/core';
 import CheckIcon from '@material-ui/icons/Check';
@@ -85,7 +85,7 @@ interface IProps {
 	id?: string;
 }
 
-export class Compare extends React.PureComponent<IProps, any> {
+export class Compare extends PureComponent<IProps, any> {
 
 	get type() {
 		return VIEWER_PANELS.COMPARE;

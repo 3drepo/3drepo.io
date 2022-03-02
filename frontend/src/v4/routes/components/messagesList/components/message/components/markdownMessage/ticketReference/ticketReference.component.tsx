@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { ReactChild, useState } from 'react';
 import { PopoverProps as PopoverType } from '@material-ui/core/Popover';
 import { renderWhenTrueOtherwise } from '../../../../../../../../helpers/rendering';
 
@@ -29,7 +27,7 @@ interface IReferenceLink {
 	onPopoverClose: () => void;
 	onCardChange: () => void;
 	to: string;
-	children: React.ReactChild;
+	children: ReactChild;
 }
 
 const ReferenceLink = ({ onPopoverOpen, onPopoverClose, onCardChange, children, to, ...props }: IReferenceLink) => (
@@ -69,7 +67,7 @@ interface IProps {
 }
 
 export const TicketReference = ({ id, text, issuesMap, risksMap, urlParams, ...props }: IProps): JSX.Element => {
-	const [anchorEl, setAnchorEl] = React.useState<PopoverType | null>(null);
+	const [anchorEl, setAnchorEl] = useState<PopoverType | null>(null);
 	const ticketData = issuesMap[id] ? issuesMap[id] : risksMap[id];
 	const { teamspace, type } = urlParams;
 	const isBoardView = Boolean(type);

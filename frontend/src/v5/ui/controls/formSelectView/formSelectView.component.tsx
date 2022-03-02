@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
 import { useParams } from 'react-router';
 import { FederationView } from '@/v5/store/federations/federations.types';
 import { generateV5ApiUrl } from '@/v5/services/api/default';

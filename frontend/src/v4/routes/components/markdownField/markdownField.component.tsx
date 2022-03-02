@@ -14,20 +14,19 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { ReactChild, FC, forwardRef, Ref } from 'react';
 import linkify from 'markdown-linkify';
-import React from 'react';
 
 // eslint-disable-next-line max-len
 import { MarkdownMessage } from '../messagesList/components/message/components/markdownMessage/markdownMessage.component';
 
 interface IProps {
-	children?: React.ReactChild;
+	children?: ReactChild;
 	className?: string;
 }
 
-export const MarkdownField: React.FC<IProps> = React.forwardRef(
-	({ className, children }: IProps, ref: React.Ref<HTMLSpanElement>) => (
+export const MarkdownField: FC<IProps> = forwardRef(
+	({ className, children }: IProps, ref: Ref<HTMLSpanElement>) => (
 		<span ref={ref}>
 			<MarkdownMessage className={className}>{linkify(children)}</MarkdownMessage>
 		</span>

@@ -14,9 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { PureComponent } from 'react';
 import filesize from 'filesize';
 import { Field, FieldArray } from 'formik';
-import * as React from 'react';
 import { EXTENSION_RE } from '../../../../constants/resources';
 import { FileEntry } from './attachResourceFileEntry.component';
 import { ResourcesListContainer, ResourcesListScroller } from './attachResourcesDialog.styles';
@@ -29,7 +29,7 @@ interface IProps {
 	validateUploadLimit: (files: []) => boolean;
 }
 
-export class AttachResourceFiles extends React.PureComponent<IProps, any> {
+export class AttachResourceFiles extends PureComponent<IProps, any> {
 	public insertFile = (fieldArray, file) => {
 		const matches = file.name.match(EXTENSION_RE);
 		const ext = matches ? matches[0] : '';

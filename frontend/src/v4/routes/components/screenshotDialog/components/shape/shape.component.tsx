@@ -14,8 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import * as React from 'react';
+import { useEffect, useRef, Fragment } from 'react';
 import { Group, Rect, Transformer } from 'react-konva';
 import { SHAPE_COMPONENTS, SHAPE_TYPES } from './shape.constants';
 
@@ -29,20 +28,20 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 	const {
 		color, figure, draggable, groupX, groupY, rotation, initScaleX, initScaleY, scaleX, scaleY, ...elementProps
 	} = element;
-	const shape = React.useRef<any>();
-	const transformer = React.useRef<any>();
-	const rect = React.useRef<any>(null);
-	const group = React.useRef<any>(null);
+	const shape = useRef<any>();
+	const transformer = useRef<any>();
+	const rect = useRef<any>(null);
+	const group = useRef<any>(null);
 	const hasLineLikeBehavior = [SHAPE_TYPES.LINE, SHAPE_TYPES.ARROW].includes(figure);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (isSelected && transformer.current) {
 			transformer.current.attachTo(group.current);
 			transformer.current.getLayer().batchDraw();
 		}
 	}, [transformer.current, isSelected]);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (shape.current) {
 			const currentShape = shape.current;
 			const selfRect = shape.current.getSelfRect();
@@ -136,7 +135,7 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 	const transformerProps = hasLineLikeBehavior ? { enabledAnchors: ['top-left', 'top-right'] } : {};
 
 	return (
-		<React.Fragment>
+		<Fragment>
 			<Group
 					ref={group}
 					{...additionalGroupProps}
@@ -166,6 +165,6 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 				onMouseEnter={handleTransformerMouseOver}
 			/>
 			}
-		</React.Fragment>
+		</Fragment>
 	);
 };

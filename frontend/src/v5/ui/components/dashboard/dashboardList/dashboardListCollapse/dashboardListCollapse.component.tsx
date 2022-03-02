@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode, useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { Collapse, Tooltip } from '@material-ui/core';
 import { ChevronButton } from '@controls/chevronButton';
 import { Container, ButtonContainer, ControlsContainer, CollapsedItemContainer, Title } from './dashboardListCollapse.styles';

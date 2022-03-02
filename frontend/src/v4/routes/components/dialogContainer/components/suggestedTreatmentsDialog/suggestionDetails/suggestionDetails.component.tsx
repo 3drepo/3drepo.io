@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { FunctionComponent, useState, useRef, useEffect, useCallback } from 'react';
 import Grid from '@material-ui/core/Grid';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
@@ -29,7 +27,7 @@ interface ITextWrapper {
 	variant?: string;
 }
 
-const TextWrapper: React.FunctionComponent<ITextWrapper> = ({
+const TextWrapper: FunctionComponent<ITextWrapper> = ({
 	children, color = 'textPrimary', variant = 'caption', inline, ...props
 }) => (
 	<StyledTypography component="span" inline={inline ? 1 : 0} variant={variant} color={color} {...props}>
@@ -43,14 +41,14 @@ interface ISuggestionDetails {
 	mitigation_type: string;
 }
 
-export const SuggestionDetails: React.FunctionComponent<ISuggestionDetails> = ({
+export const SuggestionDetails: FunctionComponent<ISuggestionDetails> = ({
 	mitigation_details, mitigation_stage, mitigation_type
 }) => {
-	const textRef = React.useRef<HTMLSpanElement>(null);
-	const [expandable, setExpandable] = React.useState<boolean>(false);
-	const [expanded, setExpanded] = React.useState<boolean>(false);
+	const textRef = useRef<HTMLSpanElement>(null);
+	const [expandable, setExpandable] = useState<boolean>(false);
+	const [expanded, setExpanded] = useState<boolean>(false);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (textRef.current) {
 			const height = textRef.current.offsetHeight;
 
@@ -64,7 +62,7 @@ export const SuggestionDetails: React.FunctionComponent<ISuggestionDetails> = ({
 
 	const handleExpand = () => setExpanded(!expanded);
 
-	const additionalProps = React.useCallback(() => {
+	const additionalProps = useCallback(() => {
 		if (expandable && !expanded) {
 			return {
 				style: {
