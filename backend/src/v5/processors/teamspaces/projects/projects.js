@@ -21,7 +21,7 @@ const {
 	hasReadAccessToModel,
 	isTeamspaceAdmin,
 } = require('../../../utils/permissions/permissions');
-const { deleteModels } = require('../../../models/modelSettings');
+const { removeModelData } = require('../../../utils/helper/models');
 
 const Projects = {};
 
@@ -40,35 +40,23 @@ Projects.getProjectList = async (teamspace, user) => {
 	}))).flat();
 };
 
-const projAdminPermissions = [
-	'create_model',
-	'create_federation',
-	'admin_project',
-	'edit_project',
-	'delete_project',
-	'upload_files_all_models',
-	'edit_federation_all_models',
-	'create_issue_all_models',
-	'comment_issue_all_models',
-	'view_issue_all_models',
-	'view_model_all_models',
-	'download_model_all_models',
-	'change_model_settings_all_models',
-];
-
-Projects.createProject = async (username, teamspace, name) => {
-	const project = { name, models: [], permissions: [] };
-	const addedProject = await createProject(teamspace, project);
-	return { ...addedProject, permissions: projAdminPermissions };
+Projects.createProject = async (teamspace, name) => {
+	const { _id } = await createProject(teamspace, { name, models: [], permissions: [] });
+	return _id;
 };
 
 Projects.deleteProject = async (teamspace, projectId) => {
 	const project = await getProjectById(teamspace, projectId, { models: 1 });
-	await deleteProject(teamspace, projectId);
-
-	if (project.models.length > 0) {
-		await deleteModels(teamspace, project.models);
+	
+	for(let i = 0; i < project.models.length; i++){
+		try {
+			await removeModelData(teamspace, project.models[i]);
+		} catch {
+			//continue removing the rest of the models
+		}		
 	}
+
+	await deleteProject(teamspace, projectId);	
 };
 
 Projects.editProject = async (teamspace, projectId, updatedProject) => {

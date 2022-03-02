@@ -17,26 +17,11 @@
 
 const {
 	addModel,
-	deleteModel,
 } = require('../../../../../models/modelSettings');
 const { addModelToProject, getProjectById, removeModelFromProject } = require('../../../../../models/projects');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
-const db = require('../../../../../handler/db');
 const { getFavourites } = require('../../../../../models/users');
-const { removeAllFilesFromModel } = require('../../../../../models/fileRefs');
-
-const removeModelCollections = async (ts, model) => {
-	const collections = await db.listCollections(ts);
-	const promises = [];
-
-	collections.forEach((collection) => {
-		if (collection.name.startsWith(`${model}.`)) {
-			promises.push(db.dropCollection(ts, collection));
-		}
-	});
-
-	return Promise.all(promises);
-};
+const { removeModelData } = require('../../../../../utils/helper/models');
 
 const ModelList = {};
 
@@ -49,14 +34,8 @@ ModelList.addModel = async (teamspace, project, data) => {
 };
 
 ModelList.deleteModel = async (teamspace, project, model) => {
-	// This needs to be done before removeModelCollections or we risk the .ref col being deleted before we check it
-	await removeAllFilesFromModel(teamspace, model);
-
-	return Promise.all([
-		removeModelCollections(teamspace, model),
-		deleteModel(teamspace, model),
-		removeModelFromProject(teamspace, project, model),
-	]);
+	await removeModelData(teamspace, model);
+	await removeModelFromProject(teamspace, project, model); 	
 };
 
 ModelList.getModelList = async (teamspace, project, user, modelSettings) => {

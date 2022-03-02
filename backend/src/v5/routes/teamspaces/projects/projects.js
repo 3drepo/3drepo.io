@@ -35,13 +35,12 @@ const getProjectList = (req, res) => {
 };
 
 const createProject = async (req, res) => {
-	const user = getUserFromSession(req.session);
 	const { teamspace } = req.params;
 	const { name } = req.body;
 
 	try {
-		const newProject = await Projects.createProject(user, teamspace, name, req.session.user.permissions);
-		respond(req, res, templates.ok, { ...newProject, _id: UUIDToString(newProject._id) });
+		const newProjectId = await Projects.createProject(teamspace, name);
+		respond(req, res, templates.ok, { _id: UUIDToString(newProjectId) });
 	} catch (err) {
 		respond(req, res, err);
 	}
@@ -120,10 +119,116 @@ const establishRoutes = () => {
 	 */
 	router.get('/', hasAccessToTeamspace, getProjectList);
 
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects:
+	 *   post:
+	 *     description: Creates a new project
+	 *     tags: [Projects]
+	 *     operationId: createProject
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     requestBody:
+	 *       content:
+	 *         application/json:
+	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *               name:
+	 *                 type: string
+	 *                 description: The name of the new project
+	 *                 example: project 1
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         description: Creates a new project
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 _id:
+	 *                   type: string
+	 *                   format: uuid
+	 *                   description: The id of the new project
+	 *                   example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 */
 	router.post('/', isTeamspaceAdmin, validateProjectData, createProject);
 
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}:
+	 *   delete:
+	 *     description: Deletes a project
+	 *     tags: [Projects]
+	 *     operationId: deleteProject
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - project:
+	 *         name: project
+	 *         description: Id of the project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         description: Deletes a project
+	 */
 	router.delete('/:project', isTeamspaceAdmin, deleteProject);
 
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}:
+	 *   patch:
+	 *     description: Edits a project
+	 *     tags: [Projects]
+	 *     operationId: editProject
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - project:
+	 *         name: project
+	 *         description: Id of the project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     requestBody:
+	 *       content:
+	 *         application/json:
+	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *               name:
+	 *                 type: string
+	 *                 description: The new name of the project
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         description: Edits the project
+	 */
 	router.patch('/:project', isAdminToProject, validateProjectData, editProject);
 
 	return router;
