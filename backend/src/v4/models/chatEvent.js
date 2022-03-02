@@ -28,10 +28,26 @@ const eventTypes = Object.freeze({
 	DELETED : "Deleted"
 });
 
-function insertEventQueue(event, emitter, account, model, extraKeys, data) {
+async function insertEventQueue(event, emitter, account, model, extraKeys, data) {
+
+	let channel = account;
+	if(model) {
+		const { findOneProject } = require("./project");
+
+		const project = await findOneProject(account, { models: model }, {_id: 1});
+
+		if(!project) {
+			// models must be inside a project
+			return;
+		}
+
+		const projectId = utils.uuidToString(project._id);
+
+		channel = `${account}::${projectId}::${model}`;
+	}
+
 	model = !model ? "" : `::${model}`;
 	extraKeys =  !extraKeys ? [] : extraKeys;
-	const channel = account + model;
 	const extraPrefix = !(extraKeys || []).length ? "" : `::${extraKeys.join("::")}`;
 	event = `${account}${model}${extraPrefix}::${event}`;
 

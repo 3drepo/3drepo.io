@@ -85,15 +85,21 @@ const joinRoomV4 = async (socket, data) => {
 			const project = await findProjectByModelId(account, model, { _id: 1 });
 			const projectId = UUIDToString(project._id);
 			await joinRoom(socket, { teamspace: account, model, project: projectId });
+
+			// v4 compatibility
+			socket.emit('joined', data);
 		} catch (err) {
-			if (err.code === templates.projectNotFound.code) {
-				throw { code: ERRORS.ROOM_NOT_FOUND, message: `Model ${model} does not belong in any project.` };
-			}
-			throw err;
+			const errToThrow = err.code === templates.projectNotFound.code
+				? { code: ERRORS.ROOM_NOT_FOUND, message: `Model ${model} does not belong in any project.` }
+				: err;
+
+			socket.emit('credentialError', data);
+			throw errToThrow;
 		}
 	} else if (account === getUserNameFromSocket(socket)) {
 		await joinRoom(socket, { notifications: true });
 	} else {
+		socket.emit('credentialError', data);
 		throw { code: ERRORS.UNAUTHORISED, message: 'You cannot subscribe to someone else\'s notifications.' };
 	}
 };

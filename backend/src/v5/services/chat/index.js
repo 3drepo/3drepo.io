@@ -41,6 +41,7 @@ const onMessageV4 = (service, msg) => {
 			}
 		} else if (channel) {
 			const sender = SocketsManager.getSocketById(emitter)?.broadcast || service;
+			logger.logDebug(`[${channel}][NEW EVENT]: ${event}`);
 			sender.to(channel).emit(event, data);
 		} else {
 			logger.logError('Unrecognised event message', msg);
