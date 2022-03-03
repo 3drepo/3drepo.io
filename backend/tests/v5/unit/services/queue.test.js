@@ -287,7 +287,7 @@ const testEventQueueConsumer = () => {
 
 			callbackFn({ content: JSON.stringify(content) });
 
-			expect(publishFn).toBeCalledWith(events.CHAT_MESSAGE, content);
+			expect(publishFn).toBeCalledWith(events.CHAT_EVENT, content);
 		});
 
 		test('Should fail gracefully if the service failed to process the message', async () => {

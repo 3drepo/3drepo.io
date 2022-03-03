@@ -152,6 +152,13 @@ const testDestroySession = () => {
 			expect(Responder.respond.mock.calls.length).toBe(1);
 			expect(Responder.respond.mock.results[0].value.code).toBe(templates.ok.code);
 		});
+
+		test('Should destroy session (v4)', async () => {
+			await Sessions.destroySession({ ...req, v4: true }, res);
+			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond.mock.results[0].value.code).toBe(templates.ok.code);
+			expect(Responder.respond.mock.calls[0][3]).toEqual({ username: req.session.user.username });
+		});
 	});
 };
 
