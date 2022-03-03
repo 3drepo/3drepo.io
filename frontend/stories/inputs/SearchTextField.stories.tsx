@@ -21,6 +21,9 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 export default {
 	title: 'Inputs/ShareTextField',
 	component: ShareTextField,
+	argTypes: {
+		className: { disabled: true },
+	},
 } as ComponentMeta<typeof ShareTextField>;
 
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
@@ -29,7 +32,6 @@ const Template: ComponentStory<typeof ShareTextField> = (args) => <ShareTextFiel
 export const Default = Template.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
 Default.args = {
-	primary: true,
-	label: 'Search input',
-	value: 'something to copy',
+	label: 'Textfield label',
+	value: 'https://3drepo.com/',
 };
