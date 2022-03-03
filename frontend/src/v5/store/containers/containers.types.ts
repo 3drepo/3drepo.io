@@ -34,39 +34,66 @@ export enum UploadStatuses {
 }
 
 export const CONTAINER_TYPES = [
-	{ value: formatMessage({ id: 'containers.type.uncategorised', defaultMessage: 'Uncategorised' }) },
-	{ value: formatMessage({ id: 'containers.type.architectural', defaultMessage: 'Architectural' }) },
-	{ value: formatMessage({ id: 'containers.type.existing', defaultMessage: 'Existing' }) },
-	{ value: formatMessage({ id: 'containers.type.gis', defaultMessage: 'GIS' }) },
-	{ value: formatMessage({ id: 'containers.type.infrastructure', defaultMessage: 'Infrastructure' }) },
-	{ value: formatMessage({ id: 'containers.type.interior', defaultMessage: 'Interior' }) },
-	{ value: formatMessage({ id: 'containers.type.landscape', defaultMessage: 'Landscape' }) },
-	{ value: formatMessage({ id: 'containers.type.mep', defaultMessage: 'MEP' }) },
-	{ value: formatMessage({ id: 'containers.type.mechanical', defaultMessage: 'Mechanical' }) },
-	{ value: formatMessage({ id: 'containers.type.structural', defaultMessage: 'Structural' }) },
-	{ value: formatMessage({ id: 'containers.type.survey', defaultMessage: 'Survey' }) },
-	{ value: formatMessage({ id: 'containers.type.other', defaultMessage: 'Other' }) },
+	{
+		value: 'Uncategorised',
+		name: formatMessage({ id: 'containers.type.uncategorised', defaultMessage: 'Uncategorised' }) },
+	{
+		value: 'Architectural',
+		name: formatMessage({ id: 'containers.type.architectural', defaultMessage: 'Architectural' }) },
+	{
+		value: 'Existing',
+		name: formatMessage({ id: 'containers.type.existing', defaultMessage: 'Existing' }) },
+	{
+		value: 'GIS',
+		name: formatMessage({ id: 'containers.type.gis', defaultMessage: 'GIS' }) },
+	{
+		value: 'Infrastructure',
+		name: formatMessage({ id: 'containers.type.infrastructure', defaultMessage: 'Infrastructure' }) },
+	{
+		value: 'Interior',
+		name: formatMessage({ id: 'containers.type.interior', defaultMessage: 'Interior' }) },
+	{
+		value: 'Landscape',
+		name: formatMessage({ id: 'containers.type.landscape', defaultMessage: 'Landscape' }) },
+	{
+		value: 'MEP',
+		name: formatMessage({ id: 'containers.type.mep', defaultMessage: 'MEP' }) },
+	{
+		value: 'Mechanical',
+		name: formatMessage({ id: 'containers.type.mechanical', defaultMessage: 'Mechanical' }) },
+	{
+		value: 'Structural',
+		name: formatMessage({ id: 'containers.type.structural', defaultMessage: 'Structural' }),
+	},
+	{
+		value: 'Survey',
+		name: formatMessage({ id: 'containers.type.survey', defaultMessage: 'Survey' }),
+	},
+	{
+		value: 'Other',
+		name: formatMessage({ id: 'containers.type.other', defaultMessage: 'Other' }),
+	},
 ];
 
 export const CONTAINER_UNITS = [
 	{
-		value: formatMessage({ id: 'containers.unit.value.mm', defaultMessage: 'mm' }),
+		value: 'mm',
 		name: formatMessage({ id: 'containers.unit.name.mm', defaultMessage: 'Millimetres' }),
 	},
 	{
-		value: formatMessage({ id: 'containers.unit.value.cm', defaultMessage: 'cm' }),
+		value: 'cm',
 		name: formatMessage({ id: 'containers.unit.name.cm', defaultMessage: 'Centimetres' }),
 	},
 	{
-		value: formatMessage({ id: 'containers.unit.value.dm', defaultMessage: 'dm' }),
+		value: 'dm',
 		name: formatMessage({ id: 'containers.unit.name.dm', defaultMessage: 'Decimetres' }),
 	},
 	{
-		value: formatMessage({ id: 'containers.unit.value.m', defaultMessage: 'm' }),
+		value: 'm',
 		name: formatMessage({ id: 'containers.unit.name.m', defaultMessage: 'Metres' }),
 	},
 	{
-		value: formatMessage({ id: 'containers.unit.value.ft', defaultMessage: 'ft' }),
+		value: 'ft',
 		name: formatMessage({ id: 'containers.unit.name.ft', defaultMessage: 'Feet and Inches' }),
 	},
 ];

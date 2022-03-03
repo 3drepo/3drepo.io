@@ -83,8 +83,10 @@ export const SidebarForm = ({
 				<FormSelect
 					required
 					control={control}
+					disabled={!isNewContainer}
 					name="containerUnit"
 					label={formatMessage({ id: 'containers.creation.form.units', defaultMessage: 'Units' })}
+					defaultValue="mm"
 					onChange={
 						(e: React.ChangeEvent<HTMLInputElement>) => {
 							setValue('containerUnit', e.currentTarget.value);
@@ -103,8 +105,10 @@ export const SidebarForm = ({
 				<FormSelect
 					required
 					control={control}
+					disabled={!isNewContainer}
 					name="containerType"
 					label={formatMessage({ id: 'containers.creation.form.type', defaultMessage: 'Category' })}
+					defaultValue="Uncategorised"
 					onChange={
 						(e: React.ChangeEvent<HTMLInputElement>) => {
 							setValue('containerType', e.target.value);
@@ -115,7 +119,7 @@ export const SidebarForm = ({
 					{
 						CONTAINER_TYPES.map((type) => (
 							<MenuItem key={type.value} value={type.value}>
-								{type.value}
+								{type.name}
 							</MenuItem>
 						))
 					}
@@ -164,6 +168,7 @@ export const SidebarForm = ({
 			/>
 			<TimezoneSelect
 				control={control}
+				hidden={!isSpm}
 				name="timezone"
 				label={formatMessage({ id: 'uploadFileForm.settingsSidebar.timezone', defaultMessage: 'Timezone' })}
 				onChange={
