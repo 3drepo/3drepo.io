@@ -552,6 +552,10 @@ router.put("/:account", middlewares.isAccountAdmin, updateUser);
 router.put("/:account/password", resetPassword);
 
 function login(req, res, next) {
+	if(req?.session?.user?.username) {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.ALREADY_LOGGED_IN, responseCodes.ALREADY_LOGGED_IN);
+	}
+
 	const { user, password } = req.body;
 	UsersV5.login(user, password).then((loginData) => {
 		req.loginData = loginData;

@@ -164,8 +164,7 @@ describe("Login", function () {
 			// double login
 				agent.post("/login").send({ username: username , password: password })
 					.expect(400, function(err, res) {
-						 console.log(res.body);
-						expect(res.body.code).to.equal(responseCodesV5.alreadyLoggedIn.code);
+						expect(res.body.value).to.equal(responseCodes.ALREADY_LOGGED_IN.value);
 						done(err);
 					});
 
@@ -201,7 +200,6 @@ describe("Login", function () {
 			.post("/login")
 			.send({ username: true , password})
 			.expect(400, function(err, res) {
-
 				expect(res.body.code).to.equal(responseCodesV5.invalidArguments.code);
 				done(err);
 
@@ -213,7 +211,6 @@ describe("Login", function () {
 			.post("/login")
 			.send({ username, password: true})
 			.expect(400, function(err, res) {
-
 				expect(res.body.code).to.equal(responseCodesV5.invalidArguments.code);
 				done(err);
 
