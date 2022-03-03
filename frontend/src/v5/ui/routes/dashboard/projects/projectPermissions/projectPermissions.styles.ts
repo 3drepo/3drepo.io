@@ -14,27 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ReactNode, SyntheticEvent } from 'react';
-import { Typography } from '@material-ui/core';
-import { Link } from 'react-router-dom';
-import { MenuItem } from './ellipsisMenuItem.styles';
+import { Row } from '@/v4/routes/components/customTable/customTable.styles';
+import styled from 'styled-components';
+import { ProjectsPermissions } from '@/v4/routes/projects/projectsPermissions';
+import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 
-type EllipsisMenuItemProps = {
-	title: ReactNode;
-	to?: any;
-	key?: string;
-	onClick?: (event: SyntheticEvent) => void;
-};
+export const V4ProjectsPermissions = styled(ProjectsPermissions)`
+	${Row} > :nth-child(2) {
+		width: 292px;
+		min-width: 0;
+	}
+`;
 
-export const EllipsisMenuItem = ({ to, title, key, onClick }: EllipsisMenuItemProps) => (
-	<MenuItem
-		component={to ? Link : null}
-		to={to}
-		key={key}
-		onClick={onClick}
-	>
-		<Typography variant="body1" noWrap>
-			{title}
-		</Typography>
-	</MenuItem>
-);
+export const Container = styled(FixedOrGrowContainer)`
+	padding-top: 5px;
+`;
