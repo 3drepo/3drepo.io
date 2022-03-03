@@ -1,3 +1,4 @@
+
 /**
  *  Copyright (C) 2021 3D Repo Ltd
  *
@@ -17,11 +18,11 @@
 
 import { useRef } from 'react';
 
-import { Tooltip } from '@material-ui/core';
+import { Tooltip } from '@mui/material';
 import { Field, Formik } from 'formik';
 import * as Yup from 'yup';
 
-import RemoveIcon from '@material-ui/icons/Close';
+import RemoveIcon from '@mui/icons-material/Close';
 import { ILegend } from '../../../../../../modules/legend/legend.redux';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';

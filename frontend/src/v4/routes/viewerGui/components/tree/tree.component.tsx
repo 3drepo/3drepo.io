@@ -1,3 +1,4 @@
+
 /**
  *  Copyright (C) 2020 3D Repo Ltd
  *
@@ -15,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent, createRef } from 'react';
-import Check from '@material-ui/icons/Check';
-import TreeIcon from '@material-ui/icons/DeviceHub';
+import Check from '@mui/icons-material/Check';
+import TreeIcon from '@mui/icons-material/DeviceHub';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList as List } from 'react-window';
 

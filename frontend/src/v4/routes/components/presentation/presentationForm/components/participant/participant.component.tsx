@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FC } from 'react';
-import PauseIcon from '@material-ui/icons/Pause';
-import PlayIcon from '@material-ui/icons/PlayArrow';
+import PauseIcon from '@mui/icons-material/Pause';
+import PlayIcon from '@mui/icons-material/PlayArrow';
 
 import { renderWhenTrueOtherwise } from '../../../../../../helpers/rendering';
 import { ButtonContainer, Container, SecondaryButton, StopButton, StyledDivider } from '../../presentationForm.styles';

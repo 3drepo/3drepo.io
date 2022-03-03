@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FunctionComponent, ReactNode } from 'react';
-import ArrowRightIcon from '@material-ui/icons/ArrowRight';
+import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { COLOR } from '../../../../../../styles';
 import { MenuIcon, MenuItem, MenuText } from '../../mainMenu/menuContent/menuContent.styles';
 

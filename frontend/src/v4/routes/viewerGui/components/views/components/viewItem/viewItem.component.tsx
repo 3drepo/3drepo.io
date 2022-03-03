@@ -1,3 +1,4 @@
+
 /**
  *  Copyright (C) 2017 3D Repo Ltd
  *
@@ -19,8 +20,8 @@ import { Field, Formik } from 'formik';
 import { debounce } from 'lodash';
 import { useState } from 'react';
 import * as Yup from 'yup';
-import { Menu, MenuItem, Tooltip } from '@material-ui/core';
-import MoreVert from '@material-ui/icons/MoreVert';
+import { Menu, MenuItem, Tooltip } from '@mui/material';
+import MoreVert from '@mui/icons-material/MoreVert';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { getViewNameFieldErrorMsg } from '../../../../../../helpers/views';

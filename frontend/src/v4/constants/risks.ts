@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CheckCircle from '@material-ui/icons/CheckCircle';
-import Download from '@material-ui/icons/CloudDownload';
-import ErrorSolid from '@material-ui/icons/Error';
-import ErrorOutline from '@material-ui/icons/ErrorOutline';
-import HighlightOff from '@material-ui/icons/HighlightOff';
-import NewReleases from '@material-ui/icons/NewReleases';
-import Pins from '@material-ui/icons/PinDrop';
-import Print from '@material-ui/icons/Print';
-import SyncProblem from '@material-ui/icons/SyncProblem';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Download from '@mui/icons-material/CloudDownload';
+import ErrorSolid from '@mui/icons-material/Error';
+import ErrorOutline from '@mui/icons-material/ErrorOutline';
+import HighlightOff from '@mui/icons-material/HighlightOff';
+import NewReleases from '@mui/icons-material/NewReleases';
+import Pins from '@mui/icons-material/PinDrop';
+import Print from '@mui/icons-material/Print';
+import SyncProblem from '@mui/icons-material/SyncProblem';
 
 import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel.component';
 import { SortAmountDown, SortAmountUp } from '../routes/components/fontAwesomeIcon';

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled, { css } from 'styled-components';
-import { fade } from '@material-ui/core/styles';
+import { alpha } from '@mui/material/styles';
 import * as ButtonStyles from '@controls/button/button.styles';
 import * as FavouriteCheckboxStyles from '@controls/favouriteCheckbox/favouriteCheckbox.styles';
 import * as EllipsisButtonStyles from '@controls/ellipsisButton/ellipsisButton.styles';
@@ -58,7 +58,7 @@ export const Container = styled.div`
 
 		${ButtonStyles.LabelButton} {
 			${ButtonStyles.labelButtonSecondaryStyles};
-			background-color: ${fade(theme.palette.tertiary.lightest, 0.8)};
+			background-color: ${alpha(theme.palette.tertiary.lightest, 0.8)};
 		}
 
 		${FavouriteCheckboxStyles.Checkbox} {

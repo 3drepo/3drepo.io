@@ -17,7 +17,7 @@
 
 import { PureComponent } from 'react';
 
-import Select, { SelectProps } from '@material-ui/core/Select';
+import Select, { SelectProps } from '@mui/material/Select';
 import { MuiTheme } from '../../../styles/theme';
 
 function findLabel(children, value) {

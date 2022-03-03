@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import { MenuItem, Select, Tooltip } from '@material-ui/core';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import BorderColorIcon from '@material-ui/icons/BorderColor';
-import ClearIcon from '@material-ui/icons/Clear';
-import DotIcon from '@material-ui/icons/FiberManualRecord';
-import RedoIcon from '@material-ui/icons/Redo';
-import TextIcon from '@material-ui/icons/TextFields';
-import UndoIcon from '@material-ui/icons/Undo';
+import { MenuItem, Select, Tooltip } from '@mui/material';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import BorderColorIcon from '@mui/icons-material/BorderColor';
+import ClearIcon from '@mui/icons-material/Clear';
+import DotIcon from '@mui/icons-material/FiberManualRecord';
+import RedoIcon from '@mui/icons-material/Redo';
+import TextIcon from '@mui/icons-material/TextFields';
+import UndoIcon from '@mui/icons-material/Undo';
 
 import { lerp } from '../../../../../helpers/lerp';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
@@ -80,88 +80,84 @@ export class Tools extends PureComponent<IProps, any> {
 			onColorChange, onBrushSizeChange, onEraseClick, onTextSizeChange,
 		} = this.props;
 
-		return (
-			<>
-				<ColorPicker
-					value={color}
-					onChange={onColorChange}
-					disableUnderline
-				/>
-				{this.renderSelectableTools(size, onBrushSizeChange, this.renderBrushSizes())}
-				{this.renderSelectableTools(textSize, onTextSizeChange, this.renderTextSizes())}
-				<OptionsDivider />
-				<TooltipButton
-					label="Draw"
-					color={this.getToolColor(MODES.BRUSH)}
-					action={onDrawClick}
-					Icon={BorderColorIcon}
-				/>
-				<TooltipButton
-					label="Add text"
-					color={this.getToolColor(MODES.TEXT)}
-					action={onTextClick}
-					Icon={TextIcon}
-				/>
-				<ButtonMenu
-					renderButton={({ IconProps, Icon, ...props }) => {
-						const ActiveIcon = activeShapeIcon(this.props.activeShape || SHAPE_TYPES.RECTANGLE);
-						return (
-							<>
-								<Tooltip title={'Add shape'}>
-									<IconButton
-										{...props}
-										aria-label="Show shapes menu"
-										aria-haspopup="true"
-										color={this.getShapeToolColor()}
-										onClick={this.setDefaultShape}
-									>
-										<ActiveIcon color={this.getShapeToolColor()} {...IconProps} />
-									</IconButton>
-								</Tooltip>
-								<ShapeMenuButton>
-									<SmallIconButton
-										Icon={ArrowDropDownIcon}
-										onClick={(e) => {
-											props.onClick(e);
-										}}
-									/>
-								</ShapeMenuButton>
-							</>
-						);
-					}}
-					renderContent={this.renderShapesMenu}
-					PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
-					PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'center' } }}
-					ButtonProps={{ disabled: false }}
-				/>
-				<TooltipButton
-					label="Erase"
-					color={this.getToolColor(MODES.ERASER)}
-					action={onEraseClick}
-					Icon={(props) => <Eraser {...props} />}
-				/>
-				<OptionsDivider />
-				<TooltipButton
-					label="Undo"
-					action={this.handleUndo}
-					Icon={UndoIcon}
-					disabled={!this.props.arePastElements}
-				/>
-				<TooltipButton
-					label="Redo"
-					action={this.handleRedo}
-					Icon={RedoIcon}
-					disabled={!this.props.areFutureElements}
-				/>
-				<TooltipButton
-					label="Clear all"
-					action={onClearClick}
-					Icon={ClearIcon}
-					disabled={!this.props.arePastElements && !this.props.areFutureElements}
-				/>
-				<OptionsDivider />
-			</>
-		);
+		return <>
+            <ColorPicker
+                value={color}
+                onChange={onColorChange}
+                disableUnderline
+            />
+            {this.renderSelectableTools(size, onBrushSizeChange, this.renderBrushSizes())}
+            {this.renderSelectableTools(textSize, onTextSizeChange, this.renderTextSizes())}
+            <OptionsDivider />
+            <TooltipButton
+                label="Draw"
+                color={this.getToolColor(MODES.BRUSH)}
+                action={onDrawClick}
+                Icon={BorderColorIcon}
+            />
+            <TooltipButton
+                label="Add text"
+                color={this.getToolColor(MODES.TEXT)}
+                action={onTextClick}
+                Icon={TextIcon}
+            />
+            <ButtonMenu
+                renderButton={({ IconProps, Icon, ...props }) => {
+                    const ActiveIcon = activeShapeIcon(this.props.activeShape || SHAPE_TYPES.RECTANGLE);
+                    return <>
+                        <Tooltip title={'Add shape'}>
+                            <IconButton
+                                {...props}
+                                aria-label="Show shapes menu"
+                                aria-haspopup="true"
+                                color={this.getShapeToolColor()}
+                                onClick={this.setDefaultShape}
+                                size="large">
+                                <ActiveIcon color={this.getShapeToolColor()} {...IconProps} />
+                            </IconButton>
+                        </Tooltip>
+                        <ShapeMenuButton>
+                            <SmallIconButton
+                                Icon={ArrowDropDownIcon}
+                                onClick={(e) => {
+                                    props.onClick(e);
+                                }}
+                            />
+                        </ShapeMenuButton>
+                    </>;
+                }}
+                renderContent={this.renderShapesMenu}
+                PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
+                PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'center' } }}
+                ButtonProps={{ disabled: false }}
+            />
+            <TooltipButton
+                label="Erase"
+                color={this.getToolColor(MODES.ERASER)}
+                action={onEraseClick}
+                Icon={(props) => <Eraser {...props} />}
+            />
+            <OptionsDivider />
+            <TooltipButton
+                label="Undo"
+                action={this.handleUndo}
+                Icon={UndoIcon}
+                disabled={!this.props.arePastElements}
+            />
+            <TooltipButton
+                label="Redo"
+                action={this.handleRedo}
+                Icon={RedoIcon}
+                disabled={!this.props.areFutureElements}
+            />
+            <TooltipButton
+                label="Clear all"
+                action={onClearClick}
+                Icon={ClearIcon}
+                disabled={!this.props.arePastElements && !this.props.areFutureElements}
+            />
+            <OptionsDivider />
+        </>;
 	});
 
 	public renderSaveButton = renderWhenTrue(() => (
@@ -221,7 +217,7 @@ export class Tools extends PureComponent<IProps, any> {
 
 	public renderBrushSizes = () => BRUSH_SIZES.map(({ label, value }) => (
 		<MenuItem key={value} value={value}>
-			<IconButton disableRipple>
+			<IconButton disableRipple size="large">
 				<Badge badgeContent={label} color="primary">
 					<DotIcon
 						style={{
@@ -235,7 +231,7 @@ export class Tools extends PureComponent<IProps, any> {
 
 	public renderTextSizes = () => TEXT_SIZES.map(({ label, value }, index) => (
 		<MenuItem key={value} value={value}>
-			<IconButton disableRipple>
+			<IconButton disableRipple size="large">
 				<Badge badgeContent={label} color="primary">
 					<TextIcon
 						style={{

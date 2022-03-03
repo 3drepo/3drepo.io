@@ -17,8 +17,8 @@
 
 import { PureComponent } from 'react';
 
-import { Tab, Tooltip } from '@material-ui/core';
-import CheckIcon from '@material-ui/icons/Check';
+import { Tab, Tooltip } from '@mui/material';
+import CheckIcon from '@mui/icons-material/Check';
 
 import {
 	CLASH_COMPARE_TYPE,

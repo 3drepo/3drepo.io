@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InputLabel from '@material-ui/core/InputLabel';
-import CameraIcon from '@material-ui/icons/AddAPhoto';
-import AddPhoto from '@material-ui/icons/AddPhotoAlternate';
-import CloseIcon from '@material-ui/icons/Close';
-import ReportProblemIcon from '@material-ui/icons/ReportProblem';
-import SaveIcon from '@material-ui/icons/Save';
-import ShortTextIcon from '@material-ui/icons/ShortText';
+import InputLabel from '@mui/material/InputLabel';
+import CameraIcon from '@mui/icons-material/AddAPhoto';
+import AddPhoto from '@mui/icons-material/AddPhotoAlternate';
+import CloseIcon from '@mui/icons-material/Close';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
+import SaveIcon from '@mui/icons-material/Save';
+import ShortTextIcon from '@mui/icons-material/ShortText';
 import ReactTextareaAutocomplete from '@webscopeio/react-textarea-autocomplete';
 import { Field, Formik } from 'formik';
 import { lowerCase, pick, values as _values } from 'lodash';

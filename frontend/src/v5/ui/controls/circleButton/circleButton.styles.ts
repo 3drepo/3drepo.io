@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { Fab } from '@material-ui/core';
+import { Fab } from '@mui/material';
 
 const SIZE_MAP = {
 	small: 22,

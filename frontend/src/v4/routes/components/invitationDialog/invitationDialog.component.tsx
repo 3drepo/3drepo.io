@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Checkbox from '@material-ui/core/Checkbox';
-import FormControl from '@material-ui/core/FormControl';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import InputLabel from '@material-ui/core/InputLabel';
-import AddIcon from '@material-ui/icons/AddCircleOutline';
-import RemoveIcon from '@material-ui/icons/RemoveCircleOutline';
+import Checkbox from '@mui/material/Checkbox';
+import FormControl from '@mui/material/FormControl';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import InputLabel from '@mui/material/InputLabel';
+import AddIcon from '@mui/icons-material/AddCircleOutline';
+import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
 import { Field, FieldArray, Form, Formik } from 'formik';
 import { keyBy, map, omit, pick, uniqBy, values } from 'lodash';
 import { isEmpty } from 'lodash';
@@ -127,7 +127,7 @@ export const InvitationDialog = (props: IProps) => {
 				{projects.map(({ project, isAdmin }, index) => (
 					<div key={index}>
 						<ProjectConfig>
-							<IconButton onClick={() => remove(index)}>
+							<IconButton onClick={() => remove(index)} size="large">
 								<RemoveIcon />
 							</IconButton>
 							<Field name={`permissions.${index}.project`} render={({ field }) => (

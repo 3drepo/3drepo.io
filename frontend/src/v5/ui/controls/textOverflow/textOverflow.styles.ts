@@ -15,24 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
-import { Tooltip as TooltipComponent, withStyles, fade } from '@material-ui/core';
+import { Tooltip as TooltipComponent, alpha } from '@mui/material';
+
+import withStyles from '@mui/styles/withStyles';
 
 export const fadeToLeft = (color: string) => `
-	background-image: linear-gradient(to left, ${color} 0%, ${fade(color, 0.886)} 37.72%, ${fade(color, 0)} 52.55%);
+	background-image: linear-gradient(to left, ${color} 0%, ${alpha(color, 0.886)} 37.72%, ${alpha(color, 0)} 52.55%);
 `;
 
-export const Tooltip = withStyles(() => ({
-	tooltip: {
-		maxWidth: 600,
-	},
-	tooltipPlacementBottom: {
-		transform: 'translateX(25%) !important',
-	},
-}))(TooltipComponent);
+export const Tooltip = TooltipComponent;
+//  withStyles(() => ({
+// 	tooltip: {
+// 		maxWidth: 600,
+// 	},
+// 	tooltipPlacementBottom: {
+// 		transform: 'translateX(25%) !important',
+// 	},
+// }))(TooltipComponent);
 
 export const Container = styled.div`
 	position: relative;
-	overflow: hidden;
+	overflow: hidden; 
 	white-space: nowrap;
 	display: block;
 	flex-grow: 1;

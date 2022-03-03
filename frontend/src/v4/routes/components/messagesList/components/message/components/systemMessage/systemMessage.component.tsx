@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FunctionComponent } from 'react';
-import SystemInfoIcon from '@material-ui/icons/InfoOutlined';
+import SystemInfoIcon from '@mui/icons-material/InfoOutlined';
 
 import { DATE_TIME_FORMAT } from '../../../../../../../services/formatting/formatDate';
 import { DateTime } from '../../../../../dateTime/dateTime.component';

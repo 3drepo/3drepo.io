@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 
-import { IconButton, InputLabel, TextField } from '@material-ui/core';
+import { IconButton, InputLabel, TextField } from '@mui/material';
 
 import { ContainedButton } from '../../viewerGui/components/containedButton/containedButton.component';
 import { LinkableField } from '../linkableField/linkableField.component';

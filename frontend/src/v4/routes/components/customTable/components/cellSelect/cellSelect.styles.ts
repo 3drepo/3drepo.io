@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import MenuItem from '@material-ui/core/MenuItem';
+import MenuItem from '@mui/material/MenuItem';
 import styled, { css } from 'styled-components';
 import { COLOR, FONT_WEIGHT } from '../../../../../styles';
 import { SelectField } from '../../../selectField/selectField.component';

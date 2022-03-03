@@ -17,7 +17,7 @@
 
 import { Dispatch, ReactNode, SyntheticEvent } from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
-import { Tooltip } from '@material-ui/core';
+import { Tooltip } from '@mui/material';
 import { IFixedOrGrowContainer } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.component';
 import { Button } from './dashboardListItemButton.styles';
 

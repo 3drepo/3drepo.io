@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import CancelIcon from '@material-ui/icons/Cancel';
-import SearchIcon from '@material-ui/icons/Search';
+import CancelIcon from '@mui/icons-material/Cancel';
+import SearchIcon from '@mui/icons-material/Search';
 import { cond, matches, stubTrue } from 'lodash';
 import memoizeOne from 'memoize-one';
 import SimpleBar from 'simplebar-react';
-import { IconButton, MenuItem, Tabs } from '@material-ui/core';
-import Add from '@material-ui/icons/Add';
-import Check from '@material-ui/icons/Check';
+import { IconButton, MenuItem, Tabs } from '@mui/material';
+import Add from '@mui/icons-material/Add';
+import Check from '@mui/icons-material/Check';
 
 import { encodeElementId } from '../../helpers/html';
 import { renderWhenTrue } from '../../helpers/rendering';
@@ -297,9 +297,9 @@ export class Teamspaces extends PureComponent<IProps, IState> {
 
 	private getSearchButton = () => {
 		if (this.props.searchEnabled) {
-			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
+			return <IconButton onClick={this.handleCloseSearchMode} size="large"><CancelIcon /></IconButton>;
 		}
-		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
+		return <IconButton onClick={this.handleOpenSearchMode} size="large"><SearchIcon /></IconButton>;
 	}
 
 	private handleSortingItemClick = (sortingType, isNameSortingActive) => {

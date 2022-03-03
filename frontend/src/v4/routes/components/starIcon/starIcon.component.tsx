@@ -17,8 +17,8 @@
 
 import { memo } from 'react';
 
-import Star from '@material-ui/icons/Star';
-import StarBorder from '@material-ui/icons/StarBorder';
+import Star from '@mui/icons-material/Star';
+import StarBorder from '@mui/icons-material/StarBorder';
 
 import { IconWrapper } from './starIcon.styles';
 

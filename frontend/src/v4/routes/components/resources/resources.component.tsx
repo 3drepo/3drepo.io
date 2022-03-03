@@ -16,7 +16,7 @@
  */
 import { PureComponent } from 'react';
 
-import { LinearProgress } from '@material-ui/core';
+import { LinearProgress } from '@mui/material';
 import { isEmpty } from 'lodash';
 
 import { renderWhenTrue } from '../../../helpers/rendering';
@@ -53,20 +53,13 @@ interface IState {
 }
 
 export const RemoveButton = (props) => (
-	<IconButton
-		{...props}
-		aria-label="Toggle menu"
-		aria-haspopup="true"
-	>
+	<IconButton {...props} aria-label="Toggle menu" aria-haspopup="true" size="large">
 		<RemoveIcon />
 	</IconButton>
 );
 
 export const QuoteButton = (props) => (
-	<IconButton
-		{...props}
-		aria-label="Quote resource"
-	>
+	<IconButton {...props} aria-label="Quote resource" size="large">
 		<QuoteIcon />
 	</IconButton>
 );

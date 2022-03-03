@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 
-import FormControl from '@material-ui/core/FormControl';
+import FormControl from '@mui/material/FormControl';
 
 import { TextField } from '../../../../../components/textField/textField.component';
 import * as TextFieldStyles from '../../../../../components/textField/textField.styles';

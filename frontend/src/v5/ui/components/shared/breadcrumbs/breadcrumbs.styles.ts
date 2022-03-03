@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { Button, Breadcrumbs } from '@material-ui/core';
+import { Button, Breadcrumbs } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { TextOverflow } from '@controls/textOverflow';
 
@@ -34,6 +34,7 @@ export const Breadcrumb = styled(Button).attrs({
 		color: ${({ theme }) => theme.palette.primary.contrast};
 		padding: 5px;
 		margin: 0 4px;
+		min-width: auto;
 
 		&:hover {
 			text-decoration: none;

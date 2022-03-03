@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 
-import FormControl from '@material-ui/core/FormControl';
+import FormControl from '@mui/material/FormControl';
 
 import { StyledButton } from '../containedButton/containedButton.styles';
 import { Container as ButtonContainer } from '../pinButton/pinButton.styles';

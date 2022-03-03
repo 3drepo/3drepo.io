@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { Select } from '@material-ui/core';
+import { Select } from '@mui/material';
 
 export const SelectInput = styled(Select)`
 	svg {

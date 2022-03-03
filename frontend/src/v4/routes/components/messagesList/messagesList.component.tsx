@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { useRef, useLayoutEffect, useState, useMemo, ChangeEvent } from 'react';
-import MenuItem from '@material-ui/core/MenuItem';
+import MenuItem from '@mui/material/MenuItem';
 import { cond, matches, stubTrue } from 'lodash';
 
 import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../helpers/rendering';

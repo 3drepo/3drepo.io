@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { MenuItem as MenuItemComponent } from '@material-ui/core';
+import { MenuItem as MenuItemComponent } from '@mui/material';
 
 export const MenuItem = styled(MenuItemComponent)`
 	color: ${({ theme }) => theme.palette.secondary.main};

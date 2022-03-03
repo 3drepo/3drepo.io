@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Popover from '@material-ui/core/Popover';
+import Popover from '@mui/material/Popover';
 import styled from 'styled-components';
 import { COLOR } from '../../../styles';
 

@@ -16,8 +16,8 @@
  */
 
 import { ComponentType, createRef, PureComponent, ReactNode } from 'react';
-import { IconProps as IIconProps } from '@material-ui/core/Icon';
-import IconButton, { IconButtonProps } from '@material-ui/core/IconButton';
+import { IconProps as IIconProps } from '@mui/material/Icon';
+import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 
 import { StyledPopover } from './buttonMenu.styles';
 

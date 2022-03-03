@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import { Button } from '@controls/button';
 
 export const Title = styled(Button).attrs({

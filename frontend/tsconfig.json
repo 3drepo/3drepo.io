@@ -22,6 +22,7 @@
     "sourceMap": true,
     "baseUrl": "./",
     "paths": {
+	  "@mui/styled-engine": ["./node_modules/@mui/styled-engine-sc"],
       "@components/*": ["./src/v5/ui/components/*"],
       "@controls/*": ["./src/v5/ui/controls/*"],
       "@assets/*": ["./assets/*"],

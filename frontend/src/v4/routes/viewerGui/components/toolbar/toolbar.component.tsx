@@ -15,21 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
-import Fade from '@material-ui/core/Fade';
-import FocusIcon from '@material-ui/icons/CenterFocusStrong';
-import ClipIcon from '@material-ui/icons/Crop';
-import HomeIcon from '@material-ui/icons/Home';
-import MetadataIcon from '@material-ui/icons/Info';
-import InvertColorsOffIcon from '@material-ui/icons/InvertColorsOff';
-import MyLocationIcon from '@material-ui/icons/MyLocation';
-import TurntableIcon from '@material-ui/icons/Redo';
-import ShowAllIcon from '@material-ui/icons/Visibility';
-import HideIcon from '@material-ui/icons/VisibilityOff';
-import IsolateIcon from '@material-ui/icons/VisibilityOutlined';
-import IncreaseIcon from '@material-ui/icons/Add';
-import DecreaseIcon from '@material-ui/icons/Remove';
-import ResetIcon from '@material-ui/icons/Replay';
+import ClickAwayListener from '@mui/material/ClickAwayListener';
+import Fade from '@mui/material/Fade';
+import FocusIcon from '@mui/icons-material/CenterFocusStrong';
+import ClipIcon from '@mui/icons-material/Crop';
+import HomeIcon from '@mui/icons-material/Home';
+import MetadataIcon from '@mui/icons-material/Info';
+import InvertColorsOffIcon from '@mui/icons-material/InvertColorsOff';
+import MyLocationIcon from '@mui/icons-material/MyLocation';
+import TurntableIcon from '@mui/icons-material/Redo';
+import ShowAllIcon from '@mui/icons-material/Visibility';
+import HideIcon from '@mui/icons-material/VisibilityOff';
+import IsolateIcon from '@mui/icons-material/VisibilityOutlined';
+import IncreaseIcon from '@mui/icons-material/Add';
+import DecreaseIcon from '@mui/icons-material/Remove';
+import ResetIcon from '@mui/icons-material/Replay';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { Helicopter } from '../../../components/fontAwesomeIcon';

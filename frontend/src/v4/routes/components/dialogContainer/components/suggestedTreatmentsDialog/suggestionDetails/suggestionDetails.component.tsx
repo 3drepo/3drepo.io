@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FunctionComponent, useState, useRef, useEffect, useCallback } from 'react';
-import Grid from '@material-ui/core/Grid';
+import Grid from '@mui/material/Grid';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { Description, ExpandButton, StyledTypography, TextContainer } from '../suggestedTreatmentsDialog.styles';

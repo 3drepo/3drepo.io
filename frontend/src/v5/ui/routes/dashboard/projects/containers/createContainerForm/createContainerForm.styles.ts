@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { FormControl } from '@material-ui/core';
+import { FormControl } from '@mui/material';
 
 export const SelectColumn = styled(FormControl)`
 	width: 50%;

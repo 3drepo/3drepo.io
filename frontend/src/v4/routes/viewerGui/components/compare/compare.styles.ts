@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { List, Tabs as TabsComponent } from '@material-ui/core';
-import SliderComponent from '@material-ui/core/Slider';
+import { List, Tabs as TabsComponent } from '@mui/material';
+import SliderComponent from '@mui/material/Slider';
 import styled from 'styled-components';
 
 import { COLOR } from '../../../../styles';

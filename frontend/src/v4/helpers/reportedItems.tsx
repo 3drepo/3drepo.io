@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ArrowRight } from '@material-ui/icons';
+import { ArrowRight } from '@mui/icons-material';
 import { FoldableMenu, FoldableMenuItem, SubMenu } from '../routes/components/foldableMenu/foldableMenu.component';
 
 export interface IHeaderMenuItem {

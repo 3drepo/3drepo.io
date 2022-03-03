@@ -1,3 +1,5 @@
+
+
 /**
  *  Copyright (C) 2020 3D Repo Ltd
  *
@@ -17,7 +19,7 @@
 
 import { PureComponent } from 'react';
 
-import Check from '@material-ui/icons/Check';
+import Check from '@mui/icons-material/Check';
 import { isEmpty } from 'lodash';
 
 import { MEASURE_ACTIONS_ITEMS, MEASURE_ACTIONS_MENU } from '../../../../constants/measure';

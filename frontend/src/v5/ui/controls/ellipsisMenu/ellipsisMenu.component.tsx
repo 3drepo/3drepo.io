@@ -17,7 +17,7 @@
 
 import { useState, cloneElement, MouseEvent } from 'react';
 import { formatMessage } from '@/v5/services/intl';
-import { ClickAwayListener, Grow, Paper, Tooltip } from '@material-ui/core';
+import { ClickAwayListener, Grow, Paper, Tooltip } from '@mui/material';
 import { EllipsisButton } from '@controls/ellipsisButton';
 import { MenuList, Popper } from './ellipsisMenu.styles';
 

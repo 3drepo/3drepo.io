@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ButtonBase from '@material-ui/core/Button';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import IconButtonBase from '@material-ui/core/IconButton';
-import TextFieldBase from '@material-ui/core/TextField';
+import ButtonBase from '@mui/material/Button';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import IconButtonBase from '@mui/material/IconButton';
+import TextFieldBase from '@mui/material/TextField';
 import styled from 'styled-components';
 import { COLOR } from '../../../styles';
 import { PermissionsTable as PermissionsTableBase } from '../permissionsTable/permissionsTable.component';

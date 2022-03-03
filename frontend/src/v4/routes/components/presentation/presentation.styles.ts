@@ -16,8 +16,8 @@
  */
 import styled from 'styled-components';
 
-import Popover from '@material-ui/core/Popover';
-import CameraIcon from '@material-ui/icons/LinkedCamera';
+import Popover from '@mui/material/Popover';
+import CameraIcon from '@mui/icons-material/LinkedCamera';
 import { cond, matches, stubTrue } from 'lodash';
 
 import { PresentationMode } from '../../../modules/presentation/presentation.constants';

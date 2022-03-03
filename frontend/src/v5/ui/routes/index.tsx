@@ -1,3 +1,5 @@
+
+
 /**
  *  Copyright (C) 2021 3D Repo Ltd
  *
@@ -18,7 +20,8 @@
 import { useEffect } from 'react';
 import { isNull } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import { MuiThemeProvider, StylesProvider } from '@material-ui/core';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material';
+import { StylesProvider } from '@material-ui/core';
 import { ThemeProvider } from 'styled-components';
 
 import { theme } from '@/v5/ui/themes/theme';

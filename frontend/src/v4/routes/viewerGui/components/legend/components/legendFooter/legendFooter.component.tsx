@@ -1,3 +1,4 @@
+
 /**
  *  Copyright (C) 2021 3D Repo Ltd
  *
@@ -15,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import AddIcon from '@material-ui/icons/Add';
+import AddIcon from '@mui/icons-material/Add';
 
 import { ILegend } from '../../../../../../modules/legend/legend.redux';
 import { ViewerPanelButton, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';

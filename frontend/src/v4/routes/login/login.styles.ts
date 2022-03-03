@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
 import styled from 'styled-components';
 
 import { COLOR, FONT_WEIGHT } from '../../styles';
@@ -54,7 +54,8 @@ export const StyledButton: any = styled(Button)`
 
 export const LoginButtons = styled(Grid)`
 	&& {
-		padding: 10px 0 25px;
+		padding: 10px 0 25px; 
+		justify-content: space-between;
 	}
 `;
 

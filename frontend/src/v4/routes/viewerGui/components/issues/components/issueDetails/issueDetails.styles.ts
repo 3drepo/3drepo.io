@@ -17,9 +17,9 @@
 
 import styled from 'styled-components';
 
-import Tab from '@material-ui/core/Tab';
+import Tab from '@mui/material/Tab';
 
-import { Tabs } from '@material-ui/core';
+import { Tabs } from '@mui/material';
 import { COLOR } from '../../../../../../styles';
 import { Image as ImageComponent } from '../../../../../components/image';
 import { MessagesList as MessagesListComponent } from '../../../../../components/messagesList/';

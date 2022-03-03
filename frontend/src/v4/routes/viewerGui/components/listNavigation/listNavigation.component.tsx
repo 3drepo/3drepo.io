@@ -1,3 +1,4 @@
+
 /**
  *  Copyright (C) 2017 3D Repo Ltd
  *
@@ -17,8 +18,8 @@
 
 import { PureComponent } from 'react';
 
-import SkipNextIcon from '@material-ui/icons/SkipNext';
-import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
+import SkipNextIcon from '@mui/icons-material/SkipNext';
+import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
 
 import { LockPanelButton } from '../panelBarActions/lockPanelButton';
 import { Container, StyledIconButton } from './listNavigation.styles';

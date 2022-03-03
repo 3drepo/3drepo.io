@@ -17,8 +17,8 @@
 
 import styled from 'styled-components';
 
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/Input';
+import Grid from '@mui/material/Grid';
+import TextField from '@mui/material/Input';
 import { Form } from 'formik';
 
 import { COLOR } from '../../../../styles';

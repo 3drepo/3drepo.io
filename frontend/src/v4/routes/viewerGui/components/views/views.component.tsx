@@ -1,3 +1,4 @@
+
 /**
  *  Copyright (C) 2020 3D Repo Ltd
  *
@@ -15,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent, createRef } from 'react';
-import AddIcon from '@material-ui/icons/Add';
+import AddIcon from '@mui/icons-material/Add';
 import { isEqual } from 'lodash';
 
 import { SORT_ORDER_TYPES } from '../../../../constants/sorting';

@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { createElement } from 'react';
-import { createMuiTheme } from '@material-ui/core/styles';
-import { TypographyOptions } from '@material-ui/core/styles/createTypography';
+import { createTheme, adaptV4Theme, TypographyOptions } from '@mui/material/styles';
 import RadioButtonIcon from '@assets/icons/controls/radio_button.svg';
 import RadioButtonCheckedIcon from '@assets/icons/controls/radio_button_checked.svg';
 import CheckboxIcon from '@assets/icons/controls/checkbox.svg';
@@ -150,7 +149,7 @@ const typography: TypographyOptions = {
 	},
 };
 
-export const theme = createMuiTheme({
+export const theme = createTheme(adaptV4Theme({
 	palette: {
 		primary: {
 			main: COLOR.PRIMARY_MAIN,
@@ -371,8 +370,6 @@ export const theme = createMuiTheme({
 				boxShadow: 'none',
 				border: `1px solid ${COLOR.PRIMARY_MAIN_CONTRAST}`,
 				transition: 'none',
-			},
-			label: {
 				'& > *:first-child': {
 					height: 17,
 					width: 'auto',
@@ -459,13 +456,13 @@ export const theme = createMuiTheme({
 				},
 			},
 		MuiSelect: {
-			root: {
-				background: COLOR.PRIMARY_MAIN_CONTRAST,
-				margin: '38px 0 0',
-				width: '100%',
-				height: 35,
-				boxSizing: 'border-box',
-			},
+			// root: {
+			// 	background: COLOR.PRIMARY_MAIN_CONTRAST,
+			// 	margin: '38px 0 0',
+			// 	width: '100%',
+			// 	height: 35,
+			// 	boxSizing: 'border-box',
+			// },
 			select: {
 				border: `1px solid ${COLOR.BASE_LIGHTEST}`,
 				borderRadius: 5,
@@ -555,7 +552,7 @@ export const theme = createMuiTheme({
 		},
 		MuiDivider: {
 			root: {
-				backgroundColor: COLOR.BASE_LIGHTEST,
+				borderColor: COLOR.BASE_LIGHTEST,
 			},
 		},
 		MuiIconButton: {
@@ -729,4 +726,4 @@ export const theme = createMuiTheme({
 			},
 		},
 	},
-});
+}));

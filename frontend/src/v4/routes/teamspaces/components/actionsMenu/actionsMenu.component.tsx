@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import MoreVert from '@material-ui/icons/MoreVert';
+import MoreVert from '@mui/icons-material/MoreVert';
 import { memo, useCallback, useRef, useState } from 'react';
 
 import { hasPermissions } from '../../../../helpers/permissions';

@@ -17,11 +17,11 @@
 
 import { PureComponent } from 'react';
 
-import { IconButton, MenuItem } from '@material-ui/core';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import BuildIcon from '@material-ui/icons/Build';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
+import { IconButton, MenuItem } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import BuildIcon from '@mui/icons-material/Build';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { includes, isEmpty } from 'lodash';
 
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
@@ -120,12 +120,13 @@ export class Gis extends PureComponent<IProps, IState> {
 	public getTitleIcon = () => {
 		if (this.state.settingsModeActive) {
 			return (
-				<IconButton
-					disabled={!this.props.hasGISCoordinates}
-					onClick={this.toggleSettings}>
+                <IconButton
+                    disabled={!this.props.hasGISCoordinates}
+                    onClick={this.toggleSettings}
+                    size="large">
 						<ArrowBackIcon />
 				</IconButton>
-			);
+            );
 		}
 		return <GisIcon />;
 	}

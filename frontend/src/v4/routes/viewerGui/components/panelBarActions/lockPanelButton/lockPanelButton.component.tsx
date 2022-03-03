@@ -1,3 +1,4 @@
+
 /**
  *  Copyright (C) 2020 3D Repo Ltd
  *
@@ -15,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import LockIcon from '@material-ui/icons/Lock';
-import UnlockIcon from '@material-ui/icons/LockOpen';
+import LockIcon from '@mui/icons-material/Lock';
+import UnlockIcon from '@mui/icons-material/LockOpen';
 
 import { StyledIconButton } from './lockPanelButton.styles';
 

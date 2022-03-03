@@ -17,10 +17,10 @@
 
 import styled from 'styled-components';
 
-import Button from '@material-ui/core/Button';
-import Divider from '@material-ui/core/Divider';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 
 import { COLOR } from '../../../../styles';
 import { ContainedButton } from '../../../viewerGui/components/containedButton/containedButton.component';

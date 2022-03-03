@@ -19,7 +19,7 @@ import {
 	IconButton as IconButtonComponent,
 	TextField as TextFieldComponent,
 	InputAdornment as InputAdornmentComponent,
-} from '@material-ui/core';
+} from '@mui/material';
 
 export const IconButton = styled(IconButtonComponent)`
 	padding: 6px;

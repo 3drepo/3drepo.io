@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent, createRef, PropsWithChildren } from 'react';
-import AutorenewIcon from '@material-ui/icons/Autorenew';
-import Delete from '@material-ui/icons/Delete';
-import SaveIcon from '@material-ui/icons/Save';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
+import Delete from '@mui/icons-material/Delete';
+import SaveIcon from '@mui/icons-material/Save';
 
 import { isEqual } from 'lodash';
 import * as Yup from 'yup';

@@ -16,7 +16,7 @@
  */
 import { PureComponent, ReactChild, createRef } from 'react';
 
-import { Checkbox, IconButton, Tooltip } from '@material-ui/core';
+import { Checkbox, IconButton, Tooltip } from '@mui/material';
 import { cond, isEmpty, isEqual, matchesProperty, orderBy, pick, stubTrue, values } from 'lodash';
 import SimpleBar from 'simplebar-react';
 
@@ -29,10 +29,10 @@ import { Body, BodyWrapper, Cell, CheckboxCell, Container, Head, HighlightWrappe
 
 export const TableButton = ({Icon, onClick, disabled}) => {
 	return (
-		<IconButton onClick={onClick} disabled={disabled}>
+        <IconButton onClick={onClick} disabled={disabled} size="large">
 			<Icon />
 		</IconButton>
-	);
+    );
 };
 
 export const CheckboxField = (props) => {

@@ -17,10 +17,10 @@
 
 import styled from 'styled-components';
 
-import FormControl from '@material-ui/core/FormControl';
-import Grid from '@material-ui/core/Grid';
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
+import FormControl from '@mui/material/FormControl';
+import Grid from '@mui/material/Grid';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 import { cond, constant, matches, stubTrue } from 'lodash';
 
 import { COLOR } from '../../../../../../styles';

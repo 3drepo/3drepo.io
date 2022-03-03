@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 
-import Checkbox from '@material-ui/core/Checkbox';
+import Checkbox from '@mui/material/Checkbox';
 
 import { COLOR } from '../../../../../../styles';
 import { ColorSelect } from '../../../../../components/colorPicker/colorPicker.styles';

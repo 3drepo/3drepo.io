@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import InputLabel from '@material-ui/core/InputLabel';
-import CloseIcon from '@material-ui/icons/Close';
-import SequencesIcon from '@material-ui/icons/Movie';
+import InputLabel from '@mui/material/InputLabel';
+import CloseIcon from '@mui/icons-material/Close';
+import SequencesIcon from '@mui/icons-material/Movie';
 import { Field } from 'formik';
 
 import { isDateOutsideRange } from '../../../helpers/dateTime';

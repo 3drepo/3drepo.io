@@ -17,12 +17,12 @@
 
 import { PureComponent } from 'react';
 
-import { FormControlLabel, FormGroup, Grid, IconButton, MenuItem, Select, Switch } from '@material-ui/core';
-import StepForwardIcon from '@material-ui/icons/FastForward';
-import StepBackIcon from '@material-ui/icons/FastRewind';
-import PlayArrow from '@material-ui/icons/PlayArrow';
-import Replay from '@material-ui/icons/Replay';
-import Stop from '@material-ui/icons/Stop';
+import { FormControlLabel, FormGroup, Grid, IconButton, MenuItem, Select, Switch } from '@mui/material';
+import StepForwardIcon from '@mui/icons-material/FastForward';
+import StepBackIcon from '@mui/icons-material/FastRewind';
+import PlayArrow from '@mui/icons-material/PlayArrow';
+import Replay from '@mui/icons-material/Replay';
+import Stop from '@mui/icons-material/Stop';
 import { debounce, findIndex, noop } from 'lodash';
 
 import { STEP_SCALE } from '../../../../../../constants/sequences';
@@ -280,7 +280,7 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 		const { value, stepScale , stepInterval } = this.state;
 
 		return (
-			<SequencePlayerContainer>
+            <SequencePlayerContainer>
 				<SequencePlayerColumn>
 					<SequenceRow>
 						<Grid item>
@@ -319,7 +319,7 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 					</IntervalRow>
 					<SliderRow>
 						<Grid item>
-							<IconButton onClick={this.onClickPlayStop} ><this.PlayButtonIcon /></IconButton>
+							<IconButton onClick={this.onClickPlayStop} size="large"><this.PlayButtonIcon /></IconButton>
 						</Grid>
 						<Grid item>
 							<SequenceSlider
@@ -354,6 +354,6 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 					{this.renderLoader(this.props.loadingFrame && !this.props.isActivitiesPending)}
 				</SequencePlayerColumn>
 			</SequencePlayerContainer>
-		);
+        );
 	}
 }

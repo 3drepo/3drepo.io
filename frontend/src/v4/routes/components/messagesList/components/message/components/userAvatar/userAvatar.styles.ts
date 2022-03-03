@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 
-import { Avatar as AvatarComponent } from '@material-ui/core';
+import { Avatar as AvatarComponent } from '@mui/material';
 import { COLOR } from '../../../../../../../styles';
 
 const jobBorderStyles = (color) => css`

@@ -16,7 +16,7 @@
  */
 import { forwardRef, Ref } from 'react';
 import StarIcon from '@assets/icons/star.svg';
-import { CheckboxProps } from '@material-ui/core';
+import { CheckboxProps } from '@mui/material';
 import { Checkbox } from './favouriteCheckbox.styles';
 
 interface IFavouriteCheckbox extends Omit<Omit<CheckboxProps, 'icon'>, 'checkedIcon'> {

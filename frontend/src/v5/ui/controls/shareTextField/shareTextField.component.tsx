@@ -17,7 +17,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { InputAdornment } from '@material-ui/core';
+import { InputAdornment } from '@mui/material';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { formatMessage } from '@/v5/services/intl';
 import {

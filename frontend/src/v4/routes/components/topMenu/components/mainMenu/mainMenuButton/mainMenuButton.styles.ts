@@ -17,8 +17,8 @@
 
 import styled from 'styled-components';
 
-import IconButton from '@material-ui/core/IconButton';
-import Menu from '@material-ui/icons/Menu';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/icons-material/Menu';
 
 import { COLOR } from '../../../../../../styles';
 

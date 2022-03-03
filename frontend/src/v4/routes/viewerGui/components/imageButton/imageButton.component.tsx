@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FC, useRef, forwardRef } from 'react';
-import Tooltip from '@material-ui/core/Tooltip';
-import ImageIcon from '@material-ui/icons/Image';
+import Tooltip from '@mui/material/Tooltip';
+import ImageIcon from '@mui/icons-material/Image';
 import { noop } from 'lodash';
 
 import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../../helpers/rendering';

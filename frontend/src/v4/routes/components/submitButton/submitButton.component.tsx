@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CircularProgress from '@material-ui/core/CircularProgress';
+import CircularProgress from '@mui/material/CircularProgress';
 import { merge } from 'lodash';
 
 import { LoaderContainer, StyledButton, StyledFab } from './submitButton.styles';

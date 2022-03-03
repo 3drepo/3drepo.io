@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { MenuItem } from '@material-ui/core';
+import { MenuItem } from '@mui/material';
 import { FormSelect as FormSelectBase } from '@controls/formSelect/formSelect.component';
 
 const ThumbnailStyles = css`

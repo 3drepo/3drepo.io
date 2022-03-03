@@ -17,7 +17,7 @@
 
 import { FC } from 'react';
 
-import Avatar from '@material-ui/core/Avatar';
+import Avatar from '@mui/material/Avatar';
 import { StyledIconButton } from './avatarButton.styles';
 
 interface IAvatarButton {

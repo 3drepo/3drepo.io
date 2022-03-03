@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Snackbar from '@material-ui/core/Snackbar';
+import Snackbar from '@mui/material/Snackbar';
 import { PureComponent } from 'react';
 
 import { DefaultSnackbar } from './components/defaultSnackbar/defaultSnackbar.component';
@@ -87,19 +87,20 @@ export class SnackbarContainer extends PureComponent<IProps, IState> {
 		const {isOpen, snack} = this.state;
 		const {message, ...snackProps} = snack as any;
 		return (
-			<Snackbar
-				autoHideDuration={5000}
-				anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-				onClose={this.handleClose}
-				onExited={this.handleExited}
-				open={isOpen}
-				{...snackProps}
-			>
+            <Snackbar
+                autoHideDuration={5000}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                onClose={this.handleClose}
+                open={isOpen}
+                {...snackProps}
+                TransitionProps={{
+                    onExited: this.handleExited
+                }}>
 				<DefaultSnackbar
 					message={message}
 					onClose={this.handleClose}
 				/>
 			</Snackbar>
-		);
+        );
 	}
 }

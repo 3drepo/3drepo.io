@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FunctionComponent } from 'react';
-import IconButton from '@material-ui/core/IconButton';
+import IconButton from '@mui/material/IconButton';
 
 import { PresentationMode } from '../../../modules/presentation/presentation.constants';
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
@@ -29,7 +29,11 @@ interface IProps {
 
 export const Presentation: FunctionComponent<IProps> = ({ presentationMode, joinedUrlQueryPresentation}) => {
 	const renderButton = ({ Icon, IconProps, ...props }) => (
-		<IconButton {...props} aria-label="Show Presentation mode options" aria-haspopup="true">
+		<IconButton
+            {...props}
+            aria-label="Show Presentation mode options"
+            aria-haspopup="true"
+            size="large">
 			<PresentationIcon fontSize="small" mode={presentationMode} />
 		</IconButton>
 	);

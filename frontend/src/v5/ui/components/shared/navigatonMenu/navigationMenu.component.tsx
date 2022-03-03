@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import { MenuList, MenuItem } from './navigationMenu.styles';
 
 interface IListItem {

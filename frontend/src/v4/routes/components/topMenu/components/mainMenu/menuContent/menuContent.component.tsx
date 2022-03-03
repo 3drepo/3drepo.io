@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FunctionComponent, Fragment } from 'react';
-import Divider from '@material-ui/core/Divider';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import LogoutIcon from '@material-ui/icons/ExitToApp';
-import PATIcon from '@material-ui/icons/InsertDriveFileOutlined';
-import SettingsIcon from '@material-ui/icons/Settings';
-import TeamspacesIcon from '@material-ui/icons/ViewList';
+import Divider from '@mui/material/Divider';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
+import LogoutIcon from '@mui/icons-material/ExitToApp';
+import PATIcon from '@mui/icons-material/InsertDriveFileOutlined';
+import SettingsIcon from '@mui/icons-material/Settings';
+import TeamspacesIcon from '@mui/icons-material/ViewList';
 
 import { LANDING_ROUTES, STATIC_ROUTES } from '../../../../../../services/staticPages';
 import { COLOR } from '../../../../../../styles';

@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent, ComponentType, SyntheticEvent } from 'react';
-import { Tooltip } from '@material-ui/core';
-import Avatar from '@material-ui/core/Avatar';
-import Place from '@material-ui/icons/Place';
+import { Tooltip } from '@mui/material';
+import Avatar from '@mui/material/Avatar';
+import Place from '@mui/icons-material/Place';
 
-import ChangeHistory from '@material-ui/icons/ChangeHistory';
-import Clear from '@material-ui/icons/Clear';
-import Lens from '@material-ui/icons/Lens';
-import PanoramaFishEye from '@material-ui/icons/PanoramaFishEye';
+import ChangeHistory from '@mui/icons-material/ChangeHistory';
+import Clear from '@mui/icons-material/Clear';
+import Lens from '@mui/icons-material/Lens';
+import PanoramaFishEye from '@mui/icons-material/PanoramaFishEye';
 
 import { FONT_WEIGHT } from '../../../../../styles';
 import { SmallIconButton } from '../../../../components/smallIconButon/smallIconButton.component';

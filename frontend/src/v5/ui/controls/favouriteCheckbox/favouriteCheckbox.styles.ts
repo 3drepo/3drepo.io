@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { Checkbox as CheckboxComponent } from '@material-ui/core';
+import { Checkbox as CheckboxComponent } from '@mui/material';
 
 const contrastStyles = css`
 	path {

@@ -1,3 +1,4 @@
+
 /**
  *  Copyright (C) 2021 3D Repo Ltd
  *
@@ -19,7 +20,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { TextField, MenuItem, InputLabel } from '@material-ui/core';
+import { TextField, MenuItem, InputLabel } from '@mui/material';
 import { Select } from '@controls/select';
 import { FormModal } from '@/v5/ui/controls/modal/formModal/formDialog.component';
 import { useForm, SubmitHandler } from 'react-hook-form';

@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent, createRef } from 'react';
-import List from '@material-ui/core/List';
-import ArrowRight from '@material-ui/icons/ArrowRight';
-import Check from '@material-ui/icons/Check';
-import Copy from '@material-ui/icons/FileCopy';
+import List from '@mui/material/List';
+import ArrowRight from '@mui/icons-material/ArrowRight';
+import Check from '@mui/icons-material/Check';
+import Copy from '@mui/icons-material/FileCopy';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';

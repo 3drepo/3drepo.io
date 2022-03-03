@@ -1,3 +1,4 @@
+
 /**
  *  Copyright (C) 2020 3D Repo Ltd
  *
@@ -17,8 +18,8 @@
 
 import { useState } from 'react';
 
-import MoreIcon from '@material-ui/icons/ChevronRight';
-import LessIcon from '@material-ui/icons/ExpandMore';
+import MoreIcon from '@mui/icons-material/ChevronRight';
+import LessIcon from '@mui/icons-material/ExpandMore';
 
 import { MEASURE_TYPE, MEASURE_TYPE_NAME} from '../../../../../../modules/measurements/measurements.constants';
 import { MeasureItem } from '../measureItem/';

@@ -16,7 +16,7 @@
  */
 import { forwardRef, Ref } from 'react';
 import ChevronIcon from '@assets/icons/chevron.svg';
-import { SelectProps } from '@material-ui/core';
+import { SelectProps } from '@mui/material';
 import { SelectInput } from './select.styles';
 
 export const SelectBase = ({ children, ...props }: SelectProps, ref: Ref<HTMLButtonElement>) => (

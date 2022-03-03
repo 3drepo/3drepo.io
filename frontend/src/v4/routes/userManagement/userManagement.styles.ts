@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 
-import Tab from '@material-ui/core/Tab';
+import Tab from '@mui/material/Tab';
 
 import { media, COLOR } from '../../styles';
 import { LoaderContainer as

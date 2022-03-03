@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ButtonBase } from '@material-ui/core';
+import { ButtonBase } from '@mui/material';
 import styled from 'styled-components';
 
 import { TARGET_MODEL_TYPE } from '../../../../../../constants/compare';

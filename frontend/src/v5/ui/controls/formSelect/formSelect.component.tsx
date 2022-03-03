@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Select, InputLabel, FormControl, SelectProps } from '@material-ui/core';
+import { Select, InputLabel, FormControl, SelectProps } from '@mui/material';
 import { Controller } from 'react-hook-form';
 
 export type FormSelectProps = SelectProps & {

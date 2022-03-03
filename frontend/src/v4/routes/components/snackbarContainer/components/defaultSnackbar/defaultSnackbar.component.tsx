@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import IconButton from '@material-ui/core/IconButton';
-import SnackbarContent from '@material-ui/core/SnackbarContent';
-import Close from '@material-ui/icons/Close';
+import IconButton from '@mui/material/IconButton';
+import SnackbarContent from '@mui/material/SnackbarContent';
+import Close from '@mui/icons-material/Close';
 
 interface IProps {
 	message: string;
@@ -26,18 +26,18 @@ interface IProps {
 
 export const DefaultSnackbar = (props: IProps) => {
 	return (
-		<SnackbarContent
+        <SnackbarContent
 			message={props.message}
 			action={ [
 				<IconButton
-					key="close"
-					aria-label="Close"
-					color="inherit"
-					onClick={props.onClose}
-				>
+                    key="close"
+                    aria-label="Close"
+                    color="inherit"
+                    onClick={props.onClose}
+                    size="large">
 					<Close />
 				</IconButton>
 			] }
 		/>
-	);
+    );
 };

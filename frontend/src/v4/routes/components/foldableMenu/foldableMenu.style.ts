@@ -17,9 +17,8 @@
 
 import styled from 'styled-components';
 
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import { DatePicker } from '@material-ui/pickers';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
 
 import { COLOR } from '../../../styles';
 import { FileUploadInvoker } from '../../viewerGui/components/commentForm/commentForm.styles';
@@ -65,36 +64,6 @@ export const StyledListItem = styled(ListItem)`
 			display: none;
 		}
 	}
-`;
-
-export const StyledDatePicker = styled(DatePicker)`
-	&& {
-		margin-left: 10px;
-	}
-
-	input {
-		font-size: 12px;
-	}
-`;
-
-export const CopyItem = styled.div`
-	display: flex;
-	align-items: center;
-	padding: 4px 0;
-`;
-
-export const CopyText = styled.span`
-	margin-left: 4px;
-`;
-
-export const MenuFooter = styled.div`
-	border-top: 1px solid ${COLOR.BLACK_20};
-	padding-top: 8px;
-	padding-bottom: 8px;
-`;
-
-export const DataTypesWrapper = styled.div`
-	border-bottom: 1px solid ${COLOR.BLACK_20};
 `;
 
 const getDirection = ({ left }) => left ? 'right: 100%' : 'left: 100%';

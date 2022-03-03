@@ -1,3 +1,4 @@
+
 /**
  *  Copyright (C) 2020 3D Repo Ltd
  *
@@ -17,8 +18,8 @@
 
 import { useRef } from 'react';
 
-import Tooltip from '@material-ui/core/Tooltip';
-import RemoveIcon from '@material-ui/icons/Close';
+import Tooltip from '@mui/material/Tooltip';
+import RemoveIcon from '@mui/icons-material/Close';
 import { Formik } from 'formik';
 import { cond, matches, stubTrue } from 'lodash';
 

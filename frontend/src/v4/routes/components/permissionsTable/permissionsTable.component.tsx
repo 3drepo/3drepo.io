@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Radio from '@material-ui/core/Radio';
-import Tooltip from '@material-ui/core/Tooltip';
+import Radio from '@mui/material/Radio';
+import Tooltip from '@mui/material/Tooltip';
 import { isEmpty, isEqual, memoize, pick } from 'lodash';
 import { PureComponent } from 'react';
 

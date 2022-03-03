@@ -17,9 +17,9 @@
 
 import styled, { css } from 'styled-components';
 
-import { Grid, IconButton, Input, ListItem } from '@material-ui/core';
-import Slider from '@material-ui/core/Slider';
-import DotIcon from '@material-ui/icons/FiberManualRecord';
+import { Grid, IconButton, Input, ListItem } from '@mui/material';
+import Slider from '@mui/material/Slider';
+import DotIcon from '@mui/icons-material/FiberManualRecord';
 
 import {
 	VIEWER_PANELS,

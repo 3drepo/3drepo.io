@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import IconButton from '@material-ui/core/IconButton';
-import MoreVert from '@material-ui/icons/MoreVert';
+import IconButton from '@mui/material/IconButton';
+import MoreVert from '@mui/icons-material/MoreVert';
 import { isEmpty } from 'lodash';
 import { PureComponent } from 'react';
 
@@ -58,7 +58,7 @@ export class RowMenu extends PureComponent<IProps, IState> {
 		const { children, disabled, forceOpen, toggleForceOpen } = this.props;
 
 		return (
-			<StyledGrid
+            <StyledGrid
 				container
 				wrap="nowrap"
 				direction="row"
@@ -75,10 +75,14 @@ export class RowMenu extends PureComponent<IProps, IState> {
 				>
 					{children}
 				</StyledGridActions>
-				<IconButton aria-label="Toggle menu" onClick={toggleForceOpen} disabled={disabled}>
+				<IconButton
+                    aria-label="Toggle menu"
+                    onClick={toggleForceOpen}
+                    disabled={disabled}
+                    size="large">
 					<MoreVert fontSize="small" />
 				</IconButton>
 			</StyledGrid>
-		);
+        );
 	}
 }

@@ -16,7 +16,7 @@
  */
 
 import { Dispatch } from 'react';
-import { TextFieldProps } from '@material-ui/core';
+import { TextFieldProps } from '@mui/material';
 import SearchIcon from '@assets/icons/search.svg';
 import CloseIcon from '@assets/icons/close_rounded.svg';
 import { IconButton, TextField, StartAdornment, EndAdornment } from './searchInput.styles';
@@ -37,7 +37,7 @@ export const SearchInput = ({ onClear, value, ...props }: ISearchInput): JSX.Ele
 			endAdornment: (
 				(
 					<EndAdornment $isVisible={value}>
-						<IconButton onClick={() => onClear()}>
+						<IconButton onClick={() => onClear()} size="large">
 							<CloseIcon />
 						</IconButton>
 					</EndAdornment>

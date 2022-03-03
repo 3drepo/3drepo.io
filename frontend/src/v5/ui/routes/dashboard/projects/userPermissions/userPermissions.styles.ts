@@ -16,7 +16,7 @@
  */
 import { Row } from '@/v4/routes/components/customTable/customTable.styles';
 import styled from 'styled-components';
-import { Tab as MuiTab, Tabs as MuiTabs } from '@material-ui/core';
+import { Tab as MuiTab, Tabs as MuiTabs } from '@mui/material';
 import { ProjectsPermissions } from '@/v4/routes/projects/projectsPermissions';
 import { ModelsPermissions } from '@/v4/routes/modelsPermissions';
 import { ModelsContainer } from '@/v4/routes/modelsPermissions/modelsPermissions.styles';

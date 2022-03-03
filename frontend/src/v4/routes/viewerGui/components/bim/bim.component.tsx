@@ -17,8 +17,8 @@
 
 import { PureComponent } from 'react';
 
-import { Tab } from '@material-ui/core';
-import InfoIcon from '@material-ui/icons/Info';
+import { Tab } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
 import { isEmpty } from 'lodash';
 
 import { BIM_ACTIONS_ITEMS, BIM_ACTIONS_MENU } from '@/v4/constants/bim';

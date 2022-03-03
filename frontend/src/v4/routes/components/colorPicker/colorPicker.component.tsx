@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import FormControl from '@material-ui/core/FormControl';
-import Grid from '@material-ui/core/Grid';
-import RootRef from '@material-ui/core/RootRef';
-import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
+import FormControl from '@mui/material/FormControl';
+import Grid from '@mui/material/Grid';
+
+import ArrowDropDown from '@mui/icons-material/ArrowDropDown';
 import { identity, memoize } from 'lodash';
 import { PureComponent, useEffect, useRef, useState, createRef } from 'react';
 
@@ -296,57 +296,55 @@ const OpacityControl = ({ opacity, onOpacityChanged, sliderVisible, onSliderVisi
 		}
 	};
 
-	return (
-		<>
-		<Grid
-			container
-			direction="row"
-			justify="flex-start"
-			alignItems="center"
-		>
-			<Grid item>
-				<OpacityVisibilityCheckbox onChange={(e, val) => onSliderVisibilityChanged(val)} checked={sliderVisible} />
-			</Grid>
-			<Grid item>
-				Set Opacity
-			</Grid>
-		</Grid>
-		{sliderVisible &&
-			<Grid
-				container
-				direction="row"
-				justify="flex-start"
-				alignItems="center"
-			>
-				<Grid item>
-					<OpacitySlider
-						max={255}
-						min={1}
-						value={opacity}
-						onChange={(e, val) => onOpacityChanged(val)} />
-				</Grid>
-				<Grid item>
-					<OpacityValue>
-						<OpacityInput
-							value={inputVal}
-							endAdornment={<OpacityInputAdornment position="end" disableTypography>%</OpacityInputAdornment>}
-							inputProps={{
-											'step': 10,
-											'min': 0,
-											'max': 100,
-											'type': 'number',
-											'aria-labelledby': 'input-slider',
-										}}
-							margin="dense"
-							onChange={onInputChanged}
-							onBlur={onInputBlur}
-						/>
-					</OpacityValue>
-				</Grid>
-			</Grid>
-		}
-	</>
-	);
+	return <>
+    <Grid
+        container
+        direction="row"
+        justifyContent="flex-start"
+        alignItems="center"
+    >
+        <Grid item>
+            <OpacityVisibilityCheckbox onChange={(e, val) => onSliderVisibilityChanged(val)} checked={sliderVisible} />
+        </Grid>
+        <Grid item>
+            Set Opacity
+        </Grid>
+    </Grid>
+    {sliderVisible &&
+        <Grid
+            container
+            direction="row"
+            justifyContent="flex-start"
+            alignItems="center"
+        >
+            <Grid item>
+                <OpacitySlider
+                    max={255}
+                    min={1}
+                    value={opacity}
+                    onChange={(e, val) => onOpacityChanged(val)} />
+            </Grid>
+            <Grid item>
+                <OpacityValue>
+                    <OpacityInput
+                        value={inputVal}
+                        endAdornment={<OpacityInputAdornment position="end" disableTypography>%</OpacityInputAdornment>}
+                        inputProps={{
+                                        'step': 10,
+                                        'min': 0,
+                                        'max': 100,
+                                        'type': 'number',
+                                        'aria-labelledby': 'input-slider',
+                                    }}
+                        margin="dense"
+                        onChange={onInputChanged}
+                        onBlur={onInputBlur}
+                    />
+                </OpacityValue>
+            </Grid>
+        </Grid>
+    }
+</>;
 };
 
 export class ColorPicker extends PureComponent<IProps, IState> {
@@ -489,59 +487,57 @@ export class ColorPicker extends PureComponent<IProps, IState> {
 		const {predefinedColors, disabled, disableButtons, opacityEnabled} = this.props;
 		const {open, hashInput, selectedColor, baseColor, opacity, opacitySliderVisibility} = this.state;
 
-		return (
-			<>
-				<RootRef rootRef={this.colorSelectRef}>
-					<OpenPanelButton onClick={this.openPanel} disabled={disabled} color={this.hexValue} />
-				</RootRef>
+		return <>
+            <>
+                <OpenPanelButton onClick={this.openPanel} disabled={disabled} color={this.hexValue} />
+            </>
 
-				<Panel
-					open={open}
-					anchorEl={this.colorSelectRef.current as HTMLElement}
-					onClose={this.handleClose}
-					onEnter={this.onPanelOpen}
-				>
-					{(predefinedColors.length > 0) && <PredefinedColors colors={predefinedColors} onChange={this.setBaseColor} />}
-					<Grid
-						container
-						direction="row"
-						alignItems="center"
-						justify="space-between"
-					>
-						<ColorSquareSelector value={baseColor} onChange={this.setSelectedColor} />
-						<ColorSlider onChange={this.setBaseColor} />
-					</Grid>
-					<Grid
-						container
-						direction="row"
-						justify="flex-start"
-						alignItems="center"
-					>
-						<Grid item>
-							<ColorSample color={selectedColor} />
-						</Grid>
-						<Grid item>
-							<FormControl>
-								<SelectedHash
-									value={hashInput.replace('#', '')}
-									onChange={this.handleHashInputChange}
-									withOpacity={opacitySliderVisibility}
-									startAdornment={<StyledAdornment position="start" disableTypography>#</StyledAdornment>}
-								/>
-							</FormControl>
-						</Grid>
-					</Grid>
-					{opacityEnabled &&
-						<OpacityControl
-							opacity={opacity}
-							onOpacityChanged={this.setOpacity}
-							sliderVisible={opacitySliderVisibility}
-							onSliderVisibilityChanged={this.setOpacityVisibility}
-						/>
-					}
-					{!disableButtons && this.renderFooter()}
-				</Panel>
-			</>
-		);
+            <Panel
+                open={open}
+                anchorEl={this.colorSelectRef.current as HTMLElement}
+                onClose={this.handleClose}
+                onEnter={this.onPanelOpen}
+            >
+                {(predefinedColors.length > 0) && <PredefinedColors colors={predefinedColors} onChange={this.setBaseColor} />}
+                <Grid
+                    container
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="space-between"
+                >
+                    <ColorSquareSelector value={baseColor} onChange={this.setSelectedColor} />
+                    <ColorSlider onChange={this.setBaseColor} />
+                </Grid>
+                <Grid
+                    container
+                    direction="row"
+                    justifyContent="flex-start"
+                    alignItems="center"
+                >
+                    <Grid item>
+                        <ColorSample color={selectedColor} />
+                    </Grid>
+                    <Grid item>
+                        <FormControl>
+                            <SelectedHash
+                                value={hashInput.replace('#', '')}
+                                onChange={this.handleHashInputChange}
+                                withOpacity={opacitySliderVisibility}
+                                startAdornment={<StyledAdornment position="start" disableTypography>#</StyledAdornment>}
+                            />
+                        </FormControl>
+                    </Grid>
+                </Grid>
+                {opacityEnabled &&
+                    <OpacityControl
+                        opacity={opacity}
+                        onOpacityChanged={this.setOpacity}
+                        sliderVisible={opacitySliderVisibility}
+                        onSliderVisibilityChanged={this.setOpacityVisibility}
+                    />
+                }
+                {!disableButtons && this.renderFooter()}
+            </Panel>
+        </>;
 	}
 }

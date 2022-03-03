@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import CloseIcon from '@material-ui/icons/Close';
+import CloseIcon from '@mui/icons-material/Close';
 
 import { TooltipButton } from '../../../../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { Wrapper } from './removeButton.styles';

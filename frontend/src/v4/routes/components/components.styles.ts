@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Button, IconButton } from '@material-ui/core';
-import Grid from '@material-ui/core/Grid';
+import { IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import styled from 'styled-components';
 import { COLOR } from '../../styles';
 
@@ -48,20 +48,6 @@ export const BarIconButton = styled(IconButton)`
 
 	&:hover {
 		background-color: ${COLOR.WHITE}
-	}
-`;
-
-export const UserActionButton = styled(Button)`
-	&& {
-		color: ${COLOR.WHITE};
-		text-shadow: 0 0 3px ${COLOR.BLACK_20};
-		min-width: 0;
-		min-height: 0;
-		padding: 0;
-	}
-
-	&&:hover {
-		background-color: transparent;
 	}
 `;
 

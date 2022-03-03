@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ComponentType } from 'react';
-import IconButton from '@material-ui/core/IconButton';
-import TableBody from '@material-ui/core/TableBody';
-import Typography from '@material-ui/core/Typography';
+import IconButton from '@mui/material/IconButton';
+import TableBody from '@mui/material/TableBody';
+import Typography from '@mui/material/Typography';
 
 import {
 	HeaderCell,
@@ -59,7 +59,7 @@ export const SubModelsTable = (props: IProps) => {
 	};
 
 	return (
-		<StyledTable>
+        <StyledTable>
 			<StyledTableHead>
 				<TableRow>
 					<HeaderCell padding="none">
@@ -72,7 +72,10 @@ export const SubModelsTable = (props: IProps) => {
 							/>
 							<Typography>{title}</Typography>
 						</HeaderCheckboxWrapper>
-						<IconButton onClick={handleIconClick} disabled={checkboxDisabled || !selectedModels.length}>
+						<IconButton
+                            onClick={handleIconClick}
+                            disabled={checkboxDisabled || !selectedModels.length}
+                            size="large">
 							<Icon />
 						</IconButton>
 					</HeaderCell>
@@ -96,5 +99,5 @@ export const SubModelsTable = (props: IProps) => {
 					}) }
 			</TableBody>
 		</StyledTable>
-	);
+    );
 };

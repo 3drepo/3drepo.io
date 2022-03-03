@@ -20,7 +20,7 @@ import {
 	MenuList as MenuListComponent,
 	MenuItem as MenuItemComponent,
 	Popper as PopperComponent,
-} from '@material-ui/core';
+} from '@mui/material';
 
 export const MenuList = styled(MenuListComponent)`
 	padding: 10px 0;

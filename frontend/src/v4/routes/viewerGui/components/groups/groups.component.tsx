@@ -17,12 +17,12 @@
 import { PureComponent, createRef, SyntheticEvent, MouseEvent } from 'react';
 import fileDialog from 'file-dialog';
 
-import IconButton from '@material-ui/core/IconButton';
-import AddIcon from '@material-ui/icons/Add';
-import ArrowBack from '@material-ui/icons/ArrowBack';
-import Check from '@material-ui/icons/Check';
-import InvertColors from '@material-ui/icons/InvertColors';
-import Visibility from '@material-ui/icons/VisibilityOutlined';
+import IconButton from '@mui/material/IconButton';
+import AddIcon from '@mui/icons-material/Add';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import Check from '@mui/icons-material/Check';
+import InvertColors from '@mui/icons-material/InvertColors';
+import Visibility from '@mui/icons-material/VisibilityOutlined';
 import { isEmpty, isEqual, size, stubTrue } from 'lodash';
 
 import {
@@ -291,10 +291,10 @@ export class Groups extends PureComponent<IProps> {
 	public renderTitleIcon = () => {
 		if (this.props.showDetails) {
 			return (
-				<IconButton onClick={this.props.closeDetails}>
+                <IconButton onClick={this.props.closeDetails} size="large">
 					<ArrowBack />
 				</IconButton>
-			);
+            );
 		}
 		return <GroupIcon />;
 	}
