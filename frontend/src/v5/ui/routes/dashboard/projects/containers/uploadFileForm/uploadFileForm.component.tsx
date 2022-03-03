@@ -151,7 +151,6 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 						/>
 					</Content>
 					<Sidebar
-						key={watch(`uploads.${selectedIndex}.containerId`)}
 						open={Number.isInteger(selectedIndex)}
 						onClick={() => setSelectedIndex(null)}
 						noButton={!(Number.isInteger(selectedIndex))}
@@ -159,7 +158,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 						{
 							Number.isInteger(selectedIndex)
 								? (
-									<>
+									<span key={watch(`uploads.${selectedIndex}.containerName`)}>
 										<SidebarForm
 											value={
 												getValues(`uploads.${getOriginalIndex(selectedIndex)}`)
@@ -177,7 +176,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 												trigger(`uploads.${getOriginalIndex(selectedIndex)}.${field}`);
 											}}
 										/>
-									</>
+									</span>
 								)
 								: <></>
 						}
