@@ -89,7 +89,7 @@ export const SidebarForm = ({
 					defaultValue="mm"
 					onChange={
 						(e: React.ChangeEvent<HTMLInputElement>) => {
-							setValue('containerUnit', e.currentTarget.value);
+							setValue('containerUnit', e.target.value);
 							updateValue('containerUnit');
 						}
 					}
