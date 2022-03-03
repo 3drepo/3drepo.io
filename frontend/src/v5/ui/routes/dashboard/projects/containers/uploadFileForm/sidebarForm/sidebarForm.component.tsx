@@ -19,8 +19,8 @@ import React, { useEffect, useMemo } from 'react';
 
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
-import { Checkbox, MenuItem } from '@material-ui/core';
-import { Controller, useForm } from 'react-hook-form';
+import { MenuItem } from '@material-ui/core';
+import { useForm } from 'react-hook-form';
 import { CONTAINER_TYPES, CONTAINER_UNITS, UploadItemFields } from '@/v5/store/containers/containers.types';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SidebarSchema } from '@/v5/validation/containers';
@@ -151,20 +151,11 @@ export const SidebarForm = ({
 				formError={errors.revisionDesc}
 			/>
 
-			<Controller
+			<AnimationsCheckbox
 				control={control}
 				name="importAnimations"
-				render={({
-					field: { ref, ...extras },
-				}) => (
-					<AnimationsCheckbox
-						control={<Checkbox />}
-						hidden={!isSpm}
-						label={formatMessage({ id: 'uploadFileForm.settingsSidebar.importAnimations', defaultMessage: 'Import transformations' })}
-						checked={extras.value}
-						{...extras}
-					/>
-				)}
+				label={formatMessage({ id: 'uploadFileForm.settingsSidebar.importAnimations', defaultMessage: 'Import transformations' })}
+				hidden={!isSpm}
 			/>
 			<TimezoneSelect
 				control={control}
