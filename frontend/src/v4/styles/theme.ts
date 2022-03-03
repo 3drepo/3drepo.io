@@ -172,6 +172,7 @@ export const MuiTheme = createTheme({
 					color: theme.colors.BLACK_60,
 					paddingTop: '12px',
 					paddingBottom: '12px',
+					width: '100%',
 				}
 			}
 		},

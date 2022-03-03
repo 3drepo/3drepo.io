@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 
-import { DatePicker, DateTimePicker } from '@material-ui/pickers';
+import { DatePicker, DateTimePicker } from '@mui/lab';
 
 export const Container = styled.div`
 	margin-top: 16px;

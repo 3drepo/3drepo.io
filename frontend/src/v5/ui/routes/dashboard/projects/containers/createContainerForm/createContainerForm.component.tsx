@@ -1,4 +1,3 @@
-
 /**
  *  Copyright (C) 2021 3D Repo Ltd
  *
@@ -20,12 +19,13 @@ import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { TextField, MenuItem, InputLabel } from '@mui/material';
-import { Select } from '@controls/select';
+import { MenuItem } from '@mui/material';
 import { FormModal } from '@/v5/ui/controls/modal/formModal/formDialog.component';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
+import { FormSelect } from '@controls/formSelect/formSelect.component';
+import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { SelectColumn } from './createContainerForm.styles';
 
 interface IFormInput {
@@ -76,7 +76,7 @@ const ContainerSchema = Yup.object().shape({
 });
 
 export const CreateContainerForm = ({ open, close }): JSX.Element => {
-	const { register, handleSubmit, formState, reset, formState: { errors } } = useForm<IFormInput>({
+	const { handleSubmit, control, formState, reset, formState: { errors } } = useForm<IFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(ContainerSchema),
 	});
@@ -97,21 +97,20 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 			confirmLabel={formatMessage({ id: 'containers.creation.ok', defaultMessage: 'Create Container' })}
 			isValid={formState.isValid}
 		>
-			<TextField
+			<FormTextField
+				name="name"
+				control={control}
 				label={formatMessage({ id: 'containers.creation.form.name', defaultMessage: 'Name' })}
 				required
-				error={!!errors.name}
-				helperText={errors.name?.message}
-				{...register('name')}
+				formError={errors.name}
 			/>
 			<SelectColumn>
-				<InputLabel id="unit-label" required>
-					<FormattedMessage id="containers.creation.form.unit" defaultMessage="Units" />
-				</InputLabel>
-				<Select
-					labelId="unit-label"
+				<FormSelect
+					label={formatMessage({ id: 'containers.creation.form.unit', defaultMessage: 'Units' })}
+					name="unit"
+					required
 					defaultValue="mm"
-					{...register('unit')}
+					control={control}
 				>
 					<MenuItem value="mm">
 						<FormattedMessage id="containers.creation.form.unit.mm" defaultMessage="Millimetres" />
@@ -128,17 +127,15 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 					<MenuItem value="ft">
 						<FormattedMessage id="containers.creation.form.unit.ft" defaultMessage="Feet and inches" />
 					</MenuItem>
-				</Select>
+				</FormSelect>
 			</SelectColumn>
 
 			<SelectColumn>
-				<InputLabel id="category-label" required>
-					<FormattedMessage id="containers.creation.form.category" defaultMessage="Category" />
-				</InputLabel>
-				<Select
-					labelId="category-label"
+				<FormSelect
+					label={formatMessage({ id: 'containers.creation.form.category', defaultMessage: 'Category' })}
+					name="category"
 					defaultValue="Uncategorised"
-					{...register('type')}
+					control={control}
 				>
 					<MenuItem value="Uncategorised">
 						<FormattedMessage id="containers.creation.form.type.uncategorised" defaultMessage="Uncategorised" />
@@ -176,21 +173,22 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 					<MenuItem value="Other">
 						<FormattedMessage id="containers.creation.form.type.other" defaultMessage="Other" />
 					</MenuItem>
-				</Select>
+				</FormSelect>
 			</SelectColumn>
 
-			<TextField
+			<FormTextField
+				name="desc"
+				control={control}
 				label={formatMessage({ id: 'containers.creation.form.desc', defaultMessage: 'Description' })}
-				error={!!errors.desc}
-				helperText={errors.desc?.message}
-				{...register('desc')}
+				required
+				formError={errors.desc}
 			/>
 
-			<TextField
+			<FormTextField
+				name="code"
+				control={control}
 				label={formatMessage({ id: 'containers.creation.form.code', defaultMessage: 'Code' })}
-				error={!!errors.code}
-				helperText={errors.code?.message}
-				{...register('code')}
+				formError={errors.code}
 			/>
 		</FormModal>
 	);

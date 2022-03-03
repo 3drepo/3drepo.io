@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date';
+import { DatePickerProps } from '@mui/lab/DatePicker';
 import { Container, StyledDatePicker, StyledDateTimePicker } from './dateField.styles';
 
 interface IProps {
@@ -25,13 +25,13 @@ interface IProps {
 	initialFocusedDate?: any;
 	name: string;
 	disabled?: boolean;
-	format?: string;
+	inputFormat?: string;
 	placeholder?: string;
 	className?: string;
 	dateTime?: boolean;
 	onChange?: (event) => void;
 	onBlur?: (event) => void;
-	shouldDisableDate?: (day: MaterialUiPickersDate) => boolean;
+	shouldDisableDate?: (day: DatePickerProps) => boolean;
 }
 
 interface IState {
@@ -73,7 +73,7 @@ export class DateField extends PureComponent<IProps, IState> {
 
 	public render() {
 		const { value } = this.state;
-		const { onBlur, name, placeholder, format, disabled, className, dateTime, defaultValue } = this.props;
+		const { onBlur, name, placeholder, inputFormat, disabled, className, dateTime, defaultValue } = this.props;
 
 		const Picker = dateTime ? StyledDateTimePicker : StyledDatePicker;
 
@@ -86,7 +86,7 @@ export class DateField extends PureComponent<IProps, IState> {
 					name={name}
 					onChange={this.handleChange}
 					placeholder={placeholder}
-					format={format}
+					inputFormat={inputFormat}
 					shouldDisableDate={this.props.shouldDisableDate}
 					defaultValue={defaultValue}
 					initialFocusedDate={this.props.initialFocusedDate}

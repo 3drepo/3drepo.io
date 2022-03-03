@@ -19,7 +19,7 @@ import styled from 'styled-components';
 
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import { DatePicker } from '@material-ui/pickers';
+import { DatePicker } from '@mui/lab';
 
 import { COLOR } from '../../../../../styles';
 import { FileUploadInvoker } from '../../../../viewerGui/components/commentForm/commentForm.styles';

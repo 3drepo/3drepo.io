@@ -119,7 +119,7 @@ export class ButtonMenu extends PureComponent<IProps, IState> {
 					open={activeMenu}
 					anchorEl={this.buttonRef.current}
 					onClose={this.toggleMenu(false)}
-					onEntering={this.handleOnOpen}
+					TransitionProps={{onEntering: this.handleOnOpen}}
 					disableRestoreFocus
 				>
 					{renderContent({ close: this.toggleMenu(false) })}

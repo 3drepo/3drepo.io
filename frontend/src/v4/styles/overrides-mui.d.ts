@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import { Overrides } from '@material-ui/core/styles/overrides';
 import { MuiPickersOverrides } from '@material-ui/pickers/typings/overrides';
 
@@ -22,6 +21,6 @@ type overridesNameToClassKey = {
 	[P in keyof MuiPickersOverrides]: keyof MuiPickersOverrides[P];
 };
 
-declare module '@material-ui/core/styles/overrides' {
+declare module '@mui/material/styles/overrides' {
 	export interface ComponentNameToClassKey extends overridesNameToClassKey, Overrides {}
 }
