@@ -86,7 +86,7 @@
 	}
 
 	function isTeamspaceMember(req, res, next) {
-		return validateUserSession(req).then(() => {
+		return validateUserSession(req, res).then(() => {
 			const teamspace = req.params.account;
 			const user = req.session.user.username;
 			return User.teamspaceMemberCheck(user, teamspace).then(() => {
@@ -94,8 +94,6 @@
 			}).catch(err => {
 				responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 			});
-		}).catch((err) => {
-			next(err);
 		});
 	}
 

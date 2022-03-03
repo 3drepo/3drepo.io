@@ -72,8 +72,8 @@ function checkPermissionsHelper(username, account, project, model, requiredPerms
 	});
 }
 
-const validateUserSession = (req) => new Promise((resolve, reject) => {
-	validSession(req, reject, resolve);
+const validateUserSession = (req, res) => new Promise((resolve) => {
+	validSession(req, res, resolve);
 });
 
 function validatePermissions(next, result) {
@@ -91,7 +91,7 @@ function validatePermissions(next, result) {
 function checkPermissions(permsRequest) {
 
 	return function(req, res, next) {
-		validateUserSession(req).then(() => {
+		validateUserSession(req, res).then(() => {
 			const username = req.session.user.username;
 			const account = req.params.account;
 			const model = req.params.model;
@@ -124,7 +124,7 @@ function checkMultiplePermissions(permsRequest) {
 			models.push(...req.query.models.split(","));
 		}
 
-		validateUserSession(req).then(() => {
+		validateUserSession(req, res).then(() => {
 			const username = req.session.user.username;
 			const account = req.params.account;
 
