@@ -75,6 +75,7 @@ module.exports = (env, options) => ({
 			'@assets': PATHS.ASSETS_DIR,
 			'@components': PATHS.COMPONENTS,
 			'@controls': PATHS.CONTROLS,
+			'@mui/styled-engine': '@mui/styled-engine-sc',
 		},
 	},
 	target: 'web',

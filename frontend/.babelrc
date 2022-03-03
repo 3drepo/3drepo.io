@@ -6,5 +6,6 @@
 			"runtime": "automatic"
 		}],
 		"@lingui/babel-preset-react"
-	]
+	],
+	"plugins": ["babel-plugin-styled-components"]
 }
