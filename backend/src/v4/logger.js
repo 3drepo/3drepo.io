@@ -22,7 +22,8 @@ require("winston-daily-rotate-file");
 
 const SystemLogger = {};
 
-const stringFormat = ({ level, message, label, timestamp, stack }) => `${timestamp} [${level}] [${label || "APP"}] ${message}${` - ${stack}` || ""}`;
+const stringFormat = ({ level, message, label, timestamp, stack }) => `${timestamp} [${level}] [${label || "APP"}] ${message}${stack ? ` - ${stack}` : ""}`;
+
 const logger = createLogger();
 SystemLogger.formatResponseMsg = (
 	resData
