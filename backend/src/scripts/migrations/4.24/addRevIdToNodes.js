@@ -22,7 +22,7 @@ const { find, updateMany } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const processModel = async (teamspace, model) => {
-	const revs = await find(teamspace, `${model}.history`, {}, { current: 1 });
+	const revs = await find(teamspace, `${model}.history`, { current: { $exists: true } }, { current: 1 });
 	const proms = revs.map(({ _id, current = [] }) => (current.length ? updateMany(
 		teamspace,
 		`${model}.scene`,

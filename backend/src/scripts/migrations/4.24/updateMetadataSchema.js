@@ -22,7 +22,7 @@ const { find, updateOne } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const processModel = async (teamspace, scene) => {
-	const meta = await find(teamspace, scene, { type: 'meta' }, { metadata: 1 });
+	const meta = await find(teamspace, scene, { type: 'meta', 'metadata.key': { $exists: false } }, { metadata: 1 });
 	const proms = meta.map(({ _id, metadata }) => {
 		if (!Array.isArray(metadata)) {
 			const metaArr = Object.keys(metadata).map((key) => ({ key, value: metadata[key] }));
@@ -43,7 +43,8 @@ const processTeamspace = async (teamspace) => {
 };
 
 const run = async () => {
-	const teamspaces = await getTeamspaceList();
+	//	const teamspaces = await getTeamspaceList();
+	const teamspaces = ['GeometryStreaming3DRepo'];
 	for (let i = 0; i < teamspaces.length; ++i) {
 		logger.logInfo(`\t\t-${teamspaces[i]}`);
 		// eslint-disable-next-line no-await-in-loop
