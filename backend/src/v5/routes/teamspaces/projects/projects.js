@@ -226,6 +226,7 @@ const establishRoutes = () => {
 	 *               name:
 	 *                 type: string
 	 *                 description: The new name of the project
+	 *                 example: project 1
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
