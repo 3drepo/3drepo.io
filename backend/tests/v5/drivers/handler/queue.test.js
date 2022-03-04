@@ -19,6 +19,8 @@ const { src } = require('../../helper/path');
 const { generateRandomString } = require('../../helper/services');
 
 const Queue = require(`${src}/handler/queue`);
+const config = require(`${src}/utils/config`);
+const { templates } = require(`${src}/utils/responseCodes`);
 
 const testQueueMessages = () => {
 	describe('Queue messages', () => {
@@ -106,7 +108,52 @@ const testExchangeMessages = () => {
 	});
 };
 
+const testConnection = () => {
+	describe('Queue connection', () => {
+		afterEach(Queue.close);
+		test(`Handler should fail with ${templates.queueConnectionError.code} if it failed to connect to the queue`, async () => {
+			const fn = jest.fn();
+			const exchangeName = generateRandomString();
+
+			const { host } = config.cn_queue;
+			config.cn_queue.host = generateRandomString();
+			await expect(Queue.listenToExchange(exchangeName, fn)).rejects
+				.toEqual(expect.objectContaining({ code: templates.queueConnectionError.code }));
+
+			config.cn_queue.host = host;
+		});
+
+		test('Handler should automatically hook up the listeners again after reconnection', async () => {
+			const fnExchange = jest.fn();
+			const fnQueue = jest.fn();
+			const exchangeName = generateRandomString();
+			const queueName = generateRandomString();
+
+			await expect(Queue.listenToExchange(exchangeName, fnExchange)).resolves.toBeUndefined();
+			await expect(Queue.listenToQueue(queueName, fnQueue)).resolves.toBeUndefined();
+
+			await Queue.close(false);
+			await Queue.init();
+
+			const messageEx = generateRandomString();
+			await Queue.broadcastMessage(exchangeName, messageEx);
+
+			const messageQu = generateRandomString();
+			const corId = generateRandomString();
+			await Queue.queueMessage(queueName, corId, messageQu);
+
+			expect(fnExchange).toHaveBeenCalledWith(expect.objectContaining({ content: Buffer.from(messageEx) }));
+
+			expect(fnQueue).toHaveBeenCalled();
+			const { content, properties } = fnQueue.mock.calls[0][0];
+			expect(content).toEqual(Buffer.from(messageQu));
+			expect(properties).toEqual(expect.objectContaining({ correlationId: corId }));
+		});
+	});
+};
+
 describe('handler/queue', () => {
 	testQueueMessages();
 	testExchangeMessages();
+	testConnection();
 });

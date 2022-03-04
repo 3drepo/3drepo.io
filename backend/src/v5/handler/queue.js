@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { createResponseCode, templates } = require('../utils/responseCodes');
 const amqp = require('amqplib');
 const { cn_queue: queueConfig } = require('../utils/config');
 const queueLabel = require('../utils/logger').labels.queue;
@@ -26,7 +27,8 @@ let retry = 0;
 let connClosed = false;
 let connectionPromise;
 
-let listeningChannels = {};
+let listeners = {};
+let channelClosers = [];
 
 const reconnect = () => {
 	if (++retry <= queueConfig.maxRetries) {
@@ -35,7 +37,7 @@ const reconnect = () => {
 		return connect();
 	}
 	logger.logError('Retries exhausted');
-	throw new Error('Max number of retries reached.');
+	throw createResponseCode(templates.queueConnectionError, 'Max number of retries reached.');
 };
 
 const callbackWrapper = (fn) => async (data) => {
@@ -51,7 +53,12 @@ const listenToQueue = async (conn, queueName, callback) => {
 	const channel = await conn.createChannel();
 	const { queue } = await channel.assertQueue(queueName);
 
-	channel.consume(queue, callbackWrapper(callback), { noAck: true });
+	const { consumerTag } = await channel.consume(queue, callbackWrapper(callback), { noAck: true });
+
+	channelClosers.push(async () => {
+		await channel.cancel(consumerTag);
+		await channel.close();
+	});
 };
 
 const listenToExchange = async (conn, exchangeName, callback) => {
@@ -59,17 +66,22 @@ const listenToExchange = async (conn, exchangeName, callback) => {
 	await channel.assertExchange(exchangeName, 'fanout', { durable: true });
 	const { queue } = await channel.assertQueue('', { exclusive: true });
 	await channel.bindQueue(queue, exchangeName, '');
-	channel.consume(queue, callbackWrapper(callback), { noAck: true });
-};
+	const { consumerTag } = await channel.consume(queue, callbackWrapper(callback), { noAck: true, exclusive: true });
 
-const hookupListeners = (conn) => {
-	Object.keys(listeningChannels).forEach((channel) => {
-		const { callbacks, isExchange } = listeningChannels[channel];
-
-		const listenFn = isExchange ? listenToExchange : listenToQueue;
-		callbacks.forEach((fn) => listenFn(conn, channel, fn));
+	channelClosers.push(async () => {
+		await channel.cancel(consumerTag);
+		await channel.close();
 	});
 };
+
+const hookupListeners = (conn) => Promise.all(
+	Object.keys(listeners).map((channel) => {
+		const { callbacks, isExchange } = listeners[channel];
+
+		const listenFn = isExchange ? listenToExchange : listenToQueue;
+		return Promise.all(callbacks.map((fn) => listenFn(conn, channel, fn)));
+	}),
+);
 
 const connect = async () => {
 	/* istanbul ignore next */
@@ -80,7 +92,8 @@ const connect = async () => {
 		const conn = await connectionPromise;
 		retry = 0;
 		connClosed = false;
-		hookupListeners(conn);
+		channelClosers = [];
+		await hookupListeners(conn);
 
 		conn.on('close',
 			/* istanbul ignore next */
@@ -109,15 +122,16 @@ const connect = async () => {
 
 Queue.listenToQueue = async (queue, callback) => {
 	const conn = await connect();
-	listeningChannels[queue] = listeningChannels[queue] || { callbacks: [] };
-	listeningChannels[queue].callbacks.push(callback);
+	listeners[queue] = listeners[queue] || { callbacks: [] };
+	listeners[queue].callbacks.push(callback);
+
 	await listenToQueue(conn, queue, callback);
 };
 
 Queue.listenToExchange = async (exchange, callback) => {
 	const conn = await connect();
-	listeningChannels[exchange] = listeningChannels[exchange] || { callbacks: [], isExchange: true };
-	listeningChannels[exchange].callbacks.push(callback);
+	listeners[exchange] = listeners[exchange] || { callbacks: [], isExchange: true };
+	listeners[exchange].callbacks.push(callback);
 	await listenToExchange(conn, exchange, callback);
 };
 
@@ -145,14 +159,25 @@ Queue.broadcastMessage = async (exchangeName, msg) => {
 	await channel.close();
 };
 
-Queue.close = async () => {
+// you shouldn't need to use this outside of testing
+Queue.close = async (reset = true) => {
 	connClosed = true;
+
 	if (connectionPromise) {
-		(await connectionPromise).close();
+		const conn = await connectionPromise;
+		await Promise.all(channelClosers.map((fn) => fn()));
+
+		await conn.close();
 		connectionPromise = undefined;
 	}
 
-	listeningChannels = {};
+	if (reset) listeners = {};
+};
+
+// you shouldn't need to use this outside of testing
+Queue.init = async () => {
+	connClosed = false;
+	await connect();
 };
 
 module.exports = Queue;
