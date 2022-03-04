@@ -50,7 +50,7 @@ const processTeamspace = async (teamspace) => {
 };
 
 const run = async () => {
-	const teamspaces = ['GeometryStreaming3DRepo'];// await getTeamspaceList();
+	const teamspaces = await getTeamspaceList();
 	for (let i = 0; i < teamspaces.length; ++i) {
 		logger.logInfo(`\t\t-${teamspaces[i]}`);
 		// eslint-disable-next-line no-await-in-loop
