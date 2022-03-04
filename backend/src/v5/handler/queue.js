@@ -126,7 +126,6 @@ Queue.queueMessage = async (queueName, correlationId, msg) => {
 	const channel = await conn.createChannel();
 	await channel.assertQueue(queueName, { durable: true });
 
-	// eslint-disable-next-line new-cap
 	const dataBuf = Buffer.from(msg);
 	const meta = { correlationId, persistent: true };
 
@@ -135,6 +134,7 @@ Queue.queueMessage = async (queueName, correlationId, msg) => {
 };
 
 Queue.close = async () => {
+	connClosed = true;
 	if (connectionPromise) {
 		(await connectionPromise).close();
 		connectionPromise = undefined;

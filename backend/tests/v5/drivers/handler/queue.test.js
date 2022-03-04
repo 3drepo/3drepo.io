@@ -47,6 +47,30 @@ const testListenToQueue = () => {
 			expect(content2).toEqual(Buffer.from(messageAfter));
 			expect(properties2).toEqual(expect.objectContaining({ correlationId: corIdAfter }));
 		});
+
+		test('Should fail gracefully if the function callback fails', async () => {
+			const fn = jest.fn().mockImplementation(() => { throw new Error(); });
+			const queueName = generateRandomString();
+			const messageBefore = generateRandomString();
+			const corIdBefore = generateRandomString();
+			await Queue.queueMessage(queueName, corIdBefore, messageBefore);
+
+			await expect(Queue.listenToQueue(queueName, fn)).resolves.toBeUndefined();
+
+			const messageAfter = generateRandomString();
+			const corIdAfter = generateRandomString();
+			await Queue.queueMessage(queueName, corIdAfter, messageAfter);
+
+			expect(fn).toHaveBeenCalledTimes(2);
+
+			const { content: content1, properties: properties1 } = fn.mock.calls[0][0];
+			expect(content1).toEqual(Buffer.from(messageBefore));
+			expect(properties1).toEqual(expect.objectContaining({ correlationId: corIdBefore }));
+
+			const { content: content2, properties: properties2 } = fn.mock.calls[1][0];
+			expect(content2).toEqual(Buffer.from(messageAfter));
+			expect(properties2).toEqual(expect.objectContaining({ correlationId: corIdAfter }));
+		});
 	});
 };
 
