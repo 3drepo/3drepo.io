@@ -20,11 +20,11 @@ const { generateRandomString } = require('../../helper/services');
 
 const Queue = require(`${src}/handler/queue`);
 
-const testListenToQueue = () => {
-	describe('Processing queue messages', () => {
+const testQueueMessages = () => {
+	describe('Queue messages', () => {
 		afterEach(Queue.close);
 
-		test('Should get the appropriate messages once subscribed', async () => {
+		test('Listener should get the appropriate messages once subscribed', async () => {
 			const fn = jest.fn();
 			const queueName = generateRandomString();
 			const messageBefore = generateRandomString();
@@ -48,7 +48,7 @@ const testListenToQueue = () => {
 			expect(properties2).toEqual(expect.objectContaining({ correlationId: corIdAfter }));
 		});
 
-		test('Should fail gracefully if the function callback fails', async () => {
+		test('Handler should treat errors on callbacks gracefully', async () => {
 			const fn = jest.fn().mockImplementation(() => { throw new Error(); });
 			const queueName = generateRandomString();
 			const messageBefore = generateRandomString();
@@ -74,6 +74,39 @@ const testListenToQueue = () => {
 	});
 };
 
+const testExchangeMessages = () => {
+	describe('Exchange messages', () => {
+		afterEach(Queue.close);
+
+		test('Listener should get the appropriate messages once subscribed', async () => {
+			const fn = jest.fn();
+			const exchangeName = generateRandomString();
+			await Queue.broadcastMessage(exchangeName, generateRandomString());
+
+			await expect(Queue.listenToExchange(exchangeName, fn)).resolves.toBeUndefined();
+
+			const messageAfter = generateRandomString();
+			await Queue.broadcastMessage(exchangeName, messageAfter);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(expect.objectContaining({ content: Buffer.from(messageAfter) }));
+		});
+
+		test('Handler should treat errors on callbacks gracefully', async () => {
+			const fn = jest.fn().mockImplementation(() => { throw new Error(); });
+			const exchangeName = generateRandomString();
+			await expect(Queue.listenToExchange(exchangeName, fn)).resolves.toBeUndefined();
+
+			const messageAfter = generateRandomString();
+			await Queue.broadcastMessage(exchangeName, messageAfter);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(expect.objectContaining({ content: Buffer.from(messageAfter) }));
+		});
+	});
+};
+
 describe('handler/queue', () => {
-	testListenToQueue();
+	testQueueMessages();
+	testExchangeMessages();
 });

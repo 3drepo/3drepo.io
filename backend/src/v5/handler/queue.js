@@ -111,14 +111,14 @@ Queue.listenToQueue = async (queue, callback) => {
 	const conn = await connect();
 	listeningChannels[queue] = listeningChannels[queue] || { callbacks: [] };
 	listeningChannels[queue].callbacks.push(callback);
-	listenToQueue(conn, queue, callback);
+	await listenToQueue(conn, queue, callback);
 };
 
 Queue.listenToExchange = async (exchange, callback) => {
 	const conn = await connect();
 	listeningChannels[exchange] = listeningChannels[exchange] || { callbacks: [], isExchange: true };
 	listeningChannels[exchange].callbacks.push(callback);
-	listenToExchange(conn, exchange, callback);
+	await listenToExchange(conn, exchange, callback);
 };
 
 Queue.queueMessage = async (queueName, correlationId, msg) => {
@@ -130,6 +130,18 @@ Queue.queueMessage = async (queueName, correlationId, msg) => {
 	const meta = { correlationId, persistent: true };
 
 	await channel.sendToQueue(queueName, dataBuf, meta);
+	await channel.close();
+};
+
+Queue.broadcastMessage = async (exchangeName, msg) => {
+	const conn = await connect();
+	const channel = await conn.createChannel();
+	await channel.assertExchange(exchangeName, 'fanout', { durable: true });
+
+	const dataBuf = Buffer.from(msg);
+	const meta = { persistent: true };
+
+	await channel.publish(exchangeName, '', dataBuf, meta);
 	await channel.close();
 };
 
