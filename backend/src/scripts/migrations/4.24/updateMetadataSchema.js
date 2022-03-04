@@ -27,7 +27,7 @@ const processModel = async (teamspace, scene) => {
 	const maxParallel = 20000;
 	for (let i = 0; i < meta.length; i += maxParallel) {
 		const proms = [];
-		for (let j = i; j < i + maxParallel; ++j) {
+		for (let j = i; j < Math.min(i + maxParallel, meta.length); ++j) {
 			const { _id, metadata } = meta[j];
 			if (!Array.isArray(metadata)) {
 				const metaArr = Object.keys(metadata).map((key) => ({ key, value: metadata[key] }));
