@@ -17,7 +17,7 @@
 
 import { Checkbox } from '@material-ui/core';
 import { capitalize } from 'lodash';
-import React from 'react';
+import { PureComponent } from 'react';
 
 import { BASE_MODEL_TYPE, TARGET_MODEL_TYPE } from '../../../../../../constants/compare';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
@@ -37,7 +37,7 @@ interface IProps {
 	onModelTypeChange: (type) => void;
 }
 
-export class CompareClashItem extends React.PureComponent<IProps, any> {
+export class CompareClashItem extends PureComponent<IProps, any> {
 	public static defaultProps = {
 		selected: false,
 		comparingType: BASE_MODEL_TYPE

@@ -17,7 +17,7 @@
 
 import { Field, Form, Formik } from 'formik';
 import { snakeCase } from 'lodash';
-import React from 'react';
+import { PureComponent } from 'react';
 import * as Yup from 'yup';
 import * as countriesAndTimezones from 'countries-and-timezones';
 import Button from '@material-ui/core/Button';
@@ -106,7 +106,7 @@ const generateTimezoneData = () => {
 
 const { allTimezones, defaultTimezone, labelToTZName } = generateTimezoneData();
 
-export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
+export class UploadModelFileDialog extends PureComponent<IProps, IState> {
 	public state = {
 		fileName: '',
 		allowImportAnimations: false,

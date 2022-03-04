@@ -14,9 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
 export default () => (
 	<svg width="110" height="96" viewBox="0 0 110 96" fill="none" xmlns="http://www.w3.org/2000/svg">
 		<path fillRule="evenodd" clipRule="evenodd" d="M106.962 89L57.5981 3.5C56.4434 1.5 53.5566 1.5 52.4019 3.5L3.03847 89C1.88377 91 3.32715 93.5 5.63655 93.5H104.363C106.673 93.5 108.116 91 106.962 89ZM59.3301 2.5C57.4056 -0.833336 52.5944 -0.833331 50.6699 2.5L1.30642 88C-0.61808 91.3333 1.78755 95.5 5.63655 95.5H104.363C108.212 95.5 110.618 91.3333 108.694 88L59.3301 2.5Z" fill="#F5CB34" />

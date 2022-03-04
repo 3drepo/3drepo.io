@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
 import { INTERNAL_IMAGE_PATH_PREFIX, VIEWPOINT_ID_REGEX } from '../../../../../../../helpers/comments';
 import { DATE_TIME_FORMAT } from '../../../../../../../services/formatting/formatDate';
 import { COMMENT_FIELD_NAME } from '../../../../../../viewerGui/components/commentForm/commentForm.constants';

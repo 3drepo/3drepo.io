@@ -16,7 +16,6 @@
  */
 
 import { upperCase } from 'lodash';
-import React from 'react';
 
 import Grid from '@material-ui/core/Grid';
 import { Highlight } from '../highlight/highlight.component';

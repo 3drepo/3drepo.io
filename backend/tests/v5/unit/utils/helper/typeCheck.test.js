@@ -16,6 +16,8 @@
  */
 
 const { src } = require('../../../helper/path');
+const fs = require('fs');
+const { image } = require('../../../helper/path');
 
 const TypeChecker = require(`${src}/utils/helper/typeCheck`);
 
@@ -67,8 +69,44 @@ const testIsUUIDString = () => {
 	});
 };
 
+const testFileMimeFromBuffer = () => {
+	const buffer = fs.readFileSync(image);
+
+	describe.each(
+		[
+			['Valid buffer', buffer, 'image/png'],
+			['Empty string', '', undefined],
+			['Number', 3, undefined],
+			['Null value', null, undefined],
+		],
+	)('Get file mime', (description, data, mime) => {
+		test(`${description} should return ${mime}`, async () => {
+			await expect(TypeChecker.fileMimeFromBuffer(data)).resolves.toBe(mime);
+		});
+	});
+};
+
+const testFileExtensionFromBuffer = () => {
+	const buffer = fs.readFileSync(image);
+
+	describe.each(
+		[
+			['Valid buffer', buffer, 'png'],
+			['Empty string', '', undefined],
+			['Number', 3, undefined],
+			['Null value', null, undefined],
+		],
+	)('Get file extension', (description, data, extension) => {
+		test(`${description} should return ${extension}`, async () => {
+			await expect(TypeChecker.fileExtensionFromBuffer(data)).resolves.toBe(extension);
+		});
+	});
+};
+
 describe('utils/helpers/typeCheck', () => {
 	testIsBuffer();
 	testIsString();
 	testIsUUIDString();
+	testFileMimeFromBuffer();
+	testFileExtensionFromBuffer();
 });

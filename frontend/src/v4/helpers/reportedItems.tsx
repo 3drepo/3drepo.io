@@ -16,7 +16,6 @@
  */
 
 import { ArrowRight } from '@material-ui/icons';
-import React from 'react';
 import { FoldableMenu, FoldableMenuItem, SubMenu } from '../routes/components/foldableMenu/foldableMenu.component';
 
 export interface IHeaderMenuItem {

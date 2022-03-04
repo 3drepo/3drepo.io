@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 
 import Grid from '@material-ui/core/Grid';
 import * as Yup from 'yup';
@@ -43,7 +43,7 @@ interface IProps {
 	onCancel: () => void;
 }
 
-export class NewJobForm extends React.PureComponent<IProps, any> {
+export class NewJobForm extends PureComponent<IProps, any> {
 	public state = {
 		color: ''
 	};

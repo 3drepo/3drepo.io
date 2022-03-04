@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 import ReactDOM from 'react-dom';
 
 import Tooltip from '@material-ui/core/Tooltip';
@@ -36,7 +36,7 @@ interface IState {
 	open: boolean;
 }
 
-export class FloatingActionPanel extends React.PureComponent<IProps, IState> {
+export class FloatingActionPanel extends PureComponent<IProps, IState> {
 	public state = {
 		anchorEl: null,
 		open: false

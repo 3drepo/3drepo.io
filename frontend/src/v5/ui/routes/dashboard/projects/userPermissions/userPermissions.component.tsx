@@ -14,23 +14,19 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React, { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { UserManagementActions } from '@/v4/modules/userManagement';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
 import { selectCurrentUser } from '@/v4/modules/currentUser';
-import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
-import { formatMessage } from '@/v5/services/intl';
-import { Container, Tab, Tabs, V4ModelsPermissions, V4ProjectsPermissions } from './userPermissions.styles';
+import { Container, V4ModelsPermissions } from './userPermissions.styles';
 
-export const UsersPermissions = () => {
+export const UserPermissions = () => {
 	const dispatch = useDispatch();
 	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails()?.name;
 	const username = useSelector(selectCurrentUser)?.username;
-
-	const [selectedTab, setSelectedTab] = useState(0);
 
 	useEffect(() => {
 		if (!username || !projectName) {
@@ -46,20 +42,9 @@ export const UsersPermissions = () => {
 		return (<></>);
 	}
 
-	const handleTabChange = (event, newValue) => {
-		setSelectedTab(newValue);
-	};
-
 	return (
 		<Container>
-			<Tabs value={selectedTab} onChange={handleTabChange}>
-				<Tab label={formatMessage({ id: 'usersPermissions.projectPermissions', defaultMessage: 'Project Permissions' })} />
-				<Tab label={formatMessage({ id: 'usersPermissions.contAndFedPermissions', defaultMessage: 'Container & Federation permissions' })} />
-			</Tabs>
-			<FixedOrGrowContainer>
-				{selectedTab === 0 && <V4ProjectsPermissions />}
-				{selectedTab === 1 && <V4ModelsPermissions />}
-			</FixedOrGrowContainer>
+			<V4ModelsPermissions />
 		</Container>
 	);
 };

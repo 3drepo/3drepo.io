@@ -18,7 +18,6 @@
 import { DialogContainer } from '@/v4/routes/components/dialogContainer';
 import { SnackbarContainer } from '@/v4/routes/components/snackbarContainer';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import React from 'react';
 import DayJsUtils from '@date-io/dayjs';
 import { V4OverridesContainer } from './v4Overrides.styles';
 

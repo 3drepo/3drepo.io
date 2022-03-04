@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 import { formatDateTime, formatShortDate, formatShortDateTime } from '../../../../../../services/formatting/formatDate';
 import { SequenceTasksListContainer, SequenceTasksListItem, TaskListLabel } from '../../sequences.styles';
 import { IActivity, TaskItem } from './sequenceTaskItem.component';
@@ -38,7 +38,7 @@ const equalsDate = (dateA: Date, dateB: Date) =>
 		dateA.getFullYear() === dateB.getFullYear()
 	);
 
-export class TasksList extends React.PureComponent<IProps, IState> {
+export class TasksList extends PureComponent<IProps, IState> {
 	public state: IState = {
 		collapsed: true
 	};

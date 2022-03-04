@@ -16,7 +16,6 @@
  */
 
 import { Tooltip } from '@material-ui/core';
-import React from 'react';
 import { DEFAULT_VIEWPOINTS } from './presetViews.constants';
 import { StyledSvgIcon } from './presetViews.styles';
 

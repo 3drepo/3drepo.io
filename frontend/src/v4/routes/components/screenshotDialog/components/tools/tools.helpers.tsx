@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-
 import SvgIcon from '@material-ui/core/SvgIcon';
 import ArrowIcon from '@material-ui/icons/ArrowRightAlt';
 import ChangeHistoryIcon from '@material-ui/icons/ChangeHistory';
