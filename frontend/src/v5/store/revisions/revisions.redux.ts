@@ -26,13 +26,13 @@ export const { Types: RevisionsTypes, Creators: RevisionsActions } = createActio
 	fetchSuccess: ['containerId', 'revisions'],
 	setIsPending: ['containerId', 'isPending'],
 	createRevision: ['teamspace', 'projectId', 'containerId', 'progressBar', 'body'],
-	setUploadFailed: ['containerId', 'errorMessage'],
+	setUploadComplete: ['containerId', 'isComplete', 'errorMessage'],
 }, { prefix: 'REVISIONS/' }) as { Types: Constants<IRevisionsActionCreators>; Creators: IRevisionsActionCreators };
 
 export const INITIAL_STATE: IRevisionsState = {
 	revisionsByContainer: {},
 	isPending: {},
-	uploadFailed: {},
+	revisionsUploadStatus: {},
 };
 
 export const setVoidStatusSuccess = (state = INITIAL_STATE, {
@@ -69,11 +69,19 @@ export const setIsPending = (state = INITIAL_STATE, { isPending, containerId }):
 	},
 });
 
-export const setUploadFailed = (state = INITIAL_STATE, { containerId, errorMessage }): IRevisionsState => ({
+export const setUploadComplete = (state = INITIAL_STATE, {
+	containerId,
+	isComplete,
+	errorMessage,
+}): IRevisionsState => ({
 	...state,
-	uploadFailed: {
-		...state.uploadFailed,
-		[containerId]: errorMessage,
+	revisionsUploadStatus: {
+		...state.revisionsUploadStatus,
+		[containerId]: {
+			...state.revisionsUploadStatus[containerId],
+			isComplete,
+			errorMessage,
+		},
 	},
 });
 
@@ -81,5 +89,5 @@ export const reducer = createReducer<IRevisionsState>(INITIAL_STATE, {
 	[RevisionsTypes.FETCH_SUCCESS]: fetchSuccess,
 	[RevisionsTypes.SET_IS_PENDING]: setIsPending,
 	[RevisionsTypes.SET_VOID_STATUS_SUCCESS]: setVoidStatusSuccess,
-	[RevisionsTypes.SET_UPLOAD_FAILED]: setUploadFailed,
+	[RevisionsTypes.SET_UPLOAD_COMPLETE]: setUploadComplete,
 });

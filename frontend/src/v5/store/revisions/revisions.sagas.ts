@@ -62,6 +62,7 @@ export function* createRevision({ teamspace, projectId, containerId, progressBar
 	if (!containerId) {
 		try {
 			newContainerId = yield API.Containers.createContainer({ teamspace, projectId, newContainer });
+			yield put(ContainersActions.createContainerSuccess(projectId, { _id: newContainerId, ...newContainer }));
 		} catch (error) {
 			yield put(DialogsActions.open('alert', {
 				currentActions: formatMessage({ id: 'containers.creation.error', defaultMessage: 'trying to create container' }),
@@ -69,8 +70,9 @@ export function* createRevision({ teamspace, projectId, containerId, progressBar
 			}));
 		}
 	}
+	const updatedContainerId = containerId || newContainerId;
 	try {
-		if (!containerId && !newContainerId) {
+		if (!updatedContainerId) {
 			throw new Error(
 				formatMessage({ id: 'placeholder', defaultMessage: 'Failed to create Container' }),
 			);
@@ -82,21 +84,23 @@ export function* createRevision({ teamspace, projectId, containerId, progressBar
 		formData.append('importAnimations', body.importAnimations.toString());
 		formData.append('timezone', body.timezone);
 
+		yield put(RevisionsActions.setUploadComplete(updatedContainerId, false));
+
 		yield API.Revisions.createRevision(
 			teamspace,
 			projectId,
-			containerId || newContainerId,
+			updatedContainerId,
 			progressBar,
 			formData,
 		);
-		if (!containerId && newContainerId) {
-			yield put(ContainersActions.createContainerSuccess(projectId, { _id: newContainerId, ...newContainer }));
-		}
+		yield put(RevisionsActions.setUploadComplete(updatedContainerId, true));
 	} catch (error) {
+		let errorMessage = '';
 		if (Object.prototype.hasOwnProperty.call(error, 'response')) {
 			const { response: { data: { message, status, code } } } = error;
-			yield put(RevisionsActions.setUploadFailed(containerId, `${status} - ${code} (${message})`));
-		} else yield put(RevisionsActions.setUploadFailed(containerId, error.message));
+			errorMessage = `${status} - ${code} (${message})`;
+		} else errorMessage = error.message;
+		yield put(RevisionsActions.setUploadComplete(updatedContainerId, true, errorMessage));
 	}
 }
 

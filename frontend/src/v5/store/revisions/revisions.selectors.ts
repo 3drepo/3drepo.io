@@ -33,8 +33,21 @@ export const selectIsPending: (any, string) => boolean = createSelector(
 	(state, containerId) => state.isPending[containerId],
 );
 
-export const selectUploadError: (any, string) => string = createSelector(
+export const selectUploads = createSelector(
 	selectRevisionsDomain,
+	(revisionsState) => revisionsState.revisionsUploadStatus,
+);
+
+export const selectUploadIsComplete = createSelector(
+	selectUploads,
+	(uploadStates) => Object.keys(uploadStates).every((id) => uploadStates[id].isComplete),
+);
+
+export const selectUploadError: (any, string) => string = createSelector(
+	selectUploads,
 	selectContainerIdParam,
-	(state, containerId) => state.uploadFailed[containerId],
+	(uploadStates, containerId) => {
+		if (uploadStates[containerId]) return uploadStates[containerId]?.errorMessage;
+		return '';
+	},
 );

@@ -57,7 +57,7 @@ export const UploadListItem = ({
 		resolver: yupResolver(ListItemSchema),
 	});
 
-	const errorMessage: string = RevisionsHooksSelectors.selectUploadError(item.containerId);
+	const uploadErrorMessage: string = RevisionsHooksSelectors.selectUploadError(item.containerId);
 
 	const updateValue = (name) => onChange(name, watch(name));
 	updateValue('revisionTag');
@@ -92,7 +92,7 @@ export const UploadListItem = ({
 				isSelected={isSelected}
 				errorMessage={errors.revisionTag?.message}
 			/>
-			<UploadProgress progress={progress} errorMessage={errorMessage} hidden={!isUploading} />
+			<UploadProgress progress={progress} errorMessage={uploadErrorMessage} hidden={!isUploading} />
 			<span hidden={isUploading}>
 				<Button $selectedrow={isSelected} onClick={onClickEdit}>
 					<EditIcon />

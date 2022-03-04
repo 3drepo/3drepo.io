@@ -30,6 +30,7 @@ import { DashboardListHeaderLabel } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
 import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
+import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
 import { Container, Content, DropZone, Modal, UploadsListHeader } from './uploadFileForm.styles';
@@ -127,6 +128,8 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		}
 	};
 
+	const allUploadsComplete = RevisionsHooksSelectors.selectUploadIsComplete();
+
 	return (
 		<FormProvider {...methods}>
 			<Modal
@@ -150,7 +153,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 				}
 				onKeyPress={(e) => e.key === 'Enter' && e.preventDefault()}
 				maxWidth="xl"
-				isValid={formState.isValid}
+				isValid={(formState.isValid && !isUploading) || (isUploading && allUploadsComplete)}
 			>
 				<Container>
 					<Content>

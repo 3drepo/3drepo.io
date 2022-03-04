@@ -26,10 +26,15 @@ export interface IRevision {
 	void?: boolean;
 }
 
+export interface IUploadStatus {
+	isComplete: boolean;
+	errorMessage: string;
+}
+
 export interface IRevisionsState {
 	revisionsByContainer: Record<string, IRevision[]>;
 	isPending: Record<string, boolean>;
-	uploadFailed: Record<string, string>;
+	revisionsUploadStatus: Record<string, IUploadStatus>;
 }
 
 export type FetchRevisionsPayload = {
@@ -76,7 +81,7 @@ export type FetchAction = Action<'FETCH'> & FetchRevisionsPayload;
 export type FetchSuccessAction = Action<'FETCH_SUCCESS'> & { containerId: string, revisions: IRevision[] };
 export type SetIsPendingAction = Action<'SET_IS_PENDING'> & { containerId: string, isPending: boolean };
 export type CreateRevisionAction = Action<'CREATE_REVISION'> & CreateRevisionPayload;
-export type SetUploadFailedAction = Action<'SET_UPLOAD_FAILED'> & { containerId: string, errorMessage: string };
+export type SetUploadCompleteAction = Action<'SET_UPLOAD_COMPLETE'> & { uploadId: string, isComplete: boolean, errorMessage?: string };
 
 export interface IRevisionsActionCreators {
 	setVoidStatus: (teamspace: string, projectId: string, containerId: string, revisionId: string, isVoid: boolean) =>
@@ -92,5 +97,5 @@ export interface IRevisionsActionCreators {
 		progressBar: (val) => void,
 		body: CreateRevisionBody & CreateContainerBody,
 	) => CreateRevisionAction;
-	setUploadFailed: (containerId: string, errorMessage: string) => SetUploadFailedAction
+	setUploadComplete: (uploadId: string, isComplete: boolean, errorMessage?: string) => SetUploadCompleteAction;
 }
