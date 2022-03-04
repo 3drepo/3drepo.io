@@ -40,27 +40,21 @@ Projects.getProjectList = async (teamspace, user) => {
 	}))).flat();
 };
 
-Projects.createProject = async (teamspace, name) => {
-	const { _id } = await createProject(teamspace, { name, models: [], permissions: [] });
-	return _id;
-};
+Projects.createProject = (teamspace, name) => createProject(teamspace, { name, models: [], permissions: [] });
 
 Projects.deleteProject = async (teamspace, projectId) => {
 	const project = await getProjectById(teamspace, projectId, { models: 1 });
-	
-	for(let i = 0; i < project.models.length; i++){
-		try {
-			await removeModelData(teamspace, project.models[i]);
-		} catch {
-			//continue removing the rest of the models
-		}		
+
+	const promises = [];
+
+	for (let i = 0; i < project.models.length; i++) {
+		promises.push(removeModelData(teamspace, project.models[i]));
 	}
 
-	await deleteProject(teamspace, projectId);	
+	await Promise.all(promises);
+	await deleteProject(teamspace, projectId);
 };
 
-Projects.editProject = async (teamspace, projectId, updatedProject) => {
-	await editProject(teamspace, projectId, updatedProject);
-};
+Projects.editProject = editProject;
 
 module.exports = Projects;

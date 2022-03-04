@@ -52,7 +52,6 @@ Projects.getProjectById = async (ts, projectId, projection) => {
 
 Projects.getProjectByName = async (ts, projectName, projection) => {
 	const res = await findOneProject(ts, { name: projectName }, projection);
-
 	if (!res) {
 		throw templates.projectNotFound;
 	}
@@ -73,8 +72,8 @@ Projects.getProjectAdmins = async (ts, project) => {
 	return permissions.flatMap((entry) => (entry.permissions.includes(PROJECT_ADMIN) ? [entry.user] : []));
 };
 
-Projects.createProject = async (teamspace, project) => {
-	const addedProject = { _id: generateUUID(), ...project };
+Projects.createProject = async (teamspace, newProject) => {
+	const addedProject = { _id: generateUUID(), ...newProject };
 	await addOneProject(teamspace, addedProject);
 	return addedProject;
 };
@@ -89,7 +88,6 @@ Projects.deleteProject = async (teamspace, projectId) => {
 
 Projects.editProject = async (teamspace, projectId, updatedProject) => {
 	const { matchedCount } = await updateOneProject(teamspace, { _id: projectId }, { $set: updatedProject });
-
 	if (matchedCount === 0) {
 		throw templates.projectNotFound;
 	}

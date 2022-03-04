@@ -15,11 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const {
-	addModel,
-} = require('../../../../../models/modelSettings');
 const { addModelToProject, getProjectById, removeModelFromProject } = require('../../../../../models/projects');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
+const { addModel } = require('../../../../../models/modelSettings');
 const { getFavourites } = require('../../../../../models/users');
 const { removeModelData } = require('../../../../../utils/helper/models');
 
@@ -35,7 +33,7 @@ ModelList.addModel = async (teamspace, project, data) => {
 
 ModelList.deleteModel = async (teamspace, project, model) => {
 	await removeModelData(teamspace, model);
-	await removeModelFromProject(teamspace, project, model); 	
+	await removeModelFromProject(teamspace, project, model);
 };
 
 ModelList.getModelList = async (teamspace, project, user, modelSettings) => {

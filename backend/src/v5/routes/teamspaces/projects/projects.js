@@ -39,9 +39,10 @@ const createProject = async (req, res) => {
 	const { name } = req.body;
 
 	try {
-		const newProjectId = await Projects.createProject(teamspace, name);
-		respond(req, res, templates.ok, { _id: UUIDToString(newProjectId) });
+		const newProject = await Projects.createProject(teamspace, name);
+		respond(req, res, templates.ok, { _id: UUIDToString(newProject._id) });
 	} catch (err) {
+		// istanbul ignore next
 		respond(req, res, err);
 	}
 };
@@ -53,6 +54,7 @@ const deleteProject = async (req, res) => {
 		await Projects.deleteProject(teamspace, project);
 		respond(req, res, templates.ok);
 	} catch (err) {
+		// istanbul ignore next
 		respond(req, res, err);
 	}
 };
@@ -65,6 +67,7 @@ const editProject = async (req, res) => {
 		await Projects.editProject(teamspace, project, updatedProject);
 		respond(req, res, templates.ok);
 	} catch (err) {
+		// istanbul ignore next
 		respond(req, res, err);
 	}
 };
