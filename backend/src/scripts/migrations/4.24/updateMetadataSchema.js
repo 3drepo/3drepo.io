@@ -22,16 +22,12 @@ const { find, updateOne } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const processModel = async (teamspace, scene) => {
-	console.log('waiting on query...');
 	const meta = await find(teamspace, scene, { type: 'meta', 'metadata.key': { $exists: false } }, { metadata: 1 });
-	console.log('query returned, number of nodes: ', meta.length);
 
 	const maxParallel = 2000;
 	for (let i = 0; i < meta.length; i += maxParallel) {
-		console.log(`i is ${i}`);
 		const proms = [];
 		for (let j = i; j < i + maxParallel; ++j) {
-			console.log(`j is ${j}`);
 			const { _id, metadata } = meta[j];
 			if (!Array.isArray(metadata)) {
 				const metaArr = Object.keys(metadata).map((key) => ({ key, value: metadata[key] }));
@@ -39,6 +35,7 @@ const processModel = async (teamspace, scene) => {
 			}
 		}
 
+		// eslint-disable-next-line no-await-in-loop
 		await Promise.all(proms);
 	}
 };
