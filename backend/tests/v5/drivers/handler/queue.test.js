@@ -22,6 +22,28 @@ const Queue = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
+const sendQueueMessage = async (queueName) => {
+	const message = generateRandomString();
+	const corId = generateRandomString();
+	await Queue.queueMessage(queueName, corId, message);
+	return { message, corId };
+};
+
+const checkQueueData = (dataSent, dataReceived) => {
+	expect(dataReceived.content).toEqual(Buffer.from(dataSent.message));
+	expect(dataReceived.properties).toEqual(expect.objectContaining({ correlationId: dataSent.corId }));
+};
+
+const sendExchangeMessage = async (exName) => {
+	const message = generateRandomString();
+	await Queue.broadcastMessage(exName, message);
+	return message;
+};
+
+const checkExchangeMessage = (fn, message) => {
+	expect(fn).toHaveBeenCalledWith(expect.objectContaining({ content: Buffer.from(message) }));
+};
+
 const testQueueMessages = () => {
 	describe('Queue messages', () => {
 		afterEach(Queue.close);
@@ -29,49 +51,31 @@ const testQueueMessages = () => {
 		test('Listener should get the appropriate messages once subscribed', async () => {
 			const fn = jest.fn();
 			const queueName = generateRandomString();
-			const messageBefore = generateRandomString();
-			const corIdBefore = generateRandomString();
-			await Queue.queueMessage(queueName, corIdBefore, messageBefore);
+			const msgBefore = await sendQueueMessage(queueName);
 
 			await expect(Queue.listenToQueue(queueName, fn)).resolves.toBeUndefined();
 
-			const messageAfter = generateRandomString();
-			const corIdAfter = generateRandomString();
-			await Queue.queueMessage(queueName, corIdAfter, messageAfter);
+			const msgAfter = await sendQueueMessage(queueName);
 
 			expect(fn).toHaveBeenCalledTimes(2);
 
-			const { content: content1, properties: properties1 } = fn.mock.calls[0][0];
-			expect(content1).toEqual(Buffer.from(messageBefore));
-			expect(properties1).toEqual(expect.objectContaining({ correlationId: corIdBefore }));
-
-			const { content: content2, properties: properties2 } = fn.mock.calls[1][0];
-			expect(content2).toEqual(Buffer.from(messageAfter));
-			expect(properties2).toEqual(expect.objectContaining({ correlationId: corIdAfter }));
+			checkQueueData(msgBefore, fn.mock.calls[0][0]);
+			checkQueueData(msgAfter, fn.mock.calls[1][0]);
 		});
 
 		test('Handler should treat errors on callbacks gracefully', async () => {
 			const fn = jest.fn().mockImplementation(() => { throw new Error(); });
 			const queueName = generateRandomString();
-			const messageBefore = generateRandomString();
-			const corIdBefore = generateRandomString();
-			await Queue.queueMessage(queueName, corIdBefore, messageBefore);
+			const msgBefore = await sendQueueMessage(queueName);
 
 			await expect(Queue.listenToQueue(queueName, fn)).resolves.toBeUndefined();
 
-			const messageAfter = generateRandomString();
-			const corIdAfter = generateRandomString();
-			await Queue.queueMessage(queueName, corIdAfter, messageAfter);
+			const msgAfter = await sendQueueMessage(queueName);
 
 			expect(fn).toHaveBeenCalledTimes(2);
 
-			const { content: content1, properties: properties1 } = fn.mock.calls[0][0];
-			expect(content1).toEqual(Buffer.from(messageBefore));
-			expect(properties1).toEqual(expect.objectContaining({ correlationId: corIdBefore }));
-
-			const { content: content2, properties: properties2 } = fn.mock.calls[1][0];
-			expect(content2).toEqual(Buffer.from(messageAfter));
-			expect(properties2).toEqual(expect.objectContaining({ correlationId: corIdAfter }));
+			checkQueueData(msgBefore, fn.mock.calls[0][0]);
+			checkQueueData(msgAfter, fn.mock.calls[1][0]);
 		});
 	});
 };
@@ -83,15 +87,14 @@ const testExchangeMessages = () => {
 		test('Listener should get the appropriate messages once subscribed', async () => {
 			const fn = jest.fn();
 			const exchangeName = generateRandomString();
-			await Queue.broadcastMessage(exchangeName, generateRandomString());
+			await sendExchangeMessage(exchangeName);
 
 			await expect(Queue.listenToExchange(exchangeName, fn)).resolves.toBeUndefined();
 
-			const messageAfter = generateRandomString();
-			await Queue.broadcastMessage(exchangeName, messageAfter);
+			const messageAfter = await sendExchangeMessage(exchangeName);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(expect.objectContaining({ content: Buffer.from(messageAfter) }));
+			checkExchangeMessage(fn, messageAfter);
 		});
 
 		test('Handler should treat errors on callbacks gracefully', async () => {
@@ -99,11 +102,10 @@ const testExchangeMessages = () => {
 			const exchangeName = generateRandomString();
 			await expect(Queue.listenToExchange(exchangeName, fn)).resolves.toBeUndefined();
 
-			const messageAfter = generateRandomString();
-			await Queue.broadcastMessage(exchangeName, messageAfter);
+			const messageAfter = await sendExchangeMessage(exchangeName);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(expect.objectContaining({ content: Buffer.from(messageAfter) }));
+			checkExchangeMessage(fn, messageAfter);
 		});
 	});
 };
@@ -135,24 +137,18 @@ const testConnection = () => {
 			await Queue.close(false);
 			await Queue.init();
 
-			const messageEx = generateRandomString();
-			await Queue.broadcastMessage(exchangeName, messageEx);
+			const messageEx = await sendExchangeMessage(exchangeName);
+			const messageQu = await sendQueueMessage(queueName);
 
-			const messageQu = generateRandomString();
-			const corId = generateRandomString();
-			await Queue.queueMessage(queueName, corId, messageQu);
+			checkExchangeMessage(fnExchange, messageEx);
 
-			expect(fnExchange).toHaveBeenCalledWith(expect.objectContaining({ content: Buffer.from(messageEx) }));
-
-			expect(fnQueue).toHaveBeenCalled();
-			const { content, properties } = fnQueue.mock.calls[0][0];
-			expect(content).toEqual(Buffer.from(messageQu));
-			expect(properties).toEqual(expect.objectContaining({ correlationId: corId }));
+			expect(fnQueue).toHaveBeenCalledTimes(1);
+			checkQueueData(messageQu, fnQueue.mock.calls[0][0]);
 		});
 	});
 };
 
-describe('handler/queue', () => {
+describe('AMQP', () => {
 	testQueueMessages();
 	testExchangeMessages();
 	testConnection();
