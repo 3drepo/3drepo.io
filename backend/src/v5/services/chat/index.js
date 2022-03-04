@@ -19,7 +19,9 @@ const { SESSION_HEADER, session } = require('../sessions');
 const SocketIO = require('socket.io');
 const SocketsManager = require('./socketsManager');
 const chatLabel = require('../../utils/logger').labels.chat;
+const { cn_queue: { event_exchange: eventExchange } } = require('../../utils/config');
 const { events } = require('../eventsManager/eventsManager.constants');
+const { listenToExchange } = require('../../handler/queue');
 const logger = require('../../utils/logger').logWithLabel(chatLabel);
 const sharedSession = require('express-socket.io-session');
 const { subscribe } = require('../eventsManager/eventsManager');
@@ -27,33 +29,32 @@ const { subscribe } = require('../eventsManager/eventsManager');
 const ChatService = {};
 
 const onMessageV4 = (service, msg) => {
-	try {
-		const { event, data, dm, recipient: sessionId, emitter, channel } = msg;
-		if (dm) {
-			const recipients = SocketsManager.getSocketIdsBySession(sessionId);
-			if (recipients) {
-				recipients.forEach((socketId) => {
-					const recipientSocket = SocketsManager.getSocketById(socketId);
-					if (recipientSocket) {
-						recipientSocket.send({ event, data });
-					}
-				});
-			}
-		} else if (channel) {
-			const sender = SocketsManager.getSocketById(emitter)?.broadcast || service;
-			logger.logDebug(`[${channel}][NEW EVENT]: ${event}`);
-			sender.to(channel).emit(event, data);
-		} else {
-			logger.logError('Unrecognised event message', msg);
+	const { event, data, dm, recipient: sessionId, emitter, channel } = msg;
+	if (dm) {
+		const recipients = SocketsManager.getSocketIdsBySession(sessionId);
+		if (recipients) {
+			recipients.forEach((socketId) => {
+				const recipientSocket = SocketsManager.getSocketById(socketId);
+				if (recipientSocket) {
+					recipientSocket.send({ event, data });
+				}
+			});
 		}
-	} catch (err) {
-		logger.logError(`Failed to process event message ${err.messsage}`);
+	} else if (channel) {
+		const sender = SocketsManager.getSocketById(emitter)?.broadcast || service;
+		logger.logDebug(`[${channel}][NEW EVENT]: ${event}`);
+		sender.to(channel).emit(event, data);
+	} else {
+		logger.logError('Unrecognised event message', msg);
 	}
 };
 
-const onMessage = (service, msg) => {
-	if (!msg.schema) {
-		onMessageV4(service, msg);
+const onMessage = (service) => (data) => {
+	try {
+		const content = JSON.parse(data.content);
+		onMessageV4(service, content);
+	} catch (err) {
+		logger.logError(`Failed to process event message ${err.messsage}`);
 	}
 };
 
@@ -64,7 +65,7 @@ const subscribeToEvents = (service) => {
 		}
 	});
 
-	subscribe(events.CHAT_EVENT, (msg) => onMessage(service, msg));
+	listenToExchange(eventExchange, onMessage(service));
 };
 
 const init = (server) => {
