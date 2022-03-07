@@ -136,7 +136,7 @@ const testEditProject = () => {
 		});
 
 		test('should fail without a valid project', async () => {
-			const res = await agent.patch(`/v5/teamspaces/teamspace/projects/12345?key=${tsAdmin.apiKey}`).expect(templates.teamspaceNotFound.status);
+			const res = await agent.patch(`/v5/teamspaces/teamspace/projects/12345?key=${tsAdmin.apiKey}`).expect(templates.projectNotFound.status);
 			expect(res.body.code).toEqual(templates.projectNotFound.code);
 		});
 
@@ -203,7 +203,7 @@ const testDeleteProject = () => {
 		});
 
 		test('should fail without a valid project', async () => {
-			const res = await agent.delete(`/v5/teamspaces/teamspace/projects/12345?key=${tsAdmin.apiKey}`).expect(templates.teamspaceNotFound.status);
+			const res = await agent.delete(`/v5/teamspaces/teamspace/projects/12345?key=${tsAdmin.apiKey}`).expect(templates.projectNotFound.status);
 			expect(res.body.code).toEqual(templates.projectNotFound.code);
 		});
 
@@ -220,6 +220,37 @@ const testDeleteProject = () => {
 	});
 };
 
+const testGetProject = () => {
+	describe('Get project', () => {
+		const route = (projectId) => `/v5/teamspaces/${teamspace}/projects/${projectId}`;
+
+		test('should fail without a valid session', async () => {
+			const res = await agent.get(route(testProject._id)).expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail without a valid teamspace', async () => {
+			const res = await agent.get(`/v5/teamspaces/badTSName/projects/${testProject._id}?key=${tsAdmin.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if the user is not teamspace member', async () => {
+			const res = await agent.delete(`${route(testProject._id)}?key=${unlicencedUser.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail without a valid project', async () => {
+			const res = await agent.get(`/v5/teamspaces/teamspace/projects/12345?key=${tsAdmin.apiKey}`).expect(templates.projectNotFound.status);
+			expect(res.body.code).toEqual(templates.projectNotFound.code);
+		});
+
+		test('should get project', async () => {			
+			const res = await agent.get(`${route(testProject._id)}?key=${tsAdmin.apiKey}`).expect(templates.ok.status);
+			expect(res.body).toEqual({name : testProject.name});
+		});
+	});
+};
+
 describe('E2E routes/teamspaces/projects/projects', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -231,4 +262,5 @@ describe('E2E routes/teamspaces/projects/projects', () => {
 	testCreateProject();
 	testEditProject();
 	testDeleteProject();
+	testGetProject();
 });
