@@ -20,8 +20,8 @@ const { src } = require('../../../../../../helper/path');
 jest.mock('../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 
-jest.mock('../../../../../../../../src/v5/models/projects');
-const ProjectsModel = require(`${src}/models/projects`);
+jest.mock('../../../../../../../../src/v5/models/projectSettings');
+const ProjectsModel = require(`${src}/models/projectSettings`);
 
 const Projects = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects`);
 

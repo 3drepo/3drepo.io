@@ -18,7 +18,7 @@
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const Yup = require('yup');
-const { getProjectByQuery } = require('../../../../../models/projects');
+const { getProjectByQuery } = require('../../../../../models/projectSettings');
 const { respond } = require('../../../../../utils/responder');
 const { types } = require('../../../../../utils/helper/yup');
 

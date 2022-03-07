@@ -66,7 +66,7 @@ Projects.getProjectAdmins = async (ts, project) => {
 Projects.createProject = async (teamspace, newProject) => {
 	const addedProject = { _id: generateUUID(), ...newProject };
 	await db.insertOne(teamspace, colName, addedProject);
-	return addedProject;
+	return addedProject._id;
 };
 
 Projects.deleteProject = async (teamspace, projectId) => {
@@ -77,7 +77,7 @@ Projects.deleteProject = async (teamspace, projectId) => {
 	}
 };
 
-Projects.editProject = async (teamspace, projectId, updatedProject) => {
+Projects.updateProject = async (teamspace, projectId, updatedProject) => {
 	const { matchedCount } = await updateOneProject(teamspace, { _id: projectId }, { $set: updatedProject });
 	if (matchedCount === 0) {
 		throw templates.projectNotFound;

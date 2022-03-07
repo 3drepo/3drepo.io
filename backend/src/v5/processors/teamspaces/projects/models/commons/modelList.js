@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addModelToProject, getProjectByQuery, removeModelFromProject } = require('../../../../../models/projects');
+const { addModelToProject, getProjectByQuery, removeModelFromProject } = require('../../../../../models/projectSettings');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
 const { addModel } = require('../../../../../models/modelSettings');
 const { getFavourites } = require('../../../../../models/users');

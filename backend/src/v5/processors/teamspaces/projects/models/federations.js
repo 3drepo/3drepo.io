@@ -22,7 +22,7 @@ const Groups = require('./commons/groups');
 const Views = require('./commons/views');
 const { getIssuesCount } = require('../../../../models/issues');
 const { getLatestRevision } = require('../../../../models/revisions');
-const { getProjectByQuery } = require('../../../../models/projects');
+const { getProjectByQuery } = require('../../../../models/projectSettings');
 const { getRisksCount } = require('../../../../models/risks');
 const { queueFederationUpdate } = require('../../../../services/queue');
 

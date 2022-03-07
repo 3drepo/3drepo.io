@@ -39,8 +39,8 @@ const createProject = async (req, res) => {
 	const { name } = req.body;
 
 	try {
-		const newProject = await Projects.createProject(teamspace, name);
-		respond(req, res, templates.ok, { _id: UUIDToString(newProject._id) });
+		const newProjectId = await Projects.createProject(teamspace, name);
+		respond(req, res, templates.ok, { _id: UUIDToString(newProjectId) });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -59,12 +59,12 @@ const deleteProject = async (req, res) => {
 	}
 };
 
-const editProject = async (req, res) => {
+const updateProject = async (req, res) => {
 	const { teamspace, project } = req.params;
 	const updatedProject = req.body;
 
 	try {
-		await Projects.editProject(teamspace, project, updatedProject);
+		await Projects.updateProject(teamspace, project, updatedProject);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
@@ -213,7 +213,7 @@ const establishRoutes = () => {
 	 *   patch:
 	 *     description: Edits a project
 	 *     tags: [Projects]
-	 *     operationId: editProject
+	 *     operationId: updateProject
 	 *     parameters:
 	 *       - teamspace:
 	 *         name: teamspace
@@ -245,7 +245,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: Edits the project
 	 */
-	router.patch('/:project', isAdminToProject, validateProjectData, editProject);
+	router.patch('/:project', isAdminToProject, validateProjectData, updateProject);
 
 	router.get('/:project', hasAccessToTeamspace, getProject);
 

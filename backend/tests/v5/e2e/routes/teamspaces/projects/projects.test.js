@@ -116,8 +116,8 @@ const testCreateProject = () => {
 	});
 };
 
-const testEditProject = () => {
-	describe('Edit project', () => {
+const testUpdateProject = () => {
+	describe('Update project', () => {
 		const route = `/v5/teamspaces/${teamspace}/projects/${testProject._id}`;
 
 		test('should fail without a valid session', async () => {
@@ -260,7 +260,7 @@ describe('E2E routes/teamspaces/projects/projects', () => {
 	afterAll(() => ServiceHelper.closeApp(server));
 	testGetProjectList();
 	testCreateProject();
-	testEditProject();
+	testUpdateProject();
 	testDeleteProject();
 	testGetProject();
 });

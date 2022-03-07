@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createProject, deleteProject, editProject, getProjectByQuery, getProjectList } = require('../../../models/projects');
+const { createProject, deleteProject, updateProject, getProjectByQuery, getProjectList } = require('../../../models/projectSettings');
 const {
 	hasProjectAdminPermissions,
 	hasReadAccessToModel,
@@ -57,6 +57,6 @@ Projects.deleteProject = async (teamspace, projectId) => {
 
 Projects.getProject = (teamspace, projectId) => getProjectByQuery(teamspace, { _id: projectId }, { name: 1, _id: 0});
 
-Projects.editProject = editProject;
+Projects.updateProject = updateProject;
 
 module.exports = Projects;

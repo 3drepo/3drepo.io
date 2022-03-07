@@ -17,8 +17,8 @@
 
 const { src } = require('../../../../helper/path');
 
-jest.mock('../../../../../../src/v5/models/projects');
-const ProjectsModel = require(`${src}/models/projects`);
+jest.mock('../../../../../../src/v5/models/projectSettings');
+const ProjectsModel = require(`${src}/models/projectSettings`);
 jest.mock('../../../../../../src/v5/utils/helper/models');
 const ModelHelper = require(`${src}/utils/helper/models`);
 const Projects = require(`${src}/processors/teamspaces/projects/projects`);

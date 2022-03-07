@@ -17,7 +17,7 @@
 
 const { src } = require('../../helper/path');
 
-const Project = require(`${src}/models/projects`);
+const Project = require(`${src}/models/projectSettings`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
@@ -173,7 +173,7 @@ const testCreateProject = () => {
 			expect(fn.mock.calls[0][2].name).toEqual('newName');
 			expect(fn.mock.calls[0][2]).toHaveProperty('_id');
 			expect(isUUIDString(fn.mock.calls[0][2]._id));
-			expect(res).toEqual({ _id: fn.mock.calls[0][2]._id, name: 'newName' });
+			expect(res).toEqual(fn.mock.calls[0][2]._id);
 		});
 	});
 };
@@ -197,11 +197,11 @@ const testDeleteProject = () => {
 	});
 };
 
-const testEditProject = () => {
-	describe('Ediedit Project', () => {
+const testUpdateProject = () => {
+	describe('Update Project', () => {
 		test('should edit a project', async () => {
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 1 });
-			await Project.editProject('someTS', 'project Id', { name: 'newName' });
+			await Project.updateProject('someTS', 'project Id', { name: 'newName' });
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual('someTS');
 			expect(fn.mock.calls[0][1]).toEqual('projects');
@@ -211,12 +211,12 @@ const testEditProject = () => {
 
 		test('should return error if the project is not found', async () => {
 			jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 0 });
-			await expect(Project.editProject('someTS', 'project Id', { name: 'newName' })).rejects.toEqual(templates.projectNotFound);
+			await expect(Project.updateProject('someTS', 'project Id', { name: 'newName' })).rejects.toEqual(templates.projectNotFound);
 		});
 	});
 };
 
-describe('models/projects', () => {
+describe('models/projectSettings', () => {
 	testProjectAdmins();
 	testGetProjectList();
 	testAddProjectModel();
@@ -224,5 +224,5 @@ describe('models/projects', () => {
 	testModelsExistInProject();
 	testCreateProject();
 	testDeleteProject();
-	testEditProject();
+	testUpdateProject();
 });
