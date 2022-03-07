@@ -55,6 +55,8 @@ Projects.deleteProject = async (teamspace, projectId) => {
 	await deleteProject(teamspace, projectId);
 };
 
+Projects.getProject = (teamspace, projectId) => getProjectById(teamspace, projectId, { name: 1, _id: 0});
+
 Projects.editProject = editProject;
 
 module.exports = Projects;

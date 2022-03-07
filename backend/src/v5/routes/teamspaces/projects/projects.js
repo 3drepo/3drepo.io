@@ -72,6 +72,18 @@ const editProject = async (req, res) => {
 	}
 };
 
+const getProject = async (req, res) => {
+	const { teamspace, project } = req.params;
+
+	try {
+		const projectSettings = await Projects.getProject(teamspace, project);
+		respond(req, res, templates.ok, projectSettings);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 
@@ -234,6 +246,8 @@ const establishRoutes = () => {
 	 *         description: Edits the project
 	 */
 	router.patch('/:project', isAdminToProject, validateProjectData, editProject);
+
+	router.get('/:project', hasAccessToTeamspace, getProject);
 
 	return router;
 };
