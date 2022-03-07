@@ -29,7 +29,7 @@ export const LinkEntry = ({onClickRemove, index }) => {
 	const linkFieldName = `links.${index}.link`;
 
 	return (
-	<FieldsRow container justify="space-between" flex={0.5}>
+	<FieldsRow container justifyContent="space-between" flex={0.5}>
 		<StyledFormControl>
 			<Field name={nameFieldName} render={({ field, form }) => (
 				<TextField {...field}

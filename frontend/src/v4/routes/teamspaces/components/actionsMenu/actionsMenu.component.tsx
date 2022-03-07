@@ -93,7 +93,7 @@ export const ActionsMenu = memo(({federate, isPending, actions = [], permissions
 				wrap="wrap"
 				direction="row"
 				alignItems="center"
-				justify="flex-start"
+				justifyContent="flex-start"
 				theme={{ forceOpen, federate }}
 			>
 				{isOnScreen && <Actions>{renderActions(actions, isPending, permissions)}</Actions>}

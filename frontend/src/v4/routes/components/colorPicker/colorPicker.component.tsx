@@ -118,7 +118,7 @@ const OpenPanelButton = ({color, onClick, disabled}) =>
 			onClick={onClick}
 			direction="row"
 			alignItems="center"
-			justify="flex-start"
+			justifyContent="flex-start"
 			disabled={disabled}
 		>
 			<Dot item color={color} />
@@ -135,7 +135,7 @@ const PredefinedColors = ({colors, onChange}) => (
 			container
 			direction="row"
 			alignItems="center"
-			justify="flex-start"
+			justifyContent="flex-start"
 		>
 			{
 				colors.slice(0, 7).map((color, index) =>
@@ -496,7 +496,9 @@ export class ColorPicker extends PureComponent<IProps, IState> {
                 open={open}
                 anchorEl={this.colorSelectRef.current as HTMLElement}
                 onClose={this.handleClose}
-                onEnter={this.onPanelOpen}
+				TransitionProps={{
+					onEnter: this.onPanelOpen,
+				}}
             >
                 {(predefinedColors.length > 0) && <PredefinedColors colors={predefinedColors} onChange={this.setBaseColor} />}
                 <Grid

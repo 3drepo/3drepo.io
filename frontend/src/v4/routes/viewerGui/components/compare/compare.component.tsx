@@ -192,7 +192,7 @@ export class Compare extends PureComponent<IProps, any> {
 						{this.renderClashContent(!this.isDiffTabActive)}
 					</TabContent>
 				</ViewerPanelContent>
-				<ViewerPanelFooter container alignItems="center" justify="space-between">
+				<ViewerPanelFooter container alignItems="center" justifyContent="space-between">
 					{this.renderSlider()}
 					<ViewerPanelButton
 							aria-label="Compare"

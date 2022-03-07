@@ -35,7 +35,7 @@ export const UserManagementTab = (props: IProps) => {
 				direction="column"
 				alignItems="stretch"
 				wrap="nowrap"
-				justify="space-between"
+				justifyContent="space-between"
 			>
 				<Content item header={props.withHeader}>{children}</Content>
 				{footerLabel && (<Footer item>{footerLabel}</Footer>)}

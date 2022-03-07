@@ -55,7 +55,7 @@ export class TableHeadingRadio extends PureComponent<IProps, any> {
 				<RadioContainer
 					container
 					direction="column"
-					justify="center"
+					justifyContent="center"
 					alignItems="center"
 					{...RadioContainerProps}
 				>

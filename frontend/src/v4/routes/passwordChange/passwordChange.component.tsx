@@ -104,7 +104,7 @@ export class PasswordChange extends PureComponent<IProps, IState> {
 				Cannot change password due to URL is incomplete.
 				Please ensure you have copied the whole link and try again.
 			</Message>
-			<Buttons container justify="space-between">
+			<Buttons container justifyContent="space-between">
 				{this.renderBackToLogin()}
 			</Buttons>
 		</>
@@ -146,7 +146,7 @@ export class PasswordChange extends PureComponent<IProps, IState> {
 							fullWidth
 						/>
 					)} />
-					<Buttons container justify="space-between">
+					<Buttons container justifyContent="space-between">
 						{this.renderBackToLogin()}
 						<Field render={({ form }) => (
 							<SubmitButton

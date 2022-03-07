@@ -45,10 +45,6 @@ export const BarIconButton = styled(IconButton)`
 	&:first-child {
 		margin-right: -18px;
 	}
-
-	&:hover {
-		background-color: ${COLOR.WHITE}
-	}
 `;
 
 export const EmptyStateInfo = styled.p`

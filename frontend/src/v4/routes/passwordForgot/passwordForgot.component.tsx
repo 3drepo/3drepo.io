@@ -77,7 +77,7 @@ export class PasswordForgot extends PureComponent<IProps, IState> {
 												fullWidth
 											/>
 										)} />
-										<Buttons container justify="space-between">
+										<Buttons container justifyContent="space-between">
 											<StyledButton
 												color="secondary"
 												component={Link}

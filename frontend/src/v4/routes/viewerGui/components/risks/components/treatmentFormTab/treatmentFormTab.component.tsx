@@ -103,7 +103,7 @@ export const TreatmentRiskFormTab: FunctionComponent<IProps> = ({
 				)} />
 			</Container>
 
-			<FieldsRow container alignItems="center" justify="space-between">
+			<FieldsRow container alignItems="center" justifyContent="space-between">
 				<StyledFormControl>
 					<Field name="mitigation_stage" render={({ field, form }) => (
 						<AutoSuggestField
@@ -144,7 +144,7 @@ export const TreatmentRiskFormTab: FunctionComponent<IProps> = ({
 				</StyledFormControl>
 			</Container>
 
-			<FieldsRow container alignItems="center" justify="space-between">
+			<FieldsRow container alignItems="center" justifyContent="space-between">
 				<FieldsContainer size={'wide'}>
 					<StyledFormControl>
 						<InputLabel shrink htmlFor="residual_likelihood">Treated Risk Likelihood</InputLabel>

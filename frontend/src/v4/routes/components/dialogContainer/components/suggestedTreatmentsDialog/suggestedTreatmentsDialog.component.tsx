@@ -115,7 +115,7 @@ export const SuggestedTreatmentsDialog = ({ suggestions, setFieldValue, handleCl
 	return (
 		<Container>
 			<StyledGrid container>
-				<Label container justify="flex-end" alignItems="center">
+				<Label container justifyContent="flex-end" alignItems="center">
 					<TextWrapper>
 						Stage:&nbsp;
 					</TextWrapper>
@@ -127,7 +127,7 @@ export const SuggestedTreatmentsDialog = ({ suggestions, setFieldValue, handleCl
 						onChange={handleStageChange}
 					/>
 				</Grid>
-				<Label container justify="flex-end" alignItems="center">
+				<Label container justifyContent="flex-end" alignItems="center">
 					<TextWrapper>
 						Type:&nbsp;
 					</TextWrapper>

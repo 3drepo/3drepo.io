@@ -236,7 +236,7 @@ export const theme = createTheme({
 					width: '100%',
 					'& label': {
 						...typography.kicker,
-						top: '-38px',
+						top: '-34px',
 						left: '-13px',
 						color: COLOR.BASE_MAIN,
 
@@ -336,8 +336,7 @@ export const theme = createTheme({
 		MuiBackdrop: {
 			styleOverrides: {
 				root: {
-					backgroundColor: 'rgba(18, 30, 51, 0.9)',
-					backdropFilter: 'blur(10px)',
+					backgroundColor: 'transparent',
 				},
 			},
 		},
@@ -349,6 +348,10 @@ export const theme = createTheme({
 				},
 				paperWidthFalse: {
 					maxWidth: 633,
+				},
+				container: {
+					backgroundColor: 'rgba(18, 30, 51, 0.9)',
+					backdropFilter: 'blur(10px)',
 				},
 			},
 		},
@@ -416,16 +419,6 @@ export const theme = createTheme({
 				colorDefault: {
 					color: null,
 					backgroundColor: null,
-				},
-			},
-		},
-		MuiMenu: {
-			styleOverrides: {
-				root: {
-					'& MuiBackdrop-invisible': {
-						backdropFilter: 'blur(0)',
-						backgroundColor: 'transparent',
-					},
 				},
 			},
 		},
@@ -581,6 +574,7 @@ export const theme = createTheme({
 		MuiSelect: {
 			defaultProps: {
 				IconComponent: ChevronIcon,
+				variant: 'outlined',
 			},
 			styleOverrides: {
 				// root: {
@@ -674,6 +668,7 @@ export const theme = createTheme({
 			styleOverrides: {
 				root: {
 					transition: 'none',
+					padding: 12,
 				},
 			},
 		},

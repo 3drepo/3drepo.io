@@ -81,7 +81,7 @@ export class SequencingDates extends PureComponent<IProps, IState> {
 	public render() {
 		return (
 			<>
-				<FieldsRow container justify="space-between" flex={1}>
+				<FieldsRow container justifyContent="space-between" flex={1}>
 					<StyledFormControl>
 						<InputLabel shrink>Start time</InputLabel>
 						<Field name="sequence_start" render={({ field, form }) => (
@@ -97,7 +97,7 @@ export class SequencingDates extends PureComponent<IProps, IState> {
 					</StyledFormControl>
 				</FieldsRow>
 
-				<FieldsRow container justify="space-between" flex={1}>
+				<FieldsRow container justifyContent="space-between" flex={1}>
 					<StyledFormControl>
 						<InputLabel shrink>End time</InputLabel>
 						<Field name="sequence_end" render={({ field, form }) =>  (

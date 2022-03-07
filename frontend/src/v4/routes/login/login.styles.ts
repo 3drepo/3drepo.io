@@ -67,6 +67,7 @@ export const UserNotice = styled.span`
 export const FooterContainer = styled.aside`
 	&& {
 		display: flex;
+		align-items: center;
 		justify-content: space-between;
 		padding-top: 10px;
 		font-size: 14px;

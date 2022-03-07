@@ -25,8 +25,8 @@ import { FooterContainer, StyledButton, Version } from '../login.styles';
 const APP_VERSION = clientConfigService.VERSION;
 
 export const Footer = () => (
-	<FooterContainer container alignItems="center" justify="space-between">
-		<Version flex-direction="row">
+	<FooterContainer>
+		<Version>
 			Version:
 			<Tooltip title="Release notes">
 				<StyledButton

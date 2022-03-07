@@ -127,7 +127,7 @@ export class ReportedItems extends PureComponent<IProps, IState> {
 					{this.renderItemsList(this.props.items)}
 				</div>
 			</ViewerPanelContent>
-			<ViewerPanelFooter onClick={this.handleClickOutside} container alignItems="center" justify="space-between">
+			<ViewerPanelFooter onClick={this.handleClickOutside} container alignItems="center" justifyContent="space-between">
 				<Summary>{this.listFooterText}</Summary>
 				<ViewerPanelButton
 					aria-label="Add item"

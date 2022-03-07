@@ -19,8 +19,8 @@ import styled from 'styled-components';
 
 export const InputLabel = styled(InputLabelBase)`
 	&& {
-		top: 28px;
-		left: -13px;
+		transform: translate(0, 1.5px) scale(0.75) !important;
+		transform-origin: top left;
 	}
 `;
 

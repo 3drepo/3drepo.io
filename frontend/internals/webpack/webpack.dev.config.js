@@ -26,7 +26,7 @@ const statsOptions = {
 
 module.exports = (env) => getWebpackConfig(env, {
   mode: MODES.DEVELOPMENT,
-  devtool: 'inline-source-map',
+  devtool: 'cheap-module-eval-source-map',
   plugins: [
     new CleanWebpackPlugin({
       root: PATHS.PROJECT_DIR,

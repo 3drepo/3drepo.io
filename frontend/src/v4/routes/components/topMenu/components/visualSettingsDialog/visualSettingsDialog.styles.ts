@@ -22,7 +22,7 @@ import styled from 'styled-components';
 import { COLOR, FONT_WEIGHT } from '../../../../../styles';
 
 export const NegativeActionButton = styled(Button)`
-	&& {
+	&&:not(.Mui-disabled) {
 		color: ${COLOR.WHITE_87};
 		background-color: ${COLOR.NEGATIVE_87};
 	}

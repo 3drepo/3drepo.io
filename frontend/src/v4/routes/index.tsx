@@ -18,7 +18,7 @@
 import { Component } from 'react';
 import AdapterDayjs from '@mui/lab/AdapterDayjs';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
-import { StylesProvider } from '@material-ui/core';
+import { StyledEngineProvider } from '@mui/material/styles';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { ThemeProvider } from 'styled-components';
 import { Route } from 'react-router-dom';
@@ -34,10 +34,10 @@ export class RootContainer extends Component {
 			<LocalizationProvider dateAdapter={AdapterDayjs}>
 				<ThemeProvider theme={theme}>
 					<MuiThemeProvider theme={MuiTheme}>
-						<StylesProvider injectFirst>
+						<StyledEngineProvider injectFirst>
 							<GlobalStyle />
 							<Route component={App} />
-						</StylesProvider>
+						</StyledEngineProvider>
 					</MuiThemeProvider>
 				</ThemeProvider>
 			</LocalizationProvider>

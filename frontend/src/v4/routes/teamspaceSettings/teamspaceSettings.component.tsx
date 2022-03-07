@@ -212,7 +212,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 		return (
 			<SuggestionsContainer container direction="column" wrap="nowrap">
 				<Headline color="textPrimary" variant="subtitle1">Treatment Suggestions</Headline>
-				<FileGrid container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
+				<FileGrid container direction="row" justifyContent="space-between" alignItems="center" wrap="nowrap">
 					<InfoColumnWrapper container>
 						<DataText variant="body1">
 							{this.renderLastTreatmentsUpdated()}
@@ -252,7 +252,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 	private renderCreateMitigationSuggestionsOption = () => {
 		return (
 			<SuggestionsContainer container direction="column" wrap="nowrap">
-				<CreateMitigationsGrid container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
+				<CreateMitigationsGrid container direction="row" justifyContent="space-between" alignItems="center" wrap="nowrap">
 					<InfoColumnWrapper container>
 						<DataText variant="body1">
 							Create Treatment Suggestions from Agreed Risks

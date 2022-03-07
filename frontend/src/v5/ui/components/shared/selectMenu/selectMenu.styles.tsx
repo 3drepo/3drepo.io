@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,28 +14,19 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Dialog } from '@mui/material';
+ 
+import { Select } from '@mui/material';
+import styled from 'styled-components';
 
-import CloseIcon from '@assets/icons/close.svg';
-import { CloseButton } from './modal.styles';
-
-interface IModal {
-	onClickClose: () => void;
-	open:boolean;
-	children:any;
-	className?: string;
-}
-
-export const Modal = ({ onClickClose, open, children, className }: IModal) => (
-	<Dialog
-		open={open}
-		onClose={onClickClose}
-		className={className}
-		maxWidth={false}
-	>
-		<CloseButton aria-label="Close dialog" onClick={onClickClose}>
-			<CloseIcon />
-		</CloseButton>
-		{children}
-	</Dialog>
-);
+export const StyledSelectMenu = styled(({ className, ...props }) => (
+	<Select {...props} classes={{ popover: className }} />
+))`
+	& .MuiPopover-root {
+		backdrop-filter: blur(0);
+		background: transparent;
+		box-shadow: 
+			0 5px 5px -3px rgb(0 0 0 / 20%), 
+			0 8px 10px 1px rgb(0 0 0 / 14%), 
+			0 3px 14px 2px rgb(0 0 0 / 12%);
+	}
+`;

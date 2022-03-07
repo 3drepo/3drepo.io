@@ -23,6 +23,5 @@ export const SelectColumn = styled(FormControl)`
 	padding-right: 5px;
 	& + & {
 		padding: 0 0 0 5px;
-		label { padding: 0 0 0 5px }
 	}
 `;

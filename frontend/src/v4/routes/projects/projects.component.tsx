@@ -130,7 +130,7 @@ export class Projects extends PureComponent<IProps, IState> {
 					<Options
 						container
 						direction="row"
-						justify="space-between"
+						justifyContent="space-between"
 						alignContent="center"
 					>
 						<SelectContainer item>

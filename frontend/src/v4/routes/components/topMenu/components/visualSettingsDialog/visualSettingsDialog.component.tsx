@@ -207,7 +207,7 @@ const Buttons = (props) => {
 				disabled={isEqual(form.values, DEFAULT_SETTINGS)}
 				type="button"
 				onClick={() => form.setValues(DEFAULT_SETTINGS)}
-				>
+			>
 					Reset
 				</NegativeActionButton>
 			)} />
@@ -226,7 +226,7 @@ const Buttons = (props) => {
 						variant="contained"
 						type="submit"
 						disabled={!form.isValid || form.isValidating}
-						>
+					>
 						Save
 					</Button>
 			)} />

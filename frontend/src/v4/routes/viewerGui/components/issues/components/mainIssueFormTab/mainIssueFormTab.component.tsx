@@ -86,7 +86,7 @@ export const MainIssueFormTab: FunctionComponent<IProps> = ({
 				/>
 			)}
 
-			<FieldsRow container alignItems="center" justify="space-between">
+			<FieldsRow container alignItems="center" justifyContent="space-between">
 				<UpdateButtons
 					isNew={isNew}
 					disableViewer={disableViewer}
@@ -102,7 +102,7 @@ export const MainIssueFormTab: FunctionComponent<IProps> = ({
 				/>
 			</FieldsRow>
 
-			<FieldsRow container alignItems="center" justify="space-between">
+			<FieldsRow container alignItems="center" justifyContent="space-between">
 				<StyledFormControl>
 					<InputLabel shrink htmlFor="priority">Priority</InputLabel>
 					<Field name="priority" render={({ field }) => (
@@ -126,7 +126,7 @@ export const MainIssueFormTab: FunctionComponent<IProps> = ({
 					)} />
 				</StyledFormControl>
 			</FieldsRow>
-			<FieldsRow container alignItems="center" justify="space-between">
+			<FieldsRow container alignItems="center" justifyContent="space-between">
 				<StyledFormControl>
 					<InputLabel shrink htmlFor="assigned_roles">Assign</InputLabel>
 					<Field name="assigned_roles" render={({ field }) => (
@@ -150,7 +150,7 @@ export const MainIssueFormTab: FunctionComponent<IProps> = ({
 					)} />
 				</StyledFormControl>
 			</FieldsRow>
-			<FieldsRow container justify="space-between" flex={0.5}>
+			<FieldsRow container justifyContent="space-between" flex={0.5}>
 				<StyledFormControl>
 					<InputLabel shrink>Due date</InputLabel>
 					<Field name="due_date" render={({ field }) =>

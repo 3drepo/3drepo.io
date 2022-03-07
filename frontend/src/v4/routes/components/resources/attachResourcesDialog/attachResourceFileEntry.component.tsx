@@ -30,7 +30,7 @@ export const FileEntry = ({onClickRemove, index, entry}) => {
 	const fileFieldName = `files.${index}.file`;
 
 	return (
-		<FieldsRow container justify="space-between" flex={0.5}>
+		<FieldsRow container justifyContent="space-between" flex={0.5}>
 			<StyledFormControl>
 				<Field name={nameFieldName} render={({ field, form }) => (
 					<TextField {...field}

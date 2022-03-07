@@ -162,7 +162,7 @@ export class Resources extends PureComponent<IProps, IState> {
 			<ResourcesContainer>
 				{this.renderResources(!isEmpty(resources))}
 				{isEmpty(resources) && <EmptyStateInfo>No resources have been attached yet</EmptyStateInfo>}
-				<FieldsRow container justify="flex-end">
+				<FieldsRow container justifyContent="flex-end">
 					<ContainedButton onClick={this.onClickAttach} disabled={!canEdit}>
 						Add Resource
 					</ContainedButton>

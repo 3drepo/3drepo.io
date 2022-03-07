@@ -264,7 +264,7 @@ export class CommentForm extends PureComponent<IProps, IState> {
 
 	public renderResidualRiskFields = renderWhenTrue(() => (
 		<Container>
-			<FieldsRow container alignItems="center" justify="space-between">
+			<FieldsRow container alignItems="center" justifyContent="space-between">
 				<StyledFormControl>
 					<InputLabel shrink htmlFor="likelihood">Risk Likelihood</InputLabel>
 					<Field name="likelihood" render={({ field }) => (

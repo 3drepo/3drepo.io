@@ -193,7 +193,7 @@ export class Groups extends PureComponent<IProps> {
 					{this.renderGroupsList(this.props.groups.length)}
 				</div>
 			</ViewerPanelContent>
-			<ViewerPanelFooter onClick={this.resetActiveGroup} container alignItems="center" justify="space-between">
+			<ViewerPanelFooter onClick={this.resetActiveGroup} container alignItems="center" justifyContent="space-between">
 				<Summary>
 					{`${this.props.groups.length} groups displayed`}
 				</Summary>

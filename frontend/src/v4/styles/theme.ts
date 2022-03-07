@@ -62,7 +62,7 @@ export const MuiTheme = createTheme({
 			styleOverrides: {
 				root: {
 					'fontSize': '14px',
-					'&$disabled': {
+					'&.Mui-disabled': {
 						color: 'gainsboro'
 					},
 				},
@@ -77,7 +77,7 @@ export const MuiTheme = createTheme({
 			styleOverrides: {
 				root: {
 					'overflow': 'hidden',
-					'&$disabled': {
+					'&.Mui-disabled': {
 						color: theme.colors.BLACK_60
 					}
 				},
@@ -86,20 +86,35 @@ export const MuiTheme = createTheme({
 				}
 			}
 		},
+		MuiIconButton: {
+			styleOverrides: {
+				root: {
+					padding: 12,
+				},
+			},
+		},
 		MuiFormControlLabel: {
 			styleOverrides: {
 				label: {
 					fontSize: '14px',
-					color: theme.colors.BLACK_60
+					color: theme.colors.BLACK_60,
 				}
 			}
+		},
+		MuiInputLabel: {
+			styleOverrides: {
+				shrink: {
+					transform: 'translate(0, 1.5px) scale(0.75) !important',
+					transformOrigin: 'top left',
+				}
+			},
 		},
 		MuiFormLabel: {
 			styleOverrides: {
 				root: {
 					'fontSize': '14px',
 					'color': theme.colors.BLACK_60,
-					'&$disabled': {
+					'&.Mui-disabled': {
 						color: theme.colors.BLACK_60
 					}
 				}
@@ -146,12 +161,24 @@ export const MuiTheme = createTheme({
 		// 		}
 		// 	}
 		// },
+		MuiTextField: {
+			defaultProps: {
+				variant: 'standard',
+			},
+		},
 		MuiSelect: {
+			defaultProps: {
+				variant: 'standard',
+				// transformOrigin: {
+				// 	vertical: "top",
+				// 	horizontal: "left"
+				// },
+			},
 			styleOverrides: {
-				// root: {
-				// 	fontSize: '14px',
-				// 	color: theme.colors.BLACK_60
-				// }
+				select: {
+					fontSize: '14px',
+					color: theme.colors.BLACK_60
+				}
 			}
 		},
 		MuiTab: {
@@ -207,6 +234,9 @@ export const MuiTheme = createTheme({
 				h6: {
 					fontSize: 20,
 					fontWeight: 400
+				},
+				h2: {
+					letterSpacing: 0,
 				}
 			}
 		},
@@ -324,7 +354,7 @@ export const MuiTheme = createTheme({
 		MuiAccordion: {
 			styleOverrides: {
 				root: {
-					'&$expanded': {
+					'&.Mui-expanded': {
 						margin: 0,
 					},
 				}
