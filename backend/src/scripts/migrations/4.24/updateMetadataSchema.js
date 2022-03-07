@@ -24,7 +24,7 @@ const { logger } = require(`${v5Path}/utils/logger`);
 const processModel = async (teamspace, scene) => {
 	const meta = await find(teamspace, scene, { type: 'meta', 'metadata.key': { $exists: false } }, { metadata: 1 });
 
-	const maxParallel = 20000;
+	const maxParallel = 5000;
 	for (let i = 0; i < meta.length; i += maxParallel) {
 		const proms = [];
 		for (let j = i; j < Math.min(i + maxParallel, meta.length); ++j) {
