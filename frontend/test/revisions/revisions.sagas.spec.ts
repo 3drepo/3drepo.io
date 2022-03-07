@@ -81,4 +81,46 @@ describe('Revisions: sagas', () => {
 		});
 	});
 
+	describe('createRevision', () => {
+		const containerBody = {
+			containerName: 'containerName',
+			containerUnit: 'unit',
+			containerType: 'type',
+		};
+		const testFile = new File(['fileContent'], 'filename.obj', {
+			lastModified: 16421855236,
+			type: '',
+		});
+		const revisionBody: {
+			revisionTag: string;
+			revisionDesc?: string;
+			file: any;
+			importAnimations?: boolean;
+			timezone?: string;
+		} = {
+			file: testFile,
+			revisionTag: 'revisionTag',
+			revisionDesc: 'revisionDesc',
+			importAnimations: false,
+			timezone: 'Europe/London',
+		}
+		const uploadBody = {
+			progress: 0,
+			extension: 'extension',
+		}
+		const body = {...revisionBody, ...containerBody, ...uploadBody }
+		const progressBar = (e) => void e;
+
+		it('should create a revision on an existing container', async () => {
+			mockServer
+				.post(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions`)
+				.reply(200, {body: {}});
+
+			await expectSaga(RevisionsSaga.default)
+				.dispatch(RevisionsActions.createRevision(teamspace, projectId, containerId, progressBar, body))
+				.put(RevisionsActions.setUploadComplete(containerId, false))
+				.put(RevisionsActions.setUploadComplete(containerId, true))
+				.silentRun();
+		})
+	})
 })
