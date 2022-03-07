@@ -15,16 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const config = require('./jest.config');
+const { v5Path } = require('../../interop');
 
-config.coveragePathIgnorePatterns = [
-	...config.coveragePathIgnorePatterns,
-	'/routes/',
-	'responder.js',
-	'responseCodes.js',
-	'users.constants.js',
-];
+const { listDatabases, listCollections } = require(`${v5Path}/handler/db`);
+const { USERNAME_BLACKLIST } = require(`${v5Path}/models/users.constants`);
 
-config.testMatch = ['**/tests/**/unit/**/*.test.[jt]s?(x)'];
+const Utils = {};
 
-module.exports = config;
+Utils.getTeamspaceList = async () => {
+	const dbList = await listDatabases();
+	return dbList.flatMap(({ name: db }) => (USERNAME_BLACKLIST.includes(db) ? [] : db));
+};
+
+Utils.getCollectionsEndsWith = async (teamspace, str) => {
+	const collections = await listCollections(teamspace);
+	return collections.filter(({ name }) => name.endsWith(str));
+};
+
+module.exports = Utils;
