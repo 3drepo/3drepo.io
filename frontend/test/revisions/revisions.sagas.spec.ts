@@ -20,6 +20,7 @@ import { expectSaga } from 'redux-saga-test-plan';
 import { mockServer } from '../../internals/testing/mockServer';
 import * as RevisionsSaga from '@/v5/store/revisions/revisions.sagas';
 import { RevisionsActions } from '@/v5/store/revisions/revisions.redux';
+import api from '@/v5/services/api/default';
 
 describe('Revisions: sagas', () => {
 	const teamspace = 'teamspace';
@@ -112,6 +113,13 @@ describe('Revisions: sagas', () => {
 		const progressBar = (e) => void e;
 
 		it('should create a revision on an existing container', async () => {
+			const post = api.post;
+			const spy = jest.spyOn(api, 'post').mockImplementation((url, body) => {
+				// Transforms the formData to a string to avoid a problem with axios
+				// in its node implementation.
+				return post(url, body.toString());
+			});
+
 			mockServer
 				.post(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions`)
 				.reply(200, {body: {}});
@@ -121,6 +129,8 @@ describe('Revisions: sagas', () => {
 				.put(RevisionsActions.setUploadComplete(containerId, false))
 				.put(RevisionsActions.setUploadComplete(containerId, true))
 				.silentRun();
+
+			spy.mockClear();
 		})
 	})
 })
