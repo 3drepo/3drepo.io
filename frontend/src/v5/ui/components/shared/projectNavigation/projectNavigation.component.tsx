@@ -28,7 +28,8 @@ export const ProjectNavigation = (): JSX.Element => {
 			<Link to={`${url}/t/federations`}><FormattedMessage id="projectNavigation.federations" defaultMessage="Federations" /></Link>
 			<Link to={`${url}/t/containers`}><FormattedMessage id="projectNavigation.containers" defaultMessage="Containers" /></Link>
 			<Link to={`${discardUrlComponent(url, 'settings')}/t/settings`}><FormattedMessage id="projectNavigation.settings" defaultMessage="Settings" /></Link>
-			<Link to={`${url}/t/users_permissions`}><FormattedMessage id="projectNavigation.usersPermissions" defaultMessage="Users permissions" /></Link>
+			<Link to={`${url}/t/project_permissions`}><FormattedMessage id="projectNavigation.projectPermissions" defaultMessage="Project permissions" /></Link>
+			<Link to={`${url}/t/user_permissions`}><FormattedMessage id="projectNavigation.userPermission" defaultMessage="User permissions" /></Link>
 		</Container>
 	);
 };

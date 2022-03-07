@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -21,11 +21,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
 import { selectCurrentUser } from '@/v4/modules/currentUser';
-import { Container, V4ModelsPermissions } from './userPermissions.styles';
+import { Container, V4ProjectsPermissions } from './projectPermissions.styles';
 
-export const UserPermissions = () => {
+export const ProjectPermissions = () => {
 	const dispatch = useDispatch();
-	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails()?.name;
+	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails().name;
 	const username = useSelector(selectCurrentUser)?.username;
 
 	useEffect(() => {
@@ -44,7 +44,7 @@ export const UserPermissions = () => {
 
 	return (
 		<Container>
-			<V4ModelsPermissions />
+			<V4ProjectsPermissions />
 		</Container>
 	);
 };

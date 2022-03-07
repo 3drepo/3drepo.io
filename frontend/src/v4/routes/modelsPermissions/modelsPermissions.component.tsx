@@ -28,7 +28,6 @@ import { TextOverlay } from '../components/textOverlay/textOverlay.component';
 import {
 	Container,
 	ModelsContainer,
-	OverflowWrapper,
 	PermissionsContainer
 } from './modelsPermissions.styles';
 
@@ -70,6 +69,7 @@ interface IProps {
 	onSelectionChange: (selectedModels) => void;
 	onPermissionsChange: (modelsWithPermissions) => void;
 	isV5: boolean;
+	selectedContFedId?: string;
 }
 
 interface IState {
@@ -156,12 +156,12 @@ export class ModelsPermissions extends PureComponent<IProps, IState> {
 	public componentDidMount() {
 		const queryParams = queryString.parse(this.props.location.search);
 		if (queryParams.modelId) {
-			this.props.onSelectionChange([{model: queryParams.modelId}]);
+			this.props.onSelectionChange([{ model: queryParams.modelId }]);
 		}
 	}
 
 	public render() {
-		const { models, permissions, selectedModels, className, isV5 } = this.props;
+		const { models, permissions, selectedModels, className, isV5, location } = this.props;
 		const { permissionsRevision } = this.state;
 		const CELLS = isV5 ? MODEL_TABLE_CELLS_V5 : MODEL_TABLE_CELLS ;
 		// eslint-disable-next-line max-len
@@ -187,13 +187,13 @@ export class ModelsPermissions extends PureComponent<IProps, IState> {
 					}
 				</ModelsContainer>
 				<PermissionsContainer item>
-							<PermissionsTable
-								key={permissionsRevision}
-								permissions={permissions}
-								roles={MODEL_ROLES_LIST}
-								onPermissionsChange={this.handlePermissionsChange}
-								rowStateInterceptor={this.hasDisabledPermissions}
-							/>
+					<PermissionsTable
+						key={permissionsRevision}
+						permissions={permissions}
+						roles={MODEL_ROLES_LIST}
+						onPermissionsChange={this.handlePermissionsChange}
+						rowStateInterceptor={this.hasDisabledPermissions}
+					/>
 					{
 						!selectedModels.length ?
 							<TextOverlay content={textOverlayMessage} /> :

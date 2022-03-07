@@ -22,6 +22,7 @@ import RadioButtonCheckedIcon from '@assets/icons/controls/radio_button_checked.
 import CheckboxIcon from '@assets/icons/controls/checkbox.svg';
 import CheckboxCheckedIcon from '@assets/icons/controls/checkbox_checked.svg';
 import CheckboxIndeterminatedIcon from '@assets/icons/controls/checkbox_indeterminated.svg';
+import ChevronIcon from '@assets/icons/chevron.svg';
 
 export const COLOR = {
 	PRIMARY_MAIN_CONTRAST: '#fff',
@@ -242,6 +243,9 @@ export const theme = createMuiTheme({
 			icon: createElement(RadioButtonIcon),
 			checkedIcon: createElement(RadioButtonCheckedIcon),
 		},
+		MuiSelect: {
+			IconComponent: ChevronIcon,
+		},
 		MuiTooltip: {
 			PopperProps: {
 				// This is necessary for overriding styles of v4 tooltips
@@ -323,6 +327,7 @@ export const theme = createMuiTheme({
 		MuiMenuItem: {
 			root: {
 				margin: '0',
+				padding: '8px 16px',
 			},
 		},
 		MuiList: {
@@ -331,8 +336,8 @@ export const theme = createMuiTheme({
 				boxShadow: SHADOW.LEVEL_5,
 			},
 			padding: {
-				paddingTop: 0,
-				paddingBottom: 0,
+				paddingTop: 8,
+				paddingBottom: 8,
 			},
 		},
 		MuiListItem: {
@@ -476,9 +481,8 @@ export const theme = createMuiTheme({
 				},
 			},
 			icon: {
-				marginTop: '38px',
+				backgroundColor: COLOR.ERROR_DARK,
 				top: 'inherit',
-				right: '5px',
 			},
 		},
 		MuiTextField: {
@@ -520,6 +524,18 @@ export const theme = createMuiTheme({
 			formControl: {
 				'label + &': {
 					marginTop: 0,
+				},
+				'& .MuiSelect-selectMenu': {
+					height: 35,
+				},
+				'& svg': {
+					right: 14,
+					marginTop: 40,
+					position: 'absolute',
+					pointerEvents: 'none',
+					'& path': {
+						fill: COLOR.BASE_MAIN,
+					},
 				},
 			},
 		},

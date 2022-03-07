@@ -84,6 +84,10 @@ export const ContainerEllipsisMenu = ({
 					id: 'containers.ellipsisMenu.editPermissions',
 					defaultMessage: 'Edit Permissions',
 				})}
+				to={{
+					pathname: './user_permissions',
+					search: `?modelId=${container._id}`,
+				}}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
