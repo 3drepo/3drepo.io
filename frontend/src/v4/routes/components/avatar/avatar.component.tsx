@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { PureComponent } from 'react';
 import { memoize } from 'lodash';
 
 import { AvatarPlaceholder, Container, StyledAvatar } from './avatar.styles';
@@ -41,7 +39,7 @@ const getInitials = memoize(
 		.toUpperCase()
 );
 
-export class Avatar extends React.PureComponent<IProps, IState> {
+export class Avatar extends PureComponent<IProps, IState> {
 	public state = {
 		avatarLoaded: false
 	};

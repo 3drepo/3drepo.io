@@ -67,6 +67,9 @@ ResponseCodes.templates = {
 	maxSizeExceeded: { message: 'The file is bigger than the maximum size allowed', status: 400 },
 	quotaLimitExceeded: { message: 'Insufficient quota.', status: 401 },
 
+	// File download related error
+	fileNotFound: { message: 'No file can be downloaded', status: 404 },
+
 	// View related error
 	viewNotFound: { message: 'View not found', status: 404 },
 

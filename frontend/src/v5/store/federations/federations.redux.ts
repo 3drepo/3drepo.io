@@ -26,6 +26,7 @@ import {
 	FetchFederationViewsSuccessAction,
 	DeleteFederationSuccessAction,
 	UpdateFederationSettingsSuccessAction,
+	UpdateFederationSuccessAction,
 } from '@/v5/store/federations/federations.types';
 import { prepareSingleFederationData } from '@/v5/store/federations/federations.helpers';
 import { Constants } from '../../helpers/actions.helper';
@@ -46,6 +47,7 @@ export const { Types: FederationsTypes, Creators: FederationsActions } = createA
 	updateFederationSettingsSuccess: ['projectId', 'federationId', 'updatedSettings'],
 	deleteFederation: ['teamspace', 'projectId', 'federationId'],
 	deleteFederationSuccess: ['projectId', 'federationId'],
+	updateFederationSuccess: ['projectId', 'federationId', 'updatedFederation'],
 }, { prefix: 'FEDERATIONS/' }) as { Types: Constants<IFederationsActionCreators>; Creators: IFederationsActionCreators };
 
 export const INITIAL_STATE: IFederationsState = {
@@ -158,6 +160,21 @@ export const deleteFederationSuccess = (state = INITIAL_STATE, {
 	},
 });
 
+export const updateFederationSuccess = (state = INITIAL_STATE, {
+	projectId,
+	federationId,
+	updatedFederation,
+}: UpdateFederationSuccessAction) => ({
+	...state,
+	federations: {
+		...state.federationsByProject,
+		[projectId]: state.federationsByProject[projectId].map((federation) => {
+			if (federationId !== federation._id) return federation;
+			return ({ ...federation, ...updatedFederation });
+		}),
+	},
+});
+
 export const reducer = createReducer<IFederationsState>(INITIAL_STATE, {
 	[FederationsTypes.FETCH_FEDERATIONS_SUCCESS]: fetchFederationsSuccess,
 	[FederationsTypes.FETCH_FEDERATION_STATS_SUCCESS]: fetchStatsSuccess,
@@ -166,4 +183,5 @@ export const reducer = createReducer<IFederationsState>(INITIAL_STATE, {
 	[FederationsTypes.FETCH_FEDERATION_SETTINGS_SUCCESS]: fetchFederationSettingsSuccess,
 	[FederationsTypes.UPDATE_FEDERATION_SETTINGS_SUCCESS]: updateFederationSettingsSuccess,
 	[FederationsTypes.DELETE_FEDERATION_SUCCESS]: deleteFederationSuccess,
+	[FederationsTypes.UPDATE_FEDERATION_SUCCESS]: updateFederationSuccess,
 }) as (state: IFederationsState, action:any) => IFederationsState;

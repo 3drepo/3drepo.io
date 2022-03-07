@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React from 'react';
+import { createElement } from 'react';
 import { createMuiTheme } from '@material-ui/core/styles';
 import { TypographyOptions } from '@material-ui/core/styles/createTypography';
 import RadioButtonIcon from '@assets/icons/controls/radio_button.svg';
@@ -22,6 +22,7 @@ import RadioButtonCheckedIcon from '@assets/icons/controls/radio_button_checked.
 import CheckboxIcon from '@assets/icons/controls/checkbox.svg';
 import CheckboxCheckedIcon from '@assets/icons/controls/checkbox_checked.svg';
 import CheckboxIndeterminatedIcon from '@assets/icons/controls/checkbox_indeterminated.svg';
+import ChevronIcon from '@assets/icons/chevron.svg';
 
 export const COLOR = {
 	PRIMARY_MAIN_CONTRAST: '#fff',
@@ -233,14 +234,17 @@ export const theme = createMuiTheme({
 		},
 		MuiCheckbox: {
 			color: 'primary',
-			icon: React.createElement(CheckboxIcon),
-			checkedIcon: React.createElement(CheckboxCheckedIcon),
-			indeterminateIcon: React.createElement(CheckboxIndeterminatedIcon),
+			icon: createElement(CheckboxIcon),
+			checkedIcon: createElement(CheckboxCheckedIcon),
+			indeterminateIcon: createElement(CheckboxIndeterminatedIcon),
 		},
 		MuiRadio: {
 			color: 'primary',
-			icon: React.createElement(RadioButtonIcon),
-			checkedIcon: React.createElement(RadioButtonCheckedIcon),
+			icon: createElement(RadioButtonIcon),
+			checkedIcon: createElement(RadioButtonCheckedIcon),
+		},
+		MuiSelect: {
+			IconComponent: ChevronIcon,
 		},
 		MuiTooltip: {
 			PopperProps: {
@@ -323,6 +327,7 @@ export const theme = createMuiTheme({
 		MuiMenuItem: {
 			root: {
 				margin: '0',
+				padding: '8px 16px',
 			},
 		},
 		MuiList: {
@@ -331,8 +336,8 @@ export const theme = createMuiTheme({
 				boxShadow: SHADOW.LEVEL_5,
 			},
 			padding: {
-				paddingTop: 0,
-				paddingBottom: 0,
+				paddingTop: 8,
+				paddingBottom: 8,
 			},
 		},
 		MuiListItem: {
@@ -476,9 +481,8 @@ export const theme = createMuiTheme({
 				},
 			},
 			icon: {
-				marginTop: '38px',
+				backgroundColor: COLOR.ERROR_DARK,
 				top: 'inherit',
-				right: '5px',
 			},
 		},
 		MuiTextField: {
@@ -520,6 +524,18 @@ export const theme = createMuiTheme({
 			formControl: {
 				'label + &': {
 					marginTop: 0,
+				},
+				'& .MuiSelect-selectMenu': {
+					height: 35,
+				},
+				'& svg': {
+					right: 14,
+					marginTop: 40,
+					position: 'absolute',
+					pointerEvents: 'none',
+					'& path': {
+						fill: COLOR.BASE_MAIN,
+					},
 				},
 			},
 		},

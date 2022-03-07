@@ -15,16 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+const UserConstants = {};
+UserConstants.USERNAME_BLACKLIST = [
+	'payment',
+	'test',
+	'os',
+	'info',
+	'contact',
+	'cookies',
+	'password-change',
+	'password-forgot',
+	'pricing',
+	'privacy',
+	'register-request',
+	'register-verify',
+	'signUp',
+	'termsAndConditions',
+	'false',
+	'admin',
+	'local',
+	'root',
+	'notifications',
+	'loginRecord',
+];
 
-import ChevronIcon from '@assets/icons/chevron.svg';
-import { SelectProps } from '@material-ui/core';
-import { SelectInput } from './select.styles';
-
-export const SelectBase = ({ children, ...props }: SelectProps, ref: React.Ref<HTMLButtonElement>) => (
-	<SelectInput IconComponent={ChevronIcon} ref={ref} {...props}>
-		{children}
-	</SelectInput>
-);
-
-export const Select = React.forwardRef(SelectBase);
+module.exports = UserConstants;

@@ -48,7 +48,7 @@ try {
 }
 
 runScripts(scripts).catch((err) => {
-	logger.logError('Script failed with errors');
+	logger.logError(`Script failed with errors: ${err.message}`);
 	// eslint-disable-next-line no-console
 	console.log(err);
 }).finally(process.exit);

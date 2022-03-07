@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 
 import Tabs from '@material-ui/core/Tabs';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -93,7 +93,7 @@ export const IssueSchema = Yup.object().shape({
 	desc: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
 });
 
-class IssueDetailsFormComponent extends React.PureComponent<IProps, IState> {
+class IssueDetailsFormComponent extends PureComponent<IProps, IState> {
 	get isNewIssue() {
 		return !this.props.issue._id;
 	}

@@ -54,7 +54,7 @@ Sessions.createSession = (req, res) => {
 				ipAddress: req.ips[0] || req.ip,
 				userAgent: req.headers['user-agent'],
 				socketId: req.headers['x-socket-id'],
-				referer: req.headers.referer });
+				referer: updatedUser.referer });
 
 			respond(req, res, templates.ok);
 		}

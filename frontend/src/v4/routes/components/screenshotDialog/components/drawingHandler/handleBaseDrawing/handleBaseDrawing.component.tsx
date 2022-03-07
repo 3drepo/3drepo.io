@@ -14,8 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import * as React from 'react';
+import { PureComponent } from 'react';
 import {getDrawFunction} from '../drawingHandler.helpers';
 
 export interface IHandleBaseDrawingProps {
@@ -34,7 +33,7 @@ export interface IHandleBaseDrawingStates {
 	isCurrentlyDrawn: boolean;
 }
 
-export class HandleBaseDrawing<P, S> extends React.PureComponent<IHandleBaseDrawingProps & P> {
+export class HandleBaseDrawing<P, S> extends PureComponent<IHandleBaseDrawingProps & P> {
 
 	public state = {
 		isCurrentlyDrawn: false,

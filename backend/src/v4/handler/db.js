@@ -262,6 +262,37 @@
 		});
 	};
 
+	Handler.indexExists = async (database, colName, index) => {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.indexExists(index);
+	};
+
+	Handler.createIndex = async (database, colName, indexDef) => {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.createIndex(indexDef);
+	};
+
+	Handler.dropIndex = async (database, colName, indexName) => {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.dropIndex(indexName);
+	};
+
+	Handler.getAllValues = async (database, colName, key) => {
+		const collection = await Handler.getCollection(database, colName);
+		return collection.distinct(key);
+	};
+
+	Handler.listDatabases = async () => {
+		try {
+			const res = await Handler.runCommand("admin", {listDatabases :1 });
+			return res.databases;
+		} catch (err) {
+			Handler.disconnect();
+			throw err;
+		}
+
+	};
+
 	Handler.listCollections = async function (database) {
 		try {
 			const dbConn = await Handler.getDB(database);

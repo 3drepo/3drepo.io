@@ -19,6 +19,8 @@ var hostname   = "127.0.0.1";
 var http_port  = 8080;
 var https_port = 443;
 
+var tmpDir = require("os").tmpdir();
+
 module.exports = {
 	host: hostname,
 	port: 8080,
@@ -79,7 +81,7 @@ module.exports = {
 		bucketName: "3drepo-travis"
 	},
 	fs: {
-		path: require("path").resolve(__dirname, '../../backend/tests/v5/fileShare'),
+		path: tmpDir,
 		levels: 2
 	},
 	defaultStorage: "fs",
@@ -99,8 +101,8 @@ module.exports = {
 		worker_queue: 'jobq',
 		model_queue: 'modelq',
 		callback_queue: 'callbackq',
-		upload_dir: '/tmp',
-		shared_storage: '/tmp',
+		upload_dir: tmpDir,
+		shared_storage: tmpDir,
 		event_exchange: 'eventExchange'
 	},
 	subscriptions: {

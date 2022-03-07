@@ -14,8 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { PureComponent } from 'react';
 import { Form, Formik } from 'formik';
-import * as React from 'react';
 import * as Yup from 'yup';
 import { renderWhenTrueOtherwise } from '../../../../helpers/rendering';
 import { clientConfigService } from '../../../../services/clientConfig';
@@ -70,7 +70,7 @@ const Loader = () => (
 		</LoaderContainer>
 );
 
-export class AttachResourcesDialog extends React.PureComponent<IProps, IState> {
+export class AttachResourcesDialog extends PureComponent<IProps, IState> {
 	public state = {
 		selectedTab: 0
 	};

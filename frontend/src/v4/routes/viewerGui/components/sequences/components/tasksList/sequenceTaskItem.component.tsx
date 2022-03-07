@@ -17,7 +17,7 @@
 
 import CollapsedIcon from '@material-ui/icons/ChevronRight';
 import ExpandedIcon from '@material-ui/icons/ExpandMore';
-import React from 'react';
+import { PureComponent } from 'react';
 import { SubTasksItemContainer, Task, TaskButton, TaskItemLabel, TaskSmallDot } from '../../sequences.styles';
 
 export interface IActivity {
@@ -44,7 +44,7 @@ const CollapseButton = ({collapsed, onClick}) => {
 	return (<TaskButton onClick={onClick}><Icon /></TaskButton>);
 };
 
-export class TaskItem extends React.PureComponent<IProps, IState> {
+export class TaskItem extends PureComponent<IProps, IState> {
 	public state: IState = {
 		collapsed: this.props.defaultCollapsed  || false
 	};

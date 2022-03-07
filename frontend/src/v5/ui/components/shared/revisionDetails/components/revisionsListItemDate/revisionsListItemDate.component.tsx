@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { Display } from '@/v5/ui/themes/media';
 import { Text } from './revisionsListItemDate.styles';
@@ -26,10 +26,8 @@ type IDashboardListItemDate = {
 	tabletWidth?: number;
 	mobileWidth?: number;
 	className?: string;
-	meta?: boolean;
 	active?: boolean;
 	hideWhenSmallerThan?: Display;
-	hover?: boolean;
 };
 
 export const RevisionsListItemDate = ({

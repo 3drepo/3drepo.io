@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { PureComponent, Ref, forwardRef, FC } from 'react';
 import Tooltip from '@material-ui/core/Tooltip';
 
 import { VIEWER_EVENTS, VIEWER_MEASURING_MODE } from '../../../../constants/viewer';
@@ -40,8 +38,8 @@ interface IUpdatePinButtonProps {
 	onClickButton: () => void;
 }
 
-const UpdatePinButton: React.FC<IUpdatePinButtonProps> = React.forwardRef(
-	({ pinLabel, disabled, onClickButton, ...props }, ref: React.Ref<HTMLSpanElement>) => (
+const UpdatePinButton: FC<IUpdatePinButtonProps> = forwardRef(
+	({ pinLabel, disabled, onClickButton, ...props }, ref: Ref<HTMLSpanElement>) => (
 		<Container ref={ref} {...props}>
 			<ContainedButton
 				onClick={onClickButton}
@@ -54,7 +52,7 @@ const UpdatePinButton: React.FC<IUpdatePinButtonProps> = React.forwardRef(
 	)
 );
 
-export class PinButton extends React.PureComponent<IProps, any> {
+export class PinButton extends PureComponent<IProps, any> {
 	public state = {
 		active: false,
 		wasPinDropped: false

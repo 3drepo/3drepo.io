@@ -87,7 +87,7 @@ SessionService.regenerateAuthSession = (req, user) => {
 				ipAddress: req.ips[0] || req.ip,
 				userAgent: req.headers["user-agent"],
 				socketId: req.headers[C.HEADER_SOCKET_ID],
-				referer: req.headers.referer });
+				referer: user.referer });
 			resolve(req.session);
 
 		});
