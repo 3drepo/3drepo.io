@@ -19,7 +19,7 @@ const { createResponseCode, templates } = require('../../../../../../../utils/re
 const Yup = require('yup');
 const { checkLegendExists } = require('../../../../../../../models/legends');
 const { getModelByQuery } = require('../../../../../../../models/modelSettings');
-const { getProjectById } = require('../../../../../../../models/projects');
+const { getProjectByQuery } = require('../../../../../../../models/projects');
 const { getViewById } = require('../../../../../../../models/views');
 const { respond } = require('../../../../../../../utils/responder');
 const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
@@ -57,7 +57,7 @@ const defaultLegendType = (teamspace, model) => types.id.nullable().test('check-
 
 const modelNameType = (teamspace, project, model) => types.strings.title.test('name-already-used', 'Name is already used within the project', async (value) => {
 	try {
-		let { models } = await getProjectById(teamspace, project, { models: 1 });
+		let { models } = await getProjectByQuery(teamspace, {_id: project}, { models: 1 });
 		if (model) {
 			models = models.flatMap((modelId) => (modelId === model ? [] : modelId));
 		}

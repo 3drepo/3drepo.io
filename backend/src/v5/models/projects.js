@@ -22,11 +22,10 @@ const { generateUUID } = require('../utils/helper/uuids');
 const { getCommonElements } = require('../utils/helper/arrays');
 const { templates } = require('../utils/responseCodes');
 
-const findProjects = (ts, query, projection, sort) => db.find(ts, 'projects', query, projection, sort);
-const findOneProject = (ts, query, projection) => db.findOne(ts, 'projects', query, projection);
-const updateOneProject = (ts, query, data) => db.updateOne(ts, 'projects', query, data);
-const addOneProject = (ts, data) => db.insertOne(ts, 'projects', data);
-const deleteOneProject = (ts, query) => db.deleteOne(ts, 'projects', query);
+const colName = 'projects';
+const findProjects = (ts, query, projection, sort) => db.find(ts, colName, query, projection, sort);
+const findOneProject = (ts, query, projection) => db.findOne(ts, colName, query, projection);
+const updateOneProject = (ts, query, data) => db.updateOne(ts, colName, query, data);
 
 Projects.addModelToProject = (ts, project, model) => updateOneProject(
 	ts,
@@ -40,46 +39,38 @@ Projects.removeModelFromProject = (ts, project, model) => updateOneProject(
 	{ $pull: { models: model } },
 );
 
-Projects.getProjectById = async (ts, projectId, projection) => {
-	const res = await findOneProject(ts, { _id: projectId }, projection);
+
+Projects.getProjectByQuery = async (ts, query, projection) => {
+	const res = await findOneProject(ts, query, projection);
 
 	if (!res) {
 		throw templates.projectNotFound;
 	}
 
 	return res;
-};
-
-Projects.getProjectByName = async (ts, projectName, projection) => {
-	const res = await findOneProject(ts, { name: projectName }, projection);
-	if (!res) {
-		throw templates.projectNotFound;
-	}
-
-	return res;
-};
+}
 
 Projects.modelsExistInProject = async (teamspace, project, models) => {
 	if (!models.length) return false;
-	const { models: projModels } = await Projects.getProjectById(teamspace, project, { models: 1 });
+	const { models: projModels } = await Projects.getProjectByQuery(teamspace, { _id: project }, { models: 1 });
 	return getCommonElements(models, projModels).length === models.length;
 };
 
 Projects.getProjectList = (ts, projection = { _id: 1, name: 1 }) => findProjects(ts, {}, projection);
 
 Projects.getProjectAdmins = async (ts, project) => {
-	const { permissions } = await Projects.getProjectById(ts, project, { permissions: 1 });
+	const { permissions } = await Projects.getProjectByQuery(ts, { _id: project }, { permissions: 1 });
 	return permissions.flatMap((entry) => (entry.permissions.includes(PROJECT_ADMIN) ? [entry.user] : []));
 };
 
 Projects.createProject = async (teamspace, newProject) => {
 	const addedProject = { _id: generateUUID(), ...newProject };
-	await addOneProject(teamspace, addedProject);
+	await db.insertOne(teamspace, colName, addedProject);
 	return addedProject;
 };
 
 Projects.deleteProject = async (teamspace, projectId) => {
-	const { deletedCount } = await deleteOneProject(teamspace, { _id: projectId });
+	const { deletedCount } = await db.deleteOne(teamspace, colName, { _id: projectId });
 
 	if (deletedCount === 0) {
 		throw templates.projectNotFound;

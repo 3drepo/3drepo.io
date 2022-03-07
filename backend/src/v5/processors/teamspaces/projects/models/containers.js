@@ -23,7 +23,7 @@ const Groups = require('./commons/groups');
 const Views = require('./commons/views');
 const { fetchFileStream } = require('../../../../models/fileRefs');
 const fs = require('fs/promises');
-const { getProjectById } = require('../../../../models/projects');
+const { getProjectByQuery } = require('../../../../models/projects');
 const { logger } = require('../../../../utils/logger');
 const { queueModelUpload } = require('../../../../services/queue');
 const { templates } = require('../../../../utils/responseCodes');
@@ -36,7 +36,7 @@ Containers.addContainer = addModel;
 Containers.deleteContainer = deleteModel;
 
 Containers.getContainerList = async (teamspace, project, user) => {
-	const { models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
+	const { models } = await getProjectByQuery(teamspace, { _id: project }, { permissions: 1, models: 1 });
 	const modelSettings = await getContainers(teamspace, models, { _id: 1, name: 1, permissions: 1 });
 
 	return getModelList(teamspace, project, user, modelSettings);

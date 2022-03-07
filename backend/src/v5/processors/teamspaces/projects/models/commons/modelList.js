@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addModelToProject, getProjectById, removeModelFromProject } = require('../../../../../models/projects');
+const { addModelToProject, getProjectByQuery, removeModelFromProject } = require('../../../../../models/projects');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
 const { addModel } = require('../../../../../models/modelSettings');
 const { getFavourites } = require('../../../../../models/users');
@@ -37,7 +37,7 @@ ModelList.deleteModel = async (teamspace, project, model) => {
 };
 
 ModelList.getModelList = async (teamspace, project, user, modelSettings) => {
-	const { permissions } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
+	const { permissions } = await getProjectByQuery(teamspace, {_id: project}, { permissions: 1, models: 1 });
 
 	const [isTSAdmin, favourites] = await Promise.all([
 		isTeamspaceAdmin(teamspace, user),

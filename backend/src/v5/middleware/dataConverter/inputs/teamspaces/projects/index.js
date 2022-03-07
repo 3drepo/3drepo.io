@@ -18,7 +18,7 @@
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const Yup = require('yup');
-const { getProjectByName } = require('../../../../../models/projects');
+const { getProjectByQuery } = require('../../../../../models/projects');
 const { respond } = require('../../../../../utils/responder');
 const { types } = require('../../../../../utils/helper/yup');
 
@@ -26,24 +26,25 @@ const Projects = {};
 
 Projects.validateProjectData = async (req, res, next) => {
 	const schema = Yup.object().shape({
-		name: types.strings.title.required().matches('^[^/?=#+]{0,119}[^/?=#+ ]{1}$', 'Invalid project name'),
+		name: types.strings.title.required(),
 	}).strict(true).noUnknown();
 
 	try {
-		await schema.validate(req.body);
+		const { body, params } = req;
+		await schema.validate(body);
 
 		try {
-			const existingProject = await getProjectByName(req.params.teamspace, req.body.name, { _id: 1 });
+			const existingProject = await getProjectByQuery(params.teamspace, { name: body.name }, { _id: 1 });
 
 			// If a project is being edited we only want to throw error if the new name belongs to a different project
-			if (UUIDToString(existingProject._id) !== UUIDToString(req.params.project)) {
-				return respond(req, res, createResponseCode(templates.invalidArguments, 'Project already exists.'));
+			if (UUIDToString(existingProject._id) !== UUIDToString(params.project)) {
+				return respond(req, res, createResponseCode(templates.invalidArguments, 'Project with the same name already exists.'));
 			}
 		} catch {
 			// do nothing, the project name is unique
 		}
 
-		return next();
+		await next();
 	} catch (err) {
 		return respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}

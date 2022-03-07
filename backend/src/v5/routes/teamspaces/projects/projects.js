@@ -22,7 +22,7 @@ const { UUIDToString } = require('../../../utils/helper/uuids');
 const { getUserFromSession } = require('../../../utils/sessions');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
-const { validateProjectData } = require('../../../middleware/dataConverter/inputs/teamspaces/projects/projects');
+const { validateProjectData } = require('../../../middleware/dataConverter/inputs/teamspaces/projects');
 
 const serialiseProject = (project) => ({ ...project, _id: UUIDToString(project._id) });
 

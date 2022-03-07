@@ -16,7 +16,7 @@
  */
 
 const { isProjectAdmin, isTeamspaceAdmin } = require('../../../utils/permissions/permissions');
-const { getProjectById } = require('../../../models/projects');
+const { getProjectByQuery } = require('../../../models/projects');
 const { getUserFromSession } = require('../../../utils/sessions');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
@@ -29,7 +29,7 @@ ProjectPerms.isProjectAdmin = async (req, res, next) => {
 	const { teamspace, project } = params;
 
 	try {
-		await getProjectById(teamspace, project);
+		await getProjectByQuery(teamspace, { _id: project});
 		const isAdmin = await isTeamspaceAdmin(teamspace, user) || await isProjectAdmin(teamspace, project, user);
 
 		if (isAdmin) {

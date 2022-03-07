@@ -150,7 +150,7 @@ const model1Revisions = [
 	{ _id: ServiceHelper.generateUUIDString(), author: 'user1', timestamp: new Date(), void: true },
 ];
 
-ProjectsModel.getProjectById.mockImplementation(() => project);
+ProjectsModel.getProjectByQuery.mockImplementation(() => project);
 ProjectsModel.addModelToProject.mockResolvedValue();
 ModelSettings.getModelByQuery.mockImplementation((ts, query) => {
 	if (query.name === 'model1') Promise.resolve(modelList[0]);

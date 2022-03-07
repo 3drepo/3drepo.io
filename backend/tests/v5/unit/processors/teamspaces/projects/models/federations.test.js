@@ -105,7 +105,7 @@ const federationSettings = {
 const user1Favourites = [1];
 const project = { _id: 1, name: 'project', models: federationList.map(({ _id }) => _id) };
 
-ProjectsModel.getProjectById.mockImplementation(() => project);
+ProjectsModel.getProjectByQuery.mockImplementation(() => project);
 ModelSettings.getFederations.mockImplementation(() => federationList);
 const getFederationByIdMock = ModelSettings.getFederationById.mockImplementation((teamspace,
 	federation) => federationSettings[federation]);

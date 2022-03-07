@@ -33,8 +33,8 @@ const ProjectMiddlewares = require(`${src}/middleware/permissions/components/pro
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 Permissions.isTeamspaceAdmin.mockImplementation((teamspace, user) => user === 'tsAdmin');
 Permissions.isProjectAdmin.mockImplementation((teamspace, project, user) => user === 'projAdmin');
-Projects.getProjectById.mockImplementation((teamspace, project) => {
-	if (project !== 'p1') {
+Projects.getProjectByQuery.mockImplementation((teamspace, query) => {
+	if (query._id !== 'p1') {
 		throw templates.projectNotFound;
 	}
 });

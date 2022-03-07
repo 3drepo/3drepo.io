@@ -23,7 +23,7 @@ const Responder = require(`${src}/utils/responder`);
 jest.mock('../../../../../../../../src/v5/models/projects');
 const ProjectsModel = require(`${src}/models/projects`);
 
-const Projects = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/projects`);
+const Projects = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -31,7 +31,7 @@ const { templates } = require(`${src}/utils/responseCodes`);
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const existingProjectName = 'existing';
-ProjectsModel.getProjectByName.mockImplementation((teamspace, name) => (name !== existingProjectName
+ProjectsModel.getProjectByQuery.mockImplementation((teamspace, query) => (query.name !== existingProjectName
 	? Promise.reject(templates.modelNotFound)
 	: Promise.resolve({ name: existingProjectName, _id: 'pr' })));
 
