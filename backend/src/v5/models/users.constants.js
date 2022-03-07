@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,17 +14,28 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-const config = require('./jest.config');
-
-config.coveragePathIgnorePatterns = [
-	...config.coveragePathIgnorePatterns,
-	'/routes/',
-	'responder.js',
-	'responseCodes.js',
-	'users.constants.js',
+const UserConstants = {};
+UserConstants.USERNAME_BLACKLIST = [
+	'payment',
+	'test',
+	'os',
+	'info',
+	'contact',
+	'cookies',
+	'password-change',
+	'password-forgot',
+	'pricing',
+	'privacy',
+	'register-request',
+	'register-verify',
+	'signUp',
+	'termsAndConditions',
+	'false',
+	'admin',
+	'local',
+	'root',
+	'notifications',
+	'loginRecord',
 ];
 
-config.testMatch = ['**/tests/**/unit/**/*.test.[jt]s?(x)'];
-
-module.exports = config;
+module.exports = UserConstants;

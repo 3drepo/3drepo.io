@@ -445,8 +445,8 @@ export const theme = createTheme({
 					boxShadow: SHADOW.LEVEL_5,
 				},
 				padding: {
-					paddingTop: 0,
-					paddingBottom: 0,
+					paddingTop: 8, // TODO check if 0 instead
+					paddingBottom: 8, // TODO check if 0 instead
 				},
 			},
 		},
@@ -608,10 +608,22 @@ export const theme = createTheme({
 						border: 0,
 					},
 					'& ~ svg': {
-						bottom: 13,
 						position: 'absolute',
+						bottom: 13,
 						right: 14,
 					},
+					// '& .MuiSelect-selectMenu': {
+					// 	height: 35,
+					// },
+					// '& svg': {
+					// 	right: 14,
+					// 	marginTop: 40,
+					// 	position: 'absolute',
+					// 	pointerEvents: 'none',
+					// 	'& path': {
+					// 		fill: COLOR.BASE_MAIN,
+					// 	},
+					// },
 				},
 			},
 		},
@@ -746,9 +758,6 @@ export const theme = createTheme({
 							fill: COLOR.BASE_LIGHTEST,
 						},
 					},
-					// '&$disabled $path': {
-					// 	fill: COLOR.BASE_LIGHTEST,
-					// },
 					[`&:hover path,
 					  &:active path`]: {
 						fill: COLOR.PRIMARY_MAIN_CONTRAST,

@@ -66,6 +66,7 @@ export const FormSelect = styled(FormSelectBase)`
 		left: 0;
 		bottom: 0;
 		position: absolute;
+		
 		& + ${ViewLabel} {
 			margin-left: 44px;
 		}
