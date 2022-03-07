@@ -15,78 +15,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { SESSION_HEADER, session } = require('../sessions');
 const SocketIO = require('socket.io');
-const SocketsManager = require('./socketsManager');
-const chatLabel = require('../../utils/logger').labels.chat;
-const { cn_queue: { event_exchange: eventExchange } } = require('../../utils/config');
-const { events } = require('../eventsManager/eventsManager.constants');
-const { listenToExchange } = require('../../handler/queue');
-const logger = require('../../utils/logger').logWithLabel(chatLabel);
 const sharedSession = require('express-socket.io-session');
-const { subscribe } = require('../eventsManager/eventsManager');
 
 const RealTimeMsging = {};
 
-const onMessageV4 = (service, msg) => {
-	const { event, data, dm, recipient: sessionId, emitter, channel } = msg;
-	if (dm) {
-		const recipients = SocketsManager.getSocketIdsBySession(sessionId);
-		if (recipients) {
-			recipients.forEach((socketId) => {
-				const recipientSocket = SocketsManager.getSocketById(socketId);
-				if (recipientSocket) {
-					recipientSocket.send({ event, data });
-				}
-			});
-		}
-	} else if (channel) {
-		const sender = SocketsManager.getSocketById(emitter)?.broadcast || service;
-		logger.logDebug(`[${channel}][NEW EVENT]: ${event}`);
-		sender.to(channel).emit(event, data);
-	} else {
-		logger.logError('Unrecognised event message', msg);
-	}
-};
+const socketWrapper = (callback) => (socket) => callback({
+	id: socket.id,
+	sessionId: socket?.handshake?.session?.id,
+	onError: (fn) => socket.on('error', fn),
+	onDisconnect: (fn) => socket.on('disconnect', fn),
+	onJoin: (fn) => socket.on('join', fn),
+	onLeave: (fn) => socket.on('leave', fn),
+	emit: socket.emit,
+	join: socket.join,
+	leave: socket.leave,
 
-const onMessage = (service) => (data) => {
-	try {
-		const content = JSON.parse(data.content);
-		onMessageV4(service, content);
-	} catch (err) {
-		logger.logError(`Failed to process event message ${err.messsage}`);
-	}
-};
+});
 
-const subscribeToEvents = (service) => {
-	subscribe(events.SESSION_CREATED, ({ sessionID, socketId }) => {
-		if (SocketsManager.getSocketById(socketId)) {
-			SocketsManager.addSocketIdToSession(sessionID, socketId);
-		}
-	});
-
-	listenToExchange(eventExchange, onMessage(service));
-};
-
-const init = (server) => {
-	logger.logDebug('Initialising service');
+RealTimeMsging.createApp = (server, sessionService, sessionHeader, onNewSockets) => {
 	const service = SocketIO(server, { path: '/chat' });
+	service.use(sharedSession(sessionService, { autoSave: true }));
 	service.use(({ handshake }, next) => {
-		if (handshake.query[SESSION_HEADER] && !handshake.headers.cookie) {
+		if (handshake.query[sessionHeader] && !handshake.headers.cookie) {
 			// eslint-disable-next-line no-param-reassign
-			handshake.headers.cookie = `${SESSION_HEADER}=${handshake.query[SESSION_HEADER]}; `;
+			handshake.headers.cookie = `${sessionHeader}=${handshake.query[sessionHeader]}; `;
 		}
 		next();
 	});
 
-	service.use(sharedSession(session, { autoSave: true }));
-	service.on('connection', SocketsManager.addSocket);
-	return service;
-};
-
-RealTimeMsging.createApp = (server) => {
-	const service = init(server);
-	subscribeToEvents(service);
+	service.on('connection', socketWrapper(onNewSockets));
 };
 
 module.exports = RealTimeMsging;
