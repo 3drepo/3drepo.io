@@ -18,27 +18,36 @@
 const { v5Path } = require('../../../interop');
 const { getTeamspaceList, getCollectionsEndsWith } = require('../utils');
 
-const { find, updateOne } = require(`${v5Path}/handler/db`);
+const { aggregate } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const processModel = async (teamspace, scene) => {
-	const meta = await find(teamspace, scene, { type: 'meta', 'metadata.key': { $exists: false } }, { metadata: 1 });
-
-	const maxParallel = 5000;
-	for (let i = 0; i < meta.length; i += maxParallel) {
-		const proms = [];
-		for (let j = i; j < Math.min(i + maxParallel, meta.length); ++j) {
-			const { _id, metadata } = meta[j];
-			if (!Array.isArray(metadata)) {
-				const metaArr = Object.keys(metadata).map((key) => ({ key, value: metadata[key] }));
-				proms.push(updateOne(teamspace, scene, { _id }, { $set: { metadata: metaArr } }));
-			}
-		}
-
-		// eslint-disable-next-line no-await-in-loop
-		await Promise.all(proms);
-	}
-};
+const processModel = (teamspace, scene) => aggregate(
+	teamspace, scene, [
+		// filter for all metasdata that has not been converted
+		{ $match: { type: 'meta', 'metadata.key': { $exists: false } } },
+		// convert metadata: { key: value } to metadata: [ {k: <key>, v: <value> }]
+		{ $project: { _id: 1, metadata: { $objectToArray: '$metadata' } } },
+		// rename k to key and v to value
+		{
+			$addFields: {
+				metadata: {
+					$map: {
+						input: '$metadata',
+						as: 'metadata',
+						in: {
+							key: '$$metadata.k',
+							value: '$$metadata.v',
+						},
+					},
+				},
+			},
+		},
+		// update
+		{
+			$merge: scene,
+		},
+	],
+);
 
 const processTeamspace = async (teamspace) => {
 	const scenes = await getCollectionsEndsWith(teamspace, '.scene');
