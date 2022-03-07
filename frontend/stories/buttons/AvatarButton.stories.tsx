@@ -15,28 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Button } from '@material-ui/core';
+import { AvatarButton as Button } from '@controls/avatarButton';
 
-// More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
-	title: 'Buttons/Button',
+	title: 'Buttons/AvatarButton',
 	component: Button,
-	// More on argTypes: https://storybook.js.org/docs/react/api/argtypes
-	argTypes: {
-	},
 } as ComponentMeta<typeof Button>;
 
-// More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template: ComponentStory<typeof Button> = (args) => <Button {...args}>Material ui button</Button>;
+const Template: ComponentStory<typeof Button> = (args) => <Button {...args} />;
 
-export const Primary = Template.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
-Primary.args = {
-	variant: 'outlined',
-	color: 'primary',
+export const AvatarNoImage = Template.bind({});
+AvatarNoImage.args = {
 };
 
-export const Secondary = Template.bind({});
-Secondary.args = {
-	label: 'Button',
+export const AvatarWithInitials = Template.bind({});
+AvatarWithInitials.args = {
+	children: 'SM',
 };

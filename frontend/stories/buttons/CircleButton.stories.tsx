@@ -15,27 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { within, userEvent } from '@storybook/testing-library';
-import { Page } from './Page';
+import { CircleButton as Button } from '@controls/circleButton';
+import IntercomIcon from '@assets/icons/intercom.svg';
+import NotificationsIcon from '@assets/icons/notifications.svg';
 
 export default {
-	title: 'Example/Page',
-	component: Page,
-	parameters: {
-		// More on Story layout: https://storybook.js.org/docs/react/configure/story-layout
-		layout: 'fullscreen',
-	},
-} as ComponentMeta<typeof Page>;
+	title: 'Buttons/CircleButton',
+	component: Button,
+} as ComponentMeta<typeof Button>;
 
-const Template: ComponentStory<typeof Page> = (args) => <Page {...args} />;
+const Template: ComponentStory<typeof Button> = (args) => <Button {...args} />;
 
-export const LoggedOut = Template.bind({});
+export const Intercom = Template.bind({});
+Intercom.args = {
+	children: IntercomIcon,
+};
 
-export const LoggedIn = Template.bind({});
-
-// More on interaction testing: https://storybook.js.org/docs/react/writing-tests/interaction-testing
-LoggedIn.play = async ({ canvasElement }) => {
-	const canvas = within(canvasElement);
-	const loginButton = await canvas.getByRole('button', { name: /Log in/i });
-	await userEvent.click(loginButton);
+export const Notifications = Template.bind({});
+Intercom.args = {
+	children: NotificationsIcon,
 };

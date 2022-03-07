@@ -11,6 +11,9 @@ export const parameters = {
       date: /Date$/,
     },
   },
+  docs: {
+    transformSource: source => source.replace(/WithStyles\(ForwardRef\(/g, "").replace(/\)\)/g, ""),
+  },
 }
 
 export const decorators = [
