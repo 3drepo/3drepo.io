@@ -22,16 +22,40 @@ import NotificationsIcon from '@assets/icons/notifications.svg';
 export default {
 	title: 'Buttons/CircleButton',
 	component: Button,
+	argTypes: {
+		variant: {
+			description: 'Variant of the button',
+			options: ['main', 'contrast'],
+			control: { type: 'select' },
+		},
+	},
+	parameters: {
+		docs: {
+			transformSource: (source) => source.replace(/__WEBPACK_DEFAULT_EXPORT__/g, 'Icon'),
+		},
+	},
 } as ComponentMeta<typeof Button>;
 
-const Template: ComponentStory<typeof Button> = (args) => <Button {...args} />;
+const TemplateIntercom: ComponentStory<typeof Button> = (args) => <Button {...args}><IntercomIcon /></Button>;
+const TemplateNotifications: ComponentStory<typeof Button> = (args) => (
+	<Button {...args}><NotificationsIcon /></Button>);
 
-export const Intercom = Template.bind({});
-Intercom.args = {
-	children: IntercomIcon,
+export const IntercomMain = TemplateIntercom.bind({});
+IntercomMain.args = {
+	variant: 'main',
 };
 
-export const Notifications = Template.bind({});
-Intercom.args = {
-	children: NotificationsIcon,
+export const IntercomContrast = TemplateIntercom.bind({});
+IntercomContrast.args = {
+	variant: 'contrast',
+};
+
+export const NotificationsMain = TemplateNotifications.bind({});
+NotificationsMain.args = {
+	variant: 'main',
+};
+
+export const NotificationsContrast = TemplateNotifications.bind({});
+NotificationsContrast.args = {
+	variant: 'contrast',
 };
