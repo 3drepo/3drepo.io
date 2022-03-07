@@ -36,31 +36,40 @@ export enum UploadStatuses {
 export const CONTAINER_TYPES = [
 	{
 		value: 'Uncategorised',
-		name: formatMessage({ id: 'containers.type.uncategorised', defaultMessage: 'Uncategorised' }) },
+		name: formatMessage({ id: 'containers.type.uncategorised', defaultMessage: 'Uncategorised' }),
+	},
 	{
 		value: 'Architectural',
-		name: formatMessage({ id: 'containers.type.architectural', defaultMessage: 'Architectural' }) },
+		name: formatMessage({ id: 'containers.type.architectural', defaultMessage: 'Architectural' }),
+	},
 	{
 		value: 'Existing',
-		name: formatMessage({ id: 'containers.type.existing', defaultMessage: 'Existing' }) },
+		name: formatMessage({ id: 'containers.type.existing', defaultMessage: 'Existing' }),
+	},
 	{
 		value: 'GIS',
-		name: formatMessage({ id: 'containers.type.gis', defaultMessage: 'GIS' }) },
+		name: formatMessage({ id: 'containers.type.gis', defaultMessage: 'GIS' }),
+	},
 	{
 		value: 'Infrastructure',
-		name: formatMessage({ id: 'containers.type.infrastructure', defaultMessage: 'Infrastructure' }) },
+		name: formatMessage({ id: 'containers.type.infrastructure', defaultMessage: 'Infrastructure' }),
+	},
 	{
 		value: 'Interior',
-		name: formatMessage({ id: 'containers.type.interior', defaultMessage: 'Interior' }) },
+		name: formatMessage({ id: 'containers.type.interior', defaultMessage: 'Interior' }),
+	},
 	{
 		value: 'Landscape',
-		name: formatMessage({ id: 'containers.type.landscape', defaultMessage: 'Landscape' }) },
+		name: formatMessage({ id: 'containers.type.landscape', defaultMessage: 'Landscape' }),
+	},
 	{
 		value: 'MEP',
-		name: formatMessage({ id: 'containers.type.mep', defaultMessage: 'MEP' }) },
+		name: formatMessage({ id: 'containers.type.mep', defaultMessage: 'MEP' }),
+	},
 	{
 		value: 'Mechanical',
-		name: formatMessage({ id: 'containers.type.mechanical', defaultMessage: 'Mechanical' }) },
+		name: formatMessage({ id: 'containers.type.mechanical', defaultMessage: 'Mechanical' }),
+	},
 	{
 		value: 'Structural',
 		name: formatMessage({ id: 'containers.type.structural', defaultMessage: 'Structural' }),

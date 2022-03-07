@@ -123,6 +123,9 @@ export const SidebarForm = ({
 							</MenuItem>
 						))
 					}
+					<MenuItem key="sample" value="sample" hidden>
+						<FormattedMessage id="containers.type.sample" defaultMessage="Sample" />
+					</MenuItem>
 				</FormSelect>
 			</FlexContainer>
 			<FormTextField
