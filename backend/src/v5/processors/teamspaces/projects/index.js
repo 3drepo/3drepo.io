@@ -40,7 +40,7 @@ Projects.getProjectList = async (teamspace, user) => {
 	}))).flat();
 };
 
-Projects.createProject = (teamspace, name) => createProject(teamspace, { name, models: [], permissions: [] });
+Projects.createProject = (teamspace, name) => createProject(teamspace, name);
 
 Projects.deleteProject = async (teamspace, projectId) => {
 	const project = await getProjectByQuery(teamspace, { _id: projectId}, { models: 1 });

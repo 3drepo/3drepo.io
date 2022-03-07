@@ -63,8 +63,8 @@ Projects.getProjectAdmins = async (ts, project) => {
 	return permissions.flatMap((entry) => (entry.permissions.includes(PROJECT_ADMIN) ? [entry.user] : []));
 };
 
-Projects.createProject = async (teamspace, newProject) => {
-	const addedProject = { _id: generateUUID(), ...newProject };
+Projects.createProject = async (teamspace, name) => {
+	const addedProject = { _id: generateUUID(), name, models: [], permissions: [] };
 	await db.insertOne(teamspace, colName, addedProject);
 	return addedProject._id;
 };

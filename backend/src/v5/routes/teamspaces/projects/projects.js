@@ -16,7 +16,7 @@
  */
 
 const { hasAccessToTeamspace, isAdminToProject, isTeamspaceAdmin } = require('../../../middleware/permissions/permissions');
-const Projects = require('../../../processors/teamspaces/projects/projects');
+const Projects = require('../../../processors/teamspaces/projects');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../utils/helper/uuids');
 const { getUserFromSession } = require('../../../utils/sessions');

@@ -21,7 +21,7 @@ jest.mock('../../../../../../src/v5/models/projectSettings');
 const ProjectsModel = require(`${src}/models/projectSettings`);
 jest.mock('../../../../../../src/v5/utils/helper/models');
 const ModelHelper = require(`${src}/utils/helper/models`);
-const Projects = require(`${src}/processors/teamspaces/projects/projects`);
+const Projects = require(`${src}/processors/teamspaces/projects`);
 const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 
 const projectList = [
@@ -118,7 +118,7 @@ const testCreateProject = () => {
 			await Projects.createProject('teamspace', 'newName');
 			expect(createProjectMock.mock.calls.length).toEqual(1);
 			expect(createProjectMock.mock.calls[0][0]).toEqual('teamspace');
-			expect(createProjectMock.mock.calls[0][1]).toEqual({ name: 'newName', models: [], permissions: [] });
+			expect(createProjectMock.mock.calls[0][1]).toEqual('newName');
 		});
 	});
 };
