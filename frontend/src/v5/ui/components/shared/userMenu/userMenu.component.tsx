@@ -25,7 +25,7 @@ import VisualSettingsIcon from '@assets/icons/settings.svg';
 import SupportCentreIcon from '@assets/icons/question_mark.svg';
 import { IUser } from '@/v5/store/users/users.redux';
 import { Avatar } from '@controls/avatar';
-import { ActionMenu, ActionMenuSection, ActionMenuItem, ActionMenuTriggerButton } from '@controls/actionMenu';
+import { ActionMenu, ActionMenuSection, ActionMenuItem, ActionMenuTriggerButton, ActionMenuItemLink } from '@controls/actionMenu';
 import {
 	AvatarContainer,
 	AvatarSection,
@@ -72,54 +72,49 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 					</AvatarSection>
 				</ActionMenuSection>
 				<ActionMenuSection>
-					<ActionMenuItem
+					<ActionMenuItemLink
 						Icon={TeamspacesIcon}
 						to={`${baseUrl}/${teamspace}`}
-						actionButton
 					>
 						<FormattedMessage
 							id="userMenu.teamspaces"
 							defaultMessage="Teamspaces"
 						/>
-					</ActionMenuItem>
-					<ActionMenuItem
+					</ActionMenuItemLink>
+					<ActionMenuItemLink
 						Icon={VisualSettingsIcon}
-						actionButton
 					>
 						<FormattedMessage
 							id="userMenu.visualSettings"
 							defaultMessage="Visual settings"
 						/>
-					</ActionMenuItem>
+					</ActionMenuItemLink>
 				</ActionMenuSection>
 				<ActionMenuSection>
-					<ActionMenuItem
+					<ActionMenuItemLink
 						Icon={SupportCentreIcon}
-						actionButton
 					>
 						<FormattedMessage
 							id="userMenu.supportCentre"
 							defaultMessage="Support centre"
 						/>
-					</ActionMenuItem>
-					<ActionMenuItem
+					</ActionMenuItemLink>
+					<ActionMenuItemLink
 						Icon={ContactUsIcon}
-						actionButton
 					>
 						<FormattedMessage
 							id="userMenu.contactUs"
 							defaultMessage="Contact us"
 						/>
-					</ActionMenuItem>
-					<ActionMenuItem
+					</ActionMenuItemLink>
+					<ActionMenuItemLink
 						Icon={InviteAFriendIcon}
-						actionButton
 					>
 						<FormattedMessage
 							id="userMenu.inviteAFriend"
 							defaultMessage="Invite a friend"
 						/>
-					</ActionMenuItem>
+					</ActionMenuItemLink>
 				</ActionMenuSection>
 				<ActionMenuSection>
 					<ActionMenuItem>

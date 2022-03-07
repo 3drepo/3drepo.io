@@ -14,47 +14,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import {
-	ActionMenuItemButton,
-	ItemIcon,
-	Link,
-	MenuItem,
-	ItemText,
-} from './actionMenuItem.styles';
-
-export const ACTION_MENU_ITEM_NAME = 'ActionMenuItem';
+import { MenuItem } from './actionMenuItem.styles';
 
 type ActionMenuItemProps = {
 	className?: string;
-	label?: string;
-	Icon?: any;
-	to?: string;
 	children?: React.ReactNode;
-	actionButton?: boolean;
 	onClick?: () => void;
 };
 
 export const ActionMenuItem = ({
 	children,
-	to,
-	Icon,
-	actionButton,
 	...props
 }: ActionMenuItemProps) => (
-	<MenuItem data-name="menuItem" {...props} button={!!actionButton}>
-		{actionButton ? (
-			<Link to={to}>
-				<ActionMenuItemButton>
-					{Icon && (
-						<ItemIcon>
-							<Icon />
-						</ItemIcon>
-					)}
-					<ItemText>{children}</ItemText>
-				</ActionMenuItemButton>
-			</Link>
-		) : (
-			children
-		)}
+	<MenuItem {...props}>
+		{children}
 	</MenuItem>
 );
+ActionMenuItem.isActionMenuClosingElement = true;

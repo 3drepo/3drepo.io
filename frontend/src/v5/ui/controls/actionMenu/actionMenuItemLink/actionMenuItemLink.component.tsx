@@ -14,12 +14,26 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { Link, ItemIcon, ItemText } from './actionMenuItemLink.styles';
+import { ActionMenuItem } from '../actionMenuItem/actionMenuItem.component';
 
-import styled from 'styled-components';
+type ActionMenuItemLinkProps = {
+	className?: string;
+	Icon?: any;
+	to?: string;
+	children?: React.ReactNode;
+};
 
-export const MenuItem = styled.div`
-	&& {
-		padding: 0;
-		margin: 0;
-	}
-`;
+export const ActionMenuItemLink = ({ Icon, to, children, ...otherProps }: ActionMenuItemLinkProps) => (
+	<ActionMenuItem {...otherProps}>
+		<Link to={to}>
+			{Icon && (
+				<ItemIcon>
+					<Icon />
+				</ItemIcon>
+			)}
+			<ItemText>{children}</ItemText>
+		</Link>
+	</ActionMenuItem>
+);
+ActionMenuItemLink.isActionMenuClosingElement = true;

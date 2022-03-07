@@ -17,7 +17,6 @@
 import { ReactNode, useState, Children, ReactElement, cloneElement } from 'react';
 import { ClickAwayListener, Grow } from '@material-ui/core';
 import { ActionMenuTriggerButton } from '@controls/actionMenu';
-import { ACTION_MENU_ITEM_NAME } from './actionMenuItem/actionMenuItem.component';
 import {
 	Menu,
 	Popper,
@@ -25,7 +24,7 @@ import {
 } from './actionMenu.styles';
 
 const applyCloseMenuToActionMenuItems = (el: any, handleClose: () => void) => {
-	if (el?.type?.name === ACTION_MENU_ITEM_NAME) {
+	if (el?.type?.isActionMenuClosingElement) {
 		return cloneElement(el, {
 			onClick: () => {
 				el.props.onClick?.();
@@ -88,7 +87,7 @@ export const ActionMenu = ({ className, children }: ActionMenuProps) => {
 					>
 						<Paper>
 							<ClickAwayListener onClickAway={handleClose}>
-								<Menu data-name="menu">
+								<Menu>
 									{MenuChildren}
 								</Menu>
 							</ClickAwayListener>
