@@ -49,15 +49,13 @@ export const ProgressBarLabelLight = styled(ProgressBarPercentage)`
 
 export const ProgressBarLabelDark = styled(ProgressBarPercentage)`
 	${({ progress }) => `clip-path: inset(0 0 0 ${progress}%)`};
-
-	color: ${({ uploadStatus }) => PROGRESS_BAR_COLOUR_MAP[uploadStatus]};
 `;
 
 export const LabelledProgressBar = styled.div`
 	position: relative;
 	height: 16px;
 
-	color: ${({ uploadStatus }) => PROGRESS_BAR_COLOUR_MAP[uploadStatus]};
+	color: ${({ uploadstatus }) => PROGRESS_BAR_COLOUR_MAP[uploadstatus]};
 	.MuiLinearProgress-barColorPrimary {
 		background-color: ${({ uploadstatus }) => PROGRESS_BAR_COLOUR_MAP[uploadstatus]};
 	}
