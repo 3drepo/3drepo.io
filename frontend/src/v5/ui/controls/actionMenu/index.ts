@@ -15,17 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { Select } from '@material-ui/core';
-
-export const SelectInput = styled(Select)`
-	svg {
-		position: absolute;
-		pointer-events: none;
-		right: 14px;
-		margin-top: 40px;
-		path { 
-			fill: ${({ theme }) => theme.palette.base.main}
-		}
-	}
-`;
+export { ActionMenu } from './actionMenu.component';
+export { ActionMenuItem } from './actionMenuItem/actionMenuItem.component';
+export { ActionMenuItemLink } from './actionMenuItemLink/actionMenuItemLink.component';
+export { ActionMenuSection, ActionMenuTriggerButton } from './actionMenu.styles';

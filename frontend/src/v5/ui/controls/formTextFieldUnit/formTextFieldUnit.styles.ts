@@ -20,14 +20,15 @@ import styled from 'styled-components';
 
 export const UnitTextField = styled(FormTextField).attrs((props) => ({
 	label: ` (${props.$labelUnit})`,
+	type: 'tel',
 }))`
 	.MuiInputLabel-formControl {
 		&::before {
 			content: "${(props) => props.$labelName}";
+			${(props) => props.theme.typography.kicker};
 		}
 		
 		text-transform: none; 
 		letter-spacing: 0;
-		${(props) => props.theme.typography.caption};
 	}
 `;

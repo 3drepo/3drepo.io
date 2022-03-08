@@ -17,7 +17,7 @@
 import { createSelector } from 'reselect';
 import { IUser, IUsersState } from './users.redux';
 
-const selectUsersDomain = (state):IUsersState => state.users;
+const selectUsersDomain = (state): IUsersState => state.users;
 
 export const selectUsersByTeamspace = createSelector(
 	selectUsersDomain,

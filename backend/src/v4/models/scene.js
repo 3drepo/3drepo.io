@@ -45,29 +45,22 @@ function getSceneCollectionName(model) {
 }
 
 async function getNodeBySharedId(account, model, shared_id, revisionIds, projection = {}) {
-	return await db.findOne(account, getSceneCollectionName(model), {shared_id, _id :{$in: revisionIds}}, projection);
+	return await db.findOne(account, getSceneCollectionName(model), {shared_id, rev_id :{$in: revisionIds}}, projection);
 }
 
 async function findNodes(account, model, branch, revision, query = {}, projection = {}) {
 	const history = await History.getHistory(account, model, branch, revision);
 
-	if (!query._id) {
-		query._id = {"$in": history.current };
-	}
-
-	return cleanAll(await db.find(account, getSceneCollectionName(model), query, projection));
+	return cleanAll(await db.find(account, getSceneCollectionName(model), { rev_id: history._id, ...query}, projection));
 }
 
 const Scene = {};
 
 Scene.findNodesByField = async function (account, model, branch, revision, fieldName, projection = {}) {
-	const query = {};
-	query[fieldName] = {"$exists" : true};
+	const query = {"metadata.key": fieldName};
+	const proj = {parents: 1, metadata: {$elemMatch: {key: fieldName}}, ...projection};
 
-	projection.parents = 1;
-	projection[fieldName] = 1;
-
-	return findNodes(account, model, branch, revision, query, projection);
+	return findNodes(account, model, branch, revision, query, proj);
 };
 
 Scene.findNodesByType = async function (account, model, branch, revision, type, searchString, projection) {

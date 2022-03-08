@@ -27,12 +27,14 @@ type FederationEllipsisMenuProps = {
 	federation: IFederation,
 	openFederationSettings: () => void,
 	openShareModal: () => void,
+	openEditFederationModal: () => void,
 };
 
 export const FederationEllipsisMenu = ({
 	federation,
 	openFederationSettings,
 	openShareModal,
+	openEditFederationModal,
 }: FederationEllipsisMenuProps) => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 	const dispatch = useDispatch();
@@ -52,6 +54,7 @@ export const FederationEllipsisMenu = ({
 					id: 'federations.ellipsisMenu.edit',
 					defaultMessage: 'Edit Federation',
 				})}
+				onClick={openEditFederationModal}
 			/>
 
 			<EllipsisMenuItem
@@ -73,6 +76,10 @@ export const FederationEllipsisMenu = ({
 					id: 'federations.ellipsisMenu.editPermissions',
 					defaultMessage: 'Edit Permissions',
 				})}
+				to={{
+					pathname: './user_permissions',
+					search: `?modelId=${federation._id}`,
+				}}
 			/>
 
 			<EllipsisMenuItem

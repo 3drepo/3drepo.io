@@ -23,6 +23,7 @@ config.coveragePathIgnorePatterns = [
 	'/handler/',
 	'responder.js',
 	'responseCodes.js',
+	'users.constants.js',
 ];
 
 config.testMatch = ['**/tests/**/unit/**/*.test.[jt]s?(x)'];

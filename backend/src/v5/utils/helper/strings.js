@@ -23,6 +23,7 @@ const StringHelper = {};
 // Turns thisIsUs to THIS_IS_US
 StringHelper.toConstantCase = (str) => snakeCase(str).toUpperCase();
 StringHelper.toCamelCase = (str) => camelCase(str);
+StringHelper.sanitiseRegex = (str) => str.replace(/(\W)/g, '\\$1');
 
 // e.g. URL `https://3drepo.org/abc/xyz` this returns `https://3drepo.org`
 // returns the whole string if the regex is not matched
