@@ -208,7 +208,7 @@ function getObjectsArrayAsIfcGuids(data) {
 			Meta.uuidsToIfcGuids(account, model, sharedIds).then(ifcGuids => {
 				if (ifcGuids && ifcGuids.length > 0) {
 					for (let j = 0; j < ifcGuids.length; j++) {
-						ifcGuidsSet.add(ifcGuids[j].metadata["IFC GUID"]);
+						ifcGuidsSet.add(ifcGuids[j].metadata[0].value);
 
 						for (let k = 0; k < ifcGuids[j].parents.length; k++) {
 							sharedIdsSet.delete(utils.uuidToString(ifcGuids[j].parents[k]));
@@ -377,15 +377,15 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 	const sharedIdConversionPromises = [];
 
 	results.forEach(result => {
-		sharedIdConversionPromises.push(
-			getObjectIds(account, model, branch, revId, result, true, showIfcGuids).then((sharedIdObjects) => {
+		const getObjIdProm = getObjectIds(account, model, branch, revId, result, true, showIfcGuids)
+			.then((sharedIdObjects) => {
 				result.objects = sharedIdObjects;
 				return clean(result);
-			}).catch(() => clean(result))
-		);
+			}).catch(() => clean(result));
+		sharedIdConversionPromises.push(getObjIdProm);
 	});
 
-	return await Promise.all(sharedIdConversionPromises);
+	return Promise.all(sharedIdConversionPromises);
 };
 
 Group.update = async function (account, model, branch = "master", revId = null, sessionId, user = "", groupId, data) {

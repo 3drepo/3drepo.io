@@ -143,9 +143,6 @@ History.findByTag = async function(account, model, tag, projection = {}) {
 	return await findOne(account, model, { tag, incomplete: {"$exists": false }}, projection);
 };
 
-History.findByObjectId = async (account, model, id, projection) =>
-	await findOne(account, model, { current: stringToUUID(id) }, projection);
-
 const clean = function(history, branch) {
 	history._id = uuidToString(history._id);
 	history.name = history._id;

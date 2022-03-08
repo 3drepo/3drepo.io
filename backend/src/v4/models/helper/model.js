@@ -334,9 +334,9 @@ function importToyProject(account, username) {
 
 		return Promise.all([
 
-			importToyModel(account, username, "Lego_House_Architecture", "1cac0310-e3cc-11ea-bc6b-69e466be9639", project.name),
-			importToyModel(account, username, "Lego_House_Landscape", "1cab8de0-e3cc-11ea-bc6b-69e466be9639", project.name),
-			importToyModel(account, username, "Lego_House_Structure", "1cac5130-e3cc-11ea-bc6b-69e466be9639", project.name)
+			importToyModel(account, username, "Lego_House_Architecture", "cac0c1c0-4eb5-11ec-934b-b1a3427c3c40", project.name),
+			importToyModel(account, username, "Lego_House_Landscape", "cac332c0-4eb5-11ec-934b-b1a3427c3c40", project.name),
+			importToyModel(account, username, "Lego_House_Structure", "cac332c1-4eb5-11ec-934b-b1a3427c3c40", project.name)
 
 		]).then(models => {
 
@@ -352,7 +352,7 @@ function importToyProject(account, username) {
 				};
 			});
 
-			return importToyModel(account, username, "Lego_House_Federation", "1ccd46b0-e3cc-11ea-bc6b-69e466be9639", project.name, subModels, skip);
+			return importToyModel(account, username, "Lego_House_Federation", "cacc8190-4eb5-11ec-934b-b1a3427c3c40", project.name, subModels, skip);
 		});
 
 	}).catch(err => {
@@ -769,22 +769,21 @@ async function getModelPermission(username, setting, account) {
 }
 
 async function getMeshById(account, model, meshId) {
-	const historyRes =  (await History.findByObjectId(account, model, meshId, {current:1}));
-	if (!historyRes) {
-		throw responseCodes.RESOURCE_NOT_FOUND;
-	}
-
-	const revisionIds = historyRes.current;
 	const projection = {
-		"parents": 1,
-		"vertices": 1,
-		"faces": 1,
-		"_extRef": 1,
-		"primitive": 1
+		parents: 1,
+		vertices: 1,
+		faces: 1,
+		_extRef: 1,
+		primitive: 1,
+		rev_id: 1
 	};
 
 	const mesh = await getNodeById(account, model, utils.stringToUUID(meshId), projection);
-	mesh.matrix = await getParentMatrix(account, model, mesh.parents[0], revisionIds);
+
+	if (!mesh) {
+		throw responseCodes.RESOURCE_NOT_FOUND;
+	}
+	mesh.matrix = await getParentMatrix(account, model, mesh.parents[0], [mesh.rev_id]);
 
 	const vertices =  mesh.vertices ? new StreamBuffer({buffer: mesh.vertices.buffer, chunkSize: mesh.vertices.buffer.length}) : await getGridfsFileStream(account, model, mesh._extRef.vertices);
 	const faces = mesh.faces ?  new StreamBuffer({buffer: mesh.faces.buffer, chunkSize: mesh.faces.buffer.length})  : await getGridfsFileStream(account, model, mesh._extRef.faces);
