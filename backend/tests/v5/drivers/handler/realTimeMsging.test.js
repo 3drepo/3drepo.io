@@ -18,7 +18,7 @@
 const http = require('http');
 const { io: ioClient } = require('socket.io-client');
 const { src } = require('../../helper/path');
-const { generateRandomString } = require('../../helper/services');
+// const { generateRandomString } = require('../../helper/services');
 
 const { SESSION_HEADER, session } = require(`${src}/services/sessions`);
 
