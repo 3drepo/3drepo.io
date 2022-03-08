@@ -88,7 +88,7 @@ const federationSettings = {
 			code: 'FED2',
 		},
 		status: 'processing',
-		subModels: [{ model: 'container3' }],
+		subModels: ['container3'],
 	},
 	federation3: {
 		_id: 3,
@@ -246,9 +246,9 @@ const testDeleteFavourites = () => {
 
 const formatToStats = (settings, issueCount, riskCount, lastUpdated) => ({
 	...(settings.desc ? { desc: settings.desc } : {}),
+	...(settings.subModels ? { containers: settings.subModels.map((m) => m.model || m) } : {}),
 	code: settings.properties.code,
 	status: settings.status,
-	subModels: settings.subModels,
 	lastUpdated,
 	tickets: {
 		issues: issueCount ?? 0,

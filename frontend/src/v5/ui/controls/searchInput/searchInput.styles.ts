@@ -26,7 +26,7 @@ export const IconButton = styled(IconButtonComponent)`
 `;
 
 export const TextField = styled(TextFieldComponent)`
-	margin: 0;
+	margin: 0 0 0 14px;
 
 	input {
 		padding-left: 10px;

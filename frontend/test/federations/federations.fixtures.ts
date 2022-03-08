@@ -41,15 +41,14 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 	status: UploadStatuses.OK,
 	code: faker.datatype.uuid(),
 	category: faker.random.words(2),
-	containers: faker.datatype.number(120),
-	subModels: times(faker.datatype.number({ max: 10, min: 1 }), () => faker.datatype.uuid()),
+	containers: times(faker.datatype.number({ max: 10, min: 1 }), () => faker.datatype.uuid()),
 	isFavourite: faker.datatype.boolean(),
 	issues: faker.datatype.number(120),
 	risks: faker.datatype.number(120),
 	hasStatsPending: false,
 	views: [EMPTY_VIEW],
-	angleFromNorth: faker.datatype.number({ min: 0, max: 360 }),
 	defaultView: EMPTY_VIEW._id,
+	angleFromNorth: faker.datatype.number({ min: 0, max: 360 }),
 	surveyPoint: {
 		latLong: [
 			faker.datatype.number({ min: -100, max: 100 }), 
@@ -66,7 +65,7 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 });
 
 export const prepareMockStatsReply = (federation: IFederation): FetchFederationStatsResponse => ({
-	subModels: federation.subModels,
+	containers: federation.containers,
 	tickets: {
 		issues: federation.issues,
 		risks: federation.risks,
@@ -76,6 +75,10 @@ export const prepareMockStatsReply = (federation: IFederation): FetchFederationS
 	status: federation.status,
 	code: federation.code,
 });
+
+export const prepareMockContainers = (min = 1, max = 10): string[] => (
+	times(faker.datatype.number({ max, min }), () => faker.random.uuid())
+);
 
 export const prepareMockViewsReply = (federation: IFederation): FetchFederationViewsResponse => ({
 	views: federation.views,
@@ -87,8 +90,6 @@ const prepareMockSettingsWithoutSurveyPoint = (federation: IFederation): Omit<Fe
 	unit: federation.unit,
 	name: federation.name,
 	code: federation.code,
-	// uncomment description after backend is ready, right now it would break
-	// fetch federation settings saga tests
 	desc: federation.desc,
 });
 
