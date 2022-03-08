@@ -15,17 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { Select } from '@material-ui/core';
+const UserConstants = {};
+UserConstants.USERNAME_BLACKLIST = [
+	'payment',
+	'test',
+	'os',
+	'info',
+	'contact',
+	'cookies',
+	'password-change',
+	'password-forgot',
+	'pricing',
+	'privacy',
+	'register-request',
+	'register-verify',
+	'signUp',
+	'termsAndConditions',
+	'false',
+	'admin',
+	'local',
+	'root',
+	'notifications',
+	'loginRecord',
+];
 
-export const SelectInput = styled(Select)`
-	svg {
-		position: absolute;
-		pointer-events: none;
-		right: 14px;
-		margin-top: 40px;
-		path { 
-			fill: ${({ theme }) => theme.palette.base.main}
-		}
-	}
-`;
+module.exports = UserConstants;

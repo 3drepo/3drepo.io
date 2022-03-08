@@ -29,6 +29,7 @@ import { FormSelectView } from '@controls/formSelectView/formSelectView.componen
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { FederationSettingsSchema } from '@/v5/validation/schemes';
 import { FormTextFieldUnit } from '@controls/formTextFieldUnit/formTextFieldUnit.component';
+import { FormattedMessage } from 'react-intl';
 import { FlexContainer, SectionTitle, ShareTextField } from './federationSettingsForm.styles';
 
 const UNITS = [
@@ -160,7 +161,12 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 			confirmLabel={formatMessage({ id: 'federations.settings.ok', defaultMessage: 'Save Changes' })}
 			isValid={formState.isValid}
 		>
-			<SectionTitle>Federation information</SectionTitle>
+			<SectionTitle>
+				<FormattedMessage
+					id="federations.settings.form.informationTitle"
+					defaultMessage="Federation information"
+				/>
+			</SectionTitle>
 			<ShareTextField
 				label="ID"
 				value={federation._id}
@@ -209,14 +215,18 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 				name="defaultView"
 				label={formatMessage({ id: 'federations.settings.form.defaultView', defaultMessage: 'Default View' })}
 			/>
-			<SectionTitle>GIS servey point</SectionTitle>
+			<SectionTitle>
+				<FormattedMessage
+					id="federations.settings.form.gisTitle"
+					defaultMessage="GIS survey point"
+				/>
+			</SectionTitle>
 			<FlexContainer>
 				<FormTextFieldUnit
 					name="latitude"
 					control={control}
 					labelName={formatMessage({ id: 'federations.settings.form.lat', defaultMessage: 'LATITUDE' })}
 					labelUnit={DECIMAL_UNIT.name}
-					type="number"
 					formError={errors.latitude}
 					required
 				/>
@@ -225,7 +235,6 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 					control={control}
 					labelName={formatMessage({ id: 'federations.settings.form.long', defaultMessage: 'LONGITUDE' })}
 					labelUnit={DECIMAL_UNIT.name}
-					type="number"
 					formError={errors.longitude}
 					required
 				/>
@@ -236,7 +245,6 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 				labelName={formatMessage({ id: 'federations.settings.form.angleFromNorth', defaultMessage: 'ANGLE FROM NORTH' })}
 				labelUnit={formatMessage({ id: 'federations.settings.form.angleFromNorth.unit', defaultMessage: 'clockwise degrees' })}
 				formError={errors.angleFromNorth}
-				type="number"
 			/>
 			<FlexContainer>
 				<FormTextFieldUnit
@@ -244,7 +252,6 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 					control={control}
 					labelName="X"
 					labelUnit={currentUnit}
-					type="number"
 					formError={errors.x}
 					required
 				/>
@@ -253,7 +260,6 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 					control={control}
 					labelName="Y"
 					labelUnit={currentUnit}
-					type="number"
 					formError={errors.y}
 					required
 				/>
@@ -262,7 +268,6 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 					control={control}
 					labelName="Z"
 					labelUnit={currentUnit}
-					type="number"
 					formError={errors.z}
 					required
 				/>

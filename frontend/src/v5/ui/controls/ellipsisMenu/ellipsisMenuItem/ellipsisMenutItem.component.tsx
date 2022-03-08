@@ -21,7 +21,7 @@ import { MenuItem } from './ellipsisMenuItem.styles';
 
 type EllipsisMenuItemProps = {
 	title: ReactNode;
-	to?: string;
+	to?: any;
 	key?: string;
 	onClick?: (event: SyntheticEvent) => void;
 };
