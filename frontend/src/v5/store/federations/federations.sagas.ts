@@ -30,6 +30,7 @@ import {
 	FetchFederationViewsResponse,
 	FetchFederationSettingsAction,
 	DeleteFederationAction,
+	UpdateFederationContainersAction,
 } from '@/v5/store/federations/federations.types';
 import {
 	prepareFederationsData,
@@ -145,14 +146,14 @@ export function* fetchFederationSettings({
 }
 
 export function* updateFederationSettings({
-	teamspace, projectId, federationId, updatedSettings,
+	teamspace, projectId, federationId, settings,
 }: UpdateFederationSettingsAction) {
 	try {
-		const rawUpdatedSettings = prepareFederationSettingsForBackend(updatedSettings);
+		const rawSettings = prepareFederationSettingsForBackend(settings);
 		yield API.Federations.updateFederationSettings({
-			teamspace, projectId, federationId, updatedSettings: rawUpdatedSettings,
+			teamspace, projectId, federationId, settings: rawSettings,
 		});
-		yield put(FederationsActions.updateFederationSettingsSuccess(projectId, federationId, updatedSettings));
+		yield put(FederationsActions.updateFederationSettingsSuccess(projectId, federationId, settings));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: 'trying to update federation settings',
@@ -173,6 +174,26 @@ export function* deleteFederation({ teamspace, projectId, federationId }: Delete
 	}
 }
 
+export function* updateFederationContainers({
+	teamspace,
+	projectId,
+	federationId,
+	containers,
+}: UpdateFederationContainersAction) {
+	try {
+		yield API.Federations.updateFederationContainers({ teamspace, projectId, federationId, containers });
+		yield put(FederationsActions.updateFederationContainersSuccess(projectId, federationId, containers));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({
+				id: 'federation.update.containers.error',
+				defaultMessage: 'trying to update federation containers',
+			}),
+			error,
+		}));
+	}
+}
+
 export default function* FederationsSagas() {
 	yield takeLatest(FederationsTypes.ADD_FAVOURITE, addFavourites);
 	yield takeLatest(FederationsTypes.REMOVE_FAVOURITE, removeFavourites);
@@ -182,4 +203,5 @@ export default function* FederationsSagas() {
 	yield takeEvery(FederationsTypes.FETCH_FEDERATION_SETTINGS, fetchFederationSettings);
 	yield takeLatest(FederationsTypes.UPDATE_FEDERATION_SETTINGS, updateFederationSettings);
 	yield takeLatest(FederationsTypes.DELETE_FEDERATION, deleteFederation);
+	yield takeLatest(FederationsTypes.UPDATE_FEDERATION_CONTAINERS, updateFederationContainers);
 }

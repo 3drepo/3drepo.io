@@ -14,21 +14,26 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { createSelector } from 'reselect';
-import { IUser, IUsersState } from './users.redux';
 
-const selectUsersDomain = (state): IUsersState => state.users;
+import { DashboardListEmptyContainer } from '@components/dashboard/dashboardList';
+import { DashboardListHeaderContainer } from '@components/dashboard/dashboardList/dashboardListHeader/dashboardListHeader.styles';
+import styled from 'styled-components';
 
-export const selectUsersByTeamspace = createSelector(
-	selectUsersDomain,
-	(_, teamspace) => teamspace,
-	(state, teamspace) => state.usersByTeamspace[teamspace] || [],
-);
+export const Container = styled.div`
+	margin: 16px 0;
+	width: 100%;
 
-export const selectUser = createSelector(
-	selectUsersDomain,
-	(_, teamspace) => teamspace,
-	(_, userName) => userName,
-	(state, teamspace, userName): IUser | null => (state.usersByTeamspace[teamspace] || [])
-		.find((teamspaceUser) => teamspaceUser.user === userName),
-);
+	${DashboardListEmptyContainer} {
+		background: transparent;
+	}
+
+	${DashboardListHeaderContainer} {
+		margin-left: 46px;
+		padding-right: 10px;
+	}
+`;
+
+export const IconButtonContainer = styled.div`
+	padding: 0 8px;
+	cursor: pointer;
+`;

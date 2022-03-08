@@ -14,21 +14,26 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { createSelector } from 'reselect';
-import { IUser, IUsersState } from './users.redux';
+import { Link, ItemIcon, ItemText } from './actionMenuItemLink.styles';
+import { ActionMenuItem } from '../actionMenuItem/actionMenuItem.component';
 
-const selectUsersDomain = (state): IUsersState => state.users;
+type ActionMenuItemLinkProps = {
+	className?: string;
+	Icon?: any;
+	to?: string;
+	children?: React.ReactNode;
+};
 
-export const selectUsersByTeamspace = createSelector(
-	selectUsersDomain,
-	(_, teamspace) => teamspace,
-	(state, teamspace) => state.usersByTeamspace[teamspace] || [],
+export const ActionMenuItemLink = ({ Icon, to, children, ...otherProps }: ActionMenuItemLinkProps) => (
+	<ActionMenuItem {...otherProps}>
+		<Link to={to}>
+			{Icon && (
+				<ItemIcon>
+					<Icon />
+				</ItemIcon>
+			)}
+			<ItemText>{children}</ItemText>
+		</Link>
+	</ActionMenuItem>
 );
-
-export const selectUser = createSelector(
-	selectUsersDomain,
-	(_, teamspace) => teamspace,
-	(_, userName) => userName,
-	(state, teamspace, userName): IUser | null => (state.usersByTeamspace[teamspace] || [])
-		.find((teamspaceUser) => teamspaceUser.user === userName),
-);
+ActionMenuItemLink.isActionMenuClosingElement = true;

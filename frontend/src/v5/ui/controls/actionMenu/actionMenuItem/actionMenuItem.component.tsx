@@ -14,21 +14,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { createSelector } from 'reselect';
-import { IUser, IUsersState } from './users.redux';
+import { MenuItem } from './actionMenuItem.styles';
 
-const selectUsersDomain = (state): IUsersState => state.users;
+type ActionMenuItemProps = {
+	className?: string;
+	children?: React.ReactNode;
+	onClick?: () => void;
+};
 
-export const selectUsersByTeamspace = createSelector(
-	selectUsersDomain,
-	(_, teamspace) => teamspace,
-	(state, teamspace) => state.usersByTeamspace[teamspace] || [],
+export const ActionMenuItem = ({
+	children,
+	...props
+}: ActionMenuItemProps) => (
+	<MenuItem {...props}>
+		{children}
+	</MenuItem>
 );
-
-export const selectUser = createSelector(
-	selectUsersDomain,
-	(_, teamspace) => teamspace,
-	(_, userName) => userName,
-	(state, teamspace, userName): IUser | null => (state.usersByTeamspace[teamspace] || [])
-		.find((teamspaceUser) => teamspaceUser.user === userName),
-);
+ActionMenuItem.isActionMenuClosingElement = true;

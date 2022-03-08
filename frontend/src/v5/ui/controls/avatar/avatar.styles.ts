@@ -20,8 +20,33 @@ import { IconButton } from '@material-ui/core';
 
 export const StyledIconButton = styled(IconButton)`
 	&& {
-		margin: 0;
 		padding: 0;
+
+		${({ $isButton, theme }) => ($isButton ? `
+			cursor: pointer;
+			
+			&:hover {
+				.MuiAvatar-root {
+					background-color: ${theme.palette.tertiary.mid};
+				}
+			}
+
+			&:active {
+				.MuiAvatar-root {
+					background-color: ${theme.palette.tertiary.main};
+				}
+			}
+		` : `
+			cursor: default;
+		`)}
+	}
+
+	.MuiAvatar-circle {
+		margin: 0;
+		${({ $largeIcon }) => `
+			height: ${$largeIcon ? '48px' : '38px'};
+			width: ${$largeIcon ? '48px' : '38px'};
+		`}
 	}
 
 	${({ disabled }) => disabled && css`
@@ -33,23 +58,14 @@ export const StyledIconButton = styled(IconButton)`
 			}
 		}
 	`};
-	&:hover {
-		.MuiAvatar-root {
-			background-color: ${({ theme }) => theme.palette.tertiary.mid};
-		}
-	}
 
 	&.Mui-focusVisible {
 		.MuiAvatar-root {
-			height: 36px;
-			width: 36px;
-			border: 1px solid ${({ theme }) => theme.palette.primary.main};
-		}
-	}
-
-	&:active {
-		.MuiAvatar-root {
-			background-color: ${({ theme }) => theme.palette.tertiary.main};
+			outline: 1px solid ${({ theme }) => theme.palette.primary.main};
+			box-shadow: 
+				0 3px 5px -1px rgb(0 0 0 / 20%),
+				0 6px 10px 0 rgb(0 0 0 / 14%),
+				0 1px 18px 0 rgb(0 0 0 / 12%);
 		}
 	}
 `;
