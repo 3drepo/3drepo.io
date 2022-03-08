@@ -14,26 +14,34 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { MouseEvent } from 'react';
+import AvatarIcon from '@material-ui/core/Avatar';
 import { IUser } from '@/v5/store/users/users.redux';
-import { Avatar } from '@controls/avatar';
-import { AvatarWrapper, Container, Company, Job, Name, UserData } from './userPopover.styles';
+import { StyledIconButton } from './avatar.styles';
 
-interface IUserPopover {
-	user: IUser;
-}
+const getUserNamesInitials = ({ firstName, lastName }) => {
+	if (!(firstName || lastName)) return '';
 
-export const UserPopover = ({ user }: IUserPopover) => {
-	const { firstName, lastName, company, job } = user;
-	return (
-		<Container>
-			<AvatarWrapper>
-				<Avatar user={user} />
-			</AvatarWrapper>
-			<UserData>
-				<Name>{firstName} {lastName}</Name>
-				<Company>{company}</Company>
-				<Job>{job}</Job>
-			</UserData>
-		</Container>
-	);
+	return [firstName, lastName]
+		.map((name) => name.trim().charAt(0).toUpperCase())
+		.join('');
 };
+
+type AvatarProps = {
+	onClick?: (event: MouseEvent) => void;
+	user: IUser;
+	largeIcon?: boolean;
+	isButton?: boolean;
+};
+
+export const Avatar = ({ user, largeIcon, isButton, ...props }: AvatarProps) => (
+	<StyledIconButton
+		$largeIcon={largeIcon}
+		$isButton={isButton}
+		{...props}
+	>
+		<AvatarIcon src={user.hasAvatar ? user.avatarUrl : null}>
+			{getUserNamesInitials(user)}
+		</AvatarIcon>
+	</StyledIconButton>
+);
