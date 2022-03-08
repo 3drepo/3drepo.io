@@ -32,9 +32,10 @@ Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const existingProjectId = 'projectId';
 const existingProjectName = 'existing';
-ProjectsModel.getProjectByQuery.mockImplementation((teamspace, query) => (query.name === existingProjectName && query._id.$ne !== existingProjectId
-	? Promise.resolve({ name: existingProjectName, _id: existingProjectId })
-	: Promise.reject(templates.modelNotFound)));
+ProjectsModel.getProjectByQuery.mockImplementation((teamspace, query) => (
+	query.name === existingProjectName && query._id.$ne !== existingProjectId
+		? Promise.resolve({ name: existingProjectName, _id: existingProjectId })
+		: Promise.reject(templates.modelNotFound)));
 
 const testValidateProjectData = () => {
 	describe.each([

@@ -28,7 +28,7 @@ Projects.validateProjectData = async (req, res, next) => {
 		name: types.strings.title.required().test('check-name-is-unique', 'Project with the same name already exists', async (value) => {
 			try {
 				await getProjectByQuery(req.params.teamspace, { _id: { $ne: req.params.project }, name: value },
-					{ _id: 1 });				
+					{ _id: 1 });
 				return false;
 			} catch {
 				return true;
