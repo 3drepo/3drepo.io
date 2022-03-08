@@ -42,7 +42,9 @@ jest.mock('../../../../src/v5/handler/db', () => ({
 jest.mock('../../../../src/v5/services/sessions');
 const SessionService = require(`${src}/services/sessions`);
 
-SessionService.session = jest.fn().mockImplementation((req, res, next) => next());
+const sessionMiddleware = jest.fn().mockImplementation((req, res, next) => next());
+
+SessionService.session = Promise.resolve({ middleware: sessionMiddleware });
 
 const Sessions = require(`${src}/middleware/sessions`);
 
@@ -164,23 +166,16 @@ const testDestroySession = () => {
 
 const testManageSession = () => {
 	describe('Manage session', () => {
-		test('Should call next() immedately if session was already established', () => {
+		test('Should call next() immedately if session was already established', async () => {
 			const fn = jest.fn();
-			Sessions.manageSessions({ session: {} }, {}, fn);
-			expect(SessionService.session).not.toBeCalled();
+			await Sessions.manageSessions({ session: {} }, {}, fn);
+			expect(sessionMiddleware).not.toBeCalled();
 			expect(fn).toBeCalled();
 		});
-		test('Should call next() after trying to establish a session', () => {
+		test('Should call next() after trying to establish a session', async () => {
 			const fn = jest.fn();
-			Sessions.manageSessions({ }, {}, fn);
-			expect(SessionService.session).toBeCalled();
-			expect(fn).toBeCalled();
-		});
-		test('Should call next() after trying to establish a session even if it errored', () => {
-			const fn = jest.fn();
-			SessionService.session.mockImplementationOnce((req, res, next) => { next('some error'); });
-			Sessions.manageSessions({}, {}, fn);
-			expect(SessionService.session).toBeCalled();
+			await Sessions.manageSessions({ }, {}, fn);
+			expect(sessionMiddleware).toBeCalled();
 			expect(fn).toBeCalled();
 		});
 	});

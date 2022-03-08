@@ -27,19 +27,16 @@ const { templates } = require('../utils/responseCodes');
 
 const Sessions = {};
 
-Sessions.manageSessions = (req, res, next) => {
+Sessions.manageSessions = async (req, res, next) => {
 	// In case other middleware sets the session
 	if (req.session) {
 		next();
 		return;
 	}
 
-	session(req, res, (err) => {
-		if (err) {
-			logger.logError(`Error processing session: ${err.message}`);
-		}
-		next();
-	});
+	const { middleware } = await session;
+
+	middleware(req, res, next);
 };
 
 Sessions.createSession = (req, res) => {
