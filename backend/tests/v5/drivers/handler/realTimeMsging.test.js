@@ -27,6 +27,24 @@ const RealTime = require(`${src}/handler/realTimeMsging`);
 const ip = '127.0.0.1';
 const port = '3001';
 
+const connectClient = () => new Promise((resolve, reject) => {
+	const socket = ioClient(`http://${ip}:${port}`,
+		{
+			path: '/chat',
+			transports: ['websocket'],
+			reconnection: true,
+			reconnectionDelay: 500,
+		});
+
+	socket.on('connect', () => {
+		resolve(socket);
+	});
+
+	socket.on('connect_error', (err) => {
+		reject(err);
+	});
+});
+
 const testSockets = () => {
 	describe('Socket Connection', () => {
 		let cleanUpFn;
@@ -43,30 +61,31 @@ const testSockets = () => {
 				return deinitStore();
 			};
 		});
+		beforeEach(() => onNewSocket.mockClear());
 		afterAll(async () => {
 			await cleanUpFn();
 		});
+
 		test('call back function should get called when a new socket joins', async () => {
-			await new Promise((resolve, reject) => {
-				const socket = ioClient(`http://${ip}:${port}`,
-					{
-						path: '/chat',
-						transports: ['websocket'],
-						reconnection: true,
-						reconnectionDelay: 500,
-					});
+			const socket = await connectClient();
+			expect(onNewSocket).toHaveBeenCalledTimes(1);
+			const socketAtServ = onNewSocket.mock.calls[0][0];
+			expect(socketAtServ.id).toEqual(socket.id);
+			socket.disconnect();
+		});
 
-				socket.on('connect', () => {
-					resolve();
-					socket.disconnect();
-				});
-
-				socket.on('connect_error', (err) => {
-					reject(err);
-				});
-			});
+		test('disconnection should call the disconnect callback', async () => {
+			const socket = await connectClient();
 
 			expect(onNewSocket).toHaveBeenCalledTimes(1);
+			const socketAtServ = onNewSocket.mock.calls[0][0];
+
+			const serverDisconnect = new Promise((resolve) => {
+				socketAtServ.onDisconnect(resolve);
+			});
+
+			socket.disconnect();
+			await serverDisconnect;
 		});
 	});
 };
