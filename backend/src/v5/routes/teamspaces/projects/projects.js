@@ -120,12 +120,13 @@ const establishRoutes = () => {
 	 *                     properties:
 	 *                       id:
 	 *                         type: string
+	 *                         format: uuid
 	 *                         description: Project ID
 	 *                         example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
 	 *                       name:
 	 *                         type: string
-	 *                         description: name of the teamspace
-	 *                         example: teamspace1
+	 *                         description: name of the project
+	 *                         example: project1
 	 *                       isAdmin:
 	 *                         type: boolean
 	 *                         description: whether the user is an admin
@@ -199,6 +200,7 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *           format: uuid
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -229,6 +231,7 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *           format: uuid
 	 *     requestBody:
 	 *       content:
 	 *         application/json:
@@ -247,6 +250,44 @@ const establishRoutes = () => {
 	 */
 	router.patch('/:project', isAdminToProject, validateProjectData, updateProject);
 
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}:
+	 *   get:
+	 *     description: Gets a project
+	 *     tags: [Projects]
+	 *     operationId: getProject
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - project:
+	 *         name: project
+	 *         description: Id of the project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         description: returns a project
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 name:
+	 *                   type: string
+	 *                   description: Name of the project
+	 *                   example: project1
+	 */
 	router.get('/:project', hasAccessToTeamspace, getProject);
 
 	return router;

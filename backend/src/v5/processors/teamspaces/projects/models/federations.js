@@ -34,7 +34,7 @@ Federations.addFederation = (teamspace, project, federation) => addModel(teamspa
 Federations.deleteFederation = deleteModel;
 
 Federations.getFederationList = async (teamspace, project, user) => {
-	const { models } = await getProjectByQuery(teamspace, {_id: project}, { permissions: 1, models: 1 });
+	const { models } = await getProjectByQuery(teamspace, { _id: project }, { permissions: 1, models: 1 });
 	const modelSettings = await getFederations(teamspace, models, { _id: 1, name: 1, permissions: 1 });
 
 	return getModelList(teamspace, project, user, modelSettings);

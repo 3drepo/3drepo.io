@@ -29,7 +29,7 @@ ProjectPerms.isProjectAdmin = async (req, res, next) => {
 	const { teamspace, project } = params;
 
 	try {
-		await getProjectByQuery(teamspace, { _id: project});
+		await getProjectByQuery(teamspace, { _id: project });
 		const isAdmin = await isTeamspaceAdmin(teamspace, user) || await isProjectAdmin(teamspace, project, user);
 
 		if (isAdmin) {

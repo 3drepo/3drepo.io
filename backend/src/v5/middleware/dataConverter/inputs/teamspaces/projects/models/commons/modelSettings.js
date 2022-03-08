@@ -57,7 +57,7 @@ const defaultLegendType = (teamspace, model) => types.id.nullable().test('check-
 
 const modelNameType = (teamspace, project, model) => types.strings.title.test('name-already-used', 'Name is already used within the project', async (value) => {
 	try {
-		let { models } = await getProjectByQuery(teamspace, {_id: project}, { models: 1 });
+		let { models } = await getProjectByQuery(teamspace, { _id: project }, { models: 1 });
 		if (model) {
 			models = models.flatMap((modelId) => (modelId === model ? [] : modelId));
 		}

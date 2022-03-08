@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createProject, deleteProject, updateProject, getProjectByQuery, getProjectList } = require('../../../models/projectSettings');
+const { createProject, deleteProject, getProjectByQuery, getProjectList, updateProject } = require('../../../models/projectSettings');
 const {
 	hasProjectAdminPermissions,
 	hasReadAccessToModel,
@@ -43,19 +43,17 @@ Projects.getProjectList = async (teamspace, user) => {
 Projects.createProject = (teamspace, name) => createProject(teamspace, name);
 
 Projects.deleteProject = async (teamspace, projectId) => {
-	const project = await getProjectByQuery(teamspace, { _id: projectId}, { models: 1 });
+	const project = await getProjectByQuery(teamspace, { _id: projectId }, { models: 1 });
 
 	const promises = [];
 
-	for (let i = 0; i < project.models.length; i++) {
-		promises.push(removeModelData(teamspace, project.models[i]));
-	}
+	project.models.map((model) => promises.push(removeModelData(teamspace, model)));
 
 	await Promise.all(promises);
 	await deleteProject(teamspace, projectId);
 };
 
-Projects.getProject = (teamspace, projectId) => getProjectByQuery(teamspace, { _id: projectId }, { name: 1, _id: 0});
+Projects.getProject = (teamspace, projectId) => getProjectByQuery(teamspace, { _id: projectId }, { name: 1, _id: 0 });
 
 Projects.updateProject = updateProject;
 

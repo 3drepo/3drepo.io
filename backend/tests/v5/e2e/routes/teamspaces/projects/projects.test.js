@@ -18,6 +18,7 @@
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../helper/services');
 const { src } = require('../../../../helper/path');
+const { generateRandomString } = require('../../../../helper/services');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -26,6 +27,7 @@ let agent;
 
 // These are the users being used for tests
 const tsAdmin = ServiceHelper.generateUserCredentials();
+const nonAdminUser = ServiceHelper.generateUserCredentials();
 const unlicencedUser = ServiceHelper.generateUserCredentials();
 
 const testProject = {
@@ -40,6 +42,7 @@ const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user]);
 	await ServiceHelper.db.createTeamspace(brokenTS, [tsAdmin.user], true);
 	await ServiceHelper.db.createUser(tsAdmin, [teamspace, brokenTS]);
+	await ServiceHelper.db.createUser(nonAdminUser, [teamspace]);
 	await ServiceHelper.db.createUser(unlicencedUser);
 	await ServiceHelper.db.createProject(teamspace, testProject._id, testProject.name);
 };
@@ -86,8 +89,8 @@ const testCreateProject = () => {
 		});
 
 		test('should fail if the user is not teamspace admin', async () => {
-			const res = await agent.post(`${route}?key=${unlicencedUser.apiKey}`).expect(templates.teamspaceNotFound.status);
-			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+			const res = await agent.post(`${route}?key=${nonAdminUser.apiKey}`).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
 
 		test('should fail if the new project data are not valid', async () => {
@@ -130,9 +133,9 @@ const testUpdateProject = () => {
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
-		test('should fail if the user is not teamspace admin', async () => {
-			const res = await agent.patch(`${route}?key=${unlicencedUser.apiKey}`).expect(templates.teamspaceNotFound.status);
-			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		test('should fail if the user is not project admin', async () => {
+			const res = await agent.patch(`${route}?key=${nonAdminUser.apiKey}`).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
 
 		test('should fail without a valid project', async () => {
@@ -147,12 +150,13 @@ const testUpdateProject = () => {
 		});
 
 		test('should fail if the project name is taken by another project', async () => {
+			const name = generateRandomString();
 			// create test project
 			const res = await agent.post(`/v5/teamspaces/${teamspace}/projects/?key=${tsAdmin.apiKey}`)
-				.send({ name: 'Existing Name' }).expect(templates.ok.status);
+				.send({ name }).expect(templates.ok.status);
 
 			const projectsRes = await agent.patch(`${route}?key=${tsAdmin.apiKey}`)
-				.send({ name: 'Existing Name' }).expect(templates.invalidArguments.status);
+				.send({ name }).expect(templates.invalidArguments.status);
 			expect(projectsRes.body.code).toEqual(templates.invalidArguments.code);
 
 			// Delete test project afterwards
@@ -198,8 +202,8 @@ const testDeleteProject = () => {
 		});
 
 		test('should fail if the user is not teamspace admin', async () => {
-			const res = await agent.delete(`${route(testProject._id)}?key=${unlicencedUser.apiKey}`).expect(templates.teamspaceNotFound.status);
-			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+			const res = await agent.delete(`${route(testProject._id)}?key=${nonAdminUser.apiKey}`).expect(templates.notAuthorized.status);
+			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
 
 		test('should fail without a valid project', async () => {
@@ -244,9 +248,9 @@ const testGetProject = () => {
 			expect(res.body.code).toEqual(templates.projectNotFound.code);
 		});
 
-		test('should get project', async () => {			
+		test('should get project', async () => {
 			const res = await agent.get(`${route(testProject._id)}?key=${tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual({name : testProject.name});
+			expect(res.body).toEqual({ name: testProject.name });
 		});
 	});
 };

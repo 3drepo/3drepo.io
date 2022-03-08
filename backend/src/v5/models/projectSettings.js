@@ -39,7 +39,6 @@ Projects.removeModelFromProject = (ts, project, model) => updateOneProject(
 	{ $pull: { models: model } },
 );
 
-
 Projects.getProjectByQuery = async (ts, query, projection) => {
 	const res = await findOneProject(ts, query, projection);
 
@@ -48,7 +47,7 @@ Projects.getProjectByQuery = async (ts, query, projection) => {
 	}
 
 	return res;
-}
+};
 
 Projects.modelsExistInProject = async (teamspace, project, models) => {
 	if (!models.length) return false;

@@ -128,9 +128,9 @@ const testGetProject = () => {
 		test('should return a project', async () => {
 			const res = await Projects.getProject('teamspace', '1');
 			expect(getProjectByQueryMock.mock.calls[0][0]).toEqual('teamspace');
-			expect(getProjectByQueryMock.mock.calls[0][1]).toEqual({ _id: '1'});
+			expect(getProjectByQueryMock.mock.calls[0][1]).toEqual({ _id: '1' });
 			expect(getProjectByQueryMock.mock.calls[0][2]).toEqual({ name: 1, _id: 0 });
-			expect(res).toEqual(projectList.find(p => p._id === '1'));
+			expect(res).toEqual(projectList.find((p) => p._id === '1'));
 		});
 	});
 };

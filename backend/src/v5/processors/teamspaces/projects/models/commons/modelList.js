@@ -37,7 +37,7 @@ ModelList.deleteModel = async (teamspace, project, model) => {
 };
 
 ModelList.getModelList = async (teamspace, project, user, modelSettings) => {
-	const { permissions } = await getProjectByQuery(teamspace, {_id: project}, { permissions: 1, models: 1 });
+	const { permissions } = await getProjectByQuery(teamspace, { _id: project }, { permissions: 1, models: 1 });
 
 	const [isTSAdmin, favourites] = await Promise.all([
 		isTeamspaceAdmin(teamspace, user),
