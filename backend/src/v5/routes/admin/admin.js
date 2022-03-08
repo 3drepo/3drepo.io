@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { hasReadAccessToSystemRoles, hasWriteAccessToSystemRoles } = require('../../middleware/permissions/permissions');
-const { validatePayload, validateQueries, validateUsersAndRoles } = require('../../middleware/dataConverter/inputs/admin/admin');
+const { validatePayload, validateQueries, validateUsersAndRoles } = require('../../middleware/dataConverter/inputs/admin');
 const Admin = require('../../processors/admin');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../utils/sessions');
