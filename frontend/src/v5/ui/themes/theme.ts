@@ -236,7 +236,7 @@ export const theme = createTheme({
 					width: '100%',
 					'& label': {
 						...typography.kicker,
-						top: '-34px',
+						top: '-33.5px',
 						left: '-13px',
 						color: COLOR.BASE_MAIN,
 
@@ -338,6 +338,11 @@ export const theme = createTheme({
 				root: {
 					backgroundColor: 'transparent',
 				},
+			},
+		},
+		MuiPaper: {
+			defaultProps: {
+				elevation: 8,
 			},
 		},
 		MuiDialog: {
@@ -597,27 +602,18 @@ export const theme = createTheme({
 					width: '100%',
 					boxSizing: 'border-box',
 					pointerEvents: 'auto',
-
 					'& fieldset, &:focus fieldset, &:active fieldset': {
 						border: 0,
 					},
 					'& ~ svg': {
 						position: 'absolute',
-						bottom: 13,
 						right: 14,
+						marginTop: 40,
+						pointerEvents: 'none',
+						'& path': {
+							fill: COLOR.BASE_MAIN,
+						},
 					},
-					// '& .MuiSelect-selectMenu': {
-					// 	height: 35,
-					// },
-					// '& svg': {
-					// 	right: 14,
-					// 	marginTop: 40,
-					// 	position: 'absolute',
-					// 	pointerEvents: 'none',
-					// 	'& path': {
-					// 		fill: COLOR.BASE_MAIN,
-					// 	},
-					// },
 				},
 			},
 		},

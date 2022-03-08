@@ -28,11 +28,7 @@ export const IconButton = styled(IconButtonComponent)`
 export const TextField = styled(TextFieldComponent)`
 	margin: 0;
 
-	input {
-		padding-left: 10px;
-	}
-
-	.MuiOutlinedInput-adornedEnd {
+	.MuiInputBase-adornedEnd {
 		padding-right: 0;
 	}
 	

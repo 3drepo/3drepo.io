@@ -134,6 +134,7 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 				<FormSelect
 					label={formatMessage({ id: 'containers.creation.form.category', defaultMessage: 'Category' })}
 					name="category"
+					required
 					defaultValue="Uncategorised"
 					control={control}
 				>
@@ -180,7 +181,6 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 				name="desc"
 				control={control}
 				label={formatMessage({ id: 'containers.creation.form.desc', defaultMessage: 'Description' })}
-				required
 				formError={errors.desc}
 			/>
 
