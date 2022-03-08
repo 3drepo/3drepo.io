@@ -11,7 +11,7 @@
     "test:v5": "yarn test:v5-drivers && yarn test:v5-unit && yarn test:v5-e2e",
     "test:v5-unit": "cross-env NODE_ENV=testV5 NODE_CONFIG_DIR=../config yarn jest -c ./jest.config.unit.js",
     "test:v5-e2e": "cross-env NODE_ENV=testV5 NODE_CONFIG_DIR=../config yarn jest -c ./jest.config.e2e.js --runInBand",
-    "test:v5-drivers": "cross-env NODE_ENV=testV5 NODE_CONFIG_DIR=../config yarn jest -c ./jest.config.drivers.js",
+    "test:v5-drivers": "cross-env NODE_ENV=testV5 NODE_CONFIG_DIR=../config yarn jest -c ./jest.config.drivers.js --runInBand",
     "test:unit": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha tests/v4/unit --recursive --exit",
     "test:one": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha --exit",
     "test:int": "cross-env NODE_ENV=test NODE_CONFIG_DIR=../config mocha tests/v4/integrated --recursive --exit",
