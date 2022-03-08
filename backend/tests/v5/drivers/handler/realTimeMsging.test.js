@@ -18,7 +18,7 @@
 const http = require('http');
 const { io: ioClient } = require('socket.io-client');
 const { src } = require('../../helper/path');
-// const { generateRandomString } = require('../../helper/services');
+const { generateRandomString } = require('../../helper/services');
 
 const { SESSION_HEADER, session } = require(`${src}/services/sessions`);
 
@@ -45,23 +45,38 @@ const connectClient = () => new Promise((resolve, reject) => {
 	});
 });
 
-const testSockets = () => {
+const startServer = async (onNewSocket) => {
+	http.createServer();
+	const server = http.createServer();
+	server.listen(port, ip);
+	const { middleware, deinitStore } = await session;
+	const { broadcast, close: destroySocketIO } = RealTime.createApp(server, middleware, SESSION_HEADER, onNewSocket);
+
+	return {
+		broadcast,
+		close: async () => {
+			await destroySocketIO();
+			await new Promise((resolve) => server.close(resolve));
+			return deinitStore();
+		} };
+};
+
+const connectSocket = async (onNewSocket) => {
+	onNewSocket.mockClear();
+	const socketAtClient = await connectClient();
+	expect(onNewSocket).toHaveBeenCalledTimes(1);
+	const socketAtServer = onNewSocket.mock.calls[0][0];
+
+	return { socketAtClient, socketAtServer };
+};
+
+const testSocketConnection = () => {
 	describe('Socket Connection', () => {
 		let cleanUpFn;
 		const onNewSocket = jest.fn();
 		beforeAll(async () => {
-			http.createServer();
-			const server = http.createServer();
-			server.listen(port, ip);
-			const { middleware, deinitStore } = await session;
-			const destroySocketIO = RealTime.createApp(server, middleware, SESSION_HEADER, onNewSocket);
-			cleanUpFn = async () => {
-				await destroySocketIO();
-				await new Promise((resolve) => server.close(resolve));
-				return deinitStore();
-			};
+			cleanUpFn = (await startServer(onNewSocket)).close;
 		});
-		beforeEach(() => onNewSocket.mockClear());
 		afterAll(async () => {
 			await cleanUpFn();
 		});
@@ -75,21 +90,192 @@ const testSockets = () => {
 		});
 
 		test('disconnection should call the disconnect callback', async () => {
-			const socket = await connectClient();
-
-			expect(onNewSocket).toHaveBeenCalledTimes(1);
-			const socketAtServ = onNewSocket.mock.calls[0][0];
-
+			const { socketAtClient, socketAtServer } = await connectSocket(onNewSocket);
 			const serverDisconnect = new Promise((resolve) => {
-				socketAtServ.onDisconnect(resolve);
+				socketAtServer.onDisconnect(resolve);
 			});
 
-			socket.disconnect();
+			socketAtClient.disconnect();
 			await serverDisconnect;
 		});
 	});
 };
 
+const testSocketEmit = () => {
+	describe('Socket emit', () => {
+		let cleanUpFn;
+		const onNewSocket = jest.fn();
+		beforeAll(async () => {
+			cleanUpFn = (await startServer(onNewSocket)).close;
+		});
+		afterAll(async () => {
+			await cleanUpFn();
+		});
+
+		test('Server messages should be delivered to the client', async () => {
+			const { socketAtClient, socketAtServer } = await connectSocket(onNewSocket);
+
+			const event = generateRandomString();
+			const message = { [generateRandomString()]: generateRandomString() };
+
+			const messageProm = new Promise((resolve) => {
+				socketAtClient.on(event, (msg) => {
+					expect(msg).toEqual(message);
+					resolve();
+				});
+			});
+
+			socketAtServer.emit(event, message);
+
+			await expect(messageProm).resolves.toBeUndefined();
+
+			socketAtClient.disconnect();
+		});
+
+		test('Server should be able to catch join requests', async () => {
+			const { socketAtClient, socketAtServer } = await connectSocket(onNewSocket);
+
+			const message = { [generateRandomString()]: generateRandomString() };
+
+			const messageProm = new Promise((resolve) => {
+				socketAtServer.onJoin((msg) => {
+					expect(msg).toEqual(message);
+					resolve();
+				});
+			});
+
+			socketAtClient.emit('join', message);
+
+			await expect(messageProm);
+
+			socketAtClient.disconnect();
+		});
+
+		test('Server should be able to leave join requests', async () => {
+			const { socketAtClient, socketAtServer } = await connectSocket(onNewSocket);
+
+			const message = { [generateRandomString()]: generateRandomString() };
+
+			const messageProm = new Promise((resolve) => {
+				socketAtServer.onLeave((msg) => {
+					expect(msg).toEqual(message);
+					resolve();
+				});
+			});
+
+			socketAtClient.emit('leave', message);
+
+			await expect(messageProm);
+
+			socketAtClient.disconnect();
+		});
+	});
+};
+
+const testSocketRooms = () => {
+	describe('Socket rooms logic', () => {
+		let cleanUpFn;
+		let sendToRoom;
+		const onNewSocket = jest.fn();
+		beforeAll(async () => {
+			const { broadcast, close } = await startServer(onNewSocket);
+			cleanUpFn = close;
+			sendToRoom = broadcast;
+		});
+		afterAll(async () => {
+			await cleanUpFn();
+		});
+
+		const messageProm = (socket, event, message) => new Promise((resolve) => {
+			socket.on(event, (msg) => {
+				expect(msg).toEqual(message);
+				resolve();
+			});
+		});
+
+		const noMessageProm = (socket, event) => new Promise((resolve, reject) => {
+			socket.on(event, reject);
+			setTimeout(resolve, 10);
+		});
+
+		test('Server should be able to broadcast to channels', async () => {
+			const socket1 = await connectSocket(onNewSocket);
+			const socket2 = await connectSocket(onNewSocket);
+
+			const channel = generateRandomString();
+
+			socket1.socketAtServer.join(channel);
+			socket2.socketAtServer.join(channel);
+
+			const event = generateRandomString();
+			const message = generateRandomString();
+
+			const msgProm1 = Promise.all([
+				messageProm(socket1.socketAtClient, event, message),
+				messageProm(socket2.socketAtClient, event, message),
+			]);
+
+			sendToRoom(channel, event, message);
+
+			await msgProm1;
+
+			socket2.socketAtServer.leave(channel);
+
+			const event2 = generateRandomString();
+			const message2 = generateRandomString();
+
+			const msgProm2 = Promise.all([
+				messageProm(socket1.socketAtClient, event2, message2),
+				noMessageProm(socket2.socketAtClient, event2),
+			]);
+
+			sendToRoom(channel, event2, message2);
+			await msgProm2;
+
+			socket1.socketAtClient.disconnect();
+			socket2.socketAtClient.disconnect();
+		});
+
+		test('Socket broadcast should be able only be received by other subscribed sockets', async () => {
+			const socket1 = await connectSocket(onNewSocket);
+			const socket2 = await connectSocket(onNewSocket);
+
+			const channel = generateRandomString();
+
+			socket1.socketAtServer.join(channel);
+			socket2.socketAtServer.join(channel);
+
+			const event = generateRandomString();
+			const message = generateRandomString();
+
+			const msgProm1 = Promise.all([
+				noMessageProm(socket1.socketAtClient, event),
+				messageProm(socket2.socketAtClient, event, message),
+			]);
+
+			socket1.socketAtServer.broadcast(channel, event, message);
+
+			await msgProm1;
+
+			const event2 = generateRandomString();
+			const message2 = generateRandomString();
+
+			const msgProm2 = Promise.all([
+				messageProm(socket1.socketAtClient, event2, message2),
+				noMessageProm(socket2.socketAtClient, event2),
+			]);
+
+			socket2.socketAtServer.broadcast(channel, event2, message2);
+			await msgProm2;
+
+			socket1.socketAtClient.disconnect();
+			socket2.socketAtClient.disconnect();
+		});
+	});
+};
+
 describe('Socket IO', () => {
-	testSockets();
+	testSocketConnection();
+	testSocketEmit();
+	testSocketRooms();
 });

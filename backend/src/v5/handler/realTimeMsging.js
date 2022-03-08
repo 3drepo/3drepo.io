@@ -23,33 +23,39 @@ const RealTimeMsging = {};
 const socketWrapper = (callback) => (socket) => callback({
 	id: socket.id,
 	sessionId: socket?.handshake?.session?.id,
-	onError: (fn) => socket.on('error', fn),
 	onDisconnect: (fn) => socket.on('disconnect', fn),
 	onJoin: (fn) => socket.on('join', fn),
 	onLeave: (fn) => socket.on('leave', fn),
-	emit: socket.emit,
-	join: socket.join,
-	leave: socket.leave,
+	emit: (event, msg) => socket.emit(event, msg),
+	broadcast: (channel, event, data) => socket.to(channel).emit(event, data),
+	join: (channel) => socket.join(channel),
+	leave: (channel) => socket.leave(channel),
 
 });
 
 RealTimeMsging.createApp = (server, sessionService, sessionHeader, onNewSockets) => {
 	const service = SocketIO(server, { path: '/chat' });
 	service.use(sharedSession(sessionService, { autoSave: true }));
-	service.use(({ handshake }, next) => {
+	/*
+	 * FIXME: is this needed?
+	 * service.use(({ handshake }, next) => {
 		if (handshake.query[sessionHeader] && !handshake.headers.cookie) {
 			// eslint-disable-next-line no-param-reassign
 			handshake.headers.cookie = `${sessionHeader}=${handshake.query[sessionHeader]}; `;
 		}
 		next();
 	});
+*/
 
 	const newSocketsFn = socketWrapper(onNewSockets);
 	service.on('connection', (socket) => {
 		newSocketsFn(socket);
 	});
 
-	return () => new Promise((resolve) => service.close(resolve));
+	return {
+		broadcast: (channel, event, data) => service.to(channel).emit(event, data),
+		close: () => new Promise((resolve) => service.close(resolve)),
+	};
 };
 
 module.exports = RealTimeMsging;
