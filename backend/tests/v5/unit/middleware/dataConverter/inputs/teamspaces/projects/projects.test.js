@@ -30,17 +30,18 @@ const { templates } = require(`${src}/utils/responseCodes`);
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
+const existingProjectId = 'projectId';
 const existingProjectName = 'existing';
-ProjectsModel.getProjectByQuery.mockImplementation((teamspace, query) => (query.name !== existingProjectName
-	? Promise.reject(templates.modelNotFound)
-	: Promise.resolve({ name: existingProjectName, _id: 'pr' })));
+ProjectsModel.getProjectByQuery.mockImplementation((teamspace, query) => (query.name === existingProjectName && query._id.$ne !== existingProjectId
+	? Promise.resolve({ name: existingProjectName, _id: existingProjectId })
+	: Promise.reject(templates.modelNotFound)));
 
 const testValidateProjectData = () => {
 	describe.each([
-		['Request with valid data', { params: { teamspace: 'ts', project: 'pr' }, body: { name: '123' } }],
-		['Request with invalid name', { params: { teamspace: 'ts', project: 'pr' }, body: { name: 123 } }, templates.invalidArguments],
-		['Request with project that exists', { params: { teamspace: 'ts', project: 'pr' }, body: { name: '123' } }],
-		['Request with project that exists changing its name to the same', { params: { teamspace: 'ts', project: 'pr' }, body: { name: existingProjectName } }],
+		['Request with valid data', { params: { teamspace: 'ts', project: existingProjectId }, body: { name: '123' } }],
+		['Request with invalid name', { params: { teamspace: 'ts', project: existingProjectId }, body: { name: 123 } }, templates.invalidArguments],
+		['Request with project that exists', { params: { teamspace: 'ts', project: existingProjectId }, body: { name: '123' } }],
+		['Request with project that exists changing its name to the same', { params: { teamspace: 'ts', project: existingProjectId }, body: { name: existingProjectName } }],
 		['Request with name change with a name that is taken', { params: { teamspace: 'ts', project: 'pr2' }, body: { name: existingProjectName } }, templates.invalidArguments],
 	])('Check new project data', (desc, req, error) => {
 		test(`${desc} should ${error ? `fail with ${error.code}` : ' succeed and next() should be called'}`, async () => {
