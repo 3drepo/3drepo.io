@@ -35,7 +35,7 @@ export const TextField = styled(FormTextField)`
 			input {
 				font-weight: bold;
 				color: ${({ theme }) => theme.palette.secondary.main};
-			};
+			}
 			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 			fieldset { border: none; }
 		}

@@ -33,7 +33,6 @@ const ProgressBarPercentage = styled.div`
 	right: 0;
 	
 	font-family: Inter, Arial, sans-serif;
-	width: fit-content;
 	user-select: none;
 	font-size: 11px;
 	line-height: 16px;
