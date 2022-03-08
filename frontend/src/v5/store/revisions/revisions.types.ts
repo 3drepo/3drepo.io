@@ -57,9 +57,7 @@ export type CreateRevisionBody = {
 	file: File;
 	importAnimations?: boolean;
 	timezone?: string;
-};
 
-export type CreateContainerBody = {
 	containerName: string;
 	containerType: string;
 	containerUnit: string;
@@ -71,7 +69,7 @@ export type CreateRevisionPayload = {
 	teamspace: string;
 	projectId: string;
 	containerId: string;
-	body: CreateRevisionBody & CreateContainerBody;
+	body: CreateRevisionBody;
 	progressBar: (val) => void;
 };
 
@@ -95,7 +93,7 @@ export interface IRevisionsActionCreators {
 		projectId: string,
 		containerId: string,
 		progressBar: (val) => void,
-		body: CreateRevisionBody & CreateContainerBody,
+		body: CreateRevisionBody,
 	) => CreateRevisionAction;
 	setUploadComplete: (uploadId: string, isComplete: boolean, errorMessage?: string) => SetUploadCompleteAction;
 }
