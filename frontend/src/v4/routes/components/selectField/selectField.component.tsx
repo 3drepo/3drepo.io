@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 
 import Select, { SelectProps } from '@material-ui/core/Select';
 import { MuiTheme } from '../../../styles/theme';
@@ -30,7 +30,7 @@ function findLabel(children, value) {
 	});
 }
 
-export class SelectField extends React.PureComponent<SelectProps, any> {
+export class SelectField extends PureComponent<SelectProps, any> {
 	public menuWrapper;
 	public menuItems;
 	public query = '';

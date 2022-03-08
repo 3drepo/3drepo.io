@@ -16,7 +16,7 @@
  */
 
 import { memoize } from 'lodash';
-import React from 'react';
+import { PureComponent } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 
 import { PUBLIC_ROUTES, ROUTES } from '../../constants/routes';
@@ -67,7 +67,7 @@ interface IState {
 
 const DEFAULT_REDIRECT = ROUTES.TEAMSPACES;
 
-export class App extends React.PureComponent<IProps, IState> {
+export class App extends PureComponent<IProps, IState> {
 
 	get WebGLVersion() {
 		return WebGLChecker();

@@ -16,7 +16,6 @@
  */
 
 import { isEmpty } from 'lodash';
-import React from 'react';
 import { MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
 import { EmptyStateInfo } from '../../../../../components/components.styles';
 import { IMeasure } from '../../../measurements/components/measureItem/measureItem.component';

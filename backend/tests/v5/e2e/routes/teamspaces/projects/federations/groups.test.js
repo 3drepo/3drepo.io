@@ -255,7 +255,7 @@ const testImportGroups = () => {
 				.send({ groups: [...groups.map(({ _id }) => _id), newGroup._id] })
 				.expect(templates.ok.status);
 
-			expect(res.body.groups).toEqual([changedGroup, ...groups.slice(1), newGroup]);
+			expect(res.body.groups).toEqual(expect.arrayContaining([changedGroup, ...groups.slice(1), newGroup]));
 		});
 	});
 };

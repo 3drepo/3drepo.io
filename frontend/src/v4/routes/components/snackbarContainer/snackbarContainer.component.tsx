@@ -16,7 +16,7 @@
  */
 
 import Snackbar from '@material-ui/core/Snackbar';
-import React from 'react';
+import { PureComponent } from 'react';
 
 import { DefaultSnackbar } from './components/defaultSnackbar/defaultSnackbar.component';
 
@@ -30,7 +30,7 @@ interface IState {
 	snack: any;
 }
 
-export class SnackbarContainer extends React.PureComponent<IProps, IState> {
+export class SnackbarContainer extends PureComponent<IProps, IState> {
 	public queue = [];
 
 	public state = {

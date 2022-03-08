@@ -1,5 +1,3 @@
-const MODES = require('./modes');
-
 const TSLoader = ({ transpileOnly }) => ({
   test: /\.(ts|tsx)$/,
   loader: 'ts-loader',
@@ -47,36 +45,42 @@ const CSSExternalLoader = {
 
 const FontLoader = {
   test: /\.(woff(2)?|ttf|otf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+  type: 'asset/resource',
+  dependency: { not: ['url'] },
   include: /node_modules/,
   use: [{
-    loader: 'file-loader',
+    loader: 'url-loader',
     options: {
       outputPath: '../fonts/',
       publicPath: 'fonts/',
       name: '[name]-[hash].[ext]'
-    }
-  }]
+    },
+  }],
+  type: 'javascript/auto'
 };
 
 const ImageLoader = {
   test: /\.(png|jpg|gif|svg)$/,
+  type: 'asset/resource',
+  dependency: { not: ['url'] },
   use: [{
-    loader: 'file-loader',
+    loader: 'url-loader',
     options: {
       outputPath: '../images/',
       publicPath: 'images/',
       name: '[name]-[hash].[ext]'
     }
-  }]
+  }],
+  type: 'javascript/auto'
 };
 
 const HTMLLoader = {
   test: /\.(html)$/,
   use: {
     loader: 'html-loader',
-      options: {
-      minimize: true
-    }
+	options: {
+	  minimize: true
+	}
   }
 };
 
@@ -90,7 +94,7 @@ const WorkerLoader = {
       name: '[name].[hash].js'
     }
   }]
-}
+};
 
 module.exports = {
   TSLoader,
@@ -100,5 +104,5 @@ module.exports = {
   FontLoader,
   ImageLoader,
   HTMLLoader,
-  WorkerLoader
+  WorkerLoader,
 };

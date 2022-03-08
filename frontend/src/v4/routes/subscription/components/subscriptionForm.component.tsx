@@ -17,7 +17,7 @@
 
 import { Field, Formik } from 'formik';
 import { isEmpty, isEqual } from 'lodash';
-import React from 'react';
+import { PureComponent } from 'react';
 import * as Yup from 'yup';
 
 import { formatBytesGB } from '../../../services/formatting/formatCapacity';
@@ -71,7 +71,7 @@ interface IState {
 	payment: number;
 }
 
-export class SubscriptionForm extends React.PureComponent<IProps, IState> {
+export class SubscriptionForm extends PureComponent<IProps, IState> {
 	public state = {
 		spaceInfo: {
 			spaceUsed: 0,

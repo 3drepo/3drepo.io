@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { Fragment } from 'react';
+import { createRef, PureComponent, Fragment } from 'react';
 
 import { diffData, mergeData } from '../../../../../../helpers/forms';
 import { canChangeBasicProperty, canComment } from '../../../../../../helpers/issues';
@@ -94,17 +94,17 @@ const UNASSIGNED_JOB = {
 	value: ''
 };
 
-export class IssueDetails extends React.PureComponent<IProps, IState> {
+export class IssueDetails extends PureComponent<IProps, IState> {
 	public state = {
 		logsLoaded: false,
 		scrolled: false,
 	};
 
-	public formRef = React.createRef<any>();
-	public commentRef = React.createRef<any>();
-	public panelRef = React.createRef<any>();
-	public containerRef = React.createRef<any>();
-	public messageContainerRef = React.createRef<any>();
+	public formRef = createRef<any>();
+	public commentRef = createRef<any>();
+	public panelRef = createRef<any>();
+	public containerRef = createRef<any>();
+	public messageContainerRef = createRef<any>();
 
 	get isNewIssue() {
 		return !this.props.issue._id;

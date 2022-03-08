@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 
 import {
 	ISSUE_DEFAULT_HIDDEN_STATUSES,
@@ -78,7 +78,7 @@ interface IProps {
 	id?: string;
 }
 
-export class Issues extends React.PureComponent<IProps, any> {
+export class Issues extends PureComponent<IProps, any> {
 	get filters() {
 		const filterValuesMap = filtersValuesMap(this.props.jobs, this.props.topicTypes);
 		return ISSUE_FILTERS.map((issueFilter) => {

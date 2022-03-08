@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { FC, useState, useCallback } from 'react';
 import {
 	Container, PrimaryButton, StyledDivider, StyledDividerWithText, StyledTextfield,
 } from '../../presentationForm.styles';
@@ -27,13 +25,13 @@ interface IProps {
 	joinPresentation: (code: string) => void;
 }
 
-export const Initial: React.FC<IProps> = ({ startPresenting, joinPresentation }) => {
-	const [code, setCode] = React.useState<string>('');
+export const Initial: FC<IProps> = ({ startPresenting, joinPresentation }) => {
+	const [code, setCode] = useState<string>('');
 	const hasCode = code.trim() !== '';
 
 	const handleInputChange = ({ currentTarget }) => setCode(currentTarget?.value);
 
-	const handleJoinPresentation = React.useCallback(() => joinPresentation(code), [joinPresentation, code]);
+	const handleJoinPresentation = useCallback(() => joinPresentation(code), [joinPresentation, code]);
 
 	return (
 		<Container>

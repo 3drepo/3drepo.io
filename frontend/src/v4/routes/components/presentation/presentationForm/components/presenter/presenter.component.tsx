@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { FC, useCallback } from 'react';
 import { SessionTop } from '../sessionTop';
 
 import { Container, StopButton, StyledDivider } from '../../presentationForm.styles';
@@ -27,8 +25,8 @@ interface IProps {
 	showConfirmDialog: (config) => void;
 }
 
-export const Presenter: React.FC<IProps> = ({ stopPresenting, showConfirmDialog }) => {
-	const handleStopButtonClick = React.useCallback(() => {
+export const Presenter: FC<IProps> = ({ stopPresenting, showConfirmDialog }) => {
+	const handleStopButtonClick = useCallback(() => {
 		showConfirmDialog({
 			title: `End Session?`,
 			content: `This will end the session for all users. Continue?`,

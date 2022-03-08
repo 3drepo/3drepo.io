@@ -14,8 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import * as React from 'react';
+import { PureComponent } from 'react';
 
 import { LinearProgress } from '@material-ui/core';
 import { isEmpty } from 'lodash';
@@ -120,7 +119,7 @@ const ResourceItem = (resource) =>
 		(<ResourceUploading {...resource} />)
 ;
 
-export class Resources extends React.PureComponent<IProps, IState> {
+export class Resources extends PureComponent<IProps, IState> {
 	public onClickRemove = (r) => (e) => {
 		this.props.onRemoveResource(r);
 	}

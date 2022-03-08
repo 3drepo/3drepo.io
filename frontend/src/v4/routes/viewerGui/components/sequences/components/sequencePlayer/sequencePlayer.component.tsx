@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 
 import { FormControlLabel, FormGroup, Grid, IconButton, MenuItem, Select, Switch } from '@material-ui/core';
 import StepForwardIcon from '@material-ui/icons/FastForward';
@@ -74,7 +74,7 @@ interface IState {
 	sliderValue: number | null;
 }
 
-export class SequencePlayer extends React.PureComponent<IProps, IState> {
+export class SequencePlayer extends PureComponent<IProps, IState> {
 	private playInterval = 1000;
 	public state: IState = {
 		value: null,

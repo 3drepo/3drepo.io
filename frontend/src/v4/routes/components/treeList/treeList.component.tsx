@@ -16,7 +16,7 @@
  */
 
 import Grid from '@material-ui/core/Grid';
-import React from 'react';
+import { PureComponent } from 'react';
 
 import { Highlight } from '../highlight/highlight.component';
 import { ChildrenContainer, Container, Headline, IconContainer, Title } from './treeList.styles';
@@ -86,7 +86,7 @@ interface IState {
 	active: boolean;
 }
 
-export class TreeList extends React.PureComponent<IProps, IState> {
+export class TreeList extends PureComponent<IProps, IState> {
 	public static defaultProps = {
 		level: TREE_LEVELS.TEAMSPACE,
 		active: false,

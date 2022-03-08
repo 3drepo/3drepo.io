@@ -15,12 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNodeArray } from 'react';
+import { ReactChild, ReactNodeArray } from 'react';
+
 
 import { Container, Content, Footer } from './userManagementTab.styles';
 
 interface IProps {
-	children: React.ReactChild;
+	children: ReactChild;
 	footerLabel?: string | ReactNodeArray;
 	withHeader?: boolean;
 }

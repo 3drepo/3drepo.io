@@ -18,15 +18,18 @@
 const { addModel, deleteModel, getModelList } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
-const { getLatestRevision, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
+const { getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const Groups = require('./commons/groups');
+const Views = require('./commons/views');
+const { fetchFileStream } = require('../../../../models/fileRefs');
 const fs = require('fs/promises');
 const { getProjectById } = require('../../../../models/projects');
 const { logger } = require('../../../../utils/logger');
 const { queueModelUpload } = require('../../../../services/queue');
+const { templates } = require('../../../../utils/responseCodes');
 const { timestampToString } = require('../../../../utils/helper/dates');
 
-const Containers = { ...Groups };
+const Containers = { ...Groups, ...Views };
 
 Containers.addContainer = addModel;
 
@@ -82,6 +85,20 @@ Containers.newRevision = (teamspace, model, data, file) => queueModelUpload(team
 	}));
 
 Containers.updateRevisionStatus = updateRevisionStatus;
+
+Containers.downloadRevisionFiles = async (teamspace, container, revision) => {
+	const rev = await getRevisionByIdOrTag(teamspace, container, revision, { rFile: 1 });
+
+	if (!rev.rFile?.length) {
+		throw templates.fileNotFound;
+	}
+
+	// We currently only support single file fetches
+	const fileName = rev.rFile[0];
+	const fileNameFormatted = fileName.substr(36).replace(/_([^_]*)$/, '.$1');
+	const file = await fetchFileStream(teamspace, container, 'history.ref', fileName);
+	return { ...file, filename: fileNameFormatted };
+};
 
 Containers.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {
 	const accessibleContainers = await Containers.getContainerList(teamspace, project, username);

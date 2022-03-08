@@ -74,9 +74,9 @@ describe("Metadata", function () {
 
 	it("metadata search of a specific revision should succeed", function(done) {
 		const goldenData0 = {
-			"_id": "0062f1bb-b28e-4be2-a9d7-6f73abcdb760",
-			"metadata": { "value": "SYSTEM: PLATES" },
-			"parents": [ "dba918f9-e065-4f98-921e-ab7c05d89ee5" ]
+			"_id": "019d575a-189f-4de6-a10c-b5c2efe8afd2",
+			"metadata": { "value": "SYSTEM: BRICKS" },
+			"parents": [ "a7f7de13-52ae-4caa-9800-dbdf20d100d9" ]
 		};
 
 		agent.get(`/${username}/${model}/revision/${oldRevision}/meta/findObjsWith/Category.json`)
@@ -106,11 +106,11 @@ describe("Metadata", function () {
 
 	it("get metadata by revision tag should succeed", function(done) {
 		const goldenData0 = {
-			"_id": "0062f1bb-b28e-4be2-a9d7-6f73abcdb760",
-			"metadata": { "value": "SYSTEM: PLATES" },
-			"parents": [ "dba918f9-e065-4f98-921e-ab7c05d89ee5"
-			]
+			"_id": "019d575a-189f-4de6-a10c-b5c2efe8afd2",
+			"metadata": { "value": "SYSTEM: BRICKS" },
+			"parents": [ "a7f7de13-52ae-4caa-9800-dbdf20d100d9" ]
 		};
+
 
 		agent.get(`/${username}/${model}/revision/myTag/meta/findObjsWith/Category.json`)
 			.expect(200, function(err, res) {
@@ -187,7 +187,7 @@ describe("Metadata", function () {
 			.expect(200, function(err, res) {
 				expect(res.body.data).to.exist;
 				expect(res.body.data.length).to.equal(675);
-				expect(res.body.data[0]).to.deep.equal(goldenData0);
+				expect(res.body.data.find(({_id})=> goldenData0._id === _id)).to.deep.equal(goldenData0);
 				done(err);
 			});
 	});
@@ -230,7 +230,7 @@ describe("Metadata", function () {
 			.expect(200, function(err, res) {
 				expect(res.body.data).to.exist;
 				expect(res.body.data.length).to.equal(675);
-				expect(res.body.data[0]).to.deep.equal(goldenData0);
+				expect(res.body.data.find(({_id})=> goldenData0._id === _id)).to.deep.equal(goldenData0);
 				done(err);
 			});
 	});
@@ -459,6 +459,8 @@ describe("Metadata", function () {
 			agent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules?meshids=true`)
 				.send(query)
 				.expect(200, function(err, res) {
+					res.body[0].mesh_ids.sort();
+					goldenIfcStairFlight[0].mesh_ids.sort();
 					expect(res.body).to.deep.equal(goldenIfcStairFlight);
 					done(err);
 				});

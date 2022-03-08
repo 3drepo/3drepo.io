@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 import { isNil, isNumber } from 'lodash';
 import MoreIcon from '@material-ui/icons/ChevronRight';

@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { PureComponent, createRef } from 'react';
 import List from '@material-ui/core/List';
 import ArrowRight from '@material-ui/icons/ArrowRight';
 import Check from '@material-ui/icons/Check';
@@ -53,14 +51,14 @@ interface IState {
 	activeItem: any;
 }
 
-export class FiltersMenu extends React.PureComponent<IProps, IState> {
+export class FiltersMenu extends PureComponent<IProps, IState> {
 	public state = {
 		activeItem: null,
 		from: null,
 		to: null
 	};
 
-	public parentRef = React.createRef<HTMLElement>();
+	public parentRef = createRef<HTMLElement>();
 
 	public showSubMenu = (e) => {
 		this.setState({ activeItem: e });

@@ -19,6 +19,11 @@ import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { EMPTY_VIEW } from '@/v5/store/federations/federations.types';
 
+const numberField = Yup.number().typeError(formatMessage({
+	id: 'federations.surveyPoint.error.number',
+	defaultMessage: 'Must be a decimal number or integer',
+}));
+
 export const FederationSettingsSchema = Yup.object().shape({
 	name: Yup.string()
 		.min(2,
@@ -76,9 +81,9 @@ export const FederationSettingsSchema = Yup.object().shape({
 	defaultView: Yup.string()
 		.nullable()
 		.transform((value) => (value === EMPTY_VIEW._id ? null : value)),
-	latitude: Yup.number().required(),
-	longitude: Yup.number().required(),
-	angleFromNorth: Yup.number()
+	latitude: numberField.required(),
+	longitude: numberField.required(),
+	angleFromNorth: numberField
 		.min(0,
 			formatMessage({
 				id: 'federations.angle.error.min',
@@ -90,7 +95,7 @@ export const FederationSettingsSchema = Yup.object().shape({
 				defaultMessage: 'Angle cannot be greater than 360',
 			}))
 		.transform((value) => value ?? 0),
-	x: Yup.number().required(),
-	y: Yup.number().required(),
-	z: Yup.number().required(),
+	x: numberField.required(),
+	y: numberField.required(),
+	z: numberField.required(),
 });
