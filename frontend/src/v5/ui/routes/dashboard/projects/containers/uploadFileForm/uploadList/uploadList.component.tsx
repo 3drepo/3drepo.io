@@ -26,6 +26,7 @@ type IUploadList = {
 	onClickDelete: (index) => void;
 	values: UploadItemFields[];
 	selectedIndex: number | null;
+	getOriginalIndex: (index: number) => number;
 };
 
 export const UploadList = ({
@@ -33,24 +34,28 @@ export const UploadList = ({
 	selectedIndex,
 	onClickEdit,
 	onClickDelete,
+	getOriginalIndex,
 }: IUploadList): JSX.Element => {
 	const { trigger, setValue } = useFormContext();
 	return (
 		<Container>
 			{
-				values.map((item, index) => (
-					<UploadListItem
-						key={item.uploadId}
-						item={item}
-						onClickEdit={() => onClickEdit(index)}
-						onClickDelete={() => onClickDelete(index)}
-						onChange={(field, val) => {
-							setValue(`uploads.${index}.${field}`, val);
-							trigger(`uploads.${index}.${field}`);
-						}}
-						isSelected={index === selectedIndex}
-					/>
-				))
+				values.map((item, index) => {
+					const origIndex = getOriginalIndex(index);
+					return (
+						<UploadListItem
+							key={item.uploadId}
+							item={item}
+							onClickEdit={() => onClickEdit(index)}
+							onClickDelete={() => onClickDelete(index)}
+							onChange={(field, val) => {
+								setValue(`uploads.${origIndex}.${field}`, val);
+								trigger(`uploads.${origIndex}.${field}`);
+							}}
+							isSelected={index === selectedIndex}
+						/>
+					);
+				})
 			}
 		</Container>
 	);

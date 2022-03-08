@@ -93,6 +93,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 
 	const indexMap = new Map(fields.map(({ uploadId }, index) => [uploadId, index]));
 	const getOriginalIndex = (sortedIndex) => indexMap.get(sortedList[sortedIndex].uploadId);
+	const origIndex = Number.isInteger(selectedIndex) && getOriginalIndex(selectedIndex);
 
 	const onClickEdit = (id: number) => {
 		setSelectedIndex(id);
@@ -101,7 +102,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 	const onClickDelete = (id: number) => {
 		if (id < selectedIndex) setSelectedIndex(selectedIndex - 1);
 		if (id === selectedIndex) setSelectedIndex(null);
-		remove(id);
+		remove(getOriginalIndex(id));
 	};
 
 	const onSubmit = () => {
@@ -141,6 +142,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 							selectedIndex={selectedIndex}
 							onClickEdit={(id) => onClickEdit(id)}
 							onClickDelete={(id) => onClickDelete(id)}
+							getOriginalIndex={getOriginalIndex}
 						/>
 						<DropZone
 							message={formatMessage(
@@ -158,22 +160,22 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 						{
 							Number.isInteger(selectedIndex)
 								? (
-									<span key={watch(`uploads.${selectedIndex}.containerName`)}>
+									<span key={watch(`uploads.${origIndex}.containerName`)}>
 										<SidebarForm
 											value={
-												getValues(`uploads.${getOriginalIndex(selectedIndex)}`)
+												getValues(`uploads.${origIndex}`)
 											}
 											key={sortedList[selectedIndex].uploadId}
 											isNewContainer={
-												!getValues(`uploads.${getOriginalIndex(selectedIndex)}.containerId`)
-												&& !!getValues(`uploads.${getOriginalIndex(selectedIndex)}.containerName`)
+												!getValues(`uploads.${origIndex}.containerId`)
+												&& !!getValues(`uploads.${origIndex}.containerName`)
 											}
 											isSpm={sortedList[selectedIndex].extension === 'spm'}
 											onChange={(field: string, val: string | boolean) => {
 												// @ts-ignore
-												setValue(`uploads.${getOriginalIndex(selectedIndex)}.${field}`, val);
+												setValue(`uploads.${origIndex}.${field}`, val);
 												// @ts-ignore
-												trigger(`uploads.${getOriginalIndex(selectedIndex)}.${field}`);
+												trigger(`uploads.${origIndex}.${field}`);
 											}}
 										/>
 									</span>
