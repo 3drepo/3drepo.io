@@ -276,13 +276,16 @@
 		});
 	};
 
-	Handler.getSessionStore = function (session) {
+	Handler.getSessionStore = (session) => {
 		const MongoDBStore = require("connect-mongodb-session")(session);
-		return new MongoDBStore({
-			uri: getURL(),
-			databaseName:"admin",
-			collection: "sessions"
+		const prom = new Promise((resolve, reject) => {
+			const store = new MongoDBStore({
+				uri: getURL(),
+				databaseName:"admin",
+				collection: "sessions"
+			}, (err) => err ? reject(err) : resolve(store));
 		});
+		return prom;
 	};
 
 	Handler.updateMany = async function (database, colName, query, data, upsert = false) {

@@ -23,12 +23,13 @@ const expressSession = require('express-session');
 const { publish } = require('./eventsManager/eventsManager');
 
 const Sessions = { SESSION_HEADER: 'connect.sid' };
-const initialiseSession = () => {
-	const store = db.getSessionStore(expressSession);
+const initialiseSession = async () => {
+	const store = await db.getSessionStore(expressSession);
 	const secure = config.public_protocol === 'https';
 	const { secret, maxAge, domain } = config.cookie;
+
 	// istanbul ignore next
-	return expressSession({
+	const middleware = expressSession({
 		secret,
 		resave: true,
 		rolling: true,
@@ -38,13 +39,13 @@ const initialiseSession = () => {
 			domain,
 			path: '/',
 			secure,
-			// None can only applied with secure set to true, which requires SSL.
-			// None is required for embeddable viewer to work.
 			// FIXME: this should be deduced inside config.js
 			sameSite: secure ? 'None' : 'Lax',
 		},
 		store,
 	});
+
+	return { middleware, deinitStore: () => new Promise((resolve) => store.client.close(true, resolve)) };
 };
 
 Sessions.session = initialiseSession();
