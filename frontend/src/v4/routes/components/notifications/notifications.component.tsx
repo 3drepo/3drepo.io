@@ -65,7 +65,8 @@ const NotificationButton = ({ unreadCount, onClick, id }) => (
         aria-label="Show notifications"
         aria-haspopup="true"
         id={id}
-        size="large">
+        size="large"
+	>
 		<Badge
 			badgeContent={unreadCount}
 			color={unreadCount > 0 ? 'primary' : 'secondary'}

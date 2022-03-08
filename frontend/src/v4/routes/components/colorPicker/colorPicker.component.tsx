@@ -111,7 +111,7 @@ interface IState {
 	opacitySliderVisibility: boolean;
 }
 
-const OpenPanelButton = ({color, onClick, disabled}) =>
+const OpenPanelButton = ({color, onClick, disabled, ref}) =>
 	(
 		<ColorSelect
 			container
@@ -120,6 +120,7 @@ const OpenPanelButton = ({color, onClick, disabled}) =>
 			alignItems="center"
 			justifyContent="flex-start"
 			disabled={disabled}
+			ref={ref}
 		>
 			<Dot item color={color} />
 			<Grid item>
@@ -297,54 +298,55 @@ const OpacityControl = ({ opacity, onOpacityChanged, sliderVisible, onSliderVisi
 	};
 
 	return <>
-    <Grid
-        container
-        direction="row"
-        justifyContent="flex-start"
-        alignItems="center"
-    >
-        <Grid item>
-            <OpacityVisibilityCheckbox onChange={(e, val) => onSliderVisibilityChanged(val)} checked={sliderVisible} />
-        </Grid>
-        <Grid item>
-            Set Opacity
-        </Grid>
-    </Grid>
-    {sliderVisible &&
-        <Grid
-            container
-            direction="row"
-            justifyContent="flex-start"
-            alignItems="center"
-        >
-            <Grid item>
-                <OpacitySlider
-                    max={255}
-                    min={1}
-                    value={opacity}
-                    onChange={(e, val) => onOpacityChanged(val)} />
-            </Grid>
-            <Grid item>
-                <OpacityValue>
-                    <OpacityInput
-                        value={inputVal}
-                        endAdornment={<OpacityInputAdornment position="end" disableTypography>%</OpacityInputAdornment>}
-                        inputProps={{
-                                        'step': 10,
-                                        'min': 0,
-                                        'max': 100,
-                                        'type': 'number',
-                                        'aria-labelledby': 'input-slider',
-                                    }}
-                        margin="dense"
-                        onChange={onInputChanged}
-                        onBlur={onInputBlur}
-                    />
-                </OpacityValue>
-            </Grid>
-        </Grid>
-    }
-</>;
+		<Grid
+			container
+			direction="row"
+			justifyContent="flex-start"
+			alignItems="center"
+		>
+			<Grid item>
+				<OpacityVisibilityCheckbox onChange={(e, val) => onSliderVisibilityChanged(val)} checked={sliderVisible} />
+			</Grid>
+			<Grid item>
+				Set Opacity
+			</Grid>
+		</Grid>
+		{sliderVisible &&
+			<Grid
+				container
+				direction="row"
+				justifyContent="flex-start"
+				alignItems="center"
+			>
+				<Grid item>
+					<OpacitySlider
+						max={255}
+						min={1}
+						value={opacity}
+						onChange={(e, val) => onOpacityChanged(val)} 
+					/>
+				</Grid>
+				<Grid item>
+					<OpacityValue>
+						<OpacityInput
+							value={inputVal}
+							endAdornment={<OpacityInputAdornment position="end" disableTypography>%</OpacityInputAdornment>}
+							inputProps={{
+								'step': 10,
+								'min': 0,
+								'max': 100,
+								'type': 'number',
+								'aria-labelledby': 'input-slider',
+							}}
+							margin="dense"
+							onChange={onInputChanged}
+							onBlur={onInputBlur}
+						/>
+					</OpacityValue>
+				</Grid>
+			</Grid>
+		}
+	</>;
 };
 
 export class ColorPicker extends PureComponent<IProps, IState> {
@@ -489,7 +491,12 @@ export class ColorPicker extends PureComponent<IProps, IState> {
 
 		return <>
             <>
-                <OpenPanelButton onClick={this.openPanel} disabled={disabled} color={this.hexValue} />
+                <OpenPanelButton
+					onClick={this.openPanel}
+					disabled={disabled}
+					color={this.hexValue}
+					ref={this.colorSelectRef}
+				/>
             </>
 
             <Panel

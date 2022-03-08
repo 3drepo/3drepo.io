@@ -55,7 +55,6 @@ export const StyledButton: any = styled(Button)`
 export const LoginButtons = styled(Grid)`
 	&& {
 		padding: 10px 0 25px; 
-		justify-content: space-between;
 	}
 `;
 

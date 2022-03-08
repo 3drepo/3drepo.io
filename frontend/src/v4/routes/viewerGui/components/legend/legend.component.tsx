@@ -1,6 +1,3 @@
-
-
-
 /**
  *  Copyright (C) 2021 3D Repo Ltd
  *

@@ -81,7 +81,7 @@ export class Login extends PureComponent<IProps, IState> {
 	}
 
 	public renderLoginButtons = () => (
-		<LoginButtons container alignItems="center">
+		<LoginButtons container alignItems="center" justifyContent="space-between">
 			<StyledButton
 				color="secondary"
 				component={Link}

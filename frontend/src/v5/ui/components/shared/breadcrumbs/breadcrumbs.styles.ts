@@ -32,9 +32,9 @@ export const Breadcrumb = styled(Button).attrs({
 })`
 	&& {
 		color: ${({ theme }) => theme.palette.primary.contrast};
-		min-width: auto;
-		margin: 0 4px;
 		padding: 5px;
+		margin: 0 4px;
+		min-width: auto;
 
 		&:hover {
 			text-decoration: none;

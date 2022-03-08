@@ -33,7 +33,8 @@ export const Presentation: FunctionComponent<IProps> = ({ presentationMode, join
             {...props}
             aria-label="Show Presentation mode options"
             aria-haspopup="true"
-            size="large">
+            size="large"
+		>
 			<PresentationIcon fontSize="small" mode={presentationMode} />
 		</IconButton>
 	);
