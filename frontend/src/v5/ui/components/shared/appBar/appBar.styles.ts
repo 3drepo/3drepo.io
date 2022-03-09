@@ -21,13 +21,11 @@ export const Items = styled.div`
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	width: 50%;
-
+	flex: 1;
+	max-width: calc(100% - 200px);
+	
 	&:last-child {
 		justify-content: flex-end;
-	}
-
-	& > *:last-child div {
-		margin-right: 0;
+		min-width: 152px;
 	}
 `;

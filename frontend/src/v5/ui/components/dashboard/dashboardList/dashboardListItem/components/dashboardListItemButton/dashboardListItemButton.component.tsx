@@ -15,27 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { Dispatch, ReactNode, SyntheticEvent } from 'react';
+import { Dispatch, ReactNode, SyntheticEvent } from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { Tooltip } from '@material-ui/core';
+import { IFixedOrGrowContainer } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.component';
 import { Button } from './dashboardListItemButton.styles';
 
-type IDashboardListItemButton = {
-	children: ReactNode;
-	width?: number;
+interface IDashboardListItemButton extends IFixedOrGrowContainer {
 	onClick: Dispatch<SyntheticEvent>;
 	tooltipTitle?: ReactNode;
-	className?: string;
-};
+}
 
 export const DashboardListItemButton = ({
-	children,
-	width,
 	onClick,
 	tooltipTitle = '',
-	className,
+	children,
+	...containerProps
 }: IDashboardListItemButton): JSX.Element => (
-	<FixedOrGrowContainer width={width} className={className}>
+	<FixedOrGrowContainer {...containerProps}>
 		<Tooltip title={tooltipTitle}>
 			<Button onClick={(event) => {
 				event.stopPropagation();

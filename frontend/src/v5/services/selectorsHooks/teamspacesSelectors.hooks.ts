@@ -16,6 +16,6 @@
  */
 
 import * as TeamspacesSelectors from '@/v5/store/teamspaces/teamspaces.selectors';
-import { createHooksSelectors } from './selectorsHooks.helper';
+import { createHooksSelectors } from '@/v5/helpers/selectorsHooks.helper';
 
 export const TeamspacesHooksSelectors = createHooksSelectors(TeamspacesSelectors);

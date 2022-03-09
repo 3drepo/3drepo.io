@@ -15,40 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, select, takeLatest } from 'redux-saga/effects';
-import { isEmpty } from 'lodash';
+import { put, takeLatest } from 'redux-saga/effects';
 
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
-import { selectTeamspaceUsers } from '@/v5/store/teamspaces/teamspaces.selectors';
 import { formatMessage } from '@/v5/services/intl';
 import { TeamspacesActions, TeamspacesTypes, ITeamspace } from './teamspaces.redux';
 
 export function* fetch() {
 	try {
-		const { data: { teamspaces } } = yield API.fetchTeamspaces();
+		const { data: { teamspaces } } = yield API.Teamspaces.fetchTeamspaces();
 		yield put(TeamspacesActions.fetchSuccess(teamspaces as ITeamspace[]));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'teamspaces.fetch.error', defaultMessage: 'trying to fetch teamspaces' }),
-			error,
-		}));
-		yield put(TeamspacesActions.fetchFailure());
-	}
-}
-
-export function* fetchUsers({ teamspace }) {
-	try {
-		const users = yield select(selectTeamspaceUsers, teamspace);
-
-		if (isEmpty(users)) {
-			const { data: { members } } = yield API.fetchTeamspaceMembers(teamspace);
-
-			yield put(TeamspacesActions.fetchUsersSuccess(teamspace, members));
-		}
-	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'teamspaces.fetchUsers.error', defaultMessage: 'trying to fetch users' }),
 			error,
 		}));
 	}
@@ -56,5 +36,4 @@ export function* fetchUsers({ teamspace }) {
 
 export default function* TeamspacesSaga() {
 	yield takeLatest(TeamspacesTypes.FETCH as any, fetch);
-	yield takeLatest(TeamspacesTypes.FETCH_USERS as any, fetchUsers);
 }

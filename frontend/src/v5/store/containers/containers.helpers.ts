@@ -16,12 +16,18 @@
  */
 
 import {
-	ContainerStatuses,
+	UploadStatuses,
 	FetchContainersContainerItemResponse,
 	FetchContainerStatsResponse,
 	IContainer,
 } from '@/v5/store/containers/containers.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
+
+export const filterContainers = (federations: IContainer[], filterQuery: string) => (
+	federations.filter((
+		{ name, code, type },
+	) => [name, code, type].join('').toLowerCase().includes(filterQuery.trim().toLowerCase()))
+);
 
 export const prepareSingleContainerData = (
 	container: FetchContainersContainerItemResponse,
@@ -33,8 +39,8 @@ export const prepareSingleContainerData = (
 	latestRevision: stats?.revisions.latestRevision ?? '',
 	type: stats?.type ?? '',
 	code: stats?.code ?? '',
-	status: stats?.status ?? ContainerStatuses.OK,
-	units: stats?.units ?? '',
+	status: stats?.status ?? UploadStatuses.OK,
+	unit: stats?.unit ?? '',
 	hasStatsPending: !stats,
 	errorResponse: stats?.errorReason && {
 		message: stats.errorReason.message,

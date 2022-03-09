@@ -14,12 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { Grid, Tooltip } from '@material-ui/core';
-import React from 'react';
+import { PureComponent } from 'react';
+import { Grid } from '@material-ui/core';
 
 import { SortLabel } from '../tableHeading/tableHeading.styles';
-import { RadioButton, RadioContainer } from './tableHeadingRadio.styles';
+import { TableHeadingRadioButton, RadioContainer, TableHeadingRadioTooltip } from './tableHeadingRadio.styles';
 
 interface IProps {
 	label: string;
@@ -35,7 +34,7 @@ interface IProps {
 	onClick?: () => void;
 }
 
-export class TableHeadingRadio extends React.PureComponent<IProps, any> {
+export class TableHeadingRadio extends PureComponent<IProps, any> {
 	public state = {
 		selectedValue: ''
 	};
@@ -52,7 +51,7 @@ export class TableHeadingRadio extends React.PureComponent<IProps, any> {
 		const RadioContainerProps = { width };
 
 		return (
-			<Tooltip title={tooltipText}>
+			<TableHeadingRadioTooltip title={tooltipText}>
 				<RadioContainer
 					container
 					direction="column"
@@ -70,7 +69,7 @@ export class TableHeadingRadio extends React.PureComponent<IProps, any> {
 						</SortLabel>
 					</Grid>
 					<Grid item>
-						<RadioButton
+						<TableHeadingRadioButton
 							checked={checked}
 							name={name || label}
 							disabled={disabled}
@@ -79,7 +78,7 @@ export class TableHeadingRadio extends React.PureComponent<IProps, any> {
 						/>
 					</Grid>
 				</RadioContainer>
-			</Tooltip>
+			</TableHeadingRadioTooltip>
 		);
 	}
 }

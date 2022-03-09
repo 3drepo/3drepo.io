@@ -184,8 +184,15 @@ export function* uploadModelFile({ teamspace, project, modelData, fileData, hand
 			const formData = new FormData();
 			formData.append('file', fileData.file);
 			formData.append('tag', fileData.tag);
-			formData.append('desc', fileData.desc);
-			formData.append('importAnimations', fileData.importAnimations);
+			if (fileData.desc) {
+				formData.append('desc', fileData.desc);
+			}
+			if (fileData.importAnimations) {
+				formData.append('importAnimations', fileData.importAnimations);
+			}
+			if (fileData.timezone) {
+				formData.append('timezone', fileData.timezone);
+			}
 
 			const { modelId, modelName } = modelData;
 			const { data: { status }, data } = yield API.uploadModelFile(teamspace, modelId, formData);

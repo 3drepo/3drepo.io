@@ -19,7 +19,6 @@ import { ConnectedRouter } from 'connected-react-router';
 import { Route, Switch } from 'react-router-dom';
 import 'font-awesome/css/font-awesome.min.css';
 import 'normalize.css/normalize.css';
-import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import '@/v4/services/fontAwesome';
@@ -30,12 +29,13 @@ import { dispatch, history, store } from '@/v4/modules/store';
 import V4Root from '@/v4/routes/index';
 import { Root as V5Root } from '@/v5/ui/routes';
 
-import { IS_DEVELOPMENT } from '@/v4/constants/environment';
 import { UnityUtil } from '@/globals/unity-util';
 import { clientConfigService } from '@/v4/services/clientConfig';
-import * as OfflinePluginRuntime from 'offline-plugin/runtime';
 import { initializeIntl } from '@/v5/services/intl';
-import { initializeActionsDispatchers } from '@/v5/services/actionsDispatchers/actionsDistpatchers.helper';
+import { initializeActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
+import { Version, VersionContext } from './versionContext';
+import { getSocketId, initializeSocket, SocketEvents, subscribeToSocketEvent } from './v5/services/realtime/realtime.service';
+import { setSocketIdHeader } from './v4/services/api';
 
 window.UnityUtil = UnityUtil;
 
@@ -43,13 +43,24 @@ initializeActionsDispatchers(dispatch);
 
 initializeIntl(navigator.language);
 
+initializeSocket(clientConfigService.chatConfig);
+subscribeToSocketEvent(SocketEvents.CONNECT, () => setSocketIdHeader(getSocketId()));
+
 const render = () => {
 	ReactDOM.render(
 		<Provider store={store as any}>
 			<ConnectedRouter history={history as History}>
 				<Switch>
-					<Route path="/v5"><V5Root /></Route>
-					<Route><V4Root /></Route>
+					<Route path="/v5">
+						<VersionContext.Provider value={Version.V5}>
+							<V5Root />
+						</VersionContext.Provider>
+					</Route>
+					<Route>
+						<VersionContext.Provider value={Version.V4}>
+							<V4Root />
+						</VersionContext.Provider>
+					</Route>
 				</Switch>
 			</ConnectedRouter>
 		</Provider>,
@@ -67,7 +78,3 @@ const initApp = () => {
 };
 
 initApp();
-
-if (!IS_DEVELOPMENT) {
-	OfflinePluginRuntime.install();
-}

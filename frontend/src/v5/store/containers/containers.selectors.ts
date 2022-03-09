@@ -20,38 +20,33 @@ import { IContainersState } from '@/v5/store/containers/containers.types';
 import { isEmpty } from 'lodash';
 import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
 
-const selectContainersDomain = (state: { containers: IContainersState }) => state.containers;
+const selectContainersDomain = (state): IContainersState => state.containers;
 
 export const selectContainers = createSelector(
-	selectContainersDomain, selectCurrentProject, (state, currentProject) => state.containers[currentProject] ?? [],
+	selectContainersDomain, selectCurrentProject,
+	(state, currentProject) => state.containersByProject[currentProject] ?? [],
 );
 
-export const selectFilterQuery = createSelector(
-	selectContainersDomain, (state) => state.filterQuery,
-);
-
-export const selectFilteredContainers = createSelector(
-	selectContainers, selectFilterQuery,
-	(containers, filterQuery) => containers.filter((
-		{ name, code, type },
-	) => [name, code, type].join('').toLowerCase().includes(filterQuery.trim().toLowerCase())),
-);
-
-export const selectFilteredFavouriteContainers = createSelector(
-	selectFilteredContainers, (containers) => containers.filter(({ isFavourite }) => isFavourite),
+export const selectFavouriteContainers = createSelector(
+	selectContainers,
+	(containers) => containers.filter(({ isFavourite }) => isFavourite),
 );
 
 export const selectHasContainers = createSelector(
-	selectContainers, (containers) => ({
-		favourites: containers.some(({ isFavourite }) => isFavourite),
+	selectContainers, selectFavouriteContainers,
+	(containers, favouriteContainers) => ({
+		favourites: !isEmpty(favouriteContainers),
 		all: !isEmpty(containers),
 	}),
 );
 
 export const selectIsListPending = createSelector(
-	selectContainersDomain, (state) => state.isListPending,
+	selectContainersDomain, selectCurrentProject,
+	// Checks if the containers for the project have been fetched
+	(state, currentProject) => !state.containersByProject[currentProject],
 );
 
 export const selectAreStatsPending = createSelector(
-	selectContainers, (containers) => containers.some(({ hasStatsPending }) => hasStatsPending),
+	selectContainers,
+	(containers) => containers.some(({ hasStatsPending }) => hasStatsPending),
 );

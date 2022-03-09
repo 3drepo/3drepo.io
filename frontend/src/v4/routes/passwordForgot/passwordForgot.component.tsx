@@ -14,11 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { PureComponent } from 'react';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import { Field, Form, Formik } from 'formik';
-import React from 'react';
 import { Link } from 'react-router-dom';
 
 import { Panel } from '../components/panel/panel.component';
@@ -36,7 +35,7 @@ interface IState {
 	userNameOrEmail: string;
 }
 
-export class PasswordForgot extends React.PureComponent<IProps, IState> {
+export class PasswordForgot extends PureComponent<IProps, IState> {
 	public state = {
 		userNameOrEmail: ''
 	};

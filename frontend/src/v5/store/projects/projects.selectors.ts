@@ -16,15 +16,13 @@
  */
 
 import { createSelector } from 'reselect';
+import { selectCurrentTeamspace } from '../teamspaces/teamspaces.selectors';
+import { IProjectsState } from './projects.redux';
 
-const selectProjectsDomain = (state) => state.projects;
+const selectProjectsDomain = (state): IProjectsState => state.projects;
 
 export const selectProjects = createSelector(
-	selectProjectsDomain, (state) => state.projects,
-);
-
-export const selectCurrentTeamspace = createSelector(
-	selectProjectsDomain, (state) => state.currentTeamspace,
+	selectProjectsDomain, (state) => state.projectsByTeamspace,
 );
 
 export const selectCurrentProjects = createSelector(
@@ -33,4 +31,9 @@ export const selectCurrentProjects = createSelector(
 
 export const selectCurrentProject = createSelector(
 	selectProjectsDomain, (state) => state.currentProject,
+);
+
+export const selectCurrentProjectDetails = createSelector(
+	selectCurrentProject, selectCurrentProjects,
+	(project, projects) => projects.find(({ _id }) => _id === project),
 );

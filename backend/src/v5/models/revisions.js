@@ -58,12 +58,24 @@ Revisions.getRevisions = (teamspace, model, showVoid, projection = {}) => {
 	return findRevisionsByQuery(teamspace, model, query, projection, { timestamp: -1 });
 };
 
+Revisions.getRevisionByIdOrTag = (teamspace, model, revision, projection = {}) => findOneRevisionByQuery(teamspace,
+	model, { $or: [{ _id: revision }, { tag: revision }] }, projection);
+
 Revisions.updateRevisionStatus = async (teamspace, model, revision, status) => {
 	const query = { $or: [{ _id: revision }, { tag: revision }] };
 	const res = await db.updateOne(teamspace, collectionName(model), query, { $set: { void: status } });
 
 	if (!res || res.matchedCount === 0) {
 		throw templates.revisionNotFound;
+	}
+};
+
+Revisions.isTagUnique = async (teamspace, model, tag) => {
+	try {
+		await findOneRevisionByQuery(teamspace, model, { tag });
+		return false;
+	} catch {
+		return true;
 	}
 };
 

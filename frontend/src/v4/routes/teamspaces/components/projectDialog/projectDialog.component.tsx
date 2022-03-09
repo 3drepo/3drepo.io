@@ -23,7 +23,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import TextField from '@material-ui/core/TextField';
 import { Field, Form, Formik } from 'formik';
 import memoizeOne from 'memoize-one';
-import React from 'react';
+import { PureComponent } from 'react';
 
 import * as Yup from 'yup';
 
@@ -53,7 +53,7 @@ const getTeamspacesItems = memoizeOne((teamspaces) => teamspaces.map(({ account 
 	name: account
 })));
 
-export class ProjectDialog extends React.PureComponent<IProps, any> {
+export class ProjectDialog extends PureComponent<IProps, any> {
 	public static defaultProps = {
 		name: '',
 		teamspace: ''

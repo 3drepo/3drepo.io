@@ -33,7 +33,7 @@ module.exports = {
 		'@typescript-eslint/ban-types': 'off',
 		'@typescript-eslint/ban-ts-comment': 'off',
 		'@typescript-eslint/member-delimiter-style': [
-			'warn',
+			'off',
 			{
 				multiline: {
 					delimiter: 'semi',
@@ -49,30 +49,30 @@ module.exports = {
 		'@typescript-eslint/no-unused-expressions': 'error',
 		'@typescript-eslint/no-var-requires': 'error',
 		'@typescript-eslint/quotes': [
-			'warn',
+			'off',
 			'single',
 			{
 				allowTemplateLiterals: true
 			}
 		],
-		'@typescript-eslint/require-await': 'warn',
-		'@typescript-eslint/semi': ['warn', 'always'],
+		'@typescript-eslint/require-await': 'off',
+		'@typescript-eslint/semi': ['off', 'always'],
 		'@typescript-eslint/type-annotation-spacing': 'error',
-		'@typescript-eslint/no-unsafe-return': 'warn',
-		'@typescript-eslint/no-unsafe-call': 'warn',
-		'@typescript-eslint/no-unsafe-member-access': 'warn',
-		'@typescript-eslint/no-unsafe-assignment': 'warn',
-		'@typescript-eslint/restrict-template-expressions': 'warn',
+		'@typescript-eslint/no-unsafe-return': 'off',
+		'@typescript-eslint/no-unsafe-call': 'off',
+		'@typescript-eslint/no-unsafe-member-access': 'off',
+		'@typescript-eslint/no-unsafe-assignment': 'off',
+		'@typescript-eslint/restrict-template-expressions': 'off',
 		'@typescript-eslint/await-thenable': 'error',
-		'@typescript-eslint/unbound-method': 'warn',
-		'@typescript-eslint/no-misused-promises': 'warn',
-		'@typescript-eslint/no-inferrable-types': 'warn',
-		'@typescript-eslint/no-floating-promises': 'warn',
+		'@typescript-eslint/unbound-method': 'off',
+		'@typescript-eslint/no-misused-promises': 'off',
+		'@typescript-eslint/no-inferrable-types': 'off',
+		'@typescript-eslint/no-floating-promises': 'off',
 		'@typescript-eslint/no-shadow': 'error',
 		'@typescript-eslint/restrict-plus-operands': 'off',
 		'array-bracket-spacing': ['error', 'never'],
 		'react/display-name': 'off',
-		'react/prop-types': 'warn',
+		'react/prop-types': 'off',
 		'react/no-find-dom-node': 'off',
 		'react/jsx-wrap-multilines': 'error',
 		'brace-style': ['error', '1tbs'],
@@ -86,16 +86,16 @@ module.exports = {
 				'newlines-between': 'ignore'
 			}
 		],
-		indent: ['warn', 'tab', { SwitchCase: 1 }],
+		indent: ['off', 'tab', { SwitchCase: 1 }],
 		'max-classes-per-file': ['error', 1],
 		'max-len': [
-			'warn',
+			'off',
 			{
 				code: 120
 			}
 		],
 		'no-bitwise': 'off',
-		'no-console': ['error', { allow: ['warn', 'error', 'debug'] }],
+		'no-console': ['error', { allow: ['off', 'error', 'debug'] }],
 		'no-debugger': 'error',
 		'no-multiple-empty-lines': 'error',
 		'no-template-curly-in-string': 'error',
@@ -113,7 +113,7 @@ module.exports = {
 		quotes: 'off',
 		'react/jsx-boolean-value': ['error', 'never'],
 		'react/jsx-curly-spacing': [
-			'warn',
+			'off',
 			{
 				when: 'never'
 			}
@@ -128,11 +128,11 @@ module.exports = {
 				closingSlash: 'allow'
 			}
 		],
-		'react/jsx-wrap-multilines': 'warn',
+		'react/jsx-wrap-multilines': 'off',
 		'react/self-closing-comp': 'error',
 		'require-await': 'off',
 		semi: 'off',
-		'space-in-parens': 'warn',
+		'space-in-parens': 'off',
 		'@typescript-eslint/tslint/config': [
 			'error',
 			{
@@ -149,7 +149,13 @@ module.exports = {
 					]
 				}
 			}
-		]
+		],
+		'@typescript-eslint/explicit-module-boundary-types': "off",
+		'@typescript-eslint/no-unused-vars': "off",
+		'react/jsx-in-scope': "off",
+		'react/jsx-uses-react': "off",
+		'react/react-in-jsx-scope': "off",
+		'@typescript-eslint/no-explicit-any': "off"
 	},
 	settings: {
 		react: {

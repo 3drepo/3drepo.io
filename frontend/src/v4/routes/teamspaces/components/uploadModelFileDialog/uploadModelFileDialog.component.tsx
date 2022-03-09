@@ -17,13 +17,16 @@
 
 import { Field, Form, Formik } from 'formik';
 import { snakeCase } from 'lodash';
-import React from 'react';
+import { PureComponent } from 'react';
 import * as Yup from 'yup';
+import * as countriesAndTimezones from 'countries-and-timezones';
 import Button from '@material-ui/core/Button';
 import DialogContent from '@material-ui/core/DialogContent';
 import TextField from '@material-ui/core/TextField';
 import FileIcon from '@material-ui/icons/InsertDriveFileOutlined';
 import Checkbox from '@material-ui/core/Checkbox';
+import InputLabel from '@material-ui/core/InputLabel';
+import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
 
 import { unitsMap } from '../../../../constants/model-parameters';
 import { schema } from '../../../../services/validation';
@@ -37,6 +40,7 @@ import {
 	CheckboxContainer,
 	FileContainer,
 	FileName,
+	FormControl,
 	Main,
 	ModelInfo,
 	StyledDialogActions,
@@ -69,12 +73,46 @@ interface IProps {
 interface IState {
 	fileName: string;
 	allowImportAnimations: boolean;
+	allowSetTimezone: boolean;
 }
 
-export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
+
+const generateTimezoneData = () => {
+	let defaultTimezone;
+	const timezoneList  = [];
+	const labelToTZName = {};
+	const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+	const tzData = countriesAndTimezones.getAllTimezones();
+	for (const tz in tzData) {
+		const {name, utcOffset, utcOffsetStr} = tzData[tz];
+		const tzToAdd = {
+			name,
+			label: `(UTC${utcOffsetStr}) ${name}`,
+			utcOffset
+		};
+
+		if (name === browserTimezone ||
+			(!defaultTimezone && name === 'Etc/UTC')) {
+			defaultTimezone = tzToAdd;
+		}
+		timezoneList.push(tzToAdd);
+
+		labelToTZName[tzToAdd.label] = tzToAdd.name;
+	}
+
+	const allTimezones = timezoneList.sort((tz1, tz2) => tz1.utcOffset - tz2.utcOffset);
+	return { defaultTimezone, allTimezones, labelToTZName };
+};
+
+const { allTimezones, defaultTimezone, labelToTZName } = generateTimezoneData();
+
+export class UploadModelFileDialog extends PureComponent<IProps, IState> {
 	public state = {
 		fileName: '',
 		allowImportAnimations: false,
+		allowSetTimezone: false,
+		timezones: [],
+		selectedTimezone: {name: '', label: ''}
 	};
 
 	get modelDetails() {
@@ -108,18 +146,29 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 	public handleFileUpload = (values) => {
 		const { modelId, teamspaceName, projectName, handleClose, uploadModelFile, modelName } = this.props;
 
-		const fileData = {
+		const fileData: any = {
 			file: values.file,
 			tag: values.revisionName,
 			desc: values.revisionDesc,
-			importAnimations: values.importAnimations,
 		};
+
+		if (this.state.allowSetTimezone) {
+			fileData.timezone =  values.selectedTimezone;
+		}
+
+		if (this.state.allowImportAnimations) {
+			fileData.importAnimations = values.importAnimations;
+		}
 
 		const modelData = {
 			modelName, modelId
 		};
 
 		uploadModelFile(teamspaceName, projectName, modelData, fileData, handleClose);
+	}
+
+	public onTimezoneChanged = (newTimezone, { value, setFieldValue}) => {
+		setFieldValue('selectedTimezone', labelToTZName[newTimezone]);
 	}
 
 	public renderRevisionsInfo = renderWhenTrueOtherwise(() => (
@@ -165,6 +214,22 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		)} />
 	));
 
+	public renderTimezones = renderWhenTrue(() => (
+		<Field name="selectedTimezone" render={({ field, form }) => (
+			<FormControl margin="normal">
+				<InputLabel shrink htmlFor="timezone-select">Project Timezone</InputLabel>
+					<CellSelect
+						{...field}
+						items={allTimezones.map((tz) => tz.label)}
+						value={defaultTimezone.label}
+						onChange={ (event, data) => this.onTimezoneChanged(data, form) }
+						disabledPlaceholder
+						inputId="timezone-select"
+					/>
+			</FormControl>
+		)} />
+	));
+
 	public renderFileName = renderWhenTrue(() => (
 		<FileName><FileIcon />{this.state.fileName}</FileName>
 	));
@@ -179,11 +244,13 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 
 		if (extension === 'spm') {
 			this.setState({
-				allowImportAnimations: true
+				allowImportAnimations: true,
+				allowSetTimezone: true
 			}, () => setFieldValue('importAnimations', true));
-		} else if (this.state.allowImportAnimations) {
+		} else {
 			this.setState({
-				allowImportAnimations: false
+				allowImportAnimations: false,
+				allowSetTimezone: false
 			}, () => setFieldValue('importAnimations', false));
 		}
 
@@ -213,7 +280,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 		return (
 			<Formik
 				onSubmit={this.handleFileUpload}
-				initialValues={{ revisionName: '', revisionDesc: '', file: '', importAnimations: false, }}
+				initialValues={{ revisionName: '', revisionDesc: '', file: '', importAnimations: false, selectedTimezone: defaultTimezone.name }}
 				enableReinitialize
 				validationSchema={UploadSchema}
 			>
@@ -255,6 +322,7 @@ export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
 									fullWidth
 								/>}
 						/>
+						{this.renderTimezones(this.state.allowSetTimezone)}
 						<StyledDialogActions>
 							<Field render={ () =>
 								<CancelButton

@@ -28,19 +28,46 @@ import {
 	RemoveFavouriteAction,
 	FetchContainersResponse,
 	FetchContainerStatsResponse,
+	CreateContainerAction,
 	FetchContainersAction,
 	FetchContainerStatsAction,
+	DeleteContainerAction,
+
 } from './containers.types';
 import { prepareContainersData } from './containers.helpers';
 
-export function* fetchContainers({ teamspace, projectId }: FetchContainersAction) {
-	yield put(ContainersActions.setIsListPending(true));
+export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
 	try {
-		const { containers }: FetchContainersResponse = yield API.fetchContainers({ teamspace, projectId });
+		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, true));
+		yield API.Containers.addFavourites({ teamspace, containerId, projectId });
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'containers.addFavourite.error', defaultMessage: 'trying to add container to favourites' }),
+			error,
+		}));
+		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, false));
+	}
+}
+
+export function* removeFavourites({ containerId, teamspace, projectId }: RemoveFavouriteAction) {
+	try {
+		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, false));
+		yield API.Containers.removeFavourites({ containerId, teamspace, projectId });
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'containers.removeFavourite.error', defaultMessage: 'trying to remove container from favourites' }),
+			error,
+		}));
+		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, true));
+	}
+}
+
+export function* fetchContainers({ teamspace, projectId }: FetchContainersAction) {
+	try {
+		const { containers }: FetchContainersResponse = yield API.Containers.fetchContainers({ teamspace, projectId });
 		const containersWithoutStats = prepareContainersData(containers);
 
 		yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithoutStats));
-		yield put(ContainersActions.setIsListPending(false));
 
 		yield all(
 			containers.map(
@@ -57,7 +84,7 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 
 export function* fetchContainerStats({ teamspace, projectId, containerId }: FetchContainerStatsAction) {
 	try {
-		const stats: FetchContainerStatsResponse = yield API.fetchContainerStats({
+		const stats: FetchContainerStatsResponse = yield API.Containers.fetchContainerStats({
 			teamspace, projectId, containerId,
 		});
 
@@ -70,29 +97,32 @@ export function* fetchContainerStats({ teamspace, projectId, containerId }: Fetc
 	}
 }
 
-export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
+export function* createContainer({ teamspace, projectId, newContainer }: CreateContainerAction) {
 	try {
-		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, true));
-		yield API.addFavourites({ teamspace, containerId, projectId });
+		const id = yield API.Containers.createContainer({ teamspace, projectId, newContainer });
+
+		const container = { _id: id, ...newContainer };
+		yield put(ContainersActions.createContainerSuccess(
+			projectId,
+			container,
+		));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'containers.addFavourite.error', defaultMessage: 'trying to add container to favourites' }),
+			currentActions: formatMessage({ id: 'containers.creation.error', defaultMessage: 'trying to create container' }),
 			error,
 		}));
-		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, false));
 	}
 }
 
-export function* removeFavourites({ containerId, teamspace, projectId }: RemoveFavouriteAction) {
+export function* deleteContainer({ teamspace, projectId, containerId }: DeleteContainerAction) {
 	try {
-		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, false));
-		yield API.removeFavourites({ containerId, teamspace, projectId });
+		yield API.Containers.deleteContainer({ teamspace, projectId, containerId });
+		yield put(ContainersActions.deleteContainerSuccess(projectId, containerId));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'containers.removeFavourite.error', defaultMessage: 'trying to remove container from favourites' }),
+			currentActions: formatMessage({ id: 'container.delete.error', defaultMessage: 'trying to delete container' }),
 			error,
 		}));
-		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, true));
 	}
 }
 
@@ -101,4 +131,6 @@ export default function* ContainersSaga() {
 	yield takeLatest(ContainersTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeLatest(ContainersTypes.FETCH_CONTAINERS, fetchContainers);
 	yield takeEvery(ContainersTypes.FETCH_CONTAINER_STATS, fetchContainerStats);
+	yield takeLatest(ContainersTypes.CREATE_CONTAINER, createContainer);
+	yield takeLatest(ContainersTypes.DELETE_CONTAINER, deleteContainer);
 }

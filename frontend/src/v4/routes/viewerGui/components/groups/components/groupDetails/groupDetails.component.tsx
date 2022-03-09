@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { PureComponent, createRef, PropsWithChildren } from 'react';
 import AutorenewIcon from '@material-ui/icons/Autorenew';
 import Delete from '@material-ui/icons/Delete';
 import SaveIcon from '@material-ui/icons/Save';
@@ -75,7 +73,7 @@ const GroupSchema = Yup.object().shape({
 	return type === GROUPS_TYPES.NORMAL ||  rules.length > 0 ;
 });
 
-export class GroupDetails extends React.PureComponent<IProps, IState> {
+export class GroupDetails extends PureComponent<IProps, IState> {
 	get isNewGroup() {
 		return !this.props.editingGroup._id;
 	}
@@ -98,8 +96,8 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		scrolled: false
 	};
 
-	public formRef = React.createRef<HTMLElement>() as any;
-	public panelRef = React.createRef<any>();
+	public formRef = createRef<HTMLElement>() as any;
+	public panelRef = createRef<any>();
 
 	public renderRulesField = renderWhenTrue(() => (
 		<CriteriaField
@@ -139,7 +137,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		this.setState({ isFormDirty: this.isNewGroup, isFormValid: true });
 	}
 
-	public componentDidUpdate(prevProps: Readonly<React.PropsWithChildren<IProps>>) {
+	public componentDidUpdate(prevProps: Readonly<PropsWithChildren<IProps>>) {
 		if (prevProps === this.props) {
 			return;
 		}

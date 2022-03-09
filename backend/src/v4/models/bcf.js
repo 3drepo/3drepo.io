@@ -573,11 +573,11 @@ function parseMarkupBuffer(markupBuffer) {
 			}
 			_.get(xml, "Topic[0].ReferenceLink") && (issue.extras.ReferenceLink = _.get(xml, "Topic[0].ReferenceLink"));
 			issue.name = _.get(xml, "Markup.Topic[0].Title[0]._");
-			issue.priority = sanitise(_.get(xml, "Markup.Topic[0].Priority[0]._"), priorityEnum);
+			issue.priority = sanitise(_.get(xml, "Markup.Topic[0].Priority[0]._"), priorityEnum) || "None";
 			_.get(xml, "Markup.Topic[0].Index[0]._") && (issue.extras.Index = _.get(xml, "Markup.Topic[0].Index[0]._"));
 			_.get(xml, "Markup.Topic[0].Labels[0]._") && (issue.extras.Labels = _.get(xml, "Markup.Topic[0].Labels[0]._"));
 			issue.created = utils.isoStringToTimestamp(_.get(xml, "Markup.Topic[0].CreationDate[0]._"));
-			issue.owner = _.get(xml, "Markup.Topic[0].CreationAuthor[0]._");
+			issue.owner = _.get(xml, "Markup.Topic[0].CreationAuthor[0]._") || "Unknown";
 			_.get(xml, "Markup.Topic[0].ModifiedDate[0]._") && (issue.extras.ModifiedDate = _.get(xml, "Markup.Topic[0].ModifiedDate[0]._"));
 			_.get(xml, "Markup.Topic[0].ModifiedAuthor[0]._") && (issue.extras.ModifiedAuthor = _.get(xml, "Markup.Topic[0].ModifiedAuthor[0]._"));
 			if (_.get(xml, "Markup.Topic[0].DueDate[0]._")) {
@@ -652,7 +652,7 @@ function parseViewpointClippingPlanes(clippingPlanes, scale) {
 }
 
 async function parseViewpointComponents(groupDbCol, vpComponents, isFederation, issueName, issueId, ifcToModelMap) {
-	const vp = {};
+	const vp = { extras: {}};
 	const groupPromises = [];
 
 	for (let componentsIdx = 0; componentsIdx < vpComponents.length; componentsIdx++) {
@@ -959,7 +959,7 @@ async function readBCF(account, model, requester, ifcToModelMap, dataBuffer, set
 			issue.viewpoints.push(vp);
 		}
 
-		if (viewpoints[vpGuids[0]].snapshot) {
+		if (viewpoints[vpGuids[0]]?.snapshot) {
 			// take the first screenshot as thumbnail
 			await utils.resizeAndCropScreenshot(viewpoints[vpGuids[0]].snapshot, 120, 120, true).then((image) => {
 				if (image) {

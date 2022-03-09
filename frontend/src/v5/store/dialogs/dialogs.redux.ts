@@ -18,20 +18,20 @@
 import { createActions, createReducer } from 'reduxsauce';
 import uuid from 'uuidv4';
 
-import { Constants } from '../common/actions.helper';
+import { Constants } from '../../helpers/actions.helper';
 
 interface IDialogActions {
 	open: (type?: string, props?: any) => any;
 	close: (id: string) => any;
 }
 
-interface IDialogConfig {
+export interface IDialogConfig {
 	id: string;
 	modalType?: 'error' | 'info' | 'alert';
 	props: any;
 }
 
-interface IDialogState {
+export interface IDialogState {
 	dialogs: IDialogConfig[];
 }
 
@@ -41,7 +41,7 @@ export const INITIAL_STATE: IDialogState = {
 
 export const { Types: DialogsTypes, Creators: DialogsActions } = createActions({
 	open: ['modalType', 'props'],
-	close: ['id'],
+	close: ['dialogId'],
 }, { prefix: 'MODALS/' }) as { Types: Constants<IDialogActions>; Creators: IDialogActions };
 
 export const openHandler = (state = INITIAL_STATE, { modalType, props }): IDialogState => {

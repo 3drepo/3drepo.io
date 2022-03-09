@@ -18,25 +18,11 @@
 import styled from 'styled-components';
 import { Button, Breadcrumbs } from '@material-ui/core';
 import { Link } from 'react-router-dom';
+import { TextOverflow } from '@controls/textOverflow';
 
 export const Container = styled(Breadcrumbs)`
 	&& {
 		margin-left: 15px;
-	}
-`;
-
-export const InteractiveBreadcrumb = styled(Button).attrs({
-	variant: 'text',
-})`
-	&& {
-		${({ theme }) => theme.typography.body1};
-		color: ${({ theme }) => theme.palette.primary.main};
-		padding: 5px;
-		margin: 0;
-
-		&:hover {
-			text-decoration: none;
-		}
 	}
 `;
 
@@ -45,9 +31,38 @@ export const Breadcrumb = styled(Button).attrs({
 	component: Link,
 })`
 	&& {
-		color: ${({ theme }) => theme.palette.base.main};
+		color: ${({ theme }) => theme.palette.primary.contrast};
+		padding: 5px;
+		margin: 0 4px;
+
 		&:hover {
 			text-decoration: none;
 		}
+
+		&.MuiButton-text.Mui-focusVisible {
+			background-color: ${({ theme }) => theme.palette.secondary.mid};
+		}
 	}
+`;
+
+export const InteractiveBreadcrumb = styled(Breadcrumb).attrs({
+	variant: 'text',
+})`
+	&& {
+		${({ theme }) => theme.typography.h3};
+		color: ${({ theme }) => theme.palette.primary.main};
+		padding-right: 9px;
+		margin-right: 0;
+		max-width: 100%;
+	}
+`;
+
+export const HomeIconBreadcrumb = styled(Breadcrumb)`
+	&& {
+		padding: 10px;
+	}
+`;
+
+export const OverflowWrapper = styled(TextOverflow)`
+	width: auto;
 `;

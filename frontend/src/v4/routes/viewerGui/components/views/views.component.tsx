@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { PureComponent, createRef } from 'react';
 import AddIcon from '@material-ui/icons/Add';
 import { isEqual } from 'lodash';
 
@@ -79,12 +77,12 @@ interface IProps {
 	toggleSortOrder: () => void;
 }
 
-export class Views extends React.PureComponent<IProps, any> {
+export class Views extends PureComponent<IProps, any> {
 	public state = {
 		filteredViewpoints: []
 	};
 
-	public containerRef = React.createRef<any>();
+	public containerRef = createRef<any>();
 
 	get type() {
 		return VIEWER_PANELS.VIEWS;

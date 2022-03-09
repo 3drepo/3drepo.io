@@ -14,16 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
+import { SyntheticEvent } from 'react';
 import { useParams } from 'react-router';
 
 import { RevisionsListItemText } from '@components/shared/revisionDetails/components/revisionsListItemText';
+import { RevisionsListItemDate } from '@components/shared/revisionDetails/components/revisionsListItemDate';
 import { RevisionsListItemAuthor } from '@components/shared/revisionDetails/components/revisionsListItemAuthor';
 import { RevisionsListItemCode } from '@components/shared/revisionDetails/components/revisionsListItemCode';
 import { RevisionsListItemButton } from '@components/shared/revisionDetails/components/revisionsListItemButton';
 import { IRevision } from '@/v5/store/revisions/revisions.types';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
+import { Display } from '@/v5/ui/themes/media';
 import { formatDate } from '@/v5/services/intl';
 import { Container } from './revisionsListItem.styles';
 
@@ -37,19 +38,29 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 	const { teamspace, project } = useParams();
 	const { timestamp, desc, author, tag, void: voidStatus } = revision;
 
-	const toggleVoidStatus = (e: React.SyntheticEvent) => {
+	const toggleVoidStatus = (e: SyntheticEvent) => {
 		e.stopPropagation();
 		RevisionsActionsDispatchers.setVoidStatus(teamspace, project, containerId, tag || revision._id, !voidStatus);
 	};
 
 	return (
 		<Container>
-			<RevisionsListItemText meta width={130} active={active}>
+			<RevisionsListItemDate width={130} tabletWidth={94} active={active}>
 				{formatDate(timestamp)}
+			</RevisionsListItemDate>
+			<RevisionsListItemAuthor authorName={author} active={active} width={228} tabletWidth={155} />
+			<RevisionsListItemCode
+				tabletWidth={150}
+				onClick={() => {}}
+			>
+				{tag}
+			</RevisionsListItemCode>
+			<RevisionsListItemText
+				hideWhenSmallerThan={Display.Tablet}
+				active={active}
+			>
+				{desc}
 			</RevisionsListItemText>
-			<RevisionsListItemAuthor authorName={author} active={active} width={228} />
-			<RevisionsListItemCode width={330} onClick={() => {}}>{tag}</RevisionsListItemCode>
-			<RevisionsListItemText active={active}>{desc}</RevisionsListItemText>
 			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} />
 		</Container>
 	);

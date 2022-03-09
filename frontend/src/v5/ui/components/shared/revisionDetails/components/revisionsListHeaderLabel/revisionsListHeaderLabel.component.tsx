@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { Typography } from '@controls/typography';
+import { IFixedOrGrowContainer as IFixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.component';
 import { Container } from './revisionsListHeaderLabel.styles';
 
-type IDashboardListHeaderLabel = {
-	width?: number;
+type IDashboardListHeaderLabel = IFixedOrGrowContainerProps & {
 	className?: string;
 	children?: ReactNode;
 };

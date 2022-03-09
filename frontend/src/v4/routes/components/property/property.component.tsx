@@ -14,17 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
+import { PureComponent, ReactChild } from 'react';
 
 import { Name, Value, Wrapper } from './property.styles';
 
 interface IProps {
 	name: string;
-	children: React.ReactChild;
+	children: ReactChild;
 }
 
-export class Property extends React.PureComponent<IProps, any> {
+export class Property extends PureComponent<IProps, any> {
 	public render() {
 		const { name, children } = this.props;
 

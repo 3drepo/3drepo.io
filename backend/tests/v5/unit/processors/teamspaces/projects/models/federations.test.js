@@ -40,11 +40,11 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 const newFederationId = 'newFederationId';
 ModelSettings.addModel.mockImplementation(() => newFederationId);
-ModelSettings.deleteModel.mockImplementation(async (ts, model) => {
+ModelSettings.deleteModel.mockImplementation((ts, model) => {
 	if (Number.isInteger(model)) {
-		return undefined;
+		return Promise.resolve(undefined);
 	}
-	throw templates.federationNotFound;
+	return Promise.reject(templates.federationNotFound);
 });
 
 const federationList = [
@@ -61,18 +61,18 @@ const federationSettings = {
 		name: 'federation 1',
 		type: 'type 1',
 		properties: {
-			units: 'm',
+			unit: 'm',
 			code: 'FED1',
 		},
 		status: 'ok',
 		subModels: [{ model: 'container1' }, { model: 'container2' }],
-		category: 'category 1',
 		defaultView: 2,
 		defaultLegend: 3,
 		permissions: [1, 2, 3],
 		angleFromNorth: 10,
 		timestamp: new Date(),
 		surveyPoints: [123],
+		desc: 'This is a fed',
 		errorReason: {
 			message: 'error reason',
 			timestamp: 123,
@@ -84,23 +84,21 @@ const federationSettings = {
 		name: 'federation 2',
 		type: 'type 2',
 		properties: {
-			units: 'mm',
+			unit: 'mm',
 			code: 'FED2',
 		},
 		status: 'processing',
-		subModels: [{ model: 'container3' }],
-		category: 'category 2',
+		subModels: ['container3'],
 	},
 	federation3: {
 		_id: 3,
 		name: 'federation 3',
 		type: 'type 3',
 		properties: {
-			units: 'mm',
+			unit: 'mm',
 			code: 'FED3',
 		},
 		status: 'processing',
-		category: 'category 3',
 	},
 };
 
@@ -124,7 +122,7 @@ Risks.getRisksCount.mockImplementation((teamspace, federation) => {
 });
 
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
-Views.checkViewExists.mockImplementation((teamspace, model, view) => {
+Views.getViewById.mockImplementation((teamspace, model, view) => {
 	if (view === 1) {
 		return 1;
 	}
@@ -247,10 +245,10 @@ const testDeleteFavourites = () => {
 };
 
 const formatToStats = (settings, issueCount, riskCount, lastUpdated) => ({
+	...(settings.desc ? { desc: settings.desc } : {}),
+	...(settings.subModels ? { containers: settings.subModels.map((m) => m.model || m) } : {}),
 	code: settings.properties.code,
 	status: settings.status,
-	subModels: settings.subModels,
-	category: settings.category,
 	lastUpdated,
 	tickets: {
 		issues: issueCount ?? 0,

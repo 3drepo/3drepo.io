@@ -40,7 +40,6 @@ const dmSubscriptions = {};
 
 socket.on('connect', () => dispatch(ChatActions.handleConnect()));
 socket.on('disconnect', () => dispatch(ChatActions.handleDisconnect()));
-socket.on('reconnect', () => dispatch(ChatActions.handleReconnect()));
 socket.on('message', (data) =>  {
 	if (!dmSubscriptions[data.event]) {
 		return;
@@ -53,24 +52,15 @@ const joinedRooms = [] as any;
 
 function* handleConnect() {
 	API.setSocketIdHeader(socket.id);
+	for (let index = 0; index < joinedRooms.length; index++) {
+		const [teamspace, model] = joinedRooms[index].split('::');
+		socket.emit('join', { account: teamspace, model });
+	}
 }
 
 function* handleDisconnect() {
 	if (IS_DEVELOPMENT) {
 		console.error('The websocket for the chat service was disconnected');
-	}
-}
-
-function* handleReconnect() {
-	if (IS_DEVELOPMENT) {
-		console.debug('Rejoining all rooms on reconnect');
-	}
-
-	yield handleConnect();
-
-	for (let index = 0; index < joinedRooms.length; index++) {
-		const [teamspace, model] = joinedRooms[index].split('::');
-		socket.emit('join', { account: teamspace, model });
 	}
 }
 
@@ -141,7 +131,7 @@ export default function* ChatSaga() {
 	yield takeLatest(ChatTypes.CALL_COMMENTS_CHANNEL_ACTIONS, callCommentsChannelActions);
 	yield takeLatest(ChatTypes.HANDLE_CONNECT, handleConnect);
 	yield takeLatest(ChatTypes.HANDLE_DISCONNECT, handleDisconnect);
-	yield takeLatest(ChatTypes.HANDLE_RECONNECT, handleReconnect);
+	yield takeLatest(ChatTypes.HANDLE_RECONNECT, handleConnect);
 	yield takeLatest(ChatTypes.SUBSCRIBE_TO_DM, subscribeToDm);
 	yield takeLatest(ChatTypes.UNSUBSCRIBE_TO_DM, unsubscribeToDm);
 }

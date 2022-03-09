@@ -14,10 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { PureComponent } from 'react';
 import memoizeOne from 'memoize-one';
 import * as queryString from 'query-string';
-import React from 'react';
 
 import { MODEL_ROLES_LIST } from '../../constants/model-permissions';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
@@ -29,7 +28,6 @@ import { TextOverlay } from '../components/textOverlay/textOverlay.component';
 import {
 	Container,
 	ModelsContainer,
-	OverflowWrapper,
 	PermissionsContainer
 } from './modelsPermissions.styles';
 
@@ -40,6 +38,15 @@ const MODEL_TABLE_CELLS = [{
 	CellComponent: ModelItem,
 	searchBy: ['name']
 }];
+
+const MODEL_TABLE_CELLS_V5 = [{
+	name: 'Container/federation',
+	type: CELL_TYPES.NAME,
+	HeadingComponent: CellUserSearch,
+	CellComponent: ModelItem,
+	searchBy: ['name']
+}];
+
 
 const getModelsTableRows = memoizeOne((models = [], selectedModels = []) => {
 	return models.map((model) => {
@@ -58,8 +65,11 @@ interface IProps {
 	models: any[];
 	selectedModels: any[];
 	permissions: any[];
+	className?: string;
 	onSelectionChange: (selectedModels) => void;
 	onPermissionsChange: (modelsWithPermissions) => void;
+	isV5: boolean;
+	selectedContFedId?: string;
 }
 
 interface IState {
@@ -68,7 +78,7 @@ interface IState {
 	permissionsRevision: number;
 }
 
-export class ModelsPermissions extends React.PureComponent<IProps, IState> {
+export class ModelsPermissions extends PureComponent<IProps, IState> {
 	public state = {
 		modelRows: [],
 		currentUser: {},
@@ -146,23 +156,27 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 	public componentDidMount() {
 		const queryParams = queryString.parse(this.props.location.search);
 		if (queryParams.modelId) {
-			this.props.onSelectionChange([{model: queryParams.modelId}]);
+			this.props.onSelectionChange([{ model: queryParams.modelId }]);
 		}
 	}
 
 	public render() {
-		const { models, permissions, selectedModels } = this.props;
+		const { models, permissions, selectedModels, className, isV5, location } = this.props;
 		const { permissionsRevision } = this.state;
+		const CELLS = isV5 ? MODEL_TABLE_CELLS_V5 : MODEL_TABLE_CELLS ;
+		// eslint-disable-next-line max-len
+		const textOverlayMessage = `Select a ${ isV5 ? 'container or federation' : 'model'} to view the users' permissions`;
 
 		return (
 			<Container
 				container
 				direction="row"
 				wrap="nowrap"
+				className={className}
 			>
 				<ModelsContainer item>
 					<CustomTable
-						cells={MODEL_TABLE_CELLS}
+						cells={CELLS}
 						rows={getModelsTableRows(models, selectedModels)}
 						onSelectionChange={this.props.onSelectionChange}
 						onSearch={this.handleModelsSearch}
@@ -173,16 +187,16 @@ export class ModelsPermissions extends React.PureComponent<IProps, IState> {
 					}
 				</ModelsContainer>
 				<PermissionsContainer item>
-							<PermissionsTable
-								key={permissionsRevision}
-								permissions={permissions}
-								roles={MODEL_ROLES_LIST}
-								onPermissionsChange={this.handlePermissionsChange}
-								rowStateInterceptor={this.hasDisabledPermissions}
-							/>
+					<PermissionsTable
+						key={permissionsRevision}
+						permissions={permissions}
+						roles={MODEL_ROLES_LIST}
+						onPermissionsChange={this.handlePermissionsChange}
+						rowStateInterceptor={this.hasDisabledPermissions}
+					/>
 					{
 						!selectedModels.length ?
-							<TextOverlay content="Select a model to view the users' permissions" /> :
+							<TextOverlay content={textOverlayMessage} /> :
 							null
 					}
 				</PermissionsContainer>

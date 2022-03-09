@@ -15,30 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {
-	INITIAL_STATE,
-	reducer as containersReducer,
-	ContainersActions,
-} from '@/v5/store/containers/containers.redux';
+import { INITIAL_STATE, reducer as containersReducer, ContainersActions } from '@/v5/store/containers/containers.redux';
+import { IContainersState } from '@/v5/store/containers/containers.types';
 import { times } from 'lodash';
 import { containerMockFactory } from './containers.fixtures';
 
 describe('Containers: redux', () => {
 	const projectId = 'projectId';
 	const mockContainers = times(5, () => containerMockFactory({ isFavourite: false }));
-	const defaultState = {
+	const defaultState:IContainersState = {
 		...INITIAL_STATE,
-		containers: {
+		containersByProject: {
 			[projectId]: mockContainers
 		}
 	};
 
 	it('should add container to favourites', () => {
-		const resultState = containersReducer(
-				defaultState,
-				ContainersActions.setFavouriteSuccess(projectId, mockContainers[0]._id, true)
+		const resultState: IContainersState = containersReducer(
+			defaultState,
+			ContainersActions.setFavouriteSuccess(projectId, mockContainers[0]._id, true)
 		);
-		const resultContainers = resultState.containers[projectId];
+		const resultContainers = resultState.containersByProject[projectId];
 
 		expect(resultContainers[0].isFavourite).toEqual(true);
 		expect(resultContainers.slice(1).every(container => container.isFavourite)).toEqual(false);
@@ -46,17 +43,17 @@ describe('Containers: redux', () => {
 
 	it('should remove container from favourites', () => {
 		const mockAllFavouritesContainers = times(5, () => containerMockFactory({ isFavourite: true }))
-		const defaultStateWithAllFavourites = {
+		const defaultStateWithAllFavourites: IContainersState = {
 			...INITIAL_STATE,
-			containers: {
+			containersByProject: {
 				[projectId]: mockAllFavouritesContainers
 			}
 		}
-		const resultState = containersReducer(
+		const resultState: IContainersState = containersReducer(
 			defaultStateWithAllFavourites,
 			ContainersActions.setFavouriteSuccess(projectId, mockAllFavouritesContainers[0]._id, false)
 		);
-		const resultContainers = resultState.containers[projectId];
+		const resultContainers = resultState.containersByProject[projectId];
 
 		expect(resultContainers[0].isFavourite).toEqual(false);
 		expect(resultContainers.slice(1).every(container => container.isFavourite)).toEqual(true);

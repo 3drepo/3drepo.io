@@ -137,6 +137,12 @@ export const FileGrid = styled(Grid)`
 	}
 `;
 
+export const CreateMitigationsGrid = styled(Grid)`
+	&& {
+		max-width: 430px;
+	}
+`;
+
 export const InfoColumnWrapper = styled(Grid)`
 	&& {
 		min-width: 215px;

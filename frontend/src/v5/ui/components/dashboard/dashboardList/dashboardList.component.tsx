@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode } from 'react';
-import { ListContainer } from './dasboardList.styles';
+import { ReactNode } from 'react';
+import { ListContainer } from './dashboardList.styles';
 
 type IDashboardList = {
 	children?: ReactNode;

@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { useState } from 'react';
+import { FormattedMessage } from 'react-intl';
 import { Tooltip } from '@material-ui/core';
 import {
 	DashboardListItemButton,
@@ -27,113 +28,148 @@ import {
 import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision';
 import { Highlight } from '@controls/highlight';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
-import { EllipsisButtonWithMenu } from '@controls/ellipsisButtonWithMenu';
-import { getContainerMenuItems } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.helpers';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { RevisionDetails } from '@components/shared/revisionDetails';
-import { FormattedMessage } from 'react-intl';
-import { formatDate } from '@/v5/services/intl';
+import { Display } from '@/v5/ui/themes/media';
+import { formatDate, formatMessage } from '@/v5/services/intl';
+import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
+import { ShareModal } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
+import { ContainerEllipsisMenu } from './containerEllipsisMenu/containerEllipsisMenu.component';
 
 interface IContainerListItem {
+	index: number;
 	isSelected: boolean;
 	container: IContainer;
 	filterQuery: string;
 	onFavouriteChange: (id: string, value: boolean) => void;
-	onToggleSelected: (id: string) => void;
+	onSelectOrToggleItem: (id: string) => void;
 }
 
 export const ContainerListItem = ({
+	index,
 	isSelected,
 	container,
 	filterQuery,
-	onToggleSelected,
+	onSelectOrToggleItem,
 	onFavouriteChange,
-}: IContainerListItem): JSX.Element => (
-	<DashboardListItem
-		selected={isSelected}
-		key={container._id}
-	>
-		<DashboardListItemRow
+}: IContainerListItem): JSX.Element => {
+	if (container.hasStatsPending) {
+		return <SkeletonListItem delay={index / 10} key={container._id} />;
+	}
+	const [shareModalOpen, setShareModalOpen] = useState(false);
+
+	return (
+		<DashboardListItem
 			selected={isSelected}
-			onClick={() => onToggleSelected(container._id)}
+			key={container._id}
 		>
-			<DashboardListItemTitle
-				subtitle={(
-					<LatestRevision
-						name={container.latestRevision}
-						status={container.status}
-						error={container.errorResponse}
-						hasRevisions={container.revisionsCount > 0}
-					/>
-				)}
+			<DashboardListItemRow
 				selected={isSelected}
-				tooltipTitle={
-					<FormattedMessage id="containers.list.item.title.tooltip" defaultMessage="Launch latest revision" />
-				}
+				onClick={() => onSelectOrToggleItem(container._id)}
 			>
-				<Highlight search={filterQuery}>
-					{container.name}
-				</Highlight>
-			</DashboardListItemTitle>
-			<DashboardListItemButton
-				onClick={() => onToggleSelected(container._id)}
-				width={186}
-				tooltipTitle={
-					<FormattedMessage id="containers.list.item.revisions.tooltip" defaultMessage="View revisions" />
-				}
-			>
-				<FormattedMessage
-					id="containers.list.item.revisions"
-					defaultMessage="{count} revisions"
-					values={{ count: container.revisionsCount }}
-				/>
-			</DashboardListItemButton>
-			<DashboardListItemText selected={isSelected}>
-				<Highlight search={filterQuery}>
-					{container.code}
-				</Highlight>
-			</DashboardListItemText>
-			<DashboardListItemText width={188} selected={isSelected}>
-				<Highlight search={filterQuery}>
-					{container.type}
-				</Highlight>
-			</DashboardListItemText>
-			<DashboardListItemText width={97} selected={isSelected}>
-				{container.lastUpdated ? formatDate(container.lastUpdated) : ''}
-			</DashboardListItemText>
-			<DashboardListItemIcon>
-				<Tooltip
-					title={
-						<FormattedMessage id="containers.list.item.favourite.tooltip" defaultMessage="Add to favourites" />
+				<DashboardListItemTitle
+					subtitle={(
+						<LatestRevision
+							name={container.latestRevision}
+							status={container.status}
+							error={container.errorResponse}
+							hasRevisions={container.revisionsCount > 0}
+						/>
+					)}
+					selected={isSelected}
+					tooltipTitle={
+						<FormattedMessage id="containers.list.item.title.tooltip" defaultMessage="Launch latest revision" />
 					}
 				>
-					<FavouriteCheckbox
-						checked={container.isFavourite}
-						selected={isSelected}
-						onClick={(event) => {
-							event.stopPropagation();
-						}}
-						onChange={(event) => {
-							onFavouriteChange(
-								container._id,
-								!!event.currentTarget.checked,
-							);
-						}}
+					<Highlight search={filterQuery}>
+						{container.name}
+					</Highlight>
+				</DashboardListItemTitle>
+				<DashboardListItemButton
+					onClick={() => onSelectOrToggleItem(container._id)}
+					width={186}
+					hideWhenSmallerThan={Display.Desktop}
+					tooltipTitle={
+						<FormattedMessage id="containers.list.item.revisions.tooltip" defaultMessage="View revisions" />
+					}
+				>
+					<FormattedMessage
+						id="containers.list.item.revisions"
+						defaultMessage="{count} revisions"
+						values={{ count: container.revisionsCount }}
 					/>
-				</Tooltip>
-			</DashboardListItemIcon>
-			<DashboardListItemIcon selected={isSelected}>
-				<EllipsisButtonWithMenu
-					list={getContainerMenuItems(container._id)}
+				</DashboardListItemButton>
+				<DashboardListItemText
+					selected={isSelected}
+					width={160}
+				>
+					<Highlight search={filterQuery}>
+						{container.code}
+					</Highlight>
+				</DashboardListItemText>
+				<DashboardListItemText
+					width={188}
+					hideWhenSmallerThan={Display.Tablet}
+					selected={isSelected}
+				>
+					<Highlight search={filterQuery}>
+						{container.type}
+					</Highlight>
+				</DashboardListItemText>
+				<DashboardListItemText
+					width={78}
+					selected={isSelected}
+				>
+					{container.lastUpdated ? formatDate(container.lastUpdated) : ''}
+				</DashboardListItemText>
+				<DashboardListItemIcon>
+					<Tooltip
+						title={
+							container.isFavourite
+								? <FormattedMessage id="containers.list.item.favourite.removeTooltip" defaultMessage="Remove from favourites" />
+								: <FormattedMessage id="containers.list.item.favourite.addTooltip" defaultMessage="Add to favourites" />
+						}
+					>
+						<FavouriteCheckbox
+							checked={container.isFavourite}
+							selected={isSelected}
+							onClick={(event) => {
+								event.stopPropagation();
+							}}
+							onChange={(event) => {
+								onFavouriteChange(
+									container._id,
+									!!event.currentTarget.checked,
+								);
+							}}
+						/>
+					</Tooltip>
+				</DashboardListItemIcon>
+				<DashboardListItemIcon selected={isSelected}>
+					<ContainerEllipsisMenu
+						selected={isSelected}
+						container={container}
+						onSelectOrToggleItem={onSelectOrToggleItem}
+						openShareModal={() => setShareModalOpen(true)}
+					/>
+				</DashboardListItemIcon>
+			</DashboardListItemRow>
+			{isSelected && (
+				<RevisionDetails
+					containerId={container._id}
+					revisionsCount={container.revisionsCount || 1}
 				/>
-			</DashboardListItemIcon>
-		</DashboardListItemRow>
-		{isSelected && (
-			<RevisionDetails
-				containerId={container._id}
-				revisionsCount={container.revisionsCount || 1}
+			)}
+			<ShareModal
+				openState={shareModalOpen}
+				onClickClose={() => setShareModalOpen(false)}
+				title={formatMessage({
+					id: 'ShareModal.component.title',
+					defaultMessage: 'Share Container URL',
+				})}
+				containerOrFederation={container}
 			/>
-		)}
-	</DashboardListItem>
-);
+		</DashboardListItem>
+	);
+};

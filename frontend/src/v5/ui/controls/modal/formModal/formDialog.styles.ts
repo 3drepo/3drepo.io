@@ -17,16 +17,57 @@
 
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
+import { DialogActions, DialogContent, IconButton, Paper } from '@material-ui/core';
+
+export const RemoveWhiteCorners = styled(Paper)`
+	background-color: rgba(0, 0, 0, 0);
+`;
+
+export const CloseButton = styled(IconButton)`
+	&& {
+		position: absolute;
+		top: 10px;
+		right: 10px;
+
+		svg path {
+			stroke: ${({ theme }) => theme.palette.primary.contrast}
+		}
+	}
+`;
 
 export const Form = styled.form`
 	display: flex;
 	flex-direction: column;
 	min-width: 520px;
-	padding-top: 35px;
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	border-radius: 15px; /* prevents white pixels in corners */
 `;
 
 export const Title = styled(Typography).attrs({
 	variant: 'h2',
 })`
-	text-align: center;
+	color: ${({ theme }) => theme.palette.primary.contrast};
+	position: relative;
+	line-height: 74px;
+	user-select: none;
+	box-sizing: border-box;
+`;
+
+export const FormDialogContent = styled(DialogContent)`
+	margin: ${({ zeroMargin }) => (zeroMargin ? '0' : '20px 34px 43px')};
+	display: inline-flex;
+	flex-flow: row wrap;
+`;
+
+export const FormDialogActions = styled(DialogActions)`
+	background: ${({ theme }) => theme.palette.tertiary.lightest};
+	box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
+`;
+
+export const Header = styled.div`
+	background: ${({ theme }) => theme.palette.gradient.secondary};
+	height: 74px;
+	align-content: center;
+	display: inline-flex;
+	padding: 0 27px;
 `;

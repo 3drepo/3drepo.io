@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import * as React from 'react';
-
+import { FunctionComponent, ReactNode } from 'react';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { Avatar } from '../../../../avatar/avatar.component';
 import { IUserData } from '../mainMenu.helpers';
@@ -28,11 +26,11 @@ interface IUserButtonProps {
 	userData?: IUserData;
 	isMenuOpen?: boolean;
 	IconProps?: any;
-	Icon?: React.ReactNode;
+	Icon?: ReactNode;
 	id?: string;
 }
 
-export const MainMenuButton: React.FunctionComponent<IUserButtonProps> =
+export const MainMenuButton: FunctionComponent<IUserButtonProps> =
 	({ IconProps, Icon, isAuthenticated, isInitialised, isMenuOpen, userData, ...props }: IUserButtonProps) => {
 
 	const renderAvatar = renderWhenTrue(() => (

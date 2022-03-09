@@ -245,6 +245,11 @@ const subscribeToV5Events = () => {
 		}
 
 	});
+
+	EventsManager.subscribe(EventsV5.SESSIONS_REMOVED, async ({ids}) => {
+		ids.forEach(loggedOut);
+	});
+
 };
 
 module.exports = {

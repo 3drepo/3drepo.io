@@ -18,15 +18,18 @@
 const { addModel, deleteModel, getModelList } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
-const { getLatestRevision, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
+const { getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const Groups = require('./commons/groups');
+const Views = require('./commons/views');
+const { fetchFileStream } = require('../../../../models/fileRefs');
 const fs = require('fs/promises');
 const { getProjectById } = require('../../../../models/projects');
 const { logger } = require('../../../../utils/logger');
 const { queueModelUpload } = require('../../../../services/queue');
+const { templates } = require('../../../../utils/responseCodes');
 const { timestampToString } = require('../../../../utils/helper/dates');
 
-const Containers = { ...Groups };
+const Containers = { ...Groups, ...Views };
 
 Containers.addContainer = addModel;
 
@@ -55,7 +58,7 @@ Containers.getContainerStats = async (teamspace, project, container) => {
 		type: settings.type,
 		code: settings.properties.code,
 		status: settings.status,
-		units: settings.properties.unit,
+		unit: settings.properties.unit,
 		revisions: {
 			total: revCount,
 			lastUpdated: latestRev.timestamp,
@@ -76,12 +79,26 @@ Containers.getContainerStats = async (teamspace, project, container) => {
 Containers.getRevisions = (teamspace, container, showVoid) => getRevisions(teamspace,
 	container, showVoid, { _id: 1, author: 1, timestamp: 1, tag: 1, void: 1, desc: 1 });
 
-Containers.newRevision = async (teamspace, mode, data, file) => queueModelUpload(teamspace, mode, data, file)
+Containers.newRevision = (teamspace, model, data, file) => queueModelUpload(teamspace, model, data, file)
 	.finally(() => fs.rm(file.path).catch((e) => {
 		logger.logError(`Failed to delete uploaded file: ${e.message}`);
 	}));
 
 Containers.updateRevisionStatus = updateRevisionStatus;
+
+Containers.downloadRevisionFiles = async (teamspace, container, revision) => {
+	const rev = await getRevisionByIdOrTag(teamspace, container, revision, { rFile: 1 });
+
+	if (!rev.rFile?.length) {
+		throw templates.fileNotFound;
+	}
+
+	// We currently only support single file fetches
+	const fileName = rev.rFile[0];
+	const fileNameFormatted = fileName.substr(36).replace(/_([^_]*)$/, '.$1');
+	const file = await fetchFileStream(teamspace, container, 'history.ref', fileName);
+	return { ...file, filename: fileNameFormatted };
+};
 
 Containers.appendFavourites = async (username, teamspace, project, favouritesToAdd) => {
 	const accessibleContainers = await Containers.getContainerList(teamspace, project, username);
@@ -95,7 +112,7 @@ Containers.deleteFavourites = async (username, teamspace, project, favouritesToR
 
 Containers.updateSettings = updateModelSettings;
 
-Containers.getSettings = async (teamspace, container) => getContainerById(teamspace,
+Containers.getSettings = (teamspace, container) => getContainerById(teamspace,
 	container, { corID: 0, account: 0, permissions: 0 });
 
 module.exports = Containers;

@@ -860,9 +860,11 @@ async function _createAccounts(roles, userName) {
 				);
 
 				allFedModels.forEach(fed => {
-					fed.subModels.forEach(subModel => {
-						const foundModel = allModels.find(m => m.model === subModel.model);
-						subModel.name = foundModel && foundModel.name;
+					fed.subModels = fed.subModels.map(subModel => {
+						// backwards compatibility - we changed it from [{model: xyz}] to [xyz]
+						const subModelId = subModel?.model || subModel;
+						const foundModel = allModels.find(m => m.model === subModelId);
+						return { database: _account.account, model: subModelId, name: foundModel?.name};
 					});
 				});
 			});

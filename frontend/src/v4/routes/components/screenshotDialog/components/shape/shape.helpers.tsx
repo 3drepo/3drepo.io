@@ -14,8 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import * as React from 'react';
+import { forwardRef } from 'react';
 import {
 	Arrow as ArrowComponent,
 	Circle as CircleComponent,
@@ -32,7 +31,7 @@ export const cloud = {
 	width: 500
 };
 
-const TriangleComponent = React.forwardRef((props: any, ref: any) => {
+const TriangleComponent = forwardRef((props: any, ref: any) => {
 	return (
 		<PolygonComponent
 			{...props}
@@ -42,7 +41,7 @@ const TriangleComponent = React.forwardRef((props: any, ref: any) => {
 	);
 });
 
-const CloudComponent = React.forwardRef((props: any, ref: any) => {
+const CloudComponent = forwardRef((props: any, ref: any) => {
 	return (
 		<Path
 			{...props}

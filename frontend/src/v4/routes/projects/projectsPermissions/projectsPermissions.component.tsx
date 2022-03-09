@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 
 import { PROJECT_ROLES_LIST } from '../../../constants/project-permissions';
 import { PermissionsTable } from '../../components/permissionsTable/permissionsTable.component';
@@ -26,13 +26,14 @@ interface IProps {
 	projectName: string;
 	permissions: any[];
 	onPermissionsChange: (project) => void;
+	className?: string;
 }
 
 interface IState {
 	selectedUsers: any[];
 }
 
-export class ProjectsPermissions extends React.PureComponent<IProps, IState> {
+export class ProjectsPermissions extends PureComponent<IProps, IState> {
 	public state = {
 		selectedUsers: []
 	};
@@ -83,7 +84,7 @@ export class ProjectsPermissions extends React.PureComponent<IProps, IState> {
 		const { permissions } = this.props;
 
 		return (
-			<Container>
+			<Container className={this.props.className}>
 				<PermissionsTable
 					permissions={permissions}
 					roles={PROJECT_ROLES_LIST}

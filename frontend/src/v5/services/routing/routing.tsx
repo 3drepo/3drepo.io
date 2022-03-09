@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 const appendSlashIfNeeded = (uri) => (uri[uri.length - 1] !== '/' ? `${uri}/` : uri);
@@ -34,7 +33,12 @@ export const uriCombine = (uri, path) => {
 	return val;
 };
 
-// eslint-disable-next-line react/prop-types
+const getBaseDomain = () => `${window.location.protocol}//${window.location.hostname}`;
+
+export const viewerShareLink = (teamspace: string, containerOrFederationId: string) => (
+	`${getBaseDomain()}/viewer/${teamspace}/${containerOrFederationId}`
+);
+
 export const RouteExcept = ({ path, exceptPath, children }) => (
 	<Switch>
 		<Route exact path={exceptPath} />

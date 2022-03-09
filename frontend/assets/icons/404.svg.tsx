@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
 export default () => (
 	<svg width="301" height="128" viewBox="0 0 301 128" fill="none" xmlns="http://www.w3.org/2000/svg">
 		<path

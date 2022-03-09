@@ -15,12 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import {
-	IconsGroup,
-	StyledDeleteIcon,
-	StyledEditIcon,
-} from '../../viewerGui/components/views/components/viewItem/viewItem.styles';
+import { IconsGroup, StyledDeleteIcon, StyledEditIcon } from '../../viewerGui/components/views/components/viewItem/viewItem.styles';
 
 import { StyledContainedButton } from '../modelSettings.styles';
 import { ViewName, ViewRow } from './defaultViewField.styles';

@@ -16,15 +16,16 @@
  */
 
 const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('../../../../middleware/permissions/permissions');
-const { validateNewRevisionData, validateUpdateRevisionData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
+const { respond, writeStreamRespond } = require('../../../../utils/responder');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../utils/sessions');
-const { respond } = require('../../../../utils/responder');
 const { serialiseRevisionArray } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
 const { templates } = require('../../../../utils/responseCodes');
+const { validateNewRevisionData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
+const { validateUpdateRevisionData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 
-const getRevisions = async (req, res, next) => {
+const getRevisions = (req, res, next) => {
 	const { teamspace, container } = req.params;
 	const showVoid = req.query.showVoid === 'true';
 
@@ -37,7 +38,7 @@ const getRevisions = async (req, res, next) => {
 	);
 };
 
-const updateRevisionStatus = async (req, res) => {
+const updateRevisionStatus = (req, res) => {
 	const { teamspace, container, revision } = req.params;
 	const status = req.body.void;
 
@@ -46,7 +47,7 @@ const updateRevisionStatus = async (req, res) => {
 	}).catch((err) => respond(req, res, err));
 };
 
-const newRevision = async (req, res) => {
+const newRevision = (req, res) => {
 	const { file } = req;
 	const revInfo = req.body;
 	const { teamspace, container } = req.params;
@@ -57,6 +58,18 @@ const newRevision = async (req, res) => {
 		/* istanbul ignore next */
 		(err) => respond(req, res, err),
 	);
+};
+
+const downloadRevisionFiles = async (req, res) => {
+	const { teamspace, container, revision } = req.params;
+
+	try {
+		const file = await Containers.downloadRevisionFiles(teamspace, container, revision);
+
+		writeStreamRespond(req, res, templates.ok, file.readStream, file.filename, file.size);
+	} catch (err) {
+		respond(req, res, err);
+	}
 };
 
 const establishRoutes = () => {
@@ -177,6 +190,10 @@ const establishRoutes = () => {
 	 *               importAnimations:
 	 *                 type: bool
 	 *                 description: Whether animations should be imported (Only relevant for .SPM uploads)
+	 *               timezone:
+	 *                 description: Timezone of the revision
+	 *                 type: string
+	 *                 example: Europe/Berlin
 	 *               file:
 	 *                 type: string
 	 *                 format: binary
@@ -248,6 +265,56 @@ const establishRoutes = () => {
 	 *         description: updates the status of the revision
 	 */
 	router.patch('/:revision', hasWriteAccessToContainer, validateUpdateRevisionData, updateRevisionStatus);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions/{revision}/files:
+	 *   get:
+	 *     description: Downloads the model files of the selected revision
+	 *     tags: [Containers]
+	 *     operationId: downloadRevisionFiles
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - project:
+	 *         name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *         type: string
+	 *       - container:
+	 *         name: container
+	 *         description: Container ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *         type: string
+	 *       - revision:
+	 *         name: revision
+	 *         description: Revision ID or Revision tag
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *         type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: downloads the revision files
+	 *         content:
+	 *           application/octet-stream:
+	 *             schema:
+	 *               type: file
+	 */
+	router.get('/:revision/files', hasWriteAccessToContainer, downloadRevisionFiles);
 
 	return router;
 };

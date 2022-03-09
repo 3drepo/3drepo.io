@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { useState, useEffect } from 'react';
 
 import { ROUTES } from '../../../constants/routes';
 import { renderWhenTrue } from '../../../helpers/rendering';
@@ -45,16 +45,16 @@ interface IProps {
 const renderLoadingState = renderWhenTrue(<StyledLoader />);
 
 export const ViewsDialog = ({ viewpoints, searchQuery, searchEnabled, teamspace, modelId, ...props }: IProps) => {
-	const [filteredViews, setFilteredViewpoints] = React.useState([]);
+	const [filteredViews, setFilteredViewpoints] = useState([]);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		props.fetchViewpoints(teamspace, modelId);
 		if (props.modelSettings.model !== modelId) {
 			props.fetchModelSettings(teamspace, modelId);
 		}
 	}, [teamspace, modelId]);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		const filteredViewpoints = searchEnabled
 			? viewpoints.filter(({ name }) => name.toLowerCase().includes(searchQuery.toLowerCase()))
 			: viewpoints;

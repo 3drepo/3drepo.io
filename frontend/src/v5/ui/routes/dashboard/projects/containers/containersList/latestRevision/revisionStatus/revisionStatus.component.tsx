@@ -14,18 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-import { ContainerStatuses } from '@/v5/store/containers/containers.types';
+import { FormattedMessage } from 'react-intl';
+import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { TextOverflow } from '@controls/textOverflow';
-import { FormattedMessage } from 'react-intl';
 import { formatDate } from '@/v5/services/intl';
 import { Name, ProcessingStatus, QueuedStatus } from './revisionStatus.styles';
 
 export interface IRevisionStatus {
 	name: string;
-	status: ContainerStatuses;
+	status: UploadStatuses;
 	error?: {
 		date: Date | null;
 		message: string;
@@ -33,7 +31,7 @@ export interface IRevisionStatus {
 }
 
 export const RevisionStatus = ({ status, error, name }: IRevisionStatus): JSX.Element => {
-	if (status === ContainerStatuses.QUEUED) {
+	if (status === UploadStatuses.QUEUED) {
 		return (
 			<QueuedStatus>
 				<FormattedMessage id="containers.list.item.latestRevision.status.queued" defaultMessage="Queued" />
@@ -42,9 +40,9 @@ export const RevisionStatus = ({ status, error, name }: IRevisionStatus): JSX.El
 	}
 
 	if (
-		status === ContainerStatuses.PROCESSING
-		|| status === ContainerStatuses.GENERATING_BUNDLES
-		|| status === ContainerStatuses.QUEUED_FOR_UNITY
+		status === UploadStatuses.PROCESSING
+		|| status === UploadStatuses.GENERATING_BUNDLES
+		|| status === UploadStatuses.QUEUED_FOR_UNITY
 	) {
 		return (
 			<ProcessingStatus>
@@ -53,7 +51,7 @@ export const RevisionStatus = ({ status, error, name }: IRevisionStatus): JSX.El
 		);
 	}
 
-	if (status === ContainerStatuses.FAILED && error) {
+	if (status === UploadStatuses.FAILED && error) {
 		return (
 			<>
 				<Name>

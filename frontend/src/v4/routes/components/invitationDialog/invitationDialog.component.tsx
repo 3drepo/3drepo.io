@@ -24,7 +24,7 @@ import RemoveIcon from '@material-ui/icons/RemoveCircleOutline';
 import { Field, FieldArray, Form, Formik } from 'formik';
 import { keyBy, map, omit, pick, uniqBy, values } from 'lodash';
 import { isEmpty } from 'lodash';
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import * as yup from 'yup';
 
 import { MODEL_ROLES_LIST, MODEL_ROLES_TYPES } from '../../../constants/model-permissions';
