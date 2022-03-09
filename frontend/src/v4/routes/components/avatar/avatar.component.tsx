@@ -25,7 +25,6 @@ interface IProps {
 	loading?: boolean;
 	size?: number;
 	fontSize?: number;
-	buttonRef: any;
 }
 
 interface IState {
@@ -66,12 +65,12 @@ export class Avatar extends PureComponent<IProps, IState> {
 	)
 
 	public render() {
-		const { url, name, loading, buttonRef, ...containerProps } = this.props;
+		const { url, name, loading, ...containerProps } = this.props;
 		const { avatarLoaded } = this.state;
 		const isImageLoading = url && loading && !avatarLoaded;
 
 		return (
-			<Container {...containerProps} ref={buttonRef}>
+			<Container {...containerProps}>
 				{isImageLoading && this.renderPlaceholder()}
 				{!url && this.renderInitials(name)}
 				{url && !isImageLoading && this.renderImage(url, name)}

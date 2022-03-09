@@ -491,7 +491,6 @@ export class Teamspaces extends PureComponent<IProps, IState> {
 
 	private renderMenuButton = (isPending, props) => (
 		<MenuButton
-			buttonRef={props.buttonRef}
 			color="secondary"
 			aria-label="Toggle menu"
 			aria-haspopup="true"
