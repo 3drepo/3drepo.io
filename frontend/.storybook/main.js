@@ -21,18 +21,19 @@ module.exports = {
     // You can change the configuration based on that.
     // 'PRODUCTION' is used when building the static version of storybook.
 
-		config.resolve = {
-			extensions: ['.ts', '.js', '.tsx'],
-			descriptionFiles: ['package.json'],
-			modules: ['node_modules'],
-			alias: {
-				'@': PATHS.SRC_DIR,
-				'@assets': PATHS.ASSETS_DIR,
-				'@components': PATHS.COMPONENTS,
-				'@controls': PATHS.CONTROLS,
-			  },
-		};
-
+    config = {
+      ...config,
+      resolve:{
+        ...config.resolve,
+        descriptionFiles: ['package.json'],
+        alias : {
+          '@': PATHS.SRC_DIR,
+          '@assets': PATHS.ASSETS_DIR,
+          '@components': PATHS.COMPONENTS,
+          '@controls': PATHS.CONTROLS,
+        }
+      }
+    };
 
     // Return the altered config
     return config;

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { AvatarButton as Button } from '@controls/avatarButton';
+import { Avatar as Button } from '@controls/avatar/';
 
 export default {
 	title: 'Buttons/AvatarButton',
