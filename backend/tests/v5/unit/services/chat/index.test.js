@@ -77,6 +77,85 @@ const testInit = () => {
 		});
 	});
 };
+
+const testOnNewSessions = () => {
+	describe('On new session event', () => {
+		let subscribeCallBack;
+		beforeAll(async () => {
+			EventsManager.subscribe.mockClear();
+			await ChatService.createApp({});
+			[[, subscribeCallBack]] = EventsManager.subscribe.mock.calls;
+		});
+
+		test('Should try to update session on the socket if it is within its management', () => {
+			const socketId = generateRandomString();
+			const sessionID = generateRandomString();
+			SocketsManager.getSocketById.mockReturnValueOnce(true);
+			subscribeCallBack({ sessionID, socketId });
+
+			expect(SocketsManager.getSocketById).toHaveBeenCalledTimes(1);
+			expect(SocketsManager.getSocketById).toHaveBeenCalledWith(socketId);
+
+			expect(SocketsManager.addSocketIdToSession).toHaveBeenCalledTimes(1);
+			expect(SocketsManager.addSocketIdToSession).toHaveBeenCalledWith(sessionID, socketId);
+		});
+
+		test('Should ignore the event if the socket is not within its management', () => {
+			const socketId = generateRandomString();
+			const sessionID = generateRandomString();
+			SocketsManager.getSocketById.mockReturnValueOnce(false);
+			subscribeCallBack({ sessionID, socketId });
+
+			expect(SocketsManager.getSocketById).toHaveBeenCalledTimes(1);
+			expect(SocketsManager.getSocketById).toHaveBeenCalledWith(socketId);
+
+			expect(SocketsManager.addSocketIdToSession).not.toHaveBeenCalled();
+		});
+	});
+};
+
+const testOnNewMsg = () => {
+	describe('On new message from exchange', () => {
+		let subscribeCallBack;
+		beforeAll(async () => {
+			QueueService.listenToExchange.mockClear();
+			await ChatService.createApp({});
+			[[, subscribeCallBack]] = QueueService.listenToExchange.mock.calls;
+		});
+
+		test('Should fail gracefully if there is an unforseen error on processing the message', () => {
+			// an undefined data packet should cause a JSON parse error.
+			expect(subscribeCallBack).not.toThrow();
+		});
+
+		test('process send the recipients the messages if it is a direct message', () => {
+			const recipient = generateRandomString();
+			const event = generateRandomString();
+			const data = generateRandomString();
+			const message = { dm: true, recipient, event, data };
+
+			const socketIds = [generateRandomString(), generateRandomString(), generateRandomString()];
+			SocketsManager.getSocketIdsBySession.mockReturnValueOnce(socketIds);
+
+			const sockets = {
+				[socketIds[0]]: { send: jest.fn() },
+				// socketIds[1] is undefined on purpose
+				[socketIds[2]]: { send: jest.fn() },
+			};
+
+			SocketsManager.getSocketById.mockImplementation((id) => sockets[id]);
+
+			expect(subscribeCallBack({ content: Buffer.from(JSON.stringify(message)) })).toBeUndefined();
+
+			Object.keys(sockets).forEach((id) => {
+				expect(sockets[id].send).toHaveBeenCalledTimes(1);
+				expect(sockets[id].send).toHaveBeenCalledWith(event, data);
+			});
+		});
+	});
+};
 describe('services/chat/index', () => {
 	testInit();
+	testOnNewSessions();
+	testOnNewMsg();
 });
