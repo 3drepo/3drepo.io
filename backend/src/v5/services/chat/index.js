@@ -16,14 +16,13 @@
  */
 
 const { SESSION_HEADER, session } = require('../sessions');
-const SocketIO = require('socket.io');
+const RTMsg = require('../../handler/realTimeMsging');
 const SocketsManager = require('./socketsManager');
 const chatLabel = require('../../utils/logger').labels.chat;
 const { cn_queue: { event_exchange: eventExchange } } = require('../../utils/config');
 const { events } = require('../eventsManager/eventsManager.constants');
 const { listenToExchange } = require('../../handler/queue');
 const logger = require('../../utils/logger').logWithLabel(chatLabel);
-const sharedSession = require('express-socket.io-session');
 const { subscribe } = require('../eventsManager/eventsManager');
 
 const ChatService = {};
@@ -68,25 +67,17 @@ const subscribeToEvents = (service) => {
 	listenToExchange(eventExchange, onMessage(service));
 };
 
-const init = (server) => {
-	logger.logDebug('Initialising service');
-	const service = SocketIO(server, { path: '/chat' });
-	service.use(({ handshake }, next) => {
-		if (handshake.query[SESSION_HEADER] && !handshake.headers.cookie) {
-			// eslint-disable-next-line no-param-reassign
-			handshake.headers.cookie = `${SESSION_HEADER}=${handshake.query[SESSION_HEADER]}; `;
-		}
-		next();
-	});
-
-	service.use(sharedSession(session, { autoSave: true }));
-	service.on('connection', SocketsManager.addSocket);
-	return service;
-};
-
-ChatService.createApp = (server) => {
-	const service = init(server);
-	subscribeToEvents(service);
+ChatService.createApp = async (server) => {
+	const { middleware, close } = await session;
+	const socketServer = RTMsg.createApp(server, middleware, SESSION_HEADER, SocketsManager.addSocket);
+	subscribeToEvents(socketServer.broadcast);
+	return {
+		close: async () => {
+			await socketServer.close();
+			await close();
+			await server.close();
+		},
+	};
 };
 
 module.exports = ChatService;
