@@ -59,8 +59,16 @@ Primary.args = {
 	color: 'primary',
 };
 
+Primary.parameters = {
+	controls: { exclude: ['variant'] },
+};
+
 export const Secondary = Template.bind({});
 Secondary.args = {
 	variant: 'outlined',
 	color: 'secondary',
+};
+
+Secondary.parameters = {
+	controls: { exclude: ['color'] },
 };

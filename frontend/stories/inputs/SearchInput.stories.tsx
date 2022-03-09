@@ -16,19 +16,33 @@
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { SearchInput } from '@controls/searchInput';
+import { useState } from 'react';
 
-// More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
 	title: 'Inputs/SearchInput',
 	component: SearchInput,
+	parameters: { controls: { exclude: ['ref', 'hiddenLabel'] } },
 } as ComponentMeta<typeof SearchInput>;
 
-// More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 const Template: ComponentStory<typeof SearchInput> = (args) => <SearchInput {...args} />;
 
 export const Default = Template.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
 Default.args = {
-	primary: true,
 	label: 'Search input',
+};
+
+const Controlled: ComponentStory<typeof SearchInput> = (args) => {
+	const [val, setVal] = useState('');
+
+	const onChange = (event) => {
+		setVal(event.target.value);
+	};
+
+	return (<SearchInput {...args} onChange={onChange} value={val} />);
+};
+
+export const ControlledSearchInput = Controlled.bind({});
+// More on args: https://storybook.js.org/docs/react/writing-stories/args
+ControlledSearchInput.args = {
+	label: 'Controlled Search input',
 };
