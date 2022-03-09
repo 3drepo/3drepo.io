@@ -220,7 +220,7 @@ export class NotificationItem extends PureComponent<IProps, IState> {
 
 		return (
 			<Container {...containerProps}>
-				<Item button>
+				<Item>
 					<Avatar>
 						{icon}
 					</Avatar>

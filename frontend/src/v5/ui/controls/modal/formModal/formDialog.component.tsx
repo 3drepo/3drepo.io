@@ -17,18 +17,29 @@
 import { DetailedHTMLProps, FormHTMLAttributes } from 'react';
 import { Button, Dialog } from '@mui/material';
 import CloseIcon from '@assets/icons/close.svg';
-import { Form, Title, Header, CloseButton, FormDialogContent, FormDialogActions, RemoveWhiteCorners } from './formDialog.styles';
+import { DialogProps } from '@material-ui/core/Dialog';
+import {
+	Form,
+	Title,
+	Header,
+	CloseButton,
+	FormDialogContent,
+	FormDialogActions,
+	RemoveWhiteCorners,
+} from './formDialog.styles';
 
-interface IFormDialog extends DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement> {
+interface IFormModal extends DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement> {
 	onClickClose?: () => void;
 	title?: string;
 	open?: boolean;
 	confirmLabel?: string;
 	isValid?: boolean;
 	showButtons?: boolean;
+	maxWidth?: DialogProps['maxWidth'];
+	zeroMargin?: boolean;
 }
 
-export const FormModal = (props: IFormDialog) => {
+export const FormModal = (props: IFormModal) => {
 	const {
 		onClickClose,
 		title,
@@ -38,6 +49,8 @@ export const FormModal = (props: IFormDialog) => {
 		className,
 		isValid = true,
 		showButtons = true,
+		maxWidth = false,
+		zeroMargin = false,
 		...formProps
 	} = props;
 	return (
@@ -46,6 +59,8 @@ export const FormModal = (props: IFormDialog) => {
 			open={open}
 			PaperComponent={RemoveWhiteCorners}
 			className={className}
+			maxWidth={maxWidth}
+			fullWidth={!!maxWidth}
 		>
 			<Form {...formProps}>
 				<Header>
@@ -56,7 +71,7 @@ export const FormModal = (props: IFormDialog) => {
 						<CloseIcon />
 					</CloseButton>
 				</Header>
-				<FormDialogContent>
+				<FormDialogContent zeroMargin={zeroMargin}>
 					{children}
 				</FormDialogContent>
 				{showButtons && (

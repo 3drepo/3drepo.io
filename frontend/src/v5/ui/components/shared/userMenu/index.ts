@@ -15,17 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FC } from 'react';
-
-import Avatar from '@mui/material/Avatar';
-import { StyledIconButton } from './avatarButton.styles';
-
-interface IAvatarButton {
-	disabled?: boolean;
-}
-
-export const AvatarButton: FC<IAvatarButton> = ({ children, ...props }) => (
-	<StyledIconButton {...props}>
-		<Avatar>{children}</Avatar>
-	</StyledIconButton>
-);
+export { UserMenu } from './userMenu.component';

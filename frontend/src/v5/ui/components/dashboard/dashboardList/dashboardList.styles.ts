@@ -47,6 +47,7 @@ export const DashboardListEmptyText = styled(Typography).attrs({
 
 export const Divider = styled(DividerComponent)`
 	margin-top: 16px;
+	width: 100%;
 `;
 
 export const DashboardListButton = styled(Button).attrs({

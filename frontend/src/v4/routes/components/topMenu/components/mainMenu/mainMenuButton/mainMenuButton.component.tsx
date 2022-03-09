@@ -28,6 +28,7 @@ interface IUserButtonProps {
 	IconProps?: any;
 	Icon?: ReactNode;
 	id?: string;
+	buttonRef: any;
 }
 
 export const MainMenuButton: FunctionComponent<IUserButtonProps> =
@@ -40,6 +41,7 @@ export const MainMenuButton: FunctionComponent<IUserButtonProps> =
 			loading={!isInitialised}
 			url={userData.avatarUrl}
 			fontSize={13}
+			buttonRef={props.buttonRef}
 		/>
 	));
 

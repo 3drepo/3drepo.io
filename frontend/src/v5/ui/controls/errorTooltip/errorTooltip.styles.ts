@@ -23,7 +23,6 @@ export const Container = styled.div`
 	display: inline-block;
 `;
 
-// TODO - remove withStyles
 export const Tooltip = withStyles((theme: any) => ({
 	popper: {
 		width: 180,

@@ -50,6 +50,7 @@ export const COLOR = {
 	BASE_LIGHTEST: '#D0D9EB',
 	ERROR_MAIN: '#BE4343',
 	ERROR_DARK: '#A33232',
+	ERROR_DARKEST: '#8E2A2A',
 	ERROR_MID: '#C55656',
 	ERROR_LIGHT: '#CE7272',
 	ERROR_LIGHTEST: '#F9ECEC',
@@ -191,6 +192,7 @@ export const theme = createTheme({
 		error: {
 			main: COLOR.ERROR_MAIN,
 			dark: COLOR.ERROR_DARK,
+			darkest: COLOR.ERROR_DARKEST,
 			mid: COLOR.ERROR_MID,
 			light: COLOR.ERROR_LIGHT,
 			lightest: COLOR.ERROR_LIGHTEST,
@@ -431,8 +433,12 @@ export const theme = createTheme({
 			styleOverrides: {
 				root: {
 					margin: '0',
-					padding: '8px 16px',
+					padding: '8px 14px',
 					width: '100%',
+
+					'&.Mui-selected': {
+						backgroundColor: COLOR.SECONDARY_DARK,
+					},
 				},
 			},
 		},

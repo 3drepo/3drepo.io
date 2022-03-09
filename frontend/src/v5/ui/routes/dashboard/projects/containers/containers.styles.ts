@@ -18,9 +18,6 @@
 import styled from 'styled-components';
 
 export const HeaderButtonsGroup = styled.div`
-	margin-left: auto;
-	min-width: 278px;
-
 	& > :last-child {
 		margin-right: 0;
 	}

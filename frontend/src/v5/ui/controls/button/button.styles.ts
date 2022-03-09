@@ -15,8 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Button from '@mui/material/Button';
+import MuiButtonBase from '@mui/material/Button';
 import styled, { css } from 'styled-components';
+
+export const MuiButton = styled(MuiButtonBase)`
+	white-space: nowrap;
+`;
 
 export const labelButtonPrimaryStyles = css`
 	color: ${({ theme }) => theme.palette.primary.contrast};
@@ -98,7 +102,7 @@ export const labelOutlinedButtonSecondaryStyles = css`
 	}
 `;
 
-export const LabelButton = styled(Button)`
+export const LabelButton = styled(MuiButton)`
 	align-items: center;
 	padding: 8px 12px 8px 15px;
 
@@ -132,4 +136,28 @@ export const LabelButton = styled(Button)`
 		}
 		return '';
 	}}
+`;
+
+export const ErrorButton = styled(MuiButton).attrs({
+	variant: 'outlined',
+})`
+	height: 35px;
+	color: ${({ theme }) => theme.palette.error.main};
+	border-color: ${({ theme }) => theme.palette.error.main};
+
+	&.Mui-focusVisible {
+		background-color: ${({ theme }) => theme.palette.error.main};
+	}
+
+	&:hover {
+		color: ${({ theme }) => theme.palette.error.contrastText};
+		background-color: ${({ theme }) => theme.palette.error.main};
+		text-decoration-line: none;
+	}
+
+	&:active {
+		color: ${({ theme }) => theme.palette.error.contrastText};
+		border-color: ${({ theme }) => theme.palette.error.dark};
+		background-color: ${({ theme }) => theme.palette.error.dark};
+	}
 `;

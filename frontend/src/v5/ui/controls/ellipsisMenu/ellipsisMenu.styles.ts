@@ -19,7 +19,7 @@ import styled from 'styled-components';
 import {
 	MenuList as MenuListComponent,
 	MenuItem as MenuItemComponent,
-	Popper as PopperComponent,
+	Popover as PopoverComponent,
 } from '@mui/material';
 
 export const MenuList = styled(MenuListComponent)`
@@ -46,6 +46,6 @@ export const MenuItem = styled(MenuItemComponent)`
 	}
 `;
 
-export const Popper = styled(PopperComponent)`
-	z-index: 100;
+export const Popover = styled(PopoverComponent)`
+	margin-left: 19px;
 `;

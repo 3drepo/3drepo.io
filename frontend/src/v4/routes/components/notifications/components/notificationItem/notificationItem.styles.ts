@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ListItem from '@mui/material/ListItem';
+import { ListItemButton } from '@mui/material';
 import ListItemText from '@mui/material/ListItemText';
 import Paper from '@mui/material/Paper';
 import styled from 'styled-components';
 
 import { COLOR } from '../../../../../styles';
 
-export const Item = styled(ListItem)`
+export const Item = styled(ListItemButton)`
 	&& {
 		padding: 6px;
 	}
@@ -48,9 +48,13 @@ export const ItemSecondaryAction = styled.div`
 	visibility: hidden;
 	width: 0;
 	height: 40px;
-	overflow:hidden;
+	overflow: hidden;
 	display: flex;
 	align-items: center;
+	
+	& .MuiIconButton-root {
+		padding: 17px;
+	}
 
 	${/* sc-selector */ Item}:hover & {
 		visibility: inherit;

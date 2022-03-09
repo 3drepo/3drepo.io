@@ -53,6 +53,8 @@ export const InteractiveBreadcrumb = styled(Breadcrumb).attrs({
 		${({ theme }) => theme.typography.h3};
 		color: ${({ theme }) => theme.palette.primary.main};
 		max-width: 100%;
+		padding-right: 9px;
+		margin-right: 0;
 	}
 `;
 

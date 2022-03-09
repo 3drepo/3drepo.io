@@ -53,7 +53,7 @@ const FontLoader = {
     options: {
       outputPath: '../fonts/',
       publicPath: 'fonts/',
-      name: '[name]-[hash].[ext]'
+      name: '[name]-[contenthash].[ext]'
     },
   }],
   type: 'javascript/auto'
@@ -68,7 +68,7 @@ const ImageLoader = {
     options: {
       outputPath: '../images/',
       publicPath: 'images/',
-      name: '[name]-[hash].[ext]'
+      name: '[name]-[contenthash].[ext]'
     }
   }],
   type: 'javascript/auto'
@@ -91,7 +91,7 @@ const WorkerLoader = {
     loader: 'worker-loader',
     options: {
       inline: true,
-      name: '[name].[hash].js'
+      name: '[name].[contenthash].js'
     }
   }]
 };

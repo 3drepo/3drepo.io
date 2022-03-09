@@ -285,7 +285,7 @@ const formatToStats = (fed, issueCount, riskCount, latestRev) => {
 		...(fed.properties.desc ? { desc: fed.properties.desc } : {}),
 		code: fed.properties.properties.code,
 		status: fed.properties.status,
-		subModels: fed.properties.subModels
+		containers: fed.properties.subModels
 			? fed.properties.subModels.map(({ model }) => model) : undefined,
 		lastUpdated: latestRev ? latestRev.getTime() : undefined,
 		tickets: {
