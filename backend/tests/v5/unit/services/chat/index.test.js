@@ -43,7 +43,7 @@ const { cn_queue: { event_exchange: eventExchange } } = require(`${src}/utils/co
 const socketCloseFn = jest.fn();
 const broadcastFn = jest.fn();
 
-RTM.createApp.mockReturnValue({ close: socketCloseFn, broadcastFn });
+RTM.createApp.mockReturnValue({ close: socketCloseFn, broadcast: broadcastFn });
 
 const testInit = () => {
 	describe('Init', () => {
@@ -128,28 +128,83 @@ const testOnNewMsg = () => {
 			expect(subscribeCallBack).not.toThrow();
 		});
 
-		test('process send the recipients the messages if it is a direct message', () => {
-			const recipient = generateRandomString();
-			const event = generateRandomString();
-			const data = generateRandomString();
-			const message = { dm: true, recipient, event, data };
+		test('Should fail gracefully if the message format is not anticipated', () => {
+			expect(subscribeCallBack({
+				content: Buffer.from(JSON.stringify({ [generateRandomString()]: generateRandomString(),
+				})) })).toBeUndefined();
+		});
 
-			const socketIds = [generateRandomString(), generateRandomString(), generateRandomString()];
-			SocketsManager.getSocketIdsBySession.mockReturnValueOnce(socketIds);
+		describe('Direct message', () => {
+			test('process send the recipients the messages', () => {
+				const recipient = generateRandomString();
+				const event = generateRandomString();
+				const data = generateRandomString();
+				const message = { dm: true, recipient, event, data };
 
-			const sockets = {
-				[socketIds[0]]: { send: jest.fn() },
-				// socketIds[1] is undefined on purpose
-				[socketIds[2]]: { send: jest.fn() },
-			};
+				const socketIds = [generateRandomString(), generateRandomString(), generateRandomString()];
+				SocketsManager.getSocketIdsBySession.mockReturnValueOnce(socketIds);
 
-			SocketsManager.getSocketById.mockImplementation((id) => sockets[id]);
+				const sockets = {
+					[socketIds[0]]: { send: jest.fn() },
+					// socketIds[1] is undefined on purpose
+					[socketIds[2]]: { send: jest.fn() },
+				};
 
-			expect(subscribeCallBack({ content: Buffer.from(JSON.stringify(message)) })).toBeUndefined();
+				SocketsManager.getSocketById.mockImplementation((id) => sockets[id]);
 
-			Object.keys(sockets).forEach((id) => {
-				expect(sockets[id].send).toHaveBeenCalledTimes(1);
-				expect(sockets[id].send).toHaveBeenCalledWith(event, data);
+				expect(subscribeCallBack({ content: Buffer.from(JSON.stringify(message)) })).toBeUndefined();
+
+				Object.keys(sockets).forEach((id) => {
+					expect(sockets[id].send).toHaveBeenCalledTimes(1);
+					expect(sockets[id].send).toHaveBeenCalledWith({ event, data });
+				});
+			});
+
+			test('should ignore if recipients are not managed by this service', () => {
+				const recipient = generateRandomString();
+				const event = generateRandomString();
+				const data = generateRandomString();
+				const message = { recipient, event, data };
+
+				SocketsManager.getSocketIdsBySession.mockReturnValueOnce(undefined);
+
+				expect(subscribeCallBack({ content: Buffer.from(JSON.stringify(message)) })).toBeUndefined();
+				expect(SocketsManager.getSocketById).not.toBeCalled();
+			});
+		});
+
+		describe('Channel Broadcast', () => {
+			test('should process and broadcast on behalf of the sender', () => {
+				const event = generateRandomString();
+				const data = generateRandomString();
+				const channel = generateRandomString();
+				const emitter = generateRandomString();
+				const message = { channel, event, data, emitter };
+
+				SocketsManager.getSocketById.mockReturnValueOnce(undefined);
+
+				expect(subscribeCallBack({ content: Buffer.from(JSON.stringify(message)) })).toBeUndefined();
+
+				expect(broadcastFn).toHaveBeenCalledTimes(1);
+				expect(broadcastFn).toHaveBeenCalledWith(channel, event, data);
+			});
+
+			test('should process and send using sender\'s socket if found', () => {
+				const event = generateRandomString();
+				const data = generateRandomString();
+				const channel = generateRandomString();
+				const emitter = generateRandomString();
+				const message = { channel, event, data, emitter };
+
+				const socket = { broadcast: jest.fn() };
+				SocketsManager.getSocketById.mockReturnValueOnce(socket);
+
+				expect(subscribeCallBack({ content: Buffer.from(JSON.stringify(message)) })).toBeUndefined();
+
+				expect(broadcastFn).not.toHaveBeenCalled();
+
+				expect(socket.broadcast).toHaveBeenCalledTimes(1);
+				expect(socket.broadcast).toHaveBeenCalledWith(channel, event, data);
 			});
 		});
 	});

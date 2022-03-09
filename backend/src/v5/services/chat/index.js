@@ -28,8 +28,8 @@ const { subscribe } = require('../eventsManager/eventsManager');
 const ChatService = {};
 
 const onMessageV4 = (service, msg) => {
-	const { event, data, dm, recipient: sessionId, emitter, channel } = msg;
-	if (dm) {
+	const { event, data, recipient: sessionId, emitter, channel } = msg;
+	if (sessionId) {
 		const recipients = SocketsManager.getSocketIdsBySession(sessionId);
 		if (recipients) {
 			recipients.forEach((socketId) => {
@@ -40,9 +40,9 @@ const onMessageV4 = (service, msg) => {
 			});
 		}
 	} else if (channel) {
-		const sender = SocketsManager.getSocketById(emitter)?.broadcast || service;
+		const sender = SocketsManager.getSocketById(emitter) || service;
 		logger.logDebug(`[${channel}][NEW EVENT]: ${event}`);
-		sender.to(channel).emit(event, data);
+		sender.broadcast(channel, event, data);
 	} else {
 		logger.logError('Unrecognised event message', msg);
 	}
@@ -70,7 +70,7 @@ const subscribeToEvents = (service) => {
 ChatService.createApp = async (server) => {
 	const { middleware, close } = await session;
 	const socketServer = RTMsg.createApp(server, middleware, SESSION_HEADER, SocketsManager.addSocket);
-	subscribeToEvents(socketServer.broadcast);
+	subscribeToEvents(socketServer);
 	return {
 		close: async () => {
 			await socketServer.close();
