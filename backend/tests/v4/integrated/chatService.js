@@ -24,7 +24,6 @@ const config = require("../../../src/v4/config");
 const { createApp } = require("../../../src/v4/services/api.js");
 const async = require("async");
 const http = require("http");
-// let newXhr = require('socket.io-client-cookie');
 const io = require("socket.io-client");
 const { deleteNotifications, filterByIssueAssigned, filterByIssueClosed } = require("../helpers/notifications");
 const bouncerHelper = require("../helpers/bouncerHelper");

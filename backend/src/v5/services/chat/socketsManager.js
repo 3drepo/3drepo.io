@@ -27,10 +27,10 @@ const socketIdToSocket = {};
 const sessionToSocketIds = {};
 const SocketsManager = {};
 
-const getUserNameFromSocket = (socket) => socket?.handshake?.session?.user?.username;
+const getUserNameFromSocket = (socket) => socket.session?.user?.username;
 
 const removeSocket = (socket) => {
-	const sessionId = socket?.handshake?.session?.id;
+	const sessionId = socket.session?.id;
 	const socketId = socket.id;
 	if (sessionToSocketIds[sessionId]) {
 		if (sessionToSocketIds[sessionId].size === 1) {
@@ -49,7 +49,7 @@ const emitError = (socket, error, message, action, data) => {
 
 const addSocket = (socket) => {
 	socketIdToSocket[socket.id] = socket;
-	const sessionId = socket?.handshake?.session?.id;
+	const sessionId = socket.session?.id;
 	SocketsManager.addSocketIdToSession(sessionId, socket.id);
 };
 
@@ -93,14 +93,15 @@ const joinRoomV4 = async (socket, data) => {
 				? { code: ERRORS.ROOM_NOT_FOUND, message: `Model ${model} does not belong in any project.` }
 				: err;
 
-			socket.emit('credentialError', data);
+			socket.emit('credentialError', errToThrow);
 			throw errToThrow;
 		}
 	} else if (account === getUserNameFromSocket(socket)) {
 		await joinRoom(socket, { notifications: true });
 	} else {
-		socket.emit('credentialError', data);
-		throw { code: ERRORS.UNAUTHORISED, message: 'You cannot subscribe to someone else\'s notifications.' };
+		const error = { code: ERRORS.UNAUTHORISED, message: 'You cannot subscribe to someone else\'s notifications.' };
+		socket.emit('credentialError', error);
+		throw error;
 	}
 };
 
@@ -116,7 +117,7 @@ const leaveRoom = (socket, data) => {
 	}
 
 	socket.leave(channelName);
-	logger.logDebug(`[${getUserNameFromSocket(socket)}][${socket.Id}] has left ${channelName}`);
+	logger.logDebug(`[${getUserNameFromSocket(socket)}][${socket.id}] has left ${channelName}`);
 };
 
 const leaveRoomV4 = async (socket, data) => {
@@ -137,10 +138,8 @@ const leaveRoomV4 = async (socket, data) => {
 };
 
 const subscribeToSocketEvents = (socket) => {
-	const socketId = socket.id;
-	socket.on('error', (err) => logger.logError(`[${socketId}] Socket error: ${err?.message}`));
-	socket.on('disconnect', () => removeSocket(socket));
-	socket.on('join', async (data) => {
+	socket.onDisconnect(() => removeSocket(socket));
+	socket.onJoin(async (data) => {
 		try {
 			if (data.account) {
 				await joinRoomV4(socket, data);
@@ -152,7 +151,7 @@ const subscribeToSocketEvents = (socket) => {
 			emitError(socket, err.code, err.message, ACTIONS.JOIN, data);
 		}
 	});
-	socket.on('leave', async (data) => {
+	socket.onLeave(async (data) => {
 		try {
 			if (data.account) {
 				await leaveRoomV4(socket, data);

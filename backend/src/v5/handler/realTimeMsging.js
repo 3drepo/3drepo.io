@@ -22,7 +22,7 @@ const RealTimeMsging = {};
 
 const socketWrapper = (callback) => (socket) => callback({
 	id: socket.id,
-	sessionId: socket?.handshake?.session?.id,
+	session: socket?.handshake?.session,
 	onDisconnect: (fn) => socket.on('disconnect', fn),
 	onJoin: (fn) => socket.on('join', fn),
 	onLeave: (fn) => socket.on('leave', fn),
@@ -36,16 +36,6 @@ const socketWrapper = (callback) => (socket) => callback({
 RealTimeMsging.createApp = (server, sessionService, sessionHeader, onNewSockets) => {
 	const service = SocketIO(server, { path: '/chat' });
 	service.use(sharedSession(sessionService, { autoSave: true }));
-	/*
-	 * FIXME: is this needed?
-	 * service.use(({ handshake }, next) => {
-		if (handshake.query[sessionHeader] && !handshake.headers.cookie) {
-			// eslint-disable-next-line no-param-reassign
-			handshake.headers.cookie = `${sessionHeader}=${handshake.query[sessionHeader]}; `;
-		}
-		next();
-	});
-*/
 
 	const newSocketsFn = socketWrapper(onNewSockets);
 	service.on('connection', (socket) => {
