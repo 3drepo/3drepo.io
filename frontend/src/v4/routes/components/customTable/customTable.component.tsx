@@ -208,7 +208,7 @@ export class CustomTable extends PureComponent<IProps, IState> {
 		selectedRows: []
 	};
 
-	private rowsContainerRef = createRef<HTMLElement>();
+	private rowsContainerRef = createRef<HTMLDivElement>();
 
 	public componentDidMount() {
 		const { currentSort, searchFields, searchText } = this.state;
@@ -352,11 +352,6 @@ export class CustomTable extends PureComponent<IProps, IState> {
 	 */
 	public renderHeader = (cells) => {
 		const {currentSort} = this.state;
-		const setTooltip = (Component, text) => (
-			<Tooltip title={text} placement="bottom-end">
-				{Component}
-			</Tooltip>
-		);
 
 		return cells.map((cell, index) => {
 			const type = cell.headerType || cell.type;
@@ -384,9 +379,13 @@ export class CustomTable extends PureComponent<IProps, IState> {
 			return (
 				<Cell key={index} {...headingRootProps}>
 					{
-						headingComponentProps.tooltipText ?
-							setTooltip(HeadingComponent, headingComponentProps.tooltipText) :
+						headingComponentProps.tooltipText ? (
+							<Tooltip title={headingComponentProps.tooltipText} placement="bottom-end">
+								{HeadingComponent}
+							</Tooltip>
+						) : (
 							HeadingComponent
+						)
 					}
 				</Cell>
 			);

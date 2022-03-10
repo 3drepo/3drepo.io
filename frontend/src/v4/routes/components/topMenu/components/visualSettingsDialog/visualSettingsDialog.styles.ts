@@ -48,7 +48,7 @@ export const WarningMessage = styled.div`
 	text-align: left;
 	color: ${COLOR.VIVID_RED};
 	font-size: 12px;
-	font-weight: ${FONT_WEIGHT.SEMIBOLD}
+	font-weight: ${FONT_WEIGHT.SEMIBOLD};
 `;
 
 export const VisualSettingsButtonsContainer = styled.div`
@@ -91,7 +91,7 @@ export const ErrorTooltip = styled((prop: TooltipProps) => {
 `;
 
 export const ShortInput = styled(Input).attrs({
-inputProps: {className: 'shortInput'}
+	inputProps: {className: 'shortInput'}
 })`
 	.shortInput {
 		text-align: right;

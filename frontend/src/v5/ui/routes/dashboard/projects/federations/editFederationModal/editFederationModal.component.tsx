@@ -90,10 +90,12 @@ export const EditFederationModal = ({
 	return (
 		<FormModal
 			open={openState}
-			title={formatMessage({
-				id: 'modal.editFederation.title',
-				defaultMessage: 'Edit {federationName}',
-			}, { federationName: federation.name })}
+			title={
+				formatMessage({
+					id: 'modal.editFederation.title',
+					defaultMessage: 'Edit {federationName}',
+				}, { federationName: federation.name })
+			}
 			confirmLabel={formatMessage({ id: 'modal.editFederation.confirm', defaultMessage: 'Save Changes' })}
 			onClickClose={onClickClose}
 			onSubmit={saveChanges}

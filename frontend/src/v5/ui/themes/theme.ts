@@ -449,8 +449,8 @@ export const theme = createTheme({
 					boxShadow: SHADOW.LEVEL_5,
 				},
 				padding: {
-					paddingTop: 8, // TODO check if 0 instead
-					paddingBottom: 8, // TODO check if 0 instead
+					paddingTop: 8,
+					paddingBottom: 8,
 				},
 			},
 		},
@@ -486,7 +486,7 @@ export const theme = createTheme({
 					boxShadow: 'none',
 					border: `1px solid ${COLOR.PRIMARY_MAIN_CONTRAST}`,
 					transition: 'none',
-					'& > *:first-child': {
+					'& > *:first-child': { //TODO check this
 						height: 17,
 						width: 'auto',
 					},

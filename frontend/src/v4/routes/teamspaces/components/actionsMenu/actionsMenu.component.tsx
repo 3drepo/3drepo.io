@@ -92,9 +92,7 @@ export const ActionsMenu = memo(({federate, isPending, actions = [], permissions
 				container
 				wrap="wrap"
 				direction="row"
-				alignItems="center"
-				justifyContent="flex-start"
-				theme={{ forceOpen, federate }}
+				options={{ forceOpen, federate }}
 			>
 				{isOnScreen && <Actions>{renderActions(actions, isPending, permissions)}</Actions>}
 			</StyledGrid>

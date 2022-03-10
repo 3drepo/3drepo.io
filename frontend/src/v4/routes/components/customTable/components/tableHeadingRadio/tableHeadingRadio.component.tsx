@@ -18,7 +18,11 @@ import { PureComponent } from 'react';
 import { Grid } from '@mui/material';
 
 import { SortLabel } from '../tableHeading/tableHeading.styles';
-import { TableHeadingRadioButton, RadioContainer, TableHeadingRadioTooltip } from './tableHeadingRadio.styles';
+import {
+	TableHeadingRadioButton,
+	RadioContainer,
+	TableHeadingRadioTooltip
+} from './tableHeadingRadio.styles';
 
 interface IProps {
 	label: string;
@@ -45,10 +49,16 @@ export class TableHeadingRadio extends PureComponent<IProps, any> {
 
 	public render() {
 		const {
-			label, name, disabled, checked, activeSort, sortOrder, onClick, onChange, tooltipText, value, width
+			activeSort,
+			label,
+			name,
+			onClick,
+			onChange,
+			sortOrder,
+			tooltipText,
+			width,
+			...otherProps
 		} = this.props;
-
-		const RadioContainerProps = { width };
 
 		return (
 			<TableHeadingRadioTooltip title={tooltipText}>
@@ -57,7 +67,7 @@ export class TableHeadingRadio extends PureComponent<IProps, any> {
 					direction="column"
 					justifyContent="center"
 					alignItems="center"
-					{...RadioContainerProps}
+					width={width}
 				>
 					<Grid item>
 						<SortLabel
@@ -70,11 +80,9 @@ export class TableHeadingRadio extends PureComponent<IProps, any> {
 					</Grid>
 					<Grid item>
 						<TableHeadingRadioButton
-							checked={checked}
 							name={name || label}
-							disabled={disabled}
-							value={value}
 							onChange={this.handleChange}
+							{...otherProps}
 						/>
 					</Grid>
 				</RadioContainer>

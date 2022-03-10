@@ -189,13 +189,13 @@ export const InvitationDialog = (props: IProps) => {
 			<Container className={props.className}>
 				<Content>
 					<Field name="email" render={({ field, form }) => (
-								<TextField
-										label="Email"
-										required
-										error={form.errors.email}
-										helperText={form.errors.email}
-										{...field}
-								/>
+						<TextField
+								label="Email"
+								required
+								error={form.errors.email}
+								helperText={form.errors.email}
+								{...field}
+						/>
 					)} />
 					<Field name="job" render={({ field }) => (
 						<FormControl>

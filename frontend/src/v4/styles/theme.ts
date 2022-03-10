@@ -104,7 +104,7 @@ export const MuiTheme = createTheme({
 		MuiInputLabel: {
 			styleOverrides: {
 				shrink: {
-					transform: 'translate(0, 1.5px) scale(0.75) !important',
+					transform: 'translate(0, -.5px) scale(0.75) !important',
 					transformOrigin: 'top left',
 				}
 			},
@@ -200,6 +200,10 @@ export const MuiTheme = createTheme({
 					paddingTop: '12px',
 					paddingBottom: '12px',
 					width: '100%',
+
+					'&&.Mui-selected': {
+						background: 'rgba(0, 0, 0, 0.08)',
+					},
 				}
 			}
 		},

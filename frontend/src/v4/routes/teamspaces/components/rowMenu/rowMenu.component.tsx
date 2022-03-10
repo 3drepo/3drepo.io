@@ -79,7 +79,8 @@ export class RowMenu extends PureComponent<IProps, IState> {
                     aria-label="Toggle menu"
                     onClick={toggleForceOpen}
                     disabled={disabled}
-                    size="large">
+                    size="large"
+				>
 					<MoreVert fontSize="small" />
 				</IconButton>
 			</StyledGrid>

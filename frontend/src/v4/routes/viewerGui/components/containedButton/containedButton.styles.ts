@@ -31,7 +31,7 @@ export const StyledButton = styled(Button)`
 		text-transform: none;
 	}
 
-	&&>:first-child>:first-child  {
+	&& > :first-child {
 		width: 15px;
 		font-size: 13px;
 		margin-right: 2px;

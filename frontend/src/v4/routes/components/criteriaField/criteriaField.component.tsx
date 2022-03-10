@@ -68,7 +68,8 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
         {...props}
         aria-label="Show criteria menu"
         aria-haspopup="true"
-        size="large">
+        size="large"
+	>
 		<StyledMoreIcon {...IconProps} />
 	</IconButton>
 );

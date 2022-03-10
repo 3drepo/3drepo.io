@@ -112,7 +112,8 @@ export class Tools extends PureComponent<IProps, any> {
                                 aria-haspopup="true"
                                 color={this.getShapeToolColor()}
                                 onClick={this.setDefaultShape}
-                                size="large">
+                                size="large"
+							>
                                 <ActiveIcon color={this.getShapeToolColor()} {...IconProps} />
                             </IconButton>
                         </Tooltip>

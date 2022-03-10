@@ -18,7 +18,9 @@
 import Snackbar from '@mui/material/Snackbar';
 import { PureComponent } from 'react';
 
-import { DefaultSnackbar } from './components/defaultSnackbar/defaultSnackbar.component';
+import IconButton from '@mui/material/IconButton';
+import SnackbarContent from '@mui/material/SnackbarContent';
+import Close from '@mui/icons-material/Close';
 
 interface IProps {
 	snack: any;
@@ -85,7 +87,7 @@ export class SnackbarContainer extends PureComponent<IProps, IState> {
 
 	public render() {
 		const {isOpen, snack} = this.state;
-		const {message, ...snackProps} = snack as any;
+		const {message, ref, ...snackProps} = snack as any;
 		return (
             <Snackbar
                 autoHideDuration={5000}
@@ -95,10 +97,21 @@ export class SnackbarContainer extends PureComponent<IProps, IState> {
                 {...snackProps}
                 TransitionProps={{
                     onExited: this.handleExited
-                }}>
-				<DefaultSnackbar
+                }}
+			>
+				<SnackbarContent
 					message={message}
-					onClose={this.handleClose}
+					action={[
+						<IconButton
+							key="close"
+							aria-label="Close"
+							color="inherit"
+							size="large"
+							onClick={() => this.handleClose(null, '')}
+						>
+							<Close />
+						</IconButton>
+					]}
 				/>
 			</Snackbar>
         );

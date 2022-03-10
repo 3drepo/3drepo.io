@@ -490,7 +490,10 @@ export function Board(props: IProps) {
             <IconButton
                 disabled={!project || !modelId}
                 onClick={props.toggleSearchEnabled}
-                size="large"><SearchIcon /></IconButton>
+                size="large"
+			>
+				<SearchIcon />
+			</IconButton>
         );
 	};
 

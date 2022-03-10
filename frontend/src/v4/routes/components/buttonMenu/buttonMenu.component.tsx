@@ -44,6 +44,7 @@ const DefaultButton = ({IconProps, Icon, ...props}) => (
 		{...props}
 		aria-label="Toggle menu"
 		aria-haspopup="true"
+		size="large"
 	>
 		<Icon {...IconProps} />
 	</IconButton>

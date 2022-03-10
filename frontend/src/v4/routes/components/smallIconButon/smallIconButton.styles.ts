@@ -23,6 +23,7 @@ export const SmallIconButtonStyled = styled(IconButton)`
 		width: 10px;
 		height: 10px;
 		z-index: 1;
+		box-sizing: content-box;
 	}
 
 	svg .stroke {

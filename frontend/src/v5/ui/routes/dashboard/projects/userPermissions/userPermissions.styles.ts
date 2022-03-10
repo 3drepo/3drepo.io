@@ -27,7 +27,9 @@ export const V4ModelsPermissions = styled(ModelsPermissions)`
 		border: 0;
 		margin-right: 30px;
 				
-		.MuiIconButton-label {
+		.MuiIconButton-label { 
+			// TODO check cz this should not exist anymore... 
+			// https://mui.com/guides/migration-v4/#radio
 			border-radius: 3px;
 			background-color: ${({ theme }) => theme.palette.primary.contrast};
 		}

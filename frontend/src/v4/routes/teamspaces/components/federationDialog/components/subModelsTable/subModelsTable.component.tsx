@@ -75,7 +75,8 @@ export const SubModelsTable = (props: IProps) => {
 						<IconButton
                             onClick={handleIconClick}
                             disabled={checkboxDisabled || !selectedModels.length}
-                            size="large">
+                            size="large"
+						>
 							<Icon />
 						</IconButton>
 					</HeaderCell>

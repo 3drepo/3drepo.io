@@ -123,7 +123,8 @@ export class Gis extends PureComponent<IProps, IState> {
                 <IconButton
                     disabled={!this.props.hasGISCoordinates}
                     onClick={this.toggleSettings}
-                    size="large">
+                    size="large"
+				>
 						<ArrowBackIcon />
 				</IconButton>
             );
