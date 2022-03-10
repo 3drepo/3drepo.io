@@ -16,19 +16,46 @@
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { Avatar as Button } from '@controls/avatar/';
+import { ComponentProps } from 'react';
 
 export default {
 	title: 'Buttons/AvatarButton',
 	component: Button,
 } as ComponentMeta<typeof Button>;
 
-const Template: ComponentStory<typeof Button> = (args) => <Button {...args} />;
+type Props = ComponentProps<typeof Button>;
 
-export const AvatarNoImage = Template.bind({});
-AvatarNoImage.args = {
-};
+const Template: ComponentStory<typeof Button> = (args) => <Button {...args} />;
 
 export const AvatarWithInitials = Template.bind({});
 AvatarWithInitials.args = {
-	children: 'SM',
-};
+	user: {
+		firstName: 'Json',
+		lastName: 'Vorhees',
+		hasAvatar: false,
+		avatarUrl: '',
+	},
+	isButton: false,
+} as Props;
+
+export const AvatarWithInitialsBigAndHoverStates = Template.bind({});
+AvatarWithInitialsBigAndHoverStates.args = {
+	user: {
+		firstName: 'Json',
+		lastName: 'Vorhees',
+		hasAvatar: false,
+		avatarUrl: '',
+	},
+	largeIcon: true,
+	isButton: true,
+} as Props;
+
+export const AvatarWithImage = Template.bind({});
+AvatarWithImage.args = {
+	user: {
+		firstName: 'Json',
+		lastName: 'Vorhees',
+		hasAvatar: true,
+		avatarUrl: 'https://i.pinimg.com/170x/26/5c/1c/265c1cc710304eb15607e18c6f591c85.jpg',
+	},
+} as Props;
