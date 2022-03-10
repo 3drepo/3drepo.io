@@ -22,10 +22,10 @@ const { generateUUID } = require('../utils/helper/uuids');
 const { getCommonElements } = require('../utils/helper/arrays');
 const { templates } = require('../utils/responseCodes');
 
-const colName = 'projects';
-const findProjects = (ts, query, projection, sort) => db.find(ts, colName, query, projection, sort);
-const findOneProject = (ts, query, projection) => db.findOne(ts, colName, query, projection);
-const updateOneProject = (ts, query, data) => db.updateOne(ts, colName, query, data);
+const COL_NAME = 'projects';
+const findProjects = (ts, query, projection, sort) => db.find(ts, COL_NAME, query, projection, sort);
+const findOneProject = (ts, query, projection) => db.findOne(ts, COL_NAME, query, projection);
+const updateOneProject = (ts, query, data) => db.updateOne(ts, COL_NAME, query, data);
 
 Projects.addModelToProject = (ts, project, model) => updateOneProject(
 	ts,
@@ -68,12 +68,12 @@ Projects.getProjectAdmins = async (ts, project) => {
 
 Projects.createProject = async (teamspace, name) => {
 	const addedProject = { _id: generateUUID(), name, models: [], permissions: [] };
-	await db.insertOne(teamspace, colName, addedProject);
+	await db.insertOne(teamspace, COL_NAME, addedProject);
 	return addedProject._id;
 };
 
 Projects.deleteProject = async (teamspace, projectId) => {
-	const { deletedCount } = await db.deleteOne(teamspace, colName, { _id: projectId });
+	const { deletedCount } = await db.deleteOne(teamspace, COL_NAME, { _id: projectId });
 
 	if (deletedCount === 0) {
 		throw templates.projectNotFound;

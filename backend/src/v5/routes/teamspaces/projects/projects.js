@@ -76,7 +76,7 @@ const getProject = async (req, res) => {
 	const { teamspace, project } = req.params;
 
 	try {
-		const projectSettings = await Projects.getProject(teamspace, project);
+		const projectSettings = await Projects.getProjectSettings(teamspace, project);
 		respond(req, res, templates.ok, projectSettings);
 	} catch (err) {
 		// istanbul ignore next
@@ -164,7 +164,7 @@ const establishRoutes = () => {
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       200:
-	 *         description: Creates a new project
+	 *         description: Create a new project
 	 *         content:
 	 *           application/json:
 	 *             schema:
@@ -205,7 +205,7 @@ const establishRoutes = () => {
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       200:
-	 *         description: Deletes a project
+	 *         description: Delete a project
 	 */
 	router.delete('/:project', isTeamspaceAdmin, deleteProject);
 
@@ -246,7 +246,7 @@ const establishRoutes = () => {
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       200:
-	 *         description: Edits the project
+	 *         description: Update the project settings
 	 */
 	router.patch('/:project', isAdminToProject, validateProjectData, updateProject);
 
@@ -256,7 +256,7 @@ const establishRoutes = () => {
 	 *   get:
 	 *     description: Gets a project
 	 *     tags: [Projects]
-	 *     operationId: getProject
+	 *     operationId: getProjectSettings
 	 *     parameters:
 	 *       - teamspace:
 	 *         name: teamspace

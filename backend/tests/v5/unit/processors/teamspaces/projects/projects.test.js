@@ -123,10 +123,10 @@ const testCreateProject = () => {
 	});
 };
 
-const testGetProject = () => {
+const testGetProjectSettings = () => {
 	describe('Get a project', () => {
 		test('should return a project', async () => {
-			const res = await Projects.getProject('teamspace', '1');
+			const res = await Projects.getProjectSettings('teamspace', '1');
 			expect(getProjectByIdMock.mock.calls[0][0]).toEqual('teamspace');
 			expect(getProjectByIdMock.mock.calls[0][1]).toEqual('1');
 			expect(getProjectByIdMock.mock.calls[0][2]).toEqual({ name: 1, _id: 0 });
@@ -139,5 +139,5 @@ describe('processors/teamspaces/projects', () => {
 	testGetProjectList();
 	testDeleteProject();
 	testCreateProject();
-	testGetProject();
+	testGetProjectSettings();
 });
