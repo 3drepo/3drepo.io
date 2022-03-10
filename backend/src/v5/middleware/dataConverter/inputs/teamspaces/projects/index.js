@@ -16,8 +16,9 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
+const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const Yup = require('yup');
-const { getProjectByQuery } = require('../../../../../models/projectSettings');
+const { getProjectByName } = require('../../../../../models/projectSettings');
 const { respond } = require('../../../../../utils/responder');
 const { types } = require('../../../../../utils/helper/yup');
 
@@ -27,9 +28,8 @@ Projects.validateProjectData = async (req, res, next) => {
 	const schema = Yup.object().shape({
 		name: types.strings.title.required().test('check-name-is-unique', 'Project with the same name already exists', async (value) => {
 			try {
-				await getProjectByQuery(req.params.teamspace, { _id: { $ne: req.params.project }, name: value },
-					{ _id: 1 });
-				return false;
+				const project = await getProjectByName(req.params.teamspace, value, { _id: 1 });
+				return UUIDToString(project._id) === UUIDToString(req.params.project);
 			} catch {
 				return true;
 			}

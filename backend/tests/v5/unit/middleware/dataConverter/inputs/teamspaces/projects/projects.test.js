@@ -32,8 +32,8 @@ Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const existingProjectId = 'projectId';
 const existingProjectName = 'existing';
-ProjectsModel.getProjectByQuery.mockImplementation((teamspace, query) => (
-	query.name === existingProjectName && query._id.$ne !== existingProjectId
+ProjectsModel.getProjectByName.mockImplementation((teamspace, name) => (
+	name === existingProjectName
 		? Promise.resolve({ name: existingProjectName, _id: existingProjectId })
 		: Promise.reject(templates.modelNotFound)));
 

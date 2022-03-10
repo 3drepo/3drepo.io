@@ -59,7 +59,7 @@ ModelSettingsModel.getModelByQuery.mockImplementation((teamspace, { _id, name } 
 	throw templates.modelNotFound;
 });
 
-Projects.getProjectByQuery.mockResolvedValue({ models: ['234'] });
+Projects.getProjectById.mockResolvedValue({ models: ['234'] });
 
 const params = { teamspace: 'ts', federation: '123', project: '123', container: '123' };
 const testValidateUpdateSettingsData = () => {

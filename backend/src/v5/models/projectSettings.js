@@ -39,7 +39,7 @@ Projects.removeModelFromProject = (ts, project, model) => updateOneProject(
 	{ $pull: { models: model } },
 );
 
-Projects.getProjectByQuery = async (ts, query, projection) => {
+const getProjectByQuery = async (ts, query, projection) => {
 	const res = await findOneProject(ts, query, projection);
 
 	if (!res) {
@@ -49,16 +49,20 @@ Projects.getProjectByQuery = async (ts, query, projection) => {
 	return res;
 };
 
+Projects.getProjectByName = (ts, name, projection) => getProjectByQuery(ts, { name }, projection);
+
+Projects.getProjectById = (ts, id, projection) => getProjectByQuery(ts, { _id: id }, projection);
+
 Projects.modelsExistInProject = async (teamspace, project, models) => {
 	if (!models.length) return false;
-	const { models: projModels } = await Projects.getProjectByQuery(teamspace, { _id: project }, { models: 1 });
+	const { models: projModels } = await getProjectByQuery(teamspace, { _id: project }, { models: 1 });
 	return getCommonElements(models, projModels).length === models.length;
 };
 
 Projects.getProjectList = (ts, projection = { _id: 1, name: 1 }) => findProjects(ts, {}, projection);
 
 Projects.getProjectAdmins = async (ts, project) => {
-	const { permissions } = await Projects.getProjectByQuery(ts, { _id: project }, { permissions: 1 });
+	const { permissions } = await getProjectByQuery(ts, { _id: project }, { permissions: 1 });
 	return permissions.flatMap((entry) => (entry.permissions.includes(PROJECT_ADMIN) ? [entry.user] : []));
 };
 
