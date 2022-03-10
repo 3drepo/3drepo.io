@@ -21,6 +21,7 @@ const ChatConstants = {};
 const events = [
 	'message',
 	'error',
+	'loggedOut',
 	// message events
 	'success',
 ];
@@ -35,16 +36,16 @@ const actions = [
 	'join',
 ];
 
-const createConstantsMapping = (data) => {
+const createConstantsMapping = (data, convertCase = true) => {
 	const constants = {};
 	data.forEach((value) => {
 		const valueConstCase = toConstantCase(value);
-		constants[valueConstCase] = valueConstCase;
+		constants[valueConstCase] = convertCase ? valueConstCase : value;
 	});
 	return constants;
 };
 
-ChatConstants.EVENTS = createConstantsMapping(events);
+ChatConstants.EVENTS = createConstantsMapping(events, false);
 ChatConstants.ERRORS = createConstantsMapping(errors);
 ChatConstants.ACTIONS = createConstantsMapping(actions);
 

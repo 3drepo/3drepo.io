@@ -74,7 +74,7 @@ const joinRoom = async (socket, data) => {
 	}
 
 	socket.join(channelName);
-	logger.logDebug(`[${getUserNameFromSocket(socket)}][${socket.id}] has joined ${channelName}`);
+	logger.logDebug(`[${socket.id}][${getUserNameFromSocket(socket)}][${socket.session?.id}]  has joined ${channelName}`);
 };
 
 const joinRoomV4 = async (socket, data) => {
@@ -116,7 +116,7 @@ const leaveRoom = (socket, data) => {
 		throw { code: ERRORS.ROOM_NOT_FOUND, message: 'Cannot identify the room indicated' };
 	}
 	socket.leave(channelName);
-	logger.logDebug(`[${getUserNameFromSocket(socket)}][${socket.id}] has left ${channelName}`);
+	logger.logDebug(`[${socket.id}][${getUserNameFromSocket(socket)}][${socket.session?.id}] has left ${channelName}`);
 };
 
 const leaveRoomV4 = async (socket, data) => {
@@ -173,10 +173,11 @@ SocketsManager.addSocketIdToSession = (session, socketId) => {
 	sessionToSocketIds[session].add(socketId);
 };
 
-SocketsManager.getSocketIdsBySession = (session) => sessionToSocketIds[session];
+SocketsManager.getSocketIdsBySession = (session) => (sessionToSocketIds[session]
+	? Array.from(sessionToSocketIds[session]) : undefined);
 
 SocketsManager.addSocket = (socket) => {
-	logger.logDebug(`[${getUserNameFromSocket(socket)}][${socket.id}] connected`);
+	logger.logDebug(`[${socket.id}][${getUserNameFromSocket(socket)}][${socket.session?.id}]  connected`);
 	addSocket(socket);
 	subscribeToSocketEvents(socket);
 };

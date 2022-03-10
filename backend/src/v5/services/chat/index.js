@@ -16,26 +16,30 @@
  */
 
 const { SESSION_HEADER, session } = require('../sessions');
+const { broadcastMessage, listenToExchange } = require('../../handler/queue');
 const RTMsg = require('../../handler/realTimeMsging');
 const SocketsManager = require('./socketsManager');
+const { EVENTS: chatEvents } = require('./chat.constants');
 const chatLabel = require('../../utils/logger').labels.chat;
 const { cn_queue: { event_exchange: eventExchange } } = require('../../utils/config');
 const { events } = require('../eventsManager/eventsManager.constants');
-const { listenToExchange } = require('../../handler/queue');
 const logger = require('../../utils/logger').logWithLabel(chatLabel);
 const { subscribe } = require('../eventsManager/eventsManager');
 
 const ChatService = {};
 
 const onMessageV4 = (service, msg) => {
-	const { event, data, recipient: sessionId, emitter, channel } = msg;
-	if (sessionId) {
-		const recipients = SocketsManager.getSocketIdsBySession(sessionId);
-		if (recipients) {
+	const { event, data, recipients: sessionIds, emitter, channel } = msg;
+	if (sessionIds?.length) {
+		const recipients = sessionIds.flatMap((sessionId) => SocketsManager.getSocketIdsBySession(sessionId) || []);
+		if (recipients.length) {
 			recipients.forEach((socketId) => {
 				const recipientSocket = SocketsManager.getSocketById(socketId);
 				if (recipientSocket) {
-					recipientSocket.send({ event, data });
+					logger.logDebug(`[DM][${socketId}]: ${event}${JSON.stringify(data)}`);
+					recipientSocket.emit(event, data);
+					// v4 compatibility
+					recipientSocket.emit(chatEvents.MESSAGE, { event, data });
 				}
 			});
 		}
@@ -57,11 +61,20 @@ const onMessage = (service) => (data) => {
 	}
 };
 
+const createDirectMessage = (event, data, sessionIds) => {
+	const message = JSON.stringify({ event, data, recipients: sessionIds });
+	broadcastMessage(eventExchange, message);
+};
+
 const subscribeToEvents = (service) => {
 	subscribe(events.SESSION_CREATED, ({ sessionID, socketId }) => {
 		if (SocketsManager.getSocketById(socketId)) {
 			SocketsManager.addSocketIdToSession(sessionID, socketId);
 		}
+	});
+
+	subscribe(events.SESSIONS_REMOVED, ({ ids }) => {
+		createDirectMessage(chatEvents.LOGGED_OUT, { reason: 'You have logged in else where' }, ids);
 	});
 
 	listenToExchange(eventExchange, onMessage(service));

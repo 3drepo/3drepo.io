@@ -13270,7 +13270,7 @@ react-children-utilities@2.6.3:
   resolved "https://registry.yarnpkg.com/react-children-utilities/-/react-children-utilities-2.6.3.tgz#137dea9b140863639448073a91fd4eda68a3101b"
   integrity sha512-ncP/JU26u/V8PyORIUzR2+yMb8YSGKLMbaqo9xwvQlNUAXMyUk2mja4torT7HKvGAzknMPR9Qnl2U6c7KD4kZw==
 
-"react-click-outside@github:tj/react-click-outside":
+react-click-outside@tj/react-click-outside:
   version "1.1.1"
   resolved "https://codeload.github.com/tj/react-click-outside/tar.gz/a833ddc5be47490307f9fcc6ed09d8c353108510"
 
@@ -14894,9 +14894,9 @@ slide@^1.1.5:
   resolved "https://registry.yarnpkg.com/slide/-/slide-1.1.6.tgz#56eb027d65b4d2dce6cb2e2d32c4d4afc9e1d707"
   integrity sha1-VusCfWW00tzmyy4tMsTUr8nh1wc=
 
-"smooth-dnd@git+https://github.com/rcdexta/smooth-dnd.git":
+"smooth-dnd@https://github.com/rcdexta/smooth-dnd":
   version "1.0.0"
-  resolved "git+https://github.com/rcdexta/smooth-dnd.git#223f4672bea94f65b98af4fd28ab0db2c3b9c8a2"
+  resolved "https://github.com/rcdexta/smooth-dnd#223f4672bea94f65b98af4fd28ab0db2c3b9c8a2"
 
 snapdragon-node@^2.0.1:
   version "2.1.1"
