@@ -30,25 +30,38 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const SocketsManager = require(`${src}/services/chat/socketsManager`);
 const { ACTIONS, ERRORS, EVENTS } = require(`${src}/services/chat/chat.constants`);
 
-const generateSocket = (session = generateRandomString()) => ({
-	id: generateRandomString(),
-	on: jest.fn(),
-	handshake: { session: { id: session, user: { username: generateRandomString() } } },
-	emit: jest.fn(),
-	leave: jest.fn(),
-	join: jest.fn(),
+const generateSocket = (session = generateRandomString()) => {
+	const socket = {
+		id: generateRandomString(),
+		session: {
+			id: session,
+			user: { username: generateRandomString() },
+		},
+	};
 
-});
+	const functions = ['onDisconnect', 'onLeave', 'onJoin', 'emit', 'leave', 'join', 'broadcast'];
+
+	functions.forEach((fnName) => {
+		socket[fnName] = jest.fn();
+	});
+
+	return socket;
+};
 
 const createSocketWithEvents = () => {
-	const eventFns = {};
 	const socket = generateSocket();
-	socket.on.mockImplementation((event, fn) => { eventFns[event] = fn; });
+
+	const eventFns = {
+		leave: (msg) => socket.onLeave.mock.calls[0][0](msg),
+		join: (msg) => socket.onJoin.mock.calls[0][0](msg),
+		disconnect: () => socket.onDisconnect.mock.calls[0][0](),
+	};
+
 	return { eventFns, socket };
 };
 
-const getSessionFromSocket = (socket) => socket?.handshake?.session?.id;
-const getUserNameFromSocket = (socket) => socket?.handshake?.session?.user?.username;
+const getSessionFromSocket = (socket) => socket.session?.id;
+const getUserNameFromSocket = (socket) => socket?.session?.user?.username;
 const checkErrorCall = (fn, code, action, data) => {
 	const messageData = { code, details: { action, data } };
 	expect(fn).toHaveBeenCalled();
@@ -87,7 +100,7 @@ const testSocketsCollection = () => {
 			expect(Array.from(socketBySession)).toEqual(expect.arrayContaining([socket.id, socketWithSameSession.id]));
 
 			const otherSessionSockets = SocketsManager.getSocketIdsBySession(
-				socketWithDiffSession.handshake.session.id,
+				socketWithDiffSession.session.id,
 			);
 			expect(otherSessionSockets.size).toBe(1);
 			expect(Array.from(otherSessionSockets)).toEqual([socketWithDiffSession.id]);
@@ -105,9 +118,9 @@ const testSocketsCollection = () => {
 			const socket = generateSocket();
 			SocketsManager.addSocket(socket);
 
-			expect(socket.on.mock.calls.length).toBe(4);
-			const events = socket.on.mock.calls.map((args) => args[0]);
-			expect(events).toEqual(expect.arrayContaining(['error', 'disconnect', 'join', 'leave']));
+			expect(socket.onJoin).toHaveBeenCalledTimes(1);
+			expect(socket.onLeave).toHaveBeenCalledTimes(1);
+			expect(socket.onDisconnect).toHaveBeenCalledTimes(1);
 		});
 	});
 	afterEach(SocketsManager.reset);
@@ -115,17 +128,6 @@ const testSocketsCollection = () => {
 
 const testSocketsEvents = () => {
 	describe('Socket events', () => {
-		describe('On Error', () => {
-			afterEach(SocketsManager.reset);
-			test('should handle errors gracefully', () => {
-				const { eventFns, socket } = createSocketWithEvents();
-				SocketsManager.addSocket(socket);
-				eventFns.error();
-				eventFns.error({});
-				eventFns.error(generateRandomString());
-			});
-		});
-
 		describe('On Disconnect', () => {
 			afterEach(SocketsManager.reset);
 			test('should disconnect the socket gracefully', () => {
@@ -374,7 +376,7 @@ const testSocketsEvents = () => {
 
 				test('should fail to join the notification room if the user is not authenticated', async () => {
 					const { eventFns, socket } = createSocketWithEvents();
-					delete socket.handshake.session.user;
+					delete socket.session.user;
 					SocketsManager.addSocket(socket);
 
 					const username = getUserNameFromSocket(socket);

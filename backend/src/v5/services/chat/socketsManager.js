@@ -115,7 +115,6 @@ const leaveRoom = (socket, data) => {
 	} else {
 		throw { code: ERRORS.ROOM_NOT_FOUND, message: 'Cannot identify the room indicated' };
 	}
-
 	socket.leave(channelName);
 	logger.logDebug(`[${getUserNameFromSocket(socket)}][${socket.id}] has left ${channelName}`);
 };
