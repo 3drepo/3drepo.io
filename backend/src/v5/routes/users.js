@@ -17,7 +17,7 @@
 
 const { createSession, destroySession } = require('../middleware/sessions');
 const { isLoggedIn, notLoggedIn, validSession } = require('../middleware/auth');
-const { validateAvatarFile, validateLoginData,
+const { validateAvatarFile, validateLoginData, validateForgotPasswordData, validateResetPasswordData,
 	validateUpdateData } = require('../middleware/dataConverter/inputs/users');
 const { Router } = require('express');
 const Users = require('../processors/users');
@@ -95,6 +95,29 @@ const uploadAvatar = (req, res) => {
 		(err) => respond(req, res, err),
 	);
 };
+
+const forgotPassword = (req, res) => {
+	const { user } = req.body;
+
+	Users.forgotPassword(user).then(() => {
+		respond(req, res, templates.ok);
+	}).catch(
+		// istanbul ignore next
+		(err) => respond(req, res, err),
+	);
+};
+
+const resetPassword = (req, res) => {
+	const { user } = req.body;
+
+	Users.resetPassword(user).then(() => {
+		respond(req, res, templates.ok);
+	}).catch(
+		// istanbul ignore next
+		(err) => respond(req, res, err),
+	);
+};
+
 
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
@@ -360,6 +383,10 @@ const establishRoutes = () => {
 	*         description: Uploads a new avatar for the user
 	*/
 	router.put('/user/avatar', isLoggedIn, validateAvatarFile, uploadAvatar);
+
+	router.post('/user/password', validateForgotPasswordData, forgotPassword);
+
+	router.put('/user/password', validateResetPasswordData, resetPassword);
 
 	return router;
 };

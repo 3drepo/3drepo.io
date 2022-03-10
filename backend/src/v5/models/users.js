@@ -21,6 +21,8 @@ const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
 const { publish } = require('../services/eventsManager/eventsManager');
+const { sendResetPasswordEmail } = require('../../v4/mailer/mailer');
+const { logger } = require('../utils/logger');
 
 const User = {};
 const COLL_NAME = 'system.users';
@@ -206,5 +208,32 @@ User.getAvatar = async (username) => {
 };
 
 User.uploadAvatar = (username, avatarBuffer) => updateUser(username, { $set: { 'customData.avatar': { data: avatarBuffer } } });
+
+const sendResetPassEmail = (email, token, username, firstName) => {
+	try{		
+		sendResetPasswordEmail(email, { token, email, username, firstName });
+	} catch (err) {		
+		logger.logDebug(`Email error - ${err.message}`);
+		throw err;
+	}
+}
+
+User.resetPasswordToken = async (username) => {
+	try{
+		const { customData: { email, firstName }} = await User.getUserByQuery({ user: username }, { user: 1, 'customData.email': 1, 'customData.firstName': 1 });	
+		const expiryAt = new Date();
+		expiryAt.setHours(expiryAt.getHours() + config.tokenExpiry.forgotPassword);
+	
+		const resetPasswordToken = {
+			token: generateHashString(64),
+			expiredAt: expiryAt
+		};
+	
+		await updateUser(username,  {$set: { "customData.resetPasswordToken": resetPasswordToken }});
+		sendResetPassEmail(email, resetPasswordToken.token, username, firstName);		
+	} catch {
+		//if username is wrong still return OK
+	}	
+};
 
 module.exports = User;

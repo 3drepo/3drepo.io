@@ -120,6 +120,41 @@ const validateAvatarData = async (req, res, next) => {
 	}
 };
 
+Users.validateForgotPasswordData = async (req, res, next) => {
+	const schema = Yup.object().shape({
+		user: Yup.string().required()
+	}).strict(true).noUnknown()
+		.required();
+
+	try {
+		await schema.validate(req.body);
+
+		const usernameOrEmail = req.body.user;
+		const { user } = await getUserByQuery({ $or: [{ user: usernameOrEmail }, { 'customData.email': usernameOrEmail }] });
+		req.body.user = user;
+
+		next();
+	} catch (err) {		
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+Users.validateResetPasswordData = async (req, res, next) => {
+	const schema = Yup.object().shape({
+		token: Yup.string().required(),
+		newPassword: types.strings.password.required()
+	}).strict(true).noUnknown()
+		.required();
+
+	try {
+		await schema.validate(req.body);
+		next();
+	} catch (err) {		
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+
 Users.validateAvatarFile = validateMany([singleImageUpload('file'), validateAvatarData]);
 
 module.exports = Users;
