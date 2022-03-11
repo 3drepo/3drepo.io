@@ -41,7 +41,7 @@ const onCallbackQMsg = async ({ content, properties }) => {
 		const { status, database: teamspace, project: model, user, value, message } = JSON.parse(content);
 		if (status) {
 			publish(events.QUEUED_TASK_UPDATE,
-				{ teamspace, model, corId: properties.correlationId, status, user });
+				{ teamspace, model, corId: properties.correlationId, status });
 		} else {
 			const fedDataPath = `${sharedDir}/${properties.correlationId}/obj.json`;
 

@@ -17,11 +17,19 @@
 
 const { newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
 const { events } = require('../../eventsManager/eventsManager.constants');
+const { findProjectByModelId } = require('../../../models/projectSettings');
 const { subscribe } = require('../../eventsManager/eventsManager');
 
-const queueStatusUpdate = ({
+const queueStatusUpdate = async ({
 	teamspace, model, corId, status, user,
-}) => updateModelStatus(teamspace, model, status, corId, user);
+}) => {
+	try {
+		const project = await findProjectByModelId(teamspace, model, { _id: 1 });
+		updateModelStatus(teamspace, project, model, status, corId, user);
+	} catch (err) {
+		// do nothing - the model may have been deleted before the task came back.
+	}
+};
 const queueTasksCompleted = ({
 	teamspace, model, value, corId, user, containers,
 }) => newRevisionProcessed(teamspace, model, corId, value, user, containers);

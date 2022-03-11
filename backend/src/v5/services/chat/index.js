@@ -29,26 +29,21 @@ const { subscribe } = require('../eventsManager/eventsManager');
 const ChatService = {};
 
 const broadcastToChannel = (sender, channel, event, data) => {
-	logger.logDebug(`[${channel}][NEW EVENT]: ${event}${JSON.stringify(data)}`);
+	logger.logDebug(`[${channel}][NEW EVENT]: ${event}\t${JSON.stringify(data)}`);
 	sender.broadcast(channel, event, data);
 };
 
 const onMessageV4 = (service, msg) => {
 	const { event, data, emitter, channel } = msg;
 	const sender = SocketsManager.getSocketById(emitter) || service;
-	logger.logDebug(`[${channel}][NEW EVENT]: ${event}`);
 	broadcastToChannel(sender, channel, event, data);
 };
 
 const processMessage = (service, msg) => {
 	const { recipients, event, data } = msg;
 	if (recipients?.length) { // direct message to sessions
-		recipients?.forEach((sessionId) => {
-			const channelName = `${SESSION_CHANNEL_PREFIX}${sessionId}`;
+		recipients?.forEach((channelName) => {
 			broadcastToChannel(service, channelName, event, data);
-
-			// v4 client compatibility
-			broadcastToChannel(service, channelName, chatEvents.MESSAGE, { event, data });
 		});
 	} else {
 		logger.logError('Unrecognised event message', msg);
@@ -69,8 +64,24 @@ const onMessage = (service) => (msg) => {
 };
 
 const createDirectMessage = (event, data, sessionIds) => {
-	const message = JSON.stringify({ event, data, recipients: sessionIds });
+	const recipients = sessionIds.map((sessionId) => `${SESSION_CHANNEL_PREFIX}${sessionId}`);
+	const message = JSON.stringify({ event, data, recipients });
 	broadcastMessage(eventExchange, message);
+
+	// v4 client compatibility
+	const messageV4 = JSON.stringify({ event: chatEvents.MESSAGE, data: { event, data }, recipients });
+	broadcastMessage(eventExchange, messageV4);
+};
+
+const createModelMessage = (event, data, teamspace, project, model) => {
+	const recipients = [`${teamspace}::${project}::${model}`];
+	const message = JSON.stringify({ event, data: { ...data, teamspace, project, model }, recipients });
+	broadcastMessage(eventExchange, message);
+
+	// v4 client compatibility
+	const v4Event = `${teamspace}::${model}::${event}`;
+	const messageV4 = JSON.stringify({ event: v4Event, data, recipients });
+	broadcastMessage(eventExchange, messageV4);
 };
 
 const subscribeToEvents = (service) => {
@@ -83,6 +94,10 @@ const subscribeToEvents = (service) => {
 
 	subscribe(events.SESSIONS_REMOVED, ({ ids }) => {
 		createDirectMessage(chatEvents.LOGGED_OUT, { reason: 'You have logged in else where' }, ids);
+	});
+
+	subscribe(events.MODEL_IMPORT_UPDATE, ({ teamspace, project, model, status }) => {
+		createModelMessage(chatEvents.MODEL_STATUS_UPDATE, { status }, teamspace, project, model);
 	});
 
 	listenToExchange(eventExchange, onMessage(service));

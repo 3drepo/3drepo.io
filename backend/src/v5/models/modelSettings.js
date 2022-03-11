@@ -95,7 +95,7 @@ Models.getFederations = (ts, ids, projection, sort) => {
 	return findModels(ts, query, projection, sort);
 };
 
-Models.updateModelStatus = async (teamspace, model, status, corId, user) => {
+Models.updateModelStatus = async (teamspace, project, model, status, corId, user) => {
 	const query = { _id: model };
 	const updateObj = { status };
 	if (corId) {
@@ -106,7 +106,7 @@ Models.updateModelStatus = async (teamspace, model, status, corId, user) => {
 	if (matchedCount > 0) {
 	// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
 	// trigger notifications.
-		publish(events.MODEL_IMPORT_UPDATE, { teamspace, model, corId, status, user });
+		publish(events.MODEL_IMPORT_UPDATE, { teamspace, project, model, corId, status, user });
 	}
 };
 

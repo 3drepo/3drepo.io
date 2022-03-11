@@ -24,6 +24,9 @@ const events = [
 	'loggedOut',
 	// message events
 	'success',
+
+	// Model events
+	'modelStatusUpdate',
 ];
 
 const errors = [
