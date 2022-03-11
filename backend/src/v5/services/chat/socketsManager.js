@@ -18,7 +18,7 @@
 const { ACTIONS, ERRORS, EVENTS, SESSION_CHANNEL_PREFIX } = require('./chat.constants');
 const { UUIDToString, stringToUUID } = require('../../utils/helper/uuids');
 const chatLabel = require('../../utils/logger').labels.chat;
-const { findProjectByModelId } = require('../../models/projects');
+const { findProjectByModelId } = require('../../models/projectSettings');
 const { hasReadAccessToModel } = require('../../utils/permissions/permissions');
 const logger = require('../../utils/logger').logWithLabel(chatLabel);
 const { templates } = require('../../utils/responseCodes');

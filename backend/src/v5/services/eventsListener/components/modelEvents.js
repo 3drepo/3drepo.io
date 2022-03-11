@@ -16,6 +16,7 @@
  */
 
 const { newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
+const { UUIDToString } = require('../../../utils/helper/uuids');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { findProjectByModelId } = require('../../../models/projectSettings');
 const { subscribe } = require('../../eventsManager/eventsManager');
@@ -24,8 +25,8 @@ const queueStatusUpdate = async ({
 	teamspace, model, corId, status, user,
 }) => {
 	try {
-		const project = await findProjectByModelId(teamspace, model, { _id: 1 });
-		updateModelStatus(teamspace, project, model, status, corId, user);
+		const { _id: projectId } = await findProjectByModelId(teamspace, model, { _id: 1 });
+		updateModelStatus(teamspace, UUIDToString(projectId), model, status, corId, user);
 	} catch (err) {
 		// do nothing - the model may have been deleted before the task came back.
 	}
