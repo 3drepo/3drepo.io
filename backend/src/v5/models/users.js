@@ -219,21 +219,28 @@ const sendResetPassEmail = (email, token, username, firstName) => {
 }
 
 User.resetPasswordToken = async (username) => {
+	let email, resetPasswordToken, firstName;
+	
 	try{
-		const { customData: { email, firstName }} = await User.getUserByQuery({ user: username }, { user: 1, 'customData.email': 1, 'customData.firstName': 1 });	
+		const { customData } = await User.getUserByQuery({ user: username }, { user: 1, 'customData.email': 1, 'customData.firstName': 1 });	
+		email = customData.email;
+		firstName = customData.firstName;
+
 		const expiryAt = new Date();
 		expiryAt.setHours(expiryAt.getHours() + config.tokenExpiry.forgotPassword);
 	
-		const resetPasswordToken = {
+		resetPasswordToken = {
 			token: generateHashString(64),
 			expiredAt: expiryAt
 		};
 	
 		await updateUser(username,  {$set: { "customData.resetPasswordToken": resetPasswordToken }});
-		sendResetPassEmail(email, resetPasswordToken.token, username, firstName);		
 	} catch {
 		//if username is wrong still return OK
+		return;
 	}	
+
+	sendResetPassEmail(email, resetPasswordToken.token, username, firstName);		
 };
 
 module.exports = User;

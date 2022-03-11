@@ -129,10 +129,14 @@ Users.validateForgotPasswordData = async (req, res, next) => {
 	try {
 		await schema.validate(req.body);
 
-		const usernameOrEmail = req.body.user;
-		const { user } = await getUserByQuery({ $or: [{ user: usernameOrEmail }, { 'customData.email': usernameOrEmail }] });
-		req.body.user = user;
-
+		try{
+			const usernameOrEmail = req.body.user;
+			const { user } = await getUserByQuery({ $or: [{ user: usernameOrEmail }, { 'customData.email': usernameOrEmail }] });
+			req.body.user = user;
+		} catch {
+			//if username is wrong still continue
+		}
+		
 		next();
 	} catch (err) {		
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));

@@ -73,14 +73,12 @@ Users.getAvatar = getAvatar;
 
 Users.uploadAvatar = uploadAvatar;
 
-Users.forgotPassword = async (username) => {
-	return await resetPasswordToken(username);
-}
+Users.resetPasswordToken = (username) => resetPasswordToken(username);
 
 Users.resetPassword = async (username, token, newPassword) => {	
-	const {customData : { resetPasswordToken }} = getUserByUsername(username, {'customData.resetPasswordToken': 1});
+	const { customData: { resetPasswordToken } } = await getUserByUsername(username);
 
-	if (!resetPasswordToken || resetPasswordToken.token !== token || resetPasswordToken.expiredAt < new Date()) {
+	if (resetPasswordToken?.token !== token || resetPasswordToken.expiredAt < new Date()) {
 		throw templates.invalidToken;
 	}
 

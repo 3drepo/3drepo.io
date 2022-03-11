@@ -171,8 +171,60 @@ const testValidateAvatarData = () => {
 	});
 };
 
+
+const testForgotPasswordData = () => {
+	describe.each([
+		[{ body: { user: existingUsername } }, true, 'with valid username'],
+		[{ body: { user: existingEmail } }, true, 'with valid email'],	
+		[{ body: { user: existingEmail, extra: 'extra' } }, false, 'with extra properties', templates.invalidArguments],	
+		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
+		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
+	])('Check if req arguments for requesting a reset password email are valid', (req, shouldPass, desc, expectedError) => {
+		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
+			const mockCB = jest.fn();
+			await Users.validateForgotPasswordData(req, {}, mockCB);
+			if (shouldPass) {
+				expect(mockCB.mock.calls.length).toBe(1);
+				expect(req.body.user).toEqual(existingUsername);
+			} else {
+				expect(mockCB.mock.calls.length).toBe(0);
+				expect(Responder.respond.mock.calls.length).toBe(1);
+				expect(Responder.respond.mock.results[0].value.code).toEqual(expectedError.code);
+			}
+		});
+	});
+};
+
+const testResetingPasswordData = () => {
+	describe.each([
+		[{ body: { newPassword: 'newPassword' } }, false, 'without token', templates.invalidArguments],
+		[{ body: { token: 'someToken' } }, false, 'without new password', templates.invalidArguments],	
+		[{ body: { token: 'abc' } }, false, 'with short new password', templates.invalidArguments],	
+		[{ body: { token: 'someToken', newPassword: 'Abcdef12345!!' } }, true, 'with token and valid new password'],	
+		[{ body: { token: 'someToken', newPassword: 'Abcdef12345!!', extra: 'extra' } }, false, 'with extra properties', templates.invalidArguments],	
+		[{ body: { token: 'abc' } }, false, 'with short new password', templates.invalidArguments],	
+		[{ body: { token: 'abcdefghi' } }, false, 'with weak new password', templates.invalidArguments],	
+		[{ body: {} }, false, 'with empty body', templates.invalidArguments, templates.invalidArguments],
+		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments, templates.invalidArguments],
+	])('Check if req arguments for resseting a password are valid', (req, shouldPass, desc, expectedError) => {
+		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
+			const mockCB = jest.fn();
+			await Users.validateResetPasswordData(req, {}, mockCB);
+			if (shouldPass) {
+				expect(mockCB.mock.calls.length).toBe(1);
+			} else {
+				expect(mockCB.mock.calls.length).toBe(0);
+				expect(Responder.respond.mock.calls.length).toBe(1);
+				expect(Responder.respond.mock.results[0].value.code).toEqual(expectedError.code);
+			}
+		});
+	});
+};
+
 describe('middleware/dataConverter/inputs/users', () => {
 	testValidateLoginData();
 	testValidateUpdateData();
 	testValidateAvatarData();
+	testForgotPasswordData();
+	testResetingPasswordData();
 });

@@ -96,26 +96,29 @@ const uploadAvatar = (req, res) => {
 	);
 };
 
-const forgotPassword = (req, res) => {
+const forgotPassword = async (req, res) => {
 	const { user } = req.body;
-
-	Users.forgotPassword(user).then(() => {
+	
+	try {
+		await Users.resetPasswordToken(user);
 		respond(req, res, templates.ok);
-	}).catch(
+	} catch (err) {
 		// istanbul ignore next
-		(err) => respond(req, res, err),
-	);
+		respond(req, res, err);
+	}
 };
 
-const resetPassword = (req, res) => {
-	const { user } = req.body;
+const resetPassword = async (req, res) => {
+	const user  = req.params.account;
+	const { token, newPassword } = req.body;
 
-	Users.resetPassword(user).then(() => {
+	try {
+		await Users.resetPassword(user, token, newPassword);
 		respond(req, res, templates.ok);
-	}).catch(
+	} catch (err) {
 		// istanbul ignore next
-		(err) => respond(req, res, err),
-	);
+		respond(req, res, err);
+	}
 };
 
 

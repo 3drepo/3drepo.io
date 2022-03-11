@@ -27,6 +27,16 @@ jest.mock('../../../../src/v5/utils/helper/strings', () => ({
 	...jest.requireActual('../../../../src/v5/utils/helper/strings'),
 	generateHashString: jest.fn().mockImplementation(() => apiKey),
 }));
+
+const invalidEmail = 'invalid email';
+jest.doMock('../../../../src/v4/mailer/mailer', () => ({
+	...jest.requireActual('../../../../src/v4/mailer/mailer'),
+	sendResetPasswordEmail: jest.fn().mockImplementation((email) => {
+		if(email === invalidEmail){
+			throw templates.unknown;
+		}
+	}),
+}));
 const User = require(`${src}/models/users`);
 
 const testGetAccessibleTeamspaces = () => {
@@ -446,6 +456,39 @@ const testUploadAvatar = () => {
 	});
 };
 
+const testResetPasswordToken = () => {
+	describe('Reset password token', () => {
+		test('should do nothing if user is not found', async () => {
+			const fn1 = jest.spyOn(db, 'findOne').mockImplementation(() => { });
+			await User.resetPasswordToken('user1');
+			expect(fn1.mock.calls.length).toBe(1);
+			expect(fn1.mock.calls[0][2]).toEqual({ user: 'user1' });
+			expect(fn1.mock.calls[0][3]).toEqual({ user: 1, 'customData.email': 1, 'customData.firstName': 1 });			
+		});
+
+		test('should update user password', async () => {
+			const fn1 = jest.spyOn(db, 'findOne').mockImplementation(() => ({ customData: { email: 'example@email.com', firstName: 'John' }}));
+			const fn2 = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
+			const expiredAt = new Date();
+			expiredAt.setHours(expiredAt.getHours() + 24);
+			await User.resetPasswordToken('user1');
+			expect(fn1.mock.calls.length).toBe(1);
+			expect(fn1.mock.calls[0][2]).toEqual({ user: 'user1' });
+			expect(fn1.mock.calls[0][3]).toEqual({ user: 1, 'customData.email': 1, 'customData.firstName': 1 });
+			expect(fn2.mock.calls.length).toBe(1);
+			expect(fn2.mock.calls[0][2]).toEqual({ user: 'user1' });			
+			expect(fn2.mock.calls[0][3]).toEqual({$set: { "customData.resetPasswordToken": { token: apiKey, expiredAt } }});
+		});
+
+		test('should throw error if email ', async () => {
+			jest.spyOn(db, 'findOne').mockImplementation(() => ({ customData: { email: invalidEmail, firstName: 'John' }}));			
+			await expect(User.resetPasswordToken('user1'))
+				.rejects.toEqual(templates.unknown);
+		});
+
+	});
+};
+
 describe('models/users', () => {
 	testGetAccessibleTeamspaces();
 	testGetFavourites();
@@ -459,4 +502,5 @@ describe('models/users', () => {
 	testGetAvatar();
 	testUploadAvatar();
 	testUpdatePassword();
+	testResetPasswordToken();
 });
