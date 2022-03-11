@@ -23,11 +23,10 @@ import {
 } from '@/v5/store/containers/containers.redux';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
+import { FetchContainersResponse } from '@/v5/services/api/containers';
 import {
 	AddFavouriteAction,
 	RemoveFavouriteAction,
-	FetchContainersResponse,
-	FetchContainerStatsResponse,
 	CreateContainerAction,
 	FetchContainersAction,
 	FetchContainerStatsAction,
@@ -84,7 +83,7 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 
 export function* fetchContainerStats({ teamspace, projectId, containerId }: FetchContainerStatsAction) {
 	try {
-		const stats: FetchContainerStatsResponse = yield API.Containers.fetchContainerStats({
+		const stats = yield API.Containers.fetchContainerStats({
 			teamspace, projectId, containerId,
 		});
 

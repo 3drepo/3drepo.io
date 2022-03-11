@@ -20,12 +20,12 @@ import { Constants } from '@/v5/helpers/actions.helper';
 import { prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import {
 	IContainersActionCreators,
-	IContainersState,
 	SetFavouriteSuccessAction,
 	FetchContainersSuccessAction,
 	FetchContainerStatsSuccessAction,
 	CreateContainerSuccessAction,
 	DeleteContainerSuccessAction,
+	IContainer,
 } from './containers.types';
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({
@@ -41,6 +41,10 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	deleteContainer: ['teamspace', 'projectId', 'containerId'],
 	deleteContainerSuccess: ['projectId', 'containerId'],
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
+
+export interface IContainersState {
+	containersByProject: Record<string, IContainer[]>;
+}
 
 export const INITIAL_STATE: IContainersState = {
 	containersByProject: {},

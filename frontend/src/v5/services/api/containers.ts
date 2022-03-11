@@ -17,16 +17,58 @@
 
 import { AxiosResponse } from 'axios';
 import {
-	DeleteContainerPayload,
-	FavouritePayload,
-	FetchContainersPayload, FetchContainersResponse,
-	FetchContainerStatsPayload, FetchContainerStatsResponse,
-	CreateContainerPayload,
+	NewContainer,
+	TeamspaceAndProjectId,
+	TeamspaceProjectAndContainerId,
+	UploadStatuses,
 } from '@/v5/store/containers/containers.types';
 import api from './default';
 
+/**
+ * Types
+*/
+type FetchContainersParams = TeamspaceAndProjectId;
+type FavouriteParams = TeamspaceProjectAndContainerId;
+type DeleteContainerParams = TeamspaceProjectAndContainerId;
+type FetchContainerStatsParams = TeamspaceProjectAndContainerId;
+
+type CreateContainerPayload = {
+	teamspace: string;
+	projectId: string;
+	newContainer: NewContainer;
+};
+
+interface MinimumContainer {
+	_id: string,
+	name: string,
+	role: string,
+	isFavourite: boolean
+}
+
+export type FetchContainersResponse = {
+	containers: Array<MinimumContainer>
+};
+
+export type FetchContainerStatsResponse = {
+	revisions: {
+		total: number;
+		lastUpdated: number;
+		latestRevision: string;
+	};
+	type: string;
+	errorReason?: {
+		message: string;
+		timestamp: number;
+	};
+	status: UploadStatuses;
+	unit: string;
+	code: string;
+};
+
+/***/
+
 export const addFavourites = (
-	{ teamspace, projectId, containerId }: FavouritePayload,
+	{ teamspace, projectId, containerId }: FavouriteParams,
 ): Promise<AxiosResponse<void>> => (
 	api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites`, {
 		containers: [containerId],
@@ -34,7 +76,7 @@ export const addFavourites = (
 );
 
 export const removeFavourites = (
-	{ teamspace, projectId, containerId }: FavouritePayload,
+	{ teamspace, projectId, containerId }: FavouriteParams,
 ): Promise<AxiosResponse<void>> => (
 	api.delete(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites`, {
 		containers: [containerId],
@@ -44,7 +86,7 @@ export const removeFavourites = (
 export const fetchContainers = async ({
 	teamspace,
 	projectId,
-}: FetchContainersPayload): Promise<FetchContainersResponse> => {
+}: FetchContainersParams): Promise<FetchContainersResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers`);
 	return data;
 };
@@ -53,7 +95,7 @@ export const fetchContainerStats = async ({
 	teamspace,
 	projectId,
 	containerId,
-}: FetchContainerStatsPayload): Promise<FetchContainerStatsResponse> => {
+}: FetchContainerStatsParams): Promise<FetchContainerStatsResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/stats`);
 	return data;
 };
@@ -68,7 +110,7 @@ export const createContainer = async ({
 };
 
 export const deleteContainer = (
-	{ teamspace, projectId, containerId }: DeleteContainerPayload,
+	{ teamspace, projectId, containerId }: DeleteContainerParams,
 ): Promise<AxiosResponse<void>> => (
 	api.delete(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
 );
