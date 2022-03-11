@@ -24,8 +24,8 @@ const Responder = require(`${src}/utils/responder`);
 jest.mock('../../../../../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
 
-jest.mock('../../../../../../../../../src/v5/models/projects');
-const Projects = require(`${src}/models/projects`);
+jest.mock('../../../../../../../../../src/v5/models/projectSettings');
+const Projects = require(`${src}/models/projectSettings`);
 
 const Federations = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/federations`);
 const { templates } = require(`${src}/utils/responseCodes`);
