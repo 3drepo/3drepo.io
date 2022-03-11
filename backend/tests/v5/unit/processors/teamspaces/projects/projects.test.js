@@ -17,9 +17,11 @@
 
 const { src } = require('../../../../helper/path');
 
-jest.mock('../../../../../../src/v5/models/projects');
-const ProjectsModel = require(`${src}/models/projects`);
-const Projects = require(`${src}/processors/teamspaces/projects/projects`);
+jest.mock('../../../../../../src/v5/models/projectSettings');
+const ProjectsModel = require(`${src}/models/projectSettings`);
+jest.mock('../../../../../../src/v5/utils/helper/models');
+const ModelHelper = require(`${src}/utils/helper/models`);
+const Projects = require(`${src}/processors/teamspaces/projects`);
 const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 
 const projectList = [
@@ -35,6 +37,11 @@ const modelReadPermissions = {
 };
 
 ProjectsModel.getProjectList.mockImplementation(() => projectList);
+const deleteProjectMock = ProjectsModel.deleteProject.mockImplementation(() => {});
+const createProjectMock = ProjectsModel.createProject.mockImplementation(() => {});
+const getProjectByIdMock = ProjectsModel.getProjectById
+	.mockImplementation((teamspace, projectId) => projectList.find((p) => p._id === projectId));
+const removeModelDataMock = ModelHelper.removeModelData.mockImplementation(() => {});
 
 // Permissions mock
 jest.mock('../../../../../../src/v5/utils/permissions/permissions', () => ({
@@ -77,6 +84,60 @@ const testGetProjectList = () => {
 	});
 };
 
+const testDeleteProject = () => {
+	describe('Delete a project', () => {
+		test('should delete a project with no models', async () => {
+			await Projects.deleteProject('teamspace', '3');
+			expect(getProjectByIdMock.mock.calls.length).toEqual(1);
+			expect(getProjectByIdMock.mock.calls[0][0]).toEqual('teamspace');
+			expect(getProjectByIdMock.mock.calls[0][1]).toEqual('3');
+			expect(getProjectByIdMock.mock.calls[0][2]).toEqual({ models: 1 });
+			expect(removeModelDataMock.mock.calls.length).toEqual(0);
+			expect(deleteProjectMock.mock.calls.length).toEqual(1);
+			expect(deleteProjectMock.mock.calls[0][0]).toEqual('teamspace');
+			expect(deleteProjectMock.mock.calls[0][1]).toEqual('3');
+		});
+
+		test('should delete a project with no models', async () => {
+			await Projects.deleteProject('teamspace', '1');
+			expect(getProjectByIdMock.mock.calls.length).toEqual(1);
+			expect(getProjectByIdMock.mock.calls[0][0]).toEqual('teamspace');
+			expect(getProjectByIdMock.mock.calls[0][1]).toEqual('1');
+			expect(getProjectByIdMock.mock.calls[0][2]).toEqual({ models: 1 });
+			expect(removeModelDataMock.mock.calls.length).toEqual(1);
+			expect(deleteProjectMock.mock.calls.length).toEqual(1);
+			expect(deleteProjectMock.mock.calls[0][0]).toEqual('teamspace');
+			expect(deleteProjectMock.mock.calls[0][1]).toEqual('1');
+		});
+	});
+};
+
+const testCreateProject = () => {
+	describe('Create a project', () => {
+		test('should create a project with no models', async () => {
+			await Projects.createProject('teamspace', 'newName');
+			expect(createProjectMock.mock.calls.length).toEqual(1);
+			expect(createProjectMock.mock.calls[0][0]).toEqual('teamspace');
+			expect(createProjectMock.mock.calls[0][1]).toEqual('newName');
+		});
+	});
+};
+
+const testGetProjectSettings = () => {
+	describe('Get a project', () => {
+		test('should return a project', async () => {
+			const res = await Projects.getProjectSettings('teamspace', '1');
+			expect(getProjectByIdMock.mock.calls[0][0]).toEqual('teamspace');
+			expect(getProjectByIdMock.mock.calls[0][1]).toEqual('1');
+			expect(getProjectByIdMock.mock.calls[0][2]).toEqual({ name: 1, _id: 0 });
+			expect(res).toEqual(projectList.find((p) => p._id === '1'));
+		});
+	});
+};
+
 describe('processors/teamspaces/projects', () => {
 	testGetProjectList();
+	testDeleteProject();
+	testCreateProject();
+	testGetProjectSettings();
 });
