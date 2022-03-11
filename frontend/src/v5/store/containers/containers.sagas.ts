@@ -18,21 +18,19 @@
 import { all, put, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import {
+	AddFavouriteAction,
 	ContainersActions,
 	ContainersTypes,
+	CreateContainerAction,
+	DeleteContainerAction,
+	FetchContainersAction,
+	FetchContainerStatsAction,
+	RemoveFavouriteAction,
 } from '@/v5/store/containers/containers.redux';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { FetchContainersResponse } from '@/v5/services/api/containers';
-import {
-	AddFavouriteAction,
-	RemoveFavouriteAction,
-	CreateContainerAction,
-	FetchContainersAction,
-	FetchContainerStatsAction,
-	DeleteContainerAction,
 
-} from './containers.types';
 import { prepareContainersData } from './containers.helpers';
 
 export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {

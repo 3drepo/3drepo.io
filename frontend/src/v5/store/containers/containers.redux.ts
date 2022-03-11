@@ -18,15 +18,9 @@
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '@/v5/helpers/actions.helper';
 import { prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
-import {
-	IContainersActionCreators,
-	SetFavouriteSuccessAction,
-	FetchContainersSuccessAction,
-	FetchContainerStatsSuccessAction,
-	CreateContainerSuccessAction,
-	DeleteContainerSuccessAction,
-	IContainer,
-} from './containers.types';
+import { FetchContainerStatsResponse } from '@/v5/services/api/containers';
+import { Action } from 'redux';
+import { IContainer, NewContainer, ProjectAndContainerId, ProjectId, TeamspaceAndProjectId, TeamspaceProjectAndContainerId } from './containers.types';
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({
 	addFavourite: ['teamspace', 'projectId', 'containerId'],
@@ -126,3 +120,40 @@ export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
 	[ContainersTypes.CREATE_CONTAINER_SUCCESS]: createContainerSuccess,
 	[ContainersTypes.DELETE_CONTAINER_SUCCESS]: deleteContainerSuccess,
 }) as (state: IContainersState, action:any) => IContainersState;
+
+export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & TeamspaceProjectAndContainerId;
+export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & TeamspaceProjectAndContainerId;
+export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & ProjectAndContainerId & { isFavourite: boolean};
+export type FetchContainersAction = Action<'FETCH_CONTAINERS'> & TeamspaceAndProjectId;
+export type FetchContainersSuccessAction = Action<'FETCH_CONTAINERS_SUCCESS'> & ProjectId & { containers: IContainer[] };
+export type FetchContainerStatsAction = Action<'FETCH_CONTAINER_STATS'> & TeamspaceProjectAndContainerId;
+export type FetchContainerStatsSuccessAction = Action<'FETCH_CONTAINER_STATS_SUCCESS'> & ProjectAndContainerId & { containerStats: FetchContainerStatsResponse };
+export type CreateContainerAction = Action<'CREATE_CONTAINER'> & TeamspaceAndProjectId & {newContainer: NewContainer};
+export type CreateContainerSuccessAction = Action<'CREATE_CONTAINER_SUCCESS'> & ProjectId & { container: IContainer };
+export type DeleteContainerAction = Action<'DELETE'> & TeamspaceProjectAndContainerId;
+export type DeleteContainerSuccessAction = Action<'DELETE_SUCCESS'> & ProjectAndContainerId;
+
+export interface IContainersActionCreators {
+	addFavourite: (teamspace: string, projectId: string, containerId: string) => AddFavouriteAction;
+	removeFavourite: (teamspace: string, projectId: string, containerId: string) => RemoveFavouriteAction;
+	setFavouriteSuccess: (projectId: string, containerId: string, isFavourite: boolean) => SetFavouriteSuccessAction;
+	fetchContainers: (teamspace: string, projectId: string) => FetchContainersAction;
+	fetchContainersSuccess: (projectId: string, containers: IContainer[]) => FetchContainersSuccessAction;
+	fetchContainerStats: (teamspace: string, projectId: string, containerId: string) => FetchContainerStatsAction;
+	fetchContainerStatsSuccess: (
+		projectId: string,
+		containerId: string,
+		containerStats: FetchContainerStatsResponse
+	) => FetchContainerStatsSuccessAction;
+	createContainer: (
+		teamspace: string,
+		projectId: string,
+		newContainer: NewContainer,
+	) => CreateContainerAction;
+	createContainerSuccess: (
+		projectId: string,
+		container: NewContainer & { _id: string},
+	) => CreateContainerSuccessAction;
+	deleteContainer: (teamspace: string, projectId: string, containerId: string) => DeleteContainerAction;
+	deleteContainerSuccess: (projectId: string, containerId: string) => DeleteContainerSuccessAction;
+}

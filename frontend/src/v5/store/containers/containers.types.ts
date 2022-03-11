@@ -14,10 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { FetchContainerStatsResponse } from '@/v5/services/api/containers';
-import { Action } from 'redux';
-
 export enum UploadStatuses {
 	OK = 'ok',
 	FAILED = 'failed',
@@ -56,49 +52,12 @@ export type NewContainer = {
 	code?: string;
 };
 
-type TeamspaceId = { teamspace: string };
-type ProjectId = { projectId: string };
-type ContainerId = { containerId: string };
+export type TeamspaceId = { teamspace: string };
+export type ProjectId = { projectId: string };
+export type ContainerId = { containerId: string };
 
 export type TeamspaceAndProjectId = TeamspaceId & ProjectId;
 
 export type TeamspaceProjectAndContainerId = TeamspaceId & ProjectId & ContainerId;
 
 export type ProjectAndContainerId = ProjectId & ContainerId;
-
-export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & TeamspaceProjectAndContainerId;
-export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & TeamspaceProjectAndContainerId;
-export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & ProjectAndContainerId & { isFavourite: boolean};
-export type FetchContainersAction = Action<'FETCH_CONTAINERS'> & TeamspaceAndProjectId;
-export type FetchContainersSuccessAction = Action<'FETCH_CONTAINERS_SUCCESS'> & ProjectId & { containers: IContainer[] };
-export type FetchContainerStatsAction = Action<'FETCH_CONTAINER_STATS'> & TeamspaceProjectAndContainerId;
-export type FetchContainerStatsSuccessAction = Action<'FETCH_CONTAINER_STATS_SUCCESS'> & ProjectAndContainerId & { containerStats: FetchContainerStatsResponse };
-export type CreateContainerAction = Action<'CREATE_CONTAINER'> & TeamspaceAndProjectId & {newContainer: NewContainer};
-export type CreateContainerSuccessAction = Action<'CREATE_CONTAINER_SUCCESS'> & ProjectId & { container: IContainer };
-export type DeleteContainerAction = Action<'DELETE'> & TeamspaceProjectAndContainerId;
-export type DeleteContainerSuccessAction = Action<'DELETE_SUCCESS'> & ProjectAndContainerId;
-
-export interface IContainersActionCreators {
-	addFavourite: (teamspace: string, projectId: string, containerId: string) => AddFavouriteAction;
-	removeFavourite: (teamspace: string, projectId: string, containerId: string) => RemoveFavouriteAction;
-	setFavouriteSuccess: (projectId: string, containerId: string, isFavourite: boolean) => SetFavouriteSuccessAction;
-	fetchContainers: (teamspace: string, projectId: string) => FetchContainersAction;
-	fetchContainersSuccess: (projectId: string, containers: IContainer[]) => FetchContainersSuccessAction;
-	fetchContainerStats: (teamspace: string, projectId: string, containerId: string) => FetchContainerStatsAction;
-	fetchContainerStatsSuccess: (
-		projectId: string,
-		containerId: string,
-		containerStats: FetchContainerStatsResponse
-	) => FetchContainerStatsSuccessAction;
-	createContainer: (
-		teamspace: string,
-		projectId: string,
-		newContainer: NewContainer,
-	) => CreateContainerAction;
-	createContainerSuccess: (
-		projectId: string,
-		container: NewContainer & { _id: string},
-	) => CreateContainerSuccessAction;
-	deleteContainer: (teamspace: string, projectId: string, containerId: string) => DeleteContainerAction;
-	deleteContainerSuccess: (projectId: string, containerId: string) => DeleteContainerSuccessAction;
-}
