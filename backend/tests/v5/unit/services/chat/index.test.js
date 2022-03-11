@@ -113,6 +113,25 @@ const testOnNewSessions = () => {
 	});
 };
 
+const testOnSessionsRemoved = () => {
+	describe('On sessions removed event', () => {
+		let subscribeCallBack;
+		beforeAll(async () => {
+			EventsManager.subscribe.mockClear();
+			await ChatService.createApp({});
+			[, [, subscribeCallBack]] = EventsManager.subscribe.mock.calls;
+		});
+
+		test('Should send a message to the sesions channel', () => {
+			const ids = [generateRandomString(), generateRandomString()];
+			subscribeCallBack({ ids });
+			expect(QueueService.broadcastMessage).toHaveBeenCalledTimes(1);
+			const message = { event: chatEvents.LOGGED_OUT, data: { reason: 'You have logged in else where' }, recipients: ids };
+			expect(QueueService.broadcastMessage).toHaveBeenCalledWith(eventExchange, JSON.stringify(message));
+		});
+	});
+};
+
 const testOnNewMsg = () => {
 	describe('On new message from exchange', () => {
 		let subscribeCallBack;
@@ -192,5 +211,6 @@ const testOnNewMsg = () => {
 describe('services/chat/index', () => {
 	testInit();
 	testOnNewSessions();
+	testOnSessionsRemoved();
 	testOnNewMsg();
 });
