@@ -321,7 +321,7 @@ export class Views extends PureComponent<IProps, any> {
 			{VIEWS_ACTIONS_MENU.map(({ name, label, sortType }) => {
 				const isAscending = this.props.sortOrder === SORT_ORDER_TYPES.ASCENDING;
 				return (
-					<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
+					<StyledListItem key={name} onClick={this.menuActionsMap[name]}>
 						<IconWrapper>
 							{isAscending ? <SortAmountUp fontSize="small" /> : <SortAmountDown fontSize="small" />}
 						</IconWrapper>

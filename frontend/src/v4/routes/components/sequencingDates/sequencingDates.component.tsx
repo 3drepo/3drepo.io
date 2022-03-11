@@ -49,7 +49,7 @@ const SequenceDate = ({ value, name, onChange, showSequenceDate, min, max, initi
 		<SequenceDateContainer>
 			<SequenceDateField
 				shouldDisableDate={(date) => isDateOutsideRange(min, max, date.$d)}
-				InputFormat={NAMED_MONTH_DATETIME_FORMAT}
+				inputFormat={NAMED_MONTH_DATETIME_FORMAT}
 				dateTime
 				name={name}
 				inputId={name}

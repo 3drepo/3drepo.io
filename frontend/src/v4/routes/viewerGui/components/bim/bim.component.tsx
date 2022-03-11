@@ -191,7 +191,7 @@ export class Bim extends PureComponent<IProps, any> {
 		return(
 			<MenuList>
 				{BIM_ACTIONS_MENU.map(({ name, label }) => (
-					<StyledListItem key={name} button onClick={(e) => {
+					<StyledListItem key={name} onClick={(e) => {
 						menu.close(e);
 						this.menuActionsMap[name]();
 					}}>

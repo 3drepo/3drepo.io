@@ -248,7 +248,7 @@ export class Tree extends PureComponent<IProps, IState> {
 	private renderActionsMenu = () => (
 		<MenuList>
 			{TREE_ACTIONS_MENU.map(({ name, Icon, label }) => (
-				<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
+				<StyledListItem key={name} onClick={this.menuActionsMap[name]}>
 					<IconWrapper><Icon fontSize="small" /></IconWrapper>
 					<StyledItemText>
 						{label}

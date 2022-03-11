@@ -33,7 +33,7 @@ const ExternalLink = ({ ...props }) => {
 	const Icon = props.icon || Fragment;
 	const iconProps = props.icon ? { style: { color: COLOR.BLACK_54 } } : {};
 	return (
-		<MenuItem button aria-label={props.label} onClick={props.onButtonClick}>
+		<MenuItem aria-label={props.label} onClick={props.onButtonClick}>
 			<MenuIcon>
 				<Icon {...iconProps} />
 			</MenuIcon>
@@ -44,7 +44,7 @@ const ExternalLink = ({ ...props }) => {
 
 const UserMenuButton = ({ Icon, ...props }) => {
 	return (
-		<MenuItem button aria-label={props.label} onClick={props.onButtonClick}>
+		<MenuItem aria-label={props.label} onClick={props.onButtonClick}>
 			<MenuIcon>
 				<Icon />
 			</MenuIcon>

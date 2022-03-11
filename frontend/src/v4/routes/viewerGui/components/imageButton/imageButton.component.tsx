@@ -84,7 +84,7 @@ const UploadImage = ({ uploadScreenshot, showScreenshotDialog, close = noop, asM
 	return (
 		<label htmlFor="file-upload">
 			{renderWhenTrueOtherwise(() => (
-					<StyledListItem button>
+					<StyledListItem>
 						<StyledItemText>
 							Upload image...
 						</StyledItemText>
@@ -107,7 +107,7 @@ const CreateScreenshot = ({ disableScreenshot, takeScreenshot, ...props }) => {
 	return (
 		<>
 			{renderWhenTrue(() => (
-					<StyledListItem button onClick={handleOnClick}>
+					<StyledListItem onClick={handleOnClick}>
 						<StyledItemText>
 							Create Screenshot...
 						</StyledItemText>

@@ -225,7 +225,7 @@ export class Compare extends PureComponent<IProps, any> {
 				const isEnabled = this.props.sortType === sortType;
 				const isAscending = !isEnabled || this.props.sortOrder === SORT_ORDER_TYPES.ASCENDING;
 				return (
-					<StyledListItem key={index} button onClick={onClick}>
+					<StyledListItem key={index} onClick={onClick}>
 						<IconWrapper>
 							{isAscending && <SortAmountUp fontSize="small" />}
 							{!isAscending && <SortAmountDown fontSize="small" />}

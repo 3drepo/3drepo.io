@@ -21,6 +21,7 @@ import { IconButton } from '@mui/material';
 export const StyledIconButton = styled(IconButton)`
 	&& {
 		padding: 0;
+		margin: 0;
 
 		${({ $isButton, theme }) => ($isButton ? `
 			cursor: pointer;

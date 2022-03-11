@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 
 import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import { COLOR } from '../../../../../../styles';
@@ -28,7 +29,7 @@ export const MenuIcon = styled(ListItemIcon)`
 	}
 `;
 
-export const MenuItem = styled(ListItem)`
+export const MenuItem = styled(ListItemButton)`
 	&& {
 		height: 48px;
 	}

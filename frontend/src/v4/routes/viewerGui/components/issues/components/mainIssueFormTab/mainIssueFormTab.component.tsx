@@ -158,7 +158,8 @@ export const MainIssueFormTab: FunctionComponent<IProps> = ({
 							{...field}
 							format={NAMED_MONTH_DATE_FORMAT}
 							disabled={!canEditBasicProperty}
-							placeholder="Choose a due date" />}
+							placeholder="Choose a due date"
+						/>}
 					/>
 				</StyledFormControl>
 			</FieldsRow>

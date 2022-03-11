@@ -134,7 +134,7 @@ export class Gis extends PureComponent<IProps, IState> {
 
 	public renderActionsMenu = () => (
 		<MenuList>
-			<StyledListItem onClick={this.toggleSettings} button>
+			<StyledListItem onClick={this.toggleSettings}>
 				<IconWrapper><BuildIcon fontSize="small" /></IconWrapper>
 				<StyledItemText>
 					Settings

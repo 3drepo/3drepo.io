@@ -370,6 +370,6 @@ export const MuiTheme = createTheme({
 					height: '48px',
 				}
 			}
-		}
+		},
 	}
 });

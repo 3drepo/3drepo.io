@@ -331,7 +331,7 @@ export class Teamspaces extends PureComponent<IProps, IState> {
 					};
 
 					return(
-						<StyledListItem key={label} button onClick={() => this.handleSortingItemClick(sortingType, isNameSortingActive)}>
+						<StyledListItem key={label} onClick={() => this.handleSortingItemClick(sortingType, isNameSortingActive)}>
 							<StyledItemText>
 								<Action>
 									<SortingIcon Icon={Icon} isDesc={isDesc[sortingType]} />

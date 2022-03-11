@@ -17,7 +17,7 @@
 import { DetailedHTMLProps, FormHTMLAttributes } from 'react';
 import { Button, Dialog } from '@mui/material';
 import CloseIcon from '@assets/icons/close.svg';
-import { DialogProps } from '@material-ui/core/Dialog';
+import { DialogProps } from '@mui/material/Dialog';
 import {
 	Form,
 	Title,

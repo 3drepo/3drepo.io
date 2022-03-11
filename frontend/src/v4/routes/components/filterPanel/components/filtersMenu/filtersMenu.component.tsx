@@ -92,7 +92,7 @@ export class FiltersMenu extends PureComponent<IProps, IState> {
 
 	public renderListParentItem = (index, item) => {
 		return (
-			<StyledListItem button onMouseEnter={() => this.showSubMenu(index)}>
+			<StyledListItem onMouseEnter={() => this.showSubMenu(index)}>
 				<StyledItemText>
 					{item.label} <ArrowRight />
 				</StyledItemText>
@@ -111,7 +111,6 @@ export class FiltersMenu extends PureComponent<IProps, IState> {
 		const name = subItem.label || subItem.value;
 		return (
 			<StyledListItem
-				button
 				onClick={this.toggleSelectItem(item, subItem)}
 				key={`${name}-${index}`}
 			>
@@ -158,7 +157,7 @@ export class FiltersMenu extends PureComponent<IProps, IState> {
 							const isSelected = this.props.selectedDataTypes.includes(item.type);
 							return (
 
-								<StyledListItem button key={`${item.label}-${index}`} onClick={this.toggleSelectDataType(item.type)}>
+								<StyledListItem key={`${item.label}-${index}`} onClick={this.toggleSelectDataType(item.type)}>
 									<StyledItemText>
 										{item.label}
 										{isSelected && <Check fontSize={'small'} />}
@@ -174,7 +173,7 @@ export class FiltersMenu extends PureComponent<IProps, IState> {
 
 	public renderFooter = () => (
 		<MenuFooter>
-			<StyledListItem button disabled={!this.props.selectedItems.length}>
+			<StyledListItem disabled={!this.props.selectedItems.length}>
 				<StyledItemText>
 					<CopyToClipboard text={JSON.stringify(this.props.selectedItems)}>
 						<CopyItem>

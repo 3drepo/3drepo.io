@@ -201,7 +201,7 @@ export function Board(props: IProps) {
 			const lanes = board.getElementsByClassName('react-trello-lane');
 
 			setTimeout(() => {
-				lanes.forEach((lane) => lane.removeAttribute('title'));
+				[...lanes].forEach((lane) => lane.removeAttribute('title'));
 			});
 		}
 	}, [boardRef, props.isPending]);

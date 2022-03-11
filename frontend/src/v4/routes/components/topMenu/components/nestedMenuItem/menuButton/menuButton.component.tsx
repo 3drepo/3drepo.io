@@ -29,7 +29,6 @@ interface IProps {
 export const MenuButton: FunctionComponent<IProps> = ({ IconProps, Icon, label, icon, ...props }) => (
 	<MenuItem
 		{...props}
-		button
 		aria-label={label}
 		disableRipple
 	>

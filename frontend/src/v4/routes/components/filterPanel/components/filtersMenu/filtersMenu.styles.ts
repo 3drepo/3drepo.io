@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 
 import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
 import { DatePicker } from '@mui/lab';
 
 import { COLOR } from '../../../../../styles';
@@ -55,7 +55,7 @@ export const IconWrapper = styled.div`
 	margin-right: 10px;
 `;
 
-export const StyledListItem = styled(ListItem)`
+export const StyledListItem = styled(ListItemButton)`
 	&& {
 		padding: 4px 10px;
 		height: 30px;

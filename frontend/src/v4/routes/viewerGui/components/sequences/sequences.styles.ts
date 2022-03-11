@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 
-import { Grid, IconButton, Input, ListItem } from '@mui/material';
+import { Grid, IconButton, Input } from '@mui/material';
 import Slider from '@mui/material/Slider';
 import DotIcon from '@mui/icons-material/FiberManualRecord';
 
@@ -58,7 +58,7 @@ export const SequenceSlider = styled(Slider)`
 
 export const SequencePlayerContainer = styled.div`
 	display: block;
-	height: 165px
+	height: 165px;
 `;
 
 export const SequenceTasksListContainer = styled(ViewerPanelContent)`
