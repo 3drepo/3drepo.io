@@ -26,7 +26,7 @@ const events = [
 	'success',
 
 	// Model events
-	'modelStatusUpdate',
+	{ v5: 'modelStatusUpdate', v4: 'modelStatusChanged' },
 ];
 
 const errors = [
@@ -39,16 +39,32 @@ const actions = [
 	'join',
 ];
 
-const createConstantsMapping = (data, convertCase = true) => {
+const createConstantsMapping = (data) => {
 	const constants = {};
 	data.forEach((value) => {
 		const valueConstCase = toConstantCase(value);
-		constants[valueConstCase] = convertCase ? valueConstCase : value;
+		constants[valueConstCase] = valueConstCase;
 	});
 	return constants;
 };
 
-ChatConstants.EVENTS = createConstantsMapping(events, false);
+const createEventsMapping = (data) => {
+	const constants = {};
+	const v5ToV4 = {};
+	data.forEach((value) => {
+		const event = value.v5 || value;
+		v5ToV4[event] = value.v4 || value;
+
+		const eventConstCase = toConstantCase(event);
+		constants[eventConstCase] = event;
+	});
+
+	ChatConstants.EVENTS = constants;
+	ChatConstants.EVENTS_V5_TO_V4 = v5ToV4;
+};
+
+createEventsMapping(events, false);
+
 ChatConstants.ERRORS = createConstantsMapping(errors);
 ChatConstants.ACTIONS = createConstantsMapping(actions);
 

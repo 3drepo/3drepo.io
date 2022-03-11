@@ -190,10 +190,6 @@ const subscribeToV5Events = () => {
 		newModel(null, teamspace, { _id: model });
 	});
 
-	EventsManager.subscribe(EventsV5.MODEL_IMPORT_UPDATE, async ({teamspace, model, status, user}) => {
-		modelStatusChanged(null, teamspace, model, {status, user: user || "unknown"});
-	});
-
 	EventsManager.subscribe(EventsV5.MODEL_IMPORT_FINISHED, async ({teamspace, model, corId, success, user, userErr, errCode, message}) => {
 		const { revisionCount, findLatest } = require("./history");
 		const notifications = require("./notification");

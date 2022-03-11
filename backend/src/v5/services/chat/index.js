@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { SESSION_CHANNEL_PREFIX, EVENTS: chatEvents } = require('./chat.constants');
+const { SESSION_CHANNEL_PREFIX, EVENTS: chatEvents, EVENTS_V5_TO_V4: chatEventsV5ToV4 } = require('./chat.constants');
 const { SESSION_HEADER, session } = require('../sessions');
 const { broadcastMessage, listenToExchange } = require('../../handler/queue');
 const RTMsg = require('../../handler/realTimeMsging');
@@ -69,7 +69,9 @@ const createDirectMessage = (event, data, sessionIds) => {
 	broadcastMessage(eventExchange, message);
 
 	// v4 client compatibility
-	const messageV4 = JSON.stringify({ event: chatEvents.MESSAGE, data: { event, data }, recipients });
+	const messageV4 = JSON.stringify({ event: chatEvents.MESSAGE,
+		data: { event: chatEventsV5ToV4[event], data },
+		recipients });
 	broadcastMessage(eventExchange, messageV4);
 };
 
@@ -79,7 +81,7 @@ const createModelMessage = (event, data, teamspace, project, model) => {
 	broadcastMessage(eventExchange, message);
 
 	// v4 client compatibility
-	const v4Event = `${teamspace}::${model}::${event}`;
+	const v4Event = `${teamspace}::${model}::${chatEventsV5ToV4[event]}`;
 	const messageV4 = JSON.stringify({ event: v4Event, data, recipients });
 	broadcastMessage(eventExchange, messageV4);
 };
