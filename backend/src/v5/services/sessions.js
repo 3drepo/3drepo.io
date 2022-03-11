@@ -66,9 +66,11 @@ Sessions.removeOldSessions = async (username, currentSessionID, referrer) => {
 
 	const sessionsToRemove = await Sessions.getSessions(query, { _id: 1 });
 
-	const sessionIds = sessionsToRemove.map((s) => s._id);
+	if (sessionsToRemove.length) {
+		const sessionIds = sessionsToRemove.map((s) => s._id);
 
-	await db.deleteMany('admin', 'sessions', { _id: { $in: sessionIds } });
-	publish(events.SESSIONS_REMOVED, { ids: sessionIds });
+		await db.deleteMany('admin', 'sessions', { _id: { $in: sessionIds } });
+		publish(events.SESSIONS_REMOVED, { ids: sessionIds });
+	}
 };
 module.exports = Sessions;

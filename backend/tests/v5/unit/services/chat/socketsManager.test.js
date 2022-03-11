@@ -28,7 +28,7 @@ const Permissions = require(`${src}/utils/permissions/permissions`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const SocketsManager = require(`${src}/services/chat/socketsManager`);
-const { ACTIONS, ERRORS, EVENTS } = require(`${src}/services/chat/chat.constants`);
+const { ACTIONS, ERRORS, EVENTS, SESSION_CHANNEL_PREFIX } = require(`${src}/services/chat/chat.constants`);
 
 const generateSocket = (session = generateRandomString()) => {
 	const socket = {
@@ -83,35 +83,16 @@ const testSocketsCollection = () => {
 
 			expect(SocketsManager.getSocketById(socket.id)).toBe(socket);
 
-			const socketBySession = SocketsManager.getSocketIdsBySession(getSessionFromSocket(socket));
-			expect(socketBySession.size).toBe(1);
-			expect(Array.from(socketBySession)).toEqual([socket.id]);
+			const socket2 = generateSocket();
+			SocketsManager.addSocket(socket2);
 
-			const socketWithSameSession = generateSocket(getSessionFromSocket(socket));
-			SocketsManager.addSocket(socketWithSameSession);
+			expect(SocketsManager.getSocketById(socket2.id)).toBe(socket2);
 
-			expect(socketBySession.size).toBe(2);
-			expect(Array.from(socketBySession)).toEqual(expect.arrayContaining([socket.id, socketWithSameSession.id]));
-
-			const socketWithDiffSession = generateSocket();
-			SocketsManager.addSocket(socketWithDiffSession);
-
-			expect(socketBySession.size).toBe(2);
-			expect(Array.from(socketBySession)).toEqual(expect.arrayContaining([socket.id, socketWithSameSession.id]));
-
-			const otherSessionSockets = SocketsManager.getSocketIdsBySession(
-				socketWithDiffSession.session.id,
-			);
-			expect(otherSessionSockets.size).toBe(1);
-			expect(Array.from(otherSessionSockets)).toEqual([socketWithDiffSession.id]);
+			expect(SocketsManager.getSocketById(socket.id)).toBe(socket);
 		});
 
 		test('should return undefined with unknown socket id', () => {
 			expect(SocketsManager.getSocketById(generateRandomString())).toBe(undefined);
-		});
-
-		test('should return undefined with unknown session id', () => {
-			expect(SocketsManager.getSocketIdsBySession(generateRandomString())).toBe(undefined);
 		});
 
 		test('should subscribe to the relevant events when socket is being added ', () => {
@@ -121,6 +102,19 @@ const testSocketsCollection = () => {
 			expect(socket.onJoin).toHaveBeenCalledTimes(1);
 			expect(socket.onLeave).toHaveBeenCalledTimes(1);
 			expect(socket.onDisconnect).toHaveBeenCalledTimes(1);
+		});
+		test('should join the session channel if the user is authenticated', () => {
+			const socket = generateSocket();
+			SocketsManager.addSocket(socket);
+			expect(socket.join).toHaveBeenCalledTimes(1);
+			expect(socket.join).toHaveBeenCalledWith(`${SESSION_CHANNEL_PREFIX}${getSessionFromSocket(socket)}`);
+		});
+
+		test('should not join the session channel if the user is not authenticated', () => {
+			const socket = generateSocket();
+			delete socket.session.user;
+			SocketsManager.addSocket(socket);
+			expect(socket.join).not.toHaveBeenCalled();
 		});
 	});
 	afterEach(SocketsManager.reset);
@@ -136,27 +130,9 @@ const testSocketsEvents = () => {
 				eventFns.disconnect();
 
 				expect(SocketsManager.getSocketById(socket.id)).toBeUndefined();
-				expect(SocketsManager.getSocketIdsBySession(getSessionFromSocket(socket))).toBeUndefined();
 
 				// disconnect called twice should not run into errors
 				eventFns.disconnect();
-			});
-
-			test('when there is 2 sockets to 1 session, the other socket should still be available', () => {
-				const { eventFns, socket } = createSocketWithEvents();
-				SocketsManager.addSocket(socket);
-
-				const otherSocket = generateSocket(getSessionFromSocket(socket));
-				SocketsManager.addSocket(otherSocket);
-				expect(Array.from(SocketsManager.getSocketIdsBySession(getSessionFromSocket(socket))))
-					.toEqual(expect.arrayContaining([socket.id, otherSocket.id]));
-
-				eventFns.disconnect();
-
-				expect(SocketsManager.getSocketById(socket.id)).toBeUndefined();
-				expect(SocketsManager.getSocketById(otherSocket.id)).toBe(otherSocket);
-				expect(Array.from(SocketsManager.getSocketIdsBySession(getSessionFromSocket(socket))))
-					.toEqual(expect.arrayContaining([otherSocket.id]));
 			});
 		});
 
@@ -284,6 +260,7 @@ const testSocketsEvents = () => {
 					const { eventFns, socket } = createSocketWithEvents();
 					SocketsManager.addSocket(socket);
 
+					socket.join.mockClear();
 					const teamspace = generateRandomString();
 					const project = generateRandomString();
 					const model = generateRandomString();
@@ -300,6 +277,7 @@ const testSocketsEvents = () => {
 					const { eventFns, socket } = createSocketWithEvents();
 					SocketsManager.addSocket(socket);
 
+					socket.join.mockClear();
 					const teamspace = generateRandomString();
 					const project = generateRandomString();
 					const model = generateRandomString();
@@ -316,6 +294,7 @@ const testSocketsEvents = () => {
 					const { eventFns, socket } = createSocketWithEvents();
 					SocketsManager.addSocket(socket);
 
+					socket.join.mockClear();
 					const account = generateRandomString();
 					const model = generateRandomString();
 
@@ -331,6 +310,7 @@ const testSocketsEvents = () => {
 					const { eventFns, socket } = createSocketWithEvents();
 					SocketsManager.addSocket(socket);
 
+					socket.join.mockClear();
 					const account = generateRandomString();
 					const model = generateRandomString();
 
@@ -349,6 +329,7 @@ const testSocketsEvents = () => {
 					const { eventFns, socket } = createSocketWithEvents();
 					SocketsManager.addSocket(socket);
 
+					socket.join.mockClear();
 					const data = { notifications: true };
 					await eventFns.join(data);
 					expect(socket.join).toHaveBeenCalledWith(`notifications::${getUserNameFromSocket(socket)}`);
@@ -358,6 +339,7 @@ const testSocketsEvents = () => {
 					const { eventFns, socket } = createSocketWithEvents();
 					SocketsManager.addSocket(socket);
 
+					socket.join.mockClear();
 					const username = getUserNameFromSocket(socket);
 					const data = { account: username };
 					await eventFns.join(data);
@@ -368,6 +350,7 @@ const testSocketsEvents = () => {
 					const { eventFns, socket } = createSocketWithEvents();
 					SocketsManager.addSocket(socket);
 
+					socket.join.mockClear();
 					const data = { account: generateRandomString() };
 					await eventFns.join(data);
 					expect(socket.join).not.toHaveBeenCalled();
@@ -379,6 +362,7 @@ const testSocketsEvents = () => {
 					delete socket.session.user;
 					SocketsManager.addSocket(socket);
 
+					socket.join.mockClear();
 					const username = getUserNameFromSocket(socket);
 					const data = { account: username };
 					await eventFns.join(data);
@@ -391,6 +375,7 @@ const testSocketsEvents = () => {
 				const { eventFns, socket } = createSocketWithEvents();
 				SocketsManager.addSocket(socket);
 
+				socket.join.mockClear();
 				const data = { [generateRandomString()]: generateRandomString() };
 				await eventFns.join(data);
 				expect(socket.join).not.toHaveBeenCalled();

@@ -38,6 +38,7 @@ jest.mock('../../../../../src/v5/handler/queue');
 const QueueService = require(`${src}/handler/queue`);
 
 const ChatService = require(`${src}/services/chat`);
+const { EVENTS: chatEvents, SESSION_CHANNEL_PREFIX } = require(`${src}/services/chat/chat.constants`);
 const { cn_queue: { event_exchange: eventExchange } } = require(`${src}/utils/config`);
 
 const socketCloseFn = jest.fn();
@@ -59,8 +60,9 @@ const testInit = () => {
 				server, middleware, SessionService.SESSION_HEADER, SocketsManager.addSocket,
 			);
 
-			expect(EventsManager.subscribe).toHaveBeenCalledTimes(1);
+			expect(EventsManager.subscribe).toHaveBeenCalledTimes(2);
 			expect(EventsManager.subscribe.mock.calls[0][0]).toEqual(events.SESSION_CREATED);
+			expect(EventsManager.subscribe.mock.calls[1][0]).toEqual(events.SESSIONS_REMOVED);
 
 			expect(QueueService.listenToExchange).toHaveBeenCalledTimes(1);
 			expect(QueueService.listenToExchange.mock.calls[0][0]).toEqual(eventExchange);
@@ -95,9 +97,6 @@ const testOnNewSessions = () => {
 
 			expect(SocketsManager.getSocketById).toHaveBeenCalledTimes(1);
 			expect(SocketsManager.getSocketById).toHaveBeenCalledWith(socketId);
-
-			expect(SocketsManager.addSocketIdToSession).toHaveBeenCalledTimes(1);
-			expect(SocketsManager.addSocketIdToSession).toHaveBeenCalledWith(sessionID, socketId);
 		});
 
 		test('Should ignore the event if the socket is not within its management', () => {
@@ -109,7 +108,7 @@ const testOnNewSessions = () => {
 			expect(SocketsManager.getSocketById).toHaveBeenCalledTimes(1);
 			expect(SocketsManager.getSocketById).toHaveBeenCalledWith(socketId);
 
-			expect(SocketsManager.addSocketIdToSession).not.toHaveBeenCalled();
+			expect(SocketsManager.addSocketToSession).not.toHaveBeenCalled();
 		});
 	});
 };
@@ -135,41 +134,22 @@ const testOnNewMsg = () => {
 		});
 
 		describe('Direct message', () => {
-			test('process send the recipients the messages', () => {
-				const recipient = generateRandomString();
+			test('should process and broadcast it to the sessions channels', () => {
+				const recipients = [generateRandomString(), generateRandomString(), generateRandomString()];
 				const event = generateRandomString();
 				const data = generateRandomString();
-				const message = { dm: true, recipient, event, data };
-
-				const socketIds = [generateRandomString(), generateRandomString(), generateRandomString()];
-				SocketsManager.getSocketIdsBySession.mockReturnValueOnce(socketIds);
-
-				const sockets = {
-					[socketIds[0]]: { send: jest.fn() },
-					// socketIds[1] is undefined on purpose
-					[socketIds[2]]: { send: jest.fn() },
-				};
-
-				SocketsManager.getSocketById.mockImplementation((id) => sockets[id]);
+				const message = { recipients, event, data };
 
 				expect(subscribeCallBack({ content: Buffer.from(JSON.stringify(message)) })).toBeUndefined();
 
-				Object.keys(sockets).forEach((id) => {
-					expect(sockets[id].send).toHaveBeenCalledTimes(1);
-					expect(sockets[id].send).toHaveBeenCalledWith({ event, data });
-				});
-			});
-
-			test('should ignore if recipients are not managed by this service', () => {
-				const recipient = generateRandomString();
-				const event = generateRandomString();
-				const data = generateRandomString();
-				const message = { recipient, event, data };
-
-				SocketsManager.getSocketIdsBySession.mockReturnValueOnce(undefined);
-
-				expect(subscribeCallBack({ content: Buffer.from(JSON.stringify(message)) })).toBeUndefined();
-				expect(SocketsManager.getSocketById).not.toBeCalled();
+				expect(broadcastFn).toHaveBeenCalledTimes(recipients.length * 2);
+				for (let i = 0; i < recipients.length; ++i) {
+					const sessionChannel = `${SESSION_CHANNEL_PREFIX}${recipients[i]}`;
+					expect(broadcastFn).toHaveBeenNthCalledWith(i * 2 + 1, sessionChannel, event, data);
+					expect(broadcastFn).toHaveBeenNthCalledWith(
+						i * 2 + 2, sessionChannel, chatEvents.MESSAGE, { event, data },
+					);
+				}
 			});
 		});
 

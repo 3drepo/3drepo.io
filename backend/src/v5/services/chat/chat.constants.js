@@ -49,4 +49,6 @@ ChatConstants.EVENTS = createConstantsMapping(events, false);
 ChatConstants.ERRORS = createConstantsMapping(errors);
 ChatConstants.ACTIONS = createConstantsMapping(actions);
 
+ChatConstants.SESSION_CHANNEL_PREFIX = 'sessions::';
+
 module.exports = ChatConstants;

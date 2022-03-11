@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { SESSION_CHANNEL_PREFIX, EVENTS: chatEvents } = require('./chat.constants');
 const { SESSION_HEADER, session } = require('../sessions');
 const { broadcastMessage, listenToExchange } = require('../../handler/queue');
 const RTMsg = require('../../handler/realTimeMsging');
 const SocketsManager = require('./socketsManager');
-const { EVENTS: chatEvents } = require('./chat.constants');
 const chatLabel = require('../../utils/logger').labels.chat;
 const { cn_queue: { event_exchange: eventExchange } } = require('../../utils/config');
 const { events } = require('../eventsManager/eventsManager.constants');
@@ -28,34 +28,41 @@ const { subscribe } = require('../eventsManager/eventsManager');
 
 const ChatService = {};
 
+const broadcastToChannel = (sender, channel, event, data) => {
+	logger.logDebug(`[${channel}][NEW EVENT]: ${event}${JSON.stringify(data)}`);
+	sender.broadcast(channel, event, data);
+};
+
 const onMessageV4 = (service, msg) => {
-	const { event, data, recipients: sessionIds, emitter, channel } = msg;
-	if (sessionIds?.length) {
-		const recipients = sessionIds.flatMap((sessionId) => SocketsManager.getSocketIdsBySession(sessionId) || []);
-		if (recipients.length) {
-			recipients.forEach((socketId) => {
-				const recipientSocket = SocketsManager.getSocketById(socketId);
-				if (recipientSocket) {
-					logger.logDebug(`[DM][${socketId}]: ${event}${JSON.stringify(data)}`);
-					recipientSocket.emit(event, data);
-					// v4 compatibility
-					recipientSocket.emit(chatEvents.MESSAGE, { event, data });
-				}
-			});
-		}
-	} else if (channel) {
-		const sender = SocketsManager.getSocketById(emitter) || service;
-		logger.logDebug(`[${channel}][NEW EVENT]: ${event}`);
-		sender.broadcast(channel, event, data);
+	const { event, data, emitter, channel } = msg;
+	const sender = SocketsManager.getSocketById(emitter) || service;
+	logger.logDebug(`[${channel}][NEW EVENT]: ${event}`);
+	broadcastToChannel(sender, channel, event, data);
+};
+
+const processMessage = (service, msg) => {
+	const { recipients, event, data } = msg;
+	if (recipients?.length) { // direct message to sessions
+		recipients?.forEach((sessionId) => {
+			const channelName = `${SESSION_CHANNEL_PREFIX}${sessionId}`;
+			broadcastToChannel(service, channelName, event, data);
+
+			// v4 client compatibility
+			broadcastToChannel(service, channelName, chatEvents.MESSAGE, { event, data });
+		});
 	} else {
 		logger.logError('Unrecognised event message', msg);
 	}
 };
 
-const onMessage = (service) => (data) => {
+const onMessage = (service) => (msg) => {
 	try {
-		const content = JSON.parse(data.content);
-		onMessageV4(service, content);
+		const content = JSON.parse(msg.content);
+		if (content.channel) {
+			onMessageV4(service, content);
+		} else {
+			processMessage(service, content);
+		}
 	} catch (err) {
 		logger.logError(`Failed to process event message ${err.messsage}`);
 	}
@@ -68,8 +75,9 @@ const createDirectMessage = (event, data, sessionIds) => {
 
 const subscribeToEvents = (service) => {
 	subscribe(events.SESSION_CREATED, ({ sessionID, socketId }) => {
-		if (SocketsManager.getSocketById(socketId)) {
-			SocketsManager.addSocketIdToSession(sessionID, socketId);
+		const socket = SocketsManager.getSocketById(socketId);
+		if (socket) {
+			SocketsManager.addSocketToSession(sessionID, socket);
 		}
 	});
 

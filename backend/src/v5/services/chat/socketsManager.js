@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { ACTIONS, ERRORS, EVENTS } = require('./chat.constants');
+const { ACTIONS, ERRORS, EVENTS, SESSION_CHANNEL_PREFIX } = require('./chat.constants');
 const { UUIDToString, stringToUUID } = require('../../utils/helper/uuids');
 const chatLabel = require('../../utils/logger').labels.chat;
 const { findProjectByModelId } = require('../../models/projects');
@@ -24,33 +24,18 @@ const logger = require('../../utils/logger').logWithLabel(chatLabel);
 const { templates } = require('../../utils/responseCodes');
 
 const socketIdToSocket = {};
-const sessionToSocketIds = {};
 const SocketsManager = {};
 
 const getUserNameFromSocket = (socket) => socket.session?.user?.username;
+const socketLogPrefix = (socket) => `[${socket.id}][${getUserNameFromSocket(socket)}][${socket.session?.id}]`;
 
 const removeSocket = (socket) => {
-	const sessionId = socket.session?.id;
-	const socketId = socket.id;
-	if (sessionToSocketIds[sessionId]) {
-		if (sessionToSocketIds[sessionId].size === 1) {
-			delete sessionToSocketIds[sessionId];
-		} else {
-			sessionToSocketIds[sessionId].delete(socketId);
-		}
-	}
-	logger.logDebug(`[${getUserNameFromSocket(socket)}][${socketId}] disconnected`);
-	delete socketIdToSocket[socketId];
+	logger.logDebug(`${socketLogPrefix(socket)} disconnected`);
+	delete socketIdToSocket[socket.id];
 };
 
 const emitError = (socket, error, message, action, data) => {
 	socket.emit(EVENTS.ERROR, { code: error, message, details: { action, data } });
-};
-
-const addSocket = (socket) => {
-	socketIdToSocket[socket.id] = socket;
-	const sessionId = socket.session?.id;
-	SocketsManager.addSocketIdToSession(sessionId, socket.id);
 };
 
 const joinRoom = async (socket, data) => {
@@ -74,7 +59,7 @@ const joinRoom = async (socket, data) => {
 	}
 
 	socket.join(channelName);
-	logger.logDebug(`[${socket.id}][${getUserNameFromSocket(socket)}][${socket.session?.id}]  has joined ${channelName}`);
+	logger.logDebug(`${socketLogPrefix(socket)}  has joined ${channelName}`);
 };
 
 const joinRoomV4 = async (socket, data) => {
@@ -116,7 +101,7 @@ const leaveRoom = (socket, data) => {
 		throw { code: ERRORS.ROOM_NOT_FOUND, message: 'Cannot identify the room indicated' };
 	}
 	socket.leave(channelName);
-	logger.logDebug(`[${socket.id}][${getUserNameFromSocket(socket)}][${socket.session?.id}] has left ${channelName}`);
+	logger.logDebug(`${socketLogPrefix(socket)} has left ${channelName}`);
 };
 
 const leaveRoomV4 = async (socket, data) => {
@@ -166,27 +151,22 @@ const subscribeToSocketEvents = (socket) => {
 
 SocketsManager.getSocketById = (id) => socketIdToSocket[id];
 
-SocketsManager.addSocketIdToSession = (session, socketId) => {
-	if (!sessionToSocketIds[session]) {
-		sessionToSocketIds[session] = new Set();
-	}
-	sessionToSocketIds[session].add(socketId);
+SocketsManager.addSocketToSession = (session, socket) => {
+	socket.join(`${SESSION_CHANNEL_PREFIX}${session}`);
 };
 
-SocketsManager.getSocketIdsBySession = (session) => (sessionToSocketIds[session]
-	? Array.from(sessionToSocketIds[session]) : undefined);
-
 SocketsManager.addSocket = (socket) => {
-	logger.logDebug(`[${socket.id}][${getUserNameFromSocket(socket)}][${socket.session?.id}]  connected`);
-	addSocket(socket);
+	logger.logDebug(`${socketLogPrefix(socket)}  connected`);
+	socketIdToSocket[socket.id] = socket;
 	subscribeToSocketEvents(socket);
+
+	if (getUserNameFromSocket(socket)) {
+		SocketsManager.addSocketToSession(socket.session.id, socket);
+	}
 };
 
 // Used for testing only - should not be called in real life.
 SocketsManager.reset = () => {
-	Object.keys(sessionToSocketIds).forEach((session) => {
-		delete sessionToSocketIds[session];
-	});
 	Object.keys(socketIdToSocket).forEach((id) => {
 		delete socketIdToSocket[id];
 	});
