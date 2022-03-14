@@ -107,7 +107,7 @@
 		"simplebar": "4.0.0",
 		"simplebar-react": "1.0.0",
 		"socket.io-client": "4.4.1",
-		"styled-components": "5.3.3",
+		"styled-components": "5.3.0",
 		"sw-precache": "5.2.0",
 		"type-fest": "2.3.2",
 		"uuidv4": "5.0.1",
