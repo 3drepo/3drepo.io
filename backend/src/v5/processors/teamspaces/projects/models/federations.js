@@ -95,9 +95,7 @@ Federations.getFederationStats = async (teamspace, federation) => {
 	};
 };
 
-Federations.updateSettings = (teamspace, project, model, data) => updateModelSettings(
-	teamspace, project, model, true, data,
-);
+Federations.updateSettings = updateModelSettings;
 
 Federations.getSettings = (teamspace, federation) => getFederationById(teamspace,
 	federation, { corID: 0, account: 0, permissions: 0, subModels: 0, federate: 0 });

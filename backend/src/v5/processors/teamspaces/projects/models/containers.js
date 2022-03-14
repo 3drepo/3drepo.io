@@ -110,9 +110,7 @@ Containers.deleteFavourites = async (username, teamspace, project, favouritesToR
 	return deleteFavourites(username, teamspace, accessibleContainers, favouritesToRemove);
 };
 
-Containers.updateSettings = (teamspace, project, model, data) => updateModelSettings(
-	teamspace, project, model, false, data,
-);
+Containers.updateSettings = updateModelSettings;
 
 Containers.getSettings = (teamspace, container) => getContainerById(teamspace,
 	container, { corID: 0, account: 0, permissions: 0 });

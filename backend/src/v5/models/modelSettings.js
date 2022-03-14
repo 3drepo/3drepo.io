@@ -162,7 +162,7 @@ Models.newRevisionProcessed = async (teamspace, project, model, corId, retVal, u
 	}
 };
 
-Models.updateModelSettings = async (teamspace, project, model, isFederation, data) => {
+Models.updateModelSettings = async (teamspace, project, model, data) => {
 	const toUpdate = {};
 	const toUnset = {};
 
@@ -191,9 +191,9 @@ Models.updateModelSettings = async (teamspace, project, model, isFederation, dat
 	}
 
 	if (Object.keys(updateJson).length) {
-		const result = await updateOneModel(teamspace, { _id: model }, updateJson);
+		const result = await findOneAndUpdateModel(teamspace, { _id: model }, updateJson, { federate: 1 });
 
-		if (!result || result.matchedCount === 0) {
+		if (!result) {
 			throw templates.modelNotFound;
 		}
 
@@ -201,7 +201,7 @@ Models.updateModelSettings = async (teamspace, project, model, isFederation, dat
 			project,
 			model,
 			data,
-			isFederation });
+			isFederation: !!result.federate });
 	}
 };
 

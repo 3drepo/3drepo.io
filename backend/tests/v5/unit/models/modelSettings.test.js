@@ -471,8 +471,8 @@ const testUpdateModelSettings = () => {
 				},
 			};
 
-			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
-			await Model.updateModelSettings(teamspace, project, model, false, data);
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce({});
+			await Model.updateModelSettings(teamspace, project, model, data);
 			checkResults(fn, model, updateObject);
 			expect(publishFn).toHaveBeenCalledTimes(1);
 			expect(publishFn).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
@@ -504,8 +504,8 @@ const testUpdateModelSettings = () => {
 				},
 			};
 
-			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
-			await Model.updateModelSettings(teamspace, project, model, true, data);
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce({ federate: true });
+			await Model.updateModelSettings(teamspace, project, model, data);
 			checkResults(fn, model, updateObject);
 			expect(publishFn).toHaveBeenCalledTimes(1);
 			expect(publishFn).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
@@ -536,8 +536,8 @@ const testUpdateModelSettings = () => {
 				},
 			};
 
-			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
-			await Model.updateModelSettings(teamspace, project, model, false, data);
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce({});
+			await Model.updateModelSettings(teamspace, project, model, data);
 			checkResults(fn, model, updateObject);
 			expect(publishFn).toHaveBeenCalledTimes(1);
 
@@ -552,16 +552,16 @@ const testUpdateModelSettings = () => {
 		});
 
 		test('Should return error if the update fails', async () => {
-			jest.spyOn(db, 'updateOne').mockImplementation(() => undefined);
-			await expect(Model.updateModelSettings(teamspace, project, model, false, { name: 'someName' }))
+			jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce();
+			await expect(Model.updateModelSettings(teamspace, project, model, { name: 'someName' }))
 				.rejects.toEqual(templates.modelNotFound);
 
 			expect(publishFn).not.toHaveBeenCalled();
 		});
 
 		test('Should update nothing if the data is empty', async () => {
-			const fn = jest.spyOn(db, 'updateOne');
-			await Model.updateModelSettings(teamspace, project, model, false, {});
+			const fn = jest.spyOn(db, 'findOneAndUpdate');
+			await Model.updateModelSettings(teamspace, project, model, {});
 			expect(fn).not.toHaveBeenCalled();
 			expect(publishFn).not.toHaveBeenCalled();
 		});
