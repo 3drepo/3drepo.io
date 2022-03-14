@@ -1,4 +1,5 @@
 const PATHS = require('../internals/webpack/tools/paths');
+const { resolve } = require('path');
 
 module.exports = {
   "stories": [
@@ -20,6 +21,13 @@ module.exports = {
     // `configType` has a value of 'DEVELOPMENT' or 'PRODUCTION'
     // You can change the configuration based on that.
     // 'PRODUCTION' is used when building the static version of storybook.
+
+    if (configType == 'PRODUCTION') {
+      config.output = {
+        ...config.output,
+        "path": resolve(PATHS.PUBLIC_DIR, 'storybook'),
+      }
+    }
 
     config = {
       ...config,
