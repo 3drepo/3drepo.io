@@ -171,12 +171,11 @@ const testValidateAvatarData = () => {
 	});
 };
 
-
 const testForgotPasswordData = () => {
 	describe.each([
 		[{ body: { user: existingUsername } }, true, 'with valid username'],
-		[{ body: { user: existingEmail } }, true, 'with valid email'],	
-		[{ body: { user: existingEmail, extra: 'extra' } }, false, 'with extra properties', templates.invalidArguments],	
+		[{ body: { user: existingEmail } }, true, 'with valid email'],
+		[{ body: { user: existingEmail, extra: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
 		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
 	])('Check if req arguments for requesting a reset password email are valid', (req, shouldPass, desc, expectedError) => {
@@ -197,13 +196,12 @@ const testForgotPasswordData = () => {
 
 const testResetingPasswordData = () => {
 	describe.each([
-		[{ body: { newPassword: 'newPassword' } }, false, 'without token', templates.invalidArguments],
-		[{ body: { token: 'someToken' } }, false, 'without new password', templates.invalidArguments],	
-		[{ body: { token: 'abc' } }, false, 'with short new password', templates.invalidArguments],	
-		[{ body: { token: 'someToken', newPassword: 'Abcdef12345!!' } }, true, 'with token and valid new password'],	
-		[{ body: { token: 'someToken', newPassword: 'Abcdef12345!!', extra: 'extra' } }, false, 'with extra properties', templates.invalidArguments],	
-		[{ body: { token: 'abc' } }, false, 'with short new password', templates.invalidArguments],	
-		[{ body: { token: 'abcdefghi' } }, false, 'with weak new password', templates.invalidArguments],	
+		[{ body: { newPassword: 'newPassword', user: 'some user' } }, false, 'without token', templates.invalidArguments],
+		[{ body: { token: 'someToken', user: 'some user' } }, false, 'without new password', templates.invalidArguments],
+		[{ body: { token: 'someToken', newPassword: 'newPassword', user: 'some user' } }, false, 'without user', templates.invalidArguments],
+		[{ body: { token: 'abc', newPassword: '123', user: 'some user' } }, false, 'with weak new password', templates.invalidArguments],
+		[{ body: { token: 'someToken', newPassword: 'Abcdef12345!!', user: 'some user' } }, true, 'with token and valid new password'],
+		[{ body: { token: 'someToken', newPassword: 'Abcdef12345!!', user: 'some user', extra: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments, templates.invalidArguments],
 		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments, templates.invalidArguments],
 	])('Check if req arguments for resseting a password are valid', (req, shouldPass, desc, expectedError) => {

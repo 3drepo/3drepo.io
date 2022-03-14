@@ -209,38 +209,35 @@ User.getAvatar = async (username) => {
 
 User.uploadAvatar = (username, avatarBuffer) => updateUser(username, { $set: { 'customData.avatar': { data: avatarBuffer } } });
 
-const sendResetPassEmail = (email, token, username, firstName) => {
-	try{		
-		sendResetPasswordEmail(email, { token, email, username, firstName });
-	} catch (err) {		
-		logger.logDebug(`Email error - ${err.message}`);
-		throw err;
-	}
-}
-
 User.resetPasswordToken = async (username) => {
-	let email, resetPasswordToken, firstName;
-	
-	try{
-		const { customData } = await User.getUserByQuery({ user: username }, { user: 1, 'customData.email': 1, 'customData.firstName': 1 });	
+	let email; let resetPasswordToken; let
+		firstName;
+
+	try {
+		const { customData } = await User.getUserByQuery({ user: username }, { user: 1, 'customData.email': 1, 'customData.firstName': 1 });
 		email = customData.email;
 		firstName = customData.firstName;
 
 		const expiryAt = new Date();
 		expiryAt.setHours(expiryAt.getHours() + config.tokenExpiry.forgotPassword);
-	
+
 		resetPasswordToken = {
 			token: generateHashString(64),
-			expiredAt: expiryAt
+			expiredAt: expiryAt,
 		};
-	
-		await updateUser(username,  {$set: { "customData.resetPasswordToken": resetPasswordToken }});
-	} catch {
-		//if username is wrong still return OK
-		return;
-	}	
 
-	sendResetPassEmail(email, resetPasswordToken.token, username, firstName);		
+		await updateUser(username, { $set: { 'customData.resetPasswordToken': resetPasswordToken } });
+	} catch {
+		// if username is wrong still return OK
+		return;
+	}
+
+	try {
+		sendResetPasswordEmail(email, { token: resetPasswordToken.token, email, username, firstName });
+	} catch (err) {
+		logger.logDebug(`Email error - ${err.message}`);
+		throw err;
+	}
 };
 
 module.exports = User;

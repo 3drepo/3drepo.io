@@ -28,6 +28,8 @@ let agent;
 
 // This is the user being used for tests
 const testUser = ServiceHelper.generateUserCredentials();
+const testUserWithToken = ServiceHelper.generateUserCredentials();
+const testUserWithExpiredToken = ServiceHelper.generateUserCredentials();
 const testUserWithNoAvatar = ServiceHelper.generateUserCredentials();
 const lockedUser = ServiceHelper.generateUserCredentials();
 const lockedUserWithExpiredLock = ServiceHelper.generateUserCredentials();
@@ -35,9 +37,13 @@ const userWithFailedAttempts = ServiceHelper.generateUserCredentials();
 const userEmail = 'example@email.com';
 const userWithNoAvatarEmail = 'example2@email.com';
 const userAvatar = { data: { buffer: 'image buffer data' } };
+const validPasswordToken = { token: 'abcdefghijklmnop', expiredAt: new Date(2030, 12, 12) };
+const expiredPasswordToken = { token: 'abcdefghijklmnop', expiredAt: new Date(2020, 12, 12) };
 const setupData = async () => {
 	await Promise.all([
 		ServiceHelper.db.createUser(testUser, [], { email: userEmail, avatar: userAvatar }),
+		ServiceHelper.db.createUser(testUserWithToken, [], { resetPasswordToken: { token: validPasswordToken.token, expiredAt: validPasswordToken.expiredAt } }),
+		ServiceHelper.db.createUser(testUserWithExpiredToken, [], { resetPasswordToken: { token: expiredPasswordToken.token, expiredAt: expiredPasswordToken.expiredAt } }),
 		ServiceHelper.db.createUser(testUserWithNoAvatar, [], { email: userWithNoAvatarEmail }),
 		ServiceHelper.db.createUser(lockedUser, [], {
 			loginInfo: {
@@ -433,6 +439,82 @@ const testDeleteApiKey = () => {
 	});
 };
 
+const testForgotPassword = () => {
+	describe('Send forgot password email', () => {
+		test('should fail if a username or email is not provided', async () => {
+			const res = await agent.post('/v5/user/password').expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should return ok even if user does not exist', async () => {
+			await agent.post('/v5/user/password').send({ user: 'non existing user' })
+				.expect(templates.ok.status);
+		});
+
+		test('should send forgot password email with valid username', async () => {
+			await agent.post('/v5/user/password').send({ user: testUser.user })
+				.expect(templates.ok.status);
+		});
+	});
+};
+
+const testResetPassword = () => {
+	describe('Reset user password', () => {
+		test('should fail if a token is not provided', async () => {
+			const res = await agent.put('/v5/user/password').send({ newPassword: 'Abcdefghijk1!', user: testUserWithToken.user })
+				.expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if a new password is not provided', async () => {
+			const res = await agent.put('/v5/user/password').send({ token: 'some random token', user: testUserWithToken.user })
+				.expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if user is not provided', async () => {
+			const res = await agent.put('/v5/user/password').send({ newPassword: 'Abcdefghijk1!', token: 'some random token' })
+				.expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if the new password is too weak', async () => {
+			const res = await agent.put('/v5/user/password').send({ newPassword: 'Abcdef1!', token: 'some random token', user: testUserWithToken.user })
+				.expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
+		test('should fail if user is not found', async () => {
+			const res = await agent.put('/v5/user/password').send({ newPassword: 'Abcdefghijk1!', token: 'some random token', user: 'invalid user' })
+				.expect(templates.userNotFound.status);
+			expect(res.body.code).toEqual(templates.userNotFound.code);
+		});
+
+		test('should fail if user has no token', async () => {
+			const res = await agent.put('/v5/user/password').send({ newPassword: 'Abcdefghijk1!', token: 'some random token', user: testUser.user })
+				.expect(templates.invalidToken.status);
+			expect(res.body.code).toEqual(templates.invalidToken.code);
+		});
+
+		test('should fail if user has expired token', async () => {
+			const res = await agent.put('/v5/user/password').send({ newPassword: 'Abcdefghijk1!', token: expiredPasswordToken.token, user: testUserWithExpiredToken.user })
+				.expect(templates.invalidToken.status);
+			expect(res.body.code).toEqual(templates.invalidToken.code);
+		});
+
+		test('should fail if user token is different than the one provided', async () => {
+			const res = await agent.put('/v5/user/password').send({ newPassword: 'Abcdefghijk1!', token: 'different token', user: testUserWithToken.user })
+				.expect(templates.invalidToken.status);
+			expect(res.body.code).toEqual(templates.invalidToken.code);
+		});
+
+		test('should reset user password', async () => {
+			await agent.put('/v5/user/password').send({ newPassword: 'Abcdefghijk1!', token: validPasswordToken.token, user: testUserWithToken.user })
+				.expect(templates.ok.status);
+		});
+	});
+};
+
 const app = ServiceHelper.app();
 
 describe('E2E routes/users', () => {
@@ -451,6 +533,8 @@ describe('E2E routes/users', () => {
 	testUpdateProfile();
 	testGetAvatar();
 	testUploadAvatar();
+	testForgotPassword();
+	testResetPassword();
 	// should be called last as they update user Api key
 	testGenerateApiKey();
 	testDeleteApiKey();

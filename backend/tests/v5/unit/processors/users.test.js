@@ -40,8 +40,8 @@ const users = [
 			},
 			resetPasswordToken: {
 				token: 'valid token',
-				expiredAt: new Date(2030, 1, 1)
-			}
+				expiredAt: new Date(2030, 1, 1),
+			},
 		},
 	},
 	{
@@ -52,8 +52,8 @@ const users = [
 			email: 'example@email.com',
 			resetPasswordToken: {
 				token: 'valid token',
-				expiredAt: new Date(2020, 1, 1)
-			}
+				expiredAt: new Date(2020, 1, 1),
+			},
 		},
 	},
 	{
@@ -61,10 +61,10 @@ const users = [
 		customData: {
 			firstName: 'John',
 			lastName: 'Wilson',
-			email: 'example@email.com'
+			email: 'example@email.com',
 		},
 	},
-]
+];
 const userWithExpiredToken = users[1];
 const userWithNoToken = users[2];
 

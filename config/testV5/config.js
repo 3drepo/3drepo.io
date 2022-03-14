@@ -154,6 +154,23 @@ module.exports = {
 		{title: "Cookies", type: "haveRead", page: "cookies", fileName: "cookies.html"}
 	],
 	userNotice: false,
-	termsUpdatedAt: 12345678
+	termsUpdatedAt: 12345678,
+
+	mail: {
+		smtpConfig: {
+			host: 'smtp.gmail.com',
+			port: 465,
+			secure: true,
+			auth: {
+				user: 'no-reply@3drepo.org',
+				pass: "jhocolcadloxspxf"
+			},
+		},
+		sender: '"3D Repo" <support@3drepo.org>',
+		urls: {
+			'forgotPassword': data => `/passwordChange?username=${data.username}&token=${data.token}`,
+			'verify': data => `/registerVerify?username=${data.username}&token=${data.token}` + (data.pay ? '&pay=true' : '')
+		}
+	},
 
 }

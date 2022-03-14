@@ -14,8 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { authenticate, canLogIn, deleteApiKey, generateApiKey, getAvatar, getUserByUsername,
-	resetPasswordToken, updatePassword, updateProfile, uploadAvatar, getUserByQuery } = require('../models/users');
+const { authenticate, canLogIn, deleteApiKey, generateApiKey, getAvatar,
+	getUserByUsername, resetPasswordToken, updatePassword, updateProfile, uploadAvatar } = require('../models/users');
 
 const Users = {};
 const { isEmpty, removeFields } = require('../utils/helper/objects');
@@ -75,7 +75,7 @@ Users.uploadAvatar = uploadAvatar;
 
 Users.resetPasswordToken = (username) => resetPasswordToken(username);
 
-Users.resetPassword = async (username, token, newPassword) => {	
+Users.resetPassword = async (username, token, newPassword) => {
 	const { customData: { resetPasswordToken } } = await getUserByUsername(username);
 
 	if (resetPasswordToken?.token !== token || resetPasswordToken.expiredAt < new Date()) {

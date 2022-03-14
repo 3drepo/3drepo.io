@@ -17,7 +17,7 @@
 
 const { createSession, destroySession } = require('../middleware/sessions');
 const { isLoggedIn, notLoggedIn, validSession } = require('../middleware/auth');
-const { validateAvatarFile, validateLoginData, validateForgotPasswordData, validateResetPasswordData,
+const { validateAvatarFile, validateForgotPasswordData, validateLoginData, validateResetPasswordData,
 	validateUpdateData } = require('../middleware/dataConverter/inputs/users');
 const { Router } = require('express');
 const Users = require('../processors/users');
@@ -98,7 +98,7 @@ const uploadAvatar = (req, res) => {
 
 const forgotPassword = async (req, res) => {
 	const { user } = req.body;
-	
+
 	try {
 		await Users.resetPasswordToken(user);
 		respond(req, res, templates.ok);
@@ -109,8 +109,7 @@ const forgotPassword = async (req, res) => {
 };
 
 const resetPassword = async (req, res) => {
-	const user  = req.params.account;
-	const { token, newPassword } = req.body;
+	const { token, newPassword, user } = req.body;
 
 	try {
 		await Users.resetPassword(user, token, newPassword);
@@ -120,7 +119,6 @@ const resetPassword = async (req, res) => {
 		respond(req, res, err);
 	}
 };
-
 
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
