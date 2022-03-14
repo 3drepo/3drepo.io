@@ -27,6 +27,7 @@ import { Containers } from './containers';
 import { UserPermissions } from './userPermissions/userPermissions.component';
 import { ProjectPermissions } from './projectPermissions/projectPermissions.component';
 import { Content } from './projects.styles';
+import { ScrollArea } from '@controls/scrollArea';
 
 export const ProjectContent = () => {
 	const { teamspace } = useParams();
@@ -38,30 +39,32 @@ export const ProjectContent = () => {
 	}, [teamspace]);
 
 	return (
-		<Content>
-			<Switch>
-				<Route exact path={path}>
-					project content
-				</Route>
-				<Route exact path={`${path}/t/federations`}>
-					<Federations />
-				</Route>
-				<Route exact path={`${path}/t/containers`}>
-					<Containers />
-				</Route>
-				<Route exact path={`${path}/t/settings`}>
-					Project settings
-				</Route>
-				<Route exact path={`${path}/t/project_permissions`}>
-					<ProjectPermissions />
-				</Route>
-				<Route exact path={`${path}/t/user_permissions`}>
-					<UserPermissions />
-				</Route>
-				<Route path="*">
-					<Redirect to={NOT_FOUND_ROUTE_PATH} />
-				</Route>
-			</Switch>
-		</Content>
+		<ScrollArea autoHide>
+			<Content>
+				<Switch>
+					<Route exact path={path}>
+						project content
+					</Route>
+					<Route exact path={`${path}/t/federations`}>
+						<Federations />
+					</Route>
+					<Route exact path={`${path}/t/containers`}>
+						<Containers />
+					</Route>
+					<Route exact path={`${path}/t/settings`}>
+						Project settings
+					</Route>
+					<Route exact path={`${path}/t/project_permissions`}>
+						<ProjectPermissions />
+					</Route>
+					<Route exact path={`${path}/t/user_permissions`}>
+						<UserPermissions />
+					</Route>
+					<Route path="*">
+						<Redirect to={NOT_FOUND_ROUTE_PATH} />
+					</Route>
+				</Switch>
+			</Content>
+		</ScrollArea>
 	);
 };
