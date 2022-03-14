@@ -38,7 +38,7 @@ jest.mock('../../../../../src/v5/handler/queue');
 const QueueService = require(`${src}/handler/queue`);
 
 const ChatService = require(`${src}/services/chat`);
-const { EVENTS: chatEvents, SESSION_CHANNEL_PREFIX } = require(`${src}/services/chat/chat.constants`);
+const { SESSION_CHANNEL_PREFIX } = require(`${src}/services/chat/chat.constants`);
 const { cn_queue: { event_exchange: eventExchange } } = require(`${src}/utils/config`);
 
 const socketCloseFn = jest.fn();
@@ -60,10 +60,8 @@ const testInit = () => {
 				server, middleware, SessionService.SESSION_HEADER, SocketsManager.addSocket,
 			);
 
-			expect(EventsManager.subscribe).toHaveBeenCalledTimes(3);
+			expect(EventsManager.subscribe).toHaveBeenCalledTimes(1);
 			expect(EventsManager.subscribe.mock.calls[0][0]).toEqual(events.SESSION_CREATED);
-			expect(EventsManager.subscribe.mock.calls[1][0]).toEqual(events.SESSIONS_REMOVED);
-			expect(EventsManager.subscribe.mock.calls[2][0]).toEqual(events.MODEL_SETTINGS_UPDATE);
 
 			expect(QueueService.listenToExchange).toHaveBeenCalledTimes(1);
 			expect(QueueService.listenToExchange.mock.calls[0][0]).toEqual(eventExchange);
@@ -110,29 +108,6 @@ const testOnNewSessions = () => {
 			expect(SocketsManager.getSocketById).toHaveBeenCalledWith(socketId);
 
 			expect(SocketsManager.addSocketToSession).not.toHaveBeenCalled();
-		});
-	});
-};
-
-const testOnSessionsRemoved = () => {
-	describe('On sessions removed event', () => {
-		let subscribeCallBack;
-		beforeAll(async () => {
-			EventsManager.subscribe.mockClear();
-			await ChatService.createApp({});
-			[, [, subscribeCallBack]] = EventsManager.subscribe.mock.calls;
-		});
-
-		test('Should send a message to the sesions channel', () => {
-			const ids = [generateRandomString(), generateRandomString()];
-			subscribeCallBack({ ids });
-			expect(QueueService.broadcastMessage).toHaveBeenCalledTimes(1);
-			const message = {
-				event: chatEvents.LOGGED_OUT,
-				data: { reason: 'You have logged in else where' },
-				recipients: ids.map((id) => `${SESSION_CHANNEL_PREFIX}${id}`),
-			};
-			expect(QueueService.broadcastMessage).toHaveBeenCalledWith(eventExchange, JSON.stringify(message));
 		});
 	});
 };
@@ -209,9 +184,44 @@ const testOnNewMsg = () => {
 		});
 	});
 };
+
+const testCreateDirectMessage = () => {
+	describe('CreateDirectMessage', () => {
+		test('Should broadcast to event exchange', () => {
+			const event = generateRandomString();
+			const data = generateRandomString();
+			const recipients = [generateRandomString(), generateRandomString(), generateRandomString()];
+
+			ChatService.createDirectMessage(event, data, recipients);
+			expect(QueueService.broadcastMessage).toHaveBeenCalledTimes(1);
+
+			const expectedMsg = JSON.stringify({ event, data, recipients: recipients.map((id) => `${SESSION_CHANNEL_PREFIX}${id}`) });
+			expect(QueueService.broadcastMessage).toHaveBeenCalledWith(eventExchange, expectedMsg);
+		});
+	});
+};
+
+const testCreateModelMessage = () => {
+	describe('CreateModelMessage', () => {
+		test('Should broadcast to event exchange', () => {
+			const event = generateRandomString();
+			const data = generateRandomString();
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+
+			ChatService.createModelMessage(event, data, teamspace, project, model);
+			expect(QueueService.broadcastMessage).toHaveBeenCalledTimes(1);
+
+			const expectedMsg = JSON.stringify({ event, data: { ...data, teamspace, project, model }, recipients: [`${teamspace}::${project}::${model}`] });
+			expect(QueueService.broadcastMessage).toHaveBeenCalledWith(eventExchange, expectedMsg);
+		});
+	});
+};
 describe('services/chat/index', () => {
 	testInit();
 	testOnNewSessions();
-	testOnSessionsRemoved();
 	testOnNewMsg();
+	testCreateDirectMessage();
+	testCreateModelMessage();
 });

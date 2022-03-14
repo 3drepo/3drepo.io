@@ -17,8 +17,11 @@
 
 const { newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
 const { UUIDToString } = require('../../../utils/helper/uuids');
+const { EVENTS: chatEvents } = require('../../chat/chat.constants');
+const { createModelMessage } = require('../../chat');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { findProjectByModelId } = require('../../../models/projectSettings');
+const { logger } = require('../../../utils/logger');
 const { subscribe } = require('../../eventsManager/eventsManager');
 
 const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
@@ -40,11 +43,22 @@ const queueTasksCompleted = async ({
 	}
 };
 
+const modelSettingsUpdated = async ({ teamspace, project, model, data, isFederation }) => {
+	try {
+		const event = isFederation ? chatEvents.FEDERATION_SETTINGS_UPDATE : chatEvents.CONTAINER_SETTINGS_UPDATE;
+		await createModelMessage(event, data, teamspace, project, model);
+	} catch (err) {
+		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
+	}
+};
+
 const ModelEventsListener = {};
 
 ModelEventsListener.init = () => {
 	subscribe(events.QUEUED_TASK_UPDATE, queueStatusUpdate);
 	subscribe(events.QUEUED_TASK_COMPLETED, queueTasksCompleted);
+
+	subscribe(events.MODEL_SETTINGS_UPDATE, modelSettingsUpdated);
 };
 
 module.exports = ModelEventsListener;

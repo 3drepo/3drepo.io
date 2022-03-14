@@ -27,6 +27,10 @@ const ProjectSettings = require(`${src}/models/projectSettings`);
 jest.mock('../../../../../src/v5/models/loginRecord');
 const LoginRecord = require(`${src}/models/loginRecord`);
 
+jest.mock('../../../../../src/v5/services/chat');
+const ChatService = require(`${src}/services/chat`);
+const { EVENTS: chatEvents } = require(`${src}/services/chat/chat.constants`);
+
 // Need to mock these 2 to ensure we are not trying to create a real session configuration
 jest.mock('express-session', () => () => {});
 jest.mock('../../../../../src/v5/handler/db', () => ({
@@ -70,6 +74,73 @@ const testModelEventsListener = () => {
 				data.teamspace, project, data.model, data.corId, data.value, data.user, undefined,
 			);
 		});
+
+		test(`Should trigger modelSettingsUpdated if there is a ${events.MODEL_SETTINGS_UPDATE} (federation)`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_SETTINGS_UPDATE);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				project: generateRandomString(),
+				data: { [generateRandomString()]: generateRandomString() },
+				isFederation: true,
+			};
+			EventsManager.publish(events.MODEL_SETTINGS_UPDATE, data);
+
+			await waitOnEvent;
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				chatEvents.FEDERATION_SETTINGS_UPDATE,
+				data.data,
+				data.teamspace,
+				data.project,
+				data.model,
+			);
+		});
+
+		test(`Should trigger modelSettingsUpdated if there is a ${events.MODEL_SETTINGS_UPDATE} (container)`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_SETTINGS_UPDATE);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				project: generateRandomString(),
+				data: { [generateRandomString()]: generateRandomString() },
+				isFederation: false,
+			};
+			EventsManager.publish(events.MODEL_SETTINGS_UPDATE, data);
+
+			await waitOnEvent;
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				chatEvents.CONTAINER_SETTINGS_UPDATE,
+				data.data,
+				data.teamspace,
+				data.project,
+				data.model,
+			);
+		});
+
+		test(`Should fail gracefully on error if there is a ${events.MODEL_SETTINGS_UPDATE} (container)`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_SETTINGS_UPDATE);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				project: generateRandomString(),
+				data: { [generateRandomString()]: generateRandomString() },
+				isFederation: false,
+			};
+			ChatService.createModelMessage.mockRejectedValueOnce(new Error());
+			EventsManager.publish(events.MODEL_SETTINGS_UPDATE, data);
+
+			await waitOnEvent;
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				chatEvents.CONTAINER_SETTINGS_UPDATE,
+				data.data,
+				data.teamspace,
+				data.project,
+				data.model,
+			);
+		});
 	});
 };
 
@@ -91,6 +162,39 @@ const testAuthEventsListener = () => {
 			expect(LoginRecord.saveLoginRecord.mock.calls[0]).toEqual(['username1', '123', '1.2.3.4', 'user agent', 'www.google.com']);
 			expect(Sessions.removeOldSessions.mock.calls.length).toBe(1);
 			expect(Sessions.removeOldSessions.mock.calls[0]).toEqual(['username1', '123', 'www.google.com']);
+		});
+
+		test(`Should trigger sessionsRemoved if there is a ${events.SESSIONS_REMOVED}`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.SESSIONS_REMOVED);
+			const data = {
+				ids: [generateRandomString(), generateRandomString(), generateRandomString()],
+			};
+			EventsManager.publish(events.SESSIONS_REMOVED, data);
+
+			await waitOnEvent;
+			expect(ChatService.createDirectMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createDirectMessage).toHaveBeenCalledWith(
+				chatEvents.LOGGED_OUT,
+				{ reason: 'You have logged in else where' },
+				data.ids,
+			);
+		});
+
+		test(`Should fail gracefully on error if there is a ${events.SESSIONS_REMOVED}`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.SESSIONS_REMOVED);
+			const data = {
+				ids: [generateRandomString(), generateRandomString(), generateRandomString()],
+			};
+			ChatService.createDirectMessage.mockRejectedValueOnce(new Error());
+			EventsManager.publish(events.SESSIONS_REMOVED, data);
+
+			await waitOnEvent;
+			expect(ChatService.createDirectMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createDirectMessage).toHaveBeenCalledWith(
+				chatEvents.LOGGED_OUT,
+				{ reason: 'You have logged in else where' },
+				data.ids,
+			);
 		});
 	});
 };

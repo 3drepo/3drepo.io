@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { SESSION_CHANNEL_PREFIX, EVENTS: chatEvents } = require('./chat.constants');
 const { SESSION_HEADER, session } = require('../sessions');
 const { broadcastMessage, listenToExchange } = require('../../handler/queue');
 const RTMsg = require('../../handler/realTimeMsging');
+const { SESSION_CHANNEL_PREFIX } = require('./chat.constants');
 const SocketsManager = require('./socketsManager');
 const chatLabel = require('../../utils/logger').labels.chat;
 const { cn_queue: { event_exchange: eventExchange } } = require('../../utils/config');
@@ -63,18 +63,6 @@ const onMessage = (service) => (msg) => {
 	}
 };
 
-const createDirectMessage = (event, data, sessionIds) => {
-	const recipients = sessionIds.map((sessionId) => `${SESSION_CHANNEL_PREFIX}${sessionId}`);
-	const message = JSON.stringify({ event, data, recipients });
-	broadcastMessage(eventExchange, message);
-};
-
-const createModelMessage = (event, data, teamspace, project, model) => {
-	const recipients = [`${teamspace}::${project}::${model}`];
-	const message = JSON.stringify({ event, data: { ...data, teamspace, project, model }, recipients });
-	broadcastMessage(eventExchange, message);
-};
-
 const subscribeToEvents = (service) => {
 	subscribe(events.SESSION_CREATED, ({ sessionID, socketId }) => {
 		const socket = SocketsManager.getSocketById(socketId);
@@ -83,16 +71,19 @@ const subscribeToEvents = (service) => {
 		}
 	});
 
-	subscribe(events.SESSIONS_REMOVED, ({ ids }) => {
-		createDirectMessage(chatEvents.LOGGED_OUT, { reason: 'You have logged in else where' }, ids);
-	});
-
-	subscribe(events.MODEL_SETTINGS_UPDATE, ({ teamspace, project, model, data, isFederation }) => {
-		const event = isFederation ? chatEvents.FEDERATION_SETTINGS_UPDATE : chatEvents.CONTAINER_SETTINGS_UPDATE;
-		createModelMessage(event, data, teamspace, project, model);
-	});
-
 	listenToExchange(eventExchange, onMessage(service));
+};
+
+ChatService.createDirectMessage = (event, data, sessionIds) => {
+	const recipients = sessionIds.map((sessionId) => `${SESSION_CHANNEL_PREFIX}${sessionId}`);
+	const message = JSON.stringify({ event, data, recipients });
+	broadcastMessage(eventExchange, message);
+};
+
+ChatService.createModelMessage = (event, data, teamspace, project, model) => {
+	const recipients = [`${teamspace}::${project}::${model}`];
+	const message = JSON.stringify({ event, data: { ...data, teamspace, project, model }, recipients });
+	broadcastMessage(eventExchange, message);
 };
 
 ChatService.createApp = async (server) => {
