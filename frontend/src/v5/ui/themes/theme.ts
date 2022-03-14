@@ -50,6 +50,7 @@ export const COLOR = {
 	BASE_LIGHTEST: '#D0D9EB',
 	ERROR_MAIN: '#BE4343',
 	ERROR_DARK: '#A33232',
+	ERROR_DARKEST: '#8E2A2A',
 	ERROR_MID: '#C55656',
 	ERROR_LIGHT: '#CE7272',
 	ERROR_LIGHTEST: '#F9ECEC',
@@ -191,6 +192,7 @@ export const theme = createMuiTheme({
 		error: {
 			main: COLOR.ERROR_MAIN,
 			dark: COLOR.ERROR_DARK,
+			darkest: COLOR.ERROR_DARKEST,
 			mid: COLOR.ERROR_MID,
 			light: COLOR.ERROR_LIGHT,
 			lightest: COLOR.ERROR_LIGHTEST,

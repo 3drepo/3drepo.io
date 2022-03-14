@@ -16,23 +16,32 @@
  */
 
 import { ElementType, forwardRef, Ref } from 'react';
-import MuiButton, { ButtonProps } from '@material-ui/core/Button';
+import { ButtonProps } from '@material-ui/core/Button';
 import { Typography } from '@/v5/ui/controls/typography';
 import { ButtonTypeMap } from '@material-ui/core/Button/Button';
-import { LabelButton } from './button.styles';
+import { MuiButton, ErrorButton, LabelButton } from './button.styles';
 
 type ButtonVariants = ButtonProps['variant'] | 'label' | 'label-outlined';
 
 type IButton<T extends ElementType = ButtonTypeMap['defaultComponent']> = Omit<ButtonProps<T>, 'variant'> & {
 	variant?: ButtonVariants;
 	className?: string;
+	errorButton?: boolean;
 };
 
 export const ButtonBase = <T extends ElementType>({
 	children,
 	variant,
+	errorButton,
 	...props
 }: IButton<T>, ref: Ref<HTMLButtonElement>): JSX.Element => {
+	if (errorButton) {
+		return (
+			<ErrorButton {...props} ref={ref}>
+				{children}
+			</ErrorButton>
+		);
+	}
 	if (variant === 'label') {
 		return (
 			<LabelButton {...props} ref={ref}>

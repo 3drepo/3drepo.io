@@ -19,8 +19,8 @@ const { src } = require('../../../../../helper/path');
 
 const db = require(`${src}/handler/db`);
 
-jest.mock('../../../../../../../src/v5/models/projects');
-const ProjectsModel = require(`${src}/models/projects`);
+jest.mock('../../../../../../../src/v5/models/projectSettings');
+const ProjectsModel = require(`${src}/models/projectSettings`);
 jest.mock('../../../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
 jest.mock('../../../../../../../src/v5/models/issues');
@@ -88,7 +88,7 @@ const federationSettings = {
 			code: 'FED2',
 		},
 		status: 'processing',
-		subModels: [{ model: 'container3' }],
+		subModels: ['container3'],
 	},
 	federation3: {
 		_id: 3,
@@ -246,9 +246,9 @@ const testDeleteFavourites = () => {
 
 const formatToStats = (settings, issueCount, riskCount, lastUpdated) => ({
 	...(settings.desc ? { desc: settings.desc } : {}),
+	...(settings.subModels ? { containers: settings.subModels.map((m) => m.model || m) } : {}),
 	code: settings.properties.code,
 	status: settings.status,
-	subModels: settings.subModels,
 	lastUpdated,
 	tickets: {
 		issues: issueCount ?? 0,
