@@ -174,7 +174,6 @@ Queue.close = async (reset = true) => {
 	if (reset) listeners = {};
 };
 
-// you shouldn't need to use this outside of testing
 Queue.init = async () => {
 	connClosed = false;
 	await connect();
