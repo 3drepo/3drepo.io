@@ -18,7 +18,7 @@ import { DetailedHTMLProps, FormHTMLAttributes } from 'react';
 import { Button, Dialog } from '@material-ui/core';
 import CloseIcon from '@assets/icons/close.svg';
 import { DialogProps } from '@material-ui/core/Dialog';
-import { ScrollArea } from '@controls/scrollbar';
+import { ScrollArea } from '@controls/scrollArea';
 import {
 	Form,
 	Title,
@@ -72,7 +72,7 @@ export const FormModal = (props: IFormModal) => {
 						<CloseIcon />
 					</CloseButton>
 				</Header>
-				<ScrollArea maxHeight="70vh">
+				<ScrollArea autoHeightMax="70vh" autoHeight>
 					<FormDialogContent zeroMargin={zeroMargin}>
 						{children}
 					</FormDialogContent>

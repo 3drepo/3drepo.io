@@ -15,19 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ScrollbarWrapper } from './scrollbar.styles';
+import { ScrollbarProps } from 'react-custom-scrollbars';
+import { ScrollbarWrapper } from './scrollArea.styles';
 
-interface IScrollArea {
-	minHeight?: string,
-	maxHeight?: string;
+type IScrollArea = ScrollbarProps & {
 	children: any;
-	props?: any;
 }
 
-export const ScrollArea = ({ minHeight, maxHeight, children, ...props }: IScrollArea): JSX.Element => (
+export const ScrollArea = ({ children, ...props }: IScrollArea): JSX.Element => (
 	<ScrollbarWrapper
-		autoHeightMin={minHeight}
-		autoHeightMax={maxHeight}
 		{...props}
 	>
 		{children}

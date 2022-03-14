@@ -15,4 +15,37 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { ScrollArea } from './scrollbar.component';
+import Scrollbars from 'react-custom-scrollbars';
+import styled from 'styled-components';
+
+export const ScrollbarWrapper = styled(Scrollbars).attrs(({ theme }) => ({
+	autoHideTimeout: 3000,
+	autoHideDuration: 300,
+	renderThumbVertical: ({ style }) => (
+		<div
+			style={{
+				...style,
+				backgroundColor: theme.palette.base.lightest,
+				right: '6px',
+				bottom: '6px',
+				top: '0px',
+				borderRadius: '3px',
+				width: '6px',
+			}}
+		/>
+	),
+	renderThumbHorizontal: ({ style }) => (
+		<div
+			style={{
+				...style,
+				backgroundColor: theme.palette.base.lightest,
+				left: '6px',
+				right: '6px',
+				bottom: '6px',
+				borderRadius: '3px',
+				height: '6px',
+			}}
+		/>
+	),
+}))`
+`;
