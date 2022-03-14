@@ -68,10 +68,12 @@ const users = [
 const userWithExpiredToken = users[1];
 const userWithNoToken = users[2];
 
-const getUserByUsernameMock = UsersModel.getUserByUsername.mockImplementation((username) => users.find((u) => u.user === username));
+const getUserByUsernameMock = UsersModel.getUserByUsername.mockImplementation(
+	(username) => users.find((u) => u.user === username),
+);
 const updateUserByUsernameMock = UsersModel.updateProfile.mockImplementation(() => {});
 const updatePasswordMock = UsersModel.updatePassword.mockImplementation(() => {});
-const resetPasswordTokenMock = UsersModel.resetPasswordToken.mockImplementation((username) => {});
+const resetPasswordTokenMock = UsersModel.resetPasswordToken.mockImplementation(() => {});
 UsersModel.canLogIn.mockImplementation((user) => user);
 UsersModel.canLogIn.mockImplementation((user) => user);
 UsersModel.authenticate.mockResolvedValue('user1');

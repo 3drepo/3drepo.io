@@ -76,9 +76,9 @@ Users.uploadAvatar = uploadAvatar;
 Users.resetPasswordToken = (username) => resetPasswordToken(username);
 
 Users.resetPassword = async (username, token, newPassword) => {
-	const { customData: { resetPasswordToken } } = await getUserByUsername(username);
+	const customData = await getUserByUsername(username);
 
-	if (resetPasswordToken?.token !== token || resetPasswordToken.expiredAt < new Date()) {
+	if (customData?.resetPasswordToken?.token !== token || customData.resetPasswordToken.expiredAt < new Date()) {
 		throw templates.invalidToken;
 	}
 

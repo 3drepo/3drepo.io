@@ -385,8 +385,62 @@ const establishRoutes = () => {
 	*/
 	router.put('/user/avatar', isLoggedIn, validateAvatarFile, uploadAvatar);
 
+	/**
+	* @openapi
+	* /user/password:
+	*   post:
+	*     description: Sends an email to the user with a reset password link
+	*     tags: [User]
+	*     operationId: forgotPassword
+	*     requestBody:
+	*       content:
+	*         application/json:
+	*           schema:
+	*             type: object
+	*             properties:
+	*               user:
+	*                 type: string
+	*                 description: The username or email of the user
+	*                 example: nick.wilson@email.com
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: Sends an email to the user with a reset password link
+	*/
 	router.post('/user/password', validateForgotPasswordData, forgotPassword);
 
+	/**
+	* @openapi
+	* /user/password:
+	*   put:
+	*     description: Resets the user password
+	*     tags: [User]
+	*     operationId: resetPassword
+	*     requestBody:
+	*       content:
+	*         application/json:
+	*           schema:
+	*             type: object
+	*             properties:
+	*               user:
+	*                 type: string
+	*                 description: The username of the user
+	*                 example: username123
+	*               newPassword:
+	*                 type: string
+	*                 description: The new password of the user
+	*                 example: newPassword123!
+	*               token:
+	*                 type: string
+	*                 description: The reset passsword token
+	*                 example: c0f6b97ae5a9c210ee050a9ada3faabc
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: Resets the user password
+	*/
 	router.put('/user/password', validateResetPasswordData, resetPassword);
 
 	return router;

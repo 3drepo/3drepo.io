@@ -42,8 +42,10 @@ const expiredPasswordToken = { token: 'abcdefghijklmnop', expiredAt: new Date(20
 const setupData = async () => {
 	await Promise.all([
 		ServiceHelper.db.createUser(testUser, [], { email: userEmail, avatar: userAvatar }),
-		ServiceHelper.db.createUser(testUserWithToken, [], { resetPasswordToken: { token: validPasswordToken.token, expiredAt: validPasswordToken.expiredAt } }),
-		ServiceHelper.db.createUser(testUserWithExpiredToken, [], { resetPasswordToken: { token: expiredPasswordToken.token, expiredAt: expiredPasswordToken.expiredAt } }),
+		ServiceHelper.db.createUser(testUserWithToken, [], { resetPasswordToken: { token: validPasswordToken.token,
+			expiredAt: validPasswordToken.expiredAt } }),
+		ServiceHelper.db.createUser(testUserWithExpiredToken, [], { resetPasswordToken: {
+			token: expiredPasswordToken.token, expiredAt: expiredPasswordToken.expiredAt } }),
 		ServiceHelper.db.createUser(testUserWithNoAvatar, [], { email: userWithNoAvatarEmail }),
 		ServiceHelper.db.createUser(lockedUser, [], {
 			loginInfo: {

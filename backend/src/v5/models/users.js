@@ -20,9 +20,9 @@ const config = require('../utils/config');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
+const { logger } = require('../utils/logger');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { sendResetPasswordEmail } = require('../../v4/mailer/mailer');
-const { logger } = require('../utils/logger');
 
 const User = {};
 const COLL_NAME = 'system.users';
