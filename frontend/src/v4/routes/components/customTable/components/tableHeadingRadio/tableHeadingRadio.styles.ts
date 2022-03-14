@@ -33,8 +33,6 @@ export const TableHeadingRadioButton = styled(Radio)`
 		box-sizing: border-box;
 	}
 `;
-TableHeadingRadioButton.displayName = 'TableHeadingRadioButton';
-// TODO rename this
 
 export const TableHeadingRadioTooltip = styled(({className, ...rest}: TooltipProps) =>
 	createElement(Tooltip, {classes: { popper: className }, ...rest })

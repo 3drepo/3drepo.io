@@ -436,8 +436,8 @@ export const theme = createTheme({
 					padding: '8px 14px',
 					width: '100%',
 
-					'&.Mui-selected': {
-						backgroundColor: COLOR.SECONDARY_DARK,
+					'&.Mui-selected, &.Mui-selected:hover': {
+						backgroundColor: COLOR.TERTIARY_LIGHTEST,
 					},
 				},
 			},
@@ -486,7 +486,7 @@ export const theme = createTheme({
 					boxShadow: 'none',
 					border: `1px solid ${COLOR.PRIMARY_MAIN_CONTRAST}`,
 					transition: 'none',
-					'& > *:first-child': { //TODO check this
+					'& > *:first-child': {
 						height: 17,
 						width: 'auto',
 					},
@@ -588,13 +588,6 @@ export const theme = createTheme({
 				variant: 'outlined',
 			},
 			styleOverrides: {
-				// root: {
-				// 	background: COLOR.PRIMARY_MAIN_CONTRAST,
-				// 	margin: '38px 0 0',
-				// 	width: '100%',
-				// 	height: 35,
-				// 	boxSizing: 'border-box',
-				// },
 				select: {
 					border: `1px solid ${COLOR.BASE_LIGHTEST}`,
 					borderRadius: 5,

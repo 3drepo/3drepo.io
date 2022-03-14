@@ -60,12 +60,10 @@ export const StyledButtonContainer = styled.div`
 `;
 
 export const DeleteButton = styled(Button)`
-	&& {
-		color: ${COLOR.WHITE_87};
-		background-color:  rgba(234, 57, 57, 0.87);
-	}
+	color: ${COLOR.WHITE_87};
+	background-color:  rgba(234, 57, 57, 0.87);
 
-	&&:hover {
+	&:hover {
 		background-color:  rgba(234, 57, 57, 1);
 	}
 `;

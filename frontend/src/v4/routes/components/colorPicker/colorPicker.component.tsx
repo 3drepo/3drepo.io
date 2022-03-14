@@ -323,7 +323,7 @@ const OpacityControl = ({ opacity, onOpacityChanged, sliderVisible, onSliderVisi
 						max={255}
 						min={1}
 						value={opacity}
-						onChange={(e, val) => onOpacityChanged(val)} 
+						onChange={(e, val) => onOpacityChanged(val)}
 					/>
 				</Grid>
 				<Grid item>

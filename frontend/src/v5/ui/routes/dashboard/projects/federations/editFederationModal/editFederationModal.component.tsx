@@ -61,9 +61,13 @@ export const EditFederationModal = ({
 		setAvailableContainers(availableContainers.filter(({ _id }) => _id !== container._id));
 	};
 
-	const includeAllContainers = () => {
-		setIncludedContainers(containers);
-		setAvailableContainers([]);
+	const includeAllContainers = (filterQuery: string = '') => {
+		const containersToInclude = availableContainers.filter(
+			({ name }) => name.toLocaleLowerCase().includes(filterQuery.toLocaleLowerCase()),
+		);
+		setIncludedContainers([...includedContainers, ...containersToInclude]);
+		const idsToRemove = containersToInclude.map(({ _id }) => _id);
+		setAvailableContainers(availableContainers.filter(({ _id }) => !idsToRemove.includes(_id)));
 	};
 
 	const removeContainer = (container: IContainer) => {
@@ -71,9 +75,13 @@ export const EditFederationModal = ({
 		setIncludedContainers(includedContainers.filter(({ _id }) => _id !== container._id));
 	};
 
-	const removeAllContainers = () => {
-		setIncludedContainers([]);
-		setAvailableContainers(containers);
+	const removeAllContainers = (filterQuery: string = '') => {
+		const containersToRemove = includedContainers.filter(
+			({ name }) => name.toLocaleLowerCase().includes(filterQuery.toLocaleLowerCase()),
+		);
+		setAvailableContainers([...availableContainers, ...containersToRemove]);
+		const idsToInclude = containersToRemove.map(({ _id }) => _id);
+		setIncludedContainers(includedContainers.filter(({ _id }) => !idsToInclude.includes(_id)));
 	};
 
 	const saveChanges = (event: SyntheticEvent) => {
@@ -124,10 +132,10 @@ export const EditFederationModal = ({
 						/>
 					</DashboardListEmptyText>
 				)}
-				actionButton={({ children, disabled }: ActionButtonProps) => (
+				actionButton={({ children, disabled, filterQuery }: ActionButtonProps) => (
 					<Button
 						errorButton
-						onClick={removeAllContainers}
+						onClick={() => removeAllContainers(filterQuery)}
 						disabled={disabled}
 					>
 						{children}
@@ -176,11 +184,11 @@ export const EditFederationModal = ({
 						/>
 					</DashboardListEmptyText>
 				)}
-				actionButton={({ children, disabled }) => (
+				actionButton={({ children, disabled, filterQuery }) => (
 					<Button
 						variant="outlined"
 						color="primary"
-						onClick={includeAllContainers}
+						onClick={() => includeAllContainers(filterQuery)}
 						disabled={disabled}
 					>
 						{children}
