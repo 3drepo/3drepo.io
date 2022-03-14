@@ -22,7 +22,7 @@ const Groups = require('./commons/groups');
 const Views = require('./commons/views');
 const { getIssuesCount } = require('../../../../models/issues');
 const { getLatestRevision } = require('../../../../models/revisions');
-const { getProjectById } = require('../../../../models/projects');
+const { getProjectById } = require('../../../../models/projectSettings');
 const { getRisksCount } = require('../../../../models/risks');
 const { queueFederationUpdate } = require('../../../../services/queue');
 
@@ -57,7 +57,7 @@ const getLastUpdatesFromModels = async (teamspace, models) => {
 	if (models) {
 		await Promise.all(models.map(async (m) => {
 			try {
-				lastUpdates.push(await getLatestRevision(teamspace, m.model, { timestamp: 1 }));
+				lastUpdates.push(await getLatestRevision(teamspace, m, { timestamp: 1 }));
 			} catch {
 				// do nothing. A container can have 0 revision.
 			}
@@ -76,16 +76,19 @@ Federations.getFederationStats = async (teamspace, federation) => {
 		desc: 1,
 	});
 
+	// Legacy schema compatibility
+	const containers = subModels ? subModels.map((m) => m.model || m) : undefined;
+
 	const [issueCount, riskCount, lastUpdates] = await Promise.all([
 		getIssuesCount(teamspace, federation),
 		getRisksCount(teamspace, federation),
-		getLastUpdatesFromModels(teamspace, subModels),
+		getLastUpdatesFromModels(teamspace, containers),
 	]);
 
 	return {
 		code: properties.code,
 		status,
-		subModels,
+		containers,
 		desc,
 		lastUpdated: lastUpdates,
 		tickets: { issues: issueCount, risks: riskCount },

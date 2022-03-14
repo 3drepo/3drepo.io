@@ -15,12 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { createProject, deleteProject, getProjectById, getProjectList, updateProject } = require('../../../models/projectSettings');
 const {
 	hasProjectAdminPermissions,
 	hasReadAccessToModel,
 	isTeamspaceAdmin,
 } = require('../../../utils/permissions/permissions');
-const { getProjectList } = require('../../../models/projects');
+const { removeModelData } = require('../../../utils/helper/models');
 
 const Projects = {};
 
@@ -38,5 +39,22 @@ Projects.getProjectList = async (teamspace, user) => {
 		return hasAccess ? { _id, name, isAdmin } : [];
 	}))).flat();
 };
+
+Projects.createProject = (teamspace, name) => createProject(teamspace, name);
+
+Projects.deleteProject = async (teamspace, projectId) => {
+	const project = await getProjectById(teamspace, projectId, { models: 1 });
+
+	const promises = [];
+
+	project.models.map((model) => promises.push(removeModelData(teamspace, model)));
+
+	await Promise.all(promises);
+	await deleteProject(teamspace, projectId);
+};
+
+Projects.getProjectSettings = (teamspace, projectId) => getProjectById(teamspace, projectId, { name: 1, _id: 0 });
+
+Projects.updateProject = updateProject;
 
 module.exports = Projects;
