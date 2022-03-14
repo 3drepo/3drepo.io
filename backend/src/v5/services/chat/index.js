@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { SESSION_CHANNEL_PREFIX, EVENTS: chatEvents, EVENTS_V5_TO_V4: chatEventsV5ToV4 } = require('./chat.constants');
+const { SESSION_CHANNEL_PREFIX, EVENTS: chatEvents } = require('./chat.constants');
 const { SESSION_HEADER, session } = require('../sessions');
 const { broadcastMessage, listenToExchange } = require('../../handler/queue');
 const RTMsg = require('../../handler/realTimeMsging');
@@ -67,23 +67,12 @@ const createDirectMessage = (event, data, sessionIds) => {
 	const recipients = sessionIds.map((sessionId) => `${SESSION_CHANNEL_PREFIX}${sessionId}`);
 	const message = JSON.stringify({ event, data, recipients });
 	broadcastMessage(eventExchange, message);
-
-	// v4 client compatibility
-	const messageV4 = JSON.stringify({ event: chatEvents.MESSAGE,
-		data: { event: chatEventsV5ToV4[event], data },
-		recipients });
-	broadcastMessage(eventExchange, messageV4);
 };
 
 const createModelMessage = (event, data, teamspace, project, model) => {
 	const recipients = [`${teamspace}::${project}::${model}`];
 	const message = JSON.stringify({ event, data: { ...data, teamspace, project, model }, recipients });
 	broadcastMessage(eventExchange, message);
-
-	// v4 client compatibility
-	const v4Event = `${teamspace}::${model}::${chatEventsV5ToV4[event]}`;
-	const messageV4 = JSON.stringify({ event: v4Event, data, recipients });
-	broadcastMessage(eventExchange, messageV4);
 };
 
 const subscribeToEvents = (service) => {
@@ -98,8 +87,9 @@ const subscribeToEvents = (service) => {
 		createDirectMessage(chatEvents.LOGGED_OUT, { reason: 'You have logged in else where' }, ids);
 	});
 
-	subscribe(events.MODEL_IMPORT_UPDATE, ({ teamspace, project, model, status }) => {
-		createModelMessage(chatEvents.MODEL_STATUS_UPDATE, { status }, teamspace, project, model);
+	subscribe(events.MODEL_SETTINGS_UPDATE, ({ teamspace, project, model, data, isFederation }) => {
+		const event = isFederation ? chatEvents.FEDERATION_SETTINGS_UPDATE : chatEvents.CONTAINER_SETTINGS_UPDATE;
+		createModelMessage(event, data, teamspace, project, model);
 	});
 
 	listenToExchange(eventExchange, onMessage(service));

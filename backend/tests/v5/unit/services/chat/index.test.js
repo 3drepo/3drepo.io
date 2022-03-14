@@ -60,9 +60,10 @@ const testInit = () => {
 				server, middleware, SessionService.SESSION_HEADER, SocketsManager.addSocket,
 			);
 
-			expect(EventsManager.subscribe).toHaveBeenCalledTimes(2);
+			expect(EventsManager.subscribe).toHaveBeenCalledTimes(3);
 			expect(EventsManager.subscribe.mock.calls[0][0]).toEqual(events.SESSION_CREATED);
 			expect(EventsManager.subscribe.mock.calls[1][0]).toEqual(events.SESSIONS_REMOVED);
+			expect(EventsManager.subscribe.mock.calls[2][0]).toEqual(events.MODEL_SETTINGS_UPDATE);
 
 			expect(QueueService.listenToExchange).toHaveBeenCalledTimes(1);
 			expect(QueueService.listenToExchange.mock.calls[0][0]).toEqual(eventExchange);
@@ -126,7 +127,11 @@ const testOnSessionsRemoved = () => {
 			const ids = [generateRandomString(), generateRandomString()];
 			subscribeCallBack({ ids });
 			expect(QueueService.broadcastMessage).toHaveBeenCalledTimes(1);
-			const message = { event: chatEvents.LOGGED_OUT, data: { reason: 'You have logged in else where' }, recipients: ids };
+			const message = {
+				event: chatEvents.LOGGED_OUT,
+				data: { reason: 'You have logged in else where' },
+				recipients: ids.map((id) => `${SESSION_CHANNEL_PREFIX}${id}`),
+			};
 			expect(QueueService.broadcastMessage).toHaveBeenCalledWith(eventExchange, JSON.stringify(message));
 		});
 	});
@@ -161,13 +166,9 @@ const testOnNewMsg = () => {
 
 				expect(subscribeCallBack({ content: Buffer.from(JSON.stringify(message)) })).toBeUndefined();
 
-				expect(broadcastFn).toHaveBeenCalledTimes(recipients.length * 2);
+				expect(broadcastFn).toHaveBeenCalledTimes(recipients.length);
 				for (let i = 0; i < recipients.length; ++i) {
-					const sessionChannel = `${SESSION_CHANNEL_PREFIX}${recipients[i]}`;
-					expect(broadcastFn).toHaveBeenNthCalledWith(i * 2 + 1, sessionChannel, event, data);
-					expect(broadcastFn).toHaveBeenNthCalledWith(
-						i * 2 + 2, sessionChannel, chatEvents.MESSAGE, { event, data },
-					);
+					expect(broadcastFn).toHaveBeenNthCalledWith(i + 1, recipients[i], event, data);
 				}
 			});
 		});

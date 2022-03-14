@@ -19,8 +19,8 @@ const _ = require('lodash');
 const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 
-jest.mock('../../../../../src/v5/models/projects');
-const Projects = require(`${src}/models/projects`);
+jest.mock('../../../../../src/v5/models/projectSettings');
+const Projects = require(`${src}/models/projectSettings`);
 
 jest.mock('../../../../../src/v5/utils/permissions/permissions');
 const Permissions = require(`${src}/utils/permissions/permissions`);

@@ -18,7 +18,7 @@
 "use strict";
 const { v5Path } = require("../../interop");
 const EventsManager = require(`${v5Path}/services/eventsManager/eventsManager`);
-const EventsV5 = require(`${v5Path}/services/eventsManager/eventsManager.constants`).events;
+const { EventsV5}  = require(`${v5Path}/services/eventsManager/eventsManager.constants`).events;
 const utils = require("../utils");
 const Queue = require("../services/queue");
 
@@ -190,6 +190,10 @@ const subscribeToV5Events = () => {
 		newModel(null, teamspace, { _id: model });
 	});
 
+	EventsManager.subscribe(EventsV5.MODEL_IMPORT_UPDATE, async ({teamspace, model, status}) => {
+		modelStatusChanged(null, teamspace, model, {status});
+	});
+
 	EventsManager.subscribe(EventsV5.MODEL_IMPORT_FINISHED, async ({teamspace, model, corId, success, user, userErr, errCode, message}) => {
 		const { revisionCount, findLatest } = require("./history");
 		const notifications = require("./notification");
@@ -240,6 +244,16 @@ const subscribeToV5Events = () => {
 			}
 		}
 
+	});
+
+	EventsManager.subscribe(EventsV5.SESSIONS_REMOVED, ({ ids }) => {
+		const msg = {
+			event: "message",
+			recipients: ids.map((sessionId) => `sessions::${sessionId}`),
+			data: { event: "loggedOut", reason: "You have logged in else where" }
+		};
+
+		return Queue.insertEventMessage(msg);
 	});
 
 };

@@ -16,6 +16,7 @@
  */
 
 const { src } = require('../../helper/path');
+const { generateRandomString } = require('../../helper/services');
 
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
@@ -257,39 +258,51 @@ const testDeleteModel = () => {
 
 const testUpdateModelStatus = () => {
 	describe('Update model status', () => {
-		test(`should update model status and trigger a ${events.MODEL_IMPORT_UPDATE} event`, async () => {
-			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 1 });
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const status = 'queued';
+		const corId = generateRandomString();
+		test(`should update container status and trigger a ${events.MODEL_SETTINGS_UPDATE} event`, async () => {
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValue({ federate: false });
+			await expect(Model.updateModelStatus(teamspace, project, model, status, corId)).resolves.toBe(undefined);
 
-			const teamspace = 'ts';
-			const model = 'model';
-			const user = 'user';
-			const status = 'queued';
-			const corId = '123';
-			await expect(Model.updateModelStatus(teamspace, model, status, corId, user)).resolves.toBe(undefined);
-
-			expect(fn.mock.calls.length).toBe(1);
+			expect(fn).toHaveBeenCalledTimes(1);
 			const action = fn.mock.calls[0][3];
 			expect(action.$set.corID).toEqual(corId);
 			expect(action.$set.status).toEqual(status);
 
-			expect(publishFn.mock.calls.length).toBe(1);
-			expect(publishFn.mock.calls[0][0]).toEqual(events.MODEL_IMPORT_UPDATE);
-			expect(publishFn.mock.calls[0][1]).toEqual({ teamspace, model, corId, status, user });
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
+				{ teamspace, model, project, data: { status }, isFederation: false });
+		});
+
+		test(`should update federation status and trigger a ${events.MODEL_SETTINGS_UPDATE} event`, async () => {
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValue({ federate: true });
+
+			await expect(Model.updateModelStatus(teamspace, project, model, status, corId)).resolves.toBe(undefined);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			const action = fn.mock.calls[0][3];
+			expect(action.$set.corID).toEqual(corId);
+			expect(action.$set.status).toEqual(status);
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
+				{ teamspace, model, project, data: { status }, isFederation: true });
 		});
 
 		test('should not trigger event if model no longer exists ', async () => {
-			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 0 });
-			publishFn.mockClear();
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValue();
 
-			const status = 'queued';
-			await expect(Model.updateModelStatus('teamspace', 'model', status)).resolves.toBe(undefined);
+			await expect(Model.updateModelStatus(teamspace, project, model, status)).resolves.toBe(undefined);
 
 			expect(fn.mock.calls.length).toBe(1);
 			const action = fn.mock.calls[0][3];
 			expect(action.$set.status).toEqual(status);
 			expect(action.$set.corId).toEqual(undefined);
 
-			expect(publishFn.mock.calls.length).toBe(0);
+			expect(publishFn).not.toHaveBeenCalled();
 		});
 	});
 };
@@ -298,17 +311,18 @@ const testNewRevisionProcessed = () => {
 	describe.each([
 		[0], [1], [14], [100],
 	])('Update with new revision', (retVal) => {
-		const teamspace = 'ts';
-		const model = 'model';
-		const user = 'user';
-		const corId = '123';
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const user = generateRandomString();
+		const corId = generateRandomString();
 		const { success, message, userErr } = getInfoFromCode(retVal);
-		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED} event`,
+		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED} event and a ${events.MODEL_SETTINGS_UPDATE} event`,
 			async () => {
 				const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 1 });
 				publishFn.mockClear();
 				await expect(Model.newRevisionProcessed(
-					teamspace, model, corId, retVal, user,
+					teamspace, project, model, corId, retVal, user,
 				)).resolves.toBe(undefined);
 
 				expect(fn.mock.calls.length).toBe(1);
@@ -326,35 +340,46 @@ const testNewRevisionProcessed = () => {
 				}
 				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 
-				expect(publishFn.mock.calls.length).toBe(1);
-				expect(publishFn.mock.calls[0][0]).toEqual(events.MODEL_IMPORT_FINISHED);
-				expect(publishFn.mock.calls[0][1]).toEqual({
-					teamspace,
-					model,
-					corId,
-					userErr,
-					message,
-					success,
-					errCode: retVal,
-					user,
-				});
+				expect(publishFn).toHaveBeenCalledTimes(2);
+				expect(publishFn).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
+					{
+						teamspace,
+						model,
+						corId,
+						userErr,
+						message,
+						success,
+						errCode: retVal,
+						user,
+					});
+
+				expect(publishFn).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
+					{
+						teamspace,
+						project,
+						model,
+						data: action.$set,
+						isFederation: false,
+					});
 			});
 	});
 
 	describe('Update with new revision (Federation)', () => {
 		const retVal = 0;
-		const teamspace = 'ts';
-		const model = 'model';
-		const user = 'user';
-		const corId = '123';
-		const containers = ['a', 'b', 'c'];
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const user = generateRandomString();
+		const corId = generateRandomString();
+		const containers = [generateRandomString(), generateRandomString(), generateRandomString()];
 		const { success, message, userErr } = getInfoFromCode(retVal);
-		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED} event`,
+		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED} event and a ${events.MODEL_SETTINGS_UPDATE} event`,
 			async () => {
 				const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 1 });
 				publishFn.mockClear();
 				await expect(Model.newRevisionProcessed(
-					teamspace, model, corId, retVal, user, containers.map((project) => ({ project })),
+					teamspace, project, model, corId, retVal, user,
+					containers.map((containerId) => ({ project: containerId })),
 				)).resolves.toBe(undefined);
 
 				expect(fn.mock.calls.length).toBe(1);
@@ -365,18 +390,27 @@ const testNewRevisionProcessed = () => {
 
 				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 
-				expect(publishFn.mock.calls.length).toBe(1);
-				expect(publishFn.mock.calls[0][0]).toEqual(events.MODEL_IMPORT_FINISHED);
-				expect(publishFn.mock.calls[0][1]).toEqual({
-					teamspace,
-					model,
-					corId,
-					userErr,
-					message,
-					success,
-					errCode: retVal,
-					user,
-				});
+				expect(publishFn).toHaveBeenCalledTimes(2);
+				expect(publishFn).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
+					{
+						teamspace,
+						model,
+						corId,
+						userErr,
+						message,
+						success,
+						errCode: retVal,
+						user,
+					});
+
+				expect(publishFn).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
+					{
+						teamspace,
+						project,
+						model,
+						data: action.$set,
+						isFederation: true,
+					});
 			});
 	});
 
@@ -385,13 +419,14 @@ const testNewRevisionProcessed = () => {
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 0 });
 			publishFn.mockClear();
 
-			const teamspace = 'ts';
-			const model = 'model';
-			const user = 'user';
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const user = generateRandomString();
 			const retVal = 0;
-			const corId = '123';
+			const corId = generateRandomString();
 			await expect(Model.newRevisionProcessed(
-				teamspace, model, corId, retVal, user,
+				teamspace, project, model, corId, retVal, user,
 			)).resolves.toBe(undefined);
 
 			expect(fn.mock.calls.length).toBe(1);
@@ -406,27 +441,30 @@ const testNewRevisionProcessed = () => {
 };
 const testUpdateModelSettings = () => {
 	const checkResults = (fn, model, updateObject) => {
-		expect(fn.mock.calls.length).toBe(1);
+		expect(fn).toHaveBeenCalledTimes(1);
 		expect(fn.mock.calls[0][2]).toEqual({ _id: model });
 		expect(fn.mock.calls[0][3]).toEqual(updateObject);
 	};
 
 	describe('UpdateModelSettings', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
 		test('Should update the settings of a model with unset', async () => {
 			const data = {
-				name: 'someName',
+				name: generateRandomString(),
 				unit: 'm',
-				code: 'someCode',
+				code: generateRandomString(5),
 				defaultView: null,
 			};
 
 			const updateObject = {
 				$set: {
 					properties: {
-						unit: 'm',
-						code: 'someCode',
+						unit: data.unit,
+						code: data.code,
 					},
-					name: 'someName',
+					name: data.name,
 				},
 				$unset: {
 					defaultView: 1,
@@ -434,67 +472,98 @@ const testUpdateModelSettings = () => {
 			};
 
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
-			await Model.updateModelSettings('someTS', 'someModel', data);
-			checkResults(fn, 'someModel', updateObject);
+			await Model.updateModelSettings(teamspace, project, model, false, data);
+			checkResults(fn, model, updateObject);
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
+				{
+					teamspace,
+					project,
+					model,
+					data,
+					isFederation: false,
+				});
 		});
 
 		test('Should update the settings of a model without unset', async () => {
 			const data = {
-				name: 'someName',
+				name: generateRandomString(),
 				unit: 'm',
-				code: 'someCode',
-				defaultView: '123',
+				code: generateRandomString(5),
+				defaultView: generateRandomString(),
 			};
 
 			const updateObject = {
 				$set: {
 					properties: {
-						unit: 'm',
-						code: 'someCode',
+						unit: data.unit,
+						code: data.code,
 					},
-					name: 'someName',
-					defaultView: '123',
+					name: data.name,
+					defaultView: data.defaultView,
 				},
 			};
 
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
-			await Model.updateModelSettings('someTS', 'someModel', data);
-			checkResults(fn, 'someModel', updateObject);
+			await Model.updateModelSettings(teamspace, project, model, true, data);
+			checkResults(fn, model, updateObject);
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
+				{
+					teamspace,
+					project,
+					model,
+					data,
+					isFederation: true,
+				});
 		});
 
 		test('Should update the settings of a model and ignore a null value that cant be unset', async () => {
 			const data = {
-				name: 'someName',
+				name: generateRandomString(),
 				unit: null,
-				code: 'someCode',
-				defaultView: '123',
+				code: generateRandomString(5),
+				defaultView: generateRandomString(),
 			};
 
 			const updateObject = {
 				$set: {
 					properties: {
-						code: 'someCode',
+						code: data.code,
 					},
-					name: 'someName',
-					defaultView: '123',
+					name: data.name,
+					defaultView: data.defaultView,
 				},
 			};
 
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
-			await Model.updateModelSettings('someTS', 'someModel', data);
-			checkResults(fn, 'someModel', updateObject);
+			await Model.updateModelSettings(teamspace, project, model, false, data);
+			checkResults(fn, model, updateObject);
+			expect(publishFn).toHaveBeenCalledTimes(1);
+
+			expect(publishFn).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
+				{
+					teamspace,
+					project,
+					model,
+					data,
+					isFederation: false,
+				});
 		});
 
 		test('Should return error if the update fails', async () => {
 			jest.spyOn(db, 'updateOne').mockImplementation(() => undefined);
-			await expect(Model.updateModelSettings('someTS', 'someModel', { name: 'someName' }))
+			await expect(Model.updateModelSettings(teamspace, project, model, false, { name: 'someName' }))
 				.rejects.toEqual(templates.modelNotFound);
+
+			expect(publishFn).not.toHaveBeenCalled();
 		});
 
 		test('Should update nothing if the data is empty', async () => {
-			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => ({ matchedCount: 1 }));
-			await Model.updateModelSettings('someTS', 'someModel', {});
-			checkResults(fn, 'someModel', {});
+			const fn = jest.spyOn(db, 'updateOne');
+			await Model.updateModelSettings(teamspace, project, model, false, {});
+			expect(fn).not.toHaveBeenCalled();
+			expect(publishFn).not.toHaveBeenCalled();
 		});
 	});
 };

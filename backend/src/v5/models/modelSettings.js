@@ -23,11 +23,15 @@ const { getInfoFromCode } = require('./modelSettings.constants');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
-const deleteOneModel = (ts, query) => db.deleteOne(ts, 'settings', query);
-const findOneModel = (ts, query, projection) => db.findOne(ts, 'settings', query, projection);
-const findModels = (ts, query, projection, sort) => db.find(ts, 'settings', query, projection, sort);
-const insertOneModel = (ts, data) => db.insertOne(ts, 'settings', data);
-const updateOneModel = (ts, query, action) => db.updateOne(ts, 'settings', query, action);
+const SETTINGS_COL = 'settings';
+const deleteOneModel = (ts, query) => db.deleteOne(ts, SETTINGS_COL, query);
+const findOneModel = (ts, query, projection) => db.findOne(ts, SETTINGS_COL, query, projection);
+const findModels = (ts, query, projection, sort) => db.find(ts, SETTINGS_COL, query, projection, sort);
+const insertOneModel = (ts, data) => db.insertOne(ts, SETTINGS_COL, data);
+const updateOneModel = (ts, query, action) => db.updateOne(ts, SETTINGS_COL, query, action);
+const findOneAndUpdateModel = (ts, query, action, projection) => db.findOneAndUpdate(
+	ts, SETTINGS_COL, query, action, projection,
+);
 
 const noFederations = { federate: { $ne: true } };
 const onlyFederations = { federate: true };
@@ -95,22 +99,26 @@ Models.getFederations = (ts, ids, projection, sort) => {
 	return findModels(ts, query, projection, sort);
 };
 
-Models.updateModelStatus = async (teamspace, project, model, status, corId, user) => {
+Models.updateModelStatus = async (teamspace, project, model, status, corId) => {
 	const query = { _id: model };
 	const updateObj = { status };
 	if (corId) {
 		updateObj.corID = corId;
 	}
 
-	const { matchedCount } = await updateOneModel(teamspace, query, { $set: updateObj });
-	if (matchedCount > 0) {
+	const modelData = await findOneAndUpdateModel(teamspace, query, { $set: updateObj }, { federate: 1 });
+	if (modelData) {
 	// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
 	// trigger notifications.
-		publish(events.MODEL_IMPORT_UPDATE, { teamspace, project, model, corId, status, user });
+		publish(events.MODEL_SETTINGS_UPDATE, { teamspace,
+			project,
+			model,
+			data: { status },
+			isFederation: !!modelData.federate });
 	}
 };
 
-Models.newRevisionProcessed = async (teamspace, model, corId, retVal, user, containers) => {
+Models.newRevisionProcessed = async (teamspace, project, model, corId, retVal, user, containers) => {
 	const { success, message, userErr } = getInfoFromCode(retVal);
 	const query = { _id: model };
 	const set = {};
@@ -124,7 +132,7 @@ Models.newRevisionProcessed = async (teamspace, model, corId, retVal, user, cont
 			 *  containers used to be called models in v4, and models used to be called
 			 *  projects. This data came from 3drepobouncer, which still calls containers projects.
 			 */
-			set.subModels = containers.map(({ project }) => project);
+			set.subModels = containers.map(({ project: modelId }) => modelId);
 		}
 	} else {
 		set.status = 'failed';
@@ -132,16 +140,29 @@ Models.newRevisionProcessed = async (teamspace, model, corId, retVal, user, cont
 	}
 
 	const { matchedCount } = await updateOneModel(teamspace, query, { $set: set, $unset: unset });
-	if (matchedCount !== 0) {
+	if (matchedCount > 0) {
 	// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
 	// trigger notifications.
 
 		publish(events.MODEL_IMPORT_FINISHED,
-			{ teamspace, model, success, message, userErr, corId, errCode: retVal, user });
+			{ teamspace,
+				model,
+				success,
+				message,
+				userErr,
+				corId,
+				errCode: retVal,
+				user });
+
+		publish(events.MODEL_SETTINGS_UPDATE, { teamspace,
+			project,
+			model,
+			data: set,
+			isFederation: !!containers });
 	}
 };
 
-Models.updateModelSettings = async (ts, model, data) => {
+Models.updateModelSettings = async (teamspace, project, model, isFederation, data) => {
 	const toUpdate = {};
 	const toUnset = {};
 
@@ -162,17 +183,25 @@ Models.updateModelSettings = async (ts, model, data) => {
 	});
 
 	const updateJson = {};
-	if (Object.keys(toUpdate).length > 0) {
+	if (Object.keys(toUpdate).length) {
 		updateJson.$set = toUpdate;
 	}
-	if (Object.keys(toUnset).length > 0) {
+	if (Object.keys(toUnset).length) {
 		updateJson.$unset = toUnset;
 	}
 
-	const result = await db.updateOne(ts, 'settings', { _id: model }, updateJson);
+	if (Object.keys(updateJson).length) {
+		const result = await updateOneModel(teamspace, { _id: model }, updateJson);
 
-	if (!result || result.matchedCount === 0) {
-		throw templates.modelNotFound;
+		if (!result || result.matchedCount === 0) {
+			throw templates.modelNotFound;
+		}
+
+		publish(events.MODEL_SETTINGS_UPDATE, { teamspace,
+			project,
+			model,
+			data,
+			isFederation });
 	}
 };
 

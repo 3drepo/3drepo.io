@@ -89,9 +89,9 @@ const appendFavourites = (req, res) => {
 };
 
 const updateSettings = (req, res) => {
-	const { teamspace, container } = req.params;
+	const { teamspace, project, container } = req.params;
 
-	Containers.updateSettings(teamspace, container, req.body)
+	Containers.updateSettings(teamspace, project, container, req.body)
 		.then(() => respond(req, res, templates.ok)).catch(
 			// istanbul ignore next
 			(err) => respond(req, res, err),

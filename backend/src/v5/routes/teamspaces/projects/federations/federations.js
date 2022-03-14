@@ -83,9 +83,9 @@ const getFederationStats = (req, res) => {
 };
 
 const updateSettings = (req, res) => {
-	const { teamspace, federation } = req.params;
+	const { teamspace, project, federation } = req.params;
 
-	Federations.updateSettings(teamspace, federation, req.body)
+	Federations.updateSettings(teamspace, project, federation, req.body)
 		.then(() => respond(req, res, templates.ok)).catch(
 			// istanbul ignore next
 			(err) => respond(req, res, err),

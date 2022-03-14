@@ -21,19 +21,24 @@ const { events } = require('../../eventsManager/eventsManager.constants');
 const { findProjectByModelId } = require('../../../models/projectSettings');
 const { subscribe } = require('../../eventsManager/eventsManager');
 
-const queueStatusUpdate = async ({
-	teamspace, model, corId, status, user,
-}) => {
+const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
 	try {
 		const { _id: projectId } = await findProjectByModelId(teamspace, model, { _id: 1 });
-		updateModelStatus(teamspace, UUIDToString(projectId), model, status, corId, user);
+		await updateModelStatus(teamspace, UUIDToString(projectId), model, status, corId);
 	} catch (err) {
 		// do nothing - the model may have been deleted before the task came back.
 	}
 };
-const queueTasksCompleted = ({
+const queueTasksCompleted = async ({
 	teamspace, model, value, corId, user, containers,
-}) => newRevisionProcessed(teamspace, model, corId, value, user, containers);
+}) => {
+	try {
+		const { _id: projectId } = await findProjectByModelId(teamspace, model, { _id: 1 });
+		await newRevisionProcessed(teamspace, UUIDToString(projectId), model, corId, value, user, containers);
+	} catch (err) {
+		// do nothing - the model may have been deleted before the task came back.
+	}
+};
 
 const ModelEventsListener = {};
 

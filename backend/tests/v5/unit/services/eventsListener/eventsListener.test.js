@@ -16,9 +16,14 @@
  */
 
 const { src } = require('../../../helper/path');
+const { generateRandomString } = require('../../../helper/services');
 
 jest.mock('../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
+
+jest.mock('../../../../../src/v5/models/projectSettings');
+const ProjectSettings = require(`${src}/models/projectSettings`);
+
 jest.mock('../../../../../src/v5/models/loginRecord');
 const LoginRecord = require(`${src}/models/loginRecord`);
 
@@ -34,36 +39,35 @@ const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const EventsListener = require(`${src}/services/eventsListener/eventsListener`);
 
-ModelSettings.updateModelStatus.mockResolvedValue(() => {});
-ModelSettings.newRevisionProcessed.mockResolvedValue(() => {});
-LoginRecord.saveLoginRecord.mockImplementation(() => ({}));
-Sessions.removeOldSessions.mockImplementation(() => { });
-
-const eventTriggeredPromise = (event) => new Promise((resolve) => EventsManager.subscribe(event, resolve));
+const eventTriggeredPromise = (event) => new Promise(
+	(resolve) => EventsManager.subscribe(event, () => setTimeout(resolve, 10)),
+);
 
 const testModelEventsListener = () => {
 	describe('Model Events', () => {
 		test(`Should trigger ModelStatusUpdate if there is a ${events.QUEUED_TASK_UPDATE}`, async () => {
+			const project = generateRandomString();
+			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
 			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_UPDATE);
-			const data = { teamspace: '123', model: '345', corId: 1, status: 'happy', user: 'abc' };
-			EventsManager.publish(events.QUEUED_TASK_UPDATE, data);
-
+			const data = { teamspace: '123', model: '345', corId: 1, status: 'happy' };
+			await EventsManager.publish(events.QUEUED_TASK_UPDATE, data);
 			await waitOnEvent;
-			expect(ModelSettings.updateModelStatus.mock.calls.length).toBe(1);
-			expect(ModelSettings.updateModelStatus.mock.calls[0]).toEqual(
-				[data.teamspace, data.model, data.status, data.corId, data.user],
-			);
+			expect(ModelSettings.updateModelStatus).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.updateModelStatus).toHaveBeenCalledWith(data.teamspace, project,
+				data.model, data.status, data.corId);
 		});
 
 		test(`Should trigger newRevisionProcessed if there is a ${events.QUEUED_TASK_COMPLETED}`, async () => {
+			const project = generateRandomString();
+			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
 			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_COMPLETED);
 			const data = { teamspace: '123', model: '345', corId: 1, value: 'happy', user: 'abc' };
 			EventsManager.publish(events.QUEUED_TASK_COMPLETED, data);
 
 			await waitOnEvent;
-			expect(ModelSettings.newRevisionProcessed.mock.calls.length).toBe(1);
-			expect(ModelSettings.newRevisionProcessed.mock.calls[0]).toEqual(
-				[data.teamspace, data.model, data.corId, data.value, data.user, undefined],
+			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledWith(
+				data.teamspace, project, data.model, data.corId, data.value, data.user, undefined,
 			);
 		});
 	});

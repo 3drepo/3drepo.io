@@ -124,7 +124,6 @@ const testCallbackQueueConsumer = () => {
 				database: generateRandomString(),
 				status: generateRandomString(),
 				project: generateRandomString(),
-				user: generateRandomString(),
 			};
 			const properties = {
 				correlationId: generateRandomString(),
@@ -138,7 +137,6 @@ const testCallbackQueueConsumer = () => {
 				model: content.project,
 				corId: properties.correlationId,
 				status: content.status,
-				user: content.user,
 			};
 			expect(publishFn).toBeCalledTimes(1);
 			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_UPDATE, expectedData);
