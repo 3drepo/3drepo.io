@@ -23,8 +23,8 @@ jest.mock('../../../../../../src/v5/utils/permissions/permissions');
 const Permissions = require(`${src}/utils/permissions/permissions`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
-jest.mock('../../../../../../src/v5/models/projects');
-const Projects = require(`${src}/models/projects`);
+jest.mock('../../../../../../src/v5/models/projectSettings');
+const Projects = require(`${src}/models/projectSettings`);
 jest.mock('../../../../../../src/v5/utils/sessions');
 const Sessions = require(`${src}/utils/sessions`);
 const ProjectMiddlewares = require(`${src}/middleware/permissions/components/projects`);

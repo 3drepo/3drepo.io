@@ -21,8 +21,8 @@ const Permissions = require(`${src}/utils/permissions/permissions`);
 const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 jest.mock('../../../../../src/v5/models/teamspaces');
 const Teamspaces = require(`${src}/models/teamspaces`);
-jest.mock('../../../../../src/v5/models/projects');
-const Projects = require(`${src}/models/projects`);
+jest.mock('../../../../../src/v5/models/projectSettings');
+const Projects = require(`${src}/models/projectSettings`);
 jest.mock('../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
 
