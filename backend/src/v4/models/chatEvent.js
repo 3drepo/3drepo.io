@@ -18,7 +18,7 @@
 "use strict";
 const { v5Path } = require("../../interop");
 const EventsManager = require(`${v5Path}/services/eventsManager/eventsManager`);
-const { EventsV5}  = require(`${v5Path}/services/eventsManager/eventsManager.constants`).events;
+const EventsV5 = require(`${v5Path}/services/eventsManager/eventsManager.constants`).events;
 const utils = require("../utils");
 const Queue = require("../services/queue");
 
@@ -190,8 +190,10 @@ const subscribeToV5Events = () => {
 		newModel(null, teamspace, { _id: model });
 	});
 
-	EventsManager.subscribe(EventsV5.MODEL_IMPORT_UPDATE, async ({teamspace, model, status}) => {
-		modelStatusChanged(null, teamspace, model, {status});
+	EventsManager.subscribe(EventsV5.MODEL_SETTINGS_UPDATE, async ({teamspace, model, data: { status }}) => {
+		if(status) {
+			modelStatusChanged(null, teamspace, model, {status});
+		}
 	});
 
 	EventsManager.subscribe(EventsV5.MODEL_IMPORT_FINISHED, async ({teamspace, model, corId, success, user, userErr, errCode, message}) => {
