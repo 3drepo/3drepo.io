@@ -153,13 +153,11 @@ export const MainIssueFormTab: FunctionComponent<IProps> = ({
 			<FieldsRow container justifyContent="space-between" flex={0.5}>
 				<StyledFormControl>
 					<InputLabel shrink>Due date</InputLabel>
-					<Field name="due_date" render={({ field }) =>
-						<DateField
-							{...field}
-							format={NAMED_MONTH_DATE_FORMAT}
-							disabled={!canEditBasicProperty}
-							placeholder="Choose a due date"
-						/>}
+					<DateField
+						name="due_date"
+						inputFormat={NAMED_MONTH_DATE_FORMAT}
+						disabled={!canEditBasicProperty}
+						placeholder="Choose a due date"
 					/>
 				</StyledFormControl>
 			</FieldsRow>

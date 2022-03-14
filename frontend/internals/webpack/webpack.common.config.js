@@ -1,6 +1,7 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
+const path = require('path');
 
 const PATHS = require('./tools/paths');
 const MODES = require('./tools/modes');
@@ -76,6 +77,7 @@ module.exports = (env, options) => ({
 			'@components': PATHS.COMPONENTS,
 			'@controls': PATHS.CONTROLS,
 			'@mui/styled-engine': '@mui/styled-engine-sc',
+			'styled-components': path.resolve("./node_modules", "styled-components"),
 		},
 	},
 	target: 'web',

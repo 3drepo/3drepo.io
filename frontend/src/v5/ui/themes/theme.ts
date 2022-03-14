@@ -314,6 +314,9 @@ export const theme = createTheme({
 					// this is for letting the color prop decide the color
 					color: null,
 				},
+				colorPrimary: {
+					color: COLOR.PRIMARY_MAIN,
+				},
 			},
 		},
 		MuiTooltip: {

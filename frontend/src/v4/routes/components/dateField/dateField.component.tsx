@@ -16,11 +16,11 @@
  */
 import { PureComponent } from 'react';
 import { DatePickerProps } from '@mui/lab/DatePicker';
+import { TextField } from '@mui/material';
 import { Container, StyledDatePicker, StyledDateTimePicker } from './dateField.styles';
 
 interface IProps {
-	inputId: string;
-	value: any;
+	value?: any;
 	defaultValue?: any;
 	initialFocusedDate?: any;
 	name: string;
@@ -85,11 +85,16 @@ export class DateField extends PureComponent<IProps, IState> {
 					onBlur={onBlur}
 					name={name}
 					onChange={this.handleChange}
-					placeholder={placeholder}
 					inputFormat={inputFormat}
 					shouldDisableDate={this.props.shouldDisableDate}
-					defaultValue={defaultValue}
 					initialFocusedDate={this.props.initialFocusedDate}
+					renderInput={(params) => (
+						<TextField
+							placeholder={placeholder}
+							defaultValue={defaultValue}
+							{...params}
+						/>
+					)}
 				/>
 			</Container>
 		);

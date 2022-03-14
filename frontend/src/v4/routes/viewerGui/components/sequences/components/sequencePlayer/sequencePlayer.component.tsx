@@ -23,7 +23,8 @@ import StepBackIcon from '@mui/icons-material/FastRewind';
 import PlayArrow from '@mui/icons-material/PlayArrow';
 import Replay from '@mui/icons-material/Replay';
 import Stop from '@mui/icons-material/Stop';
-import { debounce, findIndex, noop } from 'lodash';
+import TextField from '@mui/material/TextField';
+import { debounce, noop } from 'lodash';
 
 import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
@@ -292,9 +293,8 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 							<DatePicker
 								shouldDisableDate={(date) => isDateOutsideRange(this.props.min, this.props.max, date.$d)}
 								name="date"
-								inputId="1"
 								value={value}
-								format={LONG_DATE_TIME_FORMAT_NO_MINUTES}
+								inputFormat={LONG_DATE_TIME_FORMAT_NO_MINUTES}
 								onChange={(e) => this.gotoDate(new Date(Math.floor(e.target.value / MILLI_PER_HOUR) * MILLI_PER_HOUR))}
 								placeholder="date"
 								dateTime

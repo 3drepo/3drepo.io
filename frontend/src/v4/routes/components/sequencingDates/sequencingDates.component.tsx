@@ -52,7 +52,6 @@ const SequenceDate = ({ value, name, onChange, showSequenceDate, min, max, initi
 				inputFormat={NAMED_MONTH_DATETIME_FORMAT}
 				dateTime
 				name={name}
-				inputId={name}
 				value={value}
 				onChange={onChange}
 				defaultValue={min}

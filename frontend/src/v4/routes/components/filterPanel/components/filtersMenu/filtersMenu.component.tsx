@@ -20,6 +20,7 @@ import ArrowRight from '@mui/icons-material/ArrowRight';
 import Check from '@mui/icons-material/Check';
 import Copy from '@mui/icons-material/FileCopy';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import TextField from '@mui/material/TextField';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { FILTER_TYPES } from '../../filterPanel.component';
@@ -121,6 +122,9 @@ export class FiltersMenu extends PureComponent<IProps, IState> {
 							value={this.getSelectedDate(item, subItem.value)}
 							placeholder="Select date"
 							onChange={this.onDateChange(item, subItem.value)}
+							renderInput={(params) => (
+								<TextField {...params} />
+							)}
 						/>
 					}
 					{this.isSelectedItem(item.label, subItem.value) && <Check fontSize={'small'} />}

@@ -16,7 +16,7 @@
  */
 
 import { createTheme } from '@mui/material/styles';
-import { COLOR } from './colors';
+import { COLOR, WHITE, PRIMARY_MAIN } from './colors';
 import { FONT_WEIGHT } from './fonts';
 import { media } from './media';
 import * as mixins from './mixins';
@@ -129,7 +129,10 @@ export const MuiTheme = createTheme({
 					fontSize: '20px',
 					height: '40px',
 					display: 'flex',
-					alignItems: 'center'
+					alignItems: 'center',
+					'& + .MuiDialogContent-root': {
+						paddingTop: 24,
+					}
 				}
 			}
 		},
@@ -138,7 +141,14 @@ export const MuiTheme = createTheme({
 				root: {
 					padding: '24px',
 					minWidth: '250px',
-					maxHeight: '60vh'
+					maxHeight: '60vh',
+					'.PrivatePickersToolbar-root': {
+						color: WHITE,
+						backgroundColor: PRIMARY_MAIN,
+						'.MuiTypography-root': {
+							color: WHITE,
+						}
+					}
 				}
 			}
 		},
@@ -154,13 +164,6 @@ export const MuiTheme = createTheme({
 				}
 			}
 		},
-		// MuiPickersModal: {
-		// 	styleOverrides: {
-		// 		dialog: {
-		// 			maxHeight: 'inherit',
-		// 		}
-		// 	}
-		// },
 		MuiTextField: {
 			defaultProps: {
 				variant: 'standard',
@@ -169,10 +172,6 @@ export const MuiTheme = createTheme({
 		MuiSelect: {
 			defaultProps: {
 				variant: 'standard',
-				// transformOrigin: {
-				// 	vertical: "top",
-				// 	horizontal: "left"
-				// },
 			},
 			styleOverrides: {
 				select: {

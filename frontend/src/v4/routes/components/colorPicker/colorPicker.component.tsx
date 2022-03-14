@@ -19,7 +19,7 @@ import FormControl from '@mui/material/FormControl';
 import Grid from '@mui/material/Grid';
 
 import ArrowDropDown from '@mui/icons-material/ArrowDropDown';
-import { identity, memoize } from 'lodash';
+import { identity } from 'lodash';
 import { PureComponent, useEffect, useRef, useState, createRef } from 'react';
 
 import { componentToHex, hexToGLColor, rgbaToHex, GLToHexColor } from '../../../helpers/colors';
@@ -111,7 +111,7 @@ interface IState {
 	opacitySliderVisibility: boolean;
 }
 
-const OpenPanelButton = ({color, onClick, disabled, ref}) =>
+const OpenPanelButton = ({color, onClick, disabled, colorSelectRef}) =>
 	(
 		<ColorSelect
 			container
@@ -120,7 +120,7 @@ const OpenPanelButton = ({color, onClick, disabled, ref}) =>
 			alignItems="center"
 			justifyContent="flex-start"
 			disabled={disabled}
-			ref={ref}
+			ref={colorSelectRef}
 		>
 			<Dot item color={color} />
 			<Grid item>
@@ -495,7 +495,7 @@ export class ColorPicker extends PureComponent<IProps, IState> {
 					onClick={this.openPanel}
 					disabled={disabled}
 					color={this.hexValue}
-					ref={this.colorSelectRef}
+					colorSelectRef={this.colorSelectRef}
 				/>
             </>
 

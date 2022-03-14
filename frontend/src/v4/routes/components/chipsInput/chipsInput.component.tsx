@@ -53,16 +53,5 @@ export const ChipsInput: FunctionComponent<IProps> = ({ name, onChange, placehol
 				/>
 			)}
 		/>
-		// <StyledChipInput
-		// 	// {...props}
-		// 	value={getValues()}
-		// 	InputProps={{
-		// 		name,
-		// 	}}
-		// 	onAdd={handleAddChip}
-		// 	onDelete={handleDeleteChip}
-		// 	// alwaysShowPlaceholder
-			// fullWidth
-		// />
 	);
 };
