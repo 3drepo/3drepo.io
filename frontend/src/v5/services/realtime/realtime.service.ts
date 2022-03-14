@@ -73,7 +73,7 @@ export const leaveRoom = (roomType : IRoomType) => {
 
 export const initializeSocket = ({ host, path, reconnectionAttempts }: IChatConfig) => {
 	// @ts-ignore
-	socket= {on: () => {}}
+	socket = { on: () => {} };
 	return;
 	socket = io(host, {
 		path,
