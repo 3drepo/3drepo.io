@@ -27,6 +27,7 @@ type IUploadList = {
 	values: UploadItemFields[];
 	selectedIndex: number | null;
 	isUploading: boolean;
+	getOriginalIndex: (index: number) => number;
 };
 
 export const UploadList = ({
@@ -35,26 +36,31 @@ export const UploadList = ({
 	isUploading,
 	onClickEdit,
 	onClickDelete,
+	getOriginalIndex,
 }: IUploadList): JSX.Element => {
 	const { trigger, setValue, watch, getValues } = useFormContext();
 	return (
 		<Container>
 			{
-				values.map((item, index) => (
-					<UploadListItem
-						key={item.uploadId}
-						item={getValues(`uploads.${index}`)}
-						onClickEdit={() => onClickEdit(index)}
-						onClickDelete={() => onClickDelete(index)}
-						onChange={(field, val) => {
-							setValue(`uploads.${index}.${field}`, val);
-							trigger(`uploads.${index}.${field}`);
-						}}
-						isSelected={index === selectedIndex}
-						isUploading={isUploading}
-						progress={watch(`uploads.${index}.progress`)}
-					/>
-				))
+				values.map((item, index) => {
+					const origIndex = getOriginalIndex(index);
+					return (
+						<UploadListItem
+							key={item.uploadId}
+							// item={getValues(`uploads.${index}`)}
+							item={item}
+							onClickEdit={() => onClickEdit(index)}
+							onClickDelete={() => onClickDelete(index)}
+							onChange={(field, val) => {
+								setValue(`uploads.${origIndex}.${field}`, val);
+								trigger(`uploads.${origIndex}.${field}`);
+							}}
+							isSelected={index === selectedIndex}
+							isUploading={isUploading}
+							progress={watch(`uploads.${origIndex}.progress`)}
+						/>
+					);
+				})
 			}
 		</Container>
 	);

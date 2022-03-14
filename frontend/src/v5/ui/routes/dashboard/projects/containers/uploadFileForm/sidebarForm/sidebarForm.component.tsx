@@ -19,8 +19,8 @@ import React, { useEffect, useMemo } from 'react';
 
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
-import { Checkbox, MenuItem } from '@material-ui/core';
-import { Controller, useForm } from 'react-hook-form';
+import { MenuItem } from '@material-ui/core';
+import { useForm } from 'react-hook-form';
 import { CONTAINER_TYPES, CONTAINER_UNITS, UploadItemFields } from '@/v5/store/containers/containers.types';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SidebarSchema } from '@/v5/validation/containers';
@@ -83,11 +83,13 @@ export const SidebarForm = ({
 				<FormSelect
 					required
 					control={control}
+					disabled={!isNewContainer}
 					name="containerUnit"
 					label={formatMessage({ id: 'containers.creation.form.units', defaultMessage: 'Units' })}
+					defaultValue="mm"
 					onChange={
 						(e: React.ChangeEvent<HTMLInputElement>) => {
-							setValue('containerUnit', e.currentTarget.value);
+							setValue('containerUnit', e.target.value);
 							updateValue('containerUnit');
 						}
 					}
@@ -103,8 +105,10 @@ export const SidebarForm = ({
 				<FormSelect
 					required
 					control={control}
+					disabled={!isNewContainer}
 					name="containerType"
 					label={formatMessage({ id: 'containers.creation.form.type', defaultMessage: 'Category' })}
+					defaultValue="Uncategorised"
 					onChange={
 						(e: React.ChangeEvent<HTMLInputElement>) => {
 							setValue('containerType', e.target.value);
@@ -115,10 +119,13 @@ export const SidebarForm = ({
 					{
 						CONTAINER_TYPES.map((type) => (
 							<MenuItem key={type.value} value={type.value}>
-								{type.value}
+								{type.name}
 							</MenuItem>
 						))
 					}
+					<MenuItem key="sample" value="sample" hidden>
+						<FormattedMessage id="containers.type.sample" defaultMessage="Sample" />
+					</MenuItem>
 				</FormSelect>
 			</FlexContainer>
 			<FormTextField
@@ -147,23 +154,15 @@ export const SidebarForm = ({
 				formError={errors.revisionDesc}
 			/>
 
-			<Controller
+			<AnimationsCheckbox
 				control={control}
 				name="importAnimations"
-				render={({
-					field: { ref, ...extras },
-				}) => (
-					<AnimationsCheckbox
-						control={<Checkbox />}
-						hidden={!isSpm}
-						label={formatMessage({ id: 'uploadFileForm.settingsSidebar.importAnimations', defaultMessage: 'Import transformations' })}
-						checked={extras.value}
-						{...extras}
-					/>
-				)}
+				label={formatMessage({ id: 'uploadFileForm.settingsSidebar.importAnimations', defaultMessage: 'Import transformations' })}
+				hidden={!isSpm}
 			/>
 			<TimezoneSelect
 				control={control}
+				hidden={!isSpm}
 				name="timezone"
 				label={formatMessage({ id: 'uploadFileForm.settingsSidebar.timezone', defaultMessage: 'Timezone' })}
 				onChange={

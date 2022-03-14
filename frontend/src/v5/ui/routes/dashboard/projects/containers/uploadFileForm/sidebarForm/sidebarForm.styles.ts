@@ -17,8 +17,8 @@
 
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
-import { FormControlLabel } from '@material-ui/core';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
+import { FormCheckbox } from '@controls/formCheckbox/formCheckbox.component';
 
 export const Title = styled(Typography).attrs({
 	variant: 'h3',
@@ -42,7 +42,7 @@ export const Heading = styled(Typography).attrs({
 	margin-top: 29px;
 `;
 
-export const AnimationsCheckbox = styled(FormControlLabel)`
+export const AnimationsCheckbox = styled(FormCheckbox)`
 	padding: 15px 0 0;
 	height: 24px;
 `;

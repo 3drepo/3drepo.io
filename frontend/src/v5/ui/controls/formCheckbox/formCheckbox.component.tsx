@@ -16,49 +16,32 @@
  */
 
 import React from 'react';
-import { Select, InputLabel, FormControl, SelectProps } from '@material-ui/core';
+import { Checkbox, FormControlLabel, FormControlLabelProps } from '@material-ui/core';
 import { Controller } from 'react-hook-form';
 
-export type FormSelectProps = SelectProps & {
+export type FormCheckboxProps = FormControlLabelProps & {
+	name: string;
+	label: string;
 	control: any;
 };
 
-export const FormSelect = ({
+export const FormCheckbox = ({
 	name,
-	required,
 	label,
-	children,
 	control,
-	disabled,
-	hidden,
 	...otherProps
-}: FormSelectProps) => (
-	<FormControl>
-		<InputLabel
-			id={`${name}-label`}
-			required={required}
-			disabled={disabled}
-			hidden={hidden}
-		>
-			{label}
-		</InputLabel>
-		<Controller
-			control={control}
-			name={name}
-			render={({ field }) => (
-				<Select
-					{...field}
-					inputRef={field.ref}
-					labelId={`${name}-label`}
-					id={name}
-					label={label}
-					disabled={disabled}
-					hidden={hidden}
-					{...otherProps}
-				>
-					{children}
-				</Select>
-			)}
-		/>
-	</FormControl>
+}: FormCheckboxProps) => (
+	<Controller
+		control={control}
+		name={name}
+		render={({ field }) => (
+			<FormControlLabel
+				{...field}
+				control={<Checkbox />}
+				label={label}
+				checked={field.value}
+				{...otherProps}
+			/>
+		)}
+	/>
 );
