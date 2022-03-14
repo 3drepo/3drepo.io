@@ -25,7 +25,7 @@ import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboard
 import { Tooltip } from '@material-ui/core';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import { useParams } from 'react-router-dom';
-import { isEmpty } from 'lodash';
+import { isEmpty, partition, pick } from 'lodash';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { IconContainer, IncludeIcon, RemoveIcon } from './editFederationModal.styles';
 import { ActionButtonProps, EditFederationContainers, IconButtonProps } from './editFederationContainersList/editFederationContainersList.component';
@@ -56,14 +56,30 @@ export const EditFederationModal = ({
 		);
 	}, [containers]);
 
+	const partitionContainersByQuery = (
+		containersToPartition: IContainer[],
+		query: string,
+	) : [IContainer[], IContainer[]] => (
+		partition(
+			containersToPartition,
+			(container) => (
+				Object.values(pick(container, ['name', 'code', 'type']))
+					.some((value) => (value as string).toLocaleLowerCase().includes(query.toLocaleLowerCase()))),
+		)
+	);
+
 	const includeContainer = (container: IContainer) => {
 		setIncludedContainers([...includedContainers, container]);
 		setAvailableContainers(availableContainers.filter(({ _id }) => _id !== container._id));
 	};
 
-	const includeAllContainers = () => {
-		setIncludedContainers(containers);
-		setAvailableContainers([]);
+	const includeAllContainers = (filterQuery: string = '') => {
+		const [
+			containersToInclude,
+			availableContainersLeft,
+		] = partitionContainersByQuery(availableContainers, filterQuery);
+		setIncludedContainers([...includedContainers, ...containersToInclude]);
+		setAvailableContainers(availableContainersLeft);
 	};
 
 	const removeContainer = (container: IContainer) => {
@@ -71,9 +87,13 @@ export const EditFederationModal = ({
 		setIncludedContainers(includedContainers.filter(({ _id }) => _id !== container._id));
 	};
 
-	const removeAllContainers = () => {
-		setIncludedContainers([]);
-		setAvailableContainers(containers);
+	const removeAllContainers = (filterQuery: string = '') => {
+		const [
+			containersToRemove,
+			includedContainersLeft,
+		] = partitionContainersByQuery(includedContainers, filterQuery);
+		setAvailableContainers([...availableContainers, ...containersToRemove]);
+		setIncludedContainers(includedContainersLeft);
 	};
 
 	const saveChanges = (event: SyntheticEvent) => {
@@ -90,10 +110,12 @@ export const EditFederationModal = ({
 	return (
 		<FormModal
 			open={openState}
-			title={formatMessage({
-				id: 'modal.editFederation.title',
-				defaultMessage: 'Edit {federationName}',
-			}, { federationName: federation.name })}
+			title={
+				formatMessage({
+					id: 'modal.editFederation.title',
+					defaultMessage: 'Edit {federationName}',
+				}, { federationName: federation.name })
+			}
 			confirmLabel={formatMessage({ id: 'modal.editFederation.confirm', defaultMessage: 'Save Changes' })}
 			onClickClose={onClickClose}
 			onSubmit={saveChanges}
@@ -122,10 +144,10 @@ export const EditFederationModal = ({
 						/>
 					</DashboardListEmptyText>
 				)}
-				actionButton={({ children, disabled }: ActionButtonProps) => (
+				actionButton={({ children, disabled, filterQuery }: ActionButtonProps) => (
 					<Button
 						errorButton
-						onClick={removeAllContainers}
+						onClick={() => removeAllContainers(filterQuery)}
 						disabled={disabled}
 					>
 						{children}
@@ -174,11 +196,11 @@ export const EditFederationModal = ({
 						/>
 					</DashboardListEmptyText>
 				)}
-				actionButton={({ children, disabled }) => (
+				actionButton={({ children, disabled, filterQuery }) => (
 					<Button
 						variant="outlined"
 						color="primary"
-						onClick={includeAllContainers}
+						onClick={() => includeAllContainers(filterQuery)}
 						disabled={disabled}
 					>
 						{children}
