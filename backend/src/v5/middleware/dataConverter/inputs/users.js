@@ -133,11 +133,10 @@ Users.validateForgotPasswordData = async (req, res, next) => {
 			const usernameOrEmail = req.body.user;
 			const { user } = await getUserByQuery({ $or: [{ user: usernameOrEmail }, { 'customData.email': usernameOrEmail }] });
 			req.body.user = user;
+			next();
 		} catch {
-			// if username is wrong still continue
+			respond(req, res, templates.ok);
 		}
-
-		next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
@@ -153,7 +152,15 @@ Users.validateResetPasswordData = async (req, res, next) => {
 
 	try {
 		await schema.validate(req.body);
-		next();
+
+		try {
+			await getUserByQuery({ user: req.body.user, 'customData.resetPasswordToken.token': req.body.token, 
+				'customData.resetPasswordToken.expiredAt': { $gt: new Date() }});
+
+			next();
+		} catch (err) {
+			throw templates.invalidToken;
+		}
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}

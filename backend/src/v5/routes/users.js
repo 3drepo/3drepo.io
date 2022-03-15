@@ -100,7 +100,7 @@ const forgotPassword = async (req, res) => {
 	const { user } = req.body;
 
 	try {
-		await Users.resetPasswordToken(user);
+		await Users.generateResetPasswordToken(user);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
@@ -109,10 +109,10 @@ const forgotPassword = async (req, res) => {
 };
 
 const resetPassword = async (req, res) => {
-	const { token, newPassword, user } = req.body;
+	const { newPassword, user } = req.body;
 
 	try {
-		await Users.resetPassword(user, token, newPassword);
+		await Users.updatePassword(user, newPassword);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
@@ -403,8 +403,6 @@ const establishRoutes = () => {
 	*                 description: The username or email of the user
 	*                 example: nick.wilson@email.com
 	*     responses:
-	*       401:
-	*         $ref: "#/components/responses/notLoggedIn"
 	*       200:
 	*         description: Sends an email to the user with a reset password link
 	*/
@@ -433,11 +431,11 @@ const establishRoutes = () => {
 	*                 example: newPassword123!
 	*               token:
 	*                 type: string
-	*                 description: The reset passsword token
+	*                 description: The reset password token
 	*                 example: c0f6b97ae5a9c210ee050a9ada3faabc
 	*     responses:
 	*       401:
-	*         $ref: "#/components/responses/notLoggedIn"
+	*         $ref: "#/components/responses/invalidToken"
 	*       200:
 	*         description: Resets the user password
 	*/
