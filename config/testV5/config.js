@@ -158,19 +158,13 @@ module.exports = {
 
 	mail: {
 		smtpConfig: {
-			host: 'smtp.gmail.com',
-			port: 465,
-			secure: true,
+			host: 'smtp.ethereal.email',
+			port: 587,
 			auth: {
-				user: 'no-reply@3drepo.org',
-				pass: "jhocolcadloxspxf"
+				user: 'jacynthe.abernathy28@ethereal.email',
+				pass: 'G4Mj6yM8pKhFJKvQK4'
 			},
 		},
-		sender: '"3D Repo" <support@3drepo.org>',
-		urls: {
-			'forgotPassword': data => `/passwordChange?username=${data.username}&token=${data.token}`,
-			'verify': data => `/registerVerify?username=${data.username}&token=${data.token}` + (data.pay ? '&pay=true' : '')
-		}
+		sender: '"3D Repo" <dummyEmail@3drepo.org>'		
 	},
-
 }

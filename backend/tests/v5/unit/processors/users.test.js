@@ -44,36 +44,13 @@ const users = [
 			},
 		},
 	},
-	{
-		user: 'user2',
-		customData: {
-			firstName: 'John',
-			lastName: 'Wilson',
-			email: 'example@email.com',
-			resetPasswordToken: {
-				token: 'valid token',
-				expiredAt: new Date(2020, 1, 1),
-			},
-		},
-	},
-	{
-		user: 'user3',
-		customData: {
-			firstName: 'John',
-			lastName: 'Wilson',
-			email: 'example@email.com',
-		},
-	},
 ];
-const userWithExpiredToken = users[1];
-const userWithNoToken = users[2];
 
 const getUserByUsernameMock = UsersModel.getUserByUsername.mockImplementation(
 	(username) => users.find((u) => u.user === username),
 );
 const updateUserByUsernameMock = UsersModel.updateProfile.mockImplementation(() => {});
 const updatePasswordMock = UsersModel.updatePassword.mockImplementation(() => {});
-const resetPasswordTokenMock = UsersModel.resetPasswordToken.mockImplementation(() => {});
 UsersModel.canLogIn.mockImplementation((user) => user);
 UsersModel.canLogIn.mockImplementation((user) => user);
 UsersModel.authenticate.mockResolvedValue('user1');
@@ -153,46 +130,8 @@ const tesUpdateProfile = () => {
 	});
 };
 
-const testResetPasswordToken = () => {
-	describe('Reset password token', () => {
-		test('should reset password token', async () => {
-			await Users.resetPasswordToken('user1');
-			expect(resetPasswordTokenMock.mock.calls.length).toBe(1);
-			expect(resetPasswordTokenMock.mock.calls[0][0]).toBe('user1');
-		});
-	});
-};
-
-const tesResetPassword = () => {
-	describe('Reset user password', () => {
-		test('should fail if user has no token', async () => {
-			await expect(Users.resetPassword(userWithNoToken.user, 'some token', 'newPass'))
-				.rejects.toEqual(templates.invalidToken);
-		});
-
-		test('should fail if user has no expired token', async () => {
-			await expect(Users.resetPassword(userWithExpiredToken.user, 'some token', 'newPass'))
-				.rejects.toEqual(templates.invalidToken);
-		});
-
-		test('should fail if user has token different than the provided one', async () => {
-			await expect(Users.resetPassword(users[0].user, 'some token', 'newPass'))
-				.rejects.toEqual(templates.invalidToken);
-		});
-
-		test('should reset user password', async () => {
-			await Users.resetPassword(users[0].user, users[0].customData.resetPasswordToken.token, 'newPass');
-			expect(updatePasswordMock.mock.calls.length).toBe(1);
-			expect(updatePasswordMock.mock.calls[0][0]).toEqual(users[0].user);
-			expect(updatePasswordMock.mock.calls[0][1]).toEqual('newPass');
-		});
-	});
-};
-
 describe('processors/users', () => {
 	testLogin();
 	tesGetProfileByUsername();
 	tesUpdateProfile();
-	tesResetPassword();
-	testResetPasswordToken();
 });

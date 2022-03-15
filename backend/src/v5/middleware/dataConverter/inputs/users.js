@@ -154,14 +154,20 @@ Users.validateResetPasswordData = async (req, res, next) => {
 		await schema.validate(req.body);
 
 		try {
-			await getUserByQuery({ user: req.body.user, 'customData.resetPasswordToken.token': req.body.token, 
-				'customData.resetPasswordToken.expiredAt': { $gt: new Date() }});
+			await getUserByQuery({ user: req.body.user,
+				'customData.resetPasswordToken.token': req.body.token,
+				'customData.resetPasswordToken.expiredAt': { $gt: new Date() } });
 
 			next();
 		} catch (err) {
 			throw templates.invalidToken;
 		}
 	} catch (err) {
+		if (err.code === templates.invalidToken.code) {
+			respond(req, res, templates.invalidToken);
+			return;
+		}
+
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };

@@ -19,6 +19,7 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../helper/services');
 const { src, image } = require('../../helper/path');
 const session = require('supertest-session');
+const { generateRandomString } = require('../../helper/services');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -463,7 +464,7 @@ const testForgotPassword = () => {
 const testResetPassword = () => {
 	describe('Reset user password', () => {
 		test('should fail if a token is not provided', async () => {
-			const res = await agent.put('/v5/user/password').send({ newPassword: 'Abcdefghijk1!', user: testUserWithToken.user })
+			const res = await agent.put('/v5/user/password').send({ newPassword: generateRandomString(), user: testUserWithToken.user })
 				.expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
@@ -475,7 +476,7 @@ const testResetPassword = () => {
 		});
 
 		test('should fail if user is not provided', async () => {
-			const res = await agent.put('/v5/user/password').send({ newPassword: 'Abcdefghijk1!', token: 'some random token' })
+			const res = await agent.put('/v5/user/password').send({ newPassword: generateRandomString(), token: 'some random token' })
 				.expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
@@ -487,32 +488,41 @@ const testResetPassword = () => {
 		});
 
 		test('should fail if user is not found', async () => {
-			const res = await agent.put('/v5/user/password').send({ newPassword: 'Abcdefghijk1!', token: 'some random token', user: 'invalid user' })
-				.expect(templates.userNotFound.status);
-			expect(res.body.code).toEqual(templates.userNotFound.code);
+			const res = await agent.put('/v5/user/password').send({ newPassword: generateRandomString(), token: 'some random token', user: 'invalid user' })
+				.expect(templates.invalidToken.status);
+			expect(res.body.code).toEqual(templates.invalidToken.code);
 		});
 
 		test('should fail if user has no token', async () => {
-			const res = await agent.put('/v5/user/password').send({ newPassword: 'Abcdefghijk1!', token: 'some random token', user: testUser.user })
+			const res = await agent.put('/v5/user/password').send({ newPassword: generateRandomString(), token: 'some random token', user: testUser.user })
 				.expect(templates.invalidToken.status);
 			expect(res.body.code).toEqual(templates.invalidToken.code);
 		});
 
 		test('should fail if user has expired token', async () => {
-			const res = await agent.put('/v5/user/password').send({ newPassword: 'Abcdefghijk1!', token: expiredPasswordToken.token, user: testUserWithExpiredToken.user })
+			const res = await agent.put('/v5/user/password').send({ newPassword: generateRandomString(), token: expiredPasswordToken.token, user: testUserWithExpiredToken.user })
 				.expect(templates.invalidToken.status);
 			expect(res.body.code).toEqual(templates.invalidToken.code);
 		});
 
 		test('should fail if user token is different than the one provided', async () => {
-			const res = await agent.put('/v5/user/password').send({ newPassword: 'Abcdefghijk1!', token: 'different token', user: testUserWithToken.user })
+			const res = await agent.put('/v5/user/password').send({ newPassword: generateRandomString(), token: 'different token', user: testUserWithToken.user })
 				.expect(templates.invalidToken.status);
 			expect(res.body.code).toEqual(templates.invalidToken.code);
 		});
 
 		test('should reset user password', async () => {
-			await agent.put('/v5/user/password').send({ newPassword: 'Abcdefghijk1!', token: validPasswordToken.token, user: testUserWithToken.user })
+			const newPassword = generateRandomString();
+			await agent.put('/v5/user/password').send({ newPassword, token: validPasswordToken.token, user: testUserWithToken.user })
 				.expect(templates.ok.status);
+
+			// trying to log in with the old password should fail
+			await testSession.post('/v5/login/').send({ user: testUserWithToken.user, password: testUserWithToken.password })
+				.expect(templates.incorrectPassword.status);
+
+			// using the same token should fail
+			await agent.put('/v5/user/password').send({ newPassword: generateRandomString(), token: validPasswordToken.token, user: testUserWithToken.user })
+				.expect(templates.invalidToken.status);
 		});
 	});
 };

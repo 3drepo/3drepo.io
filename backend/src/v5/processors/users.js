@@ -19,7 +19,6 @@ const { authenticate, canLogIn, deleteApiKey, generateApiKey, generateResetPassw
 
 const Users = {};
 const { isEmpty, removeFields } = require('../utils/helper/objects');
-const { templates } = require('../utils/responseCodes');
 
 Users.login = async (username, password) => {
 	await canLogIn(username);

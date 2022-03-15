@@ -456,22 +456,14 @@ const testUploadAvatar = () => {
 	});
 };
 
-const testResetPasswordToken = () => {
+const testGenerateResetPasswordToken = () => {
 	describe('Reset password token', () => {
-		test('should do nothing if user is not found', async () => {
-			const fn1 = jest.spyOn(db, 'findOne').mockImplementation(() => { });
-			await User.resetPasswordToken('user1');
-			expect(fn1.mock.calls.length).toBe(1);
-			expect(fn1.mock.calls[0][2]).toEqual({ user: 'user1' });
-			expect(fn1.mock.calls[0][3]).toEqual({ user: 1, 'customData.email': 1, 'customData.firstName': 1 });
-		});
-
 		test('should update user password', async () => {
 			const fn1 = jest.spyOn(db, 'findOne').mockImplementation(() => ({ customData: { email: 'example@email.com', firstName: 'John' } }));
 			const fn2 = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
 			const expiredAt = new Date();
 			expiredAt.setHours(expiredAt.getHours() + 24);
-			await User.resetPasswordToken('user1');
+			await User.generateResetPasswordToken('user1');
 			expect(fn1.mock.calls.length).toBe(1);
 			expect(fn1.mock.calls[0][2]).toEqual({ user: 'user1' });
 			expect(fn1.mock.calls[0][3]).toEqual({ user: 1, 'customData.email': 1, 'customData.firstName': 1 });
@@ -480,9 +472,9 @@ const testResetPasswordToken = () => {
 			expect(fn2.mock.calls[0][3]).toEqual({ $set: { 'customData.resetPasswordToken': { token: apiKey, expiredAt } } });
 		});
 
-		test('should throw error if email ', async () => {
+		test('should throw error if email fails to be sent', async () => {
 			jest.spyOn(db, 'findOne').mockImplementation(() => ({ customData: { email: invalidEmail, firstName: 'John' } }));
-			await expect(User.resetPasswordToken('user1'))
+			await expect(User.generateResetPasswordToken('user1'))
 				.rejects.toEqual(templates.unknown);
 		});
 	});
@@ -501,5 +493,5 @@ describe('models/users', () => {
 	testGetAvatar();
 	testUploadAvatar();
 	testUpdatePassword();
-	testResetPasswordToken();
+	testGenerateResetPasswordToken();
 });
