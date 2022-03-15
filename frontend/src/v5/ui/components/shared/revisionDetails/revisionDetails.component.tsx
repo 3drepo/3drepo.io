@@ -37,6 +37,7 @@ import {
 	RevisionsListEmptyWrapper,
 	RevisionsListEmptyContainer,
 	RevisionsListEmptyText,
+	ScrollArea,
 } from './revisionDetails.styles';
 
 interface IRevisionDetails {
@@ -81,30 +82,32 @@ export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDe
 			<RevisionsListHeaderContainer>
 				<RevisionsListHeaderLabel width={130} tabletWidth={94}><FormattedMessage id="revisionDetails.addedOn" defaultMessage="Added on" /></RevisionsListHeaderLabel>
 				<RevisionsListHeaderLabel width={228} tabletWidth={155}><FormattedMessage id="revisionDetails.addedBy" defaultMessage="Added by" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel width={330} tabletWidth={150}><FormattedMessage id="revisionDetails.revisionCode" defaultMessage="Revision code" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={355} tabletWidth={150}><FormattedMessage id="revisionDetails.revisionCode" defaultMessage="Revision code" /></RevisionsListHeaderLabel>
 				<RevisionsListHeaderLabel hideWhenSmallerThan={Display.Tablet}><FormattedMessage id="revisionDetails.description" defaultMessage="Description" /></RevisionsListHeaderLabel>
 			</RevisionsListHeaderContainer>
-			<RevisionsList>
-				{isLoading ? (
-					range(revisionsCount).map((key) => <SkeletonListItem key={key} />)
-				) : (
-					revisions.map((revision, i) => (
-						<RevisionsListItemWrapper
-							isSingle={isSingle}
-							isBeforeSelected={i === selected - 1}
-							selected={i === selected}
-							onClick={() => {}}
-							key={revision._id}
-						>
-							<RevisionsListItem
-								revision={revision}
-								containerId={containerId}
-								active={i === selected}
-							/>
-						</RevisionsListItemWrapper>
-					))
-				)}
-			</RevisionsList>
+			<ScrollArea autoHeight>
+				<RevisionsList>
+					{isLoading ? (
+						range(revisionsCount).map((key) => <SkeletonListItem key={key} />)
+					) : (
+						revisions.map((revision, i) => (
+							<RevisionsListItemWrapper
+								isSingle={isSingle}
+								isBeforeSelected={i === selected - 1}
+								selected={i === selected}
+								onClick={() => {}}
+								key={revision._id}
+							>
+								<RevisionsListItem
+									revision={revision}
+									containerId={containerId}
+									active={i === selected}
+								/>
+							</RevisionsListItemWrapper>
+						))
+					)}
+				</RevisionsList>
+			</ScrollArea>
 		</Container>
 	);
 };

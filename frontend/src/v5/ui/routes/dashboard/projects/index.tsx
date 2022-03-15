@@ -22,12 +22,12 @@ import { useRouteMatch, Route, Switch, Redirect } from 'react-router-dom';
 import { discardSlash } from '@/v5/services/routing/routing';
 import { NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
 import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers/usersAction.dispatchers';
+import { ScrollArea } from '@controls/scrollArea';
 import { Federations } from './federations';
 import { Containers } from './containers';
 import { UserPermissions } from './userPermissions/userPermissions.component';
 import { ProjectPermissions } from './projectPermissions/projectPermissions.component';
 import { Content } from './projects.styles';
-import { ScrollArea } from '@controls/scrollArea';
 
 export const ProjectContent = () => {
 	const { teamspace } = useParams();
