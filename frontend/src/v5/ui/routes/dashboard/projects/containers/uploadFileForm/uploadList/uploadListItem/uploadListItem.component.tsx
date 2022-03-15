@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -93,14 +93,16 @@ export const UploadListItem = ({
 				errorMessage={errors.revisionTag?.message}
 			/>
 			<UploadProgress progress={progress} errorMessage={uploadErrorMessage} hidden={!isUploading} />
-			<span hidden={isUploading}>
-				<Button $selectedrow={isSelected} onClick={onClickEdit}>
-					<EditIcon />
-				</Button>
-				<Button $selectedrow={isSelected} onClick={onClickDelete}>
-					<DeleteIcon />
-				</Button>
-			</span>
+			{ isUploading && (
+				<>
+					<Button $selectedrow={isSelected} onClick={onClickEdit}>
+						<EditIcon />
+					</Button>
+					<Button $selectedrow={isSelected} onClick={onClickDelete}>
+						<DeleteIcon />
+					</Button>
+				</>
+			)}
 		</UploadListItemRow>
 	);
 };
