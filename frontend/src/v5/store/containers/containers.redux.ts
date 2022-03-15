@@ -20,7 +20,8 @@ import { Constants } from '@/v5/helpers/actions.helper';
 import { prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import { FetchContainerStatsResponse } from '@/v5/services/api/containers';
 import { Action } from 'redux';
-import { IContainer, NewContainer, ProjectAndContainerId, ProjectId, TeamspaceAndProjectId, TeamspaceProjectAndContainerId } from './containers.types';
+import { IContainer, NewContainer } from './containers.types';
+import { TeamspaceProjectAndContainerId, ProjectAndContainerId, TeamspaceAndProjectId, ProjectId } from '../store.types';
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({
 	addFavourite: ['teamspace', 'projectId', 'containerId'],

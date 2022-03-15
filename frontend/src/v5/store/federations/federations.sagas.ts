@@ -21,7 +21,7 @@ import * as API from '@/v5/services/api';
 import {
 	FetchFederationsAction,
 	FetchFederationsResponse,
-	FetchFederationStatsResponse,
+	FederationStats,
 	AddFavouriteAction,
 	RemoveFavouriteAction,
 	FetchFederationStatsAction,
@@ -91,7 +91,7 @@ export function* fetchFederations({ teamspace, projectId }: FetchFederationsActi
 
 export function* fetchFederationStats({ teamspace, projectId, federationId }: FetchFederationStatsAction) {
 	try {
-		const stats: FetchFederationStatsResponse = yield API.Federations.fetchFederationStats({
+		const stats: FederationStats = yield API.Federations.fetchFederationStats({
 			teamspace, projectId, federationId,
 		});
 

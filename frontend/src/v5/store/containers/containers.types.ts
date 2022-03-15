@@ -51,13 +51,3 @@ export type NewContainer = {
 	desc?: string;
 	code?: string;
 };
-
-export type TeamspaceId = { teamspace: string };
-export type ProjectId = { projectId: string };
-export type ContainerId = { containerId: string };
-
-export type TeamspaceAndProjectId = TeamspaceId & ProjectId;
-
-export type TeamspaceProjectAndContainerId = TeamspaceId & ProjectId & ContainerId;
-
-export type ProjectAndContainerId = ProjectId & ContainerId;

@@ -18,10 +18,9 @@
 import { AxiosResponse } from 'axios';
 import {
 	NewContainer,
-	TeamspaceAndProjectId,
-	TeamspaceProjectAndContainerId,
 	UploadStatuses,
 } from '@/v5/store/containers/containers.types';
+import { TeamspaceAndProjectId, TeamspaceProjectAndContainerId } from '@/v5/store/store.types';
 import api from './default';
 
 /**
@@ -32,7 +31,7 @@ type FavouriteParams = TeamspaceProjectAndContainerId;
 type DeleteContainerParams = TeamspaceProjectAndContainerId;
 type FetchContainerStatsParams = TeamspaceProjectAndContainerId;
 
-type CreateContainerPayload = {
+type CreateContainerParams = {
 	teamspace: string;
 	projectId: string;
 	newContainer: NewContainer;
@@ -104,7 +103,7 @@ export const createContainer = async ({
 	teamspace,
 	projectId,
 	newContainer,
-}: CreateContainerPayload): Promise<string> => {
+}: CreateContainerParams): Promise<string> => {
 	const { data } = await api.post(`teamspaces/${teamspace}/projects/${projectId}/containers`, newContainer);
 	return data._id;
 };

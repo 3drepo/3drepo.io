@@ -16,24 +16,30 @@
  */
 
 import {
-	FetchFederationsPayload,
-	FetchFederationsResponse,
-	FetchFederationStatsPayload,
-	FetchFederationStatsResponse,
-	FavouritePayload,
-	FetchFederationViewsPayload,
-	FetchFederationViewsResponse,
-	FetchFederationSettingsPayload,
-	DeleteFederationPayload,
-	UpdateFederationContainersPayload,
-	FetchFederationRawSettingsResponse,
-	UpdateFederationSettingsPayload,
+	FederationBackendSettings,
+	FederationSettings,
+	MinimumFederation,
+	FederationView,
+	FederationStats,
 } from '@/v5/store/federations/federations.types';
+import { TeamspaceAndProjectId, TeamspaceProjectAndFederationId } from '@/v5/store/store.types';
 import { AxiosResponse } from 'axios';
 import api from './default';
 
+type FavouriteParams = TeamspaceProjectAndFederationId;
+type FetchFederationsParams = TeamspaceAndProjectId;
+type FetchFederationStatsParams = TeamspaceProjectAndFederationId;
+type FetchFederationViewsParams = TeamspaceProjectAndFederationId;
+type DeleteFederationParams = TeamspaceProjectAndFederationId;
+type UpdateFederationContainersParams = TeamspaceProjectAndFederationId & { containers: string[] };
+type UpdateFederationSettingsParams = TeamspaceProjectAndFederationId & {settings: FederationSettings};
+type FetchFederationSettingsParams = TeamspaceProjectAndFederationId;
+
+type FetchFederationsResponse = { federations: Array<MinimumFederation> };
+type FetchFederationViewsResponse = { views: FederationView[] };
+
 export const addFavourites = (
-	{ teamspace, projectId, federationId }: FavouritePayload,
+	{ teamspace, projectId, federationId }: FavouriteParams,
 ): Promise<AxiosResponse<void>> => (
 	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/favourites`, {
 		federations: [federationId],
@@ -41,7 +47,7 @@ export const addFavourites = (
 );
 
 export const removeFavourites = (
-	{ teamspace, projectId, federationId }: FavouritePayload,
+	{ teamspace, projectId, federationId }: FavouriteParams,
 ): Promise<AxiosResponse<void>> => (
 	api.delete(`teamspaces/${teamspace}/projects/${projectId}/federations/favourites`, {
 		federations: [federationId],
@@ -51,7 +57,7 @@ export const removeFavourites = (
 export const fetchFederations = async ({
 	teamspace,
 	projectId,
-}: FetchFederationsPayload): Promise<FetchFederationsResponse> => {
+}: FetchFederationsParams): Promise<FetchFederationsResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations`);
 	return data;
 };
@@ -60,7 +66,7 @@ export const fetchFederationStats = async ({
 	teamspace,
 	projectId,
 	federationId,
-}: FetchFederationStatsPayload): Promise<FetchFederationStatsResponse> => {
+}: FetchFederationStatsParams): Promise<FederationStats> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/stats`);
 	return data;
 };
@@ -69,7 +75,7 @@ export const fetchFederationViews = async ({
 	teamspace,
 	projectId,
 	federationId,
-}: FetchFederationViewsPayload): Promise<FetchFederationViewsResponse> => {
+}: FetchFederationViewsParams): Promise<FetchFederationViewsResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/views`);
 	return data;
 };
@@ -78,7 +84,7 @@ export const fetchFederationSettings = async ({
 	teamspace,
 	projectId,
 	federationId,
-}: FetchFederationSettingsPayload): Promise<FetchFederationRawSettingsResponse> => {
+}: FetchFederationSettingsParams): Promise<FederationBackendSettings> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`);
 	return data;
 };
@@ -88,7 +94,7 @@ export const updateFederationSettings = async ({
 	projectId,
 	federationId,
 	settings,
-}: UpdateFederationSettingsPayload): Promise<AxiosResponse<void>> => (
+}: UpdateFederationSettingsParams): Promise<AxiosResponse<void>> => (
 	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`, settings)
 );
 
@@ -96,7 +102,7 @@ export const deleteFederation = ({
 	teamspace,
 	projectId,
 	federationId,
-}: DeleteFederationPayload): Promise<AxiosResponse<void>> => (
+}: DeleteFederationParams): Promise<AxiosResponse<void>> => (
 	api.delete(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
 );
 
@@ -105,7 +111,7 @@ export const updateFederationContainers = async ({
 	projectId,
 	federationId,
 	containers,
-}: UpdateFederationContainersPayload): Promise<AxiosResponse<void>> => (
+}: UpdateFederationContainersParams): Promise<AxiosResponse<void>> => (
 	api.post(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/revisions`, {
 		containers,
 	})

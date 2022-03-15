@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { Action } from 'redux';
+import { ProjectAndFederationId, TeamspaceProjectAndFederationId } from '../store.types';
 
 export interface IFederation {
 	_id: string;
@@ -48,7 +49,17 @@ export interface SurveyPoint {
 
 export type FederationSettings = Pick<IFederation, 'surveyPoint' | 'angleFromNorth' | 'defaultView' | 'unit' | 'desc' | 'name' | 'code'>;
 
-export type FederationRawSettings = Omit<FederationSettings, 'surveyPoint'> & {
+export type FetchFederationSettingsResponse = FederationSettings & {
+	timestamp?: number;
+	status?: string[];
+	errorReason?: {
+		message: string;
+		timestamp: number;
+		errorCode: string;
+	}
+};
+
+export type FederationBackendSettings = Omit<FetchFederationSettingsResponse, 'surveyPoint'> & {
 	surveyPoints: SurveyPoint[];
 };
 
@@ -69,17 +80,9 @@ export type FetchFederationsPayload = {
 	teamspace: string;
 };
 
-export type FetchFederationsItemResponse = Pick<IFederation, '_id' | 'name' | 'role' | 'isFavourite'>;
+export type MinimumFederation = Pick<IFederation, '_id' | 'name' | 'role' | 'isFavourite'>;
 
-export type FetchFederationsResponse = {
-	federations: Array<FetchFederationsItemResponse>;
-};
-
-export type FavouritePayload = FetchFederationsPayload & {
-	federationId: string;
-};
-
-export type FetchFederationStatsResponse = {
+export type FederationStats = {
 	code: string;
 	status: string;
 	containers: string[];
@@ -91,14 +94,12 @@ export type FetchFederationStatsResponse = {
 	lastUpdated: number;
 };
 
-export type FetchFederationStatsPayload = FetchFederationsPayload & {
-	federationId: string;
-};
+export type FetchFederationStatsPayload = TeamspaceProjectAndFederationId;
 
 export type FetchFederationStatsSuccessPayload = {
 	federationId: string;
 	projectId: string;
-	federationStats: FetchFederationStatsResponse;
+	federationStats: FederationStats;
 };
 
 export type FetchFederationViewsPayload = FetchFederationsPayload & {
@@ -117,20 +118,6 @@ export type FetchFederationViewsSuccessPayload = {
 
 export type FetchFederationSettingsPayload = FetchFederationsPayload & {
 	federationId: string;
-};
-
-export type FetchFederationSettingsResponse = FederationSettings & {
-	timestamp?: number;
-	status?: string[];
-	errorReason?: {
-		message: string;
-		timestamp: number;
-		errorCode: string;
-	}
-};
-
-export type FetchFederationRawSettingsResponse = Omit<FetchFederationSettingsResponse, 'surveyPoint'> & {
-	surveyPoints: SurveyPoint[];
 };
 
 export type FetchFederationSettingsSuccessPayload = {
@@ -173,9 +160,9 @@ export interface UpdateFederationContainersSuccessPayload {
 }
 
 export type FetchFederationsAction = Action<'FETCH_FEDERATIONS'> & FetchFederationsPayload;
-export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & FavouritePayload;
-export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & FavouritePayload;
-export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & { projectId: string, federationId: string, isFavourite: boolean };
+export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & TeamspaceProjectAndFederationId;
+export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & TeamspaceProjectAndFederationId;
+export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & ProjectAndFederationId & { isFavourite: boolean };
 export type FetchFederationsSuccessAction = Action<'FETCH_FEDERATIONS_SUCCESS'> & { projectId: string, federations: IFederation[] };
 export type FetchFederationStatsAction = Action<'FETCH_FEDERATION_STATS'> & FetchFederationStatsPayload;
 export type FetchFederationStatsSuccessAction = Action<'FETCH_FEDERATION_STATS_SUCCESS'> & FetchFederationStatsSuccessPayload;
@@ -198,7 +185,7 @@ export interface IFederationsActionCreators {
 	fetchFederationStatsSuccess: (
 		projectId: string,
 		federationId: string,
-		federationStats: FetchFederationStatsResponse
+		federationStats: FederationStats
 	) => FetchFederationStatsSuccessAction;
 	addFavourite: (teamspace: string, projectId: string, federationId: string) => AddFavouriteAction;
 	removeFavourite: (teamspace: string, projectId: string, federationId: string) => RemoveFavouriteAction;
