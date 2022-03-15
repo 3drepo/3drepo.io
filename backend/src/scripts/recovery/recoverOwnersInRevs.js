@@ -27,22 +27,15 @@ const { getTeamspaceList, getCollectionsEndsWith } = require('../utils');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
-const { find, updateOne } = require(`${v5Path}/handler/db`);
+const { find, findOne, updateOne } = require(`${v5Path}/handler/db`);
 const { cn_queue: { shared_storage: sharedDir } } = require(`${v5Path}/utils/config`);
 
-const DayJS = require('dayjs');
 const Path = require('path');
 const { writeFileSync } = require('fs');
 
-const dateToString = (date) => DayJS(date).format('DD/MM/YYYY HH:MM');
-
+// Add any extra directories to check here (e.g. if we pulled out a efs from backup)
 const queueDirs = [
 	sharedDir,
-	/* 'Y:/aws-backup-restore_2022-03-14T16-16-05-773Z/queue',
-	'Y:/aws-backup-restore_2022-03-14T16-15-49-253Z/queue',
-	'Y:/aws-backup-restore_2022-03-14T15-53-47-269Z/queue',
-	'Y:/aws-backup-restore_2022-03-14T15-52-17-647Z/queue',
-	*/
 ];
 
 let recoveredCount = 0;
@@ -63,18 +56,27 @@ const attemptToFindRealOwner = (id) => {
 	return undefined;
 };
 
+const getFileSize = async (teamspace, collection, ref) => {
+	if (!ref) return 0;
+	const { size } = await findOne(teamspace, `${collection}.ref`, { _id: ref }, { size: 1 });
+	return size;
+};
+
 const getAnonOwnerRecords = async (teamspace, collection) => {
-	const records = await find(teamspace, collection, { author: 'ANONYMOUS USER' }, { _id: 1, timestamp: 1 });
-	const res = await Promise.all(records.map(async ({ _id, timestamp }) => {
+	const records = await find(teamspace, collection, { author: 'ANONYMOUS USER', incomplete: { $exists: false } }, { _id: 1, timestamp: 1, rFile: 1 });
+	const res = await Promise.all(records.map(async ({ _id, timestamp, rFile }) => {
 		const revId = UUIDToString(_id);
 		const owner = attemptToFindRealOwner(revId);
 		if (!owner) {
-			return {
+			// only list it as problematic if it's not a federation (has rFile)
+			return rFile?.length ? {
 				teamspace,
 				collection,
 				revId,
-				timestamp: dateToString(timestamp),
-			};
+				timestamp: new Date(timestamp).getTime(),
+				size: await getFileSize(teamspace, collection, rFile[0]),
+				fileName: rFile[0],
+			} : [];
 		}
 		logger.logInfo(`[${teamspace}][${collection}][${revId}] owner found (${owner}). recovering...`);
 		++recoveredCount;
@@ -101,9 +103,11 @@ const run = async () => {
 		if (list.length) revList.push(...list.flat());
 	}
 	logger.logInfo(`${revList.length + recoveredCount} records found. ${recoveredCount} owners recovered.`);
-	const filePath = 'anonOwners.json';
-	logger.logInfo(`Unrecoverable entries written to ${filePath}`);
-	writeFileSync(filePath, JSON.stringify(revList));
+	if (revList.length) {
+		const filePath = 'anonOwners.json';
+		logger.logInfo(`Unrecoverable entries written to ${filePath}`);
+		writeFileSync(filePath, JSON.stringify(revList));
+	}
 };
 
 if (process.argv.length < 1) {
