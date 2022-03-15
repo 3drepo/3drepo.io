@@ -20,10 +20,12 @@ import { ScrollbarWrapper } from './scrollArea.styles';
 
 type IScrollArea = ScrollbarProps & {
 	children: any;
-}
+	variant?: 'base' | 'secondary';
+};
 
-export const ScrollArea = ({ children, ...props }: IScrollArea): JSX.Element => (
+export const ScrollArea = ({ variant = 'base', children, ...props }: IScrollArea): JSX.Element => (
 	<ScrollbarWrapper
+		variant={variant}
 		{...props}
 	>
 		{children}

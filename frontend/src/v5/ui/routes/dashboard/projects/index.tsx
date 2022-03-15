@@ -39,7 +39,7 @@ export const ProjectContent = () => {
 	}, [teamspace]);
 
 	return (
-		<ScrollArea autoHide>
+		<ScrollArea variant="base" autoHide>
 			<Content>
 				<Switch>
 					<Route exact path={path}>
