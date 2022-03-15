@@ -27,7 +27,7 @@ interface IProps {
 	teamspace: string;
 	model: string;
 	query?: string;
-	history: any;
+	history?: any;
 	preview?: boolean;
 }
 

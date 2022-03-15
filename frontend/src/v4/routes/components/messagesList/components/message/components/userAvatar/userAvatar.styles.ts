@@ -33,11 +33,11 @@ const noneJobBorderStyles = css`
 	width: 34px;
 `;
 
-export const Avatar = styled(AvatarComponent)`
+export const Avatar = styled(AvatarComponent)<{ src?: string, color?: string}>`
 	&& {
-		background-color: ${(props) => !props.src ? COLOR.BLACK_20 : `transparent`};
+		background-color: ${({ src }) => !src ? COLOR.BLACK_20 : `transparent`};
 		color: ${COLOR.WHITE};
 		font-size: 14px;
-		${({ color }: { color: string }) => color ? jobBorderStyles(color) : noneJobBorderStyles};
+		${({ color }) => color ? jobBorderStyles(color) : noneJobBorderStyles};
 	}
 `;

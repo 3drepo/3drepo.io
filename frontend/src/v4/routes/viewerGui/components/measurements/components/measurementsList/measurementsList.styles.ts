@@ -76,9 +76,9 @@ const sumUnitsStyle = css`
 	padding-left: 3px;
 `;
 
-export const Units = styled.div`
+export const Units = styled.div<{ sum: any }>`
 	width: 30px;
 	text-align: right;
 	padding-right: 10px;
-	${({ sum }: any) => sum && sumUnitsStyle};
+	${({ sum }) => sum && sumUnitsStyle};
 `;

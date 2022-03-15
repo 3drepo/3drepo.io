@@ -27,13 +27,12 @@ interface IProps extends ButtonProps {
 
 export const ContainedButton: FC<IProps> = ({ children, icon, onClick, ...props }) => {
 	const IconComponent = icon;
-
 	return (
 		<StyledButton
 			color="primary"
 			variant="contained"
 			size="small"
-			squeezed={Boolean(icon) ? 1 : 0}
+			squeezed={Boolean(icon)}
 			onClick={onClick}
 			{...props}
 		>

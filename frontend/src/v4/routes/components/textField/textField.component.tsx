@@ -81,7 +81,7 @@ export class TextField extends PureComponent<IProps, IState> {
 	};
 
 	private inputLocalRef = createRef();
-	private markdownFieldRef = createRef();
+	private markdownFieldRef = createRef<HTMLSpanElement>();
 
 	get isExpandable() {
 		return this.props.expandable && this.state.isLongContent && !this.state.edit;

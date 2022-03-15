@@ -18,7 +18,9 @@
 import { IconButton } from '@mui/material';
 import styled from 'styled-components';
 
-export const SmallIconButtonStyled = styled(IconButton)`
+export const SmallIconButtonStyled = styled(IconButton).attrs({
+	component: 'span'
+})`
 	&& {
 		width: 10px;
 		height: 10px;

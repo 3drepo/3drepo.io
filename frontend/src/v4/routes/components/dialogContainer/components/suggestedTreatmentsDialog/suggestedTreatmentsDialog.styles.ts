@@ -25,9 +25,11 @@ import Typography from '@mui/material/Typography';
 
 import { COLOR } from '../../../../../styles';
 
-export const StyledTypography = styled(Typography)`
+export const StyledTypography = styled(Typography).attrs({
+	component: 'span'
+})<{ inline: boolean }>`
 	&& {
-		display: ${(props: { inline: boolean }) => props.inline ? 'inline' : 'inherit'};
+		display: ${({ inline }) => inline ? 'inline' : 'inherit'};
 	}
 `;
 

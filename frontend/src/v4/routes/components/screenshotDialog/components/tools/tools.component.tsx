@@ -176,7 +176,6 @@ export class Tools extends PureComponent<IProps, any> {
 						maxHeight: '30vh'
 					}
 				},
-				getContentAnchorEl: null,
 				anchorOrigin: {
 					vertical: 'top',
 					horizontal: 'left',

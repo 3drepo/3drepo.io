@@ -117,8 +117,8 @@ export const StyledTabs = styled(Tabs)`
 	}
 `;
 
-export const Content = styled.div`
-	display: ${(props) => props.active ? 'block' : 'none'};
+export const Content = styled.div<{ active: boolean }>`
+	display: ${({ active }) => active ? 'block' : 'none'};
 	width: 100%;
 	margin-bottom: 5px;
 

@@ -21,10 +21,10 @@ import Button from '@mui/material/Button';
 
 import { COLOR } from '../../../../styles';
 
-export const StyledButton = styled(Button)`
+export const StyledButton = styled(Button)<{ squeezed?: boolean }>`
 	&& {
 		background-color: ${COLOR.SOFT_BLUE};
-		padding: ${({ squeezed }: { squeezed: boolean }) => squeezed ? '4px 5px' : '6px 20px'};
+		padding: ${({ squeezed }) => squeezed ? '4px 5px' : '6px 20px'};
 		min-width: 56px;
 		min-height: 18px;
 		font-size: 12px;

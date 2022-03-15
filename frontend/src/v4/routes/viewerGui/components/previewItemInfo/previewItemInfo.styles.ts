@@ -58,7 +58,7 @@ export const Date = styled.span`
 	color: ${COLOR.BLACK_60};
 `;
 
-export const Details = styled.div`
+export const Details = styled.div<{ panelType: string }>`
 	align-items: center;
 	display: flex;
 	justify-content: ${({ panelType }) => panelType === VIEWER_PANELS.GROUPS ? `flex-start` : `space-between`};

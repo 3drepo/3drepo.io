@@ -72,7 +72,7 @@ export class CellSelect extends PureComponent<IProps, IState> {
 
 			return (
 				<Item
-					group={item.group ? 1 : 0}
+					group={item.group}
 					disabled={item.disabled}
 					key={index}
 					value={item.value}

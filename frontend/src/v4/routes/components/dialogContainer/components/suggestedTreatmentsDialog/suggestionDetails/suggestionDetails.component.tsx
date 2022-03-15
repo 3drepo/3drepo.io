@@ -16,6 +16,7 @@
  */
 import { FunctionComponent, useState, useRef, useEffect, useCallback } from 'react';
 import Grid from '@mui/material/Grid';
+import { TypographyProps } from '@mui/material';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { Description, ExpandButton, StyledTypography, TextContainer } from '../suggestedTreatmentsDialog.styles';
@@ -24,13 +25,18 @@ interface ITextWrapper {
 	noWrap?: boolean;
 	inline?: boolean;
 	color?: string;
-	variant?: string;
+	variant?: TypographyProps['variant'];
 }
 
 const TextWrapper: FunctionComponent<ITextWrapper> = ({
 	children, color = 'textPrimary', variant = 'caption', inline, ...props
 }) => (
-	<StyledTypography component="span" inline={inline ? 1 : 0} variant={variant} color={color} {...props}>
+	<StyledTypography
+		inline={inline}
+		variant={variant}
+		color={color}
+		{...props}
+	>
 		{children}
 	</StyledTypography>
 );

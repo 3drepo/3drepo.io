@@ -23,7 +23,6 @@ import StepBackIcon from '@mui/icons-material/FastRewind';
 import PlayArrow from '@mui/icons-material/PlayArrow';
 import Replay from '@mui/icons-material/Replay';
 import Stop from '@mui/icons-material/Stop';
-import TextField from '@mui/material/TextField';
 import { debounce, noop } from 'lodash';
 
 import { STEP_SCALE } from '../../../../../../constants/sequences';
@@ -291,7 +290,7 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 						</Grid>
 						<Grid item>
 							<DatePicker
-								shouldDisableDate={(date) => isDateOutsideRange(this.props.min, this.props.max, date.$d)}
+								shouldDisableDate={(date: any) => isDateOutsideRange(this.props.min, this.props.max, date.$d)}
 								name="date"
 								value={value}
 								inputFormat={LONG_DATE_TIME_FORMAT_NO_MINUTES}

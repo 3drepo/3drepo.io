@@ -23,10 +23,9 @@ interface IProps {
 	index: number;
 	guid: string;
 	removeMessage: (index, guid) => void;
-	isScreenshot?: boolean;
 }
 
-export const RemoveButton = ({ removeMessage, isScreenshot, index, guid }: IProps) => {
+export const RemoveButton = ({ removeMessage, index, guid }: IProps) => {
 
 	const handleRemoveMessage = (event) => {
 		event.stopPropagation();
@@ -34,7 +33,7 @@ export const RemoveButton = ({ removeMessage, isScreenshot, index, guid }: IProp
 	};
 
 	return (
-		<Wrapper screenshot={isScreenshot}>
+		<Wrapper>
 			<TooltipButton
 				label="Remove"
 				action={handleRemoveMessage}

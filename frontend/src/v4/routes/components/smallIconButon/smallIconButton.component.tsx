@@ -45,7 +45,6 @@ export class SmallIconButton extends PureComponent<IProps, any> {
 
 		return (
 			<SmallIconButtonStyled
-				component="span"
 				aria-label={ariaLabel || tooltip}
 				onClick={onClick}
 				disabled={disabled}

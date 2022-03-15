@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FC, useRef, forwardRef } from 'react';
+import { useRef, forwardRef, Ref } from 'react';
 import Tooltip from '@mui/material/Tooltip';
 import ImageIcon from '@mui/icons-material/Image';
 import { noop } from 'lodash';
@@ -117,7 +117,7 @@ const CreateScreenshot = ({ disableScreenshot, takeScreenshot, ...props }) => {
 	);
 };
 
-export const UpdateImageButton: FC<IProps> = forwardRef(({ hasImage, disabled, ...props }, ref) => {
+export const UpdateImageButton = forwardRef(({ hasImage, disabled, ...props }: IProps, ref: Ref<HTMLSpanElement>) => {
 	const imageLabel = !hasImage ? 'Add Image' : 'Edit Image';
 
 	return (

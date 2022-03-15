@@ -14,8 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent } from 'react';
+import { ComponentType, PureComponent } from 'react';
 import { DatePickerProps } from '@mui/lab/DatePicker';
+import { DateTimePickerProps } from '@mui/lab/DateTimePicker';
 import { TextField } from '@mui/material';
 import { Container, StyledDatePicker, StyledDateTimePicker } from './dateField.styles';
 
@@ -31,7 +32,7 @@ interface IProps {
 	dateTime?: boolean;
 	onChange?: (event) => void;
 	onBlur?: (event) => void;
-	shouldDisableDate?: (day: DatePickerProps) => boolean;
+	shouldDisableDate?: (day: any) => boolean;
 }
 
 interface IState {
@@ -75,23 +76,22 @@ export class DateField extends PureComponent<IProps, IState> {
 		const { value } = this.state;
 		const { onBlur, name, placeholder, inputFormat, disabled, className, dateTime, defaultValue } = this.props;
 
-		const Picker = dateTime ? StyledDateTimePicker : StyledDatePicker;
+		const Picker: ComponentType<DatePickerProps | DateTimePickerProps> = dateTime ? StyledDateTimePicker : StyledDatePicker;
 
 		return (
 			<Container className={className}>
 				<Picker
 					disabled={disabled}
 					value={value}
-					onBlur={onBlur}
-					name={name}
 					onChange={this.handleChange}
 					inputFormat={inputFormat}
 					shouldDisableDate={this.props.shouldDisableDate}
-					initialFocusedDate={this.props.initialFocusedDate}
 					renderInput={(params) => (
 						<TextField
 							placeholder={placeholder}
 							defaultValue={defaultValue}
+							name={name}
+							onBlur={onBlur}
 							{...params}
 						/>
 					)}

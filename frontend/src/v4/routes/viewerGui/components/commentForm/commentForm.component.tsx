@@ -37,6 +37,12 @@ import { ScreenshotDialog } from '../../../components/screenshotDialog';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { FieldsRow, StyledFormControl } from '../risks/components/riskDetails/riskDetails.styles';
 import { ViewerPanelButton } from '../viewerPanel/viewerPanel.styles';
+import {
+	TicketPopover as TicketSuggestion
+} from '../../../components/messagesList/components/message/components/markdownMessage/ticketReference/ticketPopover/ticketPopover.component';
+import {
+	UserPopover as UserSuggestion,
+} from '../../../components/messagesList/components/message/components/userPopover/userPopover.component';
 import { COMMENT_FIELD_NAME } from './commentForm.constants';
 import {
 	Actions,
@@ -49,8 +55,6 @@ import {
 	StyledForm,
 	StyledTextField,
 	TextFieldWrapper,
-	TicketSuggestion,
-	UserSuggestion,
 } from './commentForm.styles';
 
 interface IProps {
@@ -91,7 +95,9 @@ const CommentSchema = Yup.object().shape({
 
 interface ISuggestionItem {
 	entity: {
-		user: string
+		user: string;
+		firstName: string;
+		lastName: string;
 	};
 }
 
@@ -101,8 +107,8 @@ const UserSuggestionItem = ({ entity: { ...userData } }: ISuggestionItem) => (
 	</UserSuggestion>
 );
 
-const TicketSuggestionItem = ({ entity: { ... ticketData } }) => (
-	<TicketSuggestion {...ticketData} />
+const TicketSuggestionItem = ({ entity }) => (
+	<TicketSuggestion {...entity} />
 );
 
 export class CommentForm extends PureComponent<IProps, IState> {
@@ -404,7 +410,8 @@ export class CommentForm extends PureComponent<IProps, IState> {
 								{this.renderUploadImageButton(!hideUploadButton)}
 								{this.renderCommentTypeToggle(!hideComment && showResidualRiskInput)}
 							</ActionsGroup>
-							<Field render={({ form }) => (
+							<Field
+								render={({ form }) => (
 									<ViewerPanelButton
 										variant="fab"
 										color="secondary"

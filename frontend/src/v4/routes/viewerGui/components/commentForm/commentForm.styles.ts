@@ -22,12 +22,6 @@ import TextField from '@mui/material/Input';
 import { Form } from 'formik';
 
 import { COLOR } from '../../../../styles';
-// eslint-disable-next-line max-len
-import { TicketPopover } from '../../../components/messagesList/components/message/components/markdownMessage/ticketReference/ticketPopover/ticketPopover.component';
-import {
-	UserPopover
-} from '../../../components/messagesList/components/message/components/userPopover/userPopover.component';
-
 export const Container = styled.div`
 	position: relative;
 	background-color: ${COLOR.WHITE};
@@ -68,11 +62,11 @@ export const StyledTextFieldContainer = styled(Grid)`
 	flex: 1;
 `;
 
-export const Counter = styled.div`
+export const Counter = styled.div<{ error: boolean }>`
 	margin-right: 16px;
 	margin-top: 5px;
 	font-size: 14px;
-	color: ${(props) => props.error ? COLOR.VIVID_RED : COLOR.BLACK_60};
+	color: ${({ error }) => error ? COLOR.VIVID_RED : COLOR.BLACK_60};
 	text-align: right;
 `;
 
@@ -115,9 +109,3 @@ export const RemoveButtonWrapper = styled.div`
 	right: 0;
 	top: ${(props: any) => props.screenshot ? 0 : '-8px'};
 ` as any;
-
-export const UserSuggestion = styled(UserPopover)`
-`;
-
-export const TicketSuggestion = styled(TicketPopover)`
-`;

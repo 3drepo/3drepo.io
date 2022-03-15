@@ -187,8 +187,8 @@ export const LoaderContainer = styled.div`
 	left: 0;
 `;
 
-export const FormWrapper = styled.div`
-	width: ${(props: any) => props.size === 'sm' ? 400 : 800}px;
+export const FormWrapper = styled.div<{ size: string }>`
+	width: ${({ size }) => size === 'sm' ? 400 : 800}px;
 
 	${ViewerPanelContent} {
 		display: flex;

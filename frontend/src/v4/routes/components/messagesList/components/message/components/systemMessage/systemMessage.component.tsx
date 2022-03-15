@@ -24,25 +24,24 @@ import { Avatar, CommentWrapper, Container, MarkdownComment } from './systemMess
 interface IProps {
 	created: number;
 	comment: string;
-	teamspace: string;
 	propertyName: string;
 }
 
-const Comment: FunctionComponent<{teamspace, propertyName}> = ({teamspace, children , propertyName}) => {
+const Comment: FunctionComponent<{ propertyName }> = ({ children, propertyName }) => {
 	if (propertyName === 'issue_referenced') {
-		return (<MarkdownComment teamspace={teamspace}>{children}</MarkdownComment>);
+		return (<MarkdownComment>{children}</MarkdownComment>);
 	}
 	return (<>{children}</>);
 };
 
-export const SystemMessage = ({ created, propertyName, comment, teamspace }: IProps) => {
+export const SystemMessage = ({ created, propertyName, comment }: IProps) => {
 	return (
 		<Container>
 			<Avatar>
 				<SystemInfoIcon />
 			</Avatar>
 			<CommentWrapper>
-				<Comment propertyName={propertyName} teamspace={teamspace}>{comment}</Comment> •
+				<Comment propertyName={propertyName}>{comment}</Comment>
 				<DateTime value={created} format={DATE_TIME_FORMAT} />
 			</CommentWrapper>
 		</Container>

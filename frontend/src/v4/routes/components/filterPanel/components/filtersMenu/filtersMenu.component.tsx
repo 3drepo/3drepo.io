@@ -120,10 +120,9 @@ export class FiltersMenu extends PureComponent<IProps, IState> {
 					{item.type === FILTER_TYPES.DATE &&
 						<StyledDatePicker
 							value={this.getSelectedDate(item, subItem.value)}
-							placeholder="Select date"
 							onChange={this.onDateChange(item, subItem.value)}
 							renderInput={(params) => (
-								<TextField {...params} />
+								<TextField {...params} placeholder="Select date" />
 							)}
 						/>
 					}

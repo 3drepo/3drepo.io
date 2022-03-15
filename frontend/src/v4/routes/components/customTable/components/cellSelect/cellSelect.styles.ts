@@ -45,14 +45,14 @@ export const StyledSelect = styled(SelectField).attrs({
 	}
 `;
 
-export const Item = styled(MenuItem)`
+export const Item = styled(MenuItem)<{ group: boolean }>`
 	&& {
 		font-size: 14px;
 		color: ${COLOR.BLACK_60};
 		padding-top: 12px;
 		padding-bottom: 12px;
 
-		${(props: any) => props.group ? css`
+		${({ group }) => group ? css`
 			height: 12px;
 			font-weight: ${FONT_WEIGHT.BOLD};
 			border-top: 1px solid ${COLOR.BLACK_20};
