@@ -22,14 +22,10 @@ import {
 	FederationBackendSettings,
 	FederationSettings,
 	FederationStats,
-	FetchFederationViewsResponse,
 	IFederation,
 } from '@/v5/store/federations/federations.types';
-import {
-	prepareFederationSettingsForFrontend,
-	prepareFederationSettingsForBackend,
-} from '@/v5/store/federations/federations.helpers';
 import { times } from 'lodash';
+import { FetchFederationViewsResponse } from '@/v5/services/api/federations';
 
 
 export const federationMockFactory = (overrides?: Partial<IFederation>): IFederation => ({

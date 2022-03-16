@@ -16,21 +16,10 @@
  */
 
 import { all, put, takeEvery, takeLatest } from 'redux-saga/effects';
-import { FederationsActions, FederationsTypes } from '@/v5/store/federations/federations.redux';
+import { AddFavouriteAction, DeleteFederationAction, FederationsActions, FederationsTypes, FetchFederationsAction, FetchFederationSettingsAction, FetchFederationStatsAction, FetchFederationViewsAction, RemoveFavouriteAction, UpdateFederationContainersAction, UpdateFederationSettingsAction } from '@/v5/store/federations/federations.redux';
 import * as API from '@/v5/services/api';
 import {
-	FetchFederationsAction,
-	FetchFederationsResponse,
 	FederationStats,
-	AddFavouriteAction,
-	RemoveFavouriteAction,
-	FetchFederationStatsAction,
-	UpdateFederationSettingsAction,
-	FetchFederationViewsAction,
-	FetchFederationViewsResponse,
-	FetchFederationSettingsAction,
-	DeleteFederationAction,
-	UpdateFederationContainersAction,
 } from '@/v5/store/federations/federations.types';
 import {
 	prepareFederationsData,
@@ -39,6 +28,7 @@ import {
 } from '@/v5/store/federations/federations.helpers';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
+import { FetchFederationsResponse, FetchFederationViewsResponse } from '@/v5/services/api/federations';
 
 export function* addFavourites({ federationId, teamspace, projectId }: AddFavouriteAction) {
 	try {

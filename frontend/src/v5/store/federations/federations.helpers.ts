@@ -17,10 +17,10 @@
 
 import {
 	FederationBackendSettings,
-	FetchFederationSettingsResponse,
 	FederationStats,
 	IFederation,
 	MinimumFederation,
+	FederationSettings,
 } from '@/v5/store/federations/federations.types';
 import {
 	UploadStatuses,
@@ -63,7 +63,7 @@ export const prepareFederationsData = (
 export const prepareFederationSettingsForFrontend = ({
 	surveyPoints,
 	...otherProps
-}: FederationBackendSettings): FetchFederationSettingsResponse => (
+}: FederationBackendSettings): FederationSettings => (
 	{
 		surveyPoint: surveyPoints?.[0],
 		...otherProps,
@@ -73,7 +73,7 @@ export const prepareFederationSettingsForFrontend = ({
 export const prepareFederationSettingsForBackend = ({
 	surveyPoint,
 	...otherProps
-}: FetchFederationSettingsResponse): FederationBackendSettings => (
+}: FederationSettings): FederationBackendSettings => (
 	{
 		surveyPoints: [surveyPoint],
 		...otherProps,

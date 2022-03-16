@@ -17,7 +17,6 @@
 
 import {
 	FederationBackendSettings,
-	FederationSettings,
 	MinimumFederation,
 	FederationView,
 	FederationStats,
@@ -32,11 +31,11 @@ type FetchFederationStatsParams = TeamspaceProjectAndFederationId;
 type FetchFederationViewsParams = TeamspaceProjectAndFederationId;
 type DeleteFederationParams = TeamspaceProjectAndFederationId;
 type UpdateFederationContainersParams = TeamspaceProjectAndFederationId & { containers: string[] };
-type UpdateFederationSettingsParams = TeamspaceProjectAndFederationId & {settings: FederationSettings};
+type UpdateFederationSettingsParams = TeamspaceProjectAndFederationId & {settings: FederationBackendSettings};
 type FetchFederationSettingsParams = TeamspaceProjectAndFederationId;
 
-type FetchFederationsResponse = { federations: Array<MinimumFederation> };
-type FetchFederationViewsResponse = { views: FederationView[] };
+export type FetchFederationsResponse = { federations: Array<MinimumFederation> };
+export type FetchFederationViewsResponse = { views: FederationView[] };
 
 export const addFavourites = (
 	{ teamspace, projectId, federationId }: FavouriteParams,
