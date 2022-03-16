@@ -63,7 +63,8 @@ const calculateSpaceUsed = async (teamspace) => {
 
 	const sizes = await Promise.all(promises);
 
-	return sizes.reduce((accum, val) => accum + val, 0);
+	return sizes.reduce((accum, val) =>
+		accum + val, 0);
 };
 
 Quota.sufficientQuota = async (teamspace, size) => {

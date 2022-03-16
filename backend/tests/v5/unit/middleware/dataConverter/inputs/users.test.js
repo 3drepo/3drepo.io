@@ -32,7 +32,8 @@ const fs = require('fs');
 const path = require('path');
 
 // Mock respond function to just return the resCode
-Responder.respond.mockImplementation((req, res, errCode) => errCode);
+Responder.respond.mockImplementation((req, res, errCode) =>
+	errCode);
 
 const nonExistingUsername = 'nonExistingUser';
 const existingUsername = 'existingUsername';

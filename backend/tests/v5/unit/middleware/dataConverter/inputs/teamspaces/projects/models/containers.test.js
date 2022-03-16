@@ -37,13 +37,15 @@ const Containers = require(`${src}/middleware/dataConverter/inputs/teamspaces/pr
 const { templates } = require(`${src}/utils/responseCodes`);
 
 // Mock respond function to just return the resCode
-Responder.respond.mockImplementation((req, res, errCode) => errCode);
+Responder.respond.mockImplementation((req, res, errCode) =>
+	errCode);
 
 const subModelContainer = 'ImSub';
 
-ModelSettings.getModelByQuery.mockImplementation((teamspace, query) => (query['subModels.model'] !== subModelContainer
-	? Promise.reject(templates.modelNotFound)
-	: Promise.resolve({ _id: 1, name: 'abc' })));
+ModelSettings.getModelByQuery.mockImplementation((teamspace, query) =>
+	(query['subModels.model'] !== subModelContainer
+		? Promise.reject(templates.modelNotFound)
+		: Promise.resolve({ _id: 1, name: 'abc' })));
 
 const testCanDeleteContainer = () => {
 	describe.each([
@@ -93,8 +95,10 @@ const createRequestWithFile = (teamspace, { tag, desc, importAnim, timezone },
 	return req;
 };
 
-Quota.sufficientQuota.mockImplementation((ts) => (ts === 'noQuota' ? Promise.reject(templates.quotaLimitExceeded) : Promise.resolve()));
-RevisionsModel.isTagUnique.mockImplementation((teamspace, model, tag) => tag !== 'duplicate');
+Quota.sufficientQuota.mockImplementation((ts) =>
+	(ts === 'noQuota' ? Promise.reject(templates.quotaLimitExceeded) : Promise.resolve()));
+RevisionsModel.isTagUnique.mockImplementation((teamspace, model, tag) =>
+	tag !== 'duplicate');
 
 const testValidateNewRevisionData = () => {
 	const standardBody = { tag: '123', description: 'this is a model', importAnimations: false, timezone: 'Europe/Berlin' };

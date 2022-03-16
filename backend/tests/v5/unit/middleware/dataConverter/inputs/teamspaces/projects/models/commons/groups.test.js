@@ -29,7 +29,8 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const GroupsInputMiddlewares = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups`);
 
 // Mock respond function to just return the resCode
-Responder.respond.mockImplementation((req, res, errCode) => errCode);
+Responder.respond.mockImplementation((req, res, errCode) =>
+	errCode);
 
 const testValidateGroupsExportData = () => {
 	describe.each([

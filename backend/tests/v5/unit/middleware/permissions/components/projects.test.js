@@ -30,17 +30,22 @@ const Sessions = require(`${src}/utils/sessions`);
 const ProjectMiddlewares = require(`${src}/middleware/permissions/components/projects`);
 
 // Mock respond function to just return the resCode
-Responder.respond.mockImplementation((req, res, errCode) => errCode);
-Permissions.isTeamspaceAdmin.mockImplementation((teamspace, user) => user === 'tsAdmin');
-Permissions.isProjectAdmin.mockImplementation((teamspace, project, user) => user === 'projAdmin');
+Responder.respond.mockImplementation((req, res, errCode) =>
+	errCode);
+Permissions.isTeamspaceAdmin.mockImplementation((teamspace, user) =>
+	user === 'tsAdmin');
+Permissions.isProjectAdmin.mockImplementation((teamspace, project, user) =>
+	user === 'projAdmin');
 Projects.getProjectById.mockImplementation((teamspace, project) => {
 	if (project !== 'p1') {
 		throw templates.projectNotFound;
 	}
 });
 
-Sessions.isSessionValid.mockImplementation((session) => !!session);
-Sessions.getUserFromSession.mockImplementation(({ user }) => user.username);
+Sessions.isSessionValid.mockImplementation((session) =>
+	!!session);
+Sessions.getUserFromSession.mockImplementation(({ user }) =>
+	user.username);
 
 const testIsProjectAdmin = () => {
 	describe('isProjectAdmin', () => {

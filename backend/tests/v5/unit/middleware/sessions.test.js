@@ -35,13 +35,16 @@ const { events } = require(`${src}/services/eventsManager/eventsManager.constant
 const Sessions = require(`${src}/middleware/sessions`);
 
 // Mock respond function to just return the resCode
-Responder.respond.mockImplementation((req, res, errCode) => errCode);
+Responder.respond.mockImplementation((req, res, errCode) =>
+	errCode);
 
 const webBrowserUserAgent = 'web browser user agent';
 const urlDomain = 'url domain';
 
-UserAgentHelper.isFromWebBrowser.mockImplementation((userAgent) => userAgent === webBrowserUserAgent);
-StringsHelper.getURLDomain.mockImplementation(() => urlDomain);
+UserAgentHelper.isFromWebBrowser.mockImplementation((userAgent) =>
+	userAgent === webBrowserUserAgent);
+StringsHelper.getURLDomain.mockImplementation(() =>
+	urlDomain);
 const publishFn = EventsManager.publish.mockImplementation(() => { });
 
 const testCreateSession = () => {

@@ -43,8 +43,12 @@ const testGetTeamspaceListByUser = () => {
 				{ name: 'ts5', isAdmin: false },
 			];
 
-			UsersModel.getAccessibleTeamspaces.mockImplementation(() => goldenData.map(({ name }) => name));
-			Permissions.isTeamspaceAdmin.mockImplementation((ts) => goldenData.find(({ name }) => name === ts).isAdmin);
+			UsersModel.getAccessibleTeamspaces.mockImplementation(() =>
+				goldenData.map(({ name }) =>
+					name));
+			Permissions.isTeamspaceAdmin.mockImplementation((ts) =>
+				goldenData.find(({ name }) =>
+					name === ts).isAdmin);
 			const res = await Teamspaces.getTeamspaceListByUser('abc');
 			expect(res).toEqual(goldenData);
 		});
@@ -68,7 +72,8 @@ const testGetTeamspaceMembersInfo = () => {
 		];
 		TeamspacesModel.getMembersInfo.mockImplementation((ts) => {
 			if (tsWithoutUsers === ts) return Promise.resolve([]);
-			return Promise.resolve(goldenData.map((data) => _.omit(data, 'job')));
+			return Promise.resolve(goldenData.map((data) =>
+				_.omit(data, 'job')));
 		});
 
 		JobsModel.getJobsToUsers.mockImplementation((ts) => {
@@ -88,7 +93,8 @@ const testGetTeamspaceMembersInfo = () => {
 
 		test('should return the list of members with details if the teamspace had no jobs', async () => {
 			const res = await Teamspaces.getTeamspaceMembersInfo(tsWithoutJobs);
-			expect(res).toEqual(goldenData.map((data) => _.omit(data, 'job')));
+			expect(res).toEqual(goldenData.map((data) =>
+				_.omit(data, 'job')));
 		});
 	});
 };

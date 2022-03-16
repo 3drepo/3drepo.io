@@ -24,14 +24,16 @@ const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
 const { validateProjectData } = require('../../../middleware/dataConverter/inputs/teamspaces/projects');
 
-const serialiseProject = (project) => ({ ...project, _id: UUIDToString(project._id) });
+const serialiseProject = (project) =>
+	({ ...project, _id: UUIDToString(project._id) });
 
 const getProjectList = (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace } = req.params;
 	Projects.getProjectList(teamspace, user).then((projects) => {
 		respond(req, res, templates.ok, { projects: projects.map(serialiseProject) });
-	}).catch((err) => respond(req, res, err));
+	}).catch((err) =>
+		respond(req, res, err));
 };
 
 const createProject = async (req, res) => {

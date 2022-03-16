@@ -24,7 +24,8 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const AuthMiddlewares = require(`${src}/middleware/auth`);
 
 // Mock respond function to just return the resCode
-Responder.respond.mockImplementation((req, res, errCode) => errCode);
+Responder.respond.mockImplementation((req, res, errCode) =>
+	errCode);
 
 const testValidSession = () => {
 	describe('Valid sessions', () => {

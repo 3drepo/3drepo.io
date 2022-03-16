@@ -18,7 +18,8 @@
 const Issues = {};
 const db = require('../handler/db');
 
-const collectionName = (model) => `${model}.issues`;
+const collectionName = (model) =>
+	`${model}.issues`;
 
 const excludeResolvedIssues = {
 	status: { $nin: [
@@ -27,6 +28,7 @@ const excludeResolvedIssues = {
 	] },
 };
 
-Issues.getIssuesCount = (teamspace, model) => db.count(teamspace, collectionName(model), excludeResolvedIssues);
+Issues.getIssuesCount = (teamspace, model) =>
+	db.count(teamspace, collectionName(model), excludeResolvedIssues);
 
 module.exports = Issues;

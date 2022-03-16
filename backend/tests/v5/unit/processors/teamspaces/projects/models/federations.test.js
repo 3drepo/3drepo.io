@@ -39,7 +39,8 @@ jest.mock('../../../../../../../src/v5/models/legends');
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const newFederationId = 'newFederationId';
-ModelSettings.addModel.mockImplementation(() => newFederationId);
+ModelSettings.addModel.mockImplementation(() =>
+	newFederationId);
 ModelSettings.deleteModel.mockImplementation((ts, model) => {
 	if (Number.isInteger(model)) {
 		return Promise.resolve(undefined);
@@ -103,12 +104,18 @@ const federationSettings = {
 };
 
 const user1Favourites = [1];
-const project = { _id: 1, name: 'project', models: federationList.map(({ _id }) => _id) };
+const project = { _id: 1,
+	name: 'project',
+	models: federationList.map(({ _id }) =>
+		_id) };
 
-ProjectsModel.getProjectById.mockImplementation(() => project);
-ModelSettings.getFederations.mockImplementation(() => federationList);
+ProjectsModel.getProjectById.mockImplementation(() =>
+	project);
+ModelSettings.getFederations.mockImplementation(() =>
+	federationList);
 const getFederationByIdMock = ModelSettings.getFederationById.mockImplementation((teamspace,
-	federation) => federationSettings[federation]);
+	federation) =>
+	federationSettings[federation]);
 Issues.getIssuesCount.mockImplementation((teamspace, federation) => {
 	if (federation === 'federation1') return 1;
 	if (federation === 'federation2') return 2;
@@ -121,7 +128,8 @@ Risks.getRisksCount.mockImplementation((teamspace, federation) => {
 	return 0;
 });
 
-Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
+Users.getFavourites.mockImplementation((user) =>
+	(user === 'user1' ? user1Favourites : []));
 Views.getViewById.mockImplementation((teamspace, model, view) => {
 	if (view === 1) {
 		return 1;
@@ -160,18 +168,23 @@ Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 });
 
 // Permissions mock
-jest.mock('../../../../../../../src/v5/utils/permissions/permissions', () => ({
-	...jest.requireActual('../../../../../../../src/v5/utils/permissions/permissions'),
-	isTeamspaceAdmin: jest.fn().mockImplementation((teamspace, user) => user === 'tsAdmin'),
-	hasProjectAdminPermissions: jest.fn().mockImplementation((perm, user) => user === 'projAdmin'),
-}));
+jest.mock('../../../../../../../src/v5/utils/permissions/permissions', () =>
+	({
+		...jest.requireActual('../../../../../../../src/v5/utils/permissions/permissions'),
+		isTeamspaceAdmin: jest.fn().mockImplementation((teamspace, user) =>
+			user === 'tsAdmin'),
+		hasProjectAdminPermissions: jest.fn().mockImplementation((perm, user) =>
+			user === 'projAdmin'),
+	}));
 
-const determineResults = (username) => federationList.flatMap(({ permissions, _id, name }) => {
-	const isAdmin = username === 'projAdmin' || username === 'tsAdmin';
-	const hasModelPerm = permissions && permissions.find((entry) => entry.user === username);
-	const isFavourite = username === 'user1' && user1Favourites.includes(_id);
-	return isAdmin || hasModelPerm ? { _id, name, role: isAdmin ? 'admin' : hasModelPerm.permission, isFavourite } : [];
-});
+const determineResults = (username) =>
+	federationList.flatMap(({ permissions, _id, name }) => {
+		const isAdmin = username === 'projAdmin' || username === 'tsAdmin';
+		const hasModelPerm = permissions && permissions.find((entry) =>
+			entry.user === username);
+		const isFavourite = username === 'user1' && user1Favourites.includes(_id);
+		return isAdmin || hasModelPerm ? { _id, name, role: isAdmin ? 'admin' : hasModelPerm.permission, isFavourite } : [];
+	});
 
 const testGetFederationList = () => {
 	describe('Get federation list by user', () => {
@@ -244,17 +257,19 @@ const testDeleteFavourites = () => {
 	});
 };
 
-const formatToStats = (settings, issueCount, riskCount, lastUpdated) => ({
-	...(settings.desc ? { desc: settings.desc } : {}),
-	...(settings.subModels ? { containers: settings.subModels.map((m) => m.model || m) } : {}),
-	code: settings.properties.code,
-	status: settings.status,
-	lastUpdated,
-	tickets: {
-		issues: issueCount ?? 0,
-		risks: riskCount ?? 0,
-	},
-});
+const formatToStats = (settings, issueCount, riskCount, lastUpdated) =>
+	({
+		...(settings.desc ? { desc: settings.desc } : {}),
+		...(settings.subModels ? { containers: settings.subModels.map((m) =>
+			m.model || m) } : {}),
+		code: settings.properties.code,
+		status: settings.status,
+		lastUpdated,
+		tickets: {
+			issues: issueCount ?? 0,
+			risks: riskCount ?? 0,
+		},
+	});
 
 const testGetFederationStats = () => {
 	describe('Get federation stats', () => {

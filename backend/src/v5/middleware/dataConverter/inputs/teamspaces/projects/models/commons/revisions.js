@@ -71,13 +71,15 @@ const validateContainerRevisionUpload = async (req, res, next) => {
 	const schemaBase = {
 		tag: YupHelper.types.strings.code.test('tag-not-in-use',
 			'Revision name is already used by an existing revision',
-			(value) => value === undefined || isTagUnique(req.params.teamspace,
-				req.params.container, value)).required(),
+			(value) =>
+				value === undefined || isTagUnique(req.params.teamspace,
+					req.params.container, value)).required(),
 		desc: YupHelper.types.strings.shortDescription,
 		importAnimations: Yup.bool().default(true),
 		timezone: Yup.string().test('valid-timezone',
 			'The timezone provided is not valid',
-			(value) => value === undefined || !!tz.getTimezone(value)),
+			(value) =>
+				value === undefined || !!tz.getTimezone(value)),
 	};
 
 	const schema = Yup.object().noUnknown().required().shape(schemaBase);
@@ -101,7 +103,8 @@ const validateFederationRevisionUpload = async (req, res, next) => {
 		containers: Yup.array().of(YupHelper.types.id).min(1).required()
 			.test('containers-validation', 'Containers must exist within the same project', (value) => {
 				const { teamspace, project } = req.params;
-				return value?.length && modelsExistInProject(teamspace, project, value).catch(() => false);
+				return value?.length && modelsExistInProject(teamspace, project, value).catch(() =>
+					false);
 			})
 			.test('containers-validation', 'IDs provided cannot be of type federation', async (value) => {
 				if (value?.length) {
@@ -123,7 +126,8 @@ const validateFederationRevisionUpload = async (req, res, next) => {
 	}
 };
 
-Revisions.validateNewRevisionData = (isFederation) => (isFederation ? validateFederationRevisionUpload
-	: validateMany([singleFileUpload('file', fileFilter), validateContainerRevisionUpload]));
+Revisions.validateNewRevisionData = (isFederation) =>
+	(isFederation ? validateFederationRevisionUpload
+		: validateMany([singleFileUpload('file', fileFilter), validateContainerRevisionUpload]));
 
 module.exports = Revisions;

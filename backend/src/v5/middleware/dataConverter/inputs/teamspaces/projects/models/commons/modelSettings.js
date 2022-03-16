@@ -33,42 +33,46 @@ const convertBodyUUIDs = (req) => {
 	});
 };
 
-const defaultViewType = (teamspace, model) => types.id.nullable().test('check-view-exists', 'View not found', async (value) => {
-	if (value) {
-		try {
-			await getViewById(teamspace, model, stringToUUID(value), { _id: 1 });
-		} catch (err) {
-			return false;
+const defaultViewType = (teamspace, model) =>
+	types.id.nullable().test('check-view-exists', 'View not found', async (value) => {
+		if (value) {
+			try {
+				await getViewById(teamspace, model, stringToUUID(value), { _id: 1 });
+			} catch (err) {
+				return false;
+			}
 		}
-	}
-	return true;
-});
-
-const defaultLegendType = (teamspace, model) => types.id.nullable().test('check-legend-exists', 'Legend not found', async (value) => {
-	if (value) {
-		try {
-			await checkLegendExists(teamspace, model, stringToUUID(value));
-		} catch (err) {
-			return false;
-		}
-	}
-	return true;
-});
-
-const modelNameType = (teamspace, project, model) => types.strings.title.test('name-already-used', 'Name is already used within the project', async (value) => {
-	try {
-		let { models } = await getProjectById(teamspace, project, { models: 1 });
-		if (model) {
-			models = models.flatMap((modelId) => (modelId === model ? [] : modelId));
-		}
-		const query = { _id: { $in: models }, name: value };
-		await getModelByQuery(teamspace, query, { _id: 1 });
-		return false;
-	} catch (err) {
-		// We want this to error out. This means there's no model with the same name
 		return true;
-	}
-});
+	});
+
+const defaultLegendType = (teamspace, model) =>
+	types.id.nullable().test('check-legend-exists', 'Legend not found', async (value) => {
+		if (value) {
+			try {
+				await checkLegendExists(teamspace, model, stringToUUID(value));
+			} catch (err) {
+				return false;
+			}
+		}
+		return true;
+	});
+
+const modelNameType = (teamspace, project, model) =>
+	types.strings.title.test('name-already-used', 'Name is already used within the project', async (value) => {
+		try {
+			let { models } = await getProjectById(teamspace, project, { models: 1 });
+			if (model) {
+				models = models.flatMap((modelId) =>
+					(modelId === model ? [] : modelId));
+			}
+			const query = { _id: { $in: models }, name: value };
+			await getModelByQuery(teamspace, query, { _id: 1 });
+			return false;
+		} catch (err) {
+		// We want this to error out. This means there's no model with the same name
+			return true;
+		}
+	});
 
 const generateSchema = (newEntry, isFed, teamspace, project, modelId) => {
 	const name = modelNameType(teamspace, project, modelId);
@@ -95,41 +99,44 @@ const generateSchema = (newEntry, isFed, teamspace, project, modelId) => {
 		: yupObj.test(
 			'at-least-one-property',
 			'You must provide at least one setting value',
-			(value) => Object.keys(value).length,
+			(value) =>
+				Object.keys(value).length,
 		);
 };
 
-ModelSettings.validateAddModelData = (isFed) => async (req, res, next) => {
-	try {
-		const { teamspace, project } = req.params;
-		const schema = generateSchema(true, isFed, teamspace, project);
-		await schema.validate(req.body);
+ModelSettings.validateAddModelData = (isFed) =>
+	async (req, res, next) => {
+		try {
+			const { teamspace, project } = req.params;
+			const schema = generateSchema(true, isFed, teamspace, project);
+			await schema.validate(req.body);
 
-		req.body.properties = { unit: req.body.unit.toLowerCase() };
-		delete req.body.unit;
+			req.body.properties = { unit: req.body.unit.toLowerCase() };
+			delete req.body.unit;
 
-		if (req.body.code) {
-			req.body.properties.code = req.body.code;
-			delete req.body.code;
+			if (req.body.code) {
+				req.body.properties.code = req.body.code;
+				delete req.body.code;
+			}
+
+			next();
+		} catch (err) {
+			respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 		}
+	};
 
-		next();
-	} catch (err) {
-		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
-	}
-};
-
-ModelSettings.validateUpdateSettingsData = (isFed) => async (req, res, next) => {
-	try {
-		const { teamspace, project } = req.params;
-		const model = isFed ? req.params.federation : req.params.container;
-		const schema = generateSchema(false, isFed, teamspace, project, model);
-		req.body = await schema.validate(req.body);
-		convertBodyUUIDs(req);
-		next();
-	} catch (err) {
-		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
-	}
-};
+ModelSettings.validateUpdateSettingsData = (isFed) =>
+	async (req, res, next) => {
+		try {
+			const { teamspace, project } = req.params;
+			const model = isFed ? req.params.federation : req.params.container;
+			const schema = generateSchema(false, isFed, teamspace, project, model);
+			req.body = await schema.validate(req.body);
+			convertBodyUUIDs(req);
+			next();
+		} catch (err) {
+			respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+		}
+	};
 
 module.exports = ModelSettings;

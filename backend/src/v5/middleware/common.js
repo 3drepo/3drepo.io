@@ -20,7 +20,8 @@ const Common = {};
 Common.validateMany = (validators) => {
 	const validateAll = async (req, res, next, current = 0) => {
 		if (validators.length > current) {
-			await validators[current](req, res, () => validateAll(req, res, next, current + 1));
+			await validators[current](req, res, () =>
+				validateAll(req, res, next, current + 1));
 		} else {
 			next();
 		}

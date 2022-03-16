@@ -22,11 +22,13 @@ const zxcvbn = require('zxcvbn');
 
 const YupHelper = { validators: {}, types: { strings: {} } };
 
-YupHelper.validators.alphanumeric = (yupObj) => yupObj.matches(/^[\w|_|-]*$/,
+YupHelper.validators.alphanumeric = (yupObj) =>
+	yupObj.matches(/^[\w|_|-]*$/,
 	// eslint-disable-next-line no-template-curly-in-string
-	'${path} can only contain alpha-numeric characters, hypens or underscores');
+		'${path} can only contain alpha-numeric characters, hypens or underscores');
 
-YupHelper.types.id = Yup.string().uuid('ids are expected to be of uuid format').transform((val, org) => UUIDToString(org));
+YupHelper.types.id = Yup.string().uuid('ids are expected to be of uuid format').transform((val, org) =>
+	UUIDToString(org));
 
 YupHelper.types.colorArr = Yup.array()
 	.of(Yup.number().min(0).max(255).integer())
@@ -43,7 +45,8 @@ YupHelper.types.strings.username = YupHelper.validators.alphanumeric(Yup.string(
 YupHelper.types.strings.title = Yup.string().min(1).max(120);
 
 YupHelper.types.strings.countryCode = Yup.string().min(1).test('valid-country-code',
-	'The country code provided is not valid', (value) => value === undefined || !!tz.getCountry(value));
+	'The country code provided is not valid', (value) =>
+		value === undefined || !!tz.getCountry(value));
 
 // This is used for shorter descriptions such as revision desc, model desc, teamspace desc etc.
 YupHelper.types.strings.shortDescription = Yup.string().min(1).max(660);
@@ -60,7 +63,8 @@ YupHelper.types.timestamp = Yup.number().min(new Date(2000, 1, 1).getTime()).int
 		'Timestamp validation check',
 		// eslint-disable-next-line no-template-curly-in-string
 		'${path} is not a valid timestamp (ms since epoch)',
-		(value) => new Date(value).getTime() > 0,
+		(value) =>
+			new Date(value).getTime() > 0,
 	);
 
 YupHelper.types.position = Yup.array()

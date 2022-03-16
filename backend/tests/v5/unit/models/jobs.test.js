@@ -26,7 +26,8 @@ const testGetJobsToUsers = () => {
 			const expectedResult = [
 				{ _id: 'jobA', users: ['a', 'b', 'c'] },
 			];
-			const fn = jest.spyOn(db, 'find').mockImplementation(() => expectedResult);
+			const fn = jest.spyOn(db, 'find').mockImplementation(() =>
+				expectedResult);
 			const teamspace = 'ts';
 			const res = await Jobs.getJobsToUsers(teamspace);
 			expect(res).toEqual(expectedResult);

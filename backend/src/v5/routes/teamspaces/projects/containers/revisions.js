@@ -34,7 +34,8 @@ const getRevisions = (req, res, next) => {
 		next();
 	}).catch(
 		/* istanbul ignore next */
-		(err) => respond(req, res, err),
+		(err) =>
+			respond(req, res, err),
 	);
 };
 
@@ -44,7 +45,8 @@ const updateRevisionStatus = (req, res) => {
 
 	Containers.updateRevisionStatus(teamspace, container, revision, status).then(() => {
 		respond(req, res, templates.ok);
-	}).catch((err) => respond(req, res, err));
+	}).catch((err) =>
+		respond(req, res, err));
 };
 
 const newRevision = (req, res) => {
@@ -56,7 +58,8 @@ const newRevision = (req, res) => {
 		respond(req, res, templates.ok);
 	}).catch(
 		/* istanbul ignore next */
-		(err) => respond(req, res, err),
+		(err) =>
+			respond(req, res, err),
 	);
 };
 

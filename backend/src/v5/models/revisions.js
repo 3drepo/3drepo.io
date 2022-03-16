@@ -23,10 +23,12 @@ const Revisions = {};
 const excludeVoids = { void: { $ne: true } };
 const excludeIncomplete = { incomplete: { $exists: false } };
 
-const collectionName = (model) => `${model}.history`;
+const collectionName = (model) =>
+	`${model}.history`;
 
-const findRevisionsByQuery = (teamspace, model, query, projection, sort) => db.find(teamspace,
-	collectionName(model), query, projection, sort);
+const findRevisionsByQuery = (teamspace, model, query, projection, sort) =>
+	db.find(teamspace,
+		collectionName(model), query, projection, sort);
 
 const findOneRevisionByQuery = async (teamspace, model, query, projection, sort) => {
 	const rev = await db.findOne(teamspace, collectionName(model), query, projection, sort);
@@ -58,8 +60,9 @@ Revisions.getRevisions = (teamspace, model, showVoid, projection = {}) => {
 	return findRevisionsByQuery(teamspace, model, query, projection, { timestamp: -1 });
 };
 
-Revisions.getRevisionByIdOrTag = (teamspace, model, revision, projection = {}) => findOneRevisionByQuery(teamspace,
-	model, { $or: [{ _id: revision }, { tag: revision }] }, projection);
+Revisions.getRevisionByIdOrTag = (teamspace, model, revision, projection = {}) =>
+	findOneRevisionByQuery(teamspace,
+		model, { $or: [{ _id: revision }, { tag: revision }] }, projection);
 
 Revisions.updateRevisionStatus = async (teamspace, model, revision, status) => {
 	const query = { $or: [{ _id: revision }, { tag: revision }] };

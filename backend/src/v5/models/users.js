@@ -25,8 +25,10 @@ const { publish } = require('../services/eventsManager/eventsManager');
 const User = {};
 const COLL_NAME = 'system.users';
 
-const userQuery = (query, projection, sort) => db.findOne('admin', COLL_NAME, query, projection, sort);
-const updateUser = (username, action) => db.updateOne('admin', COLL_NAME, { user: username }, action);
+const userQuery = (query, projection, sort) =>
+	db.findOne('admin', COLL_NAME, query, projection, sort);
+const updateUser = (username, action) =>
+	db.updateOne('admin', COLL_NAME, { user: username }, action);
 
 const recordSuccessfulAuthAttempt = async (user) => {
 	const { customData: { lastLoginAt } = {} } = await User.getUserByUsername(user, { 'customData.lastLoginAt': 1 });
@@ -112,7 +114,8 @@ User.getUserByQuery = async (query, projection) => {
 	return userDoc;
 };
 
-User.getUserByUsername = (user, projection) => User.getUserByQuery({ user }, projection);
+User.getUserByUsername = (user, projection) =>
+	User.getUserByQuery({ user }, projection);
 
 User.getFavourites = async (user, teamspace) => {
 	const { customData } = await User.getUserByUsername(user, { 'customData.starredModels': 1 });
@@ -122,7 +125,8 @@ User.getFavourites = async (user, teamspace) => {
 
 User.getAccessibleTeamspaces = async (username) => {
 	const userDoc = await User.getUserByUsername(username, { roles: 1 });
-	return userDoc.roles.map((role) => role.db);
+	return userDoc.roles.map((role) =>
+		role.db);
 };
 
 User.appendFavourites = async (username, teamspace, favouritesToAdd) => {
@@ -148,7 +152,8 @@ User.deleteFavourites = async (username, teamspace, favouritesToRemove) => {
 	const favourites = userProfile.customData.starredModels || {};
 
 	if (favourites[teamspace]) {
-		const updatedFav = favourites[teamspace].filter((i) => !favouritesToRemove.includes(i));
+		const updatedFav = favourites[teamspace].filter((i) =>
+			!favouritesToRemove.includes(i));
 		if (updatedFav.length) {
 			favourites[teamspace] = updatedFav;
 			await updateUser(username, { $set: { 'customData.starredModels': favourites } });
@@ -192,7 +197,8 @@ User.generateApiKey = async (username) => {
 	return apiKey;
 };
 
-User.deleteApiKey = (username) => updateUser(username, { $unset: { 'customData.apiKey': 1 } });
+User.deleteApiKey = (username) =>
+	updateUser(username, { $unset: { 'customData.apiKey': 1 } });
 
 User.getAvatar = async (username) => {
 	const user = await User.getUserByUsername(username, { 'customData.avatar': 1 });
@@ -205,6 +211,7 @@ User.getAvatar = async (username) => {
 	return avatar;
 };
 
-User.uploadAvatar = (username, avatarBuffer) => updateUser(username, { $set: { 'customData.avatar': { data: avatarBuffer } } });
+User.uploadAvatar = (username, avatarBuffer) =>
+	updateUser(username, { $set: { 'customData.avatar': { data: avatarBuffer } } });
 
 module.exports = User;

@@ -24,7 +24,8 @@ const { getURLDomain } = require('./helper/strings');
 const referrerMatch = (sessionReferrer, headerReferrer) => {
 	const domain = getURLDomain(headerReferrer);
 	return domain === sessionReferrer
-        || apiUrls.all.some((api) => api.match(domain));
+	// eslint-disable-next-line implicit-arrow-linebreak
+		|| apiUrls.all.some((api) => api.match(domain));
 };
 
 const SessionUtils = {};
@@ -41,6 +42,7 @@ SessionUtils.isSessionValid = (session, referrer, ignoreApiKey = false) => {
 	return false;
 };
 
-SessionUtils.getUserFromSession = ({ user } = {}) => (user ? user.username : undefined);
+SessionUtils.getUserFromSession = ({ user } = {}) =>
+	(user ? user.username : undefined);
 
 module.exports = SessionUtils;

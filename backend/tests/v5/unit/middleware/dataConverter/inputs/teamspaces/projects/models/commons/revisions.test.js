@@ -24,7 +24,8 @@ const Revisions = require(`${src}/middleware/dataConverter/inputs/teamspaces/pro
 const { templates } = require(`${src}/utils/responseCodes`);
 
 // Mock respond function to just return the resCode
-Responder.respond.mockImplementation((req, res, errCode) => errCode);
+Responder.respond.mockImplementation((req, res, errCode) =>
+	errCode);
 
 const testValidateUpdateRevisionData = () => {
 	describe('Check if req arguments for void status update are valid', () => {

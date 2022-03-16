@@ -19,15 +19,16 @@ const { src } = require('../../helper/path');
 
 const unrecognisedType = 'qwerrtyuui';
 
-jest.mock('../../../../src/v5/handler/externalServices', () => ({
-	...jest.requireActual('../../../../src/v5/handler/externalServices'),
-	getFileStream: jest.fn().mockImplementation((account, collection, type) => {
-		if (type === unrecognisedType) {
-			throw new Error();
-		}
-	}),
-	removeFiles: jest.fn(),
-}));
+jest.mock('../../../../src/v5/handler/externalServices', () =>
+	({
+		...jest.requireActual('../../../../src/v5/handler/externalServices'),
+		getFileStream: jest.fn().mockImplementation((account, collection, type) => {
+			if (type === unrecognisedType) {
+				throw new Error();
+			}
+		}),
+		removeFiles: jest.fn(),
+	}));
 
 const FileRefs = require(`${src}/models/fileRefs`);
 const db = require(`${src}/handler/db`);
@@ -36,7 +37,8 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const testGetTotalSize = () => {
 	describe('Get total size', () => {
 		test('should get the total size within the collection', async () => {
-			const fn = jest.spyOn(db, 'aggregate').mockImplementation(() => [{ _id: null, total: 15 }]);
+			const fn = jest.spyOn(db, 'aggregate').mockImplementation(() =>
+				[{ _id: null, total: 15 }]);
 			const teamspace = 'someTS';
 			const collection = '123';
 			const res = await FileRefs.getTotalSize(teamspace, collection);
@@ -47,7 +49,8 @@ const testGetTotalSize = () => {
 		});
 
 		test('should get the total size within the collection with .ref already added', async () => {
-			const fn = jest.spyOn(db, 'aggregate').mockImplementation(() => [{ _id: null, total: 15 }]);
+			const fn = jest.spyOn(db, 'aggregate').mockImplementation(() =>
+				[{ _id: null, total: 15 }]);
 			const teamspace = 'someTS';
 			const collection = '123.ref';
 			const res = await FileRefs.getTotalSize(teamspace, collection);
@@ -58,7 +61,8 @@ const testGetTotalSize = () => {
 		});
 
 		test('should return 0 if there is no entry', async () => {
-			const fn = jest.spyOn(db, 'aggregate').mockImplementation(() => []);
+			const fn = jest.spyOn(db, 'aggregate').mockImplementation(() =>
+				[]);
 			const teamspace = 'someTS';
 			const collection = '123.ref';
 			const res = await FileRefs.getTotalSize(teamspace, collection);
@@ -85,8 +89,10 @@ const testRemoveAllFilesFromModel = () => {
 		test('should remove files from all collections', async () => {
 			const teamspace = 'someTS';
 
-			jest.spyOn(db, 'listCollections').mockImplementation(() => collections);
-			const fnAggregate = jest.spyOn(db, 'aggregate').mockImplementation(() => [{ _id: modelId, links: 'someLink' }]);
+			jest.spyOn(db, 'listCollections').mockImplementation(() =>
+				collections);
+			const fnAggregate = jest.spyOn(db, 'aggregate').mockImplementation(() =>
+				[{ _id: modelId, links: 'someLink' }]);
 
 			const res = await FileRefs.removeAllFilesFromModel(teamspace, modelId);
 			expect(res).toHaveLength(collections.length - 1);
@@ -110,8 +116,10 @@ const testRemoveAllFilesFromModel = () => {
 		test('should not fail if the the ref collection has no links', async () => {
 			const teamspace = 'someTS';
 
-			jest.spyOn(db, 'listCollections').mockImplementation(() => collections);
-			const fnAggregate = jest.spyOn(db, 'aggregate').mockImplementation(() => [{ _id: null, links: [] }]);
+			jest.spyOn(db, 'listCollections').mockImplementation(() =>
+				collections);
+			const fnAggregate = jest.spyOn(db, 'aggregate').mockImplementation(() =>
+				[{ _id: null, links: [] }]);
 
 			const res = await FileRefs.removeAllFilesFromModel(teamspace, modelId);
 			expect(res).toHaveLength(collections.length - 1);
@@ -135,7 +143,8 @@ const testRemoveAllFilesFromModel = () => {
 		test('should return empty []s without matching collection', async () => {
 			const teamspace = 'someTS';
 
-			const listCol = jest.spyOn(db, 'listCollections').mockImplementation(() => []);
+			const listCol = jest.spyOn(db, 'listCollections').mockImplementation(() =>
+				[]);
 
 			const res = await FileRefs.removeAllFilesFromModel(teamspace, modelId);
 			expect(res).toHaveLength(0);

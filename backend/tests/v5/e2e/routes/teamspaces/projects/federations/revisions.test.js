@@ -66,20 +66,24 @@ const anotherFed = models[1];
 const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
 	const customData = { starredModels: {
-		[teamspace]: models.flatMap(({ _id, isFavourite }) => (isFavourite ? _id : [])),
+		[teamspace]: models.flatMap(({ _id, isFavourite }) =>
+			(isFavourite ? _id : [])),
 	} };
-	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], [teamspace], customData));
-	const modelProms = models.map((model) => ServiceHelper.db.createModel(
-		teamspace,
-		model._id,
-		model.name,
-		model.properties,
-	));
+	const userProms = Object.keys(users).map((key) =>
+		ServiceHelper.db.createUser(users[key], [teamspace], customData));
+	const modelProms = models.map((model) =>
+		ServiceHelper.db.createModel(
+			teamspace,
+			model._id,
+			model.name,
+			model.properties,
+		));
 	return Promise.all([
 		...userProms,
 		...modelProms,
 		ServiceHelper.db.createUser(nobody),
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
+		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) =>
+			_id)),
 	]);
 };
 
@@ -88,7 +92,8 @@ const testNewRevision = () => {
 		ts = teamspace,
 		projectId = project.id,
 		model = models[0]._id,
-	) => `/v5/teamspaces/${ts}/projects/${projectId}/federations/${model}/revisions`;
+	) =>
+		`/v5/teamspaces/${ts}/projects/${projectId}/federations/${model}/revisions`;
 	describe('New federation upload', () => {
 		test('should fail without a valid session', async () => {
 			const res = await agent.post(route()).expect(templates.notLoggedIn.status);
@@ -180,9 +185,10 @@ describe('E2E routes/teamspaces/projects/federations', () => {
 		agent = await SuperTest(server);
 		await setupData();
 	});
-	afterAll(() => Promise.all([
-		ServiceHelper.queue.purgeQueues(),
-		ServiceHelper.closeApp(server),
-	]));
+	afterAll(() =>
+		Promise.all([
+			ServiceHelper.queue.purgeQueues(),
+			ServiceHelper.closeApp(server),
+		]));
 	testNewRevision();
 });

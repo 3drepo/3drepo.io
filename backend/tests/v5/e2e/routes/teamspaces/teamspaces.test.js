@@ -51,23 +51,26 @@ const breakingTSAccess = { name: ServiceHelper.generateRandomString(), isAdmin: 
 
 const setupData = async () => {
 	await Promise.all(testUserTSAccess.map(
-		({ name, isAdmin }) => ServiceHelper.db.createTeamspace(name, isAdmin ? [testUser.user] : []),
+		({ name, isAdmin }) =>
+			ServiceHelper.db.createTeamspace(name, isAdmin ? [testUser.user] : []),
 	));
 
 	await ServiceHelper.db.createTeamspace(breakingTSAccess.name, [testUser2.user], true);
 	await Promise.all([
 		ServiceHelper.db.createUser(
 			testUser,
-			testUserTSAccess.map(({ name }) => name),
+			testUserTSAccess.map(({ name }) =>
+				name),
 		),
 		ServiceHelper.db.createUser(
 			testUser2,
 			[breakingTSAccess.name],
 		),
-		...usersInFirstTeamspace.map((user) => ServiceHelper.db.createUser(
-			user,
-			[testUserTSAccess[0].name],
-		)),
+		...usersInFirstTeamspace.map((user) =>
+			ServiceHelper.db.createUser(
+				user,
+				[testUserTSAccess[0].name],
+			)),
 		ServiceHelper.db.createJobs(testUserTSAccess[0].name, jobToUsers),
 	]);
 };
@@ -93,7 +96,8 @@ const testGetTeamspaceList = () => {
 
 const testGetTeamspaceMembers = () => {
 	describe('Get teamspace members info', () => {
-		const route = (ts = testUserTSAccess[0].name) => `/v5/teamspaces/${ts}/members`;
+		const route = (ts = testUserTSAccess[0].name) =>
+			`/v5/teamspaces/${ts}/members`;
 		test('should fail without a valid session', async () => {
 			const res = await agent.get(route()).expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
@@ -114,7 +118,8 @@ const testGetTeamspaceMembers = () => {
 
 			const userToJob = {};
 
-			jobToUsers.forEach(({ _id, users }) => users.forEach((user) => { userToJob[user] = _id; }));
+			jobToUsers.forEach(({ _id, users }) =>
+				users.forEach((user) => { userToJob[user] = _id; }));
 
 			const expectedData = [...usersInFirstTeamspace, testUser].map(({ user, basicData }) => {
 				const { firstName, lastName, billing } = basicData;
@@ -144,7 +149,8 @@ describe('E2E routes/teamspaces', () => {
 		agent = await SuperTest(server);
 		await setupData();
 	});
-	afterAll(() => ServiceHelper.closeApp(server));
+	afterAll(() =>
+		ServiceHelper.closeApp(server));
 	testGetTeamspaceList();
 	testGetTeamspaceMembers();
 });

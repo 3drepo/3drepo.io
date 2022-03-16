@@ -110,7 +110,8 @@ const testCreateProject = () => {
 				.send({ name: 'Valid Name' }).expect(templates.ok.status);
 
 			const projectsRes = await agent.get(`${route}?key=${tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(projectsRes.body.projects.find((p) => p.name === 'Valid Name')).not.toBe(undefined);
+			expect(projectsRes.body.projects.find((p) =>
+				p.name === 'Valid Name')).not.toBe(undefined);
 
 			// Delete project afterwards
 			await agent.delete(`/v5/teamspaces/${teamspace}/projects/${res.body._id}?key=${tsAdmin.apiKey}`)
@@ -169,7 +170,8 @@ const testUpdateProject = () => {
 				.send({ name: testProject.name }).expect(templates.ok.status);
 
 			const res = await agent.get(`/v5/teamspaces/${teamspace}/projects?key=${tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body.projects.find((p) => p.name === testProject.name)).not.toBe(undefined);
+			expect(res.body.projects.find((p) =>
+				p.name === testProject.name)).not.toBe(undefined);
 		});
 
 		test('should edit project if project data are valid', async () => {
@@ -177,8 +179,10 @@ const testUpdateProject = () => {
 				.send({ name: 'New Name' }).expect(templates.ok.status);
 
 			const res = await agent.get(`/v5/teamspaces/${teamspace}/projects?key=${tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body.projects.find((p) => p.name === testProject.name)).toBe(undefined);
-			expect(res.body.projects.find((p) => p.name === 'New Name')).not.toBe(undefined);
+			expect(res.body.projects.find((p) =>
+				p.name === testProject.name)).toBe(undefined);
+			expect(res.body.projects.find((p) =>
+				p.name === 'New Name')).not.toBe(undefined);
 
 			// edit the project again to keep it the same for the next tests
 			await agent.patch(`${route}?key=${tsAdmin.apiKey}`)
@@ -189,7 +193,8 @@ const testUpdateProject = () => {
 
 const testDeleteProject = () => {
 	describe('Delete project', () => {
-		const route = (projectId) => `/v5/teamspaces/${teamspace}/projects/${projectId}`;
+		const route = (projectId) =>
+			`/v5/teamspaces/${teamspace}/projects/${projectId}`;
 
 		test('should fail without a valid session', async () => {
 			const res = await agent.delete(route(testProject._id)).expect(templates.notLoggedIn.status);
@@ -219,14 +224,16 @@ const testDeleteProject = () => {
 			await agent.delete(`${route(res.body._id)}?key=${tsAdmin.apiKey}`).expect(templates.ok.status);
 
 			const projectsRes = await agent.get(`/v5/teamspaces/${teamspace}/projects?key=${tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(projectsRes.body.projects.find((p) => p.name === 'New Project')).toBe(undefined);
+			expect(projectsRes.body.projects.find((p) =>
+				p.name === 'New Project')).toBe(undefined);
 		});
 	});
 };
 
 const testGetProject = () => {
 	describe('Get project', () => {
-		const route = (projectId) => `/v5/teamspaces/${teamspace}/projects/${projectId}`;
+		const route = (projectId) =>
+			`/v5/teamspaces/${teamspace}/projects/${projectId}`;
 
 		test('should fail without a valid session', async () => {
 			const res = await agent.get(route(testProject._id)).expect(templates.notLoggedIn.status);
@@ -261,7 +268,8 @@ describe('E2E routes/teamspaces/projects/projects', () => {
 		agent = await SuperTest(server);
 		await setupData();
 	});
-	afterAll(() => ServiceHelper.closeApp(server));
+	afterAll(() =>
+		ServiceHelper.closeApp(server));
 	testGetProjectList();
 	testCreateProject();
 	testUpdateProject();

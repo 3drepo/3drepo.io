@@ -37,7 +37,8 @@ const checkResults = (fn, teamspace, model) => {
 const testGetRiskCount = () => {
 	describe('Get risk count', () => {
 		test('should get the number of risks of a federation', async () => {
-			const fn = jest.spyOn(db, 'count').mockImplementation(() => 5);
+			const fn = jest.spyOn(db, 'count').mockImplementation(() =>
+				5);
 			const res = await Risks.getRisksCount('someTS', 'someModel');
 			expect(res).toEqual(5);
 			checkResults(fn, 'teamspace', 'someModel');

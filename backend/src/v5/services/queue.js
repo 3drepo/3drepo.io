@@ -60,7 +60,8 @@ const onCallbackQMsg = async ({ content, properties }) => {
 		} else {
 			const fedDataPath = `${sharedDir}/${properties.correlationId}/obj.json`;
 
-			const isFed = !!await stat(fedDataPath).catch(() => false);
+			const isFed = !!await stat(fedDataPath).catch(() =>
+				false);
 			const fedData = { };
 			if (isFed) {
 				// eslint-disable-next-line
@@ -138,8 +139,10 @@ const queueJob = async (queueName, correlationId, msg) => {
 	}
 };
 
-const queueModelJob = (corId, msg) => queueJob(modelq, corId, msg);
-const queueFederationJob = (corId, teamspace, dataPath) => queueJob(jobq, corId, `genFed ${dataPath} ${teamspace}`);
+const queueModelJob = (corId, msg) =>
+	queueJob(modelq, corId, msg);
+const queueFederationJob = (corId, teamspace, dataPath) =>
+	queueJob(jobq, corId, `genFed ${dataPath} ${teamspace}`);
 
 Queue.queueModelUpload = async (teamspace, model, data, { originalname, path }) => {
 	const revId = generateUUIDString();
@@ -195,7 +198,8 @@ Queue.queueFederationUpdate = async (teamspace, federation, info) => {
 			...info,
 			database: teamspace,
 			project: federation,
-			subProjects: info.containers.map((container) => ({ database: teamspace, project: container })),
+			subProjects: info.containers.map((container) =>
+				({ database: teamspace, project: container })),
 		};
 		delete data.containers;
 
@@ -221,7 +225,8 @@ Queue.queueFederationUpdate = async (teamspace, federation, info) => {
 	}
 };
 
-Queue.init = () => connect();
+Queue.init = () =>
+	connect();
 Queue.close = async () => {
 	if (connectionPromise) {
 		(await connectionPromise).close();

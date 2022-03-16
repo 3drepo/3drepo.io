@@ -33,6 +33,7 @@
         "no-restricted-syntax": 0,
         "no-underscore-dangle": ["error", { "allow": ["_id"] }],
         "security/detect-non-literal-fs-filename": 0,
-		"security/detect-object-injection": 0
+		"security/detect-object-injection": 0,
+        "implicit-arrow-linebreak": ["error", "below"]
     }
 }

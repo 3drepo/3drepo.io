@@ -26,8 +26,10 @@ const { removeModelData } = require('../../../utils/helper/models');
 const Projects = {};
 
 const hasSomeModelAccess = async (teamspace, models, user) => {
-	const modelAccess = await Promise.all(models.map((model) => hasReadAccessToModel(teamspace, model, user)));
-	return modelAccess.some((bool) => bool);
+	const modelAccess = await Promise.all(models.map((model) =>
+		hasReadAccessToModel(teamspace, model, user)));
+	return modelAccess.some((bool) =>
+		bool);
 };
 
 Projects.getProjectList = async (teamspace, user) => {
@@ -40,20 +42,23 @@ Projects.getProjectList = async (teamspace, user) => {
 	}))).flat();
 };
 
-Projects.createProject = (teamspace, name) => createProject(teamspace, name);
+Projects.createProject = (teamspace, name) =>
+	createProject(teamspace, name);
 
 Projects.deleteProject = async (teamspace, projectId) => {
 	const project = await getProjectById(teamspace, projectId, { models: 1 });
 
 	const promises = [];
 
-	project.models.map((model) => promises.push(removeModelData(teamspace, model)));
+	project.models.map((model) =>
+		promises.push(removeModelData(teamspace, model)));
 
 	await Promise.all(promises);
 	await deleteProject(teamspace, projectId);
 };
 
-Projects.getProjectSettings = (teamspace, projectId) => getProjectById(teamspace, projectId, { name: 1, _id: 0 });
+Projects.getProjectSettings = (teamspace, projectId) =>
+	getProjectById(teamspace, projectId, { name: 1, _id: 0 });
 
 Projects.updateProject = updateProject;
 

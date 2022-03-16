@@ -31,7 +31,8 @@ const Federations = require(`${src}/middleware/dataConverter/inputs/teamspaces/p
 const { templates } = require(`${src}/utils/responseCodes`);
 
 // Mock respond function to just return the resCode
-Responder.respond.mockImplementation((req, res, errCode) => errCode);
+Responder.respond.mockImplementation((req, res, errCode) =>
+	errCode);
 
 const modelNotInProject = generateUUIDString();
 
@@ -55,13 +56,15 @@ Projects.modelsExistInProject.mockImplementation(
 );
 
 ModelSettings.getContainers.mockImplementation(
-	(teamspace, models) => (teamspace === 'Error' ? Promise.resolve([]) : Promise.resolve(models)),
+	(teamspace, models) =>
+		(teamspace === 'Error' ? Promise.resolve([]) : Promise.resolve(models)),
 );
 
 const testValidateNewRevisionData = () => {
-	const createBody = (containers) => ({
-		containers,
-	});
+	const createBody = (containers) =>
+		({
+			containers,
+		});
 	describe.each([
 		['Request with valid data', createBody([generateUUIDString(), generateUUIDString()])],
 		['Request with invalid model Ids (wrong type)', createBody([1, 2, 3]), true],

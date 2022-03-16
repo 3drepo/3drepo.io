@@ -28,8 +28,9 @@ const { queueFederationUpdate } = require('../../../../services/queue');
 
 const Federations = { ...Groups, ...Views };
 
-Federations.addFederation = (teamspace, project, federation) => addModel(teamspace, project,
-	{ ...federation, federate: true });
+Federations.addFederation = (teamspace, project, federation) =>
+	addModel(teamspace, project,
+		{ ...federation, federate: true });
 
 Federations.deleteFederation = deleteModel;
 
@@ -64,7 +65,8 @@ const getLastUpdatesFromModels = async (teamspace, models) => {
 		}));
 	}
 
-	return lastUpdates.length ? lastUpdates.sort((a, b) => b.timestamp
+	return lastUpdates.length ? lastUpdates.sort((a, b) =>
+		b.timestamp
         - a.timestamp)[0].timestamp : undefined;
 };
 
@@ -77,7 +79,8 @@ Federations.getFederationStats = async (teamspace, federation) => {
 	});
 
 	// Legacy schema compatibility
-	const containers = subModels ? subModels.map((m) => m.model || m) : undefined;
+	const containers = subModels ? subModels.map((m) =>
+		m.model || m) : undefined;
 
 	const [issueCount, riskCount, lastUpdates] = await Promise.all([
 		getIssuesCount(teamspace, federation),
@@ -97,7 +100,8 @@ Federations.getFederationStats = async (teamspace, federation) => {
 
 Federations.updateSettings = updateModelSettings;
 
-Federations.getSettings = (teamspace, federation) => getFederationById(teamspace,
-	federation, { corID: 0, account: 0, permissions: 0, subModels: 0, federate: 0 });
+Federations.getSettings = (teamspace, federation) =>
+	getFederationById(teamspace,
+		federation, { corID: 0, account: 0, permissions: 0, subModels: 0, federate: 0 });
 
 module.exports = Federations;

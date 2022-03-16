@@ -76,38 +76,46 @@ const voidRevision = revisions[2];
 const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
 	const customData = { starredModels: {
-		[teamspace]: models.flatMap(({ _id, isFavourite }) => (isFavourite ? _id : [])),
+		[teamspace]: models.flatMap(({ _id, isFavourite }) =>
+			(isFavourite ? _id : [])),
 	} };
-	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], [teamspace], customData));
-	const modelProms = models.map((model) => ServiceHelper.db.createModel(
-		teamspace,
-		model._id,
-		model.name,
-		model.properties,
-	));
+	const userProms = Object.keys(users).map((key) =>
+		ServiceHelper.db.createUser(users[key], [teamspace], customData));
+	const modelProms = models.map((model) =>
+		ServiceHelper.db.createModel(
+			teamspace,
+			model._id,
+			model.name,
+			model.properties,
+		));
 	return Promise.all([
 		...userProms,
 		...modelProms,
 		ServiceHelper.db.createUser(nobody),
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
-		...revisions.map((revision) => ServiceHelper.db.createRevision(teamspace, modelWithRev._id, revision)),
+		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) =>
+			_id)),
+		...revisions.map((revision) =>
+			ServiceHelper.db.createRevision(teamspace, modelWithRev._id, revision)),
 	]);
 };
 
 const formatRevisions = (revs, includeVoid = false) => {
 	const formattedRevisions = revs
-		.sort((a, b) => b.timestamp - a.timestamp)
-		.flatMap((rev) => (includeVoid || !rev.void ? {
-			_id: rev._id,
-			tag: rev.tag,
-			author: rev.author,
-			void: rev.void,
-			timestamp: rev.timestamp.getTime() } : []));
+		.sort((a, b) =>
+			b.timestamp - a.timestamp)
+		.flatMap((rev) =>
+			(includeVoid || !rev.void ? {
+				_id: rev._id,
+				tag: rev.tag,
+				author: rev.author,
+				void: rev.void,
+				timestamp: rev.timestamp.getTime() } : []));
 	return { revisions: formattedRevisions };
 };
 
 const testGetRevisions = () => {
-	const route = (containerId, showVoid = false, ts = teamspace) => `/v5/teamspaces/${ts}/projects/${project.id}/containers/${containerId}/revisions?showVoid=${showVoid}`;
+	const route = (containerId, showVoid = false, ts = teamspace) =>
+		`/v5/teamspaces/${ts}/projects/${project.id}/containers/${containerId}/revisions?showVoid=${showVoid}`;
 	describe('Get container revisions', () => {
 		test('should fail without a valid session', async () => {
 			const res = await agent.get(route(modelWithRev._id, false)).expect(templates.notLoggedIn.status);
@@ -147,7 +155,8 @@ const testGetRevisions = () => {
 };
 
 const testUpdateRevisionStatus = () => {
-	const route = (revision) => `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${modelWithRev._id}/revisions/${revision}`;
+	const route = (revision) =>
+		`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${modelWithRev._id}/revisions/${revision}`;
 	describe('Update a revision status', () => {
 		test('should fail without a valid session', async () => {
 			const res = await agent.patch(route(voidRevision._id))
@@ -214,7 +223,8 @@ const testUpdateRevisionStatus = () => {
 				.send({ void: false }).expect(templates.ok.status);
 
 			const revs = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${modelWithRev._id}/revisions?key=${users.tsAdmin.apiKey}`);
-			expect(revs.body.revisions.find((r) => r._id === voidRevision._id).void).toBe(false);
+			expect(revs.body.revisions.find((r) =>
+				r._id === voidRevision._id).void).toBe(false);
 		});
 	});
 };
@@ -224,7 +234,8 @@ const testNewRevision = () => {
 		ts = teamspace,
 		projectId = project.id,
 		model = modelWithRev._id,
-	) => `/v5/teamspaces/${ts}/projects/${projectId}/containers/${model}/revisions`;
+	) =>
+		`/v5/teamspaces/${ts}/projects/${projectId}/containers/${model}/revisions`;
 	describe('New model upload', () => {
 		test('should fail without a valid session', async () => {
 			const res = await agent.post(route()).expect(templates.notLoggedIn.status);
@@ -303,7 +314,8 @@ const testNewRevision = () => {
 };
 
 const testDownloadRevisionFiles = () => {
-	const route = (ts, proj, container, revision) => `/v5/teamspaces/${ts}/projects/${proj}/containers/${container}/revisions/${revision}/files`;
+	const route = (ts, proj, container, revision) =>
+		`/v5/teamspaces/${ts}/projects/${proj}/containers/${container}/revisions/${revision}/files`;
 	describe('Download revision files', () => {
 		test('should fail without a valid session', async () => {
 			const res = await agent.get(route(teamspace, project.id, modelWithRev._id, validRefTypeRevision._id))
@@ -371,10 +383,11 @@ describe('E2E routes/teamspaces/projects/containers', () => {
 		agent = await SuperTest(server);
 		await setupData();
 	});
-	afterAll(() => Promise.all([
-		ServiceHelper.queue.purgeQueues(),
-		ServiceHelper.closeApp(server),
-	]));
+	afterAll(() =>
+		Promise.all([
+			ServiceHelper.queue.purgeQueues(),
+			ServiceHelper.closeApp(server),
+		]));
 	testGetRevisions();
 	testUpdateRevisionStatus();
 	testNewRevision();

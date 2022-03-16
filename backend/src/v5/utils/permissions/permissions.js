@@ -43,14 +43,17 @@ const hasAdminPermissions = async (teamspace, project, username) => {
 		Permissions.isProjectAdmin(teamspace, project, username),
 	]));
 
-	return isAdminArr.filter((bool) => bool).length;
+	return isAdminArr.filter((bool) =>
+		bool).length;
 };
 
 Permissions.hasAccessToTeamspace = hasAccessToTeamspace;
 
-Permissions.hasProjectAdminPermissions = (perms, username) => perms.some(
-	({ user, permissions }) => user === username && permissions.includes(PROJECT_ADMIN),
-);
+Permissions.hasProjectAdminPermissions = (perms, username) =>
+	perms.some(
+		({ user, permissions }) =>
+			user === username && permissions.includes(PROJECT_ADMIN),
+	);
 
 const modelType = {
 	CONTAINERS: 0,
@@ -58,41 +61,46 @@ const modelType = {
 	ALL: 2,
 };
 
-const modelPermCheck = (permCheck, mode) => async (teamspace, project, modelID, username, adminCheck = true) => {
-	let getModelFn = getModelById;
+const modelPermCheck = (permCheck, mode) =>
+	async (teamspace, project, modelID, username, adminCheck = true) => {
+		let getModelFn = getModelById;
 
-	if (mode === modelType.CONTAINERS) {
-		getModelFn = getContainerById;
-	} else if (mode === modelType.FEDERATIONS) {
-		getModelFn = getFederationById;
-	}
-
-	const model = await getModelFn(teamspace, modelID, { permissions: 1 });
-
-	const modelExists = await modelsExistInProject(teamspace, project, [modelID]);
-	if (!modelExists) {
-		return false;
-	}
-
-	if (adminCheck) {
-		const hasAdminPerms = await hasAdminPermissions(teamspace, project, username);
-		if (hasAdminPerms) {
-			return true;
+		if (mode === modelType.CONTAINERS) {
+			getModelFn = getContainerById;
+		} else if (mode === modelType.FEDERATIONS) {
+			getModelFn = getFederationById;
 		}
-	}
 
-	const { permissions } = model;
-	return permissions && permissions.some((perm) => perm.user === username && permCheck(perm));
-};
+		const model = await getModelFn(teamspace, modelID, { permissions: 1 });
+
+		const modelExists = await modelsExistInProject(teamspace, project, [modelID]);
+		if (!modelExists) {
+			return false;
+		}
+
+		if (adminCheck) {
+			const hasAdminPerms = await hasAdminPermissions(teamspace, project, username);
+			if (hasAdminPerms) {
+				return true;
+			}
+		}
+
+		const { permissions } = model;
+		return permissions && permissions.some((perm) =>
+			perm.user === username && permCheck(perm));
+	};
 
 Permissions.hasWriteAccessToModel = modelPermCheck(
-	(perm) => MODEL_WRITE_ROLES.includes(perm.permission), modelType.ALL,
+	(perm) =>
+		MODEL_WRITE_ROLES.includes(perm.permission), modelType.ALL,
 );
 Permissions.hasCommenterAccessToModel = modelPermCheck(
-	(perm) => MODEL_COMMENT_ROLES.includes(perm.permission), modelType.ALL,
+	(perm) =>
+		MODEL_COMMENT_ROLES.includes(perm.permission), modelType.ALL,
 );
 Permissions.hasReadAccessToModel = modelPermCheck(
-	(perm) => MODEL_READ_ROLES.includes(perm.permission), modelType.ALL,
+	(perm) =>
+		MODEL_READ_ROLES.includes(perm.permission), modelType.ALL,
 );
 
 Permissions.hasAdminAccessToFederation = async (teamspace, project, federation, username) => {
@@ -105,13 +113,16 @@ Permissions.hasAdminAccessToFederation = async (teamspace, project, federation, 
 	return fed && federationExistsInProject && hasAdminPerms > 0;
 };
 Permissions.hasWriteAccessToFederation = modelPermCheck(
-	(perm) => MODEL_WRITE_ROLES.includes(perm.permission), modelType.FEDERATIONS,
+	(perm) =>
+		MODEL_WRITE_ROLES.includes(perm.permission), modelType.FEDERATIONS,
 );
 Permissions.hasCommenterAccessToFederation = modelPermCheck(
-	(perm) => MODEL_COMMENT_ROLES.includes(perm.permission), modelType.FEDERATIONS,
+	(perm) =>
+		MODEL_COMMENT_ROLES.includes(perm.permission), modelType.FEDERATIONS,
 );
 Permissions.hasReadAccessToFederation = modelPermCheck(
-	(perm) => MODEL_READ_ROLES.includes(perm.permission), modelType.FEDERATIONS,
+	(perm) =>
+		MODEL_READ_ROLES.includes(perm.permission), modelType.FEDERATIONS,
 );
 
 Permissions.hasAdminAccessToContainer = async (teamspace, project, container, username) => {
@@ -124,13 +135,16 @@ Permissions.hasAdminAccessToContainer = async (teamspace, project, container, us
 	return con && containerExistsInProject && hasAdminPerms > 0;
 };
 Permissions.hasWriteAccessToContainer = modelPermCheck(
-	(perm) => MODEL_WRITE_ROLES.includes(perm.permission), modelType.CONTAINERS,
+	(perm) =>
+		MODEL_WRITE_ROLES.includes(perm.permission), modelType.CONTAINERS,
 );
 Permissions.hasCommenterAccessToContainer = modelPermCheck(
-	(perm) => MODEL_COMMENT_ROLES.includes(perm.permission), modelType.CONTAINERS,
+	(perm) =>
+		MODEL_COMMENT_ROLES.includes(perm.permission), modelType.CONTAINERS,
 );
 Permissions.hasReadAccessToContainer = modelPermCheck(
-	(perm) => MODEL_READ_ROLES.includes(perm.permission), modelType.CONTAINERS,
+	(perm) =>
+		MODEL_READ_ROLES.includes(perm.permission), modelType.CONTAINERS,
 );
 
 module.exports = Permissions;

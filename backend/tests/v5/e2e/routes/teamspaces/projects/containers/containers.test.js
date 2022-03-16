@@ -134,28 +134,35 @@ const modelWithFailedProcess = models[3];
 const modelWithFailedProcess2 = models[4];
 const modelToDelete = models[5];
 
-const latestRevision = revisions.filter((rev) => !rev.void)
-	.reduce((a, b) => (a.timestamp > b.timestamp ? a : b));
+const latestRevision = revisions.filter((rev) =>
+	!rev.void)
+	.reduce((a, b) =>
+		(a.timestamp > b.timestamp ? a : b));
 
 const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
 	const customData = { starredModels: {
-		[teamspace]: models.flatMap(({ _id, isFavourite }) => (isFavourite ? _id : [])),
+		[teamspace]: models.flatMap(({ _id, isFavourite }) =>
+			(isFavourite ? _id : [])),
 	} };
-	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], [teamspace], customData));
-	const modelProms = models.map((model) => ServiceHelper.db.createModel(
-		teamspace,
-		model._id,
-		model.name,
-		model.properties,
-	));
+	const userProms = Object.keys(users).map((key) =>
+		ServiceHelper.db.createUser(users[key], [teamspace], customData));
+	const modelProms = models.map((model) =>
+		ServiceHelper.db.createModel(
+			teamspace,
+			model._id,
+			model.name,
+			model.properties,
+		));
 
 	return Promise.all([
 		...userProms,
 		...modelProms,
 		ServiceHelper.db.createUser(nobody),
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
-		...revisions.map((revision) => ServiceHelper.db.createRevision(teamspace, modelWithRev._id, revision)),
+		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) =>
+			_id)),
+		...revisions.map((revision) =>
+			ServiceHelper.db.createRevision(teamspace, modelWithRev._id, revision)),
 		ServiceHelper.db.createViews(teamspace, modelWithViews._id, views),
 		ServiceHelper.db.createLegends(teamspace, modelWithLegends._id, legends),
 	]);
@@ -187,8 +194,9 @@ const testGetContainerList = () => {
 		test('should return the list of containers if the user has access', async () => {
 			const res = await agent.get(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
 			expect(res.body).toEqual({
-				containers: models.flatMap(({ _id, name, properties, isFavourite }) => (properties?.federate ? []
-					: { _id, name, role: 'admin', isFavourite: !!isFavourite })),
+				containers: models.flatMap(({ _id, name, properties, isFavourite }) =>
+					(properties?.federate ? []
+						: { _id, name, role: 'admin', isFavourite: !!isFavourite })),
 			});
 		});
 	});
@@ -217,7 +225,8 @@ const formatToStats = (settings, revCount, latestRev) => {
 };
 
 const testGetContainerStats = () => {
-	const route = (containerId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${containerId}/stats`;
+	const route = (containerId) =>
+		`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${containerId}/stats`;
 	describe('Get container stats', () => {
 		test('should fail without a valid session', async () => {
 			const res = await agent.get(route(modelWithRev._id)).expect(templates.notLoggedIn.status);
@@ -250,7 +259,8 @@ const testGetContainerStats = () => {
 		});
 		test('should return the container stats correctly if the user has access', async () => {
 			const res = await agent.get(`${route(modelWithRev._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			const nonVoidRevisionCount = revisions.filter((rev) => !rev.void).length;
+			const nonVoidRevisionCount = revisions.filter((rev) =>
+				!rev.void).length;
 			expect(res.body).toEqual(formatToStats(modelWithRev.properties, nonVoidRevisionCount, latestRevision));
 		});
 
@@ -289,7 +299,8 @@ const testAddContainer = () => {
 
 			const getRes = await agent.get(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
 
-			expect(getRes.body.containers.find(({ _id }) => _id === res.body._id)).not.toBe(undefined);
+			expect(getRes.body.containers.find(({ _id }) =>
+				_id === res.body._id)).not.toBe(undefined);
 		});
 
 		test('should fail if name already exists', async () => {
@@ -310,7 +321,8 @@ const testAddContainer = () => {
 };
 
 const testDeleteContainer = () => {
-	const route = (containerId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${containerId}`;
+	const route = (containerId) =>
+		`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${containerId}`;
 	describe('Delete container', () => {
 		test('should fail without a valid session', async () => {
 			const res = await agent.delete(route(modelToDelete._id)).expect(templates.notLoggedIn.status);
@@ -332,7 +344,8 @@ const testDeleteContainer = () => {
 			expect(res.body).toEqual({});
 
 			const getRes = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(getRes.body.containers.find(({ _id }) => _id === modelToDelete._id)).toBe(undefined);
+			expect(getRes.body.containers.find(({ _id }) =>
+				_id === modelToDelete._id)).toBe(undefined);
 		});
 
 		test('should fail if container is federation', async () => {
@@ -445,7 +458,8 @@ const testDeleteFavourites = () => {
 };
 
 const testUpdateContainerSettings = () => {
-	const route = (container) => `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container}`;
+	const route = (container) =>
+		`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container}`;
 	describe('Update the settings of a container', () => {
 		test('should fail without a valid session', async () => {
 			const res = await agent.patch(route(modelWithViews._id))
@@ -593,29 +607,31 @@ const testUpdateContainerSettings = () => {
 	});
 };
 
-const formatToSettings = (settings) => ({
-	_id: settings._id,
-	name: settings.name,
-	desc: settings.properties.desc,
-	type: settings.properties.type,
-	code: settings.properties.properties.code,
-	unit: settings.properties.properties.unit,
-	defaultView: settings.properties.defaultView,
-	defaultLegend: settings.properties.defaultLegend,
-	timestamp: settings.properties.timestamp ? settings.properties.timestamp.getTime() : undefined,
-	angleFromNorth: settings.properties.angleFromNorth,
-	status: settings.properties.status,
-	surveyPoints: settings.properties.surveyPoints,
-	errorReason: settings.properties.errorReason ? {
-		message: settings.properties.errorReason.message,
-		timestamp: settings.properties.errorReason.timestamp
-			? settings.properties.errorReason.timestamp.getTime() : undefined,
-		errorCode: settings.properties.errorReason.errorCode,
-	} : undefined,
-});
+const formatToSettings = (settings) =>
+	({
+		_id: settings._id,
+		name: settings.name,
+		desc: settings.properties.desc,
+		type: settings.properties.type,
+		code: settings.properties.properties.code,
+		unit: settings.properties.properties.unit,
+		defaultView: settings.properties.defaultView,
+		defaultLegend: settings.properties.defaultLegend,
+		timestamp: settings.properties.timestamp ? settings.properties.timestamp.getTime() : undefined,
+		angleFromNorth: settings.properties.angleFromNorth,
+		status: settings.properties.status,
+		surveyPoints: settings.properties.surveyPoints,
+		errorReason: settings.properties.errorReason ? {
+			message: settings.properties.errorReason.message,
+			timestamp: settings.properties.errorReason.timestamp
+				? settings.properties.errorReason.timestamp.getTime() : undefined,
+			errorCode: settings.properties.errorReason.errorCode,
+		} : undefined,
+	});
 
 const testGetSettings = () => {
-	const route = (containerId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${containerId}`;
+	const route = (containerId) =>
+		`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${containerId}`;
 	describe('Get container settings', () => {
 		test('should fail without a valid session', async () => {
 			const res = await agent.get(route(models[3]._id)).expect(templates.notLoggedIn.status);
@@ -665,7 +681,8 @@ describe('E2E routes/teamspaces/projects/containers', () => {
 		agent = await SuperTest(server);
 		await setupData();
 	});
-	afterAll(() => ServiceHelper.closeApp(server));
+	afterAll(() =>
+		ServiceHelper.closeApp(server));
 	testGetContainerList();
 	testGetContainerStats();
 	testAppendFavourites();

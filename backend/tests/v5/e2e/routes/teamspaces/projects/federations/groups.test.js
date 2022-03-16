@@ -76,26 +76,31 @@ const groups = [
 const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
 	const customData = { starredModels: {
-		[teamspace]: models.flatMap(({ _id, isFavourite }) => (isFavourite ? _id : [])),
+		[teamspace]: models.flatMap(({ _id, isFavourite }) =>
+			(isFavourite ? _id : [])),
 	} };
-	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], [teamspace], customData));
-	const modelProms = models.map((model) => ServiceHelper.db.createModel(
-		teamspace,
-		model._id,
-		model.name,
-		model.properties,
-	));
+	const userProms = Object.keys(users).map((key) =>
+		ServiceHelper.db.createUser(users[key], [teamspace], customData));
+	const modelProms = models.map((model) =>
+		ServiceHelper.db.createModel(
+			teamspace,
+			model._id,
+			model.name,
+			model.properties,
+		));
 	return Promise.all([
 		...userProms,
 		...modelProms,
 		ServiceHelper.db.createUser(nobody),
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
+		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) =>
+			_id)),
 		ServiceHelper.db.createGroups(teamspace, modelWithGroups._id, groups),
 	]);
 };
 
 const testExportGroups = () => {
-	const createRoute = (projectId = project.id, modelId = modelWithGroups._id) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/groups/export`;
+	const createRoute = (projectId = project.id, modelId = modelWithGroups._id) =>
+		`/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/groups/export`;
 	describe('Export groups', () => {
 		test('should fail without a valid session', async () => {
 			const res = await agent.post(createRoute()).expect(templates.notLoggedIn.status);
@@ -114,21 +119,24 @@ const testExportGroups = () => {
 
 		test('should fail if the federation does not exist', async () => {
 			const res = await agent.post(`${createRoute(project._id, 'dslfkjds')}?key=${users.tsAdmin.apiKey}`)
-				.send({ groups: groups.map(({ _id }) => _id) })
+				.send({ groups: groups.map(({ _id }) =>
+					_id) })
 				.expect(templates.federationNotFound.status);
 			expect(res.body.status).toEqual(templates.federationNotFound.status);
 		});
 
 		test('should fail if the federation is actually a container', async () => {
 			const res = await agent.post(`${createRoute(project._id, notFed._id)}?key=${users.tsAdmin.apiKey}`)
-				.send({ groups: groups.map(({ _id }) => _id) })
+				.send({ groups: groups.map(({ _id }) =>
+					_id) })
 				.expect(templates.federationNotFound.status);
 			expect(res.body.status).toEqual(templates.federationNotFound.status);
 		});
 
 		test('should fail if the user does not have permissions to access the federation', async () => {
 			const res = await agent.post(`${createRoute()}?key=${users.noProjectAccess.apiKey}`)
-				.send({ groups: groups.map(({ _id }) => _id) })
+				.send({ groups: groups.map(({ _id }) =>
+					_id) })
 				.expect(templates.notAuthorized.status);
 			expect(res.body.status).toEqual(templates.notAuthorized.status);
 		});
@@ -149,7 +157,8 @@ const testExportGroups = () => {
 
 		test('should give every groups the user requested', async () => {
 			const res = await agent.post(`${createRoute()}?key=${users.tsAdmin.apiKey}`)
-				.send({ groups: groups.map(({ _id }) => _id) })
+				.send({ groups: groups.map(({ _id }) =>
+					_id) })
 				.expect(templates.ok.status);
 			expect(res.body).toEqual({ groups });
 		});
@@ -163,7 +172,8 @@ const testExportGroups = () => {
 
 		test('should return an empty array should the ids are not found', async () => {
 			const res = await agent.post(`${createRoute(project._id, modelWithoutGroups._id)}?key=${users.tsAdmin.apiKey}`)
-				.send({ groups: groups.map(({ _id }) => _id) })
+				.send({ groups: groups.map(({ _id }) =>
+					_id) })
 				.expect(templates.ok.status);
 			expect(res.body).toEqual({ groups: [] });
 		});
@@ -171,8 +181,10 @@ const testExportGroups = () => {
 };
 
 const testImportGroups = () => {
-	const createRoute = (projectId = project.id, modelId = modelForImport._id) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/groups/import`;
-	const exportRoute = (projectId = project.id, modelId = modelForImport._id) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/groups/export`;
+	const createRoute = (projectId = project.id, modelId = modelForImport._id) =>
+		`/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/groups/import`;
+	const exportRoute = (projectId = project.id, modelId = modelForImport._id) =>
+		`/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/groups/export`;
 	describe('Import groups', () => {
 		test('should fail without a valid session', async () => {
 			const res = await agent.post(createRoute()).expect(templates.notLoggedIn.status);
@@ -191,21 +203,24 @@ const testImportGroups = () => {
 
 		test('should fail if the federation does not exist', async () => {
 			const res = await agent.post(`${createRoute(project._id, 'dslfkjds')}?key=${users.tsAdmin.apiKey}`)
-				.send({ groups: groups.map(({ _id }) => _id) })
+				.send({ groups: groups.map(({ _id }) =>
+					_id) })
 				.expect(templates.federationNotFound.status);
 			expect(res.body.status).toEqual(templates.federationNotFound.status);
 		});
 
 		test('should fail if the federation is actually a container', async () => {
 			const res = await agent.post(`${createRoute(project._id, notFed._id)}?key=${users.tsAdmin.apiKey}`)
-				.send({ groups: groups.map(({ _id }) => _id) })
+				.send({ groups: groups.map(({ _id }) =>
+					_id) })
 				.expect(templates.federationNotFound.status);
 			expect(res.body.status).toEqual(templates.federationNotFound.status);
 		});
 
 		test('should fail if the user does not have permissions to access the federation', async () => {
 			const res = await agent.post(`${createRoute()}?key=${users.noProjectAccess.apiKey}`)
-				.send({ groups: groups.map(({ _id }) => _id) })
+				.send({ groups: groups.map(({ _id }) =>
+					_id) })
 				.expect(templates.notAuthorized.status);
 			expect(res.body.status).toEqual(templates.notAuthorized.status);
 		});
@@ -229,7 +244,8 @@ const testImportGroups = () => {
 				.send({ groups })
 				.expect(templates.ok.status);
 			const res = await agent.post(`${exportRoute()}?key=${users.tsAdmin.apiKey}`)
-				.send({ groups: groups.map(({ _id }) => _id) })
+				.send({ groups: groups.map(({ _id }) =>
+					_id) })
 				.expect(templates.ok.status);
 			expect(res.body.groups).toEqual(groups);
 		});
@@ -239,7 +255,8 @@ const testImportGroups = () => {
 				.send({ groups })
 				.expect(templates.ok.status);
 			const res = await agent.post(`${exportRoute()}?key=${users.tsAdmin.apiKey}`)
-				.send({ groups: groups.map(({ _id }) => _id) })
+				.send({ groups: groups.map(({ _id }) =>
+					_id) })
 				.expect(templates.ok.status);
 			expect(res.body.groups).toEqual(groups);
 		});
@@ -252,7 +269,8 @@ const testImportGroups = () => {
 				.send({ groups: importData })
 				.expect(templates.ok.status);
 			const res = await agent.post(`${exportRoute()}?key=${users.tsAdmin.apiKey}`)
-				.send({ groups: [...groups.map(({ _id }) => _id), newGroup._id] })
+				.send({ groups: [...groups.map(({ _id }) =>
+					_id), newGroup._id] })
 				.expect(templates.ok.status);
 
 			expect(res.body.groups).toEqual(expect.arrayContaining([changedGroup, ...groups.slice(1), newGroup]));
@@ -266,7 +284,8 @@ describe('E2E routes/teamspaces/projects/federations/groups', () => {
 		agent = await SuperTest(server);
 		await setupData();
 	});
-	afterAll(() => ServiceHelper.closeApp(server));
+	afterAll(() =>
+		ServiceHelper.closeApp(server));
 	testExportGroups();
 	testImportGroups();
 });

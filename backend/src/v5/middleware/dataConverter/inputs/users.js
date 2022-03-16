@@ -68,11 +68,13 @@ Users.validateUpdateData = async (req, res, next) => {
 		company: types.strings.title,
 		countryCode: types.strings.countryCode.optional(),
 		oldPassword: Yup.string().optional().when('newPassword', {
-			is: (newPass) => newPass?.length > 0,
+			is: (newPass) =>
+				newPass?.length > 0,
 			then: Yup.string().required(),
 		}),
 		newPassword: types.strings.password.optional().when('oldPassword', {
-			is: (oldPass) => oldPass?.length > 0,
+			is: (oldPass) =>
+				oldPass?.length > 0,
 			then: types.strings.password.required(),
 		}).test({
 			name: 'notTheSameAsOldPassword',
@@ -88,7 +90,8 @@ Users.validateUpdateData = async (req, res, next) => {
 		.test(
 			'at-least-one-property',
 			'You must provide at least one setting value',
-			(value) => Object.keys(value).length,
+			(value) =>
+				Object.keys(value).length,
 		)
 		.required();
 

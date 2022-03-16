@@ -21,8 +21,10 @@ const { templates } = require('../utils/responseCodes');
 
 const Teamspace = {};
 
-const teamspaceQuery = (query, projection, sort) => db.findOne('admin', 'system.users', query, projection, sort);
-const findMany = (query, projection, sort) => db.find('admin', 'system.users', query, projection, sort);
+const teamspaceQuery = (query, projection, sort) =>
+	db.findOne('admin', 'system.users', query, projection, sort);
+const findMany = (query, projection, sort) =>
+	db.find('admin', 'system.users', query, projection, sort);
 
 const getTeamspace = async (ts, projection) => {
 	const tsDoc = await teamspaceQuery({ user: ts }, projection);
@@ -40,7 +42,8 @@ Teamspace.getSubscriptions = async (ts) => {
 Teamspace.getTeamspaceAdmins = async (ts) => {
 	const data = await getTeamspace(ts, { 'customData.permissions': 1 });
 	return data.customData.permissions.flatMap(
-		({ user, permissions }) => (permissions.includes(TEAMSPACE_ADMIN) ? user : []),
+		({ user, permissions }) =>
+			(permissions.includes(TEAMSPACE_ADMIN) ? user : []),
 	);
 };
 

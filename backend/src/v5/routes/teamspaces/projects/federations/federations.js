@@ -30,7 +30,8 @@ const addFederation = (req, res) => {
 		respond(req, res, templates.ok, { _id: federationId });
 	}).catch(
 		// istanbul ignore next
-		(err) => respond(req, res, err),
+		(err) =>
+			respond(req, res, err),
 	);
 };
 
@@ -40,7 +41,8 @@ const deleteFederation = (req, res) => {
 		respond(req, res, templates.ok);
 	}).catch(
 		// istanbul ignore next
-		(err) => respond(req, res, err),
+		(err) =>
+			respond(req, res, err),
 	);
 };
 
@@ -49,7 +51,8 @@ const getFederationList = (req, res) => {
 	const { teamspace, project } = req.params;
 	Federations.getFederationList(teamspace, project, user).then((federations) => {
 		respond(req, res, templates.ok, { federations });
-	}).catch((err) => respond(req, res, err));
+	}).catch((err) =>
+		respond(req, res, err));
 };
 
 const appendFavourites = (req, res) => {
@@ -58,7 +61,9 @@ const appendFavourites = (req, res) => {
 	const favouritesToAdd = req.body.federations;
 
 	Federations.appendFavourites(user, teamspace, project, favouritesToAdd)
-		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
+		.then(() =>
+			respond(req, res, templates.ok)).catch((err) =>
+			respond(req, res, err));
 };
 
 const deleteFavourites = (req, res) => {
@@ -67,7 +72,9 @@ const deleteFavourites = (req, res) => {
 	const favouritesToRemove = req.body.federations;
 
 	Federations.deleteFavourites(user, teamspace, project, favouritesToRemove)
-		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
+		.then(() =>
+			respond(req, res, templates.ok)).catch((err) =>
+			respond(req, res, err));
 };
 
 const getFederationStats = (req, res) => {
@@ -78,7 +85,8 @@ const getFederationStats = (req, res) => {
 		respond(req, res, templates.ok, statsSerialised);
 	}).catch(
 		/* istanbul ignore next */
-		(err) => respond(req, res, err),
+		(err) =>
+			respond(req, res, err),
 	);
 };
 
@@ -86,9 +94,11 @@ const updateSettings = (req, res) => {
 	const { teamspace, federation } = req.params;
 
 	Federations.updateSettings(teamspace, federation, req.body)
-		.then(() => respond(req, res, templates.ok)).catch(
+		.then(() =>
+			respond(req, res, templates.ok)).catch(
 			// istanbul ignore next
-			(err) => respond(req, res, err),
+			(err) =>
+				respond(req, res, err),
 		);
 };
 
@@ -102,7 +112,8 @@ const getSettings = (req, res, next) => {
 		})
 		.catch(
 		// istanbul ignore next
-			(err) => respond(req, res, err),
+			(err) =>
+				respond(req, res, err),
 		);
 };
 

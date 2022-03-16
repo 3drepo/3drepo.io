@@ -23,11 +23,16 @@ const { getInfoFromCode } = require('./modelSettings.constants');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
-const deleteOneModel = (ts, query) => db.deleteOne(ts, 'settings', query);
-const findOneModel = (ts, query, projection) => db.findOne(ts, 'settings', query, projection);
-const findModels = (ts, query, projection, sort) => db.find(ts, 'settings', query, projection, sort);
-const insertOneModel = (ts, data) => db.insertOne(ts, 'settings', data);
-const updateOneModel = (ts, query, action) => db.updateOne(ts, 'settings', query, action);
+const deleteOneModel = (ts, query) =>
+	db.deleteOne(ts, 'settings', query);
+const findOneModel = (ts, query, projection) =>
+	db.findOne(ts, 'settings', query, projection);
+const findModels = (ts, query, projection, sort) =>
+	db.find(ts, 'settings', query, projection, sort);
+const insertOneModel = (ts, data) =>
+	db.insertOne(ts, 'settings', data);
+const updateOneModel = (ts, query, action) =>
+	db.updateOne(ts, 'settings', query, action);
 
 const noFederations = { federate: { $ne: true } };
 const onlyFederations = { federate: true };
@@ -60,7 +65,8 @@ Models.getModelByQuery = async (ts, query, projection) => {
 	return res;
 };
 
-Models.getModelById = (ts, model, projection) => Models.getModelByQuery(ts, { _id: model }, projection);
+Models.getModelById = (ts, model, projection) =>
+	Models.getModelByQuery(ts, { _id: model }, projection);
 
 Models.getContainerById = async (ts, container, projection) => {
 	try {
@@ -124,7 +130,8 @@ Models.newRevisionProcessed = async (teamspace, model, corId, retVal, user, cont
 			 *  containers used to be called models in v4, and models used to be called
 			 *  projects. This data came from 3drepobouncer, which still calls containers projects.
 			 */
-			set.subModels = containers.map(({ project }) => project);
+			set.subModels = containers.map(({ project }) =>
+				project);
 		}
 	} else {
 		set.status = 'failed';

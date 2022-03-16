@@ -21,9 +21,11 @@ const MetaRules = require(`${src}/models/meta.rules`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const testToQuery = () => {
-	const generateRule = (field, operator, values) => ({ field, operator, values });
-	const createQuery = (field, valueQuery) => ({
-		metadata: { $elemMatch: { key: field, ...(valueQuery ? { value: valueQuery } : {}) } } });
+	const generateRule = (field, operator, values) =>
+		({ field, operator, values });
+	const createQuery = (field, valueQuery) =>
+		({
+			metadata: { $elemMatch: { key: field, ...(valueQuery ? { value: valueQuery } : {}) } } });
 
 	const fieldName = 'abc';
 	const testCases = [
@@ -138,7 +140,8 @@ const testToQuery = () => {
 	];
 
 	describe.each(
-		testCases.map(({ desc, data, query }) => [desc, data, query]),
+		testCases.map(({ desc, data, query }) =>
+			[desc, data, query]),
 	)('Smart rule to query', (desc, data, query) => {
 		test(`${desc} ${query ? ' should convert to the expected query' : 'should throw invalid arguments'}`, () => {
 			if (query) {

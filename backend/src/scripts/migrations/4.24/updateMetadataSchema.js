@@ -21,33 +21,34 @@ const { getTeamspaceList, getCollectionsEndsWith } = require('../utils');
 const { aggregate } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const processModel = (teamspace, scene) => aggregate(
-	teamspace, scene, [
+const processModel = (teamspace, scene) =>
+	aggregate(
+		teamspace, scene, [
 		// filter for all metasdata that has not been converted
-		{ $match: { type: 'meta', 'metadata.key': { $exists: false } } },
-		// convert metadata: { key: value } to metadata: [ {k: <key>, v: <value> }]
-		{ $project: { _id: 1, metadata: { $objectToArray: '$metadata' } } },
-		// rename k to key and v to value
-		{
-			$addFields: {
-				metadata: {
-					$map: {
-						input: '$metadata',
-						as: 'metadata',
-						in: {
-							key: '$$metadata.k',
-							value: '$$metadata.v',
+			{ $match: { type: 'meta', 'metadata.key': { $exists: false } } },
+			// convert metadata: { key: value } to metadata: [ {k: <key>, v: <value> }]
+			{ $project: { _id: 1, metadata: { $objectToArray: '$metadata' } } },
+			// rename k to key and v to value
+			{
+				$addFields: {
+					metadata: {
+						$map: {
+							input: '$metadata',
+							as: 'metadata',
+							in: {
+								key: '$$metadata.k',
+								value: '$$metadata.v',
+							},
 						},
 					},
 				},
 			},
-		},
-		// update
-		{
-			$merge: scene,
-		},
-	],
-);
+			// update
+			{
+				$merge: scene,
+			},
+		],
+	);
 
 const processTeamspace = async (teamspace) => {
 	const scenes = await getCollectionsEndsWith(teamspace, '.scene');

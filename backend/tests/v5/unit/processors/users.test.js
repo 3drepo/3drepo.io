@@ -23,7 +23,8 @@ const Users = require(`${src}/processors/users`);
 jest.mock('../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
 
-UsersModel.canLogIn.mockImplementation((user) => user);
+UsersModel.canLogIn.mockImplementation((user) =>
+	user);
 UsersModel.authenticate.mockResolvedValue('user1');
 
 const user = {
@@ -42,7 +43,8 @@ const user = {
 		},
 	},
 };
-const getUserByUsernameMock = UsersModel.getUserByUsername.mockImplementation(() => user);
+const getUserByUsernameMock = UsersModel.getUserByUsername.mockImplementation(() =>
+	user);
 const updateUserByUsernameMock = UsersModel.updateProfile.mockImplementation(() => {});
 const updatePasswordMock = UsersModel.updatePassword.mockImplementation(() => {});
 
@@ -60,16 +62,17 @@ const testLogin = () => {
 	});
 };
 
-const formatUser = (userProfile) => ({
-	username: userProfile.user,
-	firstName: userProfile.customData.firstName,
-	lastName: userProfile.customData.lastName,
-	email: userProfile.customData.email,
-	hasAvatar: !!userProfile.customData.avatar,
-	apiKey: userProfile.customData.apiKey,
-	countryCode: userProfile.customData.billing.billingInfo.countryCode,
-	company: userProfile.customData.billing.billingInfo.company,
-});
+const formatUser = (userProfile) =>
+	({
+		username: userProfile.user,
+		firstName: userProfile.customData.firstName,
+		lastName: userProfile.customData.lastName,
+		email: userProfile.customData.email,
+		hasAvatar: !!userProfile.customData.avatar,
+		apiKey: userProfile.customData.apiKey,
+		countryCode: userProfile.customData.billing.billingInfo.countryCode,
+		company: userProfile.customData.billing.billingInfo.company,
+	});
 
 const tesGetProfileByUsername = () => {
 	describe('Get user profile by username', () => {

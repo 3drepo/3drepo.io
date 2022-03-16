@@ -19,8 +19,10 @@ const Jobs = {};
 
 const DBHandler = require('../handler/db');
 
-const findMany = (ts, query, projection, sort) => DBHandler.find(ts, 'jobs', query, projection, sort);
+const findMany = (ts, query, projection, sort) =>
+	DBHandler.find(ts, 'jobs', query, projection, sort);
 
-Jobs.getJobsToUsers = (teamspace) => findMany(teamspace, {}, { _id: 1, users: 1 });
+Jobs.getJobsToUsers = (teamspace) =>
+	findMany(teamspace, {}, { _id: 1, users: 1 });
 
 module.exports = Jobs;

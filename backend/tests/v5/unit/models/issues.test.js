@@ -36,7 +36,8 @@ const checkResults = (fn, teamspace, model) => {
 const testGetIssueCount = () => {
 	describe('Get issue count', () => {
 		test('should get the number of issues of a federation', async () => {
-			const fn = jest.spyOn(db, 'count').mockImplementation(() => 5);
+			const fn = jest.spyOn(db, 'count').mockImplementation(() =>
+				5);
 			const res = await Issues.getIssuesCount('someTS', 'someModel');
 			expect(res).toEqual(5);
 			checkResults(fn, 'teamspace', 'someModel');

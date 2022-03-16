@@ -36,7 +36,8 @@ Rules.toQuery = (rule) => {
 	}
 		break;
 	case 'REGEX': {
-		const regexArr = rule.values.map((val) => `(${val})`);
+		const regexArr = rule.values.map((val) =>
+			`(${val})`);
 		// eslint-disable-next-line security/detect-non-literal-regexp
 		valueClause = { $regex: new RegExp(regexArr.join('|')) };
 	}
@@ -73,14 +74,15 @@ Rules.toQuery = (rule) => {
 		throw templates.invalidArguments;
 	}
 
-	const createQuery = (value) => ({
-		metadata: {
-			$elemMatch: {
-				key: rule.field,
-				...(value !== undefined ? { value } : {}),
+	const createQuery = (value) =>
+		({
+			metadata: {
+				$elemMatch: {
+					key: rule.field,
+					...(value !== undefined ? { value } : {}),
+				},
 			},
-		},
-	});
+		});
 
 	// We need to capture the 0s and nulls
 	if (valueClause !== undefined) {

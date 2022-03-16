@@ -19,7 +19,8 @@ const Views = {};
 const db = require('../handler/db');
 const { templates } = require('../utils/responseCodes');
 
-const getCollectionName = (model) => `${model}.views`;
+const getCollectionName = (model) =>
+	`${model}.views`;
 
 Views.getViewById = async (teamspace, model, id, projection) => {
 	const foundView = await db.findOne(teamspace, getCollectionName(model), { _id: id }, projection);
@@ -31,6 +32,7 @@ Views.getViewById = async (teamspace, model, id, projection) => {
 	return foundView;
 };
 
-Views.getViews = (teamspace, model, projection) => db.find(teamspace, getCollectionName(model), {}, projection);
+Views.getViews = (teamspace, model, projection) =>
+	db.find(teamspace, getCollectionName(model), {}, projection);
 
 module.exports = Views;

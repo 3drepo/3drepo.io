@@ -46,7 +46,8 @@ Sessions.session = (config) => {
 	});
 };
 
-Sessions.getSessions = (query, projection, sort) => db.find('admin', 'sessions', query, projection, sort);
+Sessions.getSessions = (query, projection, sort) =>
+	db.find('admin', 'sessions', query, projection, sort);
 
 Sessions.removeOldSessions = async (username, currentSessionID, referrer) => {
 	if (!referrer) return;
@@ -59,7 +60,8 @@ Sessions.removeOldSessions = async (username, currentSessionID, referrer) => {
 
 	const sessionsToRemove = await Sessions.getSessions(query, { _id: 1 });
 
-	const sessionIds = sessionsToRemove.map((s) => s._id);
+	const sessionIds = sessionsToRemove.map((s) =>
+		s._id);
 
 	await db.deleteMany('admin', 'sessions', { _id: { $in: sessionIds } });
 	publish(events.SESSIONS_REMOVED, { ids: sessionIds });

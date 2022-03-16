@@ -30,7 +30,8 @@ const login = (req, res, next) => {
 	Users.login(user, password).then((loginData) => {
 		req.loginData = loginData;
 		next();
-	}).catch((err) => respond(req, res, err));
+	}).catch((err) =>
+		respond(req, res, err));
 };
 
 const getUsername = (req, res) => {
@@ -43,7 +44,8 @@ const getProfile = (req, res) => {
 		respond(req, res, templates.ok, profile);
 	}).catch(
 		// istanbul ignore next
-		(err) => respond(req, res, err),
+		(err) =>
+			respond(req, res, err),
 	);
 };
 
@@ -54,7 +56,8 @@ const updateProfile = (req, res) => {
 		respond(req, res, templates.ok);
 	}).catch(
 		// istanbul ignore next
-		(err) => respond(req, res, err),
+		(err) =>
+			respond(req, res, err),
 	);
 };
 
@@ -64,7 +67,8 @@ const generateApiKey = (req, res) => {
 		respond(req, res, templates.ok, { apiKey });
 	}).catch(
 		// istanbul ignore next
-		(err) => respond(req, res, err),
+		(err) =>
+			respond(req, res, err),
 	);
 };
 
@@ -74,7 +78,8 @@ const deleteApiKey = (req, res) => {
 		respond(req, res, templates.ok);
 	}).catch(
 		// istanbul ignore next
-		(err) => respond(req, res, err),
+		(err) =>
+			respond(req, res, err),
 	);
 };
 
@@ -83,7 +88,8 @@ const getAvatar = (req, res) => {
 	Users.getAvatar(user).then((avatar) => {
 		req.params.format = 'png';
 		respond(req, res, templates.ok, avatar.data.buffer);
-	}).catch((err) => respond(req, res, err));
+	}).catch((err) =>
+		respond(req, res, err));
 };
 
 const uploadAvatar = (req, res) => {
@@ -92,7 +98,8 @@ const uploadAvatar = (req, res) => {
 		respond(req, res, templates.ok);
 	}).catch(
 		// istanbul ignore next
-		(err) => respond(req, res, err),
+		(err) =>
+			respond(req, res, err),
 	);
 };
 

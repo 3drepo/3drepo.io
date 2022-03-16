@@ -40,10 +40,11 @@ const processModel = async (teamspace, model) => {
 	// eslint-disable-next-line camelcase
 	const proms = superMeshes.map(({ _id, m_map }) => {
 		if (m_map.length && !m_map[0].shared_id) {
-			const updatedMmap = m_map.map((entry) => ({
-				...entry,
-				shared_id: meshToSharedId[UUIDToString(entry.map_id)],
-			}));
+			const updatedMmap = m_map.map((entry) =>
+				({
+					...entry,
+					shared_id: meshToSharedId[UUIDToString(entry.map_id)],
+				}));
 
 			return updateOne(teamspace, stashDB, { _id }, { $set: { m_map: updatedMmap } });
 		}

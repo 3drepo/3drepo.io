@@ -30,7 +30,8 @@ const addContainer = (req, res) => {
 		respond(req, res, templates.ok, { _id: containerId });
 	}).catch(
 		// istanbul ignore next
-		(err) => respond(req, res, err),
+		(err) =>
+			respond(req, res, err),
 	);
 };
 
@@ -40,7 +41,8 @@ const deleteContainer = (req, res) => {
 		respond(req, res, templates.ok);
 	}).catch(
 		// istanbul ignore next
-		(err) => respond(req, res, err),
+		(err) =>
+			respond(req, res, err),
 	);
 };
 
@@ -49,7 +51,8 @@ const getContainerList = (req, res) => {
 	const { teamspace, project } = req.params;
 	Containers.getContainerList(teamspace, project, user).then((containers) => {
 		respond(req, res, templates.ok, { containers });
-	}).catch((err) => respond(req, res, err));
+	}).catch((err) =>
+		respond(req, res, err));
 };
 
 const getContainerStats = (req, res) => {
@@ -66,7 +69,8 @@ const getContainerStats = (req, res) => {
 		respond(req, res, templates.ok, statsSerialised);
 	}).catch(
 		// istanbul ignore next
-		(err) => respond(req, res, err),
+		(err) =>
+			respond(req, res, err),
 	);
 };
 
@@ -76,7 +80,9 @@ const deleteFavourites = (req, res) => {
 	const favouritesToRemove = req.body.containers;
 
 	Containers.deleteFavourites(user, teamspace, project, favouritesToRemove)
-		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
+		.then(() =>
+			respond(req, res, templates.ok)).catch((err) =>
+			respond(req, res, err));
 };
 
 const appendFavourites = (req, res) => {
@@ -85,16 +91,20 @@ const appendFavourites = (req, res) => {
 	const favouritesToAdd = req.body.containers;
 
 	Containers.appendFavourites(user, teamspace, project, favouritesToAdd)
-		.then(() => respond(req, res, templates.ok)).catch((err) => respond(req, res, err));
+		.then(() =>
+			respond(req, res, templates.ok)).catch((err) =>
+			respond(req, res, err));
 };
 
 const updateSettings = (req, res) => {
 	const { teamspace, container } = req.params;
 
 	Containers.updateSettings(teamspace, container, req.body)
-		.then(() => respond(req, res, templates.ok)).catch(
+		.then(() =>
+			respond(req, res, templates.ok)).catch(
 			// istanbul ignore next
-			(err) => respond(req, res, err),
+			(err) =>
+				respond(req, res, err),
 		);
 };
 
@@ -107,7 +117,8 @@ const getSettings = (req, res, next) => {
 		})
 		.catch(
 		// istanbul ignore next
-			(err) => respond(req, res, err),
+			(err) =>
+				respond(req, res, err),
 		);
 };
 

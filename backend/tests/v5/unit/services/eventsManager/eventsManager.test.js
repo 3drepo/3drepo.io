@@ -22,11 +22,13 @@ const { events } = require(`${src}/services/eventsManager/eventsManager.constant
 
 describe('services/eventsManager/eventsManager', () => {
 	test('Should throw an error if the user tries to subscribe to an unknown event', () => {
-		expect(() => EventsManager.subscribe('sdflkdsjflds', () => {})).toThrow();
+		expect(() =>
+			EventsManager.subscribe('sdflkdsjflds', () => {})).toThrow();
 	});
 
 	test('Should throw an error if the user tries to publish an unknown event', () => {
-		expect(() => EventsManager.publish('sddsfsdfds', {})).toThrow();
+		expect(() =>
+			EventsManager.publish('sddsfsdfds', {})).toThrow();
 	});
 
 	test('Should be able to subscribe to a known event', () => {

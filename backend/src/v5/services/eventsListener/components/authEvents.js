@@ -20,10 +20,11 @@ const { removeOldSessions } = require('../../sessions');
 const { saveLoginRecord } = require('../../../models/loginRecord');
 const { subscribe } = require('../../eventsManager/eventsManager');
 
-const userLoggedIn = ({ username, sessionID, ipAddress, userAgent, referer }) => Promise.all([
-	saveLoginRecord(username, sessionID, ipAddress, userAgent, referer),
-	removeOldSessions(username, sessionID, referer),
-]);
+const userLoggedIn = ({ username, sessionID, ipAddress, userAgent, referer }) =>
+	Promise.all([
+		saveLoginRecord(username, sessionID, ipAddress, userAgent, referer),
+		removeOldSessions(username, sessionID, referer),
+	]);
 
 const AuthEventsListener = {};
 

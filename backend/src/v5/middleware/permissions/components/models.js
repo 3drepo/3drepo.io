@@ -31,22 +31,23 @@ const { templates } = require('../../../utils/responseCodes');
 
 const ModelPerms = {};
 
-const permissionsCheckTemplate = (callback, isFed = false) => async (req, res, next) => {
-	const { session, params } = req;
-	const user = getUserFromSession(session);
-	const { teamspace, project } = params;
-	const model = isFed ? params.federation : params.container;
+const permissionsCheckTemplate = (callback, isFed = false) =>
+	async (req, res, next) => {
+		const { session, params } = req;
+		const user = getUserFromSession(session);
+		const { teamspace, project } = params;
+		const model = isFed ? params.federation : params.container;
 
-	try {
-		if (await callback(teamspace, project, model, user)) {
-			next();
-		} else {
-			respond(req, res, templates.notAuthorized);
+		try {
+			if (await callback(teamspace, project, model, user)) {
+				next();
+			} else {
+				respond(req, res, templates.notAuthorized);
+			}
+		} catch (err) {
+			respond(req, res, err);
 		}
-	} catch (err) {
-		respond(req, res, err);
-	}
-};
+	};
 
 ModelPerms.hasReadAccessToContainer = permissionsCheckTemplate(hasReadAccessToContainer);
 ModelPerms.hasWriteAccessToContainer = permissionsCheckTemplate(hasWriteAccessToContainer);

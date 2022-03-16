@@ -26,7 +26,8 @@ const getTeamspaceList = (req, res) => {
 	const user = req.session.user.username;
 	Teamspaces.getTeamspaceListByUser(user).then((teamspaces) => {
 		respond(req, res, templates.ok, { teamspaces });
-	}).catch((err) => respond(req, res, err));
+	}).catch((err) =>
+		respond(req, res, err));
 };
 
 const getTeamspaceMembers = (req, res) => {
@@ -35,7 +36,8 @@ const getTeamspaceMembers = (req, res) => {
 		respond(req, res, templates.ok, { members });
 	}).catch(
 		/* istanbul ignore next */
-		(err) => respond(req, res, err),
+		(err) =>
+			respond(req, res, err),
 	);
 };
 

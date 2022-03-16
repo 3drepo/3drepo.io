@@ -24,12 +24,14 @@ const Utils = {};
 
 Utils.getTeamspaceList = async () => {
 	const dbList = await listDatabases();
-	return dbList.flatMap(({ name: db }) => (USERNAME_BLACKLIST.includes(db) ? [] : db));
+	return dbList.flatMap(({ name: db }) =>
+		(USERNAME_BLACKLIST.includes(db) ? [] : db));
 };
 
 Utils.getCollectionsEndsWith = async (teamspace, str) => {
 	const collections = await listCollections(teamspace);
-	return collections.filter(({ name }) => name.endsWith(str));
+	return collections.filter(({ name }) =>
+		name.endsWith(str));
 };
 
 module.exports = Utils;

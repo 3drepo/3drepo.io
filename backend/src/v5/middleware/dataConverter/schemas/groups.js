@@ -30,7 +30,8 @@ const objectEntryValidator = Yup.object().shape({
 }).test(
 	'Object item check',
 	'Can only contain either ifc_guids or shared_ids',
-	(value) => (value.shared_ids && !value.ifc_guids) || (!value.shared_ids && value.ifc_guids),
+	(value) =>
+		(value.shared_ids && !value.ifc_guids) || (!value.shared_ids && value.ifc_guids),
 );
 
 const schema = (group, strict = false) => {
@@ -54,13 +55,15 @@ const schema = (group, strict = false) => {
 		.test(
 			'Group validation',
 			'Should contains either rules or objects',
-			(value) => (value.rules && !value.objects) || (!value.rules && value.objects),
+			(value) =>
+				(value.rules && !value.objects) || (!value.rules && value.objects),
 		);
 
 	return output;
 };
 
-Group.validateSchema = (group) => schema(group, true).validate(group);
+Group.validateSchema = (group) =>
+	schema(group, true).validate(group);
 
 Group.castSchema = (group) => {
 	const groupToCast = { ...group };

@@ -26,7 +26,8 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const ModelSettingsOutputMiddlewares = require(`${src}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings`);
 
 // Mock respond function to just return the resCode
-const respondFn = Responder.respond.mockImplementation((req, res, errCode) => errCode);
+const respondFn = Responder.respond.mockImplementation((req, res, errCode) =>
+	errCode);
 
 const testFormatModelSettings = () => {
 	const withTimestamp = { ...generateRandomModelProperties(), timestamp: new Date() };

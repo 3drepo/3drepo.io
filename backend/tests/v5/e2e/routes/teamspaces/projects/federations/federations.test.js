@@ -173,13 +173,19 @@ const risks = [
 	},
 ];
 
-const getUnresolvedIssues = (issuesList) => issuesList.filter((i) => i.status !== 'void' && i.status !== 'closed');
+const getUnresolvedIssues = (issuesList) =>
+	issuesList.filter((i) =>
+		i.status !== 'void' && i.status !== 'closed');
 
-const getUnresolvedRisks = (risksList) => risksList.filter((i) => i.mitigation_status !== 'void' && i.mitigation_status !== 'agreed_fully'
+const getUnresolvedRisks = (risksList) =>
+	risksList.filter((i) =>
+		i.mitigation_status !== 'void' && i.mitigation_status !== 'agreed_fully'
 		&& i.mitigation_status !== 'rejected');
 
-const container = modelSettings.find(({ properties }) => !properties.federate);
-const federation = modelSettings.find(({ properties }) => properties.federate);
+const container = modelSettings.find(({ properties }) =>
+	!properties.federate);
+const federation = modelSettings.find(({ properties }) =>
+	properties.federate);
 
 const revisions = [
 	ServiceHelper.generateRevisionEntry(),
@@ -196,41 +202,50 @@ const federationWithRevRisks = [risks[0], risks[1]];
 const federationWithoutRevIssues = [issues[2]];
 const federationWithoutRevRisks = [risks[2]];
 
-const latestRevision = revisions.filter((rev) => !rev.void)
-	.reduce((a, b) => (a.timestamp > b.timestamp ? a : b));
+const latestRevision = revisions.filter((rev) =>
+	!rev.void)
+	.reduce((a, b) =>
+		(a.timestamp > b.timestamp ? a : b));
 
 const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
 	const customData = { starredModels: {
-		[teamspace]: modelSettings.flatMap(({ _id, isFavourite }) => (isFavourite ? _id : [])),
+		[teamspace]: modelSettings.flatMap(({ _id, isFavourite }) =>
+			(isFavourite ? _id : [])),
 	} };
-	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], [teamspace], customData));
-	const modelProms = modelSettings.map((model) => ServiceHelper.db.createModel(
-		teamspace,
-		model._id,
-		model.name,
-		model.properties,
-	));
-	const federationWithRevIssueProms = federationWithRevIssues.map((issue) => ServiceHelper.db.createIssue(
-		teamspace,
-		federationWithRev._id,
-		issue,
-	));
-	const federationWithRevRiskProms = federationWithRevRisks.map((risk) => ServiceHelper.db.createRisk(
-		teamspace,
-		federationWithRev._id,
-		risk,
-	));
-	const federationWithoutRevIssueProms = federationWithoutRevIssues.map((issue) => ServiceHelper.db.createIssue(
-		teamspace,
-		federationWithoutRev._id,
-		issue,
-	));
-	const federationWithoutRevRiskProms = federationWithoutRevRisks.map((risk) => ServiceHelper.db.createRisk(
-		teamspace,
-		federationWithoutRev._id,
-		risk,
-	));
+	const userProms = Object.keys(users).map((key) =>
+		ServiceHelper.db.createUser(users[key], [teamspace], customData));
+	const modelProms = modelSettings.map((model) =>
+		ServiceHelper.db.createModel(
+			teamspace,
+			model._id,
+			model.name,
+			model.properties,
+		));
+	const federationWithRevIssueProms = federationWithRevIssues.map((issue) =>
+		ServiceHelper.db.createIssue(
+			teamspace,
+			federationWithRev._id,
+			issue,
+		));
+	const federationWithRevRiskProms = federationWithRevRisks.map((risk) =>
+		ServiceHelper.db.createRisk(
+			teamspace,
+			federationWithRev._id,
+			risk,
+		));
+	const federationWithoutRevIssueProms = federationWithoutRevIssues.map((issue) =>
+		ServiceHelper.db.createIssue(
+			teamspace,
+			federationWithoutRev._id,
+			issue,
+		));
+	const federationWithoutRevRiskProms = federationWithoutRevRisks.map((risk) =>
+		ServiceHelper.db.createRisk(
+			teamspace,
+			federationWithoutRev._id,
+			risk,
+		));
 
 	return Promise.all([
 		...userProms,
@@ -240,8 +255,10 @@ const setupData = async () => {
 		...federationWithoutRevIssueProms,
 		...federationWithoutRevRiskProms,
 		ServiceHelper.db.createUser(nobody),
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, modelSettings.map(({ _id }) => _id)),
-		...revisions.map((revision) => ServiceHelper.db.createRevision(teamspace, modelWithRevId, revision)),
+		ServiceHelper.db.createProject(teamspace, project.id, project.name, modelSettings.map(({ _id }) =>
+			_id)),
+		...revisions.map((revision) =>
+			ServiceHelper.db.createRevision(teamspace, modelWithRevId, revision)),
 		ServiceHelper.db.createViews(teamspace, federation._id, views),
 		ServiceHelper.db.createLegends(teamspace, federation._id, legends),
 	]);
@@ -273,8 +290,9 @@ const testGetFederationList = () => {
 		test('should return the list of federations if the user has access', async () => {
 			const res = await agent.get(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
 			expect(res.body).toEqual({
-				federations: modelSettings.flatMap(({ _id, name, properties, isFavourite }) => (properties?.federate
-					? { _id, name, role: 'admin', isFavourite: !!isFavourite } : [])),
+				federations: modelSettings.flatMap(({ _id, name, properties, isFavourite }) =>
+					(properties?.federate
+						? { _id, name, role: 'admin', isFavourite: !!isFavourite } : [])),
 			});
 		});
 	});
@@ -286,7 +304,8 @@ const formatToStats = (fed, issueCount, riskCount, latestRev) => {
 		code: fed.properties.properties.code,
 		status: fed.properties.status,
 		containers: fed.properties.subModels
-			? fed.properties.subModels.map(({ model }) => model) : undefined,
+			? fed.properties.subModels.map(({ model }) =>
+				model) : undefined,
 		lastUpdated: latestRev ? latestRev.getTime() : undefined,
 		tickets: {
 			issues: issueCount,
@@ -298,7 +317,8 @@ const formatToStats = (fed, issueCount, riskCount, latestRev) => {
 };
 
 const testGetFederationStats = () => {
-	const route = (federationId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federationId}/stats`;
+	const route = (federationId) =>
+		`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federationId}/stats`;
 	describe('Get federation stats', () => {
 		test('should fail without a valid session', async () => {
 			const res = await agent.get(route(federationWithRev._id)).expect(templates.notLoggedIn.status);
@@ -365,7 +385,8 @@ const testAddFederation = () => {
 
 			const getRes = await agent.get(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
 
-			expect(getRes.body.federations.find(({ _id }) => _id === res.body._id)).not.toBe(undefined);
+			expect(getRes.body.federations.find(({ _id }) =>
+				_id === res.body._id)).not.toBe(undefined);
 		});
 
 		test('should fail if name already exists', async () => {
@@ -387,7 +408,8 @@ const testAddFederation = () => {
 };
 
 const testDeleteFederation = () => {
-	const route = (federationId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federationId}`;
+	const route = (federationId) =>
+		`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federationId}`;
 	describe('Delete federation', () => {
 		test('should fail without a valid session', async () => {
 			const res = await agent.delete(route(federationToDelete._id)).expect(templates.notLoggedIn.status);
@@ -409,7 +431,8 @@ const testDeleteFederation = () => {
 			expect(res.body).toEqual({});
 
 			const getRes = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(getRes.body.federations.find(({ _id }) => _id === federationToDelete._id)).toBe(undefined);
+			expect(getRes.body.federations.find(({ _id }) =>
+				_id === federationToDelete._id)).toBe(undefined);
 		});
 
 		test('should fail if federation is container', async () => {
@@ -662,28 +685,30 @@ const testUpdateFederationSettings = () => {
 	});
 };
 
-const formatToSettings = (settings) => ({
-	_id: settings._id,
-	name: settings.name,
-	desc: settings.properties.desc,
-	code: settings.properties.properties.code,
-	unit: settings.properties.properties.unit,
-	defaultView: settings.properties.defaultView,
-	defaultLegend: settings.properties.defaultLegend,
-	timestamp: settings.properties.timestamp ? settings.properties.timestamp.getTime() : undefined,
-	angleFromNorth: settings.properties.angleFromNorth,
-	status: settings.properties.status,
-	surveyPoints: settings.properties.surveyPoints,
-	errorReason: settings.properties.errorReason ? {
-		message: settings.properties.errorReason.message,
-		timestamp: settings.properties.errorReason.timestamp
-			? settings.properties.errorReason.timestamp.getTime() : undefined,
-		errorCode: settings.properties.errorReason.errorCode,
-	} : undefined,
-});
+const formatToSettings = (settings) =>
+	({
+		_id: settings._id,
+		name: settings.name,
+		desc: settings.properties.desc,
+		code: settings.properties.properties.code,
+		unit: settings.properties.properties.unit,
+		defaultView: settings.properties.defaultView,
+		defaultLegend: settings.properties.defaultLegend,
+		timestamp: settings.properties.timestamp ? settings.properties.timestamp.getTime() : undefined,
+		angleFromNorth: settings.properties.angleFromNorth,
+		status: settings.properties.status,
+		surveyPoints: settings.properties.surveyPoints,
+		errorReason: settings.properties.errorReason ? {
+			message: settings.properties.errorReason.message,
+			timestamp: settings.properties.errorReason.timestamp
+				? settings.properties.errorReason.timestamp.getTime() : undefined,
+			errorCode: settings.properties.errorReason.errorCode,
+		} : undefined,
+	});
 
 const testGetSettings = () => {
-	const route = (federationId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federationId}`;
+	const route = (federationId) =>
+		`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federationId}`;
 	describe('Get federation settings', () => {
 		test('should fail without a valid session', async () => {
 			const res = await agent.get(route(modelSettings[5]._id)).expect(templates.notLoggedIn.status);
@@ -733,7 +758,8 @@ describe('E2E routes/teamspaces/projects/federations', () => {
 		agent = await SuperTest(server);
 		await setupData();
 	});
-	afterAll(() => ServiceHelper.closeApp(server));
+	afterAll(() =>
+		ServiceHelper.closeApp(server));
 	testGetFederationList();
 	testGetFederationStats();
 	testAppendFavourites();

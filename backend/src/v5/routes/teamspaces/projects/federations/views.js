@@ -31,7 +31,8 @@ const getViewList = (req, res, next) => {
 			next();
 		}).catch(
 			// istanbul ignore next
-			(err) => respond(req, res, err),
+			(err) =>
+				respond(req, res, err),
 		);
 };
 

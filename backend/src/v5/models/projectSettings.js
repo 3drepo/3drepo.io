@@ -23,21 +23,26 @@ const { getCommonElements } = require('../utils/helper/arrays');
 const { templates } = require('../utils/responseCodes');
 
 const COL_NAME = 'projects';
-const findProjects = (ts, query, projection, sort) => db.find(ts, COL_NAME, query, projection, sort);
-const findOneProject = (ts, query, projection) => db.findOne(ts, COL_NAME, query, projection);
-const updateOneProject = (ts, query, data) => db.updateOne(ts, COL_NAME, query, data);
+const findProjects = (ts, query, projection, sort) =>
+	db.find(ts, COL_NAME, query, projection, sort);
+const findOneProject = (ts, query, projection) =>
+	db.findOne(ts, COL_NAME, query, projection);
+const updateOneProject = (ts, query, data) =>
+	db.updateOne(ts, COL_NAME, query, data);
 
-Projects.addModelToProject = (ts, project, model) => updateOneProject(
-	ts,
-	{ _id: project },
-	{ $push: { models: model } },
-);
+Projects.addModelToProject = (ts, project, model) =>
+	updateOneProject(
+		ts,
+		{ _id: project },
+		{ $push: { models: model } },
+	);
 
-Projects.removeModelFromProject = (ts, project, model) => updateOneProject(
-	ts,
-	{ _id: project },
-	{ $pull: { models: model } },
-);
+Projects.removeModelFromProject = (ts, project, model) =>
+	updateOneProject(
+		ts,
+		{ _id: project },
+		{ $pull: { models: model } },
+	);
 
 const getProjectByQuery = async (ts, query, projection) => {
 	const res = await findOneProject(ts, query, projection);
@@ -49,9 +54,11 @@ const getProjectByQuery = async (ts, query, projection) => {
 	return res;
 };
 
-Projects.getProjectByName = (ts, name, projection) => getProjectByQuery(ts, { name }, projection);
+Projects.getProjectByName = (ts, name, projection) =>
+	getProjectByQuery(ts, { name }, projection);
 
-Projects.getProjectById = (ts, id, projection) => getProjectByQuery(ts, { _id: id }, projection);
+Projects.getProjectById = (ts, id, projection) =>
+	getProjectByQuery(ts, { _id: id }, projection);
 
 Projects.modelsExistInProject = async (teamspace, project, models) => {
 	if (!models.length) return false;
@@ -59,11 +66,13 @@ Projects.modelsExistInProject = async (teamspace, project, models) => {
 	return getCommonElements(models, projModels).length === models.length;
 };
 
-Projects.getProjectList = (ts, projection = { _id: 1, name: 1 }) => findProjects(ts, {}, projection);
+Projects.getProjectList = (ts, projection = { _id: 1, name: 1 }) =>
+	findProjects(ts, {}, projection);
 
 Projects.getProjectAdmins = async (ts, project) => {
 	const { permissions } = await getProjectByQuery(ts, { _id: project }, { permissions: 1 });
-	return permissions.flatMap((entry) => (entry.permissions.includes(PROJECT_ADMIN) ? [entry.user] : []));
+	return permissions.flatMap((entry) =>
+		(entry.permissions.includes(PROJECT_ADMIN) ? [entry.user] : []));
 };
 
 Projects.createProject = async (teamspace, name) => {

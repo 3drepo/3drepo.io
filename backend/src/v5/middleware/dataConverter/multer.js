@@ -25,26 +25,27 @@ const { validateMany } = require('../common');
 const MulterHelper = {};
 
 const singleFileMulterPromise = (req, fileName, fileFilter, maxSize,
-	storeInMemory) => new Promise((resolve, reject) => {
-	const options = {
-		limits: { fileSize: maxSize },
-		fileFilter,
-	};
+	storeInMemory) =>
+	new Promise((resolve, reject) => {
+		const options = {
+			limits: { fileSize: maxSize },
+			fileFilter,
+		};
 
-	if (storeInMemory) {
-		options.storage = Multer.memoryStorage();
-	} else {
-		options.dest = uploadConfig.uploadDir;
-	}
-
-	Multer(options).single(fileName)(req, null, (err) => {
-		if (err) {
-			reject(err);
+		if (storeInMemory) {
+			options.storage = Multer.memoryStorage();
 		} else {
-			resolve();
+			options.dest = uploadConfig.uploadDir;
 		}
+
+		Multer(options).single(fileName)(req, null, (err) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve();
+			}
+		});
 	});
-});
 
 const imageFilter = (req, file, cb) => {
 	const format = file.originalname.split('.').splice(-1)[0];
@@ -73,25 +74,27 @@ const ensureFileIsImage = async (req, res, next) => {
 };
 
 MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, maxSize = uploadConfig.uploadSizeLimit,
-	storeInMemory = false) => async (req, res, next) => {
-	try {
-		await singleFileMulterPromise(req, fileName, fileFilter, maxSize, storeInMemory);
-		await next();
-	} catch (err) {
-		let response = err;
+	storeInMemory = false) =>
+	async (req, res, next) => {
+		try {
+			await singleFileMulterPromise(req, fileName, fileFilter, maxSize, storeInMemory);
+			await next();
+		} catch (err) {
+			let response = err;
 
-		if (err.code === 'LIMIT_FILE_SIZE') {
-			response = createResponseCode(templates.maxSizeExceeded, `File cannot be bigger than ${maxSize} bytes.`);
-		} else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
-			response = createResponseCode(templates.invalidArguments, `${fileName} is a required field`);
+			if (err.code === 'LIMIT_FILE_SIZE') {
+				response = createResponseCode(templates.maxSizeExceeded, `File cannot be bigger than ${maxSize} bytes.`);
+			} else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+				response = createResponseCode(templates.invalidArguments, `${fileName} is a required field`);
+			}
+
+			respond(req, res, response);
 		}
+	};
 
-		respond(req, res, response);
-	}
-};
-
-MulterHelper.singleImageUpload = (fileName) => validateMany(
-	[MulterHelper.singleFileUpload(fileName, imageFilter, uploadConfig.avatarSizeLimit, true), ensureFileIsImage],
-);
+MulterHelper.singleImageUpload = (fileName) =>
+	validateMany(
+		[MulterHelper.singleFileUpload(fileName, imageFilter, uploadConfig.avatarSizeLimit, true), ensureFileIsImage],
+	);
 
 module.exports = MulterHelper;

@@ -19,11 +19,13 @@ const { UUIDLookUpTable } = require('../../../../../utils/helper/uuids');
 
 const Groups = {};
 
-Groups.getGroups = (teamspace, model, groupsIds = [], includeHidden = false) => (groupsIds.length
-	? getGroupsByIds(teamspace, model, groupsIds) : getGroups(teamspace, model, includeHidden));
+Groups.getGroups = (teamspace, model, groupsIds = [], includeHidden = false) =>
+	(groupsIds.length
+		? getGroupsByIds(teamspace, model, groupsIds) : getGroups(teamspace, model, includeHidden));
 
 Groups.importGroups = async (teamspace, model, groups) => {
-	const ids = groups.map(({ _id }) => _id);
+	const ids = groups.map(({ _id }) =>
+		_id);
 
 	const groupsToUpdate = await getGroupsByIds(teamspace, model, ids, { _id: 1 });
 
@@ -33,7 +35,8 @@ Groups.importGroups = async (teamspace, model, groups) => {
 	// Some requires update
 		const actionPromises = [];
 
-		const updatesLookup = new UUIDLookUpTable(groupsToUpdate.map(({ _id }) => _id));
+		const updatesLookup = new UUIDLookUpTable(groupsToUpdate.map(({ _id }) =>
+			_id));
 		const groupsToInsert = [];
 
 		groups.forEach((group) => {

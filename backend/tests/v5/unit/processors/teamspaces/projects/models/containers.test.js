@@ -36,16 +36,19 @@ jest.mock('../../../../../../../src/v5/models/views');
 const Legends = require(`${src}/models/legends`);
 jest.mock('../../../../../../../src/v5/models/legends');
 const FileRefs = require(`${src}/models/fileRefs`);
-jest.mock('../../../../../../../src/v5/models/fileRefs', () => ({
-	...jest.requireActual('../../../../../../../src/v5/models/fileRefs'),
-	downloadFiles: jest.fn(),
-	fetchFileStream: jest.fn().mockImplementation(() => ({ readStream: 'some stream' })),
-}));
+jest.mock('../../../../../../../src/v5/models/fileRefs', () =>
+	({
+		...jest.requireActual('../../../../../../../src/v5/models/fileRefs'),
+		downloadFiles: jest.fn(),
+		fetchFileStream: jest.fn().mockImplementation(() =>
+			({ readStream: 'some stream' })),
+	}));
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const newContainerId = 'newContainerId';
-ModelSettings.addModel.mockImplementation(() => newContainerId);
+ModelSettings.addModel.mockImplementation(() =>
+	newContainerId);
 ModelSettings.deleteModel.mockImplementation((ts, model) => {
 	if (Number.isInteger(model)) {
 		return Promise.resolve(undefined);
@@ -134,7 +137,10 @@ const containerSettings = {
 
 const user1Favourites = [1];
 
-const project = { _id: 1, name: 'project', models: modelList.map(({ _id }) => _id) };
+const project = { _id: 1,
+	name: 'project',
+	models: modelList.map(({ _id }) =>
+		_id) };
 
 const container2Rev = {
 	_id: 12,
@@ -150,15 +156,18 @@ const model1Revisions = [
 	{ _id: ServiceHelper.generateUUIDString(), author: 'user1', timestamp: new Date(), void: true },
 ];
 
-ProjectsModel.getProjectById.mockImplementation(() => project);
+ProjectsModel.getProjectById.mockImplementation(() =>
+	project);
 ProjectsModel.addModelToProject.mockResolvedValue();
 ModelSettings.getModelByQuery.mockImplementation((ts, query) => {
 	if (query.name === 'model1') Promise.resolve(modelList[0]);
 	else throw templates.modelNotFound;
 });
-ModelSettings.getContainers.mockImplementation(() => modelList);
+ModelSettings.getContainers.mockImplementation(() =>
+	modelList);
 const getContainerByIdMock = ModelSettings.getContainerById.mockImplementation((teamspace,
-	container) => containerSettings[container]);
+	container) =>
+	containerSettings[container]);
 Views.getViewById.mockImplementation((teamspace, model, view) => {
 	if (view === 1) {
 		return 1;
@@ -173,20 +182,25 @@ Legends.checkLegendExists.mockImplementation((teamspace, model, legend) => {
 	throw templates.legendNotFound;
 });
 
-Revisions.getRevisionCount.mockImplementation((teamspace, container) => (container === 'container2' ? 10 : 0));
+Revisions.getRevisionCount.mockImplementation((teamspace, container) =>
+	(container === 'container2' ? 10 : 0));
 Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 	if (container === 'container2') return container2Rev;
 	throw templates.revisionNotFound;
 });
 
-const getRevisionsMock = Revisions.getRevisions.mockImplementation(() => model1Revisions);
+const getRevisionsMock = Revisions.getRevisions.mockImplementation(() =>
+	model1Revisions);
 
 const getRevisionByIdOrTagMock = Revisions.getRevisionByIdOrTag.mockImplementation((teamspace,
-	container, revision) => model1Revisions.find((rev) => rev._id === revision));
+	container, revision) =>
+	model1Revisions.find((rev) =>
+		rev._id === revision));
 
 FileRefs.downloadFiles.mockImplementation(() => {});
 
-Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
+Users.getFavourites.mockImplementation((user) =>
+	(user === 'user1' ? user1Favourites : []));
 Users.appendFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
 	for (const favourite of favouritesToAdd) {
 		if (user1Favourites.indexOf(favourite) === -1) {
@@ -205,18 +219,23 @@ Users.deleteFavourites.mockImplementation((username, teamspace, favouritesToAdd)
 });
 
 // Permissions mock
-jest.mock('../../../../../../../src/v5/utils/permissions/permissions', () => ({
-	...jest.requireActual('../../../../../../../src/v5/utils/permissions/permissions'),
-	isTeamspaceAdmin: jest.fn().mockImplementation((teamspace, user) => user === 'tsAdmin'),
-	hasProjectAdminPermissions: jest.fn().mockImplementation((perm, user) => user === 'projAdmin'),
-}));
+jest.mock('../../../../../../../src/v5/utils/permissions/permissions', () =>
+	({
+		...jest.requireActual('../../../../../../../src/v5/utils/permissions/permissions'),
+		isTeamspaceAdmin: jest.fn().mockImplementation((teamspace, user) =>
+			user === 'tsAdmin'),
+		hasProjectAdminPermissions: jest.fn().mockImplementation((perm, user) =>
+			user === 'projAdmin'),
+	}));
 
-const determineResults = (username) => modelList.flatMap(({ permissions, _id, name }) => {
-	const isAdmin = username === 'projAdmin' || username === 'tsAdmin';
-	const hasModelPerm = permissions && permissions.find((entry) => entry.user === username);
-	const isFavourite = username === 'user1' && user1Favourites.includes(_id);
-	return isAdmin || hasModelPerm ? { _id, name, role: isAdmin ? 'admin' : hasModelPerm.permission, isFavourite } : [];
-});
+const determineResults = (username) =>
+	modelList.flatMap(({ permissions, _id, name }) => {
+		const isAdmin = username === 'projAdmin' || username === 'tsAdmin';
+		const hasModelPerm = permissions && permissions.find((entry) =>
+			entry.user === username);
+		const isFavourite = username === 'user1' && user1Favourites.includes(_id);
+		return isAdmin || hasModelPerm ? { _id, name, role: isAdmin ? 'admin' : hasModelPerm.permission, isFavourite } : [];
+	});
 
 const testGetContainerList = () => {
 	describe('Get container list by user', () => {
@@ -392,7 +411,10 @@ const testGetRevisions = () => {
 	});
 };
 
-const fileExists = (file) => fs.access(file).then(() => true).catch(() => false);
+const fileExists = (file) =>
+	fs.access(file).then(() =>
+		true).catch(() =>
+		false);
 
 const testNewRevision = () => {
 	const fileCreated = path.join(modelFolder, 'toRemove.obj');
@@ -428,7 +450,8 @@ const testGetSettings = () => {
 	});
 };
 
-const formatFilename = (name) => name.substr(36).replace(/_([^_]*)$/, '.$1');
+const formatFilename = (name) =>
+	name.substr(36).replace(/_([^_]*)$/, '.$1');
 
 const testDownloadRevisionFiles = () => {
 	describe('Download revision files', () => {

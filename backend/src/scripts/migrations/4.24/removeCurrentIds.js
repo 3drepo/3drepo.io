@@ -21,7 +21,8 @@ const { getTeamspaceList, getCollectionsEndsWith } = require('../utils');
 const { updateMany } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const processModel = (teamspace, model) => updateMany(teamspace, `${model}.history`, {}, { $unset: { current: 1 } });
+const processModel = (teamspace, model) =>
+	updateMany(teamspace, `${model}.history`, {}, { $unset: { current: 1 } });
 
 const processTeamspace = async (teamspace) => {
 	const histories = await getCollectionsEndsWith(teamspace, '.history');

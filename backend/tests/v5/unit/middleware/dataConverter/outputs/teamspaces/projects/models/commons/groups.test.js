@@ -27,7 +27,8 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const GroupsOutputMiddlewares = require(`${src}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups`);
 
 // Mock respond function to just return the resCode
-const respondFn = Responder.respond.mockImplementation((req, res, errCode) => errCode);
+const respondFn = Responder.respond.mockImplementation((req, res, errCode) =>
+	errCode);
 
 const testSerialiseGroupArray = () => {
 	const badRuleCast = generateGroup('a', 'b', true, false, false);

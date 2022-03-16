@@ -29,7 +29,8 @@ jest.mock('../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
-Responder.respond.mockImplementation((req, res, errCode) => errCode);
+Responder.respond.mockImplementation((req, res, errCode) =>
+	errCode);
 
 const createRequestWithFile = (filename = 'file', file = 'dummy.obj') => {
 	const form = new FormData();

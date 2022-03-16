@@ -45,7 +45,8 @@ const testUUIDToString = () => {
 		undefined,
 		null,
 	];
-	const uuidAndStringPairs = uuidTargets.map((target) => [UUIDHelper.stringToUUID(target), target]);
+	const uuidAndStringPairs = uuidTargets.map((target) =>
+		[UUIDHelper.stringToUUID(target), target]);
 	uuidAndStringPairs.push(['', '']);
 	describe.each(uuidAndStringPairs)('UUID to String', (source, target) => {
 		test(`with ${source} should result in ${target}`, () => {

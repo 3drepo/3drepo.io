@@ -72,26 +72,31 @@ const viewNoThumbnail = views[1];
 const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
 	const customData = { starredModels: {
-		[teamspace]: models.flatMap(({ _id, isFavourite }) => (isFavourite ? _id : [])),
+		[teamspace]: models.flatMap(({ _id, isFavourite }) =>
+			(isFavourite ? _id : [])),
 	} };
-	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], [teamspace], customData));
-	const modelProms = models.map((model) => ServiceHelper.db.createModel(
-		teamspace,
-		model._id,
-		model.name,
-		model.properties,
-	));
+	const userProms = Object.keys(users).map((key) =>
+		ServiceHelper.db.createUser(users[key], [teamspace], customData));
+	const modelProms = models.map((model) =>
+		ServiceHelper.db.createModel(
+			teamspace,
+			model._id,
+			model.name,
+			model.properties,
+		));
 	return Promise.all([
 		...userProms,
 		...modelProms,
 		ServiceHelper.db.createUser(nobody),
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
+		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) =>
+			_id)),
 		ServiceHelper.db.createViews(teamspace, modelWithViews._id, views),
 	]);
 };
 
 const testViewList = () => {
-	const createRoute = (projectId = project.id, modelId = modelWithViews._id) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/views`;
+	const createRoute = (projectId = project.id, modelId = modelWithViews._id) =>
+		`/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/views`;
 	describe('Views List', () => {
 		test('should fail without a valid session', async () => {
 			const res = await agent.get(createRoute()).expect(templates.notLoggedIn.status);
@@ -151,7 +156,8 @@ const testViewList = () => {
 };
 
 const testViewThumbnail = () => {
-	const createRoute = (projectId = project.id, modelId = modelWithViews._id, viewId = viewWithThumbnail._id) => `/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/views/${viewId}/thumbnail`;
+	const createRoute = (projectId = project.id, modelId = modelWithViews._id, viewId = viewWithThumbnail._id) =>
+		`/v5/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/views/${viewId}/thumbnail`;
 	describe('View thumbnail', () => {
 		test('should fail without a valid session', async () => {
 			const res = await agent.get(createRoute()).expect(templates.notLoggedIn.status);
@@ -212,7 +218,8 @@ describe('E2E routes/teamspaces/projects/federations/views', () => {
 		agent = await SuperTest(server);
 		await setupData();
 	});
-	afterAll(() => ServiceHelper.closeApp(server));
+	afterAll(() =>
+		ServiceHelper.closeApp(server));
 	testViewList();
 	testViewThumbnail();
 });

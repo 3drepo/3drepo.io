@@ -36,33 +36,43 @@ const modelReadPermissions = {
 	modelB: ['mixedUser'],
 };
 
-ProjectsModel.getProjectList.mockImplementation(() => projectList);
+ProjectsModel.getProjectList.mockImplementation(() =>
+	projectList);
 const deleteProjectMock = ProjectsModel.deleteProject.mockImplementation(() => {});
 const createProjectMock = ProjectsModel.createProject.mockImplementation(() => {});
 const getProjectByIdMock = ProjectsModel.getProjectById
-	.mockImplementation((teamspace, projectId) => projectList.find((p) => p._id === projectId));
+	.mockImplementation((teamspace, projectId) =>
+		projectList.find((p) =>
+			p._id === projectId));
 const removeModelDataMock = ModelHelper.removeModelData.mockImplementation(() => {});
 
 // Permissions mock
-jest.mock('../../../../../../src/v5/utils/permissions/permissions', () => ({
-	...jest.requireActual('../../../../../../src/v5/utils/permissions/permissions'),
-	isTeamspaceAdmin: jest.fn().mockImplementation((teamspace, user) => user === 'tsAdmin'),
-	hasReadAccessToModel: jest.fn()
-		.mockImplementation((teamspace, model, user) => (modelReadPermissions[model] || []).includes(user)),
-}));
+jest.mock('../../../../../../src/v5/utils/permissions/permissions', () =>
+	({
+		...jest.requireActual('../../../../../../src/v5/utils/permissions/permissions'),
+		isTeamspaceAdmin: jest.fn().mockImplementation((teamspace, user) =>
+			user === 'tsAdmin'),
+		hasReadAccessToModel: jest.fn()
+			.mockImplementation((teamspace, model, user) =>
+				(modelReadPermissions[model] || []).includes(user)),
+	}));
 
-const determineProjectListResult = (username) => projectList.flatMap(({ permissions, _id, name, models }) => {
-	const isAdmin = permissions.some((permEntry) => permEntry.user === username
+const determineProjectListResult = (username) =>
+	projectList.flatMap(({ permissions, _id, name, models }) => {
+		const isAdmin = permissions.some((permEntry) =>
+			permEntry.user === username
 		&& permEntry.permissions.includes(PROJECT_ADMIN));
-	const hasModelAccess = models.some((model) => (modelReadPermissions[model] || []).includes(username));
-	return isAdmin || hasModelAccess ? { _id, name, isAdmin } : [];
-});
+		const hasModelAccess = models.some((model) =>
+			(modelReadPermissions[model] || []).includes(username));
+		return isAdmin || hasModelAccess ? { _id, name, isAdmin } : [];
+	});
 
 const testGetProjectList = () => {
 	describe('Get project list by user', () => {
 		test('should return the whole list if the user is a teamspace admin', async () => {
 			const res = await Projects.getProjectList('teamspace', 'tsAdmin');
-			const expectedRes = projectList.map(({ _id, name }) => ({ _id, name, isAdmin: true }));
+			const expectedRes = projectList.map(({ _id, name }) =>
+				({ _id, name, isAdmin: true }));
 			expect(res).toEqual(expectedRes);
 		});
 		test('should return a partial list if the user is a project admin in some projects', async () => {
@@ -130,7 +140,8 @@ const testGetProjectSettings = () => {
 			expect(getProjectByIdMock.mock.calls[0][0]).toEqual('teamspace');
 			expect(getProjectByIdMock.mock.calls[0][1]).toEqual('1');
 			expect(getProjectByIdMock.mock.calls[0][2]).toEqual({ name: 1, _id: 0 });
-			expect(res).toEqual(projectList.find((p) => p._id === '1'));
+			expect(res).toEqual(projectList.find((p) =>
+				p._id === '1'));
 		});
 	});
 };

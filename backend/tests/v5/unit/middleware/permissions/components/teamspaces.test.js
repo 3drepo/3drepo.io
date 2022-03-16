@@ -28,11 +28,16 @@ const Sessions = require(`${src}/utils/sessions`);
 const TSMiddlewares = require(`${src}/middleware/permissions/components/teamspaces`);
 
 // Mock respond function to just return the resCode
-Responder.respond.mockImplementation((req, res, errCode) => errCode);
-Permissions.hasAccessToTeamspace.mockImplementation((teamspace) => teamspace === 'ts');
-Permissions.isTeamspaceAdmin.mockImplementation((teamspace) => teamspace === 'ts');
-Sessions.isSessionValid.mockImplementation((session) => !!session);
-Sessions.getUserFromSession.mockImplementation(() => 'hi');
+Responder.respond.mockImplementation((req, res, errCode) =>
+	errCode);
+Permissions.hasAccessToTeamspace.mockImplementation((teamspace) =>
+	teamspace === 'ts');
+Permissions.isTeamspaceAdmin.mockImplementation((teamspace) =>
+	teamspace === 'ts');
+Sessions.isSessionValid.mockImplementation((session) =>
+	!!session);
+Sessions.getUserFromSession.mockImplementation(() =>
+	'hi');
 
 const testIsTeamspaceMember = () => {
 	describe('isTeamspaceMember', () => {

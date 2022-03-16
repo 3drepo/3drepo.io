@@ -18,7 +18,8 @@
 const Risks = {};
 const db = require('../handler/db');
 
-const collectionName = (model) => `${model}.risks`;
+const collectionName = (model) =>
+	`${model}.risks`;
 
 const excludeResolvedRisks = {
 	mitigation_status: { $nin: [
@@ -28,6 +29,7 @@ const excludeResolvedRisks = {
 	] },
 };
 
-Risks.getRisksCount = (teamspace, model) => db.count(teamspace, collectionName(model), excludeResolvedRisks);
+Risks.getRisksCount = (teamspace, model) =>
+	db.count(teamspace, collectionName(model), excludeResolvedRisks);
 
 module.exports = Risks;

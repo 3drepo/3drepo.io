@@ -25,7 +25,8 @@ const { cachePolicy } = require(`${v4Path}/config`);
 
 const Responder = {};
 
-const constructApiInfo = ({ method, originalUrl }) => `${method} ${originalUrl}`;
+const constructApiInfo = ({ method, originalUrl }) =>
+	`${method} ${originalUrl}`;
 
 const genResponseLogging = ({ status, code }, contentLength, { session, startTime, method, originalUrl } = {}) => {
 	const user = session?.user ? session.user.username : 'unknown';

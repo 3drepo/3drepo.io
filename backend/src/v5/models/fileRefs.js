@@ -23,7 +23,8 @@ const { templates } = require('../utils/responseCodes');
 
 const FileRefs = {};
 
-const collectionName = (collection) => (collection.endsWith('.ref') ? collection : `${collection}.ref`);
+const collectionName = (collection) =>
+	(collection.endsWith('.ref') ? collection : `${collection}.ref`);
 
 const getRefEntry = async (account, collection, id) => {
 	const entry = await db.findOne(account, collection, { _id: id });
@@ -89,7 +90,8 @@ FileRefs.removeAllFilesFromModel = async (teamspace, model) => {
 		const res = name.match(new RegExp(`^${model}.*\\.ref$`));
 		return !!res?.length;
 	});
-	return Promise.all(refCols.map(({ name }) => removeAllFiles(teamspace, name)));
+	return Promise.all(refCols.map(({ name }) =>
+		removeAllFiles(teamspace, name)));
 };
 
 module.exports = FileRefs;

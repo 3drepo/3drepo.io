@@ -21,15 +21,22 @@ const { systemLogger } = require(`${v4Path}/logger`);
 
 const Logger = {};
 
-Logger.logWithLabel = (label) => ({
-	...systemLogger,
-	logInfo: (msg, meta) => systemLogger.logInfo(msg, meta, label),
-	logError: (msg, meta) => systemLogger.logError(msg, meta, label),
-	logDebug: (msg, meta) => systemLogger.logDebug(msg, meta, label),
-	logTrace: (msg, meta) => systemLogger.logTrace(msg, meta, label),
-	logWarning: (msg, meta) => systemLogger.logWarning(msg, meta, label),
-	logFatal: (msg, meta) => systemLogger.logFatal(msg, meta, label),
-});
+Logger.logWithLabel = (label) =>
+	({
+		...systemLogger,
+		logInfo: (msg, meta) =>
+			systemLogger.logInfo(msg, meta, label),
+		logError: (msg, meta) =>
+			systemLogger.logError(msg, meta, label),
+		logDebug: (msg, meta) =>
+			systemLogger.logDebug(msg, meta, label),
+		logTrace: (msg, meta) =>
+			systemLogger.logTrace(msg, meta, label),
+		logWarning: (msg, meta) =>
+			systemLogger.logWarning(msg, meta, label),
+		logFatal: (msg, meta) =>
+			systemLogger.logFatal(msg, meta, label),
+	});
 
 Logger.logger = systemLogger;
 

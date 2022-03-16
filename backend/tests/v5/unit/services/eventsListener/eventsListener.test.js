@@ -30,10 +30,13 @@ const EventsListener = require(`${src}/services/eventsListener/eventsListener`);
 
 ModelSettings.updateModelStatus.mockResolvedValue(() => {});
 ModelSettings.newRevisionProcessed.mockResolvedValue(() => {});
-LoginRecord.saveLoginRecord.mockImplementation(() => ({}));
+LoginRecord.saveLoginRecord.mockImplementation(() =>
+	({}));
 Sessions.removeOldSessions.mockImplementation(() => { });
 
-const eventTriggeredPromise = (event) => new Promise((resolve) => EventsManager.subscribe(event, resolve));
+const eventTriggeredPromise = (event) =>
+	new Promise((resolve) =>
+		EventsManager.subscribe(event, resolve));
 
 const testModelEventsListener = () => {
 	describe('Model Events', () => {

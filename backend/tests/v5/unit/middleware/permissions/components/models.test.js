@@ -28,7 +28,8 @@ const Sessions = require(`${src}/utils/sessions`);
 const ModelMiddleware = require(`${src}/middleware/permissions/components/models`);
 
 // Mock respond function to just return the resCode
-Responder.respond.mockImplementation((req, res, errCode) => errCode);
+Responder.respond.mockImplementation((req, res, errCode) =>
+	errCode);
 
 const mockImp = (teamspace) => {
 	if (teamspace === 'throwProjectError') {
@@ -45,7 +46,8 @@ Permissions.hasReadAccessToFederation.mockImplementation(mockImp);
 Permissions.hasWriteAccessToFederation.mockImplementation(mockImp);
 Permissions.hasCommenterAccessToFederation.mockImplementation(mockImp);
 
-Sessions.getUserFromSession.mockImplementation(() => 'hi');
+Sessions.getUserFromSession.mockImplementation(() =>
+	'hi');
 
 const testHasReadAccessToContainer = () => {
 	describe('hasReadAccessToContainer', () => {

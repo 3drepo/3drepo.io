@@ -77,12 +77,14 @@ const testSufficientQuota = () => {
 		return Promise.resolve({ customData: { billing: { subscriptions } } });
 	});
 
-	jest.spyOn(db, 'listCollections').mockImplementation((ts) => Promise.resolve(ts === tsWithSomeUsage ? [
-		{ name: 'a.issues.ref' },
-		{ name: 'a.scene.stash' },
-		{ name: 'ref' },
-	] : []));
-	jest.spyOn(db, 'aggregate').mockImplementation(() => Promise.resolve([{ _id: null, total: 1024 * 1024 }]));
+	jest.spyOn(db, 'listCollections').mockImplementation((ts) =>
+		Promise.resolve(ts === tsWithSomeUsage ? [
+			{ name: 'a.issues.ref' },
+			{ name: 'a.scene.stash' },
+			{ name: 'ref' },
+		] : []));
+	jest.spyOn(db, 'aggregate').mockImplementation(() =>
+		Promise.resolve([{ _id: null, total: 1024 * 1024 }]));
 
 	describe.each([
 		['Size bigger than upload size limit', 'teamspace', 8388609, templates.maxSizeExceeded],

@@ -21,9 +21,12 @@ const db = require(`${src}/handler/db`);
 jest.mock('../../../../src/v5/utils/helper/userAgent');
 const UserAgentHelper = require(`${src}/utils/helper/userAgent`);
 
-UserAgentHelper.isUserAgentFromPlugin.mockImplementation((userAgent) => userAgent.split(' ')[0] === 'PLUGIN:');
-UserAgentHelper.getUserAgentInfoFromBrowser.mockImplementation(() => ({ data: 'browser ua data' }));
-UserAgentHelper.getUserAgentInfoFromPlugin.mockImplementation(() => ({ data: 'plugin ua data' }));
+UserAgentHelper.isUserAgentFromPlugin.mockImplementation((userAgent) =>
+	userAgent.split(' ')[0] === 'PLUGIN:');
+UserAgentHelper.getUserAgentInfoFromBrowser.mockImplementation(() =>
+	({ data: 'browser ua data' }));
+UserAgentHelper.getUserAgentInfoFromPlugin.mockImplementation(() =>
+	({ data: 'plugin ua data' }));
 
 const sessionId = '123456';
 const username = 'someUsername';

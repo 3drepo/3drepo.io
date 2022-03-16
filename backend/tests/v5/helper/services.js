@@ -54,16 +54,19 @@ queue.purgeQueues = async () => {
 // userCredentials should be the same format as the return value of generateUserCredentials
 db.createUser = async (userCredentials, tsList = [], customData = {}) => {
 	const { user, password, apiKey, basicData = {} } = userCredentials;
-	const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));
+	const roles = tsList.map((ts) =>
+		({ db: ts, role: 'team_member' }));
 	const adminDB = await DbHandler.getAuthDB();
 	return adminDB.addUser(user, password, { customData: { ...basicData, ...customData, apiKey }, roles });
 };
 
-db.createTeamspaceRole = (ts) => createTeamSpaceRole(ts);
+db.createTeamspaceRole = (ts) =>
+	createTeamSpaceRole(ts);
 
 // breaking = create a broken schema for teamspace to trigger errors for testing
 db.createTeamspace = (teamspace, admins = [], breaking = false) => {
-	const permissions = admins.map((adminUser) => ({ user: adminUser, permissions: TEAMSPACE_ADMIN }));
+	const permissions = admins.map((adminUser) =>
+		({ user: adminUser, permissions: TEAMSPACE_ADMIN }));
 	return Promise.all([
 		ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [],
 			{ permissions: breaking ? undefined : permissions }),
@@ -76,7 +79,8 @@ db.createProject = (teamspace, _id, name, models = [], admins = []) => {
 		_id: stringToUUID(_id),
 		name,
 		models,
-		permissions: admins.map((user) => ({ user, permissions: [PROJECT_ADMIN] })),
+		permissions: admins.map((user) =>
+			({ user, permissions: [PROJECT_ADMIN] })),
 	};
 
 	return DbHandler.insertOne(teamspace, 'projects', project);
@@ -125,7 +129,8 @@ db.createGroups = (teamspace, modelId, groups = []) => {
 	return DbHandler.insertMany(teamspace, `${modelId}.groups`, toInsert);
 };
 
-db.createJobs = (teamspace, jobs) => DbHandler.insertMany(teamspace, 'jobs', jobs);
+db.createJobs = (teamspace, jobs) =>
+	DbHandler.insertMany(teamspace, 'jobs', jobs);
 
 db.createIssue = (teamspace, modelId, issue) => {
 	const formattedIssue = { ...issue, _id: stringToUUID(issue._id) };
@@ -138,38 +143,47 @@ db.createRisk = (teamspace, modelId, risk) => {
 };
 
 db.createViews = (teamspace, modelId, views) => {
-	const formattedViews = views.map((view) => ({ ...view, _id: stringToUUID(view._id) }));
+	const formattedViews = views.map((view) =>
+		({ ...view, _id: stringToUUID(view._id) }));
 	return DbHandler.insertMany(teamspace, `${modelId}.views`, formattedViews);
 };
 
 db.createLegends = (teamspace, modelId, legends) => {
-	const formattedLegends = legends.map((legend) => ({ ...legend, _id: stringToUUID(legend._id) }));
+	const formattedLegends = legends.map((legend) =>
+		({ ...legend, _id: stringToUUID(legend._id) }));
 	return DbHandler.insertMany(teamspace, `${modelId}.sequences.legends`, formattedLegends);
 };
 
-ServiceHelper.generateUUIDString = () => UUIDToString(generateUUID());
-ServiceHelper.generateUUID = () => generateUUID();
-ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex');
-ServiceHelper.generateRandomBuffer = (length = 20) => Buffer.from(ServiceHelper.generateRandomString(length));
-ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
+ServiceHelper.generateUUIDString = () =>
+	UUIDToString(generateUUID());
+ServiceHelper.generateUUID = () =>
+	generateUUID();
+ServiceHelper.generateRandomString = (length = 20) =>
+	Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex');
+ServiceHelper.generateRandomBuffer = (length = 20) =>
+	Buffer.from(ServiceHelper.generateRandomString(length));
+ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) =>
+	new Date(start.getTime()
     + Math.random() * (end.getTime() - start.getTime()));
-ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
+ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) =>
+	Math.random() * (max - min) + min;
 
-ServiceHelper.generateUserCredentials = () => ({
-	user: ServiceHelper.generateRandomString(),
-	password: ServiceHelper.generateRandomString(),
-	apiKey: ServiceHelper.generateRandomString(),
-	basicData: {
-		firstName: ServiceHelper.generateRandomString(),
-		lastName: ServiceHelper.generateRandomString(),
-		billing: {
-			billingInfo: {
-				company: ServiceHelper.generateRandomString(),
-				countryCode: 'GB',
+ServiceHelper.generateUserCredentials = () =>
+	({
+		user: ServiceHelper.generateRandomString(),
+		password: ServiceHelper.generateRandomString(),
+		apiKey: ServiceHelper.generateRandomString(),
+		basicData: {
+			firstName: ServiceHelper.generateRandomString(),
+			lastName: ServiceHelper.generateRandomString(),
+			billing: {
+				billingInfo: {
+					company: ServiceHelper.generateRandomString(),
+					countryCode: 'GB',
+				},
 			},
 		},
-	},
-});
+	});
 
 ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true) => {
 	const _id = ServiceHelper.generateUUIDString();
@@ -189,34 +203,36 @@ ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true) => {
 	return entry;
 };
 
-ServiceHelper.generateRandomModelProperties = (isFed = false) => ({
-	properties: {
-		code: ServiceHelper.generateRandomString(),
-		unit: 'm',
-	},
-	desc: ServiceHelper.generateRandomString(),
-	...(isFed ? { federate: true } : { type: ServiceHelper.generateRandomString() }),
-	status: 'ok',
-	surveyPoints: [
-		{
-			position: [
-				ServiceHelper.generateRandomNumber(),
-				ServiceHelper.generateRandomNumber(),
-				ServiceHelper.generateRandomNumber(),
-			],
-			latLong: [
-				ServiceHelper.generateRandomNumber(),
-				ServiceHelper.generateRandomNumber(),
-			],
+ServiceHelper.generateRandomModelProperties = (isFed = false) =>
+	({
+		properties: {
+			code: ServiceHelper.generateRandomString(),
+			unit: 'm',
 		},
-	],
-	angleFromNorth: 123,
-	defaultView: ServiceHelper.generateUUIDString(),
-	defaultLegend: ServiceHelper.generateUUIDString(),
-});
+		desc: ServiceHelper.generateRandomString(),
+		...(isFed ? { federate: true } : { type: ServiceHelper.generateRandomString() }),
+		status: 'ok',
+		surveyPoints: [
+			{
+				position: [
+					ServiceHelper.generateRandomNumber(),
+					ServiceHelper.generateRandomNumber(),
+					ServiceHelper.generateRandomNumber(),
+				],
+				latLong: [
+					ServiceHelper.generateRandomNumber(),
+					ServiceHelper.generateRandomNumber(),
+				],
+			},
+		],
+		angleFromNorth: 123,
+		defaultView: ServiceHelper.generateUUIDString(),
+		defaultLegend: ServiceHelper.generateUUIDString(),
+	});
 
 ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {
-	const genId = () => (serialised ? ServiceHelper.generateUUIDString() : generateUUID());
+	const genId = () =>
+		(serialised ? ServiceHelper.generateUUIDString() : generateUUID());
 	const group = {
 		_id: genId(),
 		name: ServiceHelper.generateRandomString(),
@@ -256,13 +272,15 @@ ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = fal
 	return group;
 };
 
-ServiceHelper.generateView = (account, model, hasThumbnail = true) => ({
-	_id: ServiceHelper.generateUUIDString(),
-	name: ServiceHelper.generateRandomString(),
-	...(hasThumbnail ? { thumbnail: ServiceHelper.generateRandomBuffer() } : {}),
-});
+ServiceHelper.generateView = (account, model, hasThumbnail = true) =>
+	({
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		...(hasThumbnail ? { thumbnail: ServiceHelper.generateRandomBuffer() } : {}),
+	});
 
-ServiceHelper.app = () => createApp().listen(8080);
+ServiceHelper.app = () =>
+	createApp().listen(8080);
 
 ServiceHelper.closeApp = async (server) => {
 	await DbHandler.disconnect();

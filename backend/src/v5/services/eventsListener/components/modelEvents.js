@@ -21,10 +21,12 @@ const { subscribe } = require('../../eventsManager/eventsManager');
 
 const queueStatusUpdate = ({
 	teamspace, model, corId, status, user,
-}) => updateModelStatus(teamspace, model, status, corId, user);
+}) =>
+	updateModelStatus(teamspace, model, status, corId, user);
 const queueTasksCompleted = ({
 	teamspace, model, value, corId, user, containers,
-}) => newRevisionProcessed(teamspace, model, corId, value, user, containers);
+}) =>
+	newRevisionProcessed(teamspace, model, corId, value, user, containers);
 
 const ModelEventsListener = {};
 

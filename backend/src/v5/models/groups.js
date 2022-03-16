@@ -22,7 +22,8 @@ const { templates } = require('../utils/responseCodes');
 
 const Groups = {};
 
-const findGroup = (teamspace, model, query, projection, sort) => db.find(teamspace, `${model}.groups`, query, projection, sort);
+const findGroup = (teamspace, model, query, projection, sort) =>
+	db.find(teamspace, `${model}.groups`, query, projection, sort);
 
 Groups.getGroupsByIds = (teamspace, model, ids, projection) => {
 	const query = { _id: { $in: ids } };

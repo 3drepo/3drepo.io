@@ -23,10 +23,13 @@ jest.mock('../../../../../../../../src/v5/models/groups');
 const GroupsModel = require(`${src}/models/groups`);
 
 const fullGroupList = [{ _id: 1 }, { _id: 2 }];
-GroupsModel.getGroups.mockImplementation(() => Promise.resolve(fullGroupList));
-GroupsModel.getGroupsByIds.mockImplementation((teamspace, model, ids) => Promise.resolve(
-	fullGroupList.filter(({ _id }) => ids.includes(_id)),
-));
+GroupsModel.getGroups.mockImplementation(() =>
+	Promise.resolve(fullGroupList));
+GroupsModel.getGroupsByIds.mockImplementation((teamspace, model, ids) =>
+	Promise.resolve(
+		fullGroupList.filter(({ _id }) =>
+			ids.includes(_id)),
+	));
 const addGroupsFn = GroupsModel.addGroups.mockResolvedValue(() => {});
 const updateGroupFn = GroupsModel.updateGroup.mockResolvedValue(() => {});
 

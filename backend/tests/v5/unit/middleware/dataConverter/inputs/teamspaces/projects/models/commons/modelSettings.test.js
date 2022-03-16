@@ -35,7 +35,8 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
 // Mock respond function to just return the resCode
-Responder.respond.mockImplementation((req, res, errCode) => errCode);
+Responder.respond.mockImplementation((req, res, errCode) =>
+	errCode);
 
 const existingViewID = '3752b630-065f-11ec-8edf-ab0f7cc84da8';
 Views.getViewById.mockImplementation((teamspace, model, view) => {

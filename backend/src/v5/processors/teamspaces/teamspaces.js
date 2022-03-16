@@ -24,7 +24,8 @@ const Teamspaces = {};
 
 Teamspaces.getTeamspaceListByUser = async (user) => {
 	const tsList = await getAccessibleTeamspaces(user);
-	return Promise.all(tsList.map(async (ts) => ({ name: ts, isAdmin: await isTeamspaceAdmin(ts, user) })));
+	return Promise.all(tsList.map(async (ts) =>
+		({ name: ts, isAdmin: await isTeamspaceAdmin(ts, user) })));
 };
 
 Teamspaces.getTeamspaceMembersInfo = async (teamspace) => {
@@ -41,7 +42,8 @@ Teamspaces.getTeamspaceMembersInfo = async (teamspace) => {
 	});
 
 	return membersList.map(
-		(member) => (usersToJob[member.user] ? { ...member, job: usersToJob[member.user] } : member),
+		(member) =>
+			(usersToJob[member.user] ? { ...member, job: usersToJob[member.user] } : member),
 	);
 };
 

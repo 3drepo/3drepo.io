@@ -42,7 +42,8 @@ const findSingledOutMeshIds = async (teamspace, modelId, revId) => {
 		},
 		{ 'm_map.map_id': 1 });
 	// eslint-disable-next-line camelcase
-	return res.map(({ m_map }) => m_map[0].map_id);
+	return res.map(({ m_map }) =>
+		m_map[0].map_id);
 };
 
 const getMeshInfo = async (teamspace, modelId, meshes) => {
@@ -51,7 +52,8 @@ const getMeshInfo = async (teamspace, modelId, meshes) => {
 			_id: { $in: meshes },
 		},
 		{ name: 1, shared_id: 1 });
-	return res.map(({ _id, name, shared_id: sharedId }) => ({ _id: UUIDToString(_id), name, sharedId }));
+	return res.map(({ _id, name, shared_id: sharedId }) =>
+		({ _id: UUIDToString(_id), name, sharedId }));
 };
 
 const getMeshMeta = async (teamspace, modelId, sharedIds) => {
@@ -77,19 +79,20 @@ const getMeshMeta = async (teamspace, modelId, sharedIds) => {
 	return lut;
 };
 
-const writeResultsToFile = (meshInfo, sharedIdToResourceId) => new Promise((resolve) => {
-	const outFile = 'singleAnimatedMeshes.csv';
-	logger.logInfo(`Writing results to ${outFile}`);
-	const writeStream = FS.createWriteStream(outFile);
-	writeStream.write('3drepo ID,Name,Resource ID\n');
-	meshInfo.forEach(({ _id, name, sharedId }) => {
-		const sharedIdStr = UUIDToString(sharedId);
-		const resourceId = sharedIdToResourceId[sharedIdStr];
-		writeStream.write(`${_id},${name},${resourceId}\n`);
-	});
+const writeResultsToFile = (meshInfo, sharedIdToResourceId) =>
+	new Promise((resolve) => {
+		const outFile = 'singleAnimatedMeshes.csv';
+		logger.logInfo(`Writing results to ${outFile}`);
+		const writeStream = FS.createWriteStream(outFile);
+		writeStream.write('3drepo ID,Name,Resource ID\n');
+		meshInfo.forEach(({ _id, name, sharedId }) => {
+			const sharedIdStr = UUIDToString(sharedId);
+			const resourceId = sharedIdToResourceId[sharedIdStr];
+			writeStream.write(`${_id},${name},${resourceId}\n`);
+		});
 
-	writeStream.end(resolve);
-});
+		writeStream.end(resolve);
+	});
 
 const run = async () => {
 	const teamspace = process.argv[2];
@@ -102,7 +105,8 @@ const run = async () => {
 	logger.logInfo(`Number of singled animated meshes: ${meshes.length}`);
 	const meshInfo = await getMeshInfo(teamspace, modelId, meshes);
 	logger.logInfo(`Mesh info length: ${meshInfo.length}`);
-	const sharedIdToResourceId = await getMeshMeta(teamspace, modelId, meshInfo.map(({ sharedId }) => sharedId));
+	const sharedIdToResourceId = await getMeshMeta(teamspace, modelId, meshInfo.map(({ sharedId }) =>
+		sharedId));
 
 	await writeResultsToFile(meshInfo, sharedIdToResourceId);
 };

@@ -177,16 +177,17 @@ const testGetUsername = () => {
 	});
 };
 
-const formatUserProfile = (user, hasAvatar = true) => ({
-	username: user.user,
-	firstName: user.basicData.firstName,
-	lastName: user.basicData.lastName,
-	email: userEmail,
-	apiKey: user.apiKey,
-	hasAvatar,
-	countryCode: user.basicData.billing.billingInfo.countryCode,
-	company: user.basicData.billing.billingInfo.company,
-});
+const formatUserProfile = (user, hasAvatar = true) =>
+	({
+		username: user.user,
+		firstName: user.basicData.firstName,
+		lastName: user.basicData.lastName,
+		email: userEmail,
+		apiKey: user.apiKey,
+		hasAvatar,
+		countryCode: user.basicData.billing.billingInfo.countryCode,
+		company: user.basicData.billing.billingInfo.company,
+	});
 
 const testGetProfile = () => {
 	describe('Get profile of the logged in user', () => {
@@ -442,7 +443,8 @@ describe('E2E routes/users', () => {
 		testSession = session(app);
 		await setupData();
 	});
-	afterAll(() => ServiceHelper.closeApp(server));
+	afterAll(() =>
+		ServiceHelper.closeApp(server));
 
 	testLogin();
 	testLogout();

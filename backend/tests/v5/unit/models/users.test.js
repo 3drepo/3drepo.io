@@ -23,10 +23,12 @@ const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { loginPolicy } = require(`${src}/utils/config`);
 const apiKey = 'b284ab93f936815306fbe5b2ad3e447d';
-jest.mock('../../../../src/v5/utils/helper/strings', () => ({
-	...jest.requireActual('../../../../src/v5/utils/helper/strings'),
-	generateHashString: jest.fn().mockImplementation(() => apiKey),
-}));
+jest.mock('../../../../src/v5/utils/helper/strings', () =>
+	({
+		...jest.requireActual('../../../../src/v5/utils/helper/strings'),
+		generateHashString: jest.fn().mockImplementation(() =>
+			apiKey),
+	}));
 const User = require(`${src}/models/users`);
 
 const testGetAccessibleTeamspaces = () => {
@@ -164,7 +166,8 @@ const testDeleteFromFavourites = () => {
 	const determineAction = (teamspace, favToRm) => {
 		const results = _.cloneDeep(favouritesData.starredModels);
 		if (results[teamspace]) {
-			const newArr = results[teamspace].filter((id) => !favToRm.includes(id));
+			const newArr = results[teamspace].filter((id) =>
+				!favToRm.includes(id));
 
 			return newArr.length ? { $set: { 'customData.starredModels': results } }
 				: { $unset: { [`customData.starredModels.${teamspace}`]: 1 } };
@@ -225,10 +228,11 @@ const testDeleteFromFavourites = () => {
 };
 
 const testCanLogIn = () => {
-	const createLoginRecord = (lastFailed, failedCounts) => ({
-		lastFailedLoginAt: lastFailed,
-		failedLoginCount: failedCounts,
-	});
+	const createLoginRecord = (lastFailed, failedCounts) =>
+		({
+			lastFailedLoginAt: lastFailed,
+			failedLoginCount: failedCounts,
+		});
 	describe.each([
 		['the user can log in', {}],
 		['the user is inactive is set to false', { customData: { inactive: false } }],
@@ -411,7 +415,8 @@ const testGetAvatar = () => {
 	describe('Get users avatar', () => {
 		test('should get users avatar if user has a valid avatar', async () => {
 			const user = { customData: { avatar: 'validAvatar' } };
-			const fn = jest.spyOn(db, 'findOne').mockImplementation(() => user);
+			const fn = jest.spyOn(db, 'findOne').mockImplementation(() =>
+				user);
 			const res = await User.getAvatar('user1');
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][3]).toEqual({ 'customData.avatar': 1 });
@@ -419,7 +424,8 @@ const testGetAvatar = () => {
 		});
 
 		test('should return error if user does not exist', async () => {
-			const fn = jest.spyOn(db, 'findOne').mockImplementation(() => undefined);
+			const fn = jest.spyOn(db, 'findOne').mockImplementation(() =>
+				undefined);
 			await expect(User.getAvatar('user1')).rejects.toEqual(templates.userNotFound);
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][3]).toEqual({ 'customData.avatar': 1 });
@@ -427,7 +433,8 @@ const testGetAvatar = () => {
 
 		test('should return error if user does not have a valid avatar', async () => {
 			const user = { customData: { firstname: 'Nick' } };
-			const fn = jest.spyOn(db, 'findOne').mockImplementation(() => user);
+			const fn = jest.spyOn(db, 'findOne').mockImplementation(() =>
+				user);
 			await expect(User.getAvatar('user1')).rejects.toEqual(templates.userDoesNotHaveAvatar);
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][3]).toEqual({ 'customData.avatar': 1 });

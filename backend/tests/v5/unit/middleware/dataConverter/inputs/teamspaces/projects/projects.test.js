@@ -28,14 +28,16 @@ const Projects = require(`${src}/middleware/dataConverter/inputs/teamspaces/proj
 const { templates } = require(`${src}/utils/responseCodes`);
 
 // Mock respond function to just return the resCode
-Responder.respond.mockImplementation((req, res, errCode) => errCode);
+Responder.respond.mockImplementation((req, res, errCode) =>
+	errCode);
 
 const existingProjectId = 'projectId';
 const existingProjectName = 'existing';
-ProjectsModel.getProjectByName.mockImplementation((teamspace, name) => (
-	name === existingProjectName
-		? Promise.resolve({ name: existingProjectName, _id: existingProjectId })
-		: Promise.reject(templates.modelNotFound)));
+ProjectsModel.getProjectByName.mockImplementation((teamspace, name) =>
+	(
+		name === existingProjectName
+			? Promise.resolve({ name: existingProjectName, _id: existingProjectId })
+			: Promise.reject(templates.modelNotFound)));
 
 const testValidateProjectData = () => {
 	describe.each([

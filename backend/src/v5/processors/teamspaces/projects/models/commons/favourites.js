@@ -26,7 +26,8 @@ const checkModelsAreValid = (accessibleModels, favourites) => {
 		throw createResponseCode(templates.invalidArguments, 'The favourites list provided is empty');
 	}
 
-	const invalidFavourites = getArrayDifference(accessibleModels.map((c) => c._id), favourites);
+	const invalidFavourites = getArrayDifference(accessibleModels.map((c) =>
+		c._id), favourites);
 
 	if (invalidFavourites.length) {
 		throw createResponseCode(templates.invalidArguments, `The action cannot be performed on the following models: ${invalidFavourites}`);

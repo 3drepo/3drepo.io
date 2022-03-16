@@ -33,7 +33,8 @@ const exportGroups = (req, res, next) => {
 		})
 		.catch(
 			// istanbul ignore next
-			(err) => respond(req, res, err),
+			(err) =>
+				respond(req, res, err),
 		);
 };
 
@@ -41,10 +42,12 @@ const importGroups = (req, res) => {
 	const { teamspace, container } = req.params;
 	const { groups } = req.body;
 	Groups.importGroups(teamspace, container, groups)
-		.then(() => respond(req, res, templates.ok))
+		.then(() =>
+			respond(req, res, templates.ok))
 		.catch(
 			// istanbul ignore next
-			(err) => respond(req, res, err),
+			(err) =>
+				respond(req, res, err),
 		);
 };
 

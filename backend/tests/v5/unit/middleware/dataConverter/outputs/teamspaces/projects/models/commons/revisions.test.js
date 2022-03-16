@@ -27,7 +27,8 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const RevisionOutputMiddlewares = require(`${src}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions`);
 
 // Mock respond function to just return the resCode
-const respondFn = Responder.respond.mockImplementation((req, res, errCode) => errCode);
+const respondFn = Responder.respond.mockImplementation((req, res, errCode) =>
+	errCode);
 
 const testSerialiseRevisionArray = () => {
 	const noTS = generateRevisionEntry();

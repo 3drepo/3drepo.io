@@ -27,7 +27,8 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const ViewsOutputMiddlewares = require(`${src}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/views`);
 
 // Mock respond function to just return the resCode
-const respondFn = Responder.respond.mockImplementation((req, res, errCode) => errCode);
+const respondFn = Responder.respond.mockImplementation((req, res, errCode) =>
+	errCode);
 
 const testSerialiseViews = () => {
 	describe('Serialise views data', () => {
@@ -45,6 +46,7 @@ const testSerialiseViews = () => {
 			expect(respondFn.mock.calls.length).toBe(nextIdx + 1);
 			expect(respondFn.mock.calls[nextIdx][2]).toEqual(templates.ok);
 
+			// eslint-disable-next-line implicit-arrow-linebreak
 			const views = inputData.map((view) => ({
 				_id: UUIDToString(view._id),
 				hasThumbnail: !!(view.thumbnail?.buffer || view.thumbnail?.content?.buffer || view.screenshot?.buffer),

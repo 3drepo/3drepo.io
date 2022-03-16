@@ -31,17 +31,20 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const Queue = require(`${src}/services/queue`);
 
 const createFakeConnection = (sendToQueue, consume) => {
-	const dummyFn = () => Promise.resolve();
+	const dummyFn = () =>
+		Promise.resolve();
 	const dummyChannel = {
-		assertQueue: () => Promise.resolve({
-			queue: {},
-		}),
+		assertQueue: () =>
+			Promise.resolve({
+				queue: {},
+			}),
 		sendToQueue: sendToQueue || dummyFn,
 		consume: consume || dummyFn,
 		close: dummyFn,
 	};
 	return {
-		createChannel: () => Promise.resolve(dummyChannel),
+		createChannel: () =>
+			Promise.resolve(dummyChannel),
 		on: () => {},
 		close: dummyFn,
 	};
@@ -93,7 +96,8 @@ const testQueueModelUpload = () => {
 		});
 	});
 
-	afterAll(() => fs.rm(fileCreated).catch(() => {}));
+	afterAll(() =>
+		fs.rm(fileCreated).catch(() => {}));
 	afterEach(Queue.close);
 };
 

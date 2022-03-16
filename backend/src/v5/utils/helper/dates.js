@@ -20,6 +20,7 @@ const { isNumber } = require('./typeCheck');
 
 const DateHelper = {};
 
-DateHelper.timestampToString = (ts) => ((isNumber(ts) && ts >= 0) ? DayJS(ts).format('DD/MM/YYYY') : undefined);
+DateHelper.timestampToString = (ts) =>
+	((isNumber(ts) && ts >= 0) ? DayJS(ts).format('DD/MM/YYYY') : undefined);
 
 module.exports = DateHelper;

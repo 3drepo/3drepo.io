@@ -58,6 +58,7 @@ const importErrorMapping = {
 	36: { message: 'Failed to validate 3D Repo Server License. Please contact support.' },
 };
 
-ModelSettingConstants.getInfoFromCode = (code) => importErrorMapping[code] || systemFailureMsg;
+ModelSettingConstants.getInfoFromCode = (code) =>
+	importErrorMapping[code] || systemFailureMsg;
 
 module.exports = ModelSettingConstants;
