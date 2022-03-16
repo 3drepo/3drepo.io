@@ -1,4 +1,4 @@
-import { muiTheme } from 'storybook-addon-material-ui'
+import { muiTheme } from 'storybook-addon-material-ui5'
 import { theme } from '@/v5/ui/themes/theme';
 import { withThemesProvider } from "storybook-addon-styled-component-theme";
 
