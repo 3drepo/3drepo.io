@@ -25,10 +25,9 @@ import { CompletionMark, Container, Progress, StatusText } from './uploadProgres
 type IUploadProgress = {
 	progress: number;
 	errorMessage: string;
-	hidden: boolean;
 };
 
-export const UploadProgress = ({ progress, errorMessage, hidden }: IUploadProgress): JSX.Element => {
+export const UploadProgress = ({ progress, errorMessage, }: IUploadProgress): JSX.Element => {
 	let statusText: string;
 	let uploadStatus;
 	if (errorMessage) {
@@ -45,7 +44,7 @@ export const UploadProgress = ({ progress, errorMessage, hidden }: IUploadProgre
 		uploadStatus = UploadStatuses.QUEUED;
 	} else statusText = formatMessage({ id: 'upload.progress.status.unexpectedError', defaultMessage: 'Unexpected error' });
 
-	return hidden ? (<></>) : (
+	return (
 		<Container>
 			<StatusText uploadstatus={uploadStatus}>
 				{statusText}
