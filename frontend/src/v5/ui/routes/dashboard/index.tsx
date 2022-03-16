@@ -23,15 +23,19 @@ import { DashboardLayout } from '@components/dashboard/dashboardLayout';
 import { TeamspacesList } from '@/v5/ui/routes/dashboard/teamspaces/teamspacesList/teamspacesList.component';
 import { TeamspaceContent } from './teamspaces';
 import { ProjectContent } from './projects';
+import { Login } from '../login';
 
 export const Dashboard = () => {
 	const { path } = useRouteMatch();
 	const { pathname } = useLocation();
 
+	const renderLoginRoute = () => <Route exact path={`${path}/login`} component={Login} />;
+
 	return (
 		<>
 			<GlobalStyle />
 			<Switch>
+				{renderLoginRoute()}
 				<Route path={`${path}/dashboard/:teamspace?/:project?`}>
 					<DashboardLayout>
 						<Route exact path={`${path}/dashboard/`}>
