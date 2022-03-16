@@ -15,6 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const Login = () => (
-	<span> Login </span>
-);
+import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authActions.dispatchers';
+import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
+import { useForm } from 'react-hook-form';
+import { Redirect } from 'react-router-dom';
+
+export const Login = () => {
+	const { register, handleSubmit } = useForm({
+		mode: 'onSubmit',
+	});
+
+	if (AuthHooksSelectors.selectIsAuthenticated()) {
+		return (<Redirect to={{ pathname: '/v5/dashboard', state: { referrer: '/login' } }} />);
+	}
+
+	const onSubmit = ({ username, password }) => {
+		AuthActionsDispatchers.login(username, password);
+	};
+	return (
+		<form onSubmit={handleSubmit(onSubmit)}>
+			<input {...register('username')} />
+			<input {...register('password')} />
+			<input type="submit" />
+		</form>
+	);
+};
