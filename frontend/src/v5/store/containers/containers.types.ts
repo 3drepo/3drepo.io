@@ -51,3 +51,19 @@ export type NewContainer = {
 	desc?: string;
 	code?: string;
 };
+
+export type ContainerStats = {
+	revisions: {
+		total: number;
+		lastUpdated: number;
+		latestRevision: string;
+	};
+	type: string;
+	errorReason?: {
+		message: string;
+		timestamp: number;
+	};
+	status: UploadStatuses;
+	unit: string;
+	code: string;
+};

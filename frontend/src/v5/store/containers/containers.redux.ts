@@ -18,9 +18,8 @@
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '@/v5/helpers/actions.helper';
 import { prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
-import { FetchContainerStatsResponse } from '@/v5/services/api/containers';
 import { Action } from 'redux';
-import { IContainer, NewContainer } from './containers.types';
+import { ContainerStats, IContainer, NewContainer } from './containers.types';
 import { TeamspaceProjectAndContainerId, ProjectAndContainerId, TeamspaceAndProjectId, ProjectId } from '../store.types';
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({
@@ -128,7 +127,7 @@ export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & Projec
 export type FetchContainersAction = Action<'FETCH_CONTAINERS'> & TeamspaceAndProjectId;
 export type FetchContainersSuccessAction = Action<'FETCH_CONTAINERS_SUCCESS'> & ProjectId & { containers: IContainer[] };
 export type FetchContainerStatsAction = Action<'FETCH_CONTAINER_STATS'> & TeamspaceProjectAndContainerId;
-export type FetchContainerStatsSuccessAction = Action<'FETCH_CONTAINER_STATS_SUCCESS'> & ProjectAndContainerId & { containerStats: FetchContainerStatsResponse };
+export type FetchContainerStatsSuccessAction = Action<'FETCH_CONTAINER_STATS_SUCCESS'> & ProjectAndContainerId & { containerStats: ContainerStats };
 export type CreateContainerAction = Action<'CREATE_CONTAINER'> & TeamspaceAndProjectId & {newContainer: NewContainer};
 export type CreateContainerSuccessAction = Action<'CREATE_CONTAINER_SUCCESS'> & ProjectId & { container: IContainer };
 export type DeleteContainerAction = Action<'DELETE'> & TeamspaceProjectAndContainerId;
@@ -144,7 +143,7 @@ export interface IContainersActionCreators {
 	fetchContainerStatsSuccess: (
 		projectId: string,
 		containerId: string,
-		containerStats: FetchContainerStatsResponse
+		containerStats: ContainerStats
 	) => FetchContainerStatsSuccessAction;
 	createContainer: (
 		teamspace: string,

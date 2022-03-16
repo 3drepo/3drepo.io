@@ -17,8 +17,8 @@
 
 import { AxiosResponse } from 'axios';
 import {
+	ContainerStats,
 	NewContainer,
-	UploadStatuses,
 } from '@/v5/store/containers/containers.types';
 import { TeamspaceAndProjectId, TeamspaceProjectAndContainerId } from '@/v5/store/store.types';
 import api from './default';
@@ -37,7 +37,7 @@ type CreateContainerParams = {
 	newContainer: NewContainer;
 };
 
-interface MinimumContainer {
+export interface MinimumContainer {
 	_id: string,
 	name: string,
 	role: string,
@@ -46,22 +46,6 @@ interface MinimumContainer {
 
 export type FetchContainersResponse = {
 	containers: Array<MinimumContainer>
-};
-
-export type FetchContainerStatsResponse = {
-	revisions: {
-		total: number;
-		lastUpdated: number;
-		latestRevision: string;
-	};
-	type: string;
-	errorReason?: {
-		message: string;
-		timestamp: number;
-	};
-	status: UploadStatuses;
-	unit: string;
-	code: string;
 };
 
 /***/
@@ -94,7 +78,7 @@ export const fetchContainerStats = async ({
 	teamspace,
 	projectId,
 	containerId,
-}: FetchContainerStatsParams): Promise<FetchContainerStatsResponse> => {
+}: FetchContainerStatsParams): Promise<ContainerStats> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/stats`);
 	return data;
 };
