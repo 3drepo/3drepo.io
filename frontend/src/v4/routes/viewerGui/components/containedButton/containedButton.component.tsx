@@ -32,7 +32,7 @@ export const ContainedButton: FC<IProps> = ({ children, icon, onClick, ...props 
 			color="primary"
 			variant="contained"
 			size="small"
-			squeezed={Boolean(icon)}
+			squeezed={icon ? 1 : 0}
 			onClick={onClick}
 			{...props}
 		>

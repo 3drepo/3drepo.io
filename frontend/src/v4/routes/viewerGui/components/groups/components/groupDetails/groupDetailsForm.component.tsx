@@ -19,7 +19,6 @@ import { Select } from '@mui/material';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import { Field, Form, Formik } from 'formik';
-import { isEqual } from 'lodash';
 import { PureComponent } from 'react';
 import * as Yup from 'yup';
 

@@ -53,7 +53,7 @@ const FontLoader = {
     options: {
       outputPath: '../fonts/',
       publicPath: 'fonts/',
-      name: '[name]-[chunkhash].[ext]'
+      name: '[name]-[hash].[ext]'
     },
   }],
   type: 'javascript/auto'
@@ -68,7 +68,7 @@ const ImageLoader = {
     options: {
       outputPath: '../images/',
       publicPath: 'images/',
-      name: '[name]-[chunkhash].[ext]'
+      name: '[name]-[hash].[ext]'
     }
   }],
   type: 'javascript/auto'
@@ -91,7 +91,7 @@ const WorkerLoader = {
     loader: 'worker-loader',
     options: {
       inline: true,
-      name: '[name].[chunkhash].js'
+      name: '[name].[hash].js'
     }
   }]
 };

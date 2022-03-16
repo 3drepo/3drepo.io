@@ -21,7 +21,7 @@ import Button from '@mui/material/Button';
 
 import { COLOR } from '../../../../styles';
 
-export const StyledButton = styled(Button)<{ squeezed?: boolean }>`
+export const StyledButton = styled(Button)<{ squeezed?: number }>`
 	&& {
 		background-color: ${COLOR.SOFT_BLUE};
 		padding: ${({ squeezed }) => squeezed ? '4px 5px' : '6px 20px'};

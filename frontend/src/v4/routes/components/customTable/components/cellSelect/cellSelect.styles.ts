@@ -45,7 +45,7 @@ export const StyledSelect = styled(SelectField).attrs({
 	}
 `;
 
-export const Item = styled(MenuItem)<{ group: boolean }>`
+export const Item = styled(MenuItem)<{ group: number }>`
 	&& {
 		font-size: 14px;
 		color: ${COLOR.BLACK_60};
