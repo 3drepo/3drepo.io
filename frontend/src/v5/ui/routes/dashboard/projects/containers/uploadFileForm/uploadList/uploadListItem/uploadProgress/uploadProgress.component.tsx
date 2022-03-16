@@ -27,7 +27,7 @@ type IUploadProgress = {
 	errorMessage: string;
 };
 
-export const UploadProgress = ({ progress, errorMessage, }: IUploadProgress): JSX.Element => {
+export const UploadProgress = ({ progress, errorMessage }: IUploadProgress): JSX.Element => {
 	let statusText: string;
 	let uploadStatus;
 	if (errorMessage) {
