@@ -19,7 +19,6 @@ module.exports = (env, options) => ({
 	output: {
 		path: PATHS.DIST_DIR,
 		filename: '[name].[chunkhash].js', 
-		pathinfo: true,
 		...options.output 
 	},
 	module: {

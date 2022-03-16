@@ -31,7 +31,7 @@ export const TextField = styled(TextFieldComponent)`
 	.MuiInputBase-adornedEnd {
 		padding-right: 0;
 	}
-	
+
 	.MuiOutlinedInput-root {
 		margin: 0;
 	}
