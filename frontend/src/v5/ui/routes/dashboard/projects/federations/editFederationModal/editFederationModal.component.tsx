@@ -24,8 +24,9 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { Tooltip } from '@material-ui/core';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
+import { filterContainers } from '@/v5/store/containers/containers.helpers';
 import { useParams } from 'react-router-dom';
-import { isEmpty, partition, pick } from 'lodash';
+import { isEmpty } from 'lodash';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { IconContainer, IncludeIcon, RemoveIcon } from './editFederationModal.styles';
 import { ActionButtonProps, EditFederationContainers, IconButtonProps } from './editFederationContainersList/editFederationContainersList.component';
@@ -59,14 +60,14 @@ export const EditFederationModal = ({
 	const partitionContainersByQuery = (
 		containersToPartition: IContainer[],
 		query: string,
-	) : [IContainer[], IContainer[]] => (
-		partition(
-			containersToPartition,
-			(container) => (
-				Object.values(pick(container, ['name', 'code', 'type']))
-					.some((value) => (value as string).toLocaleLowerCase().includes(query.toLocaleLowerCase()))),
-		)
-	);
+	) : [IContainer[], IContainer[]] => {
+		const filteredInContainer = filterContainers(containersToPartition, query);
+		const filteredInContainerIds = filteredInContainer.map((container) => container._id);
+		const filteredOutContainer = containersToPartition.filter(
+			(container) => !filteredInContainerIds.includes(container._id),
+		);
+		return [filteredInContainer, filteredOutContainer];
+	};
 
 	const includeContainer = (container: IContainer) => {
 		setIncludedContainers([...includedContainers, container]);
