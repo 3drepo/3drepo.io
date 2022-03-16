@@ -17,7 +17,9 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '@/v5/helpers/actions.helper';
-import { IRevisionsActionCreators, IRevisionsState } from '@/v5/store/revisions/revisions.types';
+import { Action } from 'redux';
+import { TeamspaceProjectAndContainerId, ContainerId } from '../store.types';
+import { IRevision } from './revisions.types';
 
 export const { Types: RevisionsTypes, Creators: RevisionsActions } = createActions({
 	setVoidStatus: ['teamspace', 'projectId', 'containerId', 'revisionId', 'isVoid'],
@@ -26,6 +28,11 @@ export const { Types: RevisionsTypes, Creators: RevisionsActions } = createActio
 	fetchSuccess: ['containerId', 'revisions'],
 	setIsPending: ['containerId', 'isPending'],
 }, { prefix: 'REVISIONS/' }) as { Types: Constants<IRevisionsActionCreators>; Creators: IRevisionsActionCreators };
+
+export interface IRevisionsState {
+	revisionsByContainer: Record<string, IRevision[]>;
+	isPending: Record<string, boolean>;
+}
 
 export const INITIAL_STATE: IRevisionsState = {
 	revisionsByContainer: {},
@@ -71,3 +78,21 @@ export const reducer = createReducer<IRevisionsState>(INITIAL_STATE, {
 	[RevisionsTypes.SET_IS_PENDING]: setIsPending,
 	[RevisionsTypes.SET_VOID_STATUS_SUCCESS]: setVoidStatusSuccess,
 });
+
+type VoidParams = TeamspaceProjectAndContainerId & {revisionId: string, isVoid: boolean};
+
+export type SetRevisionVoidStatusAction = Action<'SET_REVISION_VOID_STATUS'> & VoidParams;
+export type SetRevisionVoidStatusSuccessAction = Action<'SET_REVISION_VOID_STATUS_SUCCESS'> & VoidParams;
+export type FetchAction = Action<'FETCH'> & TeamspaceProjectAndContainerId;
+export type FetchSuccessAction = Action<'FETCH_SUCCESS'> & ContainerId & { revisions: IRevision[] };
+export type SetIsPendingAction = Action<'SET_IS_PENDING'> & ContainerId & { isPending: boolean };
+
+export interface IRevisionsActionCreators {
+	setVoidStatus: (teamspace: string, projectId: string, containerId: string, revisionId: string, isVoid: boolean) =>
+	SetRevisionVoidStatusAction;
+	setVoidStatusSuccess: (containerId: string, revisionId: string, isVoid: boolean) =>
+	SetRevisionVoidStatusSuccessAction;
+	fetch: (teamspace: string, projectId: string, containerId: string) => FetchAction;
+	fetchSuccess: (containerId: string, revisions: IRevision[]) => FetchSuccessAction;
+	setIsPending: (containerId: string, isPending: boolean) => SetIsPendingAction;
+}
