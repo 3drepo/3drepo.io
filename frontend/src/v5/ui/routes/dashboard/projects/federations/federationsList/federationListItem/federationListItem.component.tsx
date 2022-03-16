@@ -61,7 +61,8 @@ export const FederationListItem = ({
 		return <SkeletonListItem delay={index / 10} key={federation._id} />;
 	}
 	const [openModal, setOpenModal] = useState(MODALS.none);
-	const closeModal = () => setOpenModal(MODALS.none);
+	const closeModal = () =>
+		setOpenModal(MODALS.none);
 
 	return (
 		<>
@@ -162,9 +163,12 @@ export const FederationListItem = ({
 					<DashboardListItemIcon>
 						<FederationEllipsisMenu
 							federation={federation}
-							openShareModal={() => setOpenModal(MODALS.share)}
-							openEditFederationModal={() => setOpenModal(MODALS.editFederation)}
-							openFederationSettings={() => setOpenModal(MODALS.federationSettings)}
+							openShareModal={() =>
+								setOpenModal(MODALS.share)}
+							openEditFederationModal={() =>
+								setOpenModal(MODALS.editFederation)}
+							openFederationSettings={() =>
+								setOpenModal(MODALS.federationSettings)}
 						/>
 					</DashboardListItemIcon>
 				</DashboardListItemRow>

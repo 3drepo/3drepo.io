@@ -22,10 +22,12 @@ import { SkeletonBlock as SkeletonBlockComponent } from '@controls/skeletonBlock
 export const Container = styled(DashboardListSkeletonItem)`
 	height: 52px;
 	padding-left: 20px;
-	background-color: ${({ theme }) => theme.palette.secondary.light};
+	background-color: ${({ theme }) =>
+		theme.palette.secondary.light};
 `;
 
 export const SkeletonBlock = styled(SkeletonBlockComponent)`
 	height: 8px;
-	background-color: ${({ theme }) => theme.palette.secondary.lightest};
+	background-color: ${({ theme }) =>
+		theme.palette.secondary.lightest};
 `;

@@ -39,17 +39,21 @@ const getButtonSize = (size) => {
 
 const mainFabStyles = css`
 	&& {
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
+		background-color: ${({ theme }) =>
+		theme.palette.primary.contrast};
 		border: none;
 
 		path {
-			stroke: ${({ theme }) => theme.palette.secondary.light};
+			stroke: ${({ theme }) =>
+		theme.palette.secondary.light};
 		}
 
-		${({ disabled }) => disabled && css`
+		${({ disabled }) =>
+		disabled && css`
 			&& {
 				path {
-					fill: ${({ theme }) => theme.palette.secondary.light};
+					fill: ${({ theme }) =>
+		theme.palette.secondary.light};
 				}
 			}
 		`};
@@ -62,56 +66,70 @@ const mainFabStyles = css`
 
 		&:active {
 			&& {
-				background-color: ${({ theme }) => theme.palette.base.lightest};
+				background-color: ${({ theme }) =>
+		theme.palette.base.lightest};
 			}
 		}
 	}
 `;
 
 const contrastFabStyles = css`
-	${({ disabled }) => disabled && css`
+	${({ disabled }) =>
+		disabled && css`
 		&& {
-			border-color: ${({ theme }) => theme.palette.secondary.light};
+			border-color: ${({ theme }) =>
+		theme.palette.secondary.light};
 			pointer-events: none;
 
 			path {
-				fill: ${({ theme }) => theme.palette.secondary.light};
+				fill: ${({ theme }) =>
+		theme.palette.secondary.light};
 			}
 		}
 	`};
 
 	&:hover {
 		&& {
-			background-color: ${({ theme }) => theme.palette.primary.contrast};
+			background-color: ${({ theme }) =>
+		theme.palette.primary.contrast};
 			path {
-				fill: ${({ theme }) => theme.palette.secondary.main};
+				fill: ${({ theme }) =>
+		theme.palette.secondary.main};
 			}
 		}
 	}
 
 	&.Mui-focusVisible {
 		&& {
-			border: 1px solid ${({ theme }) => theme.palette.primary.main};
+			border: 1px solid ${({ theme }) =>
+		theme.palette.primary.main};
 			path {
-				fill: ${({ theme }) => theme.palette.primary.main};
+				fill: ${({ theme }) =>
+		theme.palette.primary.main};
 			}
 		}
 	}
 
 	&:active {
 		&& {
-			background-color: ${({ theme }) => theme.palette.secondary.light};
-			border-color: ${({ theme }) => theme.palette.secondary.light};
+			background-color: ${({ theme }) =>
+		theme.palette.secondary.light};
+			border-color: ${({ theme }) =>
+		theme.palette.secondary.light};
 
 			path {
-				fill: ${({ theme }) => theme.palette.secondary.main};
+				fill: ${({ theme }) =>
+		theme.palette.secondary.main};
 			}
 		}
 	}
 `;
 
 export const StyledFab = styled(Fab)`
-	${({ size }) => getButtonSize(size)};
-	${({ $variant }) => $variant === 'main' && mainFabStyles}
-	${({ $variant }) => $variant === 'contrast' && contrastFabStyles}
+	${({ size }) =>
+		getButtonSize(size)};
+	${({ $variant }) =>
+		$variant === 'main' && mainFabStyles}
+	${({ $variant }) =>
+		$variant === 'contrast' && contrastFabStyles}
 `;

@@ -22,12 +22,14 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import { FormSelectProps } from '@controls/formSelect/formSelect.component';
 import { Thumbnail, ThumbnailPlaceholder, FormSelect, ViewLabel, MenuItemView } from './formSelectView.styles';
 
-const getThumbnailBasicPath = (teamspace: string, projectId: string, federationId: string) => (
-	(viewId: string) => generateV5ApiUrl(
-		`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/views/${viewId}/thumbnail`,
-		clientConfigService.GET_API,
-	)
-);
+const getThumbnailBasicPath = (teamspace: string, projectId: string, federationId: string) =>
+	(
+		(viewId: string) =>
+			generateV5ApiUrl(
+				`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/views/${viewId}/thumbnail`,
+				clientConfigService.GET_API,
+			)
+	);
 
 type FormSelectViewProps = Omit<FormSelectProps, 'children'> & {
 	views: FederationView[];
@@ -42,24 +44,25 @@ export const FormSelectView = ({ views, federationId, ...formProps }: FormSelect
 		<FormSelect
 			{...formProps}
 		>
-			{views.map((view) => (
-				<MenuItemView
-					key={view._id}
-					value={view._id}
-				>
-					{view.hasThumbnail ? (
-						<Thumbnail
-							src={getThumbnail(view._id)}
-							alt={view.name}
-						/>
-					) : (
-						<ThumbnailPlaceholder />
-					)}
-					<ViewLabel>
-						{view.name}
-					</ViewLabel>
-				</MenuItemView>
-			))}
+			{views.map((view) =>
+				(
+					<MenuItemView
+						key={view._id}
+						value={view._id}
+					>
+						{view.hasThumbnail ? (
+							<Thumbnail
+								src={getThumbnail(view._id)}
+								alt={view.name}
+							/>
+						) : (
+							<ThumbnailPlaceholder />
+						)}
+						<ViewLabel>
+							{view.name}
+						</ViewLabel>
+					</MenuItemView>
+				))}
 		</FormSelect>
 	);
 };

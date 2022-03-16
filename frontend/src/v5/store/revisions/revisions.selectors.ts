@@ -18,17 +18,21 @@
 import { createSelector } from 'reselect';
 import { IRevisionsState } from './revisions.types';
 
-const selectRevisionsDomain = (state): IRevisionsState => state.revisions;
-const selectContainerIdParam = (_, containerId: string) => containerId;
+const selectRevisionsDomain = (state): IRevisionsState =>
+	state.revisions;
+const selectContainerIdParam = (_, containerId: string) =>
+	containerId;
 
 export const selectRevisions = createSelector(
 	selectRevisionsDomain,
 	selectContainerIdParam,
-	(state, containerId) => state.revisionsByContainer[containerId] || [],
+	(state, containerId) =>
+		state.revisionsByContainer[containerId] || [],
 );
 
 export const selectIsPending: (any, string) => boolean = createSelector(
 	selectRevisionsDomain,
 	selectContainerIdParam,
-	(state, containerId) => state.isPending[containerId],
+	(state, containerId) =>
+		state.isPending[containerId],
 );

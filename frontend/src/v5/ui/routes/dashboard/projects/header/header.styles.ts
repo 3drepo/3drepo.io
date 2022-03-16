@@ -22,8 +22,10 @@ export const Wrapper = styled.div`
 	height: 114px;
 	padding: 0 30px;
 	box-sizing: border-box;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+	background-color: ${({ theme }) =>
+		theme.palette.primary.contrast};
+	border: 1px solid ${({ theme }) =>
+		theme.palette.base.lightest};
 	border-left-style: none;
 	border-right-style: none;
 `;

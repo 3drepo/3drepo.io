@@ -87,7 +87,8 @@ export const EditFederationContainers = ({
 	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
 
 	const selectOrToggleItem = (id: string) => {
-		setSelectedItemId((state) => (state === id ? null : id));
+		setSelectedItemId((state) =>
+			(state === id ? null : id));
 	};
 
 	return (
@@ -106,8 +107,10 @@ export const EditFederationContainers = ({
 							</ActionButton>
 						</HeaderButtonsGroup>
 						<SearchInput
-							onClear={() => setFilterQuery('')}
-							onChange={(event) => setFilterQuery(event.currentTarget.value)}
+							onClear={() =>
+								setFilterQuery('')}
+							onChange={(event) =>
+								setFilterQuery(event.currentTarget.value)}
 							value={filterQuery}
 							placeholder={formatMessage({ id: 'modal.editFederation.search.placeholder', defaultMessage: 'Search containers...' })}
 						/>
@@ -133,19 +136,24 @@ export const EditFederationContainers = ({
 				</DashboardListHeader>
 				<DashboardList>
 					{!isEmpty(sortedList) ? (
-						sortedList.map((container, index) => (
-							<EditFederationContainersListItem
-								index={index}
-								icon={() => (
-									<IconButton container={container} isSelected={container._id === selectedItemId} />
-								)}
-								key={container._id}
-								isSelected={container._id === selectedItemId}
-								container={container}
-								filterQuery={filterQuery}
-								onSelectOrToggleItem={selectOrToggleItem}
-							/>
-						))
+						sortedList.map((container, index) =>
+							(
+								<EditFederationContainersListItem
+									index={index}
+									icon={() =>
+										(
+											<IconButton
+												container={container}
+												isSelected={container._id === selectedItemId}
+											/>
+										)}
+									key={container._id}
+									isSelected={container._id === selectedItemId}
+									container={container}
+									filterQuery={filterQuery}
+									onSelectOrToggleItem={selectOrToggleItem}
+								/>
+							))
 					) : (
 						<DashboardListEmptyContainer>
 							{filterQuery && hasContainers ? (

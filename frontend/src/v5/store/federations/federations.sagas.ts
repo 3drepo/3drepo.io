@@ -78,7 +78,8 @@ export function* fetchFederations({ teamspace, projectId }: FetchFederationsActi
 
 		yield all(
 			federations.map(
-				(federation) => put(FederationsActions.fetchFederationStats(teamspace, projectId, federation._id)),
+				(federation) =>
+					put(FederationsActions.fetchFederationStats(teamspace, projectId, federation._id)),
 			),
 		);
 	} catch (error) {

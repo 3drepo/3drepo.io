@@ -27,22 +27,26 @@ export const MenuList = styled(MenuListComponent)`
 `;
 
 export const MenuItem = styled(MenuItemComponent)`
-	color: ${({ theme }) => theme.palette.secondary.main};
+	color: ${({ theme }) =>
+		theme.palette.secondary.main};
 	margin: 0;
 	height: 40px;
 	padding-right: 14px;
 	justify-content: space-between;
 
 	&:hover {
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+		background-color: ${({ theme }) =>
+		theme.palette.tertiary.lightest};
 	}
 
 	&:focus {
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+		background-color: ${({ theme }) =>
+		theme.palette.tertiary.lightest};
 	}
 
 	&:active {
-		background-color: ${({ theme }) => theme.palette.base.light};
+		background-color: ${({ theme }) =>
+		theme.palette.base.light};
 	}
 `;
 

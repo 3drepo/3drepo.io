@@ -29,7 +29,8 @@ export const V4ModelsPermissions = styled(ModelsPermissions)`
 				
 		.MuiIconButton-label {
 			border-radius: 3px;
-			background-color: ${({ theme }) => theme.palette.primary.contrast};
+			background-color: ${({ theme }) =>
+		theme.palette.primary.contrast};
 		}
 
 		${BodyWrapper} .simplebar-content {
@@ -38,22 +39,27 @@ export const V4ModelsPermissions = styled(ModelsPermissions)`
 			${Row}.selected {
 
 				${Name} {
-					color: ${({ theme }) => theme.palette.primary.contrast};
+					color: ${({ theme }) =>
+		theme.palette.primary.contrast};
 				}
 				
-				background-color: ${({ theme }) => theme.palette.secondary.main};
+				background-color: ${({ theme }) =>
+		theme.palette.secondary.main};
 			}
 		}
 
 		${Detail} {
-			color: ${({ theme }) => theme.palette.base.main}
+			color: ${({ theme }) =>
+		theme.palette.base.main}
 		}
 	}
 
 	${TextOverlay} {
 		background: rgba(255, 255, 255, 0.89);
-		${({ theme }) => theme.typography.h4};
-		color: ${({ theme }) => theme.palette.secondary.main};
+		${({ theme }) =>
+		theme.typography.h4};
+		color: ${({ theme }) =>
+		theme.palette.secondary.main};
 	}
 `;
 

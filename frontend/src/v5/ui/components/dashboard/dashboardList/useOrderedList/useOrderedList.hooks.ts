@@ -42,7 +42,8 @@ export const useOrderedList = <T>(items: T[], defaultConfig: ISortConfig) => {
 		};
 
 		const sortingFunctionWithDirection = direction === SortingDirection.ASCENDING
-			? sortingFunction : (a: T, b: T) => sortingFunction(b, a);
+			? sortingFunction : (a: T, b: T) =>
+				sortingFunction(b, a);
 
 		return [...items].sort(sortingFunctionWithDirection);
 	}, [sortConfig, items]);

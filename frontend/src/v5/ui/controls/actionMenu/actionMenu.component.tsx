@@ -35,7 +35,8 @@ const applyCloseMenuToActionMenuItems = (el: any, handleClose: () => void) => {
 
 	if (el?.props?.children) {
 		return cloneElement(el, {
-			children: Children.map(el.props.children, (child) => applyCloseMenuToActionMenuItems(child, handleClose)),
+			children: Children.map(el.props.children, (child) =>
+				applyCloseMenuToActionMenuItems(child, handleClose)),
 		});
 	}
 
@@ -49,8 +50,10 @@ type ActionMenuProps = {
 
 export const ActionMenu = ({ className, children }: ActionMenuProps) => {
 	const [anchorEl, setAnchorEl] = useState(null);
-	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
-	const handleClose = () => setAnchorEl(null);
+	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) =>
+		setAnchorEl(event.currentTarget);
+	const handleClose = () =>
+		setAnchorEl(null);
 
 	if (Children.count(children) < 2) {
 		throw new Error('ActionMenu must have at least 2 children: a trigger button and the menu list');
@@ -65,7 +68,8 @@ export const ActionMenu = ({ className, children }: ActionMenuProps) => {
 		onClick: handleClick,
 	});
 
-	const MenuChildren = menuChildren.map((child) => applyCloseMenuToActionMenuItems(child, handleClose));
+	const MenuChildren = menuChildren.map((child) =>
+		applyCloseMenuToActionMenuItems(child, handleClose));
 
 	return (
 		<>
@@ -78,22 +82,23 @@ export const ActionMenu = ({ className, children }: ActionMenuProps) => {
 				className={className}
 				placement="bottom-end"
 			>
-				{({ TransitionProps, placement }) => (
-					<Grow
-						{...TransitionProps}
-						style={{
-							transformOrigin: placement === 'bottom-end' ? 'center top' : 'center bottom',
-						}}
-					>
-						<Paper>
-							<ClickAwayListener onClickAway={handleClose}>
-								<Menu>
-									{MenuChildren}
-								</Menu>
-							</ClickAwayListener>
-						</Paper>
-					</Grow>
-				)}
+				{({ TransitionProps, placement }) =>
+					(
+						<Grow
+							{...TransitionProps}
+							style={{
+								transformOrigin: placement === 'bottom-end' ? 'center top' : 'center bottom',
+							}}
+						>
+							<Paper>
+								<ClickAwayListener onClickAway={handleClose}>
+									<Menu>
+										{MenuChildren}
+									</Menu>
+								</ClickAwayListener>
+							</Paper>
+						</Grow>
+					)}
 			</Popper>
 		</>
 	);

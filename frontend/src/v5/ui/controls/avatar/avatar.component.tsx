@@ -23,7 +23,8 @@ const getUserNamesInitials = ({ firstName, lastName }) => {
 	if (!(firstName || lastName)) return '';
 
 	return [firstName, lastName]
-		.map((name) => name.trim().charAt(0).toUpperCase())
+		.map((name) =>
+			name.trim().charAt(0).toUpperCase())
 		.join('');
 };
 
@@ -34,14 +35,15 @@ type AvatarProps = {
 	isButton?: boolean;
 };
 
-export const Avatar = ({ user, largeIcon, isButton, ...props }: AvatarProps) => (
-	<StyledIconButton
-		$largeIcon={largeIcon}
-		$isButton={isButton}
-		{...props}
-	>
-		<AvatarIcon src={user.hasAvatar ? user.avatarUrl : null}>
-			{getUserNamesInitials(user)}
-		</AvatarIcon>
-	</StyledIconButton>
-);
+export const Avatar = ({ user, largeIcon, isButton, ...props }: AvatarProps) =>
+	(
+		<StyledIconButton
+			$largeIcon={largeIcon}
+			$isButton={isButton}
+			{...props}
+		>
+			<AvatarIcon src={user.hasAvatar ? user.avatarUrl : null}>
+				{getUserNamesInitials(user)}
+			</AvatarIcon>
+		</StyledIconButton>
+	);

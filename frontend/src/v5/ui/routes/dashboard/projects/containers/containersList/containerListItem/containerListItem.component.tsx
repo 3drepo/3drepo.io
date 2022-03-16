@@ -66,7 +66,8 @@ export const ContainerListItem = ({
 		>
 			<DashboardListItemRow
 				selected={isSelected}
-				onClick={() => onSelectOrToggleItem(container._id)}
+				onClick={() =>
+					onSelectOrToggleItem(container._id)}
 			>
 				<DashboardListItemTitle
 					subtitle={(
@@ -87,7 +88,8 @@ export const ContainerListItem = ({
 					</Highlight>
 				</DashboardListItemTitle>
 				<DashboardListItemButton
-					onClick={() => onSelectOrToggleItem(container._id)}
+					onClick={() =>
+						onSelectOrToggleItem(container._id)}
 					width={186}
 					hideWhenSmallerThan={Display.Desktop}
 					tooltipTitle={
@@ -151,7 +153,8 @@ export const ContainerListItem = ({
 						selected={isSelected}
 						container={container}
 						onSelectOrToggleItem={onSelectOrToggleItem}
-						openShareModal={() => setShareModalOpen(true)}
+						openShareModal={() =>
+							setShareModalOpen(true)}
 					/>
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
@@ -163,7 +166,8 @@ export const ContainerListItem = ({
 			)}
 			<ShareModal
 				openState={shareModalOpen}
-				onClickClose={() => setShareModalOpen(false)}
+				onClickClose={() =>
+					setShareModalOpen(false)}
 				title={formatMessage({
 					id: 'ShareModal.component.title',
 					defaultMessage: 'Share Container URL',

@@ -27,11 +27,13 @@ import {
 } from '@/v5/store/containers/containers.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 
-export const filterFederations = (federations: IFederation[], filterQuery: string) => (
-	federations.filter((
-		{ name, code, category },
-	) => [name, code, category].join('').toLowerCase().includes(filterQuery.trim().toLowerCase()))
-);
+export const filterFederations = (federations: IFederation[], filterQuery: string) =>
+	(
+		federations.filter((
+			{ name, code, category },
+		) =>
+			[name, code, category].join('').toLowerCase().includes(filterQuery.trim().toLowerCase()))
+	);
 
 export const prepareSingleFederationData = (
 	federation: FetchFederationsItemResponse,
@@ -55,27 +57,30 @@ export const prepareSingleFederationData = (
 export const prepareFederationsData = (
 	federations: Array<FetchFederationsItemResponse>,
 	stats?: FetchFederationStatsResponse[],
-) => federations.map<IFederation>((federation, index) => {
-	const federationStats = stats?.[index];
-	return prepareSingleFederationData(federation, federationStats);
-});
+) =>
+	federations.map<IFederation>((federation, index) => {
+		const federationStats = stats?.[index];
+		return prepareSingleFederationData(federation, federationStats);
+	});
 
 export const prepareFederationSettingsForFrontend = ({
 	surveyPoints,
 	...otherProps
-}: FetchFederationRawSettingsResponse): FetchFederationSettingsResponse => (
-	{
-		surveyPoint: surveyPoints?.[0],
-		...otherProps,
-	}
-);
+}: FetchFederationRawSettingsResponse): FetchFederationSettingsResponse =>
+	(
+		{
+			surveyPoint: surveyPoints?.[0],
+			...otherProps,
+		}
+	);
 
 export const prepareFederationSettingsForBackend = ({
 	surveyPoint,
 	...otherProps
-}: FetchFederationSettingsResponse): FetchFederationRawSettingsResponse => (
-	{
-		surveyPoints: [surveyPoint],
-		...otherProps,
-	}
-);
+}: FetchFederationSettingsResponse): FetchFederationRawSettingsResponse =>
+	(
+		{
+			surveyPoints: [surveyPoint],
+			...otherProps,
+		}
+	);

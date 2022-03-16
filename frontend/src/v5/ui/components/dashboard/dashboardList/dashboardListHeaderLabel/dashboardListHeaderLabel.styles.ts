@@ -26,7 +26,8 @@ export const Container = styled(FixedOrGrowContainer)`
 	align-items: center;
 	display: flex;
 	
-	${({ hideWhenSmallerThan }: { hideWhenSmallerThan: Display }) => hideWhenSmallerThan && css`
+	${({ hideWhenSmallerThan }: { hideWhenSmallerThan: Display }) =>
+		hideWhenSmallerThan && css`
 		@media (max-width: ${hideWhenSmallerThan}px) {
 			display: none;
 		}
@@ -36,7 +37,8 @@ export const Container = styled(FixedOrGrowContainer)`
 export const Label = styled(Typography).attrs({
 	variant: 'kicker',
 })`
-	color: ${({ theme }) => theme.palette.base.main};
+	color: ${({ theme }) =>
+		theme.palette.base.main};
 	line-height: normal;
 `;
 
@@ -64,7 +66,8 @@ export const Indicator = styled.div`
 		width: 100%;
 	}
 
-	${({ sortingDirection }) => sortingDirection === SortingDirection.ASCENDING && css`
+	${({ sortingDirection }) =>
+		sortingDirection === SortingDirection.ASCENDING && css`
 		svg {
 			transform: rotate(180deg);
 		}

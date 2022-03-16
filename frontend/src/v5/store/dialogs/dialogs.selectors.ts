@@ -17,8 +17,10 @@
 import { createSelector } from 'reselect';
 import { IDialogState } from './dialogs.redux';
 
-export const selectDialogDomain = (state):IDialogState => state.dialogsV5;
+export const selectDialogDomain = (state):IDialogState =>
+	state.dialogsV5;
 
 export const selectDialogs = createSelector(
-	selectDialogDomain, (state) => state.dialogs,
+	selectDialogDomain, (state) =>
+		state.dialogs,
 );

@@ -109,11 +109,12 @@ export const FederationEllipsisMenu = ({
 							{ id: 'deleteFederation.federation.title', defaultMessage: 'Delete {name}?' },
 							{ name: federation.name },
 						),
-						onClickConfirm: () => FederationsActionsDispatchers.deleteFederation(
-							teamspace,
-							project,
-							federation._id,
-						),
+						onClickConfirm: () =>
+							FederationsActionsDispatchers.deleteFederation(
+								teamspace,
+								project,
+								federation._id,
+							),
 						message: formatMessage({
 							id: 'deleteFederation.federation.message',
 							defaultMessage: 'By deleting this Federation your data will be lost permanently and will not be recoverable.',

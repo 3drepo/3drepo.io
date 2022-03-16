@@ -42,45 +42,48 @@ export const FederationSettingsSchema = Yup.object().shape({
 				defaultMessage: 'Federation Name is a required field',
 			}),
 		),
-	desc: Yup.lazy((value) => (
-		value === ''
-			? Yup.string().strip()
-			: Yup.string()
-				.min(1,
-					formatMessage({
-						id: 'federations.desc.error.min',
-						defaultMessage: 'Federation Description must be at least 1 character',
-					}))
-				.max(600,
-					formatMessage({
-						id: 'federations.desc.error.max',
-						defaultMessage: 'Federation Description is limited to 600 characters',
-					}))
-	)),
+	desc: Yup.lazy((value) =>
+		(
+			value === ''
+				? Yup.string().strip()
+				: Yup.string()
+					.min(1,
+						formatMessage({
+							id: 'federations.desc.error.min',
+							defaultMessage: 'Federation Description must be at least 1 character',
+						}))
+					.max(600,
+						formatMessage({
+							id: 'federations.desc.error.max',
+							defaultMessage: 'Federation Description is limited to 600 characters',
+						}))
+		)),
 	unit: Yup.string().required().default('mm'),
-	code: Yup.lazy((value) => (
-		value === ''
-			? Yup.string().strip()
-			: Yup.string()
-				.min(1,
-					formatMessage({
-						id: 'federations.code.error.min',
-						defaultMessage: 'Code must be at least 1 character',
-					}))
-				.max(50,
-					formatMessage({
-						id: 'federations.code.error.max',
-						defaultMessage: 'Code is limited to 50 characters',
-					}))
-				.matches(/^[\w|_|-]*$/,
-					formatMessage({
-						id: 'federations.code.error.characters',
-						defaultMessage: 'Code can only consist of letters and numbers',
-					}))
-	)),
+	code: Yup.lazy((value) =>
+		(
+			value === ''
+				? Yup.string().strip()
+				: Yup.string()
+					.min(1,
+						formatMessage({
+							id: 'federations.code.error.min',
+							defaultMessage: 'Code must be at least 1 character',
+						}))
+					.max(50,
+						formatMessage({
+							id: 'federations.code.error.max',
+							defaultMessage: 'Code is limited to 50 characters',
+						}))
+					.matches(/^[\w|_|-]*$/,
+						formatMessage({
+							id: 'federations.code.error.characters',
+							defaultMessage: 'Code can only consist of letters and numbers',
+						}))
+		)),
 	defaultView: Yup.string()
 		.nullable()
-		.transform((value) => (value === EMPTY_VIEW._id ? null : value)),
+		.transform((value) =>
+			(value === EMPTY_VIEW._id ? null : value)),
 	latitude: numberField.required(),
 	longitude: numberField.required(),
 	angleFromNorth: numberField
@@ -94,7 +97,8 @@ export const FederationSettingsSchema = Yup.object().shape({
 				id: 'federations.angle.error.max',
 				defaultMessage: 'Angle cannot be greater than 360',
 			}))
-		.transform((value) => value ?? 0),
+		.transform((value) =>
+			value ?? 0),
 	x: numberField.required(),
 	y: numberField.required(),
 	z: numberField.required(),

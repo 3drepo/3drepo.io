@@ -23,6 +23,7 @@ type IDashboardList = {
 	className?: string;
 };
 
-export const DashboardList = ({ children, ...props }: IDashboardList): JSX.Element => (
-	<ListContainer {...props}>{children}</ListContainer>
-);
+export const DashboardList = ({ children, ...props }: IDashboardList): JSX.Element =>
+	(
+		<ListContainer {...props}>{children}</ListContainer>
+	);

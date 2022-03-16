@@ -24,7 +24,8 @@ import * as RevisionsListHeaderLabelStyles from './components/revisionsListHeade
 export const Container = styled.div`
 	display: flex;
 	flex-direction: column;
-	background-color: ${({ theme }) => theme.palette.secondary.mid};
+	background-color: ${({ theme }) =>
+		theme.palette.secondary.mid};
 	padding-left: 66px;
 	padding-right: 36px;
 	z-index: 1;
@@ -39,17 +40,20 @@ export const Container = styled.div`
 `;
 
 export const RevisionsListEmptyWrapper = styled.div`
-	background-color: ${({ theme }) => theme.palette.secondary.mid};
+	background-color: ${({ theme }) =>
+		theme.palette.secondary.mid};
 	padding: 33px;
 `;
 
 export const RevisionsListEmptyContainer = styled(DashboardListEmptyContainer)`
 	background-color: transparent;
-	border-color: ${({ theme }) => theme.palette.secondary.light};
+	border-color: ${({ theme }) =>
+		theme.palette.secondary.light};
 `;
 
 export const RevisionsListEmptyText = styled(DashboardListEmptyText)`
-	color: ${({ theme }) => theme.palette.primary.contrast};
+	color: ${({ theme }) =>
+		theme.palette.primary.contrast};
 `;
 
 export const RevisionsListHeaderContainer = styled.header`
@@ -73,14 +77,17 @@ export const RevisionsList = styled.ul`
 `;
 
 const selectedRevisionListItemStyles = css`
-	background-image: ${({ theme }) => `linear-gradient(${theme.palette.secondary.mid}, ${theme.palette.secondary.mid}), linear-gradient(to bottom, ${theme.palette.primary.main}, ${theme.palette.secondary.light})`};
+	background-image: ${({ theme }) =>
+		`linear-gradient(${theme.palette.secondary.mid}, ${theme.palette.secondary.mid}), linear-gradient(to bottom, ${theme.palette.primary.main}, ${theme.palette.secondary.light})`};
 `;
 
 const beforeSelectedRevisionListItemStyles = css`
-	background-image: ${({ theme }) => `linear-gradient(${theme.palette.secondary.mid}, ${theme.palette.secondary.mid}), linear-gradient(to bottom, ${theme.palette.secondary.light}, ${theme.palette.primary.main})`};
+	background-image: ${({ theme }) =>
+		`linear-gradient(${theme.palette.secondary.mid}, ${theme.palette.secondary.mid}), linear-gradient(to bottom, ${theme.palette.secondary.light}, ${theme.palette.primary.main})`};
 `;
 
-const singleRevisionListItemStyles = ({ theme, selected }) => css`
+const singleRevisionListItemStyles = ({ theme, selected }) =>
+	css`
 	&:after {
 		content: '';
 		display: block !important;
@@ -94,7 +101,8 @@ const singleRevisionListItemStyles = ({ theme, selected }) => css`
 	}
 `;
 
-const revisionListItemStylesLineStyles = ({ theme, selected, isBeforeSelected }) => css`
+const revisionListItemStylesLineStyles = ({ theme, selected, isBeforeSelected }) =>
+	css`
 	&:after {
 		content: '';
 		display: block;
@@ -115,21 +123,25 @@ const revisionListItemStylesLineStyles = ({ theme, selected, isBeforeSelected })
 
 export const RevisionsListItemWrapper = styled.li`
 	box-sizing: border-box;
-	background-color: ${({ theme }) => theme.palette.secondary.light};
+	background-color: ${({ theme }) =>
+		theme.palette.secondary.light};
 	height: 52px;
 	width: 100%;
 	list-style: none;
-	border: 1px solid ${({ theme }) => theme.palette.secondary.mid};
+	border: 1px solid ${({ theme }) =>
+		theme.palette.secondary.mid};
 	border-bottom-style: none;
 	border-left-style: none;
 	position: relative;
 	cursor: pointer;
 
 	&:hover {
-		background-color: ${({ theme }) => theme.palette.secondary.main};
+		background-color: ${({ theme }) =>
+		theme.palette.secondary.main};
 	}
 
-	${({ isSingle }) => css`
+	${({ isSingle }) =>
+		css`
 		${!isSingle && revisionListItemStylesLineStyles}
 		${isSingle && singleRevisionListItemStyles}
 
@@ -160,7 +172,8 @@ export const RevisionsListItemWrapper = styled.li`
 		border-radius: 5px;
 	}
 
-	${({ theme, selected }) => selected && css`
+	${({ theme, selected }) =>
+		selected && css`
 		background-color: ${theme.palette.primary.main};
 	`}
 `;

@@ -27,19 +27,26 @@ import { isEmpty } from 'lodash';
 import { NavigationMenu } from '../navigatonMenu';
 import { Container, HomeIconBreadcrumb, Breadcrumb, InteractiveBreadcrumb, OverflowWrapper } from './breadcrumbs.styles';
 
-const createToWithUrl = (url) => ({ to, title }) => ({ title, to: `${url}/${to}` });
+const createToWithUrl = (url) =>
+	({ to, title }) =>
+		({ title, to: `${url}/${to}` });
 
-const teamspaceList2LinkList = (teamspaces: ITeamspace[]) => (teamspaces.length ? teamspaces.map(({ name }) => ({
-	to: name,
-	title: name,
-})) : []);
+const teamspaceList2LinkList = (teamspaces: ITeamspace[]) =>
+	(teamspaces.length ? teamspaces.map(({ name }) =>
+		({
+			to: name,
+			title: name,
+		})) : []);
 
-const projectList2LinkList = (projects: IProject[]) => (projects.length ? projects.map(({ name, _id }) => ({
-	to: _id,
-	title: name,
-})) : []);
+const projectList2LinkList = (projects: IProject[]) =>
+	(projects.length ? projects.map(({ name, _id }) =>
+		({
+			to: _id,
+			title: name,
+		})) : []);
 
-const lastItemOf = (list: any[]) => list[list.length - 1];
+const lastItemOf = (list: any[]) =>
+	list[list.length - 1];
 
 export const Breadcrumbs = (): JSX.Element => {
 	const { teamspace } = useParams();
@@ -75,8 +82,10 @@ export const Breadcrumbs = (): JSX.Element => {
 	list = list.map(createToWithUrl(projectId ? urlProject : url));
 
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-	const handleClick = (event: MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
-	const handleClose = () => setAnchorEl(null);
+	const handleClick = (event: MouseEvent<HTMLButtonElement>) =>
+		setAnchorEl(event.currentTarget);
+	const handleClose = () =>
+		setAnchorEl(null);
 
 	return (
 		<Container aria-label="breadcrumb">
@@ -84,28 +93,29 @@ export const Breadcrumbs = (): JSX.Element => {
 				<HomeIcon />
 			</HomeIconBreadcrumb>
 
-			{breadcrumbs.map((title, index) => (
-				(breadcrumbs.length - 1) === index
-					? (
-						<div key={title}>
-							<InteractiveBreadcrumb onClick={handleClick} endIcon={<DownArrowIcon />}>
-								<OverflowWrapper>
-									{title}
-								</OverflowWrapper>
-							</InteractiveBreadcrumb>
-							<NavigationMenu
-								list={list}
-								anchorEl={anchorEl}
-								selectedItem={selectedItem}
-								handleClose={handleClose}
-							/>
-						</div>
-					) : (
-						<Breadcrumb key={title} color="inherit" to={teamspaceTo}>
-							{title}
-						</Breadcrumb>
-					)
-			))}
+			{breadcrumbs.map((title, index) =>
+				(
+					(breadcrumbs.length - 1) === index
+						? (
+							<div key={title}>
+								<InteractiveBreadcrumb onClick={handleClick} endIcon={<DownArrowIcon />}>
+									<OverflowWrapper>
+										{title}
+									</OverflowWrapper>
+								</InteractiveBreadcrumb>
+								<NavigationMenu
+									list={list}
+									anchorEl={anchorEl}
+									selectedItem={selectedItem}
+									handleClose={handleClose}
+								/>
+							</div>
+						) : (
+							<Breadcrumb key={title} color="inherit" to={teamspaceTo}>
+								{title}
+							</Breadcrumb>
+						)
+				))}
 		</Container>
 	);
 };

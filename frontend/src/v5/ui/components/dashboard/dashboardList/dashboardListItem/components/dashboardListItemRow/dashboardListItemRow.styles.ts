@@ -29,16 +29,19 @@ export const Container = styled.div`
 	padding-left: 30px;
 	padding-right: 10px;
 	cursor: pointer;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	background-color: ${({ theme }) =>
+		theme.palette.primary.contrast};
 
 	:hover {
-		background-color: ${({ theme }) => theme.palette.primary.accent};
+		background-color: ${({ theme }) =>
+		theme.palette.primary.accent};
 		${ButtonStyles.LabelButton} {
 			${ButtonStyles.labelButtonSecondaryStyles};
 		}
 	}
 
-	${({ theme, selected }) => selected && css`
+	${({ theme, selected }) =>
+		selected && css`
 		background-color: ${theme.palette.secondary.main};
 
 		::before {

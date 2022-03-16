@@ -21,5 +21,6 @@ import { Typography } from '@material-ui/core';
 export const Text = styled(Typography).attrs({
 	variant: 'body1',
 })`
-	color: ${({ theme, $active }) => ($active ? theme.palette.primary.contrast : theme.palette.base.light)};
+	color: ${({ theme, $active }) =>
+		($active ? theme.palette.primary.contrast : theme.palette.base.light)};
 `;

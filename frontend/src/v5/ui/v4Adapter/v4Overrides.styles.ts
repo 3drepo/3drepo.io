@@ -36,9 +36,11 @@ const customTableStyling = css`
 		}
 
 		.simplebar-content {
-			border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+			border: 1px solid ${({ theme }) =>
+		theme.palette.base.lightest};
 			border-radius: 5px;
-			background-color: ${({ theme }) => theme.palette.primary.contrast};
+			background-color: ${({ theme }) =>
+		theme.palette.primary.contrast};
 		}
 
 		.simplebar-content-wrapper {
@@ -60,8 +62,10 @@ const customTableStyling = css`
 	}
 
 	${UserNameCell} {
-		${({ theme }) => theme.typography.h5};
-		color: ${({ theme }) => theme.palette.secondary.main};
+		${({ theme }) =>
+		theme.typography.h5};
+		color: ${({ theme }) =>
+		theme.palette.secondary.main};
 	}
 
 	${Row} {
@@ -71,7 +75,8 @@ const customTableStyling = css`
 	${SortLabel} {
 		margin: 0;
 		padding-left: 10px;
-		${({ theme }) => theme.typography.kicker};
+		${({ theme }) =>
+		theme.typography.kicker};
 		flex-direction: row;
 		svg {
 			fill: transparent;
@@ -85,7 +90,8 @@ const customTableStyling = css`
 
 		&.MuiTableSortLabel-active {
 			svg {
-				fill: ${({ theme }) => theme.palette.base.main};
+				fill: ${({ theme }) =>
+		theme.palette.base.main};
 			}
 		}
 	}
@@ -110,14 +116,16 @@ const customTableStyling = css`
 
 	${SearchField} {
 		label {
-			${({ theme }) => theme.typography.kicker};
+			${({ theme }) =>
+		theme.typography.kicker};
 		}
 
 		input {
 			padding-bottom: 5px;
 			padding-left: 0;
 			padding-top: 0;
-			${({ theme }) => theme.typography.body1};
+			${({ theme }) =>
+		theme.typography.body1};
 		}
 
 		.search-field__label {
@@ -139,7 +147,8 @@ export const V4OverridesContainer = styled.div`
 	${customTableStyling}
 
 	${HighlighterMark} {
-		background-color: ${({ theme }) => theme.palette.primary.light};
+		background-color: ${({ theme }) =>
+		theme.palette.primary.light};
 		font-weight: inherit;
 	}
 `;

@@ -18,8 +18,10 @@ import styled from 'styled-components';
 import { Typography } from '@material-ui/core';
 
 export const Text = styled(Typography)`
-	${({ theme }) => theme.typography.link};
-	color: ${({ theme }) => theme.palette.primary.contrast};
+	${({ theme }) =>
+		theme.typography.link};
+	color: ${({ theme }) =>
+		theme.palette.primary.contrast};
 	display: inline;
 	cursor: pointer;
 `;

@@ -45,7 +45,9 @@ export const EditFederationModal = ({
 }: EditFederationModalProps): JSX.Element => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 	const { containers } = useContainersData();
-	const getContainerById = (id: string) => containers.find((container: IContainer) => container._id === id);
+	const getContainerById = (id: string) =>
+		containers.find((container: IContainer) =>
+			container._id === id);
 
 	const [includedContainers, setIncludedContainers] = useState<IContainer[]>([]);
 	const [availableContainers, setAvailableContainers] = useState<IContainer[]>([]);
@@ -53,7 +55,8 @@ export const EditFederationModal = ({
 	useEffect(() => {
 		setIncludedContainers(federation.containers.map(getContainerById));
 		setAvailableContainers(
-			containers.filter((container) => !federation.containers.includes(container._id)),
+			containers.filter((container) =>
+				!federation.containers.includes(container._id)),
 		);
 	}, [containers]);
 
@@ -62,16 +65,19 @@ export const EditFederationModal = ({
 		query: string,
 	) : [IContainer[], IContainer[]] => {
 		const filteredInContainer = filterContainers(containersToPartition, query);
-		const filteredInContainerIds = filteredInContainer.map((container) => container._id);
+		const filteredInContainerIds = filteredInContainer.map((container) =>
+			container._id);
 		const filteredOutContainer = containersToPartition.filter(
-			(container) => !filteredInContainerIds.includes(container._id),
+			(container) =>
+				!filteredInContainerIds.includes(container._id),
 		);
 		return [filteredInContainer, filteredOutContainer];
 	};
 
 	const includeContainer = (container: IContainer) => {
 		setIncludedContainers([...includedContainers, container]);
-		setAvailableContainers(availableContainers.filter(({ _id }) => _id !== container._id));
+		setAvailableContainers(availableContainers.filter(({ _id }) =>
+			_id !== container._id));
 	};
 
 	const includeAllContainers = (filterQuery: string = '') => {
@@ -85,7 +91,8 @@ export const EditFederationModal = ({
 
 	const removeContainer = (container: IContainer) => {
 		setAvailableContainers([...availableContainers, container]);
-		setIncludedContainers(includedContainers.filter(({ _id }) => _id !== container._id));
+		setIncludedContainers(includedContainers.filter(({ _id }) =>
+			_id !== container._id));
 	};
 
 	const removeAllContainers = (filterQuery: string = '') => {
@@ -102,7 +109,8 @@ export const EditFederationModal = ({
 			teamspace,
 			project,
 			federation._id,
-			includedContainers.map((container) => container._id),
+			includedContainers.map((container) =>
+				container._id),
 		);
 		event.preventDefault();
 		onClickClose();
@@ -145,35 +153,38 @@ export const EditFederationModal = ({
 						/>
 					</DashboardListEmptyText>
 				)}
-				actionButton={({ children, disabled, filterQuery }: ActionButtonProps) => (
-					<Button
-						errorButton
-						onClick={() => removeAllContainers(filterQuery)}
-						disabled={disabled}
-					>
-						{children}
-					</Button>
-				)}
+				actionButton={({ children, disabled, filterQuery }: ActionButtonProps) =>
+					(
+						<Button
+							errorButton
+							onClick={() =>
+								removeAllContainers(filterQuery)}
+							disabled={disabled}
+						>
+							{children}
+						</Button>
+					)}
 				actionButtonTexts={{
 					allResults: <FormattedMessage id="modal.editFederation.included.removeAll" defaultMessage="Remove all" />,
 					filteredResults: <FormattedMessage id="modal.editFederation.included.removeShown" defaultMessage="Remove shown" />,
 				}}
-				iconButton={({ container }: IconButtonProps) => (
-					<Tooltip title={formatMessage({
-						id: 'modal.editFederation.available.remove.tooltip',
-						defaultMessage: 'Remove container',
-					})}
-					>
-						<IconContainer
-							onClick={(event) => {
-								event.stopPropagation();
-								removeContainer(container);
-							}}
+				iconButton={({ container }: IconButtonProps) =>
+					(
+						<Tooltip title={formatMessage({
+							id: 'modal.editFederation.available.remove.tooltip',
+							defaultMessage: 'Remove container',
+						})}
 						>
-							<RemoveIcon />
-						</IconContainer>
-					</Tooltip>
-				)}
+							<IconContainer
+								onClick={(event) => {
+									event.stopPropagation();
+									removeContainer(container);
+								}}
+							>
+								<RemoveIcon />
+							</IconContainer>
+						</Tooltip>
+					)}
 			/>
 			<Divider />
 			<EditFederationContainers
@@ -197,36 +208,39 @@ export const EditFederationModal = ({
 						/>
 					</DashboardListEmptyText>
 				)}
-				actionButton={({ children, disabled, filterQuery }) => (
-					<Button
-						variant="outlined"
-						color="primary"
-						onClick={() => includeAllContainers(filterQuery)}
-						disabled={disabled}
-					>
-						{children}
-					</Button>
-				)}
+				actionButton={({ children, disabled, filterQuery }) =>
+					(
+						<Button
+							variant="outlined"
+							color="primary"
+							onClick={() =>
+								includeAllContainers(filterQuery)}
+							disabled={disabled}
+						>
+							{children}
+						</Button>
+					)}
 				actionButtonTexts={{
 					allResults: <FormattedMessage id="modal.editFederation.available.includeAll" defaultMessage="Include all" />,
 					filteredResults: <FormattedMessage id="modal.editFederation.available.includeShown" defaultMessage="Include shown" />,
 				}}
-				iconButton={({ container, isSelected }: IconButtonProps) => (
-					<Tooltip title={formatMessage({
-						id: 'modal.editFederation.available.include.tooltip',
-						defaultMessage: 'Include container',
-					})}
-					>
-						<IconContainer
-							onClick={(event) => {
-								event.stopPropagation();
-								includeContainer(container);
-							}}
+				iconButton={({ container, isSelected }: IconButtonProps) =>
+					(
+						<Tooltip title={formatMessage({
+							id: 'modal.editFederation.available.include.tooltip',
+							defaultMessage: 'Include container',
+						})}
 						>
-							<IncludeIcon isSelected={isSelected} />
-						</IconContainer>
-					</Tooltip>
-				)}
+							<IconContainer
+								onClick={(event) => {
+									event.stopPropagation();
+									includeContainer(container);
+								}}
+							>
+								<IncludeIcon isSelected={isSelected} />
+							</IconContainer>
+						</Tooltip>
+					)}
 			/>
 		</FormModal>
 	);

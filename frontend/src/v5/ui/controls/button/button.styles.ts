@@ -23,82 +23,109 @@ export const MuiButton = styled(MuiButtonBase)`
 `;
 
 export const labelButtonPrimaryStyles = css`
-	color: ${({ theme }) => theme.palette.primary.contrast};
-	background-color: ${({ theme }) => theme.palette.primary.main};
+	color: ${({ theme }) =>
+		theme.palette.primary.contrast};
+	background-color: ${({ theme }) =>
+		theme.palette.primary.main};
 
 	&.Mui-focusVisible {
-		background-color: ${({ theme }) => theme.palette.primary.main};
+		background-color: ${({ theme }) =>
+		theme.palette.primary.main};
 	}
 
 	&:hover {
-		background-color: ${({ theme }) => theme.palette.primary.dark};
+		background-color: ${({ theme }) =>
+		theme.palette.primary.dark};
 		text-decoration-line: none;
 	}
 
 	&:active {
-		background-color: ${({ theme }) => theme.palette.primary.darkest};
+		background-color: ${({ theme }) =>
+		theme.palette.primary.darkest};
 	}
 `;
 
 export const labelButtonSecondaryStyles = css`
-	color: ${({ theme }) => theme.palette.tertiary.main};
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	color: ${({ theme }) =>
+		theme.palette.tertiary.main};
+	background-color: ${({ theme }) =>
+		theme.palette.tertiary.lightest};
 
 	&.Mui-focusVisible {
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+		background-color: ${({ theme }) =>
+		theme.palette.tertiary.lightest};
 	}
 
 	&:hover {
-		background-color: ${({ theme }) => theme.palette.tertiary.main};
+		background-color: ${({ theme }) =>
+		theme.palette.tertiary.main};
 		text-decoration-line: none;
-		color: ${({ theme }) => theme.palette.primary.contrast};
+		color: ${({ theme }) =>
+		theme.palette.primary.contrast};
 	}
 
 	&:active {
-		background-color: ${({ theme }) => theme.palette.tertiary.dark};
-		color: ${({ theme }) => theme.palette.primary.contrast};
+		background-color: ${({ theme }) =>
+		theme.palette.tertiary.dark};
+		color: ${({ theme }) =>
+		theme.palette.primary.contrast};
 	}
 `;
 
 export const labelOutlinedButtonPrimaryStyles = css`
-	color: ${({ theme }) => theme.palette.primary.main};
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	border: 1px solid ${({ theme }) => theme.palette.primary.main};
+	color: ${({ theme }) =>
+		theme.palette.primary.main};
+	background-color: ${({ theme }) =>
+		theme.palette.primary.contrast};
+	border: 1px solid ${({ theme }) =>
+		theme.palette.primary.main};
 
 	&:hover {
-		color: ${({ theme }) => theme.palette.primary.contrast};
-		border-color: ${({ theme }) => theme.palette.primary.dark};
+		color: ${({ theme }) =>
+		theme.palette.primary.contrast};
+		border-color: ${({ theme }) =>
+		theme.palette.primary.dark};
 	}
 
 	&:active {
-		border-color: ${({ theme }) => theme.palette.primary.darkest};
+		border-color: ${({ theme }) =>
+		theme.palette.primary.darkest};
 	}
 
 	&.Mui-focusVisible {
-		color: ${({ theme }) => theme.palette.primary.main};
-		background-color: ${({ theme }) => theme.palette.primary.contast};
+		color: ${({ theme }) =>
+		theme.palette.primary.main};
+		background-color: ${({ theme }) =>
+		theme.palette.primary.contast};
 	}
 
 	&:disabled {
-		border-color: ${({ theme }) => theme.palette.base.lightest};
+		border-color: ${({ theme }) =>
+		theme.palette.base.lightest};
 	}
 `;
 
 export const labelOutlinedButtonSecondaryStyles = css`
-	color: ${({ theme }) => theme.palette.tertiary.main};
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	border: 1px solid ${({ theme }) => theme.palette.tertiary.main};
+	color: ${({ theme }) =>
+		theme.palette.tertiary.main};
+	background-color: ${({ theme }) =>
+		theme.palette.primary.contrast};
+	border: 1px solid ${({ theme }) =>
+		theme.palette.tertiary.main};
 
 	:active {
-		border-color: ${({ theme }) => theme.palette.tertiary.dark};
+		border-color: ${({ theme }) =>
+		theme.palette.tertiary.dark};
 	}
 
 	&.Mui-focusVisible {
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+		background-color: ${({ theme }) =>
+		theme.palette.tertiary.lightest};
 	}
 
 	&:disabled {
-		border-color: ${({ theme }) => theme.palette.base.lightest};
+		border-color: ${({ theme }) =>
+		theme.palette.base.lightest};
 	}
 `;
 
@@ -106,7 +133,8 @@ export const LabelButton = styled(MuiButton)`
 	align-items: center;
 	padding: 8px 12px 8px 15px;
 
-	${({ theme }) => css`
+	${({ theme }) =>
+		css`
 		&:disabled {
 			background-color: ${theme.palette.base.lightest};
 			color: ${theme.palette.primary.contrast};
@@ -142,22 +170,30 @@ export const ErrorButton = styled(MuiButton).attrs({
 	variant: 'outlined',
 })`
 	height: 35px;
-	color: ${({ theme }) => theme.palette.error.main};
-	border-color: ${({ theme }) => theme.palette.error.main};
+	color: ${({ theme }) =>
+		theme.palette.error.main};
+	border-color: ${({ theme }) =>
+		theme.palette.error.main};
 
 	&.Mui-focusVisible {
-		background-color: ${({ theme }) => theme.palette.error.main};
+		background-color: ${({ theme }) =>
+		theme.palette.error.main};
 	}
 
 	&:hover {
-		color: ${({ theme }) => theme.palette.error.contrastText};
-		background-color: ${({ theme }) => theme.palette.error.main};
+		color: ${({ theme }) =>
+		theme.palette.error.contrastText};
+		background-color: ${({ theme }) =>
+		theme.palette.error.main};
 		text-decoration-line: none;
 	}
 
 	&:active {
-		color: ${({ theme }) => theme.palette.error.contrastText};
-		border-color: ${({ theme }) => theme.palette.error.dark};
-		background-color: ${({ theme }) => theme.palette.error.dark};
+		color: ${({ theme }) =>
+		theme.palette.error.contrastText};
+		border-color: ${({ theme }) =>
+		theme.palette.error.dark};
+		background-color: ${({ theme }) =>
+		theme.palette.error.dark};
 	}
 `;

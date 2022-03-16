@@ -23,10 +23,11 @@ type FormTextFieldUnitProps = Omit<FormTextFieldProps, 'label'> & {
 	labelUnit: string;
 };
 
-export const FormTextFieldUnit = ({ labelName, labelUnit, ...otherProps }: FormTextFieldUnitProps) => (
-	<UnitTextField
-		$labelName={labelName}
-		$labelUnit={labelUnit}
-		{...otherProps}
-	/>
-);
+export const FormTextFieldUnit = ({ labelName, labelUnit, ...otherProps }: FormTextFieldUnitProps) =>
+	(
+		<UnitTextField
+			$labelName={labelName}
+			$labelUnit={labelUnit}
+			{...otherProps}
+		/>
+	);

@@ -17,5 +17,6 @@
 import styled from 'styled-components';
 
 export const SearchPhrase = styled.b`
-	color: ${({ theme }) => theme.palette.secondary.main};
+	color: ${({ theme }) =>
+		theme.palette.secondary.main};
 `;

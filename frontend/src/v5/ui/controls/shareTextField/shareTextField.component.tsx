@@ -59,7 +59,9 @@ export const ShareTextField = ({ label, value, className }: IShareTextField) => 
 			setIsCopying(true);
 		}, IS_COPYING_DURATION_MS);
 	};
-	useEffect(() => () => clearTimeout(isCopiedTimer), []);
+	useEffect(() =>
+		() =>
+			clearTimeout(isCopiedTimer), []);
 	return (
 		<>
 			<CopyToClipboard

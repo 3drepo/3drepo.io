@@ -16,11 +16,14 @@
  */
 import { Route, Switch } from 'react-router-dom';
 
-const appendSlashIfNeeded = (uri) => (uri[uri.length - 1] !== '/' ? `${uri}/` : uri);
+const appendSlashIfNeeded = (uri) =>
+	(uri[uri.length - 1] !== '/' ? `${uri}/` : uri);
 
-export const discardSlash = (uri) => (uri[uri.length - 1] === '/' ? uri.slice(0, -1) : uri);
+export const discardSlash = (uri) =>
+	(uri[uri.length - 1] === '/' ? uri.slice(0, -1) : uri);
 
-export const discardUrlComponent = (uri, component) => discardSlash(uri.replace(component, ''));
+export const discardUrlComponent = (uri, component) =>
+	discardSlash(uri.replace(component, ''));
 
 export const uriCombine = (uri, path) => {
 	let pathname = appendSlashIfNeeded(uri);
@@ -33,17 +36,20 @@ export const uriCombine = (uri, path) => {
 	return val;
 };
 
-const getBaseDomain = () => `${window.location.protocol}//${window.location.hostname}`;
+const getBaseDomain = () =>
+	`${window.location.protocol}//${window.location.hostname}`;
 
-export const viewerShareLink = (teamspace: string, containerOrFederationId: string) => (
-	`${getBaseDomain()}/viewer/${teamspace}/${containerOrFederationId}`
-);
+export const viewerShareLink = (teamspace: string, containerOrFederationId: string) =>
+	(
+		`${getBaseDomain()}/viewer/${teamspace}/${containerOrFederationId}`
+	);
 
-export const RouteExcept = ({ path, exceptPath, children }) => (
-	<Switch>
-		<Route exact path={exceptPath} />
-		<Route path={path}>
-			{children}
-		</Route>
-	</Switch>
-);
+export const RouteExcept = ({ path, exceptPath, children }) =>
+	(
+		<Switch>
+			<Route exact path={exceptPath} />
+			<Route path={path}>
+				{children}
+			</Route>
+		</Switch>
+	);

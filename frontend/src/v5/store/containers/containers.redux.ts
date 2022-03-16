@@ -50,70 +50,77 @@ export const setFavourite = (state = INITIAL_STATE, {
 	projectId,
 	containerId,
 	isFavourite,
-}: SetFavouriteSuccessAction):IContainersState => ({
-	...state,
-	containersByProject: {
-		...state.containersByProject,
-		[projectId]: state.containersByProject[projectId].map((container) => ({
-			...container,
-			isFavourite: container._id === containerId ? isFavourite : container.isFavourite,
-		})),
-	},
-});
+}: SetFavouriteSuccessAction):IContainersState =>
+	({
+		...state,
+		containersByProject: {
+			...state.containersByProject,
+			[projectId]: state.containersByProject[projectId].map((container) =>
+				({
+					...container,
+					isFavourite: container._id === containerId ? isFavourite : container.isFavourite,
+				})),
+		},
+	});
 
 export const fetchContainersSuccess = (state = INITIAL_STATE, {
 	projectId,
 	containers,
-}: FetchContainersSuccessAction): IContainersState => ({
-	...state,
-	containersByProject: {
-		...state.containersByProject,
-		[projectId]: containers,
-	},
-});
+}: FetchContainersSuccessAction): IContainersState =>
+	({
+		...state,
+		containersByProject: {
+			...state.containersByProject,
+			[projectId]: containers,
+		},
+	});
 
 export const fetchStatsSuccess = (state = INITIAL_STATE, {
 	projectId,
 	containerId,
 	containerStats,
-}: FetchContainerStatsSuccessAction): IContainersState => ({
-	...state,
-	containersByProject: {
-		...state.containersByProject,
-		[projectId]: state.containersByProject[projectId].map((container) => {
-			if (containerId !== container._id) return container;
-			return prepareSingleContainerData(container, containerStats);
-		}),
-	},
-});
+}: FetchContainerStatsSuccessAction): IContainersState =>
+	({
+		...state,
+		containersByProject: {
+			...state.containersByProject,
+			[projectId]: state.containersByProject[projectId].map((container) => {
+				if (containerId !== container._id) return container;
+				return prepareSingleContainerData(container, containerStats);
+			}),
+		},
+	});
 
 export const createContainerSuccess = (state = INITIAL_STATE, {
 	projectId,
 	container,
-}: CreateContainerSuccessAction): IContainersState => ({
-	...state,
-	containersByProject: {
-		...state.containersByProject,
-		[projectId]: [
-			...state.containersByProject[projectId],
-			{
-				...container,
-				revisionsCount: 0,
-			},
-		],
-	},
-});
+}: CreateContainerSuccessAction): IContainersState =>
+	({
+		...state,
+		containersByProject: {
+			...state.containersByProject,
+			[projectId]: [
+				...state.containersByProject[projectId],
+				{
+					...container,
+					revisionsCount: 0,
+				},
+			],
+		},
+	});
 
 export const deleteContainerSuccess = (state = INITIAL_STATE, {
 	projectId,
 	containerId,
-}: DeleteContainerSuccessAction): IContainersState => ({
-	...state,
-	containersByProject: {
-		...state.containersByProject,
-		[projectId]: state.containersByProject[projectId].filter((container) => containerId !== container._id),
-	},
-});
+}: DeleteContainerSuccessAction): IContainersState =>
+	({
+		...state,
+		containersByProject: {
+			...state.containersByProject,
+			[projectId]: state.containersByProject[projectId].filter((container) =>
+				containerId !== container._id),
+		},
+	});
 
 export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
 	[ContainersTypes.FETCH_CONTAINERS_SUCCESS]: fetchContainersSuccess,

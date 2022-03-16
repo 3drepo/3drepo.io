@@ -27,19 +27,21 @@ import api from './default';
 
 export const addFavourites = (
 	{ teamspace, projectId, containerId }: FavouritePayload,
-): Promise<AxiosResponse<void>> => (
-	api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites`, {
-		containers: [containerId],
-	})
-);
+): Promise<AxiosResponse<void>> =>
+	(
+		api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites`, {
+			containers: [containerId],
+		})
+	);
 
 export const removeFavourites = (
 	{ teamspace, projectId, containerId }: FavouritePayload,
-): Promise<AxiosResponse<void>> => (
-	api.delete(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites`, {
-		containers: [containerId],
-	})
-);
+): Promise<AxiosResponse<void>> =>
+	(
+		api.delete(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites`, {
+			containers: [containerId],
+		})
+	);
 
 export const fetchContainers = async ({
 	teamspace,
@@ -69,6 +71,7 @@ export const createContainer = async ({
 
 export const deleteContainer = (
 	{ teamspace, projectId, containerId }: DeleteContainerPayload,
-): Promise<AxiosResponse<void>> => (
-	api.delete(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
-);
+): Promise<AxiosResponse<void>> =>
+	(
+		api.delete(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
+	);

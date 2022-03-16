@@ -26,33 +26,34 @@ interface IDeleteModal {
 	message?: string,
 }
 
-export const DeleteModal = ({ onClickConfirm, onClickClose, title, message }: IDeleteModal) => (
-	<Container>
-		<DeleteIcon />
-		<DialogTitle>
-			<FormattedMessage
-				id="deleteModal.header"
-				defaultMessage={title}
-			/>
-		</DialogTitle>
-		<DialogContent>
-			<DialogContentText>
-				{message}
-			</DialogContentText>
-		</DialogContent>
-		<Actions>
-			<Button autoFocus type="submit" onClick={() => { onClickClose(); onClickConfirm(); }} variant="contained" color="primary">
+export const DeleteModal = ({ onClickConfirm, onClickClose, title, message }: IDeleteModal) =>
+	(
+		<Container>
+			<DeleteIcon />
+			<DialogTitle>
 				<FormattedMessage
-					id="deleteModal.action.confirm"
-					defaultMessage="Delete"
+					id="deleteModal.header"
+					defaultMessage={title}
 				/>
-			</Button>
-			<Button onClick={onClickClose} variant="outlined" color="secondary">
-				<FormattedMessage
-					id="deleteModal.action.cancel"
-					defaultMessage="Cancel"
-				/>
-			</Button>
-		</Actions>
-	</Container>
-);
+			</DialogTitle>
+			<DialogContent>
+				<DialogContentText>
+					{message}
+				</DialogContentText>
+			</DialogContent>
+			<Actions>
+				<Button autoFocus type="submit" onClick={() => { onClickClose(); onClickConfirm(); }} variant="contained" color="primary">
+					<FormattedMessage
+						id="deleteModal.action.confirm"
+						defaultMessage="Delete"
+					/>
+				</Button>
+				<Button onClick={onClickClose} variant="outlined" color="secondary">
+					<FormattedMessage
+						id="deleteModal.action.cancel"
+						defaultMessage="Cancel"
+					/>
+				</Button>
+			</Actions>
+		</Container>
+	);

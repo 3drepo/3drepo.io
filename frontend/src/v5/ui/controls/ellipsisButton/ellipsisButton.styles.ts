@@ -24,30 +24,37 @@ export const StyledIconButton = styled(IconButton)`
 	display: flex;
 	align-items: center;
 
-	${({ $isOn }) => $isOn && css`
-			background-color: ${({ theme }) => theme.palette.tertiary.main};
+	${({ $isOn }) =>
+		$isOn && css`
+			background-color: ${({ theme }) =>
+		theme.palette.tertiary.main};
 
 			circle {
-				fill: ${({ theme }) => theme.palette.primary.contrast};
+				fill: ${({ theme }) =>
+		theme.palette.primary.contrast};
 			}
 	`}
 	
 	&:hover {
 		&& {
-			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+			background-color: ${({ theme }) =>
+		theme.palette.tertiary.lightest};
 
 			circle {
-				fill: ${({ theme }) => theme.palette.secondary.main};
+				fill: ${({ theme }) =>
+		theme.palette.secondary.main};
 			}
 		}
 	}
 
 	&:active {
 		&& {
-			background-color: ${({ theme }) => theme.palette.base.lightest};
+			background-color: ${({ theme }) =>
+		theme.palette.base.lightest};
 
 			circle {
-				fill: ${({ theme }) => theme.palette.secondary.main};
+				fill: ${({ theme }) =>
+		theme.palette.secondary.main};
 			}
 		}
 	}
@@ -55,21 +62,25 @@ export const StyledIconButton = styled(IconButton)`
 	&.Mui-focusVisible {
 		&& {
 
-			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+			background-color: ${({ theme }) =>
+		theme.palette.tertiary.lightest};
 
 			circle {
-				fill: ${({ theme }) => theme.palette.secondary.main};
+				fill: ${({ theme }) =>
+		theme.palette.secondary.main};
 			}
 		}
 	}
 
 	:disabled {
 		&& {
-			background-color: ${({ theme }) => theme.palette.primary.contrast};
+			background-color: ${({ theme }) =>
+		theme.palette.primary.contrast};
 
 			svg {
 				circle {
-					fill: ${({ theme }) => theme.palette.secondary.lightest};
+					fill: ${({ theme }) =>
+		theme.palette.secondary.lightest};
 				}
 			}
 		}

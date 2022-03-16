@@ -30,7 +30,8 @@ export const CloseButton = styled(IconButton)`
 		right: 10px;
 
 		svg path {
-			stroke: ${({ theme }) => theme.palette.primary.contrast}
+			stroke: ${({ theme }) =>
+		theme.palette.primary.contrast}
 		}
 	}
 `;
@@ -39,14 +40,16 @@ export const Form = styled.form`
 	display: flex;
 	flex-direction: column;
 	min-width: 520px;
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	background-color: ${({ theme }) =>
+		theme.palette.tertiary.lightest};
 	border-radius: 15px; /* prevents white pixels in corners */
 `;
 
 export const Title = styled(Typography).attrs({
 	variant: 'h2',
 })`
-	color: ${({ theme }) => theme.palette.primary.contrast};
+	color: ${({ theme }) =>
+		theme.palette.primary.contrast};
 	position: relative;
 	line-height: 74px;
 	user-select: none;
@@ -54,18 +57,22 @@ export const Title = styled(Typography).attrs({
 `;
 
 export const FormDialogContent = styled(DialogContent)`
-	margin: ${({ zeroMargin }) => (zeroMargin ? '0' : '20px 34px 43px')};
+	margin: ${({ zeroMargin }) =>
+		(zeroMargin ? '0' : '20px 34px 43px')};
 	display: inline-flex;
 	flex-flow: row wrap;
 `;
 
 export const FormDialogActions = styled(DialogActions)`
-	background: ${({ theme }) => theme.palette.tertiary.lightest};
-	box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
+	background: ${({ theme }) =>
+		theme.palette.tertiary.lightest};
+	box-shadow: ${({ theme }) =>
+		theme.palette.shadows.level_5};
 `;
 
 export const Header = styled.div`
-	background: ${({ theme }) => theme.palette.gradient.secondary};
+	background: ${({ theme }) =>
+		theme.palette.gradient.secondary};
 	height: 74px;
 	align-content: center;
 	display: inline-flex;

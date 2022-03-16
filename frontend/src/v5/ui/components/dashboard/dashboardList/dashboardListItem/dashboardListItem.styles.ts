@@ -23,7 +23,8 @@ export const Container = styled.li`
 	height: 100%;
 	width: 100%;
 	list-style: none;
-	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+	border: 1px solid ${({ theme }) =>
+		theme.palette.base.lightest};
 	border-bottom-style: none;
 
 	&:last-child {
@@ -31,13 +32,15 @@ export const Container = styled.li`
 		border-bottom-style: solid;
 
 		${DashboardListItemRowStyles.Container} {
-			${({ selected }) => selected && css`
+			${({ selected }) =>
+		selected && css`
 				& + * {
 					border-radius: 0 0 5px 5px;
 				}
 			`}
 			
-			${({ selected }) => !selected && css`
+			${({ selected }) =>
+		!selected && css`
 				border-radius: 0 0 5px 5px;
 			`}
 		}
@@ -55,18 +58,21 @@ export const Container = styled.li`
 		border-radius: 5px;
 
 		${DashboardListItemRowStyles.Container} {
-			${({ selected }) => selected && css`
+			${({ selected }) =>
+		selected && css`
 				& + * {
 					border-radius: 0 0 5px 5px;
 				}
 			`}
-			${({ selected }) => !selected && css`
+			${({ selected }) =>
+		!selected && css`
 				border-radius: 5px;
 			`}
 		}
 	}
 
-	${({ selected }) => selected && css`
+	${({ selected }) =>
+		selected && css`
 		border: none !important;
 	`}
 `;

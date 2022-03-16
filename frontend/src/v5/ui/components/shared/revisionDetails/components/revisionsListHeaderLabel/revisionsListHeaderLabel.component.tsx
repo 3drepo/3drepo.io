@@ -25,10 +25,11 @@ type IDashboardListHeaderLabel = IFixedOrGrowContainerProps & {
 	children?: ReactNode;
 };
 
-export const RevisionsListHeaderLabel = ({ children, ...props }: IDashboardListHeaderLabel) => (
-	<Container {...props}>
-		<Typography variant="kicker">
-			{children}
-		</Typography>
-	</Container>
-);
+export const RevisionsListHeaderLabel = ({ children, ...props }: IDashboardListHeaderLabel) =>
+	(
+		<Container {...props}>
+			<Typography variant="kicker">
+				{children}
+			</Typography>
+		</Container>
+	);

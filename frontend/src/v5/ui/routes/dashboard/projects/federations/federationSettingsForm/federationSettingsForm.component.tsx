@@ -195,11 +195,12 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 					control={control}
 					defaultValue={defaultValues.unit}
 				>
-					{UNITS.map(({ name, abbreviation }) => (
-						<MenuItem key={abbreviation} value={abbreviation}>
-							{name}
-						</MenuItem>
-					))}
+					{UNITS.map(({ name, abbreviation }) =>
+						(
+							<MenuItem key={abbreviation} value={abbreviation}>
+								{name}
+							</MenuItem>
+						))}
 				</FormSelect>
 				<FormTextField
 					name="code"

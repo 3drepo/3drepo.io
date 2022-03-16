@@ -28,18 +28,20 @@ export const FormTextField = ({
 	control,
 	formError,
 	...otherProps
-}: FormTextFieldProps) => (
-	<Controller
-		name={name}
-		control={control}
-		render={({ field }) => (
-			<TextField
-				inputRef={field.ref}
-				error={!!formError}
-				helperText={formError?.message}
-				{...field}
-				{...otherProps}
-			/>
-		)}
-	/>
-);
+}: FormTextFieldProps) =>
+	(
+		<Controller
+			name={name}
+			control={control}
+			render={({ field }) =>
+				(
+					<TextField
+						inputRef={field.ref}
+						error={!!formError}
+						helperText={formError?.message}
+						{...field}
+						{...otherProps}
+					/>
+				)}
+		/>
+	);

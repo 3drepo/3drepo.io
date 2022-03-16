@@ -38,16 +38,17 @@ export const RevisionsListItemDate = ({
 	className,
 	active = false,
 	hideWhenSmallerThan,
-}: IDashboardListItemDate): JSX.Element => (
-	<FixedOrGrowContainer
-		width={width}
-		tabletWidth={tabletWidth}
-		mobileWidth={mobileWidth}
-		hideWhenSmallerThan={hideWhenSmallerThan}
-		className={className}
-	>
-		<Text $active={active}>
-			{children}
-		</Text>
-	</FixedOrGrowContainer>
-);
+}: IDashboardListItemDate): JSX.Element =>
+	(
+		<FixedOrGrowContainer
+			width={width}
+			tabletWidth={tabletWidth}
+			mobileWidth={mobileWidth}
+			hideWhenSmallerThan={hideWhenSmallerThan}
+			className={className}
+		>
+			<Text $active={active}>
+				{children}
+			</Text>
+		</FixedOrGrowContainer>
+	);

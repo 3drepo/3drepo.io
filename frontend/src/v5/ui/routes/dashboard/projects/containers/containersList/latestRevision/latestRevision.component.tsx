@@ -26,25 +26,26 @@ interface ILatestRevision extends IRevisionStatus {
 	hasRevisions: boolean;
 }
 
-export const LatestRevision = ({ hasRevisions, status, ...props }: ILatestRevision): JSX.Element => (
-	<Container>
-		{hasRevisions || status === UploadStatuses.UPLOADING ? (
-			<>
+export const LatestRevision = ({ hasRevisions, status, ...props }: ILatestRevision): JSX.Element =>
+	(
+		<Container>
+			{hasRevisions || status === UploadStatuses.UPLOADING ? (
+				<>
+					<Label>
+						<FormattedMessage
+							id="containers.list.item.latestRevision.label"
+							defaultMessage="Latest revision: "
+						/>
+					</Label>
+					<RevisionStatus status={status} {...props} />
+				</>
+			) : (
 				<Label>
 					<FormattedMessage
-						id="containers.list.item.latestRevision.label"
-						defaultMessage="Latest revision: "
+						id="containers.list.item.latestRevision.emptyContainer"
+						defaultMessage="Container empty"
 					/>
 				</Label>
-				<RevisionStatus status={status} {...props} />
-			</>
-		) : (
-			<Label>
-				<FormattedMessage
-					id="containers.list.item.latestRevision.emptyContainer"
-					defaultMessage="Container empty"
-				/>
-			</Label>
-		)}
-	</Container>
-);
+			)}
+		</Container>
+	);

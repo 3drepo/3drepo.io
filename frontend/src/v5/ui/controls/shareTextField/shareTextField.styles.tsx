@@ -39,7 +39,8 @@ export const CopyToClipboardIconContainer = styled.div`
 export const LinkBar = styled(TextField)`
 
 	& > label:not(.Mui-error).Mui-focused {
-		color: ${({ theme }) => theme.palette.base.main};
+		color: ${({ theme }) =>
+		theme.palette.base.main};
 	}
 
 	.MuiInputBase-root {
@@ -48,16 +49,19 @@ export const LinkBar = styled(TextField)`
 		padding-right: ${9 - SVG_PADDING_IN_PX}px;
 
 		&:hover .MuiOutlinedInput-notchedOutline {
-			border-color: ${({ theme }) => theme.palette.base.lightest};
+			border-color: ${({ theme }) =>
+		theme.palette.base.lightest};
 		} 
 
 		&.Mui-focused {
 			input {
-				color: ${({ theme }) => theme.palette.base.main};
+				color: ${({ theme }) =>
+		theme.palette.base.main};
 			}
 			
 			.MuiOutlinedInput-notchedOutline {
-				border-color: ${({ theme }) => theme.palette.base.lightest};
+				border-color: ${({ theme }) =>
+		theme.palette.base.lightest};
 			}
 		}
 
@@ -67,7 +71,8 @@ export const LinkBar = styled(TextField)`
 			padding-right: ${9 - SVG_PADDING_IN_PX}px;
 	
 			&:active {
-				color: ${({ theme }) => theme.palette.base.main};
+				color: ${({ theme }) =>
+		theme.palette.base.main};
 			}
 		}
 	}
@@ -77,26 +82,29 @@ export const LinkBar = styled(TextField)`
 	}
 
 	&:hover ${CopyToClipboardIcon} {
-		fill: ${({ theme }) => theme.palette.primary.main};
+		fill: ${({ theme }) =>
+		theme.palette.primary.main};
 	}
 `;
 
 export const CopyToClipboardTooltip = styled(
-	({ className, theme, ...props }: TooltipProps & { theme: any }) => (
-		<Tooltip
-			{...props}
-			PopperProps={{ keepMounted: true }}
-			classes={{ popper: className }}
-		>
-			{props.children}
-		</Tooltip>
-	),
+	({ className, theme, ...props }: TooltipProps & { theme: any }) =>
+		(
+			<Tooltip
+				{...props}
+				PopperProps={{ keepMounted: true }}
+				classes={{ popper: className }}
+			>
+				{props.children}
+			</Tooltip>
+		),
 )`
 	margin-top: -${SVG_PADDING_IN_PX}px;
 `;
 
 export const CopiedToClipboardTooltip = styled(CopyToClipboardTooltip)`
 	& .MuiTooltip-tooltip {
-		background-color: ${({ theme }) => theme.palette.primary.main};
+		background-color: ${({ theme }) =>
+		theme.palette.primary.main};
 	}
 `;

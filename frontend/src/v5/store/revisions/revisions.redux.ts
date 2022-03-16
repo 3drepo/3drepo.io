@@ -36,35 +36,39 @@ export const setVoidStatusSuccess = (state = INITIAL_STATE, {
 	containerId,
 	revisionId,
 	isVoid,
-}): IRevisionsState => ({
-	...state,
-	revisionsByContainer: {
-		...state.revisionsByContainer,
-		[containerId]: state.revisionsByContainer[containerId].map((revision) => ({
-			...revision,
-			void: [revision.tag, revision._id].includes(revisionId) ? isVoid : revision.void,
-		})),
-	},
-});
+}): IRevisionsState =>
+	({
+		...state,
+		revisionsByContainer: {
+			...state.revisionsByContainer,
+			[containerId]: state.revisionsByContainer[containerId].map((revision) =>
+				({
+					...revision,
+					void: [revision.tag, revision._id].includes(revisionId) ? isVoid : revision.void,
+				})),
+		},
+	});
 
 export const fetchSuccess = (state = INITIAL_STATE, {
 	containerId,
 	revisions,
-}): IRevisionsState => ({
-	...state,
-	revisionsByContainer: {
-		...state.revisionsByContainer,
-		[containerId]: revisions,
-	},
-});
+}): IRevisionsState =>
+	({
+		...state,
+		revisionsByContainer: {
+			...state.revisionsByContainer,
+			[containerId]: revisions,
+		},
+	});
 
-export const setIsPending = (state = INITIAL_STATE, { isPending, containerId }): IRevisionsState => ({
-	...state,
-	isPending: {
-		...state.isPending,
-		[containerId]: isPending,
-	},
-});
+export const setIsPending = (state = INITIAL_STATE, { isPending, containerId }): IRevisionsState =>
+	({
+		...state,
+		isPending: {
+			...state.isPending,
+			[containerId]: isPending,
+		},
+	});
 
 export const reducer = createReducer<IRevisionsState>(INITIAL_STATE, {
 	[RevisionsTypes.FETCH_SUCCESS]: fetchSuccess,

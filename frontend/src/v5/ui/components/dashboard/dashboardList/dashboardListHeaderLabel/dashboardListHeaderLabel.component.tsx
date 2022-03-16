@@ -35,25 +35,26 @@ export const DashboardListHeaderLabel = ({
 	onClick,
 	sort = false,
 	...containerProps
-}: IDashboardListHeaderLabel): JSX.Element => (
-	<Container
-		{...containerProps}
-	>
-		{sort ? (
-			<Button onClick={onClick}>
+}: IDashboardListHeaderLabel): JSX.Element =>
+	(
+		<Container
+			{...containerProps}
+		>
+			{sort ? (
+				<Button onClick={onClick}>
+					<Label>
+						{children}
+					</Label>
+					{sortingDirection && (
+						<Indicator sortingDirection={sortingDirection}>
+							<ArrowIcon />
+						</Indicator>
+					)}
+				</Button>
+			) : (
 				<Label>
 					{children}
 				</Label>
-				{sortingDirection && (
-					<Indicator sortingDirection={sortingDirection}>
-						<ArrowIcon />
-					</Indicator>
-				)}
-			</Button>
-		) : (
-			<Label>
-				{children}
-			</Label>
-		)}
-	</Container>
-);
+			)}
+		</Container>
+	);

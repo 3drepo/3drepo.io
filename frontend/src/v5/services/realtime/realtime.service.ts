@@ -32,8 +32,9 @@ export enum SocketEvents {
 let socket:Socket = null;
 const roomsJoined:Record<string, number> = {};
 
-const roomTypeToId = (roomType:IRoomType) => (roomType.notifications ? 'notifications'
-	: JSON.stringify(roomType, Object.keys(roomType).sort()));
+const roomTypeToId = (roomType:IRoomType) =>
+	(roomType.notifications ? 'notifications'
+		: JSON.stringify(roomType, Object.keys(roomType).sort()));
 
 const idToRoomType = (id: string): IRoomType => {
 	if (id === 'notifications') return { notifications: true };
@@ -127,4 +128,5 @@ export const subscribeToSocketEvent = (socketEvent:SocketEvents, callback) => {
 	};
 };
 
-export const getSocketId = () => socket.id;
+export const getSocketId = () =>
+	socket.id;

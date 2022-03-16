@@ -21,31 +21,38 @@ import { Checkbox as CheckboxComponent } from '@material-ui/core';
 const contrastStyles = css`
 	path {
 		fill: none;
-		stroke: ${({ theme }) => theme.palette.secondary.light};
+		stroke: ${({ theme }) =>
+		theme.palette.secondary.light};
 	}
 
 	&:hover {
 		&& {
-			background-color: ${({ theme }) => theme.palette.primary.contrast};
+			background-color: ${({ theme }) =>
+		theme.palette.primary.contrast};
 		}
 	}
 
 	&.Mui-focusVisible {
 		&& {
-			border: 1px solid ${({ theme }) => theme.palette.primary.main};
+			border: 1px solid ${({ theme }) =>
+		theme.palette.primary.main};
 			path {
-				fill: ${({ theme }) => theme.palette.primary.main};
+				fill: ${({ theme }) =>
+		theme.palette.primary.main};
 			}
 		}
 	}
 
 	&:active {
 		&& {
-			background-color: ${({ theme }) => theme.palette.secondary.light};
-			border-color: ${({ theme }) => theme.palette.secondary.light};
+			background-color: ${({ theme }) =>
+		theme.palette.secondary.light};
+			border-color: ${({ theme }) =>
+		theme.palette.secondary.light};
 
 			path {
-				fill: ${({ theme }) => theme.palette.secondary.main};
+				fill: ${({ theme }) =>
+		theme.palette.secondary.main};
 			}
 		}
 	}
@@ -61,36 +68,45 @@ export const Checkbox = styled(CheckboxComponent)`
 
 			path {
 				fill: none;
-				stroke: ${({ theme }) => theme.palette.secondary.light};
+				stroke: ${({ theme }) =>
+		theme.palette.secondary.light};
 			}
 		}
 
 		&.Mui-checked {
 			path {
-				fill: ${({ theme }) => theme.palette.favourite.main};
-				stroke: ${({ theme }) => theme.palette.favourite.main};
+				fill: ${({ theme }) =>
+		theme.palette.favourite.main};
+				stroke: ${({ theme }) =>
+		theme.palette.favourite.main};
 			}
 		}
 
 		&.Mui-focusVisible {
-			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+			background-color: ${({ theme }) =>
+		theme.palette.tertiary.lightest};
 		}
 
 		&:hover {
-			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+			background-color: ${({ theme }) =>
+		theme.palette.tertiary.lightest};
 		}
 
 		&:active {
-			background-color: ${({ theme }) => theme.palette.base.lightest};
+			background-color: ${({ theme }) =>
+		theme.palette.base.lightest};
 		}
 
 		&.Mui-disabled {
 			path {
-				fill: ${({ theme }) => theme.palette.secondary.lightest};
-				stroke: ${({ theme }) => theme.palette.secondary.lightest};
+				fill: ${({ theme }) =>
+		theme.palette.secondary.lightest};
+				stroke: ${({ theme }) =>
+		theme.palette.secondary.lightest};
 			}
 		}
 	}
 
-	${({ selected }) => selected && contrastStyles}
+	${({ selected }) =>
+		selected && contrastStyles}
 `;

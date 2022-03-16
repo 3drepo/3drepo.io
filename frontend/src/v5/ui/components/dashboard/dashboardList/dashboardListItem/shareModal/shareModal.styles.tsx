@@ -17,9 +17,12 @@
 import styled from 'styled-components';
 
 export const MailToButton = styled.a`
-	${({ theme }) => theme.typography.link};
-	color: ${({ theme }) => theme.palette.base.main};
-	font-family: ${({ theme }) => theme.typography.fontFamily};
+	${({ theme }) =>
+		theme.typography.link};
+	color: ${({ theme }) =>
+		theme.palette.base.main};
+	font-family: ${({ theme }) =>
+		theme.typography.fontFamily};
 	margin-top: 20px;
 	width: fit-content;
 `;

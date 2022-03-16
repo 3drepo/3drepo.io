@@ -66,30 +66,32 @@ export const EllipsisMenu = ({ children }: IEllipsisMenu): JSX.Element => {
 				disablePortal
 				placement="bottom-end"
 			>
-				{({ TransitionProps, placement }) => (
-					<Grow
-						{...TransitionProps}
-						style={{ transformOrigin: placement === 'bottom-end' ? 'center top' : 'center bottom' }}
-					>
-						<Paper>
-							<ClickAwayListener onClickAway={handleCloseDropdown}>
-								<MenuList autoFocusItem={Boolean(anchorEl)} id="ellipsis-menu-list" onKeyDown={handleListKeyDown}>
-									{children.map((child) => (
-										cloneElement(child, {
-											...child.props,
-											key: child.props.title,
-											onClick: (event) => {
-												event.stopPropagation();
-												child.props.onClick?.call(event);
-												handleCloseDropdown();
-											},
-										})
-									))}
-								</MenuList>
-							</ClickAwayListener>
-						</Paper>
-					</Grow>
-				)}
+				{({ TransitionProps, placement }) =>
+					(
+						<Grow
+							{...TransitionProps}
+							style={{ transformOrigin: placement === 'bottom-end' ? 'center top' : 'center bottom' }}
+						>
+							<Paper>
+								<ClickAwayListener onClickAway={handleCloseDropdown}>
+									<MenuList autoFocusItem={Boolean(anchorEl)} id="ellipsis-menu-list" onKeyDown={handleListKeyDown}>
+										{children.map((child) =>
+											(
+												cloneElement(child, {
+													...child.props,
+													key: child.props.title,
+													onClick: (event) => {
+														event.stopPropagation();
+														child.props.onClick?.call(event);
+														handleCloseDropdown();
+													},
+												})
+											))}
+									</MenuList>
+								</ClickAwayListener>
+							</Paper>
+						</Grow>
+					)}
 			</Popper>
 		</>
 	);

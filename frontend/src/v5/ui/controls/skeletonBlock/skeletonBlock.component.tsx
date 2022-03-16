@@ -28,6 +28,7 @@ export const SkeletonBlock = ({
 	delay = 0,
 	width = 100,
 	widthPercentage,
-}: ISkeletonBlock): JSX.Element => (
-	<Block className={className} delay={delay} width={width} widthPercentage={widthPercentage} />
-);
+}: ISkeletonBlock): JSX.Element =>
+	(
+		<Block className={className} delay={delay} width={width} widthPercentage={widthPercentage} />
+	);

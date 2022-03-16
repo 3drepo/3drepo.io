@@ -31,14 +31,17 @@ export default {
 	},
 	parameters: {
 		docs: {
-			transformSource: (source) => source.replace(/__WEBPACK_DEFAULT_EXPORT__/g, 'Icon'),
+			transformSource: (source) =>
+				source.replace(/__WEBPACK_DEFAULT_EXPORT__/g, 'Icon'),
 		},
 	},
 } as ComponentMeta<typeof Button>;
 
-const TemplateIntercom: ComponentStory<typeof Button> = (args) => <Button {...args}><IntercomIcon /></Button>;
-const TemplateNotifications: ComponentStory<typeof Button> = (args) => (
-	<Button {...args}><NotificationsIcon /></Button>);
+const TemplateIntercom: ComponentStory<typeof Button> = (args) =>
+	<Button {...args}><IntercomIcon /></Button>;
+const TemplateNotifications: ComponentStory<typeof Button> = (args) =>
+	(
+		<Button {...args}><NotificationsIcon /></Button>);
 
 export const IntercomMain = TemplateIntercom.bind({});
 IntercomMain.args = {

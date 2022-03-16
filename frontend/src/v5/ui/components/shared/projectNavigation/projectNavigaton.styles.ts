@@ -37,9 +37,12 @@ export const Link = styled(LinkComponent).attrs({
 		margin-right: 13px;
 		padding-top: 4px;
 		height: 56px;
-		color: ${({ theme }) => theme.palette.base.main};
-		font-family: ${({ theme }) => theme.typography.fontFamily};
-		${({ theme }) => theme.typography.kickerTitle};
+		color: ${({ theme }) =>
+		theme.palette.base.main};
+		font-family: ${({ theme }) =>
+		theme.typography.fontFamily};
+		${({ theme }) =>
+		theme.typography.kickerTitle};
 
 		&:first-child {
 			margin-left: 0;
@@ -47,7 +50,8 @@ export const Link = styled(LinkComponent).attrs({
 
 		&:hover {
 			text-decoration: none;
-			color: ${({ theme }) => theme.palette.primary.main};
+			color: ${({ theme }) =>
+		theme.palette.primary.main};
 		}
 
 		&.Mui-focusVisible {
@@ -56,9 +60,11 @@ export const Link = styled(LinkComponent).attrs({
 		}
 	}
 
-	${({ disabled }) => disabled && css`
+	${({ disabled }) =>
+		disabled && css`
 		&& {
-			color: ${({ theme }) => theme.palette.base.light};
+			color: ${({ theme }) =>
+		theme.palette.base.light};
 			pointer-events: none;
 		}
 	`};
@@ -66,7 +72,8 @@ export const Link = styled(LinkComponent).attrs({
 	&.active {
 		&::after {
 			content: '';
-			background-color: ${({ theme }) => theme.palette.primary.main};
+			background-color: ${({ theme }) =>
+		theme.palette.primary.main};
 			display: block;
 			height: 4px;
 			width: 100%;

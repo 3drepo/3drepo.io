@@ -27,7 +27,8 @@ export const ActionMenuSection = styled.div`
 	padding: 11px;
 
 	&:not(:last-of-type) {
-		border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
+		border-bottom: 1px solid ${({ theme }) =>
+		theme.palette.base.lightest};
 	}
 `;
 

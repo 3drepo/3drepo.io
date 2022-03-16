@@ -26,6 +26,7 @@ export const Container = styled(DashboardListItemStyles.Container)`
 	padding-left: 30px;
 	padding-right: 10px;
 	cursor: pointer;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	background-color: ${({ theme }) =>
+		theme.palette.primary.contrast};
 	margin-bottom: 2px;
 `;

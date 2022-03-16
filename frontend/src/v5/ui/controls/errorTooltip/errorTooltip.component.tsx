@@ -23,15 +23,16 @@ interface IErrorTooltip {
 	children: ReactNode;
 }
 
-export const ErrorTooltip = ({ children }: IErrorTooltip): JSX.Element => (
-	<Container>
-		<Tooltip
-			placement="right-start"
-			title={children}
-		>
-			<IconWrapper>
-				<ErrorCircleIcon />
-			</IconWrapper>
-		</Tooltip>
-	</Container>
-);
+export const ErrorTooltip = ({ children }: IErrorTooltip): JSX.Element =>
+	(
+		<Container>
+			<Tooltip
+				placement="right-start"
+				title={children}
+			>
+				<IconWrapper>
+					<ErrorCircleIcon />
+				</IconWrapper>
+			</Tooltip>
+		</Container>
+	);

@@ -34,12 +34,13 @@ export const TeamspacesList = (): JSX.Element => {
 				<FormattedMessage id="dashboard.teamspacesList.header" defaultMessage="Teamspaces" />
 				{
 					teamspaces.length ? (
-						teamspaces.map((teamspace) => (
-							<TeamspaceListItem
-								key={teamspace.name}
-								name={teamspace.name}
-							/>
-						))
+						teamspaces.map((teamspace) =>
+							(
+								<TeamspaceListItem
+									key={teamspace.name}
+									name={teamspace.name}
+								/>
+							))
 					) : (
 						<DashboardListEmptyContainer>
 							<FormattedMessage

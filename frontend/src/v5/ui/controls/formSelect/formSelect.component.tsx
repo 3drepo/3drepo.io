@@ -28,29 +28,31 @@ export const FormSelect = ({
 	children,
 	control,
 	...otherProps
-}: FormSelectProps) => (
-	<FormControl>
-		<InputLabel
-			id={`${name}-label`}
-			required={required}
-		>
-			{label}
-		</InputLabel>
-		<Controller
-			control={control}
-			name={name}
-			render={({ field }) => (
-				<Select
-					{...field}
-					inputRef={field.ref}
-					labelId={`${name}-label`}
-					id={name}
-					label={label}
-					{...otherProps}
-				>
-					{children}
-				</Select>
-			)}
-		/>
-	</FormControl>
-);
+}: FormSelectProps) =>
+	(
+		<FormControl>
+			<InputLabel
+				id={`${name}-label`}
+				required={required}
+			>
+				{label}
+			</InputLabel>
+			<Controller
+				control={control}
+				name={name}
+				render={({ field }) =>
+					(
+						<Select
+							{...field}
+							inputRef={field.ref}
+							labelId={`${name}-label`}
+							id={name}
+							label={label}
+							{...otherProps}
+						>
+							{children}
+						</Select>
+					)}
+			/>
+		</FormControl>
+	);

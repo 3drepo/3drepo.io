@@ -71,7 +71,8 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 
 		yield all(
 			containers.map(
-				(container) => put(ContainersActions.fetchContainerStats(teamspace, projectId, container._id)),
+				(container) =>
+					put(ContainersActions.fetchContainerStats(teamspace, projectId, container._id)),
 			),
 		);
 	} catch (error) {

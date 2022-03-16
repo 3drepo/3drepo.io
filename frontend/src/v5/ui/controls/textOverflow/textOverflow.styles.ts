@@ -17,18 +17,20 @@
 import styled from 'styled-components';
 import { Tooltip as TooltipComponent, withStyles, fade } from '@material-ui/core';
 
-export const fadeToLeft = (color: string) => `
+export const fadeToLeft = (color: string) =>
+	`
 	background-image: linear-gradient(to left, ${color} 0%, ${fade(color, 0.886)} 37.72%, ${fade(color, 0)} 52.55%);
 `;
 
-export const Tooltip = withStyles(() => ({
-	tooltip: {
-		maxWidth: 600,
-	},
-	tooltipPlacementBottom: {
-		transform: 'translateX(25%) !important',
-	},
-}))(TooltipComponent);
+export const Tooltip = withStyles(() =>
+	({
+		tooltip: {
+			maxWidth: 600,
+		},
+		tooltipPlacementBottom: {
+			transform: 'translateX(25%) !important',
+		},
+	}))(TooltipComponent);
 
 export const Container = styled.div`
 	position: relative;

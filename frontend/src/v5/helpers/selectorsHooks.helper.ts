@@ -26,7 +26,9 @@ type NameMap<Type> = {
 export const createHooksSelectors = <T>(moduleSelectors: T): NameMap<T> => {
 	const exportObject = {};
 	Object.keys(moduleSelectors).forEach((key) => {
-		exportObject[key] = (...parameters) => useSelector((state) => moduleSelectors[key](state, ...parameters));
+		exportObject[key] = (...parameters) =>
+			useSelector((state) =>
+				moduleSelectors[key](state, ...parameters));
 	});
 
 	return exportObject as NameMap<T>;

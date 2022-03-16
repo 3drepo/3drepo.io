@@ -26,10 +26,12 @@ export const DashboardListItemIcon = styled.div`
 		margin: 0;
 	}
 	
-	${({ selected }) => selected && css`
+	${({ selected }) =>
+		selected && css`
 		${EllipsisButtonStyles.StyledIconButton} {
 			circle {
-				fill: ${({ theme }) => theme.palette.primary.contrast};
+				fill: ${({ theme }) =>
+		theme.palette.primary.contrast};
 			}
 		}
 	`}

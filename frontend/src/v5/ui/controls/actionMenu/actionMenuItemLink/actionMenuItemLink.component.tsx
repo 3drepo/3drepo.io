@@ -24,16 +24,17 @@ type ActionMenuItemLinkProps = {
 	children?: React.ReactNode;
 };
 
-export const ActionMenuItemLink = ({ Icon, to, children, ...otherProps }: ActionMenuItemLinkProps) => (
-	<ActionMenuItem {...otherProps}>
-		<Link to={to}>
-			{Icon && (
-				<ItemIcon>
-					<Icon />
-				</ItemIcon>
-			)}
-			<ItemText>{children}</ItemText>
-		</Link>
-	</ActionMenuItem>
-);
+export const ActionMenuItemLink = ({ Icon, to, children, ...otherProps }: ActionMenuItemLinkProps) =>
+	(
+		<ActionMenuItem {...otherProps}>
+			<Link to={to}>
+				{Icon && (
+					<ItemIcon>
+						<Icon />
+					</ItemIcon>
+				)}
+				<ItemText>{children}</ItemText>
+			</Link>
+		</ActionMenuItem>
+	);
 ActionMenuItemLink.isActionMenuClosingElement = true;

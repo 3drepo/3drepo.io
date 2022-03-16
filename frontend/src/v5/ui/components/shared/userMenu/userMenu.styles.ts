@@ -35,22 +35,27 @@ export const AvatarSection = styled.div`
 `;
 
 export const UserFullName = styled.div`
-	${({ theme }) => theme.typography.h3};
-	color: ${({ theme }) => theme.palette.secondary.main};
+	${({ theme }) =>
+		theme.typography.h3};
+	color: ${({ theme }) =>
+		theme.palette.secondary.main};
 `;
 
 export const UserUserName = styled.div`
 	font-size: 12px;
-	color: ${({ theme }) => theme.palette.base.main};
+	color: ${({ theme }) =>
+		theme.palette.base.main};
 	margin-bottom: 11px;
 `;
 
 export const EditProfileButton = styled(Link)`
 	cursor: pointer;
-	color: ${({ theme }) => theme.palette.primary.main};
+	color: ${({ theme }) =>
+		theme.palette.primary.main};
 	width: 100%;
 	text-align: center;
-	${({ theme }) => theme.typography.link};
+	${({ theme }) =>
+		theme.typography.link};
 	text-underline-offset: 2px;
 `;
 

@@ -23,7 +23,8 @@ export const SectionTitle = styled(Typography).attrs({
 	variant: 'h5',
 })`
 	margin-top: 11px;
-	color: ${({ theme }) => theme.palette.secondary.main};
+	color: ${({ theme }) =>
+		theme.palette.secondary.main};
 
 	&:not(:first-of-type) {
 		margin-top: 38px;
@@ -50,7 +51,8 @@ export const ShareTextField = styled(ShareTextFieldBase)`
 	& > label:not(.Mui-error) {
 		&,
 		&.Mui-focused {
-			color: ${({ theme }) => theme.palette.base.light};
+			color: ${({ theme }) =>
+		theme.palette.base.light};
 		}
 	}
 `;
@@ -69,7 +71,8 @@ export const Thumbnail = styled.img`
 
 export const ThumbnailPlaceholder = styled.div`
 	${ThumbnailStyles};
-	background-color: ${({ theme }) => theme.palette.base.light};
+	background-color: ${({ theme }) =>
+		theme.palette.base.light};
 `;
 
 export const ViewLabel = styled.div`

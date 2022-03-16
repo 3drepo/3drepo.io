@@ -23,13 +23,15 @@ interface IHighlight {
 	search: string;
 }
 
-const HighlightTag = (props) => <Tag {...props} />;
+const HighlightTag = (props) =>
+	<Tag {...props} />;
 
-export const Highlight = ({ search, children = '' }: IHighlight): JSX.Element => (
-	<Highlighter
-		searchWords={[trim(search)]}
-		autoEscape
-		textToHighlight={children}
-		highlightTag={HighlightTag}
-	/>
-);
+export const Highlight = ({ search, children = '' }: IHighlight): JSX.Element =>
+	(
+		<Highlighter
+			searchWords={[trim(search)]}
+			autoEscape
+			textToHighlight={children}
+			highlightTag={HighlightTag}
+		/>
+	);

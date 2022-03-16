@@ -27,9 +27,11 @@ export const Name = styled(Typography).attrs({
 `;
 
 export const QueuedStatus = styled(Name)`
-	color: ${({ theme }) => theme.palette.favourite.dark};
+	color: ${({ theme }) =>
+		theme.palette.favourite.dark};
 `;
 
 export const ProcessingStatus = styled(Name)`
-	color: ${({ theme }) => theme.palette.primary.main};
+	color: ${({ theme }) =>
+		theme.palette.primary.main};
 `;

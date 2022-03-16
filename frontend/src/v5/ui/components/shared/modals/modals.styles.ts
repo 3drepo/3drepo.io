@@ -29,7 +29,8 @@ export const Container = styled.div`
 
 export const Actions = styled.div`
 	display: flex;
-	${({ bottomMargin }) => bottomMargin && css`
+	${({ bottomMargin }) =>
+		bottomMargin && css`
 		margin-bottom: 25px;
 	`}
 `;
@@ -39,7 +40,8 @@ export const Details = styled(Typography).attrs({
 })`
 	margin-top: 5px;
 	margin-bottom: 25px;
-	color: ${({ theme }) => theme.palette.base.main};
+	color: ${({ theme }) =>
+		theme.palette.base.main};
 `;
 
 export const Status = styled(Typography).attrs({
@@ -49,5 +51,6 @@ export const Status = styled(Typography).attrs({
 	text-align: center;
 	margin-top: 8px;
 	margin-bottom: 0;
-	color: ${({ theme }) => theme.palette.base.main};
+	color: ${({ theme }) =>
+		theme.palette.base.main};
 `;

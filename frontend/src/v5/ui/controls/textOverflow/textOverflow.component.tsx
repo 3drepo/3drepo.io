@@ -52,7 +52,11 @@ export const TextOverflow = ({ children, className, tooltipText }: ITextOverflow
 			>
 				<Container ref={setLabelRef} isTruncated={isTruncated} className={className}>{children}</Container>
 			</Tooltip>
-			<EventListener target="window" onResize={() => setIsTruncated(checkIfTruncated())} />
+			<EventListener
+				target="window"
+				onResize={() =>
+					setIsTruncated(checkIfTruncated())}
+			/>
 		</>
 	);
 };

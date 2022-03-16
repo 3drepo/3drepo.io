@@ -29,7 +29,8 @@ const ModalTemplateContainer = ({ id, modalType, props }: IDialogConfig) => {
 
 	const onClickClose = () => {
 		setOpenState(false);
-		setTimeout(() => dispatch(DialogsActions.close(id)), 500);
+		setTimeout(() =>
+			dispatch(DialogsActions.close(id)), 500);
 	};
 
 	const ModalTemplate = MODAL_TEMPLATES[modalType];
@@ -46,7 +47,8 @@ export const ModalsDispatcher = (): JSX.Element => {
 
 	return (
 		<>
-			{dialogs.map((dialog) => <ModalTemplateContainer key={dialog.id} {...dialog} />)}
+			{dialogs.map((dialog) =>
+				<ModalTemplateContainer key={dialog.id} {...dialog} />)}
 		</>
 	);
 };

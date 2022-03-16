@@ -45,18 +45,19 @@ export const NavigationMenu = ({ anchorEl, selectedItem, handleClose, list }: IN
 
 	return (
 		<MenuList anchorEl={anchorEl} onClose={handleClose} open={Boolean(anchorEl)} {...menuPosition}>
-			{list.map(({ title, to }) => (
-				<MenuItem
-					key={title}
-					to={to}
-					onClick={handleClose}
-					selected={selectedItem === title}
-				>
-					<Typography variant="body1" noWrap>
-						{title}
-					</Typography>
-				</MenuItem>
-			))}
+			{list.map(({ title, to }) =>
+				(
+					<MenuItem
+						key={title}
+						to={to}
+						onClick={handleClose}
+						selected={selectedItem === title}
+					>
+						<Typography variant="body1" noWrap>
+							{title}
+						</Typography>
+					</MenuItem>
+				))}
 		</MenuList>
 	);
 };

@@ -36,12 +36,13 @@ export const RevisionsListItemCode = ({
 	mobileWidth,
 	className,
 	onClick,
-}: IRevisionsListItemCode): JSX.Element => (
-	<FixedOrGrowContainer width={width} tabletWidth={tabletWidth} mobileWidth={mobileWidth} className={className}>
-		<TextOverflow tooltipText="Launch in Viewer">
-			<Text onClick={onClick}>
-				{children}
-			</Text>
-		</TextOverflow>
-	</FixedOrGrowContainer>
-);
+}: IRevisionsListItemCode): JSX.Element =>
+	(
+		<FixedOrGrowContainer width={width} tabletWidth={tabletWidth} mobileWidth={mobileWidth} className={className}>
+			<TextOverflow tooltipText="Launch in Viewer">
+				<Text onClick={onClick}>
+					{children}
+				</Text>
+			</TextOverflow>
+		</FixedOrGrowContainer>
+	);

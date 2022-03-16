@@ -23,15 +23,17 @@ type IDashboardListEmptySearchResults = {
 	searchPhrase: string;
 };
 
-export const DashboardListEmptySearchResults = ({ searchPhrase }: IDashboardListEmptySearchResults): JSX.Element => (
-	<DashboardListEmptyText>
-		<FormattedMessage
-			id="containers.noSearchResults"
-			defaultMessage="We couldn't find a match for <SearchPhrase>“{searchPhrase}”</SearchPhrase>. Please try another search."
-			values={{
-				SearchPhrase: (val: string) => <SearchPhrase>{val}</SearchPhrase>,
-				searchPhrase,
-			}}
-		/>
-	</DashboardListEmptyText>
-);
+export const DashboardListEmptySearchResults = ({ searchPhrase }: IDashboardListEmptySearchResults): JSX.Element =>
+	(
+		<DashboardListEmptyText>
+			<FormattedMessage
+				id="containers.noSearchResults"
+				defaultMessage="We couldn't find a match for <SearchPhrase>“{searchPhrase}”</SearchPhrase>. Please try another search."
+				values={{
+					SearchPhrase: (val: string) =>
+						<SearchPhrase>{val}</SearchPhrase>,
+					searchPhrase,
+				}}
+			/>
+		</DashboardListEmptyText>
+	);

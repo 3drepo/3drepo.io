@@ -14,10 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-export default (props) => (
+export default (props) =>
+	(
 	// eslint-disable-next-line react/destructuring-assignment
-	<svg width="24" height="24" viewBox="0 0 24 24" className={props.className} xmlns="http://www.w3.org/2000/svg">
-		<circle cx="12" cy="12" r="11.5" fill="none" stroke="currentColor" />
-		<circle cx="12" cy="12" r="7" fill="currentColor" />
-	</svg>
-);
+		<svg width="24" height="24" viewBox="0 0 24 24" className={props.className} xmlns="http://www.w3.org/2000/svg">
+			<circle cx="12" cy="12" r="11.5" fill="none" stroke="currentColor" />
+			<circle cx="12" cy="12" r="7" fill="currentColor" />
+		</svg>
+	);

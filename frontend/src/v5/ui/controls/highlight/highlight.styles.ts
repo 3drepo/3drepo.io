@@ -18,7 +18,8 @@ import styled from 'styled-components';
 
 export const Tag = styled.mark`
 	position: relative;
-	background-color: ${({ theme }) => theme.palette.primary.light};
+	background-color: ${({ theme }) =>
+		theme.palette.primary.light};
 
 	::after {
 		content: '';
@@ -27,7 +28,8 @@ export const Tag = styled.mark`
 		top: 0;
 		height: 100%;
 		width: 100%;
-		background-color: ${({ theme }) => theme.palette.primary.light};
+		background-color: ${({ theme }) =>
+		theme.palette.primary.light};
 		opacity: 30%;
 	}
 `;

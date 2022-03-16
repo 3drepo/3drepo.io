@@ -21,23 +21,24 @@ export const Container = styled.div`
 	display: inline-block;
 `;
 
-export const Tooltip = withStyles((theme: any) => ({
-	popper: {
-		width: 180,
-	},
-	tooltip: {
-		backgroundColor: theme.palette.primary.contrast,
-		color: theme.palette.error.main,
-		fontSize: theme.typography.pxToRem(12),
-		boxShadow: theme.palette.shadows.level_6,
-		border: 'none',
-		borderRadius: 5,
-		padding: '15px 15px 17px 15px',
-	},
-	tooltipPlacementRight: {
-		margin: '-17px 0px 0 -1px',
-	},
-}))(TooltipComponent);
+export const Tooltip = withStyles((theme: any) =>
+	({
+		popper: {
+			width: 180,
+		},
+		tooltip: {
+			backgroundColor: theme.palette.primary.contrast,
+			color: theme.palette.error.main,
+			fontSize: theme.typography.pxToRem(12),
+			boxShadow: theme.palette.shadows.level_6,
+			border: 'none',
+			borderRadius: 5,
+			padding: '15px 15px 17px 15px',
+		},
+		tooltipPlacementRight: {
+			margin: '-17px 0px 0 -1px',
+		},
+	}))(TooltipComponent);
 
 export const IconWrapper = styled.div`
 	height: max-content;

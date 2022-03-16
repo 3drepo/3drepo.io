@@ -32,8 +32,10 @@ export const DashboardListEmptyContainer = styled.div`
 	display: flex;
 	align-items: center;
 	height: 80px;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	border: 1px dashed ${({ theme }) => theme.palette.base.light};
+	background-color: ${({ theme }) =>
+		theme.palette.primary.contrast};
+	border: 1px dashed ${({ theme }) =>
+		theme.palette.base.light};
 	border-radius: 5px;
 	padding-left: 30px;
 `;
@@ -41,7 +43,8 @@ export const DashboardListEmptyContainer = styled.div`
 export const DashboardListEmptyText = styled(Typography).attrs({
 	variant: 'body1',
 })`
-	color: ${({ theme }) => theme.palette.base.main};
+	color: ${({ theme }) =>
+		theme.palette.base.main};
 	margin-right: 17px;
 `;
 
@@ -54,11 +57,13 @@ export const DashboardListButton = styled(Button).attrs({
 	variant: 'outlined',
 	color: 'primary',
 })`
-	${({ theme }) => theme.typography.h3}
+	${({ theme }) =>
+		theme.typography.h3}
 	width: 100%;
 	margin: 18px 0 0;
 	height: 80px;
-	border: 1px dashed ${({ theme }) => theme.palette.primary.main};
+	border: 1px dashed ${({ theme }) =>
+		theme.palette.primary.main};
 
 	svg {
 		width: 34px;

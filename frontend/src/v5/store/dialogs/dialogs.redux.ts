@@ -56,7 +56,8 @@ export const openHandler = (state = INITIAL_STATE, { modalType, props }): IDialo
 };
 
 export const closeHandler = (state = INITIAL_STATE, { dialogId }): IDialogState => {
-	const dialogs = dialogId ? state.dialogs.filter(({ id }) => (id !== dialogId)) : [];
+	const dialogs = dialogId ? state.dialogs.filter(({ id }) =>
+		(id !== dialogId)) : [];
 	return { ...state, dialogs };
 };
 

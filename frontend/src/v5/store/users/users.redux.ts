@@ -47,13 +47,14 @@ export const INITIAL_STATE: IUsersState = {
 	usersByTeamspace: {},
 };
 
-export const fetchUsersSuccess = (state = INITIAL_STATE, { teamspace, users }): IUsersState => ({
-	...state,
-	usersByTeamspace: {
-		...state.usersByTeamspace,
-		[teamspace]: users,
-	},
-});
+export const fetchUsersSuccess = (state = INITIAL_STATE, { teamspace, users }): IUsersState =>
+	({
+		...state,
+		usersByTeamspace: {
+			...state.usersByTeamspace,
+			[teamspace]: users,
+		},
+	});
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[UsersTypes.FETCH_USERS_SUCCESS]: fetchUsersSuccess,

@@ -21,7 +21,8 @@ let dispatch = null;
 export const createActionsDispatchers = <T>(ActionsCreators: T) => {
 	const exportObject = {};
 	Object.keys(ActionsCreators).forEach((key) => {
-		exportObject[key] = (...args) => dispatch(ActionsCreators[key].apply(null, args));
+		exportObject[key] = (...args) =>
+			dispatch(ActionsCreators[key].apply(null, args));
 	});
 
 	return exportObject as T;

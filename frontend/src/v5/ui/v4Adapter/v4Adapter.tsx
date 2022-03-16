@@ -21,13 +21,14 @@ import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DayJsUtils from '@date-io/dayjs';
 import { V4OverridesContainer } from './v4Overrides.styles';
 
-export const V4Adapter = ({ children }) => (
-	<V4OverridesContainer id="v4Overrides">
-		<MuiPickersUtilsProvider utils={DayJsUtils}>
+export const V4Adapter = ({ children }) =>
+	(
+		<V4OverridesContainer id="v4Overrides">
+			<MuiPickersUtilsProvider utils={DayJsUtils}>
 
-			{children}
-			<DialogContainer />
-			<SnackbarContainer />
-		</MuiPickersUtilsProvider>
-	</V4OverridesContainer>
-);
+				{children}
+				<DialogContainer />
+				<SnackbarContainer />
+			</MuiPickersUtilsProvider>
+		</V4OverridesContainer>
+	);

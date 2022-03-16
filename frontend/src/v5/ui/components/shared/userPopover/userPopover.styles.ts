@@ -31,20 +31,25 @@ export const Container = styled.div`
 export const UserData = styled.div`
 	padding: 7px 3px;
 	overflow: hidden;
-	color: ${({ theme }) => theme.palette.base.main};
+	color: ${({ theme }) =>
+		theme.palette.base.main};
 `;
 
 export const Name = styled(Typography)`
-	${({ theme }) => theme.typography.h5};
-	color: ${({ theme }) => theme.palette.secondary.main};
+	${({ theme }) =>
+		theme.typography.h5};
+	color: ${({ theme }) =>
+		theme.palette.secondary.main};
 `;
 
 export const Company = styled(Typography)`
-	${({ theme }) => theme.typography.body1};
+	${({ theme }) =>
+		theme.typography.body1};
 	margin-top: 2px;
 `;
 
 export const Job = styled(Typography)`
-	${({ theme }) => theme.typography.caption};
+	${({ theme }) =>
+		theme.typography.caption};
 	margin-top: 2px;
 `;

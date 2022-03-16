@@ -48,7 +48,8 @@ export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDe
 	const { teamspace, project } = useParams();
 	const isLoading: boolean = RevisionsHooksSelectors.selectIsPending(containerId);
 	const revisions: IRevision[] = RevisionsHooksSelectors.selectRevisions(containerId);
-	const selected = revisions.findIndex((r) => !r.void);
+	const selected = revisions.findIndex((r) =>
+		!r.void);
 	const isSingle = revisions?.length === 1;
 
 	useEffect(() => {
@@ -86,23 +87,25 @@ export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDe
 			</RevisionsListHeaderContainer>
 			<RevisionsList>
 				{isLoading ? (
-					range(revisionsCount).map((key) => <SkeletonListItem key={key} />)
+					range(revisionsCount).map((key) =>
+						<SkeletonListItem key={key} />)
 				) : (
-					revisions.map((revision, i) => (
-						<RevisionsListItemWrapper
-							isSingle={isSingle}
-							isBeforeSelected={i === selected - 1}
-							selected={i === selected}
-							onClick={() => {}}
-							key={revision._id}
-						>
-							<RevisionsListItem
-								revision={revision}
-								containerId={containerId}
-								active={i === selected}
-							/>
-						</RevisionsListItemWrapper>
-					))
+					revisions.map((revision, i) =>
+						(
+							<RevisionsListItemWrapper
+								isSingle={isSingle}
+								isBeforeSelected={i === selected - 1}
+								selected={i === selected}
+								onClick={() => {}}
+								key={revision._id}
+							>
+								<RevisionsListItem
+									revision={revision}
+									containerId={containerId}
+									active={i === selected}
+								/>
+							</RevisionsListItemWrapper>
+						))
 				)}
 			</RevisionsList>
 		</Container>

@@ -34,19 +34,21 @@ import api from './default';
 
 export const addFavourites = (
 	{ teamspace, projectId, federationId }: FavouritePayload,
-): Promise<AxiosResponse<void>> => (
-	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/favourites`, {
-		federations: [federationId],
-	})
-);
+): Promise<AxiosResponse<void>> =>
+	(
+		api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/favourites`, {
+			federations: [federationId],
+		})
+	);
 
 export const removeFavourites = (
 	{ teamspace, projectId, federationId }: FavouritePayload,
-): Promise<AxiosResponse<void>> => (
-	api.delete(`teamspaces/${teamspace}/projects/${projectId}/federations/favourites`, {
-		federations: [federationId],
-	})
-);
+): Promise<AxiosResponse<void>> =>
+	(
+		api.delete(`teamspaces/${teamspace}/projects/${projectId}/federations/favourites`, {
+			federations: [federationId],
+		})
+	);
 
 export const fetchFederations = async ({
 	teamspace,
@@ -88,25 +90,28 @@ export const updateFederationSettings = async ({
 	projectId,
 	federationId,
 	settings,
-}: UpdateFederationSettingsPayload): Promise<AxiosResponse<void>> => (
-	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`, settings)
-);
+}: UpdateFederationSettingsPayload): Promise<AxiosResponse<void>> =>
+	(
+		api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`, settings)
+	);
 
 export const deleteFederation = ({
 	teamspace,
 	projectId,
 	federationId,
-}: DeleteFederationPayload): Promise<AxiosResponse<void>> => (
-	api.delete(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
-);
+}: DeleteFederationPayload): Promise<AxiosResponse<void>> =>
+	(
+		api.delete(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
+	);
 
 export const updateFederationContainers = async ({
 	teamspace,
 	projectId,
 	federationId,
 	containers,
-}: UpdateFederationContainersPayload): Promise<AxiosResponse<void>> => (
-	api.post(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/revisions`, {
-		containers,
-	})
-);
+}: UpdateFederationContainersPayload): Promise<AxiosResponse<void>> =>
+	(
+		api.post(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/revisions`, {
+			containers,
+		})
+	);

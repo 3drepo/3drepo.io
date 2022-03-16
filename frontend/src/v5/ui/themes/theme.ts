@@ -251,7 +251,8 @@ export const theme = createMuiTheme({
 		MuiTooltip: {
 			PopperProps: {
 				// This is necessary for overriding styles of v4 tooltips
-				container: () => document.getElementById('v4Overrides'),
+				container: () =>
+					document.getElementById('v4Overrides'),
 			},
 		},
 	},

@@ -23,23 +23,24 @@ interface ISkeletonListItem {
 	delay?: number;
 }
 
-export const SkeletonListItem = ({ delay = 0 }: ISkeletonListItem): JSX.Element => (
-	<Container>
-		<FixedOrGrowContainer>
-			<TitlesContainer>
-				<SkeletonBlock delay={delay} widthPercentage={90} />
-				<SkeletonBlock delay={delay + 0.05} widthPercentage={80} />
-			</TitlesContainer>
-		</FixedOrGrowContainer>
-		<FixedOrGrowContainer width={186} />
-		<FixedOrGrowContainer>
-			<SkeletonBlock delay={delay} widthPercentage={75} />
-		</FixedOrGrowContainer>
-		<FixedOrGrowContainer width={188}>
-			<SkeletonBlock delay={delay} width={133} />
-		</FixedOrGrowContainer>
-		<FixedOrGrowContainer width={97}>
-			<SkeletonBlock delay={delay} width={65} />
-		</FixedOrGrowContainer>
-	</Container>
-);
+export const SkeletonListItem = ({ delay = 0 }: ISkeletonListItem): JSX.Element =>
+	(
+		<Container>
+			<FixedOrGrowContainer>
+				<TitlesContainer>
+					<SkeletonBlock delay={delay} widthPercentage={90} />
+					<SkeletonBlock delay={delay + 0.05} widthPercentage={80} />
+				</TitlesContainer>
+			</FixedOrGrowContainer>
+			<FixedOrGrowContainer width={186} />
+			<FixedOrGrowContainer>
+				<SkeletonBlock delay={delay} widthPercentage={75} />
+			</FixedOrGrowContainer>
+			<FixedOrGrowContainer width={188}>
+				<SkeletonBlock delay={delay} width={133} />
+			</FixedOrGrowContainer>
+			<FixedOrGrowContainer width={97}>
+				<SkeletonBlock delay={delay} width={65} />
+			</FixedOrGrowContainer>
+		</Container>
+	);

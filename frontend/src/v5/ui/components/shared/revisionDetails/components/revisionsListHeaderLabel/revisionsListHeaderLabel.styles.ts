@@ -20,5 +20,6 @@ import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 
 export const Container = styled(FixedOrGrowContainer)`
 	align-items: center;
-	color: ${({ theme }) => theme.palette.secondary.lightest};
+	color: ${({ theme }) =>
+		theme.palette.secondary.lightest};
 `;

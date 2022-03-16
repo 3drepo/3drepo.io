@@ -20,31 +20,39 @@ import { isEmpty } from 'lodash';
 import { IFederationsState } from '@/v5/store/federations/federations.types';
 import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
 
-const selectFederationsDomain = (state): IFederationsState => state.federations;
+const selectFederationsDomain = (state): IFederationsState =>
+	state.federations;
 
 export const selectFederations = createSelector(
 	selectFederationsDomain, selectCurrentProject,
-	(state, currentProject) => state.federationsByProject[currentProject] ?? [],
+	(state, currentProject) =>
+		state.federationsByProject[currentProject] ?? [],
 );
 
 export const selectFavouriteFederations = createSelector(
 	selectFederations,
-	(federations) => federations.filter(({ isFavourite }) => isFavourite),
+	(federations) =>
+		federations.filter(({ isFavourite }) =>
+			isFavourite),
 );
 
 export const selectHasFederations = createSelector(
-	selectFederations, selectFavouriteFederations, (federations, favouriteFederations) => ({
-		favourites: !isEmpty(favouriteFederations),
-		all: !isEmpty(federations),
-	}),
+	selectFederations, selectFavouriteFederations, (federations, favouriteFederations) =>
+		({
+			favourites: !isEmpty(favouriteFederations),
+			all: !isEmpty(federations),
+		}),
 );
 
 export const selectIsListPending = createSelector(
 	selectFederationsDomain, selectCurrentProject,
 	// Checks if the federations for the project have been fetched
-	(state, currentProject) => !state.federationsByProject[currentProject],
+	(state, currentProject) =>
+		!state.federationsByProject[currentProject],
 );
 
 export const selectAreStatsPending = createSelector(
-	selectFederations, (federations) => federations.some(({ hasStatsPending }) => hasStatsPending),
+	selectFederations, (federations) =>
+		federations.some(({ hasStatsPending }) =>
+			hasStatsPending),
 );

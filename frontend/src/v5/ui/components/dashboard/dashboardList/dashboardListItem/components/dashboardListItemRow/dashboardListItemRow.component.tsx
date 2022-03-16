@@ -30,6 +30,7 @@ export const DashboardListItemRow = ({
 	className,
 	selected = false,
 	onClick,
-}: IDashboardListItemRow): JSX.Element => (
-	<Container className={className} selected={selected} onClick={onClick}>{children}</Container>
-);
+}: IDashboardListItemRow): JSX.Element =>
+	(
+		<Container className={className} selected={selected} onClick={onClick}>{children}</Container>
+	);

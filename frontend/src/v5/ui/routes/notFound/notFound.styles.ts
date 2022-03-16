@@ -41,7 +41,8 @@ export const Message = styled(Typography).attrs({
 	variant: 'h4',
 	component: 'span',
 })`
-	color: ${({ theme }) => theme.palette.base.main};
+	color: ${({ theme }) =>
+		theme.palette.base.main};
 	margin-top: 25px;
 `;
 

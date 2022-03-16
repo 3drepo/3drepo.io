@@ -33,15 +33,18 @@ export const Link = styled(LinkBase)`
 	text-align: left;
 
 	&:hover {
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+		background-color: ${({ theme }) =>
+		theme.palette.tertiary.lightest};
 	}
 
 	&:focus {
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+		background-color: ${({ theme }) =>
+		theme.palette.tertiary.lightest};
 	}
 
 	&:active {
-		background-color: ${({ theme }) => theme.palette.base.light};
+		background-color: ${({ theme }) =>
+		theme.palette.base.light};
 	}
 `;
 
@@ -49,14 +52,17 @@ export const ItemIcon = styled(ListItemIcon)`
 	&& {
 		margin-right: 10px;
 		min-width: 0;
-		color: ${({ theme }) => theme.palette.base.main};
+		color: ${({ theme }) =>
+		theme.palette.base.main};
 	}
 `;
 
 export const ItemText = styled.div`
 	&& {
-		color: ${({ theme }) => theme.palette.secondary.main};
-		${({ theme }) => theme.typography.body1};
+		color: ${({ theme }) =>
+		theme.palette.secondary.main};
+		${({ theme }) =>
+		theme.typography.body1};
 		font-size: 12px;
 		text-decoration: none;
 		margin: 0;

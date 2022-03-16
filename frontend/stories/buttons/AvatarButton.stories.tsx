@@ -25,7 +25,8 @@ export default {
 
 type Props = ComponentProps<typeof Button>;
 
-const Template: ComponentStory<typeof Button> = (args) => <Button {...args} />;
+const Template: ComponentStory<typeof Button> = (args) =>
+	<Button {...args} />;
 
 export const AvatarWithInitials = Template.bind({});
 AvatarWithInitials.args = {

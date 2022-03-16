@@ -19,13 +19,16 @@ import styled, { css } from 'styled-components';
 
 export const Block = styled.div`
 	height: 15px;
-	width: ${({ width }) => width}px;
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	width: ${({ width }) =>
+		width}px;
+	background-color: ${({ theme }) =>
+		theme.palette.tertiary.lightest};
 	overflow: hidden;
 	position: relative;
 	border-radius: 3px;
 	
-	${({ widthPercentage }) => widthPercentage && css`
+	${({ widthPercentage }) =>
+		widthPercentage && css`
 			width: ${widthPercentage}%;
 	`};
 
@@ -34,11 +37,13 @@ export const Block = styled.div`
 		content: "";
 		height: 100%;
 		width: 100%;
-		background-image: ${({ theme }) => `linear-gradient(to bottom, ${theme.palette.tertiary.lightest} 0%, rgba(0, 0, 0, 0.05) 20%, ${theme.palette.tertiary.lightest} 40%, ${theme.palette.tertiary.lightest} 100%)`};
+		background-image: ${({ theme }) =>
+		`linear-gradient(to bottom, ${theme.palette.tertiary.lightest} 0%, rgba(0, 0, 0, 0.05) 20%, ${theme.palette.tertiary.lightest} 40%, ${theme.palette.tertiary.lightest} 100%)`};
 		background-repeat: no-repeat;
 		background-size: 450px 400px;
 		animation: shimmer 1s linear infinite;
-		animation-delay: ${({ delay }) => `${delay}s`};
+		animation-delay: ${({ delay }) =>
+		`${delay}s`};
 	}
 
 	@keyframes shimmer {

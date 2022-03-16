@@ -22,7 +22,8 @@ export const StyledIconButton = styled(IconButton)`
 	&& {
 		padding: 0;
 
-		${({ $isButton, theme }) => ($isButton ? `
+		${({ $isButton, theme }) =>
+		($isButton ? `
 			cursor: pointer;
 			
 			&:hover {
@@ -43,25 +44,30 @@ export const StyledIconButton = styled(IconButton)`
 
 	.MuiAvatar-circle {
 		margin: 0;
-		${({ $largeIcon }) => `
+		${({ $largeIcon }) =>
+		`
 			height: ${$largeIcon ? '48px' : '38px'};
 			width: ${$largeIcon ? '48px' : '38px'};
 		`}
 	}
 
-	${({ disabled }) => disabled && css`
+	${({ disabled }) =>
+		disabled && css`
 		&& {
 		pointer-events: none;
 			.MuiAvatar-root {
-				background-color: ${({ theme }) => theme.palette.secondary.mid};
-				color: ${({ theme }) => theme.palette.secondary.light};
+				background-color: ${({ theme }) =>
+		theme.palette.secondary.mid};
+				color: ${({ theme }) =>
+		theme.palette.secondary.light};
 			}
 		}
 	`};
 
 	&.Mui-focusVisible {
 		.MuiAvatar-root {
-			outline: 1px solid ${({ theme }) => theme.palette.primary.main};
+			outline: 1px solid ${({ theme }) =>
+		theme.palette.primary.main};
 			box-shadow: 
 				0 3px 5px -1px rgb(0 0 0 / 20%),
 				0 6px 10px 0 rgb(0 0 0 / 14%),

@@ -76,7 +76,8 @@ export const ContainersList = ({
 	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
 
 	const selectOrToggleItem = (id: string) => {
-		setSelectedItemId((state) => (state === id ? null : id));
+		setSelectedItemId((state) =>
+			(state === id ? null : id));
 	};
 
 	const setFavourite = (id: string, value: boolean) => {
@@ -96,8 +97,10 @@ export const ContainersList = ({
 				sideElement={(
 					<CollapseSideElementGroup>
 						<SearchInput
-							onClear={() => onFilterQueryChange('')}
-							onChange={(event) => onFilterQueryChange(event.currentTarget.value)}
+							onClear={() =>
+								onFilterQueryChange('')}
+							onChange={(event) =>
+								onFilterQueryChange(event.currentTarget.value)}
 							value={filterQuery}
 							placeholder={formatMessage({ id: 'containers.search.placeholder', defaultMessage: 'Search containers...' })}
 						/>
@@ -140,17 +143,18 @@ export const ContainersList = ({
 				</DashboardListHeader>
 				<DashboardList>
 					{!isEmpty(sortedList) ? (
-						sortedList.map((container, index) => (
-							<ContainerListItem
-								index={index}
-								key={container._id}
-								isSelected={container._id === selectedItemId}
-								container={container}
-								filterQuery={filterQuery}
-								onFavouriteChange={setFavourite}
-								onSelectOrToggleItem={selectOrToggleItem}
-							/>
-						))
+						sortedList.map((container, index) =>
+							(
+								<ContainerListItem
+									index={index}
+									key={container._id}
+									isSelected={container._id === selectedItemId}
+									container={container}
+									filterQuery={filterQuery}
+									onFavouriteChange={setFavourite}
+									onSelectOrToggleItem={selectOrToggleItem}
+								/>
+							))
 					) : (
 						<DashboardListEmptyContainer>
 							{filterQuery && hasContainers ? (

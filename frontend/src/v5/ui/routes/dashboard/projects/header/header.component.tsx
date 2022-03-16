@@ -25,7 +25,8 @@ import { Container, Wrapper } from './header.styles';
 export const Header = (): JSX.Element => {
 	const { project } = useParams();
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
-	const currentProject = projects.find(({ _id }) => project === _id);
+	const currentProject = projects.find(({ _id }) =>
+		project === _id);
 
 	return (
 		<Wrapper>

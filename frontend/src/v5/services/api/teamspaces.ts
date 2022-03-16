@@ -17,4 +17,5 @@
 
 import api from './default';
 
-export const fetchTeamspaces = (): Promise<any> => api.get('teamspaces');
+export const fetchTeamspaces = (): Promise<any> =>
+	api.get('teamspaces');

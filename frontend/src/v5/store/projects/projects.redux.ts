@@ -48,18 +48,20 @@ export const INITIAL_STATE: IProjectsState = {
 	currentProject: '',
 };
 
-export const fetchSuccess = (state = INITIAL_STATE, { teamspace, projects }): IProjectsState => ({
-	...state,
-	projectsByTeamspace: {
-		...state.projectsByTeamspace,
-		[teamspace]: projects,
-	},
-});
+export const fetchSuccess = (state = INITIAL_STATE, { teamspace, projects }): IProjectsState =>
+	({
+		...state,
+		projectsByTeamspace: {
+			...state.projectsByTeamspace,
+			[teamspace]: projects,
+		},
+	});
 
-export const setCurrentProject = (state = INITIAL_STATE, { projectId }): IProjectsState => ({
-	...state,
-	currentProject: projectId,
-});
+export const setCurrentProject = (state = INITIAL_STATE, { projectId }): IProjectsState =>
+	({
+		...state,
+		currentProject: projectId,
+	});
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[ProjectsTypes.FETCH_SUCCESS]: fetchSuccess,

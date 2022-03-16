@@ -25,8 +25,9 @@ interface ICircleButton {
 	disabled?: boolean;
 }
 
-export const CircleButton: FC<ICircleButton> = ({ size = 'large', variant = 'main', children, ...props }) => (
-	<StyledFab size={size} $variant={variant} {...props}>
-		{children}
-	</StyledFab>
-);
+export const CircleButton: FC<ICircleButton> = ({ size = 'large', variant = 'main', children, ...props }) =>
+	(
+		<StyledFab size={size} $variant={variant} {...props}>
+			{children}
+		</StyledFab>
+	);

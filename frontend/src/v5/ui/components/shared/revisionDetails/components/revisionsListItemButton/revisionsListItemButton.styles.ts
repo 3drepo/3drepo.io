@@ -27,5 +27,6 @@ export const Button = styled(ButtonComponent).attrs({
 })`
 	margin: 0;
 	width: 100%;
-	color: ${({ theme, $isVoid }) => ($isVoid ? theme.palette.error.main : theme.palette.primary.main)};
+	color: ${({ theme, $isVoid }) =>
+		($isVoid ? theme.palette.error.main : theme.palette.primary.main)};
 `;

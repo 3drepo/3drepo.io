@@ -31,7 +31,8 @@ export const Breadcrumb = styled(Button).attrs({
 	component: Link,
 })`
 	&& {
-		color: ${({ theme }) => theme.palette.primary.contrast};
+		color: ${({ theme }) =>
+		theme.palette.primary.contrast};
 		padding: 5px;
 		margin: 0 4px;
 
@@ -40,7 +41,8 @@ export const Breadcrumb = styled(Button).attrs({
 		}
 
 		&.MuiButton-text.Mui-focusVisible {
-			background-color: ${({ theme }) => theme.palette.secondary.mid};
+			background-color: ${({ theme }) =>
+		theme.palette.secondary.mid};
 		}
 	}
 `;
@@ -49,8 +51,10 @@ export const InteractiveBreadcrumb = styled(Breadcrumb).attrs({
 	variant: 'text',
 })`
 	&& {
-		${({ theme }) => theme.typography.h3};
-		color: ${({ theme }) => theme.palette.primary.main};
+		${({ theme }) =>
+		theme.typography.h3};
+		color: ${({ theme }) =>
+		theme.palette.primary.main};
 		padding-right: 9px;
 		margin-right: 0;
 		max-width: 100%;

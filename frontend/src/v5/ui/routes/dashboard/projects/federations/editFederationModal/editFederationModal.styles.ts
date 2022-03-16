@@ -27,17 +27,20 @@ export const IconContainer = styled.div`
 export const IncludeIcon = styled(IncludeIconBase)`
 	&:hover {
 		circle {
-			fill: ${({ theme }) => theme.palette.primary.dark};
+			fill: ${({ theme }) =>
+		theme.palette.primary.dark};
 		}
 	}
 
 	&:active {
 		circle {
-			fill: ${({ theme }) => theme.palette.primary.darkest};
+			fill: ${({ theme }) =>
+		theme.palette.primary.darkest};
 		}
 	}
 
-	${({ theme, isSelected }) => isSelected && `
+	${({ theme, isSelected }) =>
+		isSelected && `
 		circle {
 			fill: ${theme.palette.primary.lightest};
 		}
@@ -68,13 +71,15 @@ export const IncludeIcon = styled(IncludeIconBase)`
 export const RemoveIcon = styled(RemoveIconBase)`
 	&:hover {
 		circle {
-			fill: ${({ theme }) => theme.palette.error.dark};
+			fill: ${({ theme }) =>
+		theme.palette.error.dark};
 		}
 	}
 
 	&:active {
 		circle {
-			fill: ${({ theme }) => theme.palette.error.darkest};
+			fill: ${({ theme }) =>
+		theme.palette.error.darkest};
 		}
 	}
 `;

@@ -33,7 +33,8 @@ export const Thumbnail = styled.img`
 
 export const ThumbnailPlaceholder = styled.div`
 	${ThumbnailStyles};
-	background-color: ${({ theme }) => theme.palette.base.light};
+	background-color: ${({ theme }) =>
+		theme.palette.base.light};
 `;
 
 export const ViewLabel = styled.div`
@@ -76,7 +77,9 @@ export const FormSelect = styled(FormSelectBase)`
 export const MenuItemView = styled(MenuItem)`
 	&.Mui-selected ${/* sc-selector */ ViewLabel}::after {
 		content: "Selected";
-		color: ${({ theme }) => theme.palette.primary.main};
-		${({ theme }) => theme.typography.caption};
+		color: ${({ theme }) =>
+		theme.palette.primary.main};
+		${({ theme }) =>
+		theme.typography.caption};
 	}
 `;

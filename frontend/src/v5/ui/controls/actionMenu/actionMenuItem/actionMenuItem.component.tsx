@@ -25,9 +25,10 @@ type ActionMenuItemProps = {
 export const ActionMenuItem = ({
 	children,
 	...props
-}: ActionMenuItemProps) => (
-	<MenuItem {...props}>
-		{children}
-	</MenuItem>
-);
+}: ActionMenuItemProps) =>
+	(
+		<MenuItem {...props}>
+			{children}
+		</MenuItem>
+	);
 ActionMenuItem.isActionMenuClosingElement = true;

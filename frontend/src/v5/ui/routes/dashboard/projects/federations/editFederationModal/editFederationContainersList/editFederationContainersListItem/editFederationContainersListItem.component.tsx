@@ -55,7 +55,8 @@ export const EditFederationContainersListItem = ({
 		>
 			<DashboardListItemRow
 				selected={isSelected}
-				onClick={() => onSelectOrToggleItem(container._id)}
+				onClick={() =>
+					onSelectOrToggleItem(container._id)}
 			>
 				<DashboardListItemIcon
 					width={46}
@@ -84,7 +85,8 @@ export const EditFederationContainersListItem = ({
 				</DashboardListItemTitle>
 				<DashboardListItemButton
 					width={186}
-					onClick={() => onSelectOrToggleItem(container._id)}
+					onClick={() =>
+						onSelectOrToggleItem(container._id)}
 					hideWhenSmallerThan={Display.Desktop}
 					tooltipTitle={
 						<FormattedMessage id="modal.editFederation.list.item.revisions.tooltip" defaultMessage="View revisions" />

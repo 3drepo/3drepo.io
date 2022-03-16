@@ -23,7 +23,8 @@ export const MenuList = styled(MenuComponent)`
 	&& {
 		& > ul {
 			padding: 0;
-			background-color: ${({ theme }) => theme.palette.primary.contrast};
+			background-color: ${({ theme }) =>
+		theme.palette.primary.contrast};
 		}
 	}
 `;
@@ -37,29 +38,36 @@ export const MenuItem = styled(MenuItemComponent).attrs({
 		padding-right: 14px;
 		justify-content: space-between;
 
-		${({ disabled }) => disabled && css`
+		${({ disabled }) =>
+		disabled && css`
 			&& {
 				pointer-events: none;
-				color: ${({ theme }) => theme.palette.base.light};
+				color: ${({ theme }) =>
+		theme.palette.base.light};
 			}
 		`};
 
 		&:not(:last-child) {
-			border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
+			border-bottom: 1px solid ${({ theme }) =>
+		theme.palette.base.lightest};
 		}
 
 		&:hover {
-			color: ${({ theme }) => theme.palette.primary.main};
+			color: ${({ theme }) =>
+		theme.palette.primary.main};
 			background-color: initial;
 		}
 
 		&:focus {
-			background-color: ${({ theme }) => theme.palette.primary.lightest};
+			background-color: ${({ theme }) =>
+		theme.palette.primary.lightest};
 		}
 
 		&:active {
-			color: ${({ theme }) => theme.palette.primary.contrast};
-			background-color: ${({ theme }) => theme.palette.primary.dark};
+			color: ${({ theme }) =>
+		theme.palette.primary.contrast};
+			background-color: ${({ theme }) =>
+		theme.palette.primary.dark};
 		}
 	}
 `;

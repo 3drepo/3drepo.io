@@ -18,9 +18,11 @@ import styled from 'styled-components';
 import { Typography } from '@material-ui/core';
 
 export const KickerTypography = styled(Typography)`
-	${({ theme }) => theme.typography.kicker};
+	${({ theme }) =>
+		theme.typography.kicker};
 `;
 
 export const KickerTitleTypography = styled(Typography)`
-	${({ theme }) => theme.typography.kickerTitle};
+	${({ theme }) =>
+		theme.typography.kickerTitle};
 `;

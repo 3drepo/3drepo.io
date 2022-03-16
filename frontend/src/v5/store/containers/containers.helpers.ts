@@ -23,35 +23,39 @@ import {
 } from '@/v5/store/containers/containers.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 
-export const filterContainers = (federations: IContainer[], filterQuery: string) => (
-	federations.filter((
-		{ name, code, type },
-	) => [name, code, type].join('').toLowerCase().includes(filterQuery.trim().toLowerCase()))
-);
+export const filterContainers = (federations: IContainer[], filterQuery: string) =>
+	(
+		federations.filter((
+			{ name, code, type },
+		) =>
+			[name, code, type].join('').toLowerCase().includes(filterQuery.trim().toLowerCase()))
+	);
 
 export const prepareSingleContainerData = (
 	container: FetchContainersContainerItemResponse,
 	stats?: FetchContainerStatsResponse,
-): IContainer => ({
-	...container,
-	revisionsCount: stats?.revisions.total ?? 0,
-	lastUpdated: getNullableDate(stats?.revisions.lastUpdated),
-	latestRevision: stats?.revisions.latestRevision ?? '',
-	type: stats?.type ?? '',
-	code: stats?.code ?? '',
-	status: stats?.status ?? UploadStatuses.OK,
-	unit: stats?.unit ?? '',
-	hasStatsPending: !stats,
-	errorResponse: stats?.errorReason && {
-		message: stats.errorReason.message,
-		date: getNullableDate(stats?.errorReason.timestamp),
-	},
-});
+): IContainer =>
+	({
+		...container,
+		revisionsCount: stats?.revisions.total ?? 0,
+		lastUpdated: getNullableDate(stats?.revisions.lastUpdated),
+		latestRevision: stats?.revisions.latestRevision ?? '',
+		type: stats?.type ?? '',
+		code: stats?.code ?? '',
+		status: stats?.status ?? UploadStatuses.OK,
+		unit: stats?.unit ?? '',
+		hasStatsPending: !stats,
+		errorResponse: stats?.errorReason && {
+			message: stats.errorReason.message,
+			date: getNullableDate(stats?.errorReason.timestamp),
+		},
+	});
 
 export const prepareContainersData = (
 	containers: Array<FetchContainersContainerItemResponse>,
 	stats?: FetchContainerStatsResponse[],
-) => containers.map<IContainer>((container, index) => {
-	const containerStats = stats?.[index];
-	return prepareSingleContainerData(container, containerStats);
-});
+) =>
+	containers.map<IContainer>((container, index) => {
+		const containerStats = stats?.[index];
+		return prepareSingleContainerData(container, containerStats);
+	});

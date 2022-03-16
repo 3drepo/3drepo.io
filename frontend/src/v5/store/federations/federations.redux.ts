@@ -61,137 +61,149 @@ export const setFavourite = (state = INITIAL_STATE, {
 	projectId,
 	federationId,
 	isFavourite,
-}: SetFavouriteSuccessAction): IFederationsState => ({
-	...state,
-	federationsByProject: {
-		...state.federationsByProject,
-		[projectId]: state.federationsByProject[projectId].map((federation) => ({
-			...federation,
-			isFavourite: federation._id === federationId ? isFavourite : federation.isFavourite,
-		})),
-	},
-});
+}: SetFavouriteSuccessAction): IFederationsState =>
+	({
+		...state,
+		federationsByProject: {
+			...state.federationsByProject,
+			[projectId]: state.federationsByProject[projectId].map((federation) =>
+				({
+					...federation,
+					isFavourite: federation._id === federationId ? isFavourite : federation.isFavourite,
+				})),
+		},
+	});
 
 export const fetchFederationsSuccess = (state = INITIAL_STATE, {
 	projectId,
 	federations,
-}: FetchFederationsSuccessAction): IFederationsState => ({
-	...state,
-	federationsByProject: {
-		...state.federationsByProject,
-		[projectId]: federations,
-	},
-});
+}: FetchFederationsSuccessAction): IFederationsState =>
+	({
+		...state,
+		federationsByProject: {
+			...state.federationsByProject,
+			[projectId]: federations,
+		},
+	});
 
 export const fetchStatsSuccess = (state = INITIAL_STATE, {
 	projectId,
 	federationId,
 	federationStats,
-}: FetchFederationStatsSuccessAction): IFederationsState => ({
-	...state,
-	federationsByProject: {
-		...state.federationsByProject,
-		[projectId]: state.federationsByProject[projectId].map((federation) => {
-			if (federationId !== federation._id) return federation;
-			return prepareSingleFederationData(federation, federationStats);
-		}),
-	},
-});
+}: FetchFederationStatsSuccessAction): IFederationsState =>
+	({
+		...state,
+		federationsByProject: {
+			...state.federationsByProject,
+			[projectId]: state.federationsByProject[projectId].map((federation) => {
+				if (federationId !== federation._id) return federation;
+				return prepareSingleFederationData(federation, federationStats);
+			}),
+		},
+	});
 
 export const fetchFederationViewsSuccess = (state = INITIAL_STATE, {
 	projectId,
 	federationId,
 	views,
-}: FetchFederationViewsSuccessAction): IFederationsState => ({
-	...state,
-	federationsByProject: {
-		...state.federationsByProject,
-		[projectId]: state.federationsByProject[projectId].map((federation) => {
-			if (federationId !== federation._id) return federation;
-			return {
-				...federation,
-				views,
-			};
-		}),
-	},
-});
+}: FetchFederationViewsSuccessAction): IFederationsState =>
+	({
+		...state,
+		federationsByProject: {
+			...state.federationsByProject,
+			[projectId]: state.federationsByProject[projectId].map((federation) => {
+				if (federationId !== federation._id) return federation;
+				return {
+					...federation,
+					views,
+				};
+			}),
+		},
+	});
 
 export const fetchFederationSettingsSuccess = (state = INITIAL_STATE, {
 	projectId,
 	federationId,
 	settings,
-}: FetchFederationSettingsSuccessAction): IFederationsState => ({
-	...state,
-	federationsByProject: {
-		...state.federationsByProject,
-		[projectId]: state.federationsByProject[projectId].map((federation) => {
-			if (federationId !== federation._id) return federation;
-			return {
-				...federation,
-				...settings,
-			};
-		}),
-	},
-});
+}: FetchFederationSettingsSuccessAction): IFederationsState =>
+	({
+		...state,
+		federationsByProject: {
+			...state.federationsByProject,
+			[projectId]: state.federationsByProject[projectId].map((federation) => {
+				if (federationId !== federation._id) return federation;
+				return {
+					...federation,
+					...settings,
+				};
+			}),
+		},
+	});
 
 export const updateFederationSettingsSuccess = (state = INITIAL_STATE, {
 	projectId,
 	federationId,
 	settings,
-}: UpdateFederationSettingsSuccessAction): IFederationsState => ({
-	...state,
-	federationsByProject: {
-		...state.federationsByProject,
-		[projectId]: state.federationsByProject[projectId].map((federation) => {
-			if (federationId !== federation._id) return federation;
-			return {
-				...federation,
-				...settings,
-			};
-		}),
-	},
-});
+}: UpdateFederationSettingsSuccessAction): IFederationsState =>
+	({
+		...state,
+		federationsByProject: {
+			...state.federationsByProject,
+			[projectId]: state.federationsByProject[projectId].map((federation) => {
+				if (federationId !== federation._id) return federation;
+				return {
+					...federation,
+					...settings,
+				};
+			}),
+		},
+	});
 
 export const deleteFederationSuccess = (state = INITIAL_STATE, {
 	projectId,
 	federationId,
-}: DeleteFederationSuccessAction): IFederationsState => ({
-	...state,
-	federationsByProject: {
-		...state.federationsByProject,
-		[projectId]: state.federationsByProject[projectId].filter((federation) => federationId !== federation._id),
-	},
-});
+}: DeleteFederationSuccessAction): IFederationsState =>
+	({
+		...state,
+		federationsByProject: {
+			...state.federationsByProject,
+			[projectId]: state.federationsByProject[projectId].filter((federation) =>
+				federationId !== federation._id),
+		},
+	});
 
 export const updateFederationContainersSuccess = (state = INITIAL_STATE, {
 	projectId,
 	federationId,
 	containers,
-}: UpdateFederationContainersActionSuccess) => ({
-	...state,
-	federationsByProject: {
-		...state.federationsByProject,
-		[projectId]: state.federationsByProject[projectId].map((federation) => ({
-			...federation,
-			containers: federation._id === federationId ? containers : federation.containers,
-		})),
-	},
-});
+}: UpdateFederationContainersActionSuccess) =>
+	({
+		...state,
+		federationsByProject: {
+			...state.federationsByProject,
+			[projectId]: state.federationsByProject[projectId].map((federation) =>
+				({
+					...federation,
+					containers: federation._id === federationId ? containers : federation.containers,
+				})),
+		},
+	});
 
 export const updateFederationSuccess = (state = INITIAL_STATE, {
 	projectId,
 	federationId,
 	updatedFederation,
-}: UpdateFederationSuccessAction) => ({
-	...state,
-	federations: {
-		...state.federationsByProject,
-		[projectId]: state.federationsByProject[projectId].map((federation) => {
-			if (federationId !== federation._id) return federation;
-			return ({ ...federation, ...updatedFederation });
-		}),
-	},
-});
+}: UpdateFederationSuccessAction) =>
+	({
+		...state,
+		federations: {
+			...state.federationsByProject,
+			[projectId]: state.federationsByProject[projectId].map((federation) => {
+				if (federationId !== federation._id) return federation;
+				return ({ ...federation, ...updatedFederation });
+			}),
+		},
+	});
 
 export const reducer = createReducer<IFederationsState>(INITIAL_STATE, {
 	[FederationsTypes.FETCH_FEDERATIONS_SUCCESS]: fetchFederationsSuccess,

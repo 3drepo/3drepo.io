@@ -24,13 +24,14 @@ interface IFavouriteCheckbox extends Omit<Omit<CheckboxProps, 'icon'>, 'checkedI
 }
 
 export const FavouriteCheckbox = forwardRef(
-	({ selected = false, ...props }: IFavouriteCheckbox, ref: Ref<HTMLElement>): JSX.Element => (
-		<Checkbox
-			icon={<StarIcon />}
-			checkedIcon={<StarIcon />}
-			ref={ref}
-			selected={selected}
-			{...props}
-		/>
-	),
+	({ selected = false, ...props }: IFavouriteCheckbox, ref: Ref<HTMLElement>): JSX.Element =>
+		(
+			<Checkbox
+				icon={<StarIcon />}
+				checkedIcon={<StarIcon />}
+				ref={ref}
+				selected={selected}
+				{...props}
+			/>
+		),
 );

@@ -89,8 +89,10 @@ export const FederationsList = ({
 				sideElement={(
 					<CollapseSideElementGroup>
 						<SearchInput
-							onClear={() => onFilterQueryChange('')}
-							onChange={(event) => onFilterQueryChange(event.currentTarget.value)}
+							onClear={() =>
+								onFilterQueryChange('')}
+							onChange={(event) =>
+								onFilterQueryChange(event.currentTarget.value)}
 							value={filterQuery}
 							placeholder={formatMessage({ id: 'federations.search.placeholder',
 								defaultMessage: 'Search...' })}
@@ -128,15 +130,16 @@ export const FederationsList = ({
 				</DashboardListHeader>
 				<DashboardList>
 					{!isEmpty(sortedList) ? (
-						sortedList.map((federation, index) => (
-							<FederationListItem
-								index={index}
-								key={federation._id}
-								federation={federation}
-								filterQuery={filterQuery}
-								onFavouriteChange={setFavourite}
-							/>
-						))
+						sortedList.map((federation, index) =>
+							(
+								<FederationListItem
+									index={index}
+									key={federation._id}
+									federation={federation}
+									filterQuery={filterQuery}
+									onFavouriteChange={setFavourite}
+								/>
+							))
 					) : (
 						<DashboardListEmptyContainer>
 							{filterQuery && hasFederations ? (

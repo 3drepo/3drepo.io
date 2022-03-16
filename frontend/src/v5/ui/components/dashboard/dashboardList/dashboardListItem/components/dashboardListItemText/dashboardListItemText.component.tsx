@@ -26,12 +26,13 @@ export const DashboardListItemText = ({
 	selected = false,
 	children,
 	...containerProps
-}: IDashboardListItemText): JSX.Element => (
-	<FixedOrGrowContainer
-		{...containerProps}
-	>
-		<Text selected={selected}>
-			{children}
-		</Text>
-	</FixedOrGrowContainer>
-);
+}: IDashboardListItemText): JSX.Element =>
+	(
+		<FixedOrGrowContainer
+			{...containerProps}
+		>
+			<Text selected={selected}>
+				{children}
+			</Text>
+		</FixedOrGrowContainer>
+	);

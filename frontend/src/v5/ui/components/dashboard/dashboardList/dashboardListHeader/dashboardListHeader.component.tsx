@@ -57,13 +57,14 @@ export const DashboardListHeader = ({
 
 	return (
 		<DashboardListHeaderContainer>
-			{children.map((child) => (
-				cloneElement(child, {
-					key: child.props.name,
-					...registerSort(child.props.name),
-					...child.props,
-				})
-			))}
+			{children.map((child) =>
+				(
+					cloneElement(child, {
+						key: child.props.name,
+						...registerSort(child.props.name),
+						...child.props,
+					})
+				))}
 		</DashboardListHeaderContainer>
 	);
 };

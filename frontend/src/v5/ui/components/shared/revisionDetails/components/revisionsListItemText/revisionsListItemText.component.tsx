@@ -39,18 +39,19 @@ export const RevisionsListItemText = ({
 	className,
 	active = false,
 	hideWhenSmallerThan,
-}: IDashboardListItemText): JSX.Element => (
-	<FixedOrGrowContainer
-		width={width}
-		tabletWidth={tabletWidth}
-		mobileWidth={mobileWidth}
-		hideWhenSmallerThan={hideWhenSmallerThan}
-		className={className}
-	>
-		<TextOverflow>
-			<Text $active={active}>
-				{children}
-			</Text>
-		</TextOverflow>
-	</FixedOrGrowContainer>
-);
+}: IDashboardListItemText): JSX.Element =>
+	(
+		<FixedOrGrowContainer
+			width={width}
+			tabletWidth={tabletWidth}
+			mobileWidth={mobileWidth}
+			hideWhenSmallerThan={hideWhenSmallerThan}
+			className={className}
+		>
+			<TextOverflow>
+				<Text $active={active}>
+					{children}
+				</Text>
+			</TextOverflow>
+		</FixedOrGrowContainer>
+	);

@@ -28,25 +28,28 @@ type ISearchInput = {
 	onClear: () => void;
 } & TextFieldProps;
 
-export const SearchInput = ({ onClear, value, ...props }: ISearchInput): JSX.Element => (
-	<TextField
-		value={value}
-		InputProps={{
-			startAdornment: (
-				<StartAdornment>
-					<SearchIcon />
-				</StartAdornment>
-			),
-			endAdornment: (
-				(
-					<EndAdornment $isVisible={value}>
-						<IconButton onClick={() => onClear()}>
-							<CloseIcon />
-						</IconButton>
-					</EndAdornment>
-				)
-			),
-		}}
-		{...props}
-	/>
-);
+export const SearchInput = ({ onClear, value, ...props }: ISearchInput): JSX.Element =>
+	(
+		<TextField
+			value={value}
+			InputProps={{
+				startAdornment: (
+					<StartAdornment>
+						<SearchIcon />
+					</StartAdornment>
+				),
+				endAdornment: (
+					(
+						<EndAdornment $isVisible={value}>
+							<IconButton onClick={() =>
+								onClear()}
+							>
+								<CloseIcon />
+							</IconButton>
+						</EndAdornment>
+					)
+				),
+			}}
+			{...props}
+		/>
+	);

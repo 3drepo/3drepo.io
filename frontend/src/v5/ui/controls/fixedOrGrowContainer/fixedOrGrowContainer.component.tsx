@@ -39,14 +39,15 @@ export const FixedOrGrowContainer = ({
 	children,
 	hideWhenSmallerThan,
 	...props
-}: IFixedOrGrowContainer): JSX.Element => (
-	<Container
-		width={width}
-		tabletWidth={tabletWidth}
-		mobileWidth={mobileWidth}
-		hideWhenSmallerThan={hideWhenSmallerThan}
-		{...props}
-	>
-		{children}
-	</Container>
-);
+}: IFixedOrGrowContainer): JSX.Element =>
+	(
+		<Container
+			width={width}
+			tabletWidth={tabletWidth}
+			mobileWidth={mobileWidth}
+			hideWhenSmallerThan={hideWhenSmallerThan}
+			{...props}
+		>
+			{children}
+		</Container>
+	);

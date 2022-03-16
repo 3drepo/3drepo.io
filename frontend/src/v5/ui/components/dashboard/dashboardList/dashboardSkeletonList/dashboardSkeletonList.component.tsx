@@ -24,20 +24,22 @@ interface IDashboardSkeletonList {
 }
 
 export const DashboardSkeletonList = ({ itemsAmount = 10, itemComponent }: IDashboardSkeletonList): JSX.Element => {
-	const list = useMemo(() => Array(itemsAmount).fill({}), []);
+	const list = useMemo(() =>
+		Array(itemsAmount).fill({}), []);
 
 	return (
 		<DashboardList>
-			{list.map((item, index) => (
-				<Fragment key={`${itemComponent.props.name as string}-${index as number}`}>
-					{
-						cloneElement(itemComponent, {
-							delay: index / 10,
-							...itemComponent.props,
-						})
-					}
-				</Fragment>
-			))}
+			{list.map((item, index) =>
+				(
+					<Fragment key={`${itemComponent.props.name as string}-${index as number}`}>
+						{
+							cloneElement(itemComponent, {
+								delay: index / 10,
+								...itemComponent.props,
+							})
+						}
+					</Fragment>
+				))}
 		</DashboardList>
 	);
 };

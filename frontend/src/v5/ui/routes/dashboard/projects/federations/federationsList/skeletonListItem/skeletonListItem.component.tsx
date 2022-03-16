@@ -23,17 +23,18 @@ interface ISkeletonListItem {
 	delay?: number;
 }
 
-export const SkeletonListItem = ({ delay = 0 }: ISkeletonListItem): JSX.Element => (
-	<Container>
-		<FixedOrGrowContainer>
-			<SkeletonBlock widthPercentage={80} />
-		</FixedOrGrowContainer>
-		<FixedOrGrowContainer width={495} />
-		<FixedOrGrowContainer width={188}>
-			<SkeletonBlock delay={delay} width={133} />
-		</FixedOrGrowContainer>
-		<FixedOrGrowContainer width={97}>
-			<SkeletonBlock delay={delay} width={65} />
-		</FixedOrGrowContainer>
-	</Container>
-);
+export const SkeletonListItem = ({ delay = 0 }: ISkeletonListItem): JSX.Element =>
+	(
+		<Container>
+			<FixedOrGrowContainer>
+				<SkeletonBlock widthPercentage={80} />
+			</FixedOrGrowContainer>
+			<FixedOrGrowContainer width={495} />
+			<FixedOrGrowContainer width={188}>
+				<SkeletonBlock delay={delay} width={133} />
+			</FixedOrGrowContainer>
+			<FixedOrGrowContainer width={97}>
+				<SkeletonBlock delay={delay} width={65} />
+			</FixedOrGrowContainer>
+		</Container>
+	);

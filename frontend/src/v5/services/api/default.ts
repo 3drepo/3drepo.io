@@ -25,7 +25,8 @@ import { AuthActions } from '@/v4/modules/auth';
 axios.defaults.withCredentials = true;
 
 axios.interceptors.response.use(
-	(response) => response,
+	(response) =>
+		response,
 	(error) => {
 		try {
 			const invalidMessages = ['Authentication error', 'You are not logged in'] as any;
@@ -62,7 +63,8 @@ axios.interceptors.response.use(
 		}
 	},
 );
-export const generateV5ApiUrl = (url: string, requestMethod: string): string => encodeURI(clientConfigService.apiUrl(requestMethod, `v5/${url}`));
+export const generateV5ApiUrl = (url: string, requestMethod: string): string =>
+	encodeURI(clientConfigService.apiUrl(requestMethod, `v5/${url}`));
 
 const getRequest = (url, ...options) => {
 	const requestUrl = generateV5ApiUrl(url, clientConfigService.GET_API);

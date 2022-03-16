@@ -77,7 +77,8 @@ export const ContainerEllipsisMenu = ({
 				title={formatMessage(selected
 					? { id: 'containers.ellipsisMenu.hideRevisions', defaultMessage: 'Hide Revisions' }
 					: { id: 'containers.ellipsisMenu.viewRevisions', defaultMessage: 'View Revisions' })}
-				onClick={() => onSelectOrToggleItem(container._id)}
+				onClick={() =>
+					onSelectOrToggleItem(container._id)}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
@@ -107,21 +108,23 @@ export const ContainerEllipsisMenu = ({
 					id: 'containers.ellipsisMenu.delete',
 					defaultMessage: 'Delete',
 				})}
-				onClick={() => dispatch(DialogsActions.open('delete', {
-					title: formatMessage(
-						{ id: 'deleteModal.container.title', defaultMessage: 'Delete {name}?' },
-						{ name: container.name },
-					),
-					onClickConfirm: () => ContainersActionsDispatchers.deleteContainer(
-						teamspace,
-						project,
-						container._id,
-					),
-					message: formatMessage({
-						id: 'deleteModal.container.message',
-						defaultMessage: 'By deleting this Container your data will be lost permanently and will not be recoverable.',
-					}),
-				}))}
+				onClick={() =>
+					dispatch(DialogsActions.open('delete', {
+						title: formatMessage(
+							{ id: 'deleteModal.container.title', defaultMessage: 'Delete {name}?' },
+							{ name: container.name },
+						),
+						onClickConfirm: () =>
+							ContainersActionsDispatchers.deleteContainer(
+								teamspace,
+								project,
+								container._id,
+							),
+						message: formatMessage({
+							id: 'deleteModal.container.message',
+							defaultMessage: 'By deleting this Container your data will be lost permanently and will not be recoverable.',
+						}),
+					}))}
 			/>
 		</EllipsisMenu>
 	);

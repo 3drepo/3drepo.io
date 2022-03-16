@@ -44,7 +44,8 @@ initializeActionsDispatchers(dispatch);
 initializeIntl(navigator.language);
 
 initializeSocket(clientConfigService.chatConfig);
-subscribeToSocketEvent(SocketEvents.CONNECT, () => setSocketIdHeader(getSocketId()));
+subscribeToSocketEvent(SocketEvents.CONNECT, () =>
+	setSocketIdHeader(getSocketId()));
 
 const render = () => {
 	ReactDOM.render(

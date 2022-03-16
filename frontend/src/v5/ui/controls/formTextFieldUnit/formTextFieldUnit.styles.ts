@@ -18,14 +18,17 @@
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 import styled from 'styled-components';
 
-export const UnitTextField = styled(FormTextField).attrs((props) => ({
-	label: ` (${props.$labelUnit})`,
-	type: 'tel',
-}))`
+export const UnitTextField = styled(FormTextField).attrs((props) =>
+	({
+		label: ` (${props.$labelUnit})`,
+		type: 'tel',
+	}))`
 	.MuiInputLabel-formControl {
 		&::before {
-			content: "${(props) => props.$labelName}";
-			${(props) => props.theme.typography.kicker};
+			content: "${(props) =>
+		props.$labelName}";
+			${(props) =>
+		props.theme.typography.kicker};
 		}
 		
 		text-transform: none; 

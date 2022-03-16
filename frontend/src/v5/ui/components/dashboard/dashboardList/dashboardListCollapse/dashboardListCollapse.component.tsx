@@ -40,7 +40,10 @@ export const DashboardListCollapse = ({
 	return (
 		<Container className={className} isLoading={isLoading}>
 			<ControlsContainer>
-				<ButtonContainer onClick={() => setIsCollapsed((state) => !state)}>
+				<ButtonContainer onClick={() =>
+					setIsCollapsed((state) =>
+						!state)}
+				>
 					<Tooltip title={(!isCollapsed ? tooltipTitles?.visible : tooltipTitles?.collapsed) ?? ''}>
 						<ChevronButton isOn={!isCollapsed} isLoading={isLoading} />
 					</Tooltip>
