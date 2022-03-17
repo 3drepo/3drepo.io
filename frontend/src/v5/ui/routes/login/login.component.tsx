@@ -16,14 +16,14 @@
  */
 
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authActions.dispatchers';
-import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
-import { Link, useRouteMatch, Redirect } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { LoginSchema } from '@/v5/validation/auth';
-import { Background, Footer, ForgotPassword, Heading, LoginButton, LoginContainer, Logo, OtherOptions, PasswordField, SignUp, UsernameField } from './login.styles';
+import { AuthPage } from '@components/authPage';
+import { ForgotPassword, Heading, LoginButton, OtherOptions, PasswordField, SignUp, UsernameField } from './login.styles';
 
 const APP_VERSION = ClientConfig.VERSION;
 
@@ -37,75 +37,61 @@ export const Login = () => {
 		resolver: yupResolver(LoginSchema),
 	});
 
-	const { url } = useRouteMatch();
-	if (AuthHooksSelectors.selectIsAuthenticated()) {
-		return (<Redirect to={{ pathname: '/v5/dashboard', state: { referrer: url } }} />);
-	}
-
-	const customLogo = null; // Add custom logo grabber
-
 	const onSubmit = ({ username, password }) => {
 		AuthActionsDispatchers.login(username, password);
 	};
 
 	return (
-		<Background>
-			<Logo
-				draggable="false"
-				src={customLogo || 'assets/images/3drepo-logo-white.png'}
-				longdesc="3DRepoBuildingInformationModellingSoftware"
-				alt="Logo"
-			/>
-			<LoginContainer>
-				<Heading>
-					<FormattedMessage id="placeholder" defaultMessage="Log in" />
-				</Heading>
-				<form onSubmit={handleSubmit(onSubmit)}>
-					<UsernameField
-						control={control}
-						name="username"
-						label={formatMessage({
-							id: 'placeholder',
-							defaultMessage: 'Username or email',
-						})}
-						autoComplete="login"
-					/>
-					<PasswordField
-						control={control}
-						name="password"
-						label={formatMessage({
-							id: 'placeholder',
-							defaultMessage: 'Password',
-						})}
-						autoComplete="current-password"
-						type="password"
-					/>
-					<OtherOptions>
-						<SignUp>
-							<FormattedMessage
-								id="placeholder"
-								defaultMessage="Don't have an account? <Link>Sign up</Link>"
-								values={{
-									Link: (val:string) => <Link to="/sign-up">{val}</Link>,
-								}}
-							/>
-						</SignUp>
-						<ForgotPassword>
-							<Link to={`${url}/password-forgot`}>
-								<FormattedMessage id="placeholder" defaultMessage="Forgotten your password?" />
-							</Link>
-						</ForgotPassword>
-					</OtherOptions>
-					<LoginButton disabled={!isValid}>
-						<FormattedMessage id="placeholder" defaultMessage="Log in" />
-					</LoginButton>
-				</form>
-			</LoginContainer>
-			<Footer>
+		<AuthPage
+			footer={(
 				<Link to="/releaseNotes">
 					<FormattedMessage id="placeholder" defaultMessage="Version: {version}" values={{ version: APP_VERSION }} />
 				</Link>
-			</Footer>
-		</Background>
+			)}
+		>
+			<form onSubmit={handleSubmit(onSubmit)}>
+				<Heading>
+					<FormattedMessage id="placeholder" defaultMessage="Log in" />
+				</Heading>
+				<UsernameField
+					control={control}
+					name="username"
+					label={formatMessage({
+						id: 'placeholder',
+						defaultMessage: 'Username or email',
+					})}
+					autoComplete="login"
+				/>
+				<PasswordField
+					control={control}
+					name="password"
+					label={formatMessage({
+						id: 'placeholder',
+						defaultMessage: 'Password',
+					})}
+					autoComplete="current-password"
+					type="password"
+				/>
+				<OtherOptions>
+					<SignUp>
+						<FormattedMessage
+							id="placeholder"
+							defaultMessage="Don't have an account? <Link>Sign up</Link>"
+							values={{
+								Link: (val:string) => <Link to="/sign-up">{val}</Link>,
+							}}
+						/>
+					</SignUp>
+					<ForgotPassword>
+						<Link to="/password-forgot">
+							<FormattedMessage id="placeholder" defaultMessage="Forgotten your password?" />
+						</Link>
+					</ForgotPassword>
+				</OtherOptions>
+				<LoginButton disabled={!isValid}>
+					<FormattedMessage id="placeholder" defaultMessage="Log in" />
+				</LoginButton>
+			</form>
+		</AuthPage>
 	);
 };

@@ -23,29 +23,6 @@ import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { Typography } from '@controls/typography';
 import { Button } from '@controls/button';
 
-export const Background = styled.div`
-	display: flex;
-	height: 100%;
-	background: ${({ theme }) => theme.palette.gradient.secondary};
-	align-items: center;
-	justify-content: center;
-	flex-direction: column;
-`;
-
-export const Logo = styled.img`
-	max-height: 40px;
-	max-width: 200px;
-	padding: 28px;
-	user-drag: none;
-`;
-
-export const LoginContainer = styled.div`
-	width: 408px;
-	border-radius: 20px;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	padding: 58px 64px 38px;
-`;
-
 export const Heading = styled(Typography).attrs({
 	variant: 'h1',
 })`
@@ -100,17 +77,4 @@ export const LoginButton = styled(Button).attrs({
 	startIcon: <LoginIcon />,
 })`
 	margin: 20px 0;
-`;
-
-export const Footer = styled(Typography).attrs({
-	variant: 'body1',
-})`
-	color: ${({ theme }) => theme.palette.base.light};
-	padding: 30px;
-	user-select: none;
-	
-	a {
-		text-decoration: none;
-		color: inherit;
-	}
 `;
