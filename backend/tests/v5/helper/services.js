@@ -175,6 +175,37 @@ ServiceHelper.generateUserCredentials = () => ({
 	},
 });
 
+ServiceHelper.generateRandomProject = (projectAdmins = []) => ({
+	id: ServiceHelper.generateUUIDString(),
+	name: ServiceHelper.generateRandomString(),
+	permissions: projectAdmins.map(({ user }) => ({ user, permissions: ['admin_project'] })),
+});
+
+ServiceHelper.generateRandomModel = ({ isFederation, viewers, commenters, collaborators, properties = {} } = {}) => {
+	const permissions = [];
+	if (viewers?.length) {
+		permissions.push(...viewers.map((user) => ({ user, permission: 'viewer' })));
+	}
+
+	if (commenters?.length) {
+		permissions.push(...commenters.map((user) => ({ user, permission: 'commenter' })));
+	}
+
+	if (collaborators?.length) {
+		permissions.push(...collaborators.map((user) => ({ user, permission: 'collaborator' })));
+	}
+
+	return {
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		permissions,
+		properties: {
+			...ServiceHelper.generateRandomModelProperties(),
+			...(isFederation ? { federate: true } : {}),
+			...properties },
+	};
+};
+
 ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true) => {
 	const _id = ServiceHelper.generateUUIDString();
 	const entry = {

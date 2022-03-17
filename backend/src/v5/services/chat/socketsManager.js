@@ -40,11 +40,8 @@ const emitError = (socket, error, message, action, data) => {
 
 const joinRoom = async (socket, data) => {
 	const { teamspace, model, project, notifications } = data;
-	const username = getUserNameFromSocket(socket);
-	if (!username) {
-		throw { code: ERRORS.UNAUTHORISED, message: 'You are not authenticated to the service.' };
-	}
 
+	const username = getUserNameFromSocket(socket);
 	let channelName;
 
 	if (notifications) {
@@ -125,6 +122,10 @@ const subscribeToSocketEvents = (socket) => {
 	socket.onDisconnect(() => removeSocket(socket));
 	socket.onJoin(async (data) => {
 		try {
+			const username = getUserNameFromSocket(socket);
+			if (!username) {
+				throw { code: ERRORS.UNAUTHORISED, message: 'You are not authenticated to the service.' };
+			}
 			if (data.account) {
 				await joinRoomV4(socket, data);
 			} else {
