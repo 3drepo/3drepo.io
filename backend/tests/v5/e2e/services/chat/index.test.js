@@ -43,10 +43,9 @@ describe('E2E Chat Service', () => {
 		//	agent = await SuperTest(server);
 		await setupData();
 	});
-	afterAll(async () => {
-		ServiceHelper.closeApp(server);
-		await chatApp.close();
-	});
+	afterAll(() => Promise.all([
+		ServiceHelper.closeApp(server),
+		chatApp.close()]));
 
 	runConnectionTests();
 });
