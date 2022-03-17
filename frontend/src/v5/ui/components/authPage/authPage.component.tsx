@@ -30,11 +30,20 @@ export const AuthPage = ({ footer, children }: IAuthPage): JSX.Element => {
 		return (<Redirect to={{ pathname: '/v5/dashboard', state: { referrer: url } }} />);
 	}
 
+	const getSubdomain = () => {
+		const host = window.location.hostname;
+		if (host.indexOf('.') < 0) return '';
+		return host.split('.')[0];
+	};
+
+	const customLogin = ClientConfig.customLogins[getSubdomain()];
+	const topLogoSrc = customLogin?.topLogo || 'assets/images/3drepo-logo-white.png';
+
 	return (
 		<Background>
 			<Logo
 				draggable="false"
-				src="assets/images/3drepo-logo-white.png"
+				src={topLogoSrc}
 				longdesc="3DRepoBuildingInformationModellingSoftware"
 				alt="Logo"
 			/>
