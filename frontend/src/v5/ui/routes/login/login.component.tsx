@@ -21,17 +21,20 @@ import { Link, useRouteMatch, Redirect } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { LoginSchema } from '@/v5/validation/auth';
 import { Background, Footer, ForgotPassword, Heading, LoginButton, LoginContainer, Logo, OtherOptions, PasswordField, SignUp, UsernameField } from './login.styles';
 
 const APP_VERSION = ClientConfig.VERSION;
 
 export const Login = () => {
-	const { control, handleSubmit } = useForm({
+	const { control, handleSubmit, formState: { isValid } } = useForm({
 		mode: 'onSubmit',
 		defaultValues: {
 			username: '',
 			password: '',
 		},
+		resolver: yupResolver(LoginSchema),
 	});
 
 	const { url } = useRouteMatch();
@@ -93,7 +96,7 @@ export const Login = () => {
 							</Link>
 						</ForgotPassword>
 					</OtherOptions>
-					<LoginButton disabled={false}>
+					<LoginButton disabled={!isValid}>
 						<FormattedMessage id="placeholder" defaultMessage="Log in" />
 					</LoginButton>
 				</form>
