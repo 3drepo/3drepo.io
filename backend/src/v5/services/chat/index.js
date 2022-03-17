@@ -87,13 +87,13 @@ ChatService.createModelMessage = (event, data, teamspace, project, model) => {
 };
 
 ChatService.createApp = async (server) => {
-	const { middleware, close } = await session;
+	const { middleware, deinitStore } = await session;
 	const socketServer = RTMsg.createApp(server, middleware, SESSION_HEADER, SocketsManager.addSocket);
 	subscribeToEvents(socketServer);
 	return {
 		close: async () => {
 			await socketServer.close();
-			await close();
+			await deinitStore();
 			await server.close();
 		},
 	};

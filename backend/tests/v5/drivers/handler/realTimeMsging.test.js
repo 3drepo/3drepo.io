@@ -46,7 +46,6 @@ const connectClient = () => new Promise((resolve, reject) => {
 });
 
 const startServer = async (onNewSocket) => {
-	http.createServer();
 	const server = http.createServer();
 	server.listen(port, ip);
 	const { middleware, deinitStore } = await session;

@@ -17,10 +17,14 @@
 
 const Crypto = require('crypto');
 const amqp = require('amqplib');
+const http = require('http');
 
 const { src, srcV4 } = require('./path');
 
 const { createApp } = require(`${srcV4}/services/api`);
+const { io: ioClient } = require('socket.io-client');
+
+const ChatService = require(`${src}/services/chat`);
 const DbHandler = require(`${src}/handler/db`);
 const config = require(`${src}/utils/config`);
 const { createTeamSpaceRole } = require(`${srcV4}/models/role`);
@@ -263,6 +267,24 @@ ServiceHelper.generateView = (account, model, hasThumbnail = true) => ({
 });
 
 ServiceHelper.app = () => createApp().listen(8080);
+
+ServiceHelper.chatApp = () => {
+	const server = http.createServer();
+	const chatConfig = config.servers.find(({ service }) => service === 'chat');
+	server.listen(chatConfig.port, config.hostname);
+	return ChatService.createApp(server);
+};
+
+ServiceHelper.connectToSocket = () => {
+	const { port } = config.servers.find(({ service }) => service === 'chat');
+	return ioClient(`http://${config.hostname}:${port}`,
+		{
+			path: '/chat',
+			transports: ['websocket'],
+			reconnection: true,
+			reconnectionDelay: 500,
+		});
+};
 
 ServiceHelper.closeApp = async (server) => {
 	await DbHandler.disconnect();
