@@ -277,7 +277,7 @@ ServiceHelper.chatApp = () => {
 
 ServiceHelper.connectToSocket = () => {
 	const { port } = config.servers.find(({ service }) => service === 'chat');
-	return ioClient(`http://${config.hostname}:${port}`,
+	return ioClient(`http://${config.host}:${port}`,
 		{
 			path: '/chat',
 			transports: ['websocket'],

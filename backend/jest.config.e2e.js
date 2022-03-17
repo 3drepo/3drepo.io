@@ -19,7 +19,8 @@ const config = require('./jest.config');
 
 config.coveragePathIgnorePatterns = [
 	...config.coveragePathIgnorePatterns,
-	'^((?!routes).)*$'
+	// require code coverage on routes folder and services/chat folder
+	'^((?!routes|services\/chat).)*$'
 ];
 
 config.testMatch = ['**/tests/**/e2e/**/*.test.[jt]s?(x)'];
