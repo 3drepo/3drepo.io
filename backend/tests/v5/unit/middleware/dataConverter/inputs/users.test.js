@@ -205,7 +205,7 @@ const testResetingPasswordData = () => {
 		[{ body: { token: 'someToken', user: 'some user' } }, false, 'without new password', templates.invalidArguments],
 		[{ body: { token: 'someToken', newPassword: validPassword } }, false, 'without user', templates.invalidArguments],
 		[{ body: { token: 'abc', newPassword: '123', user: 'some user' } }, false, 'with weak new password', templates.invalidArguments],
-		[{ body: { token: 'abc', newPassword: validPassword, user: nonExistingUsername } }, false, 'with user that doesnt exist', templates.invalidToken],
+		[{ body: { token: 'abc', newPassword: validPassword, user: nonExistingUsername } }, false, 'with user that doesnt exist', templates.invalidArguments],
 		[{ body: { token: 'someToken', newPassword: validPassword, user: 'some user' } }, true, 'with token and valid new password'],
 		[{ body: { token: 'someToken', newPassword: validPassword, user: 'some user', extra: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments, templates.invalidArguments],

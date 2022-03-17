@@ -22,38 +22,48 @@ const Users = require(`${src}/processors/users`);
 
 jest.mock('../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
+jest.mock('../../../../src/v5/services/mailer');
+const Mailer = require(`${src}/services/mailer`);
+jest.mock('../../../../src/v5/utils/helper/strings');
+const Strings = require(`${src}/utils/helper/strings`);
 
-const users = [
-	{
-		user: 'user1',
-		customData: {
-			firstName: 'Will',
-			lastName: 'Smith',
-			email: 'example@email.com',
-			avatar: true,
-			apiKey: 123,
-			billing: {
-				billingInfo: {
-					countryCode: 'GB',
-					company: '3D Repo',
-				},
-			},
-			resetPasswordToken: {
-				token: 'valid token',
-				expiredAt: new Date(2030, 1, 1),
+const exampleHashString = 'example token';
+
+const user = {
+	user: 'user1',
+	customData: {
+		firstName: 'Will',
+		lastName: 'Smith',
+		email: 'example@email.com',
+		avatar: true,
+		apiKey: 123,
+		billing: {
+			billingInfo: {
+				countryCode: 'GB',
+				company: '3D Repo',
 			},
 		},
+		resetPasswordToken: {
+			token: 'valid token',
+			expiredAt: new Date(2030, 1, 1),
+		},
 	},
-];
+};
 
-const getUserByUsernameMock = UsersModel.getUserByUsername.mockImplementation(
-	(username) => users.find((u) => u.user === username),
-);
+const getUserByUsernameMock = UsersModel.getUserByUsername.mockImplementation((username) => {
+	if (username === user.user) {
+		return user;
+	}
+
+	throw templates.userNotFound;
+});
 const updateUserByUsernameMock = UsersModel.updateProfile.mockImplementation(() => {});
 const updatePasswordMock = UsersModel.updatePassword.mockImplementation(() => {});
-UsersModel.canLogIn.mockImplementation((user) => user);
-UsersModel.canLogIn.mockImplementation((user) => user);
+const updateResetPasswordTokenMock = UsersModel.updateResetPasswordToken.mockImplementation(() => {});
+UsersModel.canLogIn.mockImplementation(() => user);
 UsersModel.authenticate.mockResolvedValue('user1');
+const sendResetPasswordEmailMock = Mailer.sendResetPasswordEmail.mockImplementation(() => {});
+Strings.generateHashString.mockImplementation(() => exampleHashString);
 
 const testLogin = () => {
 	describe('Login', () => {
@@ -95,7 +105,7 @@ const tesGetProfileByUsername = () => {
 			};
 
 			const res = await Users.getProfileByUsername('user1');
-			expect(res).toEqual(formatUser(users[0]));
+			expect(res).toEqual(formatUser(user));
 			expect(getUserByUsernameMock.mock.calls.length).toBe(1);
 			expect(getUserByUsernameMock.mock.calls[0][1]).toEqual(projection);
 		});
@@ -130,8 +140,34 @@ const tesUpdateProfile = () => {
 	});
 };
 
+const testGenerateResetPasswordToken = () => {
+	describe('Reset password token', () => {
+		test('should reset password token', async () => {
+			const expiredAt = new Date();
+			expiredAt.setHours(expiredAt.getHours() + 24);
+			await Users.generateResetPasswordToken('user1');
+			expect(updateResetPasswordTokenMock.mock.calls.length).toBe(1);
+			expect(updateResetPasswordTokenMock.mock.calls[0][0]).toBe('user1');
+			expect(updateResetPasswordTokenMock.mock.calls[0][1])
+				.toStrictEqual({ token: exampleHashString, expiredAt });
+			expect(sendResetPasswordEmailMock.mock.calls.length).toBe(1);
+			expect(sendResetPasswordEmailMock.mock.calls[0][0]).toBe(user.customData.email);
+			expect(sendResetPasswordEmailMock.mock.calls[0][1]).toStrictEqual({ token: exampleHashString,
+				email: user.customData.email,
+				username: 'user1',
+				firstName: user.customData.firstName });
+		});
+
+		test('should reset password token', async () => {
+			await expect(Users.generateResetPasswordToken('user2'))
+				.rejects.toEqual(templates.userNotFound);
+		});
+	});
+};
+
 describe('processors/users', () => {
 	testLogin();
 	tesGetProfileByUsername();
 	tesUpdateProfile();
+	testGenerateResetPasswordToken();
 });

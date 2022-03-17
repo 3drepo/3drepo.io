@@ -434,8 +434,8 @@ const establishRoutes = () => {
 	*                 description: The reset password token
 	*                 example: c0f6b97ae5a9c210ee050a9ada3faabc
 	*     responses:
-	*       401:
-	*         $ref: "#/components/responses/invalidToken"
+	*       400:
+	*         $ref: "#/components/responses/invalidArguments"
 	*       200:
 	*         description: Resets the user password
 	*/

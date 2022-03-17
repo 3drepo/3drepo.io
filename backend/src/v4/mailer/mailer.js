@@ -16,20 +16,29 @@
  */
 
 "use strict";
+const { createTestAccount } = require("nodemailer");
 const nodemailer = require("nodemailer");
 const config = require("../config");
 const C = require("../constants");
+const { systemLogger } = require("../logger");
 const getBaseURL = config.getBaseURL;
 let transporter;
 
-function sendEmail(template, to, data, attachments) {
-
+async function sendEmail(template, to, data, attachments) {
 	if(!config.mail || !config.mail.smtpConfig) {
 		return Promise.reject({ message: "config.mail.smtpConfig is not set"});
 	}
 
 	if(!config.mail || !config.mail.smtpConfig) {
 		return Promise.reject({ message: "config.mail.sender is not set"});
+	}
+
+	if(config.useDummyEmailAccount) {
+		const testAccount = await createTestAccount();
+		config.mail.smtpConfig.auth = {
+			user: testAccount.user,
+			pass: testAccount.pass
+		};
 	}
 
 	const mailOptions = {
@@ -48,6 +57,7 @@ function sendEmail(template, to, data, attachments) {
 	return new Promise((resolve, reject) => {
 		transporter.sendMail(mailOptions, function(err, info) {
 			if(err) {
+				systemLogger.logDebug(`Email error - ${err.message}`);
 				reject(err);
 			} else {
 				resolve(info);
