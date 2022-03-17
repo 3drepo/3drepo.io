@@ -13,7 +13,6 @@ module.exports = {
 		ecmaVersion: 2020,
 		project: './tsconfig.json'
 	},
-	ignorePatterns: ['/*.*', "**/src/locales/**"],
 	parser: '@typescript-eslint/parser',
 	rules: {
 		'license-header': 'error',

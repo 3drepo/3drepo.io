@@ -30,8 +30,16 @@ import {
 } from './shareTextField.styles';
 
 type IShareTextField = {
+	/**
+	 * The label on top of the control
+	 */
 	label: string,
+
+	/**
+	 * the value to be copied
+	 */
 	value: string,
+
 	className?: string,
 };
 
