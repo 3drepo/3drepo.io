@@ -18,7 +18,7 @@
 import styled, { css } from 'styled-components';
 import * as EllipsisButtonStyles from '@controls/ellipsisButton/ellipsisButton.styles';
 
-export const DashboardListItemIcon = styled.div`
+export const DashboardListItemIcon = styled.div<{ selected?: boolean }>`
 	width: 36px;
 	margin-right: 10px;
 

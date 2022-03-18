@@ -26,6 +26,7 @@ interface IProps {
 	pending?: boolean;
 	disabled?: boolean;
 	variant?: string;
+	onClick?: (event) => void;
 }
 
 export const SubmitButton = ({ pending, children, ...props }: IProps) => {

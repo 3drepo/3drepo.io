@@ -17,7 +17,7 @@
 import { IconButton } from '@mui/material';
 import styled, { css } from 'styled-components';
 
-export const StyledIconButton = styled(IconButton)`
+export const StyledIconButton = styled(IconButton)<{ $isOn?: boolean, $isLoading?: boolean }>`
 	height: 28px;
 	width: 28px;
 	padding: 0;

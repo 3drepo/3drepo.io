@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 import { Typography } from '@mui/material';
 
-export const Text = styled(Typography)`
+export const Text = styled(Typography)<{ $active: boolean }>`
 	${({ theme }) => theme.typography.kicker};
 	color: ${({ theme, $active }) => ($active ? theme.palette.primary.contrast : theme.palette.base.light)};
 	display: inline;

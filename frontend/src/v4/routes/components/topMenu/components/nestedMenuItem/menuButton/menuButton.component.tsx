@@ -35,7 +35,7 @@ export const MenuButton: FunctionComponent<IProps> = ({ IconProps, Icon, label, 
 		<MenuIcon>
 			{icon}
 		</MenuIcon>
-		<MenuText icon="true">
+		<MenuText>
 			{label}
 		</MenuText>
 		<ArrowRightIcon style={{ color: COLOR.BLACK_54 }} {...IconProps} />

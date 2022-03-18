@@ -25,7 +25,7 @@ import { FooterContainer, StyledButton, Version } from '../signUp.styles';
 const APP_VERSION = clientConfigService.VERSION;
 
 export const Footer = () => (
-	<FooterContainer container alignItems="center" justify="space-between">
+	<FooterContainer>
 		<Version flex-direction="row">
 			Version:
 			<Tooltip title="Release notes">

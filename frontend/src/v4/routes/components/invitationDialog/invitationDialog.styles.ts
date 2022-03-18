@@ -84,9 +84,9 @@ export const IconButton = styled(IconButtonBase)`
 	}
 `;
 
-export const PermissionsTable = styled(PermissionsTableBase)`
+export const PermissionsTable = styled(PermissionsTableBase)<{ modelsNumber: number }>`
 	&& {
-		height: ${(props: any) => `calc(62px * ${props.modelsNumber} + 22px)`};
+		height: ${({ modelsNumber }) => `calc(62px * ${modelsNumber} + 22px)`};
 		width: fit-content;
 		margin-top: 15px;
 		margin-bottom: 15px;

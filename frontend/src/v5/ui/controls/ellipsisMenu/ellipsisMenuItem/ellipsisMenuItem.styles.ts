@@ -17,8 +17,9 @@
 
 import styled from 'styled-components';
 import { MenuItem as MenuItemComponent } from '@mui/material';
+import { Link } from 'react-router-dom';
 
-export const MenuItem = styled(MenuItemComponent)`
+export const MenuItem = styled(MenuItemComponent)<typeof Link>`
 	color: ${({ theme }) => theme.palette.secondary.main};
 	margin: 0;
 	height: 40px;

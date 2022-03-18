@@ -37,7 +37,7 @@ const getButtonSize = (size) => {
 	return null;
 };
 
-const mainFabStyles = css`
+const mainFabStyles = css<{ disabled?: boolean }>`
 	&& {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		border: none;
@@ -68,7 +68,7 @@ const mainFabStyles = css`
 	}
 `;
 
-const contrastFabStyles = css`
+const contrastFabStyles = css<{ disabled?: boolean }>`
 	${({ disabled }) => disabled && css`
 		&& {
 			border-color: ${({ theme }) => theme.palette.secondary.light};
@@ -110,7 +110,7 @@ const contrastFabStyles = css`
 	}
 `;
 
-export const StyledFab = styled(Fab)`
+export const StyledFab = styled(Fab)<{ size?: any, $variant?: any }>`
 	${({ size }) => getButtonSize(size)};
 	${({ $variant }) => $variant === 'main' && mainFabStyles}
 	${({ $variant }) => $variant === 'contrast' && contrastFabStyles}

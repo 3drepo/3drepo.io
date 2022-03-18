@@ -28,13 +28,13 @@ export const OwnerData = styled.div`
 	color: ${COLOR.DARK_GRAY};
 `;
 
-export const Avatar = styled(AvatarComponent)`
+export const Avatar = styled(AvatarComponent)<{ size?: number, src?: string }>`
 	&& {
-		height: ${(props) => props.size || DEFAULT_AVATAR_SIZE}px;
-		width: ${(props) => props.size || DEFAULT_AVATAR_SIZE}px;
-		background-color: ${(props) => !props.src ? COLOR.BLACK_20 : `transparent`};
+		height: ${({ size }) => size || DEFAULT_AVATAR_SIZE}px;
+		width: ${({ size }) => size || DEFAULT_AVATAR_SIZE}px;
+		background-color: ${({ src }) => !src ? COLOR.BLACK_20 : `transparent`};
 		color: ${COLOR.WHITE};
-		font-size: ${(props) => Math.round((props.size || DEFAULT_AVATAR_SIZE) * 14 / DEFAULT_AVATAR_SIZE)}px;
+		font-size: ${({ size }) => Math.round((size || DEFAULT_AVATAR_SIZE) * 14 / DEFAULT_AVATAR_SIZE)}px;
 	}
 `;
 

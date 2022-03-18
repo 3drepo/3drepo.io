@@ -38,7 +38,6 @@ const renderIcon = (Icon) => {
 const renderMenuItem = ({ label, Icon, onClick, enabled, subItems }: IHeaderMenuItem, index) => (
 	<FoldableMenuItem
 		key={index}
-		button
 		checked={enabled}
 		onClick={onClick}
 		icon={renderIcon(Icon)}

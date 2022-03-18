@@ -71,7 +71,7 @@ interface IState {
 	stepInterval: number;
 	stepScale: STEP_SCALE;
 	waitingForFrameLoad: boolean;
-	sliderValue: number | null;
+	sliderValue: number | number[] | null;
 }
 
 export class SequencePlayer extends PureComponent<IProps, IState> {
@@ -212,7 +212,7 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 	public prevStep = this.moveStep.bind(this, -1);
 
 	public play = () => {
-		(this.props.onPlayStarted || noop )();
+		(this.props.onPlayStarted || noop)();
 		this.stop();
 
 		const intervalId = (setInterval(() => {
@@ -325,9 +325,9 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 								max={this.totalTime}
 								step={36000000}
 								value={this.state.sliderValue || this.currentTime}
-								onChange={(e, val) =>  {
+								onChange={(e, val) => {
 									this.debouncedGoto(val);
-									this.setState({sliderValue: val});
+									this.setState({ sliderValue: val });
 								}}
 							/>
 						</Grid>

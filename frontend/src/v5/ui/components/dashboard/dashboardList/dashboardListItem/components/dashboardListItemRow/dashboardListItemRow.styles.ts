@@ -21,7 +21,7 @@ import * as FavouriteCheckboxStyles from '@controls/favouriteCheckbox/favouriteC
 import * as EllipsisButtonStyles from '@controls/ellipsisButton/ellipsisButton.styles';
 import * as TextOverflowStyles from '@controls/textOverflow/textOverflow.styles';
 
-export const Container = styled.div`
+export const Container = styled.div<{ selected?: boolean }>`
 	position: relative;
 	display: flex;
 	align-items: center;

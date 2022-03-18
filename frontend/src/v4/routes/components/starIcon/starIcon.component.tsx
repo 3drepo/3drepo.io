@@ -32,7 +32,8 @@ export const StarIcon = memo(({ active, onClick, className }: IProps) => {
 	const IconComponent = active ? Star : StarBorder;
 
 	return (
-		<IconWrapper className={className} active={Number(active)}>
+		<IconWrapper className={className} active={Boolean(active)}>
+			star
 			<IconComponent onClick={onClick} color="inherit" fontSize="small" />
 		</IconWrapper>
 	);

@@ -43,7 +43,7 @@ export const LoaderContainer = styled(DialogLoaderContainer)`
 	height: calc(100% - 65px);
 `;
 
-export const StyledTab = styled(Tab)`
+export const StyledTab = styled(Tab)<{ component?: string }>`
 	&& {
 		padding-left: 24px;
 		padding-right: 24px;

@@ -21,19 +21,20 @@ import { Button } from '@controls/button';
 
 export const Title = styled(Button).attrs({
 	variant: 'text',
-})`
+})<{ selected?: boolean }>`
 	${({ theme }) => theme.typography.h5};
 
 	color: ${({ theme }) => theme.palette.secondary.main};
 	padding: 0;
 	margin: 0;
 	max-width: 100%;
+    justify-content: flex-start;
 
 	${({ theme, selected }) => selected && css`
 		color: ${theme.palette.primary.contrast};
 	`}
 
-	& span{
+	& span {
 		text-overflow: ellipsis;
 		white-space: nowrap;
 		overflow: hidden;
@@ -43,7 +44,7 @@ export const Title = styled(Button).attrs({
 export const Subtitle = styled(Typography).attrs({
 	variant: 'body1',
 	component: 'span',
-})`
+})<{ selected?: boolean }>`
 	white-space: nowrap;
 	display: block;
 	color: ${({ theme }) => theme.palette.base.main};

@@ -26,7 +26,7 @@ export const Container = styled(Breadcrumbs)`
 	}
 `;
 
-export const Breadcrumb = styled(Button).attrs({
+export const Breadcrumb: typeof Link = styled(Button).attrs({
 	variant: 'text',
 	component: Link,
 })`

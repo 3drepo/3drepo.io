@@ -24,10 +24,10 @@ export const Container = styled.nav`
 	margin-right: 20px;
 `;
 
-export const Link = styled(LinkComponent).attrs({
+export const Link: typeof NavLink = styled(LinkComponent).attrs({
 	component: NavLink,
 	activeClassName: 'active',
-})`
+})<{ disabled?: boolean }>`
 	&& {
 		text-decoration: none;
 		display: flex;

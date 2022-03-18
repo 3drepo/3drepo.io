@@ -51,7 +51,7 @@ const contrastStyles = css`
 	}
 `;
 
-export const Checkbox = styled(CheckboxComponent)`
+export const Checkbox = styled(CheckboxComponent)<{ selected?: boolean }>`
 	&& {
 		padding: 10px;
 

@@ -78,20 +78,22 @@ export const SubMenu = (props: ISubMenuProps) => {
 	);
 };
 
-export interface IFoldableMenuItemProps extends ListItemProps {
+export interface IFoldableMenuItemProps {
 	icon?: ReactNode;
 	checked?: boolean;
 	arrow?: boolean;
+	onClick: (event?) => void;
+	children?: any;
 }
 
 export const FoldableMenuItem = ({children, ...props}: IFoldableMenuItemProps) => (
-		<StyledListItem {...props}>
-			{props.icon  && <IconWrapper>{props.icon}</IconWrapper>}
-			<StyledItemText>
-				{children}
-				{props.checked && <Check fontSize="small" />}
-			</StyledItemText>
-		</StyledListItem>
+	<StyledListItem {...props}>
+		{props.icon  && <IconWrapper>{props.icon}</IconWrapper>}
+		<StyledItemText>
+			{children}
+			{props.checked && <Check fontSize="small" />}
+		</StyledItemText>
+	</StyledListItem>
 );
 
 interface IProps {

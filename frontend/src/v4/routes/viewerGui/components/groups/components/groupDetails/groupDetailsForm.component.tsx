@@ -89,7 +89,7 @@ export class GroupDetailsForm extends PureComponent<IProps, any> {
 					<FieldsRow>
 						<StyledTextField
 							label={<LongLabel>Number of objects</LongLabel>}
-							value={totalSavedMeshes || 0}
+							value={(totalSavedMeshes || 0).toString()}
 							disabled
 						/>
 						<StyledTextField

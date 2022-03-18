@@ -50,7 +50,7 @@ export const MainMenuButton: FunctionComponent<IUserButtonProps> =
 	return (
 		<StyledIconButton
 			{...props}
-			active={isMenuOpen ? 1 : 0}
+			active={Boolean(isMenuOpen)}
 			aria-label="Toggle main menu"
 			aria-haspopup="true"
 		>

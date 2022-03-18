@@ -29,26 +29,33 @@ import { NestedMenuItem } from '../../nestedMenuItem/nestedMenuItem.component';
 import { IUserData } from '../mainMenu.helpers';
 import { MenuIcon, MenuItem, MenuText, MenuUser } from './menuContent.styles';
 
-const ExternalLink = ({ ...props }) => {
-	const Icon = props.icon || Fragment;
-	const iconProps = props.icon ? { style: { color: COLOR.BLACK_54 } } : {};
+type ExternalLinkProps = {
+	label: string;
+	icon?: any;
+	submenu?: any;
+	onButtonClick: () => void;
+}
+
+const ExternalLink = ({ label, icon, onButtonClick, submenu }: ExternalLinkProps) => {
+	const Icon = icon || Fragment;
+	const iconProps = icon ? { style: { color: COLOR.BLACK_54 } } : {};
 	return (
-		<MenuItem aria-label={props.label} onClick={props.onButtonClick}>
+		<MenuItem aria-label={label} onClick={onButtonClick}>
 			<MenuIcon>
 				<Icon {...iconProps} />
 			</MenuIcon>
-			<MenuText primary={props.label} submenu={props.submenu} />
+			<MenuText primary={label} submenu={submenu} />
 		</MenuItem>
 	);
 };
 
-const UserMenuButton = ({ Icon, ...props }) => {
+const UserMenuButton = ({ Icon, label, onButtonClick }) => {
 	return (
-		<MenuItem aria-label={props.label} onClick={props.onButtonClick}>
+		<MenuItem aria-label={label} onClick={onButtonClick}>
 			<MenuIcon>
 				<Icon />
 			</MenuIcon>
-			<MenuText primary={props.label} />
+			<MenuText primary={label} />
 		</MenuItem>
 	);
 };

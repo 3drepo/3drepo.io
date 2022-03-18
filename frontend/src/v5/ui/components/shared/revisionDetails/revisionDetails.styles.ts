@@ -113,7 +113,7 @@ const revisionListItemStylesLineStyles = ({ theme, selected, isBeforeSelected })
 	}
 `;
 
-export const RevisionsListItemWrapper = styled.li`
+export const RevisionsListItemWrapper = styled.li<{ isSingle?: boolean, selected?: boolean, isBeforeSelected?: boolean }>`
 	box-sizing: border-box;
 	background-color: ${({ theme }) => theme.palette.secondary.light};
 	height: 52px;

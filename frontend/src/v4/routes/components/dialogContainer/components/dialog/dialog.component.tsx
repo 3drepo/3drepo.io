@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState, FunctionComponent, forwardRef } from 'react';
+import { useEffect, useState, FunctionComponent, forwardRef, Ref } from 'react';
 
 import Button from '@mui/material/Button';
 import DialogBase from '@mui/material/Dialog';
@@ -38,7 +38,7 @@ interface IProps {
 	searchEnabled?: boolean;
 }
 
-export const Dialog: FunctionComponent<IProps> = forwardRef((props, ref) => {
+export const Dialog: FunctionComponent<IProps> = forwardRef((props, ref: Ref<HTMLDivElement>) => {
 	const [isOpen, setIsOpen] = useState(true);
 	const [closeDisabled, setCloseDisabled] = useState(false);
 

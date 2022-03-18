@@ -58,6 +58,7 @@ export const FooterContainer = styled.aside`
 	&& {
 		display: flex;
 		justify-content: space-between;
+		align-items: center;
 		padding-top: 10px;
 		font-size: 14px;
 

@@ -57,10 +57,7 @@ export const EditFederationContainersListItem = ({
 				selected={isSelected}
 				onClick={() => onSelectOrToggleItem(container._id)}
 			>
-				<DashboardListItemIcon
-					width={46}
-					minWidth={46}
-				>
+				<DashboardListItemIcon>
 					<Icon />
 				</DashboardListItemIcon>
 				<DashboardListItemTitle

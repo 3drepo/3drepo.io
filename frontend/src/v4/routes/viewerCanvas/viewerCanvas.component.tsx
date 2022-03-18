@@ -60,7 +60,7 @@ interface IProps {
 }
 
 export class ViewerCanvas extends PureComponent<IProps, any> {
-	private containerRef = createRef<HTMLElement>();
+	private containerRef = createRef<HTMLDivElement>();
 
 	constructor(props) {
 		super(props);

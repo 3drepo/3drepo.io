@@ -66,11 +66,6 @@ export class RowMenu extends PureComponent<IProps, IState> {
 				justifyContent="flex-start"
 			>
 				<StyledGridActions
-					container
-					wrap="nowrap"
-					direction="row"
-					alignItems="center"
-					justify="flex-start"
 					opened={forceOpen}
 				>
 					{children}

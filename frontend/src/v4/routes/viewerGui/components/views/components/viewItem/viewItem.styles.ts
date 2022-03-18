@@ -36,11 +36,11 @@ export const IconStyles = css`
 	}
 `;
 
-export const ViewpointItem = styled(MenuItem)`
+export const ViewpointItem = styled(MenuItem)<{ active?: boolean }>`
 	&& {
 		height: 80px;
 		padding: 8px;
-		background-color: ${(props: any) => props.active ? `${COLOR.BLACK_6}` : 'initial'};
+		background-color: ${({ active }) => active ? `${COLOR.BLACK_6}` : 'initial'};
 		border-bottom: 1px solid ${COLOR.BLACK_20};
 		box-sizing: content-box;
 	}
@@ -53,7 +53,7 @@ export const StyledForm = styled(Form)`
 	justify-content: space-between;
 `;
 
-export const IconsGroup = styled.div<{ disabled: boolean }>`
+export const IconsGroup = styled.div<{ disabled?: boolean }>`
 	display: flex;
 	align-items: center;
 	margin-right: 0;
@@ -131,9 +131,9 @@ export const NameRow = styled.div`
 	justify-content: space-between;
 `;
 
-export const Name = styled.h3`
+export const Name = styled.h3<{ active?: boolean }>`
 	margin-left: 16px;
-	max-width: ${(props: any) => props.active ? '150px' : '260px'};
+	max-width: ${({ active }) => active ? '150px' : '260px'};
 	font-weight: ${FONT_WEIGHT.NORMAL};
 	font-size: 14px;
 	color: ${COLOR.BLACK};

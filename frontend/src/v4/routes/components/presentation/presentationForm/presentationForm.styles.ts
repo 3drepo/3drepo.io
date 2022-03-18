@@ -31,7 +31,7 @@ export const Container = styled.div`
 	max-width: 250px;
 `;
 
-export const PrimaryButton = styled(Button).attrs({
+export const PrimaryButton: typeof Button = styled(Button).attrs({
 	variant: 'contained',
 	color: 'secondary',
 })`
@@ -66,13 +66,13 @@ export const StopButton = styled(PrimaryButton).attrs({
 	}
 `;
 
-export const StyledTextfield = styled(TextField)`
+export const StyledTextfield = styled(TextField)<{ disabled?: boolean }>`
 	&& {
 		width: 100%;
 		margin-bottom: 16px;
 
 		input {
-			color: ${(props) => props.disabled ? COLOR.BLACK_87 : 'inherit' };
+			color: ${({ disabled }) => disabled ? COLOR.BLACK_87 : 'inherit' };
 		}
 	}
 `;

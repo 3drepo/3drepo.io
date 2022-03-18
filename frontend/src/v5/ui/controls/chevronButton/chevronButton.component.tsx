@@ -27,7 +27,7 @@ export type IChevronButton = IconButtonProps & {
 };
 
 export const ChevronButton = forwardRef(
-	({ isOn, isLoading = false, ...props }: IChevronButton, ref: Ref<HTMLSpanElement>): JSX.Element => (
+	({ isOn, isLoading = false, ...props }: IChevronButton, ref: Ref<HTMLButtonElement>): JSX.Element => (
 		<StyledIconButton $isOn={isOn} $isLoading={isLoading} {...props} ref={ref}>
 			{isLoading ? (
 				<SpinnerLoader />

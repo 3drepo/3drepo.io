@@ -298,7 +298,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 							/>
 						</StyledGrid>
 
-						<StyledGrid paddingBottom>
+						<StyledGrid gridPaddingBottom>
 							<Headline>Risk Categories</Headline>
 							<Field
 								name="riskCategories"

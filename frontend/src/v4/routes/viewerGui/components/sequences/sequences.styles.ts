@@ -121,11 +121,11 @@ export const Task = styled.div`
 	display: flex;
 ` as any;
 
-export const TaskItemLabel = styled.div`
+export const TaskItemLabel = styled.div<{ clickable?: boolean }>`
 	margin-top: 3px;
 	line-height: 1.3;
 	margin-bottom: 2px;
-	${(props: any) => props.clickable && css`
+	${({ clickable }) => clickable && css`
 		&:hover {
 			cursor: pointer;
 		}

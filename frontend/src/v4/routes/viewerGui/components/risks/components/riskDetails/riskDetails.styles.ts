@@ -194,7 +194,7 @@ export const Content = styled.div<{ active: boolean }>`
 	}
 `;
 
-export const ExpandAction = styled.span<{ top: boolean }>`
+export const ExpandAction = styled.span<{ top?: boolean }>`
 	font-size: 11px;
 	cursor: pointer;
 	display: block;

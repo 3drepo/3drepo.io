@@ -102,7 +102,7 @@ export const labelOutlinedButtonSecondaryStyles = css`
 	}
 `;
 
-export const LabelButton = styled(MuiButton)`
+export const LabelButton = styled(MuiButton)<{ color?: string, outlined?: any }>`
 	align-items: center;
 	padding: 8px 12px 8px 15px;
 

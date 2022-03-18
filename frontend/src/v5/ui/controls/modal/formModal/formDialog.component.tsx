@@ -28,7 +28,7 @@ import {
 	RemoveWhiteCorners,
 } from './formDialog.styles';
 
-interface IFormModal extends DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement> {
+interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
 	onClickClose?: () => void;
 	title?: string;
 	open?: boolean;

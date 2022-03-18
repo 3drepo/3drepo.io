@@ -90,7 +90,7 @@ export class ReportedItems extends PureComponent<IProps, IState> {
 		prevScroll: 0
 	};
 
-	public listViewRef = createRef<HTMLElement>();
+	public listViewRef = createRef<HTMLDivElement>();
 	public listContainerRef = createRef<any>();
 
 	public handleClickOutside = () => {

@@ -53,7 +53,7 @@ export const Title = styled(Typography).attrs({
 	box-sizing: border-box;
 `;
 
-export const FormDialogContent = styled(DialogContent)`
+export const FormDialogContent = styled(DialogContent)<{ zeroMargin?: boolean }>`
 	margin: ${({ zeroMargin }) => (zeroMargin ? '0' : '20px 34px 43px')};
 	display: inline-flex;
 	flex-flow: row wrap;

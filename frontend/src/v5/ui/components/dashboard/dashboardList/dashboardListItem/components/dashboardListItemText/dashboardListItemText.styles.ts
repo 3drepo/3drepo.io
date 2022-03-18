@@ -19,7 +19,7 @@ import { Typography } from '@mui/material';
 
 export const Text = styled(Typography).attrs({
 	variant: 'body1',
-})`
+})<{ selected?: boolean }>`
 	color: ${({ theme }) => theme.palette.base.main};
 	overflow: hidden;
 	text-overflow: ellipsis;

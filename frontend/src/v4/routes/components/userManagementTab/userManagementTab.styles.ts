@@ -24,7 +24,8 @@ const FOOTER_HEIGHT = 45;
 const FOOTER_HEIGHT_WITH_HEADER = 145;
 
 interface IContent {
-	withHeader: boolean;
+	withHeader?: boolean;
+	header?: any;
 }
 
 export const Container = styled(Grid)`
@@ -34,7 +35,7 @@ export const Container = styled(Grid)`
 `;
 
 export const Content = styled(Grid)<IContent>`
-	max-height: calc(100% - ${(props) => props.header ? FOOTER_HEIGHT_WITH_HEADER : FOOTER_HEIGHT}px);
+	max-height: calc(100% - ${({ header }) => header ? FOOTER_HEIGHT_WITH_HEADER : FOOTER_HEIGHT}px);
 	flex: 1;
 `;
 

@@ -45,7 +45,7 @@ export const StartAdornment = styled(InputAdornmentComponent).attrs({
 
 export const EndAdornment = styled(InputAdornmentComponent).attrs({
 	position: 'end',
-})`
+})<{ $isVisible?: boolean }>`
 	${({ $isVisible }) => !$isVisible && css`
 		visibility: hidden;
 	`}

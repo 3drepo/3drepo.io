@@ -18,9 +18,13 @@
 import Grid from '@mui/material/Grid';
 import styled from 'styled-components';
 
-export const StyledGridActions = styled.div`
+export const StyledGridActions = styled.div<{ opened?: boolean }>`
 	display: flex;
-	opacity: ${(props) => props.opened ? 1 : 0};
+	direction: row;
+	flex-wrap: nowrap;
+	align-items: center;
+	justify-content: flex-start;
+	opacity: ${({ opened }) => opened ? 1 : 0};
 	transform-origin: right;
 	transition: opacity 200ms ease-in-out;
 `;

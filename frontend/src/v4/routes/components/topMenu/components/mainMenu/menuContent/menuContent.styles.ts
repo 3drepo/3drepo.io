@@ -43,7 +43,7 @@ export const MenuUser = styled(ListItem)`
 
 export const MenuText = styled(ListItemText).attrs({
 	disableTypography: true
-})`
+})<{ submenu?: any }>`
 	&& {
 		color: ${COLOR.BLACK_60};
 		font-size: 14px;

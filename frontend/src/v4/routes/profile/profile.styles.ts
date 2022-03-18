@@ -133,8 +133,8 @@ export const DropzoneMessage = styled.div`
 	box-sizing: border-box;
 `;
 
-export const DropzonePreview = styled.div`
-	background-image: ${(props: any) => props.src ? `url('${(props.src)}')` : 'transparent'};
+export const DropzonePreview = styled.div<{ src?: any }>`
+	background-image: ${({ src }) => src ? `url('${(src)}')` : 'transparent'};
 	width: 100%;
 	height: 100%;
 	background-size: cover;

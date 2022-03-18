@@ -76,5 +76,3 @@ export const Description = styled(TextField)`
 		margin: 1px 0;
 	}
 `;
-
-export const Content = styled(ViewerPanelContent)``;

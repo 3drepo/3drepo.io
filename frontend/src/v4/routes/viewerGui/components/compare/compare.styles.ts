@@ -34,8 +34,8 @@ export const CompareIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.COMPARE];
 
 export const CompareContainer = styled(ViewerPanel).attrs({
 	title: VIEWER_PANELS_TITLES[VIEWER_PANELS.COMPARE]
-})`
-	min-height: ${((props) => props.empty ? 0 : VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.COMPARE])}px;
+})<{ empty?: boolean }>`
+	min-height: ${(({ empty }) => empty ? 0 : VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.COMPARE])}px;
 `;
 
 interface ISliderLabel {
@@ -113,7 +113,7 @@ export const SliderLabels = styled.div`
 `;
 
 export const SliderLabel = styled.div<ISliderLabel>`
-	color: ${((props) => props.disabled ? COLOR.BLACK_40 : COLOR.BLACK_60)};
+	color: ${(({ disabled }) => disabled ? COLOR.BLACK_40 : COLOR.BLACK_60)};
 	cursor: pointer;
 	padding-top: 8px;
 
