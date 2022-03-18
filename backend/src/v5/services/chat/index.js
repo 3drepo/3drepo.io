@@ -92,6 +92,7 @@ ChatService.createApp = async (server) => {
 	subscribeToEvents(socketServer);
 	return {
 		close: async () => {
+			SocketsManager.reset();
 			await socketServer.close();
 			await deinitStore();
 			await server.close();

@@ -24,6 +24,4 @@ config.coveragePathIgnorePatterns = [
 
 config.testMatch = ['**/tests/**/drivers/**/*.test.[jt]s?(x)'];
 
-config.forceExit = false;
-
 module.exports = config;

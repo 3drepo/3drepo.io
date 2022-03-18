@@ -111,7 +111,7 @@ const testUnauthenticatedUser = () => {
 };
 
 const testTSAdmin = () => {
-	describe('Teamspace admin', () => {
+	describe('User with access', () => {
 		let cookie;
 		beforeAll(async () => {
 			const res = await agent.post('/v5/login')
@@ -148,9 +148,41 @@ const testTSAdmin = () => {
 	});
 };
 
+const testNobody = () => {
+	describe('User without a license', () => {
+		let cookie;
+		beforeAll(async () => {
+			const res = await agent.post('/v5/login')
+				.send({ user: nobody.user, password: nobody.password })
+				.expect(templates.ok.status);
+			[, cookie] = res.header['set-cookie'][0].match(/connect.sid=([^;]*)/);
+		});
+		test('should be able to connect to the chat service', async () => {
+			const socket = await connectToSocket(cookie);
+			socket.close();
+		});
+
+		describe.each([
+			['should be not able to join a model room', { teamspace, project: project.id, model: container._id }, ERRORS.ROOM_NOT_FOUND],
+		])('Join room', (desc, data, failError) => {
+			let socket;
+			beforeAll(async () => {
+				socket = await connectToSocket(cookie);
+			});
+			afterAll(() => socket.close());
+			test(desc, async () => {
+				if (failError) {
+					await expect(onJoinErrorCheck(socket, data, failError)).resolves.toBeUndefined();
+				} else await expect(onJoinSuccessCheck(socket, data)).resolves.toBeUndefined();
+			});
+		});
+	});
+};
+
 const runConnectionTests = () => {
 	testUnauthenticatedUser();
 	testTSAdmin();
+	testNobody();
 };
 
 describe('E2E Chat Service', () => {
