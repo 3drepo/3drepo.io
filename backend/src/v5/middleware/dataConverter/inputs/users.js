@@ -131,7 +131,7 @@ Users.validateForgotPasswordData = async (req, res, next) => {
 
 		try {
 			const usernameOrEmail = req.body.user;
-			const { user } = await getUserByQuery({ $or: [{ user: usernameOrEmail }, { 'customData.email': usernameOrEmail }] });
+			const { user } = await getUserByUsernameOrEmail(usernameOrEmail, { user: 1, _id: 0 });
 			req.body.user = user;
 			next();
 		} catch {

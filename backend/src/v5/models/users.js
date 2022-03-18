@@ -114,6 +114,9 @@ User.getUserByQuery = async (query, projection) => {
 
 User.getUserByUsername = (user, projection) => User.getUserByQuery({ user }, projection);
 
+User.getUserByUsernameOrEmail = (usernameOrEmail, projection) => User.getUserByQuery({
+	$or: [{ user: usernameOrEmail }, { 'customData.email': usernameOrEmail.toLowerCase() }] }, projection);
+
 User.getFavourites = async (user, teamspace) => {
 	const { customData } = await User.getUserByUsername(user, { 'customData.starredModels': 1 });
 	const favs = customData.starredModels || {};
