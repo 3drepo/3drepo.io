@@ -23,7 +23,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { LoginSchema } from '@/v5/validation/auth';
 import { AuthPage } from '@components/authPage';
-import { ForgotPassword, Heading, LoginButton, OtherOptions, PasswordField, SignUp, UsernameField } from './login.styles';
+import { ForgotPasswordPrompt, Heading, LoginButton, OtherOptions, PasswordField, SignUpPrompt, UsernameField } from './login.styles';
 
 const APP_VERSION = ClientConfig.VERSION;
 
@@ -73,7 +73,7 @@ export const Login = () => {
 					type="password"
 				/>
 				<OtherOptions>
-					<SignUp>
+					<SignUpPrompt>
 						<FormattedMessage
 							id="placeholder"
 							defaultMessage="Don't have an account? <Link>Sign up</Link>"
@@ -81,14 +81,14 @@ export const Login = () => {
 								Link: (val:string) => <Link to="/sign-up">{val}</Link>,
 							}}
 						/>
-					</SignUp>
-					<ForgotPassword>
+					</SignUpPrompt>
+					<ForgotPasswordPrompt>
 						<Link to="/password-forgot">
 							<FormattedMessage id="placeholder" defaultMessage="Forgotten your password?" />
 						</Link>
-					</ForgotPassword>
+					</ForgotPasswordPrompt>
 				</OtherOptions>
-				<LoginButton disabled={!isValid}>
+				<LoginButton type="submit" disabled={!isValid}>
 					<FormattedMessage id="placeholder" defaultMessage="Log in" />
 				</LoginButton>
 			</form>

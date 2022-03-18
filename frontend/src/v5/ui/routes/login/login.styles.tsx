@@ -65,12 +65,12 @@ export const OtherOptions = styled.div`
 	}
 `;
 
-export const SignUp = styled(Typography).attrs({
+export const SignUpPrompt = styled(Typography).attrs({
 	variant: 'body1',
 })`
 `;
 
-export const ForgotPassword = styled(Typography).attrs({
+export const ForgotPasswordPrompt = styled(Typography).attrs({
 	variant: 'body1',
 })`
 	margin-left: auto;
