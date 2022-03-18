@@ -157,11 +157,7 @@ module.exports = {
 	termsUpdatedAt: 12345678,
 
 	mail: {
-		smtpConfig: {
-			host: 'smtp.ethereal.email',
-			port: 587,
-		},
-		sender: '"3D Repo" <dummyEmail@3drepo.org>'		
+		generateCredentials: true,
+		sender: '"3D Repo" <dummyEmail@3drepo.org>'
 	},
-	useDummyEmailAccount: true
 }
