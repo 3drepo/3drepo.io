@@ -25,20 +25,21 @@ const getBaseURL = config.getBaseURL;
 let transporter;
 
 async function sendEmail(template, to, data, attachments) {
-	if(!config.mail || !config.mail.smtpConfig) {
-		return Promise.reject({ message: "config.mail.smtpConfig is not set"});
+	if(!config?.mail?.sender) {
+		throw { message: "config.mail.sender is not set"};
 	}
 
-	if(!config.mail || !config.mail.smtpConfig) {
-		return Promise.reject({ message: "config.mail.sender is not set"});
-	}
-
-	if(config.useDummyEmailAccount) {
-		const testAccount = await createTestAccount();
-		config.mail.smtpConfig.auth = {
-			user: testAccount.user,
-			pass: testAccount.pass
-		};
+	if(!config?.mail?.smtpConfig) {
+		if(config?.mail?.generateCredentials) {
+			const { user, pass } = await createTestAccount();
+			config.mail.smtpConfig = {
+				host: "smtp.ethereal.email",
+				port: 587,
+				auth: {	user, pass }
+			};
+		} else {
+			throw { message: "config.mail.smtpConfig is not set"};
+		}
 	}
 
 	const mailOptions = {

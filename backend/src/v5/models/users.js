@@ -210,8 +210,6 @@ User.getAvatar = async (username) => {
 
 User.uploadAvatar = (username, avatarBuffer) => updateUser(username, { $set: { 'customData.avatar': { data: avatarBuffer } } });
 
-User.updateResetPasswordToken = async (username, resetPasswordToken) => {
-	await updateUser(username, { $set: { 'customData.resetPasswordToken': resetPasswordToken } });
-};
+User.updateResetPasswordToken = (username, resetPasswordToken) => updateUser(username, { $set: { 'customData.resetPasswordToken': resetPasswordToken } });
 
 module.exports = User;
