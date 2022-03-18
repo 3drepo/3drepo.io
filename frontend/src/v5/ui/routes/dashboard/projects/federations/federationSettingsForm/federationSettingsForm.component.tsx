@@ -124,12 +124,18 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 
+	const resetValues = () => {
+		defaultValues = getDefaultValues(federation) as any;
+		reset(defaultValues);
+	};
+
+	useEffect(resetValues, [federation]);
+
 	useEffect(() => {
-		if (!open) {
-			defaultValues = getDefaultValues(federation) as any;
-			reset(defaultValues);
+		if (open) {
 			FederationsActionsDispatchers.fetchFederationSettings(teamspace, project, federation._id);
 			FederationsActionsDispatchers.fetchFederationViews(teamspace, project, federation._id);
+			resetValues();
 		}
 	}, [open]);
 
