@@ -306,7 +306,7 @@ ServiceHelper.chatApp = () => {
 	return ChatService.createApp(server);
 };
 
-ServiceHelper.connectToSocket = () => {
+ServiceHelper.connectToSocket = (session) => {
 	const { port } = config.servers.find(({ service }) => service === 'chat');
 	return ioClient(`http://${config.host}:${port}`,
 		{
@@ -314,6 +314,7 @@ ServiceHelper.connectToSocket = () => {
 			transports: ['websocket'],
 			reconnection: true,
 			reconnectionDelay: 500,
+			...(session ? { extraHeaders: { Cookie: `connect.sid=${session}` } } : {}),
 		});
 };
 

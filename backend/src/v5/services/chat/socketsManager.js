@@ -48,8 +48,12 @@ const joinRoom = async (socket, data) => {
 		channelName = `notifications::${username}`;
 	} else if (teamspace && project && model) {
 		channelName = `${teamspace}::${project}::${model}`;
-		if (!await hasReadAccessToModel(teamspace, stringToUUID(project), model, username)) {
-			throw { code: ERRORS.UNAUTHORISED, message: 'You do not have sufficient access rights to join the room requested' };
+		try {
+			if (!await hasReadAccessToModel(teamspace, stringToUUID(project), model, username)) {
+				throw { code: ERRORS.UNAUTHORISED, message: 'You do not have sufficient access rights to join the room requested' };
+			}
+		} catch (err) {
+			throw { code: ERRORS.ROOM_NOT_FOUND, message: err.message };
 		}
 	} else {
 		throw { code: ERRORS.ROOM_NOT_FOUND, message: 'Cannot identify the room indicated' };
@@ -71,10 +75,7 @@ const joinRoomV4 = async (socket, data) => {
 			// v4 compatibility
 			socket.emit('joined', data);
 		} catch (err) {
-			const errToThrow = err.code === templates.projectNotFound.code
-				? { code: ERRORS.ROOM_NOT_FOUND, message: `Model ${model} does not belong in any project.` }
-				: err;
-
+			const errToThrow = { code: ERRORS.ROOM_NOT_FOUND, message: err.message };
 			socket.emit('credentialError', errToThrow);
 			throw errToThrow;
 		}
@@ -160,7 +161,6 @@ SocketsManager.addSocket = (socket) => {
 	logger.logDebug(`${socketLogPrefix(socket)}  connected`);
 	socketIdToSocket[socket.id] = socket;
 	subscribeToSocketEvents(socket);
-
 	if (getUserNameFromSocket(socket)) {
 		SocketsManager.addSocketToSession(socket.session.id, socket);
 	}
