@@ -276,7 +276,7 @@
 		return collection.distinct(key);
 	};
 
-	Handler.listDatabases = async (nameOnly = false) => {
+	Handler.listDatabases = async (nameOnly = true) => {
 		try {
 			const res = await Handler.runCommand("admin", {listDatabases :1, nameOnly });
 			return res.databases;
