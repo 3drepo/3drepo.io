@@ -270,7 +270,7 @@ const testSocketsEvents = () => {
 					const data = { teamspace, model, project };
 					await eventFns.join(data);
 					expect(socket.join).not.toHaveBeenCalled();
-					checkErrorCall(socket.emit, ERRORS.UNAUTHORISED, ACTIONS.JOIN, data);
+					checkErrorCall(socket.emit, ERRORS.ROOM_NOT_FOUND, ACTIONS.JOIN, data);
 				});
 
 				test('should fail gracefully if hasReadAccessToModel() threw an error', async () => {
@@ -287,7 +287,7 @@ const testSocketsEvents = () => {
 					const data = { teamspace, model, project };
 					await eventFns.join(data);
 					expect(socket.join).not.toHaveBeenCalled();
-					checkErrorCall(socket.emit, templates.projectNotFound.code, ACTIONS.JOIN, data);
+					checkErrorCall(socket.emit, ERRORS.ROOM_NOT_FOUND, ACTIONS.JOIN, data);
 				});
 
 				test('should fail gracefully if project was not found (v4)', async () => {
@@ -319,7 +319,7 @@ const testSocketsEvents = () => {
 					const data = { account, model };
 					await eventFns.join(data);
 					expect(socket.join).not.toHaveBeenCalled();
-					checkErrorCall(socket.emit, templates.unknown.code, ACTIONS.JOIN, data);
+					checkErrorCall(socket.emit, ERRORS.ROOM_NOT_FOUND, ACTIONS.JOIN, data);
 				});
 			});
 
