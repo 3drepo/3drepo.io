@@ -163,7 +163,7 @@ Users.validateResetPasswordData = async (req, res, next) => {
 
 	try {
 		await schema.validate(req.body);
-		next();
+		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}

@@ -77,9 +77,9 @@ Users.getAvatar = getAvatar;
 Users.uploadAvatar = uploadAvatar;
 
 Users.generateResetPasswordToken = async (username) => {
-	const expiryAt = new Date();
-	expiryAt.setHours(expiryAt.getHours() + config.tokenExpiry.forgotPassword);
-	const resetPasswordToken = { token: generateHashString(), expiredAt: expiryAt };
+	const expiredAt = new Date();
+	expiredAt.setHours(expiredAt.getHours() + config.tokenExpiry.forgotPassword);
+	const resetPasswordToken = { token: generateHashString(), expiredAt };
 
 	await updateResetPasswordToken(username, resetPasswordToken);
 
