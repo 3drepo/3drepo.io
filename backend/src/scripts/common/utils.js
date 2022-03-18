@@ -24,7 +24,7 @@ const Utils = {};
 
 Utils.getTeamspaceList = async () => {
 	const dbList = await listDatabases();
-	return dbList.flatMap(({ name: db }) => (USERNAME_BLACKLIST.includes(db) ? [] : db));
+	return dbList.flatMap(({ name }) => (USERNAME_BLACKLIST.includes(name) ? [] : name));
 };
 
 Utils.getCollectionsEndsWith = async (teamspace, str) => {
