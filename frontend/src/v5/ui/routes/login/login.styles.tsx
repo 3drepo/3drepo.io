@@ -30,20 +30,27 @@ export const Heading = styled(Typography).attrs({
 	user-select: none;
 `;
 
-export const LoginField = styled(FormTextField).attrs({
+export const AuthField = styled(FormTextField).attrs({
 	required: true,
 
 })`
 	>* { color: ${({ theme }) => theme.palette.secondary.main}; }
+
+	label {
+		text-transform: none;
+		font-weight: 400;
+		font-size: 12px;
+		letter-spacing: 0.04em;
+	}
 `;
 
-export const UsernameField = styled(LoginField).attrs({
+export const UsernameField = styled(AuthField).attrs({
 	InputProps: {
 		startAdornment: <UserIcon />,
 	},
 })``;
 
-export const PasswordField = styled(LoginField).attrs({
+export const PasswordField = styled(AuthField).attrs({
 	InputProps: {
 		startAdornment: <PasswordIcon />,
 	},
