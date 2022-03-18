@@ -16,7 +16,7 @@
  */
 
 import { Typography } from '@controls/typography';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export const Background = styled.div`
 	display: flex;
@@ -25,6 +25,10 @@ export const Background = styled.div`
 	align-items: center;
 	justify-content: center;
 	flex-direction: column;
+	${({ backgroundSrc }) => backgroundSrc && css`background-image: url("${backgroundSrc}");`}
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
 `;
 
 export const Logo = styled.img`

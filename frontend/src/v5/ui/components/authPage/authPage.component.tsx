@@ -38,9 +38,10 @@ export const AuthPage = ({ footer, children }: IAuthPage): JSX.Element => {
 
 	const customLogin = ClientConfig.customLogins[getSubdomain()];
 	const topLogoSrc = customLogin?.topLogo || 'assets/images/3drepo-logo-white.png';
+	const backgroundSrc = customLogin?.backgroundImage;
 
 	return (
-		<Background>
+		<Background backgroundSrc={backgroundSrc}>
 			<Logo
 				draggable="false"
 				src={topLogoSrc}
