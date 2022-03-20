@@ -465,6 +465,16 @@ const testForgotPassword = () => {
 			await agent.post('/v5/user/password').send({ user: testUser.user })
 				.expect(templates.ok.status);
 		});
+
+		test('should send forgot password email with valid email', async () => {
+			await agent.post('/v5/user/password').send({ user: userEmail })
+				.expect(templates.ok.status);
+		});
+
+		test('should send forgot password email with valid email in upper case', async () => {
+			await agent.post('/v5/user/password').send({ user: userEmail.toUpperCase() })
+				.expect(templates.ok.status);
+		});
 	});
 };
 

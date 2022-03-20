@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, getUserByQuery } = require('../../../models/users');
+const { authenticate, getUserByQuery, getUserByUsernameOrEmail } = require('../../../models/users');
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const Yup = require('yup');
 const { respond } = require('../../../utils/responder');

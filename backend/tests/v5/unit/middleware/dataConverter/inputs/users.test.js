@@ -52,6 +52,14 @@ UsersModel.getUserByQuery.mockImplementation((query) => {
 	return { user: existingUsername };
 });
 
+UsersModel.getUserByUsernameOrEmail.mockImplementation((usernameOrEmail) => {
+	if (usernameOrEmail === nonExistingUsername || usernameOrEmail === nonExistingEmail) {
+		throw templates.userNotFound;
+	}
+
+	return { user: existingUsername };
+});
+
 UsersModel.authenticate.mockImplementation((username, password) => {
 	// eslint-disable-next-line security/detect-possible-timing-attacks
 	if (password !== validPassword) {
@@ -105,6 +113,7 @@ const testValidateUpdateData = () => {
 		[{ body: { newPassword: 'Abcdef123456!' } }, false, 'with newPassword but not oldPassword', templates.invalidArguments],
 		[{ body: { oldPassword: validPassword, newPassword: 'abc' } }, false, 'with short newPassword', templates.invalidArguments],
 		[{ body: { oldPassword: validPassword, newPassword: 'abcdefghi' } }, false, 'with weak newPassword', templates.invalidArguments],
+		[{ body: { oldPassword: validPassword, newPassword: 'Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef' } }, false, 'with too long newPassword', templates.invalidArguments],
 		[{ body: { oldPassword: validPassword, newPassword: validPassword } }, false, 'with newPassword same as old', templates.invalidArguments],
 		[{ body: { oldPassword: validPassword, newPassword: 'Abcdef12345!!' } }, true, 'with strong newPassword'],
 		[{ body: { oldPassword: 'invalid password', newPassword: 'Abcdef123456!' } }, false, 'with wrong oldPassword', templates.incorrectPassword],
@@ -205,6 +214,7 @@ const testResetingPasswordData = () => {
 		[{ body: { token: 'someToken', user: 'some user' } }, false, 'without new password', templates.invalidArguments],
 		[{ body: { token: 'someToken', newPassword: validPassword } }, false, 'without user', templates.invalidArguments],
 		[{ body: { token: 'abc', newPassword: '123', user: 'some user' } }, false, 'with weak new password', templates.invalidArguments],
+		[{ body: { token: 'abc', newPassword: 'Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef', user: 'some user' } }, false, 'with too long new password', templates.invalidArguments],
 		[{ body: { token: 'abc', newPassword: validPassword, user: nonExistingUsername } }, false, 'with user that doesnt exist', templates.invalidArguments],
 		[{ body: { token: 'someToken', newPassword: validPassword, user: 'some user' } }, true, 'with token and valid new password'],
 		[{ body: { token: 'someToken', newPassword: validPassword, user: 'some user', extra: 'extra' } }, false, 'with extra properties', templates.invalidArguments],

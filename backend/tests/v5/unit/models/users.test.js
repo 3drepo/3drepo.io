@@ -469,6 +469,42 @@ const testUpdateResetPasswordToken = () => {
 	});
 };
 
+const testGetUserByUsernameOrEmail = () => {
+	describe('Get user by username or email', () => {
+		test('should return user by username if user exists', async () => {
+			const username = 'user';
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ user: username });
+			const res = await User.getUserByUsernameOrEmail(username);
+			expect(res).toEqual({ user: username });
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][2]).toEqual({ $or: [{ user: username }, { 'customData.email': username }] });
+		});
+
+		test('should return user by email if user exists', async () => {
+			const email = 'example@email.com';
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ user: 'user' });
+			const res = await User.getUserByUsernameOrEmail(email);
+			expect(res).toEqual({ user: 'user' });
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][2]).toEqual({ $or: [{ user: email }, { 'customData.email': email }] });
+		});
+
+		test('should return user by email with capital letters if user exists', async () => {
+			const email = 'eXaMpLe@emAil.cOm';
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ user: 'user' });
+			const res = await User.getUserByUsernameOrEmail(email);
+			expect(res).toEqual({ user: 'user' });
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][2]).toEqual({ $or: [{ user: email }, { 'customData.email': 'example@email.com' }] });
+		});
+
+		test('should throw error if user does not exist', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+			await expect(User.getUserByUsernameOrEmail('user')).rejects.toEqual(templates.userNotFound);
+		});
+	});
+};
+
 describe('models/users', () => {
 	testGetAccessibleTeamspaces();
 	testGetFavourites();
@@ -483,4 +519,5 @@ describe('models/users', () => {
 	testUploadAvatar();
 	testUpdatePassword();
 	testUpdateResetPasswordToken();
+	testGetUserByUsernameOrEmail();
 });
