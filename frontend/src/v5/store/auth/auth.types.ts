@@ -26,4 +26,6 @@ export interface IAuthActionCreators {
 	loginSuccess: () => Action<'LOGIN_SUCCESS'>;
 	logout: () => Action<'LOGOUT'>;
 	setPendingStatus: (isPending: boolean) => SetPendingStatusAction;
+	setLocalSessionStatus: (status: string) => void;
+	sessionExpired: () => void;
 }

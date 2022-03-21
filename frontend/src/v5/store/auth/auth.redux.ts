@@ -30,6 +30,8 @@ export const { Types: AuthTypes, Creators: AuthActions } = createActions({
 	loginSuccess: [],
 	logout: [],
 	setPendingStatus: ['isPending'],
+	setLocalSessionStatus: ['status'],
+	sessionExpired: [],
 }, { prefix: 'AUTH2/' }) as { Types: Constants<IAuthActionCreators>; Creators: IAuthActionCreators };
 
 export const INITIAL_STATE: IAuthState = {
@@ -37,18 +39,42 @@ export const INITIAL_STATE: IAuthState = {
 	isPending: false,
 };
 
+export const setLocalSessionStatus = (state = INITIAL_STATE, { status }) => {
+	window.localStorage.setItem('loggedIn', JSON.stringify(status));
+	return state;
+};
+
 export const setPendingStatus = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
 
-export const loginSuccess = (state = INITIAL_STATE): IAuthState => (
-	{ ...state, isAuthenticated: true, isPending: false }
-);
+export const loginSuccess = (state = INITIAL_STATE): IAuthState => {
+	setLocalSessionStatus(state, { status: true });
+	return (
+		{ ...state,
+			isAuthenticated: true,
+			isPending: false,
+		}
+	);
+};
 
-export const logout = (state = INITIAL_STATE): IAuthState => (
-	{ ...state, isAuthenticated: false, isPending: false }
-);
+export const logout = (state = INITIAL_STATE): IAuthState => {
+	setLocalSessionStatus(state, { status: false });
+	return { ...state, isAuthenticated: false, isPending: false };
+};
+
+export const sessionExpired = (state = INITIAL_STATE): IAuthState => {
+	setLocalSessionStatus(state, { status: false });
+	return (
+		{ ...state,
+			isAuthenticated: false,
+			isPending: false,
+		}
+	);
+};
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[AuthTypes.LOGIN_SUCCESS]: loginSuccess,
 	[AuthTypes.SET_PENDING_STATUS]: setPendingStatus,
 	[AuthTypes.LOGOUT]: logout,
+	[AuthTypes.SET_LOCAL_SESSION_STATUS]: setLocalSessionStatus,
+	[AuthTypes.SESSION_EXPIRED]: sessionExpired,
 });

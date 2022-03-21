@@ -18,6 +18,7 @@
 import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { CurrentUserActions } from '@/v4/modules/currentUser';
+import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authActions.dispatchers';
 import { AuthActions, AuthTypes } from './auth.redux';
 import { LoginAction } from './auth.types';
 
@@ -48,6 +49,7 @@ function* logout() {
 		yield API.Auth.logout();
 	} catch (e) {
 	}
+	yield AuthActionsDispatchers.setLocalSessionStatus('false');
 }
 
 export default function* AuthSaga() {
