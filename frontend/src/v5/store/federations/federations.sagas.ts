@@ -16,7 +16,10 @@
  */
 
 import { all, put, takeEvery, takeLatest } from 'redux-saga/effects';
-import { AddFavouriteAction, DeleteFederationAction, FederationsActions, FederationsTypes, FetchFederationsAction, FetchFederationSettingsAction, FetchFederationStatsAction, FetchFederationViewsAction, RemoveFavouriteAction, UpdateFederationContainersAction, UpdateFederationSettingsAction } from '@/v5/store/federations/federations.redux';
+import { AddFavouriteAction, DeleteFederationAction, FederationsActions,
+	FederationsTypes, FetchFederationsAction, FetchFederationSettingsAction,
+	FetchFederationStatsAction, FetchFederationViewsAction, RemoveFavouriteAction,
+	UpdateFederationContainersAction, UpdateFederationSettingsAction } from '@/v5/store/federations/federations.redux';
 import * as API from '@/v5/services/api';
 import {
 	FederationStats,

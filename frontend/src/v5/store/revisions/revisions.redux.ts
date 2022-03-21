@@ -29,11 +29,6 @@ export const { Types: RevisionsTypes, Creators: RevisionsActions } = createActio
 	setIsPending: ['containerId', 'isPending'],
 }, { prefix: 'REVISIONS/' }) as { Types: Constants<IRevisionsActionCreators>; Creators: IRevisionsActionCreators };
 
-export interface IRevisionsState {
-	revisionsByContainer: Record<string, IRevision[]>;
-	isPending: Record<string, boolean>;
-}
-
 export const INITIAL_STATE: IRevisionsState = {
 	revisionsByContainer: {},
 	isPending: {},
@@ -73,11 +68,19 @@ export const setIsPending = (state = INITIAL_STATE, { isPending, containerId }):
 	},
 });
 
-export const reducer = createReducer<IRevisionsState>(INITIAL_STATE, {
+export const revisionsReducer = createReducer<IRevisionsState>(INITIAL_STATE, {
 	[RevisionsTypes.FETCH_SUCCESS]: fetchSuccess,
 	[RevisionsTypes.SET_IS_PENDING]: setIsPending,
 	[RevisionsTypes.SET_VOID_STATUS_SUCCESS]: setVoidStatusSuccess,
 });
+
+/**
+ * Types
+ */
+export interface IRevisionsState {
+	revisionsByContainer: Record<string, IRevision[]>;
+	isPending: Record<string, boolean>;
+}
 
 type VoidParams = TeamspaceProjectAndContainerId & {revisionId: string, isVoid: boolean};
 

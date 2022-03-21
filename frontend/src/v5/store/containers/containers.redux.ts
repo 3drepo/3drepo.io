@@ -36,10 +36,6 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	deleteContainerSuccess: ['projectId', 'containerId'],
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
 
-export interface IContainersState {
-	containersByProject: Record<string, IContainer[]>;
-}
-
 export const INITIAL_STATE: IContainersState = {
 	containersByProject: {},
 };
@@ -48,7 +44,7 @@ export const setFavourite = (state = INITIAL_STATE, {
 	projectId,
 	containerId,
 	isFavourite,
-}: SetFavouriteSuccessAction):IContainersState => ({
+}: SetFavouriteSuccessAction): IContainersState => ({
 	...state,
 	containersByProject: {
 		...state.containersByProject,
@@ -113,13 +109,21 @@ export const deleteContainerSuccess = (state = INITIAL_STATE, {
 	},
 });
 
-export const reducer = createReducer<IContainersState>(INITIAL_STATE, {
+export const containersReducer = createReducer<IContainersState>(INITIAL_STATE, {
 	[ContainersTypes.FETCH_CONTAINERS_SUCCESS]: fetchContainersSuccess,
 	[ContainersTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
 	[ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS]: fetchStatsSuccess,
 	[ContainersTypes.CREATE_CONTAINER_SUCCESS]: createContainerSuccess,
 	[ContainersTypes.DELETE_CONTAINER_SUCCESS]: deleteContainerSuccess,
 }) as (state: IContainersState, action:any) => IContainersState;
+
+/**
+ * Types
+*/
+
+export interface IContainersState {
+	containersByProject: Record<string, IContainer[]>;
+}
 
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & TeamspaceProjectAndContainerId;
 export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & TeamspaceProjectAndContainerId;

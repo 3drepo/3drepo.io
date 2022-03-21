@@ -17,9 +17,9 @@
 
 import {
 	INITIAL_STATE,
-	IRevisionsState,
-	reducer as revisionsReducer,
+	revisionsReducer,
 	RevisionsActions,
+	IRevisionsState,
 } from '@/v5/store/revisions/revisions.redux';
 import { times } from 'lodash';
 import { revisionsMockFactory } from './revisions.fixtures';

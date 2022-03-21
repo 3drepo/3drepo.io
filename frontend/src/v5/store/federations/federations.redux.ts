@@ -17,7 +17,6 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import {
-	IFederationsState,
 	FederationSettings,
 	FederationStats,
 	FederationView,
@@ -189,7 +188,7 @@ export const updateFederationSuccess = (state = INITIAL_STATE, {
 	},
 });
 
-export const reducer = createReducer<IFederationsState>(INITIAL_STATE, {
+export const federationsReducer = createReducer<IFederationsState>(INITIAL_STATE, {
 	[FederationsTypes.FETCH_FEDERATIONS_SUCCESS]: fetchFederationsSuccess,
 	[FederationsTypes.FETCH_FEDERATION_STATS_SUCCESS]: fetchStatsSuccess,
 	[FederationsTypes.SET_FAVOURITE_SUCCESS]: setFavourite,
@@ -200,6 +199,13 @@ export const reducer = createReducer<IFederationsState>(INITIAL_STATE, {
 	[FederationsTypes.UPDATE_FEDERATION_CONTAINERS_SUCCESS]: updateFederationContainersSuccess,
 	[FederationsTypes.UPDATE_FEDERATION_SUCCESS]: updateFederationSuccess,
 }) as (state: IFederationsState, action:any) => IFederationsState;
+
+/**
+ * Types
+*/
+export interface IFederationsState {
+	federationsByProject: Record<string, IFederation[]>;
+}
 
 export type FetchFederationsAction = Action<'FETCH_FEDERATIONS'> & TeamspaceAndProjectId;
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & TeamspaceProjectAndFederationId;

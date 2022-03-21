@@ -25,20 +25,8 @@ import { TeamspaceAndProjectId, TeamspaceProjectAndFederationId } from '@/v5/sto
 import { AxiosResponse } from 'axios';
 import api from './default';
 
-type FavouriteParams = TeamspaceProjectAndFederationId;
-type FetchFederationsParams = TeamspaceAndProjectId;
-type FetchFederationStatsParams = TeamspaceProjectAndFederationId;
-type FetchFederationViewsParams = TeamspaceProjectAndFederationId;
-type DeleteFederationParams = TeamspaceProjectAndFederationId;
-type UpdateFederationContainersParams = TeamspaceProjectAndFederationId & { containers: string[] };
-type UpdateFederationSettingsParams = TeamspaceProjectAndFederationId & {settings: FederationBackendSettings};
-type FetchFederationSettingsParams = TeamspaceProjectAndFederationId;
-
-export type FetchFederationsResponse = { federations: Array<MinimumFederation> };
-export type FetchFederationViewsResponse = { views: FederationView[] };
-
 export const addFavourites = (
-	{ teamspace, projectId, federationId }: FavouriteParams,
+	{ teamspace, projectId, federationId }: TeamspaceProjectAndFederationId,
 ): Promise<AxiosResponse<void>> => (
 	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/favourites`, {
 		federations: [federationId],
@@ -46,7 +34,7 @@ export const addFavourites = (
 );
 
 export const removeFavourites = (
-	{ teamspace, projectId, federationId }: FavouriteParams,
+	{ teamspace, projectId, federationId }: TeamspaceProjectAndFederationId,
 ): Promise<AxiosResponse<void>> => (
 	api.delete(`teamspaces/${teamspace}/projects/${projectId}/federations/favourites`, {
 		federations: [federationId],
@@ -56,7 +44,7 @@ export const removeFavourites = (
 export const fetchFederations = async ({
 	teamspace,
 	projectId,
-}: FetchFederationsParams): Promise<FetchFederationsResponse> => {
+}: TeamspaceAndProjectId): Promise<FetchFederationsResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations`);
 	return data;
 };
@@ -65,7 +53,7 @@ export const fetchFederationStats = async ({
 	teamspace,
 	projectId,
 	federationId,
-}: FetchFederationStatsParams): Promise<FederationStats> => {
+}: TeamspaceProjectAndFederationId): Promise<FederationStats> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/stats`);
 	return data;
 };
@@ -74,7 +62,7 @@ export const fetchFederationViews = async ({
 	teamspace,
 	projectId,
 	federationId,
-}: FetchFederationViewsParams): Promise<FetchFederationViewsResponse> => {
+}: TeamspaceProjectAndFederationId): Promise<FetchFederationViewsResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/views`);
 	return data;
 };
@@ -83,7 +71,7 @@ export const fetchFederationSettings = async ({
 	teamspace,
 	projectId,
 	federationId,
-}: FetchFederationSettingsParams): Promise<FederationBackendSettings> => {
+}: TeamspaceProjectAndFederationId): Promise<FederationBackendSettings> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`);
 	return data;
 };
@@ -101,7 +89,7 @@ export const deleteFederation = ({
 	teamspace,
 	projectId,
 	federationId,
-}: DeleteFederationParams): Promise<AxiosResponse<void>> => (
+}: TeamspaceProjectAndFederationId): Promise<AxiosResponse<void>> => (
 	api.delete(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
 );
 
@@ -115,3 +103,12 @@ export const updateFederationContainers = async ({
 		containers,
 	})
 );
+
+/**
+ * Types
+*/
+type UpdateFederationContainersParams = TeamspaceProjectAndFederationId & { containers: string[] };
+type UpdateFederationSettingsParams = TeamspaceProjectAndFederationId & {settings: FederationBackendSettings};
+
+export type FetchFederationsResponse = { federations: Array<MinimumFederation> };
+export type FetchFederationViewsResponse = { views: FederationView[] };

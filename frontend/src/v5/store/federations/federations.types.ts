@@ -29,17 +29,13 @@ export interface IFederation {
 	lastUpdated: Date;
 	hasStatsPending: boolean;
 	views?: FederationView[];
-	surveyPoint?: SurveyPoint;
+	surveyPoint?: ISurveyPoint;
 	angleFromNorth?: number;
 	defaultView?: string;
 	unit?: string;
 }
 
-export interface IFederationsState {
-	federationsByProject: Record<string, IFederation[]>;
-}
-
-export interface SurveyPoint {
+export interface ISurveyPoint {
 	latLong: [number, number];
 	position: [number, number, number];
 }
@@ -48,7 +44,7 @@ export type FederationBackendSettings = {
 	_id?: string;
 	desc?: string;
 	name?: string;
-	surveyPoints?: SurveyPoint[];
+	surveyPoints?: ISurveyPoint[];
 	status?: string;
 	timestamp?: number;
 	type?: string;
@@ -64,7 +60,7 @@ export type FederationBackendSettings = {
 };
 
 export type FederationSettings = Omit<FederationBackendSettings, 'surveyPoints'> & {
-	surveyPoint: SurveyPoint;
+	surveyPoint: ISurveyPoint;
 };
 
 export type FederationView = {

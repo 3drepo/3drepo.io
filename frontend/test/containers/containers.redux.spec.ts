@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { INITIAL_STATE, reducer as containersReducer, ContainersActions, IContainersState } from '@/v5/store/containers/containers.redux';
+import { INITIAL_STATE, containersReducer, ContainersActions, IContainersState } from '@/v5/store/containers/containers.redux';
 import { times } from 'lodash';
 import { containerMockFactory } from './containers.fixtures';
 
