@@ -17,13 +17,18 @@
 
 import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
+import { CurrentUserActions } from '@/v4/modules/currentUser';
 import { AuthActions, AuthTypes } from './auth.redux';
 import { LoginAction } from './auth.types';
 
 function* authenticate() {
 	yield put(AuthActions.setPendingStatus(true));
 	try {
-		const { username } = yield API.Auth.authenticate();
+		const { data: { username } } = yield API.Auth.authenticate();
+		yield put(CurrentUserActions.fetchUserSuccess({
+			username,
+			avatarUrl: yield API.Users.getAvatarUrl(),
+		}));
 		yield put(AuthActions.loginSuccess());
 	} catch (e) {
 	}
