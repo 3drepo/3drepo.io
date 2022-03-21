@@ -20,7 +20,6 @@ const SuperTest = require('supertest');
 const { src } = require('../../../helper/path');
 
 const { EVENTS, ERRORS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
-const { templates } = require(`${src}/utils/responseCodes`);
 
 const tsAdmin = ServiceHelper.generateUserCredentials();
 const nobody = ServiceHelper.generateUserCredentials();
@@ -43,16 +42,6 @@ const setupData = async () => {
 		ServiceHelper.db.createUser(nobody),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id]),
 	]);
-};
-
-const connectToSocket = (session) => {
-	const promise = new Promise((resolve, reject) => {
-		const socket = ServiceHelper.connectToSocket(session);
-		socket.on('connect', () => resolve(socket));
-		socket.on('connect_error', reject);
-	});
-
-	return promise;
 };
 
 const onJoinErrorCheck = async (socket, data, error) => {
@@ -90,7 +79,7 @@ const onJoinSuccessCheck = async (socket, data) => {
 const testUnauthenticatedUser = () => {
 	describe('An unauthenticated user', () => {
 		test('should be able to connect to the chat service', async () => {
-			const socket = await connectToSocket();
+			const socket = await ServiceHelper.connectToSocket();
 			socket.close();
 		});
 
@@ -101,7 +90,7 @@ const testUnauthenticatedUser = () => {
 			['should not be able to join a model room (v4)', { account: teamspace, model: container._id }],
 		])('Join room', (desc, data) => {
 			test(desc, async () => {
-				const socket = await connectToSocket();
+				const socket = await ServiceHelper.connectToSocket();
 
 				await expect(onJoinErrorCheck(socket, data, ERRORS.UNAUTHORISED)).resolves.toBeUndefined();
 				socket.close();
@@ -114,13 +103,10 @@ const testTSAdmin = () => {
 	describe('User with access', () => {
 		let cookie;
 		beforeAll(async () => {
-			const res = await agent.post('/v5/login')
-				.send({ user: tsAdmin.user, password: tsAdmin.password })
-				.expect(templates.ok.status);
-			[, cookie] = res.header['set-cookie'][0].match(/connect.sid=([^;]*)/);
+			cookie = await ServiceHelper.loginAndGetCookie(agent, tsAdmin.user, tsAdmin.password);
 		});
 		test('should be able to connect to the chat service', async () => {
-			const socket = await connectToSocket(cookie);
+			const socket = await ServiceHelper.connectToSocket(cookie);
 			socket.close();
 		});
 
@@ -136,7 +122,7 @@ const testTSAdmin = () => {
 		])('Join room', (desc, data, failError) => {
 			let socket;
 			beforeAll(async () => {
-				socket = await connectToSocket(cookie);
+				socket = await ServiceHelper.connectToSocket(cookie);
 			});
 			afterAll(() => socket.close());
 			test(desc, async () => {
@@ -152,13 +138,10 @@ const testNobody = () => {
 	describe('User without a license', () => {
 		let cookie;
 		beforeAll(async () => {
-			const res = await agent.post('/v5/login')
-				.send({ user: nobody.user, password: nobody.password })
-				.expect(templates.ok.status);
-			[, cookie] = res.header['set-cookie'][0].match(/connect.sid=([^;]*)/);
+			cookie = await ServiceHelper.loginAndGetCookie(agent, nobody.user, nobody.password);
 		});
 		test('should be able to connect to the chat service', async () => {
-			const socket = await connectToSocket(cookie);
+			const socket = await ServiceHelper.connectToSocket(cookie);
 			socket.close();
 		});
 
@@ -167,7 +150,7 @@ const testNobody = () => {
 		])('Join room', (desc, data, failError) => {
 			let socket;
 			beforeAll(async () => {
-				socket = await connectToSocket(cookie);
+				socket = await ServiceHelper.connectToSocket(cookie);
 			});
 			afterAll(() => socket.close());
 			test(desc, async () => {

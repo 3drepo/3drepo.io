@@ -27,6 +27,7 @@ const { io: ioClient } = require('socket.io-client');
 const ChatService = require(`${src}/services/chat`);
 const DbHandler = require(`${src}/handler/db`);
 const config = require(`${src}/utils/config`);
+const { templates } = require(`${src}/utils/responseCodes`);
 const { createTeamSpaceRole } = require(`${srcV4}/models/role`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { PROJECT_ADMIN, TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
@@ -306,9 +307,18 @@ ServiceHelper.chatApp = () => {
 	return ChatService.createApp(server);
 };
 
-ServiceHelper.connectToSocket = (session) => {
+ServiceHelper.loginAndGetCookie = async (agent, user, password, headers = {}) => {
+	const res = await agent.post('/v5/login')
+		.set(headers)
+		.send({ user, password })
+		.expect(templates.ok.status);
+	const [, cookie] = res.header['set-cookie'][0].match(/connect.sid=([^;]*)/);
+	return cookie;
+};
+
+ServiceHelper.connectToSocket = (session) => new Promise((resolve, reject) => {
 	const { port } = config.servers.find(({ service }) => service === 'chat');
-	return ioClient(`http://${config.host}:${port}`,
+	const socket = ioClient(`http://${config.host}:${port}`,
 		{
 			path: '/chat',
 			transports: ['websocket'],
@@ -316,7 +326,9 @@ ServiceHelper.connectToSocket = (session) => {
 			reconnectionDelay: 500,
 			...(session ? { extraHeaders: { Cookie: `connect.sid=${session}` } } : {}),
 		});
-};
+	socket.on('connect', () => resolve(socket));
+	socket.on('connect_error', reject);
+});
 
 ServiceHelper.closeApp = async (server) => {
 	await DbHandler.disconnect();
