@@ -16,16 +16,37 @@
  */
 
 import { put, takeLatest } from 'redux-saga/effects';
+import * as API from '@/v5/services/api';
 import { AuthActions, AuthTypes } from './auth.redux';
+import { LoginAction } from './auth.types';
 
-export function* login() {
+function* authenticate() {
+	yield put(AuthActions.setPendingStatus(true));
 	try {
+		const { username } = yield API.Auth.authenticate();
+		yield put(AuthActions.loginSuccess());
+	} catch (e) {
+	}
+}
+
+export function* login({ username, password }: LoginAction) {
+	try {
+		yield API.Auth.login(username, password);
 		yield put(AuthActions.loginSuccess());
 	// eslint-disable-next-line no-empty
-	} finally {
+	} catch (e) {
+	}
+}
+
+function* logout() {
+	try {
+		yield API.Auth.logout();
+	} catch (e) {
 	}
 }
 
 export default function* AuthSaga() {
-	yield takeLatest(AuthTypes.LOGIN as any, login);
+	yield takeLatest(AuthTypes.AUTHENTICATE, authenticate);
+	yield takeLatest(AuthTypes.LOGIN, login);
+	yield takeLatest(AuthTypes.LOGOUT, logout);
 }

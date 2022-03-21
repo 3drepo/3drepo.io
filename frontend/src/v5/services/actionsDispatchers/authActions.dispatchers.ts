@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AuthActions } from '@/v4/modules/auth';
-import { IAuthActions } from '@/v4/modules/auth/auth.redux';
+import { AuthActions } from '@/v5/store/auth/auth.redux';
+import { IAuthActionCreators } from '@/v5/store/auth/auth.types';
 import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 
-export const AuthActionsDispatchers = createActionsDispatchers<IAuthActions>(AuthActions);
+export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);

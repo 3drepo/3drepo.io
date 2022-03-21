@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,14 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { createSelector } from 'reselect';
 
-const selectAuthDomain = (state) => ({ ...state.auth2 });
+import api from './default';
 
-export const selectIsAuthenticated = createSelector(
-	selectAuthDomain, (state) => state.isAuthenticated,
-);
+export const authenticate = () => api.get('login');
 
-export const selectIsPending = createSelector(
-	selectAuthDomain, (state) => state.isPending,
-);
+export const login = (user, password) => api.post('login', { user, password });
+
+export const logout = () => api.post('logout');

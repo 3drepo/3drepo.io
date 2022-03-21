@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,14 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { createSelector } from 'reselect';
 
-const selectAuthDomain = (state) => ({ ...state.auth2 });
+import { Action } from 'redux';
 
-export const selectIsAuthenticated = createSelector(
-	selectAuthDomain, (state) => state.isAuthenticated,
-);
+export type LoginAction = Action<'LOGIN'> & { username: string, password: string };
+export type SetPendingStatusAction = Action<'SET_PENDING_STATUS'> & { isPending: boolean };
 
-export const selectIsPending = createSelector(
-	selectAuthDomain, (state) => state.isPending,
-);
+export interface IAuthActionCreators {
+	authenticate: () => Action<'AUTHENTICATE'>;
+	login: (username: string, password: string) => LoginAction;
+	loginSuccess: () => Action<'LOGIN_SUCCESS'>;
+	logout: () => Action<'LOGOUT'>;
+	setPendingStatus: (isPending: boolean) => SetPendingStatusAction;
+}

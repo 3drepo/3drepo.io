@@ -24,6 +24,7 @@ import { reducer as containersReducer } from '@/v5/store/containers/containers.r
 import { reducer as dialogsReducer } from '@/v5/store/dialogs/dialogs.redux';
 import { reducer as projectsReducer } from '@/v5/store/projects/projects.redux';
 import { reducer as teamspaces2Reducer } from '@/v5/store/teamspaces/teamspaces.redux';
+import { reducer as auth2Reducer } from '@/v5/store/auth/auth.redux';
 import { reducer as usersReducer } from '@/v5/store/users/users.redux';
 
 import { reducer as revisionsReducer } from '@/v5/store/revisions/revisions.redux';
@@ -82,6 +83,7 @@ export default function createReducer(history) {
 		billing: billingReducer,
 		teamspaces: teamspacesReducer,
 		teamspaces2: teamspaces2Reducer,
+		auth2: auth2Reducer,
 		model: modelReducer,
 		auth: authReducer,
 		notifications: notificationsReducer,

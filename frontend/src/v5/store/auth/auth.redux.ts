@@ -17,27 +17,38 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
-
-interface IAuthActions {
-	login: (username: string, password: string) => any;
-	loginSuccess: () => any;
-}
+import { IAuthActionCreators } from './auth.types';
 
 interface IAuthState {
 	isAuthenticated: boolean;
+	isPending: boolean;
 }
 
 export const { Types: AuthTypes, Creators: AuthActions } = createActions({
+	authenticate: [],
 	login: ['username', 'password'],
 	loginSuccess: [],
-}, { prefix: 'AUTH2/' }) as { Types: Constants<IAuthActions>; Creators: IAuthActions };
+	logout: [],
+	setPendingStatus: ['isPending'],
+}, { prefix: 'AUTH2/' }) as { Types: Constants<IAuthActionCreators>; Creators: IAuthActionCreators };
 
 export const INITIAL_STATE: IAuthState = {
-	isAuthenticated: false,
+	isAuthenticated: null,
+	isPending: false,
 };
 
-export const loginSuccess = (state = INITIAL_STATE): IAuthState => ({ ...state, isAuthenticated: true });
+export const setPendingStatus = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
+
+export const loginSuccess = (state = INITIAL_STATE): IAuthState => (
+	{ ...state, isAuthenticated: true, isPending: false }
+);
+
+export const logout = (state = INITIAL_STATE): IAuthState => (
+	{ ...state, isAuthenticated: false, isPending: false }
+);
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[AuthTypes.LOGIN_SUCCESS]: loginSuccess,
+	[AuthTypes.SET_PENDING_STATUS]: setPendingStatus,
+	[AuthTypes.LOGOUT]: logout,
 });
