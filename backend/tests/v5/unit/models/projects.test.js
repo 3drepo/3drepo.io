@@ -17,10 +17,11 @@
 
 const { src } = require('../../helper/path');
 
-const Project = require(`${src}/models/projects`);
+const Project = require(`${src}/models/projectSettings`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
+const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 
 const testProjectAdmins = () => {
 	describe('Get project admins', () => {
@@ -159,10 +160,107 @@ const testModelsExistInProject = () => {
 	});
 };
 
-describe('models/projects', () => {
+const testCreateProject = () => {
+	describe('Create New Project', () => {
+		test('should add and return a project', async () => {
+			const fn = jest.spyOn(db, 'insertOne').mockResolvedValue();
+
+			const res = await Project.createProject('someTS', { name: 'newName' });
+
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual('someTS');
+			expect(fn.mock.calls[0][1]).toEqual('projects');
+			expect(fn.mock.calls[0][2].name).toEqual({ name: 'newName' });
+			expect(fn.mock.calls[0][2]).toHaveProperty('_id');
+			expect(isUUIDString(fn.mock.calls[0][2]._id));
+			expect(res).toEqual(fn.mock.calls[0][2]._id);
+		});
+	});
+};
+
+const testDeleteProject = () => {
+	describe('Delete Project', () => {
+		test('should delete a project', async () => {
+			const fn = jest.spyOn(db, 'deleteOne').mockResolvedValue({ deletedCount: 1 });
+			await Project.deleteProject('someTS', 'project Id');
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual('someTS');
+			expect(fn.mock.calls[0][1]).toEqual('projects');
+			expect(fn.mock.calls[0][2]).toEqual({ _id: 'project Id' });
+		});
+
+		test('should return error if the project is not found', async () => {
+			jest.spyOn(db, 'deleteOne').mockResolvedValue({ deletedCount: 0 });
+			await expect(Project.deleteProject('someTS', 'project Id'))
+				.rejects.toEqual(templates.projectNotFound);
+		});
+	});
+};
+
+const testUpdateProject = () => {
+	describe('Update Project', () => {
+		test('should edit a project', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 1 });
+			await Project.updateProject('someTS', 'project Id', { name: 'newName' });
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual('someTS');
+			expect(fn.mock.calls[0][1]).toEqual('projects');
+			expect(fn.mock.calls[0][2]).toEqual({ _id: 'project Id' });
+			expect(fn.mock.calls[0][3]).toEqual({ $set: { name: 'newName' } });
+		});
+
+		test('should return error if the project is not found', async () => {
+			jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 0 });
+			await expect(Project.updateProject('someTS', 'project Id', { name: 'newName' })).rejects.toEqual(templates.projectNotFound);
+		});
+	});
+};
+
+const testGetProjectByName = () => {
+	describe('Get Project by Name', () => {
+		test('should return a project', async () => {
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue('project');
+			await Project.getProjectByName('someTS', 'project name');
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual('someTS');
+			expect(fn.mock.calls[0][1]).toEqual('projects');
+			expect(fn.mock.calls[0][2]).toEqual({ name: 'project name' });
+		});
+
+		test('should return error if project is not found', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+			await expect(Project.getProjectByName('someTS', 'project name')).rejects.toEqual(templates.projectNotFound);
+		});
+	});
+};
+
+const testGetProjectById = () => {
+	describe('Get Project by id', () => {
+		test('should return a project', async () => {
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue('project');
+			await Project.getProjectById('someTS', 'project id');
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual('someTS');
+			expect(fn.mock.calls[0][1]).toEqual('projects');
+			expect(fn.mock.calls[0][2]).toEqual({ _id: 'project id' });
+		});
+
+		test('should return error if project is not found', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+			await expect(Project.getProjectById('someTS', 'project id')).rejects.toEqual(templates.projectNotFound);
+		});
+	});
+};
+
+describe('models/projectSettings', () => {
 	testProjectAdmins();
 	testGetProjectList();
 	testAddProjectModel();
 	testRemoveProjectModel();
 	testModelsExistInProject();
+	testCreateProject();
+	testDeleteProject();
+	testUpdateProject();
+	testGetProjectByName();
+	testGetProjectById();
 });
