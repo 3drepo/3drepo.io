@@ -24,6 +24,7 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { Tooltip } from '@mui/material';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
+import { filterContainers } from '@/v5/store/containers/containers.helpers';
 import { useParams } from 'react-router-dom';
 import { isEmpty } from 'lodash';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
@@ -56,18 +57,30 @@ export const EditFederationModal = ({
 		);
 	}, [containers]);
 
+	const partitionContainersByQuery = (
+		containersToPartition: IContainer[],
+		query: string,
+	) : [IContainer[], IContainer[]] => {
+		const filteredInContainer = filterContainers(containersToPartition, query);
+		const filteredInContainerIds = filteredInContainer.map((container) => container._id);
+		const filteredOutContainer = containersToPartition.filter(
+			(container) => !filteredInContainerIds.includes(container._id),
+		);
+		return [filteredInContainer, filteredOutContainer];
+	};
+
 	const includeContainer = (container: IContainer) => {
 		setIncludedContainers([...includedContainers, container]);
 		setAvailableContainers(availableContainers.filter(({ _id }) => _id !== container._id));
 	};
 
 	const includeAllContainers = (filterQuery: string = '') => {
-		const containersToInclude = availableContainers.filter(
-			({ name }) => name.toLocaleLowerCase().includes(filterQuery.toLocaleLowerCase()),
-		);
+		const [
+			containersToInclude,
+			availableContainersLeft,
+		] = partitionContainersByQuery(availableContainers, filterQuery);
 		setIncludedContainers([...includedContainers, ...containersToInclude]);
-		const idsToRemove = containersToInclude.map(({ _id }) => _id);
-		setAvailableContainers(availableContainers.filter(({ _id }) => !idsToRemove.includes(_id)));
+		setAvailableContainers(availableContainersLeft);
 	};
 
 	const removeContainer = (container: IContainer) => {
@@ -76,12 +89,12 @@ export const EditFederationModal = ({
 	};
 
 	const removeAllContainers = (filterQuery: string = '') => {
-		const containersToRemove = includedContainers.filter(
-			({ name }) => name.toLocaleLowerCase().includes(filterQuery.toLocaleLowerCase()),
-		);
+		const [
+			containersToRemove,
+			includedContainersLeft,
+		] = partitionContainersByQuery(includedContainers, filterQuery);
 		setAvailableContainers([...availableContainers, ...containersToRemove]);
-		const idsToInclude = containersToRemove.map(({ _id }) => _id);
-		setIncludedContainers(includedContainers.filter(({ _id }) => !idsToInclude.includes(_id)));
+		setIncludedContainers(includedContainersLeft);
 	};
 
 	const saveChanges = (event: SyntheticEvent) => {

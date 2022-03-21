@@ -93,7 +93,7 @@ export const EditFederationContainers = ({
 	return (
 		<Container>
 			<DashboardListCollapse
-				title={<>{title} {!isListPending && `(${containers.length})`}</>}
+				title={<>{title} {!isListPending && `(${sortedList.length})`}</>}
 				isLoading={areStatsPending}
 				tooltipTitles={collapsableTooltips}
 				sideElement={(

@@ -14,28 +14,22 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const UserConstants = {};
-UserConstants.USERNAME_BLACKLIST = [
-	'payment',
-	'test',
-	'os',
-	'info',
-	'contact',
-	'cookies',
-	'password-change',
-	'password-forgot',
-	'pricing',
-	'privacy',
-	'register-request',
-	'register-verify',
-	'signUp',
-	'termsAndConditions',
-	'false',
-	'admin',
-	'local',
-	'root',
-	'notifications',
-	'loginRecords',
-];
 
-module.exports = UserConstants;
+const { v5Path } = require('../../interop');
+
+const { listDatabases, listCollections } = require(`${v5Path}/handler/db`);
+const { USERNAME_BLACKLIST } = require(`${v5Path}/models/users.constants`);
+
+const Utils = {};
+
+Utils.getTeamspaceList = async () => {
+	const dbList = await listDatabases();
+	return dbList.flatMap(({ name }) => (USERNAME_BLACKLIST.includes(name) ? [] : name));
+};
+
+Utils.getCollectionsEndsWith = async (teamspace, str) => {
+	const collections = await listCollections(teamspace);
+	return collections.filter(({ name }) => name.endsWith(str));
+};
+
+module.exports = Utils;
