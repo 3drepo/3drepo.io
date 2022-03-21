@@ -155,10 +155,15 @@ Models.newRevisionProcessed = async (teamspace, project, model, corId, retVal, u
 				errCode: retVal,
 				user });
 
+		const data = { ...set };
+		if (data.subModels) {
+			data.containers = data.subModels;
+			delete data.subModels;
+		}
 		publish(events.MODEL_SETTINGS_UPDATE, { teamspace,
 			project,
 			model,
-			data: set,
+			data,
 			isFederation: !!containers });
 	}
 };

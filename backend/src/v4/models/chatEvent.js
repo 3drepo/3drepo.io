@@ -210,9 +210,11 @@ const subscribeToV5Events = () => {
 		modelStatusChanged(null, teamspace, model, data);
 
 		if(success) {
-			const { tag } = await findLatest(teamspace, model, {tag: 1});
-			const notes = await notifications.upsertModelUpdatedNotifications(teamspace, model, tag || corId);
-			notes.forEach((note) => upsertedNotification(null, note));
+			const rev = await findLatest(teamspace, model, {tag: 1});
+			if(rev) {
+				const notes = await notifications.upsertModelUpdatedNotifications(teamspace, model, rev.tag || corId);
+				notes.forEach((note) => upsertedNotification(null, note));
+			}
 		}
 		if(message) {
 			const Mailer = require("../mailer/mailer");
