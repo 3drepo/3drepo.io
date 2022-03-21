@@ -91,7 +91,7 @@ const runSessionsRemovedTests = () => {
 	});
 };
 
-describe('E2E Chat Service', () => {
+describe('E2E Chat Service (Session Channel)', () => {
 	let server;
 	let chatApp;
 	beforeAll(async () => {
