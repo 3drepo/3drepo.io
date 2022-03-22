@@ -216,7 +216,7 @@ const queueFinishedTest = () => {
 			await queueMessage(queueConfig.callback_queue, ServiceHelper.generateRandomString(),
 				JSON.stringify(content));
 			const results = await modelUpdatePromise;
-			expect(results).toEqual(expect.objectContaining(data));
+			expect(results).toEqual(expect.objectContaining({ ...data, status: 'ok' }));
 			expect(results.timestamp).not.toBeUndefined();
 
 			socket.close();
@@ -237,7 +237,7 @@ const queueFinishedTest = () => {
 			});
 			await queueMessage(queueConfig.callback_queue, corId, JSON.stringify(content));
 			const results = await modelUpdatePromise;
-			expect(results).toEqual(expect.objectContaining({ ...data, containers: [container._id] }));
+			expect(results).toEqual(expect.objectContaining({ ...data, containers: [container._id], status: 'ok' }));
 			expect(results.timestamp).not.toBeUndefined();
 
 			socket.close();
