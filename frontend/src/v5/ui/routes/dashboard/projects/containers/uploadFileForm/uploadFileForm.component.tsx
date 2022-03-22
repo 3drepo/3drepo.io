@@ -123,8 +123,8 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		} else {
 			setIsUploading(true);
 			setSelectedIndex(null);
-			data.uploads.forEach((revision, i) => {
-				RevisionsActionsDispatchers.createRevision(teamspace, project, revision.containerId, (value) => setValue(`uploads.${i}.progress`, value), revision);
+			data.uploads.forEach((revision) => {
+				RevisionsActionsDispatchers.createRevision(teamspace, project, revision);
 			});
 		}
 	};

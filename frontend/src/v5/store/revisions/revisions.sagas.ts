@@ -19,6 +19,7 @@ import { put, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
+import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
 import { RevisionsActions, RevisionsTypes } from './revisions.redux';
 import { FetchAction, SetRevisionVoidStatusAction, CreateRevisionAction } from './revisions.types';
 import { ContainersActions } from '../containers/containers.redux';
@@ -50,8 +51,8 @@ export function* setVoidStatus({ teamspace, projectId, containerId, revisionId, 
 	}
 }
 
-export function* createRevision({ teamspace, projectId, containerId, progressBar, body }: CreateRevisionAction) {
-	let newContainerId: string;
+export function* createRevision({ teamspace, projectId, body }: CreateRevisionAction) {
+	let { containerId } = body;
 	const newContainer = {
 		name: body.containerName,
 		unit: body.containerUnit,
@@ -61,8 +62,8 @@ export function* createRevision({ teamspace, projectId, containerId, progressBar
 	};
 	if (!containerId) {
 		try {
-			newContainerId = yield API.Containers.createContainer({ teamspace, projectId, newContainer });
-			yield put(ContainersActions.createContainerSuccess(projectId, { _id: newContainerId, ...newContainer }));
+			containerId = yield API.Containers.createContainer({ teamspace, projectId, newContainer });
+			yield put(ContainersActions.createContainerSuccess(projectId, { _id: containerId, ...newContainer }));
 		} catch (error) {
 			yield put(DialogsActions.open('alert', {
 				currentActions: formatMessage({ id: 'containers.creation.error', defaultMessage: 'trying to create container' }),
@@ -70,9 +71,8 @@ export function* createRevision({ teamspace, projectId, containerId, progressBar
 			}));
 		}
 	}
-	const updatedContainerId = containerId || newContainerId;
 	try {
-		if (!updatedContainerId) {
+		if (!containerId) {
 			throw new Error(
 				formatMessage({ id: 'placeholder', defaultMessage: 'Failed to create Container' }),
 			);
@@ -84,23 +84,26 @@ export function* createRevision({ teamspace, projectId, containerId, progressBar
 		formData.append('importAnimations', body.importAnimations.toString());
 		formData.append('timezone', body.timezone);
 
-		yield put(RevisionsActions.setUploadComplete(updatedContainerId, false));
+		yield put(RevisionsActions.setUploadComplete(containerId, false));
+		const updateProgress = (val: number) => {
+			RevisionsActionsDispatchers.setUploadProgress(containerId, val);
+		};
 
 		yield API.Revisions.createRevision(
 			teamspace,
 			projectId,
-			updatedContainerId,
-			progressBar,
+			containerId,
+			(percent) => updateProgress(percent),
 			formData,
 		);
-		yield put(RevisionsActions.setUploadComplete(updatedContainerId, true));
+		yield put(RevisionsActions.setUploadComplete(containerId, true));
 	} catch (error) {
 		let errorMessage = '';
 		if (Object.prototype.hasOwnProperty.call(error, 'response')) {
 			const { response: { data: { message, status, code } } } = error;
 			errorMessage = `${status} - ${code} (${message})`;
 		} else errorMessage = error.message;
-		yield put(RevisionsActions.setUploadComplete(updatedContainerId, true, errorMessage));
+		yield put(RevisionsActions.setUploadComplete(containerId, true, errorMessage));
 	}
 }
 

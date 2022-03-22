@@ -15,4 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { ProgressBar } from './progressBar.component';
+export { UploadProgressBar } from './uploadProgressBar.component';

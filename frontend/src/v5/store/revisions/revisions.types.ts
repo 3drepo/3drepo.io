@@ -29,6 +29,7 @@ export interface IRevision {
 export interface IUploadStatus {
 	isComplete: boolean;
 	errorMessage: string;
+	progress: number;
 }
 
 export interface IRevisionsState {
@@ -58,6 +59,7 @@ export type CreateRevisionBody = {
 	importAnimations?: boolean;
 	timezone?: string;
 
+	containerId: string;
 	containerName: string;
 	containerType: string;
 	containerUnit: string;
@@ -68,9 +70,7 @@ export type CreateRevisionBody = {
 export type CreateRevisionPayload = {
 	teamspace: string;
 	projectId: string;
-	containerId: string;
 	body: CreateRevisionBody;
-	progressBar: (val) => void;
 };
 
 export type SetRevisionVoidStatusAction = Action<'SET_REVISION_VOID_STATUS'> & RevisionVoidStatusPayload;
@@ -79,7 +79,8 @@ export type FetchAction = Action<'FETCH'> & FetchRevisionsPayload;
 export type FetchSuccessAction = Action<'FETCH_SUCCESS'> & { containerId: string, revisions: IRevision[] };
 export type SetIsPendingAction = Action<'SET_IS_PENDING'> & { containerId: string, isPending: boolean };
 export type CreateRevisionAction = Action<'CREATE_REVISION'> & CreateRevisionPayload;
-export type SetUploadCompleteAction = Action<'SET_UPLOAD_COMPLETE'> & { uploadId: string, isComplete: boolean, errorMessage?: string };
+export type SetUploadCompleteAction = Action<'SET_UPLOAD_COMPLETE'> & { containerId: string, isComplete: boolean, errorMessage?: string };
+export type SetUploadProgressAction = Action<'SET_UPLOAD_PROGRESS'> & { containerId: string, progress: number };
 
 export interface IRevisionsActionCreators {
 	setVoidStatus: (teamspace: string, projectId: string, containerId: string, revisionId: string, isVoid: boolean) =>
@@ -91,9 +92,8 @@ export interface IRevisionsActionCreators {
 	setIsPending: (containerId: string, isPending: boolean) => SetIsPendingAction;
 	createRevision: (teamspace: string,
 		projectId: string,
-		containerId: string,
-		progressBar: (val) => void,
 		body: CreateRevisionBody,
 	) => CreateRevisionAction;
-	setUploadComplete: (uploadId: string, isComplete: boolean, errorMessage?: string) => SetUploadCompleteAction;
+	setUploadComplete: (containerId: string, isComplete: boolean, errorMessage?: string) => SetUploadCompleteAction;
+	setUploadProgress: (containerId: string, progress: number) => SetUploadProgressAction
 }

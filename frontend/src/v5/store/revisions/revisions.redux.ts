@@ -25,8 +25,9 @@ export const { Types: RevisionsTypes, Creators: RevisionsActions } = createActio
 	fetch: ['teamspace', 'projectId', 'containerId'],
 	fetchSuccess: ['containerId', 'revisions'],
 	setIsPending: ['containerId', 'isPending'],
-	createRevision: ['teamspace', 'projectId', 'containerId', 'progressBar', 'body'],
+	createRevision: ['teamspace', 'projectId', 'body'],
 	setUploadComplete: ['containerId', 'isComplete', 'errorMessage'],
+	setUploadProgress: ['containerId', 'progress'],
 }, { prefix: 'REVISIONS/' }) as { Types: Constants<IRevisionsActionCreators>; Creators: IRevisionsActionCreators };
 
 export const INITIAL_STATE: IRevisionsState = {
@@ -85,9 +86,21 @@ export const setUploadComplete = (state = INITIAL_STATE, {
 	},
 });
 
+export const setUploadProgress = (state = INITIAL_STATE, { containerId, progress }): IRevisionsState => ({
+	...state,
+	revisionsUploadStatus: {
+		...state.revisionsUploadStatus,
+		[containerId]: {
+			...state.revisionsUploadStatus[containerId],
+			progress,
+		},
+	},
+});
+
 export const reducer = createReducer<IRevisionsState>(INITIAL_STATE, {
 	[RevisionsTypes.FETCH_SUCCESS]: fetchSuccess,
 	[RevisionsTypes.SET_IS_PENDING]: setIsPending,
 	[RevisionsTypes.SET_VOID_STATUS_SUCCESS]: setVoidStatusSuccess,
 	[RevisionsTypes.SET_UPLOAD_COMPLETE]: setUploadComplete,
+	[RevisionsTypes.SET_UPLOAD_PROGRESS]: setUploadProgress,
 });

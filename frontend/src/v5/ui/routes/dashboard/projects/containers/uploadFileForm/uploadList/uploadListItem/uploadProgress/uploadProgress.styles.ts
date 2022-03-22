@@ -17,8 +17,8 @@
 
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
-import { PROGRESS_BAR_COLOUR_MAP } from '@controls/progressBar/progressBar.styles';
-import { ProgressBar } from '@controls/progressBar';
+import { PROGRESS_BAR_COLOUR_MAP } from '@controls/uploadProgressBar/uploadProgressBar.styles';
+import { UploadProgressBar } from '@controls/uploadProgressBar';
 
 export const Container = styled.div`
 	width: auto;
@@ -44,6 +44,6 @@ export const CompletionMark = styled.div`
 	color: ${PROGRESS_BAR_COLOUR_MAP.uploaded};
 `;
 
-export const Progress = styled(ProgressBar)`
+export const Progress = styled(UploadProgressBar)`
 	width: 174px;
 `;

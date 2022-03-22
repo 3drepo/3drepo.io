@@ -46,8 +46,11 @@ export const selectUploadIsComplete = createSelector(
 export const selectUploadError: (any, string) => string = createSelector(
 	selectUploads,
 	selectContainerIdParam,
-	(uploadStates, containerId) => {
-		if (uploadStates[containerId]) return uploadStates[containerId]?.errorMessage;
-		return '';
-	},
+	(uploadStates, containerId) => uploadStates[containerId]?.errorMessage || null,
+);
+
+export const selectUploadProgress: (any, string) => number = createSelector(
+	selectUploads,
+	selectContainerIdParam,
+	(uploadStates, containerId) => uploadStates[containerId]?.progress || 0,
 );

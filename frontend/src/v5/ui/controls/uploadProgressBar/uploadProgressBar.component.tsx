@@ -17,9 +17,9 @@
 
 import { LinearProgress } from '@material-ui/core';
 import React from 'react';
-import { LabelledProgressBar, ProgressBarLabelLight, ProgressBarLabelDark } from './progressBar.styles';
+import { LabelledProgressBar, ProgressBarLabelLight, ProgressBarLabelDark } from './uploadProgressBar.styles';
 
-type IProgressBar = {
+type IUploadProgressBar = {
 	progress: number;
 	uploadStatus: 'queued' | 'uploading' | 'uploaded' | 'failed';
 	noLabel?: boolean;
@@ -27,13 +27,13 @@ type IProgressBar = {
 	hidden?: boolean;
 };
 
-export const ProgressBar = ({
+export const UploadProgressBar = ({
 	progress,
 	uploadStatus,
 	noLabel = false,
 	hidden = false,
 	...props
-}: IProgressBar): JSX.Element => (
+}: IUploadProgressBar): JSX.Element => (
 	<LabelledProgressBar uploadstatus={uploadStatus} hidden={hidden}>
 		<LinearProgress value={progress} {...props} />
 		<ProgressBarLabelLight hidden={noLabel}>{`${progress}%`}</ProgressBarLabelLight>

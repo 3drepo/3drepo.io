@@ -39,7 +39,6 @@ type IUploadListItem = {
 	onClickEdit: () => void;
 	onClickDelete: () => void;
 	onChange: (name, val) => void;
-	progress: number;
 };
 
 export const UploadListItem = ({
@@ -49,7 +48,6 @@ export const UploadListItem = ({
 	isSelected,
 	isUploading,
 	onChange,
-	progress,
 }: IUploadListItem): JSX.Element => {
 	const { control, formState: { errors }, setValue, trigger, watch } = useForm({
 		defaultValues: item,
@@ -57,7 +55,9 @@ export const UploadListItem = ({
 		resolver: yupResolver(ListItemSchema),
 	});
 
-	const uploadErrorMessage: string = RevisionsHooksSelectors.selectUploadError(watch('containerId'));
+	const containerId = watch('containerId');
+
+	const uploadErrorMessage: string = RevisionsHooksSelectors.selectUploadError(containerId);
 
 	const updateValue = (name) => onChange(name, watch(name));
 	updateValue('revisionTag');
@@ -93,7 +93,7 @@ export const UploadListItem = ({
 				errorMessage={errors.revisionTag?.message}
 			/>
 			{ isUploading
-				? <UploadProgress progress={progress} errorMessage={uploadErrorMessage} />
+				? <UploadProgress containerId={containerId} errorMessage={uploadErrorMessage} />
 				: (
 					<>
 						<Button $selectedrow={isSelected} onClick={onClickEdit}>
