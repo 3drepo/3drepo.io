@@ -477,7 +477,8 @@ const testGetUserByUsernameOrEmail = () => {
 			const res = await User.getUserByUsernameOrEmail(username);
 			expect(res).toEqual({ user: username });
 			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][2]).toEqual({ $or: [{ user: username }, { 'customData.email': username }] });
+			// eslint-disable-next-line security/detect-non-literal-regexp
+			expect(fn.mock.calls[0][2]).toEqual({ $or: [{ user: username }, { 'customData.email': new RegExp(`^${username.replace(/(\W)/g, '\\$1')}$`, 'i') }] });
 		});
 
 		test('should return user by email if user exists', async () => {
@@ -486,16 +487,8 @@ const testGetUserByUsernameOrEmail = () => {
 			const res = await User.getUserByUsernameOrEmail(email);
 			expect(res).toEqual({ user: 'user' });
 			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][2]).toEqual({ $or: [{ user: email }, { 'customData.email': email }] });
-		});
-
-		test('should return user by email with capital letters if user exists', async () => {
-			const email = 'eXaMpLe@emAil.cOm';
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ user: 'user' });
-			const res = await User.getUserByUsernameOrEmail(email);
-			expect(res).toEqual({ user: 'user' });
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][2]).toEqual({ $or: [{ user: email }, { 'customData.email': 'example@email.com' }] });
+			// eslint-disable-next-line security/detect-non-literal-regexp
+			expect(fn.mock.calls[0][2]).toEqual({ $or: [{ user: email }, { 'customData.email': new RegExp(`^${email.replace(/(\W)/g, '\\$1')}$`, 'i') }] });
 		});
 
 		test('should throw error if user does not exist', async () => {
