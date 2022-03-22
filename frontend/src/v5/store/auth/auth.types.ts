@@ -23,6 +23,7 @@ export type SetPendingStatusAction = Action<'SET_PENDING_STATUS'> & { isPending:
 export interface IAuthActionCreators {
 	authenticate: () => Action<'AUTHENTICATE'>;
 	login: (username: string, password: string) => LoginAction;
+	loginFailed: (errorMessage: string) => void,
 	loginSuccess: () => Action<'LOGIN_SUCCESS'>;
 	logout: () => Action<'LOGOUT'>;
 	setPendingStatus: (isPending: boolean) => SetPendingStatusAction;

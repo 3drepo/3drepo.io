@@ -39,8 +39,12 @@ export function* login({ username, password }: LoginAction) {
 	try {
 		yield API.Auth.login(username, password);
 		yield put(AuthActions.loginSuccess());
-	// eslint-disable-next-line no-empty
-	} catch (e) {
+	} catch ({ message, response: { data: { status, code } } }) {
+		if (status === 400 && code === 'INCORRECT_USERNAME_OR_PASSWORD') {
+			AuthActionsDispatchers.loginFailed(
+				formatMessage({ id: 'placeholder', defaultMessage: 'Incorrect username or password. Please try again.' }),
+			);
+		} else AuthActionsDispatchers.loginFailed(message);
 	}
 }
 

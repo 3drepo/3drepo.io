@@ -23,7 +23,9 @@ import { formatMessage } from '@/v5/services/intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { LoginSchema } from '@/v5/validation/auth';
 import { AuthPage } from '@components/authPage';
-import { ForgotPasswordPrompt, Heading, LoginButton, OtherOptions, PasswordField, SignUpPrompt, UsernameField } from './login.styles';
+import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
+import ErrorIcon from '@assets/icons/warning_small.svg';
+import { ErrorMessage, ForgotPasswordPrompt, Heading, LoginButton, OtherOptions, PasswordField, SignUpPrompt, UsernameField } from './login.styles';
 
 const APP_VERSION = ClientConfig.VERSION;
 
@@ -36,6 +38,8 @@ export const Login = () => {
 		},
 		resolver: yupResolver(LoginSchema),
 	});
+
+	const errorMessage: string = AuthHooksSelectors.selectLoginError();
 
 	const onSubmit = ({ username, password }) => {
 		AuthActionsDispatchers.login(username, password);
@@ -72,6 +76,7 @@ export const Login = () => {
 					autoComplete="current-password"
 					type="password"
 				/>
+				{errorMessage && <ErrorMessage><ErrorIcon />{errorMessage}</ErrorMessage>}
 				<OtherOptions>
 					<SignUpPrompt>
 						<FormattedMessage

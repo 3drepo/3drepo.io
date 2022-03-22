@@ -22,12 +22,14 @@ import { IAuthActionCreators } from './auth.types';
 interface IAuthState {
 	isAuthenticated: boolean;
 	isPending: boolean;
+	errorMessage: string;
 }
 
 export const { Types: AuthTypes, Creators: AuthActions } = createActions({
 	authenticate: [],
 	login: ['username', 'password'],
 	loginSuccess: [],
+	loginFailed: ['errorMessage'],
 	logout: [],
 	setPendingStatus: ['isPending'],
 	setLocalSessionStatus: ['status'],
@@ -37,6 +39,7 @@ export const { Types: AuthTypes, Creators: AuthActions } = createActions({
 export const INITIAL_STATE: IAuthState = {
 	isAuthenticated: null,
 	isPending: false,
+	errorMessage: null,
 };
 
 export const setLocalSessionStatus = (state = INITIAL_STATE, { status }) => {
@@ -56,6 +59,13 @@ export const loginSuccess = (state = INITIAL_STATE): IAuthState => {
 	);
 };
 
+export const loginFailed = (state = INITIAL_STATE, { errorMessage }): IAuthState => (
+	{ ...state,
+		errorMessage,
+		isPending: false,
+	}
+);
+
 export const logout = (state = INITIAL_STATE): IAuthState => {
 	setLocalSessionStatus(state, { status: false });
 	return { ...state, isAuthenticated: false, isPending: false };
@@ -73,6 +83,7 @@ export const sessionExpired = (state = INITIAL_STATE): IAuthState => {
 
 export const reducer = createReducer(INITIAL_STATE, {
 	[AuthTypes.LOGIN_SUCCESS]: loginSuccess,
+	[AuthTypes.LOGIN_FAILED]: loginFailed,
 	[AuthTypes.SET_PENDING_STATUS]: setPendingStatus,
 	[AuthTypes.LOGOUT]: logout,
 	[AuthTypes.SET_LOCAL_SESSION_STATUS]: setLocalSessionStatus,

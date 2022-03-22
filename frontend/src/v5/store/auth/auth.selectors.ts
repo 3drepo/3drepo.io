@@ -23,5 +23,7 @@ export const selectIsAuthenticated = createSelector(
 );
 
 export const selectIsPending = createSelector(
-	selectAuthDomain, (state) => state.isPending,
+
+export const selectLoginError = createSelector(
+	selectAuthDomain, (state): string => state.errorMessage,
 );

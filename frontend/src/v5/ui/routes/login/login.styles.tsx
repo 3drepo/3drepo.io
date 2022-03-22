@@ -76,6 +76,18 @@ export const ForgotPasswordPrompt = styled(Typography).attrs({
 	margin-left: auto;
 `;
 
+export const ErrorMessage = styled(Typography).attrs({
+	variant: 'body1',
+})`
+	color: ${({ theme }) => theme.palette.error.main};
+	display: flex;
+	align-items: center;
+	margin-top: 15px;
+	svg {
+		margin-right: 5px;
+	}
+`;
+
 export const LoginButton = styled(Button).attrs({
 	type: 'submit',
 	variant: 'contained',
