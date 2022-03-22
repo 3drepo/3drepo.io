@@ -27,6 +27,16 @@ jest.mock('../../../../src/v5/utils/helper/strings', () => ({
 	...jest.requireActual('../../../../src/v5/utils/helper/strings'),
 	generateHashString: jest.fn().mockImplementation(() => apiKey),
 }));
+
+const invalidEmail = 'invalid email';
+jest.doMock('../../../../src/v4/mailer/mailer', () => ({
+	...jest.requireActual('../../../../src/v4/mailer/mailer'),
+	sendResetPasswordEmail: jest.fn().mockImplementation((email) => {
+		if (email === invalidEmail) {
+			throw templates.unknown;
+		}
+	}),
+}));
 const User = require(`${src}/models/users`);
 
 const testGetAccessibleTeamspaces = () => {
@@ -446,6 +456,48 @@ const testUploadAvatar = () => {
 	});
 };
 
+const testUpdateResetPasswordToken = () => {
+	describe('Reset password token', () => {
+		test('should update user password', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
+			const resetPasswordToken = { token: apiKey, expiredAt: new Date() };
+			await User.updateResetPasswordToken('user1', resetPasswordToken);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][2]).toEqual({ user: 'user1' });
+			expect(fn.mock.calls[0][3]).toEqual({ $set: { 'customData.resetPasswordToken': resetPasswordToken } });
+		});
+	});
+};
+
+const testGetUserByUsernameOrEmail = () => {
+	describe('Get user by username or email', () => {
+		test('should return user by username if user exists', async () => {
+			const username = 'user';
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ user: username });
+			const res = await User.getUserByUsernameOrEmail(username);
+			expect(res).toEqual({ user: username });
+			expect(fn.mock.calls.length).toBe(1);
+			// eslint-disable-next-line security/detect-non-literal-regexp
+			expect(fn.mock.calls[0][2]).toEqual({ $or: [{ user: username }, { 'customData.email': new RegExp(`^${username.replace(/(\W)/g, '\\$1')}$`, 'i') }] });
+		});
+
+		test('should return user by email if user exists', async () => {
+			const email = 'example@email.com';
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ user: 'user' });
+			const res = await User.getUserByUsernameOrEmail(email);
+			expect(res).toEqual({ user: 'user' });
+			expect(fn.mock.calls.length).toBe(1);
+			// eslint-disable-next-line security/detect-non-literal-regexp
+			expect(fn.mock.calls[0][2]).toEqual({ $or: [{ user: email }, { 'customData.email': new RegExp(`^${email.replace(/(\W)/g, '\\$1')}$`, 'i') }] });
+		});
+
+		test('should throw error if user does not exist', async () => {
+			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+			await expect(User.getUserByUsernameOrEmail('user')).rejects.toEqual(templates.userNotFound);
+		});
+	});
+};
+
 describe('models/users', () => {
 	testGetAccessibleTeamspaces();
 	testGetFavourites();
@@ -459,4 +511,6 @@ describe('models/users', () => {
 	testGetAvatar();
 	testUploadAvatar();
 	testUpdatePassword();
+	testUpdateResetPasswordToken();
+	testGetUserByUsernameOrEmail();
 });
