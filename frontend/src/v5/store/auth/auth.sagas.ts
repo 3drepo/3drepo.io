@@ -37,6 +37,7 @@ function* authenticate() {
 
 export function* login({ username, password }: LoginAction) {
 	try {
+		yield put(AuthActions.setPendingStatus(true));
 		yield API.Auth.login(username, password);
 		yield put(AuthActions.loginSuccess());
 	} catch ({ message, response: { data: { status, code } } }) {

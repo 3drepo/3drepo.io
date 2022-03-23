@@ -38,6 +38,7 @@ export const Login = () => {
 		},
 		resolver: yupResolver(LoginSchema),
 	});
+	const isPending = AuthHooksSelectors.selectIsPending();
 
 	const errorMessage: string = AuthHooksSelectors.selectLoginError();
 
@@ -93,7 +94,7 @@ export const Login = () => {
 						</Link>
 					</ForgotPasswordPrompt>
 				</OtherOptions>
-				<LoginButton type="submit" disabled={!isValid}>
+				<LoginButton type="submit" isPending={isPending} disabled={!isValid}>
 					<FormattedMessage id="placeholder" defaultMessage="Log in" />
 				</LoginButton>
 			</form>
