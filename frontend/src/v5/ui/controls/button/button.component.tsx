@@ -19,6 +19,7 @@ import { ElementType, forwardRef, Ref } from 'react';
 import { ButtonProps } from '@material-ui/core/Button';
 import { Typography } from '@/v5/ui/controls/typography';
 import { ButtonTypeMap } from '@material-ui/core/Button/Button';
+import { CircularProgress } from '@material-ui/core';
 import { MuiButton, ErrorButton, LabelButton } from './button.styles';
 
 type ButtonVariants = ButtonProps['variant'] | 'label' | 'label-outlined';
@@ -27,12 +28,14 @@ type IButton<T extends ElementType = ButtonTypeMap['defaultComponent']> = Omit<B
 	variant?: ButtonVariants;
 	className?: string;
 	errorButton?: boolean;
+	isPending?: boolean;
 };
 
 export const ButtonBase = <T extends ElementType>({
 	children,
 	variant,
 	errorButton,
+	isPending,
 	...props
 }: IButton<T>, ref: Ref<HTMLButtonElement>): JSX.Element => {
 	if (errorButton) {
@@ -56,7 +59,18 @@ export const ButtonBase = <T extends ElementType>({
 			</LabelButton>
 		);
 	}
-	return <MuiButton variant={variant} {...props} ref={ref}>{children}</MuiButton>;
+
+	return isPending
+		? (
+			<MuiButton variant={variant} {...props} startIcon="" ref={ref}>
+				<CircularProgress color="inherit" size="13px" thickness={7} />
+			</MuiButton>
+		)
+		: (
+			<MuiButton variant={variant} {...props} ref={ref}>
+				{ children }
+			</MuiButton>
+		);
 };
 
 export const Button = forwardRef(ButtonBase);
