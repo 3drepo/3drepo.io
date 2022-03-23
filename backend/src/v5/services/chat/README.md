@@ -24,7 +24,7 @@ Note: This is currently a work in progress, new events will be added as they are
 ## Connecting to the service
 You will need to use utilise a [Socket.io client library](https://socket.io/docs/v4/client-installation/) to connect to this service. Please check our [package.json](../../../../package.json) to see which version of Socket.io we are currently using.
 
-You can find the domain to in the frontend config. e.g. For `https://www.3drepo.io/`, you can probe the config from `https://www.3drepo.io/config/config.js`, which contains the following information:
+You can find the domain to connect to within the frontend config. e.g. For `https://www.3drepo.io/`, perform a HTTP GET request to `https://www.3drepo.io/config/config.js`, which contains the following information:
 ````js
 {
   // ...
