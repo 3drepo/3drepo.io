@@ -44,6 +44,13 @@ export interface IContainer {
 	};
 }
 
+export interface MinimumContainer {
+	_id: string,
+	name: string,
+	role: string,
+	isFavourite: boolean
+}
+
 export type NewContainer = {
 	name: string;
 	unit: string;

@@ -19,9 +19,9 @@ import {
 	UploadStatuses,
 	IContainer,
 	ContainerStats,
+	MinimumContainer,
 } from '@/v5/store/containers/containers.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
-import { MinimumContainer } from '@/v5/services/api/containers';
 
 export const filterContainers = (federations: IContainer[], filterQuery: string) => (
 	federations.filter((

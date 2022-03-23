@@ -18,23 +18,11 @@
 import { AxiosResponse } from 'axios';
 import {
 	ContainerStats,
+	MinimumContainer,
 	NewContainer,
 } from '@/v5/store/containers/containers.types';
 import { TeamspaceAndProjectId, TeamspaceProjectAndContainerId } from '@/v5/store/store.types';
 import api from './default';
-
-export interface MinimumContainer {
-	_id: string,
-	name: string,
-	role: string,
-	isFavourite: boolean
-}
-
-export type FetchContainersResponse = {
-	containers: Array<MinimumContainer>
-};
-
-/***/
 
 export const addFavourites = (
 	{ teamspace, projectId, containerId }: TeamspaceProjectAndContainerId,
@@ -88,3 +76,5 @@ export const deleteContainer = (
  * Types
 */
 type CreateContainerParams = TeamspaceAndProjectId & { newContainer: NewContainer };
+
+export type FetchContainersResponse = { containers: Array<MinimumContainer> };
