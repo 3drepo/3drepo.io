@@ -17,8 +17,8 @@
 
 import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
+import { formatMessage } from '@/v5/services/intl';
 import { CurrentUserActions } from '@/v4/modules/currentUser';
-import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authActions.dispatchers';
 import { AuthActions, AuthTypes } from './auth.redux';
 import { LoginAction } from './auth.types';
 
@@ -42,10 +42,10 @@ export function* login({ username, password }: LoginAction) {
 		yield put(AuthActions.loginSuccess());
 	} catch ({ message, response: { data: { status, code } } }) {
 		if (status === 400 && code === 'INCORRECT_USERNAME_OR_PASSWORD') {
-			AuthActionsDispatchers.loginFailed(
+			yield put(AuthActions.loginFailed(
 				formatMessage({ id: 'placeholder', defaultMessage: 'Incorrect username or password. Please try again.' }),
-			);
-		} else AuthActionsDispatchers.loginFailed(message);
+			));
+		} else yield put(AuthActions.loginFailed(message));
 	}
 }
 
@@ -54,7 +54,7 @@ function* logout() {
 		yield API.Auth.logout();
 	} catch (e) {
 	}
-	yield AuthActionsDispatchers.setLocalSessionStatus('false');
+	yield put(AuthActions.setLocalSessionStatus('false'));
 }
 
 export default function* AuthSaga() {

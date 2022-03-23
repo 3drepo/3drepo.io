@@ -19,7 +19,7 @@ import { createSelector } from 'reselect';
 const selectAuthDomain = (state) => ({ ...state.auth2 });
 
 export const selectIsAuthenticated = createSelector(
-	selectAuthDomain, (state) => state.isAuthenticated,
+	selectAuthDomain, (state): boolean => state.isAuthenticated,
 );
 
 export const selectIsPending = createSelector(
