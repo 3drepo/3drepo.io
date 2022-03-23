@@ -54,6 +54,15 @@ const setupData = async () => {
 	]);
 };
 
+const waitForEvent = (socket, event) => new Promise((resolve) => {
+	socket.on(event, resolve);
+});
+
+const noEventExpected = (socket, event, fn) => new Promise((resolve, reject) => {
+	socket.on(event, () => { fn(); reject(); });
+	setTimeout(resolve, 500);
+});
+
 const modelUploadTest = () => {
 	describe('Model uploads', () => {
 		const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/revisions`;
@@ -63,10 +72,7 @@ const modelUploadTest = () => {
 			const data = { teamspace, project: project.id, model: container._id };
 
 			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
-			const modelUpdatePromise = new Promise((resolve, reject) => {
-				socket.on(EVENTS.CONTAINER_SETTINGS_UPDATE, resolve);
-				setTimeout(reject, 100);
-			});
+			const modelUpdatePromise = waitForEvent(socket, EVENTS.CONTAINER_SETTINGS_UPDATE);
 
 			await agent.post(`${route}?key=${user.apiKey}`)
 				.set('Content-Type', 'multipart/form-data')
@@ -85,10 +91,7 @@ const modelUploadTest = () => {
 			const joinPromise = ServiceHelper.socket.joinRoom(socket, data);
 
 			await expect(joinPromise).resolves.toBeUndefined();
-			const modelUpdatePromise = new Promise((resolve, reject) => {
-				socket.on(EVENTS.FEDERATION_SETTINGS_UPDATE, resolve);
-				setTimeout(reject, 100);
-			});
+			const modelUpdatePromise = waitForEvent(socket, EVENTS.FEDERATION_SETTINGS_UPDATE);
 
 			await agent.post(`${fedRoute}?key=${user.apiKey}`)
 				.send({ containers: [container._id] })
@@ -105,10 +108,7 @@ const modelUploadTest = () => {
 			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
 
 			const fn = jest.fn();
-			const modelUpdatePromise = new Promise((resolve, reject) => {
-				socket.on(EVENTS.CONTAINER_SETTINGS_UPDATE, () => { fn(); reject(); });
-				setTimeout(resolve, 100);
-			});
+			const modelUpdatePromise = noEventExpected(socket, EVENTS.CONTAINER_SETTINGS_UPDATE, fn);
 
 			const leavePromise = new Promise((resolve, reject) => {
 				socket.on(EVENTS.MESSAGE, (msg) => {
@@ -145,10 +145,7 @@ const queueUpdateTest = () => {
 			const data = { teamspace, project: project.id, model: container._id };
 			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
 
-			const modelUpdatePromise = new Promise((resolve, reject) => {
-				socket.on(EVENTS.CONTAINER_SETTINGS_UPDATE, resolve);
-				setTimeout(reject, 100);
-			});
+			const modelUpdatePromise = waitForEvent(socket, EVENTS.CONTAINER_SETTINGS_UPDATE);
 
 			const content = { status: 'processing', database: teamspace, project: container._id };
 			await queueMessage(queueConfig.callback_queue, ServiceHelper.generateRandomString(),
@@ -163,10 +160,7 @@ const queueUpdateTest = () => {
 			const data = { teamspace, project: project.id, model: federation._id };
 			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
 
-			const modelUpdatePromise = new Promise((resolve, reject) => {
-				socket.on(EVENTS.FEDERATION_SETTINGS_UPDATE, resolve);
-				setTimeout(reject, 100);
-			});
+			const modelUpdatePromise = waitForEvent(socket, EVENTS.FEDERATION_SETTINGS_UPDATE);
 
 			const content = { status: 'processing', database: teamspace, project: federation._id };
 			await queueMessage(queueConfig.callback_queue, ServiceHelper.generateRandomString(),
@@ -185,10 +179,7 @@ const queueFinishedTest = () => {
 			const data = { teamspace, project: project.id, model: container._id };
 			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
 
-			const modelUpdatePromise = new Promise((resolve, reject) => {
-				socket.on(EVENTS.CONTAINER_SETTINGS_UPDATE, resolve);
-				setTimeout(reject, 100);
-			});
+			const modelUpdatePromise = waitForEvent(socket, EVENTS.CONTAINER_SETTINGS_UPDATE);
 
 			const content = { value: 0, database: teamspace, project: container._id };
 			await queueMessage(queueConfig.callback_queue, ServiceHelper.generateRandomString(),
@@ -209,10 +200,9 @@ const queueFinishedTest = () => {
 			const fileContent = { subProjects: [{ project: container._id }] };
 			mkdirSync(`${queueConfig.shared_storage}/${corId}`);
 			writeFileSync(`${queueConfig.shared_storage}/${corId}/obj.json`, JSON.stringify(fileContent));
-			const modelUpdatePromise = new Promise((resolve, reject) => {
-				socket.on(EVENTS.FEDERATION_SETTINGS_UPDATE, resolve);
-				setTimeout(reject, 100);
-			});
+
+			const modelUpdatePromise = waitForEvent(socket, EVENTS.FEDERATION_SETTINGS_UPDATE);
+
 			await queueMessage(queueConfig.callback_queue, corId, JSON.stringify(content));
 			const results = await modelUpdatePromise;
 			expect(results?.data?.timestamp).not.toBeUndefined();
