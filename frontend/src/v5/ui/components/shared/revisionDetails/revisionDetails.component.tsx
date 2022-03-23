@@ -29,6 +29,8 @@ import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/re
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
 import { Display } from '@/v5/ui/themes/media';
 import { FormattedMessage } from 'react-intl';
+import { UploadStatuses } from '@/v5/store/containers/containers.types';
+import { isBusyInBackend } from '@/v5/store/containers/containers.helpers';
 import {
 	Container,
 	RevisionsListHeaderContainer,
@@ -43,9 +45,10 @@ import {
 interface IRevisionDetails {
 	containerId: string;
 	revisionsCount?: number;
+	status: UploadStatuses
 }
 
-export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDetails): JSX.Element => {
+export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisionDetails): JSX.Element => {
 	const { teamspace, project } = useParams();
 	const isLoading: boolean = RevisionsHooksSelectors.selectIsPending(containerId);
 	const revisions: IRevision[] = RevisionsHooksSelectors.selectRevisions(containerId);
@@ -58,7 +61,19 @@ export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDe
 		}
 	}, []);
 
-	if (!isLoading && revisions && revisions.length === 0) {
+	if (revisionsCount === 0) {
+		if (isBusyInBackend(status)) {
+			return (
+				<RevisionsListEmptyWrapper>
+					<RevisionsListEmptyContainer>
+						<RevisionsListEmptyText>
+							<FormattedMessage id="containers.revisions.emptyMessageBusy" defaultMessage="Your files are being processed at this moment, please wait before creating new revisions for this container." />
+						</RevisionsListEmptyText>
+					</RevisionsListEmptyContainer>
+				</RevisionsListEmptyWrapper>
+			);
+		}
+
 		return (
 			<RevisionsListEmptyWrapper>
 				<RevisionsListEmptyContainer>

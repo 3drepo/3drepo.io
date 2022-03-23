@@ -29,6 +29,17 @@ export const filterContainers = (federations: IContainer[], filterQuery: string)
 	) => [name, code, type].join('').toLowerCase().includes(filterQuery.trim().toLowerCase()))
 );
 
+export const isBusyInBackend = (status: UploadStatuses) => {
+	const busyInBackend = [
+		UploadStatuses.QUEUED,
+		UploadStatuses.PROCESSING,
+		UploadStatuses.QUEUED_FOR_UNITY,
+		UploadStatuses.UPLOADING,
+		UploadStatuses.GENERATING_BUNDLES,
+	];
+	return busyInBackend.includes(status);
+};
+
 export const prepareSingleContainerData = (
 	container: MinimumContainer,
 	stats?: ContainerStats,
