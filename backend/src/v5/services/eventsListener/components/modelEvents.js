@@ -43,10 +43,10 @@ const queueTasksCompleted = async ({
 	}
 };
 
-const modelSettingsUpdated = async ({ teamspace, project, model, data, isFederation }) => {
+const modelSettingsUpdated = async ({ teamspace, project, model, data, sender, isFederation }) => {
 	try {
 		const event = isFederation ? chatEvents.FEDERATION_SETTINGS_UPDATE : chatEvents.CONTAINER_SETTINGS_UPDATE;
-		await createModelMessage(event, data, teamspace, project, model);
+		await createModelMessage(event, data, teamspace, project, model, sender);
 	} catch (err) {
 		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
 	}

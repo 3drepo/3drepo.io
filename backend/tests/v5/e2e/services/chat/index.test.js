@@ -79,7 +79,7 @@ const onJoinSuccessCheck = async (socket, data) => {
 const testUnauthenticatedUser = () => {
 	describe('An unauthenticated user', () => {
 		test('should be able to connect to the chat service', async () => {
-			const socket = await ServiceHelper.connectToSocket();
+			const socket = await ServiceHelper.socket.connectToSocket();
 			socket.close();
 		});
 
@@ -90,7 +90,7 @@ const testUnauthenticatedUser = () => {
 			['should not be able to join a model room (v4)', { account: teamspace, model: container._id }],
 		])('Join room', (desc, data) => {
 			test(desc, async () => {
-				const socket = await ServiceHelper.connectToSocket();
+				const socket = await ServiceHelper.socket.connectToSocket();
 
 				await expect(onJoinErrorCheck(socket, data, ERRORS.UNAUTHORISED)).resolves.toBeUndefined();
 				socket.close();
@@ -106,7 +106,7 @@ const testTSAdmin = () => {
 			cookie = await ServiceHelper.loginAndGetCookie(agent, tsAdmin.user, tsAdmin.password);
 		});
 		test('should be able to connect to the chat service', async () => {
-			const socket = await ServiceHelper.connectToSocket(cookie);
+			const socket = await ServiceHelper.socket.connectToSocket(cookie);
 			socket.close();
 		});
 
@@ -122,7 +122,7 @@ const testTSAdmin = () => {
 		])('Join room', (desc, data, failError) => {
 			let socket;
 			beforeAll(async () => {
-				socket = await ServiceHelper.connectToSocket(cookie);
+				socket = await ServiceHelper.socket.connectToSocket(cookie);
 			});
 			afterAll(() => socket.close());
 			test(desc, async () => {
@@ -141,7 +141,7 @@ const testNobody = () => {
 			cookie = await ServiceHelper.loginAndGetCookie(agent, nobody.user, nobody.password);
 		});
 		test('should be able to connect to the chat service', async () => {
-			const socket = await ServiceHelper.connectToSocket(cookie);
+			const socket = await ServiceHelper.socket.connectToSocket(cookie);
 			socket.close();
 		});
 
@@ -150,7 +150,7 @@ const testNobody = () => {
 		])('Join room', (desc, data, failError) => {
 			let socket;
 			beforeAll(async () => {
-				socket = await ServiceHelper.connectToSocket(cookie);
+				socket = await ServiceHelper.socket.connectToSocket(cookie);
 			});
 			afterAll(() => socket.close());
 			test(desc, async () => {

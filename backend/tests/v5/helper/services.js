@@ -24,7 +24,7 @@ const { src, srcV4 } = require('./path');
 const { createApp } = require(`${srcV4}/services/api`);
 const { io: ioClient } = require('socket.io-client');
 
-const ChatService = require(`${src}/services/chat`);
+const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -35,7 +35,7 @@ const ExternalServices = require('../../../src/v5/handler/externalServices');
 
 const db = {};
 const queue = {};
-const ServiceHelper = { db, queue };
+const ServiceHelper = { db, queue, socket: {} };
 
 queue.purgeQueues = async () => {
 	try {
@@ -304,6 +304,10 @@ ServiceHelper.chatApp = () => {
 	const server = http.createServer();
 	const chatConfig = config.servers.find(({ service }) => service === 'chat');
 	server.listen(chatConfig.port, config.hostname);
+
+	// doing a local import as this includes the session service which doesn't clean itself up properly
+	// eslint-disable-next-line global-require
+	const ChatService = require(`${src}/services/chat`);
 	return ChatService.createApp(server);
 };
 
@@ -316,7 +320,7 @@ ServiceHelper.loginAndGetCookie = async (agent, user, password, headers = {}) =>
 	return cookie;
 };
 
-ServiceHelper.connectToSocket = (session) => new Promise((resolve, reject) => {
+ServiceHelper.socket.connectToSocket = (session) => new Promise((resolve, reject) => {
 	const { port } = config.servers.find(({ service }) => service === 'chat');
 	const socket = ioClient(`http://${config.host}:${port}`,
 		{
@@ -328,6 +332,29 @@ ServiceHelper.connectToSocket = (session) => new Promise((resolve, reject) => {
 		});
 	socket.on('connect', () => resolve(socket));
 	socket.on('connect_error', reject);
+});
+
+ServiceHelper.socket.loginAndGetSocket = async (agent, user, password) => {
+	const cookie = await ServiceHelper.loginAndGetCookie(agent, user, password);
+	return ServiceHelper.socket.connectToSocket(cookie);
+};
+
+ServiceHelper.socket.joinRoom = (socket, data) => new Promise((resolve, reject) => {
+	socket.on(EVENTS.MESSAGE, (msg) => {
+		expect(msg).toEqual(expect.objectContaining(
+			{ event: EVENTS.SUCCESS, data: { action: ACTIONS.JOIN, data } },
+		));
+		socket.off(EVENTS.MESSAGE);
+		socket.off(EVENTS.ERROR);
+		resolve();
+	});
+
+	socket.on(EVENTS.ERROR, () => {
+		socket.off(EVENTS.MESSAGE);
+		socket.off(EVENTS.ERROR);
+		reject();
+	});
+	socket.emit('join', data);
 });
 
 ServiceHelper.closeApp = async (server) => {

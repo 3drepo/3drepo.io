@@ -37,7 +37,7 @@ const runSessionsRemovedTests = () => {
 		test('Should log user out if they are logged in else where (login before socket connection)', async () => {
 			const headers = { referer: referrer, 'user-agent': userAgent };
 			const cookie = await ServiceHelper.loginAndGetCookie(agent, user.user, user.password, headers);
-			const socket = await ServiceHelper.connectToSocket(cookie);
+			const socket = await ServiceHelper.socket.connectToSocket(cookie);
 			const onLogOutMessage = new Promise((resolve) => {
 				socket.on(EVENTS.LOGGED_OUT, resolve);
 			});
@@ -48,7 +48,7 @@ const runSessionsRemovedTests = () => {
 
 		test('Should log user out if they are logged in else where (login after socket connection)', async () => {
 			const headers = { referer: referrer, 'user-agent': userAgent };
-			const socket = await ServiceHelper.connectToSocket();
+			const socket = await ServiceHelper.socket.connectToSocket();
 			await ServiceHelper.loginAndGetCookie(agent, user.user, user.password, { ...headers, 'x-socket-id': socket.id });
 			const onLogOutMessage = new Promise((resolve) => {
 				socket.on(EVENTS.LOGGED_OUT, resolve);
@@ -61,7 +61,7 @@ const runSessionsRemovedTests = () => {
 		test('Should not log the user out if the referrer is different', async () => {
 			const headers = { referer: referrer, 'user-agent': userAgent };
 			const cookie = await ServiceHelper.loginAndGetCookie(agent, user.user, user.password, headers);
-			const socket = await ServiceHelper.connectToSocket(cookie);
+			const socket = await ServiceHelper.socket.connectToSocket(cookie);
 			const fn = jest.fn();
 			const onLogOutMessage = new Promise((resolve, reject) => {
 				socket.on(EVENTS.LOGGED_OUT, () => { reject(); fn(); });
@@ -77,7 +77,7 @@ const runSessionsRemovedTests = () => {
 		test('Should not affect a different user', async () => {
 			const headers = { referer: referrer, 'user-agent': userAgent };
 			const cookie = await ServiceHelper.loginAndGetCookie(agent, user.user, user.password, headers);
-			const socket = await ServiceHelper.connectToSocket(cookie);
+			const socket = await ServiceHelper.socket.connectToSocket(cookie);
 			const fn = jest.fn();
 			const onLogOutMessage = new Promise((resolve, reject) => {
 				socket.on(EVENTS.LOGGED_OUT, () => { reject(); fn(); });

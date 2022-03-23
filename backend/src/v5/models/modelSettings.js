@@ -107,7 +107,7 @@ Models.updateModelStatus = async (teamspace, project, model, status, corId) => {
 	}
 
 	const modelData = await findOneAndUpdateModel(teamspace, query, { $set: updateObj }, { federate: 1 });
-	if (modelData.ok) {
+	if (modelData?.ok) {
 	// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
 	// trigger notifications.
 
@@ -169,7 +169,7 @@ Models.newRevisionProcessed = async (teamspace, project, model, corId, retVal, u
 	}
 };
 
-Models.updateModelSettings = async (teamspace, project, model, data) => {
+Models.updateModelSettings = async (teamspace, project, model, data, sender) => {
 	const toUpdate = {};
 	const toUnset = {};
 
@@ -200,7 +200,7 @@ Models.updateModelSettings = async (teamspace, project, model, data) => {
 	if (Object.keys(updateJson).length) {
 		const result = await findOneAndUpdateModel(teamspace, { _id: model }, updateJson, { federate: 1 });
 
-		if (!result) {
+		if (!result?.ok) {
 			throw templates.modelNotFound;
 		}
 
@@ -208,6 +208,7 @@ Models.updateModelSettings = async (teamspace, project, model, data) => {
 			project,
 			model,
 			data,
+			sender,
 			isFederation: !!result.value.federate });
 	}
 };

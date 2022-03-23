@@ -84,8 +84,9 @@ const getFederationStats = (req, res) => {
 
 const updateSettings = (req, res) => {
 	const { teamspace, project, federation } = req.params;
+	const sender = req.headers['x-socket-id'];
 
-	Federations.updateSettings(teamspace, project, federation, req.body)
+	Federations.updateSettings(teamspace, project, federation, req.body, sender)
 		.then(() => respond(req, res, templates.ok)).catch(
 			// istanbul ignore next
 			(err) => respond(req, res, err),

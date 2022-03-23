@@ -20,6 +20,7 @@ const { broadcastMessage, listenToExchange } = require('../../handler/queue');
 const RTMsg = require('../../handler/realTimeMsging');
 const { SESSION_CHANNEL_PREFIX } = require('./chat.constants');
 const SocketsManager = require('./socketsManager');
+const { UUIDToString } = require('../../utils/helper/uuids');
 const chatLabel = require('../../utils/logger').labels.chat;
 const { cn_queue: { event_exchange: eventExchange } } = require('../../utils/config');
 const { events } = require('../eventsManager/eventsManager.constants');
@@ -40,10 +41,12 @@ const onMessageV4 = (service, msg) => {
 };
 
 const processMessage = (service, msg) => {
-	const { recipients, event, data } = msg;
+	const { recipients, event, data, sender } = msg;
 	if (recipients?.length) { // direct message to sessions
+		const socket = SocketsManager.getSocketById(sender);
+		const emitter = socket || service;
 		recipients?.forEach((channelName) => {
-			broadcastToChannel(service, channelName, event, data);
+			broadcastToChannel(emitter, channelName, event, data);
 		});
 	} else {
 		logger.logError('Unrecognised event message', msg);
@@ -80,9 +83,10 @@ ChatService.createDirectMessage = (event, data, sessionIds) => {
 	broadcastMessage(eventExchange, message);
 };
 
-ChatService.createModelMessage = (event, data, teamspace, project, model) => {
+ChatService.createModelMessage = (event, data, teamspace, projectId, model, sender) => {
+	const project = UUIDToString(projectId);
 	const recipients = [`${teamspace}::${project}::${model}`];
-	const message = JSON.stringify({ event, data: { ...data, teamspace, project, model }, recipients });
+	const message = JSON.stringify({ event, data: { data, teamspace, project, model }, recipients, sender });
 	broadcastMessage(eventExchange, message);
 };
 

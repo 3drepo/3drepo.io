@@ -90,8 +90,9 @@ const appendFavourites = (req, res) => {
 
 const updateSettings = (req, res) => {
 	const { teamspace, project, container } = req.params;
+	const sender = req.headers['x-socket-id'];
 
-	Containers.updateSettings(teamspace, project, container, req.body)
+	Containers.updateSettings(teamspace, project, container, req.body, sender)
 		.then(() => respond(req, res, templates.ok)).catch(
 			// istanbul ignore next
 			(err) => respond(req, res, err),
