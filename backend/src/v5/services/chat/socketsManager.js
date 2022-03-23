@@ -21,7 +21,6 @@ const chatLabel = require('../../utils/logger').labels.chat;
 const { findProjectByModelId } = require('../../models/projectSettings');
 const { hasReadAccessToModel } = require('../../utils/permissions/permissions');
 const logger = require('../../utils/logger').logWithLabel(chatLabel);
-const { templates } = require('../../utils/responseCodes');
 
 const socketIdToSocket = {};
 const SocketsManager = {};
@@ -109,10 +108,7 @@ const leaveRoomV4 = async (socket, data) => {
 			const project = await findProjectByModelId(account, model, { _id: 1 });
 			leaveRoom(socket, { teamspace: account, model, project: project._id });
 		} catch (err) {
-			if (err.code === templates.projectNotFound.code) {
-				throw { code: ERRORS.ROOM_NOT_FOUND, message: `Model ${model} does not belong in any project.` };
-			}
-			throw err;
+			throw { code: ERRORS.ROOM_NOT_FOUND, message: err.message };
 		}
 	} else {
 		leaveRoom(socket, { notifications: true });

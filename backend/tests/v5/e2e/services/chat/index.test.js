@@ -78,6 +78,38 @@ const onJoinSuccessCheck = async (socket, data) => {
 	}));
 };
 
+const onLeaveErrorCheck = async (socket, data, error) => {
+	const untilErrorEvent = new Promise((resolve, reject) => {
+		socket.on(EVENTS.ERROR, resolve);
+		socket.on(EVENTS.MESSAGE, reject);
+	});
+
+	socket.emit('leave', data);
+	await expect(untilErrorEvent).resolves.toEqual(expect.objectContaining({
+		code: error,
+		details: {
+			action: ACTIONS.LEAVE,
+			data,
+		},
+	}));
+};
+
+const onLeaveSuccessCheck = async (socket, data) => {
+	const untilEvent = new Promise((resolve, reject) => {
+		socket.on(EVENTS.ERROR, reject);
+		socket.on(EVENTS.MESSAGE, resolve);
+	});
+
+	socket.emit('leave', data);
+	await expect(untilEvent).resolves.toEqual(expect.objectContaining({
+		event: EVENTS.SUCCESS,
+		data: {
+			action: ACTIONS.LEAVE,
+			data,
+		},
+	}));
+};
+
 const testUnauthenticatedUser = () => {
 	describe('An unauthenticated user', () => {
 		test('should be able to connect to the chat service', async () => {
@@ -119,7 +151,7 @@ const testTSAdmin = () => {
 			['should be able to join a model room', { teamspace, project: project.id, model: container._id }],
 			['should be able to join a model room (v4)', { account: teamspace, model: container._id }],
 			['should be able to join a model room that doesn\'t exist', { teamspace, project: project.id, model: ServiceHelper.generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
-			['should be able to join a model room that doens\'t exist (v4)', { account: teamspace, model: ServiceHelper.generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
+			['should be able to join a model room that doesn\'t exist (v4)', { account: teamspace, model: ServiceHelper.generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
 			['should be able to join a room with jibberish', { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
 		])('Join room', (desc, data, failError) => {
 			let socket;
@@ -131,6 +163,26 @@ const testTSAdmin = () => {
 				if (failError) {
 					await expect(onJoinErrorCheck(socket, data, failError)).resolves.toBeUndefined();
 				} else await expect(onJoinSuccessCheck(socket, data)).resolves.toBeUndefined();
+			});
+		});
+
+		describe.each([
+			['should be able to leave the notification room', { notifications: true }],
+			['should be able to leave the notification room (v4)', { account: tsAdmin.user }],
+			['should be able to leave a model room', { teamspace, project: project.id, model: container._id }],
+			['should be able to leave a model room (v4)', { account: teamspace, model: container._id }],
+			['should be able to leave a model room that doesn\'t exist (v4)', { account: teamspace, model: ServiceHelper.generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
+			['should be able to leave a room with jibberish', { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() }, ERRORS.ROOM_NOT_FOUND],
+		])('Leave room', (desc, data, failError) => {
+			let socket;
+			beforeAll(async () => {
+				socket = await ServiceHelper.socket.connectToSocket(cookie);
+			});
+			afterAll(() => socket.close());
+			test(desc, async () => {
+				if (failError) {
+					await expect(onLeaveErrorCheck(socket, data, failError)).resolves.toBeUndefined();
+				} else await expect(onLeaveSuccessCheck(socket, data)).resolves.toBeUndefined();
 			});
 		});
 	});
