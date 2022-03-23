@@ -3,6 +3,24 @@
 
 Note: This is currently a work in progress, new events will be added as they are supported on the v5 front end revamp project. You may find some events may be available in the v4 service instead. Should you need assistence with using the v4 service, please contact support@3drepo.org
 
+## Table of Contents
+- [Connecting to the service](#connecting-to-the-service)
+  * [Syncing your cookie session with your Socket.io connection](#syncing-your-cookie-session-with-your-socketio-connection)
+- [Rooms](#rooms)
+  * [Joining a room](#joining-a-room)
+  * [Leaving a room](#leaving-a-room)
+  * [Room types](#room-types)
+    + [User Notifications](#user-notifications)
+    + [Container/Federation notifications](#containerfederation-notifications)
+- [Events](#events)
+  * [General Events](#general-events)
+    + [message event](#message-event)
+    + [error event](#error-event)
+    + [logged out event](#logged-out-event)
+  * [Container/Federation events](#containerfederation-events)
+    + [Container Settings Update](#container-settings-update)
+    + [Federation Settings Update](#federation-settings-update)
+
 ## Connecting to the service
 You will need to use utilise a [Socket.io client library](https://socket.io/docs/v4/client-installation/) to connect to this service. Please check our [package.json](../../../../package.json) to see which version of Socket.io we are currently using.
 
@@ -17,9 +35,10 @@ You can find the domain to in the frontend config. e.g. For `https://www.3drepo.
 
 Plug them into the io client as follows:
 ````js
+// Assuming the data from config.js is stored in a variable named "config"...
 const socket = ioClient(config.chatHost,
   {
-    path: chatPath,
+    path: config.chatPath,
     transports: ['websocket'],
     reconnection: true,
     reconnectionDelay: 500,
@@ -85,6 +104,8 @@ To leave a room (unsubscribe to that type of events), emit a `leave` event with 
   - Description: Subscribe to new activity within the model (e.g. new revision, model settings update, new issues)
 
 ## Events
+Provided the client has subscribed to the room (where neccessary), the server will emit events when available. The client can [subscribe onto these events](https://socket.io/docs/v4/client-api/#socketoneventname-callback) just like regular Socket.io events
+
 ### General Events
 The following events are emitted without requiring the client to join a room
 
@@ -102,6 +123,19 @@ The following events are emitted without requiring the client to join a room
   - Event name: `loggedOut`
   - Data format: `{ reason: "<string>" }`
   - Description: Used to notify the user if they have been logged out of the session
+
+### Container/Federation events
+The following events will be emitted if the user has subscribed to [Container/Federation notifications](#containerfederation-notifications).
+
+#### Container Settings Update
+  - Event name: `containerSettingsUpdate`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "container id", data: { /* Changes on container settings */}}`
+  - Description: Used to notify the user of any changes on the container settings. This will be triggered if there is a PATCH request, or any changes on the model status (i.e. updates from processing a new revision)
+
+#### Federation Settings Update
+  - Event name: `federationSettingsUpdate`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "federation id", data: { /* Changes on federation settings */}}`
+  - Description: Used to notify the user of any changes on the federation settings. This will be triggered if there is a PATCH request, or any changes on the model status (i.e. updates from processing editing the federation)
 
  
 
