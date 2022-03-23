@@ -1,4 +1,4 @@
-# 3D Repo Chat Service (Real Time messenging)
+# 3D Repo Chat Service (Real Time messaging)
 3D Repo Chat Service allows users to connect to a [Socket.io](https://socket.io/) based service to receive push notifications on events such as New model revision, new issue etc.
 
 Note: This is currently a work in progress, new events will be added as they are supported on the v5 front end revamp project. You may find some events may be available in the v4 service instead. Should you need assistence with using the v4 service, please contact support@3drepo.org
