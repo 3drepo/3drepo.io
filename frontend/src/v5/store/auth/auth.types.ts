@@ -20,15 +20,14 @@ import { Action } from 'redux';
 export type LoginAction = Action<'LOGIN'> & { username: string, password: string };
 export type LoginFailedAction = Action<'LOGIN_Failed'> & { errorMessage: string };
 export type SetPendingStatusAction = Action<'SET_PENDING_STATUS'> & { isPending: boolean };
-export type SetLocalSessionStatusAction = Action<'SET_LOCAL_SESSION_STATUS'> & { status: string };
+export type SetAuthenticationStatusAction = Action<'SET_AUTHENTICATION_STATUS'> & { status: boolean };
 
 export interface IAuthActionCreators {
 	authenticate: () => Action<'AUTHENTICATE'>;
 	login: (username: string, password: string) => LoginAction;
 	loginFailed: (errorMessage: string) => LoginFailedAction,
-	loginSuccess: () => Action<'LOGIN_SUCCESS'>;
 	logout: () => Action<'LOGOUT'>;
 	setPendingStatus: (isPending: boolean) => SetPendingStatusAction;
-	setLocalSessionStatus: (status: string) => SetLocalSessionStatusAction;
+	setAuthenticationStatus: (status: boolean) => SetAuthenticationStatusAction;
 	sessionExpired: () => void;
 }

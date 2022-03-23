@@ -15,12 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { getAvatarUrl } from '@/v4/services/api/users';
+import { CurrentUserActions } from '@/v4/modules/currentUser';
+
 import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
-import { CurrentUserActions } from '@/v4/modules/currentUser';
 import { AuthActions, AuthTypes } from './auth.redux';
 import { LoginAction } from './auth.types';
+import { DialogsActions } from '../dialogs/dialogs.redux';
 
 function* authenticate() {
 	yield put(AuthActions.setPendingStatus(true));
@@ -28,33 +31,57 @@ function* authenticate() {
 		const { data: { username } } = yield API.Auth.authenticate();
 		yield put(CurrentUserActions.fetchUserSuccess({
 			username,
-			avatarUrl: yield API.Users.getAvatarUrl(),
+			avatarUrl: yield getAvatarUrl(username),
 		}));
-		yield put(AuthActions.loginSuccess());
-	} catch (e) {
+	} catch (error) {
+		if (error.response.status === 401) {
+			yield put(AuthActions.setPendingStatus(false));
+			yield put(AuthActions.setAuthenticationStatus(false));
+		} else {
+			yield put(DialogsActions.open('alert', {
+				currentActions: formatMessage({ id: 'auth.authenticate.error', defaultMessage: 'trying to authenticate' }),
+				error,
+			}));
+		}
 	}
+	yield put(AuthActions.setPendingStatus(false));
 }
 
 export function* login({ username, password }: LoginAction) {
+	yield put(AuthActions.setPendingStatus(true));
 	try {
-		yield put(AuthActions.setPendingStatus(true));
 		yield API.Auth.login(username, password);
-		yield put(AuthActions.loginSuccess());
+		yield authenticate();
+		yield put(AuthActions.setAuthenticationStatus(true));
 	} catch ({ message, response: { data: { status, code } } }) {
 		if (status === 400 && code === 'INCORRECT_USERNAME_OR_PASSWORD') {
 			yield put(AuthActions.loginFailed(
-				formatMessage({ id: 'placeholder', defaultMessage: 'Incorrect username or password. Please try again.' }),
+				formatMessage({ id: 'auth.login.badFields', defaultMessage: 'Incorrect username or password. Please try again.' }),
 			));
+		} else if (status === 400 && code === 'ALREADY_LOGGED_IN') {
+			yield put(AuthActions.authenticate());
 		} else yield put(AuthActions.loginFailed(message));
 	}
+	yield put(AuthActions.setPendingStatus(false));
 }
 
 function* logout() {
+	yield put(AuthActions.setPendingStatus(true));
 	try {
 		yield API.Auth.logout();
-	} catch (e) {
+		yield put({ type: 'RESET_APP' });
+	} catch (error) {
+		if (error.response.status === 401) {
+			yield put({ type: 'RESET_APP' });
+		} else {
+			yield put(DialogsActions.open('alert', {
+				currentActions: formatMessage({ id: 'auth.logout.error', defaultMessage: 'trying to log out' }),
+				error,
+			}));
+		}
 	}
-	yield put(AuthActions.setLocalSessionStatus('false'));
+	yield put(AuthActions.setAuthenticationStatus(false));
+	yield put(AuthActions.setPendingStatus(false));
 }
 
 export default function* AuthSaga() {
