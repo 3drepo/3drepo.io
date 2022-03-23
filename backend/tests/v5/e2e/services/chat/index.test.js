@@ -20,6 +20,8 @@ const SuperTest = require('supertest');
 const { src } = require('../../../helper/path');
 
 const { EVENTS, ERRORS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
+const { broadcastMessage } = require(`${src}/handler/queue`);
+const { cn_queue: { event_exchange: eventExchange } } = require(`${src}/utils/config`);
 
 const tsAdmin = ServiceHelper.generateUserCredentials();
 const nobody = ServiceHelper.generateUserCredentials();
@@ -168,6 +170,18 @@ const runConnectionTests = () => {
 	testNobody();
 };
 
+const broadcastErrorTests = () => {
+	describe('Error catching on message processing', () => {
+		test('should not crash the service if message processing failed', async () => {
+			await Promise.all([
+				broadcastMessage(eventExchange, ServiceHelper.generateRandomString()),
+				broadcastMessage(eventExchange,
+					JSON.stringify({ [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() })),
+			]);
+		});
+	});
+};
+
 describe('E2E Chat Service', () => {
 	let server;
 	let chatApp;
@@ -182,4 +196,5 @@ describe('E2E Chat Service', () => {
 		chatApp.close()]));
 
 	runConnectionTests();
+	broadcastErrorTests();
 });

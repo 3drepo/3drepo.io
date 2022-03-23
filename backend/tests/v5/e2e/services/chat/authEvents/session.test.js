@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const ServiceHelper = require('../../../helper/services');
+const ServiceHelper = require('../../../../helper/services');
 const SuperTest = require('supertest');
-const { src } = require('../../../helper/path');
+const { src } = require('../../../../helper/path');
 
 const { EVENTS } = require(`${src}/services/chat/chat.constants`);
 
