@@ -31,6 +31,7 @@ jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager.constants');
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+const { SOCKET_HEADER } = require(`${src}/services/chat/chat.constants`);
 
 // Need to mock these 2 to ensure we are not trying to create a real session configuration
 jest.mock('express-session', () => () => {});
@@ -70,7 +71,7 @@ const testCreateSession = () => {
 			ipAddress: request.ips[0] || request.ip,
 			userAgent: request.headers['user-agent'],
 			referer: request?.session?.user?.referer,
-			socketId: request.headers['x-socket-id'],
+			socketId: request.headers[SOCKET_HEADER],
 		});
 	};
 
@@ -97,7 +98,7 @@ const testCreateSession = () => {
 		});
 
 		test('Should regenerate session with request with socket id', async () => {
-			const reqWithSocket = { ...req, headers: { ...req.headers, 'x-socket-id': 'socketsdlfkdsj' } };
+			const reqWithSocket = { ...req, headers: { ...req.headers, [SOCKET_HEADER]: 'socketsdlfkdsj' } };
 			await Sessions.createSession(reqWithSocket, {});
 			checkResults(reqWithSocket);
 		});

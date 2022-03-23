@@ -19,7 +19,7 @@ const ServiceHelper = require('../../../../helper/services');
 const SuperTest = require('supertest');
 const { src } = require('../../../../helper/path');
 
-const { EVENTS } = require(`${src}/services/chat/chat.constants`);
+const { EVENTS, SOCKET_HEADER } = require(`${src}/services/chat/chat.constants`);
 
 const user = ServiceHelper.generateUserCredentials();
 const anotherUser = ServiceHelper.generateUserCredentials();
@@ -49,7 +49,7 @@ const runSessionsRemovedTests = () => {
 		test('Should log user out if they are logged in else where (login after socket connection)', async () => {
 			const headers = { referer: referrer, 'user-agent': userAgent };
 			const socket = await ServiceHelper.socket.connectToSocket();
-			await ServiceHelper.loginAndGetCookie(agent, user.user, user.password, { ...headers, 'x-socket-id': socket.id });
+			await ServiceHelper.loginAndGetCookie(agent, user.user, user.password, { ...headers, [SOCKET_HEADER]: socket.id });
 			const onLogOutMessage = new Promise((resolve) => {
 				socket.on(EVENTS.LOGGED_OUT, resolve);
 			});

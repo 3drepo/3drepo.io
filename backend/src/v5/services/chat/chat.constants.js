@@ -57,4 +57,6 @@ ChatConstants.ACTIONS = createConstantsMapping(actions);
 
 ChatConstants.SESSION_CHANNEL_PREFIX = 'sessions::';
 
+ChatConstants.SOCKET_HEADER = 'x-socket-id';
+
 module.exports = ChatConstants;

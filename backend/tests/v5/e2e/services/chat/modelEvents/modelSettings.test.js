@@ -19,7 +19,7 @@ const ServiceHelper = require('../../../../helper/services');
 const { src } = require('../../../../helper/path');
 const SuperTest = require('supertest');
 
-const { EVENTS } = require(`${src}/services/chat/chat.constants`);
+const { EVENTS, SOCKET_HEADER } = require(`${src}/services/chat/chat.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const user = ServiceHelper.generateUserCredentials();
@@ -78,7 +78,7 @@ const modelSettingsTest = () => {
 
 			const payload = { name: ServiceHelper.generateRandomString() };
 			await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}?key=${user.apiKey}`)
-				.set({ 'x-socket-id': socket1.id })
+				.set({ [SOCKET_HEADER]: socket1.id })
 				.send(payload)
 				.expect(templates.ok.status);
 
@@ -116,7 +116,7 @@ const modelSettingsTest = () => {
 
 			const payload = { name: ServiceHelper.generateRandomString() };
 			await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federation._id}?key=${user.apiKey}`)
-				.set({ 'x-socket-id': socket1.id })
+				.set({ [SOCKET_HEADER]: socket1.id })
 				.send(payload)
 				.expect(templates.ok.status);
 

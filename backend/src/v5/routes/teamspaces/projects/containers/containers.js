@@ -18,6 +18,7 @@ const { canDeleteContainer, validateAddModelData, validateUpdateSettingsData } =
 const { hasAccessToTeamspace, hasAdminAccessToContainer, hasReadAccessToContainer, isAdminToProject } = require('../../../../middleware/permissions/permissions');
 const Containers = require('../../../../processors/teamspaces/projects/models/containers');
 const { Router } = require('express');
+const { SOCKET_HEADER } = require('../../../../services/chat/chat.constants');
 const { UUIDToString } = require('../../../../utils/helper/uuids');
 const { formatModelSettings } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
 const { getUserFromSession } = require('../../../../utils/sessions');
@@ -90,7 +91,7 @@ const appendFavourites = (req, res) => {
 
 const updateSettings = (req, res) => {
 	const { teamspace, project, container } = req.params;
-	const sender = req.headers['x-socket-id'];
+	const sender = req.headers[SOCKET_HEADER];
 
 	Containers.updateSettings(teamspace, project, container, req.body, sender)
 		.then(() => respond(req, res, templates.ok)).catch(

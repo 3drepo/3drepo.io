@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { SOCKET_HEADER } = require('../services/chat/chat.constants');
 const config = require('../utils/config');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { getURLDomain } = require('../utils/helper/strings');
@@ -66,7 +67,7 @@ Sessions.createSession = (req, res) => {
 				sessionID: req.sessionID,
 				ipAddress: req.ips[0] || req.ip,
 				userAgent: req.headers['user-agent'],
-				socketId: req.headers['x-socket-id'],
+				socketId: req.headers[SOCKET_HEADER],
 				referer: updatedUser.referer });
 
 			respond(req, res, templates.ok, req.v4 ? updatedUser : undefined);
