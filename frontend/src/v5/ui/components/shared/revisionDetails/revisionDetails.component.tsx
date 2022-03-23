@@ -62,31 +62,36 @@ export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisi
 	}, []);
 
 	if (revisionsCount === 0) {
-		if (!canUploadToBackend(status)) {
-			return (
-				<RevisionsListEmptyWrapper>
-					<RevisionsListEmptyContainer>
-						<RevisionsListEmptyText>
-							<FormattedMessage id="containers.revisions.emptyMessageBusy" defaultMessage="Your files are being processed at this moment, please wait before creating new revisions for this container." />
-						</RevisionsListEmptyText>
-					</RevisionsListEmptyContainer>
-				</RevisionsListEmptyWrapper>
-			);
-		}
-
 		return (
 			<RevisionsListEmptyWrapper>
 				<RevisionsListEmptyContainer>
-					<RevisionsListEmptyText>
-						<FormattedMessage id="containers.revisions.emptyMessage" defaultMessage="You haven’t added any Files." />
-					</RevisionsListEmptyText>
-					<Button
-						startIcon={<ArrowUpCircleIcon />}
-						variant="contained"
-						color="primary"
-					>
-						<FormattedMessage id="containers.revisions.uploadFile" defaultMessage="Upload File" />
-					</Button>
+					{
+						!canUploadToBackend(status)
+							&& (
+								<RevisionsListEmptyText>
+									<FormattedMessage id="containers.revisions.emptyMessageBusy" defaultMessage="Your files are being processed at this moment, please wait before creating new revisions for this container." />
+								</RevisionsListEmptyText>
+							)
+					}
+
+					{
+						canUploadToBackend(status)
+							&& (
+								<>
+									<RevisionsListEmptyText>
+										<FormattedMessage id="containers.revisions.emptyMessage" defaultMessage="You haven’t added any Files." />
+									</RevisionsListEmptyText>
+									<Button
+										startIcon={<ArrowUpCircleIcon />}
+										variant="contained"
+										color="primary"
+									>
+										<FormattedMessage id="containers.revisions.uploadFile" defaultMessage="Upload File" />
+									</Button>
+								</>
+							)
+
+					}
 				</RevisionsListEmptyContainer>
 			</RevisionsListEmptyWrapper>
 		);
