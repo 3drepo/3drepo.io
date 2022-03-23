@@ -213,7 +213,7 @@ const testCreateModelMessage = () => {
 			ChatService.createModelMessage(event, data, teamspace, project, model);
 			expect(QueueService.broadcastMessage).toHaveBeenCalledTimes(1);
 
-			const expectedMsg = JSON.stringify({ event, data: { ...data, teamspace, project, model }, recipients: [`${teamspace}::${project}::${model}`] });
+			const expectedMsg = JSON.stringify({ event, data: { data, teamspace, project, model }, recipients: [`${teamspace}::${project}::${model}`], sender: undefined });
 			expect(QueueService.broadcastMessage).toHaveBeenCalledWith(eventExchange, expectedMsg);
 		});
 	});

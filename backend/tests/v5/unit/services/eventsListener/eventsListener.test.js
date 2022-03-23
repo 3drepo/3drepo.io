@@ -94,6 +94,7 @@ const testModelEventsListener = () => {
 				data.teamspace,
 				data.project,
 				data.model,
+				undefined,
 			);
 		});
 
@@ -116,6 +117,7 @@ const testModelEventsListener = () => {
 				data.teamspace,
 				data.project,
 				data.model,
+				undefined,
 			);
 		});
 
@@ -139,6 +141,7 @@ const testModelEventsListener = () => {
 				data.teamspace,
 				data.project,
 				data.model,
+				undefined,
 			);
 		});
 	});
