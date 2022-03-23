@@ -3,6 +3,7 @@ eslint-rules
 jest.config.js
 jest.config.e2e.js
 jest.config.unit.js
+jest.sequencer.e2e.js
 jest-mongodb-config.js
 docs/
 node_modules/
