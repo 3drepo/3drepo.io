@@ -18,22 +18,19 @@
 import { all, put, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import {
+	AddFavouriteAction,
 	ContainersActions,
 	ContainersTypes,
+	CreateContainerAction,
+	DeleteContainerAction,
+	FetchContainersAction,
+	FetchContainerStatsAction,
+	RemoveFavouriteAction,
 } from '@/v5/store/containers/containers.redux';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
-import {
-	AddFavouriteAction,
-	RemoveFavouriteAction,
-	FetchContainersResponse,
-	FetchContainerStatsResponse,
-	CreateContainerAction,
-	FetchContainersAction,
-	FetchContainerStatsAction,
-	DeleteContainerAction,
+import { FetchContainersResponse } from '@/v5/services/api/containers';
 
-} from './containers.types';
 import { prepareContainersData } from './containers.helpers';
 
 export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
@@ -84,7 +81,7 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 
 export function* fetchContainerStats({ teamspace, projectId, containerId }: FetchContainerStatsAction) {
 	try {
-		const stats: FetchContainerStatsResponse = yield API.Containers.fetchContainerStats({
+		const stats = yield API.Containers.fetchContainerStats({
 			teamspace, projectId, containerId,
 		});
 

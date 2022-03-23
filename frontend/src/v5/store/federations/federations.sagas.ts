@@ -16,21 +16,13 @@
  */
 
 import { all, put, takeEvery, takeLatest } from 'redux-saga/effects';
-import { FederationsActions, FederationsTypes } from '@/v5/store/federations/federations.redux';
+import { AddFavouriteAction, DeleteFederationAction, FederationsActions,
+	FederationsTypes, FetchFederationsAction, FetchFederationSettingsAction,
+	FetchFederationStatsAction, FetchFederationViewsAction, RemoveFavouriteAction,
+	UpdateFederationContainersAction, UpdateFederationSettingsAction } from '@/v5/store/federations/federations.redux';
 import * as API from '@/v5/services/api';
 import {
-	FetchFederationsAction,
-	FetchFederationsResponse,
-	FetchFederationStatsResponse,
-	AddFavouriteAction,
-	RemoveFavouriteAction,
-	FetchFederationStatsAction,
-	UpdateFederationSettingsAction,
-	FetchFederationViewsAction,
-	FetchFederationViewsResponse,
-	FetchFederationSettingsAction,
-	DeleteFederationAction,
-	UpdateFederationContainersAction,
+	FederationStats,
 } from '@/v5/store/federations/federations.types';
 import {
 	prepareFederationsData,
@@ -39,6 +31,7 @@ import {
 } from '@/v5/store/federations/federations.helpers';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
+import { FetchFederationsResponse, FetchFederationViewsResponse } from '@/v5/services/api/federations';
 
 export function* addFavourites({ federationId, teamspace, projectId }: AddFavouriteAction) {
 	try {
@@ -91,7 +84,7 @@ export function* fetchFederations({ teamspace, projectId }: FetchFederationsActi
 
 export function* fetchFederationStats({ teamspace, projectId, federationId }: FetchFederationStatsAction) {
 	try {
-		const stats: FetchFederationStatsResponse = yield API.Federations.fetchFederationStats({
+		const stats: FederationStats = yield API.Federations.fetchFederationStats({
 			teamspace, projectId, federationId,
 		});
 
