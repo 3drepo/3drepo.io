@@ -215,7 +215,7 @@ const testSocketsEvents = () => {
 				const data = { account, model };
 				await eventFns.leave(data);
 				expect(socket.leave).not.toHaveBeenCalled();
-				checkErrorCall(socket.emit, templates.unknown.code, ACTIONS.LEAVE, data);
+				checkErrorCall(socket.emit, ERRORS.ROOM_NOT_FOUND, ACTIONS.LEAVE, data);
 			});
 		});
 
