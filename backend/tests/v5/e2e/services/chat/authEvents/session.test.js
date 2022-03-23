@@ -49,7 +49,8 @@ const runSessionsRemovedTests = () => {
 		test('Should log user out if they are logged in else where (login after socket connection)', async () => {
 			const headers = { referer: referrer, 'user-agent': userAgent };
 			const socket = await ServiceHelper.socket.connectToSocket();
-			await ServiceHelper.loginAndGetCookie(agent, user.user, user.password, { ...headers, [SOCKET_HEADER]: socket.id });
+			await ServiceHelper.loginAndGetCookie(agent, user.user, user.password,
+				{ ...headers, [SOCKET_HEADER]: socket.id });
 			const onLogOutMessage = new Promise((resolve) => {
 				socket.on(EVENTS.LOGGED_OUT, resolve);
 			});
