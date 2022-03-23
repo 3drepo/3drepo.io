@@ -15,8 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import LoginBackground from '@assets/images/login_background.svg';
 import { Typography } from '@controls/typography';
 import styled, { css } from 'styled-components';
+
+export const BackgroundOverlay = styled(LoginBackground)`
+	width: 1585px;
+	height: 1040px;
+	max-width: 100vw;
+	position: absolute;
+	z-index: 0;
+	margin: auto;
+	left: 0;
+	right: 0;
+	overflow: hidden;
+`;
 
 export const Background = styled.div`
 	display: flex;
@@ -36,6 +49,7 @@ export const Logo = styled.img`
 	max-width: 100px;
 	padding: 28px;
 	user-drag: none;
+	z-index: 1;
 `;
 
 export const Container = styled.div`
@@ -43,6 +57,7 @@ export const Container = styled.div`
 	border-radius: 20px;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	padding: 58px 64px 38px;
+	z-index: 1;
 `;
 
 export const Footer = styled(Typography).attrs({
@@ -51,6 +66,7 @@ export const Footer = styled(Typography).attrs({
 	color: ${({ theme }) => theme.palette.base.light};
 	padding: 30px;
 	user-select: none;
+	z-index: 1;
 	
 	a {
 		text-decoration: none;

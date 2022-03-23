@@ -17,7 +17,7 @@
 
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
 import { useRouteMatch, Redirect } from 'react-router-dom';
-import { Background, Container, Footer, Logo } from './authPage.styles';
+import { Background, Container, Footer, Logo, BackgroundOverlay } from './authPage.styles';
 
 interface IAuthPage {
 	footer?: JSX.Element;
@@ -42,6 +42,7 @@ export const AuthPage = ({ footer, children }: IAuthPage): JSX.Element => {
 
 	return (
 		<Background backgroundSrc={backgroundSrc}>
+			{!backgroundSrc && <BackgroundOverlay />}
 			<Logo
 				draggable="false"
 				src={topLogoSrc}
