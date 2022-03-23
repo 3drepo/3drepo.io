@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { INITIAL_STATE, federationsReducer as federationsReducer, FederationsActions, IFederationsState } from '@/v5/store/federations/federations.redux';
+import { INITIAL_STATE, federationsReducer, FederationsActions, IFederationsState } from '@/v5/store/federations/federations.redux';
 import { times } from 'lodash';
 import { federationMockFactory,  prepareMockSettingsReply } from './federations.fixtures';
 import { EMPTY_VIEW } from '@/v5/store/federations/federations.types';
