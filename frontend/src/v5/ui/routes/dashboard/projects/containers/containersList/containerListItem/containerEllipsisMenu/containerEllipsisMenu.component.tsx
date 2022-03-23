@@ -22,7 +22,7 @@ import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { useDispatch } from 'react-redux';
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
-import { isBusyInBackend } from '@/v5/store/containers/containers.helpers';
+import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 
 type ContainerEllipsisMenuProps = {
 	selected: boolean,
@@ -60,7 +60,7 @@ export const ContainerEllipsisMenu = ({
 					id: 'containers.ellipsisMenu.uploadNewRevision',
 					defaultMessage: 'Upload new Revision',
 				})}
-				disabled={isBusyInBackend(container.status)}
+				disabled={!canUploadToBackend(container.status)}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({

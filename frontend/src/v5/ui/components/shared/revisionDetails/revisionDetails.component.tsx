@@ -30,7 +30,7 @@ import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsS
 import { Display } from '@/v5/ui/themes/media';
 import { FormattedMessage } from 'react-intl';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
-import { isBusyInBackend } from '@/v5/store/containers/containers.helpers';
+import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 import {
 	Container,
 	RevisionsListHeaderContainer,
@@ -62,7 +62,7 @@ export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisi
 	}, []);
 
 	if (revisionsCount === 0) {
-		if (isBusyInBackend(status)) {
+		if (!canUploadToBackend(status)) {
 			return (
 				<RevisionsListEmptyWrapper>
 					<RevisionsListEmptyContainer>

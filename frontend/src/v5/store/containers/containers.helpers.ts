@@ -29,15 +29,13 @@ export const filterContainers = (federations: IContainer[], filterQuery: string)
 	) => [name, code, type].join('').toLowerCase().includes(filterQuery.trim().toLowerCase()))
 );
 
-export const isBusyInBackend = (status: UploadStatuses) => {
-	const busyInBackend = [
-		UploadStatuses.QUEUED,
-		UploadStatuses.PROCESSING,
-		UploadStatuses.QUEUED_FOR_UNITY,
-		UploadStatuses.UPLOADING,
-		UploadStatuses.GENERATING_BUNDLES,
+export const canUploadToBackend = (status: UploadStatuses) => {
+	const statusesForUpload = [
+		UploadStatuses.OK,
+		UploadStatuses.FAILED,
 	];
-	return busyInBackend.includes(status);
+
+	return !statusesForUpload.includes(status);
 };
 
 export const prepareSingleContainerData = (
