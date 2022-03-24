@@ -71,6 +71,12 @@ export const leaveRoom = (roomType : IRoomType) => {
 	socket.emit('leave', roomType);
 };
 
+export const setSocket = (extSocket) => {
+	socket = extSocket;
+	socket.on('connect', reJoinRooms);
+};
+
+// Instead of using setSocket, use this when v4 gets deleted.
 export const initializeSocket = ({ host, path, reconnectionAttempts }: IChatConfig) => {
 	socket = io(host, {
 		path,

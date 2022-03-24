@@ -38,6 +38,8 @@ const socket = io(host, {
 });
 const dmSubscriptions = {};
 
+export const getSocket = () => socket;
+
 socket.on('connect', () => dispatch(ChatActions.handleConnect()));
 socket.on('disconnect', () => dispatch(ChatActions.handleDisconnect()));
 socket.on('message', (data) =>  {

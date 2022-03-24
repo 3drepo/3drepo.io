@@ -34,8 +34,9 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import { initializeIntl } from '@/v5/services/intl';
 import { initializeActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 import { Version, VersionContext } from './versionContext';
-import { getSocketId, initializeSocket, SocketEvents, subscribeToSocketEvent } from './v5/services/realtime/realtime.service';
+import { getSocketId, setSocket, SocketEvents, subscribeToSocketEvent } from './v5/services/realtime/realtime.service';
 import { setSocketIdHeader } from './v4/services/api';
+import { getSocket } from './v4/modules/chat/chat.sagas';
 
 window.UnityUtil = UnityUtil;
 
@@ -43,7 +44,9 @@ initializeActionsDispatchers(dispatch);
 
 initializeIntl(navigator.language);
 
-initializeSocket(clientConfigService.chatConfig);
+// initializeSocket(clientConfigService.chatConfig);
+setSocket(getSocket());
+
 subscribeToSocketEvent(SocketEvents.CONNECT, () => setSocketIdHeader(getSocketId()));
 
 const render = () => {
