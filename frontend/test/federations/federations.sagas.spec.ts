@@ -27,7 +27,7 @@ import {
 	prepareMockViewsReply,
 } from './federations.fixtures';
 import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
-import { FetchFederationStatsResponse, IFederation } from '@/v5/store/federations/federations.types';
+import { FederationStats, IFederation } from '@/v5/store/federations/federations.types';
 import { prepareMockContainers } from './federations.fixtures';
 import { prepareFederationSettingsForFrontend } from '@/v5/store/federations/federations.helpers';
 
@@ -90,7 +90,7 @@ describe('Federations: sagas', () => {
 		})
 
 		it('should fetch stats', async () => {
-			const prepareMockStatsReply = (federation: IFederation): FetchFederationStatsResponse => ({
+			const prepareMockStatsReply = (federation: IFederation): FederationStats => ({
 				containers: federation.containers,
 				tickets: {
 					issues: federation.issues,

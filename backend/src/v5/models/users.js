@@ -114,6 +114,11 @@ User.getUserByQuery = async (query, projection) => {
 
 User.getUserByUsername = (user, projection) => User.getUserByQuery({ user }, projection);
 
+User.getUserByUsernameOrEmail = (usernameOrEmail, projection) => User.getUserByQuery({
+	$or: [{ user: usernameOrEmail },
+		// eslint-disable-next-line security/detect-non-literal-regexp
+		{ 'customData.email': new RegExp(`^${usernameOrEmail.replace(/(\W)/g, '\\$1')}$`, 'i') }] }, projection);
+
 User.getFavourites = async (user, teamspace) => {
 	const { customData } = await User.getUserByUsername(user, { 'customData.starredModels': 1 });
 	const favs = customData.starredModels || {};
@@ -273,5 +278,7 @@ User.verify = async (username, token) => {
 };
 
 User.uploadAvatar = (username, avatarBuffer) => updateUser(username, { $set: { 'customData.avatar': { data: avatarBuffer } } });
+
+User.updateResetPasswordToken = (username, resetPasswordToken) => updateUser(username, { $set: { 'customData.resetPasswordToken': resetPasswordToken } });
 
 module.exports = User;

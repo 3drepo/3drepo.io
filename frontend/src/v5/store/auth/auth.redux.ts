@@ -38,6 +38,6 @@ export const INITIAL_STATE: IAuthState = {
 
 export const loginSuccess = (state = INITIAL_STATE): IAuthState => ({ ...state, isAuthenticated: true });
 
-export const reducer = createReducer(INITIAL_STATE, {
+export const authReducer = createReducer(INITIAL_STATE, {
 	[AuthTypes.LOGIN_SUCCESS]: loginSuccess,
 });

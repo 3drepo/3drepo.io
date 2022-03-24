@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, getUserByQuery, getUserByUsername } = require('../../../models/users');
+const { authenticate, getUserByQuery, getUserByUsername, getUserByUsernameOrEmail } = require('../../../models/users');
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const Yup = require('yup');
 const config = require('../../../utils/config');
@@ -116,6 +116,55 @@ const validateAvatarData = async (req, res, next) => {
 	try {
 		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
 
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+Users.validateForgotPasswordData = async (req, res, next) => {
+	const schema = Yup.object().shape({
+		user: Yup.string().required(),
+	}).strict(true).noUnknown()
+		.required();
+
+	try {
+		await schema.validate(req.body);
+
+		try {
+			const usernameOrEmail = req.body.user;
+			const { user } = await getUserByUsernameOrEmail(usernameOrEmail, { user: 1, _id: 0 });
+			req.body.user = user;
+			next();
+		} catch {
+			respond(req, res, templates.ok);
+		}
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+Users.validateResetPasswordData = async (req, res, next) => {
+	const schema = Yup.object().shape({
+		token: Yup.string().required(),
+		newPassword: types.strings.password.required(),
+		user: Yup.string().required(),
+	}).strict(true).noUnknown()
+		.required()
+		.test('token-validity', 'Token is invalid or expired', async () => {
+			try {
+				await getUserByQuery({ user: req.body.user,
+					'customData.resetPasswordToken.token': req.body.token,
+					'customData.resetPasswordToken.expiredAt': { $gt: new Date() } });
+
+				return true;
+			} catch {
+				return false;
+			}
+		});
+
+	try {
+		await schema.validate(req.body);
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));

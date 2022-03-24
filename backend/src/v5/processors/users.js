@@ -58,6 +58,11 @@ Users.verify = async (username, token) => {
 	});
 };
 
+const Users = {};
+const config = require('../utils/config');
+const { generateHashString } = require('../utils/helper/strings');
+const { sendResetPasswordEmail } = require('../services/mailer');
+
 Users.login = async (username, password) => {
 	await canLogIn(username);
 	return authenticate(username, password);
@@ -109,5 +114,18 @@ Users.getUserByUsername = getUserByUsername;
 Users.getAvatar = getAvatar;
 
 Users.uploadAvatar = uploadAvatar;
+
+Users.generateResetPasswordToken = async (username) => {
+	const expiredAt = new Date();
+	expiredAt.setHours(expiredAt.getHours() + config.tokenExpiry.forgotPassword);
+	const resetPasswordToken = { token: generateHashString(), expiredAt };
+
+	await updateResetPasswordToken(username, resetPasswordToken);
+
+	const { customData: { email, firstName } } = await getUserByUsername(username, { user: 1, 'customData.email': 1, 'customData.firstName': 1 });
+	sendResetPasswordEmail(email, { token: resetPasswordToken.token, email, username, firstName });
+};
+
+Users.updatePassword = updatePassword;
 
 module.exports = Users;

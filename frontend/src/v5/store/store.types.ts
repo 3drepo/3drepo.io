@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,7 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ITeamspacesActionCreators, TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
-import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
+export type TeamspaceId = { teamspace: string };
+export type ProjectId = { projectId: string };
+export type ContainerId = { containerId: string };
+export type FederationId = { federationId: string };
 
-export const TeamspacesActionsDispatchers = createActionsDispatchers<ITeamspacesActionCreators>(TeamspacesActions);
+export type TeamspaceAndProjectId = TeamspaceId & ProjectId;
+
+export type TeamspaceProjectAndContainerId = TeamspaceId & ProjectId & ContainerId;
+
+export type TeamspaceProjectAndFederationId= TeamspaceId & ProjectId & FederationId;
+
+export type ProjectAndContainerId = ProjectId & ContainerId;
+
+export type ProjectAndFederationId = ProjectId & FederationId;

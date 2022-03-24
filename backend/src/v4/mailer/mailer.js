@@ -16,20 +16,30 @@
  */
 
 "use strict";
+const { createTestAccount } = require("nodemailer");
 const nodemailer = require("nodemailer");
 const config = require("../config");
 const C = require("../constants");
+const { systemLogger } = require("../logger");
 const getBaseURL = config.getBaseURL;
 let transporter;
 
-function sendEmail(template, to, data, attachments) {
-
-	if(!config.mail || !config.mail.smtpConfig) {
-		return Promise.reject({ message: "config.mail.smtpConfig is not set"});
+async function sendEmail(template, to, data, attachments) {
+	if(!config?.mail?.sender) {
+		throw { message: "config.mail.sender is not set"};
 	}
 
-	if(!config.mail || !config.mail.smtpConfig) {
-		return Promise.reject({ message: "config.mail.sender is not set"});
+	if(!config?.mail?.smtpConfig) {
+		if(config?.mail?.generateCredentials) {
+			const { user, pass } = await createTestAccount();
+			config.mail.smtpConfig = {
+				host: "smtp.ethereal.email",
+				port: 587,
+				auth: {	user, pass }
+			};
+		} else {
+			throw { message: "config.mail.smtpConfig is not set"};
+		}
 	}
 
 	const mailOptions = {
@@ -48,6 +58,7 @@ function sendEmail(template, to, data, attachments) {
 	return new Promise((resolve, reject) => {
 		transporter.sendMail(mailOptions, function(err, info) {
 			if(err) {
+				systemLogger.logDebug(`Email error - ${err.message}`);
 				reject(err);
 			} else {
 				resolve(info);

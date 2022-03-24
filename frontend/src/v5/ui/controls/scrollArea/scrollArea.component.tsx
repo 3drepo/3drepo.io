@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,7 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ITeamspacesActionCreators, TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
-import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
+import { ScrollbarProps } from 'react-custom-scrollbars';
+import { ScrollbarWrapper } from './scrollArea.styles';
 
-export const TeamspacesActionsDispatchers = createActionsDispatchers<ITeamspacesActionCreators>(TeamspacesActions);
+type IScrollArea = ScrollbarProps & {
+	children: any;
+	variant?: 'base' | 'secondary';
+};
+
+export const ScrollArea = ({ variant = 'base', children, ...props }: IScrollArea): JSX.Element => (
+	<ScrollbarWrapper
+		variant={variant}
+		{...props}
+	>
+		{children}
+	</ScrollbarWrapper>
+);
