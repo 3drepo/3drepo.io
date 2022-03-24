@@ -44,8 +44,8 @@ import {
 
 interface IRevisionDetails {
 	containerId: string;
-	revisionsCount?: number;
-	status: UploadStatuses
+	revisionsCount: number;
+	status?: UploadStatuses
 }
 
 export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisionDetails): JSX.Element => {

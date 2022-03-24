@@ -47,12 +47,6 @@ export const ContainerEllipsisMenu = ({
 					id: 'containers.ellipsisMenu.loadContainer',
 					defaultMessage: 'Load Container in 3D Viewer',
 				})}
-			/>
-			<EllipsisMenuItem
-				title={formatMessage({
-					id: 'containers.ellipsisMenu.loadContainer',
-					defaultMessage: 'Load Container in 3D Viewer',
-				})}
 				to={`/${container._id}`}
 			/>
 			<EllipsisMenuItem
