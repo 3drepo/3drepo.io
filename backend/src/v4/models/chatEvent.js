@@ -191,7 +191,7 @@ const subscribeToV5Events = () => {
 	});
 
 	EventsManager.subscribe(EventsV5.MODEL_SETTINGS_UPDATE, async ({teamspace, model, data: { status }}) => {
-		if(status) {
+		if(status && !["ok", "failed"].includes(status)) {
 			modelStatusChanged(null, teamspace, model, {status});
 		}
 	});

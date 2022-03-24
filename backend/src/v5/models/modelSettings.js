@@ -145,6 +145,7 @@ Models.newRevisionProcessed = async (teamspace, project, model, corId, retVal, u
 	// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
 	// trigger notifications.
 
+		// only sent for v4 compatibility
 		publish(events.MODEL_IMPORT_FINISHED,
 			{ teamspace,
 				model,
