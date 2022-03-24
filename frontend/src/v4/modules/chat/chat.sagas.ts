@@ -29,25 +29,28 @@ import { ChatActions, ChatTypes } from './chat.redux';
 import { Subscriptions } from './subscriptions';
 
 const { host, path, reconnectionAttempts } = clientConfigService.chatConfig;
-const socket = io(host, {
-	path,
-	transports: ['websocket'],
-	reconnection: true,
-	reconnectionDelay: 500,
-	reconnectionAttempts
-});
+// const socket = io(host, {
+// 	path,
+// 	transports: ['websocket'],
+// 	reconnection: true,
+// 	reconnectionDelay: 500,
+// 	reconnectionAttempts
+// });
 const dmSubscriptions = {};
 
-export const getSocket = () => socket;
+let socket = null;
 
-socket.on('connect', () => dispatch(ChatActions.handleConnect()));
-socket.on('disconnect', () => dispatch(ChatActions.handleDisconnect()));
-socket.on('message', (data) =>  {
-	if (!dmSubscriptions[data.event]) {
-		return;
-	}
-	dmSubscriptions[data.event].invokeCallbacks(data.data);
-});
+export const setSocket = (extSocket) => {
+	socket = extSocket;
+	socket.on('connect', () => dispatch(ChatActions.handleConnect()));
+	socket.on('disconnect', () => dispatch(ChatActions.handleDisconnect()));
+	socket.on('message', (data) =>  {
+		if (!dmSubscriptions[data.event]) {
+			return;
+		}
+		dmSubscriptions[data.event].invokeCallbacks(data.data);
+	});
+};
 
 const channels = {};
 const joinedRooms = [] as any;
