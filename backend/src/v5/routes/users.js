@@ -17,8 +17,7 @@
 
 const { createSession, destroySession } = require('../middleware/sessions');
 const { isLoggedIn, notLoggedIn, validSession } = require('../middleware/auth');
-const { validateAvatarFile, validateLoginData,
-	validateUpdateData } = require('../middleware/dataConverter/inputs/users');
+const { validateAvatarFile, validateLoginData, validateSignUpData, validateUpdateData, validateVerifyData } = require('../middleware/dataConverter/inputs/users');
 const { Router } = require('express');
 const Users = require('../processors/users');
 const { getUserFromSession } = require('../utils/sessions');
@@ -89,6 +88,25 @@ const getAvatar = (req, res) => {
 const uploadAvatar = (req, res) => {
 	const user = getUserFromSession(req.session);
 	Users.uploadAvatar(user, req.file.buffer).then(() => {
+		respond(req, res, templates.ok);
+	}).catch(
+		// istanbul ignore next
+		(err) => respond(req, res, err),
+	);
+};
+
+const signUp = (req, res) => {
+	Users.signUp(req.body).then(() => {
+		respond(req, res, templates.ok);
+	}).catch(
+		// istanbul ignore next
+		(err) => respond(req, res, err),
+	);
+};
+
+const verify = (req, res) => {
+	const { username, token } = req.body;
+	Users.verify(username, token).then(() => {
 		respond(req, res, templates.ok);
 	}).catch(
 		// istanbul ignore next
@@ -360,6 +378,10 @@ const establishRoutes = () => {
 	*         description: Uploads a new avatar for the user
 	*/
 	router.put('/user/avatar', isLoggedIn, validateAvatarFile, uploadAvatar);
+
+	router.post('/user', validateSignUpData, signUp);
+
+	router.post('/user/verify', validateVerifyData, verify);
 
 	return router;
 };

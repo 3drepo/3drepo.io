@@ -14,11 +14,49 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { authenticate, canLogIn, deleteApiKey, generateApiKey, getAvatar,
-	getUserByUsername, updatePassword, updateProfile, uploadAvatar } = require('../models/users');
 
 const Users = {};
+const { addUser, authenticate, canLogIn, deleteApiKey, generateApiKey, getAvatar,
+	getUserByUsername, updatePassword, updateProfile, uploadAvatar, verify } = require('../models/users');
+const { formatPronouns, ucFirst } = require('../utils/helper/strings');
 const { isEmpty, removeFields } = require('../utils/helper/objects');
+const { events } = require('../services/eventsManager/eventsManager.constants');
+const { generateHashString } = require('../utils/helper/strings');
+const { logger } = require('../utils/logger');
+const { publish } = require('../services/eventsManager/eventsManager');
+const { sendVerifyUserEmail } = require('../../v4/mailer/mailer');
+
+Users.signUp = async (newUserData) => {
+	const token = generateHashString();
+	await addUser({ ...newUserData, token });
+
+	try {
+		const emailRes = await sendVerifyUserEmail(newUserData.email, {
+			token,
+			email: newUserData.email,
+			firstName: ucFirst(newUserData.firstName),
+			username: newUserData.username,
+			pay: newUserData.pay,
+		});
+
+		logger.logInfo(`Email info - ${JSON.stringify(emailRes)}`);
+	} catch (err) {
+		logger.logError(`Email error - ${err.message}`);
+	}
+};
+
+Users.verify = async (username, token) => {
+	const customData = await verify(username, token);
+
+	publish(events.USER_VERIFIED, {
+		username,
+		email: customData.email,
+		fullName: formatPronouns(`${customData.firstName} ${customData.lastName}`),
+		lastName: customData.lastName,
+		company: customData.billing.billingInfo.company,
+		mailListOptOut: customData.mailListOptOut,
+	});
+};
 
 Users.login = async (username, password) => {
 	await canLogIn(username);

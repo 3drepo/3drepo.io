@@ -15,9 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, getUserByQuery } = require('../../../models/users');
+const { authenticate, getUserByQuery, getUserByUsername } = require('../../../models/users');
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const Yup = require('yup');
+const config = require('../../../utils/config');
+
 const { respond } = require('../../../utils/responder');
 const { singleImageUpload } = require('../multer');
 const { types } = require('../../../utils/helper/yup');
@@ -115,6 +117,73 @@ const validateAvatarData = async (req, res, next) => {
 		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
 
 		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+Users.validateSignUpData = async (req, res, next) => {
+	const schema = Yup.object().shape({
+		username: types.strings.username.test('checkUsernameAvailable', 'Username already exists',
+			async (value) => {
+				if (value) {
+					try {
+						await getUserByUsername(value, { _id: 1 });
+						return false;
+					} catch {
+					// do nothing
+					}
+				}
+				return true;
+			}).required(),
+		email: types.strings.email.test('checkEmailAvailable', 'Email already exists',
+			async (value) => {
+				if (value) {
+					try {
+						await getUserByQuery({ 'customData.email': value, user: { $ne: req.session?.user?.username } }, { _id: 1 });
+						return false;
+					} catch {
+						// do nothing
+					}
+				}
+				return true;
+			}).required(),
+		password: types.strings.password.required(),
+		firstName: types.strings.name.required(),
+		lastName: types.strings.name.required(),
+		countryCode: types.strings.countryCode.required(),
+		company: types.strings.title.optional(),
+		mailListAgreed: Yup.bool().required(),
+	}).required().test('check-captcha', 'Invalid captcha', () => {
+		const checkCaptcha = config.auth.captcha ? httpPost(config.captcha.validateUrl, {
+			secret: config.captcha.secretKey,
+			response: req.body.captcha,
+		}) : Promise.resolve({
+			success: true,
+		});
+
+		return checkCaptcha.then(() => true).catch(() => false);
+	});
+
+	try {
+		await schema.validate(req.body);
+
+		next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+Users.validateVerifyData = async (req, res, next) => {
+	const schema = Yup.object().shape({
+		username: types.strings.username.required(),
+		token: Yup.string().required(),
+	}).required();
+
+	try {
+		await schema.validate(req.body);
+
+		next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}

@@ -48,6 +48,13 @@ UsersModel.getUserByQuery.mockImplementation((query) => {
 	return { user: existingUsername };
 });
 
+UsersModel.getUserByUsername.mockImplementation((username) => {
+	if (username === existingUsername) {
+		return { user: existingUsername };
+	}
+	throw templates.userNotFound;
+});
+
 UsersModel.authenticate.mockImplementation((username, password) => {
 	// eslint-disable-next-line security/detect-possible-timing-attacks
 	if (password !== existingPassword) {
@@ -160,6 +167,57 @@ const testValidateAvatarData = () => {
 			const mockCB = jest.fn();
 			const req = createRequestWithFile(filename, extraProp);
 			await Users.validateAvatarFile(req, {}, mockCB);
+			if (shouldPass) {
+				expect(mockCB.mock.calls.length).toBe(1);
+			} else {
+				expect(mockCB.mock.calls.length).toBe(0);
+				expect(Responder.respond.mock.calls.length).toBe(1);
+				expect(Responder.respond.mock.results[0].value.code).toEqual(expectedError.code);
+			}
+		});
+	});
+};
+
+const testValidateSignUpData = () => {
+
+	const newUserData = {
+		username: 'newUsername',
+		email: 'new@email.com',
+		password: 'validPassword123',
+		firstName: 'newFirstName',
+		lastName: 'newLastName',
+		countryCode: 'GB',
+		company: '3D Repo',
+		mailListAgreed: true
+	}
+
+	describe.each([
+		[{ body: { ...newUserData, username: existingUsername } }, false, 'with username that already exists', templates.invalidArguments],
+		[{ body: { ...newUserData, username: 'invalid username' } }, false, 'with invalid username', templates.invalidArguments],
+		[{ body: { ...newUserData, email: 'invalid email' } }, false, 'with invalid email', templates.invalidArguments],
+		[{ body: { ...newUserData, email: existingEmail } }, false, 'with email that already exists', templates.invalidArguments],
+		[{ body: { email: nonExistingEmail } }, true, 'with email that is available'],
+		[{ body: { email: nonExistingEmail, extraProp: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
+		[{ body: { firstName: 'this is a very very large string that should fail' } }, false, 'with too large firstName', templates.invalidArguments],
+		[{ body: { lastName: 'this is a very very large string that should fail' } }, false, 'with too large lastName', templates.invalidArguments],
+		[{ body: { company: '' } }, false, 'with empty company', templates.invalidArguments],
+		[{ body: { company: 'Some company' } }, true, 'with company'],
+		[{ body: { countryCode: 'invalid country' } }, false, 'with invalid country', templates.invalidArguments],
+		[{ body: { countryCode: 'GB' } }, true, 'with valid country'],
+		[{ body: { oldPassword: existingPassword } }, false, 'with oldPassword but not newPassword', templates.invalidArguments],
+		[{ body: { newPassword: 'Abcdef123456!' } }, false, 'with newPassword but not oldPassword', templates.invalidArguments],
+		[{ body: { oldPassword: existingPassword, newPassword: 'abc' } }, false, 'with short newPassword', templates.invalidArguments],
+		[{ body: { oldPassword: existingPassword, newPassword: 'abcdefghi' } }, false, 'with weak newPassword', templates.invalidArguments],
+		[{ body: { oldPassword: existingPassword, newPassword: existingPassword } }, false, 'with newPassword same as old', templates.invalidArguments],
+		[{ body: { oldPassword: existingPassword, newPassword: 'Abcdef12345!!' } }, true, 'with strong newPassword'],
+		[{ body: { oldPassword: 'invalid password', newPassword: 'Abcdef123456!' } }, false, 'with wrong oldPassword', templates.incorrectPassword],
+		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
+		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
+	])('Check if req arguments for updating profile are valid', (data, shouldPass, desc, expectedError) => {
+		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
+			const mockCB = jest.fn();
+			const req = { ...cloneDeep(data), session: { user: { username: existingUsername } } };
+			await Users.validateUpdateData(req, {}, mockCB);
 			if (shouldPass) {
 				expect(mockCB.mock.calls.length).toBe(1);
 			} else {

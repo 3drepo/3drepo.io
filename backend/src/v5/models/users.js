@@ -205,6 +205,73 @@ User.getAvatar = async (username) => {
 	return avatar;
 };
 
+User.addUser = async (newUserData) => {
+	const customData = {
+		createdAt: new Date(),
+		inactive: true,
+		billing: {
+			billingInfo: {
+				firstName: newUserData.firstName,
+				lastName: newUserData.lastName,
+				countryCode: newUserData.countryCode,
+				company: newUserData.company,
+			},
+		},
+		firstName: newUserData.firstName,
+		lastName: newUserData.lastName,
+		email: newUserData.email,
+		permissions: [{
+			user: newUserData.username,
+			permissions: ['teamspace_admin'],
+		}],
+		mailListOptOut: !newUserData.mailListAgreed,
+	};
+
+	const expiryAt = new Date();
+	expiryAt.setHours(expiryAt.getHours() + config.tokenExpiry.emailVerify);
+	customData.emailVerifyToken = {
+		token: newUserData.token,
+		expiredAt: expiryAt,
+	};
+
+	const adminDB = await db.getAuthDB();
+	await adminDB.addUser(newUserData.username, newUserData.password, { customData, roles: [] });
+};
+
+User.verify = async (username, token) => {
+	try {
+		const { customData } = await User.getUserByUsername(username, {
+			'customData.firstName': 1,
+			'customData.lastName': 1,
+			'customData.email': 1,
+			'customData.billing.billingInfo.company': 1,
+			'customData.mailListOptOut': 1,
+			'customData.emailVerifyToken': 1,
+			'customData.inactive': 1,
+		});
+
+		const tokenData = customData.emailVerifyToken;
+
+		if (!customData.inactive) {
+			throw templates.userAlreadyVerified;
+		}
+
+		if (tokenData.token !== token || tokenData.expiredAt <= new Date()) {
+			throw templates.invalidToken;
+		}
+
+		await updateUser(username, { $unset: { 'customData.inactive': 1, 'customData.emailVerifyToken': 1 } });
+
+		return customData;
+	} catch (err) {
+		if (err === templates.userNotFound) {
+			throw templates.invalidToken;
+		}
+
+		throw err;
+	}
+};
+
 User.uploadAvatar = (username, avatarBuffer) => updateUser(username, { $set: { 'customData.avatar': { data: avatarBuffer } } });
 
 module.exports = User;
