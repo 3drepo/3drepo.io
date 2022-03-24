@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ComponentType } from 'react';
+import { ComponentType, useEffect } from 'react';
 import { DatePickerProps } from '@mui/lab/DatePicker';
 import { DateTimePickerProps } from '@mui/lab/DateTimePicker';
 import { TextField } from '@mui/material';
@@ -50,6 +50,11 @@ export const DateField = ({
 	const [value, setValue] = useState(propValue || null);
 	const [selectedValue, setSelectedValue] = useState(value);
 
+	useEffect(() => {
+		setValue(propValue || null);
+		setSelectedValue(propValue || null);
+	}, [propValue]);
+
 	const handleOpen = () => {
 		setSelectedValue(selectedValue || new Date());
 	};
@@ -71,28 +76,27 @@ export const DateField = ({
 	const handleChange = (newValue) => {
 		setSelectedValue(newValue);
 	};
-
 	const Picker: ComponentType<DatePickerProps | DateTimePickerProps> = dateTime ? StyledDateTimePicker : StyledDatePicker;
 
 	return (
-	  <Container>
-		<Picker
-			value={selectedValue}
-			onOpen={handleOpen}
-			onAccept={handleAccept}
-			onChange={handleChange}
-			disableHighlightToday
-			renderInput={(props) => (
-				<TextField
-					placeholder={placeholder}
-					defaultValue={defaultValue}
-					name={name}
-					onBlur={onBlur}
-					{...props}
-				/>
-			)}
-			{...dateFieldProps}
-		/>
-	  </Container>
+		<Container>
+			<Picker
+				value={selectedValue}
+				onOpen={handleOpen}
+				onAccept={handleAccept}
+				onChange={handleChange}
+				disableHighlightToday
+				renderInput={(props) => (
+					<TextField
+						placeholder={placeholder}
+						defaultValue={defaultValue}
+						name={name}
+						onBlur={onBlur}
+						{...props}
+					/>
+				)}
+				{...dateFieldProps}
+			/>
+		</Container>
 	);
 };

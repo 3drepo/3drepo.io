@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent } from 'react';
+import { PureComponent, useState } from 'react';
 import InputLabel from '@mui/material/InputLabel';
 import CloseIcon from '@mui/icons-material/Close';
 import SequencesIcon from '@mui/icons-material/Movie';
@@ -44,7 +44,18 @@ interface IState {
 	valued: any;
 }
 
-const SequenceDate = ({ value, name, onChange, showSequenceDate, min, max, initialFocusedDate }) => {
+const SequenceDate = ({ name, onChange, showSequenceDate, min, max, initialFocusedDate, ...props }) => {
+	const [value, setValue] = useState(props.value);
+	const deleteValue = () => {
+		onChange({target: { value: null, name }})
+		setValue(null);
+	};
+
+	const handleChange = ({ target }) => {
+		onChange({ target })
+		setValue(target.value);
+	};
+
 	return (
 		<SequenceDateContainer>
 			<SequenceDateField
@@ -53,14 +64,14 @@ const SequenceDate = ({ value, name, onChange, showSequenceDate, min, max, initi
 				dateTime
 				name={name}
 				value={value}
-				onChange={onChange}
+				onChange={handleChange}
 				defaultValue={min}
 				initialFocusedDate={initialFocusedDate}
 			/>
 			{ value &&
 				<SequenceDateActions>
 					<SmallIconButton onClick={(e) => showSequenceDate(value)} Icon={SequencesIcon} />
-					<SmallIconButton onClick={(e) => onChange({target: { value: null, name }})} Icon={CloseIcon} />
+					<SmallIconButton onClick={deleteValue} Icon={CloseIcon} />
 				</SequenceDateActions>
 			}
 		</SequenceDateContainer>
