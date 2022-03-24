@@ -86,8 +86,9 @@ describe('Revisions: sagas', () => {
 
 	describe('createRevision', () => {
 
+		const uploadId = 'uploadId';
 		const mockBody = mockCreateRevisionBody();
-		const progressBar = (e) => void e;
+		const newContainerMockBody = {...mockBody, containerId: ''};
 
 		const post = api.post;
 		const spy = jest.spyOn(api, 'post').mockImplementation((url, body) => {
@@ -99,13 +100,13 @@ describe('Revisions: sagas', () => {
 		it('should create a revision on an existing container', async () => {
 
 			mockServer
-				.post(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions`)
+				.post(`/teamspaces/${teamspace}/projects/${projectId}/containers/${mockBody.containerId}/revisions`)
 				.reply(200, {body: {}});
 
 			await expectSaga(RevisionsSaga.default)
-				.dispatch(RevisionsActions.createRevision(teamspace, projectId, containerId, progressBar, mockBody))
-				.put(RevisionsActions.setUploadComplete(containerId, false))
-				.put(RevisionsActions.setUploadComplete(containerId, true))
+				.dispatch(RevisionsActions.createRevision(teamspace, projectId, uploadId, mockBody))
+				.put(RevisionsActions.setUploadComplete(uploadId, false))
+				.put(RevisionsActions.setUploadComplete(uploadId, true))
 				.silentRun();
 
 			spy.mockClear();
@@ -129,10 +130,10 @@ describe('Revisions: sagas', () => {
 				.reply(200, {body: {}});
 
 			await expectSaga(RevisionsSaga.default)
-				.dispatch(RevisionsActions.createRevision(teamspace, projectId, '', progressBar, mockBody))
+				.dispatch(RevisionsActions.createRevision(teamspace, projectId, uploadId, newContainerMockBody))
 				.put(ContainersActions.createContainerSuccess(projectId, newContainer))
-				.put(RevisionsActions.setUploadComplete(newContainer._id, false))
-				.put(RevisionsActions.setUploadComplete(newContainer._id, true))
+				.put(RevisionsActions.setUploadComplete(uploadId, false))
+				.put(RevisionsActions.setUploadComplete(uploadId, true))
 				.silentRun();
 
 			spy.mockClear();
@@ -143,13 +144,13 @@ describe('Revisions: sagas', () => {
 			const code = 'ERROR_CODE';
 			const message = 'Error Message'
 			mockServer
-				.post(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions`)
+				.post(`/teamspaces/${teamspace}/projects/${projectId}/containers/${mockBody.containerId}/revisions`)
 				.reply(400, { status, code, message});
 
 			await expectSaga(RevisionsSaga.default)
-				.dispatch(RevisionsActions.createRevision(teamspace, projectId, containerId, progressBar, mockBody))
-				.put(RevisionsActions.setUploadComplete(containerId, false))
-				.put(RevisionsActions.setUploadComplete(containerId, true, `${status} - ${code} (${message})`))
+				.dispatch(RevisionsActions.createRevision(teamspace, projectId, uploadId, mockBody))
+				.put(RevisionsActions.setUploadComplete(uploadId, false))
+				.put(RevisionsActions.setUploadComplete(uploadId, true, `${status} - ${code} (${message})`))
 				.silentRun();
 
 			spy.mockClear();
@@ -161,8 +162,8 @@ describe('Revisions: sagas', () => {
 				.reply(400)
 
 			await expectSaga(RevisionsSaga.default)
-				.dispatch(RevisionsActions.createRevision(teamspace, projectId, '', progressBar, mockBody))
-				.put(RevisionsActions.setUploadComplete(undefined, true, 'Failed to create Container'))
+				.dispatch(RevisionsActions.createRevision(teamspace, projectId, uploadId, newContainerMockBody))
+				.put(RevisionsActions.setUploadComplete(uploadId, true, 'Failed to create Container'))
 				.silentRun();
 
 			spy.mockClear();

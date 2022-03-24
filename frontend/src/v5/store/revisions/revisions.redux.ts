@@ -25,9 +25,9 @@ export const { Types: RevisionsTypes, Creators: RevisionsActions } = createActio
 	fetch: ['teamspace', 'projectId', 'containerId'],
 	fetchSuccess: ['containerId', 'revisions'],
 	setIsPending: ['containerId', 'isPending'],
-	createRevision: ['teamspace', 'projectId', 'body'],
-	setUploadComplete: ['containerId', 'isComplete', 'errorMessage'],
-	setUploadProgress: ['containerId', 'progress'],
+	createRevision: ['teamspace', 'projectId', 'uploadId', 'body'],
+	setUploadComplete: ['uploadId', 'isComplete', 'errorMessage'],
+	setUploadProgress: ['uploadId', 'progress'],
 }, { prefix: 'REVISIONS/' }) as { Types: Constants<IRevisionsActionCreators>; Creators: IRevisionsActionCreators };
 
 export const INITIAL_STATE: IRevisionsState = {
@@ -71,27 +71,27 @@ export const setIsPending = (state = INITIAL_STATE, { isPending, containerId }):
 });
 
 export const setUploadComplete = (state = INITIAL_STATE, {
-	containerId,
+	uploadId,
 	isComplete,
 	errorMessage,
 }): IRevisionsState => ({
 	...state,
 	revisionsUploadStatus: {
 		...state.revisionsUploadStatus,
-		[containerId]: {
-			...state.revisionsUploadStatus[containerId],
+		[uploadId]: {
+			...state.revisionsUploadStatus[uploadId],
 			isComplete,
 			errorMessage,
 		},
 	},
 });
 
-export const setUploadProgress = (state = INITIAL_STATE, { containerId, progress }): IRevisionsState => ({
+export const setUploadProgress = (state = INITIAL_STATE, { uploadId, progress }): IRevisionsState => ({
 	...state,
 	revisionsUploadStatus: {
 		...state.revisionsUploadStatus,
-		[containerId]: {
-			...state.revisionsUploadStatus[containerId],
+		[uploadId]: {
+			...state.revisionsUploadStatus[uploadId],
 			progress,
 		},
 	},

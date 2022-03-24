@@ -51,7 +51,7 @@ export function* setVoidStatus({ teamspace, projectId, containerId, revisionId, 
 	}
 }
 
-export function* createRevision({ teamspace, projectId, body }: CreateRevisionAction) {
+export function* createRevision({ teamspace, projectId, uploadId, body }: CreateRevisionAction) {
 	let { containerId } = body;
 	const newContainer = {
 		name: body.containerName,
@@ -84,9 +84,9 @@ export function* createRevision({ teamspace, projectId, body }: CreateRevisionAc
 		formData.append('importAnimations', body.importAnimations.toString());
 		formData.append('timezone', body.timezone);
 
-		yield put(RevisionsActions.setUploadComplete(containerId, false));
+		yield put(RevisionsActions.setUploadComplete(uploadId, false));
 		const updateProgress = (val: number) => {
-			RevisionsActionsDispatchers.setUploadProgress(containerId, val);
+			RevisionsActionsDispatchers.setUploadProgress(uploadId, val);
 		};
 
 		yield API.Revisions.createRevision(
@@ -96,14 +96,14 @@ export function* createRevision({ teamspace, projectId, body }: CreateRevisionAc
 			(percent) => updateProgress(percent),
 			formData,
 		);
-		yield put(RevisionsActions.setUploadComplete(containerId, true));
+		yield put(RevisionsActions.setUploadComplete(uploadId, true));
 	} catch (error) {
 		let errorMessage = '';
 		if (Object.prototype.hasOwnProperty.call(error, 'response')) {
 			const { response: { data: { message, status, code } } } = error;
 			errorMessage = `${status} - ${code} (${message})`;
 		} else errorMessage = error.message;
-		yield put(RevisionsActions.setUploadComplete(containerId, true, errorMessage));
+		yield put(RevisionsActions.setUploadComplete(uploadId, true, errorMessage));
 	}
 }
 

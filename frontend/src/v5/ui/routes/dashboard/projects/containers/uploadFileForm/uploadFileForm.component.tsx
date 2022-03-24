@@ -116,15 +116,16 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		remove(getOriginalIndex(id));
 	};
 
-	const onSubmit = async (data: UploadFieldArray) => {
+	const onSubmit = async ({ uploads }: UploadFieldArray) => {
 		if (isUploading) {
 			setIsUploading(false);
 			onClickClose();
 		} else {
 			setIsUploading(true);
 			setSelectedIndex(null);
-			data.uploads.forEach((revision) => {
-				RevisionsActionsDispatchers.createRevision(teamspace, project, revision);
+			uploads.forEach((revision, index) => {
+				const { uploadId } = fields[index];
+				RevisionsActionsDispatchers.createRevision(teamspace, project, uploadId, revision);
 			});
 		}
 	};

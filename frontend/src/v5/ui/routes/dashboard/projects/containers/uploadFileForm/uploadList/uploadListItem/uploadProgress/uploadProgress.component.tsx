@@ -24,13 +24,13 @@ import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsS
 import { CompletionMark, Container, Progress, StatusText } from './uploadProgress.styles';
 
 type IUploadProgress = {
-	containerId: string;
+	uploadId: string;
 	errorMessage: string;
 };
 
-export const UploadProgress = ({ containerId, errorMessage }: IUploadProgress): JSX.Element => {
+export const UploadProgress = ({ uploadId, errorMessage }: IUploadProgress): JSX.Element => {
 	let statusText: string;
-	const progress: number = RevisionsHooksSelectors.selectUploadProgress(containerId);
+	const progress: number = RevisionsHooksSelectors.selectUploadProgress(uploadId);
 	let uploadStatus;
 	if (errorMessage) {
 		statusText = formatMessage({ id: 'upload.progress.status.failed', defaultMessage: 'Upload failed' });
