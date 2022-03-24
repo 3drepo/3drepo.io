@@ -36,8 +36,7 @@ Users.validateLoginData = async (req, res, next) => {
 		await schema.validate(req.body);
 
 		const usernameOrEmail = req.body.user;
-		const userInputCaseInsensitive = { $regex: usernameOrEmail, $options: 'i' };
-		const { user } = await getUserByQuery({ $or: [{ user: usernameOrEmail }, { 'customData.email': userInputCaseInsensitive }] });
+		const { user } = await getUserByUsernameOrEmail(usernameOrEmail, { user: 1 });
 		req.body.user = user;
 
 		next();
