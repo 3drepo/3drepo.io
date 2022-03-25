@@ -43,6 +43,9 @@ export default {
 				'text'],
 			control: { type: 'select' },
 		},
+		isPending: {
+			type: 'boolean',
+		},
 		disabled: {
 			type: 'boolean',
 		},
