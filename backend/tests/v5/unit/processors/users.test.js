@@ -26,6 +26,8 @@ jest.mock('../../../../src/v5/services/mailer');
 const Mailer = require(`${src}/services/mailer`);
 jest.mock('../../../../src/v5/utils/helper/strings');
 const Strings = require(`${src}/utils/helper/strings`);
+jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 
 const exampleHashString = 'example token';
 
@@ -47,6 +49,8 @@ const user = {
 			token: 'valid token',
 			expiredAt: new Date(2030, 1, 1),
 		},
+
+		mailListOptOut: false
 	},
 };
 
@@ -61,11 +65,14 @@ const updateUserByUsernameMock = UsersModel.updateProfile.mockImplementation(() 
 const updatePasswordMock = UsersModel.updatePassword.mockImplementation(() => {});
 const updateResetPasswordTokenMock = UsersModel.updateResetPasswordToken.mockImplementation(() => {});
 const addUserMock = UsersModel.addUser.mockImplementation(() => {});
+const verifyMock = UsersModel.verify.mockImplementation(() => {});
+const publishFn = EventsManager.publish.mockImplementation(() => { });
 UsersModel.canLogIn.mockImplementation(() => user);
 UsersModel.authenticate.mockResolvedValue('user1');
 const sendResetPasswordEmailMock = Mailer.sendResetPasswordEmail.mockImplementation(() => {});
 Strings.generateHashString.mockImplementation(() => exampleHashString);
-Strings.ucFirst.mockImplementation((s) => s.charAt(0).toUpperCase() + s.slice(1));
+Strings.ucFirst.mockImplementation((s) => s);
+Strings.formatPronouns.mockImplementation((str) => str);
 
 const testLogin = () => {
 	describe('Login', () => {
@@ -187,7 +194,7 @@ const testSignUp = () => {
 			expect(sendVerifyUserEmailMock.mock.calls[0][1]).toEqual({
 				token: exampleHashString,
 				email: newUserData.email,
-				firstName: 'Newname',
+				firstName: newUserData.firstName,
 				username: newUserData.username
 			});		
 		});
@@ -203,9 +210,38 @@ const testSignUp = () => {
 			expect(sendVerifyUserEmailMock.mock.calls[0][1]).toEqual({
 				token: exampleHashString,
 				email: newUserData.email,
-				firstName: 'Newname',
+				firstName: newUserData.firstName,
 				username: newUserData.username
 			});		
+		});
+	});
+};
+
+const testVerify = () => {
+	describe('Verify a user', () => {
+		test('should verify a user', async () => {			
+			await Users.verify(user.user, 'someToken');			
+			expect(verifyMock.mock.calls.length).toBe(1);
+			expect(verifyMock.mock.calls[0][0]).toEqual(user.user);
+			expect(verifyMock.mock.calls[0][1]).toEqual('someToken');
+			expect(getUserByUsernameMock.mock.calls.length).toBe(1);
+			expect(getUserByUsernameMock.mock.calls[0][0]).toEqual(user.user);
+			expect(getUserByUsernameMock.mock.calls[0][1]).toEqual({
+				'customData.firstName': 1,
+				'customData.lastName': 1,
+				'customData.email': 1,
+				'customData.billing.billingInfo.company': 1,
+				'customData.mailListOptOut': 1,
+			});			
+			expect(publishFn.mock.calls.length).toBe(1);
+			expect(publishFn.mock.calls[0][0]).toEqual('USER_VERIFIED');
+			expect(publishFn.mock.calls[0][1]).toEqual({
+				username: user.user,
+				email: user.customData.email,
+				fullName: `${user.customData.firstName} ${user.customData.lastName}`,
+				company: user.customData.billing.billingInfo.company,
+				mailListOptOut: user.customData.mailListOptOut,
+			});				
 		});
 	});
 };
@@ -217,4 +253,5 @@ describe('processors/users', () => {
 	tesUpdateProfile();
 	testGenerateResetPasswordToken();
 	testSignUp();
+	testVerify();
 });

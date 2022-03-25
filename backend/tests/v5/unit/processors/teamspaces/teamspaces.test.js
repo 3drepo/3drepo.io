@@ -16,6 +16,7 @@
  */
 
 const _ = require('lodash');
+const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
 
 const Teamspaces = require(`${src}/processors/teamspaces/teamspaces`);
@@ -28,6 +29,9 @@ const JobsModel = require(`${src}/models/jobs`);
 
 jest.mock('../../../../../src/v5/models/teamspaces');
 const TeamspacesModel = require(`${src}/models/teamspaces`);
+
+jest.mock('../../../../../src/v5/models/roles');
+const RolesModel = require(`${src}/models/roles`);
 
 jest.mock('../../../../../src/v5/utils/permissions/permissions');
 const Permissions = require(`${src}/utils/permissions/permissions`);
@@ -93,7 +97,36 @@ const testGetTeamspaceMembersInfo = () => {
 	});
 };
 
+const testInitializeTeamspace = () => {
+	describe('Initialize teamspace', () => {
+		test('should initialize a teamspace', async () => {	
+			const createTeamspaceRoleMock = RolesModel.createTeamspaceRole.mockImplementation(() => { });
+			const grantTeamspaceRoleToUserMock = RolesModel.grantTeamspaceRoleToUser.mockImplementation(() => { });
+			const addDefaultJobsMock = JobsModel.addDefaultJobs.mockImplementation(() => { });
+			const createTeamspaceSettingsMock = TeamspacesModel.createTeamspaceSettings.mockImplementation(() => { });
+			const username = 'username';
+			await Teamspaces.initializeTeamspace(username);
+			expect(createTeamspaceRoleMock.mock.calls.length).toEqual(1);
+			expect(createTeamspaceRoleMock.mock.calls[0][0]).toEqual(username);			
+			expect(grantTeamspaceRoleToUserMock.mock.calls.length).toEqual(1);
+			expect(grantTeamspaceRoleToUserMock.mock.calls[0][0]).toEqual(username);			
+			expect(addDefaultJobsMock.mock.calls.length).toEqual(1);
+			expect(addDefaultJobsMock.mock.calls[0][0]).toEqual(username);			
+			expect(createTeamspaceSettingsMock.mock.calls.length).toEqual(1);
+			expect(createTeamspaceSettingsMock.mock.calls[0][0]).toEqual(username);			
+		});
+
+		test('should initialize a teamspace even if an error is thrown ', async () => {	
+			const username = 'username';
+			const createTeamspaceRoleMock = RolesModel.createTeamspaceRole.mockImplementation(() => { throw templates.unknown });
+			await Teamspaces.initializeTeamspace(username);		
+		});
+	});
+};
+
+
 describe('processors/teamspaces', () => {
 	testGetTeamspaceListByUser();
 	testGetTeamspaceMembersInfo();
+	testInitializeTeamspace();
 });

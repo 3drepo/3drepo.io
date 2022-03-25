@@ -61,7 +61,6 @@ Users.verify = async (username, token) => {
 		username,
 		email: customData.email,
 		fullName: formatPronouns(`${customData.firstName} ${customData.lastName}`),
-		lastName: customData.lastName,
 		company: customData.billing.billingInfo.company,
 		mailListOptOut: customData.mailListOptOut,
 	});

@@ -189,7 +189,7 @@ Users.validateSignUpData = async (req, res, next) => {
 			async (value) => {
 				if (value) {
 					try {
-						await getUserByQuery({ 'customData.email': value, user: { $ne: req.session?.user?.username } }, { _id: 1 });
+						await getUserByQuery({ 'customData.email': value }, { _id: 1 });
 						return false;
 					} catch {
 						// do nothing

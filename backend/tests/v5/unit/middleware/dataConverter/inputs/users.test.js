@@ -246,8 +246,8 @@ const testResetingPasswordData = () => {
 
 const testValidateSignUpData = () => {
 	const newUserData = {
-		username: 'newUsername',
-		email: 'new@email.com',
+		username: availableUsername,
+		email: availableEmail,
 		password: 'validPassword123',
 		firstName: 'newFirstName',
 		lastName: 'newLastName',
