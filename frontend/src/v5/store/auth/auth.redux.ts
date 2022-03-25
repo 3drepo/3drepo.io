@@ -15,15 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
-import { IAuthActionCreators } from './auth.types';
-
-interface IAuthState {
-	isAuthenticated: boolean;
-	isPending: boolean;
-	errorMessage: string;
-}
 
 export const { Types: AuthTypes, Creators: AuthActions } = createActions({
 	authenticate: [],
@@ -58,8 +52,32 @@ export const loginFailed = (state = INITIAL_STATE, { errorMessage }): IAuthState
 	}
 );
 
-export const reducer = createReducer(INITIAL_STATE, {
+export const authReducer = createReducer(INITIAL_STATE, {
 	[AuthTypes.LOGIN_FAILED]: loginFailed,
 	[AuthTypes.SET_PENDING_STATUS]: setPendingStatus,
 	[AuthTypes.SET_AUTHENTICATION_STATUS]: setAuthenticationStatus,
 });
+
+/**
+ * Types
+*/
+
+interface IAuthState {
+	isAuthenticated: boolean;
+	isPending: boolean;
+	errorMessage: string;
+}
+
+export type LoginAction = Action<'LOGIN'> & { username: string, password: string };
+export type LoginFailedAction = Action<'LOGIN_FAILED'> & { errorMessage: string };
+export type SetPendingStatusAction = Action<'SET_PENDING_STATUS'> & { isPending: boolean };
+export type SetAuthenticationStatusAction = Action<'SET_AUTHENTICATION_STATUS'> & { status: boolean };
+export interface IAuthActionCreators {
+	authenticate: () => Action<'AUTHENTICATE'>;
+	login: (username: string, password: string) => LoginAction;
+	loginFailed: (errorMessage: string) => LoginFailedAction,
+	logout: () => Action<'LOGOUT'>;
+	setPendingStatus: (isPending: boolean) => SetPendingStatusAction;
+	setAuthenticationStatus: (status: boolean) => SetAuthenticationStatusAction;
+	sessionExpired: () => void;
+}

@@ -15,7 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ITeamspacesActionCreators, TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
-import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
+const { v5Path } = require('../../interop');
 
-export const TeamspacesActionsDispatchers = createActionsDispatchers<ITeamspacesActionCreators>(TeamspacesActions);
+const { listDatabases, listCollections } = require(`${v5Path}/handler/db`);
+const { USERNAME_BLACKLIST } = require(`${v5Path}/models/users.constants`);
+
+const Utils = {};
+
+Utils.getTeamspaceList = async () => {
+	const dbList = await listDatabases();
+	return dbList.flatMap(({ name }) => (USERNAME_BLACKLIST.includes(name) ? [] : name));
+};
+
+Utils.getCollectionsEndsWith = async (teamspace, str) => {
+	const collections = await listCollections(teamspace);
+	return collections.filter(({ name }) => name.endsWith(str));
+};
+
+module.exports = Utils;

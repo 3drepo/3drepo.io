@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { RevisionsActions } from '@/v5/store/revisions/revisions.redux';
-import { IRevisionsActionCreators } from '@/v5/store/revisions/revisions.types';
+import { IRevisionsActionCreators, RevisionsActions } from '@/v5/store/revisions/revisions.redux';
 import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 
 export const RevisionsActionsDispatchers = createActionsDispatchers<IRevisionsActionCreators>(RevisionsActions);

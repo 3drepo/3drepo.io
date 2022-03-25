@@ -16,9 +16,9 @@
  */
 
 import { createSelector } from 'reselect';
-import { IContainersState } from '@/v5/store/containers/containers.types';
 import { isEmpty } from 'lodash';
 import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
+import { IContainersState } from './containers.redux';
 
 const selectContainersDomain = (state): IContainersState => state.containers;
 

@@ -41,6 +41,7 @@ import { Container } from './editFederationContainersList.styles';
 export type ActionButtonProps = {
 	children: ReactNode;
 	disabled?: boolean;
+	filterQuery?: string;
 };
 
 export type IconButtonProps = {
@@ -92,13 +93,13 @@ export const EditFederationContainers = ({
 	return (
 		<Container>
 			<DashboardListCollapse
-				title={<>{title} {!isListPending && `(${containers.length})`}</>}
+				title={<>{title} {!isListPending && `(${sortedList.length})`}</>}
 				isLoading={areStatsPending}
 				tooltipTitles={collapsableTooltips}
 				sideElement={(
 					<CollapseSideElementGroup>
 						<HeaderButtonsGroup>
-							<ActionButton disabled={isEmpty(containers)}>
+							<ActionButton disabled={isEmpty(containers)} filterQuery={filterQuery}>
 								{isEmpty(filterQuery)
 									? actionButtonTexts.allResults
 									: actionButtonTexts.filteredResults}
