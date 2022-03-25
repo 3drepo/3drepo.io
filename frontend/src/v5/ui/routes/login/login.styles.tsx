@@ -35,13 +35,6 @@ export const AuthField = styled(FormTextField).attrs({
 
 })`
 	>* { color: ${({ theme }) => theme.palette.secondary.main}; }
-
-	label {
-		text-transform: none;
-		font-weight: 400;
-		font-size: 12px;
-		letter-spacing: 0.04em;
-	}
 `;
 
 export const UsernameField = styled(AuthField).attrs({
