@@ -30,7 +30,6 @@ import * as countriesAndTimezones from 'countries-and-timezones';
 import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer } from './sidebarForm.styles';
 
 type ISidebarForm = {
-	className?: string;
 	value: UploadItemFields,
 	isNewContainer: boolean;
 	isSpm: boolean;

@@ -20,7 +20,6 @@ import { Container, Label } from './uploadListHeaderLabel.styles';
 
 type IUploadListHeaderLabel = {
 	children: JSX.Element;
-	name: string;
 };
 
 export const UploadListHeaderLabel = ({ children }: IUploadListHeaderLabel): JSX.Element => (
