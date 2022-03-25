@@ -53,6 +53,16 @@ export function* login({ username, password }: LoginAction) {
 			));
 		} else if (data?.status === 400 && data?.code === 'ALREADY_LOGGED_IN') {
 			yield put(AuthActions.authenticate());
+		} else if (data?.status === 400 && data?.code === 'TOO_MANY_LOGIN_ATTEMPTS') {
+			const lockoutDuration = Math.round(ClientConfig.loginPolicy.lockoutDuration / 1000 / 60);
+			yield put(AuthActions.loginFailed(
+				formatMessage(
+					{
+						id: 'auth.login.tooManyAttempts',
+						defaultMessage: 'Too many unsuccessful login attempts! Account locked for {time} minutes.',
+					}, { time: lockoutDuration },
+				),
+			));
 		} else yield put(AuthActions.loginFailed(error.message));
 	}
 	yield put(AuthActions.setPendingStatus(false));
