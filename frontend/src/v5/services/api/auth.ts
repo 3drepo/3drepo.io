@@ -15,10 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { AxiosResponse } from 'axios';
 import api from './default';
 
-export const authenticate = () => api.get('login');
+export const authenticate = async (): Promise<string> => {
+	const { data } = await api.get('login');
+	return data.username;
+};
 
-export const login = (user, password) => api.post('login', { user, password });
+export const login = (user, password): Promise<AxiosResponse<void>> => api.post('login', { user, password });
 
-export const logout = () => api.post('logout');
+export const logout = (): Promise<AxiosResponse<void>> => api.post('logout');

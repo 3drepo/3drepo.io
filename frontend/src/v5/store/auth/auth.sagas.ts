@@ -18,8 +18,7 @@
 import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
-import { AuthActions, AuthTypes } from './auth.redux';
-import { LoginAction } from './auth.types';
+import { AuthActions, AuthTypes, LoginAction } from './auth.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 
 function* authenticate() {
