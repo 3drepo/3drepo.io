@@ -18,7 +18,6 @@
 const Jobs = {};
 
 const DBHandler = require('../handler/db');
-const db = require('../handler/db');
 
 const DEFAULT_JOBS = [
 	{ _id: 'Client', color: '#a6cee3' },
@@ -37,7 +36,7 @@ const findMany = (ts, query, projection, sort) => DBHandler.find(ts, 'jobs', que
 Jobs.getJobsToUsers = (teamspace) => findMany(teamspace, {}, { _id: 1, users: 1 });
 
 Jobs.addDefaultJobs = async (teamspace) => {
-	await db.insertMany(teamspace, 'jobs', DEFAULT_JOBS.map((job) => ({ ...job, users: [] })));
+	await DBHandler.insertMany(teamspace, 'jobs', DEFAULT_JOBS.map((job) => ({ ...job, users: [] })));
 };
 
 module.exports = Jobs;

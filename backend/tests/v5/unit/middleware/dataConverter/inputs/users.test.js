@@ -34,30 +34,31 @@ const path = require('path');
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
-const nonExistingUsername = 'nonExistingUser';
+const availableUsername = 'nonExistingUser';
 const existingUsername = 'existingUsername';
-const nonExistingEmail = 'nonExistingEmail@email.com';
+const availableEmail = 'availableEmail@email.com';
 const existingEmail = 'existingEmail@email.com';
 const validPassword = 'Abcdef12345!';
 
 UsersModel.getUserByQuery.mockImplementation((query) => {
-	if ((query.$or && query.$or[0]?.user === nonExistingUsername) || query['customData.email'] === nonExistingEmail) {
+	if ((query.$or && query.$or[0]?.user === availableUsername) || query['customData.email'] === availableEmail) {
 		throw templates.userNotFound;
 	}
 
-	if (query.user === nonExistingUsername) {
+	if (query.user === availableUsername) {
 		throw templates.userNotFound;
 	}
 
 	return { user: existingUsername };
 });
 
+
 UsersModel.getUserByUsernameOrEmail.mockImplementation((usernameOrEmail) => {
-	if (usernameOrEmail === nonExistingUsername || usernameOrEmail === nonExistingEmail) {
-		throw templates.userNotFound;
+	if (usernameOrEmail === existingUsername || usernameOrEmail === existingEmail) {
+		return { user: existingUsername };
 	}
 
-	return { user: existingUsername };
+	throw templates.userNotFound;
 });
 
 UsersModel.getUserByUsername.mockImplementation((username) => {
@@ -81,12 +82,12 @@ const testValidateLoginData = () => {
 		[{ body: { user: 1, password: '123' } }, false, 'with invalid username', templates.invalidArguments],
 		[{ body: { user: '123' } }, false, 'with no username', templates.invalidArguments],
 		[{ body: { user: existingUsername, password: 123 } }, false, 'with invalid password', templates.invalidArguments],
-		[{ body: { user: nonExistingUsername, password: 'validPassword' } }, false, 'with user that does not exist',
+		[{ body: { user: availableUsername, password: 'validPassword' } }, false, 'with user that does not exist',
 			templates.incorrectUsernameOrPassword],
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
 		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
 		[{ body: { user: existingUsername, password: 'validPassword' } }, true, 'with user that exists'],
-		[{ body: { user: 'existing@email.com', password: 'validPassword' } }, true, 'with user that exists using email'],
+		[{ body: { user: existingEmail, password: 'validPassword' } }, true, 'with user that exists using email'],
 		[{ body: { user: existingUsername, password: 'validPassword', extraProp: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
 	])('Check if req arguments for loggin in are valid', (data, shouldPass, desc, expectedError) => {
 		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
@@ -111,8 +112,8 @@ const testValidateUpdateData = () => {
 		[{ body: { lastName: 'this is a very very large string that should fail' } }, false, 'with too large lastName', templates.invalidArguments],
 		[{ body: { email: 'invalid email' } }, false, 'with invalid email', templates.invalidArguments],
 		[{ body: { email: existingEmail } }, false, 'with email that already exists', templates.invalidArguments],
-		[{ body: { email: nonExistingEmail } }, true, 'with email that is available'],
-		[{ body: { email: nonExistingEmail, extraProp: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
+		[{ body: { email: availableEmail } }, true, 'with email that is available'],
+		[{ body: { email: availableEmail, extraProp: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
 		[{ body: { company: '' } }, false, 'with empty company', templates.invalidArguments],
 		[{ body: { company: 'Some company' } }, true, 'with company'],
 		[{ body: { countryCode: 'invalid country' } }, false, 'with invalid country', templates.invalidArguments],
@@ -195,7 +196,7 @@ const testValidateAvatarData = () => {
 const testForgotPasswordData = () => {
 	describe.each([
 		[{ body: { user: existingUsername } }, true, 'with valid username'],
-		[{ body: { user: nonExistingUsername } }, false, 'with invalid username', templates.ok],
+		[{ body: { user: availableUsername } }, false, 'with invalid username', templates.ok],
 		[{ body: { user: existingEmail } }, true, 'with valid email'],
 		[{ body: { user: existingEmail, extra: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
@@ -223,7 +224,7 @@ const testResetingPasswordData = () => {
 		[{ body: { token: 'someToken', newPassword: validPassword } }, false, 'without user', templates.invalidArguments],
 		[{ body: { token: 'abc', newPassword: '123', user: 'some user' } }, false, 'with weak new password', templates.invalidArguments],
 		[{ body: { token: 'abc', newPassword: 'Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef', user: 'some user' } }, false, 'with too long new password', templates.invalidArguments],
-		[{ body: { token: 'abc', newPassword: validPassword, user: nonExistingUsername } }, false, 'with user that doesnt exist', templates.invalidArguments],
+		[{ body: { token: 'abc', newPassword: validPassword, user: availableUsername } }, false, 'with user that doesnt exist', templates.invalidArguments],
 		[{ body: { token: 'someToken', newPassword: validPassword, user: 'some user' } }, true, 'with token and valid new password'],
 		[{ body: { token: 'someToken', newPassword: validPassword, user: 'some user', extra: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments, templates.invalidArguments],
@@ -244,7 +245,6 @@ const testResetingPasswordData = () => {
 };
 
 const testValidateSignUpData = () => {
-
 	const newUserData = {
 		username: 'newUsername',
 		email: 'new@email.com',
@@ -254,35 +254,49 @@ const testValidateSignUpData = () => {
 		countryCode: 'GB',
 		company: '3D Repo',
 		mailListAgreed: true
-	}
+	};
 
 	describe.each([
+		[{ body: { ...newUserData } }, true, 'with valid data'],
+		[{ body: { ...newUserData, company: undefined } }, true, 'with empty company'],
 		[{ body: { ...newUserData, username: existingUsername } }, false, 'with username that already exists', templates.invalidArguments],
 		[{ body: { ...newUserData, username: 'invalid username' } }, false, 'with invalid username', templates.invalidArguments],
-		[{ body: { ...newUserData, email: 'invalid email' } }, false, 'with invalid email', templates.invalidArguments],
 		[{ body: { ...newUserData, email: existingEmail } }, false, 'with email that already exists', templates.invalidArguments],
-		[{ body: { email: nonExistingEmail } }, true, 'with email that is available'],
-		[{ body: { email: nonExistingEmail, extraProp: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
-		[{ body: { firstName: 'this is a very very large string that should fail' } }, false, 'with too large firstName', templates.invalidArguments],
-		[{ body: { lastName: 'this is a very very large string that should fail' } }, false, 'with too large lastName', templates.invalidArguments],
-		[{ body: { company: '' } }, false, 'with empty company', templates.invalidArguments],
-		[{ body: { company: 'Some company' } }, true, 'with company'],
-		[{ body: { countryCode: 'invalid country' } }, false, 'with invalid country', templates.invalidArguments],
-		[{ body: { countryCode: 'GB' } }, true, 'with valid country'],
-		[{ body: { oldPassword: existingPassword } }, false, 'with oldPassword but not newPassword', templates.invalidArguments],
-		[{ body: { newPassword: 'Abcdef123456!' } }, false, 'with newPassword but not oldPassword', templates.invalidArguments],
-		[{ body: { oldPassword: existingPassword, newPassword: 'abc' } }, false, 'with short newPassword', templates.invalidArguments],
-		[{ body: { oldPassword: existingPassword, newPassword: 'abcdefghi' } }, false, 'with weak newPassword', templates.invalidArguments],
-		[{ body: { oldPassword: existingPassword, newPassword: existingPassword } }, false, 'with newPassword same as old', templates.invalidArguments],
-		[{ body: { oldPassword: existingPassword, newPassword: 'Abcdef12345!!' } }, true, 'with strong newPassword'],
-		[{ body: { oldPassword: 'invalid password', newPassword: 'Abcdef123456!' } }, false, 'with wrong oldPassword', templates.incorrectPassword],
+		[{ body: { ...newUserData, email: 'invalid email' } }, false, 'with invalid email', templates.invalidArguments],
+		[{ body: { ...newUserData, extraProp: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
+		[{ body: { ...newUserData, firstName: 'this is a very very large string that should fail' } }, false, 'with too large firstName', templates.invalidArguments],
+		[{ body: { ...newUserData, lastName: 'this is a very very large string that should fail' } }, false, 'with too large lastName', templates.invalidArguments],		
+		[{ body: { ...newUserData, countryCode: 'invalid country' } }, false, 'with invalid country', templates.invalidArguments],		
+		[{ body: { ...newUserData, password: 'abc' } }, false, 'with short password', templates.invalidArguments],
+		[{ body: { ...newUserData, password: 'abcdefghi' } }, false, 'with weak newPassword', templates.invalidArguments],		
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
 		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
-	])('Check if req arguments for updating profile are valid', (data, shouldPass, desc, expectedError) => {
+	])('Check if req arguments for signing up user are valid', (req, shouldPass, desc, expectedError) => {
 		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
 			const mockCB = jest.fn();
-			const req = { ...cloneDeep(data), session: { user: { username: existingUsername } } };
-			await Users.validateUpdateData(req, {}, mockCB);
+			await Users.validateSignUpData(req, {}, mockCB);
+			if (shouldPass) {
+				expect(mockCB.mock.calls.length).toBe(1);
+			} else {
+				expect(mockCB.mock.calls.length).toBe(0);
+				expect(Responder.respond.mock.calls.length).toBe(1);
+				expect(Responder.respond.mock.results[0].value.code).toEqual(expectedError.code);
+			}
+		});
+	});
+};
+
+const testVerifyData = () => {
+	describe.each([
+		[{ body: { username: existingUsername, token: 'someToken' } }, true, 'with valid data'],
+		[{ body: { username: existingUsername } }, false, 'without token', templates.invalidArguments],
+		[{ body: { username: availableUsername, token: 'someToken' } }, false, 'with non existing username', templates.invalidArguments],				
+		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
+		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
+	])('Check if req arguments for verifying user are valid', (req, shouldPass, desc, expectedError) => {
+		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
+			const mockCB = jest.fn();
+			await Users.validateVerifyData(req, {}, mockCB);
 			if (shouldPass) {
 				expect(mockCB.mock.calls.length).toBe(1);
 			} else {
@@ -301,4 +315,6 @@ describe('middleware/dataConverter/inputs/users', () => {
 	testValidateAvatarData();
 	testForgotPasswordData();
 	testResetingPasswordData();
+	testValidateSignUpData();
+	testVerifyData();
 });

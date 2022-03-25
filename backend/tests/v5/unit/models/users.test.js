@@ -498,6 +498,68 @@ const testGetUserByUsernameOrEmail = () => {
 	});
 };
 
+const formatNewUserData = (newUserData) => {
+	const formattedData = {		
+		inactive: true,
+		firstName: newUserData.firstName,
+		lastName: newUserData.lastName,
+		email: newUserData.email,
+		mailListOptOut: !newUserData.mailListAgreed,
+		permissions: [{
+			user: newUserData.username,
+			permissions: ['teamspace_admin'],
+		}],
+		billing: {
+			billingInfo: {
+				firstName: newUserData.firstName,
+				lastName: newUserData.lastName,
+				countryCode: newUserData.countryCode,
+				company: newUserData.company,
+			},
+		},
+		createdAt: new Date(),
+	};
+
+	const expiryAt = new Date();
+	expiryAt.setHours(expiryAt.getHours() + 336);
+	formattedData.emailVerifyToken = {
+		token: newUserData.token,
+		expiredAt: expiryAt,
+	};
+
+	return formattedData;
+};
+
+const testAddUser = () => {
+	describe('Add a new user', () => {
+		test('should add a new user', async () => {
+
+			const newUserData = {
+				username: 'newUser',
+				email: 'example@email.com',
+				password: 'newPassword',
+				firstName: 'new first name',
+				lastName: 'new last name',
+				mailListAgreed: true,
+				countryCode: 'GB',
+				company: '3D repo'
+			};
+
+
+			const authDB = { addUser: () => {} };
+			jest.spyOn(db, 'getAuthDB').mockImplementation(() => authDB);
+			const fn = jest.spyOn(authDB, 'addUser');
+
+			const expectedData = formatNewUserData(newUserData);
+			await User.addUser(newUserData);
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual(newUserData.username);
+			expect(fn.mock.calls[0][1]).toEqual(newUserData.password);
+			expect(fn.mock.calls[0][2]).toEqual({ customData: expectedData, roles: []});
+		});
+	});
+};
+
 describe('models/users', () => {
 	testGetAccessibleTeamspaces();
 	testGetFavourites();
@@ -513,4 +575,5 @@ describe('models/users', () => {
 	testUpdatePassword();
 	testUpdateResetPasswordToken();
 	testGetUserByUsernameOrEmail();
+	testAddUser();
 });

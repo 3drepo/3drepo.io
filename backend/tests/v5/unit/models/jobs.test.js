@@ -37,6 +37,31 @@ const testGetJobsToUsers = () => {
 	});
 };
 
+const testAddDefaultJobs = () => {
+	describe('Add default jobs', () => {
+		test('should add the default jobs', async () => {
+			const DEFAULT_JOBS = [
+				{ _id: 'Client', color: '#a6cee3' },
+				{ _id: 'Architect', color: '#213f99' },
+				{ _id: 'Structural Engineer', color: '#33a02c' },
+				{ _id: 'MEP Engineer', color: '#fb9a99' },
+				{ _id: 'Project Manager', color: '#e31a1c' },
+				{ _id: 'Quantity Surveyor', color: '#ff7f00' },
+				{ _id: 'Asset Manager', color: '#ffff99' },
+				{ _id: 'Main Contractor', color: '#b15928' },
+				{ _id: 'Supplier', color: '#6a3d9a' },
+			];
+			
+			const fn = jest.spyOn(db, 'insertMany').mockImplementation(() => {});
+			await Jobs.addDefaultJobs('teamspace');
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][0]).toEqual('teamspace');
+			expect(fn.mock.calls[0][2]).toEqual(DEFAULT_JOBS.map((job) => ({ ...job, users: [] })));
+		});
+	});
+};
+
 describe('models/jobs', () => {
 	testGetJobsToUsers();
+	testAddDefaultJobs();
 });

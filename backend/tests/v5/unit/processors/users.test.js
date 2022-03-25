@@ -60,10 +60,12 @@ const getUserByUsernameMock = UsersModel.getUserByUsername.mockImplementation((u
 const updateUserByUsernameMock = UsersModel.updateProfile.mockImplementation(() => {});
 const updatePasswordMock = UsersModel.updatePassword.mockImplementation(() => {});
 const updateResetPasswordTokenMock = UsersModel.updateResetPasswordToken.mockImplementation(() => {});
+const addUserMock = UsersModel.addUser.mockImplementation(() => {});
 UsersModel.canLogIn.mockImplementation(() => user);
 UsersModel.authenticate.mockResolvedValue('user1');
 const sendResetPasswordEmailMock = Mailer.sendResetPasswordEmail.mockImplementation(() => {});
 Strings.generateHashString.mockImplementation(() => exampleHashString);
+Strings.ucFirst.mockImplementation((s) => s.charAt(0).toUpperCase() + s.slice(1));
 
 const testLogin = () => {
 	describe('Login', () => {
@@ -165,9 +167,54 @@ const testGenerateResetPasswordToken = () => {
 	});
 };
 
+const testSignUp = () => {
+	describe('Sign up a user', () => {
+		const newUserData = {				
+			username: 'newUsername',
+			email: 'newEmail',
+			password: 'newPassword',
+			firstName: 'newname'
+		};
+
+		test('should sign a user up', async () => {
+			const sendVerifyUserEmailMock = Mailer.sendVerifyUserEmail.mockImplementation(() => {});
+
+			await Users.signUp(newUserData);			
+			expect(addUserMock.mock.calls.length).toBe(1);
+			expect(addUserMock.mock.calls[0][0]).toEqual({...newUserData, token: exampleHashString});
+			expect(sendVerifyUserEmailMock.mock.calls.length).toBe(1);
+			expect(sendVerifyUserEmailMock.mock.calls[0][0]).toEqual(newUserData.email);
+			expect(sendVerifyUserEmailMock.mock.calls[0][1]).toEqual({
+				token: exampleHashString,
+				email: newUserData.email,
+				firstName: 'Newname',
+				username: newUserData.username
+			});		
+		});
+
+		test('should sign a user up even if verification email fails to be sent', async () => {
+			const sendVerifyUserEmailMock = Mailer.sendVerifyUserEmail.mockImplementation(() => { throw templates.unknown });
+
+			await Users.signUp(newUserData);			
+			expect(addUserMock.mock.calls.length).toBe(1);
+			expect(addUserMock.mock.calls[0][0]).toEqual({...newUserData, token: exampleHashString});
+			expect(sendVerifyUserEmailMock.mock.calls.length).toBe(1);
+			expect(sendVerifyUserEmailMock.mock.calls[0][0]).toEqual(newUserData.email);
+			expect(sendVerifyUserEmailMock.mock.calls[0][1]).toEqual({
+				token: exampleHashString,
+				email: newUserData.email,
+				firstName: 'Newname',
+				username: newUserData.username
+			});		
+		});
+	});
+};
+
+
 describe('processors/users', () => {
 	testLogin();
 	tesGetProfileByUsername();
 	tesUpdateProfile();
 	testGenerateResetPasswordToken();
+	testSignUp();
 });

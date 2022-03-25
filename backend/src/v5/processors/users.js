@@ -16,15 +16,17 @@
  */
 
 const Users = {};
+
+const config = require('../utils/config');
 const { addUser, authenticate, canLogIn, deleteApiKey, generateApiKey, getAvatar,
-	getUserByUsername, updatePassword, updateProfile, uploadAvatar, verify } = require('../models/users');
+	getUserByUsername, updatePassword, updateProfile, uploadAvatar, verify, updateResetPasswordToken } = require('../models/users');
 const { formatPronouns, ucFirst } = require('../utils/helper/strings');
 const { isEmpty, removeFields } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
 const { logger } = require('../utils/logger');
 const { publish } = require('../services/eventsManager/eventsManager');
-const { sendVerifyUserEmail } = require('../../v4/mailer/mailer');
+const { sendResetPasswordEmail, sendVerifyUserEmail } = require('../services/mailer');
 
 Users.signUp = async (newUserData) => {
 	const token = generateHashString();
@@ -34,9 +36,8 @@ Users.signUp = async (newUserData) => {
 		const emailRes = await sendVerifyUserEmail(newUserData.email, {
 			token,
 			email: newUserData.email,
-			firstName: ucFirst(newUserData.firstName),
-			username: newUserData.username,
-			pay: newUserData.pay,
+			firstName:  ucFirst(newUserData.firstName),
+			username: newUserData.username
 		});
 
 		logger.logInfo(`Email info - ${JSON.stringify(emailRes)}`);
@@ -46,7 +47,15 @@ Users.signUp = async (newUserData) => {
 };
 
 Users.verify = async (username, token) => {
-	const customData = await verify(username, token);
+	await verify(username, token);
+
+	const { customData } = await getUserByUsername(username, {
+		'customData.firstName': 1,
+		'customData.lastName': 1,
+		'customData.email': 1,
+		'customData.billing.billingInfo.company': 1,
+		'customData.mailListOptOut': 1,
+	});		
 
 	publish(events.USER_VERIFIED, {
 		username,
@@ -57,11 +66,6 @@ Users.verify = async (username, token) => {
 		mailListOptOut: customData.mailListOptOut,
 	});
 };
-
-const Users = {};
-const config = require('../utils/config');
-const { generateHashString } = require('../utils/helper/strings');
-const { sendResetPasswordEmail } = require('../services/mailer');
 
 Users.login = async (username, password) => {
 	await canLogIn(username);

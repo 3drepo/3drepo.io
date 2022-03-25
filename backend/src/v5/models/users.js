@@ -214,6 +214,14 @@ User.addUser = async (newUserData) => {
 	const customData = {
 		createdAt: new Date(),
 		inactive: true,
+		firstName: newUserData.firstName,
+		lastName: newUserData.lastName,
+		email: newUserData.email,
+		mailListOptOut: !newUserData.mailListAgreed,
+		permissions: [{
+			user: newUserData.username,
+			permissions: ['teamspace_admin'],
+		}],
 		billing: {
 			billingInfo: {
 				firstName: newUserData.firstName,
@@ -222,14 +230,6 @@ User.addUser = async (newUserData) => {
 				company: newUserData.company,
 			},
 		},
-		firstName: newUserData.firstName,
-		lastName: newUserData.lastName,
-		email: newUserData.email,
-		permissions: [{
-			user: newUserData.username,
-			permissions: ['teamspace_admin'],
-		}],
-		mailListOptOut: !newUserData.mailListAgreed,
 	};
 
 	const expiryAt = new Date();
@@ -243,39 +243,7 @@ User.addUser = async (newUserData) => {
 	await adminDB.addUser(newUserData.username, newUserData.password, { customData, roles: [] });
 };
 
-User.verify = async (username, token) => {
-	try {
-		const { customData } = await User.getUserByUsername(username, {
-			'customData.firstName': 1,
-			'customData.lastName': 1,
-			'customData.email': 1,
-			'customData.billing.billingInfo.company': 1,
-			'customData.mailListOptOut': 1,
-			'customData.emailVerifyToken': 1,
-			'customData.inactive': 1,
-		});
-
-		const tokenData = customData.emailVerifyToken;
-
-		if (!customData.inactive) {
-			throw templates.userAlreadyVerified;
-		}
-
-		if (tokenData.token !== token || tokenData.expiredAt <= new Date()) {
-			throw templates.invalidToken;
-		}
-
-		await updateUser(username, { $unset: { 'customData.inactive': 1, 'customData.emailVerifyToken': 1 } });
-
-		return customData;
-	} catch (err) {
-		if (err === templates.userNotFound) {
-			throw templates.invalidToken;
-		}
-
-		throw err;
-	}
-};
+User.verify = async (username) => updateUser(username, { $unset: { 'customData.inactive': 1, 'customData.emailVerifyToken': 1 } });
 
 User.uploadAvatar = (username, avatarBuffer) => updateUser(username, { $set: { 'customData.avatar': { data: avatarBuffer } } });
 

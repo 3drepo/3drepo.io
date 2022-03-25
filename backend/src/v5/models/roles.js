@@ -21,27 +21,20 @@ const Roles = {};
 
 const TEAM_MEMBER_ROLE = 'team_member';
 
-const getRoleByQuery = (query, projection) => db.findOne('admin', 'system.roles', query, projection);
-
 Roles.createTeamspaceRole = async (username) => {
-	const roleId = `${username}.${TEAM_MEMBER_ROLE}`;
-	const role = await getRoleByQuery({ _id: roleId });
+	const createRoleCmd = {
+		createRole: TEAM_MEMBER_ROLE,
+		privileges: [{
+			resource: {
+				db: username,
+				collection: 'settings',
+			},
+			actions: ['find'] },
+		],
+		roles: [],
+	};
 
-	if (!role) {
-		const createRoleCmd = {
-			createRole: TEAM_MEMBER_ROLE,
-			privileges: [{
-				resource: {
-					db: username,
-					collection: 'settings',
-				},
-				actions: ['find'] },
-			],
-			roles: [],
-		};
-
-		await db.runCommand(username, createRoleCmd);
-	}
+	await db.runCommand(username, createRoleCmd);
 };
 
 Roles.grantTeamspaceRoleToUser = (username) => {
