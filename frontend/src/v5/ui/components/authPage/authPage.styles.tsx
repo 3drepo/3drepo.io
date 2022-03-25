@@ -48,7 +48,6 @@ export const Logo = styled.img`
 	max-height: 100px;
 	max-width: 100px;
 	padding: 28px;
-	user-drag: none;
 	z-index: 1;
 `;
 
