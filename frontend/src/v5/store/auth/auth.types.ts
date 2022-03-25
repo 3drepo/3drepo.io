@@ -18,7 +18,7 @@
 import { Action } from 'redux';
 
 export type LoginAction = Action<'LOGIN'> & { username: string, password: string };
-export type LoginFailedAction = Action<'LOGIN_Failed'> & { errorMessage: string };
+export type LoginFailedAction = Action<'LOGIN_FAILED'> & { errorMessage: string };
 export type SetPendingStatusAction = Action<'SET_PENDING_STATUS'> & { isPending: boolean };
 export type SetAuthenticationStatusAction = Action<'SET_AUTHENTICATION_STATUS'> & { status: boolean };
 
