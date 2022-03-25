@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { formatMessage } from '@/v5/services/intl';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
 import { useRouteMatch, Redirect } from 'react-router-dom';
 import { Background, Container, Footer, Logo, BackgroundOverlay } from './authPage.styles';
@@ -46,8 +47,8 @@ export const AuthPage = ({ footer, children }: IAuthPage): JSX.Element => {
 			<Logo
 				draggable="false"
 				src={topLogoSrc}
-				longdesc="3DRepoBuildingInformationModellingSoftware"
-				alt="Logo"
+				longdesc={formatMessage({ id: 'auth.logo.longDesc', defaultMessage: '3DRepoBuildingInformationModellingSoftware' })}
+				alt={formatMessage({ id: 'auth.logo.alt', defaultMessage: 'Logo' })}
 			/>
 			<Container>
 				{children}

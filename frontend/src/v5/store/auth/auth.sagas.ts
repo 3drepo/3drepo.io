@@ -48,7 +48,7 @@ export function* login({ username, password }: LoginAction) {
 		const data = error.response?.data;
 		if (data?.status === 400 && data?.code === 'INCORRECT_USERNAME_OR_PASSWORD') {
 			yield put(AuthActions.loginFailed(
-				formatMessage({ id: 'auth.login.badFields', defaultMessage: 'Incorrect username or password. Please try again.' }),
+				formatMessage({ id: 'auth.login.error.badFields', defaultMessage: 'Incorrect username or password. Please try again.' }),
 			));
 		} else if (data?.status === 400 && data?.code === 'ALREADY_LOGGED_IN') {
 			yield put(AuthActions.authenticate());
@@ -57,7 +57,7 @@ export function* login({ username, password }: LoginAction) {
 			yield put(AuthActions.loginFailed(
 				formatMessage(
 					{
-						id: 'auth.login.tooManyAttempts',
+						id: 'auth.login.error.tooManyAttempts',
 						defaultMessage: 'Too many unsuccessful login attempts! Account locked for {time} minutes.',
 					}, { time: lockoutDuration },
 				),

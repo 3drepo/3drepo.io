@@ -50,19 +50,19 @@ export const Login = () => {
 		<AuthPage
 			footer={(
 				<Link to="/releaseNotes">
-					<FormattedMessage id="placeholder" defaultMessage="Version: {version}" values={{ version: APP_VERSION }} />
+					<FormattedMessage id="auth.login.versionFooter" defaultMessage="Version: {version}" values={{ version: APP_VERSION }} />
 				</Link>
 			)}
 		>
 			<form onSubmit={handleSubmit(onSubmit)}>
 				<Heading>
-					<FormattedMessage id="placeholder" defaultMessage="Log in" />
+					<FormattedMessage id="auth.login.heading" defaultMessage="Log in" />
 				</Heading>
 				<UsernameField
 					control={control}
 					name="username"
 					label={formatMessage({
-						id: 'placeholder',
+						id: 'auth.login.usernameLabel',
 						defaultMessage: 'Username or email',
 					})}
 					autoComplete="login"
@@ -71,7 +71,7 @@ export const Login = () => {
 					control={control}
 					name="password"
 					label={formatMessage({
-						id: 'placeholder',
+						id: 'auth.login.passwordLabel',
 						defaultMessage: 'Password',
 					})}
 					autoComplete="current-password"
@@ -81,7 +81,7 @@ export const Login = () => {
 				<OtherOptions>
 					<SignUpPrompt>
 						<FormattedMessage
-							id="placeholder"
+							id="auth.login.signUp"
 							defaultMessage="Don't have an account? <Link>Sign up</Link>"
 							values={{
 								Link: (val:string) => <Link to="/sign-up">{val}</Link>,
@@ -90,12 +90,12 @@ export const Login = () => {
 					</SignUpPrompt>
 					<ForgotPasswordPrompt>
 						<Link to="/password-forgot">
-							<FormattedMessage id="placeholder" defaultMessage="Forgotten your password?" />
+							<FormattedMessage id="auth.login.forgotPassword" defaultMessage="Forgotten your password?" />
 						</Link>
 					</ForgotPasswordPrompt>
 				</OtherOptions>
 				<LoginButton type="submit" isPending={isPending} disabled={!isValid}>
-					<FormattedMessage id="placeholder" defaultMessage="Log in" />
+					<FormattedMessage id="auth.login.buttonText" defaultMessage="Log in" />
 				</LoginButton>
 			</form>
 		</AuthPage>
