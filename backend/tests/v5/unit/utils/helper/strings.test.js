@@ -94,7 +94,7 @@ const testGenerateHashString = () => {
 };
 
 const testCapitalizeFirstLetter = () => {
-	describe('Capitalize first letter', () => {		
+	describe('Capitalize first letter', () => {
 		test('with a lower case first letter', () => {
 			const name = 'will';
 			const formattedString = StringHelper.capitalizeFirstLetter(name);

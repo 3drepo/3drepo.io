@@ -499,7 +499,7 @@ const testGetUserByUsernameOrEmail = () => {
 };
 
 const formatNewUserData = (newUserData) => {
-	const formattedData = {		
+	const formattedData = {
 		inactive: true,
 		firstName: newUserData.firstName,
 		lastName: newUserData.lastName,
@@ -533,7 +533,6 @@ const formatNewUserData = (newUserData) => {
 const testAddUser = () => {
 	describe('Add a new user', () => {
 		test('should add a new user', async () => {
-
 			const newUserData = {
 				username: 'newUser',
 				email: 'example@email.com',
@@ -542,9 +541,8 @@ const testAddUser = () => {
 				lastName: 'new last name',
 				mailListAgreed: true,
 				countryCode: 'GB',
-				company: '3D repo'
+				company: '3D repo',
 			};
-
 
 			const authDB = { addUser: () => {} };
 			jest.spyOn(db, 'getAuthDB').mockImplementation(() => authDB);
@@ -555,14 +553,14 @@ const testAddUser = () => {
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual(newUserData.username);
 			expect(fn.mock.calls[0][1]).toEqual(newUserData.password);
-			expect(fn.mock.calls[0][2]).toEqual({ customData: expectedData, roles: []});
+			expect(fn.mock.calls[0][2]).toEqual({ customData: expectedData, roles: [] });
 		});
 	});
 };
 
 const testVerify = () => {
 	describe('Verify a user', () => {
-		test('should verify a user', async () => {			
+		test('should verify a user', async () => {
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
 			await User.verify('username');
 			expect(fn.mock.calls.length).toBe(1);

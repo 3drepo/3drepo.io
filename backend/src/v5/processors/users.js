@@ -17,16 +17,16 @@
 
 const Users = {};
 
-const config = require('../utils/config');
 const { addUser, authenticate, canLogIn, deleteApiKey, generateApiKey, getAvatar,
-	getUserByUsername, updatePassword, updateProfile, uploadAvatar, verify, updateResetPasswordToken } = require('../models/users');
-const { formatPronouns, capitalizeFirstLetter } = require('../utils/helper/strings');
+	getUserByUsername, updatePassword, updateProfile, updateResetPasswordToken, uploadAvatar, verify } = require('../models/users');
+const { capitalizeFirstLetter, formatPronouns } = require('../utils/helper/strings');
 const { isEmpty, removeFields } = require('../utils/helper/objects');
+const { sendResetPasswordEmail, sendVerifyUserEmail } = require('../services/mailer');
+const config = require('../utils/config');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
 const { logger } = require('../utils/logger');
 const { publish } = require('../services/eventsManager/eventsManager');
-const { sendResetPasswordEmail, sendVerifyUserEmail } = require('../services/mailer');
 
 Users.signUp = async (newUserData) => {
 	const token = generateHashString();
@@ -36,8 +36,8 @@ Users.signUp = async (newUserData) => {
 		const emailRes = await sendVerifyUserEmail(newUserData.email, {
 			token,
 			email: newUserData.email,
-			firstName:  capitalizeFirstLetter(newUserData.firstName),
-			username: newUserData.username
+			firstName: capitalizeFirstLetter(newUserData.firstName),
+			username: newUserData.username,
 		});
 
 		logger.logInfo(`Email info - ${JSON.stringify(emailRes)}`);
@@ -55,7 +55,7 @@ Users.verify = async (username, token) => {
 		'customData.email': 1,
 		'customData.billing.billingInfo.company': 1,
 		'customData.mailListOptOut': 1,
-	});		
+	});
 
 	publish(events.USER_VERIFIED, {
 		username,

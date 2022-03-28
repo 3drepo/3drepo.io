@@ -139,7 +139,6 @@ const testGetSubscriptions = () => {
 	});
 };
 
-
 const testCreateTeamspaceSettings = () => {
 	describe('Create teamspace settings', () => {
 		test('should create teamspace settings', async () => {
@@ -175,13 +174,13 @@ const testCreateTeamspaceSettings = () => {
 				],
 			};
 
-			const fn = jest.spyOn(db, 'insertOne').mockImplementation(()=> {});
+			const fn = jest.spyOn(db, 'insertOne').mockImplementation(() => {});
 			await Teamspace.createTeamspaceSettings(teamspaceName);
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual(teamspaceName);
 			expect(fn.mock.calls[0][1]).toEqual('teamspace');
 			expect(fn.mock.calls[0][2]).toEqual(expectedSettings);
-		});		
+		});
 	});
 };
 

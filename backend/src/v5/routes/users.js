@@ -17,8 +17,8 @@
 
 const { createSession, destroySession } = require('../middleware/sessions');
 const { isLoggedIn, notLoggedIn, validSession } = require('../middleware/auth');
-const { validateAvatarFile, validateLoginData, validateSignUpData, validateVerifyData, validateForgotPasswordData, validateResetPasswordData,
-	validateUpdateData } = require('../middleware/dataConverter/inputs/users');
+const { validateAvatarFile, validateForgotPasswordData, validateLoginData, validateResetPasswordData,
+	validateSignUpData, validateUpdateData, validateVerifyData } = require('../middleware/dataConverter/inputs/users');
 const { Router } = require('express');
 const Users = require('../processors/users');
 const { getUserFromSession } = require('../utils/sessions');

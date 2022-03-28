@@ -52,7 +52,6 @@ UsersModel.getUserByQuery.mockImplementation((query) => {
 	return { user: existingUsername };
 });
 
-
 UsersModel.getUserByUsernameOrEmail.mockImplementation((usernameOrEmail) => {
 	if (usernameOrEmail === existingUsername || usernameOrEmail === existingEmail) {
 		return { user: existingUsername };
@@ -67,7 +66,6 @@ UsersModel.getUserByUsername.mockImplementation((username) => {
 	}
 	throw templates.userNotFound;
 });
-
 
 UsersModel.authenticate.mockImplementation((username, password) => {
 	// eslint-disable-next-line security/detect-possible-timing-attacks
@@ -253,7 +251,7 @@ const testValidateSignUpData = () => {
 		lastName: 'newLastName',
 		countryCode: 'GB',
 		company: '3D Repo',
-		mailListAgreed: true
+		mailListAgreed: true,
 	};
 
 	describe.each([
@@ -265,10 +263,10 @@ const testValidateSignUpData = () => {
 		[{ body: { ...newUserData, email: 'invalid email' } }, false, 'with invalid email', templates.invalidArguments],
 		[{ body: { ...newUserData, extraProp: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
 		[{ body: { ...newUserData, firstName: 'this is a very very large string that should fail' } }, false, 'with too large firstName', templates.invalidArguments],
-		[{ body: { ...newUserData, lastName: 'this is a very very large string that should fail' } }, false, 'with too large lastName', templates.invalidArguments],		
-		[{ body: { ...newUserData, countryCode: 'invalid country' } }, false, 'with invalid country', templates.invalidArguments],		
+		[{ body: { ...newUserData, lastName: 'this is a very very large string that should fail' } }, false, 'with too large lastName', templates.invalidArguments],
+		[{ body: { ...newUserData, countryCode: 'invalid country' } }, false, 'with invalid country', templates.invalidArguments],
 		[{ body: { ...newUserData, password: 'abc' } }, false, 'with short password', templates.invalidArguments],
-		[{ body: { ...newUserData, password: 'abcdefghi' } }, false, 'with weak newPassword', templates.invalidArguments],		
+		[{ body: { ...newUserData, password: 'abcdefghi' } }, false, 'with weak newPassword', templates.invalidArguments],
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
 		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
 	])('Check if req arguments for signing up user are valid', (req, shouldPass, desc, expectedError) => {
@@ -290,7 +288,7 @@ const testVerifyData = () => {
 	describe.each([
 		[{ body: { username: existingUsername, token: 'someToken' } }, true, 'with valid data'],
 		[{ body: { username: existingUsername } }, false, 'without token', templates.invalidArguments],
-		[{ body: { username: availableUsername, token: 'someToken' } }, false, 'with non existing username', templates.invalidArguments],				
+		[{ body: { username: availableUsername, token: 'someToken' } }, false, 'with non existing username', templates.invalidArguments],
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
 		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
 	])('Check if req arguments for verifying user are valid', (req, shouldPass, desc, expectedError) => {
@@ -307,7 +305,6 @@ const testVerifyData = () => {
 		});
 	});
 };
-
 
 describe('middleware/dataConverter/inputs/users', () => {
 	testValidateLoginData();

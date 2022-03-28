@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { initializeTeamspace } = require('../../../processors/teamspaces/teamspaces');
 const { events } = require('../../eventsManager/eventsManager.constants');
+const { initializeTeamspace } = require('../../../processors/teamspaces/teamspaces');
 const { subscribe } = require('../../eventsManager/eventsManager');
 
 const userVerified = ({ username }) => Promise.all([
-	initializeTeamspace(username)
+	initializeTeamspace(username),
 ]);
 
 const UserEventsListener = {};

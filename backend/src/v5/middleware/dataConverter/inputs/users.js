@@ -19,7 +19,7 @@ const { authenticate, getUserByQuery, getUserByUsername, getUserByUsernameOrEmai
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const Yup = require('yup');
 const config = require('../../../utils/config');
-const httpsPost = require("../../../utils/httpsReq").post;
+const httpsPost = require('../../../utils/httpsReq').post;
 const { respond } = require('../../../utils/responder');
 const { singleImageUpload } = require('../multer');
 const { types } = require('../../../utils/helper/yup');
@@ -203,17 +203,18 @@ Users.validateSignUpData = async (req, res, next) => {
 		countryCode: types.strings.countryCode.required(),
 		company: types.strings.title.optional(),
 		mailListAgreed: Yup.bool().required(),
-	}).strict(true).noUnknown().required()
-	.test('check-captcha', 'Invalid captcha', () => {
-		const checkCaptcha = config.auth.captcha ? httpsPost(config.captcha.validateUrl, {
-			secret: config.captcha.secretKey,
-			response: req.body.captcha,
-		}) : Promise.resolve({
-			success: true,
-		});
+	}).strict(true).noUnknown()
+		.required()
+		.test('check-captcha', 'Invalid captcha', () => {
+			const checkCaptcha = config.auth.captcha ? httpsPost(config.captcha.validateUrl, {
+				secret: config.captcha.secretKey,
+				response: req.body.captcha,
+			}) : Promise.resolve({
+				success: true,
+			});
 
-		return checkCaptcha.then(() => true).catch(() => false);
-	});
+			return checkCaptcha.then(() => true).catch(() => false);
+		});
 
 	try {
 		await schema.validate(req.body);
@@ -229,20 +230,20 @@ Users.validateVerifyData = async (req, res, next) => {
 		username: types.strings.username.required(),
 		token: Yup.string().required(),
 	}).strict(true).noUnknown()
-	.required()
-	.test('token-validity', 'Token is invalid or expired', async () => {
-		try {
-			await getUserByQuery({ user: req.body.username,
-				'customData.emailVerifyToken.token': req.body.token,
-				'customData.emailVerifyToken.expiredAt': { $gt: new Date() },
-				'customData.inactive': true
-			});
+		.required()
+		.test('token-validity', 'Token is invalid or expired', async () => {
+			try {
+				await getUserByQuery({ user: req.body.username,
+					'customData.emailVerifyToken.token': req.body.token,
+					'customData.emailVerifyToken.expiredAt': { $gt: new Date() },
+					'customData.inactive': true,
+				});
 
-			return true;
-		} catch {
-			return false;
-		}
-	});
+				return true;
+			} catch {
+				return false;
+			}
+		});
 
 	try {
 		await schema.validate(req.body);

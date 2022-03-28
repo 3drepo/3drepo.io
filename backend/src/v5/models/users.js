@@ -243,7 +243,7 @@ User.addUser = async (newUserData) => {
 	await adminDB.addUser(newUserData.username, newUserData.password, { customData, roles: [] });
 };
 
-User.verify = async (username) => updateUser(username, { $unset: { 'customData.inactive': 1, 'customData.emailVerifyToken': 1 } });
+User.verify = (username) => updateUser(username, { $unset: { 'customData.inactive': 1, 'customData.emailVerifyToken': 1 } });
 
 User.uploadAvatar = (username, avatarBuffer) => updateUser(username, { $set: { 'customData.avatar': { data: avatarBuffer } } });
 

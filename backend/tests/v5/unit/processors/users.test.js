@@ -51,7 +51,7 @@ const user = {
 			expiredAt: new Date(2030, 1, 1),
 		},
 
-		mailListOptOut: false
+		mailListOptOut: false,
 	},
 };
 
@@ -177,51 +177,53 @@ const testGenerateResetPasswordToken = () => {
 
 const testSignUp = () => {
 	describe('Sign up a user', () => {
-		const newUserData = {				
+		const newUserData = {
 			username: 'newUsername',
 			email: 'newEmail',
 			password: 'newPassword',
-			firstName: 'newname'
+			firstName: 'newname',
 		};
 
 		test('should sign a user up', async () => {
 			const sendVerifyUserEmailMock = Mailer.sendVerifyUserEmail.mockImplementation(() => {});
 
-			await Users.signUp(newUserData);			
+			await Users.signUp(newUserData);
 			expect(addUserMock.mock.calls.length).toBe(1);
-			expect(addUserMock.mock.calls[0][0]).toEqual({...newUserData, token: exampleHashString});
+			expect(addUserMock.mock.calls[0][0]).toEqual({ ...newUserData, token: exampleHashString });
 			expect(sendVerifyUserEmailMock.mock.calls.length).toBe(1);
 			expect(sendVerifyUserEmailMock.mock.calls[0][0]).toEqual(newUserData.email);
 			expect(sendVerifyUserEmailMock.mock.calls[0][1]).toEqual({
 				token: exampleHashString,
 				email: newUserData.email,
 				firstName: newUserData.firstName,
-				username: newUserData.username
-			});		
+				username: newUserData.username,
+			});
 		});
 
 		test('should sign a user up even if verification email fails to be sent', async () => {
-			const sendVerifyUserEmailMock = Mailer.sendVerifyUserEmail.mockImplementation(() => { throw templates.unknown });
+			const sendVerifyUserEmailMock = Mailer.sendVerifyUserEmail.mockImplementation(() => {
+				throw templates.unknown;
+			});
 
-			await Users.signUp(newUserData);			
+			await Users.signUp(newUserData);
 			expect(addUserMock.mock.calls.length).toBe(1);
-			expect(addUserMock.mock.calls[0][0]).toEqual({...newUserData, token: exampleHashString});
+			expect(addUserMock.mock.calls[0][0]).toEqual({ ...newUserData, token: exampleHashString });
 			expect(sendVerifyUserEmailMock.mock.calls.length).toBe(1);
 			expect(sendVerifyUserEmailMock.mock.calls[0][0]).toEqual(newUserData.email);
 			expect(sendVerifyUserEmailMock.mock.calls[0][1]).toEqual({
 				token: exampleHashString,
 				email: newUserData.email,
 				firstName: newUserData.firstName,
-				username: newUserData.username
-			});		
+				username: newUserData.username,
+			});
 		});
 	});
 };
 
 const testVerify = () => {
 	describe('Verify a user', () => {
-		test('should verify a user', async () => {			
-			await Users.verify(user.user, 'someToken');			
+		test('should verify a user', async () => {
+			await Users.verify(user.user, 'someToken');
 			expect(verifyMock.mock.calls.length).toBe(1);
 			expect(verifyMock.mock.calls[0][0]).toEqual(user.user);
 			expect(verifyMock.mock.calls[0][1]).toEqual('someToken');
@@ -233,7 +235,7 @@ const testVerify = () => {
 				'customData.email': 1,
 				'customData.billing.billingInfo.company': 1,
 				'customData.mailListOptOut': 1,
-			});			
+			});
 			expect(publishFn.mock.calls.length).toBe(1);
 			expect(publishFn.mock.calls[0][0]).toEqual(events.USER_VERIFIED);
 			expect(publishFn.mock.calls[0][1]).toEqual({
@@ -242,11 +244,10 @@ const testVerify = () => {
 				fullName: `${user.customData.firstName} ${user.customData.lastName}`,
 				company: user.customData.billing.billingInfo.company,
 				mailListOptOut: user.customData.mailListOptOut,
-			});				
+			});
 		});
 	});
 };
-
 
 describe('processors/users', () => {
 	testLogin();

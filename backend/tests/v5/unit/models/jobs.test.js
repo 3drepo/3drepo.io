@@ -51,7 +51,7 @@ const testAddDefaultJobs = () => {
 				{ _id: 'Main Contractor', color: '#b15928' },
 				{ _id: 'Supplier', color: '#6a3d9a' },
 			];
-			
+
 			const fn = jest.spyOn(db, 'insertMany').mockImplementation(() => {});
 			await Jobs.addDefaultJobs('teamspace');
 			expect(fn.mock.calls.length).toBe(1);
