@@ -368,6 +368,66 @@ export const theme = createMuiTheme({
 				margin: '5px 0 !important',
 			},
 		},
+		MuiStepper: {
+			root: {
+				padding: 0,
+				borderRadius: 10,
+				boxShadow: '0 1px 1px rgb(0 0 0 / 14%)',
+				'&, &.MuiStepLabel-root, & .MuiStepLabel-label': {
+					color: COLOR.SECONDARY_MAIN, // active step
+				},
+				'& .Mui-disabled': {
+					'&.MuiStepLabel-root, & .MuiStepLabel-label': {
+						color: COLOR.BASE_LIGHTEST,
+					},
+				},
+				'& .MuiStep-completed': {
+					'&, &.MuiStepLabel-root, & .MuiStepLabel-label': {
+						color: COLOR.PRIMARY_MAIN,
+					},
+				},
+				'&& .Mui-error': {
+					color: COLOR.ERROR_MAIN,
+				},
+				'& .MuiStepLabel': {
+					'&-label': {
+						fontWeight: FONT_WEIGHT.BOLD,
+						textTransform: 'none',
+						fontSize: '.8rem',
+						letterSpacing: 0,
+					},
+				},
+
+				'& > *': {
+					padding: '20px 24px',
+					borderBottom: `1px solid ${COLOR.TERTIARY_LIGHTEST}`,
+					'&:last-child': {
+						borderBottom: 'none',
+					},
+				},
+				'& .MuiStepConnector-root': {
+					display: 'none',
+				},
+				'& .MuiStepContent-root': {
+					padding: 0,
+					margin: 0,
+					border: 0,
+				},
+			},
+		},
+		MuiStepIcon: {
+			root: {
+				'& .MuiStepIcon-text': {
+					fill: COLOR.PRIMARY_MAIN_CONTRAST,
+				},
+				'&.MuiStepIcon-active': {
+					color: COLOR.SECONDARY_MAIN,
+				},
+				'&.MuiStepIcon-completed': {
+					color: COLOR.PRIMARY_MAIN,
+				},
+			},
+		},
 		MuiFab: {
 			root: {
 				color: COLOR.PRIMARY_MAIN_CONTRAST,
@@ -502,6 +562,15 @@ export const theme = createMuiTheme({
 				},
 				'& $label.Mui-disabled': {
 					color: COLOR.BASE_LIGHT,
+				},
+				'& .MuiInputAdornment-positionStart': {
+					width: 18,
+					marginRight: 0,
+				},
+				'& MuiInputBase-adornedStart': {
+					'&.Mui-focused': {
+						color: COLOR.SECONDARY_MAIN,
+					},
 				},
 			},
 		},
