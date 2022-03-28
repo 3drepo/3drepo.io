@@ -17,7 +17,7 @@
 
 import { useEffect } from 'react';
 import { isNull } from 'lodash';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Switch, Route } from 'react-router-dom';
 import { MuiThemeProvider, StylesProvider } from '@material-ui/core';
 import { ThemeProvider } from 'styled-components';
 
@@ -31,6 +31,7 @@ import { getIntlProviderProps } from '@/v5/services/intl';
 import { IntlProvider } from 'react-intl';
 import { Dashboard } from './dashboard';
 import { V4Adapter } from '../v4Adapter/v4Adapter';
+import { UserSignup } from './userSignup/userSignup.component';
 
 export const Root = () => {
 	const history = useHistory();
@@ -61,7 +62,10 @@ export const Root = () => {
 				<StylesProvider injectFirst>
 					<IntlProvider {...getIntlProviderProps()}>
 						<V4Adapter>
-							<Dashboard />
+							<Switch>
+								<Route path="/v5/sign-up" component={UserSignup} />
+								<Route component={Dashboard} />
+							</Switch>
 						</V4Adapter>
 					</IntlProvider>
 				</StylesProvider>
