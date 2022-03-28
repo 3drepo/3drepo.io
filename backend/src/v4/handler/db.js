@@ -105,11 +105,13 @@
 	};
 
 	Handler.dropCollection = function (database, collection) {
-		Handler.getDB(database).then(dbConn => {
-			dbConn.dropCollection(collection.name);
+		return Handler.getDB(database).then(dbConn => {
+			return dbConn.dropCollection(collection);
 		}).catch(err => {
-			Handler.disconnect();
-			return Promise.reject(err);
+			if(err.message !== "ns not found") {
+				Handler.disconnect();
+				return Promise.reject(err);
+			}
 		});
 	};
 

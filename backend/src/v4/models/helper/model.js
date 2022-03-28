@@ -680,7 +680,7 @@ async function removeModelCollections(account, model) {
 
 	collections.forEach(collection => {
 		if(collection.name.startsWith(model + ".")) {
-			promises.push(db.dropCollection(account, collection));
+			promises.push(db.dropCollection(account, collection.name));
 		}
 	});
 
