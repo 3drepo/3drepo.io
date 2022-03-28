@@ -18,7 +18,7 @@
 import { ComponentType, createRef, PureComponent, ReactNode } from 'react';
 import { IconProps as IIconProps } from '@mui/material/Icon';
 import IconButton, { IconButtonProps } from '@mui/material/IconButton';
-import { StyledPopover } from './buttonMenu.styles';
+import { StyledPopover, Container } from './buttonMenu.styles';
 
 interface IProps {
 	Icon?: ComponentType;
@@ -119,9 +119,9 @@ export class ButtonMenu extends PureComponent<IProps, IState> {
 
 		return (
 			<>
-				<div ref={this.ref}>
+				<Container ref={this.ref}>
 					{renderButton(buttonProps)}
-				</div>
+				</Container>
 				<StyledPopover
 					{...popoverProps}
 					PaperProps={...PaperProps}

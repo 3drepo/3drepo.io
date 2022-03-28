@@ -59,18 +59,24 @@ export const ToolsContainer = styled.div`
 	}
 ` as any;
 
-export const OptionsDivider = styled(Divider)`
+export const OptionsDivider = styled(Divider).attrs({
+	orientation: 'vertical',
+	flexItem: true,
+})`
 	&& {
 		margin: 0 12px;
 		height: 48px;
 		width: 1px;
 		opacity: 0.5;
+		align-self: auto;
 	}
 `;
 
 export const IconButton = styled(IconButtonComponent)`
-	background: ${COLOR.BLACK_60};
 	opacity: 1;
+	&:hover {
+		background-color: rgba(0, 0, 0, 0.04);
+	}
 	svg .stroke {
 		stroke: currentColor;
 	}
@@ -78,6 +84,9 @@ export const IconButton = styled(IconButtonComponent)`
 
 export const ShapeMenuButton = styled.div`
 	margin-left: -10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 `;
 
 export const Badge = styled(IconBadge)`

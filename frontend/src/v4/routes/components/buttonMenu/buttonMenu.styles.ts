@@ -19,7 +19,12 @@ import Popover from '@mui/material/Popover';
 import styled from 'styled-components';
 import { COLOR } from '../../../styles';
 
-export const Container = styled.div``;
+export const Container = styled.div`
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+`;
 
 export const StyledPopover = styled(Popover)`
 	&& {
