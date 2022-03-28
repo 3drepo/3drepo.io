@@ -28,7 +28,7 @@ export class RegisterRequest extends PureComponent<any, any> {
 				direction="column"
 				alignItems="center"
 				wrap="nowrap"
-				>
+			>
 				<Grid item xs={9} sm={6} md={4} lg={3} xl={2}>
 					<Panel title="Sign up request">
 						<Paragraph>
