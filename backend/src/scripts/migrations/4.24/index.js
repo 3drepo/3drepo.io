@@ -29,12 +29,12 @@ const { logger } = require(`${v5Path}/utils/logger`);
 logger.logWarning('This migration changes the schema of the scene graph. Please ensure there are no active bouncer processes');
 
 const scripts = [
-	//	{ script: removeIndex, desc: 'Remove deprecated index' },
+	{ script: removeIndex, desc: 'Remove deprecated index' },
 	{ script: addRevId, desc: 'Add revision id to all scene nodes' },
-	/*	{ script: updateMetaSchema, desc: 'Update metadata schema' },
+	{ script: updateMetaSchema, desc: 'Update metadata schema' },
 	{ script: addIndex, desc: 'Add new indices to scene graph' },
 	{ script: addSharedIdToMeshMap, desc: 'Add shared id to super mesh mappings' },
-	{ script: removeCurrentIds, desc: 'Remove current id array from revision nodes' }, */
+	{ script: removeCurrentIds, desc: 'Remove current id array from revision nodes' },
 ];
 
 module.exports = scripts;
