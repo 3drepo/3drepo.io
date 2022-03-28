@@ -123,7 +123,7 @@ export const EditFederationContainersListItem = ({
 			{isSelected && (
 				<RevisionDetails
 					containerId={container._id}
-					revisionsCount={container.revisionsCount || 1}
+					revisionsCount={container.revisionsCount}
 				/>
 			)}
 		</DashboardListItem>
