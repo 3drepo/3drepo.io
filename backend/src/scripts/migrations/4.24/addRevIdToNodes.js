@@ -18,33 +18,30 @@
 const { v5Path } = require('../../../interop');
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
-const { find, updateMany } = require(`${v5Path}/handler/db`);
+const { aggregate } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const processModel = async (teamspace, model) => {
-	const revs = await find(teamspace, `${model}.history`, { current: { $exists: true } }, { current: 1 });
-	const proms = revs.map(({ _id, current = [] }) => (current.length ? updateMany(
-		teamspace,
-		`${model}.scene`,
-		{ _id: { $in: current } },
-		{ $set: { rev_id: _id } },
-	) : Promise.resolve()));
-	return Promise.all(proms);
-};
+const processModel = (teamspace, model) => aggregate(teamspace, `${model}.history`, [
+	// Get { _id, current: [] }
+	{ $project: { current: 1 } },
+	{ $unwind: '$current' },
+	// rename current to _id and _id to rev_id
+	{ $project: { rev_id: '$_id', _id: '$current' } },
+	{ $merge: '1253c590-c29f-11ea-b809-15db7aeb54e1.scene' },
+]);
 
 const processTeamspace = async (teamspace) => {
-	const histories = await getCollectionsEndsWith(teamspace, '.history');
+	const histories = [{ name: '37cc94bb-1326-44cd-b2b5-8d264e6c8f85.history' }];// await getCollectionsEndsWith(teamspace, '.history');
 	for (let i = 0; i < histories.length; ++i) {
 		const model = histories[i].name.slice(0, -('.history'.length));
 		logger.logInfo(`\t\t\t${model}`);
 		// eslint-disable-next-line no-await-in-loop
 		await processModel(teamspace, model);
-		// eslint-disable-next-line no-await-in-loop
 	}
 };
 
 const run = async () => {
-	const teamspaces = await getTeamspaceList();
+	const teamspaces = ['CWCL'];// await getTeamspaceList();
 	for (let i = 0; i < teamspaces.length; ++i) {
 		logger.logInfo(`\t\t-${teamspaces[i]}`);
 		// eslint-disable-next-line no-await-in-loop
