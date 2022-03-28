@@ -23,8 +23,12 @@ import styled from 'styled-components';
 import { COLOR, FONT_WEIGHT } from '../../styles';
 import * as PanelStyles from '../components/panel/panel.styles';
 
-export const Container = styled(Grid)`
+export const Container = styled.div`
 	&& {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		flex-wrap: nowrap;
 		overflow: auto;
 		height: 100%;
 		z-index: 1;
