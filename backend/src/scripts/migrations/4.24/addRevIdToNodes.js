@@ -16,19 +16,26 @@
  */
 
 const { v5Path } = require('../../../interop');
-const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
+const { getTeamspaceList, getCollectionsEndsWith } = require('../utils');
 
-const { aggregate } = require(`${v5Path}/handler/db`);
+const { find, updateMany } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
+const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
 
-const processModel = (teamspace, model) => aggregate(teamspace, `${model}.history`, [
-	// Get { _id, current: [] }
-	{ $project: { current: 1 } },
-	{ $unwind: '$current' },
-	// rename current to _id and _id to rev_id
-	{ $project: { rev_id: '$_id', _id: '$current' } },
-	{ $merge: '1253c590-c29f-11ea-b809-15db7aeb54e1.scene' },
-]);
+const processModel = async (teamspace, model) => {
+	const revs = await find(teamspace, `${model}.history`, { current: { $exists: true } }, { current: 1 });
+	for (let i = 0; i < revs.length; ++i) {
+		const { _id, current } = revs[i];
+		logger.logInfo(`\t\t\t\t${UUIDToString(_id)}`);
+		// eslint-disable-next-line no-await-in-loop
+		await updateMany(
+			teamspace,
+			`${model}.scene`,
+			{ _id: { $in: current }, rev_id: { $exists: false } },
+			{ $set: { rev_id: _id } },
+		);
+	}
+};
 
 const processTeamspace = async (teamspace) => {
 	const histories = [{ name: '37cc94bb-1326-44cd-b2b5-8d264e6c8f85.history' }];// await getCollectionsEndsWith(teamspace, '.history');
