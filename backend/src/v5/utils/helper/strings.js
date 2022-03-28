@@ -36,7 +36,7 @@ StringHelper.hasEmailFormat = (str) => types.strings.email.isValidSync(str, { st
 
 StringHelper.generateHashString = (length = 32) => crypto.randomBytes(length / 2).toString('hex');
 
-StringHelper.ucFirst = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+StringHelper.capitalizeFirstLetter = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 StringHelper.formatPronouns = (str) => {
 	const strArr = str.toLowerCase().split(' ');

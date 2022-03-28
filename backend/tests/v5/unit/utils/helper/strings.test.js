@@ -93,10 +93,56 @@ const testGenerateHashString = () => {
 	});
 };
 
+const testCapitalizeFirstLetter = () => {
+	describe('Capitalize first letter', () => {		
+		test('with a lower case first letter', () => {
+			const name = 'will';
+			const formattedString = StringHelper.capitalizeFirstLetter(name);
+			expect(formattedString).toEqual('Will');
+		});
+
+		test('with a capital case first letter', () => {
+			const name = 'Will';
+			const formattedString = StringHelper.capitalizeFirstLetter(name);
+			expect(formattedString).toEqual('Will');
+		});
+
+		test('with a capital case string', () => {
+			const name = 'WILL';
+			const formattedString = StringHelper.capitalizeFirstLetter(name);
+			expect(formattedString).toEqual('WILL');
+		});
+	});
+};
+
+const testFormatPronouns = () => {
+	describe('Format string pronouns', () => {
+		test('with two words all lowercase', () => {
+			const name = 'will smith';
+			const formattedString = StringHelper.formatPronouns(name);
+			expect(formattedString).toEqual('Will Smith');
+		});
+
+		test('with two words all capital case', () => {
+			const name = 'WILL SMITH';
+			const formattedString = StringHelper.formatPronouns(name);
+			expect(formattedString).toEqual('Will Smith');
+		});
+
+		test('with a single word', () => {
+			const name = 'will';
+			const formattedString = StringHelper.formatPronouns(name);
+			expect(formattedString).toEqual('Will');
+		});
+	});
+};
+
 describe('utils/helper/strings', () => {
 	testGetURLDomain();
 	testToCamelCase();
 	testToConstantCase();
 	testHasEmailFormat();
 	testGenerateHashString();
+	testFormatPronouns();
+	testCapitalizeFirstLetter();
 });

@@ -23,6 +23,8 @@ jest.mock('../../../../../src/v5/models/loginRecord');
 const LoginRecord = require(`${src}/models/loginRecord`);
 jest.mock('../../../../../src/v5/services/sessions');
 const Sessions = require(`${src}/services/sessions`);
+jest.mock('../../../../../src/v5/processors/teamspaces/teamspaces');
+const Teamspaces = require(`${src}/processors/teamspaces/teamspaces`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 
@@ -32,6 +34,7 @@ ModelSettings.updateModelStatus.mockResolvedValue(() => {});
 ModelSettings.newRevisionProcessed.mockResolvedValue(() => {});
 LoginRecord.saveLoginRecord.mockImplementation(() => ({}));
 Sessions.removeOldSessions.mockImplementation(() => { });
+Teamspaces.initializeTeamspace.mockImplementation(()=> {});
 
 const eventTriggeredPromise = (event) => new Promise((resolve) => EventsManager.subscribe(event, resolve));
 
@@ -85,8 +88,21 @@ const testAuthEventsListener = () => {
 	});
 };
 
+const testUserEventsListener = () => {
+	describe('User Events', () => {
+		test(`Should trigger userVerified if there is a ${events.USER_VERIFIED}`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.USER_VERIFIED);
+			EventsManager.publish(events.USER_VERIFIED,  { username: 'username1'});
+			await waitOnEvent;
+			expect(Teamspaces.initializeTeamspace.mock.calls.length).toBe(1);
+			expect(Teamspaces.initializeTeamspace.mock.calls[0][0]).toEqual( 'username1');
+		});
+	});
+};
+
 describe('services/eventsListener/eventsListener', () => {
 	EventsListener.init();
 	testModelEventsListener();
 	testAuthEventsListener();
+	testUserEventsListener();
 });

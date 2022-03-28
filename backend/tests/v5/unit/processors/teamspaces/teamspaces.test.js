@@ -36,6 +36,16 @@ const RolesModel = require(`${src}/models/roles`);
 jest.mock('../../../../../src/v5/utils/permissions/permissions');
 const Permissions = require(`${src}/utils/permissions/permissions`);
 
+const invalidUsername = 'invalid';
+const createTeamspaceRoleMock = RolesModel.createTeamspaceRole.mockImplementation((username) => { 
+	if(username === invalidUsername){
+		throw templates.unknown;
+	}
+});
+const grantTeamspaceRoleToUserMock = RolesModel.grantTeamspaceRoleToUser.mockImplementation(() => { });
+const addDefaultJobsMock = JobsModel.addDefaultJobs.mockImplementation(() => { });
+const createTeamspaceSettingsMock = TeamspacesModel.createTeamspaceSettings.mockImplementation(() => { });
+
 const testGetTeamspaceListByUser = () => {
 	describe('Get Teamspace list by user', () => {
 		test('should give the expected list of teamspaces', async () => {
@@ -100,10 +110,6 @@ const testGetTeamspaceMembersInfo = () => {
 const testInitializeTeamspace = () => {
 	describe('Initialize teamspace', () => {
 		test('should initialize a teamspace', async () => {	
-			const createTeamspaceRoleMock = RolesModel.createTeamspaceRole.mockImplementation(() => { });
-			const grantTeamspaceRoleToUserMock = RolesModel.grantTeamspaceRoleToUser.mockImplementation(() => { });
-			const addDefaultJobsMock = JobsModel.addDefaultJobs.mockImplementation(() => { });
-			const createTeamspaceSettingsMock = TeamspacesModel.createTeamspaceSettings.mockImplementation(() => { });
 			const username = 'username';
 			await Teamspaces.initializeTeamspace(username);
 			expect(createTeamspaceRoleMock.mock.calls.length).toEqual(1);
@@ -117,9 +123,9 @@ const testInitializeTeamspace = () => {
 		});
 
 		test('should initialize a teamspace even if an error is thrown ', async () => {	
-			const username = 'username';
-			const createTeamspaceRoleMock = RolesModel.createTeamspaceRole.mockImplementation(() => { throw templates.unknown });
-			await Teamspaces.initializeTeamspace(username);		
+			await Teamspaces.initializeTeamspace(invalidUsername);	
+			expect(createTeamspaceRoleMock.mock.calls.length).toEqual(1);
+			expect(createTeamspaceRoleMock.mock.calls[0][0]).toEqual(invalidUsername);		
 		});
 	});
 };

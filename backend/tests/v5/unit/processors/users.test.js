@@ -28,6 +28,7 @@ jest.mock('../../../../src/v5/utils/helper/strings');
 const Strings = require(`${src}/utils/helper/strings`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 
 const exampleHashString = 'example token';
 
@@ -71,7 +72,7 @@ UsersModel.canLogIn.mockImplementation(() => user);
 UsersModel.authenticate.mockResolvedValue('user1');
 const sendResetPasswordEmailMock = Mailer.sendResetPasswordEmail.mockImplementation(() => {});
 Strings.generateHashString.mockImplementation(() => exampleHashString);
-Strings.ucFirst.mockImplementation((s) => s);
+Strings.capitalizeFirstLetter.mockImplementation((s) => s);
 Strings.formatPronouns.mockImplementation((str) => str);
 
 const testLogin = () => {
@@ -234,7 +235,7 @@ const testVerify = () => {
 				'customData.mailListOptOut': 1,
 			});			
 			expect(publishFn.mock.calls.length).toBe(1);
-			expect(publishFn.mock.calls[0][0]).toEqual('USER_VERIFIED');
+			expect(publishFn.mock.calls[0][0]).toEqual(events.USER_VERIFIED);
 			expect(publishFn.mock.calls[0][1]).toEqual({
 				username: user.user,
 				email: user.customData.email,

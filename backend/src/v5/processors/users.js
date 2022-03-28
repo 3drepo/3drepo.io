@@ -20,7 +20,7 @@ const Users = {};
 const config = require('../utils/config');
 const { addUser, authenticate, canLogIn, deleteApiKey, generateApiKey, getAvatar,
 	getUserByUsername, updatePassword, updateProfile, uploadAvatar, verify, updateResetPasswordToken } = require('../models/users');
-const { formatPronouns, ucFirst } = require('../utils/helper/strings');
+const { formatPronouns, capitalizeFirstLetter } = require('../utils/helper/strings');
 const { isEmpty, removeFields } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
@@ -36,7 +36,7 @@ Users.signUp = async (newUserData) => {
 		const emailRes = await sendVerifyUserEmail(newUserData.email, {
 			token,
 			email: newUserData.email,
-			firstName:  ucFirst(newUserData.firstName),
+			firstName:  capitalizeFirstLetter(newUserData.firstName),
 			username: newUserData.username
 		});
 

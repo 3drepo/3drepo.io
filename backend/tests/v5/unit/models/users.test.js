@@ -560,6 +560,18 @@ const testAddUser = () => {
 	});
 };
 
+const testVerify = () => {
+	describe('Verify a user', () => {
+		test('should verify a user', async () => {			
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
+			await User.verify('username');
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][2]).toEqual({ user: 'username' });
+			expect(fn.mock.calls[0][3]).toEqual({ $unset: { 'customData.inactive': 1, 'customData.emailVerifyToken': 1 } });
+		});
+	});
+};
+
 describe('models/users', () => {
 	testGetAccessibleTeamspaces();
 	testGetFavourites();
@@ -576,4 +588,5 @@ describe('models/users', () => {
 	testUpdateResetPasswordToken();
 	testGetUserByUsernameOrEmail();
 	testAddUser();
+	testVerify();
 });
