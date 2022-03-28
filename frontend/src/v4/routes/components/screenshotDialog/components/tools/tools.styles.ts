@@ -84,9 +84,9 @@ export const IconButton = styled(IconButtonComponent)`
 
 export const ShapeMenuButton = styled.div`
 	margin-left: -10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 `;
 
 export const Badge = styled(IconBadge)`
