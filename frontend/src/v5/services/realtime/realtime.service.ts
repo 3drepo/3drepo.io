@@ -72,11 +72,6 @@ export const leaveRoom = (roomType : IRoomType) => {
 };
 
 export const initializeSocket = ({ host, path, reconnectionAttempts }: IChatConfig) => {
-	// hack to stop this connection interferring with v4
-	// should be removed when this is fixed https://github.com/3drepo/3drepo.io/issues/3098
-	// @ts-ignore
-	socket = { on: () => {} };
-	return;
 	socket = io(host, {
 		path,
 		reconnectionAttempts,
