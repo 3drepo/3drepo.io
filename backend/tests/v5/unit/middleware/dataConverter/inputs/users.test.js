@@ -32,12 +32,13 @@ const MockExpressRequest = require('mock-express-request');
 const FormData = require('form-data');
 const fs = require('fs');
 const path = require('path');
+
 const config = require(`${src}/utils/config`);
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
-HttpsReq.post.mockImplementation(()=> Promise.resolve({
-	success: true
+HttpsReq.post.mockImplementation(() => Promise.resolve({
+	success: true,
 }));
 
 const availableUsername = 'nonExistingUser';

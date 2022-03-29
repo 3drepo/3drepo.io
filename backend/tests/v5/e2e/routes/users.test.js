@@ -53,15 +53,15 @@ const setupData = async () => {
 				token: validEmailToken.token,
 				expiredAt: validEmailToken.expiredAt,
 			},
-			permissions: []
-		}),		
+			permissions: [],
+		}),
 		ServiceHelper.db.createUser(nonVerifiedUserWithExpiredToken, [], {
 			inactive: true,
 			emailVerifyToken: {
 				token: expiredEmailToken.token,
 				expiredAt: expiredEmailToken.expiredAt,
 			},
-			permissions: []
+			permissions: [],
 		}),
 		ServiceHelper.db.createUser(testUserWithToken, [], {
 			resetPasswordToken: {
@@ -602,7 +602,7 @@ const testSignUp = () => {
 
 		test('should sign a user up', async () => {
 			await agent.post('/v5/user').send(newUserData)
-				.expect(templates.ok.status);		
+				.expect(templates.ok.status);
 		});
 	});
 };
@@ -640,18 +640,18 @@ const testVerify = () => {
 
 			await agent.post('/v5/user/verify').send({ username: nonVerifiedUser.user, token: validEmailToken.token })
 				.expect(templates.ok.status);
-		
+
 			// trying to log in after verification should succeed
 			await testSession.post('/v5/login/').send({ user: nonVerifiedUser.user, password: nonVerifiedUser.password })
 				.expect(templates.ok.status);
 			await testSession.post('/v5/logout/');
 
-			//check that a teamspace has been created
+			// check that a teamspace has been created
 			const userTeamspaces = await agent.get(`/v5/teamspaces?key=${nonVerifiedUser.apiKey}`)
 				.expect(templates.ok.status);
 			expect(userTeamspaces.body.teamspaces.length).toEqual(1);
 
-			//trying to verify the user again should fail
+			// trying to verify the user again should fail
 			await agent.post('/v5/user/verify').send({ username: nonVerifiedUser.user, token: validEmailToken.token })
 				.expect(templates.invalidArguments.status);
 		});
