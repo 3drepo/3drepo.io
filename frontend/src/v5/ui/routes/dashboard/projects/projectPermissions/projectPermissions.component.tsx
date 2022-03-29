@@ -20,13 +20,13 @@ import { UserManagementActions } from '@/v4/modules/userManagement';
 import { useDispatch, useSelector } from 'react-redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
-import { selectCurrentUser } from '@/v4/modules/currentUser';
+import { selectUsername } from '@/v5/store/currentUser/currentUser.selectors';
 import { Container, V4ProjectsPermissions } from './projectPermissions.styles';
 
 export const ProjectPermissions = () => {
 	const dispatch = useDispatch();
 	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails().name;
-	const username = useSelector(selectCurrentUser)?.username;
+	const username = useSelector(selectUsername);
 
 	useEffect(() => {
 		if (!username || !projectName) {

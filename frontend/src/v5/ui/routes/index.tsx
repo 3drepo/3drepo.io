@@ -16,15 +16,16 @@
  */
 
 import { useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { isNull } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { MuiThemeProvider, StylesProvider } from '@material-ui/core';
 import { ThemeProvider } from 'styled-components';
 
 import { theme } from '@/v5/ui/themes/theme';
-import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
 import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
+import { selectCurrentUser } from '@/v4/modules/currentUser';
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authActions.dispatchers';
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
 import { getIntlProviderProps } from '@/v5/services/intl';
@@ -34,7 +35,7 @@ import { V4Adapter } from '../v4Adapter/v4Adapter';
 
 export const Root = () => {
 	const history = useHistory();
-	const userName: string = CurrentUserHooksSelectors.selectUsername();
+	const userName: string = useSelector(selectCurrentUser);
 	const isAuthenticated: boolean | null = AuthHooksSelectors.selectIsAuthenticated();
 
 	useEffect(() => {
@@ -43,7 +44,7 @@ export const Root = () => {
 
 	useEffect(() => {
 		if (userName) {
-			CurrentUserActionsDispatchers.fetchUser(userName);
+			CurrentUserActionsDispatchers.fetchUser();
 		}
 
 		if (isAuthenticated) {

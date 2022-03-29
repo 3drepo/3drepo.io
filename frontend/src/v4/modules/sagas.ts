@@ -20,6 +20,7 @@ import containersSaga from '@/v5/store/containers/containers.sagas';
 import federationsSaga from '@/v5/store/federations/federations.sagas';
 import projectsSaga from '@/v5/store/projects/projects.sagas';
 import teamspaces2Saga from '@/v5/store/teamspaces/teamspaces.sagas';
+import currentUser2Saga from '@/v5/store/currentUser/currentUser.sagas';
 import usersSaga from '@/v5/store/users/users.sagas';
 import revisionsSaga from '@/v5/store/revisions/revisions.sagas';
 import activitiesSaga from './activities/activities.sagas';
@@ -64,6 +65,7 @@ export default function* rootSaga() {
 		fork(teamspacesSaga),
 		fork(modelSaga),
 		fork(authSaga),
+		fork(currentUser2Saga),
 		fork(notificationsSaga),
 		fork(commentsSaga),
 		fork(viewerSaga),
