@@ -16,6 +16,7 @@
  */
 
 import styled from 'styled-components';
+import { clientConfigService } from '@/v4/services/clientConfig';
 
 export const Container = styled.div`
 	display: flex;
@@ -23,4 +24,10 @@ export const Container = styled.div`
 	justify-content: stretch;
 	width: 100%;
 	height: 100vh;
+`;
+
+export const Background = styled.div`
+	width: 100%;
+	height: 100%;
+	background: ${({ theme }) => clientConfigService.getCustomBackgroundImagePath() || theme.palette.tertiary.lightest};
 `;

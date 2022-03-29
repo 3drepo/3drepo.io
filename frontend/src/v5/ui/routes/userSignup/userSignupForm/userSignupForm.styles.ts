@@ -22,7 +22,6 @@ import StepLabelBase from '@material-ui/core/StepLabel';
 export const Container = styled.div`
 	height: 100%;
 	flex: 1;
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	display: flex;
 	flex-direction: column;
 	align-items: center;

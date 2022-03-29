@@ -25,7 +25,6 @@ export const Body = styled.div`
 	justify-content: center;
 	width: 454px;
 	border-radius: 6px;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	margin: 28px;
 	padding: 45px 60px;
 	text-align: center;

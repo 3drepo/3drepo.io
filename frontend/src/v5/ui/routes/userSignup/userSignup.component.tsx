@@ -17,7 +17,7 @@
 import { Switch, Route, useRouteMatch } from 'react-router-dom';
 import { UserSignupSidebar } from './userSignupSidebar/userSignupSidebar.component';
 import { UserSignupForm } from './userSignupForm/userSignupForm.component';
-import { Container } from './userSignup.styles';
+import { Container, Background } from './userSignup.styles';
 import { UserSignupWelcome } from './userSignupWelcome/userSignupWelcome.component';
 
 export const UserSignup = () => {
@@ -25,10 +25,12 @@ export const UserSignup = () => {
 	return (
 		<Container>
 			<UserSignupSidebar />
-			<Switch>
-				<Route path={`${path}/welcome`} component={UserSignupWelcome} />
-				<Route component={UserSignupForm} />
-			</Switch>
+			<Background>
+				<Switch>
+					<Route path={`${path}/welcome`} component={UserSignupWelcome} />
+					<Route component={UserSignupForm} />
+				</Switch>
+			</Background>
 		</Container>
 	);
 };
