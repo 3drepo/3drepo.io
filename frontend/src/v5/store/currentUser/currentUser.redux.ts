@@ -18,6 +18,7 @@
 import { Constants } from '@/v5/helpers/actions.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
+import { ICurrentUser } from './currentUser.types';
 
 export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createActions({
 	fetchUser: [],
@@ -47,7 +48,7 @@ export const currentUserReducer = createReducer(INITIAL_STATE, {
 
 interface ICurrentUserState {
 	currentTeamspace: string;
-	currentUser: Object; // TODO make this interface
+	currentUser: ICurrentUser; // TODO make this interface
 	isAvatarPending: boolean;
 }
 
