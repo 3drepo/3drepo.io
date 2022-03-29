@@ -29,13 +29,13 @@ export const Dashboard = () => {
 	const { path } = useRouteMatch();
 	const { pathname } = useLocation();
 
-	const renderLoginRoute = () => <Route exact path={`${path}/login`} component={Login} />;
-
 	return (
 		<>
 			<GlobalStyle />
 			<Switch>
-				{renderLoginRoute()}
+				<Route exact path={`${path}/login`}>
+					<Login />
+				</Route>
 				<Route path={`${path}/dashboard/:teamspace?/:project?`}>
 					<DashboardLayout>
 						<Route exact path={`${path}/dashboard/`}>
