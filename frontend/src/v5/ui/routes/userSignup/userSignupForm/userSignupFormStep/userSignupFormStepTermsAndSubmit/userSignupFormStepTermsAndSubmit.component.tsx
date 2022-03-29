@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Recaptcha from 'react-google-invisible-recaptcha';
 import { FormattedMessage } from 'react-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { CircularProgress } from '@material-ui/core';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { UserSignupSchemaTermsAndSubmit } from '@/v5/validation/schemes';
-import { pick } from 'lodash';
 import { FormCheckbox } from '@controls/formCheckbox/formCheckbox.component';
+import { clientConfigService } from '@/v4/services/clientConfig';
+import ReCAPTCHA from 'react-google-recaptcha';
 import {
 	CircularProgressContainer,
 	CreateAccountButton,
@@ -39,6 +39,7 @@ import {
 interface ITermsAndSubmitFormInput {
 	terms: string;
 	news: string;
+	reCaptchaToken: string;
 }
 
 type UserSignupFormStepTermsAndSubmitProps = {
@@ -71,23 +72,30 @@ export const UserSignupFormStepTermsAndSubmit = ({
 		defaultValues: fields,
 	});
 
-	const termsIsTicked = watch('terms');
+	const termsAgreed = watch('terms');
 
-	const getFields = () => pick(getValues(), ['terms', 'news']);
+	const reCaptchaRef = useRef<ReCAPTCHA>();
 
 	const createAccount: SubmitHandler<ITermsAndSubmitFormInput> = () => {
-		updateFields(getFields());
+		updateFields(getValues());
+		reCaptchaRef?.current?.reset();
 		onSubmitStep();
 	};
-	const [captchaIsValidated, setCaptchaIsValidated] = useState(false);
-	const [refRecaptcha, setRefRecaptcha] = useState<Recaptcha | null>(null);
 
 	useEffect(() => {
-		(termsIsTicked ? onComplete : onUncomplete)();
-		refRecaptcha?.execute();
-	}, [termsIsTicked]);
+		if (termsAgreed) {
+			onComplete();
+			if (!fields.reCaptchaToken) {
+				reCaptchaRef?.current?.execute();
+			}
+		} else {
+			onUncomplete();
+		}
+	}, [termsAgreed]);
 
-	useEffect(() => () => { updateFields(getFields()); }, []);
+	useEffect(() => () => { updateFields(getValues()); }, []);
+
+	const handleChange = (reCaptchaToken) => updateFields({ reCaptchaToken });
 
 	return (
 		<>
@@ -97,71 +105,77 @@ export const UserSignupFormStepTermsAndSubmit = ({
 						name="terms"
 						control={control}
 						formError={errors.terms}
+						label={(
+							<CheckboxMessage>
+								<FormattedMessage
+									id="userSignup.form.terms.termsAndContitions"
+									defaultMessage={`
+										I agree to the {termsAndConditions} and I have
+										read the {privacyPolicy} and the {cookiesPolicy}.
+									`}
+									values={{
+										termsAndConditions: (
+											<Link
+												to="/terms"
+												target="_blank"
+											>
+												<FormattedMessage
+													id="userSignup.form.terms.termsAndConditions.link"
+													defaultMessage="Terms & Conditions"
+												/>
+											</Link>
+										),
+										privacyPolicy: (
+											<Link
+												to="/privacy"
+												target="_blank"
+											>
+												<FormattedMessage
+													id="userSignup.form.terms.privacyPolicy.link"
+													defaultMessage="Privacy Policy"
+												/>
+											</Link>
+										),
+										cookiesPolicy: (
+											<Link
+												to="/cookies"
+												target="_blank"
+											>
+												<FormattedMessage
+													id="userSignup.form.terms.cookiesPolicy.link"
+													defaultMessage="Cookies Policy"
+												/>
+											</Link>
+										),
+									}}
+								/>
+							</CheckboxMessage>
+						)}
 					/>
-					<CheckboxMessage>
-						<FormattedMessage
-							id="userSignup.form.terms.termsAndContitions"
-							defaultMessage={`
-								I agree to the {termsAndConditions} and I have
-								read the {privacyPolicy} and the {cookiesPolicy}.
-							`}
-							values={{
-								termsAndConditions: (
-									<Link
-										to="/terms"
-										target="_blank"
-									>
-										<FormattedMessage
-											id="userSignup.form.terms.termsAndConditions.link"
-											defaultMessage="Terms & Conditions"
-										/>
-									</Link>
-								),
-								privacyPolicy: (
-									<Link
-										to="/privacy"
-										target="_blank"
-									>
-										<FormattedMessage
-											id="userSignup.form.terms.privacyPolicy.link"
-											defaultMessage="Privacy Policy"
-										/>
-									</Link>
-								),
-								cookiesPolicy: (
-									<Link
-										to="/cookies"
-										target="_blank"
-									>
-										<FormattedMessage
-											id="userSignup.form.terms.cookiesPolicy.link"
-											defaultMessage="Cookies Policy"
-										/>
-									</Link>
-								),
-							}}
-						/>
-					</CheckboxMessage>
 				</CheckboxContainer>
 				<CheckboxContainer>
 					<FormCheckbox
 						name="news"
 						control={control}
 						formError={errors.news}
+						label={(
+							<CheckboxMessage>
+								<FormattedMessage
+									id="userSignup.form.terms.latestNews"
+									defaultMessage="Sign up for the latest news and tutorials."
+								/>
+							</CheckboxMessage>
+						)}
 					/>
-					<CheckboxMessage>
-						<FormattedMessage
-							id="userSignup.form.terms.latestNews"
-							defaultMessage="Sign up for the latest news and tutorials."
-						/>
-					</CheckboxMessage>
 				</CheckboxContainer>
-				<Recaptcha
-					ref={setRefRecaptcha}
-					onResolved={() => setCaptchaIsValidated(true)}
-					// TODO add site key
-					sitekey="6Lc1og4fAAAAAGj5H0b-2neb3j6KP8C7paoCgGdv"
-				/>
+				{ clientConfigService.captcha_client_key && (
+					<ReCAPTCHA
+						ref={reCaptchaRef}
+						size="invisible"
+						sitekey={clientConfigService.captcha_client_key}
+						onChange={handleChange}
+					/>
+				)}
 			</TermsContainer>
 			{ unexpectedError && (
 				<ErrorContainer>
@@ -175,7 +189,7 @@ export const UserSignupFormStepTermsAndSubmit = ({
 				</CircularProgressContainer>
 			) : (
 				<CreateAccountButton
-					// disabled={!termsIsTicked || isSubmitting || !captchaIsValidated}
+					disabled={!termsAgreed || !fields.reCaptchaToken}
 					onClick={createAccount}
 					type="submit"
 				>

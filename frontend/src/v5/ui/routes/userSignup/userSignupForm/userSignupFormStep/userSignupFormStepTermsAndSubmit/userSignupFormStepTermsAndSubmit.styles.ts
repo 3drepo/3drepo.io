@@ -44,20 +44,15 @@ export const TermsContainer = styled.div`
 	box-sizing: border-box;
 	
 	.grecaptcha-badge {
-		display: none;
+		visibility: hidden;
 	}
 `;
 
 export const CheckboxContainer = styled.div`
-	display: flex;
-	flex-direction: row;
-	justify-content: flex-start;
-	align-items: center;
 	width: 100%;
 `;
 
 export const CheckboxMessage = styled.div`
-	flex: 1;
 	color: ${({ theme }) => theme.palette.base.main};
 	${({ theme }) => theme.typography.caption};
 `;
