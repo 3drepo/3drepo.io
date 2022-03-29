@@ -152,12 +152,12 @@ const tesUpdateProfile = () => {
 
 const testGenerateResetPasswordToken = () => {
 	describe('Reset password token', () => {
-		test('should reset password token', async () => {
-			const expiredAt = new Date();
-			expiredAt.setHours(expiredAt.getHours() + 24);
+		test('should reset password token', async () => {						
 			await Users.generateResetPasswordToken('user1');
 			expect(updateResetPasswordTokenMock.mock.calls.length).toBe(1);
 			expect(updateResetPasswordTokenMock.mock.calls[0][0]).toBe('user1');
+			expect(updateResetPasswordTokenMock.mock.calls[0][1]).toHaveProperty('expiredAt');
+			const expiredAt = updateResetPasswordTokenMock.mock.calls[0][1].expiredAt;
 			expect(updateResetPasswordTokenMock.mock.calls[0][1])
 				.toStrictEqual({ token: exampleHashString, expiredAt });
 			expect(sendResetPasswordEmailMock.mock.calls.length).toBe(1);
