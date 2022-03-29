@@ -18,6 +18,7 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import StepperBase from '@material-ui/core/Stepper';
 import StepLabelBase from '@material-ui/core/StepLabel';
+import { clientConfigService } from '@/v4/services/clientConfig';
 
 export const Container = styled.div`
 	height: 100%;
@@ -44,6 +45,7 @@ export const Underlined = styled.div`
 export const Stepper = styled(StepperBase)`
 	margin: 28px;
 	width: 454px;
+	box-shadow: ${clientConfigService.getCustomBackgroundImagePath() ? '0px 8px 15px -3px #878787' : '0 1px 1px rgb(0 0 0 / 14%)'}; // TODO - fix after new design
 `;
 
 export const StepLabel = styled(StepLabelBase)<{ reachable?: boolean }>`

@@ -29,5 +29,8 @@ export const Container = styled.div`
 export const Background = styled.div`
 	width: 100%;
 	height: 100%;
-	background: ${({ theme }) => clientConfigService.getCustomBackgroundImagePath() || theme.palette.tertiary.lightest};
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	${clientConfigService.getCustomBackgroundImagePath() && `
+		background: url('${clientConfigService.getCustomBackgroundImagePath()}') 0% 0% / cover no-repeat;
+	`};
 `;

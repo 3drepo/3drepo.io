@@ -17,6 +17,7 @@
 import styled from 'styled-components';
 import EmailIconBase from '@assets/icons/twoToned/email-two_toned.svg';
 import { Link as LinkBase } from 'react-router-dom';
+import { clientConfigService } from '@/v4/services/clientConfig';
 
 export const Body = styled.div`
 	display: flex;
@@ -28,6 +29,8 @@ export const Body = styled.div`
 	margin: 28px;
 	padding: 45px 60px;
 	text-align: center;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	box-shadow: ${clientConfigService.getCustomBackgroundImagePath() ? '0px 8px 15px -3px #878787' : '0 1px 1px rgb(0 0 0 / 14%)'}; // TODO - fix after new design
 `;
 
 export const EmailIcon = styled(EmailIconBase)`
