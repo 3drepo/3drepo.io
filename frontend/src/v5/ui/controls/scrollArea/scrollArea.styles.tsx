@@ -18,40 +18,41 @@
 import Scrollbars from 'react-custom-scrollbars';
 import styled from 'styled-components';
 
-export const ScrollbarWrapper = styled(Scrollbars).attrs(({ variant, theme }) => {
-	const COLOUR_MAP = {
-		base: theme.palette.base.lightest,
-		secondary: theme.palette.secondary.light,
-	};
-	return ({
-		autoHideTimeout: 3000,
-		autoHideDuration: 300,
-		renderThumbVertical: ({ style }) => (
-			<div
-				style={{
-					...style,
-					backgroundColor: COLOUR_MAP[variant],
-					right: '6px',
-					bottom: '6px',
-					top: '0px',
-					borderRadius: '3px',
-					width: '6px',
-				}}
-			/>
-		),
-		renderThumbHorizontal: ({ style }) => (
-			<div
-				style={{
-					...style,
-					backgroundColor: COLOUR_MAP[variant],
-					left: '6px',
-					right: '6px',
-					bottom: '6px',
-					borderRadius: '3px',
-					height: '6px',
-				}}
-			/>
-		),
-	});
-})`
-`;
+export const ScrollbarWrapper = styled(Scrollbars).attrs(
+	({ variant, theme }: { variant: string, theme: any }) => {
+		const COLOUR_MAP = {
+			base: theme.palette.base.lightest,
+			secondary: theme.palette.secondary.light,
+		};
+		return ({
+			autoHideTimeout: '3000',
+			autoHideDuration: 300,
+			renderThumbVertical: ({ style }) => (
+				<div
+					style={{
+						...style,
+						backgroundColor: COLOUR_MAP[variant],
+						right: '6px',
+						bottom: '6px',
+						top: '0px',
+						borderRadius: '3px',
+						width: '6px',
+					}}
+				/>
+			),
+			renderThumbHorizontal: ({ style }) => (
+				<div
+					style={{
+						...style,
+						backgroundColor: COLOUR_MAP[variant],
+						left: '6px',
+						right: '6px',
+						bottom: '6px',
+						borderRadius: '3px',
+						height: '6px',
+					}}
+				/>
+			),
+		});
+	},
+)<{ variant: 'base' | 'secondary' }>``;
