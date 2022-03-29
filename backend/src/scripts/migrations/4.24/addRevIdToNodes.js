@@ -21,20 +21,26 @@ const { getTeamspaceList, getCollectionsEndsWith } = require('../utils');
 const { find, findOne, updateMany } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
+const processRevision = async (teamspace, model, revId) => {
+	const { current } = await findOne(teamspace, `${model}.history`, { _id: revId }, { current: 1 });
+	// eslint-disable-next-line no-await-in-loop
+	await updateMany(
+		teamspace,
+		`${model}.scene`,
+		{ _id: { $in: current }, rev_id: { $exists: false } },
+		{ $set: { rev_id: revId } },
+	);
+};
+
 const processModel = async (teamspace, model) => {
 	const revs = await find(teamspace, `${model}.history`, { current: { $exists: true } }, { _id: 1 });
 	for (let i = 0; i < revs.length; ++i) {
 		const { _id } = revs[i];
 		// eslint-disable-next-line no-await-in-loop
-		const { current } = await findOne(teamspace, `${model}.history`, { _id }, { current: 1 });
-		// eslint-disable-next-line no-await-in-loop
-		await updateMany(
-			teamspace,
-			`${model}.scene`,
-			{ _id: { $in: current }, rev_id: { $exists: false } },
-			{ $set: { rev_id: _id } },
-		);
+		await processRevision(teamspace, model, _id);
 	}
+
+	await updateMany(teamspace, `${model}.history`, {}, { $unset: { current: 1 } });
 };
 
 const processTeamspace = async (teamspace) => {
