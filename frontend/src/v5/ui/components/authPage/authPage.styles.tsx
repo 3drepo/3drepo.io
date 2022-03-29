@@ -57,6 +57,8 @@ export const Container = styled.div`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	padding: 58px 64px 38px;
 	z-index: 1;
+
+	${({ theme }) => theme.typography.body1};
 `;
 
 export const Footer = styled(Typography).attrs({

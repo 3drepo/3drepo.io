@@ -58,20 +58,15 @@ export const OtherOptions = styled.div`
 	}
 `;
 
-export const SignUpPrompt = styled(Typography).attrs({
-	variant: 'body1',
-})`
+export const SignUpPrompt = styled(Typography)`
+	margin-right: auto;
 `;
 
-export const ForgotPasswordPrompt = styled(Typography).attrs({
-	variant: 'body1',
-})`
+export const ForgotPasswordPrompt = styled(Typography)`
 	margin-left: auto;
 `;
 
-export const ErrorMessage = styled(Typography).attrs({
-	variant: 'body1',
-})`
+export const ErrorMessage = styled(Typography)`
 	color: ${({ theme }) => theme.palette.error.main};
 	display: flex;
 	align-items: center;
