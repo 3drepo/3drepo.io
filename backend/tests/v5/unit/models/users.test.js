@@ -517,14 +517,10 @@ const formatNewUserData = (newUserData) => {
 				company: newUserData.company,
 			},
 		},
-		createdAt: new Date(),
 	};
 
-	const expiryAt = new Date();
-	expiryAt.setHours(expiryAt.getHours() + 336);
 	formattedData.emailVerifyToken = {
 		token: newUserData.token,
-		expiredAt: expiryAt,
 	};
 
 	return formattedData;
@@ -553,7 +549,12 @@ const testAddUser = () => {
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual(newUserData.username);
 			expect(fn.mock.calls[0][1]).toEqual(newUserData.password);
-			expect(fn.mock.calls[0][2]).toEqual({ customData: expectedData, roles: [] });
+			const userCustomData = fn.mock.calls[0][2];
+			expect(userCustomData).toHaveProperty('customData.createdAt');
+			expect(userCustomData).toHaveProperty('customData.emailVerifyToken.expiredAt');
+			expectedData.createdAt = userCustomData.customData.createdAt;
+			expectedData.emailVerifyToken.expiredAt = userCustomData.customData.emailVerifyToken.expiredAt;
+			expect(userCustomData).toEqual({ customData: expectedData, roles: [] });
 		});
 	});
 };
