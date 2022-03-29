@@ -20,6 +20,7 @@ import * as AuthSaga from '@/v5/store/auth/auth.sagas';
 import { CurrentUserActions } from '@/v5/store/currentUser/currentUser.redux';
 import { expectSaga } from 'redux-saga-test-plan';
 import { mockServer } from '../../internals/testing/mockServer';
+import { alertAction } from '../test.helpers'
 
 describe('Auth: sagas', () => {
 	const username = 'Jason';
@@ -49,15 +50,7 @@ describe('Auth: sagas', () => {
 				.dispatch(AuthActions.authenticate())
 				.put(AuthActions.setPendingStatus(true))
 				.put(AuthActions.setAuthenticationStatus(false))
-				.put.like({
-					action: {
-						type: 'MODALS/OPEN',
-						modalType: 'alert',
-						props: {
-							currentActions: 'trying to authenticate',
-						}
-					}
-				})
+				.put.like(alertAction('trying to authenticate'))
 				.put(AuthActions.setPendingStatus(false))
 				.silentRun();
 		});
@@ -116,15 +109,7 @@ describe('Auth: sagas', () => {
 			await expectSaga(AuthSaga.default)
 				.dispatch(AuthActions.logout())
 				.put(AuthActions.setPendingStatus(true))
-				.put.like({
-					action: {
-						type: 'MODALS/OPEN',
-						modalType: 'alert',
-						props: {
-							currentActions: 'trying to log out',
-						}
-					}
-				})
+				.put.like(alertAction('trying to log out'))
 				.put({ type: 'RESET_APP' })
 				.put(AuthActions.setAuthenticationStatus(false))
 				.put(AuthActions.setPendingStatus(false))
