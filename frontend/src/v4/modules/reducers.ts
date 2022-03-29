@@ -25,6 +25,7 @@ import { dialogsReducer } from '@/v5/store/dialogs/dialogs.redux';
 import { projectsReducer } from '@/v5/store/projects/projects.redux';
 import { teamspacesReducer as teamspaces2Reducer } from '@/v5/store/teamspaces/teamspaces.redux';
 import { usersReducer } from '@/v5/store/users/users.redux';
+import { authReducer as auth2Reducer } from '@/v5/store/auth/auth.redux';
 
 import { revisionsReducer } from '@/v5/store/revisions/revisions.redux';
 import { CanvasHistoryTypes } from './canvasHistory';
@@ -82,6 +83,7 @@ export default function createReducer(history) {
 		billing: billingReducer,
 		teamspaces: teamspacesReducer,
 		teamspaces2: teamspaces2Reducer,
+		auth2: auth2Reducer,
 		model: modelReducer,
 		auth: authReducer,
 		notifications: notificationsReducer,

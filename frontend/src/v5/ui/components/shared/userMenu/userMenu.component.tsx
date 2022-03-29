@@ -18,6 +18,7 @@ import { useParams } from 'react-router';
 import { useRouteMatch } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 
+import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authActions.dispatchers';
 import ContactUsIcon from '@assets/icons/email.svg';
 import InviteAFriendIcon from '@assets/icons/add_user.svg';
 import TeamspacesIcon from '@assets/icons/teamspaces.svg';
@@ -43,6 +44,8 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 	const { teamspace } = useParams();
 	const { url } = useRouteMatch();
 	const baseUrl = url.split('/').slice(0, 3).join('/');
+
+	const onClickSignOut = () => AuthActionsDispatchers.logout();
 
 	return (
 		<AvatarContainer>
@@ -118,7 +121,7 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 				</ActionMenuSection>
 				<ActionMenuSection>
 					<ActionMenuItem>
-						<SignOutButton>
+						<SignOutButton onClick={onClickSignOut}>
 							<FormattedMessage
 								id="userMenu.signOut"
 								defaultMessage="Sign out"
