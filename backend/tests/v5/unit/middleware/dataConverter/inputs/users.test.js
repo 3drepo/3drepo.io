@@ -19,6 +19,8 @@ const { src, modelFolder, imagesFolder } = require('../../../../helper/path');
 
 jest.mock('../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
+jest.mock('../../../../../../src/v5/utils/httpsReq');
+const HttpsReq = require(`${src}/utils/httpsReq`);
 jest.mock('../../../../../../src/v5/utils/permissions/permissions');
 const { cloneDeep } = require(`${src}/utils/helper/objects`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -30,9 +32,13 @@ const MockExpressRequest = require('mock-express-request');
 const FormData = require('form-data');
 const fs = require('fs');
 const path = require('path');
+const config = require(`${src}/utils/config`);
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
+HttpsReq.post.mockImplementation(()=> Promise.resolve({
+	success: true
+}));
 
 const availableUsername = 'nonExistingUser';
 const existingUsername = 'existingUsername';
@@ -280,6 +286,18 @@ const testValidateSignUpData = () => {
 				expect(Responder.respond.mock.calls.length).toBe(1);
 				expect(Responder.respond.mock.results[0].value.code).toEqual(expectedError.code);
 			}
+		});
+
+		test('with captcha enabled it should call next', async () => {
+			config.auth.captcha = true;
+			config.captcha = {};
+
+			const mockCB = jest.fn();
+			await Users.validateSignUpData({ body: newUserData }, {}, mockCB);
+			expect(mockCB.mock.calls.length).toBe(1);
+
+			config.auth.captcha = false;
+			config.captcha = null;
 		});
 	});
 };

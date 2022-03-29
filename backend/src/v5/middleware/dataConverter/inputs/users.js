@@ -201,19 +201,22 @@ Users.validateSignUpData = async (req, res, next) => {
 		firstName: types.strings.name.required(),
 		lastName: types.strings.name.required(),
 		countryCode: types.strings.countryCode.required(),
-		company: types.strings.title.optional(),
+		company: Yup.string().max(120).optional(),
 		mailListAgreed: Yup.bool().required(),
+		captcha: Yup.string().optional()
 	}).strict(true).noUnknown()
 		.required()
 		.test('check-captcha', 'Invalid captcha', () => {
 			const checkCaptcha = config.auth.captcha ? httpsPost(config.captcha.validateUrl, {
 				secret: config.captcha.secretKey,
-				response: req.body.captcha,
+				response: req.body.captcha
 			}) : Promise.resolve({
-				success: true,
+				success: true
 			});
 
-			return checkCaptcha.then(() => true).catch(() => false);
+			return checkCaptcha.then((res) => { 
+				return res.success;
+			});
 		});
 
 	try {
