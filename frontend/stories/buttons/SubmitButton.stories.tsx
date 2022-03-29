@@ -15,14 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Button } from '@controls/button';
+import { SubmitButton as Button } from '@controls/submitButton';
+
+import LoginIcon from '@assets/icons/login.svg';
+import EmailIcon from '@assets/icons/email.svg';
+import LockIcon from '@assets/icons/lock.svg';
+import AddIcon from '@assets/icons/add_circle.svg';
+
+const Icons = {
+	loginIcon: <LoginIcon />,
+	emailIcon: <EmailIcon />,
+	lockIcon: <LockIcon />,
+	addIcon: <AddIcon />,
+	none: <></>,
+};
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
-	title: 'Buttons/Button',
-	component: Button,
-	// More on argTypes: https://storybook.js.org/docs/react/api/argtypes
-
+	title: 'Buttons/SubmitButton',
 	argTypes: {
 		variant: {
 			description: 'Variant of the button',
@@ -31,8 +41,8 @@ export default {
 		},
 
 		/**
- * The color of the component. It supports those theme colors that make sense for this component.
- */
+		 * The color of the component. It supports those theme colors that make sense for this component.
+		 */
 		color: {
 			options: ['inherit',
 				'primary', 'secondary',
@@ -43,43 +53,53 @@ export default {
 				'text'],
 			control: { type: 'select' },
 		},
-		size: {
-			options: ['small', 'medium', 'large'],
-			control: { type: 'select' },
-		},
 		isPending: {
 			type: 'boolean',
 		},
 		disabled: {
 			type: 'boolean',
 		},
+		startIcon: {
+			options: Object.keys(Icons), // An array of serializable values
+			mapping: Icons, // Maps serializable option values to complex arg values
+			control: {
+				type: 'select',
+				labels: {
+					loginIcon: 'Login',
+					emailIcon: 'Email',
+					lockIcon: 'Lock',
+					addIcon: 'Add Circle',
+					none: 'None',
+				},
+			},
+		},
+		children: {
+			description: 'The text that appears on the button',
+			type: 'string',
+			defaultValue: 'Submit',
+		},
 	},
 } as ComponentMeta<typeof Button>;
 
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template: ComponentStory<typeof Button> = (args) => <Button {...args}>Material ui button</Button>;
+const Template: ComponentStory<typeof Button> = (args) => {
+	const { children } = args;
+	return (
+		<Button {...args}>{children}</Button>
+	);
+};
 
 export const Primary = Template.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
 Primary.args = {
-	variant: 'outlined',
+	variant: 'contained',
 	color: 'primary',
+	startIcon: <LoginIcon />,
 };
 
 export const Secondary = Template.bind({});
 Secondary.args = {
 	variant: 'outlined',
 	color: 'secondary',
-};
-
-export const Label = Template.bind({});
-Label.args = {
-	variant: 'label',
-	color: 'primary',
-};
-
-export const LabelOutined = Template.bind({});
-LabelOutined.args = {
-	variant: 'label-outlined',
-	color: 'primary',
+	startIcon: <EmailIcon />,
 };
