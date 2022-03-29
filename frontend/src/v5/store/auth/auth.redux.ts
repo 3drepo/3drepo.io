@@ -35,14 +35,11 @@ export const INITIAL_STATE: IAuthState = {
 	errorMessage: null,
 };
 
-export const setAuthenticationStatus = (state = INITIAL_STATE, { status }) => {
-	window.localStorage.setItem('loggedIn', JSON.stringify(status));
-	return (
-		{ ...state,
-			isAuthenticated: status,
-		}
-	);
-};
+export const setAuthenticationStatus = (state = INITIAL_STATE, { status }) => (
+	{ ...state,
+		isAuthenticated: status,
+	}
+);
 
 export const setPendingStatus = (state = INITIAL_STATE, { isPending }) => ({ ...state, isPending });
 
