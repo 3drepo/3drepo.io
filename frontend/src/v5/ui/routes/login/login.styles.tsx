@@ -18,10 +18,8 @@
 import styled from 'styled-components';
 import UserIcon from '@assets/icons/user.svg';
 import PasswordIcon from '@assets/icons/lock.svg';
-import LoginIcon from '@assets/icons/login.svg';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { Typography } from '@controls/typography';
-import { Button } from '@controls/button';
 
 export const Heading = styled(Typography).attrs({
 	variant: 'h1',
@@ -51,7 +49,7 @@ export const PasswordField = styled(AuthField).attrs({
 
 export const OtherOptions = styled.div`
 	display: flex;
-	padding: 14px 0;
+	padding: 14px 0 20px;
 	color: ${({ theme }) => theme.palette.base.main};
 	a {
 		color: ${({ theme }) => theme.palette.primary.main};
@@ -74,14 +72,4 @@ export const ErrorMessage = styled(Typography)`
 	svg {
 		margin-right: 5px;
 	}
-`;
-
-export const LoginButton = styled(Button).attrs({
-	type: 'submit',
-	variant: 'contained',
-	color: 'primary',
-	fullWidth: true,
-	startIcon: <LoginIcon />,
-})`
-	margin: 20px 0;
 `;

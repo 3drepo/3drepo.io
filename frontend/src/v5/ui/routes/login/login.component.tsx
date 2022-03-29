@@ -17,6 +17,7 @@
 
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authActions.dispatchers';
 import { Link } from 'react-router-dom';
+import LoginIcon from '@assets/icons/login.svg';
 import { useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
@@ -25,7 +26,8 @@ import { LoginSchema } from '@/v5/validation/auth';
 import { AuthPage } from '@components/authPage';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
 import ErrorIcon from '@assets/icons/warning_small.svg';
-import { ErrorMessage, ForgotPasswordPrompt, Heading, LoginButton, OtherOptions, PasswordField, SignUpPrompt, UsernameField } from './login.styles';
+import { SubmitButton } from '@controls/submitButton/submitButton.component';
+import { ErrorMessage, ForgotPasswordPrompt, Heading, OtherOptions, PasswordField, SignUpPrompt, UsernameField } from './login.styles';
 
 const APP_VERSION = ClientConfig.VERSION;
 
@@ -94,9 +96,9 @@ export const Login = () => {
 						</Link>
 					</ForgotPasswordPrompt>
 				</OtherOptions>
-				<LoginButton type="submit" isPending={isPending} disabled={!isValid}>
+				<SubmitButton isValid={isValid} isPending={isPending} startIcon={<LoginIcon />}>
 					<FormattedMessage id="auth.login.buttonText" defaultMessage="Log in" />
-				</LoginButton>
+				</SubmitButton>
 			</form>
 		</AuthPage>
 	);
