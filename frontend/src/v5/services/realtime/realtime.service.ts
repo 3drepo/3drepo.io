@@ -132,4 +132,4 @@ export const subscribeToSocketEvent = (socketEvent:SocketEvents, callback) => {
 	};
 };
 
-export const getSocketId = () => socket.id;
+export const getSocket = () => socket;
