@@ -29,6 +29,8 @@ import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/re
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
 import { Display } from '@/v5/ui/themes/media';
 import { FormattedMessage } from 'react-intl';
+import { UploadStatuses } from '@/v5/store/containers/containers.types';
+import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 import {
 	Container,
 	RevisionsListHeaderContainer,
@@ -42,10 +44,11 @@ import {
 
 interface IRevisionDetails {
 	containerId: string;
-	revisionsCount?: number;
+	revisionsCount: number;
+	status?: UploadStatuses
 }
 
-export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDetails): JSX.Element => {
+export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisionDetails): JSX.Element => {
 	const { teamspace, project } = useParams();
 	const isLoading: boolean = RevisionsHooksSelectors.selectIsPending(containerId);
 	const revisions: IRevision[] = RevisionsHooksSelectors.selectRevisions(containerId);
@@ -58,20 +61,37 @@ export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDe
 		}
 	}, []);
 
-	if (!isLoading && revisions && revisions.length === 0) {
+	if (revisionsCount === 0) {
 		return (
 			<RevisionsListEmptyWrapper>
 				<RevisionsListEmptyContainer>
-					<RevisionsListEmptyText>
-						<FormattedMessage id="containers.revisions.emptyMessage" defaultMessage="You haven’t added any Files." />
-					</RevisionsListEmptyText>
-					<Button
-						startIcon={<ArrowUpCircleIcon />}
-						variant="contained"
-						color="primary"
-					>
-						<FormattedMessage id="containers.revisions.uploadFile" defaultMessage="Upload File" />
-					</Button>
+					{
+						!canUploadToBackend(status)
+							&& (
+								<RevisionsListEmptyText>
+									<FormattedMessage id="containers.revisions.emptyMessageBusy" defaultMessage="Your files are being processed at this moment, please wait before creating new revisions for this container." />
+								</RevisionsListEmptyText>
+							)
+					}
+
+					{
+						canUploadToBackend(status)
+							&& (
+								<>
+									<RevisionsListEmptyText>
+										<FormattedMessage id="containers.revisions.emptyMessage" defaultMessage="You haven’t added any Files." />
+									</RevisionsListEmptyText>
+									<Button
+										startIcon={<ArrowUpCircleIcon />}
+										variant="contained"
+										color="primary"
+									>
+										<FormattedMessage id="containers.revisions.uploadFile" defaultMessage="Upload File" />
+									</Button>
+								</>
+							)
+
+					}
 				</RevisionsListEmptyContainer>
 			</RevisionsListEmptyWrapper>
 		);
