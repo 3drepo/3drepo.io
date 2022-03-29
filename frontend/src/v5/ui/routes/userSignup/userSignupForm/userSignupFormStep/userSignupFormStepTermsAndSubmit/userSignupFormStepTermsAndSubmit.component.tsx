@@ -189,7 +189,7 @@ export const UserSignupFormStepTermsAndSubmit = ({
 				</CircularProgressContainer>
 			) : (
 				<CreateAccountButton
-					disabled={!termsAgreed || !fields.reCaptchaToken}
+					disabled={!termsAgreed || !fields.reCaptchaToken || isSubmitting}
 					onClick={createAccount}
 					type="submit"
 				>

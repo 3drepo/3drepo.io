@@ -14,22 +14,30 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Switch, Route, useRouteMatch } from 'react-router-dom';
+import { useState } from 'react';
 import { UserSignupSidebar } from './userSignupSidebar/userSignupSidebar.component';
 import { UserSignupForm } from './userSignupForm/userSignupForm.component';
 import { Container, Background } from './userSignup.styles';
-import { UserSignupWelcome } from './userSignupWelcome/userSignupWelcome.component';
+import { UserSignupWelcome, UserSignupWelcomeProps } from './userSignupWelcome/userSignupWelcome.component';
 
 export const UserSignup = () => {
-	const { path } = useRouteMatch();
+	const [registrationIsComplete, setRegistrationIsComplete] = useState(false);
+	const [registrationCompleteData, setRegistrationCompleteData] = useState<UserSignupWelcomeProps>(null);
+
+	const completeRegistration = (userData: UserSignupWelcomeProps) => {
+		setRegistrationIsComplete(true);
+		setRegistrationCompleteData(userData);
+	};
+
 	return (
 		<Container>
 			<UserSignupSidebar />
 			<Background>
-				<Switch>
-					<Route path={`${path}/welcome`} component={UserSignupWelcome} />
-					<Route component={UserSignupForm} />
-				</Switch>
+				{registrationIsComplete ? (
+					<UserSignupWelcome {...registrationCompleteData} />
+				) : (
+					<UserSignupForm completeRegistration={completeRegistration} />
+				)}
 			</Background>
 		</Container>
 	);

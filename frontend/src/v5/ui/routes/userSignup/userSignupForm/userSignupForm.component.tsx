@@ -16,10 +16,8 @@
  */
 
 import { useState } from 'react';
-import { useHistory, useRouteMatch } from 'react-router-dom';
-import { registerNewUser } from '@/v5/services/api/signup';
-// import API from '@/v4/services/api';
 import { FormattedMessage } from 'react-intl';
+import { registerNewUser } from '@/v5/services/api/signup';
 import { formatMessage } from '@/v5/services/intl';
 import { getRegistrationError, USER_ALREADY_EXISTS } from '@/v5/store/auth/auth.helpers';
 import { UserSignupFormStepAccount } from './userSignupFormStep/userSignupFormStepAccount/userSignupFormStepAccount.component';
@@ -34,8 +32,13 @@ import {
 	LoginPromptLink,
 } from './userSignupForm.styles';
 import { UserSignupFormStep } from './userSignupFormStep/userSignupFormStep.component';
+import { UserSignupWelcomeProps } from '../userSignupWelcome/userSignupWelcome.component';
 
-export const UserSignupForm = () => {
+type UserSignupFormProps = {
+	completeRegistration: (registrationCompleteData: UserSignupWelcomeProps) => void;
+};
+
+export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) => {
 	const LAST_STEP = 2;
 	const [activeStep, setActiveStep] = useState(0);
 	const [completedSteps, setCompletedSteps] = useState(new Set<number>());
@@ -43,9 +46,6 @@ export const UserSignupForm = () => {
 	const [alreadyExistingUsernames, setAlreadyExistingUsernames] = useState([]);
 	const [unexpectedError, setUnexpectedError] = useState('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
-
-	const history = useHistory();
-	const { path } = useRouteMatch();
 
 	const addCompletedStep = (stepIndex: number) => {
 		completedSteps.add(stepIndex);
@@ -58,7 +58,6 @@ export const UserSignupForm = () => {
 	};
 
 	const canReachStep = (stepToReach: number): boolean => {
-		return true;
 		// move to a previous step
 		if (stepToReach <= activeStep) return true;
 		// move to a next step iff the current step and the
@@ -78,15 +77,11 @@ export const UserSignupForm = () => {
 	const moveToNextStep = () => setActiveStep(activeStep + 1);
 
 	const createAccount = async () => {
+		setIsSubmitting(true);
 		try {
-			setIsSubmitting(true);
 			await registerNewUser(fields);
-			const email = encodeURIComponent(fields.email);
-			const firstname = encodeURIComponent(fields.firstname);
-			history.push({
-				pathname: `${path}/welcome`,
-				search: `?email=${email}&firstname=${firstname}`,
-			});
+			const { email, firstname } = fields;
+			completeRegistration({ email, firstname });
 		} catch (error) {
 			const errorMessage = getRegistrationError(error);
 			if (errorMessage === USER_ALREADY_EXISTS) {
@@ -96,8 +91,8 @@ export const UserSignupForm = () => {
 			} else {
 				setUnexpectedError(errorMessage);
 			}
-			setIsSubmitting(false);
 		}
+		setIsSubmitting(false);
 	};
 
 	const updateFields = (newFields) => setFields((prevFields) => ({ ...prevFields, ...newFields }));

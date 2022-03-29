@@ -16,8 +16,6 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { useLocation } from 'react-router-dom';
-import queryString from 'query-string';
 import { Container, Title } from '../userSignupForm/userSignupForm.styles';
 import {
 	Body,
@@ -30,68 +28,66 @@ import {
 	Link,
 } from './userSignupWelcome.styles';
 
-export const UserSignupWelcome = () => {
-	const { search } = useLocation();
-	let { firstname, email } = queryString.parse(search);
-	firstname = decodeURIComponent(firstname);
-	email = decodeURIComponent(email);
-
-	return (
-		<Container>
-			<Title>
-				<FormattedMessage
-					id="userSignup.confirmation.title"
-					defaultMessage="Welcome, {firstname}!"
-					values={{ firstname }}
-				/>
-			</Title>
-			<Body>
-				<EmailIcon />
-				<Subtitle>
-					<FormattedMessage
-						id="userSignup.confirmation.subtitle"
-						defaultMessage="First, let's verify your email"
-					/>
-				</Subtitle>
-				<ActionMessage>
-					<FormattedMessage
-						id="userSignup.confirmation.checkEmail"
-						defaultMessage="Check {email} to verify your account and get started."
-						values={{
-							email: <EmailAddress>{email}</EmailAddress>,
-						}}
-					/>
-				</ActionMessage>
-				<InfoMessage>
-					<FormattedMessage
-						id="userSignup.confirmation.description"
-						defaultMessage={`
-							If you have not received your verification email, please
-							check your spam folder or ask your email administrator for assistance.
-						`}
-					/>
-				</InfoMessage>
-				<HelpMessage>
-					<FormattedMessage
-						id="userSignup.confirmation.help"
-						defaultMessage="Need help? Visit {support} or {contact} us."
-						values={{
-							support: (
-								<Link
-									to={{ pathname: 'https://3drepo.com/support/' }}
-								>
-									<FormattedMessage id="userSignup.confirmation.help.support" defaultMessage="support" />
-								</Link>
-							),
-							contact: (
-								<Link to={{ pathname: 'https://3drepo.com/contact/' }}>
-									<FormattedMessage id="userSignup.confirmation.help.contact" defaultMessage="contact" />
-								</Link>
-							),
-						}}
-					/>
-				</HelpMessage>
-			</Body>
-		</Container>
-	);
+export type UserSignupWelcomeProps = {
+	email: string;
+	firstname: string;
 };
+
+export const UserSignupWelcome = ({ firstname, email }: UserSignupWelcomeProps) => (
+	<Container>
+		<Title>
+			<FormattedMessage
+				id="userSignup.confirmation.title"
+				defaultMessage="Welcome, {firstname}!"
+				values={{ firstname }}
+			/>
+		</Title>
+		<Body>
+			<EmailIcon />
+			<Subtitle>
+				<FormattedMessage
+					id="userSignup.confirmation.subtitle"
+					defaultMessage="First, let's verify your email"
+				/>
+			</Subtitle>
+			<ActionMessage>
+				<FormattedMessage
+					id="userSignup.confirmation.checkEmail"
+					defaultMessage="Check {email} to verify your account and get started."
+					values={{
+						email: <EmailAddress>{email}</EmailAddress>,
+					}}
+				/>
+			</ActionMessage>
+			<InfoMessage>
+				<FormattedMessage
+					id="userSignup.confirmation.description"
+					defaultMessage={`
+						If you have not received your verification email, please
+						check your spam folder or ask your email administrator for assistance.
+					`}
+				/>
+			</InfoMessage>
+			<HelpMessage>
+				<FormattedMessage
+					id="userSignup.confirmation.help"
+					defaultMessage="Need help? Visit {support} or {contact} us."
+					values={{
+						support: (
+							<Link
+								to={{ pathname: 'https://3drepo.com/support/' }}
+							>
+								<FormattedMessage id="userSignup.confirmation.help.support" defaultMessage="support" />
+							</Link>
+						),
+						contact: (
+							<Link to={{ pathname: 'https://3drepo.com/contact/' }}>
+								<FormattedMessage id="userSignup.confirmation.help.contact" defaultMessage="contact" />
+							</Link>
+						),
+					}}
+				/>
+			</HelpMessage>
+		</Body>
+	</Container>
+);
