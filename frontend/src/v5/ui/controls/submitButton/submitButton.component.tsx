@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,7 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AuthActions, IAuthActionCreators } from '@/v5/store/auth/auth.redux';
-import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
+import { Button } from '@controls/button';
+import { IButton } from '@controls/button/button.component';
 
-export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);
+export const SubmitButton = ({
+	variant = 'contained',
+	color = 'primary',
+	children,
+	...props
+}: IButton): JSX.Element => (
+	<Button
+		type="submit"
+		fullWidth
+		variant={variant}
+		color={color}
+		style={{ marginLeft: 0, marginRight: 0 }}
+		{...props}
+	>
+		{children}
+	</Button>
+);

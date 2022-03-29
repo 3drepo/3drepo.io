@@ -52,7 +52,7 @@ export const Root = () => {
 		}
 
 		if (!isNull(isAuthenticated) && !isAuthenticated) {
-			history.push('/');
+			history.push('/v5/login');
 		}
 	}, [userName, isAuthenticated]);
 

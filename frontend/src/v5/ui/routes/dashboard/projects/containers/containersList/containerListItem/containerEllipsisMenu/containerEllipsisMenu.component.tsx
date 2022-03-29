@@ -22,6 +22,7 @@ import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { useDispatch } from 'react-redux';
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
+import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 
 type ContainerEllipsisMenuProps = {
 	selected: boolean,
@@ -46,12 +47,6 @@ export const ContainerEllipsisMenu = ({
 					id: 'containers.ellipsisMenu.loadContainer',
 					defaultMessage: 'Load Container in 3D Viewer',
 				})}
-			/>
-			<EllipsisMenuItem
-				title={formatMessage({
-					id: 'containers.ellipsisMenu.loadContainer',
-					defaultMessage: 'Load Container in 3D Viewer',
-				})}
 				to={`/${container._id}`}
 			/>
 			<EllipsisMenuItem
@@ -59,6 +54,7 @@ export const ContainerEllipsisMenu = ({
 					id: 'containers.ellipsisMenu.uploadNewRevision',
 					defaultMessage: 'Upload new Revision',
 				})}
+				disabled={!canUploadToBackend(container.status)}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({

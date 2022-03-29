@@ -16,6 +16,7 @@
  */
 
 import * as CurrentUser from './currentUser';
+import * as Auth from './auth';
 import * as Teamspaces from './teamspaces';
 import * as Projects from './projects';
 import * as Containers from './containers';
@@ -23,4 +24,4 @@ import * as Federations from './federations';
 import * as Revisions from './revisions';
 import * as Users from './users';
 
-export { CurrentUser, Teamspaces, Projects, Containers, Federations, Revisions, Users };
+export { Auth, CurrentUser, Teamspaces, Projects, Containers, Federations, Revisions, Users };
