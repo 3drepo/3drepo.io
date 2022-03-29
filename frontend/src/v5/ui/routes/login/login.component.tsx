@@ -96,7 +96,7 @@ export const Login = () => {
 						</Link>
 					</ForgotPasswordPrompt>
 				</OtherOptions>
-				<SubmitButton isValid={isValid} isPending={isPending} startIcon={<LoginIcon />}>
+				<SubmitButton disabled={!isValid} isPending={isPending} startIcon={<LoginIcon />}>
 					<FormattedMessage id="auth.login.buttonText" defaultMessage="Log in" />
 				</SubmitButton>
 			</form>
