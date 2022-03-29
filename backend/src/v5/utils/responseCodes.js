@@ -29,7 +29,7 @@ ResponseCodes.templates = {
 	notAuthorized: { message: 'You do not have sufficient access rights for this action', status: 401 },
 	licenceExpired: { message: 'Licence expired.', status: 401 },
 	tooManyLoginAttempts: { message: 'Too many unsuccessful login attempts! Account locked', status: 400 },
-	userNotVerified: { message: 'Account not yet verified. Please check your email.', status: 400 },
+	userNotVerified: { message: 'Account not yet verified. Please check your email', status: 400 },
 	incorrectUsernameOrPassword: { message: 'Incorrect username or password', status: 400 },
 	incorrectPassword: { message: 'Incorrect password', status: 400 },
 	userDoesNotHaveAvatar: { message: 'User does not have an avatar', status: 404 },

@@ -17,8 +17,8 @@
 
 import { createSelector } from 'reselect';
 import { isEmpty } from 'lodash';
-import { IFederationsState } from '@/v5/store/federations/federations.types';
 import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
+import { IFederationsState } from './federations.redux';
 
 const selectFederationsDomain = (state): IFederationsState => state.federations;
 

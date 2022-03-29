@@ -19,19 +19,20 @@ import styled, { css } from 'styled-components';
 import { DashboardListEmptyContainer } from '@components/dashboard/dashboardList';
 import { Display } from '@/v5/ui/themes/media';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dashboardList.styles';
+import { ScrollArea as Scrollbar } from '@controls/scrollArea';
 import * as RevisionsListHeaderLabelStyles from './components/revisionsListHeaderLabel/revisionsListHeaderLabel.styles';
+
+const revisionsListItemHeight = '52px';
 
 export const Container = styled.div`
 	display: flex;
 	flex-direction: column;
 	background-color: ${({ theme }) => theme.palette.secondary.mid};
-	padding-left: 66px;
-	padding-right: 36px;
+	padding-right: 10px;
 	z-index: 1;
 	position: relative;
 	max-height: 500px;
 	overflow: hidden;
-	overflow-y: scroll;
 
 	@media (max-width: ${Display.Desktop}px) {
 		padding-left: 45px;
@@ -54,7 +55,7 @@ export const RevisionsListEmptyText = styled(DashboardListEmptyText)`
 
 export const RevisionsListHeaderContainer = styled.header`
 	display: flex;
-	padding: 13px 20px 10px 23px;
+	padding: 13px 20px 10px 86px;
 	margin-top: 17px;
 
 	${RevisionsListHeaderLabelStyles.Container} {
@@ -67,8 +68,7 @@ export const RevisionsListHeaderContainer = styled.header`
 export const RevisionsList = styled.ul`
 	display: flex;
 	flex-direction: column;
-	width: 100%;
-	margin: 0 0 40px;
+	width: calc(100% - 98px);
 	padding: 0;
 `;
 
@@ -116,13 +116,14 @@ const revisionListItemStylesLineStyles = ({ theme, selected, isBeforeSelected })
 export const RevisionsListItemWrapper = styled.li<{ isSingle?: boolean, selected?: boolean, isBeforeSelected?: boolean }>`
 	box-sizing: border-box;
 	background-color: ${({ theme }) => theme.palette.secondary.light};
-	height: 52px;
+	height: ${revisionsListItemHeight};
 	width: 100%;
 	list-style: none;
 	border: 1px solid ${({ theme }) => theme.palette.secondary.mid};
 	border-bottom-style: none;
 	border-left-style: none;
 	position: relative;
+	margin-left: 66px;
 	cursor: pointer;
 
 	&:hover {
@@ -163,4 +164,10 @@ export const RevisionsListItemWrapper = styled.li<{ isSingle?: boolean, selected
 	${({ theme, selected }) => selected && css`
 		background-color: ${theme.palette.primary.main};
 	`}
+`;
+
+export const ScrollArea = styled(Scrollbar).attrs({
+	autoHeightMax: `calc(${revisionsListItemHeight} * 5)`,
+})`
+	margin-bottom: 40px;
 `;

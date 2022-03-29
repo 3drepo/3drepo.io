@@ -19,8 +19,7 @@ import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
-import { RevisionsActions, RevisionsTypes } from './revisions.redux';
-import { FetchAction, SetRevisionVoidStatusAction } from './revisions.types';
+import { FetchAction, RevisionsActions, RevisionsTypes, SetRevisionVoidStatusAction } from './revisions.redux';
 
 export function* fetch({ teamspace, projectId, containerId }: FetchAction) {
 	yield put(RevisionsActions.setIsPending(containerId, true));

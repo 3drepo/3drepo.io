@@ -158,7 +158,8 @@ export const ContainerListItem = ({
 			{isSelected && (
 				<RevisionDetails
 					containerId={container._id}
-					revisionsCount={container.revisionsCount || 1}
+					revisionsCount={container.revisionsCount}
+					status={container.status}
 				/>
 			)}
 			<ShareModal

@@ -124,11 +124,19 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 
-	useEffect(() => {
+	const resetValues = () => {
 		defaultValues = getDefaultValues(federation) as any;
 		reset(defaultValues);
-		FederationsActionsDispatchers.fetchFederationSettings(teamspace, project, federation._id);
-		FederationsActionsDispatchers.fetchFederationViews(teamspace, project, federation._id);
+	};
+
+	useEffect(resetValues, [federation]);
+
+	useEffect(() => {
+		if (open) {
+			FederationsActionsDispatchers.fetchFederationSettings(teamspace, project, federation._id);
+			FederationsActionsDispatchers.fetchFederationViews(teamspace, project, federation._id);
+			resetValues();
+		}
 	}, [open]);
 
 	const onSubmit: SubmitHandler<IFormInput> = ({

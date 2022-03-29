@@ -22,6 +22,7 @@ import { useRouteMatch, Route, Switch, Redirect } from 'react-router-dom';
 import { discardSlash } from '@/v5/services/routing/routing';
 import { NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
 import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers/usersAction.dispatchers';
+import { ScrollArea } from '@controls/scrollArea';
 import { Federations } from './federations';
 import { Containers } from './containers';
 import { UserPermissions } from './userPermissions/userPermissions.component';
@@ -38,30 +39,32 @@ export const ProjectContent = () => {
 	}, [teamspace]);
 
 	return (
-		<Content>
-			<Switch>
-				<Route exact path={path}>
-					project content
-				</Route>
-				<Route exact path={`${path}/t/federations`}>
-					<Federations />
-				</Route>
-				<Route exact path={`${path}/t/containers`}>
-					<Containers />
-				</Route>
-				<Route exact path={`${path}/t/settings`}>
-					Project settings
-				</Route>
-				<Route exact path={`${path}/t/project_permissions`}>
-					<ProjectPermissions />
-				</Route>
-				<Route exact path={`${path}/t/user_permissions`}>
-					<UserPermissions />
-				</Route>
-				<Route path="*">
-					<Redirect to={NOT_FOUND_ROUTE_PATH} />
-				</Route>
-			</Switch>
-		</Content>
+		<ScrollArea variant="base" autoHide>
+			<Content>
+				<Switch>
+					<Route exact path={path}>
+						project content
+					</Route>
+					<Route exact path={`${path}/t/federations`}>
+						<Federations />
+					</Route>
+					<Route exact path={`${path}/t/containers`}>
+						<Containers />
+					</Route>
+					<Route exact path={`${path}/t/settings`}>
+						Project settings
+					</Route>
+					<Route exact path={`${path}/t/project_permissions`}>
+						<ProjectPermissions />
+					</Route>
+					<Route exact path={`${path}/t/user_permissions`}>
+						<UserPermissions />
+					</Route>
+					<Route path="*">
+						<Redirect to={NOT_FOUND_ROUTE_PATH} />
+					</Route>
+				</Switch>
+			</Content>
+		</ScrollArea>
 	);
 };
