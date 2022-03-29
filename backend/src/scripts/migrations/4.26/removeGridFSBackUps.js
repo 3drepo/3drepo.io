@@ -43,7 +43,7 @@ const removeGridFSBackup = async (teamspace, col, filename) => {
 			dropCollection(teamspace, filesCol),
 			dropCollection(teamspace, chunksCol),
 		]).catch(() => {
-			// This may error if the collection doesn't exist
+			// Don't actually care if this errored - not a big issue.
 		});
 	}
 };
