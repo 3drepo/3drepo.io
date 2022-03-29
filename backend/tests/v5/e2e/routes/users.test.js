@@ -634,14 +634,24 @@ const testVerify = () => {
 		});
 
 		test('should verify the user', async () => {
+			// trying to log in before verification should fail
+			await testSession.post('/v5/login/').send({ user: nonVerifiedUser.user, password: nonVerifiedUser.password })
+				.expect(templates.userNotVerified.status);
+
 			await agent.post('/v5/user/verify').send({ username: nonVerifiedUser.user, token: validEmailToken.token })
 				.expect(templates.ok.status);
 		
+			// trying to log in after verification should succeed
+			await testSession.post('/v5/login/').send({ user: nonVerifiedUser.user, password: nonVerifiedUser.password })
+				.expect(templates.ok.status);
+			await testSession.post('/v5/logout/');
+
 			//check that a teamspace has been created
 			const userTeamspaces = await agent.get(`/v5/teamspaces?key=${nonVerifiedUser.apiKey}`)
 				.expect(templates.ok.status);
 			expect(userTeamspaces.body.teamspaces.length).toEqual(1);
 
+			//trying to verify the user again should fail
 			await agent.post('/v5/user/verify').send({ username: nonVerifiedUser.user, token: validEmailToken.token })
 				.expect(templates.invalidArguments.status);
 		});

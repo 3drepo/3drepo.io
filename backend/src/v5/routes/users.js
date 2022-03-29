@@ -460,8 +460,86 @@ const establishRoutes = () => {
 	*/
 	router.put('/user/password', validateResetPasswordData, resetPassword);
 
+	/**
+	* @openapi
+	* /user:
+	*   post:
+	*     description: Signs a user up
+	*     tags: [User]
+	*     operationId: signUp
+	*     requestBody:
+	*       content:
+	*         application/json:
+	*           schema:
+	*             type: object
+	*             properties:
+	*               username:
+	*                 type: string
+	*                 description: The username of the user
+	*                 example: username123
+	*               email:
+	*                 type: string
+	*                 description: The email of the user
+	*                 example: example@email.com
+	*               password:
+	*                 type: string
+	*                 description: The password of the user
+	*                 example: newPassword123!
+	*               firstName:
+	*                 type: string
+	*                 description: The first name of the user
+	*                 example: Nick
+	*               lasttName:
+	*                 type: string
+	*                 description: The last name of the user
+	*                 example: Wilson
+	*               countryCode:
+	*                 type: string
+	*                 description: The country code of the user
+	*                 example: GB
+	*               company:
+	*                 type: string
+	*                 description: The company of the user
+	*                 example: 3D Repo
+	*               mailListAgreed:
+	*                 type: boolean
+	*                 description: Whether the user has signed yp for the latest news and tutorials
+	*                 example: true
+	*     responses:
+	*       400:
+	*         $ref: "#/components/responses/invalidArguments"
+	*       200:
+	*         description: Signs a user up
+	*/
 	router.post('/user', validateSignUpData, signUp);
 
+	/**
+	* @openapi
+	* /user/verify:
+	*   post:
+	*     description: Verifies a user
+	*     tags: [User]
+	*     operationId: verify
+	*     requestBody:
+	*       content:
+	*         application/json:
+	*           schema:
+	*             type: object
+	*             properties:
+	*               username:
+	*                 type: string
+	*                 description: The username of the user
+	*                 example: username123
+	*               token:
+	*                 type: string
+	*                 description: The verification token of the user
+	*                 example: c0f6b97ae5a9c210ee050a9ada3faabc
+	*     responses:
+	*       400:
+	*         $ref: "#/components/responses/invalidArguments"
+	*       200:
+	*         description: Verifies a user
+	*/
 	router.post('/user/verify', validateVerifyData, verify);
 	return router;
 };
