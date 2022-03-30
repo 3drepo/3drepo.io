@@ -16,7 +16,7 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CircularProgress } from '@material-ui/core';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -38,7 +38,7 @@ import {
 
 interface ITermsAndSubmitFormInput {
 	terms: string;
-	news: string;
+	newsletter: string;
 	reCaptchaToken: string;
 }
 
@@ -73,8 +73,8 @@ export const UserSignupFormStepTermsAndSubmit = ({
 	});
 
 	const termsAgreed = watch('terms');
-
 	const reCaptchaRef = useRef<ReCAPTCHA>();
+	const [submitButtonIsDisabled, setSubmitButtonIsDisabled] = useState(true);
 
 	const createAccount: SubmitHandler<ITermsAndSubmitFormInput> = () => {
 		updateFields(getValues());
@@ -94,6 +94,10 @@ export const UserSignupFormStepTermsAndSubmit = ({
 	}, [termsAgreed]);
 
 	useEffect(() => () => { updateFields(getValues()); }, []);
+	useEffect(() => {
+		const captchaIsValid = clientConfigService.captcha_client_key ? fields.reCaptchaToken : true;
+		setSubmitButtonIsDisabled(!termsAgreed || !captchaIsValid || isSubmitting);
+	}, [termsAgreed, fields.reCaptchaToken, isSubmitting]);
 
 	const handleChange = (reCaptchaToken) => updateFields({ reCaptchaToken });
 
@@ -155,9 +159,9 @@ export const UserSignupFormStepTermsAndSubmit = ({
 				</CheckboxContainer>
 				<CheckboxContainer>
 					<FormCheckbox
-						name="news"
+						name="newsletter"
 						control={control}
-						formError={errors.news}
+						formError={errors.newsletter}
 						label={(
 							<CheckboxMessage>
 								<FormattedMessage
@@ -189,7 +193,7 @@ export const UserSignupFormStepTermsAndSubmit = ({
 				</CircularProgressContainer>
 			) : (
 				<CreateAccountButton
-					disabled={!termsAgreed || !fields.reCaptchaToken || isSubmitting}
+					disabled={submitButtonIsDisabled}
 					onClick={createAccount}
 					type="submit"
 				>

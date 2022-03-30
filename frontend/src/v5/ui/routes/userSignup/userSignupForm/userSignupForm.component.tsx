@@ -86,7 +86,7 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 			const errorMessage = getRegistrationError(error);
 			if (errorMessage === USER_ALREADY_EXISTS) {
 				setAlreadyExistingUsernames([...alreadyExistingUsernames, fields.username]);
-				setFields(({ password, terms, ...prevFields }) => prevFields);
+				setFields(({ password, terms, newsletter, ...prevFields }) => prevFields);
 				setActiveStep(0);
 			} else {
 				setUnexpectedError(errorMessage);
