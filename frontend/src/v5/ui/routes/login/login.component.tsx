@@ -86,7 +86,7 @@ export const Login = () => {
 							id="auth.login.signUp"
 							defaultMessage="Don't have an account? <Link>Sign up</Link>"
 							values={{
-								Link: (val:string) => <Link to="/sign-up">{val}</Link>,
+								Link: (val:string) => <Link to="/v5/signup">{val}</Link>,
 							}}
 						/>
 					</SignUpPrompt>

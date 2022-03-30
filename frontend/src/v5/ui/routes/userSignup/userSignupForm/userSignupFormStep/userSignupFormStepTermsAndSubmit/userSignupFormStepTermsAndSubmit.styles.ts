@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 import { Link as LinkBase } from 'react-router-dom';
-import ErrorIconBase from '@assets/icons/stepper_error.svg';
+import ErrorIconBase from '@assets/icons/warning_small.svg';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
 
 export const CreateAccountButton = styled(SubmitButton)`
