@@ -17,9 +17,9 @@
 
 import styled from 'styled-components';
 
-import IconButton from '@material-ui/core/IconButton';
-import Select from '@material-ui/core/Select';
-import MapIcon from '@material-ui/icons/Map';
+import IconButton from '@mui/material/IconButton';
+import Select from '@mui/material/Select';
+import MapIcon from '@mui/icons-material/Map';
 
 import { COLOR } from '../../../../styles';
 

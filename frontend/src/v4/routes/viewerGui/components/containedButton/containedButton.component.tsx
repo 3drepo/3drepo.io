@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FC, ReactNode } from 'react';
-import { ButtonProps } from '@material-ui/core/Button';
+import { ButtonProps } from '@mui/material/Button';
 
 import { StyledButton } from './containedButton.styles';
 
@@ -27,13 +27,12 @@ interface IProps extends ButtonProps {
 
 export const ContainedButton: FC<IProps> = ({ children, icon, onClick, ...props }) => {
 	const IconComponent = icon;
-
 	return (
 		<StyledButton
 			color="primary"
 			variant="contained"
 			size="small"
-			squeezed={Boolean(icon) ? 1 : 0}
+			squeezed={icon ? 1 : 0}
 			onClick={onClick}
 			{...props}
 		>

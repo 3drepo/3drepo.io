@@ -49,7 +49,7 @@ export const UserMessage = ({
 			<UserMarker name={name} />
 			<CommentContainer self={props.self}>
 				{isScreenshot && <Screenshot comment={commentWithMarkdown} viewpoint={viewpoint} />}
-				<Comment teamspace={props.teamspace}>{commentWithMarkdown}</Comment>
+				<Comment>{commentWithMarkdown}</Comment>
 				<Footer
 					name={name}
 					formRef={props.formRef}

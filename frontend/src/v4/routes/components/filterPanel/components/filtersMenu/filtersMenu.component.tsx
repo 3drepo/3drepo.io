@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent, createRef } from 'react';
-import List from '@material-ui/core/List';
-import ArrowRight from '@material-ui/icons/ArrowRight';
-import Check from '@material-ui/icons/Check';
-import Copy from '@material-ui/icons/FileCopy';
+import List from '@mui/material/List';
+import ArrowRight from '@mui/icons-material/ArrowRight';
+import Check from '@mui/icons-material/Check';
+import Copy from '@mui/icons-material/FileCopy';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import TextField from '@mui/material/TextField';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { FILTER_TYPES } from '../../filterPanel.component';
@@ -92,7 +93,7 @@ export class FiltersMenu extends PureComponent<IProps, IState> {
 
 	public renderListParentItem = (index, item) => {
 		return (
-			<StyledListItem button onMouseEnter={() => this.showSubMenu(index)}>
+			<StyledListItem onMouseEnter={() => this.showSubMenu(index)}>
 				<StyledItemText>
 					{item.label} <ArrowRight />
 				</StyledItemText>
@@ -111,7 +112,6 @@ export class FiltersMenu extends PureComponent<IProps, IState> {
 		const name = subItem.label || subItem.value;
 		return (
 			<StyledListItem
-				button
 				onClick={this.toggleSelectItem(item, subItem)}
 				key={`${name}-${index}`}
 			>
@@ -120,8 +120,10 @@ export class FiltersMenu extends PureComponent<IProps, IState> {
 					{item.type === FILTER_TYPES.DATE &&
 						<StyledDatePicker
 							value={this.getSelectedDate(item, subItem.value)}
-							placeholder="Select date"
 							onChange={this.onDateChange(item, subItem.value)}
+							renderInput={(params) => (
+								<TextField {...params} placeholder="Select date" />
+							)}
 						/>
 					}
 					{this.isSelectedItem(item.label, subItem.value) && <Check fontSize={'small'} />}
@@ -158,7 +160,7 @@ export class FiltersMenu extends PureComponent<IProps, IState> {
 							const isSelected = this.props.selectedDataTypes.includes(item.type);
 							return (
 
-								<StyledListItem button key={`${item.label}-${index}`} onClick={this.toggleSelectDataType(item.type)}>
+								<StyledListItem key={`${item.label}-${index}`} onClick={this.toggleSelectDataType(item.type)}>
 									<StyledItemText>
 										{item.label}
 										{isSelected && <Check fontSize={'small'} />}
@@ -174,7 +176,7 @@ export class FiltersMenu extends PureComponent<IProps, IState> {
 
 	public renderFooter = () => (
 		<MenuFooter>
-			<StyledListItem button disabled={!this.props.selectedItems.length}>
+			<StyledListItem disabled={!this.props.selectedItems.length}>
 				<StyledItemText>
 					<CopyToClipboard text={JSON.stringify(this.props.selectedItems)}>
 						<CopyItem>

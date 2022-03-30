@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 
-import IconButton from '@material-ui/core/IconButton';
+import IconButton from '@mui/material/IconButton';
 
 import { COLOR } from '../../../../../../styles';
 import { CheckboxCell } from '../../../../../components/customTable/customTable.styles';
@@ -76,9 +76,9 @@ const sumUnitsStyle = css`
 	padding-left: 3px;
 `;
 
-export const Units = styled.div`
+export const Units = styled.div<{ sum: any }>`
 	width: 30px;
 	text-align: right;
 	padding-right: 10px;
-	${({ sum }: any) => sum && sumUnitsStyle};
+	${({ sum }) => sum && sumUnitsStyle};
 `;

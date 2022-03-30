@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import SelectAllIcon from '@material-ui/icons/DoneAll';
-import GeometryIcon from '@material-ui/icons/ViewAgenda';
-import ShowAllIcon from '@material-ui/icons/Visibility';
-import IsolateIcon from '@material-ui/icons/VisibilityOutlined';
+import SelectAllIcon from '@mui/icons-material/DoneAll';
+import GeometryIcon from '@mui/icons-material/ViewAgenda';
+import ShowAllIcon from '@mui/icons-material/Visibility';
+import IsolateIcon from '@mui/icons-material/VisibilityOutlined';
 
 export const TREE_ACTIONS_ITEMS = {
 	SHOW_ALL: 'showAll',

@@ -17,7 +17,7 @@
 
 import { PureComponent } from 'react';
 
-import Check from '@material-ui/icons/Check';
+import Check from '@mui/icons-material/Check';
 import { isEmpty } from 'lodash';
 
 import { MEASURE_ACTIONS_ITEMS, MEASURE_ACTIONS_MENU } from '../../../../constants/measure';
@@ -140,7 +140,7 @@ export class Measurements extends PureComponent<IProps, IState> {
 				// When the model is in feet there shouldnt be the options of change the units
 				.filter(({name}) => name !== MEASURE_ACTIONS_ITEMS.UNITS_DISPLAYED_IN || this.props.modelUnit !== 'ft')
 				.map(( {name, Icon, label }) => (
-				<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
+				<StyledListItem key={name} onClick={this.menuActionsMap[name]}>
 					<IconWrapper><Icon fontSize="small" /></IconWrapper>
 					<StyledItemText>
 						{label}

@@ -19,11 +19,11 @@ import { ScrollbarProps } from 'react-custom-scrollbars';
 import { ScrollbarWrapper } from './scrollArea.styles';
 
 type IScrollArea = ScrollbarProps & {
-	children: any;
 	variant?: 'base' | 'secondary';
+	as?: React.ElementType;
 };
 
-export const ScrollArea = ({ variant = 'base', children, ...props }: IScrollArea): JSX.Element => (
+export const ScrollArea = ({ variant = 'base', children, ...props }: IScrollArea) => (
 	<ScrollbarWrapper
 		variant={variant}
 		{...props}

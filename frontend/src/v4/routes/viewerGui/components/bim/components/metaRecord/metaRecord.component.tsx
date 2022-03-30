@@ -18,9 +18,9 @@
 import { useState, useEffect } from 'react';
 
 import { isNil, isNumber } from 'lodash';
-import MoreIcon from '@material-ui/icons/ChevronRight';
-import LessIcon from '@material-ui/icons/ExpandMore';
-import Tooltip from '@material-ui/core/Tooltip';
+import MoreIcon from '@mui/icons-material/ChevronRight';
+import LessIcon from '@mui/icons-material/ExpandMore';
+import Tooltip from '@mui/material/Tooltip';
 
 import { sortMetadata } from '@/v4/helpers/bim';
 import { StarIcon } from '@/v4/routes/components/starIcon/starIcon.component';

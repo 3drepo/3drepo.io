@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DialogContent, InputAdornment } from '@material-ui/core';
+import { DialogContent, InputAdornment } from '@mui/material';
 import Dropzone from 'react-dropzone';
 import styled from 'styled-components';
 import { COLOR } from '../../../../styles';

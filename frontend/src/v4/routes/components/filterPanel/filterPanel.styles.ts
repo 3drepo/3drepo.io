@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Chip from '@material-ui/core/Chip';
-import IconButton from '@material-ui/core/IconButton';
-import Popper from '@material-ui/core/Popper';
-import TextField from '@material-ui/core/TextField';
-import Copy from '@material-ui/icons/FileCopy';
+import Chip from '@mui/material/Chip';
+import IconButton from '@mui/material/IconButton';
+import Popper from '@mui/material/Popper';
+import TextField from '@mui/material/TextField';
+import Copy from '@mui/icons-material/FileCopy';
 import styled, { css } from 'styled-components';
 import { COLOR } from './../../../styles/colors';
 

@@ -17,7 +17,7 @@
 
 import { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { Tooltip } from '@material-ui/core';
+import { Tooltip } from '@mui/material';
 import {
 	DashboardListItemButton,
 	DashboardListItemIcon,

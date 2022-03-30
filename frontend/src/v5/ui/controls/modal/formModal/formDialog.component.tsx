@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { DetailedHTMLProps, FormHTMLAttributes } from 'react';
-import { Button, Dialog } from '@material-ui/core';
+import { Button, Dialog } from '@mui/material';
 import CloseIcon from '@assets/icons/close.svg';
-import { DialogProps } from '@material-ui/core/Dialog';
+import { DialogProps } from '@mui/material/Dialog';
 import { ScrollArea } from '@controls/scrollArea';
 import {
 	Form,
@@ -29,7 +29,7 @@ import {
 	RemoveWhiteCorners,
 } from './formDialog.styles';
 
-interface IFormModal extends DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement> {
+interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
 	onClickClose?: () => void;
 	title?: string;
 	open?: boolean;

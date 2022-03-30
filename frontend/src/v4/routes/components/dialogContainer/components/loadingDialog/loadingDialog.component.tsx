@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FunctionComponent } from 'react';
-import DialogContent from '@material-ui/core/DialogContent';
+import DialogContent from '@mui/material/DialogContent';
 import { Loader } from '../../../loader/loader.component';
 import { LoaderContainer } from './loadingDialog.styles';
 
