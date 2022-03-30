@@ -31,7 +31,7 @@ export const ForgotPassword = (): JSX.Element => {
 		defaultValues: { username: '' },
 		resolver: yupResolver(ForgotPasswordSchema),
 	});
-	const onSubmit = () => { };
+	const onSubmit = ({ username }) => API.Auth.resetPassword(username);
 
 	return (
 		<AuthPage>

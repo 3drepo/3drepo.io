@@ -26,3 +26,5 @@ export const authenticate = async (): Promise<string> => {
 export const login = (user, password): Promise<AxiosResponse<void>> => api.post('login', { user, password });
 
 export const logout = (): Promise<AxiosResponse<void>> => api.post('logout');
+
+export const resetPassword = (user) => api.post('user/password', { user });
