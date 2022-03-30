@@ -19,14 +19,15 @@ import { connectRouter } from 'connected-react-router';
 import { combineReducers } from 'redux';
 import undoable from 'redux-undo';
 
-import { reducer as federationsReducer } from '@/v5/store/federations/federations.redux';
-import { reducer as containersReducer } from '@/v5/store/containers/containers.redux';
-import { reducer as dialogsReducer } from '@/v5/store/dialogs/dialogs.redux';
-import { reducer as projectsReducer } from '@/v5/store/projects/projects.redux';
-import { reducer as teamspaces2Reducer } from '@/v5/store/teamspaces/teamspaces.redux';
-import { reducer as usersReducer } from '@/v5/store/users/users.redux';
+import { federationsReducer } from '@/v5/store/federations/federations.redux';
+import { containersReducer } from '@/v5/store/containers/containers.redux';
+import { dialogsReducer } from '@/v5/store/dialogs/dialogs.redux';
+import { projectsReducer } from '@/v5/store/projects/projects.redux';
+import { teamspacesReducer as teamspaces2Reducer } from '@/v5/store/teamspaces/teamspaces.redux';
+import { usersReducer } from '@/v5/store/users/users.redux';
+import { authReducer as auth2Reducer } from '@/v5/store/auth/auth.redux';
 
-import { reducer as revisionsReducer } from '@/v5/store/revisions/revisions.redux';
+import { revisionsReducer } from '@/v5/store/revisions/revisions.redux';
 import { CanvasHistoryTypes } from './canvasHistory';
 import { batchGroupBy } from './canvasHistory/canvasHistory.helpers';
 
@@ -82,6 +83,7 @@ export default function createReducer(history) {
 		billing: billingReducer,
 		teamspaces: teamspacesReducer,
 		teamspaces2: teamspaces2Reducer,
+		auth2: auth2Reducer,
 		model: modelReducer,
 		auth: authReducer,
 		notifications: notificationsReducer,

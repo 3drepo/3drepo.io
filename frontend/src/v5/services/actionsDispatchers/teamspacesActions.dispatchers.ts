@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ITeamspacesActions, TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
+import { ITeamspacesActionCreators, TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 
-export const TeamspacesActionsDispatchers = createActionsDispatchers<ITeamspacesActions>(TeamspacesActions);
+export const TeamspacesActionsDispatchers = createActionsDispatchers<ITeamspacesActionCreators>(TeamspacesActions);

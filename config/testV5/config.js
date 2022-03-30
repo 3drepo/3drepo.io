@@ -154,6 +154,10 @@ module.exports = {
 		{title: "Cookies", type: "haveRead", page: "cookies", fileName: "cookies.html"}
 	],
 	userNotice: false,
-	termsUpdatedAt: 12345678
+	termsUpdatedAt: 12345678,
 
+	mail: {
+		generateCredentials: true,
+		sender: '"3D Repo" <dummyEmail@3drepo.org>'
+	},
 }

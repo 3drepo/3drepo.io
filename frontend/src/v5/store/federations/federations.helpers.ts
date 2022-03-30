@@ -16,11 +16,11 @@
  */
 
 import {
-	FetchFederationRawSettingsResponse,
-	FetchFederationSettingsResponse,
-	FetchFederationsItemResponse,
-	FetchFederationStatsResponse,
+	FederationBackendSettings,
+	FederationStats,
 	IFederation,
+	MinimumFederation,
+	FederationSettings,
 } from '@/v5/store/federations/federations.types';
 import {
 	UploadStatuses,
@@ -34,8 +34,8 @@ export const filterFederations = (federations: IFederation[], filterQuery: strin
 );
 
 export const prepareSingleFederationData = (
-	federation: FetchFederationsItemResponse,
-	stats?: FetchFederationStatsResponse,
+	federation: MinimumFederation,
+	stats?: FederationStats,
 ): IFederation => {
 	const containers = stats?.containers ?? (federation as any).containers ?? [];
 
@@ -53,8 +53,8 @@ export const prepareSingleFederationData = (
 };
 
 export const prepareFederationsData = (
-	federations: Array<FetchFederationsItemResponse>,
-	stats?: FetchFederationStatsResponse[],
+	federations: Array<MinimumFederation>,
+	stats?: FederationStats[],
 ) => federations.map<IFederation>((federation, index) => {
 	const federationStats = stats?.[index];
 	return prepareSingleFederationData(federation, federationStats);
@@ -63,7 +63,7 @@ export const prepareFederationsData = (
 export const prepareFederationSettingsForFrontend = ({
 	surveyPoints,
 	...otherProps
-}: FetchFederationRawSettingsResponse): FetchFederationSettingsResponse => (
+}: FederationBackendSettings): FederationSettings => (
 	{
 		surveyPoint: surveyPoints?.[0],
 		...otherProps,
@@ -73,7 +73,7 @@ export const prepareFederationSettingsForFrontend = ({
 export const prepareFederationSettingsForBackend = ({
 	surveyPoint,
 	...otherProps
-}: FetchFederationSettingsResponse): FetchFederationRawSettingsResponse => (
+}: FederationSettings): FederationBackendSettings => (
 	{
 		surveyPoints: [surveyPoint],
 		...otherProps,

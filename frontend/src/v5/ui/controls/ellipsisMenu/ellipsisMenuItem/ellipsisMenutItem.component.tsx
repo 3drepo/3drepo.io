@@ -24,14 +24,16 @@ type EllipsisMenuItemProps = {
 	to?: any;
 	key?: string;
 	onClick?: (event: SyntheticEvent) => void;
+	disabled?: boolean;
 };
 
-export const EllipsisMenuItem = ({ to, title, key, onClick }: EllipsisMenuItemProps) => (
+export const EllipsisMenuItem = ({ to, title, key, disabled, onClick }: EllipsisMenuItemProps) => (
 	<MenuItem
 		component={to ? Link : null}
 		to={to}
 		key={key}
 		onClick={onClick}
+		disabled={disabled}
 	>
 		<Typography variant="body1" noWrap>
 			{title}

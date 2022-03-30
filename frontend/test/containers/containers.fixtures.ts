@@ -16,7 +16,7 @@
  */
 
 import * as faker from 'faker';
-import { UploadStatuses, FetchContainerStatsResponse, IContainer } from '@/v5/store/containers/containers.types';
+import { UploadStatuses, IContainer, ContainerStats } from '@/v5/store/containers/containers.types';
 
 export const containerMockFactory = (overrides?: Partial<IContainer>): IContainer => ({
 	_id: faker.datatype.uuid(),
@@ -34,7 +34,7 @@ export const containerMockFactory = (overrides?: Partial<IContainer>): IContaine
 	...overrides,
 });
 
-export const prepareMockStatsReply = (container: IContainer): FetchContainerStatsResponse => ({
+export const prepareMockStatsReply = (container: IContainer): ContainerStats => ({
 	revisions: {
 		total: container.revisionsCount,
 		lastUpdated: container.lastUpdated.valueOf(),
