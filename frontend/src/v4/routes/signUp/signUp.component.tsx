@@ -199,7 +199,7 @@ export class SignUp extends PureComponent<IProps, IState> {
 
 		return (
 			<Container>
-				<StyledGrid item xs={9} sm={6} md={6} lg={6} xl={2}>
+				<StyledGrid item xs={9} sm={6}>
 					<Panel title="Sign up" hiddenScrollbars>
 						<Headline>Creating a 3D Repo account is free</Headline>
 						<Formik

@@ -25,7 +25,7 @@ export const ScrollbarWrapper = styled(Scrollbars).attrs(
 			secondary: theme.palette.secondary.light,
 		};
 		return ({
-			autoHideTimeout: '3000',
+			autoHideTimeout: 3000,
 			autoHideDuration: 300,
 			renderThumbVertical: ({ style }) => (
 				<div

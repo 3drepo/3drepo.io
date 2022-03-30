@@ -28,6 +28,6 @@ export const ScrollArea = ({ variant = 'base', children, ...props }: IScrollArea
 		variant={variant}
 		{...props}
 	>
-		<p>e</p>
+		{children}
 	</ScrollbarWrapper>
 );
