@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ComponentType } from 'react';
-import Tooltip from '@material-ui/core/Tooltip';
-import { TooltipProps } from '@material-ui/core/Tooltip';
+import Tooltip from '@mui/material/Tooltip';
+import { TooltipProps } from '@mui/material/Tooltip';
 import { StyledIconButton } from './tooltipButton.styles';
 
 interface IProps {

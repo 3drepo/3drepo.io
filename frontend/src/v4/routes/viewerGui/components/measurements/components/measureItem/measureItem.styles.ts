@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 
-import Checkbox from '@material-ui/core/Checkbox';
+import Checkbox from '@mui/material/Checkbox';
 
 import { COLOR } from '../../../../../../styles';
 import { ColorSelect } from '../../../../../components/colorPicker/colorPicker.styles';
@@ -30,17 +30,6 @@ import {
 	StyledMarkdownField,
 } from '../../../../../components/textField/textField.styles';
 import { StyledForm as StyledFormComponent } from '../../../views/components/viewItem/viewItem.styles';
-
-interface IContainer {
-	nodeType: string;
-	expandable: boolean;
-	selected: boolean;
-	highlighted: boolean;
-	expanded: boolean;
-	level: number;
-	active: boolean;
-	hasFederationRoot: boolean;
-}
 
 export const MeasurementPoint = styled.div`
 	display: flex;
@@ -78,14 +67,14 @@ export const Actions = styled.div`
 	}
 `;
 
-export const Container = styled.li<IContainer>`
+export const Container = styled.li<{ tall: number }>`
 	color: ${COLOR.BLACK_60};
 	border-bottom: 1px solid ${COLOR.BLACK_6};
 	background-color: ${COLOR.WHITE};
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	height: ${({ tall }: any) => tall ? '56px' : '40px'};
+	height: ${({ tall }) => tall ? '56px' : '40px'};
 	box-sizing: border-box;
 	padding: 0 8px;
 

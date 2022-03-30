@@ -14,10 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent } from 'react';
-import InputLabel from '@material-ui/core/InputLabel';
-import CloseIcon from '@material-ui/icons/Close';
-import SequencesIcon from '@material-ui/icons/Movie';
+import { PureComponent, useState } from 'react';
+import InputLabel from '@mui/material/InputLabel';
+import CloseIcon from '@mui/icons-material/Close';
+import SequencesIcon from '@mui/icons-material/Movie';
 import { Field } from 'formik';
 
 import { isDateOutsideRange } from '../../../helpers/dateTime';
@@ -44,24 +44,34 @@ interface IState {
 	valued: any;
 }
 
-const SequenceDate = ({ value, name, onChange, showSequenceDate, min, max, initialFocusedDate }) => {
+const SequenceDate = ({ name, onChange, showSequenceDate, min, max, initialFocusedDate, ...props }) => {
+	const [value, setValue] = useState(props.value);
+	const deleteValue = () => {
+		onChange({target: { value: null, name }})
+		setValue(null);
+	};
+
+	const handleChange = ({ target }) => {
+		onChange({ target })
+		setValue(target.value);
+	};
+
 	return (
 		<SequenceDateContainer>
 			<SequenceDateField
-				shouldDisableDate={(date) => isDateOutsideRange(min, max, date.$d)}
-				format={NAMED_MONTH_DATETIME_FORMAT}
+				shouldDisableDate={(date: any) => isDateOutsideRange(min, max, date.$d)}
+				inputFormat={NAMED_MONTH_DATETIME_FORMAT}
 				dateTime
 				name={name}
-				inputId={name}
 				value={value}
-				onChange={onChange}
+				onChange={handleChange}
 				defaultValue={min}
 				initialFocusedDate={initialFocusedDate}
 			/>
 			{ value &&
 				<SequenceDateActions>
 					<SmallIconButton onClick={(e) => showSequenceDate(value)} Icon={SequencesIcon} />
-					<SmallIconButton onClick={(e) => onChange({target: { value: null, name }})} Icon={CloseIcon} />
+					<SmallIconButton onClick={deleteValue} Icon={CloseIcon} />
 				</SequenceDateActions>
 			}
 		</SequenceDateContainer>
@@ -81,7 +91,7 @@ export class SequencingDates extends PureComponent<IProps, IState> {
 	public render() {
 		return (
 			<>
-				<FieldsRow container justify="space-between" flex={1}>
+				<FieldsRow container justifyContent="space-between" flex={1}>
 					<StyledFormControl>
 						<InputLabel shrink>Start time</InputLabel>
 						<Field name="sequence_start" render={({ field, form }) => (
@@ -97,7 +107,7 @@ export class SequencingDates extends PureComponent<IProps, IState> {
 					</StyledFormControl>
 				</FieldsRow>
 
-				<FieldsRow container justify="space-between" flex={1}>
+				<FieldsRow container justifyContent="space-between" flex={1}>
 					<StyledFormControl>
 						<InputLabel shrink>End time</InputLabel>
 						<Field name="sequence_end" render={({ field, form }) =>  (

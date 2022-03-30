@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Grid from '@material-ui/core/Grid';
+import Grid from '@mui/material/Grid';
 import { PureComponent } from 'react';
 
 import { Highlight } from '../highlight/highlight.component';
@@ -49,7 +49,7 @@ export const DefaultHeadline = ({children = Function.prototype, ...props}) => (
 		container
 		direction="row"
 		alignItems="center"
-		justify="flex-start"
+		justifyContent="flex-start"
 		wrap="nowrap"
 	>
 		<HeadlineIcon fontSize="small" active={props.active && !props.disabled} {...props.IconProps} />

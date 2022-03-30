@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import DialogContent from '@material-ui/core/DialogContent';
-import List from '@material-ui/core/List';
+import DialogContent from '@mui/material/DialogContent';
+import List from '@mui/material/List';
 import styled from 'styled-components';
 
 export const StyledList = styled(List)`

@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Button from '@material-ui/core/Button';
-import MenuItem from '@material-ui/core/MenuItem';
-import Popper from '@material-ui/core/Popper';
-import Select from '@material-ui/core/Select';
-import TextField from '@material-ui/core/TextField';
+import Button from '@mui/material/Button';
+import MenuItem from '@mui/material/MenuItem';
+import Popper from '@mui/material/Popper';
+import Select from '@mui/material/Select';
+import TextField from '@mui/material/TextField';
 import styled, { css } from 'styled-components';
 
 import { COLOR, FONT_WEIGHT } from '../../../styles';

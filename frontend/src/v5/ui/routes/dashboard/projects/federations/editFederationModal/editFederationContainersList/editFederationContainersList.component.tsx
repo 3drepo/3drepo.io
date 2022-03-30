@@ -30,7 +30,7 @@ import { SearchInput } from '@controls/searchInput';
 import { Display } from '@/v5/ui/themes/media';
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { IContainer } from '@/v5/store/containers/containers.types';
-import { ButtonProps } from '@material-ui/core/Button';
+import { ButtonProps } from '@mui/material/Button';
 import { isEmpty } from 'lodash';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { filterContainers } from '@/v5/store/containers/containers.helpers';

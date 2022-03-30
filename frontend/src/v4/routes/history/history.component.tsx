@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import CloudDownload from '@material-ui/icons/CloudDownload';
+import CloudDownload from '@mui/icons-material/CloudDownload';
 import { isEmpty, isEqual } from 'lodash';
 
 import { LoaderContainer } from '../billing/billing.styles';

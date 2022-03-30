@@ -47,7 +47,6 @@ export const AuthPage = ({ footer, children }: IAuthPage): JSX.Element => {
 			<Logo
 				draggable="false"
 				src={topLogoSrc}
-				longdesc={formatMessage({ id: 'auth.logo.longDesc', defaultMessage: '3DRepoBuildingInformationModellingSoftware' })}
 				alt={formatMessage({ id: 'auth.logo.alt', defaultMessage: 'Logo' })}
 			/>
 			<Container>

@@ -18,7 +18,7 @@
 import styled, { css } from 'styled-components';
 import { Typography } from '@controls/typography';
 
-export const Container = styled.div`
+export const Container = styled.div<{ isLoading?: boolean }>`
 	${({ isLoading }) => isLoading && css`
 		pointer-events: none;
 	`}

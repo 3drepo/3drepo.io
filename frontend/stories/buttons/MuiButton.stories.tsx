@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Button } from '@material-ui/core';
+import { Button } from '@mui/material';
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {

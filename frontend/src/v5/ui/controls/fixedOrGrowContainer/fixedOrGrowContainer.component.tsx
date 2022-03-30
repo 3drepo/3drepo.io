@@ -17,11 +17,10 @@
 
 import { ReactNode, CSSProperties } from 'react';
 
-import { StyledComponentProps } from 'styled-components';
 import { Display } from '@/v5/ui/themes/media';
 import { Container } from './fixedOrGrowContainer.styles';
 
-export interface IFixedOrGrowContainer extends StyledComponentProps {
+export type IFixedOrGrowContainer = {
 	width?: number;
 	tabletWidth?: number;
 	mobileWidth?: number;
@@ -30,7 +29,7 @@ export interface IFixedOrGrowContainer extends StyledComponentProps {
 	children?: JSX.Element | ReactNode | ReactNode[] ;
 	className?: string;
 	style?: CSSProperties;
-}
+};
 
 export const FixedOrGrowContainer = ({
 	width,

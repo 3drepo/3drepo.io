@@ -17,7 +17,7 @@
 
 import { upperCase } from 'lodash';
 
-import Grid from '@material-ui/core/Grid';
+import Grid from '@mui/material/Grid';
 import { Highlight } from '../highlight/highlight.component';
 import { Detail, Name } from './userItem.styles';
 
@@ -35,10 +35,10 @@ export const UserItem = (props: IProps) => {
 	};
 
 	return (
-		<Grid
+        <Grid
 			container
 			direction="column"
-			justify="center"
+			justifyContent="center"
 			alignItems="flex-start"
 			style={{minWidth: 0}}
 		>
@@ -61,5 +61,5 @@ export const UserItem = (props: IProps) => {
 				/>
 			</Detail>
 		</Grid>
-	);
+    );
 };

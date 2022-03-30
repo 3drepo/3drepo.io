@@ -72,17 +72,17 @@ export const Footer = ({ name, created, formRef, commentRef, comment, ...props }
 	};
 
 	return (
-		<Container>
+        <Container>
 			<Username>{name}</Username>
 			<Date>
 				<DateTime value={created} format={DATE_TIME_FORMAT} />
 			</Date>
-			<IconButton onClick={handleQuoteButtonClick}>
+			<IconButton onClick={handleQuoteButtonClick} size="large">
 				<StyledQuoteIcon />
 			</IconButton>
-			<IconButton onClick={handleReplayButtonClick}>
+			<IconButton onClick={handleReplayButtonClick} size="large">
 				<StyledReplyIcon />
 			</IconButton>
 		</Container>
-	);
+    );
 };

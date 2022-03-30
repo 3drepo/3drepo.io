@@ -16,16 +16,16 @@
  */
 
 import { debounce } from 'lodash';
-import { PureComponent, ReactNodeArray } from 'react';
+import { PureComponent, ReactNode } from 'react';
 import Autosuggest from 'react-autosuggest';
 
-import Checkbox from '@material-ui/core/Checkbox';
-import FormControl from '@material-ui/core/FormControl';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Grid from '@material-ui/core/Grid';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import Paper from '@material-ui/core/Paper';
+import Checkbox from '@mui/material/Checkbox';
+import FormControl from '@mui/material/FormControl';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Grid from '@mui/material/Grid';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Paper from '@mui/material/Paper';
 
 import { JobItem } from '../jobItem/jobItem.component';
 import { UserItem } from '../userItem/userItem.component';
@@ -45,7 +45,7 @@ import {
 } from './newUserForm.styles';
 
 interface IProps {
-	title: string | ReactNodeArray;
+	title: string | ReactNode[];
 	jobs: any[];
 	users: any[];
 	onInvitationOpen: (email, job, isAdmin) => void;
