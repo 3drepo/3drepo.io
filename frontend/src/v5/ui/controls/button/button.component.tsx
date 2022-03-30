@@ -19,20 +19,23 @@ import { ElementType, forwardRef, Ref } from 'react';
 import { Typography } from '@/v5/ui/controls/typography';
 import { ButtonTypeMap } from '@mui/material/Button/Button';
 import { ButtonProps } from '@mui/material/Button';
+import { CircularProgress } from '@mui/material';
 import { MuiButton, ErrorButton, LabelButton } from './button.styles';
 
 type ButtonVariants = ButtonProps['variant'] | 'label' | 'label-outlined';
 
-type IButton<T extends ElementType = ButtonTypeMap['defaultComponent']> = Omit<ButtonProps<T>, 'variant'> & {
+export type IButton<T extends ElementType = ButtonTypeMap['defaultComponent']> = Omit<ButtonProps<T>, 'variant'> & {
 	variant?: ButtonVariants;
 	className?: string;
 	errorButton?: boolean;
+	isPending?: boolean;
 };
 
 export const ButtonBase = <T extends ElementType>({
 	children,
 	variant,
 	errorButton,
+	isPending,
 	...props
 }: IButton<T>, ref: Ref<HTMLButtonElement>): JSX.Element => {
 	if (errorButton) {
@@ -56,7 +59,18 @@ export const ButtonBase = <T extends ElementType>({
 			</LabelButton>
 		);
 	}
-	return <MuiButton variant={variant} {...props} ref={ref}>{children}</MuiButton>;
+
+	return isPending
+		? (
+			<MuiButton variant={variant} {...props} startIcon="" ref={ref}>
+				<CircularProgress color="inherit" size="13px" thickness={7} />
+			</MuiButton>
+		)
+		: (
+			<MuiButton variant={variant} {...props} ref={ref}>
+				{ children }
+			</MuiButton>
+		);
 };
 
 export const Button = forwardRef(ButtonBase);
