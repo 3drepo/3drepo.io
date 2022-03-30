@@ -20,7 +20,7 @@ import { Controller } from 'react-hook-form';
 
 export type FormTextFieldProps = TextFieldProps & {
 	control: any,
-	formError: any,
+	formError?: any,
 };
 
 export const FormTextField = ({

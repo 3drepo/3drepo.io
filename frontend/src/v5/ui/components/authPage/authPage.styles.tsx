@@ -31,7 +31,7 @@ export const BackgroundOverlay = styled(LoginBackground)`
 	overflow: hidden;
 `;
 
-export const Background = styled.div`
+export const Background = styled.div<{ backgroundSrc?: string }>`
 	display: flex;
 	height: 100%;
 	background: ${({ theme }) => theme.palette.gradient.secondary};

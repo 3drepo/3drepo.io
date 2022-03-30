@@ -56,15 +56,19 @@ export const OtherOptions = styled.div`
 	}
 `;
 
-export const SignUpPrompt = styled(Typography)`
+const StyledTypography = styled(Typography).attrs({
+	variant: 'body1',
+})``;
+
+export const SignUpPrompt = styled(StyledTypography)`
 	margin-right: auto;
 `;
 
-export const ForgotPasswordPrompt = styled(Typography)`
+export const ForgotPasswordPrompt = styled(StyledTypography)`
 	margin-left: auto;
 `;
 
-export const ErrorMessage = styled(Typography)`
+export const ErrorMessage = styled(StyledTypography)`
 	color: ${({ theme }) => theme.palette.error.main};
 	display: flex;
 	align-items: center;
