@@ -51,7 +51,7 @@ export const Root = () => {
 			TeamspacesActionsDispatchers.fetch();
 		}
 
-		if (!isNull(isAuthenticated) && !isAuthenticated) {
+		if (!isNull(isAuthenticated) && !isAuthenticated && history.location.pathname !== '/v5/signup') {
 			history.push('/v5/login');
 		}
 	}, [userName, isAuthenticated]);
@@ -63,7 +63,7 @@ export const Root = () => {
 					<IntlProvider {...getIntlProviderProps()}>
 						<V4Adapter>
 							<Switch>
-								<Route path="/v5/sign-up" component={UserSignup} />
+								<Route path="/v5/signup" component={UserSignup} />
 								<Route component={Dashboard} />
 							</Switch>
 						</V4Adapter>
