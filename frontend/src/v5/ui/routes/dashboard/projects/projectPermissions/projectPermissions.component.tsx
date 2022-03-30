@@ -25,7 +25,7 @@ import { Container, V4ProjectsPermissions } from './projectPermissions.styles';
 
 export const ProjectPermissions = () => {
 	const dispatch = useDispatch();
-	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails().name;
+	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails()?.name;
 	const username = useSelector(selectUsername);
 
 	useEffect(() => {
