@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { Menu as MenuComponent, MenuItem as MenuItemComponent } from '@material-ui/core';
+import { Menu as MenuComponent, MenuItem as MenuItemComponent } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 export const MenuList = styled(MenuComponent)`
@@ -28,9 +28,9 @@ export const MenuList = styled(MenuComponent)`
 	}
 `;
 
-export const MenuItem = styled(MenuItemComponent).attrs({
+export const MenuItem: typeof Link = styled(MenuItemComponent).attrs({
 	component: Link,
-})`
+})<{ disabled?: boolean }>`
 	&& {
 		margin: 0;
 		height: 46px;

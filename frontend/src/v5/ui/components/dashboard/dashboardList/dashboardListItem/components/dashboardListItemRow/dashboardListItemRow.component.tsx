@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Dispatch, ReactNode } from 'react';
+import { MouseEventHandler, ReactNode } from 'react';
 import { Container } from './dashboardListItemRow.styles';
 
 type IDashboardListItemRow = {
 	children: ReactNode;
 	className?: string;
 	selected?: boolean;
-	onClick?: Dispatch<void>;
+	onClick?: MouseEventHandler<HTMLDivElement>;
 };
 
 export const DashboardListItemRow = ({

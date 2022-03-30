@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import FormControl from '@material-ui/core/FormControl';
-import Grid from '@material-ui/core/Grid';
-import InputLabel from '@material-ui/core/InputLabel';
+import FormControl from '@mui/material/FormControl';
+import Grid from '@mui/material/Grid';
+import InputLabel from '@mui/material/InputLabel';
 import * as queryString from 'query-string';
 import { Route } from 'react-router-dom';
 
@@ -130,7 +130,7 @@ export class Projects extends PureComponent<IProps, IState> {
 					<Options
 						container
 						direction="row"
-						justify="space-between"
+						justifyContent="space-between"
 						alignContent="center"
 					>
 						<SelectContainer item>

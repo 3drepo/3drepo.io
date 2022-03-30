@@ -17,16 +17,16 @@
 
 import styled from 'styled-components';
 
-import FormControl from '@material-ui/core/FormControl';
+import FormControl from '@mui/material/FormControl';
 
 import { StyledButton } from '../containedButton/containedButton.styles';
 import { Container as ButtonContainer } from '../pinButton/pinButton.styles';
 
-export const UpdateButtonsContainer = styled(FormControl)`
+export const UpdateButtonsContainer = styled(FormControl)<{ center?: boolean }>`
 	&& {
 		display: flex;
 		flex-direction: row;
-		justify-content: ${({ center }: { center: boolean }) => center ? 'center' : 'flex-start'};
+		justify-content: ${({ center }) => center ? 'center' : 'flex-start'};
 		width: 100%;
 
 		${StyledButton} {

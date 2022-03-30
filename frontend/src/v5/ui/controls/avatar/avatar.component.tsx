@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { MouseEvent } from 'react';
-import AvatarIcon from '@material-ui/core/Avatar';
+import AvatarIcon from '@mui/material/Avatar';
 import { IUser } from '@/v5/store/users/users.redux';
 import { StyledIconButton } from './avatar.styles';
 

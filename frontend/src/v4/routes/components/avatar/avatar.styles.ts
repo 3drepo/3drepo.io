@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Avatar from '@material-ui/core/Avatar';
+import Avatar from '@mui/material/Avatar';
 import styled from 'styled-components';
 
-import Icon from '@material-ui/core/Icon';
+import Icon from '@mui/material/Icon';
 import { COLOR } from '../../../styles';
 
 const DEFAULT_SIZE = 50;

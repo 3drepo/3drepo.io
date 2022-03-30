@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 
-import SvgIcon from '@material-ui/core/SvgIcon';
+import SvgIcon from '@mui/material/SvgIcon';
 
 export const StyledSvgIcon = styled(SvgIcon)`
 	cursor: pointer;
