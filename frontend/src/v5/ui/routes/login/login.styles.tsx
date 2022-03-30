@@ -20,8 +20,9 @@ import UserIcon from '@assets/icons/user.svg';
 import PasswordIcon from '@assets/icons/lock.svg';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { Typography } from '@controls/typography';
+import { formatMessage } from '@/v5/services/intl';
 
-export const Heading = styled(Typography).attrs({
+export const AuthHeading = styled(Typography).attrs({
 	variant: 'h1',
 })`
 	color: ${({ theme }) => theme.palette.secondary.main};
@@ -39,12 +40,25 @@ export const UsernameField = styled(AuthField).attrs({
 	InputProps: {
 		startAdornment: <UserIcon />,
 	},
+	name: 'username',
+	label: formatMessage({
+		id: 'auth.login.usernameLabel',
+		defaultMessage: 'Username or email',
+	}),
+	autoComplete: 'login',
 })``;
 
 export const PasswordField = styled(AuthField).attrs({
 	InputProps: {
 		startAdornment: <PasswordIcon />,
 	},
+	name: 'password',
+	label: formatMessage({
+		id: 'auth.login.passwordLabel',
+		defaultMessage: 'Password',
+	}),
+	autoComplete: 'current-password',
+	type: 'password',
 })``;
 
 export const OtherOptions = styled.div`

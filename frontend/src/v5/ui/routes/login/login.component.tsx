@@ -20,14 +20,14 @@ import { Link } from 'react-router-dom';
 import LoginIcon from '@assets/icons/login.svg';
 import { useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
-import { formatMessage } from '@/v5/services/intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { LoginSchema } from '@/v5/validation/auth';
 import { AuthPage } from '@components/authPage';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
 import ErrorIcon from '@assets/icons/warning_small.svg';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
-import { ErrorMessage, ForgotPasswordPrompt, Heading, OtherOptions, PasswordField, SignUpPrompt, UsernameField } from './login.styles';
+import { ErrorMessage, ForgotPasswordPrompt, AuthHeading,
+	OtherOptions, PasswordField, SignUpPrompt, UsernameField } from './login.styles';
 
 const APP_VERSION = ClientConfig.VERSION;
 
@@ -57,28 +57,11 @@ export const Login = () => {
 			)}
 		>
 			<form onSubmit={handleSubmit(onSubmit)}>
-				<Heading>
+				<AuthHeading>
 					<FormattedMessage id="auth.login.heading" defaultMessage="Log in" />
-				</Heading>
-				<UsernameField
-					control={control}
-					name="username"
-					label={formatMessage({
-						id: 'auth.login.usernameLabel',
-						defaultMessage: 'Username or email',
-					})}
-					autoComplete="login"
-				/>
-				<PasswordField
-					control={control}
-					name="password"
-					label={formatMessage({
-						id: 'auth.login.passwordLabel',
-						defaultMessage: 'Password',
-					})}
-					autoComplete="current-password"
-					type="password"
-				/>
+				</AuthHeading>
+				<UsernameField control={control} />
+				<PasswordField control={control} />
 				{errorMessage && <ErrorMessage><ErrorIcon />{errorMessage}</ErrorMessage>}
 				<OtherOptions>
 					<SignUpPrompt>
@@ -91,7 +74,7 @@ export const Login = () => {
 						/>
 					</SignUpPrompt>
 					<ForgotPasswordPrompt>
-						<Link to="/password-forgot">
+						<Link to="/v5/password-forgot">
 							<FormattedMessage id="auth.login.forgotPassword" defaultMessage="Forgotten your password?" />
 						</Link>
 					</ForgotPasswordPrompt>

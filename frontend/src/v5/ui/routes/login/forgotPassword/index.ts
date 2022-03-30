@@ -15,16 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as Yup from 'yup';
-
-export const username = Yup.string().required();
-const password = Yup.string().required();
-
-export const LoginSchema = Yup.object().shape({
-	password,
-	username,
-});
-
-export const ForgotPasswordSchema = Yup.object().shape({
-	username,
-});
+export { ForgotPassword } from './forgotPassword.component';

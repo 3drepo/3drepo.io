@@ -15,16 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as Yup from 'yup';
+import styled from 'styled-components';
+import { Link } from 'react-router-dom';
+import { UsernameField } from '../login.styles';
 
-export const username = Yup.string().required();
-const password = Yup.string().required();
+export const Input = styled(UsernameField)`
+	margin-bottom: 7px;
+`;
 
-export const LoginSchema = Yup.object().shape({
-	password,
-	username,
-});
-
-export const ForgotPasswordSchema = Yup.object().shape({
-	username,
-});
+export const ReturnLink = styled(Link)`
+	display: flex;
+	margin: 22px auto 12px;
+	justify-content: center;
+	color: ${({ theme }) => theme.palette.primary.main};
+`;
