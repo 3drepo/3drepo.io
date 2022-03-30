@@ -22,7 +22,7 @@ import { Checkbox } from './formCheckbox.styles';
 export type FormCheckboxProps = CheckboxProps & {
 	control: any,
 	formError: any,
-	label,
+	label: string,
 };
 
 export const FormCheckbox = ({
