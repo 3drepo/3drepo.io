@@ -17,17 +17,15 @@
 
 import { FormattedMessage } from 'react-intl';
 import { useEffect, useRef, useState } from 'react';
-import { CircularProgress } from '@material-ui/core';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { UserSignupSchemaTermsAndSubmit } from '@/v5/validation/schemes';
 import { FormCheckbox } from '@controls/formCheckbox/formCheckbox.component';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import ReCAPTCHA from 'react-google-recaptcha';
+import SignupIcon from '@assets/icons/outlined/add_user-outlined.svg';
 import {
-	CircularProgressContainer,
 	CreateAccountButton,
-	CreateAccountIcon,
 	CheckboxContainer,
 	CheckboxMessage,
 	TermsContainer,
@@ -64,6 +62,7 @@ export const UserSignupFormStepTermsAndSubmit = ({
 	const {
 		watch,
 		getValues,
+		handleSubmit,
 		control,
 		formState: { errors },
 	} = useForm<ITermsAndSubmitFormInput>({
@@ -96,8 +95,8 @@ export const UserSignupFormStepTermsAndSubmit = ({
 	useEffect(() => () => { updateFields(getValues()); }, []);
 	useEffect(() => {
 		const captchaIsValid = clientConfigService.captcha_client_key ? fields.reCaptchaToken : true;
-		setSubmitButtonIsDisabled(!termsAgreed || !captchaIsValid || isSubmitting);
-	}, [termsAgreed, fields.reCaptchaToken, isSubmitting]);
+		setSubmitButtonIsDisabled(!termsAgreed || !captchaIsValid);
+	}, [termsAgreed, fields.reCaptchaToken]);
 
 	const handleChange = (reCaptchaToken) => updateFields({ reCaptchaToken });
 
@@ -187,23 +186,17 @@ export const UserSignupFormStepTermsAndSubmit = ({
 					{unexpectedError}
 				</ErrorContainer>
 			)}
-			{isSubmitting ? (
-				<CircularProgressContainer>
-					<CircularProgress size={20} thickness={7} />
-				</CircularProgressContainer>
-			) : (
-				<CreateAccountButton
-					disabled={submitButtonIsDisabled}
-					onClick={createAccount}
-					type="submit"
-				>
-					<CreateAccountIcon />
-					<FormattedMessage
-						id="userSignup.form.button.createAccount"
-						defaultMessage="Create account"
-					/>
-				</CreateAccountButton>
-			)}
+			<CreateAccountButton
+				isPending={isSubmitting}
+				startIcon={<SignupIcon />}
+				disabled={submitButtonIsDisabled}
+				onClick={handleSubmit(createAccount)}
+			>
+				<FormattedMessage
+					id="userSignup.form.button.createAccount"
+					defaultMessage="Create account"
+				/>
+			</CreateAccountButton>
 		</>
 	);
 };

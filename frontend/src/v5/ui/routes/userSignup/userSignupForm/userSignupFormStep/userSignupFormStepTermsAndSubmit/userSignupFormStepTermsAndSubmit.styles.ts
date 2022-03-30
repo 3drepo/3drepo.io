@@ -16,19 +16,12 @@
  */
 
 import styled from 'styled-components';
-import { Button } from '@controls/button';
 import { Link as LinkBase } from 'react-router-dom';
 import ErrorIconBase from '@assets/icons/stepper_error.svg';
-import CreateAccountIconBase from '@assets/icons/outlined/add_user-outlined.svg';
+import { SubmitButton } from '@controls/submitButton/submitButton.component';
 
-export const CreateAccountButton = styled(Button).attrs({
-	variant: 'contained',
-	color: 'primary',
-})`
-	width: fit-content;
-	font-weight: 300;
+export const CreateAccountButton = styled(SubmitButton)`
 	margin: 20px 0 0 0;
-	width: 100%;
 `;
 
 export const TermsContainer = styled.div`
@@ -79,12 +72,6 @@ export const ErrorContainer = styled.div`
 export const ErrorIcon = styled(ErrorIconBase)`
 	margin-right: 8px;
 	width: 20px;
-`;
-
-export const CreateAccountIcon = styled(CreateAccountIconBase)`
-	width: 15px;
-	width: 15px;
-	margin-right: 8px;
 `;
 
 export const CircularProgressContainer = styled.div`
