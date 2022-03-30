@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,14 +14,25 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { Select as SelectBase, InputLabel as InputLabelBase } from '@mui/material';
+import styled from 'styled-components';
 
-import { Overrides } from '@material-ui/core/styles/overrides';
-import { MuiPickersOverrides } from '@material-ui/pickers/typings/overrides';
+export const InputLabel = styled(InputLabelBase)`
+	&& {
+		transform: translate(0, 1.5px) scale(0.75) !important;
+		transform-origin: top left;
+	}
+`;
 
-type overridesNameToClassKey = {
-	[P in keyof MuiPickersOverrides]: keyof MuiPickersOverrides[P];
-};
-
-declare module '@material-ui/core/styles/overrides' {
-	export interface ComponentNameToClassKey extends overridesNameToClassKey, Overrides {}
-}
+export const Select = styled(SelectBase)`
+	&& {
+		background: transparent;
+		width: 100%;
+		cursor: initial;
+		pointer-events: none;
+		
+		fieldset {
+			border: 0;
+		}
+	}
+`;

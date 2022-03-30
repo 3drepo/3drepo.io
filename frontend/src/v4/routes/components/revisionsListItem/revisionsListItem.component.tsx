@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFileOutlined';
-import LinkIcon from '@material-ui/icons/Link';
-import PersonIcon from '@material-ui/icons/Person';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFileOutlined';
+import LinkIcon from '@mui/icons-material/Link';
+import PersonIcon from '@mui/icons-material/Person';
 import { useMemo } from 'react';
 
 import { CUSTOM_FILE_EXTS_NAMES } from '../../../constants/revisions';

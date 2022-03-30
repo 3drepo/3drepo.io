@@ -27,7 +27,7 @@ export const V4ModelsPermissions = styled(ModelsPermissions)`
 		border: 0;
 		margin-right: 30px;
 				
-		.MuiIconButton-label {
+		.Mui-checked svg { 
 			border-radius: 3px;
 			background-color: ${({ theme }) => theme.palette.primary.contrast};
 		}

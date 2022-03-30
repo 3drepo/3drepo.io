@@ -17,17 +17,12 @@
 
 import { DialogContainer } from '@/v4/routes/components/dialogContainer';
 import { SnackbarContainer } from '@/v4/routes/components/snackbarContainer';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import DayJsUtils from '@date-io/dayjs';
 import { V4OverridesContainer } from './v4Overrides.styles';
 
 export const V4Adapter = ({ children }) => (
 	<V4OverridesContainer id="v4Overrides">
-		<MuiPickersUtilsProvider utils={DayJsUtils}>
-
-			{children}
-			<DialogContainer />
-			<SnackbarContainer />
-		</MuiPickersUtilsProvider>
+		{children}
+		<DialogContainer />
+		<SnackbarContainer />
 	</V4OverridesContainer>
 );

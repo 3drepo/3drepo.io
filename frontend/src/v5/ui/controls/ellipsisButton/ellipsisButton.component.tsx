@@ -16,7 +16,7 @@
  */
 import { forwardRef, Ref } from 'react';
 import EllipsisIcon from '@assets/icons/ellipsis.svg';
-import { IconButtonProps } from '@material-ui/core/IconButton';
+import { IconButtonProps } from '@mui/material/IconButton';
 import { StyledIconButton } from './ellipsisButton.styles';
 
 export type IEllipsisButton = IconButtonProps & {
@@ -24,7 +24,7 @@ export type IEllipsisButton = IconButtonProps & {
 };
 
 export const EllipsisButton = forwardRef(
-	({ isOn, ...props }: IEllipsisButton, ref: Ref<HTMLSpanElement>): JSX.Element => (
+	({ isOn, ...props }: IEllipsisButton, ref: Ref<HTMLButtonElement>): JSX.Element => (
 		<StyledIconButton $isOn={isOn} {...props} ref={ref}>
 			<EllipsisIcon />
 		</StyledIconButton>

@@ -14,8 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useRef, useLayoutEffect, useState, useMemo, ChangeEvent } from 'react';
-import MenuItem from '@material-ui/core/MenuItem';
+import { useRef, useLayoutEffect, useState, useMemo } from 'react';
+import MenuItem from '@mui/material/MenuItem';
+import { SelectChangeEvent } from '@mui/material';
 import { cond, matches, stubTrue } from 'lodash';
 
 import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../helpers/rendering';
@@ -94,7 +95,7 @@ export const MessagesList = ({ teamspace, isPending, messages, ...props }: IProp
 		)).reverse()
 	, [messages, filter]);
 
-	const handleChange = (event: ChangeEvent<{ value: unknown }>) => {
+	const handleChange = (event: SelectChangeEvent<{ value: unknown }>) => {
 		setFilter(event.target.value as string);
 	};
 
@@ -106,9 +107,9 @@ export const MessagesList = ({ teamspace, isPending, messages, ...props }: IProp
 						Show:
 					</Label>
 					<Select
-							id="messages-filter"
-							value={filter}
-							onChange={handleChange}
+						id="messages-filter"
+						value={filter}
+						onChange={handleChange}
 					>
 						<MenuItem value="comments">Comments</MenuItem>
 						<MenuItem value="systemLogs">System logs</MenuItem>

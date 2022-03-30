@@ -1,6 +1,7 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
+const path = require('path');
 
 const PATHS = require('./tools/paths');
 const MODES = require('./tools/modes');
@@ -18,7 +19,6 @@ module.exports = (env, options) => ({
 	output: {
 		path: PATHS.DIST_DIR,
 		filename: '[name].[chunkhash].js', 
-		pathinfo: true,
 		...options.output 
 	},
 	module: {

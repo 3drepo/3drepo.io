@@ -20,7 +20,12 @@ import breaks from 'remark-breaks';
 
 import { renderers } from './markdownMessage.renderers';
 
-export const MarkdownMessage = ({ className, children }) => (
+type MarkdownMessageProps = {
+	className?: string;
+	children: any;
+};
+
+export const MarkdownMessage = ({ className, children }: MarkdownMessageProps) => (
 	<ReactMarkdown
 		source={children}
 		renderers={renderers}

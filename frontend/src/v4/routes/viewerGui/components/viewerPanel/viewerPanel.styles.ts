@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Grid from '@material-ui/core/Grid';
+import Grid from '@mui/material/Grid';
 import styled, { css } from 'styled-components';
 
 import { COLOR } from '../../../../styles';
@@ -32,12 +32,17 @@ interface IViewerPanelContent {
 
 interface IViewerPanelButton {
 	active?: number;
+	color?: string;
+	type?: string;
+	size?: string;
+	id?: string;
 }
 
 interface IPanel {
 	classname?: string;
 	isPending?: boolean;
 	title?: any;
+	flexHeight?: boolean;
 }
 
 export const Panel = styled(PanelComponent)<IPanel>`
@@ -45,11 +50,11 @@ export const Panel = styled(PanelComponent)<IPanel>`
 	margin-bottom: 20px;
 
 	&& {
-		${(props) => props.flexHeight ? '' : css`
+		${({ flexHeight }) => flexHeight ? '' : css`
 		height: 100%;` };
 	}
 
-	${(props) => props.isPending ? css`
+	${({ isPending }) => isPending ? css`
 		min-height: 120px !important;
 	` : ''};
 
@@ -102,16 +107,16 @@ export const TitleIcon = styled.div`
 `;
 
 export const ViewerPanelContent = styled.div<IViewerPanelContent>`
-	overflow: ${(props) => props.scrollDisabled ? 'hidden' : 'auto'};
-	display: ${(props) => props.scrollDisabled ? 'flex' : 'block'};
-	flex-direction: ${(props) => props.scrollDisabled ? 'column' : 'unset'};
+	overflow: ${({ scrollDisabled }) => scrollDisabled ? 'hidden' : 'auto'};
+	display: ${({ scrollDisabled }) => scrollDisabled ? 'flex' : 'block'};
+	flex-direction: ${({ scrollDisabled }) => scrollDisabled ? 'column' : 'unset'};
 	position: relative;
 	flex: 1;
 `;
 
-export const LoaderContainer = styled(ViewerPanelContent)`
+export const LoaderContainer = styled(ViewerPanelContent)<IPanel>`
 	padding: 24px;
-	${(props) => props.flexHeight ? '' : css`height: 100%;`};
+	${({ flexHeight }) => flexHeight ? '' : css`height: 100%;`};
 `;
 
 export const ViewerPanelFooter = styled(Grid).attrs({
@@ -120,7 +125,7 @@ export const ViewerPanelFooter = styled(Grid).attrs({
 	wrap: 'nowrap'
 })<IViewerPanelFooter>`
 	background-color: ${COLOR.WHITE};
-	padding: ${(props) => props.padding ? props.padding : '0 16px' };
+	padding: ${({ padding }) => padding || '0 16px' };
 	border-top: 1px solid ${COLOR.BLACK_20};
 	flex: none;
 	min-height: 65px;

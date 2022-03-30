@@ -17,7 +17,7 @@
 
 import { PureComponent } from 'react';
 
-import Tooltip from '@material-ui/core/Tooltip';
+import Tooltip from '@mui/material/Tooltip';
 import { withFormik, Form } from 'formik';
 import { debounce, get, isEmpty, isEqual } from 'lodash';
 import * as Yup from 'yup';

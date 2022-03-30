@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { useMemo, forwardRef } from 'react';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
 import { ListItemContainer, StyledLink } from './listItemLink.styles';
 
 interface IProps {
@@ -34,11 +34,11 @@ export const ListItemLink = ({ title, to }: IProps) => {
 
 	return (
 		<ListItemContainer>
-			<ListItem button component={renderLink}>
+			<ListItemButton component={renderLink}>
 				<ListItemText>
 					{title}
 				</ListItemText>
-			</ListItem>
+			</ListItemButton>
 		</ListItemContainer>
 	);
 };

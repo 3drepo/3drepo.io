@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AppBar as MuiAppBar } from '@material-ui/core';
+import { AppBar as MuiAppBar } from '@mui/material';
 
 import LogoIcon from '@assets/icons/logo.svg';
 import IntercomIcon from '@assets/icons/intercom.svg';

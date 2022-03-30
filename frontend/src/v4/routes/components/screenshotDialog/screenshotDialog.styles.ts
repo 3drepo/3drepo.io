@@ -18,7 +18,7 @@
 import { Stage as KonvaStage } from 'react-konva';
 import styled from 'styled-components';
 
-export const Container = styled.div`
+export const Container = styled.div<{ height: number, width: number }>`
 	position: relative;
 	overflow: hidden;
 	display: flex;
@@ -53,7 +53,7 @@ export const Stage = styled(KonvaStage)`
 	position: absolute;
 `;
 
-export const StageContainer = styled.div`
+export const StageContainer = styled.div<{ height: number, width: number }>`
 	position: relative;
 	overflow: hidden;
 	height: ${(props: any) => `${props.height}px` || 'auto'};

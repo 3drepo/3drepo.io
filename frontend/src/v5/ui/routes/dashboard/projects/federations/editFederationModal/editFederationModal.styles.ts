@@ -24,7 +24,7 @@ export const IconContainer = styled.div`
 	min-width: 46px;
 `;
 
-export const IncludeIcon = styled(IncludeIconBase)`
+export const IncludeIcon = styled(IncludeIconBase)<{ isSelected?: boolean }>`
 	&:hover {
 		circle {
 			fill: ${({ theme }) => theme.palette.primary.dark};
