@@ -25,19 +25,13 @@ const testCreateTeamspaceRole = () => {
 		test('should create a new teamspace role', async () => {
 			const expectedCommand = {
 				createRole: 'team_member',
-				privileges: [{
-					resource: {
-						db: 'username',
-						collection: 'settings',
-					},
-					actions: ['find'] },
-				],
+				privileges: [],
 				roles: [],
 			};
 			const fn = jest.spyOn(db, 'runCommand').mockImplementation(() => { });
-			await Roles.createTeamspaceRole('username');
+			await Roles.createTeamspaceRole('teamspace');
 			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][0]).toEqual('username');
+			expect(fn.mock.calls[0][0]).toEqual('teamspace');
 			expect(fn.mock.calls[0][1]).toEqual(expectedCommand);
 		});
 	});
@@ -48,11 +42,11 @@ const testGrantTeamspaceRoleToUser = () => {
 		test('should assign a teamspace role to the user', async () => {
 			const expectedCommand = {
 				grantRolesToUser: 'username',
-				roles: [{ role: 'team_member', db: 'username' }],
+				roles: [{ role: 'team_member', db: 'teamspace' }],
 			};
 
 			const fn = jest.spyOn(db, 'runCommand').mockImplementation(() => { });
-			await Roles.grantTeamspaceRoleToUser('username');
+			await Roles.grantTeamspaceRoleToUser('teamspace', 'username');
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual('admin');
 			expect(fn.mock.calls[0][1]).toEqual(expectedCommand);

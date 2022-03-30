@@ -18,7 +18,7 @@
 const { addDefaultJobs, getJobsToUsers } = require('../../models/jobs');
 const { createTeamspaceRole, grantTeamspaceRoleToUser } = require('../../models/roles');
 const { createTeamspaceSettings, getMembersInfo } = require('../../models/teamspaces');
-const { getAccessibleTeamspaces } = require('../../models/users');
+const { getAccessibleTeamspaces, grantTeamspacePermissionsToUser } = require('../../models/users');
 const { isTeamspaceAdmin } = require('../../utils/permissions/permissions');
 const { logger } = require('../../utils/logger');
 
@@ -27,9 +27,10 @@ const Teamspaces = {};
 Teamspaces.initializeTeamspace = async (username) => {
 	try {
 		await createTeamspaceRole(username);
-		await grantTeamspaceRoleToUser(username);
+		await grantTeamspaceRoleToUser(username, username);
 		await addDefaultJobs(username);
 		await createTeamspaceSettings(username);
+		await grantTeamspacePermissionsToUser(username, username, ['teamspace_admin']);
 	} catch (err) {
 		logger.logError(`Failed to initialize teamspace for ${username}`);
 	}

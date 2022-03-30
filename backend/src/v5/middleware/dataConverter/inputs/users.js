@@ -153,9 +153,11 @@ Users.validateResetPasswordData = async (req, res, next) => {
 		.required()
 		.test('token-validity', 'Token is invalid or expired', async () => {
 			try {
-				await getUserByQuery({ user: req.body.user,
+				await getUserByQuery({
+					user: req.body.user,
 					'customData.resetPasswordToken.token': req.body.token,
-					'customData.resetPasswordToken.expiredAt': { $gt: new Date() } });
+					'customData.resetPasswordToken.expiredAt': { $gt: new Date() }
+				});
 
 				return true;
 			} catch {
@@ -171,7 +173,7 @@ Users.validateResetPasswordData = async (req, res, next) => {
 	}
 };
 
-Users.validateSignUpData = async (req, res, next) => {
+const generateSignUpSchema = (captchaEnabled) => {
 	const schema = Yup.object().shape({
 		username: types.strings.username.test('checkUsernameAvailable', 'Username already exists',
 			async (value) => {
@@ -201,26 +203,30 @@ Users.validateSignUpData = async (req, res, next) => {
 		firstName: types.strings.name.required(),
 		lastName: types.strings.name.required(),
 		countryCode: types.strings.countryCode.required(),
-		company: Yup.string().max(120).optional(),
+		company: types.strings.title.optional(),
 		mailListAgreed: Yup.bool().required(),
-		captcha: Yup.string().optional(),
-	}).strict(true).noUnknown()
-		.required()
-		.test('check-captcha', 'Invalid captcha', () => {
-			const checkCaptcha = config.auth.captcha ? httpsPost(config.captcha.validateUrl, {
+		...(captchaEnabled ? { captcha: Yup.string().required() }: {}),
+	}).strict(true).noUnknown().required();
+
+	return captchaEnabled
+		? schema.test('check-captcha', 'Invalid captcha', async () => {
+			const checkCaptcha = httpsPost(config.captcha.validateUrl, {
 				secret: config.captcha.secretKey,
 				response: req.body.captcha,
-			}) : Promise.resolve({
-				success: true,
 			});
 
-			return checkCaptcha.then((result) => result.success);
-		});
+			const result = await checkCaptcha;
+			return result.success;
+		})
+		: schema;
+};
 
+Users.validateSignUpData = async (req, res, next) => {
 	try {
+		const schema = generateSignUpSchema(config.auth.captcha);
 		await schema.validate(req.body);
 
-		next();
+		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
@@ -234,11 +240,12 @@ Users.validateVerifyData = async (req, res, next) => {
 		.required()
 		.test('token-validity', 'Token is invalid or expired', async () => {
 			try {
-				await getUserByQuery({ user: req.body.username,
+				await getUserByQuery({
+					user: req.body.username,
 					'customData.emailVerifyToken.token': req.body.token,
 					'customData.emailVerifyToken.expiredAt': { $gt: new Date() },
 					'customData.inactive': true,
-				});
+				}, { _id: 1 });
 
 				return true;
 			} catch {
@@ -249,7 +256,7 @@ Users.validateVerifyData = async (req, res, next) => {
 	try {
 		await schema.validate(req.body);
 
-		next();
+		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}

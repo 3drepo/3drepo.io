@@ -88,7 +88,7 @@ const testValidateLoginData = () => {
 		[{ body: { user: '123' } }, false, 'with no username', templates.invalidArguments],
 		[{ body: { user: existingUsername, password: 123 } }, false, 'with invalid password', templates.invalidArguments],
 		[{ body: { user: availableUsername, password: 'validPassword' } }, false, 'with user that does not exist',
-			templates.incorrectUsernameOrPassword],
+		templates.incorrectUsernameOrPassword],
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
 		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
 		[{ body: { user: existingUsername, password: 'validPassword' } }, true, 'with user that exists'],
@@ -288,18 +288,18 @@ const testValidateSignUpData = () => {
 				expect(Responder.respond.mock.results[0].value.code).toEqual(expectedError.code);
 			}
 		});
+	});
 
-		test('with captcha enabled it should call next', async () => {
-			config.auth.captcha = true;
-			config.captcha = {};
+	test('with captcha enabled it should call next', async () => {
+		config.auth.captcha = true;
+		config.captcha = {};
 
-			const mockCB = jest.fn();
-			await Users.validateSignUpData({ body: newUserData }, {}, mockCB);
-			expect(mockCB.mock.calls.length).toBe(1);
+		const mockCB = jest.fn();
+		await Users.validateSignUpData({ body: {... newUserData,  captcha: 'someCaptcha' } }, {}, mockCB);
+		expect(mockCB.mock.calls.length).toBe(1);
 
-			config.auth.captcha = false;
-			config.captcha = null;
-		});
+		config.auth.captcha = false;
+		config.captcha = null;
 	});
 };
 

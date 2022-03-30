@@ -217,11 +217,7 @@ User.addUser = async (newUserData) => {
 		firstName: newUserData.firstName,
 		lastName: newUserData.lastName,
 		email: newUserData.email,
-		mailListOptOut: !newUserData.mailListAgreed,
-		permissions: [{
-			user: newUserData.username,
-			permissions: ['teamspace_admin'],
-		}],
+		mailListOptOut: !newUserData.mailListAgreed,	
 		billing: {
 			billingInfo: {
 				firstName: newUserData.firstName,
@@ -239,11 +235,14 @@ User.addUser = async (newUserData) => {
 		expiredAt: expiryAt,
 	};
 
-	const adminDB = await db.getAuthDB();
-	await adminDB.addUser(newUserData.username, newUserData.password, { customData, roles: [] });
+	await db.createUser(newUserData.username, newUserData.password, customData);	
 };
 
 User.verify = (username) => updateUser(username, { $unset: { 'customData.inactive': 1, 'customData.emailVerifyToken': 1 } });
+
+User.grantTeamspacePermissionsToUser = async (username, teamspace, permissions) => {
+	await updateUser(username, { $set: { 'customData.permissions': [{ user: teamspace,	permissions }] } });
+}
 
 User.uploadAvatar = (username, avatarBuffer) => updateUser(username, { $set: { 'customData.avatar': { data: avatarBuffer } } });
 

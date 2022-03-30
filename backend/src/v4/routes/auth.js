@@ -36,6 +36,7 @@ const FileType = require("file-type");
 const multer = require("multer");
 
 const { regenerateAuthSession } = require("../services/session");
+const { validateSignUpData } = require("../../v5/middleware/dataConverter/inputs/users.js");
 
 /**
  * @api {post} /login Login
@@ -437,7 +438,7 @@ router.post("/:account/avatar", middlewares.isAccountAdmin, uploadAvatar);
  * 	"place": "POST /nabile"
  * }
  */
-router.post("/:account", signUp);
+router.post("/:account", validateSignUpData, signUp);
 
 /**
  * @api {post} /:user/verify Verify

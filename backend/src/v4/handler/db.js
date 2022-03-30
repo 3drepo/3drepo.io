@@ -333,6 +333,11 @@
 		return collection.countDocuments(query, options);
 	};
 
+	Handler.createUser = async function (username, password, customData) {
+		const adminDB = await this.getAuthDB();
+		await adminDB.addUser(username, password, { customData, roles: [] });
+	};
+
 	module.exports = Handler;
 }());
 

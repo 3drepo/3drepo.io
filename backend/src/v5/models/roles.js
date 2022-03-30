@@ -21,26 +21,20 @@ const Roles = {};
 
 const TEAM_MEMBER_ROLE = 'team_member';
 
-Roles.createTeamspaceRole = async (username) => {
+Roles.createTeamspaceRole = async (teamspace) => {
 	const createRoleCmd = {
 		createRole: TEAM_MEMBER_ROLE,
-		privileges: [{
-			resource: {
-				db: username,
-				collection: 'settings',
-			},
-			actions: ['find'] },
-		],
+		privileges: [],
 		roles: [],
 	};
 
-	await db.runCommand(username, createRoleCmd);
+	await db.runCommand(teamspace, createRoleCmd);
 };
 
-Roles.grantTeamspaceRoleToUser = (username) => {
+Roles.grantTeamspaceRoleToUser = (teamspace, username) => {
 	const grantRoleCmd = {
 		grantRolesToUser: username,
-		roles: [{ role: TEAM_MEMBER_ROLE, db: username }],
+		roles: [{ role: TEAM_MEMBER_ROLE, db: teamspace }],
 	};
 
 	return db.runCommand('admin', grantRoleCmd);

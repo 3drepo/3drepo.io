@@ -17,7 +17,9 @@
 
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
 const db = require('../handler/db');
+const { riskCategories } = require('./risks.constants');
 const { templates } = require('../utils/responseCodes');
+const { topicTypes } = require('./issues.constants');
 
 const Teamspace = {};
 
@@ -66,37 +68,7 @@ Teamspace.getMembersInfo = async (teamspace) => {
 };
 
 Teamspace.createTeamspaceSettings = async (teamspace) => {
-	const settings = {
-		_id: teamspace,
-		topicTypes: [
-			'Clash',
-			'Diff',
-			'RFI',
-			'Risk',
-			'H&S',
-			'Design',
-			'Constructibility',
-			'GIS',
-			'For information',
-			'VR',
-		],
-		riskCategories: [
-			'Commercial Issue',
-			'Environmental Issue',
-			'Health - Material effect',
-			'Health - Mechanical effect',
-			'Safety Issue - Fall',
-			'Safety Issue - Trapped',
-			'Safety Issue - Event',
-			'Safety Issue - Handling',
-			'Safety Issue - Struck',
-			'Safety Issue - Public',
-			'Social Issue',
-			'Other Issue',
-			'Unknown',
-		],
-	};
-
+	const settings = { _id: teamspace, topicTypes, riskCategories };
 	await db.insertOne(teamspace, 'teamspace', settings);
 };
 
