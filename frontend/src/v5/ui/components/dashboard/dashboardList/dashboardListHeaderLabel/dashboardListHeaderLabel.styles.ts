@@ -31,6 +31,8 @@ export const Container = styled(FixedOrGrowContainer)`
 			display: none;
 		}
 	`};
+
+	${({ hidden }) => hidden && 'display: none;'}
 `;
 
 export const Label = styled(Typography).attrs({

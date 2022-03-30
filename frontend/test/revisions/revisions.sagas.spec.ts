@@ -20,6 +20,9 @@ import { expectSaga } from 'redux-saga-test-plan';
 import { mockServer } from '../../internals/testing/mockServer';
 import * as RevisionsSaga from '@/v5/store/revisions/revisions.sagas';
 import { RevisionsActions } from '@/v5/store/revisions/revisions.redux';
+import api from '@/v5/services/api/default';
+import { ContainersActions } from '@/v5/store/containers/containers.redux';
+import { mockCreateRevisionBody, revisionsMockFactory } from './revisions.fixtures';
 
 describe('Revisions: sagas', () => {
 	const teamspace = 'teamspace';
@@ -81,4 +84,89 @@ describe('Revisions: sagas', () => {
 		});
 	});
 
+	describe('createRevision', () => {
+
+		const uploadId = 'uploadId';
+		const mockBody = mockCreateRevisionBody();
+		const newContainerMockBody = {...mockBody, containerId: ''};
+
+		const post = api.post;
+		const spy = jest.spyOn(api, 'post').mockImplementation((url, body) => {
+			// Transforms the formData to a string to avoid a problem with axios
+			// in its node implementation.
+			return post(url, body.toString());
+		});
+
+		it('should create a revision on an existing container', async () => {
+
+			mockServer
+				.post(`/teamspaces/${teamspace}/projects/${projectId}/containers/${mockBody.containerId}/revisions`)
+				.reply(200, {body: {}});
+
+			await expectSaga(RevisionsSaga.default)
+				.dispatch(RevisionsActions.createRevision(teamspace, projectId, uploadId, mockBody))
+				.put(RevisionsActions.setUploadComplete(uploadId, false))
+				.put(RevisionsActions.setUploadComplete(uploadId, true))
+				.silentRun();
+
+			spy.mockClear();
+		})
+
+		it('should create a revision on a new container', async () => {
+			
+			const newContainer = {
+				_id: 'newContainerId',
+				name: mockBody.containerName,
+				unit: mockBody.containerUnit,
+				type: mockBody.containerType,
+				code: mockBody.containerCode,
+				desc: mockBody.containerDesc,
+			};
+
+			mockServer
+				.post(`/teamspaces/${teamspace}/projects/${projectId}/containers`)
+				.reply(200, { _id: newContainer._id })
+				.post(`/teamspaces/${teamspace}/projects/${projectId}/containers/${newContainer._id}/revisions`)
+				.reply(200, {body: {}});
+
+			await expectSaga(RevisionsSaga.default)
+				.dispatch(RevisionsActions.createRevision(teamspace, projectId, uploadId, newContainerMockBody))
+				.put(ContainersActions.createContainerSuccess(projectId, newContainer))
+				.put(RevisionsActions.setUploadComplete(uploadId, false))
+				.put(RevisionsActions.setUploadComplete(uploadId, true))
+				.silentRun();
+
+			spy.mockClear();
+		})
+
+		it('should 400 on revision creation and prepare an error message', async () => {
+			const status = 400;
+			const code = 'ERROR_CODE';
+			const message = 'Error Message'
+			mockServer
+				.post(`/teamspaces/${teamspace}/projects/${projectId}/containers/${mockBody.containerId}/revisions`)
+				.reply(400, { status, code, message});
+
+			await expectSaga(RevisionsSaga.default)
+				.dispatch(RevisionsActions.createRevision(teamspace, projectId, uploadId, mockBody))
+				.put(RevisionsActions.setUploadComplete(uploadId, false))
+				.put(RevisionsActions.setUploadComplete(uploadId, true, `${status} - ${code} (${message})`))
+				.silentRun();
+
+			spy.mockClear();
+		})
+
+		it('should 400 on container creation and not create revision', async () => {
+			mockServer
+				.post(`/teamspaces/${teamspace}/projects/${projectId}/containers`)
+				.reply(400)
+
+			await expectSaga(RevisionsSaga.default)
+				.dispatch(RevisionsActions.createRevision(teamspace, projectId, uploadId, newContainerMockBody))
+				.put(RevisionsActions.setUploadComplete(uploadId, true, 'Failed to create Container'))
+				.silentRun();
+
+			spy.mockClear();
+		})
+	})
 })

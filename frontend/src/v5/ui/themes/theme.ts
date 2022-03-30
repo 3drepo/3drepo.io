@@ -258,6 +258,10 @@ export const theme = createMuiTheme({
 			clearText: '',
 			handleHomeEndKeys: true,
 		},
+		MuiLinearProgress: {
+			color: 'primary',
+			variant: 'determinate',
+		},
 	},
 	overrides: {
 		MuiBackdrop: {
@@ -819,6 +823,22 @@ export const theme = createMuiTheme({
 		MuiButtonBase: {
 			root: {
 				margin: '8px',
+			},
+		},
+		MuiLinearProgress: {
+			root: {
+				borderRadius: '5px',
+				height: '16px',
+				margin: 'auto 10px',
+			},
+			barColorPrimary: {
+				backgroundColor: COLOR.TERTIARY_MAIN,
+			},
+			colorPrimary: {
+				backgroundColor: COLOR.TERTIARY_LIGHTEST,
+			},
+			bar1Determinate: {
+				transition: 'none',
 			},
 		},
 		MuiRadio: {

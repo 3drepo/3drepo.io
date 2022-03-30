@@ -23,19 +23,22 @@ import { UploadItemFields } from '@/v5/store/containers/containers.types';
 import { TextField } from './uploadListItemRevisionTag.styles';
 
 type IUploadListItemRevision = {
-	isSelected: boolean;
+	isSelected?: boolean;
 	errorMessage?: string;
 	control: Control<UploadItemFields>;
+	disabled?: boolean;
 };
 
 export const UploadListItemRevisionTag = ({
 	control,
-	isSelected,
+	isSelected = false,
 	errorMessage,
+	disabled = false,
 	...props
 }: IUploadListItemRevision): JSX.Element => (
 	<TextField
 		control={control}
+		disabled={disabled}
 		$selectedrow={isSelected}
 		name="revisionTag"
 		formError={errorMessage}

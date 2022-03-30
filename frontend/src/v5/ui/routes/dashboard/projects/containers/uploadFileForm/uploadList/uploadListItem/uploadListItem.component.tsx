@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -23,16 +23,19 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { DestinationOption, UploadItemFields } from '@/v5/store/containers/containers.types';
 import filesize from 'filesize';
 import { ListItemSchema } from '@/v5/validation/containers';
+import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
 import { UploadListItemTitle } from './components/uploadListItemTitle/uploadListItemTitle.component';
 import { Button } from './uploadListItem.styles';
 import { UploadListItemRevisionTag } from './components/uploadListItemRevisionTag';
 import { UploadListItemDestination } from './components/uploadListItemDestination';
+import { UploadProgress } from './uploadProgress';
 
 type IUploadListItem = {
 	item: UploadItemFields;
 	isSelected: boolean;
+	isUploading: boolean;
 	onClickEdit: () => void;
 	onClickDelete: () => void;
 	onChange: (name, val) => void;
@@ -43,6 +46,7 @@ export const UploadListItem = ({
 	onClickEdit,
 	onClickDelete,
 	isSelected,
+	isUploading,
 	onChange,
 }: IUploadListItem): JSX.Element => {
 	const { control, formState: { errors }, setValue, trigger, watch } = useForm({
@@ -50,6 +54,8 @@ export const UploadListItem = ({
 		mode: 'onChange',
 		resolver: yupResolver(ListItemSchema),
 	});
+
+	const uploadErrorMessage: string = RevisionsHooksSelectors.selectUploadError(item.uploadId);
 
 	const updateValue = (name) => onChange(name, watch(name));
 	updateValue('revisionTag');
@@ -67,6 +73,7 @@ export const UploadListItem = ({
 			/>
 			<UploadListItemDestination
 				control={control}
+				disabled={isUploading}
 				errorMessage={errors.containerName?.message}
 				onChange={(vals: DestinationOption) => {
 					Object.keys(vals).forEach((key: keyof DestinationOption) => {
@@ -79,15 +86,22 @@ export const UploadListItem = ({
 			/>
 			<UploadListItemRevisionTag
 				control={control}
+				disabled={isUploading}
 				isSelected={isSelected}
 				errorMessage={errors.revisionTag?.message}
 			/>
-			<Button $selectedrow={isSelected} onClick={onClickEdit}>
-				<EditIcon />
-			</Button>
-			<Button $selectedrow={isSelected} onClick={onClickDelete}>
-				<DeleteIcon />
-			</Button>
+			{ isUploading
+				? <UploadProgress uploadId={item.uploadId} errorMessage={uploadErrorMessage} />
+				: (
+					<>
+						<Button $selectedrow={isSelected} onClick={onClickEdit}>
+							<EditIcon />
+						</Button>
+						<Button $selectedrow={isSelected} onClick={onClickDelete}>
+							<DeleteIcon />
+						</Button>
+					</>
+				)}
 		</UploadListItemRow>
 	);
 };
