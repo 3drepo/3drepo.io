@@ -21,12 +21,13 @@ import { AuthPage } from '@components/authPage';
 import { SubmitButton } from '@controls/submitButton';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
+import * as API from '@/v5/services/api';
 import { FormattedMessage } from 'react-intl';
 import { AuthHeading } from '../login.styles';
-import { Input, ReturnLink } from './forgotPassword.styles';
+import { Input, RequestSentMessage, ReturnLink } from './forgotPassword.styles';
 
 export const ForgotPassword = (): JSX.Element => {
-	const { control, handleSubmit, formState: { isValid } } = useForm({
+	const { control, handleSubmit, formState: { isValid, isSubmitted } } = useForm({
 		mode: 'onSubmit',
 		defaultValues: { username: '' },
 		resolver: yupResolver(ForgotPasswordSchema),
@@ -37,14 +38,33 @@ export const ForgotPassword = (): JSX.Element => {
 		<AuthPage>
 			<form onSubmit={handleSubmit(onSubmit)}>
 				<AuthHeading>
-					Forgot Password
+					<FormattedMessage id="auth.forgotPassword.heading" defaultMessage="Forgot Password" />
 				</AuthHeading>
-
-				<Input control={control} />
-				<SubmitButton disabled={!isValid} startIcon={<EmailIcon />}> {/* Add pending state? */}
-					<FormattedMessage id="auth.forgotPassword.buttonText" defaultMessage="Send request" />
-				</SubmitButton>
-
+				{
+					isSubmitted ? (
+						<RequestSentMessage>
+							<FormattedMessage
+								id="auth.forgotPassword.passwordSent.p1"
+								defaultMessage="A password change request has been sent. You will receive an email
+								shortly with a link to change your password."
+							/>
+							<br />
+							<br />
+							<FormattedMessage
+								id="auth.forgotPassword.passwordSent.p2"
+								defaultMessage="If you have not received this, please check your spam folder or ask
+								your email administrator for assistance."
+							/>
+						</RequestSentMessage>
+					) : (
+						<>
+							<Input control={control} />
+							<SubmitButton disabled={!isValid} startIcon={<EmailIcon />}>
+								<FormattedMessage id="auth.forgotPassword.buttonText" defaultMessage="Send request" />
+							</SubmitButton>
+						</>
+					)
+				}
 				<ReturnLink to="/v5/login">
 					<FormattedMessage id="auth.forgotPassword.goBack" defaultMessage="Back to login" />
 				</ReturnLink>

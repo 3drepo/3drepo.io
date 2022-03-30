@@ -23,6 +23,11 @@ export const Input = styled(UsernameField)`
 	margin-bottom: 7px;
 `;
 
+export const RequestSentMessage = styled.div`
+	margin: 22px 0;
+	color: ${({ theme }) => theme.palette.base.main};
+`;
+
 export const ReturnLink = styled(Link)`
 	display: flex;
 	margin: 22px auto 12px;
