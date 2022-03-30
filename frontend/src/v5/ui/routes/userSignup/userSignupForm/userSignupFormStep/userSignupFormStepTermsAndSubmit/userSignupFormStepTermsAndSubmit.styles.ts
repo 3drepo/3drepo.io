@@ -17,7 +17,6 @@
 
 import styled from 'styled-components';
 import { Link as LinkBase } from 'react-router-dom';
-import ErrorIconBase from '@assets/icons/warning_small.svg';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
 
 export const CreateAccountButton = styled(SubmitButton)`
@@ -69,9 +68,8 @@ export const ErrorContainer = styled.div`
     align-items: center;
 `;
 
-export const ErrorIcon = styled(ErrorIconBase)`
-	margin-right: 8px;
-	width: 20px;
+export const ErrorMessage = styled.div`
+	margin-left: 8px;
 `;
 
 export const CircularProgressContainer = styled.div`

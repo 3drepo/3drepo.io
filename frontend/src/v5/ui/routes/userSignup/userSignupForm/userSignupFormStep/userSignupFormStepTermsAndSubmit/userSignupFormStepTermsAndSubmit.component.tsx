@@ -23,6 +23,7 @@ import { UserSignupSchemaTermsAndSubmit } from '@/v5/validation/schemes';
 import { FormCheckbox } from '@controls/formCheckbox/formCheckbox.component';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import ReCAPTCHA from 'react-google-recaptcha';
+import ErrorIcon from '@assets/icons/warning_small.svg';
 import SignupIcon from '@assets/icons/outlined/add_user-outlined.svg';
 import {
 	CreateAccountButton,
@@ -30,7 +31,7 @@ import {
 	CheckboxMessage,
 	TermsContainer,
 	ErrorContainer,
-	ErrorIcon,
+	ErrorMessage,
 	Link,
 } from './userSignupFormStepTermsAndSubmit.styles';
 
@@ -183,7 +184,7 @@ export const UserSignupFormStepTermsAndSubmit = ({
 			{ unexpectedError && (
 				<ErrorContainer>
 					<ErrorIcon />
-					{unexpectedError}
+					<ErrorMessage>{unexpectedError}</ErrorMessage>
 				</ErrorContainer>
 			)}
 			<CreateAccountButton
