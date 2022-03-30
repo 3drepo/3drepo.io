@@ -492,8 +492,8 @@ export const theme = createTheme({
 							color: COLOR.BASE_LIGHTEST,
 						},
 					},
-					'& .MuiStep-completed': {
-						'&, &.MuiStepLabel-root, & .MuiStepLabel-label': {
+					'& .Mui-completed': {
+						'.MuiStepLabel-vertical, .MuiStepLabel-label': {
 							color: COLOR.PRIMARY_MAIN,
 						},
 					},

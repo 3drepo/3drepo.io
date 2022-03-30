@@ -23,10 +23,10 @@ import { FormTextField } from '@controls/formTextField/formTextField.component';
 import UserIcon from '@assets/icons/outlined/user-outlined.svg';
 import EmailIcon from '@assets/icons/outlined/email-outlined.svg';
 import PasswordIcon from '@assets/icons/outlined/lock-outlined.svg';
-import { InputAdornment } from '@material-ui/core';
 import { UserSignupSchemaAccount } from '@/v5/validation/schemes';
 import { pick } from 'lodash';
 import { NextStepButton } from '../userSignupFormStep.styles';
+import { IconContainer } from './userSignupFormStepAccount.styles';
 
 interface IAccountFormInput {
 	username: string;
@@ -112,9 +112,9 @@ export const UserSignupFormStepAccount = ({
 				formError={errors.username}
 				InputProps={{
 					startAdornment: (
-						<InputAdornment position="start">
+						<IconContainer>
 							<UserIcon />
-						</InputAdornment>
+						</IconContainer>
 					),
 				}}
 			/>
@@ -129,9 +129,9 @@ export const UserSignupFormStepAccount = ({
 				formError={errors.email}
 				InputProps={{
 					startAdornment: (
-						<InputAdornment position="start">
+						<IconContainer>
 							<EmailIcon />
-						</InputAdornment>
+						</IconContainer>
 					),
 				}}
 			/>
@@ -147,9 +147,9 @@ export const UserSignupFormStepAccount = ({
 				formError={errors.password}
 				InputProps={{
 					startAdornment: (
-						<InputAdornment position="start">
+						<IconContainer>
 							<PasswordIcon />
-						</InputAdornment>
+						</IconContainer>
 					),
 				}}
 			/>
@@ -166,9 +166,9 @@ export const UserSignupFormStepAccount = ({
 				formError={errors.confirmPassword}
 				InputProps={{
 					startAdornment: (
-						<InputAdornment position="start">
+						<IconContainer>
 							<PasswordIcon />
-						</InputAdornment>
+						</IconContainer>
 					),
 				}}
 			/>

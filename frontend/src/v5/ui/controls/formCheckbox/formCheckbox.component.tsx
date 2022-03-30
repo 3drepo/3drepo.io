@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CheckboxProps, FormControlLabel } from '@material-ui/core';
+import { CheckboxProps, FormControlLabel } from '@mui/material';
 import { Controller } from 'react-hook-form';
 import { Checkbox } from './formCheckbox.styles';
 
 export type FormCheckboxProps = CheckboxProps & {
 	control: any,
 	formError: any,
-	label: string,
+	label: string | JSX.Element,
 };
 
 export const FormCheckbox = ({
@@ -38,7 +38,7 @@ export const FormCheckbox = ({
 		render={({ field }) => (
 			<FormControlLabel
 				label={label}
-				key={label}
+				key={field.name}
 				control={(
 					<Checkbox
 						{...field}

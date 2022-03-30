@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { StepContent, Step, StepProps } from '@material-ui/core';
+import { StepContent, Step, StepProps } from '@mui/material';
 import { StepLabel } from '../userSignupForm.styles';
 import { UserSignupFormStepIcon } from './userSignupFormStepIcon/userSignupFormStepIcon.component';
 
@@ -26,6 +26,7 @@ type UserSignupFormStepProps = StepProps & {
 	label: string;
 	completedSteps: Set<number>;
 	children: any;
+	error?: boolean;
 };
 
 export const UserSignupFormStep = ({
@@ -35,15 +36,18 @@ export const UserSignupFormStep = ({
 	label,
 	completedSteps,
 	children,
+	error,
 	...props
 }: UserSignupFormStepProps) => (
 	<Step {...props}>
 		<StepLabel
+			error={error}
 			onClick={() => moveToStep(stepIndex)}
 			icon={(
 				<UserSignupFormStepIcon
 					stepIndex={stepIndex}
 					completed={completedSteps.has(stepIndex)}
+					error={error}
 				/>
 			)}
 			reachable={canReachStep(stepIndex)}

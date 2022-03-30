@@ -46,6 +46,7 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 	const [alreadyExistingUsernames, setAlreadyExistingUsernames] = useState([]);
 	const [unexpectedError, setUnexpectedError] = useState('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [erroredStep, setErroredStep] = useState<number>();
 
 	const addCompletedStep = (stepIndex: number) => {
 		completedSteps.add(stepIndex);
@@ -71,10 +72,13 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 	};
 
 	const moveToStep = (stepToReach: number) => {
-		if (canReachStep(stepToReach)) setActiveStep(stepToReach);
+		if (canReachStep(stepToReach)) {
+			setActiveStep(stepToReach);
+			if (stepToReach > erroredStep) setErroredStep(null);
+		}
 	};
 
-	const moveToNextStep = () => setActiveStep(activeStep + 1);
+	const moveToNextStep = () => moveToStep(activeStep + 1);
 
 	const createAccount = async () => {
 		setIsSubmitting(true);
@@ -88,8 +92,10 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 				setAlreadyExistingUsernames([...alreadyExistingUsernames, fields.username]);
 				setFields(({ password, terms, newsletter, ...prevFields }) => prevFields);
 				setActiveStep(0);
+				setErroredStep(0);
 			} else {
 				setUnexpectedError(errorMessage);
+				setErroredStep(2);
 			}
 		}
 		setIsSubmitting(false);
@@ -110,6 +116,7 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 		completedSteps,
 		moveToStep,
 		canReachStep,
+		error: erroredStep === stepIndex,
 	});
 
 	return (

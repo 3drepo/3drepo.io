@@ -16,8 +16,12 @@
  */
 
 import styled from 'styled-components';
-import InputAdornment from '@material-ui/core/InputAdornment';
+import InputAdornment from '@mui/material/InputAdornment';
 
 export const IconContainer = styled(InputAdornment).attrs({
 	position: 'start',
-})``;
+})`
+	width: 15px;
+	margin-right: 0;
+	color: ${({ theme }) => theme.palette.secondary.main};
+`;

@@ -15,14 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CheckboxBase from '@material-ui/core/Checkbox';
+import CheckboxBase from '@mui/material/Checkbox';
 import styled from 'styled-components';
 
 export const Checkbox = styled(CheckboxBase)`
 	margin: 0;
 
-	.MuiIconButton-label {
+	svg {
+		border-radius: 3px;
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
-		border-radius: 5px;
+		
+		& > rect {
+			stroke: ${({ theme }) => theme.palette.base.light};
+		}
 	}
 `;

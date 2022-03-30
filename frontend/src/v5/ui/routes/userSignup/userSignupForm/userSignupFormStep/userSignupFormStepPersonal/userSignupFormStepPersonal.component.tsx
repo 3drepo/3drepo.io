@@ -24,7 +24,7 @@ import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { UserSignupSchemaPersonal } from '@/v5/validation/schemes';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { clientConfigService } from '@/v4/services/clientConfig';
-import { MenuItem } from '@material-ui/core';
+import { MenuItem } from '@mui/material';
 import { NextStepButton } from '../userSignupFormStep.styles';
 
 interface IPersonalFormInput {

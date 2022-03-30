@@ -16,9 +16,9 @@
  */
 
 import { FormattedMessage } from 'react-intl';
+import { Logo } from '../userSignup.styles';
 import {
 	Container,
-	Logo,
 	BulletPoint,
 	BulletPointMessage,
 	BulletPointTitle,

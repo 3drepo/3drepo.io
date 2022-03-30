@@ -40,7 +40,11 @@ export const StepIconContainer = styled.div`
 export const CompletedStepIcon = styled(CheckIcon)``;
 
 export const ErrorStepIcon = styled(ErrorIcon)`
-	padding: 6px;
+	width: 22px;
+	height: 22px;
+	padding: 5px;
+	border-radius: 50%;
+	box-sizing: border-box;
 	overflow: visible;
 	background-color: ${({ theme }) => theme.palette.error.main};
 	& path {

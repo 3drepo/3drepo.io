@@ -32,7 +32,7 @@ export const AuthField = styled(FormTextField).attrs({
 	required: true,
 
 })`
-	>* { color: ${({ theme }) => theme.palette.secondary.main}; }
+	> * { color: ${({ theme }) => theme.palette.secondary.main}; }
 `;
 
 export const UsernameField = styled(AuthField).attrs({

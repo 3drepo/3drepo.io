@@ -17,16 +17,14 @@
 
 import CheckBase from '@assets/icons/check.svg';
 import LatopIconBase from '@assets/icons/outlined/laptop-outlined.svg';
-import DEFAULT_LOGO from '@assets/images/3drepo-logo-white.png';
 import { Button } from '@controls/button';
-import { clientConfigService } from '@/v4/services/clientConfig';
 import { Display } from '@/v5/ui/themes/media';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 export const Container = styled.div`
 	margin: auto;
-	height: 100%;
+	min-height: 100vh;
 	width: 400px;
 	padding: 0 70px;
 	display: flex;
@@ -38,13 +36,6 @@ export const Container = styled.div`
 	@media (max-width: ${Display.Tablet}px) {
 		display: none;
 	}
-`;
-
-export const Logo = styled.img.attrs({
-	src: clientConfigService.getCustomLogoPath() || DEFAULT_LOGO,
-	alt: '3D Repo',
-})`
-	width: 100px;
 `;
 
 export const MainTitle = styled.div`

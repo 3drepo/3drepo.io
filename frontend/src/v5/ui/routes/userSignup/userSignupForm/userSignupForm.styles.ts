@@ -16,12 +16,12 @@
  */
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import StepperBase from '@material-ui/core/Stepper';
-import StepLabelBase from '@material-ui/core/StepLabel';
+import StepperBase from '@mui/material/Stepper';
+import StepLabelBase from '@mui/material/StepLabel';
 import { clientConfigService } from '@/v4/services/clientConfig';
 
 export const Container = styled.div`
-	height: 100%;
+	min-height: 100vh;
 	flex: 1;
 	display: flex;
 	flex-direction: column;
@@ -43,6 +43,7 @@ export const Underlined = styled.div`
 
 // Stepper
 export const Stepper = styled(StepperBase)`
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	margin: 28px;
 	width: 454px;
 	box-shadow: ${clientConfigService.getCustomBackgroundImagePath() ? '0px 8px 15px -3px #878787' : '0 1px 1px rgb(0 0 0 / 14%)'}; // TODO - fix after new design

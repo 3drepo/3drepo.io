@@ -17,20 +17,35 @@
 
 import styled from 'styled-components';
 import { clientConfigService } from '@/v4/services/clientConfig';
+import DefaultLogoBase from '@assets/icons/colored_logo.svg';
 
 export const Container = styled.div`
 	display: flex;
 	flex-direction: row;
 	justify-content: stretch;
 	width: 100%;
-	height: 100vh;
+	min-height: 100vh;
 `;
 
 export const Background = styled.div`
-	width: 100%;
 	height: 100%;
+	width: 100%;
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	${clientConfigService.getCustomBackgroundImagePath() && `
 		background: url('${clientConfigService.getCustomBackgroundImagePath()}') 0% 0% / cover no-repeat;
 	`};
 `;
+
+const DefaultLogo = styled(DefaultLogoBase)`
+	color: ${({ theme }) => theme.palette.primary.contrast};
+	width: 100px;
+`;
+
+const CustomLogo = styled.img.attrs({
+	src: clientConfigService.getCustomLogoPath(),
+	alt: '3D Repo',
+})`
+	width: 100px;
+`;
+
+export const Logo = clientConfigService.getCustomLogoPath() ? CustomLogo : DefaultLogo;
