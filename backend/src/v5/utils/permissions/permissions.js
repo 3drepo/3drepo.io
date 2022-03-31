@@ -22,7 +22,7 @@ const {
 	PROJECT_ADMIN,
 } = require('./permissions.constants');
 const { getContainerById, getFederationById, getModelById } = require('../../models/modelSettings');
-const { getProjectAdmins, modelsExistInProject } = require('../../models/projects');
+const { getProjectAdmins, modelsExistInProject } = require('../../models/projectSettings');
 const { getTeamspaceAdmins, hasAccessToTeamspace } = require('../../models/teamspaces');
 
 const Permissions = {};

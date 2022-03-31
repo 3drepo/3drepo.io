@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Paper from '@material-ui/core/Paper';
+import Paper from '@mui/material/Paper';
 import styled from 'styled-components';
 
 import { COLOR, FONT_WEIGHT } from '../../../styles';

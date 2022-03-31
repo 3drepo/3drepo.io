@@ -14,12 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
-import AutorenewIcon from '@material-ui/icons/Autorenew';
-import Delete from '@material-ui/icons/Delete';
-import SaveIcon from '@material-ui/icons/Save';
+import { PureComponent, createRef, PropsWithChildren, UIEvent } from 'react';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
+import Delete from '@mui/icons-material/Delete';
+import SaveIcon from '@mui/icons-material/Save';
 
 import { isEqual } from 'lodash';
 import * as Yup from 'yup';
@@ -34,7 +32,8 @@ import { TooltipButton } from '../../../../../teamspaces/components/tooltipButto
 import { PreviewDetails } from '../../../previewDetails/previewDetails.component';
 import { ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { ViewerPanelButton } from '../../../viewerPanel/viewerPanel.styles';
-import { Actions, ColorPickerWrapper, Container, Content } from './groupDetails.styles';
+import { ViewerPanelContent as Content } from '../../../viewerPanel/viewerPanel.styles';
+import { Actions, ColorPickerWrapper, Container } from './groupDetails.styles';
 import { GroupDetailsForm } from './groupDetailsForm.component';
 
 interface IProps {
@@ -75,7 +74,7 @@ const GroupSchema = Yup.object().shape({
 	return type === GROUPS_TYPES.NORMAL ||  rules.length > 0 ;
 });
 
-export class GroupDetails extends React.PureComponent<IProps, IState> {
+export class GroupDetails extends PureComponent<IProps, IState> {
 	get isNewGroup() {
 		return !this.props.editingGroup._id;
 	}
@@ -98,8 +97,8 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		scrolled: false
 	};
 
-	public formRef = React.createRef<HTMLElement>() as any;
-	public panelRef = React.createRef<any>();
+	public formRef = createRef<HTMLElement>() as any;
+	public panelRef = createRef<any>();
 
 	public renderRulesField = renderWhenTrue(() => (
 		<CriteriaField
@@ -139,7 +138,7 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		this.setState({ isFormDirty: this.isNewGroup, isFormValid: true });
 	}
 
-	public componentDidUpdate(prevProps: Readonly<React.PropsWithChildren<IProps>>) {
+	public componentDidUpdate(prevProps: Readonly<PropsWithChildren<IProps>>) {
 		if (prevProps === this.props) {
 			return;
 		}
@@ -199,12 +198,13 @@ export class GroupDetails extends React.PureComponent<IProps, IState> {
 		this.props.setCriteriaState({ criterionForm: criterion });
 	}
 
-	public handlePanelScroll = (e: { target: { scrollHeight: number; offsetHeight: any; scrollTop: number; }; }) => {
-		if (e.target.scrollHeight > e.target.offsetHeight + e.target.scrollTop) {
-			if (e.target.scrollTop > 0 && !this.state.scrolled) {
+	public handlePanelScroll = (event: UIEvent) => {
+		const target = event.target as HTMLDivElement;
+		if (target.scrollHeight > target.offsetHeight + target.scrollTop) {
+			if (target.scrollTop > 0 && !this.state.scrolled) {
 				this.setState({ scrolled: true });
 			}
-			if (e.target.scrollTop === 0 && this.state.scrolled) {
+			if (target.scrollTop === 0 && this.state.scrolled) {
 				this.setState({ scrolled: false });
 			}
 		} else {

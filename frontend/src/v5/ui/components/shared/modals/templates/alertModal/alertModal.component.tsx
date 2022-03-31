@@ -14,29 +14,36 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-import { Button, DialogContentText, DialogTitle } from '@material-ui/core';
+import { FC } from 'react';
+import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import WarningIcon from '@assets/icons/warning.svg';
 import { FormattedMessage } from 'react-intl';
-import { Container, Content, Actions, Details, Status } from '@/v5/ui/components/shared/modals/modals.styles';
+import { Container, Actions, Details, Status } from '@/v5/ui/components/shared/modals/modals.styles';
+import { AxiosError } from 'axios';
 
 interface IAlertModal {
 	onClickClose?: () => void,
 	currentActions?: string
 	errorMessage?: string;
-	error?: {
-		request: {
-			response: string;
-		};
-	};
+	error: AxiosError;
 	details?: string
 }
 
-export const AlertModal: React.FC<IAlertModal> = ({ onClickClose, currentActions = '', error, details, errorMessage }) => {
-	const responseData = error?.request?.response ? JSON.parse(error?.request?.response) : {};
-	const { message, status, code } = responseData;
-	const errorStatus = `${status} - ${code}`;
+export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '', error, details, errorMessage }) => {
+	let message; let code;
+
+	const { response } = error;
+	const { status, headers } = response;
+	const responseType = headers['content-type'];
+
+	if (responseType === 'application/json; charset=utf-8') {
+		const { data } = response;
+		message = data.message;
+		code = data.code;
+	} else {
+		code = response.statusText;
+	}
+	const errorStatus = status && code ? `${status} - ${code}` : '';
 
 	return (
 		<Container>
@@ -48,12 +55,12 @@ export const AlertModal: React.FC<IAlertModal> = ({ onClickClose, currentActions
 					values={{ currentActions }}
 				/>
 			</DialogTitle>
-			<Content>
+			<DialogContent>
 				<DialogContentText>
 					{message || errorMessage}
 				</DialogContentText>
 				{!!status && <Status>{errorStatus}</Status>}
-			</Content>
+			</DialogContent>
 			<Actions bottomMargin={!details}>
 				<Button autoFocus type="submit" onClick={onClickClose} variant="contained" color="primary">
 					<FormattedMessage

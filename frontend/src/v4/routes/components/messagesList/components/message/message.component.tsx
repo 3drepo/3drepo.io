@@ -14,9 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
 import { SystemMessage } from './components/systemMessage/systemMessage.component';
 import { UserMessage } from './components/userMessage/userMessage.component';
 import { Container } from './message.styles';
@@ -66,7 +63,7 @@ export const Message = ({
 					created={created}
 					comment={commentWithMarkdown}
 					propertyName={action.property}
-					teamspace={teamspace} />
+				/>
 				: <Container onClick={handleClick} clickable={Boolean(viewpoint)}>
 						<UserMessage
 							name={owner}

@@ -14,16 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { PureComponent } from 'react';
 import { get } from 'lodash';
-import React from 'react';
 import * as Yup from 'yup';
 
-import { Tooltip } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import InfoIcon from '@material-ui/icons/InfoOutlined';
+import { Tooltip } from '@mui/material';
+import Button from '@mui/material/Button';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import InfoIcon from '@mui/icons-material/InfoOutlined';
 import { connect, withFormik, Field, Form } from 'formik';
 
 import {
@@ -91,7 +90,7 @@ interface IState {
 	filterAlreadyExistsError: boolean;
 }
 
-class NewCreaterionFormComponent extends React.PureComponent<IProps, IState> {
+class NewCreaterionFormComponent extends PureComponent<IProps, IState> {
 	public state = {
 		filterAlreadyExistsError: false
 	};

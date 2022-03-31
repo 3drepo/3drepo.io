@@ -75,7 +75,6 @@ const getFederationStats = (req, res) => {
 	Federations.getFederationStats(teamspace, federation).then((stats) => {
 		const statsSerialised = { ...stats };
 		statsSerialised.lastUpdated = stats.lastUpdated ? stats.lastUpdated.getTime() : undefined;
-		if (statsSerialised.subModels) statsSerialised.subModels = statsSerialised.subModels.map(({ model }) => model);
 		respond(req, res, templates.ok, statsSerialised);
 	}).catch(
 		/* istanbul ignore next */
@@ -405,7 +404,7 @@ const establishRoutes = () => {
 	 *                   type: string
 	 *                   description: Current status of the federation
 	 *                   example: ok
-   	 *                 subModels:
+   	 *                 containers:
 	 *                   type: array
 	 *                   description: The IDs of the models the federation consists of
 	 *                   items:

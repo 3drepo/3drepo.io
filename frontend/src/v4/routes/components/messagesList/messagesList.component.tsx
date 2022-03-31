@@ -14,10 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
-import MenuItem from '@material-ui/core/MenuItem';
+import { useRef, useLayoutEffect, useState, useMemo } from 'react';
+import MenuItem from '@mui/material/MenuItem';
+import { SelectChangeEvent } from '@mui/material';
 import { cond, matches, stubTrue } from 'lodash';
 
 import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../helpers/rendering';
@@ -57,10 +56,10 @@ const Loader = () => (
 const maxScrollTop = (element) => element.scrollHeight - element.clientHeight;
 
 export const MessagesList = ({ teamspace, isPending, messages, ...props }: IProps) => {
-	const [filter, setFilter] = React.useState('comments');
-	const listRef = React.useRef<HTMLDivElement>();
+	const [filter, setFilter] = useState('comments');
+	const listRef = useRef<HTMLDivElement>();
 
-	React.useLayoutEffect(() => {
+	useLayoutEffect(() => {
 		if (listRef.current) {
 			const list = listRef.current;
 			const currentScroll = Math.ceil(list.scrollTop);
@@ -75,7 +74,7 @@ export const MessagesList = ({ teamspace, isPending, messages, ...props }: IProp
 		}
 	}, [isPending, messages.length, filter]);
 
-	const messagesList = React.useMemo(() => messages
+	const messagesList = useMemo(() => messages
 		.filter((message) => cond([
 			[matches('comments'), () => !Boolean(message.action)],
 			[matches('systemLogs'), () => Boolean(message.action)],
@@ -96,7 +95,7 @@ export const MessagesList = ({ teamspace, isPending, messages, ...props }: IProp
 		)).reverse()
 	, [messages, filter]);
 
-	const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+	const handleChange = (event: SelectChangeEvent<{ value: unknown }>) => {
 		setFilter(event.target.value as string);
 	};
 
@@ -108,9 +107,9 @@ export const MessagesList = ({ teamspace, isPending, messages, ...props }: IProp
 						Show:
 					</Label>
 					<Select
-							id="messages-filter"
-							value={filter}
-							onChange={handleChange}
+						id="messages-filter"
+						value={filter}
+						onChange={handleChange}
 					>
 						<MenuItem value="comments">Comments</MenuItem>
 						<MenuItem value="systemLogs">System logs</MenuItem>

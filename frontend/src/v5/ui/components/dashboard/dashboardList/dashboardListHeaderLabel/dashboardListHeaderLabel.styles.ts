@@ -22,11 +22,11 @@ import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { Typography } from '@controls/typography';
 import { Display } from '@/v5/ui/themes/media';
 
-export const Container = styled(FixedOrGrowContainer)`
+export const Container = styled(FixedOrGrowContainer)<{ hideWhenSmallerThan?: Display }>`
 	align-items: center;
 	display: flex;
 	
-	${({ hideWhenSmallerThan }: { hideWhenSmallerThan: Display }) => hideWhenSmallerThan && css`
+	${({ hideWhenSmallerThan }) => hideWhenSmallerThan && css`
 		@media (max-width: ${hideWhenSmallerThan}px) {
 			display: none;
 		}
@@ -54,7 +54,7 @@ export const Button = styled(ButtonComponent).attrs({
 	}
 `;
 
-export const Indicator = styled.div`
+export const Indicator = styled.div<{ sortingDirection?: string }>`
 	margin-left: 5px;
 	display: flex;
 	justify-content: center;

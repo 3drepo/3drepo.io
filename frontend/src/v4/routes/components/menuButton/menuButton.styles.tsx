@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
 import styled, { css } from 'styled-components';
 
-import IconButton from '@material-ui/core/IconButton';
+import IconButton from '@mui/material/IconButton';
 
 const hiddenStyles = css`
 	pointer-events: none;
@@ -31,7 +30,7 @@ const widenedStyles = css`
 	}
 `;
 
-export const StyledIconButton = styled(({ disableGutters, ...props}) => <IconButton {...props}  />)`
+export const StyledIconButton = styled(({ disableGutters, ...props}) => <IconButton {...props} size="large" />)`
 	${({ hidden }) => hidden && hiddenStyles};
 	${({ widened }) => widened && widenedStyles};
 `;

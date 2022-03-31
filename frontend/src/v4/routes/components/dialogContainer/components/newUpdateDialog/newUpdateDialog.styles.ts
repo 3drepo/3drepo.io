@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import DialogActionsComponent from '@material-ui/core/DialogActions';
+import DialogActionsComponent from '@mui/material/DialogActions';
 import styled from 'styled-components';
 import { COLOR } from '../../../../../styles';
 

@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { INITIAL_STATE, reducer as federationsReducer, FederationsActions } from '@/v5/store/federations/federations.redux';
-import { IFederationsState } from '@/v5/store/federations/federations.types';
+import { INITIAL_STATE, federationsReducer, FederationsActions, IFederationsState } from '@/v5/store/federations/federations.redux';
 import { times } from 'lodash';
-import { federationMockFactory, prepareMockSettingsReply } from './federations.fixtures';
+import { federationMockFactory,  prepareMockSettingsReply } from './federations.fixtures';
 import { EMPTY_VIEW } from '@/v5/store/federations/federations.types';
 
 const EMPTY_SETTINGS = {
@@ -66,6 +65,24 @@ describe('Federations: redux', () => {
 		expect(result[0].isFavourite).toEqual(false);
 		expect(result.slice(1).every(federation => federation.isFavourite)).toEqual(true);
 	});
+
+	// it('should update federation containers', () => {
+	// 	const mockFederation = federationMockFactory({ containers: [] });
+	// 	const mockContainers = prepareMockContainers();
+	// 	const defaultStateWithContainers = {
+	// 		...INITIAL_STATE,
+	// 		federationsByProject: {
+	// 			[projectId]: [mockFederation]
+	// 		}
+	// 	}
+	// 	const resultState = federationsReducer(
+	// 		defaultStateWithContainers,
+	// 		FederationsActions.updateFederationContainersSuccess(projectId, mockFederation._id, mockContainers)
+	// 	);
+	// 	const result = resultState.federations[projectId];
+
+	// 	expect(result[0].containers).toEqual(mockContainers);
+	// });
 
 	it('should load fetched views', () => {
 		const mockFederation = federationMockFactory({ views: [] });

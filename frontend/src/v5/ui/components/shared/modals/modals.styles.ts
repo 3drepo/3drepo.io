@@ -28,7 +28,7 @@ export const Container = styled.div`
 	padding-top: 43px;
 `;
 
-export const Actions = styled.div`
+export const Actions = styled.div<{ bottomMargin?: boolean }>`
 	display: flex;
 	${({ bottomMargin }) => bottomMargin && css`
 		margin-bottom: 25px;

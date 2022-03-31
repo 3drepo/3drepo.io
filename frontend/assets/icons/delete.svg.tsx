@@ -14,9 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
 export default () => (
 	<svg width="15" height="16" viewBox="0 0 15 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
 		<path d="M5.3335 6.66667V12C5.3335 12.1768 5.40373 12.3464 5.52876 12.4714C5.65378 12.5964 5.82335 12.6667 6.00016 12.6667C6.17697 12.6667 6.34654 12.5964 6.47157 12.4714C6.59659 12.3464 6.66683 12.1768 6.66683 12V6.66667C6.66683 6.48986 6.59659 6.32029 6.47157 6.19526C6.34654 6.07024 6.17697 6 6.00016 6C5.82335 6 5.65378 6.07024 5.52876 6.19526C5.40373 6.32029 5.3335 6.48986 5.3335 6.66667Z" fill="currentColor" stroke="none" />

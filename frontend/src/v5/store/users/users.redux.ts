@@ -15,30 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
-
-export interface IUser {
-	user: string;
-	firstName: string;
-	lastName: string;
-	company?: string;
-	job?: string;
-}
-
-export interface IUsersActions {
-	fetchUsers: (teamspace: string) => any;
-	fetchUsersSuccess: (teamspace: string, users: IUser[]) => any;
-}
+import { TeamspaceId } from '../store.types';
 
 export const { Types: UsersTypes, Creators: UsersActions } = createActions({
 	fetchUsers: ['teamspace'],
 	fetchUsersSuccess: ['teamspace', 'users'],
 }, { prefix: 'USERS/' }) as { Types: Constants<IUsersActions>; Creators: IUsersActions };
-
-export interface IUsersState {
-	usersByTeamspace: Record<string, IUser[]>;
-}
 
 export const INITIAL_STATE: IUsersState = {
 	usersByTeamspace: {},
@@ -52,6 +37,32 @@ export const fetchUsersSuccess = (state = INITIAL_STATE, { teamspace, users }): 
 	},
 });
 
-export const reducer = createReducer(INITIAL_STATE, {
+export const usersReducer = createReducer(INITIAL_STATE, {
 	[UsersTypes.FETCH_USERS_SUCCESS]: fetchUsersSuccess,
 });
+
+/**
+ * Types
+ */
+export interface IUsersState {
+	usersByTeamspace: Record<string, IUser[]>;
+}
+
+export interface IUser {
+	user: string;
+	firstName: string;
+	lastName: string;
+	company?: string;
+	job?: string;
+	email?: string;
+	hasAvatar?: boolean;
+	avatarUrl: string;
+}
+
+export type FetchUsersAction = Action<'FETCH_USERS'> & TeamspaceId;
+export type FetchUsersSuccessAction = Action<'FETCH_USERS_SUCCESS'> & TeamspaceId & {users: IUser[]};
+
+export interface IUsersActions {
+	fetchUsers: (teamspace: string) => FetchUsersAction;
+	fetchUsersSuccess: (teamspace: string, users: IUser[]) => FetchUsersSuccessAction;
+}

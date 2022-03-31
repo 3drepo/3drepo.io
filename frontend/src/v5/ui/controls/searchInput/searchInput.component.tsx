@@ -15,14 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { Dispatch } from 'react';
-import { TextFieldProps } from '@material-ui/core';
+import { TextFieldProps } from '@mui/material';
 import SearchIcon from '@assets/icons/search.svg';
 import CloseIcon from '@assets/icons/close_rounded.svg';
 import { IconButton, TextField, StartAdornment, EndAdornment } from './searchInput.styles';
 
 type ISearchInput = {
-	onClear: Dispatch<void>;
+	/**
+	 * Callback when the clear button is clicked.
+	 * Note: the clear button only appears when the controls is controlled (read more https://reactjs.org/docs/forms.html#controlled-components)
+	 */
+	onClear: () => void;
 } & TextFieldProps;
 
 export const SearchInput = ({ onClear, value, ...props }: ISearchInput): JSX.Element => (
@@ -35,13 +38,11 @@ export const SearchInput = ({ onClear, value, ...props }: ISearchInput): JSX.Ele
 				</StartAdornment>
 			),
 			endAdornment: (
-				(
-					<EndAdornment $isVisible={value}>
-						<IconButton onClick={() => onClear()}>
-							<CloseIcon />
-						</IconButton>
-					</EndAdornment>
-				)
+				<EndAdornment $isVisible={Boolean(value)}>
+					<IconButton onClick={() => onClear()} size="large">
+						<CloseIcon />
+					</IconButton>
+				</EndAdornment>
 			),
 		}}
 		{...props}

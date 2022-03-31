@@ -16,11 +16,11 @@
  */
 
 import {
-	FetchFederationRawSettingsResponse,
-	FetchFederationSettingsResponse,
-	FetchFederationsItemResponse,
-	FetchFederationStatsResponse,
+	FederationBackendSettings,
+	FederationStats,
 	IFederation,
+	MinimumFederation,
+	FederationSettings,
 } from '@/v5/store/federations/federations.types';
 import {
 	UploadStatuses,
@@ -34,17 +34,16 @@ export const filterFederations = (federations: IFederation[], filterQuery: strin
 );
 
 export const prepareSingleFederationData = (
-	federation: FetchFederationsItemResponse,
-	stats?: FetchFederationStatsResponse,
+	federation: MinimumFederation,
+	stats?: FederationStats,
 ): IFederation => {
-	const subModels = stats?.subModels ?? (federation as any).subModels ?? [];
+	const containers = stats?.containers ?? (federation as any).containers ?? [];
 
 	return {
 		...federation,
 		code: stats?.code ?? '',
 		status: stats?.status ?? UploadStatuses.OK,
-		subModels,
-		containers: subModels.length,
+		containers,
 		issues: stats?.tickets.issues ?? 0,
 		risks: stats?.tickets.risks ?? 0,
 		lastUpdated: getNullableDate(stats?.lastUpdated),
@@ -54,8 +53,8 @@ export const prepareSingleFederationData = (
 };
 
 export const prepareFederationsData = (
-	federations: Array<FetchFederationsItemResponse>,
-	stats?: FetchFederationStatsResponse[],
+	federations: Array<MinimumFederation>,
+	stats?: FederationStats[],
 ) => federations.map<IFederation>((federation, index) => {
 	const federationStats = stats?.[index];
 	return prepareSingleFederationData(federation, federationStats);
@@ -64,7 +63,7 @@ export const prepareFederationsData = (
 export const prepareFederationSettingsForFrontend = ({
 	surveyPoints,
 	...otherProps
-}: FetchFederationRawSettingsResponse): FetchFederationSettingsResponse => (
+}: FederationBackendSettings): FederationSettings => (
 	{
 		surveyPoint: surveyPoints?.[0],
 		...otherProps,
@@ -74,7 +73,7 @@ export const prepareFederationSettingsForFrontend = ({
 export const prepareFederationSettingsForBackend = ({
 	surveyPoint,
 	...otherProps
-}: FetchFederationSettingsResponse): FetchFederationRawSettingsResponse => (
+}: FederationSettings): FederationBackendSettings => (
 	{
 		surveyPoints: [surveyPoint],
 		...otherProps,

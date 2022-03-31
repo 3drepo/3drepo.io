@@ -15,11 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Button from '@material-ui/core/Button';
-import Delete from '@material-ui/icons/Delete';
-import Edit from '@material-ui/icons/Edit';
+import Button from '@mui/material/Button';
+import Delete from '@mui/icons-material/Delete';
+import Edit from '@mui/icons-material/Edit';
 import { get } from 'lodash';
-import React from 'react';
 
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { EmptyStateInfo } from '../components.styles';

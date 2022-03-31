@@ -14,67 +14,81 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { Button, Dialog } from '@material-ui/core';
-import React from 'react';
+import { DetailedHTMLProps, FormHTMLAttributes } from 'react';
+import { Button, Dialog } from '@mui/material';
 import CloseIcon from '@assets/icons/close.svg';
-import { Form, Title, Header, CloseButton, FormDialogContent, FormDialogActions, RemoveWhiteCorners, Subtitle } from './formDialog.styles';
+import { DialogProps } from '@mui/material/Dialog';
+import { ScrollArea } from '@controls/scrollArea';
+import {
+	Form,
+	Title,
+	Header,
+	CloseButton,
+	FormDialogContent,
+	FormDialogActions,
+	RemoveWhiteCorners,
+} from './formDialog.styles';
 
-interface IFormDialog extends React.DetailedHTMLProps<React.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement> {
+interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
 	onClickClose?: () => void;
 	title: string;
 	subtitle?: string;
 	open?: boolean;
 	confirmLabel?: string;
-	maxWidth?: false | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 	isValid?: boolean;
 	showButtons?: boolean;
+	maxWidth?: DialogProps['maxWidth'];
+	zeroMargin?: boolean;
 }
 
-export const FormModal = ({
-	onClickClose,
-	title,
-	subtitle,
-	confirmLabel,
-	open,
-	children,
-	className,
-	maxWidth,
-	isValid = true,
-	...formProps
-}: IFormDialog) => (
-	<Dialog
-		open={open}
-		onClose={onClickClose}
-		className={className}
-		maxWidth={maxWidth}
-		PaperComponent={RemoveWhiteCorners}
-		fullWidth
-	>
-		<Form {...formProps}>
-			<Header>
-				<div>
+export const FormModal = (props: IFormModal) => {
+	const {
+		onClickClose,
+		title,
+		confirmLabel,
+		open,
+		children,
+		className,
+		isValid = true,
+		showButtons = true,
+		maxWidth = false,
+		zeroMargin = false,
+		...formProps
+	} = props;
+	return (
+		<Dialog
+			onClose={onClickClose}
+			open={open}
+			PaperComponent={RemoveWhiteCorners}
+			className={className}
+			maxWidth={maxWidth}
+			fullWidth={!!maxWidth}
+		>
+			<Form {...formProps}>
+				<Header>
 					<Title>
 						{title}
 					</Title>
-					{subtitle && <Subtitle>{subtitle}</Subtitle>}
-				</div>
-
-				<CloseButton aria-label="Close dialog" onClick={onClickClose}>
-					<CloseIcon />
-				</CloseButton>
-			</Header>
-			<FormDialogContent>
-				{children}
-			</FormDialogContent>
-			<FormDialogActions>
-				<Button autoFocus onClick={onClickClose} variant="outlined" color="secondary" size="medium">
-					Cancel
-				</Button>
-				<Button disabled={!isValid} type="submit" variant="contained" color="primary" size="medium">
-					{confirmLabel || 'OK'}
-				</Button>
-			</FormDialogActions>
-		</Form>
-	</Dialog>
-);
+					<CloseButton aria-label="Close dialog" onClick={onClickClose}>
+						<CloseIcon />
+					</CloseButton>
+				</Header>
+				<ScrollArea variant="base" autoHeightMax="70vh" autoHeight>
+					<FormDialogContent zeroMargin={zeroMargin}>
+						{children}
+					</FormDialogContent>
+				</ScrollArea>
+				{showButtons && (
+					<FormDialogActions>
+						<Button autoFocus onClick={onClickClose} variant="outlined" color="secondary" size="medium">
+							Cancel
+						</Button>
+						<Button disabled={!isValid} type="submit" variant="contained" color="primary" size="medium">
+							{confirmLabel || 'OK'}
+						</Button>
+					</FormDialogActions>
+				)}
+			</Form>
+		</Dialog>
+	);
+};

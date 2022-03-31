@@ -14,8 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
+import { useEffect } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { MenuItem } from '@material-ui/core';
@@ -48,7 +47,7 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 		close();
 	};
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (formState.isSubmitSuccessful) reset();
 	}, [formState, reset]);
 

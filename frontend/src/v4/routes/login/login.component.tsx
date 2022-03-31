@@ -14,12 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import Divider from '@material-ui/core/Divider';
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
+import { PureComponent, createRef } from 'react';
+import Divider from '@mui/material/Divider';
+import Grid from '@mui/material/Grid';
+import TextField from '@mui/material/TextField';
 import { Field, Form, Formik } from 'formik';
-import React from 'react';
 import { Link, Redirect } from 'react-router-dom';
 import * as Yup from 'yup';
 
@@ -61,8 +60,8 @@ interface IState {
 	password: string;
 }
 
-export class Login extends React.PureComponent<IProps, IState> {
-	public formRef = React.createRef<any>();
+export class Login extends PureComponent<IProps, IState> {
+	public formRef = createRef<any>();
 
 	public state = {
 		login: '',
@@ -82,7 +81,7 @@ export class Login extends React.PureComponent<IProps, IState> {
 	}
 
 	public renderLoginButtons = () => (
-		<LoginButtons container alignItems="center" justify="space-between">
+		<LoginButtons container alignItems="center" justifyContent="space-between">
 			<StyledButton
 				color="secondary"
 				component={Link}

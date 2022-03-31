@@ -14,8 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
+import { PureComponent } from 'react';
 import { LoaderContainer } from '../billing/billing.styles';
 import { Loader } from '../components/loader/loader.component';
 import { clientConfigService } from './../../services/clientConfig';
@@ -33,7 +32,7 @@ interface IProps {
 	changeSubscription: (teamspace, subscriptionData) => void;
 }
 
-export class Subscription extends React.PureComponent<IProps, any> {
+export class Subscription extends PureComponent<IProps, any> {
 	public componentDidMount() {
 		this.props.fetchQuotaInfo(this.props.teamspace);
 		this.props.fetchBillingData(this.props.teamspace);

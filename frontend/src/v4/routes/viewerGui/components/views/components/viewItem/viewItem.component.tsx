@@ -14,13 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { PureComponent, SyntheticEvent, MouseEvent } from 'react';
 import { Field, Formik } from 'formik';
 import { debounce } from 'lodash';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import * as Yup from 'yup';
-import { Menu, MenuItem, Tooltip } from '@material-ui/core';
-import MoreVert from '@material-ui/icons/MoreVert';
+import { Menu, MenuItem, Tooltip } from '@mui/material';
+import MoreVert from '@mui/icons-material/MoreVert';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { getViewNameFieldErrorMsg } from '../../../../../../helpers/views';
@@ -70,13 +70,13 @@ const ViewItemSchema = Yup.object().shape({
 const HamburgerMenu = ({onSetAsDefault, onDelete, isAdmin, defaultView}) => {
 	const [anchorElement, setAnchorElement] = useState(null);
 
-	const toggleMenu = (e: React.SyntheticEvent) => {
+	const toggleMenu = (e: SyntheticEvent) => {
 		setAnchorElement(Boolean(anchorElement) ? null : e.currentTarget );
 		return false;
 	};
 
 	const closeMenuAnd = ( action: (e?) => void ) =>
-		(e: React.SyntheticEvent) => {
+		(e: SyntheticEvent) => {
 			toggleMenu(e);
 			action(e);
 	};
@@ -104,7 +104,7 @@ const HamburgerMenu = ({onSetAsDefault, onDelete, isAdmin, defaultView}) => {
 	);
 };
 
-export class ViewItem extends React.PureComponent<IProps, any> {
+export class ViewItem extends PureComponent<IProps, any> {
 
 	private get screenshot() {
 		const vpscreenshot = this.props.viewpoint.screenshot || this.props.viewpoint.viewpoint.screenshot ;
@@ -130,7 +130,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 
 	public renderViewpointName = renderWhenTrue(() => (
 		<Tooltip title={this.props.viewpoint.name} placement="bottom">
-			<Name active={Number(this.props.active)}>
+			<Name active={Boolean(this.props.active)}>
 				{this.props.viewpoint.name}{this.renderViewpointDefault(this.props.defaultView)}
 			</Name>
 		</Tooltip>
@@ -230,7 +230,7 @@ export class ViewItem extends React.PureComponent<IProps, any> {
 		this._handleDelete(event);
 	}
 
-	public handleShareLink = (event: React.MouseEvent) => {
+	public handleShareLink = (event: MouseEvent) => {
 		event.stopPropagation();
 		const { teamspace, modelId, viewpoint: {_id} } = this.props;
 		this.props.onShare(teamspace, modelId, _id);

@@ -14,10 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import Grid from '@material-ui/core/Grid';
+import { PureComponent } from 'react';
+import Grid from '@mui/material/Grid';
 import * as queryString from 'query-string';
-import React from 'react';
 import { Link } from 'react-router-dom';
 
 import { Panel } from '../components/panel/panel.component';
@@ -37,7 +36,7 @@ interface IState {
 	message: string;
 }
 
-export class RegisterVerify extends React.PureComponent<IProps, IState> {
+export class RegisterVerify extends PureComponent<IProps, IState> {
 	public state = {
 		message: ''
 	};
@@ -83,7 +82,7 @@ export class RegisterVerify extends React.PureComponent<IProps, IState> {
 				<Grid item xs={9} sm={6} md={4} lg={3} xl={2}>
 					<Panel title="Registered for 3D Repo">
 						{message && <Paragraph> {message} </Paragraph>}
-						<Buttons container justify="space-between">
+						<Buttons container justifyContent="space-between">
 							<StyledButton
 								color="secondary"
 								component={Link}

@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 
-import Checkbox from '@material-ui/core/Checkbox';
+import Checkbox from '@mui/material/Checkbox';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { formatShortDate } from '../../../../../../services/formatting/formatDate';
 import { ArrowsAltH } from '../../../../../components/fontAwesomeIcon';
@@ -44,7 +44,7 @@ interface IProps {
 	onRevisionChange: (modelProps) => void;
 }
 
-export class CompareDiffItem extends React.PureComponent<IProps, any> {
+export class CompareDiffItem extends PureComponent<IProps, any> {
 	public static defaultProps = {
 		selected: false
 	};

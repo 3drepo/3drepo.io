@@ -15,19 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { HTMLInputTypeAttribute } from 'react';
 import styled from 'styled-components';
+import { FormTextField, FormTextFieldProps } from '@controls/formTextField/formTextField.component';
 
-export const UnitTextField = styled(FormTextField).attrs((props) => ({
+export const UnitTextField = styled(FormTextField).attrs((
+	props: FormTextFieldProps & { $labelUnit: string },
+) => ({
 	label: ` (${props.$labelUnit})`,
-}))`
+	type: 'number' as HTMLInputTypeAttribute,
+}))<{ $labelName: string, $labelUnit: string }>`
 	.MuiInputLabel-formControl {
 		&::before {
-			content: "${(props) => props.$labelName}";
+			content: "${({ $labelName }) => $labelName}";
+			${({ theme }) => theme.typography.kicker};
 		}
 		
 		text-transform: none; 
 		letter-spacing: 0;
-		${(props) => props.theme.typography.caption};
 	}
 `;

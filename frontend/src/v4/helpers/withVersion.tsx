@@ -16,12 +16,12 @@
  */
 
 import { Version, VersionContext } from '@/versionContext';
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 
 
 export const withVersion = (WrappedComponent) => (props) => {
 	const version = useContext(VersionContext);
-	 return (
+	return (
 		<WrappedComponent {...props} isV5={version === Version.V5} />
 	);
 };

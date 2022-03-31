@@ -14,86 +14,89 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
-import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date';
+import { ComponentType, useEffect } from 'react';
+import { DatePickerProps } from '@mui/lab/DatePicker';
+import { DateTimePickerProps } from '@mui/lab/DateTimePicker';
+import { TextField } from '@mui/material';
+import { useState } from 'react';
 import { Container, StyledDatePicker, StyledDateTimePicker } from './dateField.styles';
 
 interface IProps {
-	inputId: string;
-	value: any;
+	value?: any;
 	defaultValue?: any;
 	initialFocusedDate?: any;
 	name: string;
 	disabled?: boolean;
-	format?: string;
+	inputFormat?: string;
 	placeholder?: string;
 	className?: string;
 	dateTime?: boolean;
 	onChange?: (event) => void;
 	onBlur?: (event) => void;
-	shouldDisableDate?: (day: MaterialUiPickersDate) => boolean;
+	shouldDisableDate?: (day: any) => boolean;
 }
 
-interface IState {
-	value: any;
-}
+export const DateField = ({
+	onBlur,
+	onChange,
+	name,
+	value: propValue,
+	placeholder,
+	disabled,
+	dateTime,
+	defaultValue,
+	...dateFieldProps
+}: IProps) => {
+	const [value, setValue] = useState(propValue || null);
+	const [selectedValue, setSelectedValue] = useState(value);
 
-export class DateField extends React.PureComponent<IProps, IState> {
-	public state = {
-		value: new Date().valueOf()
+	useEffect(() => {
+		setValue(propValue || null);
+		setSelectedValue(propValue || null);
+	}, [propValue]);
+
+	const handleOpen = () => {
+		setSelectedValue(selectedValue || new Date());
 	};
 
-	public componentDidMount() {
-		this.setState({
-			value: this.props.value ? this.props.value : null
-		});
-	}
-
-	public componentDidUpdate(prevProps) {
-		if (prevProps.value !== this.props.value) {
-			this.setState({
-				value: this.props.value
-			});
+	const handleAccept = (newValue) => {
+		if (newValue) {
+			setValue(selectedValue);
+			if (onChange) {
+				onChange({
+					target: {
+						value: newValue.valueOf(),
+						name,
+					}
+				});
+			}
 		}
-	}
+	};
 
-	public handleChange = (newDate) => {
-		if (this.props.onChange) {
-			this.props.onChange({
-				target: {
-					value: newDate.valueOf(),
-					name: this.props.name,
-				}
-			});
-		}
-		this.setState({
-			value: newDate.valueOf()
-		});
-	}
+	const handleChange = (newValue) => {
+		setSelectedValue(newValue);
+	};
+	const Picker: ComponentType<DatePickerProps | DateTimePickerProps> = dateTime ? StyledDateTimePicker : StyledDatePicker;
 
-	public render() {
-		const { value } = this.state;
-		const { onBlur, name, placeholder, format, disabled, className, dateTime, defaultValue } = this.props;
-
-		const Picker = dateTime ? StyledDateTimePicker : StyledDatePicker;
-
-		return (
-			<Container className={className}>
-				<Picker
-					disabled={disabled}
-					value={value}
-					onBlur={onBlur}
-					name={name}
-					onChange={this.handleChange}
-					placeholder={placeholder}
-					format={format}
-					shouldDisableDate={this.props.shouldDisableDate}
-					defaultValue={defaultValue}
-					initialFocusedDate={this.props.initialFocusedDate}
-				/>
-			</Container>
-		);
-	}
-}
+	return (
+		<Container>
+			<Picker
+				value={selectedValue}
+				onOpen={handleOpen}
+				onAccept={handleAccept}
+				onChange={handleChange}
+				disableHighlightToday
+				renderInput={(props) => (
+					<TextField
+						placeholder={placeholder}
+						defaultValue={defaultValue}
+						name={name}
+						onBlur={onBlur}
+						{...props}
+					/>
+				)}
+				{...dateFieldProps}
+			/>
+		</Container>
+	);
+};

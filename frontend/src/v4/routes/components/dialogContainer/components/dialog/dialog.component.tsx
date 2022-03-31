@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, FunctionComponent, forwardRef, Ref } from 'react';
 
-import Button from '@material-ui/core/Button';
-import DialogBase from '@material-ui/core/Dialog';
-import DialogContent from '@material-ui/core/DialogContent';
-import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Close';
+import Button from '@mui/material/Button';
+import DialogBase from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { IDialogConfig } from '../../../../../modules/dialog/dialog.redux';
@@ -38,7 +38,7 @@ interface IProps {
 	searchEnabled?: boolean;
 }
 
-export const Dialog: React.FunctionComponent<IProps> = React.forwardRef((props, ref) => {
+export const Dialog: FunctionComponent<IProps> = forwardRef((props, ref: Ref<HTMLDivElement>) => {
 	const [isOpen, setIsOpen] = useState(true);
 	const [closeDisabled, setCloseDisabled] = useState(false);
 
@@ -78,7 +78,7 @@ export const Dialog: React.FunctionComponent<IProps> = React.forwardRef((props, 
 				onOpen={search.onOpen}
 				onClose={search.onClose}
 			/>}
-			<IconButton onClick={handleClose}><CloseIcon htmlColor={COLOR.WHITE} /></IconButton>
+			<IconButton onClick={handleClose} size="large"><CloseIcon htmlColor={COLOR.WHITE} /></IconButton>
 		</TopDialogActions>
 	);
 
@@ -132,11 +132,11 @@ export const Dialog: React.FunctionComponent<IProps> = React.forwardRef((props, 
 	};
 
 	return (
-		<DialogBase {...DialogProps} ref={ref} open={isOpen} onClose={handleClose}>
-			<DialogTitle disableTypography>{title}{renderCloseButton()}</DialogTitle>
+        <DialogBase {...DialogProps} ref={ref} open={isOpen} onClose={handleClose}>
+			<DialogTitle>{title}{renderCloseButton()}</DialogTitle>
 			{renderContent(content && !DialogTemplate)}
 			{renderTemplate(!!DialogTemplate)}
 			{renderActions(content && onCancel && !props.config.onConfirm)}
 		</DialogBase>
-	);
+    );
 });

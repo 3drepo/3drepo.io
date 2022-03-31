@@ -14,14 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { PureComponent, ChangeEvent } from 'react';
 import { debounce } from 'lodash';
 
-import IconButton from '@material-ui/core/IconButton';
-import ArrowBack from '@material-ui/icons/ArrowBack';
-import ActivitiesIcon from '@material-ui/icons/Movie';
+import IconButton from '@mui/material/IconButton';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import ActivitiesIcon from '@mui/icons-material/Movie';
 import { isEqual } from 'lodash';
 
 import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../../helpers/rendering';
@@ -52,7 +50,7 @@ interface IState {
 	listCollapsed: boolean;
 }
 
-export class Activities extends React.PureComponent<IProps, IState> {
+export class Activities extends PureComponent<IProps, IState> {
 
 	public state = {
 		listCollapsed: true,
@@ -92,10 +90,10 @@ export class Activities extends React.PureComponent<IProps, IState> {
 	public renderTitleIcon = () => {
 		if (this.props.showDetails) {
 			return (
-				<IconButton onClick={this.handleBackArrowClick}>
+                <IconButton onClick={this.handleBackArrowClick} size="large">
 					<ArrowBack />
 				</IconButton>
-			);
+            );
 		}
 
 		return <ActivitiesIcon />;
@@ -121,7 +119,7 @@ export class Activities extends React.PureComponent<IProps, IState> {
 		this.props.setComponentState({ searchQuery });
 	}, 200);
 
-	public handleSearchQueryChange = ({ currentTarget }: React.ChangeEvent<HTMLInputElement>) => {
+	public handleSearchQueryChange = ({ currentTarget }: ChangeEvent<HTMLInputElement>) => {
 		const searchQuery = currentTarget.value.toLowerCase();
 		this.debounceSearchQueryChange(searchQuery);
 	}

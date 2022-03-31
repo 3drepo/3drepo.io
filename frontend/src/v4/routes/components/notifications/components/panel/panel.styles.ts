@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import MaterialList from '@material-ui/core/List';
+import MaterialList from '@mui/material/List';
 import styled from 'styled-components';
 
 export const List = styled(MaterialList)`

@@ -14,16 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { Button, DialogContent, Input, ListItem, Tab, Tabs, Tooltip } from '@material-ui/core';
-import { TooltipProps } from '@material-ui/core/Tooltip';
+import { createElement } from 'react';
+import { Button, DialogContent, Input, ListItem, Tab, Tabs, Tooltip } from '@mui/material';
+import { TooltipProps } from '@mui/material/Tooltip';
 import { omit } from 'lodash';
-import React from 'react';
 import styled from 'styled-components';
 import { COLOR, FONT_WEIGHT } from '../../../../../styles';
 
 export const NegativeActionButton = styled(Button)`
-	&& {
+	&&:not(.Mui-disabled) {
 		color: ${COLOR.WHITE_87};
 		background-color: ${COLOR.NEGATIVE_87};
 	}
@@ -49,7 +48,7 @@ export const WarningMessage = styled.div`
 	text-align: left;
 	color: ${COLOR.VIVID_RED};
 	font-size: 12px;
-	font-weight: ${FONT_WEIGHT.SEMIBOLD}
+	font-weight: ${FONT_WEIGHT.SEMIBOLD};
 `;
 
 export const VisualSettingsButtonsContainer = styled.div`
@@ -81,7 +80,7 @@ export const FormListItem = styled(ListItem)`
 export const ErrorTooltip = styled((prop: TooltipProps) => {
 	const props = omit(prop, 'className');
 	props.classes = { popper: prop.className, tooltip: 'tooltip' };
-	return React.createElement(Tooltip, props);
+	return createElement(Tooltip, props);
 })`
 	.tooltip {
 		background-color: ${COLOR.LIGHT_GRAY};
@@ -92,7 +91,7 @@ export const ErrorTooltip = styled((prop: TooltipProps) => {
 `;
 
 export const ShortInput = styled(Input).attrs({
-inputProps: {className: 'shortInput'}
+	inputProps: {className: 'shortInput'}
 })`
 	.shortInput {
 		text-align: right;

@@ -14,17 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
+import { PureComponent } from 'react';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
 import { Field, Formik } from 'formik';
 import { isEmpty } from 'lodash';
 import * as queryString from 'query-string';
 import * as Yup from 'yup';
 
-import InputLabel from '@material-ui/core/InputLabel';
+import InputLabel from '@mui/material/InputLabel';
 import { ROUTES } from '../../constants/routes';
 import { convertPositionToDirectX, convertPositionToOpenGL, getModelCodeFieldErrorMsg } from '../../helpers/model';
 import { IViewpointsComponentState } from '../../modules/viewpoints/viewpoints.redux';
@@ -97,7 +95,7 @@ interface IProps {
 	searchEnabled?: boolean;
 }
 
-export class ModelSettings extends React.PureComponent<IProps, IState> {
+export class ModelSettings extends PureComponent<IProps, IState> {
 	public state = {
 		latitude: 0,
 		longitude: 0,

@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import { MenuList, MenuItem } from './navigationMenu.styles';
 
 interface IListItem {
@@ -31,33 +30,31 @@ interface INavigationMenu {
 	list: IListItem[];
 }
 
-export const NavigationMenu = ({ anchorEl, selectedItem, handleClose, list }: INavigationMenu): JSX.Element => {
-	const menuPosition = {
-		getContentAnchorEl: null,
-		anchorOrigin: {
+export const NavigationMenu = ({ anchorEl, selectedItem, handleClose, list }: INavigationMenu): JSX.Element => (
+	<MenuList
+		anchorEl={anchorEl}
+		onClose={handleClose}
+		open={Boolean(anchorEl)}
+		anchorOrigin={{
 			vertical: 'bottom',
 			horizontal: 'left',
-		},
-		transformOrigin: {
+		}}
+		transformOrigin={{
 			vertical: 'top',
 			horizontal: 'left',
-		},
-	};
-
-	return (
-		<MenuList anchorEl={anchorEl} onClose={handleClose} open={Boolean(anchorEl)} {...menuPosition}>
-			{list.map(({ title, to }) => (
-				<MenuItem
-					key={title}
-					to={to}
-					onClick={handleClose}
-					selected={selectedItem === title}
-				>
-					<Typography variant="body1" noWrap>
-						{title}
-					</Typography>
-				</MenuItem>
-			))}
-		</MenuList>
-	);
-};
+		}}
+	>
+		{list.map(({ title, to }) => (
+			<MenuItem
+				key={title}
+				to={to}
+				onClick={handleClose}
+				selected={selectedItem === title}
+			>
+				<Typography variant="body1" noWrap>
+					{title}
+				</Typography>
+			</MenuItem>
+		))}
+	</MenuList>
+);

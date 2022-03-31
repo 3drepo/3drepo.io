@@ -20,6 +20,7 @@ const { Client } = require("@elastic/elasticsearch");
 const logger = require("../logger");
 const systemLogger = logger.systemLogger;
 const elasticConfig = require("../config").elastic;
+const repoLicense = require("../config").repoLicense;
 const { v5Path } = require("../../interop");
 const EventsV5 = require(`${v5Path}/services/eventsManager/eventsManager.constants`).events;
 const EventsManager = require(`${v5Path}/services/eventsManager/eventsManager`);
@@ -44,7 +45,8 @@ const loginRecordMapping = {
 	"engine.version": { "type": "text" },
 	"os.name": { "type": "text" },
 	"os.version": { "type": "text" },
-	"device": { "type": "text" }
+	"device": { "type": "text" },
+	"licenseKey": { "type": "keyword" }
 };
 
 const indicesMappings = [
@@ -66,7 +68,7 @@ const createElasticClient = async () => {
 		await establishIndices(client);
 		return client;
 	} catch (err) {
-		systemLogger.logError("Health check failed on elastic connection, please check settings.");
+		systemLogger.logError("Health check failed on elastic connection, please check settings.",err);
 		// eslint-disable-next-line
 		process.exit(1);
 	}
@@ -96,7 +98,7 @@ const createElasticRecord = async (index, body, id) => {
 	try {
 		const elasticClient = await elasticClientPromise;
 		if (elasticClient && body) {
-			await elasticClient.index({
+			await elasticClient.create({
 				index,
 				id,
 				refresh: true,
@@ -105,7 +107,7 @@ const createElasticRecord = async (index, body, id) => {
 			systemLogger.logDebug(`created doc ${index} ${JSON.stringify(body)}`);
 		}
 	} catch (error) {
-		systemLogger.logError(`createElasticRecord ${error} ${index}`);
+		systemLogger.logError(`createElasticRecord ${error} ${index}`,error);
 	}
 };
 
@@ -125,7 +127,8 @@ Elastic.createLoginRecord = async (username, loginRecord) => {
 		"Engine.Version" : loginRecord.engine.version,
 		"OS.Name" : loginRecord.os.name,
 		"OS.Version" : loginRecord.os.version,
-		"Device" : loginRecord.device
+		"Device" : loginRecord.device,
+		"licenseKey": repoLicense
 	};
 
 	await createElasticRecord(loginRecordIndex, elasticBody, elasticBody.Id);

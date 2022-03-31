@@ -16,20 +16,13 @@
  */
 
 import { all, put, takeEvery, takeLatest } from 'redux-saga/effects';
-import { FederationsActions, FederationsTypes } from '@/v5/store/federations/federations.redux';
+import { AddFavouriteAction, DeleteFederationAction, FederationsActions,
+	FederationsTypes, FetchFederationsAction, FetchFederationSettingsAction,
+	FetchFederationStatsAction, FetchFederationViewsAction, RemoveFavouriteAction,
+	UpdateFederationContainersAction, UpdateFederationSettingsAction } from '@/v5/store/federations/federations.redux';
 import * as API from '@/v5/services/api';
 import {
-	FetchFederationsAction,
-	FetchFederationsResponse,
-	FetchFederationStatsResponse,
-	AddFavouriteAction,
-	RemoveFavouriteAction,
-	FetchFederationStatsAction,
-	UpdateFederationSettingsAction,
-	FetchFederationViewsAction,
-	FetchFederationViewsResponse,
-	FetchFederationSettingsAction,
-	DeleteFederationAction,
+	FederationStats,
 } from '@/v5/store/federations/federations.types';
 import {
 	prepareFederationsData,
@@ -38,6 +31,7 @@ import {
 } from '@/v5/store/federations/federations.helpers';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
+import { FetchFederationsResponse, FetchFederationViewsResponse } from '@/v5/services/api/federations';
 
 export function* addFavourites({ federationId, teamspace, projectId }: AddFavouriteAction) {
 	try {
@@ -90,7 +84,7 @@ export function* fetchFederations({ teamspace, projectId }: FetchFederationsActi
 
 export function* fetchFederationStats({ teamspace, projectId, federationId }: FetchFederationStatsAction) {
 	try {
-		const stats: FetchFederationStatsResponse = yield API.Federations.fetchFederationStats({
+		const stats: FederationStats = yield API.Federations.fetchFederationStats({
 			teamspace, projectId, federationId,
 		});
 
@@ -145,14 +139,14 @@ export function* fetchFederationSettings({
 }
 
 export function* updateFederationSettings({
-	teamspace, projectId, federationId, updatedSettings,
+	teamspace, projectId, federationId, settings,
 }: UpdateFederationSettingsAction) {
 	try {
-		const rawUpdatedSettings = prepareFederationSettingsForBackend(updatedSettings);
+		const rawSettings = prepareFederationSettingsForBackend(settings);
 		yield API.Federations.updateFederationSettings({
-			teamspace, projectId, federationId, updatedSettings: rawUpdatedSettings,
+			teamspace, projectId, federationId, settings: rawSettings,
 		});
-		yield put(FederationsActions.updateFederationSettingsSuccess(projectId, federationId, updatedSettings));
+		yield put(FederationsActions.updateFederationSettingsSuccess(projectId, federationId, settings));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: 'trying to update federation settings',
@@ -173,6 +167,26 @@ export function* deleteFederation({ teamspace, projectId, federationId }: Delete
 	}
 }
 
+export function* updateFederationContainers({
+	teamspace,
+	projectId,
+	federationId,
+	containers,
+}: UpdateFederationContainersAction) {
+	try {
+		yield API.Federations.updateFederationContainers({ teamspace, projectId, federationId, containers });
+		yield put(FederationsActions.updateFederationContainersSuccess(projectId, federationId, containers));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({
+				id: 'federation.update.containers.error',
+				defaultMessage: 'trying to update federation containers',
+			}),
+			error,
+		}));
+	}
+}
+
 export default function* FederationsSagas() {
 	yield takeLatest(FederationsTypes.ADD_FAVOURITE, addFavourites);
 	yield takeLatest(FederationsTypes.REMOVE_FAVOURITE, removeFavourites);
@@ -182,4 +196,5 @@ export default function* FederationsSagas() {
 	yield takeEvery(FederationsTypes.FETCH_FEDERATION_SETTINGS, fetchFederationSettings);
 	yield takeLatest(FederationsTypes.UPDATE_FEDERATION_SETTINGS, updateFederationSettings);
 	yield takeLatest(FederationsTypes.DELETE_FEDERATION, deleteFederation);
+	yield takeLatest(FederationsTypes.UPDATE_FEDERATION_CONTAINERS, updateFederationContainers);
 }

@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 
 import { Typography } from '@controls/typography';
-import { DialogActions, DialogContent, IconButton, Paper } from '@material-ui/core';
+import { DialogActions, DialogContent, IconButton, Paper } from '@mui/material';
 
 export const RemoveWhiteCorners = styled(Paper)`
 	background-color: rgba(0, 0, 0, 0);
@@ -71,8 +71,9 @@ export const Subtitle = styled(Typography).attrs({
 	color: ${({ theme }) => theme.palette.secondary.lightest};
 `;
 
-export const FormDialogContent = styled(DialogContent)`
-	display: inline-flex;
+export const FormDialogContent = styled(DialogContent)<{ zeroMargin?: boolean }>`
+	margin: ${({ zeroMargin }) => (zeroMargin ? '0' : '20px 34px 43px')};
+	display: block;
 	flex-flow: row wrap;
 	margin: 20px 34px 43px;
 `;

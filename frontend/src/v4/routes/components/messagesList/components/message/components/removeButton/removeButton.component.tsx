@@ -14,10 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
-import CloseIcon from '@material-ui/icons/Close';
+import CloseIcon from '@mui/icons-material/Close';
 
 import { TooltipButton } from '../../../../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { Wrapper } from './removeButton.styles';
@@ -26,10 +23,9 @@ interface IProps {
 	index: number;
 	guid: string;
 	removeMessage: (index, guid) => void;
-	isScreenshot?: boolean;
 }
 
-export const RemoveButton = ({ removeMessage, isScreenshot, index, guid }: IProps) => {
+export const RemoveButton = ({ removeMessage, index, guid }: IProps) => {
 
 	const handleRemoveMessage = (event) => {
 		event.stopPropagation();
@@ -37,7 +33,7 @@ export const RemoveButton = ({ removeMessage, isScreenshot, index, guid }: IProp
 	};
 
 	return (
-		<Wrapper screenshot={isScreenshot}>
+		<Wrapper>
 			<TooltipButton
 				label="Remove"
 				action={handleRemoveMessage}

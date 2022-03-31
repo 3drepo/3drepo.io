@@ -18,7 +18,7 @@
 import styled, { css } from 'styled-components';
 import * as DashboardListItemRowStyles from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemRow/dashboardListItemRow.styles';
 
-export const Container = styled.li`
+export const Container = styled.li<{ selected?: boolean }>`
 	box-sizing: border-box;
 	height: 100%;
 	width: 100%;

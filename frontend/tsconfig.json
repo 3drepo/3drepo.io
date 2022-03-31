@@ -5,7 +5,6 @@
     "module": "commonjs",
     "target": "es6",
     "types": [
-      "@types/jest",
       "react",
       "react-dom",
       "lodash",
@@ -18,7 +17,7 @@
       "dom",
       "es2020.string"
     ],
-    "jsx": "react",
+    "jsx": "react-jsx",
     "removeComments": true,
     "sourceMap": true,
     "baseUrl": "./",

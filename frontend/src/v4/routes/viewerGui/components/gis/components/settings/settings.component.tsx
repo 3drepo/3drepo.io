@@ -16,7 +16,7 @@
  */
 
 import { withFormik } from 'formik';
-import React from 'react';
+import { PureComponent } from 'react';
 import * as Yup from 'yup';
 
 import { convertPositionToDirectX, convertPositionToOpenGL } from '../../../../../../helpers/model';
@@ -46,7 +46,7 @@ interface IProps {
 	getDataFromPathname: () => { teamspace, modelId, revision };
 }
 
-export class Settings extends React.PureComponent<IProps, any> {
+export class Settings extends PureComponent<IProps, any> {
 	public getFormValues = (settings) => {
 		let formValues = {} as any;
 

@@ -79,7 +79,7 @@ YupHelper.types.surveyPoints = Yup.array()
 YupHelper.types.strings.unit = Yup.string()
 	.oneOf(['mm', 'cm', 'dm', 'm', 'ft']);
 
-YupHelper.types.strings.password = Yup.string()
+YupHelper.types.strings.password = Yup.string().max(65)
 	.test('checkPasswordStrength', 'Password is too weak',
 		(value) => {
 			if (value) {

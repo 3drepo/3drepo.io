@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { useEffect } from 'react';
 import { isNull } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import { MuiThemeProvider, StylesProvider } from '@material-ui/core';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material';
+import { StylesProvider } from '@mui/styles';
 import { ThemeProvider } from 'styled-components';
 
 import { theme } from '@/v5/ui/themes/theme';
@@ -37,11 +38,11 @@ export const Root = () => {
 	const userName: string = CurrentUserHooksSelectors.selectUsername();
 	const isAuthenticated: boolean | null = AuthHooksSelectors.selectIsAuthenticated();
 
-	React.useEffect(() => {
+	useEffect(() => {
 		AuthActionsDispatchers.authenticate();
 	}, []);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (userName) {
 			CurrentUserActionsDispatchers.fetchUser(userName);
 		}
@@ -51,7 +52,7 @@ export const Root = () => {
 		}
 
 		if (!isNull(isAuthenticated) && !isAuthenticated) {
-			history.push('/');
+			history.push('/v5/login');
 		}
 	}, [userName, isAuthenticated]);
 

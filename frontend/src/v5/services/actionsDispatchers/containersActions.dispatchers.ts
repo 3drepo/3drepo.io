@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ContainersActions } from '@/v5/store/containers/containers.redux';
-import { IContainersActionCreators } from '@/v5/store/containers/containers.types';
+import { ContainersActions, IContainersActionCreators } from '@/v5/store/containers/containers.redux';
 import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 
 export const ContainersActionsDispatchers = createActionsDispatchers<IContainersActionCreators>(ContainersActions);

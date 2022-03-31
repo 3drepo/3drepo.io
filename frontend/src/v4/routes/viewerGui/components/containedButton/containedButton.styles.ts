@@ -17,21 +17,21 @@
 
 import styled from 'styled-components';
 
-import Button from '@material-ui/core/Button';
+import Button from '@mui/material/Button';
 
 import { COLOR } from '../../../../styles';
 
-export const StyledButton = styled(Button)`
+export const StyledButton = styled(Button)<{ squeezed?: number }>`
 	&& {
 		background-color: ${COLOR.SOFT_BLUE};
-		padding: ${({ squeezed }: { squeezed: boolean }) => squeezed ? '4px 5px' : '6px 20px'};
+		padding: ${({ squeezed }) => squeezed ? '4px 5px' : '6px 20px'};
 		min-width: 56px;
 		min-height: 18px;
 		font-size: 12px;
 		text-transform: none;
 	}
 
-	&&>:first-child>:first-child  {
+	&& > :first-child {
 		width: 15px;
 		font-size: 13px;
 		margin-right: 2px;

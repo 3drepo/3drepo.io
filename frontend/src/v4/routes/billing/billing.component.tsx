@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Tabs from '@material-ui/core/Tabs';
+import Tabs from '@mui/material/Tabs';
 import { values } from 'lodash';
 import * as queryString from 'query-string';
-import React from 'react';
+import { PureComponent } from 'react';
 import { Link, Redirect, Route, Switch } from 'react-router-dom';
 
 import { Panel } from '../components/panel/panel.component';
@@ -51,7 +51,7 @@ interface IState {
 	activeTab: string;
 }
 
-export class Billing extends React.PureComponent<IProps, IState> {
+export class Billing extends PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps = (nextProps, prevState) => {
 		const queryParams = queryString.parse(location.search);
 		const activeTab = Number(queryParams.tab || prevState.activeTab);

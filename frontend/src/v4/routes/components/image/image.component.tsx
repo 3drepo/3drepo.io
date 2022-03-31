@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { useState } from 'react';
 import { ScreenshotDialog } from '../screenshotDialog';
 import { Container, ImagePlaceholder, StyledImage } from './image.styles';
 
@@ -31,7 +29,7 @@ interface IProps {
 }
 
 export const Image = ({ src, enablePlaceholder, enablePreview, showScreenshotDialog, onClick, ...props }: IProps) => {
-	const [loaded, setLoaded] = React.useState<boolean>(false);
+	const [loaded, setLoaded] = useState<boolean>(false);
 
 	const handleLoaded = () => setLoaded(true);
 
@@ -47,9 +45,18 @@ export const Image = ({ src, enablePlaceholder, enablePreview, showScreenshotDia
 	};
 
 	return (
-		<Container className={props.className} enablePreview={enablePreview} onLoad={handleLoaded} onClick={handlePreview}>
+		<Container
+			className={props.className}
+			enablePreview={enablePreview}
+			onLoad={handleLoaded}
+			onClick={handlePreview}
+		>
 			{enablePlaceholder && !loaded && <ImagePlaceholder />}
-			<StyledImage loading={enablePlaceholder && !loaded ? 1 : 0} src={src} alt={props.alt} />
+			<StyledImage
+				loading={enablePlaceholder && !loaded ? 1 : 0}
+				src={src}
+				alt={props.alt}
+			/>
 		</Container>
 	);
 };
