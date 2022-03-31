@@ -120,23 +120,26 @@ const resetPassword = async (req, res) => {
 	}
 };
 
-const signUp = (req, res) => {
-	Users.signUp(req.body).then(() => {
+const signUp = async (req, res) => {
+	try {
+		await Users.signUp(req.body);
 		respond(req, res, templates.ok);
-	}).catch(
+	} catch (err) {
 		// istanbul ignore next
-		(err) => respond(req, res, err),
-	);
+		(err) => respond(req, res, err)
+	}
 };
 
-const verify = (req, res) => {
+const verify = async (req, res) => {
 	const { username, token } = req.body;
-	Users.verify(username, token).then(() => {
+
+	try {
+		await Users.verify(username, token);
 		respond(req, res, templates.ok);
-	}).catch(
+	} catch (err) {
 		// istanbul ignore next
-		(err) => respond(req, res, err),
-	);
+		(err) => respond(req, res, err)
+	}
 };
 
 const establishRoutes = () => {

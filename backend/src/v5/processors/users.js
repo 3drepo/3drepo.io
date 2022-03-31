@@ -19,7 +19,6 @@ const Users = {};
 
 const { addUser, authenticate, canLogIn, deleteApiKey, generateApiKey, getAvatar,
 	getUserByUsername, updatePassword, updateProfile, updateResetPasswordToken, uploadAvatar, verify } = require('../models/users');
-const { capitalizeFirstLetter, formatPronouns } = require('../utils/helper/strings');
 const { isEmpty, removeFields } = require('../utils/helper/objects');
 const { sendResetPasswordEmail, sendVerifyUserEmail } = require('../services/mailer');
 const config = require('../utils/config');
@@ -36,7 +35,7 @@ Users.signUp = async (newUserData) => {
 		const emailRes = await sendVerifyUserEmail(newUserData.email, {
 			token,
 			email: newUserData.email,
-			firstName: capitalizeFirstLetter(newUserData.firstName),
+			firstName: newUserData.firstName,
 			username: newUserData.username,
 		});
 
@@ -47,20 +46,12 @@ Users.signUp = async (newUserData) => {
 };
 
 Users.verify = async (username, token) => {
-	await verify(username, token);
-
-	const { customData } = await getUserByUsername(username, {
-		'customData.firstName': 1,
-		'customData.lastName': 1,
-		'customData.email': 1,
-		'customData.billing.billingInfo.company': 1,
-		'customData.mailListOptOut': 1,
-	});
+	const customData = await verify(username, token);
 
 	publish(events.USER_VERIFIED, {
 		username,
 		email: customData.email,
-		fullName: formatPronouns(`${customData.firstName} ${customData.lastName}`),
+		fullName: `${customData.firstName} ${customData.lastName}`,
 		company: customData.billing.billingInfo.company,
 		mailListOptOut: customData.mailListOptOut,
 	});

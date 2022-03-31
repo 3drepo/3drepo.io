@@ -93,28 +93,6 @@ const testGenerateHashString = () => {
 	});
 };
 
-const testCapitalizeFirstLetter = () => {
-	describe('Capitalize first letter', () => {
-		test('with a lower case first letter', () => {
-			const name = 'will';
-			const formattedString = StringHelper.capitalizeFirstLetter(name);
-			expect(formattedString).toEqual('Will');
-		});
-
-		test('with a capital case first letter', () => {
-			const name = 'Will';
-			const formattedString = StringHelper.capitalizeFirstLetter(name);
-			expect(formattedString).toEqual('Will');
-		});
-
-		test('with a capital case string', () => {
-			const name = 'WILL';
-			const formattedString = StringHelper.capitalizeFirstLetter(name);
-			expect(formattedString).toEqual('WILL');
-		});
-	});
-};
-
 const testFormatPronouns = () => {
 	describe('Format string pronouns', () => {
 		test('with two words all lowercase', () => {

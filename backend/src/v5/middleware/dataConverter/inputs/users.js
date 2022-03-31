@@ -24,6 +24,7 @@ const { respond } = require('../../../utils/responder');
 const { singleImageUpload } = require('../multer');
 const { types } = require('../../../utils/helper/yup');
 const { validateMany } = require('../../common');
+const { formatPronouns } = require('../../../utils/helper/strings');
 
 const Users = {};
 
@@ -225,6 +226,9 @@ Users.validateSignUpData = async (req, res, next) => {
 	try {
 		const schema = generateSignUpSchema(config.auth.captcha);
 		await schema.validate(req.body);
+
+		req.body.firstName = formatPronouns(req.body.firstName);
+		req.body.lastName = formatPronouns(req.body.lastName);
 
 		await next();
 	} catch (err) {

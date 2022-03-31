@@ -72,7 +72,6 @@ UsersModel.canLogIn.mockImplementation(() => user);
 UsersModel.authenticate.mockResolvedValue('user1');
 const sendResetPasswordEmailMock = Mailer.sendResetPasswordEmail.mockImplementation(() => {});
 Strings.generateHashString.mockImplementation(() => exampleHashString);
-Strings.capitalizeFirstLetter.mockImplementation((s) => s);
 Strings.formatPronouns.mockImplementation((str) => str);
 
 const testLogin = () => {

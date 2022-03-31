@@ -148,6 +148,13 @@
 		return collection.findOne(query, options);
 	};
 
+	Handler.findOneAndUpdate = async function (database, colName, query, data, projection = {}) {
+		const collection = await Handler.getCollection(database, colName);
+		const options = { projection };
+
+		return collection.findOneAndUpdate(query, data, options);
+	};
+
 	Handler.findOneAndDelete = async function (database, colName, query, projection = {}) {
 		const collection = await Handler.getCollection(database, colName);
 		const findResult = await collection.findOneAndDelete(query, projection);

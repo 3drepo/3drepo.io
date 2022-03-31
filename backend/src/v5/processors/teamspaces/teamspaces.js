@@ -27,10 +27,12 @@ const Teamspaces = {};
 Teamspaces.initializeTeamspace = async (username) => {
 	try {
 		await createTeamspaceRole(username);
-		await grantTeamspaceRoleToUser(username, username);
-		await addDefaultJobs(username);
-		await createTeamspaceSettings(username);
-		await grantTeamspacePermissionsToUser(username, username, ['teamspace_admin']);
+		await Promise.all([
+			grantTeamspaceRoleToUser(username, username),
+			addDefaultJobs(username),
+			createTeamspaceSettings(username),
+			grantTeamspacePermissionsToUser(username, username, ['teamspace_admin']),
+		]);	
 	} catch (err) {
 		logger.logError(`Failed to initialize teamspace for ${username}`);
 	}
