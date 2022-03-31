@@ -241,8 +241,10 @@ User.addUser = async (newUserData) => {
 User.verify = async (username) => {
 	const { value: { customData }}  = await db.findOneAndUpdate('admin', COLL_NAME, { user: username }, 
 		{ 
-			$unset: { 'customData.inactive': 1,
-			'customData.emailVerifyToken': 1 } 
+			$unset: { 
+				'customData.inactive': 1,
+				'customData.emailVerifyToken': 1 
+			} 
 		}, 
 		{
 			'customData.firstName': 1,
@@ -250,7 +252,8 @@ User.verify = async (username) => {
 			'customData.email': 1,
 			'customData.billing.billingInfo.company': 1,
 			'customData.mailListOptOut': 1,
-		});
+		}
+	);
 
 	return customData;
 };

@@ -32,6 +32,7 @@ const MockExpressRequest = require('mock-express-request');
 const FormData = require('form-data');
 const fs = require('fs');
 const path = require('path');
+const { generateRandomString } = require('../../../../../../tests/v5/helper/services');
 
 const config = require(`${src}/utils/config`);
 
@@ -265,14 +266,14 @@ const testValidateSignUpData = () => {
 		[{ body: { ...newUserData } }, true, 'with valid data'],
 		[{ body: { ...newUserData, company: undefined } }, true, 'with empty company'],
 		[{ body: { ...newUserData, username: existingUsername } }, false, 'with username that already exists', templates.invalidArguments],
-		[{ body: { ...newUserData, username: 'invalid username' } }, false, 'with invalid username', templates.invalidArguments],
+		[{ body: { ...newUserData, username: '_*., +-=' } }, false, 'with invalid username', templates.invalidArguments],
 		[{ body: { ...newUserData, email: existingEmail } }, false, 'with email that already exists', templates.invalidArguments],
-		[{ body: { ...newUserData, email: 'invalid email' } }, false, 'with invalid email', templates.invalidArguments],
-		[{ body: { ...newUserData, extraProp: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
-		[{ body: { ...newUserData, firstName: 'this is a very very large string that should fail' } }, false, 'with too large firstName', templates.invalidArguments],
-		[{ body: { ...newUserData, lastName: 'this is a very very large string that should fail' } }, false, 'with too large lastName', templates.invalidArguments],
-		[{ body: { ...newUserData, countryCode: 'invalid country' } }, false, 'with invalid country', templates.invalidArguments],
-		[{ body: { ...newUserData, password: 'abc' } }, false, 'with short password', templates.invalidArguments],
+		[{ body: { ...newUserData, email: generateRandomString() } }, false, 'with invalid email', templates.invalidArguments],
+		[{ body: { ...newUserData, extraProp: generateRandomString() } }, false, 'with extra properties', templates.invalidArguments],
+		[{ body: { ...newUserData, firstName: generateRandomString(50) } }, false, 'with too large firstName', templates.invalidArguments],
+		[{ body: { ...newUserData, lastName: generateRandomString(50) } }, false, 'with too large lastName', templates.invalidArguments],
+		[{ body: { ...newUserData, countryCode: generateRandomString() } }, false, 'with invalid country', templates.invalidArguments],
+		[{ body: { ...newUserData, password: generateRandomString(3) } }, false, 'with short password', templates.invalidArguments],
 		[{ body: { ...newUserData, password: 'abcdefghi' } }, false, 'with weak newPassword', templates.invalidArguments],
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
 		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
@@ -301,13 +302,27 @@ const testValidateSignUpData = () => {
 		config.auth.captcha = false;
 		config.captcha = null;
 	});
+
+	test('with captcha enabled but not provided it should respond with invalidArguments', async () => {
+		config.auth.captcha = true;
+		config.captcha = {};
+
+		const mockCB = jest.fn();
+		await Users.validateSignUpData({ body: newUserData }, {}, mockCB);
+		expect(mockCB.mock.calls.length).toBe(0);
+		expect(Responder.respond.mock.calls.length).toBe(1);
+		expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
+
+		config.auth.captcha = false;
+		config.captcha = null;
+	}); 
 };
 
 const testVerifyData = () => {
 	describe.each([
-		[{ body: { username: existingUsername, token: 'someToken' } }, true, 'with valid data'],
+		[{ body: { username: existingUsername, token: generateRandomString() } }, true, 'with valid data'],
 		[{ body: { username: existingUsername } }, false, 'without token', templates.invalidArguments],
-		[{ body: { username: availableUsername, token: 'someToken' } }, false, 'with non existing username', templates.invalidArguments],
+		[{ body: { username: availableUsername, token: generateRandomString() } }, false, 'with non existing username', templates.invalidArguments],
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
 		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
 	])('Check if req arguments for verifying user are valid', (req, shouldPass, desc, expectedError) => {

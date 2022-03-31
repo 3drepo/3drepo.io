@@ -29,6 +29,7 @@ const Strings = require(`${src}/utils/helper/strings`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+const { generateRandomString } = require('../../helper/services');
 
 const exampleHashString = 'example token';
 
@@ -66,7 +67,7 @@ const updateUserByUsernameMock = UsersModel.updateProfile.mockImplementation(() 
 const updatePasswordMock = UsersModel.updatePassword.mockImplementation(() => {});
 const updateResetPasswordTokenMock = UsersModel.updateResetPasswordToken.mockImplementation(() => {});
 const addUserMock = UsersModel.addUser.mockImplementation(() => {});
-const verifyMock = UsersModel.verify.mockImplementation(() => {});
+const verifyMock = UsersModel.verify.mockImplementation(() => user.customData);
 const publishFn = EventsManager.publish.mockImplementation(() => { });
 UsersModel.canLogIn.mockImplementation(() => user);
 UsersModel.authenticate.mockResolvedValue('user1');
@@ -222,19 +223,11 @@ const testSignUp = () => {
 const testVerify = () => {
 	describe('Verify a user', () => {
 		test('should verify a user', async () => {
-			await Users.verify(user.user, 'someToken');
+			const token = generateRandomString();
+			await Users.verify(user.user, token);
 			expect(verifyMock.mock.calls.length).toBe(1);
 			expect(verifyMock.mock.calls[0][0]).toEqual(user.user);
-			expect(verifyMock.mock.calls[0][1]).toEqual('someToken');
-			expect(getUserByUsernameMock.mock.calls.length).toBe(1);
-			expect(getUserByUsernameMock.mock.calls[0][0]).toEqual(user.user);
-			expect(getUserByUsernameMock.mock.calls[0][1]).toEqual({
-				'customData.firstName': 1,
-				'customData.lastName': 1,
-				'customData.email': 1,
-				'customData.billing.billingInfo.company': 1,
-				'customData.mailListOptOut': 1,
-			});
+			expect(verifyMock.mock.calls[0][1]).toEqual(token);		
 			expect(publishFn.mock.calls.length).toBe(1);
 			expect(publishFn.mock.calls[0][0]).toEqual(events.USER_VERIFIED);
 			expect(publishFn.mock.calls[0][1]).toEqual({

@@ -467,7 +467,7 @@ const establishRoutes = () => {
 	* @openapi
 	* /user:
 	*   post:
-	*     description: Signs a user up
+	*     description: Signs a user up and sends a verification email to the email address provided
 	*     tags: [User]
 	*     operationId: signUp
 	*     requestBody:
@@ -480,39 +480,53 @@ const establishRoutes = () => {
 	*                 type: string
 	*                 description: The username of the user
 	*                 example: username123
+	*                 required: true
 	*               email:
 	*                 type: string
 	*                 description: The email of the user
 	*                 example: example@email.com
+	*                 format: email
+	*                 required: true
 	*               password:
 	*                 type: string
 	*                 description: The password of the user
 	*                 example: newPassword123!
+	*                 required: true
 	*               firstName:
 	*                 type: string
 	*                 description: The first name of the user
 	*                 example: Nick
-	*               lasttName:
+	*                 required: true
+	*               lastName:
 	*                 type: string
 	*                 description: The last name of the user
 	*                 example: Wilson
+	*                 required: true
 	*               countryCode:
 	*                 type: string
 	*                 description: The country code of the user
 	*                 example: GB
+	*                 required: true
 	*               company:
 	*                 type: string
 	*                 description: The company of the user
 	*                 example: 3D Repo
+	*                 required: false
 	*               mailListAgreed:
 	*                 type: boolean
 	*                 description: Whether the user has signed yp for the latest news and tutorials
 	*                 example: true
+	*                 required: true
+	*               captcha:
+	*                 type: string
+	*                 description: The reCAPTCHA token generated from the sign up form
+	*                 example: 5LcN0ysfAAAAAHpnld1tAweI7DKU7dswmwnHWYcB
+	*                 required: false
 	*     responses:
 	*       400:
 	*         $ref: "#/components/responses/invalidArguments"
 	*       200:
-	*         description: Signs a user up
+	*         description: Signs a user up and sends a verification email to the email address provided
 	*/
 	router.post('/user', validateSignUpData, signUp);
 
@@ -520,7 +534,7 @@ const establishRoutes = () => {
 	* @openapi
 	* /user/verify:
 	*   post:
-	*     description: Verifies a user
+	*     description: Verifies a user and the user teamspace is initialised
 	*     tags: [User]
 	*     operationId: verify
 	*     requestBody:
@@ -533,15 +547,17 @@ const establishRoutes = () => {
 	*                 type: string
 	*                 description: The username of the user
 	*                 example: username123
+	*                 required: true
 	*               token:
 	*                 type: string
 	*                 description: The verification token of the user
 	*                 example: c0f6b97ae5a9c210ee050a9ada3faabc
+	*                 required: true
 	*     responses:
 	*       400:
 	*         $ref: "#/components/responses/invalidArguments"
 	*       200:
-	*         description: Verifies a user
+	*         description: Verifies a user and the user teamspace is initialised
 	*/
 	router.post('/user/verify', validateVerifyData, verify);
 	return router;

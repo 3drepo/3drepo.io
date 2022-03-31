@@ -24,7 +24,7 @@ const { logger } = require('../../utils/logger');
 
 const Teamspaces = {};
 
-Teamspaces.initializeTeamspace = async (username) => {
+Teamspaces.initTeamspace = async (username) => {
 	try {
 		await createTeamspaceRole(username);
 		await Promise.all([

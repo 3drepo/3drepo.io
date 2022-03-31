@@ -34,7 +34,7 @@ ModelSettings.updateModelStatus.mockResolvedValue(() => {});
 ModelSettings.newRevisionProcessed.mockResolvedValue(() => {});
 LoginRecord.saveLoginRecord.mockImplementation(() => ({}));
 Sessions.removeOldSessions.mockImplementation(() => { });
-Teamspaces.initializeTeamspace.mockImplementation(() => {});
+Teamspaces.initTeamspace.mockImplementation(() => {});
 
 const eventTriggeredPromise = (event) => new Promise((resolve) => EventsManager.subscribe(event, resolve));
 
@@ -94,8 +94,8 @@ const testUserEventsListener = () => {
 			const waitOnEvent = eventTriggeredPromise(events.USER_VERIFIED);
 			EventsManager.publish(events.USER_VERIFIED, { username: 'username1' });
 			await waitOnEvent;
-			expect(Teamspaces.initializeTeamspace.mock.calls.length).toBe(1);
-			expect(Teamspaces.initializeTeamspace.mock.calls[0][0]).toEqual('username1');
+			expect(Teamspaces.initTeamspace.mock.calls.length).toBe(1);
+			expect(Teamspaces.initTeamspace.mock.calls[0][0]).toEqual('username1');
 		});
 	});
 };

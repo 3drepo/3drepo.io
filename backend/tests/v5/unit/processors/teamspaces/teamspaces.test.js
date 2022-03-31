@@ -107,11 +107,11 @@ const testGetTeamspaceMembersInfo = () => {
 	});
 };
 
-const testInitializeTeamspace = () => {
+const testInitTeamspace = () => {
 	describe('Initialize teamspace', () => {
 		test('should initialize a teamspace', async () => {
 			const username = 'username';
-			await Teamspaces.initializeTeamspace(username);
+			await Teamspaces.initTeamspace(username);
 			expect(createTeamspaceRoleMock.mock.calls.length).toEqual(1);
 			expect(createTeamspaceRoleMock.mock.calls[0][0]).toEqual(username);
 			expect(grantTeamspaceRoleToUserMock.mock.calls.length).toEqual(1);
@@ -123,7 +123,7 @@ const testInitializeTeamspace = () => {
 		});
 
 		test('should initialize a teamspace even if an error is thrown ', async () => {
-			await Teamspaces.initializeTeamspace(invalidUsername);
+			await Teamspaces.initTeamspace(invalidUsername);
 			expect(createTeamspaceRoleMock.mock.calls.length).toEqual(1);
 			expect(createTeamspaceRoleMock.mock.calls[0][0]).toEqual(invalidUsername);
 		});
@@ -133,5 +133,5 @@ const testInitializeTeamspace = () => {
 describe('processors/teamspaces', () => {
 	testGetTeamspaceListByUser();
 	testGetTeamspaceMembersInfo();
-	testInitializeTeamspace();
+	testInitTeamspace();
 });

@@ -122,5 +122,4 @@ describe('utils/helper/strings', () => {
 	testHasEmailFormat();
 	testGenerateHashString();
 	testFormatPronouns();
-	testCapitalizeFirstLetter();
 });

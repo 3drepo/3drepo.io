@@ -16,12 +16,10 @@
  */
 
 const { events } = require('../../eventsManager/eventsManager.constants');
-const { initializeTeamspace } = require('../../../processors/teamspaces/teamspaces');
+const { initTeamspace } = require('../../../processors/teamspaces/teamspaces');
 const { subscribe } = require('../../eventsManager/eventsManager');
 
-const userVerified = ({ username }) => Promise.all([
-	initializeTeamspace(username),
-]);
+const userVerified = ({ username }) => initTeamspace(username);
 
 const UserEventsListener = {};
 

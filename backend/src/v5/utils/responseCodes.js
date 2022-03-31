@@ -33,7 +33,6 @@ ResponseCodes.templates = {
 	incorrectUsernameOrPassword: { message: 'Incorrect username or password', status: 400 },
 	incorrectPassword: { message: 'Incorrect password', status: 400 },
 	userDoesNotHaveAvatar: { message: 'User does not have an avatar', status: 404 },
-	signUpDisabled: { message: 'Sign up function is disabled', status: 400 },
 
 	// Fail safe
 	unknown: { message: 'Unknown error occured. Please contact support.', status: 500 },

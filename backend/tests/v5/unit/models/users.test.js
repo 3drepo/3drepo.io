@@ -22,6 +22,8 @@ const _ = require('lodash');
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { loginPolicy } = require(`${src}/utils/config`);
+const { generateRandomString } = require('../../helper/services');
+
 const apiKey = 'b284ab93f936815306fbe5b2ad3e447d';
 jest.mock('../../../../src/v5/utils/helper/strings', () => ({
 	...jest.requireActual('../../../../src/v5/utils/helper/strings'),
@@ -504,11 +506,7 @@ const formatNewUserData = (newUserData) => {
 		firstName: newUserData.firstName,
 		lastName: newUserData.lastName,
 		email: newUserData.email,
-		mailListOptOut: !newUserData.mailListAgreed,
-		permissions: [{
-			user: newUserData.username,
-			permissions: ['teamspace_admin'],
-		}],
+		mailListOptOut: !newUserData.mailListAgreed,		
 		billing: {
 			billingInfo: {
 				firstName: newUserData.firstName,
@@ -530,14 +528,14 @@ const testAddUser = () => {
 	describe('Add a new user', () => {
 		test('should add a new user', async () => {
 			const newUserData = {
-				username: 'newUser',
+				username: generateRandomString(),
 				email: 'example@email.com',
-				password: 'newPassword',
-				firstName: 'new first name',
-				lastName: 'new last name',
+				password: generateRandomString(),
+				firstName: generateRandomString(),
+				lastName: generateRandomString(),
 				mailListAgreed: true,
 				countryCode: 'GB',
-				company: '3D repo',
+				company: generateRandomString()
 			};
 
 			const authDB = { addUser: () => {} };
@@ -562,11 +560,23 @@ const testAddUser = () => {
 const testVerify = () => {
 	describe('Verify a user', () => {
 		test('should verify a user', async () => {
-			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
-			await User.verify('username');
+			const customData = { firstName: generateRandomString(), lastName: generateRandomString() };
+			const username = generateRandomString();
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementation(() => ({ 
+				value: { customData	}
+			}));
+			const res = await User.verify(username);
+			expect(res).toEqual(customData);
 			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][2]).toEqual({ user: 'username' });
+			expect(fn.mock.calls[0][2]).toEqual({ user: username });
 			expect(fn.mock.calls[0][3]).toEqual({ $unset: { 'customData.inactive': 1, 'customData.emailVerifyToken': 1 } });
+			expect(fn.mock.calls[0][4]).toEqual({
+				'customData.firstName': 1,
+				'customData.lastName': 1,
+				'customData.email': 1,
+				'customData.billing.billingInfo.company': 1,
+				'customData.mailListOptOut': 1,
+			});
 		});
 	});
 };

@@ -174,7 +174,7 @@ Users.validateResetPasswordData = async (req, res, next) => {
 	}
 };
 
-const generateSignUpSchema = (captchaEnabled) => {
+const generateSignUpSchema = (captchaEnabled, captcha) => {
 	const schema = Yup.object().shape({
 		username: types.strings.username.test('checkUsernameAvailable', 'Username already exists',
 			async (value) => {
@@ -213,7 +213,7 @@ const generateSignUpSchema = (captchaEnabled) => {
 		? schema.test('check-captcha', 'Invalid captcha', async () => {
 			const checkCaptcha = httpsPost(config.captcha.validateUrl, {
 				secret: config.captcha.secretKey,
-				response: req.body.captcha,
+				response: captcha,
 			});
 
 			const result = await checkCaptcha;
@@ -224,7 +224,7 @@ const generateSignUpSchema = (captchaEnabled) => {
 
 Users.validateSignUpData = async (req, res, next) => {
 	try {
-		const schema = generateSignUpSchema(config.auth.captcha);
+		const schema = generateSignUpSchema(config.auth.captcha, req.body.captcha);
 		await schema.validate(req.body);
 
 		req.body.firstName = formatPronouns(req.body.firstName);
