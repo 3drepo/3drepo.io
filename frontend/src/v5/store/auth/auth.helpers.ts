@@ -17,10 +17,13 @@
 
 export const USER_ALREADY_EXISTS = 'USER_EXISTS';
 
-export const getRegistrationError = (error: any) => {
+export const getRegistrationErrorMessage = (error: any) => {
 	const { data } = error.response;
 	if (data.code === USER_ALREADY_EXISTS) return USER_ALREADY_EXISTS;
 	if (data.message) return data.message;
 	const [, message] = data.split(/<\/?pre>/);
 	return message;
 };
+
+// TODO implement after VerifyEndpoint is implemented
+export const getVerifyCaptchaErrorMessage = (error: any) => error.message;

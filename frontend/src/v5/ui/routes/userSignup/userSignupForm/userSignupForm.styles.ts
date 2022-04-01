@@ -21,7 +21,7 @@ import StepLabelBase from '@mui/material/StepLabel';
 import { clientConfigService } from '@/v4/services/clientConfig';
 
 export const Container = styled.div`
-	min-height: 100vh;
+	/* min-height: 100vh; */
 	flex: 1;
 	display: flex;
 	flex-direction: column;

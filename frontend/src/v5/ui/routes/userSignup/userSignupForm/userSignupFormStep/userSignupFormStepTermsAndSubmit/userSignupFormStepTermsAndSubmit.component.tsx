@@ -23,8 +23,10 @@ import { UserSignupSchemaTermsAndSubmit } from '@/v5/validation/schemes';
 import { FormCheckbox } from '@controls/formCheckbox/formCheckbox.component';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import ReCAPTCHA from 'react-google-recaptcha';
-import ErrorIcon from '@assets/icons/warning_small.svg';
+import { pick, defaults, isMatch } from 'lodash';
 import SignupIcon from '@assets/icons/outlined/add_user-outlined.svg';
+import { verifyToken } from '@/v5/services/api/signup';
+import { getVerifyCaptchaErrorMessage } from '@/v5/store/auth/auth.helpers';
 import {
 	CreateAccountButton,
 	CheckboxContainer,
@@ -32,13 +34,15 @@ import {
 	TermsContainer,
 	ErrorContainer,
 	ErrorMessage,
+	ErrorIcon,
 	Link,
+	Gap,
 } from './userSignupFormStepTermsAndSubmit.styles';
 
-interface ITermsAndSubmitFormInput {
-	terms: string;
-	newsletter: string;
-	reCaptchaToken: string;
+export interface ITermsAndSubmitFormInput {
+	terms: boolean;
+	newsletter: boolean;
+	captchaToken: string;
 }
 
 type UserSignupFormStepTermsAndSubmitProps = {
@@ -46,9 +50,10 @@ type UserSignupFormStepTermsAndSubmitProps = {
 	onSubmitStep: () => void;
 	onComplete: () => void;
 	onUncomplete: () => void;
-	fields: ITermsAndSubmitFormInput;
+	setUnexpectedError: (error: string) => void;
 	unexpectedError: string;
-	isSubmitting: boolean;
+	fields: ITermsAndSubmitFormInput;
+	isActiveStep: boolean;
 };
 
 export const UserSignupFormStepTermsAndSubmit = ({
@@ -56,50 +61,83 @@ export const UserSignupFormStepTermsAndSubmit = ({
 	onSubmitStep,
 	onComplete,
 	onUncomplete,
-	fields,
+	setUnexpectedError,
 	unexpectedError,
-	isSubmitting,
+	fields,
+	isActiveStep,
 }: UserSignupFormStepTermsAndSubmitProps) => {
+	const DEFAULT_FIELDS: Omit<ITermsAndSubmitFormInput, 'captchaToken'> = {
+		terms: false,
+		newsletter: false,
+	};
+
+	const getTermsAndSubmitFields = (): Omit<ITermsAndSubmitFormInput, 'captchaToken'> => defaults(
+		pick(fields, ['terms', 'newsletter']),
+		DEFAULT_FIELDS,
+	);
+
 	const {
-		watch,
-		getValues,
 		handleSubmit,
 		control,
-		formState: { errors },
+		getValues,
+		formState,
+		formState: { errors, isValid: formIsValid },
 	} = useForm<ITermsAndSubmitFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(UserSignupSchemaTermsAndSubmit),
-		defaultValues: fields,
+		defaultValues: getTermsAndSubmitFields(),
 	});
 
-	const termsAgreed = watch('terms');
-	const reCaptchaRef = useRef<ReCAPTCHA>();
-	const [submitButtonIsDisabled, setSubmitButtonIsDisabled] = useState(true);
+	const captchaRef = useRef<ReCAPTCHA>();
+	const [submitButtonIsPending, setSubmitButtonIsPending] = useState(false);
 
 	const createAccount: SubmitHandler<ITermsAndSubmitFormInput> = () => {
-		updateFields(getValues());
-		reCaptchaRef?.current?.reset();
+		// captchaRef?.current?.reset();
+		setSubmitButtonIsPending(true);
 		onSubmitStep();
 	};
 
+	const handleCaptchaChange = async (captchaToken) => {
+		if (!fields.captchaToken && captchaToken) {
+			setSubmitButtonIsPending(true);
+			try {
+				// TODO - fix after endpoint is implemented
+				const verifiedCaptchaToken = await verifyToken(captchaToken);
+				updateFields({ captchaToken: verifiedCaptchaToken });
+			} catch (error) {
+				setUnexpectedError(getVerifyCaptchaErrorMessage(error));
+			}
+			setSubmitButtonIsPending(false);
+		}
+	};
+
 	useEffect(() => {
-		if (termsAgreed) {
+		if (!clientConfigService.captcha_client_key && !fields.captchaToken) {
+			updateFields({
+				captchaToken: 'CAPTCHA_IS_DISABLED',
+			});
+		}
+	}, []);
+
+	useEffect(() => {
+		if (formIsValid) {
 			onComplete();
-			if (!fields.reCaptchaToken) {
-				reCaptchaRef?.current?.execute();
+			if (!fields.captchaToken) {
+				captchaRef?.current?.execute();
 			}
 		} else {
 			onUncomplete();
 		}
-	}, [termsAgreed]);
+	}, [formIsValid]);
 
-	useEffect(() => () => { updateFields(getValues()); }, []);
 	useEffect(() => {
-		const captchaIsValid = clientConfigService.captcha_client_key ? fields.reCaptchaToken : true;
-		setSubmitButtonIsDisabled(!termsAgreed || !captchaIsValid);
-	}, [termsAgreed, fields.reCaptchaToken]);
+		const formValues = getValues();
+		if (isActiveStep && !isMatch(getTermsAndSubmitFields(), formValues)) {
+			updateFields(formValues);
+		}
+	}, [formState]);
 
-	const handleChange = (reCaptchaToken) => updateFields({ reCaptchaToken });
+	useEffect(() => setSubmitButtonIsPending(false), [unexpectedError]);
 
 	return (
 		<>
@@ -174,23 +212,44 @@ export const UserSignupFormStepTermsAndSubmit = ({
 				</CheckboxContainer>
 				{ clientConfigService.captcha_client_key && (
 					<ReCAPTCHA
-						ref={reCaptchaRef}
+						ref={captchaRef}
 						size="invisible"
 						sitekey={clientConfigService.captcha_client_key}
-						onChange={handleChange}
+						onChange={handleCaptchaChange}
 					/>
 				)}
 			</TermsContainer>
 			{ unexpectedError && (
 				<ErrorContainer>
 					<ErrorIcon />
-					<ErrorMessage>{unexpectedError}</ErrorMessage>
+					<ErrorMessage>
+						<FormattedMessage
+							id="userSignup.form.error.unexpected"
+							defaultMessage="An unexpected error has occurred: &quot;{unexpectedError}&quot;. Please try again later."
+							values={{ unexpectedError }}
+						/>
+						<Gap />
+						<FormattedMessage
+							id="userSignup.form.error.unexpected.contactSupport"
+							defaultMessage="If the error persists, please {contactSupport}."
+							values={{
+								contactSupport: (
+									<Link to={{ pathname: 'https://3drepo.com/contact/' }}>
+										<FormattedMessage
+											id="userSignup.form.error.contactSupport"
+											defaultMessage="contact the support"
+										/>
+									</Link>
+								),
+							}}
+						/>
+					</ErrorMessage>
 				</ErrorContainer>
 			)}
 			<CreateAccountButton
-				isPending={isSubmitting}
+				isPending={submitButtonIsPending}
 				startIcon={<SignupIcon />}
-				disabled={submitButtonIsDisabled}
+				disabled={!formIsValid || !fields.captchaToken || !!unexpectedError}
 				onClick={handleSubmit(createAccount)}
 			>
 				<FormattedMessage

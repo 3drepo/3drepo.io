@@ -16,7 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
@@ -25,9 +25,10 @@ import { UserSignupSchemaPersonal } from '@/v5/validation/schemes';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { MenuItem } from '@mui/material';
+import { defaults, isEqual, pick } from 'lodash';
 import { NextStepButton } from '../userSignupFormStep.styles';
 
-interface IPersonalFormInput {
+export interface IPersonalFormInput {
 	firstname: string;
 	lastname: string;
 	company: string;
@@ -49,37 +50,36 @@ export const UserSignupFormStepPersonal = ({
 	onUncomplete,
 	fields,
 }: UserSignupFormStepPersonalProps) => {
-	const getDefaultValues = (): IPersonalFormInput => ({
-		firstname: fields.firstname || '',
-		lastname: fields.lastname || '',
-		company: fields.company || '',
-		country: fields.country || formatMessage({
-			id: 'userSignup.form.defaultCountryCode',
-			defaultMessage: 'GB',
-		}),
-	});
+	const DEFAULT_FIELDS: IPersonalFormInput = {
+		firstname: '',
+		lastname: '',
+		company: '',
+		country: 'GB',
+	};
+	const getPersonalFields = (): IPersonalFormInput => defaults(
+		pick(fields, ['firstname', 'lastname', 'company', 'country']),
+		DEFAULT_FIELDS,
+	);
+
 	const {
 		getValues,
 		control,
 		formState,
-		formState: { errors },
+		formState: { errors, isValid: formIsValid },
 	} = useForm<IPersonalFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(UserSignupSchemaPersonal),
-		defaultValues: getDefaultValues(),
+		defaultValues: getPersonalFields(),
 	});
 
-	const [formIsValid, setFormIsValid] = useState(formState.isValid);
+	useEffect(() => (formIsValid ? onComplete : onUncomplete)(), [formIsValid]);
+
 	useEffect(() => {
-		if (formState.isValid !== formIsValid) {
-			setFormIsValid(formState.isValid);
-			(formState.isValid ? onComplete : onUncomplete)();
+		const newFields = getValues();
+		if (!isEqual(newFields, getPersonalFields())) {
+			updateFields(newFields);
 		}
 	}, [formState]);
-
-	useEffect(() => () => {
-		updateFields(getValues());
-	}, []);
 
 	return (
 		<>
@@ -121,7 +121,6 @@ export const UserSignupFormStepPersonal = ({
 					defaultMessage: 'Country',
 				})}
 				required
-				defaultValue={getDefaultValues().country}
 			>
 				{clientConfigService.countries.map((country) => (
 					<MenuItem key={country.code} value={country.code}>
@@ -130,7 +129,7 @@ export const UserSignupFormStepPersonal = ({
 				))}
 			</FormSelect>
 			<NextStepButton
-				disabled={!formState.isValid}
+				disabled={!formIsValid}
 				onClick={onSubmitStep}
 			>
 				<FormattedMessage

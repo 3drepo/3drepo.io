@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import { Link as LinkBase } from 'react-router-dom';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
+import ErrorIconBase from '@assets/icons/warning_small.svg';
 
 export const CreateAccountButton = styled(SubmitButton)`
 	margin: 20px 0 0 0;
@@ -29,7 +30,7 @@ export const TermsContainer = styled.div`
 	justify-content: center;
 	align-items: center;
 	width: 100%;
-	background-color: ${({ theme }) => theme.palette.base.lightest};
+	background-color: #edf0f8; // TODO fix when new palette is created
 	border-radius: 5px;
 	padding: 14px;
 	margin-top: 22px;
@@ -53,8 +54,8 @@ export const Link = styled(LinkBase).attrs({
 	target: '_blank',
 })`
 	text-underline-offset: 1.4px;
-	&:active, &:visited, &:hover {
-		color: inherit;
+	&, &:active, &:visited, &:hover {
+		color: currentColor;
 	}
 `;
 
@@ -65,7 +66,11 @@ export const ErrorContainer = styled.div`
 	margin-top: 13px;
     justify-content: flex-start;
     display: flex;
-    align-items: center;
+`;
+
+export const ErrorIcon = styled(ErrorIconBase)`
+	margin-right: 8px;
+	min-width: 18px;
 `;
 
 export const ErrorMessage = styled.div`
@@ -79,4 +84,8 @@ export const CircularProgressContainer = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+`;
+
+export const Gap = styled.div`
+	height: 10px;
 `;

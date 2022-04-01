@@ -19,7 +19,7 @@ import { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { registerNewUser } from '@/v5/services/api/signup';
 import { formatMessage } from '@/v5/services/intl';
-import { getRegistrationError, USER_ALREADY_EXISTS } from '@/v5/store/auth/auth.helpers';
+import { getRegistrationErrorMessage, USER_ALREADY_EXISTS } from '@/v5/store/auth/auth.helpers';
 import { UserSignupFormStepAccount } from './userSignupFormStep/userSignupFormStepAccount/userSignupFormStepAccount.component';
 import { UserSignupFormStepPersonal } from './userSignupFormStep/userSignupFormStepPersonal/userSignupFormStepPersonal.component';
 import { UserSignupFormStepTermsAndSubmit } from './userSignupFormStep/userSignupFormStepTermsAndSubmit/userSignupFormStepTermsAndSubmit.component';
@@ -45,10 +45,12 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 	const [fields, setFields] = useState<any>({});
 	const [alreadyExistingUsernames, setAlreadyExistingUsernames] = useState([]);
 	const [unexpectedError, setUnexpectedError] = useState('');
-	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [erroredStep, setErroredStep] = useState<number>();
 
+	const updateFields = (newFields) => setFields((prevFields) => ({ ...prevFields, ...newFields }));
+
 	const addCompletedStep = (stepIndex: number) => {
+		if (stepIndex === LAST_STEP && unexpectedError) return;
 		completedSteps.add(stepIndex);
 		setCompletedSteps(new Set(completedSteps));
 	};
@@ -56,6 +58,11 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 	const removeCompletedStep = (stepIndex: number) => {
 		completedSteps.delete(stepIndex);
 		setCompletedSteps(new Set(completedSteps));
+	};
+
+	const updateUnexpectedError = (error: string) => {
+		setUnexpectedError(error);
+		removeCompletedStep(LAST_STEP);
 	};
 
 	const canReachStep = (stepToReach: number): boolean => {
@@ -81,27 +88,25 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 	const moveToNextStep = () => moveToStep(activeStep + 1);
 
 	const createAccount = async () => {
-		setIsSubmitting(true);
 		try {
 			await registerNewUser(fields);
 			const { email, firstname } = fields;
 			completeRegistration({ email, firstname });
 		} catch (error) {
-			const errorMessage = getRegistrationError(error);
+			const errorMessage = getRegistrationErrorMessage(error);
 			if (errorMessage === USER_ALREADY_EXISTS) {
+				setUnexpectedError('');
 				setAlreadyExistingUsernames([...alreadyExistingUsernames, fields.username]);
-				setFields(({ password, terms, newsletter, ...prevFields }) => prevFields);
+				updateFields({ password: '', confirmPassword: '' });
 				setActiveStep(0);
 				setErroredStep(0);
+				removeCompletedStep(LAST_STEP);
+				updateFields({ terms: false, newsletter: false });
 			} else {
-				setUnexpectedError(errorMessage);
-				setErroredStep(2);
+				updateUnexpectedError(errorMessage);
 			}
 		}
-		setIsSubmitting(false);
 	};
-
-	const updateFields = (newFields) => setFields((prevFields) => ({ ...prevFields, ...newFields }));
 
 	const getStepProps = (stepIndex: number) => ({
 		fields,
@@ -175,8 +180,9 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 					>
 						<UserSignupFormStepTermsAndSubmit
 							{...getStepProps(2)}
-							isSubmitting={isSubmitting}
 							unexpectedError={unexpectedError}
+							setUnexpectedError={updateUnexpectedError}
+							isActiveStep={activeStep === LAST_STEP}
 						/>
 					</UserSignupFormStep>
 				</Stepper>

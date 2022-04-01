@@ -30,6 +30,6 @@ export const UserSignupFormStepIcon = ({ error = false, stepIndex, completed }: 
 	<StepIconContainer>
 		{ error && <ErrorStepIcon /> }
 		{ completed && <CompletedStepIcon /> }
-		{ !error && !completed && <span>{stepIndex}</span> }
+		{ !error && !completed && <span>{stepIndex + 1}</span> }
 	</StepIconContainer>
 );
