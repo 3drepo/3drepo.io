@@ -37,15 +37,6 @@ const removeGridFSBackup = async (teamspace, col, filename) => {
 	if (gridFSRef) {
 		await deleteMany(teamspace, chunksCol, { files_id: gridFSRef._id });
 	}
-	const fileCount = await count(teamspace, filesCol, { filename: { $not: { $regex: '.*unityAssets.json$' } } });
-	if (!fileCount) {
-		await Promise.all([
-			dropCollection(teamspace, filesCol),
-			dropCollection(teamspace, chunksCol),
-		]).catch(() => {
-			// Don't actually care if this errored - not a big issue.
-		});
-	}
 };
 
 const processCollection = async (teamspace, collection) => {
@@ -59,6 +50,18 @@ const processCollection = async (teamspace, collection) => {
 			logger.logError(`Failed to process file ${_id}: ${err.message}`);
 		}
 	}));
+
+	const filesCol = `${ownerCol}.files`;
+	const chunksCol = `${ownerCol}.chunks`;
+	const fileCount = await count(teamspace, filesCol, { filename: { $not: { $regex: '.*unityAssets.json$' } } });
+	if (!fileCount) {
+		await Promise.all([
+			dropCollection(teamspace, filesCol),
+			dropCollection(teamspace, chunksCol),
+		]).catch(() => {
+			// Don't actually care if this errored - not a big issue.
+		});
+	}
 };
 
 const processTeamspace = async (teamspace) => {

@@ -14,14 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-const removeGridFSBackUps = require('./removeGridFSBackUps');
-const moveGridFSToFS = require('./moveGridFSToFS');
-
-const scripts = [
-	{ script: removeGridFSBackUps, desc: 'Remove GridFS backup entries' },
-	{ script: moveGridFSToFS, desc: 'Move gridFS documents to fileshare' },
-	{ script: removeGridFSBackUps, desc: 'Remove redundant GridFS files (due to last script)' },
-];
-
-module.exports = scripts;
+const { v4Path } = require('../../interop');
+// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
+module.exports = require(`${v4Path}/handler/fs`);
