@@ -24,25 +24,17 @@ const { sendResetPasswordEmail, sendVerifyUserEmail } = require('../services/mai
 const config = require('../utils/config');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
-const { logger } = require('../utils/logger');
 const { publish } = require('../services/eventsManager/eventsManager');
 
 Users.signUp = async (newUserData) => {
 	const token = generateHashString();
 	await addUser({ ...newUserData, token });
-
-	try {
-		const emailRes = await sendVerifyUserEmail(newUserData.email, {
-			token,
-			email: newUserData.email,
-			firstName: newUserData.firstName,
-			username: newUserData.username,
-		});
-
-		logger.logInfo(`Email info - ${JSON.stringify(emailRes)}`);
-	} catch (err) {
-		logger.logError(`Email error - ${err.message}`);
-	}
+	await sendVerifyUserEmail(newUserData.email, {
+		token,
+		email: newUserData.email,
+		firstName: newUserData.firstName,
+		username: newUserData.username,
+	});
 };
 
 Users.verify = async (username, token) => {

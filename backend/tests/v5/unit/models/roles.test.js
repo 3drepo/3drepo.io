@@ -16,6 +16,8 @@
  */
 
 const { src } = require('../../helper/path');
+const { TEAM_MEMBER } = require('../../../../src/v5/models/roles.constants');
+const { generateRandomString } = require('../../helper/services');
 
 const Roles = require(`${src}/models/roles`);
 const db = require(`${src}/handler/db`);
@@ -23,16 +25,16 @@ const db = require(`${src}/handler/db`);
 const testCreateTeamspaceRole = () => {
 	describe('Create teamspace role', () => {
 		test('should create a new teamspace role', async () => {
+			const teamspace = generateRandomString();
 			const expectedCommand = {
-				createRole: 'team_member',
+				createRole: TEAM_MEMBER,
 				privileges: [],
 				roles: [],
 			};
 			const fn = jest.spyOn(db, 'runCommand').mockImplementation(() => { });
-			await Roles.createTeamspaceRole('teamspace');
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][0]).toEqual('teamspace');
-			expect(fn.mock.calls[0][1]).toEqual(expectedCommand);
+			await Roles.createTeamspaceRole(teamspace);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, expectedCommand);
 		});
 	});
 };
@@ -40,16 +42,17 @@ const testCreateTeamspaceRole = () => {
 const testGrantTeamspaceRoleToUser = () => {
 	describe('Grant teamspace role to user', () => {
 		test('should assign a teamspace role to the user', async () => {
+			const teamspace = generateRandomString();
+			const username = generateRandomString();
 			const expectedCommand = {
-				grantRolesToUser: 'username',
-				roles: [{ role: 'team_member', db: 'teamspace' }],
+				grantRolesToUser: username,
+				roles: [{ role: TEAM_MEMBER, db: teamspace }],
 			};
 
 			const fn = jest.spyOn(db, 'runCommand').mockImplementation(() => { });
-			await Roles.grantTeamspaceRoleToUser('teamspace', 'username');
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][0]).toEqual('admin');
-			expect(fn.mock.calls[0][1]).toEqual(expectedCommand);
+			await Roles.grantTeamspaceRoleToUser(teamspace, username);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', expectedCommand);
 		});
 	});
 };

@@ -15,28 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { TEAM_MEMBER } = require('./roles.constants');
-const db = require('../handler/db');
+const JobsConstants = {};
 
-const Roles = {};
+JobsConstants.DEFAULT_JOBS = [
+	{ _id: 'Admin', color: '#f7f7b2' },
+	{ _id: 'Client', color: '#a6cee3' },
+	{ _id: 'Architect', color: '#213f99' },
+	{ _id: 'Structural Engineer', color: '#33a02c' },
+	{ _id: 'MEP Engineer', color: '#fb9a99' },
+	{ _id: 'Project Manager', color: '#e31a1c' },
+	{ _id: 'Quantity Surveyor', color: '#ff7f00' },
+	{ _id: 'Asset Manager', color: '#ffff99' },
+	{ _id: 'Main Contractor', color: '#b15928' },
+	{ _id: 'Supplier', color: '#6a3d9a' },
+];
 
-Roles.createTeamspaceRole = async (teamspace) => {
-	const createRoleCmd = {
-		createRole: TEAM_MEMBER,
-		privileges: [],
-		roles: [],
-	};
-
-	await db.runCommand(teamspace, createRoleCmd);
-};
-
-Roles.grantTeamspaceRoleToUser = (teamspace, username) => {
-	const grantRoleCmd = {
-		grantRolesToUser: username,
-		roles: [{ role: TEAM_MEMBER, db: teamspace }],
-	};
-
-	return db.runCommand('admin', grantRoleCmd);
-};
-
-module.exports = Roles;
+module.exports = JobsConstants;

@@ -15,28 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { TEAM_MEMBER } = require('./roles.constants');
-const db = require('../handler/db');
+const RolesConstants = {};
 
-const Roles = {};
+RolesConstants.TEAM_MEMBER = 'team_member';
 
-Roles.createTeamspaceRole = async (teamspace) => {
-	const createRoleCmd = {
-		createRole: TEAM_MEMBER,
-		privileges: [],
-		roles: [],
-	};
-
-	await db.runCommand(teamspace, createRoleCmd);
-};
-
-Roles.grantTeamspaceRoleToUser = (teamspace, username) => {
-	const grantRoleCmd = {
-		grantRolesToUser: username,
-		roles: [{ role: TEAM_MEMBER, db: teamspace }],
-	};
-
-	return db.runCommand('admin', grantRoleCmd);
-};
-
-module.exports = Roles;
+module.exports = RolesConstants;

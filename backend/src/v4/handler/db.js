@@ -152,7 +152,8 @@
 		const collection = await Handler.getCollection(database, colName);
 		const options = { projection };
 
-		return collection.findOneAndUpdate(query, data, options);
+		const findResult = await collection.findOneAndUpdate(query, data, options);
+		return findResult.value;
 	};
 
 	Handler.findOneAndDelete = async function (database, colName, query, projection = {}) {

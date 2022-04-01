@@ -21,6 +21,9 @@ const Teamspace = require(`${src}/models/teamspaces`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
+const { generateRandomString } = require('../../helper/services');
+const { topicTypes } = require('../../../../src/v5/models/issues.constants');
+const { riskCategories } = require('../../../../src/v5/models/risks.constants');
 
 const testHasAccessToTeamspace = () => {
 	test('should return true if the user has access to teamspace', async () => {
@@ -142,44 +145,13 @@ const testGetSubscriptions = () => {
 const testCreateTeamspaceSettings = () => {
 	describe('Create teamspace settings', () => {
 		test('should create teamspace settings', async () => {
-			const teamspaceName = 'someTS';
-			const expectedSettings = {
-				_id: teamspaceName,
-				topicTypes: [
-					'Clash',
-					'Diff',
-					'RFI',
-					'Risk',
-					'H&S',
-					'Design',
-					'Constructibility',
-					'GIS',
-					'For information',
-					'VR',
-				],
-				riskCategories: [
-					'Commercial Issue',
-					'Environmental Issue',
-					'Health - Material effect',
-					'Health - Mechanical effect',
-					'Safety Issue - Fall',
-					'Safety Issue - Trapped',
-					'Safety Issue - Event',
-					'Safety Issue - Handling',
-					'Safety Issue - Struck',
-					'Safety Issue - Public',
-					'Social Issue',
-					'Other Issue',
-					'Unknown',
-				],
-			};
+			const teamspace = generateRandomString();
+			const expectedSettings = { _id: teamspace, topicTypes, riskCategories };
 
 			const fn = jest.spyOn(db, 'insertOne').mockImplementation(() => {});
-			await Teamspace.createTeamspaceSettings(teamspaceName);
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][0]).toEqual(teamspaceName);
-			expect(fn.mock.calls[0][1]).toEqual('teamspace');
-			expect(fn.mock.calls[0][2]).toEqual(expectedSettings);
+			await Teamspace.createTeamspaceSettings(teamspace);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'teamspace', expectedSettings);
 		});
 	});
 };

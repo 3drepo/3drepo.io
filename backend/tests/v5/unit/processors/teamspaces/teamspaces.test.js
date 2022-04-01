@@ -18,6 +18,7 @@
 const _ = require('lodash');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
+const { generateRandomString } = require('../../../helper/services');
 
 const Teamspaces = require(`${src}/processors/teamspaces/teamspaces`);
 
@@ -42,9 +43,6 @@ const createTeamspaceRoleMock = RolesModel.createTeamspaceRole.mockImplementatio
 		throw templates.unknown;
 	}
 });
-const grantTeamspaceRoleToUserMock = RolesModel.grantTeamspaceRoleToUser.mockImplementation(() => { });
-const addDefaultJobsMock = JobsModel.addDefaultJobs.mockImplementation(() => { });
-const createTeamspaceSettingsMock = TeamspacesModel.createTeamspaceSettings.mockImplementation(() => { });
 
 const testGetTeamspaceListByUser = () => {
 	describe('Get Teamspace list by user', () => {
@@ -110,22 +108,22 @@ const testGetTeamspaceMembersInfo = () => {
 const testInitTeamspace = () => {
 	describe('Initialize teamspace', () => {
 		test('should initialize a teamspace', async () => {
-			const username = 'username';
+			const username = generateRandomString();
 			await Teamspaces.initTeamspace(username);
-			expect(createTeamspaceRoleMock.mock.calls.length).toEqual(1);
-			expect(createTeamspaceRoleMock.mock.calls[0][0]).toEqual(username);
-			expect(grantTeamspaceRoleToUserMock.mock.calls.length).toEqual(1);
-			expect(grantTeamspaceRoleToUserMock.mock.calls[0][0]).toEqual(username);
-			expect(addDefaultJobsMock.mock.calls.length).toEqual(1);
-			expect(addDefaultJobsMock.mock.calls[0][0]).toEqual(username);
-			expect(createTeamspaceSettingsMock.mock.calls.length).toEqual(1);
-			expect(createTeamspaceSettingsMock.mock.calls[0][0]).toEqual(username);
+			expect(createTeamspaceRoleMock).toHaveBeenCalledTimes(1);
+			expect(createTeamspaceRoleMock).toHaveBeenCalledWith(username);
+			expect(RolesModel.grantTeamspaceRoleToUser).toHaveBeenCalledTimes(1);
+			expect(RolesModel.grantTeamspaceRoleToUser).toHaveBeenCalledWith(username, username);
+			expect(JobsModel.addDefaultJobs).toHaveBeenCalledTimes(1);
+			expect(JobsModel.addDefaultJobs).toHaveBeenCalledWith(username);
+			expect(TeamspacesModel.createTeamspaceSettings).toHaveBeenCalledTimes(1);
+			expect(TeamspacesModel.createTeamspaceSettings).toHaveBeenCalledWith(username);
 		});
 
 		test('should initialize a teamspace even if an error is thrown ', async () => {
 			await Teamspaces.initTeamspace(invalidUsername);
-			expect(createTeamspaceRoleMock.mock.calls.length).toEqual(1);
-			expect(createTeamspaceRoleMock.mock.calls[0][0]).toEqual(invalidUsername);
+			expect(createTeamspaceRoleMock).toHaveBeenCalledTimes(1);
+			expect(createTeamspaceRoleMock).toHaveBeenCalledWith(invalidUsername);
 		});
 	});
 };

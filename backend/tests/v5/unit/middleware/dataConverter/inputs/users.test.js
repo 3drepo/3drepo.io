@@ -32,7 +32,7 @@ const MockExpressRequest = require('mock-express-request');
 const FormData = require('form-data');
 const fs = require('fs');
 const path = require('path');
-const { generateRandomString } = require('../../../../../../tests/v5/helper/services');
+const { generateRandomString } = require('../../../../helper/services');
 
 const config = require(`${src}/utils/config`);
 
@@ -89,7 +89,7 @@ const testValidateLoginData = () => {
 		[{ body: { user: '123' } }, false, 'with no username', templates.invalidArguments],
 		[{ body: { user: existingUsername, password: 123 } }, false, 'with invalid password', templates.invalidArguments],
 		[{ body: { user: availableUsername, password: 'validPassword' } }, false, 'with user that does not exist',
-		templates.incorrectUsernameOrPassword],
+			templates.incorrectUsernameOrPassword],
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
 		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
 		[{ body: { user: existingUsername, password: 'validPassword' } }, true, 'with user that exists'],
@@ -254,11 +254,11 @@ const testValidateSignUpData = () => {
 	const newUserData = {
 		username: availableUsername,
 		email: availableEmail,
-		password: 'validPassword123',
-		firstName: 'newFirstName',
-		lastName: 'newLastName',
+		password: generateRandomString(),
+		firstName: generateRandomString(),
+		lastName: generateRandomString(),
 		countryCode: 'GB',
-		company: '3D Repo',
+		company: generateRandomString(),
 		mailListAgreed: true,
 	};
 
@@ -282,10 +282,10 @@ const testValidateSignUpData = () => {
 			const mockCB = jest.fn();
 			await Users.validateSignUpData(req, {}, mockCB);
 			if (shouldPass) {
-				expect(mockCB.mock.calls.length).toBe(1);
+				expect(mockCB).toHaveBeenCalledTimes(1);
 			} else {
-				expect(mockCB.mock.calls.length).toBe(0);
-				expect(Responder.respond.mock.calls.length).toBe(1);
+				expect(mockCB).toHaveBeenCalledTimes(0);
+				expect(Responder.respond).toHaveBeenCalledTimes(1);
 				expect(Responder.respond.mock.results[0].value.code).toEqual(expectedError.code);
 			}
 		});
@@ -296,8 +296,8 @@ const testValidateSignUpData = () => {
 		config.captcha = {};
 
 		const mockCB = jest.fn();
-		await Users.validateSignUpData({ body: {... newUserData,  captcha: 'someCaptcha' } }, {}, mockCB);
-		expect(mockCB.mock.calls.length).toBe(1);
+		await Users.validateSignUpData({ body: { ...newUserData, captcha: generateRandomString() } }, {}, mockCB);
+		expect(mockCB).toHaveBeenCalledTimes(1);
 
 		config.auth.captcha = false;
 		config.captcha = null;
@@ -309,13 +309,13 @@ const testValidateSignUpData = () => {
 
 		const mockCB = jest.fn();
 		await Users.validateSignUpData({ body: newUserData }, {}, mockCB);
-		expect(mockCB.mock.calls.length).toBe(0);
-		expect(Responder.respond.mock.calls.length).toBe(1);
+		expect(mockCB).toHaveBeenCalledTimes(0);
+		expect(Responder.respond).toHaveBeenCalledTimes(1);
 		expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
 
 		config.auth.captcha = false;
 		config.captcha = null;
-	}); 
+	});
 };
 
 const testVerifyData = () => {
@@ -330,11 +330,11 @@ const testVerifyData = () => {
 			const mockCB = jest.fn();
 			await Users.validateVerifyData(req, {}, mockCB);
 			if (shouldPass) {
-				expect(mockCB.mock.calls.length).toBe(1);
+				expect(mockCB).toHaveBeenCalledTimes(1);
 			} else {
-				expect(mockCB.mock.calls.length).toBe(0);
-				expect(Responder.respond.mock.calls.length).toBe(1);
-				expect(Responder.respond.mock.results[0].value.code).toEqual(expectedError.code);
+				expect(mockCB).toHaveBeenCalledTimes(0);
+				expect(Responder.respond).toHaveBeenCalledTimes(1);
+				expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
 			}
 		});
 	});

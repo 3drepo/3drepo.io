@@ -20,11 +20,11 @@ const { createResponseCode, templates } = require('../../../utils/responseCodes'
 const Yup = require('yup');
 const config = require('../../../utils/config');
 const httpsPost = require('../../../utils/httpsReq').post;
+const { formatPronouns } = require('../../../utils/helper/strings');
 const { respond } = require('../../../utils/responder');
 const { singleImageUpload } = require('../multer');
 const { types } = require('../../../utils/helper/yup');
 const { validateMany } = require('../../common');
-const { formatPronouns } = require('../../../utils/helper/strings');
 
 const Users = {};
 
@@ -157,7 +157,7 @@ Users.validateResetPasswordData = async (req, res, next) => {
 				await getUserByQuery({
 					user: req.body.user,
 					'customData.resetPasswordToken.token': req.body.token,
-					'customData.resetPasswordToken.expiredAt': { $gt: new Date() }
+					'customData.resetPasswordToken.expiredAt': { $gt: new Date() },
 				});
 
 				return true;
@@ -206,8 +206,9 @@ const generateSignUpSchema = (captchaEnabled, captcha) => {
 		countryCode: types.strings.countryCode.required(),
 		company: types.strings.title.optional(),
 		mailListAgreed: Yup.bool().required(),
-		...(captchaEnabled ? { captcha: Yup.string().required() }: {}),
-	}).strict(true).noUnknown().required();
+		...(captchaEnabled ? { captcha: Yup.string().required() } : {}),
+	}).strict(true).noUnknown()
+		.required();
 
 	return captchaEnabled
 		? schema.test('check-captcha', 'Invalid captcha', async () => {

@@ -16,6 +16,8 @@
  */
 
 const { src } = require('../../helper/path');
+const { generateRandomString } = require('../../helper/services');
+const { DEFAULT_JOBS } = require('../../../../src/v5/models/jobs.constants');
 
 const Jobs = require(`${src}/models/jobs`);
 const db = require(`${src}/handler/db`);
@@ -40,23 +42,25 @@ const testGetJobsToUsers = () => {
 const testAddDefaultJobs = () => {
 	describe('Add default jobs', () => {
 		test('should add the default jobs', async () => {
-			const DEFAULT_JOBS = [
-				{ _id: 'Client', color: '#a6cee3' },
-				{ _id: 'Architect', color: '#213f99' },
-				{ _id: 'Structural Engineer', color: '#33a02c' },
-				{ _id: 'MEP Engineer', color: '#fb9a99' },
-				{ _id: 'Project Manager', color: '#e31a1c' },
-				{ _id: 'Quantity Surveyor', color: '#ff7f00' },
-				{ _id: 'Asset Manager', color: '#ffff99' },
-				{ _id: 'Main Contractor', color: '#b15928' },
-				{ _id: 'Supplier', color: '#6a3d9a' },
-			];
-
+			const teamspace = generateRandomString();
 			const fn = jest.spyOn(db, 'insertMany').mockImplementation(() => {});
-			await Jobs.addDefaultJobs('teamspace');
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][0]).toEqual('teamspace');
-			expect(fn.mock.calls[0][2]).toEqual(DEFAULT_JOBS.map((job) => ({ ...job, users: [] })));
+			await Jobs.addDefaultJobs(teamspace);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'jobs', DEFAULT_JOBS.map((job) => ({ ...job, users: [] })));
+		});
+	});
+};
+
+const testAssignUserToJob = () => {
+	describe('Assign user to job', () => {
+		test('should assign a user to a job', async () => {
+			const teamspace = generateRandomString();
+			const job = generateRandomString();
+			const username = generateRandomString();
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
+			await Jobs.assignUserToJob(teamspace, job, username);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'jobs', { _id: job }, { $push: { users: username } });
 		});
 	});
 };
@@ -64,4 +68,5 @@ const testAddDefaultJobs = () => {
 describe('models/jobs', () => {
 	testGetJobsToUsers();
 	testAddDefaultJobs();
+	testAssignUserToJob();
 });

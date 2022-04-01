@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addDefaultJobs, getJobsToUsers } = require('../../models/jobs');
+const { addDefaultJobs, assignUserToJob, getJobsToUsers } = require('../../models/jobs');
 const { createTeamspaceRole, grantTeamspaceRoleToUser } = require('../../models/roles');
 const { createTeamspaceSettings, getMembersInfo } = require('../../models/teamspaces');
 const { getAccessibleTeamspaces, grantTeamspacePermissionsToUser } = require('../../models/users');
+const { DEFAULT_JOBS } = require('../../models/jobs.constants');
 const { isTeamspaceAdmin } = require('../../utils/permissions/permissions');
 const { logger } = require('../../utils/logger');
 
@@ -32,7 +33,8 @@ Teamspaces.initTeamspace = async (username) => {
 			addDefaultJobs(username),
 			createTeamspaceSettings(username),
 			grantTeamspacePermissionsToUser(username, username, ['teamspace_admin']),
-		]);	
+			assignUserToJob(username, DEFAULT_JOBS.find((j) => j._id === 'Admin'), username),
+		]);
 	} catch (err) {
 		logger.logError(`Failed to initialize teamspace for ${username}`);
 	}

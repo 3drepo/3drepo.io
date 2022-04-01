@@ -126,7 +126,7 @@ const signUp = async (req, res) => {
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
-		(err) => respond(req, res, err)
+		respond(req, res, err);
 	}
 };
 
@@ -138,7 +138,7 @@ const verify = async (req, res) => {
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
-		(err) => respond(req, res, err)
+		respond(req, res, err);
 	}
 };
 

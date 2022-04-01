@@ -17,26 +17,20 @@
 
 const Jobs = {};
 
-const DBHandler = require('../handler/db');
+const COL_NAME = 'jobs';
+const { DEFAULT_JOBS } = require('./jobs.constants');
+const db = require('../handler/db');
 
-const DEFAULT_JOBS = [
-	{ _id: 'Client', color: '#a6cee3' },
-	{ _id: 'Architect', color: '#213f99' },
-	{ _id: 'Structural Engineer', color: '#33a02c' },
-	{ _id: 'MEP Engineer', color: '#fb9a99' },
-	{ _id: 'Project Manager', color: '#e31a1c' },
-	{ _id: 'Quantity Surveyor', color: '#ff7f00' },
-	{ _id: 'Asset Manager', color: '#ffff99' },
-	{ _id: 'Main Contractor', color: '#b15928' },
-	{ _id: 'Supplier', color: '#6a3d9a' },
-];
-
-const findMany = (ts, query, projection, sort) => DBHandler.find(ts, 'jobs', query, projection, sort);
+const findMany = (ts, query, projection, sort) => db.find(ts, 'jobs', query, projection, sort);
 
 Jobs.getJobsToUsers = (teamspace) => findMany(teamspace, {}, { _id: 1, users: 1 });
 
 Jobs.addDefaultJobs = async (teamspace) => {
-	await DBHandler.insertMany(teamspace, 'jobs', DEFAULT_JOBS.map((job) => ({ ...job, users: [] })));
+	await db.insertMany(teamspace, COL_NAME, DEFAULT_JOBS.map((job) => ({ ...job, users: [] })));
+};
+
+Jobs.assignUserToJob = async (teamspace, job, username) => {
+	await db.updateOne(teamspace, COL_NAME, { _id: job }, { $push: { users: username } });
 };
 
 module.exports = Jobs;

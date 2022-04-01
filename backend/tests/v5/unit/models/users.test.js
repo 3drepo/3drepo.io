@@ -500,13 +500,14 @@ const testGetUserByUsernameOrEmail = () => {
 	});
 };
 
-const formatNewUserData = (newUserData) => {
+const formatNewUserData = (newUserData, createdAt, emailExpiredAt) => {
 	const formattedData = {
+		createdAt,
 		inactive: true,
 		firstName: newUserData.firstName,
 		lastName: newUserData.lastName,
 		email: newUserData.email,
-		mailListOptOut: !newUserData.mailListAgreed,		
+		mailListOptOut: !newUserData.mailListAgreed,
 		billing: {
 			billingInfo: {
 				firstName: newUserData.firstName,
@@ -515,10 +516,10 @@ const formatNewUserData = (newUserData) => {
 				company: newUserData.company,
 			},
 		},
-	};
-
-	formattedData.emailVerifyToken = {
-		token: newUserData.token,
+		emailVerifyToken: {
+			token: newUserData.token,
+			expiredAt: emailExpiredAt,
+		},
 	};
 
 	return formattedData;
@@ -535,24 +536,18 @@ const testAddUser = () => {
 				lastName: generateRandomString(),
 				mailListAgreed: true,
 				countryCode: 'GB',
-				company: generateRandomString()
+				company: generateRandomString(),
 			};
 
-			const authDB = { addUser: () => {} };
-			jest.spyOn(db, 'getAuthDB').mockImplementation(() => authDB);
-			const fn = jest.spyOn(authDB, 'addUser');
-
-			const expectedData = formatNewUserData(newUserData);
+			const fn = jest.spyOn(db, 'createUser');
 			await User.addUser(newUserData);
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][0]).toEqual(newUserData.username);
-			expect(fn.mock.calls[0][1]).toEqual(newUserData.password);
+			expect(fn).toHaveBeenCalledTimes(1);
 			const userCustomData = fn.mock.calls[0][2];
-			expect(userCustomData).toHaveProperty('customData.createdAt');
-			expect(userCustomData).toHaveProperty('customData.emailVerifyToken.expiredAt');
-			expectedData.createdAt = userCustomData.customData.createdAt;
-			expectedData.emailVerifyToken.expiredAt = userCustomData.customData.emailVerifyToken.expiredAt;
-			expect(userCustomData).toEqual({ customData: expectedData, roles: [] });
+			expect(userCustomData).toHaveProperty('createdAt');
+			expect(userCustomData).toHaveProperty('emailVerifyToken.expiredAt');
+			const expectedCustomData = formatNewUserData(newUserData, userCustomData.createdAt,
+				userCustomData.emailVerifyToken.expiredAt);
+			expect(fn).toHaveBeenCalledWith(newUserData.username, newUserData.password, expectedCustomData);
 		});
 	});
 };
@@ -562,21 +557,34 @@ const testVerify = () => {
 		test('should verify a user', async () => {
 			const customData = { firstName: generateRandomString(), lastName: generateRandomString() };
 			const username = generateRandomString();
-			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementation(() => ({ 
-				value: { customData	}
-			}));
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementation(() => ({ customData }));
 			const res = await User.verify(username);
 			expect(res).toEqual(customData);
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][2]).toEqual({ user: username });
-			expect(fn.mock.calls[0][3]).toEqual({ $unset: { 'customData.inactive': 1, 'customData.emailVerifyToken': 1 } });
-			expect(fn.mock.calls[0][4]).toEqual({
-				'customData.firstName': 1,
-				'customData.lastName': 1,
-				'customData.email': 1,
-				'customData.billing.billingInfo.company': 1,
-				'customData.mailListOptOut': 1,
-			});
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username },
+				{ $unset: { 'customData.inactive': 1, 'customData.emailVerifyToken': 1 } },
+				{
+					'customData.firstName': 1,
+					'customData.lastName': 1,
+					'customData.email': 1,
+					'customData.billing.billingInfo.company': 1,
+					'customData.mailListOptOut': 1,
+				});
+		});
+	});
+};
+
+const testGrantTeamspacePermissionToUser = () => {
+	describe('Grant teamspace permission to user', () => {
+		test('Should grant teamspace permission to user', async () => {
+			const teamspace = generateRandomString();
+			const username = generateRandomString();
+			const permissions = [generateRandomString()];
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
+			await User.grantTeamspacePermissionsToUser(username, teamspace, permissions);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username },
+				{ $set: { 'customData.permissions': [{ user: teamspace, permissions }] } });
 		});
 	});
 };
@@ -598,4 +606,5 @@ describe('models/users', () => {
 	testGetUserByUsernameOrEmail();
 	testAddUser();
 	testVerify();
+	testGrantTeamspacePermissionToUser();
 });
