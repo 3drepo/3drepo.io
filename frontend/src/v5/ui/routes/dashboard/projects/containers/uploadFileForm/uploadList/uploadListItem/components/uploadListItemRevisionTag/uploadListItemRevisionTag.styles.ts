@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 
-export const TextField = styled(FormTextField)`
+export const TextField = styled(FormTextField)<{ $selectedrow: boolean }>`
 	margin: 0 12px;
 	width: 200px;
 	.MuiOutlinedInput-root {

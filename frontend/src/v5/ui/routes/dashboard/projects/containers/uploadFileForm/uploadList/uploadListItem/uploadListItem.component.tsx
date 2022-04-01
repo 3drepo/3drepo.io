@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useEffect } from 'react';
 import DeleteIcon from '@assets/icons/delete.svg';
 import EditIcon from '@assets/icons/edit.svg';
 import { useForm } from 'react-hook-form';
@@ -33,6 +34,10 @@ import { UploadProgress } from './uploadProgress';
 
 type IUploadListItem = {
 	item: UploadItemFields;
+	defaultValues: {
+		containerName: string;
+		revisionTag: string;
+	}
 	isSelected: boolean;
 	isUploading: boolean;
 	onClickEdit: () => void;
@@ -42,14 +47,15 @@ type IUploadListItem = {
 
 export const UploadListItem = ({
 	item,
+	defaultValues,
 	onClickEdit,
 	onClickDelete,
 	isSelected,
 	isUploading,
 	onChange,
 }: IUploadListItem): JSX.Element => {
-	const { control, formState: { errors }, setValue, trigger, watch } = useForm({
-		defaultValues: item,
+	const { control, formState: { errors }, setValue, trigger, watch } = useForm<UploadItemFields>({
+		defaultValues,
 		mode: 'onChange',
 		resolver: yupResolver(ListItemSchema),
 	});
@@ -57,7 +63,11 @@ export const UploadListItem = ({
 	const uploadErrorMessage: string = RevisionsHooksSelectors.selectUploadError(item.uploadId);
 
 	const updateValue = (name) => onChange(name, watch(name));
-	updateValue('revisionTag');
+
+	useEffect(() => {
+		trigger('revisionTag');
+		updateValue('revisionTag');
+	}, [watch('revisionTag')]);
 
 	return (
 		<UploadListItemRow
@@ -74,6 +84,7 @@ export const UploadListItem = ({
 				control={control}
 				disabled={isUploading}
 				errorMessage={errors.containerName?.message}
+				defaultValue={defaultValues.containerName}
 				onChange={(vals: DestinationOption) => {
 					Object.keys(vals).forEach((key: keyof DestinationOption) => {
 						if (key === 'latestRevision') return;

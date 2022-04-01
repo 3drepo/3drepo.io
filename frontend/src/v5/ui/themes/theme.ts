@@ -635,7 +635,7 @@ export const theme = createTheme({
 					'& input': {
 						padding: '0px 15px',
 						height: 35,
-						color: 'plum',
+						color: COLOR.BASE_LIGHT,
 						...typography.body1,
 						lineHeight: '35px',
 					},

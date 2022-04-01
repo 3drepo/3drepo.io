@@ -24,6 +24,7 @@ type IUploadListItemRevision = {
 	isSelected?: boolean;
 	errorMessage?: string;
 	control: Control<UploadItemFields>;
+	defaultValue?: string;
 	disabled?: boolean;
 };
 
@@ -32,6 +33,7 @@ export const UploadListItemRevisionTag = ({
 	isSelected = false,
 	errorMessage,
 	disabled = false,
+	defaultValue,
 	...props
 }: IUploadListItemRevision): JSX.Element => (
 	<TextField
@@ -40,6 +42,7 @@ export const UploadListItemRevisionTag = ({
 		$selectedrow={isSelected}
 		name="revisionTag"
 		formError={errorMessage}
+		defaultValue={defaultValue}
 		required
 		InputProps={{
 			startAdornment: !!errorMessage && (

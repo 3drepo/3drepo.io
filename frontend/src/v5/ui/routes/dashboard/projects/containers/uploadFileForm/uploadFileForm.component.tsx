@@ -193,7 +193,6 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 						/>
 					</Content>
 					<Sidebar
-						key={watch(`uploads.${selectedIndex}.containerId`)}
 						open={Number.isInteger(selectedIndex) && !isUploading}
 						onClick={() => setSelectedIndex(null)}
 						noButton={!(Number.isInteger(selectedIndex))}

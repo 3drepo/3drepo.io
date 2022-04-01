@@ -37,16 +37,21 @@ export const UploadList = ({
 	onClickDelete,
 	getOriginalIndex,
 }: IUploadList): JSX.Element => {
-	const { trigger, setValue } = useFormContext();
+	const { trigger, setValue, watch } = useFormContext();
 	return (
 		<Container>
 			{
 				values.map((item, index) => {
 					const origIndex = getOriginalIndex(index);
+					const defaultInputValues = {
+						containerName: watch(`uploads.${origIndex}.containerName`),
+						revisionTag: watch(`uploads.${origIndex}.revisionTag`),
+					};
 					return (
 						<UploadListItem
 							key={item.uploadId}
 							item={item}
+							defaultValues={defaultInputValues}
 							onClickEdit={() => onClickEdit(index)}
 							onClickDelete={() => onClickDelete(index)}
 							onChange={(field, val) => {

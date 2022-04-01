@@ -31,6 +31,7 @@ interface IUploadListItemDestination {
 	errorMessage: string;
 	disabled?: boolean;
 	className?: string;
+	defaultValue: string;
 }
 
 const emptyOption = {
@@ -46,11 +47,17 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 	disabled = false,
 	className,
 	onChange,
+	defaultValue,
 	...props
 }) => {
-	const [value, setValue] = useState<DestinationOption>(emptyOption);
-	const [newOrExisting, setNewOrExisting] = useState('unset');
+	const [value, setValue] = useState<DestinationOption>({ ...emptyOption, containerName: defaultValue });
 	const containers = ContainersHooksSelectors.selectContainers();
+	const [newOrExisting, setNewOrExisting] = useState(() => {
+		if (value.containerName) {
+			return containers.find((c) => c.name === value.containerName) ? 'existing' : 'new';
+		}
+		return 'unset';
+	});
 
 	const [containersInUse, setContainersInUse] = useState([]);
 	const { getValues } = useFormContext();
@@ -61,8 +68,6 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 
 	return (
 		<Autocomplete
-			// noOptionsText={false}
-			// open
 			value={value}
 			onChange={async (event, newValue: DestinationOption) => {
 				if (!newValue) {
@@ -106,7 +111,7 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 				<TextInput
 					name="containerName"
 					control={control}
-					neworexisting={!errorMessage && newOrExisting}
+					neworexisting={newOrExisting}
 					formError={errorMessage}
 					{...params}
 					{...props}
