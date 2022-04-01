@@ -18,7 +18,7 @@
 const { v5Path } = require('../../../interop');
 const { getTeamspaceList, getCollectionsEndsWith } = require('../utils');
 
-const { find, updateOne, getFileFromGridFS } = require(`${v5Path}/handler/db`);
+const { find, findOne, updateOne, getFileFromGridFS } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 const FsService = require(`${v5Path}/handler/fs`);
 
@@ -26,9 +26,18 @@ const filesExt = '.files';
 
 const moveFile = async (teamspace, collection, filename) => {
 	const file = await getFileFromGridFS(teamspace, collection, filename);
-	const ref = await FsService.storeFile(file);
-	delete ref._id;
-	await updateOne(teamspace, `${collection}.ref`, { _id: filename }, { $set: ref }, true);
+	const [newRef, existingRef] = await Promise.all([
+		FsService.storeFile(file),
+		findOne(teamspace, `${collection}.ref`, { link: filename }),
+	]);
+
+	if (existingRef) {
+		newRef._id = existingRef._id;
+	}
+	await Promise.all([
+		updateOne(teamspace, `${collection}.ref`, { _id: newRef._id }, { $set: newRef }, true),
+		updateOne(teamspace, `${collection}${filesExt}`, { filename }, { $set: { filename: newRef._id } }),
+	]);
 };
 
 const processCollection = async (teamspace, collection) => {
