@@ -15,10 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Typography } from '@controls/typography';
-import React from 'react';
 import { FormattedMessage } from 'react-intl';
-import { Container, LastRevision, ErrorText } from './existingContainer.styles';
+import { Container, LastRevision, ErrorText, ContainerName } from './existingContainer.styles';
 
 interface IExistingContainer {
 	containerName: string;
@@ -28,11 +26,11 @@ interface IExistingContainer {
 
 const noneText = <FormattedMessage id="uploads.destination.existing.none" defaultMessage="None" />;
 
-export const ExistingContainer = ({ containerName, latestRevision, inUse }: IExistingContainer) => (
-	<Container>
-		<Typography variant="h5">
+export const ExistingContainer = ({ containerName, latestRevision, inUse, ...props }: IExistingContainer) => (
+	<Container {...props}>
+		<ContainerName>
 			{containerName}
-		</Typography>
+		</ContainerName>
 		<LastRevision>
 			<FormattedMessage id="uploads.destination.existing.lastRevision" defaultMessage="Last revision: " />
 			{latestRevision || noneText}

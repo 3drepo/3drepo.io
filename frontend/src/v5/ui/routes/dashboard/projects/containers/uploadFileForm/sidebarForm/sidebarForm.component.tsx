@@ -19,7 +19,6 @@ import React, { useEffect, useMemo } from 'react';
 
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
-import { MenuItem } from '@material-ui/core';
 import { useForm } from 'react-hook-form';
 import { CONTAINER_TYPES, CONTAINER_UNITS, UploadItemFields } from '@/v5/store/containers/containers.types';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -27,7 +26,8 @@ import { SidebarSchema } from '@/v5/validation/containers';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import * as countriesAndTimezones from 'countries-and-timezones';
-import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer } from './sidebarForm.styles';
+import { MenuItem } from '@mui/material';
+import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer, HiddenMenuItem } from './sidebarForm.styles';
 
 type ISidebarForm = {
 	value: UploadItemFields,
@@ -122,9 +122,9 @@ export const SidebarForm = ({
 							</MenuItem>
 						))
 					}
-					<MenuItem key="sample" value="sample" hidden>
+					<HiddenMenuItem key="sample" value="sample">
 						<FormattedMessage id="containers.type.sample" defaultMessage="Sample" />
-					</MenuItem>
+					</HiddenMenuItem>
 				</FormSelect>
 			</FlexContainer>
 			<FormTextField
@@ -153,32 +153,34 @@ export const SidebarForm = ({
 				formError={errors.revisionDesc}
 			/>
 
-			<AnimationsCheckbox
-				control={control}
-				name="importAnimations"
-				label={formatMessage({ id: 'uploadFileForm.settingsSidebar.importAnimations', defaultMessage: 'Import transformations' })}
-				hidden={!isSpm}
-			/>
-			<TimezoneSelect
-				control={control}
-				hidden={!isSpm}
-				name="timezone"
-				label={formatMessage({ id: 'uploadFileForm.settingsSidebar.timezone', defaultMessage: 'Timezone' })}
-				onChange={
-					(e: React.ChangeEvent<HTMLInputElement>) => {
-						setValue('timezone', e.target.value);
-						updateValue('timezone');
-					}
-				}
-			>
-				{
-					TimezoneOptions.map((opt) => (
-						<MenuItem key={opt.name} value={opt.name}>
-							{opt.label}
-						</MenuItem>
-					))
-				}
-			</TimezoneSelect>
+			{ isSpm && (
+				<>
+					<AnimationsCheckbox
+						control={control}
+						name="importAnimations"
+						label={formatMessage({ id: 'uploadFileForm.settingsSidebar.importAnimations', defaultMessage: 'Import transformations' })}
+					/>
+					<TimezoneSelect
+						control={control}
+						name="timezone"
+						label={formatMessage({ id: 'uploadFileForm.settingsSidebar.timezone', defaultMessage: 'Timezone' })}
+						onChange={
+							(e: React.ChangeEvent<HTMLInputElement>) => {
+								setValue('timezone', e.target.value);
+								updateValue('timezone');
+							}
+						}
+					>
+						{
+							TimezoneOptions.map((opt) => (
+								<MenuItem key={opt.name} value={opt.name}>
+									{opt.label}
+								</MenuItem>
+							))
+						}
+					</TimezoneSelect>
+				</>
+			)}
 		</div>
 	);
 };

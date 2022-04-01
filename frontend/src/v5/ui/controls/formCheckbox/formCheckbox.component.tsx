@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { Checkbox, FormControlLabel, FormControlLabelProps } from '@material-ui/core';
+import { Checkbox, FormControlLabel, FormControlLabelProps } from '@mui/material';
 import { Controller } from 'react-hook-form';
 
 export type FormCheckboxProps = FormControlLabelProps & {

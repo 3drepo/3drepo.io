@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { LinearProgress } from '@material-ui/core';
-import React from 'react';
+import { LinearProgress } from '@mui/material';
+
 import { LabelledProgressBar, ProgressBarLabelLight, ProgressBarLabelDark } from './uploadProgressBar.styles';
 
 type IUploadProgressBar = {

@@ -15,11 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { ButtonProps } from '@material-ui/core';
+import { ButtonProps } from '@mui/material';
 import { Button } from '@controls/button';
 import { FormattedMessage } from 'react-intl';
-import { HiddenFileInput, FileLabel } from './fileInputField.styles';
+import { FileLabel, HiddenFileInput } from './fileInputField.styles';
 
 type IFileInputField = ButtonProps & {
 	acceptedFormats?: string;
@@ -27,18 +26,16 @@ type IFileInputField = ButtonProps & {
 };
 
 export const FileInputField = ({ acceptedFormats, handleChange, ...props }: IFileInputField) => (
-	<>
-		<FileLabel htmlFor="flat-button-file">
-			<HiddenFileInput
-				accept={acceptedFormats}
-				id="flat-button-file"
-				type="file"
-				onChange={(event) => handleChange(event.target.files)}
-				multiple="multiple"
-			/>
-			<Button component="span" {...props}>
-				<FormattedMessage id="fileInput.browse" defaultMessage="Browse" />
-			</Button>
-		</FileLabel>
-	</>
+	<FileLabel htmlFor="hidden-file-buton">
+		<HiddenFileInput
+			accept={acceptedFormats}
+			id="hidden-file-buton"
+			type="file"
+			onChange={(event) => handleChange(event.target.files)}
+			multiple
+		/>
+		<Button component="span" {...props}>
+			<FormattedMessage id="fileInput.browse" defaultMessage="Browse" />
+		</Button>
+	</FileLabel>
 );

@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
 import { DashboardListItem as UploadListItem } from '@components/dashboard/dashboardList';
 import { Content } from './uploadListItemRow.styles';
 

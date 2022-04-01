@@ -19,13 +19,14 @@ import styled from 'styled-components';
 
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 
-export const TextInput = styled(FormTextField)`
+export const TextInput = styled(FormTextField)<{ neworexisting: string }>`
 	margin: 0;
 	width: 271px;
 	border: none;
 	>.MuiInputBase-root {
 		>.MuiInputBase-input {
 			font-weight: bold;
+			padding: 0;
 		}
 		${({ neworexisting, theme }) => {
 		if (neworexisting === 'new') {

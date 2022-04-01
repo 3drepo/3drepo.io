@@ -99,7 +99,7 @@ export const setUploadProgress = (state = INITIAL_STATE, { uploadId, progress })
 	},
 });
 
-export const reducer = createReducer<IRevisionsState>(INITIAL_STATE, {
+export const revisionsReducer = createReducer<IRevisionsState>(INITIAL_STATE, {
 	[RevisionsTypes.FETCH_SUCCESS]: fetchSuccess,
 	[RevisionsTypes.SET_IS_PENDING]: setIsPending,
 	[RevisionsTypes.SET_VOID_STATUS_SUCCESS]: setVoidStatusSuccess,

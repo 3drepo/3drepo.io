@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { Avatar } from '@material-ui/core';
+import { Avatar } from '@mui/material';
 
 export const StyledIconButton = styled(Avatar)`
 	width: 32px;

@@ -17,7 +17,6 @@
 import { useEffect } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { MenuItem } from '@material-ui/core';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router';
@@ -26,6 +25,7 @@ import { CONTAINER_TYPES, CONTAINER_UNITS } from '@/v5/store/containers/containe
 import { CreateContainerSchema } from '@/v5/validation/containers';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
+import { MenuItem } from '@mui/material';
 import { FlexContainer } from './createContainerForm.styles';
 
 interface IFormInput {

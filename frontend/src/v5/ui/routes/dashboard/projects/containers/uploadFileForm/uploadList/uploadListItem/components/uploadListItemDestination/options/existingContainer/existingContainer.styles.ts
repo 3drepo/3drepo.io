@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 
 export const Container = styled.div`
@@ -23,20 +22,20 @@ export const Container = styled.div`
 	flex-direction: column;
 	color: ${({ theme }) => theme.palette.secondary.main};
 	width: 100%;
+	${({ theme }) => theme.typography.h5};
+	flexDirection: 'column';
 `;
 
-export const LastRevision = styled(Typography).attrs({
-	component: 'div',
-	variant: 'h5',
-})`
+export const ContainerName = styled.div`
+	width: 100%;
+`;
+
+export const LastRevision = styled.div`
 	width: 100%;
 	color: ${({ theme }) => theme.palette.base.main};
 `;
 
-export const ErrorText = styled(Typography).attrs({
-	component: 'div',
-	variant: 'h5',
-})`
+export const ErrorText = styled.div`
 	width: 100%;
 	color: ${({ theme }) => theme.palette.error.main};
 `;

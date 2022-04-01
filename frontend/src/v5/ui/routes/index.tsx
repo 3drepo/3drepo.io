@@ -41,7 +41,6 @@ export const Root = () => {
 	useEffect(() => {
 		AuthActionsDispatchers.authenticate();
 	}, []);
-
 	useEffect(() => {
 		if (userName) {
 			CurrentUserActionsDispatchers.fetchUser(userName);

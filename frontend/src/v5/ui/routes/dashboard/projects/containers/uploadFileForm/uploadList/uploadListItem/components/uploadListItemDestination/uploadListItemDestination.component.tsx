@@ -16,11 +16,11 @@
  */
 
 import React, { useState } from 'react';
-import MuiAutocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
 import { DestinationOption, UploadItemFields } from '@/v5/store/containers/containers.types';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { Control, useFormContext } from 'react-hook-form';
 import { ErrorTooltip } from '@controls/errorTooltip';
+import { Autocomplete, createFilterOptions } from '@mui/material';
 import { TextInput } from './uploadListItemDestination.styles';
 import { NewContainer } from './options/newContainer';
 import { ExistingContainer } from './options/existingContainer';
@@ -60,7 +60,9 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 	}, []);
 
 	return (
-		<MuiAutocomplete
+		<Autocomplete
+			// noOptionsText={false}
+			// open
 			value={value}
 			onChange={async (event, newValue: DestinationOption) => {
 				if (!newValue) {
@@ -118,15 +120,17 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 				/>
 			)}
 			getOptionDisabled={(option: DestinationOption) => containersInUse.includes(option.containerName)}
-			renderOption={(option: DestinationOption) => (option.containerName && !option.containerId
-				? <NewContainer containerName={option.containerName} />
+			renderOption={(optionProps, option) => (option.containerName && !option.containerId
+				? <NewContainer containerName={option.containerName} {...optionProps} />
 				: (
 					<ExistingContainer
 						inUse={containersInUse.includes(option.containerName)}
 						containerName={option.containerName}
 						latestRevision={option.latestRevision}
+						{...optionProps}
 					/>
-				))}
+				)
+			)}
 			disabled={disabled}
 		/>
 	);

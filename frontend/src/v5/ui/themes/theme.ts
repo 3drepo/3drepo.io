@@ -340,19 +340,87 @@ export const theme = createTheme({
 			},
 		},
 		MuiAutocomplete: {
-			popupIcon: createElement(ChevronIcon),
-			closeIcon: createElement(ClearIcon),
-			openText: '',
-			closeText: '',
-			clearText: '',
-			handleHomeEndKeys: true,
+			defaultProps: {
+				clearIcon: createElement(ClearIcon),
+				popupIcon: createElement(ChevronIcon),
+				openText: '',
+				closeText: '',
+				clearText: '',
+				handleHomeEndKeys: true,
+			},
+			styleOverrides: {
+				root: {
+					height: '31px',
+					'.MuiFormControl-root .MuiInputBase-root': {
+						'&.MuiAutocomplete-inputRoot ': {
+							padding: '0 0 0 10px',
+							height: '31px',
+							lineHeight: '31px',
+						},
+					},
+				},
+				input: {
+					height: '100%',
+					padding: 0,
+				},
+				endAdornment: {
+					position: 'static',
+					height: '100%',
+					top: 'unset',
+					display: 'flex',
+					alignItems: 'center',
+					margin: '0 10px',
+				},
+				popupIndicator: {
+					width: '20px',
+					height: '20px',
+					margin: '8px 0px',
+				},
+				clearIndicator: {
+					width: '20px',
+					height: '20px',
+					margin: '0 5px 0 0',
+					padding: '2px',
+				},
+				option: {
+					height: '100%',
+					alignItems: 'baseline',
+					margin: 'auto 0',
+					display: 'flex',
+					padding: '12px',
+					wordWrap: 'break-word',
+					boxSizing: 'border-box',
+
+					'&.MuiAutocomplete-option': {
+						'&.Mui-focused': {
+							backgroundColor: COLOR.TERTIARY_LIGHTEST,
+						},
+					},
+				},
+			},
 		},
 		MuiLinearProgress: {
-			color: 'primary',
-			variant: 'determinate',
+			defaultProps: {
+				color: 'primary',
+				variant: 'determinate',
+			},
+			styleOverrides: {
+				root: {
+					borderRadius: '5px',
+					height: '16px',
+					margin: 'auto 10px',
+				},
+				barColorPrimary: {
+					backgroundColor: COLOR.TERTIARY_MAIN,
+				},
+				colorPrimary: {
+					backgroundColor: COLOR.TERTIARY_LIGHTEST,
+				},
+				bar1Determinate: {
+					transition: 'none',
+				},
+			},
 		},
-	},
-	overrides: {
 		MuiBackdrop: {
 			styleOverrides: {
 				root: {
@@ -378,12 +446,12 @@ export const theme = createTheme({
 					backgroundColor: 'rgba(18, 30, 51, 0.9)',
 					backdropFilter: 'blur(10px)',
 				},
-			},
-			paperFullWidth: {
-				width: 'calc(100% - 100px)',
-			},
-			paperScrollPaper: {
-				maxHeight: '100vh',
+				paperFullWidth: {
+					width: 'calc(100% - 100px)',
+				},
+				paperScrollPaper: {
+					maxHeight: '100vh',
+				},
 			},
 		},
 		MuiDialogActions: {
@@ -514,6 +582,9 @@ export const theme = createTheme({
 						height: 17,
 						width: 'auto',
 					},
+					'&:active': {
+						boxShadow: 'none',
+					},
 				},
 				extended: {
 					height: null,
@@ -564,7 +635,7 @@ export const theme = createTheme({
 					'& input': {
 						padding: '0px 15px',
 						height: 35,
-						color: COLOR.BASE_MAIN,
+						color: 'plum',
 						...typography.body1,
 						lineHeight: '35px',
 					},
@@ -648,36 +719,6 @@ export const theme = createTheme({
 				},
 			},
 		},
-		MuiInput: {
-			root: {
-				width: '100%',
-				'&$disabled $input': {
-					color: COLOR.BASE_LIGHT,
-				},
-				'&$disabled $path': {
-					fill: COLOR.BASE_LIGHT,
-				},
-			},
-			underline: {
-				'&:before': {
-					borderBottom: `1px solid ${COLOR.BASE_LIGHTEST}`,
-				},
-				'&:after': {
-					borderBottom: `1px solid ${COLOR.BASE_LIGHTEST}`,
-				},
-				'&:hover:not($disabled):before': {
-					borderBottom: `1px solid ${COLOR.BASE_LIGHTEST}`,
-				},
-			},
-			input: {
-				padding: '0px 14px',
-			},
-			formControl: {
-				'label + &': {
-					marginTop: 0,
-				},
-			},
-		},
 		MuiInputLabel: {
 			styleOverrides: {
 				root: {
@@ -689,6 +730,10 @@ export const theme = createTheme({
 					'&:not(.Mui-error).Mui-focused': {
 						color: COLOR.TERTIARY_MAIN,
 					},
+
+					'&.Mui-disabled.MuiInputLabel-asterisk': {
+						display: 'none',
+					},
 				},
 				formControl: {
 					top: '20px',
@@ -696,69 +741,6 @@ export const theme = createTheme({
 				},
 				asterisk: {
 					color: COLOR.ERROR_MAIN,
-				},
-				'&$disabled .MuiInputLabel-asterisk': {
-					display: 'none',
-				},
-			},
-			formControl: {
-				top: '20px',
-				left: '1px',
-				transform: 'none',
-			},
-			asterisk: {
-				color: COLOR.ERROR_MAIN,
-			},
-		},
-		MuiAutocomplete: {
-			root: {
-				height: '31px',
-				'&&& $input': {
-					padding: '0px',
-					height: '31px',
-					lineHeight: '31px',
-				},
-			},
-			inputRoot: {
-				height: '100%',
-				'&&&&': {
-					padding: '0 6px',
-				},
-			},
-			endAdornment: {
-				height: '100%',
-				top: 'unset',
-				display: 'flex',
-				alignItems: 'center',
-			},
-			popupIndicator: {
-				width: '20px',
-				height: '20px',
-				margin: '8px 0px',
-			},
-			clearIndicator: {
-				'&': {
-					width: '20px',
-					height: '20px',
-					margin: '0 5px 0 0',
-					padding: '2px',
-				},
-			},
-			option: {
-				'&&': {
-					height: '100%',
-					alignItems: 'baseline',
-					margin: 'auto 0',
-					display: 'flex',
-					flexDirection: 'column',
-					padding: '12px',
-					wordWrap: 'break-word',
-				},
-				'&:focus': {
-					backgroundColor: COLOR.TERTIARY_LIGHTEST,
-				},
-				'&[data-focus]': {
-					backgroundColor: COLOR.TERTIARY_LIGHTEST,
 				},
 			},
 		},
@@ -771,15 +753,19 @@ export const theme = createTheme({
 			},
 		},
 		MuiFormControlLabel: {
-			label: {
-				color: COLOR.BASE_MAIN,
+			styleOverrides: {
+				label: {
+					color: COLOR.BASE_MAIN,
+				},
 			},
 		},
 		MuiFormHelperText: {
-			contained: {
-				position: 'absolute',
-				bottom: '-14px',
-				'&&': { margin: 0 },
+			styleOverrides: {
+				contained: {
+					position: 'absolute',
+					bottom: '-16px',
+					margin: 0,
+				},
 			},
 		},
 		MuiTouchRipple: {
@@ -954,22 +940,6 @@ export const theme = createTheme({
 				root: {
 					margin: '8px',
 				},
-			},
-		},
-		MuiLinearProgress: {
-			root: {
-				borderRadius: '5px',
-				height: '16px',
-				margin: 'auto 10px',
-			},
-			barColorPrimary: {
-				backgroundColor: COLOR.TERTIARY_MAIN,
-			},
-			colorPrimary: {
-				backgroundColor: COLOR.TERTIARY_LIGHTEST,
-			},
-			bar1Determinate: {
-				transition: 'none',
 			},
 		},
 	},

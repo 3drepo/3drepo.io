@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { DialogContent } from '@material-ui/core';
+import { DialogContent } from '@mui/material';
 import { Typography } from '@controls/typography';
 
 export const Container = styled.div`

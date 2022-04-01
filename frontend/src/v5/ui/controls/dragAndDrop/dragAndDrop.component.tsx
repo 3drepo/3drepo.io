@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode, useState } from 'react';
+import { ReactNode, useState } from 'react';
 
 import { FormattedMessage } from 'react-intl';
 import { Typography } from '@controls/typography';
@@ -26,7 +26,7 @@ interface IDragAndDrop {
 	message?: ReactNode,
 	hidden?: boolean;
 	processFiles: (files) => void,
-	className: string;
+	className?: string;
 }
 
 export const DragAndDrop = ({ className, message, processFiles, hidden = false }: IDragAndDrop) => {

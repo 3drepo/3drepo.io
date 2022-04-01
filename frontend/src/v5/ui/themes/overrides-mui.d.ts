@@ -16,8 +16,6 @@
  */
 
 import { CSSProperties } from 'react';
-import '@material-ui/core/styles';
-import { AutocompleteProps } from '@material-ui/lab';
 
 interface IGradient {
 	main: string;
@@ -74,11 +72,5 @@ declare module '@mui/material/styles/createTypography' {
 		link?: CSSProperties;
 		kickerTitle?: CSSProperties;
 		kicker?: CSSProperties;
-	}
-}
-
-declare module '@material-ui/core/styles/props' {
-	interface ComponentsPropsList {
-		MuiAutocomplete: AutocompleteProps<any, boolean, boolean, boolean>;
 	}
 }

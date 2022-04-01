@@ -152,3 +152,34 @@ export type ContainerStats = {
 	unit: string;
 	code: string;
 };
+
+export type DestinationOption = {
+	containerId: string;
+	containerName: string;
+	containerUnit?: string;
+	containerType?: string;
+	containerDesc?: string;
+	containerCode?: string;
+	latestRevision: string;
+};
+
+export type UploadItemFields = {
+	uploadId: string;
+	file: File;
+	progress: number;
+	extension: string;
+	containerId: string;
+	containerName: string;
+	containerUnit: string;
+	containerType: string;
+	containerDesc?: string;
+	containerCode?: string;
+	revisionTag: string;
+	revisionDesc?: string;
+	importAnimations?: boolean;
+	timezone?: string;
+};
+
+export type UploadFieldArray = {
+	uploads: UploadItemFields[];
+};

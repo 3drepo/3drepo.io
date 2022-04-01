@@ -24,7 +24,5 @@ export const HiddenFileInput = styled.input`
 `;
 
 export const FileLabel = styled.label`
-	&& {
-		margin: 0 4px 0 0;
-	}
+	margin: 0 10px;
 `;

@@ -29,7 +29,7 @@ export const Container = styled.div`
 
 export const Filename = styled(Typography).attrs({
 	variant: 'h3',
-})`
+})<{ '$selectedrow': boolean }>`
 	width: fit-content;
 	max-width: 100%;
 	color: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.primary.contrast : theme.palette.secondary.main)};

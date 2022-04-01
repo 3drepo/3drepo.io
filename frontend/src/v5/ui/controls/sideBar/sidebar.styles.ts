@@ -21,7 +21,7 @@ import { CircleButton } from '@controls/circleButton';
 export const Container = styled.span`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	position: relative;
-	${({ open }) => (open ? 'width: 400px; transition: width 0.1s;' : 'width: 0; transition: width 0.1s;')}
+	${({ open }: {open: boolean}) => (open ? 'width: 400px; transition: width 0.1s;' : 'width: 0; transition: width 0.1s;')}
 `;
 
 export const Content = styled.div`

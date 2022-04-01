@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 
-export const Container = styled.div`
+export const Container = styled.div<{ error: string }>`
 	color: ${({ theme, error }) => (error ? theme.palette.error.main : theme.palette.primary.dark)};
 	display: inline-flex;
 	width: 100%;
+	${({ theme }) => theme.typography.h5};
+	flex-flow: row;
 	
 	svg {
 		height: 18px;
@@ -35,10 +36,6 @@ export const Container = styled.div`
 	}
 `;
 
-export const Message = styled(Typography).attrs({
-	variant: 'h5',
-	component: 'span',
-
-})`
+export const Message = styled.div`
 	width: calc(100% - 30px);
 `;

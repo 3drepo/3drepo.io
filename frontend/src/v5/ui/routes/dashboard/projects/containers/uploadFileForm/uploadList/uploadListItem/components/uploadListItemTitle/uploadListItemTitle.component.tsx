@@ -15,10 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
-import { Tooltip } from '@material-ui/core';
+import { Tooltip } from '@mui/material';
 import { Container, Filename, Filesize } from './uploadListItemTitle.styles';
 
 type IUploadListItemTitle = {

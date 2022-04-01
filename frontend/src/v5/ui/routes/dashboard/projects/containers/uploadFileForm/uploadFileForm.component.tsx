@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
 import { useParams } from 'react-router';
 
@@ -64,7 +64,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		column: 'file',
 		direction: SortingDirection.ASCENDING,
 	};
-	const { sortedList, setSortConfig } = useOrderedList(fields || [], DEFAULT_SORT_CONFIG);
+	const { sortedList, setSortConfig }: any = useOrderedList(fields || [], DEFAULT_SORT_CONFIG);
 
 	const revTagMaxValue = useMemo(() => {
 		const schemaDescription = Yup.reach(UploadsSchema, 'uploads.revisionTag').describe();

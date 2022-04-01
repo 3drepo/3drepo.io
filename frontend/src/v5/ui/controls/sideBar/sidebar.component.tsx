@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
 import ExpandIcon from '@assets/icons/expand_panel.svg';
 import { Container, Content, Button } from './sidebar.styles';
 
@@ -37,9 +36,11 @@ export const Sidebar = ({
 	children,
 }: ISidebar): JSX.Element => (
 	<Container className={className} open={open} hidden={hidden}>
-		<Button onClick={onClick} variant="main" hidden={noButton}>
-			<ExpandIcon />
-		</Button>
+		{!noButton && (
+			<Button onClick={onClick} variant="main" hidden={noButton}>
+				<ExpandIcon />
+			</Button>
+		)}
 		<Content>
 			{children}
 		</Content>
