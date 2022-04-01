@@ -22,20 +22,20 @@ const Path = require('path');
 const { v5Path } = require('../../../interop');
 const { getTeamspaceList, getCollectionsEndsWith } = require('../utils');
 
-const { count, dropCollection, find, findOneAndDelete, deleteMany } = require(`${v5Path}/handler/db`);
+const { count, dropCollection, find, findOne } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 const { fs } = require(`${v5Path}/utils/config`);
+const GridFS = require(`${v5Path}/handler/gridfs`);
 
 const refExt = '.ref';
 
 const removeGridFSBackup = async (teamspace, col, filename) => {
 	const filesCol = `${col}.files`;
-	const chunksCol = `${col}.chunks`;
 	const legacyFileName = { $regex: `^/\\w+/\\w+.*/${filename}$` };
-	const gridFSRef = await findOneAndDelete(teamspace, filesCol,
-		{ $or: [{ filename }, { filename: legacyFileName }] }, { _id: 1 });
-	if (gridFSRef) {
-		await deleteMany(teamspace, chunksCol, { files_id: gridFSRef._id });
+	const rec = await findOne(teamspace, filesCol,
+		{ $or: [{ filename }, { filename: legacyFileName }] }, { filename: 1 });
+	if (rec?.filename) {
+		GridFS.removeFiles(teamspace, col, [rec.filename]);
 	}
 };
 
