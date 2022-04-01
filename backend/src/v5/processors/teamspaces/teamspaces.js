@@ -32,9 +32,9 @@ Teamspaces.initTeamspace = async (username) => {
 			grantTeamspaceRoleToUser(username, username),
 			addDefaultJobs(username),
 			createTeamspaceSettings(username),
-			grantTeamspacePermissionsToUser(username, username, ['teamspace_admin']),
-			assignUserToJob(username, DEFAULT_JOBS.find((j) => j._id === 'Admin'), username),
+			grantTeamspacePermissionsToUser(username, username, ['teamspace_admin']),			
 		]);
+		await assignUserToJob(username, DEFAULT_JOBS.find((j) => j._id === 'Admin')._id, username);
 	} catch (err) {
 		logger.logError(`Failed to initialize teamspace for ${username}`);
 	}
