@@ -25,6 +25,7 @@ export const Body = styled.div`
 	align-items: center;
 	justify-content: center;
 	width: 454px;
+	box-sizing: border-box;
 	border-radius: 6px;
 	margin: 28px;
 	padding: 45px 60px;
@@ -34,7 +35,7 @@ export const Body = styled.div`
 `;
 
 export const EmailIcon = styled(EmailIconBase)`
-    transform: scale(1.5);
+    transform: scale(1.7);
 `;
 
 export const Subtitle = styled.div`
@@ -44,9 +45,11 @@ export const Subtitle = styled.div`
 `;
 
 export const ActionMessage = styled.div`
-	${({ theme }) => theme.typography.h4};
+	${({ theme }) => theme.typography.h5};
 	color: ${({ theme }) => theme.palette.secondary.main};
 	font-weight: 500;
+	font-size: 13px;
+	line-height: 15.73px;
 	margin-top: 20px;
 	display: inline-block;
 `;
@@ -57,11 +60,14 @@ export const EmailAddress = styled(ActionMessage)`
 `;
 
 export const InfoMessage = styled.div`
-	${({ theme }) => theme.typography.h5};
+	${({ theme }) => theme.typography.body};
 	color: ${({ theme }) => theme.palette.base.main};
+	line-height: 14.52px;
+	font-size: 12px;
 	font-weight: 400;
 	margin-top: 20px;
 	display: inline-block;
+	font-family: ${({ theme }) => theme.typography.fontFamily};
 `;
 
 export const HelpMessage = styled.div`
