@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import DefaultLogoBase from '@assets/icons/colored_logo.svg';
+import { Display } from '@/v5/ui/themes/media';
 
 export const Container = styled.div`
 	display: flex;
@@ -28,12 +29,25 @@ export const Container = styled.div`
 `;
 
 export const Background = styled.div`
-	height: 100%;
+	height: 100vh;
 	width: 100%;
+	display: flex;
+	flex-direction: column;
+    justify-content: center;
+    align-items: center;
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	${clientConfigService.getCustomBackgroundImagePath() && `
 		background: url('${clientConfigService.getCustomBackgroundImagePath()}') 0% 0% / cover no-repeat;
 	`};
+`;
+
+export const UserSignupMain = styled.div`
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	height: fit-content;
 `;
 
 const DefaultLogo = styled(DefaultLogoBase)`
@@ -49,3 +63,24 @@ const CustomLogo = styled.img.attrs({
 `;
 
 export const Logo = clientConfigService.getCustomLogoPath() ? CustomLogo : DefaultLogo;
+
+export const BlueLogo = styled(Logo)`
+	color: ${({ theme }) => theme.palette.secondary.main};
+`;
+
+export const LogoHeightBalancer = styled(BlueLogo)`
+	color: transparent;
+`;
+
+export const LogoContainer = styled.div`
+	width: 100%;
+	padding-bottom: 100px;
+	display: none;
+
+	@media (max-width: ${Display.Tablet}px) {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+	}
+`;

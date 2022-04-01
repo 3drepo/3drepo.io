@@ -17,7 +17,14 @@
 import { useState } from 'react';
 import { UserSignupSidebar } from './userSignupSidebar/userSignupSidebar.component';
 import { UserSignupForm } from './userSignupForm/userSignupForm.component';
-import { Container, Background } from './userSignup.styles';
+import {
+	Container,
+	UserSignupMain,
+	LogoContainer,
+	LogoHeightBalancer,
+	BlueLogo,
+	Background,
+} from './userSignup.styles';
 import { UserSignupWelcome, UserSignupWelcomeProps } from './userSignupWelcome/userSignupWelcome.component';
 
 export const UserSignup = () => {
@@ -33,11 +40,19 @@ export const UserSignup = () => {
 		<Container>
 			<UserSignupSidebar />
 			<Background>
-				{registrationIsComplete ? (
-					<UserSignupWelcome {...registrationCompleteData} />
-				) : (
-					<UserSignupForm completeRegistration={completeRegistration} />
-				)}
+				<UserSignupMain>
+					<LogoContainer>
+						<BlueLogo />
+					</LogoContainer>
+					{registrationIsComplete ? (
+						<UserSignupWelcome {...registrationCompleteData} />
+					) : (
+						<UserSignupForm completeRegistration={completeRegistration} />
+					)}
+					<LogoContainer>
+						<LogoHeightBalancer />
+					</LogoContainer>
+				</UserSignupMain>
 			</Background>
 		</Container>
 	);
