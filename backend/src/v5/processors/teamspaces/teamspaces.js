@@ -32,7 +32,7 @@ Teamspaces.initTeamspace = async (username) => {
 			grantTeamspaceRoleToUser(username, username),
 			addDefaultJobs(username),
 			createTeamspaceSettings(username),
-			grantTeamspacePermissionsToUser(username, username, ['teamspace_admin']),			
+			grantTeamspacePermissionsToUser(username, username, ['teamspace_admin']),
 		]);
 		await assignUserToJob(username, DEFAULT_JOBS.find((j) => j._id === 'Admin')._id, username);
 	} catch (err) {

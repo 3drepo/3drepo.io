@@ -226,7 +226,7 @@ User.addUser = async (newUserData) => {
 				company: newUserData.company,
 			},
 		},
-		permissions: []
+		permissions: [],
 	};
 
 	const expiryAt = new Date();
