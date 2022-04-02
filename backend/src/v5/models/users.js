@@ -226,6 +226,7 @@ User.addUser = async (newUserData) => {
 				company: newUserData.company,
 			},
 		},
+		permissions: []
 	};
 
 	const expiryAt = new Date();
@@ -258,7 +259,7 @@ User.verify = async (username) => {
 };
 
 User.grantTeamspacePermissionsToUser = async (username, teamspace, permissions) => {
-	await updateUser(username, { $set: { 'customData.permissions': [{ user: teamspace, permissions }] } });
+	await updateUser(username, { $push: { 'customData.permissions': { user: teamspace, permissions } } });
 };
 
 User.uploadAvatar = (username, avatarBuffer) => updateUser(username, { $set: { 'customData.avatar': { data: avatarBuffer } } });

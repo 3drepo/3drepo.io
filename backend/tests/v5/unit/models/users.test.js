@@ -520,6 +520,7 @@ const formatNewUserData = (newUserData, createdAt, emailExpiredAt) => {
 			token: newUserData.token,
 			expiredAt: emailExpiredAt,
 		},
+		permissions: newUserData.permissions
 	};
 
 	return formattedData;
@@ -537,6 +538,7 @@ const testAddUser = () => {
 				mailListAgreed: true,
 				countryCode: 'GB',
 				company: generateRandomString(),
+				permissions: []
 			};
 
 			const fn = jest.spyOn(db, 'createUser');
@@ -584,7 +586,7 @@ const testGrantTeamspacePermissionToUser = () => {
 			await User.grantTeamspacePermissionsToUser(username, teamspace, permissions);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username },
-				{ $set: { 'customData.permissions': [{ user: teamspace, permissions }] } });
+			{ $push: { 'customData.permissions': { user: teamspace, permissions } } });
 		});
 	});
 };
