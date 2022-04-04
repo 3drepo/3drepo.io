@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import TextField from '@material-ui/core/TextField';
-import Search from '@material-ui/icons/Search';
+import TextField from '@mui/material/TextField';
+import Search from '@mui/icons-material/Search';
 import styled from 'styled-components';
 
 import { COLOR, FONT_WEIGHT } from '../../../../../styles';

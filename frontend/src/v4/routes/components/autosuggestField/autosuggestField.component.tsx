@@ -16,7 +16,7 @@
  */
 
 import { PureComponent } from 'react';
-import { MenuItem, Paper } from '@material-ui/core';
+import { MenuItem, Paper } from '@mui/material';
 import Autosuggest from 'react-autosuggest';
 import { Highlight } from '../highlight/highlight.component';
 

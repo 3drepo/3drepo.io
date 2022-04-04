@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { createElement } from 'react';
-import { Tooltip } from '@material-ui/core';
-import { TooltipProps } from '@material-ui/core/Tooltip';
+import { Tooltip } from '@mui/material';
+import { TooltipProps } from '@mui/material/Tooltip';
 import { omit } from 'lodash';
 import styled from 'styled-components';
 import { COLOR } from '../../../../../../styles';

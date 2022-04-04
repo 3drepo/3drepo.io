@@ -18,21 +18,27 @@ import styled from 'styled-components';
 
 import { DateField } from '../dateField/dateField.component';
 
-export const SequenceDateField = styled(DateField)`
-	&& {
-		display: inline-block;
-		width: 181px;
+export const SequenceDateContainer = styled.div`
+	display: flex;
+	justify-content: space-between;
+
+	& .MuiFormControl-root {
+		width: 190px;
 	}
 `;
 
-export const SequenceDateContainer = styled.div`
-	display: block;
+export const SequenceDateField = styled(DateField)`
+	&& {
+		display: inline-block;
+		& .MuiInputBase-formControl {
+			margin-top: 0;
+		}
+	}
 `;
 
 export const SequenceDateActions = styled.div`
-	top: 3px;
+	top: 13px;
+	right: 151px;
 	position: relative;
-	display: inline-block;
-	right: 53px;
-	width: 85px;
+	display: flex;
 `;

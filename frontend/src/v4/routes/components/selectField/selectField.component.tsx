@@ -17,7 +17,7 @@
 
 import { PureComponent } from 'react';
 
-import Select, { SelectProps } from '@material-ui/core/Select';
+import Select, { SelectProps } from '@mui/material/Select';
 import { MuiTheme } from '../../../styles/theme';
 
 function findLabel(children, value) {
@@ -97,8 +97,8 @@ export class SelectField extends PureComponent<SelectProps, any> {
 		this.menuWrapper.addEventListener('keypress', this.handleKeyPress);
 		this.menuWrapper.addEventListener('mousemove', this.handleMouseMove);
 
-		if ((this.props.MenuProps || {}).onEntered) {
-			this.props.MenuProps.onEntered(menuWrapper, isAppearing);
+		if (this.props.MenuProps?.TransitionProps?.onEntered) {
+			this.props.MenuProps.TransitionProps.onEntered(menuWrapper, isAppearing);
 		}
 	}
 
@@ -111,8 +111,8 @@ export class SelectField extends PureComponent<SelectProps, any> {
 		this.menuWrapper = null;
 		this.selectedItem = null;
 
-		if ((this.props.MenuProps || {}).onExit) {
-			this.props.MenuProps.onExit(node);
+		if (this.props.MenuProps?.TransitionProps?.onExit) {
+			this.props.MenuProps.TransitionProps.onExit(node);
 		}
 	}
 
@@ -121,8 +121,11 @@ export class SelectField extends PureComponent<SelectProps, any> {
 
 		const customMenuProps = {
 			...MenuProps,
-			onEntered: this.handleOpen,
-			onExit: this.handleClose
+			TransitionProps: {
+				...MenuProps?.TransitionProps,
+				onEntered: this.handleOpen,
+				onExit: this.handleClose
+			}
 		};
 
 		const hasLabel = Boolean(findLabel(this.props.children, selectProps.value));
@@ -131,7 +134,8 @@ export class SelectField extends PureComponent<SelectProps, any> {
 			<Select
 				className={className}
 				{...selectProps}
-				MenuProps={customMenuProps} displayEmpty
+				MenuProps={customMenuProps}
+				displayEmpty
 				renderValue={renderValue}>
 				{children}
 			</Select>

@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
-import Tooltip from '@material-ui/core/Tooltip';
-import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
-import EditIcon from '@material-ui/icons/Edit';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import TextField from '@mui/material/TextField';
+import Tooltip from '@mui/material/Tooltip';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import EditIcon from '@mui/icons-material/Edit';
 import { Field, Formik } from 'formik';
 import { isEmpty } from 'lodash';
 
-import { Switch } from '@material-ui/core';
+import { Switch } from '@mui/material';
 import { ROUTES } from '../../constants/routes';
 import { LONG_DATE_TIME_FORMAT } from '../../services/formatting/formatDate';
 import { ChipsInput } from '../components/chipsInput/chipsInput.component';
@@ -212,7 +212,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 		return (
 			<SuggestionsContainer container direction="column" wrap="nowrap">
 				<Headline color="textPrimary" variant="subtitle1">Treatment Suggestions</Headline>
-				<FileGrid container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
+				<FileGrid container direction="row" justifyContent="space-between" alignItems="center" wrap="nowrap">
 					<InfoColumnWrapper container>
 						<DataText variant="body1">
 							{this.renderLastTreatmentsUpdated()}
@@ -252,7 +252,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 	private renderCreateMitigationSuggestionsOption = () => {
 		return (
 			<SuggestionsContainer container direction="column" wrap="nowrap">
-				<CreateMitigationsGrid container direction="row" justify="space-between" alignItems="center" wrap="nowrap">
+				<CreateMitigationsGrid container direction="row" justifyContent="space-between" alignItems="center" wrap="nowrap">
 					<InfoColumnWrapper container>
 						<DataText variant="body1">
 							Create Treatment Suggestions from Agreed Risks
@@ -298,7 +298,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 							/>
 						</StyledGrid>
 
-						<StyledGrid paddingBottom>
+						<StyledGrid gridPaddingBottom>
 							<Headline>Risk Categories</Headline>
 							<Field
 								name="riskCategories"

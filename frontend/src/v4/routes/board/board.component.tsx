@@ -15,14 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import IconButton from '@material-ui/core/IconButton';
-import InputLabel from '@material-ui/core/InputLabel';
-import Add from '@material-ui/icons/Add';
-import CancelIcon from '@material-ui/icons/Cancel';
-import Check from '@material-ui/icons/Check';
-import SearchIcon from '@material-ui/icons/Search';
+import IconButton from '@mui/material/IconButton';
+import InputLabel from '@mui/material/InputLabel';
+import Add from '@mui/icons-material/Add';
+import CancelIcon from '@mui/icons-material/Cancel';
+import SearchIcon from '@mui/icons-material/Search';
 import { get } from 'lodash';
 import { useParams } from 'react-router-dom';
 import TrelloBoard from 'react-trello';
@@ -202,7 +201,7 @@ export function Board(props: IProps) {
 			const lanes = board.getElementsByClassName('react-trello-lane');
 
 			setTimeout(() => {
-				lanes.forEach((lane) => lane.removeAttribute('title'));
+				[...lanes].forEach((lane) => lane.removeAttribute('title'));
 			});
 		}
 	}, [boardRef, props.isPending]);
@@ -485,9 +484,17 @@ export function Board(props: IProps) {
 
 	const getSearchButton = () => {
 		if (props.searchEnabled) {
-			return <IconButton disabled={!project || !modelId} onClick={handleSearchClose}><CancelIcon /></IconButton>;
+			return <IconButton disabled={!project || !modelId} onClick={handleSearchClose} size="large"><CancelIcon /></IconButton>;
 		}
-		return <IconButton disabled={!project || !modelId} onClick={props.toggleSearchEnabled}><SearchIcon /></IconButton>;
+		return (
+            <IconButton
+                disabled={!project || !modelId}
+                onClick={props.toggleSearchEnabled}
+                size="large"
+			>
+				<SearchIcon />
+			</IconButton>
+        );
 	};
 
 	const menuProps = {...props, teamspace, model: modelId};

@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import { IconButton } from '@material-ui/core';
-import ArrowBack from '@material-ui/icons/ArrowBack';
+import { IconButton } from '@mui/material';
+import ArrowBack from '@mui/icons-material/ArrowBack';
 import { STEP_SCALE } from '../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { getSelectedFrame } from '../../../../modules/sequences/sequences.helper';
@@ -118,10 +118,10 @@ export class Sequences extends PureComponent<IProps, {}> {
 	public renderTitleIcon = () => {
 		if (this.props.selectedSequence) {
 			return (
-				<IconButton onClick={() => this.props.setSelectedSequence(null)}>
+                <IconButton onClick={() => this.props.setSelectedSequence(null)} size="large">
 					<ArrowBack />
 				</IconButton>
-			);
+            );
 		}
 		return <SequencesIcon />;
 	}

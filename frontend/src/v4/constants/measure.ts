@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import DeleteIcon from '@material-ui/icons/Delete';
-import EdgeSnappingIcon from '@material-ui/icons/PermDataSetting';
-import ResetIcon from '@material-ui/icons/RotateLeft';
-import UnitsIcon from '@material-ui/icons/Straighten';
-import ShowXYZIcon from '@material-ui/icons/Toc';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EdgeSnappingIcon from '@mui/icons-material/PermDataSetting';
+import ResetIcon from '@mui/icons-material/RotateLeft';
+import UnitsIcon from '@mui/icons-material/Straighten';
+import ShowXYZIcon from '@mui/icons-material/Toc';
 
 export const MEASURE_ACTIONS_ITEMS = {
 	EDGE_SNAPPING: 'edgeSnapping',

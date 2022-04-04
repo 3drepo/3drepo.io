@@ -19,7 +19,7 @@ import {
 	IconButton as IconButtonComponent,
 	TextField as TextFieldComponent,
 	InputAdornment as InputAdornmentComponent,
-} from '@material-ui/core';
+} from '@mui/material';
 
 export const IconButton = styled(IconButtonComponent)`
 	padding: 6px;
@@ -28,11 +28,7 @@ export const IconButton = styled(IconButtonComponent)`
 export const TextField = styled(TextFieldComponent)`
 	margin: 0 0 0 14px;
 
-	input {
-		padding-left: 10px;
-	}
-
-	.MuiOutlinedInput-adornedEnd {
+	.MuiInputBase-adornedEnd {
 		padding-right: 0;
 	}
 
@@ -49,7 +45,7 @@ export const StartAdornment = styled(InputAdornmentComponent).attrs({
 
 export const EndAdornment = styled(InputAdornmentComponent).attrs({
 	position: 'end',
-})`
+})<{ $isVisible?: boolean }>`
 	${({ $isVisible }) => !$isVisible && css`
 		visibility: hidden;
 	`}

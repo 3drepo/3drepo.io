@@ -17,7 +17,7 @@
 
 import { PureComponent } from 'react';
 
-import { Grid, Tooltip } from '@material-ui/core';
+import { Grid, Tooltip } from '@mui/material';
 
 import { formatShortDate } from '../../../../../../services/formatting/formatDate';
 import { ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';

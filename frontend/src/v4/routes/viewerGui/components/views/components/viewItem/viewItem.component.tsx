@@ -14,13 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent, SyntheticEvent } from 'react';
+import { PureComponent, SyntheticEvent, MouseEvent } from 'react';
 import { Field, Formik } from 'formik';
 import { debounce } from 'lodash';
 import { useState } from 'react';
 import * as Yup from 'yup';
-import { Menu, MenuItem, Tooltip } from '@material-ui/core';
-import MoreVert from '@material-ui/icons/MoreVert';
+import { Menu, MenuItem, Tooltip } from '@mui/material';
+import MoreVert from '@mui/icons-material/MoreVert';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { getViewNameFieldErrorMsg } from '../../../../../../helpers/views';
@@ -130,7 +130,7 @@ export class ViewItem extends PureComponent<IProps, any> {
 
 	public renderViewpointName = renderWhenTrue(() => (
 		<Tooltip title={this.props.viewpoint.name} placement="bottom">
-			<Name active={Number(this.props.active)}>
+			<Name active={Boolean(this.props.active)}>
 				{this.props.viewpoint.name}{this.renderViewpointDefault(this.props.defaultView)}
 			</Name>
 		</Tooltip>

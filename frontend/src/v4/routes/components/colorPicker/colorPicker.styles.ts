@@ -15,20 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { createElement } from 'react';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import IconButton from '@material-ui/core/IconButton';
-import Input from '@material-ui/core/Input';
-import InputAdornment from '@material-ui/core/InputAdornment';
-import Popover from '@material-ui/core/Popover';
-import Slider from '@material-ui/core/Slider';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
+import Input from '@mui/material/Input';
+import InputAdornment from '@mui/material/InputAdornment';
+import Popover from '@mui/material/Popover';
+import Slider from '@mui/material/Slider';
 import styled from 'styled-components';
 
 import { COLOR, FONT_WEIGHT } from '../../../styles';
 import { CheckboxField } from '../customTable/customTable.component';
 
-export const ColorSelect = styled(Grid)`
-	cursor: ${(props: any) => props.disabled ? 'default' : 'pointer'};
+export const ColorSelect = styled(Grid)<{ disabled: boolean }>`
+	cursor: ${({ disabled }) => disabled ? 'default' : 'pointer'};
 	border-bottom: 1px solid rgba(0, 0, 0, .12);
 
 	&& {
@@ -36,12 +36,12 @@ export const ColorSelect = styled(Grid)`
 	}
 ` as any;
 
-export const Dot = styled(Grid)`
+export const Dot = styled(Grid)<{ color: string }>`
 	width: 16px;
 	height: 16px;
 	border-radius: 100%;
-	background-color: ${({color}) => color || 'transparent'};
-	border: 2px dotted ${({color}) => color ? 'transparent' : 'rgba(0, 0, 0, .38)'};
+	background-color: ${({ color }) => color || 'transparent'};
+	border: 2px dotted ${({ color }) => color ? 'transparent' : 'rgba(0, 0, 0, .38)'};
 `;
 
 export const Panel = styled(Popover).attrs({
@@ -81,14 +81,14 @@ export const PredefinedColorsContainer = styled(Grid)`
 	padding-bottom: 14px;
 `;
 
-export const PredefinedColor = styled(Grid)`
+export const PredefinedColor = styled(Grid)<{ color: string }>`
 	border-radius: 100%;
 	width: 20px;
 	height: 20px;
 	cursor: pointer;
 	outline: none;
 	transition: box-shadow 200ms ease-in-out;
-	background-color: ${(props) => props.color};
+	background-color: ${({ color }) => color};
 	margin-right: 0.9rem !important;
 
 	&:hover {
