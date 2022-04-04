@@ -220,16 +220,6 @@ function sendImportError(data) {
 	}
 }
 
-function sendFileMissingError(data) {
-	if(config.contact) {
-		const template = require("./templates/fileMissingError");
-		data.domain = config.host;
-		return sendEmail(template, config.contact.email, data);
-	} else {
-		return Promise.reject({ message: "config.mail.sender is not set"});
-	}
-}
-
 module.exports = {
 	sendVerifyUserEmail,
 	sendWelcomeUserEmail,
@@ -244,6 +234,5 @@ module.exports = {
 	sendImportError,
 	sendNewUser,
 	sendQueueFailedEmail,
-	sendFileMissingError,
 	sendTeamspaceInvitation
 };
