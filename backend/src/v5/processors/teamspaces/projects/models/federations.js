@@ -19,7 +19,6 @@ const { addModel, deleteModel, getModelList } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getFederationById, getFederations, updateModelSettings } = require('../../../../models/modelSettings');
 const Groups = require('./commons/groups');
-const { UUIDToString } = require('../../../../utils/helper/uuids');
 const Views = require('./commons/views');
 const { getIssuesCount } = require('../../../../models/issues');
 const { getLatestRevision } = require('../../../../models/revisions');
@@ -98,14 +97,7 @@ Federations.getFederationStats = async (teamspace, federation) => {
 
 Federations.updateSettings = updateModelSettings;
 
-Federations.getSettings = async (teamspace, federation) => {
-	const { defaultView, ...otherSettings } = await getFederationById(teamspace, federation, {
-		corID: 0, account: 0, permissions: 0, subModels: 0, federate: 0,
-	});
-	return {
-		...otherSettings,
-		...(defaultView ? { defaultView: UUIDToString(defaultView) } : {}),
-	};
-};
+Federations.getSettings = (teamspace, federation) => getFederationById(teamspace,
+	federation, { corID: 0, account: 0, permissions: 0, subModels: 0, federate: 0 });
 
 module.exports = Federations;
