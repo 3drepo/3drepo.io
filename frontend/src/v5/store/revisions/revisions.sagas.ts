@@ -20,8 +20,12 @@ import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
-import { RevisionsActions, RevisionsTypes } from './revisions.redux';
-import { FetchAction, SetRevisionVoidStatusAction, CreateRevisionAction } from './revisions.types';
+import { CreateRevisionAction,
+	FetchAction,
+	RevisionsActions,
+	RevisionsTypes,
+	SetRevisionVoidStatusAction,
+} from './revisions.redux';
 import { ContainersActions } from '../containers/containers.redux';
 
 export function* fetch({ teamspace, projectId, containerId }: FetchAction) {
