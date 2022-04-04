@@ -23,7 +23,6 @@ export const Container = styled.div`
 	color: ${({ theme }) => theme.palette.secondary.main};
 	width: 100%;
 	${({ theme }) => theme.typography.h5};
-	flexDirection: 'column';
 
 	&:hover,&:focus {
 		background-color: ${({ theme }) => theme.palette.tertiary.lightest};

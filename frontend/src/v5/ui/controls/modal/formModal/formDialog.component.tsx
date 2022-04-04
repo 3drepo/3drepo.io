@@ -74,7 +74,7 @@ export const FormModal = (props: IFormModal) => {
 					</CloseButton>
 				</Header>
 				<ScrollArea variant="base" autoHeightMax="70vh" autoHeight>
-					<FormDialogContent $zeroMargin={zeroMargin}>
+					<FormDialogContent zeromargin={zeroMargin}>
 						{children}
 					</FormDialogContent>
 				</ScrollArea>
