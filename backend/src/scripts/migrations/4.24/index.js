@@ -21,7 +21,6 @@ const removeCurrentIds = require('./removeCurrentIds');
 const updateMetaSchema = require('./updateMetadataSchema');
 const addIndex = require('./addIndices');
 const addSharedIdToMeshMap = require('./addSharedIdToMeshMap');
-const addAdminJob = require('./addAdminJob');
 
 const { v5Path } = require('../../../interop');
 
@@ -36,7 +35,6 @@ const scripts = [
 	{ script: addIndex, desc: 'Add new indices to scene graph' },
 	{ script: addSharedIdToMeshMap, desc: 'Add shared id to super mesh mappings' },
 	{ script: removeCurrentIds, desc: 'Remove current id array from revision nodes' },
-	{ script: addAdminJob, desc: 'Add Admin job and assign the teamspace owner' },
 ];
 
 module.exports = scripts;
