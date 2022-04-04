@@ -34,7 +34,7 @@ const moveFile = async (teamspace, collection, filename) => {
 
 	const existingRef = await findOne(teamspace, `${collection}.ref`, { $or: [
 		{ link: filename },
-		{ link: convertLegacyFileName },
+		{ link: convertLegacyFileName(filename) },
 	] });
 
 	if (existingRef && existingRef.type !== 'gridfs') {
