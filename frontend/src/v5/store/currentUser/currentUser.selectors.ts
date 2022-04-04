@@ -19,22 +19,10 @@ import { createSelector } from 'reselect';
 
 const selectCurrentUserDomain = (state) => (state.currentUser2);
 
-export const selectCurrentTeamspace = createSelector(
-	selectCurrentUserDomain, (state) => state.currentTeamspace,
-);
-
-export const selectIsAvatarPending = createSelector(
-	selectCurrentUserDomain, (state) => state.isAvatarPending,
-);
-
 export const selectCurrentUser = createSelector(
 	selectCurrentUserDomain, (state) => state.currentUser || {},
 );
 
 export const selectUsername: (state) => string = createSelector(
 	selectCurrentUser, (state) => state.username || '',
-);
-
-export const selectAvatar = createSelector(
-	selectCurrentUser, (state) => state.avatarUrl,
 );

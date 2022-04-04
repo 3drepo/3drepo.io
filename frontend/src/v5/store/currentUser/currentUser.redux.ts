@@ -26,16 +26,12 @@ export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createA
 }, { prefix: 'CURRENT_USER2/' }) as { Types: Constants<ICurrentUserActionCreators>; Creators: ICurrentUserActionCreators };
 
 export const INITIAL_STATE: ICurrentUserState = {
-	currentTeamspace: '',
 	currentUser: { username: '' },
-	isAvatarPending: true,
 };
 
 export const getProfileSuccess = (state = INITIAL_STATE, { userData }): ICurrentUserState => ({
 	...state,
-	currentTeamspace: userData.username,
 	currentUser: userData,
-	isAvatarPending: false,
 });
 
 export const currentUserReducer = createReducer(INITIAL_STATE, {
@@ -47,9 +43,7 @@ export const currentUserReducer = createReducer(INITIAL_STATE, {
 */
 
 interface ICurrentUserState {
-	currentTeamspace: string;
-	currentUser: ICurrentUser; // TODO make this interface
-	isAvatarPending: boolean;
+	currentUser: ICurrentUser;
 }
 
 export type GetProfileSuccessAction = Action<'GET_PROFILE_SUCCESS'> & { userData: any };
