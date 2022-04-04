@@ -19,6 +19,7 @@ import styled from 'styled-components';
 import { DragAndDrop } from '@controls/dragAndDrop';
 import { DashboardListHeader } from '@components/dashboard/dashboardList/dashboardListHeader';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
+import { ScrollArea } from '@controls/scrollArea';
 
 export const Modal = styled(FormModal)`
 	.MuiDialogContent-root {
@@ -33,22 +34,22 @@ export const Container = styled.div`
 	display: flex;
 	flex-direction: row;
 	height: 550px;
-	width:100%;
+	width: 100%;
 	overflow-x: hidden;
 `;
 
 export const DropZone = styled(DragAndDrop)`
 	max-height: 190px;
+	width: auto;
+	margin: 0 30px;
+	padding-bottom: 30px;
 `;
 
-export const Content = styled.span`
-	width: 100%;
-	overflow-y: auto;
-	overflow-x: hidden;
-	padding: 30px;
+export const Content = styled(ScrollArea)`
+	margin: 0 10px;
 `;
 
 export const UploadsListHeader = styled(DashboardListHeader)`
-	padding: 0 15px 13px 20px;
+	padding: 30px 45px 13px 87px;
 	margin-top: 0;
 `;

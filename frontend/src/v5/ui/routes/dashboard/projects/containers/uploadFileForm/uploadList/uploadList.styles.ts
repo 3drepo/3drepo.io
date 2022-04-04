@@ -18,6 +18,6 @@
 import styled from 'styled-components';
 
 export const Container = styled.ul`
-	padding: 0;
+	padding: 0 30px;
 	margin: 0 0 20px;
 `;
