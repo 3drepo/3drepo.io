@@ -29,6 +29,8 @@ const ModelSettingsOutputMiddlewares = require(`${src}/middleware/dataConverter/
 const respondFn = Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const testFormatModelSettings = () => {
+	const withoutDefaultView = { ...generateRandomModelProperties() };
+	delete withoutDefaultView.defaultView;
 	const withTimestamp = { ...generateRandomModelProperties(), timestamp: new Date() };
 	const withErrorReason = { ...generateRandomModelProperties(),
 		errorReason: {
@@ -45,6 +47,7 @@ const testFormatModelSettings = () => {
 	};
 	describe.each([
 		[generateRandomModelProperties(), 'no timestamp, no errorReason'],
+		[withoutDefaultView, 'no defaultView'],
 		[withTimestamp, 'timestamp'],
 		[withErrorReason, 'errorReason'],
 		[withErrorReasonNoTimestamp, 'errorReason without timestamp'],
