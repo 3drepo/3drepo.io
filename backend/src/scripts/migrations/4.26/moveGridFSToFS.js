@@ -24,20 +24,30 @@ const FsService = require(`${v5Path}/handler/fs`);
 
 const filesExt = '.files';
 
+const convertLegacyFileName = (filename) => {
+	const res = filename.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/[^/]*$/g);
+	return res?.length ? res[0] : filename;
+};
+
 const moveFile = async (teamspace, collection, filename) => {
 	const file = await getFileFromGridFS(teamspace, collection, filename);
-	const [newRef, existingRef] = await Promise.all([
-		FsService.storeFile(file),
-		findOne(teamspace, `${collection}.ref`, { link: filename }),
-	]);
 
-	if (existingRef) {
-		newRef._id = existingRef._id;
+	const existingRef = await findOne(teamspace, `${collection}.ref`, { $or: [
+		{ link: filename },
+		{ link: convertLegacyFileName },
+	] });
+
+	if (existingRef && existingRef.type !== 'gridfs') {
+		// Already have an entry for this file, just update the name in gridfs so it will get removed
+		await updateOne(teamspace, `${collection}${filesExt}`, { filename }, { $set: { filename: existingRef._id } });
+	} else {
+		const newRef = await FsService.storeFile(file);
+		newRef._id = existingRef?._id || newRef._id;
+		await Promise.all([
+			updateOne(teamspace, `${collection}.ref`, { _id: newRef._id }, { $set: newRef }, true),
+			updateOne(teamspace, `${collection}${filesExt}`, { filename }, { $set: { filename: newRef._id } }),
+		]);
 	}
-	await Promise.all([
-		updateOne(teamspace, `${collection}.ref`, { _id: newRef._id }, { $set: newRef }, true),
-		updateOne(teamspace, `${collection}${filesExt}`, { filename }, { $set: { filename: newRef._id } }),
-	]);
 };
 
 const processCollection = async (teamspace, collection) => {
