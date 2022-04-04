@@ -71,7 +71,7 @@ export const Subtitle = styled(Typography).attrs({
 	color: ${({ theme }) => theme.palette.secondary.lightest};
 `;
 
-export const FormDialogContent = styled(DialogContent)<{ zeroMargin?: boolean }>`
+export const FormDialogContent = styled(DialogContent)<{ zeromargin?: boolean }>`
 	margin: ${({ zeromargin }) => (zeromargin ? '0' : '20px 34px 43px')};
 	display: block;
 	flex-flow: row wrap;
