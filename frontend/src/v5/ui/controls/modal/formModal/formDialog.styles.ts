@@ -75,7 +75,6 @@ export const FormDialogContent = styled(DialogContent)<{ zeromargin?: boolean }>
 	margin: ${({ zeromargin }) => (zeromargin ? '0' : '20px 34px 43px')};
 	display: block;
 	flex-flow: row wrap;
-	margin: 20px 34px 43px;
 `;
 
 export const FormDialogActions = styled(DialogActions)`
