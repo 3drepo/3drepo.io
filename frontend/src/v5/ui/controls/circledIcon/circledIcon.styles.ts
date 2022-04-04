@@ -29,7 +29,7 @@ const COLOUR_MAP = {
 	error: ({ theme }) => theme.palette.error.main,
 };
 
-const getIconSize = (size) => {
+const getIconSize = (size: string) => {
 	const iconSize = SIZE_MAP[size];
 	if (iconSize) {
 		return css`
@@ -42,7 +42,7 @@ const getIconSize = (size) => {
 	return null;
 };
 
-const getIconColour = (variant) => {
+const getIconColour = (variant: string) => {
 	const iconColour = COLOUR_MAP[variant];
 	if (iconColour) {
 		return css`
@@ -54,9 +54,9 @@ const getIconColour = (variant) => {
 	return null;
 };
 
-export const Container = styled.div`
+export const Container = styled.div<{ size: string; variant: string; }>`
 	${({ size }) => getIconSize(size)};
-	${({ $variant }) => getIconColour($variant)}
+	${({ variant }) => getIconColour(variant)}
 	display: flex;
 	align-items: center;
 	justify-content: center;

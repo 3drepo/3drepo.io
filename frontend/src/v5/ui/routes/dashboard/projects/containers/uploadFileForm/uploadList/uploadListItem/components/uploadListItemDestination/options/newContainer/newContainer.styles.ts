@@ -17,9 +17,9 @@
 
 import styled from 'styled-components';
 
-export const Container = styled.div<{ error: string }>`
+export const Container = styled.div`
 	height: 55px;
-	color: ${({ theme, error }) => (error ? theme.palette.error.main : theme.palette.primary.dark)};
+	color: ${({ theme }) => theme.palette.primary.dark};
 	display: inline-flex;
 	width: 100%;
 	${({ theme }) => theme.typography.h5};

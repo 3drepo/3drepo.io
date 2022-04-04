@@ -19,7 +19,7 @@ import Scrollbars from 'react-custom-scrollbars';
 import styled from 'styled-components';
 
 export const ScrollbarWrapper = styled(Scrollbars).attrs(
-	({ variant, hideHorizontal, theme }: { variant: string, hideHorizontal: boolean, theme: any }) => {
+	({ variant, hidehorizontal, theme }: { variant: string, hidehorizontal: boolean, theme: any }) => {
 		const COLOUR_MAP = {
 			base: theme.palette.base.lightest,
 			secondary: theme.palette.secondary.light,
@@ -50,7 +50,7 @@ export const ScrollbarWrapper = styled(Scrollbars).attrs(
 						bottom: '6px',
 						borderRadius: '3px',
 						height: '6px',
-						display: hideHorizontal ? 'none' : 'block',
+						display: hidehorizontal ? 'none' : 'block',
 					}}
 				/>
 			),

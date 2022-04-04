@@ -37,7 +37,7 @@ export const Sidebar = ({
 }: ISidebar): JSX.Element => (
 	<Container className={className} open={open} hidden={hidden}>
 		{!noButton && (
-			<Button onClick={onClick} variant="main" hidden={noButton}>
+			<Button onClick={onClick} variant="main">
 				<ExpandIcon />
 			</Button>
 		)}

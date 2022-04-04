@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { cloneElement } from 'react';
 import { Container } from './uploadListHeader.styles';
 
 type IUploadListHeader = {
@@ -23,7 +24,7 @@ type IUploadListHeader = {
 
 export const UploadListHeader = ({ children }: IUploadListHeader): JSX.Element => (
 	<Container>
-		{children.map((child) => React.cloneElement(child, {
+		{children.map((child) => cloneElement(child, {
 			key: child.props.name,
 			...child.props,
 		}))}

@@ -23,7 +23,7 @@ interface ICircledIcon {
 }
 
 export const CircledIcon: React.FC<ICircledIcon> = ({ size = 'large', variant = 'main', children, ...props }) => (
-	<Container size={size} $variant={variant} {...props}>
+	<Container size={size} variant={variant} {...props}>
 		{children}
 	</Container>
 );

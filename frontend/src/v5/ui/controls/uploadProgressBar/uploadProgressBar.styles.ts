@@ -46,11 +46,11 @@ export const ProgressBarLabelLight = styled(ProgressBarPercentage)`
 	color: ${({ theme }) => theme.palette.primary.contrast};
 `;
 
-export const ProgressBarLabelDark = styled(ProgressBarPercentage)`
+export const ProgressBarLabelDark = styled(ProgressBarPercentage)<{ progress: number; }>`
 	${({ progress }) => `clip-path: inset(0 0 0 ${progress}%)`};
 `;
 
-export const LabelledProgressBar = styled.div`
+export const LabelledProgressBar = styled.div<{ uploadstatus: string; }>`
 	position: relative;
 	height: 16px;
 
