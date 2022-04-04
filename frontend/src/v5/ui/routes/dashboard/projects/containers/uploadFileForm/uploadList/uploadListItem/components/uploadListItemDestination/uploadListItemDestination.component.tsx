@@ -24,6 +24,7 @@ import { Autocomplete, createFilterOptions } from '@mui/material';
 import { TextInput } from './uploadListItemDestination.styles';
 import { NewContainer } from './options/newContainer';
 import { ExistingContainer } from './options/existingContainer';
+import { OptionsBox } from './options';
 
 interface IUploadListItemDestination {
 	control: Control<UploadItemFields>;
@@ -136,6 +137,7 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 					/>
 				)
 			)}
+			ListboxComponent={(listboxProps) => <OptionsBox {...listboxProps} />}
 			disabled={disabled}
 		/>
 	);

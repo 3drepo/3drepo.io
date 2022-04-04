@@ -383,19 +383,13 @@ export const theme = createTheme({
 					padding: '2px',
 				},
 				option: {
-					height: '100%',
+					height: 'auto',
 					alignItems: 'baseline',
 					margin: 'auto 0',
 					display: 'flex',
 					padding: '12px',
 					wordWrap: 'break-word',
 					boxSizing: 'border-box',
-
-					'&.MuiAutocomplete-option': {
-						'&.Mui-focused': {
-							backgroundColor: COLOR.TERTIARY_LIGHTEST,
-						},
-					},
 				},
 			},
 		},

@@ -15,29 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { Container } from './optionsBox.styles';
 
-export const Container = styled.div<{ error: string }>`
-	height: 55px;
-	color: ${({ theme, error }) => (error ? theme.palette.error.main : theme.palette.primary.dark)};
-	display: inline-flex;
-	width: 100%;
-	${({ theme }) => theme.typography.h5};
-	flex-flow: row;
-	
-	svg {
-		height: 18px;
-		width: 18px;
-		box-sizing: border-box;
-		margin: 6px;
-		flex-shrink: 0;
-	}
-
-	&:hover,&:focus {
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	}
-`;
-
-export const Message = styled.div`
-	width: calc(100% - 30px);
-`;
+export const OptionsBox = (props): JSX.Element => (
+	<Container autoHeightMax="350px" autoHeight {...props} />
+);

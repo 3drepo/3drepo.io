@@ -24,6 +24,10 @@ export const Container = styled.div`
 	width: 100%;
 	${({ theme }) => theme.typography.h5};
 	flexDirection: 'column';
+
+	&:hover,&:focus {
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	}
 `;
 
 export const ContainerName = styled.div`
