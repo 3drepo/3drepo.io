@@ -24,8 +24,8 @@
 
 const { createTestAccount } = require("nodemailer");
 const nodemailer = require("nodemailer");
-const config = require("../utils/config");
-const { logger } = require("../utils/logger");
+const config = require("../../utils/config");
+const { logger } = require("../../utils/logger");
 let transporter;
 
 const Mailer = {};
