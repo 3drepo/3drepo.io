@@ -47,6 +47,7 @@ export class APIKeyForm extends PureComponent<IProps> {
 								readOnly: true
 							}}
 							margin="normal"
+							type="password"
 						/>
 					</FieldsRow>
 					<StyledButtonContainer>
