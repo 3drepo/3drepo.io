@@ -22,7 +22,8 @@ const { isEmpty, removeFields } = require('../utils/helper/objects');
 const Users = {};
 const config = require('../utils/config');
 const { generateHashString } = require('../utils/helper/strings');
-const { sendResetPasswordEmail } = require('../services/mailer');
+const { sendEmail } = require('../services/mailer/mailer');
+const { FORGOT_PASSWORD } = require('../services/mailer/templateNames');
 
 Users.login = async (username, password) => {
 	await canLogIn(username);
@@ -84,7 +85,7 @@ Users.generateResetPasswordToken = async (username) => {
 	await updateResetPasswordToken(username, resetPasswordToken);
 
 	const { customData: { email, firstName } } = await getUserByUsername(username, { user: 1, 'customData.email': 1, 'customData.firstName': 1 });
-	sendResetPasswordEmail(email, { token: resetPasswordToken.token, email, username, firstName });
+	sendEmail(FORGOT_PASSWORD, email, { token: resetPasswordToken.token, email, username, firstName });
 };
 
 Users.updatePassword = updatePassword;

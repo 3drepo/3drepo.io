@@ -15,17 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// const { v4Path } = require('../../interop');
-// // eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
-// const Mailer = require(`${v4Path}/mailer/mailer`);
-
-// module.exports = Mailer;
-
-
 const { createTestAccount } = require("nodemailer");
 const nodemailer = require("nodemailer");
 const config = require("../../utils/config");
-const getBaseURL = config.getBaseURL;
 const { logger } = require("../../utils/logger");
 let transporter;
 
@@ -74,36 +66,6 @@ Mailer.sendEmail = async (templateName, to, data, attachments) => {
             }
         });
     });
-}
-
-Mailer.getURL = (urlName, params) => {
-    if (!C.MAIL_URLS || !C.MAIL_URLS[urlName]) {
-        return Promise.reject({ message: `config.mails.urls[${urlName}] is not defined` });
-    }
-
-    return getBaseURL() + C.MAIL_URLS[urlName](params);
-}
-
-function sendVerifyUserEmail(to, data) {
-
-    data.url = getURL("verify", { token: data.token, username: data.username, pay: data.pay });
-
-    if (!data.url) {
-        return rejectNoUrl("verify");
-    }
-
-    const template = require("./templates/verifyUser");
-    return sendEmail(template, to, data);
-}
-
-function sendResetPasswordEmail(to, data) {
-    data.url = getURL("forgotPassword", { token: data.token, username: data.username });
-
-    if (!data.url) {
-        return rejectNoUrl("forgotPassword");
-    }
-    const template = require("./templates/forgotPassword");
-    return sendEmail(template, to, data);
 }
 
 module.exports = Mailer;
