@@ -58,6 +58,16 @@ export const PasswordField = styled(AuthField).attrs({
 	type: 'password',
 })``;
 
+export const ErrorMessage = styled(Typography)`
+	color: ${({ theme }) => theme.palette.error.main};
+	display: flex;
+	align-items: center;
+	margin-top: 15px;
+	svg {
+		margin-right: 5px;
+	}
+`;
+
 export const CenteredLink = styled(Link)`
 	display: flex;
 	margin: 15px auto 12px;

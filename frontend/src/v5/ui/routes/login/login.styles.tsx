@@ -34,13 +34,3 @@ export const SignUpPrompt = styled(Typography)`
 export const ForgotPasswordPrompt = styled(Typography)`
 	margin-left: auto;
 `;
-
-export const ErrorMessage = styled(Typography)`
-	color: ${({ theme }) => theme.palette.error.main};
-	display: flex;
-	align-items: center;
-	margin-top: 15px;
-	svg {
-		margin-right: 5px;
-	}
-`;

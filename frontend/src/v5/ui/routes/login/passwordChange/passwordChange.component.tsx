@@ -15,20 +15,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import * as queryString from 'query-string';
+import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
+import * as API from '@/v5/services/api';
 import { AuthPage } from '@components/authPage';
 import { SubmitButton } from '@controls/submitButton';
 import { useForm } from 'react-hook-form';
-import { FormattedMessage } from 'react-intl';
-import { AuthHeading, PasswordField } from '../components/components.styles';
+import ErrorIcon from '@assets/icons/warning_small.svg';
+import { AuthHeading, ErrorMessage, PasswordField } from '../components/components.styles';
 import { ReturnLink } from '../components/returnLink.component';
+import { LOGIN_PATH } from '../../routes.constants';
 
 export const ChangePassword = () => {
-	const { control, handleSubmit, formState: { isValid } } = useForm({
+	const [errorMessage, setErrorMessage] = useState('');
 		mode: 'onSubmit',
 		defaultValues: { newPassword: '', newPasswordConfirm: '' },
 	});
-	const onSubmit = () => { };
+	const history = useHistory();
+	const onSubmit = async ({ newPassword }) => {
+		const { token, username } = queryString.parse(window.location.search);
+		try {
+			await API.Auth.changePassword(username, newPassword, token);
+			history.push(LOGIN_PATH);
+		} catch ({ response: { data: { message } } }) {
+			setErrorMessage(message);
+		}
+	};
 
 	return (
 		<AuthPage>
@@ -55,6 +70,7 @@ export const ChangePassword = () => {
 				<SubmitButton disabled={!isValid}>
 					<FormattedMessage id="auth.changePassword.buttonText" defaultMessage="Save changes" />
 				</SubmitButton>
+				{errorMessage && <ErrorMessage><ErrorIcon />{errorMessage}</ErrorMessage>}
 				<ReturnLink />
 			</form>
 		</AuthPage>

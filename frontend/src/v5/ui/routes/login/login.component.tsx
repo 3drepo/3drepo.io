@@ -27,8 +27,8 @@ import { AuthPage } from '@components/authPage';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
 import ErrorIcon from '@assets/icons/warning_small.svg';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
-import { ErrorMessage, ForgotPasswordPrompt, OtherOptions, SignUpPrompt } from './login.styles';
-import { AuthHeading, PasswordField, UsernameField } from './components/components.styles';
+import { ForgotPasswordPrompt, OtherOptions, SignUpPrompt } from './login.styles';
+import { AuthHeading, ErrorMessage, PasswordField, UsernameField } from './components/components.styles';
 import { PASSWORD_FORGOT_PATH, SIGN_UP_PATH } from '../routes.constants';
 
 const APP_VERSION = ClientConfig.VERSION;

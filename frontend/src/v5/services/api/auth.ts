@@ -28,3 +28,5 @@ export const login = (user, password): Promise<AxiosResponse<void>> => api.post(
 export const logout = (): Promise<AxiosResponse<void>> => api.post('logout');
 
 export const resetPassword = (user) => api.post('user/password', { user });
+
+export const changePassword = (user, newPassword, token) => api.put('user/password', { user, newPassword, token });
