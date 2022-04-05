@@ -15,32 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { Typography } from '@controls/typography';
+import { FormattedMessage } from 'react-intl';
+import { LOGIN_PATH } from '../../routes.constants';
+import { CenteredLink } from './components.styles';
 
-export const OtherOptions = styled.div`
-	display: flex;
-	padding: 14px 0 14px;
-	color: ${({ theme }) => theme.palette.base.main};
-	a {
-		color: ${({ theme }) => theme.palette.primary.main};
-	}
-`;
-
-export const SignUpPrompt = styled(Typography)`
-	margin-right: auto;
-`;
-
-export const ForgotPasswordPrompt = styled(Typography)`
-	margin-left: auto;
-`;
-
-export const ErrorMessage = styled(Typography)`
-	color: ${({ theme }) => theme.palette.error.main};
-	display: flex;
-	align-items: center;
-	margin-top: 15px;
-	svg {
-		margin-right: 5px;
-	}
-`;
+export const ReturnLink = () => (
+	<CenteredLink to={LOGIN_PATH}>
+		<FormattedMessage id="auth.forgotPassword.goBack" defaultMessage="Back to login" />
+	</CenteredLink>
+);

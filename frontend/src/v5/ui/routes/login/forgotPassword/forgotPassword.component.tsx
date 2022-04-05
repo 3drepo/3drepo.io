@@ -23,8 +23,9 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
 import * as API from '@/v5/services/api';
 import { FormattedMessage } from 'react-intl';
-import { AuthHeading } from '../login.styles';
-import { Input, RequestSentMessage, ReturnLink } from './forgotPassword.styles';
+import { RequestSentMessage } from './forgotPassword.styles';
+import { ReturnLink } from '../components/returnLink.component';
+import { AuthHeading, UsernameField } from '../components/components.styles';
 
 export const ForgotPassword = (): JSX.Element => {
 	const { control, handleSubmit, formState: { isValid, isSubmitted } } = useForm({
@@ -58,16 +59,14 @@ export const ForgotPassword = (): JSX.Element => {
 						</RequestSentMessage>
 					) : (
 						<>
-							<Input control={control} />
+							<UsernameField control={control} />
 							<SubmitButton disabled={!isValid} startIcon={<EmailIcon />}>
 								<FormattedMessage id="auth.forgotPassword.buttonText" defaultMessage="Send request" />
 							</SubmitButton>
 						</>
 					)
 				}
-				<ReturnLink to="/v5/login">
-					<FormattedMessage id="auth.forgotPassword.goBack" defaultMessage="Back to login" />
-				</ReturnLink>
+				<ReturnLink />
 			</form>
 		</AuthPage>
 	);

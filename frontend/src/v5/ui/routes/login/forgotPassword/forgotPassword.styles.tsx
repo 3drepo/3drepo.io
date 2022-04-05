@@ -16,21 +16,8 @@
  */
 
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
-import { UsernameField } from '../login.styles';
-
-export const Input = styled(UsernameField)`
-	margin-bottom: 7px;
-`;
 
 export const RequestSentMessage = styled.div`
 	margin: 22px 0;
 	color: ${({ theme }) => theme.palette.base.main};
-`;
-
-export const ReturnLink = styled(Link)`
-	display: flex;
-	margin: 22px auto 12px;
-	justify-content: center;
-	color: ${({ theme }) => theme.palette.primary.main};
 `;

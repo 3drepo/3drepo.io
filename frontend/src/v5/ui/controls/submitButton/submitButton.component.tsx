@@ -29,7 +29,7 @@ export const SubmitButton = ({
 		fullWidth
 		variant={variant}
 		color={color}
-		style={{ marginLeft: 0, marginRight: 0 }}
+		style={{ margin: '15px 0' }}
 		{...props}
 	>
 		{children}
