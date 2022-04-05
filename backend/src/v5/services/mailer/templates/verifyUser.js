@@ -1,8 +1,24 @@
+/**
+ *  Copyright (C) 2022 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 const baseTemplate = require('./baseTemplate');
 const config = require('../../../utils/config');
 
-const getEmailContent = data => `
+const getEmailContent = (data) => `
 <table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;">
    <tbody class="mcnTextBlockOuter">
       <tr>
@@ -64,7 +80,7 @@ const getEmailContent = data => `
                <tbody>
                   <tr>
                      <td class="mcnImageContent" valign="top" style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 0; text-align:center;">
-                        <a href="${config.getBaseUrl()}/register-verify?username=${data.username}&token=${data.token}${(data.pay ? "&pay=true" : "")}" title="" class="" target="_blank">
+                        <a href="${config.getBaseUrl()}/register-verify?username=${data.username}&token=${data.token}${(data.pay ? '&pay=true' : '')}" title="" class="" target="_blank">
                         <img align="center" alt="" src="https://3drepo.com/wp-content/uploads/email/Verify%20email%20address.png" width="564" style="max-width:1200px; padding-bottom: 0; display: inline !important; vertical-align: bottom;" class="mcnImage">
                         </a>
                      </td>
@@ -130,9 +146,9 @@ const getEmailContent = data => `
 </table>
 `;
 
-const html = data => baseTemplate.html({ ...data, emailContent: getEmailContent(data) });
+const html = (data) => baseTemplate.html({ ...data, emailContent: getEmailContent(data) });
 
 module.exports = {
 	html,
-	subject: "Welcome to 3D Repo! Verify Your Email‏"
+	subject: 'Welcome to 3D Repo! Verify Your Email‏',
 };

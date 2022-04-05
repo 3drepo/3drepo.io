@@ -15,57 +15,59 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createTestAccount } = require("nodemailer");
-const nodemailer = require("nodemailer");
-const config = require("../../utils/config");
-const { logger } = require("../../utils/logger");
+const config = require('../../utils/config');
+const { createTestAccount } = require('nodemailer');
+const { logger } = require('../../utils/logger');
+const nodemailer = require('nodemailer');
+
 let transporter;
 
 const Mailer = {};
 
 Mailer.sendEmail = async (templateName, to, data, attachments) => {
-    if (!config?.mail?.sender) {
-        throw { message: "config.mail.sender is not set" };
-    }
+	if (!config?.mail?.sender) {
+		throw { message: 'config.mail.sender is not set' };
+	}
 
-    if (!config?.mail?.smtpConfig) {
-        if (config?.mail?.generateCredentials) {
-            const { user, pass } = await createTestAccount();
-            config.mail.smtpConfig = {
-                host: "smtp.ethereal.email",
-                port: 587,
-                auth: { user, pass }
-            };
-        } else {
-            throw { message: "config.mail.smtpConfig is not set" };
-        }
-    }
+	if (!config?.mail?.smtpConfig) {
+		if (config?.mail?.generateCredentials) {
+			const { user, pass } = await createTestAccount();
+			config.mail.smtpConfig = {
+				host: 'smtp.ethereal.email',
+				port: 587,
+				auth: { user, pass },
+			};
+		} else {
+			throw { message: 'config.mail.smtpConfig is not set' };
+		}
+	}
 
-    const template = require(`./templates/${templateName}`);
+	const templatePath = `./templates/${templateName}`;
+	const template = require(templatePath);
 
-    const mailOptions = {
-        from: config.mail.sender,
-        to,
-        subject: typeof template.subject === "function" ? template.subject(data) : template.subject,
-        html: template.html(data)
-    };
+	const mailOptions = {
+		from: config.mail.sender,
+		to,
+		subject: typeof template.subject === 'function' ? template.subject(data) : template.subject,
+		html: template.html(data),
+	};
 
-    if (attachments) {
-        mailOptions.attachments = attachments;
-    }
+	if (attachments) {
+		mailOptions.attachments = attachments;
+	}
 
-    transporter = transporter || nodemailer.createTransport(config.mail.smtpConfig);
+	transporter = transporter || nodemailer.createTransport(config.mail.smtpConfig);
 
-    return new Promise((resolve, reject) => {
-        transporter.sendMail(mailOptions, (err, info) => {
-            if (err) {
-                logger.logDebug(`Email error - ${err.message}`);
-                reject(err);
-            } else {
-                resolve(info);
-            }
-        });
-    });
-}
+	return new Promise((resolve, reject) => {
+		transporter.sendMail(mailOptions, (err, info) => {
+			if (err) {
+				logger.logDebug(`Email error - ${err.message}`);
+				reject(err);
+			} else {
+				resolve(info);
+			}
+		});
+	});
+};
 
 module.exports = Mailer;

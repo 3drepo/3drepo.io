@@ -1,5 +1,21 @@
+/**
+ *  Copyright (C) 2022 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
- const html = data => ` 
+const html = (data) => ` 
  <!doctype html>
  <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
    <head>
@@ -315,75 +331,75 @@
          .templateContainer{
          width:600px !important;
          }
-         }	@media only screen and (max-width: 480px){
+         } @media only screen and (max-width: 480px){
          body,table,td,p,a,li,blockquote{
          -webkit-text-size-adjust:none !important;
          }
-         }	@media only screen and (max-width: 480px){
+         } @media only screen and (max-width: 480px){
          body{
          width:100% !important;
          min-width:100% !important;
          }
-         }	@media only screen and (max-width: 480px){
+         } @media only screen and (max-width: 480px){
          .mcnRetinaImage{
          max-width:100% !important;
          }
-         }	@media only screen and (max-width: 480px){
+         } @media only screen and (max-width: 480px){
          .mcnImage{
          width:100% !important;
          }
-         }	@media only screen and (max-width: 480px){
+         } @media only screen and (max-width: 480px){
          .mcnCartContainer,.mcnCaptionTopContent,.mcnRecContentContainer,.mcnCaptionBottomContent,.mcnTextContentContainer,.mcnBoxedTextContentContainer,.mcnImageGroupContentContainer,.mcnCaptionLeftTextContentContainer,.mcnCaptionRightTextContentContainer,.mcnCaptionLeftImageContentContainer,.mcnCaptionRightImageContentContainer,.mcnImageCardLeftTextContentContainer,.mcnImageCardRightTextContentContainer,.mcnImageCardLeftImageContentContainer,.mcnImageCardRightImageContentContainer{
          max-width:100% !important;
          width:100% !important;
          }
-         }	@media only screen and (max-width: 480px){
+         } @media only screen and (max-width: 480px){
          .mcnBoxedTextContentContainer{
          min-width:100% !important;
          }
-         }	@media only screen and (max-width: 480px){
+         } @media only screen and (max-width: 480px){
          .mcnImageGroupContent{
          padding:9px !important;
          }
-         }	@media only screen and (max-width: 480px){
+         } @media only screen and (max-width: 480px){
          .mcnCaptionLeftContentOuter .mcnTextContent,.mcnCaptionRightContentOuter .mcnTextContent{
          padding-top:9px !important;
          }
-         }	@media only screen and (max-width: 480px){
+         } @media only screen and (max-width: 480px){
          .mcnImageCardTopImageContent,.mcnCaptionBottomContent:last-child .mcnCaptionBottomImageContent,.mcnCaptionBlockInner .mcnCaptionTopContent:last-child .mcnTextContent{
          padding-top:18px !important;
          }
-         }	@media only screen and (max-width: 480px){
+         } @media only screen and (max-width: 480px){
          .mcnImageCardBottomImageContent{
          padding-bottom:9px !important;
          }
-         }	@media only screen and (max-width: 480px){
+         } @media only screen and (max-width: 480px){
          .mcnImageGroupBlockInner{
          padding-top:0 !important;
          padding-bottom:0 !important;
          }
-         }	@media only screen and (max-width: 480px){
+         } @media only screen and (max-width: 480px){
          .mcnImageGroupBlockOuter{
          padding-top:9px !important;
          padding-bottom:9px !important;
          }
-         }	@media only screen and (max-width: 480px){
+         } @media only screen and (max-width: 480px){
          .mcnTextContent,.mcnBoxedTextContentColumn{
          padding-right:18px !important;
          padding-left:18px !important;
          }
-         }	@media only screen and (max-width: 480px){
+         } @media only screen and (max-width: 480px){
          .mcnImageCardLeftImageContent,.mcnImageCardRightImageContent{
          padding-right:18px !important;
          padding-bottom:0 !important;
          padding-left:18px !important;
          }
-         }	@media only screen and (max-width: 480px){
+         } @media only screen and (max-width: 480px){
          .mcpreview-image-uploader{
          display:none !important;
          width:100% !important;
          }
-         }	@media only screen and (max-width: 480px){
+         } @media only screen and (max-width: 480px){
          /*
          @tab Mobile Styles
          @section Heading 1
@@ -393,7 +409,7 @@
          /*@editable*/font-size:30px !important;
          /*@editable*/line-height:125% !important;
          }
-         }	@media only screen and (max-width: 480px){
+         } @media only screen and (max-width: 480px){
          /*
          @tab Mobile Styles
          @section Heading 2
@@ -403,7 +419,7 @@
          /*@editable*/font-size:26px !important;
          /*@editable*/line-height:125% !important;
          }
-         }	@media only screen and (max-width: 480px){
+         } @media only screen and (max-width: 480px){
          /*
          @tab Mobile Styles
          @section Heading 3
@@ -413,7 +429,7 @@
          /*@editable*/font-size:20px !important;
          /*@editable*/line-height:150% !important;
          }
-         }	@media only screen and (max-width: 480px){
+         } @media only screen and (max-width: 480px){
          /*
          @tab Mobile Styles
          @section Heading 4
@@ -423,7 +439,7 @@
          /*@editable*/font-size:18px !important;
          /*@editable*/line-height:150% !important;
          }
-         }	@media only screen and (max-width: 480px){
+         } @media only screen and (max-width: 480px){
          /*
          @tab Mobile Styles
          @section Boxed Text
@@ -433,7 +449,7 @@
          /*@editable*/font-size:14px !important;
          /*@editable*/line-height:150% !important;
          }
-         }	@media only screen and (max-width: 480px){
+         } @media only screen and (max-width: 480px){
          /*
          @tab Mobile Styles
          @section Header Text
@@ -443,7 +459,7 @@
          /*@editable*/font-size:16px !important;
          /*@editable*/line-height:150% !important;
          }
-         }	@media only screen and (max-width: 480px){
+         } @media only screen and (max-width: 480px){
          /*
          @tab Mobile Styles
          @section Body Text
@@ -453,7 +469,7 @@
          /*@editable*/font-size:16px !important;
          /*@editable*/line-height:150% !important;
          }
-         }	@media only screen and (max-width: 480px){
+         } @media only screen and (max-width: 480px){
          /*
          @tab Mobile Styles
          @section Footer Text
@@ -554,11 +570,7 @@
                                                    </tr>
                                                 </tbody>
                                              </table>
-                                             
-                                             
                                              ${data.emailContent}
-
-
                                              <table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;">
                                                 <tbody class="mcnTextBlockOuter">
                                                    <tr>
@@ -925,8 +937,7 @@
 </html>
  
  `;
- 
- module.exports =  {
-     html: html
- };
- 
+
+module.exports = {
+	html,
+};
