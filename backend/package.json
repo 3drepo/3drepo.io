@@ -28,7 +28,7 @@
     "app-config": "1.0.0",
     "archiver": "3.0.0",
     "async": "2.6.1",
-    "axios": "0.21.1",
+    "axios": "0.26.1",
     "body-parser": "1.18.3",
     "combined-stream": "1.0.8",
     "compression": "1.7.3",
