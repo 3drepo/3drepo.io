@@ -39,7 +39,6 @@ import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/
 import { Display } from '@/v5/ui/themes/media';
 import { formatMessage } from '@/v5/services/intl';
 import { DashboardListButton, DashedButtonContainer } from '@components/dashboard/dashboardList/dashboardList.styles';
-import { DashedContainer } from '@components/shared/dashedContainer/dashedContainer.component';
 import { Container, CollapseSideElementGroup } from './containersList.styles';
 
 interface IContainersList {
@@ -150,13 +149,11 @@ export const ContainersList = ({
 							/>
 						))
 					) : (
-						<DashedContainer>
-							<DashboardListEmptyContainer>
-								{filterQuery && hasContainers ? (
-									<DashboardListEmptySearchResults searchPhrase={filterQuery} />
-								) : emptyMessage}
-							</DashboardListEmptyContainer>
-						</DashedContainer>
+						<DashboardListEmptyContainer>
+							{filterQuery && hasContainers ? (
+								<DashboardListEmptySearchResults searchPhrase={filterQuery} />
+							) : emptyMessage}
+						</DashboardListEmptyContainer>
 					)}
 				</DashboardList>
 				{showBottomButton && !isListPending && hasContainers && (

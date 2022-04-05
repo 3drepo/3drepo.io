@@ -39,7 +39,6 @@ import { Button } from '@controls/button';
 import { DashboardListButton, DashedButtonContainer } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { formatMessage } from '@/v5/services/intl';
 import { Display } from '@/v5/ui/themes/media';
-import { DashedContainer } from '@components/shared/dashedContainer/dashedContainer.component';
 import { CollapseSideElementGroup, Container } from './federationsList.styles';
 
 type IFederationsList = {
@@ -139,13 +138,11 @@ export const FederationsList = ({
 							/>
 						))
 					) : (
-						<DashedContainer>
-							<DashboardListEmptyContainer>
-								{filterQuery && hasFederations ? (
-									<DashboardListEmptySearchResults searchPhrase={filterQuery} />
-								) : emptyMessage}
-							</DashboardListEmptyContainer>
-						</DashedContainer>
+						<DashboardListEmptyContainer>
+							{filterQuery && hasFederations ? (
+								<DashboardListEmptySearchResults searchPhrase={filterQuery} />
+							) : emptyMessage}
+						</DashboardListEmptyContainer>
 					)}
 				</DashboardList>
 				{showBottomButton && !isListPending && hasFederations && (
