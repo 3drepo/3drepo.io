@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Overrides } from '@material-ui/core/styles/overrides';
-import { MuiPickersOverrides } from '@material-ui/pickers/typings/overrides';
+import * as Yup from 'yup';
 
-type overridesNameToClassKey = {
-	[P in keyof MuiPickersOverrides]: keyof MuiPickersOverrides[P];
-};
+const username = Yup.string().required();
+const password = Yup.string().required();
 
-declare module '@material-ui/core/styles/overrides' {
-	export interface ComponentNameToClassKey extends overridesNameToClassKey, Overrides {}
-}
+export const LoginSchema = Yup.object().shape({
+	password,
+	username,
+});

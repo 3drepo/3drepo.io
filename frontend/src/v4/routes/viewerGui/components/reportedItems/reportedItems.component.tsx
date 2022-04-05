@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent, ReactChildren, createRef } from 'react';
-import IconButton from '@material-ui/core/IconButton';
-import AddIcon from '@material-ui/icons/Add';
-import ArrowBack from '@material-ui/icons/ArrowBack';
+import IconButton from '@mui/material/IconButton';
+import AddIcon from '@mui/icons-material/Add';
+import ArrowBack from '@mui/icons-material/ArrowBack';
 
 import { CREATE_ISSUE, VIEW_ISSUE } from '../../../../constants/issue-permissions';
 import { hasPermissions } from '../../../../helpers/permissions';
@@ -90,7 +90,7 @@ export class ReportedItems extends PureComponent<IProps, IState> {
 		prevScroll: 0
 	};
 
-	public listViewRef = createRef<HTMLElement>();
+	public listViewRef = createRef<HTMLDivElement>();
 	public listContainerRef = createRef<any>();
 
 	public handleClickOutside = () => {
@@ -127,7 +127,7 @@ export class ReportedItems extends PureComponent<IProps, IState> {
 					{this.renderItemsList(this.props.items)}
 				</div>
 			</ViewerPanelContent>
-			<ViewerPanelFooter onClick={this.handleClickOutside} container alignItems="center" justify="space-between">
+			<ViewerPanelFooter onClick={this.handleClickOutside} container alignItems="center" justifyContent="space-between">
 				<Summary>{this.listFooterText}</Summary>
 				<ViewerPanelButton
 					aria-label="Add item"
@@ -222,10 +222,10 @@ export class ReportedItems extends PureComponent<IProps, IState> {
 
 		if (showDetails) {
 			return (
-				<IconButton onClick={this.props.onCloseDetails} >
+                <IconButton onClick={this.props.onCloseDetails} size="large">
 					<ArrowBack />
 				</IconButton>
-			);
+            );
 		}
 		return <Icon />;
 	}

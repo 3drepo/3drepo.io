@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import { Button, InputAdornment, List, MenuItem, Switch } from '@material-ui/core';
+import { Button, InputAdornment, List, MenuItem, Switch } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import * as Yup from 'yup';
@@ -207,7 +207,7 @@ const Buttons = (props) => {
 				disabled={isEqual(form.values, DEFAULT_SETTINGS)}
 				type="button"
 				onClick={() => form.setValues(DEFAULT_SETTINGS)}
-				>
+			>
 					Reset
 				</NegativeActionButton>
 			)} />
@@ -226,7 +226,7 @@ const Buttons = (props) => {
 						variant="contained"
 						type="submit"
 						disabled={!form.isValid || form.isValidating}
-						>
+					>
 						Save
 					</Button>
 			)} />

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,29 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import IconButton from '@material-ui/core/IconButton';
-import SnackbarContent from '@material-ui/core/SnackbarContent';
-import Close from '@material-ui/icons/Close';
-
-interface IProps {
-	message: string;
-	onClose: (event, reason?) => void;
-}
-
-export const DefaultSnackbar = (props: IProps) => {
-	return (
-		<SnackbarContent
-			message={props.message}
-			action={ [
-				<IconButton
-					key="close"
-					aria-label="Close"
-					color="inherit"
-					onClick={props.onClose}
-				>
-					<Close />
-				</IconButton>
-			] }
-		/>
-	);
-};
+export { Login } from './login.component';

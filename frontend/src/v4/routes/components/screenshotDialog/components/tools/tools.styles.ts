@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Button, Divider, IconButton as IconButtonComponent } from '@material-ui/core';
-import IconBadge from '@material-ui/core/Badge';
+import { Button, Divider, IconButton as IconButtonComponent } from '@mui/material';
+import IconBadge from '@mui/material/Badge';
 import styled from 'styled-components';
 import { COLOR } from '../../../../../styles';
 import * as ColorPickerStyles from '../../../../components/colorPicker/colorPicker.styles';
@@ -59,18 +59,24 @@ export const ToolsContainer = styled.div`
 	}
 ` as any;
 
-export const OptionsDivider = styled(Divider)`
+export const OptionsDivider = styled(Divider).attrs({
+	orientation: 'vertical',
+	flexItem: true,
+})`
 	&& {
 		margin: 0 12px;
 		height: 48px;
 		width: 1px;
 		opacity: 0.5;
+		align-self: auto;
 	}
 `;
 
 export const IconButton = styled(IconButtonComponent)`
-	background: ${COLOR.BLACK_60};
 	opacity: 1;
+	&:hover {
+		background-color: rgba(0, 0, 0, 0.04);
+	}
 	svg .stroke {
 		stroke: currentColor;
 	}
@@ -78,6 +84,9 @@ export const IconButton = styled(IconButtonComponent)`
 
 export const ShapeMenuButton = styled.div`
 	margin-left: -10px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 `;
 
 export const Badge = styled(IconBadge)`

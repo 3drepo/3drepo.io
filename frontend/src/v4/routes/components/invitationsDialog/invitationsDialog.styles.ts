@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ButtonBase from '@material-ui/core/Button';
+import ButtonBase from '@mui/material/Button';
 import styled from 'styled-components';
 import { COLOR } from '../../../styles';
 

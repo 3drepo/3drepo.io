@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import AddIcon from '@material-ui/icons/AddCircleOutline';
-import RemoveIcon from '@material-ui/icons/RemoveCircleOutline';
+import AddIcon from '@mui/icons-material/AddCircleOutline';
+import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
 
-import { InputLabel } from '@material-ui/core';
+import { InputLabel } from '@mui/material';
 import {
 	VALUE_FIELD_MAP,
 	VALUE_FIELD_TYPES

@@ -50,7 +50,9 @@ export const TextOverflow = ({ children, className, tooltipText }: ITextOverflow
 				style={{ pointerEvents: isTruncated ? 'all' : 'none' }}
 				placement="bottom"
 			>
-				<Container ref={setLabelRef} isTruncated={isTruncated} className={className}>{children}</Container>
+				<Container ref={setLabelRef} className={className}>
+					{children}
+				</Container>
 			</Tooltip>
 			<EventListener target="window" onResize={() => setIsTruncated(checkIfTruncated())} />
 		</>

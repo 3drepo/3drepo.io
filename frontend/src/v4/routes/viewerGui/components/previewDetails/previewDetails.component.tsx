@@ -16,8 +16,8 @@
  */
 import { PureComponent, ReactNode, createRef } from 'react';
 import { Field, Formik } from 'formik';
-import { Tooltip } from '@material-ui/core';
-import Grid from '@material-ui/core/Grid';
+import { Tooltip } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import * as Yup from 'yup';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { schema } from '../../../../services/validation';

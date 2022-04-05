@@ -17,11 +17,11 @@
 
 import styled from 'styled-components';
 
-import Checkbox from '@material-ui/core/Checkbox';
-import Table from '@material-ui/core/Table';
-import TableCellComponent from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRowComponent from '@material-ui/core/TableRow';
+import Checkbox from '@mui/material/Checkbox';
+import Table from '@mui/material/Table';
+import TableCellComponent from '@mui/material/TableCell';
+import TableHead from '@mui/material/TableHead';
+import TableRowComponent from '@mui/material/TableRow';
 
 import { COLOR } from '../../../../../../styles';
 

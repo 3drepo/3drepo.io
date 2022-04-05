@@ -43,6 +43,13 @@ export default {
 				'text'],
 			control: { type: 'select' },
 		},
+		size: {
+			options: ['small', 'medium', 'large'],
+			control: { type: 'select' },
+		},
+		isPending: {
+			type: 'boolean',
+		},
 		disabled: {
 			type: 'boolean',
 		},

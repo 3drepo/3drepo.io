@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { MenuItem } from '@material-ui/core';
+import { MenuItem } from '@mui/material';
 import { FormSelect as FormSelectBase } from '@controls/formSelect/formSelect.component';
 
 const ThumbnailStyles = css`
@@ -58,7 +58,7 @@ export const FormSelect = styled(FormSelectBase)`
 	${ThumbnailPlaceholder} {
 		display: none;
 	}
-
+	
 	${Thumbnail} {
 		width: 44px;
 		height: 37px;
@@ -66,7 +66,7 @@ export const FormSelect = styled(FormSelectBase)`
 		left: 0;
 		bottom: 0;
 		position: absolute;
-
+		
 		& + ${ViewLabel} {
 			margin-left: 44px;
 		}

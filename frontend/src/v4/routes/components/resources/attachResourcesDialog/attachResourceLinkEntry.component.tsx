@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { TextField } from '@material-ui/core';
+import { TextField } from '@mui/material';
 import { Field } from 'formik';
 import { get } from 'lodash';
 import {
@@ -29,7 +29,7 @@ export const LinkEntry = ({onClickRemove, index }) => {
 	const linkFieldName = `links.${index}.link`;
 
 	return (
-	<FieldsRow container justify="space-between" flex={0.5}>
+	<FieldsRow container justifyContent="space-between" flex={0.5}>
 		<StyledFormControl>
 			<Field name={nameFieldName} render={({ field, form }) => (
 				<TextField {...field}

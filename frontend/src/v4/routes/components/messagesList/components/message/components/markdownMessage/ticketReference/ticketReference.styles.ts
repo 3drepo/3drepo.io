@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 
-import PopoverComponent from '@material-ui/core/Popover';
+import PopoverComponent from '@mui/material/Popover';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { COLOR } from '../../../../../../../../styles';

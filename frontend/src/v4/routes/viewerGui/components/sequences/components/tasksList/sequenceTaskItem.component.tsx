@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CollapsedIcon from '@material-ui/icons/ChevronRight';
-import ExpandedIcon from '@material-ui/icons/ExpandMore';
+import CollapsedIcon from '@mui/icons-material/ChevronRight';
+import ExpandedIcon from '@mui/icons-material/ExpandMore';
 import { PureComponent } from 'react';
 import { SubTasksItemContainer, Task, TaskButton, TaskItemLabel, TaskSmallDot } from '../../sequences.styles';
 

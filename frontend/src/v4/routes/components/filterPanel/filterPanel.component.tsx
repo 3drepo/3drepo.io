@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import MenuItem from '@material-ui/core/MenuItem';
-import Paper from '@material-ui/core/Paper';
-import ExpandIcon from '@material-ui/icons/ChevronRight';
-import CollapseIcon from '@material-ui/icons/ExpandMore';
-import SearchIcon from '@material-ui/icons/Search';
+import MenuItem from '@mui/material/MenuItem';
+import Paper from '@mui/material/Paper';
+import ExpandIcon from '@mui/icons-material/ChevronRight';
+import CollapseIcon from '@mui/icons-material/ExpandMore';
+import SearchIcon from '@mui/icons-material/Search';
 import { isEqual, isNil, keyBy, omit, uniqBy } from 'lodash';
 import Autosuggest from 'react-autosuggest';
 import { CopyToClipboard } from 'react-copy-to-clipboard';

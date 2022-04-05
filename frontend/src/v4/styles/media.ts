@@ -33,7 +33,7 @@ interface IMedia {
 
 export const media = Object.keys(breakpoints).reduce((accumulator, label) => {
 	const emSize = breakpoints[label] / 16;
-	accumulator[label] = (...args: any) => css`
+	accumulator[label] = (...args: Parameters<typeof css>) => css`
 		@media (max-width: ${emSize}em) {
 			${css(...args)};
 		}

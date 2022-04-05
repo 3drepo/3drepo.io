@@ -63,7 +63,7 @@ export const Message = ({
 					created={created}
 					comment={commentWithMarkdown}
 					propertyName={action.property}
-					teamspace={teamspace} />
+				/>
 				: <Container onClick={handleClick} clickable={Boolean(viewpoint)}>
 						<UserMessage
 							name={owner}
