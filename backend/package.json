@@ -33,7 +33,7 @@
     "body-parser": "1.18.3",
     "combined-stream": "1.0.8",
     "compression": "1.7.3",
-    "connect-mongodb-session": "2.4.1",
+    "connect-mongodb-session": "3.1.1",
     "cors": "2.8.5",
     "countries-and-timezones": "3.3.0",
     "crypto-js": "4.0.0",
