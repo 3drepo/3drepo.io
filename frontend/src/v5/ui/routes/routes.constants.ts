@@ -16,3 +16,6 @@
  */
 
 export const NOT_FOUND_ROUTE_PATH = '/v5/404';
+export const LOGIN_PATH = '/v5/login';
+export const PASSWORD_FORGOT_PATH = '/v5/password-forgot';
+export const SIGN_UP_PATH = '/sign-up';

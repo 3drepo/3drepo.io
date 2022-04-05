@@ -31,6 +31,7 @@ import { getIntlProviderProps } from '@/v5/services/intl';
 import { IntlProvider } from 'react-intl';
 import { Dashboard } from './dashboard';
 import { V4Adapter } from '../v4Adapter/v4Adapter';
+import { LOGIN_PATH } from './routes.constants';
 
 export const Root = () => {
 	const history = useHistory();
@@ -51,7 +52,7 @@ export const Root = () => {
 		}
 
 		if (!isNull(isAuthenticated) && !isAuthenticated) {
-			history.push('/v5/login');
+			history.push(LOGIN_PATH);
 		}
 	}, [userName, isAuthenticated]);
 
