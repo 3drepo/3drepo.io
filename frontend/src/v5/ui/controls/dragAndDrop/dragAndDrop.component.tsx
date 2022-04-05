@@ -59,11 +59,11 @@ export const DragAndDrop = ({ className, message, processFiles, hidden = false }
 		>
 			<UploadDialog className={dragOverlay && 'drag-over'}>
 				<Typography variant="h3" color="secondary">
-					<FormattedMessage id="draganddrop.drop" defaultMessage="Drop files here" />
+					<FormattedMessage id="dragAndDrop.drop" defaultMessage="Drop files here" />
 				</Typography>
 
 				<Typography variant="h5" color="secondary">
-					<FormattedMessage id="draganddrop.or" defaultMessage="or" />
+					<FormattedMessage id="dragAndDrop.or" defaultMessage="or" />
 				</Typography>
 
 				<FileInputField

@@ -70,7 +70,7 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 			yield put(ContainersActions.createContainerSuccess(projectId, { _id: containerId, ...newContainer }));
 		} catch (error) {
 			yield put(DialogsActions.open('alert', {
-				currentActions: formatMessage({ id: 'containers.creation.error', defaultMessage: 'trying to create container' }),
+				currentActions: formatMessage({ id: 'revision.containersCreation.error', defaultMessage: 'trying to create container' }),
 				error,
 			}));
 		}
@@ -78,7 +78,7 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 	try {
 		if (!containerId) {
 			throw new Error(
-				formatMessage({ id: 'placeholder', defaultMessage: 'Failed to create Container' }),
+				formatMessage({ id: 'revisions.error.noContainer', defaultMessage: 'Failed to create Container' }),
 			);
 		}
 		const formData = new FormData();

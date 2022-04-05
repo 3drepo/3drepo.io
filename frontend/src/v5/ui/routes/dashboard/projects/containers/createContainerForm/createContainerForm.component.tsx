@@ -73,7 +73,7 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 					required
 					control={control}
 					name="unit"
-					label={formatMessage({ id: 'containers.creation.form.unit', defaultMessage: 'Units' })}
+					label={formatMessage({ id: 'containers.creation.form.units', defaultMessage: 'Units' })}
 					defaultValue="mm"
 				>
 					{

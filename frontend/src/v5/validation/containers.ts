@@ -66,7 +66,7 @@ const revisionTag = Yup.string()
 		}))
 	.required(
 		formatMessage({
-			id: 'validation.revision.tag.error.required',
+			id: 'revisions.tag.error.required',
 			defaultMessage: 'Revision Name is a required field',
 		}),
 	);
@@ -74,7 +74,7 @@ const revisionTag = Yup.string()
 const revisionDesc = Yup.string()
 	.max(660,
 		formatMessage({
-			id: 'validation.revision.description.error.max',
+			id: 'revisions.description.error.max',
 			defaultMessage: 'Revision Description is limited to 50 characters',
 		}));
 

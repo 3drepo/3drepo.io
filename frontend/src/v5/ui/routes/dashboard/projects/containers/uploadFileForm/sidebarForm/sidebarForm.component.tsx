@@ -130,26 +130,26 @@ export const SidebarForm = ({
 			<FormTextField
 				control={control}
 				name="containerCode"
-				label={formatMessage({ id: 'uploadFileForm.settingsSidebar.containerCode', defaultMessage: 'Container Code' })}
+				label={formatMessage({ id: 'uploads.sidebar.containerCode', defaultMessage: 'Container Code' })}
 				formError={errors.containerCode}
 				disabled={!isNewContainer}
 			/>
 			<FormTextField
 				control={control}
 				name="containerDesc"
-				label={formatMessage({ id: 'uploadFileForm.settingsSidebar.containerDesc', defaultMessage: 'Container Description' })}
+				label={formatMessage({ id: 'uploads.sidebar.containerDesc', defaultMessage: 'Container Description' })}
 				formError={errors.containerDesc}
 				disabled={!isNewContainer}
 			/>
 
 			<Heading>
-				<FormattedMessage id="uploadFileForm.settingsSidebar.revisionDetails" defaultMessage="Revision details" />
+				<FormattedMessage id="uploads.sidebar.revisionDetails" defaultMessage="Revision details" />
 			</Heading>
 
 			<FormTextField
 				control={control}
 				name="revisionDesc"
-				label={formatMessage({ id: 'uploadFileForm.settingsSidebar.revisionDesc', defaultMessage: 'Revision Description' })}
+				label={formatMessage({ id: 'uploads.sidebar.revisionDesc', defaultMessage: 'Revision Description' })}
 				formError={errors.revisionDesc}
 			/>
 
@@ -158,12 +158,12 @@ export const SidebarForm = ({
 					<AnimationsCheckbox
 						control={control}
 						name="importAnimations"
-						label={formatMessage({ id: 'uploadFileForm.settingsSidebar.importAnimations', defaultMessage: 'Import transformations' })}
+						label={formatMessage({ id: 'uploads.sidebar.importAnimations', defaultMessage: 'Import transformations' })}
 					/>
 					<TimezoneSelect
 						control={control}
 						name="timezone"
-						label={formatMessage({ id: 'uploadFileForm.settingsSidebar.timezone', defaultMessage: 'Timezone' })}
+						label={formatMessage({ id: 'uploads.sidebar.timezone', defaultMessage: 'Timezone' })}
 						onChange={
 							(e: React.ChangeEvent<HTMLInputElement>) => {
 								setValue('timezone', e.target.value);

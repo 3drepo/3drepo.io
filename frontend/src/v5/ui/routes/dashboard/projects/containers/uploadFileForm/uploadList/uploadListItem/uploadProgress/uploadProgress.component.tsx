@@ -32,18 +32,18 @@ export const UploadProgress = ({ uploadId, errorMessage }: IUploadProgress): JSX
 	const progress: number = RevisionsHooksSelectors.selectUploadProgress(uploadId);
 	let uploadStatus;
 	if (errorMessage) {
-		statusText = formatMessage({ id: 'upload.progress.status.failed', defaultMessage: 'Upload failed' });
+		statusText = formatMessage({ id: 'uploads.progress.status.failed', defaultMessage: 'Upload failed' });
 		uploadStatus = UploadStatuses.FAILED;
 	} else if (progress === 100) {
-		statusText = formatMessage({ id: 'upload.progress.status.uploaded', defaultMessage: 'Upload complete' });
+		statusText = formatMessage({ id: 'uploads.progress.status.uploaded', defaultMessage: 'Upload complete' });
 		uploadStatus = UploadStatuses.UPLOADED;
 	} else if (progress < 100 && progress > 0) {
-		statusText = formatMessage({ id: 'upload.progress.status.uploading', defaultMessage: 'Uploading' });
+		statusText = formatMessage({ id: 'uploads.progress.status.uploading', defaultMessage: 'Uploading' });
 		uploadStatus = UploadStatuses.UPLOADING;
 	} else if (progress === 0) {
-		statusText = formatMessage({ id: 'upload.progress.status.queued', defaultMessage: 'Waiting to upload' });
+		statusText = formatMessage({ id: 'uploads.progress.status.queued', defaultMessage: 'Waiting to upload' });
 		uploadStatus = UploadStatuses.QUEUED;
-	} else statusText = formatMessage({ id: 'upload.progress.status.unexpectedError', defaultMessage: 'Unexpected error' });
+	} else statusText = formatMessage({ id: 'uploads.progress.status.unexpectedError', defaultMessage: 'Unexpected error' });
 
 	return (
 		<Container>

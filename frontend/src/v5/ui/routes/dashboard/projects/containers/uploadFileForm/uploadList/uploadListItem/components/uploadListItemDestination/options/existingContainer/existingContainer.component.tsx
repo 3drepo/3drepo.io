@@ -24,7 +24,7 @@ interface IExistingContainer {
 	inUse: boolean;
 }
 
-const noneText = <FormattedMessage id="uploads.destination.existing.none" defaultMessage="None" />;
+const noneText = <FormattedMessage id="uploads.destination.lastRevision.none" defaultMessage="None" />;
 
 export const ExistingContainer = ({ containerName, latestRevision, inUse, ...props }: IExistingContainer) => (
 	<Container {...props}>
@@ -32,11 +32,11 @@ export const ExistingContainer = ({ containerName, latestRevision, inUse, ...pro
 			{containerName}
 		</ContainerName>
 		<LastRevision>
-			<FormattedMessage id="uploads.destination.existing.lastRevision" defaultMessage="Last revision: " />
+			<FormattedMessage id="uploads.destination.lastRevision" defaultMessage="Last revision: " />
 			{latestRevision || noneText}
 		</LastRevision>
 		<ErrorText hidden={!inUse}>
-			<FormattedMessage id="uploads.destination.existing.inUse" defaultMessage="Already in use in another file upload" />
+			<FormattedMessage id="uploads.destination.containerInUse" defaultMessage="Already in use in another file upload" />
 		</ErrorText>
 	</Container>
 );
