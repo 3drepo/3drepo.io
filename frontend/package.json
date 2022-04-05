@@ -148,10 +148,10 @@
 		"babel-loader": "8.2.3",
 		"babel-plugin-styled-components": "2.0.6",
 		"clean-webpack-plugin": "4.0.0",
-		"copy-webpack-plugin": "6.0.0",
+		"copy-webpack-plugin": "10.2.4",
 		"cross-env": "7.0.2",
 		"css-loader": "6.6.0",
-		"cssnano": "4.1.7",
+		"cssnano": "5.1.7",
 		"eslint": "7.29.0",
 		"eslint-config-airbnb-typescript": "12.0.0",
 		"eslint-plugin-import": "2.22.0",
@@ -187,8 +187,7 @@
 		"webpack": "5.69.1",
 		"webpack-bundle-analyzer": "3.0.3",
 		"webpack-cli": "4.9.2",
-		"webpack-livereload-plugin": "3.0.2",
-		"webpack-stream": "4.0.0"
+		"webpack-livereload-plugin": "3.0.2"
 	},
 	"resolutions": {
 		"@mui/styled-engine": "npm:@mui/styled-engine-sc@5.4.2",
