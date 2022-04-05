@@ -65,7 +65,7 @@
     "string-to-stream": "3.0.1",
     "supertest-session": "4.1.0",
     "swagger-jsdoc": "6.1.0",
-    "swagger-ui-express": "4.1.6",
+    "swagger-ui-express": "4.3.0",
     "ua-parser-js": "0.7.28",
     "useragent": "2.3.0",
     "uuid": "8.3.2",
