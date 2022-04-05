@@ -31,12 +31,13 @@ import { getIntlProviderProps } from '@/v5/services/intl';
 import { IntlProvider } from 'react-intl';
 import { Dashboard } from './dashboard';
 import { V4Adapter } from '../v4Adapter/v4Adapter';
-import { LOGIN_PATH } from './routes.constants';
+import { LOGIN_PATH, PASSWORD_CHANGE_PATH } from './routes.constants';
 
 export const Root = () => {
 	const history = useHistory();
 	const userName: string = CurrentUserHooksSelectors.selectUsername();
 	const isAuthenticated: boolean | null = AuthHooksSelectors.selectIsAuthenticated();
+	const { location: { pathname } } = history;
 
 	useEffect(() => {
 		AuthActionsDispatchers.authenticate();
@@ -51,7 +52,7 @@ export const Root = () => {
 			TeamspacesActionsDispatchers.fetch();
 		}
 
-		if (!isNull(isAuthenticated) && !isAuthenticated) {
+		if (!isNull(isAuthenticated) && !isAuthenticated && pathname !== PASSWORD_CHANGE_PATH) {
 			history.push(LOGIN_PATH);
 		}
 	}, [userName, isAuthenticated]);
