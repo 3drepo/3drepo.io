@@ -36,9 +36,10 @@ import { FederationListItem } from '@/v5/ui/routes/dashboard/projects/federation
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { Button } from '@controls/button';
-import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
+import { DashboardListButton, DashedButtonContainer } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { formatMessage } from '@/v5/services/intl';
 import { Display } from '@/v5/ui/themes/media';
+import { DashedContainer } from '@components/shared/dashedContainer/dashedContainer.component';
 import { CollapseSideElementGroup, Container } from './federationsList.styles';
 
 type IFederationsList = {
@@ -138,23 +139,27 @@ export const FederationsList = ({
 							/>
 						))
 					) : (
-						<DashboardListEmptyContainer>
-							{filterQuery && hasFederations ? (
-								<DashboardListEmptySearchResults searchPhrase={filterQuery} />
-							) : emptyMessage}
-						</DashboardListEmptyContainer>
+						<DashedContainer>
+							<DashboardListEmptyContainer>
+								{filterQuery && hasFederations ? (
+									<DashboardListEmptySearchResults searchPhrase={filterQuery} />
+								) : emptyMessage}
+							</DashboardListEmptyContainer>
+						</DashedContainer>
 					)}
 				</DashboardList>
 				{showBottomButton && !isListPending && hasFederations && (
-					<DashboardListButton
-						startIcon={<AddCircleIcon />}
-						onClick={() => {
-							// eslint-disable-next-line no-console
-							console.log('->  handle add federation');
-						}}
-					>
-						<FormattedMessage id="federations.addFederationButton" defaultMessage="Add new Federation" />
-					</DashboardListButton>
+					<DashedButtonContainer>
+						<DashboardListButton
+							startIcon={<AddCircleIcon />}
+							onClick={() => {
+								// eslint-disable-next-line no-console
+								console.log('->  handle add federation');
+							}}
+						>
+							<FormattedMessage id="federations.addFederationButton" defaultMessage="Add new Federation" />
+						</DashboardListButton>
+					</DashedButtonContainer>
 				)}
 			</DashboardListCollapse>
 		</Container>

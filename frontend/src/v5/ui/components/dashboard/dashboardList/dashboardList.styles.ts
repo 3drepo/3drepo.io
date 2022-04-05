@@ -19,6 +19,7 @@ import styled from 'styled-components';
 import { Divider as DividerComponent } from '@mui/material';
 import { Button } from '@controls/button';
 import { Typography } from '@controls/typography';
+import { DashedContainer } from '@components/shared/dashedContainer/dashedContainer.component';
 
 export const ListContainer = styled.ul`
 	display: flex;
@@ -33,8 +34,6 @@ export const DashboardListEmptyContainer = styled.div`
 	align-items: center;
 	height: 80px;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	border: 1px dashed ${({ theme }) => theme.palette.base.light};
-	border-radius: 5px;
 	padding-left: 30px;
 `;
 
@@ -56,12 +55,20 @@ export const DashboardListButton = styled(Button).attrs({
 })`
 	${({ theme }) => theme.typography.h3}
 	width: 100%;
-	margin: 18px 0 0;
+	margin: 0;
+	border: 0;
 	height: 80px;
-	border: 1px dashed ${({ theme }) => theme.palette.primary.main};
 
 	svg {
 		width: 34px;
 		height: 34px;
 	}
+`;
+
+export const DashedButtonContainer = styled(DashedContainer).attrs(({ theme }) => ({
+	strokeColor: theme.palette.primary.main,
+}))<{ strokeColor: string }>`
+	margin-top: 18px;
+	padding: 0;
+	background-color: transparent;
 `;

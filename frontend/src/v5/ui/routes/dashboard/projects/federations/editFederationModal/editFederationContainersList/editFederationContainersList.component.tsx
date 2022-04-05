@@ -34,6 +34,7 @@ import { isEmpty } from 'lodash';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { filterContainers } from '@/v5/store/containers/containers.helpers';
 import { CollapseSideElementGroup } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.styles';
+import { DashedContainer } from '@components/shared/dashedContainer/dashedContainer.component';
 import { EditFederationContainersListItem } from './editFederationContainersListItem/editFederationContainersListItem.component';
 import { Container } from './editFederationContainersList.styles';
 
@@ -144,11 +145,13 @@ export const EditFederationContainers = ({
 							/>
 						))
 					) : (
-						<DashboardListEmptyContainer>
-							{filterQuery && hasContainers ? (
-								<DashboardListEmptySearchResults searchPhrase={filterQuery} />
-							) : emptyListMessage}
-						</DashboardListEmptyContainer>
+						<DashedContainer>
+							<DashboardListEmptyContainer>
+								{filterQuery && hasContainers ? (
+									<DashboardListEmptySearchResults searchPhrase={filterQuery} />
+								) : emptyListMessage}
+							</DashboardListEmptyContainer>
+						</DashedContainer>
 					)}
 				</DashboardList>
 			</DashboardListCollapse>
