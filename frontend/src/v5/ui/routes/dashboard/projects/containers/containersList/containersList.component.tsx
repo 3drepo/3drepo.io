@@ -29,7 +29,6 @@ import {
 } from '@components/dashboard/dashboardList';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
-import { HeaderButtonsGroup } from '@/v5/ui/routes/dashboard/projects/containers/containers.styles';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { SearchInput } from '@controls/searchInput';
 import { Button } from '@controls/button';
@@ -101,23 +100,21 @@ export const ContainersList = ({
 							value={filterQuery}
 							placeholder={formatMessage({ id: 'containers.search.placeholder', defaultMessage: 'Search containers...' })}
 						/>
-						<HeaderButtonsGroup>
-							<Button
-								startIcon={<AddCircleIcon />}
-								variant="outlined"
-								color="secondary"
-								onClick={onClickCreate}
-							>
-								<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New container" />
-							</Button>
-							<Button
-								startIcon={<ArrowUpCircleIcon />}
-								variant="contained"
-								color="primary"
-							>
-								<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
-							</Button>
-						</HeaderButtonsGroup>
+						<Button
+							startIcon={<AddCircleIcon />}
+							variant="outlined"
+							color="secondary"
+							onClick={onClickCreate}
+						>
+							<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New container" />
+						</Button>
+						<Button
+							startIcon={<ArrowUpCircleIcon />}
+							variant="contained"
+							color="primary"
+						>
+							<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
+						</Button>
 					</CollapseSideElementGroup>
 				)}
 			>
