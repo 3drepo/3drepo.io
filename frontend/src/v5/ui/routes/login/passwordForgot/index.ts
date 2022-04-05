@@ -15,4 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { ChangePassword } from './changePassword.component';
+export { ForgotPassword } from './passwordForgot.component';

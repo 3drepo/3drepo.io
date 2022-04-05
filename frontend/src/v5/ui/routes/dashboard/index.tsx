@@ -24,8 +24,8 @@ import { TeamspacesList } from '@/v5/ui/routes/dashboard/teamspaces/teamspacesLi
 import { TeamspaceContent } from './teamspaces';
 import { ProjectContent } from './projects';
 import { Login } from '../login';
-import { ForgotPassword } from '../login/forgotPassword';
-import { ChangePassword } from '../login/changePassword';
+import { ForgotPassword } from '../login/passwordForgot';
+import { ChangePassword } from '../login/passwordChange';
 
 export const Dashboard = () => {
 	const { path } = useRouteMatch();

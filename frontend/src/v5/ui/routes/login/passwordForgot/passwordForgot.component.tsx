@@ -23,7 +23,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
 import * as API from '@/v5/services/api';
 import { FormattedMessage } from 'react-intl';
-import { RequestSentMessage } from './forgotPassword.styles';
+import { RequestSentMessage } from './passwordForgot.styles';
 import { ReturnLink } from '../components/returnLink.component';
 import { AuthHeading, UsernameField } from '../components/components.styles';
 
