@@ -16,6 +16,7 @@
  */
 
 import * as Yup from 'yup';
+import { formatMessage } from '../services/intl';
 
 export const username = Yup.string().required();
 const password = Yup.string().required();
@@ -27,4 +28,29 @@ export const LoginSchema = Yup.object().shape({
 
 export const ForgotPasswordSchema = Yup.object().shape({
 	username,
+});
+
+export const PasswordChangeSchema = Yup.object().shape({
+	newPassword: Yup.string()
+		.required(
+			formatMessage({
+				id: 'passwordChange.error.passwordRequired',
+				defaultMessage: 'Password is required',
+			}),
+		)
+		.max(65,
+			formatMessage({
+				id: 'passwordChange.error.tooLong',
+				defaultMessage: 'Password is limited to 65 characters',
+			})),
+	newPasswordConfirm: Yup.string()
+		.required(formatMessage({
+			id: 'passwordChange.error.passwordRequired',
+			defaultMessage: 'Password is required',
+		}))
+		.oneOf([Yup.ref('newPassword')],
+			formatMessage({
+				id: 'passwordChange.error.notMatching',
+				defaultMessage: 'The two entered passwords do not match',
+			})),
 });

@@ -15,13 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import * as queryString from 'query-string';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
 import * as API from '@/v5/services/api';
 import { AuthPage } from '@components/authPage';
+import { PasswordChangeSchema } from '@/v5/validation/auth';
+import { yupResolver } from '@hookform/resolvers/yup';
 import { SubmitButton } from '@controls/submitButton';
 import { useForm } from 'react-hook-form';
 import ErrorIcon from '@assets/icons/warning_small.svg';
@@ -32,8 +34,11 @@ import { LOGIN_PATH } from '../../routes.constants';
 export const ChangePassword = () => {
 	const { token, username } = queryString.parse(window.location.search);
 	const [errorMessage, setErrorMessage] = useState('');
+	const { control, handleSubmit, formState: { isDirty, errors } } = useForm({
 		mode: 'onSubmit',
+		reValidateMode: 'onSubmit',
 		defaultValues: { newPassword: '', newPasswordConfirm: '' },
+		resolver: yupResolver(PasswordChangeSchema),
 	});
 	const history = useHistory();
 	const onSubmit = async ({ newPassword }) => {
@@ -44,6 +49,10 @@ export const ChangePassword = () => {
 			setErrorMessage(message);
 		}
 	};
+
+	useEffect(() => {
+		setErrorMessage(errors.newPasswordConfirm?.message);
+	}, [errors.newPasswordConfirm]);
 
 	return (
 		<AuthPage>
@@ -69,7 +78,7 @@ export const ChangePassword = () => {
 								defaultMessage: 'Confirm new password',
 							})}
 						/>
-						<SubmitButton disabled={!isValid}>
+						<SubmitButton disabled={!isDirty}>
 							<FormattedMessage id="auth.changePassword.buttonText" defaultMessage="Save changes" />
 						</SubmitButton>
 					</>
