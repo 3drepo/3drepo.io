@@ -24,6 +24,7 @@ const { logger } = require(`${v5Path}/utils/logger`);
 const addAdminJob = async (teamspace, username) => {
 	// Check if user is assigned any job
 	const userJob = await findOne(teamspace, 'jobs', { users: username }, { _id: 1 });
+
 	if (!userJob) {
 		// Check if admin job exists
 		const adminJob = await findOne(teamspace, 'jobs', { _id: 'Admin' }, { _id: 1 });
@@ -37,11 +38,11 @@ const addAdminJob = async (teamspace, username) => {
 
 const run = async () => {
 	const teamspaces = await getTeamspaceList();
-	for (let i = 0; i < teamspaces.length; ++i) {
-		logger.logInfo(`\t\t-${teamspaces[i]}`);
-		// eslint-disable-next-line no-await-in-loop
-		await addAdminJob(teamspaces[i], teamspaces[i]);
-	}
+
+	await Promise.all(teamspaces.map(async (ts) => {
+		logger.logInfo(`\t\t-${ts}`);
+		await addAdminJob(ts, ts);
+	}));
 };
 
 module.exports = run;

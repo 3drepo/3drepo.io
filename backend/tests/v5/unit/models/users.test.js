@@ -23,6 +23,7 @@ const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { loginPolicy } = require(`${src}/utils/config`);
 const { generateRandomString } = require('../../helper/services');
+const { TEAMSPACE_ADMIN } = require('../../../../src/v5/utils/permissions/permissions.constants');
 
 const apiKey = 'b284ab93f936815306fbe5b2ad3e447d';
 jest.mock('../../../../src/v5/utils/helper/strings', () => ({
@@ -581,12 +582,11 @@ const testGrantTeamspacePermissionToUser = () => {
 		test('Should grant teamspace permission to user', async () => {
 			const teamspace = generateRandomString();
 			const username = generateRandomString();
-			const permissions = [generateRandomString()];
 			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
-			await User.grantTeamspacePermissionsToUser(username, teamspace, permissions);
+			await User.grantAdminToUser(username, teamspace);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username },
-				{ $push: { 'customData.permissions': { user: teamspace, permissions } } });
+				{ $push: { 'customData.permissions': { user: teamspace, TEAMSPACE_ADMIN } } });
 		});
 	});
 };

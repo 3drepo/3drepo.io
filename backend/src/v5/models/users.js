@@ -16,6 +16,7 @@
  */
 
 const { createResponseCode, templates } = require('../utils/responseCodes');
+const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
 const config = require('../utils/config');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
@@ -258,12 +259,12 @@ User.verify = async (username) => {
 	return customData;
 };
 
-User.grantTeamspacePermissionsToUser = async (username, teamspace, permissions) => {
-	await updateUser(username, { $push: { 'customData.permissions': { user: teamspace, permissions } } });
-};
+User.grantAdminToUser = (teamspaceOwner, username) => updateUser(teamspaceOwner,
+	{ $push: { 'customData.permissions': { user: username, TEAMSPACE_ADMIN } } });
 
 User.uploadAvatar = (username, avatarBuffer) => updateUser(username, { $set: { 'customData.avatar': { data: avatarBuffer } } });
 
-User.updateResetPasswordToken = (username, resetPasswordToken) => updateUser(username, { $set: { 'customData.resetPasswordToken': resetPasswordToken } });
+User.updateResetPasswordToken = (username, resetPasswordToken) => updateUser(username,
+	{ $set: { 'customData.resetPasswordToken': resetPasswordToken } });
 
 module.exports = User;

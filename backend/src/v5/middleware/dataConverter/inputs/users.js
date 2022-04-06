@@ -174,7 +174,8 @@ Users.validateResetPasswordData = async (req, res, next) => {
 	}
 };
 
-const generateSignUpSchema = (captchaEnabled, captcha) => {
+const generateSignUpSchema = () => {
+	const captchaEnabled = config.auth.captcha;
 	const schema = Yup.object().shape({
 		username: types.strings.username.test('checkUsernameAvailable', 'Username already exists',
 			async (value) => {
@@ -201,20 +202,20 @@ const generateSignUpSchema = (captchaEnabled, captcha) => {
 				return true;
 			}).required(),
 		password: types.strings.password.required(),
-		firstName: types.strings.name.required(),
-		lastName: types.strings.name.required(),
+		firstName: types.strings.name.required().transform((value) => formatPronouns(value)),
+		lastName: types.strings.name.required().transform((value) => formatPronouns(value)),
 		countryCode: types.strings.countryCode.required(),
 		company: types.strings.title.optional(),
 		mailListAgreed: Yup.bool().required(),
 		...(captchaEnabled ? { captcha: Yup.string().required() } : {}),
-	}).strict(true).noUnknown()
-		.required();
+	})
+		.noUnknown().required();
 
 	return captchaEnabled
-		? schema.test('check-captcha', 'Invalid captcha', async () => {
+		? schema.test('check-captcha', 'Invalid captcha', async (body) => {
 			const checkCaptcha = httpsPost(config.captcha.validateUrl, {
 				secret: config.captcha.secretKey,
-				response: captcha,
+				response: body.captcha,
 			});
 
 			const result = await checkCaptcha;
@@ -225,12 +226,8 @@ const generateSignUpSchema = (captchaEnabled, captcha) => {
 
 Users.validateSignUpData = async (req, res, next) => {
 	try {
-		const schema = generateSignUpSchema(config.auth.captcha, req.body.captcha);
-		await schema.validate(req.body);
-
-		req.body.firstName = formatPronouns(req.body.firstName);
-		req.body.lastName = formatPronouns(req.body.lastName);
-
+		const schema = generateSignUpSchema();
+		req.body = await schema.validate(req.body);
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
@@ -259,7 +256,7 @@ Users.validateVerifyData = async (req, res, next) => {
 		});
 
 	try {
-		await schema.validate(req.body);
+		req.body = await schema.validate(req.body);
 
 		await next();
 	} catch (err) {

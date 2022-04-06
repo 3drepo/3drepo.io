@@ -17,6 +17,8 @@
 
 const JobsConstants = {};
 
+JobsConstants.DEFAULT_OWNER_JOB = 'Admin';
+
 JobsConstants.DEFAULT_JOBS = [
 	{ _id: 'Admin', color: '#f7f7b2' },
 	{ _id: 'Client', color: '#a6cee3' },

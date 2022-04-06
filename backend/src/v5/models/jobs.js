@@ -21,7 +21,7 @@ const COL_NAME = 'jobs';
 const { DEFAULT_JOBS } = require('./jobs.constants');
 const db = require('../handler/db');
 
-const findMany = (ts, query, projection, sort) => db.find(ts, 'jobs', query, projection, sort);
+const findMany = (ts, query, projection, sort) => db.find(ts, COL_NAME, query, projection, sort);
 
 Jobs.getJobsToUsers = (teamspace) => findMany(teamspace, {}, { _id: 1, users: 1 });
 
