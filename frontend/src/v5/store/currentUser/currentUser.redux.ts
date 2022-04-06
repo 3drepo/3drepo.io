@@ -21,7 +21,7 @@ import { createActions, createReducer } from 'reduxsauce';
 import { ICurrentUser } from './currentUser.types';
 
 export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createActions({
-	fetchUser: [],
+	getProfile: [],
 	getProfileSuccess: ['userData'],
 }, { prefix: 'CURRENT_USER2/' }) as { Types: Constants<ICurrentUserActionCreators>; Creators: ICurrentUserActionCreators };
 
@@ -49,6 +49,6 @@ interface ICurrentUserState {
 export type GetProfileSuccessAction = Action<'GET_PROFILE_SUCCESS'> & { userData: any };
 
 export interface ICurrentUserActionCreators {
-	fetchUser: () => Action<'GET_PROFILE'>;
+	getProfile: () => Action<'GET_PROFILE'>;
 	getProfileSuccess: (userData: Object) => GetProfileSuccessAction;
 }

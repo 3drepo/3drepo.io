@@ -23,7 +23,7 @@ import { put, takeLatest } from 'redux-saga/effects';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { CurrentUserActions, CurrentUserTypes } from './currentUser.redux';
 
-export function* fetchUser() {
+export function* getProfile() {
 	try {
 		const userData = yield API.CurrentUser.getProfile();
 		const avatarUrl = generateV5ApiUrl(`user/avatar?${Date.now()}`, clientConfigService.GET_API);
@@ -33,12 +33,12 @@ export function* fetchUser() {
 		}));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'currentUser.fetchUser.error', defaultMessage: 'trying to fetch current user details' }),
+			currentActions: formatMessage({ id: 'currentUser.getProfile.error', defaultMessage: 'trying to fetch current user details' }),
 			error,
 		}));
 	}
 }
 
 export default function* AuthSaga() {
-	yield takeLatest(CurrentUserTypes.FETCH_USER, fetchUser);
+	yield takeLatest(CurrentUserTypes.GET_PROFILE, getProfile);
 }

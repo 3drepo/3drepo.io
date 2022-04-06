@@ -29,14 +29,14 @@ describe('Current User: sagas', () => {
 		company: '13DRepo',
 	}
 
-	describe('fetchUser', () => {
+	describe('getProfile', () => {
 		it('should fetch profile data', async () => {
 			mockServer
 				.get(`/user`)
 				.reply(200, userData);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.fetchUser())
+				.dispatch(CurrentUserActions.getProfile())
 				.put.like({ // Using like because avatarUrl uses a timestamp
 					action: {
 						type: 'CURRENT_USER2/GET_PROFILE_SUCCESS',
@@ -54,14 +54,14 @@ describe('Current User: sagas', () => {
 				.reply(400, Error);
 
 			await expectSaga(CurrentUserSaga.default)
-				.dispatch(CurrentUserActions.fetchUser())
+				.dispatch(CurrentUserActions.getProfile())
 				.put.like({
 					action: {
 						type: 'MODALS/OPEN',
 						modalType: 'alert',
 						props: {
 							currentActions: 'trying to fetch current user details',
-						}
+						},
 					}})
 				.silentRun();
 		})
