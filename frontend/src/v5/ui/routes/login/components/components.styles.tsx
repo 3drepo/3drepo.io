@@ -68,6 +68,11 @@ export const ErrorMessage = styled(Typography)`
 	}
 `;
 
+export const AuthParagraph = styled.div`
+	margin: 22px 0;
+	color: ${({ theme }) => theme.palette.base.main};
+`;
+
 export const CenteredLink = styled(Link)`
 	display: flex;
 	margin: 15px auto 12px;

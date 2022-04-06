@@ -23,9 +23,8 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
 import * as API from '@/v5/services/api';
 import { FormattedMessage } from 'react-intl';
-import { RequestSentMessage } from './passwordForgot.styles';
 import { ReturnLink } from '../components/returnLink.component';
-import { AuthHeading, UsernameField } from '../components/components.styles';
+import { AuthHeading, AuthParagraph, UsernameField } from '../components/components.styles';
 
 export const ForgotPassword = (): JSX.Element => {
 	const { control, handleSubmit, formState: { isValid, isSubmitted } } = useForm({
@@ -43,7 +42,7 @@ export const ForgotPassword = (): JSX.Element => {
 				</AuthHeading>
 				{
 					isSubmitted ? (
-						<RequestSentMessage>
+						<AuthParagraph>
 							<FormattedMessage
 								id="auth.forgotPassword.passwordSent.p1"
 								defaultMessage="A password change request has been sent. You will receive an email
@@ -56,7 +55,7 @@ export const ForgotPassword = (): JSX.Element => {
 								defaultMessage="If you have not received this, please check your spam folder or ask
 								your email administrator for assistance."
 							/>
-						</RequestSentMessage>
+						</AuthParagraph>
 					) : (
 						<>
 							<UsernameField control={control} />

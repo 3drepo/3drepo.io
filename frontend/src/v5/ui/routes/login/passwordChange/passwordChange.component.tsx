@@ -25,18 +25,18 @@ import { AuthPage } from '@components/authPage';
 import { SubmitButton } from '@controls/submitButton';
 import { useForm } from 'react-hook-form';
 import ErrorIcon from '@assets/icons/warning_small.svg';
-import { AuthHeading, ErrorMessage, PasswordField } from '../components/components.styles';
+import { AuthHeading, AuthParagraph, ErrorMessage, PasswordField } from '../components/components.styles';
 import { ReturnLink } from '../components/returnLink.component';
 import { LOGIN_PATH } from '../../routes.constants';
 
 export const ChangePassword = () => {
+	const { token, username } = queryString.parse(window.location.search);
 	const [errorMessage, setErrorMessage] = useState('');
 		mode: 'onSubmit',
 		defaultValues: { newPassword: '', newPasswordConfirm: '' },
 	});
 	const history = useHistory();
 	const onSubmit = async ({ newPassword }) => {
-		const { token, username } = queryString.parse(window.location.search);
 		try {
 			await API.Auth.changePassword(username, newPassword, token);
 			history.push(LOGIN_PATH);
@@ -51,25 +51,37 @@ export const ChangePassword = () => {
 				<AuthHeading>
 					<FormattedMessage id="auth.changePassword.heading" defaultMessage="Create a new password" />
 				</AuthHeading>
-				<PasswordField
-					control={control}
-					name="newPassword"
-					label={formatMessage({
-						id: 'auth.passwordChange.newPassword',
-						defaultMessage: 'Password',
-					})}
-				/>
-				<PasswordField
-					control={control}
-					name="newPasswordConfirm"
-					label={formatMessage({
-						id: 'auth.passwordChange.confirmNewPassword',
-						defaultMessage: 'Confirm new password',
-					})}
-				/>
-				<SubmitButton disabled={!isValid}>
-					<FormattedMessage id="auth.changePassword.buttonText" defaultMessage="Save changes" />
-				</SubmitButton>
+				{ username && token ? (
+					<>
+						<PasswordField
+							control={control}
+							name="newPassword"
+							label={formatMessage({
+								id: 'auth.passwordChange.newPassword',
+								defaultMessage: 'Password',
+							})}
+						/>
+						<PasswordField
+							control={control}
+							name="newPasswordConfirm"
+							label={formatMessage({
+								id: 'auth.passwordChange.confirmNewPassword',
+								defaultMessage: 'Confirm new password',
+							})}
+						/>
+						<SubmitButton disabled={!isValid}>
+							<FormattedMessage id="auth.changePassword.buttonText" defaultMessage="Save changes" />
+						</SubmitButton>
+					</>
+				)
+					: (
+						<AuthParagraph>
+							<FormattedMessage
+								id="auth.changePassword.missingParams"
+								defaultMessage="Cannot change password due to URL is incomplete. Please ensure you have copied the whole link and try again."
+							/>
+						</AuthParagraph>
+					)}
 				{errorMessage && <ErrorMessage><ErrorIcon />{errorMessage}</ErrorMessage>}
 				<ReturnLink />
 			</form>
