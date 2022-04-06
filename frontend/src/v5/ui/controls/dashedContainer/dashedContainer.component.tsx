@@ -14,24 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { Container } from './dashedContainer.styles';
 
-import { HTMLInputTypeAttribute } from 'react';
-import styled from 'styled-components';
-import { FormTextField, FormTextFieldProps } from '@controls/formTextField/formTextField.component';
+type DashedContainerProps = {
+	children: any;
+	className?: string;
+	borderRadius?: number;
+	strokeColor?: string;
+	strokeWidth?: number;
+	dashSize?: number;
+	gapSize?: number;
+	zeroPadding?: boolean;
+};
 
-export const UnitTextField = styled(FormTextField).attrs((
-	props: FormTextFieldProps & { $labelUnit: string },
-) => ({
-	label: ` (${props.$labelUnit})`,
-	type: 'number' as HTMLInputTypeAttribute,
-}))<{ $labelName: string, $labelUnit: string }>`
-	.MuiInputLabel-formControl {
-		&::before {
-			content: "${({ $labelName }) => $labelName}";
-			${({ theme }) => theme.typography.kicker};
-		}
-		
-		text-transform: none; 
-		letter-spacing: 0;
-	}
-`;
+export const DashedContainer = ({ children, ...dashedOptions }: DashedContainerProps) => (
+	<Container {...dashedOptions}>
+		{children}
+	</Container>
+);
