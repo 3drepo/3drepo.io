@@ -15,4 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const Viewer = () => (<h1>hi babe, im the viewer.</h1>);
+import { ViewerCanvas } from '@/v4/routes/viewerCanvas';
+import { ViewerGui } from '@/v4/routes/viewerGui';
+import { useParams } from 'react-router-dom';
+
+export const Viewer = () => {
+	const { teamspace, containerOrFederation } = useParams();
+	const v4Match = {
+		params: {
+			model: containerOrFederation,
+			teamspace,
+			revision: '',
+		} };
+
+
+	return (
+		<>
+			{/* <ViewerCanvas /> */}
+			<ViewerGui match={v4Match} />
+		</>
+	);
+};
