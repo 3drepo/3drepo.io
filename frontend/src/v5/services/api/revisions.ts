@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import api from './default';
+import { clientConfigService } from '@/v4/services/clientConfig';
+import api, { generateV5ApiUrl } from './default';
 
 export const fetchRevisions = (teamspace: string, projectId: string, containerId: string, showVoid = true): Promise<any> => api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions${showVoid ? '?showVoid=true' : ''}`);
 
@@ -23,4 +24,9 @@ export const setRevisionVoidStatus = (teamspace: string, projectId: string, cont
 	void: isVoid,
 });
 
-export const fetchRevisionFile = (teamspace: string, projectId: string, containerId: string, revision: string) => api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions/${revision}/files`);
+export const getRevisionFileUrl = (teamspace: string, projectId: string, containerId: string, revision: string) => (
+	generateV5ApiUrl(
+		`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions/${revision}/files`,
+		clientConfigService.GET_API,
+	)
+);

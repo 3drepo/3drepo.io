@@ -51,8 +51,8 @@ export function* setVoidStatus({ teamspace, projectId, containerId, revisionId, 
 
 export function* download({ teamspace, projectId, containerId, revisionId }: DownloadAction) {
 	try {
-		const { data } = yield API.Revisions.fetchRevisionFile(teamspace, projectId, containerId, revisionId);
-		downloadFile(data, 'revision.ifc');
+		const url = yield API.Revisions.getRevisionFileUrl(teamspace, projectId, containerId, revisionId);
+		window.open(url, '_blank');
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'revisions.download.error', defaultMessage: 'trying to download revision file' }),
