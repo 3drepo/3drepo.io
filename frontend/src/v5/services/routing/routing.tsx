@@ -14,6 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { IContainer } from '@/v5/store/containers/containers.types';
+import { IFederation } from '@/v5/store/federations/federations.types';
 import { Route, Switch } from 'react-router-dom';
 
 const appendSlashIfNeeded = (uri) => (uri[uri.length - 1] !== '/' ? `${uri}/` : uri);
@@ -35,9 +37,18 @@ export const uriCombine = (uri, path) => {
 
 const getBaseDomain = () => `${window.location.protocol}//${window.location.hostname}`;
 
-export const viewerShareLink = (teamspace: string, containerOrFederationId: string) => (
-	`${getBaseDomain()}/viewer/${teamspace}/${containerOrFederationId}`
+const relativeViewerRoute = (teamspace: string, containerOrFederation: IContainer | IFederation | string) => (
+	`v5/viewer/${teamspace}/${(containerOrFederation as IContainer | IFederation)?._id || containerOrFederation}`
 );
+
+export const viewerRoute = (
+	teamspace: string,
+	containerOrFederation: IContainer | IFederation | string,
+	withDomain: boolean = false,
+) => {
+	const domain = withDomain ? getBaseDomain() : '';
+	return `${domain}/${relativeViewerRoute(teamspace, containerOrFederation)}`;
+};
 
 export const RouteExcept = ({ path, exceptPath, children }) => (
 	<Switch>

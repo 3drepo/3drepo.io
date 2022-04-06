@@ -22,6 +22,7 @@ import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
+import { viewerRoute } from '@/v5/services/routing/routing';
 
 type FederationEllipsisMenuProps = {
 	federation: IFederation,
@@ -41,12 +42,13 @@ export const FederationEllipsisMenu = ({
 
 	return (
 		<EllipsisMenu>
+			<h1>{viewerRoute(teamspace, federation)}</h1>
 			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'federations.ellipsisMenu.loadFederation',
 					defaultMessage: 'Load Federation in 3D Viewer',
 				})}
-				to={`/${federation._id}`}
+				to={viewerRoute(teamspace, federation)}
 			/>
 
 			<EllipsisMenuItem
