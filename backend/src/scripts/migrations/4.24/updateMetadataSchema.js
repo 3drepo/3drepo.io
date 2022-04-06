@@ -18,13 +18,16 @@
 const { v5Path } = require('../../../interop');
 const { getTeamspaceList, getCollectionsEndsWith } = require('../utils');
 
-const { aggregate } = require(`${v5Path}/handler/db`);
+const { aggregate, indexExists } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const processModel = (teamspace, scene) => aggregate(
-	teamspace, scene, [
+const processModel = async (teamspace, scene) => {
+	if (await indexExists(teamspace, scene, 'metadata.key_1_metadata.value_1')) {
+		return;
+	}
+	const query = [
 		// filter for all metasdata that has not been converted
-		{ $match: { type: 'meta', 'metadata.key': { $exists: false } } },
+		{ $match: { type: 'meta', metadata: { $not: { $type: 'array' } } } },
 		// convert metadata: { key: value } to metadata: [ {k: <key>, v: <value> }]
 		{ $project: { _id: 1, metadata: { $objectToArray: '$metadata' } } },
 		// rename k to key and v to value
@@ -46,8 +49,9 @@ const processModel = (teamspace, scene) => aggregate(
 		{
 			$merge: scene,
 		},
-	],
-);
+	];
+	await aggregate(teamspace, scene, query);
+};
 
 const processTeamspace = async (teamspace) => {
 	const scenes = await getCollectionsEndsWith(teamspace, '.scene');
