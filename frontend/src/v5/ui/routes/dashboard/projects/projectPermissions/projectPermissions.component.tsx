@@ -17,16 +17,17 @@
 import { useEffect } from 'react';
 import { UserManagementActions } from '@/v4/modules/userManagement';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
-import { selectCurrentUser } from '@/v4/modules/currentUser';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { Container, V4ProjectsPermissions } from './projectPermissions.styles';
 
 export const ProjectPermissions = () => {
 	const dispatch = useDispatch();
 	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails()?.name;
-	const username = useSelector(selectCurrentUser)?.username;
+
+	const username = CurrentUserHooksSelectors.selectUsername();
 
 	useEffect(() => {
 		if (!username || !projectName) {
