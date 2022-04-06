@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,22 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Jobs = {};
+const RisksConstants = {};
 
-const COL_NAME = 'jobs';
-const { DEFAULT_JOBS } = require('./jobs.constants');
-const db = require('../handler/db');
+RisksConstants.riskCategories = [
+	'Commercial Issue',
+	'Environmental Issue',
+	'Health - Material effect',
+	'Health - Mechanical effect',
+	'Safety Issue - Fall',
+	'Safety Issue - Trapped',
+	'Safety Issue - Event',
+	'Safety Issue - Handling',
+	'Safety Issue - Struck',
+	'Safety Issue - Public',
+	'Social Issue',
+	'Other Issue',
+	'Unknown',
+];
 
-const findMany = (ts, query, projection, sort) => db.find(ts, COL_NAME, query, projection, sort);
-
-Jobs.getJobsToUsers = (teamspace) => findMany(teamspace, {}, { _id: 1, users: 1 });
-
-Jobs.addDefaultJobs = async (teamspace) => {
-	await db.insertMany(teamspace, COL_NAME, DEFAULT_JOBS.map((job) => ({ ...job, users: [] })));
-};
-
-Jobs.assignUserToJob = async (teamspace, job, username) => {
-	await db.updateOne(teamspace, COL_NAME, { _id: job }, { $push: { users: username } });
-};
-
-module.exports = Jobs;
+module.exports = RisksConstants;

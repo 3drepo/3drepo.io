@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,22 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Jobs = {};
+const JobsConstants = {};
 
-const COL_NAME = 'jobs';
-const { DEFAULT_JOBS } = require('./jobs.constants');
-const db = require('../handler/db');
+JobsConstants.DEFAULT_OWNER_JOB = 'Admin';
 
-const findMany = (ts, query, projection, sort) => db.find(ts, COL_NAME, query, projection, sort);
+JobsConstants.DEFAULT_JOBS = [
+	{ _id: 'Admin', color: '#f7f7b2' },
+	{ _id: 'Client', color: '#a6cee3' },
+	{ _id: 'Architect', color: '#213f99' },
+	{ _id: 'Structural Engineer', color: '#33a02c' },
+	{ _id: 'MEP Engineer', color: '#fb9a99' },
+	{ _id: 'Project Manager', color: '#e31a1c' },
+	{ _id: 'Quantity Surveyor', color: '#ff7f00' },
+	{ _id: 'Asset Manager', color: '#ffff99' },
+	{ _id: 'Main Contractor', color: '#b15928' },
+	{ _id: 'Supplier', color: '#6a3d9a' },
+];
 
-Jobs.getJobsToUsers = (teamspace) => findMany(teamspace, {}, { _id: 1, users: 1 });
-
-Jobs.addDefaultJobs = async (teamspace) => {
-	await db.insertMany(teamspace, COL_NAME, DEFAULT_JOBS.map((job) => ({ ...job, users: [] })));
-};
-
-Jobs.assignUserToJob = async (teamspace, job, username) => {
-	await db.updateOne(teamspace, COL_NAME, { _id: job }, { $push: { users: username } });
-};
-
-module.exports = Jobs;
+module.exports = JobsConstants;
