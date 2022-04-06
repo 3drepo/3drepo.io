@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,25 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
-import DownloadIconBase from '@assets/icons/download_arrow.svg';
-import { IconButton } from '@mui/material';
+type IProps = {
+	className?: any;
+};
 
-export const Container = styled.div`
-	display: flex;
-	align-items: center;
-	height: 100%;
-	padding-left: 20px;
-	padding-right: 13px;
-`;
-
-export const DownloadIcon = styled(DownloadIconBase)`
-	color: ${({ theme }) => theme.palette.primary.contrast};
-`;
-
-export const DownloadButton = styled(IconButton)`
-	margin: 0 0 0 11px;
-	&:hover {
-		background-color: ${({ theme }) => theme.palette.primary.main};
-	}
-`;
+export default ({ className }: IProps) => (
+	<svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+		<path
+			d="M11.6667 4.66667H8.55556V0H3.88889V4.66667H0.777778L6.22222 10.8889L11.6667 4.66667ZM0 12.4444H12.4444V14H0V12.4444Z"
+			fill="currentColor"
+		/>
+	</svg>
+);

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,25 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
-import DownloadIconBase from '@assets/icons/download_arrow.svg';
-import { IconButton } from '@mui/material';
 
-export const Container = styled.div`
-	display: flex;
-	align-items: center;
-	height: 100%;
-	padding-left: 20px;
-	padding-right: 13px;
-`;
-
-export const DownloadIcon = styled(DownloadIconBase)`
-	color: ${({ theme }) => theme.palette.primary.contrast};
-`;
-
-export const DownloadButton = styled(IconButton)`
-	margin: 0 0 0 11px;
-	&:hover {
-		background-color: ${({ theme }) => theme.palette.primary.main};
-	}
-`;
+// TODO - correctly implement this
+export const downloadFile = (data, filename) => {
+	const content = JSON.stringify(data, null, 2);
+	const a = document.createElement('a');
+	const file = new Blob([content]);
+	a.href = URL.createObjectURL(file);
+	a.download = filename;
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+};

@@ -22,3 +22,5 @@ export const fetchRevisions = (teamspace: string, projectId: string, containerId
 export const setRevisionVoidStatus = (teamspace: string, projectId: string, containerId: string, revision: string, isVoid = true) => api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions/${revision}`, {
 	void: isVoid,
 });
+
+export const fetchRevisionFile = (teamspace: string, projectId: string, containerId: string, revision: string) => api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions/${revision}/files`);
