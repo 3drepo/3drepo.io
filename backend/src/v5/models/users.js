@@ -16,6 +16,7 @@
  */
 
 const { createResponseCode, templates } = require('../utils/responseCodes');
+const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
 const config = require('../utils/config');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
@@ -210,8 +211,60 @@ User.getAvatar = async (username) => {
 	return avatar;
 };
 
+User.addUser = async (newUserData) => {
+	const customData = {
+		createdAt: new Date(),
+		inactive: true,
+		firstName: newUserData.firstName,
+		lastName: newUserData.lastName,
+		email: newUserData.email,
+		mailListOptOut: !newUserData.mailListAgreed,
+		billing: {
+			billingInfo: {
+				firstName: newUserData.firstName,
+				lastName: newUserData.lastName,
+				countryCode: newUserData.countryCode,
+				company: newUserData.company,
+			},
+		},
+		permissions: [],
+	};
+
+	const expiryAt = new Date();
+	expiryAt.setHours(expiryAt.getHours() + config.tokenExpiry.emailVerify);
+	customData.emailVerifyToken = {
+		token: newUserData.token,
+		expiredAt: expiryAt,
+	};
+
+	await db.createUser(newUserData.username, newUserData.password, customData);
+};
+
+User.verify = async (username) => {
+	const { customData } = await db.findOneAndUpdate('admin', COLL_NAME, { user: username },
+		{
+			$unset: {
+				'customData.inactive': 1,
+				'customData.emailVerifyToken': 1,
+			},
+		},
+		{
+			'customData.firstName': 1,
+			'customData.lastName': 1,
+			'customData.email': 1,
+			'customData.billing.billingInfo.company': 1,
+			'customData.mailListOptOut': 1,
+		});
+
+	return customData;
+};
+
+User.grantAdminToUser = (teamspace, username) => updateUser(teamspace,
+	{ $push: { 'customData.permissions': { user: username, permissions: [TEAMSPACE_ADMIN] } } });
+
 User.uploadAvatar = (username, avatarBuffer) => updateUser(username, { $set: { 'customData.avatar': { data: avatarBuffer } } });
 
-User.updateResetPasswordToken = (username, resetPasswordToken) => updateUser(username, { $set: { 'customData.resetPasswordToken': resetPasswordToken } });
+User.updateResetPasswordToken = (username, resetPasswordToken) => updateUser(username,
+	{ $set: { 'customData.resetPasswordToken': resetPasswordToken } });
 
 module.exports = User;
