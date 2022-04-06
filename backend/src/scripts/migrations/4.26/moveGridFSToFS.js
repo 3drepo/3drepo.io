@@ -42,7 +42,7 @@ const moveFile = async (teamspace, collection, filename) => {
 		await updateOne(teamspace, `${collection}${filesExt}`, { filename }, { $set: { filename: existingRef._id } });
 	} else {
 		const newRef = await FsService.storeFile(file);
-		newRef._id = existingRef?._id || newRef._id;
+		newRef._id = existingRef?._id || filename;
 		await Promise.all([
 			updateOne(teamspace, `${collection}.ref`, { _id: newRef._id }, { $set: newRef }, true),
 			updateOne(teamspace, `${collection}${filesExt}`, { filename }, { $set: { filename: newRef._id } }),
