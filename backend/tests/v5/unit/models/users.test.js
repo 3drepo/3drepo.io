@@ -586,7 +586,7 @@ const testGrantTeamspacePermissionToUser = () => {
 			await User.grantAdminToUser(username, teamspace);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username },
-				{ $push: { 'customData.permissions': { user: teamspace, TEAMSPACE_ADMIN } } });
+				{ $push: { 'customData.permissions': { user: teamspace, permissions: [TEAMSPACE_ADMIN] } } });
 		});
 	});
 };

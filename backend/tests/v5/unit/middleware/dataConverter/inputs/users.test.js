@@ -269,7 +269,6 @@ const testValidateSignUpData = () => {
 		[{ body: { ...newUserData, username: '_*., +-=' } }, false, 'with invalid username', templates.invalidArguments],
 		[{ body: { ...newUserData, email: existingEmail } }, false, 'with email that already exists', templates.invalidArguments],
 		[{ body: { ...newUserData, email: generateRandomString() } }, false, 'with invalid email', templates.invalidArguments],
-		[{ body: { ...newUserData, extraProp: generateRandomString() } }, false, 'with extra properties', templates.invalidArguments],
 		[{ body: { ...newUserData, firstName: generateRandomString(50) } }, false, 'with too large firstName', templates.invalidArguments],
 		[{ body: { ...newUserData, lastName: generateRandomString(50) } }, false, 'with too large lastName', templates.invalidArguments],
 		[{ body: { ...newUserData, countryCode: generateRandomString() } }, false, 'with invalid country', templates.invalidArguments],
