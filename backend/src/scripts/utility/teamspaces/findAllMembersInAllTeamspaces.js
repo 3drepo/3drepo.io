@@ -25,6 +25,7 @@ const { v5Path } = require('../../../interop');
 const { logger } = require(`${v5Path}/utils/logger`);
 const { getTeamspaceList } = require('../../common/utils');
 const FS = require('fs');
+const Path = require('path');
 
 const { find } = require(`${v5Path}/handler/db`);
 
@@ -35,8 +36,7 @@ const findMembersInTS = async (teamspace) => {
 	return results.map(({ user, customData: { lastLoginAt } }) => ({ user, lastLoginAt }));
 };
 
-const writeResultsToFile = (results) => new Promise((resolve) => {
-	const outFile = 'membersInTeamspaces.csv';
+const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 	logger.logInfo(`Writing results to ${outFile}`);
 	const writeStream = FS.createWriteStream(outFile);
 	writeStream.write('Teamspace,User,lastLogin\n');
@@ -49,7 +49,7 @@ const writeResultsToFile = (results) => new Promise((resolve) => {
 	writeStream.end(resolve);
 });
 
-const run = async () => {
+const run = async (outFile) => {
 	logger.logInfo('Finding all members from all teamspaces...');
 	const teamspaces = await getTeamspaceList();
 	const res = [];
@@ -59,8 +59,23 @@ const run = async () => {
 		const members = await findMembersInTS(teamspace);
 		res.push({ teamspace, members });
 	}
-	await writeResultsToFile(res);
+	await writeResultsToFile(res, outFile);
 };
 
-// eslint-disable-next-line no-console
-run().catch(console.log).finally(process.exit);
+const genYargs = (yargs) => {
+	const commandName = Path.basename(__filename, Path.extname(__filename));
+	const argsSpec = (subYargs) => subYargs.option('out', {
+		describe: 'file path for the output CSV',
+		type: 'string',
+		default: './output.csv',
+	});
+	return yargs.command(commandName,
+		'Create a CSV dump of all members from all teamspaces',
+		argsSpec,
+		(argv) => run(argv.out));
+};
+
+module.exports = {
+	run,
+	genYargs,
+};

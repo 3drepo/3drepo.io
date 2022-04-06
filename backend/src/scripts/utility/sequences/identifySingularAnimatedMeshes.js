@@ -26,6 +26,7 @@ const { getLatestRevision } = require(`${v5Path}/models/revisions`);
 const { find } = require(`${v5Path}/handler/db`);
 const { stringToUUID, UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
 const FS = require('fs');
+const Path = require('path');
 
 const findLatestRevId = async (teamspace, modelId) => {
 	const { _id } = await getLatestRevision(teamspace, modelId, { _id: 1 });
@@ -77,8 +78,7 @@ const getMeshMeta = async (teamspace, modelId, sharedIds) => {
 	return lut;
 };
 
-const writeResultsToFile = (meshInfo, sharedIdToResourceId) => new Promise((resolve) => {
-	const outFile = 'singleAnimatedMeshes.csv';
+const writeResultsToFile = (meshInfo, sharedIdToResourceId, outFile) => new Promise((resolve) => {
 	logger.logInfo(`Writing results to ${outFile}`);
 	const writeStream = FS.createWriteStream(outFile);
 	writeStream.write('3drepo ID,Name,Resource ID\n');
@@ -91,10 +91,11 @@ const writeResultsToFile = (meshInfo, sharedIdToResourceId) => new Promise((reso
 	writeStream.end(resolve);
 });
 
-const run = async () => {
-	const teamspace = process.argv[2];
-	const modelId = process.argv[3];
-	const revId = stringToUUID(process.argv[4]) || await findLatestRevId(teamspace, modelId);
+const run = async (teamspace, modelId, rev, outFile) => {
+	if (!(teamspace && modelId)) {
+		throw new Error('Teamspace and model must be provided to execute this script');
+	}
+	const revId = stringToUUID(rev) || await findLatestRevId(teamspace, modelId);
 
 	logger.logInfo(`Finding meshes in ${teamspace}.${modelId} rev: ${UUIDToString(revId)}`);
 
@@ -104,12 +105,36 @@ const run = async () => {
 	logger.logInfo(`Mesh info length: ${meshInfo.length}`);
 	const sharedIdToResourceId = await getMeshMeta(teamspace, modelId, meshInfo.map(({ sharedId }) => sharedId));
 
-	await writeResultsToFile(meshInfo, sharedIdToResourceId);
+	await writeResultsToFile(meshInfo, sharedIdToResourceId, outFile);
 };
 
-if (process.argv.length < 4) {
-	logger.logError('Not enough arguments. (<teamspace> <model id> [revision id])');
-} else {
-	// eslint-disable-next-line no-console
-	run().catch(console.log).finally(process.exit);
-}
+const genYargs = (yargs) => {
+	const commandName = Path.basename(__filename, Path.extname(__filename));
+	const argsSpec = (subYargs) => subYargs.positional('teamspace', {
+		describe: 'Name of the teamspace',
+		type: 'string',
+	})
+		.positional('model', {
+			describe: 'Model ID',
+			type: 'string',
+		}).positional('revision', {
+			describe: 'Revision ID (Latest is used if not provided)',
+			type: 'string',
+		}).option('out', {
+			describe: 'File path to output the results to',
+			type: 'string',
+			default: 'out.csv',
+		});
+
+	return yargs.command(
+		commandName,
+		'Identify any meshes that are animated on its own.',
+		argsSpec,
+		(argv) => run(argv._[1], argv._[2], argv._[3], argv.out),
+	);
+};
+
+module.exports = {
+	run,
+	genYargs,
+};

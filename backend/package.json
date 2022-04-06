@@ -19,7 +19,7 @@
     "start": "cross-env NODE_CONFIG_DIR=../config node ./src/v4/3drepo.js",
     "watch": "cross-env NODE_CONFIG_DIR=../config nodemon ./src/v4/3drepo.js",
     "run-migration": "cross-env NODE_CONFIG_DIR=../config node ./src/scripts/migrations/runMigrations",
-    "run-script": "cross-env NODE_CONFIG_DIR=../config node"
+    "run-script": "cross-env NODE_CONFIG_DIR=../config node ./src/scripts/utility/index"
   },
   "dependencies": {
     "@elastic/elasticsearch": "7.12.0",
@@ -75,6 +75,7 @@
     "winston-daily-rotate-file": "3.6.0",
     "xml2js": "0.4.19",
     "xmlbuilder": "10.1.1",
+    "yargs": "17.4.0",
     "yauzl-promise": "2.1.3",
     "yup": "0.32.9",
     "zxcvbn": "4.4.2"
