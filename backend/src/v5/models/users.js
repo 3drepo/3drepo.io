@@ -259,7 +259,7 @@ User.verify = async (username) => {
 	return customData;
 };
 
-User.grantAdminToUser = (teamspaceOwner, username) => updateUser(teamspaceOwner,
+User.grantAdminToUser = (teamspace, username) => updateUser(teamspace,
 	{ $push: { 'customData.permissions': { user: username, permissions: [TEAMSPACE_ADMIN] } } });
 
 User.uploadAvatar = (username, avatarBuffer) => updateUser(username, { $set: { 'customData.avatar': { data: avatarBuffer } } });

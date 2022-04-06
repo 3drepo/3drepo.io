@@ -27,6 +27,7 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 jest.mock('../../../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
+const { formatPronouns } = require(`${src}/utils/helper/strings`);
 const Users = require(`${src}/middleware/dataConverter/inputs/users`);
 const MockExpressRequest = require('mock-express-request');
 const FormData = require('form-data');
@@ -279,9 +280,12 @@ const testValidateSignUpData = () => {
 	])('Check if req arguments for signing up user are valid', (req, shouldPass, desc, expectedError) => {
 		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
 			const mockCB = jest.fn();
+			const bodyBefore = { ...req.body };
 			await Users.validateSignUpData(req, {}, mockCB);
 			if (shouldPass) {
 				expect(mockCB).toHaveBeenCalledTimes(1);
+				expect(req.body.firstName).toEqual(formatPronouns(bodyBefore.firstName));
+				expect(req.body.lastName).toEqual(formatPronouns(bodyBefore.lastName));
 			} else {
 				expect(mockCB).toHaveBeenCalledTimes(0);
 				expect(Responder.respond).toHaveBeenCalledTimes(1);

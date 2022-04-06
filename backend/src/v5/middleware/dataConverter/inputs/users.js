@@ -202,8 +202,8 @@ const generateSignUpSchema = () => {
 				return true;
 			}).required(),
 		password: types.strings.password.required(),
-		firstName: types.strings.name.required().transform((value) => formatPronouns(value)),
-		lastName: types.strings.name.required().transform((value) => formatPronouns(value)),
+		firstName: types.strings.name.required().transform(formatPronouns),
+		lastName: types.strings.name.required().transform(formatPronouns),
 		countryCode: types.strings.countryCode.required(),
 		company: types.strings.title.optional(),
 		mailListAgreed: Yup.bool().required(),
