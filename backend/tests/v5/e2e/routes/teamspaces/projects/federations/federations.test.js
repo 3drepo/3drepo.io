@@ -18,6 +18,8 @@
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../helper/services');
 const { src } = require('../../../../../helper/path');
+const { generateUUID } = require('../../../../../helper/services');
+const { UUIDToString } = require('../../../../../../../src/v5/utils/helper/uuids');
 
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -124,6 +126,19 @@ const modelSettings = [
 			},
 		},
 	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: { ...ServiceHelper.generateRandomModelProperties(true),
+			defaultView: generateUUID(),
+			timestamp: new Date(),
+			errorReason: {
+				message: 'error reason',
+				timestamp: new Date(),
+				errorCode: 1,
+			},
+		},
+	},
 	// NOTE: this model gets deleted after deleteFederation test
 	{
 		_id: ServiceHelper.generateUUIDString(),
@@ -190,7 +205,8 @@ const revisions = [
 const federationWithRev = modelSettings[0];
 const federationWithoutRev = modelSettings[1];
 const federationWithoutSubModels = modelSettings[2];
-const federationToDelete = modelSettings[7];
+const federationToDelete = modelSettings[8];
+const federationWithUUIDView = modelSettings[7];
 const federationWithRevIssues = [issues[0], issues[1]];
 const federationWithRevRisks = [risks[0], risks[1]];
 const federationWithoutRevIssues = [issues[2]];
@@ -723,6 +739,18 @@ const testGetSettings = () => {
 		test('should return the federation settings correctly if the user has access (no timestamp)', async () => {
 			const res = await agent.get(`${route(modelSettings[6]._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
 			expect(res.body).toEqual(formatToSettings(modelSettings[6]));
+		});
+
+		test('should return the federation settings correctly if the user has access (with UUID default view)', async () => {
+			const res = await agent.get(`${route(federationWithUUIDView._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			const federationWithStringView = {
+				...federationWithUUIDView,
+				properties: {
+					...federationWithUUIDView.properties,
+					defaultView: UUIDToString(federationWithUUIDView.properties.defaultView),
+				},
+			};
+			expect(res.body).toEqual(formatToSettings(federationWithStringView));
 		});
 	});
 };
