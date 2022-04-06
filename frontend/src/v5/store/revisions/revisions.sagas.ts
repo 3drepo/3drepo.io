@@ -51,7 +51,7 @@ export function* setVoidStatus({ teamspace, projectId, containerId, revisionId, 
 
 export function* download({ teamspace, projectId, containerId, revisionId }: DownloadAction) {
 	try {
-		const url = yield API.Revisions.getRevisionFileUrl(teamspace, projectId, containerId, revisionId);
+		const url = API.Revisions.getRevisionFileUrl(teamspace, projectId, containerId, revisionId);
 		window.open(url, '_blank');
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
