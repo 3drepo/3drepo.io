@@ -20,11 +20,13 @@ import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { AuthActions, AuthTypes, LoginAction } from './auth.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
+import { CurrentUserActions } from '../currentUser/currentUser.redux';
 
 function* authenticate() {
 	yield put(AuthActions.setPendingStatus(true));
 	try {
 		yield API.Auth.authenticate();
+		yield put(CurrentUserActions.getProfile());
 		yield put(AuthActions.setAuthenticationStatus(true));
 	} catch (error) {
 		if (error.response.status !== 401) {
@@ -42,7 +44,7 @@ export function* login({ username, password }: LoginAction) {
 	yield put(AuthActions.setPendingStatus(true));
 	try {
 		yield API.Auth.login(username, password);
-		yield authenticate();
+		yield put(CurrentUserActions.getProfile());
 		yield put(AuthActions.setAuthenticationStatus(true));
 	} catch (error) {
 		const data = error.response?.data;
