@@ -69,8 +69,6 @@ const CATEGORIES = [
 	formatMessage({ id: 'category.type.other', defaultMessage: 'Other' }),
 ];
 
-const DECIMAL_UNIT = UNITS[2];
-
 interface IFormInput {
 	name: string;
 	unit: string;
@@ -291,14 +289,14 @@ export const SettingsForm = ({
 				<FormTextField
 					name="latitude"
 					control={control}
-					label={formatMessage({ id: 'settings.form.lat', defaultMessage: 'Latitude {unit}' }, { unit: DECIMAL_UNIT.name })}
+					label={formatMessage({ id: 'settings.form.lat', defaultMessage: 'Latitude (decimal)' })}
 					formError={errors.latitude}
 					required
 				/>
 				<FormTextField
 					name="longitude"
 					control={control}
-					label={formatMessage({ id: 'settings.form.long', defaultMessage: 'Longitude {unit}' }, { unit: DECIMAL_UNIT.name })}
+					label={formatMessage({ id: 'settings.form.long', defaultMessage: 'Longitude (decimal)' })}
 					formError={errors.longitude}
 					required
 				/>
@@ -308,26 +306,27 @@ export const SettingsForm = ({
 				control={control}
 				label={formatMessage({ id: 'settings.form.angleFromNorth', defaultMessage: 'Angle from North (clockwise degrees)' })}
 				formError={errors.angleFromNorth}
+				required
 			/>
 			<FlexContainer>
 				<FormTextField
 					name="x"
 					control={control}
-					label={`x ${currentUnit}`}
+					label={`x (${currentUnit})`}
 					formError={errors.x}
 					required
 				/>
 				<FormTextField
 					name="y"
 					control={control}
-					label={`y ${currentUnit}`}
+					label={`y (${currentUnit})`}
 					formError={errors.y}
 					required
 				/>
 				<FormTextField
 					name="z"
 					control={control}
-					label={`z ${currentUnit}`}
+					label={`z (${currentUnit})`}
 					formError={errors.z}
 					required
 				/>
