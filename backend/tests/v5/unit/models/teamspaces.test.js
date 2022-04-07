@@ -21,6 +21,9 @@ const Teamspace = require(`${src}/models/teamspaces`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
+const { generateRandomString } = require('../../helper/services');
+const { topicTypes } = require('../../../../src/v5/models/issues.constants');
+const { riskCategories } = require('../../../../src/v5/models/risks.constants');
 
 const testHasAccessToTeamspace = () => {
 	test('should return true if the user has access to teamspace', async () => {
@@ -139,9 +142,24 @@ const testGetSubscriptions = () => {
 	});
 };
 
+const testCreateTeamspaceSettings = () => {
+	describe('Create teamspace settings', () => {
+		test('should create teamspace settings', async () => {
+			const teamspace = generateRandomString();
+			const expectedSettings = { _id: teamspace, topicTypes, riskCategories };
+
+			const fn = jest.spyOn(db, 'insertOne').mockImplementation(() => {});
+			await Teamspace.createTeamspaceSettings(teamspace);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'teamspace', expectedSettings);
+		});
+	});
+};
+
 describe('models/teamspaces', () => {
 	testTeamspaceAdmins();
 	testHasAccessToTeamspace();
 	testGetSubscriptions();
 	testGetMembersInfo();
+	testCreateTeamspaceSettings();
 });
