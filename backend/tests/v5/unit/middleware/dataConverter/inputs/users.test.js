@@ -19,33 +19,42 @@ const { src, modelFolder, imagesFolder } = require('../../../../helper/path');
 
 jest.mock('../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
+jest.mock('../../../../../../src/v5/utils/httpsReq');
+const HttpsReq = require(`${src}/utils/httpsReq`);
 jest.mock('../../../../../../src/v5/utils/permissions/permissions');
 const { cloneDeep } = require(`${src}/utils/helper/objects`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 jest.mock('../../../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
+const { formatPronouns } = require(`${src}/utils/helper/strings`);
 const Users = require(`${src}/middleware/dataConverter/inputs/users`);
 const MockExpressRequest = require('mock-express-request');
 const FormData = require('form-data');
 const fs = require('fs');
 const path = require('path');
+const { generateRandomString } = require('../../../../helper/services');
+
+const config = require(`${src}/utils/config`);
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
+HttpsReq.post.mockImplementation(() => Promise.resolve({
+	success: true,
+}));
 
-const nonExistingUsername = 'nonExistingUser';
+const availableUsername = 'nonExistingUser';
 const existingUsername = 'existingUsername';
-const nonExistingEmail = 'nonExistingEmail@email.com';
+const availableEmail = 'availableEmail@email.com';
 const existingEmail = 'existingEmail@email.com';
 const validPassword = 'Abcdef12345!';
 
 UsersModel.getUserByQuery.mockImplementation((query) => {
-	if ((query.$or && query.$or[0]?.user === nonExistingUsername) || query['customData.email'] === nonExistingEmail) {
+	if ((query.$or && query.$or[0]?.user === availableUsername) || query['customData.email'] === availableEmail) {
 		throw templates.userNotFound;
 	}
 
-	if (query.user === nonExistingUsername) {
+	if (query.user === availableUsername) {
 		throw templates.userNotFound;
 	}
 
@@ -53,11 +62,18 @@ UsersModel.getUserByQuery.mockImplementation((query) => {
 });
 
 UsersModel.getUserByUsernameOrEmail.mockImplementation((usernameOrEmail) => {
-	if (usernameOrEmail === nonExistingUsername || usernameOrEmail === nonExistingEmail) {
-		throw templates.userNotFound;
+	if (usernameOrEmail === existingUsername || usernameOrEmail === existingEmail) {
+		return { user: existingUsername };
 	}
 
-	return { user: existingUsername };
+	throw templates.userNotFound;
+});
+
+UsersModel.getUserByUsername.mockImplementation((username) => {
+	if (username === existingUsername) {
+		return { user: existingUsername };
+	}
+	throw templates.userNotFound;
 });
 
 UsersModel.authenticate.mockImplementation((username, password) => {
@@ -73,12 +89,12 @@ const testValidateLoginData = () => {
 		[{ body: { user: 1, password: '123' } }, false, 'with invalid username', templates.invalidArguments],
 		[{ body: { user: '123' } }, false, 'with no username', templates.invalidArguments],
 		[{ body: { user: existingUsername, password: 123 } }, false, 'with invalid password', templates.invalidArguments],
-		[{ body: { user: nonExistingUsername, password: 'validPassword' } }, false, 'with user that does not exist',
+		[{ body: { user: availableUsername, password: 'validPassword' } }, false, 'with user that does not exist',
 			templates.incorrectUsernameOrPassword],
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
 		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
 		[{ body: { user: existingUsername, password: 'validPassword' } }, true, 'with user that exists'],
-		[{ body: { user: 'existing@email.com', password: 'validPassword' } }, true, 'with user that exists using email'],
+		[{ body: { user: existingEmail, password: 'validPassword' } }, true, 'with user that exists using email'],
 		[{ body: { user: existingUsername, password: 'validPassword', extraProp: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
 	])('Check if req arguments for loggin in are valid', (data, shouldPass, desc, expectedError) => {
 		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
@@ -103,8 +119,8 @@ const testValidateUpdateData = () => {
 		[{ body: { lastName: 'this is a very very large string that should fail' } }, false, 'with too large lastName', templates.invalidArguments],
 		[{ body: { email: 'invalid email' } }, false, 'with invalid email', templates.invalidArguments],
 		[{ body: { email: existingEmail } }, false, 'with email that already exists', templates.invalidArguments],
-		[{ body: { email: nonExistingEmail } }, true, 'with email that is available'],
-		[{ body: { email: nonExistingEmail, extraProp: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
+		[{ body: { email: availableEmail } }, true, 'with email that is available'],
+		[{ body: { email: availableEmail, extraProp: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
 		[{ body: { company: '' } }, false, 'with empty company', templates.invalidArguments],
 		[{ body: { company: 'Some company' } }, true, 'with company'],
 		[{ body: { countryCode: 'invalid country' } }, false, 'with invalid country', templates.invalidArguments],
@@ -187,7 +203,7 @@ const testValidateAvatarData = () => {
 const testForgotPasswordData = () => {
 	describe.each([
 		[{ body: { user: existingUsername } }, true, 'with valid username'],
-		[{ body: { user: nonExistingUsername } }, false, 'with invalid username', templates.ok],
+		[{ body: { user: availableUsername } }, false, 'with invalid username', templates.ok],
 		[{ body: { user: existingEmail } }, true, 'with valid email'],
 		[{ body: { user: existingEmail, extra: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
@@ -215,7 +231,7 @@ const testResetingPasswordData = () => {
 		[{ body: { token: 'someToken', newPassword: validPassword } }, false, 'without user', templates.invalidArguments],
 		[{ body: { token: 'abc', newPassword: '123', user: 'some user' } }, false, 'with weak new password', templates.invalidArguments],
 		[{ body: { token: 'abc', newPassword: 'Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef123!Abcdef', user: 'some user' } }, false, 'with too long new password', templates.invalidArguments],
-		[{ body: { token: 'abc', newPassword: validPassword, user: nonExistingUsername } }, false, 'with user that doesnt exist', templates.invalidArguments],
+		[{ body: { token: 'abc', newPassword: validPassword, user: availableUsername } }, false, 'with user that doesnt exist', templates.invalidArguments],
 		[{ body: { token: 'someToken', newPassword: validPassword, user: 'some user' } }, true, 'with token and valid new password'],
 		[{ body: { token: 'someToken', newPassword: validPassword, user: 'some user', extra: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
 		[{ body: {} }, false, 'with empty body', templates.invalidArguments, templates.invalidArguments],
@@ -235,10 +251,104 @@ const testResetingPasswordData = () => {
 	});
 };
 
+const testValidateSignUpData = () => {
+	const newUserData = {
+		username: availableUsername,
+		email: availableEmail,
+		password: generateRandomString(),
+		firstName: generateRandomString(),
+		lastName: generateRandomString(),
+		countryCode: 'GB',
+		company: generateRandomString(),
+		mailListAgreed: true,
+	};
+
+	describe.each([
+		[{ body: { ...newUserData } }, true, 'with valid data'],
+		[{ body: { ...newUserData, company: undefined } }, true, 'with empty company'],
+		[{ body: { ...newUserData, username: existingUsername } }, false, 'with username that already exists', templates.invalidArguments],
+		[{ body: { ...newUserData, username: '_*., +-=' } }, false, 'with invalid username', templates.invalidArguments],
+		[{ body: { ...newUserData, email: existingEmail } }, false, 'with email that already exists', templates.invalidArguments],
+		[{ body: { ...newUserData, email: generateRandomString() } }, false, 'with invalid email', templates.invalidArguments],
+		[{ body: { ...newUserData, firstName: generateRandomString(50) } }, false, 'with too large firstName', templates.invalidArguments],
+		[{ body: { ...newUserData, lastName: generateRandomString(50) } }, false, 'with too large lastName', templates.invalidArguments],
+		[{ body: { ...newUserData, countryCode: generateRandomString() } }, false, 'with invalid country', templates.invalidArguments],
+		[{ body: { ...newUserData, password: generateRandomString(3) } }, false, 'with short password', templates.invalidArguments],
+		[{ body: { ...newUserData, password: 'abcdefghi' } }, false, 'with weak newPassword', templates.invalidArguments],
+		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
+		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
+	])('Check if req arguments for signing up user are valid', (req, shouldPass, desc, expectedError) => {
+		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
+			const mockCB = jest.fn();
+			const bodyBefore = { ...req.body };
+			await Users.validateSignUpData(req, {}, mockCB);
+			if (shouldPass) {
+				expect(mockCB).toHaveBeenCalledTimes(1);
+				expect(req.body.firstName).toEqual(formatPronouns(bodyBefore.firstName));
+				expect(req.body.lastName).toEqual(formatPronouns(bodyBefore.lastName));
+			} else {
+				expect(mockCB).toHaveBeenCalledTimes(0);
+				expect(Responder.respond).toHaveBeenCalledTimes(1);
+				expect(Responder.respond.mock.results[0].value.code).toEqual(expectedError.code);
+			}
+		});
+	});
+
+	test('with captcha enabled it should call next', async () => {
+		config.auth.captcha = true;
+		config.captcha = {};
+
+		const mockCB = jest.fn();
+		await Users.validateSignUpData({ body: { ...newUserData, captcha: generateRandomString() } }, {}, mockCB);
+		expect(mockCB).toHaveBeenCalledTimes(1);
+
+		config.auth.captcha = false;
+		config.captcha = null;
+	});
+
+	test('with captcha enabled but not provided it should respond with invalidArguments', async () => {
+		config.auth.captcha = true;
+		config.captcha = {};
+
+		const mockCB = jest.fn();
+		await Users.validateSignUpData({ body: newUserData }, {}, mockCB);
+		expect(mockCB).toHaveBeenCalledTimes(0);
+		expect(Responder.respond).toHaveBeenCalledTimes(1);
+		expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
+
+		config.auth.captcha = false;
+		config.captcha = null;
+	});
+};
+
+const testVerifyData = () => {
+	describe.each([
+		[{ body: { username: existingUsername, token: generateRandomString() } }, true, 'with valid data'],
+		[{ body: { username: existingUsername } }, false, 'without token', templates.invalidArguments],
+		[{ body: { username: availableUsername, token: generateRandomString() } }, false, 'with non existing username', templates.invalidArguments],
+		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
+		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
+	])('Check if req arguments for verifying user are valid', (req, shouldPass, desc, expectedError) => {
+		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
+			const mockCB = jest.fn();
+			await Users.validateVerifyData(req, {}, mockCB);
+			if (shouldPass) {
+				expect(mockCB).toHaveBeenCalledTimes(1);
+			} else {
+				expect(mockCB).toHaveBeenCalledTimes(0);
+				expect(Responder.respond).toHaveBeenCalledTimes(1);
+				expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
+			}
+		});
+	});
+};
+
 describe('middleware/dataConverter/inputs/users', () => {
 	testValidateLoginData();
 	testValidateUpdateData();
 	testValidateAvatarData();
 	testForgotPasswordData();
 	testResetingPasswordData();
+	testValidateSignUpData();
+	testVerifyData();
 });

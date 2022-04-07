@@ -15,15 +15,40 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, canLogIn, deleteApiKey, generateApiKey, getAvatar,
-	getUserByUsername, updatePassword, updateProfile, updateResetPasswordToken, uploadAvatar } = require('../models/users');
-const { isEmpty, removeFields } = require('../utils/helper/objects');
-
 const Users = {};
+
+const { addUser, authenticate, canLogIn, deleteApiKey, generateApiKey, getAvatar,
+	getUserByUsername, updatePassword, updateProfile, updateResetPasswordToken, uploadAvatar, verify } = require('../models/users');
+const { isEmpty, removeFields } = require('../utils/helper/objects');
 const { FORGOT_PASSWORD } = require('../services/mailer/templateNames');
-const config = require('../utils/config');
-const { generateHashString } = require('../utils/helper/strings');
 const { sendEmail } = require('../services/mailer/mailer');
+const config = require('../utils/config');
+const { events } = require('../services/eventsManager/eventsManager.constants');
+const { generateHashString } = require('../utils/helper/strings');
+const { publish } = require('../services/eventsManager/eventsManager');
+
+Users.signUp = async (newUserData) => {
+	const token = generateHashString();
+	await addUser({ ...newUserData, token });
+	await sendVerifyUserEmail(newUserData.email, {
+		token,
+		email: newUserData.email,
+		firstName: newUserData.firstName,
+		username: newUserData.username,
+	});
+};
+
+Users.verify = async (username, token) => {
+	const customData = await verify(username, token);
+
+	publish(events.USER_VERIFIED, {
+		username,
+		email: customData.email,
+		fullName: `${customData.firstName} ${customData.lastName}`,
+		company: customData.billing.billingInfo.company,
+		mailListOptOut: customData.mailListOptOut,
+	});
+};
 
 Users.login = async (username, password) => {
 	await canLogIn(username);
