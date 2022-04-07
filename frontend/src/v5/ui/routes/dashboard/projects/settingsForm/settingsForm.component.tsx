@@ -28,7 +28,6 @@ import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelectView } from '@controls/formSelectView/formSelectView.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
-import { FormTextFieldUnit } from '@controls/formTextFieldUnit/formTextFieldUnit.component';
 import { FormattedMessage } from 'react-intl';
 import { FlexContainer, SectionTitle, ShareTextField, Placeholder } from './settingsForm.styles';
 
@@ -289,52 +288,46 @@ export const SettingsForm = ({
 				/>
 			</SectionTitle>
 			<FlexContainer>
-				<FormTextFieldUnit
+				<FormTextField
 					name="latitude"
 					control={control}
-					labelName={formatMessage({ id: 'settings.form.lat', defaultMessage: 'LATITUDE' })}
-					labelUnit={DECIMAL_UNIT.name}
+					label={formatMessage({ id: 'settings.form.lat', defaultMessage: 'Latitude {unit}' }, { unit: DECIMAL_UNIT.name })}
 					formError={errors.latitude}
 					required
 				/>
-				<FormTextFieldUnit
+				<FormTextField
 					name="longitude"
 					control={control}
-					labelName={formatMessage({ id: 'settings.form.long', defaultMessage: 'LONGITUDE' })}
-					labelUnit={DECIMAL_UNIT.name}
+					label={formatMessage({ id: 'settings.form.long', defaultMessage: 'Longitude {unit}' }, { unit: DECIMAL_UNIT.name })}
 					formError={errors.longitude}
 					required
 				/>
 			</FlexContainer>
-			<FormTextFieldUnit
+			<FormTextField
 				name="angleFromNorth"
 				control={control}
-				labelName={formatMessage({ id: 'settings.form.angleFromNorth', defaultMessage: 'ANGLE FROM NORTH' })}
-				labelUnit={formatMessage({ id: 'settings.form.angleFromNorth.unit', defaultMessage: 'clockwise degrees' })}
+				label={formatMessage({ id: 'settings.form.angleFromNorth', defaultMessage: 'Angle from North (clockwise degrees)' })}
 				formError={errors.angleFromNorth}
 			/>
 			<FlexContainer>
-				<FormTextFieldUnit
+				<FormTextField
 					name="x"
 					control={control}
-					labelName="X"
-					labelUnit={currentUnit}
+					label={`x ${currentUnit}`}
 					formError={errors.x}
 					required
 				/>
-				<FormTextFieldUnit
+				<FormTextField
 					name="y"
 					control={control}
-					labelName="Y"
-					labelUnit={currentUnit}
+					label={`y ${currentUnit}`}
 					formError={errors.y}
 					required
 				/>
-				<FormTextFieldUnit
+				<FormTextField
 					name="z"
 					control={control}
-					labelName="Z"
-					labelUnit={currentUnit}
+					label={`z ${currentUnit}`}
 					formError={errors.z}
 					required
 				/>
