@@ -23,7 +23,7 @@ jest.mock('../../../../src/v5/handler/externalServices', () => ({
 	...jest.requireActual('../../../../src/v5/handler/externalServices'),
 	getFileStream: jest.fn().mockImplementation((account, collection, type) => {
 		if (type === unrecognisedType) {
-			throw new Error();
+			throw undefined;
 		}
 	}),
 	removeFiles: jest.fn(),
@@ -154,10 +154,8 @@ const testFetchFileStream = () => {
 
 		test('should download the revision files using grid fs if entry has invalid type', async () => {
 			const fileEntry = { size: '12345', type: unrecognisedType };
-			const expectedData = { readStream: undefined, size: '12345' };
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(fileEntry);
-			const res = await FileRefs.fetchFileStream('someTS', 'someModel', 'history.ref', 'filename');
-			expect(res).toEqual(expectedData);
+			await expect(FileRefs.fetchFileStream('someTS', 'someModel', 'history.ref', 'filename')).rejects.toEqual();
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual('someTS');
 			expect(fn.mock.calls[0][1]).toEqual('someModel.history.ref');
