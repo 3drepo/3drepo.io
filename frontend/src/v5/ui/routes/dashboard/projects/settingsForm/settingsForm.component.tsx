@@ -257,7 +257,6 @@ export const SettingsForm = ({
 			{isContainer && (
 				<FlexContainer>
 					<FormSelect
-						required
 						name="category"
 						label={formatMessage({
 							id: 'settings.form.category',
