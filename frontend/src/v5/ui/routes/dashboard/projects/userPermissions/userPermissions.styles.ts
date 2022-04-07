@@ -32,6 +32,10 @@ export const V4ModelsPermissions = styled(ModelsPermissions)`
 			background-color: ${({ theme }) => theme.palette.primary.contrast};
 		}
 
+		.MuiCheckbox-root:hover {
+			background: transparent;
+		}
+
 		${BodyWrapper} .simplebar-content {
 			overflow: hidden;
 		

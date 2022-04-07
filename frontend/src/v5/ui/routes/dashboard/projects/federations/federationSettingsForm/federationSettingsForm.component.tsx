@@ -28,7 +28,6 @@ import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelectView } from '@controls/formSelectView/formSelectView.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { FederationSettingsSchema } from '@/v5/validation/schemes';
-import { FormTextFieldUnit } from '@controls/formTextFieldUnit/formTextFieldUnit.component';
 import { FormattedMessage } from 'react-intl';
 import { FlexContainer, SectionTitle, ShareTextField } from './federationSettingsForm.styles';
 
@@ -230,52 +229,55 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 				/>
 			</SectionTitle>
 			<FlexContainer>
-				<FormTextFieldUnit
+				<FormTextField
 					name="latitude"
 					control={control}
-					labelName={formatMessage({ id: 'federations.settings.form.lat', defaultMessage: 'LATITUDE' })}
-					labelUnit={DECIMAL_UNIT.name}
+					label={formatMessage({
+						id: 'federations.settings.form.lat',
+						defaultMessage: 'Latitude ({unit})',
+					}, { unit: DECIMAL_UNIT.name })}
 					formError={errors.latitude}
 					required
 				/>
-				<FormTextFieldUnit
+				<FormTextField
 					name="longitude"
 					control={control}
-					labelName={formatMessage({ id: 'federations.settings.form.long', defaultMessage: 'LONGITUDE' })}
-					labelUnit={DECIMAL_UNIT.name}
+					label={formatMessage({
+						id: 'federations.settings.form.long',
+						defaultMessage: 'Longitude ({unit})',
+					}, { unit: DECIMAL_UNIT.name })}
 					formError={errors.longitude}
 					required
 				/>
 			</FlexContainer>
-			<FormTextFieldUnit
+			<FormTextField
 				name="angleFromNorth"
 				control={control}
-				labelName={formatMessage({ id: 'federations.settings.form.angleFromNorth', defaultMessage: 'ANGLE FROM NORTH' })}
-				labelUnit={formatMessage({ id: 'federations.settings.form.angleFromNorth.unit', defaultMessage: 'clockwise degrees' })}
+				label={formatMessage({
+					id: 'federations.settings.form.angleFromNorth',
+					defaultMessage: 'Angle from North ({unit})',
+				}, { unit: 'clockwise degrees' })}
 				formError={errors.angleFromNorth}
 			/>
 			<FlexContainer>
-				<FormTextFieldUnit
+				<FormTextField
 					name="x"
 					control={control}
-					labelName="X"
-					labelUnit={currentUnit}
+					label={`x (${currentUnit})`}
 					formError={errors.x}
 					required
 				/>
-				<FormTextFieldUnit
+				<FormTextField
 					name="y"
 					control={control}
-					labelName="Y"
-					labelUnit={currentUnit}
+					label={`y (${currentUnit})`}
 					formError={errors.y}
 					required
 				/>
-				<FormTextFieldUnit
+				<FormTextField
 					name="z"
 					control={control}
-					labelName="Z"
-					labelUnit={currentUnit}
+					label={`z (${currentUnit})`}
 					formError={errors.z}
 					required
 				/>
