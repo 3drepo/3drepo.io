@@ -60,15 +60,13 @@ Mailer.sendEmail = async (templateName, to, data, attachments) => {
 
 	transporter = transporter || nodemailer.createTransport(config.mail.smtpConfig);
 
-	return new Promise((resolve, reject) => {
-		transporter.sendMail(mailOptions, (err, info) => {
-			if (err) {
-				logger.logDebug(`Email error - ${err.message}`);
-				reject(err);
-			} else {
-				resolve(info);
-			}
-		});
+	await transporter.sendMail(mailOptions, (err, info) => {
+		if (err) {
+			logger.logDebug(`Email error - ${err.message}`);
+			reject(err);
+		} else {
+			resolve(info);
+		}
 	});
 };
 

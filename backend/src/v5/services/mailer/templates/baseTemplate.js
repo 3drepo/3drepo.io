@@ -936,8 +936,6 @@ BaseTemplate.html = (data) => `
          </table>
       </center>
    </body>
-</html>
- 
- `;
+</html>`;
 
 module.exports = BaseTemplate;
