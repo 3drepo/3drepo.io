@@ -26,7 +26,7 @@ export const LoginSchema = Yup.object().shape({
 	username,
 });
 
-export const ForgotPasswordSchema = Yup.object().shape({
+export const PasswordForgotSchema = Yup.object().shape({
 	username,
 });
 

@@ -31,7 +31,7 @@ import { AuthHeading, AuthParagraph, ErrorMessage, PasswordField } from '../comp
 import { ReturnLink } from '../components/returnLink.component';
 import { LOGIN_PATH } from '../../routes.constants';
 
-export const ChangePassword = () => {
+export const PasswordChange = () => {
 	const { token, username } = queryString.parse(window.location.search);
 	const [errorMessage, setErrorMessage] = useState('');
 	const { control, handleSubmit, formState: { isValid, isDirty, errors }, trigger } = useForm({

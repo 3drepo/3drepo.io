@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ForgotPasswordSchema } from '@/v5/validation/auth';
+import { PasswordForgotSchema } from '@/v5/validation/auth';
 import EmailIcon from '@assets/icons/email.svg';
 import { AuthPage } from '@components/authPage';
 import { SubmitButton } from '@controls/submitButton';
@@ -26,11 +26,11 @@ import { FormattedMessage } from 'react-intl';
 import { ReturnLink } from '../components/returnLink.component';
 import { AuthHeading, AuthParagraph, UsernameField } from '../components/components.styles';
 
-export const ForgotPassword = (): JSX.Element => {
+export const PasswordForgot = (): JSX.Element => {
 	const { control, handleSubmit, formState: { isValid, isSubmitted } } = useForm({
 		mode: 'onSubmit',
 		defaultValues: { username: '' },
-		resolver: yupResolver(ForgotPasswordSchema),
+		resolver: yupResolver(PasswordForgotSchema),
 	});
 	const onSubmit = ({ username }) => API.Auth.resetPassword(username);
 
