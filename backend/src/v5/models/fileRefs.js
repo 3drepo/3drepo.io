@@ -16,9 +16,11 @@
  */
 
 const ExternalServices = require('../handler/externalServices');
+const { FILE_MISSING } = require('../services/mailer/templateNames');
+const config = require('../utils/config');
 const db = require('../handler/db');
 const { logger } = require('../utils/logger');
-const { sendFileMissingError } = require('../services/mailer');
+const { sendEmail } = require('../services/mailer/mailer');
 const { templates } = require('../utils/responseCodes');
 
 const FileRefs = {};
@@ -62,7 +64,12 @@ FileRefs.fetchFileStream = async (teamspace, model, extension, fileName) => {
 		return { readStream: stream, size: entry.size };
 	} catch {
 		logger.logError(`Failed to fetch file from ${entry.type}. Trying GridFS....`);
-		sendFileMissingError({ teamspace, model, collection, refId: entry._id, link: entry.link }).catch((err) => {
+		await sendEmail(FILE_MISSING, config.contact?.email, { teamspace,
+			model,
+			collection,
+			refId: entry._id,
+			link: entry.link,
+			domain: config.host }).catch((err) => {
 			logger.logError(`Failed to send file missing error: ${err.message}`);
 		});
 

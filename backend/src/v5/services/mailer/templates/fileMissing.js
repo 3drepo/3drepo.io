@@ -15,10 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const TemplateNames = {};
+const FileMissingTemplate = {};
 
-TemplateNames.VERIFY_USER = 'verifyUser';
-TemplateNames.FORGOT_PASSWORD = 'forgotPassword';
-TemplateNames.FILE_MISSING = 'fileMissing';
+FileMissingTemplate.html = (data) => `
+	Backup read from GridFS triggered:
+	<br>
+	account: ${data.account}
+	<br>
+	model: ${data.model}
+	<br>
+	collection: ${data.collection}
+	<br>
+	ref: ${data.refId}
+	<br>
+	link: ${data.link}
+	<br>
+	domain: ${data.domain}
+`;
 
-module.exports = TemplateNames;
+FileMissingTemplate.subject = (data) => `[System][${data.domain}] Missing file from Fileshare detected`;
+
+module.exports = FileMissingTemplate;

@@ -43,6 +43,8 @@ Mailer.sendEmail = async (templateName, to, data, attachments) => {
 	}
 
 	const templatePath = `./templates/${templateName}`;
+
+	// eslint-disable-next-line global-require, import/no-dynamic-require, security/detect-non-literal-require
 	const template = require(templatePath);
 
 	const mailOptions = {

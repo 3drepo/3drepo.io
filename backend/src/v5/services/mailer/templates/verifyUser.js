@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const VerifyUserTemplate = {};
+
 const baseTemplate = require('./baseTemplate');
 const config = require('../../../utils/config');
 
@@ -146,9 +148,8 @@ const getEmailContent = (data) => `
 </table>
 `;
 
-const html = (data) => baseTemplate.html({ ...data, emailContent: getEmailContent(data) });
+VerifyUserTemplate.html = (data) => baseTemplate.html({ ...data, emailContent: getEmailContent(data) });
 
-module.exports = {
-	html,
-	subject: 'Welcome to 3D Repo! Verify Your Email‏',
-};
+VerifyUserTemplate.subject = 'Welcome to 3D Repo! Verify Your Email‏';
+
+module.exports = VerifyUserTemplate;

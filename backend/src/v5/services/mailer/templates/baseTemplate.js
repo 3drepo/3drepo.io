@@ -15,7 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const html = (data) => ` 
+const BaseTemplate = {};
+
+BaseTemplate.html = (data) => ` 
  <!doctype html>
  <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
    <head>
@@ -938,6 +940,4 @@ const html = (data) => `
  
  `;
 
-module.exports = {
-	html,
-};
+module.exports = BaseTemplate;

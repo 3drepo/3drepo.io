@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const ForgotPasswordTemplate = {};
 const baseTemplate = require('./baseTemplate');
 const config = require('../../../utils/config');
 
@@ -148,9 +149,8 @@ const getEmailContent = (data) => `
 </table>
 `;
 
-const html = (data) => baseTemplate.html({ ...data, emailContent: getEmailContent(data) });
+ForgotPasswordTemplate.html = (data) => baseTemplate.html({ ...data, emailContent: getEmailContent(data) });
 
-module.exports = {
-	html,
-	subject: 'Reset your password',
-};
+ForgotPasswordTemplate.subject = 'Reset your password';
+
+module.exports = ForgotPasswordTemplate;
