@@ -16,7 +16,7 @@
  */
 
 import { push } from 'connected-react-router';
-import { all, put, select, take, takeLatest } from 'redux-saga/effects';
+import { all, delay, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { ROUTES } from '../../constants/routes';
 import { INITIAL_HELICOPTER_SPEED, NEW_PIN_ID, VIEWER_CLIP_MODES, VIEWER_EVENTS } from '../../constants/viewer';
@@ -373,6 +373,8 @@ function* loadModel() {
 		const revision = yield select(selectCurrentRevisionId);
 		const modelSettings = yield select(selectSettings);
 		const selectedViewpoint = yield select(selectInitialView);
+
+		yield delay(10000);
 
 		yield Viewer.loadViewerModel(teamspace, model, 'master', revision || 'head', selectedViewpoint?.viewpoint);
 		yield Viewer.updateViewerSettings(modelSettings);

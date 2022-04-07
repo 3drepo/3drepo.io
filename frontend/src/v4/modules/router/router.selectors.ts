@@ -38,7 +38,7 @@ export const selectHash = createSelector(
 	selectLocation, (location) => location.hash
 );
 
-export const selectUrlParams = createSelector(
+const selectV4UrlParams = createSelector(
 	selectLocation, (location) => {
 		const viewerPath = ROUTES.MODEL_VIEWER;
 		const boardPath = ROUTES.BOARD_SPECIFIC;
@@ -48,6 +48,22 @@ export const selectUrlParams = createSelector(
 
 		return (viewerParams || boardParams || {}).params;
 	}
+);
+
+const selectV5UrlParams = createSelector(
+	selectLocation, (location) => {
+		const viewerPath = '/v5/viewer/:teamspace/:model/:revision?';
+		const boardPath = ROUTES.BOARD_SPECIFIC;
+
+		const viewerParams = matchPath(location.pathname, { path: viewerPath });
+		const boardParams = matchPath(location.pathname, { path: boardPath });
+
+		return (viewerParams || boardParams || {}).params;
+	}
+);
+
+export const selectUrlParams =  createSelector(
+	selectV4UrlParams, selectV5UrlParams, (v4Params, v5Params) => v4Params || v5Params
 );
 
 export const selectQueryParams = createSelector(

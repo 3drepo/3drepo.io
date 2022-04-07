@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ViewerCanvas } from '@/v4/routes/viewerCanvas';
 import { ViewerGui } from '@/v4/routes/viewerGui';
 import { useParams } from 'react-router-dom';
 
@@ -28,11 +27,7 @@ export const Viewer = () => {
 			revision: '',
 		} };
 
-
 	return (
-		<>
-			{/* <ViewerCanvas /> */}
-			<ViewerGui match={v4Match} />
-		</>
+		<ViewerGui match={v4Match} />
 	);
 };

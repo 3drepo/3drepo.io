@@ -42,7 +42,6 @@ export const FederationEllipsisMenu = ({
 
 	return (
 		<EllipsisMenu>
-			<h1>{viewerRoute(teamspace, federation)}</h1>
 			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'federations.ellipsisMenu.loadFederation',

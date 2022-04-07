@@ -23,6 +23,7 @@ import { useDispatch } from 'react-redux';
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
+import { viewerRoute } from '@/v5/services/routing/routing';
 
 type ContainerEllipsisMenuProps = {
 	selected: boolean,
@@ -47,7 +48,7 @@ export const ContainerEllipsisMenu = ({
 					id: 'containers.ellipsisMenu.loadContainer',
 					defaultMessage: 'Load Container in 3D Viewer',
 				})}
-				to={`/${container._id}`}
+				to={viewerRoute(teamspace, container)}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
