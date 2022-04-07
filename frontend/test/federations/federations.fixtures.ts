@@ -18,7 +18,6 @@
 import * as faker from 'faker';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import {
-	EMPTY_VIEW,
 	FederationBackendSettings,
 	FederationSettings,
 	FederationStats,
@@ -26,6 +25,7 @@ import {
 } from '@/v5/store/federations/federations.types';
 import { times } from 'lodash';
 import { FetchFederationViewsResponse } from '@/v5/services/api/federations';
+import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 
 
 export const federationMockFactory = (overrides?: Partial<IFederation>): IFederation => ({

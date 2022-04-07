@@ -15,27 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FederationSettingsSchema } from '@/v5/validation/schemes';
-import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
-import { IFederation } from '@/v5/store/federations/federations.types';
+import { IContainer } from '@/v5/store/containers/containers.types';
+import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
+import { ContainerSettingsSchema } from '@/v5/validation/schemes';
 import { SettingsForm } from '../../settingsForm/settingsForm.component';
 
-type FederationSettingsFormProps = {
+type ContainerSettingsFormProps = {
 	open: boolean;
-	federation: IFederation;
+	container: IContainer;
 	onClose: () => void;
 };
 
-export const FederationSettingsForm = ({
-	federation,
+export const ContainerSettingsForm = ({
+	container,
 	...otherProps
-}: FederationSettingsFormProps) => (
+}: ContainerSettingsFormProps) => (
 	<SettingsForm
-		containerOrFederation={federation}
-		settingsSchema={FederationSettingsSchema}
-		fetchSettings={FederationsActionsDispatchers.fetchFederationSettings}
-		fetchViews={FederationsActionsDispatchers.fetchFederationViews}
-		updateSettings={FederationsActionsDispatchers.updateFederationSettings}
+		containerOrFederation={container}
+		isContainer
+		settingsSchema={ContainerSettingsSchema}
+		fetchSettings={ContainersActionsDispatchers.fetchContainerSettings}
+		fetchViews={ContainersActionsDispatchers.fetchContainerViews}
+		updateSettings={ContainersActionsDispatchers.updateContainerSettings}
 		{...otherProps}
 	/>
 );

@@ -36,6 +36,13 @@ import { formatDate, formatMessage } from '@/v5/services/intl';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { ShareModal } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
 import { ContainerEllipsisMenu } from './containerEllipsisMenu/containerEllipsisMenu.component';
+import { ContainerSettingsForm } from '../../containerSettingsForm/containerSettingsForm.component';
+
+const MODALS = {
+	share: 'share',
+	containerSettings: 'containerSettings',
+	none: 'none',
+};
 
 interface IContainerListItem {
 	index: number;
@@ -57,7 +64,8 @@ export const ContainerListItem = ({
 	if (container.hasStatsPending) {
 		return <SkeletonListItem delay={index / 10} key={container._id} />;
 	}
-	const [shareModalOpen, setShareModalOpen] = useState(false);
+	const [openModal, setOpenModal] = useState(MODALS.none);
+	const closeModal = () => setOpenModal(MODALS.none);
 
 	return (
 		<DashboardListItem
@@ -151,7 +159,8 @@ export const ContainerListItem = ({
 						selected={isSelected}
 						container={container}
 						onSelectOrToggleItem={onSelectOrToggleItem}
-						openShareModal={() => setShareModalOpen(true)}
+						openShareModal={() => setOpenModal(MODALS.share)}
+						openContainerSettings={() => setOpenModal(MODALS.containerSettings)}
 					/>
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
@@ -163,13 +172,18 @@ export const ContainerListItem = ({
 				/>
 			)}
 			<ShareModal
-				openState={shareModalOpen}
-				onClickClose={() => setShareModalOpen(false)}
+				openState={openModal === MODALS.share}
+				onClickClose={closeModal}
 				title={formatMessage({
 					id: 'ShareModal.component.title',
 					defaultMessage: 'Share Container URL',
 				})}
 				containerOrFederation={container}
+			/>
+			<ContainerSettingsForm
+				open={openModal === MODALS.containerSettings}
+				container={container}
+				onClose={closeModal}
 			/>
 		</DashboardListItem>
 	);

@@ -20,6 +20,8 @@ import {
 	IContainer,
 	ContainerStats,
 	MinimumContainer,
+	ContainerBackendSettings,
+	ContainerSettings,
 } from '@/v5/store/containers/containers.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 
@@ -63,4 +65,24 @@ export const prepareContainersData = (
 ) => containers.map<IContainer>((container, index) => {
 	const containerStats = stats?.[index];
 	return prepareSingleContainerData(container, containerStats);
+});
+
+export const prepareContainerSettingsForFrontend = ({
+	surveyPoints,
+	type,
+	...otherProps
+}: ContainerBackendSettings) => ({
+	surveyPoint: surveyPoints?.[0],
+	category: type,
+	...otherProps,
+});
+
+export const prepareContainerSettingsForBackend = ({
+	surveyPoint,
+	category,
+	...otherProps
+}: ContainerSettings) => ({
+	surveyPoints: [surveyPoint],
+	type: category,
+	...otherProps,
 });

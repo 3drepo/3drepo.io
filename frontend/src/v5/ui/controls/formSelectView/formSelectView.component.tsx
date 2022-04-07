@@ -16,33 +16,41 @@
  */
 
 import { useParams } from 'react-router';
-import { FederationView } from '@/v5/store/federations/federations.types';
+import { View } from '@/v5/store/store.types';
+import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { generateV5ApiUrl } from '@/v5/services/api/default';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { FormSelectProps } from '@controls/formSelect/formSelect.component';
 import { Thumbnail, ThumbnailPlaceholder, FormSelect, ViewLabel, MenuItemView } from './formSelectView.styles';
 
-const getThumbnailBasicPath = (teamspace: string, projectId: string, federationId: string) => (
-	(viewId: string) => generateV5ApiUrl(
-		`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/views/${viewId}/thumbnail`,
+const getThumbnailBasicPath = (
+	teamspace: string,
+	projectId: string,
+	containerOrFederationId: string,
+	isContainer: boolean,
+) => {
+	const pathSegment = isContainer ? 'containers' : 'federations';
+	return (viewId: string) => generateV5ApiUrl(
+		`teamspaces/${teamspace}/projects/${projectId}/${pathSegment}/${containerOrFederationId}/views/${viewId}/thumbnail`,
 		clientConfigService.GET_API,
-	)
-);
-
-type FormSelectViewProps = Omit<FormSelectProps, 'children'> & {
-	views: FederationView[];
-	federationId: string;
+	);
 };
 
-export const FormSelectView = ({ views, federationId, ...formProps }: FormSelectViewProps) => {
+type FormSelectViewProps = Omit<FormSelectProps, 'children'> & {
+	views: View[];
+	containerOrFederationId: string;
+	isContainer?: boolean;
+};
+
+export const FormSelectView = ({ views, containerOrFederationId, isContainer, ...formProps }: FormSelectViewProps) => {
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
-	const getThumbnail = getThumbnailBasicPath(teamspace, project, federationId);
+	const getThumbnail = getThumbnailBasicPath(teamspace, project, containerOrFederationId, isContainer);
 
 	return (
 		<FormSelect
 			{...formProps}
 		>
-			{views.map((view) => (
+			{[EMPTY_VIEW].concat(views || []).map((view) => (
 				<MenuItemView
 					key={view._id}
 					value={view._id}

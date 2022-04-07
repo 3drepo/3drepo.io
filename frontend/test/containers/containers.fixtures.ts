@@ -17,6 +17,10 @@
 
 import * as faker from 'faker';
 import { UploadStatuses, IContainer, ContainerStats } from '@/v5/store/containers/containers.types';
+import { EMPTY_VIEW } from './../../src/v5/store/store.helpers';
+import { FetchContainerViewsResponse } from '@/v5/services/api/containers';
+import { ContainerSettings } from '@/v5/store/containers/containers.types';
+import { ContainerBackendSettings } from '@/v5/store/containers/containers.types';
 
 export const containerMockFactory = (overrides?: Partial<IContainer>): IContainer => ({
 	_id: faker.datatype.uuid(),
@@ -24,13 +28,29 @@ export const containerMockFactory = (overrides?: Partial<IContainer>): IContaine
 	revisionsCount: faker.datatype.number({ min: 10, max: 1200 }),
 	lastUpdated: faker.date.past(2),
 	name: faker.random.words(3),
+	desc: faker.random.words(3),
 	role: faker.random.arrayElement(['admin', 'collaborator']),
 	type: faker.random.word(),
 	status: UploadStatuses.OK,
 	code: faker.datatype.uuid(),
-	unit: 'mm',
 	isFavourite: faker.datatype.boolean(),
 	hasStatsPending: true,
+	views: [EMPTY_VIEW],
+	defaultView: EMPTY_VIEW._id,
+	angleFromNorth: faker.datatype.number({ min: 0, max: 360 }),
+	surveyPoint: {
+		latLong: [
+			faker.datatype.number({ min: -100, max: 100 }),
+			faker.datatype.number({ min: -100, max: 100 }),
+		],
+		position: [
+			faker.datatype.number({ min: -100, max: 100 }),
+			faker.datatype.number({ min: -100, max: 100 }),
+			faker.datatype.number({ min: -100, max: 100 }),
+		],
+	},
+	unit: faker.random.arrayElement(['mm', 'cm', 'dm', 'm', 'ft']),
+	
 	...overrides,
 });
 
@@ -44,4 +64,29 @@ export const prepareMockStatsReply = (container: IContainer): ContainerStats => 
 	status: container.status,
 	code: container.code,
 	unit: container.unit,
+});
+
+export const prepareMockViewsReply = (container: IContainer): FetchContainerViewsResponse => ({
+	views: container.views,
+});
+
+const prepareMockSettingsWithoutSurveyPointAndCategory = (container: IContainer): Omit<ContainerSettings, 'surveyPoint'> => ({
+	angleFromNorth: container.angleFromNorth,
+	defaultView: container.defaultView,
+	unit: container.unit,
+	name: container.name,
+	code: container.code,
+	desc: container.desc,
+});
+
+export const prepareMockSettingsReply = (container: IContainer): ContainerSettings => ({
+	...prepareMockSettingsWithoutSurveyPointAndCategory(container),
+	category: container.category,
+	surveyPoint: container.surveyPoint,
+});
+
+export const prepareMockRawSettingsReply = (container: IContainer): ContainerBackendSettings => ({
+	...prepareMockSettingsWithoutSurveyPointAndCategory(container),
+	type: container.category,
+	surveyPoints: [container.surveyPoint],
 });

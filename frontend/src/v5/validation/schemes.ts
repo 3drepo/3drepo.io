@@ -17,85 +17,94 @@
 
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
-import { EMPTY_VIEW } from '@/v5/store/federations/federations.types';
+import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 
-const numberField = Yup.number().typeError(formatMessage({
-	id: 'federations.surveyPoint.error.number',
-	defaultMessage: 'Must be a decimal number or integer',
-}));
+const nullableSelectValue = (emptyValue: string) => (
+	Yup.string().nullable().transform((value) => (value === emptyValue ? null : value))
+);
 
-export const FederationSettingsSchema = Yup.object().shape({
-	name: Yup.string()
-		.min(2,
-			formatMessage({
-				id: 'federations.name.error.min',
-				defaultMessage: 'Federation Name must be at least 2 characters',
-			}))
-		.max(120,
-			formatMessage({
-				id: 'federations.name.error.max',
-				defaultMessage: 'Federation Name is limited to 120 characters',
-			}))
-		.required(
-			formatMessage({
-				id: 'federations.name.error.required',
-				defaultMessage: 'Federation Name is a required field',
-			}),
+const SettingsSchema = (isContainer?: boolean) => {
+	const numberField = Yup.number().typeError(formatMessage({
+		id: 'settings.surveyPoint.error.number',
+		defaultMessage: 'Must be a decimal number or integer',
+	}));
+
+	return Yup.object().shape({
+		name: Yup.string()
+			.min(2,
+				formatMessage({
+					id: 'settings.name.error.min',
+					defaultMessage: 'Name must be at least 2 characters',
+				}))
+			.max(120,
+				formatMessage({
+					id: 'settings.name.error.max',
+					defaultMessage: 'Name is limited to 120 characters',
+				}))
+			.required(
+				formatMessage({
+					id: 'settings.name.error.required',
+					defaultMessage: 'Name is a required field',
+				}),
+			),
+		desc: Yup.lazy((value) => (
+			value === ''
+				? Yup.string().strip()
+				: Yup.string()
+					.min(1,
+						formatMessage({
+							id: 'settings.desc.error.min',
+							defaultMessage: 'Description must be at least 1 character',
+						}))
+					.max(600,
+						formatMessage({
+							id: 'settings.desc.error.max',
+							defaultMessage: 'Description is limited to 600 characters',
+						}))
+		)),
+		unit: Yup.string().required().default('mm'),
+		code: Yup.lazy((value) => (
+			value === ''
+				? Yup.string().strip()
+				: Yup.string()
+					.min(1,
+						formatMessage({
+							id: 'settings.code.error.min',
+							defaultMessage: 'Code must be at least 1 character',
+						}))
+					.max(50,
+						formatMessage({
+							id: 'settings.code.error.max',
+							defaultMessage: 'Code is limited to 50 characters',
+						}))
+					.matches(/^[\w|_|-]*$/,
+						formatMessage({
+							id: 'settings.code.error.characters',
+							defaultMessage: 'Code can only consist of letters and numbers',
+						}))
+		)),
+		...(isContainer ? { category: nullableSelectValue(' ') } : {}
 		),
-	desc: Yup.lazy((value) => (
-		value === ''
-			? Yup.string().strip()
-			: Yup.string()
-				.min(1,
-					formatMessage({
-						id: 'federations.desc.error.min',
-						defaultMessage: 'Federation Description must be at least 1 character',
-					}))
-				.max(600,
-					formatMessage({
-						id: 'federations.desc.error.max',
-						defaultMessage: 'Federation Description is limited to 600 characters',
-					}))
-	)),
-	unit: Yup.string().required().default('mm'),
-	code: Yup.lazy((value) => (
-		value === ''
-			? Yup.string().strip()
-			: Yup.string()
-				.min(1,
-					formatMessage({
-						id: 'federations.code.error.min',
-						defaultMessage: 'Code must be at least 1 character',
-					}))
-				.max(50,
-					formatMessage({
-						id: 'federations.code.error.max',
-						defaultMessage: 'Code is limited to 50 characters',
-					}))
-				.matches(/^[\w|_|-]*$/,
-					formatMessage({
-						id: 'federations.code.error.characters',
-						defaultMessage: 'Code can only consist of letters and numbers',
-					}))
-	)),
-	defaultView: Yup.string()
-		.nullable()
-		.transform((value) => (value === EMPTY_VIEW._id ? null : value)),
-	latitude: numberField.required(),
-	longitude: numberField.required(),
-	angleFromNorth: numberField
-		.min(0,
-			formatMessage({
-				id: 'federations.angle.error.min',
-				defaultMessage: 'Angle cannot be smaller than 0',
-			}))
-		.max(360,
-			formatMessage({
-				id: 'federations.angle.error.max',
-				defaultMessage: 'Angle cannot be greater than 360',
-			}))
-		.transform((value) => value ?? 0),
-	x: numberField.required(),
-	y: numberField.required(),
-	z: numberField.required(),
-});
+		defaultView: nullableSelectValue(EMPTY_VIEW._id),
+		latitude: numberField.required(),
+		longitude: numberField.required(),
+		angleFromNorth: numberField
+			.min(0,
+				formatMessage({
+					id: 'settings.angle.error.min',
+					defaultMessage: 'Angle cannot be smaller than 0',
+				}))
+			.max(360,
+				formatMessage({
+					id: 'settings.angle.error.max',
+					defaultMessage: 'Angle cannot be greater than 360',
+				}))
+			.transform((value) => value ?? 0),
+		x: numberField.required(),
+		y: numberField.required(),
+		z: numberField.required(),
+	});
+};
+
+export const FederationSettingsSchema = SettingsSchema();
+export const ContainerSettingsSchema = SettingsSchema(true);
