@@ -17,8 +17,10 @@
 
 import { AuthActions } from '@/v5/store/auth/auth.redux';
 import * as AuthSaga from '@/v5/store/auth/auth.sagas';
+import { CurrentUserActions } from '@/v5/store/currentUser/currentUser.redux';
 import { expectSaga } from 'redux-saga-test-plan';
 import { mockServer } from '../../internals/testing/mockServer';
+import { alertAction } from '../test.helpers'
 
 describe('Auth: sagas', () => {
 	const username = 'Jason';
@@ -28,25 +30,27 @@ describe('Auth: sagas', () => {
 		it('should authenticate successfuly', async () => {
 			mockServer
 				.get('/login')
-				.reply(200, { username });
+				.reply(200);
 
 			await expectSaga(AuthSaga.default)
 				.dispatch(AuthActions.authenticate())
 				.put(AuthActions.setPendingStatus(true))
+				.put(CurrentUserActions.getProfile())
 				.put(AuthActions.setAuthenticationStatus(true))
 				.put(AuthActions.setPendingStatus(false))
 				.silentRun();
 		});
 
-		it('should fail to authenticate and call a 400', async () => {
+		it('should fail to authenticate and open alert modal', async () => {
 			mockServer
 				.get('/login')
-				.reply(401);
+				.reply(400);
 
 			await expectSaga(AuthSaga.default)
 				.dispatch(AuthActions.authenticate())
 				.put(AuthActions.setPendingStatus(true))
 				.put(AuthActions.setAuthenticationStatus(false))
+				.put.like(alertAction('trying to authenticate'))
 				.put(AuthActions.setPendingStatus(false))
 				.silentRun();
 		});
@@ -58,13 +62,10 @@ describe('Auth: sagas', () => {
 				.post('/login')
 				.reply(200);
 
-			mockServer
-				.get('/login')
-				.reply(200, { username });
-
 			await expectSaga(AuthSaga.default)
 				.dispatch(AuthActions.login(username, password))
 				.put(AuthActions.setPendingStatus(true))
+				.put(CurrentUserActions.getProfile())
 				.put(AuthActions.setAuthenticationStatus(true))
 				.put(AuthActions.setPendingStatus(false))
 				.silentRun();
@@ -100,7 +101,7 @@ describe('Auth: sagas', () => {
 				.put(AuthActions.setPendingStatus(false))
 				.silentRun();
 		});
-		it('should fail to logout', async () => {
+		it('should fail to logout and open alert modal', async () => {
 			mockServer
 				.post('/logout')
 				.reply(400);
@@ -108,6 +109,8 @@ describe('Auth: sagas', () => {
 			await expectSaga(AuthSaga.default)
 				.dispatch(AuthActions.logout())
 				.put(AuthActions.setPendingStatus(true))
+				.put.like(alertAction('trying to log out'))
+				.put({ type: 'RESET_APP' })
 				.put(AuthActions.setAuthenticationStatus(false))
 				.put(AuthActions.setPendingStatus(false))
 				.silentRun();

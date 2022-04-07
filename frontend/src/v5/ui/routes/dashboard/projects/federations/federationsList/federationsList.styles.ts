@@ -28,18 +28,17 @@ export const CollapseSideElementGroup = styled.div`
 	display: flex;
 	align-items: center;
 	
+	> :last-child {
+		margin-right: 0;
+	}
+	
 	${SearchInputStyles.TextField} {
 		width: 405px;
-		margin-right: 15px;
 
 		@media (max-width: ${Display.Tablet}px) {
 			width: 367px;
 			padding-left: 25px;
 			box-sizing: border-box;
 		}
-	}
-	
-	> :last-child {
-		margin-right: 0;
 	}
 `;
