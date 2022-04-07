@@ -58,7 +58,7 @@ export const PasswordField = styled(AuthField).attrs({
 	type: 'password',
 })``;
 
-export const ErrorMessage = styled(Typography)`
+export const ErrorMessage = styled.div`
 	color: ${({ theme }) => theme.palette.error.main};
 	display: flex;
 	align-items: center;
