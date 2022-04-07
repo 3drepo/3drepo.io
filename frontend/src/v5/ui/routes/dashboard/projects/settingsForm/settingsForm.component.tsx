@@ -306,7 +306,6 @@ export const SettingsForm = ({
 				control={control}
 				label={formatMessage({ id: 'settings.form.angleFromNorth', defaultMessage: 'Angle from North (clockwise degrees)' })}
 				formError={errors.angleFromNorth}
-				required
 			/>
 			<FlexContainer>
 				<FormTextField
