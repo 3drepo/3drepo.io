@@ -19,13 +19,13 @@ import {
 	DashboardList,
 	DashboardListEmptyContainer,
 } from '@components/dashboard/dashboardList';
-import { TeamspaceListItem } from '@/v5/ui/routes/dashboard/teamspaces/teamspacesList/teamspaceListItem/teamspaceListItem.component';
+import { TeamspaceListItem } from '@components/teamspace/teamspaceList/teamspaceListItem/teamspaceListItem.component';
 import { FormattedMessage } from 'react-intl';
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
-import { Container } from './teamspacesList.styles';
+import { Container } from './teamspaceList.styles';
 
-export const TeamspacesList = (): JSX.Element => {
+export const TeamspaceList = (): JSX.Element => {
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
 
 	return (
