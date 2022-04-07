@@ -40,7 +40,7 @@ const Mailer = require("../../mailer/mailer");
 const systemLogger = require("../../logger.js").systemLogger;
 const History = require("../history");
 const { getRefNodes } = require("../ref");
-const { findNodesByType, getGridfsFileStream, getNodeById, getParentMatrix } = require("../scene");
+const { findNodesByType, getNodeById, getParentMatrix } = require("../scene");
 const utils = require("../../utils");
 const middlewares = require("../../middlewares/middlewares");
 const fs = require("fs");
@@ -785,8 +785,12 @@ async function getMeshById(account, model, meshId) {
 	}
 	mesh.matrix = await getParentMatrix(account, model, mesh.parents[0], [mesh.rev_id]);
 
-	const vertices =  mesh.vertices ? new StreamBuffer({buffer: mesh.vertices.buffer, chunkSize: mesh.vertices.buffer.length}) : await getGridfsFileStream(account, model, mesh._extRef.vertices);
-	const faces = mesh.faces ?  new StreamBuffer({buffer: mesh.faces.buffer, chunkSize: mesh.faces.buffer.length})  : await getGridfsFileStream(account, model, mesh._extRef.faces);
+	const { fetchFileStream } = require("../fileRef");
+
+	const { readStream: vertices } =  await fetchFileStream(account, `${model}.scene` ,mesh._extRef.vertices);
+	const { readStream: faces } = await fetchFileStream(account, `${model}.scene`, mesh._extRef.faces);
+
+	console.log(account, model, meshId, vertices, faces);
 
 	if (!("primitive" in mesh)) { // if the primitive type is missing, then set it to triangles for backwards compatibility. this matches the behaviour of the bouncer api.
 		mesh.primitive = 3;

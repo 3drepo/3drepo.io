@@ -60,7 +60,7 @@ async function _fetchFile(account, model, ext, fileName, metadata = false) {
 
 }
 
-async function fetchFileStream(account, model, collection, fileName) {
+async function fetchFileStream(account,collection, fileName) {
 
 	const entry = await getRefEntry(account, collection, fileName);
 	if(!entry) {
@@ -68,7 +68,6 @@ async function fetchFileStream(account, model, collection, fileName) {
 	}
 
 	const stream  = await ExternalServices.getFileStream(account, collection, entry.type, entry.link);
-
 	return {readStream: stream, size: entry.size };
 }
 
@@ -108,9 +107,11 @@ async function insertRef(account, collection, user, name, refInfo) {
 
 const FileRef = {};
 
+FileRef.fetchFileStream = (account, collection, fileName) => fetchFileStream(account, `${collection}.ref`, fileName);
+
 FileRef.getOriginalFile = function(account, model, fileName) {
 	const collection = model + ORIGINAL_FILE_REF_EXT;
-	return fetchFileStream(account, model, collection, fileName, false);
+	return fetchFileStream(account, collection, fileName, false);
 };
 
 FileRef.getSRCFile = function(account, model, fileName) {
@@ -188,7 +189,7 @@ FileRef.getResourceFile = function(account, model, fileName) {
  */
 FileRef.getJSONFileStream = function(account, model, fileName) {
 	const collection = model + JSON_FILE_REF_EXT;
-	return fetchFileStream(account, model, collection, fileName, true);
+	return fetchFileStream(account, collection, fileName, true);
 };
 
 FileRef.removeAllFilesFromModel = function(account, model) {
