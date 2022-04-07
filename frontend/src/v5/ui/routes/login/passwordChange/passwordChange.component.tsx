@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import * as queryString from 'query-string';
 import { FormattedMessage } from 'react-intl';
@@ -34,9 +34,8 @@ import { LOGIN_PATH } from '../../routes.constants';
 export const ChangePassword = () => {
 	const { token, username } = queryString.parse(window.location.search);
 	const [errorMessage, setErrorMessage] = useState('');
-	const { control, handleSubmit, formState: { isDirty, errors } } = useForm({
-		mode: 'onSubmit',
-		reValidateMode: 'onSubmit',
+	const { control, handleSubmit, formState: { isValid, errors } } = useForm({
+		mode: 'onChange',
 		defaultValues: { newPassword: '', newPasswordConfirm: '' },
 		resolver: yupResolver(PasswordChangeSchema),
 	});
@@ -49,10 +48,6 @@ export const ChangePassword = () => {
 			setErrorMessage(message);
 		}
 	};
-
-	useEffect(() => {
-		setErrorMessage(errors.newPasswordConfirm?.message);
-	}, [errors.newPasswordConfirm]);
 
 	return (
 		<AuthPage>
@@ -69,6 +64,7 @@ export const ChangePassword = () => {
 								id: 'auth.passwordChange.newPassword',
 								defaultMessage: 'Password',
 							})}
+							formError={errors.newPassword}
 						/>
 						<PasswordField
 							control={control}
@@ -77,8 +73,9 @@ export const ChangePassword = () => {
 								id: 'auth.passwordChange.confirmNewPassword',
 								defaultMessage: 'Confirm new password',
 							})}
+							formError={errors.newPasswordConfirm}
 						/>
-						<SubmitButton disabled={!isDirty}>
+						<SubmitButton disabled={!isValid}>
 							<FormattedMessage id="auth.changePassword.buttonText" defaultMessage="Save changes" />
 						</SubmitButton>
 					</>
