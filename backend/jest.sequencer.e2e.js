@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const config = require('./jest.config');
+const Sequencer = require('@jest/test-sequencer').default;
 
-config.coveragePathIgnorePatterns = [
-	...config.coveragePathIgnorePatterns,
-	'/routes/',
-	'/handler/',
-	'responder.js',
-	'responseCodes.js',
-	'users.constants.js',
-];
+class CustomSequencer extends Sequencer {
+	sort(tests) {
+		// Test structure information
+		// https://github.com/facebook/jest/blob/6b8b1404a1d9254e7d5d90a8934087a9c9899dab/packages/jest-runner/src/types.ts#L17-L21
+		const copyTests = Array.from(tests);
+		return copyTests.sort((testA, testB) => (testA.path > testB.path ? -1 : 1));
+	}
+}
 
-config.testMatch = ['**/tests/**/unit/**/*.test.[jt]s?(x)'];
-
-module.exports = config;
+module.exports = CustomSequencer;
