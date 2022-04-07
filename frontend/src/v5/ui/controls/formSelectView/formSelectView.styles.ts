@@ -51,17 +51,12 @@ export const FormSelect = styled(FormSelectBase)`
 		margin-right: 0;
 	}
 
-	${ViewLabel} {
-		padding-left: 14px;
-	}
-
 	${ThumbnailPlaceholder} {
 		display: none;
 	}
 	
 	${Thumbnail} {
-		width: 44px;
-		height: 37px;
+		height: 35px;
 		border-radius: 4px 0 0 3px;
 		left: 0;
 		bottom: 0;

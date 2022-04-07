@@ -150,7 +150,8 @@
 
 	Handler.findOneAndUpdate = async function (database, colName, query, action, projection = {}) {
 		const collection = await Handler.getCollection(database, colName);
-		return collection.findOneAndUpdate(query, action, {projection});
+		const findResult = await collection.findOneAndUpdate(query, action, {projection});
+		return findResult.value;
 	};
 
 	Handler.findOneAndDelete = async function (database, colName, query, projection = {}) {
@@ -339,6 +340,11 @@
 	Handler.count = async function (database, colName, query, options) {
 		const collection = await Handler.getCollection(database, colName);
 		return collection.countDocuments(query, options);
+	};
+
+	Handler.createUser = async function (username, password, customData) {
+		const adminDB = await this.getAuthDB();
+		await adminDB.addUser(username, password, { customData, roles: [] });
 	};
 
 	module.exports = Handler;

@@ -17,10 +17,20 @@
 
 const Jobs = {};
 
-const DBHandler = require('../handler/db');
+const COL_NAME = 'jobs';
+const { DEFAULT_JOBS } = require('./jobs.constants');
+const db = require('../handler/db');
 
-const findMany = (ts, query, projection, sort) => DBHandler.find(ts, 'jobs', query, projection, sort);
+const findMany = (ts, query, projection, sort) => db.find(ts, COL_NAME, query, projection, sort);
 
 Jobs.getJobsToUsers = (teamspace) => findMany(teamspace, {}, { _id: 1, users: 1 });
+
+Jobs.addDefaultJobs = async (teamspace) => {
+	await db.insertMany(teamspace, COL_NAME, DEFAULT_JOBS.map((job) => ({ ...job, users: [] })));
+};
+
+Jobs.assignUserToJob = async (teamspace, job, username) => {
+	await db.updateOne(teamspace, COL_NAME, { _id: job }, { $push: { users: username } });
+};
 
 module.exports = Jobs;

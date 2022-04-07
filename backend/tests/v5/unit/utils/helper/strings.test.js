@@ -93,10 +93,33 @@ const testGenerateHashString = () => {
 	});
 };
 
+const testFormatPronouns = () => {
+	describe('Format string pronouns', () => {
+		test('with two words all lowercase', () => {
+			const name = 'will smith';
+			const formattedString = StringHelper.formatPronouns(name);
+			expect(formattedString).toEqual('Will Smith');
+		});
+
+		test('with two words all capital case', () => {
+			const name = 'WILL SMITH';
+			const formattedString = StringHelper.formatPronouns(name);
+			expect(formattedString).toEqual('Will Smith');
+		});
+
+		test('with a single word', () => {
+			const name = 'will';
+			const formattedString = StringHelper.formatPronouns(name);
+			expect(formattedString).toEqual('Will');
+		});
+	});
+};
+
 describe('utils/helper/strings', () => {
 	testGetURLDomain();
 	testToCamelCase();
 	testToConstantCase();
 	testHasEmailFormat();
 	testGenerateHashString();
+	testFormatPronouns();
 });

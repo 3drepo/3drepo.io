@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,11 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { Container } from './dashedContainer.styles';
 
-import styled from 'styled-components';
+type DashedContainerProps = {
+	children: any;
+	className?: string;
+	borderRadius?: number;
+	strokeColor?: string;
+	strokeWidth?: number;
+	dashSize?: number;
+	gapSize?: number;
+	zeroPadding?: boolean;
+};
 
-export const HeaderButtonsGroup = styled.div`
-	& > :last-child {
-		margin-right: 0;
-	}
-`;
+export const DashedContainer = ({ children, ...dashedOptions }: DashedContainerProps) => (
+	<Container {...dashedOptions}>
+		{children}
+	</Container>
+);

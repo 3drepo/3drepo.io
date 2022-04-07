@@ -15,9 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { authenticate, getUserByQuery, getUserByUsernameOrEmail } = require('../../../models/users');
+const { authenticate, getUserByQuery, getUserByUsername, getUserByUsernameOrEmail } = require('../../../models/users');
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const Yup = require('yup');
+const config = require('../../../utils/config');
+const httpsPost = require('../../../utils/httpsReq').post;
+const { formatPronouns } = require('../../../utils/helper/strings');
 const { respond } = require('../../../utils/responder');
 const { singleImageUpload } = require('../multer');
 const { types } = require('../../../utils/helper/yup');
@@ -151,9 +154,11 @@ Users.validateResetPasswordData = async (req, res, next) => {
 		.required()
 		.test('token-validity', 'Token is invalid or expired', async () => {
 			try {
-				await getUserByQuery({ user: req.body.user,
+				await getUserByQuery({
+					user: req.body.user,
 					'customData.resetPasswordToken.token': req.body.token,
-					'customData.resetPasswordToken.expiredAt': { $gt: new Date() } });
+					'customData.resetPasswordToken.expiredAt': { $gt: new Date() },
+				});
 
 				return true;
 			} catch {
@@ -163,6 +168,96 @@ Users.validateResetPasswordData = async (req, res, next) => {
 
 	try {
 		await schema.validate(req.body);
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+const generateSignUpSchema = () => {
+	const captchaEnabled = config.auth.captcha;
+	const schema = Yup.object().shape({
+		username: types.strings.username.test('checkUsernameAvailable', 'Username already exists',
+			async (value) => {
+				if (value) {
+					try {
+						await getUserByUsername(value, { _id: 1 });
+						return false;
+					} catch {
+					// do nothing
+					}
+				}
+				return true;
+			}).required(),
+		email: types.strings.email.test('checkEmailAvailable', 'Email already exists',
+			async (value) => {
+				if (value) {
+					try {
+						await getUserByQuery({ 'customData.email': value }, { _id: 1 });
+						return false;
+					} catch {
+						// do nothing
+					}
+				}
+				return true;
+			}).required(),
+		password: types.strings.password.required(),
+		firstName: types.strings.name.required().transform(formatPronouns),
+		lastName: types.strings.name.required().transform(formatPronouns),
+		countryCode: types.strings.countryCode.required(),
+		company: types.strings.title.optional(),
+		mailListAgreed: Yup.bool().required(),
+		...(captchaEnabled ? { captcha: Yup.string().required() } : {}),
+	})
+		.noUnknown().required();
+
+	return captchaEnabled
+		? schema.test('check-captcha', 'Invalid captcha', async (body) => {
+			const checkCaptcha = httpsPost(config.captcha.validateUrl, {
+				secret: config.captcha.secretKey,
+				response: body.captcha,
+			});
+
+			const result = await checkCaptcha;
+			return result.success;
+		})
+		: schema;
+};
+
+Users.validateSignUpData = async (req, res, next) => {
+	try {
+		const schema = generateSignUpSchema();
+		req.body = await schema.validate(req.body);
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+Users.validateVerifyData = async (req, res, next) => {
+	const schema = Yup.object().shape({
+		username: types.strings.username.required(),
+		token: Yup.string().required(),
+	}).strict(true).noUnknown()
+		.required()
+		.test('token-validity', 'Token is invalid or expired', async () => {
+			try {
+				await getUserByQuery({
+					user: req.body.username,
+					'customData.emailVerifyToken.token': req.body.token,
+					'customData.emailVerifyToken.expiredAt': { $gt: new Date() },
+					'customData.inactive': true,
+				}, { _id: 1 });
+
+				return true;
+			} catch {
+				return false;
+			}
+		});
+
+	try {
+		req.body = await schema.validate(req.body);
+
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));

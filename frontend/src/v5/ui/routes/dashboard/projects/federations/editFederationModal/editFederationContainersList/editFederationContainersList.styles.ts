@@ -24,7 +24,7 @@ export const Container = styled.div`
 	width: 100%;
 
 	${DashboardListEmptyContainer} {
-		background: transparent;
+		background-color: transparent;
 	}
 
 	${DashboardListHeaderContainer} {

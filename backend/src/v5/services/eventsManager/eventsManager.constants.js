@@ -30,6 +30,8 @@ const eventList = [
 	'CHAT_EVENT',
 	// Authentication
 	'FAILED_LOGIN_ATTEMPT', 'LOGIN_RECORD_CREATED', 'SESSION_CREATED', 'SESSIONS_REMOVED',
+	// User related
+	'USER_VERIFIED',
 ];
 
 const generateEventsMap = () => {
