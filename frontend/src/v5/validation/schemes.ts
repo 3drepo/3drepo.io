@@ -19,10 +19,6 @@ import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 
-const nullableSelectValue = (emptyValue: string) => (
-	Yup.string().nullable().transform((value) => (value === emptyValue ? null : value))
-);
-
 const SettingsSchema = (isContainer?: boolean) => {
 	const numberField = Yup.number().typeError(formatMessage({
 		id: 'settings.surveyPoint.error.number',
@@ -83,9 +79,11 @@ const SettingsSchema = (isContainer?: boolean) => {
 							defaultMessage: 'Code can only consist of letters and numbers',
 						}))
 		)),
-		...(isContainer ? { category: nullableSelectValue(' ') } : {}
+		...(isContainer ? { category: Yup.string() } : {}
 		),
-		defaultView: nullableSelectValue(EMPTY_VIEW._id),
+		defaultView: Yup.string()
+			.nullable()
+			.transform((value) => (value === EMPTY_VIEW._id ? null : value)),
 		latitude: numberField.required(),
 		longitude: numberField.required(),
 		angleFromNorth: numberField

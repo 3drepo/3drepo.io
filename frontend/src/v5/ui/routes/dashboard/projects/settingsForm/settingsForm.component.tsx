@@ -112,7 +112,7 @@ const getDefaultValues = (containerOrFederation: IContainer | IFederation, isCon
 		x,
 		y,
 		z,
-		...(isContainer ? { category: containerOrFederation.category || ' ' } : {}),
+		...(isContainer ? { category: containerOrFederation.category || 'Uncategorised' } : {}),
 	};
 };
 
