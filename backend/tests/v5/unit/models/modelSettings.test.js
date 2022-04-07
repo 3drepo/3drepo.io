@@ -477,7 +477,7 @@ const testUpdateModelSettings = () => {
 				},
 			};
 
-			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce();
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce({});
 			await Model.updateModelSettings(teamspace, project, model, data);
 			checkResults(fn, model, updateObject);
 			expect(publishFn).toHaveBeenCalledTimes(1);
@@ -542,7 +542,7 @@ const testUpdateModelSettings = () => {
 				},
 			};
 
-			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce();
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockResolvedValueOnce({});
 			await Model.updateModelSettings(teamspace, project, model, data);
 			checkResults(fn, model, updateObject);
 			expect(publishFn).toHaveBeenCalledTimes(1);
