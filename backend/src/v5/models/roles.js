@@ -15,18 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormTextFieldProps } from '@controls/formTextField/formTextField.component';
-import { UnitTextField } from './formTextFieldUnit.styles';
+const { TEAM_MEMBER } = require('./roles.constants');
+const db = require('../handler/db');
 
-type FormTextFieldUnitProps = Omit<FormTextFieldProps, 'label'> & {
-	labelName: string;
-	labelUnit: string;
+const Roles = {};
+
+Roles.createTeamspaceRole = async (teamspace) => {
+	const createRoleCmd = {
+		createRole: TEAM_MEMBER,
+		privileges: [],
+		roles: [],
+	};
+
+	await db.runCommand(teamspace, createRoleCmd);
 };
 
-export const FormTextFieldUnit = ({ labelName, labelUnit, ...otherProps }: FormTextFieldUnitProps) => (
-	<UnitTextField
-		$labelName={labelName}
-		$labelUnit={labelUnit}
-		{...otherProps}
-	/>
-);
+Roles.grantTeamspaceRoleToUser = (teamspace, username) => {
+	const grantRoleCmd = {
+		grantRolesToUser: username,
+		roles: [{ role: TEAM_MEMBER, db: teamspace }],
+	};
+
+	return db.runCommand('admin', grantRoleCmd);
+};
+
+module.exports = Roles;

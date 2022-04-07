@@ -150,6 +150,14 @@
 		return collection.findOne(query, options);
 	};
 
+	Handler.findOneAndUpdate = async function (database, colName, query, data, projection = {}) {
+		const collection = await Handler.getCollection(database, colName);
+		const options = { projection };
+
+		const findResult = await collection.findOneAndUpdate(query, data, options);
+		return findResult.value;
+	};
+
 	Handler.findOneAndDelete = async function (database, colName, query, projection = {}) {
 		const collection = await Handler.getCollection(database, colName);
 		const findResult = await collection.findOneAndDelete(query, projection);
@@ -333,6 +341,11 @@
 	Handler.count = async function (database, colName, query, options) {
 		const collection = await Handler.getCollection(database, colName);
 		return collection.countDocuments(query, options);
+	};
+
+	Handler.createUser = async function (username, password, customData) {
+		const adminDB = await this.getAuthDB();
+		await adminDB.addUser(username, password, { customData, roles: [] });
 	};
 
 	module.exports = Handler;
