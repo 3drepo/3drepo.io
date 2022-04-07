@@ -51,7 +51,6 @@ const FileRef = require("../fileRef");
 const notifications = require("../notification");
 const CombinedStream = require("combined-stream");
 const stringToStream = require("string-to-stream");
-const { StreamBuffer } = require("./stream");
 const { BinToFaceStringStream, BinToVector3dStringStream } = require("./binary");
 const PermissionTemplates = require("../permissionTemplates");
 const AccountPermissions = require("../accountPermissions");
@@ -789,8 +788,6 @@ async function getMeshById(account, model, meshId) {
 
 	const { readStream: vertices } =  await fetchFileStream(account, `${model}.scene` ,mesh._extRef.vertices);
 	const { readStream: faces } = await fetchFileStream(account, `${model}.scene`, mesh._extRef.faces);
-
-	console.log(account, model, meshId, vertices, faces);
 
 	if (!("primitive" in mesh)) { // if the primitive type is missing, then set it to triangles for backwards compatibility. this matches the behaviour of the bouncer api.
 		mesh.primitive = 3;
