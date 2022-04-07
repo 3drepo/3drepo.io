@@ -50,7 +50,7 @@ async function _fetchFile(account, model, ext, fileName, metadata = false) {
 		throw ResponseCodes.NO_FILE_FOUND;
 	}
 
-	const fileBuffer = await ExternalServices.getfile(account, collection, entry.type, entry.link);
+	const fileBuffer = await ExternalServices.getFile(account, collection, entry.type, entry.link);
 
 	if (metadata) {
 		const type = (((entry.name || "").match(extensionRe) || [])[0] || "").toLowerCase();
