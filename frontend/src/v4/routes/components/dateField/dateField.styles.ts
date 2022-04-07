@@ -17,16 +17,16 @@
 
 import styled from 'styled-components';
 
-import { DatePicker, DateTimePicker } from '@material-ui/pickers';
+import { MobileDatePicker, MobileDateTimePicker } from '@mui/lab';
 
 export const Container = styled.div`
 	margin-top: 16px;
 `;
 
-export const StyledDateTimePicker = styled(DateTimePicker)`
+export const StyledDateTimePicker = styled(MobileDateTimePicker)`
 	width: 100%;
 `;
 
-export const StyledDatePicker = styled(DatePicker)`
+export const StyledDatePicker = styled(MobileDatePicker)`
 	width: 100%;
 `;

@@ -15,12 +15,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getAccessibleTeamspaces } = require('../../models/users');
-const { getJobsToUsers } = require('../../models/jobs');
-const { getMembersInfo } = require('../../models/teamspaces');
+const { addDefaultJobs, assignUserToJob, getJobsToUsers } = require('../../models/jobs');
+const { createTeamspaceRole, grantTeamspaceRoleToUser } = require('../../models/roles');
+const { createTeamspaceSettings, getMembersInfo } = require('../../models/teamspaces');
+const { getAccessibleTeamspaces, grantAdminToUser } = require('../../models/users');
+const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { isTeamspaceAdmin } = require('../../utils/permissions/permissions');
+const { logger } = require('../../utils/logger');
 
 const Teamspaces = {};
+
+Teamspaces.initTeamspace = async (username) => {
+	try {
+		await Promise.all([
+			createTeamspaceRole(username),
+			addDefaultJobs(username),
+		]);
+		await Promise.all([
+			grantTeamspaceRoleToUser(username, username),
+			createTeamspaceSettings(username),
+			grantAdminToUser(username, username),
+			assignUserToJob(username, DEFAULT_OWNER_JOB, username),
+		]);
+	} catch (err) {
+		logger.logError(`Failed to initialize teamspace for ${username}`);
+	}
+};
 
 Teamspaces.getTeamspaceListByUser = async (user) => {
 	const tsList = await getAccessibleTeamspaces(user);

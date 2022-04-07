@@ -17,7 +17,7 @@
 
 import { PureComponent } from 'react';
 
-import Grid from '@material-ui/core/Grid';
+import Grid from '@mui/material/Grid';
 import * as Yup from 'yup';
 
 import { Field, Form, Formik } from 'formik';

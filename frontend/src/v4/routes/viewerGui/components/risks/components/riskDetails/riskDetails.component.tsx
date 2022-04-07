@@ -462,7 +462,7 @@ export class RiskDetails extends PureComponent<IProps, IState> {
 	public render() {
 		const { failedToLoad, risk, horizontal } = this.props;
 		return (
-			<Container ref={this.containerRef} fill={Number(this.isNewRisk)}>
+			<Container ref={this.containerRef} fill={Boolean(this.isNewRisk)}>
 				<ViewerPanelContent
 					onScroll={this.handlePanelScroll}
 					ref={this.panelRef}

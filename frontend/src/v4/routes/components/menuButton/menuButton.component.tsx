@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import MoreIcon from '@material-ui/icons/MoreVert';
+import MoreIcon from '@mui/icons-material/MoreVert';
 
 import { StyledIconButton } from './menuButton.styles';
 //

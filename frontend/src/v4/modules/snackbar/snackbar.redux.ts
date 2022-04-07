@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SnackbarProps } from '@material-ui/core/Snackbar';
+import { SnackbarProps } from '@mui/material/Snackbar';
 import { isString } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 

@@ -17,9 +17,9 @@
 
 import styled, { css } from 'styled-components';
 
-import IconButton from '@material-ui/core/IconButton';
-import SelectSimilarIcon from '@material-ui/icons/Adjust';
-import CopyIcon from '@material-ui/icons/FileCopy';
+import IconButton from '@mui/material/IconButton';
+import SelectSimilarIcon from '@mui/icons-material/Adjust';
+import CopyIcon from '@mui/icons-material/FileCopy';
 
 import { COLOR } from '@/v4/styles';
 import {

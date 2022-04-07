@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent, createRef } from 'react';
-import RemoveCircle from '@material-ui/icons/RemoveCircle';
+import RemoveCircle from '@mui/icons-material/RemoveCircle';
 import {
 	cond,
 	filter,

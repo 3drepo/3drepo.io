@@ -18,13 +18,12 @@
 import { useEffect } from 'react';
 import { isNull } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import { MuiThemeProvider, StylesProvider } from '@material-ui/core';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material';
+import { StylesProvider } from '@mui/styles';
 import { ThemeProvider } from 'styled-components';
 
 import { theme } from '@/v5/ui/themes/theme';
-import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
-import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authActions.dispatchers';
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
 import { getIntlProviderProps } from '@/v5/services/intl';
@@ -35,7 +34,6 @@ import { LOGIN_PATH, PASSWORD_CHANGE_PATH } from './routes.constants';
 
 export const Root = () => {
 	const history = useHistory();
-	const userName: string = CurrentUserHooksSelectors.selectUsername();
 	const isAuthenticated: boolean | null = AuthHooksSelectors.selectIsAuthenticated();
 	const { location: { pathname } } = history;
 
@@ -44,10 +42,6 @@ export const Root = () => {
 	}, []);
 
 	useEffect(() => {
-		if (userName) {
-			CurrentUserActionsDispatchers.fetchUser(userName);
-		}
-
 		if (isAuthenticated) {
 			TeamspacesActionsDispatchers.fetch();
 		}
@@ -55,7 +49,7 @@ export const Root = () => {
 		if (!isNull(isAuthenticated) && !isAuthenticated && pathname !== PASSWORD_CHANGE_PATH) {
 			history.push(LOGIN_PATH);
 		}
-	}, [userName, isAuthenticated]);
+	}, [isAuthenticated]);
 
 	return (
 		<ThemeProvider theme={theme}>

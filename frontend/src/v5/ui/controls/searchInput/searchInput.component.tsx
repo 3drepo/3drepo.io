@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TextFieldProps } from '@material-ui/core';
+import { TextFieldProps } from '@mui/material';
 import SearchIcon from '@assets/icons/search.svg';
 import CloseIcon from '@assets/icons/close_rounded.svg';
 import { IconButton, TextField, StartAdornment, EndAdornment } from './searchInput.styles';
@@ -38,13 +38,11 @@ export const SearchInput = ({ onClear, value, ...props }: ISearchInput): JSX.Ele
 				</StartAdornment>
 			),
 			endAdornment: (
-				(
-					<EndAdornment $isVisible={value}>
-						<IconButton onClick={() => onClear()}>
-							<CloseIcon />
-						</IconButton>
-					</EndAdornment>
-				)
+				<EndAdornment $isVisible={Boolean(value)}>
+					<IconButton onClick={() => onClear()} size="large">
+						<CloseIcon />
+					</IconButton>
+				</EndAdornment>
 			),
 		}}
 		{...props}

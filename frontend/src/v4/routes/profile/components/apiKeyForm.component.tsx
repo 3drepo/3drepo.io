@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent, SyntheticEvent } from 'react';
-import { Button } from '@material-ui/core';
+import { Button } from '@mui/material';
 import { Form } from 'formik';
 
 import {
@@ -47,6 +47,7 @@ export class APIKeyForm extends PureComponent<IProps> {
 								readOnly: true
 							}}
 							margin="normal"
+							type="password"
 						/>
 					</FieldsRow>
 					<StyledButtonContainer>

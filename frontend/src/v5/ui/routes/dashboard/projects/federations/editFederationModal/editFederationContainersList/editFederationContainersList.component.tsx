@@ -25,12 +25,11 @@ import {
 	DashboardListHeader } from '@components/dashboard/dashboardList';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
-import { HeaderButtonsGroup } from '@/v5/ui/routes/dashboard/projects/containers/containers.styles';
 import { SearchInput } from '@controls/searchInput';
 import { Display } from '@/v5/ui/themes/media';
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { IContainer } from '@/v5/store/containers/containers.types';
-import { ButtonProps } from '@material-ui/core/Button';
+import { ButtonProps } from '@mui/material/Button';
 import { isEmpty } from 'lodash';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 import { filterContainers } from '@/v5/store/containers/containers.helpers';
@@ -98,13 +97,11 @@ export const EditFederationContainers = ({
 				tooltipTitles={collapsableTooltips}
 				sideElement={(
 					<CollapseSideElementGroup>
-						<HeaderButtonsGroup>
-							<ActionButton disabled={isEmpty(containers)} filterQuery={filterQuery}>
-								{isEmpty(filterQuery)
-									? actionButtonTexts.allResults
-									: actionButtonTexts.filteredResults}
-							</ActionButton>
-						</HeaderButtonsGroup>
+						<ActionButton disabled={isEmpty(containers)} filterQuery={filterQuery}>
+							{isEmpty(filterQuery)
+								? actionButtonTexts.allResults
+								: actionButtonTexts.filteredResults}
+						</ActionButton>
 						<SearchInput
 							onClear={() => setFilterQuery('')}
 							onChange={(event) => setFilterQuery(event.currentTarget.value)}

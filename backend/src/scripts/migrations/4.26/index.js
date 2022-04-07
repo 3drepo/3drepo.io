@@ -15,20 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormTextField } from '@controls/formTextField/formTextField.component';
-import styled from 'styled-components';
+const addAdminJob = require('./addAdminJob');
 
-export const UnitTextField = styled(FormTextField).attrs((props) => ({
-	label: ` (${props.$labelUnit})`,
-	type: 'tel',
-}))`
-	.MuiInputLabel-formControl {
-		&::before {
-			content: "${(props) => props.$labelName}";
-			${(props) => props.theme.typography.kicker};
-		}
-		
-		text-transform: none; 
-		letter-spacing: 0;
-	}
-`;
+const scripts = [
+	{ script: addAdminJob, desc: 'Add Admin job and assign the teamspace owner' },
+];
+
+module.exports = scripts;

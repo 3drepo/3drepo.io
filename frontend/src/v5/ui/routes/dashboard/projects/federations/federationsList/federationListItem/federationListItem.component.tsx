@@ -27,7 +27,7 @@ import {
 	DashboardListItemTitle,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { Highlight } from '@controls/highlight';
-import { Tooltip } from '@material-ui/core';
+import { Tooltip } from '@mui/material';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IFederation } from '@/v5/store/federations/federations.types';

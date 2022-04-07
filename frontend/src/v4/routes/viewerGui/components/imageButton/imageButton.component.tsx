@@ -14,9 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FC, useRef, forwardRef } from 'react';
-import Tooltip from '@material-ui/core/Tooltip';
-import ImageIcon from '@material-ui/icons/Image';
+import { useRef, forwardRef, Ref } from 'react';
+import Tooltip from '@mui/material/Tooltip';
+import ImageIcon from '@mui/icons-material/Image';
 import { noop } from 'lodash';
 
 import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../../helpers/rendering';
@@ -84,7 +84,7 @@ const UploadImage = ({ uploadScreenshot, showScreenshotDialog, close = noop, asM
 	return (
 		<label htmlFor="file-upload">
 			{renderWhenTrueOtherwise(() => (
-					<StyledListItem button>
+					<StyledListItem>
 						<StyledItemText>
 							Upload image...
 						</StyledItemText>
@@ -107,7 +107,7 @@ const CreateScreenshot = ({ disableScreenshot, takeScreenshot, ...props }) => {
 	return (
 		<>
 			{renderWhenTrue(() => (
-					<StyledListItem button onClick={handleOnClick}>
+					<StyledListItem onClick={handleOnClick}>
 						<StyledItemText>
 							Create Screenshot...
 						</StyledItemText>
@@ -117,7 +117,7 @@ const CreateScreenshot = ({ disableScreenshot, takeScreenshot, ...props }) => {
 	);
 };
 
-export const UpdateImageButton: FC<IProps> = forwardRef(({ hasImage, disabled, ...props }, ref) => {
+export const UpdateImageButton = forwardRef(({ hasImage, disabled, ...props }: IProps, ref: Ref<HTMLSpanElement>) => {
 	const imageLabel = !hasImage ? 'Add Image' : 'Edit Image';
 
 	return (

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FunctionComponent, ReactNode, useState, useEffect, useRef } from 'react';
-import List from '@material-ui/core/List';
+import List from '@mui/material/List';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { Wrapper } from './childMenu.styles';

@@ -18,7 +18,7 @@ import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { IFixedOrGrowContainer } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.component';
 import { Text } from './dashboardListItemText.styles';
 
-interface IDashboardListItemText extends IFixedOrGrowContainer{
+interface IDashboardListItemText extends IFixedOrGrowContainer {
 	selected?: boolean;
 }
 
