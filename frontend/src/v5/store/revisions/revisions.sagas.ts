@@ -20,6 +20,7 @@ import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { FetchAction, RevisionsActions, RevisionsTypes, SetRevisionVoidStatusAction, DownloadAction } from './revisions.redux';
+import { downloadRevision } from './revisions.helper';
 
 export function* fetch({ teamspace, projectId, containerId }: FetchAction) {
 	yield put(RevisionsActions.setIsPending(containerId, true));
@@ -51,7 +52,7 @@ export function* setVoidStatus({ teamspace, projectId, containerId, revisionId, 
 export function* download({ teamspace, projectId, containerId, revisionId }: DownloadAction) {
 	try {
 		const url = API.Revisions.getRevisionFileUrl(teamspace, projectId, containerId, revisionId);
-		window.open(url, '_blank');
+		downloadRevision(url);
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'revisions.download.error', defaultMessage: 'trying to download revision file' }),
