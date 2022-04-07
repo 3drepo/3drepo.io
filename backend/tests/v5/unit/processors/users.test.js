@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { FORGOT_PASSWORD } = require('../../../../src/v5/services/mailer/templateNames');
 const { templates } = require('../../../../src/v5/utils/responseCodes');
 const { src } = require('../../helper/path');
 
@@ -22,8 +23,8 @@ const Users = require(`${src}/processors/users`);
 
 jest.mock('../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
-jest.mock('../../../../src/v5/services/mailer');
-const Mailer = require(`${src}/services/mailer`);
+jest.mock('../../../../src/v5/services/mailer/mailer');
+const Mailer = require(`${src}/services/mailer/mailer`);
 jest.mock('../../../../src/v5/utils/helper/strings');
 const Strings = require(`${src}/utils/helper/strings`);
 
@@ -62,7 +63,7 @@ const updatePasswordMock = UsersModel.updatePassword.mockImplementation(() => {}
 const updateResetPasswordTokenMock = UsersModel.updateResetPasswordToken.mockImplementation(() => {});
 UsersModel.canLogIn.mockImplementation(() => user);
 UsersModel.authenticate.mockResolvedValue('user1');
-const sendResetPasswordEmailMock = Mailer.sendResetPasswordEmail.mockImplementation(() => {});
+const sendEmailMock = Mailer.sendEmail.mockImplementation(() => {});
 Strings.generateHashString.mockImplementation(() => exampleHashString);
 
 const testLogin = () => {
@@ -147,14 +148,15 @@ const testGenerateResetPasswordToken = () => {
 			expiredAt.setHours(expiredAt.getHours() + 24);
 			await Users.generateResetPasswordToken('user1');
 			expect(updateResetPasswordTokenMock.mock.calls.length).toBe(1);
-			expect(updateResetPasswordTokenMock.mock.calls[0][0]).toBe('user1');
+			expect(updateResetPasswordTokenMock.mock.calls[0][0]).toBe(user.user);
 			expect(updateResetPasswordTokenMock.mock.calls[0][1])
 				.toStrictEqual({ token: exampleHashString, expiredAt });
-			expect(sendResetPasswordEmailMock.mock.calls.length).toBe(1);
-			expect(sendResetPasswordEmailMock.mock.calls[0][0]).toBe(user.customData.email);
-			expect(sendResetPasswordEmailMock.mock.calls[0][1]).toStrictEqual({ token: exampleHashString,
+			expect(sendEmailMock.mock.calls.length).toBe(1);
+			expect(sendEmailMock.mock.calls[0][0]).toBe(FORGOT_PASSWORD);
+			expect(sendEmailMock.mock.calls[0][1]).toBe(user.customData.email);
+			expect(sendEmailMock.mock.calls[0][2]).toStrictEqual({ token: exampleHashString,
 				email: user.customData.email,
-				username: 'user1',
+				username: user.user,
 				firstName: user.customData.firstName });
 		});
 
