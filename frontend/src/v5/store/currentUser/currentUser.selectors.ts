@@ -26,3 +26,7 @@ export const selectCurrentUser = createSelector(
 export const selectUsername: (state) => string = createSelector(
 	selectCurrentUser, (state) => state.username || '',
 );
+
+export const selectFirstName: (state) => string = createSelector(
+	selectCurrentUser, (state) => state.firstName || '',
+);

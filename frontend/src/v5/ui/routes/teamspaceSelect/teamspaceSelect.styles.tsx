@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 
 export const Content = styled.section`
@@ -22,4 +23,12 @@ export const Content = styled.section`
 	border-top: 1px solid rgba(196, 196, 196, 0.1);
 	overflow-y: auto;
 	flex-grow: 1;
+`;
+
+export const WelcomeMessage = styled(Typography).attrs({
+	variant: 'h1',
+})`
+	color: ${({ theme }) => theme.palette.primary.contrast};
+	text-align: center;
+	margin: 75px auto 40px;
 `;

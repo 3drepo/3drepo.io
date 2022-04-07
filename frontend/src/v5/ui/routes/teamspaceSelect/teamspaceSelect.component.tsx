@@ -15,18 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { AppBar } from '@components/shared/appBar';
 import { ModalsDispatcher } from '@components/shared/modals';
 import { TeamspaceList } from '@components/teamspace/teamspaceList/teamspaceList.component';
+import { FormattedMessage } from 'react-intl';
+import { Content, WelcomeMessage } from './teamspaceSelect.styles';
 
-import { Content } from './teamspaceSelect.styles';
-
-export const TeamspaceSelect = (): JSX.Element => (
-	<>
-		<AppBar />
-		<Content>
-			<TeamspaceList />
-		</Content>
-		<ModalsDispatcher />
-	</>
-);
+export const TeamspaceSelect = (): JSX.Element => {
+	const firstName = CurrentUserHooksSelectors.selectFirstName();
+	return (
+		<>
+			<AppBar />
+			<Content>
+				<WelcomeMessage>
+					<FormattedMessage id="teamspaces.welcome" defaultMessage="Welcome back, {firstName}!" values={{ firstName }} />
+				</WelcomeMessage>
+				<TeamspaceList />
+			</Content>
+			<ModalsDispatcher />
+		</>
+	);
+};
