@@ -26,7 +26,12 @@ const filesExt = '.files';
 
 const convertLegacyFileName = (filename) => {
 	const res = filename.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/[^/]*$/g);
-	return res?.length ? res[0] : filename;
+	if (res?.length) {
+		const match = res[0];
+		const superMeshRegex = match.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}[^/]*$/g);
+		return superMeshRegex?.length ? superMeshRegex[0] : match;
+	}
+	return filename;
 };
 
 const moveFile = async (teamspace, collection, filename) => {
@@ -42,7 +47,7 @@ const moveFile = async (teamspace, collection, filename) => {
 		await updateOne(teamspace, `${collection}${filesExt}`, { filename }, { $set: { filename: existingRef._id } });
 	} else {
 		const newRef = await FsService.storeFile(file);
-		newRef._id = existingRef?._id || filename;
+		newRef._id = existingRef?._id || convertLegacyFileName(filename);
 		await Promise.all([
 			updateOne(teamspace, `${collection}.ref`, { _id: newRef._id }, { $set: newRef }, true),
 			updateOne(teamspace, `${collection}${filesExt}`, { filename }, { $set: { filename: newRef._id } }),
