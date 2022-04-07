@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import * as queryString from 'query-string';
 import { FormattedMessage } from 'react-intl';
@@ -34,8 +34,9 @@ import { LOGIN_PATH } from '../../routes.constants';
 export const ChangePassword = () => {
 	const { token, username } = queryString.parse(window.location.search);
 	const [errorMessage, setErrorMessage] = useState('');
-	const { control, handleSubmit, formState: { isValid, errors } } = useForm({
+	const { control, handleSubmit, formState: { isValid, isDirty, errors }, trigger } = useForm({
 		mode: 'onChange',
+		reValidateMode: 'onChange',
 		defaultValues: { newPassword: '', newPasswordConfirm: '' },
 		resolver: yupResolver(PasswordChangeSchema),
 	});
@@ -48,6 +49,10 @@ export const ChangePassword = () => {
 			setErrorMessage(message);
 		}
 	};
+
+	useEffect(() => {
+		if (isDirty) trigger('newPasswordConfirm');
+	}, [isValid]);
 
 	return (
 		<AuthPage>
