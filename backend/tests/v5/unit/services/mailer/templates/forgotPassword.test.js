@@ -15,10 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const ForgotPasswordTemplate = {};
-const config = require('../../../utils/config');
+const { src } = require('../../../../helper/path');
+const { generateRandomString } = require('../../../../helper/services');
 
-ForgotPasswordTemplate.html = (data) => `<table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;">
+const config = require(`${src}/utils/config`);
+const ForgotPassword = require(`${src}/services/mailer/templates/forgotPassword`);
+
+const getHtml = (data) => `<table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;">
 <tbody class="mcnTextBlockOuter">
    <tr>
       <td valign="top" class="mcnTextBlockInner" style="padding-top:9px;">
@@ -146,6 +149,19 @@ ForgotPasswordTemplate.html = (data) => `<table border="0" cellpadding="0" cells
 </tbody>
 </table>`;
 
-ForgotPasswordTemplate.subject = 'Reset your password';
+const testHtml = () => {
+	describe('get forgotPassword template html', () => {
+		test('should get forgotPassword template html', async () => {
+			const data = {
+				username: generateRandomString(),
+				token: generateRandomString(),
+			};
+			const res = await ForgotPassword.html(data);
+			expect(res).toEqual(getHtml(data));
+		});
+	});
+};
 
-module.exports = ForgotPasswordTemplate;
+describe('services/mailer/templates/forgotPassword', () => {
+	testHtml();
+});

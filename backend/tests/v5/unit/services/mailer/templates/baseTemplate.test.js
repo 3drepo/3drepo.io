@@ -15,9 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const BaseTemplate = {};
+const { src } = require('../../../../helper/path');
+const { generateRandomString } = require('../../../../helper/services');
 
-BaseTemplate.html = (data) => `<!doctype html>
+const BaseTemplate = require(`${src}/services/mailer/templates/baseTemplate`);
+
+const testHtml = () => {
+	describe('get base template html', () => {
+		test('should get base template html', async () => {
+			const data = {
+				firstName: generateRandomString(),
+				emailContent: generateRandomString(),
+			};
+
+			const res = await BaseTemplate.html(data);
+
+			expect(res).toEqual(
+				`<!doctype html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
    <head>
       <!-- NAME: FOLLOW UP -->
@@ -935,6 +949,12 @@ BaseTemplate.html = (data) => `<!doctype html>
          </table>
       </center>
    </body>
-</html>`;
+</html>`,
+			);
+		});
+	});
+};
 
-module.exports = BaseTemplate;
+describe('services/mailer/templates/baseTemplate', () => {
+	testHtml();
+});

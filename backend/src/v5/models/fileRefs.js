@@ -64,7 +64,8 @@ FileRefs.fetchFileStream = async (teamspace, model, extension, fileName) => {
 		return { readStream: stream, size: entry.size };
 	} catch {
 		logger.logError(`Failed to fetch file from ${entry.type}. Trying GridFS....`);
-		await sendEmail(FILE_MISSING, config.contact?.email, { teamspace,
+		await sendEmail(FILE_MISSING, config.contact?.email, {
+			account: teamspace,
 			model,
 			collection,
 			refId: entry._id,

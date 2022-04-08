@@ -17,21 +17,19 @@
 
 const FileMissingTemplate = {};
 
-FileMissingTemplate.html = (data) => `
-	Backup read from GridFS triggered:
-	<br>
-	account: ${data.account}
-	<br>
-	model: ${data.model}
-	<br>
-	collection: ${data.collection}
-	<br>
-	ref: ${data.refId}
-	<br>
-	link: ${data.link}
-	<br>
-	domain: ${data.domain}
-`;
+FileMissingTemplate.html = (data) => `Backup read from GridFS triggered:
+<br>
+account: ${data.account}
+<br>
+model: ${data.model}
+<br>
+collection: ${data.collection}
+<br>
+ref: ${data.refId}
+<br>
+link: ${data.link}
+<br>
+domain: ${data.domain}`;
 
 FileMissingTemplate.subject = (data) => `[System][${data.domain}] Missing file from Fileshare detected`;
 

@@ -17,20 +17,20 @@
 
 const Users = {};
 
+const { FORGOT_PASSWORD, VERIFY_USER } = require('../services/mailer/templateNames');
 const { addUser, authenticate, canLogIn, deleteApiKey, generateApiKey, getAvatar,
 	getUserByUsername, updatePassword, updateProfile, updateResetPasswordToken, uploadAvatar, verify } = require('../models/users');
 const { isEmpty, removeFields } = require('../utils/helper/objects');
-const { FORGOT_PASSWORD } = require('../services/mailer/templateNames');
-const { sendEmail } = require('../services/mailer/mailer');
 const config = require('../utils/config');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
 const { publish } = require('../services/eventsManager/eventsManager');
+const { sendEmail } = require('../services/mailer/mailer');
 
 Users.signUp = async (newUserData) => {
 	const token = generateHashString();
 	await addUser({ ...newUserData, token });
-	await sendVerifyUserEmail(newUserData.email, {
+	await sendEmail(VERIFY_USER, newUserData.email, {
 		token,
 		email: newUserData.email,
 		firstName: newUserData.firstName,

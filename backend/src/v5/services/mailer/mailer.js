@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const baseTemplate = require('./templates/baseTemplate');
 const config = require('../../utils/config');
 const { createTestAccount } = require('nodemailer');
 const { logger } = require('../../utils/logger');
@@ -42,16 +43,15 @@ Mailer.sendEmail = async (templateName, to, data, attachments) => {
 		}
 	}
 
-	const templatePath = `./templates/${templateName}`;
-
 	// eslint-disable-next-line global-require, import/no-dynamic-require, security/detect-non-literal-require
-	const template = require(templatePath);
+	const template = require(`./templates/${templateName}`);
+	const templateHtml = template.html(data);
 
 	const mailOptions = {
 		from: config.mail.sender,
 		to,
 		subject: typeof template.subject === 'function' ? template.subject(data) : template.subject,
-		html: template.html(data),
+		html: baseTemplate.html({ ...data, emailContent: templateHtml }),
 	};
 
 	if (attachments) {
@@ -60,13 +60,15 @@ Mailer.sendEmail = async (templateName, to, data, attachments) => {
 
 	transporter = transporter || nodemailer.createTransport(config.mail.smtpConfig);
 
-	await transporter.sendMail(mailOptions, (err, info) => {
-		if (err) {
-			logger.logDebug(`Email error - ${err.message}`);
-			reject(err);
-		} else {
-			resolve(info);
-		}
+	return new Promise((resolve, reject) => {
+		transporter.sendMail(mailOptions, (err, info) => {
+			if (err) {
+				logger.logDebug(`Email error - ${err.message}`);
+				reject(err);
+			} else {
+				resolve(info);
+			}
+		});
 	});
 };
 

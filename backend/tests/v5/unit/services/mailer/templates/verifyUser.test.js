@@ -15,10 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const VerifyUserTemplate = {};
-const config = require('../../../utils/config');
+const { src } = require('../../../../helper/path');
+const { generateRandomString } = require('../../../../helper/services');
 
-VerifyUserTemplate.html = (data) => `<table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;">
+const config = require(`${src}/utils/config`);
+const VerifyUser = require(`${src}/services/mailer/templates/verifyUser`);
+
+const getHtml = (data) => `<table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;">
    <tbody class="mcnTextBlockOuter">
       <tr>
          <td valign="top" class="mcnTextBlockInner" style="padding-top:9px;">
@@ -144,6 +147,31 @@ VerifyUserTemplate.html = (data) => `<table border="0" cellpadding="0" cellspaci
    </tbody>
 </table>`;
 
-VerifyUserTemplate.subject = 'Welcome to 3D Repo! Verify Your Email‏';
+const testHtml = () => {
+	describe('get verifyUser template html', () => {
+		test('should get verifyUser template html with pay', async () => {
+			const data = {
+				username: generateRandomString(),
+				token: generateRandomString(),
+				pay: generateRandomString(),
+			};
 
-module.exports = VerifyUserTemplate;
+			const res = await VerifyUser.html(data);
+			expect(res).toEqual(getHtml(data));
+		});
+
+		test('should get verifyUser template html without pay', async () => {
+			const data = {
+				username: generateRandomString(),
+				token: generateRandomString(),
+			};
+
+			const res = await VerifyUser.html(data);
+			expect(res).toEqual(getHtml(data));
+		});
+	});
+};
+
+describe('services/mailer/templates/verifyUser', () => {
+	testHtml();
+});
