@@ -19,7 +19,7 @@ const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 
 const config = require(`${src}/utils/config`);
-const { FORGOT_PASSWORD, FILE_MISSING } = require(`${src}/services/mailer/mailer.constants`);
+const { templates } = require(`${src}/services/mailer/mailer.constants`);
 
 const Mailer = require(`${src}/services/mailer`);
 
@@ -32,32 +32,32 @@ const testSendEmail = () => {
 		test('should fail if config.mail.sender is not set', async () => {
 			const { sender } = config.mail;
 			config.mail.sender = undefined;
-			await expect(Mailer.sendEmail(FORGOT_PASSWORD, recipient, data, attachments))
+			await expect(Mailer.sendEmail(templates.FORGOT_PASSWORD.name, recipient, data, attachments))
 				.rejects.toEqual({ message: 'config.mail.sender is not set' });
 			config.mail.sender = sender;
 		});
 
 		test('should fail if config.mail.smtpConfig is not set and config.mail.generateCredentials is false', async () => {
 			config.mail.generateCredentials = false;
-			await expect(Mailer.sendEmail(FORGOT_PASSWORD, recipient, data, attachments))
+			await expect(Mailer.sendEmail(templates.FORGOT_PASSWORD.name, recipient, data, attachments))
 				.rejects.toEqual({ message: 'config.mail.smtpConfig is not set' });
 			config.mail.generateCredentials = true;
 		});
 
 		test('should send email if attachments are provided', async () => {
-			await Mailer.sendEmail(FORGOT_PASSWORD, recipient, data, attachments);
+			await Mailer.sendEmail(templates.FORGOT_PASSWORD.name, recipient, data, attachments);
 		});
 
 		test('should send email if attachments are not provided', async () => {
-			await Mailer.sendEmail(FORGOT_PASSWORD, recipient, data);
+			await Mailer.sendEmail(templates.FORGOT_PASSWORD.name, recipient, data);
 		});
 
 		test('should send email if the subject of template is a function', async () => {
-			await Mailer.sendEmail(FILE_MISSING, recipient, data, attachments);
+			await Mailer.sendEmail(templates.FILE_MISSING.name, recipient, data, attachments);
 		});
 	});
 };
 
-describe('services/mailer/mailer', () => {
+describe('services/mailer', () => {
 	testSendEmail();
 });

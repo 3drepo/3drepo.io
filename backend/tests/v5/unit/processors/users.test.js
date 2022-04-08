@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { FORGOT_PASSWORD, VERIFY_USER } = require('../../../../src/v5/services/mailer/mailer.constants');
+const { templates: emailTemplates } = require('../../../../src/v5/services/mailer/mailer.constants');
 const { templates } = require('../../../../src/v5/utils/responseCodes');
 const { src } = require('../../helper/path');
 
@@ -156,7 +156,7 @@ const testGenerateResetPasswordToken = () => {
 			expect(UsersModel.updateResetPasswordToken)
 				.toHaveBeenCalledWith(user.user, { token: exampleHashString, expiredAt });
 			expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
-			expect(Mailer.sendEmail).toHaveBeenCalledWith(FORGOT_PASSWORD, user.customData.email,
+			expect(Mailer.sendEmail).toHaveBeenCalledWith(emailTemplates.FORGOT_PASSWORD.name, user.customData.email,
 				{
 					token: exampleHashString,
 					email: user.customData.email,
@@ -186,7 +186,7 @@ const testSignUp = () => {
 			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
 			expect(UsersModel.addUser).toHaveBeenCalledWith({ ...newUserData, token: exampleHashString });
 			expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
-			expect(Mailer.sendEmail).toHaveBeenCalledWith(VERIFY_USER, newUserData.email, {
+			expect(Mailer.sendEmail).toHaveBeenCalledWith(emailTemplates.VERIFY_USER.name, newUserData.email, {
 				token: exampleHashString,
 				email: newUserData.email,
 				firstName: newUserData.firstName,
