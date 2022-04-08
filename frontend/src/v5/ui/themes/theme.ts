@@ -350,6 +350,16 @@ export const theme = createTheme({
 				elevation: 8,
 			},
 		},
+		MuiCard: {
+			styleOverrides: {
+				root: {
+					padding: '12px',
+					borderRadius: '5px',
+					boxShadow: 'none',
+					boxSizing: 'border-box',
+				},
+			},
+		},
 		MuiDialog: {
 			styleOverrides: {
 				paper: {
