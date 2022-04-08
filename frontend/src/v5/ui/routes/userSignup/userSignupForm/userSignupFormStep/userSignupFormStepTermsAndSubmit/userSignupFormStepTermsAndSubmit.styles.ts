@@ -21,7 +21,7 @@ import { SubmitButton } from '@controls/submitButton/submitButton.component';
 import ErrorIconBase from '@assets/icons/warning_small.svg';
 
 export const CreateAccountButton = styled(SubmitButton)`
-	margin: 20px 0 0 0;
+	margin: 20px 0 0;
 `;
 
 export const TermsContainer = styled.div`
@@ -30,7 +30,8 @@ export const TermsContainer = styled.div`
 	justify-content: center;
 	align-items: center;
 	width: 100%;
-	background-color: #edf0f8; // TODO - fix when new palette will be implemented
+	/*TODO - fix when new palette will be implemented*/
+	background-color: #edf0f8;
 	border-radius: 5px;
 	padding: 14px;
 	margin-top: 22px;
@@ -64,8 +65,8 @@ export const ErrorContainer = styled.div`
 	${({ theme }) => theme.typography.body1};
 	font-weight: 500;
 	margin-top: 13px;
-    justify-content: flex-start;
-    display: flex;
+	justify-content: flex-start;
+	display: flex;
 `;
 
 export const ErrorIcon = styled(ErrorIconBase)`
@@ -81,9 +82,9 @@ export const CircularProgressContainer = styled.div`
 	margin: auto;
 	margin-top: 20px;
 	height: 35px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 `;
 
 export const Gap = styled.div`

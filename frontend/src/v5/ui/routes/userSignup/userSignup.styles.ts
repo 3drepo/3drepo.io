@@ -33,8 +33,8 @@ export const Background = styled.div`
 	width: 100%;
 	display: flex;
 	flex-direction: column;
-    justify-content: center;
-    align-items: center;
+	justify-content: center;
+	align-items: center;
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	${clientConfigService.getCustomBackgroundImagePath() && `
 		background: url('${clientConfigService.getCustomBackgroundImagePath()}') 0% 0% / cover no-repeat;

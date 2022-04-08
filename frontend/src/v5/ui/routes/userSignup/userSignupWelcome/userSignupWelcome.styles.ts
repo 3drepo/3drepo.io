@@ -31,11 +31,12 @@ export const Body = styled.div`
 	padding: 45px 60px;
 	text-align: center;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	box-shadow: ${clientConfigService.getCustomBackgroundImagePath() ? '0px 8px 15px -3px #878787' : '0 1px 1px rgb(0 0 0 / 14%)'}; // TODO - fix when new design will be implemented
+	/*TODO - fix when new design will be implemented*/
+	box-shadow: ${clientConfigService.getCustomBackgroundImagePath() ? '0px 8px 15px -3px #878787' : '0 1px 1px rgb(0 0 0 / 14%)'};
 `;
 
 export const EmailIcon = styled(EmailIconBase)`
-    transform: scale(1.7);
+	transform: scale(1.7);
 `;
 
 export const Subtitle = styled.div`
@@ -84,5 +85,6 @@ export const Link = styled(LinkBase).attrs({
 	color: ${({ theme }) => theme.palette.base.main};
 	font-weight: 500;
 	text-underline-offset: 1px;
+	/* stylelint-disable-next-line */
 	text-decoration-thickness: .11em;
 `;

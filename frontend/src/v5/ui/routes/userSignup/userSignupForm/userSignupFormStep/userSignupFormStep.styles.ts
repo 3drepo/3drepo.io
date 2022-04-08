@@ -16,6 +16,7 @@
  */
 
 import styled from 'styled-components';
+
 import { Button } from '@controls/button';
 
 export const NextStepButton = styled(Button).attrs({
@@ -24,6 +25,6 @@ export const NextStepButton = styled(Button).attrs({
 })`
 	width: fit-content;
 	font-weight: 300;
-	margin: 20px 0 0 0;
+	margin: 20px 0 0;
 	float: right;
 `;

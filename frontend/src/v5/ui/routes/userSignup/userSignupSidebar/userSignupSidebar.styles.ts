@@ -42,7 +42,7 @@ export const MainTitle = styled.div`
 	${({ theme }) => theme.typography.h2};
 	font-weight: lighter;
 	letter-spacing: 0.03rem;
-	margin: 36px 0 22px 0;
+	margin: 36px 0 22px;
 `;
 
 export const BulletPoint = styled.div`
@@ -53,8 +53,8 @@ export const BulletPoint = styled.div`
 
 export const BulletPointIcon = styled.div`
 	display: flex;
-    align-items: center;
-    justify-content: center;
+	align-items: center;
+	justify-content: center;
 	border: solid 1px ${({ theme }) => theme.palette.primary.main};
 	border-radius: 50%;
 	min-width: 21px;
@@ -82,8 +82,8 @@ export const BulletPointTitle = styled.div`
 
 export const BulletPointBody = styled.div`
 	color: ${({ theme }) => theme.palette.base.main};
-    margin-bottom: 10px;
-    line-height: 1.4rem;
+	margin-bottom: 10px;
+	line-height: 1.4rem;
 `;
 
 export const BookADemoButton = styled(Button).attrs({
@@ -94,8 +94,8 @@ export const BookADemoButton = styled(Button).attrs({
 })`
 	width: fit-content;
 	font-weight: 300;
-	margin: 28px 0 0 0;
-    padding: 10px 20px 10px 28px;
+	margin: 28px 0 0;
+	padding: 10px 20px 10px 28px;
 `;
 
 export const LaptopIcon = styled(LatopIconBase)`

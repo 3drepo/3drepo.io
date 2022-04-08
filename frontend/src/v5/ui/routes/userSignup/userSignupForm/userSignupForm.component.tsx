@@ -199,7 +199,6 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 						<UserSignupFormStepTermsAndSubmit
 							{...getStepProps(2)}
 							unexpectedError={unexpectedError}
-							setUnexpectedError={updateUnexpectedError}
 							isActiveStep={activeStep === LAST_STEP}
 						/>
 					</UserSignupFormStep>
