@@ -101,7 +101,10 @@ export const FederationSettingsSchema = Yup.object().shape({
 	z: numberField.required(),
 });
 
-export const UserSignupSchemaAccount = (usernameAlreadyExisting: string[] = []) => Yup.object().shape({
+export const UserSignupSchemaAccount = (
+	alreadyExistingUsernames: string[] = [],
+	alreadyExistingEmails: string[] = [],
+) => Yup.object().shape({
 	username: Yup.string()
 		.matches(/^[a-zA-Z][\w]{1,63}$/, formatMessage({
 			id: 'user.username.error.characters',
@@ -124,12 +127,12 @@ export const UserSignupSchemaAccount = (usernameAlreadyExisting: string[] = []) 
 				defaultMessage: 'Username is limited to 120 characters',
 			}))
 		.test(
-			'usernameAlreadyExisting',
+			'alreadyExistingUsernames',
 			formatMessage({
 				id: 'userRegistration.username.alreadyExisting',
 				defaultMessage: 'This username is already taken',
 			}),
-			(username) => !usernameAlreadyExisting.includes(username),
+			(username) => !alreadyExistingUsernames.includes(username),
 		),
 	email: Yup.string().email()
 		.required(
@@ -137,6 +140,14 @@ export const UserSignupSchemaAccount = (usernameAlreadyExisting: string[] = []) 
 				id: 'userRegistration.email.error.required',
 				defaultMessage: 'Email is a required field',
 			}),
+		)
+		.test(
+			'alreadyExistingEmails',
+			formatMessage({
+				id: 'userRegistration.email.alreadyExisting',
+				defaultMessage: 'This email is already taken',
+			}),
+			(email) => !alreadyExistingEmails.includes(email),
 		),
 	password: Yup.string()
 		.required(
@@ -177,30 +188,30 @@ export const UserSignupSchemaAccount = (usernameAlreadyExisting: string[] = []) 
 });
 
 export const UserSignupSchemaPersonal = Yup.object().shape({
-	firstname: Yup.string()
+	firstName: Yup.string()
 		.min(2, formatMessage({
-			id: 'userRegistration.firstname.error.min',
+			id: 'userRegistration.firstName.error.min',
 			defaultMessage: 'First name must be at least 2 characters',
 		}))
 		.max(50, formatMessage({
-			id: 'userRegistration.firstname.error.max',
+			id: 'userRegistration.firstName.error.max',
 			defaultMessage: 'First name is limited to 50 characters',
 		}))
 		.required(formatMessage({
-			id: 'userRegistration.firstname.error.required',
+			id: 'userRegistration.firstName.error.required',
 			defaultMessage: 'First name is a required field',
 		})),
-	lastname: Yup.string()
+	lastName: Yup.string()
 		.min(2, formatMessage({
-			id: 'userRegistration.lastname.error.min',
+			id: 'userRegistration.lastName.error.min',
 			defaultMessage: 'Last name must be at least 2 characters',
 		}))
 		.max(50, formatMessage({
-			id: 'userRegistration.lastname.error.max',
+			id: 'userRegistration.lastName.error.max',
 			defaultMessage: 'Last name is limited to 50 characters',
 		}))
 		.required(formatMessage({
-			id: 'userRegistration.lastname.error.required',
+			id: 'userRegistration.lastName.error.required',
 			defaultMessage: 'Last name is a required field',
 		})),
 	company: Yup.string()
@@ -210,15 +221,15 @@ export const UserSignupSchemaPersonal = Yup.object().shape({
 				defaultMessage: 'Company is a required field',
 			}),
 		),
-	country: Yup.string()
+	countryCode: Yup.string()
 		.required(
 			formatMessage({
-				id: 'userRegistration.country.error.required',
+				id: 'userRegistration.countryCode.error.required',
 				defaultMessage: 'Country is a required field',
 			}),
 		),
 });
 
 export const UserSignupSchemaTermsAndSubmit = Yup.object().shape({
-	terms: Yup.boolean().oneOf([true]),
+	termsAgreed: Yup.boolean().oneOf([true]),
 });

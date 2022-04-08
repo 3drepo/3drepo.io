@@ -30,16 +30,16 @@ import {
 
 export type UserSignupWelcomeProps = {
 	email: string;
-	firstname: string;
+	firstName: string;
 };
 
-export const UserSignupWelcome = ({ firstname, email }: UserSignupWelcomeProps) => (
+export const UserSignupWelcome = ({ firstName, email }: UserSignupWelcomeProps) => (
 	<Container>
 		<Title>
 			<FormattedMessage
 				id="userSignup.confirmation.title"
-				defaultMessage="Welcome, {firstname}!"
-				values={{ firstname }}
+				defaultMessage="Welcome, {firstName}!"
+				values={{ firstName }}
 			/>
 		</Title>
 		<Body>

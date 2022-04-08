@@ -29,10 +29,10 @@ import { defaults, isEqual, pick } from 'lodash';
 import { NextStepButton } from '../userSignupFormStep.styles';
 
 export interface IPersonalFormInput {
-	firstname: string;
-	lastname: string;
+	firstName: string;
+	lastName: string;
 	company: string;
-	country: string;
+	countryCode: string;
 }
 
 type UserSignupFormStepPersonalProps = {
@@ -51,13 +51,13 @@ export const UserSignupFormStepPersonal = ({
 	fields,
 }: UserSignupFormStepPersonalProps) => {
 	const DEFAULT_FIELDS: IPersonalFormInput = {
-		firstname: '',
-		lastname: '',
+		firstName: '',
+		lastName: '',
 		company: '',
-		country: 'GB',
+		countryCode: 'GB',
 	};
 	const getPersonalFields = (): IPersonalFormInput => defaults(
-		pick(fields, ['firstname', 'lastname', 'company', 'country']),
+		pick(fields, ['firstName', 'lastName', 'company', 'countryCode']),
 		DEFAULT_FIELDS,
 	);
 
@@ -84,24 +84,24 @@ export const UserSignupFormStepPersonal = ({
 	return (
 		<>
 			<FormTextField
-				name="firstname"
+				name="firstName"
 				control={control}
 				label={formatMessage({
-					id: 'userSignup.form.firstname',
+					id: 'userSignup.form.firstName',
 					defaultMessage: 'Firstname',
 				})}
 				required
-				formError={errors.firstname}
+				formError={errors.firstName}
 			/>
 			<FormTextField
-				name="lastname"
+				name="lastName"
 				control={control}
 				label={formatMessage({
-					id: 'userSignup.form.lastname',
+					id: 'userSignup.form.lastName',
 					defaultMessage: 'Lastname',
 				})}
 				required
-				formError={errors.lastname}
+				formError={errors.lastName}
 			/>
 			<FormTextField
 				name="company"
@@ -114,10 +114,10 @@ export const UserSignupFormStepPersonal = ({
 				formError={errors.company}
 			/>
 			<FormSelect
-				name="country"
+				name="countryCode"
 				control={control}
 				label={formatMessage({
-					id: 'userSignup.form.country',
+					id: 'userSignup.form.countryCode',
 					defaultMessage: 'Country',
 				})}
 				required

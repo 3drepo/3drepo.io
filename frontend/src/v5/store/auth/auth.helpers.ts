@@ -14,16 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+export const isInvalidArguments = (error: any): boolean => error.response.data.code === 'INVALID_ARGUMENTS';
 
-export const USER_ALREADY_EXISTS = 'USER_EXISTS';
+export const usernameAlreadyExists = (error: string): boolean => error.toLowerCase().includes('username already exists');
+
+export const emailAlreadyExists = (error: string): boolean => error.toLowerCase().includes('email already exists');
 
 export const getRegistrationErrorMessage = (error: any) => {
 	const { data } = error.response;
-	if (data.code === USER_ALREADY_EXISTS) return USER_ALREADY_EXISTS;
 	if (data.message) return data.message;
 	const [, message] = data.split(/<\/?pre>/);
 	return message;
 };
 
-// TODO implement after VerifyEndpoint is implemented
-export const getVerifyCaptchaErrorMessage = (error: any) => error.message;
+export const getVerifyCaptchaErrorMessage = (error: any) => error.response.data.message;

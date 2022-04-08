@@ -41,7 +41,8 @@ type UserSignupFormStepAccountProps = {
 	onComplete: () => void;
 	onUncomplete: () => void;
 	fields: IAccountFormInput;
-	alreadyExistingUsernames?: string[];
+	alreadyExistingUsernames: string[];
+	alreadyExistingEmails: string[];
 };
 
 export const UserSignupFormStepAccount = ({
@@ -51,6 +52,7 @@ export const UserSignupFormStepAccount = ({
 	onUncomplete,
 	fields,
 	alreadyExistingUsernames,
+	alreadyExistingEmails,
 }: UserSignupFormStepAccountProps) => {
 	const DEFAULT_FIELDS: IAccountFormInput = {
 		username: '',
@@ -74,7 +76,7 @@ export const UserSignupFormStepAccount = ({
 	} = useForm<IAccountFormInput>({
 		mode: 'all',
 		reValidateMode: 'onChange',
-		resolver: yupResolver(UserSignupSchemaAccount(alreadyExistingUsernames)),
+		resolver: yupResolver(UserSignupSchemaAccount(alreadyExistingUsernames, alreadyExistingEmails)),
 		defaultValues: getAccountFields(),
 	});
 
@@ -92,6 +94,7 @@ export const UserSignupFormStepAccount = ({
 		} else {
 			onUncomplete();
 			if (alreadyExistingUsernames.length) trigger('username');
+			if (alreadyExistingEmails.length) trigger('email');
 		}
 	}, [formIsValid]);
 

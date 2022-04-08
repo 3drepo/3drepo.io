@@ -19,7 +19,14 @@ import { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { registerNewUser } from '@/v5/services/api/signup';
 import { formatMessage } from '@/v5/services/intl';
-import { getRegistrationErrorMessage, USER_ALREADY_EXISTS } from '@/v5/store/auth/auth.helpers';
+import {
+	emailAlreadyExists,
+	getRegistrationErrorMessage,
+	isInvalidArguments,
+	usernameAlreadyExists,
+} from '@/v5/store/auth/auth.helpers';
+import { INewUser } from '@/v5/store/auth/auth.types';
+import { omit } from 'lodash';
 import { UserSignupFormStepAccount } from './userSignupFormStep/userSignupFormStepAccount/userSignupFormStepAccount.component';
 import { UserSignupFormStepPersonal } from './userSignupFormStep/userSignupFormStepPersonal/userSignupFormStepPersonal.component';
 import { UserSignupFormStepTermsAndSubmit } from './userSignupFormStep/userSignupFormStepTermsAndSubmit/userSignupFormStepTermsAndSubmit.component';
@@ -44,6 +51,7 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 	const [completedSteps, setCompletedSteps] = useState(new Set<number>());
 	const [fields, setFields] = useState<any>({});
 	const [alreadyExistingUsernames, setAlreadyExistingUsernames] = useState([]);
+	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
 	const [unexpectedError, setUnexpectedError] = useState('');
 	const [erroredStep, setErroredStep] = useState<number>();
 
@@ -87,21 +95,30 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 
 	const moveToNextStep = () => moveToStep(activeStep + 1);
 
+	const handleInvalidArgumentsError = (errorMessage: string) => {
+		setUnexpectedError('');
+		if (usernameAlreadyExists(errorMessage)) {
+			setAlreadyExistingUsernames([...alreadyExistingUsernames, fields.username]);
+		} else if (emailAlreadyExists(errorMessage)) {
+			setAlreadyExistingEmails([...alreadyExistingEmails, fields.email]);
+		}
+		updateFields({ password: '', confirmPassword: '' });
+		setActiveStep(0);
+		setErroredStep(0);
+		removeCompletedStep(LAST_STEP);
+		updateFields({ termsAgreed: false, mailListAgreed: false });
+	};
+
 	const createAccount = async () => {
 		try {
-			await registerNewUser(fields);
-			const { email, firstname } = fields;
-			completeRegistration({ email, firstname });
+			const newUser = omit(fields, ['confirmPassword', 'termsAgreed']) as INewUser;
+			await registerNewUser(newUser);
+			const { email, firstName } = fields;
+			completeRegistration({ email, firstName });
 		} catch (error) {
 			const errorMessage = getRegistrationErrorMessage(error);
-			if (errorMessage === USER_ALREADY_EXISTS) {
-				setUnexpectedError('');
-				setAlreadyExistingUsernames([...alreadyExistingUsernames, fields.username]);
-				updateFields({ password: '', confirmPassword: '' });
-				setActiveStep(0);
-				setErroredStep(0);
-				removeCompletedStep(LAST_STEP);
-				updateFields({ terms: false, newsletter: false });
+			if (isInvalidArguments(error)) {
+				handleInvalidArgumentsError(errorMessage);
 			} else {
 				updateUnexpectedError(errorMessage);
 			}
@@ -158,6 +175,7 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 						<UserSignupFormStepAccount
 							{...getStepProps(0)}
 							alreadyExistingUsernames={alreadyExistingUsernames}
+							alreadyExistingEmails={alreadyExistingEmails}
 						/>
 					</UserSignupFormStep>
 					<UserSignupFormStep

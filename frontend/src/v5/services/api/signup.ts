@@ -15,10 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { INewUser } from '@/v5/store/auth/auth.types';
+import { INewUser, NewUserVerification } from '@/v5/store/auth/auth.types';
 import api from './default';
 
-export const registerNewUser = ({ username, ...data }: INewUser): Promise<any> => api.post(username, data);
+export const registerNewUser = (data: INewUser): Promise<any> => api.post('user', data);
 
 // TODO fix after endpoints are implemented
-export const verifyToken = (token: string): Promise<any> => api.post('verify', { token });
+export const verifyCaptchaToken = async (userData: NewUserVerification): Promise<any> => {
+	const { data } = await api.post('user/verify', userData);
+	return data;
+};

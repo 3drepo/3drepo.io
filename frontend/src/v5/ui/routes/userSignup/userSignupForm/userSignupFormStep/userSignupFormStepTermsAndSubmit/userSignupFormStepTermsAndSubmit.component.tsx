@@ -25,7 +25,7 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { pick, defaults, isMatch } from 'lodash';
 import SignupIcon from '@assets/icons/outlined/add_user-outlined.svg';
-import { verifyToken } from '@/v5/services/api/signup';
+import { verifyCaptchaToken } from '@/v5/services/api/signup';
 import { getVerifyCaptchaErrorMessage } from '@/v5/store/auth/auth.helpers';
 import {
 	CreateAccountButton,
@@ -40,10 +40,13 @@ import {
 } from './userSignupFormStepTermsAndSubmit.styles';
 
 export interface ITermsAndSubmitFormInput {
-	terms: boolean;
-	newsletter: boolean;
-	captchaToken: string;
+	termsAgreed: boolean;
+	mailListAgreed: boolean;
+	captcha: string;
+	username: string;
 }
+
+type MinimalTermsAndSubmitFormInput = Omit<ITermsAndSubmitFormInput, 'captcha' | 'username'>;
 
 type UserSignupFormStepTermsAndSubmitProps = {
 	updateFields: (fields: any) => void;
@@ -66,13 +69,13 @@ export const UserSignupFormStepTermsAndSubmit = ({
 	fields,
 	isActiveStep,
 }: UserSignupFormStepTermsAndSubmitProps) => {
-	const DEFAULT_FIELDS: Omit<ITermsAndSubmitFormInput, 'captchaToken'> = {
-		terms: false,
-		newsletter: false,
+	const DEFAULT_FIELDS: MinimalTermsAndSubmitFormInput = {
+		termsAgreed: false,
+		mailListAgreed: false,
 	};
 
-	const getTermsAndSubmitFields = (): Omit<ITermsAndSubmitFormInput, 'captchaToken'> => defaults(
-		pick(fields, ['terms', 'newsletter']),
+	const getTermsAndSubmitFields = (): MinimalTermsAndSubmitFormInput => defaults(
+		pick(fields, ['termsAgreed', 'mailListAgreed']),
 		DEFAULT_FIELDS,
 	);
 
@@ -92,18 +95,17 @@ export const UserSignupFormStepTermsAndSubmit = ({
 	const [submitButtonIsPending, setSubmitButtonIsPending] = useState(false);
 
 	const createAccount: SubmitHandler<ITermsAndSubmitFormInput> = () => {
-		// captchaRef?.current?.reset();
 		setSubmitButtonIsPending(true);
 		onSubmitStep();
 	};
 
 	const handleCaptchaChange = async (captchaToken) => {
-		if (!fields.captchaToken && captchaToken) {
+		if (!fields.captcha && captchaToken) {
 			setSubmitButtonIsPending(true);
 			try {
 				// TODO - fix after endpoint is implemented
-				const verifiedCaptchaToken = await verifyToken(captchaToken);
-				updateFields({ captchaToken: verifiedCaptchaToken });
+				const captcha = await verifyCaptchaToken({ token: captchaToken, username: fields.username });
+				updateFields({ captcha });
 			} catch (error) {
 				setUnexpectedError(getVerifyCaptchaErrorMessage(error));
 			}
@@ -112,9 +114,9 @@ export const UserSignupFormStepTermsAndSubmit = ({
 	};
 
 	useEffect(() => {
-		if (!clientConfigService.captcha_client_key && !fields.captchaToken) {
+		if (!clientConfigService.captcha_client_key && !fields.captcha) {
 			updateFields({
-				captchaToken: 'CAPTCHA_IS_DISABLED',
+				captcha: 'CAPTCHA_IS_DISABLED',
 			});
 		}
 	}, []);
@@ -122,7 +124,7 @@ export const UserSignupFormStepTermsAndSubmit = ({
 	useEffect(() => {
 		if (formIsValid) {
 			onComplete();
-			if (!fields.captchaToken) {
+			if (!fields.captcha) {
 				captchaRef?.current?.execute();
 			}
 		} else {
@@ -144,9 +146,9 @@ export const UserSignupFormStepTermsAndSubmit = ({
 			<TermsContainer>
 				<CheckboxContainer>
 					<FormCheckbox
-						name="terms"
+						name="termsAgreed"
 						control={control}
-						formError={errors.terms}
+						formError={errors.termsAgreed}
 						label={(
 							<CheckboxMessage>
 								<FormattedMessage
@@ -197,9 +199,9 @@ export const UserSignupFormStepTermsAndSubmit = ({
 				</CheckboxContainer>
 				<CheckboxContainer>
 					<FormCheckbox
-						name="newsletter"
+						name="mailListAgreed"
 						control={control}
-						formError={errors.newsletter}
+						formError={errors.mailListAgreed}
 						label={(
 							<CheckboxMessage>
 								<FormattedMessage
@@ -249,7 +251,7 @@ export const UserSignupFormStepTermsAndSubmit = ({
 			<CreateAccountButton
 				isPending={submitButtonIsPending}
 				startIcon={<SignupIcon />}
-				disabled={!formIsValid || !fields.captchaToken || !!unexpectedError}
+				disabled={!formIsValid || !fields.captcha || !!unexpectedError}
 				onClick={handleSubmit(createAccount)}
 			>
 				<FormattedMessage
