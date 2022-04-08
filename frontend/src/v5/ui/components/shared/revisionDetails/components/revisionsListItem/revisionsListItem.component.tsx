@@ -26,6 +26,7 @@ import { IRevision } from '@/v5/store/revisions/revisions.types';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
 import { Display } from '@/v5/ui/themes/media';
 import { formatDate } from '@/v5/services/intl';
+import { viewerRoute } from '@/v5/services/routing/routing';
 import { Container } from './revisionsListItem.styles';
 
 type IRevisionsListItem = {
@@ -39,12 +40,13 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 	const { timestamp, desc, author, tag, void: voidStatus } = revision;
 
 	const toggleVoidStatus = (e: SyntheticEvent) => {
+		e.preventDefault();
 		e.stopPropagation();
 		RevisionsActionsDispatchers.setVoidStatus(teamspace, project, containerId, tag || revision._id, !voidStatus);
 	};
 
 	return (
-		<Container>
+		<Container to={viewerRoute(teamspace, containerId, revision)}>
 			<RevisionsListItemDate width={130} tabletWidth={94} active={active}>
 				{formatDate(timestamp)}
 			</RevisionsListItemDate>

@@ -17,6 +17,8 @@
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { Route, Switch } from 'react-router-dom';
+import { generatePath } from 'react-router';
+import { IRevision } from '@/v5/store/revisions/revisions.types';
 
 const appendSlashIfNeeded = (uri) => (uri[uri.length - 1] !== '/' ? `${uri}/` : uri);
 
@@ -37,17 +39,36 @@ export const uriCombine = (uri, path) => {
 
 const getBaseDomain = () => `${window.location.protocol}//${window.location.hostname}`;
 
-const relativeViewerRoute = (teamspace: string, containerOrFederation: IContainer | IFederation | string) => (
-	`v5/viewer/${teamspace}/${(containerOrFederation as IContainer | IFederation)?._id || containerOrFederation}`
-);
+export const VIEWER_ROUTE = '/v5/viewer/:teamspace/:containerOrFederation/:revision?';
+
+type RevisionParam = IRevision | string | null | undefined;
+type ContainerOrFederationParam = IContainer | IFederation | string;
+
+const relativeViewerRoute = (
+	teamspace: string,
+	containerOrFederation: ContainerOrFederationParam,
+	revision: RevisionParam,
+) => {
+	const containerOrFederationId = (containerOrFederation as IContainer | IFederation)?._id || containerOrFederation;
+	const revisionId = (revision as IRevision)?._id || (revision as string);
+
+	const params = {
+		teamspace,
+		containerOrFederation: containerOrFederationId,
+		revision: revisionId,
+	};
+
+	return generatePath(VIEWER_ROUTE, params);
+};
 
 export const viewerRoute = (
 	teamspace: string,
-	containerOrFederation: IContainer | IFederation | string,
+	containerOrFederation: ContainerOrFederationParam,
+	revision: RevisionParam = undefined,
 	withDomain: boolean = false,
 ) => {
 	const domain = withDomain ? getBaseDomain() : '';
-	return `${domain}/${relativeViewerRoute(teamspace, containerOrFederation)}`;
+	return `${domain}${relativeViewerRoute(teamspace, containerOrFederation, revision)}`;
 };
 
 export const RouteExcept = ({ path, exceptPath, children }) => (
