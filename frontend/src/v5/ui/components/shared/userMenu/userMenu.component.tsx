@@ -17,6 +17,7 @@
 import { useParams } from 'react-router';
 import { useRouteMatch } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
+import { useState } from 'react';
 
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authActions.dispatchers';
 import ContactUsIcon from '@assets/icons/email.svg';
@@ -35,6 +36,7 @@ import {
 	SignOutButton,
 	EditProfileButton,
 } from './userMenu.styles';
+import { EditProfileModal } from './editProfileModal/editProfileModal.component';
 
 type UserMenuProps = {
 	user: IUser;
@@ -47,89 +49,98 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 
 	const onClickSignOut = () => AuthActionsDispatchers.logout();
 
+	const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
+
 	return (
-		<AvatarContainer>
-			<ActionMenu>
-				<ActionMenuTriggerButton>
-					<Avatar
-						user={user}
-						isButton
-					/>
-				</ActionMenuTriggerButton>
-				<ActionMenuSection>
-					<AvatarSection>
+		<>
+			<AvatarContainer>
+				<ActionMenu>
+					<ActionMenuTriggerButton>
 						<Avatar
 							user={user}
-							largeIcon
+							isButton
 						/>
-						<UserFullName>{user.firstName} {user.lastName}</UserFullName>
-						<UserUserName>{user.user}</UserUserName>
-						<ActionMenuItem>
-							<EditProfileButton>
-								<FormattedMessage
-									id="userMenu.editYourProfile"
-									defaultMessage="Edit your profile"
-								/>
-							</EditProfileButton>
-						</ActionMenuItem>
-					</AvatarSection>
-				</ActionMenuSection>
-				<ActionMenuSection>
-					<ActionMenuItemLink
-						Icon={TeamspacesIcon}
-						to={`${baseUrl}/${teamspace}`}
-					>
-						<FormattedMessage
-							id="userMenu.teamspaces"
-							defaultMessage="Teamspaces"
-						/>
-					</ActionMenuItemLink>
-					<ActionMenuItemLink
-						Icon={VisualSettingsIcon}
-					>
-						<FormattedMessage
-							id="userMenu.visualSettings"
-							defaultMessage="Visual settings"
-						/>
-					</ActionMenuItemLink>
-				</ActionMenuSection>
-				<ActionMenuSection>
-					<ActionMenuItemLink
-						Icon={SupportCentreIcon}
-					>
-						<FormattedMessage
-							id="userMenu.supportCentre"
-							defaultMessage="Support centre"
-						/>
-					</ActionMenuItemLink>
-					<ActionMenuItemLink
-						Icon={ContactUsIcon}
-					>
-						<FormattedMessage
-							id="userMenu.contactUs"
-							defaultMessage="Contact us"
-						/>
-					</ActionMenuItemLink>
-					<ActionMenuItemLink
-						Icon={InviteAFriendIcon}
-					>
-						<FormattedMessage
-							id="userMenu.inviteAFriend"
-							defaultMessage="Invite a friend"
-						/>
-					</ActionMenuItemLink>
-				</ActionMenuSection>
-				<ActionMenuSection>
-					<ActionMenuItem>
-						<SignOutButton onClick={onClickSignOut}>
-							<FormattedMessage
-								id="userMenu.signOut"
-								defaultMessage="Sign out"
+					</ActionMenuTriggerButton>
+					<ActionMenuSection>
+						<AvatarSection>
+							<Avatar
+								user={user}
+								largeIcon
 							/>
-						</SignOutButton>
-					</ActionMenuItem>
-				</ActionMenuSection>
-			</ActionMenu>
-		</AvatarContainer>
+							<UserFullName>{user.firstName} {user.lastName}</UserFullName>
+							<UserUserName>{user.user}</UserUserName>
+							<ActionMenuItem>
+								<EditProfileButton onClick={() => setIsEditProfileModalOpen(true)}>
+									<FormattedMessage
+										id="userMenu.editYourProfile"
+										defaultMessage="Edit your profile"
+									/>
+								</EditProfileButton>
+							</ActionMenuItem>
+						</AvatarSection>
+					</ActionMenuSection>
+					<ActionMenuSection>
+						<ActionMenuItemLink
+							Icon={TeamspacesIcon}
+							to={`${baseUrl}/${teamspace}`}
+						>
+							<FormattedMessage
+								id="userMenu.teamspaces"
+								defaultMessage="Teamspaces"
+							/>
+						</ActionMenuItemLink>
+						<ActionMenuItemLink
+							Icon={VisualSettingsIcon}
+						>
+							<FormattedMessage
+								id="userMenu.visualSettings"
+								defaultMessage="Visual settings"
+							/>
+						</ActionMenuItemLink>
+					</ActionMenuSection>
+					<ActionMenuSection>
+						<ActionMenuItemLink
+							Icon={SupportCentreIcon}
+						>
+							<FormattedMessage
+								id="userMenu.supportCentre"
+								defaultMessage="Support centre"
+							/>
+						</ActionMenuItemLink>
+						<ActionMenuItemLink
+							Icon={ContactUsIcon}
+						>
+							<FormattedMessage
+								id="userMenu.contactUs"
+								defaultMessage="Contact us"
+							/>
+						</ActionMenuItemLink>
+						<ActionMenuItemLink
+							Icon={InviteAFriendIcon}
+						>
+							<FormattedMessage
+								id="userMenu.inviteAFriend"
+								defaultMessage="Invite a friend"
+							/>
+						</ActionMenuItemLink>
+					</ActionMenuSection>
+					<ActionMenuSection>
+						<ActionMenuItem>
+							<SignOutButton onClick={onClickSignOut}>
+								<FormattedMessage
+									id="userMenu.signOut"
+									defaultMessage="Sign out"
+								/>
+							</SignOutButton>
+						</ActionMenuItem>
+					</ActionMenuSection>
+				</ActionMenu>
+			</AvatarContainer>
+			<EditProfileModal
+				user={user}
+				open={isEditProfileModalOpen}
+				onClose={() => setIsEditProfileModalOpen(false)}
+			/>
+		</>
 	);
 };
