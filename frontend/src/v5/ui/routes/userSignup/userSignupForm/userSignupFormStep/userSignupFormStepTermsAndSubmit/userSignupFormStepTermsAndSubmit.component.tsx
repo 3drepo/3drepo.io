@@ -25,8 +25,6 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { pick, defaults, isMatch } from 'lodash';
 import SignupIcon from '@assets/icons/outlined/add_user-outlined.svg';
-import { verifyCaptchaToken } from '@/v5/services/api/signup';
-import { getVerifyCaptchaErrorMessage } from '@/v5/store/auth/auth.helpers';
 import {
 	CreateAccountButton,
 	CheckboxContainer,
@@ -53,7 +51,6 @@ type UserSignupFormStepTermsAndSubmitProps = {
 	onSubmitStep: () => void;
 	onComplete: () => void;
 	onUncomplete: () => void;
-	setUnexpectedError: (error: string) => void;
 	unexpectedError: string;
 	fields: ITermsAndSubmitFormInput;
 	isActiveStep: boolean;
@@ -64,7 +61,6 @@ export const UserSignupFormStepTermsAndSubmit = ({
 	onSubmitStep,
 	onComplete,
 	onUncomplete,
-	setUnexpectedError,
 	unexpectedError,
 	fields,
 	isActiveStep,
@@ -99,16 +95,10 @@ export const UserSignupFormStepTermsAndSubmit = ({
 		onSubmitStep();
 	};
 
-	const handleCaptchaChange = async (captchaToken) => {
-		if (!fields.captcha && captchaToken) {
+	const handleCaptchaChange = async (captcha) => {
+		if (!fields.captcha && captcha) {
 			setSubmitButtonIsPending(true);
-			try {
-				// TODO - fix after endpoint is implemented
-				const captcha = await verifyCaptchaToken({ token: captchaToken, username: fields.username });
-				updateFields({ captcha });
-			} catch (error) {
-				setUnexpectedError(getVerifyCaptchaErrorMessage(error));
-			}
+			updateFields({ captcha });
 			setSubmitButtonIsPending(false);
 		}
 	};

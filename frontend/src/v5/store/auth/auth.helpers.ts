@@ -26,5 +26,3 @@ export const getRegistrationErrorMessage = (error: any) => {
 	const [, message] = data.split(/<\/?pre>/);
 	return message;
 };
-
-export const getVerifyCaptchaErrorMessage = (error: any) => error.response.data.message;

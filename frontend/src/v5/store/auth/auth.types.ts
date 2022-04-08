@@ -28,10 +28,6 @@ export interface INewUser {
 	captcha: string;
 	mailListAgreed: boolean;
 }
-export type NewUserVerification = {
-	token: string;
-	username: string;
-};
 export type RegisterPayload = INewUser;
 export type RegisterResponse = INewUser;
 export type RegisterSuccessPayload = RegisterResponse;

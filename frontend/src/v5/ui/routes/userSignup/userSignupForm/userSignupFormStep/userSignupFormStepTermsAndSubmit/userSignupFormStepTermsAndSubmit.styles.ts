@@ -30,7 +30,7 @@ export const TermsContainer = styled.div`
 	justify-content: center;
 	align-items: center;
 	width: 100%;
-	background-color: #edf0f8; // TODO fix when new palette is created
+	background-color: #edf0f8; // TODO - fix when new palette will be implemented
 	border-radius: 5px;
 	padding: 14px;
 	margin-top: 22px;

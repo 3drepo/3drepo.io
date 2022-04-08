@@ -46,7 +46,7 @@ export const Stepper = styled(StepperBase)`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	margin: 28px;
 	width: 454px;
-	box-shadow: ${clientConfigService.getCustomBackgroundImagePath() ? '0px 8px 15px -3px #878787' : '0 1px 1px rgb(0 0 0 / 14%)'}; // TODO - fix after new design
+	box-shadow: ${clientConfigService.getCustomBackgroundImagePath() ? '0px 8px 15px -3px #878787' : '0 1px 1px rgb(0 0 0 / 14%)'}; // TODO - fix when new design will be implemented
 `;
 
 export const StepLabel = styled(StepLabelBase)<{ reachable?: boolean }>`
