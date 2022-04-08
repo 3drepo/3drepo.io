@@ -65,9 +65,6 @@ export const RevisionsListItem = (props: IProps) => {
 
 	const handleClick = (event) => props.onClick(event, props.data);
 	const handleToggleVoid = (event) => props.onToggleVoid(event, props.data);
-	const themeProps = useMemo(() =>
-		({ current, void: props.data.void, isPending }), [isPending, props.data.void, current]
-	);
 
 	const renderGoToRevisionButton = renderWhenTrue(
 		<LinkWrapper>
@@ -76,14 +73,13 @@ export const RevisionsListItem = (props: IProps) => {
 	);
 
 	const renderToggleButton = renderWhenTrue(
-		<ToggleButton onClick={handleToggleVoid} theme={themeProps}>
+		<ToggleButton onClick={handleToggleVoid} >
 			{props.data.void ? 'Void' : 'Active'}
 		</ToggleButton>
 	);
 
 	return (
 		<Container
-			theme={themeProps}
 			divider
 		>
 			{renderLoader(isPending)}
