@@ -110,7 +110,7 @@ Users.generateResetPasswordToken = async (username) => {
 	await updateResetPasswordToken(username, resetPasswordToken);
 
 	const { customData: { email, firstName } } = await getUserByUsername(username, { user: 1, 'customData.email': 1, 'customData.firstName': 1 });
-	sendEmail(templates.FORGOT_PASSWORD.name, email, { token: resetPasswordToken.token, email, username, firstName });
+	await sendEmail(templates.FORGOT_PASSWORD.name, email, { token: resetPasswordToken.token, email, username, firstName });
 };
 
 Users.updatePassword = updatePassword;

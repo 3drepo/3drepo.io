@@ -22,28 +22,34 @@ const { logger } = require('../../utils/logger');
 const nodemailer = require('nodemailer');
 const { templates } = require('./mailer.constants');
 
-let transporter;
-
 const Mailer = {};
 
-Mailer.sendEmail = async (templateName, to, data, attachments) => {
+const checkMailerConfig = async () => {
 	if (!config?.mail?.sender) {
-		throw { message: 'config.mail.sender is not set' };
+		throw new Error('config.mail.sender is not set');
 	}
 
 	if (!config?.mail?.smtpConfig) {
 		if (config?.mail?.generateCredentials) {
-			const { user, pass } = await createTestAccount();
+			const { user, pass } = await createTestAccount();			
+
 			config.mail.smtpConfig = {
 				host: 'smtp.ethereal.email',
 				port: 587,
 				auth: { user, pass },
 			};
+
+			transporter = nodemailer.createTransport(config.mail.smtpConfig);
 		} else {
-			throw { message: 'config.mail.smtpConfig is not set' };
+			throw new Error('config.mail.smtpConfig is not set');
 		}
 	}
+}
 
+let transporter;
+checkMailerConfig();
+
+Mailer.sendEmail = async (templateName, to, data, attachments) => {
 	const template = templates[templateName];
 	const templateHtml = template.html(data);
 
@@ -58,18 +64,12 @@ Mailer.sendEmail = async (templateName, to, data, attachments) => {
 		mailOptions.attachments = attachments;
 	}
 
-	transporter = transporter || nodemailer.createTransport(config.mail.smtpConfig);
-
-	return new Promise((resolve, reject) => {
-		transporter.sendMail(mailOptions, (err, info) => {
-			if (err) {
-				logger.logDebug(`Email error - ${err.message}`);
-				reject(err);
-			} else {
-				resolve(info);
-			}
-		});
-	});
+	try {
+		await transporter.sendMail(mailOptions);
+	} catch (err) {
+		logger.logDebug(`Email error - ${err.message}`);
+		throw err;		
+	}
 };
 
 module.exports = Mailer;
