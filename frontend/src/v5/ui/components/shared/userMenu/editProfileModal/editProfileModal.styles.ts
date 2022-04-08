@@ -17,9 +17,18 @@
 import styled from 'styled-components';
 import TabBase from '@mui/material/Tab';
 import TabListBase from '@mui/lab/TabList';
+import { FormModal as FormModalBase } from '@controls/modal/formModal/formDialog.component';
+
+export const FormModal = styled(FormModalBase)`
+	.MuiDialogContent-root {
+		padding: 0;
+	}
+`;
 
 export const Tab = styled(TabBase)`
 	text-transform: 'none';
+    padding: 15px 0;
+	margin: 0 24px;
 `;
 
 export const TabList = styled(TabListBase)`

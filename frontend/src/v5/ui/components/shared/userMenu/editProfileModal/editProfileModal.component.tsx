@@ -16,10 +16,9 @@
  */
 import { useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
-import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { IUser } from '@/v5/store/users/users.redux';
 import { TabContext, TabPanel } from '@mui/lab';
-import { TabList, Tab } from './editProfileModal.styles';
+import { FormModal, TabList, Tab } from './editProfileModal.styles';
 
 type EditProfileModalProps = {
 	open: boolean;
@@ -35,7 +34,8 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 
 	return (
 		<FormModal
-			open={open}
+			open
+			// open={open}
 			title={formatMessage(
 				{ defaultMessage: "{firstName}'s profile", id: 'editProfile.title' },
 				{ firstName: user.firstName },
