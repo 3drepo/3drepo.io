@@ -52,13 +52,19 @@ const selectV4UrlParams = createSelector(
 
 const selectV5UrlParams = createSelector(
 	selectLocation, (location) => {
-		const viewerPath = '/v5/viewer/:teamspace/:model/:revision?';
+		const viewerPath = ROUTES.V5_MODEL_VIEWER;
 		const boardPath = ROUTES.BOARD_SPECIFIC;
 
 		const viewerParams = matchPath(location.pathname, { path: viewerPath });
 		const boardParams = matchPath(location.pathname, { path: boardPath });
 
-		return (viewerParams || boardParams || {}).params;
+		const params =  (viewerParams || boardParams || {}).params;
+
+		if (params) {
+			params.v5 = true;
+		}
+
+		return params;
 	}
 );
 

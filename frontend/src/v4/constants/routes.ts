@@ -25,6 +25,7 @@ export const ROUTES = {
 	REGISTER_VERIFY: '/register-verify',
 	VIEWER: '/viewer',
 	MODEL_VIEWER: '/viewer/:teamspace/:model/:revision?',
+	V5_MODEL_VIEWER: '/v5/viewer/:teamspace/:model/:revision?',
 	DASHBOARD: '/dashboard',
 	TEAMSPACES: '/dashboard/teamspaces',
 	TEAMSPACE_SETTINGS: '/dashboard/teamspaces/:teamspace',

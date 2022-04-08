@@ -374,8 +374,6 @@ function* loadModel() {
 		const modelSettings = yield select(selectSettings);
 		const selectedViewpoint = yield select(selectInitialView);
 
-		yield delay(10000);
-
 		yield Viewer.loadViewerModel(teamspace, model, 'master', revision || 'head', selectedViewpoint?.viewpoint);
 		yield Viewer.updateViewerSettings(modelSettings);
 
