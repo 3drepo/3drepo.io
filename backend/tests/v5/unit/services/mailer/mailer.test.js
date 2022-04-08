@@ -19,9 +19,9 @@ const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 
 const config = require(`${src}/utils/config`);
-const { FORGOT_PASSWORD, FILE_MISSING } = require(`${src}/services/mailer/templateNames`);
+const { FORGOT_PASSWORD, FILE_MISSING } = require(`${src}/services/mailer/mailer.constants`);
 
-const Mailer = require(`${src}/services/mailer/mailer`);
+const Mailer = require(`${src}/services/mailer`);
 
 const testSendEmail = () => {
 	describe('send email', () => {

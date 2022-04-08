@@ -15,10 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const TemplateNames = {};
+const verifyUser = require('./templates/verifyUser');
+const forgotPassword = require('./templates/forgotPassword');
+const fileMissing = require('./templates/fileMissing');
+const MailerConstants = {};
 
-TemplateNames.VERIFY_USER = 'verifyUser';
-TemplateNames.FORGOT_PASSWORD = 'forgotPassword';
-TemplateNames.FILE_MISSING = 'fileMissing';
+MailerConstants.templates = {
+    VERIFY_USER: { html: (data) => verifyUser.html(data), subject: () => verifyUser.subject },
+    FORGOT_PASSWORD: { html: (data) => forgotPassword.html(data), subject: () => forgotPassword.subject },
+    FILE_MISSING: { html: (data) => fileMissing.html(data), subject: (data) => fileMissing.subject(data) },
+}
 
-module.exports = TemplateNames;
+for (const templateName in MailerConstants.templates) {    
+    MailerConstants.templates[templateName].name = templateName;
+}
+
+module.exports = MailerConstants;

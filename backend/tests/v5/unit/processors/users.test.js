@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { FORGOT_PASSWORD, VERIFY_USER } = require('../../../../src/v5/services/mailer/templateNames');
+const { FORGOT_PASSWORD, VERIFY_USER } = require('../../../../src/v5/services/mailer/mailer.constants');
 const { templates } = require('../../../../src/v5/utils/responseCodes');
 const { src } = require('../../helper/path');
 
@@ -23,8 +23,8 @@ const Users = require(`${src}/processors/users`);
 
 jest.mock('../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
-jest.mock('../../../../src/v5/services/mailer/mailer');
-const Mailer = require(`${src}/services/mailer/mailer`);
+jest.mock('../../../../src/v5/services/mailer');
+const Mailer = require(`${src}/services/mailer`);
 jest.mock('../../../../src/v5/utils/helper/strings');
 const Strings = require(`${src}/utils/helper/strings`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');

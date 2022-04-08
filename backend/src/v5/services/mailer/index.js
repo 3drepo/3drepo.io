@@ -20,6 +20,7 @@ const config = require('../../utils/config');
 const { createTestAccount } = require('nodemailer');
 const { logger } = require('../../utils/logger');
 const nodemailer = require('nodemailer');
+const { templates } = require('./mailer.constants');
 
 let transporter;
 
@@ -43,14 +44,13 @@ Mailer.sendEmail = async (templateName, to, data, attachments) => {
 		}
 	}
 
-	// eslint-disable-next-line global-require, import/no-dynamic-require, security/detect-non-literal-require
-	const template = require(`./templates/${templateName}`);
+	const template = templates[templateName];
 	const templateHtml = template.html(data);
 
 	const mailOptions = {
 		from: config.mail.sender,
 		to,
-		subject: typeof template.subject === 'function' ? template.subject(data) : template.subject,
+		subject: template.subject(data),
 		html: baseTemplate.html({ ...data, emailContent: templateHtml }),
 	};
 

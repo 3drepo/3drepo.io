@@ -16,11 +16,11 @@
  */
 
 const ExternalServices = require('../handler/externalServices');
-const { FILE_MISSING } = require('../services/mailer/templateNames');
+const { FILE_MISSING } = require('../services/mailer/mailer.constants');
 const config = require('../utils/config');
 const db = require('../handler/db');
 const { logger } = require('../utils/logger');
-const { sendEmail } = require('../services/mailer/mailer');
+const { sendEmail } = require('../services/mailer');
 const { templates } = require('../utils/responseCodes');
 
 const FileRefs = {};
