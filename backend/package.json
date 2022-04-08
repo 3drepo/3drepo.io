@@ -23,7 +23,7 @@
     "run-script": "cross-env NODE_CONFIG_DIR=../config node"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "8.1.0",
+    "@elastic/elasticsearch": "^7.17.0",
     "amqplib": "0.8.0",
     "apidoc": "0.17.7",
     "app-config": "1.0.0",
