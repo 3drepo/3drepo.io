@@ -32,7 +32,7 @@ module.exports.createApp = function (config, v5Init = true) {
 	const bodyParser = require("body-parser");
 	const utils = require("../utils");
 	const keyAuthentication =  require("../middlewares/keyAuthentication");
-	const sessionManager = require("../middlewares/sessionManager");
+	const { manageSessions } = require(`${v5Path}/middleware/sessions`);
 
 	// Express app
 	const app = express();
@@ -44,7 +44,7 @@ module.exports.createApp = function (config, v5Init = true) {
 	app.disable("etag");
 
 	// Session middlewares
-	app.use(keyAuthentication, sessionManager);
+	app.use(keyAuthentication, manageSessions);
 
 	app.use(cors({ origin: true, credentials: true }));
 
@@ -74,7 +74,7 @@ module.exports.createApp = function (config, v5Init = true) {
 		require("../models/chatEvent").subscribeToV5Events();
 		require("../models/intercom").subscribeToV5Events();
 		require("../handler/elastic").subscribeToV5Events();
-		require(`${v5Path}/services/queue`).init();
+		require(`${v5Path}/services/modelProcessing`).init();
 	}
 	require(`${v5Path}/routes/routesManager`).init(app);
 

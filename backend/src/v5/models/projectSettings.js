@@ -49,6 +49,13 @@ const getProjectByQuery = async (ts, query, projection) => {
 	return res;
 };
 
+Projects.findProjectByModelId = async (teamspace, modelId, projection) => {
+	const data = await findOneProject(teamspace, { models: modelId }, projection);
+	if (!data) {
+		throw templates.projectNotFound;
+	}
+	return data;
+};
 Projects.getProjectByName = (ts, name, projection) => getProjectByQuery(ts, { name }, projection);
 
 Projects.getProjectById = (ts, id, projection) => getProjectByQuery(ts, { _id: id }, projection);

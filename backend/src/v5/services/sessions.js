@@ -15,20 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const config = require('../utils/config');
 const db = require('../handler/db');
 
 const { events } = require('./eventsManager/eventsManager.constants');
 const expressSession = require('express-session');
 const { publish } = require('./eventsManager/eventsManager');
 
-const Sessions = {};
-
-// istanbul ignore next
-Sessions.session = (config) => {
-	const store = db.getSessionStore(expressSession);
+const Sessions = { SESSION_HEADER: 'connect.sid' };
+const initialiseSession = async () => {
+	const store = await db.getSessionStore(expressSession);
 	const secure = config.public_protocol === 'https';
 	const { secret, maxAge, domain } = config.cookie;
-	return expressSession({
+
+	// istanbul ignore next
+	const middleware = expressSession({
 		secret,
 		resave: true,
 		rolling: true,
@@ -38,13 +39,19 @@ Sessions.session = (config) => {
 			domain,
 			path: '/',
 			secure,
-			// None can only applied with secure set to true, which requires SSL.
-			// None is required for embeddable viewer to work.
+			// FIXME: this should be deduced inside config.js
 			sameSite: secure ? 'None' : 'Lax',
 		},
 		store,
 	});
+
+	return { middleware,
+		deinitStore:
+		// istanbul ignore next
+		() => new Promise((resolve) => store.client.close(true, resolve)) };
 };
+
+Sessions.session = initialiseSession();
 
 Sessions.getSessions = (query, projection, sort) => db.find('admin', 'sessions', query, projection, sort);
 
@@ -59,10 +66,11 @@ Sessions.removeOldSessions = async (username, currentSessionID, referrer) => {
 
 	const sessionsToRemove = await Sessions.getSessions(query, { _id: 1 });
 
-	const sessionIds = sessionsToRemove.map((s) => s._id);
+	if (sessionsToRemove.length) {
+		const sessionIds = sessionsToRemove.map((s) => s._id);
 
-	await db.deleteMany('admin', 'sessions', { _id: { $in: sessionIds } });
-	publish(events.SESSIONS_REMOVED, { ids: sessionIds });
+		await db.deleteMany('admin', 'sessions', { _id: { $in: sessionIds } });
+		publish(events.SESSIONS_REMOVED, { ids: sessionIds });
+	}
 };
-
 module.exports = Sessions;
