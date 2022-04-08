@@ -16,12 +16,13 @@
  */
 
 import { Typography } from '@controls/typography';
-import { Card, CardContent, CardMedia } from '@mui/material';
+import { Card, CardContent } from '@mui/material';
 import styled, { css } from 'styled-components';
 
 export const ListItem = styled.li`
 	margin: 10px;
 	list-style-type: none;
+	float: left;
 `;
 
 export const Container = styled(Card)<{ $variant: string; }>`
@@ -44,9 +45,28 @@ export const Container = styled(Card)<{ $variant: string; }>`
 	height: 253px;
 `;
 
-export const Image = styled(CardMedia)`
+export const TeamspaceImage = styled.div<{ imageURL?: string;}>`
+	position: relative;
 	height: 175px;
-	background-color: ${({ theme }) => theme.palette.primary.contrast}
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	background-image: ${({ imageURL }) => (imageURL ? `url(${imageURL})` : 'none')};
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: cover;
+`;
+
+export const TeamspaceLogo = styled.img`
+	max-height: 100px;
+	max-width: 100px;
+
+	margin: auto;
+	display: block;
+	display: ;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
 `;
 
 export const Content = styled(CardContent)`

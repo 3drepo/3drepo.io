@@ -15,30 +15,49 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
+import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
-import { CardHeading, CardSubheading, Container, Content, Image, ListItem } from './teamspaceCard.styles';
+import { CardHeading, CardSubheading, Container, Content, ListItem, TeamspaceImage, TeamspaceLogo } from './teamspaceCard.styles';
 
 interface ITeamspaceCard {
 	variant?: 'primary' | 'secondary',
-	name: string;
-	status?: string;
+	teamspaceName: string;
 	imageURL?: string;
 }
 
-export const TeamspaceCard = ({ variant = 'primary', name, status, imageURL }: ITeamspaceCard): JSX.Element => (
-	<ListItem>
-		<Link to={`${name}`} style={{ textDecoration: 'none' }}>
-			<Container $variant={variant}>
-				<Image
-					component="img"
-					alt={`${name} Image`}
-					image={imageURL}
-				/>
-				<Content>
-					<CardHeading>{name}</CardHeading>
-					<CardSubheading>{status}</CardSubheading>
-				</Content>
-			</Container>
-		</Link>
-	</ListItem>
-);
+export const TeamspaceCard = ({ variant = 'primary', teamspaceName, imageURL }: ITeamspaceCard): JSX.Element => {
+	const username = CurrentUserHooksSelectors.selectUsername();
+	const isPersonalTeamspace = teamspaceName === username;
+	return (
+		<ListItem>
+			<Link to={teamspaceName} style={{ textDecoration: 'none' }}>
+				<Container $variant={variant}>
+					{
+						isPersonalTeamspace
+							? (
+								<TeamspaceImage
+									alt={`${teamspaceName} Image`}
+									imageURL={imageURL}
+								/>
+							) : (
+								<TeamspaceImage>
+									<TeamspaceLogo src={imageURL} />
+								</TeamspaceImage>
+							)
+					}
+					<Content>
+						<CardHeading>{teamspaceName}</CardHeading>
+						<CardSubheading>
+							{
+								isPersonalTeamspace
+									? <FormattedMessage id="teamspaceCard.myTeamspace" defaultMessage="My Teamspace" />
+									: <FormattedMessage id="teamspaceCard.sharedWithMe" defaultMessage="Shared with me" />
+							}
+						</CardSubheading>
+					</Content>
+				</Container>
+			</Link>
+		</ListItem>
+	);
+};
