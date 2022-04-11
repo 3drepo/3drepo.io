@@ -15,22 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IButton } from '@controls/button/button.component';
-import { Button } from './submitButton.styles';
+import { Button as ButtonBase } from '@controls/button';
+import styled from 'styled-components';
 
-export const SubmitButton = ({
-	variant = 'contained',
-	color = 'primary',
-	children,
-	...props
-}: IButton): JSX.Element => (
-	<Button
-		type="submit"
-		fullWidth
-		variant={variant}
-		color={color}
-		{...props}
-	>
-		{children}
-	</Button>
-);
+export const Button = styled(ButtonBase)`
+	margin: 15px 0;
+`;
