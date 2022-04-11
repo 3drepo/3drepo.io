@@ -17,8 +17,8 @@
 
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { FormattedMessage } from 'react-intl';
-import { Link } from 'react-router-dom';
-import { CardHeading, CardSubheading, Container, Content, ListItem, TeamspaceImage, TeamspaceLogo } from './teamspaceCard.styles';
+import { useRouteMatch } from 'react-router-dom';
+import { CardHeading, CardSubheading, Container, Content, ListItem, TeamspaceImage, TeamspaceLogo, Link } from './teamspaceCard.styles';
 
 interface ITeamspaceCard {
 	variant?: 'primary' | 'secondary',
@@ -29,9 +29,11 @@ interface ITeamspaceCard {
 export const TeamspaceCard = ({ variant = 'primary', teamspaceName, imageURL }: ITeamspaceCard): JSX.Element => {
 	const username = CurrentUserHooksSelectors.selectUsername();
 	const isPersonalTeamspace = teamspaceName === username;
+	const { url } = useRouteMatch();
+	const to = [url, teamspaceName].join('');
 	return (
 		<ListItem>
-			<Link to={teamspaceName} style={{ textDecoration: 'none' }}>
+			<Link to={to}>
 				<Container $variant={variant}>
 					{
 						isPersonalTeamspace

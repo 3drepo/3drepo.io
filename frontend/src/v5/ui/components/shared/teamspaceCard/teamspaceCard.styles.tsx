@@ -16,6 +16,7 @@
  */
 
 import { Typography } from '@controls/typography';
+import { Link as DecoratedLink } from 'react-router-dom';
 import { Card, CardContent } from '@mui/material';
 import styled, { css } from 'styled-components';
 
@@ -24,6 +25,10 @@ export const ListItem = styled.li`
 	list-style-type: none;
 	float: left;
 	cursor: pointer;
+`;
+
+export const Link = styled(DecoratedLink)`
+	text-decoration: none;
 `;
 
 export const Container = styled(Card)<{ $variant: string; }>`
