@@ -25,6 +25,7 @@ import * as API from '@/v5/services/api';
 import { FormattedMessage } from 'react-intl';
 import { ReturnLink } from '../components/returnLink.component';
 import { AuthHeading, AuthParagraph, UsernameField } from '../components/components.styles';
+import { Gap } from './passwordForgot.styles';
 
 export const PasswordForgot = (): JSX.Element => {
 	const { control, handleSubmit, formState: { isValid, isSubmitted } } = useForm({
@@ -48,8 +49,7 @@ export const PasswordForgot = (): JSX.Element => {
 								defaultMessage="A password change request has been sent. You will receive an email
 								shortly with a link to change your password."
 							/>
-							<br />
-							<br />
+							<Gap />
 							<FormattedMessage
 								id="auth.forgotPassword.passwordSent.p2"
 								defaultMessage="If you have not received this, please check your spam folder or ask
