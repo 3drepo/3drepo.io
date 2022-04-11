@@ -40,6 +40,9 @@ const testUserTSAccess = [
 	{ name: ServiceHelper.generateRandomString(), isAdmin: true },
 ];
 
+const avatar = ServiceHelper.generateRandomString();
+const tsWithAvatar = testUserTSAccess[1].name;
+
 const jobToUsers = [
 	{ _id: 'jobA', users: [testUser, usersInFirstTeamspace[0]] },
 	{ _id: 'jobB', users: [usersInFirstTeamspace[1]] },
@@ -51,7 +54,11 @@ const breakingTSAccess = { name: ServiceHelper.generateRandomString(), isAdmin: 
 
 const setupData = async () => {
 	await Promise.all(testUserTSAccess.map(
-		({ name, isAdmin }) => ServiceHelper.db.createTeamspace(name, isAdmin ? [testUser.user] : []),
+		({ name, isAdmin }) => {
+			const perms = isAdmin ? [testUser.user] : [];
+			const customData = tsWithAvatar === name ? { avatar: { data: { buffer: avatar } } } : {};
+			return ServiceHelper.db.createTeamspace(name, perms, false, customData);
+		},
 	));
 
 	await ServiceHelper.db.createTeamspace(breakingTSAccess.name, [testUser2.user], true);
@@ -138,6 +145,36 @@ const testGetTeamspaceMembers = () => {
 	});
 };
 
+const testGetAvatar = () => {
+	describe('Get teamspace avatar', () => {
+		const route = (ts = testUserTSAccess[0].name) => `/v5/teamspaces/${ts}/avatar`;
+		test('should fail without a valid session', async () => {
+			const res = await agent.get(route()).expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user does not have access to the teamspace', async () => {
+			const res = await agent.get(`${route()}/?key=${testUser2.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if the teamspace does not exist', async () => {
+			const res = await agent.get(`${route('sldkfjdl')}/?key=${testUser2.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test(`should return ${templates.avatarNotFound.code} if the teamspace does not have an avatar`, async () => {
+			const res = await agent.get(`${route()}/?key=${testUser.apiKey}`).expect(templates.avatarNotFound.status);
+			expect(res.body.code).toEqual(templates.avatarNotFound.code);
+		});
+
+		test('should return avatar if the teamspace has one', async () => {
+			const res = await agent.get(`${route(tsWithAvatar)}/?key=${testUser.apiKey}`).expect(templates.ok.status);
+			expect(res.text).toEqual(avatar);
+		});
+	});
+};
+
 describe('E2E routes/teamspaces', () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -147,4 +184,5 @@ describe('E2E routes/teamspaces', () => {
 	afterAll(() => ServiceHelper.closeApp(server));
 	testGetTeamspaceList();
 	testGetTeamspaceMembers();
+	testGetAvatar();
 });

@@ -372,7 +372,7 @@ const testGetAvatar = () => {
 
 		test('should fail if the user has no avatar', async () => {
 			await testSession.post('/v5/login/').send({ user: testUserWithNoAvatar.user, password: testUserWithNoAvatar.password });
-			await testSession.get('/v5/user/avatar').expect(templates.userDoesNotHaveAvatar.status);
+			await testSession.get('/v5/user/avatar').expect(templates.avatarNotFound.status);
 			await testSession.post('/v5/logout/');
 		});
 	});
