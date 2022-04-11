@@ -18,7 +18,7 @@
 import * as queryString from 'query-string';
 import { matchPath } from 'react-router';
 import { createSelector } from 'reselect';
-import { ROUTES } from '../../constants/routes';
+import { RouteParams, ROUTES } from '../../constants/routes';
 
 export const selectRouterDomain = (state) => state.router || '';
 
@@ -43,8 +43,8 @@ const selectV4UrlParams = createSelector(
 		const viewerPath = ROUTES.MODEL_VIEWER;
 		const boardPath = ROUTES.BOARD_SPECIFIC;
 
-		const viewerParams = matchPath(location.pathname, { path: viewerPath });
-		const boardParams = matchPath(location.pathname, { path: boardPath });
+		const viewerParams = matchPath<RouteParams>(location.pathname, { path: viewerPath });
+		const boardParams = matchPath<RouteParams>(location.pathname, { path: boardPath });
 
 		return (viewerParams || boardParams || {}).params;
 	}
@@ -55,10 +55,10 @@ const selectV5UrlParams = createSelector(
 		const viewerPath = ROUTES.V5_MODEL_VIEWER;
 		const boardPath = ROUTES.BOARD_SPECIFIC;
 
-		const viewerParams = matchPath(location.pathname, { path: viewerPath });
-		const boardParams = matchPath(location.pathname, { path: boardPath });
+		const viewerParams = matchPath<RouteParams>(location.pathname, { path: viewerPath });
+		const boardParams = matchPath<RouteParams>(location.pathname, { path: boardPath });
 
-		const params =  (viewerParams || boardParams || {}).params;
+		const params: RouteParams & {v5?: boolean} = (viewerParams || boardParams || {}).params;
 
 		if (params) {
 			params.v5 = true;

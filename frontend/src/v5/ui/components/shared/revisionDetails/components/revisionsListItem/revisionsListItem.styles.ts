@@ -25,7 +25,6 @@ export const Container = styled(Link)`
 	padding-left: 20px;
 	padding-right: 13px;
 
-
 	&:link { text-decoration: none; }
 	&:visited { text-decoration: none; }
 	&:hover { text-decoration: none; }
