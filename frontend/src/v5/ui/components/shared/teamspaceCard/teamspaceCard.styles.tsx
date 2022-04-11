@@ -23,6 +23,7 @@ export const ListItem = styled.li`
 	margin: 10px;
 	list-style-type: none;
 	float: left;
+	cursor: pointer;
 `;
 
 export const Container = styled(Card)<{ $variant: string; }>`

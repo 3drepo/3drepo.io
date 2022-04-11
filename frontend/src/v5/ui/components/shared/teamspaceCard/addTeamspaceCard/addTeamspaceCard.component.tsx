@@ -15,5 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { TeamspaceCard } from './teamspaceCard.component';
-export { AddTeamspaceCard } from './addTeamspaceCard';
+import { FormattedMessage } from 'react-intl';
+import { ListItem } from '../teamspaceCard.styles';
+import { AddTeamspaceIcon, Container } from './addTeamspaceCard.styles';
+
+interface IAddTeamspaceCard {
+	variant?: 'primary' | 'secondary',
+}
+
+export const AddTeamspaceCard = ({ variant = 'primary' }: IAddTeamspaceCard): JSX.Element => (
+	<ListItem onClick={() => {
+		window.location.href = 'mailto:blah@gmail.com';
+	}}
+	>
+		<Container $variant={variant}>
+			<AddTeamspaceIcon />
+			<FormattedMessage id="teamspaceSelect.addNewTeamspace" defaultMessage="New Teamspace" />
+		</Container>
+	</ListItem>
+);
