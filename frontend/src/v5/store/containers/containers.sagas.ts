@@ -111,7 +111,7 @@ export function* fetchContainerViews({
 		yield put(ContainersActions.fetchContainerViewsSuccess(projectId, containerId, views));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: 'trying to fetch container views',
+			currentActions: formatMessage({ id: 'containers.fetchViews.error', defaultMessage: 'trying to fetch container views' }),
 			error,
 		}));
 	}
@@ -132,7 +132,7 @@ export function* fetchContainerSettings({
 		yield put(ContainersActions.fetchContainerSettingsSuccess(projectId, containerId, settings));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: 'trying to fetch container settings',
+			currentActions: formatMessage({ id: 'containers.fetchSettings.error', defaultMessage: 'trying to fetch container settings' }),
 			error,
 		}));
 	}
@@ -152,7 +152,7 @@ export function* updateContainerSettings({
 		yield put(ContainersActions.updateContainerSettingsSuccess(projectId, containerId, settings));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: 'trying to update container settings',
+			currentActions: formatMessage({ id: 'containers.updateSettings.error', defaultMessage: 'trying to update container settings' }),
 			error,
 		}));
 	}
