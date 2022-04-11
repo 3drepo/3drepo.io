@@ -208,7 +208,7 @@ User.getAvatar = async (username) => {
 		throw templates.userDoesNotHaveAvatar;
 	}
 
-	return avatar;
+	return avatar.data.buffer;
 };
 
 User.addUser = async (newUserData) => {

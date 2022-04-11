@@ -423,7 +423,7 @@ const testDeleteApiKey = () => {
 const testGetAvatar = () => {
 	describe('Get users avatar', () => {
 		test('should get users avatar if user has a valid avatar', async () => {
-			const user = { customData: { avatar: 'validAvatar' } };
+			const user = { customData: { avatar: { data: { buffer: 'validAvatar' } } } };
 			const fn = jest.spyOn(db, 'findOne').mockImplementation(() => user);
 			const res = await User.getAvatar('user1');
 			expect(fn.mock.calls.length).toBe(1);
