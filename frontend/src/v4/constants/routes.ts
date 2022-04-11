@@ -48,4 +48,10 @@ export const PUBLIC_ROUTES = [
 ] as any;
 
 
-export type RouteParams = { teampace: string, model?: string, revision?: string, modelId?: string, type?: string };
+export type RouteParams = {
+	teamspace: string,
+	model?: string,
+	revision?: string,
+	modelId?: string,
+	type?: string
+};
