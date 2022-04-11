@@ -21,6 +21,7 @@ const request = require("supertest");
 const expect = require("chai").expect;
 const config = require("../../../src/v4/config");
 const responseCodes = require("../../../src/v4/response_codes.js");
+const { templates: responseCodesV5}  = require("../../../src/v5/utils/responseCodes");
 const app = require("../../../src/v4/services/api.js").createApp();
 const async = require("async");
 
@@ -76,7 +77,7 @@ describe("Cross-site requests", function () {
 		agent.get(`/${username}.json`)
 			.set({"Referer":"invalid"})
 			.expect(401, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.NOT_LOGGED_IN.value);
+				expect(res.body.code).to.equal(responseCodesV5.notLoggedIn.code);
 				done(err);
 			});
 	});
@@ -85,7 +86,7 @@ describe("Cross-site requests", function () {
 		agent.get(`/${username}.json`)
 			.set({"Referer":`ftp://${config.cookie_domain}`})
 			.expect(401, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.NOT_LOGGED_IN.value);
+				expect(res.body.code).to.equal(responseCodesV5.notLoggedIn.code);
 				done(err);
 			});
 	});
@@ -94,7 +95,7 @@ describe("Cross-site requests", function () {
 		agent.get(`/${username}.json`)
 			.set({"Referer":`${config.public_protocol}://invalid`})
 			.expect(401, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.NOT_LOGGED_IN.value);
+				expect(res.body.code).to.equal(responseCodesV5.notLoggedIn.code);
 				done(err);
 			});
 	});

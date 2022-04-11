@@ -17,7 +17,9 @@
 
 const { src, modelFolder, objModel } = require('../../helper/path');
 const { generateRandomString } = require('../../helper/services');
-const AMQP = require('amqplib');
+
+jest.mock('../../../../src/v5/handler/queue');
+const Queue = require(`${src}/handler/queue`);
 
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
@@ -28,27 +30,12 @@ const path = require('path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
-const Queue = require(`${src}/services/queue`);
+const ModelProcessing = require(`${src}/services/modelProcessing`);
 
-const createFakeConnection = (sendToQueue, consume) => {
-	const dummyFn = () => Promise.resolve();
-	const dummyChannel = {
-		assertQueue: () => Promise.resolve({
-			queue: {},
-		}),
-		sendToQueue: sendToQueue || dummyFn,
-		consume: consume || dummyFn,
-		close: dummyFn,
-	};
-	return {
-		createChannel: () => Promise.resolve(dummyChannel),
-		on: () => {},
-		close: dummyFn,
-	};
-};
+Queue.listenToQueue.mockResolvedValue();
+Queue.queueMessage.mockResolvedValue();
 
 const publishFn = EventsManager.publish.mockImplementation(() => { });
-const fn = jest.spyOn(AMQP, 'connect').mockRejectedValue(undefined);
 
 const testQueueModelUpload = () => {
 	const fileCreated = path.join(modelFolder, 'queueObjectTest.obj');
@@ -59,42 +46,35 @@ const testQueueModelUpload = () => {
 		const file = { originalname: 'test.obj', path: fileCreated };
 
 		test(`should fail with ${templates.queueInsertionFailed.code} if there is some generic error`, async () => {
-			expect.assertions(1);
-			try {
-				await Queue.queueModelUpload(teamspace, model, data, file);
-			} catch (err) {
-				expect(err.code).toEqual(templates.queueInsertionFailed.code);
-			}
+			await expect(ModelProcessing.queueModelUpload(
+				teamspace, model, data, file,
+			)).rejects.toEqual(expect.objectContaining({ code: templates.queueInsertionFailed.code }));
 		});
 
-		test(`should fail with ${templates.queueConnectionError.code} if it cannot connect to queue`, async () => {
+		test(`should fail with ${templates.queueConnectionError.code} if Queue handler threw the error`, async () => {
 			await fs.copyFile(objModel, fileCreated);
-			expect.assertions(1);
-			try {
-				await Queue.queueModelUpload(teamspace, model, data, file);
-			} catch (err) {
-				expect(err.code).toEqual(templates.queueConnectionError.code);
-			}
+
+			Queue.queueMessage.mockRejectedValueOnce(templates.queueConnectionError);
+
+			await expect(ModelProcessing.queueModelUpload(
+				teamspace, model, data, file,
+			)).rejects.toEqual(expect.objectContaining({ code: templates.queueConnectionError.code }));
 		});
 
 		test('should succeed with job inserted into the queue', async () => {
 			await fs.copyFile(objModel, fileCreated);
-			const sendToQueueFn = jest.fn(() => {});
-			fn.mockResolvedValueOnce(createFakeConnection(sendToQueueFn));
+			await expect(ModelProcessing.queueModelUpload(teamspace, model, data, file)).resolves.toBeUndefined();
 
-			await expect(Queue.queueModelUpload(teamspace, model, data, file)).resolves.toBe(undefined);
+			expect(Queue.queueMessage).toBeCalledTimes(1);
 
-			expect(sendToQueueFn.mock.calls.length).toBe(1);
-			const { correlationId: corId } = sendToQueueFn.mock.calls[0][2];
+			const corId = Queue.queueMessage.mock.calls[0][1];
 
-			expect(publishFn.mock.calls.length).toBe(1);
-			expect(publishFn.mock.calls[0][0]).toEqual(events.QUEUED_TASK_UPDATE);
-			expect(publishFn.mock.calls[0][1]).toEqual({ teamspace, model, corId, status: 'queued' });
+			expect(publishFn).toBeCalledTimes(1);
+			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_UPDATE, { teamspace, model, corId, status: 'queued' });
 		});
 	});
 
 	afterAll(() => fs.rm(fileCreated).catch(() => {}));
-	afterEach(Queue.close);
 };
 
 const testQueueFederationUpdate = () => {
@@ -107,34 +87,23 @@ const testQueueFederationUpdate = () => {
 		};
 
 		test(`should fail with ${templates.queueInsertionFailed.code} if there is some generic error`, async () => {
-			expect.assertions(1);
-			try {
-				await Queue.queueFederationUpdate(teamspace, federation, {});
-			} catch (err) {
-				expect(err.code).toEqual(templates.queueInsertionFailed.code);
-			}
+			await expect(ModelProcessing.queueFederationUpdate(teamspace, federation, {}))
+				.rejects.toEqual(expect.objectContaining({ code: templates.queueInsertionFailed.code }));
 		});
-		test(`should fail with ${templates.queueConnectionError.code} if it cannot connect to queue`, async () => {
-			expect.assertions(1);
-			try {
-				await Queue.queueFederationUpdate(teamspace, federation, data);
-			} catch (err) {
-				expect(err.code).toEqual(templates.queueConnectionError.code);
-			}
+		test(`should fail with ${templates.queueConnectionError.code} if Queue handler threw the error`, async () => {
+			Queue.queueMessage.mockRejectedValueOnce(templates.queueConnectionError);
+			await expect(ModelProcessing.queueFederationUpdate(teamspace, federation, data))
+				.rejects.toEqual(expect.objectContaining({ code: templates.queueConnectionError.code }));
 		});
 
 		test('should succeed with job inserted into the queue', async () => {
-			const sendToQueueFn = jest.fn(() => {});
-			fn.mockResolvedValueOnce(createFakeConnection(sendToQueueFn));
+			await expect(ModelProcessing.queueFederationUpdate(teamspace, federation, data)).resolves.toBeUndefined();
 
-			await expect(Queue.queueFederationUpdate(teamspace, federation, data)).resolves.toBe(undefined);
+			expect(Queue.queueMessage).toBeCalledTimes(1);
+			const corId = Queue.queueMessage.mock.calls[0][1];
 
-			expect(sendToQueueFn.mock.calls.length).toBe(1);
-			const { correlationId: corId } = sendToQueueFn.mock.calls[0][2];
-
-			expect(publishFn.mock.calls.length).toBe(1);
-			expect(publishFn.mock.calls[0][0]).toEqual(events.QUEUED_TASK_UPDATE);
-			expect(publishFn.mock.calls[0][1]).toEqual({ teamspace, model: federation, corId, status: 'queued' });
+			expect(publishFn).toBeCalledTimes(1);
+			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_UPDATE, { teamspace, model: federation, corId, status: 'queued' });
 		});
 	});
 
@@ -143,55 +112,37 @@ const testQueueFederationUpdate = () => {
 
 const testCallbackQueueConsumer = () => {
 	describe('Callback queue consumption', () => {
-		let callbackFn;
+		const getCallbackFn = async () => {
+			Queue.listenToQueue.mockClear();
+			await expect(ModelProcessing.init()).resolves.toBeUndefined();
+			expect(Queue.listenToQueue).toHaveBeenCalled();
+			return Queue.listenToQueue.mock.calls[0][1];
+		};
+
 		test(`Should trigger ${events.QUEUED_TASK_UPDATE} event if there is a task update message`, async () => {
-			publishFn.mockClear();
-			const waitForConsume = new Promise((resolve) => {
-				fn.mockResolvedValueOnce(createFakeConnection(undefined, (a, cb) => {
-					callbackFn = cb;
-					resolve();
-				}));
-				Queue.init();
-			});
-
-			await waitForConsume;
-
-			expect(callbackFn).not.toBe(undefined);
 			const content = {
 				database: generateRandomString(),
 				status: generateRandomString(),
 				project: generateRandomString(),
-				user: generateRandomString(),
 			};
 			const properties = {
 				correlationId: generateRandomString(),
 			};
+
+			const callbackFn = await getCallbackFn();
 			await callbackFn({ content: JSON.stringify(content), properties });
 
-			expect(publishFn.mock.calls.length).toBe(1);
-			expect(publishFn.mock.calls[0][0]).toEqual(events.QUEUED_TASK_UPDATE);
-			expect(publishFn.mock.calls[0][1]).toEqual({
+			const expectedData = {
 				teamspace: content.database,
 				model: content.project,
 				corId: properties.correlationId,
 				status: content.status,
-				user: content.user,
-			});
+			};
+			expect(publishFn).toBeCalledTimes(1);
+			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_UPDATE, expectedData);
 		});
 
 		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event if there is a task failed message`, async () => {
-			publishFn.mockClear();
-			const waitForConsume = new Promise((resolve) => {
-				fn.mockResolvedValueOnce(createFakeConnection(undefined, (a, cb) => {
-					callbackFn = cb;
-					resolve();
-				}));
-				Queue.init();
-			});
-
-			await waitForConsume;
-
-			expect(callbackFn).not.toBe(undefined);
 			const content = {
 				database: generateRandomString(),
 				project: generateRandomString(),
@@ -202,33 +153,24 @@ const testCallbackQueueConsumer = () => {
 			const properties = {
 				correlationId: generateRandomString(),
 			};
+
+			const callbackFn = await getCallbackFn();
 			await callbackFn({ content: JSON.stringify(content), properties });
 
-			expect(publishFn.mock.calls.length).toBe(1);
-			expect(publishFn.mock.calls[0][0]).toEqual(events.QUEUED_TASK_COMPLETED);
-			expect(publishFn.mock.calls[0][1]).toEqual({
+			const expectedData = {
 				teamspace: content.database,
 				model: content.project,
 				corId: properties.correlationId,
 				value: content.value,
 				message: content.message,
 				user: content.user,
-			});
+			};
+
+			expect(publishFn).toBeCalledTimes(1);
+			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_COMPLETED, expectedData);
 		});
 
 		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event with container information if the task was a federation`, async () => {
-			publishFn.mockClear();
-			const waitForConsume = new Promise((resolve) => {
-				fn.mockResolvedValueOnce(createFakeConnection(undefined, (a, cb) => {
-					callbackFn = cb;
-					resolve();
-				}));
-				Queue.init();
-			});
-
-			await waitForConsume;
-
-			expect(callbackFn).not.toBe(undefined);
 			const content = {
 				database: generateRandomString(),
 				value: 0,
@@ -248,11 +190,11 @@ const testCallbackQueueConsumer = () => {
 			await fs.mkdir(`${config.cn_queue.shared_storage}/${properties.correlationId}`);
 			await fs.writeFile(`${config.cn_queue.shared_storage}/${properties.correlationId}/obj.json`,
 				JSON.stringify({ subProjects: containers }));
+
+			const callbackFn = await getCallbackFn();
 			await callbackFn({ content: JSON.stringify(content), properties });
 
-			expect(publishFn.mock.calls.length).toBe(1);
-			expect(publishFn.mock.calls[0][0]).toEqual(events.QUEUED_TASK_COMPLETED);
-			expect(publishFn.mock.calls[0][1]).toEqual({
+			const expectedData = {
 				teamspace: content.database,
 				model: content.project,
 				corId: properties.correlationId,
@@ -260,36 +202,26 @@ const testCallbackQueueConsumer = () => {
 				message: content.message,
 				user: content.user,
 				containers,
-			});
+			};
+
+			expect(publishFn).toBeCalledTimes(1);
+			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_COMPLETED, expectedData);
 		});
 
 		test('Should fail gracefully if the service failed to process the message', async () => {
-			publishFn.mockClear();
-			const waitForConsume = new Promise((resolve) => {
-				fn.mockResolvedValueOnce(createFakeConnection(undefined, (a, cb) => {
-					callbackFn = cb;
-					resolve();
-				}));
-				Queue.init();
-			});
-
-			await waitForConsume;
-
-			expect(callbackFn).not.toBe(undefined);
-
 			const properties = {
 				correlationId: generateRandomString(),
 			};
+
+			const callbackFn = await getCallbackFn();
 			await callbackFn({ content: {}, properties });
 
-			expect(publishFn.mock.calls.length).toBe(0);
+			expect(publishFn).not.toBeCalled();
 		});
 	});
-
-	afterEach(Queue.close);
 };
 
-describe('services/queue', () => {
+describe('services/modelProcessing', () => {
 	testQueueModelUpload();
 	testQueueFederationUpdate();
 	testCallbackQueueConsumer();

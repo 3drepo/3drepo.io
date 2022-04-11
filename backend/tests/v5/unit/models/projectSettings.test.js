@@ -16,6 +16,7 @@
  */
 
 const { src } = require('../../helper/path');
+const { generateRandomString } = require('../../helper/services');
 
 const Project = require(`${src}/models/projectSettings`);
 const db = require(`${src}/handler/db`);
@@ -68,6 +69,33 @@ const testGetProjectList = () => {
 			expect(fn.mock.calls[0][1]).toEqual('projects');
 			expect(fn.mock.calls[0][2]).toEqual({});
 			expect(fn.mock.calls[0][3]).toEqual({ _id: 1, name: 1 });
+		});
+	});
+};
+
+const testFindProjectByModelId = () => {
+	describe('Get project by model Id', () => {
+		test('should return a project if there is a match', async () => {
+			const data = { _id: generateRandomString() };
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(data);
+
+			const teamspace = generateRandomString();
+			const model = generateRandomString();
+			const projection = { _id: 1 };
+			await expect(Project.findProjectByModelId(teamspace, model, projection)).resolves.toEqual(data);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'projects', { models: model }, projection);
+		});
+
+		test('should throw project not found if it is not available', async () => {
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+
+			const teamspace = generateRandomString();
+			const model = generateRandomString();
+			const projection = { _id: 1 };
+			await expect(Project.findProjectByModelId(
+				teamspace, model, projection,
+			)).rejects.toEqual(templates.projectNotFound);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'projects', { models: model }, projection);
 		});
 	});
 };
@@ -258,6 +286,7 @@ describe('models/projectSettings', () => {
 	testAddProjectModel();
 	testRemoveProjectModel();
 	testModelsExistInProject();
+	testFindProjectByModelId();
 	testCreateProject();
 	testDeleteProject();
 	testUpdateProject();
