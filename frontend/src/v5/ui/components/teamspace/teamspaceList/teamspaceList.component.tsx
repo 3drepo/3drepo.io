@@ -15,41 +15,40 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {
-	DashboardList,
-	DashboardListEmptyContainer,
-} from '@components/dashboard/dashboardList';
-import { TeamspaceListItem } from '@components/teamspace/teamspaceList/teamspaceListItem/teamspaceListItem.component';
 import { FormattedMessage } from 'react-intl';
+import { AddTeamspaceCard, TeamspaceCard } from '@components/shared/teamspaceCard';
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
-import { Container } from './teamspaceList.styles';
+import { generateV5ApiUrl } from '@/v5/services/api/default';
+import { clientConfigService } from '@/v4/services/clientConfig';
+import { CardList } from './teamspaceList.styles';
 
 export const TeamspaceList = (): JSX.Element => {
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
-
 	return (
-		<Container>
-			<DashboardList>
-				<FormattedMessage id="dashboard.teamspacesList.header" defaultMessage="Teamspaces" />
-				{
-					teamspaces.length ? (
-						teamspaces.map((teamspace) => (
-							<TeamspaceListItem
-								key={teamspace.name}
-								name={teamspace.name}
-							/>
-						))
-					) : (
-						<DashboardListEmptyContainer>
-							<FormattedMessage
-								id="dashboard.teamspacesList.emptyList"
-								defaultMessage="No teamspaces found"
-							/>
-						</DashboardListEmptyContainer>
-					)
-				}
-			</DashboardList>
-		</Container>
+		<CardList>
+			{
+				teamspaces.length ? (
+					<>
+						{
+							teamspaces.map((teamspace) => (
+								<TeamspaceCard
+									key={teamspace.name}
+									variant="secondary"
+									teamspaceName={teamspace.name}
+									imageURL={generateV5ApiUrl(`teamspaces/${teamspace.name}/avatar?${Date.now()}`, clientConfigService.GET_API)}
+								/>
+							))
+						}
+						<AddTeamspaceCard variant="secondary" />
+					</>
+				) : (
+					<FormattedMessage
+						id="dashboard.teamspacesList.emptyList"
+						defaultMessage="No teamspaces found"
+					/>
+				)
+			}
+		</CardList>
 	);
 };

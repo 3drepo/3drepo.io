@@ -20,3 +20,15 @@ import styled from 'styled-components';
 export const Container = styled.div`
 	margin: 16px;
 `;
+
+export const CardList = styled.ul`
+	display: inline-block;
+	flex-direction: row;
+	justify-content: center;
+	width: 100%;
+	margin: 0 auto 75px;
+	padding: 0;
+	max-width: 70vw;
+	display: flex;
+	flex-wrap: wrap;
+`;
