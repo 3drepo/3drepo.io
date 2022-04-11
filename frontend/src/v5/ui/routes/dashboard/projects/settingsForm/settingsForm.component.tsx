@@ -140,7 +140,7 @@ export const SettingsForm = ({
 	updateSettings,
 	onClose,
 }: ISettingsForm) => {
-	let defaultValues = getDefaultValues(containerOrFederation, isContainer) as any;
+	const DEFAULT_VALUES = getDefaultValues(containerOrFederation, isContainer) as any;
 	const {
 		handleSubmit,
 		reset,
@@ -151,17 +151,14 @@ export const SettingsForm = ({
 	} = useForm<IFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(settingsSchema),
-		defaultValues,
+		defaultValues: DEFAULT_VALUES,
 	});
 
 	const currentUnit = watch('unit');
 
 	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 
-	const resetValues = () => {
-		defaultValues = getDefaultValues(containerOrFederation, isContainer) as any;
-		reset(defaultValues);
-	};
+	const resetValues = () => { reset(DEFAULT_VALUES); };
 
 	useEffect(() => {
 		if (open) {
@@ -235,7 +232,7 @@ export const SettingsForm = ({
 						defaultMessage: 'Units',
 					})}
 					control={control}
-					defaultValue={defaultValues.unit}
+					defaultValue={DEFAULT_VALUES.unit}
 				>
 					{UNITS.map(({ name, abbreviation }) => (
 						<MenuItem key={abbreviation} value={abbreviation}>
@@ -259,7 +256,7 @@ export const SettingsForm = ({
 							defaultMessage: 'Category',
 						})}
 						control={control}
-						defaultValue={defaultValues.type}
+						defaultValue={DEFAULT_VALUES.type}
 					>
 						{CATEGORIES.map((category) => (
 							<MenuItem key={category} value={category}>
