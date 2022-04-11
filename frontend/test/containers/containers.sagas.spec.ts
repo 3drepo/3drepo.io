@@ -184,6 +184,17 @@ describe('Containers: sagas', () => {
 			))
 			.silentRun();
 		})
+
+		it('should call container settings endpoint with 404', async () => {
+			const containerId = mockContainers[0]._id;
+			mockServer
+			.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
+			.reply(404);
+
+			await expectSaga(ContainersSaga.default)
+			.dispatch(ContainersActions.fetchContainerSettings(teamspace, projectId, containerId))
+			.silentRun();
+		})
 	})
 
 	describe('createContainer', () => {
@@ -241,6 +252,17 @@ describe('Containers: sagas', () => {
 				mockSettings,
 			))
 			.silentRun();	
+		})
+
+		it('should call container settings endpoint with 404', async () => {
+			const containerId = mockContainer._id;
+			mockServer
+			.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
+			.reply(404);
+
+			await expectSaga(ContainersSaga.default)
+			.dispatch(ContainersActions.updateContainerSettings(teamspace, projectId, containerId, mockSettings))
+			.silentRun();
 		})
 	})
 	
