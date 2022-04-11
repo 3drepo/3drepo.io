@@ -65,9 +65,11 @@ export const RevisionsListItem = (props: IProps) => {
 
 	const handleClick = (event) => props.onClick(event, props.data);
 	const handleToggleVoid = (event) => props.onToggleVoid(event, props.data);
-	const stateTheme = useMemo(() =>
-		({ current, isVoid: props.data.void, isPending }), [isPending, props.data.void, current]
-	);
+	const stateTheme = {
+		current,
+		isPending,
+		isVoid: props.data.void,
+	};
 
 	const renderGoToRevisionButton = renderWhenTrue(
 		<LinkWrapper>
