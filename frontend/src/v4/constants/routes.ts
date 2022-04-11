@@ -46,3 +46,6 @@ export const PUBLIC_ROUTES = [
 	ROUTES.PASSWORD_FORGOT,
 	ROUTES.PASSWORD_FORGOT
 ] as any;
+
+
+export type RouteParams = { teampace: string, model?: string, revision?: string, modelId?: string, type?: string };

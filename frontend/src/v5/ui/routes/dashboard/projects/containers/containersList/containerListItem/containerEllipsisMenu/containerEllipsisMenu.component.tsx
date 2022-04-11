@@ -24,6 +24,7 @@ import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 import { viewerRoute } from '@/v5/services/routing/routing';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 
 type ContainerEllipsisMenuProps = {
 	selected: boolean,
@@ -38,7 +39,7 @@ export const ContainerEllipsisMenu = ({
 	onSelectOrToggleItem,
 	openShareModal,
 }: ContainerEllipsisMenuProps) => {
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const { teamspace, project } = useParams<DashboardParams>();
 	const dispatch = useDispatch();
 
 	return (

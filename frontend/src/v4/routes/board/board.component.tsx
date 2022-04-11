@@ -28,7 +28,7 @@ import TrelloBoard from 'react-trello';
 
 import { ISSUE_FILTERS, ISSUES_ACTIONS_MENU } from '../../constants/issues';
 import { RISK_FILTERS } from '../../constants/risks';
-import { ROUTES } from '../../constants/routes';
+import { ROUTES, RouteParams } from '../../constants/routes';
 import { filtersValuesMap as issuesFilters, getHeaderMenuItems as getIssueMenuItems } from '../../helpers/issues';
 import { renderWhenTrue } from '../../helpers/rendering';
 import { filtersValuesMap as risksFilters, getHeaderMenuItems as getRisksMenuItems  } from '../../helpers/risks';
@@ -155,7 +155,7 @@ const IssueBoardCard = ({ metadata, onClick }: any) => (
 
 export function Board(props: IProps) {
 	const boardRef = useRef(null);
-	const { type, teamspace, project, modelId } = useParams();
+	const { type, teamspace, project, modelId } = useParams<RouteParams>();
 	const projectParam = `${project ? `/${project}` : ''}`;
 	const modelParam = `${modelId ? `/${modelId}` : ''}`;
 	const isIssuesBoard = type === 'issues';

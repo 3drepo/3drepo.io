@@ -23,6 +23,7 @@ import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellips
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import { viewerRoute } from '@/v5/services/routing/routing';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 
 type FederationEllipsisMenuProps = {
 	federation: IFederation,
@@ -37,7 +38,7 @@ export const FederationEllipsisMenu = ({
 	openShareModal,
 	openEditFederationModal,
 }: FederationEllipsisMenuProps) => {
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const { teamspace, project } = useParams<DashboardParams>();
 	const dispatch = useDispatch();
 
 	return (

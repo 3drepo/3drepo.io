@@ -23,6 +23,7 @@ import { useParams } from 'react-router-dom';
 import { ShareTextField } from '@controls/shareTextField';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { IFederation } from '@/v5/store/federations/federations.types';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { MailToButton } from './shareModal.styles';
 
 type IShareModal = {
@@ -38,7 +39,7 @@ export const ShareModal = ({
 	containerOrFederation,
 	onClickClose,
 }: IShareModal): JSX.Element => {
-	const { teamspace } = useParams();
+	const { teamspace } = useParams<DashboardParams>();
 	const link = viewerRoute(teamspace, containerOrFederation, null, true);
 
 	return (

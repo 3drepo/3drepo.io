@@ -26,6 +26,7 @@ import { useParams } from 'react-router';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers/containersActions.dispatchers';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { SelectColumn } from './createContainerForm.styles';
 
 interface IFormInput {
@@ -80,7 +81,7 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 		mode: 'onChange',
 		resolver: yupResolver(ContainerSchema),
 	});
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const { teamspace, project } = useParams<DashboardParams>();
 	const onSubmit: SubmitHandler<IFormInput> = (body) => {
 		ContainersActionsDispatchers.createContainer(teamspace, project, body);
 		close();

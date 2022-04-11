@@ -39,6 +39,7 @@ import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/
 import { Display } from '@/v5/ui/themes/media';
 import { formatMessage } from '@/v5/services/intl';
 import { DashboardListButton, DashedButtonContainer } from '@components/dashboard/dashboardList/dashboardList.styles';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Container, CollapseSideElementGroup } from './containersList.styles';
 
 interface IContainersList {
@@ -67,7 +68,7 @@ export const ContainersList = ({
 	hasContainers,
 	showBottomButton = false,
 }: IContainersList): JSX.Element => {
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const { teamspace, project } = useParams<DashboardParams>();
 	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 	const { sortedList, setSortConfig } = useOrderedList(containers, DEFAULT_SORT_CONFIG);
 

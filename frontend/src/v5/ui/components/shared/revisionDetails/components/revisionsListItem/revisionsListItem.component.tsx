@@ -27,6 +27,7 @@ import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/re
 import { Display } from '@/v5/ui/themes/media';
 import { formatDate } from '@/v5/services/intl';
 import { viewerRoute } from '@/v5/services/routing/routing';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Container } from './revisionsListItem.styles';
 
 type IRevisionsListItem = {
@@ -36,7 +37,7 @@ type IRevisionsListItem = {
 };
 
 export const RevisionsListItem = ({ revision, containerId, active = false }: IRevisionsListItem): JSX.Element => {
-	const { teamspace, project } = useParams();
+	const { teamspace, project } = useParams<DashboardParams>();
 	const { timestamp, desc, author, tag, void: voidStatus } = revision;
 
 	const toggleVoidStatus = (e: SyntheticEvent) => {
