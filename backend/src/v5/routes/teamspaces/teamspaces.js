@@ -146,16 +146,24 @@ const establishRoutes = () => {
 
 	/**
 	* @openapi
-	* /user/avatar:
+	* /teamspaces/{teamspace}/avatar:
 	*   get:
-	*     description: Gets the avatar of the logged in user
-	*     tags: [User]
-	*     operationId: getAvatar
+	*     description: Gets the avatar of the teamspace
+	*     tags: [Teamspaces]
+	*     parameters:
+   	*       - teamspace:
+	*         name: teamspace
+	*         description: name of teamspace
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*     operationId: getTeamspaceAvatar
 	*     responses:
 	*       401:
 	*         $ref: "#/components/responses/notLoggedIn"
 	*       200:
-	*         description: Gets the avatar of the user
+	*         description: Gets the avatar of the Teamspace
 	*         produces:
 	*           image/png:
 	*         content:
@@ -164,7 +172,7 @@ const establishRoutes = () => {
 	*               type: string
 	*               format: binary
 	*/
-	router.get('/teamspace/avatar', hasAccessToTeamspace, getAvatar);
+	router.get('/:teamspace/avatar', hasAccessToTeamspace, getAvatar);
 
 	return router;
 };
