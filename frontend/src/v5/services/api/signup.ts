@@ -19,3 +19,5 @@ import { INewUser } from '@/v5/store/auth/auth.types';
 import api from './default';
 
 export const registerNewUser = (data: INewUser): Promise<any> => api.post('user', data);
+
+export const verifyUser = (token: string, username: string) => api.post('user/verify', { username, token });

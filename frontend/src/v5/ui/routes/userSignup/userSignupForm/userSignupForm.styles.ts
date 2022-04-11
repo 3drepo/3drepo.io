@@ -18,7 +18,7 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import StepperBase from '@mui/material/Stepper';
 import StepLabelBase from '@mui/material/StepLabel';
-import { clientConfigService } from '@/v4/services/clientConfig';
+import { Content } from '../userSignup.styles';
 
 export const Container = styled.div`
 	/* min-height: 100vh; */
@@ -29,7 +29,6 @@ export const Container = styled.div`
 	justify-content: center;
 `;
 
-// Top text
 export const Title = styled.div`
 	${({ theme }) => theme.typography.h1};
 	color: ${({ theme }) => theme.palette.secondary.main};
@@ -41,13 +40,8 @@ export const Underlined = styled.div`
 	text-underline-offset: 3px;
 `;
 
-// Stepper
 export const Stepper = styled(StepperBase)`
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	margin: 28px;
-	width: 454px;
-	/*TODO - fix when new design will be implemented*/
-	box-shadow: ${clientConfigService.getCustomBackgroundImagePath() ? '0px 8px 15px -3px #878787' : '0 1px 1px rgb(0 0 0 / 14%)'};
+	${Content}
 `;
 
 export const StepLabel = styled(StepLabelBase)<{ reachable?: boolean }>`
@@ -58,7 +52,6 @@ export const StepLabel = styled(StepLabelBase)<{ reachable?: boolean }>`
 	`}
 `;
 
-// Bottom text
 export const LoginPrompt = styled.div`
 	${({ theme }) => theme.typography.link};
 	color: ${({ theme }) => theme.palette.base.main};

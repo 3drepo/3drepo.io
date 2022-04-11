@@ -17,22 +17,17 @@
 import styled from 'styled-components';
 import EmailIconBase from '@assets/icons/twoToned/email-two_toned.svg';
 import { Link as LinkBase } from 'react-router-dom';
-import { clientConfigService } from '@/v4/services/clientConfig';
+import { Content } from '../userSignup.styles';
 
 export const Body = styled.div`
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	width: 454px;
-	box-sizing: border-box;
-	border-radius: 6px;
-	margin: 28px;
-	padding: 45px 60px;
 	text-align: center;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	/*TODO - fix when new design will be implemented*/
-	box-shadow: ${clientConfigService.getCustomBackgroundImagePath() ? '0px 8px 15px -3px #878787' : '0 1px 1px rgb(0 0 0 / 14%)'};
+	box-sizing: border-box;
+	padding: 45px 60px;
+	${Content}
 `;
 
 export const EmailIcon = styled(EmailIconBase)`

@@ -31,6 +31,7 @@ import { IntlProvider } from 'react-intl';
 import { Dashboard } from './dashboard';
 import { V4Adapter } from '../v4Adapter/v4Adapter';
 import { UserSignup } from './userSignup/userSignup.component';
+import { UserSignupVerification } from './userSignup/userSignupVerification/userSignupVerification.component';
 
 export const Root = () => {
 	const history = useHistory();
@@ -45,7 +46,7 @@ export const Root = () => {
 			TeamspacesActionsDispatchers.fetch();
 		}
 
-		if (!isNull(isAuthenticated) && !isAuthenticated && history.location.pathname !== '/v5/signup') {
+		if (!isNull(isAuthenticated) && !isAuthenticated && history.location.pathname.startsWith('/v5/signup')) {
 			history.push('/v5/login');
 		}
 	}, [isAuthenticated]);
@@ -57,6 +58,7 @@ export const Root = () => {
 					<IntlProvider {...getIntlProviderProps()}>
 						<V4Adapter>
 							<Switch>
+								<Route path="/v5/verification" component={UserSignupVerification} />
 								<Route path="/v5/signup" component={UserSignup} />
 								<Route component={Dashboard} />
 							</Switch>

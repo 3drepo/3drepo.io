@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import DefaultLogoBase from '@assets/icons/colored_logo.svg';
 import { Display } from '@/v5/ui/themes/media';
@@ -83,4 +83,14 @@ export const LogoContainer = styled.div`
 		justify-content: center;
 		align-items: center;
 	}
+`;
+
+export const Content = css`
+	margin: 28px;
+	width: 454px;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	border-radius: 6px;
+	box-sizing: border-box;
+	/* TODO - fix after new design will be released */
+	box-shadow: ${clientConfigService.getCustomBackgroundImagePath() ? '0px 8px 15px -3px #878787' : '0 1px 1px rgb(0 0 0 / 14%)'};
 `;
