@@ -19,6 +19,7 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { Route, Switch } from 'react-router-dom';
 import { generatePath } from 'react-router';
 import { IRevision } from '@/v5/store/revisions/revisions.types';
+import { VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
 
 const appendSlashIfNeeded = (uri) => (uri[uri.length - 1] !== '/' ? `${uri}/` : uri);
 
@@ -39,8 +40,6 @@ export const uriCombine = (uri, path) => {
 
 const getBaseDomain = () => `${window.location.protocol}//${window.location.hostname}`;
 
-export const VIEWER_ROUTE = '/v5/viewer/:teamspace/:containerOrFederation/:revision?';
-
 type RevisionParam = IRevision | string | null | undefined;
 type ContainerOrFederationParam = IContainer | IFederation | string;
 
@@ -49,7 +48,9 @@ const relativeViewerRoute = (
 	containerOrFederation: ContainerOrFederationParam,
 	revision: RevisionParam,
 ) => {
-	const containerOrFederationId = (containerOrFederation as IContainer | IFederation)?._id || containerOrFederation;
+	const containerOrFederationId = (containerOrFederation as IContainer | IFederation)?._id
+		|| (containerOrFederation as string);
+
 	const revisionId = (revision as IRevision)?._id || (revision as string);
 
 	const params = {

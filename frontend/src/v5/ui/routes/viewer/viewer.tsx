@@ -17,9 +17,10 @@
 
 import { ViewerGui } from '@/v4/routes/viewerGui';
 import { useParams } from 'react-router-dom';
+import { ViewerParams } from '../routes.constants';
 
 export const Viewer = () => {
-	const { teamspace, containerOrFederation } = useParams();
+	const { teamspace, containerOrFederation } = useParams<ViewerParams>();
 	const v4Match = {
 		params: {
 			model: containerOrFederation,

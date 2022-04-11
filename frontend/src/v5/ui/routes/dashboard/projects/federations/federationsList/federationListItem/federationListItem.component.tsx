@@ -36,6 +36,11 @@ import { Display } from '@/v5/ui/themes/media';
 import { FederationSettingsForm } from '@/v5/ui/routes/dashboard/projects/federations/federationSettingsForm/federationSettingsForm.component';
 import { ShareModal } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
 import { EditFederationModal } from '@/v5/ui/routes/dashboard/projects/federations/editFederationModal/editFederationModal.component';
+
+import { useParams } from 'react-router-dom';
+import { viewerRoute } from '@/v5/services/routing/routing';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { DashboardLink } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { FederationEllipsisMenu } from './federationEllipsisMenu/federationEllipsisMenu.component';
 
 const MODALS = {
@@ -57,6 +62,8 @@ export const FederationListItem = ({
 	filterQuery,
 	onFavouriteChange,
 }: IFederationListItem): JSX.Element => {
+	const { teamspace } = useParams<DashboardParams>();
+
 	if (federation.hasStatsPending) {
 		return <SkeletonListItem delay={index / 10} key={federation._id} />;
 	}
@@ -76,9 +83,11 @@ export const FederationListItem = ({
 						subtitle={federation.desc}
 						minWidth={90}
 					>
-						<Highlight search={filterQuery}>
-							{federation.name}
-						</Highlight>
+						<DashboardLink to={viewerRoute(teamspace, federation)}>
+							<Highlight search={filterQuery}>
+								{federation.name}
+							</Highlight>
+						</DashboardLink>
 					</DashboardListItemTitle>
 					<DashboardListItemButton
 						hideWhenSmallerThan={1080}

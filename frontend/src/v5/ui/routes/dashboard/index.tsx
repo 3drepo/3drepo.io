@@ -17,7 +17,7 @@
 
 import { useRouteMatch, useLocation, Route, Switch, Redirect } from 'react-router-dom';
 import { GlobalStyle } from '@/v5/ui/themes/global';
-import { discardSlash, VIEWER_ROUTE } from '@/v5/services/routing/routing';
+import { discardSlash } from '@/v5/services/routing/routing';
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { DashboardLayout } from '@components/dashboard/dashboardLayout';
 import { TeamspacesList } from '@/v5/ui/routes/dashboard/teamspaces/teamspacesList/teamspacesList.component';
@@ -26,6 +26,7 @@ import { TeamspaceContent } from './teamspaces';
 import { ProjectContent } from './projects';
 import { Login } from '../login';
 import { Viewer } from '../viewer/viewer';
+import { VIEWER_ROUTE } from '../routes.constants';
 
 export const MainRoute = () => {
 	const { path } = useRouteMatch();

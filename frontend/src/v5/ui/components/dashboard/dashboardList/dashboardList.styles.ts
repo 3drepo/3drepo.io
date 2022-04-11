@@ -20,6 +20,7 @@ import { Divider as DividerComponent } from '@mui/material';
 import { Button } from '@controls/button';
 import { Typography } from '@controls/typography';
 import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
+import { Link } from 'react-router-dom';
 
 export const ListContainer = styled.ul`
 	display: flex;
@@ -71,4 +72,14 @@ export const DashedButtonContainer = styled(DashedContainer).attrs(({ theme }) =
 }))<{ strokeColor: string }>`
 	margin-top: 18px;
 	background-color: transparent;
+`;
+
+export const DashboardLink = styled(Link)`
+	&:link { text-decoration: none; }
+	&:visited {
+		text-decoration: none;
+		color:inherit;
+	}
+	&:hover { text-decoration: none; }
+	&:active { text-decoration: none; }
 `;
