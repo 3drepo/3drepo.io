@@ -15,14 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { ScrollArea } from '@controls/scrollArea';
 import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 
-export const Content = styled.section`
+export const Content = styled(ScrollArea).attrs({
+	variant: 'secondary',
+})`
 	background: ${({ theme }) => theme.palette.gradient.secondary};
 	border-top: 1px solid rgba(196, 196, 196, 0.1);
 	overflow-y: auto;
-	flex-grow: 1;
+	flex-flow: column;
+	height: 100%;
+	display: flex;
 `;
 
 export const WelcomeMessage = styled(Typography).attrs({
