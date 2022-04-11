@@ -141,7 +141,6 @@
 		"@types/react": "17.0.39",
 		"@types/react-custom-scrollbars": "4.0.10",
 		"@types/react-dom": "17.0.11",
-		"@types/react-router-dom": "^5.3.3",
 		"@types/styled-components": "5.1.4",
 		"@typescript-eslint/eslint-plugin": "4.33.0",
 		"@typescript-eslint/eslint-plugin-tslint": "4.28.1",
