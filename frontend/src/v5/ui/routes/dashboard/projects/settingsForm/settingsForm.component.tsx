@@ -162,8 +162,6 @@ export const SettingsForm = ({
 		reset(defaultValues);
 	};
 
-	useEffect(resetValues, [containerOrFederation]);
-
 	useEffect(() => {
 		if (open) {
 			fetchSettings(teamspace, project, containerOrFederation._id);
