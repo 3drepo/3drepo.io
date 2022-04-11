@@ -69,20 +69,16 @@ export const prepareContainersData = (
 
 export const prepareContainerSettingsForFrontend = ({
 	surveyPoints,
-	type,
 	...otherProps
 }: ContainerBackendSettings) => ({
 	surveyPoint: surveyPoints?.[0],
-	category: type,
 	...otherProps,
 });
 
 export const prepareContainerSettingsForBackend = ({
 	surveyPoint,
-	category,
 	...otherProps
 }: ContainerSettings) => ({
 	surveyPoints: [surveyPoint],
-	type: category,
 	...otherProps,
 });

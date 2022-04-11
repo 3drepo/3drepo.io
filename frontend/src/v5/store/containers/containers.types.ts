@@ -43,7 +43,6 @@ export interface IContainer {
 		message: string;
 		date: Date | null;
 	};
-	category?: string;
 	desc?: string;
 	views?: View[];
 	surveyPoint?: SurveyPoint;
@@ -104,7 +103,6 @@ export type ContainerBackendSettings = {
 
 export type ContainerSettings = Omit<ContainerBackendSettings, 'surveyPoints'> & {
 	surveyPoint: SurveyPoint;
-	category?: string;
 };
 
 export type FetchContainerViewsResponseView = { views: View[] };

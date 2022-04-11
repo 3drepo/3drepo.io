@@ -55,18 +55,18 @@ const UNITS = [
 ];
 
 const CATEGORIES = [
-	formatMessage({ id: 'category.type.uncategorised', defaultMessage: 'Uncategorised' }),
-	formatMessage({ id: 'category.type.architectural', defaultMessage: 'Architectural' }),
-	formatMessage({ id: 'category.type.existing', defaultMessage: 'Existing' }),
-	formatMessage({ id: 'category.type.gis', defaultMessage: 'GIS' }),
-	formatMessage({ id: 'category.type.infrastructure', defaultMessage: 'Infrastructure' }),
-	formatMessage({ id: 'category.type.interior', defaultMessage: 'Interior' }),
-	formatMessage({ id: 'category.type.landscape', defaultMessage: 'Landscape' }),
-	formatMessage({ id: 'category.type.mep', defaultMessage: 'MEP' }),
-	formatMessage({ id: 'category.type.mechanical', defaultMessage: 'Mechanical' }),
-	formatMessage({ id: 'category.type.structural', defaultMessage: 'Structural' }),
-	formatMessage({ id: 'category.type.survey', defaultMessage: 'Survey' }),
-	formatMessage({ id: 'category.type.other', defaultMessage: 'Other' }),
+	formatMessage({ id: 'category.uncategorised', defaultMessage: 'Uncategorised' }),
+	formatMessage({ id: 'category.architectural', defaultMessage: 'Architectural' }),
+	formatMessage({ id: 'category.existing', defaultMessage: 'Existing' }),
+	formatMessage({ id: 'category.gis', defaultMessage: 'GIS' }),
+	formatMessage({ id: 'category.infrastructure', defaultMessage: 'Infrastructure' }),
+	formatMessage({ id: 'category.interior', defaultMessage: 'Interior' }),
+	formatMessage({ id: 'category.landscape', defaultMessage: 'Landscape' }),
+	formatMessage({ id: 'category.mep', defaultMessage: 'MEP' }),
+	formatMessage({ id: 'category.mechanical', defaultMessage: 'Mechanical' }),
+	formatMessage({ id: 'category.structural', defaultMessage: 'Structural' }),
+	formatMessage({ id: 'category.survey', defaultMessage: 'Survey' }),
+	formatMessage({ id: 'category.other', defaultMessage: 'Other' }),
 ];
 
 interface IFormInput {
@@ -75,6 +75,7 @@ interface IFormInput {
 	desc: string;
 	code: string;
 	category?: string,
+	type?: string,
 	defaultView: string;
 	latitude: number;
 	longitude: number;
@@ -109,7 +110,7 @@ const getDefaultValues = (containerOrFederation: IContainer | IFederation, isCon
 		x,
 		y,
 		z,
-		...(isContainer ? { category: containerOrFederation.category || 'Uncategorised' } : {}),
+		...(isContainer ? { type: (containerOrFederation as IContainer).type || 'Uncategorised' } : {}),
 	};
 };
 
@@ -252,13 +253,13 @@ export const SettingsForm = ({
 			{isContainer && (
 				<FlexContainer>
 					<FormSelect
-						name="category"
+						name="type"
 						label={formatMessage({
 							id: 'settings.form.category',
 							defaultMessage: 'Category',
 						})}
 						control={control}
-						defaultValue={defaultValues.category}
+						defaultValue={defaultValues.type}
 					>
 						{CATEGORIES.map((category) => (
 							<MenuItem key={category} value={category}>

@@ -79,8 +79,7 @@ const SettingsSchema = (isContainer?: boolean) => {
 							defaultMessage: 'Code can only consist of letters and numbers',
 						}))
 		)),
-		...(isContainer ? { category: Yup.string() } : {}
-		),
+		...(isContainer ? { type: Yup.string() } : {}),
 		defaultView: Yup.string()
 			.nullable()
 			.transform((value) => (value === EMPTY_VIEW._id ? null : value)),

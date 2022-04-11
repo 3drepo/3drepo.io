@@ -70,23 +70,22 @@ export const prepareMockViewsReply = (container: IContainer): FetchContainerView
 	views: container.views,
 });
 
-const prepareMockSettingsWithoutSurveyPointAndCategory = (container: IContainer): Omit<ContainerSettings, 'surveyPoint'> => ({
+const prepareMockSettingsWithoutSurveyPoint = (container: IContainer): Omit<ContainerSettings, 'surveyPoint'> => ({
 	angleFromNorth: container.angleFromNorth,
 	defaultView: container.defaultView,
 	unit: container.unit,
 	name: container.name,
 	code: container.code,
 	desc: container.desc,
+	type: container.type,
 });
 
 export const prepareMockSettingsReply = (container: IContainer): ContainerSettings => ({
-	...prepareMockSettingsWithoutSurveyPointAndCategory(container),
-	category: container.category,
+	...prepareMockSettingsWithoutSurveyPoint(container),
 	surveyPoint: container.surveyPoint,
 });
 
 export const prepareMockRawSettingsReply = (container: IContainer): ContainerBackendSettings => ({
-	...prepareMockSettingsWithoutSurveyPointAndCategory(container),
-	type: container.category,
+	...prepareMockSettingsWithoutSurveyPoint(container),
 	surveyPoints: [container.surveyPoint],
 });
