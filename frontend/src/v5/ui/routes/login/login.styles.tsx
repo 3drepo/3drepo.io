@@ -24,6 +24,7 @@ export const OtherOptions = styled.div`
 	color: ${({ theme }) => theme.palette.base.main};
 	a {
 		color: ${({ theme }) => theme.palette.primary.main};
+		text-decoration: none;
 	}
 `;
 

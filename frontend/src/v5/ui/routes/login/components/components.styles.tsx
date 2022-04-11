@@ -78,4 +78,5 @@ export const CenteredLink = styled(Link)`
 	margin: 15px auto 12px;
 	justify-content: center;
 	color: ${({ theme }) => theme.palette.primary.main};
+	text-decoration: none;
 `;
