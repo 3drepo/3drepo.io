@@ -61,7 +61,7 @@ const CATEGORIES = [
 	formatMessage({ id: 'category.type.gis', defaultMessage: 'GIS' }),
 	formatMessage({ id: 'category.type.infrastructure', defaultMessage: 'Infrastructure' }),
 	formatMessage({ id: 'category.type.interior', defaultMessage: 'Interior' }),
-	formatMessage({ id: 'category.type.ladscape', defaultMessage: 'Landscape' }),
+	formatMessage({ id: 'category.type.landscape', defaultMessage: 'Landscape' }),
 	formatMessage({ id: 'category.type.mep', defaultMessage: 'MEP' }),
 	formatMessage({ id: 'category.type.mechanical', defaultMessage: 'Mechanical' }),
 	formatMessage({ id: 'category.type.structural', defaultMessage: 'Structural' }),

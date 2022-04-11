@@ -157,7 +157,7 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 						<FormattedMessage id="containers.creation.form.type.interior" defaultMessage="Interior" />
 					</MenuItem>
 					<MenuItem value="Landscape">
-						<FormattedMessage id="containers.creation.form.type.ladscape" defaultMessage="Landscape" />
+						<FormattedMessage id="containers.creation.form.type.landscape" defaultMessage="Landscape" />
 					</MenuItem>
 					<MenuItem value="MEP">
 						<FormattedMessage id="containers.creation.form.type.mep" defaultMessage="MEP" />
