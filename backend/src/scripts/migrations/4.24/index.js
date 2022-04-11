@@ -20,8 +20,6 @@ const addRevId = require('./addRevIdToNodes');
 const removeCurrentIds = require('./removeCurrentIds');
 const updateMetaSchema = require('./updateMetadataSchema');
 const addIndex = require('./addIndices');
-const addSharedIdToMeshMap = require('./addSharedIdToMeshMap');
-const shrinkMeshNodes = require('./shrinkMeshNodes');
 
 const { v5Path } = require('../../../interop');
 

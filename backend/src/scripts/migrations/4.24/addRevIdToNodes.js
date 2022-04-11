@@ -56,7 +56,7 @@ const processTeamspace = async (teamspace) => {
 const run = async () => {
 	const teamspaces = await getTeamspaceList();
 	for (let i = 0; i < teamspaces.length; ++i) {
-		logger.logInfo(`\t\t-${teamspaces[i]}`);
+		logger.logInfo(`\t\t-[TEAMSPACE]${teamspaces[i]}`);
 		// eslint-disable-next-line no-await-in-loop
 		await processTeamspace(teamspaces[i]);
 	}
