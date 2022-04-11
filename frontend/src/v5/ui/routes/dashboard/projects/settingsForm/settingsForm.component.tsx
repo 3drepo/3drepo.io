@@ -29,7 +29,7 @@ import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelectView } from '@controls/formSelectView/formSelectView.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { FormattedMessage } from 'react-intl';
-import { FlexContainer, SectionTitle, ShareTextField, Placeholder } from './settingsForm.styles';
+import { FlexContainer, SectionTitle, ShareTextField, Placeholder, HiddenMenuItem } from './settingsForm.styles';
 
 const UNITS = [
 	{
@@ -54,19 +54,19 @@ const UNITS = [
 	},
 ];
 
-const CATEGORIES = [
-	formatMessage({ id: 'category.uncategorised', defaultMessage: 'Uncategorised' }),
-	formatMessage({ id: 'category.architectural', defaultMessage: 'Architectural' }),
-	formatMessage({ id: 'category.existing', defaultMessage: 'Existing' }),
-	formatMessage({ id: 'category.gis', defaultMessage: 'GIS' }),
-	formatMessage({ id: 'category.infrastructure', defaultMessage: 'Infrastructure' }),
-	formatMessage({ id: 'category.interior', defaultMessage: 'Interior' }),
-	formatMessage({ id: 'category.landscape', defaultMessage: 'Landscape' }),
-	formatMessage({ id: 'category.mep', defaultMessage: 'MEP' }),
-	formatMessage({ id: 'category.mechanical', defaultMessage: 'Mechanical' }),
-	formatMessage({ id: 'category.structural', defaultMessage: 'Structural' }),
-	formatMessage({ id: 'category.survey', defaultMessage: 'Survey' }),
-	formatMessage({ id: 'category.other', defaultMessage: 'Other' }),
+const CONTAINER_TYPES = [
+	formatMessage({ id: 'settings.type.uncategorised', defaultMessage: 'Uncategorised' }),
+	formatMessage({ id: 'settings.type.architectural', defaultMessage: 'Architectural' }),
+	formatMessage({ id: 'settings.type.existing', defaultMessage: 'Existing' }),
+	formatMessage({ id: 'settings.type.gis', defaultMessage: 'GIS' }),
+	formatMessage({ id: 'settings.type.infrastructure', defaultMessage: 'Infrastructure' }),
+	formatMessage({ id: 'settings.type.interior', defaultMessage: 'Interior' }),
+	formatMessage({ id: 'settings.type.landscape', defaultMessage: 'Landscape' }),
+	formatMessage({ id: 'settings.type.mep', defaultMessage: 'MEP' }),
+	formatMessage({ id: 'settings.type.mechanical', defaultMessage: 'Mechanical' }),
+	formatMessage({ id: 'settings.type.structural', defaultMessage: 'Structural' }),
+	formatMessage({ id: 'settings.type.survey', defaultMessage: 'Survey' }),
+	formatMessage({ id: 'settings.type.other', defaultMessage: 'Other' }),
 ];
 
 interface IFormInput {
@@ -258,11 +258,14 @@ export const SettingsForm = ({
 						control={control}
 						defaultValue={DEFAULT_VALUES.type}
 					>
-						{CATEGORIES.map((category) => (
-							<MenuItem key={category} value={category}>
-								{category}
+						{CONTAINER_TYPES.map((type) => (
+							<MenuItem key={type} value={type}>
+								{type}
 							</MenuItem>
 						))}
+						<HiddenMenuItem key="sample" value="sample">
+							<FormattedMessage id="settings.type.sample" defaultMessage="Sample" />
+						</HiddenMenuItem>
 					</FormSelect>
 					<Placeholder />
 				</FlexContainer>

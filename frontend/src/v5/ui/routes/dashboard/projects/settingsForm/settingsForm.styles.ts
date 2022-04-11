@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { Typography } from '@mui/material';
+import { MenuItem, Typography } from '@mui/material';
 import { ShareTextField as ShareTextFieldBase } from '@controls/shareTextField';
 
 export const SectionTitle = styled(Typography).attrs({
@@ -79,4 +79,8 @@ export const ViewLabel = styled.div`
 
 export const Placeholder = styled.div`
 	visibility: hidden;
+`;
+
+export const HiddenMenuItem = styled(MenuItem)`
+	display: none;
 `;
