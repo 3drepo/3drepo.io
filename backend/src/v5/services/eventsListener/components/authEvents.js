@@ -15,7 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { EVENTS: chatEvents } = require('../../chat/chat.constants');
+const { createDirectMessage } = require('../../chat');
 const { events } = require('../../eventsManager/eventsManager.constants');
+const { logger } = require('../../../utils/logger');
 const { removeOldSessions } = require('../../sessions');
 const { saveLoginRecord } = require('../../../models/loginRecord');
 const { subscribe } = require('../../eventsManager/eventsManager');
@@ -25,10 +28,19 @@ const userLoggedIn = ({ username, sessionID, ipAddress, userAgent, referer }) =>
 	removeOldSessions(username, sessionID, referer),
 ]);
 
+const sessionsRemoved = async ({ ids }) => {
+	try {
+		await createDirectMessage(chatEvents.LOGGED_OUT, { reason: 'You have logged in else where' }, ids);
+	} catch (err) {
+		logger.logError(`Failed to create direct message: ${err.message}`);
+	}
+};
+
 const AuthEventsListener = {};
 
 AuthEventsListener.init = () => {
 	subscribe(events.SESSION_CREATED, userLoggedIn);
+	subscribe(events.SESSIONS_REMOVED, sessionsRemoved);
 };
 
 module.exports = AuthEventsListener;

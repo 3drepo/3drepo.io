@@ -39,7 +39,7 @@ Users.validateLoginData = async (req, res, next) => {
 		await schema.validate(req.body);
 
 		const usernameOrEmail = req.body.user;
-		const { user } = await getUserByUsernameOrEmail(usernameOrEmail);
+		const { user } = await getUserByUsernameOrEmail(usernameOrEmail, { user: 1 });
 		req.body.user = user;
 
 		next();
