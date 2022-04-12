@@ -18,11 +18,14 @@
 const baseTemplate = require('./templates/baseTemplate');
 const config = require('../../utils/config');
 const { createTestAccount } = require('nodemailer');
+const { templates: emailTemplates } = require('./mailer.constants');
 const { logger } = require('../../utils/logger');
 const nodemailer = require('nodemailer');
-const { templates } = require('./mailer.constants');
+const { templates } = require('../../utils/responseCodes');
 
 const Mailer = {};
+
+let transporter;
 
 const checkMailerConfig = async () => {
 	if (!config?.mail?.sender) {
@@ -31,7 +34,7 @@ const checkMailerConfig = async () => {
 
 	if (!config?.mail?.smtpConfig) {
 		if (config?.mail?.generateCredentials) {
-			const { user, pass } = await createTestAccount();			
+			const { user, pass } = await createTestAccount();
 
 			config.mail.smtpConfig = {
 				host: 'smtp.ethereal.email',
@@ -44,19 +47,22 @@ const checkMailerConfig = async () => {
 			throw new Error('config.mail.smtpConfig is not set');
 		}
 	}
-}
+};
 
-let transporter;
-checkMailerConfig();
+const prom = checkMailerConfig();
 
 Mailer.sendEmail = async (templateName, to, data, attachments) => {
-	const template = templates[templateName];
+	const template = emailTemplates[templateName];
+
+	if (!template) {
+		throw templates.unknown;
+	}
 	const templateHtml = template.html(data);
 
 	const mailOptions = {
 		from: config.mail.sender,
 		to,
-		subject: template.subject(data),
+		subject: template.subject,
 		html: baseTemplate.html({ ...data, emailContent: templateHtml }),
 	};
 
@@ -65,10 +71,11 @@ Mailer.sendEmail = async (templateName, to, data, attachments) => {
 	}
 
 	try {
+		await prom;
 		await transporter.sendMail(mailOptions);
 	} catch (err) {
 		logger.logDebug(`Email error - ${err.message}`);
-		throw err;		
+		throw err;
 	}
 };
 

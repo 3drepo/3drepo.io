@@ -24,8 +24,8 @@ const config = require('../utils/config');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
 const { publish } = require('../services/eventsManager/eventsManager');
-const { templates } = require('../services/mailer/mailer.constants');
 const { sendEmail } = require('../services/mailer');
+const { templates } = require('../services/mailer/mailer.constants');
 
 Users.signUp = async (newUserData) => {
 	const token = generateHashString();
@@ -109,8 +109,13 @@ Users.generateResetPasswordToken = async (username) => {
 
 	await updateResetPasswordToken(username, resetPasswordToken);
 
-	const { customData: { email, firstName } } = await getUserByUsername(username, { user: 1, 'customData.email': 1, 'customData.firstName': 1 });
-	await sendEmail(templates.FORGOT_PASSWORD.name, email, { token: resetPasswordToken.token, email, username, firstName });
+	const { customData: { email, firstName } } = await getUserByUsername(username, { user: 1,
+		'customData.email': 1,
+		'customData.firstName': 1 });
+	await sendEmail(templates.FORGOT_PASSWORD.name, email, { token: resetPasswordToken.token,
+		email,
+		username,
+		firstName });
 };
 
 Users.updatePassword = updatePassword;

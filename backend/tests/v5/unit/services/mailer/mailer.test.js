@@ -17,10 +17,18 @@
 
 const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
+const BaseTemplate = require('../../../../../src/v5/services/mailer/templates/baseTemplate');
 
 const config = require(`${src}/utils/config`);
-const { templates } = require(`${src}/services/mailer/mailer.constants`);
+const { templates: emailTemplates } = require(`${src}/services/mailer/mailer.constants`);
+const { templates } = require(`${src}/utils/responseCodes`);
 
+const sendMailMock = jest.fn();
+jest.mock('nodemailer');
+const nodemailer = require('nodemailer');
+
+nodemailer.createTransport.mockImplementation(() => ({ sendMail: sendMailMock }));
+nodemailer.createTestAccount.mockImplementation(() => ({ user: generateRandomString(), pass: generateRandomString() }));
 const Mailer = require(`${src}/services/mailer`);
 
 const testSendEmail = () => {
@@ -32,32 +40,56 @@ const testSendEmail = () => {
 		test('should fail if config.mail.sender is not set', async () => {
 			const { sender } = config.mail;
 			config.mail.sender = undefined;
-			await expect(Mailer.sendEmail(templates.FORGOT_PASSWORD.name, recipient, data, attachments))
+
+			await expect(Mailer.sendEmail(emailTemplates.FORGOT_PASSWORD.name, recipient, data, attachments))
 				.rejects.toEqual({ message: 'config.mail.sender is not set' });
 			config.mail.sender = sender;
 		});
 
 		test('should fail if config.mail.smtpConfig is not set and config.mail.generateCredentials is false', async () => {
 			config.mail.generateCredentials = false;
-			await expect(Mailer.sendEmail(templates.FORGOT_PASSWORD.name, recipient, data, attachments))
+			await expect(Mailer.sendEmail(emailTemplates.FORGOT_PASSWORD.name, recipient, data, attachments))
 				.rejects.toEqual({ message: 'config.mail.smtpConfig is not set' });
 			config.mail.generateCredentials = true;
 		});
 
 		test('should send email if attachments are provided', async () => {
-			await Mailer.sendEmail(templates.FORGOT_PASSWORD.name, recipient, data, attachments);
+			await Mailer.sendEmail(emailTemplates.FORGOT_PASSWORD.name, recipient, data, attachments);
+			expect(sendMailMock).toBeCalledTimes(1);
+			expect(sendMailMock).toBeCalledWith({
+				from: config.mail.sender,
+				to: recipient,
+				subject: emailTemplates.FORGOT_PASSWORD.subject,
+				html: BaseTemplate.html({ ...data, emailContent: emailTemplates.FORGOT_PASSWORD.html(data) }),
+				attachments,
+			});
 		});
 
 		test('should send email if attachments are not provided', async () => {
-			await Mailer.sendEmail(templates.FORGOT_PASSWORD.name, recipient, data);
+			await Mailer.sendEmail(emailTemplates.VERIFY_USER.name, recipient, data);
+			expect(sendMailMock).toBeCalledTimes(1);
+			expect(sendMailMock).toBeCalledWith({
+				from: config.mail.sender,
+				to: recipient,
+				subject: emailTemplates.VERIFY_USER.subject,
+				html: BaseTemplate.html({ ...data, emailContent: emailTemplates.VERIFY_USER.html(data) }),
+			});
 		});
 
-		test('should send email if the subject of template is a function', async () => {
-			await Mailer.sendEmail(templates.FILE_MISSING.name, recipient, data, attachments);
+		test('should log the error and throw it back if sendMail fails', async () => {
+			sendMailMock.mockImplementationOnce(() => { throw templates.unknown; });
+
+			await expect(Mailer.sendEmail(emailTemplates.FORGOT_PASSWORD.name, recipient, data, attachments))
+				.rejects.toEqual(templates.unknown);
+		});
+
+		test('should throw error if the template name is not recognised', async () => {
+			await expect(Mailer.sendEmail(generateRandomString(), recipient, data, attachments))
+				.rejects.toEqual(templates.unknown);
 		});
 	});
 };
 
-describe('services/mailer', () => {
+describe('services/mailer/index', () => {
 	testSendEmail();
 });

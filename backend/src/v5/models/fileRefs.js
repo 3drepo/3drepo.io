@@ -16,10 +16,8 @@
  */
 
 const ExternalServices = require('../handler/externalServices');
-const config = require('../utils/config');
 const db = require('../handler/db');
 const { logger } = require('../utils/logger');
-const { sendEmail } = require('../services/mailer');
 const { templates } = require('../utils/responseCodes');
 
 const FileRefs = {};
