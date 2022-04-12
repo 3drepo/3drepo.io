@@ -27,7 +27,6 @@ export const { Types: RevisionsTypes, Creators: RevisionsActions } = createActio
 	fetch: ['teamspace', 'projectId', 'containerId'],
 	fetchSuccess: ['containerId', 'revisions'],
 	setIsPending: ['containerId', 'isPending'],
-	download: ['teamspace', 'projectId', 'containerId', 'revisionId'],
 }, { prefix: 'REVISIONS/' }) as { Types: Constants<IRevisionsActionCreators>; Creators: IRevisionsActionCreators };
 
 export const INITIAL_STATE: IRevisionsState = {
