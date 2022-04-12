@@ -15,19 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ICurrentUser, UpdateUser } from '@/v5/store/currentUser/currentUser.types';
-import api from './default';
-
-export const fetchUser = async (): Promise<ICurrentUser> => {
-	const { data } = await api.get('user');
-	return data;
+export const EditProfilePersonalTab = () => {
+	return (
+		<div>
+			<h1>Edit Profile Personal Tab</h1>
+		</div>
+	);
 };
-
-export const updateUser = async (user: UpdateUser) => api.put('user', user);
-
-export const generateApiKey = async (): Promise<{ apiKey: string }> => {
-	const { data } = await api.post('user/key');
-	return data;
-};
-
-export const deleteApiKey = () => api.delete('user/key');

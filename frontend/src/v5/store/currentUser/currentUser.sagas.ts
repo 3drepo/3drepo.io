@@ -23,44 +23,43 @@ import { put, takeLatest } from 'redux-saga/effects';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { CurrentUserActions, CurrentUserTypes, UpdateUserAction } from './currentUser.redux';
 
-export function* getProfile() {
+export function* fetchUser() {
 	try {
-		const userData = yield API.CurrentUser.getProfile();
+		const userData = yield API.CurrentUser.fetchUser();
 		const avatarUrl = generateV5ApiUrl(`user/avatar?${Date.now()}`, clientConfigService.GET_API);
-		yield put(CurrentUserActions.getProfileSuccess({
+		yield put(CurrentUserActions.fetchUserSuccess({
 			...userData,
 			avatarUrl,
 		}));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'currentUser.getProfile.error', defaultMessage: 'trying to fetch current user details' }),
+			currentActions: formatMessage({ id: 'currentUser.fetchUser.error', defaultMessage: 'trying to fetch current user details' }),
 			error,
 		}));
 	}
 }
 
 export function* updateUser({ userData }: UpdateUserAction) {
+	yield put(CurrentUserActions.setIsPending(true));
 	try {
-		yield put(CurrentUserActions.setPendingState(true));
 		yield API.CurrentUser.updateUser(userData);
-		yield put(CurrentUserActions.setPendingState(false));
 		yield put(CurrentUserActions.updateUserSuccess(userData));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({
-				id: 'currentUser.updateProfile.error',
+				id: 'currentUser.updateUser.error',
 				defaultMessage: 'trying to update current user details',
 			}),
 			error,
 		}));
 	}
+	yield put(CurrentUserActions.setIsPending(false));
 }
 
 export function* generateApiKey() {
+	yield put(CurrentUserActions.setIsPending(true));
 	try {
-		yield put(CurrentUserActions.setPendingState(true));
 		const apiKey = yield API.CurrentUser.generateApiKey();
-		yield put(CurrentUserActions.setPendingState(false));
 		yield put(CurrentUserActions.updateUserSuccess(apiKey));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -71,13 +70,13 @@ export function* generateApiKey() {
 			error,
 		}));
 	}
+	yield put(CurrentUserActions.setIsPending(false));
 }
 
 export function* deleteApiKey() {
+	yield put(CurrentUserActions.setIsPending(true));
 	try {
-		yield put(CurrentUserActions.setPendingState(true));
 		yield API.CurrentUser.deleteApiKey();
-		yield put(CurrentUserActions.setPendingState(false));
 		yield put(CurrentUserActions.updateUserSuccess({ apiKey: null }));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -88,10 +87,11 @@ export function* deleteApiKey() {
 			error,
 		}));
 	}
+	yield put(CurrentUserActions.setIsPending(false));
 }
 
 export default function* AuthSaga() {
-	yield takeLatest(CurrentUserTypes.GET_PROFILE, getProfile);
+	yield takeLatest(CurrentUserTypes.FETCH_USER, fetchUser);
 	yield takeLatest(CurrentUserTypes.GENERATE_API_KEY, generateApiKey);
 	yield takeLatest(CurrentUserTypes.DELETE_API_KEY, deleteApiKey);
 }

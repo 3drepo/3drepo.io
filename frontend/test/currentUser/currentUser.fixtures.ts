@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,19 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ICurrentUser, UpdateUser } from '@/v5/store/currentUser/currentUser.types';
-import api from './default';
+import * as faker from 'faker';
+import { ICurrentUser } from '../../src/v5/store/currentUser/currentUser.types';
 
-export const fetchUser = async (): Promise<ICurrentUser> => {
-	const { data } = await api.get('user');
-	return data;
-};
+export const currentUserMockFactory = (overrides?: Partial<ICurrentUser>): ICurrentUser => ({
+	username:  faker.random.word(),
+	firstName:  faker.random.word(),
+	lastName:  faker.random.word(),
+	email:  faker.random.word(),
+	apiKey:  faker.datatype.uuid(),
+	company:  faker.random.word(),
+	countryCode:  faker.random.word(),
+	hasAvatar: faker.datatype.boolean(),
+	...overrides,
+});
 
-export const updateUser = async (user: UpdateUser) => api.put('user', user);
-
-export const generateApiKey = async (): Promise<{ apiKey: string }> => {
-	const { data } = await api.post('user/key');
-	return data;
-};
-
-export const deleteApiKey = () => api.delete('user/key');
+export const generateFakeApiKey = () => ({ apiKey: faker.datatype.uuid() });

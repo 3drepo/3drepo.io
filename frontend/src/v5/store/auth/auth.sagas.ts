@@ -26,7 +26,7 @@ function* authenticate() {
 	yield put(AuthActions.setPendingStatus(true));
 	try {
 		yield API.Auth.authenticate();
-		yield put(CurrentUserActions.getProfile());
+		yield put(CurrentUserActions.fetchUser());
 		yield put(AuthActions.setAuthenticationStatus(true));
 	} catch (error) {
 		if (error.response.status !== 401) {
@@ -44,7 +44,7 @@ export function* login({ username, password }: LoginAction) {
 	yield put(AuthActions.setPendingStatus(true));
 	try {
 		yield API.Auth.login(username, password);
-		yield put(CurrentUserActions.getProfile());
+		yield put(CurrentUserActions.fetchUser());
 		yield put(AuthActions.setAuthenticationStatus(true));
 	} catch (error) {
 		const data = error.response?.data;

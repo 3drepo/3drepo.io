@@ -27,7 +27,7 @@ export interface ICurrentUser {
 	avatarUrl?: string,
 }
 
-export type UpdateCurrentUser = Omit<ICurrentUser, 'username'> & {
+export type UpdateUser = Omit<ICurrentUser, 'username'> & {
 	oldPassword: string;
 	newPassword: string;
 };

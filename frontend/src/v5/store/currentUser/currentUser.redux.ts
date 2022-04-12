@@ -18,14 +18,14 @@
 import { Constants } from '@/v5/helpers/actions.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
-import { ICurrentUser, UpdateCurrentUser } from './currentUser.types';
+import { ICurrentUser, UpdateUser } from './currentUser.types';
 
 export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createActions({
-	getProfile: [],
-	getProfileSuccess: ['userData'],
+	fetchUser: [],
+	fetchUserSuccess: ['userData'],
 	updateUser: ['userData'],
 	updateUserSuccess: ['userData'],
-	setPendingState: ['pendingState'],
+	setIsPending: ['isPending'],
 	generateApiKey: [],
 	deleteApiKey: [],
 }, { prefix: 'CURRENT_USER2/' }) as { Types: Constants<ICurrentUserActionCreators>; Creators: ICurrentUserActionCreators };
@@ -34,7 +34,7 @@ export const INITIAL_STATE: ICurrentUserState = {
 	currentUser: { username: '' },
 };
 
-export const getProfileSuccess = (state = INITIAL_STATE, { userData }): ICurrentUserState => ({
+export const fetchUserSuccess = (state = INITIAL_STATE, { userData }): ICurrentUserState => ({
 	...state,
 	currentUser: userData,
 });
@@ -47,38 +47,37 @@ export const updateUserSuccess = (state = INITIAL_STATE, { userData }): ICurrent
 	},
 });
 
-const setPendingState = (state = INITIAL_STATE, { pendingState }) => ({
+const setIsPending = (state = INITIAL_STATE, { pendingState }) => ({
 	...state,
 	isPending: pendingState,
 });
 
-export const currentUserReducer = createReducer(INITIAL_STATE, {
-	[CurrentUserTypes.GET_PROFILE_SUCCESS]: getProfileSuccess,
+export const currentUserReducer = createReducer<ICurrentUserState>(INITIAL_STATE, {
+	[CurrentUserTypes.FETCH_USER_SUCCESS]: fetchUserSuccess,
 	[CurrentUserTypes.UPDATE_USER_SUCCESS]: updateUserSuccess,
-	[CurrentUserTypes.SET_PENDING_STATE]: setPendingState,
+	[CurrentUserTypes.SET_IS_PENDING]: setIsPending,
 });
 
 /**
  * Types
 */
 
-interface ICurrentUserState {
+export interface ICurrentUserState {
 	currentUser: ICurrentUser;
 }
 
-export type GetProfileAction = Action<'GET_PROFILE'>;
-export type GetProfileSuccessAction = Action<'GET_PROFILE_SUCCESS'> & { userData: ICurrentUser };
-export type UpdateUserAction = Action<'UPDATE_USER'> & { userData: UpdateCurrentUser };
-export type UpdateUserSuccessAction = Action<'UPDATE_USER_SUCCESS'> & { userData: UpdateCurrentUser };
-export type UpdateApiKeySuccessAction = Action<'UPDATE_API_KEY_SUCCESS'>;
-export type SetPendingStateAction = Action<'SET_PENDING_STATE'>;
+export type FetchUserAction = Action<'FETCH_USER'>;
+export type FetchUserSuccessAction = Action<'FETCH_USER_SUCCESS'> & { userData: ICurrentUser };
+export type UpdateUserAction = Action<'UPDATE_USER'> & { userData: UpdateUser };
+export type UpdateUserSuccessAction = Action<'UPDATE_USER_SUCCESS'> & { userData: UpdateUser };
+export type SetIsPendingAction = Action<'SET_IS_PENDING'>;
 
 export interface ICurrentUserActionCreators {
-	getProfile: () => GetProfileAction;
-	getProfileSuccess: (userData: Object) => GetProfileSuccessAction;
+	fetchUser: () => FetchUserAction;
+	fetchUserSuccess: (userData: Object) => FetchUserSuccessAction;
 	updateUser: (userData: Object) => UpdateUserAction;
 	updateUserSuccess: (userData: Object) => UpdateUserSuccessAction;
-	setPendingState: (pendingState: boolean) => SetPendingStateAction;
-	generateApiKey: () => UpdateApiKeySuccessAction;
-	deleteApiKey: () => UpdateApiKeySuccessAction;
+	setIsPending: (isPending: boolean) => SetIsPendingAction;
+	generateApiKey: () => UpdateUserSuccessAction;
+	deleteApiKey: () => UpdateUserSuccessAction;
 }
