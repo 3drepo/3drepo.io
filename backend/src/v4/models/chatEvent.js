@@ -28,10 +28,26 @@ const eventTypes = Object.freeze({
 	DELETED : "Deleted"
 });
 
-function insertEventQueue(event, emitter, account, model, extraKeys, data) {
+async function insertEventQueue(event, emitter, account, model, extraKeys, data) {
+
+	let channel = `notifications::${account}`;
+	if(model) {
+		const { findOneProject } = require("./project");
+
+		const project = await findOneProject(account, { models: model }, {_id: 1});
+
+		if(!project) {
+			// models must be inside a project
+			return;
+		}
+
+		const projectId = utils.uuidToString(project._id);
+
+		channel = `${account}::${projectId}::${model}`;
+	}
+
 	model = !model ? "" : `::${model}`;
 	extraKeys =  !extraKeys ? [] : extraKeys;
-	const channel = account + model;
 	const extraPrefix = !(extraKeys || []).length ? "" : `::${extraKeys.join("::")}`;
 	event = `${account}${model}${extraPrefix}::${event}`;
 
@@ -45,22 +61,11 @@ function insertEventQueue(event, emitter, account, model, extraKeys, data) {
 	return Queue.insertEventMessage(msg);
 }
 
-function insertEventQueueDM(event, recipient, data) {
-	const msg = {
-		event,
-		recipient,
-		data,
-		dm: true
-	};
-
-	return Queue.insertEventMessage(msg);
-}
-
 // Notifications chat events
 function upsertedNotification(session, notification) {
 	const msg = {
 		event : notification.username + "::notificationUpserted",
-		channel : notification.username,
+		channel : `notifications::${notification.username}`,
 		emitter : session,
 		data : notification.notification
 	};
@@ -70,7 +75,7 @@ function upsertedNotification(session, notification) {
 const deletedNotification = function(session, notification) {
 	const msg = {
 		event : notification.username + "::notificationDeleted",
-		channel : notification.username,
+		channel : `notifications::${notification.username}`,
 		emitter : session,
 		data : {_id:notification.notification._id}
 	};
@@ -111,11 +116,6 @@ function commentDeleted(emitter, account, model, _id, data) {
 
 function modelStatusChanged(emitter, account, model, data) {
 	return insertEventQueue("modelStatusChanged", emitter, account, model, null, data);
-}
-
-// Remotely logged out
-function loggedOut(recipient) {
-	return insertEventQueueDM("loggedOut" , recipient, { reason: 0 });
 }
 
 // Not sure if this one is being used.
@@ -190,8 +190,10 @@ const subscribeToV5Events = () => {
 		newModel(null, teamspace, { _id: model });
 	});
 
-	EventsManager.subscribe(EventsV5.MODEL_IMPORT_UPDATE, async ({teamspace, model, status, user}) => {
-		modelStatusChanged(null, teamspace, model, {status, user: user || "unknown"});
+	EventsManager.subscribe(EventsV5.MODEL_SETTINGS_UPDATE, async ({teamspace, model, data: { status }}) => {
+		if(status && !["ok", "failed"].includes(status)) {
+			modelStatusChanged(null, teamspace, model, {status});
+		}
 	});
 
 	EventsManager.subscribe(EventsV5.MODEL_IMPORT_FINISHED, async ({teamspace, model, corId, success, user, userErr, errCode, message}) => {
@@ -208,9 +210,11 @@ const subscribeToV5Events = () => {
 		modelStatusChanged(null, teamspace, model, data);
 
 		if(success) {
-			const { tag } = await findLatest(teamspace, model, {tag: 1});
-			const notes = await notifications.upsertModelUpdatedNotifications(teamspace, model, tag || corId);
-			notes.forEach((note) => upsertedNotification(null, note));
+			const rev = await findLatest(teamspace, model, {tag: 1});
+			if(rev) {
+				const notes = await notifications.upsertModelUpdatedNotifications(teamspace, model, rev.tag || corId);
+				notes.forEach((note) => upsertedNotification(null, note));
+			}
 		}
 		if(message) {
 			const Mailer = require("../mailer/mailer");
@@ -246,8 +250,14 @@ const subscribeToV5Events = () => {
 
 	});
 
-	EventsManager.subscribe(EventsV5.SESSIONS_REMOVED, async ({ids}) => {
-		ids.forEach(loggedOut);
+	EventsManager.subscribe(EventsV5.SESSIONS_REMOVED, ({ ids }) => {
+		const msg = {
+			event: "message",
+			recipients: ids.map((sessionId) => `sessions::${sessionId}`),
+			data: { event: "loggedOut", reason: "You have logged in else where" }
+		};
+
+		return Queue.insertEventMessage(msg);
 	});
 
 };
@@ -273,7 +283,6 @@ module.exports = {
 	deletedNotification,
 	resourcesCreated,
 	resourceDeleted,
-	loggedOut,
 	streamPresentation,
 	endPresentation,
 	subscribeToV5Events

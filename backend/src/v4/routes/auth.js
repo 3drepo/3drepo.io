@@ -16,17 +16,22 @@
  */
 
 "use strict";
+const {v5Path} = require("../../interop");
 
 const express = require("express");
 const router = express.Router({mergeParams: true});
 const responseCodes = require("../response_codes.js");
 const C = require("../constants");
-const sessionCheck = require("../middlewares/sessionCheck");
 const middlewares = require("../middlewares/middlewares");
 const config = require("../config");
 const utils = require("../utils");
 const systemLogger = require("../logger.js").systemLogger;
 const User = require("../models/user");
+const UsersV5 = require(`${v5Path}/processors/users`);
+const { createSession, destroySession } = require(`${v5Path}/middleware/sessions`);
+const { validateLoginData} = require(`${v5Path}/middleware/dataConverter/inputs/users`);
+
+const { respond: respondV5} = require(`${v5Path}/utils/responder`);
 
 const Mailer = require("../mailer/mailer");
 const httpsPost = require("../libs/httpsReq").post;
@@ -34,8 +39,6 @@ const httpsPost = require("../libs/httpsReq").post;
 const FileType = require("file-type");
 
 const multer = require("multer");
-
-const { regenerateAuthSession } = require("../services/session");
 
 /**
  * @api {post} /login Login
@@ -68,7 +71,7 @@ const { regenerateAuthSession } = require("../services/session");
  * 	"username": "alice"
  * }
  */
-router.post("/login", login);
+router.post("/login", middlewares.formatV5LogInData, validateLoginData, login, middlewares.flagAsV4Request, createSession);
 
 /**
  * @api {post} /logout Logout
@@ -89,7 +92,7 @@ router.post("/login", login);
  * }
  *
  */
-router.post("/logout", logout);
+router.post("/logout", middlewares.loggedIn, middlewares.flagAsV4Request, destroySession);
 
 /**
  * @api {get} /login Get current username
@@ -548,55 +551,20 @@ router.put("/:account", middlewares.isAccountAdmin, updateUser);
  */
 router.put("/:account/password", resetPassword);
 
-function createSession(place, req, res, next, user) {
-	req.body.username = user.username;
-
-	regenerateAuthSession(req, user).then(()=>{
-		responseCodes.respond(place, req, res, next, responseCodes.OK, user);
-	}).catch((err) => {
-		responseCodes.respond(place, responseCodes.EXTERNAL_ERROR(err), res, {username: user.username});
-	});
-}
-
 function login(req, res, next) {
-	const responsePlace = utils.APIInfo(req);
-
-	const { username, password} = req.body;
-	if (utils.isString(username) && utils.isString(password)) {
-		systemLogger.logInfo(`Authenticating ${username}...`);
-
-		if(sessionCheck(req)) {
-			return responseCodes.respond(responsePlace, req, res, next, responseCodes.ALREADY_LOGGED_IN, responseCodes.ALREADY_LOGGED_IN);
-		}
-
-		User.authenticate(username, password).then(user => {
-			createSession(responsePlace, req, res, next, user);
-		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || err, err.resCode || err);
-		});
-	} else {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
+	if(req?.session?.user?.username) {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.ALREADY_LOGGED_IN, responseCodes.ALREADY_LOGGED_IN);
 	}
 
+	const { user, password } = req.body;
+	UsersV5.login(user, password).then((loginData) => {
+		req.loginData = loginData;
+		next();
+	}).catch((err) => respondV5(req, res, err));
 }
 
 function checkLogin(req, res, next) {
 	responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, {username: req.session.user.username});
-}
-
-function logout(req, res, next) {
-	const responsePlace = utils.APIInfo(req);
-	if(!sessionCheck(req)) {
-		return responseCodes.respond(responsePlace, req, res, next, responseCodes.NOT_LOGGED_IN, {});
-	}
-
-	const username = req.session.user.username;
-
-	req.session.destroy(function() {
-		systemLogger.logDebug("User has logged out.");
-		res.clearCookie("connect.sid", { domain: config.cookie_domain, path: "/" });
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {username: username});
-	});
 }
 
 function updateUser(req, res, next) {
