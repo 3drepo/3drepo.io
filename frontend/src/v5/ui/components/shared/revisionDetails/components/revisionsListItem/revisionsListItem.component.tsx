@@ -26,7 +26,10 @@ import { IRevision } from '@/v5/store/revisions/revisions.types';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
 import { Display } from '@/v5/ui/themes/media';
 import { formatDate } from '@/v5/services/intl';
-import { Container } from './revisionsListItem.styles';
+import { FormattedMessage } from 'react-intl';
+import { Tooltip } from '@mui/material';
+import { getRevisionFileUrl } from '@/v5/services/api/revisions';
+import { Container, DownloadButton, DownloadIcon } from './revisionsListItem.styles';
 
 type IRevisionsListItem = {
 	revision: IRevision;
@@ -62,6 +65,20 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 				{desc}
 			</RevisionsListItemText>
 			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} />
+			<Tooltip
+				title={(
+					<FormattedMessage
+						id="revisionDetails.list.item.download.tooltip"
+						defaultMessage="Download revision"
+					/>
+				)}
+			>
+				<a href={getRevisionFileUrl(teamspace, project, containerId, revision._id)}>
+					<DownloadButton>
+						<DownloadIcon />
+					</DownloadButton>
+				</a>
+			</Tooltip>
 		</Container>
 	);
 };
