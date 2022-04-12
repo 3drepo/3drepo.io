@@ -21,7 +21,7 @@ import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
 import { generateV5ApiUrl } from '@/v5/services/api/default';
 import { clientConfigService } from '@/v4/services/clientConfig';
-import { CardList } from './teamspaceList.styles';
+import { CardList, DummyCard } from './teamspaceList.styles';
 
 export const TeamspaceList = (): JSX.Element => {
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
@@ -41,6 +41,10 @@ export const TeamspaceList = (): JSX.Element => {
 							))
 						}
 						<AddTeamspaceCard variant="secondary" />
+						<DummyCard />
+						<DummyCard />
+						<DummyCard />
+						<DummyCard />
 					</>
 				) : (
 					<FormattedMessage

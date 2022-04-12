@@ -22,11 +22,12 @@ import { CardHeading, CardSubheading, Container, Content, ListItem, TeamspaceIma
 
 interface ITeamspaceCard {
 	variant?: 'primary' | 'secondary',
-	teamspaceName: string;
+	teamspaceName?: string;
 	imageURL?: string;
+	className?: string;
 }
 
-export const TeamspaceCard = ({ variant = 'primary', teamspaceName, imageURL }: ITeamspaceCard): JSX.Element => {
+export const TeamspaceCard = ({ variant = 'primary', teamspaceName, imageURL, className }: ITeamspaceCard): JSX.Element => {
 	const username = CurrentUserHooksSelectors.selectUsername();
 	const isPersonalTeamspace = teamspaceName === username;
 	const { url } = useRouteMatch();
@@ -34,7 +35,7 @@ export const TeamspaceCard = ({ variant = 'primary', teamspaceName, imageURL }: 
 	return (
 		<ListItem>
 			<Link to={to}>
-				<Container $variant={variant}>
+				<Container $variant={variant} className={className}>
 					{
 						isPersonalTeamspace
 							? (

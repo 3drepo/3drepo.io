@@ -44,6 +44,7 @@ export const Container = styled(Card)<{ $variant: string; }>`
 	flex-flow: column;
 	align-items: center;
 	justify-content: center;
+	cursor: pointer;
 `;
 
 export const AddTeamspaceIcon = styled(AddCircleIcon)`
