@@ -23,6 +23,7 @@ export const BackgroundOverlay = styled(LoginBackground)`
 	width: 1585px;
 	height: 1040px;
 	max-width: 100vw;
+	max-height: 100vh;
 	position: absolute;
 	z-index: 0;
 	margin: auto;
@@ -33,7 +34,7 @@ export const BackgroundOverlay = styled(LoginBackground)`
 
 export const Background = styled.div<{ backgroundSrc?: string }>`
 	display: flex;
-	height: 100%;
+	height: 100vh;
 	background: ${({ theme }) => theme.palette.gradient.secondary};
 	align-items: center;
 	justify-content: center;

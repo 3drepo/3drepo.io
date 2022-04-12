@@ -182,7 +182,7 @@ export const UserSignupSchemaAccount = (
 			[Yup.ref('password'), null],
 			formatMessage({
 				id: 'userRegistration.confirmPassword.error.notMatch',
-				defaultMessage: 'Passwords must match',
+				defaultMessage: 'Password confirmation doesn\'t match the password',
 			}),
 		),
 });

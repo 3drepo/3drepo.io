@@ -31,11 +31,16 @@ import { IntlProvider } from 'react-intl';
 import { Dashboard } from './dashboard';
 import { V4Adapter } from '../v4Adapter/v4Adapter';
 import { UserSignup } from './userSignup/userSignup.component';
-import { UserSignupVerification } from './userSignup/userSignupVerification/userSignupVerification.component';
+import { UserVerification } from './userVerification/userVerification.component';
 
 export const Root = () => {
 	const history = useHistory();
 	const isAuthenticated: boolean | null = AuthHooksSelectors.selectIsAuthenticated();
+
+	const isRegistrationRoute = () => {
+		const registrationRoutes = ['v5/signup', 'v5/register-verify'];
+		return registrationRoutes.some((route) => history.location.pathname.endsWith(route));
+	};
 
 	useEffect(() => {
 		AuthActionsDispatchers.authenticate();
@@ -46,7 +51,10 @@ export const Root = () => {
 			TeamspacesActionsDispatchers.fetch();
 		}
 
-		if (!isNull(isAuthenticated) && !isAuthenticated && history.location.pathname.startsWith('/v5/signup')) {
+		if (!isNull(isAuthenticated)
+			&& !isAuthenticated
+			&& !isRegistrationRoute()
+		) {
 			history.push('/v5/login');
 		}
 	}, [isAuthenticated]);
@@ -58,8 +66,8 @@ export const Root = () => {
 					<IntlProvider {...getIntlProviderProps()}>
 						<V4Adapter>
 							<Switch>
-								<Route path="/v5/verification" component={UserSignupVerification} />
 								<Route path="/v5/signup" component={UserSignup} />
+								<Route path="/v5/register-verify" component={UserVerification} />
 								<Route component={Dashboard} />
 							</Switch>
 						</V4Adapter>

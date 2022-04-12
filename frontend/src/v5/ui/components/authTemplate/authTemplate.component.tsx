@@ -18,14 +18,14 @@
 import { formatMessage } from '@/v5/services/intl';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
 import { useRouteMatch, Redirect } from 'react-router-dom';
-import { Background, Container, Footer, Logo, BackgroundOverlay } from './authPage.styles';
+import { Background, Container, Footer, Logo, BackgroundOverlay } from './authTemplate.styles';
 
-interface IAuthPage {
+interface IAuthTemplate {
 	footer?: JSX.Element;
-	children: JSX.Element;
+	children: JSX.Element | JSX.Element[];
 }
 
-export const AuthPage = ({ footer, children }: IAuthPage): JSX.Element => {
+export const AuthTemplate = ({ footer, children }: IAuthTemplate): JSX.Element => {
 	const { url } = useRouteMatch();
 	if (AuthHooksSelectors.selectIsAuthenticated()) {
 		return (<Redirect to={{ pathname: '/v5/dashboard', state: { referrer: url } }} />);
