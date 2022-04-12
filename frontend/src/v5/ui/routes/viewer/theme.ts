@@ -17,23 +17,23 @@
 
 import { createTheme } from '@mui/material/styles';
 import { theme as oldTheme } from '@/v5/ui/themes/theme';
+import _ from 'lodash';
 
-export const theme = createTheme({
-	components: {
-		...oldTheme.components,
-		MuiInput: {
-			...oldTheme.components.MuiInput,
-
-			styleOverrides: {
-				...oldTheme.components.MuiInput.styleOverrides,
-				formControl: {
-					...(oldTheme.components.MuiInput.styleOverrides.formControl as object),
-					'& svg': {
-						...oldTheme.components.MuiInput.styleOverrides['& svg'],
-						top: 13,
+export const theme = createTheme(
+	_.merge(
+		oldTheme,
+		{
+			components: {
+				MuiInput: {
+					styleOverrides: {
+						formControl: {
+							'& svg': {
+								top: 13,
+							},
+						},
 					},
 				},
 			},
 		},
-	},
-});
+	),
+);
