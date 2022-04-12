@@ -16,15 +16,10 @@
  */
 
 import { Card } from '@mui/material';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 
 export const Container = styled(Card)<{ $variant: string; }>`
-	border-color: ${({ $variant, theme }) => {
-		if ($variant === 'primary') return theme.palette.tertiary.lightest;
-		if ($variant === 'secondary') return theme.palette.secondary.mid;
-		return '';
-	}};
 	color: ${({ theme }) => theme.palette.primary.main};
 	${({ theme }) => theme.typography.h3};
 	border-style: dashed;
@@ -37,6 +32,15 @@ export const Container = styled(Card)<{ $variant: string; }>`
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
+	${({ $variant }) => {
+		if ($variant === 'secondary') {
+			return css`
+				background-color: rgb(255 255 255 / 5%);
+				border: none;
+			`;
+		}
+		return '';
+	}};
 `;
 
 export const AddTeamspaceIcon = styled(AddCircleIcon)`

@@ -21,12 +21,21 @@ import { Card, CardContent } from '@mui/material';
 import styled, { css } from 'styled-components';
 
 export const ListItem = styled.li`
-	margin: 10px;
 	list-style-type: none;
 	float: left;
+	margin: 10px;
+	transition: margin 0.1s;
+	:hover {
+		transition: margin 0.1s;
+		.MuiCard-root {
+			margin-top: -5px;
+			box-shadow: ${({ theme }) => theme.palette.shadows.level_6};
+		}
+	}
 `;
 
 export const Link = styled(DecoratedLink)`
+	display: block;
 	text-decoration: none;
 `;
 
@@ -40,7 +49,7 @@ export const Container = styled(Card)<{ $variant: string; }>`
 		}
 		if ($variant === 'secondary') {
 			return css`
-				background-color: ${theme.palette.secondary.mid};
+				background-color: rgb(255 255 255 / 5%);
 				h5 { color: ${theme.palette.primary.contrast};}
 			`;
 		}
