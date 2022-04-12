@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { DetailedHTMLProps, FormHTMLAttributes } from 'react';
-import { Button, Dialog } from '@material-ui/core';
+import { Button, Dialog } from '@mui/material';
 import CloseIcon from '@assets/icons/close.svg';
-import { DialogProps } from '@material-ui/core/Dialog';
+import { DialogProps } from '@mui/material/Dialog';
+import { ScrollArea } from '@controls/scrollArea';
 import {
 	Form,
 	Title,
@@ -28,7 +29,7 @@ import {
 	RemoveWhiteCorners,
 } from './formDialog.styles';
 
-interface IFormModal extends DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement> {
+interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
 	onClickClose?: () => void;
 	title?: string;
 	open?: boolean;
@@ -71,9 +72,11 @@ export const FormModal = (props: IFormModal) => {
 						<CloseIcon />
 					</CloseButton>
 				</Header>
-				<FormDialogContent zeroMargin={zeroMargin}>
-					{children}
-				</FormDialogContent>
+				<ScrollArea variant="base" autoHeightMax="70vh" autoHeight>
+					<FormDialogContent zeroMargin={zeroMargin}>
+						{children}
+					</FormDialogContent>
+				</ScrollArea>
 				{showButtons && (
 					<FormDialogActions>
 						<Button autoFocus onClick={onClickClose} variant="outlined" color="secondary" size="medium">

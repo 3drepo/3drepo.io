@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import MuiButtonBase from '@material-ui/core/Button';
+import MuiButtonBase from '@mui/material/Button';
 import styled, { css } from 'styled-components';
 
 export const MuiButton = styled(MuiButtonBase)`
@@ -102,7 +102,7 @@ export const labelOutlinedButtonSecondaryStyles = css`
 	}
 `;
 
-export const LabelButton = styled(MuiButton)`
+export const LabelButton = styled(MuiButton)<{ color?: string, outlined?: any }>`
 	align-items: center;
 	padding: 8px 12px 8px 15px;
 

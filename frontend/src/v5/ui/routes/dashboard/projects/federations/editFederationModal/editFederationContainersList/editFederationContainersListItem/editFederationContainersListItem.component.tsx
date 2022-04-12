@@ -57,10 +57,7 @@ export const EditFederationContainersListItem = ({
 				selected={isSelected}
 				onClick={() => onSelectOrToggleItem(container._id)}
 			>
-				<DashboardListItemIcon
-					width={46}
-					minWidth={46}
-				>
+				<DashboardListItemIcon>
 					<Icon />
 				</DashboardListItemIcon>
 				<DashboardListItemTitle
@@ -123,7 +120,7 @@ export const EditFederationContainersListItem = ({
 			{isSelected && (
 				<RevisionDetails
 					containerId={container._id}
-					revisionsCount={container.revisionsCount || 1}
+					revisionsCount={container.revisionsCount}
 				/>
 			)}
 		</DashboardListItem>

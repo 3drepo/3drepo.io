@@ -17,7 +17,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { InputAdornment } from '@material-ui/core';
+import { InputAdornment } from '@mui/material';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { formatMessage } from '@/v5/services/intl';
 import {
@@ -30,8 +30,16 @@ import {
 } from './shareTextField.styles';
 
 type IShareTextField = {
+	/**
+	 * The label on top of the control
+	 */
 	label: string,
+
+	/**
+	 * the value to be copied
+	 */
 	value: string,
+
 	className?: string,
 };
 

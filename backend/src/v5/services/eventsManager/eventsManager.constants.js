@@ -21,13 +21,17 @@ const eventList = [
 	// Groups
 	'NEW_GROUPS', 'UPDATE_GROUP',
 	// Model settngs
-	'NEW_MODEL', 'DELETE_MODEL',
+	'NEW_MODEL', 'DELETE_MODEL', 'MODEL_SETTINGS_UPDATE',
 	// Model import (including federation and toy project)
-	'MODEL_IMPORT_UPDATE', 'MODEL_IMPORT_FINISHED',
+	'MODEL_IMPORT_FINISHED',
 	// Queue specific
 	'QUEUED_TASK_UPDATE', 'QUEUED_TASK_COMPLETED',
+	// Socket IO events
+	'CHAT_EVENT',
 	// Authentication
 	'FAILED_LOGIN_ATTEMPT', 'LOGIN_RECORD_CREATED', 'SESSION_CREATED', 'SESSIONS_REMOVED',
+	// User related
+	'USER_VERIFIED',
 ];
 
 const generateEventsMap = () => {

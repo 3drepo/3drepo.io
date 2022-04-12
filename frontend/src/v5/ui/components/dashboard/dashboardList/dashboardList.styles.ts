@@ -16,9 +16,10 @@
  */
 
 import styled from 'styled-components';
-import { Divider as DividerComponent } from '@material-ui/core';
+import { Divider as DividerComponent } from '@mui/material';
 import { Button } from '@controls/button';
 import { Typography } from '@controls/typography';
+import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
 
 export const ListContainer = styled.ul`
 	display: flex;
@@ -28,13 +29,11 @@ export const ListContainer = styled.ul`
 	padding: 0;
 `;
 
-export const DashboardListEmptyContainer = styled.div`
+export const DashboardListEmptyContainer = styled(DashedContainer)`
 	display: flex;
 	align-items: center;
 	height: 80px;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	border: 1px dashed ${({ theme }) => theme.palette.base.light};
-	border-radius: 5px;
 	padding-left: 30px;
 `;
 
@@ -56,12 +55,20 @@ export const DashboardListButton = styled(Button).attrs({
 })`
 	${({ theme }) => theme.typography.h3}
 	width: 100%;
-	margin: 18px 0 0;
+	margin: 0;
+	border: 0;
 	height: 80px;
-	border: 1px dashed ${({ theme }) => theme.palette.primary.main};
 
 	svg {
 		width: 34px;
 		height: 34px;
 	}
+`;
+
+export const DashedButtonContainer = styled(DashedContainer).attrs(({ theme }) => ({
+	strokeColor: theme.palette.primary.main,
+	zeroPadding: true,
+}))<{ strokeColor: string }>`
+	margin-top: 18px;
+	background-color: transparent;
 `;

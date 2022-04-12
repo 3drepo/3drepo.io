@@ -22,8 +22,9 @@ import { Button } from '@controls/button';
 import { formatMessage } from '@/v5/services/intl';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
-import { Tooltip } from '@material-ui/core';
+import { Tooltip } from '@mui/material';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
+import { filterContainers } from '@/v5/store/containers/containers.helpers';
 import { useParams } from 'react-router-dom';
 import { isEmpty } from 'lodash';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
@@ -56,14 +57,30 @@ export const EditFederationModal = ({
 		);
 	}, [containers]);
 
+	const partitionContainersByQuery = (
+		containersToPartition: IContainer[],
+		query: string,
+	) : [IContainer[], IContainer[]] => {
+		const filteredInContainer = filterContainers(containersToPartition, query);
+		const filteredInContainerIds = filteredInContainer.map((container) => container._id);
+		const filteredOutContainer = containersToPartition.filter(
+			(container) => !filteredInContainerIds.includes(container._id),
+		);
+		return [filteredInContainer, filteredOutContainer];
+	};
+
 	const includeContainer = (container: IContainer) => {
 		setIncludedContainers([...includedContainers, container]);
 		setAvailableContainers(availableContainers.filter(({ _id }) => _id !== container._id));
 	};
 
-	const includeAllContainers = () => {
-		setIncludedContainers(containers);
-		setAvailableContainers([]);
+	const includeAllContainers = (filterQuery: string = '') => {
+		const [
+			containersToInclude,
+			availableContainersLeft,
+		] = partitionContainersByQuery(availableContainers, filterQuery);
+		setIncludedContainers([...includedContainers, ...containersToInclude]);
+		setAvailableContainers(availableContainersLeft);
 	};
 
 	const removeContainer = (container: IContainer) => {
@@ -71,9 +88,13 @@ export const EditFederationModal = ({
 		setIncludedContainers(includedContainers.filter(({ _id }) => _id !== container._id));
 	};
 
-	const removeAllContainers = () => {
-		setIncludedContainers([]);
-		setAvailableContainers(containers);
+	const removeAllContainers = (filterQuery: string = '') => {
+		const [
+			containersToRemove,
+			includedContainersLeft,
+		] = partitionContainersByQuery(includedContainers, filterQuery);
+		setAvailableContainers([...availableContainers, ...containersToRemove]);
+		setIncludedContainers(includedContainersLeft);
 	};
 
 	const saveChanges = (event: SyntheticEvent) => {
@@ -90,10 +111,12 @@ export const EditFederationModal = ({
 	return (
 		<FormModal
 			open={openState}
-			title={formatMessage({
-				id: 'modal.editFederation.title',
-				defaultMessage: 'Edit {federationName}',
-			}, { federationName: federation.name })}
+			title={
+				formatMessage({
+					id: 'modal.editFederation.title',
+					defaultMessage: 'Edit {federationName}',
+				}, { federationName: federation.name })
+			}
 			confirmLabel={formatMessage({ id: 'modal.editFederation.confirm', defaultMessage: 'Save Changes' })}
 			onClickClose={onClickClose}
 			onSubmit={saveChanges}
@@ -122,10 +145,10 @@ export const EditFederationModal = ({
 						/>
 					</DashboardListEmptyText>
 				)}
-				actionButton={({ children, disabled }: ActionButtonProps) => (
+				actionButton={({ children, disabled, filterQuery }: ActionButtonProps) => (
 					<Button
 						errorButton
-						onClick={removeAllContainers}
+						onClick={() => removeAllContainers(filterQuery)}
 						disabled={disabled}
 					>
 						{children}
@@ -174,11 +197,11 @@ export const EditFederationModal = ({
 						/>
 					</DashboardListEmptyText>
 				)}
-				actionButton={({ children, disabled }) => (
+				actionButton={({ children, disabled, filterQuery }) => (
 					<Button
 						variant="outlined"
 						color="primary"
-						onClick={includeAllContainers}
+						onClick={() => includeAllContainers(filterQuery)}
 						disabled={disabled}
 					>
 						{children}

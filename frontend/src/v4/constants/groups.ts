@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Download from '@material-ui/icons/CloudDownload';
-import Upload from '@material-ui/icons/CloudUpload';
-import Delete from '@material-ui/icons/Delete';
-import InvertColors from '@material-ui/icons/InvertColors';
-import OfflineBolt from '@material-ui/icons/OfflineBolt';
-import PanTool from '@material-ui/icons/PanTool';
+import Download from '@mui/icons-material/CloudDownload';
+import Upload from '@mui/icons-material/CloudUpload';
+import Delete from '@mui/icons-material/Delete';
+import InvertColors from '@mui/icons-material/InvertColors';
+import OfflineBolt from '@mui/icons-material/OfflineBolt';
+import PanTool from '@mui/icons-material/PanTool';
 
 import { capitalize } from 'lodash';
 

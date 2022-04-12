@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import IconButton from '@material-ui/core/IconButton';
+import IconButton from '@mui/material/IconButton';
 import styled from 'styled-components';
 
 export const StyledIconButton = styled(IconButton)`` as any;

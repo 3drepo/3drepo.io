@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useState, useRef, useEffect, CSSProperties } from 'react';
+import { useState, useRef, useEffect, CSSProperties, MutableRefObject } from 'react';
 import Konva from 'konva';
 
 import { isEmpty } from 'lodash';
@@ -98,7 +98,7 @@ export const EditableText = ({
 	return (
 		<>
 			<Textarea
-				ref={textareaRef}
+				ref={textareaRef as MutableRefObject<HTMLTextAreaElement>}
 				id={EDITABLE_TEXTAREA_NAME}
 				name={EDITABLE_TEXTAREA_NAME}
 				placeholder={EDITABLE_TEXTAREA_PLACEHOLDER}

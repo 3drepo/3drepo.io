@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled, { css } from 'styled-components';
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 
 export const Text = styled(Typography).attrs({
 	variant: 'body1',
-})`
+})<{ selected?: boolean }>`
 	color: ${({ theme }) => theme.palette.base.main};
 	overflow: hidden;
 	text-overflow: ellipsis;

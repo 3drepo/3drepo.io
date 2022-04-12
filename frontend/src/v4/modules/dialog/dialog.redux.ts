@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DialogProps as IDialogProps } from '@material-ui/core/Dialog';
+import { DialogProps as IDialogProps } from '@mui/material/Dialog';
 import { push } from 'connected-react-router';
 import { get, omit } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';

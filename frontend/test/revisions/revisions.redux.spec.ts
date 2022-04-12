@@ -17,10 +17,10 @@
 
 import {
 	INITIAL_STATE,
-	reducer as revisionsReducer,
+	revisionsReducer,
 	RevisionsActions,
+	IRevisionsState,
 } from '@/v5/store/revisions/revisions.redux';
-import { IRevisionsState } from '@/v5/store/revisions/revisions.types';
 import { times } from 'lodash';
 import { revisionsMockFactory } from './revisions.fixtures';
 

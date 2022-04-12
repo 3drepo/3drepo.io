@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 import { Button } from '@controls/button';
-import { Link } from '@material-ui/core';
+import { Link } from '@mui/material';
 
 export const AvatarContainer = styled.div`
 	&& {

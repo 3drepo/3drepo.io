@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent, SyntheticEvent } from 'react';
-import Badge from '@material-ui/core/Badge';
-import Drawer from '@material-ui/core/Drawer';
-import IconButton from '@material-ui/core/IconButton';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import Typography from '@material-ui/core/Typography';
-import Close from '@material-ui/icons/Close';
-import MoreVert from '@material-ui/icons/MoreVert';
+import Badge from '@mui/material/Badge';
+import Drawer from '@mui/material/Drawer';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import Typography from '@mui/material/Typography';
+import Close from '@mui/icons-material/Close';
+import MoreVert from '@mui/icons-material/MoreVert';
 
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { simpleDate } from '../../../services/formatting/formatDate';
@@ -60,7 +60,13 @@ interface IProps {
 }
 
 const NotificationButton = ({ unreadCount, onClick, id }) => (
-	<IconButton onClick={onClick} aria-label="Show notifications" aria-haspopup="true" id={id}>
+	<IconButton
+        onClick={onClick}
+        aria-label="Show notifications"
+        aria-haspopup="true"
+        id={id}
+        size="large"
+	>
 		<Badge
 			badgeContent={unreadCount}
 			color={unreadCount > 0 ? 'primary' : 'secondary'}

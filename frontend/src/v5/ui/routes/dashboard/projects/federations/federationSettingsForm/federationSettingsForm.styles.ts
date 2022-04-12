@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import { ShareTextField as ShareTextFieldBase } from '@controls/shareTextField';
 
 export const SectionTitle = styled(Typography).attrs({

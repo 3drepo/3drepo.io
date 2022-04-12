@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 const UserConstants = {};
 UserConstants.USERNAME_BLACKLIST = [
 	'payment',
@@ -37,6 +36,7 @@ UserConstants.USERNAME_BLACKLIST = [
 	'root',
 	'notifications',
 	'loginRecord',
+	'sessions',
 ];
 
 module.exports = UserConstants;

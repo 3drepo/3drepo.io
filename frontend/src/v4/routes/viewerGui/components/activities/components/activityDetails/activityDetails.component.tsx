@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Grid from '@material-ui/core/Grid';
+import Grid from '@mui/material/Grid';
 import { map, isString } from 'lodash';
 
 import { formatShortDateTime } from "../../../../../../services/formatting/formatDate";
@@ -67,7 +67,7 @@ export const ActivityDetails = ({ isPending, activityDetails, setSelectedDate }:
 		<Container container direction="row" alignItems="center">
 			{activityDetails.data.map(({value, key}) => (
 				<Grid key={key} item xs={12} >
-					<Row container justify="center">
+					<Row container justifyContent="center">
 						<Grid item xs={6}>{key}</Grid>
 						{renderValue(key, value, setSelectedDate)}
 					</Row>

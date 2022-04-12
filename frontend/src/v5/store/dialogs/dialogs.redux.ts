@@ -20,21 +20,6 @@ import uuid from 'uuidv4';
 
 import { Constants } from '../../helpers/actions.helper';
 
-interface IDialogActions {
-	open: (type?: string, props?: any) => any;
-	close: (id: string) => any;
-}
-
-export interface IDialogConfig {
-	id: string;
-	modalType?: 'error' | 'info' | 'alert';
-	props: any;
-}
-
-export interface IDialogState {
-	dialogs: IDialogConfig[];
-}
-
 export const INITIAL_STATE: IDialogState = {
 	dialogs: [],
 };
@@ -60,7 +45,25 @@ export const closeHandler = (state = INITIAL_STATE, { dialogId }): IDialogState 
 	return { ...state, dialogs };
 };
 
-export const reducer = createReducer(INITIAL_STATE, {
+export const dialogsReducer = createReducer(INITIAL_STATE, {
 	[DialogsTypes.OPEN]: openHandler,
 	[DialogsTypes.CLOSE]: closeHandler,
 });
+
+/**
+ * Types
+ */
+interface IDialogActions {
+	open: (type?: string, props?: any) => any;
+	close: (id: string) => any;
+}
+
+export interface IDialogConfig {
+	id: string;
+	modalType?: 'error' | 'info' | 'alert';
+	props: any;
+}
+
+export interface IDialogState {
+	dialogs: IDialogConfig[];
+}

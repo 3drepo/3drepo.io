@@ -18,8 +18,8 @@
 import { PureComponent } from 'react';
 import ReactDOM from 'react-dom';
 
-import Tooltip from '@material-ui/core/Tooltip';
-import Add from '@material-ui/icons/Add';
+import Tooltip from '@mui/material/Tooltip';
+import Add from '@mui/icons-material/Add';
 
 import { Container, FloatingButton, FloatingButtonContainer, Panel } from './floatingActionPanel.styles';
 

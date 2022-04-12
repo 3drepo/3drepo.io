@@ -18,7 +18,7 @@ import { FunctionComponent } from 'react';
 import { Content, StyledDivider, Wrapper } from './dividerWithText.styles';
 
 interface IProps {
-	className: string;
+	className?: string;
 }
 
 export const DividerWithText: FunctionComponent<IProps> = ({ children, className }) => {

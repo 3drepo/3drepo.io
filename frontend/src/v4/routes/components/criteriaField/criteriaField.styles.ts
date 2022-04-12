@@ -23,8 +23,8 @@ import {
 	List as ListComponent,
 	ListSubheader,
 	MenuItem as MenuItemComponent
-} from '@material-ui/core';
-import MoreIcon from '@material-ui/icons/MoreVert';
+} from '@mui/material';
+import MoreIcon from '@mui/icons-material/MoreVert';
 import styled, { css } from 'styled-components';
 
 import { hexToRgba } from '../../../helpers/colors';
