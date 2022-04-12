@@ -137,7 +137,8 @@ Scene.getMeshInfo = async (account, model, branch, rev, user) => {
 				nVertices: vertices_count || 0,
 				nFaces: faces_count || 0,
 				nUVChannels: uv_channels_count || 0,
-				boundingBox: bounding_box
+				min: bounding_box[0],
+				max: bounding_box[1]
 			}))
 		};
 
