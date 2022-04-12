@@ -90,7 +90,6 @@ export type SetRevisionVoidStatusSuccessAction = Action<'SET_REVISION_VOID_STATU
 export type FetchAction = Action<'FETCH'> & TeamspaceProjectAndContainerId;
 export type FetchSuccessAction = Action<'FETCH_SUCCESS'> & ContainerId & { revisions: IRevision[] };
 export type SetIsPendingAction = Action<'SET_IS_PENDING'> & ContainerId & { isPending: boolean };
-export type DownloadAction = Action<'DOWNLOAD'> & TeamspaceProjectAndContainerId & { revisionId: string };
 
 export interface IRevisionsActionCreators {
 	setVoidStatus: (teamspace: string, projectId: string, containerId: string, revisionId: string, isVoid: boolean) =>
@@ -100,5 +99,4 @@ export interface IRevisionsActionCreators {
 	fetch: (teamspace: string, projectId: string, containerId: string) => FetchAction;
 	fetchSuccess: (containerId: string, revisions: IRevision[]) => FetchSuccessAction;
 	setIsPending: (containerId: string, isPending: boolean) => SetIsPendingAction;
-	download: (teamspace: string, projectId: string, containerId: string, revisionId: string) => DownloadAction;
 }

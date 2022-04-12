@@ -15,12 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeEvery, takeLatest } from 'redux-saga/effects';
+import { put, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
-import { FetchAction, RevisionsActions, RevisionsTypes, SetRevisionVoidStatusAction, DownloadAction } from './revisions.redux';
-import { downloadRevision } from './revisions.helper';
+import { FetchAction, RevisionsActions, RevisionsTypes, SetRevisionVoidStatusAction } from './revisions.redux';
 
 export function* fetch({ teamspace, projectId, containerId }: FetchAction) {
 	yield put(RevisionsActions.setIsPending(containerId, true));
@@ -49,20 +48,7 @@ export function* setVoidStatus({ teamspace, projectId, containerId, revisionId, 
 	}
 }
 
-export function* download({ teamspace, projectId, containerId, revisionId }: DownloadAction) {
-	try {
-		const url = API.Revisions.getRevisionFileUrl(teamspace, projectId, containerId, revisionId);
-		downloadRevision(url);
-	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'revisions.download.error', defaultMessage: 'trying to download revision file' }),
-			error,
-		}));
-	}
-}
-
 export default function* RevisionsSaga() {
 	yield takeLatest(RevisionsTypes.FETCH, fetch);
 	yield takeLatest(RevisionsTypes.SET_VOID_STATUS, setVoidStatus);
-	yield takeEvery(RevisionsTypes.DOWNLOAD, download);
 }
