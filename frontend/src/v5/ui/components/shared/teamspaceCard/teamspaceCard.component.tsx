@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { uriCombine } from '@/v5/services/routing/routing';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { FormattedMessage } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
@@ -31,7 +32,7 @@ export const TeamspaceCard = ({ variant = 'primary', teamspaceName, imageURL, cl
 	const username = CurrentUserHooksSelectors.selectUsername();
 	const isPersonalTeamspace = teamspaceName === username;
 	const { url } = useRouteMatch();
-	const to = [url, teamspaceName].join('');
+	const to = uriCombine(url, teamspaceName || '');
 	return (
 		<ListItem>
 			<Link to={to}>
