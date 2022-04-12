@@ -27,6 +27,7 @@ const C = require("../constants");
 const ModelHelpers = require("../models/helper/model");
 const TextureHelpers = require("../models/helper/texture");
 const UnityAssets = require("../models/unityAssets");
+const Scene = require("../models/scene");
 const SrcAssets = require("../models/srcAssets");
 const JSONAssets = require("../models/jsonAssets");
 const Upload = require("../models/upload");
@@ -328,6 +329,72 @@ router.get("/:model/revision/master/head/unityAssets.json", middlewares.hasReadA
  */
 
 router.get("/:model/revision/:rev/unityAssets.json", middlewares.hasReadAccessToModel, getUnityAssets);
+
+/**
+ * @api {get} /:teamspace/:model/revision/master/head/unityAssets.json Get unity assets
+ * @apiName getUnityAssets
+ * @apiGroup Model
+ * @apiDescription Get the lastest model's version unity assets
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model The model Id to get unity assets for.
+ *
+ * @apiExample {get} Example usage:
+ * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/unityAssets.json HTTP/1.1
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model The model Id
+ * @apiParam {String} rev The revision of the model
+ *
+ * @apiExample {get} Example usage:
+ * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/assetsMeta HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success:
+ * {
+ *     superMeshes: [
+ *          {
+ *               _id: "<uuid string>",
+ *              nVertices: 123,
+ *              nFaces: 123,
+ *              nUVChannels: 123,
+ *              boundingBox: [[1, 2, 3], [3,4, 5]]
+ *          },
+ *     ]
+ * }
+ *
+ */
+
+router.get("/:model/revision/master/head/assetsMeta", middlewares.hasReadAccessToModel, getAssetsMeta);
+
+/**
+ * @api {get} /:teamspace/:model/revision/:rev/assetsMeta Get revision's metadata about the assets generated
+ * @apiName getRevUnityAssets
+ * @apiGroup Model
+ * @apiDescription Get the model's assets metadata of a particular revision
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model The model Id
+ * @apiParam {String} rev The revision of the model
+ *
+ * @apiExample {get} Example usage:
+ * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/assetsMeta HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success:
+ * {
+ *     superMeshes: [
+ *          {
+ *               _id: "<uuid string>",
+ *              nVertices: 123,
+ *              nFaces: 123,
+ *              nUVChannels: 123,
+ *              boundingBox: [[1, 2, 3], [3,4, 5]]
+ *          },
+ *     ]
+ * }
+ *
+ */
+
+router.get("/:model/revision/:rev/assetsMeta", middlewares.hasReadAccessToModel, getAssetsMeta);
 
 /**
  * @api {get} /:teamspace/:model/:uid.json.mpc Get JSON Mpc
@@ -2146,6 +2213,18 @@ function getSingleModelPermissions(req, res, next) {
 function getMultipleModelsPermissions(req, res, next) {
 	return ModelSetting.getMultipleModelsPermissions(req.params.account, req.query.models).then(permissions => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permissions);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
+function getAssetsMeta(req, res, next) {
+	const {account, model, rev} = req.params;
+	const username = req.session.user.username;
+	const branch = rev ? undefined : C.MASTER_BRANCH_NAME;
+
+	Scene.getMeshInfo(account, model, branch, rev, username).then(obj => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});

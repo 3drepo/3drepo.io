@@ -44,6 +44,10 @@ function getSceneCollectionName(model) {
 	return model + ".scene";
 }
 
+function getSceneStashCollectionName(model) {
+	return model + ".stash.3drepo";
+}
+
 async function getNodeBySharedId(account, model, shared_id, revisionIds, projection = {}) {
 	return await db.findOne(account, getSceneCollectionName(model), {shared_id, rev_id :{$in: revisionIds}}, projection);
 }
@@ -52,6 +56,12 @@ async function findNodes(account, model, branch, revision, query = {}, projectio
 	const history = await History.getHistory(account, model, branch, revision);
 
 	return cleanAll(await db.find(account, getSceneCollectionName(model), { rev_id: history._id, ...query}, projection));
+}
+
+async function findStashNodes(account, model, branch, revision, query = {}, projection = {}) {
+	const history = await History.getHistory(account, model, branch, revision);
+
+	return cleanAll(await db.find(account, getSceneStashCollectionName(model), { rev_id: history._id, ...query}, projection));
 }
 
 const Scene = {};
@@ -75,12 +85,63 @@ Scene.findNodesByType = async function (account, model, branch, revision, type, 
 	return findNodes(account, model, branch, revision, query, projection);
 };
 
+Scene.findStashNodesByType = async function (account, model, branch, revision, type, searchString, projection) {
+	const query = {
+		type
+	};
+
+	if (searchString) {
+		query.name = new RegExp(searchString, "i");
+	}
+
+	return findStashNodes(account, model, branch, revision, query, projection);
+};
+
 Scene.getGridfsFileStream = async function (account, model, filename) {
-	return await ExternalServices.getFileStream(account, getSceneCollectionName(model), "gridfs", filename);
+	return ExternalServices.getFileStream(account, getSceneCollectionName(model), "gridfs", filename);
 };
 
 Scene.getNodeById = async function (account, model, id, projection = {}) {
 	return clean(await db.findOne(account, getSceneCollectionName(model), {_id: id}, projection));
+};
+
+Scene.getMeshInfo = async (account, model, branch, rev, user) => {
+	const refNodes = await Scene.findNodesByType(account, model, branch, rev, "ref", undefined, {project: 1});
+
+	if(refNodes.length) {
+		// it is a federation
+		const { hasReadAccessToModelHelper } = require("../middlewares/middlewares");
+		const C = require("../constants");
+		const subModelMeshes = await Promise.all(refNodes.map(async ({project}) => {
+			if(await hasReadAccessToModelHelper(user, account, project)) {
+				const superMeshes = await Scene.getMeshInfo(account, project, C.MASTER_BRANCH_NAME, undefined, user);
+				return { teamspace: account, model: project, superMeshes };
+			}
+
+		}));
+		return { subModels: subModelMeshes };
+
+	} else {
+		const Utils = require("../utils");
+		const projection = {
+			_id: 1,
+			vertices_count : 1,
+			faces_count: 1,
+			uv_channels_count: 1,
+			bounding_box: 1
+		};
+		const results = await Scene.findStashNodesByType(account, model, branch, rev, "mesh", undefined, projection);
+		return {
+			superMeshes: results.map(({_id, vertices_count, faces_count, uv_channels_count, bounding_box}) => ({
+				_id: Utils.uuidToString(_id),
+				nVertices: vertices_count || 0,
+				nFaces: faces_count || 0,
+				uv_channels_count: uv_channels_count || 0,
+				boundingBox: bounding_box
+			}))
+		};
+
+	}
 };
 
 Scene.getParentMatrix = async function (account, model, parent, revisionIds) {
