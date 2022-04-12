@@ -33,6 +33,10 @@ export const DownloadIcon = styled(DownloadIconBase)`
 export const DownloadButton = styled(IconButton)`
 	margin: 0 0 0 11px;
 	&:hover {
-		background-color: ${({ theme }) => theme.palette.primary.main};
+		background: transparent;
+
+		& ${DownloadIcon} {
+			color: ${({ theme }) => theme.palette.primary.main};
+		}
 	}
 `;
