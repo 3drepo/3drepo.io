@@ -26,3 +26,8 @@ export interface ICurrentUser {
 	countryCode?: string,
 	avatarUrl?: string,
 }
+
+export type UpdateCurrentUser = Omit<ICurrentUser, 'username'> & {
+	oldPassword: string;
+	newPassword: string;
+};

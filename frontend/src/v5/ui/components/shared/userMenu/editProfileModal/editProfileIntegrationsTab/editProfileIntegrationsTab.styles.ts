@@ -14,19 +14,19 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import styled from 'styled-components';
+import { ShareTextField as ShareTextFieldBase } from '@controls/shareTextField';
+import { Button as ButtonBase } from '@controls/button';
 
-import { createSelector } from 'reselect';
+export const ShareTextField = styled(ShareTextFieldBase)``;
 
-const selectCurrentUserDomain = (state) => (state.currentUser2);
+export const ButtonsContainer = styled.div`
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	align-items: center;
+`;
 
-export const selectCurrentUser = createSelector(
-	selectCurrentUserDomain, (state) => state.currentUser || {},
-);
-
-export const selectUsername: (state) => string = createSelector(
-	selectCurrentUser, (state) => state.username || '',
-);
-
-export const selectApiKey: (state) => string = createSelector(
-	selectCurrentUser, (state) => state.apiKey || '',
-);
+export const Button = styled(ButtonBase)`
+	margin: 14px 12px 0 0;
+`;

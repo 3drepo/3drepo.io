@@ -17,6 +17,7 @@
 import styled from 'styled-components';
 import TabBase from '@mui/material/Tab';
 import TabListBase from '@mui/lab/TabList';
+import TabPanelBase from '@mui/lab/TabPanel';
 import { FormModal as FormModalBase } from '@controls/modal/formModal/formDialog.component';
 
 export const FormModal = styled(FormModalBase)`
@@ -33,4 +34,11 @@ export const Tab = styled(TabBase)`
 
 export const TabList = styled(TabListBase)`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	transition: none;
+`;
+
+export const TabPanel = styled(TabPanelBase)`
+	padding: 30px 58px;
+	height: 554px;
+	margin: 0;
 `;

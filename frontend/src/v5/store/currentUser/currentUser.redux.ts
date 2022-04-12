@@ -18,11 +18,16 @@
 import { Constants } from '@/v5/helpers/actions.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
-import { ICurrentUser } from './currentUser.types';
+import { ICurrentUser, UpdateCurrentUser } from './currentUser.types';
 
 export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createActions({
 	getProfile: [],
 	getProfileSuccess: ['userData'],
+	updateUser: ['userData'],
+	updateUserSuccess: ['userData'],
+	setPendingState: ['pendingState'],
+	generateApiKey: [],
+	deleteApiKey: [],
 }, { prefix: 'CURRENT_USER2/' }) as { Types: Constants<ICurrentUserActionCreators>; Creators: ICurrentUserActionCreators };
 
 export const INITIAL_STATE: ICurrentUserState = {
@@ -34,8 +39,23 @@ export const getProfileSuccess = (state = INITIAL_STATE, { userData }): ICurrent
 	currentUser: userData,
 });
 
+export const updateUserSuccess = (state = INITIAL_STATE, { userData }): ICurrentUserState => ({
+	...state,
+	currentUser: {
+		...state.currentUser,
+		...userData,
+	},
+});
+
+const setPendingState = (state = INITIAL_STATE, { pendingState }) => ({
+	...state,
+	isPending: pendingState,
+});
+
 export const currentUserReducer = createReducer(INITIAL_STATE, {
 	[CurrentUserTypes.GET_PROFILE_SUCCESS]: getProfileSuccess,
+	[CurrentUserTypes.UPDATE_USER_SUCCESS]: updateUserSuccess,
+	[CurrentUserTypes.SET_PENDING_STATE]: setPendingState,
 });
 
 /**
@@ -46,9 +66,19 @@ interface ICurrentUserState {
 	currentUser: ICurrentUser;
 }
 
-export type GetProfileSuccessAction = Action<'GET_PROFILE_SUCCESS'> & { userData: any };
+export type GetProfileAction = Action<'GET_PROFILE'>;
+export type GetProfileSuccessAction = Action<'GET_PROFILE_SUCCESS'> & { userData: ICurrentUser };
+export type UpdateUserAction = Action<'UPDATE_USER'> & { userData: UpdateCurrentUser };
+export type UpdateUserSuccessAction = Action<'UPDATE_USER_SUCCESS'> & { userData: UpdateCurrentUser };
+export type UpdateApiKeySuccessAction = Action<'UPDATE_API_KEY_SUCCESS'>;
+export type SetPendingStateAction = Action<'SET_PENDING_STATE'>;
 
 export interface ICurrentUserActionCreators {
-	getProfile: () => Action<'GET_PROFILE'>;
+	getProfile: () => GetProfileAction;
 	getProfileSuccess: (userData: Object) => GetProfileSuccessAction;
+	updateUser: (userData: Object) => UpdateUserAction;
+	updateUserSuccess: (userData: Object) => UpdateUserSuccessAction;
+	setPendingState: (pendingState: boolean) => SetPendingStateAction;
+	generateApiKey: () => UpdateApiKeySuccessAction;
+	deleteApiKey: () => UpdateApiKeySuccessAction;
 }

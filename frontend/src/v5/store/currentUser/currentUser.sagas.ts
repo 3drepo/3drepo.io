@@ -21,7 +21,7 @@ import { generateV5ApiUrl } from '@/v5/services/api/default';
 import { formatMessage } from '@/v5/services/intl';
 import { put, takeLatest } from 'redux-saga/effects';
 import { DialogsActions } from '../dialogs/dialogs.redux';
-import { CurrentUserActions, CurrentUserTypes } from './currentUser.redux';
+import { CurrentUserActions, CurrentUserTypes, UpdateUserAction } from './currentUser.redux';
 
 export function* getProfile() {
 	try {
@@ -39,6 +39,59 @@ export function* getProfile() {
 	}
 }
 
+export function* updateUser({ userData }: UpdateUserAction) {
+	try {
+		yield put(CurrentUserActions.setPendingState(true));
+		yield API.CurrentUser.updateUser(userData);
+		yield put(CurrentUserActions.setPendingState(false));
+		yield put(CurrentUserActions.updateUserSuccess(userData));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({
+				id: 'currentUser.updateProfile.error',
+				defaultMessage: 'trying to update current user details',
+			}),
+			error,
+		}));
+	}
+}
+
+export function* generateApiKey() {
+	try {
+		yield put(CurrentUserActions.setPendingState(true));
+		const apiKey = yield API.CurrentUser.generateApiKey();
+		yield put(CurrentUserActions.setPendingState(false));
+		yield put(CurrentUserActions.updateUserSuccess(apiKey));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({
+				id: 'currentUser.generateApiKey.error',
+				defaultMessage: 'trying to generate API key',
+			}),
+			error,
+		}));
+	}
+}
+
+export function* deleteApiKey() {
+	try {
+		yield put(CurrentUserActions.setPendingState(true));
+		yield API.CurrentUser.deleteApiKey();
+		yield put(CurrentUserActions.setPendingState(false));
+		yield put(CurrentUserActions.updateUserSuccess({ apiKey: null }));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({
+				id: 'currentUser.deleteApiKey.error',
+				defaultMessage: 'trying to delete API key',
+			}),
+			error,
+		}));
+	}
+}
+
 export default function* AuthSaga() {
 	yield takeLatest(CurrentUserTypes.GET_PROFILE, getProfile);
+	yield takeLatest(CurrentUserTypes.GENERATE_API_KEY, generateApiKey);
+	yield takeLatest(CurrentUserTypes.DELETE_API_KEY, deleteApiKey);
 }

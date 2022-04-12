@@ -17,8 +17,17 @@
 import { useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { IUser } from '@/v5/store/users/users.redux';
-import { TabContext, TabPanel } from '@mui/lab';
-import { FormModal, TabList, Tab } from './editProfileModal.styles';
+import { TabContext } from '@mui/lab';
+import { FormModal, TabList, Tab, TabPanel } from './editProfileModal.styles';
+import { EditProfilePersonalTab } from './editProfilePersonalTab/editProfilePersonalTab.component';
+import { EditProfilePasswordTab } from './editProfilePasswordTab/editProfilePasswordTab.component';
+import { EditProfileIntegrationsTab } from './editProfileIntegrationsTab/editProfileIntegrationsTab.component';
+
+const CONFIRM_LABELS = {
+	personal: formatMessage({ defaultMessage: 'Update profile', id: 'editProfile.updateProfile' }),
+	password: formatMessage({ defaultMessage: 'Update password', id: 'editProfile.updatePassword' }),
+	integrations: formatMessage({ defaultMessage: 'Update profile', id: 'editProfile.updateIntegrations' }),
+};
 
 type EditProfileModalProps = {
 	open: boolean;
@@ -35,6 +44,7 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 	return (
 		<FormModal
 			open
+			// TODO uncomment this
 			// open={open}
 			title={formatMessage(
 				{ defaultMessage: "{firstName}'s profile", id: 'editProfile.title' },
@@ -42,7 +52,7 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 			)}
 			zeroMargin
 			onClickClose={onClose}
-			confirmLabel={formatMessage({ defaultMessage: 'Update profile', id: 'editProfile.updateProfile' })}
+			confirmLabel={CONFIRM_LABELS[activeTab]}
 		>
 			<TabContext value={activeTab}>
 				<TabList
@@ -65,21 +75,21 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 						})}
 					/>
 					<Tab
-						value="integration"
+						value="integrations"
 						label={formatMessage({
-							defaultMessage: 'Integration',
-							id: 'editProfile.tab.title.integration',
+							defaultMessage: 'Integrations',
+							id: 'editProfile.tab.title.integrations',
 						})}
 					/>
 				</TabList>
 				<TabPanel value="personal">
-					Item One
+					<EditProfilePersonalTab />
 				</TabPanel>
 				<TabPanel value="password">
-					Item Two
+					<EditProfilePasswordTab />
 				</TabPanel>
-				<TabPanel value="integration">
-					Item Three
+				<TabPanel value="integrations">
+					<EditProfileIntegrationsTab />
 				</TabPanel>
 			</TabContext>
 		</FormModal>

@@ -39,13 +39,13 @@ type IShareTextField = {
 	 * the value to be copied
 	 */
 	value: string,
-
+	hideValue?: boolean,
 	className?: string,
 };
 
 const IS_COPYING_DURATION_MS = 3000;
 
-export const ShareTextField = ({ label, value, className }: IShareTextField) => {
+export const ShareTextField = ({ label, value, className, hideValue }: IShareTextField) => {
 	let isCopiedTimer;
 	const [isCopying, setIsCopying] = useState(true);
 
@@ -70,6 +70,7 @@ export const ShareTextField = ({ label, value, className }: IShareTextField) => 
 					value={value}
 					label={label}
 					className={className}
+					{...(hideValue ? { type: 'password' } : {})}
 					InputProps={{
 						readOnly: true,
 						endAdornment: (

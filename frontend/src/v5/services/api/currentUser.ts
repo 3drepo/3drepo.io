@@ -15,9 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { UpdateCurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import api from './default';
 
 export const getProfile = async () => {
 	const { data } = await api.get('user');
+	return data;
+};
+
+export const updateUser = async (user: UpdateCurrentUser) => {
+	const { data } = await api.put('user', user);
+	return data;
+};
+
+export const generateApiKey = async () => {
+	const { data } = await api.post('user/key');
+	return data;
+};
+
+export const deleteApiKey = async () => {
+	const { data } = await api.delete('user/key');
 	return data;
 };
