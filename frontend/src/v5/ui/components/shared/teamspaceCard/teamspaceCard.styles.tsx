@@ -40,7 +40,7 @@ export const Container = styled(Card)<{ $variant: string; }>`
 		}
 		if ($variant === 'secondary') {
 			return css`
-				background-color: rgba(255, 255, 255, 0.05);
+				background-color: ${theme.palette.secondary.mid};
 				h5 { color: ${theme.palette.primary.contrast};}
 			`;
 		}
