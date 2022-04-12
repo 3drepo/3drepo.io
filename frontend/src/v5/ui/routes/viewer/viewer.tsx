@@ -17,7 +17,10 @@
 
 import { ViewerGui } from '@/v4/routes/viewerGui';
 import { useParams } from 'react-router-dom';
+import { ThemeProvider } from 'styled-components';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { ViewerParams } from '../routes.constants';
+import { theme } from './theme';
 
 export const Viewer = () => {
 	const { teamspace, containerOrFederation } = useParams<ViewerParams>();
@@ -29,6 +32,10 @@ export const Viewer = () => {
 		} };
 
 	return (
-		<ViewerGui match={v4Match} />
+		<ThemeProvider theme={theme}>
+			<MuiThemeProvider theme={theme}>
+				<ViewerGui match={v4Match} />
+			</MuiThemeProvider>
+		</ThemeProvider>
 	);
 };
