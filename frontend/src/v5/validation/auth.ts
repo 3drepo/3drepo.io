@@ -57,6 +57,6 @@ export const PasswordChangeSchema = Yup.object().shape({
 		.oneOf([Yup.ref('newPassword')],
 			formatMessage({
 				id: 'passwordChange.error.notMatching',
-				defaultMessage: 'The two entered passwords do not match',
+				defaultMessage: 'Password confirmation doesn\'t match the password',
 			})),
 });
