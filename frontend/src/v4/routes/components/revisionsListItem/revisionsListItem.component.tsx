@@ -65,6 +65,11 @@ export const RevisionsListItem = (props: IProps) => {
 
 	const handleClick = (event) => props.onClick(event, props.data);
 	const handleToggleVoid = (event) => props.onToggleVoid(event, props.data);
+	const stateTheme = {
+		current,
+		isPending,
+		isVoid: props.data.void,
+	};
 
 	const renderGoToRevisionButton = renderWhenTrue(
 		<LinkWrapper>
@@ -73,13 +78,14 @@ export const RevisionsListItem = (props: IProps) => {
 	);
 
 	const renderToggleButton = renderWhenTrue(
-		<ToggleButton onClick={handleToggleVoid} >
+		<ToggleButton onClick={handleToggleVoid} {...stateTheme}>
 			{props.data.void ? 'Void' : 'Active'}
 		</ToggleButton>
 	);
 
 	return (
 		<Container
+			{...stateTheme}
 			divider
 		>
 			{renderLoader(isPending)}
