@@ -66,7 +66,7 @@ export const Breadcrumbs = (): JSX.Element => {
 		breadcrumbs.push(teamspace);
 	}
 
-	if (!isEmpty(project)) {
+	if (!isEmpty(project) && projectId) {
 		breadcrumbs.push(project.name);
 	}
 
@@ -80,7 +80,7 @@ export const Breadcrumbs = (): JSX.Element => {
 
 	return (
 		<Container aria-label="breadcrumb">
-			<HomeIconBreadcrumb color="inherit" to={teamspaceTo}>
+			<HomeIconBreadcrumb active={!breadcrumbs.length} color="inherit" to={url}>
 				<HomeIcon />
 			</HomeIconBreadcrumb>
 

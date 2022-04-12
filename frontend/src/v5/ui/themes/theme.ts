@@ -527,7 +527,6 @@ export const theme = createTheme({
 						overflow: 'hidden',
 					},
 					'& > a': {
-						color: COLOR.PRIMARY_MAIN_CONTRAST,
 						...typography.h3,
 					},
 					'& > button > span > span': {
