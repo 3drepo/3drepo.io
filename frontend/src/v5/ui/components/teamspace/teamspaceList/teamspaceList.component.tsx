@@ -22,24 +22,25 @@ import { generateV5ApiUrl } from '@/v5/services/api/default';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { CardList, DummyCard } from './teamspaceList.styles';
 
+const MAX_CARDS_PER_ROW = 5;
+const DummyCards = () => <>{Array.from({ length: MAX_CARDS_PER_ROW }, (_, i) => <DummyCard key={i} />)}</>;
+
 export const TeamspaceList = (): JSX.Element => {
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
 	return (
 		<CardList>
 			{
-				teamspaces.length ? (
-					<>
-						{
-							teamspaces.map((teamspace) => (
-								<TeamspaceCard
-									key={teamspace.name}
-									variant="secondary"
-									teamspaceName={teamspace.name}
-									imageURL={generateV5ApiUrl(`teamspaces/${teamspace.name}/avatar?${Date.now()}`, clientConfigService.GET_API)}
-								/>
-							))
-						}
+				teamspaces.map((teamspace) => (
+					<TeamspaceCard
+						key={teamspace.name}
+						variant="secondary"
+						teamspaceName={teamspace.name}
+						imageURL={generateV5ApiUrl(`teamspaces/${teamspace.name}/avatar?${Date.now()}`, clientConfigService.GET_API)}
+					/>
+				))
+			}
 			{ !!teamspaces.length && (<AddTeamspaceCard variant="secondary" />) }
+			{ (teamspaces.length > MAX_CARDS_PER_ROW) && <DummyCards /> }
 		</CardList>
 	);
 };
