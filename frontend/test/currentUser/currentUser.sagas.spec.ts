@@ -59,7 +59,6 @@ describe('Current User: sagas', () => {
 		})
 	})
 
-	// TODO fix updateUser tests
 	describe('updateUser', () => {
 		const userData = currentUserMockFactory();
 		it('should update user data', async () => {
@@ -69,12 +68,9 @@ describe('Current User: sagas', () => {
 
 			await expectSaga(CurrentUserSaga.default)
 				.dispatch(CurrentUserActions.updateUser(userData))
-				.put.like({
-					action: {
-						type: 'CURRENT_USER2/UPDATE_USER_SUCCESS',
-						userData,
-					}
-				})
+				.put(CurrentUserActions.setIsPending(true))
+				.put(CurrentUserActions.updateUserSuccess(userData))
+				.put(CurrentUserActions.setIsPending(false))
 				.silentRun();
 		})
 
@@ -85,7 +81,7 @@ describe('Current User: sagas', () => {
 
 			await expectSaga(CurrentUserSaga.default)
 				.dispatch(CurrentUserActions.updateUser(userData))
-				// .put(CurrentUserActions.setIsPending(true))
+				.put(CurrentUserActions.setIsPending(true))
 				.put.like({
 					action: {
 						type: 'MODALS/OPEN',
