@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useParams } from 'react-router';
+
 import { useRouteMatch } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 
@@ -41,7 +41,6 @@ type UserMenuProps = {
 };
 
 export const UserMenu = ({ user } : UserMenuProps) => {
-	const { teamspace } = useParams();
 	const { url } = useRouteMatch();
 	const baseUrl = url.split('/').slice(0, 3).join('/');
 
@@ -77,7 +76,7 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 				<ActionMenuSection>
 					<ActionMenuItemLink
 						Icon={TeamspacesIcon}
-						to={`${baseUrl}/${teamspace}`}
+						to={baseUrl}
 					>
 						<FormattedMessage
 							id="userMenu.teamspaces"
