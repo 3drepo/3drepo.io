@@ -33,7 +33,7 @@ type IShareTextField = {
 	/**
 	 * The label on top of the control
 	 */
-	label: string,
+	label: string | JSX.Element,
 
 	/**
 	 * the value to be copied

@@ -16,11 +16,10 @@
  */
 
 import { ShareTextField } from '@controls/shareTextField';
-import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
-import { ButtonsContainer, Button } from './editProfileIntegrationsTab.styles';
+import { ButtonsContainer, Button, ShareTextFieldLabel } from './editProfileIntegrationsTab.styles';
 
 export const EditProfileIntegrationsTab = () => {
 	const key = CurrentUserHooksSelectors.selectApiKey();
@@ -31,10 +30,14 @@ export const EditProfileIntegrationsTab = () => {
 	return (
 		<>
 			<ShareTextField
-				label={formatMessage({
-					id: 'editProfile.apiKey',
-					defaultMessage: 'API KEY',
-				})}
+				label={(
+					<ShareTextFieldLabel>
+						<FormattedMessage
+							id="editProfile.apiKey"
+							defaultMessage="API KEY"
+						/>
+					</ShareTextFieldLabel>
+				)}
 				value={key}
 				hideValue
 			/>

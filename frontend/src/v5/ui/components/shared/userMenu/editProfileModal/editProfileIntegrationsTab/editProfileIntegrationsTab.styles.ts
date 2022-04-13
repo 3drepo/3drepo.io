@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
-import { ShareTextField as ShareTextFieldBase } from '@controls/shareTextField';
 import { Button as ButtonBase } from '@controls/button';
 
-export const ShareTextField = styled(ShareTextFieldBase)``;
+export const ShareTextFieldLabel = styled.span`
+	${({ theme }) => theme.typography.kicker};
+`;
 
 export const ButtonsContainer = styled.div`
 	display: flex;
