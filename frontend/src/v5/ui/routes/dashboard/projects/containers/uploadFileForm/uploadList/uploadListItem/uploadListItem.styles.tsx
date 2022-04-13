@@ -19,6 +19,7 @@ import { CircleButton } from '@controls/circleButton';
 import styled from 'styled-components';
 
 export const Button = styled(CircleButton)<{ $selectedrow: boolean; onClick: () => void; }>`
+	margin: 0;
 	&&&&& {
 		:hover { 
 			background-color: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.secondary.light : theme.palette.secondary.lightest)}
