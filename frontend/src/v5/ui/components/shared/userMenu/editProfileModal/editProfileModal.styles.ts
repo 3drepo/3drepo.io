@@ -23,13 +23,13 @@ import { FormModal as FormModalBase } from '@controls/modal/formModal/formDialog
 export const FormModal = styled(FormModalBase)`
 	.MuiDialogContent-root {
 		padding: 0;
+		margin-bottom: 15px;
 	}
 `;
 
 export const Tab = styled(TabBase)`
-	text-transform: 'none';
     padding: 15px 0;
-	margin: 0 24px;
+	margin: 0 10px;
 `;
 
 export const TabList = styled(TabListBase)`
@@ -39,6 +39,8 @@ export const TabList = styled(TabListBase)`
 
 export const TabPanel = styled(TabPanelBase)`
 	padding: 30px 58px;
-	height: 554px;
 	margin: 0;
+	height: 554px;
+	width: 522px;
+    box-sizing: border-box;
 `;

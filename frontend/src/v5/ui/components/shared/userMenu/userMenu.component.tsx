@@ -68,7 +68,7 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 								largeIcon
 							/>
 							<UserFullName>{user.firstName} {user.lastName}</UserFullName>
-							<UserUserName>{user.user}</UserUserName>
+							<UserUserName>{user.username}</UserUserName>
 							<ActionMenuItem>
 								<EditProfileButton onClick={() => setIsEditProfileModalOpen(true)}>
 									<FormattedMessage

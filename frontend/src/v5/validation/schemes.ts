@@ -18,6 +18,7 @@
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { EMPTY_VIEW } from '@/v5/store/federations/federations.types';
+import { getPasswordStrength } from '@/v4/services/validation';
 
 const numberField = Yup.number().typeError(formatMessage({
 	id: 'federations.surveyPoint.error.number',
@@ -98,4 +99,125 @@ export const FederationSettingsSchema = Yup.object().shape({
 	x: numberField.required(),
 	y: numberField.required(),
 	z: numberField.required(),
+});
+
+export const EditProfileUpdatePasswordSchema = Yup.object().shape({
+	currentPassword: Yup.string()
+		.when('$passwordWasIncorrect', (passwordWasIncorrect, schema) => (
+			passwordWasIncorrect
+				? schema.min(1,
+					formatMessage({
+						id: 'editProfile.password.error.incorrectPassword',
+						defaultMessage: 'Your existing password was incorrect. Please try again',
+					}))
+				: schema.min(1,
+					formatMessage({
+						id: 'federations.password.error.empty',
+						defaultMessage: 'Current password is a required field',
+					}))
+		)),
+	newPassword: Yup.string()
+		.required(
+			formatMessage({
+				id: 'editProfile.password.error.required',
+				defaultMessage: 'Password is a required field',
+			}),
+		)
+		.min(8,
+			formatMessage({
+				id: 'editProfile.password.error.min',
+				defaultMessage: 'Password must be at least 8 characters',
+			}))
+		.max(128,
+			formatMessage({
+				id: 'editProfile.password.error.max',
+				defaultMessage: 'Password is limited to 128 characters',
+			}))
+		.differentThan(
+			Yup.ref('oldPassword'),
+			formatMessage({
+				id: 'editProfile.password.error.max',
+				defaultMessage: 'New password should be different than old password',
+			}),
+		)
+		.test(
+			'checkPasswordStrength',
+			formatMessage({
+				id: 'editProfile.password.error.tooWeak',
+				defaultMessage: 'Password is too weak',
+			}),
+			async (password) => await getPasswordStrength(password) >= 2,
+		),
+	confirmPassword: Yup.string()
+		.required(
+			formatMessage({
+				id: 'editProfile.confirmPassword.error.required',
+				defaultMessage: 'Confirm password is a required field',
+			}),
+		)
+		.oneOf(
+			[Yup.ref('newPassword'), null],
+			formatMessage({
+				id: 'editProfile.confirmPassword.error.notMatch',
+				defaultMessage: 'Password confirmation doesn\'t match the password',
+			}),
+		),
+});
+
+export const EditProfileUpdatePersonalSchema = (alreadyExistingEmails: string[] = []) => Yup.object().shape({
+	firstName: Yup.string()
+		.min(2, formatMessage({
+			id: 'editProfile.firstName.error.min',
+			defaultMessage: 'First name must be at least 2 characters',
+		}))
+		.max(50, formatMessage({
+			id: 'editProfile.firstName.error.max',
+			defaultMessage: 'First name is limited to 50 characters',
+		}))
+		.required(formatMessage({
+			id: 'editProfile.firstName.error.required',
+			defaultMessage: 'First name is a required field',
+		})),
+	lastName: Yup.string()
+		.min(2, formatMessage({
+			id: 'editProfile.lastName.error.min',
+			defaultMessage: 'Last name must be at least 2 characters',
+		}))
+		.max(50, formatMessage({
+			id: 'editProfile.lastName.error.max',
+			defaultMessage: 'Last name is limited to 50 characters',
+		}))
+		.required(formatMessage({
+			id: 'editProfile.lastName.error.required',
+			defaultMessage: 'Last name is a required field',
+		})),
+	email: Yup.string().email()
+		.required(
+			formatMessage({
+				id: 'editProfile.email.error.required',
+				defaultMessage: 'Email is a required field',
+			}),
+		)
+		.test(
+			'alreadyExistingEmails',
+			formatMessage({
+				id: 'editProfile.email.alreadyExisting',
+				defaultMessage: 'This email is already taken',
+			}),
+			(email) => !alreadyExistingEmails.includes(email),
+		),
+	company: Yup.string()
+		.required(
+			formatMessage({
+				id: 'editProfile.company.required',
+				defaultMessage: 'Company is a required field',
+			}),
+		),
+	countryCode: Yup.string()
+		.required(
+			formatMessage({
+				id: 'editProfile.countryCode.error.required',
+				defaultMessage: 'Country is a required field',
+			}),
+		),
 });
