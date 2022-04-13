@@ -49,12 +49,13 @@ export interface IUsersState {
 }
 
 export interface IUser {
-	user: string;
+	username: string;
 	firstName: string;
 	lastName: string;
+	countryCode?: string;
 	company?: string;
 	job?: string;
-	email?: string;
+	email: string;
 	hasAvatar?: boolean;
 	avatarUrl: string;
 }

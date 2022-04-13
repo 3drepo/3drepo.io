@@ -19,7 +19,7 @@ export interface ICurrentUser {
 	username: string,
 	firstName?: string,
 	lastName?: string,
-	email?: string,
+	email: string,
 	hasAvatar?: boolean,
 	apiKey?: string,
 	company?: string,
@@ -27,7 +27,7 @@ export interface ICurrentUser {
 	avatarUrl?: string,
 }
 
-export type UpdateUser = Omit<ICurrentUser, 'username'> & {
-	oldPassword: string;
+export type UpdateUser = Partial<Omit<ICurrentUser, 'avatarUrl' | 'hasAvatar' | 'username'> & {
+	currentPassword: string;
 	newPassword: string;
-};
+}>;

@@ -31,7 +31,7 @@ export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createA
 }, { prefix: 'CURRENT_USER2/' }) as { Types: Constants<ICurrentUserActionCreators>; Creators: ICurrentUserActionCreators };
 
 export const INITIAL_STATE: ICurrentUserState = {
-	currentUser: { username: '' },
+	currentUser: { username: '', email: '' },
 };
 
 export const fetchUserSuccess = (state = INITIAL_STATE, { userData }): ICurrentUserState => ({
@@ -47,7 +47,7 @@ export const updateUserSuccess = (state = INITIAL_STATE, { userData }): ICurrent
 	},
 });
 
-const setIsPending = (state = INITIAL_STATE, { pendingState }) => ({
+export const setIsPending = (state = INITIAL_STATE, { pendingState }) => ({
 	...state,
 	isPending: pendingState,
 });
@@ -74,9 +74,9 @@ export type SetIsPendingAction = Action<'SET_IS_PENDING'>;
 
 export interface ICurrentUserActionCreators {
 	fetchUser: () => FetchUserAction;
-	fetchUserSuccess: (userData: Object) => FetchUserSuccessAction;
-	updateUser: (userData: Object) => UpdateUserAction;
-	updateUserSuccess: (userData: Object) => UpdateUserSuccessAction;
+	fetchUserSuccess: (userData: ICurrentUser) => FetchUserSuccessAction;
+	updateUser: (userData: UpdateUser) => UpdateUserAction;
+	updateUserSuccess: (userData: UpdateUser) => UpdateUserSuccessAction;
 	setIsPending: (isPending: boolean) => SetIsPendingAction;
 	generateApiKey: () => UpdateUserSuccessAction;
 	deleteApiKey: () => UpdateUserSuccessAction;

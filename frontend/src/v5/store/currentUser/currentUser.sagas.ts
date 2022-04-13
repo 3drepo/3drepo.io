@@ -92,6 +92,7 @@ export function* deleteApiKey() {
 
 export default function* AuthSaga() {
 	yield takeLatest(CurrentUserTypes.FETCH_USER, fetchUser);
+	yield takeLatest(CurrentUserTypes.UPDATE_USER, updateUser);
 	yield takeLatest(CurrentUserTypes.GENERATE_API_KEY, generateApiKey);
 	yield takeLatest(CurrentUserTypes.DELETE_API_KEY, deleteApiKey);
 }
