@@ -24,11 +24,11 @@ export const ListItem = styled.li`
 	list-style-type: none;
 	float: left;
 	margin: 10px;
-	transition: margin 0.1s;
+	.MuiCard-root { transition: margin 0.1s; }
 	:hover {
-		transition: margin 0.1s;
 		.MuiCard-root {
 			margin-top: -5px;
+			transition: margin 0.1s;
 			box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
 		}
 	}
