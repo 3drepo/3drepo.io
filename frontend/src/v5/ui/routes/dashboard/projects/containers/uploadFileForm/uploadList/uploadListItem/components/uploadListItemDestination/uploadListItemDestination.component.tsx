@@ -52,6 +52,7 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 	...props
 }) => {
 	const [value, setValue] = useState<DestinationOption>({ ...emptyOption, containerName: defaultValue });
+	const [disableClearable, setDisableClearable] = useState(true);
 	const containers = ContainersHooksSelectors.selectContainers();
 	const [newOrExisting, setNewOrExisting] = useState(() => {
 		if (value.containerName) {
@@ -70,6 +71,7 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 	return (
 		<Autocomplete
 			value={value}
+			disableClearable={disableClearable}
 			onChange={async (event, newValue: DestinationOption) => {
 				if (!newValue) {
 					setValue(emptyOption);
@@ -80,6 +82,7 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 					setNewOrExisting(!newValue.containerId.length ? 'new' : 'existing');
 					onChange(newValue);
 				}
+				setDisableClearable(!newValue);
 			}}
 			onOpen={forceUpdate}
 			options={containers.map((val) => ({
@@ -94,6 +97,8 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 			filterOptions={(options: DestinationOption[], params) => {
 				let filtered: DestinationOption[] = filter(options, params);
 				const { inputValue } = params;
+
+				setDisableClearable(!inputValue);
 				const isExisting = options.some((option: DestinationOption) => inputValue === option.containerName);
 				if (inputValue !== '' && !isExisting) {
 					filtered = [{
