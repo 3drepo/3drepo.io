@@ -75,10 +75,6 @@ export const EditProfilePasswordTab = ({
 		reset();
 	};
 
-	// useEffect(() => {
-	// 	if (passwordWasIncorrect) trigger('currentPassword');
-	// }, [passwordWasIncorrect]);
-
 	useEffect(() => {
 		if (passwordWasIncorrect) {
 			trigger('currentPassword');
