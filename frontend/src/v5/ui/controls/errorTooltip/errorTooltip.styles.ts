@@ -31,7 +31,7 @@ export const Tooltip = withStyles((theme: any) => ({
 		backgroundColor: theme.palette.primary.contrast,
 		color: theme.palette.error.main,
 		fontSize: theme.typography.pxToRem(12),
-		boxShadow: theme.palette.shadows.level_6,
+		boxShadow: theme.palette.shadows.level_5,
 		border: 'none',
 		borderRadius: 5,
 		padding: '15px 15px 17px 15px',

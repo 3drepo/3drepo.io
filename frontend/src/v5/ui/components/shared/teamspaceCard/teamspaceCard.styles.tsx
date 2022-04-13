@@ -29,7 +29,7 @@ export const ListItem = styled.li`
 		transition: margin 0.1s;
 		.MuiCard-root {
 			margin-top: -5px;
-			box-shadow: ${({ theme }) => theme.palette.shadows.level_6};
+			box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
 		}
 	}
 `;
