@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { formatMessage } from '@/v5/services/intl';
 import { uriCombine } from '@/v5/services/routing/routing';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { FormattedMessage } from 'react-intl';
@@ -41,12 +42,21 @@ export const TeamspaceCard = ({ variant = 'primary', teamspaceName, imageURL, cl
 						isPersonalTeamspace
 							? (
 								<TeamspaceImage
-									alt={`${teamspaceName} Image`}
+									title={formatMessage({
+										id: 'teamspaceSelect.teamspaceImageAlt',
+										defaultMessage: 'Image for {teamspaceName} teamspace',
+									}, { teamspaceName })}
 									imageURL={imageURL}
 								/>
 							) : (
 								<TeamspaceImage>
-									<TeamspaceLogo src={imageURL} />
+									<TeamspaceLogo
+										src={imageURL}
+										alt={formatMessage({
+											id: 'teamspaceSelect.teamspaceImageAlt',
+											defaultMessage: 'Image for {teamspaceName} teamspace',
+										}, { teamspaceName })}
+									/>
 								</TeamspaceImage>
 							)
 					}
