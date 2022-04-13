@@ -53,6 +53,7 @@ export const EditProfilePersonalTab = ({
 	user,
 }: EditProfilePersonalTabProps) => {
 	const [newAvatarUrl, setNewAvatarUrl] = useState(null);
+	const [avatarFile, setAvatarFile] = useState(null);
 	const [avatarError, setAvatarError] = useState('');
 	const {
 		getValues,
@@ -72,8 +73,9 @@ export const EditProfilePersonalTab = ({
 		try {
 			CurrentUserActionsDispatchers.updateUser({
 				...getValues(),
-				...(newAvatarUrl ? { avatarUrl: newAvatarUrl } : {}),
+				...(avatarFile ? { avatarUrl: avatarFile } : {}),
 			});
+			setAvatarFile(null);
 			setNewAvatarUrl(null);
 			reset();
 		} catch (error) {
@@ -84,10 +86,11 @@ export const EditProfilePersonalTab = ({
 
 	const addImage = (event) => {
 		const file = event.target.files[0];
-		const formData = new FormData();
 		const maxSize = 1024 * 1024; // 1 MB
 		if (file.size < maxSize) {
+			const formData = new FormData();
 			formData.append('file', file);
+			setAvatarFile(file);
 			setNewAvatarUrl(URL.createObjectURL(file));
 		} else {
 			setAvatarError(formatMessage({
