@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormattedMessage } from 'react-intl';
 import { AddTeamspaceCard, TeamspaceCard } from '@components/shared/teamspaceCard';
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
@@ -40,19 +39,7 @@ export const TeamspaceList = (): JSX.Element => {
 								/>
 							))
 						}
-						<AddTeamspaceCard variant="secondary" />
-						<DummyCard />
-						<DummyCard />
-						<DummyCard />
-						<DummyCard />
-					</>
-				) : (
-					<FormattedMessage
-						id="dashboard.teamspacesList.emptyList"
-						defaultMessage="No teamspaces found"
-					/>
-				)
-			}
+			{ !!teamspaces.length && (<AddTeamspaceCard variant="secondary" />) }
 		</CardList>
 	);
 };
