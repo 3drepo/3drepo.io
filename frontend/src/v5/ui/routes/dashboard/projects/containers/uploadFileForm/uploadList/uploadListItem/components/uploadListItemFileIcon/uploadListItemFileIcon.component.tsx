@@ -22,7 +22,7 @@ type IUploadListItemFileIcon = {
 };
 
 export const UploadListItemFileIcon = ({ extension }: IUploadListItemFileIcon): JSX.Element => (
-	<StyledIconButton>
+	<StyledIconButton extension={extension}>
 		{extension[0] || '?'}
 	</StyledIconButton>
 );

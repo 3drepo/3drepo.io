@@ -18,7 +18,19 @@
 import styled from 'styled-components';
 import { Avatar } from '@mui/material';
 
-export const StyledIconButton = styled(Avatar)`
+const EXTENSION_COLOUR_MAP = {
+	ifc: '#A8007A',
+	bim: '#80E0E9',
+	dgn: '#62BB46',
+	rvt: '#186BFE',
+	rfa: '#186BFE',
+	spm: '#62BB46',
+	dwg: '#E51050',
+	dxf: '#1D1D1B',
+	nwd: '#007628',
+};
+
+export const StyledIconButton = styled(Avatar)<{ extension: string}>`
 	width: 32px;
 	height: 32px;
 	display: flex;
@@ -34,7 +46,7 @@ export const StyledIconButton = styled(Avatar)`
 	user-select: none;
 	text-transform: uppercase;
 
-	color: ${({ theme }) => theme.palette.tertiary.main};
+	color: ${({ extension, theme }) => EXTENSION_COLOUR_MAP[extension] || theme.palette.tertiary.main};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 `;
