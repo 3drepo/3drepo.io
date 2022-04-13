@@ -15,10 +15,131 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const EditProfilePasswordTab = () => {
+import { EditProfileUpdatePasswordSchema } from '@/v5/validation/schemes';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
+import { FormTextField } from '@controls/formTextField/formTextField.component';
+import { useEffect, useState } from 'react';
+import { formatMessage } from '@/v5/services/intl';
+import { isEqual, omit } from 'lodash';
+import { FormattedMessage } from 'react-intl';
+import { PostSubmitSuccessfulMessage, TickIcon } from './editProfilePasswordTab.styles';
+
+export interface IUpdatePasswordInputs {
+	currentPassword: string;
+	newPassword: string;
+	confirmPassword: string;
+}
+
+type EditProfilePasswordTabProps = {
+	fields: IUpdatePasswordInputs;
+	setSubmitFunction: (fn: Function) => void;
+	updatePasswordFields: (values: Partial<IUpdatePasswordInputs>) => void;
+};
+
+export const EditProfilePasswordTab = ({
+	fields,
+	setSubmitFunction,
+	updatePasswordFields,
+}: EditProfilePasswordTabProps) => {
+	const [passwordWasIncorrect, setPasswordWasIncorrect] = useState(false);
+	const [submitWasSuccessful, setSubmitWasSuccesful] = useState(false);
+	const {
+		formState: { errors, isValid: formIsValid },
+		control,
+		trigger,
+		reset,
+		watch,
+		getValues,
+		handleSubmit,
+	} = useForm<IUpdatePasswordInputs>({
+		mode: 'onChange',
+		resolver: yupResolver(EditProfileUpdatePasswordSchema),
+		context: { passwordWasIncorrect },
+		defaultValues: fields,
+	});
+
+	const currentPassword = watch('currentPassword');
+
+	const onSubmit = () => {
+		try {
+			throw new Error('Not implemented');
+			const userData = omit(getValues(), ['confirmPassword']);
+			CurrentUserActionsDispatchers.updateUser(userData);
+			setSubmitWasSuccesful(true);
+		} catch (error) {
+			setPasswordWasIncorrect(true);
+			// TODO handle error
+		}
+		reset();
+	};
+
+	// useEffect(() => {
+	// 	if (passwordWasIncorrect) trigger('currentPassword');
+	// }, [passwordWasIncorrect]);
+
+	useEffect(() => {
+		if (passwordWasIncorrect) {
+			trigger('currentPassword');
+			if (currentPassword) {
+				setPasswordWasIncorrect(false);
+			}
+		}
+	}, [currentPassword]);
+
+	useEffect(() => {
+		setSubmitFunction(formIsValid ? handleSubmit(onSubmit) : null);
+	}, [formIsValid]);
+
+	useEffect(() => () => {
+		const newFields = getValues();
+		if (!isEqual(newFields, fields)) {
+			updatePasswordFields(newFields);
+		}
+	}, []);
+
 	return (
-		<div>
-			<h1>Edit Profile Password Tab</h1>
-		</div>
+		<>
+			<FormTextField
+				control={control}
+				name="currentPassword"
+				label={formatMessage({
+					id: 'editProfile.updatePassword.currentPassword',
+					defaultMessage: 'Current Password',
+				})}
+				type="password"
+				formError={errors.currentPassword}
+				required
+			/>
+			<FormTextField
+				control={control}
+				name="newPassword"
+				label={formatMessage({
+					id: 'editProfile.updatePassword.newPassword',
+					defaultMessage: 'New Password',
+				})}
+				type="password"
+				formError={errors.newPassword}
+				required
+			/>
+			<FormTextField
+				control={control}
+				name="confirmPassword"
+				label={formatMessage({
+					id: 'editProfile.updatePassword.confirmPassword',
+					defaultMessage: 'Confirm Password',
+				})}
+				type="password"
+				formError={errors.confirmPassword}
+				required
+			/>
+			{submitWasSuccessful && (
+				<PostSubmitSuccessfulMessage>
+					<TickIcon />
+					<FormattedMessage id="editProfile.updatePassword.success" defaultMessage="Your password has been changed successfully." />
+				</PostSubmitSuccessfulMessage>
+			)}
+		</>
 	);
 };

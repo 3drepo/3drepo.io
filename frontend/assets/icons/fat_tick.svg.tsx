@@ -14,24 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
-import TickIconBase from '@assets/icons/fat_tick.svg';
+type IProps = {
+	className?: any;
+};
 
-export const PostSubmitSuccessfulMessage = styled.div`
-	${({ theme }) => theme.typography.body1};
-	color: ${({ theme }) => theme.palette.primary.main};
-	background-color: ${({ theme }) => theme.palette.primary.lightest}; // TODO - fix after new palette is created
-	height: 45px;
-	box-sizing: border-box;
-	border: solid 1px currentColor;
-	padding: 15px;
-	margin-top: 19px;
-	border-radius: 5px;
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-`;
-
-export const TickIcon = styled(TickIconBase)`
-	margin-right: 10px;
-`;
+export default ({ className }: IProps) => (
+	<svg width="12" height="9" viewBox="0 0 12 9" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+		<path
+			d="M4.07573 8.7728L0.175729 4.8728C-0.0585762 4.63849 -0.0585762 4.25859 0.175729 4.02426L1.02424 3.17573C1.25854 2.9414 1.63846 2.9414 1.87277 3.17573L4.5 5.80294L10.1272 0.175729C10.3615 -0.0585762 10.7415 -0.0585762 10.9758 0.175729L11.8243 1.02426C12.0586 1.25857 12.0586 1.63846 11.8243 1.87279L4.92426 8.77282C4.68994 9.00713 4.31004 9.00713 4.07573 8.7728Z"
+			fill="currentColor"
+		/>
+	</svg>
+);
