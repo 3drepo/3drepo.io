@@ -35,11 +35,12 @@ export const Link: typeof NavLink = styled(LinkComponent).attrs({
 		position: relative;
 		margin-left: 13px;
 		margin-right: 13px;
-		padding-top: 4px;
-		height: 56px;
+		height: 50px;
 		color: ${({ theme }) => theme.palette.base.main};
 		font-family: ${({ theme }) => theme.typography.fontFamily};
-		${({ theme }) => theme.typography.kickerTitle};
+		font-weight: 600;
+		font-size: 13px;
+		text-transform: none;
 
 		&:first-child {
 			margin-left: 0;
@@ -64,14 +65,16 @@ export const Link: typeof NavLink = styled(LinkComponent).attrs({
 	`};
 
 	&.active {
+		color: ${({ theme }) => theme.palette.primary.main};
+
 		&::after {
 			content: '';
-			background-color: ${({ theme }) => theme.palette.primary.main};
+			background-color: currentColor;
 			display: block;
-			height: 4px;
+			height: 3px;
 			width: 100%;
 			position: absolute;
-			bottom: 4px;
+			bottom: 0;
 			left: 0;
 		}
 	}

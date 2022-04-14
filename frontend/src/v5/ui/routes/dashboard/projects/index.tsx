@@ -51,7 +51,10 @@ export const ProjectContent = () => {
 					<Route exact path={`${path}/t/containers`}>
 						<Containers />
 					</Route>
-					<Route exact path={`${path}/t/settings`}>
+					<Route exact path={`${path}/t/tasks`}>
+						Tasks
+					</Route>
+					<Route exact path={`${path}/t/project_settings`}>
 						Project settings
 					</Route>
 					<Route exact path={`${path}/t/project_permissions`}>
