@@ -22,5 +22,5 @@ export const Content = styled.section`
 	overflow-y: auto;
 	flex-grow: 1;
 	/* using inset box-shadow because ScrollArea gives an absolute position to the component */
-	box-shadow: inset 0px 6px 16px -16px;
+	box-shadow: inset 0 6px 16px -16px;
 `;
