@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
+import DownloadIconBase from '@assets/icons/download_arrow.svg';
+import { IconButton } from '@mui/material';
 
 export const Container = styled.div`
 	display: flex;
@@ -22,4 +24,19 @@ export const Container = styled.div`
 	height: 100%;
 	padding-left: 20px;
 	padding-right: 13px;
+`;
+
+export const DownloadIcon = styled(DownloadIconBase)`
+	color: ${({ theme }) => theme.palette.primary.contrast};
+`;
+
+export const DownloadButton = styled(IconButton)`
+	margin: 0 0 0 11px;
+	&:hover {
+		background: transparent;
+
+		& ${DownloadIcon} {
+			color: ${({ theme }) => theme.palette.primary.main};
+		}
+	}
 `;

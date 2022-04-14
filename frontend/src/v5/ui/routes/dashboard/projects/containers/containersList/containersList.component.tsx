@@ -29,7 +29,6 @@ import {
 } from '@components/dashboard/dashboardList';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
-import { HeaderButtonsGroup } from '@/v5/ui/routes/dashboard/projects/containers/containers.styles';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { SearchInput } from '@controls/searchInput';
 import { Button } from '@controls/button';
@@ -39,7 +38,7 @@ import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashb
 import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containerListItem';
 import { Display } from '@/v5/ui/themes/media';
 import { formatMessage } from '@/v5/services/intl';
-import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
+import { DashboardListButton, DashedButtonContainer } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { Container, CollapseSideElementGroup } from './containersList.styles';
 
 interface IContainersList {
@@ -163,12 +162,14 @@ export const ContainersList = ({
 					)}
 				</DashboardList>
 				{showBottomButton && !isListPending && hasContainers && (
-					<DashboardListButton
-						startIcon={<AddCircleIcon />}
-						onClick={onClickCreate}
-					>
-						<FormattedMessage id="containers.addContainerButton" defaultMessage="Add new Container" />
-					</DashboardListButton>
+					<DashedButtonContainer>
+						<DashboardListButton
+							startIcon={<AddCircleIcon />}
+							onClick={onClickCreate}
+						>
+							<FormattedMessage id="containers.addContainerButton" defaultMessage="Add new Container" />
+						</DashboardListButton>
+					</DashedButtonContainer>
 				)}
 
 			</DashboardListCollapse>

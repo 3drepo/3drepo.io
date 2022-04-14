@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { SOCKET_HEADER } = require('../services/chat/chat.constants');
 const config = require('../utils/config');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { getURLDomain } = require('../utils/helper/strings');
@@ -22,9 +23,22 @@ const { isFromWebBrowser } = require('../utils/helper/userAgent');
 const { logger } = require('../utils/logger');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { respond } = require('../utils/responder');
+const { session } = require('../services/sessions');
 const { templates } = require('../utils/responseCodes');
 
 const Sessions = {};
+
+Sessions.manageSessions = async (req, res, next) => {
+	// In case other middleware sets the session
+	if (req.session) {
+		next();
+		return;
+	}
+
+	const { middleware } = await session;
+
+	middleware(req, res, next);
+};
 
 Sessions.createSession = (req, res) => {
 	req.session.regenerate((err) => {
@@ -53,10 +67,10 @@ Sessions.createSession = (req, res) => {
 				sessionID: req.sessionID,
 				ipAddress: req.ips[0] || req.ip,
 				userAgent: req.headers['user-agent'],
-				socketId: req.headers['x-socket-id'],
+				socketId: req.headers[SOCKET_HEADER],
 				referer: updatedUser.referer });
 
-			respond(req, res, templates.ok);
+			respond(req, res, templates.ok, req.v4 ? updatedUser : undefined);
 		}
 	});
 };
@@ -66,8 +80,8 @@ Sessions.destroySession = (req, res) => {
 	try {
 		req.session.destroy(() => {
 			res.clearCookie('connect.sid', { domain: config.cookie_domain, path: '/' });
-			const session = { user: { username } };
-			respond({ ...req, session }, res, templates.ok);
+			const sessionData = { user: { username } };
+			respond({ ...req, session: sessionData }, res, templates.ok, req.v4 ? { username } : undefined);
 		});
 	} catch (err) {
 		// istanbul ignore next

@@ -16,7 +16,8 @@
  */
 
 import { AxiosResponse } from 'axios';
-import api from './default';
+import { clientConfigService } from '@/v4/services/clientConfig';
+import api, { generateV5ApiUrl } from './default';
 
 export const fetchRevisions = (teamspace: string, projectId: string, containerId: string, showVoid = true): Promise<any> => api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions${showVoid ? '?showVoid=true' : ''}`);
 
@@ -38,3 +39,10 @@ export const createRevision = (
 	};
 	return api.post(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions`, body, config);
 };
+
+export const getRevisionFileUrl = (teamspace: string, projectId: string, containerId: string, revision: string) => (
+	generateV5ApiUrl(
+		`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/revisions/${revision}/files`,
+		clientConfigService.GET_API,
+	)
+);

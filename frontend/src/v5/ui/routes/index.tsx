@@ -23,9 +23,7 @@ import { StylesProvider } from '@mui/styles';
 import { ThemeProvider } from 'styled-components';
 
 import { theme } from '@/v5/ui/themes/theme';
-import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
-import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authActions.dispatchers';
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
 import { getIntlProviderProps } from '@/v5/services/intl';
@@ -35,17 +33,12 @@ import { V4Adapter } from '../v4Adapter/v4Adapter';
 
 export const Root = () => {
 	const history = useHistory();
-	const userName: string = CurrentUserHooksSelectors.selectUsername();
 	const isAuthenticated: boolean | null = AuthHooksSelectors.selectIsAuthenticated();
 
 	useEffect(() => {
 		AuthActionsDispatchers.authenticate();
 	}, []);
 	useEffect(() => {
-		if (userName) {
-			CurrentUserActionsDispatchers.fetchUser(userName);
-		}
-
 		if (isAuthenticated) {
 			TeamspacesActionsDispatchers.fetch();
 		}
@@ -53,7 +46,7 @@ export const Root = () => {
 		if (!isNull(isAuthenticated) && !isAuthenticated) {
 			history.push('/v5/login');
 		}
-	}, [userName, isAuthenticated]);
+	}, [isAuthenticated]);
 
 	return (
 		<ThemeProvider theme={theme}>

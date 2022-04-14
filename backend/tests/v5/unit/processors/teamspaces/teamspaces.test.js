@@ -16,7 +16,9 @@
  */
 
 const _ = require('lodash');
+const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
+const { generateRandomString } = require('../../../helper/services');
 
 const Teamspaces = require(`${src}/processors/teamspaces/teamspaces`);
 
@@ -29,8 +31,18 @@ const JobsModel = require(`${src}/models/jobs`);
 jest.mock('../../../../../src/v5/models/teamspaces');
 const TeamspacesModel = require(`${src}/models/teamspaces`);
 
+jest.mock('../../../../../src/v5/models/roles');
+const RolesModel = require(`${src}/models/roles`);
+
 jest.mock('../../../../../src/v5/utils/permissions/permissions');
 const Permissions = require(`${src}/utils/permissions/permissions`);
+
+const invalidUsername = 'invalid';
+const createTeamspaceRoleMock = RolesModel.createTeamspaceRole.mockImplementation((username) => {
+	if (username === invalidUsername) {
+		throw templates.unknown;
+	}
+});
 
 const testGetTeamspaceListByUser = () => {
 	describe('Get Teamspace list by user', () => {
@@ -93,7 +105,31 @@ const testGetTeamspaceMembersInfo = () => {
 	});
 };
 
+const testInitTeamspace = () => {
+	describe('Initialize teamspace', () => {
+		test('should initialize a teamspace', async () => {
+			const username = generateRandomString();
+			await Teamspaces.initTeamspace(username);
+			expect(createTeamspaceRoleMock).toHaveBeenCalledTimes(1);
+			expect(createTeamspaceRoleMock).toHaveBeenCalledWith(username);
+			expect(RolesModel.grantTeamspaceRoleToUser).toHaveBeenCalledTimes(1);
+			expect(RolesModel.grantTeamspaceRoleToUser).toHaveBeenCalledWith(username, username);
+			expect(JobsModel.addDefaultJobs).toHaveBeenCalledTimes(1);
+			expect(JobsModel.addDefaultJobs).toHaveBeenCalledWith(username);
+			expect(TeamspacesModel.createTeamspaceSettings).toHaveBeenCalledTimes(1);
+			expect(TeamspacesModel.createTeamspaceSettings).toHaveBeenCalledWith(username);
+		});
+
+		test('should initialize a teamspace even if an error is thrown ', async () => {
+			await Teamspaces.initTeamspace(invalidUsername);
+			expect(createTeamspaceRoleMock).toHaveBeenCalledTimes(1);
+			expect(createTeamspaceRoleMock).toHaveBeenCalledWith(invalidUsername);
+		});
+	});
+};
+
 describe('processors/teamspaces', () => {
 	testGetTeamspaceListByUser();
 	testGetTeamspaceMembersInfo();
+	testInitTeamspace();
 });
