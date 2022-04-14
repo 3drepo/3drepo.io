@@ -15,23 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createSelector } from 'reselect';
-import { pick } from 'lodash';
-
-const selectCurrentUserDomain = (state) => (state.currentUser2);
-
-export const selectCurrentUser = createSelector(
-	selectCurrentUserDomain, (state) => state.currentUser || {},
-);
-
-export const selectUsername: (state) => string = createSelector(
-	selectCurrentUser, (state) => state.username || '',
-);
-
-export const selectErrors: (state) => { avatarError?: string, passwordError?: string } = createSelector(
-	selectCurrentUser, (state) => pick(state, 'avatarError', 'passwordError'),
-);
-
-export const selectApiKey: (state) => string = createSelector(
-	selectCurrentUser, (state) => state.apiKey || '',
-);
+export const fileIsTooBig = (file): boolean => {
+	const MAX_FILE_SIZE = 1024 * 1024; // 1MB
+	return file.size > MAX_FILE_SIZE;
+};

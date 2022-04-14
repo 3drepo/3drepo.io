@@ -67,14 +67,13 @@ export const AddImageHiddenInput = styled.input.attrs({
 	display: none;
 `;
 
-const AddImageButtonLabel = styled.label.attrs({
-	htmlFor: ADD_IMAGE_ID,
-})``;
-
 export const AddImageButton = styled(Button).attrs({
 	variant: 'outlined',
 	color: 'primary',
-	as: AddImageButtonLabel,
 })`
 	margin: 14px 0 0;
 `;
+
+export const AddImageButtonContainer = styled.label.attrs({
+	htmlFor: ADD_IMAGE_ID,
+})``;

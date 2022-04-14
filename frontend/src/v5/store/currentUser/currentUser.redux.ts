@@ -25,6 +25,11 @@ export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createA
 	fetchUserSuccess: ['userData'],
 	updateUser: ['userData'],
 	updateUserSuccess: ['userData'],
+	updateUserAvatar: ['avatarFile'],
+	updateUserAvatarSuccess: ['avatarUrl'],
+	updateUserAvatarFailure: ['avatarError'],
+	updateUserPasswordFailure: ['passwordError'],
+	resetErrors: [],
 	setIsPending: ['isPending'],
 	generateApiKey: [],
 	deleteApiKey: [],
@@ -47,6 +52,39 @@ export const updateUserSuccess = (state = INITIAL_STATE, { userData }): ICurrent
 	},
 });
 
+export const updateUserAvatarSuccess = (state = INITIAL_STATE, { avatarUrl }): ICurrentUserState => ({
+	...state,
+	currentUser: {
+		...state.currentUser,
+		avatarUrl,
+	},
+});
+
+export const updateUserAvatarFailure = (state = INITIAL_STATE, { avatarError }): ICurrentUserState => ({
+	...state,
+	currentUser: {
+		...state.currentUser,
+		avatarError,
+	},
+});
+
+export const updateUserPasswordFailure = (state = INITIAL_STATE, { passwordError }): ICurrentUserState => ({
+	...state,
+	currentUser: {
+		...state.currentUser,
+		passwordError,
+	},
+});
+
+export const resetErrors = (state = INITIAL_STATE): ICurrentUserState => ({
+	...state,
+	currentUser: {
+		...state.currentUser,
+		avatarError: null,
+		passwordError: null,
+	},
+});
+
 export const setIsPending = (state = INITIAL_STATE, { pendingState }) => ({
 	...state,
 	isPending: pendingState,
@@ -55,6 +93,10 @@ export const setIsPending = (state = INITIAL_STATE, { pendingState }) => ({
 export const currentUserReducer = createReducer<ICurrentUserState>(INITIAL_STATE, {
 	[CurrentUserTypes.FETCH_USER_SUCCESS]: fetchUserSuccess,
 	[CurrentUserTypes.UPDATE_USER_SUCCESS]: updateUserSuccess,
+	[CurrentUserTypes.UPDATE_USER_AVATAR_SUCCESS]: updateUserAvatarSuccess,
+	[CurrentUserTypes.UPDATE_USER_AVATAR_FAILURE]: updateUserAvatarFailure,
+	[CurrentUserTypes.UPDATE_USER_PASSWORD_FAILURE]: updateUserPasswordFailure,
+	[CurrentUserTypes.RESET_ERRORS]: resetErrors,
 	[CurrentUserTypes.SET_IS_PENDING]: setIsPending,
 });
 
@@ -70,6 +112,11 @@ export type FetchUserAction = Action<'FETCH_USER'>;
 export type FetchUserSuccessAction = Action<'FETCH_USER_SUCCESS'> & { userData: ICurrentUser };
 export type UpdateUserAction = Action<'UPDATE_USER'> & { userData: UpdateUser };
 export type UpdateUserSuccessAction = Action<'UPDATE_USER_SUCCESS'> & { userData: UpdateUser };
+export type UpdateUserAvatarAction = Action<'UPDATE_USER_AVATAR'> & { avatarFile: File };
+export type UpdateUserAvatarSuccessAction = Action<'UPDATE_USER_AVATAR_SUCCESS'> & { avatarUrl: string };
+export type UpdateUserAvatarFailureAction = Action<'UPDATE_USER_AVATAR_FAILURE'> & { avatarError: string };
+export type UpdateUserPasswordFailureAction = Action<'UPDATE_USER_PASSWORD_FAILURE'> & { passwordError: string };
+export type ResetErrorsActions = Action<'RESET_ERRORS'>;
 export type SetIsPendingAction = Action<'SET_IS_PENDING'>;
 
 export interface ICurrentUserActionCreators {
@@ -77,6 +124,11 @@ export interface ICurrentUserActionCreators {
 	fetchUserSuccess: (userData: ICurrentUser) => FetchUserSuccessAction;
 	updateUser: (userData: UpdateUser) => UpdateUserAction;
 	updateUserSuccess: (userData: UpdateUser) => UpdateUserSuccessAction;
+	updateUserAvatar: (avatarFile: File) => UpdateUserAvatarAction;
+	updateUserAvatarSuccess: (avatarUrl: string) => UpdateUserAvatarSuccessAction;
+	updateUserAvatarFailure: (avatarError: string) => UpdateUserAvatarFailureAction;
+	updateUserPasswordFailure: (passwordError: string) => UpdateUserPasswordFailureAction;
+	resetErrors: () => ResetErrorsActions;
 	setIsPending: (isPending: boolean) => SetIsPendingAction;
 	generateApiKey: () => UpdateUserSuccessAction;
 	deleteApiKey: () => UpdateUserSuccessAction;

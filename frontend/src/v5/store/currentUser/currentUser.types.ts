@@ -25,6 +25,8 @@ export interface ICurrentUser {
 	company?: string,
 	countryCode?: string,
 	avatarUrl?: string,
+	avatarError?: string,
+	passwordError?: string,
 }
 
 export type UpdateUser = Partial<Omit<ICurrentUser, 'avatarUrl' | 'hasAvatar' | 'username'> & {

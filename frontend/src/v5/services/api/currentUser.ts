@@ -25,6 +25,8 @@ export const fetchUser = async (): Promise<ICurrentUser> => {
 
 export const updateUser = async (user: UpdateUser) => api.put('user', user);
 
+export const updateUserAvatar = async (avatarFile: FormData) => api.put('user/avatar', avatarFile);
+
 export const generateApiKey = async (): Promise<{ apiKey: string }> => {
 	const { data } = await api.post('user/key');
 	return data;
