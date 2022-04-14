@@ -102,24 +102,22 @@ export const ContainersList = ({
 							value={filterQuery}
 							placeholder={formatMessage({ id: 'containers.search.placeholder', defaultMessage: 'Search containers...' })}
 						/>
-						<HeaderButtonsGroup>
-							<Button
-								startIcon={<AddCircleIcon />}
-								variant="outlined"
-								color="secondary"
-								onClick={onClickCreate}
-							>
-								<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New container" />
-							</Button>
-							<Button
-								startIcon={<ArrowUpCircleIcon />}
-								variant="contained"
-								color="primary"
-								onClick={onClickUpload}
-							>
-								<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
-							</Button>
-						</HeaderButtonsGroup>
+						<Button
+							startIcon={<AddCircleIcon />}
+							variant="outlined"
+							color="secondary"
+							onClick={onClickCreate}
+						>
+							<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New container" />
+						</Button>
+						<Button
+							startIcon={<ArrowUpCircleIcon />}
+							variant="contained"
+							color="primary"
+							onClick={onClickUpload}
+						>
+							<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
+						</Button>
 					</CollapseSideElementGroup>
 				)}
 			>
