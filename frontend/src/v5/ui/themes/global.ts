@@ -39,6 +39,23 @@ export const GlobalStyle = createGlobalStyle`
 		flex-direction: column;
 	}
 
+	a {
+		&:link {
+			text-decoration: none;
+			color:inherit;
+		}
+
+		&:visited {
+			text-decoration: none;
+			color:inherit;
+		}
+		&:hover {
+			text-decoration: none;
+		}
+
+		&:active { text-decoration: none; }
+	}
+
 	#viewer #unityViewer {
 		position : absolute;
 		height: 100% !important;

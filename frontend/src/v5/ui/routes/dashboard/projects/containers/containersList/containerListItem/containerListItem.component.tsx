@@ -35,7 +35,7 @@ import { Display } from '@/v5/ui/themes/media';
 import { formatDate, formatMessage } from '@/v5/services/intl';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { ShareModal } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
-import { DashboardLink } from '@components/dashboard/dashboardList/dashboardList.styles';
+import { Link } from 'react-router-dom';
 import { useParams } from 'react-router';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { viewerRoute } from '@/v5/services/routing/routing';
@@ -88,11 +88,11 @@ export const ContainerListItem = ({
 						<FormattedMessage id="containers.list.item.title.tooltip" defaultMessage="Launch latest revision" />
 					}
 				>
-					<DashboardLink to={viewerRoute(teamspace, container)}>
+					<Link to={viewerRoute(teamspace, container)}>
 						<Highlight search={filterQuery}>
 							{container.name}
 						</Highlight>
-					</DashboardLink>
+					</Link>
 				</DashboardListItemTitle>
 				<DashboardListItemButton
 					onClick={() => onSelectOrToggleItem(container._id)}

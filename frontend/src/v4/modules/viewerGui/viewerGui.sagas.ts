@@ -16,7 +16,7 @@
  */
 
 import { push } from 'connected-react-router';
-import { all, delay, put, select, take, takeLatest } from 'redux-saga/effects';
+import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { ROUTES } from '../../constants/routes';
 import { INITIAL_HELICOPTER_SPEED, NEW_PIN_ID, VIEWER_CLIP_MODES, VIEWER_EVENTS } from '../../constants/viewer';

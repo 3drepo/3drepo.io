@@ -37,10 +37,9 @@ import { FederationSettingsForm } from '@/v5/ui/routes/dashboard/projects/federa
 import { ShareModal } from '@components/dashboard/dashboardList/dashboardListItem/shareModal/shareModal.component';
 import { EditFederationModal } from '@/v5/ui/routes/dashboard/projects/federations/editFederationModal/editFederationModal.component';
 
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { viewerRoute } from '@/v5/services/routing/routing';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { DashboardLink } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { FederationEllipsisMenu } from './federationEllipsisMenu/federationEllipsisMenu.component';
 
 const MODALS = {
@@ -83,11 +82,11 @@ export const FederationListItem = ({
 						subtitle={federation.desc}
 						minWidth={90}
 					>
-						<DashboardLink to={viewerRoute(teamspace, federation)}>
+						<Link to={viewerRoute(teamspace, federation)}>
 							<Highlight search={filterQuery}>
 								{federation.name}
 							</Highlight>
-						</DashboardLink>
+						</Link>
 					</DashboardListItemTitle>
 					<DashboardListItemButton
 						hideWhenSmallerThan={1080}
