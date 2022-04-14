@@ -24,7 +24,7 @@ export const Container = styled.div`
 	width: auto;
 	display: inline-flex;
 	align-items: center;
-	margin-left: 70px;
+	margin-left: 7px;
 `;
 
 export const StatusText = styled(Typography).attrs({
@@ -39,8 +39,9 @@ export const StatusText = styled(Typography).attrs({
 `;
 
 export const CompletionMark = styled.div`
-	width: 25px;
-	margin: auto 10px;
+	height: 15px;
+	width: 15px;
+	margin: auto 0 auto 5px;
 	color: ${PROGRESS_BAR_COLOUR_MAP.uploaded};
 `;
 

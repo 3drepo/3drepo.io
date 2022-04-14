@@ -401,7 +401,7 @@ export const theme = createTheme({
 			styleOverrides: {
 				root: {
 					borderRadius: '5px',
-					height: '16px',
+					height: '18px',
 					margin: 'auto 10px',
 				},
 				barColorPrimary: {

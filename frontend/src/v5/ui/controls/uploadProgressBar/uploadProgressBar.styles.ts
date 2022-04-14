@@ -35,7 +35,7 @@ const ProgressBarPercentage = styled.div`
 	font-family: Inter, Arial, sans-serif;
 	user-select: none;
 	font-size: 11px;
-	line-height: 16px;
+	line-height: 18px;
 	font-weight: bold;
 	width: 100%;
 	justify-content: center;
@@ -52,8 +52,6 @@ export const ProgressBarLabelDark = styled(ProgressBarPercentage)<{ progress: nu
 
 export const LabelledProgressBar = styled.div<{ uploadstatus: string; }>`
 	position: relative;
-	height: 16px;
-
 	color: ${({ uploadstatus }) => PROGRESS_BAR_COLOUR_MAP[uploadstatus]};
 	.MuiLinearProgress-barColorPrimary {
 		background-color: ${({ uploadstatus }) => PROGRESS_BAR_COLOUR_MAP[uploadstatus]};
