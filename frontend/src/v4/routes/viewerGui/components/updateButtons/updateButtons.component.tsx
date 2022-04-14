@@ -14,9 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
 import { renderWhenTrue, renderWhenTrueOtherwise } from '../../../../helpers/rendering';
 import { ImageButton } from '../imageButton/imageButton.component';
 import PinButton from '../pinButton/pinButton.container';
@@ -41,9 +38,9 @@ interface IProps {
 export const UpdateButtons = ({
 	isNew, canEditViewpoint, disableViewer, onSavePin, onChangePin, onUpdateViewpoint, hasImage, hasPin, ...props
 }: IProps) => (
-	<FieldsRow container alignItems="center" justify="space-between">
+	<FieldsRow container alignItems="center" justifyContent="space-between">
 		{renderWhenTrueOtherwise(() => (
-			<UpdateButtonsContainer center={!isNew ? 1 : 0}>
+			<UpdateButtonsContainer center={!isNew}>
 				<PinButton
 					onChange={onChangePin}
 					onSave={onSavePin}

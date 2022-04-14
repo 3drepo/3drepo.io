@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { INITIAL_STATE, reducer as projectsReducer, ProjectsActions, IProjectsState } from "@/v5/store/projects/projects.redux";
+import { INITIAL_STATE, projectsReducer, ProjectsActions, IProjectsState } from "@/v5/store/projects/projects.redux";
 
 describe('Projects: redux', () => {
 	const defaultState: IProjectsState = {

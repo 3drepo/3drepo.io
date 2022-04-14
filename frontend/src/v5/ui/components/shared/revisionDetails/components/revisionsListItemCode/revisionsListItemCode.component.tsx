@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { Dispatch, ReactNode } from 'react';
+import { MouseEventHandler, ReactNode } from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { TextOverflow } from '@controls/textOverflow';
 import { Text } from './revisionsListItemCode.styles';
@@ -26,7 +26,7 @@ type IRevisionsListItemCode = {
 	tabletWidth?: number;
 	mobileWidth?: number;
 	className?: string;
-	onClick?: Dispatch<void>;
+	onClick?: MouseEventHandler<HTMLSpanElement>;
 };
 
 export const RevisionsListItemCode = ({

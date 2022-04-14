@@ -14,20 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { FunctionComponent, ReactNode } from 'react';
 import { ButtonMenu } from '../../../buttonMenu/buttonMenu.component';
 import { MenuButton } from './menuButton/menuButton.component';
 
 interface IProps {
-	children?: React.ReactNode;
-	renderContent?: React.ReactNode;
-	icon?: React.ReactNode;
+	children?: ReactNode;
+	renderContent?: ReactNode;
+	icon?: ReactNode;
 	label: string;
 }
 
-export const NestedMenuItem: React.FunctionComponent<IProps> = ({ children, label, renderContent, icon }) => {
+export const NestedMenuItem: FunctionComponent<IProps> = ({ children, label, renderContent, icon }) => {
 	const renderSubMenuContent = () => renderContent || children;
 
 	const renderButton = ({ ...props }) => <MenuButton label={label} icon={icon} {...props} />;

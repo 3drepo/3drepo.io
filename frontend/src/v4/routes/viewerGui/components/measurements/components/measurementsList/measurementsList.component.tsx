@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { useState } from 'react';
 
-import MoreIcon from '@material-ui/icons/ChevronRight';
-import LessIcon from '@material-ui/icons/ExpandMore';
+import MoreIcon from '@mui/icons-material/ChevronRight';
+import LessIcon from '@mui/icons-material/ExpandMore';
 
 import { MEASURE_TYPE, MEASURE_TYPE_NAME} from '../../../../../../modules/measurements/measurements.constants';
 import { MeasureItem } from '../measureItem/';
@@ -47,7 +47,7 @@ export const MeasurementsList = ({
 	measurements, units, measureType, removeMeasurement,
 	setMeasurementColor, setMeasurementName, colors, ...props
 }: IProps) => {
-	const [expanded, setExpanded] = React.useState(true);
+	const [expanded, setExpanded] = useState(true);
 
 	const handleOnClick = () => setExpanded(!expanded);
 

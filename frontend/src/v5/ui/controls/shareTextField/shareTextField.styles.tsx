@@ -14,10 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React from 'react';
 import styled from 'styled-components';
-import { TextField } from '@material-ui/core';
-import Tooltip, { TooltipProps } from '@material-ui/core/Tooltip';
+import { TextField } from '@mui/material';
+import Tooltip, { TooltipProps } from '@mui/material/Tooltip';
 import copyToClipboardIcon from '@assets/icons/copy_to_clipboard';
 import tick from '@assets/icons/tick';
 

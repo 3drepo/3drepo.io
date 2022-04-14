@@ -14,12 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { Grid } from '@material-ui/core';
-import React from 'react';
+import { forwardRef } from 'react';
+import { Grid } from '@mui/material';
 
 import { SortLabel } from '../tableHeading/tableHeading.styles';
-import { TableHeadingRadioButton, RadioContainer, TableHeadingRadioTooltip } from './tableHeadingRadio.styles';
+import {
+	TableHeadingRadioButton,
+	RadioContainer,
+} from './tableHeadingRadio.styles';
 
 interface IProps {
 	label: string;
@@ -30,56 +32,57 @@ interface IProps {
 	checked?: boolean;
 	name?: string;
 	tooltipText?: string;
+	className?: string;
 	width?: string;
 	onChange?: (event, value) => void;
 	onClick?: () => void;
 }
 
-export class TableHeadingRadio extends React.PureComponent<IProps, any> {
-	public state = {
-		selectedValue: ''
-	};
+export const TableHeadingRadio = forwardRef((({
+	activeSort,
+	label,
+	name,
+	onClick,
+	onChange,
+	sortOrder,
+	tooltipText,
+	value,
+	checked,
+	disabled,
+	...otherProps
+}: IProps, ref: any ) => {
 
-	public handleChange = (event) => {
-		this.props.onChange(event, this.props.value);
+	const handleChange = (event) => {
+		onChange(event, value);
 	}
 
-	public render() {
-		const {
-			label, name, disabled, checked, activeSort, sortOrder, onClick, onChange, tooltipText, value, width
-		} = this.props;
-
-		const RadioContainerProps = { width };
-
-		return (
-			<TableHeadingRadioTooltip title={tooltipText}>
-				<RadioContainer
-					container
-					direction="column"
-					justify="center"
-					alignItems="center"
-					{...RadioContainerProps}
+	return (
+		<RadioContainer
+			container
+			direction="column"
+			justifyContent="center"
+			alignItems="center"
+			ref={ref}
+			{...otherProps}
+		>
+			<Grid item>
+				<SortLabel
+					active={activeSort}
+					direction={sortOrder}
+					onClick={onClick}
 				>
-					<Grid item>
-						<SortLabel
-							active={activeSort}
-							direction={sortOrder}
-							onClick={onClick}
-						>
-							{label}
-						</SortLabel>
-					</Grid>
-					<Grid item>
-						<TableHeadingRadioButton
-							checked={checked}
-							name={name || label}
-							disabled={disabled}
-							value={value}
-							onChange={this.handleChange}
-						/>
-					</Grid>
-				</RadioContainer>
-			</TableHeadingRadioTooltip>
-		);
-	}
-}
+					{label}
+				</SortLabel>
+			</Grid>
+			<Grid item>
+				<TableHeadingRadioButton
+					checked={checked}
+					name={name || label}
+					disabled={disabled}
+					value={value}
+					onChange={handleChange}
+				/>
+			</Grid>
+		</RadioContainer>
+	);
+}));

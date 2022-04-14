@@ -15,17 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Tooltip from '@material-ui/core/Tooltip';
-import React, { memo } from 'react';
+import { Box } from '@mui/material';
+import Tooltip from '@mui/material/Tooltip';
+import { memo, ReactNode } from 'react';
 import TruncateBase from 'react-truncate';
 
 import { Container } from './truncate.styles';
 
 interface IProps {
 	className?: string;
-	children: string | React.ReactNode;
+	children: string | ReactNode;
 	lines: number | boolean;
-	ellipsis?: string | React.ReactNode;
+	ellipsis?: string | ReactNode;
 	trimWhitespace?: boolean;
 	width?: number;
 	onTruncate?: () => void;
@@ -37,7 +38,9 @@ export const Truncate = memo((props: IProps) => {
 	return (
 		<Container className={props.className}>
 			<Tooltip title={children}>
-				<TruncateBase {...truncateProps}>{children}</TruncateBase>
+				<Box>
+					<TruncateBase {...truncateProps}>{children}</TruncateBase>
+				</Box>
 			</Tooltip>
 		</Container>
 	);

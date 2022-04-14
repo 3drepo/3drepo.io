@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 
-import { Tab } from '@material-ui/core';
-import InfoIcon from '@material-ui/icons/Info';
+import { Tab } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
 import { isEmpty } from 'lodash';
 
 import { BIM_ACTIONS_ITEMS, BIM_ACTIONS_MENU } from '@/v4/constants/bim';
@@ -58,7 +58,7 @@ interface IProps {
 	showConfirmDialog: (config) => void;
 }
 
-export class Bim extends React.PureComponent<IProps, any> {
+export class Bim extends PureComponent<IProps, any> {
 	get menuActionsMap() {
 		const { clearStarredMetadata, teamspace, model } = this.props;
 		return {
@@ -191,7 +191,7 @@ export class Bim extends React.PureComponent<IProps, any> {
 		return(
 			<MenuList>
 				{BIM_ACTIONS_MENU.map(({ name, label }) => (
-					<StyledListItem key={name} button onClick={(e) => {
+					<StyledListItem key={name} onClick={(e) => {
 						menu.close(e);
 						this.menuActionsMap[name]();
 					}}>

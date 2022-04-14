@@ -14,10 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
-import InputLabel from '@material-ui/core/InputLabel';
+import { FunctionComponent } from 'react';
+import InputLabel from '@mui/material/InputLabel';
 import { Field } from 'formik';
 
 import {
@@ -62,7 +60,7 @@ interface IProps {
 	showScreenshotDialog: (config: any) => void;
 }
 
-export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
+export const MainRiskFormTab: FunctionComponent<IProps> = ({
 	active, isNewRisk, risk, disableViewer, jobs, canComment, canEditBasicProperty,
 	canEditViewpoint, values, criteria, ...props
 }) => {
@@ -97,7 +95,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 				/>
 			)}
 
-			<FieldsRow container alignItems="center" justify="space-between">
+			<FieldsRow container alignItems="center" justifyContent="space-between">
 				<UpdateButtons
 					isNew={isNewRisk}
 					disableViewer={disableViewer}
@@ -113,7 +111,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 				/>
 			</FieldsRow>
 
-			<FieldsRow container alignItems="center" justify="space-between">
+			<FieldsRow container alignItems="center" justifyContent="space-between">
 				<FieldsContainer size={'wide'}>
 					<StyledFormControl>
 						<InputLabel shrink htmlFor="likelihood">Risk Likelihood</InputLabel>
@@ -157,7 +155,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 				</FieldsContainer>
 			</FieldsRow>
 
-			<FieldsRow container alignItems="center" justify="space-between">
+			<FieldsRow container alignItems="center" justifyContent="space-between">
 				<StyledFormControl>
 					<InputLabel shrink htmlFor="assigned_roles">Risk owner</InputLabel>
 					<Field name="assigned_roles" render={({ field }) => (
@@ -183,7 +181,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 				</StyledFormControl>
 			</FieldsRow>
 
-			<FieldsRow container alignItems="center" justify="space-between">
+			<FieldsRow container alignItems="center" justifyContent="space-between">
 				<StyledFormControl>
 					<Field name="associated_activity" render={({ field, form }) => (
 						<AutoSuggestField
@@ -210,7 +208,7 @@ export const MainRiskFormTab: React.FunctionComponent<IProps> = ({
 				</StyledFormControl>
 			</FieldsRow>
 
-			<FieldsRow container alignItems="center" justify="space-between">
+			<FieldsRow container alignItems="center" justifyContent="space-between">
 				<FieldsContainer>
 					<Field name="risk_factor" render={({ field, form }) => (
 						<AutoSuggestField

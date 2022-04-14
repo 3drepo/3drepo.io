@@ -15,12 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Select } from '@material-ui/core';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
+import { Select } from '@mui/material';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
 import { Field, Form, Formik } from 'formik';
-import { isEqual } from 'lodash';
-import React from 'react';
+import { PureComponent } from 'react';
 import * as Yup from 'yup';
 
 import { GROUPS_TYPES, GROUPS_TYPES_LIST } from '../../../../../../constants/groups';
@@ -54,7 +53,7 @@ interface IProps {
 	handleChange: (event) => void;
 }
 
-export class GroupDetailsForm extends React.PureComponent<IProps, any> {
+export class GroupDetailsForm extends PureComponent<IProps, any> {
 	get isNewGroup() {
 		return !this.props.group._id;
 	}
@@ -90,7 +89,7 @@ export class GroupDetailsForm extends React.PureComponent<IProps, any> {
 					<FieldsRow>
 						<StyledTextField
 							label={<LongLabel>Number of objects</LongLabel>}
-							value={totalSavedMeshes || 0}
+							value={(totalSavedMeshes || 0).toString()}
 							disabled
 						/>
 						<StyledTextField

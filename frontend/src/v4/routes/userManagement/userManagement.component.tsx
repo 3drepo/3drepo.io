@@ -14,12 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
-import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
-import Tabs from '@material-ui/core/Tabs';
+import { PureComponent } from 'react';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Tabs from '@mui/material/Tabs';
 import { isEmpty, isEqual } from 'lodash';
 import { Link, Redirect, Route, Switch } from 'react-router-dom';
 
@@ -86,7 +84,7 @@ interface IState {
 	teamspacesItems: any[];
 }
 
-export class UserManagement extends React.PureComponent<IProps, IState> {
+export class UserManagement extends PureComponent<IProps, IState> {
 	public state = {
 		activeTab: USERS_TAB.path,
 		teamspacesItems: []

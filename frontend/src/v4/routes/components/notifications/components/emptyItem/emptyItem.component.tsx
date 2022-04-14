@@ -14,12 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import Notifications from '@material-ui/icons/Notifications';
-import React from 'react';
+import { PureComponent } from 'react';
+import Notifications from '@mui/icons-material/Notifications';
 import { EmptyItem, EmptyItemText } from './emptyItem.styles';
 
-export class NotificationEmptyItem extends React.PureComponent {
+export class NotificationEmptyItem extends PureComponent {
 	public render() {
 		return (
 			<EmptyItem>

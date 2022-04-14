@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import MoreVert from '@material-ui/icons/MoreVert';
-import React, { memo, useCallback, useRef, useState } from 'react';
+import MoreVert from '@mui/icons-material/MoreVert';
+import { memo, useCallback, useRef, useState } from 'react';
 
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -92,9 +92,7 @@ export const ActionsMenu = memo(({federate, isPending, actions = [], permissions
 				container
 				wrap="wrap"
 				direction="row"
-				alignItems="center"
-				justify="flex-start"
-				theme={{ forceOpen, federate }}
+				options={{ forceOpen, federate }}
 			>
 				{isOnScreen && <Actions>{renderActions(actions, isPending, permissions)}</Actions>}
 			</StyledGrid>

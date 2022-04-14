@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CollapsedIcon from '@material-ui/icons/ChevronRight';
-import ExpandedIcon from '@material-ui/icons/ExpandMore';
-import React from 'react';
+import CollapsedIcon from '@mui/icons-material/ChevronRight';
+import ExpandedIcon from '@mui/icons-material/ExpandMore';
+import { PureComponent } from 'react';
 import { SubTasksItemContainer, Task, TaskButton, TaskItemLabel, TaskSmallDot } from '../../sequences.styles';
 
 export interface IActivity {
@@ -44,7 +44,7 @@ const CollapseButton = ({collapsed, onClick}) => {
 	return (<TaskButton onClick={onClick}><Icon /></TaskButton>);
 };
 
-export class TaskItem extends React.PureComponent<IProps, IState> {
+export class TaskItem extends PureComponent<IProps, IState> {
 	public state: IState = {
 		collapsed: this.props.defaultCollapsed  || false
 	};

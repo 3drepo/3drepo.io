@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { useState, useEffect } from 'react';
 
 import { isEmpty, memoize } from 'lodash';
 import { renderWhenTrueOtherwise } from '../../../../../../../helpers/rendering';
@@ -34,9 +34,9 @@ interface IProps {
 }
 
 export const UserAvatar = ({ name, currentUser }: IProps) => {
-	const [url, setUrl] = React.useState(null);
+	const [url, setUrl] = useState(null);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		(async () => {
 			const avatarCheckedUrl = await avatarUrl(name);
 			setUrl(avatarCheckedUrl);
@@ -45,7 +45,7 @@ export const UserAvatar = ({ name, currentUser }: IProps) => {
 
 	return (
 		<>
-			{!currentUser && <Avatar initials>{getInitials(name)}</Avatar>}
+			{!currentUser && <Avatar>{getInitials(name)}</Avatar>}
 			{currentUser && renderWhenTrueOtherwise(
 				() => <Avatar src={url} color={currentUser.job && currentUser.job.color} />,
 				() => <Avatar color={currentUser.job && currentUser.job.color}>{getInitials(name)}</Avatar>

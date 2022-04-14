@@ -15,14 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-
-import SvgIcon from '@material-ui/core/SvgIcon';
-import ArrowIcon from '@material-ui/icons/ArrowRightAlt';
-import ChangeHistoryIcon from '@material-ui/icons/ChangeHistory';
-import CropSquareIcon from '@material-ui/icons/CropSquare';
-import PanoramaFishEyeIcon from '@material-ui/icons/PanoramaFishEye';
-import RemoveIcon from '@material-ui/icons/Remove';
+import SvgIcon from '@mui/material/SvgIcon';
+import ArrowIcon from '@mui/icons-material/ArrowRightAlt';
+import ChangeHistoryIcon from '@mui/icons-material/ChangeHistory';
+import CropSquareIcon from '@mui/icons-material/CropSquare';
+import PanoramaFishEyeIcon from '@mui/icons-material/PanoramaFishEye';
+import RemoveIcon from '@mui/icons-material/Remove';
 
 import { DrawPolygon } from '../../../fontAwesomeIcon';
 import { SHAPE_TYPES } from '../shape/shape.constants';

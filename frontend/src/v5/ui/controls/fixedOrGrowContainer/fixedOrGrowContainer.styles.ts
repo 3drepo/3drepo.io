@@ -18,7 +18,15 @@
 import styled, { css } from 'styled-components';
 import { Display } from '@/v5/ui/themes/media';
 
-export const Container = styled.div<{width?: number}>`
+interface IProps {
+	width?: number;
+	minWidth?: number;
+	tabletWidth?: number;
+	mobileWidth?: number;
+	hideWhenSmallerThan?: Display;
+}
+
+export const Container = styled.div<IProps>`
 	min-width: ${({ minWidth }) => minWidth || 0}px;
 
 	${({ width }) => (width
@@ -45,7 +53,7 @@ export const Container = styled.div<{width?: number}>`
 		}
 	`}
 
-	${({ hideWhenSmallerThan }: { hideWhenSmallerThan: Display }) => hideWhenSmallerThan && css`
+	${({ hideWhenSmallerThan }) => hideWhenSmallerThan && css`
 		@media (max-width: ${hideWhenSmallerThan}px) {
 			display: none;
 		}

@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Grid from '@material-ui/core/Grid';
+import Grid from '@mui/material/Grid';
 import { Field, Form, Formik } from 'formik';
-import React from 'react';
+import { PureComponent } from 'react';
 import * as Yup from 'yup';
 
 import { schema } from '../../../services/validation';
@@ -56,7 +56,7 @@ const ProfileSchema = Yup.object().shape({
 	email: schema.email
 });
 
-export class ProfileDataForm extends React.PureComponent<IProps, IState> {
+export class ProfileDataForm extends PureComponent<IProps, IState> {
 	public state = {
 		uploadedAvatar: {}
 	};

@@ -277,7 +277,7 @@
 		ACCOUNT_PERM_EMPTY: { message: "Cannot add empty permissions", status: 404},
 		ADMIN_TEMPLATE_CANNOT_CHANGE: { message: "Admin permission template cannot be changed or deleted", status: 400},
 
-		UNSUPPORTED_STORAGE_TYPE : {message: "File is stored in an unsupported storage type is not supported", status: 500},
+		UNSUPPORTED_STORAGE_TYPE : {message: "File is stored in an unsupported storage type", status: 500},
 		UNRECOGNISED_STORAGE_TYPE : {message: "File is stored an unrecognised storage type", status: 500},
 
 		VAT_CODE_ERROR:{ message: "Error validating VAT number", status: 500},

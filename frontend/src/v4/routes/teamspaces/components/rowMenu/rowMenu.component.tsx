@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import IconButton from '@material-ui/core/IconButton';
-import MoreVert from '@material-ui/icons/MoreVert';
+import IconButton from '@mui/material/IconButton';
+import MoreVert from '@mui/icons-material/MoreVert';
 import { isEmpty } from 'lodash';
-import React from 'react';
+import { PureComponent } from 'react';
 
 import { StyledGrid, StyledGridActions } from './rowMenu.styles';
 
@@ -33,7 +33,7 @@ interface IState {
 	pointerEvents: boolean;
 }
 
-export class RowMenu extends React.PureComponent<IProps, IState> {
+export class RowMenu extends PureComponent<IProps, IState> {
 	public state = {
 		pointerEvents: false
 	};
@@ -58,27 +58,27 @@ export class RowMenu extends React.PureComponent<IProps, IState> {
 		const { children, disabled, forceOpen, toggleForceOpen } = this.props;
 
 		return (
-			<StyledGrid
+            <StyledGrid
 				container
 				wrap="nowrap"
 				direction="row"
 				alignItems="center"
-				justify="flex-start"
+				justifyContent="flex-start"
 			>
 				<StyledGridActions
-					container
-					wrap="nowrap"
-					direction="row"
-					alignItems="center"
-					justify="flex-start"
 					opened={forceOpen}
 				>
 					{children}
 				</StyledGridActions>
-				<IconButton aria-label="Toggle menu" onClick={toggleForceOpen} disabled={disabled}>
+				<IconButton
+                    aria-label="Toggle menu"
+                    onClick={toggleForceOpen}
+                    disabled={disabled}
+                    size="large"
+				>
 					<MoreVert fontSize="small" />
 				</IconButton>
 			</StyledGrid>
-		);
+        );
 	}
 }

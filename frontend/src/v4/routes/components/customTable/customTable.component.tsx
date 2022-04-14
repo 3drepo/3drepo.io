@@ -14,10 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { PureComponent, ReactChild, createRef } from 'react';
 
-import { Checkbox, IconButton, Tooltip } from '@material-ui/core';
+import { Checkbox, IconButton, Tooltip } from '@mui/material';
 import { cond, isEmpty, isEqual, matchesProperty, orderBy, pick, stubTrue, values } from 'lodash';
-import React from 'react';
 import SimpleBar from 'simplebar-react';
 
 import { SORT_ORDER_TYPES } from '../../../constants/sorting';
@@ -29,10 +29,10 @@ import { Body, BodyWrapper, Cell, CheckboxCell, Container, Head, HighlightWrappe
 
 export const TableButton = ({Icon, onClick, disabled}) => {
 	return (
-		<IconButton onClick={onClick} disabled={disabled}>
+        <IconButton onClick={onClick} disabled={disabled} size="large">
 			<Icon />
 		</IconButton>
-	);
+    );
 };
 
 export const CheckboxField = (props) => {
@@ -172,7 +172,7 @@ interface IProps {
 	rows: any[];
 	defaultSort?: number;
 	onSelectionChange?: (selectedRows) => void;
-	renderCheckbox?: (props, data) => React.ReactChild;
+	renderCheckbox?: (props, data) => ReactChild;
 	onSearch?: (props) => any[];
 	rowStyle?: any;
 	checkboxDisabled?: boolean;
@@ -190,7 +190,7 @@ interface IState {
 	selectedRows: any[];
 }
 
-export class CustomTable extends React.PureComponent<IProps, IState> {
+export class CustomTable extends PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps(nextProps, prevState) {
 		const searchFields = getSearchFields(nextProps.cells);
 		return {searchFields};
@@ -208,7 +208,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		selectedRows: []
 	};
 
-	private rowsContainerRef = React.createRef<HTMLElement>();
+	private rowsContainerRef = createRef<HTMLDivElement>();
 
 	public componentDidMount() {
 		const { currentSort, searchFields, searchText } = this.state;
@@ -352,11 +352,6 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 	 */
 	public renderHeader = (cells) => {
 		const {currentSort} = this.state;
-		const setTooltip = (Component, text) => (
-			<Tooltip title={text} placement="bottom-end">
-				{Component}
-			</Tooltip>
-		);
 
 		return cells.map((cell, index) => {
 			const type = cell.headerType || cell.type;
@@ -384,16 +379,20 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 			return (
 				<Cell key={index} {...headingRootProps}>
 					{
-						headingComponentProps.tooltipText ?
-							setTooltip(HeadingComponent, headingComponentProps.tooltipText) :
+						headingComponentProps.tooltipText ? (
+							<Tooltip title={headingComponentProps.tooltipText} placement="bottom-end">
+								{HeadingComponent}
+							</Tooltip>
+						) : (
 							HeadingComponent
+						)
 					}
 				</Cell>
 			);
 		});
 	}
 
-	public renderCheckbox({row = {}, ...props}): React.ReactChild {
+	public renderCheckbox({row = {}, ...props}): ReactChild {
 		if (this.props.renderCheckbox) {
 			return this.props.renderCheckbox(props, row);
 		}
@@ -408,7 +407,7 @@ export class CustomTable extends React.PureComponent<IProps, IState> {
 		return data.map((row, index) => {
 			const rowProps = {clickable: showCheckbox && !row.disabled, style: this.props.rowStyle};
 			return (
-				<Row key={index} {...rowProps}>
+				<Row key={index} {...rowProps} className={row.selected ? 'selected' : ''}>
 					{
 						showCheckbox ? (
 							<CheckboxCell {...CELL_DEFAULT_PROPS[CELL_TYPES.CHECKBOX]}>

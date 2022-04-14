@@ -14,15 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import Badge from '@material-ui/core/Badge';
-import Drawer from '@material-ui/core/Drawer';
-import IconButton from '@material-ui/core/IconButton';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import Typography from '@material-ui/core/Typography';
-import Close from '@material-ui/icons/Close';
-import MoreVert from '@material-ui/icons/MoreVert';
-import React from 'react';
+import { PureComponent, SyntheticEvent } from 'react';
+import Badge from '@mui/material/Badge';
+import Drawer from '@mui/material/Drawer';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import Typography from '@mui/material/Typography';
+import Close from '@mui/icons-material/Close';
+import MoreVert from '@mui/icons-material/MoreVert';
 
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { simpleDate } from '../../../services/formatting/formatDate';
@@ -60,7 +60,13 @@ interface IProps {
 }
 
 const NotificationButton = ({ unreadCount, onClick, id }) => (
-	<IconButton onClick={onClick} aria-label="Show notifications" aria-haspopup="true" id={id}>
+	<IconButton
+        onClick={onClick}
+        aria-label="Show notifications"
+        aria-haspopup="true"
+        id={id}
+        size="large"
+	>
 		<Badge
 			badgeContent={unreadCount}
 			color={unreadCount > 0 ? 'primary' : 'secondary'}
@@ -70,7 +76,7 @@ const NotificationButton = ({ unreadCount, onClick, id }) => (
 	</IconButton>
 );
 
-export class Notifications extends React.PureComponent<IProps, any> {
+export class Notifications extends PureComponent<IProps, any> {
 	public state = {
 		open: false,
 		menuElement: null
@@ -133,19 +139,19 @@ export class Notifications extends React.PureComponent<IProps, any> {
 		this.props.setDrawerPanelState(!this.props.drawerOpened);
 	}
 
-	public toggleMenu = (e: React.SyntheticEvent) => {
+	public toggleMenu = (e: SyntheticEvent) => {
 		this.setState({ menuElement: this.state.menuElement ? null : e.currentTarget });
 		return false;
 	}
 
-	public markAllNotifications = (read) => (e: React.SyntheticEvent) => {
+	public markAllNotifications = (read) => (e: SyntheticEvent) => {
 		this.toggleMenu(e);
 		this.props.notifications.forEach((notification) => {
 			this.props.sendUpdateAllNotificationsRead(read);
 		});
 	}
 
-	public deleteAllNotifications = (e: React.SyntheticEvent) => {
+	public deleteAllNotifications = (e: SyntheticEvent) => {
 		this.toggleMenu(e);
 		this.props.confirmSendDeleteAllNotifications();
 	}

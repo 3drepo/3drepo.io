@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
 import { useRouteMatch, useLocation, Route, Switch, Redirect } from 'react-router-dom';
 import { GlobalStyle } from '@/v5/ui/themes/global';
 import { discardSlash } from '@/v5/services/routing/routing';
@@ -24,6 +23,7 @@ import { DashboardLayout } from '@components/dashboard/dashboardLayout';
 import { TeamspacesList } from '@/v5/ui/routes/dashboard/teamspaces/teamspacesList/teamspacesList.component';
 import { TeamspaceContent } from './teamspaces';
 import { ProjectContent } from './projects';
+import { Login } from '../login';
 
 export const Dashboard = () => {
 	const { path } = useRouteMatch();
@@ -33,6 +33,9 @@ export const Dashboard = () => {
 		<>
 			<GlobalStyle />
 			<Switch>
+				<Route exact path={`${path}/login`}>
+					<Login />
+				</Route>
 				<Route path={`${path}/dashboard/:teamspace?/:project?`}>
 					<DashboardLayout>
 						<Route exact path={`${path}/dashboard/`}>

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Avatar as AvatarComponent } from '@material-ui/core';
+import { Avatar as AvatarComponent } from '@mui/material';
 import styled from 'styled-components';
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
 import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
@@ -28,13 +28,13 @@ export const OwnerData = styled.div`
 	color: ${COLOR.DARK_GRAY};
 `;
 
-export const Avatar = styled(AvatarComponent)`
+export const Avatar = styled(AvatarComponent)<{ size?: number, src?: string }>`
 	&& {
-		height: ${(props) => props.size || DEFAULT_AVATAR_SIZE}px;
-		width: ${(props) => props.size || DEFAULT_AVATAR_SIZE}px;
-		background-color: ${(props) => !props.src ? COLOR.BLACK_20 : `transparent`};
+		height: ${({ size }) => size || DEFAULT_AVATAR_SIZE}px;
+		width: ${({ size }) => size || DEFAULT_AVATAR_SIZE}px;
+		background-color: ${({ src }) => !src ? COLOR.BLACK_20 : `transparent`};
 		color: ${COLOR.WHITE};
-		font-size: ${(props) => Math.round((props.size || DEFAULT_AVATAR_SIZE) * 14 / DEFAULT_AVATAR_SIZE)}px;
+		font-size: ${({ size }) => Math.round((size || DEFAULT_AVATAR_SIZE) * 14 / DEFAULT_AVATAR_SIZE)}px;
 	}
 `;
 

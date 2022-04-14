@@ -14,8 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { PureComponent } from 'react';
 import { FieldArray } from 'formik';
-import * as React from 'react';
 import { LabelButton } from '../../../viewerGui/components/labelButton/labelButton.styles';
 import { LinkEntry } from './attachResourceLinkEntry.component';
 import {
@@ -37,7 +37,7 @@ interface IState {
 	urls: IResourceUrl[];
 }
 
-export class AttachResourceUrls extends React.PureComponent<IProps, IState> {
+export class AttachResourceUrls extends PureComponent<IProps, IState> {
 	public render() {
 		const { links } = this.props;
 

@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { useEffect } from 'react';
 
-import { Tooltip } from '@material-ui/core';
+import { Tooltip } from '@mui/material';
 
 import { BASIC_TYPES, MEASURING_TYPES } from './measuringType.constants';
 import { Icon, Wrapper } from './measuringType.styles';
@@ -35,7 +35,7 @@ const isBasicType = (({mode}) => BASIC_TYPES.includes(mode));
 export const MeasuringType = ({
 	setMeasureMode, measureMode, isMetadataActive, isClipEdit
 , basicTypes}: IProps) => {
-	React.useEffect(() => {
+	useEffect(() => {
 		if (isMetadataActive || isClipEdit) {
 			setMeasureMode('');
 		}

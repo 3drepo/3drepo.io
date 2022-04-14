@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-import { Dialog } from '@material-ui/core';
+import { Dialog } from '@mui/material';
 
 import CloseIcon from '@assets/icons/close.svg';
 import { CloseButton } from './modal.styles';
@@ -29,7 +27,12 @@ interface IModal {
 }
 
 export const Modal = ({ onClickClose, open, children, className }: IModal) => (
-	<Dialog open={open} onClose={onClickClose} className={className} maxWidth={false}>
+	<Dialog
+		open={open}
+		onClose={onClickClose}
+		className={className}
+		maxWidth={false}
+	>
 		<CloseButton aria-label="Close dialog" onClick={onClickClose}>
 			<CloseIcon />
 		</CloseButton>

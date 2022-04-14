@@ -14,11 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
-import LockIcon from '@material-ui/icons/Lock';
-import UnlockIcon from '@material-ui/icons/LockOpen';
+import { PureComponent } from 'react';
+import LockIcon from '@mui/icons-material/Lock';
+import UnlockIcon from '@mui/icons-material/LockOpen';
 
 import { StyledIconButton } from './lockPanelButton.styles';
 
@@ -29,7 +27,7 @@ export interface ILockPanelButton {
 	setPanelLock: (panelName) => void;
 }
 
-export class LockPanelButton extends React.PureComponent<ILockPanelButton, any> {
+export class LockPanelButton extends PureComponent<ILockPanelButton, any> {
 	get isLocked() {
 		return this.props.lockedPanels.includes(this.props.type);
 	}

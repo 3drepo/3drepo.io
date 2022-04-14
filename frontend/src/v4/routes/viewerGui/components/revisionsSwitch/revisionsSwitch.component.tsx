@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 
-import ArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
+import ArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { formatDate, LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
@@ -36,7 +36,7 @@ interface IProps {
 	getCompareModels: (revisionId) => void;
 }
 
-export class RevisionsSwitch extends React.PureComponent<IProps, any> {
+export class RevisionsSwitch extends PureComponent<IProps, any> {
 
 	public componentDidUpdate(prevProps: IProps) {
 		const { currentRevision, getCompareModels } = this.props;

@@ -14,14 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
-import Grid from '@material-ui/core/Grid';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import ListItemText from '@material-ui/core/ListItemText';
+import { FunctionComponent, useState, useMemo } from 'react';
+import Grid from '@mui/material/Grid';
+import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
+import ListItemText from '@mui/material/ListItemText';
 import { isEmpty } from 'lodash';
 import { forOwn, pick, uniq } from 'lodash';
+import { TypographyProps } from '@mui/material';
 
 import { LabelButton } from '../../../../viewerGui/components/labelButton/labelButton.styles';
 import { EmptyStateInfo } from '../../../components.styles';
@@ -37,13 +36,18 @@ interface ITextWrapper {
 	noWrap?: boolean;
 	inline?: boolean;
 	color?: string;
-	variant?: string;
+	variant?: TypographyProps['variant'];
 }
 
-const TextWrapper: React.FunctionComponent<ITextWrapper> = ({
+const TextWrapper: FunctionComponent<ITextWrapper> = ({
 	children, color = 'textPrimary', variant = 'caption', inline, ...props
 }) => (
-	<StyledTypography component="span" inline={inline ? 1 : 0} variant={variant} color={color} {...props}>
+	<StyledTypography
+		inline={inline}
+		variant={variant}
+		color={color}
+		{...props}
+	>
 		{children}
 	</StyledTypography>
 );
@@ -90,8 +94,8 @@ interface IProps {
 }
 
 export const SuggestedTreatmentsDialog = ({ suggestions, setFieldValue, handleClose }: IProps) => {
-	const [type, setType] = React.useState('');
-	const [stage, setStage] = React.useState('');
+	const [type, setType] = useState('');
+	const [stage, setStage] = useState('');
 
 	const handleClick = (suggestion) => {
 		const mitigationProperties = pick(suggestion, MITIGATION_PROPERTIES);
@@ -99,7 +103,7 @@ export const SuggestedTreatmentsDialog = ({ suggestions, setFieldValue, handleCl
 		handleClose();
 	};
 
-	const getSuggestions = React.useMemo(() => suggestions.filter((suggestion) => {
+	const getSuggestions = useMemo(() => suggestions.filter((suggestion) => {
 		const hasProperStage = stage ? suggestion.mitigation_stage === stage : true;
 		const hasProperType = type ? suggestion.mitigation_type === type : true;
 
@@ -117,7 +121,7 @@ export const SuggestedTreatmentsDialog = ({ suggestions, setFieldValue, handleCl
 	return (
 		<Container>
 			<StyledGrid container>
-				<Label container justify="flex-end" alignItems="center">
+				<Label container justifyContent="flex-end" alignItems="center">
 					<TextWrapper>
 						Stage:&nbsp;
 					</TextWrapper>
@@ -129,7 +133,7 @@ export const SuggestedTreatmentsDialog = ({ suggestions, setFieldValue, handleCl
 						onChange={handleStageChange}
 					/>
 				</Grid>
-				<Label container justify="flex-end" alignItems="center">
+				<Label container justifyContent="flex-end" alignItems="center">
 					<TextWrapper>
 						Type:&nbsp;
 					</TextWrapper>

@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
-import CircularProgress from '@material-ui/core/CircularProgress';
+import CircularProgress from '@mui/material/CircularProgress';
 import { merge } from 'lodash';
+import { ComponentType } from 'react';
 
 import { LoaderContainer, StyledButton, StyledFab } from './submitButton.styles';
 
@@ -27,18 +26,20 @@ interface IProps {
 	pending?: boolean;
 	disabled?: boolean;
 	variant?: string;
+	onClick?: (event) => void;
 }
 
-export const SubmitButton = ({ pending, disabled, children, ...props }: IProps) => {
+export const SubmitButton = ({ pending, children, ...props }: IProps) => {
 	const additionalProps = merge({
 		type: 'submit',
 		variant: 'contained',
 		color: 'secondary',
+		disabled: pending || props.disabled,
 	}, props);
 
 	const isFabVariant = props.variant === 'fab';
 
-	const Button = isFabVariant ? StyledFab : StyledButton;
+	const Button: ComponentType = isFabVariant ? StyledFab : StyledButton;
 
 	if (additionalProps.hasOwnProperty('variant') && isFabVariant) {
 		delete additionalProps.variant;
@@ -46,7 +47,6 @@ export const SubmitButton = ({ pending, disabled, children, ...props }: IProps) 
 
 	return (
 		<Button
-			disabled={pending || disabled}
 			{...additionalProps}
 		>
 			{children}

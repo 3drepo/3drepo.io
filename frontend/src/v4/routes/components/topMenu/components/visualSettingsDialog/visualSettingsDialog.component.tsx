@@ -14,11 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { Button, InputAdornment, List, MenuItem, Switch } from '@material-ui/core';
+import { PureComponent } from 'react';
+import { Button, InputAdornment, List, MenuItem, Switch } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import * as React from 'react';
 import * as Yup from 'yup';
 import { DEFAULT_SETTINGS } from '../../../../../constants/viewer';
 import { IS_FIREFOX } from '../../../../../helpers/browser';
@@ -208,7 +207,7 @@ const Buttons = (props) => {
 				disabled={isEqual(form.values, DEFAULT_SETTINGS)}
 				type="button"
 				onClick={() => form.setValues(DEFAULT_SETTINGS)}
-				>
+			>
 					Reset
 				</NegativeActionButton>
 			)} />
@@ -227,7 +226,7 @@ const Buttons = (props) => {
 						variant="contained"
 						type="submit"
 						disabled={!form.isValid || form.isValidating}
-						>
+					>
 						Save
 					</Button>
 			)} />
@@ -250,7 +249,7 @@ interface IState {
 	showCacheWarning: boolean;
 }
 
-export class VisualSettingsDialog extends React.PureComponent<IProps, IState> {
+export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 	public state = {
 		selectedTab: 0,
 		visualSettings: null,

@@ -16,13 +16,12 @@
  */
 
 import styled from 'styled-components';
-import { FormControl } from '@material-ui/core';
+import { FormControl } from '@mui/material';
 
 export const SelectColumn = styled(FormControl)`
 	width: 50%;
 	padding-right: 5px;
 	& + & {
 		padding: 0 0 0 5px;
-		label { padding: 0 0 0 5px }
 	}
 `;

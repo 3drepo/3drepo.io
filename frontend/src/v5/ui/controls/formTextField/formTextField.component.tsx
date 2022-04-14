@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TextField, TextFieldProps } from '@material-ui/core';
-import React from 'react';
+import { TextField, TextFieldProps } from '@mui/material';
 import { Controller } from 'react-hook-form';
 
 export type FormTextFieldProps = TextFieldProps & {
 	control: any,
-	formError: any,
+	formError?: any,
 };
 
 export const FormTextField = ({

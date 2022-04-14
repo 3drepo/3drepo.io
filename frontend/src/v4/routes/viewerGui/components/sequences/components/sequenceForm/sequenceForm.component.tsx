@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { useRef } from 'react';
 
-import { Tooltip } from '@material-ui/core';
+import { Tooltip } from '@mui/material';
 import { Formik } from 'formik';
 
 import { StyledForm, StyledTextField, TextFieldWrapper } from './sequenceForm.styles';
 
 export const SequenceForm = ({ id, name, updateSequence }) => {
-	const textFieldRef = React.useRef(null);
+	const textFieldRef = useRef(null);
 
 	const handleSubmit = () => textFieldRef.current.saveChange();
 

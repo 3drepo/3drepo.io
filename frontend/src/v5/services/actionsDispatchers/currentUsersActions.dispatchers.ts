@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CurrentUserActions } from '@/v4/modules/currentUser';
-import { ICurrentUserActions } from '@/v4/modules/currentUser/currentUser.redux';
 import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
+import { CurrentUserActions, ICurrentUserActionCreators } from '@/v5/store/currentUser/currentUser.redux';
 
-export const CurrentUserActionsDispatchers = createActionsDispatchers<ICurrentUserActions>(CurrentUserActions);
+export const CurrentUserActionsDispatchers = createActionsDispatchers<ICurrentUserActionCreators>(CurrentUserActions);

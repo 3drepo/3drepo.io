@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode } from 'react';
+import { ReactNode, PureComponent, useRef, useEffect, useState } from 'react';
 
-import { ListItemProps } from '@material-ui/core/ListItem';
-import { Check } from '@material-ui/icons';
+import { ListItemProps } from '@mui/material/ListItem';
+import { Check } from '@mui/icons-material';
 
 import { IconWrapper, MenuList, NestedWrapper, StyledItemText, StyledListItem, Wrapper } from './foldableMenu.style';
 
 /**
 // Example:
 
-import Upload from '@material-ui/icons/CloudUpload';
+import Upload from '@mui/icons-material/CloudUpload';
 
 export const TestFold = () => (
 	<FoldableMenu>
@@ -57,10 +57,10 @@ export interface ISubMenuProps extends ListItemProps {
 }
 
 export const SubMenu = (props: ISubMenuProps) => {
-	const [top, setTop] = React.useState(0);
-	const wrapperRef = React.useRef<HTMLDivElement>(null);
+	const [top, setTop] = useState(0);
+	const wrapperRef = useRef<HTMLDivElement>(null);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		const rect = wrapperRef.current.getBoundingClientRect();
 
 		if (rect.top !== top) {
@@ -78,20 +78,22 @@ export const SubMenu = (props: ISubMenuProps) => {
 	);
 };
 
-export interface IFoldableMenuItemProps extends ListItemProps {
+export interface IFoldableMenuItemProps {
 	icon?: ReactNode;
 	checked?: boolean;
 	arrow?: boolean;
+	onClick: (event?) => void;
+	children?: any;
 }
 
 export const FoldableMenuItem = ({children, ...props}: IFoldableMenuItemProps) => (
-		<StyledListItem {...props}>
-			{props.icon  && <IconWrapper>{props.icon}</IconWrapper>}
-			<StyledItemText>
-				{children}
-				{props.checked && <Check fontSize="small" />}
-			</StyledItemText>
-		</StyledListItem>
+	<StyledListItem {...props}>
+		{props.icon  && <IconWrapper>{props.icon}</IconWrapper>}
+		<StyledItemText>
+			{children}
+			{props.checked && <Check fontSize="small" />}
+		</StyledItemText>
+	</StyledListItem>
 );
 
 interface IProps {
@@ -102,7 +104,7 @@ interface IState {
 	activeItem: any;
 }
 
-export class FoldableMenu extends React.PureComponent<IProps, IState> {
+export class FoldableMenu extends PureComponent<IProps, IState> {
 	public state = {
 		activeItem: null,
 	};

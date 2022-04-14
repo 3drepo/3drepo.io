@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 
-import Fade from '@material-ui/core/Fade';
-import CloseIcon from '@material-ui/icons/Close';
+import Fade from '@mui/material/Fade';
+import CloseIcon from '@mui/icons-material/Close';
 
 import { Button } from '../../components/panelButton/panelButton.styles';
 import { Container } from './closeFocusModeButton.styles';
@@ -28,7 +28,7 @@ interface IProps {
 	setIsFocusMode: (isFocusMode) => void;
 }
 
-export class CloseFocusModeButton extends React.PureComponent<IProps, any> {
+export class CloseFocusModeButton extends PureComponent<IProps, any> {
 	public render() {
 		return (
 			<Fade in={this.props.isFocusMode}>

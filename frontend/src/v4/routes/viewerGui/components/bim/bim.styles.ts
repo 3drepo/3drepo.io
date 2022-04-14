@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Tabs as TabsComponent } from '@material-ui/core';
+import { Tabs as TabsComponent } from '@mui/material';
 import styled from 'styled-components';
 
 import { COLOR } from '../../../../styles';

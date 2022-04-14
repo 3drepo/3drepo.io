@@ -14,12 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
-import FormControl from '@material-ui/core/FormControl';
-import Grid from '@material-ui/core/Grid';
-import InputLabel from '@material-ui/core/InputLabel';
+import { PureComponent } from 'react';
+import FormControl from '@mui/material/FormControl';
+import Grid from '@mui/material/Grid';
+import InputLabel from '@mui/material/InputLabel';
 import * as queryString from 'query-string';
 import { Route } from 'react-router-dom';
 
@@ -56,7 +54,7 @@ interface IState {
 	selectedModels: any[];
 }
 
-export class Projects extends React.PureComponent<IProps, IState> {
+export class Projects extends PureComponent<IProps, IState> {
 	public static getDerivedStateFromProps = (nextProps) => {
 		const queryParams = queryString.parse(nextProps.location.search);
 		return {
@@ -132,7 +130,7 @@ export class Projects extends React.PureComponent<IProps, IState> {
 					<Options
 						container
 						direction="row"
-						justify="space-between"
+						justifyContent="space-between"
 						alignContent="center"
 					>
 						<SelectContainer item>

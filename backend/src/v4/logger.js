@@ -22,7 +22,8 @@ require("winston-daily-rotate-file");
 
 const SystemLogger = {};
 
-const stringFormat = ({ level, message, label, timestamp }) => `${timestamp} [${level}] [${label || "APP"}] ${message}`;
+const stringFormat = ({ level, message, label, timestamp, stack }) => `${timestamp} [${level}] [${label || "APP"}] ${message}${stack ? ` - ${stack}` : ""}`;
+
 const logger = createLogger();
 SystemLogger.formatResponseMsg = (
 	resData
@@ -67,6 +68,7 @@ function createLogger() {
 	let format;
 	if (!config.logfile.jsonOutput) {
 		format = winston.format.combine(
+			winston.format.errors({stack: true}),
 			winston.format.timestamp(),
 			winston.format.align(),
 			winston.format.printf(stringFormat)
@@ -79,6 +81,7 @@ function createLogger() {
 		}
 	} else {
 		format = winston.format.combine(
+			winston.format.errors({stack: true}),
 			winston.format.timestamp(),
 			winston.format.json()
 		);
@@ -142,7 +145,7 @@ SystemLogger.logDebug = (msg, meta, label) => {
  * @param {Object} meta - Extra informative metadata
  */
 SystemLogger.logWarning = (msg, meta, label) => {
-	logger && logger.warning(logMessage(msg, meta, label), {label});
+	logger && logger.warn(logMessage(msg, meta, label), {label});
 };
 
 /**

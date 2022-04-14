@@ -16,7 +16,6 @@
  */
 
 import { CSSProperties } from 'react';
-import '@material-ui/core/styles';
 
 interface IGradient {
 	main: string;
@@ -36,7 +35,7 @@ interface IShadow {
 	level_10: string;
 }
 
-declare module '@material-ui/core/styles/createPalette' {
+declare module '@mui/material/styles/createPalette' {
 	interface SimplePaletteColorOptions {
 		mid?: CSSProperties['color'],
 		lightest?: CSSProperties['color'],
@@ -62,7 +61,7 @@ declare module '@material-ui/core/styles/createPalette' {
 	}
 }
 
-declare module '@material-ui/core/styles/createTypography' {
+declare module '@mui/material/styles/createTypography' {
 	interface Typography {
 		link?: CSSProperties;
 		kickerTitle?: CSSProperties;

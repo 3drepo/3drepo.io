@@ -15,10 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Snackbar from '@material-ui/core/Snackbar';
-import React from 'react';
+import Snackbar from '@mui/material/Snackbar';
+import { PureComponent } from 'react';
 
-import { DefaultSnackbar } from './components/defaultSnackbar/defaultSnackbar.component';
+import IconButton from '@mui/material/IconButton';
+import SnackbarContent from '@mui/material/SnackbarContent';
+import Close from '@mui/icons-material/Close';
 
 interface IProps {
 	snack: any;
@@ -30,7 +32,7 @@ interface IState {
 	snack: any;
 }
 
-export class SnackbarContainer extends React.PureComponent<IProps, IState> {
+export class SnackbarContainer extends PureComponent<IProps, IState> {
 	public queue = [];
 
 	public state = {
@@ -85,21 +87,33 @@ export class SnackbarContainer extends React.PureComponent<IProps, IState> {
 
 	public render() {
 		const {isOpen, snack} = this.state;
-		const {message, ...snackProps} = snack as any;
+		const {message, ref, ...snackProps} = snack as any;
 		return (
-			<Snackbar
-				autoHideDuration={5000}
-				anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-				onClose={this.handleClose}
-				onExited={this.handleExited}
-				open={isOpen}
-				{...snackProps}
+            <Snackbar
+                autoHideDuration={5000}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                onClose={this.handleClose}
+                open={isOpen}
+                {...snackProps}
+                TransitionProps={{
+                    onExited: this.handleExited
+                }}
 			>
-				<DefaultSnackbar
+				<SnackbarContent
 					message={message}
-					onClose={this.handleClose}
+					action={[
+						<IconButton
+							key="close"
+							aria-label="Close"
+							color="inherit"
+							size="large"
+							onClick={() => this.handleClose(null, '')}
+						>
+							<Close />
+						</IconButton>
+					]}
 				/>
 			</Snackbar>
-		);
+        );
 	}
 }

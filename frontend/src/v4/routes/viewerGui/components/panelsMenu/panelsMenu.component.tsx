@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CompareIcon from '@material-ui/icons/Compare';
-import TreeIcon from '@material-ui/icons/DeviceHub';
-import GroupsIcon from '@material-ui/icons/GroupWork';
-import GisIcon from '@material-ui/icons/Layers';
-import ViewsIcon from '@material-ui/icons/PhotoCamera';
-import IssuesIcon from '@material-ui/icons/Place';
-import RisksIcon from '@material-ui/icons/Warning';
-import React from 'react';
+import CompareIcon from '@mui/icons-material/Compare';
+import TreeIcon from '@mui/icons-material/DeviceHub';
+import GroupsIcon from '@mui/icons-material/GroupWork';
+import GisIcon from '@mui/icons-material/Layers';
+import ViewsIcon from '@mui/icons-material/PhotoCamera';
+import IssuesIcon from '@mui/icons-material/Place';
+import RisksIcon from '@mui/icons-material/Warning';
+import { PureComponent } from 'react';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { Container } from './panelsMenu.styles';
 
@@ -40,7 +40,7 @@ const PANELS = {
 	GIS: 'GIS'
 };
 
-export class PanelsMenu extends React.PureComponent<any, IState> {
+export class PanelsMenu extends PureComponent<any, IState> {
 	public state = {
 		activePanels: {}
 	};

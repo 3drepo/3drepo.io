@@ -17,11 +17,11 @@
 
 import styled from 'styled-components';
 
-import FormControl from '@material-ui/core/FormControl';
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
-import ArrowBack from '@material-ui/icons/ArrowBack';
+import FormControl from '@mui/material/FormControl';
+import Grid from '@mui/material/Grid';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import ArrowBack from '@mui/icons-material/ArrowBack';
 import { Form } from 'formik';
 
 import { COLOR } from '../../styles';

@@ -15,16 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { useEffect } from 'react';
 import { isNull } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import { MuiThemeProvider, StylesProvider } from '@material-ui/core';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material';
+import { StylesProvider } from '@mui/styles';
 import { ThemeProvider } from 'styled-components';
 
 import { theme } from '@/v5/ui/themes/theme';
-import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks/authSelectors.hooks';
-import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authActions.dispatchers';
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
 import { getIntlProviderProps } from '@/v5/services/intl';
@@ -34,26 +33,21 @@ import { V4Adapter } from '../v4Adapter/v4Adapter';
 
 export const Root = () => {
 	const history = useHistory();
-	const userName: string = CurrentUserHooksSelectors.selectUsername();
 	const isAuthenticated: boolean | null = AuthHooksSelectors.selectIsAuthenticated();
 
-	React.useEffect(() => {
+	useEffect(() => {
 		AuthActionsDispatchers.authenticate();
 	}, []);
 
-	React.useEffect(() => {
-		if (userName) {
-			CurrentUserActionsDispatchers.fetchUser(userName);
-		}
-
+	useEffect(() => {
 		if (isAuthenticated) {
 			TeamspacesActionsDispatchers.fetch();
 		}
 
 		if (!isNull(isAuthenticated) && !isAuthenticated) {
-			history.push('/');
+			history.push('/v5/login');
 		}
-	}, [userName, isAuthenticated]);
+	}, [isAuthenticated]);
 
 	return (
 		<ThemeProvider theme={theme}>

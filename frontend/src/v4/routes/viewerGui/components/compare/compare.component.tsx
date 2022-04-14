@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 
-import { Tab, Tooltip } from '@material-ui/core';
-import CheckIcon from '@material-ui/icons/Check';
+import { Tab, Tooltip } from '@mui/material';
+import CheckIcon from '@mui/icons-material/Check';
 
 import {
 	CLASH_COMPARE_TYPE,
@@ -85,7 +85,7 @@ interface IProps {
 	id?: string;
 }
 
-export class Compare extends React.PureComponent<IProps, any> {
+export class Compare extends PureComponent<IProps, any> {
 
 	get type() {
 		return VIEWER_PANELS.COMPARE;
@@ -192,7 +192,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 						{this.renderClashContent(!this.isDiffTabActive)}
 					</TabContent>
 				</ViewerPanelContent>
-				<ViewerPanelFooter container alignItems="center" justify="space-between">
+				<ViewerPanelFooter container alignItems="center" justifyContent="space-between">
 					{this.renderSlider()}
 					<ViewerPanelButton
 							aria-label="Compare"
@@ -225,7 +225,7 @@ export class Compare extends React.PureComponent<IProps, any> {
 				const isEnabled = this.props.sortType === sortType;
 				const isAscending = !isEnabled || this.props.sortOrder === SORT_ORDER_TYPES.ASCENDING;
 				return (
-					<StyledListItem key={index} button onClick={onClick}>
+					<StyledListItem key={index} onClick={onClick}>
 						<IconWrapper>
 							{isAscending && <SortAmountUp fontSize="small" />}
 							{!isAscending && <SortAmountDown fontSize="small" />}

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'react-router';
 import { range } from 'lodash';
 
@@ -29,6 +29,8 @@ import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/re
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
 import { Display } from '@/v5/ui/themes/media';
 import { FormattedMessage } from 'react-intl';
+import { UploadStatuses } from '@/v5/store/containers/containers.types';
+import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 import {
 	Container,
 	RevisionsListHeaderContainer,
@@ -37,14 +39,16 @@ import {
 	RevisionsListEmptyWrapper,
 	RevisionsListEmptyContainer,
 	RevisionsListEmptyText,
+	ScrollArea,
 } from './revisionDetails.styles';
 
 interface IRevisionDetails {
 	containerId: string;
-	revisionsCount?: number;
+	revisionsCount: number;
+	status?: UploadStatuses
 }
 
-export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDetails): JSX.Element => {
+export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisionDetails): JSX.Element => {
 	const { teamspace, project } = useParams();
 	const isLoading: boolean = RevisionsHooksSelectors.selectIsPending(containerId);
 	const revisions: IRevision[] = RevisionsHooksSelectors.selectRevisions(containerId);
@@ -57,20 +61,37 @@ export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDe
 		}
 	}, []);
 
-	if (!isLoading && revisions && revisions.length === 0) {
+	if (revisionsCount === 0) {
 		return (
 			<RevisionsListEmptyWrapper>
 				<RevisionsListEmptyContainer>
-					<RevisionsListEmptyText>
-						<FormattedMessage id="containers.revisions.emptyMessage" defaultMessage="You haven’t added any Files." />
-					</RevisionsListEmptyText>
-					<Button
-						startIcon={<ArrowUpCircleIcon />}
-						variant="contained"
-						color="primary"
-					>
-						<FormattedMessage id="containers.revisions.uploadFile" defaultMessage="Upload File" />
-					</Button>
+					{
+						!canUploadToBackend(status)
+							&& (
+								<RevisionsListEmptyText>
+									<FormattedMessage id="containers.revisions.emptyMessageBusy" defaultMessage="Your files are being processed at this moment, please wait before creating new revisions for this container." />
+								</RevisionsListEmptyText>
+							)
+					}
+
+					{
+						canUploadToBackend(status)
+							&& (
+								<>
+									<RevisionsListEmptyText>
+										<FormattedMessage id="containers.revisions.emptyMessage" defaultMessage="You haven’t added any Files." />
+									</RevisionsListEmptyText>
+									<Button
+										startIcon={<ArrowUpCircleIcon />}
+										variant="contained"
+										color="primary"
+									>
+										<FormattedMessage id="containers.revisions.uploadFile" defaultMessage="Upload File" />
+									</Button>
+								</>
+							)
+
+					}
 				</RevisionsListEmptyContainer>
 			</RevisionsListEmptyWrapper>
 		);
@@ -81,30 +102,32 @@ export const RevisionDetails = ({ containerId, revisionsCount = 1 }: IRevisionDe
 			<RevisionsListHeaderContainer>
 				<RevisionsListHeaderLabel width={130} tabletWidth={94}><FormattedMessage id="revisionDetails.addedOn" defaultMessage="Added on" /></RevisionsListHeaderLabel>
 				<RevisionsListHeaderLabel width={228} tabletWidth={155}><FormattedMessage id="revisionDetails.addedBy" defaultMessage="Added by" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel width={330} tabletWidth={150}><FormattedMessage id="revisionDetails.revisionCode" defaultMessage="Revision code" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={355} tabletWidth={150}><FormattedMessage id="revisionDetails.revisionCode" defaultMessage="Revision code" /></RevisionsListHeaderLabel>
 				<RevisionsListHeaderLabel hideWhenSmallerThan={Display.Tablet}><FormattedMessage id="revisionDetails.description" defaultMessage="Description" /></RevisionsListHeaderLabel>
 			</RevisionsListHeaderContainer>
-			<RevisionsList>
-				{isLoading ? (
-					range(revisionsCount).map((key) => <SkeletonListItem key={key} />)
-				) : (
-					revisions.map((revision, i) => (
-						<RevisionsListItemWrapper
-							isSingle={isSingle}
-							isBeforeSelected={i === selected - 1}
-							selected={i === selected}
-							onClick={() => {}}
-							key={revision._id}
-						>
-							<RevisionsListItem
-								revision={revision}
-								containerId={containerId}
-								active={i === selected}
-							/>
-						</RevisionsListItemWrapper>
-					))
-				)}
-			</RevisionsList>
+			<ScrollArea variant="secondary" autoHeight>
+				<RevisionsList>
+					{isLoading ? (
+						range(revisionsCount).map((key) => <SkeletonListItem key={key} />)
+					) : (
+						revisions.map((revision, i) => (
+							<RevisionsListItemWrapper
+								isSingle={isSingle}
+								isBeforeSelected={i === selected - 1}
+								selected={i === selected}
+								onClick={() => {}}
+								key={revision._id}
+							>
+								<RevisionsListItem
+									revision={revision}
+									containerId={containerId}
+									active={i === selected}
+								/>
+							</RevisionsListItemWrapper>
+						))
+					)}
+				</RevisionsList>
+			</ScrollArea>
 		</Container>
 	);
 };

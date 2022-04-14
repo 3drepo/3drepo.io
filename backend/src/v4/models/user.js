@@ -47,6 +47,7 @@ const {
 const FileRef = require("./fileRef");
 const PermissionTemplates = require("./permissionTemplates");
 const { get } = require("lodash");
+const { assignUserToJob } = require("../../v5/models/jobs.js");
 
 const COLL_NAME = "system.users";
 
@@ -575,6 +576,12 @@ User.verify = async function (username, token, options) {
 		await addDefaultJobs(username);
 	} catch(err) {
 		systemLogger.logError("Failed to create default jobs for ", username, err);
+	}
+
+	try {
+		await assignUserToJob(username, C.DEFAULT_OWNER_JOB, username);
+	} catch(err) {
+		systemLogger.logError("Failed to assign user to job ", C.DEFAULT_OWNER_JOB, err);
 	}
 
 	try {

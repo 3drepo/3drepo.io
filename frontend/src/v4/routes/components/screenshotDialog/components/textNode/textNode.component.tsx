@@ -14,8 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import * as React from 'react';
+import { useRef } from 'react';
 import { Text, Transformer } from 'react-konva';
 
 interface IProps {
@@ -26,8 +25,8 @@ interface IProps {
 
 export const TextNode = ({ element, isSelected, handleChange }: IProps) => {
 	const { color, ...elementProps } = element;
-	const shape = React.useRef<any>(null);
-	const transformer = React.useRef<any>();
+	const shape = useRef<any>(null);
+	const transformer = useRef<any>();
 
 	return (
 		<>

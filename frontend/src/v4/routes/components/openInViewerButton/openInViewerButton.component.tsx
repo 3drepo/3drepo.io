@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import OpenInBrowser from '@material-ui/icons/OpenInBrowser';
-import React, { memo } from 'react';
+import OpenInBrowser from '@mui/icons-material/OpenInBrowser';
+import { memo } from 'react';
 
 import { ROUTES } from '../../../constants/routes';
 import { TooltipButton } from '../../teamspaces/components/tooltipButton/tooltipButton.component';
@@ -27,7 +27,7 @@ interface IProps {
 	teamspace: string;
 	model: string;
 	query?: string;
-	history: any;
+	history?: any;
 	preview?: boolean;
 }
 

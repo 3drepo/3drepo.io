@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import IconButtonComponent from '@material-ui/core/IconButton';
-import Description from '@material-ui/icons/Description';
-import QuoteIconComponent from '@material-ui/icons/FormatQuote';
-import Link from '@material-ui/icons/Link';
-import Photo from '@material-ui/icons/Photo';
-import RemoveCircleOutline from '@material-ui/icons/RemoveCircleOutline';
+import IconButtonComponent from '@mui/material/IconButton';
+import Description from '@mui/icons-material/Description';
+import QuoteIconComponent from '@mui/icons-material/FormatQuote';
+import Link from '@mui/icons-material/Link';
+import Photo from '@mui/icons-material/Photo';
+import RemoveCircleOutline from '@mui/icons-material/RemoveCircleOutline';
 import styled from 'styled-components';
 
 import { COLOR } from '../../../styles';

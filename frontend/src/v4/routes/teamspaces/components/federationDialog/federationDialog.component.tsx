@@ -14,16 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import Button from '@material-ui/core/Button';
-import DialogActions from '@material-ui/core/DialogActions';
-import InputLabel from '@material-ui/core/InputLabel';
-import TextField from '@material-ui/core/TextField';
-import ArrowBack from '@material-ui/icons/ArrowBack';
-import ArrowForward from '@material-ui/icons/ArrowForward';
+import { PureComponent } from 'react';
+import Button from '@mui/material/Button';
+import DialogActions from '@mui/material/DialogActions';
+import InputLabel from '@mui/material/InputLabel';
+import TextField from '@mui/material/TextField';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import ArrowForward from '@mui/icons-material/ArrowForward';
 import { Field, Form, Formik } from 'formik';
 import { differenceBy, includes, isEmpty, values } from 'lodash';
-import React from 'react';
 import * as Yup from 'yup';
 
 import { clientConfigService } from '../../../../services/clientConfig';
@@ -85,7 +84,7 @@ interface IState {
 
 const getModelsName = (models) => models.map(({ name}) => name);
 
-export class FederationDialog extends React.PureComponent<IProps, IState> {
+export class FederationDialog extends PureComponent<IProps, IState> {
 	public static defaultProps = {
 		name: '',
 		teamspace: '',

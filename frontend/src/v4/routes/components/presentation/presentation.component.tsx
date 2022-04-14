@@ -14,10 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
-import IconButton from '@material-ui/core/IconButton';
+import { FunctionComponent } from 'react';
+import IconButton from '@mui/material/IconButton';
 
 import { PresentationMode } from '../../../modules/presentation/presentation.constants';
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
@@ -29,9 +27,14 @@ interface IProps {
 	joinedUrlQueryPresentation: boolean;
 }
 
-export const Presentation: React.FunctionComponent<IProps> = ({ presentationMode, joinedUrlQueryPresentation}) => {
+export const Presentation: FunctionComponent<IProps> = ({ presentationMode, joinedUrlQueryPresentation}) => {
 	const renderButton = ({ Icon, IconProps, ...props }) => (
-		<IconButton {...props} aria-label="Show Presentation mode options" aria-haspopup="true">
+		<IconButton
+            {...props}
+            aria-label="Show Presentation mode options"
+            aria-haspopup="true"
+            size="large"
+		>
 			<PresentationIcon fontSize="small" mode={presentationMode} />
 		</IconButton>
 	);

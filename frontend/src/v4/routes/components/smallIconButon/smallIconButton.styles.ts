@@ -15,14 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IconButton } from '@material-ui/core';
+import { IconButton } from '@mui/material';
 import styled from 'styled-components';
 
-export const SmallIconButtonStyled = styled(IconButton)`
+export const SmallIconButtonStyled = styled(IconButton).attrs({
+	component: 'span'
+})`
 	&& {
 		width: 10px;
 		height: 10px;
 		z-index: 1;
+		box-sizing: content-box;
 	}
 
 	svg .stroke {

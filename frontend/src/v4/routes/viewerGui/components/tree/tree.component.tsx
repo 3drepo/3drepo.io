@@ -14,11 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
-import Check from '@material-ui/icons/Check';
-import TreeIcon from '@material-ui/icons/DeviceHub';
+import { PureComponent, createRef } from 'react';
+import Check from '@mui/icons-material/Check';
+import TreeIcon from '@mui/icons-material/DeviceHub';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList as List } from 'react-window';
 
@@ -66,7 +64,7 @@ interface IState {
 	isScrollToActive: boolean;
 }
 
-export class Tree extends React.PureComponent<IProps, IState> {
+export class Tree extends PureComponent<IProps, IState> {
 
 	get type() {
 		return VIEWER_PANELS.TREE;
@@ -103,7 +101,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 		isScrollToActive: true
 	};
 
-	public nodeListRef = React.createRef() as any;
+	public nodeListRef = createRef() as any;
 
 	public renderFilterPanel = renderWhenTrue(() => (
 		<FilterPanel
@@ -249,7 +247,7 @@ export class Tree extends React.PureComponent<IProps, IState> {
 	private renderActionsMenu = () => (
 		<MenuList>
 			{TREE_ACTIONS_MENU.map(({ name, Icon, label }) => (
-				<StyledListItem key={name} button onClick={this.menuActionsMap[name]}>
+				<StyledListItem key={name} onClick={this.menuActionsMap[name]}>
 					<IconWrapper><Icon fontSize="small" /></IconWrapper>
 					<StyledItemText>
 						{label}

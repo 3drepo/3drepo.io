@@ -14,11 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
-import CancelIcon from '@material-ui/icons/Cancel';
-import SearchIcon from '@material-ui/icons/Search';
+import { FunctionComponent } from 'react';
+import CancelIcon from '@mui/icons-material/Cancel';
+import SearchIcon from '@mui/icons-material/Search';
 
 import { StyledIconButton } from '../lockPanelButton/lockPanelButton.styles';
 
@@ -29,7 +27,7 @@ export interface IMenuButton {
 	onClose?: () => void;
 }
 
-export const SearchButton: React.FunctionComponent<IMenuButton> = ({ hidden, enabled, onOpen, onClose }) => {
+export const SearchButton: FunctionComponent<IMenuButton> = ({ hidden, enabled, onOpen, onClose }) => {
 	return (
 		<StyledIconButton
 			hidden={hidden}

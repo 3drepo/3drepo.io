@@ -14,18 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
+import { forwardRef, Ref } from 'react';
 import StarIcon from '@assets/icons/star.svg';
-import { CheckboxProps } from '@material-ui/core';
+import { CheckboxProps } from '@mui/material';
 import { Checkbox } from './favouriteCheckbox.styles';
 
-interface IFavouriteCheckbox extends Omit<Omit<CheckboxProps, 'icon'>, 'checkedIcon'> {
+interface IFavouriteCheckbox extends Omit<CheckboxProps, 'icon'|'checkedIcon'> {
 	selected?: boolean;
 }
 
-export const FavouriteCheckbox = React.forwardRef(
-	({ selected = false, ...props }: IFavouriteCheckbox, ref: React.Ref<HTMLElement>): JSX.Element => (
+export const FavouriteCheckbox = forwardRef(
+	({ selected = false, ...props }: IFavouriteCheckbox, ref: Ref<HTMLButtonElement>): JSX.Element => (
 		<Checkbox
 			icon={<StarIcon />}
 			checkedIcon={<StarIcon />}

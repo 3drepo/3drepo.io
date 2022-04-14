@@ -14,12 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
+import { PureComponent } from 'react';
+import Grid from '@mui/material/Grid';
+import TextField from '@mui/material/TextField';
 import { Field, Form, Formik } from 'formik';
 import * as queryString from 'query-string';
-import React from 'react';
 import { Link } from 'react-router-dom';
 import * as Yup from 'yup';
 
@@ -54,7 +53,7 @@ interface IState {
 	hasInvalidParams: boolean;
 }
 
-export class PasswordChange extends React.PureComponent<IProps, IState> {
+export class PasswordChange extends PureComponent<IProps, IState> {
 	public state = {
 		newPassword: '',
 		newPasswordConfirm: '',
@@ -105,7 +104,7 @@ export class PasswordChange extends React.PureComponent<IProps, IState> {
 				Cannot change password due to URL is incomplete.
 				Please ensure you have copied the whole link and try again.
 			</Message>
-			<Buttons container justify="space-between">
+			<Buttons container justifyContent="space-between">
 				{this.renderBackToLogin()}
 			</Buttons>
 		</>
@@ -147,7 +146,7 @@ export class PasswordChange extends React.PureComponent<IProps, IState> {
 							fullWidth
 						/>
 					)} />
-					<Buttons container justify="space-between">
+					<Buttons container justifyContent="space-between">
 						{this.renderBackToLogin()}
 						<Field render={({ form }) => (
 							<SubmitButton
