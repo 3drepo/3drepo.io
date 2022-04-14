@@ -26,27 +26,33 @@ jest.mock('../../../../src/v5/services/mailer');
 const Mailer = require(`${src}/services/mailer`);
 jest.mock('../../../../src/v5/utils/helper/strings');
 const Strings = require(`${src}/utils/helper/strings`);
+jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+const { generateRandomString } = require('../../helper/services');
 
-const exampleHashString = 'example token';
+const exampleHashString = generateRandomString();
 
 const user = {
-	user: 'user1',
+	user: generateRandomString(),
 	customData: {
-		firstName: 'Will',
-		lastName: 'Smith',
-		email: 'example@email.com',
+		firstName: generateRandomString(),
+		lastName: generateRandomString(),
+		email: generateRandomString(),
 		avatar: true,
 		apiKey: 123,
 		billing: {
 			billingInfo: {
 				countryCode: 'GB',
-				company: '3D Repo',
+				company: generateRandomString(),
 			},
 		},
 		resetPasswordToken: {
-			token: 'valid token',
+			token: generateRandomString(),
 			expiredAt: new Date(2030, 1, 1),
 		},
+
+		mailListOptOut: false,
 	},
 };
 
@@ -57,24 +63,23 @@ const getUserByUsernameMock = UsersModel.getUserByUsername.mockImplementation((u
 
 	throw templates.userNotFound;
 });
-const updateUserByUsernameMock = UsersModel.updateProfile.mockImplementation(() => {});
-const updatePasswordMock = UsersModel.updatePassword.mockImplementation(() => {});
-const updateResetPasswordTokenMock = UsersModel.updateResetPasswordToken.mockImplementation(() => {});
+
+const verifyMock = UsersModel.verify.mockImplementation(() => user.customData);
 UsersModel.canLogIn.mockImplementation(() => user);
-UsersModel.authenticate.mockResolvedValue('user1');
-const sendResetPasswordEmailMock = Mailer.sendResetPasswordEmail.mockImplementation(() => {});
+UsersModel.authenticate.mockResolvedValue(user.user);
 Strings.generateHashString.mockImplementation(() => exampleHashString);
+Strings.formatPronouns.mockImplementation((str) => str);
 
 const testLogin = () => {
 	describe('Login', () => {
 		test('should login with username', async () => {
-			const res = await Users.login('user1');
-			expect(res).toEqual('user1');
+			const res = await Users.login(user.user);
+			expect(res).toEqual(user.user);
 		});
 
 		test('should fail if canLogIn fails', async () => {
 			UsersModel.canLogIn.mockImplementationOnce(() => { throw templates.userNotFound; });
-			await expect(Users.login('user1')).rejects.toEqual(templates.userNotFound);
+			await expect(Users.login(user.user)).rejects.toEqual(templates.userNotFound);
 		});
 	});
 };
@@ -104,7 +109,7 @@ const tesGetProfileByUsername = () => {
 				'customData.billing.billingInfo.company': 1,
 			};
 
-			const res = await Users.getProfileByUsername('user1');
+			const res = await Users.getProfileByUsername(user.user);
 			expect(res).toEqual(formatUser(user));
 			expect(getUserByUsernameMock.mock.calls.length).toBe(1);
 			expect(getUserByUsernameMock.mock.calls[0][1]).toEqual(projection);
@@ -116,26 +121,26 @@ const tesUpdateProfile = () => {
 	describe('Update user profile by username', () => {
 		test('should update user profile', async () => {
 			const updatedProfile = { firstName: 'Nick' };
-			await Users.updateProfile('user1', updatedProfile);
-			expect(updateUserByUsernameMock.mock.calls.length).toBe(1);
-			expect(updateUserByUsernameMock.mock.calls[0][1]).toEqual(updatedProfile);
+			await Users.updateProfile(user.user, updatedProfile);
+			expect(UsersModel.updateProfile.mock.calls.length).toBe(1);
+			expect(UsersModel.updateProfile.mock.calls[0][1]).toEqual(updatedProfile);
 		});
 
 		test('should update user profile and password', async () => {
 			const updatedProfile = { firstName: 'Nick', oldPassword: 'oldPass', newPassword: 'newPass' };
-			await Users.updateProfile('user1', updatedProfile);
-			expect(updateUserByUsernameMock.mock.calls.length).toBe(1);
-			expect(updateUserByUsernameMock.mock.calls[0][1]).toEqual({ firstName: 'Nick' });
-			expect(updatePasswordMock.mock.calls.length).toBe(1);
-			expect(updatePasswordMock.mock.calls[0][1]).toEqual('newPass');
+			await Users.updateProfile(user.user, updatedProfile);
+			expect(UsersModel.updateProfile.mock.calls.length).toBe(1);
+			expect(UsersModel.updateProfile.mock.calls[0][1]).toEqual({ firstName: 'Nick' });
+			expect(UsersModel.updatePassword.mock.calls.length).toBe(1);
+			expect(UsersModel.updatePassword.mock.calls[0][1]).toEqual('newPass');
 		});
 
 		test('should update password', async () => {
 			const updatedProfile = { oldPassword: 'oldPass', newPassword: 'newPass' };
-			await Users.updateProfile('user1', updatedProfile);
-			expect(updateUserByUsernameMock.mock.calls.length).toBe(0);
-			expect(updatePasswordMock.mock.calls.length).toBe(1);
-			expect(updatePasswordMock.mock.calls[0][1]).toEqual('newPass');
+			await Users.updateProfile(user.user, updatedProfile);
+			expect(UsersModel.updateProfile.mock.calls.length).toBe(0);
+			expect(UsersModel.updatePassword.mock.calls.length).toBe(1);
+			expect(UsersModel.updatePassword.mock.calls[0][1]).toEqual('newPass');
 		});
 	});
 };
@@ -143,18 +148,18 @@ const tesUpdateProfile = () => {
 const testGenerateResetPasswordToken = () => {
 	describe('Reset password token', () => {
 		test('should reset password token', async () => {
-			const expiredAt = new Date();
-			expiredAt.setHours(expiredAt.getHours() + 24);
-			await Users.generateResetPasswordToken('user1');
-			expect(updateResetPasswordTokenMock.mock.calls.length).toBe(1);
-			expect(updateResetPasswordTokenMock.mock.calls[0][0]).toBe('user1');
-			expect(updateResetPasswordTokenMock.mock.calls[0][1])
+			await Users.generateResetPasswordToken(user.user);
+			expect(UsersModel.updateResetPasswordToken.mock.calls.length).toBe(1);
+			expect(UsersModel.updateResetPasswordToken.mock.calls[0][0]).toBe(user.user);
+			expect(UsersModel.updateResetPasswordToken.mock.calls[0][1]).toHaveProperty('expiredAt');
+			const { expiredAt } = UsersModel.updateResetPasswordToken.mock.calls[0][1];
+			expect(UsersModel.updateResetPasswordToken.mock.calls[0][1])
 				.toStrictEqual({ token: exampleHashString, expiredAt });
-			expect(sendResetPasswordEmailMock.mock.calls.length).toBe(1);
-			expect(sendResetPasswordEmailMock.mock.calls[0][0]).toBe(user.customData.email);
-			expect(sendResetPasswordEmailMock.mock.calls[0][1]).toStrictEqual({ token: exampleHashString,
+			expect(Mailer.sendResetPasswordEmail.mock.calls.length).toBe(1);
+			expect(Mailer.sendResetPasswordEmail.mock.calls[0][0]).toBe(user.customData.email);
+			expect(Mailer.sendResetPasswordEmail.mock.calls[0][1]).toStrictEqual({ token: exampleHashString,
 				email: user.customData.email,
-				username: 'user1',
+				username: user.user,
 				firstName: user.customData.firstName });
 		});
 
@@ -165,9 +170,54 @@ const testGenerateResetPasswordToken = () => {
 	});
 };
 
+const testSignUp = () => {
+	describe('Sign up a user', () => {
+		const newUserData = {
+			username: generateRandomString(),
+			email: generateRandomString(),
+			password: generateRandomString(),
+			firstName: generateRandomString(),
+		};
+
+		test('should sign a user up', async () => {
+			await Users.signUp(newUserData);
+			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
+			expect(UsersModel.addUser).toHaveBeenCalledWith({ ...newUserData, token: exampleHashString });
+			expect(Mailer.sendVerifyUserEmail).toHaveBeenCalledTimes(1);
+			expect(Mailer.sendVerifyUserEmail).toHaveBeenCalledWith(newUserData.email, {
+				token: exampleHashString,
+				email: newUserData.email,
+				firstName: newUserData.firstName,
+				username: newUserData.username,
+			});
+		});
+	});
+};
+
+const testVerify = () => {
+	describe('Verify a user', () => {
+		test('should verify a user', async () => {
+			const token = generateRandomString();
+			await Users.verify(user.user, token);
+			expect(verifyMock).toHaveBeenCalledTimes(1);
+			expect(verifyMock).toHaveBeenCalledWith(user.user, token);
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.USER_VERIFIED, {
+				username: user.user,
+				email: user.customData.email,
+				fullName: `${user.customData.firstName} ${user.customData.lastName}`,
+				company: user.customData.billing.billingInfo.company,
+				mailListOptOut: user.customData.mailListOptOut,
+			});
+		});
+	});
+};
+
 describe('processors/users', () => {
 	testLogin();
 	tesGetProfileByUsername();
 	tesUpdateProfile();
 	testGenerateResetPasswordToken();
+	testSignUp();
+	testVerify();
 });

@@ -148,6 +148,12 @@
 		return collection.findOne(query, options);
 	};
 
+	Handler.findOneAndUpdate = async function (database, colName, query, action, projection = {}) {
+		const collection = await Handler.getCollection(database, colName);
+		const findResult = await collection.findOneAndUpdate(query, action, {projection});
+		return findResult.value;
+	};
+
 	Handler.findOneAndDelete = async function (database, colName, query, projection = {}) {
 		const collection = await Handler.getCollection(database, colName);
 		const findResult = await collection.findOneAndDelete(query, projection);
@@ -307,13 +313,16 @@
 		});
 	};
 
-	Handler.getSessionStore = function (session) {
+	Handler.getSessionStore = (session) => {
 		const MongoDBStore = require("connect-mongodb-session")(session);
-		return new MongoDBStore({
-			uri: getURL(),
-			databaseName:"admin",
-			collection: "sessions"
+		const prom = new Promise((resolve, reject) => {
+			const store = new MongoDBStore({
+				uri: getURL(),
+				databaseName:"admin",
+				collection: "sessions"
+			}, (err) => err ? reject(err) : resolve(store));
 		});
+		return prom;
 	};
 
 	Handler.updateMany = async function (database, colName, query, data, upsert = false) {
@@ -331,6 +340,11 @@
 	Handler.count = async function (database, colName, query, options) {
 		const collection = await Handler.getCollection(database, colName);
 		return collection.countDocuments(query, options);
+	};
+
+	Handler.createUser = async function (username, password, customData) {
+		const adminDB = await this.getAuthDB();
+		await adminDB.addUser(username, password, { customData, roles: [] });
 	};
 
 	module.exports = Handler;

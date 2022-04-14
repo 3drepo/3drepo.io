@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,18 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-"use strict";
-const apiUrls = require("../config").apiUrls["all"];
-const utils = require("../utils");
+const addAdminJob = require('./addAdminJob');
 
-const referrerMatch = (sessionReferrer, headerReferrer) => {
-	const domain = utils.getURLDomain(headerReferrer);
-	return domain === sessionReferrer ||
-		apiUrls.some((api) => api.match(domain));
-};
+const scripts = [
+	{ script: addAdminJob, desc: 'Add Admin job and assign the teamspace owner' },
+];
 
-module.exports = ({session, headers}) => session && session.user && (
-	session.user.isAPIKey || (!headers.referer ||
-		referrerMatch(session.user.referer, headers.referer))
-);
-
+module.exports = scripts;
