@@ -31,12 +31,6 @@ export const Container = styled.div<{ selected?: boolean }>`
 	cursor: pointer;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 
-	:hover {
-		background-color: ${({ theme }) => theme.palette.primary.accent};
-		${ButtonStyles.LabelButton} {
-			${ButtonStyles.labelButtonSecondaryStyles};
-		}
-	}
 
 	${({ theme, selected }) => selected && css`
 		background-color: ${theme.palette.secondary.main};
@@ -44,10 +38,6 @@ export const Container = styled.div<{ selected?: boolean }>`
 		::before {
 			background-color: ${theme.palette.secondary.main};
 			border: none;
-		}
-
-		:hover {
-			background-color: ${theme.palette.secondary.main};
 		}
 		
 		${TextOverflowStyles.Container} {
