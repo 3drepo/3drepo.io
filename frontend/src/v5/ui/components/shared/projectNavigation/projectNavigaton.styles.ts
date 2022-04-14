@@ -38,7 +38,7 @@ export const Link: typeof NavLink = styled(LinkComponent).attrs({
 		height: 50px;
 		color: ${({ theme }) => theme.palette.base.main};
 		font-family: ${({ theme }) => theme.typography.fontFamily};
-		font-weight: 600;
+		font-weight: 500;
 		font-size: 13px;
 		text-transform: none;
 
