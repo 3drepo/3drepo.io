@@ -20,7 +20,6 @@ import { FormTextField } from '@controls/formTextField/formTextField.component';
 
 export const TextField = styled(FormTextField)<{ $selectedrow: boolean }>`
 	margin: 0 12px;
-	width: 200px;
 	.MuiOutlinedInput-root {
 		input { height: 31px }
 		${({ $selectedrow, theme }) => $selectedrow && `
@@ -31,7 +30,6 @@ export const TextField = styled(FormTextField)<{ $selectedrow: boolean }>`
 			}
 		`}
 		&.Mui-disabled {
-			width: 255px;
 			input {
 				font-weight: bold;
 				color: ${({ theme }) => theme.palette.secondary.main};

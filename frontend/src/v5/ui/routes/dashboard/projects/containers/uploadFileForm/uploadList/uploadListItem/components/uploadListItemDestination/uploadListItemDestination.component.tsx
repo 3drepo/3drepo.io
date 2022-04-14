@@ -143,6 +143,7 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 				)
 			)}
 			ListboxComponent={(listboxProps) => <OptionsBox {...listboxProps} />}
+			className={className}
 			disabled={disabled}
 		/>
 	);

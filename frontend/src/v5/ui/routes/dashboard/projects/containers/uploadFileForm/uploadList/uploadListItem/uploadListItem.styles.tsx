@@ -15,8 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import styled, { css } from 'styled-components';
 import { CircleButton } from '@controls/circleButton';
-import styled from 'styled-components';
+import { UploadListItemRevisionTag } from './components/uploadListItemRevisionTag';
+import { UploadListItemDestination } from './components/uploadListItemDestination';
 
 export const Button = styled(CircleButton)<{ $selectedrow: boolean; onClick: () => void; }>`
 	margin: 0;
@@ -29,4 +31,16 @@ export const Button = styled(CircleButton)<{ $selectedrow: boolean; onClick: () 
 		background-color: transparent;
 		color: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.primary.contrast : theme.palette.secondary.main)}
 	}
+`;
+
+const ListItemInputWidth = css`
+	width: 340px;
+`;
+
+export const Destination = styled(UploadListItemDestination)`
+	${ListItemInputWidth}
+`;
+
+export const RevisionTag = styled(UploadListItemRevisionTag)`
+	${ListItemInputWidth}
 `;

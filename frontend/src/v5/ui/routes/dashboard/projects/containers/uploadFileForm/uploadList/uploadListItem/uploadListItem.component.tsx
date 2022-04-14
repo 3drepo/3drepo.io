@@ -27,9 +27,7 @@ import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsS
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
 import { UploadListItemTitle } from './components/uploadListItemTitle/uploadListItemTitle.component';
-import { Button } from './uploadListItem.styles';
-import { UploadListItemRevisionTag } from './components/uploadListItemRevisionTag';
-import { UploadListItemDestination } from './components/uploadListItemDestination';
+import { Button, Destination, RevisionTag } from './uploadListItem.styles';
 import { UploadProgress } from './uploadProgress';
 
 type IUploadListItem = {
@@ -80,7 +78,7 @@ export const UploadListItem = ({
 				filesize={filesize(item.file.size)}
 				selectedrow={isSelected}
 			/>
-			<UploadListItemDestination
+			<Destination
 				control={control}
 				disabled={isUploading}
 				errorMessage={errors.containerName?.message}
@@ -94,7 +92,7 @@ export const UploadListItem = ({
 					trigger('containerName');
 				}}
 			/>
-			<UploadListItemRevisionTag
+			<RevisionTag
 				control={control}
 				disabled={isUploading}
 				isSelected={isSelected}

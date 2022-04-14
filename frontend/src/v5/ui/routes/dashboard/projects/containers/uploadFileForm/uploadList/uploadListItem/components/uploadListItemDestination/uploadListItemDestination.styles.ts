@@ -21,7 +21,6 @@ import { FormTextField } from '@controls/formTextField/formTextField.component';
 
 export const TextInput = styled(FormTextField)<{ neworexisting: string }>`
 	margin: 0;
-	width: 271px;
 	border: none;
 	>.MuiInputBase-root {
 		>.MuiInputBase-input {
