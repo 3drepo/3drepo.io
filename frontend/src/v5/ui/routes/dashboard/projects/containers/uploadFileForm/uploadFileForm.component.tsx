@@ -24,6 +24,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { formatMessage } from '@/v5/services/intl';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
 import { Sidebar } from '@controls/sideBar';
+import { ScrollArea } from '@controls/scrollArea';
 import { UploadFieldArray } from '@/v5/store/containers/containers.types';
 import { UploadsSchema } from '@/v5/validation/containers';
 import { DashboardListHeaderLabel } from '@components/dashboard/dashboardList';
@@ -33,7 +34,7 @@ import { SortingDirection } from '@components/dashboard/dashboardList/dashboardL
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
-import { Container, Content, DropZone, Modal, UploadsListHeader } from './uploadFileForm.styles';
+import { Container, DropZone, Modal, UploadsListHeader, Padding } from './uploadFileForm.styles';
 
 type IUploadFileForm = {
 	openState: boolean;
@@ -158,40 +159,47 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 				isValid={(formState.isValid && !isUploading) || (isUploading && allUploadsComplete)}
 			>
 				<Container>
-					<Content>
-						<div hidden={!fields.length}>
-							<UploadsListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
-								<DashboardListHeaderLabel key="file" name="file.name">
-									<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
-								</DashboardListHeaderLabel>
-								<DashboardListHeaderLabel key="destination" width={282}>
-									<FormattedMessage id="uploads.list.header.destination" defaultMessage="Destination" />
-								</DashboardListHeaderLabel>
-								<DashboardListHeaderLabel key="revisionName" width={isUploading ? 282 : 302}>
-									<FormattedMessage id="uploads.list.header.revisionName" defaultMessage="Revision Name" />
-								</DashboardListHeaderLabel>
-								<DashboardListHeaderLabel key="progress" width={337} hidden={!isUploading}>
-									<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
-								</DashboardListHeaderLabel>
-							</UploadsListHeader>
-						</div>
-						<UploadList
-							values={sortedList}
-							selectedIndex={selectedIndex}
-							isUploading={isUploading}
-							onClickEdit={(id) => onClickEdit(id)}
-							onClickDelete={(id) => onClickDelete(id)}
-							getOriginalIndex={getOriginalIndex}
-						/>
-						<DropZone
-							message={formatMessage(
-								{ id: 'uploads.dropzone.message', defaultMessage: 'Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>' },
-								{ MoreLink: (child: string) => <a href="https://help.3drepo.io/en/articles/4798885-supported-file-formats" target="_blank" rel="noreferrer">{child}</a> },
+					<ScrollArea>
+						<Padding>
+							<div hidden={!fields.length}>
+								<UploadsListHeader
+									onSortingChange={setSortConfig}
+									defaultSortConfig={DEFAULT_SORT_CONFIG}
+								>
+									<DashboardListHeaderLabel key="file" name="file.name">
+										<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
+									</DashboardListHeaderLabel>
+									<DashboardListHeaderLabel key="destination" width={282}>
+										<FormattedMessage id="uploads.list.header.destination" defaultMessage="Destination" />
+									</DashboardListHeaderLabel>
+									<DashboardListHeaderLabel key="revisionName" width={isUploading ? 282 : 302}>
+										<FormattedMessage id="uploads.list.header.revisionName" defaultMessage="Revision Name" />
+									</DashboardListHeaderLabel>
+									<DashboardListHeaderLabel key="progress" width={337} hidden={!isUploading}>
+										<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
+									</DashboardListHeaderLabel>
+								</UploadsListHeader>
+							</div>
+							{!!fields.length && (
+								<UploadList
+									values={sortedList}
+									selectedIndex={selectedIndex}
+									isUploading={isUploading}
+									onClickEdit={(id) => onClickEdit(id)}
+									onClickDelete={(id) => onClickDelete(id)}
+									getOriginalIndex={getOriginalIndex}
+								/>
 							)}
-							processFiles={(files) => { processFiles(files); }}
-							hidden={isUploading}
-						/>
-					</Content>
+							<DropZone
+								message={formatMessage(
+									{ id: 'uploads.dropzone.message', defaultMessage: 'Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>' },
+									{ MoreLink: (child: string) => <a href="https://help.3drepo.io/en/articles/4798885-supported-file-formats" target="_blank" rel="noreferrer">{child}</a> },
+								)}
+								processFiles={(files) => { processFiles(files); }}
+								hidden={isUploading}
+							/>
+						</Padding>
+					</ScrollArea>
 					<Sidebar
 						open={Number.isInteger(selectedIndex) && !isUploading}
 						onClick={() => setSelectedIndex(null)}

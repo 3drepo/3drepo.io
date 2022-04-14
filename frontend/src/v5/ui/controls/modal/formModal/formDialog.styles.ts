@@ -52,7 +52,7 @@ export const Header = styled.div`
 	box-sizing: border-box;
 	align-items: center;
 	display: flex;
-	padding: 0 27px;
+	padding: 0 35px;
 `;
 
 export const Title = styled(Typography).attrs({

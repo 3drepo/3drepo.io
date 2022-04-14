@@ -19,7 +19,8 @@ import styled from 'styled-components';
 import { DragAndDrop } from '@controls/dragAndDrop';
 import { DashboardListHeader } from '@components/dashboard/dashboardList/dashboardListHeader';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
-import { ScrollArea } from '@controls/scrollArea';
+
+const MODAL_PADDING = 35;
 
 export const Modal = styled(FormModal)`
 	.MuiDialogContent-root {
@@ -35,21 +36,24 @@ export const Container = styled.div`
 	flex-direction: row;
 	height: 550px;
 	width: 100%;
+	box-sizing: border-box;
 	overflow-x: hidden;
+`;
+
+export const Padding = styled.div`
+	margin: ${MODAL_PADDING}px;
+	padding-bottom: 0;
+	width: 100%;
+	box-sizing: border-box;
+	padding-right: ${MODAL_PADDING * 2}px;
 `;
 
 export const DropZone = styled(DragAndDrop)`
 	max-height: 190px;
 	width: auto;
-	margin: 0 30px;
-	padding-bottom: 30px;
-`;
-
-export const Content = styled(ScrollArea)`
-	margin: 0 10px;
 `;
 
 export const UploadsListHeader = styled(DashboardListHeader)`
-	padding: 30px 45px 13px 87px;
+	padding: 0 45px 13px 87px;
 	margin-top: 0;
 `;

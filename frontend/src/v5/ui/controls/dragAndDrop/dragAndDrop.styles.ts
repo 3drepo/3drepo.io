@@ -28,6 +28,8 @@ export const Container = styled(Dropzone)`
 export const UploadDialog = styled.div`
 	width: 100%;
 	height: 100%;
+	padding: 30px;
+	box-sizing: border-box;
 
 	border: 1px dashed ${({ theme }) => theme.palette.primary.main};
 	border-radius: 10px;
