@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2020 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,29 +16,6 @@
  */
 import styled from 'styled-components';
 
-import { DateField } from '../dateField/dateField.component';
-
-export const SequenceDateContainer = styled.div`
-	display: flex;
-	justify-content: space-between;
-
-	& .MuiFormControl-root {
-		width: 190px;
-	}
-`;
-
-export const SequenceDateField = styled(DateField)`
-	&& {
-		display: inline-block;
-		& .MuiInputBase-formControl {
-			margin-top: 16px;
-		}
-	}
-`;
-
-export const SequenceDateActions = styled.div`
-	top: 13px;
-	right: 151px;
-	position: relative;
-	display: flex;
+export const DateFieldContainer = styled.div`
+	margin-top: 16px;
 `;
