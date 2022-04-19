@@ -25,6 +25,11 @@ type IFileInputField = ButtonProps & {
 	handleChange: (files) => void;
 };
 
+const onInputClick = (event: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
+	const element = event.target as HTMLInputElement;
+	element.value = '';
+};
+
 export const FileInputField = ({ acceptedFormats, handleChange, ...props }: IFileInputField) => (
 	<FileLabel htmlFor="hidden-file-buton">
 		<HiddenFileInput
@@ -32,6 +37,7 @@ export const FileInputField = ({ acceptedFormats, handleChange, ...props }: IFil
 			id="hidden-file-buton"
 			type="file"
 			onChange={(event) => handleChange(event.target.files)}
+			onClick={onInputClick}
 			multiple
 		/>
 		<Button component="span" {...props}>
