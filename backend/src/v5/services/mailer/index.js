@@ -42,13 +42,13 @@ const initConfig = async () => {
 			port: 587,
 			auth: { user, pass },
 		};
-
-		transporter = nodemailer.createTransport(config.mail.smtpConfig);
 	}
 
 	if (!config.mail?.smtpConfig) {
 		throw new Error('config.mail.smtpConfig is not set');
 	}
+
+	transporter = nodemailer.createTransport(config.mail.smtpConfig);
 };
 
 const checkMailerConfig = async () => {
