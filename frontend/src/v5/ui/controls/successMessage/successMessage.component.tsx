@@ -15,21 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import ErrorIconBase from '@assets/icons/warning_small.svg';
+import { PostSubmitSuccessfulMessage, TickIcon } from './successMessage.style';
 
-export const Container = styled.div`
-	color: ${({ theme }) => theme.palette.error.main};
-	${({ theme }) => theme.typography.body1};
-	font-weight: 500;
-	justify-content: flex-start;
-	display: flex;
-`;
+type SuccessMessageProps = {
+	children: any;
+};
 
-export const ErrorIcon = styled(ErrorIconBase)`
-	min-width: 18px;
-`;
-
-export const Message = styled.div`
-	margin-left: 8px;
-`;
+export const SuccessMessage = ({ children }: SuccessMessageProps) => (
+	<PostSubmitSuccessfulMessage>
+		<TickIcon />
+		{children}
+	</PostSubmitSuccessfulMessage>
+);

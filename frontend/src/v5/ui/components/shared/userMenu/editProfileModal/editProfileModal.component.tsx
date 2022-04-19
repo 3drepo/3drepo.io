@@ -17,9 +17,10 @@
 import { useEffect, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { IUser } from '@/v5/store/users/users.redux';
+import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers/currentUsersActions.dispatchers';
 import { TabContext } from '@mui/lab';
 import { defaults, pick } from 'lodash';
-import { FormModal, TabList, Tab, TabPanel } from './editProfileModal.styles';
+import { FormModal, TabList, Tab, TabPanel, ScrollArea } from './editProfileModal.styles';
 import { EditProfilePersonalTab, IUpdatePersonalInputs } from './editProfilePersonalTab/editProfilePersonalTab.component';
 import { EditProfilePasswordTab, IUpdatePasswordInputs } from './editProfilePasswordTab/editProfilePasswordTab.component';
 import { EditProfileIntegrationsTab } from './editProfileIntegrationsTab/editProfileIntegrationsTab.component';
@@ -43,20 +44,25 @@ type EditProfileModalProps = {
 };
 
 export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps) => {
-	const [passwordFields, setPasswordFields] = useState<IUpdatePasswordInputs>(null);
+	// personal tab
 	const [personalFields, setPersonalFields] = useState<IUpdatePersonalInputs>(null);
+	const [newAvatarFile, setNewAvatarFile] = useState(null);
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
-	const [activeTab, setActiveTab] = useState(null);
-	const [submitFunction, setSubmitFunctionWithCallback] = useState(null);
-	const setSubmitFunction = (callback) => setSubmitFunctionWithCallback(() => callback);
+
+	const updatePersonalFields = (fields: Partial<IUpdatePersonalInputs>) => {
+		setPersonalFields({ ...personalFields, ...fields });
+	};
+	// password tab
+	const [passwordFields, setPasswordFields] = useState<IUpdatePasswordInputs>(null);
 
 	const updatePasswordFields = (fields: Partial<IUpdatePasswordInputs>) => {
 		setPasswordFields({ ...passwordFields, ...fields });
 	};
 
-	const updatePersonalFields = (fields: Partial<IUpdatePersonalInputs>) => {
-		setPersonalFields({ ...personalFields, ...fields });
-	};
+	// all tabs
+	const [activeTab, setActiveTab] = useState(null);
+	const [submitFunction, setSubmitFunctionWithCallback] = useState(null);
+	const setSubmitFunction = (callback) => setSubmitFunctionWithCallback(() => callback);
 
 	const onTabChange = (_, selectedTab) => setActiveTab(selectedTab);
 
@@ -75,6 +81,8 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 			));
 		}
 	}, [open]);
+
+	useEffect(() => { CurrentUserActionsDispatchers.resetErrors(); }, [activeTab, open]);
 
 	return (
 		<FormModal
@@ -99,14 +107,18 @@ export const EditProfileModal = ({ open, user, onClose }: EditProfileModalProps)
 					<Tab value="password" label={TAB_LABELS.password} />
 					<Tab value="integrations" label={TAB_LABELS.integrations} />
 				</TabList>
-				<TabPanel value="personal">
-					<EditProfilePersonalTab
-						setSubmitFunction={setSubmitFunction}
-						fields={personalFields}
-						alreadyExistingEmails={alreadyExistingEmails}
-						updatePersonalFields={updatePersonalFields}
-						user={user}
-					/>
+				<TabPanel value="personal" zeroSidePadding>
+					<ScrollArea>
+						<EditProfilePersonalTab
+							setSubmitFunction={setSubmitFunction}
+							fields={personalFields}
+							alreadyExistingEmails={alreadyExistingEmails}
+							updatePersonalFields={updatePersonalFields}
+							user={user}
+							newAvatarFile={newAvatarFile}
+							setNewAvatarFile={setNewAvatarFile}
+						/>
+					</ScrollArea>
 				</TabPanel>
 				<TabPanel value="password">
 					<EditProfilePasswordTab

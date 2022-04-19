@@ -16,11 +16,21 @@
  */
 import styled from 'styled-components';
 import { Button } from '@controls/button';
+import UserIconBase from '@assets/icons/filled/user-filled.svg';
+import { ScrollArea as ScrollAreaBase } from '@controls/scrollArea';
+
+export const ScrollArea = styled(ScrollAreaBase).attrs({
+	variant: 'base',
+})``;
 
 export const Header = styled.div`
 	display: flex;
 	flex-direction: row;
 	align-items: center;
+`;
+
+export const UserIcon = styled(UserIconBase)`
+	color: ${({ theme }) => theme.palette.primary.contrast};
 `;
 
 export const ProfilePicture = styled.div`
@@ -54,7 +64,7 @@ export const Username = styled.div`
 export const FullName = styled.div`
 	font-size: ${({ theme }) => theme.typography.fontSize.medium};
 	color: #6B778C;
-	margin-top: 5px;
+	margin-top: 1px;
 `;
 
 const ADD_IMAGE_ID = 'add-image';
@@ -69,11 +79,15 @@ export const AddImageHiddenInput = styled.input.attrs({
 
 export const AddImageButton = styled(Button).attrs({
 	variant: 'outlined',
-	color: 'primary',
 })`
-	margin: 14px 0 0;
+	margin: 7px 0 7px;
+	padding: 0;
+	width: fit-content;
 `;
 
-export const AddImageButtonContainer = styled.label.attrs({
+export const AddImageInputLabel = styled.label.attrs({
 	htmlFor: ADD_IMAGE_ID,
-})``;
+})`
+	padding: 10px 15px;
+	cursor: pointer;
+`;

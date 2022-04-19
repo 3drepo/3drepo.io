@@ -134,7 +134,7 @@ export const EditProfileUpdatePasswordSchema = Yup.object().shape({
 				defaultMessage: 'Password is limited to 128 characters',
 			}))
 		.differentThan(
-			Yup.ref('oldPassword'),
+			Yup.ref('currentPassword'),
 			formatMessage({
 				id: 'editProfile.password.error.max',
 				defaultMessage: 'New password should be different than old password',

@@ -24,7 +24,7 @@ import { useEffect, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { isEqual, omit } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { PostSubmitSuccessfulMessage, TickIcon } from './editProfilePasswordTab.styles';
+import { SuccessMessage } from '@controls/successMessage/successMessage.component';
 
 export interface IUpdatePasswordInputs {
 	currentPassword: string;
@@ -64,7 +64,6 @@ export const EditProfilePasswordTab = ({
 
 	const onSubmit = () => {
 		try {
-			throw new Error('Not implemented');
 			const userData = omit(getValues(), ['confirmPassword']);
 			CurrentUserActionsDispatchers.updateUser(userData);
 			setSubmitWasSuccesful(true);
@@ -131,10 +130,9 @@ export const EditProfilePasswordTab = ({
 				required
 			/>
 			{submitWasSuccessful && (
-				<PostSubmitSuccessfulMessage>
-					<TickIcon />
+				<SuccessMessage>
 					<FormattedMessage id="editProfile.updatePassword.success" defaultMessage="Your password has been changed successfully." />
-				</PostSubmitSuccessfulMessage>
+				</SuccessMessage>
 			)}
 		</>
 	);

@@ -28,7 +28,9 @@ import { IUser } from '@/v5/store/users/users.redux';
 import { FormattedMessage } from 'react-intl';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
+import { isMatch } from 'lodash';
 import { fileIsTooBig } from '@/v5/store/currentUser/currentUser.helpers';
+import { SuccessMessage } from '@controls/successMessage/successMessage.component';
 import {
 	Header,
 	ProfilePicture,
@@ -36,8 +38,9 @@ import {
 	UserInfo,
 	FullName,
 	AddImageButton,
+	AddImageInputLabel,
 	AddImageHiddenInput,
-	AddImageButtonContainer,
+	UserIcon,
 } from './editProfilePersonalTab.styles';
 
 export interface IUpdatePersonalInputs {
@@ -50,8 +53,10 @@ export interface IUpdatePersonalInputs {
 
 type EditProfilePersonalTabProps = {
 	setSubmitFunction: (fn: Function) => void,
-	updatePersonalFields: (values: Partial<IUpdatePersonalInputs>) => void,
 	fields: IUpdatePersonalInputs,
+	updatePersonalFields: (values: Partial<IUpdatePersonalInputs>) => void,
+	newAvatarFile: File | null,
+	setNewAvatarFile: (file: File | null) => void,
 	alreadyExistingEmails: string[],
 	user: IUser,
 };
@@ -60,19 +65,19 @@ export const EditProfilePersonalTab = ({
 	setSubmitFunction,
 	fields,
 	updatePersonalFields,
+	newAvatarFile,
+	setNewAvatarFile,
 	alreadyExistingEmails,
 	user,
 }: EditProfilePersonalTabProps) => {
-	const [newAvatarUrl, setNewAvatarUrl] = useState(null);
-	const [avatarFile, setAvatarFile] = useState(null);
 	const [avatarTooBigError, setAvatarTooBigError] = useState('');
+	const [submitWasSuccessful, setSubmitWasSuccessful] = useState(false);
 	const {
 		getValues,
-		handleSubmit,
 		trigger,
-		reset,
+		handleSubmit,
 		control,
-		formState: { errors, isValid: formIsValid, isDirty: formIsDirty },
+		formState: { errors, isValid: formIsValid },
 	} = useForm<IUpdatePersonalInputs>({
 		mode: 'all',
 		reValidateMode: 'onChange',
@@ -84,12 +89,11 @@ export const EditProfilePersonalTab = ({
 	const onSubmit = () => {
 		try {
 			CurrentUserActionsDispatchers.updateUser(getValues());
-			if (avatarFile) {
-				CurrentUserActionsDispatchers.updateUserAvatar(avatarFile);
-				setAvatarFile(null);
-				setNewAvatarUrl(null);
+			setSubmitWasSuccessful(true);
+			if (newAvatarFile) {
+				CurrentUserActionsDispatchers.updateUserAvatar(newAvatarFile);
+				setNewAvatarFile(null);
 			}
-			reset();
 		} catch (error) {
 			if (alreadyExistingEmails.length) trigger('email');
 			// TODO handle error
@@ -97,48 +101,58 @@ export const EditProfilePersonalTab = ({
 	};
 
 	const addImage = (event) => {
+		if (!event.target.files.length) return;
 		setAvatarTooBigError('');
 		CurrentUserActionsDispatchers.resetErrors();
 		const file = event.target.files[0];
 		if (!fileIsTooBig(file)) {
-			setNewAvatarUrl(URL.createObjectURL(file));
-			setAvatarFile(file);
+			setNewAvatarFile(file);
 		} else {
 			setAvatarTooBigError(formatMessage({
 				id: 'editProfile.avatar.error.size',
-				defaultMessage: 'File is too big! Must be smaller than 1 MB.',
+				defaultMessage: 'Image cannot exceed 1 MB.',
 			}));
 		}
 	};
 
+	const getAvatarUrl = () => (newAvatarFile ? URL.createObjectURL(newAvatarFile) : user.avatarUrl);
+
+	const avatarIsAvailable = () => newAvatarFile || user.hasAvatar;
+
+	const fieldsAreDirty = () => !isMatch(user, getValues());
+
 	useEffect(() => {
-		setSubmitFunction(formIsValid && (formIsDirty || newAvatarUrl) ? handleSubmit(onSubmit) : null);
-	}, [formIsValid, newAvatarUrl]);
+		const shouldEnableSubmit = formIsValid && (fieldsAreDirty() || newAvatarFile);
+		setSubmitFunction(shouldEnableSubmit ? handleSubmit(onSubmit) : null);
+	}, [formIsValid, newAvatarFile, fieldsAreDirty()]);
 
 	useEffect(() => () => {
 		updatePersonalFields(getValues());
-		CurrentUserActionsDispatchers.resetErrors();
 	}, []);
 
 	return (
 		<>
 			<Header>
 				<ProfilePicture>
-					{newAvatarUrl || user.hasAvatar ? (
-						<img src={newAvatarUrl || user.avatarUrl} alt="avatar" />
+					{avatarIsAvailable() ? (
+						<img src={getAvatarUrl()} alt="avatar" />
 					) : (
-						<i>icon</i>
+						<UserIcon />
 					)}
 				</ProfilePicture>
 				<UserInfo>
 					<Username>{user.username}</Username>
 					<FullName>{user.firstName} {user.lastName}</FullName>
-					<AddImageButtonContainer>
-						<AddImageButton>
-							<FormattedMessage id="editProfile.addImage" defaultMessage="Add image" />
-						</AddImageButton>
-					</AddImageButtonContainer>
-					<AddImageHiddenInput id="add-image" onChange={addImage} />
+					<AddImageButton color={avatarIsAvailable() ? 'secondary' : 'primary'}>
+						<AddImageInputLabel>
+							{avatarIsAvailable() ? (
+								<FormattedMessage id="editProfile.changeImage" defaultMessage="Change image" />
+							) : (
+								<FormattedMessage id="editProfile.addImage" defaultMessage="Add image" />
+							)}
+							<AddImageHiddenInput onChange={addImage} />
+						</AddImageInputLabel>
+					</AddImageButton>
 					{(avatarTooBigError || avatarError) && (
 						<ErrorMessage>{avatarTooBigError || avatarError}</ErrorMessage>
 					)}
@@ -200,6 +214,11 @@ export const EditProfilePersonalTab = ({
 					</MenuItem>
 				))}
 			</FormSelect>
+			{submitWasSuccessful && (
+				<SuccessMessage>
+					<FormattedMessage id="editProfile.updateProfile.success" defaultMessage="Your profile has been changed successfully." />
+				</SuccessMessage>
+			)}
 		</>
 	);
 };

@@ -19,28 +19,36 @@ import TabBase from '@mui/material/Tab';
 import TabListBase from '@mui/lab/TabList';
 import TabPanelBase from '@mui/lab/TabPanel';
 import { FormModal as FormModalBase } from '@controls/modal/formModal/formDialog.component';
+import { ScrollArea as ScrollAreaBase } from '@controls/scrollArea';
 
 export const FormModal = styled(FormModalBase)`
 	.MuiDialogContent-root {
 		padding: 0;
-		margin-bottom: 15px;
+		margin-bottom: 0;
 	}
 `;
 
 export const Tab = styled(TabBase)`
     padding: 15px 0;
 	margin: 0 10px;
+	min-width: fit-content;
 `;
 
 export const TabList = styled(TabListBase)`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	transition: none;
+	padding-left: 17px;
 `;
 
-export const TabPanel = styled(TabPanelBase)`
-	padding: 30px 58px;
-	margin: 0;
+export const TabPanel = styled(TabPanelBase)<{ zeroSidePadding?: boolean }>`
+	padding: 30px ${({ zeroSidePadding }) => (zeroSidePadding ? 0 : 58)}px;
+	width: ${({ zeroSidePadding }) => (zeroSidePadding ? 406 : 522)}px;
 	height: 554px;
-	width: 522px;
+	margin: auto;
+    overflow-x: hidden;
     box-sizing: border-box;
+`;
+
+export const ScrollArea = styled(ScrollAreaBase)`
+	width: auto;
 `;
