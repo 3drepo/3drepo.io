@@ -58,8 +58,8 @@ const attemptToFindRealOwner = (id) => {
 
 const getFileSize = async (teamspace, collection, ref) => {
 	if (!ref) return 0;
-	const { size } = await findOne(teamspace, `${collection}.ref`, { _id: ref }, { size: 1 });
-	return size;
+	const res = await findOne(teamspace, `${collection}.ref`, { _id: ref }, { size: 1 });
+	return res?.size || 0;
 };
 
 const getAnonOwnerRecords = async (teamspace, collection) => {
