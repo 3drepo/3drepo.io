@@ -358,6 +358,9 @@ export const theme = createTheme({
 							lineHeight: '31px',
 						},
 					},
+					'&.Mui-focused .MuiAutocomplete-inputRoot .MuiOutlinedInput-notchedOutline': {
+						borderWidth: 1,
+					},
 				},
 				input: {
 					height: '100%',
@@ -370,6 +373,9 @@ export const theme = createTheme({
 					display: 'flex',
 					alignItems: 'center',
 					margin: '0 10px',
+					'button:hover': {
+						backgroundColor: 'unset',
+					},
 				},
 				popupIndicator: {
 					width: '20px',
@@ -382,14 +388,16 @@ export const theme = createTheme({
 					margin: '0 5px 0 0',
 					padding: '2px',
 				},
-				option: {
-					height: 'auto',
-					alignItems: 'baseline',
-					margin: 'auto 0',
-					display: 'flex',
-					padding: '12px',
-					wordWrap: 'break-word',
-					boxSizing: 'border-box',
+				listbox: {
+					'.MuiAutocomplete-option': {
+						height: 'auto',
+						alignItems: 'baseline',
+						margin: 'auto 0',
+						display: 'flex',
+						padding: '6px 12px',
+						wordWrap: 'break-word',
+						boxSizing: 'border-box',
+					},
 				},
 			},
 		},
@@ -624,7 +632,6 @@ export const theme = createTheme({
 		MuiOutlinedInput: {
 			styleOverrides: {
 				root: {
-					padidng: 0,
 					background: COLOR.PRIMARY_MAIN_CONTRAST,
 					'& input': {
 						padding: '0px 15px',

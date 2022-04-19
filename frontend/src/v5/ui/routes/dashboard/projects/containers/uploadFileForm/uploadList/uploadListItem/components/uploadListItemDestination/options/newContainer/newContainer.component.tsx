@@ -15,9 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import AddCircleIcon from '@assets/icons/add_circle.svg';
 import { FormattedMessage } from 'react-intl';
-import { Container, Message } from './newContainer.styles';
+import { AddCircleIcon, Container, Message } from './newContainer.styles';
 
 interface INewContainer {
 	containerName: string;

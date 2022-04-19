@@ -20,4 +20,6 @@ import styled from 'styled-components';
 
 export const Container = styled(ScrollArea)`
 	padding: 0;
+	${({ theme }) => theme.typography.body1};
+	font-weight: 500;
 `;

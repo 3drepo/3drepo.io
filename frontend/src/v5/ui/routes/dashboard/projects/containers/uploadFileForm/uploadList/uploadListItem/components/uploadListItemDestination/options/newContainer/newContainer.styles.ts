@@ -16,26 +16,30 @@
  */
 
 import styled from 'styled-components';
+import UnstyledIcon from '@assets/icons/add_circle.svg';
 
 export const Container = styled.div`
-	height: 55px;
-	color: ${({ theme }) => theme.palette.primary.dark};
-	display: inline-flex;
-	width: 100%;
-	${({ theme }) => theme.typography.h5};
-	flex-flow: row;
-	
-	svg {
-		height: 18px;
-		width: 18px;
-		box-sizing: border-box;
-		margin: 6px;
-		flex-shrink: 0;
+	&& {
+		color: ${({ theme }) => theme.palette.primary.dark};
+		display: inline-flex;
+		width: 100%;
+		flex-flow: row;
+		align-items: flex-start;
+		padding: 12px;
 	}
 
 	&:hover,&:focus {
 		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	}
+`;
+
+export const AddCircleIcon = styled(UnstyledIcon)`
+	height: 18px;
+	width: 18px;
+	box-sizing: border-box;
+	margin: 0 6px 6px 0;
+	flex-shrink: 0;
+
 `;
 
 export const Message = styled.div`

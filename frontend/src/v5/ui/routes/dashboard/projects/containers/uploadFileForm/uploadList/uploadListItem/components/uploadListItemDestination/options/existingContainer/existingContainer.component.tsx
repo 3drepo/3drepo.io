@@ -16,7 +16,7 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { Container, LastRevision, ErrorText, ContainerName } from './existingContainer.styles';
+import { Container, LastRevision, ErrorText } from './existingContainer.styles';
 
 interface IExistingContainer {
 	containerName: string;
@@ -28,9 +28,7 @@ const noneText = <FormattedMessage id="uploads.destination.lastRevision.none" de
 
 export const ExistingContainer = ({ containerName, latestRevision, inUse, ...props }: IExistingContainer) => (
 	<Container {...props}>
-		<ContainerName>
-			{containerName}
-		</ContainerName>
+		{containerName}
 		<LastRevision>
 			<FormattedMessage id="uploads.destination.lastRevision" defaultMessage="Last revision: " />
 			{latestRevision || noneText}

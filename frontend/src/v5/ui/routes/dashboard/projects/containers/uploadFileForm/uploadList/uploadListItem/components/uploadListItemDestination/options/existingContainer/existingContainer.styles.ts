@@ -22,23 +22,18 @@ export const Container = styled.div`
 	flex-direction: column;
 	color: ${({ theme }) => theme.palette.secondary.main};
 	width: 100%;
-	${({ theme }) => theme.typography.h5};
+	align-items: baseline;
+	padding: 12px;
 
 	&:hover,&:focus {
 		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	}
 `;
 
-export const ContainerName = styled.div`
-	width: 100%;
-`;
-
 export const LastRevision = styled.div`
-	width: 100%;
 	color: ${({ theme }) => theme.palette.base.main};
 `;
 
 export const ErrorText = styled.div`
-	width: 100%;
 	color: ${({ theme }) => theme.palette.error.main};
 `;
