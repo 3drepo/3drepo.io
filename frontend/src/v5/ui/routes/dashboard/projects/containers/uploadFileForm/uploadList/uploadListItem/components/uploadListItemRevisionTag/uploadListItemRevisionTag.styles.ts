@@ -32,7 +32,7 @@ export const TextField = styled(FormTextField)<{ $selectedrow: boolean }>`
 		&.Mui-disabled {
 			input {
 				font-weight: bold;
-				color: ${({ theme }) => theme.palette.secondary.main};
+				-webkit-text-fill-color: ${({ theme }) => theme.palette.secondary.main};
 			}
 			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 			fieldset { border: none; }

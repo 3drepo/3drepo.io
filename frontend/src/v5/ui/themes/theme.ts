@@ -366,6 +366,14 @@ export const theme = createTheme({
 					height: '100%',
 					padding: 0,
 				},
+				inputRoot: {
+					'&.Mui-disabled': {
+						backgroundColor: COLOR.TERTIARY_LIGHTEST,
+						'.MuiAutocomplete-endAdornment': {
+							display: 'none',
+						},
+					},
+				},
 				endAdornment: {
 					position: 'static',
 					height: '100%',

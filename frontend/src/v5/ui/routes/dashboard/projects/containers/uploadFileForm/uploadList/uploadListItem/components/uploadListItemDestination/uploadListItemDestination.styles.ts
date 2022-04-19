@@ -26,6 +26,7 @@ export const TextInput = styled(FormTextField)<{ neworexisting: string }>`
 		>.MuiInputBase-input {
 			font-weight: bold;
 			padding: 0;
+			&.Mui-disabled { -webkit-text-fill-color: ${({ theme }) => theme.palette.secondary.main}; };
 		}
 		${({ neworexisting, theme }) => {
 		if (neworexisting === 'new') {
