@@ -26,7 +26,7 @@ export const IconButton = styled(IconButtonComponent)`
 `;
 
 export const TextField = styled(TextFieldComponent)`
-	margin: 0 0 0 14px;
+	margin: 8px;
 
 	.MuiInputBase-adornedEnd {
 		padding-right: 0;

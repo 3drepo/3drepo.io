@@ -31,6 +31,21 @@ jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager.constants');
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+const { SOCKET_HEADER } = require(`${src}/services/chat/chat.constants`);
+
+// Need to mock these 2 to ensure we are not trying to create a real session configuration
+jest.mock('express-session', () => () => {});
+jest.mock('../../../../src/v5/handler/db', () => ({
+	...jest.requireActual('../../../../src/v5/handler/db'),
+	getSessionStore: () => {},
+}));
+
+jest.mock('../../../../src/v5/services/sessions');
+const SessionService = require(`${src}/services/sessions`);
+
+const sessionMiddleware = jest.fn().mockImplementation((req, res, next) => next());
+
+SessionService.session = Promise.resolve({ middleware: sessionMiddleware });
 
 const Sessions = require(`${src}/middleware/sessions`);
 
@@ -56,7 +71,7 @@ const testCreateSession = () => {
 			ipAddress: request.ips[0] || request.ip,
 			userAgent: request.headers['user-agent'],
 			referer: request?.session?.user?.referer,
-			socketId: request.headers['x-socket-id'],
+			socketId: request.headers[SOCKET_HEADER],
 		});
 	};
 
@@ -83,7 +98,7 @@ const testCreateSession = () => {
 		});
 
 		test('Should regenerate session with request with socket id', async () => {
-			const reqWithSocket = { ...req, headers: { ...req.headers, 'x-socket-id': 'socketsdlfkdsj' } };
+			const reqWithSocket = { ...req, headers: { ...req.headers, [SOCKET_HEADER]: 'socketsdlfkdsj' } };
 			await Sessions.createSession(reqWithSocket, {});
 			checkResults(reqWithSocket);
 		});
@@ -103,6 +118,11 @@ const testCreateSession = () => {
 		test('Should regenerate session without cookie.maxAge', async () => {
 			config.cookie.maxAge = undefined;
 			await Sessions.createSession(req, {});
+			checkResults(req);
+		});
+
+		test('Should regenerate session and respond with user data if v4 is flagged', async () => {
+			await Sessions.createSession({ ...req, v4: true }, {});
 			checkResults(req);
 		});
 
@@ -135,10 +155,35 @@ const testDestroySession = () => {
 			expect(Responder.respond.mock.calls.length).toBe(1);
 			expect(Responder.respond.mock.results[0].value.code).toBe(templates.ok.code);
 		});
+
+		test('Should destroy session (v4)', async () => {
+			await Sessions.destroySession({ ...req, v4: true }, res);
+			expect(Responder.respond.mock.calls.length).toBe(1);
+			expect(Responder.respond.mock.results[0].value.code).toBe(templates.ok.code);
+			expect(Responder.respond.mock.calls[0][3]).toEqual({ username: req.session.user.username });
+		});
+	});
+};
+
+const testManageSession = () => {
+	describe('Manage session', () => {
+		test('Should call next() immedately if session was already established', async () => {
+			const fn = jest.fn();
+			await Sessions.manageSessions({ session: {} }, {}, fn);
+			expect(sessionMiddleware).not.toBeCalled();
+			expect(fn).toBeCalled();
+		});
+		test('Should call next() after trying to establish a session', async () => {
+			const fn = jest.fn();
+			await Sessions.manageSessions({ }, {}, fn);
+			expect(sessionMiddleware).toBeCalled();
+			expect(fn).toBeCalled();
+		});
 	});
 };
 
 describe('middleware/sessions', () => {
 	testCreateSession();
 	testDestroySession();
+	testManageSession();
 });

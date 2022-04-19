@@ -24,6 +24,7 @@ import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { IProject } from '@/v5/store/projects/projects.redux';
 import { isEmpty } from 'lodash';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { NavigationMenu } from '../navigatonMenu';
 import { Container, HomeIconBreadcrumb, Breadcrumb, InteractiveBreadcrumb, OverflowWrapper } from './breadcrumbs.styles';
 
@@ -42,8 +43,7 @@ const projectList2LinkList = (projects: IProject[]) => (projects.length ? projec
 const lastItemOf = (list: any[]) => list[list.length - 1];
 
 export const Breadcrumbs = (): JSX.Element => {
-	const { teamspace } = useParams();
-	const { project: projectId } = useParams();
+	const { teamspace, project: projectId } = useParams<DashboardParams>();
 
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();

@@ -238,8 +238,8 @@ export const theme = createTheme({
 					margin: '38px 0 0',
 					width: '100%',
 					'& label': {
-						...typography.kicker,
-						top: '-33.5px',
+						...typography.body1,
+						top: '-35.5px',
 						left: '-13px',
 						color: COLOR.BASE_MAIN,
 
@@ -732,7 +732,7 @@ export const theme = createTheme({
 			styleOverrides: {
 				root: {
 					position: 'absolute',
-					...typography.kicker,
+					...typography.body1,
 					fontSize: '12px',
 					color: COLOR.BASE_MAIN,
 
@@ -745,7 +745,7 @@ export const theme = createTheme({
 					},
 				},
 				formControl: {
-					top: '20px',
+					top: '18px',
 					left: '1px',
 				},
 				asterisk: {

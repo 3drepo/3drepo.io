@@ -31,7 +31,7 @@ export const SequenceDateField = styled(DateField)`
 	&& {
 		display: inline-block;
 		& .MuiInputBase-formControl {
-			margin-top: 0;
+			margin-top: 16px;
 		}
 	}
 `;

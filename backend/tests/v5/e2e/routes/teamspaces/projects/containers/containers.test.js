@@ -37,11 +37,7 @@ const nobody = ServiceHelper.generateUserCredentials();
 
 const teamspace = ServiceHelper.generateRandomString();
 
-const project = {
-	id: ServiceHelper.generateUUIDString(),
-	name: ServiceHelper.generateRandomString(),
-	permissions: [{ user: users.projectAdmin.user, permissions: ['admin_project'] }],
-};
+const project = ServiceHelper.generateRandomProject();
 
 const views = [
 	{
@@ -69,50 +65,34 @@ const legends = [
 
 const models = [
 	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
+		...ServiceHelper.generateRandomModel({ viewers: [users.viewer], commenters: [users.commenter] }),
 		isFavourite: true,
-		permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
-		properties: ServiceHelper.generateRandomModelProperties(),
 	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
-		properties: ServiceHelper.generateRandomModelProperties(),
-	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
-		properties: { ...ServiceHelper.generateRandomModelProperties(), federate: true },
-	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
+	ServiceHelper.generateRandomModel(),
+	ServiceHelper.generateRandomModel({ isFederation: true }),
+	ServiceHelper.generateRandomModel({
 		properties: {
-			...ServiceHelper.generateRandomModelProperties(),
 			status: 'failed',
 			errorReason: {
 				message: ServiceHelper.generateRandomString(),
 				timestamp: new Date(),
-			} },
-	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
-		properties: { ...ServiceHelper.generateRandomModelProperties(),
+			},
+		},
+	}),
+	ServiceHelper.generateRandomModel({
+		properties: {
 			errorReason: {
 				message: ServiceHelper.generateRandomString(),
 				errorCode: 1,
 			},
 		},
-	},
+	}),
+	// NOTE: this model gets deleted after deleteContainer test
 	{
-		// NOTE: this model gets deleted after deleteContainer test
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
+		...ServiceHelper.generateRandomModel({
+			viewers: [users.viewer], commenters: [users.commenter],
+		}),
 		isFavourite: true,
-		permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
-		properties: ServiceHelper.generateRandomModelProperties(),
 	},
 ];
 

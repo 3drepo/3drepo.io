@@ -26,6 +26,7 @@ import { CreateContainerSchema } from '@/v5/validation/containers';
 import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { MenuItem } from '@mui/material';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { FlexContainer } from './createContainerForm.styles';
 
 interface IFormInput {
@@ -41,7 +42,7 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 		mode: 'onChange',
 		resolver: yupResolver(CreateContainerSchema),
 	});
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const { teamspace, project } = useParams<DashboardParams>();
 	const onSubmit: SubmitHandler<IFormInput> = (body) => {
 		ContainersActionsDispatchers.createContainer(teamspace, project, body);
 		close();
