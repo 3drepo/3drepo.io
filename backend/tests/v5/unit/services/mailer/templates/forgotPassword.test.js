@@ -23,6 +23,18 @@ const ForgotPassword = require(`${src}/services/mailer/templates/forgotPassword`
 
 const testHtml = () => {
 	describe('get forgotPassword template html', () => {
+		describe.each([
+			['data is undefined', undefined],
+			['username is undefined', { token: generateRandomString() }],
+			['token is undefined', { username: generateRandomString() }],
+		])(
+			'Error checking ', (desc, data) => {
+				test(`should throw an error if ${desc}`, () => {
+					expect(() => ForgotPassword.html(data)).toThrow();
+				});
+			},
+		);
+
 		test('should get forgotPassword template html', async () => {
 			const data = {
 				username: generateRandomString(),

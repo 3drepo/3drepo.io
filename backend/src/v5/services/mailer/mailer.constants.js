@@ -21,8 +21,8 @@ const verifyUser = require('./templates/verifyUser');
 const MailerConstants = {};
 
 MailerConstants.templates = {
-	VERIFY_USER: { html: (data) => verifyUser.html(data), subject: verifyUser.subject },
-	FORGOT_PASSWORD: { html: (data) => forgotPassword.html(data), subject: forgotPassword.subject },
+	VERIFY_USER: verifyUser,
+	FORGOT_PASSWORD: forgotPassword,
 };
 
 Object.keys(MailerConstants.templates).forEach((templateName) => {

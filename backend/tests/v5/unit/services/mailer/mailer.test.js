@@ -35,7 +35,11 @@ const testSendEmail = () => {
 	describe('send email', () => {
 		const recipient = 'example@email.com';
 		const attachments = { attachment: generateRandomString() };
-		const data = {};
+		const data = {
+			username: generateRandomString(),
+			token: generateRandomString(),
+			firstName: generateRandomString(),
+		};
 
 		const mailerConfig = { ...config.mail };
 
@@ -69,7 +73,7 @@ const testSendEmail = () => {
 			expect(sendMailMock).toBeCalledWith({
 				from: config.mail.sender,
 				to: recipient,
-				subject: emailTemplates.FORGOT_PASSWORD.subject,
+				subject: emailTemplates.FORGOT_PASSWORD.subject(),
 				html: BaseTemplate.html({ ...data, emailContent: emailTemplates.FORGOT_PASSWORD.html(data) }),
 				attachments,
 			});
@@ -81,7 +85,7 @@ const testSendEmail = () => {
 			expect(sendMailMock).toBeCalledWith({
 				from: config.mail.sender,
 				to: recipient,
-				subject: emailTemplates.VERIFY_USER.subject,
+				subject: emailTemplates.VERIFY_USER.subject(),
 				html: BaseTemplate.html({ ...data, emailContent: emailTemplates.VERIFY_USER.html(data) }),
 			});
 		});
@@ -96,6 +100,11 @@ const testSendEmail = () => {
 		test('should throw error if the template name is not recognised', async () => {
 			await expect(Mailer.sendEmail(generateRandomString(), recipient, data, attachments))
 				.rejects.toEqual(templates.unknown);
+		});
+
+		test('should throw error if the data does not provide sufficient info for the template', async () => {
+			await expect(Mailer.sendEmail(emailTemplates.VERIFY_USER.name, recipient, undefined, attachments))
+				.rejects.toThrow();
 		});
 	});
 };

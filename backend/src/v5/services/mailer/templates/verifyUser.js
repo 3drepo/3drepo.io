@@ -15,10 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const VerifyUserTemplate = {};
+const Yup = require('yup');
 const config = require('../../../utils/config');
 
-VerifyUserTemplate.html = (data) => `<table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;">
+const dataSchema = Yup.object({
+	username: Yup.string().required(),
+	token: Yup.string().required(),
+}).strict(true).required(true);
+
+const VerifyUserTemplate = {};
+VerifyUserTemplate.subject = () => 'Welcome to 3D Repo! Verify Your Email';
+
+const generateHtml = ({ username, token }) => `<table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;">
    <tbody class="mcnTextBlockOuter">
       <tr>
          <td valign="top" class="mcnTextBlockInner" style="padding-top:9px;">
@@ -79,7 +87,7 @@ VerifyUserTemplate.html = (data) => `<table border="0" cellpadding="0" cellspaci
                <tbody>
                   <tr>
                      <td class="mcnImageContent" valign="top" style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 0; text-align:center;">
-                        <a href="${config.getBaseURL()}/register-verify?username=${data.username}&token=${data.token}${(data.pay ? '&pay=true' : '')}" title="" class="" target="_blank">
+                        <a href="${config.getBaseURL()}/register-verify?username=${username}&token=${token}" title="" class="" target="_blank">
                         <img align="center" alt="" src="https://3drepo.com/wp-content/uploads/email/Verify%20email%20address.png" width="564" style="max-width:1200px; padding-bottom: 0; display: inline !important; vertical-align: bottom;" class="mcnImage">
                         </a>
                      </td>
@@ -144,6 +152,9 @@ VerifyUserTemplate.html = (data) => `<table border="0" cellpadding="0" cellspaci
    </tbody>
 </table>`;
 
-VerifyUserTemplate.subject = 'Welcome to 3D Repo! Verify Your Email‏';
+VerifyUserTemplate.html = (data) => {
+	dataSchema.validateSync(data);
+	return generateHtml(data);
+};
 
 module.exports = VerifyUserTemplate;

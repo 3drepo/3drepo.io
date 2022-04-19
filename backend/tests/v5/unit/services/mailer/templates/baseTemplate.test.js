@@ -23,15 +23,27 @@ const BaseTemplate = require(`${src}/services/mailer/templates/baseTemplate`);
 
 const testHtml = () => {
 	describe('get base template html', () => {
-		test('should get base template html', async () => {
+		describe.each([
+			['data is undefined', undefined],
+			['firstName is undefined', { emailContent: generateRandomString() }],
+			['emailContent is undefined', { firstName: generateRandomString() }],
+		])(
+			'Error checking ', (desc, data) => {
+				test(`should throw an error if ${desc}`, () => {
+					expect(() => BaseTemplate.html(data)).toThrow();
+				});
+			},
+		);
+
+		test('should get base template html', () => {
 			const data = {
 				firstName: generateRandomString(),
 				emailContent: generateRandomString(),
 			};
 
-			const res = await BaseTemplate.html(data);
+			const res = BaseTemplate.html(data);
 
-			expect(isHtml(res)).toEqual(true);
+			expect(isHtml(res)).toBe(true);
 		});
 	});
 };

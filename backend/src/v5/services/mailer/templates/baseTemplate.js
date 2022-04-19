@@ -15,9 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const Yup = require('yup');
+
+const dataSchema = Yup.object({
+	firstName: Yup.string().required(),
+	emailContent: Yup.string().required(),
+}).strict(true).required(true);
+
 const BaseTemplate = {};
 
-BaseTemplate.html = (data) => `<!doctype html>
+const generateHtml = ({ firstName, emailContent }) => `<!doctype html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
    <head>
       <!-- NAME: FOLLOW UP -->
@@ -555,7 +562,7 @@ BaseTemplate.html = (data) => `<!doctype html>
                                                                      <tbody>
                                                                         <tr>
                                                                            <td valign="top" class="mcnTextContent" style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;">
-                                                                              <span style="font-size:18px"><strong><span style="color:#808080"><span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif">Hello ${data.firstName},</span></span></strong></span>
+                                                                              <span style="font-size:18px"><strong><span style="color:#808080"><span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif">Hello ${firstName},</span></span></strong></span>
                                                                            </td>
                                                                         </tr>
                                                                      </tbody>
@@ -571,7 +578,7 @@ BaseTemplate.html = (data) => `<!doctype html>
                                                    </tr>
                                                 </tbody>
                                              </table>
-                                             ${data.emailContent}
+                                             ${emailContent}
                                              <table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;">
                                                 <tbody class="mcnTextBlockOuter">
                                                    <tr>
@@ -936,5 +943,10 @@ BaseTemplate.html = (data) => `<!doctype html>
       </center>
    </body>
 </html>`;
+
+BaseTemplate.html = (data) => {
+	dataSchema.validateSync(data);
+	return generateHtml(data);
+};
 
 module.exports = BaseTemplate;

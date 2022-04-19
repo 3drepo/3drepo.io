@@ -69,17 +69,18 @@ Mailer.sendEmail = async (templateName, to, data, attachments) => {
 	const template = emailTemplates[templateName];
 
 	if (!template) {
+		logger.logError(`Mailer error - Unrecognised email template ${templateName}`);
 		throw templates.unknown;
 	}
-	const templateHtml = template.html(data);
 
 	try {
 		await checkMailerConfig();
+		const emailContent = template.html(data);
 		const mailOptions = {
 			from: config.mail.sender,
 			to,
-			subject: template.subject,
-			html: baseTemplate.html({ ...data, emailContent: templateHtml }),
+			subject: template.subject(data),
+			html: baseTemplate.html({ ...data, emailContent }),
 		};
 
 		if (attachments) {
@@ -87,7 +88,7 @@ Mailer.sendEmail = async (templateName, to, data, attachments) => {
 		}
 		await transporter.sendMail(mailOptions);
 	} catch (err) {
-		logger.logDebug(`Email error - ${err.message}`);
+		logger.logError(`Email error - ${err.message}`);
 		throw err;
 	}
 };

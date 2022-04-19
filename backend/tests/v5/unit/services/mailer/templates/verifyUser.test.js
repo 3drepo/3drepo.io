@@ -23,23 +23,23 @@ const VerifyUser = require(`${src}/services/mailer/templates/verifyUser`);
 
 const testHtml = () => {
 	describe('get verifyUser template html', () => {
-		test('should get verifyUser template html with pay', async () => {
+		describe.each([
+			['data is undefined', undefined],
+			['username is undefined', { token: generateRandomString() }],
+			['token is undefined', { username: generateRandomString() }],
+		])(
+			'Error checking ', (desc, data) => {
+				test(`should throw an error if ${desc}`, () => {
+					expect(() => VerifyUser.html(data)).toThrow();
+				});
+			},
+		);
+
+		test('should get forgotPassword template html', async () => {
 			const data = {
 				username: generateRandomString(),
 				token: generateRandomString(),
-				pay: generateRandomString(),
 			};
-
-			const res = await VerifyUser.html(data);
-			expect(isHtml(res)).toEqual(true);
-		});
-
-		test('should get verifyUser template html without pay', async () => {
-			const data = {
-				username: generateRandomString(),
-				token: generateRandomString(),
-			};
-
 			const res = await VerifyUser.html(data);
 			expect(isHtml(res)).toEqual(true);
 		});

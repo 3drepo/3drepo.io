@@ -15,10 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const ForgotPasswordTemplate = {};
+const Yup = require('yup');
 const config = require('../../../utils/config');
 
-ForgotPasswordTemplate.html = (data) => `<table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;">
+const dataSchema = Yup.object({
+	username: Yup.string().required(),
+	token: Yup.string().required(),
+}).strict(true).required(true);
+
+const ForgotPasswordTemplate = {};
+
+ForgotPasswordTemplate.subject = () => 'Reset your password';
+
+const generateHtml = ({ username, token }) => `<table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width:100%;">
 <tbody class="mcnTextBlockOuter">
    <tr>
       <td valign="top" class="mcnTextBlockInner" style="padding-top:9px;">
@@ -33,7 +42,7 @@ ForgotPasswordTemplate.html = (data) => `<table border="0" cellpadding="0" cells
                      <tbody>
                         <tr>
                            <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 200%; text-align: left;">
-                              <span style="font-size:15px">We received a request to reset your password, for username <strong>${data.username}</strong>.<br>
+                              <span style="font-size:15px">We received a request to reset your password, for username <strong>${username}</strong>.<br>
                               Use the link below to set up a new password for your account.</span>
                            </td>
                         </tr>
@@ -80,7 +89,7 @@ ForgotPasswordTemplate.html = (data) => `<table border="0" cellpadding="0" cells
                <tr>
                   <td class="mcnImageContent" valign="top" style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 0; text-align:center;">
                      <!-- buttonImage -->
-                     <a href="${config.getBaseURL()}/password-change?username=${data.username}&token=${data.token}" title="" class="" target="_blank">
+                     <a href="${config.getBaseURL()}/password-change?username=${username}&token=${token}" title="" class="" target="_blank">
                      <img align="center" alt="" src="https://3drepo.com/wp-content/uploads/email/Reset%20Your%20Password.png" width="400" style="max-width:400px; padding-bottom: 0; display: inline !important; vertical-align: bottom;" class="mcnImage">
                      </a>
                   </td>
@@ -146,6 +155,9 @@ ForgotPasswordTemplate.html = (data) => `<table border="0" cellpadding="0" cells
 </tbody>
 </table>`;
 
-ForgotPasswordTemplate.subject = 'Reset your password';
+ForgotPasswordTemplate.html = (data) => {
+	dataSchema.validateSync(data);
+	return generateHtml(data);
+};
 
 module.exports = ForgotPasswordTemplate;
