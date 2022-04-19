@@ -360,7 +360,7 @@
   dependencies:
     "@elastic/ecs-helpers" "^1.1.0"
 
-"@elastic/elasticsearch@^7.17.0":
+"@elastic/elasticsearch@7.17.0":
   version "7.17.0"
   resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-7.17.0.tgz#589fb219234cf1b0da23744e82b1d25e2fe9a797"
   integrity sha512-5QLPCjd0uLmLj1lSuKSThjNpq39f6NmlTy9ROLFwG5gjyTgpwSqufDeYG/Fm43Xs05uF7WcscoO7eguI3HuuYA==
@@ -3628,6 +3628,11 @@ is-glob@^4.0.0, is-glob@^4.0.1, is-glob@~4.0.1:
   integrity sha512-xelSayHH36ZgE7ZWhli7pW34hNbNl8Ojv5KVmkJD4hBdD3th8Tfk9vYasLM+mXWOZhFkgZfxhLSnrwRr4elSSg==
   dependencies:
     is-extglob "^2.1.1"
+
+is-html-content@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/is-html-content/-/is-html-content-1.0.0.tgz#5853540e5d4143fb42cf0ed3c5f12cd9c67df3a3"
+  integrity sha512-GhUQOpN/YQ65rybhJ77MjabmrY39IZ/OHiKJZPC+WPg6KytNaqKlbs1tNizJ0Aluz4MOuAV9ItVSBKIZTAx0Iw==
 
 is-installed-globally@^0.3.1:
   version "0.3.2"

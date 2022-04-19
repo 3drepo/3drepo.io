@@ -37,20 +37,30 @@ const testSendEmail = () => {
 		const attachments = { attachment: generateRandomString() };
 		const data = {};
 
+		const mailerConfig = { ...config.mail };
+
+		beforeEach(() => {
+			config.mail = mailerConfig;
+		});
+
 		test('should fail if config.mail.sender is not set', async () => {
+			Mailer.reset();
 			const { sender } = config.mail;
 			config.mail.sender = undefined;
 
 			await expect(Mailer.sendEmail(emailTemplates.FORGOT_PASSWORD.name, recipient, data, attachments))
-				.rejects.toEqual({ message: 'config.mail.sender is not set' });
+				.rejects.toThrow('config.mail.sender is not set');
 			config.mail.sender = sender;
+			Mailer.reset();
 		});
 
 		test('should fail if config.mail.smtpConfig is not set and config.mail.generateCredentials is false', async () => {
+			Mailer.reset();
 			config.mail.generateCredentials = false;
 			await expect(Mailer.sendEmail(emailTemplates.FORGOT_PASSWORD.name, recipient, data, attachments))
-				.rejects.toEqual({ message: 'config.mail.smtpConfig is not set' });
+				.rejects.toThrow('config.mail.smtpConfig is not set');
 			config.mail.generateCredentials = true;
+			Mailer.reset();
 		});
 
 		test('should send email if attachments are provided', async () => {

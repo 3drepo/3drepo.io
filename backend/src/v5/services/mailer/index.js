@@ -27,29 +27,43 @@ const Mailer = {};
 
 let transporter;
 
-const checkMailerConfig = async () => {
+let prom;
+
+const initConfig = async () => {
 	if (!config?.mail?.sender) {
 		throw new Error('config.mail.sender is not set');
 	}
 
-	if (!config?.mail?.smtpConfig) {
-		if (config?.mail?.generateCredentials) {
-			const { user, pass } = await createTestAccount();
+	if (config.mail?.generateCredentials) {
+		const { user, pass } = await createTestAccount();
 
-			config.mail.smtpConfig = {
-				host: 'smtp.ethereal.email',
-				port: 587,
-				auth: { user, pass },
-			};
+		config.mail.smtpConfig = {
+			host: 'smtp.ethereal.email',
+			port: 587,
+			auth: { user, pass },
+		};
 
-			transporter = nodemailer.createTransport(config.mail.smtpConfig);
-		} else {
-			throw new Error('config.mail.smtpConfig is not set');
-		}
+		transporter = nodemailer.createTransport(config.mail.smtpConfig);
+	}
+
+	if (!config.mail?.smtpConfig) {
+		throw new Error('config.mail.smtpConfig is not set');
 	}
 };
 
-const prom = checkMailerConfig();
+const checkMailerConfig = async () => {
+	if (!prom) prom = initConfig();
+	await prom;
+};
+
+checkMailerConfig().catch(
+	// istanbul ignore next
+	(err) => {
+		logger.logError(`Failed to initialise mailer: ${err.message}`);
+		// eslint-disable-next-line no-process-exit
+		process.exit(1);
+	},
+);
 
 Mailer.sendEmail = async (templateName, to, data, attachments) => {
 	const template = emailTemplates[templateName];
@@ -59,24 +73,27 @@ Mailer.sendEmail = async (templateName, to, data, attachments) => {
 	}
 	const templateHtml = template.html(data);
 
-	const mailOptions = {
-		from: config.mail.sender,
-		to,
-		subject: template.subject,
-		html: baseTemplate.html({ ...data, emailContent: templateHtml }),
-	};
-
-	if (attachments) {
-		mailOptions.attachments = attachments;
-	}
-
 	try {
-		await prom;
+		await checkMailerConfig();
+		const mailOptions = {
+			from: config.mail.sender,
+			to,
+			subject: template.subject,
+			html: baseTemplate.html({ ...data, emailContent: templateHtml }),
+		};
+
+		if (attachments) {
+			mailOptions.attachments = attachments;
+		}
 		await transporter.sendMail(mailOptions);
 	} catch (err) {
 		logger.logDebug(`Email error - ${err.message}`);
 		throw err;
 	}
+};
+
+Mailer.reset = () => {
+	prom = undefined;
 };
 
 module.exports = Mailer;
