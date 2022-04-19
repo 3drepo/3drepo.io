@@ -98,17 +98,16 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 				let filtered: DestinationOption[] = filter(options, params);
 				const { inputValue } = params;
 
-				setDisableClearable(!inputValue);
+				setDisableClearable(!(value.containerName || inputValue));
 				const isExisting = options.some((option: DestinationOption) => inputValue === option.containerName);
-				if (inputValue !== '' && !isExisting) {
+				filtered = filtered.filter((x) => x.containerName !== value.containerName);
+				if (!isExisting || !inputValue) {
 					filtered = [{
 						containerId: '',
 						containerName: inputValue,
 						latestRevision: '',
 					}, ...filtered];
 				}
-
-				filtered = filtered.filter((x) => x.containerName !== value.containerName);
 
 				return filtered;
 			}}
@@ -130,8 +129,9 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 					}}
 				/>
 			)}
-			getOptionDisabled={(option: DestinationOption) => containersInUse.includes(option.containerName)}
-			renderOption={(optionProps, option) => (option.containerName && !option.containerId
+			getOptionDisabled={(option: DestinationOption) => !!option.containerName
+				&& containersInUse.includes(option.containerName)}
+			renderOption={(optionProps, option) => (!option.containerId
 				? <NewContainer containerName={option.containerName} {...optionProps} />
 				: (
 					<ExistingContainer
@@ -140,8 +140,7 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 						latestRevision={option.latestRevision}
 						{...optionProps}
 					/>
-				)
-			)}
+				))}
 			ListboxComponent={(listboxProps) => <OptionsBox {...listboxProps} />}
 			className={className}
 			disabled={disabled}

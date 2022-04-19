@@ -19,21 +19,30 @@ import { FormattedMessage } from 'react-intl';
 import { AddCircleIcon, Container, Message } from './newContainer.styles';
 
 interface INewContainer {
-	containerName: string;
+	containerName?: string;
 }
 
 export const NewContainer = ({ containerName, ...props }: INewContainer) => (
 	<Container {...props}>
 		<AddCircleIcon />
 		<Message>
-			<FormattedMessage
-				id="uploads.destination.addNewContainer"
-				defaultMessage="Add <Bold>{containerName}</Bold> as a new container"
-				values={{
-					Bold: (val: string) => <b>{val}</b>,
-					containerName,
-				}}
-			/>
+			{
+				containerName ? (
+					<FormattedMessage
+						id="uploads.destination.addNewContainer.named"
+						defaultMessage="Add <Bold>{containerName}</Bold> as a new container"
+						values={{
+							Bold: (val: string) => <b>{val}</b>,
+							containerName,
+						}}
+					/>
+				) : (
+					<FormattedMessage
+						id="uploads.destination.addNewContainer.noInput"
+						defaultMessage="Add new container"
+					/>
+				)
+			}
 		</Message>
 	</Container>
 );
