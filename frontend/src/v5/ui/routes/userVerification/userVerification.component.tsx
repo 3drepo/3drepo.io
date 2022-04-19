@@ -72,7 +72,7 @@ export const UserVerification = () => {
 			<BackToLoginContainer>
 				<BackToLogin>
 					<FormattedMessage
-						id="userVerification.backtoLogin"
+						id="userVerification.backToLogin"
 						defaultMessage="Back to login"
 					/>
 				</BackToLogin>
