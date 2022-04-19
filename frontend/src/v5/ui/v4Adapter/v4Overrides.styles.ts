@@ -201,7 +201,7 @@ const BottomToolbar = css`
 		border-radius: 5px;
 		bottom: 30px;
 		height: 40px;
-	    width: 554px;
+		width: 554px;
 		justify-content: space-evenly;
 		padding: 2px 10px;
 
@@ -211,7 +211,7 @@ const BottomToolbar = css`
 				fill: ${({ theme }) => theme.palette.primary.contrast};
 			}
 		}
-
+		/* stylelint-disable-next-line */
 		& :not(${Submenu} ${StyledIconButton}) {
 			background: transparent;
 			border-radius: 0;
