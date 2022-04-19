@@ -24,6 +24,9 @@ import { RadioContainer as TableHeadingRadioContainer, TableHeadingRadioButton, 
 import { SearchField } from '@/v4/routes/components/customTable/components/cellUserSearch/cellUserSearch.styles';
 import { Mark as HighlighterMark } from '@/v4/routes/components/highlight/highlight.styles';
 import { ArrowButton } from '@/v4/routes/viewerGui/components/previewListItem/previewListItem.styles';
+import { StyledIconButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.styles';
+import { LeftPanelsButtons } from '@/v4/routes/viewerGui/viewerGui.styles';
+import { ButtonWrapper } from '@/v4/routes/viewerGui/components/panelButton/panelButton.styles';
 
 // all the .simplebar-... stuff is to disable simplebar
 const customTableStyling = css`
@@ -144,6 +147,47 @@ const viewerStyling = css`
 	}
 `;
 
+// all the buttons on the left hand side of the viewer
+const PanelsMenu = css`
+
+	${LeftPanelsButtons} {
+		width: 68px;
+		margin-top: 10px;
+
+		${ButtonWrapper} {
+			margin-bottom: 0;
+		}
+	}
+
+	${StyledIconButton} {
+		&, &:hover {
+			background-color: ${({ theme }) => theme.palette.primary.contrast};
+		}
+
+		svg path,
+		svg circle {
+			fill: ${({ theme }) => theme.palette.secondary.main};
+		}
+
+		&:hover {
+			svg path,
+			svg circle {
+				fill: ${({ theme }) => theme.palette.primary.main};
+			}
+		}
+
+		&[active="1"] {
+			background-color: ${({ theme }) => theme.palette.secondary.main};
+
+			svg path,
+			svg circle {
+				fill: ${({ theme }) => theme.palette.primary.main};
+				color: ${({ theme }) => theme.palette.primary.main};
+			}
+		}
+	}
+`;
+
 export const V4OverridesContainer = styled.div`
 	display: flex;
 	flex-direction: column;
@@ -157,4 +201,6 @@ export const V4OverridesContainer = styled.div`
 		background-color: ${({ theme }) => theme.palette.primary.light};
 		font-weight: inherit;
 	}
+
+	${PanelsMenu}
 `;
