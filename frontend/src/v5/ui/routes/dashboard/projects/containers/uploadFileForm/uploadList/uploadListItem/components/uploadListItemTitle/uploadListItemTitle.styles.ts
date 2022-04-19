@@ -16,7 +16,6 @@
  */
 
 import styled from 'styled-components';
-import { Typography } from '@controls/typography';
 
 export const Container = styled.div`
 	width: fit-content;
@@ -25,25 +24,22 @@ export const Container = styled.div`
 	overflow: hidden;
 	text-overflow: ellipsis;
 	user-select: none;
+	${({ theme }) => theme.typography.h5};
+	font-weight: 600;
+	font-size: 14px;
 `;
 
-export const Filename = styled(Typography).attrs({
-	variant: 'h3',
-})<{ '$selectedrow': boolean }>`
+export const Filename = styled.div<{ '$selectedrow': boolean }>`
 	width: fit-content;
 	max-width: 100%;
 	color: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.primary.contrast : theme.palette.secondary.main)};
-	height: 21px;
-
 	white-space: nowrap;
 	user-select: none;
 	overflow: hidden;
 	text-overflow: ellipsis;
 `;
 
-export const Filesize = styled(Typography).attrs({
-	variant: 'h5',
-	component: 'div',
-})`
+export const Filesize = styled.div`
 	color: ${({ theme }) => theme.palette.base.main};
+	font-size: 12px;
 `;
