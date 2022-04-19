@@ -31,6 +31,7 @@ interface IProps {
 	action?: (event) => void;
 	onClick?: (event) => void;
 	id?: string;
+	children?: any;
 }
 
 export const TooltipButton = (props: IProps) => {
@@ -44,7 +45,8 @@ export const TooltipButton = (props: IProps) => {
 		className,
 		active = false,
 		placement,
-		disableFocusListener
+		disableFocusListener,
+		children
 	} = props;
 	const iconProps = { color, fontSize: 'small' } as any;
 
@@ -57,6 +59,7 @@ export const TooltipButton = (props: IProps) => {
 			active={Number(active)}
 		>
 			<Icon {...iconProps} />
+			{children}
 		</StyledIconButton>
 	);
 
