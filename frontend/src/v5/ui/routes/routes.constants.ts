@@ -16,3 +16,15 @@
  */
 
 export const NOT_FOUND_ROUTE_PATH = '/v5/404';
+export const VIEWER_ROUTE = '/v5/viewer/:teamspace/:containerOrFederation/:revision?';
+
+export interface DashboardParams {
+	teamspace?: string;
+	project?: string;
+}
+
+export interface ViewerParams {
+	teamspace?: string;
+	containerOrFederation?: string;
+	revision?: string;
+}
