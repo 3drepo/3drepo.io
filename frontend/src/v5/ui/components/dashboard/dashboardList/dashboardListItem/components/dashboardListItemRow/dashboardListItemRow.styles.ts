@@ -31,7 +31,6 @@ export const Container = styled.div<{ selected?: boolean }>`
 	cursor: pointer;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 
-
 	${({ theme, selected }) => selected && css`
 		background-color: ${theme.palette.secondary.main};
 
