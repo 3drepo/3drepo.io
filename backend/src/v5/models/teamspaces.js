@@ -19,8 +19,11 @@ const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants'
 const db = require('../handler/db');
 const { templates } = require('../utils/responseCodes');
 
+const SUBSCRIPTION_PATH = 'customData.billing.subscriptions';
+
 const Teamspace = {};
 
+const teamspaceUpdate = (query, actions) => db.updateOne('admin', 'system.users', query, actions);
 const teamspaceQuery = (query, projection, sort) => db.findOne('admin', 'system.users', query, projection, sort);
 const findMany = (query, projection, sort) => db.find('admin', 'system.users', query, projection, sort);
 
@@ -33,8 +36,21 @@ const getTeamspace = async (ts, projection) => {
 };
 
 Teamspace.getSubscriptions = async (ts) => {
-	const tsDoc = await getTeamspace(ts, { 'customData.billing.subscriptions': 1 });
+	const tsDoc = await getTeamspace(ts, { [SUBSCRIPTION_PATH]: 1 });
 	return tsDoc.customData?.billing?.subscriptions || {};
+};
+
+Teamspace.editSubscriptions = async (ts, type, data) => {
+	const subsObjPath = `${SUBSCRIPTION_PATH}.${type}`;
+	const action = {};
+	const fields = ['collaborators', 'data', 'expiryDate'];
+	fields.forEach((field) => {
+		if (data[field] !== undefined) {
+			action[`${subsObjPath}.${field}`] = data[field];
+		}
+	});
+
+	await teamspaceUpdate({ user: ts }, { $set: action });
 };
 
 Teamspace.getTeamspaceAdmins = async (ts) => {
