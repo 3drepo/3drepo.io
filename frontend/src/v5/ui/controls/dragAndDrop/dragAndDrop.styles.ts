@@ -18,6 +18,7 @@
 import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 import Dropzone from 'react-dropzone';
+import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
 
 export const Container = styled(Dropzone)`
 	position: relative;
@@ -25,25 +26,24 @@ export const Container = styled(Dropzone)`
 	height: 100%;
 `;
 
-export const UploadDialog = styled.div`
+export const UploadDialog = styled(DashedContainer).attrs(({ theme }) => ({
+	borderRadius: 10,
+	dashSize: 5,
+	strokeColor: theme.palette.primary.main,
+}))`
 	width: 100%;
 	height: 100%;
 	padding: 30px;
 	box-sizing: border-box;
-
-	border: 1px dashed ${({ theme }) => theme.palette.primary.main};
-	border-radius: 10px;
-	background: ${({ theme }) => theme.palette.primary.contrast};
 	user-select: none;
-
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	flex-direction: column;
-
+	
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	&.drag-over {
-		background: ${({ theme }) => theme.palette.primary.lightest};
-		border-style: solid;
+		background-color: ${({ theme }) => theme.palette.primary.lightest};
 	}
 `;
 

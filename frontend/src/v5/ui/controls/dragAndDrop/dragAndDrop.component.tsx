@@ -57,7 +57,10 @@ export const DragAndDrop = ({ className, message, processFiles, hidden = false }
 			hidden={hidden}
 			disableClick
 		>
-			<UploadDialog className={dragOverlay && 'drag-over'}>
+			<UploadDialog
+				gapSize={dragOverlay ? 0 : 5}
+				className={dragOverlay && 'drag-over'}
+			>
 				<Typography variant="h3" color="secondary">
 					<FormattedMessage id="dragAndDrop.drop" defaultMessage="Drop files here" />
 				</Typography>
