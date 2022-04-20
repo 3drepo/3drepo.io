@@ -64,6 +64,8 @@ function* fetchData({ teamspace, model }) {
 	}
 
 	try {
+		// TODO remove
+		yield put((() => { throw new Error('Not implemented') })());
 		const { username } = yield select(selectCurrentUser);
 
 		yield all([

@@ -22,6 +22,7 @@ import DialogBase from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
+import { ErrorDialog } from '@/v5/ui/v4Adapter/v4ComponentsOverrides/ErrorDialog/ErrorDialog.component';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { IDialogConfig } from '../../../../../modules/dialog/dialog.redux';
@@ -131,12 +132,39 @@ export const Dialog: FunctionComponent<IProps> = forwardRef((props, ref: Ref<HTM
 		}
 	};
 
+	const isV5 = () => {
+		// TODO implement this one
+		const { v5 } = { v5: true } // selectUrlParams(state);
+		return v5;
+	}
+
+	const renderV5Dialog = () => {
+		const data = { content, ...(props.data || {})};
+
+		return (
+			<ErrorDialog
+				{...data}
+				handleResolve={handleResolve}
+				handleClose={handleClose}
+				dialogId={props.id}
+				handleDisableClose={handleCloseDisable}
+				disableClosed={closeDisabled}
+			/>
+		);
+	};
+
 	return (
         <DialogBase {...DialogProps} ref={ref} open={isOpen} onClose={handleClose}>
-			<DialogTitle>{title}{renderCloseButton()}</DialogTitle>
-			{renderContent(content && !DialogTemplate)}
-			{renderTemplate(!!DialogTemplate)}
-			{renderActions(content && onCancel && !props.config.onConfirm)}
+			{isV5() ? (
+				renderV5Dialog()
+			) : (
+				<>
+					<DialogTitle>{title}{renderCloseButton()}</DialogTitle>
+					{renderContent(content && !DialogTemplate)}
+					{renderTemplate(!!DialogTemplate)}
+					{renderActions(content && onCancel && !props.config.onConfirm)}
+				</>
+			)}
 		</DialogBase>
     );
 });
