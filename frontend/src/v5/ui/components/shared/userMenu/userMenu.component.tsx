@@ -123,8 +123,8 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 					<ActionMenuItem>
 						<SignOutButton onClick={onClickSignOut}>
 							<FormattedMessage
-								id="userMenu.signOut"
-								defaultMessage="Sign out"
+								id="userMenu.logOut"
+								defaultMessage="Log out"
 							/>
 						</SignOutButton>
 					</ActionMenuItem>
