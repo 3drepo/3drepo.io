@@ -37,7 +37,6 @@ import { isEmpty } from 'lodash';
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
 import { Container, DropZone, Modal, UploadsListHeader, Padding } from './uploadFileForm.styles';
-import axios from 'axios';
 
 type IUploadFileForm = {
 	openState: boolean;
@@ -128,8 +127,6 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 	const getOriginalIndex = (sortedIndex) => indexMap.get(sortedList[sortedIndex].uploadId);
 	const origIndex = Number.isInteger(selectedIndex) && getOriginalIndex(selectedIndex);
 
-	const source = axios.CancelToken.source();
-
 	const onClickEdit = (id: number) => {
 		setSelectedIndex(id);
 	};
@@ -147,26 +144,21 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		} else {
 			setIsUploading(true);
 			setSelectedIndex(null);
-			const cancelToken = source.token;
 			uploads.forEach((revision, index) => {
 				const { uploadId } = fields[index];
-				RevisionsActionsDispatchers.createRevision(teamspace, project, uploadId, revision, cancelToken);
+				RevisionsActionsDispatchers.createRevision(teamspace, project, uploadId, revision);
 			});
 		}
 	};
 
 	const allUploadsComplete = RevisionsHooksSelectors.selectUploadIsComplete();
 
-	const blah = () => {
-		source.cancel('test cancellation');
-	};
-
 	return (
 		<FormProvider {...methods}>
 			<Modal
 				open={openState}
 				onSubmit={handleSubmit(onSubmit)}
-				onClickClose={blah}
+				onClickClose={onClickClose}
 				confirmLabel={
 					isUploading
 						? formatMessage({ id: 'uploads.modal.buttonText.uploading', defaultMessage: 'Finished' })
