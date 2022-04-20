@@ -22,12 +22,12 @@ import { formatMessage } from '../services/intl';
 const containerName = Yup.string()
 	.max(120,
 		formatMessage({
-			id: 'containers.creation.name.error.max',
+			id: 'validation.containers.name.error.max',
 			defaultMessage: 'Container Name is limited to 120 characters',
 		}))
 	.required(
 		formatMessage({
-			id: 'containers.creation.name.error.required',
+			id: 'validation.containers.name.error.required',
 			defaultMessage: 'Container Name is a required field',
 		}),
 	);
@@ -38,12 +38,12 @@ const containerType = Yup.string().required().default('Uncategorised');
 const containerCode = Yup.string()
 	.max(50,
 		formatMessage({
-			id: 'containers.creation.code.error.max',
+			id: 'validation.containers.code.error.max',
 			defaultMessage: 'Code is limited to 50 characters',
 		}))
 	.matches(/^[\w|_|-]*$/,
 		formatMessage({
-			id: 'containers.creation.code.error.characters',
+			id: 'validation.containers.code.error.characters',
 			defaultMessage: 'Code can only consist of letters, numbers, hyphens or underscores',
 		}));
 
@@ -58,24 +58,24 @@ export const filesizeTooLarge = (file: File): string => {
 const containerDesc = Yup.string()
 	.max(660,
 		formatMessage({
-			id: 'containers.creation.description.error.max',
+			id: 'validation.containers.description.error.max',
 			defaultMessage: 'Container Description is limited to 50 characters',
 		}));
 
 const revisionTag = Yup.string()
 	.max(50,
 		formatMessage({
-			id: 'containers.creation.code.error.max',
+			id: 'validation.revisions.tag.error.error.max',
 			defaultMessage: 'Revision Name is limited to 50 characters',
 		}))
 	.matches(/^[\w|_|-]*$/,
 		formatMessage({
-			id: 'containers.creation.code.error.characters',
+			id: 'validation.revisions.tag.error.characters',
 			defaultMessage: 'Revision Name can only consist of letters, numbers, hyphens or underscores',
 		}))
 	.required(
 		formatMessage({
-			id: 'revisions.tag.error.required',
+			id: 'validation.revisions.tag.error.required',
 			defaultMessage: 'Revision Name is a required field',
 		}),
 	);
@@ -83,7 +83,7 @@ const revisionTag = Yup.string()
 const revisionDesc = Yup.string()
 	.max(660,
 		formatMessage({
-			id: 'revisions.description.error.max',
+			id: 'validation.revisions.desc.error.max',
 			defaultMessage: 'Revision Description is limited to 50 characters',
 		}));
 
