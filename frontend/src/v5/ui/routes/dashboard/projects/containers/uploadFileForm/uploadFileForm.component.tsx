@@ -31,11 +31,13 @@ import { DashboardListHeaderLabel } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
 import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
+import { Display } from '@/v5/ui/themes/media';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
 import { isEmpty } from 'lodash';
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
 import { Container, DropZone, Modal, UploadsListHeader, Padding } from './uploadFileForm.styles';
+import axios from 'axios';
 
 type IUploadFileForm = {
 	openState: boolean;
@@ -126,6 +128,8 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 	const getOriginalIndex = (sortedIndex) => indexMap.get(sortedList[sortedIndex].uploadId);
 	const origIndex = Number.isInteger(selectedIndex) && getOriginalIndex(selectedIndex);
 
+	const source = axios.CancelToken.source();
+
 	const onClickEdit = (id: number) => {
 		setSelectedIndex(id);
 	};
@@ -143,21 +147,26 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 		} else {
 			setIsUploading(true);
 			setSelectedIndex(null);
+			const cancelToken = source.token;
 			uploads.forEach((revision, index) => {
 				const { uploadId } = fields[index];
-				RevisionsActionsDispatchers.createRevision(teamspace, project, uploadId, revision);
+				RevisionsActionsDispatchers.createRevision(teamspace, project, uploadId, revision, cancelToken);
 			});
 		}
 	};
 
 	const allUploadsComplete = RevisionsHooksSelectors.selectUploadIsComplete();
 
+	const blah = () => {
+		source.cancel('test cancellation');
+	};
+
 	return (
 		<FormProvider {...methods}>
 			<Modal
 				open={openState}
 				onSubmit={handleSubmit(onSubmit)}
-				onClickClose={onClickClose}
+				onClickClose={blah}
 				confirmLabel={
 					isUploading
 						? formatMessage({ id: 'uploads.modal.buttonText.uploading', defaultMessage: 'Finished' })
@@ -185,16 +194,16 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 									onSortingChange={setSortConfig}
 									defaultSortConfig={DEFAULT_SORT_CONFIG}
 								>
-									<DashboardListHeaderLabel key="file" name="file.name">
+									<DashboardListHeaderLabel key="file" name="file.name" hideWhenSmallerThan={Display.Desktop}>
 										<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
 									</DashboardListHeaderLabel>
-									<DashboardListHeaderLabel key="destination" width={282}>
+									<DashboardListHeaderLabel key="destination" width={352}>
 										<FormattedMessage id="uploads.list.header.destination" defaultMessage="Destination" />
 									</DashboardListHeaderLabel>
-									<DashboardListHeaderLabel key="revisionName" width={isUploading ? 282 : 302}>
+									<DashboardListHeaderLabel key="revisionName" width={isUploading ? 359 : 399}>
 										<FormattedMessage id="uploads.list.header.revisionName" defaultMessage="Revision Name" />
 									</DashboardListHeaderLabel>
-									<DashboardListHeaderLabel key="progress" width={337} hidden={!isUploading}>
+									<DashboardListHeaderLabel key="progress" width={297} hidden={!isUploading}>
 										<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
 									</DashboardListHeaderLabel>
 								</UploadsListHeader>

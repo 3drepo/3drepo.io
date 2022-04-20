@@ -54,6 +54,6 @@ export const DropZone = styled(DragAndDrop)`
 `;
 
 export const UploadsListHeader = styled(DashboardListHeader)`
-	padding: 0 45px 13px 87px;
+	padding: 0 45px 13px 25px;
 	margin-top: 0;
 `;
