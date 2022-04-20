@@ -34,7 +34,7 @@ export const AuthField = styled(FormTextField).attrs({
 	required: true,
 
 })`
-	margin-bottom: 5px;
+	margin-bottom: 14px;
 	>* { color: ${({ theme }) => theme.palette.secondary.main}; }
 `;
 
