@@ -26,12 +26,13 @@ import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/re
 import { Sidebar } from '@controls/sideBar';
 import { ScrollArea } from '@controls/scrollArea';
 import { UploadFieldArray } from '@/v5/store/containers/containers.types';
-import { UploadsSchema } from '@/v5/validation/containers';
+import { filesizeTooLarge, UploadsSchema } from '@/v5/validation/containers';
 import { DashboardListHeaderLabel } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
 import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
+import { isEmpty } from 'lodash';
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
 import { Container, DropZone, Modal, UploadsListHeader, Padding } from './uploadFileForm.styles';
@@ -47,10 +48,20 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 	const [selectedIndex, setSelectedIndex] = useState<number>(null);
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 	const methods = useForm<UploadFieldArray>({
-		mode: 'onChange',
+		mode: 'onBlur',
 		resolver: yupResolver(UploadsSchema),
 	});
-	const { control, handleSubmit, formState, trigger, getValues, setValue, watch, reset } = methods;
+	const { control,
+		handleSubmit,
+		formState: { errors, isValid },
+		trigger,
+		getValues,
+		setValue,
+		watch,
+		reset,
+		setError,
+		clearErrors,
+	} = methods;
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'uploads',
@@ -60,6 +71,14 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 	useEffect(() => {
 		if (!isUploading) reset();
 	}, [isUploading]);
+
+	useEffect(() => {
+		if (fields.some((field) => filesizeTooLarge(field.file))) {
+			setError('uploads', { type: 'custom', message: '' });
+		} else {
+			clearErrors('uploads');
+		}
+	}, [fields.length]);
 
 	const DEFAULT_SORT_CONFIG = {
 		column: 'file',
@@ -156,7 +175,7 @@ export const UploadFileForm = ({ openState, onClickClose }: IUploadFileForm): JS
 				}
 				onKeyPress={(e) => e.key === 'Enter' && e.preventDefault()}
 				maxWidth="xl"
-				isValid={(formState.isValid && !isUploading) || (isUploading && allUploadsComplete)}
+				isValid={(isValid && isEmpty(errors) && !isUploading) || (isUploading && allUploadsComplete)}
 			>
 				<Container>
 					<ScrollArea>

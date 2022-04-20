@@ -19,7 +19,6 @@ import styled from 'styled-components';
 
 export const Container = styled.div`
 	width: fit-content;
-	min-width: 120px;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -29,14 +28,21 @@ export const Container = styled.div`
 	font-size: 14px;
 `;
 
-export const Filename = styled.div<{ '$selectedrow': boolean }>`
-	width: fit-content;
+export const FlexContainer = styled.div<{ '$selectedrow': boolean; error?: string }>`
 	max-width: 100%;
-	color: ${({ $selectedrow, theme }) => ($selectedrow ? theme.palette.primary.contrast : theme.palette.secondary.main)};
-	white-space: nowrap;
+	color: ${({ $selectedrow, error, theme }) => {
+		if (error) return theme.palette.error.main;
+		return $selectedrow ? theme.palette.primary.contrast : theme.palette.secondary.main;
+	}};
 	user-select: none;
-	overflow: hidden;
+	align-items: center;
+	display: flex;
+`;
+
+export const Filename = styled.span`
 	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
 `;
 
 export const Filesize = styled.div`

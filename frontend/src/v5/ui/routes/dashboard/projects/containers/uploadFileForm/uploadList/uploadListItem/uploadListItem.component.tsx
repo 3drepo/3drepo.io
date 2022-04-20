@@ -22,7 +22,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { DestinationOption, UploadItemFields } from '@/v5/store/containers/containers.types';
 import filesize from 'filesize';
-import { ListItemSchema } from '@/v5/validation/containers';
+import { filesizeTooLarge, ListItemSchema } from '@/v5/validation/containers';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks/revisionsSelectors.hooks';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
@@ -52,7 +52,7 @@ export const UploadListItem = ({
 	isUploading,
 	onChange,
 }: IUploadListItem): JSX.Element => {
-	const { control, formState: { errors }, setValue, trigger, watch } = useForm<UploadItemFields>({
+	const { control, formState: { errors }, setValue, trigger, watch, setError } = useForm<UploadItemFields>({
 		defaultValues,
 		mode: 'onChange',
 		resolver: yupResolver(ListItemSchema),
@@ -65,6 +65,10 @@ export const UploadListItem = ({
 	useEffect(() => {
 		trigger('revisionTag');
 		updateValue('revisionTag');
+		const largeFilesizeMessage = filesizeTooLarge(item.file);
+		if (largeFilesizeMessage) {
+			setError('file', { type: 'custom', message: largeFilesizeMessage });
+		}
 	}, [watch('revisionTag')]);
 
 	return (
@@ -77,6 +81,7 @@ export const UploadListItem = ({
 				name={item.file.name}
 				filesize={filesize(item.file.size)}
 				selectedrow={isSelected}
+				errorMessage={errors.file?.message}
 			/>
 			<Destination
 				control={control}

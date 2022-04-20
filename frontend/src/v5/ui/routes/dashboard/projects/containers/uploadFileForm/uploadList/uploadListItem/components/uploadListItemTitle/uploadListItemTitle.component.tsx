@@ -15,27 +15,41 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { ErrorTooltip } from '@controls/errorTooltip';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { Tooltip } from '@mui/material';
-import { Container, Filename, Filesize } from './uploadListItemTitle.styles';
+import { Container, Filename, Filesize, FlexContainer } from './uploadListItemTitle.styles';
 
 type IUploadListItemTitle = {
 	name: string;
 	filesize: string;
 	selectedrow: boolean;
+	errorMessage: string;
 };
 
-export const UploadListItemTitle = ({ name, filesize, selectedrow }: IUploadListItemTitle): JSX.Element => (
+export const UploadListItemTitle = ({
+	name,
+	filesize,
+	selectedrow,
+	errorMessage,
+}: IUploadListItemTitle): JSX.Element => (
 	<FixedOrGrowContainer>
-		<Tooltip title={name} placement="bottom-start">
-			<Container>
-				<Filename $selectedrow={selectedrow}>
-					{name}
-				</Filename>
-				<Filesize>
-					{filesize}
-				</Filesize>
-			</Container>
-		</Tooltip>
+		<Container>
+			<FlexContainer $selectedrow={selectedrow} error={errorMessage}>
+				<Tooltip title={name} placement="bottom-start">
+					<Filename>
+						{name}
+					</Filename>
+				</Tooltip>
+				{errorMessage && (
+					<ErrorTooltip>
+						{errorMessage}
+					</ErrorTooltip>
+				)}
+			</FlexContainer>
+			<Filesize>
+				{filesize}
+			</Filesize>
+		</Container>
 	</FixedOrGrowContainer>
 );

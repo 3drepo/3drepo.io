@@ -16,6 +16,7 @@
  */
 
 import * as Yup from 'yup';
+import filesize from 'filesize';
 import { formatMessage } from '../services/intl';
 
 const containerName = Yup.string()
@@ -45,6 +46,14 @@ const containerCode = Yup.string()
 			id: 'containers.creation.code.error.characters',
 			defaultMessage: 'Code can only consist of letters, numbers, hyphens or underscores',
 		}));
+
+export const filesizeTooLarge = (file: File): string => {
+	const { uploadSizeLimit } = ClientConfig;
+	return (file.size > uploadSizeLimit) && formatMessage({
+		id: 'validation.revisions.file.error.tooLarge',
+		defaultMessage: 'File exceeds size limit of {sizeLimit}',
+	}, { sizeLimit: filesize(uploadSizeLimit) });
+};
 
 const containerDesc = Yup.string()
 	.max(660,
