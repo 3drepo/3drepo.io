@@ -80,7 +80,7 @@ export const Breadcrumbs = (): JSX.Element => {
 
 	return (
 		<Container aria-label="breadcrumb">
-			<HomeIconBreadcrumb active={!breadcrumbs.length} color="inherit" to={url}>
+			<HomeIconBreadcrumb $active={!breadcrumbs.length} color="inherit" to={url}>
 				<HomeIcon />
 			</HomeIconBreadcrumb>
 

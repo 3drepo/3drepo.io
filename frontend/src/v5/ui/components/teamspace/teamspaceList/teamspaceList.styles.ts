@@ -23,7 +23,6 @@ export const Container = styled.div`
 `;
 
 export const CardList = styled.ul`
-	display: inline-block;
 	flex-direction: row;
 	justify-content: center;
 	width: 100%;

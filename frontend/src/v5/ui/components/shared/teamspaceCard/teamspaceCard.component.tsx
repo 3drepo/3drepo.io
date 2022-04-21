@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatMessage } from '@/v5/services/intl';
 import { uriCombine } from '@/v5/services/routing/routing';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { useState } from 'react';
@@ -53,10 +52,6 @@ export const TeamspaceCard = ({ variant = 'primary', teamspaceName, imageURL, cl
 								<TeamspaceImage>
 									<TeamspaceLogo
 										src={imgSrc}
-										alt={formatMessage({
-											id: 'teamspaceSelect.teamspaceImageAlt',
-											defaultMessage: 'Image for {teamspaceName} teamspace',
-										}, { teamspaceName })}
 										onError={onImageError}
 									/>
 								</TeamspaceImage>
