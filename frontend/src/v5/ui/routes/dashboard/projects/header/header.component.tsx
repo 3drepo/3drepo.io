@@ -21,9 +21,10 @@ import { IProject } from '@/v5/store/projects/projects.redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { ProjectNavigation } from '@components/shared/projectNavigation';
 import { Container, Wrapper } from './header.styles';
+import { DashboardParams } from '../../../routes.constants';
 
 export const Header = (): JSX.Element => {
-	const { project } = useParams();
+	const { project } = useParams<DashboardParams>();
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
 	const currentProject = projects.find(({ _id }) => project === _id);
 

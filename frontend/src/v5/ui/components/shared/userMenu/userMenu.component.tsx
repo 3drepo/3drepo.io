@@ -27,6 +27,7 @@ import SupportCentreIcon from '@assets/icons/question_mark.svg';
 import { IUser } from '@/v5/store/users/users.redux';
 import { Avatar } from '@controls/avatar';
 import { ActionMenu, ActionMenuSection, ActionMenuItem, ActionMenuTriggerButton, ActionMenuItemLink } from '@controls/actionMenu';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import {
 	AvatarContainer,
 	AvatarSection,
@@ -41,7 +42,7 @@ type UserMenuProps = {
 };
 
 export const UserMenu = ({ user } : UserMenuProps) => {
-	const { teamspace } = useParams();
+	const { teamspace } = useParams<DashboardParams>();
 	const { url } = useRouteMatch();
 	const baseUrl = url.split('/').slice(0, 3).join('/');
 

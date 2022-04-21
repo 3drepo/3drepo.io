@@ -18,7 +18,6 @@
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import LinkIcon from '@mui/icons-material/Link';
 import PersonIcon from '@mui/icons-material/Person';
-import { useMemo } from 'react';
 
 import { CUSTOM_FILE_EXTS_NAMES } from '../../../constants/revisions';
 import { renderWhenTrue } from '../../../helpers/rendering';
@@ -65,9 +64,11 @@ export const RevisionsListItem = (props: IProps) => {
 
 	const handleClick = (event) => props.onClick(event, props.data);
 	const handleToggleVoid = (event) => props.onToggleVoid(event, props.data);
-	const themeProps = useMemo(() =>
-		({ current, void: props.data.void, isPending }), [isPending, props.data.void, current]
-	);
+	const stateTheme = {
+		current,
+		isPending,
+		isVoid: props.data.void,
+	};
 
 	const renderGoToRevisionButton = renderWhenTrue(
 		<LinkWrapper>
@@ -76,14 +77,14 @@ export const RevisionsListItem = (props: IProps) => {
 	);
 
 	const renderToggleButton = renderWhenTrue(
-		<ToggleButton onClick={handleToggleVoid} theme={themeProps}>
+		<ToggleButton onClick={handleToggleVoid} {...stateTheme}>
 			{props.data.void ? 'Void' : 'Active'}
 		</ToggleButton>
 	);
 
 	return (
 		<Container
-			theme={themeProps}
+			{...stateTheme}
 			divider
 		>
 			{renderLoader(isPending)}

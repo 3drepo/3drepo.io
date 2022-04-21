@@ -15,18 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-"use strict";
-const apiUrls = require("../config").apiUrls["all"];
-const utils = require("../utils");
+import { createTheme } from '@mui/material/styles';
+import { theme as oldTheme } from '@/v5/ui/themes/theme';
+import _ from 'lodash';
 
-const referrerMatch = (sessionReferrer, headerReferrer) => {
-	const domain = utils.getURLDomain(headerReferrer);
-	return domain === sessionReferrer ||
-		apiUrls.some((api) => api.match(domain));
-};
-
-module.exports = ({session, headers}) => session && session.user && (
-	session.user.isAPIKey || (!headers.referer ||
-		referrerMatch(session.user.referer, headers.referer))
+export const theme = createTheme(
+	_.merge(
+		oldTheme,
+		{
+			components: {
+				MuiInput: {
+					styleOverrides: {
+						formControl: {
+							'& svg': {
+								top: 13,
+							},
+						},
+					},
+				},
+			},
+		},
+	),
 );
-
