@@ -15,23 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { flatten, partition } from 'lodash';
 import { AddTeamspaceCard, TeamspaceCard, PlaceholderCard } from '@components/shared/teamspaceCard';
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
 import { generateV5ApiUrl } from '@/v5/services/api/default';
 import { clientConfigService } from '@/v4/services/clientConfig';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
 import { CardList, DummyCard } from './teamspaceList.styles';
 
 const MAX_CARDS_PER_ROW = 5;
 const DummyCards = () => <>{Array.from({ length: MAX_CARDS_PER_ROW }, (_, i) => <DummyCard key={i} />)}</>;
 
 export const TeamspaceList = (): JSX.Element => {
+	const username = CurrentUserHooksSelectors.selectUsername();
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
+	const sortedTeamspaces = flatten(partition(teamspaces, (ts) => ts.name === username));
+
 	return (
 		<CardList>
 			{
 				teamspaces.length ? (
-					teamspaces.map((teamspace) => (
+					sortedTeamspaces.map((teamspace) => (
 						<TeamspaceCard
 							key={teamspace.name}
 							variant="secondary"
