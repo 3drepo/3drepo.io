@@ -283,6 +283,9 @@ config.fileUploads = {
 config.version = VERSION;
 config.userNotice = coalesce(config.userNotice, "");
 
+config.contact = config.contact || {};
+config.contact.support = "support@3drepo.org";
+
 // default vat validation url
 config.vat = coalesce(config.vat, {});
 config.vat.checkUrl = coalesce(config.vat.checkUrl, "http://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl");
