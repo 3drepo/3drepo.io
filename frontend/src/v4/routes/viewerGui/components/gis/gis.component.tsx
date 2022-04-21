@@ -59,6 +59,7 @@ interface IProps {
 	resetVisibleLayers: () => void;
 	visibleLayers: any[];
 	id?: string;
+	urlParams: any;
 }
 
 interface IState {
@@ -100,15 +101,10 @@ export class Gis extends PureComponent<IProps, IState> {
 	});
 
 	public componentDidMount() {
-		const { teamspace, modelId } = this.getDataFromPathname();
+		const { teamspace, model } = this.props.urlParams;
 		if (this.props.settings._id) {
-			this.props.fetchModelMaps(teamspace, modelId);
+			this.props.fetchModelMaps(teamspace, model);
 		}
-	}
-
-	public getDataFromPathname = () => {
-		const [teamspace, modelId, revision] = this.props.location.pathname.replace('/viewer/', '').split('/');
-		return { teamspace, modelId, revision };
 	}
 
 	public toggleSettings = () => {
@@ -241,7 +237,7 @@ export class Gis extends PureComponent<IProps, IState> {
 							values={this.getSettingsValues()}
 							properties={this.getSettingsProperties()}
 							updateModelSettings={this.props.updateModelSettings}
-							getDataFromPathname={this.getDataFromPathname}
+							urlParams={this.props.urlParams}
 						/>
 					)
 				}

@@ -23,6 +23,7 @@ import { PermissionsCellContainer } from '@/v4/routes/components/permissionsTabl
 import { RadioContainer as TableHeadingRadioContainer, TableHeadingRadioButton, TableHeadingRadioTooltip } from '@/v4/routes/components/customTable/components/tableHeadingRadio/tableHeadingRadio.styles';
 import { SearchField } from '@/v4/routes/components/customTable/components/cellUserSearch/cellUserSearch.styles';
 import { Mark as HighlighterMark } from '@/v4/routes/components/highlight/highlight.styles';
+import { ArrowButton } from '@/v4/routes/viewerGui/components/previewListItem/previewListItem.styles';
 
 // all the .simplebar-... stuff is to disable simplebar
 const customTableStyling = css`
@@ -131,12 +132,26 @@ const customTableStyling = css`
 	}
 `;
 
+const viewerStyling = css`
+	${ArrowButton} {
+		background-color: ${({ theme }) => theme.palette.primary.dark};
+		padding: 0;
+		margin: 0;
+
+		&:hover {
+			background-color: ${({ theme }) => theme.palette.primary.main};
+		}
+	}
+`;
+
 export const V4OverridesContainer = styled.div`
 	display: flex;
 	flex-direction: column;
 	height: 100%;
 
 	${customTableStyling}
+
+	${viewerStyling}
 
 	${HighlighterMark} {
 		background-color: ${({ theme }) => theme.palette.primary.light};

@@ -18,12 +18,19 @@ import styled from 'styled-components';
 import DownloadIconBase from '@assets/icons/download_arrow.svg';
 import { IconButton } from '@mui/material';
 
-export const Container = styled.div`
+import { Link } from 'react-router-dom';
+
+export const Container = styled(Link)`
 	display: flex;
 	align-items: center;
 	height: 100%;
 	padding-left: 20px;
 	padding-right: 13px;
+
+	&:link { text-decoration: none; }
+	&:visited { text-decoration: none; }
+	&:hover { text-decoration: none; }
+	&:active { text-decoration: none; }
 `;
 
 export const DownloadIcon = styled(DownloadIconBase)`
