@@ -38,6 +38,67 @@ const updateMetadata = async (req, res) => {
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 
+    /**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/metadata/{metadata}:
+	 *   patch:
+	 *     description: Adds, removes or edits metadata of an element of a 3D model. If a metadata does not exist it is added and if it exists it is updated. To remove a metadata provide null value.
+	 *     tags: [Containers]
+	 *     operationId: updateMetadata
+	 *     parameters:
+	 *       - teamspace:
+	 *         name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - project:
+	 *         name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *         type: string
+	 *       - container:
+	 *         name: container
+	 *         description: Container ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *         type: string
+	 *       - metadata:
+	 *         name: metadata
+	 *         description: Metadata ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *         type: string
+     *     requestBody:
+	 *       content:
+     *         application/json:
+	 *           schema:
+	 *             properties:
+	 *               metadata:
+	 *                 description: The metadata to be added, removed or updated
+	 *                 type: array
+	 *                 items:
+	 *                   type: object
+	 *                   properties:
+	 *                     key:
+	 *                       description: The key of the metadata
+	 *                       type: string
+     *                       example: Length
+	 *                     value:
+	 *                       description: The value of the metadata
+     *                       type: string
+	 *                       example: 100mm
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         description: Adds, removes or edits metadata of an element of a 3D model
+	 */
 	router.patch('/:metadata', hasWriteAccessToContainer, validateUpdateMetadata, updateMetadata);
 
 	return router;

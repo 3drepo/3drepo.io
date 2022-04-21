@@ -35,7 +35,7 @@ Metadata.getMetadataById = async (teamspace, model, metadataId, projection) => {
 Metadata.updateMetadata = async (teamspace, model, metadataId, updatedMetadata) => {
 	const { metadata } = await Metadata.getMetadataById(teamspace, model, metadataId, { metadata: 1 });
 
-	updatedMetadata.foreach((um) => {
+	updatedMetadata.forEach((um) => {
 		const existingMetadata = metadata.find((m) => m.key === um.key);
 		if (existingMetadata) {
 			if (um.value) {

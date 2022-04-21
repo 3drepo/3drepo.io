@@ -19,7 +19,7 @@
 
 const responseCodes = require("../../response_codes.js");
 const { v5Path } = require("../../../interop");
-const { toQuery } =  require(`${v5Path}/models/meta.rules`);
+const { toQuery } =  require(`${v5Path}/models/metadata.rules`);
 const { schema: rulesSchema} =  require(`${v5Path}/middleware/dataConverter/schemas/components/rules`);
 
 const ruleOperators = {

@@ -29,20 +29,20 @@ const metadataSchema = Yup.object().shape({
 
 const generateSchema = (existingMetadata) => {
 	const schema = Yup.object().shape({
-		metadata: Yup.array().of(metadataSchema.test('check-metadata-is-custom', (value, { createError, path }) => {
+		metadata: Yup.array().of(metadataSchema.test('check-metadata-can-be-Updated', (value, { createError, path }) => {
 			if (existingMetadata.find((m) => m.key === value.key && !m.custom)) {
 				return createError({ path, message: `Metadata ${value.key} already exists and is not custom.` });
 			}
 
 			return true;
-		})),
-	}).strict(true).noUnknown();
+		})).required(),
+	}).required().strict(true).noUnknown();
 
 	return schema;
 };
 
 Metadata.validateUpdateMetadata = async (req, res, next) => {
-	try {
+	try {		
 		const { teamspace, container, metadata } = req.params;
 		const containerMetadata = await getMetadataById(teamspace, container, metadata, { metadata: 1 });
 
