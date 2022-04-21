@@ -15,6 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { TeamspaceCard } from './teamspaceCard.component';
-export { AddTeamspaceCard } from './addTeamspaceCard';
-export { PlaceholderCard } from './placeholderCard';
+export { PlaceholderCard } from './placeholderCard.component';

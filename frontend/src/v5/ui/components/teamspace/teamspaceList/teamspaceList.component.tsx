@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AddTeamspaceCard, TeamspaceCard } from '@components/shared/teamspaceCard';
+import { AddTeamspaceCard, TeamspaceCard, PlaceholderCard } from '@components/shared/teamspaceCard';
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
 import { generateV5ApiUrl } from '@/v5/services/api/default';
@@ -30,14 +30,22 @@ export const TeamspaceList = (): JSX.Element => {
 	return (
 		<CardList>
 			{
-				teamspaces.map((teamspace) => (
-					<TeamspaceCard
-						key={teamspace.name}
-						variant="secondary"
-						teamspaceName={teamspace.name}
-						imageURL={generateV5ApiUrl(`teamspaces/${teamspace.name}/avatar?${Date.now()}`, clientConfigService.GET_API)}
-					/>
-				))
+				teamspaces.length ? (
+					teamspaces.map((teamspace) => (
+						<TeamspaceCard
+							key={teamspace.name}
+							variant="secondary"
+							teamspaceName={teamspace.name}
+							imageURL={generateV5ApiUrl(`teamspaces/${teamspace.name}/avatar?${Date.now()}`, clientConfigService.GET_API)}
+						/>
+					))
+				) : (
+					<>
+						<PlaceholderCard variant="secondary" />
+						<PlaceholderCard variant="secondary" />
+						<PlaceholderCard variant="secondary" />
+					</>
+				)
 			}
 			{ !!teamspaces.length && (<AddTeamspaceCard variant="secondary" />) }
 			{ (teamspaces.length > MAX_CARDS_PER_ROW) && <DummyCards /> }

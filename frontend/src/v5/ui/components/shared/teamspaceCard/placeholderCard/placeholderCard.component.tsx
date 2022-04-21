@@ -15,6 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { TeamspaceCard } from './teamspaceCard.component';
-export { AddTeamspaceCard } from './addTeamspaceCard';
-export { PlaceholderCard } from './placeholderCard';
+import { Container } from '../teamspaceCard.styles';
+import { ImagePlaceholder, ListItem, TextPlaceholder } from './placeholderCard.styles';
+
+interface IAddTeamspaceCard {
+	variant?: 'primary' | 'secondary',
+}
+
+export const PlaceholderCard = ({ variant = 'primary' }: IAddTeamspaceCard): JSX.Element => (
+	<ListItem>
+		<Container $variant={variant}>
+			<ImagePlaceholder />
+			<TextPlaceholder />
+			<TextPlaceholder width="50%" />
+		</Container>
+	</ListItem>
+);

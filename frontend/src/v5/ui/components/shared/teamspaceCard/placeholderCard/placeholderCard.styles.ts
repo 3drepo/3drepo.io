@@ -15,6 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { TeamspaceCard } from './teamspaceCard.component';
-export { AddTeamspaceCard } from './addTeamspaceCard';
-export { PlaceholderCard } from './placeholderCard';
+import styled, { css } from 'styled-components';
+import { TeamspaceImage } from '../teamspaceCard.styles';
+
+const PlaceholderStyle = css`
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	opacity: 0.1;
+	border-radius: 3px;
+`;
+
+export const ListItem = styled.li`
+	list-style-type: none;
+	float: left;
+	margin: 10px;
+`;
+
+export const ImagePlaceholder = styled(TeamspaceImage)`
+	${PlaceholderStyle}
+`;
+
+export const TextPlaceholder = styled.div<{ width?: string;}>`
+	${PlaceholderStyle}
+	height: 10px;
+	width: ${({ width }) => width || '100%'};
+	margin-top: 13px;
+`;
