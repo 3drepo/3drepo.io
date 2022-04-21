@@ -19,6 +19,7 @@ import { Typography } from '@controls/typography';
 import { Link as DecoratedLink } from 'react-router-dom';
 import { Card, CardContent } from '@mui/material';
 import styled, { css } from 'styled-components';
+import { Avatar } from '@controls/avatar';
 
 export const ListItem = styled.li`
 	list-style-type: none;
@@ -57,6 +58,19 @@ export const Container = styled(Card)<{ $variant: string; }>`
 	}};
 	width: 246px;
 	height: 253px;
+`;
+
+export const MyTeamspaceImage = styled(Avatar)`
+	width: 100%;
+	.MuiAvatar-root {
+		border-radius: 0;
+		width: 100%;
+		height: 175px;
+		margin: 0;
+		font-size: 40px;
+		color: ${({ theme }) => theme.palette.tertiary.dark};
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+	}
 `;
 
 export const TeamspaceImage = styled.div<{ imageURL?: string;}>`

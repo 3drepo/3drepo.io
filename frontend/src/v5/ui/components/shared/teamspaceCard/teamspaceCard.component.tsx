@@ -18,9 +18,10 @@
 import { formatMessage } from '@/v5/services/intl';
 import { uriCombine } from '@/v5/services/routing/routing';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
+import { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
-import { CardHeading, CardSubheading, Container, Content, ListItem, TeamspaceImage, TeamspaceLogo, Link } from './teamspaceCard.styles';
+import { CardHeading, CardSubheading, Container, Content, ListItem, TeamspaceImage, TeamspaceLogo, Link, MyTeamspaceImage } from './teamspaceCard.styles';
 
 interface ITeamspaceCard {
 	variant?: 'primary' | 'secondary',
@@ -30,10 +31,16 @@ interface ITeamspaceCard {
 }
 
 export const TeamspaceCard = ({ variant = 'primary', teamspaceName, imageURL, className }: ITeamspaceCard): JSX.Element => {
-	const username = CurrentUserHooksSelectors.selectUsername();
-	const isPersonalTeamspace = teamspaceName === username;
+	const user = CurrentUserHooksSelectors.selectCurrentUser();
+	const isPersonalTeamspace = teamspaceName === user.username;
 	const { url } = useRouteMatch();
 	const to = uriCombine(url, teamspaceName || '');
+
+	const [imgSrc, setImgSrc] = useState(imageURL);
+	const defaultLogo = 'assets/images/logo.png';
+	const onImageError = () => {
+		setImgSrc(defaultLogo);
+	};
 	return (
 		<ListItem>
 			<Link to={to}>
@@ -41,21 +48,16 @@ export const TeamspaceCard = ({ variant = 'primary', teamspaceName, imageURL, cl
 					{
 						isPersonalTeamspace
 							? (
-								<TeamspaceImage
-									title={formatMessage({
-										id: 'teamspaceSelect.teamspaceImageAlt',
-										defaultMessage: 'Image for {teamspaceName} teamspace',
-									}, { teamspaceName })}
-									imageURL={imageURL}
-								/>
+								<MyTeamspaceImage user={user} isButton={false} />
 							) : (
 								<TeamspaceImage>
 									<TeamspaceLogo
-										src={imageURL}
+										src={imgSrc}
 										alt={formatMessage({
 											id: 'teamspaceSelect.teamspaceImageAlt',
 											defaultMessage: 'Image for {teamspaceName} teamspace',
 										}, { teamspaceName })}
+										onError={onImageError}
 									/>
 								</TeamspaceImage>
 							)
