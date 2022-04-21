@@ -15,39 +15,39 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { access } = require('fs/promises');
 const { src } = require('../../../../helper/path');
 const { generateRandomString } = require('../../../../helper/services');
 const isHtml = require('is-html-content');
 
-const BaseTemplate = require(`${src}/services/mailer/templates/baseTemplate`);
+const Common = require(`${src}/services/mailer/templates/common`);
 
-const testHtml = () => {
-	describe('get base template html', () => {
-		describe.each([
-			['data is undefined', undefined],
-			['firstName is undefined', { emailContent: generateRandomString() }],
-			['emailContent is undefined', { firstName: generateRandomString() }],
-		])(
-			'Error checking ', (desc, data) => {
-				test(`should throw an error if ${desc}`, async () => {
-					await expect(BaseTemplate.html(data)).rejects.toThrow();
-				});
-			},
-		);
+const testRenderTemplate = () => {
+	describe('Rendering template', () => {
+		test('should fail if template path doesn\'t exist', async () => {
+			await expect(Common.renderTemplate()).rejects.toThrow();
+		});
 
-		test('should get base template html', async () => {
+		test('should fail if data required for template doesn\'t exist', async () => {
+			const templatePath = `${src}/services/mailer/templates/html/baseTemplate.html`;
+			await access(templatePath);
+			await expect(Common.renderTemplate(templatePath, {})).rejects.toThrow();
+		});
+
+		test('should return with html string if all parameters are provided', async () => {
+			const templatePath = `${src}/services/mailer/templates/html/baseTemplate.html`;
+			await access(templatePath);
 			const data = {
 				firstName: generateRandomString(),
+				domain: generateRandomString(),
 				emailContent: generateRandomString(),
 			};
-
-			const res = await BaseTemplate.html(data);
-
+			const res = await Common.renderTemplate(templatePath, data);
 			expect(isHtml(res)).toBe(true);
 		});
 	});
 };
 
-describe('services/mailer/templates/baseTemplate', () => {
-	testHtml();
+describe('services/mailer/templates/common', () => {
+	testRenderTemplate();
 });

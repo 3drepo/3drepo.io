@@ -15,26 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Yup = require('yup');
-const config = require('../../../utils/config');
+const EJS = require('ejs');
 
-const { renderTemplate } = require('./common');
+const Common = {};
 
-const TEMPLATE_PATH = `${__dirname}/html/baseTemplate.html`;
+Common.renderTemplate = (templatePath, data) => new Promise((resolve, reject) => {
+	EJS.renderFile(templatePath, data, {}, (err, output) => {
+		if (err) reject(err);
+		else resolve(output);
+	});
+});
 
-const dataSchema = Yup.object({
-	domain: Yup.string().default(() => config.getBaseURL()),
-	firstName: Yup.string().required(),
-	emailContent: Yup.string().required(),
-}).required(true);
-
-const BaseTemplate = {};
-
-const generateHtml = (data) => renderTemplate(TEMPLATE_PATH, data);
-
-BaseTemplate.html = async (data) => {
-	const input = await dataSchema.validate(data);
-	return generateHtml(input);
-};
-
-module.exports = BaseTemplate;
+module.exports = Common;

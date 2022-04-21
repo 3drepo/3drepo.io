@@ -29,8 +29,8 @@ const testHtml = () => {
 			['token is undefined', { username: generateRandomString() }],
 		])(
 			'Error checking ', (desc, data) => {
-				test(`should throw an error if ${desc}`, () => {
-					expect(() => ForgotPassword.html(data)).toThrow();
+				test(`should throw an error if ${desc}`, async () => {
+					await expect(ForgotPassword.html(data)).rejects.toThrow();
 				});
 			},
 		);

@@ -75,7 +75,7 @@ Mailer.sendEmail = async (templateName, to, data, attachments) => {
 
 	try {
 		await checkMailerConfig();
-		const emailContent = template.html(data);
+		const emailContent = await template.html(data);
 		const mailOptions = {
 			from: config.mail.sender,
 			to,

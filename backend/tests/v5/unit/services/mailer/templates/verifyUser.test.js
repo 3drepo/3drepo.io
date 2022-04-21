@@ -29,13 +29,13 @@ const testHtml = () => {
 			['token is undefined', { username: generateRandomString() }],
 		])(
 			'Error checking ', (desc, data) => {
-				test(`should throw an error if ${desc}`, () => {
-					expect(() => VerifyUser.html(data)).toThrow();
+				test(`should throw an error if ${desc}`, async () => {
+					await expect(VerifyUser.html(data)).rejects.toThrow();
 				});
 			},
 		);
 
-		test('should get forgotPassword template html', async () => {
+		test('should get verifyUser template html', async () => {
 			const data = {
 				username: generateRandomString(),
 				token: generateRandomString(),
