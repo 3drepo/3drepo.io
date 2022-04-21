@@ -29,7 +29,7 @@ const dataSchema = Yup.object({
 }).required(true);
 
 const VerifyUserTemplate = {};
-VerifyUserTemplate.subject = () => 'Welcome to 3D Repo ! Let\'s verify your email.';
+VerifyUserTemplate.subject = () => 'Welcome to 3D Repo! Let\'s verify your email.';
 
 VerifyUserTemplate.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
 
