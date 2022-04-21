@@ -25,6 +25,7 @@ export const ROUTES = {
 	REGISTER_VERIFY: '/register-verify',
 	VIEWER: '/viewer',
 	MODEL_VIEWER: '/viewer/:teamspace/:model/:revision?',
+	V5_MODEL_VIEWER: '/v5/viewer/:teamspace/:model/:revision?',
 	DASHBOARD: '/dashboard',
 	TEAMSPACES: '/dashboard/teamspaces',
 	TEAMSPACE_SETTINGS: '/dashboard/teamspaces/:teamspace',
@@ -45,3 +46,12 @@ export const PUBLIC_ROUTES = [
 	ROUTES.PASSWORD_FORGOT,
 	ROUTES.PASSWORD_FORGOT
 ] as any;
+
+
+export type RouteParams = {
+	teamspace: string,
+	model?: string,
+	revision?: string,
+	modelId?: string,
+	type?: string
+};
