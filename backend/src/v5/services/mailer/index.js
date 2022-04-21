@@ -80,7 +80,7 @@ Mailer.sendEmail = async (templateName, to, data, attachments) => {
 			from: config.mail.sender,
 			to,
 			subject: template.subject(data),
-			html: baseTemplate.html({ ...data, emailContent }),
+			html: await baseTemplate.html({ ...data, emailContent }),
 		};
 
 		if (attachments) {
