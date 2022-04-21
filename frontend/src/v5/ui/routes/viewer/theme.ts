@@ -15,18 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DialogContainer } from '@/v4/routes/components/dialogContainer';
-import { SnackbarContainer } from '@/v4/routes/components/snackbarContainer';
-import AdapterDayjs from '@mui/lab/AdapterDayjs';
-import LocalizationProvider from '@mui/lab/LocalizationProvider';
-import { V4OverridesContainer } from './v4Overrides.styles';
+import { createTheme } from '@mui/material/styles';
+import { theme as oldTheme } from '@/v5/ui/themes/theme';
+import _ from 'lodash';
 
-export const V4Adapter = ({ children }) => (
-	<V4OverridesContainer id="v4Overrides">
-		<LocalizationProvider dateAdapter={AdapterDayjs}>
-			{children}
-			<DialogContainer />
-			<SnackbarContainer />
-		</LocalizationProvider>
-	</V4OverridesContainer>
+export const theme = createTheme(
+	_.merge(
+		oldTheme,
+		{
+			components: {
+				MuiInput: {
+					styleOverrides: {
+						formControl: {
+							'& svg': {
+								top: 13,
+							},
+						},
+					},
+				},
+			},
+		},
+	),
 );
