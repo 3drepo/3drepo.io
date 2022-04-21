@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const Yup = require('yup');
 const { access } = require('fs/promises');
 const { src } = require('../../../../helper/path');
 const { generateRandomString } = require('../../../../helper/services');
@@ -25,24 +26,25 @@ const Common = require(`${src}/services/mailer/templates/common`);
 const testRenderTemplate = () => {
 	describe('Rendering template', () => {
 		test('should fail if template path doesn\'t exist', async () => {
-			await expect(Common.renderTemplate()).rejects.toThrow();
+			const fn = Common.generateTemplateFn(Yup.object({}));
+			await expect(fn).rejects.toThrow();
 		});
-
-		test('should fail if data required for template doesn\'t exist', async () => {
-			const templatePath = `${src}/services/mailer/templates/html/baseTemplate.html`;
-			await access(templatePath);
-			await expect(Common.renderTemplate(templatePath, {})).rejects.toThrow();
-		});
-
 		test('should return with html string if all parameters are provided', async () => {
 			const templatePath = `${src}/services/mailer/templates/html/baseTemplate.html`;
 			await access(templatePath);
+			const dataSchema = Yup.object({
+				domain: Yup.string().required(),
+				firstName: Yup.string().required(),
+				emailContent: Yup.string().required(),
+			}).required(true);
+
 			const data = {
 				firstName: generateRandomString(),
 				domain: generateRandomString(),
 				emailContent: generateRandomString(),
 			};
-			const res = await Common.renderTemplate(templatePath, data);
+			const fn = Common.generateTemplateFn(dataSchema, templatePath);
+			const res = await fn(data);
 			expect(isHtml(res)).toBe(true);
 		});
 	});

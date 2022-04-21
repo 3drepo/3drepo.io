@@ -17,7 +17,7 @@
 
 const Yup = require('yup');
 const config = require('../../../utils/config');
-const { renderTemplate } = require('./common');
+const { generateTemplateFn } = require('./common');
 
 const dataSchema = Yup.object({
 	username: Yup.string().required(),
@@ -32,9 +32,6 @@ const ForgotPasswordTemplate = {};
 
 ForgotPasswordTemplate.subject = () => 'Reset your password';
 
-const generateHtml = (data) => renderTemplate(TEMPLATE_PATH, data);
-ForgotPasswordTemplate.html = async (data) => {
-	const input = await dataSchema.validate(data);
-	return generateHtml(input);
-};
+ForgotPasswordTemplate.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
+
 module.exports = ForgotPasswordTemplate;

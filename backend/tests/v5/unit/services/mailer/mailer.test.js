@@ -74,7 +74,10 @@ const testSendEmail = () => {
 				from: config.mail.sender,
 				to: recipient,
 				subject: emailTemplates.FORGOT_PASSWORD.subject(),
-				html: BaseTemplate.html({ ...data, emailContent: emailTemplates.FORGOT_PASSWORD.html(data) }),
+				html: await BaseTemplate.html({
+					...data,
+					emailContent: await emailTemplates.FORGOT_PASSWORD.html(data),
+				}),
 				attachments,
 			});
 		});
@@ -86,7 +89,7 @@ const testSendEmail = () => {
 				from: config.mail.sender,
 				to: recipient,
 				subject: emailTemplates.VERIFY_USER.subject(),
-				html: BaseTemplate.html({ ...data, emailContent: emailTemplates.VERIFY_USER.html(data) }),
+				html: await BaseTemplate.html({ ...data, emailContent: await emailTemplates.VERIFY_USER.html(data) }),
 			});
 		});
 

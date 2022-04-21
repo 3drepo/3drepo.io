@@ -18,7 +18,7 @@
 const Yup = require('yup');
 const config = require('../../../utils/config');
 
-const { renderTemplate } = require('./common');
+const { generateTemplateFn } = require('./common');
 
 const TEMPLATE_PATH = `${__dirname}/html/baseTemplate.html`;
 
@@ -30,11 +30,6 @@ const dataSchema = Yup.object({
 
 const BaseTemplate = {};
 
-const generateHtml = (data) => renderTemplate(TEMPLATE_PATH, data);
-
-BaseTemplate.html = async (data) => {
-	const input = await dataSchema.validate(data);
-	return generateHtml(input);
-};
+BaseTemplate.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
 
 module.exports = BaseTemplate;

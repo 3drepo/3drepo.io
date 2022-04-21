@@ -17,7 +17,7 @@
 
 const Yup = require('yup');
 const config = require('../../../utils/config');
-const { renderTemplate } = require('./common');
+const { generateTemplateFn } = require('./common');
 
 const TEMPLATE_PATH = `${__dirname}/html/verifyUser.html`;
 
@@ -31,10 +31,6 @@ const dataSchema = Yup.object({
 const VerifyUserTemplate = {};
 VerifyUserTemplate.subject = () => 'Welcome to 3D Repo ! Let\'s verify your email.';
 
-const generateHtml = (data) => renderTemplate(TEMPLATE_PATH, data);
+VerifyUserTemplate.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
 
-VerifyUserTemplate.html = async (data) => {
-	const input = await dataSchema.validate(data);
-	return generateHtml(input);
-};
 module.exports = VerifyUserTemplate;

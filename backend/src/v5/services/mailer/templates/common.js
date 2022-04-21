@@ -19,11 +19,16 @@ const EJS = require('ejs');
 
 const Common = {};
 
-Common.renderTemplate = (templatePath, data) => new Promise((resolve, reject) => {
+const renderTemplate = (templatePath, data) => new Promise((resolve, reject) => {
 	EJS.renderFile(templatePath, data, {}, (err, output) => {
 		if (err) reject(err);
 		else resolve(output);
 	});
 });
+
+Common.generateTemplateFn = (schema, templatePath) => async (data) => {
+	const input = await schema.validate(data);
+	return renderTemplate(templatePath, input);
+};
 
 module.exports = Common;
