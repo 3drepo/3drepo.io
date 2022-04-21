@@ -23,7 +23,7 @@ export const Content = styled(ScrollArea).attrs({
 	variant: 'secondary',
 })`
 	background: ${({ theme }) => theme.palette.gradient.secondary};
-	border-top: 1px solid ${({ theme }) => theme.palette.secondary.mid};
+	border-top: 1px solid rgb(255 255 255 / 10%);
 	overflow-y: auto;
 	flex-flow: column;
 	height: 100%;
