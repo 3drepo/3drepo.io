@@ -39,6 +39,7 @@ import { Button } from '@controls/button';
 import { DashboardListButton, DashedButtonContainer } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { formatMessage } from '@/v5/services/intl';
 import { Display } from '@/v5/ui/themes/media';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { CollapseSideElementGroup, Container } from './federationsList.styles';
 
 type IFederationsList = {
@@ -65,7 +66,7 @@ export const FederationsList = ({
 	showBottomButton = false,
 	hasFederations,
 }: IFederationsList): JSX.Element => {
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const { teamspace, project } = useParams<DashboardParams>();
 
 	const { sortedList, setSortConfig } = useOrderedList(federations, DEFAULT_SORT_CONFIG);
 

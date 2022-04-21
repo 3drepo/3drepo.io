@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2021 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,8 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { v4Path } = require('../../interop');
-// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
-const Mailer = require(`${v4Path}/mailer/mailer`);
+import { createTheme } from '@mui/material/styles';
+import { theme as oldTheme } from '@/v5/ui/themes/theme';
+import _ from 'lodash';
 
-module.exports = Mailer;
+export const theme = createTheme(
+	_.merge(
+		oldTheme,
+		{
+			components: {
+				MuiInput: {
+					styleOverrides: {
+						formControl: {
+							'& svg': {
+								top: 13,
+							},
+						},
+					},
+				},
+			},
+		},
+	),
+);

@@ -18,7 +18,6 @@
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import LinkIcon from '@mui/icons-material/Link';
 import PersonIcon from '@mui/icons-material/Person';
-import { useMemo } from 'react';
 
 import { CUSTOM_FILE_EXTS_NAMES } from '../../../constants/revisions';
 import { renderWhenTrue } from '../../../helpers/rendering';
