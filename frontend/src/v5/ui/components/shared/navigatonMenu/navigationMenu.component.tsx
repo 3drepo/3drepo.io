@@ -18,9 +18,9 @@
 import { Typography } from '@mui/material';
 import { MenuList, MenuItem } from './navigationMenu.styles';
 
-interface IListItem {
+export interface IListItem {
 	title: string;
-	to: string;
+	to?: string;
 }
 
 interface INavigationMenu {

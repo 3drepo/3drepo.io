@@ -15,64 +15,93 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { useState, MouseEvent } from 'react';
-import { useParams, useRouteMatch } from 'react-router-dom';
+import { useParams, generatePath, matchPath } from 'react-router-dom';
 import HomeIcon from '@assets/icons/home.svg';
 import DownArrowIcon from '@assets/icons/down_arrow.svg';
-import { uriCombine } from '@/v5/services/routing/routing';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { IProject } from '@/v5/store/projects/projects.redux';
-import { isEmpty } from 'lodash';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { CONTAINERS_ROUTE, DashboardParams, DASHBOARD_ROUTE, FEDERATIONS_ROUTE, matchesPath, PROJECTS_ROUTE, PROJECT_ROUTE, VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { useSelector } from 'react-redux';
+import { selectCurrentModelName, selectIsFederation } from '@/v4/modules/model/model.selectors';
 import { NavigationMenu } from '../navigatonMenu';
 import { Container, HomeIconBreadcrumb, Breadcrumb, InteractiveBreadcrumb, OverflowWrapper } from './breadcrumbs.styles';
-
-const createToWithUrl = (url) => ({ to, title }) => ({ title, to: `${url}/${to}` });
-
-const teamspaceList2LinkList = (teamspaces: ITeamspace[]) => (teamspaces.length ? teamspaces.map(({ name }) => ({
-	to: name,
-	title: name,
-})) : []);
-
-const projectList2LinkList = (projects: IProject[]) => (projects.length ? projects.map(({ name, _id }) => ({
-	to: _id,
-	title: name,
-})) : []);
-
-const lastItemOf = (list: any[]) => list[list.length - 1];
+import { IListItem } from '../navigatonMenu/navigationMenu.component';
 
 export const Breadcrumbs = (): JSX.Element => {
-	const { teamspace, project: projectId } = useParams<DashboardParams>();
-
+	const params = useParams<DashboardParams>();
+	const { teamspace } = params;
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
 	const project: IProject = ProjectsHooksSelectors.selectCurrentProjectDetails();
+	const isFederation = useSelector(selectIsFederation);
+	const federationOrContainerName = useSelector(selectCurrentModelName);
 
-	let { url } = useRouteMatch();
+	let breadcrumbs: IListItem[] = [];
+	let options: IListItem[] = [];
 
-	const urlProject = projectId ? uriCombine(url, '../') : url;
+	if (matchesPath(PROJECTS_ROUTE)) {
+		breadcrumbs = [
+			{
+				title: teamspace,
+			},
+		];
 
-	url = teamspace ? uriCombine(url, '../') : url;
-	url = projectId ? uriCombine(url, '../') : url;
-
-	const breadcrumbs = [];
-
-	const teamspaceTo = `${url}/${teamspace}`;
-
-	let list: any[] = !projectId ? teamspaceList2LinkList(teamspaces) : projectList2LinkList(projects) || [];
-
-	if (teamspace) {
-		breadcrumbs.push(teamspace);
+		options = teamspaces.map(({ name }) => ({
+			title: name,
+			to: generatePath(PROJECTS_ROUTE, { teamspace: name }),
+		}));
 	}
 
-	if (!isEmpty(project)) {
-		breadcrumbs.push(project.name);
+	if (matchesPath(PROJECT_ROUTE)) {
+		breadcrumbs = [
+			{
+				title: teamspace,
+				to: generatePath(PROJECTS_ROUTE, { teamspace }),
+			},
+			{
+				title: project?.name,
+			},
+		];
+
+		// eslint-disable-next-line no-restricted-globals
+		const { params: projectParams } = matchPath(location.pathname, { path: PROJECT_ROUTE });
+
+		options = projects.map(({ name, _id }) => ({
+			title: name,
+			to: generatePath(PROJECT_ROUTE, { ...projectParams, project: _id }),
+		}));
 	}
 
-	const selectedItem = lastItemOf(breadcrumbs);
+	if (matchesPath(VIEWER_ROUTE)) {
+		breadcrumbs = [
+			{
+				title: teamspace,
+				to: DASHBOARD_ROUTE,
+			},
+			{
+				title: project?.name,
+				to: generatePath(PROJECTS_ROUTE, params),
+			},
+		];
 
-	list = list.map(createToWithUrl(projectId ? urlProject : url));
+		if (isFederation) {
+			breadcrumbs.push({
+				title: federationOrContainerName,
+				to: generatePath(FEDERATIONS_ROUTE, params),
+			});
+		}
+
+		if (!isFederation) {
+			breadcrumbs.push({
+				title: federationOrContainerName,
+				to: generatePath(CONTAINERS_ROUTE, params),
+			});
+
+			// options =
+		}
+	}
 
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const handleClick = (event: MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
@@ -80,12 +109,12 @@ export const Breadcrumbs = (): JSX.Element => {
 
 	return (
 		<Container aria-label="breadcrumb">
-			<HomeIconBreadcrumb color="inherit" to={teamspaceTo}>
+			<HomeIconBreadcrumb color="inherit" to={DASHBOARD_ROUTE}>
 				<HomeIcon />
 			</HomeIconBreadcrumb>
 
-			{breadcrumbs.map((title, index) => (
-				(breadcrumbs.length - 1) === index
+			{breadcrumbs.map(({ title, to }, index) => (
+				(breadcrumbs.length - 1) === index && options.length
 					? (
 						<div key={title}>
 							<InteractiveBreadcrumb onClick={handleClick} endIcon={<DownArrowIcon />}>
@@ -94,14 +123,14 @@ export const Breadcrumbs = (): JSX.Element => {
 								</OverflowWrapper>
 							</InteractiveBreadcrumb>
 							<NavigationMenu
-								list={list}
+								list={options}
 								anchorEl={anchorEl}
-								selectedItem={selectedItem}
+								selectedItem={title}
 								handleClose={handleClose}
 							/>
 						</div>
 					) : (
-						<Breadcrumb key={title} color="inherit" to={teamspaceTo}>
+						<Breadcrumb key={title} color="inherit" to={to}>
 							{title}
 						</Breadcrumb>
 					)
