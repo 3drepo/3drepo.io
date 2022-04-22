@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,10 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useState, MouseEvent } from 'react';
 import { useParams, generatePath, matchPath } from 'react-router-dom';
-import HomeIcon from '@assets/icons/home.svg';
-import DownArrowIcon from '@assets/icons/down_arrow.svg';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspacesSelectors.hooks';
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
@@ -26,11 +23,10 @@ import { CONTAINERS_ROUTE, DASHBOARD_ROUTE, FEDERATIONS_ROUTE, matchesPath, PROJ
 import { useSelector } from 'react-redux';
 import { selectCurrentModelName, selectIsFederation, selectRevisions } from '@/v4/modules/model/model.selectors';
 import { formatMessage } from '@/v5/services/intl';
-import { NavigationMenu } from '../navigatonMenu';
-import { Container, HomeIconBreadcrumb, Breadcrumb, InteractiveBreadcrumb, OverflowWrapper } from './breadcrumbs.styles';
-import { IListItem } from '../navigatonMenu/navigationMenu.component';
+import { IListItem } from '@controls/breadcrumbs/navigatonMenu/navigationMenu.component';
+import { Breadcrumbs } from '@controls/breadcrumbs';
 
-export const Breadcrumbs = (): JSX.Element => {
+export const BreadcrumbsRouting = () => {
 	const params = useParams();
 	const { teamspace, revision } = params;
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
@@ -105,8 +101,12 @@ export const Breadcrumbs = (): JSX.Element => {
 
 			const noName = formatMessage({ id: 'breadcrumbs.revisions.noName', defaultMessage: '(no name)' });
 
+			const selectedRevision = revisions.find(
+				({ _id, tag }) => _id === revision || tag === revision,
+			) || revisions[0];
+
 			breadcrumbs.push({
-				title: revisions.find(({ _id, tag }) => _id === revision || tag === revision)?.tag || noName,
+				title: selectedRevision?.tag || noName,
 				id: revision,
 			});
 
@@ -118,38 +118,5 @@ export const Breadcrumbs = (): JSX.Element => {
 		}
 	}
 
-	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-	const handleClick = (event: MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
-	const handleClose = () => setAnchorEl(null);
-
-	return (
-		<Container aria-label="breadcrumb">
-			<HomeIconBreadcrumb color="inherit" to={DASHBOARD_ROUTE}>
-				<HomeIcon />
-			</HomeIconBreadcrumb>
-
-			{breadcrumbs.map(({ title, to, id }, index) => (
-				(breadcrumbs.length - 1) === index && options.length
-					? (
-						<div key={title}>
-							<InteractiveBreadcrumb onClick={handleClick} endIcon={<DownArrowIcon />}>
-								<OverflowWrapper>
-									{title}
-								</OverflowWrapper>
-							</InteractiveBreadcrumb>
-							<NavigationMenu
-								list={options}
-								anchorEl={anchorEl}
-								selectedItem={title || id}
-								handleClose={handleClose}
-							/>
-						</div>
-					) : (
-						<Breadcrumb key={title} color="inherit" to={to}>
-							{title}
-						</Breadcrumb>
-					)
-			))}
-		</Container>
-	);
+	return (<Breadcrumbs breadcrumbs={breadcrumbs} options={options} />);
 };
