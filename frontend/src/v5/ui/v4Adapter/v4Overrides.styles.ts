@@ -15,134 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BodyWrapper as CustomTableBody, Cell, Head, Row } from '@/v4/routes/components/customTable/customTable.styles';
-import styled, { css } from 'styled-components';
-import { Name as UserNameCell } from '@/v4/routes/components/userItem/userItem.styles';
-import { SortLabel } from '@/v4/routes/components/customTable/components/tableHeading/tableHeading.styles';
-import { PermissionsCellContainer } from '@/v4/routes/components/permissionsTable/permissionsTable.styles';
-import { RadioContainer as TableHeadingRadioContainer, TableHeadingRadioButton, TableHeadingRadioTooltip } from '@/v4/routes/components/customTable/components/tableHeadingRadio/tableHeadingRadio.styles';
-import { SearchField } from '@/v4/routes/components/customTable/components/cellUserSearch/cellUserSearch.styles';
+import styled from 'styled-components';
 import { Mark as HighlighterMark } from '@/v4/routes/components/highlight/highlight.styles';
-import { ArrowButton } from '@/v4/routes/viewerGui/components/previewListItem/previewListItem.styles';
-
-// all the .simplebar-... stuff is to disable simplebar
-const customTableStyling = css`
-	${CustomTableBody} {
-		position: relative;
-		height: auto;
-
-		div {
-			position: relative;
-			height: auto;
-		}
-
-		.simplebar-content {
-			border: 1px solid ${({ theme }) => theme.palette.base.lightest};
-			border-radius: 5px;
-			background-color: ${({ theme }) => theme.palette.primary.contrast};
-		}
-
-		.simplebar-content-wrapper {
-			height: auto !important;
-			max-height: initial;
-		}
-
-		.simplebar-placeholder {
-			display: none;
-		}
-	}
-
-	${Head} {
-		border: 0;
-
-		${Cell} {
-			padding-top: 22px;
-		}
-	}
-
-	${UserNameCell} {
-		${({ theme }) => theme.typography.h5};
-		color: ${({ theme }) => theme.palette.secondary.main};
-	}
-
-	${Row} {
-		min-height: 80px;
-	}
-
-	${SortLabel} {
-		margin: 0;
-		padding-left: 10px;
-		${({ theme }) => theme.typography.kicker};
-		flex-direction: row;
-		svg {
-			fill: transparent;
-			width: 10px;
-			margin-left: 2px;
-		}
-
-		::before {
-			background: transparent;
-		}
-
-		&.MuiTableSortLabel-active {
-			svg {
-				fill: ${({ theme }) => theme.palette.base.main};
-			}
-		}
-	}
-
-	${PermissionsCellContainer} {
-		justify-content: flex-start;
-	}
-
-	${TableHeadingRadioContainer} {
-		justify-content: flex-start;
-		align-items: baseline;
-		margin-top: -22px;
-	}
-
-	${TableHeadingRadioTooltip} {
-		margin-left: -50px;
-	}
-
-	${TableHeadingRadioButton} {
-		height: 20px;
-	}
-
-	${SearchField} {
-		label {
-			${({ theme }) => theme.typography.kicker};
-		}
-
-		input {
-			padding-bottom: 5px;
-			padding-left: 0;
-			padding-top: 0;
-			${({ theme }) => theme.typography.body1};
-		}
-
-		.search-field__label {
-			margin-top: 3px;
-			transform: translate(13px,39px) scale(1);
-
-			&[data-shrink='true'] {
-				transform: translate(13px, 20px) scale(1) !important;
-			}
-		}
-	}
-`;
-
-const viewerStyling = css`
-	${ArrowButton} {
-		background-color: ${({ theme }) => theme.palette.primary.dark};
-		padding: 0;
-		margin: 0;
-
-		&:hover {
-			background-color: ${({ theme }) => theme.palette.primary.main};
-		}
-	}
-`;
+import leftPanelStyling from './overrides/leftPanel.overrides';
+import customTableStyling from './overrides/customTable.overrides';
+import viewerStyling from './overrides/viewer.overrides';
 
 export const V4OverridesContainer = styled.div`
 	display: flex;
@@ -157,4 +34,6 @@ export const V4OverridesContainer = styled.div`
 		background-color: ${({ theme }) => theme.palette.primary.light};
 		font-weight: inherit;
 	}
+
+	${leftPanelStyling}
 `;

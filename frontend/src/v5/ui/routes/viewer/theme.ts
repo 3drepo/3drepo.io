@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,12 +16,12 @@
  */
 
 import { createTheme } from '@mui/material/styles';
-import { theme as oldTheme } from '@/v5/ui/themes/theme';
+import { COLOR, theme as oldTheme } from '@/v5/ui/themes/theme';
 import _ from 'lodash';
 
 export const theme = createTheme(
 	_.merge(
-		oldTheme,
+		_.cloneDeep(oldTheme),
 		{
 			components: {
 				MuiInput: {
@@ -29,6 +29,28 @@ export const theme = createTheme(
 						formControl: {
 							'& svg': {
 								top: 13,
+							},
+						},
+					},
+				},
+				MuiTextField: {
+					styleOverrides: {
+						root: {
+							margin: 0,
+						},
+					},
+				},
+				MuiList: {
+					styleOverrides: {
+						root: {
+							boxShadow: 'none',
+							borderRadius: 5,
+							'& .MuiButtonBase-root': {
+								margin: 0,
+								color: `${COLOR.SECONDARY_MAIN} !important`,
+								'&:hover': {
+									backgroundColor: '#f0f5ff', // TODO: fix after new palette is released
+								},
 							},
 						},
 					},
