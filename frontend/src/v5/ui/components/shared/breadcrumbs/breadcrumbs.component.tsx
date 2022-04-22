@@ -22,21 +22,25 @@ import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspace
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { IProject } from '@/v5/store/projects/projects.redux';
-import { CONTAINERS_ROUTE, DashboardParams, DASHBOARD_ROUTE, FEDERATIONS_ROUTE, matchesPath, PROJECTS_ROUTE, PROJECT_ROUTE, VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { CONTAINERS_ROUTE, DASHBOARD_ROUTE, FEDERATIONS_ROUTE, matchesPath, PROJECTS_ROUTE, PROJECT_ROUTE, VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { useSelector } from 'react-redux';
-import { selectCurrentModelName, selectIsFederation } from '@/v4/modules/model/model.selectors';
+import { selectCurrentModelName, selectIsFederation, selectRevisions } from '@/v4/modules/model/model.selectors';
+import { formatMessage } from '@/v5/services/intl';
 import { NavigationMenu } from '../navigatonMenu';
 import { Container, HomeIconBreadcrumb, Breadcrumb, InteractiveBreadcrumb, OverflowWrapper } from './breadcrumbs.styles';
 import { IListItem } from '../navigatonMenu/navigationMenu.component';
 
 export const Breadcrumbs = (): JSX.Element => {
-	const params = useParams<DashboardParams>();
-	const { teamspace } = params;
+	const params = useParams();
+	const { teamspace, revision } = params;
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
 	const project: IProject = ProjectsHooksSelectors.selectCurrentProjectDetails();
+
+	// Because we are using v4 viewer for now, we use the v4 selectors.
 	const isFederation = useSelector(selectIsFederation);
 	const federationOrContainerName = useSelector(selectCurrentModelName);
+	const revisions = useSelector(selectRevisions);
 
 	let breadcrumbs: IListItem[] = [];
 	let options: IListItem[] = [];
@@ -82,7 +86,7 @@ export const Breadcrumbs = (): JSX.Element => {
 			},
 			{
 				title: project?.name,
-				to: generatePath(PROJECTS_ROUTE, params),
+				to: generatePath(FEDERATIONS_ROUTE, params),
 			},
 		];
 
@@ -99,7 +103,16 @@ export const Breadcrumbs = (): JSX.Element => {
 				to: generatePath(CONTAINERS_ROUTE, params),
 			});
 
-			// options =
+			const noName = formatMessage({ id: 'breadcrumbs.revisions.noName', defaultMessage: '(no name)' });
+
+			breadcrumbs.push({
+				title: revisions.find(({ _id }) => _id === revision)?.tag || noName,
+			});
+
+			options = revisions.map(({ _id, tag }) => ({
+				title: tag || noName,
+				to: generatePath(VIEWER_ROUTE, { ...params, revision: _id }),
+			}));
 		}
 	}
 
