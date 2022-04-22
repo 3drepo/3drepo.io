@@ -23,12 +23,12 @@ import { ViewerParams } from '../routes.constants';
 import { theme } from './theme';
 
 export const Viewer = () => {
-	const { teamspace, containerOrFederation } = useParams<ViewerParams>();
+	const { teamspace, containerOrFederation, revision } = useParams<ViewerParams>();
 	const v4Match = {
 		params: {
 			model: containerOrFederation,
 			teamspace,
-			revision: '',
+			revision,
 		} };
 
 	return (

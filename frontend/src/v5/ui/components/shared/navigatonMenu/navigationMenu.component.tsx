@@ -20,6 +20,7 @@ import { MenuList, MenuItem } from './navigationMenu.styles';
 
 export interface IListItem {
 	title: string;
+	id?: string;
 	to?: string;
 }
 
@@ -44,12 +45,12 @@ export const NavigationMenu = ({ anchorEl, selectedItem, handleClose, list }: IN
 			horizontal: 'left',
 		}}
 	>
-		{list.map(({ title, to }) => (
+		{list.map(({ title, to, id }) => (
 			<MenuItem
 				key={title}
 				to={to}
 				onClick={handleClose}
-				selected={selectedItem === title}
+				selected={selectedItem === title || selectedItem === id}
 			>
 				<Typography variant="body1" noWrap>
 					{title}

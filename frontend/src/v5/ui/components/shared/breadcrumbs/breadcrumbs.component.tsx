@@ -106,12 +106,14 @@ export const Breadcrumbs = (): JSX.Element => {
 			const noName = formatMessage({ id: 'breadcrumbs.revisions.noName', defaultMessage: '(no name)' });
 
 			breadcrumbs.push({
-				title: revisions.find(({ _id }) => _id === revision)?.tag || noName,
+				title: revisions.find(({ _id, tag }) => _id === revision || tag === revision)?.tag || noName,
+				id: revision,
 			});
 
 			options = revisions.map(({ _id, tag }) => ({
 				title: tag || noName,
-				to: generatePath(VIEWER_ROUTE, { ...params, revision: _id }),
+				to: generatePath(VIEWER_ROUTE, { ...params, revision: tag || _id }),
+				id: _id,
 			}));
 		}
 	}
@@ -126,7 +128,7 @@ export const Breadcrumbs = (): JSX.Element => {
 				<HomeIcon />
 			</HomeIconBreadcrumb>
 
-			{breadcrumbs.map(({ title, to }, index) => (
+			{breadcrumbs.map(({ title, to, id }, index) => (
 				(breadcrumbs.length - 1) === index && options.length
 					? (
 						<div key={title}>
@@ -138,7 +140,7 @@ export const Breadcrumbs = (): JSX.Element => {
 							<NavigationMenu
 								list={options}
 								anchorEl={anchorEl}
-								selectedItem={title}
+								selectedItem={title || id}
 								handleClose={handleClose}
 							/>
 						</div>
