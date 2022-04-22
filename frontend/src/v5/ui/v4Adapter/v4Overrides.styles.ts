@@ -166,6 +166,8 @@ const PanelsMenuStyling = css`
 	}
 
 	${StyledIconButton} {
+		margin-right: -4px;
+
 		&, &:hover {
 			background-color: ${({ theme }) => theme.palette.primary.contrast};
 		}

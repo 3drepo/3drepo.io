@@ -65,18 +65,20 @@ export const TooltipButton = (props: IProps) => {
 
 	return (
 		<>
-			{ disabled ?
-				renderButton() :
+			{ disabled
+				? renderButton()
+				: (
 					<Tooltip
-							title={label}
-							disableHoverListener={disabled}
-							placement={placement}
-							disableFocusListener={disableFocusListener}
+						title={label}
+						disableHoverListener={disabled}
+						placement={placement}
+						disableFocusListener={disableFocusListener}
 					>
-					<span>
-						{renderButton()}
-					</span>
-				</Tooltip>
+						<span>
+							{renderButton()}
+						</span>
+					</Tooltip>
+				)
 			}
 		</>
 	);
