@@ -50,7 +50,7 @@ export const Breadcrumbs = ({ breadcrumbs, options }:IProps): JSX.Element => {
 							<NavigationMenu
 								list={options}
 								anchorEl={anchorEl}
-								selectedItem={title || id}
+								selectedItem={id || title}
 								handleClose={handleClose}
 							/>
 						</div>
