@@ -15,8 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { v4Path } = require('../../interop');
-// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
-const Mailer = require(`${v4Path}/mailer/mailer`);
+const Yup = require('yup');
+const config = require('../../../utils/config');
+const { generateTemplateFn } = require('./common');
 
-module.exports = Mailer;
+const TEMPLATE_PATH = `${__dirname}/html/verifyUser.html`;
+
+const dataSchema = Yup.object({
+	username: Yup.string().required(),
+	token: Yup.string().required(),
+	domain: Yup.string().default(() => config.getBaseURL()),
+	supportEmail: Yup.string().default(() => config.contact.support),
+}).required(true);
+
+const VerifyUserTemplate = {};
+VerifyUserTemplate.subject = () => 'Welcome to 3D Repo! Let\'s verify your email.';
+
+VerifyUserTemplate.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
+
+module.exports = VerifyUserTemplate;
