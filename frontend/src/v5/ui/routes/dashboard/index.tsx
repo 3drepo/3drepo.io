@@ -27,6 +27,8 @@ import { ProjectContent } from './projects';
 import { Login } from '../login';
 import { Viewer } from '../viewer/viewer';
 import { VIEWER_ROUTE } from '../routes.constants';
+import { UserSignup } from '../userSignup/userSignup.component';
+import { UserVerification } from '../userVerification/userVerification.component';
 
 export const MainRoute = () => {
 	const { path } = useRouteMatch();
@@ -37,9 +39,9 @@ export const MainRoute = () => {
 			<GlobalStyle />
 			<ViewerCanvas location={{ pathname }} />
 			<Switch>
-				<Route exact path={`${path}/login`}>
-					<Login />
-				</Route>
+				<Route exact path={`${path}/login`} component={Login} />
+				<Route exact path={`${path}/signup`} component={UserSignup} />
+				<Route exact path={`${path}/register-verify`} component={UserVerification} />
 				<Route path={`${path}/dashboard/:teamspace?/:project?`}>
 					<DashboardLayout>
 						<Route exact path={`${path}/dashboard/`}>
