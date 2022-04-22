@@ -20,7 +20,7 @@ import { LeftPanels } from '@/v4/routes/viewerGui/viewerGui.styles';
 import { TitleIcon, ViewerPanelFooter } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
 import { Title, Container as ViewerPanelBody } from '@/v4/routes/components/panel/panel.styles';
 import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
-import { Container as FilterPanelContainer, StyledIconButton as FilterIcon, ButtonWrapper } from '@/v4/routes/components/filterPanel/filterPanel.styles';
+import { Container as FilterPanelContainer, StyledIconButton as FilterIcon } from '@/v4/routes/components/filterPanel/filterPanel.styles';
 import { MenuFooter, StyledListItem } from '@/v4/routes/components/filterPanel/components/filtersMenu/filtersMenu.styles';
 
 export default css`
@@ -93,10 +93,6 @@ export default css`
 		border-radius: 0;
 		border-right: 0;
 		border-left: 0;
-	}
-
-	${ButtonWrapper} {
-		background-color: purple;
 	}
 
 	// !NOT WORKING
