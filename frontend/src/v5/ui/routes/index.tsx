@@ -17,7 +17,7 @@
 
 import { useEffect } from 'react';
 import { isNull } from 'lodash';
-import { useHistory, Switch, Route } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { StylesProvider } from '@mui/styles';
 import { ThemeProvider } from 'styled-components';
@@ -28,10 +28,8 @@ import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers/authAct
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
 import { getIntlProviderProps } from '@/v5/services/intl';
 import { IntlProvider } from 'react-intl';
-import { Dashboard } from './dashboard';
+import { MainRoute } from './dashboard';
 import { V4Adapter } from '../v4Adapter/v4Adapter';
-import { UserSignup } from './userSignup/userSignup.component';
-import { UserVerification } from './userVerification/userVerification.component';
 
 export const Root = () => {
 	const history = useHistory();
@@ -65,11 +63,7 @@ export const Root = () => {
 				<StylesProvider injectFirst>
 					<IntlProvider {...getIntlProviderProps()}>
 						<V4Adapter>
-							<Switch>
-								<Route path="/v5/signup" component={UserSignup} />
-								<Route path="/v5/register-verify" component={UserVerification} />
-								<Route component={Dashboard} />
-							</Switch>
+							<MainRoute />
 						</V4Adapter>
 					</IntlProvider>
 				</StylesProvider>
