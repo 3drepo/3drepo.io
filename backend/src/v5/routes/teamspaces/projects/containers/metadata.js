@@ -38,7 +38,7 @@ const updateMetadata = async (req, res) => {
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 
-    /**
+	/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/metadata/{metadata}:
 	 *   patch:

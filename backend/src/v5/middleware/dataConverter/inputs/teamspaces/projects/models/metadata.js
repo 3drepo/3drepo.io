@@ -36,21 +36,26 @@ const generateSchema = (existingMetadata) => {
 
 			return true;
 		})).required(),
-	}).required().strict(true).noUnknown();
+	}).required().strict(true)
+		.noUnknown();
 
 	return schema;
 };
 
 Metadata.validateUpdateMetadata = async (req, res, next) => {
-	try {		
+	try {
 		const { teamspace, container, metadata } = req.params;
 		const containerMetadata = await getMetadataById(teamspace, container, metadata, { metadata: 1 });
-
 		const schema = generateSchema(containerMetadata.metadata);
 		req.body = await schema.validate(req.body);
 
 		await next();
 	} catch (err) {
+		if (err === templates.metadataNotFound) {
+			respond(req, res, createResponseCode(templates.metadataNotFound, err?.message));
+			return;
+		}
+
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };

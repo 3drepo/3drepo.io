@@ -1,0 +1,178 @@
+/**
+ *  Copyright (C) 2022 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+const SuperTest = require('supertest');
+const ServiceHelper = require('../../../../../helper/services');
+const { src } = require('../../../../../helper/path');
+const { generateRandomString } = require('../../../../../helper/services');
+
+const { templates } = require(`${src}/utils/responseCodes`);
+
+let server;
+let agent;
+
+const users = {
+	tsAdmin: ServiceHelper.generateUserCredentials(),
+	viewer: ServiceHelper.generateUserCredentials(),
+};
+const nobody = ServiceHelper.generateUserCredentials();
+const teamspace = ServiceHelper.generateRandomString();
+
+const project = {
+	id: ServiceHelper.generateUUIDString(),
+	name: ServiceHelper.generateRandomString(),
+};
+
+const models = [
+	ServiceHelper.generateRandomModel({ viewers: [users.viewer] }),
+	ServiceHelper.generateRandomModel({ isFederation: true }),
+	ServiceHelper.generateRandomModel(),
+];
+const container = models[0];
+const federation = models[1];
+
+const metadataId = ServiceHelper.generateUUIDString();
+const metadata = [
+	{ key: ServiceHelper.generateRandomString(), value: ServiceHelper.generateRandomString() },
+	{ key: ServiceHelper.generateRandomString(), value: ServiceHelper.generateRandomString(), custom: true },
+	{ key: ServiceHelper.generateRandomString(), value: ServiceHelper.generateRandomString(), custom: true },
+];
+const nonCustomMetadata = metadata[0];
+const customMetadata = metadata[1];
+const metadataToDelete = metadata[2];
+
+const setupData = async () => {
+	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
+
+	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], [teamspace]));
+	const modelProms = models.map((model) => ServiceHelper.db.createModel(
+		teamspace,
+		model._id,
+		model.name,
+		model.properties,
+	));
+	return Promise.all([
+		...userProms,
+		...modelProms,
+		ServiceHelper.db.createUser(nobody),
+		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map((m) => m._id)),
+		ServiceHelper.db.createMetadata(teamspace, container._id, metadataId, metadata),
+	]);
+};
+
+const testUpdateMetadata = () => {
+	const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/metadata/${metadataId}`;
+	describe('Update Metadata', () => {
+		test('should fail without a valid session', async () => {
+			const res = await agent.patch(route).expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail if the user is not a member of the teamspace', async () => {
+			const res = await agent.patch(`${route}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if the project does not exist', async () => {
+			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/${ServiceHelper.generateRandomString()}/containers/${container._id}/metadata/${metadataId}?key=${users.tsAdmin.apiKey}`)
+				.expect(templates.projectNotFound.status);
+			expect(res.body.code).toEqual(templates.projectNotFound.code);
+		});
+
+		test('should fail if the container does not exist', async () => {
+			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${ServiceHelper.generateRandomString()}/metadata/${metadataId}?key=${users.tsAdmin.apiKey}`)
+				.expect(templates.containerNotFound.status);
+			expect(res.body.status).toEqual(templates.containerNotFound.status);
+		});
+
+		test('should fail if the container is a federation', async () => {
+			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${federation._id}/metadata/${metadataId}?key=${users.tsAdmin.apiKey}`);
+			expect(templates.containerNotFound.status);
+			expect(res.body.status).toEqual(templates.containerNotFound.status);
+		});
+
+		test('should fail if the metadata do not exist', async () => {
+			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${ServiceHelper.generateRandomString()}/metadata/${ServiceHelper.generateRandomString()}?key=${users.tsAdmin.apiKey}`)
+				.expect(templates.metadataNotFound.status);
+			expect(res.body.status).toEqual(templates.metadataNotFound.status);
+		});
+
+		test('should fail if the user does not have permissions to access the container', async () => {
+			const res = await agent.patch(`${route}?key=${users.viewer.apiKey}`)
+				.expect(templates.notAuthorized.status);
+			expect(res.body.status).toEqual(templates.notAuthorized.status);
+		});
+
+		test('should fail if the user is trying to update non custom metadata', async () => {
+			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.send({ metadata: [
+					{ key: nonCustomMetadata.key, value: ServiceHelper.generateRandomString() },
+					{ key: customMetadata.key, value: ServiceHelper.generateRandomString() },
+				] }).expect(templates.invalidArguments.status);
+			expect(res.body.status).toEqual(templates.invalidArguments.status);
+		});
+
+		test('should add new metadata', async () => {
+			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.send({ metadata: [{ key: ServiceHelper.generateRandomString(),
+					value: ServiceHelper.generateRandomString() }] })
+				.expect(templates.ok.status);
+		});
+
+		test('should edit metadata', async () => {
+			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.send({ metadata: [{ key: customMetadata.key, value: ServiceHelper.generateRandomString() }] })
+				.expect(templates.ok.status);
+		});
+
+		test('should delete metadata', async () => {
+			const metadataBackup = { ...metadataToDelete };
+			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.send({ metadata: [{ key: metadataToDelete.key, value: null }] })
+				.expect(templates.ok.status);
+
+			// add the deleted metadata again
+			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.send({ metadata: [{ key: metadataBackup.key, value: metadataBackup.value }] });
+		});
+
+		test('should add, edit and delete metadata', async () => {
+			const metadataBackup = { ...metadataToDelete };
+			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.send({ metadata: [
+					{ key: customMetadata._id, value: generateRandomString() },
+					{ key: metadataToDelete._id, value: null },
+					{ key: generateRandomString(), value: generateRandomString() },
+				] })
+				.expect(templates.ok.status);
+
+			// add the deleted metadata again
+			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.send({ metadata: [{ key: metadataBackup.key, value: metadataBackup.value }] });
+		});
+	});
+};
+
+describe('E2E routes/teamspaces/projects/containers/metadata', () => {
+	beforeAll(async () => {
+		server = await ServiceHelper.app();
+		agent = await SuperTest(server);
+		await setupData();
+	});
+	afterAll(() => ServiceHelper.closeApp(server));
+	testUpdateMetadata();
+});
