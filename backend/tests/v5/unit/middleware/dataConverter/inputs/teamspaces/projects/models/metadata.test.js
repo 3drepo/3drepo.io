@@ -37,9 +37,9 @@ const metadata = [
 ];
 
 const existingMetadataId = generateRandomString();
-const nonCustomMetadata = metadata[0].key;
-const customMetadata = metadata[1].key;
-const customMetadata2 = metadata[2].key;
+const nonCustomMetadata = metadata[0];
+const customMetadata = metadata[1];
+const customMetadata2 = metadata[2];
 
 MetadataModel.getMetadataById.mockImplementation((teamspace, container, metadataId) => {
 	if (metadataId === existingMetadataId) {
@@ -61,17 +61,19 @@ const testValidateUpdateMetadata = () => {
 		['Updating non existing metadata', { params: { ...standardReq.params, metadata: generateRandomString() },
 			body: { metadata: [{ key: generateRandomString(), value: generateRandomString() }] } }, false,
 		templates.metadataNotFound],
-		['Updating non custom metadata', { ...standardReq, body: { metadata: [{ key: nonCustomMetadata, value: generateRandomString() }] } }, false],
-		['Deleting non custom metadata', { ...standardReq, body: { metadata: [{ key: nonCustomMetadata, value: null }] } }, false],
-		['Editing custom metadata', { ...standardReq, body: { metadata: [{ key: customMetadata, value: generateRandomString() }] } }, true],
+		['Updating non custom metadata', { ...standardReq, body: { metadata: [{ key: nonCustomMetadata.key, value: generateRandomString() }] } }, false],
+		['Deleting non custom metadata', { ...standardReq, body: { metadata: [{ key: nonCustomMetadata.key, value: null }] } }, false],
+		['Editing custom metadata', { ...standardReq, body: { metadata: [{ key: customMetadata.key, value: generateRandomString() }] } }, true],
 		['Adding, removing and editing custom metadata', { ...standardReq,
 			body: { metadata: [
-				{ key: customMetadata, value: null },
-				{ key: customMetadata2, value: generateRandomString() },
+				{ key: customMetadata.key, value: null },
+				{ key: customMetadata2.key, value: generateRandomString() },
 				{ key: generateRandomString(), value: generateRandomString() }] } }, true],
-		['Deleting custom metadata', { ...standardReq, body: { metadata: [{ key: customMetadata, value: null }] } }, true],
+		['Deleting custom metadata', { ...standardReq, body: { metadata: [{ key: customMetadata.key, value: null }] } }, true],
 		['Adding custom metadata', { ...standardReq, body: { metadata: [{ key: generateRandomString(), value: generateRandomString() }] } }, true],
 		['With extra properties', { ...standardReq, body: { metadata: [{ key: generateRandomString(), value: generateRandomString() }], extra: 1 } }, false],
+		['Without a key', { ...standardReq, body: { metadata: [{ value: generateRandomString() }] } }, false],
+		['Without a value', { ...standardReq, body: { metadata: [{ key: generateRandomString() }] } }, false],
 		['With empty body', { ...standardReq, body: { } }, false],
 		['With undefined body', { ...standardReq, body: undefined }, false],
 	])('Can update metadata', (desc, req, success, expectedError = templates.invalidArguments) => {

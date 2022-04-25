@@ -23,9 +23,9 @@ const { respond } = require('../../../../../../utils/responder');
 const Metadata = {};
 
 const metadataSchema = Yup.object().shape({
-	key: Yup.string(),
-	value: Yup.string().nullable(),
-}).required();
+	key: Yup.string().required(),
+	value: Yup.string().nullable(true).test('ensure-value-present', 'Metadata value is a required field', (value) => value !== undefined),
+}).required().noUnknown();
 
 const generateSchema = (existingMetadata) => {
 	const schema = Yup.object().shape({

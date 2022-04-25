@@ -129,10 +129,18 @@ const testUpdateMetadata = () => {
 			expect(res.body.status).toEqual(templates.invalidArguments.status);
 		});
 
+		test('should fail if the user is tryign to add metadata with missing value', async () => {
+			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+				.send({
+					metadata: [{ key: nonCustomMetadata.key }],
+				}).expect(templates.invalidArguments.status);
+			expect(res.body.status).toEqual(templates.invalidArguments.status);
+		});
+
 		test('should add new metadata', async () => {
-			const metadataToAdd = { key: ServiceHelper.generateRandomString(),
-				value: ServiceHelper.generateRandomString(),
-				custom: true };
+			const metadataToAdd = {
+				key: ServiceHelper.generateRandomString(),
+				value: ServiceHelper.generateRandomString() };
 			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`).send({ metadata: [metadataToAdd] })
 				.expect(templates.ok.status);
 
