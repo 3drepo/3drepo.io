@@ -91,9 +91,7 @@ export const BreadcrumbsRouting = () => {
 				title: federationOrContainerName,
 				to: generatePath(FEDERATIONS_ROUTE, params),
 			});
-		}
-
-		if (!isFederation) {
+		} else { // In the case that it is a container it has revisions.
 			breadcrumbs.push({
 				title: federationOrContainerName,
 				to: generatePath(CONTAINERS_ROUTE, params),

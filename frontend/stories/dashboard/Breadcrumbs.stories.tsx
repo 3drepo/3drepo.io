@@ -53,11 +53,11 @@ BreadCrumbsNoOptions.args = {
 export const BreadCrumbsWithOptions = Template.bind({});
 BreadCrumbsWithOptions.args = {
 	breadcrumbs: [{ title: 'My teamspace', to: 'http://3drepo.com' }, { title: 'A project' }],
-	options: [{ title: 'another Project' }, { title: 'A project' }, { title: 'Yet anothed project' }],
+	options: [{ title: 'Another Project' }, { title: 'A project' }, { title: 'Yet another project' }],
 };
 
 export const BreadCrumbsWithOptionsIdMatch = Template.bind({});
 BreadCrumbsWithOptionsIdMatch.args = {
 	breadcrumbs: [{ title: 'My teamspace', to: 'http://3drepo.com' }, { title: 'A project', id: 123 }],
-	options: [{ title: 'another Project' }, { title: 'A project' }, { title: 'A project with sameId', id: 123 }],
+	options: [{ title: 'Another Project' }, { title: 'A project' }, { title: 'A project with sameId', id: 123 }],
 };
