@@ -200,17 +200,43 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 		</CopyToClipboard>
 	));
 
-	public renderFiltersMenuButton = renderWhenTrue(() => (
-		<ButtonContainer>
-			<ButtonMenu
-				renderButton={FilterButton}
-				renderContent={this.renderFiltersMenu}
-				PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
-				PopoverProps={{ anchorOrigin: { vertical: 'center', horizontal: 'left' } }}
-				ButtonProps={{ disabled: false }}
-			/>
-		</ButtonContainer>
-	));
+	public renderFiltersMenuButton = renderWhenTrue(() => {
+		const v5Props = {
+			PopoverProps: {
+				anchorOrigin: {
+					vertical: 'bottom',
+					horizontal: 'center',
+				},
+				transformOrigin: {
+					vertical: 'top',
+					horizontal: 'right',
+				},
+				sx: {
+					marginLeft: '-25px',
+					marginTop: '-15px',
+				}
+			}
+		};
+		const v4Props = {
+			PopoverProps: {
+				anchorOrigin: {
+					vertical: 'center',
+					horizontal: 'left',
+				},
+			},
+		};
+		return (
+			<ButtonContainer>
+				<ButtonMenu
+					renderButton={FilterButton}
+					renderContent={this.renderFiltersMenu}
+					PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
+					{...(isV5() ? v5Props : v4Props)}
+					ButtonProps={{ disabled: false }}
+				/>
+			</ButtonContainer>
+		);
+	});
 
 	public renderPlaceholder = renderWhenTrue(() => (
 		<Placeholder onClick={this.handlePlaceholderClick}>
