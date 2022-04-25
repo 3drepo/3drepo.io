@@ -58,7 +58,7 @@ export const UserVerification = () => {
 			<Title>
 				<FormattedMessage
 					id="userVerification.title"
-					defaultMessage="Registered for 3D Repo"
+					defaultMessage="Registration complete"
 				/>
 			</Title>
 			<Message>

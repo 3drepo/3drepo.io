@@ -60,7 +60,9 @@ export const LoginPrompt = styled.div`
 `;
 
 export const LoginPromptLink = styled(Link)`
-	color: ${({ theme }) => theme.palette.primary.main};
-	text-decoration: none;
-	margin-left: 7px;
+	&& {
+		color: ${({ theme }) => theme.palette.primary.main};
+		text-decoration: none;
+		margin-left: 7px;
+	}
 `;

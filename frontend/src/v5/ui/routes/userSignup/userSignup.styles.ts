@@ -19,6 +19,7 @@ import styled, { css } from 'styled-components';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import DefaultLogoBase from '@assets/icons/colored_logo.svg';
 import { Display } from '@/v5/ui/themes/media';
+import { Link } from 'react-router-dom';
 
 export const Container = styled.div`
 	display: flex;
@@ -62,7 +63,13 @@ const CustomLogo = styled.img.attrs({
 	width: 100px;
 `;
 
-export const Logo = clientConfigService.getCustomLogoPath() ? CustomLogo : DefaultLogo;
+export const LoginLink = styled(Link).attrs({
+	to: '/v5/login',
+})`
+	width: fit-content;
+`;
+
+export const Logo = clientConfigService.getCustomLogoPath() ? CustomLogo : DefaultLogo};
 
 export const BlueLogo = styled(Logo)`
 	color: ${({ theme }) => theme.palette.secondary.main};
@@ -72,9 +79,8 @@ export const LogoHeightBalancer = styled(BlueLogo)`
 	color: transparent;
 `;
 
-export const LogoContainer = styled.div`
-	width: 100%;
-	padding-bottom: 100px;
+export const LogoContainer = styled(LoginLink)`
+	margin-bottom: 100px;
 	display: none;
 
 	@media (max-width: ${Display.Tablet}px) {

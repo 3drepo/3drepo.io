@@ -16,7 +16,7 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { Logo } from '../userSignup.styles';
+import { LoginLink, Logo } from '../userSignup.styles';
 import {
 	Container,
 	BulletPoint,
@@ -32,7 +32,9 @@ import {
 
 export const UserSignupSidebar = () => (
 	<Container>
+	<LoginLink>
 		<Logo />
+	</LoginLink>
 		<MainTitle>
 			<FormattedMessage
 				id="userSignup.sidebar"
