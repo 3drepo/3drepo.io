@@ -112,6 +112,7 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 	const createAccount = async () => {
 		try {
 			const newUser = omit(fields, ['confirmPassword', 'termsAgreed']) as INewUser;
+			if (!fields.company) delete newUser.company;
 			await registerNewUser(newUser);
 			const { email, firstName } = fields;
 			completeRegistration({ email, firstName });

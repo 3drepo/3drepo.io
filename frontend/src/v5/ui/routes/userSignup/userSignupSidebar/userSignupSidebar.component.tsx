@@ -32,9 +32,9 @@ import {
 
 export const UserSignupSidebar = () => (
 	<Container>
-	<LoginLink>
-		<Logo />
-	</LoginLink>
+		<LoginLink>
+			<Logo />
+		</LoginLink>
 		<MainTitle>
 			<FormattedMessage
 				id="userSignup.sidebar"

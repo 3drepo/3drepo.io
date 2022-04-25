@@ -69,7 +69,7 @@ export const LoginLink = styled(Link).attrs({
 	width: fit-content;
 `;
 
-export const Logo = clientConfigService.getCustomLogoPath() ? CustomLogo : DefaultLogo};
+export const Logo = clientConfigService.getCustomLogoPath() ? CustomLogo : DefaultLogo;
 
 export const BlueLogo = styled(Logo)`
 	color: ${({ theme }) => theme.palette.secondary.main};
