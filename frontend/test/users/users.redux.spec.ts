@@ -44,7 +44,7 @@ describe('Users: redux', () => {
 		lastName: 'Member',
 		company: 'Company B',
 		job: 'Architect',
-		email: 'bob@companyb.com',
+		email: 'alice@companyb.com',
 		hasAvatar: true,
 		avatarUrl: 'http://companyb.com/avatar/alice.png',
 	};
