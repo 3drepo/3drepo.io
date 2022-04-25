@@ -19,7 +19,7 @@ import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspace
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { IProject } from '@/v5/store/projects/projects.redux';
-import { CONTAINERS_ROUTE, DASHBOARD_ROUTE, FEDERATIONS_ROUTE, matchesPath, PROJECTS_ROUTE, PROJECT_ROUTE, VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { CONTAINERS_ROUTE, DASHBOARD_ROUTE, FEDERATIONS_ROUTE, matchesPath, PROJECTS_LIST_ROUTE, PROJECT_ROUTE, VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { useSelector } from 'react-redux';
 import { selectCurrentModelName, selectIsFederation, selectRevisions } from '@/v4/modules/model/model.selectors';
 import { formatMessage } from '@/v5/services/intl';
@@ -41,7 +41,7 @@ export const BreadcrumbsRouting = () => {
 	let breadcrumbs: IListItem[] = [];
 	let options: IListItem[] = [];
 
-	if (matchesPath(PROJECTS_ROUTE)) {
+	if (matchesPath(PROJECTS_LIST_ROUTE)) {
 		breadcrumbs = [
 			{
 				title: teamspace,
@@ -50,7 +50,7 @@ export const BreadcrumbsRouting = () => {
 
 		options = teamspaces.map(({ name }) => ({
 			title: name,
-			to: generatePath(PROJECTS_ROUTE, { teamspace: name }),
+			to: generatePath(PROJECTS_LIST_ROUTE, { teamspace: name }),
 		}));
 	}
 
@@ -58,7 +58,7 @@ export const BreadcrumbsRouting = () => {
 		breadcrumbs = [
 			{
 				title: teamspace,
-				to: generatePath(PROJECTS_ROUTE, { teamspace }),
+				to: generatePath(PROJECTS_LIST_ROUTE, { teamspace }),
 			},
 			{
 				title: project?.name,
