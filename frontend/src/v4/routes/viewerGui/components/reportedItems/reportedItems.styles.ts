@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,26 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import styled from 'styled-components';
-import { Mark as HighlighterMark } from '@/v4/routes/components/highlight/highlight.styles';
-import leftPanelStyling from './overrides/leftPanel.overrides';
-import customTableStyling from './overrides/customTable.overrides';
-import viewerStyling from './overrides/viewer.overrides';
+import { DashedContainer as DashedContainerBase } from '@controls/dashedContainer/dashedContainer.component';
 
-export const V4OverridesContainer = styled.div`
-	display: flex;
-	flex-direction: column;
-	height: 100%;
-
-	${customTableStyling}
-
-	${viewerStyling}
-
-	${HighlighterMark} {
-		background-color: ${({ theme }) => theme.palette.primary.light};
-		font-weight: inherit;
-	}
-
-	${leftPanelStyling}
+export const DashedContainer = styled(DashedContainerBase).attrs({
+	strokeColor: '#c0c8d5', // TODO - fix when new palette is released
+	borderRadius: 5,
+	dashSize: 2,
+	gapSize: 2,
+	strokeWidth: 2,
+	zeroPadding: true,
+})`
+	margin: 12px 15px;
 `;

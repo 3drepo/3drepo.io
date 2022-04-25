@@ -97,7 +97,9 @@ export const Container = styled.div`
 	height: inherit;
 	overflow: hidden;
 	flex: 1;
-	box-sizing: border-box;padding: 7px 40px 7px 7px;position: relative;
+	box-sizing: border-box;
+	padding: 7px 40px 7px 7px;
+	position: relative;
 `;
 
 const ThumbnailStyles = css`
