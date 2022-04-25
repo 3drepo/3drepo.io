@@ -18,7 +18,6 @@
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../helper/services');
 const { src } = require('../../../../../helper/path');
-const { generateRandomString } = require('../../../../../helper/services');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -76,6 +75,8 @@ const setupData = async () => {
 
 const testUpdateMetadata = () => {
 	const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/metadata/${metadataId}`;
+	const routeV4 = `/${teamspace}/${container._id}/meta/${metadataId}.json`;
+
 	describe('Update Metadata', () => {
 		test('should fail without a valid session', async () => {
 			const res = await agent.patch(route).expect(templates.notLoggedIn.status);
@@ -119,24 +120,41 @@ const testUpdateMetadata = () => {
 
 		test('should fail if the user is trying to update non custom metadata', async () => {
 			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
-				.send({ metadata: [
-					{ key: nonCustomMetadata.key, value: ServiceHelper.generateRandomString() },
-					{ key: customMetadata.key, value: ServiceHelper.generateRandomString() },
-				] }).expect(templates.invalidArguments.status);
+				.send({
+					metadata: [
+						{ key: nonCustomMetadata.key, value: ServiceHelper.generateRandomString() },
+						{ key: customMetadata.key, value: ServiceHelper.generateRandomString() },
+					],
+				}).expect(templates.invalidArguments.status);
 			expect(res.body.status).toEqual(templates.invalidArguments.status);
 		});
 
 		test('should add new metadata', async () => {
-			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
-				.send({ metadata: [{ key: ServiceHelper.generateRandomString(),
-					value: ServiceHelper.generateRandomString() }] })
+			const metadataToAdd = { key: ServiceHelper.generateRandomString(),
+				value: ServiceHelper.generateRandomString(),
+				custom: true };
+			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`).send({ metadata: [metadataToAdd] })
 				.expect(templates.ok.status);
+
+			const updatedMetdata = await agent.get(`${routeV4}?key=${users.tsAdmin.apiKey}`);
+			const updatedMetadataObj = updatedMetdata.body.meta[0].metadata;
+			const itemAdded = Object.prototype.hasOwnProperty.call(updatedMetadataObj, metadataToAdd.key)
+				&& updatedMetadataObj[metadataToAdd.key] === metadataToAdd.value;
+			expect(itemAdded).toEqual(true);
 		});
 
 		test('should edit metadata', async () => {
+			const newMetadataValue = ServiceHelper.generateRandomString();
+
 			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
-				.send({ metadata: [{ key: customMetadata.key, value: ServiceHelper.generateRandomString() }] })
+				.send({ metadata: [{ key: customMetadata.key, value: newMetadataValue }] })
 				.expect(templates.ok.status);
+
+			const updatedMetdata = await agent.get(`${routeV4}?key=${users.tsAdmin.apiKey}`);
+			const updatedMetadataObj = updatedMetdata.body.meta[0].metadata;
+			const itemEdited = Object.prototype.hasOwnProperty.call(updatedMetadataObj, customMetadata.key)
+				&& updatedMetadataObj[customMetadata.key] === newMetadataValue;
+			expect(itemEdited).toEqual(true);
 		});
 
 		test('should delete metadata', async () => {
@@ -145,6 +163,11 @@ const testUpdateMetadata = () => {
 				.send({ metadata: [{ key: metadataToDelete.key, value: null }] })
 				.expect(templates.ok.status);
 
+			const updatedMetdata = await agent.get(`${routeV4}?key=${users.tsAdmin.apiKey}`);
+			const updatedMetadataObj = updatedMetdata.body.meta[0].metadata;
+			const itemRemoved = !Object.prototype.hasOwnProperty.call(updatedMetadataObj, metadataToDelete.key);
+			expect(itemRemoved).toEqual(true);
+
 			// add the deleted metadata again
 			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
 				.send({ metadata: [{ key: metadataBackup.key, value: metadataBackup.value }] });
@@ -152,13 +175,30 @@ const testUpdateMetadata = () => {
 
 		test('should add, edit and delete metadata', async () => {
 			const metadataBackup = { ...metadataToDelete };
+			const metadataToAdd = {
+				key: ServiceHelper.generateRandomString(),
+				value: ServiceHelper.generateRandomString(),
+			};
+			const metadataToEdit = { key: customMetadata.key, value: ServiceHelper.generateRandomString() };
 			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
-				.send({ metadata: [
-					{ key: customMetadata._id, value: generateRandomString() },
-					{ key: metadataToDelete._id, value: null },
-					{ key: generateRandomString(), value: generateRandomString() },
-				] })
+				.send({
+					metadata: [
+						{ key: metadataToDelete.key, value: null },
+						metadataToEdit,
+						metadataToAdd,
+					],
+				})
 				.expect(templates.ok.status);
+
+			const updatedMetadata = await agent.get(`${routeV4}?key=${users.tsAdmin.apiKey}`);
+			const updatedMetadataObj = updatedMetadata.body.meta[0].metadata;
+
+			const itemsUpdated = !Object.prototype.hasOwnProperty.call(updatedMetadataObj, metadataToDelete.key)
+				&& Object.prototype.hasOwnProperty.call(updatedMetadataObj, metadataToEdit.key)
+				&& updatedMetadataObj[metadataToEdit.key] === metadataToEdit.value
+				&& Object.prototype.hasOwnProperty.call(updatedMetadataObj, metadataToAdd.key)
+				&& updatedMetadataObj[metadataToAdd.key] === metadataToAdd.value;
+			expect(itemsUpdated).toEqual(true);
 
 			// add the deleted metadata again
 			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
