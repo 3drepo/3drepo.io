@@ -22,6 +22,7 @@ import TextField from '@mui/material/TextField';
 import Copy from '@mui/icons-material/FileCopy';
 import styled, { css } from 'styled-components';
 import { COLOR } from './../../../styles/colors';
+import { isV5 } from '@/v4/helpers/isV5';
 
 interface IContainer {
 	filtersOpen: boolean;
@@ -58,6 +59,11 @@ export const SelectedFilters = styled.div<ISelectedFilters>`
 	min-height: ${(props) => props.empty ? '0' : '45px'};
 	position: relative;
 	max-height: 240px;
+	${({ theme, empty }) => isV5() && !empty && `
+		border-bottom: solid 1px ${theme.palette.base.lightest};
+		padding: 9px 40px 9px 15px;
+		min-height: fit-content;
+	`}
 `;
 
 export const InputContainer = styled.div<IInputContainer>`

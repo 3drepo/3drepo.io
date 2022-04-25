@@ -100,16 +100,6 @@ export default css`
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 	}
 
-
-	// !NOT WORKING, fix props usage
-	${SelectedFilters} {
-		${({ empty, theme }) => !empty && `
-			border-bottom: solid 1px ${theme.palette.base.lightest};
-			padding: 9px 40px 9px 15px;
-			min-height: fit-content;
-		`};
-	}
-
 	${ViewerPanelFooter} {
 		min-height: 48px;
 		${({ theme }) => theme.typography.caption};
