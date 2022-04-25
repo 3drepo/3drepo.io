@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { templates: emailTemplates } = require('../../../../src/v5/services/mailer/mailer.constants');
 const { templates } = require('../../../../src/v5/utils/responseCodes');
 const { src } = require('../../helper/path');
 
@@ -149,18 +150,19 @@ const testGenerateResetPasswordToken = () => {
 	describe('Reset password token', () => {
 		test('should reset password token', async () => {
 			await Users.generateResetPasswordToken(user.user);
-			expect(UsersModel.updateResetPasswordToken.mock.calls.length).toBe(1);
-			expect(UsersModel.updateResetPasswordToken.mock.calls[0][0]).toBe(user.user);
+			expect(UsersModel.updateResetPasswordToken).toHaveBeenCalledTimes(1);
 			expect(UsersModel.updateResetPasswordToken.mock.calls[0][1]).toHaveProperty('expiredAt');
 			const { expiredAt } = UsersModel.updateResetPasswordToken.mock.calls[0][1];
-			expect(UsersModel.updateResetPasswordToken.mock.calls[0][1])
-				.toStrictEqual({ token: exampleHashString, expiredAt });
-			expect(Mailer.sendResetPasswordEmail.mock.calls.length).toBe(1);
-			expect(Mailer.sendResetPasswordEmail.mock.calls[0][0]).toBe(user.customData.email);
-			expect(Mailer.sendResetPasswordEmail.mock.calls[0][1]).toStrictEqual({ token: exampleHashString,
-				email: user.customData.email,
-				username: user.user,
-				firstName: user.customData.firstName });
+			expect(UsersModel.updateResetPasswordToken)
+				.toHaveBeenCalledWith(user.user, { token: exampleHashString, expiredAt });
+			expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
+			expect(Mailer.sendEmail).toHaveBeenCalledWith(emailTemplates.FORGOT_PASSWORD.name, user.customData.email,
+				{
+					token: exampleHashString,
+					email: user.customData.email,
+					username: user.user,
+					firstName: user.customData.firstName,
+				});
 		});
 
 		test('should reset password token', async () => {
@@ -183,8 +185,8 @@ const testSignUp = () => {
 			await Users.signUp(newUserData);
 			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
 			expect(UsersModel.addUser).toHaveBeenCalledWith({ ...newUserData, token: exampleHashString });
-			expect(Mailer.sendVerifyUserEmail).toHaveBeenCalledTimes(1);
-			expect(Mailer.sendVerifyUserEmail).toHaveBeenCalledWith(newUserData.email, {
+			expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
+			expect(Mailer.sendEmail).toHaveBeenCalledWith(emailTemplates.VERIFY_USER.name, newUserData.email, {
 				token: exampleHashString,
 				email: newUserData.email,
 				firstName: newUserData.firstName,
