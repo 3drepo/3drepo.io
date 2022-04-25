@@ -48,6 +48,7 @@ import {
 	StyledTextField,
 	SuggestionsList
 } from './filterPanel.styles';
+import { isV5 } from '@/v4/helpers/isV5';
 
 export const FILTER_TYPES = {
 	UNDEFINED: 1,
@@ -215,7 +216,7 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 		<Placeholder onClick={this.handlePlaceholderClick}>
 			<SearchIcon />
 			<PlaceholderText>
-				Search
+				Search{isV5() && '...'}
 			</PlaceholderText>
 		</Placeholder>
 	));

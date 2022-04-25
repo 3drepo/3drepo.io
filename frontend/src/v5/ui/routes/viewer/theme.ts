@@ -17,6 +17,8 @@
 
 import { createTheme } from '@mui/material/styles';
 import { COLOR, theme as oldTheme } from '@/v5/ui/themes/theme';
+import { StyledItemText, StyledListItem, CopyText } from '@/v4/routes/components/filterPanel/components/filtersMenu/filtersMenu.styles';
+import { Wrapper } from '@/v4/routes/components/filterPanel/components/childMenu/childMenu.styles';
 import _ from 'lodash';
 
 export const theme = createTheme(
@@ -40,14 +42,47 @@ export const theme = createTheme(
 						},
 					},
 				},
+				MuiPaper: {
+					styleOverrides: {
+						rounded: {
+							borderRadius: 6,
+						},
+					},
+				},
 				MuiList: {
 					styleOverrides: {
 						root: {
-							boxShadow: 'none',
-							borderRadius: 5,
+							borderRadius: '6px !important',
+							boxShadow: `0px 9px 28px 8px rgb(0 0 0 / 5%),
+										0px 6px 16px 0px rgb(0 0 0 / 8%),
+										0px 3px 6px -4px rgb(0 0 0 / 12%) !important`,
+							padding: '4px 0',
+							'.MuiList-root': {
+								paddingTop: 0,
+								paddingBottom: 0,
+								boxShadow: 'none !important',
+								borderRadius: '6px',
+
+								[`& ${Wrapper}`]: {
+									overflow: 'hidden',
+									left: '100%',
+									borderRadius: '6px',
+								},
+							},
+							// filter panel menu
+							[`& ${StyledListItem}${StyledListItem}`]: {
+								minWidth: 121,
+								padding: '2px 10px',
+								// items
+								[`& ${StyledItemText}`]: {
+									color: COLOR.SECONDARY_MAIN,
+								},
+								[`& ${CopyText}`]: {
+									fontWeight: 500,
+								},
+							},
 							'& .MuiButtonBase-root': {
 								margin: 0,
-								color: `${COLOR.SECONDARY_MAIN} !important`,
 								'&:hover': {
 									backgroundColor: '#f0f5ff', // TODO: fix after new palette is released
 								},

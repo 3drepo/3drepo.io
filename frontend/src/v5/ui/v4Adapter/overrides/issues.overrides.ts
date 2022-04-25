@@ -15,28 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { Mark as HighlighterMark } from '@/v4/routes/components/highlight/highlight.styles';
-import leftPanelStyling from './overrides/leftPanel.overrides';
-import customTableStyling from './overrides/customTable.overrides';
-import viewerStyling from './overrides/viewer.overrides';
-import issuesStyling from './overrides/issues.overrides';
+import { css } from 'styled-components';
+import { Content, Description } from '@/v4/routes/viewerGui/components/previewListItem/previewListItem.styles';
+import { Date, Details } from '@/v4/routes/viewerGui/components/previewItemInfo/previewItemInfo.styles';
 
-export const V4OverridesContainer = styled.div`
-	display: flex;
-	flex-direction: column;
-	height: 100%;
+export default css`
+	${Content} {
+		margin: 4px 0 0 12px;
+		color: ${({ theme }) => theme.palette.secondary.main};
 
-	${customTableStyling}
+		${Details} {
+			height: fit-content;
+		}
 
-	${viewerStyling}
+		${Date} {
+			color: ${({ theme }) => theme.palette.base.main};
+		}
 
-	${HighlighterMark} {
-		background-color: ${({ theme }) => theme.palette.primary.light};
-		font-weight: inherit;
+		${Description} {
+			color: ${({ theme }) => theme.palette.base.main};
+		}
 	}
-
-	${leftPanelStyling}
-
-	${issuesStyling}
 `;

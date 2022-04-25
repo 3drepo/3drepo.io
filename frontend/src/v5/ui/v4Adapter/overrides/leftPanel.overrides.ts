@@ -20,8 +20,11 @@ import { LeftPanels } from '@/v4/routes/viewerGui/viewerGui.styles';
 import { TitleIcon, ViewerPanelFooter } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
 import { Title, Container as ViewerPanelBody } from '@/v4/routes/components/panel/panel.styles';
 import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
-import { Container as FilterPanelContainer, StyledIconButton as FilterIcon, ButtonWrapper } from '@/v4/routes/components/FilterPanel/filterPanel.styles';
-import { MenuFooter, StyledListItem } from '@/v4/routes/components/filterPanel/components/filtersMenu/filtersMenu.styles';
+import {
+	Container as FilterPanelContainer,
+	PlaceholderText,
+} from '@/v4/routes/components/filterPanel/filterPanel.styles';
+import { MenuList } from '@/v4/routes/components/filterPanel/components/filtersMenu/filtersMenu.styles';
 
 export default css`
 	${LeftPanels} .MuiPaper-root {
@@ -34,6 +37,11 @@ export default css`
 		${({ theme }) => theme.typography.h3};
 		border-bottom: 1px solid ${({ theme }) => theme.palette.base.light};
 		height: 48px;
+
+		.panelTitle { 
+			margin: 0 0 0 -16px;
+			width: calc(100% + 16px);
+		}
 
 		// back arrow icon
 		${TitleIcon} .MuiIconButton-root {
@@ -49,26 +57,24 @@ export default css`
 			border-radius: 50%;
 			height: 32px;
 			width: 32px;
+			margin: 0 0 0 5px;	
 		}
 	}
 	
-	// !NOT WORKING
 	${FilterPanelContainer} {
-		padding: 20px;
-		background-color: purple;
-
-		button {
-			background-color: blue;
+		.MuiOutlinedInput-notchedOutline {
+			border-radius: 0;
+			border-right: 0;
+			border-left: 0;
+			border-top: 0;
 		}
 
-		.MuiInputBase-root {
-			background-color: red;
-			padding: 10px;
+		${PlaceholderText} {
+			color: ${({ theme }) => theme.palette.base.main};
 		}
 		
 		.MuiButtonBase-root {
 			margin: 0;
-			background-color: yellow;
 		}
 	}
 
@@ -86,34 +92,6 @@ export default css`
 		path {
 			fill: ${({ theme }) => theme.palette.secondary.main};
 		}
-	}
-
-	// TODO - contain this style in the search field component
-	.MuiOutlinedInput-notchedOutline {
-		border-radius: 0;
-		border-right: 0;
-		border-left: 0;
-	}
-
-	${ButtonWrapper} {
-		background-color: purple;
-	}
-
-	// !NOT WORKING
-	${FilterIcon} {
-		&& {
-			margin: 0;
-			background-color: blue !important;
-		}
-	}
-
-	// !NOT WORKING
-	${StyledListItem} {
-		min-width: fit-content !important;
-	}
-
-	${MenuFooter} {
-		padding: 8px 0 8px 8px;
 	}
 
 	${ViewerPanelFooter} {
@@ -135,6 +113,10 @@ export default css`
 			&:active {
 				box-shadow: none;
 				background-color: ${({ theme }) => theme.palette.primary.darkest};
+			}
+
+			&:disabled {
+				background-color: ${({ theme }) => theme.palette.base.light};
 			}
 		}
 	}
