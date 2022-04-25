@@ -110,7 +110,6 @@ export const UserSignupFormStepPersonal = ({
 					id: 'userSignup.form.company',
 					defaultMessage: 'Company',
 				})}
-				required
 				formError={errors.company}
 			/>
 			<FormSelect

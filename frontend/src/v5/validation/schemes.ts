@@ -214,13 +214,6 @@ export const UserSignupSchemaPersonal = Yup.object().shape({
 			id: 'userRegistration.lastName.error.required',
 			defaultMessage: 'Last name is a required field',
 		})),
-	company: Yup.string()
-		.required(
-			formatMessage({
-				id: 'userRegistration.company.required',
-				defaultMessage: 'Company is a required field',
-			}),
-		),
 	countryCode: Yup.string()
 		.required(
 			formatMessage({
