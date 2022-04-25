@@ -22,9 +22,10 @@ import { Title, Container as ViewerPanelBody } from '@/v4/routes/components/pane
 import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
 import {
 	Container as FilterPanelContainer,
+	FiltersButton,
 	PlaceholderText,
+	SelectedFilters,
 } from '@/v4/routes/components/filterPanel/filterPanel.styles';
-import { MenuList } from '@/v4/routes/components/filterPanel/components/filtersMenu/filtersMenu.styles';
 
 export default css`
 	${LeftPanels} .MuiPaper-root {
@@ -61,6 +62,11 @@ export default css`
 		}
 	}
 	
+	// Filter components
+	${FiltersButton} {
+		top: 13px;
+	}
+
 	${FilterPanelContainer} {
 		.MuiOutlinedInput-notchedOutline {
 			border-radius: 0;
@@ -76,22 +82,32 @@ export default css`
 		.MuiButtonBase-root {
 			margin: 0;
 		}
+
+		.MuiChip-root {
+			border-radius: 5px;
+			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+			color: ${({ theme }) => theme.palette.secondary.main};
+			font-weight: 600;
+			margin: 3px 4px 3px 0;
+
+			path {
+				fill: ${({ theme }) => theme.palette.secondary.main};
+			}
+		}
 	}
 
 	${ViewerPanelBody} {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 	}
 
-	// Filter components
-	.MuiChip-root {
-		border-radius: 5px;
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-		color: ${({ theme }) => theme.palette.secondary.main};
-		font-weight: 600;
 
-		path {
-			fill: ${({ theme }) => theme.palette.secondary.main};
-		}
+	// !NOT WORKING, fix props usage
+	${SelectedFilters} {
+		${({ empty, theme }) => !empty && `
+			border-bottom: solid 1px ${theme.palette.base.lightest};
+			padding: 9px 40px 9px 15px;
+			min-height: fit-content;
+		`};
 	}
 
 	${ViewerPanelFooter} {
