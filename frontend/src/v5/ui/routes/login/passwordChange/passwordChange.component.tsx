@@ -66,7 +66,7 @@ export const PasswordChange = () => {
 							name="newPassword"
 							label={formatMessage({
 								id: 'auth.passwordChange.newPassword',
-								defaultMessage: 'Password',
+								defaultMessage: 'New password',
 							})}
 							formError={errors.newPassword}
 						/>
