@@ -20,3 +20,15 @@ export const LOGIN_PATH = '/v5/login';
 export const PASSWORD_FORGOT_PATH = '/v5/password-forgot';
 export const SIGN_UP_PATH = '/sign-up';
 export const PASSWORD_CHANGE_PATH = '/v5/password-change';
+export const VIEWER_ROUTE = '/v5/viewer/:teamspace/:containerOrFederation/:revision?';
+
+export interface DashboardParams {
+	teamspace?: string;
+	project?: string;
+}
+
+export interface ViewerParams {
+	teamspace?: string;
+	containerOrFederation?: string;
+	revision?: string;
+}

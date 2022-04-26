@@ -19,7 +19,7 @@ import { DatePickerProps } from '@mui/lab/DatePicker';
 import { DateTimePickerProps } from '@mui/lab/DateTimePicker';
 import { TextField } from '@mui/material';
 import { useState } from 'react';
-import { Container, StyledDatePicker, StyledDateTimePicker } from './dateField.styles';
+import { StyledDatePicker, StyledDateTimePicker } from './dateField.styles';
 
 interface IProps {
 	value?: any;
@@ -45,6 +45,7 @@ export const DateField = ({
 	disabled,
 	dateTime,
 	defaultValue,
+	className,
 	...dateFieldProps
 }: IProps) => {
 	const [value, setValue] = useState(propValue || null);
@@ -79,24 +80,23 @@ export const DateField = ({
 	const Picker: ComponentType<DatePickerProps | DateTimePickerProps> = dateTime ? StyledDateTimePicker : StyledDatePicker;
 
 	return (
-		<Container>
-			<Picker
-				value={selectedValue}
-				onOpen={handleOpen}
-				onAccept={handleAccept}
-				onChange={handleChange}
-				disableHighlightToday
-				renderInput={(props) => (
-					<TextField
-						placeholder={placeholder}
-						defaultValue={defaultValue}
-						name={name}
-						onBlur={onBlur}
-						{...props}
-					/>
-				)}
-				{...dateFieldProps}
-			/>
-		</Container>
+		<Picker
+			value={selectedValue}
+			onOpen={handleOpen}
+			onAccept={handleAccept}
+			onChange={handleChange}
+			disableHighlightToday
+			renderInput={(props) => (
+				<TextField
+					placeholder={placeholder}
+					defaultValue={defaultValue}
+					name={name}
+					onBlur={onBlur}
+					className={className}
+					{...props}
+				/>
+			)}
+			{...dateFieldProps}
+		/>
 	);
 };

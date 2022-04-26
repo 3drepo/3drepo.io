@@ -110,6 +110,12 @@ const testLogin = () => {
 				.expect(templates.ok.status);
 		});
 
+		test('should log in a user using email (all upper case)', async () => {
+			await agent.post('/v5/login/')
+				.send({ user: userEmail.toUpperCase(), password: testUser.password })
+				.expect(templates.ok.status);
+		});
+
 		test('should fail with an incorrect username', async () => {
 			const res = await agent.post('/v5/login/')
 				.send({ user: 'randomUsername', password: testUser.password })

@@ -43,7 +43,7 @@ interface IProps {
 		unit: string;
 	};
 	updateModelSettings: (modelData, settings) => void;
-	getDataFromPathname: () => { teamspace, modelId, revision };
+	urlParams: { teamspace, model, revision };
 }
 
 export class Settings extends PureComponent<IProps, any> {
@@ -79,8 +79,8 @@ export class Settings extends PureComponent<IProps, any> {
 					}]
 				};
 
-				const { teamspace, modelId } = this.props.getDataFromPathname();
-				const modelData = { teamspace, modelId };
+				const { teamspace, model } = this.props.urlParams;
+				const modelData = { teamspace, modelId: model };
 
 				this.props.updateModelSettings(modelData, pointsSettings);
 			},

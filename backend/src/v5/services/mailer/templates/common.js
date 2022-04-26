@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,25 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-"use strict";
-const { systemLogger } = require("../logger");
-const { session } = require("../services/session");
+const EJS = require('ejs');
 
-module.exports = async (req, res, next) => {
-	// In case other middleware sets the session
-	if (req.session) {
-		next();
-		return;
-	}
+const Common = {};
 
-	session(req, res, function(err) {
-		if(err) {
-			// something is wrong with the library or the session (i.e. corrupted json file) itself, log the user out
-			systemLogger.logError(`express-session internal error: ${err}`);
-			systemLogger.logError(`express-session internal error: ${JSON.stringify(err)}`);
-			systemLogger.logError(`express-session internal error: ${err.stack}`);
-		} else {
-			next();
-		}
+const renderTemplate = (templatePath, data) => new Promise((resolve, reject) => {
+	EJS.renderFile(templatePath, data, {}, (err, output) => {
+		if (err) reject(err);
+		else resolve(output);
 	});
+});
+
+Common.generateTemplateFn = (schema, templatePath) => async (data) => {
+	const input = await schema.validate(data);
+	return renderTemplate(templatePath, input);
 };
+
+module.exports = Common;

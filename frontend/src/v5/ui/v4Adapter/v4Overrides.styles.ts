@@ -23,6 +23,12 @@ import { PermissionsCellContainer } from '@/v4/routes/components/permissionsTabl
 import { RadioContainer as TableHeadingRadioContainer, TableHeadingRadioButton, TableHeadingRadioTooltip } from '@/v4/routes/components/customTable/components/tableHeadingRadio/tableHeadingRadio.styles';
 import { SearchField } from '@/v4/routes/components/customTable/components/cellUserSearch/cellUserSearch.styles';
 import { Mark as HighlighterMark } from '@/v4/routes/components/highlight/highlight.styles';
+import { ArrowButton } from '@/v4/routes/viewerGui/components/previewListItem/previewListItem.styles';
+import { StyledIconButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.styles';
+import { LeftPanels, LeftPanelsButtons } from '@/v4/routes/viewerGui/viewerGui.styles';
+import { ButtonWrapper } from '@/v4/routes/viewerGui/components/panelButton/panelButton.styles';
+import { Container, Submenu } from '@/v4/routes/viewerGui/components/toolbar/toolbar.styles';
+import { hexToOpacity } from '../themes/theme';
 
 // all the .simplebar-... stuff is to disable simplebar
 const customTableStyling = css`
@@ -131,6 +137,97 @@ const customTableStyling = css`
 	}
 `;
 
+const viewerStyling = css`
+	${ArrowButton} {
+		background-color: ${({ theme }) => theme.palette.primary.dark};
+		padding: 0;
+		margin: 0;
+
+		&:hover {
+			background-color: ${({ theme }) => theme.palette.primary.main};
+		}
+	}
+`;
+
+// all the buttons on the left hand side of the viewer
+const PanelsMenuStyling = css`
+
+	${LeftPanelsButtons} {
+		width: 68px;
+		margin-top: 10px;
+
+		${ButtonWrapper} {
+			margin-bottom: 0;
+		}
+	}
+
+	${LeftPanels} {
+		left: 80px;
+	}
+
+	${StyledIconButton} {
+		margin-right: -4px;
+
+		&, &:hover {
+			background-color: ${({ theme }) => theme.palette.primary.contrast};
+		}
+
+		svg path,
+		svg circle {
+			fill: ${({ theme }) => theme.palette.secondary.main};
+		}
+
+		&:hover {
+			svg path,
+			svg circle {
+				fill: ${({ theme }) => theme.palette.primary.main};
+			}
+		}
+
+		&[active="1"] {
+			background-color: ${({ theme }) => theme.palette.secondary.main};
+
+			svg path,
+			svg circle {
+				fill: ${({ theme }) => theme.palette.primary.main};
+				color: ${({ theme }) => theme.palette.primary.main};
+			}
+		}
+	}
+`;
+
+const BottomToolbar = css`
+	${Container} {
+		background-color: ${({ theme }) => hexToOpacity(theme.palette.secondary.main, 90)};
+		border: 0;
+		border-radius: 5px;
+		bottom: 30px;
+		height: 40px;
+		width: 554px;
+		justify-content: space-evenly;
+		padding: 2px 10px;
+
+		${StyledIconButton} {
+			svg path,
+			svg circle {
+				fill: ${({ theme }) => theme.palette.primary.contrast};
+			}
+		}
+		/* stylelint-disable-next-line */
+		& :not(${Submenu} ${StyledIconButton}) {
+			background: transparent;
+			border-radius: 0;
+			margin: 0;
+		}
+
+		${Submenu} ${StyledIconButton} {
+			background-color: ${({ theme }) => hexToOpacity(theme.palette.secondary.main, 90)};
+			margin: 8px 0;
+		}
+	}
+
+`;
+
 export const V4OverridesContainer = styled.div`
 	display: flex;
 	flex-direction: column;
@@ -138,8 +235,14 @@ export const V4OverridesContainer = styled.div`
 
 	${customTableStyling}
 
+	${viewerStyling}
+
 	${HighlighterMark} {
 		background-color: ${({ theme }) => theme.palette.primary.light};
 		font-weight: inherit;
 	}
+
+	${PanelsMenuStyling}
+
+	${BottomToolbar}
 `;

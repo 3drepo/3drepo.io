@@ -85,6 +85,8 @@ ResponseCodes.templates = {
 
 Object.keys(ResponseCodes.templates).forEach((key) => {
 	ResponseCodes.templates[key].code = toConstantCase(key);
+	// value = code (v4 compatibility)
+	ResponseCodes.templates[key].value = ResponseCodes.templates[key].code;
 });
 
 ResponseCodes.getSwaggerComponents = () => {

@@ -92,6 +92,10 @@ module.exports = {
 		levels: 2
 	},
 	defaultStorage: "fs",
+	mail: {
+		generateCredentials: true,
+		sender: '"3D Repo" <dummyEmail@3drepo.org>'
+	},
 	tokenExpiry: {
 		emailVerify: 336,
 		forgotPassword: 24
