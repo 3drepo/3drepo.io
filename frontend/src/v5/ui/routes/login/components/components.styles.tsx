@@ -28,12 +28,14 @@ export const AuthHeading = styled(Typography).attrs({
 })`
 	color: ${({ theme }) => theme.palette.secondary.main};
 	user-select: none;
+	margin-bottom: 22px;
 `;
 
 export const AuthField = styled(FormTextField).attrs({
 	required: true,
 
 })`
+	margin-top: 26px;
 	margin-bottom: 14px;
 	>* { color: ${({ theme }) => theme.palette.secondary.main}; }
 `;
