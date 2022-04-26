@@ -29,6 +29,7 @@ import { FormSelectView } from '@controls/formSelectView/formSelectView.componen
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { FederationSettingsSchema } from '@/v5/validation/schemes';
 import { FormattedMessage } from 'react-intl';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { FlexContainer, SectionTitle, ShareTextField } from './federationSettingsForm.styles';
 
 const UNITS = [
@@ -121,7 +122,7 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 
 	const currentUnit = watch('unit');
 
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const { teamspace, project } = useParams<DashboardParams>();
 
 	const resetValues = () => {
 		defaultValues = getDefaultValues(federation) as any;

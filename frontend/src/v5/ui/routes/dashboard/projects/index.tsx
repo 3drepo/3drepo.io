@@ -20,7 +20,7 @@ import { useParams } from 'react-router';
 import { useRouteMatch, Route, Switch, Redirect } from 'react-router-dom';
 
 import { discardSlash } from '@/v5/services/routing/routing';
-import { NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
+import { DashboardParams, NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
 import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers/usersAction.dispatchers';
 import { ScrollArea } from '@controls/scrollArea';
 import { Federations } from './federations';
@@ -30,7 +30,7 @@ import { ProjectPermissions } from './projectPermissions/projectPermissions.comp
 import { Content } from './projects.styles';
 
 export const ProjectContent = () => {
-	const { teamspace } = useParams();
+	const { teamspace } = useParams<DashboardParams>();
 	let { path } = useRouteMatch();
 	path = discardSlash(path);
 

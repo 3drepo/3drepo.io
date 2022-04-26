@@ -14,11 +14,26 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ProjectNavigation } from '@components/shared/projectNavigation';
-import { Wrapper } from './header.styles';
+import { useParams } from 'react-router-dom';
 
-export const Header = (): JSX.Element => (
-	<Wrapper>
-		<ProjectNavigation />
-	</Wrapper>
-);
+import { Typography } from '@controls/typography';
+import { IProject } from '@/v5/store/projects/projects.redux';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
+import { ProjectNavigation } from '@components/shared/projectNavigation';
+import { Container, Wrapper } from './header.styles';
+import { DashboardParams } from '../../../routes.constants';
+
+export const Header = (): JSX.Element => {
+	const { project } = useParams<DashboardParams>();
+	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
+	const currentProject = projects.find(({ _id }) => project === _id);
+
+	return (
+		<Wrapper>
+			<Container>
+				<Typography variant="h1">{currentProject ? currentProject.name : 'Loading project'}</Typography>
+				<ProjectNavigation />
+			</Container>
+		</Wrapper>
+	);
+};
