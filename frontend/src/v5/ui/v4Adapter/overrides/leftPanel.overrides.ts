@@ -24,7 +24,6 @@ import {
 	Container as FilterPanelContainer,
 	FiltersButton,
 	PlaceholderText,
-	SelectedFilters,
 } from '@/v4/routes/components/filterPanel/filterPanel.styles';
 
 export default css`

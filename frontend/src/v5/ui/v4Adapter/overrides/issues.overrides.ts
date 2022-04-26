@@ -17,7 +17,7 @@
 
 import { css } from 'styled-components';
 import { Content, Description } from '@/v4/routes/viewerGui/components/previewListItem/previewListItem.styles';
-import { Date, Details } from '@/v4/routes/viewerGui/components/previewItemInfo/previewItemInfo.styles';
+import { Date, Details, Status } from '@/v4/routes/viewerGui/components/previewItemInfo/previewItemInfo.styles';
 
 export default css`
 	${Content} {
@@ -26,6 +26,20 @@ export default css`
 
 		${Details} {
 			height: fit-content;
+		}
+
+		${Status} {
+			svg {
+				display: none;
+			}
+			&::before {
+				content: "";
+				background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+				border-radius: 50%;
+				width: 9px;
+				height: 9px;
+				border: solid 1px ${({ theme }) => theme.palette.tertiary.mid};
+			}
 		}
 
 		${Date} {

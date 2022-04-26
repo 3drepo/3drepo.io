@@ -61,8 +61,29 @@ export const theme = createTheme(
 								paddingTop: 0,
 								paddingBottom: 0,
 								boxShadow: 'none !important',
-								borderRadius: '6px',
-
+								minWidth: 180,
+								'.MuiTextField-root': {
+									width: 122,
+								},
+								'.MuiInputBase-root.MuiInputBase-adornedEnd': {
+									paddingRight: 0,
+								},
+								'fieldset.MuiOutlinedInput-notchedOutline' : {
+									borderWidth: 0,
+									'&:hover:not(.Mui-error)': {
+										borderTop: 0,
+										borderLeft: 0,
+										borderRight: 0,
+										borderRadius: 0,
+									},
+								},
+								'input[type="tel"].MuiOutlinedInput-input' : {
+									padding: '0 5px 0 9px',
+									height: 28,
+								},
+								'.MuiButtonBase-root.MuiIconButton-edgeEnd': {
+									padding: 0,
+								},
 								[`& ${Wrapper}`]: {
 									overflow: 'hidden',
 									left: '100%',
