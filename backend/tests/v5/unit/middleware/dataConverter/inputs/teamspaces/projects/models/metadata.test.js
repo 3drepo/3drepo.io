@@ -16,7 +16,7 @@
  */
 
 const { src } = require('../../../../../../../helper/path');
-const { generateRandomString } = require('../../../../../../../helper/services');
+const { generateRandomString, generateRandomNumber } = require('../../../../../../../helper/services');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -52,18 +52,19 @@ MetadataModel.getMetadataById.mockImplementation((teamspace, container, metadata
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
-const testValidateUpdateMetadata = () => {
+const testValidateUpdateCustomMetadata = () => {
 	const standardReq = { params: { teamspace: generateRandomString(),
 		project: generateRandomString(),
 		container: generateRandomString(),
 		metadata: existingMetadataId } };
 	describe.each([
 		['Updating non existing metadata', { params: { ...standardReq.params, metadata: generateRandomString() },
-			body: { metadata: [{ key: generateRandomString(), value: generateRandomString() }] } }, false,
-		templates.metadataNotFound],
+			body: { metadata: [{ key: generateRandomString(), value: generateRandomString() }] } }, false, templates.metadataNotFound],
 		['Updating non custom metadata', { ...standardReq, body: { metadata: [{ key: nonCustomMetadata.key, value: generateRandomString() }] } }, false],
 		['Deleting non custom metadata', { ...standardReq, body: { metadata: [{ key: nonCustomMetadata.key, value: null }] } }, false],
-		['Editing custom metadata', { ...standardReq, body: { metadata: [{ key: customMetadata.key, value: generateRandomString() }] } }, true],
+		['Updating custom metadata with string value', { ...standardReq, body: { metadata: [{ key: customMetadata.key, value: generateRandomString() }] } }, true],
+		['Updating custom metadata with number value', { ...standardReq, body: { metadata: [{ key: customMetadata.key, value: generateRandomNumber() }] } }, true],
+		['Updating custom metadata with bool value', { ...standardReq, body: { metadata: [{ key: customMetadata.key, value: true }] } }, true],
 		['Adding, removing and editing custom metadata', { ...standardReq,
 			body: { metadata: [
 				{ key: customMetadata.key, value: null },
@@ -72,6 +73,8 @@ const testValidateUpdateMetadata = () => {
 		['Deleting custom metadata', { ...standardReq, body: { metadata: [{ key: customMetadata.key, value: null }] } }, true],
 		['Adding custom metadata', { ...standardReq, body: { metadata: [{ key: generateRandomString(), value: generateRandomString() }] } }, true],
 		['With extra properties', { ...standardReq, body: { metadata: [{ key: generateRandomString(), value: generateRandomString() }], extra: 1 } }, false],
+		['With empty key', { ...standardReq, body: { metadata: [{ key: '', value: generateRandomString() }] } }, false],
+		['With too long key', { ...standardReq, body: { metadata: [{ key: generateRandomString(121), value: generateRandomString() }] } }, false],
 		['Without a key', { ...standardReq, body: { metadata: [{ value: generateRandomString() }] } }, false],
 		['Without a value', { ...standardReq, body: { metadata: [{ key: generateRandomString() }] } }, false],
 		['With empty body', { ...standardReq, body: { } }, false],
@@ -79,7 +82,7 @@ const testValidateUpdateMetadata = () => {
 	])('Can update metadata', (desc, req, success, expectedError = templates.invalidArguments) => {
 		test(`${desc} ${success ? 'should call next()' : `should respond with ${expectedError.code}}`}`, async () => {
 			const mockCB = jest.fn();
-			await Metadata.validateUpdateMetadata(req, {}, mockCB);
+			await Metadata.validateUpdateCustomMetadata(req, {}, mockCB);
 
 			if (success) {
 				expect(mockCB.mock.calls.length).toBe(1);
@@ -93,5 +96,5 @@ const testValidateUpdateMetadata = () => {
 };
 
 describe('middleware/dataConverter/inputs/teamspaces/projects/models/metadata', () => {
-	testValidateUpdateMetadata();
+	testValidateUpdateCustomMetadata();
 });

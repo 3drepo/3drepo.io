@@ -73,7 +73,7 @@ const setupData = async () => {
 	]);
 };
 
-const testUpdateMetadata = () => {
+const testUpdateCustomMetadata = () => {
 	const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/metadata/${metadataId}`;
 	const routeV4 = `/${teamspace}/${container._id}/meta/${metadataId}.json`;
 
@@ -222,5 +222,5 @@ describe('E2E routes/teamspaces/projects/containers/metadata', () => {
 		await setupData();
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
-	testUpdateMetadata();
+	testUpdateCustomMetadata();
 });

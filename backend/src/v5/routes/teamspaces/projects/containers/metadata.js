@@ -20,14 +20,14 @@ const { Router } = require('express');
 const { hasWriteAccessToContainer } = require('../../../../middleware/permissions/permissions');
 const { respond } = require('../../../../utils/responder');
 const { templates } = require('../../../../utils/responseCodes');
-const { validateUpdateMetadata } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/metadata');
+const { validateUpdateCustomMetadata } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/metadata');
 
-const updateMetadata = async (req, res) => {
+const updateCustomMetadata = async (req, res) => {
 	const { teamspace, container, metadata } = req.params;
 	const updatedMetadata = req.body.metadata;
 
 	try {
-		await Metadata.updateMetadata(teamspace, container, metadata, updatedMetadata);
+		await Metadata.updateCustomMetadata(teamspace, container, metadata, updatedMetadata);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
@@ -44,7 +44,7 @@ const establishRoutes = () => {
 	 *   patch:
 	 *     description: Adds, removes or edits metadata of an element of a 3D model. If a metadata does not exist it is added and if it exists it is updated. To remove a metadata provide null value.
 	 *     tags: [Containers]
-	 *     operationId: updateMetadata
+	 *     operationId: updateCustomMetadata
 	 *     parameters:
 	 *       - teamspace:
 	 *         name: teamspace
@@ -88,18 +88,17 @@ const establishRoutes = () => {
 	 *                     key:
 	 *                       description: The key of the metadata
 	 *                       type: string
-     *                       example: Length
+     *                       example: Length (mm)
 	 *                     value:
 	 *                       description: The value of the metadata
-     *                       type: string
-	 *                       example: 100mm
+	 *                       example: 100
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       200:
 	 *         description: Adds, removes or edits metadata of an element of a 3D model
 	 */
-	router.patch('/:metadata', hasWriteAccessToContainer, validateUpdateMetadata, updateMetadata);
+	router.patch('/:metadata', hasWriteAccessToContainer, validateUpdateCustomMetadata, updateCustomMetadata);
 
 	return router;
 };

@@ -23,8 +23,19 @@ const { respond } = require('../../../../../../utils/responder');
 const Metadata = {};
 
 const metadataSchema = Yup.object().shape({
-	key: Yup.string().required(),
-	value: Yup.string().nullable(true).test('ensure-value-present', 'Metadata value is a required field', (value) => value !== undefined),
+	key: Yup.string().min(1).max(120).required(),	
+	value: Yup.lazy((value) => {
+		switch (typeof value) {
+			case 'string':
+				return Yup.string().max(120);
+			case 'number':
+				return Yup.number();
+			case 'boolean':
+				return Yup.bool();			  
+			default:
+				return Yup.mixed().nullable(true).test('ensure-value-present', 'Metadata value is a required field', () => value !== undefined);
+		  }
+	})
 }).required().noUnknown();
 
 const generateSchema = (existingMetadata) => {
@@ -42,7 +53,7 @@ const generateSchema = (existingMetadata) => {
 	return schema;
 };
 
-Metadata.validateUpdateMetadata = async (req, res, next) => {
+Metadata.validateUpdateCustomMetadata = async (req, res, next) => {
 	try {
 		const { teamspace, container, metadata } = req.params;
 		const containerMetadata = await getMetadataById(teamspace, container, metadata, { metadata: 1 });

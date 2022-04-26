@@ -16,6 +16,7 @@
  */
 
 const db = require('../handler/db');
+const { UUIDLookUpTable } = require('../utils/helper/uuids');
 const { templates } = require('../utils/responseCodes');
 
 const Metadata = {};
@@ -32,12 +33,14 @@ Metadata.getMetadataById = async (teamspace, model, metadataId, projection) => {
 	return metadata;
 };
 
-Metadata.updateMetadata = async (teamspace, model, metadataId, updatedMetadata) => {
+Metadata.updateCustomMetadata = async (teamspace, model, metadataId, dataToUpdate) => {
 	const { metadata } = await Metadata.getMetadataById(teamspace, model, metadataId, { metadata: 1 });
+	const metadataKeyLookup = new UUIDLookUpTable(metadata.map(({key}) => key));
 
-	updatedMetadata.forEach((um) => {
-		const existingMetadata = metadata.find((m) => m.key === um.key);
-		if (existingMetadata) {
+	dataToUpdate.forEach((um) => {
+		const metadataExists = metadataKeyLookup.has(um.key);
+		if (metadataExists) {
+			const existingMetadata = metadata.find((m) => m.key === um.key);
 			if (um.value) {
 				existingMetadata.value = um.value;
 			} else {

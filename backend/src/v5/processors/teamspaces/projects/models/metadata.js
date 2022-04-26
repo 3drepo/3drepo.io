@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { updateMetadata } = require('../../../../models/metadata');
+const { updateCustomMetadata } = require('../../../../models/metadata');
 
 const Metadata = { };
 
-Metadata.updateMetadata = updateMetadata;
+Metadata.updateCustomMetadata = updateCustomMetadata;
 
 module.exports = Metadata;

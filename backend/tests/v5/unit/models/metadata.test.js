@@ -49,7 +49,7 @@ const testGetMetadataById = () => {
 	});
 };
 
-const testUpdateMetadata = () => {
+const testUpdateCustomMetadata = () => {
 	describe('Update Metadata', () => {
 		test('should return error if metadata dont not exist', async () => {
 			const teamspace = generateRandomString();
@@ -57,7 +57,7 @@ const testUpdateMetadata = () => {
 			const metadataId = generateRandomString();
 			const metadataToAdd = [{ key: generateRandomString(), value: generateRandomString() }];
 			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
-			await expect(Metadata.updateMetadata(teamspace, model, metadataId, metadataToAdd))
+			await expect(Metadata.updateCustomMetadata(teamspace, model, metadataId, metadataToAdd))
 				.rejects.toEqual(templates.metadataNotFound);
 		});
 
@@ -68,7 +68,7 @@ const testUpdateMetadata = () => {
 			const metadataToAdd = [{ key: generateRandomString(), value: generateRandomString() }];
 			const fn1 = jest.spyOn(db, 'findOne').mockResolvedValue({ metadata: [] });
 			const fn2 = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
-			await Metadata.updateMetadata(teamspace, model, metadataId, metadataToAdd);
+			await Metadata.updateCustomMetadata(teamspace, model, metadataId, metadataToAdd);
 
 			expect(fn1).toHaveBeenCalledTimes(1);
 			expect(fn1).toHaveBeenCalledWith(teamspace, `${model}.scene`, { _id: metadataId }, { metadata: 1 });
@@ -84,7 +84,7 @@ const testUpdateMetadata = () => {
 			const metadataToAdd = [{ key: generateRandomString(), value: null }];
 			const fn1 = jest.spyOn(db, 'findOne').mockResolvedValue({ metadata: [] });
 			const fn2 = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
-			await Metadata.updateMetadata(teamspace, model, metadataId, metadataToAdd);
+			await Metadata.updateCustomMetadata(teamspace, model, metadataId, metadataToAdd);
 
 			expect(fn1).toHaveBeenCalledTimes(1);
 			expect(fn1).toHaveBeenCalledWith(teamspace, `${model}.scene`, { _id: metadataId }, { metadata: 1 });
@@ -98,16 +98,16 @@ const testUpdateMetadata = () => {
 			const model = generateRandomString();
 			const metadataId = generateRandomString();
 			const existingMetadata = [{ key: generateRandomString(), value: generateRandomString() }];
-			const updatedMetadata = existingMetadata.map((em) => ({ ...em, value: generateRandomString() }));
+			const metadataToUpdate = existingMetadata.map((em) => ({ ...em, value: generateRandomString() }));
 			const fn1 = jest.spyOn(db, 'findOne').mockResolvedValue({ metadata: existingMetadata });
 			const fn2 = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
-			await Metadata.updateMetadata(teamspace, model, metadataId, updatedMetadata);
+			await Metadata.updateCustomMetadata(teamspace, model, metadataId, metadataToUpdate);
 
 			expect(fn1).toHaveBeenCalledTimes(1);
 			expect(fn1).toHaveBeenCalledWith(teamspace, `${model}.scene`, { _id: metadataId }, { metadata: 1 });
 			expect(fn2).toHaveBeenCalledTimes(1);
 			expect(fn2).toHaveBeenCalledWith(teamspace, `${model}.scene`, { _id: metadataId },
-				{ $set: { metadata: updatedMetadata } });
+				{ $set: { metadata: metadataToUpdate } });
 		});
 
 		test('should remove existing', async () => {
@@ -121,7 +121,7 @@ const testUpdateMetadata = () => {
 			const metadataToRemove = existingMetadata.map((em) => ({ ...em, value: null }));
 			const fn1 = jest.spyOn(db, 'findOne').mockResolvedValue({ metadata: existingMetadata });
 			const fn2 = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
-			await Metadata.updateMetadata(teamspace, model, metadataId, metadataToRemove);
+			await Metadata.updateCustomMetadata(teamspace, model, metadataId, metadataToRemove);
 
 			expect(fn1).toHaveBeenCalledTimes(1);
 			expect(fn1).toHaveBeenCalledWith(teamspace, `${model}.scene`, { _id: metadataId }, { metadata: 1 });
@@ -134,5 +134,5 @@ const testUpdateMetadata = () => {
 
 describe('models/metadata', () => {
 	testGetMetadataById();
-	testUpdateMetadata();
+	testUpdateCustomMetadata();
 });
