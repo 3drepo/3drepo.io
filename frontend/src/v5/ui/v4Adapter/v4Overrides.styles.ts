@@ -17,9 +17,10 @@
 
 import styled from 'styled-components';
 import { Mark as HighlighterMark } from '@/v4/routes/components/highlight/highlight.styles';
+import bottomToolbar from './overrides/bottomToolbar.overrides';
+import panelsMenuStyling from './overrides/panelsMenu.overrides';
 import leftPanelStyling from './overrides/leftPanel.overrides';
 import customTableStyling from './overrides/customTable.overrides';
-import viewerStyling from './overrides/viewer.overrides';
 import issuesStyling from './overrides/issues.overrides';
 
 export const V4OverridesContainer = styled.div`
@@ -39,4 +40,8 @@ export const V4OverridesContainer = styled.div`
 	${leftPanelStyling}
 
 	${issuesStyling}
+
+	${panelsMenuStyling}
+
+	${bottomToolbar}
 `;

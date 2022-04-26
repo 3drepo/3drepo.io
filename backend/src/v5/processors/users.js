@@ -20,16 +20,17 @@ const Users = {};
 const { addUser, authenticate, canLogIn, deleteApiKey, generateApiKey, getAvatar,
 	getUserByUsername, updatePassword, updateProfile, updateResetPasswordToken, uploadAvatar, verify } = require('../models/users');
 const { isEmpty, removeFields } = require('../utils/helper/objects');
-const { sendResetPasswordEmail, sendVerifyUserEmail } = require('../services/mailer');
 const config = require('../utils/config');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
 const { publish } = require('../services/eventsManager/eventsManager');
+const { sendEmail } = require('../services/mailer');
+const { templates } = require('../services/mailer/mailer.constants');
 
 Users.signUp = async (newUserData) => {
 	const token = generateHashString();
 	await addUser({ ...newUserData, token });
-	await sendVerifyUserEmail(newUserData.email, {
+	await sendEmail(templates.VERIFY_USER.name, newUserData.email, {
 		token,
 		email: newUserData.email,
 		firstName: newUserData.firstName,
@@ -108,8 +109,13 @@ Users.generateResetPasswordToken = async (username) => {
 
 	await updateResetPasswordToken(username, resetPasswordToken);
 
-	const { customData: { email, firstName } } = await getUserByUsername(username, { user: 1, 'customData.email': 1, 'customData.firstName': 1 });
-	sendResetPasswordEmail(email, { token: resetPasswordToken.token, email, username, firstName });
+	const { customData: { email, firstName } } = await getUserByUsername(username, { user: 1,
+		'customData.email': 1,
+		'customData.firstName': 1 });
+	await sendEmail(templates.FORGOT_PASSWORD.name, email, { token: resetPasswordToken.token,
+		email,
+		username,
+		firstName });
 };
 
 Users.updatePassword = updatePassword;
