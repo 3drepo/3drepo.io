@@ -22,9 +22,5 @@ export const Wrapper = styled.div`
 	height: 50px;
 	box-sizing: border-box;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	/* 14px for home-icon left-padding + left-margin */
-	/* 15px breadcrumbs left-margin */
-	/* 30px 3D logo width */
-	/* 20px header left-padding */
 	padding-left: 79px;
 `;
