@@ -22,10 +22,7 @@ import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspace
 import { generateV5ApiUrl } from '@/v5/services/api/default';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
-import { CardList, DummyCard } from './teamspaceList.styles';
-
-const MAX_CARDS_PER_ROW = 5;
-const DummyCards = () => <>{Array.from({ length: MAX_CARDS_PER_ROW }, (_, i) => <DummyCard key={i} />)}</>;
+import { CardList, AlignLeft } from './teamspaceList.styles';
 
 export const TeamspaceList = (): JSX.Element => {
 	const username = CurrentUserHooksSelectors.selectUsername();
@@ -34,26 +31,27 @@ export const TeamspaceList = (): JSX.Element => {
 
 	return (
 		<CardList>
-			{
-				teamspaces.length ? (
-					sortedTeamspaces.map((teamspace) => (
-						<TeamspaceCard
-							key={teamspace.name}
-							variant="secondary"
-							teamspaceName={teamspace.name}
-							imageURL={generateV5ApiUrl(`teamspaces/${teamspace.name}/avatar?${Date.now()}`, clientConfigService.GET_API)}
-						/>
-					))
-				) : (
-					<>
-						<PlaceholderCard variant="secondary" />
-						<PlaceholderCard variant="secondary" />
-						<PlaceholderCard variant="secondary" />
-					</>
-				)
-			}
-			{ !!teamspaces.length && (<AddTeamspaceCard variant="secondary" />) }
-			{ (teamspaces.length > MAX_CARDS_PER_ROW) && <DummyCards /> }
+			<AlignLeft>
+				{
+					teamspaces.length ? (
+						sortedTeamspaces.map((teamspace) => (
+							<TeamspaceCard
+								key={teamspace.name}
+								variant="secondary"
+								teamspaceName={teamspace.name}
+								imageURL={generateV5ApiUrl(`teamspaces/${teamspace.name}/avatar?${Date.now()}`, clientConfigService.GET_API)}
+							/>
+						))
+					) : (
+						<>
+							<PlaceholderCard variant="secondary" />
+							<PlaceholderCard variant="secondary" />
+							<PlaceholderCard variant="secondary" />
+						</>
+					)
+				}
+				{ !!teamspaces.length && (<AddTeamspaceCard variant="secondary" />) }
+			</AlignLeft>
 		</CardList>
 	);
 };
