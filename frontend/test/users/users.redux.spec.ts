@@ -60,7 +60,7 @@ describe('Users: redux', () => {
 		});
 
 		it('shouldnt return the users for non existent teamspace', () => {
-			expect(selectUsersByTeamspace(state,'nonExistenTeamspace')).toEqual([]);
+			expect(selectUsersByTeamspace(state,'nonExistentTeamspace')).toEqual([]);
 		});
 
 		it('should return the specific user for the teamspace', () => {
@@ -72,7 +72,7 @@ describe('Users: redux', () => {
 			expect(selectUser(state, teamspace, 'nonExistentUser')).toBeFalsy();
 		});
 
-		it('shouldnt return a existent user for  non existent teamspace', () => {
+		it('shouldnt return a existent user for non existent teamspace', () => {
 			expect(selectUser(state, 'nonExistent', 'alice')).toBeFalsy();
 		});
 	});
