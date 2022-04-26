@@ -85,10 +85,10 @@ const testValidateUpdateCustomMetadata = () => {
 			await Metadata.validateUpdateCustomMetadata(req, {}, mockCB);
 
 			if (success) {
-				expect(mockCB.mock.calls.length).toBe(1);
+				expect(mockCB).toHaveBeenCalledTimes(1);
 			} else {
-				expect(mockCB.mock.calls.length).toBe(0);
-				expect(Responder.respond.mock.calls.length).toBe(1);
+				expect(mockCB).toHaveBeenCalledTimes(0);
+				expect(Responder.respond).toHaveBeenCalledTimes(1);
 				expect(Responder.respond.mock.results[0].value.code).toEqual(expectedError.code);
 			}
 		});

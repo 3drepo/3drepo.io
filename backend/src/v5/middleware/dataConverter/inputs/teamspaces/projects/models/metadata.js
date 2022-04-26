@@ -42,7 +42,7 @@ const generateSchema = (existingMetadata) => {
 	const schema = Yup.object().shape({
 		metadata: Yup.array().of(metadataSchema.test('check-metadata-can-be-Updated', (value, { createError, path }) => {
 			if (existingMetadata.find((m) => m.key === value.key && !m.custom)) {
-				return createError({ path, message: `Metadata ${value.key} already exists and is not custom.` });
+				return createError({ path, message: `Metadata ${value.key} already exists and is not editable.` });
 			}
 
 			return true;
