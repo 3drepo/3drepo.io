@@ -79,4 +79,7 @@ export const CenteredLink = styled(Link)`
 	justify-content: center;
 	color: ${({ theme }) => theme.palette.primary.main};
 	text-decoration: none;
+	&:hover, &:visited {
+		color: ${({ theme }) => theme.palette.primary.main};
+	}
 `;
