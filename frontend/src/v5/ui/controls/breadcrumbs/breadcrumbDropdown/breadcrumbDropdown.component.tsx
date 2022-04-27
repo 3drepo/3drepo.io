@@ -14,8 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { Typography } from '@mui/material';
 import { MenuList, MenuItem } from './breadcrumbDropdownstyles';
 
 export interface BreadcrumbItem {
@@ -28,12 +26,11 @@ interface INavigationMenu {
 	anchorEl: null | HTMLElement;
 	handleClose: () => void;
 	options: BreadcrumbItem[];
-	secondary?: Boolean;
 	open: boolean;
 }
 
 export const BreadcrumbDropdown = ({
-	anchorEl, handleClose, options, secondary, open,
+	anchorEl, handleClose, options, open,
 }: INavigationMenu): JSX.Element => (
 	<MenuList
 		anchorEl={anchorEl}
@@ -54,11 +51,8 @@ export const BreadcrumbDropdown = ({
 				to={to}
 				onClick={handleClose}
 				selected={selected}
-				secondary={secondary}
 			>
-				<Typography variant="body1" noWrap>
-					{title}
-				</Typography>
+				{title}
 			</MenuItem>
 		))}
 	</MenuList>
