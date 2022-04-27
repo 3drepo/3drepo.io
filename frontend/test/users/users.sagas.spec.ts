@@ -46,12 +46,13 @@ describe('Users: sagas', () => {
 		});
 
 		it('should handle fetch users api error and dispatch a dialog opening for an alert', async () => {
+			const nonExistentTeamspace = 'nonExistentTeamspace';
 			mockServer
-				.get(`/teamspaces/nonExistentTeamspace/members`)
+				.get(`/teamspaces/${nonExistentTeamspace}/members`)
 				.reply(404)
 
 			await expectSaga(UsersSaga.default)
-					.dispatch(UsersActions.fetchUsers(teamspace))
+					.dispatch(UsersActions.fetchUsers(nonExistentTeamspace))
 					.put(DialogsActions.open('alert'))
 					.silentRun();
 		});
