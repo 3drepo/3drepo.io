@@ -21,6 +21,8 @@ import { ThemeProvider } from 'styled-components';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { ViewerParams } from '../routes.constants';
 import { theme } from './theme';
+import { useContainersData } from '../dashboard/projects/containers/containers.hooks';
+import { useFederationsData } from '../dashboard/projects/federations/federations.hooks';
 
 export const Viewer = () => {
 	const { teamspace, containerOrFederation, revision } = useParams<ViewerParams>();
@@ -30,6 +32,9 @@ export const Viewer = () => {
 			teamspace,
 			revision,
 		} };
+
+	useFederationsData();
+	useContainersData();
 
 	return (
 		<ThemeProvider theme={theme}>

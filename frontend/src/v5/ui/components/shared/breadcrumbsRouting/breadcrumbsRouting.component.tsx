@@ -19,13 +19,15 @@ import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspace
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { IProject } from '@/v5/store/projects/projects.redux';
-import { CONTAINERS_ROUTE, DASHBOARD_ROUTE, FEDERATIONS_ROUTE, matchesPath, PROJECTS_LIST_ROUTE, PROJECT_ROUTE, VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { DASHBOARD_ROUTE, FEDERATIONS_ROUTE, matchesPath, PROJECTS_LIST_ROUTE, PROJECT_ROUTE, VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { useSelector } from 'react-redux';
-import { selectCurrentModelName, selectIsFederation, selectRevisions } from '@/v4/modules/model/model.selectors';
+import { selectCurrentModel, selectIsFederation, selectRevisions } from '@/v4/modules/model/model.selectors';
 import { formatMessage } from '@/v5/services/intl';
 import { BreadcrumbItem } from '@controls/breadcrumbs/breadcrumbDropdown/breadcrumbDropdown.component';
 import { Breadcrumbs } from '@controls/breadcrumbs';
 import { BreadcrumbItemOrOptions } from '@controls/breadcrumbs/breadcrumbs.component';
+import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks/federationsSelectors.hooks';
+import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks/containersSelectors.hooks';
 
 export const BreadcrumbsRouting = () => {
 	const params = useParams();
@@ -34,9 +36,12 @@ export const BreadcrumbsRouting = () => {
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
 	const project: IProject = ProjectsHooksSelectors.selectCurrentProjectDetails();
 
+	const federations = FederationsHooksSelectors.selectFederations();
+	const containers = ContainersHooksSelectors.selectContainers();
+
 	// Because we are using v4 viewer for now, we use the v4 selectors.
 	const isFederation = useSelector(selectIsFederation);
-	const federationOrContainerName = useSelector(selectCurrentModelName);
+	const federationOrContainerId = useSelector(selectCurrentModel);
 	const revisions = useSelector(selectRevisions);
 
 	let breadcrumbs: BreadcrumbItemOrOptions[] = [];
@@ -84,20 +89,26 @@ export const BreadcrumbsRouting = () => {
 			},
 		];
 
-		if (isFederation) {
-			breadcrumbs.push({
-				title: federationOrContainerName,
-				to: generatePath(FEDERATIONS_ROUTE, params),
-			});
-		} else { // In the case that it is a container it has revisions.
-			breadcrumbs.push({
-				title: federationOrContainerName,
-				to: generatePath(CONTAINERS_ROUTE, params),
-			});
+		if (isFederation) { // In the case the user is viewing a federation
+			options = federations.map(({ _id, name }) => ({
+				title: name,
+				to: generatePath(VIEWER_ROUTE, { ...params, containerOrFederation: _id, revision: null }),
+				selected: _id === federationOrContainerId,
+			}));
 
+			breadcrumbs.push({ options });
+		} else { // In the case that the user is viewing a container
+			options = containers.map(({ _id, name }) => ({
+				title: name,
+				to: generatePath(VIEWER_ROUTE, { ...params, containerOrFederation: _id, revision: null }),
+				selected: _id === federationOrContainerId,
+			}));
+			breadcrumbs.push({ options });
+
+			// Revisions options ( only containers have revisions)
 			const noName = formatMessage({ id: 'breadcrumbs.revisions.noName', defaultMessage: '(no name)' });
 
-			options = revisions.map(({ _id, tag }) => ({
+			const revisionOptions = revisions.map(({ _id, tag }) => ({
 				title: tag || noName,
 				to: generatePath(VIEWER_ROUTE, { ...params, revision: tag || _id }),
 				selected: _id === revision || tag === revision,
@@ -105,7 +116,7 @@ export const BreadcrumbsRouting = () => {
 
 			breadcrumbs.push({
 				secondary: true,
-				options,
+				options: revisionOptions,
 			});
 		}
 	}
