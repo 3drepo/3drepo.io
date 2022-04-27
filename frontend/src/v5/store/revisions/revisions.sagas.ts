@@ -27,6 +27,7 @@ import { CreateRevisionAction,
 	SetRevisionVoidStatusAction,
 } from './revisions.redux';
 import { ContainersActions } from '../containers/containers.redux';
+import { UploadStatuses } from '../containers/containers.types';
 
 export function* fetch({ teamspace, projectId, containerId }: FetchAction) {
 	yield put(RevisionsActions.setIsPending(containerId, true));
@@ -100,6 +101,7 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 			(percent) => updateProgress(percent),
 			formData,
 		);
+		yield put(ContainersActions.setContainerStatus(projectId, containerId, UploadStatuses.QUEUED));
 		yield put(RevisionsActions.setUploadComplete(uploadId, true));
 	} catch (error) {
 		let errorMessage = '';

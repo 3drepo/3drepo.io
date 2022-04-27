@@ -23,6 +23,7 @@ import { RevisionsActions } from '@/v5/store/revisions/revisions.redux';
 import api from '@/v5/services/api/default';
 import { ContainersActions } from '@/v5/store/containers/containers.redux';
 import { mockCreateRevisionBody, revisionsMockFactory } from './revisions.fixtures';
+import { UploadStatuses } from '@/v5/store/containers/containers.types';
 
 describe('Revisions: sagas', () => {
 	const teamspace = 'teamspace';
@@ -106,6 +107,7 @@ describe('Revisions: sagas', () => {
 			await expectSaga(RevisionsSaga.default)
 				.dispatch(RevisionsActions.createRevision(teamspace, projectId, uploadId, mockBody))
 				.put(RevisionsActions.setUploadComplete(uploadId, false))
+				.put(ContainersActions.setContainerStatus(projectId, mockBody.containerId, UploadStatuses.QUEUED))
 				.put(RevisionsActions.setUploadComplete(uploadId, true))
 				.silentRun();
 
@@ -133,6 +135,7 @@ describe('Revisions: sagas', () => {
 				.dispatch(RevisionsActions.createRevision(teamspace, projectId, uploadId, newContainerMockBody))
 				.put(ContainersActions.createContainerSuccess(projectId, newContainer))
 				.put(RevisionsActions.setUploadComplete(uploadId, false))
+				.put(ContainersActions.setContainerStatus(projectId, newContainer._id, UploadStatuses.QUEUED))
 				.put(RevisionsActions.setUploadComplete(uploadId, true))
 				.silentRun();
 
