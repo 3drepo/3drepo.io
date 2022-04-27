@@ -17,14 +17,13 @@
 
 import styled from 'styled-components';
 import { Mark as HighlighterMark } from '@/v4/routes/components/highlight/highlight.styles';
-import bottomToolbarStyling from './overrides/bottomToolbar.overrides';
-import panelsMenuStyling from './overrides/panelsMenu.overrides';
-import leftPanelStyling from './overrides/leftPanel.overrides';
-import customTableStyling from './overrides/customTable.overrides';
-import previewDetails from './overrides/previewDetails.overrides';
-import viewerStyling from './overrides/viewer.overrides';
-import previewItemStyling from './overrides/previewItem.overrides';
-import commentsStyling from './overrides/comments.overrides';
+import bottomToolbar from './overrides/bottomToolbar.overrides';
+import panelsMenu from './overrides/panelsMenu.overrides';
+import leftPanel from './overrides/leftPanel.overrides';
+import customTable from './overrides/customTable.overrides';
+import previewDetails from './overrides/preview//previewDetails.overrides';
+import previewItem from './overrides/preview//previewItem.overrides';
+import previewComments from './overrides/preview/previewComments.overrides';
 
 export const V4OverridesContainer = styled.div`
 	display: flex;
@@ -36,19 +35,14 @@ export const V4OverridesContainer = styled.div`
 		font-weight: inherit;
 	}
 
-	${customTableStyling}
+	${customTable}
 
-	${viewerStyling}
+	${leftPanel}
+	${panelsMenu}
+	${bottomToolbar}
 
-	${leftPanelStyling}
-
-	${panelsMenuStyling}
-
-	${bottomToolbarStyling}
-
-	${previewItemStyling}
-
+	// preview
+	${previewItem}
 	${previewDetails}
-
-	${commentsStyling}
+	${previewComments}
 `;
