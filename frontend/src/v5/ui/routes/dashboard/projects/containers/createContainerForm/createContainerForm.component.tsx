@@ -29,6 +29,11 @@ import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { SelectColumn } from './createContainerForm.styles';
 
+interface ICreateContainer {
+	open: boolean;
+	onClickClose: () => void;
+}
+
 interface IFormInput {
 	name: string;
 	unit: string;
@@ -76,7 +81,7 @@ const ContainerSchema = Yup.object().shape({
 			})).default('Uncategorised'),
 });
 
-export const CreateContainerForm = ({ open, close }): JSX.Element => {
+export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): JSX.Element => {
 	const { handleSubmit, control, formState, reset, formState: { errors } } = useForm<IFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(ContainerSchema),
@@ -84,7 +89,7 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const onSubmit: SubmitHandler<IFormInput> = (body) => {
 		ContainersActionsDispatchers.createContainer(teamspace, project, body);
-		close();
+		onClickClose();
 	};
 
 	useEffect(() => { reset(); }, [!open]);
@@ -93,7 +98,7 @@ export const CreateContainerForm = ({ open, close }): JSX.Element => {
 		<FormModal
 			title={formatMessage({ id: 'containers.creation.title', defaultMessage: 'Create new Container' })}
 			open={open}
-			onClickClose={close}
+			onClickClose={onClickClose}
 			onSubmit={handleSubmit(onSubmit)}
 			confirmLabel={formatMessage({ id: 'containers.creation.ok', defaultMessage: 'Create Container' })}
 			isValid={formState.isValid}
