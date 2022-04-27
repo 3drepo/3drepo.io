@@ -27,7 +27,7 @@ import Print from '@mui/icons-material/Print';
 import ViewModule from '@mui/icons-material/ViewModule';
 
 import { SortAmountDown, SortAmountUp } from '../routes/components/fontAwesomeIcon';
-import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel.component';
+import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel';
 import { COLOR, PIN_COLORS } from '../styles';
 
 export const ISSUE_PANEL_NAME = 'issue';

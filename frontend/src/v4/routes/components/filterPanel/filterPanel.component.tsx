@@ -24,6 +24,7 @@ import { isEqual, isNil, keyBy, omit, uniqBy } from 'lodash';
 import Autosuggest from 'react-autosuggest';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import * as yup from 'yup';
+import { isV5 } from '@/v4/helpers/isV5';
 import { BACKSPACE, ENTER_KEY } from '../../../constants/keys';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { compareStrings } from '../../../helpers/searching';
@@ -48,37 +49,8 @@ import {
 	StyledTextField,
 	SuggestionsList
 } from './filterPanel.styles';
-import { isV5 } from '@/v4/helpers/isV5';
+import { FILTER_TYPES, IDataType, IFilter, ISelectedFilter } from './filterPanel';
 
-export const FILTER_TYPES = {
-	UNDEFINED: 1,
-	DATE: 2,
-	QUERY: 3
-};
-
-export const DATA_TYPES = {
-	MODELS: 1,
-	FEDERATIONS: 2,
-	PROJECTS: 3
-};
-
-export interface IFilter {
-	values: any;
-	label?: string;
-	type?: number;
-}
-
-export interface ISelectedFilter {
-	value: any;
-	label: string;
-	relatedField: string;
-	type?: number;
-}
-
-export interface IDataType {
-	label?: string;
-	type?: number;
-}
 
 const filterItemSchema = yup.object().shape({
 	label: yup.string(),

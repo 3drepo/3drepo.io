@@ -23,6 +23,7 @@ import Copy from '@mui/icons-material/FileCopy';
 import styled, { css } from 'styled-components';
 import { COLOR } from './../../../styles/colors';
 import { isV5 } from '@/v4/helpers/isV5';
+import { V4OverridesContainer } from '@/v5/ui/v4Adapter/v4Overrides.styles';
 
 interface IContainer {
 	filtersOpen: boolean;

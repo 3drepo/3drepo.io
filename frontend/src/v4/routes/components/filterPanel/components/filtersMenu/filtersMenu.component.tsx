@@ -23,7 +23,7 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import TextField from '@mui/material/TextField';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
-import { FILTER_TYPES } from '../../filterPanel.component';
+import { FILTER_TYPES } from '../../filterPanel';
 import { ChildMenu } from '../childMenu/childMenu.component';
 
 import {
