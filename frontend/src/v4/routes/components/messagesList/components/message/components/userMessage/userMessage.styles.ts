@@ -45,10 +45,20 @@ const regularCommentStyles = css`
 	${Comment} {
 		color: ${COLOR.BLACK_60};
 	}
+
+	${V4OverridesContainer} && {
+		background-color: #edf0f8; // TODO - fix after new palette is released
+	}
+
+
 `;
 
 const selfCommentStyles = css`
 	background-color: ${COLOR.LIGHT_GREY_BLUE};
+
+	${V4OverridesContainer} && {
+		background-color: #f7f8fa; // TODO - fix after new palette is released
+	}
 `;
 
 export const CommentContainer = styled.div<{self?: boolean}>`
@@ -58,8 +68,4 @@ export const CommentContainer = styled.div<{self?: boolean}>`
 	padding: 8px 14px;
 	border-radius: 10px;
 	${({ self }) => self ? selfCommentStyles : regularCommentStyles};
-
-	${V4OverridesContainer} && {
-		background-color: ${({ self }) => self ? '#f7f8fa' : '#edf0f8'}; // TODO - fix after new palette is released
-	}
 `;

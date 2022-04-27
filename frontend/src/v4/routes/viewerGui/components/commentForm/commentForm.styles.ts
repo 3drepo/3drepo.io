@@ -22,6 +22,7 @@ import TextField from '@mui/material/Input';
 import { Form } from 'formik';
 
 import { COLOR } from '../../../../styles';
+
 export const Container = styled.div`
 	position: relative;
 	background-color: ${COLOR.WHITE};

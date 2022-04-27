@@ -48,8 +48,12 @@ export const Container = styled.div<IContainer>`
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
-	height: ${(props) => props.filtersOpen ? (isV5() ? '57px' : '45px') : 'auto'};
+	height: ${(props) => props.filtersOpen ? '45px' : 'auto'};
 	flex: none;
+	
+	${V4OverridesContainer} && {
+		height: ${(props) => props.filtersOpen && '57px'};
+	}
 `;
 
 export const SelectedFilters = styled.div<ISelectedFilters>`
@@ -60,17 +64,20 @@ export const SelectedFilters = styled.div<ISelectedFilters>`
 	min-height: ${(props) => props.empty ? '0' : '45px'};
 	position: relative;
 	max-height: 240px;
-	${({ theme, empty }) => isV5() && !empty && `
-		border-bottom: solid 1px ${theme.palette.base.lightest};
-		padding: 9px 40px 9px 15px;
-		min-height: 38px;
-	`}
 
-	${({ empty, filtersOpen }) => isV5() && !empty && filtersOpen && `
-		& .MuiChip-root {
-			margin-bottom: 11px !important;
-		}
-	`}
+	${V4OverridesContainer} && {
+		${({ theme, empty }) => !empty && `
+			border-bottom: solid 1px ${theme.palette.base.lightest};
+			padding: 9px 40px 9px 15px;
+			min-height: 38px;
+		`}
+
+		${({ empty, filtersOpen }) => !empty && filtersOpen && `
+			& .MuiChip-root {
+				margin-bottom: 11px !important;
+			}
+		`}
+	}
 `;
 
 export const InputContainer = styled.div<IInputContainer>`

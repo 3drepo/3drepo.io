@@ -16,50 +16,110 @@
  */
 
 import { css } from 'styled-components';
-import { Select, FilterWrapper, Container as CommentListContainer } from '@/v4/routes/components/messagesList/messagesList.styles';
+import { Select, FilterWrapper, Container as CommentListContainer, Label as ShowLabel } from '@/v4/routes/components/messagesList/messagesList.styles';
 import { CommentContainer, Comment } from '@/v4/routes/components/messagesList/components/message/components/userMessage/userMessage.styles';
 import { Container as CommentPadding } from '@/v4/routes/components/messagesList/components/message/message.styles';
+import { Counter, Actions, ActionsGroup, Container as AddNewCommentContainer } from '@/v4/routes/viewerGui/components/commentForm/commentForm.styles';
+import { NotCollapsableContent } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
+import { Avatar } from '@/v4/routes/components/messagesList/components/message/components/userAvatar/userAvatar.styles';
+import { Container as CommentFooter, Username, Date } from '@/v4/routes/components/messagesList/components/message/components/footer/footer.styles';
 
 export default css`
-	// comments header section
-	${FilterWrapper} {
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
-		padding-top: 20px;
-		padding-left: 16px;
-		
-		// dropdown
-		${Select} {
-			.MuiSelect-outlined {
-				margin: 0;
-				height: 24px;
-				width: 170px;
-				display: flex;
-				align-items: center;
-				padding-left: 7px;
-			}
 
-			svg {
-				right: 8px;
-				margin-top: 4px;
+	${NotCollapsableContent} {
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+		padding: 15px 13px 10px 17px;
+
+		// comments header section
+		${FilterWrapper} {
+			padding: 0 0 13px 0;
+
+			${ShowLabel} {
+				font-size: 10px;
+				font-weight: 500;
+			}
+			
+			// dropdown
+			${Select} {
+				.MuiSelect-outlined {
+					margin: 0;
+					height: 24px;
+					width: 170px;
+					display: flex;
+					align-items: center;
+					padding-left: 7px;
+					color: ${({ theme }) => theme.palette.secondary.main};
+					font-size: 10px;
+					font-weight: 500;
+				}
+
+				svg {
+					right: 8px;
+					margin-top: 0;
+				}
+			}
+		}
+		
+		// comments body section
+		${CommentListContainer} {
+			padding: 0;
+
+			${Avatar} {
+				height: 32px;
+				width: 32px;
+				border: none;
+				margin: 0;
+			}
+	
+			${CommentContainer} {
+				border-radius: 5px;
+				margin: 0;
+				padding: 8px 14px 0 14px;
+
+				${Comment} {
+					color: ${({ theme }) => theme.palette.secondary.main};
+
+					${CommentFooter} {
+						margin-right: -11px;
+					}
+
+					${Username} {
+						font-style: unset;
+					}
+
+					${Date} {
+						font-style: unset;
+					}
+
+				}
+			}
+	
+			${CommentPadding} {
+				padding: 5px 0 10px;
 			}
 		}
 	}
 
-	// comments body section
-	${CommentListContainer} {
-		padding-top: 8px;
-		background: ${({ theme }) => theme.palette.primary.contrast};
 
-		${CommentContainer} {
-			border-radius: 5px;
+	${AddNewCommentContainer} {
+		${Actions} {
+			padding: 0 16px 0 9px;
+
+			${ActionsGroup} {
+				button {
+					background-color: transparent;
+					color: ${({ theme }) => theme.palette.secondary.main};
+				}
+			}
 		}
 
-		${CommentPadding} {
-			padding: 10px 0;
-		}
-
-		${Comment} {
-			color: ${({ theme }) => theme.palette.secondary.main};
+		${Counter} {
+			color: #c1c8d5; // TODO - fix after new palette is released
+			position: absolute;
+			left: 94px;
+			bottom: -32px;
+			font-weight: 500;
+			font-size: 10px;
 		}
 	}
 `;
