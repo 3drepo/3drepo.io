@@ -27,13 +27,13 @@ import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/
 import { filterContainers } from '@/v5/store/containers/containers.helpers';
 import { useParams } from 'react-router-dom';
 import { isEmpty } from 'lodash';
-import { FormModal } from '@controls/modal/formModal/formDialog.component';
+import { FormModal, IFormModal } from '@controls/modal/formModal/formDialog.component';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { IconContainer, IncludeIcon, RemoveIcon } from './editFederationModal.styles';
 import { ActionButtonProps, EditFederationContainers, IconButtonProps } from './editFederationContainersList/editFederationContainersList.component';
 import { useContainersData } from '../../containers/containers.hooks';
 
-type EditFederationModalProps = {
+type EditFederationModalProps = IFormModal & {
 	openState: boolean;
 	federation: IFederation;
 	onClickClose: () => void;
@@ -43,6 +43,7 @@ export const EditFederationModal = ({
 	openState,
 	federation,
 	onClickClose,
+	...otherProps
 }: EditFederationModalProps): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const { containers } = useContainersData();
@@ -124,6 +125,7 @@ export const EditFederationModal = ({
 			isValid={includedContainers.length > 0}
 			maxWidth="lg"
 			zeroMargin
+			{...otherProps}
 		>
 			<EditFederationContainers
 				containers={includedContainers}

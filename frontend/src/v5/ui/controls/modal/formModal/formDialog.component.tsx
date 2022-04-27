@@ -29,11 +29,13 @@ import {
 	RemoveWhiteCorners,
 } from './formDialog.styles';
 
-interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
+export interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
 	onClickClose?: () => void;
+	onClickCancel?: () => void;
 	title?: string;
 	open?: boolean;
 	confirmLabel?: string;
+	cancelLabel?: string;
 	isValid?: boolean;
 	showButtons?: boolean;
 	maxWidth?: DialogProps['maxWidth'];
@@ -43,8 +45,10 @@ interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormE
 export const FormModal = (props: IFormModal) => {
 	const {
 		onClickClose,
+		onClickCancel,
 		title,
 		confirmLabel,
+		cancelLabel,
 		open,
 		children,
 		className,
@@ -79,8 +83,8 @@ export const FormModal = (props: IFormModal) => {
 				</ScrollArea>
 				{showButtons && (
 					<FormDialogActions>
-						<Button autoFocus onClick={onClickClose} variant="outlined" color="secondary" size="medium">
-							Cancel
+						<Button autoFocus onClick={onClickCancel || onClickClose} variant="outlined" color="secondary" size="medium">
+							{cancelLabel || 'Cancel'}
 						</Button>
 						<Button disabled={!isValid} type="submit" variant="contained" color="primary" size="medium">
 							{confirmLabel || 'OK'}

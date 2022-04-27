@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { FederationCreationSchema } from '@/v5/validation/federations';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
@@ -26,6 +27,7 @@ import { useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { SectionTitle } from '../federationSettingsForm/federationSettingsForm.styles';
 import { HalfWidth } from './createFederationForm.styles';
+import { EditFederationModal } from '../editFederationModal/editFederationModal.component';
 
 const UNITS = [
 	{
@@ -61,23 +63,56 @@ interface IFormInput {
 	unit: string;
 }
 
+const defaultValues = {
+	_id: '',
+	desc: '',
+	name: '',
+	role: '',
+	isFavourite: false,
+	code: '',
+	status: '',
+	containers: [],
+	issues: 0,
+	risks: 0,
+	category: 'Uncategorised',
+	lastUpdated: new Date(),
+	hasStatsPending: false,
+	unit: 'mm',
+};
+
 export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) => {
 	const {
+		handleSubmit,
 		control,
 		formState: { errors },
 	} = useForm<IFormInput>({
+		defaultValues,
 		mode: 'onChange',
 		resolver: yupResolver(FederationCreationSchema),
 	});
-	return (
+
+	const [modalPhase, setModalPhase] = useState('settings');
+
+	const onClickBack = () => {
+		setModalPhase('settings');
+	};
+
+	const onClickContinue = () => {
+		if (modalPhase === 'settings') {
+			setModalPhase('edit');
+		}
+	};
+	return modalPhase === 'settings' ? (
 		<FormModal
-			title={formatMessage({ id: 'federations.creation.title', defaultMessage: 'Create new Federation' })}
+			title={formatMessage({ id: 'createFederation.modal.title', defaultMessage: 'Create new Federation' })}
+			confirmLabel={formatMessage({ id: 'createFederation.modal.continue', defaultMessage: 'Continue' })}
 			open={open}
 			onClickClose={onClickClose}
+			onSubmit={handleSubmit(onClickContinue)}
 		>
 			<SectionTitle>
 				<FormattedMessage
-					id="federations.creation.form.informationTitle"
+					id="createFederation.form.informationTitle"
 					defaultMessage="Federation information"
 				/>
 			</SectionTitle>
@@ -85,15 +120,14 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) 
 			<FormTextField
 				name="name"
 				control={control}
-				label={formatMessage({ id: 'federations.creation.form.name', defaultMessage: 'Name' })}
+				label={formatMessage({ id: 'createFederation.form.name', defaultMessage: 'Name' })}
 				required
 				formError={errors.name}
 			/>
 			<FormTextField
 				name="description"
 				control={control}
-				label={formatMessage({ id: 'federations.settings.form.description', defaultMessage: 'Description' })}
-				required
+				label={formatMessage({ id: 'createFederation.form.description', defaultMessage: 'Description' })}
 				formError={errors.description}
 			/>
 			<HalfWidth>
@@ -101,7 +135,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) 
 					required
 					name="unit"
 					label={formatMessage({
-						id: 'federations.creation.form.unit',
+						id: 'createFederation.form.unit',
 						defaultMessage: 'Units',
 					})}
 					control={control}
@@ -117,10 +151,19 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) 
 			<FormTextField
 				name="code"
 				control={control}
-				label={formatMessage({ id: 'federations.creation.form.code', defaultMessage: 'Code' })}
-				required
+				label={formatMessage({ id: 'createFederation.form.code', defaultMessage: 'Code' })}
 				formError={errors.code}
 			/>
 		</FormModal>
+	) : (
+		<EditFederationModal
+			openState={open}
+			federation={defaultValues}
+			onClickClose={onClickClose}
+			onClickCancel={onClickBack}
+			title={formatMessage({ id: 'createFederation.modal.title', defaultMessage: 'Create new Federation' })}
+			cancelLabel={formatMessage({ id: 'createFederation.modal.back', defaultMessage: 'Back' })}
+			confirmLabel={formatMessage({ id: 'createFederation.modal.create', defaultMessage: 'Create Federation' })}
+		/>
 	);
 };
