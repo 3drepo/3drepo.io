@@ -16,15 +16,14 @@
  */
 
 const db = require('../handler/db');
-const { UUIDLookUpTable } = require('../utils/helper/uuids');
 const { templates } = require('../utils/responseCodes');
 
 const Metadata = {};
 
 const collectionName = (model) => `${model}.scene`;
 
-Metadata.getMetadataById = async (teamspace, model, metadataId, projection) => {
-	const metadata = await db.findOne(teamspace, collectionName(model), { _id: metadataId }, projection);
+Metadata.getMetadataByQuery = async (teamspace, model, query, projection) => {
+	const metadata = await db.findOne(teamspace, collectionName(model), query, projection);
 
 	if (!metadata) {
 		throw templates.metadataNotFound;
@@ -33,12 +32,12 @@ Metadata.getMetadataById = async (teamspace, model, metadataId, projection) => {
 	return metadata;
 };
 
-Metadata.updateCustomMetadata = async (teamspace, model, metadataId, dataToUpdate) => {
-	const { metadata } = await Metadata.getMetadataById(teamspace, model, metadataId, { metadata: 1 });
-	const metadataKeyLookup = new UUIDLookUpTable(metadata.map(({key}) => key));
+Metadata.updateCustomMetadata = async (teamspace, model, metadataId, changeSet) => {
+	const { metadata } = await Metadata.getMetadataByQuery(teamspace, model, { _id: metadataId }, { metadata: 1 });
+	const metadataKeyLookup = metadata.reduce((a, b) => ({ ...a, [b.key]: 1 }), {});
 
-	dataToUpdate.forEach((um) => {
-		const metadataExists = metadataKeyLookup.has(um.key);
+	changeSet.forEach((um) => {
+		const metadataExists = metadataKeyLookup[um.key];
 		if (metadataExists) {
 			const existingMetadata = metadata.find((m) => m.key === um.key);
 			if (um.value) {

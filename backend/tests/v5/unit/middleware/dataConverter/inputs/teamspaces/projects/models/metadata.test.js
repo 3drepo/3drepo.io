@@ -41,9 +41,9 @@ const nonCustomMetadata = metadata[0];
 const customMetadata = metadata[1];
 const customMetadata2 = metadata[2];
 
-MetadataModel.getMetadataById.mockImplementation((teamspace, container, metadataId) => {
-	if (metadataId === existingMetadataId) {
-		return { metadata };
+MetadataModel.getMetadataByQuery.mockImplementation((teamspace, container, query) => {
+	if (query._id === existingMetadataId) {
+		return { metadata: [nonCustomMetadata] };
 	}
 
 	throw templates.metadataNotFound;
@@ -57,9 +57,11 @@ const testValidateUpdateCustomMetadata = () => {
 		project: generateRandomString(),
 		container: generateRandomString(),
 		metadata: existingMetadataId } };
+
 	describe.each([
 		['Updating non existing metadata', { params: { ...standardReq.params, metadata: generateRandomString() },
-			body: { metadata: [{ key: generateRandomString(), value: generateRandomString() }] } }, false, templates.metadataNotFound],
+			body: { metadata: [{ key: generateRandomString(), value: generateRandomString() }] } },
+		false, templates.metadataNotFound],
 		['Updating non custom metadata', { ...standardReq, body: { metadata: [{ key: nonCustomMetadata.key, value: generateRandomString() }] } }, false],
 		['Deleting non custom metadata', { ...standardReq, body: { metadata: [{ key: nonCustomMetadata.key, value: null }] } }, false],
 		['Updating custom metadata with string value', { ...standardReq, body: { metadata: [{ key: customMetadata.key, value: generateRandomString() }] } }, true],

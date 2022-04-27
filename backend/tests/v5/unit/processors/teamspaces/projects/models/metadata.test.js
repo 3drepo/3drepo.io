@@ -33,7 +33,8 @@ const testUpdateCustomMetadata = () => {
 
 			await expect(Metadata.updateCustomMetadata(teamspace, project, container, dataToUpdate));
 			expect(MetadataModel.updateCustomMetadata).toHaveBeenCalledTimes(1);
-			expect(MetadataModel.updateCustomMetadata).toHaveBeenCalledWith(teamspace, project, container, dataToUpdate);
+			expect(MetadataModel.updateCustomMetadata).toHaveBeenCalledWith(teamspace, project, container,
+				dataToUpdate);
 		});
 	});
 };

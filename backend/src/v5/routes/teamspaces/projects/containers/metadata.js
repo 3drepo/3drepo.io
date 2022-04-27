@@ -91,6 +91,11 @@ const establishRoutes = () => {
      *                       example: Length (mm)
 	 *                     value:
 	 *                       description: The value of the metadata
+	 *                       oneOf:
+	 *                         - type: string
+	 *                           maxLength: 120
+	 *                         - type: number
+	 *                         - type: boolean
 	 *                       example: 100
 	 *     responses:
 	 *       401:

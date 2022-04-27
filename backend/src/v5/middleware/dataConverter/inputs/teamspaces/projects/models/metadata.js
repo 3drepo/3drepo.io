@@ -17,37 +17,46 @@
 
 const { createResponseCode, templates } = require('../../../../../../utils/responseCodes');
 const Yup = require('yup');
-const { getMetadataById } = require('../../../../../../models/metadata');
+const { getMetadataByQuery } = require('../../../../../../models/metadata');
 const { respond } = require('../../../../../../utils/responder');
 
 const Metadata = {};
 
 const metadataSchema = Yup.object().shape({
-	key: Yup.string().min(1).max(120).required(),	
+	key: Yup.string().min(1).max(120).required(),
 	value: Yup.lazy((value) => {
 		switch (typeof value) {
-			case 'string':
-				return Yup.string().max(120);
-			case 'number':
-				return Yup.number();
-			case 'boolean':
-				return Yup.bool();			  
-			default:
-				return Yup.mixed().nullable(true).test('ensure-value-present', 'Metadata value is a required field', () => value !== undefined);
-		  }
-	})
+		case 'string':
+			return Yup.string().max(120);
+		case 'number':
+			return Yup.number();
+		case 'boolean':
+			return Yup.bool();
+		default:
+			return Yup.mixed().nullable(true).test('ensure-value-present', 'Metadata value is a required field', () => value !== undefined);
+		}
+	}),
 }).required().noUnknown();
 
-const generateSchema = (existingMetadata) => {
+const generateSchema = (nonCustomMetadataLookup) => {
 	const schema = Yup.object().shape({
-		metadata: Yup.array().of(metadataSchema.test('check-metadata-can-be-Updated', (value, { createError, path }) => {
-			if (existingMetadata.find((m) => m.key === value.key && !m.custom)) {
-				return createError({ path, message: `Metadata ${value.key} already exists and is not editable.` });
-			}
+		metadata: Yup.array().of(metadataSchema).required(),
+	}).required().test('check-metadata-can-be-Updated', (value, { createError, path }) => {
+		const nonEditableMetadata = [];
 
-			return true;
-		})).required(),
-	}).required().strict(true)
+		value.metadata.forEach((metadataToUpdate) => {
+			if (nonCustomMetadataLookup[metadataToUpdate.key]) {
+				nonEditableMetadata.push(metadataToUpdate.key);
+			}
+		});
+
+		if (nonEditableMetadata.length > 0) {
+			return createError({ path, message: `Metadata [${nonEditableMetadata.join(', ')}] already exist and are not editable.` });
+		}
+
+		return true;
+	})
+		.strict(true)
 		.noUnknown();
 
 	return schema;
@@ -56,8 +65,11 @@ const generateSchema = (existingMetadata) => {
 Metadata.validateUpdateCustomMetadata = async (req, res, next) => {
 	try {
 		const { teamspace, container, metadata } = req.params;
-		const containerMetadata = await getMetadataById(teamspace, container, metadata, { metadata: 1 });
-		const schema = generateSchema(containerMetadata.metadata);
+		const existingMetadata = await getMetadataByQuery(teamspace, container, { _id: metadata },
+			{ _id: 0, metadata: 1 });
+		const nonCustomMetadataLookup = existingMetadata.metadata.filter((m) => m.custom !== true)
+			.reduce((a, b) => ({ ...a, [b.key]: 1 }), {});
+		const schema = generateSchema(nonCustomMetadataLookup);
 		req.body = await schema.validate(req.body);
 
 		await next();
