@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { V4OverridesContainer } from '@/v5/ui/v4Adapter/v4Overrides.styles';
 import styled, { css } from 'styled-components';
 
 import { COLOR } from '../../../../../../../styles';
@@ -50,11 +51,15 @@ const selfCommentStyles = css`
 	background-color: ${COLOR.LIGHT_GREY_BLUE};
 `;
 
-export const CommentContainer = styled.div`
+export const CommentContainer = styled.div<{self?: boolean}>`
 	width: 100%;
 	margin-left: 10px;
 	margin-right: 32px;
 	padding: 8px 14px;
 	border-radius: 10px;
-	${({ self }: { self: boolean; }) => self ? selfCommentStyles : regularCommentStyles};
+	${({ self }) => self ? selfCommentStyles : regularCommentStyles};
+
+	${V4OverridesContainer} && {
+		background-color: ${({ self }) => self ? '#f7f8fa' : '#edf0f8'}; // TODO - fix after new palette is released
+	}
 `;

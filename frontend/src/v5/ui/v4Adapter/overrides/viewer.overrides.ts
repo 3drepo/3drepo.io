@@ -16,78 +16,8 @@
  */
 
 import { css } from 'styled-components';
-import { ArrowButton, RoleIndicator, ThumbnailWrapper, Container, Name, Description } from '@/v4/routes/viewerGui/components/previewListItem/previewListItem.styles';
-import { Details, Icon, Status, Author, Date } from '@/v4/routes/viewerGui/components/previewItemInfo/previewItemInfo.styles';
 
+// general styling
 export default css`
 
-	${Container} {
-		padding: 12px 0 12px 15px;
-	}
-
-	${RoleIndicator} {
-		display: none;
-	}
-
-	${ThumbnailWrapper} {
-		width: 70px;
-		height: 70px;
-		border-radius: 5px;
-		overflow: hidden;
-	}
-
-	${Name} {
-		font-weight: 500;
-		color: ${({ theme }) => theme.palette.secondary.main};
-	}
-
-	${Details} {
-		justify-content: flex-start;
-		
-		${Icon} {
-			font-size: 11px;
-		}
-		
-		${Status} {
-			width: unset;
-		}
-
-		${Author} {
-			font-size: 9px;
-			font-weight: 500;
-			margin-left: 4px;
-			color: ${({ theme }) => theme.palette.secondary.main};
-		}
-
-		${Date} {
-			font-size: 9px;
-			font-weight: 500;
-		}
-	}
-
-	${Description} {
-		${({ theme }) => theme.typography.caption};
-		font-weight: 500px;
-		font-size: 10px;
-		margin-top: 2px;
-	}
-
-
-	${ArrowButton} {
-		background-color: ${({ theme }) => theme.palette.primary.lightest};
-		padding: 0;
-		margin: 0;
-
-		svg {
-			color: ${({ theme }) => theme.palette.primary.main};
-		}
-
-		&:hover {
-			background-color: ${({ theme }) => theme.palette.primary.main};
-
-			svg {
-				color: ${({ theme }) => theme.palette.primary.contrast};
-			}
-		}
-	}
 `;

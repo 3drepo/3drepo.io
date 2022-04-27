@@ -16,7 +16,6 @@
  */
 
 import styled, { css } from 'styled-components';
-
 import { Form } from 'formik';
 
 import {
@@ -25,12 +24,14 @@ import {
 	AccordionSummary,
 	IconButton,
 	Typography as TypographyComponent
+
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import {GROUP_PANEL_NAME, GROUPS_TYPES} from '../../../../constants/groups';
+import GridBase from '@mui/material/Grid';
+import {GROUP_PANEL_NAME} from '../../../../constants/groups';
 
 import { COLOR } from '../../../../styles';
-import { Container as MessageListContainer, FilterWrapper } from '../../../components/messagesList/messagesList.styles';
+import { Container as MessageListContainer } from '../../../components/messagesList/messagesList.styles';
 
 const SUMMARY_HEIGHT = 78;
 
@@ -107,6 +108,8 @@ export const Header = styled(AccordionSummary).attrs({
 		box-shadow: ${({expanded}: { expanded: boolean }) => expanded ? `0 4px 7px -4px ${COLOR.BLACK_30};` : 'none'};
 	}
 ` as any;
+
+export const Grid = styled(GridBase)``;
 
 export const CollapsableContent = styled.div`
 	margin-bottom: 8px;

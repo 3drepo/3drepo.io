@@ -17,8 +17,8 @@
 import { PureComponent, ReactNode, createRef } from 'react';
 import { Field, Formik } from 'formik';
 import { Tooltip } from '@mui/material';
-import Grid from '@mui/material/Grid';
 import * as Yup from 'yup';
+import { isV5 } from '@/v4/helpers/isV5';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { schema } from '../../../../services/validation';
 import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
@@ -31,6 +31,7 @@ import {
 	Container,
 	Details,
 	Header,
+	Grid,
 	MainInfoContainer,
 	NotCollapsableContent,
 	ScrollableContainer,
@@ -97,7 +98,7 @@ export class PreviewDetails extends PureComponent<IProps, any> {
 	));
 
 	public renderTitleNumber = renderWhenTrue(() => (
-		<TitleNumber>{this.props.number}.</TitleNumber>
+		<TitleNumber>{this.props.number}{!isV5() && '.'}</TitleNumber>
 	));
 
 	public renderNameField = renderWhenTrue(() => (
@@ -255,22 +256,22 @@ export class PreviewDetails extends PureComponent<IProps, any> {
 				>
 					<RoleIndicator color={roleColor} ref={this.headerRef} />
 					<MainInfoContainer>
-						<Grid container alignItems="center" >
+						<Grid container alignItems="center">
 							{this.renderTitleNumber(number)}
 							{this.renderName(!editable)}
 							{this.renderNameField(editable)}
 						</Grid>
-							<PreviewItemInfo
-								author={owner}
-								createdAt={created}
-								StatusIconComponent={StatusIconComponent}
-								statusColor={statusColor}
-								actionButton={actionButton}
-								showModelButton={showModelButton}
-								type={type}
-								id={id}
-								urlParams={urlParams}
-							/>
+						<PreviewItemInfo
+							author={owner}
+							createdAt={created}
+							StatusIconComponent={StatusIconComponent}
+							statusColor={statusColor}
+							actionButton={actionButton}
+							showModelButton={showModelButton}
+							type={type}
+							id={id}
+							urlParams={urlParams}
+						/>
 					</MainInfoContainer>
 				</Header>
 

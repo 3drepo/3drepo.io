@@ -242,7 +242,7 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 		<Placeholder onClick={this.handlePlaceholderClick}>
 			<SearchIcon />
 			<PlaceholderText>
-				Search{isV5() && '...'}
+				{isV5() ? 'Search...' : 'Search'}
 			</PlaceholderText>
 		</Placeholder>
 	));

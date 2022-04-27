@@ -17,31 +17,38 @@
 
 import styled from 'styled-components';
 import { Mark as HighlighterMark } from '@/v4/routes/components/highlight/highlight.styles';
-import bottomToolbar from './overrides/bottomToolbar.overrides';
+import bottomToolbarStyling from './overrides/bottomToolbar.overrides';
 import panelsMenuStyling from './overrides/panelsMenu.overrides';
 import leftPanelStyling from './overrides/leftPanel.overrides';
 import customTableStyling from './overrides/customTable.overrides';
-import issuesStyling from './overrides/issues.overrides';
+import previewDetails from './overrides/previewDetails.overrides';
+import viewerStyling from './overrides/viewer.overrides';
+import previewItemStyling from './overrides/previewItem.overrides';
+import commentsStyling from './overrides/comments.overrides';
 
 export const V4OverridesContainer = styled.div`
 	display: flex;
 	flex-direction: column;
 	height: 100%;
 
-	${customTableStyling}
-
-	${viewerStyling}
-
 	${HighlighterMark} {
 		background-color: ${({ theme }) => theme.palette.primary.light};
 		font-weight: inherit;
 	}
 
-	${leftPanelStyling}
+	${customTableStyling}
 
-	${issuesStyling}
+	${viewerStyling}
+
+	${leftPanelStyling}
 
 	${panelsMenuStyling}
 
-	${bottomToolbar}
+	${bottomToolbarStyling}
+
+	${previewItemStyling}
+
+	${previewDetails}
+
+	${commentsStyling}
 `;

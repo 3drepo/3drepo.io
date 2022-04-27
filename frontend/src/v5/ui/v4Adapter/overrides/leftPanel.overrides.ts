@@ -52,7 +52,7 @@ export default css`
 
 		// action icons
 		.MuiIconButton-root {
-			background-color: #edf0f8;
+			background-color: #edf0f8; // TODO - fix when new palette is released	
 			color: currentColor;
 			border-radius: 50%;
 			height: 32px;
