@@ -120,7 +120,7 @@ export const Federations = (): JSX.Element => {
 			)}
 			<CreateFederationForm
 				open={createFedOpen}
-				close={() => setCreateFedOpen(false)}
+				onClickClose={() => setCreateFedOpen(false)}
 			/>
 		</>
 	);
