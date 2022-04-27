@@ -122,19 +122,6 @@ describe("Check DB handler", function() {
 		it("get DB should succeed", async function() {
 			const database = await db.getDB(account);
 			expect(database).to.exist;
-			const coll = await database.collection("jobs");
-			expect(coll).to.exist;
-			const findResults = await coll.find({}).toArray();
-			expect(findResults).to.deep.equal(goldenJobs);
-		});
-
-		it("get DB with incorrect username to be empty", async function() {
-			const database = await db.getDB("nope");
-			expect(database).to.exist;
-			const coll = await database.collection("jobs");
-			expect(coll).to.exist;
-			const findResults = await coll.find({}).toArray();
-			expect(findResults).to.be.empty;
 		});
 	});
 
