@@ -23,8 +23,9 @@ import { CONTAINERS_ROUTE, DASHBOARD_ROUTE, FEDERATIONS_ROUTE, matchesPath, PROJ
 import { useSelector } from 'react-redux';
 import { selectCurrentModelName, selectIsFederation, selectRevisions } from '@/v4/modules/model/model.selectors';
 import { formatMessage } from '@/v5/services/intl';
-import { IListItem } from '@controls/breadcrumbs/navigatonMenu/navigationMenu.component';
+import { BreadcrumbItem } from '@controls/breadcrumbs/breadcrumbDropdown/breadcrumbDropdown.component';
 import { Breadcrumbs } from '@controls/breadcrumbs';
+import { BreadcrumbItemOrOptions } from '@controls/breadcrumbs/breadcrumbs.component';
 
 export const BreadcrumbsRouting = () => {
 	const params = useParams();
@@ -38,20 +39,17 @@ export const BreadcrumbsRouting = () => {
 	const federationOrContainerName = useSelector(selectCurrentModelName);
 	const revisions = useSelector(selectRevisions);
 
-	let breadcrumbs: IListItem[] = [];
-	let options: IListItem[] = [];
+	let breadcrumbs: BreadcrumbItemOrOptions[] = [];
+	let options: BreadcrumbItem[];
 
 	if (matchesPath(PROJECTS_LIST_ROUTE)) {
-		breadcrumbs = [
-			{
-				title: teamspace,
-			},
-		];
-
 		options = teamspaces.map(({ name }) => ({
 			title: name,
 			to: generatePath(PROJECTS_LIST_ROUTE, { teamspace: name }),
+			selected: name === teamspace,
 		}));
+
+		breadcrumbs = [{ options }];
 	}
 
 	if (matchesPath(PROJECT_ROUTE)) {
@@ -59,9 +57,6 @@ export const BreadcrumbsRouting = () => {
 			{
 				title: teamspace,
 				to: generatePath(PROJECTS_LIST_ROUTE, { teamspace }),
-			},
-			{
-				title: project?.name,
 			},
 		];
 
@@ -71,7 +66,10 @@ export const BreadcrumbsRouting = () => {
 		options = projects.map(({ name, _id }) => ({
 			title: name,
 			to: generatePath(PROJECT_ROUTE, { ...projectParams, project: _id }),
+			selected: project?._id === _id,
 		}));
+
+		breadcrumbs.push({ options });
 	}
 
 	if (matchesPath(VIEWER_ROUTE)) {
@@ -99,22 +97,18 @@ export const BreadcrumbsRouting = () => {
 
 			const noName = formatMessage({ id: 'breadcrumbs.revisions.noName', defaultMessage: '(no name)' });
 
-			const selectedRevision = revisions.find(
-				({ _id, tag }) => _id === revision || tag === revision,
-			) || revisions[0];
-
-			breadcrumbs.push({
-				title: selectedRevision?.tag || noName,
-				id: revision,
-			});
-
 			options = revisions.map(({ _id, tag }) => ({
 				title: tag || noName,
 				to: generatePath(VIEWER_ROUTE, { ...params, revision: tag || _id }),
-				id: _id,
+				selected: _id === revision || tag === revision,
 			}));
+
+			breadcrumbs.push({
+				secondary: true,
+				options,
+			});
 		}
 	}
 
-	return (<Breadcrumbs breadcrumbs={breadcrumbs} options={options} />);
+	return (<Breadcrumbs breadcrumbs={breadcrumbs} />);
 };

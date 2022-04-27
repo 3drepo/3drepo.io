@@ -18,18 +18,28 @@ import { useState, MouseEvent } from 'react';
 import HomeIcon from '@assets/icons/home.svg';
 import DownArrowIcon from '@assets/icons/down_arrow.svg';
 import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
-import { NavigationMenu } from './navigatonMenu';
 import { Container, HomeIconBreadcrumb, Breadcrumb, InteractiveBreadcrumb, OverflowWrapper } from './breadcrumbs.styles';
-import { IListItem } from './navigatonMenu/navigationMenu.component';
+import { BreadcrumbDropdown, BreadcrumbItem } from './breadcrumbDropdown/breadcrumbDropdown.component';
 
-interface IProps {
-	options: IListItem[];
-	breadcrumbs: IListItem[];
+export interface BreadcrumbOptions {
+	options: BreadcrumbItem[];
+	secondary?: Boolean;
 }
 
-export const Breadcrumbs = ({ breadcrumbs, options }:IProps): JSX.Element => {
+export type BreadcrumbItemOrOptions = BreadcrumbOptions | BreadcrumbItem;
+
+interface IProps {
+	breadcrumbs: BreadcrumbItemOrOptions[];
+}
+
+export const Breadcrumbs = ({ breadcrumbs }:IProps): JSX.Element => {
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-	const handleClick = (event: MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
+	const [indexOpened, setIndexOpened] = useState<null | number>(null);
+
+	const handleClick = (index) => (event: MouseEvent<HTMLButtonElement>) => {
+		setIndexOpened(index);
+		setAnchorEl(event.currentTarget);
+	};
 	const handleClose = () => setAnchorEl(null);
 
 	return (
@@ -38,28 +48,45 @@ export const Breadcrumbs = ({ breadcrumbs, options }:IProps): JSX.Element => {
 				<HomeIcon />
 			</HomeIconBreadcrumb>
 
-			{breadcrumbs.map(({ title, to, id }, index) => (
-				(breadcrumbs.length - 1) === index && options.length
-					? (
+			{breadcrumbs.map((item, index) => {
+				let { title } = item as BreadcrumbItem;
+
+				if ((item as BreadcrumbOptions).options?.length > 0) {
+					const { options, secondary } = (item as BreadcrumbOptions);
+
+					// If no options is marked as selected use the first one
+					title = (options.find(({ selected }) => selected) || options[0])?.title;
+
+					return (
 						<div key={title}>
-							<InteractiveBreadcrumb onClick={handleClick} endIcon={<DownArrowIcon />}>
+							<InteractiveBreadcrumb
+								secondary={secondary}
+								onClick={handleClick(index)}
+								endIcon={<DownArrowIcon />}
+							>
 								<OverflowWrapper>
 									{title}
 								</OverflowWrapper>
 							</InteractiveBreadcrumb>
-							<NavigationMenu
-								list={options}
+							<BreadcrumbDropdown
+								secondary={secondary}
+								options={options}
 								anchorEl={anchorEl}
-								selectedItem={id || title}
+								open={indexOpened === index}
 								handleClose={handleClose}
 							/>
 						</div>
-					) : (
-						<Breadcrumb key={title} color="inherit" to={to}>
-							{title}
-						</Breadcrumb>
-					)
-			))}
+					);
+				}
+
+				const { to } = item as BreadcrumbItem;
+
+				return (
+					<Breadcrumb key={title} color="inherit" to={to}>
+						{title}
+					</Breadcrumb>
+				);
+			})}
 		</Container>
 	);
 };

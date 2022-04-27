@@ -16,26 +16,29 @@
  */
 
 import { Typography } from '@mui/material';
-import { MenuList, MenuItem } from './navigationMenu.styles';
+import { MenuList, MenuItem } from './breadcrumbDropdownstyles';
 
-export interface IListItem {
+export interface BreadcrumbItem {
 	title: string;
-	id?: string;
 	to?: string;
+	selected?: boolean;
 }
 
 interface INavigationMenu {
 	anchorEl: null | HTMLElement;
-	selectedItem: string;
 	handleClose: () => void;
-	list: IListItem[];
+	options: BreadcrumbItem[];
+	secondary?: Boolean;
+	open: boolean;
 }
 
-export const NavigationMenu = ({ anchorEl, selectedItem, handleClose, list }: INavigationMenu): JSX.Element => (
+export const BreadcrumbDropdown = ({
+	anchorEl, handleClose, options, secondary, open,
+}: INavigationMenu): JSX.Element => (
 	<MenuList
 		anchorEl={anchorEl}
 		onClose={handleClose}
-		open={Boolean(anchorEl)}
+		open={open && !!anchorEl}
 		anchorOrigin={{
 			vertical: 'bottom',
 			horizontal: 'left',
@@ -45,12 +48,13 @@ export const NavigationMenu = ({ anchorEl, selectedItem, handleClose, list }: IN
 			horizontal: 'left',
 		}}
 	>
-		{list.map(({ title, to, id }) => (
+		{options.map(({ title, to, selected }) => (
 			<MenuItem
 				key={title}
 				to={to}
 				onClick={handleClose}
-				selected={selectedItem === title || selectedItem === id}
+				selected={selected}
+				secondary={secondary}
 			>
 				<Typography variant="body1" noWrap>
 					{title}

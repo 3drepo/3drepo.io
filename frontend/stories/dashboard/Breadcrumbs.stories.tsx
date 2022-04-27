@@ -40,24 +40,42 @@ const Template: ComponentStory<typeof Breadcrumbs> = (args) => (
 
 export const NoBreadCrumbs = Template.bind({});
 NoBreadCrumbs.args = {
-	options: [],
 	breadcrumbs: [],
 };
 
 export const BreadCrumbsNoOptions = Template.bind({});
 BreadCrumbsNoOptions.args = {
 	breadcrumbs: [{ title: 'My teamspace', to: 'http://3drepo.com' }, { title: 'A project' }],
-	options: [],
 };
 
 export const BreadCrumbsWithOptions = Template.bind({});
 BreadCrumbsWithOptions.args = {
-	breadcrumbs: [{ title: 'My teamspace', to: 'http://3drepo.com' }, { title: 'A project' }],
-	options: [{ title: 'Another Project' }, { title: 'A project' }, { title: 'Yet another project' }],
+	breadcrumbs: [{ title: 'My teamspace', to: 'http://3drepo.com' },
+		{
+			options: [
+				{ title: 'Another Project' },
+				{ title: 'A project', selected: true },
+				{ title: 'Yet another project' },
+			],
+		}],
 };
 
-export const BreadCrumbsWithOptionsIdMatch = Template.bind({});
-BreadCrumbsWithOptionsIdMatch.args = {
-	breadcrumbs: [{ title: 'My teamspace', to: 'http://3drepo.com' }, { title: 'A project', id: 123 }],
-	options: [{ title: 'Another Project' }, { title: 'A project' }, { title: 'A project with sameId', id: 123 }],
+export const BreadCrumbsWithVariousOptions = Template.bind({});
+BreadCrumbsWithVariousOptions.args = {
+	breadcrumbs: [{ title: 'My teamspace', to: 'http://3drepo.com' },
+		{
+			options: [
+				{ title: 'Another Project' },
+				{ title: 'A project' },
+				{ title: 'Yet another project', selected: true },
+			],
+		},
+		{
+			options: [
+				{ title: 'A federation' },
+				{ title: 'Another federation' },
+			],
+		},
+	],
+
 };
