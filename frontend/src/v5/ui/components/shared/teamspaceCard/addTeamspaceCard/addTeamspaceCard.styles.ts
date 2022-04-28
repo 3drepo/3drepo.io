@@ -43,7 +43,9 @@ export const Container = styled(Card)<{ $variant: string; }>`
 	}};
 `;
 
-export const AddTeamspaceIcon = styled(AddCircleIcon)`
-	width: 31px;
-	height: 31px;
+export const AddTeamspaceIcon = styled(AddCircleIcon).attrs(({ theme }) => ({
+	fillColour: theme.palette.primary.contrast,
+}))`
+	width: 37px;
+	height: 37px;
 `;
