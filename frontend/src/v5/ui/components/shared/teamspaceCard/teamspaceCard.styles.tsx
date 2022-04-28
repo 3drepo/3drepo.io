@@ -29,6 +29,7 @@ export const ListItem = styled.li`
 	:hover {
 		.MuiCard-root {
 			margin-top: -5px;
+			margin-bottom: 5px;
 			transition: margin 0.1s;
 			box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
 		}
