@@ -22,7 +22,7 @@ import { Container as CommentPadding } from '@/v4/routes/components/messagesList
 import { Counter, Actions, ActionsGroup, Container as AddNewCommentContainer } from '@/v4/routes/viewerGui/components/commentForm/commentForm.styles';
 import { NotCollapsableContent } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { Avatar } from '@/v4/routes/components/messagesList/components/message/components/userAvatar/userAvatar.styles';
-import { Container as CommentFooter, Username, Date } from '@/v4/routes/components/messagesList/components/message/components/footer/footer.styles';
+import { Container as CommentFooter, Date, Username } from '@/v4/routes/components/messagesList/components/message/components/footer/footer.styles';
 
 export default css`
 
@@ -63,13 +63,6 @@ export default css`
 		// comments body section
 		${CommentListContainer} {
 			padding: 0;
-
-			${Avatar} {
-				height: 32px;
-				width: 32px;
-				border: none;
-				margin: 0;
-			}
 	
 			${CommentContainer} {
 				border-radius: 5px;
@@ -79,25 +72,25 @@ export default css`
 
 				${Comment} {
 					color: ${({ theme }) => theme.palette.secondary.main};
+				}
 
-					${CommentFooter} {
-						margin-right: -11px;
-					}
-
+				${CommentFooter} {
 					${Username} {
+						color: #6b778c; // TODO - fix after new palette is released
 						font-style: unset;
-						color: #6b778c; // TODO - fix after new palette is realeased
 					}
-
+	
 					${Date} {
+						color: #6b778c; // TODO - fix after new palette is released
 						font-style: unset;
-						color: #6b778c; // TODO - fix after new palette is realeased
-
 						&::before {
 							content: '';
 						}
 					}
 
+					button {
+						margin: 10px 0 10px 10px;
+					}
 				}
 			}
 	

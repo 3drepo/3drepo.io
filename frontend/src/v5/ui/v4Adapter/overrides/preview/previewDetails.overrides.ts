@@ -88,6 +88,7 @@ export default css`
 						align-items: center;
 						padding-left: 8px;
 						height: 22px;
+						font-size: 14px;
 					}
 
 					.MuiOutlinedInput-notchedOutline {

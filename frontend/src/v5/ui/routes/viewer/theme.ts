@@ -49,6 +49,16 @@ export const theme = createTheme(
 						},
 					},
 				},
+				MuiAvatar: {
+					styleOverrides: {
+						root: {
+							height: '32 !important',
+							width: '32 !important',
+							border: 'none !important',
+							margin: '0 !important',
+						},
+					},
+				},
 				MuiList: {
 					styleOverrides: {
 						root: {

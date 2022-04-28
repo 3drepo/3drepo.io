@@ -70,6 +70,14 @@ export default css`
 				color: ${({ theme }) => theme.palette.primary.contrast};
 			}
 		}
+
+		&:disabled {
+			background-color: ${({ theme }) => theme.palette.base.light};
+
+			svg {
+				color: ${({ theme }) => theme.palette.base.main};
+			}
+		}
 	}
 	
 	${Details} {
