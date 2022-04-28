@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,15 +17,13 @@
 
 import { css } from 'styled-components';
 import { Select, FilterWrapper, Container as CommentListContainer, Label as ShowLabel } from '@/v4/routes/components/messagesList/messagesList.styles';
-import { CommentContainer, Comment } from '@/v4/routes/components/messagesList/components/message/components/userMessage/userMessage.styles';
+import { CommentContainer, Comment, Container as CommentAndDeleteButtonContainer } from '@/v4/routes/components/messagesList/components/message/components/userMessage/userMessage.styles';
 import { Container as CommentPadding } from '@/v4/routes/components/messagesList/components/message/message.styles';
 import { Counter, Actions, ActionsGroup, Container as AddNewCommentContainer } from '@/v4/routes/viewerGui/components/commentForm/commentForm.styles';
 import { NotCollapsableContent } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
-import { Avatar } from '@/v4/routes/components/messagesList/components/message/components/userAvatar/userAvatar.styles';
 import { Container as CommentFooter, Date, Username } from '@/v4/routes/components/messagesList/components/message/components/footer/footer.styles';
 
 export default css`
-
 	${NotCollapsableContent} {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		padding: 15px 12px 10px;
@@ -63,15 +61,27 @@ export default css`
 		// comments body section
 		${CommentListContainer} {
 			padding: 0;
-	
+
+			${CommentAndDeleteButtonContainer} {
+				&:not(:hover) [aria-label="Remove"] > button {
+					display: none;
+				} 
+
+				// delete comment icon
+				[aria-label="Remove"] > button {
+					margin: 8px 48px 0 0;
+				}
+			}
+
 			${CommentContainer} {
 				border-radius: 5px;
-				margin: 0 0 0 10px;
-				/* padding: 8px 0 0; */
+				margin: 0 10px;
 				padding: 8px 14px 0 14px;
 
+				// just the text
 				${Comment} {
 					color: ${({ theme }) => theme.palette.secondary.main};
+					word-break: break-word;
 				}
 
 				${CommentFooter} {

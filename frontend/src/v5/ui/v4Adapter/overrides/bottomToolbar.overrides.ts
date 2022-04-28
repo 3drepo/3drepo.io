@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -18,8 +18,8 @@
 import { css } from 'styled-components';
 
 import { Container, Submenu } from '@/v4/routes/viewerGui/components/toolbar/toolbar.styles';
-import { hexToOpacity } from '../../themes/theme';
 import { StyledIconButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.styles';
+import { hexToOpacity } from '../../themes/theme';
 
 export default css`
 	${Container} {

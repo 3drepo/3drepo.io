@@ -21,14 +21,17 @@ import bottomToolbar from './overrides/bottomToolbar.overrides';
 import panelsMenu from './overrides/panelsMenu.overrides';
 import leftPanel from './overrides/leftPanel.overrides';
 import customTable from './overrides/customTable.overrides';
-import previewDetails from './overrides/preview//previewDetails.overrides';
-import previewItem from './overrides/preview//previewItem.overrides';
+import previewDetails from './overrides/preview/previewDetails.overrides';
+import previewItem from './overrides/preview/previewItem.overrides';
 import previewComments from './overrides/preview/previewComments.overrides';
+import avatarPopover from './overrides/avatarPopover.overrides';
 
 export const V4OverridesContainer = styled.div`
 	display: flex;
 	flex-direction: column;
 	height: 100%;
+
+	${avatarPopover}
 
 	${HighlighterMark} {
 		background-color: ${({ theme }) => theme.palette.primary.light};
@@ -41,7 +44,6 @@ export const V4OverridesContainer = styled.div`
 	${panelsMenu}
 	${bottomToolbar}
 
-	// preview
 	${previewItem}
 	${previewDetails}
 	${previewComments}

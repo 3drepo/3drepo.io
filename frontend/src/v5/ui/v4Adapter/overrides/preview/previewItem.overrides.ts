@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -72,10 +72,10 @@ export default css`
 		}
 
 		&:disabled {
-			background-color: ${({ theme }) => theme.palette.base.light};
+			background-color: #edf0f8; // TODO - fix after new palette is released
 
 			svg {
-				color: ${({ theme }) => theme.palette.base.main};
+				color: ${({ theme }) => theme.palette.primary.contrast};
 			}
 		}
 	}

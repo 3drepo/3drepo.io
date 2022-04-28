@@ -17,8 +17,8 @@
 import { ComponentType } from 'react';
 import Tooltip from '@mui/material/Tooltip';
 import { TooltipProps } from '@mui/material/Tooltip';
+import { isV5 } from '@/v4/helpers/isV5';
 import { StyledIconButton } from './tooltipButton.styles';
-
 interface IProps {
 	label: string;
 	Icon: ComponentType;
@@ -32,6 +32,7 @@ interface IProps {
 	onClick?: (event) => void;
 	id?: string;
 	children?: any;
+	sx?: any;
 }
 
 export const TooltipButton = (props: IProps) => {
@@ -46,7 +47,8 @@ export const TooltipButton = (props: IProps) => {
 		active = false,
 		placement,
 		disableFocusListener,
-		children
+		children,
+		sx,
 	} = props;
 	const iconProps = { color, fontSize: 'small' } as any;
 
@@ -63,16 +65,27 @@ export const TooltipButton = (props: IProps) => {
 		</StyledIconButton>
 	);
 
+	const v5PopperProps = isV5 && {
+		PopperProps: {
+			sx: {
+				top: '14px !important',
+				left: '-24px !important',
+			}
+		}
+	}
+
 	return (
 		<>
 			{ disabled
 				? renderButton()
 				: (
+					// @ts-ignore
 					<Tooltip
 						title={label}
 						disableHoverListener={disabled}
 						placement={placement}
 						disableFocusListener={disableFocusListener}
+						{...v5PopperProps}
 					>
 						<span>
 							{renderButton()}

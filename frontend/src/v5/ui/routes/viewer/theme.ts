@@ -56,6 +56,7 @@ export const theme = createTheme(
 							width: '32 !important',
 							border: 'none !important',
 							margin: '0 !important',
+							alignSelf: 'flex-start',
 						},
 					},
 				},
@@ -78,7 +79,7 @@ export const theme = createTheme(
 								'.MuiInputBase-root.MuiInputBase-adornedEnd': {
 									paddingRight: 0,
 								},
-								'fieldset.MuiOutlinedInput-notchedOutline' : {
+								'fieldset.MuiOutlinedInput-notchedOutline': {
 									borderWidth: 0,
 									'&:hover:not(.Mui-error)': {
 										borderTop: 0,
@@ -87,7 +88,7 @@ export const theme = createTheme(
 										borderRadius: 0,
 									},
 								},
-								'input[type="tel"].MuiOutlinedInput-input' : {
+								'input[type="tel"].MuiOutlinedInput-input': {
 									padding: '0 5px 0 9px',
 									height: 28,
 								},

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,6 @@ import { css } from 'styled-components';
 import { LeftPanels } from '@/v4/routes/viewerGui/viewerGui.styles';
 import { TitleIcon, ViewerPanelFooter } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
 import { Title, Container as ViewerPanelBody } from '@/v4/routes/components/panel/panel.styles';
-import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
 import {
 	Container as FilterPanelContainer,
 	FiltersButton,
@@ -52,12 +51,12 @@ export default css`
 
 		// action icons
 		.MuiIconButton-root {
-			background-color: #edf0f8; // TODO - fix when new palette is released	
+			background-color: #edf0f8; // TODO - fix when new palette is released
 			color: currentColor;
 			border-radius: 50%;
 			height: 32px;
 			width: 32px;
-			margin: 0 0 0 5px;	
+			margin: 0 0 0 5px;
 		}
 	}
 	
@@ -121,7 +120,7 @@ export default css`
 			}
 
 			&:disabled {
-				background-color: ${({ theme }) => theme.palette.base.light};
+				background-color: #edf0f8; // TODO - fix after new palette is released
 			}
 		}
 	}
