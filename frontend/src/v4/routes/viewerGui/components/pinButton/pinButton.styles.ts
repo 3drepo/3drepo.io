@@ -46,5 +46,4 @@ export const Container = styled.span`
 	display: flex;
 	align-items: center;
 	height: 100%;
-	min-height: 40px;
 `;
