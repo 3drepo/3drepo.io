@@ -42,7 +42,7 @@ const establishRoutes = () => {
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/metadata/{metadata}:
 	 *   patch:
-	 *     description: Adds, removes or edits metadata of an element of a 3D model. If a metadata does not exist it is added and if it exists it is updated. To remove a metadata provide null value.
+	 *     description: Adds, removes or edits custom metadata of an element of a 3D model. If a metadata does not exist it is added and if it exists it is updated. To remove a metadata provide null value.
 	 *     tags: [Containers]
 	 *     operationId: updateCustomMetadata
 	 *     parameters:
@@ -59,21 +59,24 @@ const establishRoutes = () => {
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
+	 *           type: string
+	 *           format: uuid
 	 *       - container:
 	 *         name: container
 	 *         description: Container ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
+	 *           type: string
+	 *           format: uuid
 	 *       - metadata:
 	 *         name: metadata
 	 *         description: Metadata ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
-	 *         type: string
+	 *           type: string
+	 *           format: uuid
      *     requestBody:
 	 *       content:
      *         application/json:
@@ -88,6 +91,7 @@ const establishRoutes = () => {
 	 *                     key:
 	 *                       description: The key of the metadata
 	 *                       type: string
+	 *                       maxLength: 120
      *                       example: Length (mm)
 	 *                     value:
 	 *                       description: The value of the metadata

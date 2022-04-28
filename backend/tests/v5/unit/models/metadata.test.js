@@ -23,14 +23,14 @@ const Metadata = require(`${src}/models/metadata`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
-const testGetMetadataByQuery = () => {
+const testGetMetadataById = () => {
 	describe('Get metadata by Id', () => {
 		test('should return error if the metadata does not exist', async () => {
 			const teamspace = generateRandomString();
 			const model = generateRandomString();
 			const metadataId = generateRandomString();
 			jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
-			await expect(Metadata.getMetadataByQuery(teamspace, model, { _id: metadataId }))
+			await expect(Metadata.getMetadataById(teamspace, model, metadataId))
 				.rejects.toEqual(templates.metadataNotFound);
 		});
 
@@ -41,7 +41,7 @@ const testGetMetadataByQuery = () => {
 			const expectedData = [{ key: generateRandomString(), value: generateRandomString() }];
 			const projection = { _id: 1 };
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(expectedData);
-			const res = await Metadata.getMetadataByQuery(teamspace, model, { _id: metadataId }, { _id: 1 });
+			const res = await Metadata.getMetadataById(teamspace, model, metadataId, { _id: 1 });
 			expect(res).toEqual(expectedData);
 			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.scene`, { _id: metadataId }, projection);
 			expect(fn).toHaveBeenCalledTimes(1);
@@ -151,7 +151,6 @@ const testUpdateCustomMetadata = () => {
 			const fn2 = jest.spyOn(db, 'updateOne').mockImplementationOnce(() => { });
 			await Metadata.updateCustomMetadata(teamspace, model, metadataId, changeSet);
 
-			changeSet[2].custom = true;
 			expect(fn1).toHaveBeenCalledTimes(1);
 			expect(fn1).toHaveBeenCalledWith(teamspace, `${model}.scene`, { _id: metadataId }, { metadata: 1 });
 			expect(fn2).toHaveBeenCalledTimes(1);
@@ -162,6 +161,6 @@ const testUpdateCustomMetadata = () => {
 };
 
 describe('models/metadata', () => {
-	testGetMetadataByQuery();
+	testGetMetadataById();
 	testUpdateCustomMetadata();
 });

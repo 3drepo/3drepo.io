@@ -41,9 +41,9 @@ const nonCustomMetadata = metadata[0];
 const customMetadata = metadata[1];
 const customMetadata2 = metadata[2];
 
-MetadataModel.getMetadataByQuery.mockImplementation((teamspace, container, query) => {
-	if (query._id === existingMetadataId) {
-		return { metadata: [nonCustomMetadata] };
+MetadataModel.getMetadataById.mockImplementation((teamspace, container, metadataId) => {
+	if (metadataId === existingMetadataId) {
+		return { metadata };
 	}
 
 	throw templates.metadataNotFound;

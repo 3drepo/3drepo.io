@@ -22,8 +22,8 @@ const Metadata = {};
 
 const collectionName = (model) => `${model}.scene`;
 
-Metadata.getMetadataByQuery = async (teamspace, model, query, projection) => {
-	const metadata = await db.findOne(teamspace, collectionName(model), query, projection);
+Metadata.getMetadataById = async (teamspace, model, metadataId, projection) => {
+	const metadata = await db.findOne(teamspace, collectionName(model), { _id: metadataId }, projection);
 
 	if (!metadata) {
 		throw templates.metadataNotFound;
@@ -33,25 +33,25 @@ Metadata.getMetadataByQuery = async (teamspace, model, query, projection) => {
 };
 
 Metadata.updateCustomMetadata = async (teamspace, model, metadataId, changeSet) => {
-	const { metadata } = await Metadata.getMetadataByQuery(teamspace, model, { _id: metadataId }, { metadata: 1 });
-	const metadataKeyLookup = metadata.reduce((a, b) => ({ ...a, [b.key]: 1 }), {});
+	const { metadata } = await Metadata.getMetadataById(teamspace, model, metadataId, { metadata: 1 });
+	const metadataKeyIndexLookup = metadata.reduce((parsedItems, currItem) => (
+		{
+			...parsedItems,
+			[currItem.key]: metadata.indexOf(currItem),
+		}), {});
 
-	changeSet.forEach((um) => {
-		const metadataExists = metadataKeyLookup[um.key];
-		if (metadataExists) {
-			const existingMetadata = metadata.find((m) => m.key === um.key);
-			if (um.value) {
-				existingMetadata.value = um.value;
-			} else {
-				const index = metadata.indexOf(existingMetadata);
-				metadata.splice(index, 1);
-			}
-		} else if (um.value) {
-			metadata.push({ ...um, custom: true });
+	changeSet.forEach((changeSetItem) => {
+		const metadataIndex = metadataKeyIndexLookup[changeSetItem.key];
+		if (metadataIndex !== undefined) {
+			metadata[metadataIndex].value = changeSetItem.value;
+		} else if (changeSetItem.value !== null) {
+			metadata.push({ ...changeSetItem, custom: true });
 		}
 	});
 
-	await db.updateOne(teamspace, collectionName(model), { _id: metadataId }, { $set: { metadata } });
+	const updatedMetadata = metadata.filter((m) => m.value !== null);
+
+	await db.updateOne(teamspace, collectionName(model), { _id: metadataId }, { $set: { metadata: updatedMetadata } });
 };
 
 module.exports = Metadata;

@@ -17,38 +17,32 @@
 
 const { createResponseCode, templates } = require('../../../../../../utils/responseCodes');
 const Yup = require('yup');
-const { getMetadataByQuery } = require('../../../../../../models/metadata');
+const { getCommonElements } = require('../../../../../../utils/helper/arrays');
+const { getMetadataById } = require('../../../../../../models/metadata');
 const { respond } = require('../../../../../../utils/responder');
+const { types } = require('../../../../../../utils/helper/yup');
 
 const Metadata = {};
 
 const metadataSchema = Yup.object().shape({
-	key: Yup.string().min(1).max(120).required(),
+	key: types.strings.title.required(),
 	value: Yup.lazy((value) => {
 		switch (typeof value) {
-		case 'string':
-			return Yup.string().max(120);
 		case 'number':
 			return Yup.number();
 		case 'boolean':
 			return Yup.bool();
 		default:
-			return Yup.mixed().nullable(true).test('ensure-value-present', 'Metadata value is a required field', () => value !== undefined);
+			return types.strings.title.nullable().test('ensure-value-present', 'Metadata value is a required field', () => value !== undefined);
 		}
 	}),
 }).required().noUnknown();
 
-const generateSchema = (nonCustomMetadataLookup) => {
+const generateSchema = (nonCustomMetadataKeys) => {
 	const schema = Yup.object().shape({
 		metadata: Yup.array().of(metadataSchema).required(),
 	}).required().test('check-metadata-can-be-Updated', (value, { createError, path }) => {
-		const nonEditableMetadata = [];
-
-		value.metadata.forEach((metadataToUpdate) => {
-			if (nonCustomMetadataLookup[metadataToUpdate.key]) {
-				nonEditableMetadata.push(metadataToUpdate.key);
-			}
-		});
+		const nonEditableMetadata = getCommonElements(value.metadata.map((m) => m.key), nonCustomMetadataKeys);
 
 		if (nonEditableMetadata.length > 0) {
 			return createError({ path, message: `Metadata [${nonEditableMetadata.join(', ')}] already exist and are not editable.` });
@@ -65,11 +59,17 @@ const generateSchema = (nonCustomMetadataLookup) => {
 Metadata.validateUpdateCustomMetadata = async (req, res, next) => {
 	try {
 		const { teamspace, container, metadata } = req.params;
-		const existingMetadata = await getMetadataByQuery(teamspace, container, { _id: metadata },
+		const existingMetadata = await getMetadataById(teamspace, container, metadata,
 			{ _id: 0, metadata: 1 });
-		const nonCustomMetadataLookup = existingMetadata.metadata.filter((m) => m.custom !== true)
-			.reduce((a, b) => ({ ...a, [b.key]: 1 }), {});
-		const schema = generateSchema(nonCustomMetadataLookup);
+
+		const nonCustomMetadataKeys = existingMetadata.metadata.reduce((parsedItems, currItem) => {
+			if (!currItem.custom) {
+				parsedItems.push(metadata.key);
+			}
+			return parsedItems;
+		}, []);
+
+		const schema = generateSchema(nonCustomMetadataKeys);
 		req.body = await schema.validate(req.body);
 
 		await next();
