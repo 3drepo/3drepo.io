@@ -39,8 +39,9 @@ export const Comment = styled(MarkdownMessage)`
 	}
 `;
 
+// TODO - fix after new palette is released
 const regularCommentStyles = css`
-	background-color: ${isV5() ? '#edf0f8' : COLOR.WHITE}; // TODO - fix after new palette is released
+	background-color: ${isV5() ? '#edf0f8' : COLOR.WHITE};
 	${isV5() && 'margin-right: 0 !important;'}
 
 	${Comment} {
@@ -48,8 +49,9 @@ const regularCommentStyles = css`
 	}
 `;
 
+// TODO - fix after new palette is released
 const selfCommentStyles = css`
-	background-color: ${isV5() ? '#f5f8fa' : COLOR.WHITE}; // TODO - fix after new palette is released
+	background-color: ${isV5() ? '#f5f8fa' : COLOR.WHITE};
 	${isV5() && 'margin-left: 0 !important;'}
 `;
 

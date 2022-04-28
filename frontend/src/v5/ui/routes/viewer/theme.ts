@@ -60,6 +60,29 @@ export const theme = createTheme(
 						},
 					},
 				},
+				MuiTabs: {
+					styleOverrides: {
+						root: {
+							minHeight: 'unset',
+							'.MuiTabs-indicator': {
+								backgroundColor: COLOR.PRIMARY_MAIN,
+							},
+						},
+					},
+				},
+				MuiTab: {
+					styleOverrides: {
+						root: {
+							minWidth: 'unset',
+							minHeight: 'unset',
+							textTransform: 'unset',
+							margin: 0,
+							marginRight: 15,
+							paddingTop: 0,
+							fontWeight: 400,
+						},
+					},
+				},
 				MuiList: {
 					styleOverrides: {
 						root: {

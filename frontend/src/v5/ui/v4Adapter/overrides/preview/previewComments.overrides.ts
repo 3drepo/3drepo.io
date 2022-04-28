@@ -20,10 +20,14 @@ import { Select, FilterWrapper, Container as CommentListContainer, Label as Show
 import { CommentContainer, Comment, Container as CommentAndDeleteButtonContainer } from '@/v4/routes/components/messagesList/components/message/components/userMessage/userMessage.styles';
 import { Container as CommentPadding } from '@/v4/routes/components/messagesList/components/message/message.styles';
 import { Counter, Actions, ActionsGroup, Container as AddNewCommentContainer } from '@/v4/routes/viewerGui/components/commentForm/commentForm.styles';
-import { NotCollapsableContent } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
+import { Collapsable, NotCollapsableContent } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { Container as CommentFooter, Date, Username } from '@/v4/routes/components/messagesList/components/message/components/footer/footer.styles';
 
 export default css`
+	${Collapsable} {
+		border-radius: 0 !important;
+	}
+
 	${NotCollapsableContent} {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		padding: 15px 12px 10px;
