@@ -125,10 +125,4 @@ export default css`
 			}
 		}
 	}
-
-	${EmptyStateInfo} {
-		background-color: transparent;
-		color: ${({ theme }) => theme.palette.base.main};
-		margin: 0;
-	}
 `;

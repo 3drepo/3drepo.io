@@ -14,8 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { V4OverridesContainer } from '@/v5/ui/v4Adapter/v4Overrides.styles';
+import { isV5 } from '@/v4/helpers/isV5';
 import styled, { css } from 'styled-components';
 
 import { COLOR } from '../../../../../../../styles';
@@ -40,25 +39,15 @@ export const Comment = styled(MarkdownMessage)`
 `;
 
 const regularCommentStyles = css`
-	background-color: ${COLOR.WHITE};
+	background-color: ${isV5() ? '#edf0f8' : COLOR.WHITE}; // TODO - fix after new palette is released
 
 	${Comment} {
 		color: ${COLOR.BLACK_60};
 	}
-
-	${V4OverridesContainer} && {
-		background-color: #edf0f8; // TODO - fix after new palette is released
-	}
-
-
 `;
 
 const selfCommentStyles = css`
-	background-color: ${COLOR.LIGHT_GREY_BLUE};
-
-	${V4OverridesContainer} && {
-		background-color: #f7f8fa; // TODO - fix after new palette is released
-	}
+	background-color: ${isV5() ? '#f7f8fa' : COLOR.LIGHT_GREY_BLUE}; // TODO - fix after new palette is released
 `;
 
 export const CommentContainer = styled.div<{self?: boolean}>`

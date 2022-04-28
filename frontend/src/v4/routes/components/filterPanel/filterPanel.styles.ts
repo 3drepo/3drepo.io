@@ -20,10 +20,9 @@ import IconButton from '@mui/material/IconButton';
 import Popper from '@mui/material/Popper';
 import TextField from '@mui/material/TextField';
 import Copy from '@mui/icons-material/FileCopy';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { COLOR } from './../../../styles/colors';
 import { isV5 } from '@/v4/helpers/isV5';
-import { V4OverridesContainer } from '@/v5/ui/v4Adapter/v4Overrides.styles';
 
 interface IContainer {
 	filtersOpen: boolean;
@@ -51,9 +50,7 @@ export const Container = styled.div<IContainer>`
 	height: ${(props) => props.filtersOpen ? '45px' : 'auto'};
 	flex: none;
 	
-	${V4OverridesContainer} && {
-		height: ${(props) => props.filtersOpen && '57px'};
-	}
+	${(props) => isV5() && props.filtersOpen && 'height: 57px;'}
 `;
 
 export const SelectedFilters = styled.div<ISelectedFilters>`
@@ -65,19 +62,19 @@ export const SelectedFilters = styled.div<ISelectedFilters>`
 	position: relative;
 	max-height: 240px;
 
-	${V4OverridesContainer} && {
-		${({ theme, empty }) => !empty && `
+	${({ theme, empty, filtersOpen}) => isV5() && `
+		${!empty && `
 			border-bottom: solid 1px ${theme.palette.base.lightest};
 			padding: 9px 40px 9px 15px;
 			min-height: 38px;
 		`}
 
-		${({ empty, filtersOpen }) => !empty && filtersOpen && `
+		${!empty && filtersOpen && `
 			& .MuiChip-root {
 				margin-bottom: 11px !important;
 			}
 		`}
-	}
+	`}
 `;
 
 export const InputContainer = styled.div<IInputContainer>`

@@ -61,6 +61,7 @@ export default css`
 					padding: 2px 7px;
 					font-weight: 500;
 					margin-right: 0;
+					min-width: 8px;
 				}
 
 				${StyledForm} {

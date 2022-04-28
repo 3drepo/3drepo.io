@@ -560,7 +560,7 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 		const { hideMenu, filters } = this.props;
 
 		return (
-			<Container filtersOpen={selectedFilters.length && filtersOpen} className={this.props.className}>
+			<Container filtersOpen={selectedFilters.length && filtersOpen} className={this.props.className}  id="___HERE">
 				{this.renderSelectedFilters()}
 
 				<InputContainer menuHidden={hideMenu}>

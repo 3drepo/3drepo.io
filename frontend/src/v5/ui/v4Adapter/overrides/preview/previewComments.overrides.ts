@@ -28,7 +28,7 @@ export default css`
 
 	${NotCollapsableContent} {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
-		padding: 15px 13px 10px 17px;
+		padding: 15px 12px 10px;
 
 		// comments header section
 		${FilterWrapper} {
@@ -73,7 +73,8 @@ export default css`
 	
 			${CommentContainer} {
 				border-radius: 5px;
-				margin: 0;
+				margin: 0 0 0 10px;
+				/* padding: 8px 0 0; */
 				padding: 8px 14px 0 14px;
 
 				${Comment} {
@@ -85,10 +86,16 @@ export default css`
 
 					${Username} {
 						font-style: unset;
+						color: #6b778c; // TODO - fix after new palette is realeased
 					}
 
 					${Date} {
 						font-style: unset;
+						color: #6b778c; // TODO - fix after new palette is realeased
+
+						&::before {
+							content: '';
+						}
 					}
 
 				}
@@ -117,7 +124,7 @@ export default css`
 			color: #c1c8d5; // TODO - fix after new palette is released
 			position: absolute;
 			left: 94px;
-			bottom: -32px;
+			bottom: -33px;
 			font-weight: 500;
 			font-size: 10px;
 		}

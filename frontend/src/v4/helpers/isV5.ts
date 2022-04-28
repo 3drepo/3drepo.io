@@ -15,7 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { selectUrlParams } from '@/v4/modules/router/router.selectors';
-import { getState } from '@/v4/modules/store';
-
-export const isV5 = () => selectUrlParams(getState()).v5;
+export const isV5 = () => window.location.pathname.startsWith("/v5");

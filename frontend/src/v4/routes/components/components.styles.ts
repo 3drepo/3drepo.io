@@ -19,6 +19,8 @@ import { IconButton } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import styled from 'styled-components';
 import { COLOR } from '../../styles';
+import { DashedContainer as DashedContainerBase } from '@controls/dashedContainer/dashedContainer.component';
+import { isV5 } from '@/v4/helpers/isV5';
 
 const BaseStyles = styled(Grid)`
 	white-space: nowrap;
@@ -47,12 +49,31 @@ export const BarIconButton = styled(IconButton)`
 	}
 `;
 
-export const EmptyStateInfo = styled.p`
-	padding: 14px;
+const V5EmptyStateInfo = styled(DashedContainerBase).attrs({
+	strokeColor: '#c0c8d5', // TODO - fix when new palette is released
+	borderRadius: 5,
+	dashSize: 2,
+	gapSize: 2,
+	strokeWidth: 2,
+	zeroPadding: true,
+})`
+	text-align: center;
 	font-size: 13px;
+	background-color: transparent;
+	color: ${({ theme }) => theme.palette.base.main};
+	margin: 12px auto;
+	padding: 10px;
+	width: 315px;
+`;
+
+const V4EmptyStateInfo = styled.p`
+	text-align: center;
+	font-size: 13px;
+	margin: 25px;
+	padding: 14px;
 	color: ${COLOR.BLACK_60};
 	background-color: ${COLOR.BLACK_6};
-	margin: 25px;
 	border-radius: 6px;
-	text-align: center;
 `;
+
+export const EmptyStateInfo = styled(isV5() ? V5EmptyStateInfo : V4EmptyStateInfo)``;
