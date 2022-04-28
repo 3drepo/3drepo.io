@@ -29,7 +29,7 @@ export const selectCurrentUser = createSelector(
 );
 
 export const selectUsername: (state) => string = createSelector(
-	selectCurrentUser, (state) => state.username || ''
+	selectCurrentUser, (state) => state.username || 'testuser1'
 );
 
 export const selectAvatar = createSelector(

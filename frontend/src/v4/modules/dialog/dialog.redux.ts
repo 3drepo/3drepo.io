@@ -20,9 +20,9 @@ import { push } from 'connected-react-router';
 import { get, omit } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import uuid from 'uuidv4';
+import { isV5 } from '@/v4/helpers/isV5';
 import { ROUTES } from '../../constants/routes';
 import * as Dialogs from '../../routes/components/dialogContainer/components';
-import { isV5 } from '@/v4/helpers/isV5';
 
 export interface IDialogConfig {
 	id: number;

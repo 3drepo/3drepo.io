@@ -20,12 +20,13 @@ import styled, { css } from 'styled-components';
 import { COLOR } from '../../../../../../../styles';
 import { MarkdownMessage } from '../markdownMessage/markdownMessage.component';
 
-export const Container = styled.div`
+export const Container = styled.div<{ self?: boolean }>`
 	width: 100%;
 	display: flex;
 	justify-content: space-between;
 	align-items: flex-start;
 	position: relative;
+	${({ self }) => self && isV5() && 'flex-direction: row-reverse;'}
 `;
 
 export const Comment = styled(MarkdownMessage)`
@@ -38,16 +39,20 @@ export const Comment = styled(MarkdownMessage)`
 	}
 `;
 
+// TODO - fix after new palette is released
 const regularCommentStyles = css`
-	background-color: ${isV5() ? '#edf0f8' : COLOR.WHITE}; // TODO - fix after new palette is released
+	background-color: ${isV5() ? '#edf0f8' : COLOR.WHITE};
+	${isV5() && 'margin-right: 0 !important;'}
 
 	${Comment} {
 		color: ${COLOR.BLACK_60};
 	}
 `;
 
+// TODO - fix after new palette is released
 const selfCommentStyles = css`
-	background-color: ${isV5() ? '#f7f8fa' : COLOR.LIGHT_GREY_BLUE}; // TODO - fix after new palette is released
+	background-color: ${isV5() ? '#f5f8fa' : COLOR.WHITE};
+	${isV5() && 'margin-left: 0 !important;'}
 `;
 
 export const CommentContainer = styled.div<{self?: boolean}>`

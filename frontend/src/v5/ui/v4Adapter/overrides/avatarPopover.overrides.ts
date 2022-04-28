@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,12 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { css } from 'styled-components';
+import { AvatarWrapper } from '@/v4/routes/components/messagesList/components/message/components/userPopover/userPopover.styles';
 
-export const Wrapper = styled.div`
-	width: 100%;
-	height: 50px;
-	box-sizing: border-box;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	padding-left: 79px;
+export default css`
+	${AvatarWrapper} {
+		align-items: flex-start;
+	}
 `;

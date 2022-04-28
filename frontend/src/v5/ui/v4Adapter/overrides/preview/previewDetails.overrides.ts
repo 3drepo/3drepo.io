@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -20,7 +20,6 @@ import { Details, Container as IssueDetails } from '@/v4/routes/viewerGui/compon
 import { Container, Header, Grid, TitleNumber, StyledForm } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { FieldWrapper } from '@/v4/routes/components/textField/textField.styles';
 import { StyledButton } from '@/v4/routes/viewerGui/components/containedButton/containedButton.styles';
-
 
 export default css`
 	${Container} {
@@ -72,7 +71,7 @@ export default css`
 						}
 					}
 
-					button {						
+					button {
 						margin: 0 10px 0 0 !important;
 						height: 15px;
 						width: 15px;
@@ -88,6 +87,7 @@ export default css`
 						align-items: center;
 						padding-left: 8px;
 						height: 22px;
+						font-size: 14px;
 					}
 
 					.MuiOutlinedInput-notchedOutline {

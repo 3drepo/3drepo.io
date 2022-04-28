@@ -78,10 +78,10 @@ export const Footer = ({ name, created, formRef, commentRef, comment, ...props }
 			<Date>
 				{isV5() ? (
 					<>
-						<span>at </span> 
+						<span>at </span>
 						<DateTime value={created} format={SHORT_TIME_FORMAT} />
-						<span> on </span> 
-						<DateTime value={created} format={SHORT_DATE_FORMAT}/>
+						<span> on </span>
+						<DateTime value={created} format={SHORT_DATE_FORMAT} />
 					</>
 				) : (
 					<DateTime value={created} format={DATE_TIME_FORMAT} />

@@ -18,9 +18,9 @@
 import { IconButton } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import styled from 'styled-components';
-import { COLOR } from '../../styles';
-import { DashedContainer as DashedContainerBase } from '@controls/dashedContainer/dashedContainer.component';
 import { isV5 } from '@/v4/helpers/isV5';
+import { COLOR } from '../../styles';
+import { DashedContainer as DashedContainerBase } from './../../../v5/ui/controls/dashedContainer/dashedContainer.component';
 
 const BaseStyles = styled(Grid)`
 	white-space: nowrap;

@@ -21,8 +21,8 @@ import Popper from '@mui/material/Popper';
 import TextField from '@mui/material/TextField';
 import Copy from '@mui/icons-material/FileCopy';
 import styled from 'styled-components';
-import { COLOR } from './../../../styles/colors';
 import { isV5 } from '@/v4/helpers/isV5';
+import { COLOR } from './../../../styles/colors';
 
 interface IContainer {
 	filtersOpen: boolean;
