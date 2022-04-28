@@ -64,7 +64,7 @@ Metadata.validateUpdateCustomMetadata = async (req, res, next) => {
 
 		const nonCustomMetadataKeys = existingMetadata.metadata.reduce((parsedItems, currItem) => {
 			if (!currItem.custom) {
-				parsedItems.push(metadata.key);
+				parsedItems.push(currItem.key);
 			}
 			return parsedItems;
 		}, []);
