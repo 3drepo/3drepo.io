@@ -69,7 +69,6 @@ export const Breadcrumbs = ({ breadcrumbs }:IProps): JSX.Element => {
 								</OverflowWrapper>
 							</InteractiveBreadcrumb>
 							<BreadcrumbDropdown
-								secondary={secondary}
 								options={options}
 								anchorEl={anchorEl}
 								open={indexOpened === index}
