@@ -34,10 +34,10 @@ Metadata.getMetadataById = async (teamspace, model, metadataId, projection) => {
 
 Metadata.updateCustomMetadata = async (teamspace, model, metadataId, changeSet) => {
 	const { metadata } = await Metadata.getMetadataById(teamspace, model, metadataId, { metadata: 1 });
-	const metadataKeyIndexLookup = metadata.reduce((parsedItems, currItem) => (
+	const metadataKeyIndexLookup = metadata.reduce((parsedItems, currItem, currIndex) => (
 		{
 			...parsedItems,
-			[currItem.key]: metadata.indexOf(currItem),
+			[currItem.key]: currIndex,
 		}), {});
 
 	changeSet.forEach((changeSetItem) => {
