@@ -31,7 +31,6 @@ export const CardList = styled.ul`
 	max-width: 70vw;
 	display: flex;
 	flex-wrap: wrap;
-	padding: 0;
 `;
 
 export const DummyCard = styled(TeamspaceCard)`
