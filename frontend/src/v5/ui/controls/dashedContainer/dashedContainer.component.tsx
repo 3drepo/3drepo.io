@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,19 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { Container } from './dashedContainer.styles';
 
-"use strict";
-const apiUrls = require("../config").apiUrls["all"];
-const utils = require("../utils");
-
-const referrerMatch = (sessionReferrer, headerReferrer) => {
-	const domain = utils.getURLDomain(headerReferrer);
-	return domain === sessionReferrer ||
-		apiUrls.some((api) => api.match(domain));
+type DashedContainerProps = {
+	children: any;
+	className?: string;
+	borderRadius?: number;
+	strokeColor?: string;
+	strokeWidth?: number;
+	dashSize?: number;
+	gapSize?: number;
+	zeroPadding?: boolean;
 };
 
-module.exports = ({session, headers}) => session && session.user && (
-	session.user.isAPIKey || (!headers.referer ||
-		referrerMatch(session.user.referer, headers.referer))
+export const DashedContainer = ({ children, ...dashedOptions }: DashedContainerProps) => (
+	<Container {...dashedOptions}>
+		{children}
+	</Container>
 );
-

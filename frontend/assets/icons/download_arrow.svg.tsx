@@ -14,9 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+type IProps = {
+	className?: any;
+};
 
-const { v4Path } = require('../../interop');
-// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
-const Mailer = require(`${v4Path}/mailer/mailer`);
-
-module.exports = Mailer;
+export default ({ className }: IProps) => (
+	<svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+		<path
+			d="M11.6667 4.66667H8.55556V0H3.88889V4.66667H0.777778L6.22222 10.8889L11.6667 4.66667ZM0 12.4444H12.4444V14H0V12.4444Z"
+			fill="currentColor"
+		/>
+	</svg>
+);

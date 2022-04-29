@@ -19,6 +19,7 @@ const { hasAccessToTeamspace, hasAdminAccessToFederation, hasReadAccessToFederat
 const { validateAddModelData, validateUpdateSettingsData } = require('../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
 const Federations = require('../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
+const { SOCKET_HEADER } = require('../../../../services/chat/chat.constants');
 const { formatModelSettings } = require('../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { respond } = require('../../../../utils/responder');
@@ -83,9 +84,10 @@ const getFederationStats = (req, res) => {
 };
 
 const updateSettings = (req, res) => {
-	const { teamspace, federation } = req.params;
+	const { teamspace, project, federation } = req.params;
+	const sender = req.headers[SOCKET_HEADER];
 
-	Federations.updateSettings(teamspace, federation, req.body)
+	Federations.updateSettings(teamspace, project, federation, req.body, sender)
 		.then(() => respond(req, res, templates.ok)).catch(
 			// istanbul ignore next
 			(err) => respond(req, res, err),

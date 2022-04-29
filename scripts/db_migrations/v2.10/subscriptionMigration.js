@@ -103,7 +103,7 @@ db.getSiblingDB('admin').getCollection('system.users').find({}).forEach(function
 			if(createdAt) {
 				updateBson.createdAt = createdAt;
 			}
-			db.getSiblingDB('admin').getCollection('system.users').update({_id: user._id}, {$set : updateBson});
+			db.getSiblingDB('admin').getCollection('system.users').updateOne({_id: user._id}, {$set : updateBson});
 
 		}
 		print("\tUpdated Sub:");

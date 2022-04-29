@@ -17,7 +17,9 @@
 
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
 const db = require('../handler/db');
+const { riskCategories } = require('./risks.constants');
 const { templates } = require('../utils/responseCodes');
+const { topicTypes } = require('./issues.constants');
 
 const SUBSCRIPTION_PATH = 'customData.billing.subscriptions';
 
@@ -83,6 +85,11 @@ Teamspace.getMembersInfo = async (teamspace) => {
 		}
 		return res;
 	});
+};
+
+Teamspace.createTeamspaceSettings = async (teamspace) => {
+	const settings = { _id: teamspace, topicTypes, riskCategories };
+	await db.insertOne(teamspace, 'teamspace', settings);
 };
 
 module.exports = Teamspace;

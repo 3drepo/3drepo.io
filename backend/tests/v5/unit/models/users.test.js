@@ -22,6 +22,9 @@ const _ = require('lodash');
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { loginPolicy } = require(`${src}/utils/config`);
+const { generateRandomString } = require('../../helper/services');
+const { TEAMSPACE_ADMIN } = require('../../../../src/v5/utils/permissions/permissions.constants');
+
 const apiKey = 'b284ab93f936815306fbe5b2ad3e447d';
 jest.mock('../../../../src/v5/utils/helper/strings', () => ({
 	...jest.requireActual('../../../../src/v5/utils/helper/strings'),
@@ -498,6 +501,96 @@ const testGetUserByUsernameOrEmail = () => {
 	});
 };
 
+const formatNewUserData = (newUserData, createdAt, emailExpiredAt) => {
+	const formattedData = {
+		createdAt,
+		inactive: true,
+		firstName: newUserData.firstName,
+		lastName: newUserData.lastName,
+		email: newUserData.email,
+		mailListOptOut: !newUserData.mailListAgreed,
+		billing: {
+			billingInfo: {
+				firstName: newUserData.firstName,
+				lastName: newUserData.lastName,
+				countryCode: newUserData.countryCode,
+				company: newUserData.company,
+			},
+		},
+		emailVerifyToken: {
+			token: newUserData.token,
+			expiredAt: emailExpiredAt,
+		},
+		permissions: newUserData.permissions,
+	};
+
+	return formattedData;
+};
+
+const testAddUser = () => {
+	describe('Add a new user', () => {
+		test('should add a new user', async () => {
+			const newUserData = {
+				username: generateRandomString(),
+				email: 'example@email.com',
+				password: generateRandomString(),
+				firstName: generateRandomString(),
+				lastName: generateRandomString(),
+				mailListAgreed: true,
+				countryCode: 'GB',
+				company: generateRandomString(),
+				permissions: [],
+			};
+
+			const fn = jest.spyOn(db, 'createUser');
+			await User.addUser(newUserData);
+			expect(fn).toHaveBeenCalledTimes(1);
+			const userCustomData = fn.mock.calls[0][2];
+			expect(userCustomData).toHaveProperty('createdAt');
+			expect(userCustomData).toHaveProperty('emailVerifyToken.expiredAt');
+			const expectedCustomData = formatNewUserData(newUserData, userCustomData.createdAt,
+				userCustomData.emailVerifyToken.expiredAt);
+			expect(fn).toHaveBeenCalledWith(newUserData.username, newUserData.password, expectedCustomData);
+		});
+	});
+};
+
+const testVerify = () => {
+	describe('Verify a user', () => {
+		test('should verify a user', async () => {
+			const customData = { firstName: generateRandomString(), lastName: generateRandomString() };
+			const username = generateRandomString();
+			const fn = jest.spyOn(db, 'findOneAndUpdate').mockImplementation(() => ({ customData }));
+			const res = await User.verify(username);
+			expect(res).toEqual(customData);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username },
+				{ $unset: { 'customData.inactive': 1, 'customData.emailVerifyToken': 1 } },
+				{
+					'customData.firstName': 1,
+					'customData.lastName': 1,
+					'customData.email': 1,
+					'customData.billing.billingInfo.company': 1,
+					'customData.mailListOptOut': 1,
+				});
+		});
+	});
+};
+
+const testGrantTeamspacePermissionToUser = () => {
+	describe('Grant teamspace permission to user', () => {
+		test('Should grant teamspace permission to user', async () => {
+			const teamspace = generateRandomString();
+			const username = generateRandomString();
+			const fn = jest.spyOn(db, 'updateOne').mockImplementation(() => {});
+			await User.grantAdminToUser(username, teamspace);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: username },
+				{ $push: { 'customData.permissions': { user: teamspace, permissions: [TEAMSPACE_ADMIN] } } });
+		});
+	});
+};
+
 describe('models/users', () => {
 	testGetAccessibleTeamspaces();
 	testGetFavourites();
@@ -513,4 +606,7 @@ describe('models/users', () => {
 	testUpdatePassword();
 	testUpdateResetPasswordToken();
 	testGetUserByUsernameOrEmail();
+	testAddUser();
+	testVerify();
+	testGrantTeamspacePermissionToUser();
 });

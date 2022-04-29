@@ -15,18 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormTextFieldProps } from '@controls/formTextField/formTextField.component';
-import { UnitTextField } from './formTextFieldUnit.styles';
+const addAdminJob = require('./addAdminJob');
 
-type FormTextFieldUnitProps = Omit<FormTextFieldProps, 'label'> & {
-	labelName: string;
-	labelUnit: string;
-};
+const scripts = [
+	{ script: addAdminJob, desc: 'Add Admin job and assign the teamspace owner' },
+];
 
-export const FormTextFieldUnit = ({ labelName, labelUnit, ...otherProps }: FormTextFieldUnitProps) => (
-	<UnitTextField
-		$labelName={labelName}
-		$labelUnit={labelUnit}
-		{...otherProps}
-	/>
-);
+module.exports = scripts;

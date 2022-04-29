@@ -8,7 +8,7 @@ db.getSiblingDB('admin').adminCommand({listDatabases:1}).databases.forEach(funct
 		print('\tCollection: ' + riskCollection + ' ----------------------------------');
 		myDb.getCollection(riskCollection).find().forEach(function(risk) {
 			if(risk.viewpoint && !risk.viewpoints) {
-				myDb.getCollection(riskCollection).update({_id: risk._id}, {$set: {viewpoints: [risk.viewpoint]}});
+				myDb.getCollection(riskCollection).updateOne({_id: risk._id}, {$set: {viewpoints: [risk.viewpoint]}});
 			}
 		});
 	});

@@ -15,10 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { createTheme } from '@mui/material/styles';
+import { theme as oldTheme } from '@/v5/ui/themes/theme';
+import _ from 'lodash';
 
-export const HeaderButtonsGroup = styled.div`
-	& > :last-child {
-		margin-right: 0;
-	}
-`;
+export const theme = createTheme(
+	_.merge(
+		oldTheme,
+		{
+			components: {
+				MuiInput: {
+					styleOverrides: {
+						formControl: {
+							'& svg': {
+								top: 13,
+							},
+						},
+					},
+				},
+			},
+		},
+	),
+);

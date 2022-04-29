@@ -28,6 +28,7 @@ import { filterContainers } from '@/v5/store/containers/containers.helpers';
 import { useParams } from 'react-router-dom';
 import { isEmpty } from 'lodash';
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { IconContainer, IncludeIcon, RemoveIcon } from './editFederationModal.styles';
 import { ActionButtonProps, EditFederationContainers, IconButtonProps } from './editFederationContainersList/editFederationContainersList.component';
 import { useContainersData } from '../../containers/containers.hooks';
@@ -43,7 +44,7 @@ export const EditFederationModal = ({
 	federation,
 	onClickClose,
 }: EditFederationModalProps): JSX.Element => {
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const { teamspace, project } = useParams<DashboardParams>();
 	const { containers } = useContainersData();
 	const getContainerById = (id: string) => containers.find((container: IContainer) => container._id === id);
 
