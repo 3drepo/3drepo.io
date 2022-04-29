@@ -74,28 +74,12 @@ export const MyTeamspaceImage = styled(Avatar)`
 	}
 `;
 
-export const TeamspaceImage = styled.div<{ imageURL?: string;}>`
+export const TeamspaceImage = styled.img<{ imageURL?: string;}>`
 	position: relative;
 	height: 175px;
+	width: 222px;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	background-image: ${({ imageURL }) => (imageURL ? `url(${imageURL})` : 'none')};
-	background-repeat: no-repeat;
-	background-position: center;
-	background-size: cover;
-`;
-
-export const TeamspaceLogo = styled.img`
-	max-height: 100px;
-	max-width: 100px;
-
-	margin: auto;
-	display: block;
-	display: ;
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
+	object-fit: cover;
 `;
 
 export const Content = styled(CardContent)`

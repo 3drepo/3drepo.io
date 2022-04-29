@@ -20,7 +20,7 @@ import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentU
 import { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
-import { CardHeading, CardSubheading, Container, Content, ListItem, TeamspaceImage, TeamspaceLogo, Link, MyTeamspaceImage } from './teamspaceCard.styles';
+import { CardHeading, CardSubheading, Container, Content, ListItem, TeamspaceImage, Link, MyTeamspaceImage } from './teamspaceCard.styles';
 
 interface ITeamspaceCard {
 	variant?: 'primary' | 'secondary',
@@ -36,9 +36,9 @@ export const TeamspaceCard = ({ variant = 'primary', teamspaceName, imageURL, cl
 	const to = uriCombine(url, teamspaceName || '');
 
 	const [imgSrc, setImgSrc] = useState(imageURL);
-	const defaultLogo = 'assets/images/logo.png';
+	const DEFAULT_LOGO = 'assets/images/teamspace_placeholder.png';
 	const onImageError = () => {
-		setImgSrc(defaultLogo);
+		setImgSrc(DEFAULT_LOGO);
 	};
 	return (
 		<ListItem>
@@ -49,12 +49,7 @@ export const TeamspaceCard = ({ variant = 'primary', teamspaceName, imageURL, cl
 							? (
 								<MyTeamspaceImage user={user} isButton={false} />
 							) : (
-								<TeamspaceImage>
-									<TeamspaceLogo
-										src={imgSrc}
-										onError={onImageError}
-									/>
-								</TeamspaceImage>
+								<TeamspaceImage src={imgSrc} onError={onImageError} />
 							)
 					}
 					<Content>
