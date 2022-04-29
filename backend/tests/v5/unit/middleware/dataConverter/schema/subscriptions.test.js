@@ -20,7 +20,19 @@ const { generateRandomString } = require('../../../../helper/services');
 
 const SubscriptionSchema = require(`${src}/middleware/dataConverter/schemas/subscriptions`);
 
-const formatData = (data) => ({ ...data, ...(data.expiryDate ? { expiryDate: new Date(data.expiryDate) } : {}) });
+const formatData = (data) => {
+	const res = { ...data };
+
+	if (data.expiryDate) {
+		res.expiryDate = new Date(data.expiryDate);
+	}
+	if (data.collaborators) {
+		const num = parseInt(data.collaborators, 10);
+
+		res.collaborators = Number.isNaN(num) ? data.collaborators : num;
+	}
+	return res;
+};
 
 const testSubscriptionSchema = () => {
 	const dummyData = {
@@ -38,6 +50,7 @@ const testSubscriptionSchema = () => {
 		['unlimited collaborators', 'enterprise', { collaborators: 'unlimited' }, true],
 		['negative collaborators', 'enterprise', { collaborators: -1 }, false],
 		['random string as collaborators', 'enterprise', { collaborators: generateRandomString() }, false],
+		['numer string as collaborators', 'enterprise', { collaborators: '100' }, true],
 		['only data', 'enterprise', { data: 1 }, true],
 		['negative data', 'enterprise', { data: -1 }, false],
 		['just expiryDate', 'enterprise', { expiryDate: new Date(Date.now() + 1000) }, true],

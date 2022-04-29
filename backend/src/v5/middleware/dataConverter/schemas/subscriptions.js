@@ -22,12 +22,11 @@ const Subscription = {};
 
 const schema = Yup.object().shape({
 	collaborators: Yup.lazy((value) => {
-		switch (typeof value) {
-		case 'string':
+		if (Number.isNaN(parseInt(value, 10))) {
 			return Yup.string().test('collaborator value check', 'must be number or unlimited', (v) => v === 'unlimited');
-		default:
-			return Yup.number().min(0).optional();
 		}
+
+		return Yup.number().min(0).optional();
 	}),
 	data: Yup.number().min(0),
 	expiryDate: Yup.date().min(new Date()).nullable().transform((v, o) => (o !== null ? new Date(o) : null)),
@@ -36,11 +35,11 @@ const schema = Yup.object().shape({
 			|| obj.data !== undefined
 			|| obj.expiryDate !== undefined);
 
-const typeSchema = Yup.string().oneOf(SUBSCRIPTION_TYPES).required();
+const typeSchema = Yup.object().shape({ type: Yup.string().oneOf(SUBSCRIPTION_TYPES).required() });
 
 Subscription.validateSchema = async (type, data) => {
 	const [, output] = await Promise.all([
-		typeSchema.validate(type),
+		typeSchema.validate({ type }),
 		schema.validate(data),
 	]);
 
