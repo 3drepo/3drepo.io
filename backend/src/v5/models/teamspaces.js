@@ -50,7 +50,9 @@ Teamspace.editSubscriptions = async (ts, type, data) => {
 		}
 	});
 
-	await teamspaceUpdate({ user: ts }, { $set: action });
+	if (Object.keys(action).length) {
+		await teamspaceUpdate({ user: ts }, { $set: action });
+	}
 };
 
 Teamspace.getTeamspaceAdmins = async (ts) => {

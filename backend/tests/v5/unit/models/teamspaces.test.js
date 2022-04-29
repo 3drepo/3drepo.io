@@ -17,6 +17,8 @@
 
 const { src } = require('../../helper/path');
 
+const { generateRandomString } = require('../../helper/services');
+
 const Teamspace = require(`${src}/models/teamspaces`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -100,7 +102,7 @@ const testGetMembersInfo = () => {
 
 const testGetSubscriptions = () => {
 	describe('Get teamspace subscriptions', () => {
-		test('should subscription if teamspace exists', async () => {
+		test('should succeed if teamspace exists', async () => {
 			const expectedData = {
 				customData: {
 					billing: {
@@ -139,9 +141,73 @@ const testGetSubscriptions = () => {
 	});
 };
 
+const testEditSubscriptions = () => {
+	describe('Get teamspace subscriptions', () => {
+		const formatToMongoAction = (obj, prefix) => {
+			const res = {};
+
+			Object.keys(obj).forEach((val) => {
+				res[`${prefix}.${val}`] = obj[val];
+			});
+
+			return res;
+		};
+
+		test('should update fields provided', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue();
+
+			const teamspace = generateRandomString();
+			const type = generateRandomString();
+
+			const update = {
+				collaborators: 10,
+				data: 100,
+				expiryDate: new Date(),
+			};
+			const subsObjPath = `customData.billing.subscriptions.${type}`;
+
+			await expect(Teamspace.editSubscriptions(teamspace, type, update)).resolves.toBeUndefined();
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: teamspace }, { $set: formatToMongoAction(update, subsObjPath) });
+		});
+
+		test('should only update fields that are recognised', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue();
+
+			const teamspace = generateRandomString();
+			const type = generateRandomString();
+
+			const update = {
+				collaborators: 10,
+				[generateRandomString()]: generateRandomString(),
+			};
+			const subsObjPath = `customData.billing.subscriptions.${type}`;
+
+			await expect(Teamspace.editSubscriptions(teamspace, type, update)).resolves.toBeUndefined();
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: teamspace }, { $set: formatToMongoAction({ collaborators: update.collaborators }, subsObjPath) });
+		});
+
+		test('should not call update if there was no valid data to update', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue();
+
+			const teamspace = generateRandomString();
+			const type = generateRandomString();
+
+			const update = {
+				[generateRandomString()]: generateRandomString(),
+			};
+
+			await expect(Teamspace.editSubscriptions(teamspace, type, update)).resolves.toBeUndefined();
+			expect(fn).not.toHaveBeenCalled(1);
+		});
+	});
+};
+
 describe('models/teamspaces', () => {
 	testTeamspaceAdmins();
 	testHasAccessToTeamspace();
 	testGetSubscriptions();
+	testEditSubscriptions();
 	testGetMembersInfo();
 });

@@ -23,7 +23,7 @@ const { v5Path } = require('../../../interop');
 const Yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 
-const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
+const { getTeamspaceList, getCollectionsEndsWith } = require('../../common/utils');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 const { fs: fsConfig } = require(`${v5Path}/utils/config`);
