@@ -18,15 +18,15 @@
 module.exports = {
 	mongodbMemoryServerOptions: {
 		binary: {
-			version: '5.0.2',
+			version: '5.0.8',
 			skipMD5: true,
 			downloadDir: './node_modules/.cache',
 		},
 		instance: {
 			auth: false,
-			dbName: "admin",
-			ip: "127.0.0.1",
-			port: 27227
+			dbName: 'admin',
+			ip: '127.0.0.1',
+			port: 27227,
 		},
 		autoStart: false,
 	},
