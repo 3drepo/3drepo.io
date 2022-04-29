@@ -41,7 +41,7 @@ export const Link = styled(DecoratedLink)`
 	text-decoration: none;
 `;
 
-export const Container = styled(Card)<{ $variant: string; }>`
+export const StyledCard = styled(Card)<{ $variant: string; }>`
 	${({ $variant, theme }) => {
 		if ($variant === 'primary') {
 			return css`
@@ -74,7 +74,7 @@ export const MyTeamspaceImage = styled(Avatar)`
 	}
 `;
 
-export const TeamspaceImage = styled.img<{ imageURL?: string;}>`
+export const OtherTeamspaceImage = styled.img<{ imageURL?: string;}>`
 	position: relative;
 	height: 175px;
 	width: 222px;
@@ -82,7 +82,7 @@ export const TeamspaceImage = styled.img<{ imageURL?: string;}>`
 	object-fit: cover;
 `;
 
-export const Content = styled(CardContent)`
+export const TeamspaceDetails = styled(CardContent)`
 	padding: 15px 0;
 `;
 

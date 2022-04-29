@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Container } from '../teamspaceCard.styles';
+import { StyledCard } from '../teamspaceCard.styles';
 import { ImagePlaceholder, ListItem, TextPlaceholder } from './placeholderCard.styles';
 
 interface IAddTeamspaceCard {
@@ -24,10 +24,10 @@ interface IAddTeamspaceCard {
 
 export const PlaceholderCard = ({ variant = 'primary' }: IAddTeamspaceCard): JSX.Element => (
 	<ListItem>
-		<Container $variant={variant}>
+		<StyledCard $variant={variant}>
 			<ImagePlaceholder />
 			<TextPlaceholder />
 			<TextPlaceholder width="50%" />
-		</Container>
+		</StyledCard>
 	</ListItem>
 );

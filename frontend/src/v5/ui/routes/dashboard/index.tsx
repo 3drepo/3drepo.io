@@ -23,7 +23,7 @@ import { DashboardLayout } from '@components/dashboard/dashboardLayout';
 import { ViewerCanvas } from '@/v4/routes/viewerCanvas';
 import { PasswordForgot } from '../login/passwordForgot';
 import { PasswordChange } from '../login/passwordChange';
-import { TeamspaceSelect } from '../teamspaceSelect';
+import { TeamspaceSelection } from '../teamspaceSelection';
 import { TeamspaceContent } from './teamspaces';
 import { ProjectContent } from './projects';
 import { Login } from '../login';
@@ -49,7 +49,7 @@ export const MainRoute = () => {
 					<PasswordChange />
 				</Route>
 				<Route exact path={`${path}/dashboard/`}>
-					<TeamspaceSelect />
+					<TeamspaceSelection />
 				</Route>
 				<Route path={`${path}/dashboard/:teamspace/:project?`}>
 					<DashboardLayout>

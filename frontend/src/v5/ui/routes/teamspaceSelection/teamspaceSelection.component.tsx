@@ -20,9 +20,9 @@ import { AppBar } from '@components/shared/appBar';
 import { ModalsDispatcher } from '@components/shared/modals';
 import { TeamspaceList } from '@components/teamspace/teamspaceList/teamspaceList.component';
 import { FormattedMessage } from 'react-intl';
-import { Content, WelcomeMessage } from './teamspaceSelect.styles';
+import { Content, WelcomeMessage } from './teamspaceSelection.styles';
 
-export const TeamspaceSelect = (): JSX.Element => {
+export const TeamspaceSelection = (): JSX.Element => {
 	const firstName = CurrentUserHooksSelectors.selectFirstName();
 	return (
 		<>

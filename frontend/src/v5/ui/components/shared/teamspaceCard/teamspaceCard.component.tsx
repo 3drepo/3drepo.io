@@ -20,7 +20,7 @@ import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentU
 import { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
-import { CardHeading, CardSubheading, Container, Content, ListItem, TeamspaceImage, Link, MyTeamspaceImage } from './teamspaceCard.styles';
+import { CardHeading, CardSubheading, StyledCard, TeamspaceDetails, ListItem, OtherTeamspaceImage, Link, MyTeamspaceImage } from './teamspaceCard.styles';
 
 interface ITeamspaceCard {
 	variant?: 'primary' | 'secondary',
@@ -43,16 +43,16 @@ export const TeamspaceCard = ({ variant = 'primary', teamspaceName, imageURL, cl
 	return (
 		<ListItem>
 			<Link to={to}>
-				<Container $variant={variant} className={className}>
+				<StyledCard $variant={variant} className={className}>
 					{
 						isPersonalTeamspace
 							? (
 								<MyTeamspaceImage user={user} isButton={false} />
 							) : (
-								<TeamspaceImage src={imgSrc} onError={onImageError} />
+								<OtherTeamspaceImage src={imgSrc} onError={onImageError} />
 							)
 					}
-					<Content>
+					<TeamspaceDetails>
 						<CardHeading>{teamspaceName}</CardHeading>
 						<CardSubheading>
 							{
@@ -61,8 +61,8 @@ export const TeamspaceCard = ({ variant = 'primary', teamspaceName, imageURL, cl
 									: <FormattedMessage id="teamspaceCard.sharedWithMe" defaultMessage="Shared with me" />
 							}
 						</CardSubheading>
-					</Content>
-				</Container>
+					</TeamspaceDetails>
+				</StyledCard>
 			</Link>
 		</ListItem>
 	);

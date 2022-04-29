@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { TeamspaceImage } from '../teamspaceCard.styles';
+import { OtherTeamspaceImage } from '../teamspaceCard.styles';
 
 const PlaceholderStyle = css`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
@@ -30,7 +30,7 @@ export const ListItem = styled.li`
 	margin: 10px;
 `;
 
-export const ImagePlaceholder = styled(TeamspaceImage)`
+export const ImagePlaceholder = styled(OtherTeamspaceImage)`
 	${PlaceholderStyle}
 `;
 
