@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,21 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Container, Actions, Status } from '@/v5/ui/components/shared/modals/modals.styles';
 import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import WarningIcon from '@assets/icons/warning.svg';
 import CloseIcon from '@assets/icons/close.svg';
 import { CloseButton } from '@controls/modal/modal.styles';
+import { Actions, Status } from '@/v5/ui/components/shared/modals/modals.styles';
+import { Container } from './alertModal.styles';
 
-interface ErrorDialogProps {
+interface AlertModalProps {
 	method: string;
 	dataType: string;
 	message: string;
 	status: string;
 	handleResolve: () => string;
 }
-export const ErrorDialog = (props: ErrorDialogProps) => {
+export const AlertModal = (props: AlertModalProps) => {
 	const { method, dataType, message, status, handleResolve } = props;
 
 	return (
@@ -39,14 +40,21 @@ export const ErrorDialog = (props: ErrorDialogProps) => {
 				<CloseIcon />
 			</CloseButton>
 			<DialogTitle>
-				<FormattedMessage
-					id="alertModal.header"
-					defaultMessage="Something went wrong trying to {method} the {dataType}"
-					values={{
-						method,
-						dataType,
-					}}
-				/>
+				{method && dataType ? (
+					<FormattedMessage
+						id="alertModal.header"
+						defaultMessage="Something went wrong trying to {method} the {dataType}"
+						values={{
+							method,
+							dataType,
+						}}
+					/>
+				) : (
+					<FormattedMessage
+						id="alertModal.header.default"
+						defaultMessage="Something went wrong"
+					/>
+				)}
 			</DialogTitle>
 			<DialogContent>
 				<DialogContentText>{message}</DialogContentText>

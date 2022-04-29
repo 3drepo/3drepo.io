@@ -22,7 +22,8 @@ import DialogBase from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import { ErrorDialog } from '@/v5/ui/v4Adapter/v4ComponentsOverrides/ErrorDialog/ErrorDialog.component';
+import { AlertModal } from '@/v5/ui/v4Adapter/components/alertModal.component';
+import { isV5 } from '@/v4/helpers/isV5';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { IDialogConfig } from '../../../../../modules/dialog/dialog.redux';
@@ -132,17 +133,11 @@ export const Dialog: FunctionComponent<IProps> = forwardRef((props, ref: Ref<HTM
 		}
 	};
 
-	const isV5 = () => {
-		// TODO implement this one
-		const { v5 } = { v5: true } // selectUrlParams(state);
-		return v5;
-	}
-
 	const renderV5Dialog = () => {
 		const data = { content, ...(props.data || {})};
 
 		return (
-			<ErrorDialog
+			<AlertModal
 				{...data}
 				handleResolve={handleResolve}
 				handleClose={handleClose}
