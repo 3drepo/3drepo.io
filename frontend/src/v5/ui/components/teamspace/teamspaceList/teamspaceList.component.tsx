@@ -22,36 +22,37 @@ import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspace
 import { generateV5ApiUrl } from '@/v5/services/api/default';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
-import { CardList, AlignLeft } from './teamspaceList.styles';
+import { CardList, DummyCard } from './teamspaceList.styles';
 
 export const TeamspaceList = (): JSX.Element => {
 	const username = CurrentUserHooksSelectors.selectUsername();
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
 	const sortedTeamspaces = flatten(partition(teamspaces, (ts) => ts.name === username));
 
+	const MAX_CARDS_PER_ROW = 3;
+	const DummyCards = () => <>{Array.from({ length: MAX_CARDS_PER_ROW - 1 }, (_, i) => <DummyCard key={i} />)}</>;
 	return (
 		<CardList>
-			<AlignLeft>
-				{
-					teamspaces.length ? (
-						sortedTeamspaces.map((teamspace) => (
-							<TeamspaceCard
-								key={teamspace.name}
-								variant="secondary"
-								teamspaceName={teamspace.name}
-								imageURL={generateV5ApiUrl(`teamspaces/${teamspace.name}/avatar?${Date.now()}`, clientConfigService.GET_API)}
-							/>
-						))
-					) : (
-						<>
-							<PlaceholderCard variant="secondary" />
-							<PlaceholderCard variant="secondary" />
-							<PlaceholderCard variant="secondary" />
-						</>
-					)
-				}
-				{ !!teamspaces.length && (<AddTeamspaceCard variant="secondary" />) }
-			</AlignLeft>
+			{
+				teamspaces.length ? (
+					sortedTeamspaces.map((teamspace) => (
+						<TeamspaceCard
+							key={teamspace.name}
+							variant="secondary"
+							teamspaceName={teamspace.name}
+							imageURL={generateV5ApiUrl(`teamspaces/${teamspace.name}/avatar?${Date.now()}`, clientConfigService.GET_API)}
+						/>
+					))
+				) : (
+					<>
+						<PlaceholderCard variant="secondary" />
+						<PlaceholderCard variant="secondary" />
+						<PlaceholderCard variant="secondary" />
+					</>
+				)
+			}
+			{ !!teamspaces.length && (<AddTeamspaceCard variant="secondary" />) }
+			{ teamspaces.length >= MAX_CARDS_PER_ROW - 1 && (<DummyCards />)}
 		</CardList>
 	);
 };

@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { TeamspaceCard } from '@components/shared/teamspaceCard';
 import styled from 'styled-components';
 
 export const Container = styled.div`
 	margin: 16px;
 `;
 
-export const CardList = styled.div`
+export const CardList = styled.ul`
 	flex-direction: row;
 	justify-content: center;
 	width: 798px;
@@ -30,9 +31,10 @@ export const CardList = styled.div`
 	max-width: 70vw;
 	display: flex;
 	flex-wrap: wrap;
+	padding: 0;
 `;
 
-export const AlignLeft = styled.ul`
-	justify-content: left;
+export const DummyCard = styled(TeamspaceCard)`
+	height: 0;
 	padding: 0;
 `;
