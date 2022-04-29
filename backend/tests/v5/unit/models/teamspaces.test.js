@@ -144,7 +144,7 @@ const testGetSubscriptions = () => {
 };
 
 const testEditSubscriptions = () => {
-	describe('Get teamspace subscriptions', () => {
+	describe('Edit teamspace subscriptions', () => {
 		const formatToMongoAction = (obj, prefix) => {
 			const res = {};
 
@@ -206,6 +206,23 @@ const testEditSubscriptions = () => {
 	});
 };
 
+const testRemoveSubscription = () => {
+	describe('Remove teamspace subscriptions', () => {
+		test('should get rid of the license of the given subscription type', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue();
+
+			const teamspace = generateRandomString();
+			const type = generateRandomString();
+
+			const subsObjPath = `customData.billing.subscriptions.${type}`;
+
+			await expect(Teamspace.removeSubscription(teamspace, type)).resolves.toBeUndefined();
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: teamspace }, { $unset: { [subsObjPath]: 1 } });
+		});
+	});
+};
+
 const testCreateTeamspaceSettings = () => {
 	describe('Create teamspace settings', () => {
 		test('should create teamspace settings', async () => {
@@ -225,6 +242,7 @@ describe('models/teamspaces', () => {
 	testHasAccessToTeamspace();
 	testGetSubscriptions();
 	testEditSubscriptions();
+	testRemoveSubscription();
 	testGetMembersInfo();
 	testCreateTeamspaceSettings();
 });

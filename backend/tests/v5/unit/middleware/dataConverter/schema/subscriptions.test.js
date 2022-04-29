@@ -19,6 +19,7 @@ const { src } = require('../../../../helper/path');
 const { generateRandomString } = require('../../../../helper/services');
 
 const SubscriptionSchema = require(`${src}/middleware/dataConverter/schemas/subscriptions`);
+const { SUBSCRIPTION_TYPES } = require(`${src}/models/teamspaces.constants`);
 
 const formatData = (data) => {
 	const res = { ...data };
@@ -68,6 +69,20 @@ const testSubscriptionSchema = () => {
 	});
 };
 
+const testIsValidType = () => {
+	describe.each([
+		...SUBSCRIPTION_TYPES.map((type) => [type, true]),
+		[generateRandomString(), false],
+		[undefined, false],
+		[null, false],
+	])('Checking if a license type is valid', (type, valid) => {
+		test(`License type ${type} should return ${valid}`, () => {
+			expect(SubscriptionSchema.isValidType(type)).toBe(valid);
+		});
+	});
+};
+
 describe('middleware/dataConverter/schema/subscriptions', () => {
 	testSubscriptionSchema();
+	testIsValidType();
 });

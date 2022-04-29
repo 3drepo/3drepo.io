@@ -20,7 +20,7 @@ const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const { validateSchema } = require(`${v5Path}/middleware/dataConverter/schemas/subscriptions`);
+const { isValidType, validateSchema } = require(`${v5Path}/middleware/dataConverter/schemas/subscriptions`);
 const { getSubscriptions, editSubscriptions, removeSubscription } = require(`${v5Path}/models/teamspaces`);
 
 const run = async (teamspace, remove, type, collaborators, data, expiryDate) => {
@@ -28,7 +28,11 @@ const run = async (teamspace, remove, type, collaborators, data, expiryDate) => 
 	logger.logInfo(`${teamspace} currently has the following subscription(s): ${JSON.stringify(subs)}`);
 
 	if (remove) {
-		await removeSubscription(teamspace, type);
+		if (isValidType(type)) {
+			await removeSubscription(teamspace, type);
+		} else {
+			throw new Error(`Unrecognised license type: ${type}`);
+		}
 	} else {
 		const changes = await validateSchema(type, { collaborators, data, expiryDate });
 		await editSubscriptions(teamspace, type, changes);

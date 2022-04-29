@@ -47,9 +47,9 @@ Subscription.validateSchema = async (type, data) => {
 	return output;
 };
 
-Subscription.isValidType = async (type) => {
+Subscription.isValidType = (type) => {
 	try {
-		await typeSchema.validateSync({ type });
+		typeSchema.validateSync({ type });
 		return true;
 	} catch {
 		return false;
