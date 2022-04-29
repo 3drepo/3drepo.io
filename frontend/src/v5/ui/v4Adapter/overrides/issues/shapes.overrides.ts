@@ -18,11 +18,20 @@
 import { css } from 'styled-components';
 import { Content } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { MeasuringTypeContainer } from '@/v4/routes/viewerGui/components/risks/components/shapesFormTab/shapesFormTab.styles';
+import { Wrapper as Measurement } from '@/v4/routes/viewerGui/components/measurements/components/measuringType/measuringType.styles';
 
 export default css`
 	${Content} {
+		align-items: center;
+		
 		${MeasuringTypeContainer} {
-			text-transform: capitalize;
+			color: ${({ theme }) => theme.palette.base.main};
+			font-size: 10px;
+		}
+
+		${Measurement} {
+			margin: 0 8px;
+			height: 24px;
 		}
 	}
 `;

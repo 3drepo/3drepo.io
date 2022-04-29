@@ -65,7 +65,7 @@ export const TooltipButton = (props: IProps) => {
 		</StyledIconButton>
 	);
 
-	const v5PopperProps = isV5 && {
+	const v5PopperProps = isV5() && {
 		PopperProps: {
 			sx: {
 				top: '14px !important',
