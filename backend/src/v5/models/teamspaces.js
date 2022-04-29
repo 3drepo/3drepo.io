@@ -55,6 +55,8 @@ Teamspace.editSubscriptions = async (ts, type, data) => {
 	}
 };
 
+Teamspace.removeSubscription = (ts, type) => teamspaceUpdate({ user: ts }, { $unset: { [`${SUBSCRIPTION_PATH}.${type}`]: 1 } });
+
 Teamspace.getTeamspaceAdmins = async (ts) => {
 	const data = await getTeamspace(ts, { 'customData.permissions': 1 });
 	return data.customData.permissions.flatMap(

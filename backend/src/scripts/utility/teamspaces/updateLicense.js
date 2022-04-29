@@ -21,17 +21,20 @@ const { v5Path } = require('../../../interop');
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const { validateSchema } = require(`${v5Path}/middleware/dataConverter/schemas/subscriptions`);
-const { getSubscriptions, editSubscriptions } = require(`${v5Path}/models/teamspaces`);
+const { getSubscriptions, editSubscriptions, removeSubscription } = require(`${v5Path}/models/teamspaces`);
 
-const run = async (teamspace, type, collaborators, data, expiryDate) => {
+const run = async (teamspace, remove, type, collaborators, data, expiryDate) => {
 	const subs = await getSubscriptions(teamspace);
-	logger.logInfo(`${teamspace} currently has the following subscription: ${JSON.stringify(subs)}`);
+	logger.logInfo(`${teamspace} currently has the following subscription(s): ${JSON.stringify(subs)}`);
 
-	let changes = { collaborators, data, expiryDate };
-	changes = await validateSchema(type, changes);
-	await editSubscriptions(teamspace, type, changes);
+	if (remove) {
+		await removeSubscription(teamspace, type);
+	} else {
+		const changes = await validateSchema(type, { collaborators, data, expiryDate });
+		await editSubscriptions(teamspace, type, changes);
+	}
 	const subsUpdated = await getSubscriptions(teamspace);
-	logger.logInfo(`${teamspace} has been updated with the following subscription: ${JSON.stringify(subsUpdated)}`);
+	logger.logInfo(`${teamspace} has been updated. Current subscription(s): ${JSON.stringify(subsUpdated)}`);
 };
 
 const genYargs = (yargs) => {
@@ -53,11 +56,16 @@ const genYargs = (yargs) => {
 			describe: 'teamspace to update',
 			type: 'string',
 			demandOption: true,
+		})
+		.option('remove', {
+			describe: 'remove license from user',
+			type: 'boolean',
+			default: false,
 		});
 	return yargs.command(commandName,
 		'Update the license on a teamspace',
 		argsSpec,
-		(argv) => run(argv.teamspace, argv.type, argv.users, argv.data, argv.expiryDate === 'null' ? null : argv.expiryDate));
+		(argv) => run(argv.teamspace, argv.remove, argv.type, argv.users, argv.data, argv.expiryDate === 'null' ? null : argv.expiryDate));
 };
 
 module.exports = {

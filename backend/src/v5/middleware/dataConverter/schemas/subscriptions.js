@@ -46,4 +46,13 @@ Subscription.validateSchema = async (type, data) => {
 	return output;
 };
 
+Subscription.isValidType = async (type) => {
+	try {
+		await typeSchema.validateSync({ type });
+		return true;
+	} catch {
+		return false;
+	}
+};
+
 module.exports = Subscription;
