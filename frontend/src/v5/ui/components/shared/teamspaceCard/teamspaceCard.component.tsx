@@ -36,9 +36,9 @@ export const TeamspaceCard = ({ variant = 'primary', teamspaceName, imageURL, cl
 	const to = uriCombine(url, teamspaceName || '');
 
 	const [imgSrc, setImgSrc] = useState(imageURL);
-	const DEFAULT_LOGO = 'assets/images/teamspace_placeholder.png';
+	const DEFAULT_IMAGE = 'assets/images/teamspace_placeholder.svg';
 	const onImageError = () => {
-		setImgSrc(DEFAULT_LOGO);
+		setImgSrc(DEFAULT_IMAGE);
 	};
 	return (
 		<ListItem>
