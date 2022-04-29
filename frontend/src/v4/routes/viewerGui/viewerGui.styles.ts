@@ -26,7 +26,7 @@ export const Container = styled.div`
 	visibility: ${({ hidden }) => hidden ? 'hidden' : 'initial'};
 `;
 
-export const panelStyles = css`
+const panelStyles = css`
 	width: 380px;
 	height: calc(100% - 95px);
 	position: absolute;

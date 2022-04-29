@@ -27,7 +27,6 @@ import {
 
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import GridBase from '@mui/material/Grid';
 import {GROUP_PANEL_NAME} from '../../../../constants/groups';
 
 import { COLOR } from '../../../../styles';
@@ -108,8 +107,6 @@ export const Header = styled(AccordionSummary).attrs({
 		box-shadow: ${({expanded}: { expanded: boolean }) => expanded ? `0 4px 7px -4px ${COLOR.BLACK_30};` : 'none'};
 	}
 ` as any;
-
-export const Grid = styled(GridBase)``;
 
 export const CollapsableContent = styled.div`
 	margin-bottom: 8px;
