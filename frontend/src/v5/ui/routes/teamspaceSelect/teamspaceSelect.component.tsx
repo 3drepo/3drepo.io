@@ -29,7 +29,13 @@ export const TeamspaceSelect = (): JSX.Element => {
 			<AppBar />
 			<Content>
 				<WelcomeMessage>
-					<FormattedMessage id="teamspaces.welcome" defaultMessage="Welcome back, {firstName}!" values={{ firstName }} />
+					{
+						firstName ? (
+							<FormattedMessage id="teamspaces.welcome.name" defaultMessage="Welcome back, {firstName}!" values={{ firstName }} />
+						) : (
+							<FormattedMessage id="teamspaces.welcome.noName" defaultMessage="Welcome back!" />
+						)
+					}
 				</WelcomeMessage>
 				<TeamspaceList />
 			</Content>
