@@ -35,7 +35,7 @@ db.getSiblingDB('admin').adminCommand({listDatabases:1}).databases.forEach(funct
 			};
 
 			print("Adding topic types to: " + setting.name);
-			myDb.getCollection('settings').update({ _id: setting._id }, updateObj);
+			myDb.getCollection('settings').updateOne({ _id: setting._id }, updateObj);
 		}
 	});
 });

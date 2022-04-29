@@ -16,7 +16,7 @@
  */
 import { PureComponent, ReactNode, createRef } from 'react';
 import { Field, Formik } from 'formik';
-import { Tooltip } from '@mui/material';
+import { Tooltip, Grid } from '@mui/material';
 import * as Yup from 'yup';
 import { isV5 } from '@/v4/helpers/isV5';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -31,7 +31,6 @@ import {
 	Container,
 	Details,
 	Header,
-	Grid,
 	MainInfoContainer,
 	NotCollapsableContent,
 	ScrollableContainer,

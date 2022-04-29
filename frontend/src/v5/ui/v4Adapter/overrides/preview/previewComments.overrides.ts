@@ -33,6 +33,7 @@ export default css`
 		${Tabs} {
 			padding: 0 14px;
 			background-color: ${({ theme }) => theme.palette.primary.contrast};
+			width: unset;
 		}
 
 		${TabContainer} {

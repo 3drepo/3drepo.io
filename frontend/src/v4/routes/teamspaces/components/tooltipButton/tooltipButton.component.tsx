@@ -32,7 +32,7 @@ interface IProps {
 	onClick?: (event) => void;
 	id?: string;
 	children?: any;
-	sx?: any;
+	notOverlap?: boolean;
 }
 
 export const TooltipButton = (props: IProps) => {
@@ -48,7 +48,7 @@ export const TooltipButton = (props: IProps) => {
 		placement,
 		disableFocusListener,
 		children,
-		sx,
+		notOverlap,
 	} = props;
 	const iconProps = { color, fontSize: 'small' } as any;
 
@@ -65,7 +65,7 @@ export const TooltipButton = (props: IProps) => {
 		</StyledIconButton>
 	);
 
-	const v5PopperProps = isV5() && {
+	const v5PopperProps = isV5() && notOverlap && {
 		PopperProps: {
 			sx: {
 				top: '14px !important',
