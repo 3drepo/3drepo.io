@@ -80,6 +80,7 @@ export const OtherTeamspaceImage = styled.img<{ imageURL?: string;}>`
 	width: 222px;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	object-fit: cover;
+	margin-bottom: -5px;
 `;
 
 export const TeamspaceDetails = styled(CardContent)`
