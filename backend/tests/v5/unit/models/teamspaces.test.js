@@ -199,7 +199,7 @@ const testEditSubscriptions = () => {
 			};
 
 			await expect(Teamspace.editSubscriptions(teamspace, type, update)).resolves.toBeUndefined();
-			expect(fn).not.toHaveBeenCalled(1);
+			expect(fn).not.toHaveBeenCalled();
 		});
 	});
 };
