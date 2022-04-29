@@ -527,7 +527,7 @@ export class ColorPicker extends PureComponent<IProps, IState> {
                         <ColorSample color={selectedColor} />
                     </Grid>
                     <Grid item>
-                        <FormControl>
+                        <FormControl className='colorPicker'>
                             <SelectedHash
                                 value={hashInput.replace('#', '')}
                                 onChange={this.handleHashInputChange}
