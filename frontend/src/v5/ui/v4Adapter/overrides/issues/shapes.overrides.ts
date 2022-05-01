@@ -22,7 +22,7 @@ import { Wrapper as Measurement } from '@/v4/routes/viewerGui/components/measure
 import { SectionHeader, List, StyledIconButton as ExpandListButton } from '@/v4/routes/viewerGui/components/measurements/components/measurementsList/measurementsList.styles';
 import { StyledTextField, MeasurementPoint, MeasurementValue } from '@/v4/routes/viewerGui/components/measurements/components/measureItem/measureItem.styles';
 import { ColorSelect, StyledIconButton } from '@/v4/routes/components/colorPicker/colorPicker.styles';
-import { StyledMarkdownField, StyledLinkableField } from '@/v4/routes/components/textField/textField.styles';
+import { StyledMarkdownField, StyledLinkableField, ActionsLine } from '@/v4/routes/components/textField/textField.styles';
 
 export default css`
 	// color picker
@@ -77,7 +77,7 @@ export default css`
 			border-bottom: none;
 
 			&:last-of-type {
-				margin-bottom: -15px;
+				margin-bottom: -5px;
 			}
 
 			li { 
@@ -92,11 +92,26 @@ export default css`
 				color: ${({ theme }) => theme.palette.secondary.main};
 			}
 
+			.MuiFormControl-root {
+				width: 113%;
+				margin-left: -15px;
+			}
+
 			${StyledTextField} {
+				overflow: visible;
+
 				${StyledMarkdownField},
 				${StyledLinkableField} {
 					font-size: 12px;
 					color: ${({ theme }) => theme.palette.secondary.main};
+				}
+
+				${ActionsLine} {
+					bottom: 4px;
+
+					button { 
+						margin: 0;
+					}
 				}
 			}
 		}
