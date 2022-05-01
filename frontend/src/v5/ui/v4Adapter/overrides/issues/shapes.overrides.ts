@@ -19,13 +19,20 @@ import { css } from 'styled-components';
 import { Content } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { MeasuringTypeContainer } from '@/v4/routes/viewerGui/components/risks/components/shapesFormTab/shapesFormTab.styles';
 import { Wrapper as Measurement } from '@/v4/routes/viewerGui/components/measurements/components/measuringType/measuringType.styles';
-import { ColorSelect } from '@/v4/routes/components/colorPicker/colorPicker.styles';
+import { SectionHeader, List, StyledIconButton as ExpandListButton } from '@/v4/routes/viewerGui/components/measurements/components/measurementsList/measurementsList.styles';
+import { StyledTextField, MeasurementPoint, MeasurementValue } from '@/v4/routes/viewerGui/components/measurements/components/measureItem/measureItem.styles';
+import { ColorSelect, StyledIconButton } from '@/v4/routes/components/colorPicker/colorPicker.styles';
+import { StyledMarkdownField, StyledLinkableField } from '@/v4/routes/components/textField/textField.styles';
 
 export default css`
 	// color picker
 	${ColorSelect} {
 		width: unset;
 		margin-left: 8px;
+
+		${StyledIconButton} {
+			margin: 0;
+		}
 	}
 
 	${Content} {
@@ -39,6 +46,59 @@ export default css`
 		${Measurement} {
 			margin: 0 8px;
 			height: 24px;
+		}
+
+		// expandable list header
+		${SectionHeader} {
+			background-color: inherit;
+			border-bottom: none;
+
+			&:not(:first-of-type) {
+				margin-top: 15px;
+			}
+
+			${ExpandListButton} {
+				margin: 0;
+			}
+
+			* {
+				font-size: 12px;
+				color: ${({ theme }) => theme.palette.secondary.main};
+				font-weight: 500;
+
+				svg {
+					font-size: 24px;
+				}
+			}
+		}
+
+		// expandable list
+		${List} {
+			border-bottom: none;
+
+			&:last-of-type {
+				margin-bottom: -15px;
+			}
+
+			li { 
+				background-color: inherit;
+				border-top: 1px solid ${({ theme }) => theme.palette.base.lightest};
+				border-bottom: none;
+			}
+
+			${MeasurementPoint},
+			${MeasurementValue} {
+				font-size: 12px;
+				color: ${({ theme }) => theme.palette.secondary.main};
+			}
+
+			${StyledTextField} {
+				${StyledMarkdownField},
+				${StyledLinkableField} {
+					font-size: 12px;
+					color: ${({ theme }) => theme.palette.secondary.main};
+				}
+			}
 		}
 	}
 `;
