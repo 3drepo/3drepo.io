@@ -16,7 +16,7 @@ adminDB.getCollection('system.users').find().forEach(function(user){
 		});
 		if(needUpdate)
 		{
-			adminDB.getCollection('system.users').update({"user": user.user}, {"$set" : {"roles": newRoles}});
+			adminDB.getCollection('system.users').updateOne({"user": user.user}, {"$set" : {"roles": newRoles}});
 		}
 		
 });

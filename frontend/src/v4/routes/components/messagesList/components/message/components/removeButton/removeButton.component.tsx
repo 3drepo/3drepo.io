@@ -36,9 +36,7 @@ export const RemoveButton = ({ removeMessage, index, guid }: IProps) => {
 	return (
 		<Wrapper>
 			<TooltipButton
-				sx={{
-					...(isV5() && { margin: '10px 48px 0 0' }),
-				}}
+				notOverlap
 				label="Remove"
 				action={handleRemoveMessage}
 				Icon={CloseIcon}

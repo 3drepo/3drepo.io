@@ -17,11 +17,16 @@
 
 import { css } from 'styled-components';
 import { Details, Container as IssueDetails } from '@/v4/routes/viewerGui/components/previewItemInfo/previewItemInfo.styles';
-import { Container, Header, Grid, TitleNumber, StyledForm } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
+import { Container, Header, TitleNumber, StyledForm, Details as Accordion } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { FieldWrapper } from '@/v4/routes/components/textField/textField.styles';
 import { StyledButton } from '@/v4/routes/viewerGui/components/containedButton/containedButton.styles';
 
 export default css`
+	${Accordion} {
+		padding: 0;
+		background-color: #f7f8fa; // TODO - fix after new palette is released
+	}
+
 	${Container} {
 		${StyledButton} {
 			border: solid 1px ${({ theme }) => theme.palette.secondary.main};
@@ -47,65 +52,61 @@ export default css`
 			padding-top: 6px;
 			min-height: 84px;
 
-			// number and title field
-			${Grid} {
+			${TitleNumber} {
+				color: ${({ theme }) => theme.palette.secondary.main};
+				background-color: #edf0f8; // TODO - fix after new palette is released
+				border: solid 1px #d9d9d9; // TODO - fix after new palette is released
+				border-right: 0;
+				border-top-left-radius: 5px;
+				border-bottom-left-radius: 5px;
+				padding: 2px 7px;
+				font-weight: 500;
+				margin-right: 0;
+				min-width: 8px;
+			}
 
-				${TitleNumber} {
-					color: ${({ theme }) => theme.palette.secondary.main};
-					background-color: #edf0f8; // TODO - fix after new palette is released
-					border: solid 1px #d9d9d9; // TODO - fix after new palette is released
-					border-right: 0;
-					border-top-left-radius: 5px;
-					border-bottom-left-radius: 5px;
-					padding: 2px 7px;
-					font-weight: 500;
-					margin-right: 0;
-					min-width: 8px;
+			${StyledForm} {
+				${FieldWrapper} {
+					height: 24px;
+					&::after {
+						border-bottom: 1px solid transparent;
+					}
 				}
 
-				${StyledForm} {
-					${FieldWrapper} {
-						height: 24px;
-						&::after {
-							border-bottom: 1px solid transparent;
-						}
-					}
+				button {
+					margin: 0 10px 0 0 !important;
+					height: 15px;
+					width: 15px;
+				}
 
-					button {
-						margin: 0 10px 0 0 !important;
-						height: 15px;
-						width: 15px;
-					}
+				// title textfield input
+				span, fieldset, .MuiOutlinedInput-notchedOutline, input {
+					border-top-right-radius: 5px;
+					border-bottom-right-radius: 5px;
+					border-top-left-radius: 0;
+					border-bottom-left-radius: 0;
+					display: flex;
+					align-items: center;
+					padding-left: 8px;
+					height: 22px;
+					font-size: 14px;
+				}
 
-					// title textfield input
-					span, fieldset, .MuiOutlinedInput-notchedOutline, input {
-						border-top-right-radius: 5px;
-						border-bottom-right-radius: 5px;
-						border-top-left-radius: 0;
-						border-bottom-left-radius: 0;
-						display: flex;
-						align-items: center;
-						padding-left: 8px;
-						height: 22px;
-						font-size: 14px;
-					}
+				.MuiOutlinedInput-notchedOutline {
+					top: -1px;
+				}
 
-					.MuiOutlinedInput-notchedOutline {
-						top: -1px;
-					}
+				span {
+					color: #c1c8d5; // TODO - fix after new palette is released
+					border: solid 1px #c1c8d5; // TODO - fix after new palette is released
+					margin: 0;
+					box-sizing: border-box;
+					height: 100%;
+				}
 
-					span {
-						color: #c1c8d5; // TODO - fix after new palette is released
-						border: solid 1px #c1c8d5; // TODO - fix after new palette is released
-						margin: 0;
-						box-sizing: border-box;
-						height: 100%;
-					}
-
-					// weird floating legend
-					legend {
-						display: none;
-					}
+				// weird floating legend
+				legend {
+					display: none;
 				}
 			}
 
