@@ -23,7 +23,8 @@ import {
 	AccordionDetails,
 	AccordionSummary,
 	IconButton,
-	Typography as TypographyComponent
+	Typography as TypographyComponent,
+	Grid as GridBase
 
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -118,6 +119,8 @@ export const StyledForm = styled(Form)`
 		padding-right: 4px !important;
 	}
 `;
+
+export const Grid = styled(GridBase)``;
 
 export const Content = styled.div`
 	background-color: ${COLOR.BLACK_6};
