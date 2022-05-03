@@ -55,28 +55,27 @@ export const MeasurementsList = ({
 
 	return (
 		<>
-			<SectionHeader className='___SECTION_HEADER'>
-				<StyledIconButton onClick={handleOnClick} className='___STYLED_ICON'>
+			<SectionHeader>
+				<StyledIconButton onClick={handleOnClick}>
 					{expanded ? <LessIcon /> : <MoreIcon />}
 				</StyledIconButton>
 
-				<Title className='___TITLE'>{MEASURE_TYPE_NAME[measureType]}</Title>
+				<Title>{MEASURE_TYPE_NAME[measureType]}</Title>
 				{
 					isCountable &&
 					<>
-						<Total className='___TOTAL'>
+						<Total>
 							Total:&nbsp;
 							{getTotal(measurements, measureType, units, props.modelUnit)}
 						</Total>
-						<Units sum className='___UNITS'>{getUnits(units, measureType)}</Units>
+						<Units sum>{getUnits(units, measureType)}</Units>
 					</>
 				}
 			</SectionHeader>
 			{expanded &&
-				<List className='___LIST'>
+				<List>
 					{measurements.map((measurement, index) => (
 						<MeasureItem
-							className='___MEASURE_ITEM'
 							key={measurement.uuid}
 							index={index + 1}
 							typeName={MEASURE_TYPE_NAME[measureType]}
