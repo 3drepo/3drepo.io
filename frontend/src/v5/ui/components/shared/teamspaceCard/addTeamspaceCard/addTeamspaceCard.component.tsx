@@ -23,17 +23,13 @@ interface IAddTeamspaceCard {
 	variant?: 'primary' | 'secondary',
 }
 
-const SUBJECT = 'New 3DRepo Teamspace';
-const BODY = '3D Repo Team, I would like to set up a new Teamspace';
-
 export const AddTeamspaceCard = ({ variant = 'primary' }: IAddTeamspaceCard): JSX.Element => (
-	<ListItem onClick={() => {
-		window.location.href = `mailto:support@3drepo.com?subject=${SUBJECT}&body=${BODY}`;
-	}}
-	>
-		<Container $variant={variant}>
-			<AddTeamspaceIcon />
-			<FormattedMessage id="teamspaceSelect.addNewTeamspace" defaultMessage="New Teamspace" />
-		</Container>
+	<ListItem>
+		<a href="https://3drepo.com/pricing/" target="_blank">
+			<Container $variant={variant}>
+				<AddTeamspaceIcon />
+				<FormattedMessage id="teamspaceSelect.addNewTeamspace" defaultMessage="New Teamspace" />
+			</Container>
+		</a>
 	</ListItem>
 );
