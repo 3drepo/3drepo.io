@@ -345,7 +345,7 @@ class Ticket extends View {
 
 		if (Object.keys(data).length > 0) {
 			updateData["$set"] = data;
-			await tickets.update({ _id }, updateData);
+			await tickets.updateOne({ _id }, updateData);
 		}
 
 		if (shapes) {
@@ -727,7 +727,7 @@ class Ticket extends View {
 			}).concat([systemComment]);
 
 			// 8. Add update promise to updates array
-			ticketsCommentsUpdates.push(ticketsColl.update({_id: ticket._id}, { $set: { comments }}));
+			ticketsCommentsUpdates.push(ticketsColl.updateOne({_id: ticket._id}, { $set: { comments }}));
 		});
 		// 9. update referenced tickets with new system comments
 		await Promise.all(ticketsCommentsUpdates);
@@ -756,7 +756,7 @@ class Ticket extends View {
 			ref_ids.push(ref._id);
 		});
 
-		await tickets.update(ticketQuery, { $set: { comments }, $push: { refs: { $each: ref_ids } } });
+		await tickets.updateOne(ticketQuery, { $set: { comments }, $push: { refs: { $each: ref_ids } } });
 		return refs;
 	}
 
@@ -808,7 +808,7 @@ class Ticket extends View {
 
 		const comments = ticketFound.comments;
 		comments.push(await this.createSystemComment(account, model, sessionId, id, username, "resource", ref.name, null));
-		await tickets.update(ticketQuery, { $set: { comments }, $pull: { refs: resourceId } });
+		await tickets.updateOne(ticketQuery, { $set: { comments }, $pull: { refs: resourceId } });
 
 		if (ref.type !== "http") {
 			delete ref.link;

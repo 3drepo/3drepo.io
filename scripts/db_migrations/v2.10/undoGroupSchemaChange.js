@@ -34,7 +34,7 @@ databaseList.databases.forEach(function(dbEntry) {
 						});
 						print(JSON.stringify(newObjects));
 						if(!dryRun)
-							dbConn.getCollection(colName).update({_id: group._id}, {$set: {objects: newObjects}});
+							dbConn.getCollection(colName).updateOne({_id: group._id}, {$set: {objects: newObjects}});
 					}
 
 				}

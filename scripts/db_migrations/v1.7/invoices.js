@@ -27,7 +27,7 @@ db.adminCommand({listDatabases:1}).databases.forEach(function(database){
 
 		var removeAttrs = { 'pending': ''};
 
-		db.getSiblingDB(database.name).getCollection('billings').update({_id: invoice._id},{
+		db.getSiblingDB(database.name).getCollection('billings').updateOne({_id: invoice._id},{
 			'$set': updateAttrs,
 			'$unset': removeAttrs
 		});

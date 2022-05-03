@@ -107,7 +107,7 @@ function checkTeamspacePrivileges(dbName, members) {
 
 	if (permChanged && autoFix) {
 		log("Removing incorrect teamspace permissions...");
-		userCol.update({user: dbName}, {$set: { "customData.permissions": updatedPerm }});
+		userCol.updateOne({user: dbName}, {$set: { "customData.permissions": updatedPerm }});
 	}
 }
 
@@ -126,7 +126,7 @@ function checkProjectPrivileges(thisDB, members) {
 
 			if(needUpdate && autoFix) {
 				log(`[${project.name}]Removing incorrect project permissions...`);
-				projectCol.update(project, {$set: { permissions: updatedPerm }});
+				projectCol.updateOne(project, {$set: { permissions: updatedPerm }});
 			}
 		});
 	});
@@ -147,7 +147,7 @@ function checkModelPrivileges(thisDB, members) {
 
 			if(needUpdate && autoFix) {
 				log(`[${model.name}]Removing incorrect model permissions...`);
-				modelCol.update(model, {$set: { permissions: updatedPerm }});
+				modelCol.updateOne(model, {$set: { permissions: updatedPerm }});
 			}
 		});
 	});
@@ -345,7 +345,7 @@ function checkProjectSanity() {
 
 			if(autoFix && project.models.length !== newModels.length) {
 				log(`Updating project entry...`);
-			 	projCol.update(project, {$set: {models: newModels}});
+			 	projCol.updateOne(project, {$set: {models: newModels}});
 			}
 		});
 		exitSubSection();

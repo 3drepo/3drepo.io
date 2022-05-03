@@ -1,6 +1,6 @@
 // add basic licence if dun have one
 print('init: create basic licence for everyone if they do not have one');
-db.getSiblingDB('admin').system.users.update({ 'customData.billing.subscriptions.plan': {'$ne':'BASIC'}}, { 
+db.getSiblingDB('admin').system.users.updateMany({ 'customData.billing.subscriptions.plan': {'$ne':'BASIC'}}, { 
     '$push': {
         'customData.billing.subscriptions': {
                     "plan" : "BASIC",
@@ -40,7 +40,7 @@ var permissionTemplates = [
 
 print('init: create default permission templates(viwer, commenter, collaborator) for everyone');
 // generate default permission templates 
-db.getSiblingDB('admin').system.users.update({}, { '$addToSet': {
+db.getSiblingDB('admin').system.users.updateMany({}, { '$addToSet': {
         'customData.permissionTemplates': { '$each': permissionTemplates }
     } 
 }, { multi: true});
@@ -88,7 +88,7 @@ while(users.hasNext()){
 
                 print('creating teamsapce admin permission');
 
-                db.getSiblingDB('admin').system.users.update({
+                db.getSiblingDB('admin').system.users.updateOne({
                     'user': findRoleWithAdmin.db,
                 }, { $addToSet: {
                     'customData.permissions': {
@@ -101,7 +101,7 @@ while(users.hasNext()){
 
                 print('adding teamsapce admin permission');
 
-                db.getSiblingDB('admin').system.users.update({
+                db.getSiblingDB('admin').system.users.updateOne({
                     'user': findRoleWithAdmin.db,
                     'customData.permissions.user': user.user
                 }, { $addToSet: {
@@ -148,7 +148,7 @@ while(users.hasNext()){
                         color = color.color;
                     }
 
-                    db.getSiblingDB('admin').system.users.update({ user: role.db},{
+                    db.getSiblingDB('admin').system.users.updateOne({ user: role.db},{
                         '$addToSet': {
                             'customData.jobs':{
                                 _id: role.role,
@@ -159,7 +159,7 @@ while(users.hasNext()){
 
                     //assign job to this users
                     print('assign job to user');
-                    var res = db.getSiblingDB('admin').system.users.update({user: role.db, 'customData.billing.subscriptions.assignedUser': user.user},{
+                    var res = db.getSiblingDB('admin').system.users.updateOne({user: role.db, 'customData.billing.subscriptions.assignedUser': user.user},{
                         '$set': {
                             'customData.billing.subscriptions.$.job': role.role
                         }
@@ -184,7 +184,7 @@ while(users.hasNext()){
             print('template: ' + permTemplate + ' will be used for this role');
 
             print('add model to customData.models');
-            db.getSiblingDB('admin').system.users.update({ _id: user._id }, { '$addToSet': {
+            db.getSiblingDB('admin').system.users.updateOne({ _id: user._id }, { '$addToSet': {
                 'customData.models': {
                     account: role.db,
                     model: model
@@ -207,7 +207,7 @@ while(users.hasNext()){
 
                 if(updatePerm){
                     print('updating permission for this user on this role');
-                    db.getSiblingDB(role.db).settings.update({ _id: model, 'permissions.user': user.user }, {
+                    db.getSiblingDB(role.db).settings.updateOne({ _id: model, 'permissions.user': user.user }, {
                         '$set':{
                             'permissions.$.permission': permTemplate
                         }
@@ -219,7 +219,7 @@ while(users.hasNext()){
             } else {
 
                 print('adding permission for this user on this role');
-                db.getSiblingDB(role.db).settings.update({ _id: model}, {
+                db.getSiblingDB(role.db).settings.updateOne({ _id: model}, {
                     '$addToSet':{
                         permissions: {
                             user: user.user,
