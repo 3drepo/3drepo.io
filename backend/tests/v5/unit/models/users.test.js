@@ -19,6 +19,7 @@ const { src } = require('../../helper/path');
 
 const _ = require('lodash');
 
+jest.mock('../../../../src/v5/handler/db')
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { loginPolicy } = require(`${src}/utils/config`);
@@ -543,6 +544,7 @@ const testAddUser = () => {
 				permissions: [],
 			};
 
+			db.createUser.mockImplementationOnce(() => {});
 			const fn = jest.spyOn(db, 'createUser');
 			await User.addUser(newUserData);
 			expect(fn).toHaveBeenCalledTimes(1);
