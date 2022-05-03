@@ -103,7 +103,7 @@ export default css`
 				}
 
 				& > *:first-child {
-					&, input, span, fieldset {	
+					&, input, span, fieldset {
 						border-top-left-radius: 5px;
 						border-bottom-left-radius: 5px;
 					}
