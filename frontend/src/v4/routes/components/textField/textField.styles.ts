@@ -40,8 +40,13 @@ export const Container = styled.div`
 
 export const ActionsLine = styled.div`
 	position: absolute;
-	bottom: 4px;
-	right: 0;
+	${isV5() ? css`
+		bottom: 0;
+		right: 5px;
+	` : css`
+		bottom: 4px;
+		right: 0;
+	`}
 `;
 
 export const StyledIconButton = styled(IconButton)`
