@@ -72,7 +72,7 @@ MongoClient.connect(url).then(_db => {
 											}
 										}
 
-										thisDb.collection(modelId + '.issues').update({ '_id': issue._id }, issue);
+										thisDb.collection(modelId + '.issues').updateOne({ '_id': issue._id }, issue);
 									}, err => {
 										err ? reject(err) : resolve();
 									});
