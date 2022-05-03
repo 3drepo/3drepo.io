@@ -57,7 +57,7 @@ queue.purgeQueues = async () => {
 };
 
 const defaultTestRoleName = 'userTest';
- 
+
 // userCredentials should be the same format as the return value of generateUserCredentials
 db.createUser = async (userCredentials, tsList = [], customData = {}) => {
 	const { user, password, apiKey, basicData = {} } = userCredentials;
