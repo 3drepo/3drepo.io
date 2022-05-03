@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import FormControl from '@mui/material/FormControl';
 import Grid from '@mui/material/Grid';
@@ -23,6 +23,7 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import { cond, constant, matches, stubTrue } from 'lodash';
 
+import { isV5 } from '@/v4/helpers/isV5';
 import { COLOR } from '../../../../../../styles';
 import { Image as ImageComponent } from '../../../../../components/image';
 import { MessagesList as MessagesListComponent } from '../../../../../components/messagesList/';
@@ -66,6 +67,20 @@ export const Container = styled.div<{ fill?: boolean, top?: boolean }>`
 	${StyledFormControl} {
 		margin: 1px 0;
 	}
+	
+	${isV5() && css`
+		${TextFieldStyles.StyledTextField} {
+			margin-top: 15px;
+		}
+		margin-bottom: 15px;
+		.MuiInputBase-root {
+			padding: 0;
+			>textarea {
+				min-height: 2rem;
+				padding: 5px 10px;
+			}
+		}
+	`}
 `;
 
 const getFieldsContainerSize = cond([

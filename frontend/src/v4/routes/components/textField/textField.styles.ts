@@ -19,6 +19,7 @@ import styled, { css } from 'styled-components';
 
 import { IconButton, InputLabel, TextField } from '@mui/material';
 
+import { isV5 } from '@/v4/helpers/isV5';
 import { ContainedButton } from '../../viewerGui/components/containedButton/containedButton.component';
 import { LinkableField } from '../linkableField/linkableField.component';
 import { MarkdownField } from '../markdownField/markdownField.component';
@@ -70,6 +71,19 @@ export const StyledMarkdownField = styled(MarkdownField)`
 		min-height: 14px;
 		font-size: 14px;
 		overflow: hidden;
+
+		${ isV5() && css`
+			border: 1px solid #C1C8D5; // TODO: fix after new palette is released
+			border-radius: 5px;
+			min-height: 2rem;
+			padding: 5px 10px;
+			margin-top: 17px;
+			margin-bottom: 0px;
+			background-color: ${({ theme }) => theme.palette.primary.contrast };
+			p {
+				margin: 0;
+			}
+		`}
 	}
 `;
 

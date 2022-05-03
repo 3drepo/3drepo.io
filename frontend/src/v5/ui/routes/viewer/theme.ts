@@ -35,6 +35,23 @@ export const theme = createTheme(
 						},
 					},
 				},
+				MuiInputLabel: {
+					styleOverrides: {
+						root: {
+							fontSize: '13px',
+						},
+					},
+				},
+				MuiInputBase: {
+					styleOverrides: {
+						formControl: {
+							'&&& .MuiInputBase-input::placeholder': {
+								opacity: '1 !important',
+								color: '#C1C8D5', // TODO: fix after new palette is released
+							},
+						},
+					},
+				},
 				MuiTextField: {
 					styleOverrides: {
 						root: {

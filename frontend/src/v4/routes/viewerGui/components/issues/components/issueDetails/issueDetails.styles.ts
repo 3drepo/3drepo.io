@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import Tab from '@mui/material/Tab';
 
 import { Tabs } from '@mui/material';
+import { isV5 } from '@/v4/helpers/isV5';
 import { COLOR } from '../../../../../../styles';
 import { Image as ImageComponent } from '../../../../../components/image';
 import { MessagesList as MessagesListComponent } from '../../../../../components/messagesList/';
@@ -54,6 +55,9 @@ export const DescriptionImage = styled(ImageComponent)`
 		width: 100%;
 		max-height: 200px;
 		height: auto;
+		${ isV5() && css`
+			border-radius: 5px;
+		`}
 	}
 ` as any;
 
