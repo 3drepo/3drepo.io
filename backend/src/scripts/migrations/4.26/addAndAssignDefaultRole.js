@@ -15,40 +15,38 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { DEFAULT, TEAM_MEMBER } = require('./roles.constants');
-const db = require('../handler/db');
+const { v5Path } = require('../../../interop');
+
+const db = require(`${v5Path}/handler/db`);
+const { logger } = require(`${v5Path}/utils/logger`);
+const { DEFAULT } = require(`${v5Path}/models/roles.constants`);
 
 const createDefaultRole = async () => {
 	const roleFound = await db.findOne('admin', 'system.roles', { _id: `admin.${DEFAULT}` });
 
-	// istanbul ignore next
 	if (!roleFound) {
 		const createRoleCmd = { createRole: DEFAULT, privileges: [], roles: [] };
 		await db.runCommand('admin', createRoleCmd);
 	}
 };
 
-createDefaultRole();
+const addAndAssignDefaultRole = async () => {
+	const users = await db.find('admin', 'system.users', {}, { roles: 1, user: 1 });
 
-const Roles = {};
+	await Promise.all(users.map(async (user) => {
+		logger.logInfo(`\t\t-${user.user}`);
 
-Roles.createTeamspaceRole = async (teamspace) => {
-	const createRoleCmd = {
-		createRole: TEAM_MEMBER,
-		privileges: [],
-		roles: [],
-	};
-
-	await db.runCommand(teamspace, createRoleCmd);
+		const role = { role: DEFAULT, db: 'admin' };
+		if (!user.roles.includes(role)) {
+			const grantRoleCmd = { grantRolesToUser: user.user, roles: [role] };
+			await db.runCommand('admin', grantRoleCmd);
+		}
+	}));
 };
 
-Roles.grantTeamspaceRoleToUser = (teamspace, username) => {
-	const grantRoleCmd = {
-		grantRolesToUser: username,
-		roles: [{ role: TEAM_MEMBER, db: teamspace }],
-	};
-
-	return db.runCommand('admin', grantRoleCmd);
+const run = async () => {
+	await createDefaultRole();
+	await addAndAssignDefaultRole();
 };
 
-module.exports = Roles;
+module.exports = run;

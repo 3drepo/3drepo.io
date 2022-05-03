@@ -49,6 +49,7 @@ const testGetAccessibleTeamspaces = () => {
 				roles: [
 					{ db: 'ts1', role: 'a' },
 					{ db: 'ts2', role: 'b' },
+					{ db: 'admin', role: 'user' },
 				],
 			};
 			jest.spyOn(db, 'findOne').mockResolvedValue(expectedData);

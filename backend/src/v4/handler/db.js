@@ -18,6 +18,7 @@
 "use strict";
 (function() {
 	const config	  = require("../config.js");
+	const C = require("../constants");
 	const MongoClient = require("mongodb").MongoClient;
 	const GridFSBucket = require("mongodb").GridFSBucket;
 	const { PassThrough } = require("stream");
@@ -344,7 +345,8 @@
 
 	Handler.createUser = async function (username, password, customData) {
 		const adminDB = await this.getAuthDB();
-		await adminDB.addUser(username, password, { customData, roles: [] });
+		const defaultRole = { role: C.DEFAULT_USER_ROLE, db: "admin" };
+		await adminDB.addUser(username, password, { customData, roles: [defaultRole]});
 	};
 
 	module.exports = Handler;
