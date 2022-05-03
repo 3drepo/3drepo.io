@@ -25,7 +25,7 @@ interface IAddTeamspaceCard {
 
 export const AddTeamspaceCard = ({ variant = 'primary' }: IAddTeamspaceCard): JSX.Element => (
 	<ListItem>
-		<a href="https://3drepo.com/pricing/" target="_blank">
+		<a href="https://3drepo.com/pricing/" target="_blank" rel="noreferrer">
 			<Container $variant={variant}>
 				<AddTeamspaceIcon />
 				<FormattedMessage id="teamspaceSelect.addNewTeamspace" defaultMessage="New Teamspace" />
