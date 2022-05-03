@@ -59,6 +59,17 @@ export const theme = createTheme(
 						},
 					},
 				},
+				MuiSelect: {
+					styleOverrides: {
+						select: {
+							lineHeight: '22px',
+							height: '24px',
+							padding: '0 12px',
+							marginTop: '27px',
+							left: '-14px',
+						},
+					},
+				},
 				MuiPaper: {
 					styleOverrides: {
 						rounded: {

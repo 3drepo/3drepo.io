@@ -37,6 +37,10 @@ import { Container as PreviewDetailsContainer } from '../../../previewDetails/pr
 import { Container as TabContainer } from '../../../risks/components/riskDetails/riskDetails.styles';
 
 export const StyledFormControl = styled(FormControl)`
+	${isV5() && css`
+		label { left: -14px; }
+		.MuiInput-root svg { margin-top: 22px; }
+	`}
 `;
 
 export const MessagesList = styled(MessagesListComponent)`

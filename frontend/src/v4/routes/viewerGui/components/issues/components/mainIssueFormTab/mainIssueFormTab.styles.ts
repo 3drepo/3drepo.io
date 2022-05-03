@@ -14,8 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
+import { isV5 } from '@/v4/helpers/isV5';
+import styled, { css } from 'styled-components';
 
 export const DateFieldContainer = styled.div`
-	margin-top: 16px;
+	${ isV5() ? css`
+		margin-top: 27px;
+		input { height: 24px; }
+	` : css`
+		margin-top: 16px;
+	`}
 `;
