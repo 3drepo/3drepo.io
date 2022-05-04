@@ -51,7 +51,9 @@ const calculateStorageUsed = async (teamspace) => {
 		getFileStorageSize(teamspace),
 	]);
 
-	const totalDBSize = dbStats.totalSize - (dbStats.indexFreeStorageSize + dbStats.freeStorageSize);
+	const totalDBSize = dbStats.indexFreeStorageSize
+		? dbStats.totalSize - (dbStats.indexFreeStorageSize + dbStats.freeStorageSize)
+		: dbStats.storageSize; // pre-v5 compatibility
 	return totalDBSize + totalFilesSize;
 };
 
