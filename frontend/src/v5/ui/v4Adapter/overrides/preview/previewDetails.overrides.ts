@@ -58,7 +58,7 @@ export default css`
 				${TitleNumber} {
 					color: ${({ theme }) => theme.palette.secondary.main};
 					border-right: 0;
-					padding: 2px 7px;
+					padding: 2px 7px 2px 0;
 					font-weight: 500;
 					margin-right: 0;
 					min-width: 8px;
