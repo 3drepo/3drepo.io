@@ -406,7 +406,7 @@ export class ColorPicker extends PureComponent<IProps, IState> {
 			</StyledButton>
 			<StyledButton
 				color={isV5() ? 'secondary' : 'primary'}
-				variant="outlined"
+				{...(isV5() && { variant: "outlined" })}
 				onClick={this.handleClose}
 			>
 				Cancel
