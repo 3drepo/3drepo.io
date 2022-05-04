@@ -63,14 +63,15 @@ export const Container = styled.div<{ fill?: boolean, top?: boolean }>`
 	flex: ${({ fill }) => fill ? 1 : 'auto'};
 	padding-top: ${({ top }) => top ? '16px' : 'auto'};
 
-	${TextFieldStyles.StyledTextField},
+	${TextFieldStyles.StyledTextField} {
+		margin: 1px 0;
+	}
+
 	${TextFieldStyles.Container},
 	${StyledFormControl} {
 		margin: 1px 0;
 	}
 
-
-	
 	${isV5() && css`
 		margin-bottom: 15px;
 		.MuiInputBase-root {

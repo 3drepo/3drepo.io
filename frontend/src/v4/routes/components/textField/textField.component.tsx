@@ -24,6 +24,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import copy from 'copy-to-clipboard';
 import { Field, Formik } from 'formik';
 
+import { isV5 } from '@/v4/helpers/isV5';
 import CopyIcon from '@mui/icons-material/FileCopy';
 import { ENTER_KEY } from '../../../constants/keys';
 import { renderWhenTrue } from '../../../helpers/rendering';
@@ -35,7 +36,6 @@ import {
 	FieldLabel,
 	FieldWrapper,
 	MutableActionsLine,
-	PlaceholderText,
 	StyledIconButton,
 	StyledLinkableField,
 	StyledMarkdownField,
@@ -332,7 +332,11 @@ export class TextField extends PureComponent<IProps, IState> {
 						<FieldWrapper line={Number(!disableShowDefaultUnderline)} onClick={this.handlePlaceholderClick}>
 							<FieldLabel shrink>{this.props.label}</FieldLabel>
 							{enableMarkdown &&
-							<StyledMarkdownField ref={this.markdownFieldRef} $isPlaceholder={!this.fieldValue} {...this.additionalProps()}>
+							<StyledMarkdownField
+								ref={this.markdownFieldRef}
+								$isPlaceholder={!this.fieldValue && isV5()}
+								{...this.additionalProps()}
+							>
 								{this.fieldValue || placeholder}
 							</StyledMarkdownField>
 							}
