@@ -27,11 +27,12 @@ interface AlertModalProps {
 	method: string;
 	dataType: string;
 	message: string;
+	content: string;
 	status: string;
 	handleResolve: () => string;
 }
 export const AlertModal = (props: AlertModalProps) => {
-	const { method, dataType, message, status, handleResolve } = props;
+	const { method, dataType, content, message, status, handleResolve } = props;
 
 	return (
 		<Container>
@@ -57,8 +58,9 @@ export const AlertModal = (props: AlertModalProps) => {
 				)}
 			</DialogTitle>
 			<DialogContent>
-				<DialogContentText>{message}</DialogContentText>
-				{!!status && <Status>{status}</Status>}
+				<DialogContentText>{content}</DialogContentText>
+				{!!status && <Status>{status}{message && ' - ' + message}</Status>}
+				
 			</DialogContent>
 			<Actions bottomMargin>
 				<Button autoFocus type="submit" onClick={handleResolve} variant="contained" color="primary">
