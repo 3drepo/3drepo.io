@@ -63,19 +63,35 @@ export const Container = styled.div<{ fill?: boolean, top?: boolean }>`
 	flex: ${({ fill }) => fill ? 1 : 'auto'};
 	padding-top: ${({ top }) => top ? '16px' : 'auto'};
 
-	${TextFieldStyles.StyledTextField} {
-		margin: 1px 0;
-	}
-
+	${TextFieldStyles.StyledTextField},
 	${TextFieldStyles.Container},
 	${StyledFormControl} {
 		margin: 1px 0;
 	}
+
+	.description {
+		margin-top: 16px;
+		${TextFieldStyles.StyledTextField},
+		${TextFieldStyles.Container},
+		${StyledFormControl} {
+			margin: 0;
+		}
+
+		label {
+			font-size: 12px;
+			transform: scale(1);
+			left: 1px;
+			top: -18px;
+		}
+		.MuiFormControl-root {
+			margin-top: 0;
+		}
+		button {
+			margin: 8px 4px 2px 0;
+		}
+	}
 	
 	${isV5() && css`
-		${TextFieldStyles.StyledTextField} {
-			margin-top: 15px;
-		}
 		margin-bottom: 15px;
 		.MuiInputBase-root {
 			padding: 0;

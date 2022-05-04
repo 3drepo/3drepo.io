@@ -80,6 +80,7 @@ export const MainIssueFormTab: FunctionComponent<IProps> = ({
 						{...(isV5() && ({
 							placeholder: 'Type a description',
 							disableShowDefaultUnderline: true,
+							className: 'description',
 						}
 						))}
 					/>

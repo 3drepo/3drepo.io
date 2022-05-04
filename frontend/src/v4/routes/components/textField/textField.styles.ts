@@ -41,8 +41,8 @@ export const Container = styled.div`
 export const ActionsLine = styled.div`
 	position: absolute;
 	${isV5() ? css`
-		bottom: 0;
-		right: 5px;
+		bottom: 4px;
+		right: 0;
 	` : css`
 		bottom: 4px;
 		right: 0;
@@ -80,10 +80,12 @@ export const StyledMarkdownField = styled(MarkdownField)`
 		${ isV5() && css`
 			border: 1px solid #C1C8D5; // TODO: fix after new palette is released
 			border-radius: 5px;
-			min-height: 2rem;
-			padding: 5px 10px;
+			min-height: 32px;
+			padding: 4px 10px;
 			margin-top: 17px;
+			margin-top: 0px;
 			margin-bottom: 0px;
+			font-size: 0.75rem;
 			background-color: ${({ theme }) => theme.palette.primary.contrast };
 			p {
 				margin: 0;
