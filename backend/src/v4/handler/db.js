@@ -193,6 +193,11 @@
 		});
 	};
 
+	Handler.getDatabaseStats = async (database) => {
+		const dbConn = await Handler.getDB(database);
+		return dbConn.stats();
+	};
+
 	Handler.getCollectionStats = function (database, colName) {
 		return Handler.getDB(database).then(dbConn => {
 			return dbConn.collection(colName).stats();
