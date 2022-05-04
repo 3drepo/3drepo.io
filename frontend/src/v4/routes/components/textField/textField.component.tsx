@@ -35,6 +35,7 @@ import {
 	FieldLabel,
 	FieldWrapper,
 	MutableActionsLine,
+	PlaceholderText,
 	StyledIconButton,
 	StyledLinkableField,
 	StyledMarkdownField,
@@ -310,6 +311,7 @@ export class TextField extends PureComponent<IProps, IState> {
 			mutable,
 			disableShowDefaultUnderline,
 			enableMarkdown,
+			placeholder,
 		} = this.props;
 		const { initialValue } = this.state;
 		const shouldRenderActions = mutable && this.isEditMode;
@@ -330,8 +332,8 @@ export class TextField extends PureComponent<IProps, IState> {
 						<FieldWrapper line={Number(!disableShowDefaultUnderline)} onClick={this.handlePlaceholderClick}>
 							<FieldLabel shrink>{this.props.label}</FieldLabel>
 							{enableMarkdown &&
-							<StyledMarkdownField ref={this.markdownFieldRef} {...this.additionalProps()}>
-								{this.fieldValue}
+							<StyledMarkdownField ref={this.markdownFieldRef} $isPlaceholder={!this.fieldValue} {...this.additionalProps()}>
+								{this.fieldValue || placeholder}
 							</StyledMarkdownField>
 							}
 							{!enableMarkdown &&

@@ -68,7 +68,7 @@ export const StyledTextField = styled(TextField)`
 	}
 `;
 
-export const StyledMarkdownField = styled(MarkdownField)`
+export const StyledMarkdownField = styled(MarkdownField)<{ $isPlaceholder?: boolean }>`
 	&& {
 		display: block;
 		position: relative;
@@ -77,6 +77,7 @@ export const StyledMarkdownField = styled(MarkdownField)`
 		font-size: 14px;
 		overflow: hidden;
 
+		${({ $isPlaceholder }) => $isPlaceholder && css`color: #C1C8D5;`} // TODO: fix after new palette is released
 		${ isV5() && css`
 			border: 1px solid #C1C8D5; // TODO: fix after new palette is released
 			border-radius: 5px;
