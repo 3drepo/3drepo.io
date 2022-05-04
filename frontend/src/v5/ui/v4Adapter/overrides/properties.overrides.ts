@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { StyledTextField } from '@/v4/routes/components/textField/textField.styles';
+import { StyledMarkdownField, StyledTextField } from '@/v4/routes/components/textField/textField.styles';
 import { css } from 'styled-components';
 
 export default css`
@@ -36,6 +36,21 @@ export default css`
 		}
 		button {
 			margin: 8px 4px 2px 0;
+		}
+	}
+
+	${StyledMarkdownField} {
+		border: 1px solid #C1C8D5; // TODO: fix after new palette is released
+		border-radius: 5px;
+		min-height: 32px;
+		padding: 4px 10px;
+		margin-top: 17px;
+		margin-top: 0px;
+		margin-bottom: 0px;
+		font-size: 0.75rem;
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+		p {
+			margin: 0;
 		}
 	}
 `;
