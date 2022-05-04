@@ -19,7 +19,7 @@ import * as Yup from 'yup';
 import { getPasswordStrength } from '@/v4/services/validation';
 import { formatMessage } from '../services/intl';
 
-export const username = Yup.string().required();
+const username = Yup.string().required();
 const password = Yup.string().required();
 
 export const LoginSchema = Yup.object().shape({
