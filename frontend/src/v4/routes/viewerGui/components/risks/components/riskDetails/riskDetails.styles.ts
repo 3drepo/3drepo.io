@@ -69,27 +69,7 @@ export const Container = styled.div<{ fill?: boolean, top?: boolean }>`
 		margin: 1px 0;
 	}
 
-	.description {
-		margin-top: 16px;
-		${TextFieldStyles.StyledTextField},
-		${TextFieldStyles.Container},
-		${StyledFormControl} {
-			margin: 0;
-		}
 
-		label {
-			font-size: 12px;
-			transform: scale(1);
-			left: 1px;
-			top: -18px;
-		}
-		.MuiFormControl-root {
-			margin-top: 0;
-		}
-		button {
-			margin: 8px 4px 2px 0;
-		}
-	}
 	
 	${isV5() && css`
 		margin-bottom: 15px;
