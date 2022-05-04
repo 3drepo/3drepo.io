@@ -24,7 +24,14 @@ import { MEASURE_TYPE, MEASURE_TYPE_NAME} from '../../../../../../modules/measur
 import { MeasureItem } from '../measureItem/';
 import { getUnits, getValue, IMeasure } from '../measureItem/measureItem.component';
 import {
-	List, SectionHeader, StyledCheckboxCell, StyledIconButton, Title, Total, Units,
+	List,
+	SectionHeader,
+	StyledCheckboxCell,
+	StyledIconButton,
+	Title,
+	Total,
+	Units,
+	Container,
 } from './measurementsList.styles';
 
 interface IProps {
@@ -54,7 +61,7 @@ export const MeasurementsList = ({
 	const isCountable = ![MEASURE_TYPE.POINT].includes(measureType);
 
 	return (
-		<>
+		<Container>
 			<SectionHeader>
 				<StyledIconButton onClick={handleOnClick}>
 					{expanded ? <LessIcon /> : <MoreIcon />}
@@ -89,6 +96,6 @@ export const MeasurementsList = ({
 					))}
 				</List>
 			}
-		</>
+		</Container>
 	);
 };

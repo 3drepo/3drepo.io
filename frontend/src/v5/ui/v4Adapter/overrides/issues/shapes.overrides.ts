@@ -19,19 +19,31 @@ import { css } from 'styled-components';
 import { Content } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { MeasuringTypeContainer } from '@/v4/routes/viewerGui/components/risks/components/shapesFormTab/shapesFormTab.styles';
 import { Wrapper as Measurement } from '@/v4/routes/viewerGui/components/measurements/components/measuringType/measuringType.styles';
-import { SectionHeader, List, StyledIconButton as ExpandListButton } from '@/v4/routes/viewerGui/components/measurements/components/measurementsList/measurementsList.styles';
+import { SectionHeader, List, StyledIconButton as ExpandListButton, Container as MeasurementType } from '@/v4/routes/viewerGui/components/measurements/components/measurementsList/measurementsList.styles';
 import { StyledTextField, MeasurementPoint, MeasurementValue } from '@/v4/routes/viewerGui/components/measurements/components/measureItem/measureItem.styles';
-import { ColorSelect, StyledIconButton } from '@/v4/routes/components/colorPicker/colorPicker.styles';
+import { ColorSelect, Dot, StyledIconButton } from '@/v4/routes/components/colorPicker/colorPicker.styles';
 import { StyledMarkdownField, StyledLinkableField, ActionsLine } from '@/v4/routes/components/textField/textField.styles';
+import { SmallIconButtonStyled } from '@/v4/routes/components/smallIconButon/smallIconButton.styles';
 
 export default css`
 	// color picker
 	${ColorSelect} {
 		width: unset;
-		margin-left: 8px;
+		padding-left: 8px;
+		border-radius: 5px;
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+
+		${Dot} {
+			width: 13px;
+			height: 13px;
+		}
 
 		${StyledIconButton} {
 			margin: 0;
+
+			&:hover {
+				background-color: transparent;
+			}
 		}
 	}
 
@@ -53,10 +65,6 @@ export default css`
 			background-color: inherit;
 			border-bottom: none;
 
-			&:not(:first-of-type) {
-				margin-top: 15px;
-			}
-
 			${ExpandListButton} {
 				margin: 0;
 			}
@@ -72,18 +80,43 @@ export default css`
 			}
 		}
 
+		${MeasurementType}:not(:last-of-type) {
+			border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
+		}
+
 		// expandable list
 		${List} {
-			border-bottom: none;
+			// icons
+			${SmallIconButtonStyled} {
+				height: 7px;
+				width: 7px;
+				padding: 4px;
+				&, &:hover {
+					background-color: ${({ theme }) => theme.palette.secondary.main};
+				}
+
+				svg {
+					font-size: 13px;
+					color: ${({ theme }) => theme.palette.primary.contrast};
+				}
+			}
+
+			svg {
+				font-size: 17px;
+			}
 
 			&:last-of-type {
 				margin-bottom: -5px;
 			}
 
+			// measurement item
 			li { 
 				background-color: inherit;
-				border-top: 1px solid ${({ theme }) => theme.palette.base.lightest};
-				border-bottom: none;
+				border: none;
+
+				&:last-of-type {
+					padding-bottom: 10px;
+				}
 			}
 
 			${MeasurementPoint},
