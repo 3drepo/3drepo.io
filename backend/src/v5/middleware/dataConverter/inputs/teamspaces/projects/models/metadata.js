@@ -33,7 +33,7 @@ const metadataSchema = Yup.object().shape({
 		case 'boolean':
 			return Yup.bool();
 		default:
-			return types.strings.title.nullable().test('ensure-value-present', 'Metadata value is a required field', () => value !== undefined);
+			return types.strings.title.nullable().test('ensure-value-present', 'Metadata value is a required field, to delete an entry, please pass in null', () => value !== undefined);
 		}
 	}),
 }).required().noUnknown();
@@ -41,10 +41,9 @@ const metadataSchema = Yup.object().shape({
 const generateSchema = (nonCustomMetadataKeys) => {
 	const schema = Yup.object().shape({
 		metadata: Yup.array().of(metadataSchema).required(),
-	}).required().test('check-metadata-can-be-Updated', (value, { createError, path }) => {
-		const nonEditableMetadata = getCommonElements(value.metadata.map((m) => m.key), nonCustomMetadataKeys);
-
-		if (nonEditableMetadata.length > 0) {
+	}).required().test('check-metadata-can-be-Updated', ({ metadata }, { createError, path }) => {
+		const nonEditableMetadata = getCommonElements(metadata.map(({ key }) => key), nonCustomMetadataKeys);
+		if (nonEditableMetadata.length) {
 			return createError({ path, message: `Metadata [${nonEditableMetadata.join(', ')}] already exist and are not editable.` });
 		}
 
@@ -74,12 +73,9 @@ Metadata.validateUpdateCustomMetadata = async (req, res, next) => {
 
 		await next();
 	} catch (err) {
-		if (err === templates.metadataNotFound) {
-			respond(req, res, createResponseCode(templates.metadataNotFound, err?.message));
-			return;
-		}
-
-		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+		const errorTemplate = err.code === templates.metadataNotFound.code
+			? templates.metadataNotFound : templates.invalidArguments;
+		respond(req, res, createResponseCode(errorTemplate, err.message));
 	}
 };
 

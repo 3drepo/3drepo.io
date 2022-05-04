@@ -34,18 +34,18 @@ Metadata.getMetadataById = async (teamspace, model, metadataId, projection) => {
 
 Metadata.updateCustomMetadata = async (teamspace, model, metadataId, changeSet) => {
 	const { metadata } = await Metadata.getMetadataById(teamspace, model, metadataId, { metadata: 1 });
-	const metadataKeyIndexLookup = metadata.reduce((parsedItems, currItem, currIndex) => (
-		{
-			...parsedItems,
-			[currItem.key]: currIndex,
-		}), {});
+	const metadataKeyIndexLookup = metadata.reduce((parsedItems, currItem, currIndex) => {
+		// eslint-disable-next-line no-param-reassign
+		parsedItems[currItem.key] = currIndex;
+		return parsedItems;
+	}, {});
 
-	changeSet.forEach((changeSetItem) => {
-		const metadataIndex = metadataKeyIndexLookup[changeSetItem.key];
+	changeSet.forEach(({ key, value }) => {
+		const metadataIndex = metadataKeyIndexLookup[key];
 		if (metadataIndex !== undefined) {
-			metadata[metadataIndex].value = changeSetItem.value;
-		} else if (changeSetItem.value !== null) {
-			metadata.push({ ...changeSetItem, custom: true });
+			metadata[metadataIndex].value = value;
+		} else if (value !== null) {
+			metadata.push({ key, value, custom: true });
 		}
 	});
 
