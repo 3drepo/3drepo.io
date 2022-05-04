@@ -57,8 +57,6 @@ export default css`
 
 				${TitleNumber} {
 					color: ${({ theme }) => theme.palette.secondary.main};
-					background-color: #edf0f8; // TODO - fix after new palette is released
-					border: solid 1px #d9d9d9; // TODO - fix after new palette is released
 					border-right: 0;
 					padding: 2px 7px;
 					font-weight: 500;
@@ -92,21 +90,6 @@ export default css`
 				input::placeholder {
 					font-size: 14px;
 					font-weight: 500;
-				}
-
-				& > *:last-child {
-					// title textfield input
-					input, span, fieldset {
-						border-top-left-radius: 0px;
-						border-bottom-left-radius: 0px;
-					}
-				}
-
-				& > *:first-child {
-					&, input, span, fieldset {
-						border-top-left-radius: 5px;
-						border-bottom-left-radius: 5px;
-					}
 				}
 
 				.MuiOutlinedInput-notchedOutline {
