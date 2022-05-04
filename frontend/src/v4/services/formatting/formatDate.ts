@@ -17,6 +17,7 @@
 
 import dayjs from 'dayjs';
 
+export const SHORT_TIME_FORMAT = 'HH:mm';
 export const SHORT_DATE_FORMAT = 'DD/MM/YYYY';
 export const DATE_TIME_FORMAT = 'HH:mm DD MMM';
 export const LONG_DATE_TIME_FORMAT = 'DD/MM/YYYY HH:mm';

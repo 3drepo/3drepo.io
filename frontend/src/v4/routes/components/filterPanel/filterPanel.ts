@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,19 +15,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-module.exports = {
-	mongodbMemoryServerOptions: {
-		binary: {
-			version: '5.0.8',
-			skipMD5: true,
-			downloadDir: './node_modules/.cache',
-		},
-		instance: {
-			auth: false,
-			dbName: 'admin',
-			ip: '127.0.0.1',
-			port: 27227,
-		},
-		autoStart: false,
-	},
+export const FILTER_TYPES = {
+	UNDEFINED: 1,
+	DATE: 2,
+	QUERY: 3
 };
+
+export const DATA_TYPES = {
+	MODELS: 1,
+	FEDERATIONS: 2,
+	PROJECTS: 3
+};
+
+export interface IFilter {
+	values: any;
+	label?: string;
+	type?: number;
+}
+
+export interface ISelectedFilter {
+	value: any;
+	label: string;
+	relatedField: string;
+	type?: number;
+}
+
+export interface IDataType {
+	label?: string;
+	type?: number;
+}

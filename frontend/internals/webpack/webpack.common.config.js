@@ -75,7 +75,7 @@ module.exports = (env, options) => ({
 			'@assets': PATHS.ASSETS_DIR,
 			'@components': PATHS.COMPONENTS,
 			'@controls': PATHS.CONTROLS,
-			"styled-components": path.resolve('./', "node_modules", "styled-components"),
+			"styled-components": path.resolve("node_modules", "styled-components"),
 		},
 	},
 	target: 'web',

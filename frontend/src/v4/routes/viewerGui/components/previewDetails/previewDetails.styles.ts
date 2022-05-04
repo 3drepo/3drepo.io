@@ -16,7 +16,6 @@
  */
 
 import styled, { css } from 'styled-components';
-
 import { Form } from 'formik';
 
 import {
@@ -24,13 +23,15 @@ import {
 	AccordionDetails,
 	AccordionSummary,
 	IconButton,
-	Typography as TypographyComponent
+	Typography as TypographyComponent,
+	Grid as GridBase
+
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import {GROUP_PANEL_NAME, GROUPS_TYPES} from '../../../../constants/groups';
+import {GROUP_PANEL_NAME} from '../../../../constants/groups';
 
 import { COLOR } from '../../../../styles';
-import { Container as MessageListContainer, FilterWrapper } from '../../../components/messagesList/messagesList.styles';
+import { Container as MessageListContainer } from '../../../components/messagesList/messagesList.styles';
 
 const SUMMARY_HEIGHT = 78;
 
@@ -118,6 +119,8 @@ export const StyledForm = styled(Form)`
 		padding-right: 4px !important;
 	}
 `;
+
+export const Grid = styled(GridBase)``;
 
 export const Content = styled.div`
 	background-color: ${COLOR.BLACK_6};

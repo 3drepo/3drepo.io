@@ -28,6 +28,7 @@ export const ROUTES = {
 	V5_MODEL_VIEWER: '/v5/viewer/:teamspace/:model/:revision?',
 	DASHBOARD: '/dashboard',
 	TEAMSPACES: '/dashboard/teamspaces',
+	V5_TEAMSPACES: '/v5/dashboard/teamspaces',
 	TEAMSPACE_SETTINGS: '/dashboard/teamspaces/:teamspace',
 	MODEL_SETTINGS: '/dashboard/teamspaces/:teamspace/models/:modelId',
 	USER_MANAGEMENT_MAIN: '/dashboard/user-management',

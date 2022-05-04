@@ -17,6 +17,8 @@
 
 import { createTheme } from '@mui/material/styles';
 import { COLOR, theme as oldTheme } from '@/v5/ui/themes/theme';
+import { StyledItemText, StyledListItem, CopyText } from '@/v4/routes/components/filterPanel/components/filtersMenu/filtersMenu.styles';
+import { Wrapper } from '@/v4/routes/components/filterPanel/components/childMenu/childMenu.styles';
 import _ from 'lodash';
 
 export const theme = createTheme(
@@ -40,14 +42,102 @@ export const theme = createTheme(
 						},
 					},
 				},
+				MuiPaper: {
+					styleOverrides: {
+						rounded: {
+							borderRadius: 6,
+						},
+					},
+				},
+				MuiAvatar: {
+					styleOverrides: {
+						root: {
+							height: '32 !important',
+							width: '32 !important',
+							border: 'none !important',
+							margin: '0 !important',
+							alignSelf: 'flex-start',
+						},
+					},
+				},
+				MuiTabs: {
+					styleOverrides: {
+						root: {
+							minHeight: 'unset',
+							'.MuiTabs-indicator': {
+								backgroundColor: COLOR.PRIMARY_MAIN,
+							},
+						},
+					},
+				},
+				MuiTab: {
+					styleOverrides: {
+						root: {
+							minWidth: 'unset',
+							minHeight: 'unset',
+							textTransform: 'unset',
+							margin: 0,
+							marginRight: 15,
+							paddingTop: 0,
+							fontWeight: 400,
+						},
+					},
+				},
 				MuiList: {
 					styleOverrides: {
 						root: {
-							boxShadow: 'none',
-							borderRadius: 5,
+							borderRadius: '6px !important',
+							boxShadow: `0px 9px 28px 8px rgb(0 0 0 / 5%),
+										0px 6px 16px 0px rgb(0 0 0 / 8%),
+										0px 3px 6px -4px rgb(0 0 0 / 12%) !important`,
+							padding: '4px 0',
+							'.MuiList-root': {
+								paddingTop: 0,
+								paddingBottom: 0,
+								boxShadow: 'none !important',
+								minWidth: 180,
+								'.MuiTextField-root': {
+									width: 122,
+								},
+								'.MuiInputBase-root.MuiInputBase-adornedEnd': {
+									paddingRight: 0,
+								},
+								'fieldset.MuiOutlinedInput-notchedOutline': {
+									borderWidth: 0,
+									'&:hover:not(.Mui-error)': {
+										borderTop: 0,
+										borderLeft: 0,
+										borderRight: 0,
+										borderRadius: 0,
+									},
+								},
+								'input[type="tel"].MuiOutlinedInput-input': {
+									padding: '0 5px 0 9px',
+									height: 28,
+								},
+								'.MuiButtonBase-root.MuiIconButton-edgeEnd': {
+									padding: 0,
+								},
+								[`& ${Wrapper}`]: {
+									overflow: 'hidden',
+									left: '100%',
+									borderRadius: '6px',
+								},
+							},
+							// filter panel menu
+							[`& ${StyledListItem}${StyledListItem}`]: {
+								minWidth: 121,
+								padding: '2px 10px',
+								// items
+								[`& ${StyledItemText}`]: {
+									color: COLOR.SECONDARY_MAIN,
+								},
+								[`& ${CopyText}`]: {
+									fontWeight: 500,
+								},
+							},
 							'& .MuiButtonBase-root': {
 								margin: 0,
-								color: `${COLOR.SECONDARY_MAIN} !important`,
 								'&:hover': {
 									backgroundColor: '#f0f5ff', // TODO: fix after new palette is released
 								},

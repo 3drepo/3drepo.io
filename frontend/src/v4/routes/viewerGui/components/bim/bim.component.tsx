@@ -31,7 +31,8 @@ import {
 	StyledItemText,
 	StyledListItem
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
-import { FilterPanel, ISelectedFilter } from '../../../components/filterPanel/filterPanel.component';
+import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
+import { ISelectedFilter } from '../../../components/filterPanel/filterPanel';
 import { PanelBarActions } from '../panelBarActions';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
