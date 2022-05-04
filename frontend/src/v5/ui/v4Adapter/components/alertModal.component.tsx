@@ -60,7 +60,7 @@ export const AlertModal = (props: AlertModalProps) => {
 				<DialogContentText>{message}</DialogContentText>
 				{!!status && <Status>{status}</Status>}
 			</DialogContent>
-			<Actions>
+			<Actions bottomMargin>
 				<Button autoFocus type="submit" onClick={handleResolve} variant="contained" color="primary">
 					<FormattedMessage
 						id="alertModal.action.ok"
