@@ -15,18 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DialogContainer } from '@/v4/routes/components/dialogContainer';
-import { SnackbarContainer } from '@/v4/routes/components/snackbarContainer';
-import AdapterDayjs from '@mui/lab/AdapterDayjs';
-import LocalizationProvider from '@mui/lab/LocalizationProvider';
-import { V4OverridesContainer } from './v4Overrides.styles';
+import styled from 'styled-components';
+import { Container as ContainerBase } from '@/v5/ui/components/shared/modals/modals.styles';
 
-export const V4Adapter = ({ children }) => (
-	<V4OverridesContainer id="v4Overrides">
-		<LocalizationProvider dateAdapter={AdapterDayjs}>
-			{children}
-			<DialogContainer />
-			<SnackbarContainer />
-		</LocalizationProvider>
-	</V4OverridesContainer>
-);
+export const Container = styled(ContainerBase)`
+	min-width: 450px;
+	min-height: 248px;
+`;
