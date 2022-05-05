@@ -496,10 +496,9 @@ User.createUser = async function (username, password, customData, tokenExpiryTim
 	};
 
 	cleanedCustomData.billing = await UserBilling.changeBillingAddress(cleanedCustomData.billing || {}, billingInfo);
-	const defaultRole = { db: "admin", role: C.DEFAULT_USER_ROLE };
 
 	try {
-		await adminDB.addUser(username, password, { customData: cleanedCustomData, roles: [defaultRole] });
+		await adminDB.addUser(username, password, { customData: cleanedCustomData, roles: [C.DEFAULT_ROLE_OBJ] });
 	} catch(err) {
 		throw ({ resCode: utils.mongoErrorToResCode(err) });
 	}

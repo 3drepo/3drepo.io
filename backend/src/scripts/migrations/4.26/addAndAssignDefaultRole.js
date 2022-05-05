@@ -31,16 +31,14 @@ const createDefaultRole = async () => {
 };
 
 const addAndAssignDefaultRole = async () => {
-	const users = await db.find('admin', 'system.users', {}, { roles: 1, user: 1 });
+	const users = await db.find('admin', 'system.users',
+		{ 'roles.role': { $nin: [DEFAULT] } }, { user: 1 });
 
-	await Promise.all(users.map(async (user) => {
-		logger.logInfo(`\t\t-${user.user}`);
-
-		const role = { role: DEFAULT, db: 'admin' };
-		if (!user.roles.includes(role)) {
-			const grantRoleCmd = { grantRolesToUser: user.user, roles: [role] };
-			await db.runCommand('admin', grantRoleCmd);
-		}
+	const role = { role: DEFAULT, db: 'admin' };
+	await Promise.all(users.map(async ({ user }) => {
+		logger.logInfo(`\t\t-${user}`);
+		const grantRoleCmd = { grantRolesToUser: user, roles: [role] };
+		await db.runCommand('admin', grantRoleCmd);
 	}));
 };
 

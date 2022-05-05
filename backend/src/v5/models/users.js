@@ -128,7 +128,7 @@ User.getFavourites = async (user, teamspace) => {
 
 User.getAccessibleTeamspaces = async (username) => {
 	const userDoc = await User.getUserByUsername(username, { roles: 1 });
-	return userDoc.roles.flatMap((role) => (role.db !== 'admin' ? [role.db] : []));
+	return userDoc.roles.flatMap(({db}) => (db !== 'admin' ? [db] : []));
 };
 
 User.appendFavourites = async (username, teamspace, favouritesToAdd) => {

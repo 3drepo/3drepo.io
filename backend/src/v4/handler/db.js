@@ -345,8 +345,7 @@
 
 	Handler.createUser = async function (username, password, customData) {
 		const adminDB = await this.getAuthDB();
-		const defaultRole = { role: C.DEFAULT_USER_ROLE, db: "admin" };
-		await adminDB.addUser(username, password, { customData, roles: [defaultRole]});
+		await adminDB.addUser(username, password, { customData, roles: [C.DEFAULT_USER_ROLE]});
 	};
 
 	module.exports = Handler;
