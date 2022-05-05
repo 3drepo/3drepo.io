@@ -50,7 +50,7 @@ const testGetAccessibleTeamspaces = () => {
 				roles: [
 					{ db: 'ts1', role: 'a' },
 					{ db: 'ts2', role: 'b' },
-					{ db: 'admin', role: 'user' },
+					{ db: 'admin', role: generateRandomString() },
 				],
 			};
 			jest.spyOn(db, 'findOne').mockResolvedValue(expectedData);
@@ -544,7 +544,6 @@ const testAddUser = () => {
 				permissions: [],
 			};
 
-			db.createUser.mockImplementationOnce(() => {});
 			const fn = jest.spyOn(db, 'createUser');
 			await User.addUser(newUserData);
 			expect(fn).toHaveBeenCalledTimes(1);

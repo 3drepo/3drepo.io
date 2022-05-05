@@ -350,11 +350,11 @@
 
 			const createDefaultRole = async () => {
 
-				const roleFound = await Handler.findOne("admin", "system.roles", { _id: `admin.${C.DEFAULT_USER_ROLE}` });
+				const roleFound = await Handler.findOne("admin", "system.roles", { _id: `admin.${C.DEFAULT_ROLE_OBJ.role}` });
 
 				// istanbul ignore next
 				if (!roleFound) {
-					const createRoleCmd = { createRole: C.DEFAULT_USER_ROLE, privileges: [], roles: [] };
+					const createRoleCmd = { createRole: C.DEFAULT_ROLE_OBJ.role, privileges: [], roles: [] };
 					await Handler.runCommand("admin", createRoleCmd);
 				}
 			};
@@ -370,8 +370,7 @@
 			ensureDefaultRoleExists()
 		]);
 
-		const defaultRole = { role: C.DEFAULT_USER_ROLE, db: "admin" };
-		await adminDB.addUser(username, password, { customData, roles: [defaultRole]});
+		await adminDB.addUser(username, password, { customData, roles: [C.DEFAULT_ROLE_OBJ]});
 	};
 
 	module.exports = Handler;
