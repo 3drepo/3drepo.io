@@ -18,6 +18,8 @@
 const { src } = require('../../../helper/path');
 
 const UserAgentHelper = require(`${src}/utils/helper/userAgent`);
+const ServiceHelper = require('../../../helper/services');
+
 
 const matchHelper = (func, string, match) => {
 	const res = func(string);
@@ -70,7 +72,7 @@ const testGetUserAgentInfo = () => {
 		});
 
 		test('Should return user agent info with unknown fields if user agent is present but not recognizable', () => {
-			const browserUserAgent = '123';
+			const browserUserAgent = ServiceHelper.generateRandomString();
 			const expectedUserAgentInfo = {
 				application: {
 					type: 'unknown',

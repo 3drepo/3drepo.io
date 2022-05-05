@@ -89,9 +89,12 @@ UserAgent.getUserAgentInfo = (userAgent) => {
 			},
 			device: 'unknown',
 		};
-	} if (isUserAgentFromPlugin(userAgent)) {
+	}
+
+	if (isUserAgentFromPlugin(userAgent)) {
 		return getUserAgentInfoFromPlugin(userAgent);
 	}
+
 	return getUserAgentInfoFromBrowser(userAgent);
 };
 
