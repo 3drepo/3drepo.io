@@ -145,6 +145,15 @@ export const theme = createTheme(
 						},
 					},
 				},
+				MuiDialogContent: {
+					styleOverrides: {
+						root: {
+							'.PrivatePickersToolbar-dateTitleContainer button': {
+								margin: 0,
+							},
+						},
+					},
+				},
 			},
 		},
 	),
