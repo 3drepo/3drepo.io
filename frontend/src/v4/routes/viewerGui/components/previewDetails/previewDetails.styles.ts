@@ -23,10 +23,12 @@ import {
 	AccordionDetails,
 	AccordionSummary,
 	IconButton,
-	Typography as TypographyComponent
+	Typography as TypographyComponent,
+	Grid as GridBase
 
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { isV5 } from '@/v4/helpers/isV5';
 import {GROUP_PANEL_NAME} from '../../../../constants/groups';
 
 import { COLOR } from '../../../../styles';
@@ -119,6 +121,8 @@ export const StyledForm = styled(Form)`
 	}
 `;
 
+export const Grid = styled(GridBase)``;
+
 export const Content = styled.div`
 	background-color: ${COLOR.BLACK_6};
 `;
@@ -185,18 +189,6 @@ export const MainInfoContainer = styled.div`
 	padding-right: 0 !important;
 `;
 
-const unexpandedStyles  = css`
-	height: calc(100% - ${SUMMARY_HEIGHT}px);
-
-	${NotCollapsableContent} {
-		height: calc(100% - 40px);
-	}
-
-	${MessageListContainer} {
-		height: calc(100% - 40px);
-	}
-`;
-
 const expandedStyles = css`
 	overflow: auto;
 	position: static;
@@ -204,7 +196,23 @@ const expandedStyles = css`
 	${MessageListContainer} {
 		height: auto;
 	}
+`;
 
+const unexpandedStyles  = css`
+	height: calc(100% - ${SUMMARY_HEIGHT}px);
+
+	${isV5()
+		? expandedStyles
+		: `
+			${NotCollapsableContent} {
+				height: calc(100% - 40px);
+			}
+
+			${MessageListContainer} {
+				height: calc(100% - 40px);
+			}
+		`
+	}
 `;
 
 export const ScrollableContainer = styled.div`

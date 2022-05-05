@@ -14,19 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import styled from 'styled-components';
+import { DashedContainer as DashedContainerBase } from '@controls/dashedContainer/dashedContainer.component';
 
-import { DialogContainer } from '@/v4/routes/components/dialogContainer';
-import { SnackbarContainer } from '@/v4/routes/components/snackbarContainer';
-import AdapterDayjs from '@mui/lab/AdapterDayjs';
-import LocalizationProvider from '@mui/lab/LocalizationProvider';
-import { V4OverridesContainer } from './v4Overrides.styles';
-
-export const V4Adapter = ({ children }) => (
-	<V4OverridesContainer id="v4Overrides">
-		<LocalizationProvider dateAdapter={AdapterDayjs}>
-			{children}
-			<DialogContainer />
-			<SnackbarContainer />
-		</LocalizationProvider>
-	</V4OverridesContainer>
-);
+export const DashedContainer = styled(DashedContainerBase).attrs({
+	strokeColor: '#c0c8d5', // TODO - fix when new palette is released
+	borderRadius: 5,
+	dashSize: 2,
+	gapSize: 2,
+	strokeWidth: 2,
+	zeroPadding: true,
+})`
+	margin: 12px 15px;
+`;

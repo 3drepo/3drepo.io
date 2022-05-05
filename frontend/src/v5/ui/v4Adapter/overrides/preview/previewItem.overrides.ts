@@ -17,25 +17,38 @@
 
 import { css } from 'styled-components';
 import {
-	Content,
+	Container as PreviewListItemContainer,
+	Content as PreviewListItemContent,
 	Description,
 	ArrowButton,
 	RoleIndicator,
 	ThumbnailWrapper,
-	Container,
 	Name,
 } from '@/v4/routes/viewerGui/components/previewListItem/previewListItem.styles';
 import { Date, Details, Status, Icon, Author, UserAndModelDetails } from '@/v4/routes/viewerGui/components/previewItemInfo/previewItemInfo.styles';
 
 export default css`
-	${Content} {
+	${PreviewListItemContainer} {
+		padding: 12px 40px 12px 15px;
+
+		${Name} {
+			min-height: 14px;
+			text-decoration: underline;
+			text-decoration-color: transparent;
+		}
+
+		&:hover {
+			background-color: ${({ theme }) => theme.palette.primary.contrast};
+
+			${Name} {
+				text-decoration-color: currentColor;
+			}
+		}
+	}
+	
+	${PreviewListItemContent} {
 		margin: 4px 0 0 12px;
 		color: ${({ theme }) => theme.palette.secondary.main};
-	}
-
-
-	${Container} {
-		padding: 12px 40px 12px 15px;
 	}
 
 	${RoleIndicator} {

@@ -19,7 +19,7 @@ import { css } from 'styled-components';
 import { Select, FilterWrapper, Container as CommentListContainer, Label as ShowLabel } from '@/v4/routes/components/messagesList/messagesList.styles';
 import { CommentContainer, Comment, Container as CommentAndDeleteButtonContainer } from '@/v4/routes/components/messagesList/components/message/components/userMessage/userMessage.styles';
 import { Container as CommentPadding } from '@/v4/routes/components/messagesList/components/message/message.styles';
-import { Counter, Actions, ActionsGroup, Container as AddNewCommentContainer } from '@/v4/routes/viewerGui/components/commentForm/commentForm.styles';
+import { Counter, Actions, StyledTextField, ActionsGroup, Container as AddNewCommentContainer } from '@/v4/routes/viewerGui/components/commentForm/commentForm.styles';
 import { Collapsable, NotCollapsableContent, ToggleButtonContainer as CollaspableButton } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { Container as CommentFooter, Date, Username } from '@/v4/routes/components/messagesList/components/message/components/footer/footer.styles';
 import { Container as TabContainer } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
@@ -139,6 +139,17 @@ export default css`
 
 
 	${AddNewCommentContainer} {
+
+		${StyledTextField} {
+			color: ${({ theme }) => theme.palette.secondary.main};
+			font-size: 12px;
+			
+			textarea:placeholder-shown {
+				// should be #c1c8d5 but something is making it clearer 
+				color: #77849d
+			}
+		}
+
 		${Actions} {
 			padding: 0 16px 0 9px;
 

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -26,6 +26,7 @@ import previewDetails from './overrides/preview/previewDetails.overrides';
 import previewItem from './overrides/preview/previewItem.overrides';
 import previewComments from './overrides/preview/previewComments.overrides';
 import avatarPopover from './overrides/avatarPopover.overrides';
+import issueShapes from './overrides/issues/shapes.overrides';
 
 export const V4OverridesContainer = styled.div`
 	display: flex;
@@ -50,4 +51,6 @@ export const V4OverridesContainer = styled.div`
 	${previewItem}
 	${previewDetails}
 	${previewComments}
+
+	${issueShapes}
 `;
