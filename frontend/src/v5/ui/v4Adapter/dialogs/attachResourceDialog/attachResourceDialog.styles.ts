@@ -30,6 +30,7 @@ export const Container = styled(V5ModalContainer)`
 
 	${DialogTabs} {
 		padding-left: 10px;
+		box-shadow: 0px 1px 10px rgba(23, 43, 77, 0.15);
 	}
 
 	${VisualSettingsButtonsContainer} {
