@@ -101,7 +101,7 @@ export const UploadListItemDestination: React.FC<IUploadListItemDestination> = (
 				setDisableClearable(!(value.containerName || inputValue));
 				const isExisting = options.some((option: DestinationOption) => inputValue === option.containerName);
 				filtered = filtered.filter((x) => x.containerName !== value.containerName);
-				if (!isExisting || !inputValue) {
+				if (inputValue !== '' && !isExisting) {
 					filtered = [{
 						containerId: '',
 						containerName: inputValue,

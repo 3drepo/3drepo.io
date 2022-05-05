@@ -26,23 +26,14 @@ export const NewContainer = ({ containerName, ...props }: INewContainer) => (
 	<Container {...props}>
 		<AddCircleIcon />
 		<Message>
-			{
-				containerName ? (
-					<FormattedMessage
-						id="uploads.destination.addNewContainer.named"
-						defaultMessage="Add <Bold>{containerName}</Bold> as a new container"
-						values={{
-							Bold: (val: string) => <b>{val}</b>,
-							containerName,
-						}}
-					/>
-				) : (
-					<FormattedMessage
-						id="uploads.destination.addNewContainer.noInput"
-						defaultMessage="Add new container"
-					/>
-				)
-			}
+			<FormattedMessage
+				id="uploads.destination.addNewContainer"
+				defaultMessage="Add <Bold>{containerName}</Bold> as a new container"
+				values={{
+					Bold: (val: string) => <b>{val}</b>,
+					containerName,
+				}}
+			/>
 		</Message>
 	</Container>
 );
