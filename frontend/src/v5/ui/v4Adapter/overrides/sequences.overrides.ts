@@ -15,17 +15,48 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SequenceDateActions, SequenceDateContainer, SequenceDateField } from '@/v4/routes/components/sequencingDates/sequencingDates.styles';
 import { StyledFormControl } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { css } from 'styled-components';
 
 // The 4D tab
 export default css`
 	${StyledFormControl} {
+		margin-top: 6px;
 		label {
 			transform: none;
 			top: 0;
 			left: 0;
 			font-size: 10px;
+		}
+		${SequenceDateContainer} {
+			${SequenceDateField} {
+				.MuiInputBase-root {
+					margin-top: 18px;
+
+					input {
+						color: ${({ theme }) => theme.palette.secondary.main};
+						box-sizing: border-box;
+						width: 184px;
+						padding: 0px 8px;
+						height: 24px;
+						line-height: 24px;
+					}
+				}
+			}
+			
+			${SequenceDateActions} {
+				bottom: -22px;
+				top: unset;
+				.MuiIconButton-root {
+					margin: 3px;
+					padding: 0;
+					svg {
+						height: 15px;
+						width: 15px;
+					}
+				}
+			}
 		}
 	}
 `;
