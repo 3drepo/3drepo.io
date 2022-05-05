@@ -16,15 +16,15 @@
  */
 
 import { StyledMarkdownField, StyledTextField } from '@/v4/routes/components/textField/textField.styles';
+import { StyledFormControl } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { css } from 'styled-components';
 
 export default css`
 	.description {
-		margin-top: 16px;
+		margin: 14px 0;
 		${StyledTextField} {
 			margin: 0;
 		}
-		
 		label {
 			font-size: 12px;
 			transform: scale(1);
@@ -34,6 +34,13 @@ export default css`
 		.MuiFormControl-root {
 			margin-top: 0;
 		}
+		.MuiInputBase-root {
+			padding: 0;
+			>textarea {
+				min-height: 2rem;
+				padding: 5px 10px;
+			}
+		} 
 		button {
 			margin: 8px 4px 2px 0;
 		}
@@ -52,5 +59,11 @@ export default css`
 		p {
 			margin: 0;
 		}
+	}
+
+	// Drop-down inputs
+	${StyledFormControl} {
+		label { left: -14px; }
+		.MuiInput-root svg { margin-top: 23px; }
 	}
 `;

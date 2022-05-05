@@ -37,10 +37,6 @@ import { Container as PreviewDetailsContainer } from '../../../previewDetails/pr
 import { Container as TabContainer } from '../../../risks/components/riskDetails/riskDetails.styles';
 
 export const StyledFormControl = styled(FormControl)`
-	${isV5() && css`
-		label { left: -14px; }
-		.MuiInput-root svg { margin-top: 22px; }
-	`}
 `;
 
 export const MessagesList = styled(MessagesListComponent)`
@@ -71,17 +67,6 @@ export const Container = styled.div<{ fill?: boolean, top?: boolean }>`
 	${StyledFormControl} {
 		margin: 1px 0;
 	}
-
-	${isV5() && css`
-		margin-bottom: 15px;
-		.MuiInputBase-root {
-			padding: 0;
-			>textarea {
-				min-height: 2rem;
-				padding: 5px 10px;
-			}
-		}
-	`}
 `;
 
 const getFieldsContainerSize = cond([
