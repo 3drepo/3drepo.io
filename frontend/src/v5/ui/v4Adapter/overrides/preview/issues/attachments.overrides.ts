@@ -18,6 +18,38 @@
 import { css } from 'styled-components';
 import { FieldsRow } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { ResourcesContainer } from '@/v4/routes/components/resources/resources.styles';
+import { Form } from '@controls/modal/formModal/formDialog.styles';
+import { DialogTabs, VisualSettingsButtonsContainer } from '@/v4/routes/components/topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
+
+// used in the attach resources modal styling file
+export const AttachResourcesModalStyling = css`
+	padding: 0;
+	.MuiDialogContent-root {
+		padding: 0px;
+		overflow-x: hidden;
+	}
+
+	${DialogTabs} {
+		padding-left: 10px;
+		box-shadow: 0px 1px 10px rgba(23, 43, 77, 0.15);
+	}
+
+	${VisualSettingsButtonsContainer} {
+		display: flex;
+		justify-content: flex-end;
+		position: unset;
+		box-shadow: 0px 6px 10px rgb(0 0 0 / 14%),
+					0px 1px 18px rgb(0 0 0 / 12%),
+					0px 3px 5px rgb(0 0 0 / 20%);
+		padding: 8px;
+		box-sizing: border-box;
+	}
+
+	${Form}${Form} {
+		padding-bottom: 0;
+		height: fit-content;
+	}
+`;
 
 export default css`
 	${ResourcesContainer} {

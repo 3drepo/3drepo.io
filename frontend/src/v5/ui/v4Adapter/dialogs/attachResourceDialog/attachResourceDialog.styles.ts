@@ -15,43 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
-import { ScrollArea as ScrollAreaBase } from '@controls/scrollArea';
+import { AttachResourcesModalStyling } from '../../overrides/preview/issues/attachments.overrides';
 import { V5ModalContainer } from './../dialog.styles';
-import { Form as FormBase } from '@controls/modal/formModal/formDialog.styles';
-import { DialogTabs, VisualSettingsButtonsContainer } from '@/v4/routes/components/topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
 
 export const Container = styled(V5ModalContainer)`
-	padding: 0;
-
-	.MuiDialogContent-root {
-		padding: 0px;
-		overflow-x: hidden;
-	}
-
-	${DialogTabs} {
-		padding-left: 10px;
-		box-shadow: 0px 1px 10px rgba(23, 43, 77, 0.15);
-	}
-
-	${VisualSettingsButtonsContainer} {
-		display: flex;
-		justify-content: flex-end;
-		position: unset;
-		box-shadow: 0px 6px 10px rgb(0 0 0 / 14%),
-					0px 1px 18px rgb(0 0 0 / 12%),
-					0px 3px 5px rgb(0 0 0 / 20%);
-		padding: 8px;
-		box-sizing: border-box;
-	}
-`;
-
-export const Form = styled(FormBase)`
-	&&& {
-		padding-bottom: 0;
-		height: auto;
-	}
-`;
-
-export const ScrollArea = styled(ScrollAreaBase)`
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	${AttachResourcesModalStyling}
 `;

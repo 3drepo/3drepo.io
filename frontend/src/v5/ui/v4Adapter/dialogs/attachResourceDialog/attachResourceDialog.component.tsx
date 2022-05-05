@@ -22,11 +22,9 @@ import {
 	CloseButton,
 	FormDialogContent,
 } from '@/v5/ui/controls/modal/formModal/formDialog.styles';
-import {
-	ScrollArea,
-	Container,
-	Form,
-} from './attachResourceDialog.styles';
+import { ScrollArea } from '@controls/scrollArea';
+import { Form } from '@controls/modal/formModal/formDialog.styles';
+import { Container } from './attachResourceDialog.styles';
 
 interface V5AttachResourcesDialogProps extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
 	onClickClose?: () => void;
