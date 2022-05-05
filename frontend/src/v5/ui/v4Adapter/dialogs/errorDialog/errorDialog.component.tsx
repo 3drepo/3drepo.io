@@ -21,22 +21,20 @@ import WarningIcon from '@assets/icons/warning.svg';
 import CloseIcon from '@assets/icons/close.svg';
 import { CloseButton } from '@controls/modal/modal.styles';
 import { Actions, Status } from '@/v5/ui/components/shared/modals/modals.styles';
-import { Container } from './alertModal.styles';
+import { V5ModalContainer } from '../dialog.styles';
 
-interface AlertModalProps {
+interface V5ErrorDialogProps {
 	method: string;
 	dataType: string;
 	message: string;
-	content: string;
 	status: string;
 	handleResolve: () => string;
 }
-export const AlertModal = (props: AlertModalProps) => {
-	const { method, dataType, content, message, status, handleResolve } = props;
-	const statusMessage = status + message ? ` -  ${message}` : '';
+export const V5ErrorDialog = (props: V5ErrorDialogProps) => {
+	const { method, dataType, message, status, handleResolve } = props;
 
 	return (
-		<Container>
+		<V5ModalContainer>
 			<WarningIcon />
 			<CloseButton type="submit" onClick={handleResolve}>
 				<CloseIcon />
@@ -44,7 +42,7 @@ export const AlertModal = (props: AlertModalProps) => {
 			<DialogTitle>
 				{method && dataType ? (
 					<FormattedMessage
-						id="alertModal.header"
+						id="errorDialog.header"
 						defaultMessage="Something went wrong trying to {method} the {dataType}"
 						values={{
 							method,
@@ -53,29 +51,29 @@ export const AlertModal = (props: AlertModalProps) => {
 					/>
 				) : (
 					<FormattedMessage
-						id="alertModal.header.default"
+						id="errorDialog.header.default"
 						defaultMessage="Something went wrong"
 					/>
 				)}
 			</DialogTitle>
 			<DialogContent>
-				<DialogContentText>{content}</DialogContentText>
-				{!!status && <Status>{statusMessage}</Status>}
+				<DialogContentText>{message}</DialogContentText>
+				{!!status && <Status>{status}</Status>}
 			</DialogContent>
 			<Actions bottomMargin>
 				<Button autoFocus type="submit" onClick={handleResolve} variant="contained" color="primary">
 					<FormattedMessage
-						id="alertModal.action.ok"
+						id="errorDialog.action.ok"
 						defaultMessage="Ok, close window"
 					/>
 				</Button>
 				<Button href="https://3drepo.com/contact/" variant="outlined" color="secondary">
 					<FormattedMessage
-						id="alertModal.action.contactSupport"
+						id="errorDialog.action.contactSupport"
 						defaultMessage="Contact support"
 					/>
 				</Button>
 			</Actions>
-		</Container>
+		</V5ModalContainer>
 	);
 };

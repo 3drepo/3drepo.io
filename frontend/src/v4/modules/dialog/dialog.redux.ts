@@ -23,6 +23,7 @@ import uuid from 'uuidv4';
 import { isV5 } from '@/v4/helpers/isV5';
 import { ROUTES } from '../../constants/routes';
 import * as Dialogs from '../../routes/components/dialogContainer/components';
+import { V5ErrorDialog } from '@/v5/ui/v4Adapter/dialogs/errorDialog/errorDialog.component';
 
 export interface IDialogConfig {
 	id: number;
@@ -82,7 +83,7 @@ const showErrorDialog = (state = INITIAL_STATE, action) => {
 	const messageText = typeof message === 'object' && message.message ? message.message : message;
 	const config = {
 		title: 'Error',
-		template: Dialogs.ErrorDialog,
+		template: isV5() ? V5ErrorDialog : Dialogs.ErrorDialog,
 		data: {
 			method,
 			dataType,

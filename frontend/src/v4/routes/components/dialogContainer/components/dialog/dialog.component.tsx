@@ -22,8 +22,6 @@ import DialogBase from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import { AlertModal } from '@/v5/ui/v4Adapter/components/alertModal.component';
-import { isV5 } from '@/v4/helpers/isV5';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { IDialogConfig } from '../../../../../modules/dialog/dialog.redux';
@@ -31,6 +29,9 @@ import { dispatch } from '../../../../../modules/store';
 import { COLOR } from '../../../../../styles';
 import { SearchButton } from '../../../../viewerGui/components/panelBarActions/searchButton';
 import { DialogActions, DialogTitle, TopDialogActions } from './dialog.styles';
+import { isV5 } from '@/v4/helpers/isV5';
+import { ThemeProvider } from 'styled-components';
+import { theme } from '@/v5/ui/routes/viewer/theme';
 
 interface IProps {
 	id: number;
@@ -133,33 +134,18 @@ export const Dialog: FunctionComponent<IProps> = forwardRef((props, ref: Ref<HTM
 		}
 	};
 
-	const renderV5Dialog = () => {
-		const data = { content, ...(props.data || {})};
-
-		return (
-			<AlertModal
-				{...data}
-				handleResolve={handleResolve}
-				handleClose={handleClose}
-				dialogId={props.id}
-				handleDisableClose={handleCloseDisable}
-				disableClosed={closeDisabled}
-			/>
-		);
-	};
-
-	return (
+	const renderDialog = () => (
         <DialogBase {...DialogProps} ref={ref} open={isOpen} onClose={handleClose}>
-			{isV5() ? (
-				renderV5Dialog()
-			) : (
-				<>
-					<DialogTitle>{title}{renderCloseButton()}</DialogTitle>
-					{renderContent(content && !DialogTemplate)}
-					{renderTemplate(!!DialogTemplate)}
-					{renderActions(content && onCancel && !props.config.onConfirm)}
-				</>
-			)}
+			<DialogTitle>{title}{renderCloseButton()}</DialogTitle>
+			{renderContent(content && !DialogTemplate)}
+			{renderTemplate(!!DialogTemplate)}
+			{renderActions(content && onCancel && !props.config.onConfirm)}
 		</DialogBase>
     );
+
+	return isV5() ? (
+		<ThemeProvider theme={theme}>
+			{renderDialog()}
+		</ThemeProvider>
+	) : renderDialog();
 });

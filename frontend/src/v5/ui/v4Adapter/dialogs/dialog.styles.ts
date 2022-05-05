@@ -16,9 +16,12 @@
  */
 
 import styled from 'styled-components';
-import { Container as ContainerBase } from '@/v5/ui/components/shared/modals/modals.styles';
+import { Container } from '@/v5/ui/components/shared/modals/modals.styles';
 
-export const Container = styled(ContainerBase)`
+export const V5ModalContainer = styled(Container)`
 	min-width: 450px;
-	min-height: 248px;
+	min-height: 229px;
+    position: relative;
+    margin-top: -92px;
+    background: ${({ theme }) => theme.palette.primary.contrast};
 `;
