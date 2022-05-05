@@ -16,10 +16,10 @@
  */
 
 // detects edge as browser but not device
-const { getUserAgentInfo} = require('../utils/helper/userAgent');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const geoip = require('geoip-lite');
+const { getUserAgentInfo } = require('../utils/helper/userAgent');
 const { publish } = require('../services/eventsManager/eventsManager');
 
 const LoginRecord = {};

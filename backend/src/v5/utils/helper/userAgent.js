@@ -58,7 +58,7 @@ const getUserAgentInfoFromBrowser = (userAgentString) => {
 		application: browser.name ? { ...browser, type: 'browser' } : { type: 'unknown' },
 		engine,
 		os,
-		device: Device(userAgentString).type
+		device: Device(userAgentString).type,
 	};
 
 	return userAgentInfo;
@@ -74,7 +74,7 @@ UserAgent.isFromWebBrowser = (userAgent) => {
 };
 
 UserAgent.getUserAgentInfo = (userAgent) => {
-	if(!userAgent){
+	if (!userAgent) {
 		return {
 			application: {
 				type: 'unknown',
@@ -88,13 +88,11 @@ UserAgent.getUserAgentInfo = (userAgent) => {
 				version: undefined,
 			},
 			device: 'unknown',
-		}
-	} else if (isUserAgentFromPlugin(userAgent)){
+		};
+	} if (isUserAgentFromPlugin(userAgent)) {
 		return getUserAgentInfoFromPlugin(userAgent);
-	} else{
-		return getUserAgentInfoFromBrowser(userAgent);
 	}
-}
-
+	return getUserAgentInfoFromBrowser(userAgent);
+};
 
 module.exports = UserAgent;
