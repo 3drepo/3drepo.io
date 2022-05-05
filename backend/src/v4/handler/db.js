@@ -343,9 +343,35 @@
 		return collection.countDocuments(query, options);
 	};
 
+	let defaultRoleProm;
+
+	const ensureDefaultRoleExists = async () => {
+		if(!defaultRoleProm) {
+
+			const createDefaultRole = async () => {
+
+				const roleFound = await Handler.findOne("admin", "system.roles", { _id: `admin.${C.DEFAULT_USER_ROLE}` });
+
+				// istanbul ignore next
+				if (!roleFound) {
+					const createRoleCmd = { createRole: C.DEFAULT_USER_ROLE, privileges: [], roles: [] };
+					await Handler.runCommand("admin", createRoleCmd);
+				}
+			};
+
+			defaultRoleProm = createDefaultRole();
+		}
+		return defaultRoleProm;
+	};
+
 	Handler.createUser = async function (username, password, customData) {
-		const adminDB = await this.getAuthDB();
-		await adminDB.addUser(username, password, { customData, roles: [C.DEFAULT_USER_ROLE]});
+		const [adminDB] = await Promise.all([
+			this.getAuthDB(),
+			ensureDefaultRoleExists()
+		]);
+
+		const defaultRole = { role: C.DEFAULT_USER_ROLE, db: "admin" };
+		await adminDB.addUser(username, password, { customData, roles: [defaultRole]});
 	};
 
 	module.exports = Handler;

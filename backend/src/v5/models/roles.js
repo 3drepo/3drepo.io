@@ -15,20 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { DEFAULT, TEAM_MEMBER } = require('./roles.constants');
+const { TEAM_MEMBER } = require('./roles.constants');
 const db = require('../handler/db');
-
-const createDefaultRole = async () => {
-	const roleFound = await db.findOne('admin', 'system.roles', { _id: `admin.${DEFAULT}` });
-
-	// istanbul ignore next
-	if (!roleFound) {
-		const createRoleCmd = { createRole: DEFAULT, privileges: [], roles: [] };
-		await db.runCommand('admin', createRoleCmd);
-	}
-};
-
-createDefaultRole();
 
 const Roles = {};
 
