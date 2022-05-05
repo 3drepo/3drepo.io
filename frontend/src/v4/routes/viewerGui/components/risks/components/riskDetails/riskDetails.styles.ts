@@ -33,7 +33,6 @@ import {
 import * as TextFieldStyles from '../../../../../components/textField/textField.styles';
 import PreviewDetailsBase from '../../../previewDetails/previewDetails.container';
 import { Container as PreviewDetailsContainer } from '../../../previewDetails/previewDetails.styles';
-import { Container as TabContainer } from '../../../risks/components/riskDetails/riskDetails.styles';
 
 export const StyledFormControl = styled(FormControl)`
 `;
@@ -189,7 +188,7 @@ export const Content = styled.div<{ active: boolean }>`
 	width: 100%;
 	margin-bottom: 5px;
 
-	${TabContainer} {
+	${Container} {
 		margin-top: 6px;
 	}
 `;

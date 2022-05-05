@@ -78,9 +78,6 @@ export const AddLinkContainer = styled.div`
 	margin-top: 20px;
 `;
 
-AddLinkContainer.displayName = '___AddLinkContainer';
-console.log("AddLinkContainer", AddLinkContainer);
-
 export const DropzoneContent = styled.div`
 	cursor: ${(props: any) => props.error ? 'default' : 'pointer' };
 	background-color: ${dropZoneColors('transparent', COLOR.PRIMARY_MAIN_6, COLOR.WARNING_LIGHT)};

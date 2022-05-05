@@ -27,7 +27,6 @@ import { Field, Formik } from 'formik';
 import CopyIcon from '@mui/icons-material/FileCopy';
 import { ENTER_KEY } from '../../../constants/keys';
 import { renderWhenTrue } from '../../../helpers/rendering';
-import { ExpandAction } from '../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import {
 	ActionsLine,
 	Container,
@@ -39,6 +38,7 @@ import {
 	StyledLinkableField,
 	StyledMarkdownField,
 	StyledTextField,
+	ExpandAction,
 } from './textField.styles';
 
 interface IProps extends StandardTextFieldProps {
