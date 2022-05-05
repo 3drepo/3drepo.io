@@ -123,7 +123,7 @@ export class AttachResourcesDialog extends PureComponent<IProps, IState> {
 	public render() {
 		const {selectedTab} = this.state;
 		return (
-			<Container>
+			<Container onClickClose={this.onCancel}>
 				<DialogTabs
 					value={selectedTab}
 					indicatorColor="primary"
@@ -140,19 +140,17 @@ export class AttachResourcesDialog extends PureComponent<IProps, IState> {
 					onSubmit={this.onSubmit}
 					render={({ values }) => (
 						<Form>
-							{
-								selectedTab === 0 && this.renderAttachResourceFiles(values)(this.props.quotaLeft)
-							}
+							{selectedTab === 0 && this.renderAttachResourceFiles(values)(this.props.quotaLeft)}
 							{selectedTab === 1 && <AttachResourceUrls links={values.links} />}
-								<DialogButtons
-									onClickCancel={this.onCancel}
-									validateQuota={this.validateQuota}
-									validateUploadLimit={this.validateUploadLimit}
-								/>
+							<DialogButtons
+								onClickCancel={this.onCancel}
+								validateQuota={this.validateQuota}
+								validateUploadLimit={this.validateUploadLimit}
+							/>
 						</Form>
-						)}
+					)}
 				/>
 			</Container>
-			);
+		);
 	}
 }

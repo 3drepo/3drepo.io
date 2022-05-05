@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { isV5 } from '@/v4/helpers/isV5';
 import { Button } from '@mui/material';
 import { Field } from 'formik';
 import {
@@ -25,8 +26,8 @@ export const DialogButtons = ({onClickCancel, validateQuota, validateUploadLimit
 	return (
 		<VisualSettingsButtonsContainer>
 			<NeutralActionButton
-				color="primary"
-				variant="contained"
+				color={isV5() ? 'secondary' : 'primary'}
+				variant={isV5() ? 'outlined' : 'contained'}
 				disabled={false}
 				type="button"
 				onClick={onClickCancel}
@@ -36,7 +37,7 @@ export const DialogButtons = ({onClickCancel, validateQuota, validateUploadLimit
 
 			<Field render={ ({ form }) => (
 				<Button
-					color="secondary"
+					color={isV5() ? 'primary' : 'secondary'}
 					variant="contained"
 					type="submit"
 					disabled={!form.isValid || form.isValidating ||

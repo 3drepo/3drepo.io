@@ -15,18 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DialogContent, InputAdornment } from '@mui/material';
+import { isV5 } from '@/v4/helpers/isV5';
+import { DialogContent } from '@mui/material';
 import Dropzone from 'react-dropzone';
 import styled from 'styled-components';
+import { V5AttachResourcesDialog } from '@/v5/ui/v4Adapter/dialogs/attachResourceDialog/attachResourceDialog.component';
 import { COLOR } from '../../../../styles';
 
 const dropZoneColors = (normalColour, dragColour, errorColour) => (props: any) =>
 	props.error ? errorColour :
 	props.isDragActive ? dragColour :  normalColour ;
 
-export const Container = styled(DialogContent)`
+const V5DialogContent = styled(V5AttachResourcesDialog).attrs({
+	title: "Attach Resources",
+})``;
+
+export const Container = styled(isV5() ? V5DialogContent : DialogContent)<{ onClickClose?: Function }>`
 	width: 500px;
 	height: 250px;
+	
 	&& {
 		padding-top: 0;
 		padding-bottom: 68px;

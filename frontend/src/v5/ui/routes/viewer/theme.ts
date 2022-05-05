@@ -64,8 +64,15 @@ export const theme = createTheme(
 					styleOverrides: {
 						root: {
 							minHeight: 'unset',
+							background: COLOR.PRIMARY_MAIN_CONTRAST,
+							paddingLeft: 0,
+							paddingRight: 0,
 							'.MuiTabs-indicator': {
 								backgroundColor: COLOR.PRIMARY_MAIN,
+							},
+							'.MuiTabs-flexContainer': {
+								padding: '0 14px',
+								width: 'fit-content',
 							},
 						},
 					},
@@ -78,7 +85,7 @@ export const theme = createTheme(
 							textTransform: 'unset',
 							margin: 0,
 							marginRight: 15,
-							paddingTop: 0,
+							padding: '15px 0',
 							fontWeight: 400,
 						},
 					},
