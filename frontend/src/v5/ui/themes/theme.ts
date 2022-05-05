@@ -153,6 +153,11 @@ const typography: TypographyOptions = {
 	},
 };
 
+export const hexToOpacity = (hex: string, opacityInPercentage: number): string => {
+	const formattedOpacity = (opacityInPercentage / 100) * 255;
+	return hex + Math.floor(formattedOpacity).toString(16);
+};
+
 export const theme = createTheme({
 	palette: {
 		primary: {
