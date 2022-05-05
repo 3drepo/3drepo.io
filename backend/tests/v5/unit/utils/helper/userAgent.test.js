@@ -24,7 +24,7 @@ const matchHelper = (func, string, match) => {
 	expect(res).toEqual(match);
 };
 
-const testGetUserAgentInfoFromPlugin = () => {
+const testGetUserAgentInfo = () => {
 	describe('Get user agent info from plugin user agent', () => {
 		test('Should return user agent info object from plugin user agent', () => {
 			const pluginUserAgent = 'PLUGIN: Windows/10.0.19042.0 REVIT/2021.1 PUBLISH/4.15.0';
@@ -44,13 +44,9 @@ const testGetUserAgentInfoFromPlugin = () => {
 				},
 				device: 'desktop',
 			};
-			matchHelper(UserAgentHelper.getUserAgentInfoFromPlugin, pluginUserAgent, expectedUserAgentInfo);
+			matchHelper(UserAgentHelper.getUserAgentInfo, pluginUserAgent, expectedUserAgentInfo);
 		});
-	});
-};
 
-const testGetUserAgentInfoFromBrowser = () => {
-	describe('Get user agent info from browser user agent', () => {
 		test('Should return user agent info object from browser', () => {
 			const browserUserAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36 OPR/38.0.2220.41';
 			const expectedUserAgentInfo = {
@@ -70,7 +66,26 @@ const testGetUserAgentInfoFromBrowser = () => {
 				},
 				device: 'desktop',
 			};
-			matchHelper(UserAgentHelper.getUserAgentInfoFromBrowser, browserUserAgent, expectedUserAgentInfo);
+			matchHelper(UserAgentHelper.getUserAgentInfo, browserUserAgent, expectedUserAgentInfo);
+		});
+
+		test('Should return user agent info with unknown fields if user agent is present but not recognizable', () => {
+			const browserUserAgent = '123';
+			const expectedUserAgentInfo = {
+				application: {
+					type: 'unknown',
+				},
+				engine: {
+					name: undefined,
+					version: undefined,
+				},
+				os: {
+					name: undefined,
+					version: undefined,
+				},
+				device: 'phone',
+			};
+			matchHelper(UserAgentHelper.getUserAgentInfo, browserUserAgent, expectedUserAgentInfo);
 		});
 
 		test('Should return user agent info object if user agent is missing', () => {
@@ -89,20 +104,7 @@ const testGetUserAgentInfoFromBrowser = () => {
 				},
 				device: 'unknown',
 			};
-			matchHelper(UserAgentHelper.getUserAgentInfoFromBrowser, browserUserAgent, expectedUserAgentInfo);
-		});
-	});
-};
-
-const testIsUserAgentFromPlugin = () => {
-	describe('Check whether user agent is coming from the plugin', () => {
-		test('Should return true if user agent is coming from the plugin', () => {
-			const pluginUserAgent = 'PLUGIN: Windows/10.0.19042.0 REVIT/2021.1 PUBLISH/4.15.0';
-			matchHelper(UserAgentHelper.isUserAgentFromPlugin, pluginUserAgent, true);
-		});
-		test('Should return false if user agent is not coming from the plugin', () => {
-			const browserUserAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36 OPR/38.0.2220.41';
-			matchHelper(UserAgentHelper.isUserAgentFromPlugin, browserUserAgent, false);
+			matchHelper(UserAgentHelper.getUserAgentInfo, browserUserAgent, expectedUserAgentInfo);
 		});
 	});
 };
@@ -121,8 +123,6 @@ const testIsFromWebBrowser = () => {
 };
 
 describe('utils/helper/userAgent', () => {
-	testGetUserAgentInfoFromPlugin();
-	testGetUserAgentInfoFromBrowser();
-	testIsUserAgentFromPlugin();
+	testGetUserAgentInfo();
 	testIsFromWebBrowser();
 });

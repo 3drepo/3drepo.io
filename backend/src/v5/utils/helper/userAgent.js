@@ -25,7 +25,7 @@ const UserAgent = {};
 // PLUGIN: {OS Name}/{OS Version} {Host Software Name}/{Host Software Version} {Plugin Type}/{Plugin Version}
 // Example:
 // PLUGIN: Windows/10.0.19042.0 REVIT/2021.1 PUBLISH/4.15.0
-UserAgent.getUserAgentInfoFromPlugin = (userAgentString) => {
+const getUserAgentInfoFromPlugin = (userAgentString) => {
 	const [osInfo, appInfo, engineInfo] = userAgentString.replace('PLUGIN: ', '').split(' ');
 
 	const osInfoComponents = osInfo.split('/');
@@ -52,19 +52,19 @@ UserAgent.getUserAgentInfoFromPlugin = (userAgentString) => {
 	return userAgentInfo;
 };
 
-UserAgent.getUserAgentInfoFromBrowser = (userAgentString) => {
+const getUserAgentInfoFromBrowser = (userAgentString) => {
 	const { browser, engine, os } = UaParserJs(userAgentString);
 	const userAgentInfo = {
 		application: browser.name ? { ...browser, type: 'browser' } : { type: 'unknown' },
 		engine,
 		os,
-		device: userAgentString ? Device(userAgentString).type : 'unknown',
+		device: Device(userAgentString).type
 	};
 
 	return userAgentInfo;
 };
 
-UserAgent.isUserAgentFromPlugin = (userAgent) => userAgent.split(' ')[0] === 'PLUGIN:';
+const isUserAgentFromPlugin = (userAgent) => userAgent.split(' ')[0] === 'PLUGIN:';
 
 UserAgent.isFromWebBrowser = (userAgent) => {
 	const ua = useragent.is(userAgent);
@@ -72,5 +72,29 @@ UserAgent.isFromWebBrowser = (userAgent) => {
 		.some((browserType) => ua[browserType]); // If any of these browser types matches then is a websession
 	return isFromWebBrowser;
 };
+
+UserAgent.getUserAgentInfo = (userAgent) => {
+	if(!userAgent){
+		return {
+			application: {
+				type: 'unknown',
+			},
+			engine: {
+				name: undefined,
+				version: undefined,
+			},
+			os: {
+				name: undefined,
+				version: undefined,
+			},
+			device: 'unknown',
+		}
+	} else if (isUserAgentFromPlugin(userAgent)){
+		return getUserAgentInfoFromPlugin(userAgent);
+	} else{
+		return getUserAgentInfoFromBrowser(userAgent);
+	}
+}
+
 
 module.exports = UserAgent;
