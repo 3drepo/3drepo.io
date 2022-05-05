@@ -84,7 +84,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) 
 	const {
 		handleSubmit,
 		control,
-		formState: { errors },
+		formState: { errors, isValid },
 	} = useForm<IFormInput>({
 		defaultValues,
 		mode: 'onChange',
@@ -109,6 +109,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) 
 			open={open}
 			onClickClose={onClickClose}
 			onSubmit={handleSubmit(onClickContinue)}
+			isValid={isValid}
 		>
 			<SectionTitle>
 				<FormattedMessage
