@@ -22,8 +22,8 @@ import {
 	FieldsRow,
 	StyledFormControl
 } from '../../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
-import { RemoveButton } from '../resources.component';
-import {  ResourceListItem } from './attachResourcesDialog.styles';
+import { RemoveButton } from '../removeButton.component';
+import { ResourceListItem } from './attachResourcesDialog.styles';
 
 export const FileEntry = ({onClickRemove, index, entry}) => {
 	const nameFieldName = `files.${index}.name`;
@@ -33,7 +33,8 @@ export const FileEntry = ({onClickRemove, index, entry}) => {
 		<FieldsRow container justifyContent="space-between" flex={0.5}>
 			<StyledFormControl>
 				<Field name={nameFieldName} render={({ field, form }) => (
-					<TextField {...field}
+					<TextField
+						{...field}
 						fullWidth
 						error={Boolean(get(form.errors, nameFieldName))}
 						helperText={get(form.errors, nameFieldName)}

@@ -14,23 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { isV5 } from '@/v4/helpers/isV5';
 import { DialogContent } from '@mui/material';
 import Dropzone from 'react-dropzone';
 import styled from 'styled-components';
-import { V5AttachResourcesDialog } from '@/v5/ui/v4Adapter/dialogs/attachResourceDialog/attachResourceDialog.component';
 import { COLOR } from '../../../../styles';
 
 const dropZoneColors = (normalColour, dragColour, errorColour) => (props: any) =>
 	props.error ? errorColour :
 	props.isDragActive ? dragColour :  normalColour ;
 
-const V5DialogContent = styled(V5AttachResourcesDialog).attrs({
-	title: "Attach Resources",
-})``;
-
-export const Container = styled(isV5() ? V5DialogContent : DialogContent)<{ onClickClose?: Function }>`
+export const Container = styled(DialogContent)`
 	width: 500px;
 	height: 250px;
 	
@@ -39,6 +32,8 @@ export const Container = styled(isV5() ? V5DialogContent : DialogContent)<{ onCl
 		padding-bottom: 68px;
 	}
 `;
+
+export const ResourcesContainer = styled.div``;
 
 export const StyledDropZone = styled(Dropzone)`
 	margin-left: 20px;
@@ -82,6 +77,9 @@ export const ResourceListLinkItem = styled.div`
 export const AddLinkContainer = styled.div`
 	margin-top: 20px;
 `;
+
+AddLinkContainer.displayName = '___AddLinkContainer';
+console.log("AddLinkContainer", AddLinkContainer);
 
 export const DropzoneContent = styled.div`
 	cursor: ${(props: any) => props.error ? 'default' : 'pointer' };

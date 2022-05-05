@@ -20,6 +20,28 @@ import { FieldsRow } from '@/v4/routes/viewerGui/components/risks/components/ris
 import { ResourcesContainer } from '@/v4/routes/components/resources/resources.styles';
 import { Form } from '@controls/modal/formModal/formDialog.styles';
 import { DialogTabs, VisualSettingsButtonsContainer } from '@/v4/routes/components/topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
+import { AddLinkContainer } from '@/v4/routes/components/resources/attachResourcesDialog/attachResourcesDialog.styles';
+import { LabelButton } from '@/v4/routes/viewerGui/components/labelButton/labelButton.styles';
+;import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
+
+
+export const AttachResourcesFile = css`
+`;
+
+export const AttachResourcesLink = css`
+	${AddLinkContainer} {
+		padding: 28px;
+		background: red;
+
+		${LabelButton} {
+			${labelButtonPrimaryStyles}
+			text-decoration: none !important;
+			padding: 4px 19px;
+			margin-left: 19px;
+			border-radius: 5px;
+		}
+	}
+`;
 
 // used in the attach resources modal styling file
 export const AttachResourcesModalStyling = css`

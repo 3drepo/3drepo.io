@@ -17,14 +17,14 @@
 import { PureComponent } from 'react';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
+import { isV5 } from '@/v4/helpers/isV5';
+import { V5AttachResourcesDialog } from '@/v5/ui/v4Adapter/dialogs/attachResourceDialog/attachResourceDialog.component';
+
 import { renderWhenTrueOtherwise } from '../../../../helpers/rendering';
 import { clientConfigService } from '../../../../services/clientConfig';
 import { Loader as LoaderIndicator } from '../../loader/loader.component';
 import { LoaderContainer } from '../../messagesList/messagesList.styles';
-import {
-	DialogTab,
-	DialogTabs
-} from '../../topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
+import { DialogTab, DialogTabs } from '../../topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
 import { AttachResourceFiles } from './attachResourceFiles.component';
 import { Container } from './attachResourcesDialog.styles';
 import { DialogButtons } from './attachResourcesDialogButtons';
@@ -120,10 +120,10 @@ export class AttachResourcesDialog extends PureComponent<IProps, IState> {
 		<Loader />
 	)
 
-	public render() {
+	public renderDialogContent() {
 		const {selectedTab} = this.state;
 		return (
-			<Container onClickClose={this.onCancel}>
+			<>
 				<DialogTabs
 					value={selectedTab}
 					indicatorColor="primary"
@@ -150,6 +150,21 @@ export class AttachResourcesDialog extends PureComponent<IProps, IState> {
 						</Form>
 					)}
 				/>
+			</>
+		);
+	}
+
+	public render() {
+		return isV5() ? (
+			<V5AttachResourcesDialog
+				onClickClose={this.onCancel}
+				title="Attach Resources"
+			>
+				{this.renderDialogContent()}
+			</V5AttachResourcesDialog>
+		) : (
+			<Container>
+				{this.renderDialogContent()}
 			</Container>
 		);
 	}

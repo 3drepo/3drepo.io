@@ -29,6 +29,7 @@ import {
 	ActionContainer, DocumentIcon, IconButton, LinkIcon, PhotoIcon, QuoteIcon, RemoveIcon, ResourcesContainer,
 	ResourcesList, ResourceItemContainer, ResourceItemRightColumn, ResourceLabel, ResourceLink, UploadSizeLabel,
 } from './resources.styles';
+import { RemoveButton } from './removeButton.component';
 
 interface IResource {
 	_id: string;
@@ -51,12 +52,6 @@ interface IProps {
 interface IState {
 	value: any;
 }
-
-export const RemoveButton = (props) => (
-	<IconButton {...props} aria-label="Toggle menu" aria-haspopup="true" size="large">
-		<RemoveIcon />
-	</IconButton>
-);
 
 export const QuoteButton = (props) => (
 	<IconButton {...props} aria-label="Quote resource" size="large">
