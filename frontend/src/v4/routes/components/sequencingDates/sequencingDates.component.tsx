@@ -61,13 +61,14 @@ const SequenceDate = ({ name, onChange, showSequenceDate, min, max, initialFocus
 		<SequenceDateContainer>
 			<SequenceDateField
 				shouldDisableDate={(date: any) => isDateOutsideRange(min, max, date.$d)}
-				inputFormat={ isV5() ? LONG_DATE_TIME_FORMAT : NAMED_MONTH_DATETIME_FORMAT}
+				inputFormat={isV5() ? LONG_DATE_TIME_FORMAT : NAMED_MONTH_DATETIME_FORMAT}
 				dateTime
 				name={name}
 				value={value}
 				onChange={handleChange}
 				defaultValue={min}
 				initialFocusedDate={initialFocusedDate}
+				placeholder={isV5() ? 'Set time and date' : ''}
 			/>
 			{ value &&
 				<SequenceDateActions>
