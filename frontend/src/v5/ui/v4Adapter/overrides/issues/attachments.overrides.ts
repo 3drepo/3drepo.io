@@ -20,24 +20,47 @@ import { FieldsRow } from '@/v4/routes/viewerGui/components/risks/components/ris
 import { ResourcesContainer } from '@/v4/routes/components/resources/resources.styles';
 import { Form } from '@controls/modal/formModal/formDialog.styles';
 import { DialogTabs, VisualSettingsButtonsContainer } from '@/v4/routes/components/topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
-import { AddLinkContainer } from '@/v4/routes/components/resources/attachResourcesDialog/attachResourcesDialog.styles';
+import { AddLinkContainer, ResourcesListContainer, ResourcesListScroller } from '@/v4/routes/components/resources/attachResourcesDialog/attachResourcesDialog.styles';
 import { LabelButton } from '@/v4/routes/viewerGui/components/labelButton/labelButton.styles';
-;import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
-
+import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
 
 export const AttachResourcesFile = css`
 `;
 
 export const AttachResourcesLink = css`
+	${ResourcesListScroller} {
+		margin-top: 0px;
+		overflow-y: overlay;
+		max-height: 207px;
+
+		${ResourcesListContainer} {
+			width: 100%;
+			box-sizing: border-box;
+			padding: 0 28px;
+
+			${FieldsRow} {
+				&:first-of-type {
+					margin-top: 20px;
+				}
+
+				button {
+					margin: 0 0 8px 8px;
+				}
+			}
+		}
+	}
+
 	${AddLinkContainer} {
-		padding: 28px;
-		background: red;
+		padding: 28px 0;
+		margin: 0 28px;
+		// TODO - fix after new palette is released
+		border-top: solid 1px #e0e5f0;
 
 		${LabelButton} {
 			${labelButtonPrimaryStyles}
 			text-decoration: none !important;
 			padding: 4px 19px;
-			margin-left: 19px;
+			margin: 0;
 			border-radius: 5px;
 		}
 	}
@@ -46,6 +69,7 @@ export const AttachResourcesLink = css`
 // used in the attach resources modal styling file
 export const AttachResourcesModalStyling = css`
 	padding: 0;
+
 	.MuiDialogContent-root {
 		padding: 0px;
 		overflow-x: hidden;
