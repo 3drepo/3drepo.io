@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { StyledDatePicker } from '@/v4/routes/components/dateField/dateField.styles';
 import { ActionsLine, StyledMarkdownField, StyledTextField } from '@/v4/routes/components/textField/textField.styles';
 import { StyledButton } from '@/v4/routes/viewerGui/components/containedButton/containedButton.styles';
 import { DescriptionImage } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
@@ -69,6 +70,15 @@ export default css`
 	${StyledFormControl} {
 		label { left: -14px; }
 		.MuiInput-root svg { margin-top: 23px; }
+
+		// Drop down icon for date selector
+		.MuiInputAdornment-root {
+			position: absolute;
+			right: 8px;
+			svg {
+				height: 20px;
+			}
+		}
 	}
 
 	${ActionsLine} {
