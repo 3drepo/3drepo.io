@@ -23,11 +23,13 @@ const { logger } = require(`${v5Path}/utils/logger`);
 const { isValidType, validateSchema } = require(`${v5Path}/middleware/dataConverter/schemas/subscriptions`);
 const { getSubscriptions, editSubscriptions, removeSubscription } = require(`${v5Path}/models/teamspaces`);
 
-const run = async (teamspace, remove, type, collaborators, data, expiryDate) => {
+const run = async (teamspace, remove, removeAll, type, collaborators, data, expiryDate) => {
 	const subs = await getSubscriptions(teamspace);
 	logger.logInfo(`${teamspace} currently has the following subscription(s): ${JSON.stringify(subs)}`);
 
-	if (remove) {
+	if (removeAll) {
+		await removeSubscription(teamspace);
+	} else if (remove) {
 		if (isValidType(type)) {
 			await removeSubscription(teamspace, type);
 		} else {
@@ -43,33 +45,48 @@ const run = async (teamspace, remove, type, collaborators, data, expiryDate) => 
 
 const genYargs = (yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
-	const argsSpec = (subYargs) => subYargs.option('users', {
-		describe: 'number of users on the license',
-		type: 'string',
-	}).option('data', {
-		describe: 'data quota on the license(in MiB)',
-		type: 'number',
-	}).option('expiryDate', {
-		describe: 'expiry date on the license',
-		type: 'string',
-	}).option('type', {
-		describe: 'type of license',
-		type: 'string',
-	})
-		.option('teamspace', {
-			describe: 'teamspace to update',
+	const argsSpec = (subYargs) => subYargs.option('users',
+		{
+			describe: 'number of users on the license',
 			type: 'string',
-			demandOption: true,
 		})
-		.option('remove', {
-			describe: 'remove license from user',
-			type: 'boolean',
-			default: false,
-		});
+		.option('data',
+			{
+				describe: 'data quota on the license(in MiB)',
+				type: 'number',
+			})
+		.option('expiryDate',
+			{
+				describe: 'expiry date on the license',
+				type: 'string',
+			})
+		.option('type',
+			{
+				describe: 'type of license',
+				type: 'string',
+			})
+		.option('teamspace',
+			{
+				describe: 'teamspace to update',
+				type: 'string',
+				demandOption: true,
+			})
+		.option('remove',
+			{
+				describe: 'remove a specified license type',
+				type: 'boolean',
+				default: false,
+			})
+		.option('removeAll',
+			{
+				describe: 'remove all licenses',
+				type: 'boolean',
+				default: false,
+			});
 	return yargs.command(commandName,
 		'Update the license on a teamspace',
 		argsSpec,
-		(argv) => run(argv.teamspace, argv.remove, argv.type, argv.users, argv.data, argv.expiryDate === 'null' ? null : argv.expiryDate));
+		(argv) => run(argv.teamspace, argv.remove, argv.removeAll, argv.type, argv.users, argv.data, argv.expiryDate === 'null' ? null : argv.expiryDate));
 };
 
 module.exports = {
