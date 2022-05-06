@@ -15,11 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 import FormControl from '@mui/material/FormControl';
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { StyledButton } from '../containedButton/containedButton.styles';
 import { Container as ButtonContainer } from '../pinButton/pinButton.styles';
 
@@ -37,12 +36,5 @@ export const UpdateButtonsContainer = styled(FormControl)<{ center?: boolean }>`
 		${ButtonContainer} ~ ${ButtonContainer} {
 			margin-left: 12px;
 		}
-
-		${ isV5() && css`
-			justify-content: left;
-			${StyledButton} {
-				margin: 0;
-			}
-		`}
 	}
 `;

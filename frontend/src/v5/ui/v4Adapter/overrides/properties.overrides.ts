@@ -15,8 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { StyledMarkdownField, StyledTextField } from '@/v4/routes/components/textField/textField.styles';
+import { ActionsLine, StyledMarkdownField, StyledTextField } from '@/v4/routes/components/textField/textField.styles';
+import { StyledButton } from '@/v4/routes/viewerGui/components/containedButton/containedButton.styles';
+import { DescriptionImage } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
+import { DateFieldContainer } from '@/v4/routes/viewerGui/components/issues/components/mainIssueFormTab/mainIssueFormTab.styles';
 import { StyledFormControl } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+import { UpdateButtonsContainer } from '@/v4/routes/viewerGui/components/updateButtons/updateButtons.styles';
 import { css } from 'styled-components';
 
 export default css`
@@ -65,5 +69,26 @@ export default css`
 	${StyledFormControl} {
 		label { left: -14px; }
 		.MuiInput-root svg { margin-top: 23px; }
+	}
+
+	${ActionsLine} {
+		bottom: 4px;
+		right: 0;
+	}
+
+	${DescriptionImage} {
+		border-radius: 5px;
+	}
+
+	${DateFieldContainer} {
+		margin-top: 27px;
+		input { height: 24px; }
+	}
+
+	${UpdateButtonsContainer} {
+		justify-content: left;
+		${StyledButton} {
+			margin: 0;
+		}
 	}
 `;

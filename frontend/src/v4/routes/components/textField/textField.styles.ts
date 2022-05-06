@@ -19,7 +19,6 @@ import styled, { css } from 'styled-components';
 
 import { IconButton, InputLabel, TextField } from '@mui/material';
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { ContainedButton } from '../../viewerGui/components/containedButton/containedButton.component';
 import { LinkableField } from '../linkableField/linkableField.component';
 import { MarkdownField } from '../markdownField/markdownField.component';
@@ -40,13 +39,8 @@ export const Container = styled.div`
 
 export const ActionsLine = styled.div`
 	position: absolute;
-	${isV5() ? css`
-		bottom: 4px;
-		right: 0;
-	` : css`
-		bottom: 4px;
-		right: 0;
-	`}
+	bottom: 4px;
+	right: 0;
 `;
 
 export const StyledIconButton = styled(IconButton)`
