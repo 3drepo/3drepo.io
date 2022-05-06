@@ -37,31 +37,37 @@ const removeAllUsersFromTS = async (teamspace) => {
 	);
 };
 
-const run = async (teamspace) => {
-	logger.logInfo(`Removing subscriptions, project datas and users from ${teamspace}...`);
-	const opsProms = [
-		removeSubscription(teamspace),
-		removeAddOns(teamspace),
-		removeAllProjects(teamspace),
-		removeAllUsersFromTS(teamspace),
-	];
+const run = async (teamspaces) => {
+	const teamspaceArr = teamspaces.split(',');
+	for (const teamspace of teamspaceArr) {
+		logger.logInfo(`-${teamspace}`);
+		const opsProms = [
 
-	await Promise.all(opsProms);
-	logger.logInfo('done.');
+			removeSubscription(teamspace),
+			removeAddOns(teamspace),
+			removeAllProjects(teamspace),
+			removeAllUsersFromTS(teamspace),
+		];
+
+		// eslint-disable-next-line no-await-in-loop
+		await Promise.all(opsProms);
+	}
+
+	logger.logInfo('done');
 };
 
 const genYargs = (yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
-	const argsSpec = (subYargs) => subYargs.option('teamspace',
+	const argsSpec = (subYargs) => subYargs.option('teamspaces',
 		{
-			describe: 'teamspace to update',
+			describe: 'teamspaces to remove data from (comma separated)',
 			type: 'string',
 			demandOption: true,
 		});
 	return yargs.command(commandName,
 		'Remove Teamspace data, reset permissions and licenses',
 		argsSpec,
-		(argv) => run(argv.teamspace));
+		(argv) => run(argv.teamspaces));
 };
 
 module.exports = {
