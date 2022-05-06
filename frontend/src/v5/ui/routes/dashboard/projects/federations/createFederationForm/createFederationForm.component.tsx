@@ -103,15 +103,31 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) 
 			setModalPhase('edit');
 		}
 	};
+
+	const onClickSubmit = (data) => {
+		onClickClose();
+	};
+
+	const SettingsModalProps = {
+		title: formatMessage({ id: 'createFederation.modal.settings.title', defaultMessage: 'New Federation' }),
+		confirmLabel: formatMessage({ id: 'createFederation.modal.settings.submit', defaultMessage: 'Continue' }),
+		onClickClose,
+		onSubmit: handleSubmit(onClickContinue),
+	};
+	const EditModalProps = {
+		title: formatMessage({ id: 'createFederation.modal.edit.title', defaultMessage: 'New Federation' }),
+		confirmLabel: formatMessage({ id: 'createFederation.modal.edit.submit', defaultMessage: 'Create Federation' }),
+		onClickClose: onClickBack,
+		onSubmit: handleSubmit(onClickSubmit),
+		cancelLabel: formatMessage({ id: 'createFederation.modal.settings.cancel', defaultMessage: 'Back' }),
+		maxWidth: 'lg',
+	};
+
 	return (
 		<FormModal
-			title={formatMessage({ id: 'createFederation.modal.title', defaultMessage: 'Create new Federation' })}
-			confirmLabel={formatMessage({ id: 'createFederation.modal.continue', defaultMessage: 'Continue' })}
-			open={open}
-			onClickClose={onClickClose}
-			onSubmit={handleSubmit(onClickContinue)}
 			isValid={isValid}
-			maxWidth={modalPhase === 'settings' ? 'sm' : 'lg'}
+			open={open}
+			{...(modalPhase === 'settings' ? SettingsModalProps : EditModalProps)}
 		>
 			{modalPhase === 'settings' ? (
 				<>
@@ -166,5 +182,5 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) 
 				/>
 			)}
 		</FormModal>
-	)
+	);
 };
