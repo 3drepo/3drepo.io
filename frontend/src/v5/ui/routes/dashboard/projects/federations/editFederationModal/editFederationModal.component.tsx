@@ -36,12 +36,14 @@ import { useContainersData } from '../../containers/containers.hooks';
 type EditFederationModalProps = IFormModal & {
 	openState: boolean;
 	federation: IFederation;
+	isNewFederation?: boolean;
 	onClickClose: () => void;
 };
 
 export const EditFederationModal = ({
 	openState,
 	federation,
+	isNewFederation,
 	onClickClose,
 	...otherProps
 }: EditFederationModalProps): JSX.Element => {
@@ -125,6 +127,7 @@ export const EditFederationModal = ({
 			isValid={includedContainers.length > 0}
 			maxWidth="lg"
 			zeroMargin
+			noModal={isNewFederation}
 			{...otherProps}
 		>
 			<EditFederationContainers

@@ -84,6 +84,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) 
 	const {
 		handleSubmit,
 		control,
+		getValues,
 		formState: { errors, isValid },
 	} = useForm<IFormInput>({
 		defaultValues,
@@ -102,7 +103,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) 
 			setModalPhase('edit');
 		}
 	};
-	return modalPhase === 'settings' ? (
+	return (
 		<FormModal
 			title={formatMessage({ id: 'createFederation.modal.title', defaultMessage: 'Create new Federation' })}
 			confirmLabel={formatMessage({ id: 'createFederation.modal.continue', defaultMessage: 'Continue' })}
@@ -110,61 +111,60 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) 
 			onClickClose={onClickClose}
 			onSubmit={handleSubmit(onClickContinue)}
 			isValid={isValid}
+			maxWidth={modalPhase === 'settings' ? 'sm' : 'lg'}
 		>
-			<SectionTitle>
-				<FormattedMessage
-					id="createFederation.form.informationTitle"
-					defaultMessage="Federation information"
+			{modalPhase === 'settings' ? (
+				<>
+					<SectionTitle>
+						<FormattedMessage
+							id="createFederation.form.informationTitle"
+							defaultMessage="Federation information"
+						/>
+					</SectionTitle>
+					<FormTextField
+						name="name"
+						control={control}
+						label={formatMessage({ id: 'createFederation.form.name', defaultMessage: 'Name' })}
+						required
+						formError={errors.name}
+					/>
+					<FormTextField
+						name="description"
+						control={control}
+						label={formatMessage({ id: 'createFederation.form.description', defaultMessage: 'Description' })}
+						formError={errors.description}
+					/>
+					<HalfWidth>
+						<FormSelect
+							required
+							name="unit"
+							label={formatMessage({
+								id: 'createFederation.form.unit',
+								defaultMessage: 'Units',
+							})}
+							control={control}
+							defaultValue="mm"
+						>
+							{UNITS.map(({ name, abbreviation }) => (
+								<MenuItem key={abbreviation} value={abbreviation}>
+									{name}
+								</MenuItem>
+							))}
+						</FormSelect>
+					</HalfWidth>
+					<FormTextField
+						name="code"
+						control={control}
+						label={formatMessage({ id: 'createFederation.form.code', defaultMessage: 'Code' })}
+						formError={errors.code}
+					/>
+				</>
+			) : (
+				<EditFederationModal
+					federation={getValues()}
+					isNewFederation
 				/>
-			</SectionTitle>
-
-			<FormTextField
-				name="name"
-				control={control}
-				label={formatMessage({ id: 'createFederation.form.name', defaultMessage: 'Name' })}
-				required
-				formError={errors.name}
-			/>
-			<FormTextField
-				name="description"
-				control={control}
-				label={formatMessage({ id: 'createFederation.form.description', defaultMessage: 'Description' })}
-				formError={errors.description}
-			/>
-			<HalfWidth>
-				<FormSelect
-					required
-					name="unit"
-					label={formatMessage({
-						id: 'createFederation.form.unit',
-						defaultMessage: 'Units',
-					})}
-					control={control}
-					defaultValue="mm"
-				>
-					{UNITS.map(({ name, abbreviation }) => (
-						<MenuItem key={abbreviation} value={abbreviation}>
-							{name}
-						</MenuItem>
-					))}
-				</FormSelect>
-			</HalfWidth>
-			<FormTextField
-				name="code"
-				control={control}
-				label={formatMessage({ id: 'createFederation.form.code', defaultMessage: 'Code' })}
-				formError={errors.code}
-			/>
+			)}
 		</FormModal>
-	) : (
-		<EditFederationModal
-			openState={open}
-			federation={defaultValues}
-			onClickClose={onClickClose}
-			onClickCancel={onClickBack}
-			title={formatMessage({ id: 'createFederation.modal.title', defaultMessage: 'Create new Federation' })}
-			cancelLabel={formatMessage({ id: 'createFederation.modal.back', defaultMessage: 'Back' })}
-			confirmLabel={formatMessage({ id: 'createFederation.modal.create', defaultMessage: 'Create Federation' })}
-		/>
-	);
+	)
 };

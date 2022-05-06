@@ -40,6 +40,7 @@ export interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HT
 	showButtons?: boolean;
 	maxWidth?: DialogProps['maxWidth'];
 	zeroMargin?: boolean;
+	noModal?: boolean;
 }
 
 export const FormModal = (props: IFormModal) => {
@@ -56,9 +57,15 @@ export const FormModal = (props: IFormModal) => {
 		showButtons = true,
 		maxWidth = false,
 		zeroMargin = false,
+		noModal,
 		...formProps
 	} = props;
-	return (
+
+	return noModal ? (
+		<FormDialogContent zeroMargin={zeroMargin}>
+			{children}
+		</FormDialogContent>
+	) : (
 		<Dialog
 			onClose={onClickClose}
 			open={open}
