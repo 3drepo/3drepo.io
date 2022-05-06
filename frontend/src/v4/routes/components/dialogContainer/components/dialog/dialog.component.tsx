@@ -23,6 +23,7 @@ import DialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import { ThemeProvider } from 'styled-components';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { theme } from '@/v5/ui/routes/viewer/theme';
 import { ConditionalV5Wrapper } from '@/v5/ui/v4Adapter/conditionalV5Container.component';
 
@@ -32,6 +33,7 @@ import { dispatch } from '../../../../../modules/store';
 import { COLOR } from '../../../../../styles';
 import { SearchButton } from '../../../../viewerGui/components/panelBarActions/searchButton';
 import { DialogActions, DialogTitle, TopDialogActions } from './dialog.styles';
+import { V4OverridesContainer } from './../../../../../../v5/ui/v4Adapter/v4Overrides.styles';
 
 interface IProps {
 	id: number;
@@ -134,11 +136,16 @@ export const Dialog: FunctionComponent<IProps> = forwardRef((props, ref: Ref<HTM
 		}
 	};
 
+	const renderV4ThemeProviders = ({ children }) => (
+		<ThemeProvider theme={theme}>
+			<MuiThemeProvider theme={theme}>
+				{children}
+			</MuiThemeProvider>
+		</ThemeProvider>
+	);
+
 	return (
-		<ConditionalV5Wrapper
-			v5Wrapper={ThemeProvider}
-			v5WrapperProps={{ theme }}
-		>
+		<ConditionalV5Wrapper v5Wrapper={renderV4ThemeProviders}>
 			<DialogBase {...DialogProps} ref={ref} open={isOpen} onClose={handleClose}>
 				<DialogTitle>{title}{renderCloseButton()}</DialogTitle>
 				{renderContent(content && !DialogTemplate)}

@@ -28,7 +28,6 @@ export const Form = styled(FormBase).attrs({
 })``;
 
 export const Container = styled(V5ModalContainer)`
-	min-width: 450px;
 	${AttachResourcesModalStyling}
 	${AttachResourcesFile}
 	${AttachResourcesLink}

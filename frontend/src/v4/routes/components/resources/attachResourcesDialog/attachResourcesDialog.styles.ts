@@ -16,8 +16,10 @@
  */
 import { DialogContent } from '@mui/material';
 import Dropzone from 'react-dropzone';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
 import { COLOR } from '../../../../styles';
+import { isV5 } from '@/v4/helpers/isV5';
 
 const dropZoneColors = (normalColour, dragColour, errorColour) => (props: any) =>
 	props.error ? errorColour :
@@ -78,16 +80,42 @@ export const AddLinkContainer = styled.div`
 	margin-top: 20px;
 `;
 
-export const DropzoneContent = styled.div`
-	cursor: ${(props: any) => props.error ? 'default' : 'pointer' };
-	background-color: ${dropZoneColors('transparent', COLOR.PRIMARY_MAIN_6, COLOR.WARNING_LIGHT)};
-	position: relative;
-	padding: 10px;
+const V5DropzoneContent = styled(DashedContainer).attrs<{ error?: boolean, isDragActive?: boolean }>(({ 
+	theme: {
+		palette: {
+			primary,
+			error: errorPalette,
+		}
+	},
+	error,
+	isDragActive,
+}) => ({
+	borderRadius: 5,
+	strokeWidth: 2,
+	dashSize: 5,
+	gapSize: 5,
+	zeroPadding: true,
+	strokeColor: dropZoneColors(primary.main, primary.dark, errorPalette.main)({ error, isDragActive }),
+}))`
+	${({ theme: { palette: { primary, secondary, error } } }) => css`
+		background-color: ${dropZoneColors(primary.contrast, primary.accent, error.lightest)};
+		color: ${dropZoneColors(secondary.main, secondary.main, error.main)};
+	`}
+`;
+
+const V4DropzoneContent = styled.div`
 	border-width: 3px;
+	background-color: ${dropZoneColors('transparent', COLOR.PRIMARY_MAIN_6, COLOR.WARNING_LIGHT)};
 	border-color: ${dropZoneColors(COLOR.BLACK_50, COLOR.PRIMARY_MAIN_80, COLOR.NEGATIVE_87)};
 	color: ${dropZoneColors(COLOR.BLACK_60, COLOR.PRIMARY_MAIN_80, COLOR.NEGATIVE)};
 	border-style: dashed;
 	border-radius: 5px;
+` as any;
+
+export const DropzoneContent = styled(isV5() ? V5DropzoneContent : V4DropzoneContent)`
+	cursor: ${(props: any) => props.error ? 'default' : 'pointer' };
+	position: relative;
+	padding: 10px;
 	text-align: center;
 	transition: background-color 0.3s ease,color 0.3s ease,border-color 0.3s ease ;
-` as any;
+`;

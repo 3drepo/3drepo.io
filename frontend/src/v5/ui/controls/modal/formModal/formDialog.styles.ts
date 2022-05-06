@@ -26,7 +26,7 @@ export const RemoveWhiteCorners = styled(Paper)`
 export const CloseButton = styled(IconButton)`
 	&& {
 		position: absolute;
-		top: 10px;
+		top: 8px;
 		right: 10px;
 
 		svg path {

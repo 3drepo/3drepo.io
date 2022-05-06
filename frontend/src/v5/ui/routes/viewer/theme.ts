@@ -29,7 +29,18 @@ export const theme = createTheme(
 				MuiDialog: {
 					styleOverrides: {
 						paper: {
-							maxWidth: 'unset',
+							maxWidth: 'unset !important',
+							'& .MuiDialogTitle-root': {
+								padding: '14px 0 !important',
+								'& .MuiIconButton-root': {														
+									position: 'absolute',
+									right: 0,
+									top: -2,
+									'& svg': {
+										color: '#000000', // TODO fix when new palette is released
+									},
+								},
+							},
 						},
 					},
 				},
