@@ -20,6 +20,7 @@ import { StyledButton } from '@/v4/routes/viewerGui/components/containedButton/c
 import { DescriptionImage } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
 import { DateFieldContainer } from '@/v4/routes/viewerGui/components/issues/components/mainIssueFormTab/mainIssueFormTab.styles';
 import { StyledFormControl } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+import { Container as ButtonContainer } from '@/v4/routes/viewerGui/components/pinButton/pinButton.styles';
 import { UpdateButtonsContainer } from '@/v4/routes/viewerGui/components/updateButtons/updateButtons.styles';
 import { css } from 'styled-components';
 
@@ -55,7 +56,6 @@ export default css`
 		border-radius: 5px;
 		min-height: 32px;
 		padding: 4px 10px;
-		margin-top: 17px;
 		margin-top: 0px;
 		margin-bottom: 0px;
 		font-size: 0.75rem;
@@ -98,6 +98,10 @@ export default css`
 		justify-content: left;
 		${StyledButton} {
 			margin: 0;
+		}
+
+		${ButtonContainer} {
+			min-height: 26px;
 		}
 	}
 `;
