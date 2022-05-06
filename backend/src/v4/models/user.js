@@ -431,8 +431,6 @@ User.createUser = async function (username, password, customData, tokenExpiryTim
 		User.checkEmailAvailableAndValid(customData.email)
 	]);
 
-	const adminDB = await db.getAuthDB();
-
 	const cleanedCustomData = {
 		createdAt: new Date(),
 		inactive: true
@@ -498,7 +496,7 @@ User.createUser = async function (username, password, customData, tokenExpiryTim
 	cleanedCustomData.billing = await UserBilling.changeBillingAddress(cleanedCustomData.billing || {}, billingInfo);
 
 	try {
-		await adminDB.addUser(username, password, { customData: cleanedCustomData, roles: [C.DEFAULT_ROLE_OBJ] });
+		await db.createUser(username, password, cleanedCustomData);
 	} catch(err) {
 		throw ({ resCode: utils.mongoErrorToResCode(err) });
 	}
