@@ -73,6 +73,8 @@ export default css`
 		// Drop down icon for date selector
 		.MuiInputAdornment-root {
 			position: absolute;
+			cursor: pointer;
+			pointer-events: none;
 			right: 8px;
 			svg {
 				height: 20px;
@@ -91,7 +93,10 @@ export default css`
 
 	${DateFieldContainer} {
 		margin-top: 27px;
-		input { height: 24px; }
+		input {
+			cursor: pointer;
+			height: 24px;
+		}
 	}
 
 	${UpdateButtonsContainer} {
