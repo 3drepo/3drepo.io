@@ -29,6 +29,10 @@ import { TextField } from '../../../../../components/textField/textField.compone
 import { UpdateButtons } from '../../../updateButtons/updateButtons.component';
 import { AutoSuggestField } from '../autoSuggestField/autosuggestField.component';
 import { LevelOfRisk } from '../levelOfRisk/levelOfRisk.component';
+import { NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
+import { DateField } from '../../../../../components/dateField/dateField.component';
+import { DateFieldContainer } from './mainRiskFormTab.styles';
+
 import {
 	Container,
 	Content,
@@ -242,6 +246,19 @@ export const MainRiskFormTab: FunctionComponent<IProps> = ({
 							saveOnChange={isNewRisk}
 						/>
 					)} />
+					<StyledFormControl>
+						<InputLabel shrink>Due date</InputLabel>
+						<Field name="due_date" render={({ field }) => (
+							<DateFieldContainer>
+								<DateField
+									{...field}
+									inputFormat={NAMED_MONTH_DATE_FORMAT}
+									disabled={!canEditBasicProperty}
+									placeholder="Choose a due date"
+								/>
+							</DateFieldContainer>
+						)} />
+					</StyledFormControl>
 				</FieldsContainer>
 				<Field name="safetibase_id" render={({ field }) => (
 					<input {...field} type="hidden" name="safetibase_id" disabled />
