@@ -235,6 +235,28 @@ const testRemoveSubscription = () => {
 	});
 };
 
+const testRemoveAddOns = () => {
+	describe('Remove teamspace addOns', () => {
+		test('should get rid of all addOns', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue();
+
+			const teamspace = generateRandomString();
+
+			const unsetObj = {
+				'customData.vrEnabled': 1,
+				'customData.srcEnabled': 1,
+				'customData.hereEnabled': 1,
+				'customData.addOns': 1,
+
+			};
+
+			await expect(Teamspace.removeAddOns(teamspace)).resolves.toBeUndefined();
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: teamspace }, { $unset: unsetObj });
+		});
+	});
+};
+
 const testCreateTeamspaceSettings = () => {
 	describe('Create teamspace settings', () => {
 		test('should create teamspace settings', async () => {
@@ -255,6 +277,7 @@ describe('models/teamspaces', () => {
 	testGetSubscriptions();
 	testEditSubscriptions();
 	testRemoveSubscription();
+	testRemoveAddOns();
 	testGetMembersInfo();
 	testCreateTeamspaceSettings();
 });

@@ -20,7 +20,7 @@ const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const { removeSubscription, getMembersInfo } = require(`${v5Path}/models/teamspaces`);
+const { removeSubscription, removeAddOns, getMembersInfo } = require(`${v5Path}/models/teamspaces`);
 const { revokeTeamspaceRoleFromUser } = require(`${v5Path}/models/roles`);
 const { getProjectList, deleteProject } = require(`${v5Path}/processors/teamspaces/projects`);
 
@@ -41,6 +41,7 @@ const run = async (teamspace) => {
 	logger.logInfo(`Removing subscriptions, project datas and users from ${teamspace}...`);
 	const opsProms = [
 		removeSubscription(teamspace),
+		removeAddOns(teamspace),
 		removeAllProjects(teamspace),
 		removeAllUsersFromTS(teamspace),
 	];

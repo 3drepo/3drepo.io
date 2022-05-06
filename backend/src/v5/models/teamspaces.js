@@ -62,6 +62,17 @@ Teamspace.removeSubscription = (ts, type) => {
 	return teamspaceUpdate({ user: ts }, { $unset: { [field]: 1 } });
 };
 
+Teamspace.removeAddOns = (teamspace) => {
+	const possibleAddOns = {
+		'customData.vrEnabled': 1,
+		'customData.srcEnabled': 1,
+		'customData.hereEnabled': 1,
+		'customData.addOns': 1,
+
+	};
+	return teamspaceUpdate({ user: teamspace }, { $unset: possibleAddOns });
+};
+
 Teamspace.getTeamspaceAdmins = async (ts) => {
 	const data = await getTeamspace(ts, { 'customData.permissions': 1 });
 	return data.customData.permissions.flatMap(
