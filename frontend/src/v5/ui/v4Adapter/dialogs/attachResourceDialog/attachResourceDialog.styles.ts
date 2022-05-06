@@ -15,6 +15,7 @@
 *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 import styled from 'styled-components';
+import { Form as FormBase } from '@controls/modal/formModal/formDialog.styles';
 import { V5ModalContainer } from './../dialog.styles';
 import {
 	AttachResourcesModalStyling,
@@ -22,7 +23,12 @@ import {
 	AttachResourcesLink,
 } from '../../overrides/issues/attachments.overrides';
 
+export const Form = styled(FormBase).attrs({
+	as: 'div',
+})``;
+
 export const Container = styled(V5ModalContainer)`
+	min-width: 450px;
 	${AttachResourcesModalStyling}
 	${AttachResourcesFile}
 	${AttachResourcesLink}

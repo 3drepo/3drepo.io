@@ -26,6 +26,13 @@ export const theme = createTheme(
 		_.cloneDeep(oldTheme),
 		{
 			components: {
+				MuiDialog: {
+					styleOverrides: {
+						paper: {
+							maxWidth: 'unset',
+						},
+					},
+				},
 				MuiInput: {
 					styleOverrides: {
 						formControl: {

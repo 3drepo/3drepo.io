@@ -24,6 +24,7 @@ import { isV5 } from '@/v4/helpers/isV5';
 import { ROUTES } from '../../constants/routes';
 import * as Dialogs from '../../routes/components/dialogContainer/components';
 import { V5ErrorDialog } from '@/v5/ui/v4Adapter/dialogs/errorDialog/errorDialog.component';
+import { V5RedirectToTeamspaceDialog } from '@/v5/ui/v4Adapter/dialogs/redirectToTeamspaceDialog/redirectToTeamspaceDialog.component';
 
 export interface IDialogConfig {
 	id: number;
@@ -174,7 +175,7 @@ const showRedirectToTeamspaceDialog = (state = INITIAL_STATE, action) => {
 	const config = {
 		title: 'Error',
 		content: 'We cannot load the model due to the following:',
-		template: Dialogs.RedirectToTeamspaceDialog,
+		template: isV5() ? V5RedirectToTeamspaceDialog : Dialogs.RedirectToTeamspaceDialog,
 		onCancel: () => push(teamspaceRoute),
 		onConfirm: () => push(teamspaceRoute),
 		data: {

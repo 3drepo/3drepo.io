@@ -19,7 +19,6 @@ import styled from 'styled-components';
 import { Container } from '@/v5/ui/components/shared/modals/modals.styles';
 
 export const V5ModalContainer = styled(Container)`
-	min-width: 450px;
 	min-height: 229px;
     position: relative;
     margin-top: -92px;
