@@ -17,8 +17,8 @@
 import { PureComponent } from 'react';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import { isV5 } from '@/v4/helpers/isV5';
 import { V5AttachResourcesDialog } from '@/v5/ui/v4Adapter/dialogs/attachResourceDialog/attachResourceDialog.component';
+import { ConditionalV5Wrapper } from '@/v5/ui/v4Adapter/conditionalV5Container.component';
 
 import { renderWhenTrueOtherwise } from '../../../../helpers/rendering';
 import { clientConfigService } from '../../../../services/clientConfig';
@@ -120,10 +120,14 @@ export class AttachResourcesDialog extends PureComponent<IProps, IState> {
 		<Loader />
 	)
 
-	public renderDialogContent() {
+	public render() {
 		const {selectedTab} = this.state;
 		return (
-			<>
+			<ConditionalV5Wrapper
+				v5Wrapper={V5AttachResourcesDialog}
+				v5WrapperProps={{ onClickClose: this.onCancel }}
+				v4Wrapper={Container}
+			>
 				<DialogTabs
 					value={selectedTab}
 					indicatorColor="primary"
@@ -150,22 +154,7 @@ export class AttachResourcesDialog extends PureComponent<IProps, IState> {
 						</Form>
 					)}
 				/>
-			</>
-		);
-	}
-
-	public render() {
-		return isV5() ? (
-			<V5AttachResourcesDialog
-				onClickClose={this.onCancel}
-				title="Attach Resources"
-			>
-				{this.renderDialogContent()}
-			</V5AttachResourcesDialog>
-		) : (
-			<Container>
-				{this.renderDialogContent()}
-			</Container>
+			</ConditionalV5Wrapper>
 		);
 	}
 }

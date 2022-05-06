@@ -22,19 +22,15 @@ import {
 	CloseButton,
 	FormDialogContent,
 } from '@/v5/ui/controls/modal/formModal/formDialog.styles';
-import { ScrollArea } from '@controls/scrollArea';
-import { Form } from '@controls/modal/formModal/formDialog.styles';
-import { Container } from './attachResourceDialog.styles';
+import { Container, Form } from './attachResourceDialog.styles';
 
 interface V5AttachResourcesDialogProps extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
 	onClickClose?: () => void;
-	title?: string;
 	isValid?: boolean;
 }
 
 export const V5AttachResourcesDialog = ({
 	onClickClose,
-	title,
 	children,
 	isValid = true,
 	...formProps
@@ -42,18 +38,14 @@ export const V5AttachResourcesDialog = ({
 	<Container>
 		<Form {...formProps}>
 			<Header>
-				<Title>
-					{title}
-				</Title>
+				<Title>Attach Resources</Title>
 				<CloseButton aria-label="Close dialog" onClick={onClickClose}>
 					<CloseIcon />
 				</CloseButton>
 			</Header>
-			<ScrollArea variant="base" autoHeightMax="70vh" autoHeight>
-				<FormDialogContent zeroMargin>
-					{children}
-				</FormDialogContent>
-			</ScrollArea>
+			<FormDialogContent zeroMargin>
+				{children}
+			</FormDialogContent>
 		</Form>
 	</Container>
 );
