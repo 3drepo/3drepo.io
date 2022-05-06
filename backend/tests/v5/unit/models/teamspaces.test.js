@@ -220,6 +220,18 @@ const testRemoveSubscription = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: teamspace }, { $unset: { [subsObjPath]: 1 } });
 		});
+
+		test('should get rid of all licenses if subscription type is not given', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue();
+
+			const teamspace = generateRandomString();
+
+			const subsObjPath = 'customData.billing.subscriptions';
+
+			await expect(Teamspace.removeSubscription(teamspace)).resolves.toBeUndefined();
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: teamspace }, { $unset: { [subsObjPath]: 1 } });
+		});
 	});
 };
 
