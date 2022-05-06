@@ -57,7 +57,26 @@ const testGrantTeamspaceRoleToUser = () => {
 	});
 };
 
+const testRevokeTeamspaceRoleFromUser = () => {
+	describe('Revoke teamspace role from user', () => {
+		test('should revoke teamspace role from the user', async () => {
+			const teamspace = generateRandomString();
+			const username = generateRandomString();
+			const expectedCommand = {
+				revokeRolesFromUser: username,
+				roles: [{ role: TEAM_MEMBER, db: teamspace }],
+			};
+
+			const fn = jest.spyOn(db, 'runCommand').mockImplementation(() => { });
+			await Roles.revokeTeamspaceRoleFromUser(teamspace, username);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', expectedCommand);
+		});
+	});
+};
+
 describe('models/roles', () => {
 	testCreateTeamspaceRole();
 	testGrantTeamspaceRoleToUser();
+	testRevokeTeamspaceRoleFromUser();
 });
