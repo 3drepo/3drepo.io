@@ -19,20 +19,8 @@ import styled from 'styled-components';
 
 export const Wrapper = styled.div`
 	width: 100%;
-	height: 114px;
-	padding: 0 30px;
+	height: 50px;
 	box-sizing: border-box;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
-	border-left-style: none;
-	border-right-style: none;
-`;
-
-export const Container = styled.div`
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	width: 100%;
-	max-width: 1289px;
-	margin: 28px auto 0;
+	padding-left: 79px;
 `;
