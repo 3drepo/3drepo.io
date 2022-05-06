@@ -35,17 +35,16 @@ const convertLegacyFileName = (filename) => {
 };
 
 const moveFile = async (teamspace, collection, filename) => {
-	const file = await getFileFromGridFS(teamspace, collection, filename);
-
 	const existingRef = await findOne(teamspace, `${collection}.ref`, { $or: [
 		{ link: filename },
 		{ link: convertLegacyFileName(filename) },
-	] });
+	] }, { type: 1 });
 
 	if (existingRef && existingRef.type !== 'gridfs') {
 		// Already have an entry for this file, just update the name in gridfs so it will get removed
 		await updateOne(teamspace, `${collection}${filesExt}`, { filename }, { $set: { filename: existingRef._id } });
 	} else {
+		const file = await getFileFromGridFS(teamspace, collection, filename);
 		const newRef = await FsService.storeFile(file);
 		newRef._id = existingRef?._id || convertLegacyFileName(filename);
 		await Promise.all([

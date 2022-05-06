@@ -23,7 +23,7 @@ const { logger } = require(`${v5Path}/utils/logger`);
 const ExternalServices = require(`${v5Path}/handler/externalServices`);
 
 const processCollection = async (teamspace, collection) => {
-	const refs = await find(teamspace, collection, { _id: /.*unityAssets.json$/i });
+	const refs = await find(teamspace, collection, { _id: /.*unityAssets.json$/i }, { type: 1, link: 1 });
 	const ids = await Promise.all(refs.map(async ({ _id, type, link }) => {
 		await ExternalServices.removeFiles(teamspace, collection.replace('.ref', ''), type, [link]);
 		return _id;

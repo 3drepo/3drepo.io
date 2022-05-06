@@ -25,7 +25,7 @@ const removeModelCollections = async (ts, model) => {
 	const collections = await db.listCollections(ts);
 	const promises = [];
 
-	collections.flatMap((col) => (col.name.startsWith(`${model}.`) ? promises.push(db.dropCollection(ts, col)) : []));
+	collections.flatMap(({ name }) => (name.startsWith(`${model}.`) ? promises.push(db.dropCollection(ts, name)) : []));
 
 	return Promise.all(promises);
 };
