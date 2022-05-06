@@ -56,31 +56,18 @@ queue.purgeQueues = async () => {
 	}
 };
 
-const defaultTestRoleName = 'userTest';
-
 // userCredentials should be the same format as the return value of generateUserCredentials
-db.createUser = async (userCredentials, tsList = [], customData = {}) => {
+db.createUser = (userCredentials, tsList = [], customData = {}) => {
 	const { user, password, apiKey, basicData = {} } = userCredentials;
 	const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));
-	roles.push({ db: 'admin', role: defaultTestRoleName });
-	const adminDB = await DbHandler.getAuthDB();
-	return adminDB.addUser(user, password, { customData: { ...basicData, ...customData, apiKey }, roles });
+	return DbHandler.createUser(user, password, { ...basicData, ...customData, apiKey }, roles);
 };
 
 db.createTeamspaceRole = (ts) => createTeamSpaceRole(ts);
 
-db.createDefaultRole = async () => {
-	const roleFound = await DbHandler.findOne('admin', 'system.roles', { _id: `admin.${defaultTestRoleName}` });
-	if (!roleFound) {
-		const createRoleCmd = { createRole: defaultTestRoleName, privileges: [], roles: [] };
-		await DbHandler.runCommand('admin', createRoleCmd);
-	}
-};
-
 // breaking = create a broken schema for teamspace to trigger errors for testing
-db.createTeamspace = async (teamspace, admins = [], breaking = false) => {
+db.createTeamspace = (teamspace, admins = [], breaking = false) => {
 	const permissions = admins.map((adminUser) => ({ user: adminUser, permissions: TEAMSPACE_ADMIN }));
-	await db.createDefaultRole();
 	return Promise.all([
 		ServiceHelper.db.createUser({ user: teamspace, password: teamspace }, [],
 			{ permissions: breaking ? undefined : permissions }),

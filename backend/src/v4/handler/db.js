@@ -364,13 +364,14 @@
 		return defaultRoleProm;
 	};
 
-	Handler.createUser = async function (username, password, customData) {
+	Handler.createUser = async function (username, password, customData, roles = []) {
 		const [adminDB] = await Promise.all([
 			this.getAuthDB(),
 			ensureDefaultRoleExists()
 		]);
 
-		await adminDB.addUser(username, password, { customData, roles: [C.DEFAULT_ROLE_OBJ]});
+		roles.push(C.DEFAULT_ROLE_OBJ);
+		await adminDB.addUser(username, password, { customData, roles});
 	};
 
 	module.exports = Handler;
