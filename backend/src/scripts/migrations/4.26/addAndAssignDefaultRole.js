@@ -32,7 +32,7 @@ const createDefaultRole = async () => {
 
 const addAndAssignDefaultRole = async () => {
 	const users = await db.find('admin', 'system.users',
-		{ 'roles.role': { $nin: [DEFAULT] } }, { user: 1 });
+		{ 'roles.role': { $ne: DEFAULT } }, { user: 1 });
 
 	const role = { role: DEFAULT, db: 'admin' };
 	await Promise.all(users.map(async ({ user }) => {
