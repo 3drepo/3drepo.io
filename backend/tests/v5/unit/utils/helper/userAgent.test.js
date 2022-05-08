@@ -20,7 +20,6 @@ const { src } = require('../../../helper/path');
 const UserAgentHelper = require(`${src}/utils/helper/userAgent`);
 const ServiceHelper = require('../../../helper/services');
 
-
 const matchHelper = (func, string, match) => {
 	const res = func(string);
 	expect(res).toEqual(match);
