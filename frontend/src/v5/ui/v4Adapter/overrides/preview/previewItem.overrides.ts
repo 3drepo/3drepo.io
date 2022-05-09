@@ -38,6 +38,8 @@ export default css`
 		}
 
 		&:hover {
+			background-color: ${({ theme }) => theme.palette.primary.contrast};
+
 			${Name} {
 				text-decoration-color: currentColor;
 			}
