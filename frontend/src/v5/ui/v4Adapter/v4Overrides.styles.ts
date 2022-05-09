@@ -41,7 +41,6 @@ export const V4OverridesContainer = styled.div`
 		font-weight: inherit;
 	}
 
-	
 	${customTable}
 	
 	${leftPanel}
