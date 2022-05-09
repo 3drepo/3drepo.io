@@ -35,10 +35,48 @@ export const theme = createTheme(
 						},
 					},
 				},
+				MuiInputLabel: {
+					styleOverrides: {
+						root: {
+							fontSize: '13px',
+						},
+					},
+				},
+				MuiInputBase: {
+					styleOverrides: {
+						formControl: {
+							'&&& .MuiInputBase-input::placeholder': {
+								opacity: '1 !important',
+								color: '#C1C8D5', // TODO: fix after new palette is released
+							},
+						},
+					},
+				},
 				MuiTextField: {
 					styleOverrides: {
 						root: {
 							margin: 0,
+						},
+					},
+				},
+				MuiSelect: {
+					styleOverrides: {
+						select: {
+							lineHeight: '22px',
+							height: '24px',
+							padding: '0 12px',
+							marginTop: '27px',
+							left: '-14px',
+						},
+					},
+				},
+				MuiMenuItem: {
+					styleOverrides: {
+						root: {
+							'&&&': {
+								padding: '4px 10px',
+								fontSize: '12px',
+							},
 						},
 					},
 				},
