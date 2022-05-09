@@ -18,7 +18,7 @@
 import { css } from 'styled-components';
 import { StyledIconButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.styles';
 import { ButtonWrapper } from '@/v4/routes/viewerGui/components/panelButton/panelButton.styles';
-import { LeftPanels, LeftPanelsButtons } from '@/v4/routes/viewerGui/viewerGui.styles';
+import { LeftPanels, LeftPanelsButtons, RightPanels } from '@/v4/routes/viewerGui/viewerGui.styles';
 
 // all the buttons on the left hand side of the viewer
 export default css`
@@ -34,6 +34,15 @@ export default css`
 
 	${LeftPanels} {
 		left: 80px;
+	}
+
+	${LeftPanels},
+	${RightPanels} {
+		margin-top: 8px;
+
+		@media (min-width: 1520px) {
+			height: calc(100% - 38px);
+		}
 	}
 
 	${StyledIconButton} {

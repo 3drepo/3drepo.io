@@ -16,7 +16,7 @@
  */
 import { PureComponent, ReactNode, createRef } from 'react';
 import { Field, Formik } from 'formik';
-import { Tooltip, Grid } from '@mui/material';
+import { Tooltip } from '@mui/material';
 import * as Yup from 'yup';
 import { isV5 } from '@/v4/helpers/isV5';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -40,7 +40,8 @@ import {
 	ToggleButton,
 	ToggleButtonContainer,
 	ToggleIcon,
-	Typography
+	Typography,
+	Grid
 } from './previewDetails.styles';
 
 interface IProps {

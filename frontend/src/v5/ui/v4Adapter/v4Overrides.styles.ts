@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -20,12 +20,14 @@ import { Mark as HighlighterMark } from '@/v4/routes/components/highlight/highli
 import bottomToolbar from './overrides/bottomToolbar.overrides';
 import panelsMenu from './overrides/panelsMenu.overrides';
 import leftPanel from './overrides/leftPanel.overrides';
-import sequences from './overrides/sequences.overrides';
+import issueSequences from './overrides/sequences.overrides';
+import issueProperties from './overrides/properties.overrides';
 import customTable from './overrides/customTable.overrides';
 import previewDetails from './overrides/preview/previewDetails.overrides';
 import previewItem from './overrides/preview/previewItem.overrides';
 import previewComments from './overrides/preview/previewComments.overrides';
 import avatarPopover from './overrides/avatarPopover.overrides';
+import issueShapes from './overrides/issues/shapes.overrides';
 
 export const V4OverridesContainer = styled.div`
 	display: flex;
@@ -39,10 +41,9 @@ export const V4OverridesContainer = styled.div`
 		font-weight: inherit;
 	}
 
-	${sequences}
-
+	
 	${customTable}
-
+	
 	${leftPanel}
 	${panelsMenu}
 	${bottomToolbar}
@@ -50,4 +51,8 @@ export const V4OverridesContainer = styled.div`
 	${previewItem}
 	${previewDetails}
 	${previewComments}
+	
+	${issueShapes}
+	${issueSequences}
+	${issueProperties}
 `;

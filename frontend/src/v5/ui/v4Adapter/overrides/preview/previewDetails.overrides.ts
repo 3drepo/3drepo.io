@@ -17,7 +17,7 @@
 
 import { css } from 'styled-components';
 import { Details, Container as IssueDetails } from '@/v4/routes/viewerGui/components/previewItemInfo/previewItemInfo.styles';
-import { Container, Header, TitleNumber, StyledForm, Details as Accordion } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
+import { Container, Header, TitleNumber, Grid, Details as Accordion } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { FieldWrapper } from '@/v4/routes/components/textField/textField.styles';
 import { StyledButton } from '@/v4/routes/viewerGui/components/containedButton/containedButton.styles';
 
@@ -31,7 +31,7 @@ export default css`
 		${StyledButton} {
 			border: solid 1px ${({ theme }) => theme.palette.secondary.main};
 			color: ${({ theme }) => theme.palette.secondary.main};
-			background-color: ${({ theme }) => theme.palette.primary.contrast};
+			background-color: transparent;
 			padding: 0 7px;
 			font-size: 10px;
 			height: 24px;
@@ -49,23 +49,21 @@ export default css`
 		// title (top part)
 		${Header} {
 			margin: 0;
-			padding-top: 6px;
+			display: flex;
+			align-items: start;
 			min-height: 84px;
 
-			${TitleNumber} {
-				color: ${({ theme }) => theme.palette.secondary.main};
-				background-color: #edf0f8; // TODO - fix after new palette is released
-				border: solid 1px #d9d9d9; // TODO - fix after new palette is released
-				border-right: 0;
-				border-top-left-radius: 5px;
-				border-bottom-left-radius: 5px;
-				padding: 2px 7px;
-				font-weight: 500;
-				margin-right: 0;
-				min-width: 8px;
-			}
+			${Grid} {
 
-			${StyledForm} {
+				${TitleNumber} {
+					color: ${({ theme }) => theme.palette.secondary.main};
+					border-right: 0;
+					padding: 2px 7px 2px 0;
+					font-weight: 500;
+					margin-right: 0;
+					min-width: 8px;
+				}
+
 				${FieldWrapper} {
 					height: 24px;
 					&::after {
@@ -80,16 +78,18 @@ export default css`
 				}
 
 				// title textfield input
-				span, fieldset, .MuiOutlinedInput-notchedOutline, input {
-					border-top-right-radius: 5px;
-					border-bottom-right-radius: 5px;
-					border-top-left-radius: 0;
-					border-bottom-left-radius: 0;
+				input, span, fieldset {
 					display: flex;
 					align-items: center;
 					padding-left: 8px;
 					height: 22px;
 					font-size: 14px;
+					border-radius: 5px;
+				}
+
+				input::placeholder {
+					font-size: 14px;
+					font-weight: 500;
 				}
 
 				.MuiOutlinedInput-notchedOutline {
@@ -113,12 +113,12 @@ export default css`
 			// user + status + clone button
 			${Details} {
 				${StyledButton} {
-					margin-right: 5px;
+					margin: 0 5px 0 0;
 				}
 			}
 
 			${IssueDetails} {
-				margin-top: 0;
+				margin-top: 8px;
 				justify-content: space-between;
 			}
 		}
