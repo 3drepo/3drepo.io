@@ -31,7 +31,7 @@ export default css`
 		padding: 0;
 
 		${Tabs} {
-			padding: 0 14px;
+			padding: 0 16px;
 			background-color: ${({ theme }) => theme.palette.primary.contrast};
 			width: unset;
 		}
@@ -43,7 +43,7 @@ export default css`
 
 		${TabContent} {
 			background-color: inherit;
-			padding: 0 14px;
+			padding: 0 16px;
 		}
 	}
 
@@ -53,7 +53,7 @@ export default css`
 
 	${NotCollapsableContent} {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
-		padding: 15px 12px 10px;
+		padding: 15px 16px 10px;
 
 		// comments header section
 		${FilterWrapper} {

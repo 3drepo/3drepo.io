@@ -82,9 +82,9 @@ export const MenuItemContainer = styled(MenuItem)<{ expired?: boolean }>`
 	${({ theme, expired }) => isV5() && css`
 		&&:hover {
 			// TODO - fix after new palette is released
-			background-color: ${expired ? COLOR.WARNING_LIGHT : COLOR.WHITE};
+			${!expired && 'background-color: #F7F8FA'}; // TODO - fix after new palette is released
 		}
-
+		
 		${expired && css`
 			${ArrowButton}:not(:disabled) {
 				background-color: #ffcac6; // TODO - fix after new palette is released
