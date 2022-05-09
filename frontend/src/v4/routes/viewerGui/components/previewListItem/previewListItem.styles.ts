@@ -23,6 +23,7 @@ import styled, { css } from 'styled-components';
 
 import { COLOR } from '../../../../styles/colors';
 import OpenInViewerButtonComponent from '../../../components/openInViewerButton/openInViewerButton.container';
+import { isV5 } from '@/v4/helpers/isV5';
 
 export const OpenInViewerButton = styled(OpenInViewerButtonComponent)`
 	&& {
@@ -35,25 +36,6 @@ export const OpenInViewerButton = styled(OpenInViewerButtonComponent)`
 		}
 	}
 `;
-
-export const MenuItemContainer = styled(MenuItem)`
-	position: relative;
-
-	&& {
-		background-color: ${(props: any) => props.expired ? COLOR.WARNING_LIGHT : COLOR.WHITE};
-		height: 94px;
-		border-bottom: 1px solid ${COLOR.BLACK_6};
-		padding: 0;
-
-		&:hover {
-			background-color: ${(props: any) => props.expired ? COLOR.WARNING : COLOR.GRAY};
-
-			${OpenInViewerButton} {
-				display: block;
-			}
-		}
-	}
-` as any;
 
 export const ArrowButton = styled(Button)`
 	&& {
@@ -78,6 +60,48 @@ export const ArrowButton = styled(Button)`
 		}
 	}
 `;
+
+export const MenuItemContainer = styled(MenuItem)<{ expired?: boolean }>`
+	position: relative;
+
+	&& {
+		background-color: ${(props: any) => props.expired ? COLOR.WARNING_LIGHT : COLOR.WHITE};
+		height: 94px;
+		border-bottom: 1px solid ${COLOR.BLACK_6};
+		padding: 0;
+
+		&:hover {
+			background-color: ${(props: any) => props.expired ? COLOR.WARNING : COLOR.GRAY};
+
+			${OpenInViewerButton} {
+				display: block;
+			}
+		}
+	}
+
+	${({ theme, expired }) => isV5() && css`
+		&&:hover {
+			// TODO - fix after new palette is released
+			background-color: ${expired ? COLOR.WARNING_LIGHT : COLOR.WHITE};
+		}
+
+		${expired && css`
+			${ArrowButton}:not(:disabled) {
+				background-color: #ffcac6; // TODO - fix after new palette is released
+				svg {
+					color: #ff3646; // TODO - fix after new palette is released
+				}
+
+				&:hover {
+					background-color: #ff3646; // TODO - fix after new palette is released
+					svg {
+						color: ${theme.palette.primary.contrast};
+					}
+				}
+			}
+		`}
+	`}
+` as any;
 
 export const StyledArrowIcon = styled(ArrowIcon)`
 	color: ${COLOR.WHITE};
