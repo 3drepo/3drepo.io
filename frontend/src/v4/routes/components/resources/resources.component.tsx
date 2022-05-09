@@ -77,15 +77,13 @@ const imageExtensions = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff', 'pcx'];
 
 export const ResourceIcon = ({type}) => (
 	<ResourceIconContainer>
-		{(type === 'http') 
+		{(type === 'http')
 			? (<LinkIcon />)
-			: (imageExtensions.indexOf(type) >= 0) 
+			: (imageExtensions.indexOf(type) >= 0)
 				? (<PhotoIcon />)
 				: (<DocumentIcon />)}
 	</ResourceIconContainer>
-)
-	
-;
+);
 
 const ResourceAvailable = ({link, type, name, size, onClickRemove, canEdit, onClickQuote}) => {
 	return (
@@ -156,34 +154,9 @@ export class Resources extends PureComponent<IProps, IState> {
 		});
 	}
 
-
-	RESOURCES = [{
-		"_id": "79ebaaf0-cd48-11ec-ab40-0f0b096cd2ab",
-		"size": "3KB",
-		"name": "dateField dateField.component.ts",
-		"createdAt": 1651847170881,
-		"link": "https://api2.staging.dev.3drepo.io:443/api/Alessandro/6e1114f0-b3f7-11ec-8d8a-c58f2cd1a209/resources/79ebaaf0-cd48-11ec-ab40-0f0b096cd2ab",
-		"type": "ts",
-	},{
-		"_id": "79ebaaf0-cd48-11ec-ab40-0f0b096cd2ab",
-		"size": "3KB",
-		"name": "dateField",
-		"createdAt": 1651847170881,
-		"link": "https://api2.staging.dev.3drepo.io:443/api/Alessandro/6e1114f0-b3f7-11ec-8d8a-c58f2cd1a209/resources/79ebaaf0-cd48-11ec-ab40-0f0b096cd2ab",
-		"type": "png",
-	},{
-		"_id": "79ebaaf0-cd48-11ec-ab40-0f0b096cd2ab",
-		"size": "3342KB",
-		"name": "dateFieldnwsdfbwsuefbuiwebfuiwebfuiwbefiuwieufiwhefiuwhefiuhwiuefhuiwhefuiwehfuiwets",
-		"createdAt": 1651847170881,
-		"link": "https://api2.staging.dev.3drepo.io:443/api/Alessandro/6e1114f0-b3f7-11ec-8d8a-c58f2cd1a209/resources/79ebaaf0-cd48-11ec-ab40-0f0b096cd2ab",
-		"type": "http",
-	}];
-
 	public renderResources = renderWhenTrue(() => (
 		<ResourcesList>
-			{/* {this.props.resources.map((r) => ( */}
-			{this.RESOURCES.map((r) => (
+			{this.props.resources.map((r) => (
 				<ResourceItem
 					key={r._id}
 					{...r}
@@ -194,10 +167,9 @@ export class Resources extends PureComponent<IProps, IState> {
 			))}
 		</ResourcesList>
 	));
-	
+
 	public render() {
-		// const { resources = [], canEdit } = this.props;
-		const { resources = this.RESOURCES, canEdit } = this.props;
+		const { resources = [], canEdit } = this.props;
 
 		return (
 			<ResourcesContainer>
