@@ -30,6 +30,7 @@ export default css`
 			font-size: 10px;
 		}
 		${SequenceDateContainer} {
+			width: 190px;
 			${SequenceDateField} {
 				.MuiInputBase-root {
 					margin-top: 18px;
@@ -47,7 +48,9 @@ export default css`
 			
 			${SequenceDateActions} {
 				bottom: -22px;
+				left: -9px;
 				top: unset;
+				right: unset;
 				.MuiIconButton-root {
 					margin: 3px;
 					padding: 0;
