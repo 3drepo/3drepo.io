@@ -17,10 +17,10 @@
 
 import styled, { css } from 'styled-components';
 
-import IconButtonComponent from '@material-ui/core/IconButton';
-import Typography from '@material-ui/core/Typography';
-import QuoteIcon from '@material-ui/icons/FormatQuote';
-import ReplyIcon from '@material-ui/icons/Reply';
+import IconButtonComponent from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import QuoteIcon from '@mui/icons-material/FormatQuote';
+import ReplyIcon from '@mui/icons-material/Reply';
 
 import { COLOR } from '../../../../../../../styles';
 

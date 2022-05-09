@@ -14,8 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import { createGlobalStyle } from 'styled-components';
+import { DefaultTheme } from '@mui/styles';
+import { COLOR } from '@/v4/styles/colors';
+
+export type Theme = DefaultTheme & { typography: any };
 
 export const GlobalStyle = createGlobalStyle`
 	html, body {
@@ -23,16 +26,57 @@ export const GlobalStyle = createGlobalStyle`
 		position: relative;
 		overflow-y: hidden;
 	}
-	
+
 	body {
 		margin: 0;
 		padding: 0;
-		${({ theme }) => theme.typography.body1};
+		${({ theme }: { theme: Theme }) => theme.typography.body1};
 	}
-	
+
 	#app {
 		height: 100%;
 		display: flex;
 		flex-direction: column;
 	}
+
+	a {
+		&:link {
+			text-decoration: none;
+			color:inherit;
+		}
+
+		&:visited {
+			text-decoration: none;
+			color:inherit;
+		}
+		&:hover {
+			text-decoration: none;
+		}
+
+		&:active { text-decoration: none; }
+	}
+
+	#viewer #unityViewer {
+		position : absolute;
+		height: 100% !important;
+		width: 100% !important;
+		overflow: hidden;
+		margin-top: 72px;
+		background: ${COLOR.TRANSPARENT} !important;
+	}
+
+	.emscripten {
+		background: ${COLOR.TRANSPARENT} !important;
+	}
+
+	div#unityViewer.emscripten canvas {
+		background: ${COLOR.TRANSPARENT} !important;
+	}
+
+	#viewer #unityViewer canvas {
+		height: 100% !important;
+		width: 100% !important;
+		background: ${COLOR.TRANSPARENT} !important;
+	}
+
 `;

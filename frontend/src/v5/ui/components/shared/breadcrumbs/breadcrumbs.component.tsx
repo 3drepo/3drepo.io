@@ -14,8 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
+import { useState, MouseEvent } from 'react';
 import { useParams, useRouteMatch } from 'react-router-dom';
 import HomeIcon from '@assets/icons/home.svg';
 import DownArrowIcon from '@assets/icons/down_arrow.svg';
@@ -25,6 +24,7 @@ import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks/projectsSelectors.hooks';
 import { IProject } from '@/v5/store/projects/projects.redux';
 import { isEmpty } from 'lodash';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { NavigationMenu } from '../navigatonMenu';
 import { Container, HomeIconBreadcrumb, Breadcrumb, InteractiveBreadcrumb, OverflowWrapper } from './breadcrumbs.styles';
 
@@ -43,8 +43,7 @@ const projectList2LinkList = (projects: IProject[]) => (projects.length ? projec
 const lastItemOf = (list: any[]) => list[list.length - 1];
 
 export const Breadcrumbs = (): JSX.Element => {
-	const { teamspace } = useParams();
-	const { project: projectId } = useParams();
+	const { teamspace, project: projectId } = useParams<DashboardParams>();
 
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
@@ -75,8 +74,8 @@ export const Breadcrumbs = (): JSX.Element => {
 
 	list = list.map(createToWithUrl(projectId ? urlProject : url));
 
-	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
+	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+	const handleClick = (event: MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
 	const handleClose = () => setAnchorEl(null);
 
 	return (

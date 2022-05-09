@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { createRef, PureComponent } from 'react';
 
-import { StandardTextFieldProps } from '@material-ui/core/TextField';
-import CancelIcon from '@material-ui/icons/Cancel';
-import EditIcon from '@material-ui/icons/Edit';
-import SaveIcon from '@material-ui/icons/Save';
+import { StandardTextFieldProps } from '@mui/material/TextField';
+import CancelIcon from '@mui/icons-material/Cancel';
+import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Save';
 import copy from 'copy-to-clipboard';
 import { Field, Formik } from 'formik';
 
-import CopyIcon from '@material-ui/icons/FileCopy';
+import CopyIcon from '@mui/icons-material/FileCopy';
 import { ENTER_KEY } from '../../../constants/keys';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { ExpandAction } from '../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
@@ -70,7 +70,7 @@ const SmallButton = ({ onClick, children}) => (
 	<StyledIconButton onClick={onClick}>{children}</StyledIconButton>
 );
 
-export class TextField extends React.PureComponent<IProps, IState> {
+export class TextField extends PureComponent<IProps, IState> {
 	public state = {
 		initialValue: '',
 		currentValue: '',
@@ -80,8 +80,8 @@ export class TextField extends React.PureComponent<IProps, IState> {
 		hasError: false,
 	};
 
-	private inputLocalRef = React.createRef();
-	private markdownFieldRef = React.createRef();
+	private inputLocalRef = createRef();
+	private markdownFieldRef = createRef<HTMLSpanElement>();
 
 	get isExpandable() {
 		return this.props.expandable && this.state.isLongContent && !this.state.edit;

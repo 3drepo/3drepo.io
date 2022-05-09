@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Grid from '@material-ui/core/Grid';
-import React from 'react';
+import Grid from '@mui/material/Grid';
 
 import { Color, Name } from './jobItem.styles';
 
@@ -27,14 +26,14 @@ interface IProps {
 
 export const JobItem = (props: IProps) => {
 	return (
-		<Grid
+        <Grid
 			container
 			direction="row"
-			justify="flex-start"
+			justifyContent="flex-start"
 			alignItems="center"
 		>
 			<Color item color={props.color} />
 			<Name item>{props.name}</Name>
 		</Grid>
-	);
+    );
 };

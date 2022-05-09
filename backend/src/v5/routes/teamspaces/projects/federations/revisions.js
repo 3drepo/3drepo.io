@@ -87,7 +87,7 @@ const establishRoutes = () => {
 	 *       404:
 	 *         $ref: "#/components/responses/teamspaceNotFound"
 	 *       200:
-	 *         description: updates the status of the revision
+	 *         description: The request is sent successfully.
 	 */
 	router.post('', hasWriteAccessToFederation, validateNewRevisionData, newRevision);
 	return router;

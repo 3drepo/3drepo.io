@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Radio from '@material-ui/core/Radio';
-import Tooltip from '@material-ui/core/Tooltip';
+import Radio from '@mui/material/Radio';
+import Tooltip from '@mui/material/Tooltip';
 import { isEmpty, isEqual, memoize, pick } from 'lodash';
-import React from 'react';
+import { PureComponent } from 'react';
 
 import AdminIconSrc from '@assets/icons/how_to_reg.svg';
 import { MODEL_ROLES_TYPES } from '../../../constants/model-permissions';
@@ -126,7 +126,7 @@ export const PermissionsTableContexts = {
 	MODELS: 'MODELS'
 };
 
-export class PermissionsTable extends React.PureComponent<IProps, IState> {
+export class PermissionsTable extends PureComponent<IProps, IState> {
 	public static defaultProps = {
 		context: PermissionsTableContexts.USERS
 	};

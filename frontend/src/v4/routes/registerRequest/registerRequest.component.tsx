@@ -14,14 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import Grid from '@material-ui/core/Grid';
-import React from 'react';
+import { PureComponent } from 'react';
+import Grid from '@mui/material/Grid';
 import { Panel } from '../components/panel/panel.component';
 
 import { Container, Paragraph } from './registerRequest.styles';
 
-export class RegisterRequest extends React.PureComponent<any, any> {
+export class RegisterRequest extends PureComponent<any, any> {
 	public render() {
 		return (
 			<Container

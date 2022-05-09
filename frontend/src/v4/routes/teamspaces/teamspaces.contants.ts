@@ -15,18 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import AddCircle from '@material-ui/icons/AddCircle';
-import LoadModel from '@material-ui/icons/CameraEnhance';
-import CloudDownload from '@material-ui/icons/CloudDownload';
-import CloudUpload from '@material-ui/icons/CloudUpload';
-import Delete from '@material-ui/icons/Delete';
-import Edit from '@material-ui/icons/Edit';
-import ExitToApp from '@material-ui/icons/ExitToApp';
-import People from '@material-ui/icons/People';
-import Settings from '@material-ui/icons/Settings';
-import SettingsBackupRestore from '@material-ui/icons/SettingsBackupRestore';
-import Share from '@material-ui/icons/Share';
-import Board from '@material-ui/icons/TableChart';
+import AddCircle from '@mui/icons-material/AddCircle';
+import LoadModel from '@mui/icons-material/CameraEnhance';
+import CloudDownload from '@mui/icons-material/CloudDownload';
+import CloudUpload from '@mui/icons-material/CloudUpload';
+import Delete from '@mui/icons-material/Delete';
+import Edit from '@mui/icons-material/Edit';
+import ExitToApp from '@mui/icons-material/ExitToApp';
+import People from '@mui/icons-material/People';
+import Settings from '@mui/icons-material/Settings';
+import SettingsBackupRestore from '@mui/icons-material/SettingsBackupRestore';
+import Share from '@mui/icons-material/Share';
+import Board from '@mui/icons-material/TableChart';
 import { DATA_TYPES, FILTER_TYPES } from '../components/filterPanel/filterPanel.component';
 import { SortAmountDown, SortAmountUp } from '../components/fontAwesomeIcon';
 

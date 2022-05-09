@@ -7,12 +7,12 @@ module.exports = {
 	extends: [
 		'airbnb-typescript',
 		'plugin:security/recommended',
+		'plugin:react/jsx-runtime',
 	],
 	parserOptions: {
 		ecmaVersion: 2020,
 		project: './tsconfig.json'
 	},
-	ignorePatterns: ['/*.*', "**/src/locales/**"],
 	parser: '@typescript-eslint/parser',
 	rules: {
 		'license-header': 'error',
@@ -23,8 +23,8 @@ module.exports = {
 				allowIndentationTabs: true,
 			},
 		],
-		'no-plusplus': 0,
-		'object-curly-newline': 0,
+		'no-plusplus': 'off',
+		'object-curly-newline': 'off',
 		'max-len': [
 			'error',
 			{
@@ -34,8 +34,8 @@ module.exports = {
 				ignoreStrings: true,
 			},
 		],
-		'no-throw-literal': 0,
-		'no-restricted-syntax': 0,
+		'no-throw-literal': 'off',
+		'no-restricted-syntax': 'off',
 		'no-underscore-dangle': [
 			'error',
 			{
@@ -43,8 +43,8 @@ module.exports = {
 			},
 		],
 		'no-console': ['error', { allow: ['warn', 'error', 'debug'] }],
-		'security/detect-non-literal-fs-filename': 0,
-		'security/detect-object-injection': 0,
+		'security/detect-non-literal-fs-filename': 'off',
+		'security/detect-object-injection': 'off',
 		'@typescript-eslint/no-explicit-any': 'off',
 		'@typescript-eslint/explicit-module-boundary-types': 'off',
 		'indent': 'off',
@@ -55,6 +55,9 @@ module.exports = {
 		'react/prop-types': 'off',
 		'react/require-default-props': 'off',
 		'react/jsx-indent-props': ['error', 'tab'],
-		'react/jsx-one-expression-per-line':  0
+		'react/jsx-one-expression-per-line':  'off',
+		'react/jsx-uses-react': 'off',
+		'react/react-in-jsx-scope': 'off',
+		'react/jsx-filename-extension': ['warn', { 'extensions': ['.ts', '.tsx'] }], 
 	}
 };

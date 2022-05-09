@@ -14,16 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import CancelIcon from '@material-ui/icons/Cancel';
-import SearchIcon from '@material-ui/icons/Search';
+import { PureComponent } from 'react';
+import CancelIcon from '@mui/icons-material/Cancel';
+import SearchIcon from '@mui/icons-material/Search';
 import { cond, matches, stubTrue } from 'lodash';
 import memoizeOne from 'memoize-one';
-import React from 'react';
 import SimpleBar from 'simplebar-react';
-import { IconButton, MenuItem, Tabs } from '@material-ui/core';
-import Add from '@material-ui/icons/Add';
-import Check from '@material-ui/icons/Check';
+import { IconButton, MenuItem, Tabs } from '@mui/material';
+import Add from '@mui/icons-material/Add';
+import Check from '@mui/icons-material/Check';
 
 import { encodeElementId } from '../../helpers/html';
 import { renderWhenTrue } from '../../helpers/rendering';
@@ -125,7 +124,7 @@ const SortingIcon = ({Icon, isDesc}) => {
 	}
 	return <Icon.ASC IconProps={iconProps} />;
 };
-export class Teamspaces extends React.PureComponent<IProps, IState> {
+export class Teamspaces extends PureComponent<IProps, IState> {
 	public static defaultProps = {
 		teamspaces: []
 	};
@@ -298,9 +297,9 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 
 	private getSearchButton = () => {
 		if (this.props.searchEnabled) {
-			return <IconButton onClick={this.handleCloseSearchMode}><CancelIcon /></IconButton>;
+			return <IconButton onClick={this.handleCloseSearchMode} size="large"><CancelIcon /></IconButton>;
 		}
-		return <IconButton onClick={this.handleOpenSearchMode}><SearchIcon /></IconButton>;
+		return <IconButton onClick={this.handleOpenSearchMode} size="large"><SearchIcon /></IconButton>;
 	}
 
 	private handleSortingItemClick = (sortingType, isNameSortingActive) => {
@@ -332,7 +331,7 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 					};
 
 					return(
-						<StyledListItem key={label} button onClick={() => this.handleSortingItemClick(sortingType, isNameSortingActive)}>
+						<StyledListItem key={label} onClick={() => this.handleSortingItemClick(sortingType, isNameSortingActive)}>
 							<StyledItemText>
 								<Action>
 									<SortingIcon Icon={Icon} isDesc={isDesc[sortingType]} />
@@ -492,7 +491,6 @@ export class Teamspaces extends React.PureComponent<IProps, IState> {
 
 	private renderMenuButton = (isPending, props) => (
 		<MenuButton
-			buttonRef={props.buttonRef}
 			color="secondary"
 			aria-label="Toggle menu"
 			aria-haspopup="true"

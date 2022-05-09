@@ -16,7 +16,7 @@
  */
 
 import { withFormik } from 'formik';
-import React from 'react';
+import { PureComponent } from 'react';
 import * as Yup from 'yup';
 
 import { convertPositionToDirectX, convertPositionToOpenGL } from '../../../../../../helpers/model';
@@ -43,10 +43,10 @@ interface IProps {
 		unit: string;
 	};
 	updateModelSettings: (modelData, settings) => void;
-	getDataFromPathname: () => { teamspace, modelId, revision };
+	urlParams: { teamspace, model, revision };
 }
 
-export class Settings extends React.PureComponent<IProps, any> {
+export class Settings extends PureComponent<IProps, any> {
 	public getFormValues = (settings) => {
 		let formValues = {} as any;
 
@@ -79,8 +79,8 @@ export class Settings extends React.PureComponent<IProps, any> {
 					}]
 				};
 
-				const { teamspace, modelId } = this.props.getDataFromPathname();
-				const modelData = { teamspace, modelId };
+				const { teamspace, model } = this.props.urlParams;
+				const modelData = { teamspace, modelId: model };
 
 				this.props.updateModelSettings(modelData, pointsSettings);
 			},

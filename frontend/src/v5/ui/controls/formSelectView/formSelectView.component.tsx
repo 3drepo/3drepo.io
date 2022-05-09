@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
 import { useParams } from 'react-router';
 import { FederationView } from '@/v5/store/federations/federations.types';
 import { generateV5ApiUrl } from '@/v5/services/api/default';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { FormSelectProps } from '@controls/formSelect/formSelect.component';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Thumbnail, ThumbnailPlaceholder, FormSelect, ViewLabel, MenuItemView } from './formSelectView.styles';
 
 const getThumbnailBasicPath = (teamspace: string, projectId: string, federationId: string) => (
@@ -36,7 +36,7 @@ type FormSelectViewProps = Omit<FormSelectProps, 'children'> & {
 };
 
 export const FormSelectView = ({ views, federationId, ...formProps }: FormSelectViewProps) => {
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const { teamspace, project } = useParams<DashboardParams>() as { teamspace: string, project: string };
 	const getThumbnail = getThumbnailBasicPath(teamspace, project, federationId);
 
 	return (

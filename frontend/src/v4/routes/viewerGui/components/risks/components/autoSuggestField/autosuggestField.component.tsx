@@ -14,13 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
-import MenuItem from '@material-ui/core/MenuItem';
-import Paper from '@material-ui/core/Paper';
-import Portal from '@material-ui/core/Portal';
-import TextField from '@material-ui/core/TextField';
+import { FunctionComponent, useState, useEffect } from 'react';
+import MenuItem from '@mui/material/MenuItem';
+import Paper from '@mui/material/Paper';
+import Portal from '@mui/material/Portal';
+import TextField from '@mui/material/TextField';
 import Autosuggest from 'react-autosuggest';
 import { usePopper } from 'react-popper';
 
@@ -69,16 +67,16 @@ interface IProps {
 	saveOnChange?: boolean;
 }
 
-export const AutoSuggestField: React.FunctionComponent<IProps> = ({
+export const AutoSuggestField: FunctionComponent<IProps> = ({
 	label, placeholder, field, form, disabled, saveOnChange, suggestions: allSuggestions = []
 }) => {
-	const [suggestions, setSuggestions] = React.useState([]);
-	const [value, setValue] = React.useState('');
-	const [nodeRef, setNodeRef] = React.useState(null);
-	const [popperElement, setPopperElement] = React.useState(null);
+	const [suggestions, setSuggestions] = useState([]);
+	const [value, setValue] = useState('');
+	const [nodeRef, setNodeRef] = useState(null);
+	const [popperElement, setPopperElement] = useState(null);
 	const { styles, attributes } = usePopper(nodeRef, popperElement, { placement: 'top-start' });
 
-	React.useEffect(() => {
+	useEffect(() => {
 		setValue(field.value);
 	}, [field.value]);
 

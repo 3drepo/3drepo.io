@@ -16,7 +16,7 @@
  */
 
 import { keyBy } from 'lodash';
-import React from 'react';
+import { PureComponent } from 'react';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { formatShortDate, NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
 import { DateTime } from '../../../../../components/dateTime/dateTime.component';
@@ -37,7 +37,7 @@ interface IState {
 	tooltipHidden?: boolean;
 }
 
-export class RevisionsSelect extends React.PureComponent<IProps, IState> {
+export class RevisionsSelect extends PureComponent<IProps, IState> {
 	get defaultValue() {
 		const { defaultValue, revisions } = this.props;
 		return defaultValue || revisions[0]._id;
@@ -71,7 +71,12 @@ export class RevisionsSelect extends React.PureComponent<IProps, IState> {
 					disabled={disabled}
 					renderValue={this.renderValue}
 					onChange={this.handleChange}
-					MenuProps={({onEntered: this.handleOpen, onExit: this.handleClose})}
+					MenuProps={{
+						TransitionProps: {
+							onEntered: this.handleOpen,
+							onExit: this.handleClose
+						}
+					}}
 				>
 					{revisions.map((revision) => (
 						<MenuItem key={revision._id} value={revision}>

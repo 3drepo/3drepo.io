@@ -14,13 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { PureComponent } from 'react';
+import AddIcon from '@mui/icons-material/AddCircleOutline';
+import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
 
-import React from 'react';
-
-import AddIcon from '@material-ui/icons/AddCircleOutline';
-import RemoveIcon from '@material-ui/icons/RemoveCircleOutline';
-
-import { InputLabel } from '@material-ui/core';
+import { InputLabel } from '@mui/material';
 import {
 	VALUE_FIELD_MAP,
 	VALUE_FIELD_TYPES
@@ -64,7 +62,7 @@ const INITIAL_VALUE = {
 	[VALUE_FIELD_TYPES.EMPTY]: ['']
 };
 
-export class CriteriaValueField extends React.PureComponent<IProps, IState> {
+export class CriteriaValueField extends PureComponent<IProps, IState> {
 	public state = {
 		value: []
 	};

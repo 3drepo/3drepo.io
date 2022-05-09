@@ -16,14 +16,14 @@
  */
 
 import { Field, Form, Formik } from 'formik';
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import * as Yup from 'yup';
 
-import Button from '@material-ui/core/Button';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import InputLabel from '@material-ui/core/InputLabel';
-import TextField from '@material-ui/core/TextField';
+import Button from '@mui/material/Button';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import InputLabel from '@mui/material/InputLabel';
+import TextField from '@mui/material/TextField';
 
 import { clientConfigService } from '../../../../services/clientConfig';
 import { schema } from '../../../../services/validation';

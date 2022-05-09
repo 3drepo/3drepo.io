@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ButtonBase, ListItem } from '@material-ui/core';
+import { ButtonBase, ListItem } from '@mui/material';
 import styled, { css } from 'styled-components';
 import { COLOR, FONT_WEIGHT } from '../../../styles';
 
@@ -50,18 +50,24 @@ export const Description = styled.div`
 	margin-top: 5px;
 `;
 
-export const Container = styled(ListItem)`
+interface IStateTheme {
+	isVoid?: boolean;
+	current?: boolean;
+	isPending?: boolean;
+}
+
+export const Container = styled(ListItem)<IStateTheme>`
 	display: flex;
 	flex-direction: column;
 	border-bottom: 1px solid ${COLOR.BLACK_20};
-	color: ${({ theme }) => theme.void || theme.isPending ? COLOR.BLACK_20 : COLOR.BLACK};
+	color: ${({ isVoid, isPending }) => isVoid || isPending ? COLOR.BLACK_20 : COLOR.BLACK};
 	font-size: 14px;
-	font-weight: ${({ theme }) => theme.current ? FONT_WEIGHT.SEMIBOLD : FONT_WEIGHT.NORMAL};
+	font-weight: ${({ current }) => current ? FONT_WEIGHT.SEMIBOLD : FONT_WEIGHT.NORMAL};
 
 	&& {
 		justify-content: space-between;
 		padding: 18px 24px;
-		background-color: ${({ theme }) => theme.current ? COLOR.WHITE_87 : COLOR.BLACK_6};
+		background-color: ${({ current }) => current ? COLOR.WHITE_87 : COLOR.BLACK_6};
 		border-bottom: 1px solid ${COLOR.BLACK_20};
 		transition: background-color 0.25s ease-in-out;
 
@@ -71,7 +77,7 @@ export const Container = styled(ListItem)`
 	}
 
 	${Description} {
-		${({ theme }) => theme.void || theme.isPending ? css`
+		${({ isVoid, isPending }) => isVoid || isPending ? css`
 			color: ${COLOR.BLACK_20};
 		` : ''}
 	}
@@ -89,15 +95,11 @@ export const Row = styled.div`
 	}
 `;
 
-interface IStateSwitch {
-	void?: boolean;
-}
-
-const StyledButtonBase = styled(ButtonBase)`
+const StyledButtonBase = styled(ButtonBase)<IStateTheme>`
 	&& {
 		font-size: 14px;
 		color: ${COLOR.WHITE};
-		background-color: ${({ theme }) => !theme.void ? COLOR.SECONDARY_MAIN : COLOR.BLACK_30};
+		background-color: ${({ isVoid }) => !isVoid ? COLOR.SECONDARY_MAIN : COLOR.BLACK_30};
 		cursor: pointer;
 		box-sizing: border-box;
 		height: 20px;
@@ -106,13 +108,13 @@ const StyledButtonBase = styled(ButtonBase)`
 		white-space: nowrap;
 
 		&:disabled {
-			background-color: ${({ theme }) => !theme.void ? COLOR.SECONDARY_MAIN_54 : COLOR.BLACK_16};
+			background-color: ${({ isVoid }) => !isVoid ? COLOR.SECONDARY_MAIN_54 : COLOR.BLACK_16};
 			cursor: default;
 		}
 	}
 `;
 
-export const ToggleButton = styled(StyledButtonBase)<IStateSwitch>`
+export const ToggleButton = styled(StyledButtonBase)`
 	&& {
 		width: 80px;
 	}

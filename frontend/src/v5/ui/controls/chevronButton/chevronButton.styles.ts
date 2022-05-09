@@ -14,10 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { IconButton } from '@material-ui/core';
+import { IconButton } from '@mui/material';
 import styled, { css } from 'styled-components';
 
-export const StyledIconButton = styled(IconButton)`
+export const StyledIconButton = styled(IconButton)<{ $isOn?: boolean, $isLoading?: boolean }>`
 	height: 28px;
 	width: 28px;
 	padding: 0;

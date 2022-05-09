@@ -14,11 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
+import { useMemo, forwardRef } from 'react';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
 import { ListItemContainer, StyledLink } from './listItemLink.styles';
 
 interface IProps {
@@ -28,19 +26,19 @@ interface IProps {
 }
 
 export const ListItemLink = ({ title, to }: IProps) => {
-	const renderLink = React.useMemo(
-		() => React.forwardRef((itemProps, ref) =>
+	const renderLink = useMemo(
+		() => forwardRef((itemProps, ref) =>
 			<StyledLink to={to} ref={ref} {...itemProps} />),
 		[to],
 	);
 
 	return (
 		<ListItemContainer>
-			<ListItem button component={renderLink}>
+			<ListItemButton component={renderLink}>
 				<ListItemText>
 					{title}
 				</ListItemText>
-			</ListItem>
+			</ListItemButton>
 		</ListItemContainer>
 	);
 };

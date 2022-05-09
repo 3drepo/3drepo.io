@@ -29,7 +29,7 @@ ResponseCodes.templates = {
 	notAuthorized: { message: 'You do not have sufficient access rights for this action', status: 401 },
 	licenceExpired: { message: 'Licence expired.', status: 401 },
 	tooManyLoginAttempts: { message: 'Too many unsuccessful login attempts! Account locked', status: 400 },
-	userNotVerified: { message: 'Account not yet verified. Please check your email.', status: 400 },
+	userNotVerified: { message: 'Account not yet verified. Please check your email', status: 400 },
 	incorrectUsernameOrPassword: { message: 'Incorrect username or password', status: 400 },
 	incorrectPassword: { message: 'Incorrect password', status: 400 },
 	userDoesNotHaveAvatar: { message: 'User does not have an avatar', status: 404 },
@@ -63,6 +63,9 @@ ResponseCodes.templates = {
 	maxSizeExceeded: { message: 'The file is bigger than the maximum size allowed', status: 400 },
 	quotaLimitExceeded: { message: 'Insufficient quota.', status: 401 },
 
+	// File download related error
+	fileNotFound: { message: 'No file can be downloaded', status: 404 },
+
 	// View related error
 	viewNotFound: { message: 'View not found', status: 404 },
 
@@ -82,6 +85,8 @@ ResponseCodes.templates = {
 
 Object.keys(ResponseCodes.templates).forEach((key) => {
 	ResponseCodes.templates[key].code = toConstantCase(key);
+	// value = code (v4 compatibility)
+	ResponseCodes.templates[key].value = ResponseCodes.templates[key].code;
 });
 
 ResponseCodes.getSwaggerComponents = () => {

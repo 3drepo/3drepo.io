@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { FunctionComponent } from 'react';
 import { SequencingDates } from '../../../../../components/sequencingDates/sequencingDates.component';
 import { Content } from '../riskDetails/riskDetails.styles';
 
@@ -34,7 +32,7 @@ interface IProps {
 	sequences?: any[];
 }
 
-export const SequencingFormTab: React.FunctionComponent<IProps> = ({
+export const SequencingFormTab: FunctionComponent<IProps> = ({
 	active, canComment, showSequenceDate, min, max, selectedDate, endTimeValue, startTimeValue, sequences
 }) => {
 	const startDate = sequences ? sequences[0]?.startDate : undefined;

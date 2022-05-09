@@ -17,15 +17,15 @@
 
 import { Field, Form, Formik } from 'formik';
 import { snakeCase } from 'lodash';
-import React from 'react';
+import { PureComponent } from 'react';
 import * as Yup from 'yup';
 import * as countriesAndTimezones from 'countries-and-timezones';
-import Button from '@material-ui/core/Button';
-import DialogContent from '@material-ui/core/DialogContent';
-import TextField from '@material-ui/core/TextField';
-import FileIcon from '@material-ui/icons/InsertDriveFileOutlined';
-import Checkbox from '@material-ui/core/Checkbox';
-import InputLabel from '@material-ui/core/InputLabel';
+import Button from '@mui/material/Button';
+import DialogContent from '@mui/material/DialogContent';
+import TextField from '@mui/material/TextField';
+import FileIcon from '@mui/icons-material/InsertDriveFileOutlined';
+import Checkbox from '@mui/material/Checkbox';
+import InputLabel from '@mui/material/InputLabel';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
 
 import { unitsMap } from '../../../../constants/model-parameters';
@@ -106,7 +106,7 @@ const generateTimezoneData = () => {
 
 const { allTimezones, defaultTimezone, labelToTZName } = generateTimezoneData();
 
-export class UploadModelFileDialog extends React.PureComponent<IProps, IState> {
+export class UploadModelFileDialog extends PureComponent<IProps, IState> {
 	public state = {
 		fileName: '',
 		allowImportAnimations: false,

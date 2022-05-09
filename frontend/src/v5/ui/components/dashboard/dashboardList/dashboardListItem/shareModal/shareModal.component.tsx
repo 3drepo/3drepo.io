@@ -15,16 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
 import { FormModal } from '@controls/modal/formModal/formDialog.component';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
-import { viewerShareLink } from '@/v5/services/routing/routing';
+import { viewerRoute } from '@/v5/services/routing/routing';
 import { useParams } from 'react-router-dom';
 import { ShareTextField } from '@controls/shareTextField';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { IFederation } from '@/v5/store/federations/federations.types';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { MailToButton } from './shareModal.styles';
 
 type IShareModal = {
@@ -40,8 +39,8 @@ export const ShareModal = ({
 	containerOrFederation,
 	onClickClose,
 }: IShareModal): JSX.Element => {
-	const { teamspace } = useParams();
-	const link = viewerShareLink(teamspace, containerOrFederation._id);
+	const { teamspace } = useParams<DashboardParams>();
+	const link = viewerRoute(teamspace, containerOrFederation, null, true);
 
 	return (
 		<FormModal

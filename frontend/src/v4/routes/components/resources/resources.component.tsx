@@ -14,10 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { PureComponent } from 'react';
 
-import * as React from 'react';
-
-import { LinearProgress } from '@material-ui/core';
+import { LinearProgress } from '@mui/material';
 import { isEmpty } from 'lodash';
 
 import { renderWhenTrue } from '../../../helpers/rendering';
@@ -54,20 +53,13 @@ interface IState {
 }
 
 export const RemoveButton = (props) => (
-	<IconButton
-		{...props}
-		aria-label="Toggle menu"
-		aria-haspopup="true"
-	>
+	<IconButton {...props} aria-label="Toggle menu" aria-haspopup="true" size="large">
 		<RemoveIcon />
 	</IconButton>
 );
 
 export const QuoteButton = (props) => (
-	<IconButton
-		{...props}
-		aria-label="Quote resource"
-	>
+	<IconButton {...props} aria-label="Quote resource" size="large">
 		<QuoteIcon />
 	</IconButton>
 );
@@ -120,7 +112,7 @@ const ResourceItem = (resource) =>
 		(<ResourceUploading {...resource} />)
 ;
 
-export class Resources extends React.PureComponent<IProps, IState> {
+export class Resources extends PureComponent<IProps, IState> {
 	public onClickRemove = (r) => (e) => {
 		this.props.onRemoveResource(r);
 	}
@@ -170,7 +162,7 @@ export class Resources extends React.PureComponent<IProps, IState> {
 			<ResourcesContainer>
 				{this.renderResources(!isEmpty(resources))}
 				{isEmpty(resources) && <EmptyStateInfo>No resources have been attached yet</EmptyStateInfo>}
-				<FieldsRow container justify="flex-end">
+				<FieldsRow container justifyContent="flex-end">
 					<ContainedButton onClick={this.onClickAttach} disabled={!canEdit}>
 						Add Resource
 					</ContainedButton>

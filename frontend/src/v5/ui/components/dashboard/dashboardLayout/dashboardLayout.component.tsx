@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { AppBar } from '@components/shared/appBar';
@@ -23,6 +23,7 @@ import { ModalsDispatcher } from '@components/shared/modals';
 import { Header as ProjectHeader } from '@/v5/ui/routes/dashboard/projects/header';
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers/teamspacesActions.dispatchers';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers/projectsActions.dispatchers';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Content } from './dashboardLayout.styles';
 
 interface IDashboardLayout {
@@ -30,7 +31,7 @@ interface IDashboardLayout {
 }
 
 export const DashboardLayout = ({ children }: IDashboardLayout): JSX.Element => {
-	const { teamspace, project } = useParams();
+	const { teamspace, project } = useParams<DashboardParams>();
 
 	useEffect(() => {
 		if (teamspace) {

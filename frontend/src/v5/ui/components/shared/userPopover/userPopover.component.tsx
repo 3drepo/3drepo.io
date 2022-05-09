@@ -14,30 +14,26 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
-import { AvatarButton } from '@controls/avatarButton';
 import { IUser } from '@/v5/store/users/users.redux';
+import { Avatar } from '@controls/avatar';
 import { AvatarWrapper, Container, Company, Job, Name, UserData } from './userPopover.styles';
 
 interface IUserPopover {
 	user: IUser;
 }
 
-const getInitials = (name) => name.split(' ').slice(0, 2).map((text) => text[0]).join('')
-	.trim()
-	.toUpperCase();
-
-export const UserPopover = ({ user: { firstName, lastName, company, job } }: IUserPopover) => (
-	<Container>
-		<AvatarWrapper>
-			<AvatarButton>{getInitials(`${firstName} ${lastName}`)}</AvatarButton>
-		</AvatarWrapper>
-		<UserData>
-			<Name>{firstName} {lastName}</Name>
-			<Company>{company}</Company>
-			<Job>{job}</Job>
-		</UserData>
-	</Container>
-);
+export const UserPopover = ({ user }: IUserPopover) => {
+	const { firstName, lastName, company, job } = user;
+	return (
+		<Container>
+			<AvatarWrapper>
+				<Avatar user={user} />
+			</AvatarWrapper>
+			<UserData>
+				<Name>{firstName} {lastName}</Name>
+				<Company>{company}</Company>
+				<Job>{job}</Job>
+			</UserData>
+		</Container>
+	);
+};

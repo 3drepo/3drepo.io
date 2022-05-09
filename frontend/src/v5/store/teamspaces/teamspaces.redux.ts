@@ -15,30 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
-
-export interface ITeamspace {
-	name: string;
-	isAdmin: boolean;
-}
-
-export interface ITeamspacesActions {
-	fetch: () => any;
-	fetchSuccess: (teamspaces: ITeamspace[]) => any;
-	setCurrentTeamspace: (teamspace: string) => any;
-}
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
 	fetch: [],
 	fetchSuccess: ['teamspaces'],
 	setCurrentTeamspace: ['currentTeamspace'],
-}, { prefix: 'TEAMSPACES2/' }) as { Types: Constants<ITeamspacesActions>; Creators: ITeamspacesActions };
-
-export interface ITeamspacesState {
-	teamspaces: ITeamspace[];
-	currentTeamspace: string;
-}
+}, { prefix: 'TEAMSPACES2/' }) as { Types: Constants<ITeamspacesActionCreators>; Creators: ITeamspacesActionCreators };
 
 export const INITIAL_STATE: ITeamspacesState = {
 	teamspaces: [],
@@ -46,11 +31,40 @@ export const INITIAL_STATE: ITeamspacesState = {
 };
 
 // eslint-disable-next-line max-len
-export const setCurrentTeamspace = (state = INITIAL_STATE, { currentTeamspace }): ITeamspacesState => ({ ...state, currentTeamspace });
+export const setCurrentTeamspace = (state = INITIAL_STATE, { currentTeamspace }: SetCurrentTeamspaceAction): ITeamspacesState => ({
+	...state,
+	currentTeamspace,
+});
 
-export const fetchSuccess = (state = INITIAL_STATE, { teamspaces }): ITeamspacesState => ({ ...state, teamspaces });
+export const fetchSuccess = (state = INITIAL_STATE, { teamspaces }: FetchSuccessAction): ITeamspacesState => ({
+	...state,
+	teamspaces,
+});
 
-export const reducer = createReducer(INITIAL_STATE, {
+export const teamspacesReducer = createReducer(INITIAL_STATE, {
 	[TeamspacesTypes.FETCH_SUCCESS]: fetchSuccess,
 	[TeamspacesTypes.SET_CURRENT_TEAMSPACE]: setCurrentTeamspace,
 });
+
+/**
+ * Types
+ */
+export interface ITeamspacesState {
+	teamspaces: ITeamspace[];
+	currentTeamspace: string;
+}
+
+export interface ITeamspace {
+	name: string;
+	isAdmin: boolean;
+}
+
+export type FetchAction = Action<'FETCH'>;
+export type FetchSuccessAction = Action<'FETCH_SUCCESS'> & { teamspaces: ITeamspace[] };
+export type SetCurrentTeamspaceAction = Action<'SET_CURRENT_TEAMSPACE'> & { currentTeamspace: string };
+
+export interface ITeamspacesActionCreators {
+	fetch: () => FetchAction;
+	fetchSuccess: (teamspaces: ITeamspace[]) => FetchSuccessAction;
+	setCurrentTeamspace: (teamspace: string) => SetCurrentTeamspaceAction;
+}

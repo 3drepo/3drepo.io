@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as React from 'react';
-
 import { isEmpty } from 'lodash';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { batchGroupBy } from '../../../../../../modules/canvasHistory/canvasHistory.helpers';

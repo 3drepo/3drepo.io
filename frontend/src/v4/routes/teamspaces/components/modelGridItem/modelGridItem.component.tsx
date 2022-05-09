@@ -17,7 +17,7 @@
 
 import copy from 'copy-to-clipboard';
 import { pick, startCase } from 'lodash';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ROUTES } from '../../../../constants/routes';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { IViewpointsComponentState } from '../../../../modules/viewpoints/viewpoints.redux';
@@ -341,7 +341,7 @@ export const ModelGridItem = memo((props: IProps) => {
 
 	return (
 		<Container federate={isFederation}>
-			<ModelLink onClick={handleClick} isPending={isPending} />
+			<ModelLink onClick={handleClick} />
 			<Header>
 				<NameWrapper>
 					<StarIcon

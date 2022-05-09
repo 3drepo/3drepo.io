@@ -14,11 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { Tooltip } from '@material-ui/core';
-import { TooltipProps } from '@material-ui/core/Tooltip';
+import { createElement } from 'react';
+import { Tooltip } from '@mui/material';
+import { TooltipProps } from '@mui/material/Tooltip';
 import { omit } from 'lodash';
-import * as React from 'react';
 import styled from 'styled-components';
 import { COLOR } from '../../../../../../styles';
 
@@ -66,7 +65,7 @@ export const RevisionTooltip =  styled((prop: TooltipProps) => {
 	const props = omit(prop, ['className', 'hidden']);
 	props.classes = { popper: prop.className, tooltip: 'tooltip' };
 
-	return React.createElement(Tooltip, props);
+	return createElement(Tooltip, props);
 })`
 	.tooltip {
 		font-size: 12px;

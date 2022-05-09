@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 
-import Tooltip from '@material-ui/core/Tooltip';
+import Tooltip from '@mui/material/Tooltip';
 import { withFormik, Form } from 'formik';
 import { debounce, get, isEmpty, isEqual } from 'lodash';
 import * as Yup from 'yup';
@@ -95,7 +95,7 @@ export const RiskSchema = Yup.object().shape({
 	residual_risk: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
 });
 
-class RiskDetailsFormComponent extends React.PureComponent<IProps, IState> {
+class RiskDetailsFormComponent extends PureComponent<IProps, IState> {
 	get isNewRisk() {
 		return !this.props.risk._id;
 	}

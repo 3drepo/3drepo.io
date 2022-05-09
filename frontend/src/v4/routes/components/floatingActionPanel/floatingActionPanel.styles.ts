@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Fab from '@material-ui/core/Fab';
-import Popover from '@material-ui/core/Popover';
+import Fab from '@mui/material/Fab';
+import Popover from '@mui/material/Popover';
 import styled from 'styled-components';
 
 export const Container = styled.div``;

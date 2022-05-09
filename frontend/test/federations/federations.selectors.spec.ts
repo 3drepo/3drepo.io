@@ -14,14 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { INITIAL_STATE } from '@/v5/store/federations/federations.redux';
+import { IFederationsState, INITIAL_STATE } from '@/v5/store/federations/federations.redux';
 import { times } from 'lodash';
 import {
 	selectFederations,
 	selectFavouriteFederations,
 	selectAreStatsPending, selectHasFederations
 } from '@/v5/store/federations/federations.selectors';
-import { IFederationsState } from '@/v5/store/federations/federations.types';
 import { federationMockFactory } from './federations.fixtures';
 
 const searchPhrase = 'test phrase';

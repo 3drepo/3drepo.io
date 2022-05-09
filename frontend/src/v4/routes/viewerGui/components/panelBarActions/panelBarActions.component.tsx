@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import * as React from 'react';
-
+import { FunctionComponent, ReactNode } from 'react';
 import { LockPanelButton } from './lockPanelButton';
 import { MenuButton } from './menuButton';
 import { SearchButton } from './searchButton';
@@ -26,7 +24,7 @@ interface IProps {
 	type?: string;
 	hideMenu?: boolean;
 	menuLabel?: string;
-	menuActions?: (props?) => React.ReactNode;
+	menuActions?: (props?) => ReactNode;
 	menuDisabled?: boolean;
 	menuOpen?: boolean;
 	hideSearch?: boolean;
@@ -37,7 +35,7 @@ interface IProps {
 	onMenuOpen?: () => void;
 }
 
-export const PanelBarActions: React.FunctionComponent<IProps> = ({
+export const PanelBarActions: FunctionComponent<IProps> = ({
 	hideLock = false, hideSearch = false, hideMenu = false, type, menuLabel, menuActions,
 	isSearchEnabled, onSearchOpen, onSearchClose, menuDisabled = false, menuOpen, onMenuClose, onMenuOpen
 }) => {

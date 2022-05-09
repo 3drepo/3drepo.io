@@ -14,9 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
 import { Footer } from '../footer/footer.component';
 import { RemoveButton } from '../removeButton/removeButton.component';
 import { Screenshot } from '../screenshot/screenshot.component';
@@ -52,7 +49,7 @@ export const UserMessage = ({
 			<UserMarker name={name} />
 			<CommentContainer self={props.self}>
 				{isScreenshot && <Screenshot comment={commentWithMarkdown} viewpoint={viewpoint} />}
-				<Comment teamspace={props.teamspace}>{commentWithMarkdown}</Comment>
+				<Comment>{commentWithMarkdown}</Comment>
 				<Footer
 					name={name}
 					formRef={props.formRef}

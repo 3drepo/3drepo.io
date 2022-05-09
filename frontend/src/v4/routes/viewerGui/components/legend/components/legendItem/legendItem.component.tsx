@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { useRef } from 'react';
 
-import { Tooltip } from '@material-ui/core';
+import { Tooltip } from '@mui/material';
 import { Field, Formik } from 'formik';
 import * as Yup from 'yup';
 
-import RemoveIcon from '@material-ui/icons/Close';
+import RemoveIcon from '@mui/icons-material/Close';
 import { ILegend } from '../../../../../../modules/legend/legend.redux';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
@@ -52,7 +52,7 @@ interface IProps extends ILegend {
 export const LegendItem = ({
 	name, color, updateLegendItem, deleteLegendItem, legendNames, editMode, setComponentState, ...props
 }: IProps) => {
-	const textFieldRef = React.useRef(null);
+	const textFieldRef = useRef(null);
 
 	const getLegendSchema = LegendSchema(legendNames.filter((item) => item !== name));
 

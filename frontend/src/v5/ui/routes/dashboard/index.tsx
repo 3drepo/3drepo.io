@@ -15,24 +15,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
 import { useRouteMatch, useLocation, Route, Switch, Redirect } from 'react-router-dom';
 import { GlobalStyle } from '@/v5/ui/themes/global';
 import { discardSlash } from '@/v5/services/routing/routing';
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { DashboardLayout } from '@components/dashboard/dashboardLayout';
 import { TeamspacesList } from '@/v5/ui/routes/dashboard/teamspaces/teamspacesList/teamspacesList.component';
+import { ViewerCanvas } from '@/v4/routes/viewerCanvas';
 import { TeamspaceContent } from './teamspaces';
 import { ProjectContent } from './projects';
+import { Login } from '../login';
+import { Viewer } from '../viewer/viewer';
+import { VIEWER_ROUTE } from '../routes.constants';
 
-export const Dashboard = () => {
+export const MainRoute = () => {
 	const { path } = useRouteMatch();
 	const { pathname } = useLocation();
 
 	return (
 		<>
 			<GlobalStyle />
+			<ViewerCanvas location={{ pathname }} />
 			<Switch>
+				<Route exact path={`${path}/login`}>
+					<Login />
+				</Route>
 				<Route path={`${path}/dashboard/:teamspace?/:project?`}>
 					<DashboardLayout>
 						<Route exact path={`${path}/dashboard/`}>
@@ -57,6 +64,12 @@ export const Dashboard = () => {
 						</Switch>
 					</DashboardLayout>
 				</Route>
+				<Route path={VIEWER_ROUTE}>
+					<DashboardLayout>
+						<Viewer />
+					</DashboardLayout>
+				</Route>
+
 				<Route path="*">
 					<DashboardLayout>
 						<NotFound />

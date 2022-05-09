@@ -16,7 +16,6 @@
  */
 
 import { deleteDB, openDB, DBSchema, IDBPDatabase } from 'idb';
-import React from 'react';
 
 export const STORE_NAME = {
 	FRAMES: 'frames',

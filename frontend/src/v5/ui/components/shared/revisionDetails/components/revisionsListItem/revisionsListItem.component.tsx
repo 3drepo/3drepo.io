@@ -14,8 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
+import { SyntheticEvent } from 'react';
 import { useParams } from 'react-router';
 
 import { RevisionsListItemText } from '@components/shared/revisionDetails/components/revisionsListItemText';
@@ -27,7 +26,12 @@ import { IRevision } from '@/v5/store/revisions/revisions.types';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers/revisionsActions.dispatchers';
 import { Display } from '@/v5/ui/themes/media';
 import { formatDate } from '@/v5/services/intl';
-import { Container } from './revisionsListItem.styles';
+import { viewerRoute } from '@/v5/services/routing/routing';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { FormattedMessage } from 'react-intl';
+import { Tooltip } from '@mui/material';
+import { getRevisionFileUrl } from '@/v5/services/api/revisions';
+import { Container, DownloadButton, DownloadIcon } from './revisionsListItem.styles';
 
 type IRevisionsListItem = {
 	revision: IRevision;
@@ -36,16 +40,17 @@ type IRevisionsListItem = {
 };
 
 export const RevisionsListItem = ({ revision, containerId, active = false }: IRevisionsListItem): JSX.Element => {
-	const { teamspace, project } = useParams();
+	const { teamspace, project } = useParams<DashboardParams>();
 	const { timestamp, desc, author, tag, void: voidStatus } = revision;
 
-	const toggleVoidStatus = (e: React.SyntheticEvent) => {
+	const toggleVoidStatus = (e: SyntheticEvent) => {
+		e.preventDefault();
 		e.stopPropagation();
 		RevisionsActionsDispatchers.setVoidStatus(teamspace, project, containerId, tag || revision._id, !voidStatus);
 	};
 
 	return (
-		<Container>
+		<Container to={viewerRoute(teamspace, containerId, revision)}>
 			<RevisionsListItemDate width={130} tabletWidth={94} active={active}>
 				{formatDate(timestamp)}
 			</RevisionsListItemDate>
@@ -63,6 +68,20 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 				{desc}
 			</RevisionsListItemText>
 			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} />
+			<Tooltip
+				title={(
+					<FormattedMessage
+						id="revisionDetails.list.item.download.tooltip"
+						defaultMessage="Download revision"
+					/>
+				)}
+			>
+				<a href={getRevisionFileUrl(teamspace, project, containerId, revision._id)}>
+					<DownloadButton>
+						<DownloadIcon />
+					</DownloadButton>
+				</a>
+			</Tooltip>
 		</Container>
 	);
 };

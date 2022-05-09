@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React from 'react';
 import { useParams } from 'react-router';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { formatMessage } from '@/v5/services/intl';
@@ -23,6 +22,9 @@ import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { useDispatch } from 'react-redux';
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
+import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
+import { viewerRoute } from '@/v5/services/routing/routing';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 
 type ContainerEllipsisMenuProps = {
 	selected: boolean,
@@ -37,7 +39,7 @@ export const ContainerEllipsisMenu = ({
 	onSelectOrToggleItem,
 	openShareModal,
 }: ContainerEllipsisMenuProps) => {
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const { teamspace, project } = useParams<DashboardParams>();
 	const dispatch = useDispatch();
 
 	return (
@@ -47,19 +49,14 @@ export const ContainerEllipsisMenu = ({
 					id: 'containers.ellipsisMenu.loadContainer',
 					defaultMessage: 'Load Container in 3D Viewer',
 				})}
-			/>
-			<EllipsisMenuItem
-				title={formatMessage({
-					id: 'containers.ellipsisMenu.loadContainer',
-					defaultMessage: 'Load Container in 3D Viewer',
-				})}
-				to={`/${container._id}`}
+				to={viewerRoute(teamspace, container)}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.uploadNewRevision',
 					defaultMessage: 'Upload new Revision',
 				})}
+				disabled={!canUploadToBackend(container.status)}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
@@ -85,6 +82,10 @@ export const ContainerEllipsisMenu = ({
 					id: 'containers.ellipsisMenu.editPermissions',
 					defaultMessage: 'Edit Permissions',
 				})}
+				to={{
+					pathname: './user_permissions',
+					search: `?modelId=${container._id}`,
+				}}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({

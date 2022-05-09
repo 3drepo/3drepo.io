@@ -15,55 +15,56 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Grid from '@material-ui/core/Grid';
+import Grid from '@mui/material/Grid';
 import styled from 'styled-components';
 
 import { ellipsis, COLOR } from '../../../styles';
 import { TREE_LEVELS } from './treeList.component';
 
-const isActive = (props) => props.active && !props.disabled;
+const isActive = ({ active, disabled }) => active && !disabled;
 
-export const Headline = styled.div`
+interface IContainer {
+	active?: boolean;
+	disabled?: boolean;
+	disableShadow?: boolean;
+	level?: number;
+}
+
+export const Headline = styled.div<IContainer>`
 	cursor: pointer;
 	display: flex;
 	align-items: center;
 	justify-content: flex-start;
 	padding-left: 24px;
 	padding-right: 13px;
-	background: ${(props) => props.active || props.level === TREE_LEVELS.PROJECT && COLOR.WHITE};
-	min-height: ${(props) => (props.level === TREE_LEVELS.TEAMSPACE) ? '65px' : '50px'};
+	${({ active, level }) => (active || level === TREE_LEVELS.PROJECT) && `background: ${COLOR.WHITE}`};
+	min-height: ${({ level }) => (level === TREE_LEVELS.TEAMSPACE) ? '65px' : '50px'};
 `;
 
-export const Details = styled.div`
+export const Details = styled.div<IContainer>`
 	transition: all 200ms ease-in-out;
-	background: ${(props: any) => props.active ? COLOR.WHITE : 'transparent'};
-	box-shadow: 0 12px 30px ${(props: any) => props.disableShadow ? 'none' : 'currentColor'};
+	background: ${({ active }) => active ? COLOR.WHITE : 'transparent'};
+	box-shadow: 0 12px 30px ${({ disableShadow }) => disableShadow ? 'none' : 'currentColor'};
 `;
 
-interface IContainer {
-	active: boolean;
-	disabled: boolean;
-	disableShadow: boolean;
-}
-
-const getShadowColor = (props) => props.active && !props.disableShadow ? 'currentColor' : 'transparent';
+const getShadowColor = ({ active, disableShadow }) => active && !disableShadow ? 'currentColor' : 'transparent';
 
 export const Container = styled.div<IContainer>`
 	overflow: hidden;
 	border-bottom: 1px solid ${COLOR.BLACK_6};
-	background: ${(props) => props.active ? COLOR.GRAY : 'rgba(250, 250, 250)'};
-	box-shadow: inset 0 -15px 30px -27px ${getShadowColor};
+	background: ${({ active }) => active ? COLOR.GRAY : 'rgba(250, 250, 250)'};
+	box-shadow: inset 0 -15px 30px -27px ${({ active, disableShadow }) => getShadowColor({ active, disableShadow })};
 	transition: background 150ms ease-in-out;
-	color: ${(props) => props.disabled ? COLOR.BLACK_30 : COLOR.BLACK_60};
+	color: ${({ disabled }) => disabled ? COLOR.BLACK_30 : COLOR.BLACK_60};
 	user-select: none;
 	position: relative;
 
 	& > ${Headline} {
-		padding-left: ${(props) => (props.level || 0) * 24}px;
+		padding-left: ${({ level }) => (level || 0) * 24}px;
 	}
 
 	& > ${/* sc-selector */ Headline}:hover {
-		background: ${(props) => isActive(props) ? 'transparent' : COLOR.WHITE};
+		background: ${({ active, disabled }) => isActive({ active, disabled }) ? 'transparent' : COLOR.WHITE};
 	}
 
 	width: calc(100% - 1px);

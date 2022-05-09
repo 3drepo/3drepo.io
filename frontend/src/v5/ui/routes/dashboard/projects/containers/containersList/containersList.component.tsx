@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode, useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { useParams } from 'react-router';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
@@ -29,7 +29,6 @@ import {
 } from '@components/dashboard/dashboardList';
 import AddCircleIcon from '@assets/icons/add_circle.svg';
 import ArrowUpCircleIcon from '@assets/icons/arrow_up_circle.svg';
-import { HeaderButtonsGroup } from '@/v5/ui/routes/dashboard/projects/containers/containers.styles';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { SearchInput } from '@controls/searchInput';
 import { Button } from '@controls/button';
@@ -39,7 +38,8 @@ import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashb
 import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containerListItem';
 import { Display } from '@/v5/ui/themes/media';
 import { formatMessage } from '@/v5/services/intl';
-import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
+import { DashboardListButton, DashedButtonContainer } from '@components/dashboard/dashboardList/dashboardList.styles';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Container, CollapseSideElementGroup } from './containersList.styles';
 
 interface IContainersList {
@@ -68,7 +68,7 @@ export const ContainersList = ({
 	hasContainers,
 	showBottomButton = false,
 }: IContainersList): JSX.Element => {
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const { teamspace, project } = useParams<DashboardParams>();
 	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 	const { sortedList, setSortConfig } = useOrderedList(containers, DEFAULT_SORT_CONFIG);
 
@@ -101,40 +101,38 @@ export const ContainersList = ({
 							value={filterQuery}
 							placeholder={formatMessage({ id: 'containers.search.placeholder', defaultMessage: 'Search containers...' })}
 						/>
-						<HeaderButtonsGroup>
-							<Button
-								startIcon={<AddCircleIcon />}
-								variant="outlined"
-								color="secondary"
-								onClick={onClickCreate}
-							>
-								<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New container" />
-							</Button>
-							<Button
-								startIcon={<ArrowUpCircleIcon />}
-								variant="contained"
-								color="primary"
-							>
-								<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
-							</Button>
-						</HeaderButtonsGroup>
+						<Button
+							startIcon={<AddCircleIcon />}
+							variant="outlined"
+							color="secondary"
+							onClick={onClickCreate}
+						>
+							<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New container" />
+						</Button>
+						<Button
+							startIcon={<ArrowUpCircleIcon />}
+							variant="contained"
+							color="primary"
+						>
+							<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
+						</Button>
 					</CollapseSideElementGroup>
 				)}
 			>
 				<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
-					<DashboardListHeaderLabel name="name">
+					<DashboardListHeaderLabel name="name" minWidth={90}>
 						<FormattedMessage id="containers.list.header.container" defaultMessage="Container" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="revisionsCount" width={186} hideWhenSmallerThan={Display.Desktop}>
 						<FormattedMessage id="containers.list.header.revisions" defaultMessage="Revisions" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="code" minWidth={112}>
+					<DashboardListHeaderLabel name="code" width={160}>
 						<FormattedMessage id="containers.list.header.containerCode" defaultMessage="Container code" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="type" width={188} hideWhenSmallerThan={Display.Tablet}>
+					<DashboardListHeaderLabel name="type" width={160} hideWhenSmallerThan={Display.Tablet}>
 						<FormattedMessage id="containers.list.header.category" defaultMessage="Category" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="lastUpdated" width={160}>
+					<DashboardListHeaderLabel name="lastUpdated" width={188}>
 						<FormattedMessage id="containers.list.header.lastUpdated" defaultMessage="Last updated" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>
@@ -160,12 +158,14 @@ export const ContainersList = ({
 					)}
 				</DashboardList>
 				{showBottomButton && !isListPending && hasContainers && (
-					<DashboardListButton
-						startIcon={<AddCircleIcon />}
-						onClick={onClickCreate}
-					>
-						<FormattedMessage id="containers.addContainerButton" defaultMessage="Add new Container" />
-					</DashboardListButton>
+					<DashedButtonContainer>
+						<DashboardListButton
+							startIcon={<AddCircleIcon />}
+							onClick={onClickCreate}
+						>
+							<FormattedMessage id="containers.addContainerButton" defaultMessage="Add new Container" />
+						</DashboardListButton>
+					</DashedButtonContainer>
 				)}
 
 			</DashboardListCollapse>

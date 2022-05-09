@@ -14,10 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import * as React from 'react';
-
-import { SvgIconProps } from '@material-ui/core/SvgIcon';
+import { FunctionComponent, ComponentType } from 'react';
+import { SvgIconProps } from '@mui/material/SvgIcon';
 
 import { LEVELS_OF_RISK } from '../../../../../../constants/risks';
 import { getRiskStatus } from '../../../../../../helpers/risks';
@@ -27,10 +25,10 @@ interface IProps {
 	header: string;
 	level: number;
 	status?: string;
-	Icon?: React.ComponentType<SvgIconProps>;
+	Icon?: ComponentType<SvgIconProps>;
 }
 
-export const LevelOfRisk: React.FunctionComponent<IProps> = ({ header, status, level, ...props
+export const LevelOfRisk: FunctionComponent<IProps> = ({ header, status, level, ...props
 }) => {
 	const currentRisk = LEVELS_OF_RISK.find(({ value }) => (value === level) );
 	const name = currentRisk ? currentRisk.name : '';

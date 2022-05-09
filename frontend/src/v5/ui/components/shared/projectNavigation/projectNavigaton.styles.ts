@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { Link as LinkComponent } from '@material-ui/core';
+import { Link as LinkComponent } from '@mui/material';
 import { NavLink } from 'react-router-dom';
 
 export const Container = styled.nav`
@@ -24,10 +24,10 @@ export const Container = styled.nav`
 	margin-right: 20px;
 `;
 
-export const Link = styled(LinkComponent).attrs({
+export const Link: typeof NavLink = styled(LinkComponent).attrs({
 	component: NavLink,
 	activeClassName: 'active',
-})`
+})<{ disabled?: boolean }>`
 	&& {
 		text-decoration: none;
 		display: flex;
@@ -35,11 +35,12 @@ export const Link = styled(LinkComponent).attrs({
 		position: relative;
 		margin-left: 13px;
 		margin-right: 13px;
-		padding-top: 4px;
-		height: 56px;
+		height: 50px;
 		color: ${({ theme }) => theme.palette.base.main};
 		font-family: ${({ theme }) => theme.typography.fontFamily};
-		${({ theme }) => theme.typography.kickerTitle};
+		font-weight: 500;
+		font-size: 13px;
+		text-transform: none;
 
 		&:first-child {
 			margin-left: 0;
@@ -64,14 +65,16 @@ export const Link = styled(LinkComponent).attrs({
 	`};
 
 	&.active {
+		color: ${({ theme }) => theme.palette.primary.main};
+
 		&::after {
 			content: '';
-			background-color: ${({ theme }) => theme.palette.primary.main};
+			background-color: currentColor;
 			display: block;
-			height: 4px;
+			height: 3px;
 			width: 100%;
 			position: absolute;
-			bottom: 4px;
+			bottom: 0;
 			left: 0;
 		}
 	}

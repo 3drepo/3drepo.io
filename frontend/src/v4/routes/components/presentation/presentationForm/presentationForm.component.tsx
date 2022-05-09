@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
+import { FunctionComponent, useMemo } from 'react';
 import { PresentationMode } from '../../../../modules/presentation/presentation.constants';
 import { Initial } from './components/initial/';
 import { Participant } from './components/participant/';
@@ -32,9 +30,9 @@ interface IProps {
 	mode: PresentationMode;
 }
 
-export const PresentationForm: React.FunctionComponent<IProps> = ({ mode, ...props }) => {
+export const PresentationForm: FunctionComponent<IProps> = ({ mode, ...props }) => {
 
-	const Component = React.useMemo(() => COMPONENTS_MAP[mode] ? COMPONENTS_MAP[mode] : Initial, [mode]);
+	const Component = useMemo(() => COMPONENTS_MAP[mode] ? COMPONENTS_MAP[mode] : Initial, [mode]);
 
 	return <Component {...props} />;
 };

@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import { PureComponent } from 'react';
 
-import { IconButton, MenuItem } from '@material-ui/core';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import BuildIcon from '@material-ui/icons/Build';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
+import { IconButton, MenuItem } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import BuildIcon from '@mui/icons-material/Build';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { includes, isEmpty } from 'lodash';
 
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
@@ -59,6 +59,7 @@ interface IProps {
 	resetVisibleLayers: () => void;
 	visibleLayers: any[];
 	id?: string;
+	urlParams: any;
 }
 
 interface IState {
@@ -66,7 +67,7 @@ interface IState {
 	activeMapIndex: number;
 }
 
-export class Gis extends React.PureComponent<IProps, IState> {
+export class Gis extends PureComponent<IProps, IState> {
 
 	get type() {
 		return VIEWER_PANELS.GIS;
@@ -100,15 +101,10 @@ export class Gis extends React.PureComponent<IProps, IState> {
 	});
 
 	public componentDidMount() {
-		const { teamspace, modelId } = this.getDataFromPathname();
+		const { teamspace, model } = this.props.urlParams;
 		if (this.props.settings._id) {
-			this.props.fetchModelMaps(teamspace, modelId);
+			this.props.fetchModelMaps(teamspace, model);
 		}
-	}
-
-	public getDataFromPathname = () => {
-		const [teamspace, modelId, revision] = this.props.location.pathname.replace('/viewer/', '').split('/');
-		return { teamspace, modelId, revision };
 	}
 
 	public toggleSettings = () => {
@@ -120,19 +116,21 @@ export class Gis extends React.PureComponent<IProps, IState> {
 	public getTitleIcon = () => {
 		if (this.state.settingsModeActive) {
 			return (
-				<IconButton
-					disabled={!this.props.hasGISCoordinates}
-					onClick={this.toggleSettings}>
+                <IconButton
+                    disabled={!this.props.hasGISCoordinates}
+                    onClick={this.toggleSettings}
+                    size="large"
+				>
 						<ArrowBackIcon />
 				</IconButton>
-			);
+            );
 		}
 		return <GisIcon />;
 	}
 
 	public renderActionsMenu = () => (
 		<MenuList>
-			<StyledListItem onClick={this.toggleSettings} button>
+			<StyledListItem onClick={this.toggleSettings}>
 				<IconWrapper><BuildIcon fontSize="small" /></IconWrapper>
 				<StyledItemText>
 					Settings
@@ -239,7 +237,7 @@ export class Gis extends React.PureComponent<IProps, IState> {
 							values={this.getSettingsValues()}
 							properties={this.getSettingsProperties()}
 							updateModelSettings={this.props.updateModelSettings}
-							getDataFromPathname={this.getDataFromPathname}
+							urlParams={this.props.urlParams}
 						/>
 					)
 				}

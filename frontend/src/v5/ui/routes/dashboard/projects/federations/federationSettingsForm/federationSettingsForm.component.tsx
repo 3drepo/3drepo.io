@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { MenuItem } from '@material-ui/core';
+import { MenuItem } from '@mui/material';
 import { FormModal } from '@/v5/ui/controls/modal/formModal/formDialog.component';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router';
@@ -28,7 +28,8 @@ import { FormTextField } from '@controls/formTextField/formTextField.component';
 import { FormSelectView } from '@controls/formSelectView/formSelectView.component';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
 import { FederationSettingsSchema } from '@/v5/validation/schemes';
-import { FormTextFieldUnit } from '@controls/formTextFieldUnit/formTextFieldUnit.component';
+import { FormattedMessage } from 'react-intl';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { FlexContainer, SectionTitle, ShareTextField } from './federationSettingsForm.styles';
 
 const UNITS = [
@@ -121,13 +122,21 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 
 	const currentUnit = watch('unit');
 
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const { teamspace, project } = useParams<DashboardParams>();
 
-	useEffect(() => {
+	const resetValues = () => {
 		defaultValues = getDefaultValues(federation) as any;
 		reset(defaultValues);
-		FederationsActionsDispatchers.fetchFederationSettings(teamspace, project, federation._id);
-		FederationsActionsDispatchers.fetchFederationViews(teamspace, project, federation._id);
+	};
+
+	useEffect(resetValues, [federation]);
+
+	useEffect(() => {
+		if (open) {
+			FederationsActionsDispatchers.fetchFederationSettings(teamspace, project, federation._id);
+			FederationsActionsDispatchers.fetchFederationViews(teamspace, project, federation._id);
+			resetValues();
+		}
 	}, [open]);
 
 	const onSubmit: SubmitHandler<IFormInput> = ({
@@ -160,7 +169,12 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 			confirmLabel={formatMessage({ id: 'federations.settings.ok', defaultMessage: 'Save Changes' })}
 			isValid={formState.isValid}
 		>
-			<SectionTitle>Federation information</SectionTitle>
+			<SectionTitle>
+				<FormattedMessage
+					id="federations.settings.form.informationTitle"
+					defaultMessage="Federation information"
+				/>
+			</SectionTitle>
 			<ShareTextField
 				label="ID"
 				value={federation._id}
@@ -209,60 +223,62 @@ export const FederationSettingsForm = ({ open, federation, onClose }: IFederatio
 				name="defaultView"
 				label={formatMessage({ id: 'federations.settings.form.defaultView', defaultMessage: 'Default View' })}
 			/>
-			<SectionTitle>GIS servey point</SectionTitle>
+			<SectionTitle>
+				<FormattedMessage
+					id="federations.settings.form.gisTitle"
+					defaultMessage="GIS survey point"
+				/>
+			</SectionTitle>
 			<FlexContainer>
-				<FormTextFieldUnit
+				<FormTextField
 					name="latitude"
 					control={control}
-					labelName={formatMessage({ id: 'federations.settings.form.lat', defaultMessage: 'LATITUDE' })}
-					labelUnit={DECIMAL_UNIT.name}
-					type="number"
+					label={formatMessage({
+						id: 'federations.settings.form.lat',
+						defaultMessage: 'Latitude ({unit})',
+					}, { unit: DECIMAL_UNIT.name })}
 					formError={errors.latitude}
 					required
 				/>
-				<FormTextFieldUnit
+				<FormTextField
 					name="longitude"
 					control={control}
-					labelName={formatMessage({ id: 'federations.settings.form.long', defaultMessage: 'LONGITUDE' })}
-					labelUnit={DECIMAL_UNIT.name}
-					type="number"
+					label={formatMessage({
+						id: 'federations.settings.form.long',
+						defaultMessage: 'Longitude ({unit})',
+					}, { unit: DECIMAL_UNIT.name })}
 					formError={errors.longitude}
 					required
 				/>
 			</FlexContainer>
-			<FormTextFieldUnit
+			<FormTextField
 				name="angleFromNorth"
 				control={control}
-				labelName={formatMessage({ id: 'federations.settings.form.angleFromNorth', defaultMessage: 'ANGLE FROM NORTH' })}
-				labelUnit={formatMessage({ id: 'federations.settings.form.angleFromNorth.unit', defaultMessage: 'clockwise degrees' })}
+				label={formatMessage({
+					id: 'federations.settings.form.angleFromNorth',
+					defaultMessage: 'Angle from North ({unit})',
+				}, { unit: 'clockwise degrees' })}
 				formError={errors.angleFromNorth}
-				type="number"
 			/>
 			<FlexContainer>
-				<FormTextFieldUnit
+				<FormTextField
 					name="x"
 					control={control}
-					labelName="X"
-					labelUnit={currentUnit}
-					type="number"
+					label={`x (${currentUnit})`}
 					formError={errors.x}
 					required
 				/>
-				<FormTextFieldUnit
+				<FormTextField
 					name="y"
 					control={control}
-					labelName="Y"
-					labelUnit={currentUnit}
-					type="number"
+					label={`y (${currentUnit})`}
 					formError={errors.y}
 					required
 				/>
-				<FormTextFieldUnit
+				<FormTextField
 					name="z"
 					control={control}
-					labelName="Z"
-					labelUnit={currentUnit}
-					type="number"
+					label={`z (${currentUnit})`}
 					formError={errors.z}
 					required
 				/>

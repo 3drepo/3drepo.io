@@ -14,10 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
-import InputLabel from '@material-ui/core/InputLabel';
+import { FunctionComponent } from 'react';
+import InputLabel from '@mui/material/InputLabel';
 import { Field } from 'formik';
 
 import { ISSUE_PRIORITIES, ISSUE_STATUSES } from '../../../../../../constants/issues';
@@ -35,6 +33,7 @@ import {
 import { UpdateButtons } from '../../../updateButtons/updateButtons.component';
 import { Content, DescriptionImage } from '../issueDetails/issueDetails.styles';
 import { IssueSchema } from '../issueDetails/issueDetailsForm.component';
+import { DateFieldContainer } from './mainIssueFormTab.styles';
 
 interface IProps {
 	active: boolean;
@@ -58,7 +57,7 @@ interface IProps {
 	showScreenshotDialog: (config: any) => void;
 }
 
-export const MainIssueFormTab: React.FunctionComponent<IProps> = ({
+export const MainIssueFormTab: FunctionComponent<IProps> = ({
 	active, issue, permissions, topicTypes, currentUser, myJob, isNew, canChangeAssigned,
 	canEditBasicProperty, canEditViewpoint, jobs, disableViewer, ...props
 }) => {
@@ -88,7 +87,7 @@ export const MainIssueFormTab: React.FunctionComponent<IProps> = ({
 				/>
 			)}
 
-			<FieldsRow container alignItems="center" justify="space-between">
+			<FieldsRow container alignItems="center" justifyContent="space-between">
 				<UpdateButtons
 					isNew={isNew}
 					disableViewer={disableViewer}
@@ -104,7 +103,7 @@ export const MainIssueFormTab: React.FunctionComponent<IProps> = ({
 				/>
 			</FieldsRow>
 
-			<FieldsRow container alignItems="center" justify="space-between">
+			<FieldsRow container alignItems="center" justifyContent="space-between">
 				<StyledFormControl>
 					<InputLabel shrink htmlFor="priority">Priority</InputLabel>
 					<Field name="priority" render={({ field }) => (
@@ -128,7 +127,7 @@ export const MainIssueFormTab: React.FunctionComponent<IProps> = ({
 					)} />
 				</StyledFormControl>
 			</FieldsRow>
-			<FieldsRow container alignItems="center" justify="space-between">
+			<FieldsRow container alignItems="center" justifyContent="space-between">
 				<StyledFormControl>
 					<InputLabel shrink htmlFor="assigned_roles">Assign</InputLabel>
 					<Field name="assigned_roles" render={({ field }) => (
@@ -152,16 +151,19 @@ export const MainIssueFormTab: React.FunctionComponent<IProps> = ({
 					)} />
 				</StyledFormControl>
 			</FieldsRow>
-			<FieldsRow container justify="space-between" flex={0.5}>
+			<FieldsRow container justifyContent="space-between" flex={0.5}>
 				<StyledFormControl>
 					<InputLabel shrink>Due date</InputLabel>
-					<Field name="due_date" render={({ field }) =>
-						<DateField
-							{...field}
-							format={NAMED_MONTH_DATE_FORMAT}
-							disabled={!canEditBasicProperty}
-							placeholder="Choose a due date" />}
-					/>
+					<Field name="due_date" render={({ field }) => (
+						<DateFieldContainer>
+							<DateField
+								{...field}
+								inputFormat={NAMED_MONTH_DATE_FORMAT}
+								disabled={!canEditBasicProperty}
+								placeholder="Choose a due date"
+							/>
+						</DateFieldContainer>
+					)} />
 				</StyledFormControl>
 			</FieldsRow>
 		</Content>

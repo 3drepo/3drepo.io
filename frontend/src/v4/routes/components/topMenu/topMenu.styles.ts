@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ViewListIcon from '@material-ui/icons/ViewList';
+import ViewListIcon from '@mui/icons-material/ViewList';
 import styled from 'styled-components';
 import { COLOR } from '../../../styles';
 import * as LogoStyles from '../logo/logo.styles';

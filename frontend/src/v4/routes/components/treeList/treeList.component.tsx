@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Grid from '@material-ui/core/Grid';
-import React from 'react';
+import Grid from '@mui/material/Grid';
+import { PureComponent } from 'react';
 
 import { Highlight } from '../highlight/highlight.component';
 import { ChildrenContainer, Container, Headline, IconContainer, Title } from './treeList.styles';
@@ -49,7 +49,7 @@ export const DefaultHeadline = ({children = Function.prototype, ...props}) => (
 		container
 		direction="row"
 		alignItems="center"
-		justify="flex-start"
+		justifyContent="flex-start"
 		wrap="nowrap"
 	>
 		<HeadlineIcon fontSize="small" active={props.active && !props.disabled} {...props.IconProps} />
@@ -86,7 +86,7 @@ interface IState {
 	active: boolean;
 }
 
-export class TreeList extends React.PureComponent<IProps, IState> {
+export class TreeList extends PureComponent<IProps, IState> {
 	public static defaultProps = {
 		level: TREE_LEVELS.TEAMSPACE,
 		active: false,

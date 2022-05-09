@@ -464,6 +464,7 @@
 		"termsAndConditions",
 		"false",
 		"admin",
+		"local",
 		"root",
 		"notifications",
 		"loginRecords"
@@ -629,7 +630,10 @@
 		"signup": () => "/sign-up"
 	});
 
+	define("DEFAULT_OWNER_JOB",  "Admin");
+
 	define("DEFAULT_JOBS",[
+		{ _id: "Admin", "color": "#f7f7b2" },
 		{ _id: "Client", "color": "#a6cee3" },
 		{ _id: "Architect", "color": "#213f99"},
 		{ _id: "Structural Engineer", "color" : "#33a02c"},

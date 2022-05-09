@@ -20,7 +20,7 @@ import { push } from 'connected-react-router';
 
 import { dispatch } from '@/v4/modules/store';
 import { clientConfigService } from '@/v4/services/clientConfig';
-import { AuthActions } from '@/v4/modules/auth';
+import { AuthActionsDispatchers } from '../actionsDispatchers/authActions.dispatchers';
 
 axios.defaults.withCredentials = true;
 
@@ -33,13 +33,13 @@ axios.interceptors.response.use(
 			switch (error.response.status) {
 				case 401:
 					if (error.response.data) {
-						const notLogin = error.response.data.place !== 'GET /login';
+						const notLogin = error.response.data.place !== 'GET /v5/login';
 						const unauthorized = invalidMessages.includes(error.response.data.message);
 
 						const sessionHasExpired = unauthorized && notLogin;
 
 						if (sessionHasExpired) {
-							dispatch(AuthActions.sessionExpired());
+							AuthActionsDispatchers.sessionExpired();
 						} else {
 							throw error.response;
 						}
@@ -87,6 +87,10 @@ const deleteRequest = (url, data?) => {
 const patchRequest = (url, ...options) => {
 	const requestUrl = generateV5ApiUrl(url, clientConfigService.POST_API);
 	return axios.patch(requestUrl, ...options);
+};
+
+export const setSocketIdHeader = (socketId) => {
+	axios.defaults.headers['x-socket-id'] = socketId;
 };
 
 export default {

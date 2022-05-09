@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { MenuItem, Paper } from '@material-ui/core';
-import React from 'react';
+import { PureComponent } from 'react';
+import { MenuItem, Paper } from '@mui/material';
 import Autosuggest from 'react-autosuggest';
 import { Highlight } from '../highlight/highlight.component';
 
@@ -39,7 +39,7 @@ interface IState {
 
 const getSuggestionValue = (suggestion) => suggestion;
 
-export class AutosuggestField extends React.PureComponent<IProps, IState> {
+export class AutosuggestField extends PureComponent<IProps, IState> {
 	public state = {
 		suggestions: [],
 		value: ''

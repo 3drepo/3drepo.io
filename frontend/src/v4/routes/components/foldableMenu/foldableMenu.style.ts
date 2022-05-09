@@ -17,9 +17,8 @@
 
 import styled from 'styled-components';
 
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import { DatePicker } from '@material-ui/pickers';
+import List from '@mui/material/List';
+import ListItemButton from '@mui/material/ListItemButton';
 
 import { COLOR } from '../../../styles';
 import { FileUploadInvoker } from '../../viewerGui/components/commentForm/commentForm.styles';
@@ -36,7 +35,7 @@ export const MenuList = styled(List)`
 	}
 `;
 
-export const NestedWrapper = styled.div`
+export const NestedWrapper = styled.li`
 	position: relative;
 `;
 
@@ -55,7 +54,7 @@ export const IconWrapper = styled.div`
 	margin-right: 10px;
 `;
 
-export const StyledListItem = styled(ListItem)`
+export const StyledListItem = styled(ListItemButton)`
 	&& {
 		padding: 4px 10px;
 		height: 30px;
@@ -67,39 +66,9 @@ export const StyledListItem = styled(ListItem)`
 	}
 `;
 
-export const StyledDatePicker = styled(DatePicker)`
-	&& {
-		margin-left: 10px;
-	}
+const getDirection = ({ left = false }) => left ? 'right: 100%' : 'left: 100%';
 
-	input {
-		font-size: 12px;
-	}
-`;
-
-export const CopyItem = styled.div`
-	display: flex;
-	align-items: center;
-	padding: 4px 0;
-`;
-
-export const CopyText = styled.span`
-	margin-left: 4px;
-`;
-
-export const MenuFooter = styled.div`
-	border-top: 1px solid ${COLOR.BLACK_20};
-	padding-top: 8px;
-	padding-bottom: 8px;
-`;
-
-export const DataTypesWrapper = styled.div`
-	border-bottom: 1px solid ${COLOR.BLACK_20};
-`;
-
-const getDirection = ({ left }) => left ? 'right: 100%' : 'left: 100%';
-
-export const Wrapper = styled.div`
+export const Wrapper = styled.div<{ top: number, left?: boolean }>`
 	background-color: ${COLOR.WHITE};
 	position: absolute;
 	top: 0;
@@ -110,6 +79,6 @@ export const Wrapper = styled.div`
 	box-shadow: 1px 1px 3px 0 ${COLOR.BLACK_20};
 	border-radius: 0 2px 2px 0;
 	${getDirection};
-	max-height: ${(props: any) => `calc(100vh - ${props.top}px - 25px)`};
+	max-height: ${({ top }) => `calc(100vh - ${top}px - 25px)`};
 	overflow: auto;
 `;

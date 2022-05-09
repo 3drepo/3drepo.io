@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-
 import { History } from 'history';
 import { memoize } from 'lodash';
 
@@ -94,8 +92,8 @@ export const TeamspaceItem = ({ name, projects, onToggle, active, isMyTeamspace,
 	};
 
 	const renderAvatar = () => renderWhenTrueOtherwise(
-		() => <Avatar src={avatarUrl} size="50" />,
-		() => <Avatar size="50">{teamspaceInitials}</Avatar>
+		() => <Avatar src={avatarUrl} size={50} />,
+		() => <Avatar size={50}>{teamspaceInitials}</Avatar>
 	)(hasAvatar);
 
 	return (

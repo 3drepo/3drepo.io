@@ -14,11 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import IconButton from '@material-ui/core/IconButton';
-import TableBody from '@material-ui/core/TableBody';
-import Typography from '@material-ui/core/Typography';
-import React from 'react';
+import { ComponentType } from 'react';
+import IconButton from '@mui/material/IconButton';
+import TableBody from '@mui/material/TableBody';
+import Typography from '@mui/material/Typography';
 
 import {
 	HeaderCell,
@@ -35,7 +34,7 @@ interface IProps {
 	title: string;
 	models: any[];
 	selectedModels: any[];
-	Icon: React.ComponentType;
+	Icon: ComponentType;
 	handleAllClick: (event) => void;
 	handleIconClick: () => void;
 	handleItemClick: (event, modelName) => void;
@@ -60,7 +59,7 @@ export const SubModelsTable = (props: IProps) => {
 	};
 
 	return (
-		<StyledTable>
+        <StyledTable>
 			<StyledTableHead>
 				<TableRow>
 					<HeaderCell padding="none">
@@ -73,7 +72,11 @@ export const SubModelsTable = (props: IProps) => {
 							/>
 							<Typography>{title}</Typography>
 						</HeaderCheckboxWrapper>
-						<IconButton onClick={handleIconClick} disabled={checkboxDisabled || !selectedModels.length}>
+						<IconButton
+                            onClick={handleIconClick}
+                            disabled={checkboxDisabled || !selectedModels.length}
+                            size="large"
+						>
 							<Icon />
 						</IconButton>
 					</HeaderCell>
@@ -97,5 +100,5 @@ export const SubModelsTable = (props: IProps) => {
 					}) }
 			</TableBody>
 		</StyledTable>
-	);
+    );
 };

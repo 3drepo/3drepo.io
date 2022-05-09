@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 
-import { IconButton, InputLabel, TextField } from '@material-ui/core';
+import { IconButton, InputLabel, TextField } from '@mui/material';
 
 import { ContainedButton } from '../../viewerGui/components/containedButton/containedButton.component';
 import { LinkableField } from '../linkableField/linkableField.component';
@@ -84,7 +84,7 @@ export const StyledLinkableField = styled(LinkableField)`
 	}
 `;
 
-export const FieldWrapper = styled.div`
+export const FieldWrapper = styled.div<{ line: number }>`
 	position: relative;
 	width: 100%;
 
@@ -94,7 +94,7 @@ export const FieldWrapper = styled.div`
 		bottom: 0;
 		content: '';
 		position: absolute;
-		border-bottom: ${(props: any) => props.line ? `1px solid rgba(0, 0, 0, 0.12);` : `none`};
+		border-bottom: ${({ line }) => line ? `1px solid rgba(0, 0, 0, 0.12);` : `none`};
 		pointer-events: none;
 	}
 `;

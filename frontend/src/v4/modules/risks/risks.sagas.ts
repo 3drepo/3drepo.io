@@ -21,6 +21,7 @@ import { isEmpty, isEqual, map, omit } from 'lodash';
 import * as queryString from 'query-string';
 import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 
+import { generatePath } from 'react-router';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { RISK_DEFAULT_HIDDEN_LEVELS } from '../../constants/risks';
 import { ROUTES } from '../../constants/routes';
@@ -272,11 +273,13 @@ function* setActiveRisk({ risk, revision, ignoreViewer = false }) {
 }
 
 function* goToRisk({ risk }) {
-	const {teamspace, model, revision} = yield select(selectUrlParams);
+	const params = yield select(selectUrlParams);
 	let queryParams =  yield select(selectQueryParams);
 
 	const riskId = (risk || {})._id;
-	const path = [ROUTES.VIEWER, teamspace, model, revision].filter(Boolean).join('/');
+
+	const route = params.v5 ? ROUTES.V5_MODEL_VIEWER : ROUTES.MODEL_VIEWER;
+	const path = generatePath(route, params);
 
 	queryParams = riskId ?  {... queryParams, riskId} : omit(queryParams, 'riskId');
 	let query = queryString.stringify(queryParams);

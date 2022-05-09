@@ -14,11 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
-
-import { snakeCase } from 'lodash';
-
+import { FunctionComponent } from 'react';
+import { TextField } from '@mui/material';
 import { StyledChipInput } from './chipsInput.styles';
 
 interface IProps {
@@ -28,46 +25,33 @@ interface IProps {
 	placeholder?: string;
 }
 
-export const ChipsInput: React.FunctionComponent<IProps> = ({ name, onChange, ...props }) => {
+export const ChipsInput: FunctionComponent<IProps> = ({ name, onChange, placeholder, ...props }) => {
 	const getValues = () => [...props.value];
 
-	const handleAddChip = (value) => {
-		const chipExists = !!props.value.find((chipValue) => (value === chipValue));
-
-		if (!chipExists && onChange) {
-			onChange({
-				target: {
-					value: [...props.value, value],
-					name,
-				}
-			});
-		}
-	};
-
-	const handleDeleteChip = (chipToRemove) => {
-		const newValue = props.value.filter((chip) => chip !== chipToRemove);
-
-		if (onChange) {
-			onChange({
-				target: {
-					value: [...newValue],
-					name,
-				}
-			});
-		}
+	const handleChipChange = (_, value) => {
+		onChange?.call(null, {
+			target: {
+				value,
+				name,
+			}
+		});
 	};
 
 	return (
 		<StyledChipInput
 			{...props}
-			value={getValues()}
-			InputProps={{
-				name,
-			}}
-			onAdd={handleAddChip}
-			onDelete={handleDeleteChip}
-			alwaysShowPlaceholder
-			fullWidth
+			multiple
+			freeSolo
+			options={[]}
+			onChange={handleChipChange}
+			defaultValue={getValues()}
+			disableClearable
+			renderInput={(params) => (
+				<TextField
+					{...params}
+					placeholder={placeholder}
+				/>
+			)}
 		/>
 	);
 };

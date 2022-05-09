@@ -14,8 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
+import { useState } from 'react';
 import { useParams } from 'react-router';
 
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
@@ -23,6 +22,7 @@ import { Popover } from '@/v4/routes/components/messagesList/components/message/
 import { UserPopover } from '@components/shared/userPopover/userPopover.component';
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks/usersSelectors.hooks';
 import { IUser } from '@/v5/store/users/users.redux';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Text } from './revisionsListItemAuthor.styles';
 
 type IRevisionsListItemAuthor = {
@@ -42,8 +42,8 @@ export const RevisionsListItemAuthor = ({
 	authorName,
 	active = false,
 }: IRevisionsListItemAuthor): JSX.Element => {
-	const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
-	const { teamspace } = useParams();
+	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+	const { teamspace } = useParams<DashboardParams>();
 	const author: IUser | null = UsersHooksSelectors.selectUser(teamspace, authorName);
 
 	const handlePopoverOpen = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {

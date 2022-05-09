@@ -15,7 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
-import { Tooltip as TooltipComponent, withStyles } from '@material-ui/core';
+import { Tooltip as TooltipComponent } from '@mui/material';
+
+import withStyles from '@mui/styles/withStyles';
 
 export const Container = styled.div`
 	display: inline-block;

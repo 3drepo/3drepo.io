@@ -25,8 +25,8 @@ import {
 	AccordionSummary,
 	IconButton,
 	Typography as TypographyComponent
-} from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+} from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {GROUP_PANEL_NAME, GROUPS_TYPES} from '../../../../constants/groups';
 
 import { COLOR } from '../../../../styles';

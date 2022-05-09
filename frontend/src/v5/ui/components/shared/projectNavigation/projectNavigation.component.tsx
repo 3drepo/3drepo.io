@@ -14,8 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { discardSlash, discardUrlComponent } from '@/v5/services/routing/routing';
 import { FormattedMessage } from 'react-intl';
@@ -29,8 +27,10 @@ export const ProjectNavigation = (): JSX.Element => {
 		<Container>
 			<Link to={`${url}/t/federations`}><FormattedMessage id="projectNavigation.federations" defaultMessage="Federations" /></Link>
 			<Link to={`${url}/t/containers`}><FormattedMessage id="projectNavigation.containers" defaultMessage="Containers" /></Link>
-			<Link to={`${discardUrlComponent(url, 'settings')}/t/settings`}><FormattedMessage id="projectNavigation.settings" defaultMessage="Settings" /></Link>
-			<Link to={`${url}/t/users_permissions`}><FormattedMessage id="projectNavigation.usersPermissions" defaultMessage="Users permissions" /></Link>
+			<Link to={`${url}/t/tasks`}><FormattedMessage id="projectNavigation.tasks" defaultMessage="Tasks" /></Link>
+			<Link to={`${discardUrlComponent(url, 'settings')}/t/project_settings`}><FormattedMessage id="projectNavigation.settings" defaultMessage="Project settings" /></Link>
+			<Link to={`${url}/t/project_permissions`}><FormattedMessage id="projectNavigation.projectPermissions" defaultMessage="Project permissions" /></Link>
+			<Link to={`${url}/t/user_permissions`}><FormattedMessage id="projectNavigation.userPermission" defaultMessage="User permissions" /></Link>
 		</Container>
 	);
 };

@@ -14,9 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Button } from '@material-ui/core';
+import { Button } from '@mui/material';
 import { Field } from 'formik';
-import * as React from 'react';
 import {
 	NeutralActionButton,
 	VisualSettingsButtonsContainer
