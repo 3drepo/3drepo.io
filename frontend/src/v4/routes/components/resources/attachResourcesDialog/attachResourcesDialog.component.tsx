@@ -26,7 +26,7 @@ import { Loader as LoaderIndicator } from '../../loader/loader.component';
 import { LoaderContainer } from '../../messagesList/messagesList.styles';
 import { DialogTab, DialogTabs } from '../../topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
 import { AttachResourceFiles } from './attachResourceFiles.component';
-import { Container } from './attachResourcesDialog.styles';
+import { Container, Content } from './attachResourcesDialog.styles';
 import { DialogButtons } from './attachResourcesDialogButtons';
 import { AttachResourceUrls } from './attachResourceUrls.component';
 
@@ -144,8 +144,10 @@ export class AttachResourcesDialog extends PureComponent<IProps, IState> {
 					onSubmit={this.onSubmit}
 					render={({ values }) => (
 						<Form>
-							{selectedTab === 0 && this.renderAttachResourceFiles(values)(this.props.quotaLeft)}
-							{selectedTab === 1 && <AttachResourceUrls links={values.links} />}
+							<Content>
+								{selectedTab === 0 && this.renderAttachResourceFiles(values)(this.props.quotaLeft)}
+								{selectedTab === 1 && <AttachResourceUrls links={values.links} />}
+							</Content>
 							<DialogButtons
 								onClickCancel={this.onCancel}
 								validateQuota={this.validateQuota}

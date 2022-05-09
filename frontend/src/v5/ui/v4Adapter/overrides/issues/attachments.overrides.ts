@@ -195,8 +195,8 @@ export default css`
 
 					svg {
 						color: currentColor;
-						font-size: 16px;
-						margin-top: 6px;
+						font-size: 18px;
+						margin-top: 5px;
 					}
 				}
 
