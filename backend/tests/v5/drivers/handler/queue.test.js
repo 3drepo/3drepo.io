@@ -22,9 +22,9 @@ const Queue = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
-const sendQueueMessage = async (queueName, cor) => {
+const sendQueueMessage = async (queueName) => {
 	const message = generateRandomString();
-	const corId = cor || generateRandomString();
+	const corId = generateRandomString();
 	await Queue.queueMessage(queueName, corId, message);
 	return { message, corId };
 };
@@ -68,11 +68,11 @@ const testQueueMessages = () => {
 		test('Handler should treat errors on callbacks gracefully', async () => {
 			const fn = jest.fn().mockImplementation(() => { throw new Error(); });
 			const queueName = generateRandomString();
-			const msgBefore = await sendQueueMessage(queueName, '1');
+			const msgBefore = await sendQueueMessage(queueName);
 
 			await expect(Queue.listenToQueue(queueName, fn)).resolves.toBeUndefined();
 
-			const msgAfter = await sendQueueMessage(queueName, '2');
+			const msgAfter = await sendQueueMessage(queueName);
 
 			// ensure msg is consumed
 			await sleepMS(10);
