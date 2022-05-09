@@ -65,9 +65,7 @@ export const theme = createTheme(
 						formControl: {
 							'&&& .MuiInputBase-input::placeholder': {
 								opacity: '1 !important',
-								'&:not(.Mui-error)': {
-									color: '#C1C8D5', // TODO: fix after new palette is released
-								},
+								color: '#C1C8D5', // TODO: fix after new palette is released
 							},
 						},
 					},
