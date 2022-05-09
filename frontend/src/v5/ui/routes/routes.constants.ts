@@ -21,9 +21,12 @@ export const NOT_FOUND_ROUTE_PATH = '/v5/404';
 export const VIEWER_ROUTE = '/v5/viewer/:teamspace/:project/:containerOrFederation/:revision?';
 export const DASHBOARD_ROUTE = '/v5/dashboard';
 export const PROJECTS_LIST_ROUTE = `${DASHBOARD_ROUTE}/:teamspace`;
-export const PROJECT_ROUTE = `${PROJECTS_LIST_ROUTE}/:project/t/:tab`;
-export const CONTAINERS_ROUTE = `${PROJECTS_LIST_ROUTE}/:project/t/containers`;
-export const FEDERATIONS_ROUTE = `${PROJECTS_LIST_ROUTE}/:project/t/federations`;
+
+const PROJECT_ROUTE_BASE = `${PROJECTS_LIST_ROUTE}/:project/t`;
+
+export const PROJECT_ROUTE = `${PROJECT_ROUTE_BASE}/:tab`;
+export const CONTAINERS_ROUTE = `${PROJECT_ROUTE_BASE}/containers`;
+export const FEDERATIONS_ROUTE = `${PROJECT_ROUTE_BASE}/federations`;
 
 // eslint-disable-next-line no-restricted-globals
 export const matchesPath = (path) => Boolean(matchPath(location.pathname, { path, exact: true }));
