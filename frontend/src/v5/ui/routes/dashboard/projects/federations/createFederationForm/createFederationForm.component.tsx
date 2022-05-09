@@ -28,6 +28,7 @@ import { FormattedMessage } from 'react-intl';
 import { SectionTitle } from '../federationSettingsForm/federationSettingsForm.styles';
 import { HalfWidth } from './createFederationForm.styles';
 import { EditFederationModal } from '../editFederationModal/editFederationModal.component';
+import { IContainer } from '@/v5/store/containers/containers.types';
 
 const UNITS = [
 	{
@@ -58,9 +59,10 @@ interface ICreateFederation {
 
 interface IFormInput {
 	name: string;
-	description: string;
+	desc: string;
 	code: string;
 	unit: string;
+	containers: IContainer[];
 }
 
 const defaultValues = {
@@ -85,6 +87,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) 
 		handleSubmit,
 		control,
 		getValues,
+		setValue,
 		formState: { errors, isValid },
 	} = useForm<IFormInput>({
 		defaultValues,
@@ -179,6 +182,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) 
 				<EditFederationModal
 					federation={getValues()}
 					isNewFederation
+					onChange={(containers) => setValue('containers', containers)}
 				/>
 			)}
 		</FormModal>

@@ -38,6 +38,7 @@ type EditFederationModalProps = IFormModal & {
 	federation: IFederation;
 	isNewFederation?: boolean;
 	onClickClose: () => void;
+	onChange?: (containers) => void;
 };
 
 export const EditFederationModal = ({
@@ -45,6 +46,7 @@ export const EditFederationModal = ({
 	federation,
 	isNewFederation,
 	onClickClose,
+	onChange,
 	...otherProps
 }: EditFederationModalProps): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
@@ -60,6 +62,10 @@ export const EditFederationModal = ({
 			containers.filter((container) => !federation.containers.includes(container._id)),
 		);
 	}, [containers]);
+
+	useEffect(() => {
+		if (isNewFederation) onChange(includedContainers);
+	}, [includedContainers]);
 
 	const partitionContainersByQuery = (
 		containersToPartition: IContainer[],
