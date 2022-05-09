@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isV5 } from '@/v4/helpers/isV5';
 import { TextField } from '@mui/material';
 import { Field } from 'formik';
 import { get } from 'lodash';
@@ -23,6 +24,7 @@ import {
 	StyledFormControl
 } from '../../../viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { RemoveButton } from '../removeButton.component';
+import { ResourceIcon } from '../resources.component';
 import { ResourceListItem } from './attachResourcesDialog.styles';
 
 export const FileEntry = ({onClickRemove, index, entry}) => {
@@ -43,6 +45,7 @@ export const FileEntry = ({onClickRemove, index, entry}) => {
 
 			</StyledFormControl>
 			<StyledFormControl>
+				{isV5() && <ResourceIcon type={entry.type} />}
 				<Field type="hidden" name={fileFieldName} />
 				<ResourceListItem>
 					<span> {entry.file.name} </span>

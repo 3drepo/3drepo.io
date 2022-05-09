@@ -35,6 +35,8 @@ export const Container = styled(DialogContent)`
 	}
 `;
 
+export const Content = styled.div``;
+
 export const ResourcesContainer = styled.div``;
 
 export const StyledDropZone = styled(Dropzone)`

@@ -14,10 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import { css } from 'styled-components';
-import { FieldsRow } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
-import { ResourcesContainer } from '@/v4/routes/components/resources/resources.styles';
+import { FieldsRow, StyledFormControl } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
+import { ResourceIconContainer, ResourceItemContainer, ResourceItemLeftColumn, ResourcesContainer, ResourcesList, Size } from '@/v4/routes/components/resources/resources.styles';
 import { Form, Header } from '@controls/modal/formModal/formDialog.styles';
 import { DialogTabs, VisualSettingsButtonsContainer } from '@/v4/routes/components/topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
 import { LabelButton } from '@/v4/routes/viewerGui/components/labelButton/labelButton.styles';
@@ -29,9 +28,11 @@ import {
 	ResourcesListContainer,
 	ResourcesListScroller,
 	StyledDropZone,
+	Content,
 } from '@/v4/routes/components/resources/attachResourcesDialog/attachResourcesDialog.styles';
+import { LoaderContainer } from '@/v4/routes/components/messagesList/messagesList.styles';
 
-const removeButtonStyling = css`
+const buttonsStyling = css`
 	${IconButton} { 
 		padding: 5px 0 0 0;
 		height: fit-content;
@@ -48,11 +49,17 @@ const removeButtonStyling = css`
 `;
 
 export const AttachResourcesFile = css`
-	${ResourceListItem} {
-		line-height: 16px;
-		color: ${({ theme }) => theme.palette.primary.main};
+	${LoaderContainer} {
+		padding-top: 20px;
+	}
 
-		${removeButtonStyling}
+	${ResourceListItem} {
+		line-height: 14px;
+		color: ${({ theme }) => theme.palette.primary.main};
+		text-decoration: underline;
+		text-underline-offset: 2px;
+
+		${buttonsStyling}
 	}
 
 	${StyledDropZone} {
@@ -60,6 +67,31 @@ export const AttachResourcesFile = css`
 		margin: 0 23px;
 		// TODO - fix after new palette is released
 		border-top: solid 1px #e0e5f0;
+	}
+		
+	// style the icon 
+	${FieldsRow} {
+		flex-direction: row;
+
+		${StyledFormControl}:nth-of-type(even) {
+			flex-direction: row;
+			margin-left: -11px;
+
+			${ResourceListItem} {
+				width: 100%;
+				
+				button {
+					width: fit-content;
+				}
+			}
+			
+			${ResourceIconContainer} svg {
+				font-size: 18px;
+				margin-top: 2px;
+				margin-right: 4px;
+				color: ${({ theme }) => theme.palette.primary.main};
+			}
+		}
 	}
 `;
 
@@ -80,16 +112,18 @@ export const AttachResourcesLink = css`
 				}
 
 				button {
-					margin: 0 0 8px 8px;
+					margin: 0;
+					margin-left: 21px;
+					width: fit-content;
 				}
 			}
 		}
 		
-		${removeButtonStyling}
+		${buttonsStyling}
 	}
 
 	${AddLinkContainer} {
-		padding: 27px 0 28px;
+		padding: 28px 0;
 		margin: 0 23px;
 		// TODO - fix after new palette is released
 		border-top: solid 1px #e0e5f0;
@@ -137,11 +171,62 @@ export const AttachResourcesModalStyling = css`
 	${Form}${Form} {
 		padding-bottom: 0;
 		height: fit-content;
+
+		${Content} {
+			min-height: 160px;
+		}
 	}
 `;
 
 export default css`
 	${ResourcesContainer} {
+
+		${ResourcesList} {
+			font-size: 12px;
+
+			${ResourceItemContainer} {
+				${ResourceItemLeftColumn} {
+					color: ${({ theme }) => theme.palette.primary.main};
+
+					a {						
+						text-decoration: underline;
+						text-underline-offset: 2px;
+					}
+
+					svg {
+						color: currentColor;
+						font-size: 16px;
+						margin-top: 6px;
+					}
+				}
+
+				&:not(:first-of-type) {
+					// TODO - fix after new palette is released
+					border-top: solid 1px #e0e5f0;
+				}
+			}
+
+			${Size} {
+				color: #6c778c; // TODO - fix after new palette is released
+				margin-right: 10px;
+				font-size: 12px;
+
+				&::before {
+					content: "(";
+				}
+				&::after {
+					content: ")";
+				}
+			}
+
+			button {
+				margin: 1px 0 0 0;
+				width: 23px;
+			}
+
+			${buttonsStyling}
+		}
+		
 		${FieldsRow} {
 			justify-content: flex-start;
 		}

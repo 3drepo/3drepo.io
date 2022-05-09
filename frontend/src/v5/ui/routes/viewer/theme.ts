@@ -65,7 +65,9 @@ export const theme = createTheme(
 						formControl: {
 							'&&& .MuiInputBase-input::placeholder': {
 								opacity: '1 !important',
-								color: '#C1C8D5', // TODO: fix after new palette is released
+								'&:not(.Mui-error)': {
+									color: '#C1C8D5', // TODO: fix after new palette is released
+								},
 							},
 						},
 					},
@@ -74,6 +76,10 @@ export const theme = createTheme(
 					styleOverrides: {
 						root: {
 							margin: 0,
+							'& .MuiInputBase-root input': {
+								lineHeight: 22,
+								height: 24,
+							}
 						},
 					},
 				},
