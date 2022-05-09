@@ -21,11 +21,12 @@ interface ICircleButton {
 	size?: 'large' | 'medium' | 'small';
 	variant?: 'main' | 'contrast';
 	disabled?: boolean;
+	onClick?: () => void;
 	children: any;
 }
 
-export const CircleButton = ({ size = 'large', variant = 'main', children, ...props }: ICircleButton) => (
-	<StyledFab size={size} $variant={variant} {...props}>
+export const CircleButton = ({ size = 'large', variant = 'main', onClick, children, ...props }: ICircleButton) => (
+	<StyledFab onClick={onClick} size={size} $variant={variant} {...props}>
 		{children}
 	</StyledFab>
 );
