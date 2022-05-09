@@ -91,4 +91,6 @@ const run = async () => {
 	}
 };
 
-module.exports = run;
+// module.exports = run;
+
+run().then(process.exit);
