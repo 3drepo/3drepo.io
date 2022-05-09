@@ -62,16 +62,50 @@ Teamspace.removeSubscription = (ts, type) => {
 	return teamspaceUpdate({ user: ts }, { $unset: { [field]: 1 } });
 };
 
-Teamspace.removeAddOns = (teamspace) => {
-	const possibleAddOns = {
-		'customData.vrEnabled': 1,
-		'customData.srcEnabled': 1,
-		'customData.hereEnabled': 1,
-		'customData.addOns': 1,
+const possibleAddOns = {
+	'customData.vrEnabled': 1,
+	'customData.srcEnabled': 1,
+	'customData.hereEnabled': 1,
+	'customData.addOns': 1,
 
-	};
-	return teamspaceUpdate({ user: teamspace }, { $unset: possibleAddOns });
 };
+
+Teamspace.getAddOns = async (teamspace) => {
+	const { customData } = await getTeamspace(teamspace, possibleAddOns);
+	const addOns = customData?.addOns || {};
+	return { ...addOns,
+		vrEnabled: customData.vrEnabled,
+		srcEnabled: customData.srcEnabled,
+		hereEnabled: customData.hereEnabled,
+	};
+};
+
+Teamspace.updateAddOns = async (teamspace, addOns) => {
+	const set = {};
+	const unset = {};
+
+	Object.keys(addOns).forEach((key) => {
+		const path = (key === 'powerBIEnabled') ? `customData.addOns.${key}` : `customData.${key}`;
+		if (addOns[key]) {
+			set[path] = true;
+		} else {
+			unset[path] = 1;
+		}
+	});
+	const action = {};
+
+	if (Object.keys(set).length) {
+		action.$set = set;
+	}
+
+	if (Object.keys(unset).length) {
+		action.$unset = unset;
+	}
+
+	if (Object.keys(action).length) await teamspaceUpdate({ user: teamspace }, action);
+};
+
+Teamspace.removeAddOns = (teamspace) => teamspaceUpdate({ user: teamspace }, { $unset: possibleAddOns });
 
 Teamspace.getTeamspaceAdmins = async (ts) => {
 	const data = await getTeamspace(ts, { 'customData.permissions': 1 });
