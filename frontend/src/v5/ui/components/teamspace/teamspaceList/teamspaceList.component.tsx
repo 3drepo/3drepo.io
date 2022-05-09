@@ -22,15 +22,13 @@ import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks/teamspace
 import { generateV5ApiUrl } from '@/v5/services/api/default';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks/currentUserSelectors.hooks';
-import { CardList, DummyCard } from './teamspaceList.styles';
+import { CardList } from './teamspaceList.styles';
 
 export const TeamspaceList = (): JSX.Element => {
 	const username = CurrentUserHooksSelectors.selectUsername();
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
 	const sortedTeamspaces = flatten(partition(teamspaces, (ts) => ts.name === username));
 
-	const MAX_CARDS_PER_ROW = 3;
-	const DummyCards = () => <>{Array.from({ length: MAX_CARDS_PER_ROW - 1 }, (_, i) => <DummyCard key={i} />)}</>;
 	return (
 		<CardList>
 			{
@@ -52,7 +50,6 @@ export const TeamspaceList = (): JSX.Element => {
 				)
 			}
 			{ !!teamspaces.length && (<AddTeamspaceCard variant="secondary" />) }
-			{ teamspaces.length >= MAX_CARDS_PER_ROW - 1 && (<DummyCards />)}
 		</CardList>
 	);
 };
