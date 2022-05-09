@@ -24,4 +24,11 @@ TeamspaceConstants.SUBSCRIPTION_TYPES = [
 	'internal',
 ];
 
+TeamspaceConstants.ADD_ONS = {
+	VR: 'vrEnabled',
+	POWERBI: 'powerBIEnabled',
+	SRC: 'srcEnabled',
+	HERE: 'hereEnabled',
+};
+
 module.exports = TeamspaceConstants;

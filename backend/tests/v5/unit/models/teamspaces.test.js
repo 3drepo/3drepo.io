@@ -20,6 +20,7 @@ const { src } = require('../../helper/path');
 const { generateRandomString } = require('../../helper/services');
 
 const Teamspace = require(`${src}/models/teamspaces`);
+const { ADD_ONS } = require(`${src}/models/teamspaces.constants`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
@@ -257,6 +258,128 @@ const testRemoveAddOns = () => {
 	});
 };
 
+const testGetAddOns = () => {
+	describe('Get teamspace addOns', () => {
+		test('should get all applicable addOns', async () => {
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ customData: {
+				vrEnabled: true,
+				srcEnabled: true,
+				hereEnabled: true,
+				addOns: {
+					powerBIEnabled: true,
+				},
+			} });
+
+			const teamspace = generateRandomString();
+
+			await expect(Teamspace.getAddOns(teamspace)).resolves.toEqual({
+				vrEnabled: true,
+				srcEnabled: true,
+				hereEnabled: true,
+				powerBIEnabled: true,
+			});
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: teamspace }, {
+				'customData.vrEnabled': 1,
+				'customData.srcEnabled': 1,
+				'customData.hereEnabled': 1,
+				'customData.addOns': 1,
+
+			}, undefined);
+		});
+
+		test('should get all applicable addOns (without powerBI)', async () => {
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ customData: {
+				vrEnabled: true,
+				srcEnabled: true,
+				hereEnabled: true,
+			} });
+
+			const teamspace = generateRandomString();
+
+			await expect(Teamspace.getAddOns(teamspace)).resolves.toEqual({
+				vrEnabled: true,
+				srcEnabled: true,
+				hereEnabled: true,
+			});
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: teamspace }, {
+				'customData.vrEnabled': 1,
+				'customData.srcEnabled': 1,
+				'customData.hereEnabled': 1,
+				'customData.addOns': 1,
+
+			}, undefined);
+		});
+	});
+};
+
+const testUpdateAddOns = () => {
+	describe('Update teamspace addOns', () => {
+		const formatToMongoAction = (obj) => {
+			const set = {};
+			const unset = {};
+
+			Object.keys(obj).forEach((val) => {
+				const prefix = val === ADD_ONS.POWERBI ? 'customData.addOns' : 'customData';
+				if (obj[val]) {
+					set[`${prefix}.${val}`] = true;
+				} else {
+					unset[`${prefix}.${val}`] = 1;
+				}
+			});
+
+			return {
+				...(Object.keys(set).length ? { $set: set } : {}),
+				...(Object.keys(unset).length ? { $unset: unset } : {}),
+			};
+		};
+
+		test('should update fields provided', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue();
+
+			const teamspace = generateRandomString();
+
+			const update = {
+				[ADD_ONS.VR]: true,
+				[ADD_ONS.POWERBI]: true,
+				[ADD_ONS.SRC]: false,
+			};
+			await expect(Teamspace.updateAddOns(teamspace, update)).resolves.toBeUndefined();
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: teamspace }, formatToMongoAction(update));
+		});
+
+		test('should only update fields that are recognised', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue();
+
+			const teamspace = generateRandomString();
+
+			const update = {
+				[ADD_ONS.POWERBI]: true,
+				[generateRandomString()]: generateRandomString(),
+			};
+
+			await expect(Teamspace.updateAddOns(teamspace, update)).resolves.toBeUndefined();
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'system.users', { user: teamspace }, formatToMongoAction({ [ADD_ONS.POWERBI]: true }));
+		});
+
+		test('should not call update if there was no valid data to update', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue();
+
+			const teamspace = generateRandomString();
+
+			const update = {
+				[generateRandomString()]: generateRandomString(),
+			};
+
+			await expect(Teamspace.updateAddOns(teamspace, update)).resolves.toBeUndefined();
+			expect(fn).not.toHaveBeenCalled();
+		});
+	});
+};
+
 const testCreateTeamspaceSettings = () => {
 	describe('Create teamspace settings', () => {
 		test('should create teamspace settings', async () => {
@@ -278,6 +401,8 @@ describe('models/teamspaces', () => {
 	testEditSubscriptions();
 	testRemoveSubscription();
 	testRemoveAddOns();
+	testGetAddOns();
+	testUpdateAddOns();
 	testGetMembersInfo();
 	testCreateTeamspaceSettings();
 });

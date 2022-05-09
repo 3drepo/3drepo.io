@@ -15,7 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { ADD_ONS } = require('./teamspaces.constants');
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
+
 const db = require('../handler/db');
 const { riskCategories } = require('./risks.constants');
 const { templates } = require('../utils/responseCodes');
@@ -63,9 +65,9 @@ Teamspace.removeSubscription = (ts, type) => {
 };
 
 const possibleAddOns = {
-	'customData.vrEnabled': 1,
-	'customData.srcEnabled': 1,
-	'customData.hereEnabled': 1,
+	[`customData.${ADD_ONS.VR}`]: 1,
+	[`customData.${ADD_ONS.HERE}`]: 1,
+	[`customData.${ADD_ONS.SRC}`]: 1,
 	'customData.addOns': 1,
 
 };
@@ -74,9 +76,9 @@ Teamspace.getAddOns = async (teamspace) => {
 	const { customData } = await getTeamspace(teamspace, possibleAddOns);
 	const addOns = customData?.addOns || {};
 	return { ...addOns,
-		vrEnabled: customData.vrEnabled,
-		srcEnabled: customData.srcEnabled,
-		hereEnabled: customData.hereEnabled,
+		[ADD_ONS.VR]: customData[ADD_ONS.VR],
+		[ADD_ONS.HERE]: customData[ADD_ONS.HERE],
+		[ADD_ONS.SRC]: customData[ADD_ONS.SRC],
 	};
 };
 
@@ -84,12 +86,15 @@ Teamspace.updateAddOns = async (teamspace, addOns) => {
 	const set = {};
 	const unset = {};
 
+	const addOnTypes = new Set(Object.values(ADD_ONS));
 	Object.keys(addOns).forEach((key) => {
-		const path = (key === 'powerBIEnabled') ? `customData.addOns.${key}` : `customData.${key}`;
-		if (addOns[key]) {
-			set[path] = true;
-		} else {
-			unset[path] = 1;
+		if (addOnTypes.has(key)) {
+			const path = (key === ADD_ONS.POWERBI) ? `customData.addOns.${key}` : `customData.${key}`;
+			if (addOns[key]) {
+				set[path] = true;
+			} else {
+				unset[path] = 1;
+			}
 		}
 	});
 	const action = {};
