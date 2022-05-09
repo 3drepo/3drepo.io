@@ -25,6 +25,8 @@ const systemLogger = logger.systemLogger;
 const responseCodes = require("../../../src/v4/response_codes.js");
 const async = require("async");
 
+
+const defaultAdmin = { "_id": "Admin", "color": "#f7f7b2"};
 describe("Job", function () {
 
 	let server;
@@ -108,7 +110,7 @@ describe("Job", function () {
 	it("get job assigned to current user should succeed", function(done) {
 		agent.get(`/${username}/myJob`)
 			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal({});
+				expect(res.body).to.deep.equal(defaultAdmin);
 				done(err);
 			});
 	});
@@ -154,6 +156,7 @@ describe("Job", function () {
 				agent.get(`/${username}/jobs`)
 					.expect(200, function(err, res) {
 						const newJobs = [
+							defaultAdmin,
 							job,
 							updatedJob
 						];
@@ -214,7 +217,7 @@ describe("Job", function () {
 	it("should able to list the job created", function(done) {
 		agent.get(`/${username}/jobs`)
 			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal([job, job2]);
+				expect(res.body).to.deep.equal([defaultAdmin, job, job2]);
 				done(err);
 			});
 	});
@@ -278,7 +281,7 @@ describe("Job", function () {
 	it("list job colours should show unique list and succeed", function(done) {
 		agent.get(`/${username}/jobs/colors`)
 			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal([job.color]);
+				expect(res.body).to.deep.equal([defaultAdmin.color, job.color]);
 				done(err);
 			});
 	});
@@ -307,7 +310,7 @@ describe("Job", function () {
 			function(done) {
 				agent.get(`/${username}/jobs/colors`)
 					.expect(200, function(err, res) {
-						expect(res.body).to.deep.equal([job.color, updatedJob.color]);
+						expect(res.body).to.deep.equal([defaultAdmin.color, job.color, updatedJob.color]);
 						done(err);
 					});
 			},
@@ -345,7 +348,7 @@ describe("Job", function () {
 	it("job should be removed from the list", function(done) {
 		agent.get(`/${username}/jobs`)
 			.expect(200, function(err, res) {
-				expect(res.body).to.deep.equal([job2]);
+				expect(res.body).to.deep.equal([defaultAdmin, job2]);
 				done(err);
 			});
 	});
