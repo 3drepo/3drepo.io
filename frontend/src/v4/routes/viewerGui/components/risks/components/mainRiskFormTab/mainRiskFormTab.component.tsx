@@ -31,7 +31,6 @@ import { AutoSuggestField } from '../autoSuggestField/autosuggestField.component
 import { LevelOfRisk } from '../levelOfRisk/levelOfRisk.component';
 import { NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
 import { DateField } from '../../../../../components/dateField/dateField.component';
-import { DateFieldContainer } from './mainRiskFormTab.styles';
 
 import {
 	Container,
@@ -43,6 +42,7 @@ import {
 } from '../riskDetails/riskDetails.styles';
 import { RiskSchema } from '../riskDetails/riskDetailsForm.component';
 import { RisksIcon } from '../riskIcon/riskIcon.component';
+import { DateFieldContainer } from './mainRiskFormTab.styles';
 
 interface IProps {
 	risk: any;
