@@ -19,9 +19,11 @@ const addAdminJob = require('./addAdminJob');
 const removeUnityAssetsJSON = require('./removeUnityAssetsJSON');
 const removeGridFSBackUps = require('./removeGridFSBackUps');
 const moveGridFSToFS = require('./moveGridFSToFS');
+const addAndAssignDefaultRole = require('./addAndAssignDefaultRole');
 
 const scripts = [
 	{ script: addAdminJob, desc: 'Add Admin job and assign the teamspace owner' },
+	{ script: addAndAssignDefaultRole, desc: 'Add Default role and assign it to all users' },
 	{ script: removeUnityAssetsJSON, desc: 'Remove redundant UnityAssets.json files' },
 	{ script: removeGridFSBackUps, desc: 'Remove GridFS backup entries' },
 	{ script: moveGridFSToFS, desc: 'Move gridFS documents to fileshare' },
