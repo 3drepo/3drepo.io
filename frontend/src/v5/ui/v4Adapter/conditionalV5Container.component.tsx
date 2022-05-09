@@ -22,7 +22,7 @@ type ConditionalV5WrapperProps = {
 	v5WrapperProps?: any;
 	v4Wrapper?: any;
 	v4WrapperProps?: any;
-}
+};
 
 // If the version is v5, use the v5 wrapper.
 // Otherwise, use the v4 wrapper if passed or just render the children.
@@ -32,10 +32,12 @@ export const ConditionalV5Wrapper = ({
 	v5WrapperProps,
 	v4Wrapper: V4Wrapper,
 	v4WrapperProps,
-}: ConditionalV5WrapperProps) => (
-	isV5() ? (
-		<V5Wrapper {...v5WrapperProps}>{children}</V5Wrapper>
-	) : (
-		V4Wrapper ? <V4Wrapper {...v4WrapperProps}>{children}</V4Wrapper> : children
-	)
-);
+}: ConditionalV5WrapperProps) => {
+	// If the version is v5, use the v5 wrapper.
+	if (isV5()) {
+		return <V5Wrapper {...v5WrapperProps}>{children}</V5Wrapper>;
+	}
+
+	// If the version is v4, use the v4 wrapper if passed or just render the children.
+	return V4Wrapper ? <V4Wrapper {...v4WrapperProps}>{children}</V4Wrapper> : children;
+};

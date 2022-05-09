@@ -18,8 +18,8 @@ import { DialogContent } from '@mui/material';
 import Dropzone from 'react-dropzone';
 import styled, { css } from 'styled-components';
 import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
-import { COLOR } from '../../../../styles';
 import { isV5 } from '@/v4/helpers/isV5';
+import { COLOR } from '../../../../styles';
 
 const dropZoneColors = (normalColour, dragColour, errorColour) => (props: any) =>
 	props.error ? errorColour :
@@ -82,7 +82,7 @@ export const AddLinkContainer = styled.div`
 	margin-top: 20px;
 `;
 
-const V5DropzoneContent = styled(DashedContainer).attrs<{ error?: boolean, isDragActive?: boolean }>(({ 
+const V5DropzoneContent = styled(DashedContainer).attrs<{ error?: boolean, isDragActive?: boolean }>(({
 	theme: {
 		palette: {
 			primary,

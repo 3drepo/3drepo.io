@@ -21,10 +21,10 @@ import { get, omit } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import uuid from 'uuidv4';
 import { isV5 } from '@/v4/helpers/isV5';
-import { ROUTES } from '../../constants/routes';
-import * as Dialogs from '../../routes/components/dialogContainer/components';
 import { V5ErrorDialog } from '@/v5/ui/v4Adapter/dialogs/errorDialog/errorDialog.component';
 import { V5RedirectToTeamspaceDialog } from '@/v5/ui/v4Adapter/dialogs/redirectToTeamspaceDialog/redirectToTeamspaceDialog.component';
+import { ROUTES } from '../../constants/routes';
+import * as Dialogs from '../../routes/components/dialogContainer/components';
 
 export interface IDialogConfig {
 	id: number;

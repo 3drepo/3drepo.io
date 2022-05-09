@@ -32,7 +32,6 @@ interface V5AttachResourcesDialogProps extends Omit<DetailedHTMLProps<FormHTMLAt
 export const V5AttachResourcesDialog = ({
 	onClickClose,
 	children,
-	isValid = true,
 	...formProps
 }: V5AttachResourcesDialogProps) => (
 	<Container>

@@ -16,12 +16,19 @@
  */
 import { css } from 'styled-components';
 import { FieldsRow, StyledFormControl } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
-import { ResourceIconContainer, ResourceItemContainer, ResourceItemLeftColumn, ResourcesContainer, ResourcesList, Size } from '@/v4/routes/components/resources/resources.styles';
+import {
+	ResourceIconContainer,
+	ResourceItemContainer,
+	ResourceItemLeftColumn,
+	ResourcesContainer,
+	ResourcesList,
+	Size,
+	IconButton,
+} from '@/v4/routes/components/resources/resources.styles';
 import { Form, Header } from '@controls/modal/formModal/formDialog.styles';
 import { DialogTabs, VisualSettingsButtonsContainer } from '@/v4/routes/components/topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
 import { LabelButton } from '@/v4/routes/viewerGui/components/labelButton/labelButton.styles';
 import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
-import { IconButton } from '@/v4/routes/components/resources/resources.styles';
 import {
 	AddLinkContainer,
 	ResourceListItem,
@@ -95,7 +102,7 @@ export const AttachResourcesFile = css`
 	}
 `;
 
-export const AttachResourcesLink = css`	
+export const AttachResourcesLink = css`
 	${ResourcesListScroller} {
 		margin-top: 0px;
 		overflow-y: overlay;
@@ -188,7 +195,7 @@ export default css`
 				${ResourceItemLeftColumn} {
 					color: ${({ theme }) => theme.palette.primary.main};
 
-					a {						
+					a {
 						text-decoration: underline;
 						text-underline-offset: 2px;
 					}

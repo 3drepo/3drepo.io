@@ -28,8 +28,8 @@ interface V5RedirectToTeamspaceDialogProps {
 	message: string;
 	status: string;
 	handleResolve: () => void;
-	handleClose: () => void;
 }
+
 export const V5RedirectToTeamspaceDialog = (props: V5RedirectToTeamspaceDialogProps) => {
 	const { content, message, status, handleResolve } = props;
 

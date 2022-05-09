@@ -32,7 +32,7 @@ export const theme = createTheme(
 							maxWidth: 'unset !important',
 							'& .MuiDialogTitle-root': {
 								padding: '14px 0 !important',
-								'& .MuiIconButton-root': {														
+								'& .MuiIconButton-root': {
 									position: 'absolute',
 									right: 0,
 									top: -2,
@@ -79,7 +79,7 @@ export const theme = createTheme(
 							'& .MuiInputBase-root input': {
 								lineHeight: 22,
 								height: 24,
-							}
+							},
 						},
 					},
 				},
