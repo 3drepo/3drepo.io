@@ -20,10 +20,10 @@ import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import ArrowIcon from '@mui/icons-material/ArrowForward';
 import styled, { css } from 'styled-components';
+import { isV5 } from '@/v4/helpers/isV5';
 
 import { COLOR } from '../../../../styles/colors';
 import OpenInViewerButtonComponent from '../../../components/openInViewerButton/openInViewerButton.container';
-import { isV5 } from '@/v4/helpers/isV5';
 
 export const OpenInViewerButton = styled(OpenInViewerButtonComponent)`
 	&& {
