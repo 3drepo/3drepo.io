@@ -16,7 +16,7 @@
  */
 
 import { all, put, takeEvery, takeLatest } from 'redux-saga/effects';
-import { AddFavouriteAction, DeleteFederationAction, FederationsActions,
+import { AddFavouriteAction, CreateFederationAction, DeleteFederationAction, FederationsActions,
 	FederationsTypes, FetchFederationsAction, FetchFederationSettingsAction,
 	FetchFederationStatsAction, FetchFederationViewsAction, RemoveFavouriteAction,
 	UpdateFederationContainersAction, UpdateFederationSettingsAction } from '@/v5/store/federations/federations.redux';
@@ -32,6 +32,17 @@ import {
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { FetchFederationsResponse, FetchFederationViewsResponse } from '@/v5/services/api/federations';
+
+export function* createFederation({ teamspace, projectId, newFederation, containers }: CreateFederationAction) {
+	try {
+		const { _id } = yield API.Federations.createFederation({ teamspace, projectId, newFederation });
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: 'trying to create federation',
+			error,
+		}));
+	}
+}
 
 export function* addFavourites({ federationId, teamspace, projectId }: AddFavouriteAction) {
 	try {
@@ -188,6 +199,7 @@ export function* updateFederationContainers({
 }
 
 export default function* FederationsSagas() {
+	yield takeLatest(FederationsTypes.CREATE_FEDERATION, createFederation);
 	yield takeLatest(FederationsTypes.ADD_FAVOURITE, addFavourites);
 	yield takeLatest(FederationsTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeLatest(FederationsTypes.FETCH_FEDERATIONS, fetchFederations);

@@ -21,13 +21,16 @@ import {
 	FederationStats,
 	FederationView,
 	IFederation,
+	NewFederation,
 } from '@/v5/store/federations/federations.types';
 import { prepareSingleFederationData } from '@/v5/store/federations/federations.helpers';
 import { Action } from 'redux';
 import { Constants } from '../../helpers/actions.helper';
 import { TeamspaceAndProjectId, TeamspaceProjectAndFederationId, ProjectAndFederationId } from '../store.types';
+import { IContainer } from '../containers/containers.types';
 
 export const { Types: FederationsTypes, Creators: FederationsActions } = createActions({
+	createFederation: ['teamspace', 'projectId', 'newFederation', 'containers'],
 	addFavourite: ['teamspace', 'projectId', 'federationId'],
 	removeFavourite: ['teamspace', 'projectId', 'federationId'],
 	setFavouriteSuccess: ['projectId', 'federationId', 'isFavourite'],
@@ -207,6 +210,7 @@ export interface IFederationsState {
 	federationsByProject: Record<string, IFederation[]>;
 }
 
+export type CreateFederationAction = Action<'CREATE_FEDERATION'> & TeamspaceAndProjectId & { newFederation: NewFederation; containers?: IContainer[] };
 export type FetchFederationsAction = Action<'FETCH_FEDERATIONS'> & TeamspaceAndProjectId;
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & TeamspaceProjectAndFederationId;
 export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & TeamspaceProjectAndFederationId;
@@ -227,6 +231,12 @@ export type DeleteFederationSuccessAction = Action<'DELETE_FEDERATION_SUCCESS'> 
 export type UpdateFederationSuccessAction = Action<'UPDATE_FEDERATION'> & ProjectAndFederationId & { updatedFederation: IFederation};
 
 export interface IFederationsActionCreators {
+	createFederation: (
+		teamspace: string,
+		projectId: string,
+		newFederation: NewFederation,
+		containers?: IContainer[],
+	) => CreateFederationAction;
 	fetchFederations: (teamspace: string, projectId: string) => FetchFederationsAction;
 	fetchFederationsSuccess: (projectId: string, federations: IFederation[]) => FetchFederationsSuccessAction;
 	fetchFederationStats: (teamspace: string, projectId: string, federationId: string) => FetchFederationStatsAction;

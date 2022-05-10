@@ -16,6 +16,7 @@
  */
 
 import { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { formatMessage } from '@/v5/services/intl';
 import { FederationCreationSchema } from '@/v5/validation/federations';
 import { FormSelect } from '@controls/formSelect/formSelect.component';
@@ -25,6 +26,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { MenuItem } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
+import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers/federationsActions.dispatchers';
 import { SectionTitle } from '../federationSettingsForm/federationSettingsForm.styles';
 import { HalfWidth } from './createFederationForm.styles';
 import { EditFederationModal } from '../editFederationModal/editFederationModal.component';
@@ -87,15 +89,15 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) 
 		handleSubmit,
 		control,
 		getValues,
-		setValue,
 		formState: { errors, isValid },
 	} = useForm<IFormInput>({
 		defaultValues,
 		mode: 'onChange',
 		resolver: yupResolver(FederationCreationSchema),
 	});
-
+	const { teamspace, project } = useParams() as { teamspace: string, project: string };
 	const [modalPhase, setModalPhase] = useState('settings');
+	const [containers, setContainers] = useState([]);
 
 	const onClickBack = () => {
 		setModalPhase('settings');
@@ -107,7 +109,8 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) 
 		}
 	};
 
-	const onClickSubmit = (data) => {
+	const onClickSubmit = (newFederation: NewFederation): void => {
+		FederationsActionsDispatchers.createFederation(teamspace, project, newFederation, containers);
 		onClickClose();
 	};
 
@@ -182,7 +185,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) 
 				<EditFederationModal
 					federation={getValues()}
 					isNewFederation
-					onChange={(containers) => setValue('containers', containers)}
+					onChange={(includedContainers: IContainer[]) => setContainers(includedContainers)}
 				/>
 			)}
 		</FormModal>
