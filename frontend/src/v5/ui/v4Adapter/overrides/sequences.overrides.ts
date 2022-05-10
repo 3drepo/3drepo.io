@@ -54,6 +54,7 @@ export default css`
 				.MuiIconButton-root {
 					margin: 3px;
 					padding: 0;
+					color: ${({ theme }) => theme.palette.secondary.main};
 					svg {
 						height: 15px;
 						width: 15px;
