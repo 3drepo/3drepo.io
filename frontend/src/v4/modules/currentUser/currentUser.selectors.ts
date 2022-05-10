@@ -19,12 +19,18 @@ import { isV5 } from '@/v4/helpers/isV5';
 import { isNil } from 'lodash';
 import { createSelector } from 'reselect';
 
-const selectCurrentUserDomain = (state) => isV5() ? ({...state.currentUser2}) : ({...state.currentUser}) ;
+const selectCurrentUserDomain = (state) => ({...state.currentUser, ...(isV5() && state.currentUser2)});
 
-export const selectCurrentTeamspace = createSelector(
-	// TODO remove this
-	selectCurrentUserDomain, (state) => state.currentTeamspace || 'testuser1'
+const selectCurrentTeampspaceV5 = createSelector(
+	(state) => state.teamspaces2,
+	(state) => state.currentTeamspace
 );
+
+const selectCurrentTeamspaceV4 = createSelector(
+	selectCurrentUserDomain, (state) => state.currentTeamspace
+);
+
+export const selectCurrentTeamspace = isV5() ? selectCurrentTeampspaceV5 : selectCurrentTeamspaceV4;
 
 export const selectCurrentUser = createSelector(
 	selectCurrentUserDomain, (state) => state.currentUser || {}
