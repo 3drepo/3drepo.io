@@ -40,6 +40,14 @@ export interface ISurveyPoint {
 	position: [number, number, number];
 }
 
+export type NewFederation = {
+	name: string;
+	unit: string;
+	desc?: string;
+	code?: string;
+	type: string;
+};
+
 export type FederationBackendSettings = {
 	_id?: string;
 	desc?: string;
