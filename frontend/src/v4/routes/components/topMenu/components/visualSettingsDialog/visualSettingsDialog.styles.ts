@@ -19,7 +19,6 @@ import { Button, DialogContent, Input, ListItem, Tab, Tabs, Tooltip } from '@mui
 import { TooltipProps } from '@mui/material/Tooltip';
 import { omit } from 'lodash';
 import styled from 'styled-components';
-import { isV5 } from '@/v4/helpers/isV5';
 import { COLOR, FONT_WEIGHT } from '../../../../../styles';
 
 export const NegativeActionButton = styled(Button)`
@@ -34,17 +33,15 @@ export const NegativeActionButton = styled(Button)`
 `;
 
 export const NeutralActionButton = styled(Button)`
-	${!isV5() && `
-		&& {
-			color: ${COLOR.BLACK_60};
-			background-color: ${COLOR.TRANSPARENT};
-		}
+	&& {
+		color: ${COLOR.BLACK_60};
+		background-color: ${COLOR.TRANSPARENT};
+	}
 
-		&&:hover {
-			color: ${COLOR.BLACK_80};
-			background-color:  ${COLOR.TRANSPARENT};
-		}
-	`}
+	&&:hover {
+		color: ${COLOR.BLACK_80};
+		background-color:  ${COLOR.TRANSPARENT};
+	}
 `;
 
 export const WarningMessage = styled.div`

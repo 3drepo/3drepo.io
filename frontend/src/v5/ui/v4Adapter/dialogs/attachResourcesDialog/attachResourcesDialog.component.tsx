@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -22,7 +22,7 @@ import {
 	CloseButton,
 	FormDialogContent,
 } from '@/v5/ui/controls/modal/formModal/formDialog.styles';
-import { Container, Form } from './attachResourceDialog.styles';
+import { Container, Form } from './attachResourcesDialog.styles';
 
 interface V5AttachResourcesDialogProps extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
 	onClickClose?: () => void;

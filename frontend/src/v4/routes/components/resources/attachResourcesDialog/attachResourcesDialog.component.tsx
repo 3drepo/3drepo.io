@@ -17,7 +17,7 @@
 import { PureComponent } from 'react';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import { V5AttachResourcesDialog } from '@/v5/ui/v4Adapter/dialogs/attachResourceDialog/attachResourceDialog.component';
+import { V5AttachResourcesDialog } from '@/v5/ui/v4Adapter/dialogs/attachResourcesDialog/attachResourcesDialog.component';
 import { ConditionalV5Wrapper } from '@/v5/ui/v4Adapter/conditionalV5Container.component';
 
 import { renderWhenTrueOtherwise } from '../../../../helpers/rendering';

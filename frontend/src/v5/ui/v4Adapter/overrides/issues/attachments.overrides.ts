@@ -26,7 +26,7 @@ import {
 	IconButton,
 } from '@/v4/routes/components/resources/resources.styles';
 import { Form, Header } from '@controls/modal/formModal/formDialog.styles';
-import { DialogTabs, VisualSettingsButtonsContainer } from '@/v4/routes/components/topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
+import { DialogTabs, NeutralActionButton, VisualSettingsButtonsContainer } from '@/v4/routes/components/topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
 import { LabelButton } from '@/v4/routes/viewerGui/components/labelButton/labelButton.styles';
 import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
 import {
@@ -173,6 +173,30 @@ export const AttachResourcesModalStyling = css`
 					0px 3px 5px rgb(0 0 0 / 20%);
 		padding: 8px;
 		box-sizing: border-box;
+
+		${NeutralActionButton} {
+			&:first-of-type {
+				color: ${({ theme }) => theme.palette.secondary.main};
+				background-color: transparent;
+				border: solid 1px currentColor;
+
+				&:hover {
+					background-color: ${({ theme }) => theme.palette.secondary.main};
+					border-color: ${({ theme }) => theme.palette.secondary.main};
+					color: ${({ theme }) => theme.palette.primary.contrast};
+				}
+
+				&:active {
+					background-color: ${({ theme }) => theme.palette.secondary.dark};
+					border-color: ${({ theme }) => theme.palette.secondary.dark};
+					color: ${({ theme }) => theme.palette.primary.contrast};
+				}
+			}
+			
+			&:last-of-type {
+				${labelButtonPrimaryStyles}
+			}
+		}
 	}
 
 	${Form}${Form} {
