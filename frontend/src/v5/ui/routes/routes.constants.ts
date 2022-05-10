@@ -14,9 +14,22 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { matchPath } from 'react-router';
 
 export const NOT_FOUND_ROUTE_PATH = '/v5/404';
-export const VIEWER_ROUTE = '/v5/viewer/:teamspace/:containerOrFederation/:revision?';
+
+export const VIEWER_ROUTE = '/v5/viewer/:teamspace/:project/:containerOrFederation/:revision?';
+export const DASHBOARD_ROUTE = '/v5/dashboard';
+export const PROJECTS_LIST_ROUTE = `${DASHBOARD_ROUTE}/:teamspace`;
+
+const PROJECT_ROUTE_BASE = `${PROJECTS_LIST_ROUTE}/:project/t`;
+
+export const PROJECT_ROUTE = `${PROJECT_ROUTE_BASE}/:tab`;
+export const CONTAINERS_ROUTE = `${PROJECT_ROUTE_BASE}/containers`;
+export const FEDERATIONS_ROUTE = `${PROJECT_ROUTE_BASE}/federations`;
+
+// eslint-disable-next-line no-restricted-globals
+export const matchesPath = (path) => Boolean(matchPath(location.pathname, { path, exact: true }));
 
 export interface DashboardParams {
 	teamspace?: string;

@@ -63,6 +63,7 @@ export const COLOR = {
 };
 
 export const FONT_WEIGHT = {
+	SLIM: 300,
 	REGULAR: 400,
 	MEDIUM: 500,
 	BOLD: 600,
