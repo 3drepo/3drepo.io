@@ -37,7 +37,9 @@ const goldenColls = [
 	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.history.ref', options: {} },
 	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.issues', options: {} },
 	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.scene', options: {} },
+	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.scene.ref', options: {} },
 	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.3drepo', options: {} },
+	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.3drepo.ref', options: {} },
 	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.json_mpc.ref', options: {} },
 	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.unity3d', options: {} },
 	{ name: '8f67cd3e-d2f3-4b90-81ae-d65a065d346f.stash.unity3d.ref', options: {} },
@@ -46,6 +48,7 @@ const goldenColls = [
 	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.history.ref', options: {} },
 	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.issues', options: {} },
 	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.scene', options: {} },
+	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.scene.ref', options: {} },
 	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.3drepo', options: {} },
 	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.3drepo.ref', options: {} },
 	{ name: 'af1ccf84-71c3-490e-9e5a-cb80e30ee519.stash.json_mpc.ref', options: {} },
@@ -156,7 +159,6 @@ describe("Check DB handler", function() {
 		it("list collection with valid username should succeed", async function() {
 			const colls = await db.listCollections(account);
 			const listOrder = (a, b) => a.name < b.name ? -1 : 1;
-			console.log(colls.sort(listOrder), "!!!!!!", goldenColls.sort(listOrder));
 			expect(colls.sort(listOrder)).to.deep.equal(goldenColls.sort(listOrder));
 		});
 
